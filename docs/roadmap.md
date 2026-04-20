@@ -30,6 +30,11 @@ it converts a broad patch of standard Riemannian geometry into reusable Lean
 infrastructure and becomes a dependency for almost everything else in the
 program.
 
+Current repo status:
+there is now a concrete Lean subproject at `curvature/` that bootstraps this
+milestone and implements the first code boundary around `∇_X σ` and the raw
+curvature commutator. The tensorial curvature package itself is still open.
+
 ### 2. Time-dependent geometric structures
 
 Formalize one-parameter families of metrics, connections, tensors, and

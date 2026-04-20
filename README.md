@@ -13,6 +13,7 @@ style of the Annals of Formalized Mathematics.
 
 - `docs/roadmap.md`: the main roadmap, with AFM-scale project slices
 - `docs/dependencies.md`: dependency structure and a suggested execution order
+- `curvature/`: Lean/mathlib subproject for milestone 1, the curvature package bootstrap
 
 ## Current framing
 
@@ -28,3 +29,6 @@ The roadmap assumes:
 
 This is intentionally a research-program repository, not an implementation
 repository.
+
+The current exception is `curvature/`, which turns milestone 1 into a concrete
+Lean package with initial code at the covariant-derivative/curvature boundary.
