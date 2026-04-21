@@ -14,28 +14,50 @@ The intended proof route is:
 
 ## Candidate paper-scale projects
 
-### 1. Curvature package
+### 1. Riemannian curvature package
 
-Formalize the foundational differential-geometry layer needed for Ricci flow:
+Formalize the first reusable static curvature layer needed for Ricci flow:
 
-- Levi-Civita connection
-- Riemann curvature tensor
+- covariant derivatives along vector fields
+- the raw curvature commutator
+- the bundled Riemann curvature tensor
 - Ricci curvature
 - scalar curvature
-- first and second Bianchi identities
-- compatibility statements tying all of this back to the manifold API
+- metric compatibility interfaces for Riemannian vector bundles
+- torsion-free and Levi-Civita predicates on the tangent bundle
+- Levi-Civita uniqueness at the current manifold API boundary
+- compatibility statements tying these constructions back to the manifold API
 
 Why this is paper-worthy:
-it converts a broad patch of standard Riemannian geometry into reusable Lean
-infrastructure and becomes a dependency for almost everything else in the
-program.
+it turns the existing manifold API into an actual reusable curvature package:
+enough geometry to talk about the static tensors and contractions that later
+Ricci-flow arguments are built from.
 
 Current repo status:
-there is now a concrete Lean subproject at `curvature/` that bootstraps this
-milestone and implements the first code boundary around `∇_X σ` and the raw
-curvature commutator. The tensorial curvature package itself is still open.
+this point is now closed by the concrete Lean subproject at `curvature/`,
+which packages `∇_X σ`, the raw curvature commutator, the bundled curvature
+tensor, Ricci/scalar curvature, metric compatibility, and Levi-Civita
+uniqueness into a compilable library boundary.
 
-### 2. Time-dependent geometric structures
+### 2. Curvature identities and existence package
+
+Formalize the remaining static Riemannian-geometry layer needed before full
+Ricci-flow work:
+
+- Levi-Civita existence
+- sectional curvature
+- first and second Bianchi identities
+- compatibility statements tying these refinements back to the manifold API
+
+Why this is paper-worthy:
+it closes the remaining gap between the first curvature package and the full
+static Riemannian API that Ricci-flow arguments expect.
+
+Current repo status:
+sectional curvature, Levi-Civita existence, and the Bianchi identities are
+still open.
+
+### 3. Time-dependent geometric structures
 
 Formalize one-parameter families of metrics, connections, tensors, and
 differential operators on a manifold.
@@ -44,7 +66,7 @@ Why this is paper-worthy:
 Ricci flow is a PDE on evolving metrics, so this is the layer that lets Lean
 talk coherently about geometry at time `t` and compare it across times.
 
-### 3. Ricci-flow local existence and uniqueness
+### 4. Ricci-flow local existence and uniqueness
 
 Formalize a first existence theorem for Ricci flow on compact manifolds,
 together with uniqueness in the appropriate setting.
@@ -53,7 +75,7 @@ Why this is paper-worthy:
 this is the first theorem package that turns the geometric infrastructure into
 genuine geometric analysis.
 
-### 4. Evolution equations and parabolic maximum principles
+### 5. Evolution equations and parabolic maximum principles
 
 Formalize the evolution formulas for scalar curvature, Ricci curvature, and
 other natural quantities under Ricci flow, together with the maximum-principle
@@ -62,7 +84,7 @@ arguments used to control them.
 Why this is paper-worthy:
 this is the engine behind many later monotonicity and pinching arguments.
 
-### 5. Distance distortion, comparison, and compactness toolkit
+### 6. Distance distortion, comparison, and compactness toolkit
 
 Build the reusable analytic toolkit around evolving metrics:
 
@@ -74,7 +96,7 @@ Build the reusable analytic toolkit around evolving metrics:
 Why this is paper-worthy:
 this creates the language for passing to singularity models and ancient limits.
 
-### 6. Perelman's `L`-geometry
+### 7. Perelman's `L`-geometry
 
 Formalize Perelman's reduced length, reduced distance, and reduced volume.
 
@@ -82,7 +104,7 @@ Why this is paper-worthy:
 these are not just definitions; they are central conceptual inventions in the
 proof and would produce a distinct formalized theory with independent value.
 
-### 7. Non-collapsing theorems
+### 8. Non-collapsing theorems
 
 Formalize Perelman's no-local-collapsing theory and the estimates needed to use
 it in the singularity analysis.
@@ -91,7 +113,7 @@ Why this is paper-worthy:
 this is one of the signature results of the proof and a major benchmark for any
 proof assistant formalization of geometric analysis.
 
-### 8. Ancient-solution theory in dimension 3
+### 9. Ancient-solution theory in dimension 3
 
 Formalize the classification results for non-collapsed ancient solutions that
 feed into the description of high-curvature regions in dimension 3.
@@ -100,7 +122,7 @@ Why this is paper-worthy:
 the theory of ancient solutions is already a major theorem cluster even before
 it is connected back to surgery.
 
-### 9. Canonical-neighborhood and neck-detection machinery
+### 10. Canonical-neighborhood and neck-detection machinery
 
 Formalize the local geometric recognition results that identify necks, caps, and
 other canonical neighborhoods in high-curvature regions.
@@ -109,7 +131,7 @@ Why this is paper-worthy:
 this is the interface between the singularity analysis and the actual surgery
 construction.
 
-### 10. Ricci flow with surgery
+### 11. Ricci flow with surgery
 
 Formalize the existence of Ricci flow with surgery for the relevant class of
 compact 3-manifolds.
@@ -118,7 +140,7 @@ Why this is paper-worthy:
 this is a landmark result even in isolation and is one of the clearest natural
 paper boundaries in the whole program.
 
-### 11. Topological control of surgery
+### 12. Topological control of surgery
 
 Formalize the effect of surgery on the topology of the manifold and the precise
 bookkeeping that lets the flow continue while preserving the classification
@@ -128,7 +150,7 @@ Why this is paper-worthy:
 the surgery theorem is not useful without a mathematically precise bridge back
 to topology.
 
-### 12. Finite-time extinction
+### 13. Finite-time extinction
 
 Formalize the finite-time extinction theorem for the relevant compact
 3-manifolds.
@@ -137,7 +159,7 @@ Why this is paper-worthy:
 this is the main end-stage theorem in the Ricci-flow-with-surgery route and one
 of the cleanest major milestones before the final corollary.
 
-### 13. Topological Poincare corollary
+### 14. Topological Poincare corollary
 
 Extract from the extinction theorem the statement that a closed simply connected
 3-manifold is homeomorphic to the 3-sphere.
@@ -147,7 +169,7 @@ even if short on paper, in Lean this requires careful packaging of everything
 above into a final topological theorem with a clean interface to existing
 topology APIs.
 
-### 14. Smooth Poincare corollary
+### 15. Smooth Poincare corollary
 
 Bridge from the topological 3-dimensional statement to the smooth statement that
 a smooth closed simply connected 3-manifold is diffeomorphic to `S^3`.
@@ -158,9 +180,9 @@ program and would likely deserve its own paper-scale treatment in Lean.
 
 ## What seems most urgent
 
-If someone wanted to start now, the most leverage likely comes from:
+With point 1 closed, the most leverage likely comes from:
 
-1. the curvature package
+1. the curvature tensor package
 2. time-dependent geometric structures
 3. Ricci-flow existence and uniqueness
 4. evolution equations and maximum principles

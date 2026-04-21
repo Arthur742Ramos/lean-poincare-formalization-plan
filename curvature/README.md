@@ -1,7 +1,8 @@
 # PoincareCurvature
 
-This subproject is the first concrete Lean/mathlib implementation milestone of
-the broader Poincare Conjecture roadmap in the parent repository.
+This subproject now covers the connection-theoretic package together with the
+bundled curvature and Ricci/scalar contraction layers of the broader Poincare
+Conjecture roadmap in the parent repository.
 
 ## What is here
 
@@ -11,13 +12,24 @@ the broader Poincare Conjecture roadmap in the parent repository.
   operation
 - `CovariantDerivative.curvatureAux`, the raw curvature commutator
 - alternating identities for the raw curvature commutator
+- `CovariantDerivative.curvatureTensor`, packaging curvature fibrewise as a
+  multilinear map
+- `CovariantDerivative.ricciCurvature` and `CovariantDerivative.scalarCurvature`
+  on the tangent bundle
+- `CovariantDerivative.IsMetricCompatible`, a reusable metric-compatibility
+  interface for Riemannian vector bundles
+- tangent-bundle predicates `CovariantDerivative.IsTorsionFree` and
+  `CovariantDerivative.IsLeviCivita`
+- a Levi-Civita uniqueness theorem at the current mathlib boundary:
+  if two affine connections are torsion-free and metric-compatible, then their
+  difference one-form vanishes
 
-## What is not here yet
+## Follow-on point 2: curvature identities and existence
 
-- the bundled curvature tensor as a fibrewise multilinear map
-- Levi-Civita existence and uniqueness
-- metric compatibility
-- Riemann, Ricci, scalar, or sectional curvature
+The next roadmap point starts from this package and adds:
+
+- Levi-Civita existence
+- sectional curvature
 - Bianchi identities
 
 ## Build

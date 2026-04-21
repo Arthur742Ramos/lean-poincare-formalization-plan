@@ -17,18 +17,23 @@ This layer is not the project, but it is the substrate.
 
 These are the first major projects to land:
 
-1. curvature package
-2. time-dependent geometric structures
+1. Riemannian curvature package
+2. curvature identities and existence package
+3. time-dependent geometric structures
 
-These two projects should be designed as library infrastructure, not as
+The first three projects should be designed as library infrastructure, not as
 one-off theorem proofs.
+
+Current repo status:
+point 1 now lives in `curvature/`; the remaining Layer 1 work is point 2 plus
+time-dependent geometric structures.
 
 ## Layer 2: first Ricci-flow theorems
 
 Once Layer 1 exists:
 
-3. Ricci-flow local existence and uniqueness
-4. evolution equations and parabolic maximum principles
+4. Ricci-flow local existence and uniqueness
+5. evolution equations and parabolic maximum principles
 
 These unlock the first serious Ricci-flow API.
 
@@ -36,9 +41,9 @@ These unlock the first serious Ricci-flow API.
 
 Once Layer 2 exists:
 
-5. distance distortion, comparison, and compactness toolkit
-6. Perelman's `L`-geometry
-7. non-collapsing theorems
+6. distance distortion, comparison, and compactness toolkit
+7. Perelman's `L`-geometry
+8. non-collapsing theorems
 
 This is where the program stops looking like generic differential geometry and
 starts looking specifically like Perelman's proof.
@@ -47,8 +52,8 @@ starts looking specifically like Perelman's proof.
 
 Once Layer 3 exists:
 
-8. ancient-solution theory in dimension 3
-9. canonical-neighborhood and neck-detection machinery
+9. ancient-solution theory in dimension 3
+10. canonical-neighborhood and neck-detection machinery
 
 These results should prepare the exact hypotheses needed by surgery.
 
@@ -56,9 +61,9 @@ These results should prepare the exact hypotheses needed by surgery.
 
 Once Layer 4 exists:
 
-10. Ricci flow with surgery
-11. topological control of surgery
-12. finite-time extinction
+11. Ricci flow with surgery
+12. topological control of surgery
+13. finite-time extinction
 
 At this point, the hard analytic core is effectively complete.
 
@@ -66,8 +71,8 @@ At this point, the hard analytic core is effectively complete.
 
 Once Layer 5 exists:
 
-13. topological Poincare corollary
-14. smooth Poincare corollary
+14. topological Poincare corollary
+15. smooth Poincare corollary
 
 These are the final endpoints of the roadmap.
 
@@ -83,6 +88,6 @@ These are the final endpoints of the roadmap.
 This roadmap is not a one-paper project.
 
 A realistic first-pass estimate is that a complete public Lean formalization of
-the 3D Poincare Conjecture would decompose into roughly 10 to 15 substantial
+the 3D Poincare Conjecture would decompose into roughly 11 to 16 substantial
 projects, many of which would already be natural AFM submissions even before the
 final theorem is reached.

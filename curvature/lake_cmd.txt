@@ -1,0 +1,32 @@
+
+HelpUri            : 
+FileVersionInfo    : File:             C:\Users\arfreita\.elan\bin\lake.exe
+                     InternalName:     
+                     OriginalFilename: 
+                     FileVersion:      
+                     FileDescription:  
+                     Product:          
+                     ProductVersion:   
+                     Debug:            False
+                     Patched:          False
+                     PreRelease:       False
+                     PrivateBuild:     False
+                     SpecialBuild:     False
+                     Language:         
+                     
+Path               : C:\Users\arfreita\.elan\bin\lake.exe
+Extension          : .exe
+Definition         : C:\Users\arfreita\.elan\bin\lake.exe
+Source             : C:\Users\arfreita\.elan\bin\lake.exe
+Version            : 0.0.0.0
+Visibility         : Public
+OutputType         : {System.String}
+Name               : lake.exe
+CommandType        : Application
+ModuleName         : 
+Module             : 
+RemotingCapability : PowerShell
+Parameters         : 
+ParameterSets      : 
+
+

@@ -13,7 +13,8 @@ style of the Annals of Formalized Mathematics.
 
 - `docs/roadmap.md`: the main roadmap, with AFM-scale project slices
 - `docs/dependencies.md`: dependency structure and a suggested execution order
-- `curvature/`: Lean/mathlib subproject for milestone 1, the curvature package bootstrap
+- `curvature/`: Lean/mathlib subproject for the front-end connection and
+  curvature layers of the roadmap
 
 ## Current framing
 
@@ -30,5 +31,8 @@ The roadmap assumes:
 This is intentionally a research-program repository, not an implementation
 repository.
 
-The current exception is `curvature/`, which turns milestone 1 into a concrete
-Lean package with initial code at the covariant-derivative/curvature boundary.
+The current exception is `curvature/`, which now contains a concrete Lean
+package for covariant derivatives along vector fields, the raw curvature
+commutator, a bundled curvature tensor, Ricci/scalar curvature, metric
+compatibility, and Levi-Civita uniqueness. Levi-Civita existence, sectional
+curvature, and the Bianchi identities still remain follow-on work.

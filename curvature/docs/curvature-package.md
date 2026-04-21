@@ -1,6 +1,7 @@
-# Curvature Package Milestone
+# Curvature package status
 
-This package now contains a real Lean/mathlib bootstrap for project 1 of the roadmap.
+This package now contains the connection-theoretic layer together with the
+bundled curvature tensor and its Ricci/scalar contractions.
 
 ## Landed in code
 
@@ -11,19 +12,28 @@ This package now contains a real Lean/mathlib bootstrap for project 1 of the roa
 - a smoothness theorem showing that `∇_X σ` has the expected regularity
 - `CovariantDerivative.curvatureAux`, the raw curvature commutator
 - alternating identities `R_aux(X, Y) = -R_aux(Y, X)` and `R_aux(X, X) = 0`
+- `CovariantDerivative.curvatureTensor`, packaging curvature fibrewise as a
+  multilinear map
+- `CovariantDerivative.ricciCurvature` and `CovariantDerivative.scalarCurvature`
+  on the tangent bundle
+- `CovariantDerivative.IsMetricCompatible`, phrased for Riemannian vector bundles
+- tangent-bundle predicates `CovariantDerivative.IsTorsionFree` and
+  `CovariantDerivative.IsLeviCivita`
+- skew-adjointness of the difference of two metric-compatible affine connections
+- symmetry of the difference of two torsion-free affine connections
+- uniqueness of Levi-Civita connections in the current representation, packaged
+  as `cov.difference cov' = 0`
 
-## Not landed yet
+## Follow-on point 2: curvature identities and existence
 
-- tensoriality of the raw curvature operator in all slots
-- the bundled curvature tensor as a multilinear map on fibres
-- Levi-Civita existence and uniqueness
-- metric compatibility as a reusable Lean interface
-- Riemann, Ricci, scalar, and sectional curvature
+The next roadmap point starts from this package and adds:
+
+- Levi-Civita existence
+- sectional curvature
 - Bianchi identities
 
-## Why this is still a meaningful first milestone
+## Current boundary
 
-The current code pins down the exact interface where the existing mathlib covariant-derivative and
-vector-field libraries meet the future curvature development. It removes the ambiguity about where
-the next proofs have to land and gives the project a compilable starting boundary instead of just a
-research note.
+The tensorial curvature layer and its Ricci/scalar contractions are now part of
+the package itself, so the remaining follow-on work starts at sectional
+curvature, Levi-Civita existence, and the Bianchi identities.
