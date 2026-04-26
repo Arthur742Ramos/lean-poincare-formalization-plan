@@ -3,6 +3,12 @@
 This package now contains the connection-theoretic layer together with the
 bundled curvature tensor and its Ricci/scalar contractions.
 
+## Completion standard
+
+Within this package, a roadmap point counts as complete only when the target
+result is actually proved in Lean. Interfaces, theorem boundaries, axioms,
+`sorry`, or other scaffolding do not count as completion.
+
 ## Landed in code
 
 - a Lean package with a pinned toolchain and a mathlib dependency
@@ -24,16 +30,72 @@ bundled curvature tensor and its Ricci/scalar contractions.
 - uniqueness of Levi-Civita connections in the current representation, packaged
   as `cov.difference cov' = 0`
 
-## Follow-on point 2: curvature identities and existence
+## Point 2: curvature identities and existence
 
-The next roadmap point starts from this package and adds:
+- Levi-Civita existence via `leviCivitaConnection_nonempty` and
+  `exists_leviCivitaConnection`
+- sectional curvature via `sectionalCurvature`, `sectionalCurvatureNumerator`,
+  and `sectionalCurvatureDenominator`
+- first-Bianchi identities for `curvatureAux` and `curvatureTensor`
+- a raw second-Bianchi identity package on smooth tangent vector fields
 
-- Levi-Civita existence
-- sectional curvature
-- Bianchi identities
+## Point 3: time-dependent geometric structures
+
+- `TimeFamily`, `TimeDependentSection`, and `TimeDependentCovariantDerivative`
+- evaluation-at-time and constant-family interfaces
+- a per-time smoothness predicate `ContMDiffInSpace`
+- a time-lifted `along` construction
+- `TimeDependentRiemannianMetric` for families of smooth tangent-bundle metrics
+- family-level metric compatibility and Levi-Civita predicates
+- slicewise Levi-Civita construction and existence for time-dependent metrics
+- tangent-bundle curvature, Ricci, scalar, and sectional constructions defined
+  pointwise in time using the metric and connection at each slice
 
 ## Current boundary
 
-The tensorial curvature layer and its Ricci/scalar contractions are now part of
-the package itself, so the remaining follow-on work starts at sectional
-curvature, Levi-Civita existence, and the Bianchi identities.
+The package now closes roadmap points 1 through 3 under the repository's
+proof-only standard. Point 4 remains open. There is draft Ricci-flow scaffold
+code in the repository, but it is not part of the public package boundary and
+does not count toward completion. The next follow-on work is therefore still the
+actual Lean proof of roadmap point 4. In the meantime the package has gained a
+real proof-bearing section-smoothing layer: local-to-global convex gluing,
+trivial-bundle and open-set smoothing, local smoothing in bundle
+trivializations, and a global smoothing theorem for continuous bundle sections
+that stay inside open fiberwise convex subsets of the total space, together
+with an intrinsic fiberwise-`ε` approximation theorem for continuous sections
+of smooth Riemannian vector bundles. The package also now contains a
+proof-bearing `C^0` coordinate layer for continuous sections: local-frame
+continuity criteria, compact coordinate-map packaging in a trivialization,
+compact overlap coordinate-change identities in `C(K, F)`, and cover-level
+compatible compact coordinate families that recover the section on the covered
+union. On finite compact covers, the compatible families form a closed complete
+compatibility kernel inside the ambient product of compact `ContinuousMap`
+spaces, the gluing lemmas reconstruct continuous sections from those compatible
+families to produce a genuine finite-cover equivalence, and that equivalence
+now transfers the induced additive, module, normed, and complete structure to a
+dedicated continuous-section wrapper. Continuous and smooth Riemannian metrics
+are also now packaged as honest sections of the bilinear-form hom bundle, with
+extensionality lemmas reducing equality of metrics to pointwise equality of
+their fiberwise bilinear forms. That same public layer now also proves
+finite-dimensional coercivity and operator-norm openness lemmas for
+positive-definite continuous bilinear forms, giving the first honest fiberwise
+open-neighborhood result needed for a section-space model of metrics, and lifts
+that result to compact `ContinuousMap` and `BoundedContinuousFunction`
+families, and from there to the preferred finite-cover `ContinuousSectionSpace`
+model, where actual positive-definite bilinear-form sections form an open
+subset, the symmetric locus is now closed, and continuous Riemannian metrics
+land inside the refined symmetric positive-definite locus there, now packaged as
+an open subset of the closed symmetric section subtype. The
+repository's internal
+`RicciFlow.LocalExistence` scaffold has also gained a proof-bearing stationary
+Ricci-flat special case with the corresponding restricted metric/connection
+uniqueness statement, plus zero-velocity and Ricci-tensor-zero interval
+constancy theorems for local solutions at both the metric and Levi-Civita
+connection levels. It also now proves that the Ricci tensor, Ricci-flow
+right-hand side, and Ricci-flow equation do not depend on which Levi-Civita
+family is chosen for a fixed metric family, and it now also packages intrinsic
+metric-only `IntrinsicSolution`, `IntrinsicLocalSolution`, and
+`IntrinsicLocalExistenceUniqueness` wrappers with conversions to and from the
+older connection-parametrized scaffold. The general compact-manifold local
+existence/uniqueness theorem is still unproved and therefore point 4 remains
+open.

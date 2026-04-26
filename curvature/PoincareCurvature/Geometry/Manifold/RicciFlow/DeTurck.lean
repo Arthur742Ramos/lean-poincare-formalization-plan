@@ -1,0 +1,2103 @@
+module
+
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence
+
+/-!
+# Intrinsic DeTurck geometry for Ricci flow
+
+This internal file adds the geometric DeTurck data attached to the intrinsic
+Ricci-flow boundary from `LocalExistence.lean`.
+
+It defines:
+
+- the trace endomorphism / one-form / vector field built from the difference
+  between the chosen Levi-Civita family and a background connection family,
+- the corresponding intrinsic DeTurck correction to the metric equation,
+- the gauge-fixed Ricci-DeTurck right-hand side and its reduction to intrinsic
+  Ricci flow when the background family is Levi-Civita.
+
+These lemmas are proof-bearing preparatory infrastructure only. They do not
+complete roadmap point 4 by themselves.
+-/
+
+@[expose] public noncomputable section
+
+open Bundle
+open scoped Manifold ContDiff
+
+namespace RicciFlow
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+  [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+
+local notation "TM" => (TangentSpace I : M → Type _)
+
+section ChosenLeviCivita
+
+variable [SigmaCompactSpace M]
+
+/-- The canonical smooth Levi-Civita family attached to `g`. -/
+abbrev chosenLeviCivitaFamily
+    (g : MetricFamily (I := I) (M := M)) : ConnectionFamily (I := I) (M := M) :=
+  CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+    (I := I) (M := M) g
+
+lemma chosenLeviCivitaFamily_isLeviCivita
+    (g : MetricFamily (I := I) (M := M)) :
+    CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g (chosenLeviCivitaFamily (I := I) (M := M) g) :=
+  CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_isLeviCivita
+    (I := I) (M := M) g
+
+/-- The traced connection-difference endomorphism whose trace defines the intrinsic DeTurck
+one-form. -/
+def intrinsicDeTurckTraceEndomorphism
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (w : TM x) :
+    TM x →L[ℝ] TM x where
+  toFun u :=
+    (CovariantDerivative.difference
+      ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x u) w
+  map_add' u v := by
+    exact congrArg
+      (fun F : TM x →L[ℝ] TM x => F w)
+      ((CovariantDerivative.difference
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x).map_add u v)
+  map_smul' c u := by
+    exact congrArg
+      (fun F : TM x →L[ℝ] TM x => F w)
+      ((CovariantDerivative.difference
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x).map_smul c u)
+
+@[simp] lemma intrinsicDeTurckTraceEndomorphism_apply
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (w u : TM x) :
+    intrinsicDeTurckTraceEndomorphism (I := I) (M := M) g background t x w u =
+      (CovariantDerivative.difference
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x u) w := rfl
+
+lemma intrinsicDeTurckTraceEndomorphism_add
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (w₁ w₂ : TM x) :
+    intrinsicDeTurckTraceEndomorphism (I := I) (M := M) g background t x (w₁ + w₂) =
+      intrinsicDeTurckTraceEndomorphism (I := I) (M := M) g background t x w₁ +
+        intrinsicDeTurckTraceEndomorphism (I := I) (M := M) g background t x w₂ := by
+  ext u
+  exact
+    ((CovariantDerivative.difference
+      ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x u).map_add w₁ w₂)
+
+lemma intrinsicDeTurckTraceEndomorphism_smul
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (c : ℝ) (w : TM x) :
+    intrinsicDeTurckTraceEndomorphism (I := I) (M := M) g background t x (c • w) =
+      c • intrinsicDeTurckTraceEndomorphism (I := I) (M := M) g background t x w := by
+  ext u
+  exact
+    ((CovariantDerivative.difference
+      ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x u).map_smul c w)
+
+/-- On zero-dimensional tangent fibers, the endomorphism traced in the DeTurck one-form vanishes. -/
+theorem intrinsicDeTurckTraceEndomorphism_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (w : TM x) :
+    intrinsicDeTurckTraceEndomorphism (I := I) (M := M) g background t x w = 0 := by
+  ext u
+  exact Subsingleton.elim _ _
+
+/-- The intrinsic DeTurck one-form obtained by tracing the connection-difference endomorphism. -/
+def intrinsicDeTurckOneForm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) :
+    TM x →L[ℝ] ℝ :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun w =>
+        LinearMap.trace ℝ (TM x)
+          (intrinsicDeTurckTraceEndomorphism (I := I) (M := M) g background t x w).toLinearMap
+      map_add' := by
+        intro w₁ w₂
+        calc
+          LinearMap.trace ℝ (TM x)
+              (intrinsicDeTurckTraceEndomorphism
+                (I := I) (M := M) g background t x (w₁ + w₂)).toLinearMap
+            = LinearMap.trace ℝ (TM x)
+                ((intrinsicDeTurckTraceEndomorphism
+                  (I := I) (M := M) g background t x w₁ +
+                    intrinsicDeTurckTraceEndomorphism
+                      (I := I) (M := M) g background t x w₂).toLinearMap) := by
+                rw [intrinsicDeTurckTraceEndomorphism_add]
+          _ = LinearMap.trace ℝ (TM x)
+                (intrinsicDeTurckTraceEndomorphism
+                  (I := I) (M := M) g background t x w₁).toLinearMap +
+              LinearMap.trace ℝ (TM x)
+                (intrinsicDeTurckTraceEndomorphism
+                  (I := I) (M := M) g background t x w₂).toLinearMap := by
+                simp [LinearMap.map_add]
+      map_smul' := by
+        intro c w
+        calc
+          LinearMap.trace ℝ (TM x)
+              (intrinsicDeTurckTraceEndomorphism
+                (I := I) (M := M) g background t x (c • w)).toLinearMap
+            = LinearMap.trace ℝ (TM x)
+                ((c • intrinsicDeTurckTraceEndomorphism
+                  (I := I) (M := M) g background t x w).toLinearMap) := by
+                rw [intrinsicDeTurckTraceEndomorphism_smul]
+          _ = c * LinearMap.trace ℝ (TM x)
+                (intrinsicDeTurckTraceEndomorphism
+                  (I := I) (M := M) g background t x w).toLinearMap := by
+                simp }
+
+@[simp] lemma intrinsicDeTurckOneForm_apply
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (w : TM x) :
+    intrinsicDeTurckOneForm (I := I) (M := M) g background t x w =
+      LinearMap.trace ℝ (TM x)
+        (intrinsicDeTurckTraceEndomorphism
+          (I := I) (M := M) g background t x w).toLinearMap := by
+  simp [intrinsicDeTurckOneForm]
+
+/-- On zero-dimensional tangent fibers, the intrinsic DeTurck one-form vanishes. -/
+theorem intrinsicDeTurckOneForm_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) :
+    intrinsicDeTurckOneForm (I := I) (M := M) g background t x = 0 := by
+  ext w
+  rw [intrinsicDeTurckOneForm_apply]
+  have hEnd :
+      (intrinsicDeTurckTraceEndomorphism
+        (I := I) (M := M) g background t x w).toLinearMap = 0 := by
+    rw [intrinsicDeTurckTraceEndomorphism_eq_zero_of_subsingleton_tangent
+      (I := I) (M := M) g background t x w]
+    rfl
+  simp [hEnd]
+
+/-- The intrinsic DeTurck vector field obtained by raising the intrinsic DeTurck one-form with the
+evolving metric. -/
+def intrinsicDeTurckVectorField
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M)) :
+    CovariantDerivative.TimeDependentVectorField (I := I) (M := M) :=
+  fun t x ↦ by
+    letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+    exact CovariantDerivative.rieszMap (I := I) x
+      (intrinsicDeTurckOneForm (I := I) (M := M) g background t x)
+
+@[simp] lemma intrinsicDeTurckVectorField_apply
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) :
+    intrinsicDeTurckVectorField (I := I) (M := M) g background t x = by
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+      exact CovariantDerivative.rieszMap (I := I) x
+        (intrinsicDeTurckOneForm (I := I) (M := M) g background t x) := rfl
+
+/-- On zero-dimensional tangent fibers, the intrinsic DeTurck vector field vanishes. -/
+theorem intrinsicDeTurckVectorField_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M)) :
+    intrinsicDeTurckVectorField (I := I) (M := M) g background = 0 := by
+  funext t x
+  exact Subsingleton.elim _ _
+
+/-- The symmetrized covariant derivative of the intrinsic DeTurck vector field. -/
+def intrinsicDeTurckCorrection
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M)) :
+    MetricTensorFamily (I := I) (M := M) :=
+  fun t x u v ↦ by
+    letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+    exact
+      (g t).inner x
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x u) v +
+      (g t).inner x u
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x v)
+
+@[simp] lemma intrinsicDeTurckCorrection_apply
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v = by
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+      exact
+        (g t).inner x
+          (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+            (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x u) v +
+        (g t).inner x u
+          (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+            (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x v) := rfl
+
+/-- The DeTurck correction vanishes on zero-dimensional tangent fibers, for any background. -/
+theorem intrinsicDeTurckCorrection_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v = 0 := by
+  rw [intrinsicDeTurckCorrection_apply]
+  have hleft :
+      (g t).inner x
+          (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+            (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x u) v = 0 := by
+    simpa [metricTensor] using
+      metricTensor_eq_zero_of_subsingleton_tangent
+        (I := I) (M := M) g t x
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x u) v
+  have hright :
+      (g t).inner x u
+          (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+            (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x v) = 0 := by
+    simpa [metricTensor] using
+      metricTensor_eq_zero_of_subsingleton_tangent
+        (I := I) (M := M) g t x u
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x v)
+  simp [hleft, hright]
+
+/-- The intrinsic Ricci-DeTurck right-hand side obtained by adding the DeTurck correction to the
+intrinsic Ricci-flow right-hand side. -/
+def intrinsicRicciDeTurckRHS
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M)) :
+    MetricTensorFamily (I := I) (M := M) :=
+  fun t x u v ↦
+    intrinsicRicciFlowRHS (I := I) (M := M) g t x u v +
+      intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v
+
+@[simp] lemma intrinsicRicciDeTurckRHS_apply
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v =
+      intrinsicRicciFlowRHS (I := I) (M := M) g t x u v +
+        intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v := rfl
+
+theorem intrinsicRicciDeTurckRHS_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v = 0 := by
+  rw [intrinsicRicciDeTurckRHS_apply,
+    intrinsicRicciFlowRHS_eq_zero_of_subsingleton_tangent (I := I) (M := M) g t x u v,
+    intrinsicDeTurckCorrection_eq_zero_of_subsingleton_tangent
+      (I := I) (M := M) g background t x u v]
+  norm_num
+
+theorem intrinsicDeTurckTraceEndomorphism_eq_zero_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (t : ℝ) (x : M) (w : TM x) :
+    intrinsicDeTurckTraceEndomorphism (I := I) (M := M) g background t x w = 0 := by
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  have hdiff :
+      CovariantDerivative.difference
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) = 0 := by
+    exact CovariantDerivative.difference_eq_zero_of_isLeviCivita
+      (((chosenLeviCivitaFamily (I := I) (M := M) g) t))
+      (background t)
+      ((chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M) g) t)
+      (hbackground t)
+  ext u
+  have hzero :
+      (CovariantDerivative.difference
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x u) w = 0 := by
+    simpa using congrArg
+      (fun D => D x u w)
+      hdiff
+  simpa [intrinsicDeTurckTraceEndomorphism] using hzero
+
+theorem intrinsicDeTurckOneForm_eq_zero_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (t : ℝ) (x : M) :
+    intrinsicDeTurckOneForm (I := I) (M := M) g background t x = 0 := by
+  ext w
+  rw [intrinsicDeTurckOneForm_apply]
+  simpa using congrArg
+    (fun A => LinearMap.trace ℝ (TM x) A.toLinearMap)
+    (intrinsicDeTurckTraceEndomorphism_eq_zero_of_isLeviCivita
+      (I := I) (M := M) (g := g) (background := background)
+      (hbackground := hbackground) (t := t) (x := x) (w := w))
+
+theorem intrinsicDeTurckVectorField_eq_zero_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background) :
+    intrinsicDeTurckVectorField (I := I) (M := M) g background = 0 := by
+  funext t x
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  have hone :
+      intrinsicDeTurckOneForm (I := I) (M := M) g background t x = 0 :=
+    intrinsicDeTurckOneForm_eq_zero_of_isLeviCivita
+      (I := I) (M := M) g background hbackground t x
+  simp [intrinsicDeTurckVectorField, hone]
+
+theorem intrinsicDeTurckCorrection_eq_zero_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background) :
+    intrinsicDeTurckCorrection (I := I) (M := M) g background = 0 := by
+  funext t x u v
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  have hvector :
+      intrinsicDeTurckVectorField (I := I) (M := M) g background t = 0 := by
+    exact congrArg
+      (fun W => W t)
+      (intrinsicDeTurckVectorField_eq_zero_of_isLeviCivita
+        (I := I) (M := M) g background hbackground)
+  have hcovZero :
+      (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+        (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x) = 0 := by
+    rw [hvector]
+    exact congrArg
+      (fun A => A x)
+      (CovariantDerivative.zero
+        (cov := ((chosenLeviCivitaFamily (I := I) (M := M) g) t)))
+  have hcovU :
+      (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+        (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x u) = 0 := by
+    simpa using congrArg (fun A => A u) hcovZero
+  have hcovV :
+      (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+        (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x v) = 0 := by
+    simpa using congrArg (fun A => A v) hcovZero
+  rw [intrinsicDeTurckCorrection_apply, hcovU, hcovV]
+  simp
+
+theorem intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background =
+      intrinsicRicciFlowRHS (I := I) (M := M) g := by
+  funext t x u v
+  have hcorr :
+      intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v = 0 := by
+    simpa using congrArg
+      (fun F => F t x u v)
+      (intrinsicDeTurckCorrection_eq_zero_of_isLeviCivita
+            (I := I) (M := M) g background hbackground)
+  rw [intrinsicRicciDeTurckRHS_apply, hcorr, add_zero]
+
+/-- The intrinsic Ricci-DeTurck right-hand side vanishes wherever the intrinsic Ricci tensor
+vanishes and the background is the Levi-Civita connection of the evolving metric. -/
+theorem intrinsicRicciDeTurckRHS_eq_zero_of_isLeviCivita_of_intrinsicRicciTensor_eq_zero
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    {t : ℝ} {x : M} {u v : TM x}
+    (hRicciZero : intrinsicRicciTensor (I := I) (M := M) g t x u v = 0) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v = 0 := by
+  calc
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v =
+        intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := by
+      simpa using congrArg (fun F => F t x u v)
+        (intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+          (I := I) (M := M) g background hbackground)
+    _ = 0 :=
+      intrinsicRicciFlowRHS_eq_zero_of_intrinsicRicciTensor_eq_zero
+        (I := I) (M := M) g hRicciZero
+
+/-- The intrinsic Ricci-DeTurck equation at a single time. -/
+def SatisfiesIntrinsicDeTurckEquationAt
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) : Prop :=
+  ∀ x : M, ∀ u v : TM x,
+    gdot t x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v
+
+theorem SatisfiesIntrinsicDeTurckEquationAt.metricVelocity_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)} {t : ℝ}
+    (h : SatisfiesIntrinsicDeTurckEquationAt (I := I) (M := M) g gdot background t)
+    (x : M) (u v : TM x) :
+    gdot t x u v = 0 := by
+  rw [h x u v]
+  exact intrinsicRicciDeTurckRHS_eq_zero_of_subsingleton_tangent
+    (I := I) (M := M) g background t x u v
+
+/-- If the intrinsic Ricci tensor vanishes and the background is Levi-Civita, then the
+Ricci-DeTurck equation forces the corresponding metric-velocity component to vanish. -/
+theorem SatisfiesIntrinsicDeTurckEquationAt.metricVelocity_eq_zero_of_isLeviCivita_of_intrinsicRicciTensor_eq_zero
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)} {t : ℝ}
+    (h : SatisfiesIntrinsicDeTurckEquationAt (I := I) (M := M) g gdot background t)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    {x : M} {u v : TM x}
+    (hRicciZero : intrinsicRicciTensor (I := I) (M := M) g t x u v = 0) :
+    gdot t x u v = 0 := by
+  rw [h x u v]
+  exact intrinsicRicciDeTurckRHS_eq_zero_of_isLeviCivita_of_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M) g background hbackground hRicciZero
+
+theorem satisfiesIntrinsicDeTurckEquationAt_iff_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background) :
+    SatisfiesIntrinsicDeTurckEquationAt (I := I) (M := M) g gdot background t ↔
+      SatisfiesIntrinsicEquationAt (I := I) (M := M) g gdot t := by
+  constructor <;> intro hEq <;> intro x u v
+  · calc
+      gdot t x u v =
+          intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v := hEq x u v
+      _ = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := by
+        simpa using congrArg
+          (fun F => F t x u v)
+          (intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+            (I := I) (M := M) g background hbackground)
+  · calc
+      gdot t x u v = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := hEq x u v
+      _ = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v := by
+        simpa using congrArg
+          (fun F => F t x u v)
+          (intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+            (I := I) (M := M) g background hbackground).symm
+
+/-- On zero-dimensional tangent fibers, the intrinsic Ricci-DeTurck equation is equivalent to the
+intrinsic Ricci-flow equation for any background connection family. -/
+theorem satisfiesIntrinsicDeTurckEquationAt_iff_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) :
+    SatisfiesIntrinsicDeTurckEquationAt (I := I) (M := M) g gdot background t ↔
+      SatisfiesIntrinsicEquationAt (I := I) (M := M) g gdot t := by
+  constructor
+  · intro hEq x u v
+    calc
+      gdot t x u v = 0 :=
+        SatisfiesIntrinsicDeTurckEquationAt.metricVelocity_eq_zero_of_subsingleton_tangent
+          (I := I) (M := M) hEq x u v
+      _ = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := by
+        exact (intrinsicRicciFlowRHS_eq_zero_of_subsingleton_tangent
+          (I := I) (M := M) g t x u v).symm
+  · intro hEq x u v
+    calc
+      gdot t x u v = 0 :=
+        SatisfiesIntrinsicEquationAt.metricVelocity_eq_zero_of_subsingleton_tangent
+          (I := I) (M := M) hEq x u v
+      _ = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v := by
+        exact (intrinsicRicciDeTurckRHS_eq_zero_of_subsingleton_tangent
+          (I := I) (M := M) g background t x u v).symm
+
+/-- A metric family solves the intrinsic Ricci-DeTurck equation on `s` when its tensor derivative
+exists there and agrees with the intrinsic Ricci-DeTurck right-hand side. -/
+def IsIntrinsicRicciDeTurckOn
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  HasTimeDerivativeOn (I := I) (M := M) g gdot s ∧
+    ∀ ⦃t : ℝ⦄, t ∈ s →
+      SatisfiesIntrinsicDeTurckEquationAt (I := I) (M := M) g gdot background t
+
+theorem isIntrinsicRicciDeTurckOn_iff_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background) :
+    IsIntrinsicRicciDeTurckOn (I := I) (M := M) g gdot background s ↔
+      IsIntrinsicRicciFlowOn (I := I) (M := M) g gdot s := by
+  constructor
+  · intro hFlow
+    refine ⟨hFlow.1, ?_⟩
+    intro t ht
+    exact
+      (satisfiesIntrinsicDeTurckEquationAt_iff_of_isLeviCivita
+        (I := I) (M := M) g gdot background t hbackground).1
+        (hFlow.2 ht)
+  · intro hFlow
+    refine ⟨hFlow.1, ?_⟩
+    intro t ht
+    exact
+        (satisfiesIntrinsicDeTurckEquationAt_iff_of_isLeviCivita
+          (I := I) (M := M) g gdot background t hbackground).2
+        (hFlow.2 ht)
+
+/-- On zero-dimensional tangent fibers, intrinsic Ricci-DeTurck flow is intrinsic Ricci flow for
+any background connection family. -/
+theorem isIntrinsicRicciDeTurckOn_iff_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (s : Set ℝ) :
+    IsIntrinsicRicciDeTurckOn (I := I) (M := M) g gdot background s ↔
+      IsIntrinsicRicciFlowOn (I := I) (M := M) g gdot s := by
+  constructor
+  · intro hFlow
+    refine ⟨hFlow.1, ?_⟩
+    intro t ht
+    exact
+      (satisfiesIntrinsicDeTurckEquationAt_iff_of_subsingleton_tangent
+        (I := I) (M := M) g gdot background t).1
+        (hFlow.2 ht)
+  · intro hFlow
+    refine ⟨hFlow.1, ?_⟩
+    intro t ht
+    exact
+      (satisfiesIntrinsicDeTurckEquationAt_iff_of_subsingleton_tangent
+        (I := I) (M := M) g gdot background t).2
+        (hFlow.2 ht)
+
+/-- An intrinsic Ricci-DeTurck solution packages the evolving metric, its tensor velocity, and the
+background connection family used in the DeTurck correction. -/
+structure IntrinsicDeTurckSolution where
+  /-- The time set on which the solution is defined. -/
+  timeSet : Set ℝ
+  /-- The evolving metric. -/
+  metric : MetricFamily (I := I) (M := M)
+  /-- The time derivative of the metric tensor. -/
+  metricVelocity : MetricTensorFamily (I := I) (M := M)
+  /-- The background connection family used in the DeTurck gauge. -/
+  background : ConnectionFamily (I := I) (M := M)
+  /-- The intrinsic Ricci-DeTurck equation on the time set. -/
+  isRicciDeTurck : IsIntrinsicRicciDeTurckOn (I := I) (M := M)
+    metric metricVelocity background timeSet
+
+lemma intrinsicDeTurckSolution_hasTimeDerivativeOn
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M)) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      sol.metric sol.metricVelocity sol.timeSet :=
+  sol.isRicciDeTurck.1
+
+lemma intrinsicDeTurckSolution_equation
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    {t : ℝ} (ht : t ∈ sol.timeSet) :
+    SatisfiesIntrinsicDeTurckEquationAt (I := I) (M := M)
+      sol.metric sol.metricVelocity sol.background t :=
+  sol.isRicciDeTurck.2 ht
+
+theorem IntrinsicDeTurckSolution.metricVelocity_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    {t : ℝ} (ht : t ∈ sol.timeSet) (x : M) (u v : TM x) :
+    sol.metricVelocity t x u v = 0 :=
+  SatisfiesIntrinsicDeTurckEquationAt.metricVelocity_eq_zero_of_subsingleton_tangent
+    (I := I) (M := M) (intrinsicDeTurckSolution_equation (I := I) (M := M) sol ht)
+    x u v
+
+/-- A Ricci-DeTurck solution with Levi-Civita background has zero velocity in any component where
+the intrinsic Ricci tensor vanishes. -/
+theorem IntrinsicDeTurckSolution.metricVelocity_eq_zero_of_isLeviCivita_of_intrinsicRicciTensor_eq_zero
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) sol.metric sol.background)
+    {t : ℝ} (ht : t ∈ sol.timeSet) {x : M} {u v : TM x}
+    (hRicciZero : intrinsicRicciTensor (I := I) (M := M) sol.metric t x u v = 0) :
+    sol.metricVelocity t x u v = 0 :=
+  SatisfiesIntrinsicDeTurckEquationAt.metricVelocity_eq_zero_of_isLeviCivita_of_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M) (intrinsicDeTurckSolution_equation (I := I) (M := M) sol ht)
+    hbackground hRicciZero
+
+/-- On zero-dimensional tangent fibers, the intrinsic Ricci tensor of the evolving DeTurck metric
+vanishes pointwise. -/
+theorem IntrinsicDeTurckSolution.intrinsicRicciTensor_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M) sol.metric t x u v = 0 :=
+  _root_.RicciFlow.intrinsicRicciTensor_eq_zero_of_subsingleton_tangent (I := I) (M := M)
+    sol.metric t x u v
+
+/-- On zero-dimensional tangent fibers, the intrinsic Ricci-flow right-hand side of the evolving
+DeTurck metric vanishes pointwise. -/
+theorem IntrinsicDeTurckSolution.intrinsicRicciFlowRHS_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHS (I := I) (M := M) sol.metric t x u v = 0 :=
+  _root_.RicciFlow.intrinsicRicciFlowRHS_eq_zero_of_subsingleton_tangent (I := I) (M := M)
+    sol.metric t x u v
+
+/-- On zero-dimensional tangent fibers, the intrinsic Ricci-DeTurck right-hand side of the evolving
+DeTurck metric vanishes pointwise for the stored background. -/
+theorem IntrinsicDeTurckSolution.intrinsicRicciDeTurckRHS_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) sol.metric sol.background t x u v = 0 :=
+  _root_.RicciFlow.intrinsicRicciDeTurckRHS_eq_zero_of_subsingleton_tangent (I := I) (M := M)
+    sol.metric sol.background t x u v
+
+/-- On zero-dimensional tangent fibers, every DeTurck background is Levi-Civita for the evolving
+metric. -/
+theorem IntrinsicDeTurckSolution.background_isLeviCivita_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M)) :
+    CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) sol.metric sol.background :=
+  sol.metric.isLeviCivita_of_subsingleton_tangent sol.background
+
+/-- If the DeTurck background family is Levi-Civita for the evolving metric, then an intrinsic
+Ricci-DeTurck solution canonically determines an intrinsic Ricci-flow solution. -/
+def IntrinsicDeTurckSolution.toIntrinsicSolution
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) sol.metric sol.background) :
+    IntrinsicSolution (E := E) (H := H) (I := I) (M := M) where
+  timeSet := sol.timeSet
+  metric := sol.metric
+  metricVelocity := sol.metricVelocity
+  isRicciFlow :=
+    (isIntrinsicRicciDeTurckOn_iff_of_isLeviCivita
+      (I := I) (M := M) sol.metric sol.metricVelocity sol.background sol.timeSet
+      hbackground).1
+      sol.isRicciDeTurck
+
+/-- With Levi-Civita background, zero DeTurck velocity at a fixed component is equivalent to
+vanishing intrinsic Ricci tensor there. -/
+theorem IntrinsicDeTurckSolution.metricVelocity_eq_zero_iff_intrinsicRicciTensor_eq_zero_of_isLeviCivita
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) sol.metric sol.background)
+    {t : ℝ} (ht : t ∈ sol.timeSet) (x : M) (u v : TM x) :
+    sol.metricVelocity t x u v = 0 ↔
+      intrinsicRicciTensor (I := I) (M := M) sol.metric t x u v = 0 := by
+  simpa [IntrinsicDeTurckSolution.toIntrinsicSolution] using
+    IntrinsicSolution.metricVelocity_eq_zero_iff_intrinsicRicciTensor_eq_zero
+      (I := I) (M := M) (sol.toIntrinsicSolution hbackground) ht x u v
+
+/-- On zero-dimensional tangent fibers, a Ricci-DeTurck solution is an intrinsic Ricci-flow
+solution for any DeTurck background family. -/
+def IntrinsicDeTurckSolution.toIntrinsicSolution_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicSolution (E := E) (H := H) (I := I) (M := M) where
+  timeSet := sol.timeSet
+  metric := sol.metric
+  metricVelocity := sol.metricVelocity
+  isRicciFlow :=
+    (isIntrinsicRicciDeTurckOn_iff_of_subsingleton_tangent
+      (I := I) (M := M) sol.metric sol.metricVelocity sol.background sol.timeSet).1
+      sol.isRicciDeTurck
+
+/-- Any intrinsic Ricci-flow solution becomes an intrinsic Ricci-DeTurck solution for a chosen
+Levi-Civita background family. -/
+def IntrinsicSolution.toIntrinsicDeTurckSolution
+    (sol : IntrinsicSolution (E := E) (H := H) (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) sol.metric background) :
+    IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M) where
+  timeSet := sol.timeSet
+  metric := sol.metric
+  metricVelocity := sol.metricVelocity
+  background := background
+  isRicciDeTurck :=
+    (isIntrinsicRicciDeTurckOn_iff_of_isLeviCivita
+      (I := I) (M := M) sol.metric sol.metricVelocity background sol.timeSet
+      hbackground).2
+      sol.isRicciFlow
+
+/-- On zero-dimensional tangent fibers, any intrinsic Ricci-flow solution is a Ricci-DeTurck
+solution for any background connection family. -/
+def IntrinsicSolution.toIntrinsicDeTurckSolution_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (sol : IntrinsicSolution (E := E) (H := H) (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M)) :
+    IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M) where
+  timeSet := sol.timeSet
+  metric := sol.metric
+  metricVelocity := sol.metricVelocity
+  background := background
+  isRicciDeTurck :=
+    (isIntrinsicRicciDeTurckOn_iff_of_subsingleton_tangent
+      (I := I) (M := M) sol.metric sol.metricVelocity background sol.timeSet).2
+      sol.isRicciFlow
+
+/-- Specialize an intrinsic Ricci-flow solution to the chosen smooth Levi-Civita background family. -/
+def IntrinsicSolution.toChosenIntrinsicDeTurckSolution
+    (sol : IntrinsicSolution (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M) :=
+  sol.toIntrinsicDeTurckSolution
+    (chosenLeviCivitaFamily (I := I) (M := M) sol.metric)
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M) sol.metric)
+
+/-- Initial-metric matching condition for an intrinsic Ricci-DeTurck solution. -/
+def IntrinsicDeTurckMatchesInitialMetric
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) : Prop :=
+  ∀ x : M, ∀ u v : TM x,
+    metricTensor (I := I) (M := M) sol.metric ivp.initialTime x u v =
+      ivp.initialMetric.inner x u v
+
+/-- A local intrinsic Ricci-DeTurck solution is an interval solution together with a matched
+initial metric. -/
+structure IntrinsicDeTurckLocalSolution
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) where
+  /-- Terminal time of the local solution interval. -/
+  terminalTime : ℝ
+  /-- The interval is genuinely forward in time. -/
+  initial_lt_terminal : ivp.initialTime < terminalTime
+  /-- The underlying intrinsic Ricci-DeTurck solution object. -/
+  toIntrinsicDeTurckSolution : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M)
+  /-- The solution is defined on the whole interval `[t₀, T]`. -/
+  interval_subset : Set.Icc ivp.initialTime terminalTime ⊆ toIntrinsicDeTurckSolution.timeSet
+  /-- The initial metric is matched at the initial time. -/
+  matchesInitialMetric :
+    IntrinsicDeTurckMatchesInitialMetric (I := I) (M := M) toIntrinsicDeTurckSolution ivp
+
+lemma intrinsicDeTurckLocalSolution_initialTime_mem
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :
+    ivp.initialTime ∈ sol.toIntrinsicDeTurckSolution.timeSet :=
+  sol.interval_subset ⟨le_rfl, le_of_lt sol.initial_lt_terminal⟩
+
+lemma intrinsicDeTurckLocalSolution_metric_eq_initial
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric ivp.initialTime x u v =
+        ivp.initialMetric.inner x u v :=
+  sol.matchesInitialMetric x u v
+
+/-- If the background family is Levi-Civita for the evolving metric, then an intrinsic
+Ricci-DeTurck local solution canonically determines an intrinsic local Ricci-flow solution. -/
+def IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background) :
+    IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp where
+  terminalTime := sol.terminalTime
+  initial_lt_terminal := sol.initial_lt_terminal
+  toIntrinsicSolution := sol.toIntrinsicDeTurckSolution.toIntrinsicSolution hbackground
+  interval_subset := sol.interval_subset
+  matchesInitialMetric := by
+    simpa [IntrinsicDeTurckMatchesInitialMetric, IntrinsicMatchesInitialMetric,
+      MatchesInitialMetric, IntrinsicDeTurckSolution.toIntrinsicSolution, IntrinsicSolution.toSolution]
+      using sol.matchesInitialMetric
+
+/-- On zero-dimensional tangent fibers, an intrinsic Ricci-DeTurck local solution canonically
+determines an intrinsic Ricci-flow local solution for any background connection family. -/
+def IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :
+    IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp where
+  terminalTime := sol.terminalTime
+  initial_lt_terminal := sol.initial_lt_terminal
+  toIntrinsicSolution := sol.toIntrinsicDeTurckSolution.toIntrinsicSolution_of_subsingleton_tangent
+  interval_subset := sol.interval_subset
+  matchesInitialMetric := by
+    simpa [IntrinsicDeTurckMatchesInitialMetric, IntrinsicMatchesInitialMetric,
+      MatchesInitialMetric, IntrinsicDeTurckSolution.toIntrinsicSolution_of_subsingleton_tangent,
+      IntrinsicSolution.toSolution]
+      using sol.matchesInitialMetric
+
+/-- On zero-dimensional tangent fibers, the background of any local Ricci-DeTurck solution is
+Levi-Civita for its evolving metric. -/
+theorem IntrinsicDeTurckLocalSolution.background_isLeviCivita_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :
+    CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background :=
+  sol.toIntrinsicDeTurckSolution.background_isLeviCivita_of_subsingleton_tangent
+
+/-- Rewrite an intrinsic local Ricci-flow solution as an intrinsic Ricci-DeTurck local solution for
+an arbitrary Levi-Civita background family. -/
+def IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) sol.toIntrinsicSolution.metric background) :
+    IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp where
+  terminalTime := sol.terminalTime
+  initial_lt_terminal := sol.initial_lt_terminal
+  toIntrinsicDeTurckSolution := sol.toIntrinsicSolution.toIntrinsicDeTurckSolution background hbackground
+  interval_subset := sol.interval_subset
+  matchesInitialMetric := by
+    simpa [IntrinsicDeTurckMatchesInitialMetric, IntrinsicMatchesInitialMetric,
+      MatchesInitialMetric]
+      using sol.matchesInitialMetric
+
+/-- On zero-dimensional tangent fibers, an intrinsic Ricci-flow local solution can be rewritten as an
+intrinsic Ricci-DeTurck local solution for any background connection family. -/
+def IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (background : ConnectionFamily (I := I) (M := M)) :
+    IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp where
+  terminalTime := sol.terminalTime
+  initial_lt_terminal := sol.initial_lt_terminal
+  toIntrinsicDeTurckSolution :=
+    sol.toIntrinsicSolution.toIntrinsicDeTurckSolution_of_subsingleton_tangent background
+  interval_subset := sol.interval_subset
+  matchesInitialMetric := by
+    simpa [IntrinsicDeTurckMatchesInitialMetric, IntrinsicMatchesInitialMetric,
+      MatchesInitialMetric, IntrinsicSolution.toIntrinsicDeTurckSolution_of_subsingleton_tangent,
+      IntrinsicSolution.toSolution]
+      using sol.matchesInitialMetric
+
+/-- Specialize an intrinsic local Ricci-flow solution to the chosen smooth Levi-Civita background
+family. -/
+def IntrinsicLocalSolution.toChosenIntrinsicDeTurckLocalSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :
+    IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp :=
+  sol.toIntrinsicDeTurckLocalSolution
+    (chosenLeviCivitaFamily (I := I) (M := M) sol.toIntrinsicSolution.metric)
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M) sol.toIntrinsicSolution.metric)
+
+/-- The canonical Levi-Civita connection family extracted from an intrinsic Ricci-DeTurck local
+solution once the background family is known to be Levi-Civita. -/
+abbrev IntrinsicDeTurckLocalSolution.canonicalConnection
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background) :
+    ConnectionFamily (I := I) (M := M) :=
+  (sol.toIntrinsicLocalSolution hbackground).toIntrinsicSolution.toSolution.connection
+
+section IntrinsicDeTurckLocalWrappers
+
+/-- Along an intrinsic Ricci-DeTurck local solution with Levi-Civita background, zero metric
+velocity on the whole interval implies vanishing intrinsic Ricci tensor there. -/
+theorem intrinsicDeTurckLocalSolution_ricciTensor_eq_zero_of_zero_velocity
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hzero : ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v = 0 := by
+  simpa [IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution,
+    IntrinsicDeTurckSolution.toIntrinsicSolution] using
+    intrinsicLocalSolution_ricciTensor_eq_zero_of_zero_velocity
+      (I := I) (M := M) (sol.toIntrinsicLocalSolution hbackground) hzero ht x u v
+
+/-- Along an intrinsic Ricci-DeTurck local solution with Levi-Civita background, zero metric
+velocity on the whole interval is equivalent to vanishing intrinsic Ricci tensor there. -/
+theorem intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background) :
+    (∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0) ↔
+      (∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+        intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v = 0) := by
+  simpa [IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution,
+    IntrinsicDeTurckSolution.toIntrinsicSolution] using
+    intrinsicLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M) (sol.toIntrinsicLocalSolution hbackground)
+
+/-- A Ricci-DeTurck local solution with Levi-Civita background has zero velocity in any interval
+component where the intrinsic Ricci tensor vanishes. -/
+theorem intrinsicDeTurckLocalSolution_metricVelocity_eq_zero_of_isLeviCivita_of_intrinsicRicciTensor_eq_zero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    {x : M} {u v : TM x}
+    (hRicciZero : intrinsicRicciTensor (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric t x u v = 0) :
+    sol.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0 :=
+  IntrinsicDeTurckSolution.metricVelocity_eq_zero_of_isLeviCivita_of_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M) sol.toIntrinsicDeTurckSolution hbackground
+    (sol.interval_subset ht) hRicciZero
+
+/-- On the local interval, and with Levi-Civita background, zero DeTurck velocity at a fixed
+component is equivalent to vanishing intrinsic Ricci tensor there. -/
+theorem intrinsicDeTurckLocalSolution_metricVelocity_eq_zero_iff_intrinsicRicciTensor_eq_zero_of_isLeviCivita
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    sol.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0 ↔
+      intrinsicRicciTensor (I := I) (M := M)
+        sol.toIntrinsicDeTurckSolution.metric t x u v = 0 :=
+  IntrinsicDeTurckSolution.metricVelocity_eq_zero_iff_intrinsicRicciTensor_eq_zero_of_isLeviCivita
+    (I := I) (M := M) sol.toIntrinsicDeTurckSolution hbackground
+    (sol.interval_subset ht) x u v
+
+/-- If the metric velocity vanishes on the whole intrinsic Ricci-DeTurck local-solution interval
+and the background is Levi-Civita, then the metric tensor stays equal to the initial metric tensor
+there. -/
+theorem intrinsicDeTurckLocalSolution_metric_eq_initial_of_zero_velocity
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hzero : ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v =
+      ivp.initialMetric.inner x u v := by
+  simpa [IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution,
+    IntrinsicDeTurckSolution.toIntrinsicSolution] using
+    intrinsicLocalSolution_metric_eq_initial_of_zero_velocity
+      (I := I) (M := M) (sol.toIntrinsicLocalSolution hbackground) hzero ht x u v
+
+/-- If the metric velocity vanishes on the whole intrinsic Ricci-DeTurck local-solution interval
+and the background is Levi-Civita, then the canonical Levi-Civita connection stays equal to the
+initial one there. -/
+theorem intrinsicDeTurckLocalSolution_connection_eq_initial_of_zero_velocity
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hzero : ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol.canonicalConnection hbackground t σ x =
+      sol.canonicalConnection hbackground ivp.initialTime σ x := by
+  simpa [IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution,
+    IntrinsicDeTurckSolution.toIntrinsicSolution, IntrinsicDeTurckLocalSolution.canonicalConnection] using
+    intrinsicLocalSolution_connection_eq_initial_of_zero_velocity
+      (I := I) (M := M) (sol.toIntrinsicLocalSolution hbackground) hzero ht hσ
+
+/-- If the intrinsic Ricci tensor vanishes on the whole intrinsic Ricci-DeTurck local-solution
+interval and the background is Levi-Civita, then the metric tensor stays equal to the initial
+metric tensor there. -/
+theorem intrinsicDeTurckLocalSolution_metric_eq_initial_of_ricciTensor_zero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hRicciZero : ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v =
+      ivp.initialMetric.inner x u v := by
+  exact intrinsicDeTurckLocalSolution_metric_eq_initial_of_zero_velocity
+    (I := I) (M := M) sol hbackground
+    ((intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M) sol hbackground).2 hRicciZero)
+    ht x u v
+
+/-- If the intrinsic Ricci tensor vanishes on the whole intrinsic Ricci-DeTurck local-solution
+interval and the background is Levi-Civita, then the canonical Levi-Civita connection stays equal
+to the initial one there. -/
+theorem intrinsicDeTurckLocalSolution_connection_eq_initial_of_ricciTensor_zero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hRicciZero : ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol.canonicalConnection hbackground t σ x =
+      sol.canonicalConnection hbackground ivp.initialTime σ x := by
+  exact intrinsicDeTurckLocalSolution_connection_eq_initial_of_zero_velocity
+    (I := I) (M := M) sol hbackground
+    ((intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M) sol hbackground).2 hRicciZero)
+    ht hσ
+
+/-- Two intrinsic Ricci-DeTurck local solutions with Levi-Civita backgrounds and zero metric
+velocity on their intervals have the same evolving metric tensor on the common initial interval. -/
+theorem intrinsicDeTurckLocalSolution_unique_metric_of_zero_velocity
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground₁ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₁.toIntrinsicDeTurckSolution.metric sol₁.toIntrinsicDeTurckSolution.background)
+    (hbackground₂ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₂.toIntrinsicDeTurckSolution.metric sol₂.toIntrinsicDeTurckSolution.background)
+    (hzero₁ : ∀ t ∈ Set.Icc ivp.initialTime sol₁.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol₁.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0)
+    (hzero₂ : ∀ t ∈ Set.Icc ivp.initialTime sol₂.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol₂.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol₁.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.toIntrinsicDeTurckSolution.metric t x u v := by
+  simpa [IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution,
+    IntrinsicDeTurckSolution.toIntrinsicSolution] using
+    intrinsicLocalSolution_unique_metric_of_zero_velocity
+      (I := I) (M := M)
+      (sol₁.toIntrinsicLocalSolution hbackground₁)
+      (sol₂.toIntrinsicLocalSolution hbackground₂)
+      hzero₁ hzero₂ ht x u v
+
+/-- Two intrinsic Ricci-DeTurck local solutions with Levi-Civita backgrounds and zero metric
+velocity on their intervals have the same canonical Levi-Civita connection on the common initial
+interval. -/
+theorem intrinsicDeTurckLocalSolution_unique_connection_of_zero_velocity
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground₁ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₁.toIntrinsicDeTurckSolution.metric sol₁.toIntrinsicDeTurckSolution.background)
+    (hbackground₂ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₂.toIntrinsicDeTurckSolution.metric sol₂.toIntrinsicDeTurckSolution.background)
+    (hzero₁ : ∀ t ∈ Set.Icc ivp.initialTime sol₁.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol₁.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0)
+    (hzero₂ : ∀ t ∈ Set.Icc ivp.initialTime sol₂.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol₂.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.canonicalConnection hbackground₁ t σ x =
+      sol₂.canonicalConnection hbackground₂ t σ x := by
+  simpa [IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution,
+    IntrinsicDeTurckSolution.toIntrinsicSolution, IntrinsicDeTurckLocalSolution.canonicalConnection] using
+    intrinsicLocalSolution_unique_connection_of_zero_velocity
+      (I := I) (M := M)
+      (sol₁.toIntrinsicLocalSolution hbackground₁)
+      (sol₂.toIntrinsicLocalSolution hbackground₂)
+      hzero₁ hzero₂ ht hσ
+
+/-- On zero-dimensional tangent fibers, every intrinsic Ricci-DeTurck local solution has zero metric
+velocity on its local interval. -/
+theorem intrinsicDeTurckLocalSolution_metricVelocity_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    sol.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0 :=
+  IntrinsicDeTurckSolution.metricVelocity_eq_zero_of_subsingleton_tangent
+    (I := I) (M := M) sol.toIntrinsicDeTurckSolution (sol.interval_subset ht) x u v
+
+/-- On zero-dimensional tangent fibers, every intrinsic Ricci-DeTurck local solution has vanishing
+intrinsic Ricci tensor on its local interval, independently of the stored background. -/
+theorem intrinsicDeTurckLocalSolution_intrinsicRicciTensor_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (_ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric t x u v = 0 :=
+  sol.toIntrinsicDeTurckSolution.intrinsicRicciTensor_eq_zero_of_subsingleton_tangent t x u v
+
+/-- On zero-dimensional tangent fibers, every intrinsic Ricci-DeTurck local solution has vanishing
+intrinsic Ricci-flow right-hand side on its local interval. -/
+theorem intrinsicDeTurckLocalSolution_intrinsicRicciFlowRHS_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (_ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHS (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric t x u v = 0 :=
+  sol.toIntrinsicDeTurckSolution.intrinsicRicciFlowRHS_eq_zero_of_subsingleton_tangent t x u v
+
+/-- On zero-dimensional tangent fibers, every intrinsic Ricci-DeTurck local solution has vanishing
+Ricci-DeTurck right-hand side on its local interval, for its stored background. -/
+theorem intrinsicDeTurckLocalSolution_intrinsicRicciDeTurckRHS_eq_zero_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (_ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background t x u v = 0 :=
+  sol.toIntrinsicDeTurckSolution.intrinsicRicciDeTurckRHS_eq_zero_of_subsingleton_tangent
+    t x u v
+
+/-- On zero-dimensional tangent fibers, every intrinsic Ricci-DeTurck local solution with
+Levi-Civita background is stationary in metric tensor components on its local interval. -/
+theorem intrinsicDeTurckLocalSolution_metric_eq_initial_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v =
+      ivp.initialMetric.inner x u v := by
+  refine intrinsicDeTurckLocalSolution_metric_eq_initial_of_zero_velocity
+    (I := I) (M := M) sol hbackground ?_ ht x u v
+  intro τ hτ y a b
+  exact intrinsicDeTurckLocalSolution_metricVelocity_eq_zero_of_subsingleton_tangent
+    (I := I) (M := M) sol hτ y a b
+
+/-- On zero-dimensional tangent fibers, every intrinsic Ricci-DeTurck local solution is stationary
+in metric tensor components, independently of the DeTurck background family. -/
+theorem intrinsicDeTurckLocalSolution_metric_eq_initial_of_subsingleton_tangent_any_background
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v =
+      ivp.initialMetric.inner x u v := by
+  simpa [IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution_of_subsingleton_tangent,
+    IntrinsicDeTurckSolution.toIntrinsicSolution_of_subsingleton_tangent] using
+    intrinsicLocalSolution_metric_eq_initial_of_subsingleton_tangent
+      (I := I) (M := M)
+      (sol.toIntrinsicLocalSolution_of_subsingleton_tangent) ht x u v
+
+/-- On zero-dimensional tangent fibers, any two intrinsic Ricci-DeTurck local solutions have the
+same metric tensor on every common time. -/
+theorem intrinsicDeTurckLocalSolution_unique_metric_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (_ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol₁.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.toIntrinsicDeTurckSolution.metric t x u v := by
+  rw [metricTensor_eq_zero_of_subsingleton_tangent
+      (I := I) (M := M) sol₁.toIntrinsicDeTurckSolution.metric t x u v,
+    metricTensor_eq_zero_of_subsingleton_tangent
+      (I := I) (M := M) sol₂.toIntrinsicDeTurckSolution.metric t x u v]
+
+/-- On zero-dimensional tangent fibers, all canonical connections of intrinsic Ricci-DeTurck local
+solutions with Levi-Civita backgrounds agree. -/
+theorem intrinsicDeTurckLocalSolution_connection_eq_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground₁ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₁.toIntrinsicDeTurckSolution.metric sol₁.toIntrinsicDeTurckSolution.background)
+    (hbackground₂ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₂.toIntrinsicDeTurckSolution.metric sol₂.toIntrinsicDeTurckSolution.background)
+    (t₁ t₂ : ℝ) {x : M} {σ : Π y : M, TM y} :
+    sol₁.canonicalConnection hbackground₁ t₁ σ x =
+      sol₂.canonicalConnection hbackground₂ t₂ σ x :=
+  Subsingleton.elim _ _
+
+/-- On zero-dimensional tangent fibers, every intrinsic Ricci-DeTurck local solution with
+Levi-Civita background is stationary in canonical connection values on its local interval. -/
+theorem intrinsicDeTurckLocalSolution_connection_eq_initial_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    {t : ℝ} (_ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    {x : M} {σ : Π y : M, TM y} :
+    sol.canonicalConnection hbackground t σ x =
+      sol.canonicalConnection hbackground ivp.initialTime σ x :=
+  intrinsicDeTurckLocalSolution_connection_eq_of_subsingleton_tangent
+    (I := I) (M := M) sol sol hbackground hbackground t ivp.initialTime
+
+/-- On zero-dimensional tangent fibers, any two intrinsic Ricci-DeTurck local solutions with
+Levi-Civita backgrounds have the same canonical connection values on every common time. -/
+theorem intrinsicDeTurckLocalSolution_unique_connection_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground₁ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₁.toIntrinsicDeTurckSolution.metric sol₁.toIntrinsicDeTurckSolution.background)
+    (hbackground₂ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₂.toIntrinsicDeTurckSolution.metric sol₂.toIntrinsicDeTurckSolution.background)
+    {t : ℝ} (_ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    {x : M} {σ : Π y : M, TM y} :
+    sol₁.canonicalConnection hbackground₁ t σ x =
+      sol₂.canonicalConnection hbackground₂ t σ x :=
+  intrinsicDeTurckLocalSolution_connection_eq_of_subsingleton_tangent
+    (I := I) (M := M) sol₁ sol₂ hbackground₁ hbackground₂ t t
+
+/-- On zero-dimensional tangent fibers, the stored DeTurck background connection values of any two
+local solutions agree, without assuming those backgrounds were chosen Levi-Civita families. -/
+theorem intrinsicDeTurckLocalSolution_background_connection_eq_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (t₁ t₂ : ℝ) {x : M} {σ : Π y : M, TM y} :
+    sol₁.toIntrinsicDeTurckSolution.background t₁ σ x =
+      sol₂.toIntrinsicDeTurckSolution.background t₂ σ x :=
+  Subsingleton.elim _ _
+
+/-- On zero-dimensional tangent fibers, a DeTurck local solution's stored background connection is
+stationary in connection values. -/
+theorem intrinsicDeTurckLocalSolution_background_connection_eq_initial_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (_ht : t ∈ Set.Icc ivp.initialTime sol.terminalTime)
+    {x : M} {σ : Π y : M, TM y} :
+    sol.toIntrinsicDeTurckSolution.background t σ x =
+      sol.toIntrinsicDeTurckSolution.background ivp.initialTime σ x :=
+  intrinsicDeTurckLocalSolution_background_connection_eq_of_subsingleton_tangent
+    (I := I) (M := M) sol sol t ivp.initialTime
+
+/-- On zero-dimensional tangent fibers, any two DeTurck local solutions have the same stored
+background connection values on every common time. -/
+theorem intrinsicDeTurckLocalSolution_unique_background_connection_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (_ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    {x : M} {σ : Π y : M, TM y} :
+    sol₁.toIntrinsicDeTurckSolution.background t σ x =
+      sol₂.toIntrinsicDeTurckSolution.background t σ x :=
+  intrinsicDeTurckLocalSolution_background_connection_eq_of_subsingleton_tangent
+    (I := I) (M := M) sol₁ sol₂ t t
+
+/-- Two intrinsic Ricci-DeTurck local solutions with Levi-Civita backgrounds whose intrinsic Ricci
+tensors vanish on their intervals have the same evolving metric tensor on the common initial
+interval. -/
+theorem intrinsicDeTurckLocalSolution_unique_metric_of_ricciTensor_zero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground₁ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₁.toIntrinsicDeTurckSolution.metric sol₁.toIntrinsicDeTurckSolution.background)
+    (hbackground₂ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₂.toIntrinsicDeTurckSolution.metric sol₂.toIntrinsicDeTurckSolution.background)
+    (hRicciZero₁ : ∀ t ∈ Set.Icc ivp.initialTime sol₁.terminalTime, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) sol₁.toIntrinsicDeTurckSolution.metric t x u v = 0)
+    (hRicciZero₂ : ∀ t ∈ Set.Icc ivp.initialTime sol₂.terminalTime, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) sol₂.toIntrinsicDeTurckSolution.metric t x u v = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol₁.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.toIntrinsicDeTurckSolution.metric t x u v := by
+  exact intrinsicDeTurckLocalSolution_unique_metric_of_zero_velocity
+    (I := I) (M := M) sol₁ sol₂ hbackground₁ hbackground₂
+    ((intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M) sol₁ hbackground₁).2 hRicciZero₁)
+    ((intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M) sol₂ hbackground₂).2 hRicciZero₂)
+    ht x u v
+
+/-- Two intrinsic Ricci-DeTurck local solutions with Levi-Civita backgrounds whose intrinsic Ricci
+tensors vanish on their intervals have the same canonical Levi-Civita connection on the common
+initial interval. -/
+theorem intrinsicDeTurckLocalSolution_unique_connection_of_ricciTensor_zero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground₁ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₁.toIntrinsicDeTurckSolution.metric sol₁.toIntrinsicDeTurckSolution.background)
+    (hbackground₂ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₂.toIntrinsicDeTurckSolution.metric sol₂.toIntrinsicDeTurckSolution.background)
+    (hRicciZero₁ : ∀ t ∈ Set.Icc ivp.initialTime sol₁.terminalTime, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) sol₁.toIntrinsicDeTurckSolution.metric t x u v = 0)
+    (hRicciZero₂ : ∀ t ∈ Set.Icc ivp.initialTime sol₂.terminalTime, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) sol₂.toIntrinsicDeTurckSolution.metric t x u v = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.canonicalConnection hbackground₁ t σ x =
+      sol₂.canonicalConnection hbackground₂ t σ x := by
+  exact intrinsicDeTurckLocalSolution_unique_connection_of_zero_velocity
+    (I := I) (M := M) sol₁ sol₂ hbackground₁ hbackground₂
+    ((intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M) sol₁ hbackground₁).2 hRicciZero₁)
+    ((intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M) sol₂ hbackground₂).2 hRicciZero₂)
+    ht hσ
+
+/-- If two intrinsic Ricci-DeTurck local solutions with Levi-Civita backgrounds have the same
+metric tensor at a common time, then their canonical Levi-Civita connections agree there. -/
+theorem intrinsicDeTurckLocalSolution_connection_eq_of_metric_eq
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground₁ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₁.toIntrinsicDeTurckSolution.metric sol₁.toIntrinsicDeTurckSolution.background)
+    (hbackground₂ : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol₂.toIntrinsicDeTurckSolution.metric sol₂.toIntrinsicDeTurckSolution.background)
+    {t : ℝ}
+    (ht₁ : t ∈ sol₁.toIntrinsicDeTurckSolution.timeSet)
+    (ht₂ : t ∈ sol₂.toIntrinsicDeTurckSolution.timeSet)
+    (hmetric : ∀ x : M, ∀ u v : TM x,
+      metricTensor (I := I) (M := M) sol₁.toIntrinsicDeTurckSolution.metric t x u v =
+        metricTensor (I := I) (M := M) sol₂.toIntrinsicDeTurckSolution.metric t x u v)
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.canonicalConnection hbackground₁ t σ x =
+      sol₂.canonicalConnection hbackground₂ t σ x := by
+  simpa [IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution,
+    IntrinsicDeTurckSolution.toIntrinsicSolution, IntrinsicDeTurckLocalSolution.canonicalConnection] using
+    intrinsicLocalSolution_connection_eq_of_metric_eq
+      (I := I) (M := M)
+      (sol₁.toIntrinsicLocalSolution hbackground₁)
+      (sol₂.toIntrinsicLocalSolution hbackground₂)
+      ht₁ ht₂ hmetric hσ
+
+end IntrinsicDeTurckLocalWrappers
+
+/-- Predicate asserting that an intrinsic Ricci-DeTurck local solution uses the chosen smooth
+Levi-Civita family as its background connection. -/
+def UsesChosenBackground
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  sol.toIntrinsicDeTurckSolution.background =
+    chosenLeviCivitaFamily (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric
+
+lemma usesChosenBackground_isLeviCivita
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hchosen : UsesChosenBackground (I := I) (M := M) sol) :
+    CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background := by
+  rw [hchosen]
+  exact chosenLeviCivitaFamily_isLeviCivita
+    (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric
+
+lemma intrinsicLocalSolution_usesChosenBackground
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :
+    UsesChosenBackground (I := I) (M := M) (sol.toChosenIntrinsicDeTurckLocalSolution) := by
+  rfl
+
+/-- The DeTurck local-solution subtype using the chosen smooth Levi-Civita background. -/
+abbrev ChosenIntrinsicDeTurckLocalSolution
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :=
+  {sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp //
+    UsesChosenBackground (I := I) (M := M) sol}
+
+/-- The compact-manifold point-4 theorem package stated with the chosen smooth Levi-Civita family as
+the DeTurck background. -/
+structure ChosenIntrinsicDeTurckLocalExistenceUniqueness
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) where
+  /-- Existence of a chosen-background intrinsic Ricci-DeTurck local solution. -/
+  exists_solution :
+    Nonempty (ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+  /-- Uniqueness of the evolving metric on the overlap of two chosen-background local solution
+  intervals. -/
+  unique_metric :
+    ∀ sol₁ sol₂ :
+        ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Set.Icc ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime),
+        ∀ x : M, ∀ u v : TM x,
+          metricTensor (I := I) (M := M)
+            sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+              metricTensor (I := I) (M := M)
+                sol₂.1.toIntrinsicDeTurckSolution.metric t x u v
+
+theorem chosenIntrinsicDeTurckLocalExistenceUniqueness_nonempty_localSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    Nonempty (ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  pkg.exists_solution
+
+theorem chosenIntrinsicDeTurckLocalExistenceUniqueness_metric_eq_on_common_interval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.1.toIntrinsicDeTurckSolution.metric t x u v :=
+  pkg.unique_metric sol₁ sol₂ t ht x u v
+
+/-- Convert the intrinsic compact theorem package to the chosen-background DeTurck one. -/
+def IntrinsicLocalExistenceUniqueness.toChosenIntrinsicDeTurck
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp) :
+    ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp := by
+  refine ⟨?_, ?_⟩
+  · rcases pkg.exists_solution with ⟨sol⟩
+    exact ⟨⟨sol.toChosenIntrinsicDeTurckLocalSolution,
+      intrinsicLocalSolution_usesChosenBackground (I := I) (M := M) sol⟩⟩
+  · intro sol₁ sol₂ t ht x u v
+    simpa [IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution,
+      IntrinsicDeTurckSolution.toIntrinsicSolution] using
+      pkg.unique_metric
+        (sol₁.1.toIntrinsicLocalSolution
+          (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2))
+        (sol₂.1.toIntrinsicLocalSolution
+          (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2))
+        t ht x u v
+
+/-- Convert the chosen-background DeTurck compact theorem package back to the intrinsic Ricci-flow
+one. -/
+def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp := by
+  refine ⟨?_, ?_⟩
+  · rcases pkg.exists_solution with ⟨sol⟩
+    exact ⟨sol.1.toIntrinsicLocalSolution
+      (usesChosenBackground_isLeviCivita (I := I) (M := M) sol.1 sol.2)⟩
+  · intro sol₁ sol₂ t ht x u v
+    exact pkg.unique_metric
+      ⟨sol₁.toChosenIntrinsicDeTurckLocalSolution,
+        intrinsicLocalSolution_usesChosenBackground (I := I) (M := M) sol₁⟩
+      ⟨sol₂.toChosenIntrinsicDeTurckLocalSolution,
+        intrinsicLocalSolution_usesChosenBackground (I := I) (M := M) sol₂⟩
+      t ht x u v
+
+/-- The theorem-family version of chosen-background Ricci-DeTurck local
+existence/uniqueness. -/
+structure ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily where
+  package :
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalExistenceUniqueness
+        (E := E) (H := H) (I := I) (M := M) ivp
+
+def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsic
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  fun ivp ↦ (pkg.package ivp).toIntrinsic
+
+def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinary
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  fun ivp ↦ (pkg.toIntrinsic ivp).toOrdinary
+
+def IntrinsicLocalExistenceUniquenessFamily.toChosenIntrinsicDeTurck
+    (pkg : IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦ (pkg.package ivp).toChosenIntrinsicDeTurck
+
+def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) where
+  package := pkg.toIntrinsic
+
+def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  pkg.toIntrinsicFamily.toOrdinary
+
+theorem ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.nonempty_localSolution
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Nonempty (LocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
+  (pkg.toOrdinary ivp).exists_solution
+
+/-- A Ricci-DeTurck local-existence/uniqueness package that does not restrict the background
+connection carried by candidate local solutions. This is stronger than the chosen-background package
+only in settings, such as zero-dimensional tangent fibers, where the DeTurck background no longer
+affects the metric equation. -/
+structure IntrinsicDeTurckLocalExistenceUniqueness
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) where
+  /-- Existence of an intrinsic Ricci-DeTurck local solution with some background. -/
+  exists_solution :
+    Nonempty (IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+  /-- Metric uniqueness for arbitrary-background intrinsic Ricci-DeTurck local solutions. -/
+  unique_metric :
+    ∀ sol₁ sol₂ :
+        IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime),
+        ∀ x : M, ∀ u v : TM x,
+          metricTensor (I := I) (M := M)
+            sol₁.toIntrinsicDeTurckSolution.metric t x u v =
+              metricTensor (I := I) (M := M)
+                sol₂.toIntrinsicDeTurckSolution.metric t x u v
+
+theorem IntrinsicDeTurckLocalExistenceUniqueness.nonempty_localSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : IntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    Nonempty (IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
+  pkg.exists_solution
+
+theorem IntrinsicDeTurckLocalExistenceUniqueness.metric_eq_on_common_interval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : IntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol₁ sol₂ : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol₁.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.toIntrinsicDeTurckSolution.metric t x u v :=
+  pkg.unique_metric sol₁ sol₂ t ht x u v
+
+/-- In the zero-dimensional tangent-fiber case, an intrinsic Ricci-flow local-existence package
+gives a Ricci-DeTurck package whose uniqueness compares all backgrounds. -/
+def IntrinsicLocalExistenceUniqueness.toIntrinsicDeTurck_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp) :
+    IntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp := by
+  refine ⟨?_, ?_⟩
+  · rcases pkg.exists_solution with ⟨sol⟩
+    exact ⟨sol.toChosenIntrinsicDeTurckLocalSolution⟩
+  · intro sol₁ sol₂ t ht x u v
+    exact intrinsicDeTurckLocalSolution_unique_metric_of_subsingleton_tangent
+      (I := I) (M := M) sol₁ sol₂ ht x u v
+
+/-- In the zero-dimensional tangent-fiber case, an arbitrary-background Ricci-DeTurck package
+converts back to the intrinsic Ricci-flow package. -/
+def IntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : IntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp := by
+  refine ⟨?_, ?_⟩
+  · rcases pkg.exists_solution with ⟨sol⟩
+    exact ⟨sol.toIntrinsicLocalSolution_of_subsingleton_tangent⟩
+  · intro sol₁ sol₂ t ht x u v
+    simpa [IntrinsicLocalSolution.toChosenIntrinsicDeTurckLocalSolution,
+      IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution,
+      IntrinsicSolution.toIntrinsicDeTurckSolution] using
+      pkg.unique_metric
+        sol₁.toChosenIntrinsicDeTurckLocalSolution
+        sol₂.toChosenIntrinsicDeTurckLocalSolution
+        t ht x u v
+
+/-- In the zero-dimensional tangent-fiber case, a chosen-background DeTurck package can be widened
+to the arbitrary-background DeTurck package. -/
+def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsicDeTurck_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    IntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toIntrinsic.toIntrinsicDeTurck_of_subsingleton_tangent
+
+/-- In the zero-dimensional tangent-fiber case, an arbitrary-background DeTurck package can be
+restricted back to the chosen-background package. -/
+def IntrinsicDeTurckLocalExistenceUniqueness.toChosenIntrinsicDeTurck_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : IntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toIntrinsic_of_subsingleton_tangent.toChosenIntrinsicDeTurck
+
+/-- The theorem-family version of arbitrary-background Ricci-DeTurck local
+existence/uniqueness. -/
+structure IntrinsicDeTurckLocalExistenceUniquenessFamily where
+  package :
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      IntrinsicDeTurckLocalExistenceUniqueness
+        (E := E) (H := H) (I := I) (M := M) ivp
+
+def IntrinsicLocalExistenceUniquenessFamily.toIntrinsicDeTurck_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦ (pkg.package ivp).toIntrinsicDeTurck_of_subsingleton_tangent
+
+def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicDeTurck_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦ (pkg.package ivp).toIntrinsicDeTurck_of_subsingleton_tangent
+
+def IntrinsicDeTurckLocalExistenceUniquenessFamily.toChosenIntrinsicDeTurck_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦ (pkg.package ivp).toChosenIntrinsicDeTurck_of_subsingleton_tangent
+
+def IntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsic_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  fun ivp ↦ (pkg.package ivp).toIntrinsic_of_subsingleton_tangent
+
+def IntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinary_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  fun ivp ↦ (pkg.toIntrinsic_of_subsingleton_tangent ivp).toOrdinary
+
+def IntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) where
+  package := pkg.toIntrinsic_of_subsingleton_tangent
+
+def IntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  pkg.toIntrinsicFamily_of_subsingleton_tangent.toOrdinary
+
+theorem IntrinsicDeTurckLocalExistenceUniquenessFamily.nonempty_localSolution_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Nonempty (LocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
+  (pkg.toOrdinary_of_subsingleton_tangent ivp).exists_solution
+
+/-- Arbitrary-background Ricci-DeTurck local existence/uniqueness on compact manifolds whose tangent
+fibers are all subsingletons. -/
+noncomputable def intrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_tangent
+    [CompactSpace M] [∀ x : M, Subsingleton (TM x)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (intrinsicLocalExistenceUniqueness_of_subsingleton_tangent (I := I) (M := M) ivp)
+    |>.toIntrinsicDeTurck_of_subsingleton_tangent
+
+noncomputable def intrinsicDeTurckLocalExistenceUniquenessFamily_of_subsingleton_tangent
+    [CompactSpace M] [∀ x : M, Subsingleton (TM x)] :
+    IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    intrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_tangent
+      (I := I) (M := M) ivp
+
+/-- Arbitrary-background Ricci-DeTurck local existence/uniqueness on empty compact manifolds. -/
+noncomputable def intrinsicDeTurckLocalExistenceUniqueness_of_isEmpty
+    [CompactSpace M] [IsEmpty M]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp := by
+  letI : ∀ x : M, Subsingleton (TM x) := fun x ↦ isEmptyElim x
+  exact intrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_tangent
+    (I := I) (M := M) ivp
+
+noncomputable def intrinsicDeTurckLocalExistenceUniquenessFamily_of_isEmpty
+    [CompactSpace M] [IsEmpty M] :
+    IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    intrinsicDeTurckLocalExistenceUniqueness_of_isEmpty (I := I) (M := M) ivp
+
+/-- Chosen-background Ricci-DeTurck local existence/uniqueness on compact manifolds whose tangent
+fibers are all subsingletons. -/
+noncomputable def chosenIntrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_tangent
+    [CompactSpace M] [∀ x : M, Subsingleton (TM x)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (intrinsicLocalExistenceUniqueness_of_subsingleton_tangent (I := I) (M := M) ivp)
+    |>.toChosenIntrinsicDeTurck
+
+noncomputable def chosenIntrinsicDeTurckLocalExistenceUniquenessFamily_of_subsingleton_tangent
+    [CompactSpace M] [∀ x : M, Subsingleton (TM x)] :
+    ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    chosenIntrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_tangent
+      (I := I) (M := M) ivp
+
+/-- Chosen-background Ricci-DeTurck version of the empty-compact-manifold point-4 package. -/
+noncomputable def chosenIntrinsicDeTurckLocalExistenceUniqueness_of_isEmpty
+    [CompactSpace M] [IsEmpty M]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (intrinsicLocalExistenceUniqueness_of_isEmpty (I := I) (M := M) ivp).toChosenIntrinsicDeTurck
+
+noncomputable def chosenIntrinsicDeTurckLocalExistenceUniquenessFamily_of_isEmpty
+    [CompactSpace M] [IsEmpty M] :
+    ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    chosenIntrinsicDeTurckLocalExistenceUniqueness_of_isEmpty (I := I) (M := M) ivp
+
+theorem chosenIntrinsicDeTurckLocalExistenceUniqueness_connection_eq_on_common_interval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.1.canonicalConnection
+      (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+      sol₂.1.canonicalConnection
+        (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2) t σ x := by
+  have ht₁ : t ∈ sol₁.1.toIntrinsicDeTurckSolution.timeSet := by
+    exact sol₁.1.interval_subset ⟨ht.1, le_trans ht.2 (min_le_left _ _)⟩
+  have ht₂ : t ∈ sol₂.1.toIntrinsicDeTurckSolution.timeSet := by
+    exact sol₂.1.interval_subset ⟨ht.1, le_trans ht.2 (min_le_right _ _)⟩
+  exact intrinsicDeTurckLocalSolution_connection_eq_of_metric_eq
+    (I := I) (M := M) sol₁.1 sol₂.1
+    (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2)
+    (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2)
+    ht₁ ht₂
+    (fun y u v ↦ pkg.unique_metric sol₁ sol₂ t ht y u v)
+    hσ
+
+/-- The canonical intrinsic Ricci-DeTurck local solution attached to Ricci-flat initial data,
+using the chosen smooth Levi-Civita family as background. -/
+noncomputable def stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp :=
+  (stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat
+    (I := I) (M := M) ivp hRicciFlat).toChosenIntrinsicDeTurckLocalSolution
+
+theorem chosenIntrinsicDeTurckLocalSolution_nonempty_of_isRicciFlat
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M)) :
+    Nonempty (IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) := by
+  exact ⟨stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+    (I := I) (M := M) ivp hRicciFlat⟩
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M)) :
+    ∀ t ∈ Set.Icc ivp.initialTime
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).terminalTime,
+      ∀ x : M, ∀ u v : TM x,
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metricVelocity
+          t x u v = 0 := by
+  simpa [stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat,
+    IntrinsicLocalSolution.toChosenIntrinsicDeTurckLocalSolution,
+    IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution,
+    IntrinsicSolution.toChosenIntrinsicDeTurckSolution,
+    IntrinsicSolution.toIntrinsicDeTurckSolution] using
+    stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+      (I := I) (M := M) ivp hRicciFlat
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_intrinsicRicciTensor_eq_zero
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M)) :
+    ∀ t ∈ Set.Icc ivp.initialTime
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).terminalTime,
+      ∀ x : M, ∀ u v : TM x,
+        intrinsicRicciTensor (I := I) (M := M)
+          (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+            (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric
+          t x u v = 0 :=
+  (intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+    (I := I) (M := M)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat)
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)).1
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+      (I := I) (M := M) ivp hRicciFlat)
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_intrinsicRicciFlowRHS_eq_zero
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    {t : ℝ}
+    (ht : t ∈ Set.Icc ivp.initialTime
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).terminalTime)
+    (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHS (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric
+      t x u v = 0 :=
+  intrinsicRicciFlowRHS_eq_zero_of_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_intrinsicRicciTensor_eq_zero
+      (I := I) (M := M) ivp hRicciFlat t ht x u v)
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_intrinsicRicciDeTurckRHS_eq_zero
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    {t : ℝ}
+    (ht : t ∈ Set.Icc ivp.initialTime
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).terminalTime)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.background
+      t x u v = 0 :=
+  intrinsicRicciDeTurckRHS_eq_zero_of_isLeviCivita_of_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.background
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_intrinsicRicciTensor_eq_zero
+      (I := I) (M := M) ivp hRicciFlat t ht x u v)
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metric_eq_initial
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    {t : ℝ}
+    (ht : t ∈ Set.Icc ivp.initialTime
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).terminalTime)
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric
+      t x u v =
+        ivp.initialMetric.inner x u v := by
+  exact intrinsicDeTurckLocalSolution_metric_eq_initial_of_zero_velocity
+    (I := I) (M := M)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat)
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+      (I := I) (M := M) ivp hRicciFlat)
+    ht x u v
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_connection_eq_initial
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    {t : ℝ}
+    (ht : t ∈ Set.Icc ivp.initialTime
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).terminalTime)
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat).canonicalConnection
+      (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric) t σ x =
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).canonicalConnection
+        (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+          (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+            (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)
+        ivp.initialTime σ x := by
+  exact intrinsicDeTurckLocalSolution_connection_eq_initial_of_zero_velocity
+    (I := I) (M := M)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat)
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+      (I := I) (M := M) ivp hRicciFlat)
+    ht hσ
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_unique_metric_of_zero_velocity
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hzero : ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0)
+    {t : ℝ}
+    (ht : t ∈ Set.Icc ivp.initialTime
+      (min
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).terminalTime
+        sol.terminalTime))
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric
+      t x u v =
+        metricTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v := by
+  exact intrinsicDeTurckLocalSolution_unique_metric_of_zero_velocity
+    (I := I) (M := M)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat)
+    sol
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)
+    hbackground
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+      (I := I) (M := M) ivp hRicciFlat)
+    hzero
+    ht x u v
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_unique_metric_of_ricciTensor_zero
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hRicciZero : ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v = 0)
+    {t : ℝ}
+    (ht : t ∈ Set.Icc ivp.initialTime
+      (min
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).terminalTime
+        sol.terminalTime))
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric
+      t x u v =
+        metricTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v := by
+  exact intrinsicDeTurckLocalSolution_unique_metric_of_ricciTensor_zero
+    (I := I) (M := M)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat)
+    sol
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)
+    hbackground
+    ((intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat)
+      (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)).1
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+        (I := I) (M := M) ivp hRicciFlat))
+    hRicciZero
+    ht x u v
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_unique_connection_of_zero_velocity
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hzero : ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol.toIntrinsicDeTurckSolution.metricVelocity t x u v = 0)
+    {t : ℝ}
+    (ht : t ∈ Set.Icc ivp.initialTime
+      (min
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).terminalTime
+        sol.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat).canonicalConnection
+      (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric) t σ x =
+      sol.canonicalConnection hbackground t σ x := by
+  exact intrinsicDeTurckLocalSolution_unique_connection_of_zero_velocity
+    (I := I) (M := M)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat)
+    sol
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)
+    hbackground
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+      (I := I) (M := M) ivp hRicciFlat)
+    hzero
+    ht hσ
+
+theorem stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_unique_connection_of_ricciTensor_zero
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hRicciZero : ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicDeTurckSolution.metric t x u v = 0)
+    {t : ℝ}
+    (ht : t ∈ Set.Icc ivp.initialTime
+      (min
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).terminalTime
+        sol.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat).canonicalConnection
+      (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric) t σ x =
+      sol.canonicalConnection hbackground t σ x := by
+  exact intrinsicDeTurckLocalSolution_unique_connection_of_ricciTensor_zero
+    (I := I) (M := M)
+    (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) ivp hRicciFlat)
+    sol
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)
+    hbackground
+    ((intrinsicDeTurckLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M)
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) ivp hRicciFlat)
+      (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
+        (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+          (I := I) (M := M) ivp hRicciFlat).toIntrinsicDeTurckSolution.metric)).1
+      (stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+        (I := I) (M := M) ivp hRicciFlat))
+    hRicciZero
+    ht hσ
+
+end ChosenLeviCivita
+
+end RicciFlow

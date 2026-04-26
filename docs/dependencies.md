@@ -2,6 +2,12 @@
 
 This file turns the roadmap into a rough dependency graph.
 
+## Completion standard
+
+In this repository, a layer counts as landed only when the target mathematics is
+actually proved in Lean. Interfaces, axioms, `sorry`, or preparatory theorem
+boundaries do not count as completion.
+
 ## Layer 0: existing manifold baseline
 
 Assume the ambient Lean environment already has enough support for:
@@ -25,8 +31,10 @@ The first three projects should be designed as library infrastructure, not as
 one-off theorem proofs.
 
 Current repo status:
-point 1 now lives in `curvature/`; the remaining Layer 1 work is point 2 plus
-time-dependent geometric structures.
+points 1 through 3 now live in `curvature/` as actual Lean formalization. Point
+4 has some preparatory scaffolding in the same package, but it is not yet
+proved, so the next dependency frontier is still the first theorem in Layer 2:
+actual Ricci-flow local existence and uniqueness.
 
 ## Layer 2: first Ricci-flow theorems
 
@@ -36,6 +44,16 @@ Once Layer 1 exists:
 5. evolution equations and parabolic maximum principles
 
 These unlock the first serious Ricci-flow API.
+
+Current repo status:
+Layer 2 has been started but not landed: `curvature/` contains a
+solution/IVP/local-solution boundary, intrinsic metric-only wrappers for that
+boundary, and bundled compact-manifold `LocalExistenceUniqueness` /
+`IntrinsicLocalExistenceUniqueness` interfaces, together with section-space
+metric regularity plus the “open metrics inside closed symmetric bilinear
+sections” prerequisite layer, but not the proof of the general theorem.
+Point 4 remains open, and point 5 should not be treated as complete or unlocked
+by the current scaffolding alone.
 
 ## Layer 3: singularity-analysis toolkit
 

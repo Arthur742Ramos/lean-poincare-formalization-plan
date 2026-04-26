@@ -109,6 +109,17 @@ lemma ricciCurvature_apply (x : M) (u w : TangentSpace I x) :
     ricciCurvature (cov := cov) x u w =
       LinearMap.trace ℝ (TangentSpace I x) (ricciEndomorphism (cov := cov) x u w) := rfl
 
+/-- On a zero-dimensional tangent fiber, every Ricci component vanishes. -/
+lemma ricciCurvature_eq_zero_of_subsingleton_tangent
+    (x : M) [Subsingleton (TangentSpace I x)] (u w : TangentSpace I x) :
+    ricciCurvature (cov := cov) x u w = 0 := by
+  rw [ricciCurvature_apply]
+  have hEnd : ricciEndomorphism (cov := cov) x u w = 0 := by
+    ext v
+    exact Subsingleton.elim _ _
+  rw [hEnd]
+  exact LinearMap.map_zero (LinearMap.trace ℝ (TangentSpace I x))
+
 /-- Scalar curvature obtained by tracing Ricci curvature against an orthonormal basis. -/
 noncomputable def scalarCurvature (x : M) : ℝ := by
   letI : FiniteDimensional ℝ (TangentSpace I x) :=
@@ -132,5 +143,52 @@ lemma scalarCurvature_eq_sum (x : M) :
   letI : FiniteDimensional ℝ (TangentSpace I x) :=
     VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
   rfl
+
+/-- On a zero-dimensional tangent fiber, scalar curvature vanishes. -/
+lemma scalarCurvature_eq_zero_of_subsingleton_tangent
+    (x : M) [Subsingleton (TangentSpace I x)] :
+    scalarCurvature (cov := cov) x = 0 := by
+  rw [scalarCurvature_eq_sum]
+  simp [ricciCurvature_eq_zero_of_subsingleton_tangent (cov := cov) x]
+
+section LeviCivita
+
+variable [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+  {cov' : CovariantDerivative I E (TangentSpace I : M → Type _)}
+  [cov'.ContMDiffCovariantDerivative 1]
+
+/-- Ricci curvature depends only on the Riemannian metric, not on the chosen Levi-Civita
+connection used to compute it. -/
+theorem ricciCurvature_eq_of_isLeviCivita
+    (hcov : CovariantDerivative.IsLeviCivita cov)
+    (hcov' : CovariantDerivative.IsLeviCivita cov')
+    (x : M) (u w : TangentSpace I x) :
+    ricciCurvature (cov := cov) x u w = ricciCurvature (cov := cov') x u w := by
+  have hEnd :
+      ricciEndomorphism (cov := cov) x u w =
+        ricciEndomorphism (cov := cov') x u w := by
+    ext v
+    simpa [ricciEndomorphism_apply] using
+      curvatureTensor_eq_of_isLeviCivita
+        (I := I) (M := M) (cov := cov) (cov' := cov') hcov hcov' x v u w
+  simpa [ricciCurvature_apply] using
+    congrArg (LinearMap.trace ℝ (TangentSpace I x)) hEnd
+
+/-- Scalar curvature depends only on the Riemannian metric, not on the chosen Levi-Civita
+connection used to compute it. -/
+theorem scalarCurvature_eq_of_isLeviCivita
+    (hcov : CovariantDerivative.IsLeviCivita cov)
+    (hcov' : CovariantDerivative.IsLeviCivita cov')
+    (x : M) :
+    scalarCurvature (cov := cov) x = scalarCurvature (cov := cov') x := by
+  rw [scalarCurvature_eq_sum, scalarCurvature_eq_sum]
+  refine Finset.sum_congr rfl ?_
+  intro i hi
+  exact ricciCurvature_eq_of_isLeviCivita
+    (I := I) (M := M) (cov := cov) (cov' := cov') hcov hcov' x
+    ((stdOrthonormalBasis ℝ (TangentSpace I x)) i)
+    ((stdOrthonormalBasis ℝ (TangentSpace I x)) i)
+
+end LeviCivita
 
 end CovariantDerivative

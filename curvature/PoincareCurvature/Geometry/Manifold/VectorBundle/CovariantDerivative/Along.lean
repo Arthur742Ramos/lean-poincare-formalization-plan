@@ -113,5 +113,47 @@ lemma contMDiff_along
   simpa [CovariantDerivative.along, contMDiffOn_univ]
     using hCovSection.clm_bundle_apply hX'
 
+/-- Adding a smooth bundle-valued one-form to a `C^n` covariant derivative preserves the
+`C^n` regularity class. -/
+lemma _root_.ContMDiffCovariantDerivativeOn.addOneForm
+    {cov : CovariantDerivative I F V} {u : Set M}
+    {A : ∀ x : M, V x →L[𝕜] TangentSpace I x →L[𝕜] V x}
+    (hcov : ContMDiffCovariantDerivativeOn F n cov.toFun u)
+    (hA : ContMDiffOn I (I.prod 𝓘(𝕜, F →L[𝕜] E →L[𝕜] F)) n
+      (fun x ↦
+        TotalSpace.mk' (F →L[𝕜] E →L[𝕜] F)
+          (E := fun x : M ↦ V x →L[𝕜] TangentSpace I x →L[𝕜] V x) x (A x)) u) :
+    ContMDiffCovariantDerivativeOn F n (CovariantDerivative.addOneForm cov A).toFun u where
+  contMDiff {σ} hσ := by
+    have hCovSection :
+        ContMDiffOn I (I.prod 𝓘(𝕜, E →L[𝕜] F)) n
+          (fun x ↦
+            TotalSpace.mk' (E →L[𝕜] F)
+              (E := fun x : M ↦ TangentSpace I x →L[𝕜] V x) x (cov σ x)) u :=
+      hcov.contMDiff hσ
+    have hσ' :
+        ContMDiffOn I (I.prod 𝓘(𝕜, F)) n (fun x ↦ TotalSpace.mk' F x (σ x)) u :=
+      hσ.of_le <| le_add_of_nonneg_right (by simp)
+    have hASection :
+        ContMDiffOn I (I.prod 𝓘(𝕜, E →L[𝕜] F)) n
+          (fun x ↦
+            TotalSpace.mk' (E →L[𝕜] F)
+              (E := fun x : M ↦ TangentSpace I x →L[𝕜] V x) x (A x (σ x))) u :=
+      hA.clm_bundle_apply hσ'
+    simpa [CovariantDerivative.addOneForm] using hCovSection.add_section hASection
+
+/-- Global version of `ContMDiffCovariantDerivativeOn.addOneForm`. -/
+lemma _root_.ContMDiffCovariantDerivative.addOneForm
+    {cov : CovariantDerivative I F V}
+    [hcov : ContMDiffCovariantDerivative cov n]
+    {A : ∀ x : M, V x →L[𝕜] TangentSpace I x →L[𝕜] V x}
+    (hA : ContMDiff I (I.prod 𝓘(𝕜, F →L[𝕜] E →L[𝕜] F)) n
+      (fun x ↦
+        TotalSpace.mk' (F →L[𝕜] E →L[𝕜] F)
+          (E := fun x : M ↦ V x →L[𝕜] TangentSpace I x →L[𝕜] V x) x (A x))) :
+    ContMDiffCovariantDerivative (CovariantDerivative.addOneForm cov A) n where
+  contMDiff := by
+    exact hcov.contMDiff.addOneForm (by simpa [contMDiffOn_univ] using hA)
+
 end Regularity
 end CovariantDerivative

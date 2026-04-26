@@ -60,4 +60,28 @@ lemma sectionalCurvature_def (x : M) (u v : TangentSpace I x)
       inner ℝ (curvatureTensor (cov := cov) x u v v) u /
         (inner ℝ u u * inner ℝ v v - (inner ℝ u v) ^ 2) := rfl
 
+/-- On a zero-dimensional tangent fiber, the sectional-curvature numerator vanishes. -/
+lemma sectionalCurvatureNumerator_eq_zero_of_subsingleton_tangent
+    (x : M) [Subsingleton (TangentSpace I x)] (u v : TangentSpace I x) :
+    sectionalCurvatureNumerator (cov := cov) x u v = 0 := by
+  have hu : u = 0 := Subsingleton.elim u 0
+  subst u
+  simp [sectionalCurvatureNumerator]
+
+/-- On a zero-dimensional tangent fiber, the sectional-curvature Gram determinant vanishes. -/
+lemma sectionalCurvatureDenominator_eq_zero_of_subsingleton_tangent
+    (x : M) [Subsingleton (TangentSpace I x)] (u v : TangentSpace I x) :
+    sectionalCurvatureDenominator (I := I) x u v = 0 := by
+  have hu : u = 0 := Subsingleton.elim u 0
+  subst u
+  simp [sectionalCurvatureDenominator]
+
+/-- Zero-dimensional tangent fibers have no nondegenerate two-planes. -/
+theorem not_sectionalCurvatureDenominator_ne_zero_of_subsingleton_tangent
+    (x : M) [Subsingleton (TangentSpace I x)] (u v : TangentSpace I x) :
+    ¬ sectionalCurvatureDenominator (I := I) x u v ≠ 0 := by
+  intro h
+  exact h (sectionalCurvatureDenominator_eq_zero_of_subsingleton_tangent
+    (I := I) (M := M) x u v)
+
 end CovariantDerivative
