@@ -243,7 +243,11 @@ with intrinsic comparison lemmas against arbitrary zero-velocity or
     Ricci-flow local solution through the identity gauge, and packages the generic
    smooth Levi-Civita-background Ricci-DeTurck local-existence/uniqueness
    theorem package conversion back to intrinsic Ricci flow through that identity
-   gauge. It now also records a conditional gauge-reduced DeTurck local-solution
+   gauge. The identity `C^3` gauge path now also proves that the concrete
+   gauge-corrected pullback velocity is exactly the source DeTurck velocity and
+   packages chosen-background DeTurck theorem families as gauge-reducible by the
+   identity diffeomorphism gauge. It now also records a conditional
+   gauge-reduced DeTurck local-solution
    package for the non-identity case, bundling the transformed metric, velocity,
    pulled-back-background regularity, and transformed Ricci-flow equation
    hypotheses whose proof yields intrinsic and ordinary local-existence/uniqueness
@@ -456,10 +460,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
    pulled canonical smooth extensions that appear in curvature tensor
    contractions, and exposes direct anchored `C^3` tangent and vector-field
    pushforward identities.
-   What still remains is the analytic side: time-regularity of the non-identity
-   `C^3` gauge-pulled metric/velocity, an actual existence theorem producing
-   such gauge flows with the required regularity, and the quasilinear parabolic
-   PDE framework for genuine Ricci-flow local existence and uniqueness.
+   What still remains is the analytic side for non-identity gauges:
+   time-regularity of the non-identity `C^3` gauge-pulled metric/velocity, an
+   actual existence theorem producing such gauge flows with the required
+   regularity, and the quasilinear parabolic PDE framework for genuine
+   Ricci-flow local existence and uniqueness.
 
 ### 5. Evolution equations and parabolic maximum principles
 

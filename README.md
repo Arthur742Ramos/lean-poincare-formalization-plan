@@ -131,10 +131,14 @@ packages the canonical stationary local solution attached to
   slice by slice for connection families. That new metric is built as a bundled
   `ContMDiffRiemannianMetric I 1`, with coordinate-level `C^1` regularity for
   the pulled-back bilinear form and a wrapper that discharges the earlier
-  metric-compatibility hypothesis automatically. Bundled Levi-Civita pullback
-  transport now feeds the gauge-reduction layer, where identity diffeomorphism
-  gauges convert smooth Levi-Civita-background Ricci-DeTurck local-solution
-  packages back into intrinsic Ricci-flow local-existence/uniqueness packages.
+   metric-compatibility hypothesis automatically. Bundled Levi-Civita pullback
+   transport now feeds the gauge-reduction layer, where identity diffeomorphism
+   gauges convert smooth Levi-Civita-background Ricci-DeTurck local-solution
+  packages back into intrinsic Ricci-flow local-existence/uniqueness packages;
+  the identity `C^3` gauge path now also identifies the concrete
+  gauge-corrected pullback velocity with the source DeTurck velocity and
+  packages chosen-background DeTurck theorem families as gauge-reducible by the
+  identity diffeomorphism gauge.
   The conditional gauge-reduced package now records the exact non-identity
   gauge obligations whose discharge yields intrinsic and ordinary point-4 theorem
   packages, re-packages the transformed metric as a pulled-back Ricci-DeTurck
@@ -151,8 +155,8 @@ packages the canonical stationary local solution attached to
   chosen-Levi-Civita/source-background trace with the source DeTurck one-form.
   It also includes a
   theorem-family reduction for all initial data. The
-  remaining gap to full point 4 is therefore proving those
-  non-identity gauge-equation obligations and the quasilinear parabolic PDE
+  remaining gap to full point 4 is therefore proving the non-identity
+  gauge-equation obligations and the quasilinear parabolic PDE
   existence/uniqueness step needed to produce Ricci-DeTurck solutions.
  The public vector-bundle layer also now
  packages continuous and smooth Riemannian metrics as honest sections of the

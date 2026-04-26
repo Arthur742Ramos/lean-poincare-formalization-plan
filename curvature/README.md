@@ -171,11 +171,12 @@ now packages the matching intrinsic boundary
   `ricciEndomorphism` after applying `pushforwardTangent` and identifies
   pulled-back `ricciCurvature` with the trace of the tangent-map-conjugated
   endomorphism, again both statically and slice by slice for connection
+  families. The gauge-reduction layer also now closes the identity `C^3`
+  gauge-reducibility path for chosen Levi-Civita-background DeTurck theorem
   families. This is still not the full compact-manifold local
-  existence/uniqueness theorem, so point 4 remains open; the next geometric
-  blocker is now the extension-independence bridge from these raw
-  curvature/Ricci transport formulas to genuine bundled Levi-Civita/Ricci
-  transport, whose most direct wrapper statements currently time out.
+  existence/uniqueness theorem, so point 4 remains open; the remaining
+  geometric/analytic blockers are the non-identity gauge obligations and the
+  quasilinear parabolic PDE layer.
   The public connection
 layer now also closes the Levi-Civita regularity step: the package proves
 existence of global `C^1` affine connections on `C^2` bundle data, exports that
