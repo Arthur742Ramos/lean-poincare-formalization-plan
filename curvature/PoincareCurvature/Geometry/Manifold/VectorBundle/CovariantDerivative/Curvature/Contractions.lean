@@ -1,6 +1,7 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi
+public import Mathlib.Analysis.InnerProductSpace.Trace
 public import Mathlib.Geometry.Manifold.Riemannian.Basic
 public import Mathlib.LinearAlgebra.Trace
 
@@ -119,6 +120,174 @@ lemma ricciCurvature_eq_zero_of_subsingleton_tangent
     exact Subsingleton.elim _ _
   rw [hEnd]
   exact LinearMap.map_zero (LinearMap.trace ℝ (TangentSpace I x))
+
+/-- Algebraic Ricci symmetry from first Bianchi plus pair symmetry of the Riemann curvature tensor.
+
+This isolates the remaining Riemannian-curvature identity needed downstream: once the curvature
+tensor has the usual pair symmetry, torsion-freeness turns the trace contraction into a symmetric
+Ricci tensor. -/
+theorem ricciCurvature_symm_of_curvature_inner_pair_symm_of_firstBianchi
+    (hBianchi : ∀ (x : M) (a b c : TangentSpace I x),
+      curvatureTensor (cov := cov) x a b c +
+          curvatureTensor (cov := cov) x b c a +
+          curvatureTensor (cov := cov) x c a b = 0)
+    (hpair : ∀ (x : M) (a b c d : TangentSpace I x),
+      inner ℝ (curvatureTensor (cov := cov) x a b c) d =
+        inner ℝ (curvatureTensor (cov := cov) x c d a) b)
+    (x : M) (u w : TangentSpace I x) :
+    ricciCurvature (cov := cov) x u w = ricciCurvature (cov := cov) x w u := by
+  let b : OrthonormalBasis (Fin (Module.finrank ℝ (TangentSpace I x))) ℝ
+      (TangentSpace I x) :=
+    stdOrthonormalBasis ℝ (TangentSpace I x)
+  rw [ricciCurvature_apply, ricciCurvature_apply]
+  rw [LinearMap.trace_eq_sum_inner _ b, LinearMap.trace_eq_sum_inner _ b]
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  let e : TangentSpace I x := b i
+  have hInner := congrArg (fun z : TangentSpace I x => inner ℝ z e) (hBianchi x e u w)
+  have hInner' :
+      inner ℝ (curvatureTensor (cov := cov) x e u w) e +
+          inner ℝ (curvatureTensor (cov := cov) x u w e) e +
+          inner ℝ (curvatureTensor (cov := cov) x w e u) e = 0 := by
+    simpa only [inner_add_left, inner_zero_left] using hInner
+  have hmiddle : inner ℝ (curvatureTensor (cov := cov) x u w e) e = 0 := by
+    calc
+      inner ℝ (curvatureTensor (cov := cov) x u w e) e
+          = inner ℝ (curvatureTensor (cov := cov) x e e u) w := hpair x u w e e
+      _ = inner ℝ 0 w := by rw [curvatureTensor_self]
+      _ = 0 := by simp
+  have hthird :
+      inner ℝ (curvatureTensor (cov := cov) x w e u) e =
+        - inner ℝ (curvatureTensor (cov := cov) x e w u) e := by
+    calc
+      inner ℝ (curvatureTensor (cov := cov) x w e u) e
+          = inner ℝ (-curvatureTensor (cov := cov) x e w u) e := by
+            rw [curvatureTensor_swap (cov := cov) x w e u]
+      _ = - inner ℝ (curvatureTensor (cov := cov) x e w u) e := by
+            rw [inner_neg_left]
+  have hterm :
+      inner ℝ (curvatureTensor (cov := cov) x e u w) e =
+        inner ℝ (curvatureTensor (cov := cov) x e w u) e := by
+    rw [hmiddle, hthird] at hInner'
+    linarith
+  change inner ℝ (b i) (curvatureTensor (cov := cov) x (b i) u w) =
+    inner ℝ (b i) (curvatureTensor (cov := cov) x (b i) w u)
+  simpa [e, real_inner_comm] using hterm
+
+/-- Torsion-free version of
+`ricciCurvature_symm_of_curvature_inner_pair_symm_of_firstBianchi`. -/
+theorem ricciCurvature_symm_of_curvature_inner_pair_symm_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (hT : cov.torsion = 0)
+    (hpair : ∀ (x : M) (a b c d : TangentSpace I x),
+      inner ℝ (curvatureTensor (cov := cov) x a b c) d =
+        inner ℝ (curvatureTensor (cov := cov) x c d a) b)
+    (x : M) (u w : TangentSpace I x) :
+    ricciCurvature (cov := cov) x u w = ricciCurvature (cov := cov) x w u := by
+  exact ricciCurvature_symm_of_curvature_inner_pair_symm_of_firstBianchi
+    (cov := cov)
+    (fun x a b c =>
+      firstBianchi_curvatureTensor_of_torsion_eq_zero (cov := cov) hT x a b c)
+    hpair x u w
+
+/-- Algebraic Ricci symmetry from first Bianchi plus skew-adjointness of each curvature operator.
+
+This is the metric-compatibility-facing version of the Ricci-symmetry bridge: for a
+metric-compatible tangent connection, the remaining geometric identity should be the
+skew-adjointness of `R(a,b)` with respect to the metric. -/
+theorem ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_firstBianchi
+    (hBianchi : ∀ (x : M) (a b c : TangentSpace I x),
+      curvatureTensor (cov := cov) x a b c +
+          curvatureTensor (cov := cov) x b c a +
+          curvatureTensor (cov := cov) x c a b = 0)
+    (hskew : ∀ (x : M) (a b c d : TangentSpace I x),
+      inner ℝ (curvatureTensor (cov := cov) x a b c) d +
+        inner ℝ c (curvatureTensor (cov := cov) x a b d) = 0)
+    (x : M) (u w : TangentSpace I x) :
+    ricciCurvature (cov := cov) x u w = ricciCurvature (cov := cov) x w u := by
+  let b : OrthonormalBasis (Fin (Module.finrank ℝ (TangentSpace I x))) ℝ
+      (TangentSpace I x) :=
+    stdOrthonormalBasis ℝ (TangentSpace I x)
+  rw [ricciCurvature_apply, ricciCurvature_apply]
+  rw [LinearMap.trace_eq_sum_inner _ b, LinearMap.trace_eq_sum_inner _ b]
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  let e : TangentSpace I x := b i
+  have hInner := congrArg (fun z : TangentSpace I x => inner ℝ z e) (hBianchi x e u w)
+  have hInner' :
+      inner ℝ (curvatureTensor (cov := cov) x e u w) e +
+          inner ℝ (curvatureTensor (cov := cov) x u w e) e +
+          inner ℝ (curvatureTensor (cov := cov) x w e u) e = 0 := by
+    simpa only [inner_add_left, inner_zero_left] using hInner
+  have hmiddle : inner ℝ (curvatureTensor (cov := cov) x u w e) e = 0 := by
+    have h := hskew x u w e e
+    have hcomm :
+        inner ℝ e (curvatureTensor (cov := cov) x u w e) =
+          inner ℝ (curvatureTensor (cov := cov) x u w e) e :=
+      real_inner_comm (curvatureTensor (cov := cov) x u w e) e
+    linarith
+  have hthird :
+      inner ℝ (curvatureTensor (cov := cov) x w e u) e =
+        - inner ℝ (curvatureTensor (cov := cov) x e w u) e := by
+    calc
+      inner ℝ (curvatureTensor (cov := cov) x w e u) e
+          = inner ℝ (-curvatureTensor (cov := cov) x e w u) e := by
+            rw [curvatureTensor_swap (cov := cov) x w e u]
+      _ = - inner ℝ (curvatureTensor (cov := cov) x e w u) e := by
+            rw [inner_neg_left]
+  have hterm :
+      inner ℝ (curvatureTensor (cov := cov) x e u w) e =
+        inner ℝ (curvatureTensor (cov := cov) x e w u) e := by
+    rw [hmiddle, hthird] at hInner'
+    linarith
+  change inner ℝ (b i) (curvatureTensor (cov := cov) x (b i) u w) =
+    inner ℝ (b i) (curvatureTensor (cov := cov) x (b i) w u)
+  simpa [e, real_inner_comm] using hterm
+
+/-- Torsion-free version of
+`ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_firstBianchi`. -/
+theorem ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (hT : cov.torsion = 0)
+    (hskew : ∀ (x : M) (a b c d : TangentSpace I x),
+      inner ℝ (curvatureTensor (cov := cov) x a b c) d +
+        inner ℝ c (curvatureTensor (cov := cov) x a b d) = 0)
+    (x : M) (u w : TangentSpace I x) :
+    ricciCurvature (cov := cov) x u w = ricciCurvature (cov := cov) x w u := by
+  exact ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_firstBianchi
+    (cov := cov)
+    (fun x a b c =>
+      firstBianchi_curvatureTensor_of_torsion_eq_zero (cov := cov) hT x a b c)
+    hskew x u w
+
+/-- Torsion-free metric-compatible tangent connections have symmetric Ricci curvature. -/
+theorem ricciCurvature_symm_of_metricCompatibleTangent_of_torsion_eq_zero
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (hT : cov.torsion = 0)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (x : M) (u w : TangentSpace I x) :
+    ricciCurvature (cov := cov) x u w = ricciCurvature (cov := cov) x w u := by
+  exact ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_torsion_eq_zero
+    (cov := cov) hT
+    (fun x a b c d =>
+      curvatureTensor_inner_skew_adjoint_of_isMetricCompatibleTangent
+        (covTM := cov) hmetric x a b c d)
+    x u w
+
+/-- Levi-Civita connections have symmetric Ricci curvature. -/
+theorem ricciCurvature_symm_of_isLeviCivita
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (hLevi : cov.IsLeviCivita)
+    (x : M) (u w : TangentSpace I x) :
+    ricciCurvature (cov := cov) x u w = ricciCurvature (cov := cov) x w u := by
+  exact ricciCurvature_symm_of_metricCompatibleTangent_of_torsion_eq_zero
+    (cov := cov) hLevi.1 hLevi.2 x u w
 
 /-- Scalar curvature obtained by tracing Ricci curvature against an orthonormal basis. -/
 noncomputable def scalarCurvature (x : M) : ℝ := by

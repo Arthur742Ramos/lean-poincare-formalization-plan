@@ -138,7 +138,10 @@ packages the canonical stationary local solution attached to
   the identity `C^3` gauge path now also identifies the concrete
   gauge-corrected pullback velocity with the source DeTurck velocity and
   packages chosen-background DeTurck theorem families as gauge-reducible by the
-  identity diffeomorphism gauge.
+  identity diffeomorphism gauge. It also now lowers the non-identity boundary
+  from a prebuilt anchored `C^3` DeTurck gauge to raw `C^3` diffeomorphism
+  families equipped with anchoring, the gauge-flow equation, and scalar
+  inner-product derivative identities.
   The conditional gauge-reduced package now records the exact non-identity
   gauge obligations whose discharge yields intrinsic and ordinary point-4 theorem
   packages, re-packages the transformed metric as a pulled-back Ricci-DeTurck
@@ -154,10 +157,84 @@ packages the canonical stationary local solution attached to
   time-dependent pullback and identifies the corresponding pulled-back
   chosen-Levi-Civita/source-background trace with the source DeTurck one-form.
   It also includes a
-  theorem-family reduction for all initial data. The
-  remaining gap to full point 4 is therefore proving the non-identity
-  gauge-equation obligations and the quasilinear parabolic PDE
-  existence/uniqueness step needed to produce Ricci-DeTurck solutions.
+  theorem-family reduction for all initial data, identifies the identity `C^3`
+  gauge's fixed-vector scalar derivative, upgrades chosen-background packages
+  through the explicit scalar-derivative gauge-reducible interface, exposes
+  direct identity-`C^3` gauge-reduced wrappers with source/metric/velocity
+  simplification lemmas. The optional `PoincareCurvature.Point4` aggregate now
+  imports this gauge-reduction boundary plus a new `AnalyticPDE` file proving the reusable
+  Picard-Lindelof Banach-evolution local-solution core, open-state
+  state-preserving uniqueness, a positive-definite finite-cover metric-locus
+  bridge, an abstract continuous-linear symmetry/fixed-locus preservation
+  theorem for later slot-swap symmetry, and a direct continuous-linear
+  antisymmetric-defect criterion that keeps solutions in the symmetric
+  positive-definite locus once the vector field's coordinatewise defect vanishes,
+  plus a pointwise-symmetric-vector-field variant that supplies that defect
+  vanishing automatically. The same state-set mechanism now also has a
+  non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
+  vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
+  positive-definite local metric evolutions and, when identified pointwise with
+  the intrinsic Ricci-DeTurck RHS, remain symmetric by the proved geometric
+  symmetry theorem. This time-dependent Ricci-DeTurck bridge is also bundled as
+  `TimeDependentGeometricRicciDeTurckBanachChart`, whose fields are precisely the
+  remaining Picard/Lipschitz/geometric-agreement obligations and whose extractor
+  produces the symmetric positive-definite local Banach metric evolution. The
+  reverse metric bridge is now proof-bearing as well: any finite-cover
+  symmetric positive-definite section-state reifies to a bundled continuous
+  Riemannian metric, and the packaged Banach solution now exposes one
+  metric-valued curve whose local-interval inner products agree with the Banach
+  section curve, whose initial value is the original initial metric, and whose
+  common-interval uniqueness follows from Banach uniqueness. For autonomous
+  charts, a new local `C^1` reduction also shrinks to an open neighborhood inside
+  the positive-definite metric locus and derives the needed local Lipschitz bound
+  there, so chart estimates can be proved locally around the initial metric
+  instead of globally on the whole metric locus; for non-autonomous charts, the
+  lower-level positive-definite and symmetric bridges, plus the reusable
+  `TimeDependentGeometricRicciDeTurckBanachChartOnIcc` package, now accept
+  Lipschitz estimates restricted to the verified Picard time interval and expose
+  the constructed solution's `terminalTime ≤ T` bound. A
+  smooth-realization adapter packages the exact remaining
+  lift/time-derivative/DeTurck-equation
+  obligations needed to turn such a Banach solution into an
+  `IntrinsicDeTurckLocalSolution`; when supplied for a smooth-IVP-seeded chart
+  solution it extracts that DeTurck local solution, and two such smooth
+  realizations have equal metric tensors on common intervals. The interval
+  chart also has a bounded candidate-encoding theorem: candidates whose Banach
+  representatives satisfy `terminalTime ≤ T` promote all the way to
+  `IntrinsicDeTurckLocalExistenceUniqueness`, the identity-gauge intrinsic
+  Ricci-flow package, the non-identity gauge-reducible package, and the explicit
+  scalar-inner-derivative gauge package using only `Icc`-restricted Lipschitz
+  control; the chosen-background identity, arbitrary-background identity,
+  gauge-reducible, and scalar-inner-derivative gauge routes now preserve the
+  stronger arbitrary-background DeTurck, chosen-background DeTurck, and gauge theorem-family packages before exposing
+  `IntrinsicLocalExistenceUniquenessFamily` extractors, and the finite-cover
+  section-space completeness obligation is now discharged by the existing
+  `ContinuousSectionSpace` instance instead of being a chart field. With the
+  explicit reverse-chart encoding for arbitrary or chosen-background candidates,
+  the same package now promotes to `IntrinsicDeTurckLocalExistenceUniqueness`,
+  `ChosenIntrinsicDeTurckLocalExistenceUniqueness`, and then to intrinsic
+  Ricci-flow local existence/uniqueness either by the chosen-background identity
+  route or by the non-identity gauge-reducibility package; the global-chart
+  family theorem produces `IntrinsicLocalExistenceUniquenessFamily` once these
+  chart, realization, encoding, and gauge-reducibility obligations are supplied
+  for every initial value problem. It also specializes these criteria to genuine
+  bundled continuous Riemannian initial metrics, so future Ricci-DeTurck
+  Banach-chart work no longer has to manually prove finite-cover metric-locus
+  membership for the initial datum.
+  The ordinary, intrinsic,
+  chosen-background, gauge-reduced, and scalar-derivative theorem families expose
+  package-level connection uniqueness on common intervals. The remaining gap to
+  full point 4 is therefore proving the raw non-identity gauge-flow obligations
+  and the quasilinear parabolic PDE existence/uniqueness step needed to produce
+  Ricci-DeTurck solutions, including the actual Ricci-DeTurck Banach chart and
+  estimates plus the identification of that Banach representative with the
+  geometric Ricci-DeTurck right-hand side. The curvature, time-dependent
+  geometry, intrinsic Ricci-flow, and DeTurck layers now prove the geometric
+  symmetry input outright: metric compatibility gives curvature-operator
+  skew-adjointness, torsion-freeness gives first Bianchi, the Ricci contraction is
+  symmetric for Levi-Civita families, the intrinsic Ricci-flow RHS is symmetric,
+  and the full intrinsic Ricci-DeTurck RHS is symmetric because the DeTurck
+  correction term itself is symmetric.
  The public vector-bundle layer also now
  packages continuous and smooth Riemannian metrics as honest sections of the
 bilinear-form hom bundle, with pointwise extensionality lemmas for metric
@@ -166,11 +243,12 @@ open-ball lemmas for positive-definite continuous bilinear forms, lifts that
 openness to compact continuous families in `C(K, ·)` and
 `BoundedContinuousFunction`, and then transfers it through preferred bundle
 trivialization coordinates to the finite-cover `ContinuousSectionSpace` model:
-actual positive-definite bilinear-form sections form an open subset there, and
-the symmetric locus is now closed there, with continuous Riemannian metrics
-landing in the refined symmetric positive-definite locus inside that model. In
-particular, the metric locus is now packaged as an open subset of the closed
-symmetric section subtype. The same public layer
+actual positive-definite bilinear-form sections form an open subset there, the
+symmetric locus is closed there, and a transported continuous-linear
+coordinatewise antisymmetric-defect map has exactly that symmetric locus as its
+kernel. Continuous Riemannian metrics land in the refined symmetric
+positive-definite locus inside that model. In particular, the metric locus is now
+packaged as an open subset of the closed symmetric section subtype. The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
 Levi-Civita correction ingredients (`toDual`, fiberwise composition,

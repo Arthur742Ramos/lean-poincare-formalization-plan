@@ -4,6 +4,8 @@ public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivati
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita
 
+set_option linter.unusedSectionVars false
+
 /-!
 # Time-dependent geometric structures
 
@@ -444,6 +446,122 @@ def ricciCurvature
     g.ricciCurvature cov hcov t x u w = (by
       letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
       exact CovariantDerivative.ricciCurvature (cov := cov t) x u w) := rfl
+
+/-- Time-dependent Ricci symmetry from first Bianchi and curvature pair symmetry at each time
+slice. -/
+theorem ricciCurvature_symm_of_curvature_inner_pair_symm_of_firstBianchi
+    (cov : TimeDependentCovariantDerivative (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative (cov t) 1)
+    (hBianchi : ∀ (t : ℝ) (x : M) (a b c : TM x),
+      curvatureTensor (cov := cov t) x a b c +
+          curvatureTensor (cov := cov t) x b c a +
+          curvatureTensor (cov := cov t) x c a b = 0)
+    (hpair : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ (curvatureTensor (cov := cov t) x a b c) d =
+          Inner.inner ℝ (curvatureTensor (cov := cov t) x c d a) b)
+    (t : ℝ) (x : M) (u w : TM x) :
+    g.ricciCurvature cov hcov t x u w = g.ricciCurvature cov hcov t x w u := by
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  haveI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  exact CovariantDerivative.ricciCurvature_symm_of_curvature_inner_pair_symm_of_firstBianchi
+    (cov := cov t) (hBianchi t) (hpair t) x u w
+
+/-- Time-dependent Ricci symmetry from torsion-freeness and curvature pair symmetry at each time
+slice. -/
+theorem ricciCurvature_symm_of_curvature_inner_pair_symm_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (cov : TimeDependentCovariantDerivative (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative (cov t) 1)
+    (hT : ∀ t : ℝ, (cov t).torsion = 0)
+    (hpair : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ (curvatureTensor (cov := cov t) x a b c) d =
+          Inner.inner ℝ (curvatureTensor (cov := cov t) x c d a) b)
+    (t : ℝ) (x : M) (u w : TM x) :
+    g.ricciCurvature cov hcov t x u w = g.ricciCurvature cov hcov t x w u := by
+  exact _root_.CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature_symm_of_curvature_inner_pair_symm_of_firstBianchi
+    (g := g) cov hcov
+    (fun t x a b c =>
+      firstBianchi_curvatureTensor_of_torsion_eq_zero (cov := cov t) (hT t) x a b c)
+    hpair t x u w
+
+/-- Time-dependent Ricci symmetry from first Bianchi and skew-adjointness of each curvature
+operator at each time slice. -/
+theorem ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_firstBianchi
+    (cov : TimeDependentCovariantDerivative (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative (cov t) 1)
+    (hBianchi : ∀ (t : ℝ) (x : M) (a b c : TM x),
+      curvatureTensor (cov := cov t) x a b c +
+          curvatureTensor (cov := cov t) x b c a +
+          curvatureTensor (cov := cov t) x c a b = 0)
+    (hskew : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ (curvatureTensor (cov := cov t) x a b c) d +
+          Inner.inner ℝ c (curvatureTensor (cov := cov t) x a b d) = 0)
+    (t : ℝ) (x : M) (u w : TM x) :
+    g.ricciCurvature cov hcov t x u w = g.ricciCurvature cov hcov t x w u := by
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  haveI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  exact CovariantDerivative.ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_firstBianchi
+    (cov := cov t) (hBianchi t) (hskew t) x u w
+
+/-- Time-dependent Ricci symmetry from torsion-freeness and skew-adjointness of each curvature
+operator at each time slice. -/
+theorem ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (cov : TimeDependentCovariantDerivative (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative (cov t) 1)
+    (hT : ∀ t : ℝ, (cov t).torsion = 0)
+    (hskew : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ (curvatureTensor (cov := cov t) x a b c) d +
+          Inner.inner ℝ c (curvatureTensor (cov := cov t) x a b d) = 0)
+    (t : ℝ) (x : M) (u w : TM x) :
+    g.ricciCurvature cov hcov t x u w = g.ricciCurvature cov hcov t x w u := by
+  exact _root_.CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_firstBianchi
+    (g := g) cov hcov
+    (fun t x a b c =>
+      firstBianchi_curvatureTensor_of_torsion_eq_zero (cov := cov t) (hT t) x a b c)
+    hskew t x u w
+
+/-- Time-dependent Ricci symmetry from torsion-freeness and metric compatibility at each time
+slice. -/
+theorem ricciCurvature_symm_of_metricCompatible_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (cov : TimeDependentCovariantDerivative (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative (cov t) 1)
+    (hT : ∀ t : ℝ, (cov t).torsion = 0)
+    (hmetric : g.IsMetricCompatible cov)
+    (t : ℝ) (x : M) (u w : TM x) :
+    g.ricciCurvature cov hcov t x u w = g.ricciCurvature cov hcov t x w u := by
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  exact CovariantDerivative.ricciCurvature_symm_of_metricCompatibleTangent_of_torsion_eq_zero
+    (cov := cov t) (hT t) (hmetric t) x u w
+
+/-- Time-dependent Ricci symmetry for Levi-Civita connection families. -/
+theorem ricciCurvature_symm_of_isLeviCivita
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (cov : TimeDependentCovariantDerivative (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (t : ℝ) (x : M) (u w : TM x) :
+    g.ricciCurvature cov hcov t x u w = g.ricciCurvature cov hcov t x w u := by
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  exact CovariantDerivative.ricciCurvature_symm_of_isLeviCivita
+    (cov := cov t) (hLevi t) x u w
 
 /-- Ricci curvature of a time-dependent metric family is independent of the chosen Levi-Civita
 family used to compute it. -/

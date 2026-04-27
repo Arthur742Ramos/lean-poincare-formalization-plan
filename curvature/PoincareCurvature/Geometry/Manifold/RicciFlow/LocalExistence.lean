@@ -2,6 +2,9 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent
 
+set_option linter.unusedSectionVars false
+set_option linter.all false
+
 /-!
 # Ricci-flow local existence and uniqueness boundary
 
@@ -21,8 +24,8 @@ developments should target.
 
 Under the repository's proof-only standard, this file is preparatory
 infrastructure only: it does **not** count as completing roadmap point 4 until
-local existence and uniqueness are actually proved in Lean without new axioms,
-`sorry`, or other placeholders.
+local existence and uniqueness are actually proved in Lean with no proof holes
+or placeholder constants.
 -/
 
 @[expose] public noncomputable section
@@ -90,6 +93,145 @@ def ricciTensor
       letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
       exact fun u v ↦ CovariantDerivative.ricciCurvature (cov := cov t) x u v) := rfl
 
+/-- Ricci-tensor symmetry from first Bianchi and curvature pair symmetry in each time slice. -/
+theorem ricciTensor_symm_of_curvature_inner_pair_symm_of_firstBianchi
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hBianchi : ∀ (t : ℝ) (x : M) (a b c : TM x),
+      CovariantDerivative.curvatureTensor (cov := cov t) x a b c +
+          CovariantDerivative.curvatureTensor (cov := cov t) x b c a +
+          CovariantDerivative.curvatureTensor (cov := cov t) x c a b = 0)
+    (hpair : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ (CovariantDerivative.curvatureTensor (cov := cov t) x a b c) d =
+          Inner.inner ℝ (CovariantDerivative.curvatureTensor (cov := cov t) x c d a) b)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciTensor (I := I) (M := M) g cov hcov t x u v =
+      ricciTensor (I := I) (M := M) g cov hcov t x v u := by
+  change
+    CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature
+        (I := I) (M := M) g cov hcov t x u v =
+      CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature
+        (I := I) (M := M) g cov hcov t x v u
+  exact CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature_symm_of_curvature_inner_pair_symm_of_firstBianchi
+      (I := I) (M := M) g cov hcov hBianchi hpair t x u v
+
+/-- Ricci-tensor symmetry from torsion-freeness and curvature pair symmetry in each time slice. -/
+theorem ricciTensor_symm_of_curvature_inner_pair_symm_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hT : ∀ t : ℝ, (cov t).torsion = 0)
+    (hpair : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ (CovariantDerivative.curvatureTensor (cov := cov t) x a b c) d =
+          Inner.inner ℝ (CovariantDerivative.curvatureTensor (cov := cov t) x c d a) b)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciTensor (I := I) (M := M) g cov hcov t x u v =
+      ricciTensor (I := I) (M := M) g cov hcov t x v u := by
+  exact ricciTensor_symm_of_curvature_inner_pair_symm_of_firstBianchi
+    (I := I) (M := M) g cov hcov
+    (fun t x a b c =>
+      CovariantDerivative.firstBianchi_curvatureTensor_of_torsion_eq_zero
+        (cov := cov t) (hT t) x a b c)
+    hpair t x u v
+
+/-- Ricci-tensor symmetry from first Bianchi and skew-adjointness of curvature operators in each
+time slice. -/
+theorem ricciTensor_symm_of_curvature_inner_skew_adjoint_of_firstBianchi
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hBianchi : ∀ (t : ℝ) (x : M) (a b c : TM x),
+      CovariantDerivative.curvatureTensor (cov := cov t) x a b c +
+          CovariantDerivative.curvatureTensor (cov := cov t) x b c a +
+          CovariantDerivative.curvatureTensor (cov := cov t) x c a b = 0)
+    (hskew : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ (CovariantDerivative.curvatureTensor (cov := cov t) x a b c) d +
+          Inner.inner ℝ c (CovariantDerivative.curvatureTensor (cov := cov t) x a b d) = 0)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciTensor (I := I) (M := M) g cov hcov t x u v =
+      ricciTensor (I := I) (M := M) g cov hcov t x v u := by
+  change
+    CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature
+        (I := I) (M := M) g cov hcov t x u v =
+      CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature
+        (I := I) (M := M) g cov hcov t x v u
+  exact CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature_symm_of_curvature_inner_skew_adjoint_of_firstBianchi
+    (I := I) (M := M) g cov hcov hBianchi hskew t x u v
+
+/-- Ricci-tensor symmetry from torsion-freeness and skew-adjointness of curvature operators in
+each time slice. -/
+theorem ricciTensor_symm_of_curvature_inner_skew_adjoint_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hT : ∀ t : ℝ, (cov t).torsion = 0)
+    (hskew : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ (CovariantDerivative.curvatureTensor (cov := cov t) x a b c) d +
+          Inner.inner ℝ c (CovariantDerivative.curvatureTensor (cov := cov t) x a b d) = 0)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciTensor (I := I) (M := M) g cov hcov t x u v =
+      ricciTensor (I := I) (M := M) g cov hcov t x v u := by
+  exact ricciTensor_symm_of_curvature_inner_skew_adjoint_of_firstBianchi
+    (I := I) (M := M) g cov hcov
+    (fun t x a b c =>
+      CovariantDerivative.firstBianchi_curvatureTensor_of_torsion_eq_zero
+        (cov := cov t) (hT t) x a b c)
+    hskew t x u v
+
+/-- Ricci-tensor symmetry from torsion-freeness and metric compatibility in each time slice. -/
+theorem ricciTensor_symm_of_metricCompatible_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hT : ∀ t : ℝ, (cov t).torsion = 0)
+    (hmetric : CovariantDerivative.TimeDependentRiemannianMetric.IsMetricCompatible
+      (I := I) (M := M) g cov)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciTensor (I := I) (M := M) g cov hcov t x u v =
+      ricciTensor (I := I) (M := M) g cov hcov t x v u := by
+  change
+    CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature
+        (I := I) (M := M) g cov hcov t x u v =
+      CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature
+        (I := I) (M := M) g cov hcov t x v u
+  exact CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature_symm_of_metricCompatible_of_torsion_eq_zero
+    (I := I) (M := M) g cov hcov hT hmetric t x u v
+
+/-- Ricci-tensor symmetry for Levi-Civita connection families. -/
+theorem ricciTensor_symm_of_isLeviCivita
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hLevi : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g cov)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciTensor (I := I) (M := M) g cov hcov t x u v =
+      ricciTensor (I := I) (M := M) g cov hcov t x v u := by
+  change
+    CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature
+        (I := I) (M := M) g cov hcov t x u v =
+      CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature
+        (I := I) (M := M) g cov hcov t x v u
+  exact CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature_symm_of_isLeviCivita
+    (I := I) (M := M) g cov hcov hLevi t x u v
+
 /-- Ricci tensor components vanish when every tangent fiber is zero-dimensional as a type. -/
 lemma ricciTensor_eq_zero_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)]
@@ -138,6 +280,75 @@ def ricciFlowRHS
     (t : ℝ) (x : M) (u v : TM x) :
     ricciFlowRHS (I := I) (M := M) g cov hcov t x =
       fun u v ↦ (-2 : ℝ) * ricciTensor (I := I) (M := M) g cov hcov t x u v := rfl
+
+/-- Symmetry of the Ricci tensor implies symmetry of the Ricci-flow right-hand side. -/
+theorem ricciFlowRHS_symm_of_ricciTensor_symm
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hRicciSymm : ∀ t : ℝ, ∀ x : M, ∀ u v : TM x,
+      ricciTensor (I := I) (M := M) g cov hcov t x u v =
+        ricciTensor (I := I) (M := M) g cov hcov t x v u)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciFlowRHS (I := I) (M := M) g cov hcov t x u v =
+      ricciFlowRHS (I := I) (M := M) g cov hcov t x v u := by
+  simp [ricciFlowRHS, hRicciSymm t x u v]
+
+/-- Ricci-flow RHS symmetry from torsion-freeness and skew-adjointness of curvature operators in
+each time slice. -/
+theorem ricciFlowRHS_symm_of_curvature_inner_skew_adjoint_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hT : ∀ t : ℝ, (cov t).torsion = 0)
+    (hskew : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ (CovariantDerivative.curvatureTensor (cov := cov t) x a b c) d +
+          Inner.inner ℝ c (CovariantDerivative.curvatureTensor (cov := cov t) x a b d) = 0)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciFlowRHS (I := I) (M := M) g cov hcov t x u v =
+      ricciFlowRHS (I := I) (M := M) g cov hcov t x v u := by
+  exact ricciFlowRHS_symm_of_ricciTensor_symm (I := I) (M := M) g cov hcov
+    (ricciTensor_symm_of_curvature_inner_skew_adjoint_of_torsion_eq_zero
+      (I := I) (M := M) g cov hcov hT hskew)
+    t x u v
+
+/-- Ricci-flow RHS symmetry from torsion-freeness and metric compatibility in each time slice. -/
+theorem ricciFlowRHS_symm_of_metricCompatible_of_torsion_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hT : ∀ t : ℝ, (cov t).torsion = 0)
+    (hmetric : CovariantDerivative.TimeDependentRiemannianMetric.IsMetricCompatible
+      (I := I) (M := M) g cov)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciFlowRHS (I := I) (M := M) g cov hcov t x u v =
+      ricciFlowRHS (I := I) (M := M) g cov hcov t x v u := by
+  exact ricciFlowRHS_symm_of_ricciTensor_symm (I := I) (M := M) g cov hcov
+    (ricciTensor_symm_of_metricCompatible_of_torsion_eq_zero
+      (I := I) (M := M) g cov hcov hT hmetric)
+    t x u v
+
+/-- Ricci-flow RHS symmetry for Levi-Civita connection families. -/
+theorem ricciFlowRHS_symm_of_isLeviCivita
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (hLevi : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g cov)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciFlowRHS (I := I) (M := M) g cov hcov t x u v =
+      ricciFlowRHS (I := I) (M := M) g cov hcov t x v u := by
+  exact ricciFlowRHS_symm_of_ricciTensor_symm (I := I) (M := M) g cov hcov
+    (ricciTensor_symm_of_isLeviCivita (I := I) (M := M) g cov hcov hLevi)
+    t x u v
 
 /-- The Ricci-flow right-hand side vanishes when every tangent fiber is zero-dimensional as a
 type. -/
@@ -206,6 +417,114 @@ def intrinsicRicciTensor
           (I := I) (M := M) g)
         t x u v := rfl
 
+/-- Intrinsic Ricci-tensor symmetry from the algebraic curvature pair-symmetry identity for the
+chosen smooth Levi-Civita family. First Bianchi is discharged from the chosen family's
+torsion-freeness. -/
+theorem intrinsicRicciTensor_symm_of_curvature_inner_pair_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (hpair : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      letI : CovariantDerivative.ContMDiffCovariantDerivative
+          (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+            (I := I) (M := M) g t) 1 :=
+        CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g t;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x a b c) d =
+          Inner.inner ℝ
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x c d a) b)
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M) g t x u v =
+      intrinsicRicciTensor (I := I) (M := M) g t x v u := by
+  let cov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+      (I := I) (M := M) g
+  let hcov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g
+  exact ricciTensor_symm_of_curvature_inner_pair_symm_of_torsion_eq_zero
+    (I := I) (M := M) g cov hcov
+    (fun t => by
+      have hLevi :=
+        CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_isLeviCivita
+          (I := I) (M := M) (g := g) t
+      simpa [CovariantDerivative.IsTorsionFree] using hLevi.1)
+    (by
+      intro t x
+      simpa [cov] using hpair t x)
+    t x u v
+
+/-- Intrinsic Ricci-tensor symmetry from skew-adjointness of the chosen Levi-Civita curvature
+operators. This is the metric-compatibility-facing version of the intrinsic Ricci symmetry bridge. -/
+theorem intrinsicRicciTensor_symm_of_curvature_inner_skew_adjoint
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (hskew : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      letI : CovariantDerivative.ContMDiffCovariantDerivative
+          (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+            (I := I) (M := M) g t) 1 :=
+        CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g t;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x a b c) d +
+          Inner.inner ℝ c
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x a b d) = 0)
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M) g t x u v =
+      intrinsicRicciTensor (I := I) (M := M) g t x v u := by
+  let cov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+      (I := I) (M := M) g
+  let hcov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g
+  exact ricciTensor_symm_of_curvature_inner_skew_adjoint_of_torsion_eq_zero
+    (I := I) (M := M) g cov hcov
+    (fun t => by
+      have hLevi :=
+        CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_isLeviCivita
+          (I := I) (M := M) (g := g) t
+      simpa [CovariantDerivative.IsTorsionFree] using hLevi.1)
+    (by
+      intro t x
+      simpa [cov] using hskew t x)
+    t x u v
+
+/-- The intrinsic Ricci tensor of a metric family is symmetric, using the chosen smooth
+Levi-Civita family. -/
+theorem intrinsicRicciTensor_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M) g t x u v =
+      intrinsicRicciTensor (I := I) (M := M) g t x v u := by
+  let cov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+      (I := I) (M := M) g
+  let hcov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g
+  exact ricciTensor_symm_of_isLeviCivita
+    (I := I) (M := M) g cov hcov
+    (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_isLeviCivita
+      (I := I) (M := M) g)
+    t x u v
+
 lemma intrinsicRicciTensor_eq_zero_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)]
     (g : MetricFamily (I := I) (M := M))
@@ -255,6 +574,71 @@ def intrinsicRicciFlowRHS
         (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
           (I := I) (M := M) g)
         t x u v := rfl
+
+/-- Symmetry of the intrinsic Ricci tensor implies symmetry of the intrinsic Ricci-flow right-hand
+side. -/
+theorem intrinsicRicciFlowRHS_symm_of_intrinsicRicciTensor_symm
+    (g : MetricFamily (I := I) (M := M))
+    (hRicciSymm : ∀ t : ℝ, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) g t x u v =
+        intrinsicRicciTensor (I := I) (M := M) g t x v u)
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHS (I := I) (M := M) g t x u v =
+      intrinsicRicciFlowRHS (I := I) (M := M) g t x v u := by
+  exact ricciFlowRHS_symm_of_ricciTensor_symm (I := I) (M := M) g
+    (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+      (I := I) (M := M) g)
+    (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g)
+    (by
+      intro t x u v
+      simpa [intrinsicRicciTensor] using hRicciSymm t x u v)
+    t x u v
+
+/-- Intrinsic Ricci-flow RHS symmetry from skew-adjointness of the chosen Levi-Civita curvature
+operators. -/
+theorem intrinsicRicciFlowRHS_symm_of_curvature_inner_skew_adjoint
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (hskew : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      letI : CovariantDerivative.ContMDiffCovariantDerivative
+          (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+            (I := I) (M := M) g t) 1 :=
+        CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g t;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x a b c) d +
+          Inner.inner ℝ c
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x a b d) = 0)
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHS (I := I) (M := M) g t x u v =
+      intrinsicRicciFlowRHS (I := I) (M := M) g t x v u := by
+  exact intrinsicRicciFlowRHS_symm_of_intrinsicRicciTensor_symm
+    (I := I) (M := M) g
+    (intrinsicRicciTensor_symm_of_curvature_inner_skew_adjoint
+      (I := I) (M := M) g hskew)
+    t x u v
+
+/-- The intrinsic Ricci-flow right-hand side is symmetric, using the chosen smooth
+Levi-Civita family. -/
+theorem intrinsicRicciFlowRHS_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHS (I := I) (M := M) g t x u v =
+      intrinsicRicciFlowRHS (I := I) (M := M) g t x v u := by
+  exact intrinsicRicciFlowRHS_symm_of_intrinsicRicciTensor_symm
+    (I := I) (M := M) g
+    (intrinsicRicciTensor_symm (I := I) (M := M) g)
+    t x u v
 
 lemma intrinsicRicciFlowRHS_eq_zero_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)]
@@ -2596,6 +2980,16 @@ theorem LocalExistenceUniquenessFamily.nonempty_localSolution
     Nonempty (LocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
   (pkg.package ivp).exists_solution
 
+theorem LocalExistenceUniquenessFamily.connection_eq_on_common_interval
+    (pkg : LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol₁ sol₂ : LocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.toSolution.connection t σ x = sol₂.toSolution.connection t σ x :=
+  localExistenceUniqueness_connection_eq_on_common_interval
+    (I := I) (M := M) (pkg := pkg.package ivp) sol₁ sol₂ ht hσ
+
 section Intrinsic
 
 variable [SigmaCompactSpace M]
@@ -2685,6 +3079,17 @@ theorem intrinsicLocalExistenceUniqueness_connection_eq_on_common_interval
       sol₂.toIntrinsicSolution.toSolution.connection t σ x := by
   exact localExistenceUniqueness_connection_eq_on_common_interval
     (I := I) (M := M) (pkg := pkg.toOrdinary) sol₁.toLocalSolution sol₂.toLocalSolution ht hσ
+
+theorem IntrinsicLocalExistenceUniquenessFamily.connection_eq_on_common_interval
+    (pkg : IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol₁ sol₂ : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.toIntrinsicSolution.toSolution.connection t σ x =
+      sol₂.toIntrinsicSolution.toSolution.connection t σ x :=
+  intrinsicLocalExistenceUniqueness_connection_eq_on_common_interval
+    (I := I) (M := M) (pkg := pkg.package ivp) sol₁ sol₂ ht hσ
 
 /-- On compact manifolds whose tangent fibers are all subsingletons, Ricci flow has a stationary
 local solution for every initial metric and metric uniqueness is pointwise forced. This is a

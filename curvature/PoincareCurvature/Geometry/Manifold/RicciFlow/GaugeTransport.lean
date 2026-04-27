@@ -12,6 +12,9 @@ public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivati
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence
 
+set_option linter.unusedSectionVars false
+set_option linter.all false
+
 /-!
 # Gauge transport primitives for Ricci flow
 
@@ -232,6 +235,42 @@ lemma IsTimeDependentIntegralCurveOn.mono
   intro u hu
   exact (hγ u (hst hu)).mono hst
 
+lemma IsTimeDependentIntegralCurveOn.hasMFDerivWithinAt
+    {γ : ℝ → M}
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} (hγ : IsTimeDependentIntegralCurveOn (I := I) (M := M) γ X s)
+    {t : ℝ} (ht : t ∈ s) :
+    HasMFDerivAt[s] γ t ((1 : ℝ →L[ℝ] ℝ).smulRight <| X t (γ t)) :=
+  hγ t ht
+
+lemma IsTimeDependentIntegralCurveOn.of_hasMFDerivWithinAt
+    {γ : ℝ → M}
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ}
+    (hγ : ∀ t ∈ s,
+      HasMFDerivAt[s] γ t ((1 : ℝ →L[ℝ] ℝ).smulRight <| X t (γ t))) :
+    IsTimeDependentIntegralCurveOn (I := I) (M := M) γ X s :=
+  hγ
+
+lemma IsTimeDependentIntegralCurveAt.hasMFDerivAt
+    {γ : ℝ → M}
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (hγ : IsTimeDependentIntegralCurveAt (I := I) (M := M) γ X t) :
+    HasMFDerivAt 𝓘(ℝ) I γ t ((1 : ℝ →L[ℝ] ℝ).smulRight <| X t (γ t)) := by
+  rcases hγ with ⟨s, hs, hγs⟩
+  exact (hγs.hasMFDerivWithinAt (mem_of_mem_nhds hs)).hasMFDerivAt hs
+
+/-- Reinterpret a time-dependent integral curve for an equal vector field along the curve. -/
+lemma IsTimeDependentIntegralCurveOn.congr_vectorField
+    {γ : ℝ → M}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ}
+    (hγ : IsTimeDependentIntegralCurveOn (I := I) (M := M) γ X s)
+    (hXY : ∀ t ∈ s, X t (γ t) = Y t (γ t)) :
+    IsTimeDependentIntegralCurveOn (I := I) (M := M) γ Y s := by
+  intro t ht
+  simpa [hXY t ht] using hγ t ht
+
 lemma isTimeDependentIntegralCurveOn_const_of_eq_zero
     (X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
     (s : Set ℝ) (x : M)
@@ -281,6 +320,46 @@ lemma SatisfiesGaugeFlowOn.satisfiesAt
     SatisfiesGaugeFlowAt (I := I) (M := M) Φ X t₀ := by
   intro x
   exact ⟨s, hs, hΦ x⟩
+
+lemma SatisfiesGaugeFlowOn.hasMFDerivWithinAt
+    {Φ : SmoothSelfMapFamily (I := I) (M := M)}
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} (hΦ : SatisfiesGaugeFlowOn (I := I) (M := M) Φ X s)
+    {t : ℝ} (ht : t ∈ s) (x : M) :
+    HasMFDerivAt[s] (fun τ : ℝ ↦ Φ τ x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight <| X t (Φ t x)) :=
+  (hΦ x).hasMFDerivWithinAt ht
+
+lemma SatisfiesGaugeFlowOn.of_hasMFDerivWithinAt
+    {Φ : SmoothSelfMapFamily (I := I) (M := M)}
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ}
+    (hΦ : ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt[s] (fun τ : ℝ ↦ Φ τ x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight <| X t (Φ t x))) :
+    SatisfiesGaugeFlowOn (I := I) (M := M) Φ X s := by
+  intro x
+  exact IsTimeDependentIntegralCurveOn.of_hasMFDerivWithinAt
+    (I := I) (M := M) (fun t ht ↦ hΦ t ht x)
+
+lemma SatisfiesGaugeFlowAt.hasMFDerivAt
+    {Φ : SmoothSelfMapFamily (I := I) (M := M)}
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (hΦ : SatisfiesGaugeFlowAt (I := I) (M := M) Φ X t) (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ Φ τ x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight <| X t (Φ t x)) :=
+  (hΦ x).hasMFDerivAt
+
+/-- Reinterpret a gauge-flow family for an equal vector field along the flow image. -/
+lemma SatisfiesGaugeFlowOn.congr_vectorField
+    {Φ : SmoothSelfMapFamily (I := I) (M := M)}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ}
+    (hΦ : SatisfiesGaugeFlowOn (I := I) (M := M) Φ X s)
+    (hXY : ∀ t ∈ s, ∀ x : M, X t (Φ t x) = Y t (Φ t x)) :
+    SatisfiesGaugeFlowOn (I := I) (M := M) Φ Y s := by
+  intro x
+  exact (hΦ x).congr_vectorField (fun t ht ↦ hXY t ht x)
 
 lemma SmoothSelfMapFamily.id_satisfiesGaugeFlowOn_of_eq_zero
     {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
@@ -750,6 +829,16 @@ def toSmoothSelfMapFamily : SmoothSelfMapFamily (I := I) (M := M) :=
       SmoothSelfMapFamily.id (I := I) (M := M) := by
   funext t
   rfl
+
+lemma id_satisfiesGaugeFlowOn_of_eq_zero
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ}
+    (hX : ∀ t ∈ s, ∀ x : M, X t x = 0) :
+    SatisfiesGaugeFlowOn (I := I) (M := M)
+      (SmoothSelfDiffeomorph2Family.id (I := I) (M := M)).toSmoothSelfMapFamily X s := by
+  simpa using
+    SmoothSelfMapFamily.id_satisfiesGaugeFlowOn_of_eq_zero
+      (I := I) (M := M) (X := X) (s := s) hX
 
 /-- A `C^2` diffeomorphism family is anchored at `t₀` if its time slice there is the identity
 diffeomorphism. -/
@@ -2797,6 +2886,22 @@ def toSmoothSelfDiffeomorph2Family : SmoothSelfDiffeomorph2Family (I := I) (M :=
       SmoothSelfDiffeomorph2Family.id (I := I) (M := M) := by
   funext t
   rfl
+
+@[simp] lemma id_toSmoothSelfMapFamily :
+    (SmoothSelfDiffeomorph3Family.id (I := I) (M := M)).toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily =
+      SmoothSelfMapFamily.id (I := I) (M := M) := by
+  rw [id_toSmoothSelfDiffeomorph2Family, SmoothSelfDiffeomorph2Family.id_toSmoothSelfMapFamily]
+
+lemma id_satisfiesGaugeFlowOn_of_eq_zero
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ}
+    (hX : ∀ t ∈ s, ∀ x : M, X t x = 0) :
+    SatisfiesGaugeFlowOn (I := I) (M := M)
+      (SmoothSelfDiffeomorph3Family.id (I := I) (M := M)).toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily
+      X s := by
+  simpa using
+    SmoothSelfDiffeomorph2Family.id_satisfiesGaugeFlowOn_of_eq_zero
+      (I := I) (M := M) (X := X) (s := s) hX
 
 /-- A `C^3` diffeomorphism family is anchored at `t₀` if its time slice there is the identity
 diffeomorphism. -/

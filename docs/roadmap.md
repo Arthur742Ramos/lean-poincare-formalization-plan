@@ -249,15 +249,25 @@ with intrinsic comparison lemmas against arbitrary zero-velocity or
    identity diffeomorphism gauge. It now also records a conditional
    gauge-reduced DeTurck local-solution
    package for the non-identity case, bundling the transformed metric, velocity,
-   pulled-back-background regularity, and transformed Ricci-flow equation
-   hypotheses whose proof yields intrinsic and ordinary local-existence/uniqueness
-   packages. This package now also re-packages the transformed metric as an
-   actual pulled-back Ricci-DeTurck local solution with Levi-Civita pulled-back
-   background, converts that data into the generic Levi-Civita-background
-    DeTurck package, compares the pulled-back backgrounds on common intervals,
-    exposes the gauge ODE and transformed Ricci-flow/DeTurck equations on the
-    actual local interval, expands the source DeTurck equation into its
-    background-Ricci plus DeTurck-correction form, records the pointwise
+    pulled-back-background regularity, and transformed Ricci-flow equation
+    hypotheses whose proof yields intrinsic and ordinary local-existence/uniqueness
+    packages. This package now also re-packages the transformed metric as an
+    actual pulled-back Ricci-DeTurck local solution with Levi-Civita pulled-back
+    background, converts that data into the generic Levi-Civita-background
+     DeTurck package, compares the pulled-back backgrounds on common intervals,
+     exposes the gauge ODE and transformed Ricci-flow/DeTurck equations on the
+     actual local interval, expands the source DeTurck equation into its
+     background-Ricci plus DeTurck-correction form, records the pointwise
+      connection-uniqueness consequences at the ordinary, intrinsic,
+      chosen-background, gauge-reduced, and scalar-derivative theorem-family
+      levels, proves that the identity `C^3` gauge supplies the explicit
+      scalar-derivative gauge-reducible interface for chosen-background
+       packages, exposes direct identity-`C^3` gauge-reduced wrappers with
+       source/metric/velocity simplification lemmas, and now lowers the
+       non-identity route to raw `C^3` diffeomorphism families with anchoring,
+        the gauge-flow equation, and scalar inner-product derivative identities.
+        The optional `PoincareCurvature.Point4` aggregate imports the
+        gauge-reduction boundary. It also records the pointwise
     gauge-flow derivative, and rewrites transformed velocity as `-2` times the
      trace-conjugated pulled-back Ricci endomorphism supplied by the connection
      transport layer. In the zero-dimensional tangent-fiber case it also proves
@@ -312,8 +322,10 @@ trivialization coordinates to the finite-cover `ContinuousSectionSpace` model,
 where actual positive-definite bilinear-form sections form an open subset, the
 symmetric locus is now closed, and continuous Riemannian metrics are shown to
 inhabit the refined symmetric positive-definite locus inside that model. The
-same package now also presents that metric locus as an open subset of the
-closed symmetric section subtype. The connection side has
+same package now also constructs a transported continuous-linear coordinatewise
+antisymmetric-defect map whose kernel is exactly that symmetric locus, and it
+presents the metric locus as an open subset of the closed symmetric section
+subtype. The connection side has
 also gained a new `C^1` regularity layer on `C^2` bundle data: the package now
 proves existence of global `C^1` affine connections, specializes that theorem
 to the tangent bundle, and adds section-level `C^1` regularity lemmas for
@@ -460,11 +472,87 @@ hypothesis). That regularity gap is now closed as well: the package proves the
    pulled canonical smooth extensions that appear in curvature tensor
    contractions, and exposes direct anchored `C^3` tangent and vector-field
    pushforward identities.
-   What still remains is the analytic side for non-identity gauges:
-   time-regularity of the non-identity `C^3` gauge-pulled metric/velocity, an
-   actual existence theorem producing such gauge flows with the required
-   regularity, and the quasilinear parabolic PDE framework for genuine
-   Ricci-flow local existence and uniqueness.
+     The optional `PoincareCurvature.Point4` aggregate also imports an
+     `AnalyticPDE` file proving the reusable
+    Picard-Lindelof Banach-evolution local-solution core, open-state
+    state-preserving uniqueness, a positive-definite finite-cover metric-locus
+    bridge, an abstract continuous-linear symmetry/fixed-locus preservation
+    theorem for later slot-swap symmetry, and a direct continuous-linear
+    antisymmetric-defect criterion that keeps solutions in the symmetric
+    positive-definite locus once the vector field's coordinatewise defect
+     vanishes, plus a pointwise-symmetric-vector-field variant that supplies that
+     defect vanishing automatically. The same state-set mechanism now also has a
+     non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
+     vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
+     positive-definite local metric evolutions and, when identified pointwise with
+     the intrinsic Ricci-DeTurck RHS, remain symmetric by the proved geometric
+     symmetry theorem. This time-dependent Ricci-DeTurck bridge is also bundled
+     as `TimeDependentGeometricRicciDeTurckBanachChart`, whose fields are
+     precisely the remaining Picard/Lipschitz/geometric-agreement obligations and
+     whose extractor produces the symmetric positive-definite local Banach metric
+     evolution. The reverse metric bridge is now proof-bearing as well: any
+      finite-cover symmetric positive-definite section-state reifies to a bundled
+      continuous Riemannian metric, and the packaged Banach solution now exposes
+       one metric-valued curve whose local-interval inner products agree with the
+       Banach section curve, whose initial value is the original initial metric,
+       and whose common-interval uniqueness follows from Banach uniqueness. For
+       autonomous charts, a new local `C^1` reduction also shrinks to an open
+       neighborhood inside the positive-definite metric locus and derives the
+       needed local Lipschitz bound there, so chart estimates can be proved
+       locally around the initial metric instead of globally on the whole metric
+        locus; for non-autonomous charts, the lower-level positive-definite and
+        symmetric bridges, plus the reusable
+         `TimeDependentGeometricRicciDeTurckBanachChartOnIcc` package, now also
+         accept Lipschitz estimates restricted to the verified Picard time
+         interval and expose the constructed solution's `terminalTime ≤ T`
+         bound. A
+       smooth-realization adapter packages the exact remaining
+      lift/time-derivative/DeTurck-equation obligations needed to turn such a
+      Banach solution into an `IntrinsicDeTurckLocalSolution`; when supplied for
+      a smooth-IVP-seeded chart solution it extracts that DeTurck local solution,
+       and two such smooth realizations have equal metric tensors on common
+       intervals. The interval chart also has a bounded candidate-encoding
+       theorem: candidates whose Banach representatives satisfy
+        `terminalTime ≤ T` promote all the way to
+        `IntrinsicDeTurckLocalExistenceUniqueness`, the identity-gauge intrinsic
+         Ricci-flow package, the non-identity gauge-reducible package, and the
+         explicit scalar-inner-derivative gauge package using only
+         `Icc`-restricted Lipschitz control; the chosen-background identity,
+         arbitrary-background identity, gauge-reducible, and
+         scalar-inner-derivative gauge routes now preserve the stronger
+         arbitrary-background DeTurck, chosen-background DeTurck, and gauge
+          theorem-family packages before exposing
+          `IntrinsicLocalExistenceUniquenessFamily` extractors, and the chart
+          packages no longer carry a separate finite-cover section-space
+          completeness field because that obligation is discharged by the
+          existing `ContinuousSectionSpace` complete-space instance. With the explicit
+        reverse-chart
+        encoding for arbitrary or
+       chosen-background candidates, the same package now promotes to
+      `IntrinsicDeTurckLocalExistenceUniqueness`,
+      `ChosenIntrinsicDeTurckLocalExistenceUniqueness`, and then to intrinsic
+      Ricci-flow local existence/uniqueness either by the chosen-background
+      identity route or by the non-identity gauge-reducibility package; the
+      global-chart family theorem produces `IntrinsicLocalExistenceUniquenessFamily`
+      once these chart, realization, encoding, and gauge-reducibility obligations
+      are supplied for every initial value problem. These criteria are also
+      specialized to genuine bundled continuous Riemannian initial metrics, so
+      future Ricci-DeTurck Banach-chart work no longer has to manually prove
+      finite-cover metric-locus membership for the initial datum. The curvature, time-dependent geometry,
+    intrinsic Ricci-flow, and DeTurck layers now prove the geometric symmetry
+    input outright: metric compatibility gives curvature-operator
+    skew-adjointness, torsion-freeness gives first Bianchi, the Ricci contraction
+    is symmetric for Levi-Civita families, the intrinsic Ricci-flow RHS is
+    symmetric, and the full intrinsic Ricci-DeTurck RHS is symmetric because the
+    DeTurck correction term itself is symmetric. The analytic side is therefore
+    no longer purely documentary. What still remains is the geometric-analysis
+    specialization for non-identity gauges: time-regularity of the non-identity
+    `C^3` gauge-pulled metric/velocity, an actual existence theorem producing
+    raw gauge flows with the required regularity, and the quasilinear parabolic
+    PDE framework for genuine Ricci-flow local existence and uniqueness,
+    including the actual Ricci-DeTurck Banach chart and estimates plus the
+    identification of that Banach representative with the geometric
+    Ricci-DeTurck right-hand side.
 
 ### 5. Evolution equations and parabolic maximum principles
 

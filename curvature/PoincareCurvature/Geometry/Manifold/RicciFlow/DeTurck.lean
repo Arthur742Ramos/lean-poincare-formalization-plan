@@ -2,6 +2,9 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence
 
+set_option linter.unusedSectionVars false
+set_option linter.all false
+
 /-!
 # Intrinsic DeTurck geometry for Ricci flow
 
@@ -243,6 +246,23 @@ def intrinsicDeTurckCorrection
           (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
             (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x v) := rfl
 
+/-- The DeTurck correction is symmetric in its two tangent slots. -/
+theorem intrinsicDeTurckCorrection_symm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v =
+      intrinsicDeTurckCorrection (I := I) (M := M) g background t x v u := by
+  rw [intrinsicDeTurckCorrection_apply, intrinsicDeTurckCorrection_apply]
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  let nablaW :=
+    ((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x
+  have h₁ : (g t).inner x (nablaW u) v = (g t).inner x v (nablaW u) := (g t).symm x _ _
+  have h₂ : (g t).inner x u (nablaW v) = (g t).inner x (nablaW v) u := (g t).symm x _ _
+  rw [h₁, h₂]
+  abel
+
 /-- The DeTurck correction vanishes on zero-dimensional tangent fibers, for any background. -/
 theorem intrinsicDeTurckCorrection_eq_zero_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)]
@@ -288,6 +308,121 @@ def intrinsicRicciDeTurckRHS
     intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v =
       intrinsicRicciFlowRHS (I := I) (M := M) g t x u v +
         intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v := rfl
+
+/-- The intrinsic Ricci-DeTurck right-hand side is symmetric whenever the intrinsic Ricci-flow
+right-hand side is symmetric. This isolates the remaining Ricci-symmetry input from the already
+proved symmetry of the DeTurck correction term. -/
+theorem intrinsicRicciDeTurckRHS_symm_of_intrinsicRicciFlowRHS_symm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hRicciSymm : ∀ t : ℝ, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciFlowRHS (I := I) (M := M) g t x u v =
+        intrinsicRicciFlowRHS (I := I) (M := M) g t x v u)
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v =
+      intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x v u := by
+  rw [intrinsicRicciDeTurckRHS_apply, intrinsicRicciDeTurckRHS_apply,
+    hRicciSymm t x u v,
+    intrinsicDeTurckCorrection_symm (I := I) (M := M) g background t x u v]
+
+/-- Symmetry of the intrinsic Ricci tensor implies symmetry of the full intrinsic Ricci-DeTurck
+right-hand side. The DeTurck correction part is handled by
+`intrinsicDeTurckCorrection_symm`, so this exposes the exact remaining tensor-symmetry input. -/
+theorem intrinsicRicciDeTurckRHS_symm_of_intrinsicRicciTensor_symm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hRicciSymm : ∀ t : ℝ, ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M) g t x u v =
+        intrinsicRicciTensor (I := I) (M := M) g t x v u)
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v =
+      intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x v u := by
+  exact intrinsicRicciDeTurckRHS_symm_of_intrinsicRicciFlowRHS_symm
+    (I := I) (M := M) g background
+    (intrinsicRicciFlowRHS_symm_of_intrinsicRicciTensor_symm
+      (I := I) (M := M) g hRicciSymm)
+    t x u v
+
+/-- Curvature pair symmetry for the chosen Levi-Civita family implies symmetry of the full
+intrinsic Ricci-DeTurck right-hand side. This combines the algebraic Ricci-symmetry contraction
+bridge with the already symmetric DeTurck correction term. -/
+theorem intrinsicRicciDeTurckRHS_symm_of_curvature_inner_pair_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hpair : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      letI : CovariantDerivative.ContMDiffCovariantDerivative
+          (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+            (I := I) (M := M) g t) 1 :=
+        CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g t;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x a b c) d =
+          Inner.inner ℝ
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x c d a) b)
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v =
+      intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x v u := by
+  exact intrinsicRicciDeTurckRHS_symm_of_intrinsicRicciTensor_symm
+    (I := I) (M := M) g background
+    (intrinsicRicciTensor_symm_of_curvature_inner_pair_symm
+      (I := I) (M := M) g hpair)
+    t x u v
+
+/-- Skew-adjointness of the chosen Levi-Civita curvature operators implies symmetry of the full
+intrinsic Ricci-DeTurck right-hand side. This is the version aimed directly at the
+metric-compatibility curvature identity. -/
+theorem intrinsicRicciDeTurckRHS_symm_of_curvature_inner_skew_adjoint
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hskew : ∀ (t : ℝ) (x : M),
+      letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+      letI : CovariantDerivative.ContMDiffCovariantDerivative
+          (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+            (I := I) (M := M) g t) 1 :=
+        CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g t;
+      ∀ (a b c d : TM x),
+        Inner.inner ℝ
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x a b c) d +
+          Inner.inner ℝ c
+            (CovariantDerivative.curvatureTensor
+              (cov := CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+                (I := I) (M := M) g t) x a b d) = 0)
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v =
+      intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x v u := by
+  exact intrinsicRicciDeTurckRHS_symm_of_intrinsicRicciTensor_symm
+    (I := I) (M := M) g background
+      (intrinsicRicciTensor_symm_of_curvature_inner_skew_adjoint
+        (I := I) (M := M) g hskew)
+    t x u v
+
+/-- The intrinsic Ricci-DeTurck right-hand side is symmetric, using the chosen smooth
+Levi-Civita family for the Ricci term and the symmetric DeTurck correction. -/
+theorem intrinsicRicciDeTurckRHS_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v =
+      intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x v u := by
+  exact intrinsicRicciDeTurckRHS_symm_of_intrinsicRicciFlowRHS_symm
+    (I := I) (M := M) g background
+    (intrinsicRicciFlowRHS_symm (I := I) (M := M) g)
+    t x u v
 
 theorem intrinsicRicciDeTurckRHS_eq_zero_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)]
@@ -1570,6 +1705,28 @@ theorem IntrinsicDeTurckLocalExistenceUniqueness.metric_eq_on_common_interval
       metricTensor (I := I) (M := M) sol₂.toIntrinsicDeTurckSolution.metric t x u v :=
   pkg.unique_metric sol₁ sol₂ t ht x u v
 
+/-- If every candidate DeTurck local solution in the package uses a Levi-Civita background for its
+evolving metric, then the arbitrary-background DeTurck package yields the intrinsic Ricci-flow point-4
+package. Existence converts the package's DeTurck solution; uniqueness rewrites arbitrary intrinsic
+Ricci-flow candidates as chosen-background DeTurck candidates and uses DeTurck uniqueness. -/
+noncomputable def IntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_of_all_backgrounds_isLeviCivita
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : IntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : ∀ sol : IntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+        (I := I) (M := M)
+        sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp where
+  exists_solution := by
+    rcases pkg.exists_solution with ⟨sol⟩
+    exact ⟨sol.toIntrinsicLocalSolution (hbackground sol)⟩
+  unique_metric := by
+    intro sol₁ sol₂ t ht x u v
+    exact pkg.unique_metric sol₁.toChosenIntrinsicDeTurckLocalSolution
+      sol₂.toChosenIntrinsicDeTurckLocalSolution t ht x u v
+
 /-- In the zero-dimensional tangent-fiber case, an intrinsic Ricci-flow local-existence package
 gives a Ricci-DeTurck package whose uniqueness compares all backgrounds. -/
 def IntrinsicLocalExistenceUniqueness.toIntrinsicDeTurck_of_subsingleton_tangent
@@ -1634,6 +1791,21 @@ structure IntrinsicDeTurckLocalExistenceUniquenessFamily where
     ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
       IntrinsicDeTurckLocalExistenceUniqueness
         (E := E) (H := H) (I := I) (M := M) ivp
+
+/-- Family-level version of
+`IntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_of_all_backgrounds_isLeviCivita`. -/
+noncomputable def IntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsic_of_all_backgrounds_isLeviCivita
+    (pkg : IntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hbackground :
+      ∀ (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+        (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp),
+        CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+          (I := I) (M := M)
+          sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    (pkg.package ivp).toIntrinsic_of_all_backgrounds_isLeviCivita (hbackground ivp)
 
 def IntrinsicLocalExistenceUniquenessFamily.toIntrinsicDeTurck_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)]
@@ -1787,6 +1959,35 @@ theorem chosenIntrinsicDeTurckLocalExistenceUniqueness_connection_eq_on_common_i
     ht₁ ht₂
     (fun y u v ↦ pkg.unique_metric sol₁ sol₂ t ht y u v)
     hσ
+
+theorem ChosenIntrinsicDeTurckLocalExistenceUniqueness.connection_eq_on_common_interval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.1.canonicalConnection
+      (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+      sol₂.1.canonicalConnection
+        (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2) t σ x :=
+  chosenIntrinsicDeTurckLocalExistenceUniqueness_connection_eq_on_common_interval
+    (I := I) (M := M) pkg sol₁ sol₂ ht hσ
+
+theorem ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.connection_eq_on_common_interval
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.1.canonicalConnection
+      (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+      sol₂.1.canonicalConnection
+        (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2) t σ x :=
+  (pkg.package ivp).connection_eq_on_common_interval sol₁ sol₂ ht hσ
 
 /-- The canonical intrinsic Ricci-DeTurck local solution attached to Ricci-flat initial data,
 using the chosen smooth Levi-Civita family as background. -/

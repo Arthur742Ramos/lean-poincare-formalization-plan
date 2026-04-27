@@ -1242,6 +1242,29 @@ instance
       (fun _ => Π x : M, V x) :=
   ⟨ContinuousSectionSpace.toFun⟩
 
+@[ext]
+theorem ext
+    {κ : Type*}
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    (h : ∀ x : M, s x = t x) :
+    s = t := by
+  cases s with
+  | mk sf sc =>
+    cases t with
+    | mk tf tc =>
+      have hfun : sf = tf := funext h
+      cases hfun
+      rfl
+
 @[simp]
 lemma continuous
     {κ : Type*}
@@ -1396,6 +1419,143 @@ instance instCompleteSpace
     intro x y
     rfl
   exact (completeSpace_congr (e := e) hIso.isUniformEmbedding).2 inferInstance
+
+/-- The coordinate-family representation of a continuous section as a continuous linear map. -/
+noncomputable def toCompatibleCoordFamilySubmoduleContinuousLinearMap
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+      →L[𝕜] compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo := by
+  let e := equivCompatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo hKoEq hcover
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedAddCommGroup
+      (𝕜 := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  letI : NormedSpace 𝕜
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedSpace
+      (𝕜 := 𝕜) (R := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  letI : AddCommGroup
+      (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) :=
+    instAddCommGroup (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo hKoEq hcover
+  letI : Module 𝕜
+      (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) :=
+    instModule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo hKoEq hcover
+  letI : NormedAddCommGroup
+      (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) :=
+    instNormedAddCommGroup (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo hKoEq hcover
+  letI : NormedSpace 𝕜
+      (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) :=
+    instNormedSpace (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo hKoEq hcover
+  refine
+    { toLinearMap :=
+        { toFun := e
+          map_add' := by
+            intro s t
+            change e (e.symm (e s + e t)) = e s + e t
+            simp
+          map_smul' := by
+            intro c s
+            change e (e.symm (c • e s)) = c • e s
+            simp }
+      cont := ?_ }
+  have hIso : Isometry e := by
+    intro s t
+    rfl
+  exact hIso.continuous
+
+@[simp]
+lemma toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    toCompatibleCoordFamilySubmoduleContinuousLinearMap
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s =
+      equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s := rfl
+
+/-- Read one compact coordinate component of a continuous section as a continuous linear map. -/
+noncomputable def coordReadoutContinuousLinearMap
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (i : κ) (x : Kc i) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+      →L[𝕜] F :=
+  (ContinuousMap.evalCLM (R := 𝕜) (M := F) x).comp
+    ((ContinuousLinearMap.proj i).comp
+      (((compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo).subtypeL).comp
+        (toCompatibleCoordFamilySubmoduleContinuousLinearMap
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)))
+
+@[simp]
+lemma coordReadoutContinuousLinearMap_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (i : κ) (x : Kc i)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    coordReadoutContinuousLinearMap
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover i x s =
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x := rfl
+
+/-- Two finite-cover section-space points are equal when all compact coordinate readouts agree. -/
+theorem eq_of_coordReadout_eq
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    (hcoord : ∀ i (x : Kc i),
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x =
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x) :
+    s = t := by
+  apply (equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover).injective
+  apply Subtype.ext
+  funext i
+  ext x
+  exact hcoord i x
 
 end ContinuousSectionSpace
 
