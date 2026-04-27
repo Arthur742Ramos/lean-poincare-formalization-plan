@@ -43,6 +43,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 
+/-- If the model vector space is a subsingleton, every tangent fiber is a subsingleton. -/
+instance (priority := 100) instSubsingletonTangentSpaceOfSubsingletonModel
+    [Subsingleton E] (x : M) : Subsingleton (TM x) := by
+  rw [TangentSpace]
+  infer_instance
+
 /-- The bundle of time-dependent smooth metrics used by Ricci-flow solutions. -/
 abbrev MetricFamily :=
   CovariantDerivative.TimeDependentRiemannianMetric (I := I) (M := M)
@@ -3124,6 +3130,38 @@ noncomputable def localExistenceUniquenessFamily_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)] :
     LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
   (intrinsicLocalExistenceUniquenessFamily_of_subsingleton_tangent
+    (I := I) (M := M)).toOrdinary
+
+/-- On compact manifolds with a subsingleton model vector space, Ricci flow has a stationary local
+solution for every initial metric and metric uniqueness is pointwise forced. -/
+noncomputable def intrinsicLocalExistenceUniqueness_of_subsingleton_model
+    [Subsingleton E]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  intrinsicLocalExistenceUniqueness_of_subsingleton_tangent (I := I) (M := M) ivp
+
+/-- Ordinary connection-parametrized version of
+`intrinsicLocalExistenceUniqueness_of_subsingleton_model`. -/
+noncomputable def localExistenceUniqueness_of_subsingleton_model
+    [Subsingleton E]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (intrinsicLocalExistenceUniqueness_of_subsingleton_model (I := I) (M := M) ivp).toOrdinary
+
+/-- The theorem-family version of
+`intrinsicLocalExistenceUniqueness_of_subsingleton_model`. -/
+noncomputable def intrinsicLocalExistenceUniquenessFamily_of_subsingleton_model
+    [Subsingleton E] :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    intrinsicLocalExistenceUniqueness_of_subsingleton_model (I := I) (M := M) ivp
+
+/-- Ordinary connection-parametrized theorem-family version of
+`intrinsicLocalExistenceUniquenessFamily_of_subsingleton_model`. -/
+noncomputable def localExistenceUniquenessFamily_of_subsingleton_model
+    [Subsingleton E] :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (intrinsicLocalExistenceUniquenessFamily_of_subsingleton_model
     (I := I) (M := M)).toOrdinary
 
 /-- On an empty compact manifold, the compact point-4 theorem package is provable for every initial
