@@ -146,6 +146,9 @@ separately for the basic Ricci-flat corollary, and the initial-data side now
  `intrinsicLocalExistenceUniqueness_of_subsingleton_tangent` and
  `localExistenceUniqueness_of_subsingleton_tangent` provide stationary existence
  and metric uniqueness for every initial metric, with theorem-family variants.
+ Since mathlib's tangent space is a type synonym of the model vector space, the
+ same theorem packages are now also exposed under the more natural
+ `[Subsingleton E]` model-space hypothesis.
  More generally, the
 scaffold now proves that any local solution with zero metric velocity on its
 whole interval stays equal to the initial metric tensor there and keeps the
@@ -266,6 +269,10 @@ with intrinsic comparison lemmas against arbitrary zero-velocity or
        source/metric/velocity simplification lemmas, and now lowers the
        non-identity route to raw `C^3` diffeomorphism families with anchoring,
         the gauge-flow equation, and scalar inner-product derivative identities.
+        The non-identity right-slot/Ricci-transport obligation is now discharged
+        by the `C^3` transport layer; the remaining primitive non-identity gauge
+        input is the time-derivative/scalar-derivative formula for the
+        gauge-pulled metric.
         The optional `PoincareCurvature.Point4` aggregate imports the
         gauge-reduction boundary. It also records the pointwise
     gauge-flow derivative, and rewrites transformed velocity as `-2` times the
@@ -535,7 +542,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       identity route or by the non-identity gauge-reducibility package; the
       global-chart family theorem produces `IntrinsicLocalExistenceUniquenessFamily`
       once these chart, realization, encoding, and gauge-reducibility obligations
-      are supplied for every initial value problem. These criteria are also
+      are supplied for every initial value problem. The direct interval
+      chosen-background route now also exposes the ordinary
+      `LocalExistenceUniquenessFamily` endpoint. These criteria are also
       specialized to genuine bundled continuous Riemannian initial metrics, so
       future Ricci-DeTurck Banach-chart work no longer has to manually prove
       finite-cover metric-locus membership for the initial datum. The curvature, time-dependent geometry,

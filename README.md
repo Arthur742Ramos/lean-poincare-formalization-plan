@@ -64,9 +64,10 @@ sections of smooth Riemannian vector bundles. There is also an internal
 preparatory
 point-4 Ricci-flow scaffold file, but it is not part of the public package
 boundary and does **not** count as completing point 4 under this repository's
-proof-only standard, even though it now contains genuine stationary Ricci-flat,
-zero-velocity, and Ricci-tensor-zero special-case theorems at both the metric
-and Levi-Civita-connection levels. It also now proves that, once a connection
+ proof-only standard, even though it now contains genuine stationary Ricci-flat,
+ zero-velocity, and Ricci-tensor-zero special-case theorems at both the metric
+ and Levi-Civita-connection levels, including theorem-family packages under a
+ subsingleton model-space hypothesis. It also now proves that, once a connection
 family is known to be Levi-Civita for a metric family, the Ricci tensor,
 Ricci-flow right-hand side, and Ricci-flow equation are independent of which
 Levi-Civita family is used, and it packages intrinsic metric-only solution /
@@ -160,8 +161,11 @@ packages the canonical stationary local solution attached to
   theorem-family reduction for all initial data, identifies the identity `C^3`
   gauge's fixed-vector scalar derivative, upgrades chosen-background packages
   through the explicit scalar-derivative gauge-reducible interface, exposes
-  direct identity-`C^3` gauge-reduced wrappers with source/metric/velocity
-  simplification lemmas. The optional `PoincareCurvature.Point4` aggregate now
+   direct identity-`C^3` gauge-reduced wrappers with source/metric/velocity
+   simplification lemmas. The non-identity right-slot/Ricci-transport obligation
+   is now discharged by the `C^3` transport layer; the remaining primitive
+   non-identity gauge input is the time-derivative/scalar-derivative formula for
+   the gauge-pulled metric. The optional `PoincareCurvature.Point4` aggregate now
   imports this gauge-reduction boundary plus a new `AnalyticPDE` file proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state
   state-preserving uniqueness, a positive-definite finite-cover metric-locus
@@ -217,7 +221,9 @@ packages the canonical stationary local solution attached to
   route or by the non-identity gauge-reducibility package; the global-chart
   family theorem produces `IntrinsicLocalExistenceUniquenessFamily` once these
   chart, realization, encoding, and gauge-reducibility obligations are supplied
-  for every initial value problem. It also specializes these criteria to genuine
+  for every initial value problem. The direct interval chosen-background route
+  now also exposes the ordinary `LocalExistenceUniquenessFamily` endpoint. It
+  also specializes these criteria to genuine
   bundled continuous Riemannian initial metrics, so future Ricci-DeTurck
   Banach-chart work no longer has to manually prove finite-cover metric-locus
   membership for the initial datum.
