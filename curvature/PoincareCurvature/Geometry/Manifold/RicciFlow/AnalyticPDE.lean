@@ -7251,6 +7251,63 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.intrinsicLocalExistenceUni
   (TimeDependentGeometricRicciDeTurckBanachChart.gaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness_of_smoothRealization_chosenCandidateEncoding_and_gaugeReducible
     (M := M) (F := F) (I := I) chart realize hchosen encode exists_gaugeReducible).toIntrinsic
 
+/-- Direct non-identity gauge-reduction route from a global smooth-IVP-seeded Ricci-DeTurck Banach
+chart to the intrinsic Ricci-flow package using bounded interval candidate encodings. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChart.intrinsicLocalExistenceUniqueness_of_smoothRealization_chosenCandidateEncodingOnIcc_and_gaugeReducible
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChart
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (realize : ∀ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+      BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    (hchosen : ∀ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+      UsesChosenBackground (I := I) (M := M)
+        (BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
+          (M := M) (F := F) (I := I) (realize sol)))
+    (encode : ∀ candidate : ChosenIntrinsicDeTurckLocalSolution
+        (E := F) (H := H) (I := I) (M := M) ivp,
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding
+        (M := M) (F := F) (I := I) chart.toOnIcc candidate.1)
+    (exists_gaugeReducible :
+      Nonempty (GaugeReducibleChosenIntrinsicDeTurckLocalSolution
+        (E := F) (H := H) (I := I) (M := M) ivp)) :
+    IntrinsicLocalExistenceUniqueness (E := F) (H := H) (I := I) (M := M) ivp :=
+  (TimeDependentGeometricRicciDeTurckBanachChart.gaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness_of_smoothRealization_chosenCandidateEncodingOnIcc_and_gaugeReducible
+    (M := M) (F := F) (I := I) chart realize hchosen encode exists_gaugeReducible).toIntrinsic
+
 /-- Scalar-inner-derivative gauge route from a smooth-IVP-seeded Ricci-DeTurck Banach chart to the
 intrinsic Ricci-flow local-existence/uniqueness package. -/
 theorem TimeDependentGeometricRicciDeTurckBanachChart.intrinsicLocalExistenceUniqueness_of_smoothRealization_chosenCandidateEncoding_and_innerDerivativeGaugeReducible
@@ -7306,6 +7363,64 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.intrinsicLocalExistenceUni
         (E := F) (H := H) (I := I) (M := M) ivp)) :
     IntrinsicLocalExistenceUniqueness (E := F) (H := H) (I := I) (M := M) ivp :=
   (TimeDependentGeometricRicciDeTurckBanachChart.innerDerivativeGaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness_of_smoothRealization_chosenCandidateEncoding_and_innerDerivativeGaugeReducible
+    (M := M) (F := F) (I := I) chart realize hchosen encode
+    exists_innerDerivativeGaugeReducible).toGaugeReducible.toIntrinsic
+
+/-- Scalar-inner-derivative gauge route from a global smooth-IVP-seeded Ricci-DeTurck Banach chart
+to the intrinsic Ricci-flow package using bounded interval candidate encodings. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChart.intrinsicLocalExistenceUniqueness_of_smoothRealization_chosenCandidateEncodingOnIcc_and_innerDerivativeGaugeReducible
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChart
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (realize : ∀ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+      BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    (hchosen : ∀ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+      UsesChosenBackground (I := I) (M := M)
+        (BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
+          (M := M) (F := F) (I := I) (realize sol)))
+    (encode : ∀ candidate : ChosenIntrinsicDeTurckLocalSolution
+        (E := F) (H := H) (I := I) (M := M) ivp,
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding
+        (M := M) (F := F) (I := I) chart.toOnIcc candidate.1)
+    (exists_innerDerivativeGaugeReducible :
+      Nonempty (InnerDerivativeGaugeReducibleChosenIntrinsicDeTurckLocalSolution
+        (E := F) (H := H) (I := I) (M := M) ivp)) :
+    IntrinsicLocalExistenceUniqueness (E := F) (H := H) (I := I) (M := M) ivp :=
+  (TimeDependentGeometricRicciDeTurckBanachChart.innerDerivativeGaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness_of_smoothRealization_chosenCandidateEncodingOnIcc_and_innerDerivativeGaugeReducible
     (M := M) (F := F) (I := I) chart realize hchosen encode
     exists_innerDerivativeGaugeReducible).toGaugeReducible.toIntrinsic
 
