@@ -276,6 +276,30 @@ theorem fixedBy_continuousLinearMap_of_lipschitzOn
     exact ⟨ht.1, le_min ht.2 (by simpa [mappedSol] using ht.2)⟩
   exact (hEq ht').symm
 
+/-- Interval-scoped version of `fixedBy_continuousLinearMap_of_lipschitzOn`: it is enough for
+the vector field to be Lipschitz on the solution's finite time interval. -/
+theorem fixedBy_continuousLinearMap_of_lipschitzOn_Icc
+    {K : ℝ≥0}
+    (L : X →L[ℝ] X)
+    (hL_state : MapsTo L stateSet stateSet)
+    (hL_initial : L u₀ = u₀)
+    (hcomm : ∀ t x, x ∈ stateSet → L (F t x) = F t (L x))
+    (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    (hF : ∀ t ∈ Icc t₀ sol.terminalTime, LipschitzOnWith K (F t) stateSet) :
+    ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime → L (sol.curve t) = sol.curve t := by
+  let mappedSol := mapContinuousLinearMap L hL_state hL_initial hcomm sol
+  have hLipCommon :
+      ∀ t ∈ Icc t₀ (min sol.terminalTime mappedSol.terminalTime),
+        LipschitzOnWith K (F t) stateSet := by
+    intro t ht
+    exact hF t ⟨ht.1, le_trans ht.2 (min_le_left _ _)⟩
+  have hEq := eqOn_Icc_of_lipschitzOn_Icc (F := F) (stateSet := stateSet)
+    (t₀ := t₀) (u₀ := u₀) (K := K) sol mappedSol hLipCommon
+  intro t ht
+  have ht' : t ∈ Icc t₀ (min sol.terminalTime mappedSol.terminalTime) := by
+    exact ⟨ht.1, le_min ht.2 (by simpa [mappedSol] using ht.2)⟩
+  exact (hEq ht').symm
+
 /-- If a continuous linear defect functional annihilates the vector field on the state set and
 annihilates the initial value, then every state-preserving solution remains in the defect kernel.
 This is the abstract "tangent to a closed linear constraint" mechanism needed when a geometric
