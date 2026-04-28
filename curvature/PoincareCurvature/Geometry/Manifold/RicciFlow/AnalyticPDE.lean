@@ -1349,6 +1349,140 @@ theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_coordwiseDefect_contD
       x0 et het Kc hKc Ko hKo hKoEq hcover)
     hdefect_A
 
+/-- Interval-scoped direct defect route to the finite-cover symmetric positive-definite locus. This
+is the local-in-time version needed when the Banach-chart estimates are only available on the
+verified Picard interval. -/
+theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_linearDefect_isPicardLindelof_lipschitzOn_Icc_terminal_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {g₀ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩ g₀ a 0 L Kpic)
+    (hg₀ : g₀ ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hLip : ∀ t ∈ Icc t₀ T, LipschitzOnWith Kstate (A t)
+      (positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover))
+    {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℝ Y]
+    (C : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →L[ℝ] Y)
+    (hker_iff : ∀ x : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover,
+      C x = 0 ↔ x ∈ symmetricLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover)
+    (hC_A : ∀ t x, x ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover → C (A t x) = 0) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (positiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn A
+          (positiveDefiniteLocus (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover := by
+  rcases exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn_Icc_terminal_le
+      (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete hT hA hg₀.2 hLip with
+    ⟨sol, hsolT, huniq⟩
+  have hdefect :
+      ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime → C (sol.curve t) = 0 :=
+    BanachEvolutionLocalSolutionIn.continuousLinearMap_eq_zero_of_vectorField_eq_zero
+      (X := ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover)
+      (F := A)
+      (stateSet := positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover)
+      (t₀ := t₀) (u₀ := g₀)
+      C ((hker_iff g₀).2 hg₀.1) hC_A sol
+  exact ⟨sol, hsolT, huniq, by
+    intro t ht
+    exact ⟨(hker_iff (sol.curve t)).1 (hdefect ht), sol.mem_state ht⟩⟩
+
+/-- Concrete coordinatewise-defect version of the interval-scoped direct defect route. -/
+theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_coordwiseDefect_isPicardLindelof_lipschitzOn_Icc_terminal_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {g₀ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩ g₀ a 0 L Kpic)
+    (hg₀ : g₀ ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hLip : ∀ t ∈ Icc t₀ T, LipschitzOnWith Kstate (A t)
+      (positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover))
+    (hdefect_A : ∀ t x, x ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover →
+      _root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap
+        (F := F) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover (A t x) = 0) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (positiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn A
+          (positiveDefiniteLocus (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover := by
+  letI : Fintype κ := Fintype.ofFinite κ
+  exact exists_unique_in_symmetricPositiveDefiniteLocus_of_linearDefect_isPicardLindelof_lipschitzOn_Icc_terminal_le
+    (M := M) (F := F) (W := W)
+    x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete hT hA hg₀ hLip
+    (_root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap
+      (F := F) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover)
+    (_root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff
+      (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover)
+    hdefect_A
+
 /-- Non-autonomous finite-cover symmetry bridge. If a time-dependent Banach-chart vector field
 satisfies Picard-Lindelof hypotheses, is Lipschitz on the positive-definite locus, and takes
 positive-definite inputs to pointwise symmetric sections at every time, then the state-preserving
