@@ -3201,7 +3201,7 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_unique_symmetr
     (chart := chart.toCoordwiseDefectMetricChartOnIcc)
 
 /-- Terminal-time retaining extractor for the globally Lipschitz time-dependent geometric
-Ricci-DeTurck Banach chart, obtained through the interval-scoped chart interface. -/
+Ricci-DeTurck Banach chart, routed through the smaller coordinatewise-defect interface. -/
 theorem TimeDependentGeometricRicciDeTurckBanachChart.exists_unique_symmetricPositiveDefinite_terminal_le
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
     [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
@@ -3250,8 +3250,9 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.exists_unique_symmetricPos
         sol.curve t ∈ symmetricPositiveDefiniteLocus
           (M := M) (F := F) (W := (TangentSpace I : M → Type _))
           et Kc hKc Ko hKo hKoEq hcover := by
-  exact TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_unique_symmetricPositiveDefinite_terminal_le
-    (M := M) (F := F) (I := I) (chart := chart.toOnIcc)
+  exact TimeDependentCoordwiseDefectMetricBanachChartOnIcc.exists_unique_symmetricPositiveDefinite_terminal_le
+    (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+    (chart := chart.toCoordwiseDefectMetricChartOnIcc)
 
 /-- Reify a symmetric positive-definite state of a finite-cover Banach local solution as a bundled
 continuous Riemannian metric. -/
