@@ -557,8 +557,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       are supplied for every initial value problem. The direct interval
       chosen-background route and the global/interval raw `C^3` gauge-flow routes,
       including the boundary-reduced derivative-level scalar-derivative and
-      time-derivative boundaries, now also expose ordinary `LocalExistenceUniquenessFamily`
-      endpoints. These criteria are also
+      time-derivative boundaries, now also expose intrinsic/ordinary theorem-family
+      endpoints, and the constant `C^3` identity family supplies primitive
+      derivative-level gauge data whenever the DeTurck gauge field vanishes. These criteria are also
       specialized to genuine bundled continuous Riemannian initial metrics, so
       future Ricci-DeTurck Banach-chart work no longer has to manually prove
       finite-cover metric-locus membership for the initial datum. The curvature, time-dependent geometry,

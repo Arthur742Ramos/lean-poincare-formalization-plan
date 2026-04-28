@@ -2903,6 +2903,20 @@ lemma id_satisfiesGaugeFlowOn_of_eq_zero
     SmoothSelfDiffeomorph2Family.id_satisfiesGaugeFlowOn_of_eq_zero
       (I := I) (M := M) (X := X) (s := s) hX
 
+lemma id_hasMFDerivWithinAt_of_eq_zero
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ}
+    (hX : ∀ t ∈ s, ∀ x : M, X t x = 0) :
+    ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt[s]
+        (fun τ : ℝ ↦ (SmoothSelfDiffeomorph3Family.id (I := I) (M := M) τ) x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (X t ((SmoothSelfDiffeomorph3Family.id (I := I) (M := M) t) x))) := by
+  intro t ht x
+  simpa using
+    (SmoothSelfDiffeomorph3Family.id_satisfiesGaugeFlowOn_of_eq_zero
+      (I := I) (M := M) (X := X) (s := s) hX).hasMFDerivWithinAt ht x
+
 /-- A `C^3` diffeomorphism family is anchored at `t₀` if its time slice there is the identity
 diffeomorphism. -/
 def AnchoredAt (t₀ : ℝ) : Prop :=

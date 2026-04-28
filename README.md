@@ -173,7 +173,9 @@ packages the canonical stationary local solution attached to
    gauge-reduced, intrinsic, and ordinary packages directly from both the
    theorem-package and global/interval analytic boundary-chart surfaces, and with a
    pullback-time-derivative proof they also feed intrinsic and ordinary theorem
-   packages directly. The optional
+   packages directly. The constant `C^3` identity diffeomorphism family now also
+   supplies primitive derivative-level gauge data when the DeTurck gauge field
+   vanishes, matching the same constructor used by non-identity gauges. The optional
    `PoincareCurvature.Point4` aggregate now
   imports this gauge-reduction boundary plus a new `AnalyticPDE` file proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state

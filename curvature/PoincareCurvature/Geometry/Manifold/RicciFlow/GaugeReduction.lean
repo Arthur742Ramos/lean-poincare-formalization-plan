@@ -464,6 +464,23 @@ def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.identity_of_intrinsicDeTurckGaug
     (SmoothSelfDiffeomorph3Family.id_satisfiesGaugeFlowOn_of_eq_zero
       (I := I) (M := M) (s := s) hzero)
 
+def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.identity_of_intrinsicDeTurckGaugeField_eq_zero_via_hasMFDerivWithinAt
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (hzero : ∀ t ∈ s, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M) g background t x = 0) :
+    AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M) g background s t₀ :=
+  AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.of_hasMFDerivWithinAt
+    (I := I) (M := M) (g := g) (background := background) (s := s) (t₀ := t₀)
+    (SmoothSelfDiffeomorph3Family.id (I := I) (M := M))
+    (SmoothSelfDiffeomorph3Family.id_anchoredAt (I := I) (M := M) t₀)
+    (by
+      intro t ht x
+      simpa using
+        SmoothSelfDiffeomorph3Family.id_hasMFDerivWithinAt_of_eq_zero
+          (I := I) (M := M) (s := s) hzero t ht x)
+
 def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.congr_gaugeField
     {g g' : MetricFamily (I := I) (M := M)}
     {background background' : ConnectionFamily (I := I) (M := M)}
