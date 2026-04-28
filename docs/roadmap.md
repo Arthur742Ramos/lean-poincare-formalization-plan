@@ -514,8 +514,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         their theorem-family and direct intrinsic-family projections, can now be
         built from them; smooth Banach realizations can now reduce the
         closed-interval time-derivative boundary, including at the global and
-        interval chosen-background theorem-package surfaces, to the two endpoint
-        derivative statements, and encoded candidates in the same global or
+        interval chosen-background theorem-package surfaces and the corresponding
+        local/family non-identity gauge-time-derivative intrinsic Ricci-flow endpoints,
+        to the two endpoint derivative statements, and encoded candidates in the same global or
         interval chart now have a named metric-uniqueness theorem on their
         common interval. The same state-set mechanism now also has a
       non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
