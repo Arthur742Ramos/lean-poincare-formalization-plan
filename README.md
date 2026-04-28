@@ -175,8 +175,9 @@ packages the canonical stationary local solution attached to
   theorem for later slot-swap symmetry, and a direct continuous-linear
   antisymmetric-defect criterion that keeps solutions in the symmetric
   positive-definite locus once the vector field's coordinatewise defect vanishes,
-  plus an interval-scoped fixed-locus variant and a pointwise-symmetric-vector-field
-  variant that supplies that defect vanishing automatically. The same state-set mechanism now also has a
+  plus an interval-scoped fixed-locus variant lifted to time-dependent finite-cover
+  evolutions and a pointwise-symmetric-vector-field variant that supplies that defect
+  vanishing automatically. The same state-set mechanism now also has a
   non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
   vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
   positive-definite local metric evolutions and, when identified pointwise with
