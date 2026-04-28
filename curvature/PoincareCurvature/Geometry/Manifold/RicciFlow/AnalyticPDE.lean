@@ -4698,7 +4698,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.exists_unique_with_continu
       ∀ ⦃t : ℝ⦄, (ht : t ∈ Icc t₀ sol.terminalTime) →
         ∃ g_t : _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _),
           ∀ (x : M) (u v : TangentSpace I x), g_t.inner x u v = sol.curve t x u v := by
-  rcases chart.exists_unique_symmetricPositiveDefinite with ⟨sol, huniq, hsymm⟩
+  rcases chart.exists_unique_symmetricPositiveDefinite_terminal_le with
+    ⟨sol, _hterminal, huniq, hsymm⟩
   refine ⟨sol, huniq, hsymm, ?_⟩
   intro t ht
   refine ⟨BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricAt
@@ -4762,7 +4763,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.exists_unique_with_continu
           ∀ (x : M) (u v : TangentSpace I x),
             (G t).inner x u v = sol.curve t x u v) ∧
         G t₀ = g₀ := by
-  rcases chart.exists_unique_symmetricPositiveDefinite with ⟨sol, huniq, hsymm⟩
+  rcases chart.exists_unique_symmetricPositiveDefinite_terminal_le with
+    ⟨sol, _hterminal, huniq, hsymm⟩
   refine ⟨sol, huniq, hsymm, ?_⟩
   refine ⟨BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve
     (M := M) (F := F) (W := (TangentSpace I : M → Type _))
@@ -4948,7 +4950,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.nonempty_intrinsicDeTurckL
       BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
         (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol) :
     Nonempty (IntrinsicDeTurckLocalSolution (E := F) (H := H) (I := I) (M := M) ivp) := by
-  rcases chart.exists_unique_symmetricPositiveDefinite with ⟨sol, _huniq, _hsymm⟩
+  rcases chart.exists_unique_symmetricPositiveDefinite_terminal_le with
+    ⟨sol, _hterminal, _huniq, _hsymm⟩
   exact ⟨BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
     (M := M) (F := F) (I := I) (realize sol)⟩
 
@@ -5359,7 +5362,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.exists_chosenCandidateEnco
         (E := F) (H := H) (I := I) (M := M) ivp,
       TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding
         (M := M) (F := F) (I := I) chart candidate.1) := by
-  rcases chart.exists_unique_symmetricPositiveDefinite with ⟨sol, _huniq, _hsymm⟩
+  rcases chart.exists_unique_symmetricPositiveDefinite_terminal_le with
+    ⟨sol, _hterminal, _huniq, _hsymm⟩
   refine ⟨⟨BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
     (M := M) (F := F) (I := I) (realize sol), hchosen sol⟩, ?_⟩
   exact TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding.of_chosenSmoothRealization
@@ -5920,7 +5924,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.chosenIntrinsicDeTurckLoca
         (M := M) (F := F) (I := I) chart candidate.1) :
     ChosenIntrinsicDeTurckLocalExistenceUniqueness (E := F) (H := H) (I := I) (M := M) ivp := by
   refine ⟨?_, ?_⟩
-  · rcases chart.exists_unique_symmetricPositiveDefinite with ⟨sol, _huniq, _hsymm⟩
+  · rcases chart.exists_unique_symmetricPositiveDefinite_terminal_le with
+      ⟨sol, _hterminal, _huniq, _hsymm⟩
     exact ⟨⟨BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
       (M := M) (F := F) (I := I) (realize sol), hchosen sol⟩⟩
   · intro sol₁ sol₂ t ht x u v

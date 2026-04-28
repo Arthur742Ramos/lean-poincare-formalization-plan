@@ -190,7 +190,9 @@ now packages the matching intrinsic boundary
    positive-definite locus once the vector field's coordinatewise defect
    vanishes, plus a direct global-geometric-to-interval-defect chart adapter
    and a pointwise-symmetric-vector-field variant that supplies that defect
-   vanishing automatically. The same state-set mechanism now also has a
+   vanishing automatically; the global metric-reification and chosen-background
+   package constructors now take their witnesses through this terminal defect
+   route. The same state-set mechanism now also has a
    non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
    vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
    positive-definite local metric evolutions and, when identified pointwise with
