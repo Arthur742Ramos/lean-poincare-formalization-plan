@@ -508,7 +508,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        directly, plus a direct bounded candidate-encoding witness for the
        associated interval chart and global/local-family chosen-background routes
        that can consume those interval-bounded encodings without rebuilding
-       global encodings. The same state-set mechanism now also has a
+       global encodings; the direct global intrinsic Ricci-flow endpoint also
+       accepts the same interval-bounded encodings. The same state-set mechanism
+       now also has a
      non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
      vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
      positive-definite local metric evolutions and, when identified pointwise with
