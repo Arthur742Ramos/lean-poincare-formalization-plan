@@ -479,7 +479,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
    and slice-by-slice for diffeomorphism families, including the pushed and
    pulled canonical smooth extensions that appear in curvature tensor
    contractions, and exposes direct anchored `C^3` tangent and vector-field
-   pushforward identities.
+   pushforward identities, and extracts the scalar inner-product derivative
+   obligation from a proved `C^3` gauge-pulled metric time derivative.
      The optional `PoincareCurvature.Point4` aggregate also imports an
      `AnalyticPDE` file proving the reusable
     Picard-Lindelof Banach-evolution local-solution core, open-state

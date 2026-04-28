@@ -2739,6 +2739,30 @@ theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackMetric_hasTimeDeriva
     SmoothSelfDiffeomorph3Family.pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
       (I := I) (M := M) (Φ := gauge3.maps) hderiv
 
+/-- Extract the exact scalar inner-product derivative obligation from a proved time derivative for
+the `C³` gauge-pulled metric with the concrete gauge-corrected velocity. -/
+theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackMetric_inner_hasDerivAt_of_hasTimeDerivativeOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (source : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      source.toIntrinsicDeTurckSolution.metric source.toIntrinsicDeTurckSolution.background
+      source.toIntrinsicDeTurckSolution.timeSet ivp.initialTime)
+    (hderiv : HasTimeDerivativeOn (I := I) (M := M)
+      (gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+      (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3)
+      source.toIntrinsicDeTurckSolution.timeSet)
+    {t : ℝ} (ht : t ∈ source.toIntrinsicDeTurckSolution.timeSet)
+    (x : M) (u v : TM x) :
+    HasDerivAt
+      (fun τ ↦
+        (source.toIntrinsicDeTurckSolution.metric τ).inner ((gauge3.maps τ) x)
+          ((gauge3.maps τ).pushforwardTangent x u)
+          ((gauge3.maps τ).pushforwardTangent x v))
+      (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3 t x u v) t := by
+  exact
+    SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner_hasDerivAt_of_hasTimeDerivativeOn
+      (I := I) (M := M) (Φ := gauge3.maps) hderiv ht x u v
+
 theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_satisfiesEquationAt_of_right_slot_curvature
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (source : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)

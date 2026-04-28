@@ -167,7 +167,9 @@ packages the canonical stationary local solution attached to
    simplification lemmas. The non-identity right-slot/Ricci-transport obligation
    is now discharged by the `C^3` transport layer; the remaining primitive
    non-identity gauge input is the time-derivative/scalar-derivative formula for
-   the gauge-pulled metric. The optional `PoincareCurvature.Point4` aggregate now
+   the gauge-pulled metric, with the local scalar inner-product derivative now
+   extractable from a proved pullback-metric time derivative. The optional
+   `PoincareCurvature.Point4` aggregate now
   imports this gauge-reduction boundary plus a new `AnalyticPDE` file proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state
   state-preserving uniqueness, a positive-definite finite-cover metric-locus
