@@ -10558,6 +10558,20 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReduced_
       (E := E) (H := H) (I := I) (M := M) ivp :=
   pkg.toInnerDerivativeGaugeReducible_viaIdentityDiffeomorph3Gauge.toGaugeReduced
 
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaIdentityDiffeomorph3Gauge
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toGaugeReduced_viaIdentityDiffeomorph3Gauge.toIntrinsic
+
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaIdentityDiffeomorph3Gauge
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toIntrinsic_viaIdentityDiffeomorph3Gauge.toOrdinary
+
 theorem ChosenIntrinsicDeTurckLocalExistenceUniqueness.nonempty_gaugeReduced_viaIdentityDiffeomorph3Gauge
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
@@ -11089,6 +11103,18 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeRe
       (E := E) (H := H) (I := I) (M := M) where
   package := fun ivp ↦
     (pkg.package ivp).toGaugeReduced_viaIdentityDiffeomorph3Gauge
+
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaIdentityDiffeomorph3Gauge
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  pkg.toGaugeReduced_viaIdentityDiffeomorph3Gauge.toIntrinsicFamily
+
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily_viaIdentityDiffeomorph3Gauge
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  pkg.toIntrinsicFamily_viaIdentityDiffeomorph3Gauge.toOrdinary
 
 theorem ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.nonempty_gaugeReduced_viaIdentityDiffeomorph3Gauge
     (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily

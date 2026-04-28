@@ -559,7 +559,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       including the boundary-reduced derivative-level scalar-derivative and
       time-derivative boundaries, now also expose intrinsic/ordinary theorem-family
       endpoints, and the constant `C^3` identity family supplies primitive
-      derivative-level gauge data whenever the DeTurck gauge field vanishes. These criteria are also
+      derivative-level gauge data whenever the DeTurck gauge field vanishes, with direct
+      identity-route intrinsic/ordinary projections matching the non-identity APIs. These criteria are also
       specialized to genuine bundled continuous Riemannian initial metrics, so
       future Ricci-DeTurck Banach-chart work no longer has to manually prove
       finite-cover metric-locus membership for the initial datum. The curvature, time-dependent geometry,

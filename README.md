@@ -175,7 +175,8 @@ packages the canonical stationary local solution attached to
    pullback-time-derivative proof they also feed intrinsic and ordinary theorem
    packages directly. The constant `C^3` identity diffeomorphism family now also
    supplies primitive derivative-level gauge data when the DeTurck gauge field
-   vanishes, matching the same constructor used by non-identity gauges. The optional
+   vanishes, and the identity gauge route has direct intrinsic/ordinary theorem-package
+   projections matching the non-identity APIs. The optional
    `PoincareCurvature.Point4` aggregate now
   imports this gauge-reduction boundary plus a new `AnalyticPDE` file proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state
