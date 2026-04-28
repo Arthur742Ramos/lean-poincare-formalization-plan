@@ -484,8 +484,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
    pushforward identities, extracts the scalar inner-product derivative
     obligation from a proved `C^3` gauge-pulled metric time derivative, routes raw
     pointwise gauge-flow derivatives plus scalar derivative data to the explicit
-    scalar-derivative and gauge-reduced packages, and routes raw pointwise gauge-flow derivatives
-   plus pullback-time-derivative input to scalar-derivative, intrinsic, and
+    scalar-derivative, gauge-reduced, intrinsic, and ordinary packages, and routes raw
+    pointwise gauge-flow derivatives plus pullback-time-derivative input to scalar-derivative, intrinsic, and
    ordinary theorem packages.
      The optional `PoincareCurvature.Point4` aggregate also imports an
      `AnalyticPDE` file proving the reusable
