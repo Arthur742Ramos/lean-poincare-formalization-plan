@@ -515,7 +515,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         built from them; smooth Banach realizations can now reduce the
         closed-interval time-derivative boundary, including at the global and
         interval chosen-background theorem-package surfaces, to the two endpoint
-        derivative statements. The same state-set mechanism now also has a
+        derivative statements, and encoded candidates in the same global or
+        interval chart now have a named metric-uniqueness theorem on their
+        common interval. The same state-set mechanism now also has a
       non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
      vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
      positive-definite local metric evolutions and, when identified pointwise with

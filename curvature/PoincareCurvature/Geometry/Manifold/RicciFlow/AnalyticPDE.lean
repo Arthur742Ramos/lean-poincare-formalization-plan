@@ -5587,6 +5587,65 @@ def TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding.of_chosenSmo
   TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding.of_smoothRealization
     (M := M) (F := F) (I := I) realization
 
+/-- Two intrinsic DeTurck candidates encoded in the same global Banach chart have equal metric
+tensors on their common time interval. This isolates the reverse-chart uniqueness consequence used by
+the theorem-package constructors. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding.metric_eq_on_common_interval
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChart
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    {candidate₁ candidate₂ :
+      IntrinsicDeTurckLocalSolution (E := F) (H := H) (I := I) (M := M) ivp}
+    (enc₁ : TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding
+      (M := M) (F := F) (I := I) chart candidate₁)
+    (enc₂ : TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding
+      (M := M) (F := F) (I := I) chart candidate₂)
+    {t : ℝ} (ht : t ∈ Icc ivp.initialTime (min candidate₁.terminalTime candidate₂.terminalTime))
+    (x : M) (u v : TangentSpace I x) :
+    metricTensor (I := I) (M := M) candidate₁.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) candidate₂.toIntrinsicDeTurckSolution.metric t x u v := by
+  have ht₁ : t ∈ Icc ivp.initialTime candidate₁.terminalTime :=
+    ⟨ht.1, le_trans ht.2 (min_le_left _ _)⟩
+  have ht₂ : t ∈ Icc ivp.initialTime candidate₂.terminalTime :=
+    ⟨ht.1, le_trans ht.2 (min_le_right _ _)⟩
+  have htBanach : t ∈ Icc ivp.initialTime (min enc₁.sol.terminalTime enc₂.sol.terminalTime) := by
+    refine ⟨ht.1, ?_⟩
+    simpa [enc₁.terminal_eq, enc₂.terminal_eq] using ht.2
+  calc
+    metricTensor (I := I) (M := M) candidate₁.toIntrinsicDeTurckSolution.metric t x u v =
+        metricTensor (I := I) (M := M) enc₁.realization.metric t x u v :=
+      enc₁.metric_eq ht₁ x u v
+    _ = metricTensor (I := I) (M := M) enc₂.realization.metric t x u v :=
+      TimeDependentGeometricRicciDeTurckBanachChart.smoothRealization_metric_eq_on_common_interval
+        (M := M) (F := F) (I := I) chart enc₁.realization enc₂.realization htBanach x u v
+    _ = metricTensor (I := I) (M := M) candidate₂.toIntrinsicDeTurckSolution.metric t x u v :=
+      (enc₂.metric_eq ht₂ x u v).symm
+
 /-- The Picard-produced smooth realization gives a chosen-background DeTurck candidate already
 encoded in the same global Banach chart. Thus the existence half of the chosen-background chart route
 does not require a separate reverse-chart candidate-encoding argument. -/
@@ -5864,6 +5923,66 @@ def TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.of_chos
         ChosenIntrinsicDeTurckLocalSolution (E := F) (H := H) (I := I) (M := M) ivp).1 :=
   TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.of_smoothRealization
     (M := M) (F := F) (I := I) hterminal realization
+
+/-- Two intrinsic DeTurck candidates encoded in the same interval-scoped Banach chart have equal
+metric tensors on their common time interval. The terminal-containment fields are exactly the extra
+data needed to use the `Icc`-restricted chart uniqueness theorem. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.metric_eq_on_common_interval
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    {candidate₁ candidate₂ :
+      IntrinsicDeTurckLocalSolution (E := F) (H := H) (I := I) (M := M) ivp}
+    (enc₁ : TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding
+      (M := M) (F := F) (I := I) chart candidate₁)
+    (enc₂ : TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding
+      (M := M) (F := F) (I := I) chart candidate₂)
+    {t : ℝ} (ht : t ∈ Icc ivp.initialTime (min candidate₁.terminalTime candidate₂.terminalTime))
+    (x : M) (u v : TangentSpace I x) :
+    metricTensor (I := I) (M := M) candidate₁.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) candidate₂.toIntrinsicDeTurckSolution.metric t x u v := by
+  have ht₁ : t ∈ Icc ivp.initialTime candidate₁.terminalTime :=
+    ⟨ht.1, le_trans ht.2 (min_le_left _ _)⟩
+  have ht₂ : t ∈ Icc ivp.initialTime candidate₂.terminalTime :=
+    ⟨ht.1, le_trans ht.2 (min_le_right _ _)⟩
+  have htBanach : t ∈ Icc ivp.initialTime (min enc₁.sol.terminalTime enc₂.sol.terminalTime) := by
+    refine ⟨ht.1, ?_⟩
+    simpa [enc₁.terminal_eq, enc₂.terminal_eq] using ht.2
+  calc
+    metricTensor (I := I) (M := M) candidate₁.toIntrinsicDeTurckSolution.metric t x u v =
+        metricTensor (I := I) (M := M) enc₁.realization.metric t x u v :=
+      enc₁.metric_eq ht₁ x u v
+    _ = metricTensor (I := I) (M := M) enc₂.realization.metric t x u v :=
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc.smoothRealization_metric_eq_on_common_interval_of_terminal_le
+        (M := M) (F := F) (I := I) chart enc₁.terminal_le_chart enc₂.terminal_le_chart
+        enc₁.realization enc₂.realization htBanach x u v
+    _ = metricTensor (I := I) (M := M) candidate₂.toIntrinsicDeTurckSolution.metric t x u v :=
+      (enc₂.metric_eq ht₂ x u v).symm
 
 /-- The Picard-produced smooth realization gives a chosen-background DeTurck candidate already
 encoded in the same interval-scoped Banach chart. The terminal containment is supplied by the
