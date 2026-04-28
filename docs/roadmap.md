@@ -463,8 +463,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
    local-solution, theorem-package, and theorem-family structures whose
    conversions produce ordinary `LocalExistenceUniqueness` packages and the new
    intrinsic/ordinary theorem-family wrappers, including the direct `C^3` gauge,
-   raw gauge-flow scalar/time-derivative routes, and the derivative-level
-   gauge-flow plus pullback-time-derivative boundary; the zero-dimensional tangent-fiber
+   raw gauge-flow scalar/time-derivative routes, the derivative-level gauge-flow
+   plus scalar-derivative boundary, and the derivative-level gauge-flow plus
+   pullback-time-derivative boundary; the zero-dimensional tangent-fiber
    case and empty-manifold case are also packaged at the ordinary, intrinsic,
    chosen-background DeTurck, Levi-Civita-background, and gauge-reduced
    theorem-family levels. The
@@ -481,9 +482,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
    pulled canonical smooth extensions that appear in curvature tensor
    contractions, exposes direct anchored `C^3` tangent and vector-field
    pushforward identities, extracts the scalar inner-product derivative
-   obligation from a proved `C^3` gauge-pulled metric time derivative, and
-   routes raw pointwise gauge-flow derivatives plus that pullback-time-derivative
-   input to scalar-derivative, intrinsic, and ordinary theorem packages.
+   obligation from a proved `C^3` gauge-pulled metric time derivative, routes raw
+   pointwise gauge-flow derivatives plus scalar derivative data to the explicit
+   scalar-derivative package, and routes raw pointwise gauge-flow derivatives
+   plus pullback-time-derivative input to scalar-derivative, intrinsic, and
+   ordinary theorem packages.
      The optional `PoincareCurvature.Point4` aggregate also imports an
      `AnalyticPDE` file proving the reusable
     Picard-Lindelof Banach-evolution local-solution core, open-state
@@ -551,8 +554,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       once these chart, realization, encoding, and gauge-reducibility obligations
       are supplied for every initial value problem. The direct interval
       chosen-background route and the interval raw `C^3` gauge-flow routes,
-      including the derivative-level gauge-flow/time-derivative boundary, now
-      also expose ordinary `LocalExistenceUniquenessFamily` endpoints. These criteria are also
+      including the derivative-level scalar-derivative and time-derivative
+      boundaries, now also expose ordinary `LocalExistenceUniquenessFamily`
+      endpoints. These criteria are also
       specialized to genuine bundled continuous Riemannian initial metrics, so
       future Ricci-DeTurck Banach-chart work no longer has to manually prove
       finite-cover metric-locus membership for the initial datum. The curvature, time-dependent geometry,
