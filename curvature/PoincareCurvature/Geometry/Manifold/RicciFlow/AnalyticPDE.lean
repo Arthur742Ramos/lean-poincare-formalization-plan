@@ -4696,6 +4696,140 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.exists_unique_with_continu
       (M := M) (F := F) (W := (TangentSpace I : M → Type _))
       et Kc hKc Ko hKo hKoEq hcover g₀ sol hsymm
 
+/-- The interval-scoped time-dependent Ricci-DeTurck Banach chart produces a local Banach
+solution whose values can be reified as continuous Riemannian metrics, while retaining the
+verified `terminalTime ≤ T` Picard interval bound. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_unique_with_continuousRiemannianMetrics_terminal_le
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {g₀ : _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _)}
+    {t₀ T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate) :
+    ∃ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) t₀
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover),
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn chart.A
+          (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+            et Kc hKc Ko hKo hKoEq hcover) t₀
+          (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover),
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      (∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus
+          (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ∧
+      ∀ ⦃t : ℝ⦄, (ht : t ∈ Icc t₀ sol.terminalTime) →
+        ∃ g_t : _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _),
+          ∀ (x : M) (u v : TangentSpace I x), g_t.inner x u v = sol.curve t x u v := by
+  rcases chart.exists_unique_symmetricPositiveDefinite_terminal_le with
+    ⟨sol, hterminal, huniq, hsymm⟩
+  refine ⟨sol, hterminal, huniq, hsymm, ?_⟩
+  intro t ht
+  refine ⟨BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricAt
+    (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+    et Kc hKc Ko hKo hKoEq hcover sol hsymm ht, ?_⟩
+  intro x u v
+  rfl
+
+/-- The interval-scoped time-dependent Ricci-DeTurck Banach chart also produces a single
+continuous-Riemannian-metric-valued curve, initialized at the prescribed metric, agreeing with the
+Banach section solution on the local interval, and retaining `terminalTime ≤ T`. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_unique_with_continuousRiemannianMetricCurve_terminal_le
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {g₀ : _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _)}
+    {t₀ T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate) :
+    ∃ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) t₀
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover),
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn chart.A
+          (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+            et Kc hKc Ko hKo hKoEq hcover) t₀
+          (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover),
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      (∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus
+          (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ∧
+      ∃ G : ℝ → _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _),
+        (∀ ⦃t : ℝ⦄, (ht : t ∈ Icc t₀ sol.terminalTime) →
+          ∀ (x : M) (u v : TangentSpace I x),
+            (G t).inner x u v = sol.curve t x u v) ∧
+        G t₀ = g₀ := by
+  rcases chart.exists_unique_symmetricPositiveDefinite_terminal_le with
+    ⟨sol, hterminal, huniq, hsymm⟩
+  refine ⟨sol, hterminal, huniq, hsymm, ?_⟩
+  refine ⟨BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve
+    (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+    et Kc hKc Ko hKo hKoEq hcover sol hsymm g₀, ?_, ?_⟩
+  · intro t ht x u v
+    exact BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve_inner_eq_of_mem
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+      et Kc hKc Ko hKo hKoEq hcover sol hsymm g₀ ht x u v
+  · exact BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve_initial_eq
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+      et Kc hKc Ko hKo hKoEq hcover g₀ sol hsymm
+
 /-- A smooth-IVP-seeded Ricci-DeTurck Banach chart produces an intrinsic Ricci-DeTurck local
 solution as soon as each Banach solution has the packaged smooth realization. -/
 theorem TimeDependentGeometricRicciDeTurckBanachChart.nonempty_intrinsicDeTurckLocalSolution_of_smoothRealization

@@ -522,7 +522,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          `TimeDependentGeometricRicciDeTurckBanachChartOnIcc` package, now also
          accept Lipschitz estimates restricted to the verified Picard time
          interval and expose the constructed solution's `terminalTime ≤ T`
-         bound. A
+         bound, including after reifying the Banach section solution as
+         continuous Riemannian metrics or a single metric-valued curve. A
        smooth-realization adapter packages the exact remaining
       lift/time-derivative/DeTurck-equation obligations needed to turn such a
       Banach solution into an `IntrinsicDeTurckLocalSolution`; when supplied for

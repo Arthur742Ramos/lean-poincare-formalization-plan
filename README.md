@@ -206,7 +206,9 @@ packages the canonical stationary local solution attached to
   lower-level positive-definite and symmetric bridges, plus the reusable
   `TimeDependentGeometricRicciDeTurckBanachChartOnIcc` package, now accept
   Lipschitz estimates restricted to the verified Picard time interval and expose
-  the constructed solution's `terminalTime ≤ T` bound. A
+  the constructed solution's `terminalTime ≤ T` bound, including when the Banach
+  section solution is reified as continuous Riemannian metrics or a single
+  metric-valued curve. A
   smooth-realization adapter packages the exact remaining
   lift/time-derivative/DeTurck-equation
   obligations needed to turn such a Banach solution into an
