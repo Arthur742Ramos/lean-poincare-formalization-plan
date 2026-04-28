@@ -2730,6 +2730,50 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.A_mem_symmetricLocus
       intrinsicRicciDeTurckRHS_symm (I := I) (M := M) g background τ x u v
     _ = chart.A τ sec x v u := (hAeq x v u).symm
 
+/-- The global geometric Ricci-DeTurck identification supplies the coordinatewise
+antisymmetric-defect equation consumed by the interval defect chart. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChart.A_coordwiseSymmetryDefect_eq_zero
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {g₀ : _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _)}
+    {t₀ T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChart
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate)
+    (τ : ℝ)
+    {sec : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover}
+    (hsec : sec ∈ positiveDefiniteLocus
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+      et Kc hKc Ko hKo hKoEq hcover) :
+    _root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap
+      (F := F) (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover (chart.A τ sec) = 0 := by
+  exact (_root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff
+    (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+    x0 et het Kc hKc Ko hKo hKoEq hcover (chart.A τ sec)).2
+    (chart.A_mem_symmetricLocus τ hsec)
+
 /-- Extract the local symmetric positive-definite Banach metric evolution from a packaged
 time-dependent geometric Ricci-DeTurck Banach chart. -/
 theorem TimeDependentGeometricRicciDeTurckBanachChart.exists_unique_symmetricPositiveDefinite
@@ -3014,6 +3058,40 @@ def TimeDependentGeometricRicciDeTurckBanachChart.toOnIcc
     intro t _ht
     exact chart.lipschitz t
   geometric := chart.geometric
+
+/-- Forget a globally Lipschitz geometric Ricci-DeTurck chart directly down to the interval
+coordinatewise-defect chart interface on its Picard interval. -/
+def TimeDependentGeometricRicciDeTurckBanachChart.toCoordwiseDefectMetricChartOnIcc
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {g₀ : _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _)}
+    {t₀ T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChart
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate) :
+    TimeDependentCoordwiseDefectMetricBanachChartOnIcc
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+      x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate :=
+  chart.toOnIcc.toCoordwiseDefectMetricChartOnIcc
 
 /-- Extract the symmetric positive-definite Banach metric evolution from an interval-scoped
 time-dependent geometric Ricci-DeTurck Banach chart. -/
