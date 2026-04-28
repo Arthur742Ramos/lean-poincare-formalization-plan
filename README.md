@@ -168,7 +168,9 @@ packages the canonical stationary local solution attached to
    is now discharged by the `C^3` transport layer; the remaining primitive
    non-identity gauge input is the time-derivative/scalar-derivative formula for
    the gauge-pulled metric, with the local scalar inner-product derivative now
-   extractable from a proved pullback-metric time derivative. The optional
+   extractable from a proved pullback-metric time derivative, and the raw
+   pointwise gauge-flow-derivative plus pullback-time-derivative route now feeds
+   scalar-derivative, intrinsic, and ordinary theorem packages directly. The optional
    `PoincareCurvature.Point4` aggregate now
   imports this gauge-reduction boundary plus a new `AnalyticPDE` file proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state
@@ -229,7 +231,8 @@ packages the canonical stationary local solution attached to
   family theorem produces `IntrinsicLocalExistenceUniquenessFamily` once these
   chart, realization, encoding, and gauge-reducibility obligations are supplied
   for every initial value problem. The direct interval chosen-background route
-  and the interval raw `C^3` gauge-flow routes now also expose ordinary
+  and the interval raw `C^3` gauge-flow routes, including the derivative-level
+  gauge-flow/time-derivative boundary, now also expose ordinary
   `LocalExistenceUniquenessFamily` endpoints. It also specializes these criteria to genuine
   bundled continuous Riemannian initial metrics, so future Ricci-DeTurck
   Banach-chart work no longer has to manually prove finite-cover metric-locus
