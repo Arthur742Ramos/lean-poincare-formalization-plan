@@ -199,7 +199,8 @@ packages the canonical stationary local solution attached to
   interval-bounded encodings without rebuilding global encodings; the direct
   global intrinsic Ricci-flow endpoint also accepts the same interval-bounded
   encodings, and the global gauge-reducible and scalar-inner-derivative gauge
-  packages and their direct intrinsic projections can now be built from them. The
+  packages, including their theorem-family and direct intrinsic-family
+  projections, can now be built from them. The
   same state-set mechanism now also has a
   non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
   vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
