@@ -5759,7 +5759,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_chosenCandidat
   refine ⟨⟨BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
     (M := M) (F := F) (I := I) (realize sol), hchosen sol⟩, ?_⟩
   exact TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.of_chosenSmoothRealization
-    (M := M) (F := F) (I := I) hterminal (realize sol) (hchosen sol)
+    (M := M) (F := F) (I := I) (chart := chart) (sol := sol)
+    hterminal (realize sol) (hchosen sol)
 
 /-- A global-chart candidate encoding becomes an interval-chart candidate encoding once its Banach
 representative is known to stay inside the chart's Picard interval. -/
@@ -5803,6 +5804,71 @@ def TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding.toOnIcc
   realization := enc.realization
   terminal_eq := enc.terminal_eq
   metric_eq := enc.metric_eq
+
+/-- The global Picard-produced smooth realization also gives a chosen-background DeTurck candidate
+encoded in the interval-scoped chart obtained by restriction to `Icc`. This exposes the bounded
+candidate-encoding witness directly for downstream interval routes. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChart.exists_chosenCandidateEncodingOnIcc_of_smoothRealization
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChart
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (realize : ∀ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+      BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    (hchosen : ∀ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+      UsesChosenBackground (I := I) (M := M)
+        (BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
+          (M := M) (F := F) (I := I) (realize sol))) :
+    Nonempty (Σ candidate : ChosenIntrinsicDeTurckLocalSolution
+        (E := F) (H := H) (I := I) (M := M) ivp,
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding
+        (M := M) (F := F) (I := I) chart.toOnIcc candidate.1) := by
+  rcases chart.exists_unique_symmetricPositiveDefinite_terminal_le with
+    ⟨sol, hterminal, _huniq, _hsymm⟩
+  let candidate : ChosenIntrinsicDeTurckLocalSolution
+      (E := F) (H := H) (I := I) (M := M) ivp :=
+    ⟨BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
+      (M := M) (F := F) (I := I) (realize sol), hchosen sol⟩
+  refine ⟨candidate, ?_⟩
+  let enc : TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding
+      (M := M) (F := F) (I := I) chart candidate.1 :=
+    TimeDependentGeometricRicciDeTurckBanachChart.CandidateEncoding.of_chosenSmoothRealization
+      (M := M) (F := F) (I := I) (chart := chart) (sol := sol)
+      (realize sol) (hchosen sol)
+  exact enc.toOnIcc hterminal
 
 /-- Interval-scoped Ricci-DeTurck Banach charts yield the full intrinsic DeTurck
 local-existence/uniqueness package once smooth realizations and bounded candidate encodings are

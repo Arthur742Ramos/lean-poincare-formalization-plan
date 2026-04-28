@@ -193,7 +193,8 @@ packages the canonical stationary local solution attached to
   automatically; the global metric-reification and chosen-background package
   constructors now take their witnesses through this terminal defect route, and
   globally Lipschitz charts expose terminal-bounded continuous-metric and
-  metric-curve reification endpoints directly. The
+  metric-curve reification endpoints directly, plus a direct bounded
+  candidate-encoding witness for the associated interval chart. The
   same state-set mechanism now also has a
   non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
   vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
