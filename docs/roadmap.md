@@ -504,8 +504,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        vanishing automatically; the global metric-reification and
        chosen-background package constructors now take their witnesses through
        this terminal defect route, and globally Lipschitz charts expose a
-       terminal-bounded continuous-metric reification endpoint directly. The same
-       state-set mechanism now also has a
+       terminal-bounded continuous-metric and metric-curve reification endpoints
+       directly. The same state-set mechanism now also has a
      non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
      vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
      positive-definite local metric evolutions and, when identified pointwise with
