@@ -486,7 +486,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     pointwise gauge-flow derivatives plus scalar derivative data to the explicit
     scalar-derivative, gauge-reduced, intrinsic, and ordinary packages, exposes the
     same scalar-derivative route as global and interval analytic boundary-chart
-    ordinary theorem-family endpoints, and routes raw pointwise gauge-flow derivatives plus pullback-time-derivative input to scalar-derivative, intrinsic, and
+    intrinsic/ordinary theorem-family endpoints, and routes raw pointwise gauge-flow derivatives plus pullback-time-derivative input to scalar-derivative, intrinsic, and
    ordinary theorem packages.
      The optional `PoincareCurvature.Point4` aggregate also imports an
      `AnalyticPDE` file proving the reusable

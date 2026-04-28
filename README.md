@@ -171,7 +171,7 @@ packages the canonical stationary local solution attached to
    extractable from a proved pullback-metric time derivative. Raw pointwise
    gauge-flow-derivative routes now feed the explicit scalar-derivative,
    gauge-reduced, intrinsic, and ordinary packages directly from both the
-   theorem-package and analytic boundary-chart surfaces, and with a
+   theorem-package and global/interval analytic boundary-chart surfaces, and with a
    pullback-time-derivative proof they also feed intrinsic and ordinary theorem
    packages directly. The optional
    `PoincareCurvature.Point4` aggregate now
