@@ -1923,6 +1923,140 @@ theorem exists_unique_from_continuousRiemannianMetric_of_symmetricVectorField_co
       (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover g₀)
     hLip hA_symm
 
+/-- Continuous-Riemannian-metric initial-data version of the interval-scoped coordinatewise-defect
+bridge. This is the local-in-time shape needed by parabolic Ricci-DeTurck estimates: once the
+Banach vector field is known to be tangent to the symmetric constraint on the Picard interval, the
+solution starting from a bundled continuous Riemannian metric stays in the symmetric
+positive-definite locus and retains the terminal-time bound. -/
+theorem exists_unique_from_continuousRiemannianMetric_of_coordwiseDefect_isPicardLindelof_lipschitzOn_Icc_terminal_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F W)
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩
+      (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover) a 0 L Kpic)
+    (hLip : ∀ t ∈ Icc t₀ T, LipschitzOnWith Kstate (A t)
+      (positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover))
+    (hdefect_A : ∀ t x, x ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover →
+      _root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap
+        (F := F) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover (A t x) = 0) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (positiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+            et Kc hKc Ko hKo hKoEq hcover),
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn A
+          (positiveDefiniteLocus (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀
+          (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover),
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover := by
+  exact exists_unique_in_symmetricPositiveDefiniteLocus_of_coordwiseDefect_isPicardLindelof_lipschitzOn_Icc_terminal_le
+    (M := M) (F := F) (W := W)
+    x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete hT hA
+    (mem_symmetricPositiveDefiniteLocus_of_continuousRiemannianMetric
+      (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover g₀)
+    hLip hdefect_A
+
+/-- Continuous-Riemannian-metric initial-data version of the terminal-time interval theorem for
+time-dependent vector fields that are already pointwise symmetric on the positive-definite state
+set. This packages the common route from geometric Ricci-DeTurck RHS symmetry to the coordinatewise
+defect condition used by the interval-scoped Banach bridge. -/
+theorem exists_unique_from_continuousRiemannianMetric_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn_Icc_terminal_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F W)
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩
+      (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover) a 0 L Kpic)
+    (hLip : ∀ t ∈ Icc t₀ T, LipschitzOnWith Kstate (A t)
+      (positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover))
+    (hA_symm : ∀ t x, x ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover →
+      A t x ∈ symmetricLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (positiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+            et Kc hKc Ko hKo hKoEq hcover),
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn A
+          (positiveDefiniteLocus (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀
+          (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover),
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover := by
+  exact exists_unique_from_continuousRiemannianMetric_of_coordwiseDefect_isPicardLindelof_lipschitzOn_Icc_terminal_le
+    (M := M) (F := F) (W := W)
+    x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete g₀ hT hA hLip
+    (by
+      intro t x hx
+      exact (_root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff
+        (M := M) (F := F) (W := W)
+        x0 et het Kc hKc Ko hKo hKoEq hcover (A t x)).2 (hA_symm t x hx))
+
 /-- Continuous-Riemannian-metric initial-data version of the non-autonomous symmetric-vector-field
 bridge. This is the time-dependent analogue of
 `exists_unique_from_continuousRiemannianMetric_of_symmetricVectorField_contDiffAt_lipschitzOn`. -/
@@ -2341,13 +2475,9 @@ theorem exists_unique_from_continuousRiemannianMetric_of_timeDependent_geometric
         sol.curve t ∈ symmetricPositiveDefiniteLocus
           (M := M) (F := F) (W := (TangentSpace I : M → Type _))
           et Kc hKc Ko hKo hKoEq hcover := by
-  exact exists_unique_in_symmetricPositiveDefiniteLocus_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn_Icc_terminal_le
+  exact exists_unique_from_continuousRiemannianMetric_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn_Icc_terminal_le
     (M := M) (F := F) (W := (TangentSpace I : M → Type _))
-    x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete hT hA
-    (mem_symmetricPositiveDefiniteLocus_of_continuousRiemannianMetric
-      (M := M) (F := F) (W := (TangentSpace I : M → Type _))
-      et Kc hKc Ko hKo hKoEq hcover g₀)
-    hLip
+    x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete g₀ hT hA hLip
     (by
       intro τ s hs
       rcases hA_geometric τ s hs with ⟨g, background, hAeq⟩

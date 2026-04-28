@@ -489,8 +489,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     antisymmetric-defect criterion that keeps solutions in the symmetric
       positive-definite locus once the vector field's coordinatewise defect
        vanishes, plus interval-scoped fixed-locus, fixed-symmetry, and direct-defect
-       variants lifted to time-dependent finite-cover evolutions and a
-       pointwise-symmetric-vector-field variant that supplies that defect vanishing automatically. The same state-set mechanism now also has a
+       variants lifted to time-dependent finite-cover evolutions, bundled
+       continuous-Riemannian initial data, and a pointwise-symmetric-vector-field
+       variant that supplies that defect vanishing automatically. The same state-set mechanism now also has a
      non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
      vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
      positive-definite local metric evolutions and, when identified pointwise with
