@@ -142,7 +142,9 @@ packages the canonical stationary local solution attached to
   identity diffeomorphism gauge. It also now lowers the non-identity boundary
   from a prebuilt anchored `C^3` DeTurck gauge to raw `C^3` diffeomorphism
   families equipped with anchoring, the gauge-flow equation, and scalar
-  inner-product derivative identities.
+  inner-product derivative identities, and those direct and raw gauge-flow
+  routes now expose ordinary theorem-family wrappers alongside the intrinsic
+  ones.
   The conditional gauge-reduced package now records the exact non-identity
   gauge obligations whose discharge yields intrinsic and ordinary point-4 theorem
   packages, re-packages the transformed metric as a pulled-back Ricci-DeTurck

@@ -462,7 +462,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
    derivative formula. This final conditional boundary is also bundled as
    local-solution, theorem-package, and theorem-family structures whose
    conversions produce ordinary `LocalExistenceUniqueness` packages and the new
-   intrinsic/ordinary theorem-family wrappers; the zero-dimensional tangent-fiber
+   intrinsic/ordinary theorem-family wrappers, including the direct `C^3` gauge
+   and raw gauge-flow scalar/time-derivative routes; the zero-dimensional tangent-fiber
    case and empty-manifold case are also packaged at the ordinary, intrinsic,
    chosen-background DeTurck, Levi-Civita-background, and gauge-reduced
    theorem-family levels. The
