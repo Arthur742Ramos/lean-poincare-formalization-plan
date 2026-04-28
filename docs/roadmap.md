@@ -555,8 +555,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       once these chart, realization, encoding, and gauge-reducibility obligations
       are supplied for every initial value problem. The direct interval
       chosen-background route and the interval raw `C^3` gauge-flow routes,
-      including the derivative-level scalar-derivative and time-derivative
-      boundaries, now also expose ordinary `LocalExistenceUniquenessFamily`
+      including the derivative-level scalar-derivative and boundary-reduced
+      time-derivative boundaries, now also expose ordinary `LocalExistenceUniquenessFamily`
       endpoints. These criteria are also
       specialized to genuine bundled continuous Riemannian initial metrics, so
       future Ricci-DeTurck Banach-chart work no longer has to manually prove
