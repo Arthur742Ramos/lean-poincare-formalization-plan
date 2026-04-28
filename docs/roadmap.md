@@ -554,7 +554,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       global-chart family theorem produces `IntrinsicLocalExistenceUniquenessFamily`
       once these chart, realization, encoding, and gauge-reducibility obligations
       are supplied for every initial value problem. The direct interval
-      chosen-background route and the interval raw `C^3` gauge-flow routes,
+      chosen-background route and the global/interval raw `C^3` gauge-flow routes,
       including the boundary-reduced derivative-level scalar-derivative and
       time-derivative boundaries, now also expose ordinary `LocalExistenceUniquenessFamily`
       endpoints. These criteria are also
