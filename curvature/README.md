@@ -201,7 +201,8 @@ now packages the matching intrinsic boundary
    encodings, and the global gauge-reducible and scalar-inner-derivative gauge
    packages, including their theorem-family and direct intrinsic-family
    projections, can now be built from them; smooth Banach realizations can now
-   reduce the closed-interval time-derivative boundary to the two endpoint
+   reduce the closed-interval time-derivative boundary, including at the global
+   and interval chosen-background theorem-package surfaces, to the two endpoint
    derivative statements.
    The same state-set mechanism now also has a
    non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
