@@ -3004,6 +3004,23 @@ theorem pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
   simpa [metricTensor, SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using
     hderiv ht x u v
 
+/-- Extract the scalar inner-product derivative from a time-derivative statement for a `C³`
+gauge-pulled metric family. -/
+theorem pullbackMetricFamily_inner_hasDerivAt_of_hasTimeDerivativeOn
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hderiv : HasTimeDerivativeOn (I := I) (M := M) (Φ.pullbackMetricFamily g) gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M) (u v : TM x) :
+    HasDerivAt
+      (fun τ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v))
+      (gdot t x u v) t := by
+  simpa [metricTensor, SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using
+    hderiv ht x u v
+
 /-- Time derivatives commute with pullback by a time-independent `C³` diffeomorphism.  This is the
 static-gauge part of the non-identity gauge time-regularity problem. -/
 theorem const_pullbackMetricFamily_hasTimeDerivativeOn
