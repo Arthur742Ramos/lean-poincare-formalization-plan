@@ -6513,6 +6513,59 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.chosenIntrinsicDeTurckLoca
     BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution]
   exact hbackground sol
 
+/-- Endpoint derivative data supplies the boundary time-derivative hypothesis for a single global
+Ricci-DeTurck Banach-chart solution. This is the reusable one-solution form of the closed-interval
+endpoint reduction used by the endpoint-only smooth-realization routes. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChart.boundaryTimeDerivative_of_endpointTimeDerivative
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChart
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    {sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (metric : MetricFamily (I := I) (M := M))
+    (initial_hasTimeDerivative :
+      HasTimeDerivativeAt (I := I) (M := M) metric
+        (fun τ x u v ↦ chart.A τ (sol.curve τ) x u v) ivp.initialTime)
+    (terminal_hasTimeDerivative :
+      HasTimeDerivativeAt (I := I) (M := M) metric
+        (fun τ x u v ↦ chart.A τ (sol.curve τ) x u v) sol.terminalTime) :
+    ∀ ⦃t : ℝ⦄, t ∈ Icc ivp.initialTime sol.terminalTime →
+      t ∉ Ioo ivp.initialTime sol.terminalTime →
+      HasTimeDerivativeAt (I := I) (M := M) metric
+        (fun τ x u v ↦ chart.A τ (sol.curve τ) x u v) t := by
+  intro t ht hboundary
+  rcases eq_left_or_eq_right_of_mem_Icc_not_mem_Ioo ht hboundary with rfl | rfl
+  · exact initial_hasTimeDerivative
+  · exact terminal_hasTimeDerivative
+
 /-- Chosen-background DeTurck package from raw smooth metric realization data with endpoint-only
 time-derivative obligations. The Banach ODE supplies interior derivatives, and the closed-interval
 boundary is reduced to the initial and terminal endpoint statements. -/
@@ -6608,11 +6661,14 @@ theorem TimeDependentGeometricRicciDeTurckBanachChart.chosenIntrinsicDeTurckLoca
     BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
       (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol :=
     fun sol ↦
-      BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.of_endpointTimeDerivative_chartRHS
+      BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.of_boundaryTimeDerivative_chartRHS
         (M := M) (F := F) (I := I)
         et Kc hKc Ko hKo hKoEq hcover x0 het
         (metric sol) (background sol)
-        (metric_eq_curve sol) (initial_hasTimeDerivative sol) (terminal_hasTimeDerivative sol)
+        (metric_eq_curve sol)
+        (TimeDependentGeometricRicciDeTurckBanachChart.boundaryTimeDerivative_of_endpointTimeDerivative
+          (M := M) (F := F) (I := I) chart (metric sol)
+          (initial_hasTimeDerivative sol) (terminal_hasTimeDerivative sol))
         (chartRHS_eq_intrinsic sol)
   refine
     TimeDependentGeometricRicciDeTurckBanachChart.chosenIntrinsicDeTurckLocalExistenceUniqueness_of_smoothRealization_and_chosenCandidateEncoding
@@ -7058,6 +7114,58 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.chosenIntrinsicDeTurc
     BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution]
   exact hbackground sol
 
+/-- Endpoint derivative data supplies the boundary time-derivative hypothesis for a single
+interval-scoped Ricci-DeTurck Banach-chart solution. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.boundaryTimeDerivative_of_endpointTimeDerivative
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    {sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (metric : MetricFamily (I := I) (M := M))
+    (initial_hasTimeDerivative :
+      HasTimeDerivativeAt (I := I) (M := M) metric
+        (fun τ x u v ↦ chart.A τ (sol.curve τ) x u v) ivp.initialTime)
+    (terminal_hasTimeDerivative :
+      HasTimeDerivativeAt (I := I) (M := M) metric
+        (fun τ x u v ↦ chart.A τ (sol.curve τ) x u v) sol.terminalTime) :
+    ∀ ⦃t : ℝ⦄, t ∈ Icc ivp.initialTime sol.terminalTime →
+      t ∉ Ioo ivp.initialTime sol.terminalTime →
+      HasTimeDerivativeAt (I := I) (M := M) metric
+        (fun τ x u v ↦ chart.A τ (sol.curve τ) x u v) t := by
+  intro t ht hboundary
+  rcases eq_left_or_eq_right_of_mem_Icc_not_mem_Ioo ht hboundary with rfl | rfl
+  · exact initial_hasTimeDerivative
+  · exact terminal_hasTimeDerivative
+
 /-- Interval-scoped chosen-background DeTurck package from raw smooth metric realization data with
 endpoint-only time-derivative obligations. This is the `Icc`-Lipschitz analogue of the global
 endpoint route. -/
@@ -7153,11 +7261,14 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.chosenIntrinsicDeTurc
     BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
       (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol :=
     fun sol ↦
-      BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.of_endpointTimeDerivative_chartRHS
+      BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.of_boundaryTimeDerivative_chartRHS
         (M := M) (F := F) (I := I)
         et Kc hKc Ko hKo hKoEq hcover x0 het
         (metric sol) (background sol)
-        (metric_eq_curve sol) (initial_hasTimeDerivative sol) (terminal_hasTimeDerivative sol)
+        (metric_eq_curve sol)
+        (TimeDependentGeometricRicciDeTurckBanachChartOnIcc.boundaryTimeDerivative_of_endpointTimeDerivative
+          (M := M) (F := F) (I := I) chart (metric sol)
+          (initial_hasTimeDerivative sol) (terminal_hasTimeDerivative sol))
         (chartRHS_eq_intrinsic sol)
   refine
     TimeDependentGeometricRicciDeTurckBanachChartOnIcc.chosenIntrinsicDeTurckLocalExistenceUniqueness_of_smoothRealization_and_chosenCandidateEncoding

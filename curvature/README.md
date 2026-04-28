@@ -204,8 +204,10 @@ now packages the matching intrinsic boundary
    reduce the closed-interval time-derivative boundary, including at the global
    and interval chosen-background theorem-package surfaces and the corresponding
    local/family non-identity gauge-time-derivative intrinsic Ricci-flow endpoints,
-   to the two endpoint derivative statements, and encoded candidates in the same global or interval
-   chart now have a named metric-uniqueness theorem on their common interval.
+   to the two endpoint derivative statements; the global and interval charts also
+   expose reusable single-solution endpoint-to-boundary derivative adapters, and
+   encoded candidates in the same global or interval chart now have a named
+   metric-uniqueness theorem on their common interval.
    The same state-set mechanism now also has a
    non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
    vector fields satisfying the verified Picard/Lipschitz hypotheses shrink to
