@@ -170,7 +170,8 @@ packages the canonical stationary local solution attached to
    the gauge-pulled metric, with the local scalar inner-product derivative now
    extractable from a proved pullback-metric time derivative. Raw pointwise
    gauge-flow-derivative routes now feed the explicit scalar-derivative,
-   gauge-reduced, intrinsic, and ordinary packages directly, and with a
+   gauge-reduced, intrinsic, and ordinary packages directly from both the
+   theorem-package and analytic boundary-chart surfaces, and with a
    pullback-time-derivative proof they also feed intrinsic and ordinary theorem
    packages directly. The optional
    `PoincareCurvature.Point4` aggregate now
