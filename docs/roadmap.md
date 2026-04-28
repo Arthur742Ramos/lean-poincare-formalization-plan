@@ -482,9 +482,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
    pulled canonical smooth extensions that appear in curvature tensor
    contractions, exposes direct anchored `C^3` tangent and vector-field
    pushforward identities, extracts the scalar inner-product derivative
-   obligation from a proved `C^3` gauge-pulled metric time derivative, routes raw
-   pointwise gauge-flow derivatives plus scalar derivative data to the explicit
-   scalar-derivative package, and routes raw pointwise gauge-flow derivatives
+    obligation from a proved `C^3` gauge-pulled metric time derivative, routes raw
+    pointwise gauge-flow derivatives plus scalar derivative data to the explicit
+    scalar-derivative and gauge-reduced packages, and routes raw pointwise gauge-flow derivatives
    plus pullback-time-derivative input to scalar-derivative, intrinsic, and
    ordinary theorem packages.
      The optional `PoincareCurvature.Point4` aggregate also imports an

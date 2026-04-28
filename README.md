@@ -169,8 +169,8 @@ packages the canonical stationary local solution attached to
    non-identity gauge input is the time-derivative/scalar-derivative formula for
    the gauge-pulled metric, with the local scalar inner-product derivative now
    extractable from a proved pullback-metric time derivative. Raw pointwise
-   gauge-flow-derivative routes now feed the explicit scalar-derivative package
-   directly, and with a pullback-time-derivative proof they also feed intrinsic
+   gauge-flow-derivative routes now feed both the explicit scalar-derivative and
+   gauge-reduced packages directly, and with a pullback-time-derivative proof they also feed intrinsic
    and ordinary theorem packages directly. The optional
    `PoincareCurvature.Point4` aggregate now
   imports this gauge-reduction boundary plus a new `AnalyticPDE` file proving the reusable
