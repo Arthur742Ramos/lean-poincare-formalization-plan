@@ -224,8 +224,8 @@ packages the canonical stationary local solution attached to
   family theorem produces `IntrinsicLocalExistenceUniquenessFamily` once these
   chart, realization, encoding, and gauge-reducibility obligations are supplied
   for every initial value problem. The direct interval chosen-background route
-  now also exposes the ordinary `LocalExistenceUniquenessFamily` endpoint. It
-  also specializes these criteria to genuine
+  and the interval raw `C^3` gauge-flow routes now also expose ordinary
+  `LocalExistenceUniquenessFamily` endpoints. It also specializes these criteria to genuine
   bundled continuous Riemannian initial metrics, so future Ricci-DeTurck
   Banach-chart work no longer has to manually prove finite-cover metric-locus
   membership for the initial datum.

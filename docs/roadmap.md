@@ -544,8 +544,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       global-chart family theorem produces `IntrinsicLocalExistenceUniquenessFamily`
       once these chart, realization, encoding, and gauge-reducibility obligations
       are supplied for every initial value problem. The direct interval
-      chosen-background route now also exposes the ordinary
-      `LocalExistenceUniquenessFamily` endpoint. These criteria are also
+      chosen-background route and the interval raw `C^3` gauge-flow routes now
+      also expose ordinary `LocalExistenceUniquenessFamily` endpoints. These criteria are also
       specialized to genuine bundled continuous Riemannian initial metrics, so
       future Ricci-DeTurck Banach-chart work no longer has to manually prove
       finite-cover metric-locus membership for the initial datum. The curvature, time-dependent geometry,
