@@ -178,7 +178,9 @@ now packages the matching intrinsic boundary
    module now names the primitive `C^3` intrinsic gauge-flow derivative data,
    proves it equivalent to the geometric `SatisfiesGaugeFlowOn` formulation, and
    packages the corresponding chosen-DeTurck-solution family interface and a
-   reusable gauge-flow family bundle with anchored-gauge projections. The
+   reusable gauge-flow family bundle with anchored-gauge projections and direct
+   gauge-reducible/intrinsic/ordinary theorem-family projections from
+   pulled-back metric time-derivative data. The
    gauge-reduction layer also now closes the identity `C^3`
    gauge-reducibility path for chosen Levi-Civita-background DeTurck theorem
    families, including the explicit scalar-derivative gauge-reducible interface

@@ -144,7 +144,9 @@ packages the canonical stationary local solution attached to
   module now names the primitive `C^3` intrinsic gauge-flow derivative data and
   proves it equivalent to the geometric `SatisfiesGaugeFlowOn` formulation, with
   a reusable chosen-DeTurck-solution gauge-flow family bundle projecting to both
-  derivative-family data and anchored gauges. It also now lowers the
+  derivative-family data and anchored gauges; the same bundle now feeds the
+  gauge-reducible, intrinsic, and ordinary theorem-family routes from a proved
+  pulled-back metric time derivative. It also now lowers the
   non-identity boundary
   from a prebuilt anchored `C^3` DeTurck gauge to raw `C^3` diffeomorphism
   families equipped with anchoring, the gauge-flow equation, and scalar

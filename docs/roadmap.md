@@ -274,7 +274,9 @@ with intrinsic comparison lemmas against arbitrary zero-velocity or
          equivalent to the geometric `SatisfiesGaugeFlowOn` statement for `C^3`
          diffeomorphism families, and packages the corresponding
          chosen-DeTurck-solution family interface plus a reusable geometric
-         gauge-flow family bundle with anchored-gauge projections.
+         gauge-flow family bundle with anchored-gauge projections and direct
+         gauge-reducible/intrinsic/ordinary theorem-family routes from
+         pulled-back metric time-derivative data.
         The non-identity right-slot/Ricci-transport obligation is now discharged
         by the `C^3` transport layer; the remaining primitive non-identity gauge
         input is the time-derivative/scalar-derivative formula for the
