@@ -62,7 +62,7 @@ sections while staying inside open fiberwise convex subsets of the total space,
 as well as an intrinsic fiberwise-`ε` approximation theorem for continuous
 sections of smooth Riemannian vector bundles. There is also an internal
 preparatory
-point-4 Ricci-flow scaffold file, but it is not part of the public package
+Ricci-flow local-existence scaffold module, but it is not part of the public package
 boundary and does **not** count as completing point 4 under this repository's
  proof-only standard, even though it now contains genuine stationary Ricci-flat,
  zero-velocity, and Ricci-tensor-zero special-case theorems at both the metric
@@ -177,8 +177,8 @@ packages the canonical stationary local solution attached to
    supplies primitive derivative-level gauge data when the DeTurck gauge field
    vanishes, and the identity gauge route has direct intrinsic/ordinary theorem-package
    projections matching the non-identity APIs. The optional
-   `PoincareCurvature.Point4` aggregate now
-  imports this gauge-reduction boundary plus a new `AnalyticPDE` file proving the reusable
+   `PoincareCurvature.RicciFlowLocalExistence` aggregate now
+  imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state
   state-preserving uniqueness, a positive-definite finite-cover metric-locus
   bridge, an abstract continuous-linear symmetry/fixed-locus preservation

@@ -180,8 +180,8 @@ now packages the matching intrinsic boundary
    simplification lemmas; it also exposes a raw non-identity gauge-flow route
    from `C^3` diffeomorphism families, anchoring, the gauge-flow equation, and
    scalar inner-product derivative identities to the same scalar-derivative
-   theorem-family package. The optional `PoincareCurvature.Point4` aggregate now
-   imports this gauge-reduction boundary plus a new `AnalyticPDE` file proving the reusable
+   theorem-family package. The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate now
+   imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state
    state-preserving uniqueness, a positive-definite finite-cover metric-locus
    bridge, an abstract continuous-linear symmetry/fixed-locus preservation
@@ -301,10 +301,10 @@ From this directory:
 lake +leanprover/lean4:v4.29.1 build PoincareCurvature
 ```
 
-The heavier point-4 Ricci-flow local-existence scaffold is intentionally kept
+The heavier Ricci-flow local-existence scaffold is intentionally kept
 out of the root target for faster routine iteration. Build it explicitly when
 working on that layer:
 
 ```powershell
-lake +leanprover/lean4:v4.29.1 build PoincareCurvature.Point4
+lake +leanprover/lean4:v4.29.1 build PoincareCurvature.RicciFlowLocalExistence
 ```

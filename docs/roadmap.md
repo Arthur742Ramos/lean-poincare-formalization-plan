@@ -273,7 +273,7 @@ with intrinsic comparison lemmas against arbitrary zero-velocity or
         by the `C^3` transport layer; the remaining primitive non-identity gauge
         input is the time-derivative/scalar-derivative formula for the
         gauge-pulled metric.
-        The optional `PoincareCurvature.Point4` aggregate imports the
+        The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate imports the
         gauge-reduction boundary. It also records the pointwise
     gauge-flow derivative, and rewrites transformed velocity as `-2` times the
      trace-conjugated pulled-back Ricci endomorphism supplied by the connection
@@ -488,8 +488,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     same scalar-derivative route as global and interval analytic boundary-chart
     intrinsic/ordinary theorem-family endpoints, and routes raw pointwise gauge-flow derivatives plus pullback-time-derivative input to scalar-derivative, intrinsic, and
    ordinary theorem packages.
-     The optional `PoincareCurvature.Point4` aggregate also imports an
-     `AnalyticPDE` file proving the reusable
+     The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate also imports the
+      `AnalyticPDE` evolution layer proving the reusable
     Picard-Lindelof Banach-evolution local-solution core, open-state
     state-preserving uniqueness, a positive-definite finite-cover metric-locus
     bridge, an abstract continuous-linear symmetry/fixed-locus preservation
