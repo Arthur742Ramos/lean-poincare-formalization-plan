@@ -276,7 +276,9 @@ with intrinsic comparison lemmas against arbitrary zero-velocity or
          chosen-DeTurck-solution family interface plus a reusable geometric
          gauge-flow family bundle with anchored-gauge projections and direct
          gauge-reducible/intrinsic/ordinary theorem-family routes from
-         pulled-back metric time-derivative data.
+         pulled-back metric time-derivative data, together with a
+         fixed-initial-value-problem bundle exposing matching local
+         theorem-package projections.
         The non-identity right-slot/Ricci-transport obligation is now discharged
         by the `C^3` transport layer; the remaining primitive non-identity gauge
         input is the time-derivative/scalar-derivative formula for the

@@ -146,7 +146,8 @@ packages the canonical stationary local solution attached to
   a reusable chosen-DeTurck-solution gauge-flow family bundle projecting to both
   derivative-family data and anchored gauges; the same bundle now feeds the
   gauge-reducible, intrinsic, and ordinary theorem-family routes from a proved
-  pulled-back metric time derivative. It also now lowers the
+  pulled-back metric time derivative, and has a fixed-initial-value-problem
+  counterpart with matching local theorem-package projections. It also now lowers the
   non-identity boundary
   from a prebuilt anchored `C^3` DeTurck gauge to raw `C^3` diffeomorphism
   families equipped with anchoring, the gauge-flow equation, and scalar

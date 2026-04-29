@@ -118,6 +118,112 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_of_satisfiesGaugeFlowOn
     (I := I) (M := M) (hflow ivp sol) ht x
 
 /-- A reusable bundle of geometric `C^3` intrinsic DeTurck gauge flows for all
+chosen DeTurck local solutions of a fixed initial-value problem. -/
+structure ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) where
+  maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    SmoothSelfDiffeomorph3Family (I := I) (M := M)
+  anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      (maps3 sol) ivp.initialTime
+  satisfies : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    SatisfiesGaugeFlowOn (I := I) (M := M)
+      (maps3 sol).toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      sol.1.toIntrinsicDeTurckSolution.timeSet
+
+namespace ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+
+/-- The derivative view of a bundled geometric gauge-flow family for one initial
+value problem. -/
+theorem derivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      Diffeomorph3IntrinsicGaugeFlowDerivativeOn (I := I) (M := M)
+        (G.maps3 sol)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background
+        sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  intro sol t ht x
+  exact (G.maps3 sol).hasMFDerivWithinAt_of_satisfiesGaugeFlowOn
+    (I := I) (M := M) (G.satisfies sol) ht x
+
+/-- The anchored intrinsic DeTurck gauge associated to one solution in a bundled
+geometric gauge-flow family for a fixed initial-value problem. -/
+def gauge
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime :=
+  AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.ofSatisfiesGaugeFlowOn
+    (I := I) (M := M)
+    (g := sol.1.toIntrinsicDeTurckSolution.metric)
+    (background := sol.1.toIntrinsicDeTurckSolution.background)
+    (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (t₀ := ivp.initialTime)
+    (G.maps3 sol) (G.anchored sol) (G.satisfies sol)
+
+/-- The same anchored gauge, constructed through the derivative-family view. -/
+def gaugeViaDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime :=
+  AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.of_hasMFDerivWithinAt
+    (I := I) (M := M)
+    (g := sol.1.toIntrinsicDeTurckSolution.metric)
+    (background := sol.1.toIntrinsicDeTurckSolution.background)
+    (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (t₀ := ivp.initialTime)
+    (G.maps3 sol) (G.anchored sol) (G.derivativeData sol)
+
+@[simp] theorem gauge_maps
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    (G.gauge sol).maps = G.maps3 sol := rfl
+
+@[simp] theorem gaugeViaDerivative_maps
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    (G.gaugeViaDerivative sol).maps = G.maps3 sol := rfl
+
+@[simp] theorem gaugeCorrectedPullbackVelocity_gauge_eq_gaugeViaDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol) =
+      sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gaugeViaDerivative sol) := rfl
+
+end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+
+/-- A reusable bundle of geometric `C^3` intrinsic DeTurck gauge flows for all
 chosen DeTurck local solutions in a theorem-family argument. -/
 structure ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily where
   maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
@@ -140,6 +246,17 @@ structure ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily where
         sol.1.toIntrinsicDeTurckSolution.timeSet
 
 namespace ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+
+/-- Restrict a theorem-family gauge-flow bundle to one initial-value problem. -/
+def forInitialValueProblem
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  maps3 := G.maps3 ivp
+  anchored := G.anchored ivp
+  satisfies := G.satisfies ivp
 
 /-- The derivative-family view of a bundled geometric gauge-flow family. -/
 theorem derivativeFamily
@@ -277,6 +394,64 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinar
           sol.1.toIntrinsicDeTurckSolution.timeSet) :
     LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
   (pkg.toIntrinsicFamily_viaDiffeomorph3GaugeFlowFamilyTimeDerivative
+    G hpullDerivative).toOrdinary
+
+/-- A chosen-background DeTurck theorem package becomes gauge-reducible from a
+geometric `C^3` gauge-flow bundle once the actual gauge-pulled metric has the
+concrete corrected velocity as its time derivative. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducible_viaDiffeomorph3GaugeFlowBundleTimeDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      HasTimeDerivativeOn (I := I) (M := M)
+        ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+        (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+        sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowDerivativeTimeDerivative
+    G.maps3 G.anchored G.derivativeData
+    (fun sol ↦ by
+      simpa using hpullDerivative sol)
+
+/-- Intrinsic Ricci-flow theorem-package projection from a geometric `C^3`
+gauge-flow bundle and a pulled-back metric time derivative. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaDiffeomorph3GaugeFlowBundleTimeDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      HasTimeDerivativeOn (I := I) (M := M)
+        ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+        (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+        sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundleTimeDerivative
+    G hpullDerivative).toIntrinsic
+
+/-- Ordinary Ricci-flow theorem-package projection from a geometric `C^3`
+gauge-flow bundle and a pulled-back metric time derivative. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaDiffeomorph3GaugeFlowBundleTimeDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      HasTimeDerivativeOn (I := I) (M := M)
+        ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+        (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+        sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toIntrinsic_viaDiffeomorph3GaugeFlowBundleTimeDerivative
     G hpullDerivative).toOrdinary
 
 end RicciFlow
