@@ -179,9 +179,11 @@ packages the canonical stationary local solution attached to
    gauge-reduced, intrinsic, and ordinary packages directly from both the
     theorem-package and global/interval analytic boundary-chart surfaces, and the
     endpoint chart routes now have bundled global/interval gauge-flow data objects
-    whose gauge fields use the named derivative-family interface,
-   projecting directly to scalar-derivative, intrinsic, and ordinary theorem
-   families. With a pullback-time-derivative proof they also feed intrinsic and
+    whose gauge fields use the named derivative-family interface, plus a separate
+    `AnalyticPDE.GeometricGaugeFlow` endpoint module whose global/interval bundles
+    accept geometric `C^3` gauge-flow families and project through the derivative
+    bundles to scalar-derivative, intrinsic, and ordinary theorem families. With
+    a pullback-time-derivative proof they also feed intrinsic and
    ordinary theorem packages directly. The constant `C^3` identity diffeomorphism family now also
    supplies primitive derivative-level gauge data when the DeTurck gauge field
    vanishes, and the identity gauge route has direct intrinsic/ordinary theorem-package

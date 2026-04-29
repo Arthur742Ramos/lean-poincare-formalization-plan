@@ -495,7 +495,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      intrinsic/ordinary theorem-family endpoints, now packages those endpoint
      hypotheses into bundled global/interval data objects using the named
      gauge-flow derivative-family interface with direct scalar,
-     intrinsic, and ordinary projections, and routes raw pointwise gauge-flow derivatives plus
+     intrinsic, and ordinary projections, and adds a separate
+     `AnalyticPDE.GeometricGaugeFlow` endpoint layer whose global/interval bundles
+     take geometric `C^3` gauge-flow families and project through the derivative
+     bundles to the same scalar, intrinsic, and ordinary theorem-family endpoints,
+     and routes raw pointwise gauge-flow derivatives plus
     pullback-time-derivative input to scalar-derivative, intrinsic, and ordinary theorem packages.
      The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate also imports the
       `AnalyticPDE` evolution layer proving the reusable

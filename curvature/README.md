@@ -186,9 +186,13 @@ now packages the matching intrinsic boundary
    simplification lemmas; it also exposes a raw non-identity gauge-flow route
    from `C^3` diffeomorphism families, anchoring, the gauge-flow equation, and
    scalar inner-product derivative identities to the same scalar-derivative
-    theorem-family package, with bundled global/interval endpoint data objects
-    using that named gauge-flow derivative family and
-   projecting to scalar-derivative, intrinsic, and ordinary theorem families. The optional
+     theorem-family package, with bundled global/interval endpoint data objects
+     using that named gauge-flow derivative family and
+    projecting to scalar-derivative, intrinsic, and ordinary theorem families. A
+    separate `AnalyticPDE.GeometricGaugeFlow` module now also gives matching
+    global/interval endpoint bundles for geometric `C^3` gauge-flow families,
+    projecting through the derivative bundles to scalar, intrinsic, and ordinary
+    theorem families. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state
