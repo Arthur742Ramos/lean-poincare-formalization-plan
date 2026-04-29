@@ -189,7 +189,8 @@ packages the canonical stationary local solution attached to
     accept geometric `C^3` gauge-flow families plus pullback-time-derivative
     proofs, derive the scalar endpoint internally, and project through the
     derivative bundles to scalar-derivative, gauge-reducible, intrinsic, and
-    ordinary theorem families. With
+    ordinary theorem families; the same module now exposes a fixed-IVP endpoint
+    bundle and a family-to-fixed-IVP projection. With
     those pullback-time-derivative proofs they also feed intrinsic and
    ordinary theorem packages directly. The constant `C^3` identity diffeomorphism family now also
    supplies primitive derivative-level gauge data when the DeTurck gauge field

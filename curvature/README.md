@@ -198,7 +198,8 @@ now packages the matching intrinsic boundary
     global/interval endpoint bundles for geometric `C^3` gauge-flow families plus
     pullback-time-derivative proofs, deriving the scalar endpoint internally and
     projecting through the derivative bundles to scalar, gauge-reducible,
-    intrinsic, and ordinary theorem families. The optional
+    intrinsic, and ordinary theorem families; it also exposes a fixed-IVP
+    endpoint bundle and a family-to-fixed-IVP projection. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state
