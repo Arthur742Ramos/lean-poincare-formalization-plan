@@ -206,6 +206,19 @@ def gaugeViaDerivative
       (E := E) (H := H) (I := I) (M := M) ivp) :
     (G.gaugeViaDerivative ivp sol).maps = G.maps3 ivp sol := rfl
 
+/-- The concrete corrected pullback velocity depends on the underlying `C^3`
+diffeomorphism family, not on whether the anchored gauge was constructed from the
+geometric flow statement or from its derivative view. -/
+@[simp] theorem gaugeCorrectedPullbackVelocity_gauge_eq_gaugeViaDerivative
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge ivp sol) =
+      sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gaugeViaDerivative ivp sol) := rfl
+
 end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
 
 end RicciFlow

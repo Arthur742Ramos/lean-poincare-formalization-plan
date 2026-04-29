@@ -157,7 +157,7 @@ structure EndpointGeometricGaugeFlowFamilyData
                 (((gaugeFlow.maps3 ivp sol) τ).pushforwardTangent x u)
                 (((gaugeFlow.maps3 ivp sol) τ).pushforwardTangent x v))
             (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
-              (gaugeFlow.gaugeViaDerivative ivp sol) t x u v) t
+              (gaugeFlow.gauge ivp sol) t x u v) t
 
 /-- Convert geometric global endpoint gauge-flow data to the derivative-level
 endpoint bundle. -/
@@ -209,8 +209,7 @@ def EndpointGeometricGaugeFlowFamilyData.toEndpointDerivativeGaugeFlowFamilyData
   hflowDeriv := D.gaugeFlow.derivativeFamily
   hderiv := by
     intro ivp sol t ht x u v
-    simpa [ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily.gaugeViaDerivative] using
-      D.hderiv ivp sol ht x u v
+    simpa using D.hderiv ivp sol ht x u v
 
 /-- Geometric global endpoint gauge-flow data yields the scalar-derivative
 gauge-reducible theorem family. -/
@@ -426,7 +425,7 @@ structure EndpointGeometricGaugeFlowFamilyDataOnIcc
                 (((gaugeFlow.maps3 ivp sol) τ).pushforwardTangent x u)
                 (((gaugeFlow.maps3 ivp sol) τ).pushforwardTangent x v))
             (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
-              (gaugeFlow.gaugeViaDerivative ivp sol) t x u v) t
+              (gaugeFlow.gauge ivp sol) t x u v) t
 
 /-- Convert geometric interval endpoint gauge-flow data to the derivative-level
 endpoint bundle. -/
@@ -478,8 +477,7 @@ def EndpointGeometricGaugeFlowFamilyDataOnIcc.toEndpointDerivativeGaugeFlowFamil
   hflowDeriv := D.gaugeFlow.derivativeFamily
   hderiv := by
     intro ivp sol t ht x u v
-    simpa [ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily.gaugeViaDerivative] using
-      D.hderiv ivp sol ht x u v
+    simpa using D.hderiv ivp sol ht x u v
 
 /-- Geometric interval endpoint gauge-flow data yields the scalar-derivative
 gauge-reducible theorem family. -/
