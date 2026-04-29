@@ -486,8 +486,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     pointwise gauge-flow derivatives plus scalar derivative data to the explicit
     scalar-derivative, gauge-reduced, intrinsic, and ordinary packages, exposes the
     same scalar-derivative route as global and interval analytic boundary-chart
-    intrinsic/ordinary theorem-family endpoints, and routes raw pointwise gauge-flow derivatives plus pullback-time-derivative input to scalar-derivative, intrinsic, and
-   ordinary theorem packages.
+    intrinsic/ordinary theorem-family endpoints, now packages those endpoint
+    hypotheses into bundled global/interval data objects with direct scalar,
+    intrinsic, and ordinary projections, and routes raw pointwise gauge-flow derivatives plus
+    pullback-time-derivative input to scalar-derivative, intrinsic, and ordinary theorem packages.
      The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate also imports the
       `AnalyticPDE` evolution layer proving the reusable
     Picard-Lindelof Banach-evolution local-solution core, open-state

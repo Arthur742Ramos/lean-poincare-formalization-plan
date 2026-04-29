@@ -180,7 +180,9 @@ now packages the matching intrinsic boundary
    simplification lemmas; it also exposes a raw non-identity gauge-flow route
    from `C^3` diffeomorphism families, anchoring, the gauge-flow equation, and
    scalar inner-product derivative identities to the same scalar-derivative
-   theorem-family package. The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate now
+   theorem-family package, with bundled global/interval endpoint data objects
+   projecting to scalar-derivative, intrinsic, and ordinary theorem families. The optional
+   `PoincareCurvature.RicciFlowLocalExistence` aggregate now
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state
    state-preserving uniqueness, a positive-definite finite-cover metric-locus

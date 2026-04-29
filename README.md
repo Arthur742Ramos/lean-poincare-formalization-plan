@@ -171,9 +171,11 @@ packages the canonical stationary local solution attached to
    extractable from a proved pullback-metric time derivative. Raw pointwise
    gauge-flow-derivative routes now feed the explicit scalar-derivative,
    gauge-reduced, intrinsic, and ordinary packages directly from both the
-   theorem-package and global/interval analytic boundary-chart surfaces, and with a
-   pullback-time-derivative proof they also feed intrinsic and ordinary theorem
-   packages directly. The constant `C^3` identity diffeomorphism family now also
+   theorem-package and global/interval analytic boundary-chart surfaces, and the
+   endpoint chart routes now have bundled global/interval gauge-flow data objects
+   projecting directly to scalar-derivative, intrinsic, and ordinary theorem
+   families. With a pullback-time-derivative proof they also feed intrinsic and
+   ordinary theorem packages directly. The constant `C^3` identity diffeomorphism family now also
    supplies primitive derivative-level gauge data when the DeTurck gauge field
    vanishes, and the identity gauge route has direct intrinsic/ordinary theorem-package
    projections matching the non-identity APIs. The optional
