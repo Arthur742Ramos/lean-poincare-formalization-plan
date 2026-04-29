@@ -201,7 +201,11 @@ packages the canonical stationary local solution attached to
     and converts it into the fixed-IVP and theorem-family geometric gauge-flow
     bundles, while the geometric endpoint data can now replace its bundled
     gauge-flow component by such a raw existence witness at fixed-IVP, global,
-    and interval scope. The optional
+    and interval scope. A thin `AnalyticPDE.SmoothRealization` module names the
+    global/interval PDE closure data that turns a Banach chart solution into a
+    smooth chosen-background DeTurck solution and its self-encoding candidate:
+    metric realization, boundary time derivatives, chart-RHS/geometric-RHS
+    identification, and chosen Levi-Civita background. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
   imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state
@@ -299,8 +303,8 @@ packages the canonical stationary local solution attached to
   gauge-pullback time-regularity obligations
   and the quasilinear parabolic PDE existence/uniqueness step needed to produce
   Ricci-DeTurck solutions, including the actual Ricci-DeTurck Banach chart and
-  estimates plus the identification of that Banach representative with the
-  geometric Ricci-DeTurck right-hand side. The curvature, time-dependent
+  estimates plus the analytic proof of the now-named smooth-realization and
+  Banach/geometric RHS-identification data. The curvature, time-dependent
   geometry, intrinsic Ricci-flow, and DeTurck layers now prove the geometric
   symmetry input outright: metric compatibility gives curvature-operator
   skew-adjointness, torsion-freeness gives first Bianchi, the Ricci contraction is

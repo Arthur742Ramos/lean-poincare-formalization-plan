@@ -513,7 +513,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      theorem and converting it into the fixed-IVP and theorem-family geometric
     gauge-flow bundles, with fixed-IVP, global, and interval geometric endpoint
     data able to replace their bundled gauge-flow component by such a raw
-    existence witness,
+    existence witness, and a thin `AnalyticPDE.SmoothRealization` module naming
+    the global/interval PDE closure data that turns a Banach chart solution into
+    a smooth chosen-background DeTurck solution and its self-encoding candidate,
      and routes raw pointwise gauge-flow derivatives plus
     pullback-time-derivative input to scalar-derivative, intrinsic, and ordinary theorem packages.
      The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate also imports the

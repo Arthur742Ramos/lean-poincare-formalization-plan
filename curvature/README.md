@@ -205,7 +205,11 @@ now packages the matching intrinsic boundary
     and converts it into the fixed-IVP and theorem-family geometric gauge-flow
     bundles, and geometric endpoint data can now replace its bundled gauge-flow
     component by such a raw existence witness at fixed-IVP, global, and
-    interval scope. The optional
+    interval scope. A thin `AnalyticPDE.SmoothRealization` module names the
+    global/interval PDE closure data that turns a Banach chart solution into a
+    smooth chosen-background DeTurck solution and its self-encoding candidate:
+    metric realization, boundary time derivatives, chart-RHS/geometric-RHS
+    identification, and chosen Levi-Civita background. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state
