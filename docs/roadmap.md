@@ -518,8 +518,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         local/family non-identity gauge-time-derivative intrinsic Ricci-flow endpoints,
         to the two endpoint derivative statements; the global and interval charts
         also expose reusable single-solution and theorem-family
-        endpoint-to-boundary derivative adapters, and encoded candidates in the
-        same global or interval chart now
+        endpoint-to-boundary derivative adapters, and the raw global/interval
+        non-identity gauge-flow time-derivative theorem-family endpoints now
+        consume only endpoint time-derivative data before the gauge-flow
+        conversion; encoded candidates in the same global or interval chart now
         have a named metric-uniqueness theorem on their common interval. The same
         state-set mechanism now also has a
       non-autonomous Picard-Lindelof specialization: time-dependent Banach-chart
