@@ -9,9 +9,10 @@ set_option linter.all false
 # Geometric endpoint gauge-flow reductions
 
 This extension module packages endpoint Ricci-DeTurck chart data whose gauge input
-is the geometric `SatisfiesGaugeFlowOn` formulation.  It projects to the
-derivative-level endpoint bundles via the reusable `C^3` gauge-flow derivative
-bridge, keeping the larger analytic endpoint file stable.
+is the geometric `SatisfiesGaugeFlowOn` formulation.  It turns pulled-back metric
+time-derivative data into the scalar derivative endpoint needed by the
+derivative-level bundles via the reusable `C^3` gauge-flow bridge, keeping the
+larger analytic endpoint file stable.
 -/
 
 @[expose] public noncomputable section
@@ -145,19 +146,15 @@ structure EndpointGeometricGaugeFlowFamilyData
         (M := M) (F := F) (I := I) (chart ivp) candidate.1
   gaugeFlow : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
     (E := F) (H := H) (I := I) (M := M)
-  hderiv : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
+  hpullDerivative : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
     ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := F) (H := H) (I := I) (M := M) ivp,
-      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
-        ∀ x : M, ∀ u v : TangentSpace I x,
-          HasDerivAt
-            (fun τ ↦
-              (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
-                (((gaugeFlow.maps3 ivp sol) τ) x)
-                (((gaugeFlow.maps3 ivp sol) τ).pushforwardTangent x u)
-                (((gaugeFlow.maps3 ivp sol) τ).pushforwardTangent x v))
-            (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
-              (gaugeFlow.gauge ivp sol) t x u v) t
+      HasTimeDerivativeOn (I := I) (M := M)
+        ((gaugeFlow.maps3 ivp sol).pullbackMetricFamily
+          sol.1.toIntrinsicDeTurckSolution.metric)
+        (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+          (gaugeFlow.gauge ivp sol))
+        sol.1.toIntrinsicDeTurckSolution.timeSet
 
 /-- Convert geometric global endpoint gauge-flow data to the derivative-level
 endpoint bundle. -/
@@ -209,7 +206,9 @@ def EndpointGeometricGaugeFlowFamilyData.toEndpointDerivativeGaugeFlowFamilyData
   hflowDeriv := D.gaugeFlow.derivativeFamily
   hderiv := by
     intro ivp sol t ht x u v
-    simpa using D.hderiv ivp sol ht x u v
+    simpa using
+      D.gaugeFlow.innerHasDerivAt_of_hasTimeDerivativeOn
+        D.hpullDerivative ivp sol ht x u v
 
 /-- Geometric global endpoint gauge-flow data yields the scalar-derivative
 gauge-reducible theorem family. -/
@@ -445,19 +444,15 @@ structure EndpointGeometricGaugeFlowFamilyDataOnIcc
         (M := M) (F := F) (I := I) (chart ivp) candidate.1
   gaugeFlow : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
     (E := F) (H := H) (I := I) (M := M)
-  hderiv : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
+  hpullDerivative : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
     ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := F) (H := H) (I := I) (M := M) ivp,
-      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
-        ∀ x : M, ∀ u v : TangentSpace I x,
-          HasDerivAt
-            (fun τ ↦
-              (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
-                (((gaugeFlow.maps3 ivp sol) τ) x)
-                (((gaugeFlow.maps3 ivp sol) τ).pushforwardTangent x u)
-                (((gaugeFlow.maps3 ivp sol) τ).pushforwardTangent x v))
-            (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
-              (gaugeFlow.gauge ivp sol) t x u v) t
+      HasTimeDerivativeOn (I := I) (M := M)
+        ((gaugeFlow.maps3 ivp sol).pullbackMetricFamily
+          sol.1.toIntrinsicDeTurckSolution.metric)
+        (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+          (gaugeFlow.gauge ivp sol))
+        sol.1.toIntrinsicDeTurckSolution.timeSet
 
 /-- Convert geometric interval endpoint gauge-flow data to the derivative-level
 endpoint bundle. -/
@@ -509,7 +504,9 @@ def EndpointGeometricGaugeFlowFamilyDataOnIcc.toEndpointDerivativeGaugeFlowFamil
   hflowDeriv := D.gaugeFlow.derivativeFamily
   hderiv := by
     intro ivp sol t ht x u v
-    simpa using D.hderiv ivp sol ht x u v
+    simpa using
+      D.gaugeFlow.innerHasDerivAt_of_hasTimeDerivativeOn
+        D.hpullDerivative ivp sol ht x u v
 
 /-- Geometric interval endpoint gauge-flow data yields the scalar-derivative
 gauge-reducible theorem family. -/

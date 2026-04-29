@@ -503,10 +503,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      gauge-flow derivative-family interface with direct scalar,
      intrinsic, and ordinary projections, and adds a separate
      `AnalyticPDE.GeometricGaugeFlow` endpoint layer whose global/interval bundles
-     take geometric `C^3` gauge-flow families and project through the derivative
-     bundles to the same scalar, gauge-reducible, intrinsic, and ordinary
-     theorem-family endpoints while stating scalar derivative hypotheses against
-     the geometric anchored gauge itself,
+     take geometric `C^3` gauge-flow families plus pullback-time-derivative
+     proofs, derive the scalar endpoint internally, and project through the
+     derivative bundles to the same scalar, gauge-reducible, intrinsic, and
+     ordinary theorem-family endpoints,
      and routes raw pointwise gauge-flow derivatives plus
     pullback-time-derivative input to scalar-derivative, intrinsic, and ordinary theorem packages.
      The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate also imports the

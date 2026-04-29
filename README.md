@@ -186,11 +186,11 @@ packages the canonical stationary local solution attached to
     endpoint chart routes now have bundled global/interval gauge-flow data objects
     whose gauge fields use the named derivative-family interface, plus a separate
     `AnalyticPDE.GeometricGaugeFlow` endpoint module whose global/interval bundles
-    accept geometric `C^3` gauge-flow families and project through the derivative
-    bundles to scalar-derivative, gauge-reducible, intrinsic, and ordinary
-    theorem families; its scalar derivative hypothesis is stated against the
-    geometric anchored gauge itself. With
-    a pullback-time-derivative proof they also feed intrinsic and
+    accept geometric `C^3` gauge-flow families plus pullback-time-derivative
+    proofs, derive the scalar endpoint internally, and project through the
+    derivative bundles to scalar-derivative, gauge-reducible, intrinsic, and
+    ordinary theorem families. With
+    those pullback-time-derivative proofs they also feed intrinsic and
    ordinary theorem packages directly. The constant `C^3` identity diffeomorphism family now also
    supplies primitive derivative-level gauge data when the DeTurck gauge field
    vanishes, and the identity gauge route has direct intrinsic/ordinary theorem-package

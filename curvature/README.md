@@ -195,10 +195,10 @@ now packages the matching intrinsic boundary
      using that named gauge-flow derivative family and
     projecting to scalar-derivative, intrinsic, and ordinary theorem families. A
     separate `AnalyticPDE.GeometricGaugeFlow` module now also gives matching
-    global/interval endpoint bundles for geometric `C^3` gauge-flow families,
+    global/interval endpoint bundles for geometric `C^3` gauge-flow families plus
+    pullback-time-derivative proofs, deriving the scalar endpoint internally and
     projecting through the derivative bundles to scalar, gauge-reducible,
-    intrinsic, and ordinary theorem families while stating the scalar derivative
-    hypothesis against the geometric anchored gauge itself. The optional
+    intrinsic, and ordinary theorem families. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state
