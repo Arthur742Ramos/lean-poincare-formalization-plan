@@ -192,10 +192,14 @@ packages the canonical stationary local solution attached to
     ordinary theorem families; the same module now exposes a fixed-IVP endpoint
     bundle and a family-to-fixed-IVP projection. With
     those pullback-time-derivative proofs they also feed intrinsic and
-   ordinary theorem packages directly. The constant `C^3` identity diffeomorphism family now also
-   supplies primitive derivative-level gauge data when the DeTurck gauge field
-   vanishes, and the identity gauge route has direct intrinsic/ordinary theorem-package
-   projections matching the non-identity APIs. The optional
+    ordinary theorem packages directly. The constant `C^3` identity diffeomorphism family now also
+    supplies primitive derivative-level gauge data when the DeTurck gauge field
+    vanishes, and the identity gauge route has direct intrinsic/ordinary theorem-package
+    projections matching the non-identity APIs. A new
+    `GaugeReduction.Diffeomorph3FlowExistence` layer names the raw `C^3`
+    diffeomorphism-flow existence witness needed from the manifold ODE theorem
+    and converts it into the fixed-IVP and theorem-family geometric gauge-flow
+    bundles. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
   imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state

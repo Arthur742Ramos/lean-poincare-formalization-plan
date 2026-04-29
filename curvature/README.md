@@ -199,7 +199,11 @@ now packages the matching intrinsic boundary
     pullback-time-derivative proofs, deriving the scalar endpoint internally and
     projecting through the derivative bundles to scalar, gauge-reducible,
     intrinsic, and ordinary theorem families; it also exposes a fixed-IVP
-    endpoint bundle and a family-to-fixed-IVP projection. The optional
+    endpoint bundle and a family-to-fixed-IVP projection. A new
+    `GaugeReduction.Diffeomorph3FlowExistence` layer names the raw `C^3`
+    diffeomorphism-flow existence witness expected from the manifold ODE theorem
+    and converts it into the fixed-IVP and theorem-family geometric gauge-flow
+    bundles. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state

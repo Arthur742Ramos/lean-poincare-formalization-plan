@@ -507,7 +507,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      proofs, derive the scalar endpoint internally, and project through the
      derivative bundles to the same scalar, gauge-reducible, intrinsic, and
      ordinary theorem-family endpoints, with a fixed-IVP endpoint bundle and a
-     family-to-fixed-IVP projection for local theorem packages,
+     family-to-fixed-IVP projection for local theorem packages, and adds a
+     `GaugeReduction.Diffeomorph3FlowExistence` layer naming the raw `C^3`
+     diffeomorphism-flow existence witness expected from the manifold ODE
+     theorem and converting it into the fixed-IVP and theorem-family geometric
+     gauge-flow bundles,
      and routes raw pointwise gauge-flow derivatives plus
     pullback-time-derivative input to scalar-derivative, intrinsic, and ordinary theorem packages.
      The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate also imports the
