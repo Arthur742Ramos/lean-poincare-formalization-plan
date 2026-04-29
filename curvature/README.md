@@ -173,14 +173,21 @@ now packages the matching intrinsic boundary
   `ricciEndomorphism` after applying `pushforwardTangent` and identifies
   pulled-back `ricciCurvature` with the trace of the tangent-map-conjugated
   endomorphism, again both statically and slice by slice for connection
-   families. The gauge-reduction layer also now closes the identity `C^3`
+   families. A thin
+   `Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative`
+   module now names the primitive `C^3` intrinsic gauge-flow derivative data,
+   proves it equivalent to the geometric `SatisfiesGaugeFlowOn` formulation, and
+   packages the corresponding chosen-DeTurck-solution family interface and a
+   reusable gauge-flow family bundle with anchored-gauge projections. The
+   gauge-reduction layer also now closes the identity `C^3`
    gauge-reducibility path for chosen Levi-Civita-background DeTurck theorem
    families, including the explicit scalar-derivative gauge-reducible interface
    and direct identity-`C^3` gauge-reduced wrappers with source/metric/velocity
    simplification lemmas; it also exposes a raw non-identity gauge-flow route
    from `C^3` diffeomorphism families, anchoring, the gauge-flow equation, and
    scalar inner-product derivative identities to the same scalar-derivative
-   theorem-family package, with bundled global/interval endpoint data objects
+    theorem-family package, with bundled global/interval endpoint data objects
+    using that named gauge-flow derivative family and
    projecting to scalar-derivative, intrinsic, and ordinary theorem families. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable

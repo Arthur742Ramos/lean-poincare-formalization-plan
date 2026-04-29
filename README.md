@@ -139,7 +139,13 @@ packages the canonical stationary local solution attached to
   the identity `C^3` gauge path now also identifies the concrete
   gauge-corrected pullback velocity with the source DeTurck velocity and
   packages chosen-background DeTurck theorem families as gauge-reducible by the
-  identity diffeomorphism gauge. It also now lowers the non-identity boundary
+  identity diffeomorphism gauge. A thin
+  `Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative`
+  module now names the primitive `C^3` intrinsic gauge-flow derivative data and
+  proves it equivalent to the geometric `SatisfiesGaugeFlowOn` formulation, with
+  a reusable chosen-DeTurck-solution gauge-flow family bundle projecting to both
+  derivative-family data and anchored gauges. It also now lowers the
+  non-identity boundary
   from a prebuilt anchored `C^3` DeTurck gauge to raw `C^3` diffeomorphism
   families equipped with anchoring, the gauge-flow equation, and scalar
   inner-product derivative identities, and those direct and raw gauge-flow
@@ -171,8 +177,9 @@ packages the canonical stationary local solution attached to
    extractable from a proved pullback-metric time derivative. Raw pointwise
    gauge-flow-derivative routes now feed the explicit scalar-derivative,
    gauge-reduced, intrinsic, and ordinary packages directly from both the
-   theorem-package and global/interval analytic boundary-chart surfaces, and the
-   endpoint chart routes now have bundled global/interval gauge-flow data objects
+    theorem-package and global/interval analytic boundary-chart surfaces, and the
+    endpoint chart routes now have bundled global/interval gauge-flow data objects
+    whose gauge fields use the named derivative-family interface,
    projecting directly to scalar-derivative, intrinsic, and ordinary theorem
    families. With a pullback-time-derivative proof they also feed intrinsic and
    ordinary theorem packages directly. The constant `C^3` identity diffeomorphism family now also

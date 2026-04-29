@@ -268,7 +268,13 @@ with intrinsic comparison lemmas against arbitrary zero-velocity or
        packages, exposes direct identity-`C^3` gauge-reduced wrappers with
        source/metric/velocity simplification lemmas, and now lowers the
        non-identity route to raw `C^3` diffeomorphism families with anchoring,
-        the gauge-flow equation, and scalar inner-product derivative identities.
+         the gauge-flow equation, and scalar inner-product derivative identities.
+         A thin `GaugeReduction.Diffeomorph3FlowDerivative` module now names the
+         primitive intrinsic gauge-flow derivative proposition, proves it
+         equivalent to the geometric `SatisfiesGaugeFlowOn` statement for `C^3`
+         diffeomorphism families, and packages the corresponding
+         chosen-DeTurck-solution family interface plus a reusable geometric
+         gauge-flow family bundle with anchored-gauge projections.
         The non-identity right-slot/Ricci-transport obligation is now discharged
         by the `C^3` transport layer; the remaining primitive non-identity gauge
         input is the time-derivative/scalar-derivative formula for the
@@ -486,9 +492,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     pointwise gauge-flow derivatives plus scalar derivative data to the explicit
     scalar-derivative, gauge-reduced, intrinsic, and ordinary packages, exposes the
     same scalar-derivative route as global and interval analytic boundary-chart
-    intrinsic/ordinary theorem-family endpoints, now packages those endpoint
-    hypotheses into bundled global/interval data objects with direct scalar,
-    intrinsic, and ordinary projections, and routes raw pointwise gauge-flow derivatives plus
+     intrinsic/ordinary theorem-family endpoints, now packages those endpoint
+     hypotheses into bundled global/interval data objects using the named
+     gauge-flow derivative-family interface with direct scalar,
+     intrinsic, and ordinary projections, and routes raw pointwise gauge-flow derivatives plus
     pullback-time-derivative input to scalar-derivative, intrinsic, and ordinary theorem packages.
      The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate also imports the
       `AnalyticPDE` evolution layer proving the reusable

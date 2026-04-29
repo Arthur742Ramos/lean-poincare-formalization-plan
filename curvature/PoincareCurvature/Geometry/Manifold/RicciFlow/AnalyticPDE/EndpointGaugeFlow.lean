@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative
 
 set_option linter.unusedSectionVars false
 set_option linter.all false
@@ -156,16 +157,8 @@ structure EndpointDerivativeGaugeFlowFamilyData
         (E := F) (H := H) (I := I) (M := M) ivp,
       SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
         (maps3 ivp sol) ivp.initialTime
-  hflowDeriv : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
-    ∀ sol : ChosenIntrinsicDeTurckLocalSolution
-        (E := F) (H := H) (I := I) (M := M) ivp,
-      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
-        HasMFDerivAt[sol.1.toIntrinsicDeTurckSolution.timeSet]
-          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) t
-          ((1 : ℝ →L[ℝ] ℝ).smulRight
-            (intrinsicDeTurckGaugeField (I := I) (M := M)
-              sol.1.toIntrinsicDeTurckSolution.metric
-              sol.1.toIntrinsicDeTurckSolution.background t ((maps3 ivp sol t) x)))
+  hflowDeriv : ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+    (I := I) (M := M) maps3
   hderiv : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
     ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := F) (H := H) (I := I) (M := M) ivp,
@@ -552,16 +545,8 @@ structure EndpointDerivativeGaugeFlowFamilyDataOnIcc
         (E := F) (H := H) (I := I) (M := M) ivp,
       SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
         (maps3 ivp sol) ivp.initialTime
-  hflowDeriv : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
-    ∀ sol : ChosenIntrinsicDeTurckLocalSolution
-        (E := F) (H := H) (I := I) (M := M) ivp,
-      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
-        HasMFDerivAt[sol.1.toIntrinsicDeTurckSolution.timeSet]
-          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) t
-          ((1 : ℝ →L[ℝ] ℝ).smulRight
-            (intrinsicDeTurckGaugeField (I := I) (M := M)
-              sol.1.toIntrinsicDeTurckSolution.metric
-              sol.1.toIntrinsicDeTurckSolution.background t ((maps3 ivp sol t) x)))
+  hflowDeriv : ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+    (I := I) (M := M) maps3
   hderiv : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
     ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := F) (H := H) (I := I) (M := M) ivp,
