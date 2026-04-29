@@ -203,7 +203,9 @@ now packages the matching intrinsic boundary
     `GaugeReduction.Diffeomorph3FlowExistence` layer names the raw `C^3`
     diffeomorphism-flow existence witness expected from the manifold ODE theorem
     and converts it into the fixed-IVP and theorem-family geometric gauge-flow
-    bundles. The optional
+    bundles, and geometric endpoint data can now replace its bundled gauge-flow
+    component by such a raw existence witness at fixed-IVP, global, and
+    interval scope. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state

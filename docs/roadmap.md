@@ -511,7 +511,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      `GaugeReduction.Diffeomorph3FlowExistence` layer naming the raw `C^3`
      diffeomorphism-flow existence witness expected from the manifold ODE
      theorem and converting it into the fixed-IVP and theorem-family geometric
-     gauge-flow bundles,
+    gauge-flow bundles, with fixed-IVP, global, and interval geometric endpoint
+    data able to replace their bundled gauge-flow component by such a raw
+    existence witness,
      and routes raw pointwise gauge-flow derivatives plus
     pullback-time-derivative input to scalar-derivative, intrinsic, and ordinary theorem packages.
      The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate also imports the

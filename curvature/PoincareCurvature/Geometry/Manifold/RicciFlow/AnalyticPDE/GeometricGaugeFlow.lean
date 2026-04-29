@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EndpointGaugeFlow
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
 
 set_option linter.unusedSectionVars false
 set_option linter.all false
@@ -283,6 +284,65 @@ noncomputable def toLocalExistenceUniqueness
 
 end EndpointGeometricGaugeFlowData
 
+/-- Replace the geometric gauge-flow component of fixed-IVP endpoint data by a
+raw `C^3` diffeomorphism-flow existence witness. -/
+def EndpointGeometricGaugeFlowData.withGaugeFlowExistence
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (D : EndpointGeometricGaugeFlowData (I := I)
+      (x0 := x0) (et := et) (het := het) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+      (ivp := ivp) (T := T) (a := a) (L := L)
+      (Kpic := Kpic) (Kstate := Kstate))
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := F) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := F) (H := H) (I := I) (M := M) ivp,
+      HasTimeDerivativeOn (I := I) (M := M)
+        (((G.toDiffeomorph3GaugeFlow).maps3 sol).pullbackMetricFamily
+          sol.1.toIntrinsicDeTurckSolution.metric)
+        (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+          ((G.toDiffeomorph3GaugeFlow).gauge sol))
+        sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    EndpointGeometricGaugeFlowData (I := I)
+      (x0 := x0) (et := et) (het := het) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+      (ivp := ivp) (T := T) (a := a) (L := L)
+      (Kpic := Kpic) (Kstate := Kstate) where
+  chart := D.chart
+  metric := D.metric
+  background := D.background
+  metric_eq_curve := D.metric_eq_curve
+  initial_hasTimeDerivative := D.initial_hasTimeDerivative
+  terminal_hasTimeDerivative := D.terminal_hasTimeDerivative
+  chartRHS_eq_intrinsic := D.chartRHS_eq_intrinsic
+  hbackground := D.hbackground
+  encode := D.encode
+  gaugeFlow := G.toDiffeomorph3GaugeFlow
+  hpullDerivative := hpullDerivative
+
 /-- Bundled global endpoint data whose non-identity gauge input is a geometric
 `C^3` intrinsic DeTurck gauge-flow family. -/
 structure EndpointGeometricGaugeFlowFamilyData
@@ -450,6 +510,65 @@ def forInitialValueProblem
   hpullDerivative := D.hpullDerivative ivp
 
 end EndpointGeometricGaugeFlowFamilyData
+
+/-- Replace the geometric gauge-flow component of global endpoint family data by
+a raw theorem-family `C^3` diffeomorphism-flow existence witness. -/
+def EndpointGeometricGaugeFlowFamilyData.withGaugeFlowExistence
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (D : EndpointGeometricGaugeFlowFamilyData (I := I)
+      (x0 := x0) (et := et) (het := het) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover))
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := F) (H := H) (I := I) (M := M))
+    (hpullDerivative : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := F) (H := H) (I := I) (M := M) ivp,
+        HasTimeDerivativeOn (I := I) (M := M)
+          (((G.toDiffeomorph3GaugeFlowFamily).maps3 ivp sol).pullbackMetricFamily
+            sol.1.toIntrinsicDeTurckSolution.metric)
+          (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+          sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    EndpointGeometricGaugeFlowFamilyData (I := I)
+      (x0 := x0) (et := et) (het := het) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover) where
+  T := D.T
+  a := D.a
+  L := D.L
+  Kpic := D.Kpic
+  Kstate := D.Kstate
+  chart := D.chart
+  metric := D.metric
+  background := D.background
+  metric_eq_curve := D.metric_eq_curve
+  initial_hasTimeDerivative := D.initial_hasTimeDerivative
+  terminal_hasTimeDerivative := D.terminal_hasTimeDerivative
+  chartRHS_eq_intrinsic := D.chartRHS_eq_intrinsic
+  hbackground := D.hbackground
+  encode := D.encode
+  gaugeFlow := G.toDiffeomorph3GaugeFlowFamily
+  hpullDerivative := hpullDerivative
 
 /-- Convert geometric global endpoint gauge-flow data to the derivative-level
 endpoint bundle. -/
@@ -748,6 +867,65 @@ structure EndpointGeometricGaugeFlowFamilyDataOnIcc
         (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
           (gaugeFlow.gauge ivp sol))
         sol.1.toIntrinsicDeTurckSolution.timeSet
+
+/-- Replace the geometric gauge-flow component of interval endpoint family data by
+a raw theorem-family `C^3` diffeomorphism-flow existence witness. -/
+def EndpointGeometricGaugeFlowFamilyDataOnIcc.withGaugeFlowExistence
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (D : EndpointGeometricGaugeFlowFamilyDataOnIcc (I := I)
+      (x0 := x0) (et := et) (het := het) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover))
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := F) (H := H) (I := I) (M := M))
+    (hpullDerivative : ∀ ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := F) (H := H) (I := I) (M := M) ivp,
+        HasTimeDerivativeOn (I := I) (M := M)
+          (((G.toDiffeomorph3GaugeFlowFamily).maps3 ivp sol).pullbackMetricFamily
+            sol.1.toIntrinsicDeTurckSolution.metric)
+          (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+          sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    EndpointGeometricGaugeFlowFamilyDataOnIcc (I := I)
+      (x0 := x0) (et := et) (het := het) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover) where
+  T := D.T
+  a := D.a
+  L := D.L
+  Kpic := D.Kpic
+  Kstate := D.Kstate
+  chart := D.chart
+  metric := D.metric
+  background := D.background
+  metric_eq_curve := D.metric_eq_curve
+  initial_hasTimeDerivative := D.initial_hasTimeDerivative
+  terminal_hasTimeDerivative := D.terminal_hasTimeDerivative
+  chartRHS_eq_intrinsic := D.chartRHS_eq_intrinsic
+  hbackground := D.hbackground
+  encode := D.encode
+  gaugeFlow := G.toDiffeomorph3GaugeFlowFamily
+  hpullDerivative := hpullDerivative
 
 /-- Convert geometric interval endpoint gauge-flow data to the derivative-level
 endpoint bundle. -/

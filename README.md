@@ -199,7 +199,9 @@ packages the canonical stationary local solution attached to
     `GaugeReduction.Diffeomorph3FlowExistence` layer names the raw `C^3`
     diffeomorphism-flow existence witness needed from the manifold ODE theorem
     and converts it into the fixed-IVP and theorem-family geometric gauge-flow
-    bundles. The optional
+    bundles, while the geometric endpoint data can now replace its bundled
+    gauge-flow component by such a raw existence witness at fixed-IVP, global,
+    and interval scope. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
   imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state
@@ -293,7 +295,8 @@ packages the canonical stationary local solution attached to
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
-  full point 4 is therefore proving the raw non-identity gauge-flow obligations
+  full point 4 is therefore proving the raw non-identity gauge-flow and
+  gauge-pullback time-regularity obligations
   and the quasilinear parabolic PDE existence/uniqueness step needed to produce
   Ricci-DeTurck solutions, including the actual Ricci-DeTurck Banach chart and
   estimates plus the identification of that Banach representative with the
