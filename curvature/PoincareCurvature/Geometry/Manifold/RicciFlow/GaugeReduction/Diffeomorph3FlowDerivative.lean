@@ -221,6 +221,34 @@ def gaugeViaDerivative
       sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         (G.gaugeViaDerivative sol) := rfl
 
+/-- Extract the scalar inner-product derivative data for a fixed-IVP geometric
+gauge-flow bundle from a time derivative of the actual gauge-pulled metric. -/
+theorem innerHasDerivAt_of_hasTimeDerivativeOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      HasTimeDerivativeOn (I := I) (M := M)
+        ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+        (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+        sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (x : M) (u v : TangentSpace I x) :
+    HasDerivAt
+      (fun τ ↦
+        (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+          (((G.maps3 sol) τ) x)
+          (((G.maps3 sol) τ).pushforwardTangent x u)
+          (((G.maps3 sol) τ).pushforwardTangent x v))
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge sol) t x u v) t := by
+  simpa using
+    sol.1.gaugeCorrectedPullbackMetric_inner_hasDerivAt_of_hasTimeDerivativeOn
+      (G.gauge sol) (hpullDerivative sol) ht x u v
+
 end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
 
 /-- A reusable bundle of geometric `C^3` intrinsic DeTurck gauge flows for all
@@ -335,6 +363,36 @@ geometric flow statement or from its derivative view. -/
     sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge ivp sol) =
       sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         (G.gaugeViaDerivative ivp sol) := rfl
+
+/-- Extract the scalar inner-product derivative data for a theorem-family
+geometric gauge-flow bundle from time derivatives of the actual gauge-pulled
+metrics. -/
+theorem innerHasDerivAt_of_hasTimeDerivativeOn
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hpullDerivative : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        HasTimeDerivativeOn (I := I) (M := M)
+          ((G.maps3 ivp sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+          (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge ivp sol))
+          sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (x : M) (u v : TangentSpace I x) :
+    HasDerivAt
+      (fun τ ↦
+        (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+          (((G.maps3 ivp sol) τ) x)
+          (((G.maps3 ivp sol) τ).pushforwardTangent x u)
+          (((G.maps3 ivp sol) τ).pushforwardTangent x v))
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp sol) t x u v) t := by
+  simpa using
+    (G.forInitialValueProblem ivp).innerHasDerivAt_of_hasTimeDerivativeOn
+      (hpullDerivative ivp) sol ht x u v
 
 end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
 

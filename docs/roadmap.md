@@ -278,7 +278,9 @@ with intrinsic comparison lemmas against arbitrary zero-velocity or
          gauge-reducible/intrinsic/ordinary theorem-family routes from
          pulled-back metric time-derivative data, together with a
          fixed-initial-value-problem bundle exposing matching local
-         theorem-package projections.
+         theorem-package projections. Both bundle levels now also extract the
+         scalar inner-product derivative hypotheses from the same gauge-pulled
+         metric time-derivative proof.
         The non-identity right-slot/Ricci-transport obligation is now discharged
         by the `C^3` transport layer; the remaining primitive non-identity gauge
         input is the time-derivative/scalar-derivative formula for the
