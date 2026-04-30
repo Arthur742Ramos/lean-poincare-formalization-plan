@@ -251,6 +251,39 @@ lemma ricciTensor_eq_zero_of_subsingleton_tangent
   exact CovariantDerivative.ricciCurvature_eq_zero_of_subsingleton_tangent
     (I := I) (M := M) (cov := cov t) x u v
 
+/-- If the model vector space has dimension at most one, each tangent fiber has dimension at most
+one. -/
+lemma tangent_finrank_le_one_of_model
+    [Fact (Module.finrank ℝ E ≤ 1)] (x : M) :
+    Module.finrank ℝ (TM x) ≤ 1 := by
+  change Module.finrank ℝ E ≤ 1
+  exact Fact.out
+
+/-- Ricci tensor components vanish when every tangent fiber has dimension at most one. -/
+lemma ricciTensor_eq_zero_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciTensor (I := I) (M := M) g cov hcov t x u v = 0 := by
+  unfold ricciTensor
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  exact CovariantDerivative.ricciCurvature_eq_zero_of_finrank_le_one
+    (I := I) (M := M) (cov := cov t) x (hfin x) u v
+
+/-- Model-space version of `ricciTensor_eq_zero_of_finrank_le_one`. -/
+lemma ricciTensor_eq_zero_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)]
+    (g : MetricFamily (I := I) (M := M))
+    (cov : ConnectionFamily (I := I) (M := M))
+    (hcov : ∀ t : ℝ, CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1)
+    (t : ℝ) (x : M) (u v : TM x) :
+    ricciTensor (I := I) (M := M) g cov hcov t x u v = 0 :=
+  ricciTensor_eq_zero_of_finrank_le_one
+    (I := I) (M := M) (fun x ↦ tangent_finrank_le_one_of_model (I := I) (M := M) x)
+    g cov hcov t x u v
+
 /-- The Ricci tensor associated to a time-dependent metric family is independent of the chosen
 Levi-Civita family used to compute it. -/
 theorem ricciTensor_eq_of_isLeviCivita
@@ -543,6 +576,29 @@ lemma intrinsicRicciTensor_eq_zero_of_subsingleton_tangent
       (I := I) (M := M) g)
     t x u v
 
+/-- The intrinsic Ricci tensor vanishes when every tangent fiber has dimension at most one. -/
+lemma intrinsicRicciTensor_eq_zero_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M) g t x u v = 0 := by
+  exact ricciTensor_eq_zero_of_finrank_le_one (I := I) (M := M) hfin g
+    (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+      (I := I) (M := M) g)
+    (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g)
+    t x u v
+
+/-- Model-space version of `intrinsicRicciTensor_eq_zero_of_finrank_le_one`. -/
+lemma intrinsicRicciTensor_eq_zero_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)]
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M) g t x u v = 0 :=
+  intrinsicRicciTensor_eq_zero_of_finrank_le_one
+    (I := I) (M := M) (fun x ↦ tangent_finrank_le_one_of_model (I := I) (M := M) x)
+    g t x u v
+
 theorem intrinsicRicciTensor_eq_ricciTensor_of_isLeviCivita
     (g : MetricFamily (I := I) (M := M))
     {cov : ConnectionFamily (I := I) (M := M)}
@@ -657,6 +713,33 @@ lemma intrinsicRicciFlowRHS_eq_zero_of_subsingleton_tangent
     (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
       (I := I) (M := M) g)
     t x u v
+
+/-- The intrinsic Ricci-flow right-hand side vanishes when every tangent fiber has dimension at
+most one. -/
+lemma intrinsicRicciFlowRHS_eq_zero_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHS (I := I) (M := M) g t x u v = 0 := by
+  exact ricciFlowRHS_eq_zero_of_ricciTensor_eq_zero (I := I) (M := M) g
+    (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+      (I := I) (M := M) g)
+    (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g)
+    (by
+      simpa [intrinsicRicciTensor] using
+        intrinsicRicciTensor_eq_zero_of_finrank_le_one
+          (I := I) (M := M) hfin g t x u v)
+
+/-- Model-space version of `intrinsicRicciFlowRHS_eq_zero_of_finrank_le_one`. -/
+lemma intrinsicRicciFlowRHS_eq_zero_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)]
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHS (I := I) (M := M) g t x u v = 0 :=
+  intrinsicRicciFlowRHS_eq_zero_of_finrank_le_one
+    (I := I) (M := M) (fun x ↦ tangent_finrank_le_one_of_model (I := I) (M := M) x)
+    g t x u v
 
 /-- The intrinsic Ricci-flow right-hand side vanishes wherever the intrinsic Ricci tensor
 vanishes. -/
@@ -2174,12 +2257,54 @@ theorem InitialValueProblem.isRicciFlat_of_subsingleton_tangent
   exact CovariantDerivative.ricciCurvature_eq_zero_of_subsingleton_tangent
     (I := I) (M := M) (cov := cov₀) x u v
 
+/-- Initial data is Ricci-flat when every tangent fiber has dimension at most one. -/
+theorem InitialValueProblem.isRicciFlat_of_finrank_le_one
+    [SigmaCompactSpace M]
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M) := by
+  letI : Bundle.RiemannianBundle TM := ⟨ivp.initialMetric.toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  let cov₀ : CovariantDerivative I E TM :=
+    CovariantDerivative.someContMDiffLeviCivitaConnection (I := I) (E := E) (M := M)
+  letI : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1 :=
+    CovariantDerivative.someContMDiffLeviCivitaConnection_contMDiff (I := I) (E := E) (M := M)
+  intro x u v
+  exact CovariantDerivative.ricciCurvature_eq_zero_of_finrank_le_one
+    (I := I) (M := M) (cov := cov₀) x (hfin x) u v
+
+/-- Model-space version of `InitialValueProblem.isRicciFlat_of_finrank_le_one`. -/
+theorem InitialValueProblem.isRicciFlat_of_finrank_model_le_one
+    [SigmaCompactSpace M] [Fact (Module.finrank ℝ E ≤ 1)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M) :=
+  ivp.isRicciFlat_of_finrank_le_one (I := I) (M := M)
+    (fun x ↦ tangent_finrank_le_one_of_model (I := I) (M := M) x)
+
 theorem localSolution_nonempty_of_subsingleton_tangent
     [SigmaCompactSpace M] [∀ x : M, Subsingleton (TM x)]
     (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
     Nonempty (LocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
   localSolution_nonempty_of_isRicciFlat (I := I) (M := M) ivp
     (ivp.isRicciFlat_of_subsingleton_tangent (I := I) (M := M))
+
+/-- If all tangent fibers have dimension at most one, every initial metric admits the stationary
+Ricci-flow local solution. -/
+theorem localSolution_nonempty_of_finrank_le_one
+    [SigmaCompactSpace M]
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Nonempty (LocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
+  localSolution_nonempty_of_isRicciFlat (I := I) (M := M) ivp
+    (ivp.isRicciFlat_of_finrank_le_one (I := I) (M := M) hfin)
+
+/-- Model-space version of `localSolution_nonempty_of_finrank_le_one`. -/
+theorem localSolution_nonempty_of_finrank_model_le_one
+    [SigmaCompactSpace M] [Fact (Module.finrank ℝ E ≤ 1)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Nonempty (LocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
+  localSolution_nonempty_of_finrank_le_one
+    (I := I) (M := M) (fun x ↦ tangent_finrank_le_one_of_model (I := I) (M := M) x) ivp
 
 theorem localSolution_nonempty_of_stationary_ricciFlat_someLeviCivitaConnection
     [SigmaCompactSpace M]
@@ -2621,6 +2746,24 @@ theorem intrinsicLocalSolution_nonempty_of_isRicciFlat
     Nonempty (IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) := by
   exact ⟨stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat
     (I := I) (M := M) ivp hRicciFlat⟩
+
+/-- If all tangent fibers have dimension at most one, every initial metric admits the stationary
+intrinsic Ricci-flow local solution. -/
+theorem intrinsicLocalSolution_nonempty_of_finrank_le_one
+    [SigmaCompactSpace M]
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Nonempty (IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
+  intrinsicLocalSolution_nonempty_of_isRicciFlat (I := I) (M := M) ivp
+    (ivp.isRicciFlat_of_finrank_le_one (I := I) (M := M) hfin)
+
+/-- Model-space version of `intrinsicLocalSolution_nonempty_of_finrank_le_one`. -/
+theorem intrinsicLocalSolution_nonempty_of_finrank_model_le_one
+    [SigmaCompactSpace M] [Fact (Module.finrank ℝ E ≤ 1)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Nonempty (IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
+  intrinsicLocalSolution_nonempty_of_finrank_le_one
+    (I := I) (M := M) (fun x ↦ tangent_finrank_le_one_of_model (I := I) (M := M) x) ivp
 
 theorem stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
     [SigmaCompactSpace M]
@@ -3162,6 +3305,87 @@ noncomputable def localExistenceUniquenessFamily_of_subsingleton_model
     [Subsingleton E] :
     LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
   (intrinsicLocalExistenceUniquenessFamily_of_subsingleton_model
+    (I := I) (M := M)).toOrdinary
+
+/-- On compact manifolds whose tangent fibers have dimension at most one, Ricci flow has a
+stationary local solution for every initial metric and metric uniqueness follows because every
+intrinsic Ricci tensor vanishes identically. -/
+noncomputable def intrinsicLocalExistenceUniqueness_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp where
+  exists_solution :=
+    intrinsicLocalSolution_nonempty_of_finrank_le_one (I := I) (M := M) hfin ivp
+  unique_metric := by
+    intro sol₁ sol₂ t ht x u v
+    exact intrinsicLocalSolution_unique_metric_of_ricciTensor_zero
+      (I := I) (M := M) sol₁ sol₂
+      (fun τ _hτ y a b =>
+        intrinsicRicciTensor_eq_zero_of_finrank_le_one
+          (I := I) (M := M) hfin sol₁.toIntrinsicSolution.metric τ y a b)
+      (fun τ _hτ y a b =>
+        intrinsicRicciTensor_eq_zero_of_finrank_le_one
+          (I := I) (M := M) hfin sol₂.toIntrinsicSolution.metric τ y a b)
+      ht x u v
+
+/-- Ordinary connection-parametrized version of
+`intrinsicLocalExistenceUniqueness_of_finrank_le_one`. -/
+noncomputable def localExistenceUniqueness_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (intrinsicLocalExistenceUniqueness_of_finrank_le_one
+    (I := I) (M := M) hfin ivp).toOrdinary
+
+/-- The theorem-family version of
+`intrinsicLocalExistenceUniqueness_of_finrank_le_one`. -/
+noncomputable def intrinsicLocalExistenceUniquenessFamily_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    intrinsicLocalExistenceUniqueness_of_finrank_le_one (I := I) (M := M) hfin ivp
+
+/-- Ordinary connection-parametrized theorem-family version of
+`intrinsicLocalExistenceUniquenessFamily_of_finrank_le_one`. -/
+noncomputable def localExistenceUniquenessFamily_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (intrinsicLocalExistenceUniquenessFamily_of_finrank_le_one
+    (I := I) (M := M) hfin).toOrdinary
+
+/-- On compact manifolds with model vector space of dimension at most one, Ricci flow has a
+stationary local solution for every initial metric and metric uniqueness is pointwise forced by
+rank-one Ricci flatness. -/
+noncomputable def intrinsicLocalExistenceUniqueness_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  intrinsicLocalExistenceUniqueness_of_finrank_le_one
+    (I := I) (M := M) (fun x ↦ tangent_finrank_le_one_of_model (I := I) (M := M) x) ivp
+
+/-- Ordinary connection-parametrized version of
+`intrinsicLocalExistenceUniqueness_of_finrank_model_le_one`. -/
+noncomputable def localExistenceUniqueness_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (intrinsicLocalExistenceUniqueness_of_finrank_model_le_one
+    (I := I) (M := M) ivp).toOrdinary
+
+/-- The theorem-family version of
+`intrinsicLocalExistenceUniqueness_of_finrank_model_le_one`. -/
+noncomputable def intrinsicLocalExistenceUniquenessFamily_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)] :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    intrinsicLocalExistenceUniqueness_of_finrank_model_le_one (I := I) (M := M) ivp
+
+/-- Ordinary connection-parametrized theorem-family version of
+`intrinsicLocalExistenceUniquenessFamily_of_finrank_model_le_one`. -/
+noncomputable def localExistenceUniquenessFamily_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)] :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (intrinsicLocalExistenceUniquenessFamily_of_finrank_model_le_one
     (I := I) (M := M)).toOrdinary
 
 /-- On an empty compact manifold, the compact point-4 theorem package is provable for every initial

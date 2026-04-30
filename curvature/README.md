@@ -59,11 +59,17 @@ scaffolding do not count as completion.
 Roadmap points 1, 2, and 3 are landed in this package as actual Lean
 formalization.
 
-Point 4 is **not** closed under the package standard: the current
-`RicciFlow.LocalExistence` draft material is only a theorem boundary and not a
-Lean proof of local existence/uniqueness. It is kept as an internal scaffold,
-not as part of the public proof-bearing package surface. The next active
-milestone is therefore still point 4 itself. The package does now include a
+Point 4 is **not** closed in full generality under the package standard: the
+current `RicciFlow.LocalExistence` material does not yet prove compact
+Ricci-flow local existence/uniqueness in arbitrary dimension. It is kept as an
+internal scaffold, not as part of the public proof-bearing package surface.
+The next active milestone is therefore still the general point-4 theorem.
+The scaffold now contains proof-bearing stationary theorem packages for
+subsingleton tangent/model spaces and for rank-one tangent/model spaces
+(`Module.finrank ℝ E ≤ 1`), plus a thin `LocalExistence.RankOne` extension
+showing that every rank-one local solution has zero metric velocity, is
+stationary in metric components, and has the same Levi-Civita connection on
+overlaps. The package also includes a
 proof-bearing section-smoothing layer: local-to-global gluing for smooth
 vector-bundle sections valued in fiberwise convex sets, trivial-bundle and
 open-set smoothing, local smoothing in a fixed trivialization, and a global
@@ -209,7 +215,9 @@ now packages the matching intrinsic boundary
     global/interval PDE closure data that turns a Banach chart solution into a
     smooth chosen-background DeTurck solution and its self-encoding candidate:
     metric realization, boundary time derivatives, chart-RHS/geometric-RHS
-    identification, and chosen Levi-Civita background. The optional
+    identification, and chosen Levi-Civita background; it also packages the
+    all-solutions smooth-realization plus reverse-candidate-encoding closure
+    into direct global/interval chosen-background DeTurck theorem packages. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state
@@ -294,15 +302,20 @@ now packages the matching intrinsic boundary
    for every initial value problem. It also specializes these criteria to genuine
    bundled continuous Riemannian initial metrics, so future Ricci-DeTurck
    Banach-chart work no longer has to manually prove finite-cover metric-locus
-   membership for the initial datum. The ordinary, intrinsic,
+   membership for the initial datum. The interval chart now derives the
+   genuine symmetric-carrier vector field from the ambient Ricci-DeTurck chart:
+   geometric RHS symmetry proves tangency to symmetric bilinear forms, and the
+   ambient interval Lipschitz estimate descends to the restricted metric-locus
+   vector field. The ordinary, intrinsic,
    chosen-background, gauge-reduced, and scalar-derivative theorem families now
    expose package-level connection uniqueness on common intervals. This is still
    not the full compact-manifold local existence/uniqueness theorem, so point 4
    remains open; the remaining geometric/analytic blockers are the raw
    non-identity gauge-flow obligations and the quasilinear parabolic PDE layer,
    including the
-   actual Ricci-DeTurck Banach chart and estimates plus the identification of
-   that Banach representative with the geometric Ricci-DeTurck right-hand side.
+   actual Ricci-DeTurck Banach chart and Picard estimates on the restricted
+   symmetric carrier plus the identification of that Banach representative with
+   the geometric Ricci-DeTurck right-hand side.
    The curvature, time-dependent geometry, intrinsic Ricci-flow, and DeTurck
    layers now prove the geometric symmetry input outright: metric compatibility
    gives curvature-operator skew-adjointness, torsion-freeness gives first

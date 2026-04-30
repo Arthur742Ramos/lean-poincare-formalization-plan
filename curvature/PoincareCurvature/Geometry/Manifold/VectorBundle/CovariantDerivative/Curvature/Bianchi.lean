@@ -41,6 +41,7 @@ private lemma along_sub_right_apply {x : M}
   have hsub : σ - τ = σ + ((fun _ : M ↦ (-1 : ℝ)) • τ) := by
     ext y
     simp [sub_eq_add_neg]
+    rfl
   rw [hsub]
   have hsmul : MDiffAt (T% ((fun _ : M ↦ (-1 : ℝ)) • τ)) x := by
     simpa using
@@ -48,11 +49,15 @@ private lemma along_sub_right_apply {x : M}
         mdifferentiableAt_const hτ)
   rw [cov.along_add_right_apply hσ hsmul]
   have hnegApply : cov.along X ((fun _ : M ↦ (-1 : ℝ)) • τ) x = -cov.along X τ x := by
-    simpa using
-      (cov.along_smul_right_apply (x := x) (f := fun _ : M ↦ (-1 : ℝ)) (X := X) (σ := τ)
-        mdifferentiableAt_const hτ)
+    calc
+      cov.along X ((fun _ : M ↦ (-1 : ℝ)) • τ) x = -cov.along X τ x + 0 := by
+        simpa using
+          (cov.along_smul_right_apply (x := x) (f := fun _ : M ↦ (-1 : ℝ)) (X := X)
+            (σ := τ) mdifferentiableAt_const hτ)
+      _ = -cov.along X τ x := by simp
   rw [hnegApply]
   simp [sub_eq_add_neg]
+  rfl
 
 /-- For torsion-free affine connections, the covariant-derivative commutator on vector fields is
 the Lie bracket. -/
@@ -213,8 +218,9 @@ theorem firstBianchiAux_apply_of_torsion_eq_zero
         (cov.along Y (cov.along Z X) x - cov.along Z (cov.along Y X) x -
           cov.along (VectorField.mlieBracket I Y Z) X x) +
         (cov.along Z (cov.along X Y) x - cov.along X (cov.along Z Y) x -
-          cov.along (VectorField.mlieBracket I Z X) Y x) := by
-            simp [CovariantDerivative.curvatureAux]
+           cov.along (VectorField.mlieBracket I Z X) Y x) := by
+             simp [CovariantDerivative.curvatureAux]
+             rfl
     _ = cov.along X (cov.along Y Z - cov.along Z Y) x +
           cov.along Y (cov.along Z X - cov.along X Z) x +
           cov.along Z (cov.along X Y - cov.along Y X) x -
@@ -328,23 +334,34 @@ private lemma curvatureAux_sub_left_apply
   have h1 :
       cov.along (X - X') (cov.along Y W) x =
         cov.along X (cov.along Y W) x - cov.along X' (cov.along Y W) x := by
-    simpa using congrArg (fun s => s x) (cov.along_sub_left X X' (cov.along Y W))
+    exact congrArg (fun s => s x) (cov.along_sub_left X X' (cov.along Y W))
   have h2 :
       cov.along Y (cov.along (X - X') W) x =
         cov.along Y (cov.along X W) x - cov.along Y (cov.along X' W) x := by
-    rw [cov.along_sub_left]
-    exact cov.along_sub_right_apply (x := x) (X := Y) hXW hX'W
+    calc
+      cov.along Y (cov.along (X - X') W) x =
+          cov.along Y (cov.along X W - cov.along X' W) x := by
+            exact congrArg (fun s ↦ cov.along Y s x) (cov.along_sub_left X X' W)
+      _ = cov.along Y (cov.along X W) x - cov.along Y (cov.along X' W) x :=
+            cov.along_sub_right_apply (x := x) (X := Y) hXW hX'W
   have hBracketSub :
       VectorField.mlieBracket I (X - X') Y x =
         VectorField.mlieBracket I X Y x - VectorField.mlieBracket I X' Y x := by
-    rw [sub_eq_add_neg, VectorField.mlieBracket_add_left hXx hNegX'x]
     have hConst :
         VectorField.mlieBracket I (-X') Y x = -VectorField.mlieBracket I X' Y x := by
       simpa using
         (VectorField.mlieBracket_const_smul_left
           (I := I) (x := x) (V := X') (W := Y) (c := (-1 : ℝ)) hX'x)
-    rw [hConst]
-    abel_nf
+    calc
+      VectorField.mlieBracket I (X - X') Y x =
+          VectorField.mlieBracket I (X + -X') Y x := by
+            rw [sub_eq_add_neg]
+            rfl
+      _ = VectorField.mlieBracket I X Y x + VectorField.mlieBracket I (-X') Y x :=
+          VectorField.mlieBracket_add_left (I := I) (V := X) (V₁ := -X') (W := Y) hXx hNegX'x
+      _ = VectorField.mlieBracket I X Y x - VectorField.mlieBracket I X' Y x := by
+          rw [hConst]
+          abel_nf
   have h3 :
       cov.along (VectorField.mlieBracket I (X - X') Y) W x =
         cov.along (VectorField.mlieBracket I X Y) W x -
@@ -355,7 +372,7 @@ private lemma curvatureAux_sub_left_apply
               simp [hBracketSub]
       _ = cov.along (VectorField.mlieBracket I X Y) W x -
             cov.along (VectorField.mlieBracket I X' Y) W x := by
-              simpa using congrArg (fun s => s x)
+              exact congrArg (fun s => s x)
                 (cov.along_sub_left
                   (VectorField.mlieBracket I X Y) (VectorField.mlieBracket I X' Y) W)
   calc
@@ -364,6 +381,7 @@ private lemma curvatureAux_sub_left_apply
             cov.along Y (cov.along (X - X') W) x -
             cov.along (VectorField.mlieBracket I (X - X') Y) W x := by
               simp [CovariantDerivative.curvatureAux]
+              rfl
     _ = (cov.along X (cov.along Y W) x - cov.along X' (cov.along Y W) x) -
           (cov.along Y (cov.along X W) x - cov.along Y (cov.along X' W) x) -
           (cov.along (VectorField.mlieBracket I X Y) W x -
@@ -376,6 +394,7 @@ private lemma curvatureAux_sub_left_apply
             abel_nf
     _ = cov.curvatureAux X Y W x - cov.curvatureAux X' Y W x := by
           simp [CovariantDerivative.curvatureAux]
+          rfl
 
 private lemma along_curvatureAux_sub_curvatureAux_along_apply
     {X Y Z W : Π x : M, TM x} {x : M}
@@ -456,6 +475,7 @@ private lemma along_curvatureAux_sub_curvatureAux_along_apply
               rw [hCurvYZ, cov.along_sub_right_apply hA hBplusC,
                 cov.along_add_right_apply hB hC]
               simp [CovariantDerivative.curvatureAux]
+              rfl
     _ = cov.along X (cov.along Y (cov.along Z W)) x -
           cov.along X (cov.along Z (cov.along Y W)) x -
           cov.along Y (cov.along Z (cov.along X W)) x +
@@ -536,7 +556,7 @@ private lemma cyclic_along_curvatureAux_sub_curvatureAux_along_apply
             (VectorField.mlieBracket I X (VectorField.mlieBracket I Y Z) x +
               VectorField.mlieBracket I Y (VectorField.mlieBracket I Z X) x +
               VectorField.mlieBracket I Z (VectorField.mlieBracket I X Y) x) := by
-                simp [CovariantDerivative.along, map_add, add_assoc]
+                simp [CovariantDerivative.along, map_add]
       _ = 0 := by simp [hJac]
   calc
     (cov.along X (cov.curvatureAux Y Z W) x - cov.curvatureAux Y Z (cov.along X W) x) +

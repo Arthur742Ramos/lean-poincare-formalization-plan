@@ -148,8 +148,18 @@ separately for the basic Ricci-flat corollary, and the initial-data side now
  and metric uniqueness for every initial metric, with theorem-family variants.
  Since mathlib's tangent space is a type synonym of the model vector space, the
  same theorem packages are now also exposed under the more natural
- `[Subsingleton E]` model-space hypothesis.
- More generally, the
+ `[Subsingleton E]` model-space hypothesis. The first positive-dimensional
+ theorem package has also landed: on tangent fibers of real dimension at most
+ one, the alternating curvature tensor vanishes in its first two slots, hence
+ Ricci curvature and the intrinsic Ricci-flow right-hand side vanish. This
+ yields stationary local-existence/metric-uniqueness packages
+ `intrinsicLocalExistenceUniqueness_of_finrank_le_one`,
+ `localExistenceUniqueness_of_finrank_le_one`, and model-space theorem-family
+ variants under `[Fact (Module.finrank ℝ E ≤ 1)]`. The thin
+ `LocalExistence.RankOne` extension also proves that all ordinary and intrinsic
+ rank-one local solutions have zero metric velocity, remain equal to the initial
+ metric on their local interval, and have unique Levi-Civita connection values on
+ common intervals. More generally, the
 scaffold now proves that any local solution with zero metric velocity on its
 whole interval stays equal to the initial metric tensor there and keeps the
 same Levi-Civita connection as its initial slice, so zero-velocity local
@@ -516,6 +526,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     existence witness, and a thin `AnalyticPDE.SmoothRealization` module naming
     the global/interval PDE closure data that turns a Banach chart solution into
     a smooth chosen-background DeTurck solution and its self-encoding candidate,
+    with all-solutions smooth-realization plus reverse-candidate-encoding
+    closure packaged into direct global/interval chosen-background DeTurck
+    theorem packages,
      and routes raw pointwise gauge-flow derivatives plus
     pullback-time-derivative input to scalar-derivative, intrinsic, and ordinary theorem packages.
      The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate also imports the
@@ -616,8 +629,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       derivative-level gauge data whenever the DeTurck gauge field vanishes, with direct
       identity-route intrinsic/ordinary projections matching the non-identity APIs. These criteria are also
       specialized to genuine bundled continuous Riemannian initial metrics, so
-      future Ricci-DeTurck Banach-chart work no longer has to manually prove
-      finite-cover metric-locus membership for the initial datum. The curvature, time-dependent geometry,
+       future Ricci-DeTurck Banach-chart work no longer has to manually prove
+       finite-cover metric-locus membership for the initial datum. The interval
+       chart now also derives the genuine symmetric-carrier vector field from
+       the ambient Ricci-DeTurck chart: geometric RHS symmetry proves tangency
+       to symmetric bilinear forms, and the ambient interval Lipschitz estimate
+       descends to the restricted metric-locus vector field. The curvature, time-dependent geometry,
     intrinsic Ricci-flow, and DeTurck layers now prove the geometric symmetry
     input outright: metric compatibility gives curvature-operator
     skew-adjointness, torsion-freeness gives first Bianchi, the Ricci contraction

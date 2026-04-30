@@ -134,7 +134,7 @@ def connectionDifferenceTraceOneForm
           _ = c * LinearMap.trace ℝ (TM x)
                 (connectionDifferenceTraceEndomorphism (I := I) (M := M)
                   cov cov' t x w).toLinearMap := by
-                simp [LinearMap.map_smul] }
+                simp }
 
 @[simp] lemma connectionDifferenceTraceOneForm_apply
     (cov cov' : ConnectionFamily (I := I) (M := M))
@@ -1810,6 +1810,8 @@ lemma curvatureAux_pullbackCovariantDerivative
   funext x
   rw [CovariantDerivative.curvatureAux_apply, hXY, hYX, hBracketTerm]
   simp [CovariantDerivative.curvatureAux, SmoothSelfDiffeomorph2.pullbackVectorField]
+  rw [← map_sub, ← map_sub]
+  rfl
 
 @[simp] lemma curvatureAux_pullbackCovariantDerivative_apply
     (cov : CovariantDerivative I E TM)
@@ -2037,11 +2039,15 @@ lemma difference_pullbackCovariantDerivative
           φ.pullbackTangent x
             (cov' (φ.pushforwardVectorField X) (φ x) (φ.pushforwardTangent x u)) := by
               simp [φ.pullbackCovariantDerivative_apply]
+              rfl
     _ = φ.pullbackTangent x
           (((cov (φ.pushforwardVectorField X) (φ x) : TM (φ x) →L[ℝ] TM (φ x)) -
               (cov' (φ.pushforwardVectorField X) (φ x) : TM (φ x) →L[ℝ] TM (φ x)))
             (φ.pushforwardTangent x u)) := by
           simp
+          exact (map_sub (φ.pullbackTangent x)
+            (cov (φ.pushforwardVectorField X) (φ x) (φ.pushforwardTangent x u))
+            (cov' (φ.pushforwardVectorField X) (φ x) (φ.pushforwardTangent x u))).symm
     _ = ((φ.pullbackTangent x).comp
           (((cov (φ.pushforwardVectorField X) (φ x) : TM (φ x) →L[ℝ] TM (φ x)) -
               (cov' (φ.pushforwardVectorField X) (φ x) : TM (φ x) →L[ℝ] TM (φ x))).comp

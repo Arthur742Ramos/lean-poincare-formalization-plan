@@ -202,6 +202,101 @@ theorem exists_contMDiffSection_mem_open_of_convex
 
 end
 
+section NormedApprox
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  {V : M → Type*} [∀ x, NormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+  [TopologicalSpace (TotalSpace F V)]
+  [FiberBundle F V] [VectorBundle ℝ F V]
+
+/-- In a smooth normed vector bundle, a continuous section can be approximated by a smooth section
+within any positive continuous fiberwise error bound, provided inverse trivializations are locally
+bounded in operator norm.  The Riemannian approximation theorem below is the special case where this
+local bound is supplied by continuity of the fiber inner products. -/
+theorem Continuous.exists_contMDiffSection_approx_of_eventually_norm_symmL_lt
+    {n : ℕ∞} [SecondCountableTopology H] [ContMDiffVectorBundle n F V I]
+    (hbound : ∀ x : M, ∃ C > 0,
+      ∀ᶠ y in 𝓝 x, ‖(trivializationAt F V x).symmL ℝ y‖ < C)
+    {s : ∀ x, V x} {ε : M → ℝ}
+    (hs : Continuous (T% s)) (hε : Continuous ε) (hε_pos : ∀ x, 0 < ε x) :
+    ∃ g : Cₛ^n⟮I; F, V⟯, ∀ x, dist (g x) (s x) < ε x := by
+  classical
+  let t : ∀ x, Set (V x) := fun x ↦ Metric.ball (s x) (ε x)
+  have ht_conv : ∀ x, Convex ℝ (t x) := fun x ↦ convex_ball (s x) (ε x)
+  have hlocal :
+      ∀ x : M, ∃ U ∈ 𝓝 x, ∃ s_loc : (y : M) → V y,
+        CMDiff[U] n (T% s_loc) ∧ ∀ y ∈ U, s_loc y ∈ t y := by
+    intro x
+    let e : Trivialization F (π F V) := trivializationAt F V x
+    have hxbase : x ∈ e.baseSet := mem_baseSet_trivializationAt F V x
+    let c : M → F := fun y ↦ (e ⟨y, s y⟩).2
+    have hc : ContinuousOn c e.baseSet := by
+      have hsec : ContinuousOn (T% s) e.baseSet := hs.continuousOn
+      have hcoord : ContinuousOn (fun y ↦ e ⟨y, s y⟩) e.baseSet := by
+        refine e.continuousOn.comp hsec ?_
+        intro y hy
+        simpa [e.mem_source] using hy
+      exact continuous_snd.comp_continuousOn hcoord
+    obtain ⟨C, hCpos, hCevent⟩ := hbound x
+    have hnhds : e.baseSet ∩ {y : M | ‖e.symmL ℝ y‖ < C} ∈ 𝓝 x := by
+      exact Filter.inter_mem (f := 𝓝 x) (e.open_baseSet.mem_nhds hxbase) hCevent
+    rcases mem_nhds_iff.mp hnhds with ⟨U, hUsub, hUopen, hxU⟩
+    have hUbase : U ⊆ e.baseSet := fun y hy ↦ (hUsub hy).1
+    have hUC : ∀ y ∈ U, ‖e.symmL ℝ y‖ < C := fun y hy ↦ (hUsub hy).2
+    let η : M → ℝ := fun y ↦ C⁻¹ * ε y
+    have hη : ContinuousOn η U := continuousOn_const.mul hε.continuousOn
+    have hη_pos : ∀ y ∈ U, 0 < η y := by
+      intro y hy
+      dsimp [η]
+      exact mul_pos (inv_pos.mpr hCpos) (hε_pos y)
+    obtain ⟨s_loc, hs_loc_smooth, hs_loc_approx⟩ :=
+      Bundle.Trivialization.exists_contMDiffSectionOn_approx
+        (I := I) (e := e) (n := n) hUopen hUbase (s := s) (ε := η)
+        (hc.mono hUbase) hη hη_pos
+    refine ⟨U, IsOpen.mem_nhds hUopen hxU, s_loc, hs_loc_smooth, ?_⟩
+    intro y hy
+    have hybase : y ∈ e.baseSet := hUbase hy
+    have hyC : ‖e.symmL ℝ y‖ < C := hUC y hy
+    have hcoord : dist ((e ⟨y, s_loc y⟩).2) (c y) < η y := by
+      simpa [η, c] using hs_loc_approx y hy
+    have hcoord' : ‖(e ⟨y, s_loc y⟩).2 - c y‖ < C⁻¹ * ε y := by
+      simpa [η, c, dist_eq_norm] using hcoord
+    have hsub :
+        s_loc y - s y = e.symmL ℝ y ((e ⟨y, s_loc y⟩).2 - c y) := by
+      calc
+        s_loc y - s y = e.symmL ℝ y (e.continuousLinearMapAt ℝ y (s_loc y - s y)) := by
+          symm
+          exact e.symmL_continuousLinearMapAt (R := ℝ) hybase (s_loc y - s y)
+        _ = e.symmL ℝ y ((e ⟨y, s_loc y⟩).2 - c y) := by
+          congr 1
+          rw [map_sub]
+          simp [c, Trivialization.linearMapAt_apply, hybase]
+    have hdist_le :
+        dist (s_loc y) (s y) ≤ ‖e.symmL ℝ y‖ * ‖(e ⟨y, s_loc y⟩).2 - c y‖ := by
+      rw [dist_eq_norm]
+      calc
+        ‖s_loc y - s y‖ = ‖e.symmL ℝ y ((e ⟨y, s_loc y⟩).2 - c y)‖ := by
+          rw [hsub]
+        _ ≤ ‖e.symmL ℝ y‖ * ‖(e ⟨y, s_loc y⟩).2 - c y‖ := by
+          exact ContinuousLinearMap.le_opNorm _ _
+    have hmul :
+        ‖e.symmL ℝ y‖ * ‖(e ⟨y, s_loc y⟩).2 - c y‖ < C * (C⁻¹ * ε y) := by
+      exact mul_lt_mul'' hyC hcoord' (norm_nonneg _) (norm_nonneg _)
+    have hcancel : C * (C⁻¹ * ε y) = ε y := by
+      calc
+        C * (C⁻¹ * ε y) = (C * C⁻¹) * ε y := by ring
+        _ = ε y := by rw [mul_inv_cancel₀ hCpos.ne', one_mul]
+    have hdist : dist (s_loc y) (s y) < ε y := lt_of_le_of_lt hdist_le (hcancel ▸ hmul)
+    simpa [t, Metric.mem_ball] using hdist
+  obtain ⟨g, hg⟩ := exists_contMDiffSection_mem_of_local (I := I) (V := V) (t := t) ht_conv hlocal
+  exact ⟨g, fun x ↦ by simpa [t, Metric.mem_ball] using hg x⟩
+
+end NormedApprox
+
 section RiemannianApprox
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]

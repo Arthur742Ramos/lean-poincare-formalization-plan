@@ -914,8 +914,9 @@ lemma curvatureAux_smul_fun_left_apply
       cov.along (VectorField.mlieBracket I (f • X) Y) σ x =
         -(extDerivFun (I := I) f x (Y x)) • cov.along X σ x +
           f x • cov.along (VectorField.mlieBracket I X Y) σ x := by
-    simp [CovariantDerivative.along, VectorField.mlieBracket_smul_left hf hXx, extDerivFun,
-      map_add, map_smul]
+    rw [CovariantDerivative.along, VectorField.mlieBracket_smul_left hf hXx, extDerivFun]
+    simp [CovariantDerivative.along, map_add, map_smul]
+    rw [← neg_smul, map_smul, neg_smul]
   calc
     cov.curvatureAux (f • X) Y σ x
         = cov.along (f • X) (cov.along Y σ) x -
@@ -1323,8 +1324,9 @@ private theorem curvatureAux_tensorial_left
         cov.along (VectorField.mlieBracket I (f • X) Y) σ x =
           -(extDerivFun (I := I) f x (Y x)) • cov.along X σ x +
             f x • cov.along (VectorField.mlieBracket I X Y) σ x := by
-      simp [CovariantDerivative.along, VectorField.mlieBracket_smul_left hf hX, extDerivFun,
-        map_add, map_smul]
+      rw [CovariantDerivative.along, VectorField.mlieBracket_smul_left hf hX, extDerivFun]
+      simp [CovariantDerivative.along, map_add, map_smul]
+      rw [← neg_smul, map_smul, neg_smul]
     calc
       cov.curvatureAux (f • X) Y σ x
           = cov.along (f • X) (cov.along Y σ) x -

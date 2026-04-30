@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
+public import Mathlib.Analysis.Normed.Operator.Basic
 public import Mathlib.Analysis.Normed.Group.Submodule
 public import Mathlib.Analysis.Normed.Module.TransferInstance
 public import Mathlib.Topology.ContinuousMap.Compact
@@ -1531,6 +1532,175 @@ lemma coordReadoutContinuousLinearMap_apply
       (equivCompatibleCoordFamilySubmodule
         (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x := rfl
 
+/-- Uniform control of every compact coordinate readout controls the transported finite-cover
+section norm.  This is the basic bridge from fiberwise/local approximation estimates to the Banach
+norm on `ContinuousSectionSpace`. -/
+theorem dist_le_of_forall_coord_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {C : ℝ} (hC : 0 ≤ C)
+    (hcoord : ∀ i (x : Kc i),
+      dist
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x)
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x) ≤ C) :
+    dist s t ≤ C := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedAddCommGroup
+      (𝕜 := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+  have he : Isometry e := by
+    intro x y
+    rfl
+  rw [← he.dist_eq s t]
+  change dist ((e s).1 : CoordFamily (F := F) Kc) ((e t).1) ≤ C
+  rw [dist_pi_le_iff hC]
+  intro i
+  exact (ContinuousMap.dist_le hC).2 (hcoord i)
+
+/-- Strict coordinatewise control yields strict control in the transported finite-cover section
+norm. -/
+theorem dist_lt_of_forall_coord_dist_lt
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {C : ℝ} (hC : 0 < C)
+    (hcoord : ∀ i (x : Kc i),
+      dist
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x)
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x) < C) :
+    dist s t < C := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedAddCommGroup
+      (𝕜 := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+  have he : Isometry e := by
+    intro x y
+    rfl
+  rw [← he.dist_eq s t]
+  change dist ((e s).1 : CoordFamily (F := F) Kc) ((e t).1) < C
+  rw [dist_pi_lt_iff hC]
+  intro i
+  exact (ContinuousMap.dist_lt_iff hC).2 (hcoord i)
+
+/-- Fiberwise approximation estimates imply finite-cover section-space approximation when the
+coordinate readouts are uniformly Lipschitz with respect to the chosen fiber distances.  This is the
+bookkeeping form needed after bounding a finite trivializing family on compact sets. -/
+theorem dist_lt_of_forall_fiber_dist_lt_of_coord_lipschitz
+    {κ : Type*} [Finite κ] [T2Space M]
+    [∀ x, PseudoMetricSpace (V x)]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {L η C : ℝ} (hL : 0 < L) (hC : 0 < C) (hLC : L * η < C)
+    (hfiber : ∀ x : M, dist (s x) (t x) < η)
+    (hcoordLip : ∀ i (x : Kc i),
+      dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x)
+        ≤ L * dist (s x.1) (t x.1)) :
+    dist s t < C := by
+  refine dist_lt_of_forall_coord_dist_lt
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+    (s := s) (t := t) hC ?_
+  intro i x
+  exact lt_of_le_of_lt (hcoordLip i x)
+    ((mul_lt_mul_of_pos_left (hfiber x.1) hL).trans hLC)
+
+/-- A fiberwise approximation theorem upgrades to approximation in the transported finite-cover
+section norm once the finite coordinate readouts satisfy a uniform Lipschitz estimate. -/
+theorem exists_dist_lt_of_forall_fiber_dist_lt_of_coord_lipschitz
+    {κ : Type*} [Finite κ] [T2Space M]
+    [∀ x, PseudoMetricSpace (V x)]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {P : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover → Prop}
+    {L : ℝ} (hL : 0 < L)
+    (happrox : ∀ η > 0,
+      ∃ u : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover,
+        P u ∧ ∀ x : M, dist (s x) (u x) < η)
+    (hcoordLip : ∀ u,
+      P u →
+      ∀ i (x : Kc i),
+        dist
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x)
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover u).1 i x)
+          ≤ L * dist (s x.1) (u x.1)) :
+    ∀ ε > 0,
+      ∃ u : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover,
+        P u ∧ dist s u < ε := by
+  intro ε hε
+  let η : ℝ := ε / L / 2
+  have hηpos : 0 < η := by
+    dsimp [η]
+    positivity
+  have hLη : L * η < ε := by
+    have hLne : L ≠ 0 := ne_of_gt hL
+    have hcalc : L * η = ε / 2 := by
+      dsimp [η]
+      field_simp [hLne]
+    rw [hcalc]
+    linarith
+  rcases happrox η hηpos with ⟨u, huP, hufiber⟩
+  refine ⟨u, huP, ?_⟩
+  exact dist_lt_of_forall_fiber_dist_lt_of_coord_lipschitz
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+    (s := s) (t := u) hL hε hLη hufiber (hcoordLip u huP)
+
 /-- Two finite-cover section-space points are equal when all compact coordinate readouts agree. -/
 theorem eq_of_coordReadout_eq
     {κ : Type*} [Finite κ] [T2Space M]
@@ -1562,6 +1732,72 @@ end ContinuousSectionSpace
 end CoverCompatibility
 
 end
+
+namespace ContinuousSectionSpace
+
+section TrivializationOpNorm
+
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {M : Type*} [TopologicalSpace M]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+  {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
+  [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace 𝕜 (V x)]
+  [FiberBundle F V] [VectorBundle 𝕜 F V]
+
+/-- The compact coordinate readouts of two sections are Lipschitz with the op-norm of the
+corresponding fiber trivialization. This turns a uniform bound on a finite family of
+trivialization maps into the `hcoordLip` hypothesis used by the fiberwise approximation bridge. -/
+theorem coord_dist_le_of_trivialization_opNorm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {L : ℝ}
+    (hL : ∀ i (x : Kc i), ‖(et i).continuousLinearMapAt 𝕜 x.1‖ ≤ L)
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    ∀ i (x : Kc i),
+      dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x)
+        ≤ L * dist (s x.1) (t x.1) := by
+  intro i x
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+  have hx : x.1 ∈ (et i).baseSet := hKc i x.2
+  have hscoord :
+      ((e s).1 i x) = (et i).continuousLinearMapAt 𝕜 x.1 (s x.1) := by
+    simp [e, equivCompatibleCoordFamilySubmodule, toSubtype,
+      continuousSectionEquivCompatibleCoordFamilySubmodule,
+      continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
+      compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
+      Bundle.Trivialization.linearMapAt_apply, hx]
+  have htcoord :
+      ((e t).1 i x) = (et i).continuousLinearMapAt 𝕜 x.1 (t x.1) := by
+    simp [e, equivCompatibleCoordFamilySubmodule, toSubtype,
+      continuousSectionEquivCompatibleCoordFamilySubmodule,
+      continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
+      compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
+      Bundle.Trivialization.linearMapAt_apply, hx]
+  calc
+    dist ((e s).1 i x) ((e t).1 i x)
+        = dist ((et i).continuousLinearMapAt 𝕜 x.1 (s x.1))
+            ((et i).continuousLinearMapAt 𝕜 x.1 (t x.1)) := by rw [hscoord, htcoord]
+    _ ≤ ‖(et i).continuousLinearMapAt 𝕜 x.1‖ * dist (s x.1) (t x.1) :=
+      ContinuousLinearMap.dist_le_opNorm ((et i).continuousLinearMapAt 𝕜 x.1) (s x.1) (t x.1)
+    _ ≤ L * dist (s x.1) (t x.1) := by
+      exact mul_le_mul_of_nonneg_right (hL i x) dist_nonneg
+
+end TrivializationOpNorm
+
+end ContinuousSectionSpace
 
 end Bundle.Trivialization
 

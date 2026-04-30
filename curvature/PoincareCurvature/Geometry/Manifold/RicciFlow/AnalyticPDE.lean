@@ -227,6 +227,36 @@ theorem eqOn_Icc_of_lipschitzOn_Icc
     exact sol₂.mem_state ⟨ht.1, le_trans (le_of_lt ht.2) hT₂⟩
   · rw [sol₁.initial_eq, sol₂.initial_eq]
 
+/-- A continuous linear map between Banach state spaces transports state-preserving solutions,
+provided it maps the state set to the target state set, maps the initial condition, and commutes
+with the vector fields on the source state set. -/
+def mapContinuousLinearMapBetween
+    {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℝ Y]
+    {G : ℝ → Y → Y} {targetStateSet : Set Y} {v₀ : Y}
+    (L : X →L[ℝ] Y)
+    (hL_state : ∀ x ∈ stateSet, L x ∈ targetStateSet)
+    (hL_initial : L u₀ = v₀)
+    (hcomm : ∀ t x, x ∈ stateSet → L (F t x) = G t (L x))
+    (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀) :
+    BanachEvolutionLocalSolutionIn G targetStateSet t₀ v₀ where
+  terminalTime := sol.terminalTime
+  initial_lt_terminal := sol.initial_lt_terminal
+  curve := fun t ↦ L (sol.curve t)
+  initial_eq := by
+    rw [sol.initial_eq, hL_initial]
+  equation := by
+    intro t ht
+    have hderiv :
+        HasDerivWithinAt (fun τ ↦ L (sol.curve τ))
+          (L (F t (sol.curve t))) (Icc t₀ sol.terminalTime) t := by
+      simpa [Function.comp_def] using
+        (L.hasFDerivAt.comp_hasFDerivWithinAt t
+          (sol.toBanachEvolutionLocalSolution.equation ht).hasFDerivWithinAt).hasDerivWithinAt
+    simpa [hcomm t (sol.curve t) (sol.mem_state ht)] using hderiv
+  mem_state := by
+    intro t ht
+    exact hL_state (sol.curve t) (sol.mem_state ht)
+
 /-- A continuous linear symmetry of the Banach state space transports state-preserving solutions,
 provided it preserves the state set, fixes the initial condition, and commutes with the vector field
 on that state set. -/
@@ -803,10 +833,9 @@ ambient continuous-section Banach evolution core: any `C^1` locally modeled vect
 Lipschitz on that open locus has a positive-definite-locus-preserving forward local solution,
 unique among positive-definite-locus-preserving solutions.
 
-This is still not the Ricci-DeTurck PDE theorem; it is the precise Banach/open-state bridge that
+This is still not the Ricci-DeTurck PDE theorem; it is the ambient Banach/open-state bridge that
 the Ricci-DeTurck operator must instantiate after its `C^1`/Lipschitz parabolic estimates are
-proved. Symmetry is not encoded in the carrier here because the existing closed symmetric section
-subtype is complete but is not yet a normed vector-space carrier for ODEs. -/
+proved. The theorem below upgrades this to the symmetric-section Banach carrier. -/
 theorem exists_unique_in_positiveDefiniteLocus_of_contDiffAt_lipschitzOn
     {κ : Type*} [Finite κ] [T2Space M]
     (x0 : κ → M)
@@ -850,6 +879,62 @@ theorem exists_unique_in_positiveDefiniteLocus_of_contDiffAt_lipschitzOn
   exact exists_unique_autonomous_banachEvolutionLocalSolutionIn_of_contDiffAt_lipschitzOn
     hA
     (isOpen_setOf_forall_pos (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover)
+    hg₀ hLip
+
+/-- Symmetric finite-cover metric-locus bridge.  The vector field evolves in the closed submodule of
+pointwise symmetric bilinear-form sections, and the open state set is the positive-definite locus
+inside that Banach carrier.  This removes the previous ambient nonsymmetric section-space detour
+from the Picard-Lindelöf part of the Ricci-DeTurck proof route. -/
+theorem exists_unique_in_riemannianMetricLocusSubmodule_of_contDiffAt_lipschitzOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    {A : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover →
+      symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ : ℝ}
+    {g₀ : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {K : ℝ≥0}
+    (hA : ContDiffAt ℝ 1 A g₀)
+    (hg₀ : g₀ ∈ riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hLip : LipschitzOnWith K A
+      (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover)) :
+    ∃ sol : BanachEvolutionLocalSolutionIn (fun _ : ℝ ↦ A)
+        (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+      ∀ sol' : BanachEvolutionLocalSolutionIn (fun _ : ℝ ↦ A)
+          (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime)) := by
+  letI : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) := hcomplete
+  letI : CompleteSpace (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :=
+    instCompleteSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover
+  exact @exists_unique_autonomous_banachEvolutionLocalSolutionIn_of_contDiffAt_lipschitzOn
+    (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedAddCommGroupSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instCompleteSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    A
+    (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    t₀ g₀ K hA
+    (isOpen_riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
       x0 et het Kc hKc Ko hKo hKoEq hcover)
     hg₀ hLip
 
@@ -958,6 +1043,60 @@ theorem exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn
       x0 et het Kc hKc Ko hKo hKoEq hcover)
     hg₀ hLip
 
+/-- Non-autonomous symmetric metric-locus bridge. Picard-Lindelöf hypotheses on the closed
+symmetric section submodule produce a local solution that remains in the finite-cover
+Riemannian-metric locus, unique among solutions preserving that locus. -/
+theorem exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lipschitzOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    {A : ℝ → symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover →
+      symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {g₀ : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩ g₀ a 0 L Kpic)
+    (hg₀ : g₀ ∈ riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hLip : ∀ t : ℝ, LipschitzOnWith Kstate (A t)
+      (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover)) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+      ∀ sol' : BanachEvolutionLocalSolutionIn A
+          (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime)) := by
+  letI : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) := hcomplete
+  exact @IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isOpen
+    (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedAddCommGroupSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instCompleteSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    A
+    (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    t₀ T hT g₀ a L Kpic Kstate hA
+    (isOpen_riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover)
+    hg₀ hLip
+
 /-- Non-autonomous finite-cover metric-locus bridge with Lipschitz bounds required only on the
 verified Picard time interval. -/
 theorem exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn_Icc
@@ -1006,6 +1145,59 @@ theorem exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn_I
     (F := A) (stateSet := positiveDefiniteLocus (M := M) (F := F) (W := W)
       et Kc hKc Ko hKo hKoEq hcover) hT hA
     (isOpen_setOf_forall_pos (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover)
+    hg₀ hLip
+
+/-- Interval-scoped non-autonomous symmetric metric-locus bridge, with Lipschitz bounds required
+only on the Picard interval. -/
+theorem exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lipschitzOn_Icc
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    {A : ℝ → symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover →
+      symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {g₀ : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩ g₀ a 0 L Kpic)
+    (hg₀ : g₀ ∈ riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hLip : ∀ t ∈ Icc t₀ T, LipschitzOnWith Kstate (A t)
+      (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover)) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+      ∀ sol' : BanachEvolutionLocalSolutionIn A
+          (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime)) := by
+  letI : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) := hcomplete
+  exact @IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isOpen_Icc
+    (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedAddCommGroupSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instCompleteSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    A
+    (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    t₀ T hT g₀ a L Kpic Kstate hA
+    (isOpen_riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
       x0 et het Kc hKc Ko hKo hKoEq hcover)
     hg₀ hLip
 
@@ -1058,6 +1250,60 @@ theorem exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn_I
     (F := A) (stateSet := positiveDefiniteLocus (M := M) (F := F) (W := W)
       et Kc hKc Ko hKo hKoEq hcover) hT hA
     (isOpen_setOf_forall_pos (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover)
+    hg₀ hLip
+
+/-- Interval-scoped symmetric metric-locus bridge retaining the terminal-time bound supplied by
+the Picard interval. -/
+theorem exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lipschitzOn_Icc_terminal_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    {A : ℝ → symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover →
+      symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {g₀ : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩ g₀ a 0 L Kpic)
+    (hg₀ : g₀ ∈ riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hLip : ∀ t ∈ Icc t₀ T, LipschitzOnWith Kstate (A t)
+      (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover)) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+      sol.terminalTime ≤ T ∧
+      ∀ sol' : BanachEvolutionLocalSolutionIn A
+          (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime)) := by
+  letI : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) := hcomplete
+  exact @IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isOpen_Icc_terminal_le
+    (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedAddCommGroupSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instCompleteSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    A
+    (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    t₀ T hT g₀ a L Kpic Kstate hA
+    (isOpen_riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
       x0 et het Kc hKc Ko hKo hKoEq hcover)
     hg₀ hLip
 
@@ -3745,6 +3991,169 @@ def InitialValueProblem.toContinuousSectionSpace
       et Kc hKc Ko hKo hKoEq hcover :=
   ⟨ivp.initialMetric.toContinuousRiemannianMetric.toSection,
     ivp.initialMetric.toContinuousRiemannianMetric.continuous_toSection⟩
+
+/-- The finite-cover Banach-section representative of a smooth initial metric, valued in the closed
+symmetric section submodule. -/
+def InitialValueProblem.toSymmetricSectionSubmodule
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [T2Space M] [FiniteDimensional ℝ F] [CompleteSpace F]
+    [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)) :
+    symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover :=
+  ivp.initialMetric.toContinuousRiemannianMetric.toSymmetricSectionSubmodule
+    x0 et het Kc hKc Ko hKo hKoEq hcover
+
+@[simp] theorem InitialValueProblem.coe_toSymmetricSectionSubmodule
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [T2Space M] [FiniteDimensional ℝ F] [CompleteSpace F]
+    [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)) :
+    (InitialValueProblem.toSymmetricSectionSubmodule
+      (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp).1 =
+      InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp :=
+  rfl
+
+theorem InitialValueProblem.toSymmetricSectionSubmodule_mem_riemannianMetricLocusSubmodule
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [T2Space M] [FiniteDimensional ℝ F] [CompleteSpace F]
+    [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)) :
+    InitialValueProblem.toSymmetricSectionSubmodule
+      (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp ∈
+      riemannianMetricLocusSubmodule (M := M) (F := F)
+        (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover := by
+  exact ivp.initialMetric.toContinuousRiemannianMetric.mem_riemannianMetricLocusSubmodule
+    x0 et het Kc hKc Ko hKo hKoEq hcover
+
+/-- A Banach solution in the symmetric metric submodule carrier can be viewed as an ambient
+positive-definite section-space solution, provided the ambient and submodule vector fields agree
+after coercion. This is the bridge from the genuine metric carrier back to the existing smooth
+realization APIs. -/
+def BanachEvolutionLocalSolutionIn.toAmbientContinuousSectionSpace_of_riemannianMetricLocusSubmodule
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [T2Space M] [FiniteDimensional ℝ F] [CompleteSpace F]
+    [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M))
+    {Asub : ℝ →
+      symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover →
+      symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    (hcomm : ∀ t x,
+      x ∈ riemannianMetricLocusSubmodule (M := M) (F := F)
+        (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover →
+        (Asub t x :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) =
+          A t (x :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover))
+    (sol : BanachEvolutionLocalSolutionIn Asub
+      (riemannianMetricLocusSubmodule (M := M) (F := F)
+        (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+      ivp.initialTime
+      (InitialValueProblem.toSymmetricSectionSubmodule
+        (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp)) :
+    BanachEvolutionLocalSolutionIn A
+      (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+        et Kc hKc Ko hKo hKoEq hcover)
+      ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp) :=
+  let S := symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover
+  let Xamb := ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+    (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+    et Kc hKc Ko hKo hKoEq hcover
+  let L : S →L[ℝ] Xamb := Submodule.subtypeL S
+  BanachEvolutionLocalSolutionIn.mapContinuousLinearMapBetween
+    (X := S) (Y := Xamb)
+    (F := Asub) (G := A)
+    (stateSet := riemannianMetricLocusSubmodule (M := M) (F := F)
+      (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+    (targetStateSet := positiveDefiniteLocus (M := M) (F := F)
+      (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ := ivp.initialTime)
+    (u₀ := InitialValueProblem.toSymmetricSectionSubmodule
+      (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp)
+    (v₀ := InitialValueProblem.toContinuousSectionSpace
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)
+    L
+    (fun x hx ↦ hx)
+    (InitialValueProblem.coe_toSymmetricSectionSubmodule
+      (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp)
+    hcomm sol
 
 /-- The remaining smooth-realization obligations needed to turn a Banach metric-section solution
 into an intrinsic Ricci-DeTurck local solution for the original smooth initial-value problem. -/

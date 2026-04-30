@@ -51,9 +51,14 @@ solution/IVP/local-solution boundary, intrinsic metric-only wrappers for that
 boundary, and bundled compact-manifold `LocalExistenceUniqueness` /
 `IntrinsicLocalExistenceUniqueness` interfaces, together with section-space
 metric regularity plus the “open metrics inside closed symmetric bilinear
-sections” prerequisite layer, but not the proof of the general theorem.
-Point 4 remains open, and point 5 should not be treated as complete or unlocked
-by the current scaffolding alone.
+sections” prerequisite layer, but not the proof of the general theorem. The
+boundary now does contain proof-bearing stationary theorem packages for
+subsingleton tangent/model spaces and rank-one tangent/model spaces
+(`Module.finrank ℝ E ≤ 1`), and the `LocalExistence.RankOne` extension proves
+zero velocity, stationarity, metric uniqueness, and Levi-Civita connection
+uniqueness for all rank-one local solutions. Point 4 remains open in arbitrary
+dimension, and point 5 should not be treated as complete or unlocked by the
+current scaffolding alone.
 
 ## Layer 3: singularity-analysis toolkit
 

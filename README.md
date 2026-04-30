@@ -61,13 +61,17 @@ bundle trivializations, and a global theorem smoothing continuous bundle
 sections while staying inside open fiberwise convex subsets of the total space,
 as well as an intrinsic fiberwise-`ε` approximation theorem for continuous
 sections of smooth Riemannian vector bundles. There is also an internal
-preparatory
-Ricci-flow local-existence scaffold module, but it is not part of the public package
-boundary and does **not** count as completing point 4 under this repository's
- proof-only standard, even though it now contains genuine stationary Ricci-flat,
- zero-velocity, and Ricci-tensor-zero special-case theorems at both the metric
- and Levi-Civita-connection levels, including theorem-family packages under a
- subsingleton model-space hypothesis. It also now proves that, once a connection
+preparatory Ricci-flow local-existence scaffold module, but it is not part of
+the public package boundary and does **not** count as completing point 4 under
+this repository's proof-only standard, even though it now contains genuine
+stationary Ricci-flat, zero-velocity, and Ricci-tensor-zero special-case
+theorems at both the metric and Levi-Civita-connection levels, including
+theorem-family packages under subsingleton tangent/model hypotheses and the
+rank-one-or-less model hypothesis `Module.finrank ℝ E ≤ 1`; the thin
+`LocalExistence.RankOne` extension further proves that every rank-one local
+solution has zero metric velocity, stays equal to its initial metric, and has
+the same Levi-Civita connection on overlaps. It also now proves that, once a
+connection
 family is known to be Levi-Civita for a metric family, the Ricci tensor,
 Ricci-flow right-hand side, and Ricci-flow equation are independent of which
 Levi-Civita family is used, and it packages intrinsic metric-only solution /
@@ -205,7 +209,9 @@ packages the canonical stationary local solution attached to
     global/interval PDE closure data that turns a Banach chart solution into a
     smooth chosen-background DeTurck solution and its self-encoding candidate:
     metric realization, boundary time derivatives, chart-RHS/geometric-RHS
-    identification, and chosen Levi-Civita background. The optional
+    identification, and chosen Levi-Civita background; it also packages the
+    all-solutions smooth-realization plus reverse-candidate-encoding closure
+    into direct global/interval chosen-background DeTurck theorem packages. The optional
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
   imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state
@@ -295,16 +301,22 @@ packages the canonical stationary local solution attached to
   `LocalExistenceUniquenessFamily` endpoints. It also specializes these criteria to genuine
   bundled continuous Riemannian initial metrics, so future Ricci-DeTurck
   Banach-chart work no longer has to manually prove finite-cover metric-locus
-  membership for the initial datum.
+  membership for the initial datum. The interval chart now also restricts its
+  ambient Ricci-DeTurck vector field to the genuine symmetric Riemannian Banach
+  carrier: geometric RHS symmetry proves tangency to symmetric bilinear forms,
+  and the ambient interval Lipschitz estimate descends to the restricted
+  metric-locus vector field.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
   full point 4 is therefore proving the raw non-identity gauge-flow and
   gauge-pullback time-regularity obligations
   and the quasilinear parabolic PDE existence/uniqueness step needed to produce
-  Ricci-DeTurck solutions, including the actual Ricci-DeTurck Banach chart and
-  estimates plus the analytic proof of the now-named smooth-realization and
-  Banach/geometric RHS-identification data. The curvature, time-dependent
+  Ricci-DeTurck solutions on the restricted symmetric carrier, including the
+  actual Ricci-DeTurck Banach chart and Picard estimates plus the analytic proof
+  of the now-named smooth-realization and Banach/geometric RHS-identification
+  data, and the reverse-candidate encoding closure for arbitrary
+  chosen-background candidates. The curvature, time-dependent
   geometry, intrinsic Ricci-flow, and DeTurck layers now prove the geometric
   symmetry input outright: metric compatibility gives curvature-operator
   skew-adjointness, torsion-freeness gives first Bianchi, the Ricci contraction is

@@ -30,6 +30,45 @@ fiberwise bilinear forms.
 
 open scoped Bundle Manifold ContDiff
 
+namespace PoincareCurvature
+
+/-!
+The tangent fiber `TangentSpace I x` is definitionally the model vector space `F`, but the
+class search path does not unfold it while synthesizing normed-space structure.  These low-priority
+instances expose that structure for fiberwise continuous-linear constructions on tangent bilinear
+forms.
+-/
+
+instance (priority := 70) instNormedAddCommGroupTangentSpace
+    {M F H : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [TopologicalSpace H]
+    (I : ModelWithCorners ℝ F H) [TopologicalSpace M] [ChartedSpace H M] (x : M) :
+    NormedAddCommGroup (TangentSpace I x) := by
+  change NormedAddCommGroup F
+  infer_instance
+
+instance (priority := 100) instNormedSpaceTangentSpace
+    {M F H : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [TopologicalSpace H]
+    (I : ModelWithCorners ℝ F H) [TopologicalSpace M] [ChartedSpace H M] (x : M) :
+    NormedSpace ℝ (TangentSpace I x) := by
+  change NormedSpace ℝ F
+  infer_instance
+
+instance (priority := 100) instIsTopologicalAddGroupTangentSpace
+    {M F H : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [TopologicalSpace H]
+    (I : ModelWithCorners ℝ F H) [TopologicalSpace M] [ChartedSpace H M] (x : M) :
+    IsTopologicalAddGroup (TangentSpace I x) := by
+  change IsTopologicalAddGroup F
+  infer_instance
+
+instance (priority := 100) instT2SpaceTangentSpace
+    {M F H : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [TopologicalSpace H]
+    (I : ModelWithCorners ℝ F H) [TopologicalSpace M] [ChartedSpace H M] (x : M) :
+    T2Space (TangentSpace I x) := by
+  change T2Space F
+  infer_instance
+
+end PoincareCurvature
+
 namespace Bundle
 
 /-- The bundle of real bilinear forms on the fibers of `V`. -/
@@ -172,6 +211,9 @@ local notation "BilE" => (E →L[ℝ] E →L[ℝ] ℝ)
 local instance bilENormedAddCommGroup : NormedAddCommGroup BilE :=
   (inferInstance : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ))
 
+local instance bilENormedSpace : NormedSpace ℝ BilE :=
+  (inferInstance : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ))
+
 local instance bilEPseudoMetricSpace : PseudoMetricSpace BilE :=
   (inferInstance : PseudoMetricSpace (E →L[ℝ] E →L[ℝ] ℝ))
 
@@ -206,6 +248,84 @@ lemma flipBilinear_forall_pos_iff
       ∀ v : E, v ≠ 0 → 0 < B v v := by
   simp
 
+/-- Symmetrize a bilinear form by averaging it with its slot-flip. -/
+noncomputable def symmetrizeBilinear : BilE →L[ℝ] BilE :=
+  (2⁻¹ : ℝ) • ((ContinuousLinearMap.id ℝ BilE) + flipBilinear (E := E))
+
+@[simp] lemma symmetrizeBilinear_apply_apply
+    (B : BilE) (v w : E) :
+    symmetrizeBilinear (E := E) B v w = (B v w + B w v) / 2 := by
+  rw [symmetrizeBilinear]
+  simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.id_apply, flipBilinear_apply_apply, div_eq_mul_inv, smul_eq_mul]
+  ring_nf
+
+@[simp] lemma symmetrizeBilinear_apply_self
+    (B : BilE) (v : E) :
+    symmetrizeBilinear (E := E) B v v = B v v := by
+  rw [symmetrizeBilinear_apply_apply]
+  ring
+
+/-- Slot-flip preserves the operator norm of a bilinear form. -/
+@[simp] lemma norm_flipBilinear
+    (B : BilE) :
+    ‖flipBilinear (E := E) B‖ = ‖B‖ := by
+  simpa [flipBilinear] using
+    (ContinuousLinearMap.opNorm_flip (𝕜 := ℝ) (E := E) (F := E) (G := ℝ) B)
+
+/-- Applying symmetrization is the average of a bilinear form and its slot-flip. -/
+lemma symmetrizeBilinear_apply
+    (B : BilE) :
+    symmetrizeBilinear (E := E) B = (2⁻¹ : ℝ) • (B + flipBilinear (E := E) B) := by
+  ext v w
+  rw [symmetrizeBilinear_apply_apply]
+  simp [div_eq_mul_inv, smul_eq_mul]
+  ring
+
+/-- Symmetrization is norm non-increasing. -/
+lemma norm_symmetrizeBilinear_le
+    (B : BilE) :
+    ‖symmetrizeBilinear (E := E) B‖ ≤ ‖B‖ := by
+  rw [symmetrizeBilinear_apply]
+  calc
+    ‖(2⁻¹ : ℝ) • (B + flipBilinear (E := E) B)‖ =
+        ‖(2⁻¹ : ℝ)‖ * ‖B + flipBilinear (E := E) B‖ := norm_smul _ _
+    _ ≤ ‖(2⁻¹ : ℝ)‖ * (‖B‖ + ‖flipBilinear (E := E) B‖) := by
+      exact mul_le_mul_of_nonneg_left (norm_add_le _ _) (norm_nonneg _)
+    _ = ‖B‖ := by
+      simp
+      ring
+
+/-- Symmetrizing an approximant does not increase its distance from an already symmetric bilinear
+form. -/
+lemma dist_symmetrizeBilinear_le_of_symmetric
+    {B C : BilE}
+    (hB : ∀ v w : E, B v w = B w v) :
+    dist (symmetrizeBilinear (E := E) C) B ≤ dist C B := by
+  rw [dist_eq_norm, dist_eq_norm]
+  have hdiff :
+      symmetrizeBilinear (E := E) C - B =
+        symmetrizeBilinear (E := E) (C - B) := by
+    ext v w
+    simp [symmetrizeBilinear_apply_apply, hB v w]
+  rw [hdiff]
+  exact norm_symmetrizeBilinear_le (E := E) (C - B)
+
+/-- Symmetrization lands in the symmetric bilinear forms. -/
+lemma symmetrizeBilinear_symm
+    (B : BilE) :
+    ∀ v w : E, symmetrizeBilinear (E := E) B v w =
+      symmetrizeBilinear (E := E) B w v := by
+  intro v w
+  simp [symmetrizeBilinear_apply_apply, add_comm]
+
+/-- Symmetrization preserves pointwise positive-definiteness, because it fixes diagonal values. -/
+lemma symmetrizeBilinear_forall_pos_iff
+    (B : BilE) :
+    (∀ v : E, v ≠ 0 → 0 < symmetrizeBilinear (E := E) B v v) ↔
+      ∀ v : E, v ≠ 0 → 0 < B v v := by
+  constructor <;> intro h v hv <;> simpa using h v hv
+
 /-- The antisymmetric defect of a bilinear form. It vanishes exactly on symmetric forms. -/
 noncomputable def symmetryDefect : BilE →L[ℝ] BilE :=
   { toLinearMap := (ContinuousLinearMap.id ℝ BilE).toLinearMap - (flipBilinear (E := E)).toLinearMap
@@ -226,6 +346,31 @@ lemma symmetryDefect_eq_zero_iff
   · intro h
     ext v w
     simp [symmetryDefect, h v w]
+
+/-- Symmetric bilinear forms on the model fiber form a convex subset. -/
+lemma convex_setOf_forall_symmetric :
+    Convex ℝ ({B : BilE | ∀ v w : E, B v w = B w v} : Set BilE) := by
+  rw [convex_iff_forall_pos]
+  intro B hB C hC a b _ _ _ v w
+  simp [hB v w, hC v w]
+
+/-- Positive-definite bilinear forms on the model fiber form a convex subset. -/
+lemma convex_setOf_forall_pos :
+    Convex ℝ ({B : BilE | ∀ v : E, v ≠ 0 → 0 < B v v} : Set BilE) := by
+  rw [convex_iff_forall_pos]
+  intro B hB C hC a b ha hb hab v hv
+  have hleft : 0 < a * B v v := mul_pos ha (hB v hv)
+  have hright : 0 ≤ b * C v v := mul_nonneg hb.le (le_of_lt (hC v hv))
+  simpa [smul_eq_mul] using add_pos_of_pos_of_nonneg hleft hright
+
+/-- Symmetric positive-definite bilinear forms on the model fiber form a convex subset. -/
+lemma convex_setOf_forall_symmetric_and_pos :
+    Convex ℝ
+      ({B : BilE | (∀ v w : E, B v w = B w v) ∧
+        ∀ v : E, v ≠ 0 → 0 < B v v} : Set BilE) := by
+  simpa using
+    (convex_setOf_forall_symmetric (E := E)).inter
+      (convex_setOf_forall_pos (E := E))
 
 /-- A positive-definite continuous bilinear form on a finite-dimensional real normed space
 uniformly dominates a positive multiple of the ambient norm squared. -/
@@ -545,6 +690,32 @@ lemma trivializationAt_bilinearFormBundle_apply_eq
   have hu := congrArg (fun ψ : F →L[ℝ] F →L[ℝ] ℝ => ψ u v) hB
   simpa [hdual, e, eDual] using hu
 
+/-- Preferred bilinear-form bundle trivializations are fiberwise linear. This explicit instance
+avoids typeclass-search ambiguity from the nested hom-bundle construction when using coordinate
+changes for bilinear-form coordinates. -/
+lemma trivializationAt_bilinearFormBundle_isLinear (x0 : M) :
+    (trivializationAt BilF BilW x0).IsLinear ℝ where
+  linear x hx := by
+    have hxW : x ∈ (trivializationAt F W x0).baseSet := by
+      simpa using hx
+    refine ⟨?_, ?_⟩
+    · intro B C
+      ext u v
+      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
+        x0 x hxW (B + C) u v]
+      simp only [ContinuousLinearMap.add_apply]
+      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
+        x0 x hxW B u v]
+      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
+        x0 x hxW C u v]
+    · intro c B
+      ext u v
+      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
+        x0 x hxW (c • B) u v]
+      simp only [ContinuousLinearMap.smul_apply]
+      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
+        x0 x hxW B u v]
+
 /-- In preferred local coordinates, a bundled bilinear form evaluates by pulling the model vector
 back through the inverse fiber trivialization. -/
 lemma trivializationAt_bilinearFormBundle_apply_apply_eq
@@ -556,7 +727,213 @@ lemma trivializationAt_bilinearFormBundle_apply_apply_eq
   simpa using trivializationAt_bilinearFormBundle_apply_eq
     (F := F) (W := W) x0 x hx B u u
 
+/-- Preferred bilinear-form transition functions commute with model-fiber symmetrization. This is the
+coordinate-level replacement for intrinsic tangent-fiber symmetrization: transition maps for the
+bilinear-form bundle act by pulling both slots through the same linear equivalence, so averaging the
+two slots can be done before or after changing coordinates. The statement is written in terms of the
+trivialization action rather than `coordChangeL`, so it is usable before Lean has inferred linearity
+instances for the induced hom-bundle trivializations. -/
+lemma trivializationAt_bilinearFormBundle_transition_symmetrizeBilinear
+    (x0 x1 x : M)
+    (hx0 : x ∈ (trivializationAt F W x0).baseSet)
+    (hx1 : x ∈ (trivializationAt F W x1).baseSet)
+    (B : BilF) :
+    ((trivializationAt BilF BilW x1)
+        ⟨x, (trivializationAt BilF BilW x0).symm x
+          (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F) B)⟩).2 =
+      _root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F)
+        (((trivializationAt BilF BilW x1)
+          ⟨x, (trivializationAt BilF BilW x0).symm x B⟩).2) := by
+  let e0 := (trivializationAt F W x0).continuousLinearEquivAt ℝ x hx0
+  let e1 := (trivializationAt F W x1).continuousLinearEquivAt ℝ x hx1
+  let tb0 := trivializationAt BilF BilW x0
+  have hcoord (C : BilF) (a b : W x) :
+      tb0.symm x C a b = C (e0 a) (e0 b) := by
+    have happly :
+        (tb0 ⟨x, tb0.symm x C⟩).2 = C := by
+      exact congrArg Prod.snd (tb0.apply_mk_symm (by simpa [tb0] using hx0) C)
+    have hleft :
+        (tb0 ⟨x, tb0.symm x C⟩).2 (e0 a) (e0 b) = tb0.symm x C a b := by
+      rw [trivializationAt_bilinearFormBundle_apply_eq
+        (F := F) (W := W) x0 x hx0 (tb0.symm x C) (e0 a) (e0 b)]
+      simpa [e0] using
+        congrArg₂ (fun p q : W x => tb0.symm x C p q)
+          (e0.symm_apply_apply a) (e0.symm_apply_apply b)
+    exact hleft.symm.trans (by simpa using congrArg (fun D : BilF => D (e0 a) (e0 b)) happly)
+  ext u v
+  rw [trivializationAt_bilinearFormBundle_apply_eq
+    (F := F) (W := W) x1 x hx1
+    (tb0.symm x (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F) B)) u v]
+  rw [hcoord (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F) B)
+    (e1.symm u) (e1.symm v)]
+  rw [_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear_apply_apply]
+  rw [_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear_apply_apply]
+  rw [trivializationAt_bilinearFormBundle_apply_eq
+    (F := F) (W := W) x1 x hx1 (tb0.symm x B) u v]
+  rw [trivializationAt_bilinearFormBundle_apply_eq
+    (F := F) (W := W) x1 x hx1 (tb0.symm x B) v u]
+  rw [hcoord B (e1.symm u) (e1.symm v), hcoord B (e1.symm v) (e1.symm u)]
+
+/-- If the preferred-coordinate representative of one fiber bilinear form is symmetric, then the
+fiber bilinear form itself is symmetric. -/
+lemma forall_symmetric_of_trivializationAt_bilinearFormBundle_forall_symmetric
+    (x0 x : M) (hx : x ∈ (trivializationAt F W x0).baseSet)
+    (B : BilW x)
+    (hcoord : ∀ u v : F,
+      ((trivializationAt BilF BilW x0 ⟨x, B⟩).2) u v =
+        ((trivializationAt BilF BilW x0 ⟨x, B⟩).2) v u) :
+    ∀ u v : W x, B u v = B v u := by
+  intro u v
+  let e := (trivializationAt F W x0).continuousLinearEquivAt ℝ x hx
+  have h := hcoord (e u) (e v)
+  have hleft :
+      ((trivializationAt BilF BilW x0 ⟨x, B⟩).2) (e u) (e v) = B u v := by
+    rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x0 x hx]
+    change B (e.symm (e u)) (e.symm (e v)) = B u v
+    simpa using congrArg₂ (fun a b => B a b) (e.symm_apply_apply u) (e.symm_apply_apply v)
+  have hright :
+      ((trivializationAt BilF BilW x0 ⟨x, B⟩).2) (e v) (e u) = B v u := by
+    rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x0 x hx]
+    change B (e.symm (e v)) (e.symm (e u)) = B v u
+    simpa using congrArg₂ (fun a b => B a b) (e.symm_apply_apply v) (e.symm_apply_apply u)
+  simpa [hleft, hright] using h
+
+/-- If the preferred-coordinate representative of one fiber bilinear form is positive-definite, then
+the fiber bilinear form itself is positive-definite. -/
+lemma forall_pos_of_trivializationAt_bilinearFormBundle_forall_pos
+    (x0 x : M) (hx : x ∈ (trivializationAt F W x0).baseSet)
+    (B : BilW x)
+    (hcoord : ∀ u : F, u ≠ 0 →
+      0 < ((trivializationAt BilF BilW x0 ⟨x, B⟩).2) u u) :
+    ∀ u : W x, u ≠ 0 → 0 < B u u := by
+  intro u hu
+  let e := (trivializationAt F W x0).continuousLinearEquivAt ℝ x hx
+  have heu : e u ≠ 0 := by
+    intro hzero
+    exact hu (e.injective (by simpa using hzero))
+  have h := hcoord (e u) heu
+  have hdiag :
+      ((trivializationAt BilF BilW x0 ⟨x, B⟩).2) (e u) (e u) = B u u := by
+    rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x0 x hx]
+    change B (e.symm (e u)) (e.symm (e u)) = B u u
+    simpa using congrArg₂ (fun a b => B a b) (e.symm_apply_apply u) (e.symm_apply_apply u)
+  simpa [hdiag] using h
+
 end LocalCoordinatePositivity
+
+section FiberwiseSymmetrization
+
+set_option synthInstance.maxHeartbeats 100000
+set_option maxHeartbeats 1000000
+
+variable {M : Type*} [TopologicalSpace M]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+variable {W : M → Type*} [TopologicalSpace (_root_.Bundle.TotalSpace F W)]
+  [∀ x, NormedAddCommGroup (W x)] [∀ x, NormedSpace ℝ (W x)]
+  [FiberBundle F W] [VectorBundle ℝ F W]
+
+local notation "BilF" => (F →L[ℝ] F →L[ℝ] ℝ)
+local notation "BilW" => BilinearFormBundle (V := W)
+
+local instance bilFNormedAddCommGroup : NormedAddCommGroup BilF := inferInstance
+local instance bilFNormedSpace : NormedSpace ℝ BilF := inferInstance
+
+/-- Fiberwise slot-flip for bilinear-form sections. -/
+noncomputable def flipBilinearSection (s : Π x : M, BilW x) : Π x : M, BilW x :=
+  fun x ↦ ContinuousLinearMap.flipBilinear (E := W x) (s x)
+
+@[simp] lemma flipBilinearSection_apply_apply
+    (s : Π x : M, BilW x) (x : M) (u v : W x) :
+    flipBilinearSection (W := W) s x u v = s x v u := by
+  simp [flipBilinearSection]
+
+/-- Fiberwise symmetrization for bilinear-form sections. -/
+noncomputable def symmetrizeBilinearSection (s : Π x : M, BilW x) : Π x : M, BilW x :=
+  fun x ↦ ContinuousLinearMap.symmetrizeBilinear (E := W x) (s x)
+
+@[simp] lemma symmetrizeBilinearSection_apply_apply
+    (s : Π x : M, BilW x) (x : M) (u v : W x) :
+    symmetrizeBilinearSection (W := W) s x u v = (s x u v + s x v u) / 2 := by
+  simp [symmetrizeBilinearSection]
+
+@[simp] lemma symmetrizeBilinearSection_apply_self
+    (s : Π x : M, BilW x) (x : M) (u : W x) :
+    symmetrizeBilinearSection (W := W) s x u u = s x u u := by
+  simp
+
+lemma symmetrizeBilinearSection_forall_symmetric
+    (s : Π x : M, BilW x) :
+    ∀ x : M, ∀ u v : W x,
+      symmetrizeBilinearSection (W := W) s x u v =
+        symmetrizeBilinearSection (W := W) s x v u := by
+  intro x u v
+  simp [add_comm]
+
+lemma symmetrizeBilinearSection_forall_pos_iff
+    (s : Π x : M, BilW x) :
+    (∀ x : M, ∀ u : W x, u ≠ 0 →
+      0 < symmetrizeBilinearSection (W := W) s x u u) ↔
+      ∀ x : M, ∀ u : W x, u ≠ 0 → 0 < s x u u := by
+  constructor <;> intro h x u hu <;> simpa using h x u hu
+
+/-- Preferred coordinates commute with fiberwise slot-flip. -/
+lemma trivializationAt_bilinearFormBundle_flipSection_eq
+    (s : Π x : M, BilW x) (x0 x : M)
+    (hx : x ∈ (trivializationAt F W x0).baseSet) :
+    (trivializationAt BilF BilW x0 ⟨x, flipBilinearSection (W := W) s x⟩).2 =
+      ContinuousLinearMap.flipBilinear (E := F)
+        ((trivializationAt BilF BilW x0 ⟨x, s x⟩).2) := by
+  ext u v
+  rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x0 x hx]
+  simp [flipBilinearSection]
+  rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x0 x hx]
+  simp
+
+/-- Preferred coordinates commute with fiberwise symmetrization. -/
+lemma trivializationAt_bilinearFormBundle_symmetrizeSection_eq
+    (s : Π x : M, BilW x) (x0 x : M)
+    (hx : x ∈ (trivializationAt F W x0).baseSet) :
+    (trivializationAt BilF BilW x0 ⟨x, symmetrizeBilinearSection (W := W) s x⟩).2 =
+      ContinuousLinearMap.symmetrizeBilinear (E := F)
+        ((trivializationAt BilF BilW x0 ⟨x, s x⟩).2) := by
+  ext u v
+  rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x0 x hx]
+  simp [symmetrizeBilinearSection]
+  rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x0 x hx]
+  rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x0 x hx]
+  simp
+
+variable {EB : Type*} [NormedAddCommGroup EB] [NormedSpace ℝ EB]
+variable {HB : Type*} [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+variable [ChartedSpace HB M]
+
+/-- Fiberwise symmetrization preserves spatial smoothness of bilinear-form sections.  In local
+preferred coordinates it is the fixed continuous linear symmetrization operator on the model fiber. -/
+lemma contMDiff_symmetrizeBilinearSection
+    {s : Π x : M, BilW x}
+    (hs : ContMDiff IB (IB.prod 𝓘(ℝ, BilF)) n
+      (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (s x))) :
+    ContMDiff IB (IB.prod 𝓘(ℝ, BilF)) n
+      (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x
+        (_root_.Bundle.symmetrizeBilinearSection (W := W) s x)) := by
+  intro x0
+  have hsx := hs x0
+  rw [Bundle.contMDiffAt_section (IB := IB) (F := BilF) (E := BilW) (s := s) x0] at hsx
+  rw [Bundle.contMDiffAt_section (IB := IB) (F := BilF) (E := BilW)
+      (s := _root_.Bundle.symmetrizeBilinearSection (W := W) s) x0]
+  let L : BilF →L[ℝ] BilF := ContinuousLinearMap.symmetrizeBilinear (E := F)
+  have hcomp : ContMDiffAt IB 𝓘(ℝ, BilF) n
+      (fun x ↦ L ((trivializationAt BilF BilW x0 ⟨x, s x⟩).2)) x0 := by
+    simpa [Function.comp_def, L] using
+      (L.contMDiffAt (n := n)).comp x0 hsx
+  refine hcomp.congr_of_eventuallyEq ?_
+  filter_upwards [((trivializationAt F W x0).open_baseSet.mem_nhds
+    (FiberBundle.mem_baseSet_trivializationAt F W x0))] with x hx
+  simpa [L] using
+    (trivializationAt_bilinearFormBundle_symmetrizeSection_eq
+      (W := W) s x0 x hx)
+
+end FiberwiseSymmetrization
 
 end Bundle
 
@@ -593,6 +970,31 @@ local instance bilWContinuousSMul (x : M) : ContinuousSMul ℝ (BilW x) :=
 set_option synthInstance.maxHeartbeats 100000
 set_option maxHeartbeats 1000000
 
+/-- Symmetric bilinear forms in a single bundle fiber form a convex subset. -/
+lemma convex_fiber_setOf_forall_symmetric (x : M) :
+    Convex ℝ ({B : BilW x | ∀ v w : W x, B v w = B w v} : Set (BilW x)) := by
+  rw [convex_iff_forall_pos]
+  intro B hB C hC a b _ _ _ v w
+  simp [hB v w, hC v w]
+
+/-- Positive-definite bilinear forms in a single bundle fiber form a convex subset. -/
+lemma convex_fiber_setOf_forall_pos (x : M) :
+    Convex ℝ ({B : BilW x | ∀ v : W x, v ≠ 0 → 0 < B v v} : Set (BilW x)) := by
+  rw [convex_iff_forall_pos]
+  intro B hB C hC a b ha hb hab v hv
+  have hleft : 0 < a * B v v := mul_pos ha (hB v hv)
+  have hright : 0 ≤ b * C v v := mul_nonneg hb.le (le_of_lt (hC v hv))
+  simpa [smul_eq_mul] using add_pos_of_pos_of_nonneg hleft hright
+
+/-- Symmetric positive-definite bilinear forms in a single bundle fiber form a convex subset. -/
+lemma convex_fiber_setOf_forall_symmetric_and_pos (x : M) :
+    Convex ℝ
+      ({B : BilW x | (∀ v w : W x, B v w = B w v) ∧
+        ∀ v : W x, v ≠ 0 → 0 < B v v} : Set (BilW x)) := by
+  simpa using
+    (convex_fiber_setOf_forall_symmetric x).inter
+      (convex_fiber_setOf_forall_pos x)
+
 /-- Coordinatewise slot-flip on compact continuous families of model bilinear forms. This is the
 compact-coordinate operator that must later be shown to preserve the finite-cover compatibility
 kernel in order to produce the global section-space slot-swap map. -/
@@ -612,6 +1014,63 @@ lemma flipBilinearCoordContinuousLinearMap_forall_pos_iff
       0 < flipBilinearCoordContinuousLinearMap (M := M) (F := F) K u x v v) ↔
       ∀ x : K, ∀ v : F, v ≠ 0 → 0 < u x v v := by
   simp
+
+/-- Coordinatewise symmetrization on compact continuous families of model bilinear forms. -/
+noncomputable def symmetrizeBilinearCoordContinuousLinearMap
+    (K : TopologicalSpace.Compacts M) :
+    C(K, BilF) →L[ℝ] C(K, BilF) :=
+  (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F)).compLeftContinuous ℝ K
+
+@[simp] lemma symmetrizeBilinearCoordContinuousLinearMap_apply_apply
+    (K : TopologicalSpace.Compacts M) (u : C(K, BilF)) (x : K) (v w : F) :
+    symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) K u x v w =
+      (u x v w + u x w v) / 2 := by
+  simp [symmetrizeBilinearCoordContinuousLinearMap]
+
+@[simp] lemma symmetrizeBilinearCoordContinuousLinearMap_apply_self
+    (K : TopologicalSpace.Compacts M) (u : C(K, BilF)) (x : K) (v : F) :
+    symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) K u x v v =
+      u x v v := by
+  simp
+
+lemma symmetrizeBilinearCoordContinuousLinearMap_forall_symmetric
+    (K : TopologicalSpace.Compacts M) (u : C(K, BilF)) :
+    ∀ x : K, ∀ v w : F,
+      symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) K u x v w =
+        symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) K u x w v := by
+  intro x v w
+  simp [symmetrizeBilinearCoordContinuousLinearMap_apply_apply, add_comm]
+
+lemma symmetrizeBilinearCoordContinuousLinearMap_forall_pos_iff
+    (K : TopologicalSpace.Compacts M) (u : C(K, BilF)) :
+    (∀ x : K, ∀ v : F, v ≠ 0 →
+      0 < symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) K u x v v) ↔
+      ∀ x : K, ∀ v : F, v ≠ 0 → 0 < u x v v := by
+  constructor <;> intro h x v hv <;> simpa using h x v hv
+
+/-- Coordinatewise symmetrization does not increase compact-map distance to a pointwise symmetric
+coordinate map. -/
+lemma dist_symmetrizeBilinearCoordContinuousLinearMap_le_of_forall_symmetric
+    (K : TopologicalSpace.Compacts M) {u g : C(K, BilF)}
+    (hg : ∀ x : K, ∀ v w : F, g x v w = g x w v) :
+    dist (symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) K u) g ≤
+      dist u g := by
+  rw [dist_eq_norm, dist_eq_norm]
+  refine (ContinuousMap.norm_le (f :=
+    symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) K u - g)
+    (norm_nonneg _)).mpr ?_
+  intro x
+  calc
+    ‖(symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) K u - g) x‖ =
+        dist (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F) (u x)) (g x) := by
+      rw [dist_eq_norm]
+      rfl
+    _ ≤ dist (u x) (g x) :=
+      _root_.Bundle.ContinuousLinearMap.dist_symmetrizeBilinear_le_of_symmetric (hg x)
+    _ = ‖(u - g) x‖ := by
+      rw [dist_eq_norm]
+      rfl
+    _ ≤ ‖u - g‖ := (u - g).norm_coe_le_norm x
 
 /-- Coordinatewise slot-flip on the ambient finite product of compact bilinear-form coordinate
 families. The next global section-space step is proving that this map preserves the finite-cover
@@ -653,6 +1112,294 @@ lemma flipBilinearCoordFamilyContinuousLinearMap_eq_self_iff
     funext i
     ext x v w
     simpa using h i x w v
+
+/-- Coordinatewise symmetrization on the ambient finite product of compact bilinear-form coordinate
+families. -/
+noncomputable def symmetrizeBilinearCoordFamilyContinuousLinearMap
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts M) :
+    CoordFamily (M := M) (F := BilF) Kc →L[ℝ]
+      CoordFamily (M := M) (F := BilF) Kc :=
+  ContinuousLinearMap.piMap fun i ↦
+    symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) (Kc i)
+
+@[simp] lemma symmetrizeBilinearCoordFamilyContinuousLinearMap_apply_apply
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts M)
+    (u : CoordFamily (M := M) (F := BilF) Kc)
+    (i : κ) (x : Kc i) (v w : F) :
+    symmetrizeBilinearCoordFamilyContinuousLinearMap Kc u i x v w =
+      (u i x v w + u i x w v) / 2 := by
+  simp [symmetrizeBilinearCoordFamilyContinuousLinearMap]
+
+@[simp] lemma symmetrizeBilinearCoordFamilyContinuousLinearMap_apply_self
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts M)
+    (u : CoordFamily (M := M) (F := BilF) Kc)
+    (i : κ) (x : Kc i) (v : F) :
+    symmetrizeBilinearCoordFamilyContinuousLinearMap Kc u i x v v =
+      u i x v v := by
+  simp
+
+lemma symmetrizeBilinearCoordFamilyContinuousLinearMap_forall_symmetric
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts M)
+    (u : CoordFamily (M := M) (F := BilF) Kc) :
+    ∀ i : κ, ∀ x : Kc i, ∀ v w : F,
+      symmetrizeBilinearCoordFamilyContinuousLinearMap Kc u i x v w =
+        symmetrizeBilinearCoordFamilyContinuousLinearMap Kc u i x w v := by
+  intro i x v w
+  simp [symmetrizeBilinearCoordFamilyContinuousLinearMap_apply_apply, add_comm]
+
+lemma symmetrizeBilinearCoordFamilyContinuousLinearMap_forall_pos_iff
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts M)
+    (u : CoordFamily (M := M) (F := BilF) Kc) :
+    (∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 →
+      0 < symmetrizeBilinearCoordFamilyContinuousLinearMap Kc u i x v v) ↔
+       ∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 → 0 < u i x v v := by
+  constructor <;> intro h i x v hv <;> simpa using h i x v hv
+
+/-- For preferred bilinear-form trivializations, coordinatewise symmetrization preserves the finite
+overlap compatibility equations. This is the key coordinate-level substitute for applying
+fiberwise symmetrization directly to tangent-space bilinear forms, which would require unavailable
+normed tangent-fiber instances. -/
+lemma symmetrizeBilinearCoordFamilyContinuousLinearMap_mem_compatibleCoordFamilySubmodule
+    {κ : Type*}
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    {u : CoordFamily (M := M) (F := BilF) Kc}
+    (hu : u ∈ compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo) :
+    symmetrizeBilinearCoordFamilyContinuousLinearMap (M := M) (F := F) Kc u ∈
+      compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo := by
+  letI : AddCommMonoid BilF := ContinuousLinearMap.addCommMonoid
+  letI : Module ℝ BilF := ContinuousLinearMap.module
+  letI : ∀ x : M, AddCommMonoid (BilW x) := fun _ => ContinuousLinearMap.addCommMonoid
+  letI : ∀ x : M, Module ℝ (BilW x) := fun _ => ContinuousLinearMap.module
+  letI : FiberBundle (F →L[ℝ] ℝ) (fun x : M => W x →L[ℝ] ℝ) := inferInstance
+  letI : VectorBundle ℝ (F →L[ℝ] ℝ) (fun x : M => W x →L[ℝ] ℝ) := inferInstance
+  letI : FiberBundle BilF BilW := inferInstance
+  letI : VectorBundle ℝ BilF BilW := inferInstance
+  rw [mem_compatibleCoordFamilySubmodule_iff]
+  intro i j
+  haveI : MemTrivializationAtlas (trivializationAt BilF BilW (x0 i)) := inferInstance
+  haveI : MemTrivializationAtlas (trivializationAt BilF BilW (x0 j)) := inferInstance
+  haveI : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := F) (W := W) (x0 i)
+  haveI : (trivializationAt BilF BilW (x0 j)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := F) (W := W) (x0 j)
+  ext x p q
+  let xi : Kc i := ⟨x.1, (hKo i j x.2).1⟩
+  let xj : Kc j := ⟨x.1, (hKo i j x.2).2⟩
+  have hbase :
+      x.1 ∈ (trivializationAt BilF BilW (x0 i)).baseSet ∩
+        (trivializationAt BilF BilW (x0 j)).baseSet :=
+    ⟨hKc i xi.2, hKc j xj.2⟩
+  have hx_i : x.1 ∈ (trivializationAt F W (x0 i)).baseSet := by
+    simpa using hbase.1
+  have hx_j : x.1 ∈ (trivializationAt F W (x0 j)).baseSet := by
+    simpa using hbase.2
+  have hucomp :=
+    (mem_compatibleCoordFamilySubmodule_iff
+      (𝕜 := ℝ) (F := BilF) (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo (u := u)).1 hu i j
+  have hcomp_x :
+      (trivializationAt BilF BilW (x0 i)).coordChangeL ℝ
+          (trivializationAt BilF BilW (x0 j)) x.1 (u i xi) = u j xj := by
+    have h := congrArg (fun f : C(Ko i j, BilF) => f x) hucomp
+    simpa [coordChangeContinuousMap, restrictToCompact, xi, xj] using h
+  have htrans :
+      ((trivializationAt BilF BilW (x0 j)) ⟨x.1,
+          (trivializationAt BilF BilW (x0 i)).symm x.1
+          (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F) (u i xi))⟩).2 =
+        _root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F)
+          (((trivializationAt BilF BilW (x0 j))
+            ⟨x.1, (trivializationAt BilF BilW (x0 i)).symm x.1 (u i xi)⟩).2) :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_transition_symmetrizeBilinear
+      (F := F) (W := W) (x0 := x0 i) (x1 := x0 j) (x := x.1)
+      hx_i hx_j (u i xi)
+  have horig :
+      ((trivializationAt BilF BilW (x0 j))
+        ⟨x.1, (trivializationAt BilF BilW (x0 i)).symm x.1 (u i xi)⟩).2 = u j xj := by
+    rw [← hcomp_x]
+    exact ((trivializationAt BilF BilW (x0 i)).coordChangeL_apply (R := ℝ)
+      (trivializationAt BilF BilW (x0 j)) hbase (u i xi)).symm
+  simp only [coordChangeContinuousMap_apply, restrictToCompact_apply,
+    symmetrizeBilinearCoordFamilyContinuousLinearMap_apply_apply]
+  calc
+    ((trivializationAt BilF BilW (x0 i)).coordChangeL ℝ
+        (trivializationAt BilF BilW (x0 j)) x.1
+        (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F) (u i xi))) p q =
+        ((trivializationAt BilF BilW (x0 j))
+          ⟨x.1, (trivializationAt BilF BilW (x0 i)).symm x.1
+          (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F) (u i xi))⟩).2 p q := by
+      rw [(trivializationAt BilF BilW (x0 i)).coordChangeL_apply (R := ℝ)
+        (trivializationAt BilF BilW (x0 j)) hbase]
+    _ =
+        (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F)
+          (((trivializationAt BilF BilW (x0 j))
+            ⟨x.1, (trivializationAt BilF BilW (x0 i)).symm x.1 (u i xi)⟩).2)) p q := by
+      exact congrArg (fun B : BilF => B p q) htrans
+    _ =
+        (_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear (E := F) (u j xj)) p q := by
+      rw [horig]
+    _ = (((u j xj) p q + (u j xj) q p) / 2) := by
+      rw [_root_.Bundle.ContinuousLinearMap.symmetrizeBilinear_apply_apply]
+
+/-- Coordinatewise symmetrization as a continuous linear self-map of the preferred finite-cover
+compatibility kernel. This packages the overlap-preservation theorem into the actual Banach carrier
+used by section-space arguments. -/
+noncomputable def symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)) :
+    compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo →L[ℝ]
+      compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup (CoordFamily (M := M) (F := BilF) Kc) := inferInstance
+  letI : NormedSpace ℝ (CoordFamily (M := M) (F := BilF) Kc) := inferInstance
+  let A : CoordFamily (M := M) (F := BilF) Kc →L[ℝ]
+      CoordFamily (M := M) (F := BilF) Kc :=
+    symmetrizeBilinearCoordFamilyContinuousLinearMap (M := M) (F := F) Kc
+  let S : Submodule ℝ (CoordFamily (M := M) (F := BilF) Kc) :=
+    compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo
+  refine LinearMap.mkContinuous
+    { toFun := fun u => ⟨A u.1,
+        symmetrizeBilinearCoordFamilyContinuousLinearMap_mem_compatibleCoordFamilySubmodule
+          (M := M) (F := F) (W := W) x0 Kc hKc Ko hKo u.2⟩
+      map_add' := by
+        intro u v
+        ext i x p q
+        simp [A]
+      map_smul' := by
+        intro c u
+        ext i x p q
+        simp [A] }
+    ‖A‖ ?_
+  intro u
+  change ‖A u.1‖ ≤ ‖A‖ * ‖u.1‖
+  exact ContinuousLinearMap.le_opNorm A u.1
+
+@[simp]
+lemma symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap_apply
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (u : compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo) :
+    (symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap
+        (M := M) (F := F) (W := W) x0 Kc hKc Ko hKo u).1 =
+      symmetrizeBilinearCoordFamilyContinuousLinearMap (M := M) (F := F) Kc u.1 :=
+  by
+    ext i x p q
+    change (symmetrizeBilinearCoordFamilyContinuousLinearMap
+      (M := M) (F := F) Kc u.1) i x p q =
+      (symmetrizeBilinearCoordFamilyContinuousLinearMap
+        (M := M) (F := F) Kc u.1) i x p q
+    rfl
+
+lemma symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap_forall_symmetric
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (u : compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo) :
+    ∀ i : κ, ∀ x : Kc i, ∀ v w : F,
+      (symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap
+        (M := M) (F := F) (W := W) x0 Kc hKc Ko hKo u).1 i x v w =
+      (symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap
+        (M := M) (F := F) (W := W) x0 Kc hKc Ko hKo u).1 i x w v := by
+  intro i x v w
+  rw [symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap_apply]
+  exact symmetrizeBilinearCoordFamilyContinuousLinearMap_forall_symmetric
+    (M := M) (F := F) Kc u.1 i x v w
+
+lemma symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap_forall_pos_iff
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (u : compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo) :
+    (∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 →
+      0 <
+        (symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap
+          (M := M) (F := F) (W := W) x0 Kc hKc Ko hKo u).1 i x v v) ↔
+      ∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 → 0 < u.1 i x v v := by
+  rw [show
+    (∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 →
+      0 <
+        (symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap
+          (M := M) (F := F) (W := W) x0 Kc hKc Ko hKo u).1 i x v v) =
+    (∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 →
+      0 < (symmetrizeBilinearCoordFamilyContinuousLinearMap
+        (M := M) (F := F) Kc u.1) i x v v) by
+      simp [symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap_apply]]
+  exact symmetrizeBilinearCoordFamilyContinuousLinearMap_forall_pos_iff
+    (M := M) (F := F) Kc u.1
+
+/-- Coordinate-family symmetrization does not increase the finite-product compact norm distance to a
+pointwise symmetric coordinate family. -/
+lemma dist_symmetrizeBilinearCoordFamilyContinuousLinearMap_le_of_forall_symmetric
+    {κ : Type*} [Fintype κ] (Kc : κ → TopologicalSpace.Compacts M)
+    {u g : CoordFamily (M := M) (F := BilF) Kc}
+    (hg : ∀ i : κ, ∀ x : Kc i, ∀ v w : F, g i x v w = g i x w v) :
+    dist (symmetrizeBilinearCoordFamilyContinuousLinearMap (M := M) (F := F) Kc u) g ≤
+      dist u g := by
+  rw [dist_eq_norm, dist_eq_norm]
+  refine (pi_norm_le_iff_of_nonneg (norm_nonneg _)).2 ?_
+  intro i
+  calc
+    ‖(symmetrizeBilinearCoordFamilyContinuousLinearMap (M := M) (F := F) Kc u - g) i‖ =
+        dist (symmetrizeBilinearCoordContinuousLinearMap (M := M) (F := F) (Kc i) (u i))
+          (g i) := by
+      rw [dist_eq_norm]
+      rfl
+    _ ≤ dist (u i) (g i) :=
+      dist_symmetrizeBilinearCoordContinuousLinearMap_le_of_forall_symmetric
+        (M := M) (F := F) (Kc i) (hg i)
+    _ = ‖(u - g) i‖ := by
+      rw [dist_eq_norm]
+      rfl
+    _ ≤ ‖u - g‖ := norm_le_pi_norm (u - g) i
+
+lemma dist_symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap_le_of_forall_symmetric
+    {κ : Type*} [Fintype κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    {u g : compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo}
+    (hg : ∀ i : κ, ∀ x : Kc i, ∀ v w : F, g.1 i x v w = g.1 i x w v) :
+    dist (symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap
+        (M := M) (F := F) (W := W) x0 Kc hKc Ko hKo u) g ≤
+      dist u g := by
+  classical
+  change dist
+      (symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap
+        (M := M) (F := F) (W := W) x0 Kc hKc Ko hKo u).1 g.1 ≤
+    dist u.1 g.1
+  rw [symmetrizeBilinearCompatibleCoordFamilyContinuousLinearMap_apply
+    (M := M) (F := F) (W := W) x0 Kc hKc Ko hKo u]
+  exact dist_symmetrizeBilinearCoordFamilyContinuousLinearMap_le_of_forall_symmetric
+    (M := M) (F := F) Kc hg
 
 /-- Coordinatewise antisymmetric defect on compact continuous families of model bilinear forms. -/
 noncomputable def symmetryDefectCoordContinuousLinearMap
@@ -923,6 +1670,42 @@ lemma isClosed_setOf_coordFamily_forall_symmetric
   rw [hAll]
   exact huniv
 
+/-- Coordinate families whose bilinear forms are pointwise symmetric on every compact piece form a
+convex subset of the ambient finite product. -/
+lemma convex_setOf_coordFamily_forall_symmetric
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts M) :
+    Convex ℝ ({u : CoordFamily (M := M) (F := BilF) Kc |
+      ∀ i : κ, ∀ x : Kc i, ∀ v w : F, u i x v w = u i x w v} :
+        Set (CoordFamily (M := M) (F := BilF) Kc)) := by
+  rw [convex_iff_forall_pos]
+  intro u hu v hv a b _ _ _ i x p q
+  simp [hu i x p q, hv i x p q]
+
+/-- Coordinate families whose bilinear forms are pointwise positive-definite on every compact piece
+form a convex subset of the ambient finite product. -/
+lemma convex_setOf_coordFamily_forall_pos
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts M) :
+    Convex ℝ ({u : CoordFamily (M := M) (F := BilF) Kc |
+      ∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 → 0 < u i x v v} :
+        Set (CoordFamily (M := M) (F := BilF) Kc)) := by
+  rw [convex_iff_forall_pos]
+  intro u hu v hv a b ha hb hab i x p hp
+  have hleft : 0 < a * u i x p p := mul_pos ha (hu i x p hp)
+  have hright : 0 ≤ b * v i x p p := mul_nonneg hb.le (le_of_lt (hv i x p hp))
+  simpa [smul_eq_mul] using add_pos_of_pos_of_nonneg hleft hright
+
+/-- Coordinate families that are pointwise symmetric and positive-definite on every compact piece
+form a convex subset of the ambient finite product. -/
+lemma convex_setOf_coordFamily_forall_symmetric_and_pos
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts M) :
+    Convex ℝ ({u : CoordFamily (M := M) (F := BilF) Kc |
+      (∀ i : κ, ∀ x : Kc i, ∀ v w : F, u i x v w = u i x w v) ∧
+      ∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 → 0 < u i x v v} :
+        Set (CoordFamily (M := M) (F := BilF) Kc)) := by
+  simpa using
+    (convex_setOf_coordFamily_forall_symmetric (M := M) (F := F) Kc).inter
+      (convex_setOf_coordFamily_forall_pos (M := M) (F := F) Kc)
+
 variable {V : M → Type*}
   [TopologicalSpace (_root_.Bundle.TotalSpace (F →L[ℝ] F →L[ℝ] ℝ) V)] [∀ x, TopologicalSpace (V x)]
   [∀ x, AddCommGroup (V x)] [∀ x, Module ℝ (V x)]
@@ -966,6 +1749,62 @@ lemma isClosed_setOf_compatibleCoordFamilySubmodule_forall_symmetric
   have hS : IsClosed S := isClosed_setOf_coordFamily_forall_symmetric (M := M) (F := F) Kc
   change IsClosed (Subtype.val ⁻¹' S)
   exact hS.preimage continuous_subtype_val
+
+/-- Inside the compatibility kernel, coordinatewise symmetric bilinear-form families form a convex
+subset. -/
+lemma convex_setOf_compatibleCoordFamilySubmodule_forall_symmetric
+    {κ : Type*} [Finite κ]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)) :
+    Convex ℝ {u : compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) et Kc hKc Ko hKo |
+      ∀ i : κ, ∀ x : Kc i, ∀ v w : F, u.1 i x v w = u.1 i x w v} := by
+  rw [convex_iff_forall_pos]
+  intro u hu v hv a b _ _ _ i x p q
+  simp [hu i x p q, hv i x p q]
+
+/-- Inside the compatibility kernel, coordinatewise positive-definite bilinear-form families form a
+convex subset. -/
+lemma convex_setOf_compatibleCoordFamilySubmodule_forall_pos
+    {κ : Type*} [Finite κ]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)) :
+    Convex ℝ {u : compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) et Kc hKc Ko hKo |
+      ∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 → 0 < u.1 i x v v} := by
+  rw [convex_iff_forall_pos]
+  intro u hu v hv a b ha hb hab i x p hp
+  have hleft : 0 < a * u.1 i x p p := mul_pos ha (hu i x p hp)
+  have hright : 0 ≤ b * v.1 i x p p := mul_nonneg hb.le (le_of_lt (hv i x p hp))
+  simpa [smul_eq_mul] using add_pos_of_pos_of_nonneg hleft hright
+
+/-- Inside the compatibility kernel, coordinatewise symmetric positive-definite bilinear-form
+families form a convex subset. -/
+lemma convex_setOf_compatibleCoordFamilySubmodule_forall_symmetric_and_pos
+    {κ : Type*} [Finite κ]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)) :
+    Convex ℝ {u : compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) et Kc hKc Ko hKo |
+      (∀ i : κ, ∀ x : Kc i, ∀ v w : F, u.1 i x v w = u.1 i x w v) ∧
+      ∀ i : κ, ∀ x : Kc i, ∀ v : F, v ≠ 0 → 0 < u.1 i x v v} := by
+  simpa using
+    (convex_setOf_compatibleCoordFamilySubmodule_forall_symmetric
+      (M := M) (F := F) (V := V) et Kc hKc Ko hKo).inter
+      (convex_setOf_compatibleCoordFamilySubmodule_forall_pos
+        (M := M) (F := F) (V := V) et Kc hKc Ko hKo)
 
 namespace ContinuousSectionSpace
 
@@ -1520,6 +2359,72 @@ def _root_.Bundle.ContinuousRiemannianMetric.ofContinuousSectionSpace
     (_root_.Bundle.ContinuousRiemannianMetric.ofContinuousSectionSpace
       (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover s hs).inner x = s x := rfl
 
+/-- Reify a `C^n` bilinear-form section in the symmetric positive-definite finite-cover locus as a
+bundled `C^n` Riemannian metric. This is the smooth analogue of
+`ContinuousRiemannianMetric.ofContinuousSectionSpace` and is the section-space bridge needed to turn
+spatially smooth Banach metric-section curves into actual smooth Riemannian metrics. -/
+def _root_.Bundle.ContMDiffRiemannianMetric.ofContinuousSectionSpace
+    {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace ℝ E₀]
+    {H₀ : Type*} [TopologicalSpace H₀] {I₀ : ModelWithCorners ℝ E₀ H₀}
+    {n : WithTop ℕ∞} [ChartedSpace H₀ M]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F]
+    [∀ x : M, IsTopologicalAddGroup (W x)] [∀ x : M, ContinuousConstSMul ℝ (W x)]
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hs : s ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hsmooth : ContMDiff I₀ (I₀.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) x (s x))) :
+    _root_.Bundle.ContMDiffRiemannianMetric I₀ n F W where
+  inner := s
+  symm := hs.1
+  pos := hs.2
+  isVonNBounded x := by
+    let e : W x ≃L[ℝ] F :=
+      _root_.Bundle.Trivialization.continuousLinearEquivAt ℝ
+        (trivializationAt F W x) _ (FiberBundle.mem_baseSet_trivializationAt' x)
+    exact
+      _root_.Bundle.ContinuousLinearMap.isVonNBounded_sublevel_one_of_pos_of_continuousLinearEquiv
+        (E := F) e (s x) (hs.2 x)
+  contMDiff := hsmooth
+
+@[simp] theorem _root_.Bundle.ContMDiffRiemannianMetric.ofContinuousSectionSpace_inner
+    {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace ℝ E₀]
+    {H₀ : Type*} [TopologicalSpace H₀] {I₀ : ModelWithCorners ℝ E₀ H₀}
+    {n : WithTop ℕ∞} [ChartedSpace H₀ M]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F]
+    [∀ x : M, IsTopologicalAddGroup (W x)] [∀ x : M, ContinuousConstSMul ℝ (W x)]
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hs : s ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hsmooth : ContMDiff I₀ (I₀.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) x (s x)))
+    (x : M) :
+    (_root_.Bundle.ContMDiffRiemannianMetric.ofContinuousSectionSpace
+      (M := M) (F := F) (W := W) (I₀ := I₀) et Kc hKc Ko hKo hKoEq hcover
+      s hs hsmooth).inner x = s x := rfl
+
 /-- Read one scalar component of a bilinear-form coordinate chart as a continuous linear map on the
 bundled finite-cover continuous-section space. -/
 noncomputable def coordBilinearFormReadoutContinuousLinearMap
@@ -1673,6 +2578,101 @@ theorem eq_of_coordBilinearFormReadout_eq
   ext u v
   exact hcoord i x u v
 
+/-- The finite-cover coordinate family of the fiberwise symmetrized section is the coordinatewise
+symmetrization of the original finite-cover coordinate family. -/
+lemma equivCompatibleCoordFamilySubmodule_symmetrizeBilinearSection
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s v : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hv : ∀ x (p q : W x), v x p q = (s x p q + s x q p) / 2) :
+    (equivCompatibleCoordFamilySubmodule
+        (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover v).1 =
+      symmetrizeBilinearCoordFamilyContinuousLinearMap (M := M) (F := F) Kc
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover s).1 := by
+  ext i x u w
+  have hKpref : (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet := by
+    simpa [het i] using hKc i
+  have hxbase : x.1 ∈ (trivializationAt F W (x0 i)).baseSet := by
+    simpa using hKpref x.2
+  simp [ContinuousSectionSpace.equivCompatibleCoordFamilySubmodule,
+    ContinuousSectionSpace.toSubtype, continuousSectionEquivCompatibleCoordFamilySubmodule,
+    continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
+    compatibleCoordFamilyOfSection, coordFamilyOfSection]
+  rw [het i]
+  rw [_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
+    (F := F) (W := W) (x0 i) x.1 hxbase (v x.1) u w]
+  rw [_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
+    (F := F) (W := W) (x0 i) x.1 hxbase (s x.1) u w]
+  rw [_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
+    (F := F) (W := W) (x0 i) x.1 hxbase (s x.1) w u]
+  exact hv x.1 _ _
+
+/-- Fiberwise symmetrizing an approximant does not increase its finite-cover section-space distance
+to an already symmetric section. -/
+lemma dist_symmetrizeBilinearSection_le_of_symmetric
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s u v : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hs : s ∈ symmetricLocus (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hv : ∀ x (p q : W x), v x p q = (u x p q + u x q p) / 2) :
+    dist s v ≤ dist s u := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+  have hvcoord :
+      (e v).1 = symmetrizeBilinearCoordFamilyContinuousLinearMap (M := M) (F := F) Kc
+        (e u).1 :=
+    equivCompatibleCoordFamilySubmodule_symmetrizeBilinearSection
+      (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover u v hv
+  have hscoord : ∀ i : κ, ∀ x : Kc i, ∀ p q : F, (e s).1 i x p q = (e s).1 i x q p := by
+    have hcoord := coordwise_forall_symmetric_of_forall_symmetric
+      (M := M) (F := F) (W := W) (x0 := x0) (et := et) (het := het)
+      (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+      (hKoEq := hKoEq) (hcover := hcover) s hs
+    intro i x p q
+    simpa [e, ContinuousSectionSpace.equivCompatibleCoordFamilySubmodule,
+      ContinuousSectionSpace.toSubtype, continuousSectionEquivCompatibleCoordFamilySubmodule,
+      continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
+      compatibleCoordFamilyOfSection, coordFamilyOfSection] using hcoord i x p q
+  calc
+    dist s v = dist (e s) (e v) := rfl
+    _ = dist (e s).1 (e v).1 := rfl
+    _ = dist (e v).1 (e s).1 := by rw [dist_comm]
+    _ = dist (symmetrizeBilinearCoordFamilyContinuousLinearMap (M := M) (F := F) Kc (e u).1)
+        (e s).1 := by rw [hvcoord]
+    _ ≤ dist (e u).1 (e s).1 :=
+      dist_symmetrizeBilinearCoordFamilyContinuousLinearMap_le_of_forall_symmetric
+        (M := M) (F := F) Kc hscoord
+    _ = dist (e u) (e s) := rfl
+    _ = dist u s := rfl
+    _ = dist s u := by rw [dist_comm]
+
 /-- A continuous Riemannian metric determines a point of the closed symmetric section space. -/
 def _root_.Bundle.ContinuousRiemannianMetric.toSymmetricSectionSpace
     {κ : Type*} [Finite κ] [T2Space M]
@@ -1758,6 +2758,42 @@ lemma isOpen_setOf_forall_pos
   rw [hEq]
   exact hS
 
+/-- Membership in the positive-definite locus has a metric neighborhood inside the locus.  This is
+the neighborhood form of `isOpen_setOf_forall_pos`, useful when smooth approximation produces a
+nearby bilinear-form section and positivity must be retained by choosing the approximation radius
+small enough. -/
+lemma exists_dist_lt_subset_positiveDefiniteLocus
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover}
+    (hs : s ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    ∃ ε : ℝ, 0 < ε ∧
+      ∀ u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover,
+        dist u s < ε →
+          u ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover := by
+  obtain ⟨ε, hεpos, hεsub⟩ :=
+    (Metric.isOpen_iff.mp
+      (isOpen_setOf_forall_pos
+        (M := M) (F := F) (W := W) x0 et het Kc hKc Ko hKo hKoEq hcover)) s hs
+  refine ⟨ε, hεpos, ?_⟩
+  intro u hu
+  exact hεsub (by simpa [Metric.mem_ball] using hu)
+
 /-- For a finite compact cover by preferred bilinear-form trivializations, the actual pointwise
 symmetric locus of bundled bilinear-form sections is closed in the transported
 `ContinuousSectionSpace`. -/
@@ -1812,6 +2848,152 @@ lemma isClosed_symmetricLocus
             compatibleCoordFamilyOfSection, coordFamilyOfSection] using hs')
   rw [hEq]
   exact hS
+
+/-- The pointwise symmetric bilinear-form sections, represented as the kernel of the transported
+coordinatewise antisymmetric-defect map. Unlike the set-subtype
+`SymmetricSectionSpace`, this is an actual closed submodule of the continuous-section Banach
+space, so Picard-Lindelöf arguments can use it as their Banach carrier. -/
+noncomputable def symmetricSectionSubmodule
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ) :
+    Submodule ℝ (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) :=
+  (coordwiseSymmetryDefectContinuousLinearMap (F := F) (V := BilW)
+    et Kc hKc Ko hKo hKoEq hcover).ker
+
+instance instNormedAddCommGroupSymmetricSectionSubmodule
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ) :
+    NormedAddCommGroup (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :=
+  Submodule.normedAddCommGroup
+    (𝕜 := ℝ)
+    (E := ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (s := symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+
+instance instNormedSpaceSymmetricSectionSubmodule
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ) :
+    NormedSpace ℝ (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) := by
+  letI : NormedAddCommGroup
+      (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :=
+    instNormedAddCommGroupSymmetricSectionSubmodule
+      et Kc hKc Ko hKo hKoEq hcover
+  exact Submodule.normedSpace
+    (𝕜 := ℝ) (R := ℝ)
+    (E := ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (s := symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+
+instance instCompleteSpaceSymmetricSectionSubmodule
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)] :
+    CompleteSpace (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) := by
+  change CompleteSpace
+    ((coordwiseSymmetryDefectContinuousLinearMap (F := F) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover).ker)
+  infer_instance
+
+lemma mem_symmetricSectionSubmodule_iff
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    s ∈ symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover ↔
+      s ∈ symmetricLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover := by
+  simpa [symmetricSectionSubmodule, LinearMap.mem_ker] using
+    coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff
+      (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover s
+
+/-- Elements of the symmetric submodule coerce to genuinely pointwise symmetric sections. -/
+lemma symmetricSectionSubmodule_coe_mem_symmetricLocus
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) ∈
+      symmetricLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover :=
+  (mem_symmetricSectionSubmodule_iff
+    x0 et het Kc hKc Ko hKo hKoEq hcover s.1).1 s.2
+
+/-- A continuous Riemannian metric determines a point of the symmetric submodule Banach carrier. -/
+def _root_.Bundle.ContinuousRiemannianMetric.toSymmetricSectionSubmodule
+    {κ : Type*} [Finite κ] [T2Space M]
+    (g : _root_.Bundle.ContinuousRiemannianMetric F W)
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ) :
+    symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover :=
+  ⟨⟨g.toSection, g.continuous_toSection⟩, by
+    rw [mem_symmetricSectionSubmodule_iff
+      x0 et het Kc hKc Ko hKo hKoEq hcover]
+    exact mem_symmetricLocus_of_continuousRiemannianMetric
+      (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover g⟩
 
 /-- The bundled section space restricted to pointwise symmetric bilinear-form sections. This is the
 closed symmetric locus of the ambient bilinear-form section space, viewed as a subtype. -/
@@ -1871,6 +3053,53 @@ def riemannianMetricLocus
       et Kc hKc Ko hKo hKoEq hcover) :=
   {s | s.1 ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
     et Kc hKc Ko hKo hKoEq hcover}
+
+/-- The finite-cover metric locus inside the symmetric submodule. This is the Banach-carrier
+version of `riemannianMetricLocus`: the ambient space is a closed submodule, so autonomous ODE
+existence can be applied without leaving the pointwise symmetric bilinear-form sections. -/
+def riemannianMetricLocusSubmodule
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ) :
+    Set (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :=
+  {s | s.1 ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+    et Kc hKc Ko hKo hKoEq hcover}
+
+/-- Membership in the submodule metric locus is equivalent to membership of the coerced section in
+the ambient symmetric positive-definite locus. -/
+lemma mem_riemannianMetricLocusSubmodule_iff
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :
+    s ∈ riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover ↔
+      (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover) ∈
+        symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover := by
+  constructor
+  · intro hpos
+    exact ⟨symmetricSectionSubmodule_coe_mem_symmetricLocus
+      (M := M) (F := F) (W := W) x0 et het Kc hKc Ko hKo hKoEq hcover s, hpos⟩
+  · intro h
+    exact h.2
 
 /-- Inside the closed symmetric section space, the symmetric positive-definite locus is open. This
 packages the usual heuristic that Riemannian metrics form an open subset of symmetric bilinear
@@ -1938,6 +3167,28 @@ lemma isOpen_riemannianMetricLocus
   exact (isOpen_setOf_forall_pos (M := M) (F := F) (W := W)
     x0 et het Kc hKc Ko hKo hKoEq hcover).preimage continuous_subtype_val
 
+/-- The metric locus is open inside the symmetric submodule Banach carrier. -/
+lemma isOpen_riemannianMetricLocusSubmodule
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F] :
+    IsOpen (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover) := by
+  change IsOpen (Subtype.val ⁻¹' positiveDefiniteLocus (M := M) (F := F) (W := W)
+    et Kc hKc Ko hKo hKoEq hcover)
+  exact (isOpen_setOf_forall_pos (M := M) (F := F) (W := W)
+    x0 et het Kc hKc Ko hKo hKoEq hcover).preimage continuous_subtype_val
+
 /-- Genuine continuous Riemannian metrics land in the open metric locus of the closed symmetric
 section space. -/
 lemma _root_.Bundle.ContinuousRiemannianMetric.mem_riemannianMetricLocus
@@ -1960,6 +3211,30 @@ lemma _root_.Bundle.ContinuousRiemannianMetric.mem_riemannianMetricLocus
   exact mem_positiveDefiniteLocus_of_continuousRiemannianMetric
     (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover g
 
+/-- Genuine continuous Riemannian metrics land in the open metric locus of the symmetric
+submodule Banach carrier. -/
+lemma _root_.Bundle.ContinuousRiemannianMetric.mem_riemannianMetricLocusSubmodule
+    {κ : Type*} [Finite κ] [T2Space M]
+    (g : _root_.Bundle.ContinuousRiemannianMetric F W)
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ) :
+    g.toSymmetricSectionSubmodule x0 et het Kc hKc Ko hKo hKoEq hcover ∈
+      riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover := by
+  show (g.toSymmetricSectionSubmodule x0 et het Kc hKc Ko hKo hKoEq hcover).1 ∈
+      positiveDefiniteLocus (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover
+  exact mem_positiveDefiniteLocus_of_continuousRiemannianMetric
+    (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover g
+
 end
 
 end PreferredTrivializations
@@ -1967,6 +3242,203 @@ end PreferredTrivializations
 end ContinuousSectionSpace
 
 end CoordinatePositivity
+
+namespace ContinuousSectionSpace
+
+section PreferredBilinearNormControl
+
+variable {M : Type*} [TopologicalSpace M]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+variable {W : M → Type*} [TopologicalSpace (_root_.Bundle.TotalSpace F W)]
+  [∀ x, SeminormedAddCommGroup (W x)] [∀ x, NormedSpace ℝ (W x)]
+  [FiberBundle F W] [VectorBundle ℝ F W]
+
+local notation "BilF" => (F →L[ℝ] F →L[ℝ] ℝ)
+local notation "BilW" => _root_.Bundle.BilinearFormBundle (V := W)
+
+local instance bilFNormedAddCommGroup : NormedAddCommGroup BilF :=
+  (inferInstance : NormedAddCommGroup (F →L[ℝ] F →L[ℝ] ℝ))
+local instance bilFNormedSpace : NormedSpace ℝ BilF :=
+  (inferInstance : NormedSpace ℝ (F →L[ℝ] F →L[ℝ] ℝ))
+local instance bilWSeminormedAddCommGroup (x : M) : SeminormedAddCommGroup (BilW x) :=
+  inferInstance
+local instance bilWNormedSpace (x : M) : NormedSpace ℝ (BilW x) :=
+  inferInstance
+
+set_option synthInstance.maxHeartbeats 100000
+set_option maxHeartbeats 1000000
+
+/-- Preferred bilinear-form trivialization maps are bounded by the square of the norm of the
+underlying inverse vector-bundle trivialization. This is the concrete operator estimate behind the
+finite-cover bilinear coordinate Lipschitz bound. -/
+theorem preferredBilinear_trivialization_opNorm_le_of_symmL_opNorm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {C : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C) :
+    ∀ i (x : Kc i),
+      ‖(trivializationAt BilF BilW (x0 i)).continuousLinearMapAt ℝ x.1‖ ≤ C * C := by
+  intro i x
+  have hxBil : x.1 ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i x.2
+  have hxW : x.1 ∈ (trivializationAt F W (x0 i)).baseSet := by
+    simpa using hxBil
+  let S : F →L[ℝ] W x.1 := (trivializationAt F W (x0 i)).symmL ℝ x.1
+  let A : BilW x.1 →L[ℝ] BilF :=
+    (trivializationAt BilF BilW (x0 i)).continuousLinearMapAt ℝ x.1
+  have hS : ‖S‖ ≤ C := by
+    simpa [S] using hC i x
+  have hCC : 0 ≤ C * C := mul_nonneg hC0 hC0
+  have hA : ‖A‖ ≤ C * C := by
+    refine ContinuousLinearMap.opNorm_le_bound A hCC ?_
+    intro B
+    have hCB : 0 ≤ (C * C) * ‖B‖ := mul_nonneg hCC (norm_nonneg B)
+    refine ContinuousLinearMap.opNorm_le_bound (A B) hCB ?_
+    intro u
+    have hCBu : 0 ≤ ((C * C) * ‖B‖) * ‖u‖ := mul_nonneg hCB (norm_nonneg u)
+    refine ContinuousLinearMap.opNorm_le_bound ((A B) u) hCBu ?_
+    intro v
+    have hSu : ‖S u‖ ≤ C * ‖u‖ := by
+      exact (ContinuousLinearMap.le_opNorm S u).trans
+        (mul_le_mul_of_nonneg_right hS (norm_nonneg u))
+    have hSv : ‖S v‖ ≤ C * ‖v‖ := by
+      exact (ContinuousLinearMap.le_opNorm S v).trans
+        (mul_le_mul_of_nonneg_right hS (norm_nonneg v))
+    have hAuv : (A B) u v = B (S u) (S v) := by
+      dsimp [A, S]
+      rw [Bundle.Trivialization.linearMapAt_apply]
+      rw [if_pos hxBil]
+      simpa using
+        (_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
+          (F := F) (W := W) (x0 := x0 i) (x := x.1) hxW B u v)
+    calc
+      ‖(A B) u v‖ = ‖B (S u) (S v)‖ := by rw [hAuv]
+      _ ≤ ‖B‖ * ‖S u‖ * ‖S v‖ :=
+        ContinuousLinearMap.le_opNorm₂ B (S u) (S v)
+      _ ≤ ‖B‖ * (C * ‖u‖) * (C * ‖v‖) := by
+        gcongr
+      _ = (((C * C) * ‖B‖) * ‖u‖) * ‖v‖ := by ring
+  simpa [A] using hA
+
+/-- Preferred bilinear-form coordinate readouts inherit fiberwise Lipschitz control from a uniform
+operator-norm bound on the preferred bilinear-form trivializations. This is the bilinear-bundle
+specialization of the finite-cover norm bridge, ready to feed smooth-density arguments. -/
+theorem preferredBilinear_coord_dist_le_of_trivialization_opNorm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {L : ℝ}
+    (hL : ∀ i (x : Kc i),
+      ‖(trivializationAt BilF BilW (x0 i)).continuousLinearMapAt ℝ x.1‖ ≤ L)
+    (s t : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    ∀ i (x : Kc i),
+      dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover s).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover t).1 i x)
+        ≤ L * dist (ContinuousSectionSpace.toFun s x.1)
+          (ContinuousSectionSpace.toFun t x.1) := by
+  simpa only using
+    coord_dist_le_of_trivialization_opNorm_le
+    (𝕜 := ℝ) (F := BilF) (V := BilW)
+    (et := fun i => trivializationAt BilF BilW (x0 i))
+    (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+    (hKoEq := hKoEq) (hcover := hcover) hL s t
+
+/-- Preferred bilinear-form coordinate readouts are Lipschitz with the square of a uniform bound on
+the underlying inverse vector-bundle trivializations. -/
+theorem preferredBilinear_coord_dist_le_of_symmL_opNorm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {C : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C)
+    (s t : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    ∀ i (x : Kc i),
+      dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover s).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover t).1 i x)
+        ≤ (C * C) * dist (ContinuousSectionSpace.toFun s x.1)
+          (ContinuousSectionSpace.toFun t x.1) :=
+  preferredBilinear_coord_dist_le_of_trivialization_opNorm_le
+    (M := M) (F := F) (W := W) (x0 := x0)
+    (hL := preferredBilinear_trivialization_opNorm_le_of_symmL_opNorm_le
+      (M := M) (F := F) (W := W) (x0 := x0) (hKc := hKc) hC0 hC)
+    s t
+
+/-- Fiberwise approximation of preferred bilinear-form sections upgrades to approximation in the
+transported finite-cover section norm when the inverse vector-bundle trivializations are uniformly
+bounded on the cover. -/
+theorem exists_dist_lt_of_forall_fiber_dist_lt_preferredBilinear_of_symmL_opNorm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    {P : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover → Prop}
+    {C : ℝ} (hCpos : 0 < C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C)
+    (happrox : ∀ η > 0,
+      ∃ u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover,
+        P u ∧ ∀ x : M, dist (s x) (u x) < η) :
+    ∀ ε > 0,
+      ∃ u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover,
+        P u ∧ dist s u < ε := by
+  refine exists_dist_lt_of_forall_fiber_dist_lt_of_coord_lipschitz
+    (𝕜 := ℝ) (F := BilF) (V := BilW)
+    (et := fun i => trivializationAt BilF BilW (x0 i))
+    (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+    (hKoEq := hKoEq) (hcover := hcover)
+    (s := s) (P := P) (L := C * C) (mul_pos hCpos hCpos) happrox ?_
+  intro u _huP
+  exact preferredBilinear_coord_dist_le_of_symmL_opNorm_le
+    (M := M) (F := F) (W := W) (x0 := x0)
+    (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+    (hKoEq := hKoEq) (hcover := hcover)
+    (C := C) hCpos.le hC s u
+
+end PreferredBilinearNormControl
+
+end ContinuousSectionSpace
 
 end Bundle.Trivialization
 

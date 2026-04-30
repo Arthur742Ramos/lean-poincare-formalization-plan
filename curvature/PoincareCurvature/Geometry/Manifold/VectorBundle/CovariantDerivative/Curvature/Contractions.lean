@@ -3,6 +3,7 @@ module
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi
 public import Mathlib.Analysis.InnerProductSpace.Trace
 public import Mathlib.Geometry.Manifold.Riemannian.Basic
+public import Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition
 public import Mathlib.LinearAlgebra.Trace
 
 /-!
@@ -110,6 +111,28 @@ lemma ricciCurvature_apply (x : M) (u w : TangentSpace I x) :
     ricciCurvature (cov := cov) x u w =
       LinearMap.trace ℝ (TangentSpace I x) (ricciEndomorphism (cov := cov) x u w) := rfl
 
+/-- On a tangent fiber of dimension at most one, every curvature component vanishes. -/
+lemma curvatureTensor_eq_zero_of_finrank_le_one
+    (x : M) (hfin : Module.finrank ℝ (TangentSpace I x) ≤ 1)
+    (u v w : TangentSpace I x) :
+    curvatureTensor (cov := cov) x u v w = 0 := by
+  rcases (finrank_le_one_iff (K := ℝ) (V := TangentSpace I x)).1 hfin with
+    ⟨e, hspan⟩
+  rcases hspan u with ⟨cu, hcu⟩
+  rcases hspan v with ⟨cv, hcv⟩
+  rw [← hcu, ← hcv]
+  calc
+    curvatureTensor (cov := cov) x (cu • e) (cv • e) w =
+        cu • curvatureTensor (cov := cov) x e (cv • e) w := by
+      simpa using congrArg (fun f : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ]
+          TangentSpace I x ↦ f (cv • e) w)
+        ((curvatureTensor (cov := cov) x).map_smul cu e)
+    _ = cu • (cv • curvatureTensor (cov := cov) x e e w) := by
+      congr 1
+      simpa using congrArg (fun f : TangentSpace I x →ₗ[ℝ] TangentSpace I x ↦ f w)
+        ((curvatureTensor (cov := cov) x e).map_smul cv e)
+    _ = 0 := by simp
+
 /-- On a zero-dimensional tangent fiber, every Ricci component vanishes. -/
 lemma ricciCurvature_eq_zero_of_subsingleton_tangent
     (x : M) [Subsingleton (TangentSpace I x)] (u w : TangentSpace I x) :
@@ -118,6 +141,18 @@ lemma ricciCurvature_eq_zero_of_subsingleton_tangent
   have hEnd : ricciEndomorphism (cov := cov) x u w = 0 := by
     ext v
     exact Subsingleton.elim _ _
+  rw [hEnd]
+  exact LinearMap.map_zero (LinearMap.trace ℝ (TangentSpace I x))
+
+/-- On a tangent fiber of dimension at most one, every Ricci component vanishes. -/
+lemma ricciCurvature_eq_zero_of_finrank_le_one
+    (x : M) (hfin : Module.finrank ℝ (TangentSpace I x) ≤ 1)
+    (u w : TangentSpace I x) :
+    ricciCurvature (cov := cov) x u w = 0 := by
+  rw [ricciCurvature_apply]
+  have hEnd : ricciEndomorphism (cov := cov) x u w = 0 := by
+    ext v
+    exact curvatureTensor_eq_zero_of_finrank_le_one (cov := cov) x hfin v u w
   rw [hEnd]
   exact LinearMap.map_zero (LinearMap.trace ℝ (TangentSpace I x))
 
