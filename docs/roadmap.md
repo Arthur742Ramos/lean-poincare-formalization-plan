@@ -903,11 +903,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
            `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt`.
            The variational tangent-map bridge now has its own readout-field
            endpoint,
-           `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMap`,
-           so finite-cover/Banach readouts can enter before the additional
-           base-flow identification step.
-           On the geometric
-           velocity side,
+            `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMap`,
+            so finite-cover/Banach readouts can enter before the additional
+            base-flow identification step; its geometric-slot companion
+            keeps the same readout-field entry point while stating the scalar
+            velocity identity in actual pushed-forward tangent vectors at the
+            base time.
+            On the geometric
+            velocity side,
           `gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`
           now turns vanishing pulled-back background Ricci curvature directly
           into vanishing corrected pullback velocity, isolating the zero-curvature

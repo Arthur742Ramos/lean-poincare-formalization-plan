@@ -381,7 +381,10 @@ shape used by the variational local-flow endpoints.
 The variational tangent-map layer also has a direct readout-field entry point:
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMap`
 accepts the finite-cover/Banach two-variable readout before the base-flow
-eventual-equality hypotheses are introduced.
+eventual-equality hypotheses are introduced. Its geometric-slot companion
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMap_geometricValue`
+keeps that readout-field entry point while stating the scalar velocity identity
+in actual pushed-forward tangent vectors at the base time.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
