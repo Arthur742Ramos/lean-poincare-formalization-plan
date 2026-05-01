@@ -665,8 +665,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     adapters in the thin `Diffeomorph3FlowTimeDerivative` module. That module
     now names the remaining dynamic scalar chain-rule target as
     `PullbackMetricInnerDerivativeOn` and proves its equivalence with
-    `HasTimeDerivativeOn` for the pulled-back metric, so the remaining primitive
-    input is exactly that scalar identity; in the subsingleton-tangent case this non-identity
+    `HasTimeDerivativeOn` for the pulled-back metric, with fixed-IVP and
+    theorem-family bundle adapters, so the remaining primitive input is exactly
+    that scalar identity; in the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
     DeTurck gauge-flow families by componentwise vanishing, with direct
     gauge-reduced projections and matching model-space/empty-manifold synonyms

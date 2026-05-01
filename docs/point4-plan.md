@@ -99,10 +99,12 @@ thin `Diffeomorph3FlowTimeDerivative.lean` module now also exposes its scalar
 inner-product form plus the scalar-to-tensor repackaging lemma for fixed
 non-identity gauges. That module names the remaining dynamic scalar target as
 `SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeOn` and proves it
-equivalent to `HasTimeDerivativeOn` for the pulled-back metric. The bundled
-non-identity gauge-flow API now has proof-bearing scalar-to-tensor wrappers, so
-solving this single dynamic scalar identity automatically supplies the
-`HasTimeDerivativeOn` package required by the gauge-reduction theorem routes.
+equivalent to `HasTimeDerivativeOn` for the pulled-back metric. It also lifts
+that named scalar target to fixed-IVP and theorem-family geometric `C³` DeTurck
+gauge-flow bundles. The bundled non-identity gauge-flow API now has
+proof-bearing scalar-to-tensor wrappers, so solving this single dynamic scalar
+identity automatically supplies the `HasTimeDerivativeOn` package required by
+the gauge-reduction theorem routes.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
