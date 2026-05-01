@@ -757,7 +757,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        and within-set component derivative packages now restrict monotonically
        to smaller time sets for Picard-interval localization, and raw gauge
        flows now promote arbitrary within-time-set component data directly to
-       scalar and tensor time-regularity on the same time set. A companion
+       scalar and tensor time-regularity on the same time set; fixed-IVP,
+       theorem-family, and raw-existence bundles now expose component derivative
+       data as first-class inputs with direct model/scalar/tensor projections. A companion
        time-only model route accepts a direct `HasDerivAt B B' t` proof for the
        already-composed bilinear-form readout, while the variational flow supplies
        the tangent-map derivative terms. The analytic finite-cover layer now

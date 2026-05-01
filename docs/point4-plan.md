@@ -170,6 +170,10 @@ open-interior component hypotheses after shrinking a Picard interval.
 Raw gauge flows now also promote arbitrary within-time-set concrete component
 data directly to within-set scalar derivative data and, when the time set is a
 neighborhood at its points, to tensor time-regularity on that same set.
+The fixed-IVP, theorem-family, and raw intrinsic gauge-flow existence packages
+now also expose ordinary and within-set concrete component derivative data as
+first-class inputs, with direct projections to coordinate-model, scalar, and
+tensor time-regularity packages.
 A direct theorem packages closed-interval concrete component derivatives as
 `HasTimeDerivativeOn` for the gauge-pulled metric family over `Ioo tmin tmax`.
 The raw `Diffeomorph3GaugeFlowOn` layer now exposes the same endpoint route
