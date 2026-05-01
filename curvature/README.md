@@ -240,7 +240,11 @@ now packages the matching intrinsic boundary
        the left-composition operator-space Lipschitz estimate, a product-state
        Lipschitz estimate for the full variational vector field, and
        interior/closed-interval uniqueness for the full `(flow, tangent)` pair
-       from base-flow uniqueness plus a uniform `‖Df‖` bound. Its closed-ball
+       from base-flow uniqueness plus a uniform `‖Df‖` bound. An endpoint readout
+       bridge now transfers the closed-interval geometric-slot variational theorem
+       from any locally equal finite-cover metric-coordinate bilinear-form readout,
+       matching the Banach readout output shape before interior tensor
+       time-regularity is derived. Its closed-ball
        specialization now assembles product `IsPicardLindelof` witnesses and a
        one-step variational local-flow constructor from base/linearized
        closed-ball estimates plus the standard Picard continuity, norm, and

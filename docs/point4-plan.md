@@ -161,6 +161,11 @@ gauge-flow within derivative.
 Consequently, raw closed-interval gauge flows now have an endpoint theorem that
 uses full metric-coordinate Fréchet data and variational tangent-map data to
 prove interior tensor time-regularity with geometric-slot scalar identities.
+That endpoint theorem now also has a finite-cover/readout-field companion:
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMapWithin_geometricValue`
+transfers the required full Fréchet derivative from any locally equal
+two-variable bilinear-form readout before invoking the geometric-slot
+variational endpoint route.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package

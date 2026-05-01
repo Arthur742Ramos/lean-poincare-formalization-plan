@@ -922,9 +922,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
             `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMap`,
             so finite-cover/Banach readouts can enter before the additional
              base-flow identification step; its geometric-slot companion
-             keeps the same readout-field entry point while stating the scalar
-             velocity identity in actual pushed-forward tangent vectors at the
-             base time. On the PDE side,
+              keeps the same readout-field entry point while stating the scalar
+              velocity identity in actual pushed-forward tangent vectors at the
+              base time. The closed-interval endpoint route now also has the
+              corresponding readout-field companion,
+              `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMapWithin_geometricValue`,
+              transferring the full endpoint Fréchet derivative from any locally
+              equal finite-cover bilinear-form readout before applying the
+              geometric-slot variational endpoint theorem. On the PDE side,
               `SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_hasDerivAt_chartRHS_of_mem_Ioo`
               and its `sourceTangentCoordinate` scalar-slot variant now expose
               the Banach chart right-hand side as a centered derivative of the
