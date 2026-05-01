@@ -546,11 +546,11 @@ now packages the matching intrinsic boundary
      dependence, continuous space-time partial flows, restriction maps to smaller
      Picard intervals and initial balls with matching `Nonempty` wrappers,
      readout simp lemmas for localized flow/tangent maps and forgetful projections,
-     overlap uniqueness for local and
-     continuous base-flow packages plus variational tangent maps and full
-     `(flow, tangent)` pairs with different centers/radii, and autonomous
-     `C¹` integral
-     curves, plus Gronwall uniqueness bridges for packaged and continuous
+      overlap uniqueness for local and
+      continuous base-flow packages plus variational tangent maps and full
+      `(flow, tangent)` pairs with different centers/radii, and autonomous
+      `C¹` integral curves with packaged and directly localized
+      `LocalFlowSolution` extraction, plus Gronwall uniqueness bridges for packaged and continuous
      space-time model flows; the
      raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
      tangent-trivialization membership from neighborhood-time flow data, with

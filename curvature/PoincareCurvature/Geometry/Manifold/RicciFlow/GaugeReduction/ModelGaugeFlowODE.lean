@@ -2453,6 +2453,22 @@ theorem exists_autonomous_localFlowSolution
         linarith [ht.2]
     exact (hderiv t htopen).hasDerivWithinAt
 
+/-- Localized autonomous `C¹` model-flow existence on any smaller closed
+interval and smaller initial ball after the Picard radius has been chosen. -/
+theorem exists_autonomous_localFlowSolution_restrict
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∀ {tmin' tmax' : ℝ},
+        (htime : Icc tmin' tmax' ⊆ Icc (t₀ - ε) (t₀ + ε)) →
+        (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax') →
+        ∀ {r' : ℝ≥0}, r' ≤ r →
+          Nonempty (LocalFlowSolution (fun _ : ℝ => f)
+            (⟨t₀, ht₀'⟩ : Icc tmin' tmax') x₀ r') := by
+  obtain ⟨r, hr, ε, hε, ht₀, hα⟩ := exists_autonomous_localFlowSolution (V := V) hf t₀
+  refine ⟨r, hr, ε, hε, ?_⟩
+  intro tmin' tmax' htime ht₀' r' hr'
+  exact LocalFlowSolution.nonempty_restrict hα htime ht₀' hr'
+
 /-- Centered version of
 `exists_autonomous_local_integral_curves`, matching the single-trajectory ODE
 statement used when only the gauge curve through one point is needed. -/

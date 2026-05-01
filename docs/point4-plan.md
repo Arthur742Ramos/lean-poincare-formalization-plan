@@ -679,6 +679,9 @@ hypotheses. The autonomous `C¹` vector-field route now also extracts a
 proof-level `Nonempty LocalFlowSolution` package on a smaller closed time
 interval and smaller initial ball, giving the first direct bridge from
 mathlib's autonomous integral-curve theorem to the packaged raw model-flow API.
+It now also has a localized form that immediately restricts that autonomous
+existence witness to any smaller closed time interval containing the base time
+and any smaller initial ball.
 The model-flow packages now also have restriction constructors for
 `LocalFlowSolution`, `LipschitzLocalFlowSolution`, `ContinuousLocalFlowSolution`,
 and `VariationalLocalFlowSolution`, preserving ODE, continuity, Lipschitz, and
