@@ -228,8 +228,8 @@ now packages the matching intrinsic boundary
      `GaugeReduction.ModelGaugeFlowODE` module packages
      mathlib's time-dependent Picard-Lindelöf theorem as Banach-model local flows
       with closed-interval ODE derivative data, initialization on a closed ball of
-       initial data, ordinary interior derivative extractors, Lipschitz
-       dependence on that initial data, and the continuous
+       initial data, ordinary interior derivative extractors, named
+       Picard-interval continuity, Lipschitz dependence on that initial data, and the continuous
       space-time partial-flow form needed for chart gluing, plus the
       autonomous `C¹` local-integral-curve specialization and Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level
@@ -242,7 +242,7 @@ now packages the matching intrinsic boundary
       product variational vector field `(y, A)' = (f(t, y), Df(t, y) ∘ A)` and
       projection lemmas from product local-flow solutions to the base and tangent
        equations, including ordinary interior and vector-slot tangent derivative
-       forms, and extracts
+       forms plus named component continuity, and extracts
        `VariationalLocalFlowSolution` from continuous
        product local flows or product Picard-Lindelöf hypotheses initialized on
        `(x, 1)`, with a radius-specialized Picard constructor. It also proves

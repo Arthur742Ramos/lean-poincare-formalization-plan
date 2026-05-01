@@ -583,7 +583,7 @@ The first Banach-model ODE bridge for this item is now proof-bearing in
 theorem is packaged as `LocalFlowSolution` and `LipschitzLocalFlowSolution`,
 including the ODE derivative on the closed time interval, initialization on a
 closed ball of initial data, ordinary interior derivative extractors, and
-Lipschitz dependence on initial data.
+named continuity on the Picard interval, plus Lipschitz dependence on initial data.
 It also packages the continuous space-time partial-flow form as
 `ContinuousLocalFlowSolution`, so the chart-level output now includes the
 continuity needed before gluing local solutions.  The same module now also
@@ -599,7 +599,8 @@ also available on the closed Picard interval using the within-interval endpoint
 continuity. The module now also defines the product variational vector field
 `(y, A)' = (f(t, y), Df(t, y) ∘ A)` and proves projection lemmas extracting the
 base, tangent, and vector-slot tangent ODEs from any packaged
-`LocalFlowSolution` of that product system, providing the intended route from
+`LocalFlowSolution` of that product system, together with named continuity for
+the base and tangent components, providing the intended route from
 Picard-Lindelöf on a product Banach
 space to variational tangent data. A continuous local flow for this product
 system, initialized on `(x, 1)` and restricted to a base ball contained in the

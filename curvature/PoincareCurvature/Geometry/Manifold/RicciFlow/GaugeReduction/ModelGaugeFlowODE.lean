@@ -149,6 +149,17 @@ theorem flow_hasDerivAt_of_mem_Ioo
   (α.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
 
+/-- Every packaged local model-flow curve is continuous on the Picard interval. -/
+theorem flow_continuousOn
+    (α : LocalFlowSolution f t₀ x₀ r) {x : V} (hx : x ∈ closedBall x₀ r) :
+    ContinuousOn (α.flow x) (Icc tmin tmax) :=
+  HasDerivWithinAt.continuousOn (fun t ht => α.hasDerivWithinAt x hx t ht)
+
+/-- Center-curve continuity on the Picard interval. -/
+theorem center_continuousOn (α : LocalFlowSolution f t₀ x₀ r) :
+    ContinuousOn (α.flow x₀) (Icc tmin tmax) :=
+  α.flow_continuousOn (mem_closedBall_self r.2)
+
 /-- Two packaged local model flows agree on the interior time interval whenever
 their curves stay in a region where the vector field is uniformly Lipschitz. -/
 theorem eqOn_Ioo_of_lipschitzOnWith
@@ -243,6 +254,22 @@ theorem variational_tangent_apply_hasDerivWithinAt
   have hcomp := hev.comp t htan.hasFDerivWithinAt
     (Set.mapsTo_univ (fun τ : ℝ => (α.flow z τ).2) (Icc tmin tmax))
   simpa [Function.comp] using hcomp.hasDerivWithinAt
+
+/-- The base component of a product variational local-flow solution is
+continuous on the Picard interval. -/
+theorem variational_base_continuousOn
+    (α : LocalFlowSolution (variationalVectorField f Df) t₀ z₀ r)
+    {z : V × (V →L[ℝ] V)} (hz : z ∈ closedBall z₀ r) :
+    ContinuousOn (fun τ : ℝ => (α.flow z τ).1) (Icc tmin tmax) :=
+  HasDerivWithinAt.continuousOn (fun t ht => α.variational_base_hasDerivWithinAt hz ht)
+
+/-- The tangent-map component of a product variational local-flow solution is
+continuous on the Picard interval. -/
+theorem variational_tangent_continuousOn
+    (α : LocalFlowSolution (variationalVectorField f Df) t₀ z₀ r)
+    {z : V × (V →L[ℝ] V)} (hz : z ∈ closedBall z₀ r) :
+    ContinuousOn (fun τ : ℝ => (α.flow z τ).2) (Icc tmin tmax) :=
+  HasDerivWithinAt.continuousOn (fun t ht => α.variational_tangent_hasDerivWithinAt hz ht)
 
 /-- Interior ordinary base-curve ODE extracted from a packaged solution of the
 product variational system. -/
