@@ -740,12 +740,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        The remaining positive-dimensional primitive is isolated as
        `CoordinatePullbackMetricModelDerivativeOn`, a derivative package for the
        named coordinate model that promotes directly to the geometric scalar
-       target and tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers.
+       target and tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers
+       and fixed-IVP/theorem-family/raw-existence bundle lifts with explicit
+       time-set neighborhood hypotheses.
        The model algebra now also proves the moving metric-component chain rule
        for `Bfield(τ, y(τ))` and its combined
        `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent-map
        equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with
-       scalar, tensor, and raw-gauge-flow promotion routes. The variational ODE
+       scalar, tensor, raw-gauge-flow, and bundle-level promotion routes. The variational ODE
        layer now also proves the operator-norm Lipschitz estimate for
        left-composition, the product-state Lipschitz estimate for the full
        variational vector field `(y, A)' = (f(t,y), Df(t,y) ∘ A)`, and

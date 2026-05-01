@@ -139,10 +139,13 @@ neighborhood. The remaining positive-dimensional primitive is now isolated as
 coordinate model itself. This model-derivative package restricts to smaller time
 sets and, together with the chart-equality theorem, promotes directly to the
 geometric scalar derivative and tensor `HasTimeDerivativeOn`; raw gauge flows
-also have direct model-derivative-to-time-derivative wrappers. Coordinate-level
-derivative data still lifts through the fixed-IVP, theorem-family, and
-raw-existence gauge-flow APIs, so a future chart calculation can feed the
-point-4 theorem routes without first repackaging it as a tensor derivative.
+also have direct model-derivative-to-time-derivative wrappers. Coordinate-level,
+coordinate-model, and field-level derivative data now all lift through the
+fixed-IVP, theorem-family, and raw-existence gauge-flow APIs, so a future chart
+calculation can feed the point-4 theorem routes without first repackaging it as
+a tensor derivative. The model/field bundle routes explicitly require the
+solution time set to be a neighborhood of each time where they are used, making
+the endpoint/interior distinction visible rather than hidden.
 The model algebra now also includes the metric-component half of this remaining
 primitive: `hasDerivAt_bilinearFormField_along_curve` differentiates a bilinear
 form field `Bfield(τ, y(τ))`, and
@@ -151,7 +154,8 @@ the variational tangent-map equation to differentiate
 `Bfield(τ, y(τ)) (A(τ)u) (A(τ)v)`. This is also bundled as
 `CoordinatePullbackMetricFieldDerivativeOn`, which promotes to
 `CoordinatePullbackMetricModelDerivativeOn`, the geometric scalar derivative, and
-tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers. The variational
+tensor `HasTimeDerivativeOn`, including raw-gauge-flow and bundle-level
+wrappers. The variational
 ODE layer now also proves the operator-norm Lipschitz estimate for
 left-composition, the product-state Lipschitz estimate for the full variational
 vector field `(y, A)' = (f(t,y), Df(t,y) ∘ A)`, and interior/closed-interval

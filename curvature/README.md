@@ -443,13 +443,15 @@ now packages the matching intrinsic boundary
       the moving metric-component chain rule for `Bfield(τ, y(τ))` and the
        combined `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent
        equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with
-       scalar, tensor, and raw-gauge-flow promotion routes. A companion
+        scalar, tensor, raw-gauge-flow, and bundle-level promotion routes. A companion
        variational route discharges the tangent-map derivative while accepting a
        direct `HasDerivAt B B' t` proof for the already-composed coordinate
        readout, and raw closed-Picard gauge flows expose that route directly on
        the open interior interval. The
-       coordinate data now restricts to smaller time sets and lifts through fixed-IVP, theorem-family, and
-      raw-existence gauge-flow APIs. This leaves one primitive
+       coordinate, coordinate-model, and field-level data now restrict to smaller
+       time sets or lift through fixed-IVP, theorem-family, and raw-existence
+       gauge-flow APIs, with explicit neighborhood-time hypotheses on the
+       model/field bundle routes. This leaves one primitive
     positive-dimensional time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
