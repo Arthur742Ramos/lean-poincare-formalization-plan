@@ -740,7 +740,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       generic within-set scalar transfer for `B(τ)(A(τ)u)(A(τ)v)` and the raw
       endpoint package `PullbackMetricInnerDerivativeWithinOn`, which upgrades
       to ordinary scalar derivative data and directly to `HasTimeDerivativeOn`
-      on `Ioo tmin tmax`. A
+      on `Ioo tmin tmax`; `Diffeomorph3GaugeFlowOn` exposes this using
+      within-time-set chart equality. A
       coordinate-level package
       `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
       chartwise `B/A/D` derivative hypotheses to the actual geometric

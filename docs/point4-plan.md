@@ -147,6 +147,9 @@ Closed-interval scalar derivative data now upgrades back to ordinary
 work can feed the existing interior gauge-pulled metric time-regularity routes.
 A direct theorem packages closed-interval concrete component derivatives as
 `HasTimeDerivativeOn` for the gauge-pulled metric family over `Ioo tmin tmax`.
+The raw `Diffeomorph3GaugeFlowOn` layer now exposes the same endpoint route
+using within-time-set chart equality, so endpoints no longer need to be
+neighborhood times just to supply the component data.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package

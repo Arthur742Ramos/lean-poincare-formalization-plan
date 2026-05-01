@@ -1376,6 +1376,25 @@ theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
   exact (pullbackMetricInnerCoordinateModel_eq
     (I := I) (M := M) Φ g t τ x u v hτ).symm
 
+/-- Within-set version of
+`eventuallyEq_geometric_pullbackMetricInnerCoordinateModel`, used at endpoints
+where chart membership is only known relative to the time set. -/
+theorem eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    {s : Set ℝ} (t : ℝ) (x : M) (u v : TangentSpace I x)
+    (hmem : ∀ᶠ τ in 𝓝[s] t,
+      (Φ τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).baseSet) :
+    (fun τ : ℝ ↦
+      (g τ).inner ((Φ τ) x)
+        ((Φ τ).pushforwardTangent x u)
+        ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+      pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v := by
+  filter_upwards [hmem] with τ hτ
+  exact (pullbackMetricInnerCoordinateModel_eq
+    (I := I) (M := M) Φ g t τ x u v hτ).symm
+
 /-- The remaining coordinate-model derivative obligation after the geometric
 scalar has been identified with `pullbackMetricInnerCoordinateModel`.
 
@@ -2410,6 +2429,29 @@ theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
   SmoothSelfDiffeomorph3Family.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
     (I := I) (M := M) G.maps3 g t x u v
     (G.eventually_mem_trivializationAt_eval hs x)
+
+/-- Within-time-set version of
+`eventuallyEq_geometric_pullbackMetricInnerCoordinateModel`.
+
+This is the chart-local scalar identification needed at endpoints of a raw
+gauge-flow time set, where the flow is only known to be continuous/differentiable
+within that time set. -/
+theorem eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M))
+    (x : M) (u v : TangentSpace I x) :
+    (fun τ : ℝ ↦
+      (g τ).inner ((G.maps3 τ) x)
+        ((G.maps3 τ).pushforwardTangent x u)
+        ((G.maps3 τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+      SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+        (I := I) (M := M) G.maps3 g t x u v :=
+  SmoothSelfDiffeomorph3Family.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+    (I := I) (M := M) G.maps3 g (s := s) t x u v
+    (G.eventuallyWithin_mem_trivializationAt_eval ht x)
 
 /-- Closed-Picard-interval specialization of
 `eventuallyEq_geometric_pullbackMetricInnerCoordinateModel` at interior times. -/
@@ -3457,6 +3499,28 @@ theorem hasTimeDerivativeOn_of_coordinateComponents
     (I := I) (M := M) hdata
     (fun {t} ht x u v ↦ G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
       (t := t) (hs (t := t) ht) g x u v)
+
+/-- Raw gauge-flow endpoint route from closed-interval concrete coordinate
+component derivatives directly to tensor time-regularity on the open interior.
+
+Unlike `hasTimeDerivativeOn_of_coordinateComponents`, the chart-local equality
+used here is relative to the closed time set, so the hypotheses may include
+endpoint/right-derivative data. -/
+theorem hasTimeDerivativeOn_Ioo_of_coordinateComponentsWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot (Icc tmin tmax)) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricComponentDerivativeWithinOn
+    (I := I) (M := M) hdata
+    (fun {t} ht x u v ↦
+      G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+        (t := t) ht g x u v)
 
 /-- Closed-Picard-interval raw gauge-flow version of the coordinate-model bridge
 on the open interior interval. -/
