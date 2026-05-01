@@ -650,8 +650,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     witnesses now also feed directly into the gauge-reduced, intrinsic, and
     ordinary theorem-package routes using either pulled-back metric
     time-derivative proofs or scalar inner-product derivative proofs. The raw
-    flow layer also has fixed-IVP and theorem-family constructors from the
-    pointwise `HasMFDerivAt[s]` data produced by ODE/integral-curve theorems, so
+    flow layer also has fixed-IVP and theorem-family constructors from both
+    pointwise `HasMFDerivAt[s]` and unrestricted `HasMFDerivAt` data produced by
+    ODE/integral-curve theorems, plus time-set restriction for raw flows, so
     future manifold-flow existence results can plug in without a separate
     `SatisfiesGaugeFlowOn` packaging step. Thus the
     full point-4 input chain has no gauge-flow gap in any of the

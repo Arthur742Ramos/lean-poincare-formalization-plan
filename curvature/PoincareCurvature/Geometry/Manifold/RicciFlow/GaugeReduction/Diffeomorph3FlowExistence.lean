@@ -60,6 +60,32 @@ noncomputable def of_hasMFDerivWithinAt
     (Φ := maps3.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily)
     (X := X) (s := s) hderiv
 
+/-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from
+unrestricted pointwise manifold derivatives. -/
+noncomputable def of_hasMFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hderiv : ∀ t : ℝ, ∀ x : M,
+      HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (maps3 τ) x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (maps3 t x)))) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  of_hasMFDerivWithinAt (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    maps3 anchored (fun t _ht x ↦ (hderiv t x).hasMFDerivWithinAt)
+
+/-- Restrict a raw `C^3` gauge flow to a smaller time set. -/
+def mono
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ where
+  maps3 := G.maps3
+  anchored := G.anchored
+  satisfies := G.satisfies.mono hst
+
 /-- If the time-dependent vector field vanishes on the time set, the identity `C³`
 diffeomorphism family is a raw gauge flow. -/
 noncomputable def identity_of_eq_zero
@@ -182,6 +208,31 @@ noncomputable def of_hasMFDerivWithinAt
       (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
       (t₀ := ivp.initialTime)
       (maps3 sol) (anchored sol) (hderiv sol)
+
+/-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from unrestricted
+pointwise manifold derivative data. -/
+noncomputable def of_hasMFDerivAt
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ∀ x : M,
+        HasMFDerivAt 𝓘(ℝ) I
+          (fun τ : ℝ ↦ (maps3 sol τ) x) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight
+            (intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background t ((maps3 sol t) x)))) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  of_hasMFDerivWithinAt (I := I) (M := M) (ivp := ivp)
+    maps3 anchored (fun sol t _ht x ↦ (hderiv sol t x).hasMFDerivWithinAt)
 
 /-- Chosen-background intrinsic DeTurck solutions have zero intrinsic DeTurck gauge field, so the
 identity diffeomorphism family supplies the raw `C³` gauge-flow existence data for a fixed IVP. -/
@@ -319,6 +370,34 @@ noncomputable def of_hasMFDerivWithinAt
     (IntrinsicDeTurckGaugeFlowExistence.of_hasMFDerivWithinAt
       (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
       (maps3 ivp) (anchored ivp) (hderiv ivp)).flow sol
+
+/-- Theorem-family raw intrinsic DeTurck gauge-flow existence from unrestricted
+pointwise manifold derivative data. -/
+noncomputable def of_hasMFDerivAt
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, ∀ x : M,
+          HasMFDerivAt 𝓘(ℝ) I
+            (fun τ : ℝ ↦ (maps3 ivp sol τ) x) t
+            ((1 : ℝ →L[ℝ] ℝ).smulRight
+              (intrinsicDeTurckGaugeField (I := I) (M := M)
+                sol.1.toIntrinsicDeTurckSolution.metric
+                sol.1.toIntrinsicDeTurckSolution.background t
+                  ((maps3 ivp sol t) x)))) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  of_hasMFDerivWithinAt (I := I) (M := M)
+    maps3 anchored (fun ivp sol t _ht x ↦ (hderiv ivp sol t x).hasMFDerivWithinAt)
 
 /-- Chosen-background intrinsic DeTurck solutions admit the identity raw `C³` gauge flow for every
 initial-value problem. -/

@@ -211,7 +211,8 @@ now packages the matching intrinsic boundary
     diffeomorphism-flow existence witness expected from the manifold ODE theorem
     and converts it into the fixed-IVP and theorem-family geometric gauge-flow
     bundles. It also now has fixed-IVP and theorem-family constructors from
-    pointwise `HasMFDerivAt[s]` integral-curve data, matching the shape of
+    pointwise `HasMFDerivAt[s]` or unrestricted `HasMFDerivAt` integral-curve
+    data, plus raw-flow time-set restriction, matching the shape of
     Mathlib ODE output, and geometric endpoint data can now replace its bundled
     gauge-flow component by such a raw existence witness at fixed-IVP, global,
     and interval scope. A thin `AnalyticPDE.SmoothRealization` module names the
