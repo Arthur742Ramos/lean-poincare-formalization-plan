@@ -906,7 +906,9 @@ uniqueness on common closed intervals. The chart-derived symmetric carrier now
 has the parallel Banach-solution extraction after the standard metric-cone
 shrink, so both the built-in carrier and the density-based carrier expose
 actual state-preserving ODE solution witnesses rather than only Picard
-hypotheses.
+hypotheses. Genuine symmetric-carrier interval closure data now also exposes
+that Banach solution and common-interval uniqueness witness directly before
+projecting to chosen-background, intrinsic, or ordinary theorem packages.
 
 **Suggested decomposition** (multi-session):
 

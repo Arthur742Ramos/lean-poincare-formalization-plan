@@ -1132,7 +1132,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      uniqueness witness for the density-based interval carrier after the same
      metric-cone shrink. The built-in chart-derived symmetric carrier now has
      the matching state-preserving Banach-solution extraction after the standard
-     metric-cone shrink.
+     metric-cone shrink, and genuine symmetric-carrier interval closure data now
+     exposes the same Banach solution/uniqueness witness directly before theorem
+     package projection.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence

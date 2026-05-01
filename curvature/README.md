@@ -613,8 +613,9 @@ now packages the matching intrinsic boundary
      also extracts a state-preserving Banach solution and common-interval
      uniqueness witness for the density-based interval carrier, and the
      chart-derived symmetric carrier now has the matching extraction after the
-     standard metric-cone shrink, leaving the heavy PDE realization module
-     unchanged. The
+     standard metric-cone shrink. Genuine symmetric-carrier interval closure data
+     now exposes the same Banach solution/uniqueness witness directly, leaving
+     the heavy PDE realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic

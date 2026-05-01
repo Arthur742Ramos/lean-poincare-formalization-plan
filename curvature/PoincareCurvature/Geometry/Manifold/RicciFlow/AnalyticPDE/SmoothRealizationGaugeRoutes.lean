@@ -900,6 +900,60 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
     ⟨sol, hsolT, huniq⟩
   exact ⟨T', a', hT', chart', hT'le, ha'pos, ha'le, hball, sol, hsolT, huniq⟩
 
+/-- Symmetric-carrier interval closure data exposes the state-preserving Banach solution and its
+common-interval uniqueness witness before passing to intrinsic geometric theorem packages. -/
+theorem SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.exists_unique_banachEvolutionLocalSolutionIn
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc
+      x0 et het Kc hKc Ko hKo hKoEq hcover chart) :
+    ∃ sol : BanachEvolutionLocalSolutionIn
+        (chart.restrictedSymmetricA
+          (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+        (riemannianMetricLocusSubmodule (M := M) (F := F)
+          (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+        ivp.initialTime
+        (InitialValueProblem.toSymmetricSectionSubmodule
+          (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+      sol.terminalTime ≤ T ∧
+      ∀ sol' : BanachEvolutionLocalSolutionIn
+          (chart.restrictedSymmetricA
+            (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+          (riemannianMetricLocusSubmodule (M := M) (F := F)
+            (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+          ivp.initialTime
+          (InitialValueProblem.toSymmetricSectionSubmodule
+            (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+        EqOn sol.curve sol'.curve
+          (Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime)) := by
+  exact
+    exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lipschitzOn_Icc_terminal_le
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+      x0 et het Kc hKc Ko hKo hKoEq hcover inferInstance chart.hT
+      D.picard
+      (InitialValueProblem.toSymmetricSectionSubmodule_mem_riemannianMetricLocusSubmodule
+        (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp)
+      (chart.restrictedSymmetricA_lipschitzOn_Icc
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+
 /-- Proof-level chosen-background theorem package from symmetric-carrier interval closure data. -/
 theorem SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.nonempty_chosenIntrinsicDeTurckLocalExistenceUniqueness
     {x0 : κ → M}
