@@ -526,7 +526,7 @@ now packages the matching intrinsic boundary
       derivative-data layer with a generic within-set scalar transfer and raw
       endpoint scalar derivative package that upgrades directly to tensor
       time-regularity on the open interval through a raw gauge-flow endpoint
-      wrapper. The
+      wrapper, including variational tangent-map endpoint data. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
       promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
       scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred

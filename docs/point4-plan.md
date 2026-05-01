@@ -150,6 +150,9 @@ A direct theorem packages closed-interval concrete component derivatives as
 The raw `Diffeomorph3GaugeFlowOn` layer now exposes the same endpoint route
 using within-time-set chart equality, so endpoints no longer need to be
 neighborhood times just to supply the component data.
+It also has a variational tangent-map endpoint theorem: closed-interval
+time-only `B(τ)` derivatives plus local identification with a variational ODE
+tangent map imply interior tensor time-regularity of the gauge-pulled metric.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package
