@@ -291,7 +291,8 @@ now packages the matching intrinsic boundary
        `HasTimeDerivativeAt` / `HasTimeDerivativeOn`, including coordinate
        curves that are eventually stationary at the chart center,
        and fixed-time spatial slices of the field now proved `C²` in the
-       preferred extended chart,
+       preferred extended chart and extracted as canonical within-chart
+       `fderivWithin` data with a raw-gauge-flow coordinate-curve chain rule,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

@@ -279,7 +279,11 @@ identity/static gauges.
 For the moving spatial-coordinate side, fixed-time slices of
 `metricBilinearCoordinateField` are now proved `C²` in the preferred extended
 chart, using the existing hom-bundle coordinate smoothness of each smooth
-Riemannian metric slice.
+Riemannian metric slice. The same result now yields the canonical
+`HasFDerivWithinAt` / `fderivWithin` derivative on `Set.range I`, a chain-rule
+adapter along any chart-centered coordinate curve that stays in the model
+range, and a raw-gauge-flow specialization for the frozen-time spatial
+contribution along `τ ↦ extChartAt I ((G.maps3 t) x) ((G.maps3 τ) x)`.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

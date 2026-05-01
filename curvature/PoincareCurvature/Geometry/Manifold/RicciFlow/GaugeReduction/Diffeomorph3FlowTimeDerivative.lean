@@ -451,6 +451,100 @@ theorem metricBilinearCoordinateField_fixedTime_contDiffWithinAt
   simpa [f, metricBilinearCoordinateField, writtenInExtChartAt] using
     (contMDiffAt_iff.mp hf).2
 
+/-- Fixed-time spatial Fréchet derivative of the named metric-coordinate field
+within the model range, obtained from the `C²` chart smoothness theorem. -/
+theorem metricBilinearCoordinateField_fixedTime_hasFDerivWithinAt
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M) :
+    HasFDerivWithinAt
+      (fun yE : E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+      (fderivWithin ℝ
+        (fun yE : E ↦
+          metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+        (Set.range I) ((extChartAt I p) p))
+      (Set.range I) ((extChartAt I p) p) := by
+  exact
+    ((metricBilinearCoordinateField_fixedTime_contDiffWithinAt
+      (I := I) (M := M) g t p).differentiableWithinAt
+        (show (2 : WithTop ℕ∞) ≠ 0 by norm_num)).hasFDerivWithinAt
+
+/-- Chain rule for the fixed-time spatial part of the metric-coordinate field
+along a coordinate curve based at the chart center.  The derivative is the
+canonical within-chart Fréchet derivative applied to the curve velocity. -/
+theorem metricBilinearCoordinateField_fixedTime_hasDerivAt_along_center
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
+    {c : ℝ → E} {c' : E} {τ₀ : ℝ}
+    (hc : HasDerivAt c c' τ₀)
+    (hrange : ∀ᶠ τ in 𝓝 τ₀, c τ ∈ Set.range I)
+    (hc₀ : c τ₀ = (extChartAt I p) p) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p (t, c τ))
+      ((fderivWithin ℝ
+        (fun yE : E ↦
+          metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+        (Set.range I) ((extChartAt I p) p)) c')
+      τ₀ := by
+  let F : E → E →L[ℝ] E →L[ℝ] ℝ := fun yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g p (t, yE)
+  have hF : HasFDerivWithinAt F
+      (fderivWithin ℝ F (Set.range I) ((extChartAt I p) p))
+      (Set.range I) ((extChartAt I p) p) := by
+    simpa [F] using
+      metricBilinearCoordinateField_fixedTime_hasFDerivWithinAt
+        (I := I) (M := M) g t p
+  have hF' : HasFDerivWithinAt F
+      (fderivWithin ℝ F (Set.range I) ((extChartAt I p) p))
+      (Set.range I) (c τ₀) := by
+    simpa [hc₀] using hF
+  have hcomp := HasFDerivWithinAt.comp_hasDerivAt
+    (x := τ₀) (l := F)
+    (l' := fderivWithin ℝ F (Set.range I) ((extChartAt I p) p))
+    (f := c) (f' := c') hF' hc hrange
+  simpa [F, Function.comp_def] using hcomp
+
+/-- Raw gauge-flow coordinate curves eventually lie in the model range of the
+preferred chart centered at their time-`t` value. -/
+theorem Diffeomorph3GaugeFlowOn.eventually_extChartAt_eval_mem_range
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x) ∈ Set.range I := by
+  filter_upwards [G.eventually_mem_trivializationAt_eval hs x] with τ hτ
+  have hsrc : (G.maps3 τ) x ∈ (extChartAt I ((G.maps3 t) x)).source := by
+    simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hτ
+  exact extChartAt_target_subset_range ((G.maps3 t) x)
+    (PartialEquiv.map_source _ hsrc)
+
+/-- Frozen-time spatial derivative of the metric-coordinate field along the
+actual coordinate curve supplied by a raw gauge flow.  This is the spatial
+piece of the positive-dimensional moving-base calculation. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivAt_along_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      ((fderivWithin ℝ
+        (fun yE : E ↦
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+        (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+          (X t ((G.maps3 t) x))))
+      t := by
+  exact metricBilinearCoordinateField_fixedTime_hasDerivAt_along_center
+    (I := I) (M := M) g t ((G.maps3 t) x)
+    (G.hasDerivAt_extChartAt_eval hs x)
+    (Diffeomorph3GaugeFlowOn.eventually_extChartAt_eval_mem_range
+      (I := I) (M := M) G hs x)
+    rfl
+
 /-- Near a time where the gauge image remains in the preferred chart, the
 concrete moving bilinear component is the two-variable metric-coordinate field
 evaluated along the coordinate curve of the moved base point. -/
