@@ -69,7 +69,8 @@ subsingleton tangent/model spaces and for rank-one tangent/model spaces
 (`Module.finrank ℝ E ≤ 1`), plus a thin `LocalExistence.RankOne` extension
 showing that every rank-one local solution has zero metric velocity, is
 stationary in metric components, and has the same Levi-Civita connection on
-overlaps. The package also includes a
+overlaps; the same rank-one compact special case is also exposed through
+gauge-reduced-to-intrinsic/ordinary theorem-package projections. The package also includes a
 proof-bearing section-smoothing layer: local-to-global gluing for smooth
 vector-bundle sections valued in fiberwise convex sets, trivial-bundle and
 open-set smoothing, local smoothing in a fixed trivialization, and a global
@@ -343,7 +344,9 @@ now packages the matching intrinsic boundary
    empty-manifold, and raw-existence theorem-package routes that need no extra
    derivative input; it also exposes ordinary point-4 theorem-family endpoints
    routed through the full raw `C³` gauge-flow chain in the subsingleton-tangent,
-   subsingleton-model, and empty-manifold cases. The
+   subsingleton-model, and empty-manifold cases. The rank-one compact special
+   case also has gauge-reduced projections to intrinsic and ordinary theorem
+   packages, including model-space theorem-family aliases. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic

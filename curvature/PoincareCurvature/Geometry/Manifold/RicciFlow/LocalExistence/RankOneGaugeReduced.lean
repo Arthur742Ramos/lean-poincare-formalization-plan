@@ -119,6 +119,82 @@ noncomputable def gaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily_of_
     gaugeReducedIntrinsicDeTurckLocalExistenceUniqueness_of_finrank_model_le_one
       (I := I) (M := M) ivp
 
+/-- Intrinsic Ricci-flow theorem package on compact rank-one tangent-fiber manifolds,
+projected through the gauge-reduced rank-one package. -/
+noncomputable def intrinsicLocalExistenceUniqueness_viaGaugeReduced_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (gaugeReducedIntrinsicDeTurckLocalExistenceUniqueness_of_finrank_le_one
+    (I := I) (M := M) hfin ivp).toIntrinsic
+
+/-- Ordinary Ricci-flow theorem package on compact rank-one tangent-fiber manifolds,
+projected through the gauge-reduced rank-one package. -/
+noncomputable def localExistenceUniqueness_viaGaugeReduced_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (gaugeReducedIntrinsicDeTurckLocalExistenceUniqueness_of_finrank_le_one
+    (I := I) (M := M) hfin ivp).toOrdinary
+
+/-- Theorem-family intrinsic Ricci-flow package on compact rank-one tangent-fiber
+manifolds, projected through the gauge-reduced rank-one package. -/
+noncomputable def intrinsicLocalExistenceUniquenessFamily_viaGaugeReduced_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1) :
+    IntrinsicLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (gaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily_of_finrank_le_one
+    (I := I) (M := M) hfin).toIntrinsicFamily
+
+/-- Theorem-family ordinary Ricci-flow package on compact rank-one tangent-fiber
+manifolds, projected through the gauge-reduced rank-one package. -/
+noncomputable def localExistenceUniquenessFamily_viaGaugeReduced_of_finrank_le_one
+    (hfin : ∀ x : M, Module.finrank ℝ (TM x) ≤ 1) :
+    LocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (gaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily_of_finrank_le_one
+    (I := I) (M := M) hfin).toOrdinaryFamily
+
+/-- Model-space version of
+`intrinsicLocalExistenceUniqueness_viaGaugeReduced_of_finrank_le_one`. -/
+noncomputable def intrinsicLocalExistenceUniqueness_viaGaugeReduced_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (gaugeReducedIntrinsicDeTurckLocalExistenceUniqueness_of_finrank_model_le_one
+    (I := I) (M := M) ivp).toIntrinsic
+
+/-- Model-space version of
+`localExistenceUniqueness_viaGaugeReduced_of_finrank_le_one`. -/
+noncomputable def localExistenceUniqueness_viaGaugeReduced_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (gaugeReducedIntrinsicDeTurckLocalExistenceUniqueness_of_finrank_model_le_one
+    (I := I) (M := M) ivp).toOrdinary
+
+/-- Model-space theorem-family version of
+`intrinsicLocalExistenceUniquenessFamily_viaGaugeReduced_of_finrank_le_one`. -/
+noncomputable def intrinsicLocalExistenceUniquenessFamily_viaGaugeReduced_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)] :
+    IntrinsicLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (gaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily_of_finrank_model_le_one
+    (I := I) (M := M)).toIntrinsicFamily
+
+/-- Model-space theorem-family version of
+`localExistenceUniquenessFamily_viaGaugeReduced_of_finrank_le_one`. -/
+noncomputable def localExistenceUniquenessFamily_viaGaugeReduced_of_finrank_model_le_one
+    [Fact (Module.finrank ℝ E ≤ 1)] :
+    LocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (gaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily_of_finrank_model_le_one
+    (I := I) (M := M)).toOrdinaryFamily
+
 end Compact
 
 end RicciFlow
