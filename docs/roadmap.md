@@ -944,7 +944,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               have matching variational tangent-map and readout-field
               conveniences, filling in the `HasDerivWithinAt`
               tangent-coordinate derivative from the model variational ODE. The
-               time-difference route now also has within-set chain-rule primitives
+              time-difference route now also has direct variational endpoint
+              wrappers for `HasDerivWithinAt` time-difference data, including a
+              within-filter tangent-map variant, plus within-set chain-rule primitives
               for differentiating `B(τ, c(τ)) - B(t, c(τ))` directly at endpoints,
               including raw-gauge-flow direct and readout-field bridges
               `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`

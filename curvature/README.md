@@ -548,8 +548,8 @@ now packages the matching intrinsic boundary
       identification is only known in the closed-interval within filter, and an
       analogous direct `hasFDerivAtWithin` wrapper family that fills in the
       `HasDerivWithinAt` tangent-coordinate derivative from the variational ODE,
-      plus an
-      endpoint bridge from full metric-coordinate Fréchet data to the concrete
+      direct variational endpoint wrappers for `HasDerivWithinAt`
+      time-difference data, and an endpoint bridge from full metric-coordinate Fréchet data to the concrete
       `B(τ)` derivative and then to tensor time-regularity. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
       promotes chartwise `B/A/D` derivative hypotheses to the actual geometric

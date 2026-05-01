@@ -180,7 +180,9 @@ upgrading the tangent equality to an ambient neighborhood equality. The direct
 and readout-field conveniences, so callers can supply only the
 metric-coordinate Fréchet derivative plus tangent-map equality and let the API
 fill in the `HasDerivWithinAt` tangent-coordinate derivative. The
-time-difference formulation now also has
+time-difference formulation now also has direct variational endpoint wrappers
+for `HasDerivWithinAt` time-difference data, including a variant where the
+tangent-map equality is only assumed in the closed-interval within filter, and
 within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
