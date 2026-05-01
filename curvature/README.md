@@ -293,6 +293,8 @@ now packages the matching intrinsic boundary
        and fixed-time spatial slices of the field now proved `C²` in the
        preferred extended chart and extracted as canonical within-chart
        `fderivWithin` data with a raw-gauge-flow coordinate-curve chain rule,
+       plus an additive decomposition that isolates the only remaining
+       time-difference derivative for the full moving field,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

@@ -840,9 +840,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         `C²` in the preferred extended chart from the hom-bundle coordinate
         smoothness of each Riemannian metric slice, and this has been extracted
         as a canonical within-chart `fderivWithin` plus a chain-rule bridge for
-        raw gauge-flow coordinate curves. The remaining hard seam is combining
-        this frozen-time spatial term with the independent time derivative into
-        the full moving time-space field derivative.
+        raw gauge-flow coordinate curves. The module also now has an additive
+        time/spatial decomposition upgrading that frozen spatial term to the full
+        moving time-space field derivative once the remaining time-difference
+        derivative along the same raw coordinate curve is supplied.
         The coordinate data also restricts to smaller time sets and lifts
         through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

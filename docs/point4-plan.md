@@ -284,6 +284,10 @@ Riemannian metric slice. The same result now yields the canonical
 adapter along any chart-centered coordinate curve that stays in the model
 range, and a raw-gauge-flow specialization for the frozen-time spatial
 contribution along `τ ↦ extChartAt I ((G.maps3 t) x) ((G.maps3 τ) x)`.
+An additive time/spatial decomposition now upgrades this frozen spatial term to
+the full moving `metricBilinearCoordinateField` derivative whenever the
+remaining time-difference derivative along the same raw gauge-flow coordinate
+curve is supplied.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

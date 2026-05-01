@@ -545,6 +545,68 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDeriv
       (I := I) (M := M) G hs x)
     rfl
 
+/-- Additive time/spatial decomposition for a field evaluated along a moving
+coordinate curve.  The first hypothesis is the derivative of the pure
+time-difference term along the moving curve; the second is the frozen-time
+spatial derivative along the same curve. -/
+theorem hasDerivAt_of_timeDifference_and_frozenSpatial
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {B : ℝ → E → F} {c : ℝ → E} {t : ℝ} {Btime Bspace : F}
+    (htime :
+      HasDerivAt (fun τ : ℝ ↦ B τ (c τ) - B t (c τ)) Btime t)
+    (hspace : HasDerivAt (fun τ : ℝ ↦ B t (c τ)) Bspace t) :
+    HasDerivAt (fun τ : ℝ ↦ B τ (c τ)) (Btime + Bspace) t := by
+  have hsum := htime.add hspace
+  convert hsum using 1
+  ext τ
+  simp [sub_eq_add_neg, add_assoc]
+
+/-- Full metric-coordinate field derivative along a raw gauge-flow coordinate
+curve, assuming the remaining time-difference derivative along that same curve.
+The spatial term is supplied by the fixed-time within-chart derivative. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_timeDifference_along_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Btime : E →L[ℝ] E →L[ℝ] ℝ}
+    (htime :
+      HasDerivAt
+        (fun τ : ℝ ↦
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+        Btime t) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Btime +
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+            (X t ((G.maps3 t) x))))
+      t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have hspace : HasDerivAt (fun τ : ℝ ↦ B t (c τ))
+      ((fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+        ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+          (X t ((G.maps3 t) x)))) t := by
+    simpa [B, c] using
+      Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivAt_along_eval
+        (I := I) (M := M) G hs g x
+  have hmain :=
+    hasDerivAt_of_timeDifference_and_frozenSpatial
+      (B := B) (c := c) htime hspace
+  simpa [B, c] using hmain
+
 /-- Near a time where the gauge image remains in the preferred chart, the
 concrete moving bilinear component is the two-variable metric-coordinate field
 evaluated along the coordinate curve of the moved base point. -/
