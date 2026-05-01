@@ -124,8 +124,10 @@ scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package
 `CoordinatePullbackMetricInnerDerivativeOn` now promotes those chart-level
 `B/A/D` derivative hypotheses to the actual geometric
-`PullbackMetricInnerDerivativeOn` target, so Item 1 is reduced to proving the
-coordinate derivative hypotheses for the metric component and tangent map.
+`PullbackMetricInnerDerivativeOn` target, and directly to tensor
+`HasTimeDerivativeOn` for the gauge-pulled metric family, so Item 1 is reduced
+to proving the coordinate derivative hypotheses for the metric component and
+tangent map.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

@@ -200,6 +200,19 @@ theorem pullbackMetricInnerDerivativeOn_of_coordinate
       (B := B) (B' := B') (A := A) (D := D) (t := t) uE vE heq hB hA
   simpa [hvalue] using hderiv
 
+/-- Coordinate-level scalar derivative data packages directly as the tensor
+time derivative of the gauge-pulled metric family. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricInnerDerivativeOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hcoord : CoordinatePullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (Φ.pullbackMetricFamily g) gdot s :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
+    (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot) (s := s)
+    (pullbackMetricInnerDerivativeOn_of_coordinate (I := I) (M := M) hcoord)
+
 /-- A named scalar inner-product derivative obligation packages as the tensor
 time derivative of the gauge-pulled metric family. -/
 theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
