@@ -233,9 +233,10 @@ now packages the matching intrinsic boundary
       with closed-interval ODE derivative data, initialization on a closed ball of
        initial data, ordinary interior derivative extractors, named
        Picard-interval continuity, Lipschitz dependence on that initial data, and the continuous
-      space-time partial-flow form needed for chart gluing, plus the
-      time-slice continuity bridges for continuous/variational local-flow
-       packages, autonomous `C¹` local-integral-curve specialization with
+       space-time partial-flow form needed for chart gluing, plus the
+       time-slice continuity bridges for continuous/variational local-flow
+        packages, including direct within-interval and interior pointwise
+        continuity readouts, autonomous `C¹` local-integral-curve specialization with
        open-interval continuity and packaged `LocalFlowSolution` extraction,
        restriction constructors and direct localized Picard-Lindelöf
        constructors for local/Lipschitz/continuous model-flow packages with
