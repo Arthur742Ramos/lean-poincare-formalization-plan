@@ -1134,7 +1134,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      the matching state-preserving Banach-solution extraction after the standard
      metric-cone shrink, and genuine symmetric-carrier interval closure data now
      exposes the same Banach solution/uniqueness witness directly before theorem
-     package projection, with a proof-level `Nonempty` existence readout.
+     package projection, with a proof-level `Nonempty` existence readout. A
+     density-based interval-carrier solution also now transports back to the
+     chart's built-in restricted carrier whenever its terminal time remains
+     inside the Picard interval.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
