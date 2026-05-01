@@ -641,14 +641,20 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     is symmetric for Levi-Civita families, the intrinsic Ricci-flow RHS is
     symmetric, and the full intrinsic Ricci-DeTurck RHS is symmetric because the
     DeTurck correction term itself is symmetric. The analytic side is therefore
-    no longer purely documentary. What still remains is the geometric-analysis
+    no longer purely documentary. The raw `C³` gauge-flow existence layer
+    (`IntrinsicDeTurckGaugeFlowExistence(.Family)`) now also exposes
+    identity-gauge constructors for subsingleton tangent fibers, the model-space
+    synonym, and empty manifolds in addition to the chosen-Levi-Civita-background
+    case, so the full point-4 input chain has no gauge-flow gap in any of the
+    currently-proved special cases. What still remains is the geometric-analysis
     specialization for non-identity gauges: time-regularity of the non-identity
     `C^3` gauge-pulled metric/velocity, an actual existence theorem producing
-    raw gauge flows with the required regularity, and the quasilinear parabolic
-    PDE framework for genuine Ricci-flow local existence and uniqueness,
-    including the actual Ricci-DeTurck Banach chart and estimates plus the
-    identification of that Banach representative with the geometric
-    Ricci-DeTurck right-hand side.
+    raw gauge flows with the required regularity in the general case, and the
+    quasilinear parabolic PDE framework for genuine Ricci-flow local existence
+    and uniqueness, including the actual Ricci-DeTurck Banach chart and
+    estimates plus the identification of that Banach representative with the
+    geometric Ricci-DeTurck right-hand side. See `docs/point4-plan.md` for the
+    systematic decomposition of these three remaining items.
 
 ### 5. Evolution equations and parabolic maximum principles
 
