@@ -202,6 +202,18 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeRe
   pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamilyTimeDerivative
     G (G.hpullDerivative_of_subsingleton_tangent)
 
+/-- Gauge-reduced DeTurck theorem-family projection from any geometric `C^3`
+intrinsic gauge-flow family on subsingleton tangent fibers. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReduced_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    GaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_tangent G).toGaugeReduced
+
 /-- Intrinsic Ricci-flow theorem-family projection from any geometric `C^3`
 intrinsic gauge-flow family on subsingleton tangent fibers. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_tangent
@@ -211,7 +223,7 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrins
     (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
       (E := E) (H := H) (I := I) (M := M)) :
     IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
-  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_tangent G).toIntrinsicFamily
+  (pkg.toGaugeReduced_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_tangent G).toIntrinsicFamily
 
 /-- Ordinary Ricci-flow theorem-family projection from any geometric `C^3`
 intrinsic gauge-flow family on subsingleton tangent fibers. -/
@@ -235,6 +247,18 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeRe
       (E := E) (H := H) (I := I) (M := M) :=
   pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_tangent G
 
+/-- Gauge-reduced theorem-family model-space synonym of the subsingleton-tangent
+geometric gauge-flow route. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReduced_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_model
+    [Subsingleton E]
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    GaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_model G).toGaugeReduced
+
 /-- Intrinsic theorem-family model-space synonym of the subsingleton-tangent
 geometric gauge-flow route. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_model
@@ -244,7 +268,7 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrins
     (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
       (E := E) (H := H) (I := I) (M := M)) :
     IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
-  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_model G).toIntrinsicFamily
+  (pkg.toGaugeReduced_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_model G).toIntrinsicFamily
 
 /-- Ordinary theorem-family model-space synonym of the subsingleton-tangent
 geometric gauge-flow route. -/
@@ -269,6 +293,18 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeRe
   haveI : ∀ x : M, Subsingleton (TM x) := fun x ↦ isEmptyElim x
   exact pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_tangent G
 
+/-- Gauge-reduced theorem-family empty-manifold synonym of the
+subsingleton-tangent geometric gauge-flow route. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReduced_viaDiffeomorph3GaugeFlowFamily_of_isEmpty
+    [IsEmpty M]
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    GaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamily_of_isEmpty G).toGaugeReduced
+
 /-- Intrinsic theorem-family empty-manifold synonym of the subsingleton-tangent
 geometric gauge-flow route. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaDiffeomorph3GaugeFlowFamily_of_isEmpty
@@ -278,7 +314,7 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrins
     (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
       (E := E) (H := H) (I := I) (M := M)) :
     IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
-  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamily_of_isEmpty G).toIntrinsicFamily
+  (pkg.toGaugeReduced_viaDiffeomorph3GaugeFlowFamily_of_isEmpty G).toIntrinsicFamily
 
 /-- Ordinary theorem-family empty-manifold synonym of the subsingleton-tangent
 geometric gauge-flow route. -/
@@ -304,6 +340,19 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeRe
   pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamily_of_subsingleton_tangent
     G.toDiffeomorph3GaugeFlowFamily
 
+/-- Raw intrinsic gauge-flow existence projects directly to gauge-reduced
+DeTurck theorem families on subsingleton tangent fibers without additional
+derivative input. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReduced_viaGaugeFlowExistence_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    GaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_tangent G).toGaugeReduced
+
 /-- Raw intrinsic gauge-flow existence projects to intrinsic Ricci-flow theorem
 families on subsingleton tangent fibers without additional derivative input. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaGaugeFlowExistence_of_subsingleton_tangent
@@ -313,7 +362,7 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrins
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M)) :
     IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
-  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_tangent G).toIntrinsicFamily
+  (pkg.toGaugeReduced_viaGaugeFlowExistence_of_subsingleton_tangent G).toIntrinsicFamily
 
 /-- Raw intrinsic gauge-flow existence projects to ordinary Ricci-flow theorem
 families on subsingleton tangent fibers without additional derivative input. -/
@@ -337,6 +386,18 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeRe
       (E := E) (H := H) (I := I) (M := M) :=
   pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_tangent G
 
+/-- Gauge-reduced theorem-family model-space synonym of the raw gauge-flow
+existence route. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReduced_viaGaugeFlowExistence_of_subsingleton_model
+    [Subsingleton E]
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    GaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_model G).toGaugeReduced
+
 /-- Intrinsic theorem-family model-space synonym of the raw gauge-flow existence route. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaGaugeFlowExistence_of_subsingleton_model
     [Subsingleton E]
@@ -345,7 +406,7 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrins
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M)) :
     IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
-  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_model G).toIntrinsicFamily
+  (pkg.toGaugeReduced_viaGaugeFlowExistence_of_subsingleton_model G).toIntrinsicFamily
 
 /-- Ordinary theorem-family model-space synonym of the raw gauge-flow existence route. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily_viaGaugeFlowExistence_of_subsingleton_model
@@ -369,6 +430,18 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeRe
   haveI : ∀ x : M, Subsingleton (TM x) := fun x ↦ isEmptyElim x
   exact pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_tangent G
 
+/-- Gauge-reduced theorem-family empty-manifold synonym of the raw gauge-flow
+existence route. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReduced_viaGaugeFlowExistence_of_isEmpty
+    [IsEmpty M]
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    GaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_isEmpty G).toGaugeReduced
+
 /-- Intrinsic theorem-family empty-manifold synonym of the raw gauge-flow existence route. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaGaugeFlowExistence_of_isEmpty
     [IsEmpty M]
@@ -377,7 +450,7 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrins
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M)) :
     IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
-  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_isEmpty G).toIntrinsicFamily
+  (pkg.toGaugeReduced_viaGaugeFlowExistence_of_isEmpty G).toIntrinsicFamily
 
 /-- Ordinary theorem-family empty-manifold synonym of the raw gauge-flow existence route. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily_viaGaugeFlowExistence_of_isEmpty
@@ -404,6 +477,19 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducibl
   pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundleTimeDerivative
     G (G.hpullDerivative_of_subsingleton_tangent)
 
+/-- Fixed-IVP gauge-reduced projection from any geometric `C^3` intrinsic
+gauge-flow bundle on subsingleton tangent fibers. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReduced_viaDiffeomorph3GaugeFlowBundle_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    GaugeReducedIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundle_of_subsingleton_tangent G).toGaugeReduced
+
 /-- Fixed-IVP intrinsic projection from any geometric `C^3` intrinsic gauge-flow
 bundle on subsingleton tangent fibers. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaDiffeomorph3GaugeFlowBundle_of_subsingleton_tangent
@@ -414,7 +500,7 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_via
     (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
       (E := E) (H := H) (I := I) (M := M) ivp) :
     IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
-  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundle_of_subsingleton_tangent G).toIntrinsic
+  (pkg.toGaugeReduced_viaDiffeomorph3GaugeFlowBundle_of_subsingleton_tangent G).toIntrinsic
 
 /-- Fixed-IVP ordinary projection from any geometric `C^3` intrinsic gauge-flow
 bundle on subsingleton tangent fibers. -/
@@ -442,6 +528,20 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducibl
   pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundle_of_subsingleton_tangent
     G.toDiffeomorph3GaugeFlow
 
+/-- Fixed-IVP raw intrinsic gauge-flow existence projects directly to
+gauge-reduced DeTurck theorem packages on subsingleton tangent fibers without
+additional derivative input. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReduced_viaGaugeFlowExistence_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    GaugeReducedIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_tangent G).toGaugeReduced
+
 /-- Fixed-IVP intrinsic projection from raw intrinsic gauge-flow existence on
 subsingleton tangent fibers without additional derivative input. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaGaugeFlowExistence_of_subsingleton_tangent
@@ -452,7 +552,7 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_via
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp) :
     IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
-  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_tangent G).toIntrinsic
+  (pkg.toGaugeReduced_viaGaugeFlowExistence_of_subsingleton_tangent G).toIntrinsic
 
 /-- Fixed-IVP ordinary projection from raw intrinsic gauge-flow existence on
 subsingleton tangent fibers without additional derivative input. -/

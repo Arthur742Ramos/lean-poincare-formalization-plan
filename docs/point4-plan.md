@@ -98,6 +98,10 @@ is already proved as `const_pullbackMetricFamily_hasTimeDerivativeOn`.
 The bundled non-identity gauge-flow API now has proof-bearing scalar-to-tensor
 wrappers, so solving this scalar identity automatically supplies the
 `HasTimeDerivativeOn` package required by the gauge-reduction theorem routes.
+The subsingleton-tangent case is already closed for arbitrary geometric `C³`
+DeTurck gauge-flow families by componentwise vanishing, including direct
+gauge-reduced, intrinsic, and ordinary theorem-package projections and
+model-space/empty-manifold/raw-existence synonyms.
 
 **Module location.** A new module
 `Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowTimeDerivative.lean`

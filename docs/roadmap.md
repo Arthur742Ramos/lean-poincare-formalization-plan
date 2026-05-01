@@ -657,9 +657,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     remaining primitive input is the scalar chain-rule identity for the
     pulled-back metric; in the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
-    DeTurck gauge-flow families by componentwise vanishing, with matching
-    model-space and empty-manifold synonyms plus raw gauge-flow-existence
-    theorem-package routes requiring no extra derivative input. What still
+    DeTurck gauge-flow families by componentwise vanishing, with direct
+    gauge-reduced projections and matching model-space/empty-manifold synonyms
+    plus raw gauge-flow-existence theorem-package routes requiring no extra
+    derivative input. What still
     remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
     theorem producing raw gauge flows with the required regularity in the
