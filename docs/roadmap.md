@@ -895,7 +895,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           `gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`
           now turns vanishing pulled-back background Ricci curvature directly
           into vanishing corrected pullback velocity, isolating the zero-curvature
-          scalar case of the corrected-velocity identity.
+          scalar case of the corrected-velocity identity. The initial Ricci-flat
+          transport API now also has `C³` anchored-gauge wrappers for vanishing
+          pulled-back background Ricci curvature, both from a general
+          Levi-Civita-background hypothesis and from the chosen-background
+          specialization.
           The coordinate data also restricts to smaller time sets and lifts
          through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
         so chart computations can feed the point-4 theorem routes without an

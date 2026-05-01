@@ -322,7 +322,10 @@ now packages the matching intrinsic boundary
          exposing the chart algebra needed for Banach finite-cover metric
          readouts; the geometric corrected-velocity layer also now turns
          vanishing pulled-back background Ricci curvature directly into vanishing
-         concrete `C³` gauge-corrected pullback velocity through a named theorem. The
+         concrete `C³` gauge-corrected pullback velocity through a named theorem,
+         and the Ricci-flat initial transport API has matching `C³`
+         anchored-gauge wrappers for the general Levi-Civita-background and
+         chosen-background cases. The
          raw-flow API also extracts continuity of
       `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
