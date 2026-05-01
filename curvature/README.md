@@ -239,7 +239,11 @@ now packages the matching intrinsic boundary
        the left-composition operator-space Lipschitz estimate, a product-state
        Lipschitz estimate for the full variational vector field, and
        interior/closed-interval uniqueness for the full `(flow, tangent)` pair
-       from base-flow uniqueness plus a uniform `‖Df‖` bound. The dynamic pullback bridge now turns such a variational local
+       from base-flow uniqueness plus a uniform `‖Df‖` bound. Its closed-ball
+       specialization now assembles product `IsPicardLindelof` witnesses and a
+       one-step variational local-flow constructor from base/linearized
+       closed-ball estimates plus the standard Picard continuity, norm, and
+       time-radius assumptions. The dynamic pullback bridge now turns such a variational local
        flow into the interior coordinate-field derivative data and proves the
        exact scalar chain rule along the flow, leaving only the metric-component
       derivative and concrete chart identification as local inputs. Closed-Picard

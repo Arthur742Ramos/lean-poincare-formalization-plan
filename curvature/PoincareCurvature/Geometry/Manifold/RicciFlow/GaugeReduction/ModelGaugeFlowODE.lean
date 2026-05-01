@@ -430,6 +430,55 @@ theorem lipschitzOnWith_variationalVectorField_at
       (f_t := f t) (Df_t := Df t) (tangentState := tangentState)
       hf_lip hDf_lip hA_bound hD_bound
 
+/-- Closed-ball specialization of the product-space Lipschitz estimate for the
+variational vector field, matching the spatial state used by
+`IsPicardLindelof`. -/
+theorem lipschitzOnWith_variationalVectorField_closedBall_at
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V} {t : ℝ}
+    {x₀ : V} {A₀ : V →L[ℝ] V} {a Kf KD BA BD : ℝ≥0}
+    (hf_lip : LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hA_bound : ∀ A ∈ closedBall A₀ a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD) :
+    LipschitzOnWith (max Kf (KD * BA + BD))
+      (variationalVectorField f Df t) (closedBall (x₀, A₀) a) := by
+  rw [← closedBall_prod_same x₀ A₀ (a : ℝ)]
+  exact lipschitzOnWith_variationalVectorField_at
+    (f := f) (Df := Df) (t := t)
+    (baseState := closedBall x₀ a) (tangentState := closedBall A₀ a)
+    hf_lip hDf_lip hA_bound hD_bound
+
+/-- Assemble Picard-Lindelöf hypotheses for the product variational system from
+closed-ball estimates for the base field and its linearization.
+
+The spatial Lipschitz field is discharged by
+`lipschitzOnWith_variationalVectorField_closedBall_at`; continuity, a vector
+field norm bound, and the interval-size inequality remain as the standard
+Picard-Lindelöf assumptions. -/
+theorem isPicardLindelof_variationalVectorField_of_closedBall_estimates
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {x₀ : V} {A₀ : V →L[ℝ] V}
+    {a r L Kf KD BA BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hA_bound : ∀ A ∈ closedBall A₀ a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hcont : ∀ z ∈ closedBall (x₀, A₀) a,
+      ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) (Icc tmin tmax))
+    (hnorm : ∀ t ∈ Icc tmin tmax, ∀ z ∈ closedBall (x₀, A₀) a,
+      ‖variationalVectorField f Df t z‖ ≤ L)
+    (hmul : L * max (tmax - t₀) (t₀ - tmin) ≤ a - r) :
+    IsPicardLindelof (variationalVectorField f Df) t₀ (x₀, A₀) a r L
+      (max Kf (KD * BA + BD)) where
+  lipschitzOnWith := fun t ht =>
+    lipschitzOnWith_variationalVectorField_closedBall_at
+      (f := f) (Df := Df) (t := t)
+      (hf_lip t ht) (hDf_lip t ht) hA_bound (hD_bound t ht)
+  continuousOn := hcont
+  norm_le := hnorm
+  mul_max_le := hmul
+
 /-- Extract a variational local flow from a continuous local flow of the product
 system `(y, A)' = (f(t, y), Df(t, y) ∘ A)` initialized on pairs `(x, 1)`.
 
@@ -760,6 +809,35 @@ def ofProductPicardLindelof_of_le_radius
             rw [Prod.dist_eq]
       _ = dist x x₀ := by simp
       _ ≤ (R : ℝ) := hx.trans (by exact_mod_cast hr))
+
+/-- One-step variational local-flow constructor from closed-ball
+Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`.
+
+This is the chart-level form expected in the positive-dimensional gauge-flow
+construction: base-field and linearized-coefficient Lipschitz/boundedness
+estimates supply the product Lipschitz hypothesis, while the remaining
+continuity, norm, and time-radius assumptions are exactly the usual
+Picard-Lindelöf data. -/
+def ofProductClosedBallEstimates
+    [CompleteSpace V]
+    {a R L Kf KD BA BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hcont : ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
+      ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) (Icc tmin tmax))
+    (hnorm : ∀ t ∈ Icc tmin tmax,
+      ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
+        ‖variationalVectorField f Df t z‖ ≤ L)
+    (hmul : L * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R) :
+    VariationalLocalFlowSolution f Df t₀ x₀ r :=
+  ofProductPicardLindelof_of_le_radius
+    (isPicardLindelof_variationalVectorField_of_closedBall_estimates
+      (A₀ := (1 : V →L[ℝ] V))
+      (r := R) hf_lip hDf_lip hA_bound hD_bound hcont hnorm hmul)
+    hr
 
 end VariationalLocalFlowSolution
 

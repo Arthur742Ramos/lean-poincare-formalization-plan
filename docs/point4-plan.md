@@ -159,7 +159,11 @@ uniqueness for the full pair `(flow, tangent)` from the usual base-flow
 Lipschitz hypothesis plus a uniform `‖Df‖` bound. This removes a manual tangent
 Lipschitz obligation from the future chart-gluing step and isolates the
 remaining product Picard hypotheses to base-field and linearized-coefficient
-estimates.
+estimates. The same layer now has the closed-ball specialization matching
+Mathlib's `IsPicardLindelof` state, assembles a product-system
+`IsPicardLindelof` witness from those closed-ball estimates plus the standard
+continuity/norm/time-radius assumptions, and exposes a one-step
+`ofProductClosedBallEstimates` constructor for the variational local flow.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

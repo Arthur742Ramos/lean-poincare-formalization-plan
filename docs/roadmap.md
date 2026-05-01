@@ -740,7 +740,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        interior/closed-interval uniqueness for the full pair `(flow, tangent)`
        from a base-flow Lipschitz estimate plus a uniform `‖Df‖` bound, so the
        future chart-gluing step no longer needs a separate manual tangent
-       Lipschitz hypothesis.
+       Lipschitz hypothesis. Its closed-ball specialization now matches
+       Mathlib's `IsPicardLindelof` state, assembles product-system
+       Picard-Lindelöf witnesses from base/linearized closed-ball estimates plus
+       the standard continuity/norm/time-radius assumptions, and gives a one-step
+       variational local-flow constructor from those estimates.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an
