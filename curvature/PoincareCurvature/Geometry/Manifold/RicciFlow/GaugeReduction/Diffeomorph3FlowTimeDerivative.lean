@@ -102,6 +102,57 @@ theorem hasDerivWithinAt_bilinearForm_apply_apply
     hfirst.clm_apply hv
   simpa [ContinuousLinearMap.add_apply, add_assoc] using hsecond
 
+/-- Within-set model-space chain rule for `B(t) (A(t) u) (A(t) v)`, the
+closed-interval coordinate form of a pulled-back metric component. -/
+theorem hasDerivWithinAt_bilinearForm_linear_apply_apply
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {B : ℝ → V →L[ℝ] V →L[ℝ] ℝ} {B' : V →L[ℝ] V →L[ℝ] ℝ}
+    {A : ℝ → V →L[ℝ] V} {A' : V →L[ℝ] V} {s : Set ℝ} {t : ℝ}
+    (hB : HasDerivWithinAt B B' s t) (hA : HasDerivWithinAt A A' s t)
+    (u v : V) :
+    HasDerivWithinAt (fun τ : ℝ => B τ (A τ u) (A τ v))
+      (B' (A t u) (A t v) + B t (A' u) (A t v) + B t (A t u) (A' v)) s t := by
+  have hu : HasDerivWithinAt (fun τ : ℝ => A τ u) (A' u) s t := by
+    have hev :
+        HasFDerivWithinAt
+          (fun A : V →L[ℝ] V => A u) (ContinuousLinearMap.apply ℝ V u)
+          Set.univ (A t) :=
+      (ContinuousLinearMap.apply ℝ V u).hasFDerivWithinAt
+    have hcomp := hev.comp t hA.hasFDerivWithinAt
+      (Set.mapsTo_univ (fun τ : ℝ => A τ) s)
+    simpa [Function.comp] using hcomp.hasDerivWithinAt
+  have hv : HasDerivWithinAt (fun τ : ℝ => A τ v) (A' v) s t := by
+    have hev :
+        HasFDerivWithinAt
+          (fun A : V →L[ℝ] V => A v) (ContinuousLinearMap.apply ℝ V v)
+          Set.univ (A t) :=
+      (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
+    have hcomp := hev.comp t hA.hasFDerivWithinAt
+      (Set.mapsTo_univ (fun τ : ℝ => A τ) s)
+    simpa [Function.comp] using hcomp.hasDerivWithinAt
+  exact hasDerivWithinAt_bilinearForm_apply_apply
+    (B := B) (B' := B') (u := fun τ : ℝ => A τ u)
+    (u' := A' u) (v := fun τ : ℝ => A τ v) (v' := A' v)
+    (s := s) (t := t) hB hu hv
+
+/-- Within-set coordinate gauge-flow specialization of
+`hasDerivWithinAt_bilinearForm_linear_apply_apply`: if the tangent map `A(t)`
+has time derivative `D ∘ A(t)`, then the two vector-slot derivative terms have
+the expected Lie-derivative shape. -/
+theorem hasDerivWithinAt_bilinearForm_linear_apply_apply_of_comp_deriv
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {B : ℝ → V →L[ℝ] V →L[ℝ] ℝ} {B' : V →L[ℝ] V →L[ℝ] ℝ}
+    {A : ℝ → V →L[ℝ] V} {D : V →L[ℝ] V} {s : Set ℝ} {t : ℝ}
+    (hB : HasDerivWithinAt B B' s t)
+    (hA : HasDerivWithinAt A (D.comp (A t)) s t) (u v : V) :
+    HasDerivWithinAt (fun τ : ℝ => B τ (A τ u) (A τ v))
+      (B' (A t u) (A t v) +
+        B t (D (A t u)) (A t v) +
+        B t (A t u) (D (A t v))) s t := by
+  simpa [ContinuousLinearMap.comp_apply] using
+    hasDerivWithinAt_bilinearForm_linear_apply_apply (B := B) (B' := B') (A := A)
+      (A' := D.comp (A t)) (s := s) (t := t) hB hA u v
+
 /-- Within-set local-coordinate transfer form of
 `hasDerivWithinAt_bilinearForm_apply_apply` for the tangent-map-shaped
 derivative case `A'(t) = D ∘ A(t)`.

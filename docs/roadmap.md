@@ -682,6 +682,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       on a smaller closed interval, vector-slot variational uniqueness bridges,
       center-trajectory scalar chain-rule wrappers for basepoint
       gauge-pullback calculations including eventual-equality transfer forms,
+      direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule primitives,
       center-trajectory uniqueness wrappers for local/continuous/variational
       packages,
       and Gronwall uniqueness bridges for packaged

@@ -604,6 +604,10 @@ consume variational model-flow data without manually threading
 `x₀ ∈ closedBall x₀ r`; the same center wrappers now have within-filter and
 ordinary-neighborhood eventual-equality transfer forms for chart-local scalar
 identifications.
+The generic closed-interval scalar calculus now also includes exact within-set
+`B(t)(A(t)u)(A(t)v)` chain-rule primitives, including the `A' = D ∘ A` gauge
+tangent-map specialization, so endpoint component packages can use the direct
+model expression without first passing through an eventual-equality wrapper.
 The model ODE uniqueness layer now also has center-trajectory wrappers for
 packaged local flows, continuous space-time local flows, and the full
 variational pair `(flow, tangent)` on both `Ioo` and `Icc`, so basepoint

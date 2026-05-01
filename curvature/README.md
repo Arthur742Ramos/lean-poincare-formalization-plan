@@ -236,7 +236,8 @@ now packages the matching intrinsic boundary
       open-interval continuity and packaged `LocalFlowSolution` extraction,
       vector-slot variational uniqueness, center-trajectory scalar chain-rule
       wrappers with eventual-equality transfer forms, center-trajectory
-      uniqueness wrappers, and Gronwall uniqueness
+      uniqueness wrappers, direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule
+      primitives, and Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level
       raw-flow building block. It also packages the tangent-map variational
        equation `A'(t) = Df(t, flow(t)) ∘ A(t)` as
