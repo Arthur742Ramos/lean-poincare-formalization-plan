@@ -430,6 +430,17 @@ noncomputable def metricBilinearCoordinateField
     let y : M := (extChartAt I p).symm z.2
     ContinuousLinearMap.inCoordinates E TM OneF TStar p y p y ((g z.1).inner y)
 
+/-- A locally equal finite-cover/readout field may supply the Fréchet derivative
+of the named metric-coordinate field. -/
+theorem metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+    {g : MetricFamily (I := I) (M := M)} {p : M} {q : ℝ × E}
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq : metricBilinearCoordinateField (I := I) (M := M) g p =ᶠ[𝓝 q] Bfield)
+    (hBfield : HasFDerivAt Bfield Bfield' q) :
+    HasFDerivAt (metricBilinearCoordinateField (I := I) (M := M) g p) Bfield' q :=
+  hBfield.congr_of_eventuallyEq hEq
+
 /-- At a fixed time, the spatial coordinate part of the named
 metric-coordinate field is `C²` in the preferred extended chart. -/
 theorem metricBilinearCoordinateField_fixedTime_contDiffWithinAt
@@ -3392,7 +3403,9 @@ theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivA
   obtain ⟨xE, hxE, hbase, hA, Bfield, Bfield', hB_eq, hBfield, hvalue⟩ :=
     hdata ht x u v
   refine ⟨xE, hxE, hbase, hA, Bfield', ?_, hvalue⟩
-  exact hBfield.congr_of_eventuallyEq hB_eq
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hB_eq hBfield
 
 /-- Geometric-slot version of
 `hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalTangentMap`.
@@ -3633,7 +3646,9 @@ theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivA
   obtain ⟨xE, hxE, hbase, hA, Bfield, Bfield', hB_eq, hBfield, hvalue⟩ :=
     hdata ht x u v
   refine ⟨xE, hxE, hbase, hA, Bfield', ?_, hvalue⟩
-  exact hBfield.congr_of_eventuallyEq hB_eq
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hB_eq hBfield
 
 /-- Closed-Picard raw gauge flow plus variational model-flow chart data gives
 interior time-regularity for the gauge-pulled metric family in one step. -/
@@ -3964,7 +3979,9 @@ theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_variationa
   obtain ⟨xE, hxE, hbase, hA, Bfield, Bfield', hB_eq, hBfield, hvalue⟩ :=
     hdata ht x u v
   refine ⟨xE, hxE, hbase, hA, Bfield', ?_, hvalue⟩
-  exact hBfield.congr_of_eventuallyEq hB_eq
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hB_eq hBfield
 
 end Diffeomorph3GaugeFlowOn
 

@@ -317,7 +317,8 @@ now packages the matching intrinsic boundary
         same geometric-slot phrasing available for the direct variational
         chain-rule route, plus a readout-field companion that transfers the
         required Fréchet derivative from any locally equal two-variable
-        bilinear-form readout,
+         bilinear-form readout through the named
+         `metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq` bridge,
         exposing the chart algebra needed for Banach finite-cover metric readouts. The
         raw-flow API also extracts continuity of
       `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
