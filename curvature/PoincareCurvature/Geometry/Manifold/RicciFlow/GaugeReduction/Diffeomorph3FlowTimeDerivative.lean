@@ -221,6 +221,25 @@ theorem pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
   exact SmoothSelfDiffeomorph3Family.pullbackMetricInnerDerivativeOn_of_hasTimeDerivativeOn
     (I := I) (M := M) (hpullDerivative sol)
 
+/-- Fixed-IVP geometric bundle scalar data is equivalent to the tensor
+time-derivative package for every member of the bundle. -/
+theorem pullbackMetricInnerDerivativeData_iff_hasTimeDerivativeOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    G.PullbackMetricInnerDerivativeData ↔
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        HasTimeDerivativeOn (I := I) (M := M)
+          ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+          (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+          sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  constructor
+  · intro hinner sol
+    exact G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner sol
+  · intro hpullDerivative
+    exact G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn hpullDerivative
+
 end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
 
 namespace ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
@@ -266,6 +285,25 @@ theorem pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
   exact (G.forInitialValueProblem ivp).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
     (I := I) (M := M) (fun sol ↦ hpullDerivative ivp sol)
 
+/-- Theorem-family geometric bundle scalar data is equivalent to the tensor
+time-derivative package for every member of the family. -/
+theorem pullbackMetricInnerDerivativeData_iff_hasTimeDerivativeOn
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    G.PullbackMetricInnerDerivativeData ↔
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+            (E := E) (H := H) (I := I) (M := M) ivp,
+          HasTimeDerivativeOn (I := I) (M := M)
+            ((G.maps3 ivp sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+            (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge ivp sol))
+            sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  constructor
+  · intro hinner ivp sol
+    exact G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner ivp sol
+  · intro hpullDerivative
+    exact G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn hpullDerivative
+
 end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
 
 namespace IntrinsicDeTurckGaugeFlowExistence
@@ -295,6 +333,43 @@ theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
   G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
     (I := I) (M := M) hinner sol
 
+/-- The tensor time-derivative package for every member of a fixed-IVP raw
+gauge-flow existence witness recovers the named scalar derivative data. -/
+theorem pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      HasTimeDerivativeOn (I := I) (M := M)
+        (((G.flow sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+        (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+          ((G.toDiffeomorph3GaugeFlow).gauge sol))
+        sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (I := I) (M := M) hpullDerivative
+
+/-- Fixed-IVP raw gauge-flow scalar data is equivalent to the tensor
+time-derivative package for every induced gauge-pulled metric. -/
+theorem pullbackMetricInnerDerivativeData_iff_hasTimeDerivativeOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    G.PullbackMetricInnerDerivativeData ↔
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        HasTimeDerivativeOn (I := I) (M := M)
+          (((G.flow sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+          (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            ((G.toDiffeomorph3GaugeFlow).gauge sol))
+          sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  constructor
+  · intro hinner sol
+    exact G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner sol
+  · intro hpullDerivative
+    exact G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn hpullDerivative
+
 end IntrinsicDeTurckGaugeFlowExistence
 
 namespace IntrinsicDeTurckGaugeFlowExistenceFamily
@@ -322,6 +397,44 @@ theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
   G.toDiffeomorph3GaugeFlowFamily.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
     (I := I) (M := M) hinner ivp sol
+
+/-- The tensor time-derivative package for every member of a theorem-family raw
+gauge-flow existence witness recovers the named scalar derivative data. -/
+theorem pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hpullDerivative : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        HasTimeDerivativeOn (I := I) (M := M)
+          (((G.flow ivp sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+          (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+          sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.toDiffeomorph3GaugeFlowFamily.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (I := I) (M := M) hpullDerivative
+
+/-- Theorem-family raw gauge-flow scalar data is equivalent to the tensor
+time-derivative package for every induced gauge-pulled metric. -/
+theorem pullbackMetricInnerDerivativeData_iff_hasTimeDerivativeOn
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    G.PullbackMetricInnerDerivativeData ↔
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+            (E := E) (H := H) (I := I) (M := M) ivp,
+          HasTimeDerivativeOn (I := I) (M := M)
+            (((G.flow ivp sol).maps3).pullbackMetricFamily
+              sol.1.toIntrinsicDeTurckSolution.metric)
+            (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+              ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+            sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  constructor
+  · intro hinner ivp sol
+    exact G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner ivp sol
+  · intro hpullDerivative
+    exact G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn hpullDerivative
 
 end IntrinsicDeTurckGaugeFlowExistenceFamily
 

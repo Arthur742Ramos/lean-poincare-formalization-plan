@@ -669,7 +669,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     `HasTimeDerivativeOn` for the pulled-back metric, with fixed-IVP and
     theorem-family bundle adapters, raw-existence adapters, and direct
     gauge-reduced, intrinsic, and ordinary theorem-package projections, plus
-    time-set restriction and identity-gauge specialization lemmas, so the
+    time-set restriction, identity-gauge specialization, and fixed-IVP/family
+    equivalence lemmas with tensor time-derivative data for both geometric and
+    raw gauge-flow bundles, so the
     remaining primitive input is exactly that scalar identity; in the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
     DeTurck gauge-flow families by componentwise vanishing, with direct

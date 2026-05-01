@@ -356,8 +356,10 @@ now packages the matching intrinsic boundary
    tensor `HasTimeDerivativeOn` for the pulled-back metric, with fixed-IVP and
    theorem-family bundle adapters, raw-existence adapters, and direct
    gauge-reduced, intrinsic, and ordinary theorem-package projections, plus
-   time-set restriction and identity-gauge specialization lemmas. This leaves one primitive
-   positive-dimensional time-regularity input. Two thin extension
+   time-set restriction / identity-gauge structural lemmas and fixed-IVP/family
+   equivalences with tensor time-derivative data for both geometric and raw
+   gauge-flow bundles. This leaves one primitive positive-dimensional
+   time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`
