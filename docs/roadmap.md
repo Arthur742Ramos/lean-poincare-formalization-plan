@@ -660,8 +660,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     full point-4 input chain has no gauge-flow gap in any of the
     currently-proved special cases. The
     non-identity gauge time-regularity
-    interface now also has the proof-bearing scalar-to-tensor bridge, so its
-    remaining primitive input is the scalar chain-rule identity for the
+    interface now also has the proof-bearing scalar-to-tensor bridge, and the
+    fixed non-identity gauge case exposes both tensor and scalar derivative
+    adapters in the thin `Diffeomorph3FlowTimeDerivative` module, so its
+    remaining primitive input is the dynamic scalar chain-rule identity for the
     pulled-back metric; in the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
     DeTurck gauge-flow families by componentwise vanishing, with direct

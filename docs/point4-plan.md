@@ -94,10 +94,13 @@ calculation that splits into three pieces (time derivative of `g`,
 spatial derivative of `g.inner` along `X_t`, derivative of the
 pushforward `Φ_t * u` and `Φ_t * v`). Each piece needs a carefully
 named auxiliary lemma. The static (time-independent `Φ`) special case
-is already proved as `const_pullbackMetricFamily_hasTimeDerivativeOn`.
-The bundled non-identity gauge-flow API now has proof-bearing scalar-to-tensor
-wrappers, so solving this scalar identity automatically supplies the
-`HasTimeDerivativeOn` package required by the gauge-reduction theorem routes.
+is already proved as `const_pullbackMetricFamily_hasTimeDerivativeOn`, and the
+thin `Diffeomorph3FlowTimeDerivative.lean` module now also exposes its scalar
+inner-product form plus the scalar-to-tensor repackaging lemma for fixed
+non-identity gauges. The bundled non-identity gauge-flow API now has
+proof-bearing scalar-to-tensor wrappers, so solving the dynamic scalar identity
+automatically supplies the `HasTimeDerivativeOn` package required by the
+gauge-reduction theorem routes.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
