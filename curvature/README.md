@@ -246,7 +246,9 @@ now packages the matching intrinsic boundary
        matching the Banach readout output shape before interior tensor
        time-regularity is derived; direct and readout-field model-coordinate
        endpoint companions compare the variational ODE velocity with the raw
-       gauge velocity using within-time-set agreement. Its closed-ball
+       gauge velocity using within-time-set agreement, and the time-difference
+       formulation now has within-set chain-rule primitives for closed-interval
+       endpoints. Its closed-ball
        specialization now assembles product `IsPicardLindelof` witnesses and a
        one-step variational local-flow constructor from base/linearized
        closed-ball estimates plus the standard Picard continuity, norm, and

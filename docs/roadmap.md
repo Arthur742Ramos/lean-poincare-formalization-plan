@@ -936,7 +936,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalLocalFlowWithin_geometricValue`,
               now derives the raw gauge velocity from within-time-set agreement
               with the variational local flow, so endpoint scalar identities can
-              be stated using the model ODE vector field `f(t, y(t))`. On the PDE side,
+              be stated using the model ODE vector field `f(t, y(t))`. The
+              time-difference route now also has within-set chain-rule primitives
+              for differentiating `B(τ, c(τ)) - B(t, c(τ))` directly at endpoints,
+              including the raw-gauge-flow bridge
+              `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`.
+              On the PDE side,
               `SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_hasDerivAt_chartRHS_of_mem_Ioo`
               and its `sourceTangentCoordinate` scalar-slot variant now expose
               the Banach chart right-hand side as a centered derivative of the
