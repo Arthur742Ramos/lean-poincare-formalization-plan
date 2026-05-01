@@ -337,7 +337,9 @@ now packages the matching intrinsic boundary
             open-interior specialization, with a matching readout-field endpoint
             at the variational tangent-map layer plus a geometric-slot companion
             that keeps the readout-field derivative input while phrasing the
-            scalar identity in actual pushed-forward tangent vectors, and now
+            scalar identity in actual pushed-forward tangent vectors, with
+            further variants keeping both the base-flow and tangent-map
+            identifications in the closed-interval within filter, and now
             with a within-set time-difference component package that routes
             closed-interval endpoint derivative data through
             `CoordinatePullbackMetricComponentDerivativeWithinOn` to interior
@@ -542,9 +544,10 @@ now packages the matching intrinsic boundary
       endpoint scalar derivative package that upgrades directly to tensor
       time-regularity on the open interval through a raw gauge-flow endpoint
       wrapper, including variational tangent-map endpoint data with
-      geometric-slot scalar identities and an endpoint bridge from full
-      metric-coordinate Fréchet data to the concrete `B(τ)` derivative and then
-      to tensor time-regularity. The
+      geometric-slot scalar identities, variants where the tangent-map
+      identification is only known in the closed-interval within filter, and an
+      endpoint bridge from full metric-coordinate Fréchet data to the concrete
+      `B(τ)` derivative and then to tensor time-regularity. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
       promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
       scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred

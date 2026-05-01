@@ -937,7 +937,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               now derives the raw gauge velocity from within-time-set agreement
               with the variational local flow, so endpoint scalar identities can
               be stated using the model ODE vector field `f(t, y(t))`. The
-              time-difference route now also has within-set chain-rule primitives
+              matching `..._tangentWithin...` variants keep both base-flow and
+              tangent-map identifications in the closed-interval within filter,
+              matching Picard endpoint outputs before any neighborhood-time
+              upgrade. The
+               time-difference route now also has within-set chain-rule primitives
               for differentiating `B(τ, c(τ)) - B(t, c(τ))` directly at endpoints,
               including raw-gauge-flow direct and readout-field bridges
               `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`

@@ -172,7 +172,11 @@ and
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalLocalFlowWithin_geometricValue`,
 add the closed-interval base-velocity comparison needed when the scalar
 identity is stated with the variational ODE vector field `f(t, y(t))` rather
-than the raw gauge vector field. The time-difference formulation now also has
+than the raw gauge vector field. The corresponding `..._tangentWithin...`
+variants now keep both the base-flow and tangent-map identifications in the
+closed-interval within filter, matching Picard endpoint output without first
+upgrading the tangent equality to an ambient neighborhood equality. The
+time-difference formulation now also has
 within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
