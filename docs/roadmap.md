@@ -687,7 +687,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     API is symmetric across fixed-IVP and theorem-family packages.
     The rank-one compact special case also exposes intrinsic and ordinary
     theorem packages through the gauge-reduced rank-one package, including
-    model-space theorem-family aliases.
+    model-space theorem-family aliases. The smooth Ricci-DeTurck chart-closure
+    data now also projects to intrinsic and ordinary compact point-4 theorem
+    packages through the raw identity `C^3` gauge-flow witness plus named scalar
+    derivative data, so the PDE-realization endpoint is wired through the same
+    raw-gauge interface as the rest of the gauge-flow API.
     What still
     remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence

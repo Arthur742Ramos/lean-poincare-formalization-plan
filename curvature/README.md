@@ -340,15 +340,19 @@ now packages the matching intrinsic boundary
    non-identity gauge-pulled metric time-derivative obligation for arbitrary
    geometric `C³` DeTurck gauge-flow families on subsingleton tangent fibers by
    proving the corrected velocity and pulled metric components vanish, and
-   exposes direct gauge-reduced projections plus matching model-space,
-   empty-manifold, and raw-existence theorem-package routes that need no extra
-   derivative input; it also exposes ordinary point-4 theorem-family endpoints
-   routed through the full raw `C³` gauge-flow chain in the subsingleton-tangent,
-   subsingleton-model, and empty-manifold cases, with matching fixed-IVP
-   model-space and empty-manifold aliases for the geometric and raw gauge-flow
-   routes. The rank-one compact special case also has gauge-reduced projections
-   to intrinsic and ordinary theorem packages, including model-space
-   theorem-family aliases. The
+    exposes direct gauge-reduced projections plus matching model-space,
+    empty-manifold, and raw-existence theorem-package routes that need no extra
+    derivative input; it also exposes ordinary point-4 theorem-family endpoints
+    routed through the full raw `C³` gauge-flow chain in the subsingleton-tangent,
+    subsingleton-model, and empty-manifold cases, with matching fixed-IVP
+    model-space and empty-manifold aliases for the geometric and raw gauge-flow
+    routes. The rank-one compact special case also has gauge-reduced projections
+    to intrinsic and ordinary theorem packages, including model-space
+    theorem-family aliases. A thin `AnalyticPDE.SmoothRealizationGaugeRoutes`
+    companion now also routes global smooth Ricci-DeTurck chart-closure data to
+    intrinsic and ordinary compact point-4 theorem packages through the raw
+    identity `C³` gauge-flow witness plus named scalar derivative data, leaving
+    the heavy PDE realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic

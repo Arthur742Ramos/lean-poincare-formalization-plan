@@ -126,6 +126,11 @@ zero-dimensional API is symmetric across fixed and family theorem packages.
 The rank-one special case now also exposes intrinsic and ordinary theorem
 packages projected through the gauge-reduced rank-one package, including the
 model-space theorem-family aliases.
+The smooth Ricci-DeTurck chart-closure layer now also has a thin companion route
+from `RicciDeTurckChartClosureData` to intrinsic and ordinary compact point-4
+theorem packages through the raw identity `C^3` gauge-flow witness and its named
+scalar derivative data, rather than only through the direct identity-gauge
+projection.
 
 **Module location.** A new module
 `Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowTimeDerivative.lean`
@@ -247,3 +252,6 @@ should therefore be developed in **new modules** that import only the
 already-cached parts of the scaffolding, never modify
 `SmoothRealization.lean` or `AnalyticPDE.lean` directly, and only
 appear in `RicciFlowLocalExistence.lean` as additional imports.
+`AnalyticPDE/SmoothRealizationGaugeRoutes.lean` follows this pattern: it leaves
+the heavy PDE realization file unchanged and adds only raw-gauge endpoint
+projections on top of the already-proved chart-closure data.
