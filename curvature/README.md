@@ -327,7 +327,11 @@ now packages the matching intrinsic boundary
            open-interior specialization, with a matching readout-field endpoint
            at the variational tangent-map layer plus a geometric-slot companion
            that keeps the readout-field derivative input while phrasing the
-           scalar identity in actual pushed-forward tangent vectors; the geometric
+           scalar identity in actual pushed-forward tangent vectors, and
+           `SmoothRealizationGaugeRoutes` now exposes the Banach chart right-hand
+           side as centered derivatives of the named
+           `metricBilinearCoordinateField`, including the tangent-vector-slot
+           scalar form used by geometric gauge-pullback calculations; the geometric
            corrected-velocity layer also now turns
          vanishing pulled-back background Ricci curvature directly into vanishing
          concrete `C³` gauge-corrected pullback velocity through a named theorem,

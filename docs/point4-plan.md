@@ -385,6 +385,13 @@ eventual-equality hypotheses are introduced. Its geometric-slot companion
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMap_geometricValue`
 keeps that readout-field entry point while stating the scalar velocity identity
 in actual pushed-forward tangent vectors at the base time.
+On the PDE side,
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_hasDerivAt_chartRHS_of_mem_Ioo`
+and
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_sourceTangentCoordinate_hasDerivAt_chartRHS_of_mem_Ioo`
+now expose the Banach chart right-hand side as a centered derivative of the
+named `metricBilinearCoordinateField`, including the tangent-vector-slot scalar
+form used by geometric gauge-pullback calculations.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
@@ -622,5 +629,6 @@ already-cached parts of the scaffolding, never modify
 `SmoothRealization.lean` or `AnalyticPDE.lean` directly, and only
 appear in `RicciFlowLocalExistence.lean` as additional imports.
 `AnalyticPDE/SmoothRealizationGaugeRoutes.lean` follows this pattern: it leaves
-the heavy PDE realization file unchanged and adds only raw-gauge endpoint
-projections on top of the already-proved global and interval chart-closure data.
+the heavy PDE realization file unchanged and adds raw-gauge endpoint projections
+plus Banach-to-centered-metric-coordinate readout bridges on top of the
+already-proved global and interval chart-closure data.

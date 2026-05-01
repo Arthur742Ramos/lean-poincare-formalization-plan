@@ -905,12 +905,16 @@ hypothesis). That regularity gap is now closed as well: the package proves the
            endpoint,
             `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMap`,
             so finite-cover/Banach readouts can enter before the additional
-            base-flow identification step; its geometric-slot companion
-            keeps the same readout-field entry point while stating the scalar
-            velocity identity in actual pushed-forward tangent vectors at the
-            base time.
-            On the geometric
-            velocity side,
+             base-flow identification step; its geometric-slot companion
+             keeps the same readout-field entry point while stating the scalar
+             velocity identity in actual pushed-forward tangent vectors at the
+             base time. On the PDE side,
+             `SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_hasDerivAt_chartRHS_of_mem_Ioo`
+             and its `sourceTangentCoordinate` scalar-slot variant now expose
+             the Banach chart right-hand side as a centered derivative of the
+             named `metricBilinearCoordinateField`.
+             On the geometric
+             velocity side,
           `gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`
           now turns vanishing pulled-back background Ricci curvature directly
           into vanishing corrected pullback velocity, isolating the zero-curvature
