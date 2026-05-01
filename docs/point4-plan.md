@@ -175,7 +175,11 @@ identity is stated with the variational ODE vector field `f(t, y(t))` rather
 than the raw gauge vector field. The corresponding `..._tangentWithin...`
 variants now keep both the base-flow and tangent-map identifications in the
 closed-interval within filter, matching Picard endpoint output without first
-upgrading the tangent equality to an ambient neighborhood equality. The
+upgrading the tangent equality to an ambient neighborhood equality. The direct
+`hasFDerivAtWithin` endpoint wrappers now have the same variational tangent-map
+and readout-field conveniences, so callers can supply only the
+metric-coordinate Fréchet derivative plus tangent-map equality and let the API
+fill in the `HasDerivWithinAt` tangent-coordinate derivative. The
 time-difference formulation now also has
 within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,

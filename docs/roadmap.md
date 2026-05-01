@@ -940,7 +940,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               matching `..._tangentWithin...` variants keep both base-flow and
               tangent-map identifications in the closed-interval within filter,
               matching Picard endpoint outputs before any neighborhood-time
-              upgrade. The
+              upgrade. The direct `hasFDerivAtWithin` endpoint wrappers now
+              have matching variational tangent-map and readout-field
+              conveniences, filling in the `HasDerivWithinAt`
+              tangent-coordinate derivative from the model variational ODE. The
                time-difference route now also has within-set chain-rule primitives
               for differentiating `B(τ, c(τ)) - B(t, c(τ))` directly at endpoints,
               including raw-gauge-flow direct and readout-field bridges
