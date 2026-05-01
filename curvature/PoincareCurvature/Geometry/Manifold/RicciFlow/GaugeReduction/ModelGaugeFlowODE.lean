@@ -997,6 +997,19 @@ def ofProductContinuousLocalFlowSolution
     exact hasDerivWithinAt_snd_of_variationalVectorField
       (α.hasDerivWithinAt (x, (1 : V →L[ℝ] V)) (hball x hx) t ht)
 
+/-- Extract variational local-flow existence from proof-level continuous product
+flow existence without choosing the product flow at call sites. -/
+theorem nonempty_ofProductContinuousLocalFlowSolution
+    {R : ℝ≥0}
+    (hα : Nonempty
+      (ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+        (x₀, (1 : V →L[ℝ] V)) R))
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) := by
+  rcases hα with ⟨α⟩
+  exact ⟨ofProductContinuousLocalFlowSolution α hball⟩
+
 /-- Forget both tangent-equation and space-time continuity fields. -/
 def toLocalFlowSolution (α : VariationalLocalFlowSolution f Df t₀ x₀ r) :
     LocalFlowSolution f t₀ x₀ r :=
@@ -1122,6 +1135,23 @@ def ofProductContinuousLocalFlowSolution_restrict
     VariationalLocalFlowSolution f Df
       (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
   (ofProductContinuousLocalFlowSolution (r := r') α hball).restrict htime ht₀' le_rfl
+
+/-- Localized variational local-flow existence from proof-level continuous
+product flow existence. -/
+theorem nonempty_ofProductContinuousLocalFlowSolution_restrict
+    {R r' : ℝ≥0}
+    (hα : Nonempty
+      (ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+        (x₀, (1 : V →L[ℝ] V)) R))
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hball : ∀ x ∈ closedBall x₀ r',
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    Nonempty (VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') := by
+  rcases hα with ⟨α⟩
+  exact ⟨ofProductContinuousLocalFlowSolution_restrict α htime ht₀' hball⟩
 
 /-- On the interior of the Picard interval, the center base curve has the
 ordinary derivative required by coordinate chain rules. -/
@@ -1761,6 +1791,18 @@ def ofProductPicardLindelof
   ofProductContinuousLocalFlowSolution
     (IsPicardLindelof.toContinuousLocalFlowSolution hf) hball
 
+/-- Product Picard-Lindelöf variational flow existence as a proof-level
+witness. -/
+theorem nonempty_ofProductPicardLindelof
+    [CompleteSpace V]
+    {a R L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) :=
+  ⟨ofProductPicardLindelof hf hball⟩
+
 /-- Product Picard-Lindelöf variational flow data, immediately localized to a
 smaller closed time interval. -/
 def ofProductPicardLindelof_restrict
@@ -1777,6 +1819,22 @@ def ofProductPicardLindelof_restrict
       (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
   ofProductContinuousLocalFlowSolution_restrict
     (IsPicardLindelof.toContinuousLocalFlowSolution hf) htime ht₀' hball
+
+/-- Localized product Picard-Lindelöf variational flow existence as a
+proof-level witness. -/
+theorem nonempty_ofProductPicardLindelof_restrict
+    [CompleteSpace V]
+    {a R L K r' : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hball : ∀ x ∈ closedBall x₀ r',
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    Nonempty (VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨ofProductPicardLindelof_restrict hf htime ht₀' hball⟩
 
 /-- Picard-Lindelöf for the product variational system supplies the variational
 flow package on any base ball whose radius is no larger than the product Picard
@@ -1797,6 +1855,17 @@ def ofProductPicardLindelof_of_le_radius
             rw [Prod.dist_eq]
       _ = dist x x₀ := by simp
       _ ≤ (R : ℝ) := hx.trans (by exact_mod_cast hr))
+
+/-- Product Picard-Lindelöf variational flow existence on any base ball whose
+radius is no larger than the product Picard radius, kept proof-level. -/
+theorem nonempty_ofProductPicardLindelof_of_le_radius
+    [CompleteSpace V]
+    {a R L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    (hr : r ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) :=
+  ⟨ofProductPicardLindelof_of_le_radius hf hr⟩
 
 /-- Product Picard-Lindelöf variational flow data on a smaller closed interval
 and any base ball whose radius is no larger than the product Picard radius. -/
@@ -1820,6 +1889,21 @@ def ofProductPicardLindelof_restrict_of_le_radius
             rw [Prod.dist_eq]
       _ = dist x x₀ := by simp
       _ ≤ (R : ℝ) := hx.trans (by exact_mod_cast hr))
+
+/-- Localized product Picard-Lindelöf variational flow existence on any base
+ball whose radius is no larger than the product Picard radius, kept proof-level. -/
+theorem nonempty_ofProductPicardLindelof_restrict_of_le_radius
+    [CompleteSpace V]
+    {a R L K r' : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨ofProductPicardLindelof_restrict_of_le_radius hf htime ht₀' hr⟩
 
 /-- One-step variational local-flow constructor from closed-ball
 Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`.

@@ -736,8 +736,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        Picard ball, and product Picard-Lindelöf hypotheses construct that
        variational package directly, with an automatic radius-specialized
        constructor when the base radius is bounded by the product radius, plus
-       closed-interval localized variants for continuous-product and product
-       Picard inputs and for the one-step closed-ball estimate constructors,
+       closed-interval localized variants and proof-level `Nonempty` wrappers
+       for continuous-product and product Picard inputs, plus localized variants
+       for the one-step closed-ball estimate constructors,
        including the componentwise-continuity and identity/operator ball
        specializations. The dynamic pullback layer now uses a
       variational local flow to discharge the interior `y'(t)` and `A'(t)`

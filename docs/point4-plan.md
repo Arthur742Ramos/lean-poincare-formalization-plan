@@ -744,9 +744,10 @@ also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction
 automatically when the chosen base radius is no larger than the product Picard
 radius; continuous-product and product Picard constructors now also have
-closed-interval localized variants, including the radius-specialized form needed
-when a chart calculation shrinks the Picard time interval before extracting
-tangent-map data. The one-step closed-ball estimate constructors have matching
+closed-interval localized variants and proof-level `Nonempty` wrappers,
+including the radius-specialized form needed when a chart calculation shrinks
+the Picard time interval before extracting tangent-map data. The one-step
+closed-ball estimate constructors have matching
 localized variants, including the componentwise-continuity and identity/operator
 ball specializations used by chart-local variational estimates. The ODE package
 now also supplies ordinary interior time
