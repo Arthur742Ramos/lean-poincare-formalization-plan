@@ -224,7 +224,12 @@ packages field-level coordinate data whose moving base point is the actual raw
 gauge-flow coordinate curve, using the raw-flow derivative theorem for the
 `y'(t)` clause. The companion
 `hasTimeDerivativeOn_Ioo_of_baseCoordinateField` then routes that data to
-interior tensor time-regularity.
+interior tensor time-regularity. The same bridge is now available on arbitrary
+raw time sets at neighborhood-times as
+`coordinatePullbackMetricFieldDerivativeOn_of_baseCoordinate` and
+`hasTimeDerivativeOn_of_baseCoordinateField`, so endpoint/restricted-time
+arguments can consume the same base-coordinate readout data without re-entering
+the closed-Picard `Ioo` wrapper.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

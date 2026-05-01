@@ -263,10 +263,13 @@ now packages the matching intrinsic boundary
        before choosing tangent-vector slots; matching one-sided `Ici t`
        endpoint variants feed the boundary-reduced theorem routes.
        Closed-Picard
-       raw gauge flows also feed the coordinate-model/field time-derivative
-       bridges directly on the open interior interval, with a one-step theorem
-       from raw gauge flow plus variational model-flow chart data to interior
-      gauge-pulled time-regularity. The raw-flow API also extracts continuity of
+        raw gauge flows also feed the coordinate-model/field time-derivative
+        bridges directly on the open interior interval, with a one-step theorem
+        from raw gauge flow plus variational model-flow chart data to interior
+       gauge-pulled time-regularity; the moving-base field bridge also has an
+       arbitrary-time-set form at neighborhood-times, so endpoint/restricted
+       chart arguments can reuse the same raw-flow coordinate derivative. The
+       raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
      A thin `AnalyticPDE.SmoothRealization` module names the
