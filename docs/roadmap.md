@@ -1132,7 +1132,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      uniqueness witness for the density-based interval carrier after the same
      metric-cone shrink. The built-in chart-derived symmetric carrier now has
       the matching state-preserving Banach-solution extraction after the standard
-      metric-cone shrink, plus a no-shrink extraction when the current Picard
+       metric-cone shrink, including a proof-level `Nonempty` readout, plus a
+       no-shrink extraction when the current Picard
       ball is already contained in the Riemannian metric cone, including a
       proof-level `Nonempty` readout, and genuine
       symmetric-carrier interval closure data now

@@ -613,7 +613,8 @@ now packages the matching intrinsic boundary
      also extracts a state-preserving Banach solution and common-interval
      uniqueness witness for the density-based interval carrier, and the
       chart-derived symmetric carrier now has the matching extraction after the
-      standard metric-cone shrink plus a no-shrink extraction when the current
+       standard metric-cone shrink, including a proof-level `Nonempty` readout,
+       plus a no-shrink extraction when the current
       Picard ball is already contained in the Riemannian metric cone, including
       a proof-level `Nonempty` readout. Genuine symmetric-carrier interval closure data
       now exposes the same Banach solution/uniqueness witness directly, including

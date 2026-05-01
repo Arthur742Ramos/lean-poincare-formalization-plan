@@ -906,7 +906,8 @@ uniqueness on common closed intervals. The chart-derived symmetric carrier now
 has the parallel Banach-solution extraction after the standard metric-cone
 shrink, so both the built-in carrier and the density-based carrier expose
 actual state-preserving ODE solution witnesses rather than only Picard
-hypotheses; when the current Picard ball already lies in the Riemannian metric
+hypotheses, and the standard-shrink route now also has a proof-level `Nonempty`
+readout; when the current Picard ball already lies in the Riemannian metric
 cone, the same chart-carrier solution/uniqueness witness is now available
 without shrinking first, including a proof-level `Nonempty` readout. Genuine
 symmetric-carrier interval closure data now also exposes
