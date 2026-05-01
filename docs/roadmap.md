@@ -1109,9 +1109,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      is wired through the same raw-gauge interface as the rest of the gauge-flow
      API; smooth Banach realizations also now expose the underlying open-interval
      raw identity-gauge scalar derivative and identity-pullback tensor derivative
-     data directly.
-    What still
-    remains is the geometric-analysis specialization for positive-dimensional
+     data directly. The global and interval chart-closure records themselves now
+     also expose proof-level smooth-realization witnesses, the self-encoding of
+     realized candidates, and proof-level candidate encodings via named
+     `nonempty_realization`, `realizationCandidateEncoding`, and
+     `nonempty_candidateEncoding` readouts.
+     What still
+     remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
     theorem producing raw gauge flows with the required regularity in the
     general case, and the

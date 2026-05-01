@@ -874,7 +874,12 @@ continuous Riemannian initial metric `g₀`, construct
 compact Riemannian manifold. It is by itself a paper-scale formalization
 project. Mathlib v4.29.1 does not yet contain the parabolic
 Hölder/Sobolev framework needed; that infrastructure has to be built
-first.
+first. The abstract closure-data interface itself now has named readouts for
+both the global and closed-interval packages:
+`nonempty_realization`, `realizationCandidateEncoding`, and
+`nonempty_candidateEncoding`. These wrappers expose the already-stored smooth
+realization and reverse encoding fields without reproving or destructing the
+closure data, but they do not supply the missing Schauder/parabolic estimates.
 
 **Suggested decomposition** (multi-session):
 

@@ -592,8 +592,11 @@ now packages the matching intrinsic boundary
      chart-closure data to intrinsic and ordinary compact point-4 theorem packages
      through the raw identity `C³` gauge-flow witness plus named scalar derivative
      data, and exposes the smooth Banach realization's open-interval identity
-     raw-gauge scalar/tensor derivative data directly, leaving the heavy PDE
-     realization module unchanged. The
+     raw-gauge scalar/tensor derivative data directly; the global and interval
+     chart-closure records also now expose named `nonempty_realization`,
+     `realizationCandidateEncoding`, and `nonempty_candidateEncoding` readouts
+     for their stored realization and reverse-encoding fields, leaving the heavy
+     PDE realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic
