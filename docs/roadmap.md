@@ -662,8 +662,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     ordinary theorem-package routes using either pulled-back metric
     time-derivative proofs or scalar inner-product derivative proofs. The raw
     flow layer also has fixed-IVP and theorem-family constructors from both
-     pointwise `HasMFDerivAt[s]` and unrestricted `HasMFDerivAt` data produced by
-     ODE/integral-curve theorems, named-derivative-family adapters,
+     pointwise `HasMFDerivAt[s]`, ordinary-on-time-set `HasMFDerivAt`, and
+      unrestricted `HasMFDerivAt` data produced by
+      ODE/integral-curve theorems, named-derivative-family adapters,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and
      time-set restriction for raw flows, so future manifold-flow existence results
      can plug in through either derivative data or existing geometric gauge-flow

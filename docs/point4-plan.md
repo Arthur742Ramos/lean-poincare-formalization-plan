@@ -613,12 +613,15 @@ the bundled `SmoothSelfDiffeomorph3Family` representation used here.
 Compactness gives global-in-time existence on a small interval; `C³`
 regularity follows from `C^∞` source regularity.
 The raw-flow layer now includes fixed-IVP and theorem-family
-`of_hasMFDerivWithinAt` / `of_hasMFDerivAt` constructors, named-derivative-family
-adapters, geometric-to-raw adapters, raw-flow derivative/local-at-time extractors,
-and raw-flow time-set restriction, so an ODE construction that already returns
-pointwise manifold derivative data or a named geometric gauge-flow bundle can be
-connected directly to `Diffeomorph3GaugeFlowOn` and
-`IntrinsicDeTurckGaugeFlowExistenceFamily`.
+`of_hasMFDerivWithinAt`, `of_hasMFDerivAtOn`, and `of_hasMFDerivAt`
+constructors, named-derivative-family adapters, geometric-to-raw adapters,
+raw-flow derivative/local-at-time extractors, and raw-flow time-set restriction,
+so an ODE construction that already returns pointwise manifold derivative data
+or a named geometric gauge-flow bundle can be connected directly to
+`Diffeomorph3GaugeFlowOn` and `IntrinsicDeTurckGaugeFlowExistenceFamily`.  The
+`of_hasMFDerivAtOn` variants match the common Picard-interior shape where the
+ODE construction has ordinary derivatives only for times in the selected open
+time set, not for all real times.
 The theorem-family zero-gauge-field constructor now also carries the required
 pullback metric time-derivative proof, so any family whose intrinsic DeTurck
 gauge field vanishes on each solution time set can enter the gauge-reduction
