@@ -451,7 +451,10 @@ now packages the matching intrinsic boundary
        this package from local identifications of the named `B(τ)` and `A(τ)`
        maps with a variational model flow, plus the bilinear-form field
        derivative and scalar velocity identity, and exposes a matching raw
-       closed-Picard route to interior tensor time-regularity. The module also proves
+       closed-Picard route to interior tensor time-regularity. A narrower
+       time-only variant accepts a direct derivative of the concrete `B(τ)`
+       component, matching the Banach finite-cover readout layer, and uses the
+       variational flow only for the `A(τ)` tangent map. The module also proves
        the moving metric-component chain rule for `Bfield(τ, y(τ))` and the
        combined `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent
        equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with

@@ -165,6 +165,13 @@ variational flow, plus the bilinear-form field derivative and scalar velocity
 identity, produce the component package. The raw closed-Picard wrapper
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowComponents`
 routes that data straight to interior tensor time-regularity.
+A second, narrower route,
+`coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap`, matches
+the finite-cover Banach readout theorems: it accepts a direct time derivative of
+the already-composed concrete `B(τ)` coordinate component and uses only the
+variational flow to differentiate the concrete `A(τ)` tangent-coordinate map,
+with raw wrapper
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents`.
 The model algebra now also includes the metric-component half of this remaining
 primitive: `hasDerivAt_bilinearFormField_along_curve` differentiates a bilinear
 form field `Bfield(τ, y(τ))`, and

@@ -757,6 +757,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        `B(τ)` and `A(τ)` maps with a variational model flow, plus the
        bilinear-form field derivative and scalar velocity identity; the matching
        raw closed-Picard wrapper gives interior tensor time-regularity directly.
+       A narrower time-only variant now matches the Banach finite-cover readout
+       layer by accepting a direct derivative of the concrete `B(τ)` coordinate
+       component while using the variational flow only for the `A(τ)` tangent map,
+       again with a raw closed-Picard interior wrapper.
        The model algebra now also proves the moving metric-component chain rule
        for `Bfield(τ, y(τ))` and its combined
        `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent-map
