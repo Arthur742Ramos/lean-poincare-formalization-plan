@@ -231,8 +231,9 @@ now packages the matching intrinsic boundary
        initial data, ordinary interior derivative extractors, named
        Picard-interval continuity, Lipschitz dependence on that initial data, and the continuous
       space-time partial-flow form needed for chart gluing, plus the
-      autonomous `C¹` local-integral-curve specialization with open-interval
-      continuity and Gronwall uniqueness
+      time-slice continuity bridges for continuous/variational local-flow
+      packages, autonomous `C¹` local-integral-curve specialization with
+      open-interval continuity, and Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level
       raw-flow building block. It also packages the tangent-map variational
        equation `A'(t) = Df(t, flow(t)) ∘ A(t)` as

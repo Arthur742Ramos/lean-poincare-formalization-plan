@@ -586,7 +586,9 @@ closed ball of initial data, ordinary interior derivative extractors, and
 named continuity on the Picard interval, plus Lipschitz dependence on initial data.
 It also packages the continuous space-time partial-flow form as
 `ContinuousLocalFlowSolution`, so the chart-level output now includes the
-continuity needed before gluing local solutions. The autonomous `C¹`
+continuity needed before gluing local solutions. Continuous and variational
+local-flow packages now expose named base-flow, tangent-map, and vector-slot
+time-slice continuity bridges on the Picard interval, and the autonomous `C¹`
 local-integral-curve specialization now also returns continuity on its open
 existence interval. The same module now also
 packages the model-space variational equation as

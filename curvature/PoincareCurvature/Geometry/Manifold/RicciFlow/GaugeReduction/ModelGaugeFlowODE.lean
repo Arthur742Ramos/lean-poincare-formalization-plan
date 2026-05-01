@@ -351,6 +351,20 @@ theorem flow_hasDerivAt_of_mem_Ioo
   (α.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
 
+/-- Each time slice of a continuous space-time local flow is continuous on the
+Picard interval. -/
+theorem flow_continuousOn
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) :
+    ContinuousOn (fun t : ℝ => α.flow (x, t)) (Icc tmin tmax) :=
+  α.toLocalFlowSolution.flow_continuousOn hx
+
+/-- The center time slice of a continuous space-time local flow is continuous
+on the Picard interval. -/
+theorem center_continuousOn (α : ContinuousLocalFlowSolution f t₀ x₀ r) :
+    ContinuousOn (fun t : ℝ => α.flow (x₀, t)) (Icc tmin tmax) :=
+  α.flow_continuousOn (mem_closedBall_self r.2)
+
 /-- Continuous space-time local flows inherit the open-interval uniqueness bridge
 from `LocalFlowSolution`. -/
 theorem eqOn_Ioo_of_lipschitzOnWith
@@ -835,6 +849,50 @@ theorem center_tangent_apply_hasDerivAt_of_mem_Ioo
     HasDerivAt (fun τ : ℝ => α.tangent x₀ τ v)
       (((Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) v) t :=
   α.tangent_apply_hasDerivAt_of_mem_Ioo (mem_closedBall_self r.2) ht v
+
+/-- Each base-flow time slice of a variational local flow is continuous on the
+Picard interval. -/
+theorem flow_continuousOn
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) :
+    ContinuousOn (fun t : ℝ => α.flow (x, t)) (Icc tmin tmax) :=
+  α.toContinuousLocalFlowSolution.flow_continuousOn hx
+
+/-- The center base-flow time slice of a variational local flow is continuous on
+the Picard interval. -/
+theorem center_flow_continuousOn (α : VariationalLocalFlowSolution f Df t₀ x₀ r) :
+    ContinuousOn (fun t : ℝ => α.flow (x₀, t)) (Icc tmin tmax) :=
+  α.flow_continuousOn (mem_closedBall_self r.2)
+
+/-- Each tangent-map time slice of a variational local flow is continuous on the
+Picard interval. -/
+theorem tangent_continuousOn
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) :
+    ContinuousOn (α.tangent x) (Icc tmin tmax) := by
+  intro t ht
+  exact (α.tangent_hasDerivWithinAt x hx t ht).continuousWithinAt
+
+/-- The center tangent-map time slice of a variational local flow is continuous
+on the Picard interval. -/
+theorem center_tangent_continuousOn (α : VariationalLocalFlowSolution f Df t₀ x₀ r) :
+    ContinuousOn (α.tangent x₀) (Icc tmin tmax) :=
+  α.tangent_continuousOn (mem_closedBall_self r.2)
+
+/-- Applying the variational tangent map to a fixed vector gives a continuous
+vector-slot time curve on the Picard interval. -/
+theorem tangent_apply_continuousOn
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) (v : V) :
+    ContinuousOn (fun t : ℝ => α.tangent x t v) (Icc tmin tmax) := by
+  intro t ht
+  exact (α.tangent_apply_hasDerivWithinAt hx ht v).continuousWithinAt
+
+/-- Center-trajectory vector-slot continuity for the variational tangent map. -/
+theorem center_tangent_apply_continuousOn
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) (v : V) :
+    ContinuousOn (fun t : ℝ => α.tangent x₀ t v) (Icc tmin tmax) :=
+  α.tangent_apply_continuousOn (mem_closedBall_self r.2) v
 
 /-- Two variational local flows have the same tangent map on the interior
 interval whenever their base curves agree there and the induced linearized ODE is
