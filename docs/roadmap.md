@@ -909,12 +909,16 @@ hypothesis). That regularity gap is now closed as well: the package proves the
              keeps the same readout-field entry point while stating the scalar
              velocity identity in actual pushed-forward tangent vectors at the
              base time. On the PDE side,
-             `SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_hasDerivAt_chartRHS_of_mem_Ioo`
-             and its `sourceTangentCoordinate` scalar-slot variant now expose
-             the Banach chart right-hand side as a centered derivative of the
-             named `metricBilinearCoordinateField`.
-             On the geometric
-             velocity side,
+              `SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_hasDerivAt_chartRHS_of_mem_Ioo`
+              and its `sourceTangentCoordinate` scalar-slot variant now expose
+              the Banach chart right-hand side as a centered derivative of the
+              named `metricBilinearCoordinateField`. The same bridge now
+              packages the smooth Banach realization's chart RHS as raw
+              identity-gauge scalar derivative data on the open Banach interval,
+              with a matching identity-pullback tensor `HasTimeDerivativeOn`
+              endpoint.
+              On the geometric
+              velocity side,
           `gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`
           now turns vanishing pulled-back background Ricci curvature directly
           into vanishing corrected pullback velocity, isolating the zero-curvature
@@ -946,11 +950,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     The rank-one compact special case also exposes intrinsic and ordinary
     theorem packages through the gauge-reduced rank-one package, including
     model-space theorem-family aliases. The smooth Ricci-DeTurck global and
-    interval chart-closure data now also projects to intrinsic and ordinary
-    compact point-4 theorem packages through the raw identity `C^3` gauge-flow
-    witness plus named scalar derivative data, so the PDE-realization endpoint
-    is wired through the same raw-gauge interface as the rest of the gauge-flow
-    API.
+     interval chart-closure data now also projects to intrinsic and ordinary
+     compact point-4 theorem packages through the raw identity `C^3` gauge-flow
+     witness plus named scalar derivative data, so the PDE-realization endpoint
+     is wired through the same raw-gauge interface as the rest of the gauge-flow
+     API; smooth Banach realizations also now expose the underlying open-interval
+     raw identity-gauge scalar derivative and identity-pullback tensor derivative
+     data directly.
     What still
     remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence

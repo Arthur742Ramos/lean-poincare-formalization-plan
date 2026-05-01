@@ -391,7 +391,13 @@ and
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_sourceTangentCoordinate_hasDerivAt_chartRHS_of_mem_Ioo`
 now expose the Banach chart right-hand side as a centered derivative of the
 named `metricBilinearCoordinateField`, including the tangent-vector-slot scalar
-form used by geometric gauge-pullback calculations.
+form used by geometric gauge-pullback calculations. The same thin bridge now
+packages the smooth Banach realization's chart RHS as the raw identity-gauge
+scalar derivative obligation,
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.id_pullbackMetricInnerDerivativeOn_Ioo_chartRHS`,
+and as the corresponding tensor time-derivative statement for the identity
+pullback metric family,
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.id_pullbackMetricFamily_hasTimeDerivativeOn_Ioo_chartRHS`.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

@@ -331,7 +331,10 @@ now packages the matching intrinsic boundary
            `SmoothRealizationGaugeRoutes` now exposes the Banach chart right-hand
            side as centered derivatives of the named
            `metricBilinearCoordinateField`, including the tangent-vector-slot
-           scalar form used by geometric gauge-pullback calculations; the geometric
+           scalar form used by geometric gauge-pullback calculations, and now
+           packages the same chart RHS as raw identity-gauge scalar derivative
+           data plus the corresponding identity-pullback tensor derivative on the
+           open Banach interval; the geometric
            corrected-velocity layer also now turns
          vanishing pulled-back background Ricci curvature directly into vanishing
          concrete `C³` gauge-corrected pullback velocity through a named theorem,
@@ -492,10 +495,12 @@ now packages the matching intrinsic boundary
     routes. The rank-one compact special case also has gauge-reduced projections
     to intrinsic and ordinary theorem packages, including model-space
     theorem-family aliases. A thin `AnalyticPDE.SmoothRealizationGaugeRoutes`
-    companion now also routes global and interval smooth Ricci-DeTurck
-    chart-closure data to intrinsic and ordinary compact point-4 theorem packages
-    through the raw identity `C³` gauge-flow witness plus named scalar derivative
-    data, leaving the heavy PDE realization module unchanged. The
+     companion now also routes global and interval smooth Ricci-DeTurck
+     chart-closure data to intrinsic and ordinary compact point-4 theorem packages
+     through the raw identity `C³` gauge-flow witness plus named scalar derivative
+     data, and exposes the smooth Banach realization's open-interval identity
+     raw-gauge scalar/tensor derivative data directly, leaving the heavy PDE
+     realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic
