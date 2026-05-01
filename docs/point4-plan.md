@@ -236,11 +236,13 @@ restriction. The ODE package now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, and
 `Diffeomorph3FlowTimeDerivative.lean` uses those facts to build
 `CoordinatePullbackMetricFieldDerivativeOn` directly from a variational local
-flow on the interior Picard interval. This removes the ODE part of the remaining
-dynamic pullback chain rule from the list of manual hypotheses: the residual
-chart-local work is now the metric-component field derivative and the concrete
-identification of the geometric coordinate model with the selected variational
-flow/tangent data.
+flow on the interior Picard interval. It also proves the exact scalar chain rule
+for `B(t, y(t))(A(t)u)(A(t)v)` along such a variational flow, plus an
+eventual-equality transfer form for chart-local scalar identities. This removes
+the ODE part of the remaining dynamic pullback chain rule from the list of
+manual hypotheses: the residual chart-local work is now the metric-component
+field derivative and the concrete identification of the geometric coordinate
+model with the selected variational flow/tangent data.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged

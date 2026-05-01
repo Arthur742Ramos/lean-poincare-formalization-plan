@@ -121,6 +121,82 @@ theorem hasDerivAt_bilinearFormField_linear_apply_apply_along_curve
       (Bfield' := Bfield') (y := y) (y' := y') (t := t) hB hy)
     hA u v
 
+namespace ModelGaugeFlowODE
+
+namespace VariationalLocalFlowSolution
+
+/-- Exact scalar chain rule along a variational model flow.
+
+This is the ODE-driven heart of the dynamic gauge-pullback calculation: the base
+curve contributes `f(t, y(t))`, while the tangent map contributes
+`Df(t, y(t)) ∘ A(t)` in both vector slots. -/
+theorem hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    (hB : HasFDerivAt Bfield Bfield' (t, α.flow (x, t))) (u v : V) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        Bfield (τ, α.flow (x, τ))
+          (α.tangent x τ u) (α.tangent x τ v))
+      (Bfield' (1, f t (α.flow (x, t)))
+          (α.tangent x t u) (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          ((Df t (α.flow (x, t))) (α.tangent x t u))
+          (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          (α.tangent x t u)
+          ((Df t (α.flow (x, t))) (α.tangent x t v))) t := by
+  exact hasDerivAt_bilinearFormField_linear_apply_apply_along_curve
+    (Bfield := Bfield) (Bfield' := Bfield')
+    (y := fun τ : ℝ ↦ α.flow (x, τ))
+    (y' := f t (α.flow (x, t)))
+    (A := fun τ : ℝ ↦ α.tangent x τ)
+    (D := Df t (α.flow (x, t))) (t := t)
+    hB (α.flow_hasDerivAt_of_mem_Ioo hx ht)
+    (α.tangent_hasDerivAt_of_mem_Ioo hx ht) u v
+
+/-- Eventual-equality transfer form of
+`hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo`. -/
+theorem hasDerivAt_of_eventuallyEq_bilinearFormField_tangent_apply_apply_of_mem_Ioo
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {scalar : ℝ → ℝ}
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {u v : V}
+    (heq : scalar =ᶠ[𝓝 t]
+      fun τ : ℝ ↦
+        Bfield (τ, α.flow (x, τ))
+          (α.tangent x τ u) (α.tangent x τ v))
+    (hB : HasFDerivAt Bfield Bfield' (t, α.flow (x, t)))
+    {value : ℝ}
+    (hvalue :
+      Bfield' (1, f t (α.flow (x, t)))
+          (α.tangent x t u) (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          ((Df t (α.flow (x, t))) (α.tangent x t u))
+          (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          (α.tangent x t u)
+          ((Df t (α.flow (x, t))) (α.tangent x t v)) =
+        value) :
+    HasDerivAt scalar value t := by
+  have hderiv :=
+    α.hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo hx ht hB u v
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq
+
+end VariationalLocalFlowSolution
+
+end ModelGaugeFlowODE
+
 /-- Local-coordinate transfer form of
 `hasDerivAt_bilinearForm_linear_apply_apply`: if a scalar function is eventually
 equal near `t` to the chart expression `B(τ) (A(τ) u) (A(τ) v)`, then it has

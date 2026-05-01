@@ -236,9 +236,9 @@ now packages the matching intrinsic boundary
       equations, and extracts `VariationalLocalFlowSolution` from continuous
       product local flows or product Picard-Lindelöf hypotheses initialized on
       `(x, 1)`. The dynamic pullback bridge now turns such a variational local
-      flow into the interior coordinate-field derivative data, leaving only the
-      metric-component derivative and concrete chart identification as local
-      inputs. The raw-flow API also extracts continuity of
+      flow into the interior coordinate-field derivative data and proves the
+      exact scalar chain rule along the flow, leaving only the metric-component
+      derivative and concrete chart identification as local inputs. The raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
      A thin `AnalyticPDE.SmoothRealization` module names the

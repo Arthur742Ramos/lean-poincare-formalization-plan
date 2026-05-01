@@ -680,9 +680,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       Picard ball, and product Picard-Lindelöf hypotheses construct that
       variational package directly. The dynamic pullback layer now uses a
       variational local flow to discharge the interior `y'(t)` and `A'(t)`
-      clauses in `CoordinatePullbackMetricFieldDerivativeOn`, so the remaining
-      chart-local hypotheses are the metric-component derivative and the concrete
-      coordinate identification with that flow. Raw gauge flows now also expose the first
+      clauses in `CoordinatePullbackMetricFieldDerivativeOn` and proves the
+      exact scalar chain rule for `B(t, y(t))(A(t)u)(A(t)v)` along that flow, so
+      the remaining chart-local hypotheses are the metric-component derivative
+      and the concrete coordinate identification with that flow. Raw gauge flows now also expose the first
       chart-membership bridge needed for coordinate pullback formulas:
       neighborhood-time flow equations imply continuity of `τ ↦ Φ_τ(x)` and
       eventual membership in the tangent trivialization at `Φ_t(x)`, with the
