@@ -686,8 +686,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       moving-base full-field companion for `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` under
       `A' = D ∘ A` with within-filter/ordinary eventual-equality transfer forms,
       closed-interval field-level coordinate derivative packages and variational
-      local-flow constructors for full metric-coordinate Fréchet data, generic
-      within-filter transfer for arbitrary `A'`,
+      local-flow constructors for full metric-coordinate Fréchet data, raw
+      gauge-flow endpoint wrappers from that data to interior tensor
+      time-regularity, generic within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set, open-interior, and chart-coordinate continuity
       helpers,
       center-trajectory uniqueness wrappers for local/continuous/variational

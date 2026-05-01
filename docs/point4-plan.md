@@ -208,8 +208,10 @@ also has a closed-interval package
 constructor for it, and direct endpoint-to-interior scalar promotion theorems,
 so Picard endpoint base-flow/tangent-map derivatives plus a full
 metric-coordinate Fréchet derivative can feed the geometric scalar target
-without repackaging through frozen-time component data. It also has within-set
-chain-rule primitives:
+without repackaging through frozen-time component data. Raw
+`Diffeomorph3GaugeFlowOn` witnesses now expose the same endpoint full-field
+route directly, including a one-step variational local-flow wrapper to tensor
+time-regularity on `Ioo tmin tmax`. It also has within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`
