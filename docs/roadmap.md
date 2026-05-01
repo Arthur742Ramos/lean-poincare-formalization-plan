@@ -744,7 +744,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       within-time-set chart equality and variational tangent-map endpoint data,
       including geometric-slot scalar identities. The concrete moving bilinear
       component now has an endpoint derivative bridge from full
-      metric-coordinate Fréchet data. A
+      metric-coordinate Fréchet data, yielding a raw closed-interval theorem
+      from full metric-coordinate data plus variational tangent-map data. A
       coordinate-level package
       `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
       chartwise `B/A/D` derivative hypotheses to the actual geometric

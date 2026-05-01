@@ -528,7 +528,8 @@ now packages the matching intrinsic boundary
       time-regularity on the open interval through a raw gauge-flow endpoint
       wrapper, including variational tangent-map endpoint data with
       geometric-slot scalar identities and an endpoint bridge from full
-      metric-coordinate Fréchet data to the concrete `B(τ)` derivative. The
+      metric-coordinate Fréchet data to the concrete `B(τ)` derivative and then
+      to tensor time-regularity. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
       promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
       scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred

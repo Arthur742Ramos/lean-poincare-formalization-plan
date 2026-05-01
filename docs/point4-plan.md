@@ -158,6 +158,9 @@ stated using actual pushed-forward tangent vectors at the base time.
 The concrete moving bilinear component `B(τ)` now has an endpoint derivative
 bridge from a full metric-coordinate field Fréchet derivative plus the raw
 gauge-flow within derivative.
+Consequently, raw closed-interval gauge flows now have an endpoint theorem that
+uses full metric-coordinate Fréchet data and variational tangent-map data to
+prove interior tensor time-regularity with geometric-slot scalar identities.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package
