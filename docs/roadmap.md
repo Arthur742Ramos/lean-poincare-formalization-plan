@@ -1130,6 +1130,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      readouts. The preferred-cover local-bounds smooth-approximation route now
      also extracts an actual state-preserving Banach solution and common-interval
      uniqueness witness for the density-based interval carrier after the same
+     metric-cone shrink. The built-in chart-derived symmetric carrier now has
+     the matching state-preserving Banach-solution extraction after the standard
      metric-cone shrink.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
