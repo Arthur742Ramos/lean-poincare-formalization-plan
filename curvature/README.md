@@ -232,9 +232,11 @@ now packages the matching intrinsic boundary
        Picard-interval continuity, Lipschitz dependence on that initial data, and the continuous
       space-time partial-flow form needed for chart gluing, plus the
       time-slice continuity bridges for continuous/variational local-flow
-      packages, autonomous `C¹` local-integral-curve specialization with
-      open-interval continuity and packaged `LocalFlowSolution` extraction,
-      vector-slot variational uniqueness, center-trajectory scalar chain-rule
+       packages, autonomous `C¹` local-integral-curve specialization with
+       open-interval continuity and packaged `LocalFlowSolution` extraction,
+       restriction constructors and direct localized Picard-Lindelöf
+       constructors for local/Lipschitz/continuous model-flow packages,
+       vector-slot variational uniqueness, center-trajectory scalar chain-rule
       wrappers with eventual-equality transfer forms, center-trajectory
        uniqueness wrappers, direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule
        primitives, including a moving-base full-field companion for

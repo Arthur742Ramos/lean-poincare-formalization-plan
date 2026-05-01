@@ -1619,6 +1619,16 @@ def toLocalFlowSolution
     initial_eq := fun x hx => (hα x hx).1
     hasDerivWithinAt := fun x hx t ht => (hα x hx).2 t ht }
 
+/-- Picard-Lindelöf local-flow data, immediately localized to a smaller closed
+time interval and initial ball. -/
+def toLocalFlowSolution_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    LocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+  (toLocalFlowSolution hf).restrict htime ht₀' hr
+
 /-- Picard-Lindelöf also supplies Lipschitz dependence on the initial point, a
 key ingredient for upgrading the chartwise ODE solutions to a local flow. -/
 def toLipschitzLocalFlowSolution
@@ -1633,6 +1643,16 @@ def toLipschitzLocalFlowSolution
     hasDerivWithinAt := fun x hx t ht => (hα x hx).2 t ht
     exists_lipschitz_time := hLip }
 
+/-- Picard-Lindelöf Lipschitz local-flow data, immediately localized to a
+smaller closed time interval and initial ball. -/
+def toLipschitzLocalFlowSolution_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    LipschitzLocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+  (toLipschitzLocalFlowSolution hf).restrict htime ht₀' hr
+
 /-- Picard-Lindelöf also yields a continuous partial space-time flow on the
 initial-data ball times the closed time interval. -/
 def toContinuousLocalFlowSolution
@@ -1646,6 +1666,16 @@ def toContinuousLocalFlowSolution
     initial_eq := fun x hx => (hα x hx).1
     hasDerivWithinAt := fun x hx t ht => (hα x hx).2 t ht
     continuousOn := hcont }
+
+/-- Picard-Lindelöf continuous local-flow data, immediately localized to a
+smaller closed time interval and initial ball. -/
+def toContinuousLocalFlowSolution_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    ContinuousLocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+  (toContinuousLocalFlowSolution hf).restrict htime ht₀' hr
 
 end IsPicardLindelof
 
