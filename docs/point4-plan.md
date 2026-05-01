@@ -130,6 +130,10 @@ same bilinear-form and moving-base vector-slot chain rules are also available,
 including `hasDerivWithinAt_bilinearFormField_tangent_apply_apply` for
 variational model flows on `Icc tmin tmax`, with an eventual-equality transfer
 form for chart-local endpoint scalar identities.
+The concrete gauge tangent-coordinate component now also has a closed-interval
+derivative theorem from eventual equality with a variational tangent map, giving
+the endpoint analogue of the existing interior positive-dimensional component
+bridge.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package

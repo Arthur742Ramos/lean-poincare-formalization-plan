@@ -1550,6 +1550,53 @@ theorem pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap
     hAderiv.congr_of_eventuallyEq hA_eq
   simpa [hA_t] using hAconcrete
 
+/-- Closed-interval/right-derivative version of
+`pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`.
+
+This is the tangent-map component needed at endpoints of a model-flow time
+interval, where the variational ODE supplies only a derivative within
+`Icc tmin tmax`. -/
+theorem pullbackMetricTangentCoordinateMap_hasDerivWithinAt_of_variationalTangentMap
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {xE : E} (hxE : xE ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) (x : M)
+    (hA_eq : (fun τ : ℝ ↦
+      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x) =ᶠ[𝓝 t]
+        (fun τ : ℝ ↦ α.tangent xE τ)) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+      ((Df t (α.flow (xE, t))).comp
+        (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x))
+      (Icc tmin tmax) t := by
+  have hA_t :
+      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x =
+        α.tangent xE t :=
+    show t ∈ {τ : ℝ |
+      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x =
+        α.tangent xE τ} from
+      mem_of_mem_nhds hA_eq
+  have hAderiv :
+      HasDerivWithinAt (fun τ : ℝ ↦ α.tangent xE τ)
+        ((Df t (α.flow (xE, t))).comp (α.tangent xE t))
+        (Icc tmin tmax) t :=
+    α.tangent_hasDerivWithinAt xE hxE t ht
+  have hA_eq_within :
+      (fun τ : ℝ ↦
+        pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x) =ᶠ[
+          𝓝[Icc tmin tmax] t] (fun τ : ℝ ↦ α.tangent xE τ) :=
+    hA_eq.filter_mono nhdsWithin_le_nhds
+  have hAconcrete :
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+        ((Df t (α.flow (xE, t))).comp (α.tangent xE t))
+        (Icc tmin tmax) t :=
+    hAderiv.congr_of_eventuallyEq hA_eq_within hA_t
+  simpa [hA_t] using hAconcrete
+
 /-- A variational model flow supplies the concrete tangent-coordinate derivative
 for `A(τ)` and, together with a moving bilinear-form field derivative, supplies
 the concrete `B(τ)` derivative.
