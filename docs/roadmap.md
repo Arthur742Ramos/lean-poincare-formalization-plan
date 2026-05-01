@@ -673,6 +673,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       ODE bridge now packages the tangent-map variational equation
       `A'(t) = Df(t, flow(t)) ∘ A(t)` in `VariationalLocalFlowSolution`, matching
       the remaining coordinate-model `A`-derivative hypothesis, and proves
+      closed-interval/interior vector-slot derivative forms for `t ↦ A(t)v` plus
       variational/tangent-map uniqueness on both the interior and closed Picard
       intervals when the base local flows agree and the linearized ODE is
       uniformly Lipschitz. It also defines the product variational vector field

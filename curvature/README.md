@@ -227,10 +227,11 @@ now packages the matching intrinsic boundary
       autonomous `C¹` local-integral-curve specialization and Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level
       raw-flow building block. It also packages the tangent-map variational
-      equation `A'(t) = Df(t, flow(t)) ∘ A(t)` as
-      `VariationalLocalFlowSolution`, matching the coordinate-model
-      `A`-derivative hypothesis, with interior and closed-interval uniqueness
-      bridges for tangent maps once base local flows agree. It also defines the
+       equation `A'(t) = Df(t, flow(t)) ∘ A(t)` as
+       `VariationalLocalFlowSolution`, matching the coordinate-model
+       `A`-derivative hypothesis, including vector-slot derivatives for
+       `t ↦ A(t)v`, with interior and closed-interval uniqueness bridges for
+       tangent maps once base local flows agree. It also defines the
       product variational vector field `(y, A)' = (f(t, y), Df(t, y) ∘ A)` and
       projection lemmas from product local-flow solutions to the base and tangent
        equations, and extracts `VariationalLocalFlowSolution` from continuous

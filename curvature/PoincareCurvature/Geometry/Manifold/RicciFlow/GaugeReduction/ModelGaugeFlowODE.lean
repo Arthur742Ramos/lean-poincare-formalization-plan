@@ -658,6 +658,32 @@ theorem center_tangent_hasDerivWithinAt
       ((Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) (Icc tmin tmax) t :=
   α.tangent_hasDerivWithinAt x₀ (mem_closedBall_self r.2) t ht
 
+/-- Applying the variational tangent-map equation to a fixed model vector gives
+the vector-slot derivative used in scalar metric chain rules. -/
+theorem tangent_apply_hasDerivWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) (v : V) :
+    HasDerivWithinAt (fun τ : ℝ => α.tangent x τ v)
+      (((Df t (α.flow (x, t))).comp (α.tangent x t)) v) (Icc tmin tmax) t := by
+  have htan := α.tangent_hasDerivWithinAt x hx t ht
+  have hev :
+      HasFDerivWithinAt
+        (fun A : V →L[ℝ] V => A v) (ContinuousLinearMap.apply ℝ V v)
+        Set.univ (α.tangent x t) :=
+    (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
+  have hcomp := hev.comp t htan.hasFDerivWithinAt
+    (Set.mapsTo_univ (fun τ : ℝ => α.tangent x τ) (Icc tmin tmax))
+  simpa [Function.comp] using hcomp.hasDerivWithinAt
+
+/-- Center-trajectory specialization of
+`VariationalLocalFlowSolution.tangent_apply_hasDerivWithinAt`. -/
+theorem center_tangent_apply_hasDerivWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Icc tmin tmax) (v : V) :
+    HasDerivWithinAt (fun τ : ℝ => α.tangent x₀ τ v)
+      (((Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) v) (Icc tmin tmax) t :=
+  α.tangent_apply_hasDerivWithinAt (mem_closedBall_self r.2) ht v
+
 /-- On the interior of the Picard interval, the center base curve has the
 ordinary derivative required by coordinate chain rules. -/
 theorem center_flow_hasDerivAt_of_mem_Ioo
@@ -695,6 +721,24 @@ theorem tangent_hasDerivAt_of_mem_Ioo
       ((Df t (α.flow (x, t))).comp (α.tangent x t)) t :=
   (α.tangent_hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
+
+/-- Interior vector-slot derivative for the variational tangent map. -/
+theorem tangent_apply_hasDerivAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) (v : V) :
+    HasDerivAt (fun τ : ℝ => α.tangent x τ v)
+      (((Df t (α.flow (x, t))).comp (α.tangent x t)) v) t :=
+  (α.tangent_apply_hasDerivWithinAt hx (Ioo_subset_Icc_self ht) v).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
+/-- Center-trajectory interior vector-slot derivative for the variational
+tangent map. -/
+theorem center_tangent_apply_hasDerivAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Ioo tmin tmax) (v : V) :
+    HasDerivAt (fun τ : ℝ => α.tangent x₀ τ v)
+      (((Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) v) t :=
+  α.tangent_apply_hasDerivAt_of_mem_Ioo (mem_closedBall_self r.2) ht v
 
 /-- Two variational local flows have the same tangent map on the interior
 interval whenever their base curves agree there and the induced linearized ODE is

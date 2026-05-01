@@ -503,7 +503,9 @@ also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction
 automatically when the chosen base radius is no larger than the product Picard
 radius. The ODE package now also supplies ordinary interior time
-derivatives for both the base flow `y(t)` and tangent map `A(t)`, and
+derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
+closed-interval and interior vector-slot derivatives for `t ↦ A(t)v` via
+`tangent_apply_hasDerivWithinAt` and `tangent_apply_hasDerivAt_of_mem_Ioo`, and
 `Diffeomorph3FlowTimeDerivative.lean` uses those facts to build
 `CoordinatePullbackMetricFieldDerivativeOn` directly from a variational local
 flow on the interior Picard interval. It also proves the exact scalar chain rule
