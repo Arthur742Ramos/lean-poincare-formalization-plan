@@ -657,7 +657,10 @@ The model-flow packages now also have restriction constructors for
 and `VariationalLocalFlowSolution`, preserving ODE, continuity, Lipschitz, and
 tangent-equation data on smaller closed time intervals and smaller initial balls.
 These are the overlap/localization maps needed before chartwise solutions can be
-glued into a manifold-level flow.
+glued into a manifold-level flow. Base-flow uniqueness now also has overlap
+forms for `LocalFlowSolution` and `ContinuousLocalFlowSolution`: two packages
+with different centers/radii agree on `Ioo` and `Icc` for any initial point in
+both closed balls, assuming the usual common Lipschitz state-region hypotheses.
 The time-derivative layer now also has center-trajectory closed-interval and
 interior scalar chain-rule wrappers for
 `Bfield(t, y(t))(A(t)u)(A(t)v)`, so basepoint gauge-pullback calculations can

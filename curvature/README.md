@@ -531,7 +531,9 @@ now packages the matching intrinsic boundary
      positive-dimensional manifold ODE lift: it packages time-dependent local
      flows, their closed-interval ODE derivative, initial-data Lipschitz
      dependence, continuous space-time partial flows, restriction maps to smaller
-     Picard intervals and initial balls, and autonomous `C¹` integral
+     Picard intervals and initial balls, overlap uniqueness for local and
+     continuous base-flow packages with different centers/radii, and autonomous
+     `C¹` integral
      curves, plus Gronwall uniqueness bridges for packaged and continuous
      space-time model flows; the
      raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual

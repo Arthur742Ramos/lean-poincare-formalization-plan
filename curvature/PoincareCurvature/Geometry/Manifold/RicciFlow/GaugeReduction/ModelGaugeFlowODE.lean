@@ -183,10 +183,15 @@ def restrict
     exact (α.hasDerivWithinAt x hx' t (htime ht)).mono htime
 
 /-- Two packaged local model flows agree on the interior time interval whenever
-their curves stay in a region where the vector field is uniformly Lipschitz. -/
-theorem eqOn_Ioo_of_lipschitzOnWith
-    (α β : LocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
-    {x : V} (hx : x ∈ closedBall x₀ r)
+their curves start from the same initial point and stay in a region where the
+vector field is uniformly Lipschitz.  The two packages may have different
+initial-data centers and radii; this is the overlap form needed for chart
+gluing. -/
+theorem eqOn_Ioo_of_lipschitzOnWith_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f t₀ xα rα) (β : LocalFlowSolution f t₀ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
     (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
     (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
     (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
@@ -195,15 +200,52 @@ theorem eqOn_Ioo_of_lipschitzOnWith
   refine ODE_solution_unique_of_mem_Ioo (v := f) (s := state) hf_lip ht₀ ?_ ?_ ?_
   · intro t ht
     exact
-      ⟨(α.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
+      ⟨(α.hasDerivWithinAt x hxα t (Ioo_subset_Icc_self ht)).hasDerivAt
           (Icc_mem_nhds ht.1 ht.2),
         hα_mem t ht⟩
   · intro t ht
     exact
-      ⟨(β.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
+      ⟨(β.hasDerivWithinAt x hxβ t (Ioo_subset_Icc_self ht)).hasDerivAt
           (Icc_mem_nhds ht.1 ht.2),
         hβ_mem t ht⟩
-  · rw [α.initial_eq x hx, β.initial_eq x hx]
+  · rw [α.initial_eq x hxα, β.initial_eq x hxβ]
+
+/-- Two packaged local model flows agree on the interior time interval whenever
+their curves stay in a region where the vector field is uniformly Lipschitz. -/
+theorem eqOn_Ioo_of_lipschitzOnWith
+    (α β : LocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow x t ∈ state t) :
+    EqOn (α.flow x) (β.flow x) (Ioo tmin tmax) :=
+  α.eqOn_Ioo_of_lipschitzOnWith_of_mem β hx hx ht₀ hf_lip hα_mem hβ_mem
+
+/-- Closed-interval uniqueness form for packaged local model flows on overlap.
+This is the version needed when endpoint continuity is available from the
+within-interval ODE statements. -/
+theorem eqOn_Icc_of_lipschitzOnWith_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f t₀ xα rα) (β : LocalFlowSolution f t₀ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow x t ∈ state t) :
+    EqOn (α.flow x) (β.flow x) (Icc tmin tmax) := by
+  refine ODE_solution_unique_of_mem_Icc (v := f) (s := state) hf_lip ht₀ ?_ ?_ hα_mem ?_ ?_
+    hβ_mem ?_
+  · exact HasDerivWithinAt.continuousOn (fun t ht => α.hasDerivWithinAt x hxα t ht)
+  · intro t ht
+    exact (α.hasDerivWithinAt x hxα t (Ioo_subset_Icc_self ht)).hasDerivAt
+      (Icc_mem_nhds ht.1 ht.2)
+  · exact HasDerivWithinAt.continuousOn (fun t ht => β.hasDerivWithinAt x hxβ t ht)
+  · intro t ht
+    exact (β.hasDerivWithinAt x hxβ t (Ioo_subset_Icc_self ht)).hasDerivAt
+      (Icc_mem_nhds ht.1 ht.2)
+  · rw [α.initial_eq x hxα, β.initial_eq x hxβ]
 
 /-- Closed-interval uniqueness form for packaged local model flows.  This is the
 version needed when endpoint continuity is available from the within-interval
@@ -215,18 +257,8 @@ theorem eqOn_Icc_of_lipschitzOnWith
     (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
     (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
     (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow x t ∈ state t) :
-    EqOn (α.flow x) (β.flow x) (Icc tmin tmax) := by
-  refine ODE_solution_unique_of_mem_Icc (v := f) (s := state) hf_lip ht₀ ?_ ?_ hα_mem ?_ ?_
-    hβ_mem ?_
-  · exact HasDerivWithinAt.continuousOn (fun t ht => α.hasDerivWithinAt x hx t ht)
-  · intro t ht
-    exact (α.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
-      (Icc_mem_nhds ht.1 ht.2)
-  · exact HasDerivWithinAt.continuousOn (fun t ht => β.hasDerivWithinAt x hx t ht)
-  · intro t ht
-    exact (β.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
-      (Icc_mem_nhds ht.1 ht.2)
-  · rw [α.initial_eq x hx, β.initial_eq x hx]
+    EqOn (α.flow x) (β.flow x) (Icc tmin tmax) :=
+  α.eqOn_Icc_of_lipschitzOnWith_of_mem β hx hx ht₀ hf_lip hα_mem hβ_mem
 
 /-- Center-trajectory interior uniqueness for packaged local model flows. -/
 theorem center_eqOn_Ioo_of_lipschitzOnWith
@@ -461,6 +493,23 @@ def restrict
     rw [mem_closedBall] at hx ⊢
     exact le_trans hx (by exact_mod_cast hr)
 
+/-- Continuous space-time local flows inherit the open-interval overlap
+uniqueness bridge from `LocalFlowSolution`. -/
+theorem eqOn_Ioo_of_lipschitzOnWith_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : ContinuousLocalFlowSolution f t₀ xα rα)
+    (β : ContinuousLocalFlowSolution f t₀ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax) :=
+  LocalFlowSolution.eqOn_Ioo_of_lipschitzOnWith_of_mem
+    (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
+    (x := x) hxα hxβ ht₀ hf_lip hα_mem hβ_mem
+
 /-- Continuous space-time local flows inherit the open-interval uniqueness bridge
 from `LocalFlowSolution`. -/
 theorem eqOn_Ioo_of_lipschitzOnWith
@@ -471,9 +520,24 @@ theorem eqOn_Ioo_of_lipschitzOnWith
     (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
     (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ state t) :
     EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax) :=
-  LocalFlowSolution.eqOn_Ioo_of_lipschitzOnWith
+  α.eqOn_Ioo_of_lipschitzOnWith_of_mem β hx hx ht₀ hf_lip hα_mem hβ_mem
+
+/-- Continuous space-time local flows inherit the closed-interval overlap
+uniqueness bridge from `LocalFlowSolution`. -/
+theorem eqOn_Icc_of_lipschitzOnWith_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : ContinuousLocalFlowSolution f t₀ xα rα)
+    (β : ContinuousLocalFlowSolution f t₀ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Icc tmin tmax) :=
+  LocalFlowSolution.eqOn_Icc_of_lipschitzOnWith_of_mem
     (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
-    (x := x) hx ht₀ hf_lip hα_mem hβ_mem
+    (x := x) hxα hxβ ht₀ hf_lip hα_mem hβ_mem
 
 /-- Continuous space-time local flows inherit the closed-interval uniqueness
 bridge from `LocalFlowSolution`. -/
@@ -485,9 +549,7 @@ theorem eqOn_Icc_of_lipschitzOnWith
     (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
     (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ state t) :
     EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Icc tmin tmax) :=
-  LocalFlowSolution.eqOn_Icc_of_lipschitzOnWith
-    (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
-    (x := x) hx ht₀ hf_lip hα_mem hβ_mem
+  α.eqOn_Icc_of_lipschitzOnWith_of_mem β hx hx ht₀ hf_lip hα_mem hβ_mem
 
 /-- Center-trajectory interior uniqueness for continuous space-time local flows. -/
 theorem center_eqOn_Ioo_of_lipschitzOnWith
