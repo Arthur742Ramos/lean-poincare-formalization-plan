@@ -253,7 +253,9 @@ coordinate map, and the scalar velocity identity. Base-time simplification
 lemmas now identify `metricBilinearCoordinateField` at `(t, extChartAt p p)`
 with the ordinary metric in the tangent trivialization at `p`, and identify the
 base-time concrete tangent-coordinate component with the gauge pushforward
-tangent vector in target coordinates.
+tangent vector in target coordinates. Slot-specialized versions remove the
+centered-coordinate wrappers entirely when the model slots are
+`sourceTangentCoordinate`s of actual tangent vectors.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

@@ -477,6 +477,20 @@ theorem metricBilinearCoordinateField_base_apply_eq
     (F := E) (W := TM) (x0 := p) (x := p)
     (FiberBundle.mem_baseSet_trivializationAt' p) ((g t).inner p) uE vE]
 
+/-- At the chart center, if the model slots are the centered tangent coordinates
+of actual tangent vectors, the metric-coordinate field evaluates to the ordinary
+metric. -/
+theorem metricBilinearCoordinateField_base_sourceTangentCoordinate_eq
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
+    (u v : TangentSpace I p) :
+    metricBilinearCoordinateField (I := I) (M := M) g p
+        (t, (extChartAt I p) p)
+        (sourceTangentCoordinate (I := I) p u)
+        (sourceTangentCoordinate (I := I) p v) =
+      (g t).inner p u v := by
+  rw [metricBilinearCoordinateField_base_apply_eq]
+  simp [sourceTangentCoordinate]
+
 /-- At the base time, the two-variable metric-coordinate field agrees with the
 concrete moving bilinear coordinate component. -/
 theorem metricBilinearCoordinateField_base_eq_pullbackMetricBilinearCoordinateMap_self
@@ -549,6 +563,18 @@ theorem pullbackMetricTangentCoordinateMap_self_sourceTangentCoordinate_eq
   pullbackMetricTangentCoordinateMap_sourceTangentCoordinate_eq
     (I := I) (M := M) Φ t t x
     (FiberBundle.mem_baseSet_trivializationAt' ((Φ t) x)) u
+
+/-- At the base time, the concrete tangent-coordinate component is the target
+centered coordinate of the pushed-forward source tangent vector. -/
+theorem pullbackMetricTangentCoordinateMap_self_sourceTangentCoordinate_eq_targetCoordinate
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t : ℝ) (x : M) (u : TangentSpace I x) :
+    pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+        (sourceTangentCoordinate (I := I) x u) =
+      sourceTangentCoordinate (I := I) ((Φ t) x)
+        ((Φ t).pushforwardTangent x u) := by
+  rw [pullbackMetricTangentCoordinateMap_self_sourceTangentCoordinate_eq]
+  rfl
 
 /-- Once the gauge image lies in the target trivialization centered at the
 time-`t` image, the named coordinate model is definitionally the geometric
