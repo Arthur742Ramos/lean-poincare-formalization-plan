@@ -898,7 +898,11 @@ interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient
 coordinate coe equality on the Picard interval and Riemannian metric locus,
 which makes the smooth-density approximation route usable without confusing it
-with the ungated chart carrier outside the interval.
+with the ungated chart carrier outside the interval. The preferred-cover
+local-bounds smooth-approximation module now also turns that density-based
+Picard shrink into an actual state-preserving
+`BanachEvolutionLocalSolutionIn` witness with terminal-time control and
+uniqueness on common closed intervals.
 
 **Suggested decomposition** (multi-session):
 

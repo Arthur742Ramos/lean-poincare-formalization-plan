@@ -609,7 +609,10 @@ now packages the matching intrinsic boundary
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
      Riemannian metric locus, with both subtype and ambient-coordinate coe
-     readouts, leaving the heavy PDE realization module unchanged. The
+     readouts. The preferred-cover local-bounds smooth-approximation route now
+     also extracts a state-preserving Banach solution and common-interval
+     uniqueness witness for the density-based interval carrier, leaving the
+     heavy PDE realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic

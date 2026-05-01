@@ -1127,7 +1127,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
      Riemannian metric locus, with both subtype and ambient-coordinate coe
-     readouts.
+     readouts. The preferred-cover local-bounds smooth-approximation route now
+     also extracts an actual state-preserving Banach solution and common-interval
+     uniqueness witness for the density-based interval carrier after the same
+     metric-cone shrink.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
