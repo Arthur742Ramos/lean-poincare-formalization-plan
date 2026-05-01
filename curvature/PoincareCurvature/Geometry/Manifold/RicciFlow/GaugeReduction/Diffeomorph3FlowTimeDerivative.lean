@@ -76,6 +76,44 @@ theorem hasDerivAt_bilinearForm_linear_apply_apply_of_comp_deriv
     hasDerivAt_bilinearForm_linear_apply_apply (B := B) (B' := B') (A := A)
       (A' := D.comp (A t)) (t := t) hB hA u v
 
+/-- Local-coordinate transfer form of
+`hasDerivAt_bilinearForm_linear_apply_apply`: if a scalar function is eventually
+equal near `t` to the chart expression `B(τ) (A(τ) u) (A(τ) v)`, then it has
+the same derivative.  This is the adapter needed when the geometric pullback
+scalar is identified with the model expression only after restricting to a
+coordinate neighborhood. -/
+theorem hasDerivAt_of_eventuallyEq_bilinearForm_linear_apply_apply
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → ℝ}
+    {B : ℝ → V →L[ℝ] V →L[ℝ] ℝ} {B' : V →L[ℝ] V →L[ℝ] ℝ}
+    {A : ℝ → V →L[ℝ] V} {A' : V →L[ℝ] V} {t : ℝ}
+    (u v : V)
+    (heq : f =ᶠ[𝓝 t] fun τ : ℝ => B τ (A τ u) (A τ v))
+    (hB : HasDerivAt B B' t) (hA : HasDerivAt A A' t) :
+    HasDerivAt f
+      (B' (A t u) (A t v) + B t (A' u) (A t v) + B t (A t u) (A' v)) t :=
+  (hasDerivAt_bilinearForm_linear_apply_apply
+    (B := B) (B' := B') (A := A) (A' := A') (t := t) hB hA u v).congr_of_eventuallyEq
+      heq
+
+/-- Local-coordinate transfer form of the tangent-map-shaped derivative case
+`A'(t) = D ∘ A(t)`. -/
+theorem hasDerivAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp_deriv
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → ℝ}
+    {B : ℝ → V →L[ℝ] V →L[ℝ] ℝ} {B' : V →L[ℝ] V →L[ℝ] ℝ}
+    {A : ℝ → V →L[ℝ] V} {D : V →L[ℝ] V} {t : ℝ}
+    (u v : V)
+    (heq : f =ᶠ[𝓝 t] fun τ : ℝ => B τ (A τ u) (A τ v))
+    (hB : HasDerivAt B B' t) (hA : HasDerivAt A (D.comp (A t)) t) :
+    HasDerivAt f
+      (B' (A t u) (A t v) +
+        B t (D (A t u)) (A t v) +
+        B t (A t u) (D (A t v))) t :=
+  (hasDerivAt_bilinearForm_linear_apply_apply_of_comp_deriv
+    (B := B) (B' := B') (A := A) (D := D) (t := t) hB hA u v).congr_of_eventuallyEq
+      heq
+
 namespace SmoothSelfDiffeomorph3Family
 
 /-- The scalar derivative obligation for a `C^3` time-dependent diffeomorphism

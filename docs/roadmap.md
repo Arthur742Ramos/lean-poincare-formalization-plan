@@ -682,10 +682,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     empty-manifold identity raw gauge-flow fixed-IVP and theorem-family
     witnesses now also provide the named scalar data directly, so the
     remaining primitive input is exactly that scalar identity. The first
-    model-space chain-rule component of that scalar identity is now proved:
-    differentiating `B(t)(u(t), v(t))`, and the gauge-coordinate specialization
-    `B(t)(A(t)u, A(t)v)`, including the `D ∘ A(t)` tangent-map derivative
-    contribution. In the subsingleton-tangent case this non-identity
+     model-space chain-rule component of that scalar identity is now proved:
+     differentiating `B(t)(u(t), v(t))`, and the gauge-coordinate specialization
+     `B(t)(A(t)u, A(t)v)`, including the `D ∘ A(t)` tangent-map derivative
+     contribution, plus eventual-equality transfer lemmas for chart-local
+     coordinate identifications. In the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
     DeTurck gauge-flow families by componentwise vanishing, with direct
     gauge-reduced projections and matching model-space/empty-manifold synonyms

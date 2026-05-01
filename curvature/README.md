@@ -376,10 +376,11 @@ now packages the matching intrinsic boundary
     equivalences with tensor time-derivative data for both geometric and raw
     gauge-flow bundles; chosen-background, subsingleton-tangent/model, and
     empty-manifold identity raw gauge-flow fixed-IVP and theorem-family witnesses
-    now provide the named scalar data directly. Its first model-space
-    chain-rule component is also proved: differentiating `B(t)(u(t), v(t))` and
-    the gauge-coordinate specialization `B(t)(A(t)u, A(t)v)`, including the
-    `D ∘ A(t)` tangent-map derivative contribution. This leaves one primitive
+     now provide the named scalar data directly. Its first model-space
+     chain-rule component is also proved: differentiating `B(t)(u(t), v(t))` and
+     the gauge-coordinate specialization `B(t)(A(t)u, A(t)v)`, including the
+     `D ∘ A(t)` tangent-map derivative contribution, with eventual-equality
+     transfer lemmas for chart-local coordinate identifications. This leaves one primitive
     positive-dimensional time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`

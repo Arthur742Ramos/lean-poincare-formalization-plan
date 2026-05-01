@@ -119,6 +119,9 @@ The first proof-bearing piece of the dynamic calculation is now in place:
 `hasDerivAt_bilinearForm_linear_apply_apply[_of_comp_deriv]` specializes this
 to the local-coordinate form `B(t) (A(t) u) (A(t) v)` of a gauge-pulled metric
 component, including the expected vector-slot/Lie-derivative contributions.
+The same chain rule now has eventual-equality transfer lemmas, so a geometric
+scalar that agrees with the model-coordinate expression only near `t` can reuse
+the derivative proof directly.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
