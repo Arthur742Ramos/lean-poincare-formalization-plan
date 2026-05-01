@@ -26,6 +26,56 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
   [SigmaCompactSpace M]
 
+/-- Model-space scalar chain rule for a time-dependent bilinear form evaluated on
+two time-dependent vector paths.  This is the finite-dimensional algebraic core
+of the dynamic gauge-pullback derivative calculation. -/
+theorem hasDerivAt_bilinearForm_apply_apply
+    {V W : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    [NormedAddCommGroup W] [NormedSpace ℝ W]
+    {B : ℝ → V →L[ℝ] W →L[ℝ] ℝ} {B' : V →L[ℝ] W →L[ℝ] ℝ}
+    {u : ℝ → V} {u' : V} {v : ℝ → W} {v' : W} {t : ℝ}
+    (hB : HasDerivAt B B' t) (hu : HasDerivAt u u' t) (hv : HasDerivAt v v' t) :
+    HasDerivAt (fun τ : ℝ => B τ (u τ) (v τ))
+      (B' (u t) (v t) + B t u' (v t) + B t (u t) v') t := by
+  have hfirst : HasDerivAt (fun τ : ℝ => B τ (u τ)) (B' (u t) + B t u') t :=
+    hB.clm_apply hu
+  have hsecond : HasDerivAt (fun τ : ℝ => (B τ (u τ)) (v τ))
+      ((B' (u t) + B t u') (v t) + (B t (u t)) v') t :=
+    hfirst.clm_apply hv
+  simpa [ContinuousLinearMap.add_apply, add_assoc] using hsecond
+
+/-- Model-space chain rule for `B(t) (A(t) u) (A(t) v)`, the coordinate form of
+a pulled-back metric component when `A(t)` is the tangent map of the gauge. -/
+theorem hasDerivAt_bilinearForm_linear_apply_apply
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {B : ℝ → V →L[ℝ] V →L[ℝ] ℝ} {B' : V →L[ℝ] V →L[ℝ] ℝ}
+    {A : ℝ → V →L[ℝ] V} {A' : V →L[ℝ] V} {t : ℝ}
+    (hB : HasDerivAt B B' t) (hA : HasDerivAt A A' t) (u v : V) :
+    HasDerivAt (fun τ : ℝ => B τ (A τ u) (A τ v))
+      (B' (A t u) (A t v) + B t (A' u) (A t v) + B t (A t u) (A' v)) t := by
+  have hu : HasDerivAt (fun τ : ℝ => A τ u) (A' u) t := by
+    simpa using hA.clm_apply (hasDerivAt_const (x := t) (c := u))
+  have hv : HasDerivAt (fun τ : ℝ => A τ v) (A' v) t := by
+    simpa using hA.clm_apply (hasDerivAt_const (x := t) (c := v))
+  exact hasDerivAt_bilinearForm_apply_apply hB hu hv
+
+/-- Coordinate gauge-flow specialization of
+`hasDerivAt_bilinearForm_linear_apply_apply`: if the tangent map `A(t)` has
+time derivative `D ∘ A(t)`, then the two vector-slot derivative terms are the
+expected covariant/Lie-derivative contributions. -/
+theorem hasDerivAt_bilinearForm_linear_apply_apply_of_comp_deriv
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {B : ℝ → V →L[ℝ] V →L[ℝ] ℝ} {B' : V →L[ℝ] V →L[ℝ] ℝ}
+    {A : ℝ → V →L[ℝ] V} {D : V →L[ℝ] V} {t : ℝ}
+    (hB : HasDerivAt B B' t) (hA : HasDerivAt A (D.comp (A t)) t) (u v : V) :
+    HasDerivAt (fun τ : ℝ => B τ (A τ u) (A τ v))
+      (B' (A t u) (A t v) +
+        B t (D (A t u)) (A t v) +
+        B t (A t u) (D (A t v))) t := by
+  simpa [ContinuousLinearMap.comp_apply] using
+    hasDerivAt_bilinearForm_linear_apply_apply (B := B) (B' := B') (A := A)
+      (A' := D.comp (A t)) (t := t) hB hA u v
+
 namespace SmoothSelfDiffeomorph3Family
 
 /-- The scalar derivative obligation for a `C^3` time-dependent diffeomorphism

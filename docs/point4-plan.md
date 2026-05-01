@@ -113,6 +113,12 @@ scalar data directly. The bundled
 non-identity gauge-flow API now has proof-bearing scalar-to-tensor wrappers, so
 solving this single dynamic scalar identity automatically supplies the
 `HasTimeDerivativeOn` package required by the gauge-reduction theorem routes.
+The first proof-bearing piece of the dynamic calculation is now in place:
+`hasDerivAt_bilinearForm_apply_apply` differentiates
+`B(t) (u(t)) (v(t))`, and
+`hasDerivAt_bilinearForm_linear_apply_apply[_of_comp_deriv]` specializes this
+to the local-coordinate form `B(t) (A(t) u) (A(t) v)` of a gauge-pulled metric
+component, including the expected vector-slot/Lie-derivative contributions.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
