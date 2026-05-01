@@ -687,7 +687,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        Lipschitz, continuous, and variational local-flow packages on smaller
        closed intervals and initial balls, overlap uniqueness for local and
        continuous base-flow packages with different centers/radii, vector-slot
-       variational uniqueness bridges,
+       variational uniqueness bridges, including overlap tangent-map and
+       vector-slot forms for variational packages with different centers/radii,
       center-trajectory scalar chain-rule wrappers for basepoint
       gauge-pullback calculations including eventual-equality transfer forms,
       direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule primitives, including a
