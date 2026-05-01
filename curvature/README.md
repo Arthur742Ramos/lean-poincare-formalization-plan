@@ -609,9 +609,10 @@ now packages the matching intrinsic boundary
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
      Riemannian metric locus, with both subtype and ambient-coordinate coe
-     readouts. The preferred-cover local-bounds smooth-approximation route now
-     also extracts a state-preserving Banach solution and common-interval
-     uniqueness witness for the density-based interval carrier, and the
+      readouts. The preferred-cover local-bounds smooth-approximation route now
+      also extracts a state-preserving Banach solution and common-interval
+      uniqueness witness for the density-based interval carrier, including a
+      proof-level `Nonempty` readout, and the
       chart-derived symmetric carrier now has the matching extraction after the
        standard metric-cone shrink, including a proof-level `Nonempty` readout,
        plus a no-shrink extraction when the current

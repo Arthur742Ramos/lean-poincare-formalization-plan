@@ -1128,9 +1128,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      the chart's built-in restricted carrier on the Picard interval and the
      Riemannian metric locus, with both subtype and ambient-coordinate coe
      readouts. The preferred-cover local-bounds smooth-approximation route now
-     also extracts an actual state-preserving Banach solution and common-interval
-     uniqueness witness for the density-based interval carrier after the same
-     metric-cone shrink. The built-in chart-derived symmetric carrier now has
+      also extracts an actual state-preserving Banach solution and common-interval
+      uniqueness witness for the density-based interval carrier after the same
+      metric-cone shrink, including a proof-level `Nonempty` readout. The
+      built-in chart-derived symmetric carrier now has
       the matching state-preserving Banach-solution extraction after the standard
        metric-cone shrink, including a proof-level `Nonempty` readout, plus a
        no-shrink extraction when the current Picard

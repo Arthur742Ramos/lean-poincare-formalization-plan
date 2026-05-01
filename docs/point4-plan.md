@@ -902,7 +902,8 @@ with the ungated chart carrier outside the interval. The preferred-cover
 local-bounds smooth-approximation module now also turns that density-based
 Picard shrink into an actual state-preserving
 `BanachEvolutionLocalSolutionIn` witness with terminal-time control and
-uniqueness on common closed intervals. The chart-derived symmetric carrier now
+uniqueness on common closed intervals, plus a proof-level `Nonempty` readout
+for the density carrier. The chart-derived symmetric carrier now
 has the parallel Banach-solution extraction after the standard metric-cone
 shrink, so both the built-in carrier and the density-based carrier expose
 actual state-preserving ODE solution witnesses rather than only Picard

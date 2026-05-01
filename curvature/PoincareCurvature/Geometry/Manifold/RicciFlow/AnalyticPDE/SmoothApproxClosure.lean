@@ -404,6 +404,76 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
   refine ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, ?_⟩
   exact ⟨sol, hsolT, huniq⟩
 
+/-- Proof-level existence readout for the density-based interval carrier produced by the
+preferred-cover local-bounds smooth-density Picard shrink. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_shrunk_specificRHS_localBounds_banachEvolutionLocalSolutionIn
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [SecondCountableTopology H]
+    [ContMDiffVectorBundle 2 F TM I]
+    [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (rhs : SmoothSectionRHSIdentification
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
+    {C : ℝ} (hCpos : 0 < C)
+    (hC : ∀ i (x : Kc i), ‖(trivializationAt F TM (x0 i)).symmL ℝ x.1‖ ≤ C)
+    (hlocalBound : ∀ x : M, ∃ C > 0,
+      ∀ᶠ y in 𝓝 x, ‖(trivializationAt F TM x).continuousLinearMapAt ℝ y‖ < C)
+    (ha : 0 < a) :
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+      ∃ _chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover
+        ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T' a' L Kpic Kstate,
+        0 < a' ∧ a' ≤ a ∧
+          Metric.closedBall
+            (InitialValueProblem.toSymmetricSectionSubmodule
+              (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) (a' : ℝ) ⊆
+            riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+              et Kc hKc Ko hKo hKoEq hcover ∧
+          (let hclosure :=
+            closure_smooth_spd_of_metric_locus_and_local_trivialization_bounds_preferredBilinear
+              (M := M) (F := F) (I := I)
+              x0 et het Kc hKc Ko hKo hKoEq hcover hCpos hC hlocalBound
+           let Asub :=
+            SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc
+              (M := M) (F := F) (I := I)
+              x0 et het Kc hKc Ko hKo hKoEq hcover rhs hclosure
+              (fun t ht => chart.lipschitzOn_Icc t ⟨ht.1, le_trans ht.2 hT'le⟩)
+           Nonempty (BanachEvolutionLocalSolutionIn Asub
+             (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+               et Kc hKc Ko hKo hKoEq hcover)
+             ivp.initialTime
+             (InitialValueProblem.toSymmetricSectionSubmodule
+               (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp))) := by
+  rcases
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_localBounds_banachEvolutionLocalSolutionIn
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover chart rhs hCpos hC hlocalBound ha with
+    ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, hsolData⟩
+  rcases hsolData with ⟨sol, _hsolT, _huniq⟩
+  exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, ⟨sol⟩⟩
+
 set_option maxHeartbeats 4000000 in
 /-- The preferred-cover local-bounds route also gives an actual state-preserving Banach solution for
 the chart-derived restricted symmetric carrier. Existence is transported from the density-based
