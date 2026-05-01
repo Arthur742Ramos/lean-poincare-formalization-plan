@@ -351,10 +351,11 @@ now packages the matching intrinsic boundary
     positive-dimensional manifold ODE lift: it packages time-dependent local
     flows, their closed-interval ODE derivative, initial-data Lipschitz
     dependence, continuous space-time partial flows, and autonomous `C¹` integral
-    curves, plus Gronwall uniqueness bridges for packaged and continuous
-    space-time model flows; the
-    raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
-    tangent-trivialization membership from neighborhood-time flow data.
+     curves, plus Gronwall uniqueness bridges for packaged and continuous
+     space-time model flows; the
+     raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
+     tangent-trivialization membership from neighborhood-time flow data, with
+     matching within-time-set versions for restricted ODE intervals.
     A new
     `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the
    non-identity gauge-pulled metric time-derivative obligation for arbitrary
@@ -389,11 +390,13 @@ now packages the matching intrinsic boundary
      the gauge-coordinate specialization `B(t)(A(t)u, A(t)v)`, including the
      `D ∘ A(t)` tangent-map derivative contribution, with eventual-equality
      transfer lemmas for chart-local coordinate identifications. The
-     coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
-     promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
-     scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred
-     coordinate scalar expression is now named as
-     `pullbackMetricInnerCoordinateModel`. This leaves one primitive
+      coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
+      promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
+      scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred
+      coordinate scalar expression is now named as
+      `pullbackMetricInnerCoordinateModel`, and the coordinate data now restricts
+      to smaller time sets and lifts through fixed-IVP, theorem-family, and
+      raw-existence gauge-flow APIs. This leaves one primitive
     positive-dimensional time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`

@@ -667,9 +667,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      integral-curve specialization and Gronwall uniqueness bridges for packaged
      local model flows on open and closed Picard intervals, including direct
      uniqueness routes for the continuous space-time package. Raw gauge flows now also expose the first
-     chart-membership bridge needed for coordinate pullback formulas:
-     neighborhood-time flow equations imply continuity of `τ ↦ Φ_τ(x)` and
-     eventual membership in the tangent trivialization at `Φ_t(x)`. Thus the
+      chart-membership bridge needed for coordinate pullback formulas:
+      neighborhood-time flow equations imply continuity of `τ ↦ Φ_τ(x)` and
+      eventual membership in the tangent trivialization at `Φ_t(x)`, with the
+      same facts available directly within the raw time set for restricted ODE
+      intervals. Thus the
      full point-4 input chain has no gauge-flow gap in any of the
      currently-proved special cases. The
     non-identity gauge time-regularity
@@ -692,13 +694,16 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      `B(t)(A(t)u, A(t)v)`, including the `D ∘ A(t)` tangent-map derivative
      contribution, plus eventual-equality transfer lemmas for chart-local
      coordinate identifications. A coordinate-level package
-     `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
-     chartwise `B/A/D` derivative hypotheses to the actual geometric
-     `PullbackMetricInnerDerivativeOn` scalar target and directly to tensor
-     `HasTimeDerivativeOn` for the gauge-pulled metric, while
-     `pullbackMetricInnerCoordinateModel` names the preferred
-     `B(τ)(A(τ)u)(A(τ)v)` scalar expression for the next chart-identification
-     step. In the subsingleton-tangent case this non-identity
+      `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
+      chartwise `B/A/D` derivative hypotheses to the actual geometric
+      `PullbackMetricInnerDerivativeOn` scalar target and directly to tensor
+      `HasTimeDerivativeOn` for the gauge-pulled metric, while
+      `pullbackMetricInnerCoordinateModel` names the preferred
+      `B(τ)(A(τ)u)(A(τ)v)` scalar expression for the next chart-identification
+       proof; the coordinate data also restricts to smaller time sets and lifts
+       through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
+       so chart computations can feed the point-4 theorem routes without an
+       intermediate tensor repackaging step. In the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
     DeTurck gauge-flow families by componentwise vanishing, with direct
     gauge-reduced projections and matching model-space/empty-manifold synonyms

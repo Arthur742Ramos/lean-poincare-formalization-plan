@@ -53,6 +53,31 @@ theorem hasMFDerivWithinAt
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
   G.satisfies.hasMFDerivWithinAt ht x
 
+/-- A raw gauge-flow witness is continuous within its time set along every base
+point. -/
+theorem continuousWithinAt_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s) (x : M) :
+    ContinuousWithinAt (fun τ : ℝ ↦ (G.maps3 τ) x) s t :=
+  (G.hasMFDerivWithinAt ht x).continuousWithinAt
+
+/-- Within the raw gauge-flow time set, the image of a fixed base point
+eventually remains in the preferred tangent-bundle trivialization centered at
+its time-`t` image. -/
+theorem eventuallyWithin_mem_trivializationAt_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s) (x : M) :
+    ∀ᶠ τ in 𝓝[s] t,
+      (G.maps3 τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).baseSet :=
+  (G.continuousWithinAt_eval ht x).preimage_mem_nhdsWithin
+    ((trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' ((G.maps3 t) x)))
+
 /-- A raw gauge-flow witness on a time set gives a local-at-time gauge-flow
 statement whenever the time set is a neighborhood of that time. -/
 theorem satisfiesAt
