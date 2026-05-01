@@ -10585,6 +10585,36 @@ def CoordinatePullbackMetricFieldDerivativeWithinData
       (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
   G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricFieldDerivativeWithinData
 
+/-- Fixed-IVP raw intrinsic gauge-flow coordinate curves eventually lie in the
+preferred chart range at neighborhood-times. -/
+theorem eventually_extChartAt_eval_mem_range
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      (extChartAt I (((G.flow sol).maps3 t) x)) (((G.flow sol).maps3 τ) x) ∈
+        Set.range I :=
+  SmoothSelfDiffeomorph3Family.Diffeomorph3GaugeFlowOn.eventually_extChartAt_eval_mem_range
+    (I := I) (M := M) (G.flow sol) hs x
+
+/-- Fixed-IVP raw intrinsic gauge-flow coordinate curves eventually lie in the
+preferred chart range relative to the solution time set. -/
+theorem eventuallyWithin_extChartAt_eval_mem_range
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t,
+      (extChartAt I (((G.flow sol).maps3 t) x)) (((G.flow sol).maps3 τ) x) ∈
+        Set.range I :=
+  SmoothSelfDiffeomorph3Family.Diffeomorph3GaugeFlowOn.eventuallyWithin_extChartAt_eval_mem_range
+    (I := I) (M := M) (G.flow sol) ht x
+
 /-- Coordinate-level fixed-IVP scalar data implies the named geometric scalar
 derivative data for a raw intrinsic DeTurck gauge-flow witness. -/
 theorem pullbackMetricInnerDerivativeData_of_coordinate
@@ -10999,6 +11029,34 @@ def CoordinatePullbackMetricFieldDerivativeWithinData
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M)) : Prop :=
   G.toDiffeomorph3GaugeFlowFamily.CoordinatePullbackMetricFieldDerivativeWithinData
+
+/-- Theorem-family raw intrinsic gauge-flow coordinate curves eventually lie in
+the preferred chart range at neighborhood-times. -/
+theorem eventually_extChartAt_eval_mem_range
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      (extChartAt I (((G.flow ivp sol).maps3 t) x)) (((G.flow ivp sol).maps3 τ) x) ∈
+        Set.range I :=
+  (G.forInitialValueProblem ivp).eventually_extChartAt_eval_mem_range sol hs x
+
+/-- Theorem-family raw intrinsic gauge-flow coordinate curves eventually lie in
+the preferred chart range relative to the solution time set. -/
+theorem eventuallyWithin_extChartAt_eval_mem_range
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t,
+      (extChartAt I (((G.flow ivp sol).maps3 t) x)) (((G.flow ivp sol).maps3 τ) x) ∈
+        Set.range I :=
+  (G.forInitialValueProblem ivp).eventuallyWithin_extChartAt_eval_mem_range sol ht x
 
 /-- Coordinate-level theorem-family scalar data implies the named geometric
 scalar derivative data for a raw intrinsic DeTurck gauge-flow family. -/

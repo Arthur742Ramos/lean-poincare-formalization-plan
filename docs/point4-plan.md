@@ -741,7 +741,9 @@ They also expose the ordinary-neighborhood versions of the same readouts:
 `hasMFDerivAt`, `hasDerivAt_extChartAt_eval`,
 `continuousAt_extChartAt_eval`, `continuousAt_eval`, and
 `eventually_mem_trivializationAt_eval`, plus the matching within-time-set
-preferred-chart continuity readout.
+preferred-chart continuity readout. The same fixed-IVP/theorem-family layer now
+also mirrors raw preferred-chart range eventuality, both at ordinary
+neighborhood-times and relative to the solution time set.
 The same raw layer now also has proof-level `Nonempty` wrappers for the
 geometric, within-derivative, ordinary-on-time-set derivative, unrestricted
 derivative, restriction, and identity-flow constructors, letting downstream

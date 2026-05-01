@@ -261,8 +261,9 @@ now packages the matching intrinsic boundary
           generic within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set/open-interior continuity helpers plus
       fixed-IVP/theorem-family raw-existence derivative, continuity,
-      chart-coordinate continuity, and tangent-trivialization readouts in both
-      within-time-set and ordinary-neighborhood forms, and
+      chart-coordinate continuity, preferred-chart range eventuality, and
+      tangent-trivialization readouts in both within-time-set and
+      ordinary-neighborhood forms, and
       Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level
       raw-flow building block. It also packages the tangent-map variational
