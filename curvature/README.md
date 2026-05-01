@@ -274,8 +274,10 @@ now packages the matching intrinsic boundary
        trivialization and with the gauge pushforward tangent map in source/target
        coordinates, and the named `metricBilinearCoordinateField` identifies
        concrete `B(τ)` with a two-variable metric-coordinate field along the raw
-       coordinate curve, exposing the chart algebra needed for Banach
-       finite-cover metric readouts. The
+       coordinate curve; the raw-flow bridge now builds the field-level
+       coordinate derivative package from the derivative of that field, the
+       concrete tangent-coordinate derivative, and the scalar velocity identity,
+       exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.

@@ -812,7 +812,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         source/target coordinates. The two-variable
         `metricBilinearCoordinateField` now packages the metric-coordinate field
         behind `B(τ)`, and the concrete `B(τ)` is eventually identified with that
-        field along the raw coordinate curve.
+        field along the raw coordinate curve. A new raw-flow bridge consumes
+        this identification to build the field-level coordinate derivative
+        package directly from the Fréchet derivative of
+        `metricBilinearCoordinateField`, the derivative of the concrete tangent
+        coordinate map, and the scalar velocity identity.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

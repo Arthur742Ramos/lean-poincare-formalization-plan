@@ -243,6 +243,13 @@ the two-variable field `(τ, y)` behind the moving `B(τ)` component, and
 `pullbackMetricBilinearCoordinateMap_eventuallyEq_metricBilinearCoordinateField`
 shows that concrete `B(τ)` is eventually this field evaluated along the raw
 coordinate curve `τ ↦ extChartAt (Φ_t x) (Φ_τ x)`.
+The raw gauge-flow bridge
+`Diffeomorph3GaugeFlowOn.coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField`
+now consumes this: it automatically constructs the field-level scalar model
+equality from the concrete `B(τ)`/`A(τ)` formulas and the raw coordinate curve.
+The remaining local inputs are therefore the Fréchet derivative of
+`metricBilinearCoordinateField`, the derivative of the concrete tangent
+coordinate map, and the scalar velocity identity.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
