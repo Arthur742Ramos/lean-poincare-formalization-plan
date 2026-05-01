@@ -3,6 +3,7 @@ module
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
 public import Mathlib.Analysis.ODE.PicardLindelof
 public import Mathlib.Analysis.ODE.Gronwall
+public import Mathlib.Analysis.Calculus.Deriv.Prod
 
 set_option linter.unusedSectionVars false
 set_option linter.all false
@@ -88,6 +89,33 @@ structure VariationalLocalFlowSolution
       HasDerivWithinAt (tangent x)
         ((Df t (flow (x, t))).comp (tangent x t)) (Icc tmin tmax) t
 
+/-- The product ODE whose first component is the base gauge-flow equation and
+whose second component is the tangent-map variational equation. -/
+def variationalVectorField
+    (f : ℝ → V → V) (Df : ℝ → V → V →L[ℝ] V) :
+    ℝ → V × (V →L[ℝ] V) → V × (V →L[ℝ] V) :=
+  fun t z => (f t z.1, (Df t z.1).comp z.2)
+
+/-- Project the base ODE from a solution of the product variational system. -/
+theorem hasDerivWithinAt_fst_of_variationalVectorField
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {curve : ℝ → V × (V →L[ℝ] V)} {s : Set ℝ} {t : ℝ}
+    (h : HasDerivWithinAt curve (variationalVectorField f Df t (curve t)) s t) :
+    HasDerivWithinAt (fun τ : ℝ => (curve τ).1) (f t (curve t).1) s t := by
+  have hf := h.hasFDerivWithinAt.fst
+  simpa [variationalVectorField] using hf.hasDerivWithinAt
+
+/-- Project the tangent-map variational ODE from a solution of the product
+variational system. -/
+theorem hasDerivWithinAt_snd_of_variationalVectorField
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {curve : ℝ → V × (V →L[ℝ] V)} {s : Set ℝ} {t : ℝ}
+    (h : HasDerivWithinAt curve (variationalVectorField f Df t (curve t)) s t) :
+    HasDerivWithinAt (fun τ : ℝ => (curve τ).2)
+      ((Df t (curve t).1).comp (curve t).2) s t := by
+  have hf := h.hasFDerivWithinAt.snd
+  simpa [variationalVectorField] using hf.hasDerivWithinAt
+
 namespace LocalFlowSolution
 
 variable {f : ℝ → V → V} {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V}
@@ -149,6 +177,36 @@ theorem eqOn_Icc_of_lipschitzOnWith
     exact (β.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
       (Icc_mem_nhds ht.1 ht.2)
   · rw [α.initial_eq x hx, β.initial_eq x hx]
+
+end LocalFlowSolution
+
+namespace LocalFlowSolution
+
+variable {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+  {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+  {z₀ : V × (V →L[ℝ] V)} {r : ℝ≥0}
+
+/-- A packaged local solution of the product variational system yields the base
+ODE for its first component. -/
+theorem variational_base_hasDerivWithinAt
+    (α : LocalFlowSolution (variationalVectorField f Df) t₀ z₀ r)
+    {z : V × (V →L[ℝ] V)} (hz : z ∈ closedBall z₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    HasDerivWithinAt (fun τ : ℝ => (α.flow z τ).1)
+      (f t (α.flow z t).1) (Icc tmin tmax) t :=
+  hasDerivWithinAt_fst_of_variationalVectorField
+    (α.hasDerivWithinAt z hz t ht)
+
+/-- A packaged local solution of the product variational system yields the
+tangent-map ODE for its second component. -/
+theorem variational_tangent_hasDerivWithinAt
+    (α : LocalFlowSolution (variationalVectorField f Df) t₀ z₀ r)
+    {z : V × (V →L[ℝ] V)} (hz : z ∈ closedBall z₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    HasDerivWithinAt (fun τ : ℝ => (α.flow z τ).2)
+      ((Df t (α.flow z t).1).comp (α.flow z t).2) (Icc tmin tmax) t :=
+  hasDerivWithinAt_snd_of_variationalVectorField
+    (α.hasDerivWithinAt z hz t ht)
 
 end LocalFlowSolution
 

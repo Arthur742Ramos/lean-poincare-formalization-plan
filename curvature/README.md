@@ -230,7 +230,10 @@ now packages the matching intrinsic boundary
       equation `A'(t) = Df(t, flow(t)) ∘ A(t)` as
       `VariationalLocalFlowSolution`, matching the coordinate-model
       `A`-derivative hypothesis, with interior and closed-interval uniqueness
-      bridges for tangent maps once base local flows agree. The raw-flow API also extracts continuity of
+      bridges for tangent maps once base local flows agree. It also defines the
+      product variational vector field `(y, A)' = (f(t, y), Df(t, y) ∘ A)` and
+      projection lemmas from product local-flow solutions to the base and tangent
+      equations. The raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
      A thin `AnalyticPDE.SmoothRealization` module names the

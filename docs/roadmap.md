@@ -672,7 +672,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       the remaining coordinate-model `A`-derivative hypothesis, and proves
       variational/tangent-map uniqueness on both the interior and closed Picard
       intervals when the base local flows agree and the linearized ODE is
-      uniformly Lipschitz. Raw gauge flows now also expose the first
+      uniformly Lipschitz. It also defines the product variational vector field
+      `(y, A)' = (f(t, y), Df(t, y) ∘ A)` and projection lemmas from packaged
+      product `LocalFlowSolution`s to the base and tangent ODEs. Raw gauge flows now also expose the first
       chart-membership bridge needed for coordinate pullback formulas:
       neighborhood-time flow equations imply continuity of `τ ↦ Φ_τ(x)` and
       eventual membership in the tangent trivialization at `Φ_t(x)`, with the

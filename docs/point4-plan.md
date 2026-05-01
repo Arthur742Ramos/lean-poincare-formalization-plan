@@ -223,7 +223,11 @@ for the variational/tangent maps once the base local flows agree and the
 linearized ODE is uniformly Lipschitz on a state region, which is the tangent
 compatibility input needed for chart gluing; the same uniqueness conclusion is
 also available on the closed Picard interval using the within-interval endpoint
-continuity.  The same module also records the
+continuity. The module now also defines the product variational vector field
+`(y, A)' = (f(t, y), Df(t, y) ∘ A)` and proves projection lemmas extracting the
+base and tangent ODEs from any packaged `LocalFlowSolution` of that product
+system, providing the intended route from Picard-Lindelöf on a product Banach
+space to variational tangent data.  The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
 local model flows whose curves stay in a uniformly Lipschitz state region; the
