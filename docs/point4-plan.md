@@ -242,7 +242,11 @@ eventual-equality transfer form for chart-local scalar identities. This removes
 the ODE part of the remaining dynamic pullback chain rule from the list of
 manual hypotheses: the residual chart-local work is now the metric-component
 field derivative and the concrete identification of the geometric coordinate
-model with the selected variational flow/tangent data.
+model with the selected variational flow/tangent data. Raw `C³` gauge flows
+constructed on closed Picard intervals also now specialize directly to the open
+interior interval: their ordinary manifold derivative, continuity, chart
+membership, coordinate-model equality, and coordinate-model/field
+time-derivative bridges are available on `Ioo tmin tmax`.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged

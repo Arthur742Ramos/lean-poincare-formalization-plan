@@ -18,6 +18,7 @@ endpoint Ricci-flow APIs.
 @[expose] public noncomputable section
 
 open Bundle
+open Set
 open scoped Manifold ContDiff Topology
 
 namespace RicciFlow
@@ -75,6 +76,41 @@ theorem eventuallyWithin_mem_trivializationAt_eval
       (G.maps3 τ) x ∈
         (trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).baseSet :=
   (G.continuousWithinAt_eval ht x).preimage_mem_nhdsWithin
+    ((trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' ((G.maps3 t) x)))
+
+/-- A raw gauge-flow witness on a closed Picard interval supplies an ordinary
+manifold derivative at interior times. -/
+theorem hasMFDerivAt_of_mem_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax) (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (G.maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
+  (G.satisfies.satisfiesAt (Icc_mem_nhds ht.1 ht.2)).hasMFDerivAt x
+
+/-- A raw gauge-flow witness on a closed Picard interval is continuous at
+interior times along every base point. -/
+theorem continuousAt_eval_of_mem_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax) (x : M) :
+    ContinuousAt (fun τ : ℝ ↦ (G.maps3 τ) x) t :=
+  (G.hasMFDerivAt_of_mem_Ioo ht x).continuousAt
+
+/-- Interior times of a closed-interval raw gauge flow have the tangent-chart
+membership needed for coordinate pullback formulas. -/
+theorem eventually_mem_trivializationAt_eval_of_mem_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      (G.maps3 τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).baseSet :=
+  (G.continuousAt_eval_of_mem_Ioo ht x).preimage_mem_nhds
     ((trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).open_baseSet.mem_nhds
       (FiberBundle.mem_baseSet_trivializationAt' ((G.maps3 t) x)))
 

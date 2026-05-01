@@ -870,6 +870,25 @@ theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
     (I := I) (M := M) G.maps3 g t x u v
     (G.eventually_mem_trivializationAt_eval hs x)
 
+/-- Closed-Picard-interval specialization of
+`eventuallyEq_geometric_pullbackMetricInnerCoordinateModel` at interior times. -/
+theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax)
+    (g : MetricFamily (I := I) (M := M))
+    (x : M) (u v : TangentSpace I x) :
+    (fun τ : ℝ ↦
+      (g τ).inner ((G.maps3 τ) x)
+        ((G.maps3 τ).pushforwardTangent x u)
+        ((G.maps3 τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+      SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+        (I := I) (M := M) G.maps3 g t x u v := by
+  exact SmoothSelfDiffeomorph3Family.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
+    (I := I) (M := M) G.maps3 g t x u v
+    (G.eventually_mem_trivializationAt_eval_of_mem_Ioo ht x)
+
 /-- For a raw gauge flow whose time set is a neighborhood of each of its times,
 derivative data for the named coordinate model is enough to produce the
 coordinate derivative package for the geometric pullback scalar. -/
@@ -958,6 +977,42 @@ theorem hasTimeDerivativeOn_of_coordinateField
     (I := I) (M := M) hfield
     (fun {t} ht x u v ↦ G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
       (t := t) (hs (t := t) ht) g x u v)
+
+/-- Closed-Picard-interval raw gauge-flow version of the coordinate-model bridge
+on the open interior interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_coordinateModel
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hmodel : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricModelDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot (Ioo tmin tmax)) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_coordinatePullbackMetricModelDerivativeOn
+    (I := I) (M := M) hmodel
+    (fun {t} ht x u v ↦
+      G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
+        (t := t) ht g x u v)
+
+/-- Closed-Picard-interval raw gauge-flow version of the field-level coordinate
+derivative bridge on the open interior interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_coordinateField
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hfield : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricFieldDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot (Ioo tmin tmax)) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeOn
+    (I := I) (M := M) hfield
+    (fun {t} ht x u v ↦
+      G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
+        (t := t) ht g x u v)
 
 end Diffeomorph3GaugeFlowOn
 
