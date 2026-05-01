@@ -895,6 +895,67 @@ theorem SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.nonempty_ofShrunkRic
     (M := M) (F := F) (I := I) (D := D)
     hT' hT'le ha' htime hball hencode_terminal⟩
 
+/-- If the current chart radius already lies in the Riemannian metric cone, the chart-derived
+symmetric carrier exposes an actual state-preserving Banach solution and common-interval uniqueness
+without first passing through a smaller metric-cone shrink. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_unique_restrictedSymmetricA_banachEvolutionLocalSolutionIn_of_closedBall_subset_riemannianMetricLocus
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (hball : Metric.closedBall
+      (InitialValueProblem.toSymmetricSectionSubmodule
+        (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) (a : ℝ) ⊆
+      riemannianMetricLocusSubmodule (M := M) (F := F)
+        (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover) :
+    ∃ sol : BanachEvolutionLocalSolutionIn
+        (chart.restrictedSymmetricA
+          (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+        (riemannianMetricLocusSubmodule (M := M) (F := F)
+          (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+        ivp.initialTime
+        (InitialValueProblem.toSymmetricSectionSubmodule
+          (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+      sol.terminalTime ≤ T ∧
+      ∀ sol' : BanachEvolutionLocalSolutionIn
+          (chart.restrictedSymmetricA
+            (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+          (riemannianMetricLocusSubmodule (M := M) (F := F)
+            (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+          ivp.initialTime
+          (InitialValueProblem.toSymmetricSectionSubmodule
+            (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+        EqOn sol.curve sol'.curve
+          (Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime)) := by
+  have hpicard :=
+    chart.restrictedSymmetricA_picard_of_closedBall_subset_riemannianMetricLocus
+      (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover hball
+  exact
+    exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lipschitzOn_Icc_terminal_le
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+      x0 et het Kc hKc Ko hKo hKoEq hcover inferInstance chart.hT
+      hpicard
+      (InitialValueProblem.toSymmetricSectionSubmodule_mem_riemannianMetricLocusSubmodule
+        (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp)
+      (chart.restrictedSymmetricA_lipschitzOn_Icc
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+
 set_option maxHeartbeats 4000000 in
 /-- A positive-radius interval chart can be shrunk to an actual state-preserving Banach solution for
 the chart-derived symmetric Riemannian-metric carrier, retaining terminal-time control and uniqueness
