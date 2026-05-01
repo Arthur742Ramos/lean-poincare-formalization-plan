@@ -749,7 +749,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        `ofProductComponentClosedBallEstimates` route, reducing the chart-local
        Picard data to base/linearized Lipschitz estimates, component norm bounds,
        time-continuity of the product vector field, and the usual radius
-       inequality.
+       inequality. A further continuity adapter derives the product-field
+       continuity from separate time-continuity of `f(·, y)` and `Df(·, y)`,
+       yielding the `ofProductComponentClosedBallContinuityEstimates`
+       constructor whose inputs match the natural chartwise estimates.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

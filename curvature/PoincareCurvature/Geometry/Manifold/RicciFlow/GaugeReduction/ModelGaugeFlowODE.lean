@@ -479,6 +479,18 @@ theorem norm_variationalVectorField_le_closedBall_at
   rw [variationalVectorField, Prod.norm_mk]
   exact max_le_max (hf_bound z.1 hzprod.1) hlin
 
+/-- Time-continuity adapter for the product variational vector field at a fixed
+state `z = (y, A)`. -/
+theorem continuousOn_variationalVectorField_const
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {s : Set ℝ} (z : V × (V →L[ℝ] V))
+    (hf_cont : ContinuousOn (fun t : ℝ => f t z.1) s)
+    (hDf_cont : ContinuousOn (fun t : ℝ => Df t z.1) s) :
+    ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) s := by
+  have hlin : ContinuousOn (fun t : ℝ => (Df t z.1).comp z.2) s := by
+    simpa using hDf_cont.clm_comp (continuousOn_const (c := z.2))
+  simpa [variationalVectorField] using hf_cont.prodMk hlin
+
 /-- Assemble Picard-Lindelöf hypotheses for the product variational system from
 closed-ball estimates for the base field and its linearization.
 
@@ -534,6 +546,35 @@ theorem isPicardLindelof_variationalVectorField_of_component_closedBall_estimate
       norm_variationalVectorField_le_closedBall_at
         (f := f) (Df := Df) (t := t)
         (hf_bound t ht) hA_bound (hD_bound t ht) hz)
+    hmul
+
+/-- Assemble Picard-Lindelöf hypotheses for the product variational system from
+componentwise closed-ball estimates and componentwise time-continuity. -/
+theorem isPicardLindelof_variationalVectorField_of_component_closedBall_continuity
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {x₀ : V} {A₀ : V →L[ℝ] V}
+    {a r Kf KD Lf BA BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall A₀ a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - r) :
+    IsPicardLindelof (variationalVectorField f Df) t₀ (x₀, A₀) a r
+      (max Lf (BD * BA)) (max Kf (KD * BA + BD)) :=
+  isPicardLindelof_variationalVectorField_of_component_closedBall_estimates
+    (A₀ := A₀) hf_lip hDf_lip hf_bound hA_bound hD_bound
+    (fun z hz => by
+      have hzprod : z.1 ∈ closedBall x₀ a ∧ z.2 ∈ closedBall A₀ a := by
+        have hz' : z ∈ closedBall x₀ (a : ℝ) ×ˢ closedBall A₀ (a : ℝ) := by
+          rw [closedBall_prod_same x₀ A₀ (a : ℝ)]
+          exact hz
+        exact hz'
+      exact continuousOn_variationalVectorField_const z
+        (hf_cont z.1 hzprod.1) (hDf_cont z.1 hzprod.1))
     hmul
 
 /-- Extract a variational local flow from a continuous local flow of the product
@@ -919,6 +960,27 @@ def ofProductComponentClosedBallEstimates
     (isPicardLindelof_variationalVectorField_of_component_closedBall_estimates
       (A₀ := (1 : V →L[ℝ] V))
       (r := R) hf_lip hDf_lip hf_bound hA_bound hD_bound hcont hmul)
+    hr
+
+/-- One-step variational local-flow constructor from componentwise closed-ball
+Picard-Lindelöf estimates and componentwise time-continuity. -/
+def ofProductComponentClosedBallContinuityEstimates
+    [CompleteSpace V]
+    {a R Kf KD Lf BA BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R) :
+    VariationalLocalFlowSolution f Df t₀ x₀ r :=
+  ofProductPicardLindelof_of_le_radius
+    (isPicardLindelof_variationalVectorField_of_component_closedBall_continuity
+      (A₀ := (1 : V →L[ℝ] V))
+      (r := R) hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul)
     hr
 
 end VariationalLocalFlowSolution

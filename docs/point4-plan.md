@@ -168,7 +168,10 @@ product norm bound is also now derived from component estimates, yielding the
 stronger `ofProductComponentClosedBallEstimates` route whose remaining analytic
 inputs are exactly base/linearized closed-ball Lipschitz bounds, component norm
 bounds, continuity of the product vector field in time, and the usual Picard
-time-radius inequality.
+time-radius inequality. A further time-continuity adapter now derives product
+field continuity from separate time-continuity of `f(·, y)` and `Df(·, y)`,
+giving the `ofProductComponentClosedBallContinuityEstimates` constructor whose
+inputs match the natural chartwise estimates.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
