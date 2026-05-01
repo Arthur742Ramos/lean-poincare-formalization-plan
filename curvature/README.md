@@ -233,8 +233,8 @@ now packages the matching intrinsic boundary
       space-time partial-flow form needed for chart gluing, plus the
       time-slice continuity bridges for continuous/variational local-flow
       packages, autonomous `C¹` local-integral-curve specialization with
-      open-interval continuity, vector-slot variational uniqueness, and
-      Gronwall uniqueness
+      open-interval continuity and packaged `LocalFlowSolution` extraction,
+      vector-slot variational uniqueness, and Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level
       raw-flow building block. It also packages the tangent-map variational
        equation `A'(t) = Df(t, flow(t)) ∘ A(t)` as

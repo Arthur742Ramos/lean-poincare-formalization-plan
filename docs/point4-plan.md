@@ -593,7 +593,11 @@ local-integral-curve specialization now also returns continuity on its open
 existence interval. Variational local-flow uniqueness now also has direct
 interior and closed-interval vector-slot `A(t) v` bridges derived from
 operator-norm bounds, matching the scalar gauge-pullback chain-rule
-hypotheses. The same module now also
+hypotheses. The autonomous `C¹` vector-field route now also extracts a
+proof-level `Nonempty LocalFlowSolution` package on a smaller closed time
+interval and smaller initial ball, giving the first direct bridge from
+mathlib's autonomous integral-curve theorem to the packaged raw model-flow API.
+The same module now also
 packages the model-space variational equation as
 `VariationalLocalFlowSolution`, with tangent maps initialized by the identity
 and satisfying `A'(t) = Df(t, flow(t)) ∘ A(t)` on the Picard interval; this is

@@ -1340,6 +1340,64 @@ theorem exists_autonomous_local_integral_curves_continuousOn
   intro t ht
   exact (hderiv t ht).continuousAt.continuousWithinAt
 
+/-- A `C¹` autonomous vector field supplies a packaged `LocalFlowSolution` on a
+smaller closed time interval and a smaller initial ball.  This is the direct
+model-space raw-flow existence bridge extracted from mathlib's autonomous
+integral-curve theorem. -/
+theorem exists_autonomous_localFlowSolution
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∃ ht₀ : t₀ ∈ Icc (t₀ - ε) (t₀ + ε),
+        Nonempty (LocalFlowSolution (fun _ : ℝ => f)
+          (⟨t₀, ht₀⟩ : Icc (t₀ - ε) (t₀ + ε)) x₀ r) := by
+  classical
+  obtain ⟨r₀, hr₀, ε₀, hε₀, hcurves⟩ :=
+    exists_autonomous_local_integral_curves (V := V) hf t₀
+  let r : ℝ≥0 := ⟨r₀ / 2, by linarith⟩
+  let ε : ℝ := ε₀ / 2
+  have hr : 0 < r := by
+    rw [← NNReal.coe_lt_coe]
+    change (0 : ℝ) < r₀ / 2
+    linarith
+  have hε : 0 < ε := by
+    dsimp [ε]
+    linarith
+  have ht₀ : t₀ ∈ Icc (t₀ - ε) (t₀ + ε) := by
+    constructor <;> dsimp [ε] <;> linarith
+  refine ⟨r, hr, ε, hε, ht₀, ?_⟩
+  have hball_sub : ∀ x, x ∈ closedBall x₀ r → x ∈ closedBall x₀ r₀ := by
+    intro x hx
+    rw [mem_closedBall] at hx ⊢
+    calc
+      dist x x₀ ≤ (r : ℝ) := hx
+      _ = r₀ / 2 := rfl
+      _ ≤ r₀ := by linarith
+  have hcurves_all : ∀ x : V, ∃ α : ℝ → V,
+      x ∈ closedBall x₀ r →
+        α t₀ = x ∧
+          ∀ t ∈ Ioo (t₀ - ε₀) (t₀ + ε₀), HasDerivAt α (f (α t)) t := by
+    intro x
+    by_cases hx : x ∈ closedBall x₀ r
+    · obtain ⟨α, hinit, hderiv⟩ := hcurves x (hball_sub x hx)
+      exact ⟨α, fun _ => ⟨hinit, hderiv⟩⟩
+    · exact ⟨fun _ => x, fun hx' => (hx hx').elim⟩
+  refine ⟨?_⟩
+  refine
+    { flow := fun x t => Classical.choose (hcurves_all x) t
+      initial_eq := ?_
+      hasDerivWithinAt := ?_ }
+  · intro x hx
+    exact ((Classical.choose_spec (hcurves_all x)) hx).1
+  · intro x hx t ht
+    have hderiv := ((Classical.choose_spec (hcurves_all x)) hx).2
+    have htopen : t ∈ Ioo (t₀ - ε₀) (t₀ + ε₀) := by
+      constructor
+      · dsimp [ε] at ht
+        linarith [ht.1]
+      · dsimp [ε] at ht
+        linarith [ht.2]
+    exact (hderiv t htopen).hasDerivWithinAt
+
 /-- Centered version of
 `exists_autonomous_local_integral_curves`, matching the single-trajectory ODE
 statement used when only the gauge curve through one point is needed. -/
