@@ -101,7 +101,8 @@ non-identity gauges. That module names the remaining dynamic scalar target as
 `SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeOn` and proves it
 equivalent to `HasTimeDerivativeOn` for the pulled-back metric. It also lifts
 that named scalar target to fixed-IVP and theorem-family geometric `C³` DeTurck
-gauge-flow bundles and provides direct gauge-reduced, intrinsic, and ordinary
+gauge-flow bundles, lifts the same named target through raw `C³` gauge-flow
+existence witnesses, and provides direct gauge-reduced, intrinsic, and ordinary
 theorem-package projections from that named data. The bundled non-identity
 gauge-flow API now has proof-bearing scalar-to-tensor wrappers, so solving this
 single dynamic scalar identity automatically supplies the `HasTimeDerivativeOn`

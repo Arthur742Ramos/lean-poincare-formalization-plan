@@ -348,8 +348,8 @@ now packages the matching intrinsic boundary
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic
    scalar chain-rule target as `PullbackMetricInnerDerivativeOn`, equivalent to
    tensor `HasTimeDerivativeOn` for the pulled-back metric, with fixed-IVP and
-   theorem-family bundle adapters and direct gauge-reduced, intrinsic, and
-   ordinary theorem-package projections. This leaves one primitive
+   theorem-family bundle adapters, raw-existence adapters, and direct
+   gauge-reduced, intrinsic, and ordinary theorem-package projections. This leaves one primitive
    positive-dimensional time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
