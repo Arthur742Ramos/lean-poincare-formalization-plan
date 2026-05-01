@@ -721,6 +721,10 @@ geometric, within-derivative, ordinary-on-time-set derivative, unrestricted
 derivative, restriction, and identity-flow constructors, letting downstream
 existence arguments retain raw gauge-flow existence without choosing a concrete
 flow until needed.
+The fixed-IVP intrinsic DeTurck gauge-flow existence layer mirrors this
+proof-level shape for its derivative-data, ordinary-at-time derivative,
+zero-field identity, chosen-background identity, subsingleton, and empty
+constructors.
 The model ODE uniqueness layer now also has center-trajectory wrappers for
 packaged local flows, continuous space-time local flows, and the full
 variational pair `(flow, tangent)` on both `Ioo` and `Icc`, so basepoint

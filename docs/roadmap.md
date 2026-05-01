@@ -661,7 +661,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        proof-level `Nonempty` wrappers for geometric, within-derivative,
        ordinary-on-time-set derivative, unrestricted derivative, restriction,
        and identity-flow constructors, so later ODE existence arguments can
-       stay proof-level until a concrete gauge flow is required. Raw intrinsic gauge-flow existence
+       stay proof-level until a concrete gauge flow is required. The fixed-IVP
+       intrinsic DeTurck existence layer mirrors that proof-level shape for its
+       derivative-data and identity constructors. Raw intrinsic gauge-flow existence
      witnesses now also feed directly into the gauge-reduced, intrinsic, and
     ordinary theorem-package routes using either pulled-back metric
     time-derivative proofs or scalar inner-product derivative proofs. The raw
