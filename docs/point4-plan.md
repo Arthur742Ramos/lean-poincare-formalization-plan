@@ -608,6 +608,9 @@ The generic closed-interval scalar calculus now also includes exact within-set
 `B(t)(A(t)u)(A(t)v)` chain-rule primitives, including the `A' = D ∘ A` gauge
 tangent-map specialization, so endpoint component packages can use the direct
 model expression without first passing through an eventual-equality wrapper.
+There is also a generic within-filter eventual-equality transfer form for the
+same `B/A/A'` calculation before specializing to the `D ∘ A` gauge tangent-map
+shape.
 The raw `C³` gauge-flow existence layer now also exposes named continuity
 consequences of the ODE derivative data: `continuousOn_eval` for every base
 point on the time set and `continuousWithinAt_extChartAt_eval` in the preferred

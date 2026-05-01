@@ -154,6 +154,33 @@ theorem hasDerivWithinAt_bilinearForm_linear_apply_apply_of_comp_deriv
       (A' := D.comp (A t)) (s := s) (t := t) hB hA u v
 
 /-- Within-set local-coordinate transfer form of
+`hasDerivWithinAt_bilinearForm_linear_apply_apply` for a general tangent-map
+derivative `A'`. -/
+theorem hasDerivWithinAt_of_eventuallyEq_bilinearForm_linear_apply_apply
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {s : Set ℝ} {t : ℝ} {scalar : ℝ → ℝ}
+    {B : ℝ → V →L[ℝ] V →L[ℝ] ℝ} {B' : V →L[ℝ] V →L[ℝ] ℝ}
+    {A : ℝ → V →L[ℝ] V} {A' : V →L[ℝ] V} (u v : V)
+    (heq : scalar =ᶠ[𝓝[s] t] fun τ : ℝ ↦ B τ (A τ u) (A τ v))
+    (heq_t : scalar t = B t (A t u) (A t v))
+    (hB : HasDerivWithinAt B B' s t)
+    (hA : HasDerivWithinAt A A' s t)
+    {value : ℝ}
+    (hvalue :
+      B' (A t u) (A t v) +
+          B t (A' u) (A t v) +
+          B t (A t u) (A' v) =
+        value) :
+    HasDerivWithinAt scalar value s t := by
+  have hderiv :
+      HasDerivWithinAt (fun τ : ℝ ↦ B τ (A τ u) (A τ v))
+        (B' (A t u) (A t v) + B t (A' u) (A t v) + B t (A t u) (A' v))
+        s t :=
+    hasDerivWithinAt_bilinearForm_linear_apply_apply
+      (B := B) (B' := B') (A := A) (A' := A') (s := s) (t := t) hB hA u v
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
+/-- Within-set local-coordinate transfer form of
 `hasDerivWithinAt_bilinearForm_apply_apply` for the tangent-map-shaped
 derivative case `A'(t) = D ∘ A(t)`.
 
