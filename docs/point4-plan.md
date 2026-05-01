@@ -914,7 +914,9 @@ without shrinking first, including a proof-level `Nonempty` readout. Genuine
 symmetric-carrier interval closure data now also exposes
 that Banach solution and common-interval uniqueness witness directly before
 projecting to chosen-background, intrinsic, or ordinary theorem packages, plus
-a proof-level `Nonempty` readout for callers that only need existence. The
+a proof-level `Nonempty` readout for callers that only need existence, and it
+now mirrors the ambient closure-data proof-level readouts for smooth realization
+and reverse candidate encoding. The
 density-based interval-carrier solution now transports back to the chart's
 built-in restricted carrier whenever its terminal time stays within the Picard
 interval, giving a solution-level bridge rather than only pointwise vector-field
