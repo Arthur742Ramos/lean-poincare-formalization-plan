@@ -284,6 +284,19 @@ def of_satisfiesGaugeFlowOn
   anchored := anchored
   satisfies := satisfies
 
+/-- Package a geometric gauge-flow statement as proof-level raw `C^3`
+diffeomorphism gauge-flow existence. -/
+theorem nonempty_of_satisfiesGaugeFlowOn
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (satisfies : SatisfiesGaugeFlowOn (I := I) (M := M)
+      maps3.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily X s) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_satisfiesGaugeFlowOn maps3 anchored satisfies⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness from the pointwise
 manifold derivative form produced by ODE/integral-curve theorems. -/
 noncomputable def of_hasMFDerivWithinAt
@@ -303,6 +316,21 @@ noncomputable def of_hasMFDerivWithinAt
     (Φ := maps3.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily)
     (X := X) (s := s) hderiv
 
+/-- Build proof-level raw `C^3` gauge-flow existence from the pointwise
+within-time-set manifold derivative form produced by ODE/integral-curve
+theorems. -/
+theorem nonempty_of_hasMFDerivWithinAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt[s] (fun τ : ℝ ↦ (maps3 τ) x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (maps3 t x)))) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_hasMFDerivWithinAt maps3 anchored hderiv⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from
 ordinary pointwise manifold derivatives available at each time of `s`.  This
 matches local ODE constructions that first promote a closed-interval derivative
@@ -321,6 +349,20 @@ noncomputable def of_hasMFDerivAtOn
   of_hasMFDerivWithinAt (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
     maps3 anchored (fun t ht x ↦ (hderiv t ht x).hasMFDerivWithinAt)
 
+/-- Build proof-level raw `C^3` gauge-flow existence on `s` from ordinary
+pointwise manifold derivatives available at each time of `s`. -/
+theorem nonempty_of_hasMFDerivAtOn
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (maps3 τ) x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (maps3 t x)))) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_hasMFDerivAtOn maps3 anchored hderiv⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from
 unrestricted pointwise manifold derivatives. -/
 noncomputable def of_hasMFDerivAt
@@ -336,6 +378,20 @@ noncomputable def of_hasMFDerivAt
   of_hasMFDerivAtOn (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
     maps3 anchored (fun t _ht x ↦ hderiv t x)
 
+/-- Build proof-level raw `C^3` gauge-flow existence on `s` from unrestricted
+pointwise manifold derivatives. -/
+theorem nonempty_of_hasMFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hderiv : ∀ t : ℝ, ∀ x : M,
+      HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (maps3 τ) x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (maps3 t x)))) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_hasMFDerivAt maps3 anchored hderiv⟩
+
 /-- Restrict a raw `C^3` gauge flow to a smaller time set. -/
 def mono
     {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
@@ -346,6 +402,16 @@ def mono
   maps3 := G.maps3
   anchored := G.anchored
   satisfies := G.satisfies.mono hst
+
+/-- Restrict proof-level raw `C^3` gauge-flow existence to a smaller time set. -/
+theorem nonempty_mono
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (hG : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀))
+    (hst : s ⊆ t) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) := by
+  rcases hG with ⟨G⟩
+  exact ⟨G.mono hst⟩
 
 @[simp] theorem mono_maps3
     {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
@@ -380,6 +446,15 @@ noncomputable def identity_of_eq_zero
   satisfies := SmoothSelfDiffeomorph3Family.id_satisfiesGaugeFlowOn_of_eq_zero
     (I := I) (M := M) (X := X) (s := s) hX
 
+/-- If the time-dependent vector field vanishes on the time set, the identity
+`C³` diffeomorphism family gives proof-level raw gauge-flow existence. -/
+theorem nonempty_identity_of_eq_zero
+    (X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (s : Set ℝ) (t₀ : ℝ)
+    (hX : ∀ t ∈ s, ∀ x : M, X t x = 0) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨identity_of_eq_zero X s t₀ hX⟩
+
 /-- If every tangent fiber is a subsingleton, the identity `C³` diffeomorphism
 family is a raw gauge flow for any time-dependent vector field. -/
 noncomputable def identity_of_subsingleton_tangent
@@ -390,6 +465,15 @@ noncomputable def identity_of_subsingleton_tangent
   identity_of_eq_zero (I := I) (M := M) X s t₀
     (fun t _ht x ↦ Subsingleton.elim (X t x) 0)
 
+/-- If every tangent fiber is a subsingleton, the identity `C³` diffeomorphism
+family gives proof-level raw gauge-flow existence for any vector field. -/
+theorem nonempty_identity_of_subsingleton_tangent
+    [∀ x : M, Subsingleton ((TangentSpace I : M → Type _) x)]
+    (X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (s : Set ℝ) (t₀ : ℝ) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨identity_of_subsingleton_tangent X s t₀⟩
+
 /-- Model-space version of `identity_of_subsingleton_tangent`. -/
 noncomputable def identity_of_subsingleton_model
     [Subsingleton E]
@@ -397,6 +481,15 @@ noncomputable def identity_of_subsingleton_model
     (s : Set ℝ) (t₀ : ℝ) :
     Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
   identity_of_subsingleton_tangent (I := I) (M := M) X s t₀
+
+/-- Model-space version of
+`nonempty_identity_of_subsingleton_tangent`. -/
+theorem nonempty_identity_of_subsingleton_model
+    [Subsingleton E]
+    (X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (s : Set ℝ) (t₀ : ℝ) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨identity_of_subsingleton_model X s t₀⟩
 
 /-- On an empty manifold, the identity `C³` diffeomorphism family is a raw gauge
 flow for any time-dependent vector field. -/
@@ -407,6 +500,15 @@ noncomputable def identity_of_isEmpty
     Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
   identity_of_eq_zero (I := I) (M := M) X s t₀
     (fun _t _ht x ↦ isEmptyElim x)
+
+/-- On an empty manifold, the identity `C³` diffeomorphism family gives
+proof-level raw gauge-flow existence for any vector field. -/
+theorem nonempty_identity_of_isEmpty
+    [IsEmpty M]
+    (X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (s : Set ℝ) (t₀ : ℝ) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨identity_of_isEmpty X s t₀⟩
 
 /-- Specialize a raw flow for the intrinsic DeTurck vector field to the anchored
 gauge object used by gauge reduction. -/

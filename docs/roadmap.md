@@ -657,7 +657,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       intrinsic DeTurck gauge field vanishes on the relevant solution time sets
        immediately supplies raw identity `C^3` gauge-flow existence and, at both
        fixed-IVP and theorem-family levels, direct gauge-reduced, intrinsic, and ordinary
-      projections. Raw intrinsic gauge-flow existence
+      projections. The raw `Diffeomorph3GaugeFlowOn` layer also exposes
+       proof-level `Nonempty` wrappers for geometric, within-derivative,
+       ordinary-on-time-set derivative, unrestricted derivative, restriction,
+       and identity-flow constructors, so later ODE existence arguments can
+       stay proof-level until a concrete gauge flow is required. Raw intrinsic gauge-flow existence
      witnesses now also feed directly into the gauge-reduced, intrinsic, and
     ordinary theorem-package routes using either pulled-back metric
     time-derivative proofs or scalar inner-product derivative proofs. The raw

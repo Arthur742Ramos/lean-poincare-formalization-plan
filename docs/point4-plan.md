@@ -716,6 +716,11 @@ point on the time set and `continuousWithinAt_extChartAt_eval` in the preferred
 chart coordinates centered at the current time. Closed-Picard raw flows now
 also expose the corresponding open-interior continuity helpers:
 `continuousOn_eval_Ioo` and `continuousAt_extChartAt_eval_of_mem_Ioo`.
+The same raw layer now also has proof-level `Nonempty` wrappers for the
+geometric, within-derivative, ordinary-on-time-set derivative, unrestricted
+derivative, restriction, and identity-flow constructors, letting downstream
+existence arguments retain raw gauge-flow existence without choosing a concrete
+flow until needed.
 The model ODE uniqueness layer now also has center-trajectory wrappers for
 packaged local flows, continuous space-time local flows, and the full
 variational pair `(flow, tangent)` on both `Ioo` and `Icc`, so basepoint

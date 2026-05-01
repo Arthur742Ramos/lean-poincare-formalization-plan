@@ -532,8 +532,9 @@ now packages the matching intrinsic boundary
      derivative-family adapters, including an ordinary-on-time-set
      `ofDerivativeAtFamily` bridge and matching fixed-IVP `ofDerivative` /
      `ofDerivativeAt` bridges, geometric-to-raw adapters, and direct
-     derivative/local-at-time
-     extractors; raw intrinsic gauge-flow existence witnesses now project
+      proof-level `Nonempty` wrappers for the raw geometric/derivative,
+      restriction, and identity-flow constructors, plus derivative/local-at-time
+      extractors; raw intrinsic gauge-flow existence witnesses now project
      directly to gauge-reduced, intrinsic, and ordinary theorem packages from
     either pulled-back metric time-derivative or scalar inner-product derivative
     data. The new `GaugeReduction.ModelGaugeFlowODE` module now isolates the
