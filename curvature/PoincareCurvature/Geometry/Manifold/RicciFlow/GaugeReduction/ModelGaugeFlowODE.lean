@@ -1643,6 +1643,21 @@ def toLocalFlowSolution_restrict
     LocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
   (toLocalFlowSolution hf).restrict htime ht₀' hr
 
+/-- Picard-Lindelöf local-flow existence as a proof-level witness. -/
+theorem nonempty_localFlowSolution
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
+    Nonempty (LocalFlowSolution f t₀ x₀ r) :=
+  ⟨toLocalFlowSolution hf⟩
+
+/-- Localized Picard-Lindelöf local-flow existence as a proof-level witness. -/
+theorem nonempty_localFlowSolution_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    Nonempty (LocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨toLocalFlowSolution_restrict hf htime ht₀' hr⟩
+
 /-- Picard-Lindelöf also supplies Lipschitz dependence on the initial point, a
 key ingredient for upgrading the chartwise ODE solutions to a local flow. -/
 def toLipschitzLocalFlowSolution
@@ -1667,6 +1682,23 @@ def toLipschitzLocalFlowSolution_restrict
     LipschitzLocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
   (toLipschitzLocalFlowSolution hf).restrict htime ht₀' hr
 
+/-- Picard-Lindelöf Lipschitz local-flow existence as a proof-level witness. -/
+theorem nonempty_lipschitzLocalFlowSolution
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
+    Nonempty (LipschitzLocalFlowSolution f t₀ x₀ r) :=
+  ⟨toLipschitzLocalFlowSolution hf⟩
+
+/-- Localized Picard-Lindelöf Lipschitz local-flow existence as a proof-level
+witness. -/
+theorem nonempty_lipschitzLocalFlowSolution_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    Nonempty (LipschitzLocalFlowSolution f
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨toLipschitzLocalFlowSolution_restrict hf htime ht₀' hr⟩
+
 /-- Picard-Lindelöf also yields a continuous partial space-time flow on the
 initial-data ball times the closed time interval. -/
 def toContinuousLocalFlowSolution
@@ -1690,6 +1722,23 @@ def toContinuousLocalFlowSolution_restrict
     {r' : ℝ≥0} (hr : r' ≤ r) :
     ContinuousLocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
   (toContinuousLocalFlowSolution hf).restrict htime ht₀' hr
+
+/-- Picard-Lindelöf continuous local-flow existence as a proof-level witness. -/
+theorem nonempty_continuousLocalFlowSolution
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
+    Nonempty (ContinuousLocalFlowSolution f t₀ x₀ r) :=
+  ⟨toContinuousLocalFlowSolution hf⟩
+
+/-- Localized Picard-Lindelöf continuous local-flow existence as a proof-level
+witness. -/
+theorem nonempty_continuousLocalFlowSolution_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    Nonempty (ContinuousLocalFlowSolution f
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨toContinuousLocalFlowSolution_restrict hf htime ht₀' hr⟩
 
 end IsPicardLindelof
 

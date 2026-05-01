@@ -691,7 +691,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        closed intervals and initial balls, matching `Nonempty` restriction
         wrappers for localized Picard existence witnesses, direct localized
         Picard-Lindelöf constructors for local/Lipschitz/continuous model-flow
-        packages, readout simp lemmas
+        packages, matching `Nonempty` wrappers for those direct Picard
+        constructors, readout simp lemmas
         for the restricted flow/tangent maps and forgetful projections, overlap uniqueness for local and
        continuous base-flow packages with different centers/radii, vector-slot
        variational uniqueness bridges, including overlap tangent-map and

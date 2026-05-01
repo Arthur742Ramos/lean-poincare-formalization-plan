@@ -674,7 +674,9 @@ Their `Nonempty` wrappers now restrict directly as well, so Picard existence
 witnesses can be localized without destructing and rebuilding the package.
 Picard-Lindelöf packages now also have direct localized constructors for local,
 Lipschitz, and continuous model-flow data, combining theorem extraction with
-closed-interval/closed-ball restriction in one API call.
+closed-interval/closed-ball restriction in one API call, together with matching
+`Nonempty` wrappers so later existence arguments do not need to choose a flow
+until necessary.
 Restriction readout simp lemmas record that the localized packages retain the
 same underlying flow, and in the variational case the same tangent map, making
 overlap proofs easier to rewrite. The same compatibility is now exposed for

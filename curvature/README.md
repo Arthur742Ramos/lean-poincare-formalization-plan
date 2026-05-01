@@ -238,7 +238,8 @@ now packages the matching intrinsic boundary
        packages, autonomous `C¹` local-integral-curve specialization with
        open-interval continuity and packaged `LocalFlowSolution` extraction,
        restriction constructors and direct localized Picard-Lindelöf
-       constructors for local/Lipschitz/continuous model-flow packages,
+       constructors for local/Lipschitz/continuous model-flow packages with
+       matching proof-level `Nonempty` wrappers,
        vector-slot variational uniqueness, center-trajectory scalar chain-rule
       wrappers with eventual-equality transfer forms, center-trajectory
        uniqueness wrappers, direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule
