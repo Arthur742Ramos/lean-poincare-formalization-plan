@@ -868,9 +868,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          actual pushed-forward tangent vectors at the base time. The variational
          base-flow agreement now also identifies the model ODE velocity
          `f(t, y(t))` with the raw gauge vector field in chart coordinates by
-         uniqueness of derivatives, and a strengthened endpoint accepts the full
-         field derivative at the variational base point with the scalar identity
-         stated using that model velocity.
+         uniqueness of derivatives. A model-coordinate variational-local-flow
+         endpoint now accepts the full field derivative at the variational base
+         point with the scalar identity stated using that model velocity and the
+         concrete tangent-coordinate slots, while a geometric-slot variant states
+         the same identity using actual pushed-forward tangent vectors.
          The coordinate data also restricts to smaller time sets and lifts
          through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
         so chart computations can feed the point-4 theorem routes without an

@@ -334,10 +334,14 @@ The variational base-flow identification is now also formalized:
 `Diffeomorph3GaugeFlowOn.variationalBaseVelocity_eq_tangentCoordChange_of_eventuallyEq`
 uses uniqueness of derivatives to identify `f(t, y(t))` with the chart-coordinate
 raw gauge vector field whenever the variational model flow agrees locally with
-the raw gauge coordinate curve. The endpoint
+the raw gauge coordinate curve. The model-coordinate endpoint
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalLocalFlow`
+uses that identification directly, so the scalar identity can be stated at the
+variational base point using `f(t, y(t))` and the concrete tangent-coordinate
+slots. The geometric endpoint
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalLocalFlow_geometricValue`
-therefore accepts the full field derivative at the variational base point and a
-scalar velocity identity written using the model ODE velocity `f`.
+then accepts the same full field derivative with the scalar identity written in
+actual pushed-forward tangent vectors.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

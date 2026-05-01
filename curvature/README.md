@@ -307,9 +307,10 @@ now packages the matching intrinsic boundary
         variational-tangent endpoint that accepts the full field derivative,
         tangent-map identification, and scalar velocity identity directly, plus a
         geometric-slot companion phrasing that identity in actual pushed-forward
-        tangent vectors, and a variational-local-flow variant that identifies the
+        tangent vectors, and variational-local-flow variants that identify the
         model base velocity with the raw gauge vector field by derivative
-        uniqueness when the base coordinate curves agree,
+        uniqueness when the base coordinate curves agree, both in direct
+        model-coordinate slots and in pushed-forward geometric slots,
         exposing the chart algebra needed for Banach finite-cover metric readouts. The
         raw-flow API also extracts continuity of
       `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
