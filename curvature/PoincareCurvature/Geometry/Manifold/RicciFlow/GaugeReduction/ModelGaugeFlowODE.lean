@@ -206,6 +206,28 @@ theorem eqOn_Icc_of_lipschitzOnWith
       (Icc_mem_nhds ht.1 ht.2)
   · rw [α.initial_eq x hx, β.initial_eq x hx]
 
+/-- Center-trajectory interior uniqueness for packaged local model flows. -/
+theorem center_eqOn_Ioo_of_lipschitzOnWith
+    (α β : LocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x₀ t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow x₀ t ∈ state t) :
+    EqOn (α.flow x₀) (β.flow x₀) (Ioo tmin tmax) :=
+  α.eqOn_Ioo_of_lipschitzOnWith β (mem_closedBall_self r.2)
+    ht₀ hf_lip hα_mem hβ_mem
+
+/-- Center-trajectory closed-interval uniqueness for packaged local model flows. -/
+theorem center_eqOn_Icc_of_lipschitzOnWith
+    (α β : LocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x₀ t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow x₀ t ∈ state t) :
+    EqOn (α.flow x₀) (β.flow x₀) (Icc tmin tmax) :=
+  α.eqOn_Icc_of_lipschitzOnWith β (mem_closedBall_self r.2)
+    ht₀ hf_lip hα_mem hβ_mem
+
 end LocalFlowSolution
 
 namespace LocalFlowSolution
@@ -392,6 +414,31 @@ theorem eqOn_Icc_of_lipschitzOnWith
   LocalFlowSolution.eqOn_Icc_of_lipschitzOnWith
     (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
     (x := x) hx ht₀ hf_lip hα_mem hβ_mem
+
+/-- Center-trajectory interior uniqueness for continuous space-time local flows. -/
+theorem center_eqOn_Ioo_of_lipschitzOnWith
+    (α β : ContinuousLocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x₀, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x₀, t) ∈ state t) :
+    EqOn (fun t : ℝ => α.flow (x₀, t)) (fun t : ℝ => β.flow (x₀, t))
+      (Ioo tmin tmax) :=
+  α.eqOn_Ioo_of_lipschitzOnWith β (mem_closedBall_self r.2)
+    ht₀ hf_lip hα_mem hβ_mem
+
+/-- Center-trajectory closed-interval uniqueness for continuous space-time local
+flows. -/
+theorem center_eqOn_Icc_of_lipschitzOnWith
+    (α β : ContinuousLocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x₀, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x₀, t) ∈ state t) :
+    EqOn (fun t : ℝ => α.flow (x₀, t)) (fun t : ℝ => β.flow (x₀, t))
+      (Icc tmin tmax) :=
+  α.eqOn_Icc_of_lipschitzOnWith β (mem_closedBall_self r.2)
+    ht₀ hf_lip hα_mem hβ_mem
 
 end ContinuousLocalFlowSolution
 
@@ -995,6 +1042,23 @@ theorem flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound
   intro t ht
   exact Prod.ext (hflow ht) (htangent ht)
 
+/-- Center-trajectory interior uniqueness for the full variational pair
+`(flow, tangent)`. -/
+theorem center_flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x₀, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x₀, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x₀, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (α.flow (x₀, t), α.tangent x₀ t))
+      (fun t : ℝ => (β.flow (x₀, t), β.tangent x₀ t))
+      (Ioo tmin tmax) :=
+  α.flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound β
+    (mem_closedBall_self r.2) ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound
+
 /-- Closed-interval uniqueness for tangent maps of variational local flows.  The
 endpoint conclusion follows from the within-interval derivative statements via
 continuity, while uniqueness on the interior uses the same Gronwall argument as
@@ -1099,6 +1163,23 @@ theorem flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound
       hx ht₀ hflowIoo hD_bound (by intro t ht; simp) (by intro t ht; simp)
   intro t ht
   exact Prod.ext (hflowIcc ht) (htangent ht)
+
+/-- Center-trajectory closed-interval uniqueness for the full variational pair
+`(flow, tangent)`. -/
+theorem center_flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x₀, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x₀, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x₀, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (α.flow (x₀, t), α.tangent x₀ t))
+      (fun t : ℝ => (β.flow (x₀, t), β.tangent x₀ t))
+      (Icc tmin tmax) :=
+  α.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound β
+    (mem_closedBall_self r.2) ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound
 
 end VariationalLocalFlowSolution
 

@@ -604,6 +604,10 @@ consume variational model-flow data without manually threading
 `x₀ ∈ closedBall x₀ r`; the same center wrappers now have within-filter and
 ordinary-neighborhood eventual-equality transfer forms for chart-local scalar
 identifications.
+The model ODE uniqueness layer now also has center-trajectory wrappers for
+packaged local flows, continuous space-time local flows, and the full
+variational pair `(flow, tangent)` on both `Ioo` and `Icc`, so basepoint
+uniqueness arguments no longer repeat the same closed-ball membership proof.
 The same module now also
 packages the model-space variational equation as
 `VariationalLocalFlowSolution`, with tangent maps initialized by the identity
