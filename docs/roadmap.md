@@ -905,7 +905,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           derivative at the variational base point, so finite-cover readouts can
           feed the closed-Picard time-difference route without separately
           proving the endpoint time-difference derivative, including in the
-          pushed-forward geometric-slot scalar notation. The
+          pushed-forward geometric-slot scalar notation and in
+          ordinary-neighborhood tangent-map variants. The
            direct variational chain-rule route now has the same geometric-slot
            companion, so applications can choose either the direct full-field route
            or the time-difference route without changing geometric scalar notation.
