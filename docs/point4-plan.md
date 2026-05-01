@@ -136,6 +136,9 @@ the endpoint analogue of the existing interior positive-dimensional component
 bridge. This is packaged as
 `CoordinatePullbackMetricComponentDerivativeWithinOn`, with a variational
 tangent-map constructor over `Icc tmin tmax`.
+There is also a generic within-set eventual-equality scalar chain rule for the
+concrete component shape `B(τ)(A(τ)u)(A(τ)v)` with `A'(t) = D ∘ A(t)`, so these
+endpoint component packages can be transferred to local scalar identities.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package

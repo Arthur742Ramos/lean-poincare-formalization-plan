@@ -523,7 +523,7 @@ now packages the matching intrinsic boundary
       counterparts for endpoint work, with eventual-equality transfer lemmas for
       chart-local coordinate identifications and an endpoint derivative bridge
       for the concrete tangent-coordinate component, packaged at the component
-      derivative-data layer. The
+      derivative-data layer with a generic within-set scalar transfer. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
       promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
       scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred

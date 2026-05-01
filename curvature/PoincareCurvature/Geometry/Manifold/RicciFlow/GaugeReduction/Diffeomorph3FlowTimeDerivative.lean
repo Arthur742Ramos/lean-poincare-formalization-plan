@@ -102,6 +102,57 @@ theorem hasDerivWithinAt_bilinearForm_apply_apply
     hfirst.clm_apply hv
   simpa [ContinuousLinearMap.add_apply, add_assoc] using hsecond
 
+/-- Within-set local-coordinate transfer form of
+`hasDerivWithinAt_bilinearForm_apply_apply` for the tangent-map-shaped
+derivative case `A'(t) = D ∘ A(t)`.
+
+The explicit equality at `t` is required because `nhdsWithin` eventual equality
+does not, by itself, rewrite the value at the base point. -/
+theorem hasDerivWithinAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp_deriv
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {s : Set ℝ} {t : ℝ} {scalar : ℝ → ℝ}
+    {B : ℝ → V →L[ℝ] V →L[ℝ] ℝ} {B' : V →L[ℝ] V →L[ℝ] ℝ}
+    {A : ℝ → V →L[ℝ] V} {D : V →L[ℝ] V} (u v : V)
+    (heq : scalar =ᶠ[𝓝[s] t] fun τ : ℝ ↦ B τ (A τ u) (A τ v))
+    (heq_t : scalar t = B t (A t u) (A t v))
+    (hB : HasDerivWithinAt B B' s t)
+    (hA : HasDerivWithinAt A (D.comp (A t)) s t)
+    {value : ℝ}
+    (hvalue :
+      B' (A t u) (A t v) +
+          B t (D (A t u)) (A t v) +
+          B t (A t u) (D (A t v)) =
+        value) :
+    HasDerivWithinAt scalar value s t := by
+  have hAu : HasDerivWithinAt (fun τ : ℝ ↦ A τ u) (D (A t u)) s t := by
+    have hev :
+        HasFDerivWithinAt
+          (fun A : V →L[ℝ] V ↦ A u) (ContinuousLinearMap.apply ℝ V u)
+          Set.univ (A t) :=
+      (ContinuousLinearMap.apply ℝ V u).hasFDerivWithinAt
+    have hcomp := hev.comp t hA.hasFDerivWithinAt
+      (Set.mapsTo_univ (fun τ : ℝ ↦ A τ) s)
+    simpa [Function.comp] using hcomp.hasDerivWithinAt
+  have hAv : HasDerivWithinAt (fun τ : ℝ ↦ A τ v) (D (A t v)) s t := by
+    have hev :
+        HasFDerivWithinAt
+          (fun A : V →L[ℝ] V ↦ A v) (ContinuousLinearMap.apply ℝ V v)
+          Set.univ (A t) :=
+      (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
+    have hcomp := hev.comp t hA.hasFDerivWithinAt
+      (Set.mapsTo_univ (fun τ : ℝ ↦ A τ) s)
+    simpa [Function.comp] using hcomp.hasDerivWithinAt
+  have hderiv :
+      HasDerivWithinAt (fun τ : ℝ ↦ B τ (A τ u) (A τ v))
+        (B' (A t u) (A t v) +
+          B t (D (A t u)) (A t v) +
+          B t (A t u) (D (A t v))) s t :=
+    hasDerivWithinAt_bilinearForm_apply_apply
+      (B := B) (B' := B') (u := fun τ : ℝ ↦ A τ u)
+      (u' := D (A t u)) (v := fun τ : ℝ ↦ A τ v)
+      (v' := D (A t v)) (s := s) (t := t) hB hAu hAv
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
 /-- Within-set version of `hasDerivAt_bilinearFormField_along_curve`, using a
 full Fréchet derivative of the bilinear-form field at the base point. -/
 theorem hasDerivWithinAt_bilinearFormField_along_curve
