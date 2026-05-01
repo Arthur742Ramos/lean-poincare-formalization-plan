@@ -255,7 +255,12 @@ now packages the matching intrinsic boundary
        time-only model route now combines a variational local flow with a direct
        `HasDerivAt B B' t` proof for the already-composed moving bilinear-form
        readout, avoiding a full space-time `Bfield` derivative hypothesis when
-       the chart calculation has already reduced to `B(t)(A(t)u)(A(t)v)`.
+       the chart calculation has already reduced to `B(t)(A(t)u)(A(t)v)`. The
+       analytic finite-cover layer now differentiates the whole coordinate
+       bilinear-form readout as an `F →L[ℝ] F →L[ℝ] ℝ` value for Banach local
+       solutions, reified continuous metric curves, and smooth realizations, so
+       the Banach Picard metric curve feeds that weaker time-only interface
+       before choosing tangent-vector slots.
        Closed-Picard
        raw gauge flows also feed the coordinate-model/field time-derivative
        bridges directly on the open interior interval, with a one-step theorem

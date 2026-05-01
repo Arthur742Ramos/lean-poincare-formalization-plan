@@ -687,7 +687,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        and the concrete coordinate identification with that flow. A companion
        time-only model route accepts a direct `HasDerivAt B B' t` proof for the
        already-composed bilinear-form readout, while the variational flow supplies
-       the tangent-map derivative terms. Closed-Picard
+       the tangent-map derivative terms. The analytic finite-cover layer now
+       provides that readout in the required vector-valued shape:
+       Banach local solutions, continuous-metric curves, and smooth
+       realizations inherit `HasDerivAt` for the entire coordinate bilinear form
+       as an `F →L[ℝ] F →L[ℝ] ℝ` value, not only after applying two vector slots.
+       Closed-Picard
        raw gauge flows now specialize directly to the open interior interval for
        coordinate-model/field time-derivative bridges, including a one-step
        theorem,

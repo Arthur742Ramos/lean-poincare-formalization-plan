@@ -284,7 +284,13 @@ This route only needs the already-composed moving bilinear-form readout
 `B : ℝ → E →L[ℝ] E →L[ℝ] ℝ` to have `HasDerivAt B B' t`; it no longer forces
 the caller to package the metric component as a full space-time
 `Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ` with a `HasFDerivAt` proof when a direct
-time derivative of the readout is available.
+time derivative of the readout is available.  The finite-cover analytic layer
+now supplies exactly this vector-valued readout derivative:
+`BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_hasDerivAt_of_mem_Ioo`
+and its continuous-metric / smooth-realization variants differentiate the whole
+coordinate bilinear form as an element of `E →L[ℝ] E →L[ℝ] ℝ`, before applying
+it to tangent vectors.  This connects the Banach Picard metric curve directly to
+the weaker time-only dynamic pullback interface.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
