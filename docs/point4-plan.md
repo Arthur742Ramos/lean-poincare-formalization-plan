@@ -621,7 +621,12 @@ or a named geometric gauge-flow bundle can be connected directly to
 `Diffeomorph3GaugeFlowOn` and `IntrinsicDeTurckGaugeFlowExistenceFamily`.  The
 `of_hasMFDerivAtOn` variants match the common Picard-interior shape where the
 ODE construction has ordinary derivatives only for times in the selected open
-time set, not for all real times.
+time set, not for all real times. The derivative-view layer now mirrors this
+with `Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn`,
+`ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily`, and the theorem-family
+`ofDerivativeAtFamily` raw-existence bridge, so named Picard-interior derivative
+data no longer has to be manually weakened to within-set form before entering
+the gauge-flow existence API.
 The theorem-family zero-gauge-field constructor now also carries the required
 pullback metric time-derivative proof, so any family whose intrinsic DeTurck
 gauge field vanishes on each solution time set can enter the gauge-reduction

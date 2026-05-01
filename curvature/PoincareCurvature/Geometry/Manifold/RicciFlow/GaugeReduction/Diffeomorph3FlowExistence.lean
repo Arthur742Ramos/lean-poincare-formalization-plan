@@ -1031,6 +1031,26 @@ noncomputable def ofDerivativeFamily
   of_hasMFDerivWithinAt (I := I) (M := M)
     maps3 anchored hflowDeriv
 
+/-- Package theorem-family ordinary-at-time named derivative data as raw
+gauge-flow existence data.  This is the named derivative-family analogue of
+`of_hasMFDerivAtOn`. -/
+noncomputable def ofDerivativeAtFamily
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hflowDeriv : ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily
+      (I := I) (M := M) maps3) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  of_hasMFDerivAtOn (I := I) (M := M)
+    maps3 anchored hflowDeriv
+
 /-- Derivative-family data extracted directly from theorem-family raw intrinsic
 DeTurck gauge-flow existence. -/
 theorem derivativeFamily

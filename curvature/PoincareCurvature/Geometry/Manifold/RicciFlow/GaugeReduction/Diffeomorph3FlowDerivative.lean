@@ -39,6 +39,35 @@ def Diffeomorph3IntrinsicGaugeFlowDerivativeOn
       ((1 : ℝ →L[ℝ] ℝ).smulRight
         (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)))
 
+/-- Ordinary-at-time derivative form of the intrinsic DeTurck gauge-flow equation
+for a `C^3` diffeomorphism family, restricted to times in `s`.
+
+This is the shape produced by Picard-interior ODE arguments after upgrading
+closed-interval derivatives to ordinary derivatives on the open time set. -/
+def Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ t ∈ s, ∀ x : M,
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (Φ τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)))
+
+/-- Ordinary-at-time derivative data on `s` immediately gives the within-set
+derivative data used by the primitive gauge-flow API. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hderiv : Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+      (I := I) (M := M) Φ g background s) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  exact (hderiv t ht x).hasMFDerivWithinAt
+
 /-- A `C^3` diffeomorphism family satisfying the DeTurck gauge-flow equation
 also provides the primitive pointwise derivative data expected by the
 derivative-level gauge-reduction APIs. -/
@@ -95,6 +124,37 @@ def ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
         sol.1.toIntrinsicDeTurckSolution.metric
         sol.1.toIntrinsicDeTurckSolution.background
         sol.1.toIntrinsicDeTurckSolution.timeSet
+
+/-- Family-level ordinary-at-time derivative data for the intrinsic DeTurck
+gauges of all chosen DeTurck solutions. -/
+def ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)) : Prop :=
+  ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+    ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+        (maps3 ivp sol)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background
+        sol.1.toIntrinsicDeTurckSolution.timeSet
+
+/-- Ordinary-at-time family derivative data gives the within-set derivative-family
+view expected by derivative-level gauge-reduction APIs. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_of_derivativeAtFamily
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily
+      (I := I) (M := M) maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp sol
+  exact Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
+    (I := I) (M := M) (hderiv ivp sol)
 
 /-- Family-level derivative data extracted from geometric `C^3` gauge-flow
 solutions for every chosen DeTurck solution. -/

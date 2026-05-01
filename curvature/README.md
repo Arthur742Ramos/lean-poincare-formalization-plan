@@ -520,7 +520,9 @@ now packages the matching intrinsic boundary
     identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]`, ordinary-on-time-set
      `HasMFDerivAt`, and unrestricted `HasMFDerivAt` adapters, named
-     derivative-family adapters, geometric-to-raw adapters, and direct derivative/local-at-time
+     derivative-family adapters, including an ordinary-on-time-set
+     `ofDerivativeAtFamily` bridge, geometric-to-raw adapters, and direct
+     derivative/local-at-time
      extractors; raw intrinsic gauge-flow existence witnesses now project
      directly to gauge-reduced, intrinsic, and ordinary theorem packages from
     either pulled-back metric time-derivative or scalar inner-product derivative
