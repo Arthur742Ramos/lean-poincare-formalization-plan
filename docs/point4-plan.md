@@ -671,7 +671,8 @@ It also packages the continuous space-time partial-flow form as
 continuity needed before gluing local solutions. Continuous and variational
 local-flow packages now expose named base-flow, tangent-map, and vector-slot
 time-slice continuity bridges on the Picard interval, including direct
-within-interval and interior pointwise continuity readouts, and the autonomous `C¹`
+within-interval, interior pointwise, and open-interior `ContinuousOn`
+readouts, and the autonomous `C¹`
 local-integral-curve specialization now also returns continuity on its open
 existence interval. Variational local-flow uniqueness now also has direct
 interior and closed-interval vector-slot `A(t) v` bridges derived from

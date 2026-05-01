@@ -693,7 +693,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        partial-flow form needed for chart gluing, named base-flow, tangent-map,
        and vector-slot time-slice continuity bridges for continuous/variational
          packages, including direct within-interval and interior pointwise
-         continuity readouts, plus the autonomous `C¹` integral-curve specialization with
+         continuity readouts and open-interior `ContinuousOn` readouts, plus the
+         autonomous `C¹` integral-curve specialization with
         open-interval continuity and a packaged `LocalFlowSolution` extraction
         on a smaller closed interval, now with a direct localized existence form
         for any smaller closed interval containing the base time and any smaller

@@ -236,7 +236,8 @@ now packages the matching intrinsic boundary
        space-time partial-flow form needed for chart gluing, plus the
        time-slice continuity bridges for continuous/variational local-flow
         packages, including direct within-interval and interior pointwise
-        continuity readouts, autonomous `C¹` local-integral-curve specialization with
+        continuity readouts and open-interior `ContinuousOn` readouts,
+        autonomous `C¹` local-integral-curve specialization with
        open-interval continuity and packaged `LocalFlowSolution` extraction,
        restriction constructors and direct localized Picard-Lindelöf
        constructors for local/Lipschitz/continuous model-flow packages with
