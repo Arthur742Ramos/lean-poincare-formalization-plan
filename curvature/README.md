@@ -324,7 +324,10 @@ now packages the matching intrinsic boundary
    matching `_hpullDerivative` time-derivative lemma. The underlying
    `Diffeomorph3GaugeFlowOn` raw-flow API also has arbitrary-vector-field
    identity constructors for subsingleton tangent, subsingleton model, and empty
-   manifolds. Two new thin extension
+   manifolds, and raw intrinsic gauge-flow existence witnesses now project
+   directly to gauge-reduced, intrinsic, and ordinary theorem packages from
+   either pulled-back metric time-derivative or scalar inner-product derivative
+   data. Two new thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`

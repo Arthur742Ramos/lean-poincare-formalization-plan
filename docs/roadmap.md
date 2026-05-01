@@ -646,8 +646,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     arbitrary vector fields in subsingleton tangent, subsingleton model, and
     empty-manifold cases; `IntrinsicDeTurckGaugeFlowExistence(.Family)` lifts
     those to intrinsic DeTurck identity-gauge constructors, in addition to the
-    chosen-Levi-Civita-background case. Thus the full point-4 input chain has no
-    gauge-flow gap in any of the currently-proved special cases. The
+    chosen-Levi-Civita-background case. Raw intrinsic gauge-flow existence
+    witnesses now also feed directly into the gauge-reduced, intrinsic, and
+    ordinary theorem-package routes using either pulled-back metric
+    time-derivative proofs or scalar inner-product derivative proofs. Thus the
+    full point-4 input chain has no gauge-flow gap in any of the
+    currently-proved special cases. The
     non-identity gauge time-regularity
     interface now also has the proof-bearing scalar-to-tensor bridge, so its
     remaining primitive input is the scalar chain-rule identity for the
