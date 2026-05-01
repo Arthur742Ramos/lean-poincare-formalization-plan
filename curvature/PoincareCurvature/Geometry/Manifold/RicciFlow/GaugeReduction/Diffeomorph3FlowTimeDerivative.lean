@@ -436,6 +436,52 @@ theorem pullbackMetricInnerDerivativeData_iff_hasTimeDerivativeOn
   · intro hpullDerivative
     exact G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn hpullDerivative
 
+/-- The chosen-background identity raw `C^3` gauge-flow family carries the named
+scalar derivative data expected by the time-derivative routes. -/
+theorem identityOfChosenBackground_pullbackMetricInnerDerivativeData :
+    (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfChosenBackground
+      (E := E) (H := H) (I := I) (M := M)).PullbackMetricInnerDerivativeData :=
+  (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfChosenBackground
+    (E := E) (H := H) (I := I) (M := M)).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (fun ivp sol ↦
+      IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfChosenBackground_hpullDerivative
+        (E := E) (H := H) (I := I) (M := M) ivp sol)
+
+/-- The subsingleton-tangent identity raw `C^3` gauge-flow family carries the
+named scalar derivative data expected by the time-derivative routes. -/
+theorem identityOfSubsingletonTangent_pullbackMetricInnerDerivativeData
+    [∀ x : M, Subsingleton ((TangentSpace I : M → Type _) x)] :
+    (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonTangent
+      (E := E) (H := H) (I := I) (M := M)).PullbackMetricInnerDerivativeData :=
+  (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonTangent
+    (E := E) (H := H) (I := I) (M := M)).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (fun ivp sol ↦
+      IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonTangent_hpullDerivative
+        (E := E) (H := H) (I := I) (M := M) ivp sol)
+
+/-- Model-space synonym of
+`identityOfSubsingletonTangent_pullbackMetricInnerDerivativeData`. -/
+theorem identityOfSubsingletonModel_pullbackMetricInnerDerivativeData
+    [Subsingleton E] :
+    (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonModel
+      (E := E) (H := H) (I := I) (M := M)).PullbackMetricInnerDerivativeData :=
+  (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonModel
+    (E := E) (H := H) (I := I) (M := M)).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (fun ivp sol ↦
+      IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonModel_hpullDerivative
+        (E := E) (H := H) (I := I) (M := M) ivp sol)
+
+/-- Empty-manifold synonym of the identity raw `C^3` gauge-flow scalar data. -/
+theorem identityOfIsEmpty_pullbackMetricInnerDerivativeData
+    [IsEmpty M] :
+    (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfIsEmpty
+      (E := E) (H := H) (I := I) (M := M)).PullbackMetricInnerDerivativeData :=
+  (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfIsEmpty
+    (E := E) (H := H) (I := I) (M := M)).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (fun ivp sol ↦
+      IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfIsEmpty_hpullDerivative
+        (E := E) (H := H) (I := I) (M := M) ivp sol)
+
 end IntrinsicDeTurckGaugeFlowExistenceFamily
 
 /-- A theorem-family chosen-background DeTurck package becomes gauge-reducible
