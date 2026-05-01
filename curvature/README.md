@@ -602,7 +602,8 @@ now packages the matching intrinsic boundary
        for the concrete tangent-coordinate component, packaged at the component
        derivative-data layer, plus monotone restriction for ordinary component-level
        derivative data and for component-level and full-field within-set derivative
-       data, with a generic within-set scalar transfer and raw
+       data, with a raw within-set component route to scalar and tensor
+       time-regularity on the same time set, a generic within-set scalar transfer and raw
        endpoint scalar derivative package that upgrades directly to tensor
       time-regularity on the open interval and restricts to smaller time sets
       through a raw gauge-flow endpoint

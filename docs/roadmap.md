@@ -755,7 +755,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        the remaining chart-local hypotheses are the metric-component derivative
        and the concrete coordinate identification with that flow; both ordinary
        and within-set component derivative packages now restrict monotonically
-       to smaller time sets for Picard-interval localization. A companion
+       to smaller time sets for Picard-interval localization, and raw gauge
+       flows now promote arbitrary within-time-set component data directly to
+       scalar and tensor time-regularity on the same time set. A companion
        time-only model route accepts a direct `HasDerivAt B B' t` proof for the
        already-composed bilinear-form readout, while the variational flow supplies
        the tangent-map derivative terms. The analytic finite-cover layer now

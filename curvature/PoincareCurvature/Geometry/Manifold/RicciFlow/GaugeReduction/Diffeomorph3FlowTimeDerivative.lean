@@ -5814,6 +5814,41 @@ theorem hasTimeDerivativeOn_of_coordinateComponents
     (fun {t} ht x u v ↦ G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
       (t := t) (hs (t := t) ht) g x u v)
 
+/-- Raw gauge-flow within-set concrete component data gives the endpoint
+geometric scalar derivative target. -/
+theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateComponentsWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricInnerDerivativeWithinOn_of_coordinateComponentWithin
+    (I := I) (M := M) hdata
+    (fun {t} ht x u v ↦
+      G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+        (t := t) ht g x u v)
+
+/-- Raw gauge-flow within-set concrete component data gives tensor
+time-regularity whenever the time set is a neighborhood of each of its times. -/
+theorem hasTimeDerivativeOn_of_coordinateComponentsWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
+    (I := I) (M := M)
+    ((G.pullbackMetricInnerDerivativeWithinOn_of_coordinateComponentsWithin
+      (I := I) (M := M) hdata).toPullbackMetricInnerDerivativeOn hs)
+
 /-- Raw gauge-flow endpoint route from closed-interval concrete coordinate
 component derivatives directly to tensor time-regularity on the open interior.
 

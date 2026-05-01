@@ -167,6 +167,9 @@ instances to avoid expensive typeclass search in the bilinear codomain.
 Ordinary component-level coordinate derivative data now has the same monotone
 time-set restriction, so callers can localize either closed-interval or
 open-interior component hypotheses after shrinking a Picard interval.
+Raw gauge flows now also promote arbitrary within-time-set concrete component
+data directly to within-set scalar derivative data and, when the time set is a
+neighborhood at its points, to tensor time-regularity on that same set.
 A direct theorem packages closed-interval concrete component derivatives as
 `HasTimeDerivativeOn` for the gauge-pulled metric family over `Ioo tmin tmax`.
 The raw `Diffeomorph3GaugeFlowOn` layer now exposes the same endpoint route
