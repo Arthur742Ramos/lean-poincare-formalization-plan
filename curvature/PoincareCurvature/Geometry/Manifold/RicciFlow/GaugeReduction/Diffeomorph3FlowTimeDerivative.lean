@@ -244,4 +244,82 @@ theorem pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
 
 end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
 
+/-- A theorem-family chosen-background DeTurck package becomes gauge-reducible
+from named scalar derivative data for a geometric `C^3` gauge-flow family. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReducible_viaDiffeomorph3GaugeFlowFamilyPullbackMetricInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamilyTimeDerivative G
+    (fun ivp sol ↦ G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
+      hinner ivp sol)
+
+/-- Intrinsic Ricci-flow theorem-family projection from named scalar derivative
+data for a geometric `C^3` gauge-flow family. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaDiffeomorph3GaugeFlowFamilyPullbackMetricInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamilyPullbackMetricInnerDerivative
+    G hinner).toIntrinsicFamily
+
+/-- Ordinary Ricci-flow theorem-family projection from named scalar derivative
+data for a geometric `C^3` gauge-flow family. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily_viaDiffeomorph3GaugeFlowFamilyPullbackMetricInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toIntrinsicFamily_viaDiffeomorph3GaugeFlowFamilyPullbackMetricInnerDerivative
+    G hinner).toOrdinary
+
+/-- A fixed-IVP chosen-background DeTurck package becomes gauge-reducible from
+named scalar derivative data for a geometric `C^3` gauge-flow bundle. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducible_viaDiffeomorph3GaugeFlowBundlePullbackMetricInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundleTimeDerivative G
+    (fun sol ↦ G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner sol)
+
+/-- Intrinsic Ricci-flow fixed-IVP projection from named scalar derivative data
+for a geometric `C^3` gauge-flow bundle. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaDiffeomorph3GaugeFlowBundlePullbackMetricInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundlePullbackMetricInnerDerivative
+    G hinner).toIntrinsic
+
+/-- Ordinary Ricci-flow fixed-IVP projection from named scalar derivative data
+for a geometric `C^3` gauge-flow bundle. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaDiffeomorph3GaugeFlowBundlePullbackMetricInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toIntrinsic_viaDiffeomorph3GaugeFlowBundlePullbackMetricInnerDerivative
+    G hinner).toOrdinary
+
 end RicciFlow
