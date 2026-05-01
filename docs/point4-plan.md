@@ -218,7 +218,10 @@ packages the model-space variational equation as
 `VariationalLocalFlowSolution`, with tangent maps initialized by the identity
 and satisfying `A'(t) = Df(t, flow(t)) ∘ A(t)` on the Picard interval; this is
 the ODE-side source of the `A`-derivative hypothesis in
-`CoordinatePullbackMetricModelDerivativeOn`.  The same module also records the
+`CoordinatePullbackMetricModelDerivativeOn`. It also proves interior uniqueness
+for the variational/tangent maps once the base local flows agree and the
+linearized ODE is uniformly Lipschitz on a state region, which is the tangent
+compatibility input needed for chart gluing.  The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
 local model flows whose curves stay in a uniformly Lipschitz state region; the

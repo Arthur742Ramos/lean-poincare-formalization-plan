@@ -229,7 +229,8 @@ now packages the matching intrinsic boundary
       raw-flow building block. It also packages the tangent-map variational
       equation `A'(t) = Df(t, flow(t)) ∘ A(t)` as
       `VariationalLocalFlowSolution`, matching the coordinate-model
-      `A`-derivative hypothesis. The raw-flow API also extracts continuity of
+      `A`-derivative hypothesis, with an interior uniqueness bridge for tangent
+      maps once base local flows agree. The raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
      A thin `AnalyticPDE.SmoothRealization` module names the

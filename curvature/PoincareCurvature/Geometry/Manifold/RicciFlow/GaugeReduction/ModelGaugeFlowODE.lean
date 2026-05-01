@@ -251,6 +251,31 @@ theorem tangent_hasDerivAt_of_mem_Ioo
   (α.tangent_hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
 
+/-- Two variational local flows have the same tangent map on the interior
+interval whenever their base curves agree there and the induced linearized ODE is
+uniformly Lipschitz on a state region containing both tangent curves. -/
+theorem tangent_eqOn_Ioo_of_lipschitzOnWith
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax))
+    (hlin_lip : ∀ t ∈ Ioo tmin tmax,
+      LipschitzOnWith K (fun A : V →L[ℝ] V => (Df t (α.flow (x, t))).comp A) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.tangent x t ∈ state t) :
+    EqOn (α.tangent x) (β.tangent x) (Ioo tmin tmax) := by
+  refine ODE_solution_unique_of_mem_Ioo
+    (v := fun (t : ℝ) (A : V →L[ℝ] V) => (Df t (α.flow (x, t))).comp A)
+    (s := state) hlin_lip ht₀ ?_ ?_ ?_
+  · intro t ht
+    exact ⟨α.tangent_hasDerivAt_of_mem_Ioo hx ht, hα_mem t ht⟩
+  · intro t ht
+    have hβderiv := β.tangent_hasDerivAt_of_mem_Ioo hx ht
+    rw [show β.flow (x, t) = α.flow (x, t) from (hflow_eq ht).symm] at hβderiv
+    exact ⟨hβderiv, hβ_mem t ht⟩
+  · rw [α.tangent_initial_eq x hx, β.tangent_initial_eq x hx]
+
 end VariationalLocalFlowSolution
 
 namespace IsPicardLindelof
