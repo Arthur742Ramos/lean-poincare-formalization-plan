@@ -315,7 +315,22 @@ now packages the matching intrinsic boundary
    including the
    actual Ricci-DeTurck Banach chart and Picard estimates on the restricted
    symmetric carrier plus the identification of that Banach representative with
-   the geometric Ricci-DeTurck right-hand side.
+   the geometric Ricci-DeTurck right-hand side. Item 2 of those obligations (raw
+   `C³` gauge-flow existence) is now closed in four special cases via dedicated
+   `IntrinsicDeTurckGaugeFlowExistence(.Family)` constructors:
+   `identityOfChosenBackground`, `identityOfSubsingletonTangent`,
+   `identityOfSubsingletonModel`, and `identityOfIsEmpty`, each accompanied by a
+   matching `_hpullDerivative` time-derivative lemma. Two new thin extension
+   modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
+   `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
+   and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`
+   supplies the empty-manifold parallels of the existing
+   `_of_subsingleton_tangent` family conversions between
+   `IntrinsicLocalExistenceUniquenessFamily`,
+   `ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily`, and
+   `IntrinsicDeTurckLocalExistenceUniquenessFamily`. See
+   `docs/point4-plan.md` for the systematic decomposition of the three
+   remaining items.
    The curvature, time-dependent geometry, intrinsic Ricci-flow, and DeTurck
    layers now prove the geometric symmetry input outright: metric compatibility
    gives curvature-operator skew-adjointness, torsion-freeness gives first
