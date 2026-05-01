@@ -1934,6 +1934,25 @@ def ofProductClosedBallEstimates
       (r := R) hf_lip hDf_lip hA_bound hD_bound hcont hnorm hmul)
     hr
 
+/-- One-step variational local-flow existence from closed-ball estimates,
+kept proof-level. -/
+theorem nonempty_ofProductClosedBallEstimates
+    [CompleteSpace V]
+    {a R L Kf KD BA BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hcont : ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
+      ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) (Icc tmin tmax))
+    (hnorm : ∀ t ∈ Icc tmin tmax,
+      ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
+        ‖variationalVectorField f Df t z‖ ≤ L)
+    (hmul : L * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) :=
+  ⟨ofProductClosedBallEstimates hf_lip hDf_lip hA_bound hD_bound hcont hnorm hmul hr⟩
+
 /-- Localized one-step variational local-flow constructor from closed-ball
 Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`. -/
 def ofProductClosedBallEstimates_restrict
@@ -1961,6 +1980,30 @@ def ofProductClosedBallEstimates_restrict
       (r := R) hf_lip hDf_lip hA_bound hD_bound hcont hnorm hmul)
     htime ht₀' hr
 
+/-- Localized one-step variational local-flow existence from closed-ball
+estimates, kept proof-level. -/
+theorem nonempty_ofProductClosedBallEstimates_restrict
+    [CompleteSpace V]
+    {a R L Kf KD BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hcont : ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
+      ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) (Icc tmin tmax))
+    (hnorm : ∀ t ∈ Icc tmin tmax,
+      ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
+        ‖variationalVectorField f Df t z‖ ≤ L)
+    (hmul : L * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨ofProductClosedBallEstimates_restrict hf_lip hDf_lip hA_bound hD_bound hcont hnorm
+    hmul htime ht₀' hr⟩
+
 /-- One-step variational local-flow constructor from componentwise closed-ball
 Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`.
 
@@ -1985,6 +2028,24 @@ def ofProductComponentClosedBallEstimates
       (A₀ := (1 : V →L[ℝ] V))
       (r := R) hf_lip hDf_lip hf_bound hA_bound hD_bound hcont hmul)
     hr
+
+/-- One-step variational local-flow existence from componentwise closed-ball
+estimates, kept proof-level. -/
+theorem nonempty_ofProductComponentClosedBallEstimates
+    [CompleteSpace V]
+    {a R Kf KD Lf BA BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hcont : ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
+      ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) :=
+  ⟨ofProductComponentClosedBallEstimates hf_lip hDf_lip hf_bound hA_bound hD_bound
+    hcont hmul hr⟩
 
 /-- Localized one-step variational local-flow constructor from componentwise
 closed-ball Picard-Lindelöf estimates for the product system. -/
@@ -2011,6 +2072,28 @@ def ofProductComponentClosedBallEstimates_restrict
       (r := R) hf_lip hDf_lip hf_bound hA_bound hD_bound hcont hmul)
     htime ht₀' hr
 
+/-- Localized one-step variational local-flow existence from componentwise
+closed-ball estimates, kept proof-level. -/
+theorem nonempty_ofProductComponentClosedBallEstimates_restrict
+    [CompleteSpace V]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hcont : ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
+      ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨ofProductComponentClosedBallEstimates_restrict hf_lip hDf_lip hf_bound hA_bound
+    hD_bound hcont hmul htime ht₀' hr⟩
+
 /-- One-step variational local-flow constructor from componentwise closed-ball
 Picard-Lindelöf estimates and componentwise time-continuity. -/
 def ofProductComponentClosedBallContinuityEstimates
@@ -2031,6 +2114,24 @@ def ofProductComponentClosedBallContinuityEstimates
       (A₀ := (1 : V →L[ℝ] V))
       (r := R) hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul)
     hr
+
+/-- One-step variational local-flow existence from componentwise estimates and
+componentwise time-continuity, kept proof-level. -/
+theorem nonempty_ofProductComponentClosedBallContinuityEstimates
+    [CompleteSpace V]
+    {a R Kf KD Lf BA BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) :=
+  ⟨ofProductComponentClosedBallContinuityEstimates hf_lip hDf_lip hf_bound hA_bound
+    hD_bound hf_cont hDf_cont hmul hr⟩
 
 /-- Localized one-step variational local-flow constructor from componentwise
 closed-ball estimates and componentwise time-continuity. -/
@@ -2057,6 +2158,28 @@ def ofProductComponentClosedBallContinuityEstimates_restrict
       (r := R) hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul)
     htime ht₀' hr
 
+/-- Localized one-step variational local-flow existence from componentwise
+estimates and componentwise time-continuity, kept proof-level. -/
+theorem nonempty_ofProductComponentClosedBallContinuityEstimates_restrict
+    [CompleteSpace V]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨ofProductComponentClosedBallContinuityEstimates_restrict hf_lip hDf_lip hf_bound
+    hA_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr⟩
+
 /-- One-step variational local-flow constructor with the tangent-operator bound
 derived from the closed ball around the identity operator. -/
 def ofProductComponentClosedBallContinuityEstimates_of_operatorBall
@@ -2078,6 +2201,25 @@ def ofProductComponentClosedBallContinuityEstimates_of_operatorBall
     hf_lip hDf_lip hf_bound
     (fun A hA => nnnorm_le_nnnorm_add_radius_of_mem_closedBall hA)
     hD_bound hf_cont hDf_cont hmul hr
+
+/-- One-step variational local-flow existence with the tangent-operator bound
+derived from the closed ball around the identity operator, kept proof-level. -/
+theorem nonempty_ofProductComponentClosedBallContinuityEstimates_of_operatorBall
+    [CompleteSpace V]
+    {a R Kf KD Lf BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (‖(1 : V →L[ℝ] V)‖₊ + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) :=
+  ⟨ofProductComponentClosedBallContinuityEstimates_of_operatorBall
+    hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul hr⟩
 
 /-- Localized one-step variational local-flow constructor with the
 tangent-operator bound derived from the closed ball around the identity
@@ -2106,6 +2248,30 @@ def ofProductComponentClosedBallContinuityEstimates_restrict_of_operatorBall
     (fun A hA => nnnorm_le_nnnorm_add_radius_of_mem_closedBall hA)
     hD_bound hf_cont hDf_cont hmul htime ht₀' hr
 
+/-- Localized one-step variational local-flow existence with the tangent-operator
+bound derived from the closed ball around the identity operator, kept
+proof-level. -/
+theorem nonempty_ofProductComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+    [CompleteSpace V]
+    {a R Kf KD Lf BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (‖(1 : V →L[ℝ] V)‖₊ + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨ofProductComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+    hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr⟩
+
 /-- One-step variational local-flow constructor with the tangent-operator bound
 derived as `‖A‖₊ ≤ 1 + a` on the closed ball around the identity operator. -/
 def ofProductComponentClosedBallContinuityEstimates_of_identityBall
@@ -2127,6 +2293,25 @@ def ofProductComponentClosedBallContinuityEstimates_of_identityBall
     hf_lip hDf_lip hf_bound
     (fun A hA => nnnorm_le_one_add_radius_of_mem_closedBall_one hA)
     hD_bound hf_cont hDf_cont hmul hr
+
+/-- One-step variational local-flow existence with the tangent-operator bound
+`‖A‖₊ ≤ 1 + a`, kept proof-level. -/
+theorem nonempty_ofProductComponentClosedBallContinuityEstimates_of_identityBall
+    [CompleteSpace V]
+    {a R Kf KD Lf BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (1 + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) :=
+  ⟨ofProductComponentClosedBallContinuityEstimates_of_identityBall
+    hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul hr⟩
 
 /-- Localized one-step variational local-flow constructor with the
 tangent-operator bound derived as `‖A‖₊ ≤ 1 + a` on the closed ball around the
@@ -2154,6 +2339,29 @@ def ofProductComponentClosedBallContinuityEstimates_restrict_of_identityBall
     hf_lip hDf_lip hf_bound
     (fun A hA => nnnorm_le_one_add_radius_of_mem_closedBall_one hA)
     hD_bound hf_cont hDf_cont hmul htime ht₀' hr
+
+/-- Localized one-step variational local-flow existence with the tangent-operator
+bound `‖A‖₊ ≤ 1 + a`, kept proof-level. -/
+theorem nonempty_ofProductComponentClosedBallContinuityEstimates_restrict_of_identityBall
+    [CompleteSpace V]
+    {a R Kf KD Lf BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (1 + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R) :
+    Nonempty (VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
+  ⟨ofProductComponentClosedBallContinuityEstimates_restrict_of_identityBall
+    hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr⟩
 
 end VariationalLocalFlowSolution
 

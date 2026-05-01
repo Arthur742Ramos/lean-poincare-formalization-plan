@@ -275,7 +275,8 @@ now packages the matching intrinsic boundary
         `(x, 1)`, with a radius-specialized Picard constructor and
         closed-interval localized variants and proof-level `Nonempty` wrappers
         for continuous-product/product-Picard inputs and localized variants for
-        the one-step closed-ball estimate constructors. It also proves
+        the one-step closed-ball estimate constructors, with matching
+        proof-level `Nonempty` wrappers. It also proves
        the left-composition operator-space Lipschitz estimate, a product-state
        Lipschitz estimate for the full variational vector field, and
        interior/closed-interval uniqueness for the full `(flow, tangent)` pair
