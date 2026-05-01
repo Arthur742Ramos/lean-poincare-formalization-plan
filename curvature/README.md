@@ -390,7 +390,9 @@ now packages the matching intrinsic boundary
      transfer lemmas for chart-local coordinate identifications. The
      coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
      promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
-     scalar target and directly to tensor `HasTimeDerivativeOn`. This leaves one primitive
+     scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred
+     coordinate scalar expression is now named as
+     `pullbackMetricInnerCoordinateModel`. This leaves one primitive
     positive-dimensional time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`

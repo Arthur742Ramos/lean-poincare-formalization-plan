@@ -163,6 +163,27 @@ def CoordinatePullbackMetricInnerDerivativeOn
           B t (A t uE) (D (A t vE)) =
         gdot t x u v
 
+/-- Preferred model-coordinate scalar expression for the component of a
+gauge-pulled metric at a fixed base point and tangent-vector pair. -/
+noncomputable def pullbackMetricInnerCoordinateModel
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TangentSpace I x) : ℝ → ℝ := fun τ =>
+  let TM := (TangentSpace I : M → Type _)
+  let TStar := fun y : M => TM y →L[ℝ] ℝ
+  let OneF := E →L[ℝ] ℝ
+  let hx : x ∈ (trivializationAt E TM x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  let uE : E := (trivializationAt E TM x).continuousLinearEquivAt ℝ x hx u
+  let vE : E := (trivializationAt E TM x).continuousLinearEquivAt ℝ x hx v
+  let A : E →L[ℝ] E :=
+    ContinuousLinearMap.inCoordinates E TM E TM x x ((Φ t) x) ((Φ τ) x)
+      ((Φ τ).pushforwardTangent x)
+  let B : E →L[ℝ] E →L[ℝ] ℝ :=
+    ContinuousLinearMap.inCoordinates E TM OneF TStar
+      ((Φ t) x) ((Φ τ) x) ((Φ t) x) ((Φ τ) x) ((g τ).inner ((Φ τ) x))
+  B (A uE) (A vE)
+
 /-- Restrict named scalar pullback derivative data to a smaller time set. -/
 theorem PullbackMetricInnerDerivativeOn.mono
     {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}

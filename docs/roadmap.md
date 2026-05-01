@@ -694,7 +694,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
      chartwise `B/A/D` derivative hypotheses to the actual geometric
      `PullbackMetricInnerDerivativeOn` scalar target and directly to tensor
-     `HasTimeDerivativeOn` for the gauge-pulled metric. In the subsingleton-tangent case this non-identity
+     `HasTimeDerivativeOn` for the gauge-pulled metric, while
+     `pullbackMetricInnerCoordinateModel` names the preferred
+     `B(τ)(A(τ)u)(A(τ)v)` scalar expression for the next chart-identification
+     step. In the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
     DeTurck gauge-flow families by componentwise vanishing, with direct
     gauge-reduced projections and matching model-space/empty-manifold synonyms

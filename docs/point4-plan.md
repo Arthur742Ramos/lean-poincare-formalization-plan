@@ -127,7 +127,10 @@ the derivative proof directly.  The named coordinate package
 `PullbackMetricInnerDerivativeOn` target, and directly to tensor
 `HasTimeDerivativeOn` for the gauge-pulled metric family, so Item 1 is reduced
 to proving the coordinate derivative hypotheses for the metric component and
-tangent map.
+tangent map.  The preferred coordinate scalar expression itself is now named as
+`pullbackMetricInnerCoordinateModel`, isolating the concrete `B(τ)(A(τ)u)(A(τ)v)`
+term that the next chart-identification proof must relate to the geometric
+pullback scalar.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
