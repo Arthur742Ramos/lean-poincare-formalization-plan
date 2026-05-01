@@ -216,9 +216,12 @@ time-regularity on `Ioo tmin tmax`, and now also has same-set
 `coordinatePullbackMetricFieldDerivativeWithinOn_of_baseCoordinate`,
 `coordinatePullbackMetricFieldDerivativeWithinOn_of_metricCoordinateField`,
 `hasTimeDerivativeOn_of_baseCoordinateFieldWithin`, and
-`hasTimeDerivativeOn_of_metricCoordinateFieldWithin` constructors for time sets
-that are already neighborhoods of their points. The fixed-IVP and theorem-family
-geometric DeTurck gauge-flow bundles now also expose within-set
+`hasTimeDerivativeOn_of_metricCoordinateFieldWithin`, together with readout-field
+companions
+`coordinatePullbackMetricFieldDerivativeWithinOn_of_eventuallyEq_metricCoordinateField`
+and `hasTimeDerivativeOn_of_eventuallyEq_metricCoordinateFieldWithin`, for time
+sets that are already neighborhoods of their points. The fixed-IVP and
+theorem-family geometric DeTurck gauge-flow bundles now also expose within-set
 field-derivative data packages and direct tensor time-regularity projections
 from them, matching the ordinary field-data routes at package level. Raw
 fixed-IVP and theorem-family intrinsic gauge-flow existence witnesses now mirror

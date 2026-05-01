@@ -689,8 +689,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       local-flow constructors for full metric-coordinate Fréchet data, raw
       gauge-flow endpoint wrappers from that data to interior tensor
       time-regularity, same-set raw gauge-flow moving-base field constructors
-      and tensor projections, fixed-IVP/theorem-family within-field data packages
-      and projections, matching raw intrinsic gauge-flow existence wrappers,
+      and readout-field tensor projections, fixed-IVP/theorem-family within-field
+      data packages and projections, matching raw intrinsic gauge-flow existence wrappers,
       generic within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set, open-interior, and chart-coordinate continuity
       helpers,
