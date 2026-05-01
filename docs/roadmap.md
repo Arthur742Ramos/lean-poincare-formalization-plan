@@ -678,7 +678,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       product local flows initialized on `(x, 1)` extract directly to
       `VariationalLocalFlowSolution` on any base ball contained in the product
       Picard ball, and product Picard-Lindelöf hypotheses construct that
-      variational package directly. The dynamic pullback layer now uses a
+      variational package directly, with an automatic radius-specialized
+      constructor when the base radius is bounded by the product radius. The dynamic pullback layer now uses a
       variational local flow to discharge the interior `y'(t)` and `A'(t)`
       clauses in `CoordinatePullbackMetricFieldDerivativeOn` and proves the
       exact scalar chain rule for `B(t, y(t))(A(t)u)(A(t)v)` along that flow, so

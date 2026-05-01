@@ -510,6 +510,26 @@ def ofProductPicardLindelof
   ofProductContinuousLocalFlowSolution
     (IsPicardLindelof.toContinuousLocalFlowSolution hf) hball
 
+/-- Picard-Lindelöf for the product variational system supplies the variational
+flow package on any base ball whose radius is no larger than the product Picard
+radius. -/
+def ofProductPicardLindelof_of_le_radius
+    [CompleteSpace V]
+    {a R L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    (hr : r ≤ R) :
+    VariationalLocalFlowSolution f Df t₀ x₀ r :=
+  ofProductPicardLindelof hf (by
+    intro x hx
+    rw [mem_closedBall] at hx ⊢
+    calc
+      dist (x, (1 : V →L[ℝ] V)) (x₀, (1 : V →L[ℝ] V))
+          = max (dist x x₀) (dist (1 : V →L[ℝ] V) 1) := by
+            rw [Prod.dist_eq]
+      _ = dist x x₀ := by simp
+      _ ≤ (R : ℝ) := hx.trans (by exact_mod_cast hr))
+
 end VariationalLocalFlowSolution
 
 namespace ContDiffAt

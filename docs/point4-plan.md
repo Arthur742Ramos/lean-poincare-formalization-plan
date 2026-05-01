@@ -232,7 +232,9 @@ system, initialized on `(x, 1)` and restricted to a base ball contained in the
 product Picard ball, now extracts directly to `VariationalLocalFlowSolution`.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
-restriction. The ODE package now also supplies ordinary interior time
+restriction, with a specialized constructor that discharges this restriction
+automatically when the chosen base radius is no larger than the product Picard
+radius. The ODE package now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, and
 `Diffeomorph3FlowTimeDerivative.lean` uses those facts to build
 `CoordinatePullbackMetricFieldDerivativeOn` directly from a variational local

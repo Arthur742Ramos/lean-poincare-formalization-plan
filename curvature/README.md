@@ -235,7 +235,7 @@ now packages the matching intrinsic boundary
       projection lemmas from product local-flow solutions to the base and tangent
       equations, and extracts `VariationalLocalFlowSolution` from continuous
       product local flows or product Picard-Lindelöf hypotheses initialized on
-      `(x, 1)`. The dynamic pullback bridge now turns such a variational local
+      `(x, 1)`, with a radius-specialized Picard constructor. The dynamic pullback bridge now turns such a variational local
       flow into the interior coordinate-field derivative data and proves the
       exact scalar chain rule along the flow, leaving only the metric-component
       derivative and concrete chart identification as local inputs. Closed-Picard
