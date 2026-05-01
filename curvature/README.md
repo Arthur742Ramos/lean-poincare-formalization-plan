@@ -321,7 +321,10 @@ now packages the matching intrinsic boundary
    `IntrinsicDeTurckGaugeFlowExistence(.Family)` constructors:
    `identityOfChosenBackground`, `identityOfSubsingletonTangent`,
    `identityOfSubsingletonModel`, and `identityOfIsEmpty`, each accompanied by a
-   matching `_hpullDerivative` time-derivative lemma. Two new thin extension
+   matching `_hpullDerivative` time-derivative lemma. The underlying
+   `Diffeomorph3GaugeFlowOn` raw-flow API also has arbitrary-vector-field
+   identity constructors for subsingleton tangent, subsingleton model, and empty
+   manifolds. Two new thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`

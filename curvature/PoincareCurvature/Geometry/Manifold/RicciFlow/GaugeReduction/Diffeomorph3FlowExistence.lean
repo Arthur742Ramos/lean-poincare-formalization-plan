@@ -53,6 +53,34 @@ noncomputable def identity_of_eq_zero
   satisfies := SmoothSelfDiffeomorph3Family.id_satisfiesGaugeFlowOn_of_eq_zero
     (I := I) (M := M) (X := X) (s := s) hX
 
+/-- If every tangent fiber is a subsingleton, the identity `C³` diffeomorphism
+family is a raw gauge flow for any time-dependent vector field. -/
+noncomputable def identity_of_subsingleton_tangent
+    [∀ x : M, Subsingleton ((TangentSpace I : M → Type _) x)]
+    (X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (s : Set ℝ) (t₀ : ℝ) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  identity_of_eq_zero (I := I) (M := M) X s t₀
+    (fun t _ht x ↦ Subsingleton.elim (X t x) 0)
+
+/-- Model-space version of `identity_of_subsingleton_tangent`. -/
+noncomputable def identity_of_subsingleton_model
+    [Subsingleton E]
+    (X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (s : Set ℝ) (t₀ : ℝ) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  identity_of_subsingleton_tangent (I := I) (M := M) X s t₀
+
+/-- On an empty manifold, the identity `C³` diffeomorphism family is a raw gauge
+flow for any time-dependent vector field. -/
+noncomputable def identity_of_isEmpty
+    [IsEmpty M]
+    (X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (s : Set ℝ) (t₀ : ℝ) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  identity_of_eq_zero (I := I) (M := M) X s t₀
+    (fun _t _ht x ↦ isEmptyElim x)
+
 /-- Derivative form of a raw `C^3` diffeomorphism flow. -/
 theorem hasMFDerivWithinAt
     {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
@@ -143,22 +171,12 @@ noncomputable def identityOfSubsingletonTangent
     IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp where
   flow := fun sol ↦
-    Diffeomorph3GaugeFlowOn.identity_of_eq_zero
+    Diffeomorph3GaugeFlowOn.identity_of_subsingleton_tangent
       (I := I) (M := M)
       (intrinsicDeTurckGaugeField (I := I) (M := M)
         sol.1.toIntrinsicDeTurckSolution.metric
         sol.1.toIntrinsicDeTurckSolution.background)
       sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime
-      (fun t _ht x ↦ by
-        have hzero :
-            intrinsicDeTurckVectorField (I := I) (M := M)
-              sol.1.toIntrinsicDeTurckSolution.metric
-              sol.1.toIntrinsicDeTurckSolution.background = 0 :=
-          intrinsicDeTurckVectorField_eq_zero_of_subsingleton_tangent
-            (I := I) (M := M)
-            sol.1.toIntrinsicDeTurckSolution.metric
-            sol.1.toIntrinsicDeTurckSolution.background
-        simpa [intrinsicDeTurckGaugeField] using congrFun (congrFun hzero t) x)
 
 /-- Model-space version of `identityOfSubsingletonTangent`: when the model vector space `E` is a
 subsingleton, every tangent fiber is automatically subsingleton, so the identity `C³` family
@@ -179,13 +197,12 @@ noncomputable def identityOfIsEmpty
     IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp where
   flow := fun sol ↦
-    Diffeomorph3GaugeFlowOn.identity_of_eq_zero
+    Diffeomorph3GaugeFlowOn.identity_of_isEmpty
       (I := I) (M := M)
       (intrinsicDeTurckGaugeField (I := I) (M := M)
         sol.1.toIntrinsicDeTurckSolution.metric
         sol.1.toIntrinsicDeTurckSolution.background)
       sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime
-      (fun _t _ht x ↦ isEmptyElim x)
 def toDiffeomorph3GaugeFlow
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence

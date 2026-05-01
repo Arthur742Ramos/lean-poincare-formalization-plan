@@ -642,11 +642,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     symmetric, and the full intrinsic Ricci-DeTurck RHS is symmetric because the
     DeTurck correction term itself is symmetric. The analytic side is therefore
     no longer purely documentary. The raw `C³` gauge-flow existence layer
-    (`IntrinsicDeTurckGaugeFlowExistence(.Family)`) now also exposes
-    identity-gauge constructors for subsingleton tangent fibers, the model-space
-    synonym, and empty manifolds in addition to the chosen-Levi-Civita-background
-    case, so the full point-4 input chain has no gauge-flow gap in any of the
-    currently-proved special cases. The non-identity gauge time-regularity
+    (`Diffeomorph3GaugeFlowOn`) now exposes identity-flow constructors for
+    arbitrary vector fields in subsingleton tangent, subsingleton model, and
+    empty-manifold cases; `IntrinsicDeTurckGaugeFlowExistence(.Family)` lifts
+    those to intrinsic DeTurck identity-gauge constructors, in addition to the
+    chosen-Levi-Civita-background case. Thus the full point-4 input chain has no
+    gauge-flow gap in any of the currently-proved special cases. The
+    non-identity gauge time-regularity
     interface now also has the proof-bearing scalar-to-tensor bridge, so its
     remaining primitive input is the scalar chain-rule identity for the
     pulled-back metric. What still remains is the geometric-analysis
