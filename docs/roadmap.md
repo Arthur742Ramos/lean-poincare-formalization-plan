@@ -1121,7 +1121,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      theorem packages, including intrinsic and ordinary theorem-family witnesses
      from a family of symmetric-carrier interval closure data. Families of global
      and closed-interval `RicciDeTurckChartClosureData` now have the same
-     proof-level intrinsic and ordinary theorem-family wrappers.
+     proof-level intrinsic and ordinary theorem-family wrappers. Ambient
+     interval closure data also now has proof-level constructors for genuine
+     symmetric-carrier closure, including the metric-cone shrink route.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence

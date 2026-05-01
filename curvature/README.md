@@ -603,8 +603,10 @@ now packages the matching intrinsic boundary
      theorem packages, including intrinsic and ordinary theorem-family witnesses
      from a family of symmetric-carrier interval closure data. Families of global
      and closed-interval `RicciDeTurckChartClosureData` now have the same
-     proof-level intrinsic and ordinary theorem-family wrappers, leaving the
-     heavy PDE realization module unchanged.
+     proof-level intrinsic and ordinary theorem-family wrappers. Ambient interval
+     closure data also now has proof-level constructors for genuine
+     symmetric-carrier closure, including the metric-cone shrink route, leaving
+     the heavy PDE realization module unchanged.
      The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation

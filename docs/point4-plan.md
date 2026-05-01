@@ -890,7 +890,10 @@ proof-level readout shape for chosen-background, intrinsic, and ordinary
 compact theorem packages, plus proof-level intrinsic and ordinary theorem-family
 witnesses from a family of symmetric-carrier interval closure data. The same
 `Nonempty` theorem-family wrappers are available for families of global and
-closed-interval `RicciDeTurckChartClosureData`.
+closed-interval `RicciDeTurckChartClosureData`. Ambient interval closure data
+now also has proof-level constructors for genuine symmetric-carrier closure,
+both from an explicit restricted-carrier Picard proof and after shrinking into a
+closed ball contained in the Riemannian metric cone.
 
 **Suggested decomposition** (multi-session):
 
