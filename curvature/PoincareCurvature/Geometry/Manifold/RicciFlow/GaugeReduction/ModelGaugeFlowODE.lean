@@ -182,6 +182,13 @@ def restrict
       exact le_trans hx (by exact_mod_cast hr)
     exact (α.hasDerivWithinAt x hx' t (htime ht)).mono htime
 
+@[simp] theorem restrict_flow
+    (α : LocalFlowSolution f t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    (α.restrict htime ht₀' hr).flow = α.flow := rfl
+
 /-- Restrict a nonempty packaged local-flow existence witness to a smaller
 initial ball and closed time interval. -/
 theorem nonempty_restrict
@@ -318,6 +325,13 @@ def restrict
     intro x hx
     rw [mem_closedBall] at hx ⊢
     exact le_trans hx (by exact_mod_cast hr)
+
+@[simp] theorem restrict_flow
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    (α.restrict htime ht₀' hr).flow = α.flow := rfl
 
 /-- Restrict a nonempty Lipschitz local-flow existence witness to a smaller
 initial ball and closed time interval. -/
@@ -516,6 +530,13 @@ def restrict
     intro x hx
     rw [mem_closedBall] at hx ⊢
     exact le_trans hx (by exact_mod_cast hr)
+
+@[simp] theorem restrict_flow
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    (α.restrict htime ht₀' hr).flow = α.flow := rfl
 
 /-- Restrict a nonempty continuous local-flow existence witness to a smaller
 initial ball and closed time interval. -/
@@ -1037,6 +1058,20 @@ def restrict
       rw [mem_closedBall] at hx ⊢
       exact le_trans hx (by exact_mod_cast hr)
     exact (α.tangent_hasDerivWithinAt x hx' t (htime ht)).mono htime
+
+@[simp] theorem restrict_flow
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    (α.restrict htime ht₀' hr).flow = α.flow := rfl
+
+@[simp] theorem restrict_tangent
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    (α.restrict htime ht₀' hr).tangent = α.tangent := rfl
 
 /-- Restrict a nonempty variational local-flow existence witness to a smaller
 initial ball and closed time interval. -/
