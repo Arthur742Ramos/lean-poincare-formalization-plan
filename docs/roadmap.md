@@ -830,7 +830,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         now identifies the raw coordinate curve and concrete tangent-coordinate
         map with `VariationalLocalFlowSolution`, discharging the ODE part of
         the chain rule once the named metric-coordinate field derivative is
-        supplied.
+        supplied. The centered time-direction part of that derivative is now
+        formalized from `HasTimeDerivativeAt` / `HasTimeDerivativeOn`, leaving
+        the moving spatial-coordinate derivative as the true positive-dimensional
+        field obligation.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

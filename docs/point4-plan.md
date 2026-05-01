@@ -269,7 +269,10 @@ that data directly to tensor time-regularity, including a closed-Picard
 flows. A variational-flow variant now identifies the raw coordinate curve and
 tangent-coordinate map with a `VariationalLocalFlowSolution`, so the ODE part
 of the non-identity gauge calculation is discharged once the named
-`metricBilinearCoordinateField` has its Fréchet derivative.
+`metricBilinearCoordinateField` has its Fréchet derivative. The centered
+time-direction part of that derivative is now formalized directly from
+`HasTimeDerivativeAt` / `HasTimeDerivativeOn`; the remaining positive-dimensional
+field derivative is the moving spatial-coordinate part.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

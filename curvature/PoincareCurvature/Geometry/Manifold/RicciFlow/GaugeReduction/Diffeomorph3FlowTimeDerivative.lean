@@ -524,6 +524,76 @@ theorem metricBilinearCoordinateField_base_sourceTangentCoordinate_eq
   rw [metricBilinearCoordinateField_base_apply_eq]
   simp [sourceTangentCoordinate]
 
+/-- The time-direction derivative of the named metric-coordinate field at the
+chart center is exactly the tensor time derivative of the metric.  This isolates
+the part of the `metricBilinearCoordinateField` Fréchet derivative supplied by
+`HasTimeDerivativeAt`; the remaining positive-dimensional difficulty is the
+moving spatial-coordinate derivative. -/
+theorem metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ} (hg : HasTimeDerivativeAt (I := I) (M := M) g gdot t)
+    (p : M) (uE vE : E) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, (extChartAt I p) p) uE vE)
+      (gdot t p
+        (tangentVectorOfCoordinate (I := I) p uE)
+        (tangentVectorOfCoordinate (I := I) p vE)) t := by
+  have hmetric := hg p
+    (tangentVectorOfCoordinate (I := I) p uE)
+    (tangentVectorOfCoordinate (I := I) p vE)
+  have hEq :
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, (extChartAt I p) p) uE vE) =ᶠ[𝓝 t]
+        (fun τ : ℝ ↦ metricTensor (I := I) (M := M) g τ p
+          (tangentVectorOfCoordinate (I := I) p uE)
+          (tangentVectorOfCoordinate (I := I) p vE)) := by
+    filter_upwards with τ
+    rw [metricBilinearCoordinateField_base_apply_eq_tangentVector]
+    rfl
+  exact hmetric.congr_of_eventuallyEq hEq
+
+/-- Centered tangent-vector-slot version of
+`metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt`. -/
+theorem metricBilinearCoordinateField_base_sourceTangentCoordinate_hasDerivAt_of_hasTimeDerivativeAt
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ} (hg : HasTimeDerivativeAt (I := I) (M := M) g gdot t)
+    (p : M) (u v : TangentSpace I p) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, (extChartAt I p) p)
+          (sourceTangentCoordinate (I := I) p u)
+          (sourceTangentCoordinate (I := I) p v))
+      (gdot t p u v) t := by
+  simpa using
+    metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt
+      (I := I) (M := M) hg p
+      (sourceTangentCoordinate (I := I) p u)
+      (sourceTangentCoordinate (I := I) p v)
+
+/-- Set-indexed version of
+`metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt`. -/
+theorem metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeOn
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ} {t : ℝ}
+    (hg : HasTimeDerivativeOn (I := I) (M := M) g gdot s) (ht : t ∈ s)
+    (p : M) (uE vE : E) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, (extChartAt I p) p) uE vE)
+      (gdot t p
+        (tangentVectorOfCoordinate (I := I) p uE)
+        (tangentVectorOfCoordinate (I := I) p vE)) t :=
+  metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt
+    (I := I) (M := M) (hg ht) p uE vE
+
 /-- At the base time, the two-variable metric-coordinate field agrees with the
 concrete moving bilinear coordinate component. -/
 theorem metricBilinearCoordinateField_base_eq_pullbackMetricBilinearCoordinateMap_self
