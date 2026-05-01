@@ -597,12 +597,13 @@ now packages the matching intrinsic boundary
       `D ∘ A(t)` tangent-map derivative contribution, plus a moving-base
       direct-vector-slot version now used by the variational scalar theorem via
       applied tangent-map ODE data and closed-interval/right-derivative
-      counterparts for endpoint work, with eventual-equality transfer lemmas for
-      chart-local coordinate identifications and an endpoint derivative bridge
-      for the concrete tangent-coordinate component, packaged at the component
-      derivative-data layer, plus monotone restriction for component-level and
-      full-field within-set derivative data, with a generic within-set scalar transfer and raw
-      endpoint scalar derivative package that upgrades directly to tensor
+       counterparts for endpoint work, with eventual-equality transfer lemmas for
+       chart-local coordinate identifications and an endpoint derivative bridge
+       for the concrete tangent-coordinate component, packaged at the component
+       derivative-data layer, plus monotone restriction for ordinary component-level
+       derivative data and for component-level and full-field within-set derivative
+       data, with a generic within-set scalar transfer and raw
+       endpoint scalar derivative package that upgrades directly to tensor
       time-regularity on the open interval and restricts to smaller time sets
       through a raw gauge-flow endpoint
       wrapper, including variational tangent-map endpoint data with

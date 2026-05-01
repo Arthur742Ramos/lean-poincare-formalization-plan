@@ -164,6 +164,9 @@ sets, matching localized Picard intervals.
 Component-level within-set coordinate derivative data now also restricts
 monotonically to smaller time sets, using explicit continuous-linear-map
 instances to avoid expensive typeclass search in the bilinear codomain.
+Ordinary component-level coordinate derivative data now has the same monotone
+time-set restriction, so callers can localize either closed-interval or
+open-interior component hypotheses after shrinking a Picard interval.
 A direct theorem packages closed-interval concrete component derivatives as
 `HasTimeDerivativeOn` for the gauge-pulled metric family over `Ioo tmin tmax`.
 The raw `Diffeomorph3GaugeFlowOn` layer now exposes the same endpoint route

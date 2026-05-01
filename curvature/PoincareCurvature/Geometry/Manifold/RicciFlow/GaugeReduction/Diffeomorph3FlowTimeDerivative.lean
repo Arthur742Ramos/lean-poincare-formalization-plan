@@ -2271,6 +2271,19 @@ theorem CoordinatePullbackMetricComponentDerivativeWithinOn.mono
   obtain ⟨B', D, hB, hA, hvalue⟩ := hdata (hst hτ) x u v
   exact ⟨B', D, hB.mono hst, hA.mono hst, hvalue⟩
 
+/-- Restrict component-level coordinate derivative data to a smaller time set. -/
+theorem CoordinatePullbackMetricComponentDerivativeOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hdata : CoordinatePullbackMetricComponentDerivativeOn
+      (I := I) (M := M) Φ g gdot t)
+    (hst : s ⊆ t) :
+    CoordinatePullbackMetricComponentDerivativeOn (I := I) (M := M) Φ g gdot s := by
+  intro τ hτ x u v
+  exact hdata (hst hτ) x u v
+
 /-- Concrete component-derivative form of
 `CoordinatePullbackMetricModelDerivativeOn`.
 

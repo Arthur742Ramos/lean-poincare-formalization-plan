@@ -753,7 +753,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        clauses in `CoordinatePullbackMetricFieldDerivativeOn` and proves the
        exact scalar chain rule for `B(t, y(t))(A(t)u)(A(t)v)` along that flow, so
        the remaining chart-local hypotheses are the metric-component derivative
-       and the concrete coordinate identification with that flow. A companion
+       and the concrete coordinate identification with that flow; both ordinary
+       and within-set component derivative packages now restrict monotonically
+       to smaller time sets for Picard-interval localization. A companion
        time-only model route accepts a direct `HasDerivAt B B' t` proof for the
        already-composed bilinear-form readout, while the variational flow supplies
        the tangent-map derivative terms. The analytic finite-cover layer now
