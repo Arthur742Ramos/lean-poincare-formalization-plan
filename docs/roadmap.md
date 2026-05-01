@@ -683,7 +683,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       center-trajectory scalar chain-rule wrappers for basepoint
       gauge-pullback calculations including eventual-equality transfer forms,
       direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule primitives,
-      raw-gauge-flow time-set and chart-coordinate continuity helpers,
+      raw-gauge-flow time-set, open-interior, and chart-coordinate continuity
+      helpers,
       center-trajectory uniqueness wrappers for local/continuous/variational
       packages,
       and Gronwall uniqueness bridges for packaged

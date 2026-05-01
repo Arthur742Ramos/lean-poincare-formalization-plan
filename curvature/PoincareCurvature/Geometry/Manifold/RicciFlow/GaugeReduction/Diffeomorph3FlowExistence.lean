@@ -164,6 +164,27 @@ theorem continuousAt_eval_of_mem_Ioo
     ContinuousAt (fun τ : ℝ ↦ (G.maps3 τ) x) t :=
   (G.hasMFDerivAt_of_mem_Ioo ht x).continuousAt
 
+/-- A closed-interval raw gauge-flow witness is continuous on the open Picard
+interior along every base point. -/
+theorem continuousOn_eval_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (x : M) :
+    ContinuousOn (fun τ : ℝ ↦ (G.maps3 τ) x) (Ioo tmin tmax) :=
+  fun _t ht ↦ (G.continuousAt_eval_of_mem_Ioo ht x).continuousWithinAt
+
+/-- Interior raw gauge-flow curves are continuous in the preferred chart centered
+at the time-`t` value. -/
+theorem continuousAt_extChartAt_eval_of_mem_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax) (x : M) :
+    ContinuousAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) t :=
+  (G.hasDerivAt_extChartAt_eval_of_mem_Ioo ht x).continuousAt
+
 /-- Interior times of a closed-interval raw gauge flow have the tangent-chart
 membership needed for coordinate pullback formulas. -/
 theorem eventually_mem_trivializationAt_eval_of_mem_Ioo

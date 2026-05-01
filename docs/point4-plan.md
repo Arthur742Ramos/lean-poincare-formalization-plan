@@ -611,7 +611,9 @@ model expression without first passing through an eventual-equality wrapper.
 The raw `C³` gauge-flow existence layer now also exposes named continuity
 consequences of the ODE derivative data: `continuousOn_eval` for every base
 point on the time set and `continuousWithinAt_extChartAt_eval` in the preferred
-chart coordinates centered at the current time.
+chart coordinates centered at the current time. Closed-Picard raw flows now
+also expose the corresponding open-interior continuity helpers:
+`continuousOn_eval_Ioo` and `continuousAt_extChartAt_eval_of_mem_Ioo`.
 The model ODE uniqueness layer now also has center-trajectory wrappers for
 packaged local flows, continuous space-time local flows, and the full
 variational pair `(flow, tangent)` on both `Ioo` and `Icc`, so basepoint
