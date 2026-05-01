@@ -7,10 +7,10 @@ set_option linter.unusedSectionVars false
 set_option linter.all false
 
 /-!
-# Rank-one chosen-background Ricci-DeTurck local existence/uniqueness
+# Rank-one and model-space subsingleton chosen-background Ricci-DeTurck local existence/uniqueness
 
-This thin extension module keeps rank-one chosen-background Ricci-DeTurck consequences out of
-the core DeTurck file. The mathematical input is
+This thin extension module keeps the rank-one and model-space subsingleton chosen-background
+Ricci-DeTurck consequences out of the core DeTurck file. The mathematical input is
 `intrinsicLocalExistenceUniqueness_of_finrank_le_one` from `LocalExistence.lean` together with
 the existing conversion `IntrinsicLocalExistenceUniqueness.toChosenIntrinsicDeTurck`. This
 mirrors the patterns already in `DeTurck.lean` for the subsingleton-tangent and empty-manifold
@@ -22,6 +22,10 @@ in the rank-one case, because in finrank one the background connection on `TM` i
 equal the chosen Levi-Civita connection of the evolving metric. The subsingleton-tangent case is
 genuinely special — its arbitrary-background package follows from connection-uniqueness on
 zero-dimensional fibers — and that lemma does not generalize to rank-one.
+
+The model-space subsingleton variants (`[Subsingleton E]`) propagate via the registered instance
+`instSubsingletonTangentSpaceOfSubsingletonModel` from `LocalExistence.lean`, so they are
+straightforward synonyms of the existing `_of_subsingleton_tangent` constructors.
 -/
 
 @[expose] public noncomputable section
@@ -82,6 +86,28 @@ noncomputable def chosenIntrinsicDeTurckLocalExistenceUniquenessFamily_of_finran
       (E := E) (H := H) (I := I) (M := M) where
   package := fun ivp ↦
     chosenIntrinsicDeTurckLocalExistenceUniqueness_of_finrank_model_le_one
+      (I := I) (M := M) ivp
+
+/-- Model-space subsingleton: when the model vector space `E` is a subsingleton, every tangent
+fiber is automatically subsingleton, so chosen-background Ricci-DeTurck local existence/
+uniqueness holds. Synonym of the existing `_of_subsingleton_tangent` constructor obtained
+via the registered instance `instSubsingletonTangentSpaceOfSubsingletonModel`. -/
+noncomputable def chosenIntrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_model
+    [Subsingleton E]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  chosenIntrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_tangent
+    (I := I) (M := M) ivp
+
+/-- The theorem-family version of
+`chosenIntrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_model`. -/
+noncomputable def chosenIntrinsicDeTurckLocalExistenceUniquenessFamily_of_subsingleton_model
+    [Subsingleton E] :
+    ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    chosenIntrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_model
       (I := I) (M := M) ivp
 
 end Compact
