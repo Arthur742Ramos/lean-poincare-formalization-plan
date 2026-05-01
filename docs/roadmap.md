@@ -858,7 +858,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalTangentMap`,
          where a full field Fréchet derivative plus a variational tangent-map
          identification and the scalar velocity identity imply interior tensor
-         time-regularity.
+         time-regularity; a geometric-slot companion states that identity using
+         actual pushed-forward tangent vectors at the base time.
          The coordinate data also restricts to smaller time sets and lifts
          through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
         so chart computations can feed the point-4 theorem routes without an

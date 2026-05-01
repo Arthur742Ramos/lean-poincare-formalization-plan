@@ -313,6 +313,11 @@ identification directly: on Picard interiors, callers provide the full
 `metricBilinearCoordinateField` Fréchet derivative, an eventual equality between
 the concrete tangent-coordinate map and the variational tangent flow, and the
 final scalar velocity identity.
+The companion geometric-slot endpoint
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalTangentMap_geometricValue`
+states the same closed-Picard result with the scalar velocity identity written
+in actual pushed-forward tangent vectors rather than raw centered model slots,
+removing one more coordinate rewrite from future geometric applications.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

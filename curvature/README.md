@@ -302,7 +302,9 @@ now packages the matching intrinsic boundary
         `metricBilinearCoordinateField` Fréchet derivative after subtracting the
         frozen spatial `fderivWithin` contribution, including a closed-Picard
         variational-tangent endpoint that accepts the full field derivative,
-        tangent-map identification, and scalar velocity identity directly,
+        tangent-map identification, and scalar velocity identity directly, plus a
+        geometric-slot companion phrasing that identity in actual pushed-forward
+        tangent vectors,
         exposing the chart algebra needed for Banach finite-cover metric readouts. The
         raw-flow API also extracts continuity of
       `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
