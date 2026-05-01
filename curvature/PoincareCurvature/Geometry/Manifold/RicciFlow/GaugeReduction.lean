@@ -2598,6 +2598,45 @@ theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorp
       (gauge3.pullbackBackgroundConnection_contMDiff hbackground)
       (source.background_contMDiff_of_isLeviCivita hbackground) ht x u v
 
+/-- If the pulled-back background Ricci curvature vanishes at a slot, then the
+geometric gauge-corrected velocity of the `C³` pullback vanishes at that slot. -/
+theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (source : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      source.toIntrinsicDeTurckSolution.metric source.toIntrinsicDeTurckSolution.background
+      source.toIntrinsicDeTurckSolution.timeSet ivp.initialTime)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      source.toIntrinsicDeTurckSolution.metric source.toIntrinsicDeTurckSolution.background)
+    {t : ℝ} (ht : t ∈ source.toIntrinsicDeTurckSolution.timeSet)
+    (x : M) (u v : TM x)
+    (hRicciZero :
+      (letI : Bundle.RiemannianBundle TM :=
+        ⟨((gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+          t).toRiemannianMetric⟩;
+       letI :
+          CovariantDerivative.ContMDiffCovariantDerivative
+            (SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+              gauge3.maps source.toIntrinsicDeTurckSolution.background t) 1 :=
+        gauge3.pullbackBackgroundConnection_contMDiff hbackground t;
+       (SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+         gauge3.maps source.toIntrinsicDeTurckSolution.background t).ricciCurvature x u v) = 0) :
+    source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3 t x u v = 0 := by
+  letI : Bundle.RiemannianBundle TM :=
+    ⟨((gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+      t).toRiemannianMetric⟩
+  letI :
+      CovariantDerivative.ContMDiffCovariantDerivative
+        (SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+          gauge3.maps source.toIntrinsicDeTurckSolution.background t) 1 :=
+    gauge3.pullbackBackgroundConnection_contMDiff hbackground t
+  rw [
+    source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_neg_two_pullbackBackgroundRicciCurvature_of_isLeviCivita
+      gauge3 hbackground ht x u v,
+    hRicciZero]
+  ring
+
 theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_satisfiesEquationAt_of_sourceRicciTransportAt
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (source : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)

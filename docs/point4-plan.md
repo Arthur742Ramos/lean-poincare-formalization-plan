@@ -380,6 +380,11 @@ from global and interval `RicciDeTurckChartClosureData` to intrinsic and
 ordinary compact point-4 theorem packages through the raw identity `C^3`
 gauge-flow witness and its named scalar derivative data, rather than only
 through the direct identity-gauge projection.
+The geometric corrected-velocity side now also has the named zero-curvature
+readout
+`gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`:
+once the pulled-back background Ricci curvature vanishes in a slot, the concrete
+`C³` gauge-corrected pullback velocity vanishes in that slot.
 
 **Module location.** A new module
 `Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowTimeDerivative.lean`

@@ -319,8 +319,11 @@ now packages the matching intrinsic boundary
         required Fréchet derivative from any locally equal two-variable
          bilinear-form readout through the named
          `metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq` bridge,
-        exposing the chart algebra needed for Banach finite-cover metric readouts. The
-        raw-flow API also extracts continuity of
+         exposing the chart algebra needed for Banach finite-cover metric
+         readouts; the geometric corrected-velocity layer also now turns
+         vanishing pulled-back background Ricci curvature directly into vanishing
+         concrete `C³` gauge-corrected pullback velocity through a named theorem. The
+         raw-flow API also extracts continuity of
       `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
      A thin `AnalyticPDE.SmoothRealization` module names the
