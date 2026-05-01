@@ -132,6 +132,23 @@ theorem center_hasDerivWithinAt
     HasDerivWithinAt (α.flow x₀) (f t (α.flow x₀ t)) (Icc tmin tmax) t :=
   α.hasDerivWithinAt x₀ (mem_closedBall_self r.2) t ht
 
+/-- On the interior of the Picard interval, the center curve has an ordinary
+time derivative. -/
+theorem center_hasDerivAt_of_mem_Ioo
+    (α : LocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    HasDerivAt (α.flow x₀) (f t (α.flow x₀ t)) t :=
+  (α.center_hasDerivWithinAt (Ioo_subset_Icc_self ht)).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
+/-- Every initial point in the local ball has the ordinary model-flow derivative
+on the interior of the Picard interval. -/
+theorem flow_hasDerivAt_of_mem_Ioo
+    (α : LocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    HasDerivAt (α.flow x) (f t (α.flow x t)) t :=
+  (α.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
 /-- Two packaged local model flows agree on the interior time interval whenever
 their curves stay in a region where the vector field is uniformly Lipschitz. -/
 theorem eqOn_Ioo_of_lipschitzOnWith
@@ -207,6 +224,28 @@ theorem variational_tangent_hasDerivWithinAt
       ((Df t (α.flow z t).1).comp (α.flow z t).2) (Icc tmin tmax) t :=
   hasDerivWithinAt_snd_of_variationalVectorField
     (α.hasDerivWithinAt z hz t ht)
+
+/-- Interior ordinary base-curve ODE extracted from a packaged solution of the
+product variational system. -/
+theorem variational_base_hasDerivAt_of_mem_Ioo
+    (α : LocalFlowSolution (variationalVectorField f Df) t₀ z₀ r)
+    {z : V × (V →L[ℝ] V)} (hz : z ∈ closedBall z₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    HasDerivAt (fun τ : ℝ => (α.flow z τ).1)
+      (f t (α.flow z t).1) t :=
+  (α.variational_base_hasDerivWithinAt hz (Ioo_subset_Icc_self ht)).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
+/-- Interior ordinary tangent-map ODE extracted from a packaged solution of the
+product variational system. -/
+theorem variational_tangent_hasDerivAt_of_mem_Ioo
+    (α : LocalFlowSolution (variationalVectorField f Df) t₀ z₀ r)
+    {z : V × (V →L[ℝ] V)} (hz : z ∈ closedBall z₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    HasDerivAt (fun τ : ℝ => (α.flow z τ).2)
+      ((Df t (α.flow z t).1).comp (α.flow z t).2) t :=
+  (α.variational_tangent_hasDerivWithinAt hz (Ioo_subset_Icc_self ht)).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
 
 end LocalFlowSolution
 
