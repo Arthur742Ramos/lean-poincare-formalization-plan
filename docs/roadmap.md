@@ -678,7 +678,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       partial-flow form needed for chart gluing, named base-flow, tangent-map,
       and vector-slot time-slice continuity bridges for continuous/variational
       packages, plus the autonomous `C¹` integral-curve specialization with
-      open-interval continuity and Gronwall uniqueness bridges for packaged
+      open-interval continuity, vector-slot variational uniqueness bridges,
+      and Gronwall uniqueness bridges for packaged
       local model flows on open and closed Picard intervals, including direct
       uniqueness routes for the continuous space-time package. The same model
       ODE bridge now packages the tangent-map variational equation

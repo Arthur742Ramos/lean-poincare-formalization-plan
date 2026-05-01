@@ -937,6 +937,36 @@ theorem tangent_eqOn_Ioo_of_opNorm_bound
       ((lipschitzWith_leftComp (Df t (α.flow (x, t)))).weaken (hD_bound t ht)).lipschitzOnWith)
     hα_mem hβ_mem
 
+/-- Interior vector-slot uniqueness for variational tangent maps when the
+linearized operators are uniformly bounded. -/
+theorem tangent_apply_eqOn_Ioo_of_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax))
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ K) (v : V) :
+    EqOn (fun t : ℝ => α.tangent x t v) (fun t : ℝ => β.tangent x t v)
+      (Ioo tmin tmax) := by
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Ioo tmin tmax) :=
+    α.tangent_eqOn_Ioo_of_opNorm_bound (β := β) (state := fun _ => Set.univ)
+      hx ht₀ hflow_eq hD_bound (by intro t ht; simp) (by intro t ht; simp)
+  intro t ht
+  exact congrArg (fun A : V →L[ℝ] V => A v) (htangent ht)
+
+/-- Center-trajectory interior vector-slot uniqueness for variational tangent
+maps under an operator-norm bound. -/
+theorem center_tangent_apply_eqOn_Ioo_of_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x₀, t)) (fun t => β.flow (x₀, t))
+      (Ioo tmin tmax))
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x₀, t))‖₊ ≤ K) (v : V) :
+    EqOn (fun t : ℝ => α.tangent x₀ t v) (fun t : ℝ => β.tangent x₀ t v)
+      (Ioo tmin tmax) :=
+  α.tangent_apply_eqOn_Ioo_of_opNorm_bound β (mem_closedBall_self r.2)
+    ht₀ hflow_eq hD_bound v
+
 /-- Interior uniqueness for the full variational pair `(flow, tangent)`.
 
 The base curve is handled by the usual spatial Lipschitz hypothesis for `f`.
@@ -1011,6 +1041,36 @@ theorem tangent_eqOn_Icc_of_opNorm_bound
     (fun t ht =>
       ((lipschitzWith_leftComp (Df t (α.flow (x, t)))).weaken (hD_bound t ht)).lipschitzOnWith)
     hα_mem hβ_mem
+
+/-- Closed-interval vector-slot uniqueness for variational tangent maps when the
+linearized operators are uniformly bounded on the interior. -/
+theorem tangent_apply_eqOn_Icc_of_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax))
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ K) (v : V) :
+    EqOn (fun t : ℝ => α.tangent x t v) (fun t : ℝ => β.tangent x t v)
+      (Icc tmin tmax) := by
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
+    α.tangent_eqOn_Icc_of_opNorm_bound (β := β) (state := fun _ => Set.univ)
+      hx ht₀ hflow_eq hD_bound (by intro t ht; simp) (by intro t ht; simp)
+  intro t ht
+  exact congrArg (fun A : V →L[ℝ] V => A v) (htangent ht)
+
+/-- Center-trajectory closed-interval vector-slot uniqueness for variational
+tangent maps under an operator-norm bound. -/
+theorem center_tangent_apply_eqOn_Icc_of_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x₀, t)) (fun t => β.flow (x₀, t))
+      (Ioo tmin tmax))
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x₀, t))‖₊ ≤ K) (v : V) :
+    EqOn (fun t : ℝ => α.tangent x₀ t v) (fun t : ℝ => β.tangent x₀ t v)
+      (Icc tmin tmax) :=
+  α.tangent_apply_eqOn_Icc_of_opNorm_bound β (mem_closedBall_self r.2)
+    ht₀ hflow_eq hD_bound v
 
 /-- Closed-interval uniqueness for the full variational pair `(flow, tangent)`
 from a base-flow Lipschitz estimate and an operator-norm bound on the linearized

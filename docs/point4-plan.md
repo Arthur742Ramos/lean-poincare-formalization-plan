@@ -590,7 +590,10 @@ continuity needed before gluing local solutions. Continuous and variational
 local-flow packages now expose named base-flow, tangent-map, and vector-slot
 time-slice continuity bridges on the Picard interval, and the autonomous `C¹`
 local-integral-curve specialization now also returns continuity on its open
-existence interval. The same module now also
+existence interval. Variational local-flow uniqueness now also has direct
+interior and closed-interval vector-slot `A(t) v` bridges derived from
+operator-norm bounds, matching the scalar gauge-pullback chain-rule
+hypotheses. The same module now also
 packages the model-space variational equation as
 `VariationalLocalFlowSolution`, with tangent maps initialized by the identity
 and satisfying `A'(t) = Df(t, flow(t)) ∘ A(t)` on the Picard interval; this is
