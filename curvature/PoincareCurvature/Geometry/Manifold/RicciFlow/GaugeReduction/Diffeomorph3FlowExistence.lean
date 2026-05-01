@@ -41,6 +41,39 @@ structure Diffeomorph3GaugeFlowOn
 
 namespace Diffeomorph3GaugeFlowOn
 
+/-- Extract the pointwise manifold derivative statement from a raw `C^3`
+gauge-flow witness on its time set. -/
+theorem hasMFDerivWithinAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {t : ℝ} (ht : t ∈ s) (x : M) :
+    HasMFDerivAt[s] (fun τ : ℝ ↦ (G.maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
+  G.satisfies.hasMFDerivWithinAt ht x
+
+/-- A raw gauge-flow witness on a time set gives a local-at-time gauge-flow
+statement whenever the time set is a neighborhood of that time. -/
+theorem satisfiesAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t) :
+    SatisfiesGaugeFlowAt (I := I) (M := M)
+      G.maps3.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily X t :=
+  G.satisfies.satisfiesAt hs
+
+/-- Extract the unrestricted manifold derivative statement from a raw gauge-flow
+witness on a neighborhood of the time. -/
+theorem hasMFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t) (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (G.maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
+  (G.satisfiesAt hs).hasMFDerivAt x
+
 /-- Package a geometric `SatisfiesGaugeFlowOn` statement as a raw `C^3`
 diffeomorphism gauge-flow witness. -/
 def of_satisfiesGaugeFlowOn
@@ -140,16 +173,6 @@ noncomputable def identity_of_isEmpty
     Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
   identity_of_eq_zero (I := I) (M := M) X s t₀
     (fun _t _ht x ↦ isEmptyElim x)
-
-/-- Derivative form of a raw `C^3` diffeomorphism flow. -/
-theorem hasMFDerivWithinAt
-    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
-    {s : Set ℝ} {t₀ : ℝ}
-    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
-    {t : ℝ} (ht : t ∈ s) (x : M) :
-    HasMFDerivAt[s] (fun τ : ℝ ↦ (G.maps3 τ) x) t
-      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) := by
-  simpa using G.satisfies.hasMFDerivWithinAt ht x
 
 /-- Specialize a raw flow for the intrinsic DeTurck vector field to the anchored
 gauge object used by gauge reduction. -/
@@ -371,6 +394,22 @@ noncomputable def ofDerivativeData
   of_hasMFDerivWithinAt (I := I) (M := M) (ivp := ivp)
     maps3 anchored hflowDeriv
 
+/-- Derivative-family data extracted directly from fixed-IVP raw intrinsic
+DeTurck gauge-flow existence. -/
+theorem derivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn (I := I) (M := M)
+      (G.flow sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  intro t ht x
+  exact (G.flow sol).hasMFDerivWithinAt ht x
+
 @[simp] theorem toDiffeomorph3GaugeFlow_maps3
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
@@ -543,6 +582,16 @@ noncomputable def ofDerivativeFamily
       (E := E) (H := H) (I := I) (M := M) :=
   of_hasMFDerivWithinAt (I := I) (M := M)
     maps3 anchored hflowDeriv
+
+/-- Derivative-family data extracted directly from theorem-family raw intrinsic
+DeTurck gauge-flow existence. -/
+theorem derivativeFamily
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily (I := I) (M := M)
+      (fun ivp sol ↦ (G.flow ivp sol).maps3) := by
+  intro ivp sol
+  exact (G.forInitialValueProblem ivp).derivativeData sol
 
 /-- The family-level chosen-background raw flow induces the same anchored gauge as the existing
 identity `C³` gauge attached to a chosen-background solution. -/

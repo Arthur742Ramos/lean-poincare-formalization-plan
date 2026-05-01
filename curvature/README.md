@@ -214,8 +214,9 @@ now packages the matching intrinsic boundary
     back to raw existence witnesses. It also now has fixed-IVP and theorem-family
     constructors from pointwise `HasMFDerivAt[s]` or unrestricted `HasMFDerivAt`
     integral-curve data, named-derivative-family adapters, plus raw-flow time-set
-    restriction, matching the shape of Mathlib ODE output, and geometric endpoint
-    data can now replace its bundled
+    restriction and direct derivative/local-at-time extractors, matching the
+    shape of Mathlib ODE output, and geometric endpoint data can now replace its
+    bundled
     gauge-flow component by such a raw existence witness at fixed-IVP, global,
     and interval scope. A thin `AnalyticPDE.SmoothRealization` module names the
     global/interval PDE closure data that turns a Banach chart solution into a
@@ -328,10 +329,10 @@ now packages the matching intrinsic boundary
    `identityOfSubsingletonModel`, and `identityOfIsEmpty`, each accompanied by a
    matching `_hpullDerivative` time-derivative lemma. The underlying
    `Diffeomorph3GaugeFlowOn` raw-flow API also has arbitrary-vector-field
-   identity constructors for subsingleton tangent, subsingleton model, and empty
+    identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]` adapters, named derivative-family
-    adapters, and geometric-to-raw adapters; raw intrinsic gauge-flow existence
-    witnesses now project
+    adapters, geometric-to-raw adapters, and direct derivative/local-at-time
+    extractors; raw intrinsic gauge-flow existence witnesses now project
    directly to gauge-reduced, intrinsic, and ordinary theorem packages from
    either pulled-back metric time-derivative or scalar inner-product derivative
    data. A new `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the

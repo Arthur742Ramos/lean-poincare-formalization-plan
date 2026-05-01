@@ -146,10 +146,11 @@ Compactness gives global-in-time existence on a small interval; `C³`
 regularity follows from `C^∞` source regularity.
 The raw-flow layer now includes fixed-IVP and theorem-family
 `of_hasMFDerivWithinAt` / `of_hasMFDerivAt` constructors, named-derivative-family
-adapters, geometric-to-raw adapters, and raw-flow time-set restriction, so an ODE
-construction that already returns pointwise manifold derivative data or a named
-geometric gauge-flow bundle can be connected directly to `Diffeomorph3GaugeFlowOn`
-and `IntrinsicDeTurckGaugeFlowExistenceFamily`.
+adapters, geometric-to-raw adapters, raw-flow derivative/local-at-time extractors,
+and raw-flow time-set restriction, so an ODE construction that already returns
+pointwise manifold derivative data or a named geometric gauge-flow bundle can be
+connected directly to `Diffeomorph3GaugeFlowOn` and
+`IntrinsicDeTurckGaugeFlowExistenceFamily`.
 
 **Module location.** Extend
 `Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowExistence.lean`
