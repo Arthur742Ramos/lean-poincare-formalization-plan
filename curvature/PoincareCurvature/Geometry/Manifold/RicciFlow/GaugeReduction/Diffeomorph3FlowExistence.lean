@@ -244,6 +244,17 @@ theorem hasDerivAt_extChartAt_eval
     mfderiv_chartAt_eq_tangentCoordChange hsrc]
   exact ContinuousLinearMap.comp_toSpanSingleton _ _
 
+/-- At neighborhood-times, raw gauge-flow curves are continuous in the preferred
+chart centered at the time-`t` value. -/
+theorem continuousAt_extChartAt_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t) (x : M) :
+    ContinuousAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) t :=
+  (G.hasDerivAt_extChartAt_eval hs x).continuousAt
+
 /-- A raw gauge-flow witness is continuous in time along every base point at
 times where its time set is a neighborhood. -/
 theorem continuousAt_eval
@@ -1165,6 +1176,21 @@ theorem hasDerivWithinAt_extChartAt_eval
   (G.flow sol).hasDerivWithinAt_extChartAt_eval ht x
 
 /-- Fixed-IVP raw intrinsic gauge-flow curves are continuous within the solution
+time set in preferred chart coordinates. -/
+theorem continuousWithinAt_extChartAt_eval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ContinuousWithinAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow sol).maps3 t) x))
+        (((G.flow sol).maps3 τ) x))
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.flow sol).continuousWithinAt_extChartAt_eval ht x
+
+/-- Fixed-IVP raw intrinsic gauge-flow curves are continuous within the solution
 time set. -/
 theorem continuousWithinAt_eval
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -1240,6 +1266,20 @@ theorem hasDerivAt_extChartAt_eval
           sol.1.toIntrinsicDeTurckSolution.background t
             (((G.flow sol).maps3 t) x))) t :=
   (G.flow sol).hasDerivAt_extChartAt_eval hs x
+
+/-- Fixed-IVP raw intrinsic gauge-flow curves are ordinarily continuous at
+neighborhood-times in preferred chart coordinates. -/
+theorem continuousAt_extChartAt_eval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) (x : M) :
+    ContinuousAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow sol).maps3 t) x))
+        (((G.flow sol).maps3 τ) x)) t :=
+  (G.flow sol).continuousAt_extChartAt_eval hs x
 
 /-- Fixed-IVP raw intrinsic gauge-flow curves are ordinarily continuous at
 neighborhood-times. -/
@@ -1742,6 +1782,21 @@ theorem hasDerivWithinAt_extChartAt_eval
   (G.forInitialValueProblem ivp).hasDerivWithinAt_extChartAt_eval sol ht x
 
 /-- Theorem-family raw intrinsic gauge-flow curves are continuous within the
+solution time set in preferred chart coordinates. -/
+theorem continuousWithinAt_extChartAt_eval
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ContinuousWithinAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow ivp sol).maps3 t) x))
+        (((G.flow ivp sol).maps3 τ) x))
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.forInitialValueProblem ivp).continuousWithinAt_extChartAt_eval sol ht x
+
+/-- Theorem-family raw intrinsic gauge-flow curves are continuous within the
 solution time set. -/
 theorem continuousWithinAt_eval
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
@@ -1817,6 +1872,20 @@ theorem hasDerivAt_extChartAt_eval
           sol.1.toIntrinsicDeTurckSolution.background t
             (((G.flow ivp sol).maps3 t) x))) t :=
   (G.forInitialValueProblem ivp).hasDerivAt_extChartAt_eval sol hs x
+
+/-- Theorem-family raw intrinsic gauge-flow curves are ordinarily continuous at
+neighborhood-times in preferred chart coordinates. -/
+theorem continuousAt_extChartAt_eval
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) (x : M) :
+    ContinuousAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow ivp sol).maps3 t) x))
+        (((G.flow ivp sol).maps3 τ) x)) t :=
+  (G.forInitialValueProblem ivp).continuousAt_extChartAt_eval sol hs x
 
 /-- Theorem-family raw intrinsic gauge-flow curves are ordinarily continuous at
 neighborhood-times. -/

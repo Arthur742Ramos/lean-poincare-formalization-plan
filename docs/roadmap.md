@@ -725,8 +725,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       generic within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set, open-interior, and chart-coordinate continuity
       helpers, plus fixed-IVP/theorem-family raw-existence derivative,
-      continuity, and tangent-trivialization readouts in both within-time-set
-      and ordinary-neighborhood forms,
+      continuity, chart-coordinate continuity, and tangent-trivialization
+      readouts in both within-time-set and ordinary-neighborhood forms,
       center-trajectory uniqueness wrappers for local/continuous/variational
       packages,
       and Gronwall uniqueness bridges for packaged
