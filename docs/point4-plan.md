@@ -217,8 +217,9 @@ readout-field wrappers
 and
 `hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_variationalLocalFlowWithin`,
 so closed-interval base-flow/tangent-map identifications can feed the named
-metric-coordinate field or a locally equal Banach readout directly. It now also
-has same-set
+metric-coordinate field or a locally equal Banach readout directly; matching
+geometric-slot variants state the scalar identity in actual pushed-forward
+tangent vectors. It now also has same-set
 `hasTimeDerivativeOn_of_coordinateFieldWithin`,
 `coordinatePullbackMetricFieldDerivativeWithinOn_of_baseCoordinate`,
 `coordinatePullbackMetricFieldDerivativeWithinOn_of_metricCoordinateField`,

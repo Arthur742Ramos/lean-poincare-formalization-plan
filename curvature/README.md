@@ -244,7 +244,8 @@ now packages the matching intrinsic boundary
           constructors for full metric-coordinate Fréchet data, raw gauge-flow
           endpoint wrappers from that data to interior tensor time-regularity,
           concrete/readout wrappers where variational local-flow identifications
-          are only closed-interval within-filter equal,
+          are only closed-interval within-filter equal, including pushed-forward
+          geometric-slot forms,
           same-set raw gauge-flow moving-base field constructors plus readout-field
          and pushed-forward geometric-slot tensor projections,
          fixed-IVP/theorem-family within-field data packages and projections,
