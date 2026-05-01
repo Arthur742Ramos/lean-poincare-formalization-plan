@@ -752,7 +752,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        inequality. A further continuity adapter derives the product-field
        continuity from separate time-continuity of `f(·, y)` and `Df(·, y)`,
        yielding the `ofProductComponentClosedBallContinuityEstimates`
-       constructor whose inputs match the natural chartwise estimates.
+       constructor whose inputs match the natural chartwise estimates. The
+       tangent-operator bound is now derived from closed-ball membership itself,
+       so `ofProductComponentClosedBallContinuityEstimates_of_operatorBall`
+       removes the separate `A`-state norm-bound hypothesis.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

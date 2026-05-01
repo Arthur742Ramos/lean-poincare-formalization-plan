@@ -171,7 +171,11 @@ bounds, continuity of the product vector field in time, and the usual Picard
 time-radius inequality. A further time-continuity adapter now derives product
 field continuity from separate time-continuity of `f(·, y)` and `Df(·, y)`,
 giving the `ofProductComponentClosedBallContinuityEstimates` constructor whose
-inputs match the natural chartwise estimates.
+inputs match the natural chartwise estimates. The tangent-operator bound itself
+can now be derived from closed-ball membership via
+`nnnorm_le_nnnorm_add_radius_of_mem_closedBall`, giving an
+`ofProductComponentClosedBallContinuityEstimates_of_operatorBall` constructor
+that no longer asks callers to supply a separate `A`-state norm bound.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

@@ -320,6 +320,15 @@ theorem dist_comp_left_le (D A B : V →L[ℝ] V) :
   have h := D.opNorm_comp_le (A - B)
   simpa [dist_eq_norm, ContinuousLinearMap.comp_sub] using h
 
+/-- The operator norm is bounded on a closed ball by the center norm plus the
+radius. -/
+theorem nnnorm_le_nnnorm_add_radius_of_mem_closedBall
+    {A A₀ : V →L[ℝ] V} {a : ℝ≥0}
+    (hA : A ∈ closedBall A₀ a) :
+    ‖A‖₊ ≤ ‖A₀‖₊ + a := by
+  rw [← NNReal.coe_le_coe]
+  exact_mod_cast (norm_le_of_mem_closedBall hA)
+
 /-- Product-space Lipschitz estimate for the base component of the variational
 ODE. -/
 theorem lipschitzOnWith_variationalBasePart
@@ -982,6 +991,28 @@ def ofProductComponentClosedBallContinuityEstimates
       (A₀ := (1 : V →L[ℝ] V))
       (r := R) hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul)
     hr
+
+/-- One-step variational local-flow constructor with the tangent-operator bound
+derived from the closed ball around the identity operator. -/
+def ofProductComponentClosedBallContinuityEstimates_of_operatorBall
+    [CompleteSpace V]
+    {a R Kf KD Lf BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (‖(1 : V →L[ℝ] V)‖₊ + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R) :
+    VariationalLocalFlowSolution f Df t₀ x₀ r :=
+  ofProductComponentClosedBallContinuityEstimates
+    (BA := ‖(1 : V →L[ℝ] V)‖₊ + a)
+    hf_lip hDf_lip hf_bound
+    (fun A hA => nnnorm_le_nnnorm_add_radius_of_mem_closedBall hA)
+    hD_bound hf_cont hDf_cont hmul hr
 
 end VariationalLocalFlowSolution
 
