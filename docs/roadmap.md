@@ -629,8 +629,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        derivative-level gauge data whenever the DeTurck gauge field vanishes, with direct
        identity-route intrinsic/ordinary projections matching the non-identity APIs. The
       theorem-family zero-gauge-field raw-flow constructor now also supplies the
-      pulled-back metric time derivative for its identity gauge, discharging the
-      identity-gauge velocity algebra directly from the pointwise vanishing
+       pulled-back metric time derivative and named scalar derivative data for
+       its identity gauge, discharging the identity-gauge velocity algebra directly from the pointwise vanishing
        hypothesis, and chosen-DeTurck fixed-IVP packages and theorem families now
        project through this zero-field route directly to the gauge-reduced,
        intrinsic, and ordinary APIs. These criteria are also
@@ -733,7 +733,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     equivalence lemmas with tensor time-derivative data for both geometric and
     raw gauge-flow bundles; chosen-background, subsingleton-tangent/model, and
     empty-manifold identity raw gauge-flow fixed-IVP and theorem-family
-    witnesses now also provide the named scalar data directly, so the
+    witnesses, plus the corresponding zero-gauge-field identity witnesses, now
+    also provide the named scalar data directly, so the
     remaining primitive input is exactly that scalar identity. The first
      model-space chain-rule component of that scalar identity is now proved:
      differentiating `B(t)(u(t), v(t))`, and the gauge-coordinate specialization

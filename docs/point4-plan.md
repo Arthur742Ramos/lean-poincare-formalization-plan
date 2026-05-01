@@ -112,7 +112,9 @@ gauge-flow fixed-IVP and theorem-family witnesses now also provide this named
 scalar data directly, and a new zero-gauge-field adapter packages any proof that
 `intrinsicDeTurckGaugeField` vanishes on each solution time set into the same
 identity raw `C³` gauge-flow existence data, with direct fixed-IVP and
-theorem-family projections to the gauge-reduced, intrinsic, and ordinary APIs. The bundled
+theorem-family projections to the gauge-reduced, intrinsic, and ordinary APIs;
+the fixed-IVP and theorem-family zero-field identity raw-flow witnesses now also
+provide the named scalar derivative data expected by those routes. The bundled
 non-identity gauge-flow API now has proof-bearing scalar-to-tensor wrappers, so
 solving this single dynamic scalar identity automatically supplies the
 `HasTimeDerivativeOn` package required by the gauge-reduction theorem routes.

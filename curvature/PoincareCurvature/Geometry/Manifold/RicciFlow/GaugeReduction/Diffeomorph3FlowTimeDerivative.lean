@@ -8837,6 +8837,26 @@ theorem identityOfChosenBackground_pullbackMetricInnerDerivativeData
     IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfChosenBackground_hpullDerivative
       (E := E) (H := H) (I := I) (M := M) ivp sol
 
+/-- The fixed-IVP zero-gauge-field identity raw `C^3` gauge-flow carries the
+named scalar derivative data expected by the time-derivative routes. -/
+theorem identityOfGaugeFieldEqZero_pullbackMetricInnerDerivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (hzero : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfGaugeFieldEqZero
+      (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
+      hzero).PullbackMetricInnerDerivativeData := by
+  refine (IntrinsicDeTurckGaugeFlowExistence.identityOfGaugeFieldEqZero
+    (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
+    hzero).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn ?_
+  intro sol
+  exact IntrinsicDeTurckGaugeFlowExistence.identityOfGaugeFieldEqZero_hpullDerivative
+    (E := E) (H := H) (I := I) (M := M) (ivp := ivp) hzero sol
+
 /-- The fixed-IVP subsingleton-tangent identity raw `C^3` gauge-flow carries the
 named scalar derivative data expected by the time-derivative routes. -/
 theorem identityOfSubsingletonTangent_pullbackMetricInnerDerivativeData
@@ -9083,6 +9103,26 @@ theorem identityOfChosenBackground_pullbackMetricInnerDerivativeData :
     (fun ivp sol ↦
       IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfChosenBackground_hpullDerivative
         (E := E) (H := H) (I := I) (M := M) ivp sol)
+
+/-- The theorem-family zero-gauge-field identity raw `C^3` gauge-flow carries
+the named scalar derivative data expected by the time-derivative routes. -/
+theorem identityOfGaugeFieldEqZero_pullbackMetricInnerDerivativeData
+    (hzero : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfGaugeFieldEqZero
+      (E := E) (H := H) (I := I) (M := M)
+      hzero).PullbackMetricInnerDerivativeData :=
+  (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfGaugeFieldEqZero
+    (E := E) (H := H) (I := I) (M := M)
+    hzero).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (fun ivp sol ↦
+      IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfGaugeFieldEqZero_hpullDerivative
+        (E := E) (H := H) (I := I) (M := M) hzero ivp sol)
 
 /-- The subsingleton-tangent identity raw `C^3` gauge-flow family carries the
 named scalar derivative data expected by the time-derivative routes. -/
