@@ -131,6 +131,11 @@ local flows for `C^k` vector fields on smooth manifolds) to produce
 the bundled `SmoothSelfDiffeomorph3Family` representation used here.
 Compactness gives global-in-time existence on a small interval; `C³`
 regularity follows from `C^∞` source regularity.
+The raw-flow layer now includes fixed-IVP and theorem-family
+`of_hasMFDerivWithinAt` constructors, so an ODE construction that already
+returns pointwise manifold derivative data can be connected directly to
+`Diffeomorph3GaugeFlowOn` and
+`IntrinsicDeTurckGaugeFlowExistenceFamily`.
 
 **Module location.** Extend
 `Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowExistence.lean`

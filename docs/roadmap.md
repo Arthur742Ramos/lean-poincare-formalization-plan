@@ -649,7 +649,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     chosen-Levi-Civita-background case. Raw intrinsic gauge-flow existence
     witnesses now also feed directly into the gauge-reduced, intrinsic, and
     ordinary theorem-package routes using either pulled-back metric
-    time-derivative proofs or scalar inner-product derivative proofs. Thus the
+    time-derivative proofs or scalar inner-product derivative proofs. The raw
+    flow layer also has fixed-IVP and theorem-family constructors from the
+    pointwise `HasMFDerivAt[s]` data produced by ODE/integral-curve theorems, so
+    future manifold-flow existence results can plug in without a separate
+    `SatisfiesGaugeFlowOn` packaging step. Thus the
     full point-4 input chain has no gauge-flow gap in any of the
     currently-proved special cases. The
     non-identity gauge time-regularity
