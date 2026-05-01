@@ -913,7 +913,9 @@ a proof-level `Nonempty` readout for callers that only need existence. The
 density-based interval-carrier solution now transports back to the chart's
 built-in restricted carrier whenever its terminal time stays within the Picard
 interval, giving a solution-level bridge rather than only pointwise vector-field
-equalities.
+equalities. The preferred-cover local-bounds route now also performs that
+transport internally, returning a chart-carrier `BanachEvolutionLocalSolutionIn`
+witness directly from the smooth-density Picard shrink.
 
 **Suggested decomposition** (multi-session):
 

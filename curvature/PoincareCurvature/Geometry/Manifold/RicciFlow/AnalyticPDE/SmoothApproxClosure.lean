@@ -404,6 +404,196 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
   refine ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, ?_⟩
   exact ⟨sol, hsolT, huniq⟩
 
+set_option maxHeartbeats 4000000 in
+/-- The preferred-cover local-bounds route also gives an actual state-preserving Banach solution for
+the chart-derived restricted symmetric carrier. Existence is transported from the density-based
+interval carrier on the shrunken Picard interval, while uniqueness is read from the chart carrier's
+own Lipschitz control on the Riemannian metric locus. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_localBounds_chartRestrictedSymmetricA_banachEvolutionLocalSolutionIn
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [SecondCountableTopology H]
+    [ContMDiffVectorBundle 2 F TM I]
+    [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (rhs : SmoothSectionRHSIdentification
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
+    {C : ℝ} (hCpos : 0 < C)
+    (hC : ∀ i (x : Kc i), ‖(trivializationAt F TM (x0 i)).symmL ℝ x.1‖ ≤ C)
+    (hlocalBound : ∀ x : M, ∃ C > 0,
+      ∀ᶠ y in 𝓝 x, ‖(trivializationAt F TM x).continuousLinearMapAt ℝ y‖ < C)
+    (ha : 0 < a) :
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+      ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover
+        ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T' a' L Kpic Kstate,
+        0 < a' ∧ a' ≤ a ∧
+          Metric.closedBall
+            (InitialValueProblem.toSymmetricSectionSubmodule
+              (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) (a' : ℝ) ⊆
+            riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+              et Kc hKc Ko hKo hKoEq hcover ∧
+          ∃ sol : BanachEvolutionLocalSolutionIn
+              (chart'.restrictedSymmetricA
+                (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+              (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+                et Kc hKc Ko hKo hKoEq hcover)
+              ivp.initialTime
+              (InitialValueProblem.toSymmetricSectionSubmodule
+                (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+             sol.terminalTime ≤ T' ∧
+             ∀ sol' : BanachEvolutionLocalSolutionIn
+                (chart'.restrictedSymmetricA
+                  (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+                (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+                  et Kc hKc Ko hKo hKoEq hcover)
+                ivp.initialTime
+                (InitialValueProblem.toSymmetricSectionSubmodule
+                  (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+               EqOn sol.curve sol'.curve
+                 (Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime)) := by
+  rcases chart.exists_metricCone_shrink_parameters
+      (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover ha with
+    ⟨T', a', hT', hT'le, ha'pos, ha'le, htime, hball⟩
+  let chart' := chart.shrink (M := M) (F := F) (I := I) hT' hT'le ha'le htime
+  let hclosure :=
+    closure_smooth_spd_of_metric_locus_and_local_trivialization_bounds_preferredBilinear
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover hCpos hC hlocalBound
+  let Asub :=
+    SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover rhs hclosure
+      (fun t ht => chart.lipschitzOn_Icc t ⟨ht.1, le_trans ht.2 hT'le⟩)
+  have hpicardAmb : IsPicardLindelof chart.A
+      (tmin := ivp.initialTime) (tmax := T')
+      ⟨ivp.initialTime, ⟨le_rfl, le_of_lt hT'⟩⟩
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)
+      a' 0 L Kpic := by
+    simpa [chart', TimeDependentGeometricRicciDeTurckBanachChartOnIcc.shrink] using
+      chart'.picard
+  have hpicardAsub : IsPicardLindelof Asub
+      (tmin := ivp.initialTime) (tmax := T')
+      ⟨ivp.initialTime, ⟨le_rfl, le_of_lt hT'⟩⟩
+      (InitialValueProblem.toSymmetricSectionSubmodule
+        (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) a' 0 L Kpic := by
+    have hpicard :=
+      SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc_picard_of_closedBall_subset_riemannianMetricLocus
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover rhs hclosure hT'
+        hpicardAmb (fun t ht => chart.lipschitzOn_Icc t ⟨ht.1, le_trans ht.2 hT'le⟩) hball
+    simpa [Asub, hclosure] using hpicard
+  have hLipAsub : ∀ t ∈ Icc ivp.initialTime T', LipschitzOnWith Kstate (Asub t)
+      (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+        et Kc hKc Ko hKo hKoEq hcover) := by
+    simpa [Asub, hclosure] using
+      (SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc_lipschitzOn_Icc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover rhs hclosure
+        (t₀ := ivp.initialTime) (T := T') (Kstate := Kstate)
+        (fun t ht => chart.lipschitzOn_Icc t ⟨ht.1, le_trans ht.2 hT'le⟩))
+  rcases
+      exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lipschitzOn_Icc_terminal_le
+        (M := M) (F := F) (W := TM)
+        x0 et het Kc hKc Ko hKo hKoEq hcover inferInstance hT'
+        hpicardAsub
+        (InitialValueProblem.toSymmetricSectionSubmodule_mem_riemannianMetricLocusSubmodule
+          (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp)
+        hLipAsub with
+    ⟨solDensity, hsolDensityT, _huniqDensity⟩
+  let solChart : BanachEvolutionLocalSolutionIn
+      (chart'.restrictedSymmetricA
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+      (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+        et Kc hKc Ko hKo hKoEq hcover)
+      ivp.initialTime
+      (InitialValueProblem.toSymmetricSectionSubmodule
+        (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) :=
+    { terminalTime := solDensity.terminalTime
+      initial_lt_terminal := solDensity.initial_lt_terminal
+      curve := solDensity.curve
+      initial_eq := solDensity.initial_eq
+      equation := by
+        intro t ht
+        have htT' : t ∈ Icc ivp.initialTime T' :=
+          ⟨ht.1, le_trans ht.2 hsolDensityT⟩
+        have hEq :
+            (chart'.restrictedSymmetricA
+              (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover) t
+              (solDensity.curve t) =
+            Asub t (solDensity.curve t) := by
+          apply Subtype.ext
+          calc
+            ((chart'.restrictedSymmetricA
+              (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover) t
+                (solDensity.curve t) :
+                ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+                  et Kc hKc Ko hKo hKoEq hcover) =
+                chart'.A t (solDensity.curve t :
+                  ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+                    et Kc hKc Ko hKo hKoEq hcover) := by
+              simpa using chart'.restrictedSymmetricA_coe_of_mem
+                (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover
+                t (solDensity.curve t) (solDensity.mem_state ht)
+            _ =
+                chart.A t (solDensity.curve t :
+                  ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+                    et Kc hKc Ko hKo hKoEq hcover) := by
+              simp [chart', TimeDependentGeometricRicciDeTurckBanachChartOnIcc.shrink]
+            _ =
+                (Asub t (solDensity.curve t) :
+                  ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+                    et Kc hKc Ko hKo hKoEq hcover) := by
+              simpa [Asub, hclosure] using
+                (SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc_coe_of_mem
+                  (M := M) (F := F) (I := I)
+                  x0 et het Kc hKc Ko hKo hKoEq hcover rhs hclosure
+                  (fun t ht => chart.lipschitzOn_Icc t ⟨ht.1, le_trans ht.2 hT'le⟩)
+                  t htT' (solDensity.curve t) (solDensity.mem_state ht)).symm
+        simpa [Asub, hEq] using solDensity.toBanachEvolutionLocalSolution.equation ht
+      mem_state := solDensity.mem_state }
+  have huniqChart :
+      ∀ sol' : BanachEvolutionLocalSolutionIn
+          (chart'.restrictedSymmetricA
+            (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+          (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+            et Kc hKc Ko hKo hKoEq hcover)
+          ivp.initialTime
+          (InitialValueProblem.toSymmetricSectionSubmodule
+            (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+        EqOn solChart.curve sol'.curve
+          (Icc ivp.initialTime (min solChart.terminalTime sol'.terminalTime)) := by
+    intro sol'
+    refine BanachEvolutionLocalSolutionIn.eqOn_Icc_of_lipschitzOn_Icc
+      (K := Kstate) solChart sol' ?_
+    intro t ht
+    exact chart'.restrictedSymmetricA_lipschitzOn_Icc
+      (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover
+      t ⟨ht.1, le_trans ht.2 (le_trans (min_le_left _ _) hsolDensityT)⟩
+  exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, solChart, hsolDensityT, huniqChart⟩
+
 end PreferredSmoothApproxClosure
 
 end SmoothSectionRHSIdentification
