@@ -209,6 +209,12 @@ that no longer asks callers to supply a separate `A`-state norm bound. The
 identity-centered case is simplified further to the explicit bound
 `‖A‖₊ ≤ 1 + a` and the corresponding
 `ofProductComponentClosedBallContinuityEstimates_of_identityBall` constructor.
+The raw gauge-flow layer now also extracts the model-coordinate derivative of
+the base flow curve itself: `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`
+turns the manifold derivative of `τ ↦ Φ_τ(x)` into a `HasDerivAt` statement for
+the preferred chart around `Φ_t(x)`, with derivative given by the coordinate
+form of the DeTurck gauge vector field. This is the base-curve derivative needed
+by the moving metric-component readout.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

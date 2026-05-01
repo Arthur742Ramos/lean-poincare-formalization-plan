@@ -790,6 +790,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        removes the separate `A`-state norm-bound hypothesis, and the
        identity-centered version uses the explicit `1 + a` bound through
        `ofProductComponentClosedBallContinuityEstimates_of_identityBall`.
+       Raw gauge flows now also expose the base-flow coordinate derivative
+       directly: `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`
+       converts the manifold derivative of `τ ↦ Φ_τ(x)` into the preferred local
+       chart around `Φ_t(x)`, giving the coordinate velocity input for moving
+       metric-component readouts.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

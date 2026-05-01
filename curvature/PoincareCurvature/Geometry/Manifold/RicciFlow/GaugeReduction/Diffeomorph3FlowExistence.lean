@@ -90,6 +90,28 @@ theorem hasMFDerivAt_of_mem_Ioo
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
   (G.satisfies.satisfiesAt (Icc_mem_nhds ht.1 ht.2)).hasMFDerivAt x
 
+/-- Interior raw gauge-flow curves have the expected derivative in the preferred
+chart centered at their time-`t` value. -/
+theorem hasDerivAt_extChartAt_eval_of_mem_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax) (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+        (X t ((G.maps3 t) x))) t := by
+  have hsrc_ext : (G.maps3 t) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+    mem_extChartAt_source ((G.maps3 t) x)
+  have hsrc : (G.maps3 t) x ∈ (chartAt H ((G.maps3 t) x)).source :=
+    extChartAt_source I ((G.maps3 t) x) ▸ hsrc_ext
+  rw [hasDerivAt_iff_hasFDerivAt, ← hasMFDerivAt_iff_hasFDerivAt]
+  apply (HasMFDerivAt.comp t (hasMFDerivAt_extChartAt (I := I) hsrc)
+    (G.hasMFDerivAt_of_mem_Ioo ht x)).congr_mfderiv
+  rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton,
+    mfderiv_chartAt_eq_tangentCoordChange hsrc]
+  exact ContinuousLinearMap.comp_toSpanSingleton _ _
+
 /-- A raw gauge-flow witness on a closed Picard interval is continuous at
 interior times along every base point. -/
 theorem continuousAt_eval_of_mem_Ioo

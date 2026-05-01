@@ -395,8 +395,11 @@ now packages the matching intrinsic boundary
      space-time model flows; the
      raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
      tangent-trivialization membership from neighborhood-time flow data, with
-     matching within-time-set versions for restricted ODE intervals.
-    A new
+      matching within-time-set versions for restricted ODE intervals. It also
+      converts the raw manifold derivative into the preferred local-coordinate
+      derivative of the base flow curve at interior closed-interval times via
+      `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`.
+     A new
     `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the
    non-identity gauge-pulled metric time-derivative obligation for arbitrary
    geometric `C³` DeTurck gauge-flow families on subsingleton tangent fibers by
