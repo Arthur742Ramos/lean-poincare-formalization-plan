@@ -625,10 +625,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       chosen-background route and the global/interval raw `C^3` gauge-flow routes,
       including the boundary-reduced derivative-level scalar-derivative and
       time-derivative boundaries, now also expose intrinsic/ordinary theorem-family
-      endpoints, and the constant `C^3` identity family supplies primitive
-      derivative-level gauge data whenever the DeTurck gauge field vanishes, with direct
-      identity-route intrinsic/ordinary projections matching the non-identity APIs. These criteria are also
-      specialized to genuine bundled continuous Riemannian initial metrics, so
+       endpoints, and the constant `C^3` identity family supplies primitive
+       derivative-level gauge data whenever the DeTurck gauge field vanishes, with direct
+       identity-route intrinsic/ordinary projections matching the non-identity APIs. The
+       theorem-family zero-gauge-field raw-flow constructor now also supplies the
+       pulled-back metric time derivative for its identity gauge, discharging the
+       identity-gauge velocity algebra directly from the pointwise vanishing
+       hypothesis. These criteria are also
+       specialized to genuine bundled continuous Riemannian initial metrics, so
        future Ricci-DeTurck Banach-chart work no longer has to manually prove
        finite-cover metric-locus membership for the initial datum. The interval
        chart now also derives the genuine symmetric-carrier vector field from

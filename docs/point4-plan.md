@@ -569,6 +569,10 @@ and raw-flow time-set restriction, so an ODE construction that already returns
 pointwise manifold derivative data or a named geometric gauge-flow bundle can be
 connected directly to `Diffeomorph3GaugeFlowOn` and
 `IntrinsicDeTurckGaugeFlowExistenceFamily`.
+The theorem-family zero-gauge-field constructor now also carries the required
+pullback metric time-derivative proof, so any family whose intrinsic DeTurck
+gauge field vanishes on each solution time set can enter the gauge-reduction
+API without re-proving the identity-gauge velocity algebra.
 The first Banach-model ODE bridge for this item is now proof-bearing in
 `GaugeReduction.ModelGaugeFlowODE`: mathlib's time-dependent Picard-Lindelöf
 theorem is packaged as `LocalFlowSolution` and `LipschitzLocalFlowSolution`,
