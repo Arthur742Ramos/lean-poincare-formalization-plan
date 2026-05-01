@@ -698,8 +698,6 @@ theorem coordinatePullbackMetricComponentDerivativeOn_of_variationalLocalFlow
           (fun τ : ℝ ↦
             pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x) =ᶠ[𝓝 t]
               (fun τ : ℝ ↦ α.tangent xE τ) ∧
-          pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x =
-            α.tangent xE t ∧
           HasFDerivAt Bfield Bfield' (t, α.flow (xE, t)) ∧
           Bfield' (1, f t (α.flow (xE, t)))
               (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
@@ -722,8 +720,15 @@ theorem coordinatePullbackMetricComponentDerivativeOn_of_variationalLocalFlow
     CoordinatePullbackMetricComponentDerivativeOn (I := I) (M := M) Φ g gdot
       (Ioo tmin tmax) := by
   intro t ht x u v
-  obtain ⟨xE, hxE, Bfield, Bfield', hB_eq, hA_eq, hA_t, hBfield, hvalue⟩ :=
+  obtain ⟨xE, hxE, Bfield, Bfield', hB_eq, hA_eq, hBfield, hvalue⟩ :=
     hdata ht x u v
+  have hA_t :
+      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x =
+        α.tangent xE t :=
+    show t ∈ {τ : ℝ |
+      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x =
+        α.tangent xE τ} from
+      mem_of_mem_nhds hA_eq
   refine ⟨Bfield' (1, f t (α.flow (xE, t))), Df t (α.flow (xE, t)), ?_, ?_,
     hvalue⟩
   · have hBderiv :
@@ -1371,9 +1376,6 @@ theorem hasTimeDerivativeOn_Ioo_of_variationalLocalFlowComponents
             SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
               (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
               (fun τ : ℝ ↦ α.tangent xE τ) ∧
-          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
-              (I := I) (M := M) G.maps3 t t x =
-            α.tangent xE t ∧
           HasFDerivAt Bfield Bfield' (t, α.flow (xE, t)) ∧
           Bfield' (1, f t (α.flow (xE, t)))
               (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
