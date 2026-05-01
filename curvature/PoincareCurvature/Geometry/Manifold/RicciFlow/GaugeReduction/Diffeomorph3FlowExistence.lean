@@ -334,6 +334,66 @@ theorem identityOfChosenBackground_hpullDerivative
     (G.toDiffeomorph3GaugeFlowFamily.forInitialValueProblem ivp) =
       (G.forInitialValueProblem ivp).toDiffeomorph3GaugeFlow := rfl
 
+/-- For the subsingleton-tangent identity raw gauge-flow family, the gauge-corrected pullback
+metric has the original intrinsic DeTurck metric velocity. The proof routes through the
+chosen-background `_hpullDerivative` because both constructors produce the same identity flow. -/
+theorem identityOfSubsingletonTangent_hpullDerivative
+    [∀ x : M, Subsingleton ((TangentSpace I : M → Type _) x)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (SmoothSelfDiffeomorph3Family.pullbackMetricFamily
+        (I := I) (M := M)
+        (((identityOfSubsingletonTangent
+          (E := E) (H := H) (I := I) (M := M)).toDiffeomorph3GaugeFlowFamily).maps3 ivp sol)
+        sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (((identityOfSubsingletonTangent
+          (E := E) (H := H) (I := I) (M := M)).toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  identityOfChosenBackground_hpullDerivative
+    (E := E) (H := H) (I := I) (M := M) ivp sol
+
+/-- Model-space variant of `identityOfSubsingletonTangent_hpullDerivative`. -/
+theorem identityOfSubsingletonModel_hpullDerivative
+    [Subsingleton E]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (SmoothSelfDiffeomorph3Family.pullbackMetricFamily
+        (I := I) (M := M)
+        (((identityOfSubsingletonModel
+          (E := E) (H := H) (I := I) (M := M)).toDiffeomorph3GaugeFlowFamily).maps3 ivp sol)
+        sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (((identityOfSubsingletonModel
+          (E := E) (H := H) (I := I) (M := M)).toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  identityOfChosenBackground_hpullDerivative
+    (E := E) (H := H) (I := I) (M := M) ivp sol
+
+/-- For the empty-manifold identity raw gauge-flow family, the gauge-corrected pullback metric
+has the original intrinsic DeTurck metric velocity vacuously. -/
+theorem identityOfIsEmpty_hpullDerivative
+    [IsEmpty M]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (SmoothSelfDiffeomorph3Family.pullbackMetricFamily
+        (I := I) (M := M)
+        (((identityOfIsEmpty
+          (E := E) (H := H) (I := I) (M := M)).toDiffeomorph3GaugeFlowFamily).maps3 ivp sol)
+        sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (((identityOfIsEmpty
+          (E := E) (H := H) (I := I) (M := M)).toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  intro t _ht x
+  exact isEmptyElim x
+
 end IntrinsicDeTurckGaugeFlowExistenceFamily
 
 end RicciFlow
