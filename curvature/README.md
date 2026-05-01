@@ -222,7 +222,8 @@ now packages the matching intrinsic boundary
      and interval scope. A new `GaugeReduction.ModelGaugeFlowODE` module packages
      mathlib's time-dependent Picard-Lindelöf theorem as Banach-model local flows
      with closed-interval ODE derivative data, initialization on a closed ball of
-     initial data, and Lipschitz dependence on that initial data, plus the
+     initial data, Lipschitz dependence on that initial data, and the continuous
+     space-time partial-flow form needed for chart gluing, plus the
      autonomous `C¹` local-integral-curve specialization needed as a chart-level
      raw-flow building block. A thin `AnalyticPDE.SmoothRealization` module names the
     global/interval PDE closure data that turns a Banach chart solution into a
@@ -345,7 +346,8 @@ now packages the matching intrinsic boundary
     Banach-model Picard-Lindelöf local-flow theorem needed before the remaining
     positive-dimensional manifold ODE lift: it packages time-dependent local
     flows, their closed-interval ODE derivative, initial-data Lipschitz
-    dependence, and autonomous `C¹` integral curves. A new
+    dependence, continuous space-time partial flows, and autonomous `C¹` integral
+    curves. A new
     `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the
    non-identity gauge-pulled metric time-derivative obligation for arbitrary
    geometric `C³` DeTurck gauge-flow families on subsingleton tangent fibers by

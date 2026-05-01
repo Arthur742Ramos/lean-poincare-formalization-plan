@@ -51,6 +51,24 @@ structure LipschitzLocalFlowSolution
     ∃ L' : ℝ≥0, ∀ t ∈ Icc tmin tmax,
       LipschitzOnWith L' (fun x => flow x t) (closedBall x₀ r)
 
+/-- A local model-space flow packaged as a continuous partial map on space-time.
+
+This is the form needed for chart-gluing arguments: the solution is an ODE
+curve in the time coordinate for each initial point, and the combined map is
+continuous on the product of the initial-data ball and the Picard-Lindelöf time
+interval.
+-/
+structure ContinuousLocalFlowSolution
+    (f : ℝ → V → V) {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
+    (r : ℝ≥0) where
+  flow : V × ℝ → V
+  initial_eq : ∀ x ∈ closedBall x₀ r, flow (x, t₀) = x
+  hasDerivWithinAt :
+    ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
+      HasDerivWithinAt (fun τ : ℝ => flow (x, τ)) (f t (flow (x, t)))
+        (Icc tmin tmax) t
+  continuousOn : ContinuousOn flow (closedBall x₀ r ×ˢ Icc tmin tmax)
+
 namespace LocalFlowSolution
 
 variable {f : ℝ → V → V} {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V}
@@ -68,6 +86,25 @@ theorem center_hasDerivWithinAt
   α.hasDerivWithinAt x₀ (mem_closedBall_self r.2) t ht
 
 end LocalFlowSolution
+
+namespace ContinuousLocalFlowSolution
+
+variable {f : ℝ → V → V} {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V}
+  {r : ℝ≥0}
+
+/-- Evaluate the continuous space-time local flow at the center of the initial ball. -/
+theorem center_initial_eq (α : ContinuousLocalFlowSolution f t₀ x₀ r) :
+    α.flow (x₀, t₀) = x₀ :=
+  α.initial_eq x₀ (mem_closedBall_self r.2)
+
+/-- The center curve of the continuous space-time flow solves the model ODE. -/
+theorem center_hasDerivWithinAt
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    HasDerivWithinAt (fun τ : ℝ => α.flow (x₀, τ))
+      (f t (α.flow (x₀, t))) (Icc tmin tmax) t :=
+  α.hasDerivWithinAt x₀ (mem_closedBall_self r.2) t ht
+
+end ContinuousLocalFlowSolution
 
 namespace IsPicardLindelof
 
@@ -100,6 +137,20 @@ def toLipschitzLocalFlowSolution
     initial_eq := fun x hx => (hα x hx).1
     hasDerivWithinAt := fun x hx t ht => (hα x hx).2 t ht
     exists_lipschitz_time := hLip }
+
+/-- Picard-Lindelöf also yields a continuous partial space-time flow on the
+initial-data ball times the closed time interval. -/
+def toContinuousLocalFlowSolution
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
+    ContinuousLocalFlowSolution f t₀ x₀ r :=
+  let h := hf.exists_forall_mem_closedBall_eq_hasDerivWithinAt_continuousOn
+  let α := Classical.choose h
+  let hα := (Classical.choose_spec h).1
+  let hcont := (Classical.choose_spec h).2
+  { flow := α
+    initial_eq := fun x hx => (hα x hx).1
+    hasDerivWithinAt := fun x hx t ht => (hα x hx).2 t ht
+    continuousOn := hcont }
 
 end IsPicardLindelof
 

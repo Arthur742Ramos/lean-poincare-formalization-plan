@@ -177,8 +177,11 @@ The first Banach-model ODE bridge for this item is now proof-bearing in
 `GaugeReduction.ModelGaugeFlowODE`: mathlib's time-dependent Picard-Lindelöf
 theorem is packaged as `LocalFlowSolution` and `LipschitzLocalFlowSolution`,
 including the ODE derivative on the closed time interval, initialization on a
-closed ball of initial data, and Lipschitz dependence on initial data.  The same
-module also records the autonomous `C¹` local-integral-curve specialization.
+closed ball of initial data, and Lipschitz dependence on initial data.
+It also packages the continuous space-time partial-flow form as
+`ContinuousLocalFlowSolution`, so the chart-level output now includes the
+continuity needed before gluing local solutions.  The same module also records
+the autonomous `C¹` local-integral-curve specialization.
 What remains is the genuinely manifold-level lift: pass intrinsic DeTurck vector
 fields to these chartwise Banach ODE hypotheses, prove compatibility/gluing and
 invertibility of the local flow, and upgrade the result to the bundled `C³`

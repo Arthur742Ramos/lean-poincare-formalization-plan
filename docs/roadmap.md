@@ -662,8 +662,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent
      Picard-Lindelöf theorem as local model flows with initialization on a
      closed ball, closed-interval ODE derivative data, and Lipschitz dependence
-     on the initial point, plus the autonomous `C¹` integral-curve
-     specialization. Thus the
+     on the initial point; it also packages the continuous space-time
+     partial-flow form needed for chart gluing, plus the autonomous `C¹`
+     integral-curve specialization. Thus the
      full point-4 input chain has no gauge-flow gap in any of the
      currently-proved special cases. The
     non-identity gauge time-regularity
