@@ -185,7 +185,9 @@ now packages the matching intrinsic boundary
    module now names the primitive `C^3` intrinsic gauge-flow derivative data,
    proves it equivalent to the geometric `SatisfiesGaugeFlowOn` formulation,
    provides monotonicity lemmas for restricting within-time-set and
-   ordinary-at-time derivative views to smaller time sets, and
+   ordinary-at-time derivative views to smaller time sets, upgrades
+   within-time-set derivative views to ordinary-at-time views at
+   neighborhood-times, and
    packages the corresponding chosen-DeTurck-solution family interface and a
    reusable gauge-flow family bundle with anchored-gauge projections and direct
    gauge-reducible/intrinsic/ordinary theorem-family projections from
@@ -537,9 +539,11 @@ now packages the matching intrinsic boundary
     manifolds plus pointwise `HasMFDerivAt[s]`, ordinary-on-time-set
      `HasMFDerivAt`, and unrestricted `HasMFDerivAt` adapters, named
      derivative-family adapters, including an ordinary-on-time-set
-      `ofDerivativeAtFamily` bridge and matching fixed-IVP `ofDerivative` /
-      `ofDerivativeAt` bridges, geometric-to-raw adapters, and direct
-      proof-level `Nonempty` wrappers for the raw geometric/derivative,
+       `ofDerivativeAtFamily` bridge, neighborhood-time upgrades from
+       within-time-set to ordinary-at-time derivative data, and matching
+       fixed-IVP `ofDerivative` / `ofDerivativeAt` bridges,
+       geometric-to-raw adapters, and direct
+       proof-level `Nonempty` wrappers for the raw geometric/derivative,
       restriction, and identity-flow constructors, plus matching fixed-IVP
       and theorem-family intrinsic proof-level wrappers and derivative/local-at-time
       extractors; raw intrinsic gauge-flow existence witnesses now project

@@ -68,6 +68,21 @@ theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
   intro t ht x
   exact (hderiv t ht x).hasMFDerivWithinAt
 
+/-- Within-time-set derivative data gives ordinary-at-time data whenever the
+time set is a neighborhood of each of its times. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_derivativeOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hderiv : Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) Φ g background s)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  exact (hderiv t ht x).hasMFDerivAt (hs ht)
+
 /-- Restrict primitive within-time-set derivative data to a smaller time set. -/
 theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.mono
     {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
@@ -140,6 +155,25 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivative_of_derivativeAt
   intro sol
   exact Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
     (I := I) (M := M) (hderiv sol)
+
+/-- Fixed-IVP within-time-set derivative data gives ordinary-at-time derivative
+data whenever each chosen solution time set is a neighborhood at its times. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_derivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivative
+      (I := I) (M := M) ivp maps3)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
+      (I := I) (M := M) ivp maps3 := by
+  intro sol
+  exact Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_derivativeOn
+    (I := I) (M := M) (hderiv sol) (htime sol)
 
 /-- A `C^3` diffeomorphism family satisfying the DeTurck gauge-flow equation
 also provides the primitive pointwise derivative data expected by the
@@ -228,6 +262,27 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_of_derivativeAtFamily
   intro ivp sol
   exact Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
     (I := I) (M := M) (hderiv ivp sol)
+
+/-- Family-level within-time-set derivative data gives ordinary-at-time
+derivative data whenever each chosen solution time set is a neighborhood at its
+times. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_derivativeFamily
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+      (I := I) (M := M) maps3)
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp sol
+  exact Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_derivativeOn
+    (I := I) (M := M) (hderiv ivp sol) (htime ivp sol)
 
 /-- Family-level derivative data extracted from geometric `C^3` gauge-flow
 solutions for every chosen DeTurck solution. -/
