@@ -616,6 +616,8 @@ The raw-flow layer now includes fixed-IVP and theorem-family
 `of_hasMFDerivWithinAt`, `of_hasMFDerivAtOn`, and `of_hasMFDerivAt`
 constructors, named-derivative-family adapters, geometric-to-raw adapters,
 raw-flow derivative/local-at-time extractors, and raw-flow time-set restriction,
+with simp readouts showing restriction preserves the same `C³` diffeomorphism
+family and anchoring data,
 so an ODE construction that already returns pointwise manifold derivative data
 or a named geometric gauge-flow bundle can be connected directly to
 `Diffeomorph3GaugeFlowOn` and `IntrinsicDeTurckGaugeFlowExistenceFamily`.  The

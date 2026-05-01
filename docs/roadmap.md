@@ -666,8 +666,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       unrestricted `HasMFDerivAt` data produced by
       ODE/integral-curve theorems, named-derivative-family adapters,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and
-     time-set restriction for raw flows, so future manifold-flow existence results
-     can plug in through either derivative data or existing geometric gauge-flow
+     time-set restriction for raw flows with simp readouts for the unchanged
+     diffeomorphism family and anchoring data, so future manifold-flow existence results
+      can plug in through either derivative data or existing geometric gauge-flow
       bundles without a separate
       `SatisfiesGaugeFlowOn` repackaging step. The derivative-view layer also
        has ordinary-on-time-set derivative-family data and an

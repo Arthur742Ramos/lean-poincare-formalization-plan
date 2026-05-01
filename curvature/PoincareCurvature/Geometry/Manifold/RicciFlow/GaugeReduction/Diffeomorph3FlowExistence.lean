@@ -347,6 +347,27 @@ def mono
   anchored := G.anchored
   satisfies := G.satisfies.mono hst
 
+@[simp] theorem mono_maps3
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t) :
+    (G.mono hst).maps3 = G.maps3 := rfl
+
+@[simp] theorem mono_anchored
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t) :
+    (G.mono hst).anchored = G.anchored := rfl
+
+@[simp] theorem mono_satisfies
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t) :
+    (G.mono hst).satisfies = G.satisfies.mono hst := rfl
+
 /-- If the time-dependent vector field vanishes on the time set, the identity `C³`
 diffeomorphism family is a raw gauge flow. -/
 noncomputable def identity_of_eq_zero

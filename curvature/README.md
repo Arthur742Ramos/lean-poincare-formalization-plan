@@ -217,7 +217,8 @@ now packages the matching intrinsic boundary
     back to raw existence witnesses. It also now has fixed-IVP and theorem-family
     constructors from pointwise `HasMFDerivAt[s]` or unrestricted `HasMFDerivAt`
     integral-curve data, named-derivative-family adapters, plus raw-flow time-set
-     restriction and direct derivative/local-at-time extractors, matching the
+     restriction with readout simp lemmas and direct derivative/local-at-time
+     extractors, matching the
      shape of Mathlib ODE output, and geometric endpoint data can now replace its
      bundled
      gauge-flow component by such a raw existence witness at fixed-IVP, global,
