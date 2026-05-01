@@ -820,7 +820,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         simplification lemmas reduce those field and tangent components to the
         ordinary metric in the centered tangent trivialization and the gauge
         pushforward tangent vector in target coordinates, with slot-specialized
-        forms for actual tangent vectors.
+        forms for actual tangent vectors and a named inverse
+        `tangentVectorOfCoordinate` to switch back from model coordinates.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

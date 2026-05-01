@@ -279,7 +279,9 @@ now packages the matching intrinsic boundary
        concrete tangent-coordinate derivative, and the scalar velocity identity,
        with base-time simplification lemmas reducing those components to the
        ordinary metric and pushforward tangent vector in centered coordinates
-       and slot-specialized forms for actual tangent vectors,
+       and slot-specialized forms for actual tangent vectors, plus a named
+       `tangentVectorOfCoordinate` inverse for switching back to geometric tangent
+       vectors,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

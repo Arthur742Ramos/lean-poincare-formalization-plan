@@ -314,6 +314,27 @@ noncomputable def sourceTangentCoordinate
     FiberBundle.mem_baseSet_trivializationAt' x
   (trivializationAt E TM x).continuousLinearEquivAt ℝ x hx u
 
+/-- Convert a model tangent coordinate at the centered tangent trivialization
+back to an actual tangent vector. -/
+noncomputable def tangentVectorOfCoordinate
+    (x : M) (uE : E) : TangentSpace I x :=
+  let TM := (TangentSpace I : M → Type _)
+  let hx : x ∈ (trivializationAt E TM x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  ((trivializationAt E TM x).continuousLinearEquivAt ℝ x hx).symm uE
+
+@[simp]
+theorem tangentVectorOfCoordinate_sourceTangentCoordinate
+    (x : M) (u : TangentSpace I x) :
+    tangentVectorOfCoordinate (I := I) x (sourceTangentCoordinate (I := I) x u) = u := by
+  simp [tangentVectorOfCoordinate, sourceTangentCoordinate]
+
+@[simp]
+theorem sourceTangentCoordinate_tangentVectorOfCoordinate
+    (x : M) (uE : E) :
+    sourceTangentCoordinate (I := I) x (tangentVectorOfCoordinate (I := I) x uE) = uE := by
+  simp [tangentVectorOfCoordinate, sourceTangentCoordinate]
+
 /-- The tangent-map coordinate operator `A(τ)` in the preferred coordinate model
 for a gauge-pulled metric component. -/
 noncomputable def pullbackMetricTangentCoordinateMap
@@ -476,6 +497,18 @@ theorem metricBilinearCoordinateField_base_apply_eq
   erw [_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
     (F := E) (W := TM) (x0 := p) (x := p)
     (FiberBundle.mem_baseSet_trivializationAt' p) ((g t).inner p) uE vE]
+
+/-- Centered metric-coordinate field evaluation, expressed using the named
+inverse from model coordinates to actual tangent vectors. -/
+theorem metricBilinearCoordinateField_base_apply_eq_tangentVector
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M) (uE vE : E) :
+    metricBilinearCoordinateField (I := I) (M := M) g p
+        (t, (extChartAt I p) p) uE vE =
+      (g t).inner p
+        (tangentVectorOfCoordinate (I := I) p uE)
+        (tangentVectorOfCoordinate (I := I) p vE) := by
+  rw [metricBilinearCoordinateField_base_apply_eq]
+  rfl
 
 /-- At the chart center, if the model slots are the centered tangent coordinates
 of actual tangent vectors, the metric-coordinate field evaluates to the ordinary

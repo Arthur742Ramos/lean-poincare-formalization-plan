@@ -255,7 +255,10 @@ with the ordinary metric in the tangent trivialization at `p`, and identify the
 base-time concrete tangent-coordinate component with the gauge pushforward
 tangent vector in target coordinates. Slot-specialized versions remove the
 centered-coordinate wrappers entirely when the model slots are
-`sourceTangentCoordinate`s of actual tangent vectors.
+`sourceTangentCoordinate`s of actual tangent vectors. The inverse
+`tangentVectorOfCoordinate` is now named as well, with two-sided simplification
+lemmas against `sourceTangentCoordinate`, so remaining velocity identities can
+switch between model-coordinate and geometric tangent-vector forms directly.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
