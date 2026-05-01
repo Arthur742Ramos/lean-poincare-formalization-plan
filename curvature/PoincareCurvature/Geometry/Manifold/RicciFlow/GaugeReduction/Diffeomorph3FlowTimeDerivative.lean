@@ -352,6 +352,61 @@ theorem hasDerivAt_bilinearFormField_linear_apply_apply_along_curve
       (Bfield' := Bfield') (y := y) (y' := y') (t := t) hB hy)
     hA u v
 
+/-- Within-set local-coordinate transfer form for the moving-base full-field
+chain rule with tangent-map-shaped derivative `A'(t) = D ∘ A(t)`. -/
+theorem hasDerivWithinAt_of_eventuallyEq_bilinearFormField_linear_apply_apply_along_curve
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {scalar : ℝ → ℝ}
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V}
+    {A : ℝ → V →L[ℝ] V} {D : V →L[ℝ] V} {s : Set ℝ} {t : ℝ}
+    (u v : V)
+    (heq : scalar =ᶠ[𝓝[s] t] fun τ : ℝ => Bfield (τ, y τ) (A τ u) (A τ v))
+    (heq_t : scalar t = Bfield (t, y t) (A t u) (A t v))
+    (hB : HasFDerivAt Bfield Bfield' (t, y t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hA : HasDerivWithinAt A (D.comp (A t)) s t)
+    {value : ℝ}
+    (hvalue :
+      Bfield' (1, y') (A t u) (A t v) +
+        Bfield (t, y t) (D (A t u)) (A t v) +
+        Bfield (t, y t) (A t u) (D (A t v)) =
+        value) :
+    HasDerivWithinAt scalar value s t := by
+  have hderiv :=
+    hasDerivWithinAt_bilinearFormField_linear_apply_apply_along_curve
+      (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
+      (A := A) (D := D) (s := s) (t := t) hB hy hA u v
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
+/-- Local-coordinate transfer form for the moving-base full-field chain rule with
+tangent-map-shaped derivative `A'(t) = D ∘ A(t)`. -/
+theorem hasDerivAt_of_eventuallyEq_bilinearFormField_linear_apply_apply_along_curve
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {scalar : ℝ → ℝ}
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V}
+    {A : ℝ → V →L[ℝ] V} {D : V →L[ℝ] V} {t : ℝ}
+    (u v : V)
+    (heq : scalar =ᶠ[𝓝 t] fun τ : ℝ => Bfield (τ, y τ) (A τ u) (A τ v))
+    (hB : HasFDerivAt Bfield Bfield' (t, y t))
+    (hy : HasDerivAt y y' t)
+    (hA : HasDerivAt A (D.comp (A t)) t)
+    {value : ℝ}
+    (hvalue :
+      Bfield' (1, y') (A t u) (A t v) +
+        Bfield (t, y t) (D (A t u)) (A t v) +
+        Bfield (t, y t) (A t u) (D (A t v)) =
+        value) :
+    HasDerivAt scalar value t := by
+  have hderiv :=
+    hasDerivAt_bilinearFormField_linear_apply_apply_along_curve
+      (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
+      (A := A) (D := D) (t := t) hB hy hA u v
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq
+
 namespace ModelGaugeFlowODE
 
 namespace VariationalLocalFlowSolution

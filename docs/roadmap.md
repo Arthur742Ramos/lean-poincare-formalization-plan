@@ -684,7 +684,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       gauge-pullback calculations including eventual-equality transfer forms,
       direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule primitives, including a
       moving-base full-field companion for `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` under
-      `A' = D ∘ A`, generic within-filter transfer for arbitrary `A'`,
+      `A' = D ∘ A` with within-filter/ordinary eventual-equality transfer forms,
+      generic within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set, open-interior, and chart-coordinate continuity
       helpers,
       center-trajectory uniqueness wrappers for local/continuous/variational

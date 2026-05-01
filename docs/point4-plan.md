@@ -150,7 +150,9 @@ The basic moving-base within-set chain rule
 differentiates `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` directly under the variational
 tangent-map equation `A' = D ∘ A`, so closed-Picard chart calculations can use a
 full metric-coordinate Fréchet derivative without first freezing the base curve
-or introducing an eventual-equality transfer.
+or introducing an eventual-equality transfer. Its within-filter and ordinary
+eventual-equality transfer forms are also named, matching the chart-local
+geometric scalar identities used downstream.
 Closed-interval scalar derivative data now upgrades back to ordinary
 `PullbackMetricInnerDerivativeOn` on the open interval, so endpoint component
 work can feed the existing interior gauge-pulled metric time-regularity routes.

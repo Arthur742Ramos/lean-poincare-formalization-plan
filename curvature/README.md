@@ -238,8 +238,9 @@ now packages the matching intrinsic boundary
       wrappers with eventual-equality transfer forms, center-trajectory
        uniqueness wrappers, direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule
        primitives, including a moving-base full-field companion for
-       `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` under `A' = D ∘ A`, generic within-filter
-       transfer for arbitrary `A'`,
+       `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` under `A' = D ∘ A` with
+       within-filter/ordinary eventual-equality transfer forms, generic
+       within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set/open-interior continuity helpers, and
       Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level
