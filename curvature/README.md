@@ -345,9 +345,10 @@ now packages the matching intrinsic boundary
    subsingleton-model, and empty-manifold cases. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
-   plus its scalar-to-tensor repackaging lemma, leaving the dynamic
-   time-dependent gauge chain rule as the primitive positive-dimensional
-   time-regularity input. Two thin extension
+   plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic
+   scalar chain-rule target as `PullbackMetricInnerDerivativeOn`, equivalent to
+   tensor `HasTimeDerivativeOn` for the pulled-back metric. This leaves one
+   primitive positive-dimensional time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`

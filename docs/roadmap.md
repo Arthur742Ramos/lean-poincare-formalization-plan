@@ -662,9 +662,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     non-identity gauge time-regularity
     interface now also has the proof-bearing scalar-to-tensor bridge, and the
     fixed non-identity gauge case exposes both tensor and scalar derivative
-    adapters in the thin `Diffeomorph3FlowTimeDerivative` module, so its
-    remaining primitive input is the dynamic scalar chain-rule identity for the
-    pulled-back metric; in the subsingleton-tangent case this non-identity
+    adapters in the thin `Diffeomorph3FlowTimeDerivative` module. That module
+    now names the remaining dynamic scalar chain-rule target as
+    `PullbackMetricInnerDerivativeOn` and proves its equivalence with
+    `HasTimeDerivativeOn` for the pulled-back metric, so the remaining primitive
+    input is exactly that scalar identity; in the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
     DeTurck gauge-flow families by componentwise vanishing, with direct
     gauge-reduced projections and matching model-space/empty-manifold synonyms
