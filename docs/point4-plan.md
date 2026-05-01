@@ -211,7 +211,11 @@ metric-coordinate Fréchet derivative can feed the geometric scalar target
 without repackaging through frozen-time component data. Raw
 `Diffeomorph3GaugeFlowOn` witnesses now expose the same endpoint full-field
 route directly, including a one-step variational local-flow wrapper to tensor
-time-regularity on `Ioo tmin tmax`. It also has within-set chain-rule primitives:
+time-regularity on `Ioo tmin tmax`. The fixed-IVP and theorem-family geometric
+DeTurck gauge-flow bundles now also expose within-set field-derivative data
+packages and direct tensor time-regularity projections from them, matching the
+ordinary field-data routes at package level. It also has within-set chain-rule
+primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`

@@ -688,7 +688,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       closed-interval field-level coordinate derivative packages and variational
       local-flow constructors for full metric-coordinate Fréchet data, raw
       gauge-flow endpoint wrappers from that data to interior tensor
-      time-regularity, generic within-filter transfer for arbitrary `A'`,
+      time-regularity, fixed-IVP/theorem-family within-field data packages and
+      projections, generic within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set, open-interior, and chart-coordinate continuity
       helpers,
       center-trajectory uniqueness wrappers for local/continuous/variational
