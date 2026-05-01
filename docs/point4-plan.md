@@ -165,9 +165,12 @@ That endpoint theorem now also has a finite-cover/readout-field companion:
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMapWithin_geometricValue`
 transfers the required full Fréchet derivative from any locally equal
 two-variable bilinear-form readout before invoking the geometric-slot
-variational endpoint route. A companion model-coordinate endpoint,
+variational endpoint route. Direct and readout-field model-coordinate endpoint
+companions,
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalLocalFlowWithin_geometricValue`
+and
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalLocalFlowWithin_geometricValue`,
-adds the closed-interval base-velocity comparison needed when the scalar
+add the closed-interval base-velocity comparison needed when the scalar
 identity is stated with the variational ODE vector field `f(t, y(t))` rather
 than the raw gauge vector field.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric

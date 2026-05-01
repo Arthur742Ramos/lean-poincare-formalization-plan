@@ -929,8 +929,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMapWithin_geometricValue`,
               transferring the full endpoint Fréchet derivative from any locally
               equal finite-cover bilinear-form readout before applying the
-              geometric-slot variational endpoint theorem. A model-coordinate
-              endpoint companion,
+              geometric-slot variational endpoint theorem. Direct and
+              readout-field model-coordinate endpoint companions,
+              `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalLocalFlowWithin_geometricValue`
+              and
               `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalLocalFlowWithin_geometricValue`,
               now derives the raw gauge velocity from within-time-set agreement
               with the variational local flow, so endpoint scalar identities can
