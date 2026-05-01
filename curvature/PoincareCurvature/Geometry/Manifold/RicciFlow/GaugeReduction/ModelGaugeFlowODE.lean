@@ -1206,6 +1206,22 @@ theorem exists_autonomous_local_integral_curves
         ∀ t ∈ Ioo (t₀ - ε) (t₀ + ε), HasDerivAt α (f (α t)) t :=
   hf.exists_forall_mem_closedBall_exists_eq_forall_mem_Ioo_hasDerivAt t₀
 
+/-- Autonomous local integral curves from a `C¹` vector field, bundled with the
+continuity on the open existence interval obtained from their derivatives. -/
+theorem exists_autonomous_local_integral_curves_continuousOn
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ r > (0 : ℝ), ∃ ε > (0 : ℝ), ∀ x ∈ closedBall x₀ r,
+      ∃ α : ℝ → V, α t₀ = x ∧ ContinuousOn α (Ioo (t₀ - ε) (t₀ + ε)) ∧
+        ∀ t ∈ Ioo (t₀ - ε) (t₀ + ε), HasDerivAt α (f (α t)) t := by
+  obtain ⟨r, hr, ε, hε, hcurves⟩ :=
+    exists_autonomous_local_integral_curves (V := V) hf t₀
+  refine ⟨r, hr, ε, hε, ?_⟩
+  intro x hx
+  obtain ⟨α, hinit, hderiv⟩ := hcurves x hx
+  refine ⟨α, hinit, ?_, hderiv⟩
+  intro t ht
+  exact (hderiv t ht).continuousAt.continuousWithinAt
+
 /-- Centered version of
 `exists_autonomous_local_integral_curves`, matching the single-trajectory ODE
 statement used when only the gauge curve through one point is needed. -/
@@ -1214,6 +1230,19 @@ theorem exists_autonomous_center_integral_curve
     ∃ α : ℝ → V, α t₀ = x₀ ∧ ∃ ε > (0 : ℝ),
       ∀ t ∈ Ioo (t₀ - ε) (t₀ + ε), HasDerivAt α (f (α t)) t :=
   hf.exists_forall_mem_closedBall_exists_eq_forall_mem_Ioo_hasDerivAt₀ t₀
+
+/-- Centered autonomous integral curve with continuity on the open existence
+interval. -/
+theorem exists_autonomous_center_integral_curve_continuousOn
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ α : ℝ → V, α t₀ = x₀ ∧ ∃ ε > (0 : ℝ),
+      ContinuousOn α (Ioo (t₀ - ε) (t₀ + ε)) ∧
+        ∀ t ∈ Ioo (t₀ - ε) (t₀ + ε), HasDerivAt α (f (α t)) t := by
+  obtain ⟨α, hinit, ε, hε, hderiv⟩ :=
+    exists_autonomous_center_integral_curve (V := V) hf t₀
+  refine ⟨α, hinit, ε, hε, ?_, hderiv⟩
+  intro t ht
+  exact (hderiv t ht).continuousAt.continuousWithinAt
 
 end ContDiffAt
 

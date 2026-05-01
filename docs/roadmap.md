@@ -676,7 +676,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       derivative extractors, named Picard-interval continuity, and Lipschitz
       dependence on the initial point; it also packages the continuous space-time
       partial-flow form needed for chart gluing, plus the autonomous `C¹`
-      integral-curve specialization and Gronwall uniqueness bridges for packaged
+      integral-curve specialization with open-interval continuity and Gronwall uniqueness bridges for packaged
       local model flows on open and closed Picard intervals, including direct
       uniqueness routes for the continuous space-time package. The same model
       ODE bridge now packages the tangent-map variational equation
