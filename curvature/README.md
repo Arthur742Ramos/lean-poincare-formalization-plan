@@ -349,10 +349,10 @@ now packages the matching intrinsic boundary
     routes. The rank-one compact special case also has gauge-reduced projections
     to intrinsic and ordinary theorem packages, including model-space
     theorem-family aliases. A thin `AnalyticPDE.SmoothRealizationGaugeRoutes`
-    companion now also routes global smooth Ricci-DeTurck chart-closure data to
-    intrinsic and ordinary compact point-4 theorem packages through the raw
-    identity `C³` gauge-flow witness plus named scalar derivative data, leaving
-    the heavy PDE realization module unchanged. The
+    companion now also routes global and interval smooth Ricci-DeTurck
+    chart-closure data to intrinsic and ordinary compact point-4 theorem packages
+    through the raw identity `C³` gauge-flow witness plus named scalar derivative
+    data, leaving the heavy PDE realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic
