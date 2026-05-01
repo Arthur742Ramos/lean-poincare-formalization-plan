@@ -288,7 +288,8 @@ now packages the matching intrinsic boundary
        that discharges the raw coordinate-curve and tangent-map ODE parts once
        the named metric-coordinate field derivative is supplied,
        with the centered time-direction part of that derivative now supplied by
-       `HasTimeDerivativeAt` / `HasTimeDerivativeOn`,
+       `HasTimeDerivativeAt` / `HasTimeDerivativeOn`, including coordinate
+       curves that are eventually stationary at the chart center,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

@@ -833,7 +833,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         supplied. The centered time-direction part of that derivative is now
         formalized from `HasTimeDerivativeAt` / `HasTimeDerivativeOn`, leaving
         the moving spatial-coordinate derivative as the true positive-dimensional
-        field obligation.
+        field obligation; the same formula is available for coordinate curves
+        that are eventually stationary at the chart center, covering
+        identity/static no-spatial-motion cases.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

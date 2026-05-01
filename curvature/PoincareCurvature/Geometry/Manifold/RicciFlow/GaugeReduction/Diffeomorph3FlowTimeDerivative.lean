@@ -594,6 +594,59 @@ theorem metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeOn
   metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt
     (I := I) (M := M) (hg ht) p uE vE
 
+/-- If the spatial coordinate curve is eventually stationary at the chart center,
+the named metric-coordinate field differentiates by the same pure time-direction
+formula. -/
+theorem metricBilinearCoordinateField_hasDerivAt_of_eventuallyEq_center
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ} (hg : HasTimeDerivativeAt (I := I) (M := M) g gdot t)
+    (p : M) {y : ℝ → E}
+    (hy : y =ᶠ[𝓝 t] fun _ : ℝ ↦ (extChartAt I p) p)
+    (uE vE : E) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, y τ) uE vE)
+      (gdot t p
+        (tangentVectorOfCoordinate (I := I) p uE)
+        (tangentVectorOfCoordinate (I := I) p vE)) t := by
+  have hcenter :=
+    metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt
+      (I := I) (M := M) hg p uE vE
+  have hEq :
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, y τ) uE vE) =ᶠ[𝓝 t]
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, (extChartAt I p) p) uE vE) := by
+    filter_upwards [hy] with τ hτ
+    rw [hτ]
+  exact hcenter.congr_of_eventuallyEq hEq
+
+/-- Tangent-vector-slot version of
+`metricBilinearCoordinateField_hasDerivAt_of_eventuallyEq_center`. -/
+theorem metricBilinearCoordinateField_sourceTangentCoordinate_hasDerivAt_of_eventuallyEq_center
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ} (hg : HasTimeDerivativeAt (I := I) (M := M) g gdot t)
+    (p : M) {y : ℝ → E}
+    (hy : y =ᶠ[𝓝 t] fun _ : ℝ ↦ (extChartAt I p) p)
+    (u v : TangentSpace I p) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, y τ)
+          (sourceTangentCoordinate (I := I) p u)
+          (sourceTangentCoordinate (I := I) p v))
+      (gdot t p u v) t := by
+  simpa using
+    metricBilinearCoordinateField_hasDerivAt_of_eventuallyEq_center
+      (I := I) (M := M) hg p hy
+      (sourceTangentCoordinate (I := I) p u)
+      (sourceTangentCoordinate (I := I) p v)
+
 /-- At the base time, the two-variable metric-coordinate field agrees with the
 concrete moving bilinear coordinate component. -/
 theorem metricBilinearCoordinateField_base_eq_pullbackMetricBilinearCoordinateMap_self

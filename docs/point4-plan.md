@@ -273,6 +273,9 @@ of the non-identity gauge calculation is discharged once the named
 time-direction part of that derivative is now formalized directly from
 `HasTimeDerivativeAt` / `HasTimeDerivativeOn`; the remaining positive-dimensional
 field derivative is the moving spatial-coordinate part.
+The same centered formula now applies to any coordinate curve that is eventually
+stationary at the chart center, covering the no-spatial-motion case needed by
+identity/static gauges.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
