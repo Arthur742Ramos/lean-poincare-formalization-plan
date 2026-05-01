@@ -6,3 +6,4 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothRealizati
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothApproxClosure
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricGaugeFlow
 import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RankOne
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RankOneDeTurck
