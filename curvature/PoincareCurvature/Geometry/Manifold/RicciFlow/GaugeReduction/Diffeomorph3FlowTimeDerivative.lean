@@ -2906,6 +2906,46 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference_variatio
     G'.hasTimeDerivativeOn_of_metricCoordinateField_timeDifference
       (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht) htd
 
+/-- If a variational model flow agrees near `t` with the raw gauge-flow
+coordinate curve, then its model velocity is the coordinate form of the raw
+DeTurck gauge vector field. -/
+theorem variationalBaseVelocity_eq_tangentCoordChange_of_eventuallyEq
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (x : M) {xE : E}
+    (hxE : xE ∈ closedBall x₀ r)
+    (hbase : (fun τ : ℝ ↦
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[𝓝 t]
+        (fun τ : ℝ ↦ α.flow (xE, τ))) :
+    f t (α.flow (xE, t)) =
+      tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+        ((G.maps3 t) x) (X t ((G.maps3 t) x)) := by
+  have hraw :
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+          ((G.maps3 t) x) (X t ((G.maps3 t) x))) t :=
+    G.hasDerivAt_extChartAt_eval_of_mem_Ioo ht x
+  have hrawAsModel :
+      HasDerivAt (fun τ : ℝ ↦ α.flow (xE, τ))
+        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+          ((G.maps3 t) x) (X t ((G.maps3 t) x))) t :=
+    hraw.congr_of_eventuallyEq hbase.symm
+  have hmodel :
+      HasDerivAt (fun τ : ℝ ↦ α.flow (xE, τ))
+        (f t (α.flow (xE, t))) t :=
+    α.flow_hasDerivAt_of_mem_Ioo hxE ht
+  calc
+    f t (α.flow (xE, t)) =
+        deriv (fun τ : ℝ ↦ α.flow (xE, τ)) t := hmodel.deriv.symm
+    _ = tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+        ((G.maps3 t) x) (X t ((G.maps3 t) x)) := hrawAsModel.deriv
+
 /-- Closed-Picard raw gauge flow plus a full Fréchet derivative of the named
 metric-coordinate field and a variational tangent-map identification gives
 interior time-regularity.
@@ -3090,6 +3130,84 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variational
       (I := I) (M := M) G.maps3 t x v,
     hleft, hright]
   exact hvalue
+
+/-- Variational-flow geometric-slot version of the full-field endpoint.
+
+Here the full field derivative may be stated at the variational base point and
+the scalar identity may use the variational base velocity `f(t, y(t))`.  The
+eventual equality with the raw gauge coordinate curve identifies that velocity
+with the chart-coordinate DeTurck vector field before applying the
+closed-Picard time-regularity endpoint. -/
+theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalLocalFlow_geometricValue
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.flow (xE, τ)) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+            (fun τ : ℝ ↦ α.tangent xE τ) ∧
+        ∃ Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ),
+          HasFDerivAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield' (t, α.flow (xE, t)) ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)) +
+              (g t).inner ((G.maps3 t) x)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  ((Df t (α.flow (xE, t)))
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                      ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))))
+                ((G.maps3 t).pushforwardTangent x v) +
+              (g t).inner ((G.maps3 t) x)
+                ((G.maps3 t).pushforwardTangent x u)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  ((Df t (α.flow (xE, t)))
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                      ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) := by
+  refine
+    G.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalTangentMap_geometricValue
+      α ?_
+  intro t ht x u v
+  obtain ⟨xE, hxE, hbase, hA_eq, Bfield', hBfield, hvalue⟩ := hdata ht x u v
+  have hbase_t :
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x) = α.flow (xE, t) :=
+    show t ∈ {τ : ℝ |
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x) = α.flow (xE, τ)} from
+      mem_of_mem_nhds hbase
+  have hbase_t' :
+      (I ((chartAt H ((G.maps3 t) x)) ((G.maps3 t) x))) = α.flow (xE, t) := by
+    simpa [extChartAt] using hbase_t
+  have hBfield_center :
+      HasFDerivAt
+        (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x))
+        Bfield' (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) := by
+    simpa [extChartAt, hbase_t'] using hBfield
+  have hvel :=
+    G.variationalBaseVelocity_eq_tangentCoordChange_of_eventuallyEq
+      (I := I) (M := M) α ht x hxE hbase
+  refine ⟨xE, hxE, Bfield', hBfield_center, hA_eq, ?_⟩
+  simpa [hvel] using hvalue
 
 /-- Closed-Picard raw gauge flow plus variational model-flow chart data gives
 interior time-regularity for the gauge-pulled metric family in one step. -/

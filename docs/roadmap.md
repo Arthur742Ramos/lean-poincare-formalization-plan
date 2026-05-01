@@ -859,7 +859,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          where a full field Fréchet derivative plus a variational tangent-map
          identification and the scalar velocity identity imply interior tensor
          time-regularity; a geometric-slot companion states that identity using
-         actual pushed-forward tangent vectors at the base time.
+         actual pushed-forward tangent vectors at the base time. The variational
+         base-flow agreement now also identifies the model ODE velocity
+         `f(t, y(t))` with the raw gauge vector field in chart coordinates by
+         uniqueness of derivatives, and a strengthened endpoint accepts the full
+         field derivative at the variational base point with the scalar identity
+         stated using that model velocity.
          The coordinate data also restricts to smaller time sets and lifts
          through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
         so chart computations can feed the point-4 theorem routes without an
