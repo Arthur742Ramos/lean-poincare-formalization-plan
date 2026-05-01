@@ -605,8 +605,10 @@ now packages the matching intrinsic boundary
      and closed-interval `RicciDeTurckChartClosureData` now have the same
      proof-level intrinsic and ordinary theorem-family wrappers. Ambient interval
      closure data also now has proof-level constructors for genuine
-     symmetric-carrier closure, including the metric-cone shrink route, leaving
-     the heavy PDE realization module unchanged.
+     symmetric-carrier closure, including the metric-cone shrink route. The
+     density-based interval restricted symmetric carrier is now proved equal to
+     the chart's built-in restricted carrier on the Picard interval and the
+     Riemannian metric locus, leaving the heavy PDE realization module unchanged.
      The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation

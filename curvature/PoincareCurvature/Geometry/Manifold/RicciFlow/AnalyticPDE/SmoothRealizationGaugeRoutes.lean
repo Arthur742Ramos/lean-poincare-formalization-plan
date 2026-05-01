@@ -49,6 +49,82 @@ variable [CompleteSpace F]
 variable {κ : Type*} [Finite κ] [T2Space M]
 variable [FiniteDimensional ℝ F] [Nontrivial F]
 
+/-- On the Picard interval and the genuine Riemannian-metric locus, the density-based
+interval-scoped restricted symmetric carrier is the same as the interval chart's built-in
+restricted symmetric carrier. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.restrictedSymmetricA_eq_restrictedSymmetricA_of_closure_smooth_spd_on_Icc_of_mem
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (rhs : SmoothSectionRHSIdentification
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
+    (hclosure : ∀ s : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover,
+      s ∈ riemannianMetricLocusSubmodule (M := M) (F := F)
+        (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover →
+      (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover) ∈ closure
+          ({u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover |
+              u ∈ symmetricPositiveDefiniteLocus
+                (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+                et Kc hKc Ko hKo hKoEq hcover ∧
+              ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+                (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x))}))
+    {t : ℝ} (ht : t ∈ Icc ivp.initialTime T)
+    (x : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (hx : x ∈ riemannianMetricLocusSubmodule (M := M) (F := F)
+      (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover) :
+    (chart.restrictedSymmetricA
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover) t x =
+      (SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover rhs hclosure
+        (fun τ hτ => chart.lipschitzOn_Icc τ hτ)) t x := by
+  apply Subtype.ext
+  calc
+    ((chart.restrictedSymmetricA
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover) t x :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover) =
+        chart.A t (x :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) := by
+      exact chart.restrictedSymmetricA_coe_of_mem
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover t x hx
+    _ =
+        ((SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc
+          (M := M) (F := F) (I := I)
+          x0 et het Kc hKc Ko hKo hKoEq hcover rhs hclosure
+          (fun τ hτ => chart.lipschitzOn_Icc τ hτ)) t x :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) := by
+      exact (SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc_coe_of_mem
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover rhs hclosure
+        (fun τ hτ => chart.lipschitzOn_Icc τ hτ) t ht x hx).symm
+
 /-- The Banach chart right-hand side differentiates the named
 `metricBilinearCoordinateField` at the chart center for a smooth intrinsic
 DeTurck realization.

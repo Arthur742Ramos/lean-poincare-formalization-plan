@@ -1123,7 +1123,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      and closed-interval `RicciDeTurckChartClosureData` now have the same
      proof-level intrinsic and ordinary theorem-family wrappers. Ambient
      interval closure data also now has proof-level constructors for genuine
-     symmetric-carrier closure, including the metric-cone shrink route.
+     symmetric-carrier closure, including the metric-cone shrink route. The
+     density-based interval restricted symmetric carrier is now proved equal to
+     the chart's built-in restricted carrier on the Picard interval and the
+     Riemannian metric locus.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
