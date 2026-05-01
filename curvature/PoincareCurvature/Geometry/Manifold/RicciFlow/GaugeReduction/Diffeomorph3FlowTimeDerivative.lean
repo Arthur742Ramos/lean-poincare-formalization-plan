@@ -1,6 +1,6 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFlowODE
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 
 set_option linter.unusedSectionVars false
@@ -16,7 +16,8 @@ full chain-rule identity for a time-dependent diffeomorphism family.
 
 @[expose] public noncomputable section
 
-open scoped Manifold ContDiff Topology
+open Metric Set
+open scoped Manifold ContDiff Topology NNReal
 
 namespace RicciFlow
 
@@ -404,6 +405,50 @@ theorem CoordinatePullbackMetricFieldDerivativeOn.mono
     CoordinatePullbackMetricFieldDerivativeOn (I := I) (M := M) Φ g gdot s := by
   intro τ hτ x u v
   exact hfield (hst hτ) x u v
+
+/-- A variational model flow supplies the moving-base and tangent-map derivative
+clauses in the field-level coordinate pullback calculation.
+
+The remaining hypotheses are exactly the chart-identification and metric-field
+component derivative/evaluation facts.  Thus the ODE part of the dynamic
+gauge-pullback chain rule is discharged by `VariationalLocalFlowSolution` on
+the interior Picard interval. -/
+theorem coordinatePullbackMetricFieldDerivativeOn_of_variationalLocalFlow
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (uE vE : E),
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[𝓝 t]
+              (fun τ : ℝ ↦
+                Bfield (τ, α.flow (xE, τ))
+                  (α.tangent xE τ uE) (α.tangent xE τ vE)) ∧
+          HasFDerivAt Bfield Bfield' (t, α.flow (xE, t)) ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (α.tangent xE t uE) (α.tangent xE t vE) +
+              Bfield (t, α.flow (xE, t))
+                ((Df t (α.flow (xE, t))) (α.tangent xE t uE))
+                (α.tangent xE t vE) +
+              Bfield (t, α.flow (xE, t))
+                (α.tangent xE t uE)
+                ((Df t (α.flow (xE, t))) (α.tangent xE t vE)) =
+            gdot t x u v) :
+    CoordinatePullbackMetricFieldDerivativeOn (I := I) (M := M) Φ g gdot (Ioo tmin tmax) := by
+  intro t ht x u v
+  obtain ⟨xE, hxE, Bfield, Bfield', uE, vE, hmodel_eq, hBfield, hvalue⟩ :=
+    hdata ht x u v
+  exact ⟨Bfield, Bfield', (fun τ : ℝ ↦ α.flow (xE, τ)), f t (α.flow (xE, t)),
+    (fun τ : ℝ ↦ α.tangent xE τ), Df t (α.flow (xE, t)), uE, vE,
+    hmodel_eq, hBfield, α.flow_hasDerivAt_of_mem_Ioo hxE ht,
+    α.tangent_hasDerivAt_of_mem_Ioo hxE ht, hvalue⟩
 
 /-- Field-level moving-bilinear-form derivative data implies derivative data for
 the named coordinate model. -/

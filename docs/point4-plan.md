@@ -232,7 +232,15 @@ system, initialized on `(x, 1)` and restricted to a base ball contained in the
 product Picard ball, now extracts directly to `VariationalLocalFlowSolution`.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
-restriction.
+restriction. The ODE package now also supplies ordinary interior time
+derivatives for both the base flow `y(t)` and tangent map `A(t)`, and
+`Diffeomorph3FlowTimeDerivative.lean` uses those facts to build
+`CoordinatePullbackMetricFieldDerivativeOn` directly from a variational local
+flow on the interior Picard interval. This removes the ODE part of the remaining
+dynamic pullback chain rule from the list of manual hypotheses: the residual
+chart-local work is now the metric-component field derivative and the concrete
+identification of the geometric coordinate model with the selected variational
+flow/tangent data.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
