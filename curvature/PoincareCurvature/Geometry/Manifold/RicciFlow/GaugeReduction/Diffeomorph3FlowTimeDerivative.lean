@@ -2246,6 +2246,33 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivatives
     (coordinatePullbackMetricModelDerivativeOn_of_components (I := I) (M := M) hdata)
     hgeom
 
+/-- Closed-interval concrete component derivative data packages as tensor
+time-regularity on the open interior of the interval.
+
+This is the endpoint-data route into the existing `HasTimeDerivativeOn` API:
+within-derivatives on `Icc tmin tmax` first produce raw scalar derivatives on
+`Ioo tmin tmax`, then the usual scalar-to-tensor bridge applies. -/
+theorem hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricComponentDerivativeWithinOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hdata : CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax))
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+        (fun τ : ℝ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[Icc tmin tmax] t]
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (Φ.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
+    (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot) (s := Ioo tmin tmax)
+    (pullbackMetricInnerDerivativeOn_Ioo_of_coordinateComponentWithin
+      (I := I) (M := M) hdata hgeom)
+
 /-- A named scalar inner-product derivative obligation packages as the tensor
 time derivative of the gauge-pulled metric family. -/
 theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn

@@ -524,7 +524,8 @@ now packages the matching intrinsic boundary
       chart-local coordinate identifications and an endpoint derivative bridge
       for the concrete tangent-coordinate component, packaged at the component
       derivative-data layer with a generic within-set scalar transfer and raw
-      endpoint scalar derivative package that upgrades to the open interval. The
+      endpoint scalar derivative package that upgrades directly to tensor
+      time-regularity on the open interval. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
       promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
       scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred

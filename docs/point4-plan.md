@@ -145,6 +145,8 @@ plus chart-local equality imply this raw scalar within-derivative package.
 Closed-interval scalar derivative data now upgrades back to ordinary
 `PullbackMetricInnerDerivativeOn` on the open interval, so endpoint component
 work can feed the existing interior gauge-pulled metric time-regularity routes.
+A direct theorem packages closed-interval concrete component derivatives as
+`HasTimeDerivativeOn` for the gauge-pulled metric family over `Ioo tmin tmax`.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package
