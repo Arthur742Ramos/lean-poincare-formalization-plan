@@ -729,11 +729,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     remaining primitive input is exactly that scalar identity. The first
      model-space chain-rule component of that scalar identity is now proved:
      differentiating `B(t)(u(t), v(t))`, and the gauge-coordinate specialization
-     `B(t)(A(t)u, A(t)v)`, including the `D ∘ A(t)` tangent-map derivative
-     contribution, plus a moving-base/direct-vector-slot form that the
-     variational-flow scalar theorem now uses via the applied tangent-map ODE,
-     and eventual-equality transfer lemmas for chart-local coordinate
-     identifications. A coordinate-level package
+      `B(t)(A(t)u, A(t)v)`, including the `D ∘ A(t)` tangent-map derivative
+      contribution, plus a moving-base/direct-vector-slot form that the
+      variational-flow scalar theorem now uses via the applied tangent-map ODE,
+      closed-interval/right-derivative counterparts for endpoint work, and
+      eventual-equality transfer lemmas for chart-local coordinate
+      identifications. A coordinate-level package
       `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
       chartwise `B/A/D` derivative hypotheses to the actual geometric
       `PullbackMetricInnerDerivativeOn` scalar target and directly to tensor

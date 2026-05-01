@@ -125,7 +125,10 @@ The moving-base version
 `hasDerivAt_bilinearFormField_apply_apply_along_curve` now handles two
 independently differentiated vector paths directly, and the variational-flow
 scalar theorem uses the applied tangent-map ODE rather than only the
-operator-valued derivative.
+operator-valued derivative. Closed-interval/right-derivative versions of these
+same bilinear-form and moving-base vector-slot chain rules are also available,
+including `hasDerivWithinAt_bilinearFormField_tangent_apply_apply` for
+variational model flows on `Icc tmin tmax`.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package

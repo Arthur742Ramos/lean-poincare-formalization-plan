@@ -84,6 +84,63 @@ theorem hasDerivAt_bilinearFormField_apply_apply_along_curve
       (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y') (t := t) hB hy)
     hu hv
 
+/-- Within-set version of `hasDerivAt_bilinearForm_apply_apply`. -/
+theorem hasDerivWithinAt_bilinearForm_apply_apply
+    {V W : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    [NormedAddCommGroup W] [NormedSpace ℝ W]
+    {B : ℝ → V →L[ℝ] W →L[ℝ] ℝ} {B' : V →L[ℝ] W →L[ℝ] ℝ}
+    {u : ℝ → V} {u' : V} {v : ℝ → W} {v' : W} {s : Set ℝ} {t : ℝ}
+    (hB : HasDerivWithinAt B B' s t)
+    (hu : HasDerivWithinAt u u' s t) (hv : HasDerivWithinAt v v' s t) :
+    HasDerivWithinAt (fun τ : ℝ => B τ (u τ) (v τ))
+      (B' (u t) (v t) + B t u' (v t) + B t (u t) v') s t := by
+  have hfirst : HasDerivWithinAt (fun τ : ℝ => B τ (u τ))
+      (B' (u t) + B t u') s t :=
+    hB.clm_apply hu
+  have hsecond : HasDerivWithinAt (fun τ : ℝ => (B τ (u τ)) (v τ))
+      ((B' (u t) + B t u') (v t) + (B t (u t)) v') s t :=
+    hfirst.clm_apply hv
+  simpa [ContinuousLinearMap.add_apply, add_assoc] using hsecond
+
+/-- Within-set version of `hasDerivAt_bilinearFormField_along_curve`, using a
+full Fréchet derivative of the bilinear-form field at the base point. -/
+theorem hasDerivWithinAt_bilinearFormField_along_curve
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V} {s : Set ℝ} {t : ℝ}
+    (hB : HasFDerivAt Bfield Bfield' (t, y t))
+    (hy : HasDerivWithinAt y y' s t) :
+    HasDerivWithinAt (fun τ : ℝ => Bfield (τ, y τ)) (Bfield' (1, y')) s t := by
+  have hpair : HasDerivWithinAt (fun τ : ℝ => (τ, y τ)) (1, y') s t := by
+    simpa using (hasDerivWithinAt_id t s).prodMk hy
+  simpa [Function.comp_def] using
+    (HasFDerivAt.comp_hasDerivWithinAt (x := t) (l := Bfield) (l' := Bfield')
+      (f := fun τ : ℝ => (τ, y τ)) hB hpair)
+
+/-- Within-set chain rule for a bilinear-form field along a moving base point
+and two independently differentiated vector paths. -/
+theorem hasDerivWithinAt_bilinearFormField_apply_apply_along_curve
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V}
+    {u : ℝ → V} {u' : V} {v : ℝ → V} {v' : V} {s : Set ℝ} {t : ℝ}
+    (hB : HasFDerivAt Bfield Bfield' (t, y t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hu : HasDerivWithinAt u u' s t) (hv : HasDerivWithinAt v v' s t) :
+    HasDerivWithinAt (fun τ : ℝ => Bfield (τ, y τ) (u τ) (v τ))
+      (Bfield' (1, y') (u t) (v t) +
+        Bfield (t, y t) u' (v t) +
+        Bfield (t, y t) (u t) v') s t :=
+  hasDerivWithinAt_bilinearForm_apply_apply
+    (B := fun τ : ℝ => Bfield (τ, y τ))
+    (B' := Bfield' (1, y'))
+    (hasDerivWithinAt_bilinearFormField_along_curve
+      (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
+      (s := s) (t := t) hB hy)
+    hu hv
+
 /-- Model-space chain rule for `B(t) (A(t) u) (A(t) v)`, the coordinate form of
 a pulled-back metric component when `A(t)` is the tangent map of the gauge. -/
 theorem hasDerivAt_bilinearForm_linear_apply_apply
@@ -145,6 +202,44 @@ theorem hasDerivAt_bilinearFormField_linear_apply_apply_along_curve
 namespace ModelGaugeFlowODE
 
 namespace VariationalLocalFlowSolution
+
+/-- Closed-interval scalar chain rule along a variational model flow. This is the
+endpoint/within-set version of
+`hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo`. -/
+theorem hasDerivWithinAt_bilinearFormField_tangent_apply_apply
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    (hB : HasFDerivAt Bfield Bfield' (t, α.flow (x, t))) (u v : V) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        Bfield (τ, α.flow (x, τ))
+          (α.tangent x τ u) (α.tangent x τ v))
+      (Bfield' (1, f t (α.flow (x, t)))
+          (α.tangent x t u) (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          ((Df t (α.flow (x, t))) (α.tangent x t u))
+          (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          (α.tangent x t u)
+          ((Df t (α.flow (x, t))) (α.tangent x t v)))
+      (Icc tmin tmax) t := by
+  exact hasDerivWithinAt_bilinearFormField_apply_apply_along_curve
+    (Bfield := Bfield) (Bfield' := Bfield')
+    (y := fun τ : ℝ ↦ α.flow (x, τ))
+    (y' := f t (α.flow (x, t)))
+    (u := fun τ : ℝ ↦ α.tangent x τ u)
+    (u' := (Df t (α.flow (x, t))) (α.tangent x t u))
+    (v := fun τ : ℝ ↦ α.tangent x τ v)
+    (v' := (Df t (α.flow (x, t))) (α.tangent x t v))
+    (s := Icc tmin tmax) (t := t)
+    hB (α.hasDerivWithinAt x hx t ht)
+    (α.tangent_apply_hasDerivWithinAt hx ht u)
+    (α.tangent_apply_hasDerivWithinAt hx ht v)
 
 /-- Exact scalar chain rule along a variational model flow.
 
