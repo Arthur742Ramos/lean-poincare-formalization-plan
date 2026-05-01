@@ -430,6 +430,27 @@ noncomputable def metricBilinearCoordinateField
     let y : M := (extChartAt I p).symm z.2
     ContinuousLinearMap.inCoordinates E TM OneF TStar p y p y ((g z.1).inner y)
 
+/-- At a fixed time, the spatial coordinate part of the named
+metric-coordinate field is `C²` in the preferred extended chart. -/
+theorem metricBilinearCoordinateField_fixedTime_contDiffWithinAt
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M) :
+    ContDiffWithinAt ℝ 2
+      (fun yE : E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+      (Set.range I) ((extChartAt I p) p) := by
+  let TM := (TangentSpace I : M → Type _)
+  let TStar := fun y : M => TM y →L[ℝ] ℝ
+  let OneF := E →L[ℝ] ℝ
+  let BilF := E →L[ℝ] E →L[ℝ] ℝ
+  let f : M → BilF := fun y ↦
+    ContinuousLinearMap.inCoordinates E TM OneF TStar p y p y ((g t).inner y)
+  have hf : ContMDiffAt I 𝓘(ℝ, BilF) 2 f p := by
+    let Ftot : M → _root_.Bundle.TotalSpace BilF (fun y : M ↦ TM y →L[ℝ] TStar y) :=
+      fun y ↦ _root_.Bundle.TotalSpace.mk' BilF y ((g t).inner y)
+    exact ((contMDiffAt_hom_bundle (f := Ftot) (x₀ := p)).mp ((g t).contMDiff p)).2
+  simpa [f, metricBilinearCoordinateField, writtenInExtChartAt] using
+    (contMDiffAt_iff.mp hf).2
+
 /-- Near a time where the gauge image remains in the preferred chart, the
 concrete moving bilinear component is the two-variable metric-coordinate field
 evaluated along the coordinate curve of the moved base point. -/

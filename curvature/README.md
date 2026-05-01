@@ -290,6 +290,8 @@ now packages the matching intrinsic boundary
        with the centered time-direction part of that derivative now supplied by
        `HasTimeDerivativeAt` / `HasTimeDerivativeOn`, including coordinate
        curves that are eventually stationary at the chart center,
+       and fixed-time spatial slices of the field now proved `C²` in the
+       preferred extended chart,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

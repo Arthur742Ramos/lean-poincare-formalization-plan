@@ -276,6 +276,10 @@ field derivative is the moving spatial-coordinate part.
 The same centered formula now applies to any coordinate curve that is eventually
 stationary at the chart center, covering the no-spatial-motion case needed by
 identity/static gauges.
+For the moving spatial-coordinate side, fixed-time slices of
+`metricBilinearCoordinateField` are now proved `C²` in the preferred extended
+chart, using the existing hom-bundle coordinate smoothness of each smooth
+Riemannian metric slice.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

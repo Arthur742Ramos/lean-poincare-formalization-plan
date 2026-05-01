@@ -835,7 +835,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         the moving spatial-coordinate derivative as the true positive-dimensional
         field obligation; the same formula is available for coordinate curves
         that are eventually stationary at the chart center, covering
-        identity/static no-spatial-motion cases.
+        identity/static no-spatial-motion cases. On the moving spatial side,
+        fixed-time slices of `metricBilinearCoordinateField` are now proved
+        `C²` in the preferred extended chart from the hom-bundle coordinate
+        smoothness of each Riemannian metric slice.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an
