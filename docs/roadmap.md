@@ -681,9 +681,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       dependence on the initial point; it also packages the continuous space-time
       partial-flow form needed for chart gluing, named base-flow, tangent-map,
       and vector-slot time-slice continuity bridges for continuous/variational
-      packages, plus the autonomous `C¹` integral-curve specialization with
-      open-interval continuity and a packaged `LocalFlowSolution` extraction
-      on a smaller closed interval, vector-slot variational uniqueness bridges,
+       packages, plus the autonomous `C¹` integral-curve specialization with
+       open-interval continuity and a packaged `LocalFlowSolution` extraction
+       on a smaller closed interval, restriction constructors for local,
+       Lipschitz, continuous, and variational local-flow packages on smaller
+       closed intervals and initial balls, vector-slot variational uniqueness bridges,
       center-trajectory scalar chain-rule wrappers for basepoint
       gauge-pullback calculations including eventual-equality transfer forms,
       direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule primitives, including a

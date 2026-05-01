@@ -160,6 +160,28 @@ theorem center_continuousOn (α : LocalFlowSolution f t₀ x₀ r) :
     ContinuousOn (α.flow x₀) (Icc tmin tmax) :=
   α.flow_continuousOn (mem_closedBall_self r.2)
 
+/-- Restrict a packaged local flow to a smaller initial ball and a smaller
+closed time interval containing the same base time. -/
+def restrict
+    (α : LocalFlowSolution f t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    LocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' where
+  flow := α.flow
+  initial_eq := by
+    intro x hx
+    have hx' : x ∈ closedBall x₀ r := by
+      rw [mem_closedBall] at hx ⊢
+      exact le_trans hx (by exact_mod_cast hr)
+    simpa using α.initial_eq x hx'
+  hasDerivWithinAt := by
+    intro x hx t ht
+    have hx' : x ∈ closedBall x₀ r := by
+      rw [mem_closedBall] at hx ⊢
+      exact le_trans hx (by exact_mod_cast hr)
+    exact (α.hasDerivWithinAt x hx' t (htime ht)).mono htime
+
 /-- Two packaged local model flows agree on the interior time interval whenever
 their curves stay in a region where the vector field is uniformly Lipschitz. -/
 theorem eqOn_Ioo_of_lipschitzOnWith
@@ -229,6 +251,31 @@ theorem center_eqOn_Icc_of_lipschitzOnWith
     ht₀ hf_lip hα_mem hβ_mem
 
 end LocalFlowSolution
+
+namespace LipschitzLocalFlowSolution
+
+variable {f : ℝ → V → V} {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V}
+  {r : ℝ≥0}
+
+/-- Restrict a Lipschitz local flow to a smaller initial ball and a smaller
+closed time interval. -/
+def restrict
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    LipschitzLocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' where
+  toLocalFlowSolution := α.toLocalFlowSolution.restrict htime ht₀' hr
+  exists_lipschitz_time := by
+    obtain ⟨L', hL'⟩ := α.exists_lipschitz_time
+    refine ⟨L', ?_⟩
+    intro t ht
+    refine (hL' t (htime ht)).mono ?_
+    intro x hx
+    rw [mem_closedBall] at hx ⊢
+    exact le_trans hx (by exact_mod_cast hr)
+
+end LipschitzLocalFlowSolution
 
 namespace LocalFlowSolution
 
@@ -386,6 +433,33 @@ on the Picard interval. -/
 theorem center_continuousOn (α : ContinuousLocalFlowSolution f t₀ x₀ r) :
     ContinuousOn (fun t : ℝ => α.flow (x₀, t)) (Icc tmin tmax) :=
   α.flow_continuousOn (mem_closedBall_self r.2)
+
+/-- Restrict a continuous space-time local flow to a smaller initial ball and a
+smaller closed time interval. -/
+def restrict
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    ContinuousLocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' where
+  flow := α.flow
+  initial_eq := by
+    intro x hx
+    have hx' : x ∈ closedBall x₀ r := by
+      rw [mem_closedBall] at hx ⊢
+      exact le_trans hx (by exact_mod_cast hr)
+    simpa using α.initial_eq x hx'
+  hasDerivWithinAt := by
+    intro x hx t ht
+    have hx' : x ∈ closedBall x₀ r := by
+      rw [mem_closedBall] at hx ⊢
+      exact le_trans hx (by exact_mod_cast hr)
+    exact (α.hasDerivWithinAt x hx' t (htime ht)).mono htime
+  continuousOn := by
+    refine α.continuousOn.mono (Set.prod_mono ?_ htime)
+    intro x hx
+    rw [mem_closedBall] at hx ⊢
+    exact le_trans hx (by exact_mod_cast hr)
 
 /-- Continuous space-time local flows inherit the open-interval uniqueness bridge
 from `LocalFlowSolution`. -/
@@ -840,6 +914,31 @@ theorem center_tangent_apply_hasDerivWithinAt
     HasDerivWithinAt (fun τ : ℝ => α.tangent x₀ τ v)
       (((Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) v) (Icc tmin tmax) t :=
   α.tangent_apply_hasDerivWithinAt (mem_closedBall_self r.2) ht v
+
+/-- Restrict a variational local flow to a smaller initial ball and a smaller
+closed time interval. -/
+def restrict
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' where
+  toContinuousLocalFlowSolution :=
+    α.toContinuousLocalFlowSolution.restrict htime ht₀' hr
+  tangent := α.tangent
+  tangent_initial_eq := by
+    intro x hx
+    have hx' : x ∈ closedBall x₀ r := by
+      rw [mem_closedBall] at hx ⊢
+      exact le_trans hx (by exact_mod_cast hr)
+    simpa using α.tangent_initial_eq x hx'
+  tangent_hasDerivWithinAt := by
+    intro x hx t ht
+    have hx' : x ∈ closedBall x₀ r := by
+      rw [mem_closedBall] at hx ⊢
+      exact le_trans hx (by exact_mod_cast hr)
+    exact (α.tangent_hasDerivWithinAt x hx' t (htime ht)).mono htime
 
 /-- On the interior of the Picard interval, the center base curve has the
 ordinary derivative required by coordinate chain rules. -/

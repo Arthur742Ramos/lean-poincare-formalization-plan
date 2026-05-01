@@ -652,6 +652,12 @@ hypotheses. The autonomous `C¹` vector-field route now also extracts a
 proof-level `Nonempty LocalFlowSolution` package on a smaller closed time
 interval and smaller initial ball, giving the first direct bridge from
 mathlib's autonomous integral-curve theorem to the packaged raw model-flow API.
+The model-flow packages now also have restriction constructors for
+`LocalFlowSolution`, `LipschitzLocalFlowSolution`, `ContinuousLocalFlowSolution`,
+and `VariationalLocalFlowSolution`, preserving ODE, continuity, Lipschitz, and
+tangent-equation data on smaller closed time intervals and smaller initial balls.
+These are the overlap/localization maps needed before chartwise solutions can be
+glued into a manifold-level flow.
 The time-derivative layer now also has center-trajectory closed-interval and
 interior scalar chain-rule wrappers for
 `Bfield(t, y(t))(A(t)u)(A(t)v)`, so basepoint gauge-pullback calculations can

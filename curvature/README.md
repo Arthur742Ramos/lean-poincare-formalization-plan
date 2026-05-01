@@ -528,9 +528,10 @@ now packages the matching intrinsic boundary
     either pulled-back metric time-derivative or scalar inner-product derivative
     data. The new `GaugeReduction.ModelGaugeFlowODE` module now isolates the
     Banach-model Picard-Lindelöf local-flow theorem needed before the remaining
-    positive-dimensional manifold ODE lift: it packages time-dependent local
-    flows, their closed-interval ODE derivative, initial-data Lipschitz
-    dependence, continuous space-time partial flows, and autonomous `C¹` integral
+     positive-dimensional manifold ODE lift: it packages time-dependent local
+     flows, their closed-interval ODE derivative, initial-data Lipschitz
+     dependence, continuous space-time partial flows, restriction maps to smaller
+     Picard intervals and initial balls, and autonomous `C¹` integral
      curves, plus Gronwall uniqueness bridges for packaged and continuous
      space-time model flows; the
      raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
