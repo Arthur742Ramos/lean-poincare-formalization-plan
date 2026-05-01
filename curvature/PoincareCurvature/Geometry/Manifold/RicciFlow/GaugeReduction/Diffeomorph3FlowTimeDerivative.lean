@@ -44,6 +44,18 @@ def PullbackMetricInnerDerivativeOn
           ((Φ τ).pushforwardTangent x v))
       (gdot t x u v) t
 
+/-- Restrict named scalar pullback derivative data to a smaller time set. -/
+theorem PullbackMetricInnerDerivativeOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hinner : PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot t)
+    (hst : s ⊆ t) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s := by
+  intro τ hτ x u v
+  exact hinner (hst hτ) x u v
+
 /-- A named scalar inner-product derivative obligation packages as the tensor
 time derivative of the gauge-pulled metric family. -/
 theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
@@ -145,6 +157,18 @@ theorem const_pullbackMetricInnerDerivativeOn
   intro t ht x u v
   exact const_pullbackMetricFamily_inner_hasDerivAt
     (I := I) (M := M) φ hderiv ht x u v
+
+/-- The identity `C^3` gauge turns ordinary metric time-regularity into the
+named scalar derivative obligation. -/
+theorem id_pullbackMetricInnerDerivativeOn
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hderiv : HasTimeDerivativeOn (I := I) (M := M) g gdot s) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M)
+      (SmoothSelfDiffeomorph3Family.id (I := I) (M := M)) g gdot s := by
+  refine pullbackMetricInnerDerivativeOn_of_hasTimeDerivativeOn (I := I) (M := M) ?_
+  simpa [SmoothSelfDiffeomorph3Family.id_pullbackMetricFamily] using hderiv
 
 end SmoothSelfDiffeomorph3Family
 
