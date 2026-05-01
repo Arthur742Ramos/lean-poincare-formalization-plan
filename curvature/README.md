@@ -284,7 +284,9 @@ now packages the matching intrinsic boundary
        vectors; a geometric-slot raw-flow bridge now states the remaining scalar
        velocity identity in actual pushed-forward tangent-vector terms and routes
        that data directly to tensor time-regularity, with a closed-Picard `Ioo`
-       specialization for interior regularity,
+       specialization for interior regularity and a variational-flow version
+       that discharges the raw coordinate-curve and tangent-map ODE parts once
+       the named metric-coordinate field derivative is supplied,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

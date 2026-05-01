@@ -266,7 +266,10 @@ vectors and only uses centered coordinates for the derivative inputs. The
 companion `hasTimeDerivativeOn_of_metricCoordinateField_geometricValue` routes
 that data directly to tensor time-regularity, including a closed-Picard
 `Ioo` specialization for interior regularity from interval-local raw gauge
-flows.
+flows. A variational-flow variant now identifies the raw coordinate curve and
+tangent-coordinate map with a `VariationalLocalFlowSolution`, so the ODE part
+of the non-identity gauge calculation is discharged once the named
+`metricBilinearCoordinateField` has its Fréchet derivative.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
