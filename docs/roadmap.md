@@ -1134,7 +1134,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      the matching state-preserving Banach-solution extraction after the standard
      metric-cone shrink, and genuine symmetric-carrier interval closure data now
      exposes the same Banach solution/uniqueness witness directly before theorem
-     package projection.
+     package projection, with a proof-level `Nonempty` existence readout.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence

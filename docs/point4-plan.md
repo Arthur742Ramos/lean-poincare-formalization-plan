@@ -908,7 +908,8 @@ shrink, so both the built-in carrier and the density-based carrier expose
 actual state-preserving ODE solution witnesses rather than only Picard
 hypotheses. Genuine symmetric-carrier interval closure data now also exposes
 that Banach solution and common-interval uniqueness witness directly before
-projecting to chosen-background, intrinsic, or ordinary theorem packages.
+projecting to chosen-background, intrinsic, or ordinary theorem packages, plus
+a proof-level `Nonempty` readout for callers that only need existence.
 
 **Suggested decomposition** (multi-session):
 
