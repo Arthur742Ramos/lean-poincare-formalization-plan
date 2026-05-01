@@ -1382,6 +1382,25 @@ theorem tangent_eqOn_Icc_of_opNorm_bound
     hα_mem hβ_mem
 
 /-- Closed-interval vector-slot uniqueness for variational tangent maps when the
+linearized operators are uniformly bounded on the interior.  Overlap form
+allowing different centers/radii. -/
+theorem tangent_apply_eqOn_Icc_of_opNorm_bound_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax))
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ K) (v : V) :
+    EqOn (fun t : ℝ => α.tangent x t v) (fun t : ℝ => β.tangent x t v)
+      (Icc tmin tmax) := by
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
+    α.tangent_eqOn_Icc_of_opNorm_bound_of_mem (β := β) (state := fun _ => Set.univ)
+      hxα hxβ ht₀ hflow_eq hD_bound (by intro t ht; simp) (by intro t ht; simp)
+  intro t ht
+  exact congrArg (fun A : V →L[ℝ] V => A v) (htangent ht)
+
+/-- Closed-interval vector-slot uniqueness for variational tangent maps when the
 linearized operators are uniformly bounded on the interior. -/
 theorem tangent_apply_eqOn_Icc_of_opNorm_bound
     (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
@@ -1390,12 +1409,8 @@ theorem tangent_apply_eqOn_Icc_of_opNorm_bound
     (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax))
     (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ K) (v : V) :
     EqOn (fun t : ℝ => α.tangent x t v) (fun t : ℝ => β.tangent x t v)
-      (Icc tmin tmax) := by
-  have htangent : EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
-    α.tangent_eqOn_Icc_of_opNorm_bound (β := β) (state := fun _ => Set.univ)
-      hx ht₀ hflow_eq hD_bound (by intro t ht; simp) (by intro t ht; simp)
-  intro t ht
-  exact congrArg (fun A : V →L[ℝ] V => A v) (htangent ht)
+      (Icc tmin tmax) :=
+  α.tangent_apply_eqOn_Icc_of_opNorm_bound_of_mem β hx hx ht₀ hflow_eq hD_bound v
 
 /-- Center-trajectory closed-interval vector-slot uniqueness for variational
 tangent maps under an operator-norm bound. -/

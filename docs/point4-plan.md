@@ -662,9 +662,9 @@ forms for `LocalFlowSolution` and `ContinuousLocalFlowSolution`: two packages
 with different centers/radii agree on `Ioo` and `Icc` for any initial point in
 both closed balls, assuming the usual common Lipschitz state-region hypotheses.
 Variational tangent-map uniqueness has matching overlap forms on `Ioo` and
-`Icc`, plus operator-norm and vector-slot specializations on `Ioo`, so tangent
-compatibility can also be proved across chart-local packages with different
-centers and radii once the base curves agree. Full variational-pair uniqueness
+`Icc`, plus operator-norm and vector-slot specializations on both intervals, so
+tangent compatibility can also be proved across chart-local packages with
+different centers and radii once the base curves agree. Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, combining base-flow Lipschitz
 uniqueness and tangent operator-norm uniqueness into a single compatibility
 statement for `(flow, tangent)`.
