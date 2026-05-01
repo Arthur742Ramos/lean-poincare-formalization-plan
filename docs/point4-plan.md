@@ -211,14 +211,20 @@ metric-coordinate Fréchet derivative can feed the geometric scalar target
 without repackaging through frozen-time component data. Raw
 `Diffeomorph3GaugeFlowOn` witnesses now expose the same endpoint full-field
 route directly, including a one-step variational local-flow wrapper to tensor
-time-regularity on `Ioo tmin tmax`. The fixed-IVP and theorem-family geometric
-DeTurck gauge-flow bundles now also expose within-set field-derivative data
-packages and direct tensor time-regularity projections from them, matching the
-ordinary field-data routes at package level. Raw fixed-IVP and theorem-family
-intrinsic gauge-flow existence witnesses now mirror those within-field packages
-and projections, so endpoint full-field data can be supplied directly at the raw
-existence layer before promoting to gauge-pulled metric time-regularity. It also
-has within-set chain-rule primitives:
+time-regularity on `Ioo tmin tmax`, and now also has same-set
+`hasTimeDerivativeOn_of_coordinateFieldWithin`,
+`coordinatePullbackMetricFieldDerivativeWithinOn_of_baseCoordinate`,
+`coordinatePullbackMetricFieldDerivativeWithinOn_of_metricCoordinateField`,
+`hasTimeDerivativeOn_of_baseCoordinateFieldWithin`, and
+`hasTimeDerivativeOn_of_metricCoordinateFieldWithin` constructors for time sets
+that are already neighborhoods of their points. The fixed-IVP and theorem-family
+geometric DeTurck gauge-flow bundles now also expose within-set
+field-derivative data packages and direct tensor time-regularity projections
+from them, matching the ordinary field-data routes at package level. Raw
+fixed-IVP and theorem-family intrinsic gauge-flow existence witnesses now mirror
+those within-field packages and projections, so endpoint full-field data can be
+supplied directly at the raw existence layer before promoting to gauge-pulled
+metric time-regularity. It also has within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`
