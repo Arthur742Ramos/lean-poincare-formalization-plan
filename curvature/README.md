@@ -248,7 +248,8 @@ now packages the matching intrinsic boundary
        endpoint companions compare the variational ODE velocity with the raw
        gauge velocity using within-time-set agreement, and the time-difference
        formulation now has within-set chain-rule primitives for closed-interval
-       endpoints. Its closed-ball
+       endpoints, including a readout-field version for finite-cover metric
+       coordinate data. Its closed-ball
        specialization now assembles product `IsPicardLindelof` witnesses and a
        one-step variational local-flow constructor from base/linearized
        closed-ball estimates plus the standard Picard continuity, norm, and

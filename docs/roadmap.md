@@ -939,8 +939,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               be stated using the model ODE vector field `f(t, y(t))`. The
               time-difference route now also has within-set chain-rule primitives
               for differentiating `B(τ, c(τ)) - B(t, c(τ))` directly at endpoints,
-              including the raw-gauge-flow bridge
-              `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`.
+              including raw-gauge-flow direct and readout-field bridges
+              `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`
+              and
+              `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_eventuallyEq`.
               On the PDE side,
               `SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_hasDerivAt_chartRHS_of_mem_Ioo`
               and its `sourceTangentCoordinate` scalar-slot variant now expose
