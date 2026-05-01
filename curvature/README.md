@@ -625,8 +625,14 @@ now packages the matching intrinsic boundary
       under the terminal-time bound, and the preferred-cover local-bounds route
       now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness
       directly from the smooth-density Picard shrink, with a proof-level
-      `Nonempty` readout for callers that only need existence, leaving the heavy PDE
-      realization module unchanged. The
+      `Nonempty` readout for callers that only need existence. The vector-bundle
+      smooth-approximation layer now also discharges the local coordinate-map
+      boundedness hypothesis for continuous Riemannian vector bundles, deriving
+      preferred-bilinear smooth approximants and the finite-cover Banach-norm
+      approximation theorem from mathlib's
+      `eventually_norm_trivializationAt_lt`, with only the explicit finite-cover
+      inverse bound left as input, leaving the heavy PDE realization module
+      unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic

@@ -923,7 +923,14 @@ interval, giving a solution-level bridge rather than only pointwise vector-field
 equalities. The preferred-cover local-bounds route now also performs that
 transport internally, returning a chart-carrier `BanachEvolutionLocalSolutionIn`
 witness directly from the smooth-density Picard shrink, plus a proof-level
-`Nonempty` readout for callers that only need existence.
+`Nonempty` readout for callers that only need existence. At the vector-bundle
+smooth-approximation layer, the local coordinate-map boundedness hypothesis is
+now discharged for continuous Riemannian vector bundles:
+`RiemannianSectionSmoothApprox` derives
+`eventually_norm_trivializationAt_lt` from mathlib's Riemannian bundle estimate
+and uses it to produce preferred-bilinear smooth approximants, including the
+finite-cover Banach-norm approximation theorem under the remaining explicit
+finite-cover inverse bound.
 
 **Suggested decomposition** (multi-session):
 

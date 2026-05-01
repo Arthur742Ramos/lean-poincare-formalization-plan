@@ -132,7 +132,7 @@ theorem eventually_norm_symmL_bilinearFormBundle_trivializationAt_lt_of_eventual
       (F := F) (W := W) x y hybase hCpos.le hy.le
   exact lt_of_le_of_lt hle (by nlinarith [hCpos])
 
-/-- Continuous preferred bilinear-form sections admit smooth fiberwise approximants once the
+/-- Continuous preferred bilinear-form sections have smooth fiberwise approximants once the
 underlying vector-bundle trivializations are locally bounded. -/
 theorem exists_smooth_fiberwise_approx_preferredBilinear_of_eventually_norm_trivializationAt_lt
     [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -215,6 +215,122 @@ theorem exists_dist_lt_of_smooth_fiberwise_approx_preferredBilinear_of_symmL_opN
     simpa [u, hdist_comm] using hg x
 
 end PreferredBilinearSmoothApprox
+
+section PreferredBilinearRiemannianSmoothApprox
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+variable {W : M → Type*} [TopologicalSpace (_root_.Bundle.TotalSpace F W)]
+  [∀ x, NormedAddCommGroup (W x)] [∀ x, InnerProductSpace ℝ (W x)]
+  [FiberBundle F W] [VectorBundle ℝ F W]
+
+local notation "BilF" => (F →L[ℝ] F →L[ℝ] ℝ)
+local notation "BilW" => _root_.Bundle.BilinearFormBundle (V := W)
+
+local instance riemannianSmoothApproxBilFNormedAddCommGroup : NormedAddCommGroup BilF :=
+  (inferInstance : NormedAddCommGroup (F →L[ℝ] F →L[ℝ] ℝ))
+local instance riemannianSmoothApproxBilFNormedSpace : NormedSpace ℝ BilF :=
+  (inferInstance : NormedSpace ℝ (F →L[ℝ] F →L[ℝ] ℝ))
+local instance riemannianSmoothApproxBilWNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (BilW x) :=
+  inferInstance
+local instance riemannianSmoothApproxBilWNormedSpace (x : M) : NormedSpace ℝ (BilW x) :=
+  inferInstance
+local instance riemannianSmoothApproxBilWTopologicalSpace :
+    TopologicalSpace (_root_.Bundle.TotalSpace BilF BilW) :=
+  _root_.Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+    (RingHom.id ℝ) F W (F →L[ℝ] ℝ) (fun x ↦ W x →L[ℝ] ℝ)
+local instance riemannianSmoothApproxBilWFiberBundle : FiberBundle BilF BilW :=
+  _root_.Bundle.ContinuousLinearMap.fiberBundle
+    (RingHom.id ℝ) F W (F →L[ℝ] ℝ) (fun x ↦ W x →L[ℝ] ℝ)
+local instance riemannianSmoothApproxBilWVectorBundle : VectorBundle ℝ BilF BilW :=
+  _root_.Bundle.ContinuousLinearMap.vectorBundle
+    (RingHom.id ℝ) F W (F →L[ℝ] ℝ) (fun x ↦ W x →L[ℝ] ℝ)
+
+set_option synthInstance.maxHeartbeats 100000
+set_option maxHeartbeats 1000000
+
+/-- A continuous Riemannian vector-bundle structure gives the local coordinate-map bounds used by
+the preferred bilinear-form smooth-approximation theorem. -/
+theorem eventually_norm_trivializationAt_lt_of_isContinuousRiemannianBundle
+    [IsContinuousRiemannianBundle (B := M) F W] :
+    ∀ x : M, ∃ C > 0,
+      ∀ᶠ y in 𝓝 x, ‖(trivializationAt F W x).continuousLinearMapAt ℝ y‖ < C := by
+  intro x
+  exact eventually_norm_trivializationAt_lt (F := F) (E := W) x
+
+/-- A continuous Riemannian vector-bundle structure supplies the local inverse bounds for the
+bilinear-form bundle induced by preferred trivializations. -/
+theorem eventually_norm_symmL_bilinearFormBundle_trivializationAt_lt_of_isContinuousRiemannianBundle
+    [IsContinuousRiemannianBundle (B := M) F W] :
+    ∀ x : M, ∃ C > 0,
+      ∀ᶠ y in 𝓝 x, ‖(trivializationAt BilF BilW x).symmL ℝ y‖ < C :=
+  eventually_norm_symmL_bilinearFormBundle_trivializationAt_lt_of_eventually_norm_trivializationAt_lt
+    (F := F) (W := W)
+    (eventually_norm_trivializationAt_lt_of_isContinuousRiemannianBundle (F := F) (W := W))
+
+/-- Continuous preferred bilinear-form sections have smooth fiberwise approximants in a continuous
+Riemannian vector bundle.  This discharges the local trivialization-boundedness hypothesis from the
+Riemannian vector-bundle estimate. -/
+theorem exists_smooth_fiberwise_approx_preferredBilinear_of_continuousRiemannianBundle
+    [IsContinuousRiemannianBundle (B := M) F W]
+    [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [SecondCountableTopology H] [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    ∀ η > 0,
+      ∃ g : Cₛ^(2 : ℕ∞)⟮I; BilF, BilW⟯,
+        ∀ x : M, dist (s x) (g x) < η :=
+  exists_smooth_fiberwise_approx_preferredBilinear_of_eventually_norm_trivializationAt_lt
+    (F := F) (W := W)
+    (eventually_norm_trivializationAt_lt_of_isContinuousRiemannianBundle (F := F) (W := W))
+    x0 s
+
+/-- Smooth approximation in the transported finite-cover Banach norm for preferred bilinear-form
+trivializations in a continuous Riemannian vector bundle.  The local coordinate-map boundedness
+hypothesis is discharged internally by the Riemannian vector-bundle estimate; only the finite-cover
+inverse bound remains as explicit input. -/
+theorem exists_dist_lt_preferredBilinear_of_continuousRiemannianBundle_and_symmL_opNorm_le
+    [IsContinuousRiemannianBundle (B := M) F W]
+    [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [SecondCountableTopology H] [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    {C : ℝ} (hCpos : 0 < C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C) :
+    ∀ ε > 0,
+      ∃ u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover,
+        ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+          (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x)) ∧
+        dist s u < ε :=
+  exists_dist_lt_of_smooth_fiberwise_approx_preferredBilinear_of_symmL_opNorm_le
+    (F := F) (W := W) x0 s hCpos hC
+    (exists_smooth_fiberwise_approx_preferredBilinear_of_continuousRiemannianBundle
+      (F := F) (W := W) x0 s)
+
+end PreferredBilinearRiemannianSmoothApprox
 
 end ContinuousSectionSpace
 end Bundle.Trivialization

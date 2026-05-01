@@ -1142,11 +1142,17 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       package projection, with proof-level `Nonempty` readouts for existence,
       smooth realization, and reverse candidate encoding. A
       density-based interval-carrier solution also now transports back to the
-      chart's built-in restricted carrier whenever its terminal time remains
-       inside the Picard interval, and the preferred-cover local-bounds route
-       now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness
-       directly from the smooth-density Picard shrink, with a proof-level
-       `Nonempty` readout for callers that only need existence.
+       chart's built-in restricted carrier whenever its terminal time remains
+        inside the Picard interval, and the preferred-cover local-bounds route
+        now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness
+        directly from the smooth-density Picard shrink, with a proof-level
+        `Nonempty` readout for callers that only need existence. The
+        vector-bundle smooth-approximation layer now also discharges the local
+        coordinate-map boundedness hypothesis for continuous Riemannian vector
+        bundles, deriving preferred-bilinear smooth approximants and the
+        finite-cover Banach-norm approximation theorem from mathlib's
+        `eventually_norm_trivializationAt_lt`, with only the explicit
+        finite-cover inverse bound left as input.
       What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
