@@ -300,7 +300,9 @@ now packages the matching intrinsic boundary
         tangent-coordinate-map derivative for that formulation and a converse
         bridge deriving the time-difference derivative from the full
         `metricBilinearCoordinateField` Fréchet derivative after subtracting the
-        frozen spatial `fderivWithin` contribution,
+        frozen spatial `fderivWithin` contribution, including a closed-Picard
+        variational-tangent endpoint that accepts the full field derivative,
+        tangent-map identification, and scalar velocity identity directly,
         exposing the chart algebra needed for Banach finite-cover metric readouts. The
         raw-flow API also extracts continuity of
       `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

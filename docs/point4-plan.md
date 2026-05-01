@@ -306,6 +306,13 @@ spatial `fderivWithin` term. Thus the time-difference route is aligned with the
 Banach finite-cover readout shape: a full field derivative can now feed the
 closed-Picard component package without a separate hand-written difference
 calculation.
+The closed-Picard endpoint
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalTangentMap`
+now combines this full-field derivative route with the variational tangent-map
+identification directly: on Picard interiors, callers provide the full
+`metricBilinearCoordinateField` Fréchet derivative, an eventual equality between
+the concrete tangent-coordinate map and the variational tangent flow, and the
+final scalar velocity identity.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
