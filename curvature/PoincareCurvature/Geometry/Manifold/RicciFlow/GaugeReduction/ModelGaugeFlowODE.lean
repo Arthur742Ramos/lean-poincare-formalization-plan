@@ -1231,6 +1231,37 @@ theorem center_tangent_apply_eqOn_Ioo_of_opNorm_bound
 
 The base curve is handled by the usual spatial Lipschitz hypothesis for `f`.
 The tangent curve then needs only a uniform operator-norm bound on `Df` along the
+base curve; left-composition supplies the operator-space Lipschitz estimate.
+Overlap form allowing different centers/radii. -/
+theorem flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Ioo tmin tmax) := by
+  have hflow : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
+      (Ioo tmin tmax) :=
+    α.toContinuousLocalFlowSolution.eqOn_Ioo_of_lipschitzOnWith_of_mem
+      β.toContinuousLocalFlowSolution hxα hxβ ht₀ hf_lip hα_base_mem hβ_base_mem
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Ioo tmin tmax) :=
+    α.tangent_eqOn_Ioo_of_opNorm_bound_of_mem (β := β) (state := fun _ => Set.univ)
+      hxα hxβ ht₀ hflow hD_bound (by intro t ht; simp) (by intro t ht; simp)
+  intro t ht
+  exact Prod.ext (hflow ht) (htangent ht)
+
+/-- Interior uniqueness for the full variational pair `(flow, tangent)`.
+
+The base curve is handled by the usual spatial Lipschitz hypothesis for `f`.
+The tangent curve then needs only a uniform operator-norm bound on `Df` along the
 base curve; left-composition supplies the operator-space Lipschitz estimate. -/
 theorem flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound
     (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
@@ -1244,16 +1275,9 @@ theorem flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound
     EqOn
       (fun t : ℝ => (α.flow (x, t), α.tangent x t))
       (fun t : ℝ => (β.flow (x, t), β.tangent x t))
-      (Ioo tmin tmax) := by
-  have hflow : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
       (Ioo tmin tmax) :=
-    α.toContinuousLocalFlowSolution.eqOn_Ioo_of_lipschitzOnWith
-      β.toContinuousLocalFlowSolution hx ht₀ hf_lip hα_base_mem hβ_base_mem
-  have htangent : EqOn (α.tangent x) (β.tangent x) (Ioo tmin tmax) :=
-    α.tangent_eqOn_Ioo_of_opNorm_bound (β := β) (state := fun _ => Set.univ)
-      hx ht₀ hflow hD_bound (by intro t ht; simp) (by intro t ht; simp)
-  intro t ht
-  exact Prod.ext (hflow ht) (htangent ht)
+  α.flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem β hx hx ht₀
+    hf_lip hα_base_mem hβ_base_mem hD_bound
 
 /-- Center-trajectory interior uniqueness for the full variational pair
 `(flow, tangent)`. -/
@@ -1323,6 +1347,26 @@ theorem tangent_eqOn_Icc_of_lipschitzOnWith
     hα_mem hβ_mem
 
 /-- Closed-interval tangent-map uniqueness when the linearized operators are
+uniformly bounded on the interior.  Overlap form allowing different
+centers/radii. -/
+theorem tangent_eqOn_Icc_of_opNorm_bound_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax))
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.tangent x t ∈ state t) :
+    EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
+  α.tangent_eqOn_Icc_of_lipschitzOnWith_of_mem β hxα hxβ ht₀ hflow_eq
+    (fun t ht =>
+      ((lipschitzWith_leftComp (Df t (α.flow (x, t)))).weaken (hD_bound t ht)).lipschitzOnWith)
+    hα_mem hβ_mem
+
+/-- Closed-interval tangent-map uniqueness when the linearized operators are
 uniformly bounded on the interior. -/
 theorem tangent_eqOn_Icc_of_opNorm_bound
     (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
@@ -1334,9 +1378,7 @@ theorem tangent_eqOn_Icc_of_opNorm_bound
     (hα_mem : ∀ t ∈ Ioo tmin tmax, α.tangent x t ∈ state t)
     (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.tangent x t ∈ state t) :
     EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
-  α.tangent_eqOn_Icc_of_lipschitzOnWith β hx ht₀ hflow_eq
-    (fun t ht =>
-      ((lipschitzWith_leftComp (Df t (α.flow (x, t)))).weaken (hD_bound t ht)).lipschitzOnWith)
+  α.tangent_eqOn_Icc_of_opNorm_bound_of_mem β hx hx ht₀ hflow_eq hD_bound
     hα_mem hβ_mem
 
 /-- Closed-interval vector-slot uniqueness for variational tangent maps when the
@@ -1371,6 +1413,36 @@ theorem center_tangent_apply_eqOn_Icc_of_opNorm_bound
 
 /-- Closed-interval uniqueness for the full variational pair `(flow, tangent)`
 from a base-flow Lipschitz estimate and an operator-norm bound on the linearized
+coefficient.  Overlap form allowing different centers/radii. -/
+theorem flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Icc tmin tmax) := by
+  have hflowIcc : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
+      (Icc tmin tmax) :=
+    α.toContinuousLocalFlowSolution.eqOn_Icc_of_lipschitzOnWith_of_mem
+      β.toContinuousLocalFlowSolution hxα hxβ ht₀ hf_lip hα_base_mem hβ_base_mem
+  have hflowIoo : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
+      (Ioo tmin tmax) := fun t ht => hflowIcc (Ioo_subset_Icc_self ht)
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
+    α.tangent_eqOn_Icc_of_opNorm_bound_of_mem (β := β) (state := fun _ => Set.univ)
+      hxα hxβ ht₀ hflowIoo hD_bound (by intro t ht; simp) (by intro t ht; simp)
+  intro t ht
+  exact Prod.ext (hflowIcc ht) (htangent ht)
+
+/-- Closed-interval uniqueness for the full variational pair `(flow, tangent)`
+from a base-flow Lipschitz estimate and an operator-norm bound on the linearized
 coefficient. -/
 theorem flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound
     (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
@@ -1384,18 +1456,9 @@ theorem flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound
     EqOn
       (fun t : ℝ => (α.flow (x, t), α.tangent x t))
       (fun t : ℝ => (β.flow (x, t), β.tangent x t))
-      (Icc tmin tmax) := by
-  have hflowIcc : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
       (Icc tmin tmax) :=
-    α.toContinuousLocalFlowSolution.eqOn_Icc_of_lipschitzOnWith
-      β.toContinuousLocalFlowSolution hx ht₀ hf_lip hα_base_mem hβ_base_mem
-  have hflowIoo : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
-      (Ioo tmin tmax) := fun t ht => hflowIcc (Ioo_subset_Icc_self ht)
-  have htangent : EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
-    α.tangent_eqOn_Icc_of_opNorm_bound (β := β) (state := fun _ => Set.univ)
-      hx ht₀ hflowIoo hD_bound (by intro t ht; simp) (by intro t ht; simp)
-  intro t ht
-  exact Prod.ext (hflowIcc ht) (htangent ht)
+  α.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem β hx hx ht₀
+    hf_lip hα_base_mem hβ_base_mem hD_bound
 
 /-- Center-trajectory closed-interval uniqueness for the full variational pair
 `(flow, tangent)`. -/
