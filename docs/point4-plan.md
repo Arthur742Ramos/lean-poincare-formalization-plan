@@ -195,6 +195,10 @@ What remains is the genuinely manifold-level lift: pass intrinsic DeTurck vector
 fields to these chartwise Banach ODE hypotheses, prove compatibility/gluing and
 invertibility of the local flow, and upgrade the result to the bundled `C³`
 self-diffeomorphism family.
+The raw-flow interface also now extracts the first chart-regularity consequence
+needed for that lift: at any time where the time set is a neighborhood, a raw
+`Diffeomorph3GaugeFlowOn` gives continuity of `τ ↦ Φ_τ(x)` and eventual
+membership in the preferred tangent trivialization centered at `Φ_t(x)`.
 
 **Module location.** The Banach-model bridge lives in
 `Geometry/Manifold/RicciFlow/GaugeReduction/ModelGaugeFlowODE.lean`.  The final

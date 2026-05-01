@@ -225,7 +225,10 @@ now packages the matching intrinsic boundary
      initial data, Lipschitz dependence on that initial data, and the continuous
      space-time partial-flow form needed for chart gluing, plus the
      autonomous `C¹` local-integral-curve specialization needed as a chart-level
-     raw-flow building block. A thin `AnalyticPDE.SmoothRealization` module names the
+     raw-flow building block. The raw-flow API also extracts continuity of
+     `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
+     neighborhood-time flow equation, preparing the chart-local pullback formulas.
+     A thin `AnalyticPDE.SmoothRealization` module names the
     global/interval PDE closure data that turns a Banach chart solution into a
     smooth chosen-background DeTurck solution and its self-encoding candidate:
     metric realization, boundary time derivatives, chart-RHS/geometric-RHS
@@ -347,7 +350,9 @@ now packages the matching intrinsic boundary
     positive-dimensional manifold ODE lift: it packages time-dependent local
     flows, their closed-interval ODE derivative, initial-data Lipschitz
     dependence, continuous space-time partial flows, and autonomous `C¹` integral
-    curves. A new
+    curves; the raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and
+    eventual tangent-trivialization membership from neighborhood-time flow data.
+    A new
     `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the
    non-identity gauge-pulled metric time-derivative obligation for arbitrary
    geometric `C³` DeTurck gauge-flow families on subsingleton tangent fibers by

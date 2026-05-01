@@ -17,6 +17,7 @@ endpoint Ricci-flow APIs.
 
 @[expose] public noncomputable section
 
+open Bundle
 open scoped Manifold ContDiff Topology
 
 namespace RicciFlow
@@ -73,6 +74,31 @@ theorem hasMFDerivAt
     HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (G.maps3 τ) x) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
   (G.satisfiesAt hs).hasMFDerivAt x
+
+/-- A raw gauge-flow witness is continuous in time along every base point at
+times where its time set is a neighborhood. -/
+theorem continuousAt_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t) (x : M) :
+    ContinuousAt (fun τ : ℝ ↦ (G.maps3 τ) x) t :=
+  (G.hasMFDerivAt hs x).continuousAt
+
+/-- Near any time where the raw gauge-flow equation holds on a neighborhood,
+the image of a fixed base point remains in the preferred tangent-bundle
+trivialization centered at its time-`t` image. -/
+theorem eventually_mem_trivializationAt_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      (G.maps3 τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).baseSet :=
+  (G.continuousAt_eval hs x).preimage_mem_nhds
+    ((trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' ((G.maps3 t) x)))
 
 /-- Package a geometric `SatisfiesGaugeFlowOn` statement as a raw `C^3`
 diffeomorphism gauge-flow witness. -/
