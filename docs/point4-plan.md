@@ -211,7 +211,14 @@ metric-coordinate Fréchet derivative can feed the geometric scalar target
 without repackaging through frozen-time component data. Raw
 `Diffeomorph3GaugeFlowOn` witnesses now expose the same endpoint full-field
 route directly, including a one-step variational local-flow wrapper to tensor
-time-regularity on `Ioo tmin tmax`, and now also has same-set
+time-regularity on `Ioo tmin tmax`; the same route now also has concrete and
+readout-field wrappers
+`hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithin`
+and
+`hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_variationalLocalFlowWithin`,
+so closed-interval base-flow/tangent-map identifications can feed the named
+metric-coordinate field or a locally equal Banach readout directly. It now also
+has same-set
 `hasTimeDerivativeOn_of_coordinateFieldWithin`,
 `coordinatePullbackMetricFieldDerivativeWithinOn_of_baseCoordinate`,
 `coordinatePullbackMetricFieldDerivativeWithinOn_of_metricCoordinateField`,
