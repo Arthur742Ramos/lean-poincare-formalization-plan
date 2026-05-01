@@ -251,10 +251,15 @@ now packages the matching intrinsic boundary
        `1 + a` identity-ball specialization. The dynamic pullback bridge now turns such a variational local
        flow into the interior coordinate-field derivative data and proves the
        exact scalar chain rule along the flow, leaving only the metric-component
-      derivative and concrete chart identification as local inputs. Closed-Picard
-      raw gauge flows also feed the coordinate-model/field time-derivative
-      bridges directly on the open interior interval, with a one-step theorem
-      from raw gauge flow plus variational model-flow chart data to interior
+       derivative and concrete chart identification as local inputs. A parallel
+       time-only model route now combines a variational local flow with a direct
+       `HasDerivAt B B' t` proof for the already-composed moving bilinear-form
+       readout, avoiding a full space-time `Bfield` derivative hypothesis when
+       the chart calculation has already reduced to `B(t)(A(t)u)(A(t)v)`.
+       Closed-Picard
+       raw gauge flows also feed the coordinate-model/field time-derivative
+       bridges directly on the open interior interval, with a one-step theorem
+       from raw gauge flow plus variational model-flow chart data to interior
       gauge-pulled time-regularity. The raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
@@ -430,10 +435,14 @@ now packages the matching intrinsic boundary
       that named coordinate model and promotes it directly to scalar and tensor
       time-regularity, including raw-gauge-flow wrappers. The module also proves
       the moving metric-component chain rule for `Bfield(τ, y(τ))` and the
-      combined `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent
-      equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with
-      scalar, tensor, and raw-gauge-flow promotion routes. The
-      coordinate data now restricts to smaller time sets and lifts through fixed-IVP, theorem-family, and
+       combined `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent
+       equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with
+       scalar, tensor, and raw-gauge-flow promotion routes. A companion
+       variational route discharges the tangent-map derivative while accepting a
+       direct `HasDerivAt B B' t` proof for the already-composed coordinate
+       readout, and raw closed-Picard gauge flows expose that route directly on
+       the open interior interval. The
+       coordinate data now restricts to smaller time sets and lifts through fixed-IVP, theorem-family, and
       raw-existence gauge-flow APIs. This leaves one primitive
     positive-dimensional time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides

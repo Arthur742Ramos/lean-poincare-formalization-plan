@@ -276,9 +276,15 @@ constructed on closed Picard intervals also now specialize directly to the open
 interior interval: their ordinary manifold derivative, continuity, chart
 membership, coordinate-model equality, and coordinate-model/field
 time-derivative bridges are available on `Ioo tmin tmax`. There is also a
-one-step theorem combining a closed-interval raw gauge flow with variational
-model-flow chart data to produce interior time-regularity of the gauge-pulled
-metric family.
+one-step theorem,
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowModel`,
+combining a closed-interval raw gauge flow with variational model-flow chart
+data to produce interior time-regularity of the gauge-pulled metric family.
+This route only needs the already-composed moving bilinear-form readout
+`B : ℝ → E →L[ℝ] E →L[ℝ] ℝ` to have `HasDerivAt B B' t`; it no longer forces
+the caller to package the metric component as a full space-time
+`Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ` with a `HasFDerivAt` proof when a direct
+time derivative of the readout is available.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged

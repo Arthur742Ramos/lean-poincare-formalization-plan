@@ -526,6 +526,44 @@ theorem coordinatePullbackMetricFieldDerivativeOn_of_variationalLocalFlow
     hmodel_eq, hBfield, α.flow_hasDerivAt_of_mem_Ioo hxE ht,
     α.tangent_hasDerivAt_of_mem_Ioo hxE ht, hvalue⟩
 
+/-- A variational model flow supplies the tangent-map derivative clause in the
+coordinate-model pullback calculation when the moving bilinear-form component
+has already been differentiated directly in time.
+
+This version is useful when the metric-component derivative is obtained from an
+already-composed readout, rather than from a full Fréchet derivative of a
+two-variable field `Bfield(t, y)`. -/
+theorem coordinatePullbackMetricModelDerivativeOn_of_variationalLocalFlow
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (B : ℝ → E →L[ℝ] E →L[ℝ] ℝ)
+          (B' : E →L[ℝ] E →L[ℝ] ℝ)
+          (uE vE : E),
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[𝓝 t]
+              (fun τ : ℝ ↦ B τ (α.tangent xE τ uE) (α.tangent xE τ vE)) ∧
+          HasDerivAt B B' t ∧
+          B' (α.tangent xE t uE) (α.tangent xE t vE) +
+              B t ((Df t (α.flow (xE, t))) (α.tangent xE t uE))
+                (α.tangent xE t vE) +
+              B t (α.tangent xE t uE)
+                ((Df t (α.flow (xE, t))) (α.tangent xE t vE)) =
+            gdot t x u v) :
+    CoordinatePullbackMetricModelDerivativeOn (I := I) (M := M) Φ g gdot
+      (Ioo tmin tmax) := by
+  intro t ht x u v
+  obtain ⟨xE, hxE, B, B', uE, vE, hmodel_eq, hB, hvalue⟩ := hdata ht x u v
+  exact ⟨B, B', (fun τ : ℝ ↦ α.tangent xE τ),
+    Df t (α.flow (xE, t)), uE, vE, hmodel_eq, hB,
+    α.tangent_hasDerivAt_of_mem_Ioo hxE ht, hvalue⟩
+
 /-- Field-level moving-bilinear-form derivative data implies derivative data for
 the named coordinate model. -/
 theorem coordinatePullbackMetricModelDerivativeOn_of_field
@@ -995,6 +1033,41 @@ theorem hasTimeDerivativeOn_Ioo_of_coordinateModel
     (fun {t} ht x u v ↦
       G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
         (t := t) ht g x u v)
+
+/-- Closed-Picard raw gauge flow plus a variational model flow whose moving
+bilinear-form component has been differentiated directly in time gives interior
+time-regularity for the gauge-pulled metric family. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalLocalFlowModel
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (B : ℝ → E →L[ℝ] E →L[ℝ] ℝ)
+          (B' : E →L[ℝ] E →L[ℝ] ℝ)
+          (uE vE : E),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝 t]
+              (fun τ : ℝ ↦ B τ (α.tangent xE τ uE) (α.tangent xE τ vE)) ∧
+          HasDerivAt B B' t ∧
+          B' (α.tangent xE t uE) (α.tangent xE t vE) +
+              B t ((Df t (α.flow (xE, t))) (α.tangent xE t uE))
+                (α.tangent xE t vE) +
+              B t (α.tangent xE t uE)
+                ((Df t (α.flow (xE, t))) (α.tangent xE t vE)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_coordinateModel
+    (SmoothSelfDiffeomorph3Family.coordinatePullbackMetricModelDerivativeOn_of_variationalLocalFlow
+      (I := I) (M := M) (Φ := G.maps3) (g := g) (gdot := gdot) α hdata)
 
 /-- Closed-Picard-interval raw gauge-flow version of the field-level coordinate
 derivative bridge on the open interior interval. -/
