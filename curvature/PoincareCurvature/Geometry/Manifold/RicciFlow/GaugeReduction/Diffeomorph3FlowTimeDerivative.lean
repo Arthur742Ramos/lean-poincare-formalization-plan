@@ -63,6 +63,27 @@ theorem hasDerivAt_bilinearFormField_along_curve
     (HasFDerivAt.comp_hasDerivAt (x := t) (l := Bfield) (l' := Bfield')
       (f := fun τ : ℝ => (τ, y τ)) hB hpair)
 
+/-- Model-space chain rule for a bilinear-form field along a moving base point
+and two independently differentiated vector paths. -/
+theorem hasDerivAt_bilinearFormField_apply_apply_along_curve
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V}
+    {u : ℝ → V} {u' : V} {v : ℝ → V} {v' : V} {t : ℝ}
+    (hB : HasFDerivAt Bfield Bfield' (t, y t))
+    (hy : HasDerivAt y y' t) (hu : HasDerivAt u u' t) (hv : HasDerivAt v v' t) :
+    HasDerivAt (fun τ : ℝ => Bfield (τ, y τ) (u τ) (v τ))
+      (Bfield' (1, y') (u t) (v t) +
+        Bfield (t, y t) u' (v t) +
+        Bfield (t, y t) (u t) v') t :=
+  hasDerivAt_bilinearForm_apply_apply
+    (B := fun τ : ℝ => Bfield (τ, y τ))
+    (B' := Bfield' (1, y'))
+    (hasDerivAt_bilinearFormField_along_curve
+      (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y') (t := t) hB hy)
+    hu hv
+
 /-- Model-space chain rule for `B(t) (A(t) u) (A(t) v)`, the coordinate form of
 a pulled-back metric component when `A(t)` is the tangent map of the gauge. -/
 theorem hasDerivAt_bilinearForm_linear_apply_apply
@@ -150,15 +171,18 @@ theorem hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo
           (α.tangent x t v) +
         Bfield (t, α.flow (x, t))
           (α.tangent x t u)
-          ((Df t (α.flow (x, t))) (α.tangent x t v))) t := by
-  exact hasDerivAt_bilinearFormField_linear_apply_apply_along_curve
+           ((Df t (α.flow (x, t))) (α.tangent x t v))) t := by
+  exact hasDerivAt_bilinearFormField_apply_apply_along_curve
     (Bfield := Bfield) (Bfield' := Bfield')
     (y := fun τ : ℝ ↦ α.flow (x, τ))
     (y' := f t (α.flow (x, t)))
-    (A := fun τ : ℝ ↦ α.tangent x τ)
-    (D := Df t (α.flow (x, t))) (t := t)
+    (u := fun τ : ℝ ↦ α.tangent x τ u)
+    (u' := (Df t (α.flow (x, t))) (α.tangent x t u))
+    (v := fun τ : ℝ ↦ α.tangent x τ v)
+    (v' := (Df t (α.flow (x, t))) (α.tangent x t v)) (t := t)
     hB (α.flow_hasDerivAt_of_mem_Ioo hx ht)
-    (α.tangent_hasDerivAt_of_mem_Ioo hx ht) u v
+    (α.tangent_apply_hasDerivAt_of_mem_Ioo hx ht u)
+    (α.tangent_apply_hasDerivAt_of_mem_Ioo hx ht v)
 
 /-- Eventual-equality transfer form of
 `hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo`. -/

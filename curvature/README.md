@@ -515,10 +515,12 @@ now packages the matching intrinsic boundary
     gauge-flow bundles; chosen-background, subsingleton-tangent/model, and
     empty-manifold identity raw gauge-flow fixed-IVP and theorem-family witnesses
      now provide the named scalar data directly. Its first model-space
-     chain-rule component is also proved: differentiating `B(t)(u(t), v(t))` and
-     the gauge-coordinate specialization `B(t)(A(t)u, A(t)v)`, including the
-     `D ∘ A(t)` tangent-map derivative contribution, with eventual-equality
-     transfer lemmas for chart-local coordinate identifications. The
+      chain-rule component is also proved: differentiating `B(t)(u(t), v(t))` and
+      the gauge-coordinate specialization `B(t)(A(t)u, A(t)v)`, including the
+      `D ∘ A(t)` tangent-map derivative contribution, plus a moving-base
+      direct-vector-slot version now used by the variational scalar theorem via
+      applied tangent-map ODE data, with eventual-equality transfer lemmas for
+      chart-local coordinate identifications. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
       promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
       scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred
@@ -551,9 +553,10 @@ now packages the matching intrinsic boundary
        raw-flow bridge now uses the actual gauge-flow coordinate curve as the
        moving base point and discharges its `y'(t)` clause from the raw manifold
        flow derivative before promoting the field-level data to tensor
-       time-regularity. A companion
-       variational route discharges the tangent-map derivative while accepting a
-       direct `HasDerivAt B B' t` proof for the already-composed coordinate
+        time-regularity. A companion
+        variational route discharges the tangent-map derivative in applied
+        vector slots while accepting a
+        direct `HasDerivAt B B' t` proof for the already-composed coordinate
        readout, and raw closed-Picard gauge flows expose that route directly on
        the open interior interval. The
        coordinate, coordinate-model, and field-level data now restrict to smaller
