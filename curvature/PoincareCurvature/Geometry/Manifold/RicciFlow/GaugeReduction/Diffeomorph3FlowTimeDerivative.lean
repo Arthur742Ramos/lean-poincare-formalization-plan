@@ -460,6 +460,24 @@ def PullbackMetricInnerDerivativeOn
           ((Φ τ).pushforwardTangent x v))
       (gdot t x u v) t
 
+/-- Within-set version of `PullbackMetricInnerDerivativeOn`.
+
+This is the raw scalar endpoint/right-derivative target for a gauge-pulled
+metric. It is useful for closed Picard intervals before restricting to interior
+times where within-derivatives upgrade to ordinary derivatives. -/
+def PullbackMetricInnerDerivativeWithinOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v))
+      (gdot t x u v) s t
+
 /-- Coordinate-level sufficient data for the dynamic gauge-pullback scalar
 derivative.
 
@@ -1870,6 +1888,69 @@ theorem coordinatePullbackMetricComponentDerivativeWithinOn_of_variationalTangen
   refine ⟨B', Df t (α.flow (xE, t)), hB, ?_, hvalue⟩
   exact pullbackMetricTangentCoordinateMap_hasDerivWithinAt_of_variationalTangentMap
     (I := I) (M := M) (Φ := Φ) α hxE ht x hA_eq
+
+/-- Endpoint component data plus chart-local geometric/model equality imply the
+raw within-set scalar derivative of the gauge-pulled metric.
+
+This is the closed-interval analogue of
+`pullbackMetricInnerDerivativeOn_of_coordinate`: it turns the concrete
+positive-dimensional component derivatives into the actual geometric scalar
+right-derivative target. -/
+theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateComponentWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hdata : CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨B', D, hB, hA, hvalue⟩ := hdata ht x u v
+  let B : ℝ → E →L[ℝ] E →L[ℝ] ℝ :=
+    fun τ : ℝ ↦ pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x
+  let A : ℝ → E →L[ℝ] E :=
+    fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x
+  let uE : E := sourceTangentCoordinate (I := I) x u
+  let vE : E := sourceTangentCoordinate (I := I) x v
+  have hmodel_eq :
+      pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[
+        𝓝[s] t] (fun τ : ℝ ↦ B τ (A τ uE) (A τ vE)) := by
+    filter_upwards with τ
+    exact pullbackMetricInnerCoordinateModel_eq_components
+      (I := I) (M := M) Φ g t τ x u v
+  have heq :
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        (fun τ : ℝ ↦ B τ (A τ uE) (A τ vE)) :=
+    (hgeom ht x u v).trans hmodel_eq
+  have heq_t :
+      (g t).inner ((Φ t) x)
+          ((Φ t).pushforwardTangent x u)
+          ((Φ t).pushforwardTangent x v) =
+        B t (A t uE) (A t vE) := by
+    calc
+      (g t).inner ((Φ t) x)
+          ((Φ t).pushforwardTangent x u)
+          ((Φ t).pushforwardTangent x v) =
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v t := by
+        exact (pullbackMetricInnerCoordinateModel_eq
+          (I := I) (M := M) Φ g t t x u v
+          (FiberBundle.mem_baseSet_trivializationAt' ((Φ t) x))).symm
+      _ = B t (A t uE) (A t vE) := by
+        exact pullbackMetricInnerCoordinateModel_eq_components
+          (I := I) (M := M) Φ g t t x u v
+  exact
+    hasDerivWithinAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp_deriv
+      (B := B) (B' := B') (A := A) (D := D)
+      (u := uE) (v := vE) heq heq_t hB hA hvalue
 
 /-- Field-level moving-bilinear-form derivative data implies derivative data for
 the named coordinate model. -/

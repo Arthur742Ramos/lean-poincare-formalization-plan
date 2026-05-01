@@ -139,6 +139,9 @@ tangent-map constructor over `Icc tmin tmax`.
 There is also a generic within-set eventual-equality scalar chain rule for the
 concrete component shape `B(τ)(A(τ)u)(A(τ)v)` with `A'(t) = D ∘ A(t)`, so these
 endpoint component packages can be transferred to local scalar identities.
+The raw geometric endpoint target is now named as
+`PullbackMetricInnerDerivativeWithinOn`, and endpoint concrete component data
+plus chart-local equality imply this raw scalar within-derivative package.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package
