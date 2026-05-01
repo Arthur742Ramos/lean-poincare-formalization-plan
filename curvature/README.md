@@ -622,7 +622,8 @@ now packages the matching intrinsic boundary
       solutions now also transport back to the chart's built-in restricted carrier
       under the terminal-time bound, and the preferred-cover local-bounds route
       now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness
-      directly from the smooth-density Picard shrink, leaving the heavy PDE
+      directly from the smooth-density Picard shrink, with a proof-level
+      `Nonempty` readout for callers that only need existence, leaving the heavy PDE
       realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation

@@ -919,7 +919,8 @@ built-in restricted carrier whenever its terminal time stays within the Picard
 interval, giving a solution-level bridge rather than only pointwise vector-field
 equalities. The preferred-cover local-bounds route now also performs that
 transport internally, returning a chart-carrier `BanachEvolutionLocalSolutionIn`
-witness directly from the smooth-density Picard shrink.
+witness directly from the smooth-density Picard shrink, plus a proof-level
+`Nonempty` readout for callers that only need existence.
 
 **Suggested decomposition** (multi-session):
 

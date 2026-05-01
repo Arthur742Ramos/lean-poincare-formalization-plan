@@ -1141,9 +1141,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      package projection, with a proof-level `Nonempty` existence readout. A
       density-based interval-carrier solution also now transports back to the
       chart's built-in restricted carrier whenever its terminal time remains
-      inside the Picard interval, and the preferred-cover local-bounds route
-      now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness
-      directly from the smooth-density Picard shrink.
+       inside the Picard interval, and the preferred-cover local-bounds route
+       now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness
+       directly from the smooth-density Picard shrink, with a proof-level
+       `Nonempty` readout for callers that only need existence.
       What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
