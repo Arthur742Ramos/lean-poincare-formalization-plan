@@ -227,7 +227,10 @@ continuity. The module now also defines the product variational vector field
 `(y, A)' = (f(t, y), Df(t, y) ∘ A)` and proves projection lemmas extracting the
 base and tangent ODEs from any packaged `LocalFlowSolution` of that product
 system, providing the intended route from Picard-Lindelöf on a product Banach
-space to variational tangent data.  The same module also records the
+space to variational tangent data. A continuous local flow for this product
+system, initialized on `(x, 1)` and restricted to a base ball contained in the
+product Picard ball, now extracts directly to `VariationalLocalFlowSolution`.
+The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
 local model flows whose curves stay in a uniformly Lipschitz state region; the

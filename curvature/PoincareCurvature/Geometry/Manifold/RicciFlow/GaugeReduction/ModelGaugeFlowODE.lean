@@ -270,6 +270,45 @@ namespace VariationalLocalFlowSolution
 variable {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
   {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
 
+/-- Extract a variational local flow from a continuous local flow of the product
+system `(y, A)' = (f(t, y), Df(t, y) ∘ A)` initialized on pairs `(x, 1)`.
+
+The radius for the extracted initial base points can be smaller than the product
+Picard radius; `hball` records that every `(x, 1)` lies in the product initial
+ball. -/
+def ofProductContinuousLocalFlowSolution
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀ (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    VariationalLocalFlowSolution f Df t₀ x₀ r where
+  flow p := (α.flow ((p.1, (1 : V →L[ℝ] V)), p.2)).1
+  initial_eq := by
+    intro x hx
+    exact congrArg Prod.fst (α.initial_eq (x, (1 : V →L[ℝ] V)) (hball x hx))
+  hasDerivWithinAt := by
+    intro x hx t ht
+    exact hasDerivWithinAt_fst_of_variationalVectorField
+      (α.hasDerivWithinAt (x, (1 : V →L[ℝ] V)) (hball x hx) t ht)
+  continuousOn := by
+    let embed : V × ℝ → (V × (V →L[ℝ] V)) × ℝ :=
+      fun p => ((p.1, (1 : V →L[ℝ] V)), p.2)
+    have hemb : ContinuousOn embed (closedBall x₀ r ×ˢ Icc tmin tmax) :=
+      (by fun_prop : Continuous embed).continuousOn
+    have hmaps : MapsTo embed (closedBall x₀ r ×ˢ Icc tmin tmax)
+        (closedBall (x₀, (1 : V →L[ℝ] V)) R ×ˢ Icc tmin tmax) := by
+      intro p hp
+      exact ⟨hball p.1 hp.1, hp.2⟩
+    exact (α.continuousOn.comp hemb hmaps).fst
+  tangent x t := (α.flow ((x, (1 : V →L[ℝ] V)), t)).2
+  tangent_initial_eq := by
+    intro x hx
+    exact congrArg Prod.snd (α.initial_eq (x, (1 : V →L[ℝ] V)) (hball x hx))
+  tangent_hasDerivWithinAt := by
+    intro x hx t ht
+    exact hasDerivWithinAt_snd_of_variationalVectorField
+      (α.hasDerivWithinAt (x, (1 : V →L[ℝ] V)) (hball x hx) t ht)
+
 /-- Forget both tangent-equation and space-time continuity fields. -/
 def toLocalFlowSolution (α : VariationalLocalFlowSolution f Df t₀ x₀ r) :
     LocalFlowSolution f t₀ x₀ r :=

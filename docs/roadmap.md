@@ -674,7 +674,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       intervals when the base local flows agree and the linearized ODE is
       uniformly Lipschitz. It also defines the product variational vector field
       `(y, A)' = (f(t, y), Df(t, y) ∘ A)` and projection lemmas from packaged
-      product `LocalFlowSolution`s to the base and tangent ODEs. Raw gauge flows now also expose the first
+      product `LocalFlowSolution`s to the base and tangent ODEs; continuous
+      product local flows initialized on `(x, 1)` extract directly to
+      `VariationalLocalFlowSolution` on any base ball contained in the product
+      Picard ball. Raw gauge flows now also expose the first
       chart-membership bridge needed for coordinate pullback formulas:
       neighborhood-time flow equations imply continuity of `τ ↦ Φ_τ(x)` and
       eventual membership in the tangent trivialization at `Φ_t(x)`, with the
