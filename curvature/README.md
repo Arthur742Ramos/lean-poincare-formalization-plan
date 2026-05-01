@@ -259,7 +259,8 @@ now packages the matching intrinsic boundary
           generic within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set/open-interior continuity helpers plus
       fixed-IVP/theorem-family raw-existence derivative, continuity, and
-      tangent-trivialization readouts, and
+      tangent-trivialization readouts in both within-time-set and
+      ordinary-neighborhood forms, and
       Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level
       raw-flow building block. It also packages the tangent-map variational
@@ -554,9 +555,11 @@ now packages the matching intrinsic boundary
       `C¹` integral curves with packaged and directly localized
       `LocalFlowSolution` extraction, plus Gronwall uniqueness bridges for packaged and continuous
      space-time model flows; the
-     raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
-     tangent-trivialization membership from neighborhood-time flow data, with
-      matching within-time-set versions for restricted ODE intervals. It also
+      raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
+      tangent-trivialization membership from neighborhood-time flow data, with
+       matching within-time-set versions for restricted ODE intervals. The
+       fixed-IVP/theorem-family wrappers mirror the neighborhood-time
+       derivative, continuity, and trivialization readouts directly. It also
       converts the raw manifold derivative into the preferred local-coordinate
       derivative of the base flow curve at interior closed-interval times via
       `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`, with

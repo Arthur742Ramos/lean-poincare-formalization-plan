@@ -735,6 +735,9 @@ also expose the corresponding open-interior continuity helpers:
 The fixed-IVP and theorem-family raw intrinsic gauge-flow existence packages
 now mirror those derivative, continuity, and tangent-trivialization readouts
 directly, so downstream chart arguments no longer have to unwrap the raw flow.
+They also expose the ordinary-neighborhood versions of the same readouts:
+`hasMFDerivAt`, `hasDerivAt_extChartAt_eval`, `continuousAt_eval`, and
+`eventually_mem_trivializationAt_eval`.
 The same raw layer now also has proof-level `Nonempty` wrappers for the
 geometric, within-derivative, ordinary-on-time-set derivative, unrestricted
 derivative, restriction, and identity-flow constructors, letting downstream
