@@ -542,6 +542,41 @@ noncomputable def identityOfGaugeFieldEqZero
       sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime
       (hzero sol)
 
+/-- Package fixed-IVP named derivative data as raw gauge-flow existence data. -/
+noncomputable def ofDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hflowDeriv : ChosenIntrinsicDeTurckGaugeFlowDerivative
+      (I := I) (M := M) ivp maps3) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  of_hasMFDerivWithinAt (I := I) (M := M) (ivp := ivp)
+    maps3 anchored hflowDeriv
+
+/-- Package fixed-IVP ordinary-at-time named derivative data as raw gauge-flow
+existence data. -/
+noncomputable def ofDerivativeAt
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hflowDeriv : ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
+      (I := I) (M := M) ivp maps3) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  of_hasMFDerivAtOn (I := I) (M := M) (ivp := ivp)
+    maps3 anchored hflowDeriv
+
 /-- Chosen-background intrinsic DeTurck solutions have zero intrinsic DeTurck gauge field, so the
 identity diffeomorphism family supplies the raw `C³` gauge-flow existence data for a fixed IVP. -/
 noncomputable def identityOfChosenBackground

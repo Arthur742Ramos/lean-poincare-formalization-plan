@@ -517,11 +517,12 @@ now packages the matching intrinsic boundary
     named scalar derivative data, and direct fixed-IVP/theorem-family
     projections. The underlying
    `Diffeomorph3GaugeFlowOn` raw-flow API also has arbitrary-vector-field
-    identity constructors for subsingleton tangent, subsingleton model, and empty
+     identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]`, ordinary-on-time-set
      `HasMFDerivAt`, and unrestricted `HasMFDerivAt` adapters, named
      derivative-family adapters, including an ordinary-on-time-set
-     `ofDerivativeAtFamily` bridge, geometric-to-raw adapters, and direct
+     `ofDerivativeAtFamily` bridge and matching fixed-IVP `ofDerivative` /
+     `ofDerivativeAt` bridges, geometric-to-raw adapters, and direct
      derivative/local-at-time
      extractors; raw intrinsic gauge-flow existence witnesses now project
      directly to gauge-reduced, intrinsic, and ordinary theorem packages from

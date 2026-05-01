@@ -626,7 +626,11 @@ with `Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily`, and the theorem-family
 `ofDerivativeAtFamily` raw-existence bridge, so named Picard-interior derivative
 data no longer has to be manually weakened to within-set form before entering
-the gauge-flow existence API.
+the gauge-flow existence API. The same named-derivative symmetry is now present
+for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
+`ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,
+`IntrinsicDeTurckGaugeFlowExistence.ofDerivative`, and
+`IntrinsicDeTurckGaugeFlowExistence.ofDerivativeAt`.
 The theorem-family zero-gauge-field constructor now also carries the required
 pullback metric time-derivative proof, so any family whose intrinsic DeTurck
 gauge field vanishes on each solution time set can enter the gauge-reduction

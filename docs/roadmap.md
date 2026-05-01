@@ -672,7 +672,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       `SatisfiesGaugeFlowOn` repackaging step. The derivative-view layer also
       has ordinary-on-time-set derivative-family data and an
       `ofDerivativeAtFamily` raw-existence bridge for named Picard-interior
-      derivative packages. The Banach-model ODE component of
+      derivative packages, with matching fixed-IVP `ofDerivative` and
+      `ofDerivativeAt` bridges. The Banach-model ODE component of
      the positive-dimensional raw-flow construction is now also proof-bearing:
      `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent
      Picard-Lindelöf theorem as local model flows with initialization on a

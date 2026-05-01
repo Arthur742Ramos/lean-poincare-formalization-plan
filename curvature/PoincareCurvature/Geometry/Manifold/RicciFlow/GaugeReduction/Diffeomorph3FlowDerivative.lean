@@ -68,6 +68,51 @@ theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
   intro t ht x
   exact (hderiv t ht x).hasMFDerivWithinAt
 
+/-- Fixed-IVP primitive derivative data for the intrinsic DeTurck gauges of all
+chosen DeTurck solutions of one initial-value problem. -/
+def ChosenIntrinsicDeTurckGaugeFlowDerivative
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)) : Prop :=
+  ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn (I := I) (M := M)
+      (maps3 sol)
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      sol.1.toIntrinsicDeTurckSolution.timeSet
+
+/-- Fixed-IVP ordinary-at-time derivative data for the intrinsic DeTurck gauges
+of all chosen DeTurck solutions of one initial-value problem. -/
+def ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)) : Prop :=
+  ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+      (maps3 sol)
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      sol.1.toIntrinsicDeTurckSolution.timeSet
+
+/-- Ordinary-at-time fixed-IVP derivative data gives the within-set derivative
+view expected by derivative-level gauge-reduction APIs. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivative_of_derivativeAt
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
+      (I := I) (M := M) ivp maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivative
+      (I := I) (M := M) ivp maps3 := by
+  intro sol
+  exact Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
+    (I := I) (M := M) (hderiv sol)
+
 /-- A `C^3` diffeomorphism family satisfying the DeTurck gauge-flow equation
 also provides the primitive pointwise derivative data expected by the
 derivative-level gauge-reduction APIs. -/
