@@ -327,7 +327,8 @@ now packages the matching intrinsic boundary
         closed-Picard model-velocity time-difference route now deriving the
         remaining endpoint `Btime` term directly from full/readout
         metric-coordinate Fréchet data before rewriting the model velocity to
-        the raw gauge velocity, and the same geometric-slot phrasing available
+        the raw gauge velocity, with matching pushed-forward geometric-slot
+        variants, and the same geometric-slot phrasing available
         for the direct variational chain-rule route, plus a readout-field
         companion that transfers the
          required Fréchet derivative from any locally equal two-variable

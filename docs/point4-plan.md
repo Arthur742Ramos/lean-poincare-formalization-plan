@@ -189,7 +189,8 @@ has model-velocity wrappers that rewrite `f(t, y(t))` to the raw gauge velocity
 from within-set base-flow agreement, and direct/readout-field companions that
 derive the remaining `Btime` time-difference term from a full metric-coordinate
 Fréchet derivative at the variational base point before performing that
-velocity rewrite. It also has within-set chain-rule primitives:
+velocity rewrite, with geometric-slot variants for pushed-forward tangent-vector
+scalar identities. It also has within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`
