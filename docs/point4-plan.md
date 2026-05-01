@@ -626,7 +626,10 @@ with `Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily`, and the theorem-family
 `ofDerivativeAtFamily` raw-existence bridge, so named Picard-interior derivative
 data no longer has to be manually weakened to within-set form before entering
-the gauge-flow existence API. The same named-derivative symmetry is now present
+the gauge-flow existence API. Both within-time-set and ordinary-at-time
+intrinsic derivative views now also restrict monotonically to smaller time sets,
+matching the localized Picard intervals produced by chart ODE arguments. The
+same named-derivative symmetry is now present
 for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,
 `IntrinsicDeTurckGaugeFlowExistence.ofDerivative`, and

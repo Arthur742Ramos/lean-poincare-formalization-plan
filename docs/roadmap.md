@@ -670,10 +670,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      can plug in through either derivative data or existing geometric gauge-flow
       bundles without a separate
       `SatisfiesGaugeFlowOn` repackaging step. The derivative-view layer also
-      has ordinary-on-time-set derivative-family data and an
-      `ofDerivativeAtFamily` raw-existence bridge for named Picard-interior
-      derivative packages, with matching fixed-IVP `ofDerivative` and
-      `ofDerivativeAt` bridges. The Banach-model ODE component of
+       has ordinary-on-time-set derivative-family data and an
+       `ofDerivativeAtFamily` raw-existence bridge for named Picard-interior
+       derivative packages, monotonicity lemmas for restricting within-time-set
+       and ordinary-at-time intrinsic derivative views to smaller time sets, with matching fixed-IVP `ofDerivative` and
+       `ofDerivativeAt` bridges. The Banach-model ODE component of
      the positive-dimensional raw-flow construction is now also proof-bearing:
      `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent
      Picard-Lindelöf theorem as local model flows with initialization on a

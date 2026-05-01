@@ -183,7 +183,9 @@ now packages the matching intrinsic boundary
    families. A thin
    `Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative`
    module now names the primitive `C^3` intrinsic gauge-flow derivative data,
-   proves it equivalent to the geometric `SatisfiesGaugeFlowOn` formulation, and
+   proves it equivalent to the geometric `SatisfiesGaugeFlowOn` formulation,
+   provides monotonicity lemmas for restricting within-time-set and
+   ordinary-at-time derivative views to smaller time sets, and
    packages the corresponding chosen-DeTurck-solution family interface and a
    reusable gauge-flow family bundle with anchored-gauge projections and direct
    gauge-reducible/intrinsic/ordinary theorem-family projections from

@@ -68,6 +68,34 @@ theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
   intro t ht x
   exact (hderiv t ht x).hasMFDerivWithinAt
 
+/-- Restrict primitive within-time-set derivative data to a smaller time set. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hderiv : Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) Φ g background t)
+    (hst : s ⊆ t) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) Φ g background s := by
+  intro τ hτ x
+  exact (hderiv τ (hst hτ) x).mono hst
+
+/-- Restrict ordinary-at-time derivative data to a smaller time set. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hderiv : Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+      (I := I) (M := M) Φ g background t)
+    (hst : s ⊆ t) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+      (I := I) (M := M) Φ g background s := by
+  intro τ hτ x
+  exact hderiv τ (hst hτ) x
+
 /-- Fixed-IVP primitive derivative data for the intrinsic DeTurck gauges of all
 chosen DeTurck solutions of one initial-value problem. -/
 def ChosenIntrinsicDeTurckGaugeFlowDerivative
