@@ -184,7 +184,9 @@ time-difference formulation now also has direct variational endpoint wrappers
 for `HasDerivWithinAt` time-difference data, including a variant where the
 tangent-map equality is only assumed in the closed-interval within filter, plus
 geometric-slot variants that state the scalar identity using actual
-pushed-forward tangent vectors. It also has within-set chain-rule primitives:
+pushed-forward tangent vectors. The same endpoint time-difference route now also
+has model-velocity wrappers that rewrite `f(t, y(t))` to the raw gauge velocity
+from within-set base-flow agreement. It also has within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`

@@ -947,7 +947,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               time-difference route now also has direct variational endpoint
               wrappers for `HasDerivWithinAt` time-difference data, including a
               within-filter tangent-map variant and geometric-slot scalar
-              identities, plus within-set chain-rule primitives
+              identities, plus model-velocity wrappers that rewrite
+              `f(t, y(t))` from within-set base-flow agreement, and within-set
+              chain-rule primitives
               for differentiating `B(τ, c(τ)) - B(t, c(τ))` directly at endpoints,
               including raw-gauge-flow direct and readout-field bridges
               `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`

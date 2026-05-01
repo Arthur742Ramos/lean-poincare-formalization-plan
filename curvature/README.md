@@ -549,7 +549,8 @@ now packages the matching intrinsic boundary
       analogous direct `hasFDerivAtWithin` wrapper family that fills in the
       `HasDerivWithinAt` tangent-coordinate derivative from the variational ODE,
       direct variational endpoint wrappers for `HasDerivWithinAt`
-      time-difference data with geometric-slot scalar identities, and an
+      time-difference data with geometric-slot scalar identities and
+      model-velocity rewrites from within-set base-flow agreement, and an
       endpoint bridge from full metric-coordinate Fréchet data to the concrete
       `B(τ)` derivative and then to tensor time-regularity. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
