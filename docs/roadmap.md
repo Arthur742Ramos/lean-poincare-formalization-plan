@@ -678,6 +678,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     derivative input; the ordinary theorem-family endpoint is now also available
     through that full chosen-DeTurck → raw `C³` gauge-flow → gauge-reduced chain
     in the subsingleton-tangent, subsingleton-model, and empty-manifold cases.
+    The fixed-IVP geometric and raw gauge-flow routes now also expose matching
+    model-space and empty-manifold aliases, so the zero-dimensional gauge-flow
+    API is symmetric across fixed-IVP and theorem-family packages.
     The rank-one compact special case also exposes intrinsic and ordinary
     theorem packages through the gauge-reduced rank-one package, including
     model-space theorem-family aliases.

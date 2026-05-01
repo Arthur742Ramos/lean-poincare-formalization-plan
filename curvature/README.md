@@ -344,9 +344,11 @@ now packages the matching intrinsic boundary
    empty-manifold, and raw-existence theorem-package routes that need no extra
    derivative input; it also exposes ordinary point-4 theorem-family endpoints
    routed through the full raw `C³` gauge-flow chain in the subsingleton-tangent,
-   subsingleton-model, and empty-manifold cases. The rank-one compact special
-   case also has gauge-reduced projections to intrinsic and ordinary theorem
-   packages, including model-space theorem-family aliases. The
+   subsingleton-model, and empty-manifold cases, with matching fixed-IVP
+   model-space and empty-manifold aliases for the geometric and raw gauge-flow
+   routes. The rank-one compact special case also has gauge-reduced projections
+   to intrinsic and ordinary theorem packages, including model-space
+   theorem-family aliases. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic

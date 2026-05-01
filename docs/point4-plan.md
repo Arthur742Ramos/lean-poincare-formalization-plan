@@ -115,6 +115,9 @@ model-space/empty-manifold/raw-existence synonyms.
 The same module now also exposes ordinary point-4 theorem-family endpoints
 routed through the full chosen-DeTurck → raw `C³` gauge-flow → gauge-reduced
 chain in the subsingleton-tangent, subsingleton-model, and empty-manifold cases.
+The fixed-IVP geometric and raw gauge-flow routes now have the same
+model-space and empty-manifold aliases as the theorem-family routes, so the
+zero-dimensional API is symmetric across fixed and family theorem packages.
 The rank-one special case now also exposes intrinsic and ordinary theorem
 packages projected through the gauge-reduced rank-one package, including the
 model-space theorem-family aliases.
