@@ -86,6 +86,26 @@ theorem continuousWithinAt_eval
     ContinuousWithinAt (fun τ : ℝ ↦ (G.maps3 τ) x) s t :=
   (G.hasMFDerivWithinAt ht x).continuousWithinAt
 
+/-- A raw gauge-flow witness is continuous on its time set along every base
+point. -/
+theorem continuousOn_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) (x : M) :
+    ContinuousOn (fun τ : ℝ ↦ (G.maps3 τ) x) s :=
+  fun _t ht ↦ G.continuousWithinAt_eval ht x
+
+/-- Raw gauge-flow curves are continuous within the time set in the preferred
+chart centered at the base time value. -/
+theorem continuousWithinAt_extChartAt_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s) (x : M) :
+    ContinuousWithinAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) s t :=
+  (G.hasDerivWithinAt_extChartAt_eval ht x).continuousWithinAt
+
 /-- Within the raw gauge-flow time set, the image of a fixed base point
 eventually remains in the preferred tangent-bundle trivialization centered at
 its time-`t` image. -/
