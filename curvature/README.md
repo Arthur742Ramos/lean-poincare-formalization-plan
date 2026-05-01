@@ -323,6 +323,7 @@ now packages the matching intrinsic boundary
          readouts; the geometric corrected-velocity layer also now turns
          vanishing pulled-back background Ricci curvature directly into vanishing
          concrete `C³` gauge-corrected pullback velocity through a named theorem,
+         including an initial-time specialization,
          and the Ricci-flat initial transport API has matching `C³`
          anchored-gauge wrappers for the general Levi-Civita-background and
          chosen-background cases. The

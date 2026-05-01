@@ -385,6 +385,9 @@ readout
 `gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`:
 once the pulled-back background Ricci curvature vanishes in a slot, the concrete
 `C³` gauge-corrected pullback velocity vanishes in that slot.
+The same zero-curvature-to-zero-velocity route has an initial-time specialization
+named
+`gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_initial_of_pullbackBackgroundRicciCurvature_eq_zero`.
 The initial Ricci-flat transport API now has matching `C³` anchored-gauge
 wrappers:
 `AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.pullbackBackgroundRicciCurvature_eq_zero_initial_of_isLeviCivita`

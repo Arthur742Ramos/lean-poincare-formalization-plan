@@ -2637,6 +2637,34 @@ theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorp
     hRicciZero]
   ring
 
+/-- Initial-time specialization of
+`gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`. -/
+theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_initial_of_pullbackBackgroundRicciCurvature_eq_zero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (source : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      source.toIntrinsicDeTurckSolution.metric source.toIntrinsicDeTurckSolution.background
+      source.toIntrinsicDeTurckSolution.timeSet ivp.initialTime)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      source.toIntrinsicDeTurckSolution.metric source.toIntrinsicDeTurckSolution.background)
+    (x : M) (u v : TM x)
+    (hRicciZero :
+      (letI : Bundle.RiemannianBundle TM :=
+        ⟨((gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+          ivp.initialTime).toRiemannianMetric⟩;
+       letI :
+          CovariantDerivative.ContMDiffCovariantDerivative
+            (SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+              gauge3.maps source.toIntrinsicDeTurckSolution.background ivp.initialTime) 1 :=
+        gauge3.pullbackBackgroundConnection_contMDiff hbackground ivp.initialTime;
+       (SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+         gauge3.maps source.toIntrinsicDeTurckSolution.background
+         ivp.initialTime).ricciCurvature x u v) = 0) :
+    source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3 ivp.initialTime x u v = 0 :=
+  source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero
+    gauge3 hbackground (intrinsicDeTurckLocalSolution_initialTime_mem source) x u v hRicciZero
+
 theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_satisfiesEquationAt_of_sourceRicciTransportAt
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (source : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
