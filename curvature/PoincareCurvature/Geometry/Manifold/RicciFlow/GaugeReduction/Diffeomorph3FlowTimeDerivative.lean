@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
+public import Mathlib.Analysis.Calculus.Deriv.Prod
 
 set_option linter.unusedSectionVars false
 set_option linter.all false
@@ -44,6 +45,23 @@ theorem hasDerivAt_bilinearForm_apply_apply
     hfirst.clm_apply hv
   simpa [ContinuousLinearMap.add_apply, add_assoc] using hsecond
 
+/-- Model-space chain rule for a bilinear-form field depending on time and a
+moving base point.  This isolates the `B`-component derivative in the coordinate
+model of a dynamic gauge-pulled metric. -/
+theorem hasDerivAt_bilinearFormField_along_curve
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V} {t : ℝ}
+    (hB : HasFDerivAt Bfield Bfield' (t, y t))
+    (hy : HasDerivAt y y' t) :
+    HasDerivAt (fun τ : ℝ => Bfield (τ, y τ)) (Bfield' (1, y')) t := by
+  have hpair : HasDerivAt (fun τ : ℝ => (τ, y τ)) (1, y') t := by
+    simpa using (hasDerivAt_id t).prodMk hy
+  simpa [Function.comp_def] using
+    (HasFDerivAt.comp_hasDerivAt (x := t) (l := Bfield) (l' := Bfield')
+      (f := fun τ : ℝ => (τ, y τ)) hB hpair)
+
 /-- Model-space chain rule for `B(t) (A(t) u) (A(t) v)`, the coordinate form of
 a pulled-back metric component when `A(t)` is the tangent map of the gauge. -/
 theorem hasDerivAt_bilinearForm_linear_apply_apply
@@ -75,6 +93,32 @@ theorem hasDerivAt_bilinearForm_linear_apply_apply_of_comp_deriv
   simpa [ContinuousLinearMap.comp_apply] using
     hasDerivAt_bilinearForm_linear_apply_apply (B := B) (B' := B') (A := A)
       (A' := D.comp (A t)) (t := t) hB hA u v
+
+/-- Combined coordinate-model chain rule for a bilinear-form field along a
+moving base point and a tangent-map operator satisfying the variational equation.
+
+This is the model-space algebraic shape of the remaining dynamic
+gauge-pullback calculation:
+`Bfield(τ, y(τ)) (A(τ)u) (A(τ)v)`. -/
+theorem hasDerivAt_bilinearFormField_linear_apply_apply_along_curve
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V}
+    {A : ℝ → V →L[ℝ] V} {D : V →L[ℝ] V} {t : ℝ}
+    (hB : HasFDerivAt Bfield Bfield' (t, y t))
+    (hy : HasDerivAt y y' t)
+    (hA : HasDerivAt A (D.comp (A t)) t) (u v : V) :
+    HasDerivAt (fun τ : ℝ => Bfield (τ, y τ) (A τ u) (A τ v))
+      (Bfield' (1, y') (A t u) (A t v) +
+        Bfield (t, y t) (D (A t u)) (A t v) +
+        Bfield (t, y t) (A t u) (D (A t v))) t := by
+  exact hasDerivAt_bilinearForm_linear_apply_apply_of_comp_deriv
+    (B := fun τ : ℝ => Bfield (τ, y τ))
+    (B' := Bfield' (1, y')) (A := A) (D := D) (t := t)
+    (hasDerivAt_bilinearFormField_along_curve (Bfield := Bfield)
+      (Bfield' := Bfield') (y := y) (y' := y') (t := t) hB hy)
+    hA u v
 
 /-- Local-coordinate transfer form of
 `hasDerivAt_bilinearForm_linear_apply_apply`: if a scalar function is eventually

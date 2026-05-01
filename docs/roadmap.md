@@ -710,6 +710,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        `CoordinatePullbackMetricModelDerivativeOn`, a derivative package for the
        named coordinate model that promotes directly to the geometric scalar
        target and tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers.
+       The model algebra now also proves the moving metric-component chain rule
+       for `Bfield(τ, y(τ))` and its combined
+       `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent-map
+       equation.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

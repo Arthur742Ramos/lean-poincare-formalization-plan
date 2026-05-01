@@ -143,6 +143,12 @@ also have direct model-derivative-to-time-derivative wrappers. Coordinate-level
 derivative data still lifts through the fixed-IVP, theorem-family, and
 raw-existence gauge-flow APIs, so a future chart calculation can feed the
 point-4 theorem routes without first repackaging it as a tensor derivative.
+The model algebra now also includes the metric-component half of this remaining
+primitive: `hasDerivAt_bilinearFormField_along_curve` differentiates a bilinear
+form field `Bfield(τ, y(τ))`, and
+`hasDerivAt_bilinearFormField_linear_apply_apply_along_curve` combines that with
+the variational tangent-map equation to differentiate
+`Bfield(τ, y(τ)) (A(τ)u) (A(τ)v)`.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
