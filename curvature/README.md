@@ -186,10 +186,11 @@ now packages the matching intrinsic boundary
    packages the corresponding chosen-DeTurck-solution family interface and a
    reusable gauge-flow family bundle with anchored-gauge projections and direct
    gauge-reducible/intrinsic/ordinary theorem-family projections from
-   pulled-back metric time-derivative data, plus a fixed-initial-value-problem
-   bundle with matching local theorem-package projections. Both bundle levels
-   now also extract the scalar inner-product derivative data from the same
-   gauge-pulled metric time-derivative proof. The
+    pulled-back metric time-derivative data, plus a fixed-initial-value-problem
+    bundle with matching local theorem-package projections. Both bundle levels
+    now also build the gauge-pulled metric time-derivative proof from scalar
+    inner-product derivative data and extract the same scalar data back from
+    that proof. The
    gauge-reduction layer also now closes the identity `C^3`
    gauge-reducibility path for chosen Levi-Civita-background DeTurck theorem
    families, including the explicit scalar-derivative gauge-reducible interface

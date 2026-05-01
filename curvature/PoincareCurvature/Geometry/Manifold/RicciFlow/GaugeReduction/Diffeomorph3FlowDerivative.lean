@@ -221,6 +221,38 @@ def gaugeViaDerivative
       sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         (G.gaugeViaDerivative sol) := rfl
 
+/-- Build the actual time derivative of a fixed-IVP gauge-pulled metric from the scalar
+inner-product derivative at every fixed pair of tangent vectors. -/
+theorem hasTimeDerivativeOn_of_innerHasDerivAt
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ x : M, ∀ u v : TangentSpace I x,
+          HasDerivAt
+            (fun τ ↦
+              (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                (((G.maps3 sol) τ) x)
+                (((G.maps3 sol) τ).pushforwardTangent x u)
+                (((G.maps3 sol) τ).pushforwardTangent x v))
+            (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+              (G.gauge sol) t x u v) t)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
+    (I := I) (M := M)
+    (Φ := G.maps3 sol)
+    (g := sol.1.toIntrinsicDeTurckSolution.metric)
+    (gdot := sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+    (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hderiv sol)
+
 /-- Extract the scalar inner-product derivative data for a fixed-IVP geometric
 gauge-flow bundle from a time derivative of the actual gauge-pulled metric. -/
 theorem innerHasDerivAt_of_hasTimeDerivativeOn
@@ -364,6 +396,34 @@ geometric flow statement or from its derivative view. -/
       sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         (G.gaugeViaDerivative ivp sol) := rfl
 
+/-- Build theorem-family time derivatives of the actual gauge-pulled metrics from scalar
+inner-product derivative data for the bundled non-identity `C^3` gauges. -/
+theorem hasTimeDerivativeOn_of_innerHasDerivAt
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+          ∀ x : M, ∀ u v : TangentSpace I x,
+            HasDerivAt
+              (fun τ ↦
+                (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                  (((G.maps3 ivp sol) τ) x)
+                  (((G.maps3 ivp sol) τ).pushforwardTangent x u)
+                  (((G.maps3 ivp sol) τ).pushforwardTangent x v))
+              (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+                (G.gauge ivp sol) t x u v) t)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.maps3 ivp sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).hasTimeDerivativeOn_of_innerHasDerivAt
+    (hderiv ivp) sol
+
 /-- Extract the scalar inner-product derivative data for a theorem-family
 geometric gauge-flow bundle from time derivatives of the actual gauge-pulled
 metrics. -/
@@ -454,6 +514,80 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinar
   (pkg.toIntrinsicFamily_viaDiffeomorph3GaugeFlowFamilyTimeDerivative
     G hpullDerivative).toOrdinary
 
+/-- A chosen-background DeTurck theorem family becomes gauge-reducible from a
+geometric `C^3` gauge-flow family once the scalar inner-product derivative of the
+pulled-back metric has the concrete corrected velocity. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReducible_viaDiffeomorph3GaugeFlowFamilyInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+          ∀ x : M, ∀ u v : TangentSpace I x,
+            HasDerivAt
+              (fun τ ↦
+                (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                  (((G.maps3 ivp sol) τ) x)
+                  (((G.maps3 ivp sol) τ).pushforwardTangent x u)
+                  (((G.maps3 ivp sol) τ).pushforwardTangent x v))
+              (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+                (G.gauge ivp sol) t x u v) t) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamilyTimeDerivative
+    G (G.hasTimeDerivativeOn_of_innerHasDerivAt hderiv)
+
+/-- Intrinsic Ricci-flow theorem-family projection from a geometric `C^3`
+gauge-flow family and scalar inner-product derivative data for the pulled-back metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaDiffeomorph3GaugeFlowFamilyInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+          ∀ x : M, ∀ u v : TangentSpace I x,
+            HasDerivAt
+              (fun τ ↦
+                (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                  (((G.maps3 ivp sol) τ) x)
+                  (((G.maps3 ivp sol) τ).pushforwardTangent x u)
+                  (((G.maps3 ivp sol) τ).pushforwardTangent x v))
+              (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+                (G.gauge ivp sol) t x u v) t) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowFamilyInnerDerivative
+    G hderiv).toIntrinsicFamily
+
+/-- Ordinary Ricci-flow theorem-family projection from a geometric `C^3`
+gauge-flow family and scalar inner-product derivative data for the pulled-back metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily_viaDiffeomorph3GaugeFlowFamilyInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+          ∀ x : M, ∀ u v : TangentSpace I x,
+            HasDerivAt
+              (fun τ ↦
+                (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                  (((G.maps3 ivp sol) τ) x)
+                  (((G.maps3 ivp sol) τ).pushforwardTangent x u)
+                  (((G.maps3 ivp sol) τ).pushforwardTangent x v))
+              (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+                (G.gauge ivp sol) t x u v) t) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toIntrinsicFamily_viaDiffeomorph3GaugeFlowFamilyInnerDerivative
+    G hderiv).toOrdinary
+
 /-- A chosen-background DeTurck theorem package becomes gauge-reducible from a
 geometric `C^3` gauge-flow bundle once the actual gauge-pulled metric has the
 concrete corrected velocity as its time derivative. -/
@@ -511,5 +645,79 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaD
     LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
   (pkg.toIntrinsic_viaDiffeomorph3GaugeFlowBundleTimeDerivative
     G hpullDerivative).toOrdinary
+
+/-- A chosen-background DeTurck theorem package becomes gauge-reducible from a
+geometric `C^3` gauge-flow bundle once the scalar inner-product derivative of the
+pulled-back metric has the concrete corrected velocity. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducible_viaDiffeomorph3GaugeFlowBundleInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ x : M, ∀ u v : TangentSpace I x,
+          HasDerivAt
+            (fun τ ↦
+              (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                (((G.maps3 sol) τ) x)
+                (((G.maps3 sol) τ).pushforwardTangent x u)
+                (((G.maps3 sol) τ).pushforwardTangent x v))
+            (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+              (G.gauge sol) t x u v) t) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundleTimeDerivative
+    G (G.hasTimeDerivativeOn_of_innerHasDerivAt hderiv)
+
+/-- Intrinsic Ricci-flow theorem-package projection from a geometric `C^3`
+gauge-flow bundle and scalar inner-product derivative data for the pulled-back metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaDiffeomorph3GaugeFlowBundleInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ x : M, ∀ u v : TangentSpace I x,
+          HasDerivAt
+            (fun τ ↦
+              (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                (((G.maps3 sol) τ) x)
+                (((G.maps3 sol) τ).pushforwardTangent x u)
+                (((G.maps3 sol) τ).pushforwardTangent x v))
+            (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+              (G.gauge sol) t x u v) t) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundleInnerDerivative
+    G hderiv).toIntrinsic
+
+/-- Ordinary Ricci-flow theorem-package projection from a geometric `C^3`
+gauge-flow bundle and scalar inner-product derivative data for the pulled-back metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaDiffeomorph3GaugeFlowBundleInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ x : M, ∀ u v : TangentSpace I x,
+          HasDerivAt
+            (fun τ ↦
+              (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                (((G.maps3 sol) τ) x)
+                (((G.maps3 sol) τ).pushforwardTangent x u)
+                (((G.maps3 sol) τ).pushforwardTangent x v))
+            (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+              (G.gauge sol) t x u v) t) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toIntrinsic_viaDiffeomorph3GaugeFlowBundleInnerDerivative
+    G hderiv).toOrdinary
 
 end RicciFlow

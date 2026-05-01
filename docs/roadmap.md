@@ -287,14 +287,14 @@ with intrinsic comparison lemmas against arbitrary zero-velocity or
          gauge-flow family bundle with anchored-gauge projections and direct
          gauge-reducible/intrinsic/ordinary theorem-family routes from
          pulled-back metric time-derivative data, together with a
-         fixed-initial-value-problem bundle exposing matching local
-         theorem-package projections. Both bundle levels now also extract the
-         scalar inner-product derivative hypotheses from the same gauge-pulled
-         metric time-derivative proof.
+          fixed-initial-value-problem bundle exposing matching local
+          theorem-package projections. Both bundle levels now also build the
+          gauge-pulled metric time-derivative proof from scalar inner-product
+          derivative hypotheses, and extract those scalar hypotheses back from
+          the same proof.
         The non-identity right-slot/Ricci-transport obligation is now discharged
         by the `C^3` transport layer; the remaining primitive non-identity gauge
-        input is the time-derivative/scalar-derivative formula for the
-        gauge-pulled metric.
+        input is the scalar chain-rule proof for the gauge-pulled metric.
         The optional `PoincareCurvature.RicciFlowLocalExistence` aggregate imports the
         gauge-reduction boundary. It also records the pointwise
     gauge-flow derivative, and rewrites transformed velocity as `-2` times the
@@ -646,10 +646,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     identity-gauge constructors for subsingleton tangent fibers, the model-space
     synonym, and empty manifolds in addition to the chosen-Levi-Civita-background
     case, so the full point-4 input chain has no gauge-flow gap in any of the
-    currently-proved special cases. What still remains is the geometric-analysis
-    specialization for non-identity gauges: time-regularity of the non-identity
-    `C^3` gauge-pulled metric/velocity, an actual existence theorem producing
-    raw gauge flows with the required regularity in the general case, and the
+    currently-proved special cases. The non-identity gauge time-regularity
+    interface now also has the proof-bearing scalar-to-tensor bridge, so its
+    remaining primitive input is the scalar chain-rule identity for the
+    pulled-back metric. What still remains is the geometric-analysis
+    specialization for non-identity gauges: that scalar chain-rule proof, an
+    actual existence theorem producing raw gauge flows with the required
+    regularity in the general case, and the
     quasilinear parabolic PDE framework for genuine Ricci-flow local existence
     and uniqueness, including the actual Ricci-DeTurck Banach chart and
     estimates plus the identification of that Banach representative with the

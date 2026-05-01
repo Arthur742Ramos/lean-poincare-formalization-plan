@@ -95,6 +95,9 @@ spatial derivative of `g.inner` along `X_t`, derivative of the
 pushforward `Φ_t * u` and `Φ_t * v`). Each piece needs a carefully
 named auxiliary lemma. The static (time-independent `Φ`) special case
 is already proved as `const_pullbackMetricFamily_hasTimeDerivativeOn`.
+The bundled non-identity gauge-flow API now has proof-bearing scalar-to-tensor
+wrappers, so solving this scalar identity automatically supplies the
+`HasTimeDerivativeOn` package required by the gauge-reduction theorem routes.
 
 **Module location.** A new module
 `Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowTimeDerivative.lean`
