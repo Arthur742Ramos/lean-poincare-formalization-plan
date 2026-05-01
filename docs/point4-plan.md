@@ -230,6 +230,9 @@ system, providing the intended route from Picard-Lindelöf on a product Banach
 space to variational tangent data. A continuous local flow for this product
 system, initialized on `(x, 1)` and restricted to a base ball contained in the
 product Picard ball, now extracts directly to `VariationalLocalFlowSolution`.
+Consequently, a Picard-Lindelöf hypothesis for the product variational system
+also constructs `VariationalLocalFlowSolution` directly after the same base-ball
+restriction.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged

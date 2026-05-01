@@ -677,7 +677,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       product `LocalFlowSolution`s to the base and tangent ODEs; continuous
       product local flows initialized on `(x, 1)` extract directly to
       `VariationalLocalFlowSolution` on any base ball contained in the product
-      Picard ball. Raw gauge flows now also expose the first
+      Picard ball, and product Picard-Lindelöf hypotheses construct that
+      variational package directly. Raw gauge flows now also expose the first
       chart-membership bridge needed for coordinate pullback formulas:
       neighborhood-time flow equations imply continuity of `τ ↦ Φ_τ(x)` and
       eventual membership in the tangent trivialization at `Φ_t(x)`, with the

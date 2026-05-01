@@ -453,6 +453,27 @@ def toContinuousLocalFlowSolution
 
 end IsPicardLindelof
 
+namespace VariationalLocalFlowSolution
+
+variable {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+  {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+
+/-- Picard-Lindelöf for the product variational system directly supplies the
+base-flow/tangent-flow package after restricting to a base ball contained in the
+product Picard ball. -/
+def ofProductPicardLindelof
+    [CompleteSpace V]
+    {a R L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    VariationalLocalFlowSolution f Df t₀ x₀ r :=
+  ofProductContinuousLocalFlowSolution
+    (IsPicardLindelof.toContinuousLocalFlowSolution hf) hball
+
+end VariationalLocalFlowSolution
+
 namespace ContDiffAt
 
 variable [CompleteSpace V] {f : V → V} {x₀ : V}
