@@ -230,6 +230,15 @@ raw time sets at neighborhood-times as
 `hasTimeDerivativeOn_of_baseCoordinateField`, so endpoint/restricted-time
 arguments can consume the same base-coordinate readout data without re-entering
 the closed-Picard `Ioo` wrapper.
+The concrete coordinate algebra has also been exposed: `pullbackMetricBilinearCoordinateMap_apply_eq`
+identifies the moving `B(τ)` component with the metric at `Φ_τ(x)` read through
+the tangent trivialization centered at `Φ_t(x)`, and
+`pullbackMetricTangentCoordinateMap_apply_eq` /
+`pullbackMetricTangentCoordinateMap_sourceTangentCoordinate_eq` identify the
+moving `A(τ)` component with the gauge pushforward tangent map in source and
+target tangent coordinates. These are the chart-local identities needed before
+feeding Banach finite-cover metric readouts into the remaining component
+derivative hypothesis.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

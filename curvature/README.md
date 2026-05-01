@@ -269,6 +269,11 @@ now packages the matching intrinsic boundary
        gauge-pulled time-regularity; the moving-base field bridge also has an
        arbitrary-time-set form at neighborhood-times, so endpoint/restricted
        chart arguments can reuse the same raw-flow coordinate derivative. The
+       concrete moving `B(τ)` and `A(τ)` coordinate components are now identified
+       respectively with the metric at `Φ_τ(x)` in the target tangent
+       trivialization and with the gauge pushforward tangent map in source/target
+       coordinates, exposing the chart algebra needed for Banach finite-cover
+       metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.

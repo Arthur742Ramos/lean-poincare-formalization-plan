@@ -802,6 +802,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         remaining metric-field and tangent-map component hypotheses are applied;
         this bridge is available both on closed-Picard interiors and on arbitrary
         raw time sets at neighborhood-times.
+        The concrete coordinate algebra has now been named as well:
+        `pullbackMetricBilinearCoordinateMap_apply_eq` identifies the moving
+        `B(τ)` component with the metric at `Φ_τ(x)` in the tangent
+        trivialization centered at `Φ_t(x)`, while
+        `pullbackMetricTangentCoordinateMap_apply_eq` and
+        `pullbackMetricTangentCoordinateMap_sourceTangentCoordinate_eq` identify
+        the moving `A(τ)` component with the gauge pushforward tangent map in
+        source/target coordinates.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

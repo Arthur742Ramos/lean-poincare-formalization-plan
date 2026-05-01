@@ -350,6 +350,98 @@ theorem pullbackMetricInnerCoordinateModel_eq_components
   simp [pullbackMetricInnerCoordinateModel, pullbackMetricBilinearCoordinateMap,
     pullbackMetricTangentCoordinateMap, sourceTangentCoordinate]
 
+/-- Concrete formula for the moving bilinear coordinate component `B(τ)`: it is
+the metric at the moved point, with model vectors pulled back through the target
+tangent trivialization. -/
+theorem pullbackMetricBilinearCoordinateMap_apply_eq
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (t τ : ℝ) (x : M)
+    (hφx : (Φ τ) x ∈
+      (trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).baseSet)
+    (uE vE : E) :
+    pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x uE vE =
+      (g τ).inner ((Φ τ) x)
+        (((trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).continuousLinearEquivAt ℝ
+          ((Φ τ) x) hφx).symm uE)
+        (((trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).continuousLinearEquivAt ℝ
+          ((Φ τ) x) hφx).symm vE) := by
+  let TM := (TangentSpace I : M → Type _)
+  change
+    (ContinuousLinearMap.inCoordinates E TM (E →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      ((Φ t) x) ((Φ τ) x) ((Φ t) x) ((Φ τ) x) ((g τ).inner ((Φ τ) x)))
+        uE vE =
+      (g τ).inner ((Φ τ) x)
+        (((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ
+          ((Φ τ) x) hφx).symm uE)
+        (((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ
+          ((Φ τ) x) hφx).symm vE)
+  erw [_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
+    (F := E) (W := TM) (x0 := (Φ t) x) (x := (Φ τ) x)
+    hφx ((g τ).inner ((Φ τ) x)) uE vE]
+
+/-- At the base time, the moving bilinear coordinate component is just the metric
+in the tangent trivialization centered at the same point. -/
+theorem pullbackMetricBilinearCoordinateMap_self_apply_eq
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (uE vE : E) :
+    pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x uE vE =
+      (g t).inner ((Φ t) x)
+        (((trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).continuousLinearEquivAt ℝ
+          ((Φ t) x) (FiberBundle.mem_baseSet_trivializationAt' ((Φ t) x))).symm uE)
+        (((trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).continuousLinearEquivAt ℝ
+          ((Φ t) x) (FiberBundle.mem_baseSet_trivializationAt' ((Φ t) x))).symm vE) :=
+  pullbackMetricBilinearCoordinateMap_apply_eq (I := I) (M := M) Φ g t t x
+    (FiberBundle.mem_baseSet_trivializationAt' ((Φ t) x)) uE vE
+
+/-- Concrete formula for the tangent-coordinate component `A(τ)`: it is the
+pushforward tangent map read in the source and target tangent trivializations. -/
+theorem pullbackMetricTangentCoordinateMap_apply_eq
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M)
+    (hφx : (Φ τ) x ∈
+      (trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).baseSet)
+    (uE : E) :
+    pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x uE =
+      ((trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).continuousLinearEquivAt ℝ
+        ((Φ τ) x) hφx)
+        ((Φ τ).pushforwardTangent x
+          (((trivializationAt E (TangentSpace I : M → Type _) x).continuousLinearEquivAt ℝ x
+            (FiberBundle.mem_baseSet_trivializationAt' x)).symm uE)) := by
+  let TM := (TangentSpace I : M → Type _)
+  let hx : x ∈ (trivializationAt E TM x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  change
+    ContinuousLinearMap.inCoordinates E TM E TM x x ((Φ t) x) ((Φ τ) x)
+        ((Φ τ).pushforwardTangent x) uE =
+      ((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx)
+        ((Φ τ).pushforwardTangent x
+          (((trivializationAt E TM x).continuousLinearEquivAt ℝ x hx).symm uE))
+  rw [ContinuousLinearMap.inCoordinates_eq (x₀ := x) (x := x)
+    (y₀ := (Φ t) x) (y := (Φ τ) x) (ϕ := (Φ τ).pushforwardTangent x) hx hφx]
+  rw [show (Φ τ).pushforwardTangent x = mfderiv I I ((Φ τ) : M → M) x by
+    simpa using (Φ τ).pushforwardTangent_eq_mfderiv x]
+  simpa [TM]
+
+/-- The tangent-coordinate component applied to a source tangent vector is the
+pushforward tangent vector in target model coordinates. -/
+theorem pullbackMetricTangentCoordinateMap_sourceTangentCoordinate_eq
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M)
+    (hφx : (Φ τ) x ∈
+      (trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).baseSet)
+    (u : TangentSpace I x) :
+    pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x
+        (sourceTangentCoordinate (I := I) x u) =
+      ((trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).continuousLinearEquivAt ℝ
+        ((Φ τ) x) hφx)
+        ((Φ τ).pushforwardTangent x u) := by
+  have h :=
+    pullbackMetricTangentCoordinateMap_apply_eq
+      (I := I) (M := M) Φ t τ x hφx (sourceTangentCoordinate (I := I) x u)
+  simpa [sourceTangentCoordinate] using h
+
 /-- Once the gauge image lies in the target trivialization centered at the
 time-`t` image, the named coordinate model is definitionally the geometric
 pullback scalar.  This avoids expanding the full bundled pullback bilinear-form
