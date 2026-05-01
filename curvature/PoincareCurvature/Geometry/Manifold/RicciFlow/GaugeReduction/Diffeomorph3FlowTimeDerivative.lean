@@ -9301,6 +9301,14 @@ def CoordinatePullbackMetricFieldDerivativeData
       (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
   G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricFieldDerivativeData
 
+/-- Fixed-IVP within-set field-level derivative data for the geometric
+gauge-flow bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
+def CoordinatePullbackMetricFieldDerivativeWithinData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricFieldDerivativeWithinData
+
 /-- Coordinate-level fixed-IVP scalar data implies the named geometric scalar
 derivative data for a raw intrinsic DeTurck gauge-flow witness. -/
 theorem pullbackMetricInnerDerivativeData_of_coordinate
@@ -9342,6 +9350,22 @@ theorem coordinatePullbackMetricInnerDerivativeData_of_field
     (hfield : G.CoordinatePullbackMetricFieldDerivativeData) :
     G.CoordinatePullbackMetricInnerDerivativeData :=
   G.toDiffeomorph3GaugeFlow.coordinatePullbackMetricInnerDerivativeData_of_field
+    (I := I) (M := M) htime hfield
+
+/-- Within-set field-level fixed-IVP data implies named scalar data for raw
+intrinsic DeTurck gauge-flow existence once solution time sets are neighborhoods
+of their times. -/
+theorem pullbackMetricInnerDerivativeData_of_fieldWithin
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hfield : G.CoordinatePullbackMetricFieldDerivativeWithinData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_fieldWithin
     (I := I) (M := M) htime hfield
 
 /-- Raw gauge-flow existence plus coordinate-model data gives the required time
@@ -9386,6 +9410,28 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeData
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
   G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeData
+    (I := I) (M := M) htime hfield sol
+
+/-- Raw gauge-flow existence plus within-set field-level data gives the required
+time derivative of the induced gauge-pulled metric, provided solution time sets
+are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeWithinData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hfield : G.CoordinatePullbackMetricFieldDerivativeWithinData)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlow).gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeWithinData
     (I := I) (M := M) htime hfield sol
 
 /-- Raw gauge-flow existence plus coordinate-level scalar data gives the
@@ -9569,6 +9615,13 @@ def CoordinatePullbackMetricFieldDerivativeData
       (E := E) (H := H) (I := I) (M := M)) : Prop :=
   G.toDiffeomorph3GaugeFlowFamily.CoordinatePullbackMetricFieldDerivativeData
 
+/-- Theorem-family within-set field-level derivative data for the geometric
+gauge-flow family induced by raw intrinsic DeTurck gauge-flow existence. -/
+def CoordinatePullbackMetricFieldDerivativeWithinData
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) : Prop :=
+  G.toDiffeomorph3GaugeFlowFamily.CoordinatePullbackMetricFieldDerivativeWithinData
+
 /-- Coordinate-level theorem-family scalar data implies the named geometric
 scalar derivative data for a raw intrinsic DeTurck gauge-flow family. -/
 theorem pullbackMetricInnerDerivativeData_of_coordinate
@@ -9609,6 +9662,22 @@ theorem coordinatePullbackMetricInnerDerivativeData_of_field
     (hfield : G.CoordinatePullbackMetricFieldDerivativeData) :
     G.CoordinatePullbackMetricInnerDerivativeData :=
   G.toDiffeomorph3GaugeFlowFamily.coordinatePullbackMetricInnerDerivativeData_of_field
+    (I := I) (M := M) htime hfield
+
+/-- Within-set field-level theorem-family data implies named scalar data for raw
+intrinsic DeTurck gauge-flow existence once each solution time set is a
+neighborhood of each of its times. -/
+theorem pullbackMetricInnerDerivativeData_of_fieldWithin
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hfield : G.CoordinatePullbackMetricFieldDerivativeWithinData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.toDiffeomorph3GaugeFlowFamily.pullbackMetricInnerDerivativeData_of_fieldWithin
     (I := I) (M := M) htime hfield
 
 /-- Raw theorem-family gauge-flow existence plus coordinate-model data gives the
@@ -9655,6 +9724,29 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeData
         ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
   G.toDiffeomorph3GaugeFlowFamily.hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeData
+    (I := I) (M := M) htime hfield ivp sol
+
+/-- Raw theorem-family gauge-flow existence plus within-set field-level data
+gives the required time derivative of every induced gauge-pulled metric, provided
+solution time sets are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeWithinData
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hfield : G.CoordinatePullbackMetricFieldDerivativeWithinData)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow ivp sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.toDiffeomorph3GaugeFlowFamily.hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeWithinData
     (I := I) (M := M) htime hfield ivp sol
 
 /-- Raw theorem-family gauge-flow existence plus coordinate-level scalar data

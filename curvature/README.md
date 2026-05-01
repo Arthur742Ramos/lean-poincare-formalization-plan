@@ -241,10 +241,11 @@ now packages the matching intrinsic boundary
        `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` under `A' = D ∘ A` with
        within-filter/ordinary eventual-equality transfer forms, closed-interval
        field-level coordinate derivative packages and variational local-flow
-       constructors for full metric-coordinate Fréchet data, raw gauge-flow
-       endpoint wrappers from that data to interior tensor time-regularity,
-       fixed-IVP/theorem-family within-field data packages and projections,
-       generic within-filter transfer for arbitrary `A'`,
+        constructors for full metric-coordinate Fréchet data, raw gauge-flow
+        endpoint wrappers from that data to interior tensor time-regularity,
+        fixed-IVP/theorem-family within-field data packages and projections,
+        matching raw intrinsic gauge-flow existence wrappers, generic
+        within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set/open-interior continuity helpers, and
       Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level
