@@ -324,7 +324,8 @@ now packages the matching intrinsic boundary
           own readout-field theorem before subtracting the frozen spatial
           derivative, lifted through component data to a raw
           `HasTimeDerivativeOn` endpoint for `C³` gauge flows and its
-          open-interior specialization; the geometric
+          open-interior specialization, with a matching readout-field endpoint
+          at the variational tangent-map layer; the geometric
           corrected-velocity layer also now turns
          vanishing pulled-back background Ricci curvature directly into vanishing
          concrete `C³` gauge-corrected pullback velocity through a named theorem,

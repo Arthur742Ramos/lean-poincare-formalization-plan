@@ -378,6 +378,10 @@ The closed-Picard interior specialization
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt`
 then packages the same readout route on `Ioo tmin tmax`, matching the interval
 shape used by the variational local-flow endpoints.
+The variational tangent-map layer also has a direct readout-field entry point:
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMap`
+accepts the finite-cover/Banach two-variable readout before the base-flow
+eventual-equality hypotheses are introduced.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
