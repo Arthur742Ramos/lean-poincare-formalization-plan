@@ -463,7 +463,11 @@ now packages the matching intrinsic boundary
        the moving metric-component chain rule for `Bfield(τ, y(τ))` and the
        combined `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent
        equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with
-        scalar, tensor, raw-gauge-flow, and bundle-level promotion routes. A companion
+         scalar, tensor, raw-gauge-flow, and bundle-level promotion routes. A companion
+       raw-flow bridge now uses the actual gauge-flow coordinate curve as the
+       moving base point and discharges its `y'(t)` clause from the raw manifold
+       flow derivative before promoting the field-level data to tensor
+       time-regularity. A companion
        variational route discharges the tangent-map derivative while accepting a
        direct `HasDerivAt B B' t` proof for the already-composed coordinate
        readout, and raw closed-Picard gauge flows expose that route directly on

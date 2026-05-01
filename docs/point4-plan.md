@@ -218,6 +218,13 @@ arbitrary raw time set as `hasDerivWithinAt_extChartAt_eval` and at any
 neighborhood-time as `hasDerivAt_extChartAt_eval`, so endpoint/restricted-time
 routes do not have to reprove the chart conversion. This is the base-curve
 derivative needed by the moving metric-component readout.
+The time-derivative module now consumes this directly:
+`Diffeomorph3GaugeFlowOn.coordinatePullbackMetricFieldDerivativeOn_Ioo_of_baseCoordinate`
+packages field-level coordinate data whose moving base point is the actual raw
+gauge-flow coordinate curve, using the raw-flow derivative theorem for the
+`y'(t)` clause. The companion
+`hasTimeDerivativeOn_Ioo_of_baseCoordinateField` then routes that data to
+interior tensor time-regularity.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

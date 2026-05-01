@@ -796,7 +796,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        chart around `Φ_t(x)`, giving the coordinate velocity input for moving
        metric-component readouts. The same conversion is available in
        within-time-set and neighborhood-time forms for restricted and endpoint
-       routes.
+       routes. The dynamic pullback layer now uses this conversion in a
+       field-level bridge whose moving base point is the actual raw gauge-flow
+       coordinate curve, so the raw flow discharges the `y'(t)` clause before the
+       remaining metric-field and tangent-map component hypotheses are applied.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

@@ -1400,6 +1400,93 @@ theorem hasTimeDerivativeOn_Ioo_of_coordinateField
       G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
         (t := t) ht g x u v)
 
+/-- Closed-Picard raw gauge flows supply the moving-base coordinate derivative
+`y'(t)` in the field-level coordinate package.
+
+The remaining hypotheses are the metric-field Fréchet derivative, the
+tangent-coordinate derivative, the local coordinate identification, and the
+scalar velocity identity. -/
+theorem coordinatePullbackMetricFieldDerivativeOn_Ioo_of_baseCoordinate
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (A : ℝ → E →L[ℝ] E)
+          (D : E →L[ℝ] E)
+          (uE vE : E),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝 t]
+              (fun τ : ℝ ↦
+                Bfield
+                  (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+                  (A τ uE) (A τ vE)) ∧
+          HasFDerivAt Bfield Bfield'
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+          HasDerivAt A (D.comp (A t)) t ∧
+          Bfield'
+              (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+                ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+              (A t uE) (A t vE) +
+              Bfield (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))
+                (D (A t uE)) (A t vE) +
+              Bfield (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))
+                (A t uE) (D (A t vE)) =
+            gdot t x u v) :
+    SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricFieldDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot (Ioo tmin tmax) := by
+  intro t ht x u v
+  obtain ⟨Bfield, Bfield', A, D, uE, vE, hmodel_eq, hBfield, hA, hvalue⟩ :=
+    hdata ht x u v
+  exact ⟨Bfield, Bfield',
+    (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)),
+    tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+      (X t ((G.maps3 t) x)),
+    A, D, uE, vE, hmodel_eq, hBfield,
+    G.hasDerivAt_extChartAt_eval_of_mem_Ioo ht x, hA, hvalue⟩
+
+/-- Closed-Picard raw gauge flow plus field-level data whose moving base point is
+the actual gauge-flow coordinate curve gives interior time-regularity. -/
+theorem hasTimeDerivativeOn_Ioo_of_baseCoordinateField
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (A : ℝ → E →L[ℝ] E)
+          (D : E →L[ℝ] E)
+          (uE vE : E),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝 t]
+              (fun τ : ℝ ↦
+                Bfield
+                  (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+                  (A τ uE) (A τ vE)) ∧
+          HasFDerivAt Bfield Bfield'
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+          HasDerivAt A (D.comp (A t)) t ∧
+          Bfield'
+              (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+                ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+              (A t uE) (A t vE) +
+              Bfield (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))
+                (D (A t uE)) (A t vE) +
+              Bfield (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))
+                (A t uE) (D (A t vE)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_coordinateField
+    (G.coordinatePullbackMetricFieldDerivativeOn_Ioo_of_baseCoordinate hdata)
+
 /-- Closed-Picard-interval raw gauge-flow bridge from concrete
 coordinate-component derivatives directly to interior tensor time-regularity. -/
 theorem hasTimeDerivativeOn_Ioo_of_coordinateComponents
