@@ -309,6 +309,8 @@ calculation. This is also packaged as the raw-flow component-data constructor
 `Diffeomorph3GaugeFlowOn.metricCoordinateFieldTimeDifferenceComponentDataOn_of_hasFDerivAt`
 and tensor endpoint
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_of_metricCoordinateField_hasFDerivAt`,
+plus the closed-Picard interior wrapper
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt`,
 which hide the `Btime = Bfull - spatial` subtraction from callers.
 The tangent-map part has also been extracted as the reusable lemma
 `SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`:

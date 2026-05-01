@@ -301,8 +301,9 @@ now packages the matching intrinsic boundary
         concrete `pullbackMetricTangentCoordinateMap` derivative lemma, and a
         converse bridge deriving the time-difference derivative from the full
         `metricBilinearCoordinateField` Fréchet derivative after subtracting the
-        frozen spatial `fderivWithin` contribution, with a raw-flow endpoint that
-        packages that subtraction automatically, including a closed-Picard
+        frozen spatial `fderivWithin` contribution, with raw-flow endpoints that
+        package that subtraction automatically, including both the direct
+        closed-Picard `Ioo` wrapper for interval flows and a closed-Picard
         variational-tangent endpoint that accepts the full field derivative,
         tangent-map identification, and scalar velocity identity directly, plus a
         geometric-slot companion phrasing that identity in actual pushed-forward
