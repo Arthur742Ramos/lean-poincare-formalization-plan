@@ -733,7 +733,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       contribution, plus a moving-base/direct-vector-slot form that the
       variational-flow scalar theorem now uses via the applied tangent-map ODE,
       closed-interval/right-derivative counterparts for endpoint work, and
-      eventual-equality transfer lemmas for chart-local coordinate
+      eventual-equality transfer lemmas for chart-local interior and endpoint
       identifications. A coordinate-level package
       `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
       chartwise `B/A/D` derivative hypotheses to the actual geometric

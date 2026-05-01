@@ -128,7 +128,8 @@ scalar theorem uses the applied tangent-map ODE rather than only the
 operator-valued derivative. Closed-interval/right-derivative versions of these
 same bilinear-form and moving-base vector-slot chain rules are also available,
 including `hasDerivWithinAt_bilinearFormField_tangent_apply_apply` for
-variational model flows on `Icc tmin tmax`.
+variational model flows on `Icc tmin tmax`, with an eventual-equality transfer
+form for chart-local endpoint scalar identities.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package

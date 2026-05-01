@@ -241,6 +241,43 @@ theorem hasDerivWithinAt_bilinearFormField_tangent_apply_apply
     (α.tangent_apply_hasDerivWithinAt hx ht u)
     (α.tangent_apply_hasDerivWithinAt hx ht v)
 
+/-- Eventual-equality transfer form of
+`hasDerivWithinAt_bilinearFormField_tangent_apply_apply`. -/
+theorem hasDerivWithinAt_of_eventuallyEq_bilinearFormField_tangent_apply_apply
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {scalar : ℝ → ℝ}
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {u v : V}
+    (heq : scalar =ᶠ[𝓝[Icc tmin tmax] t]
+      fun τ : ℝ ↦
+        Bfield (τ, α.flow (x, τ))
+          (α.tangent x τ u) (α.tangent x τ v))
+    (heq_t :
+      scalar t =
+        Bfield (t, α.flow (x, t))
+          (α.tangent x t u) (α.tangent x t v))
+    (hB : HasFDerivAt Bfield Bfield' (t, α.flow (x, t)))
+    {value : ℝ}
+    (hvalue :
+      Bfield' (1, f t (α.flow (x, t)))
+          (α.tangent x t u) (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          ((Df t (α.flow (x, t))) (α.tangent x t u))
+          (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          (α.tangent x t u)
+          ((Df t (α.flow (x, t))) (α.tangent x t v)) =
+        value) :
+    HasDerivWithinAt scalar value (Icc tmin tmax) t := by
+  have hderiv :=
+    α.hasDerivWithinAt_bilinearFormField_tangent_apply_apply hx ht hB u v
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
 /-- Exact scalar chain rule along a variational model flow.
 
 This is the ODE-driven heart of the dynamic gauge-pullback calculation: the base
