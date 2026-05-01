@@ -601,7 +601,9 @@ The time-derivative layer now also has center-trajectory closed-interval and
 interior scalar chain-rule wrappers for
 `Bfield(t, y(t))(A(t)u)(A(t)v)`, so basepoint gauge-pullback calculations can
 consume variational model-flow data without manually threading
-`x₀ ∈ closedBall x₀ r`.
+`x₀ ∈ closedBall x₀ r`; the same center wrappers now have within-filter and
+ordinary-neighborhood eventual-equality transfer forms for chart-local scalar
+identifications.
 The same module now also
 packages the model-space variational equation as
 `VariationalLocalFlowSolution`, with tangent maps initialized by the identity
