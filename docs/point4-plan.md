@@ -287,7 +287,11 @@ contribution along `τ ↦ extChartAt I ((G.maps3 t) x) ((G.maps3 τ) x)`.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate
-curve is supplied.
+curve is supplied. That decomposition is also wired into the concrete
+`CoordinatePullbackMetricComponentDerivativeOn` package: raw gauge-flow
+component data now only needs the time-difference derivative for the named
+metric-coordinate field, the tangent-coordinate-map derivative, and the final
+scalar velocity identity including the canonical spatial `fderivWithin` term.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
