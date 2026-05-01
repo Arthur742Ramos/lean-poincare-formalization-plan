@@ -296,7 +296,8 @@ now packages the matching intrinsic boundary
        plus an additive decomposition that isolates the only remaining
        time-difference derivative for the full moving field and feeds the
        concrete component-derivative package through tensor time-regularity
-       endpoints,
+       endpoints, with the variational-flow route now discharging the
+       tangent-coordinate-map derivative for that formulation,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

@@ -293,7 +293,10 @@ component data now only needs the time-difference derivative for the named
 metric-coordinate field, the tangent-coordinate-map derivative, and the final
 scalar velocity identity including the canonical spatial `fderivWithin` term.
 This package now routes all the way to tensor time-regularity, including a
-closed-Picard `Ioo` specialization.
+closed-Picard `Ioo` specialization. A variational-flow endpoint now discharges
+the tangent-coordinate-map derivative in this time-difference formulation, so
+on closed Picard interiors the remaining hard input is the named
+time-difference derivative plus the final scalar velocity identity.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
