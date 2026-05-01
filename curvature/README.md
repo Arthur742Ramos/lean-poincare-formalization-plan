@@ -221,7 +221,9 @@ now packages the matching intrinsic boundary
      gauge-flow component by such a raw existence witness at fixed-IVP, global,
      and interval scope. The theorem-family zero-gauge-field identity constructor
      now also produces the pulled-back metric time-derivative proof needed by the
-     gauge-reduction API directly from pointwise gauge-field vanishing. A new
+     gauge-reduction API directly from pointwise gauge-field vanishing, plus
+     direct zero-field theorem-family projections to the gauge-reduced,
+     intrinsic, and ordinary APIs. A new
      `GaugeReduction.ModelGaugeFlowODE` module packages
      mathlib's time-dependent Picard-Lindelöf theorem as Banach-model local flows
      with closed-interval ODE derivative data, initialization on a closed ball of
@@ -482,11 +484,12 @@ now packages the matching intrinsic boundary
    the geometric Ricci-DeTurck right-hand side. Item 2 of those obligations (raw
    `C³` gauge-flow existence) is now closed in four special cases via dedicated
    `IntrinsicDeTurckGaugeFlowExistence(.Family)` constructors:
-   `identityOfChosenBackground`, `identityOfSubsingletonTangent`,
-   `identityOfSubsingletonModel`, and `identityOfIsEmpty`; a zero-gauge-field
-   adapter now turns any proof of vanishing `intrinsicDeTurckGaugeField` on
-   solution time sets into identity raw `C^3` gauge-flow existence, and the
-   identity cases include matching `_hpullDerivative` time-derivative lemmas. The underlying
+    `identityOfChosenBackground`, `identityOfSubsingletonTangent`,
+    `identityOfSubsingletonModel`, and `identityOfIsEmpty`; a zero-gauge-field
+    adapter now turns any proof of vanishing `intrinsicDeTurckGaugeField` on
+    solution time sets into identity raw `C^3` gauge-flow existence, and the
+    identity cases include matching `_hpullDerivative` time-derivative lemmas
+    and direct theorem-family projections. The underlying
    `Diffeomorph3GaugeFlowOn` raw-flow API also has arbitrary-vector-field
     identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]` adapters, named derivative-family

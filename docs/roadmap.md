@@ -628,10 +628,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        endpoints, and the constant `C^3` identity family supplies primitive
        derivative-level gauge data whenever the DeTurck gauge field vanishes, with direct
        identity-route intrinsic/ordinary projections matching the non-identity APIs. The
-       theorem-family zero-gauge-field raw-flow constructor now also supplies the
-       pulled-back metric time derivative for its identity gauge, discharging the
-       identity-gauge velocity algebra directly from the pointwise vanishing
-       hypothesis. These criteria are also
+      theorem-family zero-gauge-field raw-flow constructor now also supplies the
+      pulled-back metric time derivative for its identity gauge, discharging the
+      identity-gauge velocity algebra directly from the pointwise vanishing
+       hypothesis, and chosen-DeTurck theorem families now project through this
+       zero-field route directly to the gauge-reduced, intrinsic, and ordinary
+       APIs. These criteria are also
        specialized to genuine bundled continuous Riemannian initial metrics, so
        future Ricci-DeTurck Banach-chart work no longer has to manually prove
        finite-cover metric-locus membership for the initial datum. The interval
@@ -651,9 +653,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      empty-manifold cases; `IntrinsicDeTurckGaugeFlowExistence(.Family)` lifts
      those to intrinsic DeTurck identity-gauge constructors, in addition to the
      chosen-Levi-Civita-background case. It also has fixed-IVP and theorem-family
-     `identityOfGaugeFieldEqZero` adapters, so any future proof that the
-     intrinsic DeTurck gauge field vanishes on the relevant solution time sets
-     immediately supplies raw identity `C^3` gauge-flow existence. Raw intrinsic gauge-flow existence
+      `identityOfGaugeFieldEqZero` adapters, so any future proof that the
+      intrinsic DeTurck gauge field vanishes on the relevant solution time sets
+      immediately supplies raw identity `C^3` gauge-flow existence and, in the
+      theorem-family case, direct gauge-reduced, intrinsic, and ordinary
+      projections. Raw intrinsic gauge-flow existence
      witnesses now also feed directly into the gauge-reduced, intrinsic, and
     ordinary theorem-package routes using either pulled-back metric
     time-derivative proofs or scalar inner-product derivative proofs. The raw

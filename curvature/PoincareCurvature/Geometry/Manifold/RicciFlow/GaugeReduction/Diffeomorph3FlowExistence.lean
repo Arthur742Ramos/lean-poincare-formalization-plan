@@ -1100,6 +1100,60 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinar
   (pkg.toIntrinsicFamily_viaGaugeFlowExistenceTimeDerivative
     G hpullDerivative).toOrdinary
 
+/-- Gauge-reducible theorem-family projection when the intrinsic DeTurck gauge
+field vanishes on each solution's time set.
+
+This uses the identity raw `C³` gauge-flow family and the bundled zero-field
+pullback time-derivative theorem, so callers only provide the pointwise gauge
+field vanishing hypothesis. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReducible_viaGaugeFieldEqZero
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hzero : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  pkg.toGaugeReducible_viaGaugeFlowExistenceTimeDerivative
+    (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfGaugeFieldEqZero
+      (E := E) (H := H) (I := I) (M := M) hzero)
+    (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfGaugeFieldEqZero_hpullDerivative
+      (E := E) (H := H) (I := I) (M := M) hzero)
+
+/-- Intrinsic Ricci-flow theorem-family projection from a chosen DeTurck package
+whose intrinsic DeTurck gauge field vanishes on each solution's time set. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaGaugeFieldEqZero
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hzero : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaGaugeFieldEqZero hzero).toIntrinsicFamily
+
+/-- Ordinary Ricci-flow theorem-family projection from a chosen DeTurck package
+whose intrinsic DeTurck gauge field vanishes on each solution's time set. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily_viaGaugeFieldEqZero
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hzero : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toIntrinsicFamily_viaGaugeFieldEqZero hzero).toOrdinary
+
 /-- A chosen-background DeTurck theorem family becomes gauge-reducible directly from raw
 intrinsic `C^3` gauge-flow existence data and scalar inner-product derivative proofs. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReducible_viaGaugeFlowExistenceInnerDerivative
