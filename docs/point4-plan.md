@@ -182,8 +182,9 @@ metric-coordinate Fréchet derivative plus tangent-map equality and let the API
 fill in the `HasDerivWithinAt` tangent-coordinate derivative. The
 time-difference formulation now also has direct variational endpoint wrappers
 for `HasDerivWithinAt` time-difference data, including a variant where the
-tangent-map equality is only assumed in the closed-interval within filter, and
-within-set chain-rule primitives:
+tangent-map equality is only assumed in the closed-interval within filter, plus
+geometric-slot variants that state the scalar identity using actual
+pushed-forward tangent vectors. It also has within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`
