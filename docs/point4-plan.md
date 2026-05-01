@@ -155,6 +155,9 @@ time-only `B(τ)` derivatives plus local identification with a variational ODE
 tangent map imply interior tensor time-regularity of the gauge-pulled metric.
 The same theorem now has a geometric-slot wrapper, so scalar identities may be
 stated using actual pushed-forward tangent vectors at the base time.
+The concrete moving bilinear component `B(τ)` now has an endpoint derivative
+bridge from a full metric-coordinate field Fréchet derivative plus the raw
+gauge-flow within derivative.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package

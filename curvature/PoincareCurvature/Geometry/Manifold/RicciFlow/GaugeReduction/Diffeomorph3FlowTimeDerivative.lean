@@ -1000,6 +1000,46 @@ theorem pullbackMetricBilinearCoordinateMap_eventuallyEq_metricBilinearCoordinat
         uE) vE
   rw [hy]
 
+/-- Within-set version of
+`pullbackMetricBilinearCoordinateMap_eventuallyEq_metricBilinearCoordinateField`,
+used at endpoints where chart membership is available only relative to the
+time set. -/
+theorem pullbackMetricBilinearCoordinateMap_eventuallyWithinEq_metricBilinearCoordinateField
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    {s : Set ℝ} (t : ℝ) (x : M)
+    (hmem : ∀ᶠ τ in 𝓝[s] t,
+      (Φ τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).baseSet) :
+    (fun τ : ℝ ↦
+      pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x) =ᶠ[
+        𝓝[s] t]
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((Φ t) x)
+          (τ, (extChartAt I ((Φ t) x)) ((Φ τ) x))) := by
+  filter_upwards [hmem] with τ hτ
+  ext uE vE
+  let TM := (TangentSpace I : M → Type _)
+  have hsrc_ext : (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source := by
+    simpa [TM, extChartAt_source] using hτ
+  have hy :
+      (extChartAt I ((Φ t) x)).symm ((extChartAt I ((Φ t) x)) ((Φ τ) x)) =
+        (Φ τ) x := by
+    exact PartialEquiv.left_inv _ hsrc_ext
+  change
+    (ContinuousLinearMap.inCoordinates E TM (E →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      ((Φ t) x) ((Φ τ) x) ((Φ t) x) ((Φ τ) x) ((g τ).inner ((Φ τ) x))
+        uE) vE =
+    (ContinuousLinearMap.inCoordinates E TM (E →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      ((Φ t) x)
+      ((extChartAt I ((Φ t) x)).symm ((extChartAt I ((Φ t) x)) ((Φ τ) x)))
+      ((Φ t) x)
+      ((extChartAt I ((Φ t) x)).symm ((extChartAt I ((Φ t) x)) ((Φ τ) x)))
+      ((g τ).inner
+        ((extChartAt I ((Φ t) x)).symm ((extChartAt I ((Φ t) x)) ((Φ τ) x))))
+        uE) vE
+  rw [hy]
+
 /-- At the chart center, the named metric-coordinate field is just the metric
 read in the tangent trivialization centered at that point. -/
 theorem metricBilinearCoordinateField_base_apply_eq
@@ -2452,6 +2492,73 @@ theorem eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
   SmoothSelfDiffeomorph3Family.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
     (I := I) (M := M) G.maps3 g (s := s) t x u v
     (G.eventuallyWithin_mem_trivializationAt_eval ht x)
+
+/-- A full Fréchet derivative of the metric-coordinate field gives the
+closed-time-set derivative of the concrete moving bilinear coordinate component
+`B(τ)`.
+
+The base curve derivative is supplied by the raw gauge flow within its time set;
+chart-local equality then transfers the derivative from the named metric field
+to `pullbackMetricBilinearCoordinateMap`. -/
+theorem pullbackMetricBilinearCoordinateMap_hasDerivWithinAt_of_metricCoordinateField_hasFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+        (I := I) (M := M) g ((G.maps3 t) x))
+      Bfield' (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+          (I := I) (M := M) G.maps3 g t τ x)
+      (Bfield'
+        (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+          ((G.maps3 t) x) (X t ((G.maps3 t) x))))
+      s t := by
+  let y : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let y' : E :=
+    tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+      ((G.maps3 t) x) (X t ((G.maps3 t) x))
+  have hy : HasDerivWithinAt y y' s t := by
+    simpa [y, y'] using G.hasDerivWithinAt_extChartAt_eval ht x
+  have hpair : HasDerivWithinAt (fun τ : ℝ ↦ (τ, y τ)) (1, y') s t := by
+    simpa using (hasDerivWithinAt_id t s).prodMk hy
+  have hmetric :
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) g ((G.maps3 t) x) (τ, y τ))
+        (Bfield' (1, y')) s t := by
+    simpa [Function.comp_def] using
+      (HasFDerivAt.comp_hasDerivWithinAt
+        (x := t)
+        (l := SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x))
+        (l' := Bfield') (f := fun τ : ℝ ↦ (τ, y τ)) hB hpair)
+  have hEq :
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+          (I := I) (M := M) G.maps3 g t τ x) =ᶠ[𝓝[s] t]
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) g ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))) :=
+    SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap_eventuallyWithinEq_metricBilinearCoordinateField
+      (I := I) (M := M) G.maps3 g (s := s) t x
+      (G.eventuallyWithin_mem_trivializationAt_eval ht x)
+  have hEq_t :
+      SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+          (I := I) (M := M) G.maps3 g t t x =
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) := by
+    exact (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_base_eq_pullbackMetricBilinearCoordinateMap_self
+      (I := I) (M := M) G.maps3 g t x).symm
+  simpa [y, y'] using hmetric.congr_of_eventuallyEq hEq hEq_t
 
 /-- Closed-Picard-interval specialization of
 `eventuallyEq_geometric_pullbackMetricInnerCoordinateModel` at interior times. -/
