@@ -821,7 +821,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         ordinary metric in the centered tangent trivialization and the gauge
         pushforward tangent vector in target coordinates, with slot-specialized
         forms for actual tangent vectors and a named inverse
-        `tangentVectorOfCoordinate` to switch back from model coordinates.
+        `tangentVectorOfCoordinate` to switch back from model coordinates. A
+        geometric-slot raw-flow bridge now lets the remaining scalar velocity
+        identity be stated in actual pushed-forward tangent-vector terms while
+        keeping centered-coordinate derivative inputs.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

@@ -259,6 +259,10 @@ centered-coordinate wrappers entirely when the model slots are
 `tangentVectorOfCoordinate` is now named as well, with two-sided simplification
 lemmas against `sourceTangentCoordinate`, so remaining velocity identities can
 switch between model-coordinate and geometric tangent-vector forms directly.
+The raw-flow metric-coordinate bridge now has a geometric-slot variant,
+`coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
+whose scalar velocity hypothesis is stated using actual pushed-forward tangent
+vectors and only uses centered coordinates for the derivative inputs.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

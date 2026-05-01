@@ -281,7 +281,8 @@ now packages the matching intrinsic boundary
        ordinary metric and pushforward tangent vector in centered coordinates
        and slot-specialized forms for actual tangent vectors, plus a named
        `tangentVectorOfCoordinate` inverse for switching back to geometric tangent
-       vectors,
+       vectors; a geometric-slot raw-flow bridge now states the remaining scalar
+       velocity identity in actual pushed-forward tangent-vector terms,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
