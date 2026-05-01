@@ -699,8 +699,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       `PullbackMetricInnerDerivativeOn` scalar target and directly to tensor
       `HasTimeDerivativeOn` for the gauge-pulled metric, while
       `pullbackMetricInnerCoordinateModel` names the preferred
-      `B(τ)(A(τ)u)(A(τ)v)` scalar expression for the next chart-identification
-       proof; the coordinate data also restricts to smaller time sets and lifts
+      `B(τ)(A(τ)u)(A(τ)v)` scalar expression; eventual target-trivialization
+       membership now proves equality between that coordinate model and the
+       geometric pullback scalar, and raw `Diffeomorph3GaugeFlowOn` witnesses
+       supply this equality near times where their time set is a neighborhood.
+       The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an
        intermediate tensor repackaging step. In the subsingleton-tangent case this non-identity

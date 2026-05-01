@@ -184,6 +184,118 @@ noncomputable def pullbackMetricInnerCoordinateModel
       ((Φ t) x) ((Φ τ) x) ((Φ t) x) ((Φ τ) x) ((g τ).inner ((Φ τ) x))
   B (A uE) (A vE)
 
+/-- Once the gauge image lies in the target trivialization centered at the
+time-`t` image, the named coordinate model is definitionally the geometric
+pullback scalar.  This avoids expanding the full bundled pullback bilinear-form
+coordinate theorem in later derivative proofs. -/
+theorem pullbackMetricInnerCoordinateModel_eq
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (t τ : ℝ) (x : M) (u v : TangentSpace I x)
+    (hφx : (Φ τ) x ∈
+      (trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).baseSet) :
+    pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v τ =
+      (g τ).inner ((Φ τ) x)
+        ((Φ τ).pushforwardTangent x u)
+        ((Φ τ).pushforwardTangent x v) := by
+  let TM := (TangentSpace I : M → Type _)
+  let TStar := fun y : M => TM y →L[ℝ] ℝ
+  let OneF := E →L[ℝ] ℝ
+  let hx : x ∈ (trivializationAt E TM x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  let uE : E := (trivializationAt E TM x).continuousLinearEquivAt ℝ x hx u
+  let vE : E := (trivializationAt E TM x).continuousLinearEquivAt ℝ x hx v
+  let A : E →L[ℝ] E :=
+    ContinuousLinearMap.inCoordinates E TM E TM x x ((Φ t) x) ((Φ τ) x)
+      ((Φ τ).pushforwardTangent x)
+  let Bc : E →L[ℝ] E →L[ℝ] ℝ :=
+    ContinuousLinearMap.inCoordinates E TM OneF TStar
+      ((Φ t) x) ((Φ τ) x) ((Φ t) x) ((Φ τ) x) ((g τ).inner ((Φ τ) x))
+  have hsource_u :
+      ((trivializationAt E TM x).continuousLinearEquivAt ℝ x hx).symm uE = u := by
+    simp [uE]
+  have hsource_v :
+      ((trivializationAt E TM x).continuousLinearEquivAt ℝ x hx).symm vE = v := by
+    simp [vE]
+  have hA_u :
+      A uE =
+        ((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx)
+          ((Φ τ).pushforwardTangent x u) := by
+    change ContinuousLinearMap.inCoordinates E TM E TM x x ((Φ t) x) ((Φ τ) x)
+        ((Φ τ).pushforwardTangent x) uE =
+      ((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx)
+        ((Φ τ).pushforwardTangent x u)
+    rw [ContinuousLinearMap.inCoordinates_eq (x₀ := x) (x := x)
+      (y₀ := (Φ t) x) (y := (Φ τ) x) (ϕ := (Φ τ).pushforwardTangent x) hx hφx]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply]
+    rw [show ((↑((Bundle.Trivialization.continuousLinearEquivAt ℝ
+        (trivializationAt E (TangentSpace I : M → Type _) x) x hx).symm) :
+        E →L[ℝ] TangentSpace I x) uE) = u by
+      simpa [TM] using hsource_u]
+    simpa [TM]
+  have hA_v :
+      A vE =
+        ((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx)
+          ((Φ τ).pushforwardTangent x v) := by
+    change ContinuousLinearMap.inCoordinates E TM E TM x x ((Φ t) x) ((Φ τ) x)
+        ((Φ τ).pushforwardTangent x) vE =
+      ((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx)
+        ((Φ τ).pushforwardTangent x v)
+    rw [ContinuousLinearMap.inCoordinates_eq (x₀ := x) (x := x)
+      (y₀ := (Φ t) x) (y := (Φ τ) x) (ϕ := (Φ τ).pushforwardTangent x) hx hφx]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply]
+    rw [show ((↑((Bundle.Trivialization.continuousLinearEquivAt ℝ
+        (trivializationAt E (TangentSpace I : M → Type _) x) x hx).symm) :
+        E →L[ℝ] TangentSpace I x) vE) = v by
+      simpa [TM] using hsource_v]
+    simpa [TM]
+  have hB_eval :
+      Bc (A uE) (A vE) =
+        (g τ).inner ((Φ τ) x)
+          (((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx).symm (A uE))
+          (((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx).symm (A vE)) := by
+    erw [_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
+      (x0 := (Φ t) x) (x := (Φ τ) x) hφx ((g τ).inner ((Φ τ) x)) (A uE) (A vE)]
+  have hAu_back :
+      ((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx).symm (A uE) =
+        (Φ τ).pushforwardTangent x u := by
+    rw [hA_u]
+    simpa using
+      (((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx).symm_apply_apply
+        ((Φ τ).pushforwardTangent x u))
+  have hAv_back :
+      ((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx).symm (A vE) =
+        (Φ τ).pushforwardTangent x v := by
+    rw [hA_v]
+    simpa using
+      (((trivializationAt E TM ((Φ t) x)).continuousLinearEquivAt ℝ ((Φ τ) x) hφx).symm_apply_apply
+        ((Φ τ).pushforwardTangent x v))
+  calc
+    pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v τ = Bc (A uE) (A vE) := by
+      simp [pullbackMetricInnerCoordinateModel, TM, TStar, OneF, uE, vE, A, Bc]
+    _ = (g τ).inner ((Φ τ) x)
+        ((Φ τ).pushforwardTangent x u)
+        ((Φ τ).pushforwardTangent x v) := by
+      rw [hB_eval, hAu_back, hAv_back]
+
+/-- Eventual chart membership upgrades the named coordinate model to the
+geometric pullback scalar near the reference time. -/
+theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TangentSpace I x)
+    (hmem : ∀ᶠ τ in 𝓝 t,
+      (Φ τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).baseSet) :
+    (fun τ : ℝ ↦
+      (g τ).inner ((Φ τ) x)
+        ((Φ τ).pushforwardTangent x u)
+        ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+      pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v := by
+  filter_upwards [hmem] with τ hτ
+  exact (pullbackMetricInnerCoordinateModel_eq
+    (I := I) (M := M) Φ g t τ x u v hτ).symm
+
 /-- Restrict named scalar pullback derivative data to a smaller time set. -/
 theorem PullbackMetricInnerDerivativeOn.mono
     {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
@@ -362,6 +474,30 @@ theorem id_pullbackMetricInnerDerivativeOn
   simpa [SmoothSelfDiffeomorph3Family.id_pullbackMetricFamily] using hderiv
 
 end SmoothSelfDiffeomorph3Family
+
+namespace Diffeomorph3GaugeFlowOn
+
+/-- A raw gauge-flow witness supplies the chart-local equality between the
+geometric pullback scalar and the preferred coordinate model at every time where
+the raw flow equation holds on a neighborhood. -/
+theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M))
+    (x : M) (u v : TangentSpace I x) :
+    (fun τ : ℝ ↦
+      (g τ).inner ((G.maps3 τ) x)
+        ((G.maps3 τ).pushforwardTangent x u)
+        ((G.maps3 τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+      SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+        (I := I) (M := M) G.maps3 g t x u v :=
+  SmoothSelfDiffeomorph3Family.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
+    (I := I) (M := M) G.maps3 g t x u v
+    (G.eventually_mem_trivializationAt_eval hs x)
+
+end Diffeomorph3GaugeFlowOn
 
 namespace ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
 

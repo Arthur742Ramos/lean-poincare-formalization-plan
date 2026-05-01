@@ -129,8 +129,12 @@ the derivative proof directly.  The named coordinate package
 to proving the coordinate derivative hypotheses for the metric component and
 tangent map.  The preferred coordinate scalar expression itself is now named as
 `pullbackMetricInnerCoordinateModel`, isolating the concrete `B(τ)(A(τ)u)(A(τ)v)`
-term that the next chart-identification proof must relate to the geometric
-pullback scalar. Coordinate-level derivative data now also restricts to smaller
+term used in chart calculations. The chart-identification step for this scalar
+is now proof-bearing: eventual membership of `Φ_τ(x)` in the target tangent
+trivialization gives eventual equality between the geometric pullback scalar and
+`pullbackMetricInnerCoordinateModel`, and raw `Diffeomorph3GaugeFlowOn` witnesses
+provide that eventual equality automatically at times where their time set is a
+neighborhood. Coordinate-level derivative data now also restricts to smaller
 time sets and lifts through the fixed-IVP, theorem-family, and raw-existence
 gauge-flow APIs, so a future chart calculation can feed the point-4 theorem
 routes without first repackaging it as a tensor derivative.

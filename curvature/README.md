@@ -394,8 +394,10 @@ now packages the matching intrinsic boundary
       promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
       scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred
       coordinate scalar expression is now named as
-      `pullbackMetricInnerCoordinateModel`, and the coordinate data now restricts
-      to smaller time sets and lifts through fixed-IVP, theorem-family, and
+      `pullbackMetricInnerCoordinateModel`, with proof-bearing eventual equality
+      to the geometric pullback scalar from target-trivialization membership and
+      a raw-flow corollary supplying that equality near neighborhood-times. The
+      coordinate data now restricts to smaller time sets and lifts through fixed-IVP, theorem-family, and
       raw-existence gauge-flow APIs. This leaves one primitive
     positive-dimensional time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
