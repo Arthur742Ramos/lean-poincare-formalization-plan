@@ -680,7 +680,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       packages, plus the autonomous `C¹` integral-curve specialization with
       open-interval continuity and a packaged `LocalFlowSolution` extraction
       on a smaller closed interval, vector-slot variational uniqueness bridges,
-      and Gronwall uniqueness bridges for packaged
+      center-trajectory scalar chain-rule wrappers for basepoint
+      gauge-pullback calculations, and Gronwall uniqueness bridges for packaged
       local model flows on open and closed Picard intervals, including direct
       uniqueness routes for the continuous space-time package. The same model
       ODE bridge now packages the tangent-map variational equation

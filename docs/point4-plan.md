@@ -597,6 +597,11 @@ hypotheses. The autonomous `C¹` vector-field route now also extracts a
 proof-level `Nonempty LocalFlowSolution` package on a smaller closed time
 interval and smaller initial ball, giving the first direct bridge from
 mathlib's autonomous integral-curve theorem to the packaged raw model-flow API.
+The time-derivative layer now also has center-trajectory closed-interval and
+interior scalar chain-rule wrappers for
+`Bfield(t, y(t))(A(t)u)(A(t)v)`, so basepoint gauge-pullback calculations can
+consume variational model-flow data without manually threading
+`x₀ ∈ closedBall x₀ r`.
 The same module now also
 packages the model-space variational equation as
 `VariationalLocalFlowSolution`, with tangent maps initialized by the identity

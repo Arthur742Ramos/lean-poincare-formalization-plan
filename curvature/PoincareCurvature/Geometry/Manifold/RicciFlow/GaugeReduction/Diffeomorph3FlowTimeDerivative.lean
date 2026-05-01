@@ -292,6 +292,33 @@ theorem hasDerivWithinAt_bilinearFormField_tangent_apply_apply
     (α.tangent_apply_hasDerivWithinAt hx ht u)
     (α.tangent_apply_hasDerivWithinAt hx ht v)
 
+/-- Center-trajectory closed-interval scalar chain rule along a variational model
+flow. -/
+theorem center_hasDerivWithinAt_bilinearFormField_tangent_apply_apply
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    (hB : HasFDerivAt Bfield Bfield' (t, α.flow (x₀, t))) (u v : V) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        Bfield (τ, α.flow (x₀, τ))
+          (α.tangent x₀ τ u) (α.tangent x₀ τ v))
+      (Bfield' (1, f t (α.flow (x₀, t)))
+          (α.tangent x₀ t u) (α.tangent x₀ t v) +
+        Bfield (t, α.flow (x₀, t))
+          ((Df t (α.flow (x₀, t))) (α.tangent x₀ t u))
+          (α.tangent x₀ t v) +
+        Bfield (t, α.flow (x₀, t))
+          (α.tangent x₀ t u)
+          ((Df t (α.flow (x₀, t))) (α.tangent x₀ t v)))
+      (Icc tmin tmax) t :=
+  α.hasDerivWithinAt_bilinearFormField_tangent_apply_apply
+    (mem_closedBall_self r.2) ht hB u v
+
 /-- Eventual-equality transfer form of
 `hasDerivWithinAt_bilinearFormField_tangent_apply_apply`. -/
 theorem hasDerivWithinAt_of_eventuallyEq_bilinearFormField_tangent_apply_apply
@@ -366,6 +393,32 @@ theorem hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo
     hB (α.flow_hasDerivAt_of_mem_Ioo hx ht)
     (α.tangent_apply_hasDerivAt_of_mem_Ioo hx ht u)
     (α.tangent_apply_hasDerivAt_of_mem_Ioo hx ht v)
+
+/-- Center-trajectory ordinary scalar chain rule along a variational model flow
+on the interior of the Picard interval. -/
+theorem center_hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    (hB : HasFDerivAt Bfield Bfield' (t, α.flow (x₀, t))) (u v : V) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        Bfield (τ, α.flow (x₀, τ))
+          (α.tangent x₀ τ u) (α.tangent x₀ τ v))
+      (Bfield' (1, f t (α.flow (x₀, t)))
+          (α.tangent x₀ t u) (α.tangent x₀ t v) +
+        Bfield (t, α.flow (x₀, t))
+          ((Df t (α.flow (x₀, t))) (α.tangent x₀ t u))
+          (α.tangent x₀ t v) +
+        Bfield (t, α.flow (x₀, t))
+          (α.tangent x₀ t u)
+           ((Df t (α.flow (x₀, t))) (α.tangent x₀ t v))) t :=
+  α.hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo
+    (mem_closedBall_self r.2) ht hB u v
 
 /-- Eventual-equality transfer form of
 `hasDerivAt_bilinearFormField_tangent_apply_apply_of_mem_Ioo`. -/
