@@ -246,7 +246,10 @@ model with the selected variational flow/tangent data. Raw `C³` gauge flows
 constructed on closed Picard intervals also now specialize directly to the open
 interior interval: their ordinary manifold derivative, continuity, chart
 membership, coordinate-model equality, and coordinate-model/field
-time-derivative bridges are available on `Ioo tmin tmax`.
+time-derivative bridges are available on `Ioo tmin tmax`. There is also a
+one-step theorem combining a closed-interval raw gauge flow with variational
+model-flow chart data to produce interior time-regularity of the gauge-pulled
+metric family.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged

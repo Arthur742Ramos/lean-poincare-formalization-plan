@@ -685,7 +685,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       the remaining chart-local hypotheses are the metric-component derivative
       and the concrete coordinate identification with that flow. Closed-Picard
       raw gauge flows now specialize directly to the open interior interval for
-      coordinate-model/field time-derivative bridges. Raw gauge flows now also expose the first
+      coordinate-model/field time-derivative bridges, including a one-step
+      theorem from raw gauge flow plus variational model-flow chart data to
+      interior time-regularity of the gauge-pulled metric. Raw gauge flows now also expose the first
       chart-membership bridge needed for coordinate pullback formulas:
       neighborhood-time flow equations imply continuity of `τ ↦ Φ_τ(x)` and
       eventual membership in the tangent trivialization at `Φ_t(x)`, with the

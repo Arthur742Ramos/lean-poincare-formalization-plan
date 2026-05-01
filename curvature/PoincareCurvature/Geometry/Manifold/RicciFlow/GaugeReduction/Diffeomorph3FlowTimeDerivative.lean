@@ -1014,6 +1014,45 @@ theorem hasTimeDerivativeOn_Ioo_of_coordinateField
       G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
         (t := t) ht g x u v)
 
+/-- Closed-Picard raw gauge flow plus variational model-flow chart data gives
+interior time-regularity for the gauge-pulled metric family in one step. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalLocalFlow
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (uE vE : E),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝 t]
+              (fun τ : ℝ ↦
+                Bfield (τ, α.flow (xE, τ))
+                  (α.tangent xE τ uE) (α.tangent xE τ vE)) ∧
+          HasFDerivAt Bfield Bfield' (t, α.flow (xE, t)) ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (α.tangent xE t uE) (α.tangent xE t vE) +
+              Bfield (t, α.flow (xE, t))
+                ((Df t (α.flow (xE, t))) (α.tangent xE t uE))
+                (α.tangent xE t vE) +
+              Bfield (t, α.flow (xE, t))
+                (α.tangent xE t uE)
+                ((Df t (α.flow (xE, t))) (α.tangent xE t vE)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_coordinateField
+    (SmoothSelfDiffeomorph3Family.coordinatePullbackMetricFieldDerivativeOn_of_variationalLocalFlow
+      (I := I) (M := M) (Φ := G.maps3) (g := g) (gdot := gdot) α hdata)
+
 end Diffeomorph3GaugeFlowOn
 
 namespace ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow

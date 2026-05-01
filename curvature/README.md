@@ -240,7 +240,9 @@ now packages the matching intrinsic boundary
       exact scalar chain rule along the flow, leaving only the metric-component
       derivative and concrete chart identification as local inputs. Closed-Picard
       raw gauge flows also feed the coordinate-model/field time-derivative
-      bridges directly on the open interior interval. The raw-flow API also extracts continuity of
+      bridges directly on the open interior interval, with a one-step theorem
+      from raw gauge flow plus variational model-flow chart data to interior
+      gauge-pulled time-regularity. The raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
      A thin `AnalyticPDE.SmoothRealization` module names the
