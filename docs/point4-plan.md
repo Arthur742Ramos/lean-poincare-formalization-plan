@@ -148,7 +148,10 @@ primitive: `hasDerivAt_bilinearFormField_along_curve` differentiates a bilinear
 form field `Bfield(τ, y(τ))`, and
 `hasDerivAt_bilinearFormField_linear_apply_apply_along_curve` combines that with
 the variational tangent-map equation to differentiate
-`Bfield(τ, y(τ)) (A(τ)u) (A(τ)v)`.
+`Bfield(τ, y(τ)) (A(τ)u) (A(τ)v)`. This is also bundled as
+`CoordinatePullbackMetricFieldDerivativeOn`, which promotes to
+`CoordinatePullbackMetricModelDerivativeOn`, the geometric scalar derivative, and
+tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

@@ -405,7 +405,8 @@ now packages the matching intrinsic boundary
       time-regularity, including raw-gauge-flow wrappers. The module also proves
       the moving metric-component chain rule for `Bfield(τ, y(τ))` and the
       combined `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent
-      equation. The
+      equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with
+      scalar, tensor, and raw-gauge-flow promotion routes. The
       coordinate data now restricts to smaller time sets and lifts through fixed-IVP, theorem-family, and
       raw-existence gauge-flow APIs. This leaves one primitive
     positive-dimensional time-regularity input. Two thin extension
