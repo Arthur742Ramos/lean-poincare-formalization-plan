@@ -597,7 +597,8 @@ now packages the matching intrinsic boundary
       for the concrete tangent-coordinate component, packaged at the component
       derivative-data layer with a generic within-set scalar transfer and raw
       endpoint scalar derivative package that upgrades directly to tensor
-      time-regularity on the open interval through a raw gauge-flow endpoint
+      time-regularity on the open interval and restricts to smaller time sets
+      through a raw gauge-flow endpoint
       wrapper, including variational tangent-map endpoint data with
       geometric-slot scalar identities, variants where the tangent-map
       identification is only known in the closed-interval within filter, and an

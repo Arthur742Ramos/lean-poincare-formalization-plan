@@ -2842,6 +2842,18 @@ theorem PullbackMetricInnerDerivativeWithinOn.toPullbackMetricInnerDerivativeOn_
   exact (hwithin (Ioo_subset_Icc_self ht) x u v).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
 
+/-- Restrict endpoint scalar pullback derivative data to a smaller time set. -/
+theorem PullbackMetricInnerDerivativeWithinOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hwithin : PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot t)
+    (hst : s ⊆ t) :
+    PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro τ hτ x u v
+  exact (hwithin (hst hτ) x u v).mono hst
+
 /-- Endpoint component data on a closed interval gives ordinary geometric scalar
 derivatives on the open interior once the geometric scalar is chart-locally
 identified with the coordinate model within the closed interval. -/

@@ -155,7 +155,9 @@ eventual-equality transfer forms are also named, matching the chart-local
 geometric scalar identities used downstream.
 Closed-interval scalar derivative data now upgrades back to ordinary
 `PullbackMetricInnerDerivativeOn` on the open interval, so endpoint component
-work can feed the existing interior gauge-pulled metric time-regularity routes.
+work can feed the existing interior gauge-pulled metric time-regularity routes;
+the endpoint scalar package now also restricts monotonically to smaller time
+sets, matching localized Picard intervals.
 A direct theorem packages closed-interval concrete component derivatives as
 `HasTimeDerivativeOn` for the gauge-pulled metric family over `Ioo tmin tmax`.
 The raw `Diffeomorph3GaugeFlowOn` layer now exposes the same endpoint route

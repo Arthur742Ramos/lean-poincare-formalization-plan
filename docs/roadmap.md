@@ -794,10 +794,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       closed-interval derivative bridge from variational tangent-map data,
       packaged by `CoordinatePullbackMetricComponentDerivativeWithinOn`, plus a
       generic within-set scalar transfer for `B(τ)(A(τ)u)(A(τ)v)` and the raw
-      endpoint package `PullbackMetricInnerDerivativeWithinOn`, which upgrades
-      to ordinary scalar derivative data and directly to `HasTimeDerivativeOn`
-      on `Ioo tmin tmax`; `Diffeomorph3GaugeFlowOn` exposes this using
-      within-time-set chart equality and variational tangent-map endpoint data,
+       endpoint package `PullbackMetricInnerDerivativeWithinOn`, which upgrades
+       to ordinary scalar derivative data and directly to `HasTimeDerivativeOn`
+       on `Ioo tmin tmax` and restricts monotonically to smaller time sets;
+       `Diffeomorph3GaugeFlowOn` exposes this using
+       within-time-set chart equality and variational tangent-map endpoint data,
       including geometric-slot scalar identities. The concrete moving bilinear
       component now has an endpoint derivative bridge from full
       metric-coordinate Fréchet data, yielding a raw closed-interval theorem
