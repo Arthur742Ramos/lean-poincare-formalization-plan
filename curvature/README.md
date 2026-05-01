@@ -266,9 +266,11 @@ now packages the matching intrinsic boundary
       projection lemmas from product local-flow solutions to the base and tangent
        equations, including ordinary interior and vector-slot tangent derivative
        forms plus named component continuity, and extracts
-       `VariationalLocalFlowSolution` from continuous
-       product local flows or product Picard-Lindelöf hypotheses initialized on
-       `(x, 1)`, with a radius-specialized Picard constructor. It also proves
+        `VariationalLocalFlowSolution` from continuous
+        product local flows or product Picard-Lindelöf hypotheses initialized on
+        `(x, 1)`, with a radius-specialized Picard constructor and
+        closed-interval localized variants for continuous-product/product-Picard
+        inputs. It also proves
        the left-composition operator-space Lipschitz estimate, a product-state
        Lipschitz estimate for the full variational vector field, and
        interior/closed-interval uniqueness for the full `(flow, tangent)` pair

@@ -1109,6 +1109,20 @@ theorem nonempty_restrict
   rcases hα with ⟨α⟩
   exact ⟨α.restrict htime ht₀' hr⟩
 
+/-- Extract a variational local flow from a continuous local flow of the product
+system, immediately localized to a smaller closed time interval. -/
+def ofProductContinuousLocalFlowSolution_restrict
+    {R r' : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀ (x₀, (1 : V →L[ℝ] V)) R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hball : ∀ x ∈ closedBall x₀ r',
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+  (ofProductContinuousLocalFlowSolution (r := r') α hball).restrict htime ht₀' le_rfl
+
 /-- On the interior of the Picard interval, the center base curve has the
 ordinary derivative required by coordinate chain rules. -/
 theorem center_flow_hasDerivAt_of_mem_Ioo
@@ -1698,6 +1712,23 @@ def ofProductPicardLindelof
   ofProductContinuousLocalFlowSolution
     (IsPicardLindelof.toContinuousLocalFlowSolution hf) hball
 
+/-- Product Picard-Lindelöf variational flow data, immediately localized to a
+smaller closed time interval. -/
+def ofProductPicardLindelof_restrict
+    [CompleteSpace V]
+    {a R L K r' : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hball : ∀ x ∈ closedBall x₀ r',
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+  ofProductContinuousLocalFlowSolution_restrict
+    (IsPicardLindelof.toContinuousLocalFlowSolution hf) htime ht₀' hball
+
 /-- Picard-Lindelöf for the product variational system supplies the variational
 flow package on any base ball whose radius is no larger than the product Picard
 radius. -/
@@ -1709,6 +1740,29 @@ def ofProductPicardLindelof_of_le_radius
     (hr : r ≤ R) :
     VariationalLocalFlowSolution f Df t₀ x₀ r :=
   ofProductPicardLindelof hf (by
+    intro x hx
+    rw [mem_closedBall] at hx ⊢
+    calc
+      dist (x, (1 : V →L[ℝ] V)) (x₀, (1 : V →L[ℝ] V))
+          = max (dist x x₀) (dist (1 : V →L[ℝ] V) 1) := by
+            rw [Prod.dist_eq]
+      _ = dist x x₀ := by simp
+      _ ≤ (R : ℝ) := hx.trans (by exact_mod_cast hr))
+
+/-- Product Picard-Lindelöf variational flow data on a smaller closed interval
+and any base ball whose radius is no larger than the product Picard radius. -/
+def ofProductPicardLindelof_restrict_of_le_radius
+    [CompleteSpace V]
+    {a R L K r' : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R) :
+    VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+  ofProductPicardLindelof_restrict hf htime ht₀' (by
     intro x hx
     rw [mem_closedBall] at hx ⊢
     calc

@@ -728,11 +728,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       product `LocalFlowSolution`s to the base and tangent ODEs, including
       ordinary interior and vector-slot tangent derivative forms plus named
       component continuity; continuous
-      product local flows initialized on `(x, 1)` extract directly to
-      `VariationalLocalFlowSolution` on any base ball contained in the product
-      Picard ball, and product Picard-Lindelöf hypotheses construct that
-      variational package directly, with an automatic radius-specialized
-      constructor when the base radius is bounded by the product radius. The dynamic pullback layer now uses a
+       product local flows initialized on `(x, 1)` extract directly to
+       `VariationalLocalFlowSolution` on any base ball contained in the product
+       Picard ball, and product Picard-Lindelöf hypotheses construct that
+       variational package directly, with an automatic radius-specialized
+       constructor when the base radius is bounded by the product radius, plus
+       closed-interval localized variants for continuous-product and product
+       Picard inputs. The dynamic pullback layer now uses a
       variational local flow to discharge the interior `y'(t)` and `A'(t)`
        clauses in `CoordinatePullbackMetricFieldDerivativeOn` and proves the
        exact scalar chain rule for `B(t, y(t))(A(t)u)(A(t)v)` along that flow, so

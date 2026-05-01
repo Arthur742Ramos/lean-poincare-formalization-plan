@@ -731,7 +731,10 @@ Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction
 automatically when the chosen base radius is no larger than the product Picard
-radius. The ODE package now also supplies ordinary interior time
+radius; continuous-product and product Picard constructors now also have
+closed-interval localized variants, including the radius-specialized form needed
+when a chart calculation shrinks the Picard time interval before extracting
+tangent-map data. The ODE package now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
 closed-interval and interior vector-slot derivatives for `t ↦ A(t)v` via
 `tangent_apply_hasDerivWithinAt` and `tangent_apply_hasDerivAt_of_mem_Ioo`, and
