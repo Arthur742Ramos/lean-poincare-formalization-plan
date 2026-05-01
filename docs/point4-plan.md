@@ -221,7 +221,9 @@ the ODE-side source of the `A`-derivative hypothesis in
 `CoordinatePullbackMetricModelDerivativeOn`. It also proves interior uniqueness
 for the variational/tangent maps once the base local flows agree and the
 linearized ODE is uniformly Lipschitz on a state region, which is the tangent
-compatibility input needed for chart gluing.  The same module also records the
+compatibility input needed for chart gluing; the same uniqueness conclusion is
+also available on the closed Picard interval using the within-interval endpoint
+continuity.  The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
 local model flows whose curves stay in a uniformly Lipschitz state region; the

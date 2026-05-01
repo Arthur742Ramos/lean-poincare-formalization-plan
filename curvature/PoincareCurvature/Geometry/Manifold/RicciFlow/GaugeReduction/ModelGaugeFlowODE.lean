@@ -276,6 +276,36 @@ theorem tangent_eqOn_Ioo_of_lipschitzOnWith
     exact ⟨hβderiv, hβ_mem t ht⟩
   · rw [α.tangent_initial_eq x hx, β.tangent_initial_eq x hx]
 
+/-- Closed-interval uniqueness for tangent maps of variational local flows.  The
+endpoint conclusion follows from the within-interval derivative statements via
+continuity, while uniqueness on the interior uses the same Gronwall argument as
+the base ODE. -/
+theorem tangent_eqOn_Icc_of_lipschitzOnWith
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax))
+    (hlin_lip : ∀ t ∈ Ioo tmin tmax,
+      LipschitzOnWith K (fun A : V →L[ℝ] V => (Df t (α.flow (x, t))).comp A) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.tangent x t ∈ state t) :
+    EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) := by
+  refine ODE_solution_unique_of_mem_Icc
+    (v := fun (t : ℝ) (A : V →L[ℝ] V) => (Df t (α.flow (x, t))).comp A)
+    (s := state) hlin_lip ht₀ ?_ ?_ hα_mem ?_ ?_ hβ_mem ?_
+  · exact HasDerivWithinAt.continuousOn
+      (fun t ht => α.tangent_hasDerivWithinAt x hx t ht)
+  · intro t ht
+    exact α.tangent_hasDerivAt_of_mem_Ioo hx ht
+  · exact HasDerivWithinAt.continuousOn
+      (fun t ht => β.tangent_hasDerivWithinAt x hx t ht)
+  · intro t ht
+    have hβderiv := β.tangent_hasDerivAt_of_mem_Ioo hx ht
+    rw [show β.flow (x, t) = α.flow (x, t) from (hflow_eq ht).symm] at hβderiv
+    exact hβderiv
+  · rw [α.tangent_initial_eq x hx, β.tangent_initial_eq x hx]
+
 end VariationalLocalFlowSolution
 
 namespace IsPicardLindelof
