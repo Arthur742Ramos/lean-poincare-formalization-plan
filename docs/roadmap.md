@@ -703,6 +703,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        membership now proves equality between that coordinate model and the
        geometric pullback scalar, and raw `Diffeomorph3GaugeFlowOn` witnesses
        supply this equality near times where their time set is a neighborhood.
+       The remaining positive-dimensional primitive is isolated as
+       `CoordinatePullbackMetricModelDerivativeOn`, a derivative package for the
+       named coordinate model that promotes directly to the geometric scalar
+       target and tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

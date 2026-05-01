@@ -134,10 +134,15 @@ is now proof-bearing: eventual membership of `Φ_τ(x)` in the target tangent
 trivialization gives eventual equality between the geometric pullback scalar and
 `pullbackMetricInnerCoordinateModel`, and raw `Diffeomorph3GaugeFlowOn` witnesses
 provide that eventual equality automatically at times where their time set is a
-neighborhood. Coordinate-level derivative data now also restricts to smaller
-time sets and lifts through the fixed-IVP, theorem-family, and raw-existence
-gauge-flow APIs, so a future chart calculation can feed the point-4 theorem
-routes without first repackaging it as a tensor derivative.
+neighborhood. The remaining positive-dimensional primitive is now isolated as
+`CoordinatePullbackMetricModelDerivativeOn`: derivative data for the named
+coordinate model itself. This model-derivative package restricts to smaller time
+sets and, together with the chart-equality theorem, promotes directly to the
+geometric scalar derivative and tensor `HasTimeDerivativeOn`; raw gauge flows
+also have direct model-derivative-to-time-derivative wrappers. Coordinate-level
+derivative data still lifts through the fixed-IVP, theorem-family, and
+raw-existence gauge-flow APIs, so a future chart calculation can feed the
+point-4 theorem routes without first repackaging it as a tensor derivative.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

@@ -396,7 +396,10 @@ now packages the matching intrinsic boundary
       coordinate scalar expression is now named as
       `pullbackMetricInnerCoordinateModel`, with proof-bearing eventual equality
       to the geometric pullback scalar from target-trivialization membership and
-      a raw-flow corollary supplying that equality near neighborhood-times. The
+      a raw-flow corollary supplying that equality near neighborhood-times.
+      `CoordinatePullbackMetricModelDerivativeOn` isolates derivative data for
+      that named coordinate model and promotes it directly to scalar and tensor
+      time-regularity, including raw-gauge-flow wrappers. The
       coordinate data now restricts to smaller time sets and lifts through fixed-IVP, theorem-family, and
       raw-existence gauge-flow APIs. This leaves one primitive
     positive-dimensional time-regularity input. Two thin extension

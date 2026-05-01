@@ -296,6 +296,97 @@ theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
   exact (pullbackMetricInnerCoordinateModel_eq
     (I := I) (M := M) Φ g t τ x u v hτ).symm
 
+/-- The remaining coordinate-model derivative obligation after the geometric
+scalar has been identified with `pullbackMetricInnerCoordinateModel`.
+
+This is the next hard mathematical target for positive-dimensional dynamic
+gauges: prove derivative data for the coordinate metric component `B(τ)` and
+the tangent-map coordinate operator `A(τ)` in the named model expression. -/
+def CoordinatePullbackMetricModelDerivativeOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+    ∃ (B : ℝ → E →L[ℝ] E →L[ℝ] ℝ)
+      (B' : E →L[ℝ] E →L[ℝ] ℝ)
+      (A : ℝ → E →L[ℝ] E)
+      (D : E →L[ℝ] E)
+      (uE vE : E),
+      pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ B τ (A τ uE) (A τ vE)) ∧
+      HasDerivAt B B' t ∧
+      HasDerivAt A (D.comp (A t)) t ∧
+      B' (A t uE) (A t vE) +
+          B t (D (A t uE)) (A t vE) +
+          B t (A t uE) (D (A t vE)) =
+        gdot t x u v
+
+/-- Restrict coordinate-model scalar pullback derivative data to a smaller time
+set. -/
+theorem CoordinatePullbackMetricModelDerivativeOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hmodel : CoordinatePullbackMetricModelDerivativeOn (I := I) (M := M) Φ g gdot t)
+    (hst : s ⊆ t) :
+    CoordinatePullbackMetricModelDerivativeOn (I := I) (M := M) Φ g gdot s := by
+  intro τ hτ x u v
+  exact hmodel (hst hτ) x u v
+
+/-- Coordinate-model derivative data plus a chart-local equality between the
+geometric scalar and the named coordinate model gives the original coordinate
+derivative package. -/
+theorem coordinatePullbackMetricInnerDerivativeOn_of_model
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hmodel : CoordinatePullbackMetricModelDerivativeOn (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    CoordinatePullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨B, B', A, D, uE, vE, hmodel_eq, hB, hA, hvalue⟩ := hmodel ht x u v
+  exact ⟨B, B', A, D, uE, vE, (hgeom ht x u v).trans hmodel_eq, hB, hA, hvalue⟩
+
+/-- Once eventual chart equality is known, coordinate-model derivative data
+implies the named geometric scalar derivative target. -/
+theorem pullbackMetricInnerDerivativeOn_of_coordinateModel
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hmodel : CoordinatePullbackMetricModelDerivativeOn (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s :=
+by
+  intro t ht x u v
+  obtain ⟨B, B', A, D, uE, vE, hmodel_eq, hB, hA, hvalue⟩ := hmodel ht x u v
+  have hderiv :
+      HasDerivAt
+        (fun τ : ℝ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v))
+        (B' (A t uE) (A t vE) +
+          B t (D (A t uE)) (A t vE) +
+          B t (A t uE) (D (A t vE))) t :=
+    hasDerivAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp_deriv
+      (B := B) (B' := B') (A := A) (D := D) (t := t) uE vE
+      ((hgeom ht x u v).trans hmodel_eq) hB hA
+  simpa [hvalue] using hderiv
+
 /-- Restrict named scalar pullback derivative data to a smaller time set. -/
 theorem PullbackMetricInnerDerivativeOn.mono
     {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
@@ -358,6 +449,27 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricInnerDerivativeOn
   SmoothSelfDiffeomorph3Family.pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
     (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot) (s := s)
     (pullbackMetricInnerDerivativeOn_of_coordinate (I := I) (M := M) hcoord)
+
+/-- Coordinate-model scalar derivative data packages directly as the tensor
+time derivative of the gauge-pulled metric family once chart-local equality with
+the geometric scalar is known. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricModelDerivativeOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hmodel : CoordinatePullbackMetricModelDerivativeOn (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (Φ.pullbackMetricFamily g) gdot s :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
+    (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot) (s := s)
+    (pullbackMetricInnerDerivativeOn_of_coordinateModel
+      (I := I) (M := M) hmodel hgeom)
 
 /-- A named scalar inner-product derivative obligation packages as the tensor
 time derivative of the gauge-pulled metric family. -/
@@ -496,6 +608,60 @@ theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
   SmoothSelfDiffeomorph3Family.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
     (I := I) (M := M) G.maps3 g t x u v
     (G.eventually_mem_trivializationAt_eval hs x)
+
+/-- For a raw gauge flow whose time set is a neighborhood of each of its times,
+derivative data for the named coordinate model is enough to produce the
+coordinate derivative package for the geometric pullback scalar. -/
+theorem coordinatePullbackMetricInnerDerivativeOn_of_model
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hmodel : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricModelDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricInnerDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  SmoothSelfDiffeomorph3Family.coordinatePullbackMetricInnerDerivativeOn_of_model
+    (I := I) (M := M) hmodel
+    (fun {t} ht x u v ↦ G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
+      (t := t) (hs (t := t) ht) g x u v)
+
+/-- Raw gauge-flow version of the coordinate-model derivative bridge to the
+named geometric scalar target. -/
+theorem pullbackMetricInnerDerivativeOn_of_coordinateModel
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hmodel : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricModelDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricInnerDerivativeOn_of_coordinateModel
+    (I := I) (M := M) hmodel
+    (fun {t} ht x u v ↦ G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
+      (t := t) (hs (t := t) ht) g x u v)
+
+/-- Raw gauge-flow version of the coordinate-model derivative bridge directly
+to tensor time-regularity. -/
+theorem hasTimeDerivativeOn_of_coordinateModel
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hmodel : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricModelDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_coordinatePullbackMetricModelDerivativeOn
+    (I := I) (M := M) hmodel
+    (fun {t} ht x u v ↦ G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
+      (t := t) (hs (t := t) ht) g x u v)
 
 end Diffeomorph3GaugeFlowOn
 
