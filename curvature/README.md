@@ -595,7 +595,8 @@ now packages the matching intrinsic boundary
       counterparts for endpoint work, with eventual-equality transfer lemmas for
       chart-local coordinate identifications and an endpoint derivative bridge
       for the concrete tangent-coordinate component, packaged at the component
-      derivative-data layer with a generic within-set scalar transfer and raw
+      derivative-data layer, plus monotone restriction for full-field within-set
+      derivative data, with a generic within-set scalar transfer and raw
       endpoint scalar derivative package that upgrades directly to tensor
       time-regularity on the open interval and restricts to smaller time sets
       through a raw gauge-flow endpoint

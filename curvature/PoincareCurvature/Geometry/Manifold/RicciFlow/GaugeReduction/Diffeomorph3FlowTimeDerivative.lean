@@ -2160,6 +2160,23 @@ def CoordinatePullbackMetricFieldDerivativeWithinOn
           Bfield (t, y t) (A t uE) (D (A t vE)) =
         gdot t x u v
 
+/-- Restrict within-set field-level coordinate-model derivative data to a
+smaller time set. -/
+theorem CoordinatePullbackMetricFieldDerivativeWithinOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hfield : CoordinatePullbackMetricFieldDerivativeWithinOn (I := I) (M := M) Φ g gdot t)
+    (hst : s ⊆ t) :
+    CoordinatePullbackMetricFieldDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro τ hτ x u v
+  obtain ⟨Bfield, Bfield', y, y', A, D, uE, vE, hmodel, hB, hy, hA, hvalue⟩ :=
+    hfield (hst hτ) x u v
+  refine ⟨Bfield, Bfield', y, y', A, D, uE, vE, ?_, hB,
+    hy.mono hst, hA.mono hst, hvalue⟩
+  exact hmodel.filter_mono (nhdsWithin_mono τ hst)
+
 /-- Concrete component-derivative data for the preferred coordinate pullback
 model. This names the final positive-dimensional moving-coordinate obligations:
 differentiate the concrete `B(τ)` and `A(τ)` components and identify their
