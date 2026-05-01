@@ -651,15 +651,21 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     ordinary theorem-package routes using either pulled-back metric
     time-derivative proofs or scalar inner-product derivative proofs. The raw
     flow layer also has fixed-IVP and theorem-family constructors from both
-    pointwise `HasMFDerivAt[s]` and unrestricted `HasMFDerivAt` data produced by
-    ODE/integral-curve theorems, named-derivative-family adapters,
-    geometric-to-raw adapters, direct derivative/local-at-time extractors, and
-    time-set restriction for raw flows, so future manifold-flow existence results
-    can plug in through either derivative data or existing geometric gauge-flow
-    bundles without a separate
-    `SatisfiesGaugeFlowOn` repackaging step. Thus the
-    full point-4 input chain has no gauge-flow gap in any of the
-    currently-proved special cases. The
+     pointwise `HasMFDerivAt[s]` and unrestricted `HasMFDerivAt` data produced by
+     ODE/integral-curve theorems, named-derivative-family adapters,
+     geometric-to-raw adapters, direct derivative/local-at-time extractors, and
+     time-set restriction for raw flows, so future manifold-flow existence results
+     can plug in through either derivative data or existing geometric gauge-flow
+     bundles without a separate
+     `SatisfiesGaugeFlowOn` repackaging step. The Banach-model ODE component of
+     the positive-dimensional raw-flow construction is now also proof-bearing:
+     `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent
+     Picard-Lindelöf theorem as local model flows with initialization on a
+     closed ball, closed-interval ODE derivative data, and Lipschitz dependence
+     on the initial point, plus the autonomous `C¹` integral-curve
+     specialization. Thus the
+     full point-4 input chain has no gauge-flow gap in any of the
+     currently-proved special cases. The
     non-identity gauge time-regularity
     interface now also has the proof-bearing scalar-to-tensor bridge, and the
     fixed non-identity gauge case exposes both tensor and scalar derivative

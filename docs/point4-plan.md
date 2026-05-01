@@ -173,10 +173,22 @@ and raw-flow time-set restriction, so an ODE construction that already returns
 pointwise manifold derivative data or a named geometric gauge-flow bundle can be
 connected directly to `Diffeomorph3GaugeFlowOn` and
 `IntrinsicDeTurckGaugeFlowExistenceFamily`.
+The first Banach-model ODE bridge for this item is now proof-bearing in
+`GaugeReduction.ModelGaugeFlowODE`: mathlib's time-dependent Picard-Lindelöf
+theorem is packaged as `LocalFlowSolution` and `LipschitzLocalFlowSolution`,
+including the ODE derivative on the closed time interval, initialization on a
+closed ball of initial data, and Lipschitz dependence on initial data.  The same
+module also records the autonomous `C¹` local-integral-curve specialization.
+What remains is the genuinely manifold-level lift: pass intrinsic DeTurck vector
+fields to these chartwise Banach ODE hypotheses, prove compatibility/gluing and
+invertibility of the local flow, and upgrade the result to the bundled `C³`
+self-diffeomorphism family.
 
-**Module location.** Extend
+**Module location.** The Banach-model bridge lives in
+`Geometry/Manifold/RicciFlow/GaugeReduction/ModelGaugeFlowODE.lean`.  The final
+manifold constructor should extend
 `Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowExistence.lean`
-with a constructor for the general (non-Levi-Civita-background) case.
+with the general (non-Levi-Civita-background) case.
 
 ### Item 3 — the Ricci-DeTurck Banach chart and chart-closure data
 

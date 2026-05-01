@@ -215,11 +215,16 @@ now packages the matching intrinsic boundary
     back to raw existence witnesses. It also now has fixed-IVP and theorem-family
     constructors from pointwise `HasMFDerivAt[s]` or unrestricted `HasMFDerivAt`
     integral-curve data, named-derivative-family adapters, plus raw-flow time-set
-    restriction and direct derivative/local-at-time extractors, matching the
-    shape of Mathlib ODE output, and geometric endpoint data can now replace its
-    bundled
-    gauge-flow component by such a raw existence witness at fixed-IVP, global,
-    and interval scope. A thin `AnalyticPDE.SmoothRealization` module names the
+     restriction and direct derivative/local-at-time extractors, matching the
+     shape of Mathlib ODE output, and geometric endpoint data can now replace its
+     bundled
+     gauge-flow component by such a raw existence witness at fixed-IVP, global,
+     and interval scope. A new `GaugeReduction.ModelGaugeFlowODE` module packages
+     mathlib's time-dependent Picard-Lindelöf theorem as Banach-model local flows
+     with closed-interval ODE derivative data, initialization on a closed ball of
+     initial data, and Lipschitz dependence on that initial data, plus the
+     autonomous `C¹` local-integral-curve specialization needed as a chart-level
+     raw-flow building block. A thin `AnalyticPDE.SmoothRealization` module names the
     global/interval PDE closure data that turns a Banach chart solution into a
     smooth chosen-background DeTurck solution and its self-encoding candidate:
     metric realization, boundary time derivatives, chart-RHS/geometric-RHS
@@ -333,10 +338,15 @@ now packages the matching intrinsic boundary
     identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]` adapters, named derivative-family
     adapters, geometric-to-raw adapters, and direct derivative/local-at-time
-    extractors; raw intrinsic gauge-flow existence witnesses now project
-   directly to gauge-reduced, intrinsic, and ordinary theorem packages from
-   either pulled-back metric time-derivative or scalar inner-product derivative
-   data. A new `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the
+     extractors; raw intrinsic gauge-flow existence witnesses now project
+     directly to gauge-reduced, intrinsic, and ordinary theorem packages from
+    either pulled-back metric time-derivative or scalar inner-product derivative
+    data. The new `GaugeReduction.ModelGaugeFlowODE` module now isolates the
+    Banach-model Picard-Lindelöf local-flow theorem needed before the remaining
+    positive-dimensional manifold ODE lift: it packages time-dependent local
+    flows, their closed-interval ODE derivative, initial-data Lipschitz
+    dependence, and autonomous `C¹` integral curves. A new
+    `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the
    non-identity gauge-pulled metric time-derivative obligation for arbitrary
    geometric `C³` DeTurck gauge-flow families on subsingleton tangent fibers by
    proving the corrected velocity and pulled metric components vanish, and
