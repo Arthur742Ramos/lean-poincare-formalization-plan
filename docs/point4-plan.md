@@ -264,7 +264,9 @@ The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent
 vectors and only uses centered coordinates for the derivative inputs. The
 companion `hasTimeDerivativeOn_of_metricCoordinateField_geometricValue` routes
-that data directly to tensor time-regularity.
+that data directly to tensor time-regularity, including a closed-Picard
+`Ioo` specialization for interior regularity from interval-local raw gauge
+flows.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

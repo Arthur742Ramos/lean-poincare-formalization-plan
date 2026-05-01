@@ -1856,6 +1856,56 @@ theorem hasTimeDerivativeOn_of_metricCoordinateField_geometricValue
   G.hasTimeDerivativeOn_of_coordinateField hs
     (G.coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue hs hdata)
 
+/-- Closed-Picard-interval specialization of
+`hasTimeDerivativeOn_of_metricCoordinateField_geometricValue` on the open
+interior interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_geometricValue
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (D : E →L[ℝ] E),
+          HasFDerivAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield' (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+          HasDerivAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t τ x)
+            (D.comp
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x)) t ∧
+          Bfield'
+              (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+                ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)) +
+              (g t).inner ((G.maps3 t) x)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  (D (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                    ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))))
+                ((G.maps3 t).pushforwardTangent x v) +
+              (g t).inner ((G.maps3 t) x)
+                ((G.maps3 t).pushforwardTangent x u)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  (D (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                    ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  (G.mono (s := Ioo tmin tmax) (t := Icc tmin tmax)
+    (fun _ ht ↦ Ioo_subset_Icc_self ht)).hasTimeDerivativeOn_of_metricCoordinateField_geometricValue
+      (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht) hdata
+
 /-- Raw gauge flow plus field-level data whose moving base point is the actual
 gauge-flow coordinate curve gives tensor time-regularity at neighborhood-times. -/
 theorem hasTimeDerivativeOn_of_baseCoordinateField
