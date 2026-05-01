@@ -204,12 +204,17 @@ including the ODE derivative on the closed time interval, initialization on a
 closed ball of initial data, and Lipschitz dependence on initial data.
 It also packages the continuous space-time partial-flow form as
 `ContinuousLocalFlowSolution`, so the chart-level output now includes the
-continuity needed before gluing local solutions.  The same module also records
-the autonomous `C¹` local-integral-curve specialization and Gronwall-based
-uniqueness bridges on the open and closed Picard time intervals for two
-packaged local model flows whose curves stay in a uniformly Lipschitz state
-region; the continuous space-time package now forgets to `LocalFlowSolution` and
-inherits the same uniqueness bridges directly.
+continuity needed before gluing local solutions.  The same module now also
+packages the model-space variational equation as
+`VariationalLocalFlowSolution`, with tangent maps initialized by the identity
+and satisfying `A'(t) = Df(t, flow(t)) ∘ A(t)` on the Picard interval; this is
+the ODE-side source of the `A`-derivative hypothesis in
+`CoordinatePullbackMetricModelDerivativeOn`.  The same module also records the
+autonomous `C¹` local-integral-curve specialization and Gronwall-based
+uniqueness bridges on the open and closed Picard time intervals for two packaged
+local model flows whose curves stay in a uniformly Lipschitz state region; the
+continuous space-time package now forgets to `LocalFlowSolution` and inherits
+the same uniqueness bridges directly.
 What remains is the genuinely manifold-level lift: pass intrinsic DeTurck vector
 fields to these chartwise Banach ODE hypotheses, prove compatibility/gluing and
 invertibility of the local flow, and upgrade the result to the bundled `C³`

@@ -662,11 +662,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent
      Picard-Lindelöf theorem as local model flows with initialization on a
      closed ball, closed-interval ODE derivative data, and Lipschitz dependence
-     on the initial point; it also packages the continuous space-time
-     partial-flow form needed for chart gluing, plus the autonomous `C¹`
-     integral-curve specialization and Gronwall uniqueness bridges for packaged
-     local model flows on open and closed Picard intervals, including direct
-     uniqueness routes for the continuous space-time package. Raw gauge flows now also expose the first
+      on the initial point; it also packages the continuous space-time
+      partial-flow form needed for chart gluing, plus the autonomous `C¹`
+      integral-curve specialization and Gronwall uniqueness bridges for packaged
+      local model flows on open and closed Picard intervals, including direct
+      uniqueness routes for the continuous space-time package. The same model
+      ODE bridge now packages the tangent-map variational equation
+      `A'(t) = Df(t, flow(t)) ∘ A(t)` in `VariationalLocalFlowSolution`, matching
+      the remaining coordinate-model `A`-derivative hypothesis. Raw gauge flows now also expose the first
       chart-membership bridge needed for coordinate pullback formulas:
       neighborhood-time flow equations imply continuity of `τ ↦ Φ_τ(x)` and
       eventual membership in the tangent trivialization at `Φ_t(x)`, with the

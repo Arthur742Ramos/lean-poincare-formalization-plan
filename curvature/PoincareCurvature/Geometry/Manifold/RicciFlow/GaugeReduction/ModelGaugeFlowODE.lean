@@ -70,6 +70,24 @@ structure ContinuousLocalFlowSolution
         (Icc tmin tmax) t
   continuousOn : ContinuousOn flow (closedBall x₀ r ×ˢ Icc tmin tmax)
 
+/-- A local model-space flow equipped with its linearized tangent equation.
+
+For a chart vector field `f` and a spatial derivative candidate `Df`, this is the
+Banach-model form of the tangent-map variational equation
+`A'(t) = Df(t, flow(t)) ∘ A(t)`, initialized by the identity at the base time.
+This is the model ODE ingredient needed to prove the `A`-derivative hypothesis
+in the dynamic gauge-pullback scalar calculation. -/
+structure VariationalLocalFlowSolution
+    (f : ℝ → V → V) (Df : ℝ → V → V →L[ℝ] V)
+    {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
+    (r : ℝ≥0) extends ContinuousLocalFlowSolution f t₀ x₀ r where
+  tangent : V → ℝ → V →L[ℝ] V
+  tangent_initial_eq : ∀ x ∈ closedBall x₀ r, tangent x t₀ = 1
+  tangent_hasDerivWithinAt :
+    ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
+      HasDerivWithinAt (tangent x)
+        ((Df t (flow (x, t))).comp (tangent x t)) (Icc tmin tmax) t
+
 namespace LocalFlowSolution
 
 variable {f : ℝ → V → V} {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V}
@@ -188,6 +206,52 @@ theorem eqOn_Icc_of_lipschitzOnWith
     (x := x) hx ht₀ hf_lip hα_mem hβ_mem
 
 end ContinuousLocalFlowSolution
+
+namespace VariationalLocalFlowSolution
+
+variable {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+  {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+
+/-- Forget both tangent-equation and space-time continuity fields. -/
+def toLocalFlowSolution (α : VariationalLocalFlowSolution f Df t₀ x₀ r) :
+    LocalFlowSolution f t₀ x₀ r :=
+  α.toContinuousLocalFlowSolution.toLocalFlowSolution
+
+/-- The tangent map of the center trajectory is initialized by the identity. -/
+theorem center_tangent_initial_eq (α : VariationalLocalFlowSolution f Df t₀ x₀ r) :
+    α.tangent x₀ t₀ = 1 :=
+  α.tangent_initial_eq x₀ (mem_closedBall_self r.2)
+
+/-- The center tangent map solves the variational equation on the Picard
+closed interval. -/
+theorem center_tangent_hasDerivWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Icc tmin tmax) :
+    HasDerivWithinAt (α.tangent x₀)
+      ((Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) (Icc tmin tmax) t :=
+  α.tangent_hasDerivWithinAt x₀ (mem_closedBall_self r.2) t ht
+
+/-- On the interior of the Picard interval, the center tangent map has the
+ordinary derivative required by the coordinate gauge-pullback chain rule. -/
+theorem center_tangent_hasDerivAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Ioo tmin tmax) :
+    HasDerivAt (α.tangent x₀)
+      ((Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) t :=
+  (α.center_tangent_hasDerivWithinAt (Ioo_subset_Icc_self ht)).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
+/-- Every initial point in the local ball has the ordinary tangent-map
+variational derivative on the interior of the Picard interval. -/
+theorem tangent_hasDerivAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    HasDerivAt (α.tangent x)
+      ((Df t (α.flow (x, t))).comp (α.tangent x t)) t :=
+  (α.tangent_hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
+end VariationalLocalFlowSolution
 
 namespace IsPicardLindelof
 

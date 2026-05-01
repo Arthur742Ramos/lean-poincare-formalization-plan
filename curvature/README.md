@@ -222,11 +222,14 @@ now packages the matching intrinsic boundary
      and interval scope. A new `GaugeReduction.ModelGaugeFlowODE` module packages
      mathlib's time-dependent Picard-Lindelöf theorem as Banach-model local flows
      with closed-interval ODE derivative data, initialization on a closed ball of
-     initial data, Lipschitz dependence on that initial data, and the continuous
-     space-time partial-flow form needed for chart gluing, plus the
-     autonomous `C¹` local-integral-curve specialization and Gronwall uniqueness
-     bridges for packaged and continuous space-time model flows needed as chart-level
-     raw-flow building block. The raw-flow API also extracts continuity of
+      initial data, Lipschitz dependence on that initial data, and the continuous
+      space-time partial-flow form needed for chart gluing, plus the
+      autonomous `C¹` local-integral-curve specialization and Gronwall uniqueness
+      bridges for packaged and continuous space-time model flows needed as chart-level
+      raw-flow building block. It also packages the tangent-map variational
+      equation `A'(t) = Df(t, flow(t)) ∘ A(t)` as
+      `VariationalLocalFlowSolution`, matching the coordinate-model
+      `A`-derivative hypothesis. The raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
      A thin `AnalyticPDE.SmoothRealization` module names the
