@@ -1306,6 +1306,41 @@ theorem coordinatePullbackMetricModelDerivativeOn_of_variationalLocalFlow
     Df t (α.flow (xE, t)), uE, vE, hmodel_eq, hB,
     α.tangent_hasDerivAt_of_mem_Ioo hxE ht, hvalue⟩
 
+/-- Eventual identification with a variational tangent map supplies the
+derivative of the concrete pullback tangent-coordinate component. -/
+theorem pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {xE : E} (hxE : xE ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (x : M)
+    (hA_eq : (fun τ : ℝ ↦
+      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x) =ᶠ[𝓝 t]
+        (fun τ : ℝ ↦ α.tangent xE τ)) :
+    HasDerivAt
+      (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+      ((Df t (α.flow (xE, t))).comp
+        (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t := by
+  have hA_t :
+      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x =
+        α.tangent xE t :=
+    show t ∈ {τ : ℝ |
+      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x =
+        α.tangent xE τ} from
+      mem_of_mem_nhds hA_eq
+  have hAderiv :
+      HasDerivAt (fun τ : ℝ ↦ α.tangent xE τ)
+        ((Df t (α.flow (xE, t))).comp (α.tangent xE t)) t :=
+    α.tangent_hasDerivAt_of_mem_Ioo hxE ht
+  have hAconcrete :
+      HasDerivAt
+        (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+        ((Df t (α.flow (xE, t))).comp (α.tangent xE t)) t :=
+    hAderiv.congr_of_eventuallyEq hA_eq
+  simpa [hA_t] using hAconcrete
+
 /-- A variational model flow supplies the concrete tangent-coordinate derivative
 for `A(τ)` and, together with a moving bilinear-form field derivative, supplies
 the concrete `B(τ)` derivative.
@@ -1377,16 +1412,14 @@ theorem coordinatePullbackMetricComponentDerivativeOn_of_variationalLocalFlow
         hBfield (α.flow_hasDerivAt_of_mem_Ioo hxE ht)
     exact hBderiv.congr_of_eventuallyEq hB_eq
   · have hAderiv :
-        HasDerivAt (fun τ : ℝ ↦ α.tangent xE τ)
-          ((Df t (α.flow (xE, t))).comp (α.tangent xE t)) t :=
-      α.tangent_hasDerivAt_of_mem_Ioo hxE ht
-    have hAconcrete :
         HasDerivAt
           (fun τ : ℝ ↦
             pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
-          ((Df t (α.flow (xE, t))).comp (α.tangent xE t)) t :=
-      hAderiv.congr_of_eventuallyEq hA_eq
-    simpa [hA_t] using hAconcrete
+          ((Df t (α.flow (xE, t))).comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t :=
+      pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap
+        (I := I) (M := M) (Φ := Φ) α hxE ht x hA_eq
+    exact hAderiv
 
 /-- Time-only metric-coordinate derivatives plus a variational tangent-map
 identification supply the concrete component package.
@@ -1436,25 +1469,9 @@ theorem coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap
       (Ioo tmin tmax) := by
   intro t ht x u v
   obtain ⟨xE, hxE, B', hB, hA_eq, hvalue⟩ := hdata ht x u v
-  have hA_t :
-      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x =
-        α.tangent xE t :=
-    show t ∈ {τ : ℝ |
-      pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x =
-        α.tangent xE τ} from
-      mem_of_mem_nhds hA_eq
   refine ⟨B', Df t (α.flow (xE, t)), hB, ?_, hvalue⟩
-  have hAderiv :
-      HasDerivAt (fun τ : ℝ ↦ α.tangent xE τ)
-        ((Df t (α.flow (xE, t))).comp (α.tangent xE t)) t :=
-    α.tangent_hasDerivAt_of_mem_Ioo hxE ht
-  have hAconcrete :
-      HasDerivAt
-        (fun τ : ℝ ↦
-          pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
-        ((Df t (α.flow (xE, t))).comp (α.tangent xE t)) t :=
-    hAderiv.congr_of_eventuallyEq hA_eq
-  simpa [hA_t] using hAconcrete
+  exact pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap
+    (I := I) (M := M) (Φ := Φ) α hxE ht x hA_eq
 
 /-- Field-level moving-bilinear-form derivative data implies derivative data for
 the named coordinate model. -/

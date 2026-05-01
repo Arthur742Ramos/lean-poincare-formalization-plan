@@ -847,8 +847,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         wired into the concrete component-derivative package used by the tensor
          time-regularity endpoints, with a closed-Picard `Ioo` specialization.
          The variational-flow route now discharges the tangent-coordinate-map
-         derivative for that formulation, isolating the named time-difference
-         derivative as the remaining field-regularity input on Picard interiors.
+         derivative for that formulation, with the concrete
+         `pullbackMetricTangentCoordinateMap` derivative extracted as a reusable
+         lemma from eventual equality with the variational tangent map, isolating
+         the named time-difference derivative as the remaining field-regularity
+         input on Picard interiors.
          A converse calculus bridge now derives that time-difference derivative
          from the full Fréchet derivative of `metricBilinearCoordinateField`
          minus the already-proved frozen spatial `fderivWithin` term, with a

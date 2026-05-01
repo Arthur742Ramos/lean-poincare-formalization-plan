@@ -297,8 +297,9 @@ now packages the matching intrinsic boundary
         time-difference derivative for the full moving field and feeds the
         concrete component-derivative package through tensor time-regularity
         endpoints, with the variational-flow route now discharging the
-        tangent-coordinate-map derivative for that formulation and a converse
-        bridge deriving the time-difference derivative from the full
+        tangent-coordinate-map derivative for that formulation via a reusable
+        concrete `pullbackMetricTangentCoordinateMap` derivative lemma, and a
+        converse bridge deriving the time-difference derivative from the full
         `metricBilinearCoordinateField` Fréchet derivative after subtracting the
         frozen spatial `fderivWithin` contribution, including a closed-Picard
         variational-tangent endpoint that accepts the full field derivative,

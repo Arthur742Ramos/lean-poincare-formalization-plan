@@ -306,7 +306,13 @@ spatial `fderivWithin` term. Thus the time-difference route is aligned with the
 Banach finite-cover readout shape: a full field derivative can now feed the
 closed-Picard component package without a separate hand-written difference
 calculation.
-The closed-Picard endpoint
+The tangent-map part has also been extracted as the reusable lemma
+`SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`:
+eventual equality between the concrete `pullbackMetricTangentCoordinateMap` and
+a `VariationalLocalFlowSolution` tangent map now directly gives the required
+`HasDerivAt` statement for the concrete component. The existing component
+bridges use this lemma, so future chart-local applications can cite the tangent
+ODE bridge independently. The closed-Picard endpoint
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalTangentMap`
 now combines this full-field derivative route with the variational tangent-map
 identification directly: on Picard interiors, callers provide the full
