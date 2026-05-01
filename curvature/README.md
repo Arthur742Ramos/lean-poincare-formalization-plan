@@ -380,7 +380,10 @@ now packages the matching intrinsic boundary
      chain-rule component is also proved: differentiating `B(t)(u(t), v(t))` and
      the gauge-coordinate specialization `B(t)(A(t)u, A(t)v)`, including the
      `D ∘ A(t)` tangent-map derivative contribution, with eventual-equality
-     transfer lemmas for chart-local coordinate identifications. This leaves one primitive
+     transfer lemmas for chart-local coordinate identifications. The
+     coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
+     promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
+     scalar target. This leaves one primitive
     positive-dimensional time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`

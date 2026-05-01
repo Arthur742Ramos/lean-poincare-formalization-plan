@@ -132,6 +132,37 @@ def PullbackMetricInnerDerivativeOn
           ((Φ τ).pushforwardTangent x v))
       (gdot t x u v) t
 
+/-- Coordinate-level sufficient data for the dynamic gauge-pullback scalar
+derivative.
+
+For each scalar component of the pulled-back metric, this asks for a local
+model-space representation `B(τ) (A(τ) uE) (A(τ) vE)`, derivative data for the
+metric component `B` and tangent map `A`, and the equality between the resulting
+model derivative and the proposed geometric tensor component `gdot`.
+-/
+def CoordinatePullbackMetricInnerDerivativeOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+    ∃ (B : ℝ → E →L[ℝ] E →L[ℝ] ℝ)
+      (B' : E →L[ℝ] E →L[ℝ] ℝ)
+      (A : ℝ → E →L[ℝ] E)
+      (D : E →L[ℝ] E)
+      (uE vE : E),
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ B τ (A τ uE) (A τ vE)) ∧
+      HasDerivAt B B' t ∧
+      HasDerivAt A (D.comp (A t)) t ∧
+      B' (A t uE) (A t vE) +
+          B t (D (A t uE)) (A t vE) +
+          B t (A t uE) (D (A t vE)) =
+        gdot t x u v
+
 /-- Restrict named scalar pullback derivative data to a smaller time set. -/
 theorem PullbackMetricInnerDerivativeOn.mono
     {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
@@ -143,6 +174,31 @@ theorem PullbackMetricInnerDerivativeOn.mono
     PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s := by
   intro τ hτ x u v
   exact hinner (hst hτ) x u v
+
+/-- Coordinate-level scalar derivative data implies the actual geometric
+pullback scalar derivative.  This is the bridge from chart calculations to the
+named dynamic gauge time-regularity target. -/
+theorem pullbackMetricInnerDerivativeOn_of_coordinate
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hcoord : CoordinatePullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨B, B', A, D, uE, vE, heq, hB, hA, hvalue⟩ := hcoord ht x u v
+  have hderiv :
+      HasDerivAt
+        (fun τ : ℝ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v))
+        (B' (A t uE) (A t vE) +
+          B t (D (A t uE)) (A t vE) +
+          B t (A t uE) (D (A t vE))) t :=
+    hasDerivAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp_deriv
+      (B := B) (B' := B') (A := A) (D := D) (t := t) uE vE heq hB hA
+  simpa [hvalue] using hderiv
 
 /-- A named scalar inner-product derivative obligation packages as the tensor
 time derivative of the gauge-pulled metric family. -/
