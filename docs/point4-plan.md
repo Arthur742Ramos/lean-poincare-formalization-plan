@@ -109,7 +109,9 @@ equivalence lemmas that identify named scalar data with tensor time-derivative
 data for both geometric and raw gauge-flow bundles. The bundled
 chosen-background, subsingleton-tangent/model, and empty-manifold identity raw
 gauge-flow fixed-IVP and theorem-family witnesses now also provide this named
-scalar data directly. The bundled
+scalar data directly, and a new zero-gauge-field adapter packages any proof that
+`intrinsicDeTurckGaugeField` vanishes on each solution time set into the same
+identity raw `C³` gauge-flow existence data. The bundled
 non-identity gauge-flow API now has proof-bearing scalar-to-tensor wrappers, so
 solving this single dynamic scalar identity automatically supplies the
 `HasTimeDerivativeOn` package required by the gauge-reduction theorem routes.

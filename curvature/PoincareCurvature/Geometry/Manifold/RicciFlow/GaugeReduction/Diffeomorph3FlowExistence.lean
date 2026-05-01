@@ -426,6 +426,28 @@ noncomputable def of_hasMFDerivAt
   of_hasMFDerivWithinAt (I := I) (M := M) (ivp := ivp)
     maps3 anchored (fun sol t _ht x ↦ (hderiv sol t x).hasMFDerivWithinAt)
 
+/-- If the intrinsic DeTurck gauge field vanishes on every local solution's time
+set, the identity diffeomorphism family supplies the raw `C³` gauge-flow
+existence data for a fixed IVP. -/
+noncomputable def identityOfGaugeFieldEqZero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (hzero : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  flow := fun sol ↦
+    Diffeomorph3GaugeFlowOn.identity_of_eq_zero
+      (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime
+      (hzero sol)
+
 /-- Chosen-background intrinsic DeTurck solutions have zero intrinsic DeTurck gauge field, so the
 identity diffeomorphism family supplies the raw `C³` gauge-flow existence data for a fixed IVP. -/
 noncomputable def identityOfChosenBackground
@@ -646,6 +668,24 @@ noncomputable def of_hasMFDerivAt
       (E := E) (H := H) (I := I) (M := M) :=
   of_hasMFDerivWithinAt (I := I) (M := M)
     maps3 anchored (fun ivp sol t _ht x ↦ (hderiv ivp sol t x).hasMFDerivWithinAt)
+
+/-- If the intrinsic DeTurck gauge field vanishes on every theorem-family local
+solution time set, the identity diffeomorphism family supplies raw `C³`
+gauge-flow existence data for every initial-value problem. -/
+noncomputable def identityOfGaugeFieldEqZero
+    (hzero : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  flow := fun ivp sol ↦
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfGaugeFieldEqZero
+      (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
+      (hzero ivp)).flow sol
 
 /-- Chosen-background intrinsic DeTurck solutions admit the identity raw `C³` gauge flow for every
 initial-value problem. -/

@@ -430,8 +430,10 @@ now packages the matching intrinsic boundary
    `C³` gauge-flow existence) is now closed in four special cases via dedicated
    `IntrinsicDeTurckGaugeFlowExistence(.Family)` constructors:
    `identityOfChosenBackground`, `identityOfSubsingletonTangent`,
-   `identityOfSubsingletonModel`, and `identityOfIsEmpty`, each accompanied by a
-   matching `_hpullDerivative` time-derivative lemma. The underlying
+   `identityOfSubsingletonModel`, and `identityOfIsEmpty`; a zero-gauge-field
+   adapter now turns any proof of vanishing `intrinsicDeTurckGaugeField` on
+   solution time sets into identity raw `C^3` gauge-flow existence, and the
+   identity cases include matching `_hpullDerivative` time-derivative lemmas. The underlying
    `Diffeomorph3GaugeFlowOn` raw-flow API also has arbitrary-vector-field
     identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]` adapters, named derivative-family

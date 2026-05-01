@@ -643,11 +643,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     DeTurck correction term itself is symmetric. The analytic side is therefore
     no longer purely documentary. The raw `C³` gauge-flow existence layer
     (`Diffeomorph3GaugeFlowOn`) now exposes identity-flow constructors for
-    arbitrary vector fields in subsingleton tangent, subsingleton model, and
-    empty-manifold cases; `IntrinsicDeTurckGaugeFlowExistence(.Family)` lifts
-    those to intrinsic DeTurck identity-gauge constructors, in addition to the
-    chosen-Levi-Civita-background case. Raw intrinsic gauge-flow existence
-    witnesses now also feed directly into the gauge-reduced, intrinsic, and
+     arbitrary vector fields in subsingleton tangent, subsingleton model, and
+     empty-manifold cases; `IntrinsicDeTurckGaugeFlowExistence(.Family)` lifts
+     those to intrinsic DeTurck identity-gauge constructors, in addition to the
+     chosen-Levi-Civita-background case. It also has fixed-IVP and theorem-family
+     `identityOfGaugeFieldEqZero` adapters, so any future proof that the
+     intrinsic DeTurck gauge field vanishes on the relevant solution time sets
+     immediately supplies raw identity `C^3` gauge-flow existence. Raw intrinsic gauge-flow existence
+     witnesses now also feed directly into the gauge-reduced, intrinsic, and
     ordinary theorem-package routes using either pulled-back metric
     time-derivative proofs or scalar inner-product derivative proofs. The raw
     flow layer also has fixed-IVP and theorem-family constructors from both
