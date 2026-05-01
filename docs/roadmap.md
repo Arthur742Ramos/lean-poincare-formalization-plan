@@ -741,7 +741,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       endpoint package `PullbackMetricInnerDerivativeWithinOn`, which upgrades
       to ordinary scalar derivative data and directly to `HasTimeDerivativeOn`
       on `Ioo tmin tmax`; `Diffeomorph3GaugeFlowOn` exposes this using
-      within-time-set chart equality and variational tangent-map endpoint data. A
+      within-time-set chart equality and variational tangent-map endpoint data,
+      including geometric-slot scalar identities. A
       coordinate-level package
       `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
       chartwise `B/A/D` derivative hypotheses to the actual geometric
