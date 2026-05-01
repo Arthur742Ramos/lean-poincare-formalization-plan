@@ -345,6 +345,11 @@ actual pushed-forward tangent vectors. The direct chain-rule route, which
 bypasses the time-difference decomposition entirely, now has the matching
 geometric-slot endpoint
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlow_geometricValue`.
+Its readout-field variant
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_variationalLocalFlow_geometricValue`
+transfers a Fréchet derivative from any locally equal two-variable bilinear-form
+readout to `metricBilinearCoordinateField`, matching the finite-cover Banach
+readout shape more closely.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

@@ -876,6 +876,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          direct variational chain-rule route now has the same geometric-slot
          companion, so applications can choose either the direct full-field route
          or the time-difference route without changing geometric scalar notation.
+         A readout-field companion now transfers the required Fréchet derivative
+         from any locally equal two-variable bilinear-form readout, aligning this
+         endpoint with finite-cover Banach chart readouts.
          The coordinate data also restricts to smaller time sets and lifts
          through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
         so chart computations can feed the point-4 theorem routes without an
