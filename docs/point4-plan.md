@@ -734,7 +734,10 @@ automatically when the chosen base radius is no larger than the product Picard
 radius; continuous-product and product Picard constructors now also have
 closed-interval localized variants, including the radius-specialized form needed
 when a chart calculation shrinks the Picard time interval before extracting
-tangent-map data. The ODE package now also supplies ordinary interior time
+tangent-map data. The one-step closed-ball estimate constructors have matching
+localized variants, including the componentwise-continuity and identity/operator
+ball specializations used by chart-local variational estimates. The ODE package
+now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
 closed-interval and interior vector-slot derivatives for `t ↦ A(t)v` via
 `tangent_apply_hasDerivWithinAt` and `tangent_apply_hasDerivAt_of_mem_Ioo`, and
