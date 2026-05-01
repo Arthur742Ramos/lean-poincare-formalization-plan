@@ -111,8 +111,8 @@ chosen-background, subsingleton-tangent/model, and empty-manifold identity raw
 gauge-flow fixed-IVP and theorem-family witnesses now also provide this named
 scalar data directly, and a new zero-gauge-field adapter packages any proof that
 `intrinsicDeTurckGaugeField` vanishes on each solution time set into the same
-identity raw `C³` gauge-flow existence data, with direct theorem-family
-projections to the gauge-reduced, intrinsic, and ordinary APIs. The bundled
+identity raw `C³` gauge-flow existence data, with direct fixed-IVP and
+theorem-family projections to the gauge-reduced, intrinsic, and ordinary APIs. The bundled
 non-identity gauge-flow API now has proof-bearing scalar-to-tensor wrappers, so
 solving this single dynamic scalar identity automatically supplies the
 `HasTimeDerivativeOn` package required by the gauge-reduction theorem routes.
@@ -574,8 +574,8 @@ The theorem-family zero-gauge-field constructor now also carries the required
 pullback metric time-derivative proof, so any family whose intrinsic DeTurck
 gauge field vanishes on each solution time set can enter the gauge-reduction
 API without re-proving the identity-gauge velocity algebra; the chosen-DeTurck
-theorem-family layer now exposes direct zero-field projections to the
-gauge-reduced, intrinsic, and ordinary theorem packages.
+fixed-IVP and theorem-family layers now expose direct zero-field projections to
+the gauge-reduced, intrinsic, and ordinary theorem packages.
 The first Banach-model ODE bridge for this item is now proof-bearing in
 `GaugeReduction.ModelGaugeFlowODE`: mathlib's time-dependent Picard-Lindelöf
 theorem is packaged as `LocalFlowSolution` and `LipschitzLocalFlowSolution`,

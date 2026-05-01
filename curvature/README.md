@@ -222,7 +222,7 @@ now packages the matching intrinsic boundary
      and interval scope. The theorem-family zero-gauge-field identity constructor
      now also produces the pulled-back metric time-derivative proof needed by the
      gauge-reduction API directly from pointwise gauge-field vanishing, plus
-     direct zero-field theorem-family projections to the gauge-reduced,
+     direct fixed-IVP and theorem-family zero-field projections to the gauge-reduced,
      intrinsic, and ordinary APIs. A new
      `GaugeReduction.ModelGaugeFlowODE` module packages
      mathlib's time-dependent Picard-Lindelöf theorem as Banach-model local flows
@@ -489,7 +489,7 @@ now packages the matching intrinsic boundary
     adapter now turns any proof of vanishing `intrinsicDeTurckGaugeField` on
     solution time sets into identity raw `C^3` gauge-flow existence, and the
     identity cases include matching `_hpullDerivative` time-derivative lemmas
-    and direct theorem-family projections. The underlying
+    and direct fixed-IVP/theorem-family projections. The underlying
    `Diffeomorph3GaugeFlowOn` raw-flow API also has arbitrary-vector-field
     identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]` adapters, named derivative-family

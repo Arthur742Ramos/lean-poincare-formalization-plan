@@ -530,6 +530,136 @@ def toDiffeomorph3GaugeFlow
   anchored := fun sol ↦ (G.flow sol).anchored
   satisfies := fun sol ↦ (G.flow sol).satisfies
 
+/-- For a fixed-IVP package whose intrinsic DeTurck gauge field vanishes on each
+solution's time set, the identity raw gauge flow supplies the required pullback
+metric time derivative. -/
+theorem identityOfGaugeFieldEqZero_hpullDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (hzero : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (SmoothSelfDiffeomorph3Family.pullbackMetricFamily
+        (I := I) (M := M)
+        (((identityOfGaugeFieldEqZero
+          (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
+          hzero).toDiffeomorph3GaugeFlow).maps3 sol)
+        sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (((identityOfGaugeFieldEqZero
+          (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
+          hzero).toDiffeomorph3GaugeFlow).gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  let gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime :=
+    AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.identity_of_intrinsicDeTurckGaugeField_eq_zero
+      (I := I) (M := M)
+      (g := sol.1.toIntrinsicDeTurckSolution.metric)
+      (background := sol.1.toIntrinsicDeTurckSolution.background)
+      (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (t₀ := ivp.initialTime)
+      (hzero sol)
+  change HasTimeDerivativeOn (I := I) (M := M)
+    ((SmoothSelfDiffeomorph3Family.id (I := I) (M := M)).pullbackMetricFamily
+      sol.1.toIntrinsicDeTurckSolution.metric)
+    (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3)
+    sol.1.toIntrinsicDeTurckSolution.timeSet
+  rw [SmoothSelfDiffeomorph3Family.id_pullbackMetricFamily]
+  intro t ht x u v
+  have hΦ : (SmoothSelfDiffeomorph3Family.id (I := I) (M := M)).AnchoredAt t :=
+    SmoothSelfDiffeomorph3Family.id_anchoredAt (I := I) (M := M) t
+  have hu : (gauge3.maps t).pushforwardTangent x u = u := by
+    change (SmoothSelfDiffeomorph3Family.id (I := I) (M := M) t).pushforwardTangent x u = u
+    exact SmoothSelfDiffeomorph3Family.AnchoredAt.pushforwardTangent
+      (Φ := SmoothSelfDiffeomorph3Family.id (I := I) (M := M)) hΦ x u
+  have hv : (gauge3.maps t).pushforwardTangent x v = v := by
+    change (SmoothSelfDiffeomorph3Family.id (I := I) (M := M) t).pushforwardTangent x v = v
+    exact SmoothSelfDiffeomorph3Family.AnchoredAt.pushforwardTangent
+      (Φ := SmoothSelfDiffeomorph3Family.id (I := I) (M := M)) hΦ x v
+  have hvec :
+      sol.1.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t = 0 := by
+    rw [sol.1.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge_eq_pullbackVectorField]
+    have hsource :
+        intrinsicDeTurckVectorField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t = 0 := by
+      funext y
+      simpa [intrinsicDeTurckGaugeField] using hzero sol t ht y
+    rw [hsource]
+    funext y
+    rw [SmoothSelfDiffeomorph2.pullbackVectorField_apply]
+    exact ContinuousLinearMap.map_zero ((gauge3.maps t).pullbackTangent y)
+  let pulledConnection :=
+    SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+      gauge3.maps
+      (chosenLeviCivitaFamily (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric) t
+  have hcov :
+      pulledConnection (sol.1.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t) = 0 := by
+    rw [hvec]
+    exact CovariantDerivative.zero (cov := pulledConnection)
+  have hcovu :
+      pulledConnection (sol.1.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t) x u = 0 := by
+    exact congrArg (fun A => A u) (congrFun hcov x)
+  have hcovv :
+      pulledConnection (sol.1.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t) x v = 0 := by
+    exact congrArg (fun A => A v) (congrFun hcov x)
+  have hleft :
+      ((gauge3.maps.pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric) t).inner x
+          (pulledConnection
+            (sol.1.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t) x u) v = 0 := by
+    rw [hcovu]
+    exact congrArg (fun L : (TangentSpace I : M → Type _) x →L[ℝ] ℝ => L v)
+      (ContinuousLinearMap.map_zero
+        (((gauge3.maps.pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric) t).inner x))
+  have hright :
+      ((gauge3.maps.pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric) t).inner x u
+          (pulledConnection
+            (sol.1.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t) x v) = 0 := by
+    rw [hcovv]
+    exact ContinuousLinearMap.map_zero
+      (((gauge3.maps.pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric) t).inner x u)
+  have hleftExact :
+      ((gauge3.maps.pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric) t).inner x
+          ((SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+              gauge3.maps
+              (chosenLeviCivitaFamily (I := I) (M := M)
+                sol.1.toIntrinsicDeTurckSolution.metric) t)
+            (sol.1.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t) x u) v = 0 := by
+    simpa [pulledConnection] using hleft
+  have hrightExact :
+      ((gauge3.maps.pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric) t).inner x u
+          ((SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+              gauge3.maps
+              (chosenLeviCivitaFamily (I := I) (M := M)
+                sol.1.toIntrinsicDeTurckSolution.metric) t)
+            (sol.1.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t) x v) = 0 := by
+    simpa [pulledConnection] using hright
+  have hpoint :
+      sol.1.toIntrinsicDeTurckSolution.metricVelocity t ((gauge3.maps t) x) u v =
+        sol.1.toIntrinsicDeTurckSolution.metricVelocity t x u v := by
+    change sol.1.toIntrinsicDeTurckSolution.metricVelocity t
+        ((SmoothSelfDiffeomorph3Family.id (I := I) (M := M) t) x) u v =
+      sol.1.toIntrinsicDeTurckSolution.metricVelocity t x u v
+    rw [SmoothSelfDiffeomorph3Family.AnchoredAt.apply
+      (Φ := SmoothSelfDiffeomorph3Family.id (I := I) (M := M)) hΦ x]
+  have hvelocity :
+      sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3 t x u v =
+        sol.1.toIntrinsicDeTurckSolution.metricVelocity t x u v := by
+    rw [IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_apply]
+    rw [hu, hv, hleftExact, hrightExact, zero_add, sub_zero]
+    exact hpoint
+  rw [hvelocity]
+  exact intrinsicDeTurckSolution_hasTimeDerivativeOn
+    (I := I) (M := M) sol.1.toIntrinsicDeTurckSolution ht x u v
+
 /-- Package a fixed-IVP geometric intrinsic DeTurck gauge-flow bundle as raw
 gauge-flow existence data. -/
 def ofDiffeomorph3GaugeFlow
@@ -1293,6 +1423,56 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaG
     LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
   (pkg.toIntrinsic_viaGaugeFlowExistenceTimeDerivative
     G hpullDerivative).toOrdinary
+
+/-- Fixed-IVP gauge-reducible projection when the intrinsic DeTurck gauge field
+vanishes on each chosen solution's time set. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducible_viaGaugeFieldEqZero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hzero : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toGaugeReducible_viaGaugeFlowExistenceTimeDerivative
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfGaugeFieldEqZero
+      (E := E) (H := H) (I := I) (M := M) (ivp := ivp) hzero)
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfGaugeFieldEqZero_hpullDerivative
+      (E := E) (H := H) (I := I) (M := M) (ivp := ivp) hzero)
+
+/-- Fixed-IVP intrinsic Ricci-flow projection when the intrinsic DeTurck gauge
+field vanishes on each chosen solution's time set. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaGaugeFieldEqZero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hzero : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toGaugeReducible_viaGaugeFieldEqZero hzero).toIntrinsic
+
+/-- Fixed-IVP ordinary Ricci-flow projection when the intrinsic DeTurck gauge
+field vanishes on each chosen solution's time set. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaGaugeFieldEqZero
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hzero : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toIntrinsic_viaGaugeFieldEqZero hzero).toOrdinary
 
 /-- A fixed-IVP chosen-background DeTurck theorem package becomes gauge-reducible directly from
 raw intrinsic `C^3` gauge-flow existence data and scalar inner-product derivative proofs. -/
