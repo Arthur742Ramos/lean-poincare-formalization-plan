@@ -225,7 +225,7 @@ now packages the matching intrinsic boundary
      initial data, Lipschitz dependence on that initial data, and the continuous
      space-time partial-flow form needed for chart gluing, plus the
      autonomous `C¹` local-integral-curve specialization and Gronwall uniqueness
-     bridges for packaged model flows needed as chart-level
+     bridges for packaged and continuous space-time model flows needed as chart-level
      raw-flow building block. The raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
@@ -351,7 +351,8 @@ now packages the matching intrinsic boundary
     positive-dimensional manifold ODE lift: it packages time-dependent local
     flows, their closed-interval ODE derivative, initial-data Lipschitz
     dependence, continuous space-time partial flows, and autonomous `C¹` integral
-    curves, plus Gronwall uniqueness bridges for packaged model flows; the
+    curves, plus Gronwall uniqueness bridges for packaged and continuous
+    space-time model flows; the
     raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
     tangent-trivialization membership from neighborhood-time flow data.
     A new

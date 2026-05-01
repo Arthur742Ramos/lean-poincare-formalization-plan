@@ -196,7 +196,8 @@ continuity needed before gluing local solutions.  The same module also records
 the autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two
 packaged local model flows whose curves stay in a uniformly Lipschitz state
-region.
+region; the continuous space-time package now forgets to `LocalFlowSolution` and
+inherits the same uniqueness bridges directly.
 What remains is the genuinely manifold-level lift: pass intrinsic DeTurck vector
 fields to these chartwise Banach ODE hypotheses, prove compatibility/gluing and
 invertibility of the local flow, and upgrade the result to the bundled `C³`

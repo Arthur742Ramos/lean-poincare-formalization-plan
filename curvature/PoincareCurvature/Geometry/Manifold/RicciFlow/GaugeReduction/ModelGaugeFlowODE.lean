@@ -139,6 +139,14 @@ namespace ContinuousLocalFlowSolution
 variable {f : ℝ → V → V} {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V}
   {r : ℝ≥0}
 
+/-- Forget the space-time continuity field and view a continuous partial flow as
+a family of local ODE solutions. -/
+def toLocalFlowSolution (α : ContinuousLocalFlowSolution f t₀ x₀ r) :
+    LocalFlowSolution f t₀ x₀ r where
+  flow x t := α.flow (x, t)
+  initial_eq := α.initial_eq
+  hasDerivWithinAt := α.hasDerivWithinAt
+
 /-- Evaluate the continuous space-time local flow at the center of the initial ball. -/
 theorem center_initial_eq (α : ContinuousLocalFlowSolution f t₀ x₀ r) :
     α.flow (x₀, t₀) = x₀ :=
@@ -150,6 +158,34 @@ theorem center_hasDerivWithinAt
     HasDerivWithinAt (fun τ : ℝ => α.flow (x₀, τ))
       (f t (α.flow (x₀, t))) (Icc tmin tmax) t :=
   α.hasDerivWithinAt x₀ (mem_closedBall_self r.2) t ht
+
+/-- Continuous space-time local flows inherit the open-interval uniqueness bridge
+from `LocalFlowSolution`. -/
+theorem eqOn_Ioo_of_lipschitzOnWith
+    (α β : ContinuousLocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax) :=
+  LocalFlowSolution.eqOn_Ioo_of_lipschitzOnWith
+    (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
+    (x := x) hx ht₀ hf_lip hα_mem hβ_mem
+
+/-- Continuous space-time local flows inherit the closed-interval uniqueness
+bridge from `LocalFlowSolution`. -/
+theorem eqOn_Icc_of_lipschitzOnWith
+    (α β : ContinuousLocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Icc tmin tmax) :=
+  LocalFlowSolution.eqOn_Icc_of_lipschitzOnWith
+    (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
+    (x := x) hx ht₀ hf_lip hα_mem hβ_mem
 
 end ContinuousLocalFlowSolution
 
