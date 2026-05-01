@@ -108,7 +108,8 @@ has time-set restriction, identity-gauge specialization, and fixed-IVP/family
 equivalence lemmas that identify named scalar data with tensor time-derivative
 data for both geometric and raw gauge-flow bundles. The bundled
 chosen-background, subsingleton-tangent/model, and empty-manifold identity raw
-gauge-flow families now also provide this named scalar data directly. The bundled
+gauge-flow fixed-IVP and theorem-family witnesses now also provide this named
+scalar data directly. The bundled
 non-identity gauge-flow API now has proof-bearing scalar-to-tensor wrappers, so
 solving this single dynamic scalar identity automatically supplies the
 `HasTimeDerivativeOn` package required by the gauge-reduction theorem routes.

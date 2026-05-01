@@ -672,8 +672,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     time-set restriction, identity-gauge specialization, and fixed-IVP/family
     equivalence lemmas with tensor time-derivative data for both geometric and
     raw gauge-flow bundles; chosen-background, subsingleton-tangent/model, and
-    empty-manifold identity raw gauge-flow families now also provide the named
-    scalar data directly, so the
+    empty-manifold identity raw gauge-flow fixed-IVP and theorem-family
+    witnesses now also provide the named scalar data directly, so the
     remaining primitive input is exactly that scalar identity; in the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
     DeTurck gauge-flow families by componentwise vanishing, with direct

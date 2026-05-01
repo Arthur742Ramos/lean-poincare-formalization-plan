@@ -370,6 +370,64 @@ theorem pullbackMetricInnerDerivativeData_iff_hasTimeDerivativeOn
   · intro hpullDerivative
     exact G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn hpullDerivative
 
+/-- The fixed-IVP chosen-background identity raw `C^3` gauge-flow carries the
+named scalar derivative data expected by the time-derivative routes. -/
+theorem identityOfChosenBackground_pullbackMetricInnerDerivativeData
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfChosenBackground
+      (E := E) (H := H) (I := I) (M := M) ivp).PullbackMetricInnerDerivativeData := by
+  refine (IntrinsicDeTurckGaugeFlowExistence.identityOfChosenBackground
+    (E := E) (H := H) (I := I) (M := M) ivp).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn ?_
+  intro sol
+  simpa [IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfChosenBackground,
+    IntrinsicDeTurckGaugeFlowExistence.identityOfChosenBackground] using
+    IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfChosenBackground_hpullDerivative
+      (E := E) (H := H) (I := I) (M := M) ivp sol
+
+/-- The fixed-IVP subsingleton-tangent identity raw `C^3` gauge-flow carries the
+named scalar derivative data expected by the time-derivative routes. -/
+theorem identityOfSubsingletonTangent_pullbackMetricInnerDerivativeData
+    [∀ x : M, Subsingleton ((TangentSpace I : M → Type _) x)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonTangent
+      (E := E) (H := H) (I := I) (M := M) ivp).PullbackMetricInnerDerivativeData := by
+  refine (IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonTangent
+    (E := E) (H := H) (I := I) (M := M) ivp).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn ?_
+  intro sol
+  simpa [IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonTangent,
+    IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonTangent] using
+    IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonTangent_hpullDerivative
+      (E := E) (H := H) (I := I) (M := M) ivp sol
+
+/-- Fixed-IVP model-space synonym of
+`identityOfSubsingletonTangent_pullbackMetricInnerDerivativeData`. -/
+theorem identityOfSubsingletonModel_pullbackMetricInnerDerivativeData
+    [Subsingleton E]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonModel
+      (E := E) (H := H) (I := I) (M := M) ivp).PullbackMetricInnerDerivativeData := by
+  refine (IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonModel
+    (E := E) (H := H) (I := I) (M := M) ivp).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn ?_
+  intro sol
+  simpa [IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonModel,
+    IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonModel] using
+    IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonModel_hpullDerivative
+      (E := E) (H := H) (I := I) (M := M) ivp sol
+
+/-- Fixed-IVP empty-manifold synonym of the identity raw `C^3` gauge-flow scalar data. -/
+theorem identityOfIsEmpty_pullbackMetricInnerDerivativeData
+    [IsEmpty M]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfIsEmpty
+      (E := E) (H := H) (I := I) (M := M) ivp).PullbackMetricInnerDerivativeData := by
+  refine (IntrinsicDeTurckGaugeFlowExistence.identityOfIsEmpty
+    (E := E) (H := H) (I := I) (M := M) ivp).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn ?_
+  intro sol
+  simpa [IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfIsEmpty,
+    IntrinsicDeTurckGaugeFlowExistence.identityOfIsEmpty] using
+    IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfIsEmpty_hpullDerivative
+      (E := E) (H := H) (I := I) (M := M) ivp sol
+
 end IntrinsicDeTurckGaugeFlowExistence
 
 namespace IntrinsicDeTurckGaugeFlowExistenceFamily
