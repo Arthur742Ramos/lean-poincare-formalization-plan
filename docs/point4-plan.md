@@ -732,6 +732,9 @@ point on the time set and `continuousWithinAt_extChartAt_eval` in the preferred
 chart coordinates centered at the current time. Closed-Picard raw flows now
 also expose the corresponding open-interior continuity helpers:
 `continuousOn_eval_Ioo` and `continuousAt_extChartAt_eval_of_mem_Ioo`.
+The fixed-IVP and theorem-family raw intrinsic gauge-flow existence packages
+now mirror those derivative, continuity, and tangent-trivialization readouts
+directly, so downstream chart arguments no longer have to unwrap the raw flow.
 The same raw layer now also has proof-level `Nonempty` wrappers for the
 geometric, within-derivative, ordinary-on-time-set derivative, unrestricted
 derivative, restriction, and identity-flow constructors, letting downstream

@@ -1125,6 +1125,85 @@ theorem derivativeData
   intro t ht x
   exact (G.flow sol).hasMFDerivWithinAt ht x
 
+/-- Pointwise manifold derivative read out directly from fixed-IVP raw intrinsic
+DeTurck gauge-flow existence. -/
+theorem hasMFDerivWithinAt
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    HasMFDerivAt[sol.1.toIntrinsicDeTurckSolution.timeSet]
+      (fun τ : ℝ ↦ ((G.flow sol).maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t
+            (((G.flow sol).maps3 t) x))) :=
+  (G.flow sol).hasMFDerivWithinAt ht x
+
+/-- Preferred-chart derivative read out directly from fixed-IVP raw intrinsic
+DeTurck gauge-flow existence. -/
+theorem hasDerivWithinAt_extChartAt_eval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow sol).maps3 t) x))
+        (((G.flow sol).maps3 τ) x))
+      (tangentCoordChange I (((G.flow sol).maps3 t) x) (((G.flow sol).maps3 t) x)
+        (((G.flow sol).maps3 t) x)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t
+            (((G.flow sol).maps3 t) x)))
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.flow sol).hasDerivWithinAt_extChartAt_eval ht x
+
+/-- Fixed-IVP raw intrinsic gauge-flow curves are continuous within the solution
+time set. -/
+theorem continuousWithinAt_eval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ContinuousWithinAt (fun τ : ℝ ↦ ((G.flow sol).maps3 τ) x)
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.flow sol).continuousWithinAt_eval ht x
+
+/-- Fixed-IVP raw intrinsic gauge-flow curves are continuous on the solution time
+set. -/
+theorem continuousOn_eval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) (x : M) :
+    ContinuousOn (fun τ : ℝ ↦ ((G.flow sol).maps3 τ) x)
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.flow sol).continuousOn_eval x
+
+/-- Fixed-IVP raw intrinsic gauge-flow curves eventually remain in the preferred
+tangent-bundle trivialization within the solution time set. -/
+theorem eventuallyWithin_mem_trivializationAt_eval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t,
+      ((G.flow sol).maps3 τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _)
+          (((G.flow sol).maps3 t) x)).baseSet :=
+  (G.flow sol).eventuallyWithin_mem_trivializationAt_eval ht x
+
 @[simp] theorem toDiffeomorph3GaugeFlow_maps3
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
@@ -1558,6 +1637,85 @@ theorem derivativeFamily
       (fun ivp sol ↦ (G.flow ivp sol).maps3) := by
   intro ivp sol
   exact (G.forInitialValueProblem ivp).derivativeData sol
+
+/-- Pointwise manifold derivative read out directly from theorem-family raw
+intrinsic DeTurck gauge-flow existence. -/
+theorem hasMFDerivWithinAt
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    HasMFDerivAt[sol.1.toIntrinsicDeTurckSolution.timeSet]
+      (fun τ : ℝ ↦ ((G.flow ivp sol).maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t
+            (((G.flow ivp sol).maps3 t) x))) :=
+  (G.forInitialValueProblem ivp).hasMFDerivWithinAt sol ht x
+
+/-- Preferred-chart derivative read out directly from theorem-family raw
+intrinsic DeTurck gauge-flow existence. -/
+theorem hasDerivWithinAt_extChartAt_eval
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow ivp sol).maps3 t) x))
+        (((G.flow ivp sol).maps3 τ) x))
+      (tangentCoordChange I (((G.flow ivp sol).maps3 t) x)
+        (((G.flow ivp sol).maps3 t) x) (((G.flow ivp sol).maps3 t) x)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t
+            (((G.flow ivp sol).maps3 t) x)))
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.forInitialValueProblem ivp).hasDerivWithinAt_extChartAt_eval sol ht x
+
+/-- Theorem-family raw intrinsic gauge-flow curves are continuous within the
+solution time set. -/
+theorem continuousWithinAt_eval
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ContinuousWithinAt (fun τ : ℝ ↦ ((G.flow ivp sol).maps3 τ) x)
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.forInitialValueProblem ivp).continuousWithinAt_eval sol ht x
+
+/-- Theorem-family raw intrinsic gauge-flow curves are continuous on the solution
+time set. -/
+theorem continuousOn_eval
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) (x : M) :
+    ContinuousOn (fun τ : ℝ ↦ ((G.flow ivp sol).maps3 τ) x)
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).continuousOn_eval sol x
+
+/-- Theorem-family raw intrinsic gauge-flow curves eventually remain in the
+preferred tangent-bundle trivialization within the solution time set. -/
+theorem eventuallyWithin_mem_trivializationAt_eval
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t,
+      ((G.flow ivp sol).maps3 τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _)
+          (((G.flow ivp sol).maps3 t) x)).baseSet :=
+  (G.forInitialValueProblem ivp).eventuallyWithin_mem_trivializationAt_eval sol ht x
 
 /-- The family-level chosen-background raw flow induces the same anchored gauge as the existing
 identity `C³` gauge attached to a chosen-background solution. -/
