@@ -316,11 +316,13 @@ now packages the matching intrinsic boundary
         model-coordinate and pushed-forward geometric scalar forms, and the
         same geometric-slot phrasing available for the direct variational
         chain-rule route, plus a readout-field companion that transfers the
-        required Fréchet derivative from any locally equal two-variable
-         bilinear-form readout through the named
-         `metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq` bridge,
-         exposing the chart algebra needed for Banach finite-cover metric
-         readouts; the geometric corrected-velocity layer also now turns
+         required Fréchet derivative from any locally equal two-variable
+          bilinear-form readout through the named
+          `metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq` bridge,
+          exposing the chart algebra needed for Banach finite-cover metric
+          readouts, and the primitive time-difference decomposition now has its
+          own readout-field theorem before subtracting the frozen spatial
+          derivative; the geometric corrected-velocity layer also now turns
          vanishing pulled-back background Ricci curvature directly into vanishing
          concrete `C³` gauge-corrected pullback velocity through a named theorem,
          including an initial-time specialization,

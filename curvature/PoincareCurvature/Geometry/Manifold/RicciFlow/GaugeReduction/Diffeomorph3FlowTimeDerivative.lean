@@ -695,6 +695,48 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_has
       hB (G.hasDerivAt_extChartAt_eval hs x) hspace
   simpa [B, c] using htime
 
+/-- Readout-field version of
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_hasFDerivAt`.
+
+The full Fréchet derivative of the named metric-coordinate field can be supplied
+by any locally equal two-variable bilinear-form readout, matching the finite-cover
+Banach readout shape before the frozen spatial derivative is subtracted. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_eventuallyEq
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq :
+      metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+        𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))] Bfield)
+    (hB : HasFDerivAt Bfield Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield'
+          (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))) -
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))))
+      t := by
+  refine
+    Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_hasFDerivAt
+      (I := I) (M := M) G hs g x ?_
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hEq hB
+
 /-- Near a time where the gauge image remains in the preferred chart, the
 concrete moving bilinear component is the two-variable metric-coordinate field
 evaluated along the coordinate curve of the moved base point. -/

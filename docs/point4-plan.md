@@ -362,6 +362,12 @@ Its readout-field variant
 transfers a Fréchet derivative from any locally equal two-variable bilinear-form
 readout to `metricBilinearCoordinateField` through the same named bridge,
 matching the finite-cover Banach readout shape more closely.
+At the primitive decomposition level, the theorem
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_eventuallyEq`
+now lets a locally equal finite-cover/Banach readout supply the full field
+derivative before subtracting the frozen spatial derivative, so later arguments
+can enter the time-difference route without first rewriting to the higher-level
+endpoint.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

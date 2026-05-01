@@ -884,14 +884,18 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           `metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq`, so future
           Banach finite-cover readouts can feed the metric-coordinate field
           through a single reusable lemma. The
-          direct variational chain-rule route now has the same geometric-slot
-          companion, so applications can choose either the direct full-field route
-          or the time-difference route without changing geometric scalar notation.
-          A direct-route readout-field companion also transfers the required
-          Fréchet derivative
-          from any locally equal two-variable bilinear-form readout, aligning this
-          endpoint with finite-cover Banach chart readouts. On the geometric
-          velocity side,
+           direct variational chain-rule route now has the same geometric-slot
+           companion, so applications can choose either the direct full-field route
+           or the time-difference route without changing geometric scalar notation.
+           A direct-route readout-field companion also transfers the required
+           Fréchet derivative
+           from any locally equal two-variable bilinear-form readout, aligning this
+           endpoint with finite-cover Banach chart readouts. The primitive
+           time-difference decomposition also has a readout-field theorem,
+           `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_eventuallyEq`,
+           so locally equal Banach readouts can feed the full-field derivative
+           before the frozen spatial derivative is subtracted. On the geometric
+           velocity side,
           `gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`
           now turns vanishing pulled-back background Ricci curvature directly
           into vanishing corrected pullback velocity, isolating the zero-curvature
