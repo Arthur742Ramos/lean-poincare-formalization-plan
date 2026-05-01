@@ -292,15 +292,18 @@ now packages the matching intrinsic boundary
        curves that are eventually stationary at the chart center,
        and fixed-time spatial slices of the field now proved `C²` in the
        preferred extended chart and extracted as canonical within-chart
-       `fderivWithin` data with a raw-gauge-flow coordinate-curve chain rule,
-       plus an additive decomposition that isolates the only remaining
-       time-difference derivative for the full moving field and feeds the
-       concrete component-derivative package through tensor time-regularity
-       endpoints, with the variational-flow route now discharging the
-       tangent-coordinate-map derivative for that formulation,
-       exposing the chart algebra needed for Banach finite-cover metric readouts. The
-       raw-flow API also extracts continuity of
-     `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
+        `fderivWithin` data with a raw-gauge-flow coordinate-curve chain rule,
+        plus an additive decomposition that isolates the only remaining
+        time-difference derivative for the full moving field and feeds the
+        concrete component-derivative package through tensor time-regularity
+        endpoints, with the variational-flow route now discharging the
+        tangent-coordinate-map derivative for that formulation and a converse
+        bridge deriving the time-difference derivative from the full
+        `metricBilinearCoordinateField` Fréchet derivative after subtracting the
+        frozen spatial `fderivWithin` contribution,
+        exposing the chart algebra needed for Banach finite-cover metric readouts. The
+        raw-flow API also extracts continuity of
+      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
      A thin `AnalyticPDE.SmoothRealization` module names the
     global/interval PDE closure data that turns a Banach chart solution into a

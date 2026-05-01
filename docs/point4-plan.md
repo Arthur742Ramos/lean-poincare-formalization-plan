@@ -296,7 +296,16 @@ This package now routes all the way to tensor time-regularity, including a
 closed-Picard `Ioo` specialization. A variational-flow endpoint now discharges
 the tangent-coordinate-map derivative in this time-difference formulation, so
 on closed Picard interiors the remaining hard input is the named
-time-difference derivative plus the final scalar velocity identity.
+time-difference derivative plus the final scalar velocity identity. Conversely,
+`hasDerivAt_timeDifference_of_fullField_and_frozenSpatial` and the raw-flow
+specialization
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_hasFDerivAt`
+now derive that named time-difference derivative from a full Fréchet derivative
+of `metricBilinearCoordinateField` after subtracting the already-proved frozen
+spatial `fderivWithin` term. Thus the time-difference route is aligned with the
+Banach finite-cover readout shape: a full field derivative can now feed the
+closed-Picard component package without a separate hand-written difference
+calculation.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

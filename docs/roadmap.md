@@ -845,13 +845,18 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         moving time-space field derivative once the remaining time-difference
         derivative along the same raw coordinate curve is supplied, and this is
         wired into the concrete component-derivative package used by the tensor
-        time-regularity endpoints, with a closed-Picard `Ioo` specialization.
-        The variational-flow route now discharges the tangent-coordinate-map
-        derivative for that formulation, isolating the named time-difference
-        derivative as the remaining field-regularity input on Picard interiors.
-        The coordinate data also restricts to smaller time sets and lifts
-        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
-       so chart computations can feed the point-4 theorem routes without an
+         time-regularity endpoints, with a closed-Picard `Ioo` specialization.
+         The variational-flow route now discharges the tangent-coordinate-map
+         derivative for that formulation, isolating the named time-difference
+         derivative as the remaining field-regularity input on Picard interiors.
+         A converse calculus bridge now derives that time-difference derivative
+         from the full Fréchet derivative of `metricBilinearCoordinateField`
+         minus the already-proved frozen spatial `fderivWithin` term, with a
+         raw-flow specialization for the actual gauge coordinate curve, so the
+         finite-cover field readout can feed this formulation directly.
+         The coordinate data also restricts to smaller time sets and lifts
+         through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
+        so chart computations can feed the point-4 theorem routes without an
        intermediate tensor repackaging step. In the subsingleton-tangent case this non-identity
     time-regularity obligation is already closed for arbitrary geometric `C³`
     DeTurck gauge-flow families by componentwise vanishing, with direct

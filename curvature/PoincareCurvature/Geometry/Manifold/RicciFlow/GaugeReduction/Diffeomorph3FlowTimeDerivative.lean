@@ -561,6 +561,28 @@ theorem hasDerivAt_of_timeDifference_and_frozenSpatial
   ext τ
   simp [sub_eq_add_neg, add_assoc]
 
+/-- Conversely, a full derivative of `B(τ, c τ)` together with the frozen-time
+spatial derivative gives the derivative of the time-difference term
+`B(τ, c τ) - B(t, c τ)`. -/
+theorem hasDerivAt_timeDifference_of_fullField_and_frozenSpatial
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {B : ℝ → E → F} {c : ℝ → E} {c' : E} {t : ℝ}
+    {Bfield' : ℝ × E →L[ℝ] F} {Bspace : F}
+    (hB : HasFDerivAt (fun q : ℝ × E ↦ B q.1 q.2) Bfield' (t, c t))
+    (hc : HasDerivAt c c' t)
+    (hspace : HasDerivAt (fun τ : ℝ ↦ B t (c τ)) Bspace t) :
+    HasDerivAt (fun τ : ℝ ↦ B τ (c τ) - B t (c τ))
+      (Bfield' (1, c') - Bspace) t := by
+  have hpair : HasDerivAt (fun τ : ℝ ↦ (τ, c τ)) (1, c') t := by
+    simpa using (hasDerivAt_id t).prodMk hc
+  have hfull : HasDerivAt (fun τ : ℝ ↦ B τ (c τ))
+      (Bfield' (1, c')) t := by
+    simpa [Function.comp_def] using
+      (HasFDerivAt.comp_hasDerivAt
+        (x := t) (l := fun q : ℝ × E ↦ B q.1 q.2)
+        (l' := Bfield') (f := fun τ : ℝ ↦ (τ, c τ)) hB hpair)
+  exact hfull.sub hspace
+
 /-- Full metric-coordinate field derivative along a raw gauge-flow coordinate
 curve, assuming the remaining time-difference derivative along that same curve.
 The spatial term is supplied by the fixed-time within-chart derivative. -/
@@ -606,6 +628,61 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_time
     hasDerivAt_of_timeDifference_and_frozenSpatial
       (B := B) (c := c) htime hspace
   simpa [B, c] using hmain
+
+/-- A full Fréchet derivative of the named metric-coordinate field supplies the
+remaining time-difference derivative along a raw gauge-flow coordinate curve,
+after subtracting the frozen spatial derivative already obtained from the
+within-chart `fderivWithin`. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_hasFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield'
+          (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))) -
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))))
+      t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have hspace : HasDerivAt (fun τ : ℝ ↦ B t (c τ))
+      ((fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+        ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+          ((G.maps3 t) x) (X t ((G.maps3 t) x)))) t := by
+    simpa [B, c] using
+      Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivAt_along_eval
+        (I := I) (M := M) G hs g x
+  have htime :=
+    hasDerivAt_timeDifference_of_fullField_and_frozenSpatial
+      (B := B) (c := c)
+      (Bfield' := Bfield')
+      (Bspace :=
+        (fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))))
+      hB (G.hasDerivAt_extChartAt_eval hs x) hspace
+  simpa [B, c] using htime
 
 /-- Near a time where the gauge image remains in the preferred chart, the
 concrete moving bilinear component is the two-variable metric-coordinate field
