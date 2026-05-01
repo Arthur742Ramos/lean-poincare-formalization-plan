@@ -809,7 +809,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         `pullbackMetricTangentCoordinateMap_apply_eq` and
         `pullbackMetricTangentCoordinateMap_sourceTangentCoordinate_eq` identify
         the moving `A(τ)` component with the gauge pushforward tangent map in
-        source/target coordinates.
+        source/target coordinates. The two-variable
+        `metricBilinearCoordinateField` now packages the metric-coordinate field
+        behind `B(τ)`, and the concrete `B(τ)` is eventually identified with that
+        field along the raw coordinate curve.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

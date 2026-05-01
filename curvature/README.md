@@ -272,8 +272,10 @@ now packages the matching intrinsic boundary
        concrete moving `B(τ)` and `A(τ)` coordinate components are now identified
        respectively with the metric at `Φ_τ(x)` in the target tangent
        trivialization and with the gauge pushforward tangent map in source/target
-       coordinates, exposing the chart algebra needed for Banach finite-cover
-       metric readouts. The
+       coordinates, and the named `metricBilinearCoordinateField` identifies
+       concrete `B(τ)` with a two-variable metric-coordinate field along the raw
+       coordinate curve, exposing the chart algebra needed for Banach
+       finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.

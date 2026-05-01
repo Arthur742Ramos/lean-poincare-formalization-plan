@@ -238,7 +238,11 @@ the tangent trivialization centered at `Φ_t(x)`, and
 moving `A(τ)` component with the gauge pushforward tangent map in source and
 target tangent coordinates. These are the chart-local identities needed before
 feeding Banach finite-cover metric readouts into the remaining component
-derivative hypothesis.
+derivative hypothesis. The named `metricBilinearCoordinateField` now packages
+the two-variable field `(τ, y)` behind the moving `B(τ)` component, and
+`pullbackMetricBilinearCoordinateMap_eventuallyEq_metricBilinearCoordinateField`
+shows that concrete `B(τ)` is eventually this field evaluated along the raw
+coordinate curve `τ ↦ extChartAt (Φ_t x) (Φ_τ x)`.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

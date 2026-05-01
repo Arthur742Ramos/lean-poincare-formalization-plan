@@ -395,6 +395,58 @@ theorem pullbackMetricBilinearCoordinateMap_self_apply_eq
   pullbackMetricBilinearCoordinateMap_apply_eq (I := I) (M := M) Φ g t t x
     (FiberBundle.mem_baseSet_trivializationAt' ((Φ t) x)) uE vE
 
+/-- The two-variable metric-coordinate field underlying the moving bilinear
+component `B(τ)`.  The second argument is a model coordinate in the chart
+centered at `p`; it is converted back to a manifold point before reading the
+metric in the tangent trivialization centered at `p`. -/
+noncomputable def metricBilinearCoordinateField
+    (g : MetricFamily (I := I) (M := M)) (p : M) :
+    ℝ × E → E →L[ℝ] E →L[ℝ] ℝ :=
+  fun z ↦
+    let TM := (TangentSpace I : M → Type _)
+    let TStar := fun y : M => TM y →L[ℝ] ℝ
+    let OneF := E →L[ℝ] ℝ
+    let y : M := (extChartAt I p).symm z.2
+    ContinuousLinearMap.inCoordinates E TM OneF TStar p y p y ((g z.1).inner y)
+
+/-- Near a time where the gauge image remains in the preferred chart, the
+concrete moving bilinear component is the two-variable metric-coordinate field
+evaluated along the coordinate curve of the moved base point. -/
+theorem pullbackMetricBilinearCoordinateMap_eventuallyEq_metricBilinearCoordinateField
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (t : ℝ) (x : M)
+    (hmem : ∀ᶠ τ in 𝓝 t,
+      (Φ τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).baseSet) :
+    (fun τ : ℝ ↦
+      pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x) =ᶠ[𝓝 t]
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((Φ t) x)
+          (τ, (extChartAt I ((Φ t) x)) ((Φ τ) x))) := by
+  filter_upwards [hmem] with τ hτ
+  ext uE vE
+  let TM := (TangentSpace I : M → Type _)
+  have hsrc_ext : (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source := by
+    simpa [TM, extChartAt_source] using hτ
+  have hy :
+      (extChartAt I ((Φ t) x)).symm ((extChartAt I ((Φ t) x)) ((Φ τ) x)) =
+        (Φ τ) x := by
+    exact PartialEquiv.left_inv _ hsrc_ext
+  change
+    (ContinuousLinearMap.inCoordinates E TM (E →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      ((Φ t) x) ((Φ τ) x) ((Φ t) x) ((Φ τ) x) ((g τ).inner ((Φ τ) x))
+        uE) vE =
+    (ContinuousLinearMap.inCoordinates E TM (E →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      ((Φ t) x)
+      ((extChartAt I ((Φ t) x)).symm ((extChartAt I ((Φ t) x)) ((Φ τ) x)))
+      ((Φ t) x)
+      ((extChartAt I ((Φ t) x)).symm ((extChartAt I ((Φ t) x)) ((Φ τ) x)))
+      ((g τ).inner
+        ((extChartAt I ((Φ t) x)).symm ((extChartAt I ((Φ t) x)) ((Φ τ) x))))
+        uE) vE
+  rw [hy]
+
 /-- Concrete formula for the tangent-coordinate component `A(τ)`: it is the
 pushforward tangent map read in the source and target tangent trivializations. -/
 theorem pullbackMetricTangentCoordinateMap_apply_eq
