@@ -341,7 +341,10 @@ variational base point using `f(t, y(t))` and the concrete tangent-coordinate
 slots. The geometric endpoint
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalLocalFlow_geometricValue`
 then accepts the same full field derivative with the scalar identity written in
-actual pushed-forward tangent vectors.
+actual pushed-forward tangent vectors. The direct chain-rule route, which
+bypasses the time-difference decomposition entirely, now has the matching
+geometric-slot endpoint
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlow_geometricValue`.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

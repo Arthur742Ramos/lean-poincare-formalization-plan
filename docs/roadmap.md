@@ -872,7 +872,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          endpoint now accepts the full field derivative at the variational base
          point with the scalar identity stated using that model velocity and the
          concrete tangent-coordinate slots, while a geometric-slot variant states
-         the same identity using actual pushed-forward tangent vectors.
+         the same identity using actual pushed-forward tangent vectors. The
+         direct variational chain-rule route now has the same geometric-slot
+         companion, so applications can choose either the direct full-field route
+         or the time-difference route without changing geometric scalar notation.
          The coordinate data also restricts to smaller time sets and lifts
          through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
         so chart computations can feed the point-4 theorem routes without an

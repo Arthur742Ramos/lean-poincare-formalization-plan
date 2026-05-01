@@ -310,7 +310,9 @@ now packages the matching intrinsic boundary
         tangent vectors, and variational-local-flow variants that identify the
         model base velocity with the raw gauge vector field by derivative
         uniqueness when the base coordinate curves agree, both in direct
-        model-coordinate slots and in pushed-forward geometric slots,
+        model-coordinate slots and in pushed-forward geometric slots, with the
+        same geometric-slot phrasing available for the direct variational
+        chain-rule route,
         exposing the chart algebra needed for Banach finite-cover metric readouts. The
         raw-flow API also extracts continuity of
       `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
