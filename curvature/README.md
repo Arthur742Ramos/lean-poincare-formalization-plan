@@ -398,7 +398,9 @@ now packages the matching intrinsic boundary
       matching within-time-set versions for restricted ODE intervals. It also
       converts the raw manifold derivative into the preferred local-coordinate
       derivative of the base flow curve at interior closed-interval times via
-      `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`.
+      `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`, with
+      within-time-set and neighborhood-time variants for restricted and endpoint
+      routes.
      A new
     `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the
    non-identity gauge-pulled metric time-derivative obligation for arbitrary

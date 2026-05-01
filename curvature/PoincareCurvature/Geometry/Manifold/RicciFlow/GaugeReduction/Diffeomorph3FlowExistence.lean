@@ -54,6 +54,28 @@ theorem hasMFDerivWithinAt
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
   G.satisfies.hasMFDerivWithinAt ht x
 
+/-- Raw gauge-flow curves have the expected within-time-set derivative in the
+preferred chart centered at their time-`t` value. -/
+theorem hasDerivWithinAt_extChartAt_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s) (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+        (X t ((G.maps3 t) x))) s t := by
+  have hsrc_ext : (G.maps3 t) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+    mem_extChartAt_source ((G.maps3 t) x)
+  have hsrc : (G.maps3 t) x ∈ (chartAt H ((G.maps3 t) x)).source :=
+    extChartAt_source I ((G.maps3 t) x) ▸ hsrc_ext
+  rw [hasDerivWithinAt_iff_hasFDerivWithinAt, ← hasMFDerivWithinAt_iff_hasFDerivWithinAt]
+  apply (HasMFDerivWithinAt.comp t (hasMFDerivWithinAt_extChartAt (I := I) hsrc)
+    (G.hasMFDerivWithinAt ht x) (Set.subset_preimage_image _ _)).congr_mfderiv
+  rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton,
+    mfderiv_chartAt_eq_tangentCoordChange hsrc]
+  exact ContinuousLinearMap.comp_toSpanSingleton _ _
+
 /-- A raw gauge-flow witness is continuous within its time set along every base
 point. -/
 theorem continuousWithinAt_eval
@@ -157,6 +179,29 @@ theorem hasMFDerivAt
     HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (G.maps3 τ) x) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
   (G.satisfiesAt hs).hasMFDerivAt x
+
+/-- At any time where the raw time set is a neighborhood, a raw gauge-flow curve
+has the expected derivative in the preferred chart centered at its time-`t`
+value. -/
+theorem hasDerivAt_extChartAt_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t) (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+        (X t ((G.maps3 t) x))) t := by
+  have hsrc_ext : (G.maps3 t) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+    mem_extChartAt_source ((G.maps3 t) x)
+  have hsrc : (G.maps3 t) x ∈ (chartAt H ((G.maps3 t) x)).source :=
+    extChartAt_source I ((G.maps3 t) x) ▸ hsrc_ext
+  rw [hasDerivAt_iff_hasFDerivAt, ← hasMFDerivAt_iff_hasFDerivAt]
+  apply (HasMFDerivAt.comp t (hasMFDerivAt_extChartAt (I := I) hsrc)
+    (G.hasMFDerivAt hs x)).congr_mfderiv
+  rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton,
+    mfderiv_chartAt_eq_tangentCoordChange hsrc]
+  exact ContinuousLinearMap.comp_toSpanSingleton _ _
 
 /-- A raw gauge-flow witness is continuous in time along every base point at
 times where its time set is a neighborhood. -/

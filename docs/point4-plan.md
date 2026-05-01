@@ -213,8 +213,11 @@ The raw gauge-flow layer now also extracts the model-coordinate derivative of
 the base flow curve itself: `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`
 turns the manifold derivative of `τ ↦ Φ_τ(x)` into a `HasDerivAt` statement for
 the preferred chart around `Φ_t(x)`, with derivative given by the coordinate
-form of the DeTurck gauge vector field. This is the base-curve derivative needed
-by the moving metric-component readout.
+form of the DeTurck gauge vector field. The same extraction is available on an
+arbitrary raw time set as `hasDerivWithinAt_extChartAt_eval` and at any
+neighborhood-time as `hasDerivAt_extChartAt_eval`, so endpoint/restricted-time
+routes do not have to reprove the chart conversion. This is the base-curve
+derivative needed by the moving metric-component readout.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
