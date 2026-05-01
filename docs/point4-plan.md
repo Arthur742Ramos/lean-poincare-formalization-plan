@@ -292,6 +292,8 @@ curve is supplied. That decomposition is also wired into the concrete
 component data now only needs the time-difference derivative for the named
 metric-coordinate field, the tangent-coordinate-map derivative, and the final
 scalar velocity identity including the canonical spatial `fderivWithin` term.
+This package now routes all the way to tensor time-regularity, including a
+closed-Picard `Ioo` specialization.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
