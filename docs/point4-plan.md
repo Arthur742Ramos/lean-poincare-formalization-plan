@@ -133,7 +133,9 @@ form for chart-local endpoint scalar identities.
 The concrete gauge tangent-coordinate component now also has a closed-interval
 derivative theorem from eventual equality with a variational tangent map, giving
 the endpoint analogue of the existing interior positive-dimensional component
-bridge.
+bridge. This is packaged as
+`CoordinatePullbackMetricComponentDerivativeWithinOn`, with a variational
+tangent-map constructor over `Icc tmin tmax`.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package

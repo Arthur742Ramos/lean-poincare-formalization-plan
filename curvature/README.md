@@ -522,7 +522,8 @@ now packages the matching intrinsic boundary
       applied tangent-map ODE data and closed-interval/right-derivative
       counterparts for endpoint work, with eventual-equality transfer lemmas for
       chart-local coordinate identifications and an endpoint derivative bridge
-      for the concrete tangent-coordinate component. The
+      for the concrete tangent-coordinate component, packaged at the component
+      derivative-data layer. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
       promotes chartwise `B/A/D` derivative hypotheses to the actual geometric
       scalar target and directly to tensor `HasTimeDerivativeOn`; the preferred

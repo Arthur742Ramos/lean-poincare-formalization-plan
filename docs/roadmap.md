@@ -735,7 +735,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       closed-interval/right-derivative counterparts for endpoint work, and
       eventual-equality transfer lemmas for chart-local interior and endpoint
       identifications. The concrete tangent-coordinate component also has a
-      closed-interval derivative bridge from variational tangent-map data. A
+      closed-interval derivative bridge from variational tangent-map data,
+      packaged by `CoordinatePullbackMetricComponentDerivativeWithinOn`. A
       coordinate-level package
       `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
       chartwise `B/A/D` derivative hypotheses to the actual geometric
