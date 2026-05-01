@@ -515,6 +515,42 @@ def CoordinatePullbackMetricFieldDerivativeOn
           Bfield (t, y t) (A t uE) (D (A t vE)) =
         gdot t x u v
 
+/-- Concrete component-derivative data for the preferred coordinate pullback
+model. This names the final positive-dimensional moving-coordinate obligations:
+differentiate the concrete `B(τ)` and `A(τ)` components and identify their
+scalar chain-rule value with the proposed geometric velocity. -/
+def CoordinatePullbackMetricComponentDerivativeOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+    ∃ (B' : E →L[ℝ] E →L[ℝ] ℝ) (D : E →L[ℝ] E),
+      HasDerivAt
+        (fun τ : ℝ ↦
+          pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x)
+        B' t ∧
+      HasDerivAt
+        (fun τ : ℝ ↦
+          pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+        (D.comp (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t ∧
+      B'
+          (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+            (sourceTangentCoordinate (I := I) x u))
+          (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+            (sourceTangentCoordinate (I := I) x v)) +
+          pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
+            (D (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+              (sourceTangentCoordinate (I := I) x u)))
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+              (sourceTangentCoordinate (I := I) x v)) +
+          pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+              (sourceTangentCoordinate (I := I) x u))
+            (D (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+              (sourceTangentCoordinate (I := I) x v))) =
+        gdot t x u v
+
 /-- Concrete component-derivative form of
 `CoordinatePullbackMetricModelDerivativeOn`.
 
@@ -527,32 +563,8 @@ theorem coordinatePullbackMetricModelDerivativeOn_of_components
     {g : MetricFamily (I := I) (M := M)}
     {gdot : MetricTensorFamily (I := I) (M := M)}
     {s : Set ℝ}
-    (hdata : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
-      ∃ (B' : E →L[ℝ] E →L[ℝ] ℝ) (D : E →L[ℝ] E),
-        HasDerivAt
-          (fun τ : ℝ ↦
-            pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x)
-          B' t ∧
-        HasDerivAt
-          (fun τ : ℝ ↦
-            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
-          (D.comp (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t ∧
-        B'
-            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
-              (sourceTangentCoordinate (I := I) x u))
-            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
-              (sourceTangentCoordinate (I := I) x v)) +
-            pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
-              (D (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
-                (sourceTangentCoordinate (I := I) x u)))
-              (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
-                (sourceTangentCoordinate (I := I) x v)) +
-            pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
-              (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
-                (sourceTangentCoordinate (I := I) x u))
-              (D (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
-                (sourceTangentCoordinate (I := I) x v))) =
-          gdot t x u v) :
+    (hdata : CoordinatePullbackMetricComponentDerivativeOn
+      (I := I) (M := M) Φ g gdot s) :
     CoordinatePullbackMetricModelDerivativeOn (I := I) (M := M) Φ g gdot s := by
   intro t ht x u v
   obtain ⟨B', D, hB, hA, hvalue⟩ := hdata ht x u v
@@ -864,6 +876,46 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeOn
     (coordinatePullbackMetricModelDerivativeOn_of_field (I := I) (M := M) hfield)
     hgeom
 
+/-- Concrete component derivatives plus chart-local equality imply the
+coordinate-level scalar derivative package. -/
+theorem coordinatePullbackMetricInnerDerivativeOn_of_components
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hdata : CoordinatePullbackMetricComponentDerivativeOn
+      (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    CoordinatePullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s :=
+  coordinatePullbackMetricInnerDerivativeOn_of_model (I := I) (M := M)
+    (coordinatePullbackMetricModelDerivativeOn_of_components (I := I) (M := M) hdata)
+    hgeom
+
+/-- Concrete component derivatives plus chart-local equality imply tensor
+time-regularity of the gauge-pulled metric family. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivatives
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hdata : CoordinatePullbackMetricComponentDerivativeOn
+      (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (Φ.pullbackMetricFamily g) gdot s :=
+  hasTimeDerivativeOn_of_coordinatePullbackMetricModelDerivativeOn (I := I) (M := M)
+    (coordinatePullbackMetricModelDerivativeOn_of_components (I := I) (M := M) hdata)
+    hgeom
+
 /-- A named scalar inner-product derivative obligation packages as the tensor
 time derivative of the gauge-pulled metric family. -/
 theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
@@ -1110,6 +1162,23 @@ theorem hasTimeDerivativeOn_of_coordinateField
     (fun {t} ht x u v ↦ G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
       (t := t) (hs (t := t) ht) g x u v)
 
+/-- Raw gauge-flow bridge from concrete coordinate-component derivatives directly
+to tensor time-regularity. -/
+theorem hasTimeDerivativeOn_of_coordinateComponents
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivatives
+    (I := I) (M := M) hdata
+    (fun {t} ht x u v ↦ G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
+      (t := t) (hs (t := t) ht) g x u v)
+
 /-- Closed-Picard-interval raw gauge-flow version of the coordinate-model bridge
 on the open interior interval. -/
 theorem hasTimeDerivativeOn_Ioo_of_coordinateModel
@@ -1177,6 +1246,24 @@ theorem hasTimeDerivativeOn_Ioo_of_coordinateField
       (Ioo tmin tmax) :=
   SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeOn
     (I := I) (M := M) hfield
+    (fun {t} ht x u v ↦
+      G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
+        (t := t) ht g x u v)
+
+/-- Closed-Picard-interval raw gauge-flow bridge from concrete
+coordinate-component derivatives directly to interior tensor time-regularity. -/
+theorem hasTimeDerivativeOn_Ioo_of_coordinateComponents
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot (Ioo tmin tmax)) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivatives
+    (I := I) (M := M) hdata
     (fun {t} ht x u v ↦
       G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
         (t := t) ht g x u v)

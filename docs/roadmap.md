@@ -747,7 +747,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        `pullbackMetricBilinearCoordinateMap` and
        `pullbackMetricTangentCoordinateMap`, with a component-derivative theorem
        reducing `CoordinatePullbackMetricModelDerivativeOn` to derivatives of
-       those `B(τ)` and `A(τ)` maps plus the scalar velocity identity.
+       those `B(τ)` and `A(τ)` maps plus the scalar velocity identity. That
+       primitive is now itself named as
+       `CoordinatePullbackMetricComponentDerivativeOn`, with direct promotions to
+       the geometric scalar and tensor time-derivative packages and raw
+       `Diffeomorph3GaugeFlowOn` wrappers, including the open-interior
+       closed-Picard interval form.
        The model algebra now also proves the moving metric-component chain rule
        for `Bfield(τ, y(τ))` and its combined
        `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent-map

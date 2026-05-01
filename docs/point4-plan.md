@@ -153,7 +153,11 @@ also named explicitly as `pullbackMetricBilinearCoordinateMap` (`B(τ)`) and
 `coordinatePullbackMetricModelDerivativeOn_of_components` proves that
 derivatives of these concrete `B` and `A` components, plus the expected scalar
 velocity identity, are exactly enough to discharge
-`CoordinatePullbackMetricModelDerivativeOn`.
+`CoordinatePullbackMetricModelDerivativeOn`. This primitive is now packaged
+directly as `CoordinatePullbackMetricComponentDerivativeOn`, with one-step
+component-to-scalar and component-to-tensor promotion theorems and raw
+closed-Picard interior wrappers
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn[_Ioo]_of_coordinateComponents`.
 The model algebra now also includes the metric-component half of this remaining
 primitive: `hasDerivAt_bilinearFormField_along_curve` differentiates a bilinear
 form field `Bfield(τ, y(τ))`, and
