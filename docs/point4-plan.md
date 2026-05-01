@@ -598,8 +598,9 @@ compatibility input needed for chart gluing; the same uniqueness conclusion is
 also available on the closed Picard interval using the within-interval endpoint
 continuity. The module now also defines the product variational vector field
 `(y, A)' = (f(t, y), Df(t, y) ∘ A)` and proves projection lemmas extracting the
-base and tangent ODEs from any packaged `LocalFlowSolution` of that product
-system, providing the intended route from Picard-Lindelöf on a product Banach
+base, tangent, and vector-slot tangent ODEs from any packaged
+`LocalFlowSolution` of that product system, providing the intended route from
+Picard-Lindelöf on a product Banach
 space to variational tangent data. A continuous local flow for this product
 system, initialized on `(x, 1)` and restricted to a base ball contained in the
 product Picard ball, now extracts directly to `VariationalLocalFlowSolution`.

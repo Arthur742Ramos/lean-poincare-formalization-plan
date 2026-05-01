@@ -225,6 +225,25 @@ theorem variational_tangent_hasDerivWithinAt
   hasDerivWithinAt_snd_of_variationalVectorField
     (α.hasDerivWithinAt z hz t ht)
 
+/-- Applying the product variational tangent equation to a fixed model vector
+gives the vector-slot derivative before repackaging as a
+`VariationalLocalFlowSolution`. -/
+theorem variational_tangent_apply_hasDerivWithinAt
+    (α : LocalFlowSolution (variationalVectorField f Df) t₀ z₀ r)
+    {z : V × (V →L[ℝ] V)} (hz : z ∈ closedBall z₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) (v : V) :
+    HasDerivWithinAt (fun τ : ℝ => (α.flow z τ).2 v)
+      (((Df t (α.flow z t).1).comp (α.flow z t).2) v) (Icc tmin tmax) t := by
+  have htan := α.variational_tangent_hasDerivWithinAt hz ht
+  have hev :
+      HasFDerivWithinAt
+        (fun A : V →L[ℝ] V => A v) (ContinuousLinearMap.apply ℝ V v)
+        Set.univ (α.flow z t).2 :=
+    (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
+  have hcomp := hev.comp t htan.hasFDerivWithinAt
+    (Set.mapsTo_univ (fun τ : ℝ => (α.flow z τ).2) (Icc tmin tmax))
+  simpa [Function.comp] using hcomp.hasDerivWithinAt
+
 /-- Interior ordinary base-curve ODE extracted from a packaged solution of the
 product variational system. -/
 theorem variational_base_hasDerivAt_of_mem_Ioo
@@ -245,6 +264,17 @@ theorem variational_tangent_hasDerivAt_of_mem_Ioo
     HasDerivAt (fun τ : ℝ => (α.flow z τ).2)
       ((Df t (α.flow z t).1).comp (α.flow z t).2) t :=
   (α.variational_tangent_hasDerivWithinAt hz (Ioo_subset_Icc_self ht)).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
+/-- Interior vector-slot derivative extracted from a packaged solution of the
+product variational system before repackaging as a `VariationalLocalFlowSolution`. -/
+theorem variational_tangent_apply_hasDerivAt_of_mem_Ioo
+    (α : LocalFlowSolution (variationalVectorField f Df) t₀ z₀ r)
+    {z : V × (V →L[ℝ] V)} (hz : z ∈ closedBall z₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (v : V) :
+    HasDerivAt (fun τ : ℝ => (α.flow z τ).2 v)
+      (((Df t (α.flow z t).1).comp (α.flow z t).2) v) t :=
+  (α.variational_tangent_apply_hasDerivWithinAt hz (Ioo_subset_Icc_self ht) v).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
 
 end LocalFlowSolution

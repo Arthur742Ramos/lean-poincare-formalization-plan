@@ -241,7 +241,8 @@ now packages the matching intrinsic boundary
        tangent maps once base local flows agree. It also defines the
       product variational vector field `(y, A)' = (f(t, y), Df(t, y) ∘ A)` and
       projection lemmas from product local-flow solutions to the base and tangent
-       equations, including ordinary interior derivative forms, and extracts
+       equations, including ordinary interior and vector-slot tangent derivative
+       forms, and extracts
        `VariationalLocalFlowSolution` from continuous
        product local flows or product Picard-Lindelöf hypotheses initialized on
        `(x, 1)`, with a radius-specialized Picard constructor. It also proves
