@@ -175,7 +175,10 @@ inputs match the natural chartwise estimates. The tangent-operator bound itself
 can now be derived from closed-ball membership via
 `nnnorm_le_nnnorm_add_radius_of_mem_closedBall`, giving an
 `ofProductComponentClosedBallContinuityEstimates_of_operatorBall` constructor
-that no longer asks callers to supply a separate `A`-state norm bound.
+that no longer asks callers to supply a separate `A`-state norm bound. The
+identity-centered case is simplified further to the explicit bound
+`‖A‖₊ ≤ 1 + a` and the corresponding
+`ofProductComponentClosedBallContinuityEstimates_of_identityBall` constructor.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

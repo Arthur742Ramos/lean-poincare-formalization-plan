@@ -329,6 +329,20 @@ theorem nnnorm_le_nnnorm_add_radius_of_mem_closedBall
   rw [← NNReal.coe_le_coe]
   exact_mod_cast (norm_le_of_mem_closedBall hA)
 
+/-- The operator norm is bounded by `1 + a` on the closed ball of radius `a`
+around the identity operator. -/
+theorem nnnorm_le_one_add_radius_of_mem_closedBall_one
+    {A : V →L[ℝ] V} {a : ℝ≥0}
+    (hA : A ∈ closedBall (1 : V →L[ℝ] V) a) :
+    ‖A‖₊ ≤ 1 + a := by
+  calc
+    ‖A‖₊ ≤ ‖(1 : V →L[ℝ] V)‖₊ + a :=
+      nnnorm_le_nnnorm_add_radius_of_mem_closedBall hA
+    _ ≤ 1 + a := by
+      gcongr
+      rw [← NNReal.coe_le_coe]
+      exact_mod_cast (ContinuousLinearMap.norm_id_le (𝕜 := ℝ) (E := V))
+
 /-- Product-space Lipschitz estimate for the base component of the variational
 ODE. -/
 theorem lipschitzOnWith_variationalBasePart
@@ -1012,6 +1026,28 @@ def ofProductComponentClosedBallContinuityEstimates_of_operatorBall
     (BA := ‖(1 : V →L[ℝ] V)‖₊ + a)
     hf_lip hDf_lip hf_bound
     (fun A hA => nnnorm_le_nnnorm_add_radius_of_mem_closedBall hA)
+    hD_bound hf_cont hDf_cont hmul hr
+
+/-- One-step variational local-flow constructor with the tangent-operator bound
+derived as `‖A‖₊ ≤ 1 + a` on the closed ball around the identity operator. -/
+def ofProductComponentClosedBallContinuityEstimates_of_identityBall
+    [CompleteSpace V]
+    {a R Kf KD Lf BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (1 + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R) :
+    VariationalLocalFlowSolution f Df t₀ x₀ r :=
+  ofProductComponentClosedBallContinuityEstimates
+    (BA := 1 + a)
+    hf_lip hDf_lip hf_bound
+    (fun A hA => nnnorm_le_one_add_radius_of_mem_closedBall_one hA)
     hD_bound hf_cont hDf_cont hmul hr
 
 end VariationalLocalFlowSolution

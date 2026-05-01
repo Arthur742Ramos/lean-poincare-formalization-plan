@@ -755,7 +755,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        constructor whose inputs match the natural chartwise estimates. The
        tangent-operator bound is now derived from closed-ball membership itself,
        so `ofProductComponentClosedBallContinuityEstimates_of_operatorBall`
-       removes the separate `A`-state norm-bound hypothesis.
+       removes the separate `A`-state norm-bound hypothesis, and the
+       identity-centered version uses the explicit `1 + a` bound through
+       `ofProductComponentClosedBallContinuityEstimates_of_identityBall`.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

@@ -247,7 +247,8 @@ now packages the matching intrinsic boundary
        that derives the product norm bound automatically and a continuity
        variant that derives product-field time-continuity from separate
        time-continuity of `f` and `Df`; its operator-ball variant derives the
-       tangent-operator norm bound from closed-ball membership. The dynamic pullback bridge now turns such a variational local
+       tangent-operator norm bound from closed-ball membership, with an explicit
+       `1 + a` identity-ball specialization. The dynamic pullback bridge now turns such a variational local
        flow into the interior coordinate-field derivative data and proves the
        exact scalar chain rule along the flow, leaving only the metric-component
       derivative and concrete chart identification as local inputs. Closed-Picard
