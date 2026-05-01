@@ -312,7 +312,8 @@ now packages the matching intrinsic boundary
         uniqueness when the base coordinate curves agree, both in direct
         model-coordinate slots and in pushed-forward geometric slots, with the
         model-coordinate time-difference route also accepting any locally equal
-        two-variable bilinear-form readout for the full field derivative, and the
+        two-variable bilinear-form readout for the full field derivative in both
+        model-coordinate and pushed-forward geometric scalar forms, and the
         same geometric-slot phrasing available for the direct variational
         chain-rule route, plus a readout-field companion that transfers the
         required Fréchet derivative from any locally equal two-variable

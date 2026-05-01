@@ -875,11 +875,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          the same identity using actual pushed-forward tangent vectors. A
          model-coordinate readout-field variant transfers that full derivative
          from any locally equal two-variable bilinear-form readout before the
-         geometric rewrite. The
+         geometric rewrite, and the pushed-forward geometric version accepts the
+         same readout shape after rewriting the scalar identity. The
          direct variational chain-rule route now has the same geometric-slot
          companion, so applications can choose either the direct full-field route
          or the time-difference route without changing geometric scalar notation.
-         A direct-route readout-field companion also transfers the required Fréchet derivative
+         A direct-route readout-field companion also transfers the required
+         Fréchet derivative
          from any locally equal two-variable bilinear-form readout, aligning this
          endpoint with finite-cover Banach chart readouts.
          The coordinate data also restricts to smaller time sets and lifts
