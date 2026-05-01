@@ -660,6 +660,8 @@ The model-flow packages now also have restriction constructors for
 `LocalFlowSolution`, `LipschitzLocalFlowSolution`, `ContinuousLocalFlowSolution`,
 and `VariationalLocalFlowSolution`, preserving ODE, continuity, Lipschitz, and
 tangent-equation data on smaller closed time intervals and smaller initial balls.
+Their `Nonempty` wrappers now restrict directly as well, so Picard existence
+witnesses can be localized without destructing and rebuilding the package.
 These are the overlap/localization maps needed before chartwise solutions can be
 glued into a manifold-level flow. Base-flow uniqueness now also has overlap
 forms for `LocalFlowSolution` and `ContinuousLocalFlowSolution`: two packages

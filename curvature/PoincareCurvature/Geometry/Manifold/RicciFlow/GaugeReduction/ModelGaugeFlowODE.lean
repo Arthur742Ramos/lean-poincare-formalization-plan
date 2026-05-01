@@ -182,6 +182,18 @@ def restrict
       exact le_trans hx (by exact_mod_cast hr)
     exact (α.hasDerivWithinAt x hx' t (htime ht)).mono htime
 
+/-- Restrict a nonempty packaged local-flow existence witness to a smaller
+initial ball and closed time interval. -/
+theorem nonempty_restrict
+    (hα : Nonempty (LocalFlowSolution f t₀ x₀ r)) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    Nonempty (LocalFlowSolution f
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') := by
+  rcases hα with ⟨α⟩
+  exact ⟨α.restrict htime ht₀' hr⟩
+
 /-- Two packaged local model flows agree on the interior time interval whenever
 their curves start from the same initial point and stay in a region where the
 vector field is uniformly Lipschitz.  The two packages may have different
@@ -306,6 +318,18 @@ def restrict
     intro x hx
     rw [mem_closedBall] at hx ⊢
     exact le_trans hx (by exact_mod_cast hr)
+
+/-- Restrict a nonempty Lipschitz local-flow existence witness to a smaller
+initial ball and closed time interval. -/
+theorem nonempty_restrict
+    (hα : Nonempty (LipschitzLocalFlowSolution f t₀ x₀ r)) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    Nonempty (LipschitzLocalFlowSolution f
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') := by
+  rcases hα with ⟨α⟩
+  exact ⟨α.restrict htime ht₀' hr⟩
 
 end LipschitzLocalFlowSolution
 
@@ -492,6 +516,18 @@ def restrict
     intro x hx
     rw [mem_closedBall] at hx ⊢
     exact le_trans hx (by exact_mod_cast hr)
+
+/-- Restrict a nonempty continuous local-flow existence witness to a smaller
+initial ball and closed time interval. -/
+theorem nonempty_restrict
+    (hα : Nonempty (ContinuousLocalFlowSolution f t₀ x₀ r)) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    Nonempty (ContinuousLocalFlowSolution f
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') := by
+  rcases hα with ⟨α⟩
+  exact ⟨α.restrict htime ht₀' hr⟩
 
 /-- Continuous space-time local flows inherit the open-interval overlap
 uniqueness bridge from `LocalFlowSolution`. -/
@@ -1001,6 +1037,18 @@ def restrict
       rw [mem_closedBall] at hx ⊢
       exact le_trans hx (by exact_mod_cast hr)
     exact (α.tangent_hasDerivWithinAt x hx' t (htime ht)).mono htime
+
+/-- Restrict a nonempty variational local-flow existence witness to a smaller
+initial ball and closed time interval. -/
+theorem nonempty_restrict
+    (hα : Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r)) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    Nonempty (VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') := by
+  rcases hα with ⟨α⟩
+  exact ⟨α.restrict htime ht₀' hr⟩
 
 /-- On the interior of the Picard interval, the center base curve has the
 ordinary derivative required by coordinate chain rules. -/

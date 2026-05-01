@@ -686,7 +686,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        open-interval continuity and a packaged `LocalFlowSolution` extraction
        on a smaller closed interval, restriction constructors for local,
        Lipschitz, continuous, and variational local-flow packages on smaller
-       closed intervals and initial balls, overlap uniqueness for local and
+       closed intervals and initial balls, matching `Nonempty` restriction
+       wrappers for localized Picard existence witnesses, overlap uniqueness for local and
        continuous base-flow packages with different centers/radii, vector-slot
        variational uniqueness bridges, including overlap tangent-map and
        vector-slot forms and full `(flow, tangent)` pair forms for variational
