@@ -151,7 +151,15 @@ the variational tangent-map equation to differentiate
 `Bfield(τ, y(τ)) (A(τ)u) (A(τ)v)`. This is also bundled as
 `CoordinatePullbackMetricFieldDerivativeOn`, which promotes to
 `CoordinatePullbackMetricModelDerivativeOn`, the geometric scalar derivative, and
-tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers.
+tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers. The variational
+ODE layer now also proves the operator-norm Lipschitz estimate for
+left-composition, the product-state Lipschitz estimate for the full variational
+vector field `(y, A)' = (f(t,y), Df(t,y) ∘ A)`, and interior/closed-interval
+uniqueness for the full pair `(flow, tangent)` from the usual base-flow
+Lipschitz hypothesis plus a uniform `‖Df‖` bound. This removes a manual tangent
+Lipschitz obligation from the future chart-gluing step and isolates the
+remaining product Picard hypotheses to base-field and linearized-coefficient
+estimates.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

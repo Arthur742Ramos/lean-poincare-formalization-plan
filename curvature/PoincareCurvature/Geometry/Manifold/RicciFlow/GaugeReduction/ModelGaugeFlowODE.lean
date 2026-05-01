@@ -290,6 +290,146 @@ namespace VariationalLocalFlowSolution
 variable {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
   {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
 
+/-- Left-composition by a continuous linear map is Lipschitz on operator space,
+with constant bounded by the left factor's operator norm. -/
+theorem lipschitzWith_leftComp (D : V →L[ℝ] V) :
+    LipschitzWith ‖D‖₊ (fun A : V →L[ℝ] V => D.comp A) := by
+  let L : (V →L[ℝ] V) →L[ℝ] V →L[ℝ] V := ContinuousLinearMap.compL ℝ V V V D
+  have hL : ‖L‖₊ ≤ ‖D‖₊ := by
+    rw [← NNReal.coe_le_coe]
+    change ‖L‖ ≤ ‖D‖
+    exact L.opNorm_le_bound (norm_nonneg D) (fun A => by
+      simpa [L] using D.opNorm_comp_le A)
+  simpa [L] using L.lipschitz.weaken hL
+
+/-- Left-composition is Lipschitz on any state set, with constant bounded by the
+left factor's operator norm. -/
+theorem lipschitzOnWith_leftComp (D : V →L[ℝ] V) (state : Set (V →L[ℝ] V)) :
+    LipschitzOnWith ‖D‖₊ (fun A : V →L[ℝ] V => D.comp A) state :=
+  (lipschitzWith_leftComp D).lipschitzOnWith
+
+/-- Distance estimate for composition with a fixed right factor. -/
+theorem dist_comp_right_le (D₁ D₂ A : V →L[ℝ] V) :
+    dist (D₁.comp A) (D₂.comp A) ≤ dist D₁ D₂ * ‖A‖ := by
+  have h := (D₁ - D₂).opNorm_comp_le A
+  simpa [dist_eq_norm, ContinuousLinearMap.sub_comp] using h
+
+/-- Distance estimate for composition with a fixed left factor. -/
+theorem dist_comp_left_le (D A B : V →L[ℝ] V) :
+    dist (D.comp A) (D.comp B) ≤ ‖D‖ * dist A B := by
+  have h := D.opNorm_comp_le (A - B)
+  simpa [dist_eq_norm, ContinuousLinearMap.comp_sub] using h
+
+/-- Product-space Lipschitz estimate for the base component of the variational
+ODE. -/
+theorem lipschitzOnWith_variationalBasePart
+    {f_t : V → V} {baseState : Set V} {tangentState : Set (V →L[ℝ] V)}
+    {Kf : ℝ≥0}
+    (hf_lip : LipschitzOnWith Kf f_t baseState) :
+    LipschitzOnWith Kf (fun z : V × (V →L[ℝ] V) => f_t z.1)
+      (baseState ×ˢ tangentState) := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro z hz w hw
+  have hbase := hf_lip.dist_le_mul z.1 hz.1 w.1 hw.1
+  have hfst : dist z.1 w.1 ≤ dist z w := by
+    rw [Prod.dist_eq]
+    exact le_max_left _ _
+  exact hbase.trans (by gcongr)
+
+/-- Product-space Lipschitz estimate for the linearized component
+`(y, A) ↦ Df(y) ∘ A` on a base state and an operator state. -/
+theorem lipschitzOnWith_variationalLinearPart
+    {Df_t : V → V →L[ℝ] V}
+    {baseState : Set V} {tangentState : Set (V →L[ℝ] V)}
+    {KD BA BD : ℝ≥0}
+    (hDf_lip : LipschitzOnWith KD Df_t baseState)
+    (hA_bound : ∀ A ∈ tangentState, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ y ∈ baseState, ‖Df_t y‖₊ ≤ BD) :
+    LipschitzOnWith (KD * BA + BD)
+      (fun z : V × (V →L[ℝ] V) => (Df_t z.1).comp z.2)
+      (baseState ×ˢ tangentState) := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro z hz w hw
+  have hbase := hDf_lip.dist_le_mul z.1 hz.1 w.1 hw.1
+  have hA_bound' : ‖z.2‖ ≤ (BA : ℝ) := by
+    exact_mod_cast hA_bound z.2 hz.2
+  have hD_bound' : ‖Df_t w.1‖ ≤ (BD : ℝ) := by
+    exact_mod_cast hD_bound w.1 hw.1
+  have hfst : dist z.1 w.1 ≤ dist z w := by
+    rw [Prod.dist_eq]
+    exact le_max_left _ _
+  have hsnd : dist z.2 w.2 ≤ dist z w := by
+    rw [Prod.dist_eq]
+    exact le_max_right _ _
+  have hterm₁ :
+      dist ((Df_t z.1).comp z.2) ((Df_t w.1).comp z.2) ≤
+        (KD : ℝ) * (BA : ℝ) * dist z w := by
+    calc
+      dist ((Df_t z.1).comp z.2) ((Df_t w.1).comp z.2)
+          ≤ dist (Df_t z.1) (Df_t w.1) * ‖z.2‖ :=
+            dist_comp_right_le (Df_t z.1) (Df_t w.1) z.2
+      _ ≤ ((KD : ℝ) * dist z.1 w.1) * (BA : ℝ) := by
+            gcongr
+      _ = (KD : ℝ) * (BA : ℝ) * dist z.1 w.1 := by ring
+      _ ≤ (KD : ℝ) * (BA : ℝ) * dist z w := by
+            gcongr
+  have hterm₂ :
+      dist ((Df_t w.1).comp z.2) ((Df_t w.1).comp w.2) ≤
+        (BD : ℝ) * dist z w := by
+    calc
+      dist ((Df_t w.1).comp z.2) ((Df_t w.1).comp w.2)
+          ≤ ‖Df_t w.1‖ * dist z.2 w.2 :=
+            dist_comp_left_le (Df_t w.1) z.2 w.2
+      _ ≤ (BD : ℝ) * dist z.2 w.2 := by
+            gcongr
+      _ ≤ (BD : ℝ) * dist z w := by
+            gcongr
+  calc
+    dist ((Df_t z.1).comp z.2) ((Df_t w.1).comp w.2)
+        ≤ dist ((Df_t z.1).comp z.2) ((Df_t w.1).comp z.2) +
+            dist ((Df_t w.1).comp z.2) ((Df_t w.1).comp w.2) :=
+          dist_triangle _ _ _
+    _ ≤ ((KD : ℝ) * (BA : ℝ) * dist z w) + (BD : ℝ) * dist z w :=
+          add_le_add hterm₁ hterm₂
+    _ ≤ ↑(KD * BA + BD) * dist z w := by
+          rw [NNReal.coe_add, NNReal.coe_mul]
+          ring_nf
+          exact le_rfl
+
+/-- Product-space Lipschitz estimate for the full variational vector field,
+combining a base-field Lipschitz estimate with bounded/Lipschitz control of the
+linearized coefficient on the chosen base and operator states. -/
+theorem lipschitzOnWith_variationalVectorField
+    {f_t : V → V} {Df_t : V → V →L[ℝ] V}
+    {baseState : Set V} {tangentState : Set (V →L[ℝ] V)}
+    {Kf KD BA BD : ℝ≥0}
+    (hf_lip : LipschitzOnWith Kf f_t baseState)
+    (hDf_lip : LipschitzOnWith KD Df_t baseState)
+    (hA_bound : ∀ A ∈ tangentState, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ y ∈ baseState, ‖Df_t y‖₊ ≤ BD) :
+    LipschitzOnWith (max Kf (KD * BA + BD))
+      (fun z : V × (V →L[ℝ] V) => (f_t z.1, (Df_t z.1).comp z.2))
+      (baseState ×ˢ tangentState) :=
+  (lipschitzOnWith_variationalBasePart (tangentState := tangentState) hf_lip).prodMk
+    (lipschitzOnWith_variationalLinearPart hDf_lip hA_bound hD_bound)
+
+/-- Time-dependent specialization of the product-space Lipschitz estimate for
+`variationalVectorField`. -/
+theorem lipschitzOnWith_variationalVectorField_at
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V} {t : ℝ}
+    {baseState : Set V} {tangentState : Set (V →L[ℝ] V)}
+    {Kf KD BA BD : ℝ≥0}
+    (hf_lip : LipschitzOnWith Kf (f t) baseState)
+    (hDf_lip : LipschitzOnWith KD (Df t) baseState)
+    (hA_bound : ∀ A ∈ tangentState, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ y ∈ baseState, ‖Df t y‖₊ ≤ BD) :
+    LipschitzOnWith (max Kf (KD * BA + BD))
+      (variationalVectorField f Df t) (baseState ×ˢ tangentState) := by
+  simpa [variationalVectorField] using
+    lipschitzOnWith_variationalVectorField
+      (f_t := f t) (Df_t := Df t) (tangentState := tangentState)
+      hf_lip hDf_lip hA_bound hD_bound
+
 /-- Extract a variational local flow from a continuous local flow of the product
 system `(y, A)' = (f(t, y), Df(t, y) ∘ A)` initialized on pairs `(x, 1)`.
 
@@ -411,6 +551,52 @@ theorem tangent_eqOn_Ioo_of_lipschitzOnWith
     exact ⟨hβderiv, hβ_mem t ht⟩
   · rw [α.tangent_initial_eq x hx, β.tangent_initial_eq x hx]
 
+/-- Tangent-map uniqueness on the interior interval when the linearized
+operators are uniformly bounded there.  The Lipschitz hypothesis required by the
+Gronwall uniqueness theorem follows from left-composition on operator space. -/
+theorem tangent_eqOn_Ioo_of_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax))
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.tangent x t ∈ state t) :
+    EqOn (α.tangent x) (β.tangent x) (Ioo tmin tmax) :=
+  α.tangent_eqOn_Ioo_of_lipschitzOnWith β hx ht₀ hflow_eq
+    (fun t ht =>
+      ((lipschitzWith_leftComp (Df t (α.flow (x, t)))).weaken (hD_bound t ht)).lipschitzOnWith)
+    hα_mem hβ_mem
+
+/-- Interior uniqueness for the full variational pair `(flow, tangent)`.
+
+The base curve is handled by the usual spatial Lipschitz hypothesis for `f`.
+The tangent curve then needs only a uniform operator-norm bound on `Df` along the
+base curve; left-composition supplies the operator-space Lipschitz estimate. -/
+theorem flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Ioo tmin tmax) := by
+  have hflow : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
+      (Ioo tmin tmax) :=
+    α.toContinuousLocalFlowSolution.eqOn_Ioo_of_lipschitzOnWith
+      β.toContinuousLocalFlowSolution hx ht₀ hf_lip hα_base_mem hβ_base_mem
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Ioo tmin tmax) :=
+    α.tangent_eqOn_Ioo_of_opNorm_bound (β := β) (state := fun _ => Set.univ)
+      hx ht₀ hflow hD_bound (by intro t ht; simp) (by intro t ht; simp)
+  intro t ht
+  exact Prod.ext (hflow ht) (htangent ht)
+
 /-- Closed-interval uniqueness for tangent maps of variational local flows.  The
 endpoint conclusion follows from the within-interval derivative statements via
 continuity, while uniqueness on the interior uses the same Gronwall argument as
@@ -440,6 +626,51 @@ theorem tangent_eqOn_Icc_of_lipschitzOnWith
     rw [show β.flow (x, t) = α.flow (x, t) from (hflow_eq ht).symm] at hβderiv
     exact hβderiv
   · rw [α.tangent_initial_eq x hx, β.tangent_initial_eq x hx]
+
+/-- Closed-interval tangent-map uniqueness when the linearized operators are
+uniformly bounded on the interior. -/
+theorem tangent_eqOn_Icc_of_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo tmin tmax))
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.tangent x t ∈ state t) :
+    EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
+  α.tangent_eqOn_Icc_of_lipschitzOnWith β hx ht₀ hflow_eq
+    (fun t ht =>
+      ((lipschitzWith_leftComp (Df t (α.flow (x, t)))).weaken (hD_bound t ht)).lipschitzOnWith)
+    hα_mem hβ_mem
+
+/-- Closed-interval uniqueness for the full variational pair `(flow, tangent)`
+from a base-flow Lipschitz estimate and an operator-norm bound on the linearized
+coefficient. -/
+theorem flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound
+    (α β : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Icc tmin tmax) := by
+  have hflowIcc : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
+      (Icc tmin tmax) :=
+    α.toContinuousLocalFlowSolution.eqOn_Icc_of_lipschitzOnWith
+      β.toContinuousLocalFlowSolution hx ht₀ hf_lip hα_base_mem hβ_base_mem
+  have hflowIoo : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
+      (Ioo tmin tmax) := fun t ht => hflowIcc (Ioo_subset_Icc_self ht)
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
+    α.tangent_eqOn_Icc_of_opNorm_bound (β := β) (state := fun _ => Set.univ)
+      hx ht₀ hflowIoo hD_bound (by intro t ht; simp) (by intro t ht; simp)
+  intro t ht
+  exact Prod.ext (hflowIcc ht) (htangent ht)
 
 end VariationalLocalFlowSolution
 

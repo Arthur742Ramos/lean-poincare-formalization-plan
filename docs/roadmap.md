@@ -733,7 +733,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        for `Bfield(τ, y(τ))` and its combined
        `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent-map
        equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with
-       scalar, tensor, and raw-gauge-flow promotion routes.
+       scalar, tensor, and raw-gauge-flow promotion routes. The variational ODE
+       layer now also proves the operator-norm Lipschitz estimate for
+       left-composition, the product-state Lipschitz estimate for the full
+       variational vector field `(y, A)' = (f(t,y), Df(t,y) ∘ A)`, and
+       interior/closed-interval uniqueness for the full pair `(flow, tangent)`
+       from a base-flow Lipschitz estimate plus a uniform `‖Df‖` bound, so the
+       future chart-gluing step no longer needs a separate manual tangent
+       Lipschitz hypothesis.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an
