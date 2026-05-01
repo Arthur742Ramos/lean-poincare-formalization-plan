@@ -725,6 +725,9 @@ The fixed-IVP intrinsic DeTurck gauge-flow existence layer mirrors this
 proof-level shape for its derivative-data, ordinary-at-time derivative,
 zero-field identity, chosen-background identity, subsingleton, and empty
 constructors.
+The theorem-family intrinsic DeTurck gauge-flow existence layer now has the
+same proof-level wrappers, including conversion back down to a fixed IVP and
+the named derivative-family/ordinary-derivative-family constructors.
 The model ODE uniqueness layer now also has center-trajectory wrappers for
 packaged local flows, continuous space-time local flows, and the full
 variational pair `(flow, tangent)` on both `Ioo` and `Icc`, so basepoint

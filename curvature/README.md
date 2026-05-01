@@ -534,7 +534,7 @@ now packages the matching intrinsic boundary
       `ofDerivativeAt` bridges, geometric-to-raw adapters, and direct
       proof-level `Nonempty` wrappers for the raw geometric/derivative,
       restriction, and identity-flow constructors, plus matching fixed-IVP
-      intrinsic proof-level wrappers and derivative/local-at-time
+      and theorem-family intrinsic proof-level wrappers and derivative/local-at-time
       extractors; raw intrinsic gauge-flow existence witnesses now project
      directly to gauge-reduced, intrinsic, and ordinary theorem packages from
     either pulled-back metric time-derivative or scalar inner-product derivative

@@ -663,7 +663,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        and identity-flow constructors, so later ODE existence arguments can
        stay proof-level until a concrete gauge flow is required. The fixed-IVP
        intrinsic DeTurck existence layer mirrors that proof-level shape for its
-       derivative-data and identity constructors. Raw intrinsic gauge-flow existence
+       derivative-data and identity constructors, and the theorem-family layer
+       now mirrors it as well, including fixed-IVP extraction and named
+       derivative-family constructors. Raw intrinsic gauge-flow existence
      witnesses now also feed directly into the gauge-reduced, intrinsic, and
     ordinary theorem-package routes using either pulled-back metric
     time-derivative proofs or scalar inner-product derivative proofs. The raw
