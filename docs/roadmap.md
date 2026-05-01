@@ -1116,6 +1116,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      `nonempty_candidateEncoding` readouts. The thin raw-gauge route module now
      mirrors its global and interval theorem-package projections as proof-level
      `Nonempty` witnesses for both intrinsic and ordinary compact point-4
+     theorem packages, and does the same for the genuine symmetric-carrier
+     interval closure data across the chosen-background, intrinsic, and ordinary
      theorem packages.
      What still
      remains is the geometric-analysis specialization for positive-dimensional

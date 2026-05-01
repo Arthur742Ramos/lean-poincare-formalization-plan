@@ -598,7 +598,9 @@ now packages the matching intrinsic boundary
      for their stored realization and reverse-encoding fields. The thin
      raw-gauge route module mirrors its global and interval projections to
      intrinsic and ordinary compact point-4 theorem packages as proof-level
-     `Nonempty` witnesses, leaving the heavy PDE realization module unchanged.
+     `Nonempty` witnesses, and does the same for the genuine symmetric-carrier
+     interval closure data across the chosen-background, intrinsic, and ordinary
+     theorem packages, leaving the heavy PDE realization module unchanged.
      The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation

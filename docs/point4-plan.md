@@ -885,6 +885,9 @@ for the global and interval closure-data projections to intrinsic and ordinary
 compact point-4 theorem packages through the raw identity gauge:
 `nonempty_intrinsicLocalExistenceUniqueness_viaRawIdentityGauge` and
 `nonempty_localExistenceUniqueness_viaRawIdentityGauge`.
+It now also gives the genuine symmetric-carrier interval closure data the same
+proof-level readout shape for chosen-background, intrinsic, and ordinary
+compact theorem packages.
 
 **Suggested decomposition** (multi-session):
 
