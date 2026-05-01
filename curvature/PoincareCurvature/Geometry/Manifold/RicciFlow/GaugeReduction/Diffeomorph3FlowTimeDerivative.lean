@@ -2131,6 +2131,35 @@ def CoordinatePullbackMetricFieldDerivativeOn
           Bfield (t, y t) (A t uE) (D (A t vE)) =
         gdot t x u v
 
+/-- Within-set version of `CoordinatePullbackMetricFieldDerivativeOn`.
+
+This is the closed-Picard endpoint form of the full-field coordinate
+calculation: the metric coordinate field has a full Fréchet derivative at the
+base point, while the base curve and tangent-coordinate map are only
+differentiated within the chosen time set. -/
+def CoordinatePullbackMetricFieldDerivativeWithinOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+    ∃ (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+      (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+      (y : ℝ → E)
+      (y' : E)
+      (A : ℝ → E →L[ℝ] E)
+      (D : E →L[ℝ] E)
+      (uE vE : E),
+      pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[𝓝[s] t]
+          (fun τ : ℝ ↦ Bfield (τ, y τ) (A τ uE) (A τ vE)) ∧
+      HasFDerivAt Bfield Bfield' (t, y t) ∧
+      HasDerivWithinAt y y' s t ∧
+      HasDerivWithinAt A (D.comp (A t)) s t ∧
+      Bfield' (1, y') (A t uE) (A t vE) +
+          Bfield (t, y t) (D (A t uE)) (A t vE) +
+          Bfield (t, y t) (A t uE) (D (A t vE)) =
+        gdot t x u v
+
 /-- Concrete component-derivative data for the preferred coordinate pullback
 model. This names the final positive-dimensional moving-coordinate obligations:
 differentiate the concrete `B(τ)` and `A(τ)` components and identify their
@@ -2285,6 +2314,52 @@ theorem coordinatePullbackMetricFieldDerivativeOn_of_variationalLocalFlow
     (fun τ : ℝ ↦ α.tangent xE τ), Df t (α.flow (xE, t)), uE, vE,
     hmodel_eq, hBfield, α.flow_hasDerivAt_of_mem_Ioo hxE ht,
     α.tangent_hasDerivAt_of_mem_Ioo hxE ht, hvalue⟩
+
+/-- Closed-interval/right-derivative field-level coordinate data supplied by a
+variational model flow.
+
+This is the endpoint counterpart of
+`coordinatePullbackMetricFieldDerivativeOn_of_variationalLocalFlow`: it records
+the full-field metric-coordinate derivative together with the base-flow and
+tangent-map derivatives available only within `Icc tmin tmax`. -/
+theorem coordinatePullbackMetricFieldDerivativeWithinOn_of_variationalLocalFlow
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (uE vE : E),
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[
+              𝓝[Icc tmin tmax] t]
+              (fun τ : ℝ ↦
+                Bfield (τ, α.flow (xE, τ))
+                  (α.tangent xE τ uE) (α.tangent xE τ vE)) ∧
+          HasFDerivAt Bfield Bfield' (t, α.flow (xE, t)) ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (α.tangent xE t uE) (α.tangent xE t vE) +
+              Bfield (t, α.flow (xE, t))
+                ((Df t (α.flow (xE, t))) (α.tangent xE t uE))
+                (α.tangent xE t vE) +
+              Bfield (t, α.flow (xE, t))
+                (α.tangent xE t uE)
+                ((Df t (α.flow (xE, t))) (α.tangent xE t vE)) =
+            gdot t x u v) :
+    CoordinatePullbackMetricFieldDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax) := by
+  intro t ht x u v
+  obtain ⟨xE, hxE, Bfield, Bfield', uE, vE, hmodel_eq, hBfield, hvalue⟩ :=
+    hdata ht x u v
+  exact ⟨Bfield, Bfield', (fun τ : ℝ ↦ α.flow (xE, τ)), f t (α.flow (xE, t)),
+    (fun τ : ℝ ↦ α.tangent xE τ), Df t (α.flow (xE, t)), uE, vE,
+    hmodel_eq, hBfield, α.hasDerivWithinAt xE hxE t ht,
+    α.tangent_hasDerivWithinAt xE hxE t ht, hvalue⟩
 
 /-- A variational model flow supplies the tangent-map derivative clause in the
 coordinate-model pullback calculation when the moving bilinear-form component
@@ -2890,6 +2965,68 @@ theorem pullbackMetricInnerDerivativeOn_of_coordinateField
   pullbackMetricInnerDerivativeOn_of_coordinateModel (I := I) (M := M)
     (coordinatePullbackMetricModelDerivativeOn_of_field (I := I) (M := M) hfield)
     hgeom
+
+/-- Within-set field-level coordinate derivative data plus chart-local equality
+implies the endpoint geometric scalar derivative target directly. -/
+theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateFieldWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hfield : CoordinatePullbackMetricFieldDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨Bfield, Bfield', y, y', A, D, uE, vE, hmodel_eq,
+    hBfield, hy, hA, hvalue⟩ := hfield ht x u v
+  have heq :
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        fun τ : ℝ ↦ Bfield (τ, y τ) (A τ uE) (A τ vE) :=
+    (hgeom ht x u v).trans hmodel_eq
+  have heq_t :
+      (g t).inner ((Φ t) x)
+          ((Φ t).pushforwardTangent x u)
+          ((Φ t).pushforwardTangent x v) =
+        Bfield (t, y t) (A t uE) (A t vE) :=
+    show t ∈ {τ : ℝ |
+        (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v) =
+          Bfield (τ, y τ) (A τ uE) (A τ vE)} from
+      mem_of_mem_nhdsWithin ht heq
+  exact hasDerivWithinAt_of_eventuallyEq_bilinearFormField_linear_apply_apply_along_curve
+    (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
+    (A := A) (D := D) (s := s) (t := t) uE vE
+    heq heq_t hBfield hy hA hvalue
+
+/-- Closed-interval field-level coordinate derivative data gives ordinary
+geometric scalar derivatives on the open interior. -/
+theorem pullbackMetricInnerDerivativeOn_Ioo_of_coordinateFieldWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hfield : CoordinatePullbackMetricFieldDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax))
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+        (fun τ : ℝ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[Icc tmin tmax] t]
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot (Ioo tmin tmax) :=
+  (pullbackMetricInnerDerivativeWithinOn_of_coordinateFieldWithin
+    (I := I) (M := M) hfield hgeom).toPullbackMetricInnerDerivativeOn_Ioo
 
 /-- Restrict named scalar pullback derivative data to a smaller time set. -/
 theorem PullbackMetricInnerDerivativeOn.mono

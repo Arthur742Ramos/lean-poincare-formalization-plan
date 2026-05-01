@@ -202,7 +202,14 @@ derive the remaining `Btime` time-difference term from a full metric-coordinate
 Fréchet derivative at the variational base point before performing that
 velocity rewrite, with geometric-slot variants for pushed-forward tangent-vector
 scalar identities and ordinary-neighborhood tangent-map variants for callers
-with stronger local-flow output. It also has within-set chain-rule primitives:
+with stronger local-flow output. The full-field coordinate derivative route now
+also has a closed-interval package
+`CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
+constructor for it, and direct endpoint-to-interior scalar promotion theorems,
+so Picard endpoint base-flow/tangent-map derivatives plus a full
+metric-coordinate Fréchet derivative can feed the geometric scalar target
+without repackaging through frozen-time component data. It also has within-set
+chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`
