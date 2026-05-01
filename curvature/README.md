@@ -333,14 +333,20 @@ now packages the matching intrinsic boundary
           readouts, and the primitive time-difference decomposition now has its
           own readout-field theorem before subtracting the frozen spatial
            derivative, lifted through component data to a raw
-           `HasTimeDerivativeOn` endpoint for `C³` gauge flows and its
-           open-interior specialization, with a matching readout-field endpoint
-           at the variational tangent-map layer plus a geometric-slot companion
-           that keeps the readout-field derivative input while phrasing the
-           scalar identity in actual pushed-forward tangent vectors, and
-           `SmoothRealizationGaugeRoutes` now exposes the Banach chart right-hand
-           side as centered derivatives of the named
-           `metricBilinearCoordinateField`, including the tangent-vector-slot
+            `HasTimeDerivativeOn` endpoint for `C³` gauge flows and its
+            open-interior specialization, with a matching readout-field endpoint
+            at the variational tangent-map layer plus a geometric-slot companion
+            that keeps the readout-field derivative input while phrasing the
+            scalar identity in actual pushed-forward tangent vectors, and now
+            with a within-set time-difference component package that routes
+            closed-interval endpoint derivative data through
+            `CoordinatePullbackMetricComponentDerivativeWithinOn` to interior
+            tensor time-regularity, including direct and readout-field wrappers
+            from full metric-coordinate Fréchet data plus closed-interval
+            tangent-map derivatives, and
+            `SmoothRealizationGaugeRoutes` now exposes the Banach chart right-hand
+            side as centered derivatives of the named
+            `metricBilinearCoordinateField`, including the tangent-vector-slot
            scalar form used by geometric gauge-pullback calculations, and now
            packages the same chart RHS as raw identity-gauge scalar derivative
            data plus the corresponding identity-pullback tensor derivative on the

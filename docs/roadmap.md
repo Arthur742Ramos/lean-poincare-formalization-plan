@@ -943,6 +943,19 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`
               and
               `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_eventuallyEq`.
+              These endpoint primitives now also have the frozen-spatial
+              subtraction form and package-level lift:
+              `MetricCoordinateFieldTimeDifferenceComponentDataWithinOn`
+              feeds closed-interval time-difference and tangent-map derivatives
+              into `CoordinatePullbackMetricComponentDerivativeWithinOn`, and
+              `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifferenceWithin`
+              plus the direct/readout wrappers
+              `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAtWithin`
+              and
+              `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAtWithin`
+              turn full metric-coordinate Fréchet data with closed-interval
+              tangent-coordinate-map derivatives into interior tensor
+              time-regularity without a neighborhood-time hypothesis.
               On the PDE side,
               `SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_hasDerivAt_chartRHS_of_mem_Ioo`
               and its `sourceTangentCoordinate` scalar-slot variant now expose

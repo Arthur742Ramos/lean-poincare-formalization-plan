@@ -739,6 +739,45 @@ theorem metricBilinearCoordinateField_fixedTime_hasDerivAt_along_center
     (f := c) (f' := c') hF' hc hrange
   simpa [F, Function.comp_def] using hcomp
 
+/-- Within-set chain rule for the fixed-time spatial part of the
+metric-coordinate field along a coordinate curve based at the chart center.
+
+This is the endpoint/right-derivative companion to
+`metricBilinearCoordinateField_fixedTime_hasDerivAt_along_center`. -/
+theorem metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_center
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
+    {c : ℝ → E} {c' : E} {s : Set ℝ} {τ₀ : ℝ}
+    (hc : HasDerivWithinAt c c' s τ₀)
+    (hrange : ∀ᶠ τ in 𝓝[s] τ₀, c τ ∈ Set.range I)
+    (hc₀ : c τ₀ = (extChartAt I p) p) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p (t, c τ))
+      ((fderivWithin ℝ
+        (fun yE : E ↦
+          metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+        (Set.range I) ((extChartAt I p) p)) c')
+      s τ₀ := by
+  let F : E → E →L[ℝ] E →L[ℝ] ℝ := fun yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g p (t, yE)
+  have hF : HasFDerivWithinAt F
+      (fderivWithin ℝ F (Set.range I) ((extChartAt I p) p))
+      (Set.range I) ((extChartAt I p) p) := by
+    simpa [F] using
+      metricBilinearCoordinateField_fixedTime_hasFDerivWithinAt
+        (I := I) (M := M) g t p
+  have hF' : HasFDerivWithinAt F
+      (fderivWithin ℝ F (Set.range I) ((extChartAt I p) p))
+      (Set.range I) (c τ₀) := by
+    simpa [hc₀] using hF
+  have hst : Filter.Tendsto c (𝓝[s] τ₀) (𝓝[Set.range I] (c τ₀)) :=
+    tendsto_nhdsWithin_iff.mpr ⟨hc.continuousWithinAt, hrange⟩
+  have hcomp := HasFDerivWithinAt.comp_of_tendsto
+    (x := τ₀) (f := c) (g := F)
+    (g' := fderivWithin ℝ F (Set.range I) ((extChartAt I p) p))
+    hF' hc.hasFDerivWithinAt hst
+  simpa [F, Function.comp_def] using hcomp.hasDerivWithinAt
+
 /-- Raw gauge-flow coordinate curves eventually lie in the model range of the
 preferred chart centered at their time-`t` value. -/
 theorem Diffeomorph3GaugeFlowOn.eventually_extChartAt_eval_mem_range
@@ -749,6 +788,22 @@ theorem Diffeomorph3GaugeFlowOn.eventually_extChartAt_eval_mem_range
     ∀ᶠ τ in 𝓝 t,
       (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x) ∈ Set.range I := by
   filter_upwards [G.eventually_mem_trivializationAt_eval hs x] with τ hτ
+  have hsrc : (G.maps3 τ) x ∈ (extChartAt I ((G.maps3 t) x)).source := by
+    simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hτ
+  exact extChartAt_target_subset_range ((G.maps3 t) x)
+    (PartialEquiv.map_source _ hsrc)
+
+/-- Raw gauge-flow coordinate curves eventually lie in the model range of the
+preferred chart centered at their time-`t` value, relative to the raw time set.
+-/
+theorem Diffeomorph3GaugeFlowOn.eventuallyWithin_extChartAt_eval_mem_range
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s) (x : M) :
+    ∀ᶠ τ in 𝓝[s] t,
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x) ∈ Set.range I := by
+  filter_upwards [G.eventuallyWithin_mem_trivializationAt_eval ht x] with τ hτ
   have hsrc : (G.maps3 τ) x ∈ (extChartAt I ((G.maps3 t) x)).source := by
     simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hτ
   exact extChartAt_target_subset_range ((G.maps3 t) x)
@@ -779,6 +834,33 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDeriv
     (G.hasDerivAt_extChartAt_eval hs x)
     (Diffeomorph3GaugeFlowOn.eventually_extChartAt_eval_mem_range
       (I := I) (M := M) G hs x)
+    rfl
+
+/-- Frozen-time spatial derivative of the metric-coordinate field along the
+actual coordinate curve supplied by a raw gauge flow, relative to the raw time
+set. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      ((fderivWithin ℝ
+        (fun yE : E ↦
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+        (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+          (X t ((G.maps3 t) x))))
+      s t := by
+  exact metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_center
+    (I := I) (M := M) g t ((G.maps3 t) x)
+    (G.hasDerivWithinAt_extChartAt_eval ht x)
+    (Diffeomorph3GaugeFlowOn.eventuallyWithin_extChartAt_eval_mem_range
+      (I := I) (M := M) G ht x)
     rfl
 
 /-- Additive time/spatial decomposition for a field evaluated along a moving
@@ -934,6 +1016,29 @@ theorem hasDerivWithinAt_of_timeDifference_and_frozenSpatial
   ext τ
   simp [sub_eq_add_neg, add_assoc]
 
+/-- Within-set version of
+`hasDerivAt_timeDifference_of_fullField_and_frozenSpatial`: a full derivative
+of `B(τ, c τ)` together with the frozen-time spatial derivative gives the
+derivative of the time-difference term `B(τ, c τ) - B(t, c τ)`. -/
+theorem hasDerivWithinAt_timeDifference_of_fullField_and_frozenSpatial
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {B : ℝ → E → F} {c : ℝ → E} {c' : E} {s : Set ℝ} {t : ℝ}
+    {Bfield' : ℝ × E →L[ℝ] F} {Bspace : F}
+    (hB : HasFDerivAt (fun q : ℝ × E ↦ B q.1 q.2) Bfield' (t, c t))
+    (hc : HasDerivWithinAt c c' s t)
+    (hspace : HasDerivWithinAt (fun τ : ℝ ↦ B t (c τ)) Bspace s t) :
+    HasDerivWithinAt (fun τ : ℝ ↦ B τ (c τ) - B t (c τ))
+      (Bfield' (1, c') - Bspace) s t := by
+  have hpair : HasDerivWithinAt (fun τ : ℝ ↦ (τ, c τ)) (1, c') s t := by
+    simpa using (hasDerivWithinAt_id t s).prodMk hc
+  have hfull : HasDerivWithinAt (fun τ : ℝ ↦ B τ (c τ))
+      (Bfield' (1, c')) s t := by
+    simpa [Function.comp_def] using
+      (HasFDerivAt.comp_hasDerivWithinAt
+        (x := t) (l := fun q : ℝ × E ↦ B q.1 q.2)
+        (l' := Bfield') (f := fun τ : ℝ ↦ (τ, c τ)) hB hpair)
+  exact hfull.sub hspace
+
 /-- Within-set direct time-difference derivative from a full Fréchet derivative:
 differentiate `B(τ, c τ)` and subtract the frozen-time derivative
 `B(t, c τ)`. -/
@@ -1035,6 +1140,144 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_has
       s t := by
   refine
     Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt
+      (I := I) (M := M) G ht g x ?_
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hEq hB
+
+/-- Full metric-coordinate field derivative along a raw gauge-flow coordinate
+curve, relative to the raw time set, assuming the time-difference derivative
+along that same curve. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_of_timeDifference_along_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Btime : E →L[ℝ] E →L[ℝ] ℝ}
+    (htime :
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+        Btime s t) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Btime +
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+            (X t ((G.maps3 t) x))))
+      s t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have hspace : HasDerivWithinAt (fun τ : ℝ ↦ B t (c τ))
+      ((fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+        ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+          (X t ((G.maps3 t) x)))) s t := by
+    simpa [B, c] using
+      Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_eval
+        (I := I) (M := M) G ht g x
+  have hmain :=
+    hasDerivWithinAt_of_timeDifference_and_frozenSpatial
+      (B := B) (c := c) htime hspace
+  simpa [B, c] using hmain
+
+/-- Endpoint/right-derivative version of the metric-coordinate time-difference
+bridge that subtracts the canonical frozen-spatial `fderivWithin` term. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt_and_frozenSpatial
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield'
+          (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))) -
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))))
+      s t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have hspace : HasDerivWithinAt (fun τ : ℝ ↦ B t (c τ))
+      ((fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+        ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+          ((G.maps3 t) x) (X t ((G.maps3 t) x)))) s t := by
+    simpa [B, c] using
+      Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_eval
+        (I := I) (M := M) G ht g x
+  have htime :=
+    hasDerivWithinAt_timeDifference_of_fullField_and_frozenSpatial
+      (B := B) (c := c)
+      (Bfield' := Bfield')
+      (Bspace :=
+        (fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))))
+      hB (G.hasDerivWithinAt_extChartAt_eval ht x) hspace
+  simpa [B, c] using htime
+
+/-- Readout-field version of
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt_and_frozenSpatial`.
+-/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_eventuallyEq_and_frozenSpatial
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq :
+      metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+        𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))] Bfield)
+    (hB : HasFDerivAt Bfield Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield'
+          (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))) -
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))))
+      s t := by
+  refine
+    Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt_and_frozenSpatial
       (I := I) (M := M) G ht g x ?_
   exact
     SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
@@ -3145,6 +3388,214 @@ theorem metricCoordinateFieldTimeDifferenceComponentDataOn_of_eventuallyEq_hasFD
         (I := I) (M := M) G (hs (t := t) ht) g x hEq hBfield
   · simpa [spatial, sub_eq_add_neg, add_assoc] using hvalue
 
+/-- Within-set endpoint version of
+`MetricCoordinateFieldTimeDifferenceComponentDataOn`.
+
+It keeps the same scalar velocity identity, but allows the time-difference and
+tangent-coordinate-map derivatives to be taken relative to the raw gauge-flow
+time set. -/
+def MetricCoordinateFieldTimeDifferenceComponentDataWithinOn
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M)) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s →
+    ∀ x : M, ∀ u v : TangentSpace I x,
+      ∃ (Btime : E →L[ℝ] E →L[ℝ] ℝ)
+        (D : E →L[ℝ] E),
+        HasDerivWithinAt
+          (fun τ : ℝ ↦
+            SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x)
+              (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+            SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x)
+              (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+          Btime s t ∧
+        HasDerivWithinAt
+          (fun τ : ℝ ↦
+            SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+              (I := I) (M := M) G.maps3 t τ x)
+          (D.comp
+            (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+              (I := I) (M := M) G.maps3 t t x)) s t ∧
+        (let spatial : E →L[ℝ] E →L[ℝ] ℝ :=
+          (fderivWithin ℝ
+            (fun yE : E ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+            (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+            (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+              ((G.maps3 t) x) (X t ((G.maps3 t) x)));
+          (Btime + spatial)
+            (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+              (I := I) (M := M) G.maps3 t t x
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+            (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+              (I := I) (M := M) G.maps3 t t x
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+            SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+              (I := I) (M := M) G.maps3 g t t x
+              (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+            SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+              (I := I) (M := M) G.maps3 g t t x
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+          gdot t x u v)
+
+/-- Full Fréchet derivatives of the named metric-coordinate field supply the
+within-set time-difference component data by subtracting the canonical frozen
+spatial `fderivWithin` contribution. -/
+theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_hasFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (D : E →L[ℝ] E),
+          HasFDerivAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield'
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t τ x)
+            (D.comp
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x)) s t ∧
+          Bfield'
+              (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+                ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    MetricCoordinateFieldTimeDifferenceComponentDataWithinOn (I := I) (M := M) G g gdot := by
+  intro t ht x u v
+  obtain ⟨Bfield', D, hBfield, hA, hvalue⟩ := hdata ht x u v
+  let spatial : E →L[ℝ] E →L[ℝ] ℝ :=
+    (fderivWithin ℝ
+      (fun yE : E ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+      (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+        ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+  refine ⟨Bfield'
+      (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+        ((G.maps3 t) x) (X t ((G.maps3 t) x))) - spatial,
+    D, ?_, hA, ?_⟩
+  · simpa [spatial] using
+      SmoothSelfDiffeomorph3Family.Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt_and_frozenSpatial
+        (I := I) (M := M) G ht g x hBfield
+  · simpa [spatial, sub_eq_add_neg, add_assoc] using hvalue
+
+/-- Readout-field version of
+`metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_hasFDerivAt`. -/
+theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_eventuallyEq_hasFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (D : E →L[ℝ] E),
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+              𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))]
+            Bfield ∧
+          HasFDerivAt Bfield Bfield'
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t τ x)
+            (D.comp
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x)) s t ∧
+          Bfield'
+              (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+                ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    MetricCoordinateFieldTimeDifferenceComponentDataWithinOn (I := I) (M := M) G g gdot := by
+  intro t ht x u v
+  obtain ⟨Bfield, Bfield', D, hEq, hBfield, hA, hvalue⟩ := hdata ht x u v
+  let spatial : E →L[ℝ] E →L[ℝ] ℝ :=
+    (fderivWithin ℝ
+      (fun yE : E ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+      (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+        ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+  refine ⟨Bfield'
+      (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+        ((G.maps3 t) x) (X t ((G.maps3 t) x))) - spatial,
+    D, ?_, hA, ?_⟩
+  · simpa [spatial] using
+      SmoothSelfDiffeomorph3Family.Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_eventuallyEq_and_frozenSpatial
+        (I := I) (M := M) G ht g x hEq hBfield
+  · simpa [spatial, sub_eq_add_neg, add_assoc] using hvalue
+
 /-- Raw gauge flows plus the remaining time-difference derivative for the named
 metric-coordinate field produce the concrete component-derivative package.
 
@@ -3197,6 +3648,82 @@ theorem coordinatePullbackMetricComponentDerivativeOn_of_metricCoordinateField_t
         (G.eventually_mem_trivializationAt_eval (hs (t := t) ht) x)
     exact hmetric.congr_of_eventuallyEq hB
   · simpa [spatial] using hvalue
+
+/-- Raw gauge flows plus within-set time-difference data for the named
+metric-coordinate field produce the closed-time-set concrete component package.
+-/
+theorem coordinatePullbackMetricComponentDerivativeWithinOn_of_metricCoordinateField_timeDifference
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : MetricCoordinateFieldTimeDifferenceComponentDataWithinOn
+      (I := I) (M := M) G g gdot) :
+    SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s := by
+  intro t ht x u v
+  obtain ⟨Btime, D, htime, hA, hvalue⟩ := hdata ht x u v
+  let spatial : E →L[ℝ] E →L[ℝ] ℝ :=
+    (fderivWithin ℝ
+      (fun yE : E ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+      (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+        ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+  refine ⟨Btime + spatial, D, ?_, hA, ?_⟩
+  · have hmetric :
+        HasDerivWithinAt
+          (fun τ : ℝ ↦
+            SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x)
+              (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+          (Btime + spatial) s t := by
+      simpa [spatial] using
+        SmoothSelfDiffeomorph3Family.Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_of_timeDifference_along_eval
+          (I := I) (M := M) G ht g x htime
+    have hB :
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+            (I := I) (M := M) G.maps3 g t τ x) =ᶠ[𝓝[s] t]
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) g ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))) :=
+      SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap_eventuallyWithinEq_metricBilinearCoordinateField
+        (I := I) (M := M) G.maps3 g (s := s) t x
+        (G.eventuallyWithin_mem_trivializationAt_eval ht x)
+    have hB_t :
+        SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+            (I := I) (M := M) G.maps3 g t t x =
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) g ((G.maps3 t) x)
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) := by
+      exact (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_base_eq_pullbackMetricBilinearCoordinateMap_self
+        (I := I) (M := M) G.maps3 g t x).symm
+    exact hmetric.congr_of_eventuallyEq hB hB_t
+  · simpa [spatial] using hvalue
+
+/-- Raw gauge flow plus within-set time-difference metric-coordinate data gives
+tensor time-regularity on the open interior of a closed Picard interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifferenceWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : MetricCoordinateFieldTimeDifferenceComponentDataWithinOn
+      (I := I) (M := M) G g gdot) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricComponentDerivativeWithinOn
+    (I := I) (M := M)
+    (G.coordinatePullbackMetricComponentDerivativeWithinOn_of_metricCoordinateField_timeDifference
+      hdata)
+    (fun {t} ht x u v ↦
+      G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+        (t := t) ht g x u v)
 
 /-- Raw gauge flow plus time-difference metric-coordinate data gives tensor
 time-regularity at neighborhood-times. -/
@@ -3333,6 +3860,123 @@ theorem hasTimeDerivativeOn_of_eventuallyEq_metricCoordinateField_hasFDerivAt
     HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
   G.hasTimeDerivativeOn_of_metricCoordinateField_timeDifference hs
     (G.metricCoordinateFieldTimeDifferenceComponentDataOn_of_eventuallyEq_hasFDerivAt hs hdata)
+
+/-- Closed-interval endpoint version of
+`hasTimeDerivativeOn_of_metricCoordinateField_hasFDerivAt`.
+
+Here the metric-coordinate field still supplies an ordinary full Fréchet
+derivative at the endpoint coordinate, while the tangent-coordinate map is only
+differentiated within the closed Picard interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAtWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (D : E →L[ℝ] E),
+          HasFDerivAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield'
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t τ x)
+            (D.comp
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x)) (Icc tmin tmax) t ∧
+          Bfield'
+              (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+                ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifferenceWithin
+    (G.metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_hasFDerivAt hdata)
+
+/-- Readout-field version of
+`hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAtWithin`. -/
+theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAtWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (D : E →L[ℝ] E),
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+              𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))]
+            Bfield ∧
+          HasFDerivAt Bfield Bfield'
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t τ x)
+            (D.comp
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x)) (Icc tmin tmax) t ∧
+          Bfield'
+              (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+                ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifferenceWithin
+    (G.metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_eventuallyEq_hasFDerivAt
+      hdata)
 
 /-- Closed-Picard-interval specialization of
 `hasTimeDerivativeOn_of_metricCoordinateField_timeDifference` on the open

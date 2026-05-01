@@ -179,7 +179,17 @@ within-set chain-rule primitives:
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`
 differentiate `B(τ, c(τ)) - B(t, c(τ))` directly at closed-interval endpoints;
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_eventuallyEq`
-is the matching finite-cover/readout-field form.
+is the matching finite-cover/readout-field form. This endpoint time-difference
+layer now also subtracts the canonical frozen-spatial `fderivWithin` term, via
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt_and_frozenSpatial`
+and its readout-field companion, so callers can use the same `Bfull - spatial`
+shape at endpoints as on neighborhood-time interiors. The within-set package
+`MetricCoordinateFieldTimeDifferenceComponentDataWithinOn` feeds those
+endpoint time-difference and tangent-map derivatives into
+`CoordinatePullbackMetricComponentDerivativeWithinOn`; the wrapper
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifferenceWithin`
+then routes that closed-interval component package directly to interior tensor
+time-regularity.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package
@@ -436,7 +446,15 @@ turns that same readout shape directly into `HasTimeDerivativeOn` for raw
 The closed-Picard interior specialization
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt`
 then packages the same readout route on `Ioo tmin tmax`, matching the interval
-shape used by the variational local-flow endpoints.
+shape used by the variational local-flow endpoints. The endpoint/right-derivative
+analogue is now also packaged:
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAtWithin`
+and
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAtWithin`
+accept full metric-coordinate Fréchet data together with closed-interval
+`HasDerivWithinAt` tangent-coordinate-map data and produce the same interior
+tensor time-regularity conclusion without requiring the endpoint time set to be
+a neighborhood.
 The variational tangent-map layer also has a direct readout-field entry point:
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMap`
 accepts the finite-cover/Banach two-variable readout before the base-flow
