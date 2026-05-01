@@ -691,7 +691,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        provides that readout in the required vector-valued shape:
        Banach local solutions, continuous-metric curves, and smooth
        realizations inherit `HasDerivAt` for the entire coordinate bilinear form
-       as an `F →L[ℝ] F →L[ℝ] ℝ` value, not only after applying two vector slots.
+       as an `F →L[ℝ] F →L[ℝ] ℝ` value, not only after applying two vector slots,
+       with matching one-sided `HasDerivWithinAt` variants on `Ici t` for
+       endpoint/boundary-reduced routes.
        Closed-Picard
        raw gauge flows now specialize directly to the open interior interval for
        coordinate-model/field time-derivative bridges, including a one-step

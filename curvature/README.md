@@ -260,7 +260,8 @@ now packages the matching intrinsic boundary
        bilinear-form readout as an `F →L[ℝ] F →L[ℝ] ℝ` value for Banach local
        solutions, reified continuous metric curves, and smooth realizations, so
        the Banach Picard metric curve feeds that weaker time-only interface
-       before choosing tangent-vector slots.
+       before choosing tangent-vector slots; matching one-sided `Ici t`
+       endpoint variants feed the boundary-reduced theorem routes.
        Closed-Picard
        raw gauge flows also feed the coordinate-model/field time-derivative
        bridges directly on the open interior interval, with a one-step theorem

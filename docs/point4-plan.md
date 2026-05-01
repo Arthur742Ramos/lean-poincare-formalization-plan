@@ -289,8 +289,10 @@ now supplies exactly this vector-valued readout derivative:
 `BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_hasDerivAt_of_mem_Ioo`
 and its continuous-metric / smooth-realization variants differentiate the whole
 coordinate bilinear form as an element of `E →L[ℝ] E →L[ℝ] ℝ`, before applying
-it to tangent vectors.  This connects the Banach Picard metric curve directly to
-the weaker time-only dynamic pullback interface.
+it to tangent vectors; matching one-sided `HasDerivWithinAt` variants on
+`Ici t` are also available at the Picard interval endpoints.  This connects the
+Banach Picard metric curve directly to the weaker time-only dynamic pullback
+interface on both interior and boundary-reduced routes.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
