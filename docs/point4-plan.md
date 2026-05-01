@@ -374,6 +374,10 @@ builds the reusable time-difference component data, and
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_of_eventuallyEq_metricCoordinateField_hasFDerivAt`
 turns that same readout shape directly into `HasTimeDerivativeOn` for raw
 `C³` gauge flows at neighborhood-times.
+The closed-Picard interior specialization
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt`
+then packages the same readout route on `Ioo tmin tmax`, matching the interval
+shape used by the variational local-flow endpoints.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

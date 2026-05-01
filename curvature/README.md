@@ -323,7 +323,8 @@ now packages the matching intrinsic boundary
           readouts, and the primitive time-difference decomposition now has its
           own readout-field theorem before subtracting the frozen spatial
           derivative, lifted through component data to a raw
-          `HasTimeDerivativeOn` endpoint for `C³` gauge flows; the geometric
+          `HasTimeDerivativeOn` endpoint for `C³` gauge flows and its
+          open-interior specialization; the geometric
           corrected-velocity layer also now turns
          vanishing pulled-back background Ricci curvature directly into vanishing
          concrete `C³` gauge-corrected pullback velocity through a named theorem,
