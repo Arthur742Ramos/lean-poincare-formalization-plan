@@ -533,7 +533,8 @@ now packages the matching intrinsic boundary
      flows, their closed-interval ODE derivative, initial-data Lipschitz
      dependence, continuous space-time partial flows, restriction maps to smaller
      Picard intervals and initial balls with matching `Nonempty` wrappers,
-     readout simp lemmas for localized flow/tangent maps, overlap uniqueness for local and
+     readout simp lemmas for localized flow/tangent maps and forgetful projections,
+     overlap uniqueness for local and
      continuous base-flow packages plus variational tangent maps and full
      `(flow, tangent)` pairs with different centers/radii, and autonomous
      `C¹` integral

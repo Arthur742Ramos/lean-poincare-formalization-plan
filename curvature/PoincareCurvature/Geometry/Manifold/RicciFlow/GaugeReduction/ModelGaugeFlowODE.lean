@@ -538,6 +538,14 @@ def restrict
     {r' : ℝ≥0} (hr : r' ≤ r) :
     (α.restrict htime ht₀' hr).flow = α.flow := rfl
 
+@[simp] theorem restrict_toLocalFlowSolution
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    (α.restrict htime ht₀' hr).toLocalFlowSolution =
+      α.toLocalFlowSolution.restrict htime ht₀' hr := rfl
+
 /-- Restrict a nonempty continuous local-flow existence witness to a smaller
 initial ball and closed time interval. -/
 theorem nonempty_restrict
@@ -1072,6 +1080,22 @@ def restrict
     (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
     {r' : ℝ≥0} (hr : r' ≤ r) :
     (α.restrict htime ht₀' hr).tangent = α.tangent := rfl
+
+@[simp] theorem restrict_toContinuousLocalFlowSolution
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    (α.restrict htime ht₀' hr).toContinuousLocalFlowSolution =
+      α.toContinuousLocalFlowSolution.restrict htime ht₀' hr := rfl
+
+@[simp] theorem restrict_toLocalFlowSolution
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    (α.restrict htime ht₀' hr).toLocalFlowSolution =
+      α.toLocalFlowSolution.restrict htime ht₀' hr := rfl
 
 /-- Restrict a nonempty variational local-flow existence witness to a smaller
 initial ball and closed time interval. -/
