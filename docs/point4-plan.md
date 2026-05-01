@@ -888,7 +888,9 @@ compact point-4 theorem packages through the raw identity gauge:
 It now also gives the genuine symmetric-carrier interval closure data the same
 proof-level readout shape for chosen-background, intrinsic, and ordinary
 compact theorem packages, plus proof-level intrinsic and ordinary theorem-family
-witnesses from a family of symmetric-carrier interval closure data.
+witnesses from a family of symmetric-carrier interval closure data. The same
+`Nonempty` theorem-family wrappers are available for families of global and
+closed-interval `RicciDeTurckChartClosureData`.
 
 **Suggested decomposition** (multi-session):
 

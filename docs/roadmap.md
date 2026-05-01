@@ -1119,7 +1119,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      theorem packages, and does the same for the genuine symmetric-carrier
      interval closure data across the chosen-background, intrinsic, and ordinary
      theorem packages, including intrinsic and ordinary theorem-family witnesses
-     from a family of symmetric-carrier interval closure data.
+     from a family of symmetric-carrier interval closure data. Families of global
+     and closed-interval `RicciDeTurckChartClosureData` now have the same
+     proof-level intrinsic and ordinary theorem-family wrappers.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence

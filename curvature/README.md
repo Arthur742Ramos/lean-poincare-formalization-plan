@@ -601,8 +601,10 @@ now packages the matching intrinsic boundary
      `Nonempty` witnesses, and does the same for the genuine symmetric-carrier
      interval closure data across the chosen-background, intrinsic, and ordinary
      theorem packages, including intrinsic and ordinary theorem-family witnesses
-     from a family of symmetric-carrier interval closure data, leaving the heavy
-     PDE realization module unchanged.
+     from a family of symmetric-carrier interval closure data. Families of global
+     and closed-interval `RicciDeTurckChartClosureData` now have the same
+     proof-level intrinsic and ordinary theorem-family wrappers, leaving the
+     heavy PDE realization module unchanged.
      The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
