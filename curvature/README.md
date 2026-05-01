@@ -244,7 +244,9 @@ now packages the matching intrinsic boundary
        bridge now transfers the closed-interval geometric-slot variational theorem
        from any locally equal finite-cover metric-coordinate bilinear-form readout,
        matching the Banach readout output shape before interior tensor
-       time-regularity is derived. Its closed-ball
+       time-regularity is derived; a model-coordinate endpoint companion compares
+       the variational ODE velocity with the raw gauge velocity using
+       within-time-set agreement. Its closed-ball
        specialization now assembles product `IsPicardLindelof` witnesses and a
        one-step variational local-flow constructor from base/linearized
        closed-ball estimates plus the standard Picard continuity, norm, and

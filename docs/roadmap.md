@@ -929,7 +929,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalTangentMapWithin_geometricValue`,
               transferring the full endpoint Fréchet derivative from any locally
               equal finite-cover bilinear-form readout before applying the
-              geometric-slot variational endpoint theorem. On the PDE side,
+              geometric-slot variational endpoint theorem. A model-coordinate
+              endpoint companion,
+              `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAt_variationalLocalFlowWithin_geometricValue`,
+              now derives the raw gauge velocity from within-time-set agreement
+              with the variational local flow, so endpoint scalar identities can
+              be stated using the model ODE vector field `f(t, y(t))`. On the PDE side,
               `SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_base_hasDerivAt_chartRHS_of_mem_Ioo`
               and its `sourceTangentCoordinate` scalar-slot variant now expose
               the Banach chart right-hand side as a centered derivative of the
