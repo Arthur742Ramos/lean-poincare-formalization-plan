@@ -334,7 +334,8 @@ now packages the matching intrinsic boundary
            scalar form used by geometric gauge-pullback calculations, and now
            packages the same chart RHS as raw identity-gauge scalar derivative
            data plus the corresponding identity-pullback tensor derivative on the
-           open Banach interval; the geometric
+           open Banach interval, with closed-left endpoint/right-derivative
+           forms for the centered metric-coordinate field; the geometric
            corrected-velocity layer also now turns
          vanishing pulled-back background Ricci curvature directly into vanishing
          concrete `C³` gauge-corrected pullback velocity through a named theorem,

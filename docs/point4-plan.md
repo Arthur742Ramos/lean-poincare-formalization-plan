@@ -398,6 +398,10 @@ scalar derivative obligation,
 and as the corresponding tensor time-derivative statement for the identity
 pullback metric family,
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.id_pullbackMetricFamily_hasTimeDerivativeOn_Ioo_chartRHS`.
+The centered metric-coordinate bridge also reaches the closed-left endpoint:
+`metricBilinearCoordinateField_base_hasDerivWithinAt_Ici_chartRHS_of_mem_Ico`
+and its `sourceTangentCoordinate` variant expose the Banach chart RHS as a
+right derivative on `Ici t` throughout `Ico ivp.initialTime sol.terminalTime`.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

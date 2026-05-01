@@ -916,7 +916,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               packages the smooth Banach realization's chart RHS as raw
               identity-gauge scalar derivative data on the open Banach interval,
               with a matching identity-pullback tensor `HasTimeDerivativeOn`
-              endpoint.
+              endpoint. The centered `metricBilinearCoordinateField` bridge also
+              has closed-left endpoint/right-derivative forms on `Ici t` for
+              `t ∈ Ico ivp.initialTime sol.terminalTime`.
               On the geometric
               velocity side,
           `gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`
