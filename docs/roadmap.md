@@ -856,7 +856,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          from the full Fréchet derivative of `metricBilinearCoordinateField`
          minus the already-proved frozen spatial `fderivWithin` term, with a
          raw-flow specialization for the actual gauge coordinate curve, so the
-         finite-cover field readout can feed this formulation directly. The
+         finite-cover field readout can feed this formulation directly; a
+         raw-flow component-data constructor and tensor endpoint now package the
+         required `Btime = Bfull - spatial` subtraction automatically. The
          closed-Picard API now also exposes the combined endpoint
          `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_variationalTangentMap`,
          where a full field Fréchet derivative plus a variational tangent-map

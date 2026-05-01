@@ -305,7 +305,11 @@ of `metricBilinearCoordinateField` after subtracting the already-proved frozen
 spatial `fderivWithin` term. Thus the time-difference route is aligned with the
 Banach finite-cover readout shape: a full field derivative can now feed the
 closed-Picard component package without a separate hand-written difference
-calculation.
+calculation. This is also packaged as the raw-flow component-data constructor
+`Diffeomorph3GaugeFlowOn.metricCoordinateFieldTimeDifferenceComponentDataOn_of_hasFDerivAt`
+and tensor endpoint
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_of_metricCoordinateField_hasFDerivAt`,
+which hide the `Btime = Bfull - spatial` subtraction from callers.
 The tangent-map part has also been extracted as the reusable lemma
 `SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`:
 eventual equality between the concrete `pullbackMetricTangentCoordinateMap` and
