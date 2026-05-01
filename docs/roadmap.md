@@ -1113,7 +1113,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      also expose proof-level smooth-realization witnesses, the self-encoding of
      realized candidates, and proof-level candidate encodings via named
      `nonempty_realization`, `realizationCandidateEncoding`, and
-     `nonempty_candidateEncoding` readouts.
+     `nonempty_candidateEncoding` readouts. The thin raw-gauge route module now
+     mirrors its global and interval theorem-package projections as proof-level
+     `Nonempty` witnesses for both intrinsic and ordinary compact point-4
+     theorem packages.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence

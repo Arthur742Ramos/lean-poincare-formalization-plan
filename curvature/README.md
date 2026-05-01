@@ -595,8 +595,11 @@ now packages the matching intrinsic boundary
      raw-gauge scalar/tensor derivative data directly; the global and interval
      chart-closure records also now expose named `nonempty_realization`,
      `realizationCandidateEncoding`, and `nonempty_candidateEncoding` readouts
-     for their stored realization and reverse-encoding fields, leaving the heavy
-     PDE realization module unchanged. The
+     for their stored realization and reverse-encoding fields. The thin
+     raw-gauge route module mirrors its global and interval projections to
+     intrinsic and ordinary compact point-4 theorem packages as proof-level
+     `Nonempty` witnesses, leaving the heavy PDE realization module unchanged.
+     The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic

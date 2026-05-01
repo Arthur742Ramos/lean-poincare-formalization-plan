@@ -880,6 +880,11 @@ both the global and closed-interval packages:
 `nonempty_candidateEncoding`. These wrappers expose the already-stored smooth
 realization and reverse encoding fields without reproving or destructing the
 closure data, but they do not supply the missing Schauder/parabolic estimates.
+The thin raw-gauge route module also now has proof-level `Nonempty` wrappers
+for the global and interval closure-data projections to intrinsic and ordinary
+compact point-4 theorem packages through the raw identity gauge:
+`nonempty_intrinsicLocalExistenceUniqueness_viaRawIdentityGauge` and
+`nonempty_localExistenceUniqueness_viaRawIdentityGauge`.
 
 **Suggested decomposition** (multi-session):
 
