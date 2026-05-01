@@ -337,7 +337,9 @@ now packages the matching intrinsic boundary
    proving the corrected velocity and pulled metric components vanish, and
    exposes direct gauge-reduced projections plus matching model-space,
    empty-manifold, and raw-existence theorem-package routes that need no extra
-   derivative input. Two new thin extension
+   derivative input; it also exposes ordinary point-4 theorem-family endpoints
+   routed through the full raw `C³` gauge-flow chain in the subsingleton-tangent,
+   subsingleton-model, and empty-manifold cases. Two new thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`

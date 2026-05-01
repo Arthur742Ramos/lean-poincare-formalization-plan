@@ -566,4 +566,68 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaG
     LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
   (pkg.toIntrinsic_viaGaugeFlowExistence_of_subsingleton_tangent G).toOrdinary
 
+section Compact
+
+variable [CompactSpace M]
+
+/-- Zero-dimensional fixed-IVP point-4 closure routed through raw `C^3`
+intrinsic gauge-flow existence.  This deliberately uses the same
+chosen-DeTurck-to-gauge-reduced path as the general point-4 theorem interface. -/
+noncomputable def localExistenceUniqueness_viaGaugeFlowExistence_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (chosenIntrinsicDeTurckLocalExistenceUniqueness_of_subsingleton_tangent
+      (I := I) (M := M) ivp).toOrdinary_viaGaugeFlowExistence_of_subsingleton_tangent
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonTangent
+      (I := I) (M := M) ivp)
+
+/-- Zero-dimensional theorem-family point-4 closure routed through raw `C^3`
+intrinsic gauge-flow existence. -/
+noncomputable def localExistenceUniquenessFamily_viaGaugeFlowExistence_of_subsingleton_tangent
+    [∀ x : M, Subsingleton (TM x)] :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (chosenIntrinsicDeTurckLocalExistenceUniquenessFamily_of_subsingleton_tangent
+      (I := I) (M := M)).toOrdinaryFamily_viaGaugeFlowExistence_of_subsingleton_tangent
+    (IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonTangent
+      (I := I) (M := M))
+
+/-- Model-space synonym of
+`localExistenceUniqueness_viaGaugeFlowExistence_of_subsingleton_tangent`. -/
+noncomputable def localExistenceUniqueness_viaGaugeFlowExistence_of_subsingleton_model
+    [Subsingleton E]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  localExistenceUniqueness_viaGaugeFlowExistence_of_subsingleton_tangent
+    (I := I) (M := M) ivp
+
+/-- Theorem-family model-space synonym of
+`localExistenceUniquenessFamily_viaGaugeFlowExistence_of_subsingleton_tangent`. -/
+noncomputable def localExistenceUniquenessFamily_viaGaugeFlowExistence_of_subsingleton_model
+    [Subsingleton E] :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  localExistenceUniquenessFamily_viaGaugeFlowExistence_of_subsingleton_tangent
+    (I := I) (M := M)
+
+/-- Empty-manifold fixed-IVP point-4 closure routed through raw `C^3`
+intrinsic gauge-flow existence. -/
+noncomputable def localExistenceUniqueness_viaGaugeFlowExistence_of_isEmpty
+    [IsEmpty M]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp := by
+  letI : ∀ x : M, Subsingleton (TM x) := fun x ↦ isEmptyElim x
+  exact localExistenceUniqueness_viaGaugeFlowExistence_of_subsingleton_tangent
+    (I := I) (M := M) ivp
+
+/-- Empty-manifold theorem-family point-4 closure routed through raw `C^3`
+intrinsic gauge-flow existence. -/
+noncomputable def localExistenceUniquenessFamily_viaGaugeFlowExistence_of_isEmpty
+    [IsEmpty M] :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) := by
+  letI : ∀ x : M, Subsingleton (TM x) := fun x ↦ isEmptyElim x
+  exact localExistenceUniquenessFamily_viaGaugeFlowExistence_of_subsingleton_tangent
+    (I := I) (M := M)
+
+end Compact
+
 end RicciFlow

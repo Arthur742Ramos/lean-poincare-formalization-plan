@@ -102,6 +102,9 @@ The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
 model-space/empty-manifold/raw-existence synonyms.
+The same module now also exposes ordinary point-4 theorem-family endpoints
+routed through the full chosen-DeTurck → raw `C³` gauge-flow → gauge-reduced
+chain in the subsingleton-tangent, subsingleton-model, and empty-manifold cases.
 
 **Module location.** A new module
 `Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowTimeDerivative.lean`

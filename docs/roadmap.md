@@ -665,7 +665,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     DeTurck gauge-flow families by componentwise vanishing, with direct
     gauge-reduced projections and matching model-space/empty-manifold synonyms
     plus raw gauge-flow-existence theorem-package routes requiring no extra
-    derivative input. What still
+    derivative input; the ordinary theorem-family endpoint is now also available
+    through that full chosen-DeTurck → raw `C³` gauge-flow → gauge-reduced chain
+    in the subsingleton-tangent, subsingleton-model, and empty-manifold cases.
+    What still
     remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
     theorem producing raw gauge flows with the required regularity in the
