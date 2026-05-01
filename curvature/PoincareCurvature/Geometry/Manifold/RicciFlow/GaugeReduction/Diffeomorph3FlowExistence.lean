@@ -41,6 +41,21 @@ structure Diffeomorph3GaugeFlowOn
 
 namespace Diffeomorph3GaugeFlowOn
 
+/-- Package a geometric `SatisfiesGaugeFlowOn` statement as a raw `C^3`
+diffeomorphism gauge-flow witness. -/
+def of_satisfiesGaugeFlowOn
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (satisfies : SatisfiesGaugeFlowOn (I := I) (M := M)
+      maps3.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily X s) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ where
+  maps3 := maps3
+  anchored := anchored
+  satisfies := satisfies
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness from the pointwise
 manifold derivative form produced by ODE/integral-curve theorems. -/
 noncomputable def of_hasMFDerivWithinAt
@@ -316,6 +331,46 @@ def toDiffeomorph3GaugeFlow
   anchored := fun sol ↦ (G.flow sol).anchored
   satisfies := fun sol ↦ (G.flow sol).satisfies
 
+/-- Package a fixed-IVP geometric intrinsic DeTurck gauge-flow bundle as raw
+gauge-flow existence data. -/
+def ofDiffeomorph3GaugeFlow
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  flow := fun sol ↦
+    Diffeomorph3GaugeFlowOn.of_satisfiesGaugeFlowOn
+      (I := I) (M := M)
+      (X := intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (t₀ := ivp.initialTime)
+      (G.maps3 sol) (G.anchored sol) (G.satisfies sol)
+
+/-- Package fixed-IVP named derivative data as raw gauge-flow existence data. -/
+noncomputable def ofDerivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hflowDeriv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      Diffeomorph3IntrinsicGaugeFlowDerivativeOn (I := I) (M := M)
+        (maps3 sol)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background
+        sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  of_hasMFDerivWithinAt (I := I) (M := M) (ivp := ivp)
+    maps3 anchored hflowDeriv
+
 @[simp] theorem toDiffeomorph3GaugeFlow_maps3
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
@@ -457,6 +512,37 @@ def toDiffeomorph3GaugeFlowFamily
   maps3 := fun ivp sol ↦ (G.flow ivp sol).maps3
   anchored := fun ivp sol ↦ (G.flow ivp sol).anchored
   satisfies := fun ivp sol ↦ (G.flow ivp sol).satisfies
+
+/-- Package a theorem-family geometric intrinsic DeTurck gauge-flow bundle as raw
+gauge-flow existence data. -/
+def ofDiffeomorph3GaugeFlowFamily
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  flow := fun ivp sol ↦
+    (IntrinsicDeTurckGaugeFlowExistence.ofDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M)
+      (G.forInitialValueProblem ivp)).flow sol
+
+/-- Package theorem-family named derivative data as raw gauge-flow existence
+data. -/
+noncomputable def ofDerivativeFamily
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hflowDeriv : ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+      (I := I) (M := M) maps3) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  of_hasMFDerivWithinAt (I := I) (M := M)
+    maps3 anchored hflowDeriv
 
 /-- The family-level chosen-background raw flow induces the same anchored gauge as the existing
 identity `C³` gauge attached to a chosen-background solution. -/

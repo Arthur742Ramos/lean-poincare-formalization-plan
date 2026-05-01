@@ -652,9 +652,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     time-derivative proofs or scalar inner-product derivative proofs. The raw
     flow layer also has fixed-IVP and theorem-family constructors from both
     pointwise `HasMFDerivAt[s]` and unrestricted `HasMFDerivAt` data produced by
-    ODE/integral-curve theorems, plus time-set restriction for raw flows, so
-    future manifold-flow existence results can plug in without a separate
-    `SatisfiesGaugeFlowOn` packaging step. Thus the
+    ODE/integral-curve theorems, named-derivative-family adapters,
+    geometric-to-raw adapters, and time-set restriction for raw flows, so
+    future manifold-flow existence results can plug in through either derivative
+    data or existing geometric gauge-flow bundles without a separate
+    `SatisfiesGaugeFlowOn` repackaging step. Thus the
     full point-4 input chain has no gauge-flow gap in any of the
     currently-proved special cases. The
     non-identity gauge time-regularity
