@@ -600,7 +600,9 @@ now packages the matching intrinsic boundary
      intrinsic and ordinary compact point-4 theorem packages as proof-level
      `Nonempty` witnesses, and does the same for the genuine symmetric-carrier
      interval closure data across the chosen-background, intrinsic, and ordinary
-     theorem packages, leaving the heavy PDE realization module unchanged.
+     theorem packages, including intrinsic and ordinary theorem-family witnesses
+     from a family of symmetric-carrier interval closure data, leaving the heavy
+     PDE realization module unchanged.
      The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation

@@ -887,7 +887,8 @@ compact point-4 theorem packages through the raw identity gauge:
 `nonempty_localExistenceUniqueness_viaRawIdentityGauge`.
 It now also gives the genuine symmetric-carrier interval closure data the same
 proof-level readout shape for chosen-background, intrinsic, and ordinary
-compact theorem packages.
+compact theorem packages, plus proof-level intrinsic and ordinary theorem-family
+witnesses from a family of symmetric-carrier interval closure data.
 
 **Suggested decomposition** (multi-session):
 

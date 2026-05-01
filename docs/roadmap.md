@@ -1118,7 +1118,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      `Nonempty` witnesses for both intrinsic and ordinary compact point-4
      theorem packages, and does the same for the genuine symmetric-carrier
      interval closure data across the chosen-background, intrinsic, and ordinary
-     theorem packages.
+     theorem packages, including intrinsic and ordinary theorem-family witnesses
+     from a family of symmetric-carrier interval closure data.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
