@@ -322,7 +322,9 @@ now packages the matching intrinsic boundary
           exposing the chart algebra needed for Banach finite-cover metric
           readouts, and the primitive time-difference decomposition now has its
           own readout-field theorem before subtracting the frozen spatial
-          derivative; the geometric corrected-velocity layer also now turns
+          derivative, lifted through component data to a raw
+          `HasTimeDerivativeOn` endpoint for `C³` gauge flows; the geometric
+          corrected-velocity layer also now turns
          vanishing pulled-back background Ricci curvature directly into vanishing
          concrete `C³` gauge-corrected pullback velocity through a named theorem,
          including an initial-time specialization,

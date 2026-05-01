@@ -368,6 +368,12 @@ now lets a locally equal finite-cover/Banach readout supply the full field
 derivative before subtracting the frozen spatial derivative, so later arguments
 can enter the time-difference route without first rewriting to the higher-level
 endpoint.
+The corresponding package-level endpoint is now named as well:
+`Diffeomorph3GaugeFlowOn.metricCoordinateFieldTimeDifferenceComponentDataOn_of_eventuallyEq_hasFDerivAt`
+builds the reusable time-difference component data, and
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_of_eventuallyEq_metricCoordinateField_hasFDerivAt`
+turns that same readout shape directly into `HasTimeDerivativeOn` for raw
+`C³` gauge flows at neighborhood-times.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

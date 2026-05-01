@@ -894,7 +894,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
            time-difference decomposition also has a readout-field theorem,
            `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_eventuallyEq`,
            so locally equal Banach readouts can feed the full-field derivative
-           before the frozen spatial derivative is subtracted. On the geometric
+           before the frozen spatial derivative is subtracted. This is lifted to
+           the reusable component-data package by
+           `Diffeomorph3GaugeFlowOn.metricCoordinateFieldTimeDifferenceComponentDataOn_of_eventuallyEq_hasFDerivAt`
+           and all the way to raw gauge-pulled metric time-regularity by
+           `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_of_eventuallyEq_metricCoordinateField_hasFDerivAt`.
+           On the geometric
            velocity side,
           `gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_of_pullbackBackgroundRicciCurvature_eq_zero`
           now turns vanishing pulled-back background Ricci curvature directly
