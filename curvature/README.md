@@ -282,7 +282,8 @@ now packages the matching intrinsic boundary
        and slot-specialized forms for actual tangent vectors, plus a named
        `tangentVectorOfCoordinate` inverse for switching back to geometric tangent
        vectors; a geometric-slot raw-flow bridge now states the remaining scalar
-       velocity identity in actual pushed-forward tangent-vector terms,
+       velocity identity in actual pushed-forward tangent-vector terms and routes
+       that data directly to tensor time-regularity,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

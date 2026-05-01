@@ -824,7 +824,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         `tangentVectorOfCoordinate` to switch back from model coordinates. A
         geometric-slot raw-flow bridge now lets the remaining scalar velocity
         identity be stated in actual pushed-forward tangent-vector terms while
-        keeping centered-coordinate derivative inputs.
+        keeping centered-coordinate derivative inputs, with a direct tensor
+        time-regularity wrapper for that data.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an
