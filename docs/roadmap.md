@@ -816,7 +816,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         this identification to build the field-level coordinate derivative
         package directly from the Fréchet derivative of
         `metricBilinearCoordinateField`, the derivative of the concrete tangent
-        coordinate map, and the scalar velocity identity.
+        coordinate map, and the scalar velocity identity; base-time
+        simplification lemmas reduce those field and tangent components to the
+        ordinary metric in the centered tangent trivialization and the gauge
+        pushforward tangent vector in target coordinates.
         The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an

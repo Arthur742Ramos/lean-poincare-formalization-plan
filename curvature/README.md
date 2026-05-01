@@ -277,6 +277,8 @@ now packages the matching intrinsic boundary
        coordinate curve; the raw-flow bridge now builds the field-level
        coordinate derivative package from the derivative of that field, the
        concrete tangent-coordinate derivative, and the scalar velocity identity,
+       with base-time simplification lemmas reducing those components to the
+       ordinary metric and pushforward tangent vector in centered coordinates,
        exposing the chart algebra needed for Banach finite-cover metric readouts. The
        raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a

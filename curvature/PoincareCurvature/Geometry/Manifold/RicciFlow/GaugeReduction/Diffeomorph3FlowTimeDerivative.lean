@@ -447,6 +447,48 @@ theorem pullbackMetricBilinearCoordinateMap_eventuallyEq_metricBilinearCoordinat
         uE) vE
   rw [hy]
 
+/-- At the chart center, the named metric-coordinate field is just the metric
+read in the tangent trivialization centered at that point. -/
+theorem metricBilinearCoordinateField_base_apply_eq
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M) (uE vE : E) :
+    metricBilinearCoordinateField (I := I) (M := M) g p
+        (t, (extChartAt I p) p) uE vE =
+      (g t).inner p
+        (((trivializationAt E (TangentSpace I : M → Type _) p).continuousLinearEquivAt ℝ p
+          (FiberBundle.mem_baseSet_trivializationAt' p)).symm uE)
+        (((trivializationAt E (TangentSpace I : M → Type _) p).continuousLinearEquivAt ℝ p
+          (FiberBundle.mem_baseSet_trivializationAt' p)).symm vE) := by
+  let TM := (TangentSpace I : M → Type _)
+  have hsrc : p ∈ (extChartAt I p).source := mem_extChartAt_source p
+  have hy : (extChartAt I p).symm ((extChartAt I p) p) = p :=
+    PartialEquiv.left_inv _ hsrc
+  change
+    (ContinuousLinearMap.inCoordinates E TM (E →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      p ((extChartAt I p).symm ((extChartAt I p) p))
+      p ((extChartAt I p).symm ((extChartAt I p) p))
+      ((g t).inner ((extChartAt I p).symm ((extChartAt I p) p))) uE) vE =
+      (g t).inner p
+        (((trivializationAt E TM p).continuousLinearEquivAt ℝ p
+          (FiberBundle.mem_baseSet_trivializationAt' p)).symm uE)
+        (((trivializationAt E TM p).continuousLinearEquivAt ℝ p
+          (FiberBundle.mem_baseSet_trivializationAt' p)).symm vE)
+  rw [hy]
+  erw [_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
+    (F := E) (W := TM) (x0 := p) (x := p)
+    (FiberBundle.mem_baseSet_trivializationAt' p) ((g t).inner p) uE vE]
+
+/-- At the base time, the two-variable metric-coordinate field agrees with the
+concrete moving bilinear coordinate component. -/
+theorem metricBilinearCoordinateField_base_eq_pullbackMetricBilinearCoordinateMap_self
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (x : M) :
+    metricBilinearCoordinateField (I := I) (M := M) g ((Φ t) x)
+        (t, (extChartAt I ((Φ t) x)) ((Φ t) x)) =
+      pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x := by
+  ext uE vE
+  rw [metricBilinearCoordinateField_base_apply_eq,
+    pullbackMetricBilinearCoordinateMap_self_apply_eq]
+
 /-- Concrete formula for the tangent-coordinate component `A(τ)`: it is the
 pushforward tangent map read in the source and target tangent trivializations. -/
 theorem pullbackMetricTangentCoordinateMap_apply_eq
@@ -493,6 +535,20 @@ theorem pullbackMetricTangentCoordinateMap_sourceTangentCoordinate_eq
     pullbackMetricTangentCoordinateMap_apply_eq
       (I := I) (M := M) Φ t τ x hφx (sourceTangentCoordinate (I := I) x u)
   simpa [sourceTangentCoordinate] using h
+
+/-- Base-time specialization of the tangent-coordinate component applied to a
+source tangent vector. -/
+theorem pullbackMetricTangentCoordinateMap_self_sourceTangentCoordinate_eq
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t : ℝ) (x : M) (u : TangentSpace I x) :
+    pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+        (sourceTangentCoordinate (I := I) x u) =
+      ((trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).continuousLinearEquivAt ℝ
+        ((Φ t) x) (FiberBundle.mem_baseSet_trivializationAt' ((Φ t) x)))
+        ((Φ t).pushforwardTangent x u) :=
+  pullbackMetricTangentCoordinateMap_sourceTangentCoordinate_eq
+    (I := I) (M := M) Φ t t x
+    (FiberBundle.mem_baseSet_trivializationAt' ((Φ t) x)) u
 
 /-- Once the gauge image lies in the target trivialization centered at the
 time-`t` image, the named coordinate model is definitionally the geometric

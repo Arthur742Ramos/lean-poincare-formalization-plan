@@ -249,7 +249,11 @@ now consumes this: it automatically constructs the field-level scalar model
 equality from the concrete `B(τ)`/`A(τ)` formulas and the raw coordinate curve.
 The remaining local inputs are therefore the Fréchet derivative of
 `metricBilinearCoordinateField`, the derivative of the concrete tangent
-coordinate map, and the scalar velocity identity.
+coordinate map, and the scalar velocity identity. Base-time simplification
+lemmas now identify `metricBilinearCoordinateField` at `(t, extChartAt p p)`
+with the ordinary metric in the tangent trivialization at `p`, and identify the
+base-time concrete tangent-coordinate component with the gauge pushforward
+tangent vector in target coordinates.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
