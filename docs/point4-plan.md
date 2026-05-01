@@ -186,7 +186,10 @@ tangent-map equality is only assumed in the closed-interval within filter, plus
 geometric-slot variants that state the scalar identity using actual
 pushed-forward tangent vectors. The same endpoint time-difference route now also
 has model-velocity wrappers that rewrite `f(t, y(t))` to the raw gauge velocity
-from within-set base-flow agreement. It also has within-set chain-rule primitives:
+from within-set base-flow agreement, and direct/readout-field companions that
+derive the remaining `Btime` time-difference term from a full metric-coordinate
+Fréchet derivative at the variational base point before performing that
+velocity rewrite. It also has within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,
 `hasDerivWithinAt_timeDifference_of_fullField`, and
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`

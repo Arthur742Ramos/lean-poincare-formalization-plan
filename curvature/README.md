@@ -324,8 +324,12 @@ now packages the matching intrinsic boundary
         model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the
-        same geometric-slot phrasing available for the direct variational
-        chain-rule route, plus a readout-field companion that transfers the
+        closed-Picard model-velocity time-difference route now deriving the
+        remaining endpoint `Btime` term directly from full/readout
+        metric-coordinate Fréchet data before rewriting the model velocity to
+        the raw gauge velocity, and the same geometric-slot phrasing available
+        for the direct variational chain-rule route, plus a readout-field
+        companion that transfers the
          required Fréchet derivative from any locally equal two-variable
           bilinear-form readout through the named
           `metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq` bridge,

@@ -899,7 +899,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           transfer itself is now named as
           `metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq`, so future
           Banach finite-cover readouts can feed the metric-coordinate field
-          through a single reusable lemma. The
+          through a single reusable lemma. The model-velocity time-difference
+          endpoint now also has direct and readout-field companions that derive
+          the remaining `Btime` term from a full metric-coordinate Fréchet
+          derivative at the variational base point, so finite-cover readouts can
+          feed the closed-Picard time-difference route without separately
+          proving the endpoint time-difference derivative. The
            direct variational chain-rule route now has the same geometric-slot
            companion, so applications can choose either the direct full-field route
            or the time-difference route without changing geometric scalar notation.
