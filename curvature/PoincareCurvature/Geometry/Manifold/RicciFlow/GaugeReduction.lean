@@ -11633,6 +11633,31 @@ theorem AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.pullbackBackgroundRicciCurva
     gauge3.toDiffeomorph2Gauge.pullbackBackgroundRicciCurvature_eq_zero_initial_of_isLeviCivita
       sol hbackgroundLevi hRicciFlat x u w
 
+theorem IntrinsicDeTurckLocalSolution.pullbackBackgroundRicciCurvature_eq_zero_initial_of_diffeomorph3Gauge_of_isLeviCivita
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background
+      sol.toIntrinsicDeTurckSolution.timeSet ivp.initialTime)
+    [hbackground :
+      CovariantDerivative.ContMDiffCovariantDerivative
+        (sol.toIntrinsicDeTurckSolution.background ivp.initialTime) 1]
+    [hpull :
+      CovariantDerivative.ContMDiffCovariantDerivative
+        (SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+          gauge3.maps sol.toIntrinsicDeTurckSolution.background ivp.initialTime) 1]
+    (hbackgroundLevi : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (x : M) (u w : TM x) :
+    letI : Bundle.RiemannianBundle TM := ⟨ivp.initialMetric.toRiemannianMetric⟩;
+    (SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+      gauge3.maps sol.toIntrinsicDeTurckSolution.background
+      ivp.initialTime).ricciCurvature x u w = 0 :=
+  gauge3.pullbackBackgroundRicciCurvature_eq_zero_initial_of_isLeviCivita
+    sol hbackgroundLevi hRicciFlat x u w
+
 theorem IntrinsicDeTurckLocalSolution.pullbackChosenBackgroundRicciCurvature_eq_zero_initial_of_anchored
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
@@ -11709,6 +11734,29 @@ theorem AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.pullbackChosenBackgroundRicc
     AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.toDiffeomorph2Gauge] using
     gauge3.toDiffeomorph2Gauge.pullbackChosenBackgroundRicciCurvature_eq_zero_initial
       sol hchosen hRicciFlat x u w
+
+theorem IntrinsicDeTurckLocalSolution.pullbackChosenBackgroundRicciCurvature_eq_zero_initial_of_diffeomorph3Gauge
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hchosen : UsesChosenBackground (I := I) (M := M) sol)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background
+      sol.toIntrinsicDeTurckSolution.timeSet ivp.initialTime)
+    [hbackground :
+      CovariantDerivative.ContMDiffCovariantDerivative
+        (sol.toIntrinsicDeTurckSolution.background ivp.initialTime) 1]
+    [hpull :
+      CovariantDerivative.ContMDiffCovariantDerivative
+        (SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+          gauge3.maps sol.toIntrinsicDeTurckSolution.background ivp.initialTime) 1]
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (x : M) (u w : TM x) :
+    letI : Bundle.RiemannianBundle TM := ⟨ivp.initialMetric.toRiemannianMetric⟩;
+    (SmoothSelfDiffeomorph3Family.pullbackConnectionFamily (I := I) (M := M)
+      gauge3.maps sol.toIntrinsicDeTurckSolution.background
+      ivp.initialTime).ricciCurvature x u w = 0 :=
+  gauge3.pullbackChosenBackgroundRicciCurvature_eq_zero_initial
+    sol hchosen hRicciFlat x u w
 
 theorem GaugeReducedIntrinsicDeTurckLocalSolution.pullbackBackgroundRicciCurvature_eq_initial
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}

@@ -899,11 +899,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           specialization is also named as
           `gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_eq_zero_initial_of_pullbackBackgroundRicciCurvature_eq_zero`.
           The initial Ricci-flat
-          transport API now also has `C³` anchored-gauge wrappers for vanishing
-          pulled-back background Ricci curvature, both from a general
-          Levi-Civita-background hypothesis and from the chosen-background
-          specialization.
-          The coordinate data also restricts to smaller time sets and lifts
+           transport API now also has `C³` anchored-gauge wrappers for vanishing
+           pulled-back background Ricci curvature, both from a general
+           Levi-Civita-background hypothesis and from the chosen-background
+           specialization. Matching source-level aliases now expose those same
+           `C³` transport facts from `IntrinsicDeTurckLocalSolution` once an
+           anchored `C³` gauge is supplied, avoiding repeated manual descent to
+           the `C²` gauge layer in later corrected-velocity proofs.
+           The coordinate data also restricts to smaller time sets and lifts
          through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
         so chart computations can feed the point-4 theorem routes without an
        intermediate tensor repackaging step. In the subsingleton-tangent case this non-identity

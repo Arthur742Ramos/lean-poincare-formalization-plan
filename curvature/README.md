@@ -324,10 +324,12 @@ now packages the matching intrinsic boundary
          vanishing pulled-back background Ricci curvature directly into vanishing
          concrete `C³` gauge-corrected pullback velocity through a named theorem,
          including an initial-time specialization,
-         and the Ricci-flat initial transport API has matching `C³`
-         anchored-gauge wrappers for the general Levi-Civita-background and
-         chosen-background cases. The
-         raw-flow API also extracts continuity of
+          and the Ricci-flat initial transport API has matching `C³`
+          anchored-gauge wrappers for the general Levi-Civita-background and
+          chosen-background cases, together with source-level aliases from
+          `IntrinsicDeTurckLocalSolution` that take the anchored `C³` gauge as an
+          argument. The
+          raw-flow API also extracts continuity of
       `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
      A thin `AnalyticPDE.SmoothRealization` module names the
