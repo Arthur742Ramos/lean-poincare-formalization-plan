@@ -655,10 +655,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
     non-identity gauge time-regularity
     interface now also has the proof-bearing scalar-to-tensor bridge, so its
     remaining primitive input is the scalar chain-rule identity for the
-    pulled-back metric. What still remains is the geometric-analysis
-    specialization for non-identity gauges: that scalar chain-rule proof, an
-    actual existence theorem producing raw gauge flows with the required
-    regularity in the general case, and the
+    pulled-back metric; in the subsingleton-tangent case this non-identity
+    time-regularity obligation is already closed for arbitrary geometric `C³`
+    DeTurck gauge-flow families by componentwise vanishing. What still remains
+    is the geometric-analysis specialization for positive-dimensional
+    non-identity gauges: that scalar chain-rule proof, an actual existence
+    theorem producing raw gauge flows with the required regularity in the
+    general case, and the
     quasilinear parabolic PDE framework for genuine Ricci-flow local existence
     and uniqueness, including the actual Ricci-DeTurck Banach chart and
     estimates plus the identification of that Banach representative with the
