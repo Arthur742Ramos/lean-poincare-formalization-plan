@@ -134,8 +134,58 @@ noncomputable def identityOfChosenBackground
             sol.1.toIntrinsicDeTurckSolution.background hLC
         simpa [intrinsicDeTurckGaugeField] using congrFun (congrFun hzero t) x)
 
-/-- Turn fixed-IVP raw intrinsic gauge-flow existence data into the geometric
-gauge-flow bundle consumed by local gauge-reduction routes. -/
+/-- When every tangent fiber is a subsingleton, the intrinsic DeTurck vector field vanishes
+identically, so the identity `C³` diffeomorphism family supplies the raw gauge-flow existence
+data for any chosen DeTurck local solution of a fixed initial-value problem. -/
+noncomputable def identityOfSubsingletonTangent
+    [∀ x : M, Subsingleton ((TangentSpace I : M → Type _) x)]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  flow := fun sol ↦
+    Diffeomorph3GaugeFlowOn.identity_of_eq_zero
+      (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime
+      (fun t _ht x ↦ by
+        have hzero :
+            intrinsicDeTurckVectorField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background = 0 :=
+          intrinsicDeTurckVectorField_eq_zero_of_subsingleton_tangent
+            (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background
+        simpa [intrinsicDeTurckGaugeField] using congrFun (congrFun hzero t) x)
+
+/-- Model-space version of `identityOfSubsingletonTangent`: when the model vector space `E` is a
+subsingleton, every tangent fiber is automatically subsingleton, so the identity `C³` family
+supplies raw gauge-flow existence data. -/
+noncomputable def identityOfSubsingletonModel
+    [Subsingleton E]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  identityOfSubsingletonTangent (I := I) (M := M) ivp
+
+/-- On an empty manifold, the gauge-flow obligation is vacuous, so the identity `C³` diffeomorphism
+family supplies the raw gauge-flow existence data for any chosen DeTurck local solution of a fixed
+initial-value problem. -/
+noncomputable def identityOfIsEmpty
+    [IsEmpty M]
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  flow := fun sol ↦
+    Diffeomorph3GaugeFlowOn.identity_of_eq_zero
+      (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime
+      (fun _t _ht x ↦ isEmptyElim x)
 def toDiffeomorph3GaugeFlow
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
@@ -177,6 +227,35 @@ noncomputable def identityOfChosenBackground :
       (E := E) (H := H) (I := I) (M := M) where
   flow := fun ivp sol ↦
     (IntrinsicDeTurckGaugeFlowExistence.identityOfChosenBackground
+      (E := E) (H := H) (I := I) (M := M) ivp).flow sol
+
+/-- When every tangent fiber is a subsingleton, the identity `C³` diffeomorphism family supplies
+the raw gauge-flow existence data for every initial-value problem. -/
+noncomputable def identityOfSubsingletonTangent
+    [∀ x : M, Subsingleton ((TangentSpace I : M → Type _) x)] :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  flow := fun ivp sol ↦
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonTangent
+      (E := E) (H := H) (I := I) (M := M) ivp).flow sol
+
+/-- Model-space version of `identityOfSubsingletonTangent`: when the model vector space `E` is a
+subsingleton, the identity `C³` diffeomorphism family supplies raw gauge-flow existence data for
+every initial-value problem. -/
+noncomputable def identityOfSubsingletonModel
+    [Subsingleton E] :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  identityOfSubsingletonTangent (I := I) (M := M)
+
+/-- On an empty manifold, the identity `C³` diffeomorphism family supplies the raw gauge-flow
+existence data vacuously for every initial-value problem. -/
+noncomputable def identityOfIsEmpty
+    [IsEmpty M] :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  flow := fun ivp sol ↦
+    (IntrinsicDeTurckGaugeFlowExistence.identityOfIsEmpty
       (E := E) (H := H) (I := I) (M := M) ivp).flow sol
 
 /-- Restrict theorem-family raw gauge-flow existence data to one initial-value
