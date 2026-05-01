@@ -752,7 +752,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        `CoordinatePullbackMetricComponentDerivativeOn`, with direct promotions to
        the geometric scalar and tensor time-derivative packages and raw
        `Diffeomorph3GaugeFlowOn` wrappers, including the open-interior
-       closed-Picard interval form.
+       closed-Picard interval form. A variational-flow component bridge now
+       derives this concrete package from local identifications of the named
+       `B(τ)` and `A(τ)` maps with a variational model flow, plus the
+       bilinear-form field derivative and scalar velocity identity; the matching
+       raw closed-Picard wrapper gives interior tensor time-regularity directly.
        The model algebra now also proves the moving metric-component chain rule
        for `Bfield(τ, y(τ))` and its combined
        `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent-map

@@ -158,6 +158,13 @@ directly as `CoordinatePullbackMetricComponentDerivativeOn`, with one-step
 component-to-scalar and component-to-tensor promotion theorems and raw
 closed-Picard interior wrappers
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn[_Ioo]_of_coordinateComponents`.
+A variational model flow now also supplies the concrete component derivatives
+directly via `coordinatePullbackMetricComponentDerivativeOn_of_variationalLocalFlow`:
+local identifications of the named `B(τ)` and `A(τ)` components with a
+variational flow, plus the bilinear-form field derivative and scalar velocity
+identity, produce the component package. The raw closed-Picard wrapper
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowComponents`
+routes that data straight to interior tensor time-regularity.
 The model algebra now also includes the metric-component half of this remaining
 primitive: `hasDerivAt_bilinearFormField_along_curve` differentiates a bilinear
 form field `Bfield(τ, y(τ))`, and

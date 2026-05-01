@@ -447,7 +447,11 @@ now packages the matching intrinsic boundary
        maps plus the scalar velocity identity. That primitive is now packaged as
        `CoordinatePullbackMetricComponentDerivativeOn`, with direct scalar,
        tensor, and raw-gauge-flow promotion routes, including the closed-Picard
-       open-interior wrapper. The module also proves
+       open-interior wrapper. A variational-flow component bridge now derives
+       this package from local identifications of the named `B(τ)` and `A(τ)`
+       maps with a variational model flow, plus the bilinear-form field
+       derivative and scalar velocity identity, and exposes a matching raw
+       closed-Picard route to interior tensor time-regularity. The module also proves
        the moving metric-component chain rule for `Bfield(τ, y(τ))` and the
        combined `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent
        equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with
