@@ -738,7 +738,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       closed-interval derivative bridge from variational tangent-map data,
       packaged by `CoordinatePullbackMetricComponentDerivativeWithinOn`, plus a
       generic within-set scalar transfer for `B(τ)(A(τ)u)(A(τ)v)` and the raw
-      endpoint package `PullbackMetricInnerDerivativeWithinOn`. A
+      endpoint package `PullbackMetricInnerDerivativeWithinOn`, which upgrades
+      to ordinary scalar derivative data on `Ioo tmin tmax`. A
       coordinate-level package
       `CoordinatePullbackMetricInnerDerivativeOn` now also promotes those
       chartwise `B/A/D` derivative hypotheses to the actual geometric

@@ -1952,6 +1952,54 @@ theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateComponentWithin
       (B := B) (B' := B') (A := A) (D := D)
       (u := uE) (v := vE) heq heq_t hB hA hvalue
 
+/-- A raw within-set scalar derivative package upgrades to ordinary scalar
+derivatives at times where the set is a neighborhood. -/
+theorem PullbackMetricInnerDerivativeWithinOn.toPullbackMetricInnerDerivativeOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hwithin : PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot s)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  exact (hwithin ht x u v).hasDerivAt (hs ht)
+
+/-- Closed-interval scalar derivative data gives ordinary scalar derivative data
+on the open interior of the interval. -/
+theorem PullbackMetricInnerDerivativeWithinOn.toPullbackMetricInnerDerivativeOn_Ioo
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hwithin : PullbackMetricInnerDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax)) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot (Ioo tmin tmax) := by
+  intro t ht x u v
+  exact (hwithin (Ioo_subset_Icc_self ht) x u v).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
+/-- Endpoint component data on a closed interval gives ordinary geometric scalar
+derivatives on the open interior once the geometric scalar is chart-locally
+identified with the coordinate model within the closed interval. -/
+theorem pullbackMetricInnerDerivativeOn_Ioo_of_coordinateComponentWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hdata : CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax))
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+        (fun τ : ℝ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[Icc tmin tmax] t]
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot (Ioo tmin tmax) :=
+  (pullbackMetricInnerDerivativeWithinOn_of_coordinateComponentWithin
+    (I := I) (M := M) hdata hgeom).toPullbackMetricInnerDerivativeOn_Ioo
+
 /-- Field-level moving-bilinear-form derivative data implies derivative data for
 the named coordinate model. -/
 theorem coordinatePullbackMetricModelDerivativeOn_of_field

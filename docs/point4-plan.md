@@ -142,6 +142,9 @@ endpoint component packages can be transferred to local scalar identities.
 The raw geometric endpoint target is now named as
 `PullbackMetricInnerDerivativeWithinOn`, and endpoint concrete component data
 plus chart-local equality imply this raw scalar within-derivative package.
+Closed-interval scalar derivative data now upgrades back to ordinary
+`PullbackMetricInnerDerivativeOn` on the open interval, so endpoint component
+work can feed the existing interior gauge-pulled metric time-regularity routes.
 The same chain rule now has eventual-equality transfer lemmas, so a geometric
 scalar that agrees with the model-coordinate expression only near `t` can reuse
 the derivative proof directly.  The named coordinate package
