@@ -330,7 +330,9 @@ now packages the matching intrinsic boundary
    data. A new `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the
    non-identity gauge-pulled metric time-derivative obligation for arbitrary
    geometric `C³` DeTurck gauge-flow families on subsingleton tangent fibers by
-   proving the corrected velocity and pulled metric components vanish. Two new thin extension
+   proving the corrected velocity and pulled metric components vanish, and
+   exposes matching model-space, empty-manifold, and raw-existence
+   theorem-package routes that need no extra derivative input. Two new thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`
