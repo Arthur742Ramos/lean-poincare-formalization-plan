@@ -305,6 +305,51 @@ noncomputable def pullbackMetricInnerCoordinateModel
       ((Φ t) x) ((Φ τ) x) ((Φ t) x) ((Φ τ) x) ((g τ).inner ((Φ τ) x))
   B (A uE) (A vE)
 
+/-- Source tangent vector written in the model coordinates of the tangent
+trivialization centered at its base point. -/
+noncomputable def sourceTangentCoordinate
+    (x : M) (u : TangentSpace I x) : E :=
+  let TM := (TangentSpace I : M → Type _)
+  let hx : x ∈ (trivializationAt E TM x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  (trivializationAt E TM x).continuousLinearEquivAt ℝ x hx u
+
+/-- The tangent-map coordinate operator `A(τ)` in the preferred coordinate model
+for a gauge-pulled metric component. -/
+noncomputable def pullbackMetricTangentCoordinateMap
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M) : E →L[ℝ] E :=
+  let TM := (TangentSpace I : M → Type _)
+  ContinuousLinearMap.inCoordinates E TM E TM x x ((Φ t) x) ((Φ τ) x)
+    ((Φ τ).pushforwardTangent x)
+
+/-- The moving bilinear-form coordinate `B(τ)` in the preferred coordinate model
+for a gauge-pulled metric component. -/
+noncomputable def pullbackMetricBilinearCoordinateMap
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (t τ : ℝ) (x : M) : E →L[ℝ] E →L[ℝ] ℝ :=
+  let TM := (TangentSpace I : M → Type _)
+  let TStar := fun y : M => TM y →L[ℝ] ℝ
+  let OneF := E →L[ℝ] ℝ
+  ContinuousLinearMap.inCoordinates E TM OneF TStar
+    ((Φ t) x) ((Φ τ) x) ((Φ t) x) ((Φ τ) x) ((g τ).inner ((Φ τ) x))
+
+/-- The preferred coordinate scalar model is exactly `B(τ) (A(τ)u) (A(τ)v)`
+for the named moving bilinear-coordinate and tangent-coordinate maps. -/
+theorem pullbackMetricInnerCoordinateModel_eq_components
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (t τ : ℝ) (x : M) (u v : TangentSpace I x) :
+    pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v τ =
+      pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x
+        (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x
+          (sourceTangentCoordinate (I := I) x u))
+        (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x
+          (sourceTangentCoordinate (I := I) x v)) := by
+  simp [pullbackMetricInnerCoordinateModel, pullbackMetricBilinearCoordinateMap,
+    pullbackMetricTangentCoordinateMap, sourceTangentCoordinate]
+
 /-- Once the gauge image lies in the target trivialization centered at the
 time-`t` image, the named coordinate model is definitionally the geometric
 pullback scalar.  This avoids expanding the full bundled pullback bilinear-form
@@ -469,6 +514,55 @@ def CoordinatePullbackMetricFieldDerivativeOn
           Bfield (t, y t) (D (A t uE)) (A t vE) +
           Bfield (t, y t) (A t uE) (D (A t vE)) =
         gdot t x u v
+
+/-- Concrete component-derivative form of
+`CoordinatePullbackMetricModelDerivativeOn`.
+
+This is the main remaining moving-coordinate calculation in local coordinates:
+differentiate the named moving bilinear coordinate `B(τ)` and the named
+tangent-coordinate map `A(τ)`, then check that the resulting scalar is the
+geometric velocity component. -/
+theorem coordinatePullbackMetricModelDerivativeOn_of_components
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      ∃ (B' : E →L[ℝ] E →L[ℝ] ℝ) (D : E →L[ℝ] E),
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x)
+          B' t ∧
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t ∧
+        B'
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+              (sourceTangentCoordinate (I := I) x u))
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+              (sourceTangentCoordinate (I := I) x v)) +
+            pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
+              (D (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                (sourceTangentCoordinate (I := I) x u)))
+              (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                (sourceTangentCoordinate (I := I) x v)) +
+            pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
+              (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                (sourceTangentCoordinate (I := I) x u))
+              (D (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                (sourceTangentCoordinate (I := I) x v))) =
+          gdot t x u v) :
+    CoordinatePullbackMetricModelDerivativeOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨B', D, hB, hA, hvalue⟩ := hdata ht x u v
+  refine ⟨(fun τ : ℝ ↦ pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x),
+    B', (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x), D,
+    sourceTangentCoordinate (I := I) x u, sourceTangentCoordinate (I := I) x v,
+    ?_, hB, hA, hvalue⟩
+  filter_upwards with τ
+  exact pullbackMetricInnerCoordinateModel_eq_components
+    (I := I) (M := M) Φ g t τ x u v
 
 /-- Restrict field-level coordinate-model derivative data to a smaller time set. -/
 theorem CoordinatePullbackMetricFieldDerivativeOn.mono

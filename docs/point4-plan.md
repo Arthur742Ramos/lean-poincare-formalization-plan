@@ -146,6 +146,14 @@ calculation can feed the point-4 theorem routes without first repackaging it as
 a tensor derivative. The model/field bundle routes explicitly require the
 solution time set to be a neighborhood of each time where they are used, making
 the endpoint/interior distinction visible rather than hidden.
+The moving-coordinate pieces inside `pullbackMetricInnerCoordinateModel` are now
+also named explicitly as `pullbackMetricBilinearCoordinateMap` (`B(τ)`) and
+`pullbackMetricTangentCoordinateMap` (`A(τ)`), with
+`sourceTangentCoordinate` for fixed source vectors. The theorem
+`coordinatePullbackMetricModelDerivativeOn_of_components` proves that
+derivatives of these concrete `B` and `A` components, plus the expected scalar
+velocity identity, are exactly enough to discharge
+`CoordinatePullbackMetricModelDerivativeOn`.
 The model algebra now also includes the metric-component half of this remaining
 primitive: `hasDerivAt_bilinearFormField_along_curve` differentiates a bilinear
 form field `Bfield(τ, y(τ))`, and

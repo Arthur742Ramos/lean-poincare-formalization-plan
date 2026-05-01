@@ -742,7 +742,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        named coordinate model that promotes directly to the geometric scalar
        target and tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers
        and fixed-IVP/theorem-family/raw-existence bundle lifts with explicit
-       time-set neighborhood hypotheses.
+       time-set neighborhood hypotheses. The concrete moving-coordinate
+       components inside that named scalar are now also exposed as
+       `pullbackMetricBilinearCoordinateMap` and
+       `pullbackMetricTangentCoordinateMap`, with a component-derivative theorem
+       reducing `CoordinatePullbackMetricModelDerivativeOn` to derivatives of
+       those `B(τ)` and `A(τ)` maps plus the scalar velocity identity.
        The model algebra now also proves the moving metric-component chain rule
        for `Bfield(τ, y(τ))` and its combined
        `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent-map

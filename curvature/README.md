@@ -439,7 +439,12 @@ now packages the matching intrinsic boundary
       a raw-flow corollary supplying that equality near neighborhood-times.
       `CoordinatePullbackMetricModelDerivativeOn` isolates derivative data for
       that named coordinate model and promotes it directly to scalar and tensor
-      time-regularity, including raw-gauge-flow wrappers. The module also proves
+      time-regularity, including raw-gauge-flow wrappers. Its concrete
+      moving-coordinate components are now named as
+      `pullbackMetricBilinearCoordinateMap` and
+      `pullbackMetricTangentCoordinateMap`, with a component-derivative theorem
+      reducing the model obligation to derivatives of those `B(τ)` and `A(τ)`
+      maps plus the scalar velocity identity. The module also proves
       the moving metric-component chain rule for `Bfield(τ, y(τ))` and the
        combined `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` form with the variational tangent
        equation, bundled as `CoordinatePullbackMetricFieldDerivativeOn` with
