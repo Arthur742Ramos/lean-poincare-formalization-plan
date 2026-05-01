@@ -664,7 +664,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      closed ball, closed-interval ODE derivative data, and Lipschitz dependence
      on the initial point; it also packages the continuous space-time
      partial-flow form needed for chart gluing, plus the autonomous `C¹`
-     integral-curve specialization. Raw gauge flows now also expose the first
+     integral-curve specialization and Gronwall uniqueness bridges for packaged
+     local model flows on open and closed Picard intervals. Raw gauge flows now also expose the first
      chart-membership bridge needed for coordinate pullback formulas:
      neighborhood-time flow equations imply continuity of `τ ↦ Φ_τ(x)` and
      eventual membership in the tangent trivialization at `Φ_t(x)`. Thus the

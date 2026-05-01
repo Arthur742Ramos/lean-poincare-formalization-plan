@@ -224,7 +224,8 @@ now packages the matching intrinsic boundary
      with closed-interval ODE derivative data, initialization on a closed ball of
      initial data, Lipschitz dependence on that initial data, and the continuous
      space-time partial-flow form needed for chart gluing, plus the
-     autonomous `C¹` local-integral-curve specialization needed as a chart-level
+     autonomous `C¹` local-integral-curve specialization and Gronwall uniqueness
+     bridges for packaged model flows needed as chart-level
      raw-flow building block. The raw-flow API also extracts continuity of
      `τ ↦ Φ_τ(x)` and eventual tangent-trivialization membership from a
      neighborhood-time flow equation, preparing the chart-local pullback formulas.
@@ -350,8 +351,9 @@ now packages the matching intrinsic boundary
     positive-dimensional manifold ODE lift: it packages time-dependent local
     flows, their closed-interval ODE derivative, initial-data Lipschitz
     dependence, continuous space-time partial flows, and autonomous `C¹` integral
-    curves; the raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and
-    eventual tangent-trivialization membership from neighborhood-time flow data.
+    curves, plus Gronwall uniqueness bridges for packaged model flows; the
+    raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
+    tangent-trivialization membership from neighborhood-time flow data.
     A new
     `GaugeReduction.Diffeomorph3FlowSubsingleton` module closes the
    non-identity gauge-pulled metric time-derivative obligation for arbitrary

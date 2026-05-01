@@ -2,6 +2,7 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
 public import Mathlib.Analysis.ODE.PicardLindelof
+public import Mathlib.Analysis.ODE.Gronwall
 
 set_option linter.unusedSectionVars false
 set_option linter.all false
@@ -84,6 +85,52 @@ theorem center_hasDerivWithinAt
     (α : LocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
     HasDerivWithinAt (α.flow x₀) (f t (α.flow x₀ t)) (Icc tmin tmax) t :=
   α.hasDerivWithinAt x₀ (mem_closedBall_self r.2) t ht
+
+/-- Two packaged local model flows agree on the interior time interval whenever
+their curves stay in a region where the vector field is uniformly Lipschitz. -/
+theorem eqOn_Ioo_of_lipschitzOnWith
+    (α β : LocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow x t ∈ state t) :
+    EqOn (α.flow x) (β.flow x) (Ioo tmin tmax) := by
+  refine ODE_solution_unique_of_mem_Ioo (v := f) (s := state) hf_lip ht₀ ?_ ?_ ?_
+  · intro t ht
+    exact
+      ⟨(α.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
+          (Icc_mem_nhds ht.1 ht.2),
+        hα_mem t ht⟩
+  · intro t ht
+    exact
+      ⟨(β.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
+          (Icc_mem_nhds ht.1 ht.2),
+        hβ_mem t ht⟩
+  · rw [α.initial_eq x hx, β.initial_eq x hx]
+
+/-- Closed-interval uniqueness form for packaged local model flows.  This is the
+version needed when endpoint continuity is available from the within-interval
+ODE statements. -/
+theorem eqOn_Icc_of_lipschitzOnWith
+    (α β : LocalFlowSolution f t₀ x₀ r) {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow x t ∈ state t) :
+    EqOn (α.flow x) (β.flow x) (Icc tmin tmax) := by
+  refine ODE_solution_unique_of_mem_Icc (v := f) (s := state) hf_lip ht₀ ?_ ?_ hα_mem ?_ ?_
+    hβ_mem ?_
+  · exact HasDerivWithinAt.continuousOn (fun t ht => α.hasDerivWithinAt x hx t ht)
+  · intro t ht
+    exact (α.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
+      (Icc_mem_nhds ht.1 ht.2)
+  · exact HasDerivWithinAt.continuousOn (fun t ht => β.hasDerivWithinAt x hx t ht)
+  · intro t ht
+    exact (β.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
+      (Icc_mem_nhds ht.1 ht.2)
+  · rw [α.initial_eq x hx, β.initial_eq x hx]
 
 end LocalFlowSolution
 
