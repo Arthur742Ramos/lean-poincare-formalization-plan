@@ -163,7 +163,12 @@ estimates. The same layer now has the closed-ball specialization matching
 Mathlib's `IsPicardLindelof` state, assembles a product-system
 `IsPicardLindelof` witness from those closed-ball estimates plus the standard
 continuity/norm/time-radius assumptions, and exposes a one-step
-`ofProductClosedBallEstimates` constructor for the variational local flow.
+`ofProductClosedBallEstimates` constructor for the variational local flow. The
+product norm bound is also now derived from component estimates, yielding the
+stronger `ofProductComponentClosedBallEstimates` route whose remaining analytic
+inputs are exactly base/linearized closed-ball Lipschitz bounds, component norm
+bounds, continuity of the product vector field in time, and the usual Picard
+time-radius inequality.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and

@@ -243,7 +243,8 @@ now packages the matching intrinsic boundary
        specialization now assembles product `IsPicardLindelof` witnesses and a
        one-step variational local-flow constructor from base/linearized
        closed-ball estimates plus the standard Picard continuity, norm, and
-       time-radius assumptions. The dynamic pullback bridge now turns such a variational local
+       time-radius assumptions, with a stronger component-estimate constructor
+       that derives the product norm bound automatically. The dynamic pullback bridge now turns such a variational local
        flow into the interior coordinate-field derivative data and proves the
        exact scalar chain rule along the flow, leaving only the metric-component
       derivative and concrete chart identification as local inputs. Closed-Picard

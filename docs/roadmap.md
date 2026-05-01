@@ -744,7 +744,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        Mathlib's `IsPicardLindelof` state, assembles product-system
        Picard-Lindelöf witnesses from base/linearized closed-ball estimates plus
        the standard continuity/norm/time-radius assumptions, and gives a one-step
-       variational local-flow constructor from those estimates.
+       variational local-flow constructor from those estimates. It also derives
+       the product norm bound from component bounds and exposes the stronger
+       `ofProductComponentClosedBallEstimates` route, reducing the chart-local
+       Picard data to base/linearized Lipschitz estimates, component norm bounds,
+       time-continuity of the product vector field, and the usual radius
+       inequality.
        The coordinate data also restricts to smaller time sets and lifts
        through the fixed-IVP, theorem-family, and raw-existence gauge-flow APIs,
        so chart computations can feed the point-4 theorem routes without an
