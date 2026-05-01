@@ -270,6 +270,30 @@ theorem hasDerivWithinAt_bilinearFormField_apply_apply_along_curve
       (s := s) (t := t) hB hy)
     hu hv
 
+/-- Within-set moving-base coordinate chain rule for
+`Bfield(τ, y(τ)) (A(τ) u) (A(τ) v)`, with the tangent map satisfying
+`A'(t) = D ∘ A(t)`. -/
+theorem hasDerivWithinAt_bilinearFormField_linear_apply_apply_along_curve
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V}
+    {A : ℝ → V →L[ℝ] V} {D : V →L[ℝ] V} {s : Set ℝ} {t : ℝ}
+    (hB : HasFDerivAt Bfield Bfield' (t, y t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hA : HasDerivWithinAt A (D.comp (A t)) s t) (u v : V) :
+    HasDerivWithinAt (fun τ : ℝ => Bfield (τ, y τ) (A τ u) (A τ v))
+      (Bfield' (1, y') (A t u) (A t v) +
+        Bfield (t, y t) (D (A t u)) (A t v) +
+        Bfield (t, y t) (A t u) (D (A t v))) s t := by
+  exact hasDerivWithinAt_bilinearForm_linear_apply_apply_of_comp_deriv
+    (B := fun τ : ℝ => Bfield (τ, y τ))
+    (B' := Bfield' (1, y')) (A := A) (D := D) (s := s) (t := t)
+    (hasDerivWithinAt_bilinearFormField_along_curve
+      (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
+      (s := s) (t := t) hB hy)
+    hA u v
+
 /-- Model-space chain rule for `B(t) (A(t) u) (A(t) v)`, the coordinate form of
 a pulled-back metric component when `A(t)` is the tangent map of the gauge. -/
 theorem hasDerivAt_bilinearForm_linear_apply_apply

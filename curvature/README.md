@@ -236,8 +236,10 @@ now packages the matching intrinsic boundary
       open-interval continuity and packaged `LocalFlowSolution` extraction,
       vector-slot variational uniqueness, center-trajectory scalar chain-rule
       wrappers with eventual-equality transfer forms, center-trajectory
-      uniqueness wrappers, direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule
-      primitives, generic within-filter transfer for arbitrary `A'`,
+       uniqueness wrappers, direct within-set `B(t)(A(t)u)(A(t)v)` chain-rule
+       primitives, including a moving-base full-field companion for
+       `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` under `A' = D ∘ A`, generic within-filter
+       transfer for arbitrary `A'`,
       raw-gauge-flow time-set/open-interior continuity helpers, and
       Gronwall uniqueness
       bridges for packaged and continuous space-time model flows needed as chart-level

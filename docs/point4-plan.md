@@ -145,6 +145,12 @@ endpoint component packages can be transferred to local scalar identities.
 The raw geometric endpoint target is now named as
 `PullbackMetricInnerDerivativeWithinOn`, and endpoint concrete component data
 plus chart-local equality imply this raw scalar within-derivative package.
+The basic moving-base within-set chain rule
+`hasDerivWithinAt_bilinearFormField_linear_apply_apply_along_curve` now also
+differentiates `Bfield(τ, y(τ))(A(τ)u)(A(τ)v)` directly under the variational
+tangent-map equation `A' = D ∘ A`, so closed-Picard chart calculations can use a
+full metric-coordinate Fréchet derivative without first freezing the base curve
+or introducing an eventual-equality transfer.
 Closed-interval scalar derivative data now upgrades back to ordinary
 `PullbackMetricInnerDerivativeOn` on the open interval, so endpoint component
 work can feed the existing interior gauge-pulled metric time-regularity routes.
