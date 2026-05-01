@@ -677,7 +677,9 @@ local-integral-curve specialization now also returns continuity on its open
 existence interval. Variational local-flow uniqueness now also has direct
 interior and closed-interval vector-slot `A(t) v` bridges derived from
 operator-norm bounds, matching the scalar gauge-pullback chain-rule
-hypotheses. The autonomous `C¹` vector-field route now also extracts a
+hypotheses, and these base-flow, continuous-flow, tangent-map, vector-slot, and
+full variational-pair overlap results now have direct pointwise equality
+readouts on both `Ioo` and `Icc`. The autonomous `C¹` vector-field route now also extracts a
 proof-level `Nonempty LocalFlowSolution` package on a smaller closed time
 interval and smaller initial ball, giving the first direct bridge from
 mathlib's autonomous integral-curve theorem to the packaged raw model-flow API.
@@ -711,9 +713,10 @@ Variational tangent-map uniqueness has matching overlap forms on `Ioo` and
 `Icc`, plus operator-norm and vector-slot specializations on both intervals, so
 tangent compatibility can also be proved across chart-local packages with
 different centers and radii once the base curves agree. Full variational-pair uniqueness
-now has overlap forms on both `Ioo` and `Icc`, combining base-flow Lipschitz
-uniqueness and tangent operator-norm uniqueness into a single compatibility
-statement for `(flow, tangent)`.
+now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
+for the base, continuous, tangent, vector-slot, and full pair conclusions,
+combining base-flow Lipschitz uniqueness and tangent operator-norm uniqueness
+into a single compatibility statement for `(flow, tangent)`.
 The time-derivative layer now also has center-trajectory closed-interval and
 interior scalar chain-rule wrappers for
 `Bfield(t, y(t))(A(t)u)(A(t)v)`, so basepoint gauge-pullback calculations can

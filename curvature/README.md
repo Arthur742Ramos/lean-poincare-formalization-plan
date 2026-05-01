@@ -554,7 +554,8 @@ now packages the matching intrinsic boundary
      readout simp lemmas for localized flow/tangent maps and forgetful projections,
       overlap uniqueness for local and
       continuous base-flow packages plus variational tangent maps and full
-      `(flow, tangent)` pairs with different centers/radii, and autonomous
+       `(flow, tangent)` pairs with different centers/radii, including direct
+       pointwise equality readouts on both `Ioo` and `Icc`, and autonomous
       `C¹` integral curves with packaged and directly localized
       `LocalFlowSolution` extraction, plus Gronwall uniqueness bridges for packaged and continuous
      space-time model flows; the
