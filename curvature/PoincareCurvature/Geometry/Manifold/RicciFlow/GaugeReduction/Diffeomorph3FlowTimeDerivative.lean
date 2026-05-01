@@ -2251,6 +2251,26 @@ def CoordinatePullbackMetricComponentDerivativeWithinOn
               (sourceTangentCoordinate (I := I) x v))) =
         gdot t x u v
 
+/-- Restrict within-set component-level coordinate derivative data to a smaller
+time set. -/
+theorem CoordinatePullbackMetricComponentDerivativeWithinOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hdata : CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot t)
+    (hst : s ⊆ t) :
+    CoordinatePullbackMetricComponentDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  letI : NormedAddCommGroup (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  intro τ hτ x u v
+  obtain ⟨B', D, hB, hA, hvalue⟩ := hdata (hst hτ) x u v
+  exact ⟨B', D, hB.mono hst, hA.mono hst, hvalue⟩
+
 /-- Concrete component-derivative form of
 `CoordinatePullbackMetricModelDerivativeOn`.
 
