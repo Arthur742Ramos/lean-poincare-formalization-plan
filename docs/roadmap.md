@@ -1126,7 +1126,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      symmetric-carrier closure, including the metric-cone shrink route. The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
-     Riemannian metric locus.
+     Riemannian metric locus, with both subtype and ambient-coordinate coe
+     readouts.
      What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence

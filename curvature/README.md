@@ -608,8 +608,8 @@ now packages the matching intrinsic boundary
      symmetric-carrier closure, including the metric-cone shrink route. The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
-     Riemannian metric locus, leaving the heavy PDE realization module unchanged.
-     The
+     Riemannian metric locus, with both subtype and ambient-coordinate coe
+     readouts, leaving the heavy PDE realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic
