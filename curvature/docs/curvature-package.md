@@ -98,4 +98,9 @@ metric-only `IntrinsicSolution`, `IntrinsicLocalSolution`, and
 `IntrinsicLocalExistenceUniqueness` wrappers with conversions to and from the
 older connection-parametrized scaffold. The general compact-manifold local
 existence/uniqueness theorem is still unproved and therefore point 4 remains
-open.
+open. The analytic PDE side has started with proof-bearing parabolic Hölder
+primitives in `RicciFlow/AnalyticPDE/ParabolicHolder.lean`: parabolic distance,
+balls/cylinders, `C^{0,α}` control, product-topology local-base compatibility,
+continuity/uniform-continuity consequences, oscillation bounds, and additive
+and subtractive closure estimates. This is groundwork for the future Schauder
+and Ricci-DeTurck Banach-chart layer, not the local-existence theorem itself.

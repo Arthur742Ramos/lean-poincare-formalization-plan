@@ -1204,7 +1204,15 @@ continuous Riemannian initial metric `g₀`, construct
 compact Riemannian manifold. It is by itself a paper-scale formalization
 project. Mathlib v4.29.1 does not yet contain the parabolic
 Hölder/Sobolev framework needed; that infrastructure has to be built
-first. The abstract closure-data interface itself now has named readouts for
+first. The first proof-bearing parabolic Hölder primitives now live in
+`AnalyticPDE/ParabolicHolder.lean`: the file defines the parabolic distance,
+open/closed balls and product cylinders, proves the triangle inequality,
+topological compatibility with the ordinary product metric including a
+parabolic-ball local base, and packages `C^{0,α}`-style bounded/Hölder control
+with slice, oscillation, continuity, uniform-continuity, and additive
+subtractive algebra estimates. This is still only the norm/topology vocabulary,
+not the Schauder estimates or Ricci-DeTurck Banach chart. The abstract
+closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and
 `nonempty_candidateEncoding`. These wrappers expose the already-stored smooth

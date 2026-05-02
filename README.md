@@ -316,7 +316,14 @@ packages the canonical stationary local solution attached to
   actual Ricci-DeTurck Banach chart and Picard estimates plus the analytic proof
   of the now-named smooth-realization and Banach/geometric RHS-identification
   data, and the reverse-candidate encoding closure for arbitrary
-  chosen-background candidates. The curvature, time-dependent
+  chosen-background candidates. The first parabolic Hölder primitives are now
+  proof-bearing: `AnalyticPDE/ParabolicHolder.lean` defines the parabolic
+  distance/cylinders and `C^{0,α}` control, proves the parabolic triangle
+  inequality, product-topology local-base compatibility, continuity and uniform
+  continuity from positive Hölder exponent, oscillation bounds, and
+  add/subtract/smul closure estimates. These primitives do not yet supply the
+  Schauder estimates or the Ricci-DeTurck Banach chart. The curvature,
+  time-dependent
   geometry, intrinsic Ricci-flow, and DeTurck layers now prove the geometric
   symmetry input outright: metric compatibility gives curvature-operator
   skew-adjointness, torsion-freeness gives first Bianchi, the Ricci contraction is
