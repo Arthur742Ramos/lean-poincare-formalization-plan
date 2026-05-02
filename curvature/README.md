@@ -620,8 +620,9 @@ now packages the matching intrinsic boundary
           direct raw constructors from model-vector-field chart ODE data once
           that model field is identified with the target gauge field along the
           candidate flow, including closed-Picard `Icc` to open-interior `Ioo`,
-          a fixed-IVP closed-Picard constructor carrying that same model-field
-          RHS handoff directly to `IntrinsicDeTurckGaugeFlowExistence`,
+          fixed-IVP and theorem-family closed-Picard constructors carrying that
+          same model-field RHS handoff directly to
+          `IntrinsicDeTurckGaugeFlowExistence(.Family)`,
           direct primitive derivative-data readouts, within-filter/ordinary
           eventual-equality transfers from local model-coordinate curves, and
          direct lower-level chart-to-manifold derivative bridges,
