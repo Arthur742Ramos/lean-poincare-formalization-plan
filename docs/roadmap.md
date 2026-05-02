@@ -962,9 +962,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          keeping scalar identities in actual pushed-forward tangent vectors,
          including closed-Picard `Ioo` specializations; the field-level
          base-coordinate route now also packages the actual coordinate-curve
-         derivative as `X t (G.maps3 t x)`, and the full-field variational
+          derivative as `X t (G.maps3 t x)`, and the full-field variational
           tangent-map endpoint has direct-velocity coordinate/readout and
-          geometric/readout wrappers; the same-set within-field route now also
+          geometric/readout wrappers; the closed-Picard variational tangent-map
+          Fréchet endpoint now also has direct-velocity geometric-slot and
+          readout-field variants, including within-filter tangent-map
+          agreement; the same-set within-field route now also
           has direct-velocity base-coordinate, metric-coordinate, readout-field,
           and tensor time-regularity wrappers, and the lower concrete
           bilinear-coordinate derivative plus ordinary metric-coordinate field

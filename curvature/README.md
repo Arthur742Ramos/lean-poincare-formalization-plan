@@ -684,7 +684,9 @@ now packages the matching intrinsic boundary
        `Ioo` specializations, and field-level base-coordinate wrappers that
        store the actual coordinate-curve derivative as `X t (G.maps3 t x)`,
        plus full-field variational tangent-map coordinate/readout and
-       geometric/readout direct-velocity endpoint wrappers, and same-set
+       geometric/readout direct-velocity endpoint wrappers, closed-Picard
+       variational tangent-map Fréchet geometric/readout `_self` wrappers
+       including within-filter tangent-map agreement, and same-set
        within-field direct-velocity base-coordinate, metric-coordinate,
        readout-field, and tensor wrappers, with matching lower
        bilinear-coordinate derivative and ordinary metric-coordinate field

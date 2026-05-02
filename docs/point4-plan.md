@@ -468,7 +468,10 @@ coordinate-curve derivative as `X t (G.maps3 t x)` instead of the centered
 The full-field variational tangent-map endpoint now has direct-velocity
 coordinate-slot, readout-field, geometric-slot, and geometric readout-field
 wrappers, eliminating another public `Bfield' (1, tangentCoordChange ...)`
-obligation from the closed-Picard time-regularity route.
+obligation from the closed-Picard time-regularity route. The closed-Picard
+variational tangent-map Fréchet endpoint now also has direct-velocity
+geometric-slot and readout-field variants, including the case where tangent-map
+agreement is only known in the closed-interval within filter.
 The same-set within-field route now also has direct-velocity base-coordinate,
 metric-coordinate, readout-field, and tensor time-regularity wrappers, so
 neighborhood-time callers can keep the raw velocity in all full-field
