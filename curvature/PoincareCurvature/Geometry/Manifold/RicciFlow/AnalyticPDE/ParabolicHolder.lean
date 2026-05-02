@@ -20,7 +20,7 @@ future estimates should use.
 @[expose] public noncomputable section
 
 open Set
-open scoped Topology NNReal
+open scoped Topology NNReal BigOperators
 
 namespace RicciFlow
 namespace AnalyticPDE
@@ -1874,6 +1874,72 @@ theorem boundedOn (h : ParabolicC0AlphaOn α u s) :
 theorem holderOn (h : ParabolicC0AlphaOn α u s) : ParabolicHolderOn α u s := by
   rcases h with ⟨_B, _hB, H, hH, hBH⟩
   exact ⟨H, hH, hBH.holder⟩
+
+/-- Local-to-global parabolic `C^{0,α}` control from a finite parabolic ball cover, with local
+constants chosen automatically and summed over the finite cover. -/
+theorem of_finset_parabolicBall_cover_closedBall {r : ℝ} {K : Set (ℝ × X)}
+    (N : Finset (ℝ × X)) (hα : 0 < α) (hr : 0 < r)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicBall y r)
+    (hlocal : ∀ y ∈ N, ParabolicC0AlphaOn α u (parabolicClosedBall y (2 * r))) :
+    ParabolicC0AlphaOn α u K := by
+  classical
+  let Bc : ℝ × X → ℝ :=
+    fun y => if hy : y ∈ N then Classical.choose (hlocal y hy) else 0
+  let Hc : ℝ × X → ℝ := fun y =>
+    if hy : y ∈ N then Classical.choose (Classical.choose_spec (hlocal y hy)).2 else 0
+  have hBnonneg : ∀ y ∈ N, 0 ≤ Bc y := by
+    intro y hy
+    dsimp [Bc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hHnonneg : ∀ y ∈ N, 0 ≤ Hc y := by
+    intro y hy
+    dsimp [Hc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).1
+  have hBH :
+      ∀ y ∈ N, ParabolicC0AlphaWith (Bc y) (Hc y) α u
+        (parabolicClosedBall y (2 * r)) := by
+    intro y hy
+    dsimp [Bc, Hc]
+    rw [dif_pos hy, dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).2
+  let Bsum : ℝ := ∑ y ∈ N, Bc y
+  let Hsum : ℝ := ∑ y ∈ N, Hc y
+  have hBsum_nonneg : 0 ≤ Bsum := by
+    dsimp [Bsum]
+    exact Finset.sum_nonneg hBnonneg
+  have hHsum_nonneg : 0 ≤ Hsum := by
+    dsimp [Hsum]
+    exact Finset.sum_nonneg hHnonneg
+  have hB_le_sum : ∀ y ∈ N, Bc y ≤ Bsum := by
+    intro y hy
+    dsimp [Bsum]
+    exact Finset.single_le_sum hBnonneg hy
+  have hH_le_sum : ∀ y ∈ N, Hc y ≤ Hsum := by
+    intro y hy
+    dsimp [Hsum]
+    exact Finset.single_le_sum hHnonneg hy
+  have hlocal_sum :
+      ∀ y ∈ N, ParabolicC0AlphaWith Bsum Hsum α u (parabolicClosedBall y (2 * r)) := by
+    intro y hy
+    exact (hBH y hy).mono_const (hB_le_sum y hy) (hH_le_sum y hy)
+  refine ⟨Bsum, hBsum_nonneg, max Hsum (2 * Bsum / r ^ α),
+    hHsum_nonneg.trans (le_max_left _ _), ?_⟩
+  exact ParabolicC0AlphaWith.of_parabolicBall_cover_closedBall
+    (B := Bsum) (H := Hsum) hα hr hcover hlocal_sum
+
+/-- Compact local-to-global parabolic `C^{0,α}` control from local doubled closed-ball estimates,
+with all constants chosen automatically from a finite compact subcover. -/
+theorem of_isCompact_of_local_closedBall {r : ℝ} {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hα : 0 < α) (hr : 0 < r)
+    (hlocal : ∀ y ∈ K, ParabolicC0AlphaOn α u (parabolicClosedBall y (2 * r))) :
+    ParabolicC0AlphaOn α u K := by
+  rcases hK.elim_nhds_subcover (fun y => parabolicBall y r)
+      (fun y _hy => parabolicBall.mem_nhds (p := y) (R := r) hr) with
+    ⟨N, hNK, hcover⟩
+  exact of_finset_parabolicBall_cover_closedBall N hα hr hcover
+    (fun y hy => hlocal y (hNK y hy))
 
 theorem const (c : E) : ParabolicC0AlphaOn α (fun _ : ℝ × X => c) s :=
   ⟨‖c‖, norm_nonneg c, 0, le_rfl, ParabolicC0AlphaWith.const c le_rfl le_rfl⟩

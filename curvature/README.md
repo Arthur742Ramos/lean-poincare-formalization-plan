@@ -980,7 +980,8 @@ the controlling constants, constant-preserving localization of open-domain
 Hölder and `C^{0,α}` estimates to uniform closed parabolic patches around
 compact subsets, a bounded local-to-global Hölder estimate from parabolic ball
 covers and doubled closed patches, plus its compact uniform-local corollary,
-matching local-to-global `C^{0,α}` patching theorems, and
+matching local-to-global `C^{0,α}` patching theorems, and finite-cover
+`C^{0,α}` patching with automatic local-constant selection, and
 basic linear algebra closure estimates for Hölder and bounded control, together
 with the bounded product estimate for normed-ring-valued `C^{0,α}` functions
 and the corresponding bounded scalar-action estimate for normed-space-valued

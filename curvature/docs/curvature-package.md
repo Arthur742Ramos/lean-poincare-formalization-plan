@@ -116,6 +116,7 @@ and `C^{0,α}` estimates to uniform closed parabolic patches around compact
 subsets, a bounded local-to-global Hölder estimate from parabolic ball covers
 and doubled closed patches, plus its compact uniform-local corollary, and
 matching local-to-global `C^{0,α}` patching theorems,
+finite-cover `C^{0,α}` patching with automatic local-constant selection,
 additive/subtractive closure estimates, plus the
 bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded
