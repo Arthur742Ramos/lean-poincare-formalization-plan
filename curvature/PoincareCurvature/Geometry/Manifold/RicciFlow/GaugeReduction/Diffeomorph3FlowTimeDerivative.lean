@@ -268,6 +268,34 @@ theorem hasDerivWithinAt_bilinearFormField_along_curveWithin
     (g' := Bfield') hB hpair.hasFDerivWithinAt hdomain
   simpa [Function.comp_def] using hcomp.hasDerivWithinAt
 
+/-- Open-domain version of
+`hasDerivWithinAt_bilinearFormField_along_curveWithin`.
+
+If the product domain is open at the endpoint, the required product-graph
+convergence follows from the within-derivative of the moving base curve. -/
+theorem hasDerivWithinAt_bilinearFormField_along_curveWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V} {s : Set ℝ} {t : ℝ}
+    {domain : Set (ℝ × V)}
+    (hB : HasFDerivWithinAt Bfield Bfield' domain (t, y t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hopen : IsOpen domain) (hmem : (t, y t) ∈ domain) :
+    HasDerivWithinAt (fun τ : ℝ => Bfield (τ, y τ)) (Bfield' (1, y')) s t := by
+  have htime : ContinuousWithinAt (fun τ : ℝ ↦ τ) s t := by
+    exact continuousWithinAt_id
+  have hdomain :
+      Filter.Tendsto (fun τ : ℝ ↦ (τ, y τ)) (𝓝[s] t) (𝓝[domain] (t, y t)) := by
+    have hgraph : ContinuousWithinAt (fun τ : ℝ ↦ (τ, y τ)) s t :=
+      htime.prodMk hy.continuousWithinAt
+    rw [hopen.nhdsWithin_eq hmem]
+    exact hgraph
+  exact
+    hasDerivWithinAt_bilinearFormField_along_curveWithin
+      (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
+      (s := s) (t := t) (domain := domain) hB hy hdomain
+
 /-- Within-set chain rule for a bilinear-form field along a moving base point
 and two independently differentiated vector paths. -/
 theorem hasDerivWithinAt_bilinearFormField_apply_apply_along_curve
@@ -315,6 +343,32 @@ theorem hasDerivWithinAt_bilinearFormField_apply_apply_along_curveWithin
       (hasDerivWithinAt_bilinearFormField_along_curveWithin
         (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
         (s := s) (t := t) hB hy hdomain)
+      hu hv
+
+/-- Open-domain version of
+`hasDerivWithinAt_bilinearFormField_apply_apply_along_curveWithin`. -/
+theorem hasDerivWithinAt_bilinearFormField_apply_apply_along_curveWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V}
+    {u : ℝ → V} {u' : V} {v : ℝ → V} {v' : V} {s : Set ℝ} {t : ℝ}
+    {domain : Set (ℝ × V)}
+    (hB : HasFDerivWithinAt Bfield Bfield' domain (t, y t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hopen : IsOpen domain) (hmem : (t, y t) ∈ domain)
+    (hu : HasDerivWithinAt u u' s t) (hv : HasDerivWithinAt v v' s t) :
+    HasDerivWithinAt (fun τ : ℝ => Bfield (τ, y τ) (u τ) (v τ))
+      (Bfield' (1, y') (u t) (v t) +
+        Bfield (t, y t) u' (v t) +
+        Bfield (t, y t) (u t) v') s t := by
+  exact
+    hasDerivWithinAt_bilinearForm_apply_apply
+      (B := fun τ : ℝ => Bfield (τ, y τ))
+      (B' := Bfield' (1, y'))
+      (hasDerivWithinAt_bilinearFormField_along_curveWithinOpen
+        (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
+        (s := s) (t := t) (domain := domain) hB hy hopen hmem)
       hu hv
 
 /-- Within-set moving-base coordinate chain rule for
@@ -365,6 +419,32 @@ theorem hasDerivWithinAt_bilinearFormField_linear_apply_apply_along_curveWithin
       (hasDerivWithinAt_bilinearFormField_along_curveWithin
         (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
         (s := s) (t := t) hB hy hdomain)
+      hA u v
+
+/-- Open-domain version of
+`hasDerivWithinAt_bilinearFormField_linear_apply_apply_along_curveWithin`. -/
+theorem hasDerivWithinAt_bilinearFormField_linear_apply_apply_along_curveWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {y : ℝ → V} {y' : V}
+    {A : ℝ → V →L[ℝ] V} {D : V →L[ℝ] V} {s : Set ℝ} {t : ℝ}
+    {domain : Set (ℝ × V)}
+    (hB : HasFDerivWithinAt Bfield Bfield' domain (t, y t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hopen : IsOpen domain) (hmem : (t, y t) ∈ domain)
+    (hA : HasDerivWithinAt A (D.comp (A t)) s t) (u v : V) :
+    HasDerivWithinAt (fun τ : ℝ => Bfield (τ, y τ) (A τ u) (A τ v))
+      (Bfield' (1, y') (A t u) (A t v) +
+        Bfield (t, y t) (D (A t u)) (A t v) +
+        Bfield (t, y t) (A t u) (D (A t v))) s t := by
+  exact
+    hasDerivWithinAt_bilinearForm_linear_apply_apply_of_comp_deriv
+      (B := fun τ : ℝ => Bfield (τ, y τ))
+      (B' := Bfield' (1, y')) (A := A) (D := D) (s := s) (t := t)
+      (hasDerivWithinAt_bilinearFormField_along_curveWithinOpen
+        (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
+        (s := s) (t := t) (domain := domain) hB hy hopen hmem)
       hA u v
 
 /-- Model-space chain rule for `B(t) (A(t) u) (A(t) v)`, the coordinate form of
@@ -1609,6 +1689,36 @@ theorem hasDerivWithinAt_timeDifference_of_fullFieldWithin_and_frozenSpatial
     simpa [Function.comp_def] using hcomp.hasDerivWithinAt
   exact hfull.sub hspace
 
+/-- Open-domain version of
+`hasDerivWithinAt_timeDifference_of_fullFieldWithin_and_frozenSpatial`.
+
+For open product domains, the moving graph `(τ, c τ)` approaches the endpoint
+inside the domain automatically from the within-derivative of `c`. -/
+theorem hasDerivWithinAt_timeDifference_of_fullFieldWithinOpen_and_frozenSpatial
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {B : ℝ → E → F} {c : ℝ → E} {c' : E} {s : Set ℝ} {t : ℝ}
+    {domain : Set (ℝ × E)}
+    {Bfield' : ℝ × E →L[ℝ] F} {Bspace : F}
+    (hB : HasFDerivWithinAt (fun q : ℝ × E ↦ B q.1 q.2) Bfield'
+      domain (t, c t))
+    (hc : HasDerivWithinAt c c' s t)
+    (hopen : IsOpen domain) (hmem : (t, c t) ∈ domain)
+    (hspace : HasDerivWithinAt (fun τ : ℝ ↦ B t (c τ)) Bspace s t) :
+    HasDerivWithinAt (fun τ : ℝ ↦ B τ (c τ) - B t (c τ))
+      (Bfield' (1, c') - Bspace) s t := by
+  have htime : ContinuousWithinAt (fun τ : ℝ ↦ τ) s t := by
+    exact continuousWithinAt_id
+  have hdomain :
+      Filter.Tendsto (fun τ : ℝ ↦ (τ, c τ)) (𝓝[s] t) (𝓝[domain] (t, c t)) := by
+    have hgraph : ContinuousWithinAt (fun τ : ℝ ↦ (τ, c τ)) s t :=
+      htime.prodMk hc.continuousWithinAt
+    rw [hopen.nhdsWithin_eq hmem]
+    exact hgraph
+  exact
+    hasDerivWithinAt_timeDifference_of_fullFieldWithin_and_frozenSpatial
+      (B := B) (c := c) (c' := c') (s := s) (t := t) (domain := domain)
+      (Bfield' := Bfield') (Bspace := Bspace) hB hc hdomain hspace
+
 /-- Within-domain direct time-difference derivative from a full Fréchet
 derivative: differentiate `B(τ, c τ)` and subtract the frozen-time derivative
 `B(t, c τ)` using the same within-domain derivative. -/
@@ -1646,6 +1756,42 @@ theorem hasDerivWithinAt_timeDifference_of_fullFieldWithin
       hB hpairFrozen.hasFDerivWithinAt hfrozenDomain
     simpa [Function.comp_def] using hcomp.hasDerivWithinAt
   exact hfull.sub hfrozen
+
+/-- Open-domain version of `hasDerivWithinAt_timeDifference_of_fullFieldWithin`.
+
+Both product graphs `(τ, c τ)` and `(t, c τ)` approach the same endpoint inside
+an open derivative domain. -/
+theorem hasDerivWithinAt_timeDifference_of_fullFieldWithinOpen
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {B : ℝ → E → F} {c : ℝ → E} {c' : E} {s : Set ℝ} {t : ℝ}
+    {domain : Set (ℝ × E)}
+    {Bfield' : ℝ × E →L[ℝ] F}
+    (hB : HasFDerivWithinAt (fun q : ℝ × E ↦ B q.1 q.2) Bfield'
+      domain (t, c t))
+    (hc : HasDerivWithinAt c c' s t)
+    (hopen : IsOpen domain) (hmem : (t, c t) ∈ domain) :
+    HasDerivWithinAt (fun τ : ℝ ↦ B τ (c τ) - B t (c τ))
+      (Bfield' (1, c') - Bfield' (0, c')) s t := by
+  have htime : ContinuousWithinAt (fun τ : ℝ ↦ τ) s t := by
+    exact continuousWithinAt_id
+  have hdomain :
+      Filter.Tendsto (fun τ : ℝ ↦ (τ, c τ)) (𝓝[s] t) (𝓝[domain] (t, c t)) := by
+    have hgraph : ContinuousWithinAt (fun τ : ℝ ↦ (τ, c τ)) s t :=
+      htime.prodMk hc.continuousWithinAt
+    rw [hopen.nhdsWithin_eq hmem]
+    exact hgraph
+  have hfrozenDomain :
+      Filter.Tendsto (fun τ : ℝ ↦ (t, c τ)) (𝓝[s] t) (𝓝[domain] (t, c t)) := by
+    have hconst : ContinuousWithinAt (fun _ : ℝ ↦ t) s t :=
+      continuousWithinAt_const
+    have hgraph : ContinuousWithinAt (fun τ : ℝ ↦ (t, c τ)) s t :=
+      hconst.prodMk hc.continuousWithinAt
+    rw [hopen.nhdsWithin_eq hmem]
+    exact hgraph
+  exact
+    hasDerivWithinAt_timeDifference_of_fullFieldWithin
+      (B := B) (c := c) (c' := c') (s := s) (t := t) (domain := domain)
+      (Bfield' := Bfield') hB hc hdomain hfrozenDomain
 
 /-- Endpoint/right-derivative version of the metric-coordinate time-difference
 bridge, using the full Fréchet derivative directly for both the moving and
@@ -6165,6 +6311,109 @@ theorem coordinateProductGraph_tendstoWithin_of_isOpen
   rw [hopen.nhdsWithin_eq hmem]
   exact hgraph
 
+/-- Open-product-domain scalar endpoint time-difference bridge.
+
+This is the primitive scalar form behind the open-domain component packages:
+the full metric-coordinate derivative is known only within an open product
+domain containing the raw coordinate endpoint, and graph convergence is derived
+from gauge-flow continuity. -/
+theorem metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivWithinAtOpenDomain_and_frozenSpatial_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {domain : Set (ℝ × E)}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hopen : IsOpen domain)
+    (hmem : (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∈ domain)
+    (hB : HasFDerivWithinAt
+      (fun q : ℝ × E ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      domain (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x)) -
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      s t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+      (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have hspace : HasDerivWithinAt (fun τ : ℝ ↦ B t (c τ))
+      ((fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+        ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (X t ((G.maps3 t) x))) s t := by
+    simpa [B, c] using
+      SmoothSelfDiffeomorph3Family.Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_eval_self
+        (I := I) (M := M) G ht g x
+  have htime :=
+    SmoothSelfDiffeomorph3Family.hasDerivWithinAt_timeDifference_of_fullFieldWithinOpen_and_frozenSpatial
+      (B := B) (c := c)
+      (domain := domain)
+      (Bfield' := Bfield')
+      (Bspace :=
+        (fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      hB (G.hasDerivWithinAt_extChartAt_eval_self ht x) hopen (by simpa [c] using hmem) hspace
+  simpa [B, c] using htime
+
+/-- Readout-field open-product-domain scalar endpoint time-difference bridge.
+
+The locally equal readout field supplies the within-domain derivative while
+openness and endpoint membership derive the raw graph convergence. -/
+theorem metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_eventuallyEq_hasFDerivWithinAtOpenDomain_and_frozenSpatial_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {domain : Set (ℝ × E)}
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq :
+      SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+        (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+        𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))] Bfield)
+    (hopen : IsOpen domain)
+    (hmem : (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∈ domain)
+    (hB : HasFDerivWithinAt Bfield Bfield'
+      domain (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x)) -
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      s t :=
+  metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivWithinAtOpenDomain_and_frozenSpatial_self
+    (I := I) (M := M) G ht g x hopen hmem
+    (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEq
+      (I := I) (M := M) hEq hB)
+
 /-- Domain-restricted direct-velocity version of
 `metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_hasFDerivAt`.
 
@@ -6295,11 +6544,20 @@ theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDeri
                   (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
             gdot t x u v) :
     MetricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf (I := I) (M := M) G g gdot := by
-  refine G.metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDerivWithinAt ?_
   intro t ht x u v
   obtain ⟨domain, Bfield', D, hopen, hmem, hBfield, hA, hvalue⟩ := hdata ht x u v
-  refine ⟨domain, Bfield', D, hBfield, ?_, hA, hvalue⟩
-  exact G.coordinateProductGraph_tendstoWithin_of_isOpen ht x hopen hmem
+  let spatial : E →L[ℝ] E →L[ℝ] ℝ :=
+    (fderivWithin ℝ
+      (fun yE : E ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+      (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+      (X t ((G.maps3 t) x))
+  refine ⟨Bfield' (1, X t ((G.maps3 t) x)) - spatial, D, ?_, hA, ?_⟩
+  · simpa [spatial] using
+      metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivWithinAtOpenDomain_and_frozenSpatial_self
+        (I := I) (M := M) G ht g x hopen hmem hBfield
+  · simpa [spatial, sub_eq_add_neg, add_assoc] using hvalue
 
 /-- Readout-field product-domain version of
 `metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDerivWithinAt`.
@@ -6427,14 +6685,21 @@ theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_eventual
                   (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
             gdot t x u v) :
     MetricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf (I := I) (M := M) G g gdot := by
-  refine G.metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDerivWithinAtOpenDomain ?_
   intro t ht x u v
   obtain ⟨domain, Bfield, Bfield', D, hEq, hopen, hmem, hBfield, hA, hvalue⟩ :=
     hdata ht x u v
-  refine ⟨domain, Bfield', D, hopen, hmem, ?_, hA, hvalue⟩
-  exact
-    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEq
-      (I := I) (M := M) hEq hBfield
+  let spatial : E →L[ℝ] E →L[ℝ] ℝ :=
+    (fderivWithin ℝ
+      (fun yE : E ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+      (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+      (X t ((G.maps3 t) x))
+  refine ⟨Bfield' (1, X t ((G.maps3 t) x)) - spatial, D, ?_, hA, ?_⟩
+  · simpa [spatial] using
+      metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_eventuallyEq_hasFDerivWithinAtOpenDomain_and_frozenSpatial_self
+        (I := I) (M := M) G ht g x hEq hopen hmem hBfield
+  · simpa [spatial, sub_eq_add_neg, add_assoc] using hvalue
 
 /-- Readout-field direct-velocity version of
 `metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_eventuallyEq_hasFDerivAt`.

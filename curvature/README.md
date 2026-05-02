@@ -384,15 +384,18 @@ now packages the matching intrinsic boundary
          pushed-forward tangent vectors, plus a variational-local-flow form that
          transports product-domain convergence from the model Picard graph to the
          raw coordinate graph using closed-interval base-flow equality, with an
-         open-domain variant deriving model graph convergence from variational
-         local-flow continuity and a raw-coordinate open-domain bridge deriving
-         raw graph convergence from preferred-chart gauge-flow continuity, plus
-         lower time-difference component-data constructors with the same
-         open-domain reduction for direct and readout fields and public
-         closed-Picard tensor wrappers exposing that open-domain shape, with
-         variational tangent-map direct/readout tensor routes mirroring the same
-         interface, the
-         model-coordinate time-difference route also accepting any locally equal
+          open-domain variant deriving model graph convergence from variational
+          local-flow continuity and a raw-coordinate open-domain bridge deriving
+          raw graph convergence from preferred-chart gauge-flow continuity, plus
+          lower time-difference component-data constructors with the same
+          open-domain reduction for direct and readout fields and public
+          closed-Picard tensor wrappers exposing that open-domain shape, with
+          variational tangent-map direct/readout tensor routes mirroring the same
+          interface, and now with generic open-domain moving-base bilinear-field
+          chain rules and full-field time-difference lemmas that derive product
+          graph convergence from base-curve within-derivative continuity before
+          the raw gauge-flow scalar endpoint theorem consumes them, the
+          model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the
         closed-Picard model-velocity time-difference route now deriving the

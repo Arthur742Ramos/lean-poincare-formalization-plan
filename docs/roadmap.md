@@ -690,16 +690,22 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          product-domain convergence from the model Picard graph to the raw
          coordinate graph by closed-interval base-flow equality; when the
          derivative domain is open and contains the Picard graph endpoint, model
-         graph convergence is derived from variational-flow continuity instead
-         of being assumed, and the raw-coordinate route has the parallel
-         open-domain bridge from preferred-chart gauge-flow continuity. The same
-         open-domain reduction is available at the lower time-difference
-         component-data layer, including locally equal finite-cover/readout
-         fields, at the public closed-Picard tensor wrapper layer, and through
-         the variational tangent-map tensor routes (ordinary/within tangent-map
-         agreement, direct/readout fields), all
-         without being upgraded to global `HasFDerivAt`
-         statements. It also has
+          graph convergence is derived from variational-flow continuity instead
+          of being assumed, and the raw-coordinate route has the parallel
+          open-domain bridge from preferred-chart gauge-flow continuity. The same
+          open-domain reduction is available at the lower time-difference
+          component-data layer, including locally equal finite-cover/readout
+          fields, at the public closed-Picard tensor wrapper layer, and through
+          the variational tangent-map tensor routes (ordinary/within tangent-map
+          agreement, direct/readout fields). The generic calculus layer now also
+          has open-domain moving-base bilinear-field chain rules and full-field
+          time-difference lemmas deriving product graph convergence from the
+          within-derivative continuity of the base curve, and the raw
+          open-domain scalar time-difference theorem uses that generic proof
+          rather than a compatibility wrapper around the older explicit-graph
+          theorem, all
+          without being upgraded to global `HasFDerivAt`
+          statements. It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and

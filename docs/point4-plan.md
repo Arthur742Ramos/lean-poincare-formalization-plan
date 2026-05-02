@@ -261,7 +261,13 @@ raw metric-coordinate fields and locally equal readout fields. The variational
 tangent-map tensor routes now mirror the same open-domain interface, including
 ordinary-neighborhood and closed-interval tangent-map agreement and readout-field
 forms, so the model tangent ODE can supply the tangent derivative without a
-separate graph-convergence proof.
+separate graph-convergence proof. This reduction now reaches the generic
+calculus layer itself: open-domain variants of the moving-base bilinear-field
+chain rules and the full-field time-difference lemmas derive the needed product
+graph convergence from the within-derivative/continuity of the base curve. The
+raw gauge-flow open-domain scalar time-difference theorem is now proved through
+that generic calculus, so the open-domain component-data constructors no longer
+rest on a compatibility wrapper around the older explicit-convergence theorem.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
