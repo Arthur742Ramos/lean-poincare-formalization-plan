@@ -679,8 +679,9 @@ now packages the matching intrinsic boundary
         tangent maps and fixed vector slots, plus `(flow, tangent)` product-graph
         readouts, `(t, flow, tangent)` time-graph readouts, and fixed two-vector-slot
         `(t, flow, A(t)u, A(t)v)` readouts,
-        plus base-flow, paired fixed-vector-slot, and combined
-        `(flow, A(t)u, A(t)v)` space-time readouts and
+        plus base-flow, paired fixed-vector-slot, combined
+        `(flow, A(t)u, A(t)v)`, and full derivative-domain tuple
+        `(t, flow, A(t)u, A(t)v)` space-time readouts and
         Lipschitz/continuity/distance estimates extracted from product
         variational dependence, plus overlap uniqueness for that combined
         scalar-readout state on both `Ioo` and `Icc`, and direct tensor

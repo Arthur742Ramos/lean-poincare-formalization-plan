@@ -1064,7 +1064,8 @@ combines the base flow with those two vector slots, giving direct
 Lipschitz/continuity/distance readouts for
 `x ↦ (flow_x(t), A_x(t)u, A_x(t)v)`. The continuous product-flow extraction now
 also preserves closed-cylinder and open-cylinder space-time continuity/eventual
-membership for the same scalar-readout state, and variational overlap uniqueness
+membership for the same scalar-readout state and for the full derivative-domain
+tuple `(t, flow(t), A(t)u, A(t)v)`, and variational overlap uniqueness
 now has direct `Ioo`/`Icc` readouts for that combined state. The tensor
 time-derivative layer can also consume continuous product Picard flows directly
 in the open-domain and explicit-domain scalar-readout routes, converting them
