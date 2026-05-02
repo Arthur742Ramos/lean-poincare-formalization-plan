@@ -105,5 +105,6 @@ continuity/uniform-continuity consequences, oscillation bounds, and additive
 and subtractive closure estimates, plus the bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded
 scalar-action estimate for normed-space-valued functions, plus closure under
-taking norms. This is groundwork for the future Schauder and Ricci-DeTurck
-Banach-chart layer, not the local-existence theorem itself.
+taking norms and Lipschitz composition on the controlled range. This is
+groundwork for the future Schauder and Ricci-DeTurck Banach-chart layer, not the
+local-existence theorem itself.

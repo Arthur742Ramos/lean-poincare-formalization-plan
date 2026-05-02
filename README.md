@@ -324,8 +324,9 @@ packages the canonical stationary local solution attached to
   add/subtract/smul closure estimates plus the bounded product estimate for
   normed-ring-valued `C^{0,α}` functions and the corresponding bounded
   scalar-action estimate for normed-space-valued functions, along with closure
-  under taking norms. These primitives do not yet supply the Schauder estimates
-  or the Ricci-DeTurck Banach chart. The
+  under taking norms and Lipschitz composition on the controlled range. These
+  primitives do not yet supply the Schauder estimates or the Ricci-DeTurck
+  Banach chart. The
   curvature,
   time-dependent
   geometry, intrinsic Ricci-flow, and DeTurck layers now prove the geometric

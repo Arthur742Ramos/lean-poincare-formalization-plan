@@ -18,7 +18,7 @@ future estimates should use.
 @[expose] public noncomputable section
 
 open Set
-open scoped Topology
+open scoped Topology NNReal
 
 namespace RicciFlow
 namespace AnalyticPDE
@@ -536,6 +536,22 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     _ ≤ ‖c‖ * (C * dα) := mul_le_mul_of_nonneg_left (hu hp hq) (norm_nonneg c)
     _ = (‖c‖ * C) * dα := by ring
 
+theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicHolderWith C α u s)
+    (hφ : LipschitzOnWith K φ (u '' s)) :
+    ParabolicHolderWith ((K : ℝ) * C) α (fun z => φ (u z)) s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  have hpim : u p ∈ u '' s := ⟨p, hp, rfl⟩
+  have hqim : u q ∈ u '' s := ⟨q, hq, rfl⟩
+  calc
+    ‖φ (u p) - φ (u q)‖ = dist (φ (u p)) (φ (u q)) := by rw [dist_eq_norm]
+    _ ≤ (K : ℝ) * dist (u p) (u q) := hφ.dist_le_mul (u p) hpim (u q) hqim
+    _ = (K : ℝ) * ‖u p - u q‖ := by rw [dist_eq_norm]
+    _ ≤ (K : ℝ) * (C * dα) :=
+      mul_le_mul_of_nonneg_left (hu hp hq) (NNReal.coe_nonneg K)
+    _ = ((K : ℝ) * C) * dα := by ring
+
 /-- Restricting a parabolic Holder estimate to a fixed spatial point gives the weighted
 time-slice estimate. -/
 theorem time_slice (h : ParabolicHolderWith C α u s) {t τ : ℝ} {x : X}
@@ -669,6 +685,14 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     ParabolicHolderOn α (fun z => c • u z) s := by
   rcases hu with ⟨C, hC, hCu⟩
   exact ⟨‖c‖ * C, mul_nonneg (norm_nonneg c) hC, hCu.smul c⟩
+
+theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicHolderOn α u s)
+    (hφ : LipschitzOnWith K φ (u '' s)) :
+    ParabolicHolderOn α (fun z => φ (u z)) s := by
+  rcases hu with ⟨C, hC, hCu⟩
+  exact ⟨(K : ℝ) * C, mul_nonneg (NNReal.coe_nonneg K) hC,
+    hCu.comp_lipschitzOnWith hφ⟩
 
 /-- A parabolic Holder function has a weighted Holder estimate on every time slice through a
 fixed spatial point. -/
