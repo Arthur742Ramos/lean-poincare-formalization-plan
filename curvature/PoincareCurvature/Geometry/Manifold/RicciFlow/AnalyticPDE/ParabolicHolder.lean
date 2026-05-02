@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
 public import Mathlib.Topology.MetricSpace.Basic
 
 set_option linter.unusedSectionVars false
@@ -402,6 +403,30 @@ theorem space_slice (h : ParabolicHolderWith C α u s) {t : ℝ} {x y : X}
     ‖u (t, x) - u (t, y)‖ ≤ C * (dist x y) ^ α := by
   simpa using h hx hy
 
+/-- Positive-exponent parabolic Holder control implies continuity on the controlled set. -/
+theorem continuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) : ContinuousOn u s := by
+  intro p hp
+  rw [ContinuousWithinAt, tendsto_iff_norm_sub_tendsto_zero]
+  refine squeeze_zero' (f := fun q : ℝ × X => ‖u q - u p‖)
+    (g := fun q : ℝ × X => C * (parabolicDistance q p) ^ α) ?_ ?_ ?_
+  · filter_upwards with q
+    exact norm_nonneg _
+  · filter_upwards [eventually_mem_nhdsWithin] with q hq
+    exact h hq hp
+  · have hd : Filter.Tendsto (fun q : ℝ × X => parabolicDistance q p) (nhdsWithin p s)
+        (nhds 0) := by
+      have hd₀ : Filter.Tendsto (fun q : ℝ × X => parabolicDistance q p) (nhds p)
+          (nhds 0) := by
+        have hd₀' : ContinuousAt (fun q : ℝ × X => parabolicDistance q p) p :=
+          (parabolicDistance.continuous_fixed_right p).continuousAt
+        rw [← parabolicDistance.self p]
+        exact hd₀'
+      exact hd₀.mono_left nhdsWithin_le_nhds
+    have hpow : Filter.Tendsto (fun q : ℝ × X => (parabolicDistance q p) ^ α)
+        (nhdsWithin p s) (nhds (0 ^ α)) :=
+      Filter.Tendsto.rpow_const hd (Or.inr hα.le)
+    simpa [Real.zero_rpow hα.ne'] using tendsto_const_nhds.mul hpow
+
 end ParabolicHolderWith
 
 namespace ParabolicHolderOn
@@ -452,6 +477,11 @@ theorem space_slice (h : ParabolicHolderOn α u s) :
       ‖u (t, x) - u (t, y)‖ ≤ C * (dist x y) ^ α := by
   rcases h with ⟨C, hC, hCu⟩
   exact ⟨C, hC, fun {t x y} hx hy => hCu.space_slice (t := t) (x := x) (y := y) hx hy⟩
+
+/-- Positive-exponent parabolic Holder functions are continuous on their time-space domain. -/
+theorem continuousOn (h : ParabolicHolderOn α u s) (hα : 0 < α) : ContinuousOn u s := by
+  rcases h with ⟨_C, _hC, hCu⟩
+  exact hCu.continuousOn hα
 
 end ParabolicHolderOn
 
@@ -516,6 +546,10 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     ParabolicC0AlphaWith (‖c‖ * B) (‖c‖ * H) α (fun z => c • u z) s :=
   ⟨hu.bounded.smul c, hu.holder.smul c⟩
 
+/-- The Holder component of positive-exponent parabolic `C^{0,α}` control gives continuity. -/
+theorem continuousOn (h : ParabolicC0AlphaWith B H α u s) (hα : 0 < α) : ContinuousOn u s :=
+  h.holder.continuousOn hα
+
 end ParabolicC0AlphaWith
 
 namespace ParabolicC0AlphaOn
@@ -562,6 +596,10 @@ theorem space_slice (h : ParabolicC0AlphaOn α u s) :
     ∃ C ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
       ‖u (t, x) - u (t, y)‖ ≤ C * (dist x y) ^ α :=
   h.holderOn.space_slice
+
+/-- Positive-exponent parabolic `C^{0,α}` functions are continuous on their time-space domain. -/
+theorem continuousOn (h : ParabolicC0AlphaOn α u s) (hα : 0 < α) : ContinuousOn u s :=
+  h.holderOn.continuousOn hα
 
 end ParabolicC0AlphaOn
 
