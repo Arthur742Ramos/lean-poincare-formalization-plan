@@ -10883,6 +10883,34 @@ theorem variationalBaseVelocity_eq_tangentCoordChange_of_eventuallyEq
     _ = tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
         ((G.maps3 t) x) (X t ((G.maps3 t) x)) := hrawAsModel.deriv
 
+/-- Direct-velocity version of
+`variationalBaseVelocity_eq_tangentCoordChange_of_eventuallyEq`. -/
+theorem variationalBaseVelocity_eq_self_of_eventuallyEq
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (x : M) {xE : E}
+    (hxE : xE ∈ closedBall x₀ r)
+    (hbase : (fun τ : ℝ ↦
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[𝓝 t]
+        (fun τ : ℝ ↦ α.flow (xE, τ))) :
+    f t (α.flow (xE, t)) = X t ((G.maps3 t) x) := by
+  have hvel :=
+    G.variationalBaseVelocity_eq_tangentCoordChange_of_eventuallyEq
+      α ht x hxE hbase
+  have htc :
+      tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+          (X t ((G.maps3 t) x)) =
+        X t ((G.maps3 t) x) :=
+    tangentCoordChange_self (I := I)
+      (x := (G.maps3 t) x) (z := (G.maps3 t) x)
+      (v := X t ((G.maps3 t) x)) (mem_extChartAt_source ((G.maps3 t) x))
+  exact hvel.trans htc
+
 /-- Closed-interval/right-derivative version of
 `variationalBaseVelocity_eq_tangentCoordChange_of_eventuallyEq`.
 
@@ -10934,6 +10962,34 @@ theorem variationalBaseVelocity_eq_tangentCoordChangeWithin_of_eventuallyEq
     _ = tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
         ((G.maps3 t) x) (X t ((G.maps3 t) x)) :=
       hrawAsModel.derivWithin hunique
+
+/-- Direct-velocity version of
+`variationalBaseVelocity_eq_tangentCoordChangeWithin_of_eventuallyEq`. -/
+theorem variationalBaseVelocity_eq_selfWithin_of_eventuallyEq
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hlt : tmin < tmax) {t : ℝ} (ht : t ∈ Icc tmin tmax) (x : M) {xE : E}
+    (hxE : xE ∈ closedBall x₀ r)
+    (hbase : (fun τ : ℝ ↦
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[𝓝[Icc tmin tmax] t]
+        (fun τ : ℝ ↦ α.flow (xE, τ))) :
+    f t (α.flow (xE, t)) = X t ((G.maps3 t) x) := by
+  have hvel :=
+    G.variationalBaseVelocity_eq_tangentCoordChangeWithin_of_eventuallyEq
+      α hlt ht x hxE hbase
+  have htc :
+      tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+          (X t ((G.maps3 t) x)) =
+        X t ((G.maps3 t) x) :=
+    tangentCoordChange_self (I := I)
+      (x := (G.maps3 t) x) (z := (G.maps3 t) x)
+      (v := X t ((G.maps3 t) x)) (mem_extChartAt_source ((G.maps3 t) x))
+  exact hvel.trans htc
 
 /-- Endpoint time-difference route with the frozen spatial term stated using
 the model ODE velocity of a variational local flow.

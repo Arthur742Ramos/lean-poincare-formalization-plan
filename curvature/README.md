@@ -369,6 +369,9 @@ now packages the matching intrinsic boundary
         model base velocity with the raw gauge vector field by derivative
         uniqueness when the base coordinate curves agree, both in direct
         model-coordinate slots and in pushed-forward geometric slots, with the
+        base-velocity readouts themselves now exposing ordinary-neighborhood and
+        closed-interval within-filter direct forms that avoid the centered
+        `tangentCoordChange`, and with the
         model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

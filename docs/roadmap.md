@@ -673,10 +673,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       pointwise `HasMFDerivAt[s]`, ordinary-on-time-set `HasMFDerivAt`, and
        unrestricted `HasMFDerivAt` data produced by
        ODE/integral-curve theorems, named-derivative-family adapters,
-       centered preferred-chart derivative simplifications that expose the
-       gauge velocity directly instead of a redundant `tangentCoordChange I p p
-       p` term, and raw-flow transport across time-dependent vector fields that
-       agree on the active time set,
+        centered preferred-chart derivative simplifications that expose the
+        gauge velocity directly instead of a redundant `tangentCoordChange I p p
+        p` term, variational model-flow base-velocity readouts that identify
+        the model ODE velocity directly with the raw gauge velocity on both
+        ordinary neighborhoods and closed-interval within filters, and raw-flow
+        transport across time-dependent vector fields that agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and
      time-set restriction for raw flows with simp readouts for the unchanged
      diffeomorphism family and anchoring data, so future manifold-flow existence results

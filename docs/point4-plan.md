@@ -220,7 +220,10 @@ derive the remaining `Btime` time-difference term from a full metric-coordinate
 Fréchet derivative at the variational base point before performing that
 velocity rewrite, with geometric-slot variants for pushed-forward tangent-vector
 scalar identities and ordinary-neighborhood tangent-map variants for callers
-with stronger local-flow output. The full-field coordinate derivative route now
+with stronger local-flow output. The variational base-velocity comparison now
+also has direct ordinary-neighborhood and closed-interval within-filter readouts,
+identifying the model ODE velocity with `X t ((G.maps3 t) x)` without exposing
+the centered `tangentCoordChange` term. The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
 constructor for it, and direct endpoint-to-interior scalar promotion theorems,
