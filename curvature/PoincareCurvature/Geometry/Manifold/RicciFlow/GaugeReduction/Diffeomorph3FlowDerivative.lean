@@ -17,6 +17,7 @@ used by derivative-level non-identity gauge routes from the more geometric
 @[expose] public noncomputable section
 
 open scoped Manifold ContDiff Topology
+open Set
 
 namespace RicciFlow
 
@@ -296,6 +297,40 @@ theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.mono
       (I := I) (M := M) Φ g background s := by
   intro τ hτ x
   exact hderiv τ (hst hτ) x
+
+/-- Closed-Picard-interval primitive derivative data gives ordinary derivative
+data on the open Picard interior. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_derivativeOn_Ioo
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hderiv : Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) Φ g background (Icc tmin tmax)) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+      (I := I) (M := M) Φ g background (Ioo tmin tmax) := by
+  intro t ht x
+  exact (hderiv t (Ioo_subset_Icc_self ht) x).hasMFDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
+/-- Closed-Picard-interval preferred-chart ODE data gives ordinary
+preferred-chart ODE data on the open Picard interior. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_chartDerivativeOn_Ioo
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background (Icc tmin tmax)) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background (Ioo tmin tmax) := by
+  intro t ht x
+  have htime : Icc tmin tmax ∈ 𝓝 t := Icc_mem_nhds ht.1 ht.2
+  have hsource : (fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+      (extChartAt I ((Φ t) x)).source ∈ 𝓝 t := by
+    simpa [nhdsWithin_eq_nhds.2 htime] using
+      (hchart t (Ioo_subset_Icc_self ht) x).1
+  exact ⟨hsource, (hchart t (Ioo_subset_Icc_self ht) x).2.hasDerivAt htime⟩
 
 /-- Fixed-IVP primitive derivative data for the intrinsic DeTurck gauges of all
 chosen DeTurck solutions of one initial-value problem. -/

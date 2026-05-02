@@ -584,7 +584,8 @@ now packages the matching intrinsic boundary
         neighborhood-time upgrades from within-time-set to ordinary-at-time
         primitive derivative and chart-ODE data, monotone restriction of
         within-time-set and ordinary-at-time derivative views including
-        chart-ODE views, and matching fixed-IVP `ofDerivative` /
+        chart-ODE views, direct closed-Picard `Icc` to open-interior `Ioo`
+        upgrades for primitive derivative and chart-ODE data, and matching fixed-IVP `ofDerivative` /
         `ofDerivativeAt` bridges,
         centered preferred-chart derivative simplifications that expose the
         actual gauge velocity directly, vector-field agreement transport for

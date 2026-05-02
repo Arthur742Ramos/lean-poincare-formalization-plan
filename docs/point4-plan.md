@@ -775,7 +775,9 @@ whenever the time set is a neighborhood at each of its times, with fixed-IVP and
 theorem-family wrappers. Both within-time-set and ordinary-at-time intrinsic
 derivative views, including the chart-ODE view, now also restrict monotonically
 to smaller time sets, matching the localized Picard intervals produced by chart
-ODE arguments. The
+ODE arguments. Closed-Picard `Icc` derivative and chart-ODE data now also have
+direct ordinary open-interior `Ioo` upgrade lemmas, matching the standard Picard
+endpoint-to-interior handoff. The
 same named-derivative symmetry is now present
 for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,
