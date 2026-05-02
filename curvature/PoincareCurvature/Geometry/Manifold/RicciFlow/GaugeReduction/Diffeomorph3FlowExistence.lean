@@ -1489,6 +1489,65 @@ theorem nonempty_ofDerivative
       (E := E) (H := H) (I := I) (M := M) ivp) :=
   ⟨ofDerivative maps3 anchored hflowDeriv⟩
 
+/-- Package fixed-IVP within-time-set preferred-chart ODE data as raw gauge-flow
+existence data. This is the named chart-data analogue of
+`of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source`. -/
+noncomputable def ofChartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivative
+      (I := I) (M := M) ivp maps3) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    (I := I) (M := M) (ivp := ivp)
+    maps3 anchored
+    (fun sol t ht x ↦ (hchart sol t ht x).1)
+    (fun sol t ht x ↦ (hchart sol t ht x).2)
+
+/-- Package fixed-IVP within-time-set preferred-chart ODE data as proof-level raw
+gauge-flow existence data. -/
+theorem nonempty_ofChartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivative
+      (I := I) (M := M) ivp maps3) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofChartDerivative maps3 anchored hchart⟩
+
+/-- Fixed-IVP within-time-set preferred-chart ODE data also supplies the existing
+within-time-set derivative-family view, after passing through the raw gauge-flow
+witness. -/
+theorem derivativeData_ofChartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivative
+      (I := I) (M := M) ivp maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivative
+      (I := I) (M := M) ivp maps3 := by
+  intro sol t ht x
+  exact ((ofChartDerivative (I := I) (M := M) (ivp := ivp)
+    maps3 anchored hchart).flow sol).hasMFDerivWithinAt ht x
+
 /-- Package fixed-IVP ordinary-at-time named derivative data as raw gauge-flow
 existence data. -/
 noncomputable def ofDerivativeAt
@@ -2828,6 +2887,68 @@ theorem nonempty_ofDerivativeFamily
     Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M)) :=
   ⟨ofDerivativeFamily maps3 anchored hflowDeriv⟩
+
+/-- Package theorem-family within-time-set preferred-chart ODE data as raw
+gauge-flow existence data. This is the named chart-data analogue of
+theorem-family `of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source`. -/
+noncomputable def ofChartDerivativeFamily
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily
+      (I := I) (M := M) maps3) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    (I := I) (M := M)
+    maps3 anchored
+    (fun ivp sol t ht x ↦ (hchart ivp sol t ht x).1)
+    (fun ivp sol t ht x ↦ (hchart ivp sol t ht x).2)
+
+/-- Package theorem-family within-time-set preferred-chart ODE data as
+proof-level raw gauge-flow existence data. -/
+theorem nonempty_ofChartDerivativeFamily
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily
+      (I := I) (M := M) maps3) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :=
+  ⟨ofChartDerivativeFamily maps3 anchored hchart⟩
+
+/-- Theorem-family within-time-set preferred-chart ODE data also supplies the
+existing within-time-set derivative-family view, after passing through the raw
+gauge-flow witness. -/
+theorem derivativeFamily_ofChartDerivativeFamily
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily
+      (I := I) (M := M) maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp sol t ht x
+  exact ((ofChartDerivativeFamily (I := I) (M := M)
+    maps3 anchored hchart).flow ivp sol).hasMFDerivWithinAt ht x
 
 /-- Package theorem-family ordinary-at-time named derivative data as raw
 gauge-flow existence data.  This is the named derivative-family analogue of

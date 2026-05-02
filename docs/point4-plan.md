@@ -753,11 +753,15 @@ with `Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn`,
 `ofDerivativeAtFamily` raw-existence bridge, so named Picard-interior derivative
 data no longer has to be manually weakened to within-set form before entering
 the gauge-flow existence API. It now also has named preferred-chart ODE packages
-`Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn` and
+for both within-time-set and ordinary-at-time chart data:
+`Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn`,
+`Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn`,
+`ChosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily`, and
 `ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily`, with fixed-IVP and
-theorem-family `ofChartDerivativeAt` bridges, so source-neighborhood chart ODE
-data can enter raw existence without unpacking into ad hoc constructor
-arguments. The chart-ODE package also has an eventual-equality transfer lemma:
+theorem-family `ofChartDerivative` / `ofChartDerivativeAt` bridges, so
+source-neighborhood chart ODE data can enter raw existence without unpacking
+into ad hoc constructor arguments. The ordinary chart-ODE package also has an
+eventual-equality transfer lemma:
 local model-coordinate curves with the right derivative can be used after they
 are identified eventually with the actual centered preferred-chart coordinate
 readout. Those bridges now have direct derivative-data readouts back to
@@ -775,7 +779,8 @@ for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,
 `IntrinsicDeTurckGaugeFlowExistence.ofDerivative`, and
 `IntrinsicDeTurckGaugeFlowExistence.ofDerivativeAt`, together with the
-fixed-IVP chart-data bridge `IntrinsicDeTurckGaugeFlowExistence.ofChartDerivativeAt`.
+fixed-IVP chart-data bridges `IntrinsicDeTurckGaugeFlowExistence.ofChartDerivative`
+and `IntrinsicDeTurckGaugeFlowExistence.ofChartDerivativeAt`.
 The theorem-family zero-gauge-field constructor now also carries the required
 pullback metric time-derivative proof, so any family whose intrinsic DeTurck
 gauge field vanishes on each solution time set can enter the gauge-reduction
