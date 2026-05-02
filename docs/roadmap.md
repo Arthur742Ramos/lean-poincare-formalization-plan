@@ -963,11 +963,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          including closed-Picard `Ioo` specializations; the field-level
          base-coordinate route now also packages the actual coordinate-curve
          derivative as `X t (G.maps3 t x)`, and the full-field variational
-         tangent-map endpoint has direct-velocity coordinate/readout and
-         geometric/readout wrappers; the same-set within-field route now also
-         has direct-velocity base-coordinate, metric-coordinate, readout-field,
-         and tensor time-regularity wrappers.
-         The module also now has an additive
+          tangent-map endpoint has direct-velocity coordinate/readout and
+          geometric/readout wrappers; the same-set within-field route now also
+          has direct-velocity base-coordinate, metric-coordinate, readout-field,
+          and tensor time-regularity wrappers, and the lower concrete
+          bilinear-coordinate derivative plus ordinary metric-coordinate field
+          package now expose matching direct-velocity `_self` companions.
+          The module also now has an additive
          time/spatial decomposition upgrading that frozen spatial term to the full
          moving time-space field derivative once the remaining time-difference
         derivative along the same raw coordinate curve is supplied, and this is

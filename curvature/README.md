@@ -686,7 +686,9 @@ now packages the matching intrinsic boundary
        plus full-field variational tangent-map coordinate/readout and
        geometric/readout direct-velocity endpoint wrappers, and same-set
        within-field direct-velocity base-coordinate, metric-coordinate,
-       readout-field, and tensor wrappers,
+       readout-field, and tensor wrappers, with matching lower
+       bilinear-coordinate derivative and ordinary metric-coordinate field
+       package `_self` companions,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an

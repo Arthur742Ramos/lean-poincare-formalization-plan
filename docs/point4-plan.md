@@ -472,7 +472,10 @@ obligation from the closed-Picard time-regularity route.
 The same-set within-field route now also has direct-velocity base-coordinate,
 metric-coordinate, readout-field, and tensor time-regularity wrappers, so
 neighborhood-time callers can keep the raw velocity in all full-field
-coordinate data packages.
+coordinate data packages. The underlying concrete bilinear-coordinate
+derivative and ordinary metric-coordinate field package now also have
+direct-velocity `_self` companions, so this interface is supported by
+proof-level scalar chain-rule data rather than only by later wrapper rewrites.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate
