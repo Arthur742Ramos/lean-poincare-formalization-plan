@@ -1678,6 +1678,81 @@ theorem center_flow_tangent_eventually_mem_of_mem_Ioo
   α.flow_tangent_eventually_mem_of_mem_Ioo
     (mem_closedBall_self r.2) ht hU hmem
 
+/-- The time/base-flow/tangent-map graph is continuous within the Picard interval. -/
+theorem time_flow_tangent_continuousWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousWithinAt (fun τ : ℝ => (τ, α.flow (x, τ), α.tangent x τ))
+      (Icc tmin tmax) t :=
+  continuousWithinAt_id.prodMk (α.flow_tangent_continuousWithinAt hx ht)
+
+/-- Center time/base-flow/tangent-map graph continuity within the Picard interval. -/
+theorem center_time_flow_tangent_continuousWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousWithinAt (fun τ : ℝ => (τ, α.flow (x₀, τ), α.tangent x₀ τ))
+      (Icc tmin tmax) t :=
+  α.time_flow_tangent_continuousWithinAt (mem_closedBall_self r.2) ht
+
+/-- The time/base-flow/tangent-map graph is eventually, relative to the closed
+Picard interval, in any open product set containing its endpoint value. -/
+theorem time_flow_tangent_eventuallyWithin_mem_of_mem_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set (ℝ × V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem : (t, α.flow (x, t), α.tangent x t) ∈ U) :
+    (fun τ : ℝ => (τ, α.flow (x, τ), α.tangent x τ)) ⁻¹' U ∈
+      𝓝[Icc tmin tmax] t :=
+  (α.time_flow_tangent_continuousWithinAt hx ht) (hU.mem_nhds hmem)
+
+/-- Center specialization of
+`VariationalLocalFlowSolution.time_flow_tangent_eventuallyWithin_mem_of_mem_Icc`. -/
+theorem center_time_flow_tangent_eventuallyWithin_mem_of_mem_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Icc tmin tmax)
+    {U : Set (ℝ × V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem : (t, α.flow (x₀, t), α.tangent x₀ t) ∈ U) :
+    (fun τ : ℝ => (τ, α.flow (x₀, τ), α.tangent x₀ τ)) ⁻¹' U ∈
+      𝓝[Icc tmin tmax] t :=
+  α.time_flow_tangent_eventuallyWithin_mem_of_mem_Icc
+    (mem_closedBall_self r.2) ht hU hmem
+
+/-- The time/base-flow/tangent-map graph is ordinarily continuous on the open
+Picard interior. -/
+theorem time_flow_tangent_continuousAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    ContinuousAt (fun τ : ℝ => (τ, α.flow (x, τ), α.tangent x τ)) t :=
+  continuousAt_id.prodMk (α.flow_tangent_continuousAt_of_mem_Ioo hx ht)
+
+/-- Center time/base-flow/tangent-map graph continuity on the open Picard interior. -/
+theorem center_time_flow_tangent_continuousAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Ioo tmin tmax) :
+    ContinuousAt (fun τ : ℝ => (τ, α.flow (x₀, τ), α.tangent x₀ τ)) t :=
+  α.time_flow_tangent_continuousAt_of_mem_Ioo (mem_closedBall_self r.2) ht
+
+/-- The time/base-flow/tangent-map graph is eventually in any open product set
+containing its interior-time value. -/
+theorem time_flow_tangent_eventually_mem_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set (ℝ × V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem : (t, α.flow (x, t), α.tangent x t) ∈ U) :
+    (fun τ : ℝ => (τ, α.flow (x, τ), α.tangent x τ)) ⁻¹' U ∈ 𝓝 t :=
+  (α.time_flow_tangent_continuousAt_of_mem_Ioo hx ht) (hU.mem_nhds hmem)
+
+/-- Center specialization of
+`VariationalLocalFlowSolution.time_flow_tangent_eventually_mem_of_mem_Ioo`. -/
+theorem center_time_flow_tangent_eventually_mem_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Ioo tmin tmax)
+    {U : Set (ℝ × V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem : (t, α.flow (x₀, t), α.tangent x₀ t) ∈ U) :
+    (fun τ : ℝ => (τ, α.flow (x₀, τ), α.tangent x₀ τ)) ⁻¹' U ∈ 𝓝 t :=
+  α.time_flow_tangent_eventually_mem_of_mem_Ioo
+    (mem_closedBall_self r.2) ht hU hmem
+
 /-- Applying the variational tangent map to a fixed vector gives within-interval
 continuity of the vector-slot time curve. -/
 theorem tangent_apply_continuousWithinAt
