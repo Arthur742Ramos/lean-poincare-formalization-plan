@@ -675,7 +675,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          ODE/integral-curve theorems, and the raw, fixed-IVP, and theorem-family
          layers now also accept the preferred-chart ODE shape directly via
          continuity plus centered `HasDerivWithinAt`/`HasDerivAt` chart
-         derivatives, named-derivative-family adapters,
+         derivatives, with source-neighborhood variants that derive manifold
+         curve continuity from eventual membership in the centered chart source,
+         named-derivative-family adapters,
          centered preferred-chart derivative simplifications that expose the
          gauge velocity directly instead of a redundant `tangentCoordChange I p p
         p` term, variational model-flow base-velocity readouts that identify

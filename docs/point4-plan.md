@@ -872,6 +872,13 @@ The fixed-IVP intrinsic DeTurck gauge-flow existence layer mirrors those
 centered preferred-chart ODE constructors, so a chosen local solution can now be
 upgraded directly from Picard-style chart-continuity plus chart-derivative
 output without first packaging a manifold `HasMFDerivWithinAt` proof. The same
+raw, fixed-IVP, and theorem-family layers now also have source-neighborhood
+variants of those centered chart-ODE constructors: eventual membership in the
+current preferred chart source, together with the chart derivative, derives the
+manifold-curve continuity input automatically. This is the closer fit for
+chart-local Picard output, where the solution is constructed inside a chosen
+coordinate neighborhood.
+The same
 raw layer now also has proof-level `Nonempty` wrappers for the geometric,
 within-derivative, ordinary-on-time-set derivative, unrestricted derivative,
 restriction, and identity-flow constructors, letting downstream existence

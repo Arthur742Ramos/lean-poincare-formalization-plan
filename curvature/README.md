@@ -570,9 +570,11 @@ now packages the matching intrinsic boundary
      identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]`, ordinary-on-time-set
       `HasMFDerivAt`, unrestricted `HasMFDerivAt`, and preferred-chart
-      ODE adapters from continuity plus centered chart derivatives, named
+      ODE adapters from continuity plus centered chart derivatives, including
+      source-neighborhood variants that derive manifold-curve continuity from
+      eventual membership in the centered chart source, named
       fixed-IVP and theorem-family preferred-chart ODE constructors from the
-      same chart-continuity plus centered chart-derivative data,
+      same chart-ODE data,
       derivative-family adapters, including an ordinary-on-time-set
         `ofDerivativeAtFamily` bridge, neighborhood-time upgrades from
         within-time-set to ordinary-at-time derivative data, and matching

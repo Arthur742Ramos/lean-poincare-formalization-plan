@@ -488,6 +488,79 @@ theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_hasDerivWithinAt_extChartAt_eval_self maps3 anchored hcont hderiv⟩
 
+/-- A centered preferred-chart derivative gives continuity of the manifold
+curve, provided the curve is eventually in the source of the centered chart. -/
+theorem continuousWithinAt_eval_of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    {s : Set ℝ} {t : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M)) (x : M)
+    (hsource :
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝[s] t)
+    {v : TangentSpace I ((maps3 t) x)}
+    (hderiv : HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x)) v s t) :
+    ContinuousWithinAt (fun τ : ℝ ↦ (maps3 τ) x) s t := by
+  let e := extChartAt I ((maps3 t) x)
+  have hx : (maps3 t) x ∈ e.source := by
+    simpa [e] using mem_extChartAt_source (I := I) ((maps3 t) x)
+  have hsymm : ContinuousAt e.symm (e ((maps3 t) x)) := by
+    simpa [e] using continuousAt_extChartAt_symm (I := I) ((maps3 t) x)
+  have hchart : ContinuousWithinAt (fun τ : ℝ ↦ e ((maps3 τ) x)) s t := by
+    simpa [e] using hderiv.continuousWithinAt
+  have hcomp' : ContinuousWithinAt
+      (e.symm ∘ fun τ : ℝ ↦ e ((maps3 τ) x)) s t :=
+    ContinuousAt.comp_continuousWithinAt
+      (g := e.symm) (f := fun τ : ℝ ↦ e ((maps3 τ) x))
+      (s := s) (x := t) hsymm hchart
+  have hcomp : ContinuousWithinAt
+      (fun τ : ℝ ↦ e.symm (e ((maps3 τ) x))) s t := by
+    simpa [Function.comp_def] using hcomp'
+  have hsource' : ∀ᶠ τ in 𝓝[s] t, (maps3 τ) x ∈ e.source := by
+    simpa [e] using hsource
+  exact hcomp.congr_of_eventuallyEq
+    (hsource'.mono fun τ hτ ↦ by simpa [e] using (e.left_inv hτ).symm)
+    (by simpa [e] using (e.left_inv hx).symm)
+
+/-- Build a raw `C^3` diffeomorphism gauge-flow witness from centered
+preferred-chart ODE data, deriving manifold-curve continuity from eventual
+membership in the centered chart source. -/
+noncomputable def of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (X t ((maps3 t) x)) s t) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  of_hasDerivWithinAt_extChartAt_eval_self (I := I) (M := M)
+    (X := X) (s := s) (t₀ := t₀) maps3 anchored
+    (fun t ht x ↦
+      continuousWithinAt_eval_of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+        (I := I) (M := M) maps3 x (hsource t ht x) (hderiv t ht x))
+    hderiv
+
+/-- Proof-level raw `C^3` gauge-flow existence from centered preferred-chart
+ODE data plus eventual source membership. -/
+theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (X t ((maps3 t) x)) s t) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    maps3 anchored hsource hderiv⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from
 ordinary pointwise manifold derivatives available at each time of `s`.  This
 matches local ODE constructions that first promote a closed-interval derivative
@@ -556,6 +629,78 @@ theorem nonempty_of_hasDerivAtOn_extChartAt_eval_self
         (X t ((maps3 t) x)) t) :
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_hasDerivAtOn_extChartAt_eval_self maps3 anchored hcont hderiv⟩
+
+/-- An ordinary centered preferred-chart derivative gives ordinary continuity
+of the manifold curve, provided the curve is eventually in the source of the
+centered chart. -/
+theorem continuousAt_eval_of_hasDerivAt_extChartAt_eval_self_of_eventually_mem_source
+    {t : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M)) (x : M)
+    (hsource :
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝 t)
+    {v : TangentSpace I ((maps3 t) x)}
+    (hderiv : HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x)) v t) :
+    ContinuousAt (fun τ : ℝ ↦ (maps3 τ) x) t := by
+  let e := extChartAt I ((maps3 t) x)
+  have hx : (maps3 t) x ∈ e.source := by
+    simpa [e] using mem_extChartAt_source (I := I) ((maps3 t) x)
+  have hsymm : ContinuousAt e.symm (e ((maps3 t) x)) := by
+    simpa [e] using continuousAt_extChartAt_symm (I := I) ((maps3 t) x)
+  have hchart : ContinuousAt (fun τ : ℝ ↦ e ((maps3 τ) x)) t := by
+    simpa [e] using hderiv.continuousAt
+  have hcomp' : ContinuousAt
+      (e.symm ∘ fun τ : ℝ ↦ e ((maps3 τ) x)) t :=
+    ContinuousAt.comp
+      (g := e.symm) (f := fun τ : ℝ ↦ e ((maps3 τ) x))
+      (x := t) hsymm hchart
+  have hcomp : ContinuousAt (fun τ : ℝ ↦ e.symm (e ((maps3 τ) x))) t := by
+    simpa [Function.comp_def] using hcomp'
+  have hsource' : ∀ᶠ τ in 𝓝 t, (maps3 τ) x ∈ e.source := by
+    simpa [e] using hsource
+  exact hcomp.congr_of_eventuallyEq
+    (hsource'.mono fun τ hτ ↦ by simpa [e] using (e.left_inv hτ).symm)
+
+/-- Build a raw `C^3` diffeomorphism gauge-flow witness from ordinary centered
+preferred-chart ODE data, deriving ordinary manifold-curve continuity from
+eventual membership in the centered chart source. -/
+noncomputable def of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝 t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (X t ((maps3 t) x)) t) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  of_hasDerivAtOn_extChartAt_eval_self (I := I) (M := M)
+    (X := X) (s := s) (t₀ := t₀) maps3 anchored
+    (fun t ht x ↦
+      continuousAt_eval_of_hasDerivAt_extChartAt_eval_self_of_eventually_mem_source
+        (I := I) (M := M) maps3 x (hsource t ht x) (hderiv t ht x))
+    hderiv
+
+/-- Proof-level raw `C^3` gauge-flow existence from ordinary centered
+preferred-chart ODE data plus eventual source membership. -/
+theorem nonempty_of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝 t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (X t ((maps3 t) x)) t) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    maps3 anchored hsource hderiv⟩
 
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from
 unrestricted pointwise manifold derivatives. -/
@@ -988,6 +1133,144 @@ theorem nonempty_of_hasDerivAtOn_extChartAt_eval_self
     Nonempty (IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp) :=
   ⟨of_hasDerivAtOn_extChartAt_eval_self maps3 anchored hcont hderiv⟩
+
+/-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from centered
+preferred-chart ODE data plus eventual chart-source membership on each local
+solution's time set. -/
+noncomputable def of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        (fun τ : ℝ ↦ (maps3 sol τ) x) ⁻¹'
+            (extChartAt I ((maps3 sol t) x)).source ∈
+          𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I ((maps3 sol t) x)) ((maps3 sol τ) x))
+          (intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background t ((maps3 sol t) x))
+          sol.1.toIntrinsicDeTurckSolution.timeSet t) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  flow := fun sol ↦
+    Diffeomorph3GaugeFlowOn.of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+      (I := I) (M := M)
+      (X := intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (t₀ := ivp.initialTime)
+      (maps3 sol) (anchored sol) (hsource sol) (hderiv sol)
+
+/-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from centered
+preferred-chart ODE data plus eventual chart-source membership, kept as
+proof-level evidence. -/
+theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        (fun τ : ℝ ↦ (maps3 sol τ) x) ⁻¹'
+            (extChartAt I ((maps3 sol t) x)).source ∈
+          𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I ((maps3 sol t) x)) ((maps3 sol τ) x))
+          (intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background t ((maps3 sol t) x))
+          sol.1.toIntrinsicDeTurckSolution.timeSet t) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    maps3 anchored hsource hderiv⟩
+
+/-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from ordinary centered
+preferred-chart ODE data plus eventual chart-source membership on each local
+solution's time set. -/
+noncomputable def of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        (fun τ : ℝ ↦ (maps3 sol τ) x) ⁻¹'
+            (extChartAt I ((maps3 sol t) x)).source ∈ 𝓝 t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        HasDerivAt
+          (fun τ : ℝ ↦ (extChartAt I ((maps3 sol t) x)) ((maps3 sol τ) x))
+          (intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background t ((maps3 sol t) x)) t) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  flow := fun sol ↦
+    Diffeomorph3GaugeFlowOn.of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+      (I := I) (M := M)
+      (X := intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (t₀ := ivp.initialTime)
+      (maps3 sol) (anchored sol) (hsource sol) (hderiv sol)
+
+/-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from ordinary centered
+preferred-chart ODE data plus eventual chart-source membership, kept as
+proof-level evidence. -/
+theorem nonempty_of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        (fun τ : ℝ ↦ (maps3 sol τ) x) ⁻¹'
+            (extChartAt I ((maps3 sol t) x)).source ∈ 𝓝 t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+        HasDerivAt
+          (fun τ : ℝ ↦ (extChartAt I ((maps3 sol t) x)) ((maps3 sol τ) x))
+          (intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background t ((maps3 sol t) x)) t) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    maps3 anchored hsource hderiv⟩
 
 /-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from unrestricted
 pointwise manifold derivative data. -/
@@ -1929,6 +2212,150 @@ theorem nonempty_of_hasDerivAtOn_extChartAt_eval_self
     Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M)) :=
   ⟨of_hasDerivAtOn_extChartAt_eval_self maps3 anchored hcont hderiv⟩
+
+/-- Theorem-family raw intrinsic DeTurck gauge-flow existence from centered
+preferred-chart ODE data plus eventual chart-source membership on each local
+solution's time set. -/
+noncomputable def of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hsource : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) ⁻¹'
+              (extChartAt I ((maps3 ivp sol t) x)).source ∈
+            𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t)
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              (extChartAt I ((maps3 ivp sol t) x)) ((maps3 ivp sol τ) x))
+            (intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background t ((maps3 ivp sol t) x))
+            sol.1.toIntrinsicDeTurckSolution.timeSet t) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  flow := fun ivp sol ↦
+    (IntrinsicDeTurckGaugeFlowExistence.of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+        (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
+        (maps3 ivp) (anchored ivp) (hsource ivp) (hderiv ivp)).flow sol
+
+/-- Theorem-family raw intrinsic DeTurck gauge-flow existence from centered
+preferred-chart ODE data plus eventual chart-source membership, kept as
+proof-level evidence. -/
+theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hsource : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) ⁻¹'
+              (extChartAt I ((maps3 ivp sol t) x)).source ∈
+            𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t)
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              (extChartAt I ((maps3 ivp sol t) x)) ((maps3 ivp sol τ) x))
+            (intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background t ((maps3 ivp sol t) x))
+            sol.1.toIntrinsicDeTurckSolution.timeSet t) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :=
+  ⟨of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    maps3 anchored hsource hderiv⟩
+
+/-- Theorem-family raw intrinsic DeTurck gauge-flow existence from ordinary
+centered preferred-chart ODE data plus eventual chart-source membership on each
+local solution's time set. -/
+noncomputable def of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hsource : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) ⁻¹'
+              (extChartAt I ((maps3 ivp sol t) x)).source ∈ 𝓝 t)
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              (extChartAt I ((maps3 ivp sol t) x)) ((maps3 ivp sol τ) x))
+            (intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background t ((maps3 ivp sol t) x)) t) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  flow := fun ivp sol ↦
+    (IntrinsicDeTurckGaugeFlowExistence.of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+        (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
+        (maps3 ivp) (anchored ivp) (hsource ivp) (hderiv ivp)).flow sol
+
+/-- Theorem-family raw intrinsic DeTurck gauge-flow existence from ordinary
+centered preferred-chart ODE data plus eventual chart-source membership, kept as
+proof-level evidence. -/
+theorem nonempty_of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hsource : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) ⁻¹'
+              (extChartAt I ((maps3 ivp sol t) x)).source ∈ 𝓝 t)
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet, ∀ x : M,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              (extChartAt I ((maps3 ivp sol t) x)) ((maps3 ivp sol τ) x))
+            (intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background t ((maps3 ivp sol t) x)) t) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :=
+  ⟨of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    maps3 anchored hsource hderiv⟩
 
 /-- Theorem-family raw intrinsic DeTurck gauge-flow existence from unrestricted
 pointwise manifold derivative data. -/
