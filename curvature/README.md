@@ -1007,8 +1007,8 @@ finite matrix determinants, adjugate entries, and inverse entries under a
 determinant lower bound preserve parabolic `C^{0,α}` control from entrywise
 control; it also proves entrywise closure for matrix products, matrix-vector and
 vector-matrix products, including inverse-matrix vector products on both sides
-under the same determinant lower bound, using the finite-product,
-integer-scalar, reciprocal, and division closure layer.
+under the same determinant lower bound, and finite vector dot products, using
+the finite-product, integer-scalar, reciprocal, and division closure layer.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build

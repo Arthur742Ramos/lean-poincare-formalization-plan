@@ -1262,8 +1262,8 @@ closure, adjugate-entry closure, and inverse-entry closure under a determinant
 lower bound for finite matrix-valued parabolic `C^{0,α}` functions from
 entrywise control, plus entrywise closure for matrix products, matrix-vector
 and vector-matrix products, and inverse-matrix vector products on both sides
-under the same determinant lower bound, using finite-product, integer-scalar,
-reciprocal, and division closure. The abstract
+under the same determinant lower bound, plus finite vector dot products, using
+finite-product, integer-scalar, reciprocal, and division closure. The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and

@@ -169,6 +169,19 @@ theorem matrix_vecMul_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [No
     (v := v) (M := fun z => (M z)⁻¹)
     hv (fun r c => matrix_inv_entry (M := M) hM hδpos hdet r c) j
 
+/-- Finite dot products of vector-valued parabolic `C^{0,α}` functions are parabolic
+`C^{0,α}`. -/
+theorem vector_dot_entry {n A : Type*} [Fintype n] [NormedRing A]
+    {v w : ℝ × X → n → A}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z => v z i) s)
+    (hw : ∀ i, ParabolicC0AlphaOn α (fun z => w z i) s) :
+    ParabolicC0AlphaOn α (fun z => ∑ i : n, v z i * w z i) s := by
+  simpa using
+    (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (u := fun i z => v z i * w z i)
+      (fun i _hi => (hv i).mul (hw i)))
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow
