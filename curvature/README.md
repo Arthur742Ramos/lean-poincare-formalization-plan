@@ -579,8 +579,8 @@ now packages the matching intrinsic boundary
       derivative-family adapters, including an ordinary-on-time-set
         `ofDerivativeAtFamily` bridge and named source-neighborhood chart-ODE
         `ofChartDerivative` / `ofChartDerivativeAt` bridges with
-        derivative-data readouts and an eventual-equality transfer from local
-        model-coordinate curves,
+        derivative-data readouts and within-filter/ordinary eventual-equality
+        transfers from local model-coordinate curves,
         neighborhood-time upgrades from
         within-time-set to ordinary-at-time derivative data, and matching
         fixed-IVP `ofDerivative` / `ofDerivativeAt` bridges,

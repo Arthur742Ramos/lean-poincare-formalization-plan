@@ -85,6 +85,30 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.hasDerivWithinAt_extChar
       (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) s t :=
   (hchart t ht x).2
 
+/-- Build within-time-set preferred-chart ODE data from local coordinate curves
+that are eventually equal, in the within-filter, to the actual centered
+preferred-chart coordinate curves. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.of_eventuallyEq
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    {coord : ℝ → M → ℝ → E}
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I ((Φ t) x)).source ∈ 𝓝[s] t)
+    (hcoord : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt (coord t x)
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) s t)
+    (heq : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (extChartAt I ((Φ t) x)) ((Φ τ) x)) =ᶠ[𝓝[s] t] coord t x)
+    (heq_t : ∀ t ∈ s, ∀ x : M,
+      (extChartAt I ((Φ t) x)) ((Φ t) x) = coord t x t) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  exact ⟨hsource t ht x,
+    (hcoord t ht x).congr_of_eventuallyEq (heq t ht x) (heq_t t ht x)⟩
+
 /-- Ordinary-at-time derivative form of the intrinsic DeTurck gauge-flow equation
 for a `C^3` diffeomorphism family, restricted to times in `s`.
 

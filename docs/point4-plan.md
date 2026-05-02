@@ -760,11 +760,12 @@ for both within-time-set and ordinary-at-time chart data:
 `ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily`, with fixed-IVP and
 theorem-family `ofChartDerivative` / `ofChartDerivativeAt` bridges, so
 source-neighborhood chart ODE data can enter raw existence without unpacking
-into ad hoc constructor arguments. The ordinary chart-ODE package also has an
-eventual-equality transfer lemma:
+into ad hoc constructor arguments. Both chart-ODE packages now have
+eventual-equality transfer lemmas:
 local model-coordinate curves with the right derivative can be used after they
 are identified eventually with the actual centered preferred-chart coordinate
-readout. Those bridges now have direct derivative-data readouts back to
+readout, with the within-set version using the closed-interval within-filter.
+Those bridges now have direct derivative-data readouts back to
 `ChosenIntrinsicDeTurckGaugeFlowDerivative` and
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
 the existing scalar gauge-pullback route after supplying the chart-ODE package.
