@@ -502,6 +502,57 @@ theorem exists_dist_flow_le_mul_of_mem_Ioo
     ∃ L' : ℝ≥0, dist (α.flow x t) (α.flow y t) ≤ L' * dist x y :=
   α.exists_dist_flow_le_mul (Ioo_subset_Icc_self ht) hx hy
 
+/-- Uniform initial-data Lipschitz dependence plus the ODE time-continuity of
+each trajectory gives joint space-time continuity on the local Picard cylinder. -/
+theorem flow_continuousOn_spaceTime
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) :
+    ContinuousOn (fun p : V × ℝ => α.flow p.1 p.2) (closedBall x₀ r ×ˢ Icc tmin tmax) := by
+  rw [Metric.continuousOn_iff]
+  intro p hp ε hε
+  rcases hp with ⟨hpx, hpt⟩
+  obtain ⟨L, hL⟩ := α.exists_lipschitz_time
+  have htime_cont := α.toLocalFlowSolution.flow_continuousWithinAt hpx hpt
+  rw [Metric.continuousWithinAt_iff] at htime_cont
+  have hε2 : 0 < ε / 2 := by linarith
+  obtain ⟨δt, hδt_pos, hδt⟩ := htime_cont (ε / 2) hε2
+  let δx : ℝ := (ε / 2) / ((L : ℝ) + 1)
+  have hLnonneg : 0 ≤ (L : ℝ) := by exact_mod_cast L.2
+  have hden_pos : 0 < (L : ℝ) + 1 := by linarith
+  have hδx_pos : 0 < δx := by
+    dsimp [δx]
+    positivity
+  refine ⟨min δt δx, lt_min hδt_pos hδx_pos, ?_⟩
+  intro q hq hpq
+  rcases hq with ⟨hqx, hqt⟩
+  rw [Prod.dist_eq] at hpq
+  have hqtime_lt : dist q.2 p.2 < δt :=
+    lt_of_le_of_lt (le_max_right _ _) (lt_of_lt_of_le hpq (min_le_left _ _))
+  have hqx_lt : dist q.1 p.1 < δx :=
+    lt_of_le_of_lt (le_max_left _ _) (lt_of_lt_of_le hpq (min_le_right _ _))
+  have hspace_le :
+      dist (α.flow q.1 q.2) (α.flow p.1 q.2) ≤ (L : ℝ) * dist q.1 p.1 :=
+    (hL q.2 hqt).dist_le_mul q.1 hqx p.1 hpx
+  have hdist_nonneg : 0 ≤ dist q.1 p.1 := dist_nonneg
+  have hmul_le : (L : ℝ) * dist q.1 p.1 ≤ (L : ℝ) * δx := by
+    nlinarith
+  have hmul_bound : (L : ℝ) * δx ≤ ε / 2 := by
+    dsimp [δx]
+    have hfrac : (L : ℝ) / ((L : ℝ) + 1) ≤ 1 := by
+      rw [div_le_one hden_pos]
+      linarith
+    have heps_nonneg : 0 ≤ ε / 2 := by linarith
+    calc
+      (L : ℝ) * ((ε / 2) / ((L : ℝ) + 1)) =
+          ((L : ℝ) / ((L : ℝ) + 1)) * (ε / 2) := by ring
+      _ ≤ 1 * (ε / 2) := mul_le_mul_of_nonneg_right hfrac heps_nonneg
+      _ = ε / 2 := by ring
+  have hspace_bound : dist (α.flow q.1 q.2) (α.flow p.1 q.2) ≤ ε / 2 := by
+    exact le_trans hspace_le (le_trans hmul_le hmul_bound)
+  have htime_lt : dist (α.flow p.1 q.2) (α.flow p.1 p.2) < ε / 2 :=
+    hδt hqt hqtime_lt
+  have htri := dist_triangle (α.flow q.1 q.2) (α.flow p.1 q.2) (α.flow p.1 p.2)
+  linarith
+
 /-- Restrict a nonempty Lipschitz local-flow existence witness to a smaller
 initial ball and closed time interval. -/
 theorem nonempty_restrict

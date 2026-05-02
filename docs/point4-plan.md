@@ -873,7 +873,10 @@ theorem is packaged as `LocalFlowSolution` and `LipschitzLocalFlowSolution`,
 including the ODE derivative on the closed time interval, initialization on a
 closed ball of initial data, ordinary interior derivative extractors, and
 named continuity on the Picard interval, plus direct time-slice Lipschitz,
-continuity, and distance-estimate readouts for dependence on initial data.
+continuity, and distance-estimate readouts for dependence on initial data. The
+Lipschitz package now also proves joint space-time continuity on the local
+Picard cylinder from the uniform initial-data Lipschitz estimate and the
+ODE-derived time continuity of each trajectory.
 It also packages the continuous space-time partial-flow form as
 `ContinuousLocalFlowSolution`, so the chart-level output now includes the
 continuity needed before gluing local solutions. Continuous and variational

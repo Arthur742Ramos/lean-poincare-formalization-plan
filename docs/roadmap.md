@@ -804,7 +804,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       closed ball, closed-interval ODE derivative data, ordinary interior
       derivative extractors, named Picard-interval continuity, and direct
       time-slice Lipschitz, continuity, and distance-estimate readouts for
-      dependence on the initial point; it also packages the continuous space-time
+      dependence on the initial point, plus joint space-time continuity on the
+      local Picard cylinder; it also packages the continuous space-time
         partial-flow form needed for chart gluing, named base-flow, tangent-map,
         and vector-slot time-slice continuity bridges for continuous/variational
            packages, including direct within-interval and interior pointwise
