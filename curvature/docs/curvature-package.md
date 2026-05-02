@@ -108,4 +108,5 @@ scalar-action estimate for normed-space-valued functions, plus closure under
 taking norms and Lipschitz composition on the controlled range. This is
 groundwork for the future Schauder and Ricci-DeTurck Banach-chart layer, now
 also including exponent lowering on unit parabolic-diameter domains and
-closed-ball diameter control, not the local-existence theorem itself.
+closed-ball diameter control, plus a basepoint-to-sup bound on closed parabolic
+balls, not the local-existence theorem itself.

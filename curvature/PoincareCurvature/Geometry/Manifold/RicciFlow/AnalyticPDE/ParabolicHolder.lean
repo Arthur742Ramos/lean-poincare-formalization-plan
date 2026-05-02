@@ -625,6 +625,27 @@ theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
     Real.rpow_le_rpow_of_exponent_ge' hd0 hd1 hβ hβα
   exact (h hp hq).trans (mul_le_mul_of_nonneg_left hpow hC)
 
+theorem boundedWith_of_subset_closedBall {B₀ R : ℝ} {c : ℝ × X}
+    (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hs : s ⊆ parabolicClosedBall c R) (hc : c ∈ s) (huc : ‖u c‖ ≤ B₀) :
+    ParabolicBoundedWith (B₀ + C * R ^ α) u s := by
+  have hR : 0 ≤ R := by
+    simpa using hs hc
+  intro p hp
+  have hpc : parabolicDistance p c ≤ R := by
+    simpa [parabolicDistance.comm] using hs hp
+  have hpow : (parabolicDistance p c) ^ α ≤ R ^ α :=
+    Real.rpow_le_rpow (parabolicDistance.nonneg p c) hpc hα
+  have hdecomp : u p = (u p - u c) + u c := by
+    abel
+  calc
+    ‖u p‖ = ‖(u p - u c) + u c‖ := congrArg (fun z : E => ‖z‖) hdecomp
+    _ ≤ ‖u p - u c‖ + ‖u c‖ := norm_add_le _ _
+    _ ≤ C * (parabolicDistance p c) ^ α + B₀ := add_le_add (h hp hc) huc
+    _ ≤ C * R ^ α + B₀ :=
+      add_le_add (mul_le_mul_of_nonneg_left hpow hC) le_rfl
+    _ = B₀ + C * R ^ α := by ring
+
 /-- Positive-exponent parabolic Holder control implies continuity on the controlled set. -/
 theorem continuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) : ContinuousOn u s := by
   intro p hp
