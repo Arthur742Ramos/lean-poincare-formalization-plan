@@ -750,6 +750,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          identified with that open Picard interior, matching fixed-IVP and
          theorem-family derivative-view handoffs to ordinary-at-time derivative
          and chart-ODE packages on the same explicit open solution time sets, and
+         time-derivative wrappers that use those open time-set identifications to
+         discharge the neighborhood-of-each-time hypothesis for coordinate-model,
+         component, field-level, and within-set endpoint data, and
          matching fixed-IVP `ofDerivative` and
         `ofDerivativeAt` bridges. The Banach-model ODE component of
      the positive-dimensional raw-flow construction is now also proof-bearing:

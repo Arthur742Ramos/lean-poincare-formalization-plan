@@ -790,7 +790,11 @@ explicitly the open interval `Ioo tmin tmax`, via `ofPicardIccDerivative`,
 derivative-view layer now has matching fixed-IVP and theorem-family handoffs to
 ordinary-at-time derivative and chart-ODE packages on those explicit open
 solution time sets, so endpoint scalar routes can consume the Picard data
-without first constructing raw gauge-flow witnesses. The same
+without first constructing raw gauge-flow witnesses. The time-derivative layer
+now also turns those explicit open Picard time-set identifications into the
+neighborhood-of-each-time hypothesis once, and exposes fixed-IVP and
+theorem-family `..._of_timeSet_eq_Ioo` wrappers for coordinate-model,
+component, field-level, and within-set endpoint data. The same
 named-derivative symmetry is now present
 for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,
