@@ -1214,8 +1214,9 @@ The global raw-gauge route now also exposes the ambient state-preserving Banach
 solution with common-interval uniqueness and symmetric positive-definite
 persistence, together with a paired smooth-realization/reverse-encoding fiber.
 The interval raw-gauge route similarly exposes the ambient state-preserving
-Banach solution with terminal-time control and common-interval uniqueness, plus
-a combined proof-level fiber carrying that solution's smooth realization and
+Banach solution with terminal-time control and common-interval uniqueness, now
+including the stronger symmetric positive-definite persistence readout, plus a
+combined proof-level fiber carrying that solution's smooth realization and
 reverse encoding of the realized chosen-background candidate.
 The thin raw-gauge route module also now has proof-level `Nonempty` wrappers
 for the global and interval closure-data projections to intrinsic and ordinary

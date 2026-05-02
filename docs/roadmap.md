@@ -1325,7 +1325,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      uniqueness and symmetric positive-definite persistence, together with a
      paired smooth-realization/reverse-encoding fiber. The interval raw-gauge
      route similarly exposes the ambient state-preserving Banach solution with
-     terminal-time control and common-interval uniqueness, plus a combined
+     terminal-time control and common-interval uniqueness, now including the
+     stronger symmetric positive-definite persistence readout, plus a combined
      proof-level fiber carrying that solution's smooth realization and reverse
      encoding of the realized chosen-background candidate. The thin raw-gauge
      route module now
