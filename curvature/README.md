@@ -399,13 +399,16 @@ now packages the matching intrinsic boundary
            chain rules and full-field time-difference lemmas that derive product
            graph convergence from base-curve within-derivative continuity before
            the raw gauge-flow scalar endpoint theorem consumes them, the
-           variational local-flow full-field route now also accepting
-           `HasFDerivWithinAt` on an open chart product domain at the model-flow
-           endpoint directly through named metric-coordinate, readout-field, and
-           geometric-slot tensor wrappers, with the same open-domain input now
-           feeding the ordinary open-interior `Ioo` tensor route and its readout
-           and pushed-forward geometric-slot wrappers, and the
-           model-coordinate time-difference route also accepting any locally equal
+            variational local-flow full-field route now also accepting
+            `HasFDerivWithinAt` on an open chart product domain at the model-flow
+            endpoint directly through named metric-coordinate, readout-field, and
+            geometric-slot tensor wrappers, with the same open-domain input now
+            feeding the ordinary open-interior `Ioo` tensor route and its readout
+           and pushed-forward geometric-slot wrappers, with the lower scalar
+           calculus now also exposing a four-variable open-domain chain rule for
+           readouts on `(t, y, u, v)` and variational local-flow specializations
+           for `(t, flow(t), A(t)u, A(t)v)`, and the
+            model-coordinate time-difference route also accepting any locally equal
          two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the
         closed-Picard model-velocity time-difference route now deriving the

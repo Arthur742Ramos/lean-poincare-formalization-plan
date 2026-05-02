@@ -371,6 +371,64 @@ theorem hasDerivWithinAt_bilinearFormField_apply_apply_along_curveWithinOpen
         (s := s) (t := t) (domain := domain) hB hy hopen hmem)
       hu hv
 
+/-- Within-domain scalar chain rule for a readout depending on time, a moving base
+point, and two moving vector slots. This is the product-domain form used when a
+local chart derivative is stated directly for `(t, y, u, v)`. -/
+theorem hasDerivWithinAt_scalarField_time_base_vector₂_along_curveWithin
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Fscalar : ℝ × V × V × V → ℝ}
+    {Fscalar' : ℝ × V × V × V →L[ℝ] ℝ}
+    {y : ℝ → V} {y' : V}
+    {u : ℝ → V} {u' : V} {v : ℝ → V} {v' : V} {s : Set ℝ} {t : ℝ}
+    {domain : Set (ℝ × V × V × V)}
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain (t, y t, u t, v t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hu : HasDerivWithinAt u u' s t) (hv : HasDerivWithinAt v v' s t)
+    (hdomain : Filter.Tendsto (fun τ : ℝ ↦ (τ, y τ, u τ, v τ))
+      (𝓝[s] t) (𝓝[domain] (t, y t, u t, v t))) :
+    HasDerivWithinAt (fun τ : ℝ => Fscalar (τ, y τ, u τ, v τ))
+      (Fscalar' (1, y', u', v')) s t := by
+  have hgraph : HasDerivWithinAt (fun τ : ℝ ↦ (τ, y τ, u τ, v τ))
+      (1, y', u', v') s t := by
+    simpa using
+      (hasDerivWithinAt_id t s).prodMk
+        (hy.prodMk (hu.prodMk hv))
+  have hcomp := HasFDerivWithinAt.comp_of_tendsto
+    (x := t) (f := fun τ : ℝ ↦ (τ, y τ, u τ, v τ)) (g := Fscalar)
+    (g' := Fscalar') hF hgraph.hasFDerivWithinAt hdomain
+  simpa [Function.comp_def] using hcomp.hasDerivWithinAt
+
+/-- Open-domain scalar chain rule for a readout depending on time, a moving base
+point, and two moving vector slots. The product-graph convergence is derived
+from the three within-derivatives and openness of the domain. -/
+theorem hasDerivWithinAt_scalarField_time_base_vector₂_along_curveWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Fscalar : ℝ × V × V × V → ℝ}
+    {Fscalar' : ℝ × V × V × V →L[ℝ] ℝ}
+    {y : ℝ → V} {y' : V}
+    {u : ℝ → V} {u' : V} {v : ℝ → V} {v' : V} {s : Set ℝ} {t : ℝ}
+    {domain : Set (ℝ × V × V × V)}
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain (t, y t, u t, v t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hu : HasDerivWithinAt u u' s t) (hv : HasDerivWithinAt v v' s t)
+    (hopen : IsOpen domain) (hmem : (t, y t, u t, v t) ∈ domain) :
+    HasDerivWithinAt (fun τ : ℝ => Fscalar (τ, y τ, u τ, v τ))
+      (Fscalar' (1, y', u', v')) s t := by
+  have hdomain :
+      Filter.Tendsto (fun τ : ℝ ↦ (τ, y τ, u τ, v τ))
+        (𝓝[s] t) (𝓝[domain] (t, y t, u t, v t)) := by
+    have hgraph : ContinuousWithinAt (fun τ : ℝ ↦ (τ, y τ, u τ, v τ)) s t :=
+      continuousWithinAt_id.prodMk
+        (hy.continuousWithinAt.prodMk
+          (hu.continuousWithinAt.prodMk hv.continuousWithinAt))
+    rw [hopen.nhdsWithin_eq hmem]
+    exact hgraph
+  exact
+    hasDerivWithinAt_scalarField_time_base_vector₂_along_curveWithin
+      (Fscalar := Fscalar) (Fscalar' := Fscalar')
+      (y := y) (y' := y') (u := u) (u' := u') (v := v) (v' := v')
+      (s := s) (t := t) (domain := domain) hF hy hu hv hdomain
+
 /-- Within-set moving-base coordinate chain rule for
 `Bfield(τ, y(τ)) (A(τ) u) (A(τ) v)`, with the tangent map satisfying
 `A'(t) = D ∘ A(t)`. -/
@@ -701,6 +759,70 @@ theorem center_hasDerivWithinAt_bilinearFormField_tangent_apply_applyWithinOpen
       (Icc tmin tmax) t :=
   α.hasDerivWithinAt_bilinearFormField_tangent_apply_applyWithinOpen
     (mem_closedBall_self r.2) ht hB hopen hmem u v
+
+/-- Open-domain scalar chain rule along a variational model flow when the local
+readout derivative is stated directly on the full `(t, y, A u, A v)` product
+domain. -/
+theorem hasDerivWithinAt_scalarField_time_flow_tangent_apply₂WithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {domain : Set (ℝ × V × V × V)}
+    {Fscalar : ℝ × V × V × V → ℝ}
+    {Fscalar' : ℝ × V × V × V →L[ℝ] ℝ}
+    (u v : V)
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x, t), α.tangent x t u, α.tangent x t v))
+    (hopen : IsOpen domain)
+    (hmem : (t, α.flow (x, t), α.tangent x t u, α.tangent x t v) ∈ domain) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ Fscalar (τ, α.flow (x, τ), α.tangent x τ u, α.tangent x τ v))
+      (Fscalar'
+        (1, f t (α.flow (x, t)),
+          (Df t (α.flow (x, t))) (α.tangent x t u),
+          (Df t (α.flow (x, t))) (α.tangent x t v)))
+      (Icc tmin tmax) t := by
+  exact hasDerivWithinAt_scalarField_time_base_vector₂_along_curveWithinOpen
+    (Fscalar := Fscalar) (Fscalar' := Fscalar')
+    (y := fun τ : ℝ ↦ α.flow (x, τ))
+    (y' := f t (α.flow (x, t)))
+    (u := fun τ : ℝ ↦ α.tangent x τ u)
+    (u' := (Df t (α.flow (x, t))) (α.tangent x t u))
+    (v := fun τ : ℝ ↦ α.tangent x τ v)
+    (v' := (Df t (α.flow (x, t))) (α.tangent x t v))
+    (s := Icc tmin tmax) (t := t) (domain := domain)
+    hF (α.hasDerivWithinAt x hx t ht)
+    (α.tangent_apply_hasDerivWithinAt hx ht u)
+    (α.tangent_apply_hasDerivWithinAt hx ht v)
+    hopen hmem
+
+/-- Center-trajectory specialization of
+`VariationalLocalFlowSolution.hasDerivWithinAt_scalarField_time_flow_tangent_apply₂WithinOpen`. -/
+theorem center_hasDerivWithinAt_scalarField_time_flow_tangent_apply₂WithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {domain : Set (ℝ × V × V × V)}
+    {Fscalar : ℝ × V × V × V → ℝ}
+    {Fscalar' : ℝ × V × V × V →L[ℝ] ℝ}
+    (u v : V)
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x₀, t), α.tangent x₀ t u, α.tangent x₀ t v))
+    (hopen : IsOpen domain)
+    (hmem : (t, α.flow (x₀, t), α.tangent x₀ t u, α.tangent x₀ t v) ∈ domain) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ Fscalar (τ, α.flow (x₀, τ), α.tangent x₀ τ u, α.tangent x₀ τ v))
+      (Fscalar'
+        (1, f t (α.flow (x₀, t)),
+          (Df t (α.flow (x₀, t))) (α.tangent x₀ t u),
+          (Df t (α.flow (x₀, t))) (α.tangent x₀ t v)))
+      (Icc tmin tmax) t :=
+  α.hasDerivWithinAt_scalarField_time_flow_tangent_apply₂WithinOpen
+    (mem_closedBall_self r.2) ht u v hF hopen hmem
 
 /-- Eventual-equality transfer form of
 `hasDerivWithinAt_bilinearFormField_tangent_apply_apply`. -/

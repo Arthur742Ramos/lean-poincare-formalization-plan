@@ -714,10 +714,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           `HasFDerivWithinAt` on an open chart product domain at the model-flow
           endpoint directly, with named metric-coordinate-field, readout-field,
           and geometric-slot tensor wrappers, so local Banach/readout data need
-          not be upgraded to global `HasFDerivAt` statements; the same
-          open-domain hypothesis now also feeds the ordinary open-interior
-          `Ioo` tensor route, including readout-field and pushed-forward
-          geometric-slot wrappers. It also has
+           not be upgraded to global `HasFDerivAt` statements; the same
+           open-domain hypothesis now also feeds the ordinary open-interior
+           `Ioo` tensor route, including readout-field and pushed-forward
+          geometric-slot wrappers. The lower scalar calculus now also has a
+          four-variable open-domain chain rule for readouts on `(t, y, u, v)`,
+          with variational local-flow specializations for
+          `(t, flow(t), A(t)u, A(t)v)`. It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and

@@ -712,7 +712,11 @@ and
 `Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowTimeDerivative.lean`
 sibling of the existing `Diffeomorph3FlowDerivative.lean` and
 `Diffeomorph3FlowExistence.lean`. Should not require touching
-`SmoothRealization.lean`.
+`SmoothRealization.lean`. The scalar calculus in this module now also has a
+four-variable open-domain chain rule for readouts stated directly on
+`(t, y, u, v)`, with variational local-flow specializations for
+`(t, flow(t), A(t)u, A(t)v)`, so local chart derivatives can depend on the base
+point and both pushed vector slots in one product domain.
 
 ### Item 2 — raw `C³` gauge-flow existence on a compact manifold
 
