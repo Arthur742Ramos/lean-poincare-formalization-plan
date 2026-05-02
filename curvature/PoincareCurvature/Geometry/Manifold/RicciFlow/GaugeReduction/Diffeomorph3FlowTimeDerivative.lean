@@ -4897,6 +4897,93 @@ theorem coordinatePullbackMetricOperatorDerivativeWithinOnOpen_of_variationalLoc
     hmodel_eq, hF, α.hasDerivWithinAt xE hxE t ht,
     α.tangent_hasDerivWithinAt xE hxE t ht, hopen, hmem, hvalue⟩
 
+/-- Continuous product Picard-flow version of
+`coordinatePullbackMetricOperatorDerivativeWithinOn_of_variationalLocalFlow`.
+
+This keeps the product-flow-to-variational-flow conversion inside the named
+operator-coordinate package layer. -/
+theorem coordinatePullbackMetricOperatorDerivativeWithinOn_of_productContinuousLocalFlow
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r R : ℝ≥0}
+    (α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+      (ModelGaugeFlowODE.variationalVectorField f Df) t₀
+      (x₀, (1 : E →L[ℝ] E)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : E →L[ℝ] E)) ∈ closedBall (x₀, (1 : E →L[ℝ] E)) R)
+    (hdata :
+      let β : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r :=
+        ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball
+      ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (domain : Set (ℝ × E × (E →L[ℝ] E)))
+          (Fscalar : ℝ × E × (E →L[ℝ] E) → ℝ)
+          (Fscalar' : ℝ × E × (E →L[ℝ] E) →L[ℝ] ℝ),
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[
+              𝓝[Icc tmin tmax] t]
+              (fun τ : ℝ ↦ Fscalar (τ, β.flow (xE, τ), β.tangent xE τ)) ∧
+          HasFDerivWithinAt Fscalar Fscalar' domain
+            (t, β.flow (xE, t), β.tangent xE t) ∧
+          Filter.Tendsto
+            (fun τ : ℝ ↦ (τ, β.flow (xE, τ), β.tangent xE τ))
+            (𝓝[Icc tmin tmax] t)
+            (𝓝[domain] (t, β.flow (xE, t), β.tangent xE t)) ∧
+          Fscalar'
+            (1, f t (β.flow (xE, t)),
+              (Df t (β.flow (xE, t))).comp (β.tangent xE t)) =
+            gdot t x u v) :
+    CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax) :=
+  coordinatePullbackMetricOperatorDerivativeWithinOn_of_variationalLocalFlow
+    (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot)
+    (α := ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball)
+    hdata
+
+/-- Open-domain continuous product Picard-flow version of
+`coordinatePullbackMetricOperatorDerivativeWithinOnOpen_of_variationalLocalFlow`. -/
+theorem coordinatePullbackMetricOperatorDerivativeWithinOnOpen_of_productContinuousLocalFlow
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r R : ℝ≥0}
+    (α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+      (ModelGaugeFlowODE.variationalVectorField f Df) t₀
+      (x₀, (1 : E →L[ℝ] E)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : E →L[ℝ] E)) ∈ closedBall (x₀, (1 : E →L[ℝ] E)) R)
+    (hdata :
+      let β : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r :=
+        ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball
+      ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (domain : Set (ℝ × E × (E →L[ℝ] E)))
+          (Fscalar : ℝ × E × (E →L[ℝ] E) → ℝ)
+          (Fscalar' : ℝ × E × (E →L[ℝ] E) →L[ℝ] ℝ),
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[
+              𝓝[Icc tmin tmax] t]
+              (fun τ : ℝ ↦ Fscalar (τ, β.flow (xE, τ), β.tangent xE τ)) ∧
+          HasFDerivWithinAt Fscalar Fscalar' domain
+            (t, β.flow (xE, t), β.tangent xE t) ∧
+          IsOpen domain ∧
+          (t, β.flow (xE, t), β.tangent xE t) ∈ domain ∧
+          Fscalar'
+            (1, f t (β.flow (xE, t)),
+              (Df t (β.flow (xE, t))).comp (β.tangent xE t)) =
+            gdot t x u v) :
+    CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax) :=
+  coordinatePullbackMetricOperatorDerivativeWithinOnOpen_of_variationalLocalFlow
+    (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot)
+    (α := ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball)
+    hdata
+
 /-- A variational model flow supplies the tangent-map derivative clause in the
 coordinate-model pullback calculation when the moving bilinear-form component
 has already been differentiated directly in time.
