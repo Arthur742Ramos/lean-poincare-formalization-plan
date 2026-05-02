@@ -388,7 +388,8 @@ now packages the matching intrinsic boundary
          local-flow continuity and a raw-coordinate open-domain bridge deriving
          raw graph convergence from preferred-chart gauge-flow continuity, plus
          lower time-difference component-data constructors with the same
-         open-domain reduction for direct and readout fields, the
+         open-domain reduction for direct and readout fields and public
+         closed-Picard tensor wrappers exposing that open-domain shape, the
          model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

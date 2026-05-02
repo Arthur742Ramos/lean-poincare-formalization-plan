@@ -255,7 +255,9 @@ gauge-flow preferred-chart derivative/continuity theorem whenever the domain is
 open around the raw coordinate endpoint. The same open-domain reduction now
 exists at the lower time-difference component-data layer, including for locally
 equal finite-cover/readout fields, so downstream tensor routes can inherit the
-derived graph convergence without restating it.
+derived graph convergence without restating it. Closed-Picard tensor
+time-regularity now also exposes direct open-product-domain wrappers for both
+raw metric-coordinate fields and locally equal readout fields.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
