@@ -229,7 +229,12 @@ time-difference subtraction, so local chart/Picard derivatives that are only
 proved on a product domain can feed the gauge-pullback endpoint route directly.
 The raw gauge-flow metric-coordinate time-difference bridge now consumes that
 domain-restricted derivative shape while subtracting the canonical frozen
-spatial contribution and exposing the raw gauge velocity.
+spatial contribution and exposing the raw gauge velocity. The same
+domain-restricted shape now packages as
+`MetricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf` and feeds a
+closed-Picard `Ioo` tensor time-regularity theorem directly, so chart-local
+product-domain derivatives no longer need to be upgraded to global
+`HasFDerivAt` before entering the non-identity gauge-pullback route.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
