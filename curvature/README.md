@@ -247,8 +247,10 @@ now packages the matching intrinsic boundary
        time-slice continuity bridges for continuous/variational local-flow
         packages, including direct within-interval and interior pointwise
         continuity readouts and open-interior `ContinuousOn` readouts,
-        autonomous `C¹` local-integral-curve specialization with
-       open-interval continuity and packaged `LocalFlowSolution` extraction,
+         autonomous `C¹` local-integral-curve specialization with
+        open-interval continuity and packaged `LocalFlowSolution`,
+        `LipschitzLocalFlowSolution`, and `ContinuousLocalFlowSolution`
+        extraction,
        restriction constructors and direct localized Picard-Lindelöf
        constructors for local/Lipschitz/continuous model-flow packages with
        matching proof-level `Nonempty` wrappers,
@@ -649,9 +651,10 @@ now packages the matching intrinsic boundary
       overlap uniqueness for local and
       continuous base-flow packages plus variational tangent maps and full
        `(flow, tangent)` pairs with different centers/radii, including direct
-       pointwise equality readouts on both `Ioo` and `Icc`, and autonomous
-        `C¹` integral curves with packaged and directly localized
-        `LocalFlowSolution` extraction, closed-interval within-filter and
+        pointwise equality readouts on both `Ioo` and `Icc`, and autonomous
+         `C¹` integral curves with packaged and directly localized
+         `LocalFlowSolution`, `LipschitzLocalFlowSolution`, and
+         `ContinuousLocalFlowSolution` extraction, closed-interval within-filter and
         open-interior open-set eventual-membership readouts for
         local/continuous/variational model-flow curves and for variational
         tangent maps and fixed vector slots, plus `(flow, tangent)` product-graph

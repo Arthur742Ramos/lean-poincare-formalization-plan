@@ -887,13 +887,14 @@ interior and closed-interval vector-slot `A(t) v` bridges derived from
 operator-norm bounds, matching the scalar gauge-pullback chain-rule
 hypotheses, and these base-flow, continuous-flow, tangent-map, vector-slot, and
 full variational-pair overlap results now have direct pointwise equality
-readouts on both `Ioo` and `Icc`. The autonomous `C¹` vector-field route now also extracts a
-proof-level `Nonempty LocalFlowSolution` package on a smaller closed time
-interval and smaller initial ball, giving the first direct bridge from
-mathlib's autonomous integral-curve theorem to the packaged raw model-flow API.
-It now also has a localized form that immediately restricts that autonomous
-existence witness to any smaller closed time interval containing the base time
-and any smaller initial ball.
+readouts on both `Ioo` and `Icc`. The autonomous `C¹` vector-field route now also extracts
+proof-level `Nonempty LocalFlowSolution`, `Nonempty LipschitzLocalFlowSolution`,
+and `Nonempty ContinuousLocalFlowSolution` packages on a smaller closed time
+interval and smaller initial ball, giving direct bridges from mathlib's
+autonomous Picard-Lindelöf theorem to the packaged raw model-flow APIs. These
+autonomous existence witnesses now also have localized forms that immediately
+restrict to any smaller closed time interval containing the base time and any
+smaller initial ball.
 The model-flow packages now also have restriction constructors for
 `LocalFlowSolution`, `LipschitzLocalFlowSolution`, `ContinuousLocalFlowSolution`,
 and `VariationalLocalFlowSolution`, preserving ODE, continuity, Lipschitz, and

@@ -3312,6 +3312,75 @@ theorem exists_autonomous_localFlowSolution_restrict
   intro tmin' tmax' htime ht₀' r' hr'
   exact LocalFlowSolution.nonempty_restrict hα htime ht₀' hr'
 
+/-- A `C¹` autonomous vector field supplies a packaged Lipschitz local flow on a
+closed Picard interval.  This strengthens the bare local-flow extraction by
+using the Lipschitz-dependence part of mathlib's Picard-Lindelöf theorem. -/
+theorem exists_autonomous_lipschitzLocalFlowSolution
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∃ ht₀ : t₀ ∈ Icc (t₀ - ε) (t₀ + ε),
+        Nonempty (LipschitzLocalFlowSolution (fun _ : ℝ => f)
+          (⟨t₀, ht₀⟩ : Icc (t₀ - ε) (t₀ + ε)) x₀ r) := by
+  obtain ⟨ε, hε, a, r, L, K, hr, hpl⟩ := IsPicardLindelof.of_contDiffAt_one hf
+  have ht₀ : t₀ ∈ Icc (t₀ - ε) (t₀ + ε) := by constructor <;> linarith
+  refine ⟨r, hr, ε, hε, ht₀, ?_⟩
+  simpa using
+    (ModelGaugeFlowODE.IsPicardLindelof.nonempty_lipschitzLocalFlowSolution
+      (V := V) (f := fun _ : ℝ => f)
+      (t₀ := (⟨t₀, ht₀⟩ : Icc (t₀ - ε) (t₀ + ε)))
+      (x₀ := x₀) (a := a) (r := r) (L := L) (K := K) (hpl t₀))
+
+/-- Localized Lipschitz autonomous model-flow existence on any smaller closed
+time interval and smaller initial ball after the Picard radius has been chosen. -/
+theorem exists_autonomous_lipschitzLocalFlowSolution_restrict
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∀ {tmin' tmax' : ℝ},
+        (htime : Icc tmin' tmax' ⊆ Icc (t₀ - ε) (t₀ + ε)) →
+        (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax') →
+        ∀ {r' : ℝ≥0}, r' ≤ r →
+          Nonempty (LipschitzLocalFlowSolution (fun _ : ℝ => f)
+            (⟨t₀, ht₀'⟩ : Icc tmin' tmax') x₀ r') := by
+  obtain ⟨r, hr, ε, hε, ht₀, hα⟩ :=
+    exists_autonomous_lipschitzLocalFlowSolution (V := V) hf t₀
+  refine ⟨r, hr, ε, hε, ?_⟩
+  intro tmin' tmax' htime ht₀' r' hr'
+  exact LipschitzLocalFlowSolution.nonempty_restrict hα htime ht₀' hr'
+
+/-- A `C¹` autonomous vector field supplies a packaged continuous space-time
+local flow on a closed Picard interval. -/
+theorem exists_autonomous_continuousLocalFlowSolution
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∃ ht₀ : t₀ ∈ Icc (t₀ - ε) (t₀ + ε),
+        Nonempty (ContinuousLocalFlowSolution (fun _ : ℝ => f)
+          (⟨t₀, ht₀⟩ : Icc (t₀ - ε) (t₀ + ε)) x₀ r) := by
+  obtain ⟨ε, hε, a, r, L, K, hr, hpl⟩ := IsPicardLindelof.of_contDiffAt_one hf
+  have ht₀ : t₀ ∈ Icc (t₀ - ε) (t₀ + ε) := by constructor <;> linarith
+  refine ⟨r, hr, ε, hε, ht₀, ?_⟩
+  simpa using
+    (ModelGaugeFlowODE.IsPicardLindelof.nonempty_continuousLocalFlowSolution
+      (V := V) (f := fun _ : ℝ => f)
+      (t₀ := (⟨t₀, ht₀⟩ : Icc (t₀ - ε) (t₀ + ε)))
+      (x₀ := x₀) (a := a) (r := r) (L := L) (K := K) (hpl t₀))
+
+/-- Localized continuous autonomous model-flow existence on any smaller closed
+time interval and smaller initial ball after the Picard radius has been chosen. -/
+theorem exists_autonomous_continuousLocalFlowSolution_restrict
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∀ {tmin' tmax' : ℝ},
+        (htime : Icc tmin' tmax' ⊆ Icc (t₀ - ε) (t₀ + ε)) →
+        (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax') →
+        ∀ {r' : ℝ≥0}, r' ≤ r →
+          Nonempty (ContinuousLocalFlowSolution (fun _ : ℝ => f)
+            (⟨t₀, ht₀'⟩ : Icc tmin' tmax') x₀ r') := by
+  obtain ⟨r, hr, ε, hε, ht₀, hα⟩ :=
+    exists_autonomous_continuousLocalFlowSolution (V := V) hf t₀
+  refine ⟨r, hr, ε, hε, ?_⟩
+  intro tmin' tmax' htime ht₀' r' hr'
+  exact ContinuousLocalFlowSolution.nonempty_restrict hα htime ht₀' hr'
+
 /-- Centered version of
 `exists_autonomous_local_integral_curves`, matching the single-trajectory ODE
 statement used when only the gauge curve through one point is needed. -/

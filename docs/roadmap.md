@@ -812,10 +812,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           variational packages, and fixed two-vector-slot
           `(t, flow, A(t)u, A(t)v)` readouts for scalar pullback domains, plus the
           autonomous `C¹` integral-curve specialization with
-        open-interval continuity and a packaged `LocalFlowSolution` extraction
-        on a smaller closed interval, now with a direct localized existence form
-        for any smaller closed interval containing the base time and any smaller
-        initial ball, restriction constructors for local,
+        open-interval continuity and packaged `LocalFlowSolution`,
+        `LipschitzLocalFlowSolution`, and `ContinuousLocalFlowSolution`
+        extraction on a smaller closed interval, now with direct localized
+        existence forms for any smaller closed interval containing the base time
+        and any smaller initial ball, restriction constructors for local,
        Lipschitz, continuous, and variational local-flow packages on smaller
        closed intervals and initial balls, matching `Nonempty` restriction
         wrappers for localized Picard existence witnesses, direct localized
