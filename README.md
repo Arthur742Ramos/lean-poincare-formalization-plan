@@ -326,7 +326,8 @@ packages the canonical stationary local solution attached to
   and add/subtract/smul closure estimates plus the bounded product estimate for
   normed-ring-valued `C^{0,α}` functions and the corresponding bounded
   scalar-action estimate for normed-space-valued functions, along with closure
-  under taking norms, Lipschitz composition on the controlled range, and
+  under taking norms, Lipschitz composition on the controlled range, bounded
+  `C^{0,α}` composition under a range bound, and
   exponent lowering on unit parabolic-diameter domains with closed-ball and
   closed-cylinder specializations across the Holder and `C^{0,α}` interfaces,
   backed by closed-ball diameter control, product ball/closed-ball

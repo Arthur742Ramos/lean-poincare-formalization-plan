@@ -1000,6 +1000,12 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     ‖c • u p‖ = ‖c‖ * ‖u p‖ := norm_smul c (u p)
     _ ≤ ‖c‖ * B := mul_le_mul_of_nonneg_left (hu hp) (norm_nonneg c)
 
+theorem comp_of_range_bound {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ}
+    {φ : E → F} (hφ : ∀ y ∈ u '' s, ‖φ y‖ ≤ Bφ) :
+    ParabolicBoundedWith Bφ (fun z => φ (u z)) s := by
+  intro p hp
+  exact hφ (u p) ⟨p, hp, rfl⟩
+
 end ParabolicBoundedWith
 
 namespace ParabolicC0AlphaWith
@@ -1109,6 +1115,13 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     ParabolicC0AlphaWith (‖c‖ * B) (‖c‖ * H) α (fun z => c • u z) s :=
   ⟨hu.bounded.smul c, hu.holder.smul c⟩
 
+theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ} {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicC0AlphaWith B H α u s)
+    (hφB : ∀ y ∈ u '' s, ‖φ y‖ ≤ Bφ)
+    (hφL : LipschitzOnWith K φ (u '' s)) :
+    ParabolicC0AlphaWith Bφ ((K : ℝ) * H) α (fun z => φ (u z)) s :=
+  ⟨ParabolicBoundedWith.comp_of_range_bound hφB, hu.holder.comp_lipschitzOnWith hφL⟩
+
 /-- The Holder component of positive-exponent parabolic `C^{0,α}` control gives continuity. -/
 theorem continuousOn (h : ParabolicC0AlphaWith B H α u s) (hα : 0 < α) : ContinuousOn u s :=
   h.holder.continuousOn hα
@@ -1213,6 +1226,15 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
   rcases hu with ⟨B, hB, H, hH, hBH⟩
   exact ⟨‖c‖ * B, mul_nonneg (norm_nonneg c) hB,
     ‖c‖ * H, mul_nonneg (norm_nonneg c) hH, hBH.smul c⟩
+
+theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ} {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicC0AlphaOn α u s) (hBφ : 0 ≤ Bφ)
+    (hφB : ∀ y ∈ u '' s, ‖φ y‖ ≤ Bφ)
+    (hφL : LipschitzOnWith K φ (u '' s)) :
+    ParabolicC0AlphaOn α (fun z => φ (u z)) s := by
+  rcases hu with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨Bφ, hBφ, (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH,
+    hBH.comp_lipschitzOnWith hφB hφL⟩
 
 theorem time_slice_half_exponent (h : ParabolicC0AlphaOn α u s) :
     ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →

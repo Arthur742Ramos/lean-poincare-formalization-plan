@@ -108,7 +108,8 @@ closed-ball/cylinder oscillation bounds, and additive
 and subtractive closure estimates, plus the bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded
 scalar-action estimate for normed-space-valued functions, plus closure under
-taking norms and Lipschitz composition on the controlled range. This is
+taking norms, Lipschitz composition on the controlled range, and bounded
+`C^{0,α}` composition under a range bound. This is
 groundwork for the future Schauder and Ricci-DeTurck Banach-chart layer, now
 also including exponent lowering on unit parabolic-diameter domains with
 closed-ball and closed-cylinder specializations across the Holder and
