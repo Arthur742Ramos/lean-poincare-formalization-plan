@@ -145,7 +145,7 @@ parabolic `C^{0,α}` closure for finite matrix determinants, adjugate entries,
 and inverse entries under a determinant lower bound from entrywise control,
 including a compactness bridge from nonvanishing determinants to a uniform
 determinant lower bound and compact-domain inverse-entry and schematic RHS
-variants, as well as entrywise closure for matrix products,
+variants, as well as entrywise and whole-valued closure for matrix products,
 matrix-vector and vector-matrix products, and inverse-matrix vector products on
 both sides under the same determinant lower bound, plus whole finite
 vector/matrix and inverse-matrix packages, finite vector dot products, and

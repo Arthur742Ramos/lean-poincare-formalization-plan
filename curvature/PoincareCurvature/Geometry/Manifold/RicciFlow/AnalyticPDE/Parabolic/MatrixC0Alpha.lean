@@ -189,6 +189,15 @@ theorem matrix_mul_entry {l m n A : Type*} [Fintype m] [NormedRing A]
         (fun k _hk => (hM i k).mul (hN k j)))
   simpa [Matrix.mul_apply] using hsum
 
+/-- Products of finite matrix-valued parabolic `C^{0,α}` functions are parabolic `C^{0,α}` from
+entrywise control. -/
+theorem matrix_mul {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n] [NormedRing A]
+    {M : ℝ × X → Matrix l m A} {N : ℝ × X → Matrix m n A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) s) :
+    ParabolicC0AlphaOn α (fun z => M z * N z) s :=
+  matrix_of_entries fun i j => matrix_mul_entry hM hN i j
+
 /-- Entries of a matrix-vector product are parabolic `C^{0,α}` when the matrix entries and
 vector components are. -/
 theorem matrix_mulVec_entry {m n A : Type*} [Fintype n] [NormedRing A]
@@ -203,6 +212,15 @@ theorem matrix_mulVec_entry {m n A : Type*} [Fintype n] [NormedRing A]
         (u := fun j z => M z i j * v z j)
         (fun j _hj => (hM i j).mul (hv j)))
   simpa [Matrix.mulVec] using hsum
+
+/-- Matrix-vector products preserve parabolic `C^{0,α}` control from entrywise matrix control and
+componentwise vector control. -/
+theorem matrix_mulVec {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
+    {M : ℝ × X → Matrix m n A} {v : ℝ × X → n → A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hv : ∀ j, ParabolicC0AlphaOn α (fun z => v z j) s) :
+    ParabolicC0AlphaOn α (fun z => (M z).mulVec (v z)) s :=
+  vector_of_entries fun i => matrix_mulVec_entry hM hv i
 
 /-- Entries of a vector-matrix product are parabolic `C^{0,α}` when the vector components and
 matrix entries are. -/
@@ -219,6 +237,15 @@ theorem matrix_vecMul_entry {m n A : Type*} [Fintype m] [NormedRing A]
         (fun i _hi => (hv i).mul (hM i j)))
   simpa [Matrix.vecMul] using hsum
 
+/-- Vector-matrix products preserve parabolic `C^{0,α}` control from componentwise vector control
+and entrywise matrix control. -/
+theorem matrix_vecMul {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
+    {v : ℝ × X → m → A} {M : ℝ × X → Matrix m n A}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) :
+    ParabolicC0AlphaOn α (fun z => Matrix.vecMul (v z) (M z)) s :=
+  vector_of_entries fun j => matrix_vecMul_entry hv hM j
+
 /-- Entries of an inverse-matrix-vector product are parabolic `C^{0,α}` when the matrix entries
 and vector components are, and the determinant is uniformly bounded away from zero. -/
 theorem matrix_inv_mulVec_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
@@ -232,6 +259,16 @@ theorem matrix_inv_mulVec_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [No
     (M := fun z => (M z)⁻¹) (v := v)
     (fun r c => matrix_inv_entry (M := M) hM hδpos hdet r c) hv i
 
+/-- Inverse-matrix-vector products preserve parabolic `C^{0,α}` control when the determinant is
+uniformly bounded away from zero. -/
+theorem matrix_inv_mulVec {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜} {v : ℝ × X → n → 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hv : ∀ j, ParabolicC0AlphaOn α (fun z => v z j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaOn α (fun z => ((M z)⁻¹).mulVec (v z)) s :=
+  vector_of_entries fun i => matrix_inv_mulVec_entry hM hv hδpos hdet i
+
 /-- Entries of a vector-inverse-matrix product are parabolic `C^{0,α}` when the matrix entries
 and vector components are, and the determinant is uniformly bounded away from zero. -/
 theorem matrix_vecMul_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
@@ -244,6 +281,16 @@ theorem matrix_vecMul_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [No
   matrix_vecMul_entry
     (v := v) (M := fun z => (M z)⁻¹)
     hv (fun r c => matrix_inv_entry (M := M) hM hδpos hdet r c) j
+
+/-- Vector-inverse-matrix products preserve parabolic `C^{0,α}` control when the determinant is
+uniformly bounded away from zero. -/
+theorem matrix_vecMul_inv {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ : ℝ} {v : ℝ × X → n → 𝕜} {M : ℝ × X → Matrix n n 𝕜}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaOn α (fun z => Matrix.vecMul (v z) (M z)⁻¹) s :=
+  vector_of_entries fun j => matrix_vecMul_inv_entry hv hM hδpos hdet j
 
 /-- Finite dot products of vector-valued parabolic `C^{0,α}` functions are parabolic
 `C^{0,α}`. -/
