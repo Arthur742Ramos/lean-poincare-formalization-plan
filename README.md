@@ -322,7 +322,8 @@ packages the canonical stationary local solution attached to
   inequality, product-topology local-base compatibility for parabolic balls and
   product cylinders, exact standard ball/cylinder identifications,
   closed-to-open shrink inclusions for balls/cylinders,
-  open-to-closed closure containment, continuity and uniform continuity from
+  open-to-closed closure containment, proper-space compactness for closed
+  balls/cylinders, continuity and uniform continuity from
   positive Hölder exponent, explicit closed-ball/cylinder oscillation bounds,
   estimate monotonicity in the controlling constants, and add/subtract/smul
   closure estimates plus the bounded product estimate for

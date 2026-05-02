@@ -103,8 +103,8 @@ primitives in `RicciFlow/AnalyticPDE/ParabolicHolder.lean`: parabolic distance,
 balls/cylinders, `C^{0,α}` control, product-topology local-base compatibility
 for parabolic balls and product cylinders, exact standard ball/cylinder
 identifications, closed-to-open shrink inclusions for balls/cylinders,
-open-to-closed closure containment,
-continuity/uniform-continuity consequences, explicit
+open-to-closed closure containment, proper-space compactness for closed
+balls/cylinders, continuity/uniform-continuity consequences, explicit
 closed-ball/cylinder oscillation bounds, estimate monotonicity in the
 controlling constants, and additive/subtractive closure estimates, plus the
 bounded product estimate for

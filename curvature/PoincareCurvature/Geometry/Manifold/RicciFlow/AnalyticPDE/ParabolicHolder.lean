@@ -3,6 +3,7 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
 public import Mathlib.Topology.MetricSpace.Basic
+public import Mathlib.Topology.MetricSpace.ProperSpace
 
 set_option linter.unusedSectionVars false
 
@@ -311,6 +312,11 @@ theorem isClosed (p : ℝ × X) (R : ℝ) : IsClosed (parabolicClosedBall p R) :
   simpa [parabolicClosedBall] using
     isClosed_Iic.preimage (parabolicDistance.continuous_fixed_left p)
 
+theorem isCompact [ProperSpace X] (p : ℝ × X) (R : ℝ) :
+    IsCompact (parabolicClosedBall p R) := by
+  exact (isCompact_closedBall p (max R (R ^ 2))).of_isClosed_subset (isClosed p R)
+    (subset_metric_closedBall (p := p) (R := R) (le_max_left _ _) (le_max_right _ _))
+
 theorem pair_parabolicDistance_le {c p q : ℝ × X}
     (hp : p ∈ parabolicClosedBall c R) (hq : q ∈ parabolicClosedBall c R) :
     parabolicDistance p q ≤ 2 * R := by
@@ -500,6 +506,13 @@ theorem subset_metric_closedBall {ε : ℝ} (ht : timeRadius ≤ ε) (hs : space
   exact max_le
     (by simpa [Real.dist_eq, abs_sub_comm] using le_trans hq.1 ht)
     (by simpa [dist_comm] using le_trans hq.2 hs)
+
+theorem isCompact [ProperSpace X] (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
+    IsCompact (parabolicClosedCylinder p timeRadius spaceRadius) := by
+  exact (isCompact_closedBall p (max timeRadius spaceRadius)).of_isClosed_subset
+    (isClosed p timeRadius spaceRadius)
+    (subset_metric_closedBall (p := p) (timeRadius := timeRadius) (spaceRadius := spaceRadius)
+      (le_max_left _ _) (le_max_right _ _))
 
 /-- A closed product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at
 most `R` is contained in the closed parabolic ball of radius `R`. -/

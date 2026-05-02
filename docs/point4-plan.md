@@ -1210,11 +1210,11 @@ open/closed balls and product cylinders, proves the triangle inequality,
 topological compatibility with the ordinary product metric including local
 bases by parabolic balls and product cylinders, exact standard ball/cylinder
 identifications, plus closed-to-open shrink inclusions and open-to-closed
-closure containment for balls/cylinders, and packages `C^{0,α}`-style
-bounded/Hölder control with slice, explicit
-closed-ball/cylinder oscillation, continuity, uniform-continuity, estimate
-monotonicity in the controlling constants, and additive/subtractive algebra
-estimates,
+closure containment for balls/cylinders, proper-space compactness for closed
+balls/cylinders, and packages `C^{0,α}`-style bounded/Hölder control with
+slice, explicit closed-ball/cylinder oscillation, continuity,
+uniform-continuity, estimate monotonicity in the controlling constants, and
+additive/subtractive algebra estimates,
 including the standard bounded-product estimate for normed-ring-valued
 `C^{0,α}` functions and the corresponding bounded scalar-action estimate on
 normed-space-valued functions.
