@@ -1212,7 +1212,9 @@ bases by parabolic balls and product cylinders, exact standard ball/cylinder
 identifications, plus closed-to-open shrink inclusions and open-to-closed
 closure containment for balls/cylinders, proper-space compactness for closed
 balls/cylinders, finite open/closed parabolic ball and cylinder covers of
-compact sets, and packages `C^{0,α}`-style bounded/Hölder control with slice,
+compact sets, finite center-dependent open ball/cylinder subcovers subordinate
+to any ambient open set containing a compact set, and packages
+`C^{0,α}`-style bounded/Hölder control with slice,
 explicit closed-ball/cylinder oscillation, continuity,
 uniform-continuity, estimate monotonicity in the controlling constants, and
 additive/subtractive algebra estimates,

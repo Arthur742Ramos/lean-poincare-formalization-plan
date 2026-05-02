@@ -970,7 +970,9 @@ parabolic balls and product cylinders, exact standard ball/cylinder
 identifications, closed-to-open shrink inclusions for balls/cylinders,
 open-to-closed closure containment, proper-space compactness for closed
 balls/cylinders, finite open/closed parabolic ball and cylinder covers of
-compact sets, positive exponent continuity/uniform-continuity consequences,
+compact sets, finite center-dependent open ball/cylinder subcovers subordinate
+to any ambient open set containing a compact set, positive exponent
+continuity/uniform-continuity consequences,
 explicit closed-ball/cylinder oscillation estimates, estimate monotonicity in
 the controlling constants, and
 basic linear algebra closure estimates for Hölder and bounded control, together
