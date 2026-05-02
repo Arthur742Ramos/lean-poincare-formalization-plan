@@ -830,9 +830,10 @@ whenever the time set is a neighborhood at each of its times, with fixed-IVP and
 theorem-family wrappers. Both within-time-set and ordinary-at-time intrinsic
 derivative views, including the chart-ODE view, now also restrict monotonically
 to smaller time sets, matching the localized Picard intervals produced by chart
-ODE arguments. Closed-Picard `Icc` derivative and chart-ODE data now also have
-direct ordinary open-interior `Ioo` upgrade lemmas, matching the standard Picard
-endpoint-to-interior handoff, and the raw existence API now has a one-step
+ODE arguments. Closed-Picard `Icc` primitive and chart-ODE data now also have
+direct ordinary open-interior `Ioo` upgrade lemmas to primitive derivative data,
+with the chart-ODE route also retaining its direct chart-ODE upgrade, matching
+the standard Picard endpoint-to-interior handoff, and the raw existence API now has a one-step
 constructor producing `Diffeomorph3GaugeFlowOn` on `Ioo tmin tmax` directly from
 centered preferred-chart ODE data proved within `Icc tmin tmax`, including a
 named intrinsic DeTurck chart-package version. The same raw open-interior
@@ -842,10 +843,11 @@ package. Fixed-IVP and theorem-family wrappers now lift those closed-Picard
 primitive/chart packages directly whenever the chosen solution time set is
 explicitly the open interval `Ioo tmin tmax`, via `ofPicardIccDerivative`,
 `ofPicardIccChartDerivative`, and matching `Nonempty` wrappers. The
-derivative-view layer now has matching fixed-IVP and theorem-family handoffs to
-ordinary-at-time derivative and chart-ODE packages on those explicit open
-solution time sets, so endpoint scalar routes can consume the Picard data
-without first constructing raw gauge-flow witnesses. The time-derivative layer
+derivative-view layer now has matching fixed-IVP and theorem-family handoffs
+from closed-Picard primitive and chart-ODE data directly to ordinary-at-time
+derivative packages, plus chart-ODE packages, on those explicit open solution
+time sets, so endpoint scalar routes can consume the Picard data without first
+constructing raw gauge-flow witnesses. The time-derivative layer
 now also turns those explicit open Picard time-set identifications into the
 neighborhood-of-each-time hypothesis once, and exposes fixed-IVP and
 theorem-family `..._of_timeSet_eq_Ioo` wrappers for coordinate-model,

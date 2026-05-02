@@ -788,8 +788,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          fixed-IVP and theorem-family `ofPicardIccDerivative` /
          `ofPicardIccChartDerivative` wrappers for solution time sets explicitly
          identified with that open Picard interior, matching fixed-IVP and
-         theorem-family derivative-view handoffs to ordinary-at-time derivative
-         and chart-ODE packages on the same explicit open solution time sets, and
+         theorem-family derivative-view handoffs from closed-Picard primitive
+         and chart-ODE data directly to ordinary-at-time derivative packages,
+          plus chart-ODE packages, on the same explicit open solution time sets, and
          time-derivative wrappers that use those open time-set identifications to
          discharge the neighborhood-of-each-time hypothesis for coordinate-model,
          component, field-level, and within-set endpoint data, and

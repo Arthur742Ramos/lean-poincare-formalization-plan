@@ -625,7 +625,8 @@ now packages the matching intrinsic boundary
         and theorem-family `ofPicardIccDerivative` /
         `ofPicardIccChartDerivative` wrappers for solution time sets explicitly
         identified with the open Picard interior, matching derivative-view
-        handoffs to ordinary-at-time derivative and chart-ODE packages on the
+        handoffs from closed-Picard primitive and chart-ODE data directly to
+        ordinary-at-time derivative packages, plus chart-ODE packages, on the
         same explicit open solution time sets, and time-derivative wrappers that
         discharge the neighborhood-of-each-time hypothesis from those `Ioo`
         identifications for coordinate-model, component, field-level, and
