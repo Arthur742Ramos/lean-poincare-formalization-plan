@@ -569,7 +569,8 @@ now packages the matching intrinsic boundary
    `Diffeomorph3GaugeFlowOn` raw-flow API also has arbitrary-vector-field
      identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]`, ordinary-on-time-set
-      `HasMFDerivAt`, and unrestricted `HasMFDerivAt` adapters, named
+      `HasMFDerivAt`, unrestricted `HasMFDerivAt`, and preferred-chart
+      ODE adapters from continuity plus centered chart derivatives, named
       derivative-family adapters, including an ordinary-on-time-set
         `ofDerivativeAtFamily` bridge, neighborhood-time upgrades from
         within-time-set to ordinary-at-time derivative data, and matching

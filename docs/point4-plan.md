@@ -861,7 +861,13 @@ also have centered-chart simplifications that rewrite the derivative value from
 `tangentCoordChange I p p p (...)` to the actual gauge velocity. This removes a
 recurrent normalization step from downstream scalar gauge-pullback calculations,
 and raw `Diffeomorph3GaugeFlowOn` witnesses can now be transported across
-time-dependent vector fields that agree on the active time set.
+time-dependent vector fields that agree on the active time set. The raw
+existence layer now also has preferred-chart ODE constructors:
+`of_hasDerivWithinAt_extChartAt_eval_self` and
+`of_hasDerivAtOn_extChartAt_eval_self` build `Diffeomorph3GaugeFlowOn`
+witnesses from continuity of the manifold curves plus the centered chart
+derivative, matching the local Picard/ODE output shape more directly than a
+prepackaged manifold derivative.
 The same raw layer now also has proof-level `Nonempty` wrappers for the
 geometric, within-derivative, ordinary-on-time-set derivative, unrestricted
 derivative, restriction, and identity-flow constructors, letting downstream

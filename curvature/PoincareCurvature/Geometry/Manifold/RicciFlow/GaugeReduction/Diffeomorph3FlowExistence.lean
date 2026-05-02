@@ -442,6 +442,52 @@ theorem nonempty_of_hasMFDerivWithinAt
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_hasMFDerivWithinAt maps3 anchored hderiv⟩
 
+/-- Build a raw `C^3` diffeomorphism gauge-flow witness from the preferred-chart
+ODE form of the derivative on the time set.
+
+This is the chart-local adapter expected from Banach/Picard constructions:
+instead of asking for a manifold derivative directly, it accepts continuity of
+the raw curves and the derivative of the coordinate curve in the chart centered
+at the endpoint. -/
+noncomputable def of_hasDerivWithinAt_extChartAt_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hcont : ∀ t ∈ s, ∀ x : M,
+      ContinuousWithinAt (fun τ : ℝ ↦ (maps3 τ) x) s t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (X t ((maps3 t) x)) s t) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  of_hasMFDerivWithinAt (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    maps3 anchored
+    (fun t ht x ↦ by
+      rw [HasMFDerivWithinAt]
+      refine ⟨hcont t ht x, ?_⟩
+      have h := hderiv t ht x
+      rw [hasDerivWithinAt_iff_hasFDerivWithinAt] at h
+      simpa [writtenInExtChartAt] using h)
+
+/-- Proof-level raw `C^3` gauge-flow existence from preferred-chart ODE
+derivatives on the time set. -/
+theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hcont : ∀ t ∈ s, ∀ x : M,
+      ContinuousWithinAt (fun τ : ℝ ↦ (maps3 τ) x) s t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (X t ((maps3 t) x)) s t) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_hasDerivWithinAt_extChartAt_eval_self maps3 anchored hcont hderiv⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from
 ordinary pointwise manifold derivatives available at each time of `s`.  This
 matches local ODE constructions that first promote a closed-interval derivative
@@ -473,6 +519,43 @@ theorem nonempty_of_hasMFDerivAtOn
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (maps3 t x)))) :
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_hasMFDerivAtOn maps3 anchored hderiv⟩
+
+/-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from ordinary
+preferred-chart ODE derivatives available at each time of `s`. -/
+noncomputable def of_hasDerivAtOn_extChartAt_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hcont : ∀ t ∈ s, ∀ x : M,
+      ContinuousAt (fun τ : ℝ ↦ (maps3 τ) x) t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (X t ((maps3 t) x)) t) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  of_hasDerivWithinAt_extChartAt_eval_self (I := I) (M := M)
+    (X := X) (s := s) (t₀ := t₀) maps3 anchored
+    (fun t ht x ↦ (hcont t ht x).continuousWithinAt)
+    (fun t ht x ↦ (hderiv t ht x).hasDerivWithinAt)
+
+/-- Proof-level raw `C^3` gauge-flow existence on `s` from ordinary
+preferred-chart ODE derivatives available at each time of `s`. -/
+theorem nonempty_of_hasDerivAtOn_extChartAt_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hcont : ∀ t ∈ s, ∀ x : M,
+      ContinuousAt (fun τ : ℝ ↦ (maps3 τ) x) t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (X t ((maps3 t) x)) t) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_hasDerivAtOn_extChartAt_eval_self maps3 anchored hcont hderiv⟩
 
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from
 unrestricted pointwise manifold derivatives. -/
