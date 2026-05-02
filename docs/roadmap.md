@@ -771,7 +771,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
            RHS-identification adapters that promote manifold or preferred-chart
            derivative packages to the intrinsic derivative views once the model
            vector field agrees with the intrinsic DeTurck gauge field along the
-           flow, neighborhood-time upgrades from
+           flow, with matching fixed-IVP and theorem-family chosen-solution
+           package adapters for those model-vector-field hypotheses,
+           neighborhood-time upgrades from
            within-time-set to ordinary-at-time primitive derivative and chart-ODE
           data, monotonicity lemmas for restricting within-time-set and
         ordinary-at-time intrinsic derivative views, including chart-ODE views,

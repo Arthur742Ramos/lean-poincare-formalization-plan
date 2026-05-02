@@ -804,7 +804,10 @@ The primitive and chart derivative views now also have model-vector-field
 RHS-identification adapters, in both within-set and ordinary-at-time forms:
 once the model vector field agrees with the intrinsic DeTurck gauge field along
 the flow, its manifold or preferred-chart derivative package is promoted to the
-intrinsic derivative package directly. Those bridges now have direct
+intrinsic derivative package directly. The fixed-IVP and theorem-family chosen
+solution packages now mirror the same adapters, so Picard model-vector-field
+derivatives can enter the named derivative and chart-ODE packages without first
+hand-specializing the RHS at each solution. Those bridges now have direct
 derivative-data readouts back to
 `ChosenIntrinsicDeTurckGaugeFlowDerivative` and
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use

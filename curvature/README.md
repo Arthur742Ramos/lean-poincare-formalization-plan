@@ -220,8 +220,10 @@ now packages the matching intrinsic boundary
      also round-trip with the geometric `SatisfiesGaugeFlowOn` equation for both
      fixed-IVP and theorem-family data, promote model-vector-field derivative
      data to the intrinsic DeTurck derivative views once the model RHS is
-     identified along the flow, and anchored primitive derivative data now
-     constructs the corresponding geometric `C³` gauge-flow bundles directly.
+     identified along the flow, mirror that bridge at the fixed-IVP and
+     theorem-family chosen-solution package layers, and anchored primitive
+     derivative data now constructs the corresponding geometric `C³` gauge-flow
+     bundles directly.
     It also now has fixed-IVP and theorem-family
     constructors from pointwise `HasMFDerivAt[s]` or unrestricted `HasMFDerivAt`
     integral-curve data, named-derivative-family adapters, plus raw-flow time-set
