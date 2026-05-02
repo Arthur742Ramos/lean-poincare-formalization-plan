@@ -288,6 +288,23 @@ theorem isClosed (p : ℝ × X) (R : ℝ) : IsClosed (parabolicClosedBall p R) :
   simpa [parabolicClosedBall] using
     isClosed_Iic.preimage (parabolicDistance.continuous_fixed_left p)
 
+theorem pair_parabolicDistance_le {c p q : ℝ × X}
+    (hp : p ∈ parabolicClosedBall c R) (hq : q ∈ parabolicClosedBall c R) :
+    parabolicDistance p q ≤ 2 * R := by
+  calc
+    parabolicDistance p q ≤ parabolicDistance p c + parabolicDistance c q :=
+      parabolicDistance.triangle p c q
+    _ = parabolicDistance c p + parabolicDistance c q := by
+      rw [parabolicDistance.comm p c]
+    _ ≤ R + R := add_le_add hp hq
+    _ = 2 * R := by ring
+
+theorem pair_parabolicDistance_le_one {c p q : ℝ × X}
+    (hp : p ∈ parabolicClosedBall c R) (hq : q ∈ parabolicClosedBall c R)
+    (hR : 2 * R ≤ 1) :
+    parabolicDistance p q ≤ 1 :=
+  (pair_parabolicDistance_le hp hq).trans hR
+
 end parabolicClosedBall
 
 namespace parabolicCylinder

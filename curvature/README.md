@@ -971,8 +971,9 @@ basic linear algebra closure estimates for Hölder and bounded control, together
 with the bounded product estimate for normed-ring-valued `C^{0,α}` functions
 and the corresponding bounded scalar-action estimate for normed-space-valued
 functions, plus closure under taking norms and Lipschitz composition on the
-controlled range, and exponent lowering on unit parabolic-diameter domains. It
-still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
+controlled range, exponent lowering on unit parabolic-diameter domains, and
+closed-ball diameter control. It still does not include the Schauder estimates
+or Ricci-DeTurck Banach chart.
 
 ## Build
 
