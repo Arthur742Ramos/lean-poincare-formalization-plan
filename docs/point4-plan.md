@@ -1262,8 +1262,9 @@ closed-ball/cylinder corollaries. The new
 closure, adjugate-entry closure, and inverse-entry closure under a determinant
 lower bound for finite matrix-valued parabolic `C^{0,α}` functions from
 entrywise control, including a compactness bridge from nonvanishing determinants
-to uniform determinant lower bounds and compact-domain inverse-entry and
-schematic matrix-valued RHS variants, plus entrywise and whole-valued closure
+to uniform determinant lower bounds and compact-domain inverse-entry,
+inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants,
+plus entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 matrix-vector and vector-matrix products, and inverse-matrix vector products on
 both sides under the same determinant lower bound, plus whole finite

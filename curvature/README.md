@@ -1008,8 +1008,9 @@ The separate `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now proves that
 finite matrix determinants, adjugate entries, and inverse entries under a
 determinant lower bound preserve parabolic `C^{0,α}` control from entrywise
 control; compact nonvanishing determinant data now supplies the needed uniform
-determinant lower bound, including compact-domain inverse-entry and schematic
-matrix-valued RHS variants. It also proves entrywise and whole-valued closure
+determinant lower bound, including compact-domain inverse-entry,
+inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
+also proves entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 matrix-vector and vector-matrix products, including inverse-matrix vector
 products on both sides under the same determinant lower bound, whole finite
