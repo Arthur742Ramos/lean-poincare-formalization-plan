@@ -139,6 +139,27 @@ theorem lt_of_prod_dist_lt {R δ : ℝ} (hδ_space : δ ≤ R) (hδ_time : δ �
     lt_of_le_of_lt hspace_dist (lt_of_lt_of_le h hδ_space)
   exact max_lt hsqrt hspace
 
+/-- A small closed product-metric distance implies a small closed parabolic-distance bound, after
+shrinking the product radius quadratically in the time direction. -/
+theorem le_of_prod_dist_le {R δ : ℝ} (hδ_space : δ ≤ R) (hδ_time : δ ≤ R ^ 2)
+    (hR : 0 ≤ R) (h : dist p q ≤ δ) : parabolicDistance p q ≤ R := by
+  have htime_dist : dist p.1 q.1 ≤ dist p q := by
+    rw [Prod.dist_eq]
+    exact le_max_left _ _
+  have htime_abs : |p.1 - q.1| ≤ R ^ 2 := by
+    have hle : dist p.1 q.1 ≤ R ^ 2 :=
+      htime_dist.trans (h.trans hδ_time)
+    simpa [Real.dist_eq] using hle
+  have hsqrt : Real.sqrt |p.1 - q.1| ≤ R := by
+    exact (sq_le_sq₀ (Real.sqrt_nonneg _) hR).1 (by
+      rwa [Real.sq_sqrt (abs_nonneg _)])
+  have hspace_dist : dist p.2 q.2 ≤ dist p q := by
+    rw [Prod.dist_eq]
+    exact le_max_right _ _
+  have hspace : dist p.2 q.2 ≤ R :=
+    hspace_dist.trans (h.trans hδ_space)
+  exact max_le hsqrt hspace
+
 /-- A small parabolic distance bound gives a small ordinary product-metric bound once the time
 radius has been squared. -/
 theorem prod_dist_lt_of_lt {R ε : ℝ} (hR_space : R ≤ ε) (hR_time : R ^ 2 ≤ ε)
@@ -307,6 +328,13 @@ theorem subset_metric_closedBall {ε : ℝ} (hR_space : R ≤ ε) (hR_time : R ^
   intro q hq
   rw [Metric.mem_closedBall, dist_comm]
   exact parabolicDistance.prod_dist_le_of_le hR_space hR_time hq
+
+theorem metric_closedBall_subset {δ : ℝ} (hδ_space : δ ≤ R) (hδ_time : δ ≤ R ^ 2)
+    (hR : 0 ≤ R) :
+    Metric.closedBall p δ ⊆ parabolicClosedBall p R := by
+  intro q hq
+  rw [Metric.mem_closedBall, dist_comm] at hq
+  exact parabolicDistance.le_of_prod_dist_le hδ_space hδ_time hR hq
 
 theorem isClosed (p : ℝ × X) (R : ℝ) : IsClosed (parabolicClosedBall p R) := by
   simpa [parabolicClosedBall] using

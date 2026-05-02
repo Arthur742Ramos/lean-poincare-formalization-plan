@@ -116,7 +116,7 @@ groundwork for the future Schauder and Ricci-DeTurck Banach-chart layer, now
 also including exponent lowering on unit parabolic-diameter domains with
 closed-ball and closed-cylinder specializations across the Holder and
 `C^{0,α}` interfaces, closed-ball diameter control, product ball/closed-ball
-compatibility for parabolic balls and product cylinders, plus
+compatibility in both directions for parabolic balls and product cylinders, plus
 basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on compact domains,
 with direct proper-space closed-ball/cylinder corollaries, not the
 local-existence theorem itself.

@@ -980,9 +980,10 @@ controlled range, bounded `C^{0,α}` composition under range or
 explicit closed-sup-ball bounds, exponent lowering on unit parabolic-diameter
 domains with closed-ball and closed-cylinder specializations across the Holder
 and `C^{0,α}` interfaces, and closed-ball diameter control,
-product ball/closed-ball compatibility for parabolic balls and product
-cylinders, plus basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on
-compact domains, with direct proper-space closed-ball/cylinder corollaries.
+bidirectional product ball/closed-ball compatibility for parabolic balls and
+product cylinders, plus basepoint-to-sup bounds and Holder-to-`C^{0,α}`
+packaging on compact domains, with direct proper-space closed-ball/cylinder
+corollaries.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build

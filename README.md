@@ -334,7 +334,8 @@ packages the canonical stationary local solution attached to
   exponent lowering on unit parabolic-diameter domains with closed-ball and
   closed-cylinder specializations across the Holder and `C^{0,α}` interfaces,
   backed by closed-ball diameter control, product ball/closed-ball
-  compatibility for parabolic balls and product cylinders, plus
+  compatibility in both directions for parabolic balls and product cylinders,
+  plus
   basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on compact domains,
   with direct proper-space closed-ball/cylinder corollaries. These primitives do
   not yet supply the

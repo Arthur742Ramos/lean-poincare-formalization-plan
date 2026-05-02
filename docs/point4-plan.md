@@ -1227,7 +1227,7 @@ result under range or explicit closed-sup-ball bounds, and exponent-lowering
 on unit parabolic-diameter domains, with closed-ball and closed-cylinder
 specializations across the Holder and `C^{0,α}` interfaces supplying that
 hypothesis after shrinking.
-Closed parabolic balls now also map into ordinary product closed balls under
+Closed parabolic balls now map to and from ordinary product closed balls under
 the quadratic time-radius control, and product cylinders map into ordinary
 product balls/closed balls under coordinate radius control, matching
 compactness-style local arguments. A basepoint-to-sup estimate now turns
