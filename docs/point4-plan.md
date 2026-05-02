@@ -1210,8 +1210,10 @@ open/closed balls and product cylinders, proves the triangle inequality,
 topological compatibility with the ordinary product metric including a
 parabolic-ball local base, and packages `C^{0,α}`-style bounded/Hölder control
 with slice, oscillation, continuity, uniform-continuity, and additive
-subtractive algebra estimates. This is still only the norm/topology vocabulary,
-not the Schauder estimates or Ricci-DeTurck Banach chart. The abstract
+subtractive algebra estimates, including the standard bounded-product estimate
+for normed-ring-valued `C^{0,α}` functions. This is still only the
+norm/topology vocabulary, not the Schauder estimates or Ricci-DeTurck Banach
+chart. The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and

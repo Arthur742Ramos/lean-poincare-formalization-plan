@@ -967,8 +967,9 @@ regularity. The parabolic PDE layer has proof-bearing groundwork in
 `AnalyticPDE/ParabolicHolder.lean`: parabolic distance, balls/cylinders,
 `C^{0,α}` control, local-base compatibility with the product topology, positive
 exponent continuity/uniform-continuity consequences, oscillation estimates, and
-basic linear algebra closure estimates for Hölder and bounded control. It still
-does not include the Schauder estimates or Ricci-DeTurck Banach chart.
+basic linear algebra closure estimates for Hölder and bounded control, together
+with the bounded product estimate for normed-ring-valued `C^{0,α}` functions.
+It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build
 

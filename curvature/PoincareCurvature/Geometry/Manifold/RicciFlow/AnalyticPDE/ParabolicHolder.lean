@@ -772,6 +772,36 @@ theorem sub (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
     ParabolicC0AlphaWith (B₁ + B₂) (H₁ + H₂) α (fun z => u z - v z) s :=
   ⟨hu.bounded.sub hv.bounded, hu.holder.sub hv.holder⟩
 
+theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
+    {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
+    (hv : ParabolicC0AlphaWith B₂ H₂ α v s)
+    (hB₁ : 0 ≤ B₁) :
+    ParabolicC0AlphaWith (B₁ * B₂) (B₁ * H₂ + B₂ * H₁) α
+      (fun z => u z * v z) s := by
+  constructor
+  · intro p hp
+    exact (norm_mul_le (u p) (v p)).trans
+      (mul_le_mul (hu.bounded hp) (hv.bounded hp) (norm_nonneg _) hB₁)
+  · intro p hp q hq
+    let dα := (parabolicDistance p q) ^ α
+    have hsplit :
+        u p * v p - u q * v q = u p * (v p - v q) + (u p - u q) * v q := by
+      noncomm_ring
+    have hH₁d_nonneg : 0 ≤ H₁ * dα :=
+      (norm_nonneg (u p - u q)).trans (hu.holder hp hq)
+    calc
+      ‖u p * v p - u q * v q‖
+          = ‖u p * (v p - v q) + (u p - u q) * v q‖ := by rw [hsplit]
+      _ ≤ ‖u p * (v p - v q)‖ + ‖(u p - u q) * v q‖ := norm_add_le _ _
+      _ ≤ ‖u p‖ * ‖v p - v q‖ + ‖u p - u q‖ * ‖v q‖ :=
+        add_le_add (norm_mul_le _ _) (norm_mul_le _ _)
+      _ ≤ B₁ * (H₂ * dα) + (H₁ * dα) * B₂ :=
+        add_le_add
+          (mul_le_mul (hu.bounded hp) (hv.holder hp hq) (norm_nonneg _) hB₁)
+          (mul_le_mul (hu.holder hp hq) (hv.bounded hq) (norm_nonneg _) hH₁d_nonneg)
+      _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaWith (‖c‖ * B) (‖c‖ * H) α (fun z => c • u z) s :=
@@ -826,6 +856,15 @@ theorem sub (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
   rcases hu with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
   rcases hv with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
   exact ⟨B₁ + B₂, add_nonneg hB₁ hB₂, H₁ + H₂, add_nonneg hH₁ hH₂, hBH₁.sub hBH₂⟩
+
+theorem mul {A : Type*} [NormedRing A] {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    ParabolicC0AlphaOn α (fun z => u z * v z) s := by
+  rcases hu with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
+  rcases hv with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
+  exact ⟨B₁ * B₂, mul_nonneg hB₁ hB₂,
+    B₁ * H₂ + B₂ * H₁, add_nonneg (mul_nonneg hB₁ hH₂) (mul_nonneg hB₂ hH₁),
+    hBH₁.mul hBH₂ hB₁⟩
 
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicC0AlphaOn α u s) :
