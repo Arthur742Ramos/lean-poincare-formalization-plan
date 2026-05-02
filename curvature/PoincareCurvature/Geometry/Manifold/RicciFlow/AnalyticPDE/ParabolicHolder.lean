@@ -94,6 +94,27 @@ theorem time_abs_le_sq_of_le {R : ℝ} (hR : 0 ≤ R) (h : parabolicDistance p q
       rw [Real.sq_sqrt (abs_nonneg _)]
     _ ≤ R ^ 2 := (sq_le_sq₀ (Real.sqrt_nonneg _) hR).2 hsqrt
 
+/-- Small product-metric distance implies small parabolic distance, after shrinking the product
+radius quadratically in the time direction. -/
+theorem lt_of_prod_dist_lt {R δ : ℝ} (hδ_space : δ ≤ R) (hδ_time : δ ≤ R ^ 2)
+    (hR : 0 < R) (h : dist p q < δ) : parabolicDistance p q < R := by
+  have htime_dist : dist p.1 q.1 ≤ dist p q := by
+    rw [Prod.dist_eq]
+    exact le_max_left _ _
+  have htime_abs : |p.1 - q.1| < R ^ 2 := by
+    have hlt : dist p.1 q.1 < R ^ 2 :=
+      lt_of_le_of_lt htime_dist (lt_of_lt_of_le h hδ_time)
+    simpa [Real.dist_eq] using hlt
+  have hsqrt : Real.sqrt |p.1 - q.1| < R := by
+    exact (sq_lt_sq₀ (Real.sqrt_nonneg _) hR.le).1 (by
+      rwa [Real.sq_sqrt (abs_nonneg _)])
+  have hspace_dist : dist p.2 q.2 ≤ dist p q := by
+    rw [Prod.dist_eq]
+    exact le_max_right _ _
+  have hspace : dist p.2 q.2 < R :=
+    lt_of_le_of_lt hspace_dist (lt_of_lt_of_le h hδ_space)
+  exact max_lt hsqrt hspace
+
 end parabolicDistance
 
 /-- Open parabolic ball in time-space. -/
@@ -427,6 +448,33 @@ theorem continuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) : Continu
       Filter.Tendsto.rpow_const hd (Or.inr hα.le)
     simpa [Real.zero_rpow hα.ne'] using tendsto_const_nhds.mul hpow
 
+/-- Positive-exponent parabolic Holder control gives uniform continuity on the controlled
+time-space set. -/
+theorem uniformContinuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) :
+    UniformContinuousOn u s := by
+  refine Metric.uniformContinuousOn_iff.2 fun ε hε => ?_
+  have htend : Filter.Tendsto (fun d : ℝ => C * d ^ α) (nhds 0) (nhds 0) := by
+    have hpow : Filter.Tendsto (fun d : ℝ => d ^ α) (nhds 0) (nhds (0 ^ α)) :=
+      (Real.continuousAt_rpow_const 0 α (Or.inr hα.le)).tendsto
+    simpa [Real.zero_rpow hα.ne'] using tendsto_const_nhds.mul hpow
+  rcases Metric.tendsto_nhds_nhds.1 htend ε hε with ⟨η, hη, hη_bound⟩
+  refine ⟨min η (η ^ 2), lt_min hη (sq_pos_of_pos hη), ?_⟩
+  intro p hp q hq hpq
+  have hpq_par : parabolicDistance p q < η :=
+    parabolicDistance.lt_of_prod_dist_lt (min_le_left _ _) (min_le_right _ _) hη hpq
+  have hpd_dist : dist (parabolicDistance p q) 0 < η := by
+    simpa [Real.dist_eq, abs_of_nonneg (parabolicDistance.nonneg p q)] using hpq_par
+  have hupper_abs : dist (C * (parabolicDistance p q) ^ α) 0 < ε :=
+    hη_bound hpd_dist
+  have hupper : C * (parabolicDistance p q) ^ α < ε := by
+    have habs : |C * (parabolicDistance p q) ^ α| < ε := by
+      simpa [Real.dist_eq, sub_zero] using hupper_abs
+    exact lt_of_le_of_lt (le_abs_self _) habs
+  calc
+    dist (u p) (u q) = ‖u p - u q‖ := dist_eq_norm _ _
+    _ ≤ C * (parabolicDistance p q) ^ α := h hp hq
+    _ < ε := hupper
+
 end ParabolicHolderWith
 
 namespace ParabolicHolderOn
@@ -482,6 +530,13 @@ theorem space_slice (h : ParabolicHolderOn α u s) :
 theorem continuousOn (h : ParabolicHolderOn α u s) (hα : 0 < α) : ContinuousOn u s := by
   rcases h with ⟨_C, _hC, hCu⟩
   exact hCu.continuousOn hα
+
+/-- Positive-exponent parabolic Holder functions are uniformly continuous on their time-space
+domain. -/
+theorem uniformContinuousOn (h : ParabolicHolderOn α u s) (hα : 0 < α) :
+    UniformContinuousOn u s := by
+  rcases h with ⟨_C, _hC, hCu⟩
+  exact hCu.uniformContinuousOn hα
 
 end ParabolicHolderOn
 
@@ -550,6 +605,11 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
 theorem continuousOn (h : ParabolicC0AlphaWith B H α u s) (hα : 0 < α) : ContinuousOn u s :=
   h.holder.continuousOn hα
 
+/-- Positive-exponent parabolic `C^{0,α}` control gives uniform continuity. -/
+theorem uniformContinuousOn (h : ParabolicC0AlphaWith B H α u s) (hα : 0 < α) :
+    UniformContinuousOn u s :=
+  h.holder.uniformContinuousOn hα
+
 end ParabolicC0AlphaWith
 
 namespace ParabolicC0AlphaOn
@@ -600,6 +660,12 @@ theorem space_slice (h : ParabolicC0AlphaOn α u s) :
 /-- Positive-exponent parabolic `C^{0,α}` functions are continuous on their time-space domain. -/
 theorem continuousOn (h : ParabolicC0AlphaOn α u s) (hα : 0 < α) : ContinuousOn u s :=
   h.holderOn.continuousOn hα
+
+/-- Positive-exponent parabolic `C^{0,α}` functions are uniformly continuous on their time-space
+domain. -/
+theorem uniformContinuousOn (h : ParabolicC0AlphaOn α u s) (hα : 0 < α) :
+    UniformContinuousOn u s :=
+  h.holderOn.uniformContinuousOn hα
 
 end ParabolicC0AlphaOn
 
