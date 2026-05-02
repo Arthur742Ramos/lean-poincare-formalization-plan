@@ -223,7 +223,11 @@ scalar identities and ordinary-neighborhood tangent-map variants for callers
 with stronger local-flow output. The variational base-velocity comparison now
 also has direct ordinary-neighborhood and closed-interval within-filter readouts,
 identifying the model ODE velocity with `X t ((G.maps3 t) x)` without exposing
-the centered `tangentCoordChange` term. The full-field coordinate derivative route now
+the centered `tangentCoordChange` term. The endpoint model calculus now also has
+within-domain Fréchet chain rules for moving bilinear-form fields and their
+time-difference subtraction, so local chart/Picard derivatives that are only
+proved on a product domain can feed the gauge-pullback endpoint route directly.
+The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
 constructor for it, and direct endpoint-to-interior scalar promotion theorems,

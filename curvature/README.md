@@ -371,7 +371,9 @@ now packages the matching intrinsic boundary
         model-coordinate slots and in pushed-forward geometric slots, with the
         base-velocity readouts themselves now exposing ordinary-neighborhood and
         closed-interval within-filter direct forms that avoid the centered
-        `tangentCoordChange`, and with the
+        `tangentCoordChange`, and with within-domain Fréchet chain-rule and
+        time-difference primitives that let chart-local product-domain
+        derivatives feed the same endpoint calculus before the
         model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the
