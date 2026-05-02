@@ -42,11 +42,11 @@ local instance preferredSmoothApproxBilFNormedAddCommGroup :
     NormedAddCommGroup BilF := inferInstance
 local instance preferredSmoothApproxBilFNormedSpace :
     NormedSpace ℝ BilF := inferInstance
-local instance preferredSmoothApproxTMNormedAddCommGroup [ChartedSpace H M] (x : M) :
+local instance (priority := 10) preferredSmoothApproxTMNormedAddCommGroup [ChartedSpace H M] (x : M) :
     NormedAddCommGroup (TM x) := by
   change NormedAddCommGroup F
   infer_instance
-local instance preferredSmoothApproxTMNormedSpace [ChartedSpace H M] (x : M) :
+local instance (priority := 10) preferredSmoothApproxTMNormedSpace [ChartedSpace H M] (x : M) :
     NormedSpace ℝ (TM x) := by
   change NormedSpace ℝ F
   infer_instance
@@ -295,9 +295,68 @@ theorem closure_smooth_spd_of_metric_locus_and_local_trivialization_bounds_prefe
       (inferInstance : ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I)
       hlocalBound κ inferInstance x0
       Kc hKc Ko hKo hKoEq hcover
-      (s := (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-        (fun i ↦ trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover))
-      η hη
+       (s := (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+         (fun i ↦ trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover))
+       η hη
+
+/-- Preferred-cover smooth-SPD closure for continuous Riemannian tangent bundles, with the finite-cover
+inverse bound and the local trivialization bound both discharged by the continuous Riemannian bundle
+smooth-density theorem. -/
+theorem closure_smooth_spd_of_metric_locus_preferredBilinear_of_continuousRiemannianBundle
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [SecondCountableTopology H]
+    [ContMDiffVectorBundle 2 F TM I]
+    [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [_root_.Bundle.RiemannianBundle TM]
+    [IsContinuousRiemannianBundle (B := M) F TM]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F] :
+    ∀ s : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover,
+      s ∈ riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+        et Kc hKc Ko hKo hKoEq hcover →
+      (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover) ∈
+        closure
+          ({u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover |
+            u ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := TM)
+              (et := et)
+              (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+              (hKoEq := hKoEq) (hcover := hcover) ∧
+            ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+              (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x))}) := by
+  have hetFun : et = fun i ↦ trivializationAt BilF BilW (x0 i) := funext het
+  subst et
+  intro s hs
+  have hspd :
+      (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i ↦ trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) ∈
+        symmetricPositiveDefiniteLocus (M := M) (F := F) (W := TM)
+          (fun i ↦ trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover :=
+    (mem_riemannianMetricLocusSubmodule_iff
+      (M := M) (F := F) (W := TM)
+      x0 (fun i ↦ trivializationAt BilF BilW (x0 i)) (fun _ ↦ rfl)
+      Kc hKc Ko hKo hKoEq hcover s).1 hs
+  exact
+    mem_closure_smooth_spd_preferredBilinear_of_continuousRiemannianBundle
+      (E := F) (H := H) (I := I) (M := M) (F := F) (W := TM)
+      x0
+      (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i ↦ trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+      hspd
 
 /-- Interval Ricci-DeTurck charts can use the preferred-cover smooth-density theorem directly in the
 Picard shrink step.  The remaining density inputs are the finite-cover inverse bound used by the
@@ -365,6 +424,72 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
     (closure_smooth_spd_of_metric_locus_and_local_trivialization_bounds_preferredBilinear
       (M := M) (F := F) (I := I)
       x0 et het Kc hKc Ko hKo hKoEq hcover hCpos hC hlocalBound)
+    ha
+
+/-- Interval Ricci-DeTurck charts over a continuous Riemannian tangent bundle can use the
+preferred-cover smooth-density theorem directly in the Picard shrink step, without exposing the
+finite-cover inverse bound or local trivialization bound as hypotheses. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_continuousRiemannianBundle_restrictedSymmetricA_picard
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [SecondCountableTopology H]
+    [ContMDiffVectorBundle 2 F TM I]
+    [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    [_root_.Bundle.RiemannianBundle TM]
+    [IsContinuousRiemannianBundle (B := M) F TM]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (rhs : SmoothSectionRHSIdentification
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
+    (ha : 0 < a) :
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+      ∃ _chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover
+        ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T' a' L Kpic Kstate,
+        0 < a' ∧ a' ≤ a ∧
+          Metric.closedBall
+            (InitialValueProblem.toSymmetricSectionSubmodule
+              (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) (a' : ℝ) ⊆
+            riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+              et Kc hKc Ko hKo hKoEq hcover ∧
+          IsPicardLindelof
+            (SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc
+              (M := M) (F := F) (I := I)
+              x0 et het Kc hKc Ko hKo hKoEq hcover rhs
+              (closure_smooth_spd_of_metric_locus_preferredBilinear_of_continuousRiemannianBundle
+                (M := M) (F := F) (I := I)
+                x0 et het Kc hKc Ko hKo hKoEq hcover)
+              (fun t ht => chart.lipschitzOn_Icc t ⟨ht.1, le_trans ht.2 hT'le⟩))
+            (tmin := ivp.initialTime) (tmax := T')
+            ⟨ivp.initialTime, ⟨le_rfl, le_of_lt _hT'⟩⟩
+            (InitialValueProblem.toSymmetricSectionSubmodule
+              (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) a' 0 L Kpic := by
+  exact chart.exists_metricCone_shrunk_specificRHS_closure_restrictedSymmetricA_on_Icc_picard
+    (M := M) (F := F) (I := I)
+    x0 et het Kc hKc Ko hKo hKoEq hcover rhs
+    (closure_smooth_spd_of_metric_locus_preferredBilinear_of_continuousRiemannianBundle
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover)
     ha
 
 /-- The preferred-cover local-bounds route gives an actual state-preserving Banach solution for the
