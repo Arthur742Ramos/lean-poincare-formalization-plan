@@ -592,7 +592,9 @@ now packages the matching intrinsic boundary
         derivative data and named intrinsic primitive derivative data, fixed-IVP
         and theorem-family `ofPicardIccDerivative` /
         `ofPicardIccChartDerivative` wrappers for solution time sets explicitly
-        identified with the open Picard interior, and matching fixed-IVP `ofDerivative` /
+        identified with the open Picard interior, matching derivative-view
+        handoffs to ordinary-at-time derivative and chart-ODE packages on the
+        same explicit open solution time sets, and matching fixed-IVP `ofDerivative` /
         `ofDerivativeAt` bridges,
         centered preferred-chart derivative simplifications that expose the
         actual gauge velocity directly, vector-field agreement transport for

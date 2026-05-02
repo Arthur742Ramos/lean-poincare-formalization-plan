@@ -747,7 +747,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          derivative data and named intrinsic primitive derivative data, with
          fixed-IVP and theorem-family `ofPicardIccDerivative` /
          `ofPicardIccChartDerivative` wrappers for solution time sets explicitly
-         identified with that open Picard interior, and matching fixed-IVP `ofDerivative` and
+         identified with that open Picard interior, matching fixed-IVP and
+         theorem-family derivative-view handoffs to ordinary-at-time derivative
+         and chart-ODE packages on the same explicit open solution time sets, and
+         matching fixed-IVP `ofDerivative` and
         `ofDerivativeAt` bridges. The Banach-model ODE component of
      the positive-dimensional raw-flow construction is now also proof-bearing:
      `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent

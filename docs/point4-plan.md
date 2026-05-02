@@ -786,7 +786,11 @@ derivative data and from the named intrinsic DeTurck primitive derivative
 package. Fixed-IVP and theorem-family wrappers now lift those closed-Picard
 primitive/chart packages directly whenever the chosen solution time set is
 explicitly the open interval `Ioo tmin tmax`, via `ofPicardIccDerivative`,
-`ofPicardIccChartDerivative`, and matching `Nonempty` wrappers. The same
+`ofPicardIccChartDerivative`, and matching `Nonempty` wrappers. The
+derivative-view layer now has matching fixed-IVP and theorem-family handoffs to
+ordinary-at-time derivative and chart-ODE packages on those explicit open
+solution time sets, so endpoint scalar routes can consume the Picard data
+without first constructing raw gauge-flow witnesses. The same
 named-derivative symmetry is now present
 for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,
