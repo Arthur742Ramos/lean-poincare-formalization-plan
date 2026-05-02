@@ -763,8 +763,9 @@ now packages the matching intrinsic boundary
      for their stored realization and reverse-encoding fields. The global
      raw-gauge route now also exposes the ambient state-preserving Banach
      solution with common-interval uniqueness and symmetric positive-definite
-     persistence, together with a paired smooth-realization/reverse-encoding
-     fiber. The interval raw-gauge route similarly exposes the ambient
+     persistence, the represented continuous Riemannian-metric-valued curve, and
+     a paired smooth-realization/reverse-encoding fiber. The interval raw-gauge
+     route similarly exposes the ambient
      state-preserving Banach solution with terminal-time control and
      common-interval uniqueness, now including the stronger symmetric
      positive-definite persistence readout and the represented continuous

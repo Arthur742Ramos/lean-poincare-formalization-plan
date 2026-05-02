@@ -1322,9 +1322,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      `nonempty_realization`, `realizationCandidateEncoding`, and
      `nonempty_candidateEncoding` readouts. The global raw-gauge route now also
      exposes the ambient state-preserving Banach solution with common-interval
-     uniqueness and symmetric positive-definite persistence, together with a
-     paired smooth-realization/reverse-encoding fiber. The interval raw-gauge
-     route similarly exposes the ambient state-preserving Banach solution with
+     uniqueness and symmetric positive-definite persistence, the represented
+     continuous Riemannian-metric-valued curve, and a paired
+     smooth-realization/reverse-encoding fiber. The interval raw-gauge route
+     similarly exposes the ambient state-preserving Banach solution with
      terminal-time control and common-interval uniqueness, now including the
      stronger symmetric positive-definite persistence readout and the represented
      continuous Riemannian-metric-valued curve, plus a combined proof-level
