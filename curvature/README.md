@@ -1005,9 +1005,11 @@ corollaries.
 The separate `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now proves that
 finite matrix determinants, adjugate entries, and inverse entries under a
 determinant lower bound preserve parabolic `C^{0,α}` control from entrywise
-control; it also proves entrywise closure for matrix products, matrix-vector and
-vector-matrix products, including inverse-matrix vector products on both sides
-under the same determinant lower bound, finite vector dot products, and
+control; compact nonvanishing determinant data now supplies the needed uniform
+determinant lower bound. It also proves entrywise closure for matrix products,
+matrix-vector and vector-matrix products, including inverse-matrix vector
+products on both sides under the same determinant lower bound, finite vector
+dot products, and
 bilinear contractions through matrices or inverse matrices, including
 Christoffel-symbol type inverse-metric contractions and principal-part
 contractions `g^{ab} H_abij`, plus Ricci-coordinate quadratic Christoffel

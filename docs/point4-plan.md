@@ -1260,9 +1260,11 @@ closed-ball/cylinder corollaries. The new
 `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves determinant
 closure, adjugate-entry closure, and inverse-entry closure under a determinant
 lower bound for finite matrix-valued parabolic `C^{0,α}` functions from
-entrywise control, plus entrywise closure for matrix products, matrix-vector
-and vector-matrix products, and inverse-matrix vector products on both sides
-under the same determinant lower bound, plus finite vector dot products and
+entrywise control, including a compactness bridge from nonvanishing determinants
+to uniform determinant lower bounds, plus entrywise closure for matrix products,
+matrix-vector and vector-matrix products, and inverse-matrix vector products on
+both sides under the same determinant lower bound, plus finite vector dot
+products and
 bilinear contractions through matrices or inverse matrices, including
 Christoffel-symbol type inverse-metric contractions and principal-part
 contractions `g^{ab} H_abij`, plus Ricci-coordinate quadratic Christoffel

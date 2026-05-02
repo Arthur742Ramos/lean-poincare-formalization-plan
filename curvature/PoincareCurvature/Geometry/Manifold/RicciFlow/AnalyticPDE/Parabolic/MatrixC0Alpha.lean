@@ -26,6 +26,23 @@ namespace ParabolicC0AlphaOn
 variable {X : Type*} [PseudoMetricSpace X]
 variable {α : ℝ} {s : Set (ℝ × X)}
 
+/-- A continuous nonvanishing function on a compact time-space set has norm uniformly bounded away
+from zero. -/
+theorem exists_pos_norm_lower_bound_of_isCompact_of_continuousOn_ne_zero {E : Type*}
+    [NormedAddCommGroup E] {K : Set (ℝ × X)} {f : ℝ × X → E}
+    (hK : IsCompact K) (hf : ContinuousOn f K)
+    (hne : ∀ ⦃z : ℝ × X⦄, z ∈ K → f z ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖f z‖ := by
+  by_cases hKnonempty : K.Nonempty
+  · have hnorm : ContinuousOn (fun z => ‖f z‖) K := hf.norm
+    rcases hK.exists_isMinOn hKnonempty hnorm with ⟨z₀, hz₀, hmin⟩
+    refine ⟨‖f z₀‖, norm_pos_iff.mpr (hne hz₀), ?_⟩
+    intro z hz
+    exact (isMinOn_iff.mp hmin) z hz
+  · refine ⟨1, by norm_num, ?_⟩
+    intro z hz
+    exact False.elim (hKnonempty ⟨z, hz⟩)
+
 /-- The determinant of a finite matrix whose entries are parabolic `C^{0,α}` functions is
 again parabolic `C^{0,α}`. -/
 theorem matrix_det {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
@@ -59,6 +76,17 @@ theorem matrix_det {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
   intro σ _hσ
   rw [← zsmul_eq_mul]
   rfl
+
+/-- On a compact time-space set, a finite matrix with parabolic `C^{0,α}` entries and nonvanishing
+determinant has determinant norm uniformly bounded away from zero. -/
+theorem matrix_det_exists_pos_norm_lower_bound_of_isCompact {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)} {M : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M z).det‖ :=
+  exists_pos_norm_lower_bound_of_isCompact_of_continuousOn_ne_zero hK
+    ((matrix_det (M := M) hM).continuousOn hα) hdet_ne
 
 /-- Each adjugate entry of a finite matrix is parabolic `C^{0,α}` when the matrix entries are. -/
 theorem matrix_adjugate_entry {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
