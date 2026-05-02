@@ -89,6 +89,17 @@ structure VariationalLocalFlowSolution
       HasDerivWithinAt (tangent x)
         ((Df t (flow (x, t))).comp (tangent x t)) (Icc tmin tmax) t
 
+/-- Interior points of the Picard cylinder see the closed Picard cylinder as an
+ordinary neighborhood. -/
+theorem closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo
+    {tmin tmax : ℝ} {x₀ x : V} {r : ℝ≥0} {t : ℝ}
+    (hx : x ∈ ball x₀ r) (ht : t ∈ Ioo tmin tmax) :
+    closedBall x₀ r ×ˢ Icc tmin tmax ∈ 𝓝 (x, t) := by
+  have hx' : closedBall x₀ r ∈ 𝓝 x :=
+    mem_nhds_iff.mpr ⟨ball x₀ r, ball_subset_closedBall, isOpen_ball, hx⟩
+  have ht' : Icc tmin tmax ∈ 𝓝 t := Icc_mem_nhds ht.1 ht.2
+  exact prod_mem_nhds hx' ht'
+
 /-- The product ODE whose first component is the base gauge-flow equation and
 whose second component is the tangent-map variational equation. -/
 def variationalVectorField
@@ -589,6 +600,25 @@ theorem flow_eventuallyWithin_mem_of_mem_spaceTime_at
       𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] (x, t) :=
   α.flow_eventuallyWithin_mem_of_mem_spaceTime ⟨hx, ht⟩ hU hmem
 
+/-- A Lipschitz local-flow package is ordinarily continuous at interior points
+of the Picard cylinder. -/
+theorem flow_continuousAt_spaceTime_of_mem_ball_Ioo
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    ContinuousAt (fun q : V × ℝ => α.flow q.1 q.2) (x, t) :=
+  (α.flow_continuousWithinAt_spaceTime_at (ball_subset_closedBall hx)
+    (Ioo_subset_Icc_self ht)).continuousAt
+      (closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo hx ht)
+
+/-- Interior space-time eventual-membership readout for a Lipschitz local-flow
+package. -/
+theorem flow_eventually_mem_of_mem_spaceTime_Ioo
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow x t ∈ U) :
+    (fun q : V × ℝ => α.flow q.1 q.2) ⁻¹' U ∈ 𝓝 (x, t) :=
+  (α.flow_continuousAt_spaceTime_of_mem_ball_Ioo hx ht) (hU.mem_nhds hmem)
+
 /-- A Lipschitz local-flow package is automatically a continuous space-time
 local-flow package. -/
 def toContinuousLocalFlowSolution
@@ -787,6 +817,25 @@ theorem center_eventuallyWithin_mem_of_mem_spaceTime
     α.flow ⁻¹' U ∈ 𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] (x₀, t) :=
   α.flow_eventuallyWithin_mem_of_mem_spaceTime_at
     (mem_closedBall_self r.2) ht hU hmem
+
+/-- A continuous local-flow package is ordinarily continuous at interior points
+of the Picard cylinder. -/
+theorem flow_continuousAt_spaceTime_of_mem_ball_Ioo
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    ContinuousAt α.flow (x, t) :=
+  (α.flow_continuousWithinAt_spaceTime_at (ball_subset_closedBall hx)
+    (Ioo_subset_Icc_self ht)).continuousAt
+      (closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo hx ht)
+
+/-- Interior space-time eventual-membership readout for a continuous local-flow
+package. -/
+theorem flow_eventually_mem_of_mem_spaceTime_Ioo
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x, t) ∈ U) :
+    α.flow ⁻¹' U ∈ 𝓝 (x, t) :=
+  (α.flow_continuousAt_spaceTime_of_mem_ball_Ioo hx ht) (hU.mem_nhds hmem)
 
 /-- The center curve of the continuous space-time flow solves the model ODE. -/
 theorem center_hasDerivWithinAt

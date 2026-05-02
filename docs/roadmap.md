@@ -808,6 +808,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       local Picard cylinder and promotion from Lipschitz local flows to the
       continuous space-time partial-flow form needed for chart gluing, with
       within-filter space-time continuity and eventual-membership readouts,
+      ordinary open-cylinder versions of those readouts,
       named base-flow, tangent-map,
         and vector-slot time-slice continuity bridges for continuous/variational
            packages, including direct within-interval and interior pointwise
