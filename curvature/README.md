@@ -673,8 +673,8 @@ now packages the matching intrinsic boundary
        plus direct-velocity `_self` raw-flow endpoint lemmas for the
        frozen-spatial, total-derivative, and time-difference metric-coordinate
        calculations, including locally equal readout-field variants and
-       within-set component-data constructors that accept direct gauge-velocity
-       hypotheses,
+       ordinary-neighborhood and within-set component-data constructors that
+       accept direct gauge-velocity hypotheses,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an

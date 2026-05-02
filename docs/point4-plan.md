@@ -446,8 +446,8 @@ specializations now also have `_self` variants that simplify the centered
 `tangentCoordChange` at the base chart to the actual gauge velocity
 `X t ((G.maps3 t) x)` before these endpoint calculations are packaged. The
 same direct-velocity shape is available for locally equal finite-cover/Banach
-readout fields and for the within-set component-data constructors that feed
-closed-Picard endpoint packages.
+readout fields and for both ordinary-neighborhood and within-set component-data
+constructors that feed endpoint and closed-Picard packages.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate
