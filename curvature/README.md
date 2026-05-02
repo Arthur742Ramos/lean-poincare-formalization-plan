@@ -619,11 +619,12 @@ now packages the matching intrinsic boundary
       continuous base-flow packages plus variational tangent maps and full
        `(flow, tangent)` pairs with different centers/radii, including direct
        pointwise equality readouts on both `Ioo` and `Icc`, and autonomous
-       `C¹` integral curves with packaged and directly localized
-       `LocalFlowSolution` extraction, closed-interval within-filter and
-       open-interior open-set eventual-membership readouts for
-       local/continuous/variational model-flow curves,
-       plus Gronwall uniqueness bridges for packaged and continuous
+        `C¹` integral curves with packaged and directly localized
+        `LocalFlowSolution` extraction, closed-interval within-filter and
+        open-interior open-set eventual-membership readouts for
+        local/continuous/variational model-flow curves and for variational
+        tangent maps and fixed vector slots,
+        plus Gronwall uniqueness bridges for packaged and continuous
       space-time model flows; the
       raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
       tangent-trivialization membership from neighborhood-time flow data, with

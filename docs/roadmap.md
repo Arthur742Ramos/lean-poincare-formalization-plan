@@ -763,11 +763,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       dependence on the initial point; it also packages the continuous space-time
         partial-flow form needed for chart gluing, named base-flow, tangent-map,
         and vector-slot time-slice continuity bridges for continuous/variational
-          packages, including direct within-interval and interior pointwise
-          continuity readouts, open-interior `ContinuousOn` readouts, and
-          closed-interval within-filter plus interior open-set
-          eventual-membership readouts for local, continuous, and variational
-          model-flow curves, plus the
+           packages, including direct within-interval and interior pointwise
+           continuity readouts, open-interior `ContinuousOn` readouts, and
+           closed-interval within-filter plus interior open-set
+           eventual-membership readouts for local, continuous, and variational
+          model-flow curves, now including tangent-map and fixed-vector-slot
+          eventual-membership readouts for variational packages, plus the
           autonomous `C¹` integral-curve specialization with
         open-interval continuity and a packaged `LocalFlowSolution` extraction
         on a smaller closed interval, now with a direct localized existence form

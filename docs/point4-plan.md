@@ -824,7 +824,10 @@ readouts. Local, continuous, and variational model-flow packages now also expose
 closed-interval within-filter and interior open-set eventual-membership
 readouts, turning continuity plus membership in a chart domain into the
 source-neighborhood facts expected by the within-set and ordinary chart-ODE
-gauge-flow constructors. The autonomous `C¹`
+gauge-flow constructors; the variational package now also exposes the same
+eventual-membership readouts for tangent maps and fixed vector slots `A(t) v`,
+so tangent-coordinate chart-domain facts can be transported directly from the
+linearized ODE. The autonomous `C¹`
 local-integral-curve specialization now also returns continuity on its open
 existence interval. Variational local-flow uniqueness now also has direct
 interior and closed-interval vector-slot `A(t) v` bridges derived from
