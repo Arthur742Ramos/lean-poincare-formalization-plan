@@ -717,11 +717,13 @@ now packages the matching intrinsic boundary
       approximation theorem from mathlib's
       `eventually_norm_trivializationAt_lt`, and it now upgrades symmetric
       continuous bilinear sections to symmetric smooth finite-cover approximants
-      by fiberwise symmetrization. It also derives the finite-cover inverse
-      bound from compactness of the cover pieces inside their fixed
-      trivialization domains by factoring fixed-center inverses through centered
-      inverse trivializations and continuous coordinate changes, leaving the
-      heavy PDE realization module unchanged. The
+      by fiberwise symmetrization. The Ricci-DeTurck preferred-cover
+      local-bounds closure theorem now uses this symmetric approximation seam
+      before applying positive-definite openness. It also derives the
+      finite-cover inverse bound from compactness of the cover pieces inside
+      their fixed trivialization domains by factoring fixed-center inverses
+      through centered inverse trivializations and continuous coordinate changes,
+      leaving the heavy PDE realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic

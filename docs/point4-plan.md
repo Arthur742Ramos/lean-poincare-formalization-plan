@@ -1165,11 +1165,13 @@ now discharged for continuous Riemannian vector bundles:
 and uses it to produce preferred-bilinear smooth approximants, including the
 finite-cover Banach-norm approximation theorem. It now also upgrades symmetric
 continuous bilinear-form sections to symmetric smooth finite-cover approximants
-by fiberwise symmetrization without increasing distance. The same module now
-also derives that finite-cover inverse bound from compactness of the cover
-pieces inside their fixed trivialization domains by factoring fixed-center
-inverses through centered inverse trivializations and continuous coordinate
-changes.
+by fiberwise symmetrization without increasing distance, and the Ricci-DeTurck
+preferred-cover local-bounds closure theorem now routes through that symmetric
+finite-cover approximation seam before applying positive-definite openness. The
+same module now also derives that finite-cover inverse bound from compactness of
+the cover pieces inside their fixed trivialization domains by factoring
+fixed-center inverses through centered inverse trivializations and continuous
+coordinate changes.
 
 **Suggested decomposition** (multi-session):
 

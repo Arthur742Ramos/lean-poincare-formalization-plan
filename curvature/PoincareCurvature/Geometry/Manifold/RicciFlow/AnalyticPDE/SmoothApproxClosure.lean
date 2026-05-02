@@ -158,6 +158,82 @@ theorem closure_smooth_spd_of_metric_locus_and_smooth_fiberwise_approx_preferred
         (fun i ↦ trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
       C hCpos hC (hsmoothApprox s hs) ε hε
 
+/-- Preferred-cover smooth-SPD closure through symmetric smooth approximants.  The input only has to
+produce arbitrary smooth fiberwise approximants: symmetric metric-locus targets are symmetrized in the
+finite-cover norm before the positive-definite openness argument is applied. -/
+theorem closure_smooth_spd_of_metric_locus_and_symmetrized_smooth_fiberwise_approx_preferredBilinear
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F TM I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {C : ℝ} (hCpos : 0 < C)
+    (hC : ∀ i (x : Kc i), ‖(trivializationAt F TM (x0 i)).symmL ℝ x.1‖ ≤ C)
+    (hsmoothApprox :
+      ∀ s : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover,
+        s ∈ riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+          et Kc hKc Ko hKo hKoEq hcover →
+        ∀ η > 0,
+          ∃ g : Cₛ^(2 : ℕ∞)⟮I; BilF, BilW⟯,
+            ∀ x : M,
+              dist ((s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+                et Kc hKc Ko hKo hKoEq hcover) x) (g x) < η) :
+    ∀ s : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover,
+      s ∈ riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+        et Kc hKc Ko hKo hKoEq hcover →
+      (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover) ∈
+        closure
+          ({u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover |
+            u ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := TM)
+              (et := et)
+              (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+              (hKoEq := hKoEq) (hcover := hcover) ∧
+            ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+              (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x))}) := by
+  have hetFun : et = fun i ↦ trivializationAt BilF BilW (x0 i) := funext het
+  subst et
+  refine closure_smooth_spd_of_metric_locus_and_forall_dist_lt_symmetric
+    (M := M) (F := F) (I := I) x0
+    (fun i ↦ trivializationAt BilF BilW (x0 i)) (fun _ ↦ rfl)
+    Kc hKc Ko hKo hKoEq hcover ?_
+  intro s hs ε hε
+  have hspd :
+      (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i ↦ trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) ∈
+        symmetricPositiveDefiniteLocus (M := M) (F := F) (W := TM)
+          (fun i ↦ trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover :=
+    (mem_riemannianMetricLocusSubmodule_iff
+      (M := M) (F := F) (W := TM)
+      x0 (fun i ↦ trivializationAt BilF BilW (x0 i)) (fun _ ↦ rfl)
+      Kc hKc Ko hKo hKoEq hcover s).1 hs
+  exact
+    @exists_symmetric_dist_lt_of_smooth_fiberwise_approx_preferredBilinear_of_symmL_opNorm_le
+      F inferInstance inferInstance H inferInstance I M inferInstance inferInstance
+      F inferInstance inferInstance TM
+      (inferInstance : TopologicalSpace (_root_.Bundle.TotalSpace F TM))
+      (inferInstance : (x : M) → NormedAddCommGroup (TM x))
+      (inferInstance : (x : M) → NormedSpace ℝ (TM x))
+      (TangentSpace.fiberBundle (I := I))
+      (TangentSpace.vectorBundle (I := I))
+      κ inferInstance inferInstance x0 Kc hKc Ko hKo hKoEq hcover
+      (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i ↦ trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+      hspd.1 C hCpos hC (hsmoothApprox s hs) ε hε
+
 /-- Preferred-cover smooth-SPD closure with the smooth fiberwise approximation hypothesis produced
 from local bounds on the underlying tangent-bundle trivializations.  This removes the abstract
 smooth-approximant input from the closure criterion. -/
@@ -200,7 +276,8 @@ theorem closure_smooth_spd_of_metric_locus_and_local_trivialization_bounds_prefe
               (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x))}) := by
   have hetFun : et = fun i ↦ trivializationAt BilF BilW (x0 i) := funext het
   subst et
-  refine closure_smooth_spd_of_metric_locus_and_smooth_fiberwise_approx_preferredBilinear
+  refine
+    closure_smooth_spd_of_metric_locus_and_symmetrized_smooth_fiberwise_approx_preferredBilinear
     (M := M) (F := F) (I := I) x0
     (fun i ↦ trivializationAt BilF BilW (x0 i)) (fun _ ↦ rfl)
     Kc hKc Ko hKo hKoEq hcover hCpos hC ?_

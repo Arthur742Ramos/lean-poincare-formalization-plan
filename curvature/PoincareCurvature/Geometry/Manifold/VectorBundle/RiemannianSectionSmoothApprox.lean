@@ -214,6 +214,74 @@ theorem exists_dist_lt_of_smooth_fiberwise_approx_preferredBilinear_of_symmL_opN
     have hdist_comm : dist (s x) (g x) = dist (g x) (s x) := dist_comm _ _
     simpa [u, hdist_comm] using hg x
 
+/-- Symmetric targets admit symmetric smooth approximants in the transported finite-cover Banach
+norm whenever arbitrary smooth fiberwise approximants are available and the underlying inverse
+vector-bundle trivializations are uniformly bounded on the cover. -/
+theorem exists_symmetric_dist_lt_of_smooth_fiberwise_approx_preferredBilinear_of_symmL_opNorm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (hs : s ∈ symmetricLocus (M := M) (F := F) (W := W)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    {C : ℝ} (hCpos : 0 < C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C)
+    (hsmoothApprox : ∀ η > 0,
+      ∃ g : Cₛ^(2 : ℕ∞)⟮I; BilF, BilW⟯,
+        ∀ x : M, dist (s x) (g x) < η) :
+    ∀ ε > 0,
+      ∃ u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover,
+        u ∈ symmetricLocus (M := M) (F := F) (W := W)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover ∧
+        ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+          (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x)) ∧
+        dist s u < ε := by
+  intro ε hε
+  obtain ⟨u, hu_smooth, hudist⟩ :=
+    exists_dist_lt_of_smooth_fiberwise_approx_preferredBilinear_of_symmL_opNorm_le
+      (M := M) (F := F) (W := W) x0 s hCpos hC hsmoothApprox ε hε
+  have hu_symm_smooth : ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+      (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x
+        (_root_.Bundle.symmetrizeBilinearSection (W := W) (fun y ↦ u y) x)) :=
+    _root_.Bundle.contMDiff_symmetrizeBilinearSection
+      (W := W) (s := fun y ↦ u y) hu_smooth
+  let v : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover :=
+    ⟨fun x ↦ _root_.Bundle.symmetrizeBilinearSection (W := W) (fun y ↦ u y) x,
+      by
+        change Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x
+          (_root_.Bundle.symmetrizeBilinearSection (W := W) (fun y ↦ u y) x))
+        exact hu_symm_smooth.continuous⟩
+  have hv_symm : v ∈ symmetricLocus (M := M) (F := F) (W := W)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover := by
+    intro x p q
+    exact _root_.Bundle.symmetrizeBilinearSection_forall_symmetric
+      (W := W) (fun y ↦ u y) x p q
+  have hv_smooth : ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+      (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (v x)) := by
+    simpa [v] using hu_symm_smooth
+  have hdist_le : dist s v ≤ dist s u :=
+    dist_symmetrizeBilinearSection_le_of_symmetric
+      (M := M) (F := F) (W := W)
+      x0 (fun i ↦ trivializationAt BilF BilW (x0 i)) (fun _ ↦ rfl)
+      Kc hKc Ko hKo hKoEq hcover s u v hs (by
+        intro x p q
+        change (_root_.Bundle.symmetrizeBilinearSection
+            (W := W) (fun y ↦ u y) x) p q =
+          ((u x) p q + (u x) q p) / 2
+        exact _root_.Bundle.symmetrizeBilinearSection_apply_apply
+          (W := W) (fun y ↦ u y) x p q)
+  exact ⟨v, hv_symm, hv_smooth, lt_of_le_of_lt hdist_le hudist⟩
+
 end PreferredBilinearSmoothApprox
 
 section PreferredBilinearRiemannianSmoothApprox

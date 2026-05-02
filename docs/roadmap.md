@@ -1289,10 +1289,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         finite-cover Banach-norm approximation theorem from mathlib's
         `eventually_norm_trivializationAt_lt`, and it now produces symmetric
         smooth finite-cover approximants from symmetric continuous bilinear
-        sections by fiberwise symmetrization. It also derives the finite-cover
-        inverse bound from compactness of the cover pieces inside their fixed
-        trivialization domains, factoring fixed-center inverses through centered
-        inverse trivializations and continuous coordinate changes.
+        sections by fiberwise symmetrization. The Ricci-DeTurck preferred-cover
+        local-bounds closure theorem now consumes this symmetric approximation
+        seam before applying positive-definite openness. It also derives the
+        finite-cover inverse bound from compactness of the cover pieces inside
+        their fixed trivialization domains, factoring fixed-center inverses
+        through centered inverse trivializations and continuous coordinate
+        changes.
       What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
