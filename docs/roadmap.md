@@ -979,10 +979,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          ordinary/within-set abstract component data now has direct-velocity
          package forms and direct projections to component packages and tensor
            time-regularity, so this seam no longer forces a public centered
-          `tangentCoordChange` obligation; the variational tangent-map
-          endpoints for the time-difference formulation now have matching
-          ordinary and closed-interval direct-velocity wrappers, retaining the
-          closed-Picard `Ioo` specialization.
+           `tangentCoordChange` obligation; the variational tangent-map
+           endpoints for the time-difference formulation now have matching
+           ordinary and closed-interval direct-velocity wrappers, retaining the
+           closed-Picard `Ioo` specialization, and the pushed-forward
+           geometric-slot variants mirror that direct-velocity shape in actual
+           tangent vectors.
          The variational-flow route now discharges the tangent-coordinate-map
          derivative for that formulation, with the concrete
          `pullbackMetricTangentCoordinateMap` derivative extracted as a reusable

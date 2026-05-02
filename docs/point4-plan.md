@@ -494,7 +494,10 @@ velocity can be preserved through the time/spatial decomposition seam itself.
 The variational tangent-map endpoints for this time-difference formulation now
 also have ordinary and closed-interval direct-velocity wrappers, so the
 variational ODE still fills the tangent-map derivative while the scalar
-identity keeps the raw gauge velocity.
+identity keeps the raw gauge velocity. The pushed-forward geometric-slot
+variants for the same time-difference endpoints now mirror that direct-velocity
+shape, preserving scalar identities in actual tangent vectors without exposing
+the centered chart change.
 This package now routes all the way to tensor time-regularity, including a
 closed-Picard `Ioo` specialization. A variational-flow endpoint now discharges
 the tangent-coordinate-map derivative in this time-difference formulation, so

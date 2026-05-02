@@ -694,7 +694,8 @@ now packages the matching intrinsic boundary
        abstract time-difference component data packages with projections to
        component derivatives and tensor time-regularity, plus direct-velocity
        ordinary and closed-interval variational tangent-map wrappers for that
-       time-difference formulation,
+       time-difference formulation, including pushed-forward geometric-slot
+       variants,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an
