@@ -6,6 +6,7 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFl
 import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowTimeDerivative
 import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowSubsingleton
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.MatrixC0Alpha
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothRealization
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothRealizationGaugeRoutes
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothApproxClosure
