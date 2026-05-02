@@ -1136,6 +1136,46 @@ theorem prod {F : Type*} [NormedAddCommGroup F] {D : ℝ} {v : ℝ × X → F}
     ((hu hp hq).trans (mul_le_mul_of_nonneg_right (le_max_left C D) hdα))
     ((hv hp hq).trans (mul_le_mul_of_nonneg_right (le_max_right C D) hdα))
 
+theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
+    (ha : ParabolicHolderWith C α a s) (hδpos : 0 < δ)
+    (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
+    ParabolicHolderWith (δ⁻¹ * C * δ⁻¹) α (fun z => (a z)⁻¹) s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  have hp_norm_pos : 0 < ‖a p‖ := lt_of_lt_of_le hδpos (hδ hp)
+  have hq_norm_pos : 0 < ‖a q‖ := lt_of_lt_of_le hδpos (hδ hq)
+  have hp_ne : a p ≠ 0 := norm_pos_iff.mp hp_norm_pos
+  have hq_ne : a q ≠ 0 := norm_pos_iff.mp hq_norm_pos
+  have hinvδ_nonneg : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  have hinvp : ‖(a p)⁻¹‖ ≤ δ⁻¹ := by
+    rw [norm_inv]
+    exact (inv_le_inv₀ hp_norm_pos hδpos).2 (hδ hp)
+  have hinvq : ‖(a q)⁻¹‖ ≤ δ⁻¹ := by
+    rw [norm_inv]
+    exact (inv_le_inv₀ hq_norm_pos hδpos).2 (hδ hq)
+  have hholder : ‖a p - a q‖ ≤ C * dα := ha hp hq
+  have hCd_nonneg : 0 ≤ C * dα := (norm_nonneg (a p - a q)).trans hholder
+  have hsplit :
+      (a p)⁻¹ - (a q)⁻¹ = -((a p)⁻¹ * (a p - a q) * (a q)⁻¹) := by
+    field_simp [hp_ne, hq_ne]
+    ring
+  calc
+    ‖(a p)⁻¹ - (a q)⁻¹‖ =
+        ‖-((a p)⁻¹ * (a p - a q) * (a q)⁻¹)‖ := by rw [hsplit]
+    _ = ‖(a p)⁻¹ * (a p - a q) * (a q)⁻¹‖ := norm_neg _
+    _ ≤ ‖(a p)⁻¹‖ * ‖a p - a q‖ * ‖(a q)⁻¹‖ := by
+      calc
+        ‖(a p)⁻¹ * (a p - a q) * (a q)⁻¹‖
+            ≤ ‖(a p)⁻¹ * (a p - a q)‖ * ‖(a q)⁻¹‖ := norm_mul_le _ _
+        _ ≤ (‖(a p)⁻¹‖ * ‖a p - a q‖) * ‖(a q)⁻¹‖ :=
+          mul_le_mul_of_nonneg_right (norm_mul_le _ _) (norm_nonneg _)
+    _ ≤ δ⁻¹ * (C * dα) * δ⁻¹ := by
+      have hleft :
+          ‖(a p)⁻¹‖ * ‖a p - a q‖ ≤ δ⁻¹ * (C * dα) :=
+        mul_le_mul hinvp hholder (norm_nonneg _) hinvδ_nonneg
+      exact mul_le_mul hleft hinvq (norm_nonneg _) (mul_nonneg hinvδ_nonneg hCd_nonneg)
+    _ = (δ⁻¹ * C * δ⁻¹) * dα := by ring
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicHolderWith C α u s) :
     ParabolicHolderWith (‖c‖ * C) α (fun z => c • u z) s := by
@@ -1494,6 +1534,14 @@ theorem prod {F : Type*} [NormedAddCommGroup F] {v : ℝ × X → F}
   rcases hu with ⟨C, hC, hCu⟩
   rcases hv with ⟨D, hD, hDv⟩
   exact ⟨max C D, hC.trans (le_max_left C D), hCu.prod hDv⟩
+
+theorem inv {𝕜 : Type*} [NormedField 𝕜] {a : ℝ × X → 𝕜} {δ : ℝ}
+    (ha : ParabolicHolderOn α a s) (hδpos : 0 < δ)
+    (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
+    ParabolicHolderOn α (fun z => (a z)⁻¹) s := by
+  rcases ha with ⟨C, hC, hCa⟩
+  refine ⟨δ⁻¹ * C * δ⁻¹, ?_, hCa.inv hδpos hδ⟩
+  exact mul_nonneg (mul_nonneg (inv_nonneg.mpr hδpos.le) hC) (inv_nonneg.mpr hδpos.le)
 
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicHolderOn α u s) :
@@ -1871,6 +1919,14 @@ theorem prod {F : Type*} [NormedAddCommGroup F] {D : ℝ} {v : ℝ × X → F}
   rw [Prod.norm_mk]
   exact max_le ((hu hp).trans (le_max_left B D)) ((hv hp).trans (le_max_right B D))
 
+theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
+    (hδpos : 0 < δ) (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
+    ParabolicBoundedWith δ⁻¹ (fun z => (a z)⁻¹) s := by
+  intro p hp
+  have hp_norm_pos : 0 < ‖a p‖ := lt_of_lt_of_le hδpos (hδ hp)
+  rw [norm_inv]
+  exact (inv_le_inv₀ hp_norm_pos hδpos).2 (hδ hp)
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicBoundedWith B u s) :
     ParabolicBoundedWith (‖c‖ * B) (fun z => c • u z) s := by
@@ -2005,6 +2061,12 @@ theorem prod {F : Type*} [NormedAddCommGroup F] {B₃ H₃ : ℝ} {v : ℝ × X 
     (hv : ParabolicC0AlphaWith B₃ H₃ α v s) :
     ParabolicC0AlphaWith (max B B₃) (max H H₃) α (fun z => (u z, v z)) s :=
   ⟨hu.bounded.prod hv.bounded, hu.holder.prod hv.holder⟩
+
+theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
+    (ha : ParabolicC0AlphaWith B H α a s) (hδpos : 0 < δ)
+    (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
+    ParabolicC0AlphaWith δ⁻¹ (δ⁻¹ * H * δ⁻¹) α (fun z => (a z)⁻¹) s :=
+  ⟨ParabolicBoundedWith.inv hδpos hδ, ha.holder.inv hδpos hδ⟩
 
 theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
     {u v : ℝ × X → A} {s : Set (ℝ × X)}
@@ -2355,6 +2417,14 @@ theorem prod {F : Type*} [NormedAddCommGroup F] {v : ℝ × X → F}
   exact ⟨max B₁ B₂, hB₁.trans (le_max_left B₁ B₂), max H₁ H₂,
     hH₁.trans (le_max_left H₁ H₂),
     hBH₁.prod hBH₂⟩
+
+theorem inv {𝕜 : Type*} [NormedField 𝕜] {a : ℝ × X → 𝕜} {δ : ℝ}
+    (ha : ParabolicC0AlphaOn α a s) (hδpos : 0 < δ)
+    (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
+    ParabolicC0AlphaOn α (fun z => (a z)⁻¹) s := by
+  rcases ha with ⟨B, hB, H, hH, hBH⟩
+  refine ⟨δ⁻¹, inv_nonneg.mpr hδpos.le, δ⁻¹ * H * δ⁻¹, ?_, hBH.inv hδpos hδ⟩
+  exact mul_nonneg (mul_nonneg (inv_nonneg.mpr hδpos.le) hH) (inv_nonneg.mpr hδpos.le)
 
 theorem mul {A : Type*} [NormedRing A] {u v : ℝ × X → A} {s : Set (ℝ × X)}
     (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
