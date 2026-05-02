@@ -18,6 +18,7 @@ future estimates should use.
 @[expose] public noncomputable section
 
 open Set
+open scoped Topology
 
 namespace RicciFlow
 namespace AnalyticPDE
@@ -137,6 +138,25 @@ theorem lt_of_prod_dist_lt {R δ : ℝ} (hδ_space : δ ≤ R) (hδ_time : δ �
     lt_of_le_of_lt hspace_dist (lt_of_lt_of_le h hδ_space)
   exact max_lt hsqrt hspace
 
+/-- A small parabolic distance bound gives a small ordinary product-metric bound once the time
+radius has been squared. -/
+theorem prod_dist_lt_of_lt {R ε : ℝ} (hR_space : R ≤ ε) (hR_time : R ^ 2 ≤ ε)
+    (h : parabolicDistance p q < R) : dist p q < ε := by
+  have hRpos : 0 < R := lt_of_le_of_lt (nonneg p q) h
+  have hsqrt : Real.sqrt |p.1 - q.1| < R :=
+    lt_of_le_of_lt (sqrt_time_le p q) h
+  have htime_abs : |p.1 - q.1| < R ^ 2 := by
+    calc
+      |p.1 - q.1| = (Real.sqrt |p.1 - q.1|) ^ 2 := by
+        rw [Real.sq_sqrt (abs_nonneg _)]
+      _ < R ^ 2 := (sq_lt_sq₀ (Real.sqrt_nonneg _) hRpos.le).2 hsqrt
+  have htime : dist p.1 q.1 < ε := by
+    simpa [Real.dist_eq] using lt_of_lt_of_le htime_abs hR_time
+  have hspace : dist p.2 q.2 < ε :=
+    lt_of_lt_of_le (lt_of_le_of_lt (space_dist_le p q) h) hR_space
+  rw [Prod.dist_eq]
+  exact max_lt htime hspace
+
 end parabolicDistance
 
 /-- Open parabolic ball in time-space. -/
@@ -201,9 +221,36 @@ theorem subset_cylinder (hR : 0 ≤ R) :
   intro q hq
   exact ⟨time_abs_lt_sq_of_mem hR hq, space_dist_lt_of_mem hq⟩
 
+theorem subset_metric_ball {ε : ℝ} (hR_space : R ≤ ε) (hR_time : R ^ 2 ≤ ε) :
+    parabolicBall p R ⊆ Metric.ball p ε := by
+  intro q hq
+  rw [Metric.mem_ball, dist_comm]
+  exact parabolicDistance.prod_dist_lt_of_lt hR_space hR_time hq
+
 theorem isOpen (p : ℝ × X) (R : ℝ) : IsOpen (parabolicBall p R) := by
   simpa [parabolicBall] using
     (parabolicDistance.continuous_fixed_left p).isOpen_preimage (Iio R) isOpen_Iio
+
+theorem mem_nhds (hR : 0 < R) : parabolicBall p R ∈ 𝓝 p :=
+  (isOpen p R).mem_nhds (center_mem hR)
+
+/-- Parabolic balls form a local base for the ordinary product topology. -/
+theorem exists_subset_of_mem_nhds {s : Set (ℝ × X)} (hs : s ∈ 𝓝 p) :
+    ∃ R > 0, parabolicBall p R ⊆ s := by
+  rcases Metric.mem_nhds_iff.1 hs with ⟨ε, hε, hεs⟩
+  let R : ℝ := min (ε / 2) 1
+  have hRpos : 0 < R := lt_min (half_pos hε) zero_lt_one
+  have hR_space : R ≤ ε := by
+    unfold R
+    exact (min_le_left _ _).trans (by linarith)
+  have hR_time : R ^ 2 ≤ ε := by
+    have hRle1 : R ≤ 1 := by
+      unfold R
+      exact min_le_right _ _
+    have hRsq_le : R ^ 2 ≤ R := by
+      nlinarith [hRpos.le, hRle1]
+    exact hRsq_le.trans hR_space
+  exact ⟨R, hRpos, (subset_metric_ball (p := p) hR_space hR_time).trans hεs⟩
 
 end parabolicBall
 
@@ -285,6 +332,10 @@ theorem isOpen (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
   simpa [parabolicCylinder] using
     (((continuous_const.sub continuous_fst).abs.isOpen_preimage (Iio timeRadius) isOpen_Iio).inter
       ((continuous_const.dist continuous_snd).isOpen_preimage (Iio spaceRadius) isOpen_Iio))
+
+theorem mem_nhds (ht : 0 < timeRadius) (hs : 0 < spaceRadius) :
+    parabolicCylinder p timeRadius spaceRadius ∈ 𝓝 p :=
+  (isOpen p timeRadius spaceRadius).mem_nhds (center_mem ht hs)
 
 /-- A product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at most
 `R` is contained in the parabolic ball of radius `R`. -/
