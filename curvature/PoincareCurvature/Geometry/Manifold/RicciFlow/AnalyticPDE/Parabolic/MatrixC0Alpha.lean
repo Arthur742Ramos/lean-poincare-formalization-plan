@@ -265,6 +265,47 @@ theorem matrix_inv_two_index_contract_entry {n p q 𝕜 : Type*} [Fintype n] [De
       (u := fun a z => ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j)
       (fun a _ha => hinner a))
 
+/-- Ricci-coordinate quadratic Christoffel contractions preserve parabolic `C^{0,α}` control
+from entrywise control of the Christoffel array. -/
+theorem christoffel_quadratic_ricci_entry {n A : Type*} [Fintype n] [NormedRing A]
+    {Γ : ℝ × X → n → n → n → A}
+    (hΓ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c) s) (i j : n) :
+    ParabolicC0AlphaOn α
+      (fun z =>
+        (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+          (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)) s := by
+  have hleftInner : ∀ a : n,
+      ParabolicC0AlphaOn α (fun z => ∑ b : n, Γ z a i j * Γ z b a b) s := by
+    intro a
+    simpa using
+      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun b z => Γ z a i j * Γ z b a b)
+        (fun b _hb => (hΓ a i j).mul (hΓ b a b)))
+  have hleft :
+      ParabolicC0AlphaOn α (fun z => ∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) s := by
+    simpa using
+      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun a z => ∑ b : n, Γ z a i j * Γ z b a b)
+        (fun a _ha => hleftInner a))
+  have hrightInner : ∀ a : n,
+      ParabolicC0AlphaOn α (fun z => ∑ b : n, Γ z a i b * Γ z b a j) s := by
+    intro a
+    simpa using
+      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun b z => Γ z a i b * Γ z b a j)
+        (fun b _hb => (hΓ a i b).mul (hΓ b a j)))
+  have hright :
+      ParabolicC0AlphaOn α (fun z => ∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j) s := by
+    simpa using
+      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun a z => ∑ b : n, Γ z a i b * Γ z b a j)
+        (fun a _ha => hrightInner a))
+  exact hleft.sub hright
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow
