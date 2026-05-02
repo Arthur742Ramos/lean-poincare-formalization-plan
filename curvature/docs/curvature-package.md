@@ -108,8 +108,9 @@ normed-ring-valued `C^{0,α}` functions and the corresponding bounded
 scalar-action estimate for normed-space-valued functions, plus closure under
 taking norms and Lipschitz composition on the controlled range. This is
 groundwork for the future Schauder and Ricci-DeTurck Banach-chart layer, now
-also including exponent lowering on unit parabolic-diameter domains and
-closed-ball diameter control, product ball/closed-ball compatibility for
+also including exponent lowering on unit parabolic-diameter domains with
+closed-ball and closed-cylinder specializations, closed-ball diameter control,
+product ball/closed-ball compatibility for
 parabolic balls and product cylinders, plus basepoint-to-sup bounds on closed
 parabolic balls and closed product cylinders, not the local-existence theorem
 itself.

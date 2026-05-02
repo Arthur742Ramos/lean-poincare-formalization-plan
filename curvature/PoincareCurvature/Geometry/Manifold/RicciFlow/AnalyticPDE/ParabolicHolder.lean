@@ -682,6 +682,26 @@ theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
     Real.rpow_le_rpow_of_exponent_ge' hd0 hd1 hβ hβα
   exact (h hp hq).trans (mul_le_mul_of_nonneg_left hpow hC)
 
+theorem mono_exponent_of_subset_closedBall {β R : ℝ} {c : ℝ × X}
+    (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C)
+    (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicHolderWith C β u s :=
+  h.mono_exponent_of_parabolicDistance_le_one hC hβ hβα (by
+    intro p hp q hq
+    exact parabolicClosedBall.pair_parabolicDistance_le_one (hs hp) (hs hq) hR)
+
+theorem mono_exponent_of_subset_closedCylinder {β timeRadius spaceRadius : ℝ}
+    {c : ℝ × X}
+    (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C)
+    (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicHolderWith C β u s :=
+  h.mono_exponent_of_parabolicDistance_le_one hC hβ hβα (by
+    intro p hp q hq
+    exact (parabolicClosedCylinder.pair_parabolicDistance_le (hs hp) (hs hq)).trans hdiam)
+
 theorem boundedWith_of_subset_closedBall {B₀ R : ℝ} {c : ℝ × X}
     (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
     (hs : s ⊆ parabolicClosedBall c R) (hc : c ∈ s) (huc : ‖u c‖ ≤ B₀) :

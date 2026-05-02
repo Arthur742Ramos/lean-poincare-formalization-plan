@@ -326,8 +326,9 @@ packages the canonical stationary local solution attached to
   normed-ring-valued `C^{0,α}` functions and the corresponding bounded
   scalar-action estimate for normed-space-valued functions, along with closure
   under taking norms, Lipschitz composition on the controlled range, and
-  exponent lowering on unit parabolic-diameter domains, backed by closed-ball
-  diameter control, product ball/closed-ball compatibility for parabolic
+  exponent lowering on unit parabolic-diameter domains with closed-ball and
+  closed-cylinder specializations, backed by closed-ball diameter control,
+  product ball/closed-ball compatibility for parabolic
   balls and product cylinders, plus basepoint-to-sup bounds on closed
   parabolic balls and closed product cylinders. These primitives do not yet
   supply the
