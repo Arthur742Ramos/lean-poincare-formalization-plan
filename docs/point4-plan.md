@@ -234,7 +234,10 @@ domain-restricted shape now packages as
 `MetricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf` and feeds a
 closed-Picard `Ioo` tensor time-regularity theorem directly, so chart-local
 product-domain derivatives no longer need to be upgraded to global
-`HasFDerivAt` before entering the non-identity gauge-pullback route.
+`HasFDerivAt` before entering the non-identity gauge-pullback route. It now
+also has variational tangent-map routes, including the closed-interval
+within-filter equality form, that synthesize the tangent-coordinate derivative
+from the model variational ODE.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow

@@ -376,7 +376,9 @@ now packages the matching intrinsic boundary
         derivatives feed the same endpoint calculus, now including a raw
         gauge-flow metric-coordinate time-difference bridge that subtracts the
         frozen spatial term from such domain-restricted data before the
-        closed-Picard tensor time-regularity route consumes it directly, the
+        closed-Picard tensor time-regularity route consumes it directly and
+        variational tangent-map variants derive the tangent-coordinate
+        derivative from the model variational ODE, the
         model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

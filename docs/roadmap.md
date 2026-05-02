@@ -681,8 +681,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         within-domain Fréchet chain-rule/time-difference primitives for moving
         bilinear-form fields, so chart-local derivatives restricted to product
         domains can feed endpoint gauge-pullback calculus and the closed-Picard
-        `Ioo` tensor time-regularity route without being upgraded to global
-        `HasFDerivAt` statements. It also has raw-flow transport across
+        `Ioo` tensor time-regularity route, now with variational tangent-map
+        variants that derive the tangent-coordinate derivative from the model
+        variational ODE, without being upgraded to global `HasFDerivAt`
+        statements. It also has raw-flow transport across
         time-dependent vector fields that agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and
      time-set restriction for raw flows with simp readouts for the unchanged
