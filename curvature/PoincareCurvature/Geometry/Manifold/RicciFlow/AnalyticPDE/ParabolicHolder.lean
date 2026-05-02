@@ -328,6 +328,34 @@ theorem subset_closedBall (hR : 0 ≤ R) :
     parabolicClosedCylinder p (R ^ 2) R ⊆ parabolicClosedBall p R :=
   subset_closedBall_of_le_sq hR le_rfl le_rfl
 
+/-- Two points in the same closed product parabolic cylinder are at controlled parabolic distance
+from each other.  The time radius doubles before taking the parabolic square root, while the
+spatial radius doubles linearly. -/
+theorem pair_parabolicDistance_le {c p q : ℝ × X}
+    (hp : p ∈ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hq : q ∈ parabolicClosedCylinder c timeRadius spaceRadius) :
+    parabolicDistance p q ≤ max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) := by
+  change max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2) ≤
+    max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius)
+  have htime_abs : |p.1 - q.1| ≤ 2 * timeRadius := by
+    have hp_time : |p.1 - c.1| ≤ timeRadius := by
+      simpa [abs_sub_comm] using hp.1
+    calc
+      |p.1 - q.1| = |(p.1 - c.1) + (c.1 - q.1)| := by ring_nf
+      _ ≤ |p.1 - c.1| + |c.1 - q.1| := abs_add_le _ _
+      _ ≤ timeRadius + timeRadius := add_le_add hp_time hq.1
+      _ = 2 * timeRadius := by ring
+  have htime : Real.sqrt |p.1 - q.1| ≤ Real.sqrt (2 * timeRadius) :=
+    Real.sqrt_le_sqrt htime_abs
+  have hspace : dist p.2 q.2 ≤ 2 * spaceRadius := by
+    have hp_space : dist p.2 c.2 ≤ spaceRadius := by
+      simpa [dist_comm] using hp.2
+    calc
+      dist p.2 q.2 ≤ dist p.2 c.2 + dist c.2 q.2 := dist_triangle _ _ _
+      _ ≤ spaceRadius + spaceRadius := add_le_add hp_space hq.2
+      _ = 2 * spaceRadius := by ring
+  exact max_le (htime.trans (le_max_left _ _)) (hspace.trans (le_max_right _ _))
+
 end parabolicClosedCylinder
 
 /-- Parabolic Holder control with exponent `α` and constant `C` on a set of time-space points. -/
@@ -423,6 +451,26 @@ theorem space_slice (h : ParabolicHolderWith C α u s) {t : ℝ} {x y : X}
     (hx : (t, x) ∈ s) (hy : (t, y) ∈ s) :
     ‖u (t, x) - u (t, y)‖ ≤ C * (dist x y) ^ α := by
   simpa using h hx hy
+
+/-- A parabolic distance bound upgrades a Holder estimate to a fixed oscillation bound. -/
+theorem norm_sub_le_of_parabolicDistance_le (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C)
+    (hα : 0 ≤ α) {p q : ℝ × X} (hp : p ∈ s) (hq : q ∈ s) {R : ℝ}
+    (hpq : parabolicDistance p q ≤ R) :
+    ‖u p - u q‖ ≤ C * R ^ α := by
+  exact (h hp hq).trans
+    (mul_le_mul_of_nonneg_left
+      (Real.rpow_le_rpow (parabolicDistance.nonneg p q) hpq hα) hC)
+
+/-- Oscillation bound for two points lying in the same closed product parabolic cylinder. -/
+theorem norm_sub_le_on_closedCylinder (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C)
+    (hα : 0 ≤ α) {c p q : ℝ × X} {timeRadius spaceRadius : ℝ}
+    (hp_s : p ∈ s) (hq_s : q ∈ s)
+    (hp : p ∈ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hq : q ∈ parabolicClosedCylinder c timeRadius spaceRadius) :
+    ‖u p - u q‖ ≤
+      C * (max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius)) ^ α :=
+  h.norm_sub_le_of_parabolicDistance_le hC hα hp_s hq_s
+    (parabolicClosedCylinder.pair_parabolicDistance_le hp hq)
 
 /-- Positive-exponent parabolic Holder control implies continuity on the controlled set. -/
 theorem continuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) : ContinuousOn u s := by
