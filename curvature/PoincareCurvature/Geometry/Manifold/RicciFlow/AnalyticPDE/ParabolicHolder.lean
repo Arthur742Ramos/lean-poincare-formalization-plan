@@ -63,6 +63,76 @@ theorem time_abs_le_sq_of_le {R : ℝ} (hR : 0 ≤ R) (h : parabolicDistance p q
 
 end parabolicDistance
 
+/-- Open parabolic ball in time-space. -/
+def parabolicBall {X : Type*} [PseudoMetricSpace X] (p : ℝ × X) (R : ℝ) :
+    Set (ℝ × X) :=
+  {q | parabolicDistance p q < R}
+
+/-- Closed parabolic ball in time-space.  This is the standard local cylinder shape for parabolic
+estimates: spatial radius `R`, time radius `R^2`. -/
+def parabolicClosedBall {X : Type*} [PseudoMetricSpace X] (p : ℝ × X) (R : ℝ) :
+    Set (ℝ × X) :=
+  {q | parabolicDistance p q ≤ R}
+
+namespace parabolicBall
+
+variable {X : Type*} [PseudoMetricSpace X] {p q : ℝ × X} {R R' : ℝ}
+
+@[simp] theorem mem : q ∈ parabolicBall p R ↔ parabolicDistance p q < R := Iff.rfl
+
+theorem mono (hR : R ≤ R') : parabolicBall p R ⊆ parabolicBall p R' := by
+  intro q hq
+  exact lt_of_lt_of_le hq hR
+
+theorem subset_closedBall : parabolicBall p R ⊆ parabolicClosedBall p R := by
+  intro q hq
+  exact le_of_lt (show parabolicDistance p q < R from hq)
+
+theorem mem_comm : q ∈ parabolicBall p R ↔ p ∈ parabolicBall q R := by
+  rw [mem, mem, parabolicDistance.comm]
+
+theorem center_mem (hR : 0 < R) : p ∈ parabolicBall p R := by
+  simpa using hR
+
+theorem space_dist_lt_of_mem (hq : q ∈ parabolicBall p R) : dist p.2 q.2 < R :=
+  lt_of_le_of_lt (parabolicDistance.space_dist_le p q) hq
+
+theorem time_abs_lt_sq_of_mem (hR : 0 ≤ R) (hq : q ∈ parabolicBall p R) :
+    |p.1 - q.1| < R ^ 2 := by
+  have hsqrt : Real.sqrt |p.1 - q.1| < R :=
+    lt_of_le_of_lt (parabolicDistance.sqrt_time_le p q) hq
+  calc
+    |p.1 - q.1| = (Real.sqrt |p.1 - q.1|) ^ 2 := by
+      rw [Real.sq_sqrt (abs_nonneg _)]
+    _ < R ^ 2 := (sq_lt_sq₀ (Real.sqrt_nonneg _) hR).2 hsqrt
+
+end parabolicBall
+
+namespace parabolicClosedBall
+
+variable {X : Type*} [PseudoMetricSpace X] {p q : ℝ × X} {R R' : ℝ}
+
+@[simp] theorem mem : q ∈ parabolicClosedBall p R ↔ parabolicDistance p q ≤ R := Iff.rfl
+
+theorem mono (hR : R ≤ R') : parabolicClosedBall p R ⊆ parabolicClosedBall p R' := by
+  intro q hq
+  exact le_trans hq hR
+
+theorem mem_comm : q ∈ parabolicClosedBall p R ↔ p ∈ parabolicClosedBall q R := by
+  rw [mem, mem, parabolicDistance.comm]
+
+theorem center_mem (hR : 0 ≤ R) : p ∈ parabolicClosedBall p R := by
+  simpa using hR
+
+theorem space_dist_le_of_mem (hq : q ∈ parabolicClosedBall p R) : dist p.2 q.2 ≤ R :=
+  parabolicDistance.space_dist_le_of_le hq
+
+theorem time_abs_le_sq_of_mem (hR : 0 ≤ R) (hq : q ∈ parabolicClosedBall p R) :
+    |p.1 - q.1| ≤ R ^ 2 :=
+  parabolicDistance.time_abs_le_sq_of_le hR hq
+
+end parabolicClosedBall
+
 /-- Parabolic Holder control with exponent `α` and constant `C` on a set of time-space points. -/
 def ParabolicHolderWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
     (C α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
