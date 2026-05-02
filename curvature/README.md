@@ -683,6 +683,8 @@ now packages the matching intrinsic boundary
        actual pushed-forward tangent vectors, including the closed-Picard
        `Ioo` specializations, and field-level base-coordinate wrappers that
        store the actual coordinate-curve derivative as `X t (G.maps3 t x)`,
+       plus full-field variational tangent-map coordinate/readout and
+       geometric/readout direct-velocity endpoint wrappers,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an

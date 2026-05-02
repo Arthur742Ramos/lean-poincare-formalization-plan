@@ -465,6 +465,10 @@ The field-level base-coordinate route now also has ordinary-neighborhood and
 closed-Picard `Ioo` direct-velocity wrappers, so callers can package the actual
 coordinate-curve derivative as `X t (G.maps3 t x)` instead of the centered
 `tangentCoordChange`.
+The full-field variational tangent-map endpoint now has direct-velocity
+coordinate-slot, readout-field, geometric-slot, and geometric readout-field
+wrappers, eliminating another public `Bfield' (1, tangentCoordChange ...)`
+obligation from the closed-Picard time-regularity route.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate

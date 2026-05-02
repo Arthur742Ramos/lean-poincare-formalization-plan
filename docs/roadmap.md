@@ -962,7 +962,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          keeping scalar identities in actual pushed-forward tangent vectors,
          including closed-Picard `Ioo` specializations; the field-level
          base-coordinate route now also packages the actual coordinate-curve
-         derivative as `X t (G.maps3 t x)`.
+         derivative as `X t (G.maps3 t x)`, and the full-field variational
+         tangent-map endpoint has direct-velocity coordinate/readout and
+         geometric/readout wrappers.
          The module also now has an additive
          time/spatial decomposition upgrading that frozen spatial term to the full
          moving time-space field derivative once the remaining time-difference
