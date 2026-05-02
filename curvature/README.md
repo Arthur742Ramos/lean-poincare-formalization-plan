@@ -296,10 +296,12 @@ now packages the matching intrinsic boundary
         `VariationalLocalFlowSolution` from continuous
         product local flows or product Picard-Lindelöf hypotheses initialized on
         `(x, 1)`, preserving joint space-time continuity and eventual-membership
-        readouts for the extracted `(flow, tangent)` pair on closed and open
-        Picard cylinders, plus Lipschitz/continuity/distance estimates for the
-        extracted pair, tangent-map projection, and fixed tangent-vector slots
-        as functions of the base initial point, with a
+        readouts for the extracted `(flow, tangent)` pair and full
+        `(t, flow, tangent)` operator derivative-domain tuple on closed and
+        open Picard cylinders, plus Lipschitz/continuity/distance estimates for
+        the extracted pair, full operator derivative-domain tuple,
+        tangent-map projection, and fixed tangent-vector slots as functions of
+        the base initial point, with a
         radius-specialized Picard constructor and
         closed-interval localized variants and proof-level `Nonempty` wrappers
         for continuous-product/product-Picard inputs and localized variants for
@@ -307,8 +309,9 @@ now packages the matching intrinsic boundary
         proof-level `Nonempty` wrappers. It also proves
        the left-composition operator-space Lipschitz estimate, a product-state
        Lipschitz estimate for the full variational vector field, and
-       interior/closed-interval uniqueness for the full `(flow, tangent)` pair
-       from base-flow uniqueness plus a uniform `‖Df‖` bound. An endpoint readout
+        interior/closed-interval uniqueness for the full `(flow, tangent)` pair
+        and `(t, flow, tangent)` operator derivative-domain tuple from
+        base-flow uniqueness plus a uniform `‖Df‖` bound. An endpoint readout
        bridge now transfers the closed-interval geometric-slot variational theorem
        from any locally equal finite-cover metric-coordinate bilinear-form readout,
        matching the Banach readout output shape before interior tensor

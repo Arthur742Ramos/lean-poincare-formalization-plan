@@ -399,8 +399,13 @@ wrappers. The variational
 ODE layer now also proves the operator-norm Lipschitz estimate for
 left-composition, the product-state Lipschitz estimate for the full variational
 vector field `(y, A)' = (f(t,y), Df(t,y) ∘ A)`, and interior/closed-interval
-uniqueness for the full pair `(flow, tangent)` from the usual base-flow
-Lipschitz hypothesis plus a uniform `‖Df‖` bound. This removes a manual tangent
+uniqueness for the full pair `(flow, tangent)` and the operator
+derivative-domain tuple `(t, flow, tangent)` from the usual base-flow
+Lipschitz hypothesis plus a uniform `‖Df‖` bound. Product-derived continuous
+flows now also preserve joint space-time continuity/eventual membership for
+that operator tuple on closed and open Picard cylinders, and product Lipschitz
+dependence gives fixed-time Lipschitz/continuity/distance estimates for it as
+the base initial point varies. This removes a manual tangent
 Lipschitz obligation from the future chart-gluing step and isolates the
 remaining product Picard hypotheses to base-field and linearized-coefficient
 estimates. The same layer now has the closed-ball specialization matching

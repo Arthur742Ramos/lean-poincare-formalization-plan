@@ -1641,6 +1641,120 @@ theorem ofProduct_flow_tangent_eventually_mem_of_mem_spaceTime_Ioo
     (hU.mem_nhds hmem)
 
 /-- Product-derived variational local flows inherit joint space-time continuity
+of the full operator derivative-domain tuple `(t, flow, tangent)`. -/
+theorem ofProduct_time_flow_tangent_continuousOn_spaceTime
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    ContinuousOn
+      (fun q : V × ℝ =>
+        (q.2,
+          (ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2))
+      (closedBall x₀ r ×ˢ Icc tmin tmax) :=
+  continuousOn_snd.prodMk (ofProduct_flow_tangent_continuousOn_spaceTime α hball)
+
+/-- Pointwise within-space-time continuity of the product-derived operator
+derivative-domain tuple `(t, flow, tangent)`. -/
+theorem ofProduct_time_flow_tangent_continuousWithinAt_spaceTime
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {p : V × ℝ} (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax) :
+    ContinuousWithinAt
+      (fun q : V × ℝ =>
+        (q.2,
+          (ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2))
+      (closedBall x₀ r ×ˢ Icc tmin tmax) p :=
+  (ofProduct_time_flow_tangent_continuousOn_spaceTime α hball).continuousWithinAt hp
+
+/-- Product-derived operator derivative-domain tuples are eventually in any
+open target set around a closed-cylinder space-time endpoint. -/
+theorem ofProduct_time_flow_tangent_eventuallyWithin_mem_of_mem_spaceTime
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {p : V × ℝ} (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax)
+    {U : Set (ℝ × V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem :
+      (p.2,
+        (ofProductContinuousLocalFlowSolution α hball).flow p,
+        (ofProductContinuousLocalFlowSolution α hball).tangent p.1 p.2) ∈ U) :
+    (fun q : V × ℝ =>
+      (q.2,
+        (ofProductContinuousLocalFlowSolution α hball).flow q,
+        (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2)) ⁻¹' U ∈
+      𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] p :=
+  (ofProduct_time_flow_tangent_continuousWithinAt_spaceTime α hball hp)
+    (hU.mem_nhds hmem)
+
+/-- Product-derived operator derivative-domain tuples are ordinarily continuous
+at interior points of the open Picard cylinder. -/
+theorem ofProduct_time_flow_tangent_continuousAt_spaceTime_of_mem_ball_Ioo
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    ContinuousAt
+      (fun q : V × ℝ =>
+        (q.2,
+          (ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2))
+      (x, t) :=
+  (ofProduct_time_flow_tangent_continuousWithinAt_spaceTime α hball
+    ⟨ball_subset_closedBall hx, Ioo_subset_Icc_self ht⟩).continuousAt
+      (closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo hx ht)
+
+/-- Product-derived operator derivative-domain tuples are continuous on the open
+Picard cylinder. -/
+theorem ofProduct_time_flow_tangent_continuousOn_spaceTime_Ioo
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    ContinuousOn
+      (fun q : V × ℝ =>
+        (q.2,
+          (ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2))
+      (ball x₀ r ×ˢ Ioo tmin tmax) := by
+  intro p hp
+  exact (ofProduct_time_flow_tangent_continuousAt_spaceTime_of_mem_ball_Ioo
+    α hball hp.1 hp.2).continuousWithinAt
+
+/-- Interior ordinary eventual-membership readout for product-derived operator
+derivative-domain tuples. -/
+theorem ofProduct_time_flow_tangent_eventually_mem_of_mem_spaceTime_Ioo
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set (ℝ × V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem :
+      (t,
+        (ofProductContinuousLocalFlowSolution α hball).flow (x, t),
+        (ofProductContinuousLocalFlowSolution α hball).tangent x t) ∈ U) :
+    (fun q : V × ℝ =>
+      (q.2,
+        (ofProductContinuousLocalFlowSolution α hball).flow q,
+        (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2)) ⁻¹' U ∈
+      𝓝 (x, t) :=
+  (ofProduct_time_flow_tangent_continuousAt_spaceTime_of_mem_ball_Ioo α hball hx ht)
+    (hU.mem_nhds hmem)
+
+/-- Product-derived variational local flows inherit joint space-time continuity
 of the scalar-readout state `(flow, A(t)u, A(t)v)` from the continuous product
 flow. -/
 theorem ofProduct_flow_tangent_apply_pair_continuousOn_spaceTime
@@ -1958,6 +2072,68 @@ theorem ofProduct_exists_dist_flow_tangent_le_mul
         L' * dist x y := by
   obtain ⟨L', hL'⟩ :=
     ofProduct_flow_tangent_exists_lipschitzOnWith_time α hball ht
+  exact ⟨L', hL'.dist_le_mul x hx y hy⟩
+
+/-- Product Lipschitz dependence also controls the full fixed-time operator
+derivative-domain tuple `(t, flow(t), tangent(t))` as a function of the base
+initial point. The time coordinate is constant in this estimate. -/
+theorem ofProduct_time_flow_tangent_exists_lipschitzOnWith_time
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ∃ L' : ℝ≥0,
+      LipschitzOnWith L'
+        (fun x : V =>
+          (t,
+            (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t),
+            (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t))
+        (closedBall x₀ r) := by
+  obtain ⟨Lstate, hstate⟩ := ofProduct_flow_tangent_exists_lipschitzOnWith_time α hball ht
+  have htime : LipschitzOnWith 0 (fun _x : V => t) (closedBall x₀ r) :=
+    (LipschitzWith.const (α := V) (β := ℝ) t).lipschitzOnWith
+  exact ⟨max 0 Lstate, htime.prodMk hstate⟩
+
+/-- The full fixed-time operator derivative-domain tuple is continuous in the
+base initial point at each Picard time. -/
+theorem ofProduct_time_flow_tangent_continuousOn_initialBall_time
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousOn
+      (fun x : V =>
+        (t,
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t),
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t))
+      (closedBall x₀ r) := by
+  obtain ⟨_L', hL'⟩ := ofProduct_time_flow_tangent_exists_lipschitzOnWith_time α hball ht
+  exact hL'.continuousOn
+
+/-- Distance estimate for the full fixed-time operator derivative-domain tuple
+`(t, flow(t), tangent(t))` as the base initial point varies. -/
+theorem ofProduct_exists_dist_time_flow_tangent_le_mul
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {x y : V} (hx : x ∈ closedBall x₀ r) (hy : y ∈ closedBall x₀ r) :
+    ∃ L' : ℝ≥0,
+      dist
+        (t,
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t),
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t)
+        (t,
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (y, t),
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent y t) ≤
+        L' * dist x y := by
+  obtain ⟨L', hL'⟩ := ofProduct_time_flow_tangent_exists_lipschitzOnWith_time α hball ht
   exact ⟨L', hL'.dist_le_mul x hx y hy⟩
 
 /-- Product Lipschitz dependence gives Lipschitz dependence of the extracted
@@ -3303,6 +3479,51 @@ theorem flow_tangent_eq_of_lipschitzOnWith_opNorm_bound_of_mem_Ioo
   α.flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem β hxα hxβ
     ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound ht
 
+/-- Interior overlap uniqueness for the full operator derivative-domain tuple
+`(t, flow, tangent)`. -/
+theorem time_flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (t, α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (t, β.flow (x, t), β.tangent x t))
+      (Ioo tmin tmax) := by
+  have hstate :
+      EqOn
+        (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+        (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+        (Ioo tmin tmax) :=
+    α.flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem β hxα hxβ
+      ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound
+  intro t ht
+  exact Prod.ext rfl (hstate ht)
+
+/-- Pointwise interior uniqueness for the full operator derivative-domain tuple
+`(t, flow, tangent)`. -/
+theorem time_flow_tangent_eq_of_lipschitzOnWith_opNorm_bound_of_mem_Ioo
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    (t, α.flow (x, t), α.tangent x t) = (t, β.flow (x, t), β.tangent x t) :=
+  α.time_flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem β hxα hxβ
+    ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound ht
+
 /-- Interior uniqueness for the full variational pair `(flow, tangent)`.
 
 The base curve is handled by the usual spatial Lipschitz hypothesis for `f`.
@@ -3550,6 +3771,51 @@ theorem flow_tangent_eq_of_lipschitzOnWith_opNorm_bound_of_mem_Icc
     {t : ℝ} (ht : t ∈ Icc tmin tmax) :
     (α.flow (x, t), α.tangent x t) = (β.flow (x, t), β.tangent x t) :=
   α.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem β hxα hxβ
+    ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound ht
+
+/-- Closed-interval overlap uniqueness for the full operator derivative-domain
+tuple `(t, flow, tangent)`. -/
+theorem time_flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (t, α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (t, β.flow (x, t), β.tangent x t))
+      (Icc tmin tmax) := by
+  have hstate :
+      EqOn
+        (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+        (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+        (Icc tmin tmax) :=
+    α.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem β hxα hxβ
+      ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound
+  intro t ht
+  exact Prod.ext rfl (hstate ht)
+
+/-- Pointwise closed-interval uniqueness for the full operator derivative-domain
+tuple `(t, flow, tangent)`. -/
+theorem time_flow_tangent_eq_of_lipschitzOnWith_opNorm_bound_of_mem_Icc
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    (t, α.flow (x, t), α.tangent x t) = (t, β.flow (x, t), β.tangent x t) :=
+  α.time_flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem β hxα hxβ
     ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound ht
 
 /-- Closed-interval uniqueness for the full variational pair `(flow, tangent)`

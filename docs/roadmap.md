@@ -822,15 +822,17 @@ hypothesis). That regularity gap is now closed as well: the package proves the
            continuity readouts, open-interior `ContinuousOn` readouts, and
            closed-interval within-filter plus interior open-set
            eventual-membership readouts for local, continuous, and variational
-          model-flow curves, now including tangent-map and fixed-vector-slot
-          eventual-membership readouts and `(flow, tangent)` product-graph
-           readouts, plus `(t, flow, tangent)` time-graph readouts, for
-           variational packages, fixed two-vector-slot
-           `(t, flow, A(t)u, A(t)v)` readouts, product-derived full
-           derivative-domain tuple readouts for scalar pullback domains, and
-           fixed-time Lipschitz/continuity/distance estimates for those
-           derivative-domain tuples, plus direct overlap uniqueness for those
-           full derivative-domain tuples,
+           model-flow curves, now including tangent-map and fixed-vector-slot
+           eventual-membership readouts and `(flow, tangent)` product-graph
+            readouts, plus `(t, flow, tangent)` time-graph readouts, for
+            variational packages, product-derived closed/open cylinder
+            continuity and eventual-membership for the full operator tuple
+            `(t, flow, tangent)`, fixed two-vector-slot
+            `(t, flow, A(t)u, A(t)v)` readouts, product-derived full
+            derivative-domain tuple readouts for scalar pullback domains, and
+            fixed-time Lipschitz/continuity/distance estimates plus direct
+            overlap uniqueness for those operator and fixed-vector-slot
+            derivative-domain tuples,
            direct product-Picard bridges into scalar-readout,
            metric-coordinate-field, and finite-cover/readout-field tensor
            time-derivative routes, including closed-Picard within-filter
