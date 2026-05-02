@@ -730,7 +730,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         `ofDerivativeAtFamily` raw-existence bridge for named Picard-interior
          derivative packages, named source-neighborhood preferred-chart ODE
          packages with fixed-IVP and theorem-family `ofChartDerivativeAt`
-         bridges, neighborhood-time upgrades from within-time-set to
+         bridges plus derivative-data readouts back to the existing endpoint
+         derivative-family view, neighborhood-time upgrades from within-time-set to
          ordinary-at-time derivative data, monotonicity lemmas for restricting within-time-set
        and ordinary-at-time intrinsic derivative views to smaller time sets, with matching fixed-IVP `ofDerivative` and
        `ofDerivativeAt` bridges. The Banach-model ODE component of

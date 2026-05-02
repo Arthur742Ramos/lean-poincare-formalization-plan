@@ -757,7 +757,11 @@ the gauge-flow existence API. It now also has named preferred-chart ODE packages
 `ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily`, with fixed-IVP and
 theorem-family `ofChartDerivativeAt` bridges, so source-neighborhood chart ODE
 data can enter raw existence without unpacking into ad hoc constructor
-arguments. The same derivative-view layer now upgrades
+arguments. Those bridges now have direct derivative-data readouts back to
+`ChosenIntrinsicDeTurckGaugeFlowDerivative` and
+`ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
+the existing scalar gauge-pullback route after supplying the chart-ODE package.
+The same derivative-view layer now upgrades
 within-time-set derivative data back to ordinary-at-time data whenever the time
 set is a neighborhood at each of its times, with fixed-IVP and theorem-family
 wrappers. Both within-time-set and ordinary-at-time intrinsic derivative views

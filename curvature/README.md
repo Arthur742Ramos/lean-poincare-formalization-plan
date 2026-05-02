@@ -578,7 +578,8 @@ now packages the matching intrinsic boundary
       same chart-ODE data,
       derivative-family adapters, including an ordinary-on-time-set
         `ofDerivativeAtFamily` bridge and named source-neighborhood chart-ODE
-        `ofChartDerivativeAt` bridges, neighborhood-time upgrades from
+        `ofChartDerivativeAt` bridges with derivative-data readouts,
+        neighborhood-time upgrades from
         within-time-set to ordinary-at-time derivative data, and matching
         fixed-IVP `ofDerivative` / `ofDerivativeAt` bridges,
         centered preferred-chart derivative simplifications that expose the
