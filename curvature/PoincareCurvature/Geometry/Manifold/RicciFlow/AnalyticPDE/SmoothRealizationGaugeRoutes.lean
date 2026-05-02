@@ -853,6 +853,78 @@ theorem RicciDeTurckChartClosureData.exists_unique_with_continuousRiemannianMetr
   exact ⟨sol, huniq, hspd, hcurve,
     ⟨⟨D.realization sol, D.realizationCandidateEncoding sol⟩⟩⟩
 
+/-- Global closure data selects a canonical continuous Riemannian-metric curve whose
+values are unique on common Banach existence intervals. -/
+theorem RicciDeTurckChartClosureData.exists_unique_continuousRiemannianMetricCurve_on_common_interval
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChart
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : RicciDeTurckChartClosureData x0 et het Kc hKc Ko hKo hKoEq hcover chart) :
+    ∃ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover)
+        ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+      (∀ sol' : BanachEvolutionLocalSolutionIn chart.A
+          (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+            et Kc hKc Ko hKo hKoEq hcover)
+          ivp.initialTime
+          (InitialValueProblem.toContinuousSectionSpace
+            (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+        EqOn sol.curve sol'.curve
+          (Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime))) ∧
+      ∃ hspd : ∀ ⦃t : ℝ⦄, t ∈ Icc ivp.initialTime sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus
+          (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover,
+        ∀ (sol' : BanachEvolutionLocalSolutionIn chart.A
+            (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+              et Kc hKc Ko hKo hKoEq hcover)
+            ivp.initialTime
+            (InitialValueProblem.toContinuousSectionSpace
+              (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp))
+          (hspd' : ∀ ⦃t : ℝ⦄, t ∈ Icc ivp.initialTime sol'.terminalTime →
+            sol'.curve t ∈ symmetricPositiveDefiniteLocus
+              (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+              et Kc hKc Ko hKo hKoEq hcover)
+          ⦃t : ℝ⦄,
+          t ∈ Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime) →
+          BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve
+              (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+              et Kc hKc Ko hKo hKoEq hcover sol hspd
+              ivp.initialMetric.toContinuousRiemannianMetric t =
+            BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve
+              (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+              et Kc hKc Ko hKo hKoEq hcover sol' hspd'
+              ivp.initialMetric.toContinuousRiemannianMetric t := by
+  rcases D.exists_unique_banachEvolutionLocalSolutionIn (M := M) (F := F) (I := I) with
+    ⟨sol, huniq, hspd⟩
+  refine ⟨sol, huniq, hspd, ?_⟩
+  intro sol' hspd' t ht
+  exact BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve_eq_on_common_interval
+    (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+    et Kc hKc Ko hKo hKoEq hcover sol sol' (huniq sol') hspd hspd'
+    ivp.initialMetric.toContinuousRiemannianMetric
+    ivp.initialMetric.toContinuousRiemannianMetric ht
+
 /-- Proof-level Banach solution existence readout from global chart-closure data. -/
 theorem RicciDeTurckChartClosureData.nonempty_banachEvolutionLocalSolutionIn
     {x0 : κ → M}
@@ -1255,6 +1327,81 @@ theorem RicciDeTurckChartClosureDataOnIcc.exists_unique_with_continuousRiemannia
     ⟨sol, hterminal, huniq, hspd, hcurve⟩
   exact ⟨sol, hterminal, huniq, hspd, hcurve,
     ⟨⟨D.realization sol, D.realizationCandidateEncoding sol⟩⟩⟩
+
+/-- Interval closure data selects a canonical continuous Riemannian-metric curve
+whose values are unique on common Banach existence intervals, while retaining the
+Picard terminal-time bound. -/
+theorem RicciDeTurckChartClosureDataOnIcc.exists_unique_continuousRiemannianMetricCurve_on_common_interval_terminal_le
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : RicciDeTurckChartClosureDataOnIcc x0 et het Kc hKc Ko hKo hKoEq hcover chart) :
+    ∃ sol : BanachEvolutionLocalSolutionIn chart.A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover)
+        ivp.initialTime
+        (InitialValueProblem.toContinuousSectionSpace
+          (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn chart.A
+          (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+            et Kc hKc Ko hKo hKoEq hcover)
+          ivp.initialTime
+          (InitialValueProblem.toContinuousSectionSpace
+            (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp),
+        EqOn sol.curve sol'.curve
+          (Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime))) ∧
+      ∃ hspd : ∀ ⦃t : ℝ⦄, t ∈ Icc ivp.initialTime sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus
+          (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover,
+        ∀ (sol' : BanachEvolutionLocalSolutionIn chart.A
+            (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+              et Kc hKc Ko hKo hKoEq hcover)
+            ivp.initialTime
+            (InitialValueProblem.toContinuousSectionSpace
+              (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp))
+          (hspd' : ∀ ⦃t : ℝ⦄, t ∈ Icc ivp.initialTime sol'.terminalTime →
+            sol'.curve t ∈ symmetricPositiveDefiniteLocus
+              (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+              et Kc hKc Ko hKo hKoEq hcover)
+          ⦃t : ℝ⦄,
+          t ∈ Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime) →
+          BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve
+              (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+              et Kc hKc Ko hKo hKoEq hcover sol hspd
+              ivp.initialMetric.toContinuousRiemannianMetric t =
+            BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve
+              (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+              et Kc hKc Ko hKo hKoEq hcover sol' hspd'
+              ivp.initialMetric.toContinuousRiemannianMetric t := by
+  rcases D.exists_unique_symmetricPositiveDefinite_banachEvolutionLocalSolutionIn
+      (M := M) (F := F) (I := I) with
+    ⟨sol, hterminal, huniq, hspd⟩
+  refine ⟨sol, hterminal, huniq, hspd, ?_⟩
+  intro sol' hspd' t ht
+  exact BanachEvolutionLocalSolutionIn.toContinuousRiemannianMetricCurve_eq_on_common_interval
+    (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+    et Kc hKc Ko hKo hKoEq hcover sol sol' (huniq sol') hspd hspd'
+    ivp.initialMetric.toContinuousRiemannianMetric
+    ivp.initialMetric.toContinuousRiemannianMetric ht
 
 /-- Proof-level Banach solution existence readout from ambient interval
 chart-closure data. -/

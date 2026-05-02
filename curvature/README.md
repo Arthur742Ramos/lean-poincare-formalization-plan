@@ -765,14 +765,16 @@ now packages the matching intrinsic boundary
      solution with common-interval uniqueness and symmetric positive-definite
      persistence, the represented continuous Riemannian-metric-valued curve, and
      a paired smooth-realization/reverse-encoding fiber as a single selected
-     witness. The interval raw-gauge
+     witness; the selected metric curve is unique on common Banach existence
+     intervals. The interval raw-gauge
      route similarly exposes the ambient
      state-preserving Banach solution with terminal-time control and
      common-interval uniqueness, now including the stronger symmetric
      positive-definite persistence readout and the represented continuous
      Riemannian-metric-valued curve, plus a combined proof-level fiber carrying
      that solution's smooth realization and reverse encoding of the realized
-     chosen-background candidate, all available as a single selected witness.
+     chosen-background candidate, all available as a single selected witness;
+     the represented metric curve is likewise unique on common Banach intervals.
      The thin
      raw-gauge route module mirrors its global and interval projections to
      intrinsic and ordinary compact point-4 theorem packages as proof-level
