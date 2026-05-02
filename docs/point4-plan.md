@@ -1275,7 +1275,10 @@ inverse-metric contractions, whole matrix-valued principal-part contractions
 `g^{ab} H_abij`, whole matrix-valued Ricci-coordinate quadratic Christoffel
 contractions, and a whole matrix-valued schematic local Ricci-DeTurck coordinate
 RHS combining those terms, using finite-product, integer-scalar, reciprocal, and
-division closure. The abstract
+division closure. On the geometric side, the Levi-Civita local-frame Gram
+matrix layer now also turns pointwise Gram determinant nonvanishing into a
+positive determinant lower bound on compact subsets of a trivialization base.
+The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and

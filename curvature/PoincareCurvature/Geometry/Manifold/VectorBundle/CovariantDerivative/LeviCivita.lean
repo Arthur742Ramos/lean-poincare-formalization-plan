@@ -1526,6 +1526,35 @@ theorem localFrameGramMatrix_det_ne_zero
   rw [hsum] at hpos
   linarith
 
+/-- On a compact subset of a local trivialization base, the local-frame Gram determinant is
+uniformly bounded away from zero. -/
+theorem localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set M} (hK : IsCompact K) (hKbase : K ⊆ e.baseSet) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ ⦃x : M⦄, x ∈ K →
+      δ ≤ ‖(show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x).det‖ := by
+  let f : M → ℝ :=
+    fun x => (show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x).det
+  have hf_base : ContinuousOn f e.baseSet := by
+    simpa [f] using
+      (contMDiffOn_localFrameGramMatrix_det (I := I) (E := E) e b
+        e.open_baseSet (subset_refl e.baseSet)).continuousOn
+  have hfK : ContinuousOn f K := hf_base.mono hKbase
+  by_cases hKnonempty : K.Nonempty
+  · have hnorm : ContinuousOn (fun x => ‖f x‖) K := hfK.norm
+    rcases hK.exists_isMinOn hKnonempty hnorm with ⟨x₀, hx₀, hmin⟩
+    refine ⟨‖f x₀‖, ?_, ?_⟩
+    · exact norm_pos_iff.mpr
+        (localFrameGramMatrix_det_ne_zero (I := I) (E := E) e b (hKbase hx₀))
+    · intro x hx
+      exact (isMinOn_iff.mp hmin) x hx
+  · refine ⟨1, by norm_num, ?_⟩
+    intro x hx
+    exact False.elim (hKnonempty ⟨x, hx⟩)
+
 theorem localFrameGramMatrix_isUnit_det
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)

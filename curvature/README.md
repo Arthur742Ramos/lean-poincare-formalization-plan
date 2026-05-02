@@ -959,7 +959,10 @@ for `toDual`, fiberwise composition, `metricDefectAux`, and torsion on `C^2`
 vector fields (the torsion lemma currently uses a `C^3` manifold hypothesis),
 proves that `leviCivitaConnection` preserves
 `ContMDiffCovariantDerivative 1`, and packages both static and time-dependent
-`C^1` Levi-Civita existence. Point 4 still remains open because the missing
+`C^1` Levi-Civita existence. It also proves that local-frame Gram determinants
+are uniformly bounded away from zero on compact subsets of a trivialization
+base, connecting the pointwise Gram determinant nonvanishing theorem to compact
+lower-bound data. Point 4 still remains open because the missing
 pieces are now the extension-independence upgrade from the current raw
 curvature/Ricci transport formulas to genuine target Levi-Civita/Ricci data
 along the gauge flow, and the quasilinear parabolic PDE layer, not bundle

@@ -403,5 +403,7 @@ now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
 Levi-Civita correction ingredients (`toDual`, fiberwise composition,
 `metricDefectAux`, and torsion on `C^2` vector fields, with the torsion lemma
-currently stated on `C^3` manifolds). This still does not prove the actual
+currently stated on `C^3` manifolds). The Levi-Civita layer also proves that
+local-frame Gram determinants are uniformly bounded away from zero on compact
+subsets of a trivialization base. This still does not prove the actual
 Ricci-flow local existence/uniqueness theorem, so point 4 remains open.

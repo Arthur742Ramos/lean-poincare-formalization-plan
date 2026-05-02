@@ -34,6 +34,9 @@ result is actually proved in Lean. Interfaces, theorem boundaries, axioms,
 
 - Levi-Civita existence via `leviCivitaConnection_nonempty` and
   `exists_leviCivitaConnection`
+- local-frame Gram determinant nonvanishing, inverse Gram/Riesz-map regularity,
+  and a compact-domain positive lower bound for the Gram determinant on
+  trivialization bases
 - sectional curvature via `sectionalCurvature`, `sectionalCurvatureNumerator`,
   and `sectionalCurvatureDenominator`
 - first-Bianchi identities for `curvatureAux` and `curvatureTensor`
