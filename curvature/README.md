@@ -684,7 +684,9 @@ now packages the matching intrinsic boundary
        `Ioo` specializations, and field-level base-coordinate wrappers that
        store the actual coordinate-curve derivative as `X t (G.maps3 t x)`,
        plus full-field variational tangent-map coordinate/readout and
-       geometric/readout direct-velocity endpoint wrappers,
+       geometric/readout direct-velocity endpoint wrappers, and same-set
+       within-field direct-velocity base-coordinate, metric-coordinate,
+       readout-field, and tensor wrappers,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an
