@@ -272,7 +272,11 @@ The variational local-flow full-field route now also has open-product-domain
 scalar, named metric-coordinate-field, readout-field, and geometric-slot tensor
 wrappers; these consume `HasFDerivWithinAt` on an open chart product domain at
 the model-flow endpoint directly, without upgrading local Banach/readout data to
-global `HasFDerivAt`.
+global `HasFDerivAt`. The same open-domain input shape now reaches the ordinary
+open-interior `Ioo` tensor route as well, including readout-field and
+geometric-slot forms, by deriving the scalar `HasDerivAt` calculation from the
+closed-interval open-domain proof and the variational local-flow continuity
+package.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow

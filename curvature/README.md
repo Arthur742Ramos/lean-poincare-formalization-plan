@@ -398,7 +398,9 @@ now packages the matching intrinsic boundary
            variational local-flow full-field route now also accepting
            `HasFDerivWithinAt` on an open chart product domain at the model-flow
            endpoint directly through named metric-coordinate, readout-field, and
-           geometric-slot tensor wrappers, and the
+           geometric-slot tensor wrappers, with the same open-domain input now
+           feeding the ordinary open-interior `Ioo` tensor route and its readout
+           and pushed-forward geometric-slot wrappers, and the
            model-coordinate time-difference route also accepting any locally equal
          two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the
