@@ -742,7 +742,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         `Ioo` upgrade lemmas for primitive derivative and chart-ODE data, plus a raw
         existence constructor that produces `Diffeomorph3GaugeFlowOn` on the
         open Picard interior directly from closed-interval centered chart ODE
-        data, with matching fixed-IVP `ofDerivative` and
+        data, including a named intrinsic DeTurck chart-package version, with matching fixed-IVP `ofDerivative` and
        `ofDerivativeAt` bridges. The Banach-model ODE component of
      the positive-dimensional raw-flow construction is now also proof-bearing:
      `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent

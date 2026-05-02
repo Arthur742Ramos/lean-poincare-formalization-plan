@@ -749,6 +749,46 @@ theorem nonempty_of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_
   ⟨of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source
     maps3 anchored hsource hderiv⟩
 
+/-- Build an intrinsic DeTurck raw gauge-flow witness on the open Picard
+interior from named preferred-chart ODE data proved within the closed Picard
+interval. -/
+noncomputable def of_intrinsicChartDerivativeOn_Ioo
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) maps3 g background (Icc tmin tmax)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background)
+      (Ioo tmin tmax) t₀ :=
+  of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source
+    (I := I) (M := M)
+    (X := intrinsicDeTurckGaugeField (I := I) (M := M) g background)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    maps3 anchored
+    (fun t ht x ↦ (hchart t ht x).1)
+    (fun t ht x ↦ (hchart t ht x).2)
+
+/-- Proof-level intrinsic DeTurck raw gauge-flow existence on the open Picard
+interior from named preferred-chart ODE data proved within the closed Picard
+interval. -/
+theorem nonempty_of_intrinsicChartDerivativeOn_Ioo
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) maps3 g background (Icc tmin tmax)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background)
+      (Ioo tmin tmax) t₀) :=
+  ⟨of_intrinsicChartDerivativeOn_Ioo maps3 anchored hchart⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness from unrestricted
 ordinary centered preferred-chart ODE data plus eventual membership in the
 centered chart source. -/
