@@ -1236,7 +1236,8 @@ one value, and the same estimate is available on closed product cylinders with
 the corresponding time/space radius expression; both closed-domain shapes now
 also package Holder plus one basepoint bound as full `C^{0,α}` control, and
 positive-exponent Holder control on any compact domain now packages as
-`C^{0,α}` by compact-continuous boundedness. The
+`C^{0,α}` by compact-continuous boundedness, with direct proper-space
+closed-ball/cylinder corollaries. The
 abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:

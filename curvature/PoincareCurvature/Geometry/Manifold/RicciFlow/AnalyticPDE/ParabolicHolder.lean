@@ -1045,6 +1045,19 @@ theorem c0AlphaOn_of_isCompact (h : ParabolicHolderOn α u s) (hα : 0 < α)
   exact ⟨max B 0, le_max_right _ _, C, hC,
     ⟨fun p hp => (hB p hp).trans (le_max_left _ _), hCu⟩⟩
 
+theorem c0AlphaOn_of_closedBall [ProperSpace X] {c : ℝ × X} {R : ℝ}
+    (h : ParabolicHolderOn α u (parabolicClosedBall c R)) (hα : 0 < α) :
+    ParabolicC0AlphaOn α u (parabolicClosedBall c R) :=
+  h.c0AlphaOn_of_isCompact hα (parabolicClosedBall.isCompact c R)
+
+theorem c0AlphaOn_of_closedCylinder [ProperSpace X] {c : ℝ × X}
+    {timeRadius spaceRadius : ℝ}
+    (h : ParabolicHolderOn α u (parabolicClosedCylinder c timeRadius spaceRadius))
+    (hα : 0 < α) :
+    ParabolicC0AlphaOn α u (parabolicClosedCylinder c timeRadius spaceRadius) :=
+  h.c0AlphaOn_of_isCompact hα
+    (parabolicClosedCylinder.isCompact c timeRadius spaceRadius)
+
 end ParabolicHolderOn
 
 namespace ParabolicBoundedWith
