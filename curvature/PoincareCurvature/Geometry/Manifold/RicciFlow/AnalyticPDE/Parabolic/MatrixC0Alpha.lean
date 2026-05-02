@@ -306,6 +306,48 @@ theorem christoffel_quadratic_ricci_entry {n A : Type*} [Fintype n] [NormedRing 
         (fun a _ha => hrightInner a))
   exact hleft.sub hright
 
+/-- Schematic local Ricci-DeTurck coordinate right-hand sides preserve parabolic `C^{0,α}`
+control from entrywise control of metric coefficients, first derivative coefficients, and second
+derivative coefficients, assuming the metric determinant is bounded away from zero.  The formula
+packages the principal contraction `g^{ab} H_{abij}` together with the standard quadratic
+Christoffel contraction. -/
+theorem ricciDeTurck_schematic_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    {D : ℝ × X → n → n → n → 𝕜} {H : ℝ × X → n → n → n → n → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaOn α (fun z => D z a b c) s)
+    (hH : ∀ a b i j, ParabolicC0AlphaOn α (fun z => H z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i j : n) :
+    ParabolicC0AlphaOn α
+      (fun z =>
+        let Γ : n → n → n → 𝕜 := fun a b c =>
+          (2 : 𝕜)⁻¹ *
+            ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+              (D z b c l + D z c b l - D z l b c)
+        (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+          ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) s := by
+  let Γ : ℝ × X → n → n → n → 𝕜 := fun z a b c =>
+    (2 : 𝕜)⁻¹ *
+      ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+        (D z b c l + D z c b l - D z l b c)
+  have hΓ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c) s := by
+    intro a b c
+    exact matrix_inv_christoffel_entry (M := M) (D := D) hM hD hδpos hdet a b c
+  have hprincipal :
+      ParabolicC0AlphaOn α
+        (fun z => ∑ a : n, ∑ b : n,
+          ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) s :=
+    matrix_inv_two_index_contract_entry hM hH hδpos hdet i j
+  have hquadratic :
+      ParabolicC0AlphaOn α
+        (fun z =>
+          (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+            (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)) s :=
+    christoffel_quadratic_ricci_entry hΓ i j
+  simpa [Γ] using hprincipal.add hquadratic
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow

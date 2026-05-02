@@ -1266,7 +1266,8 @@ under the same determinant lower bound, plus finite vector dot products and
 bilinear contractions through matrices or inverse matrices, including
 Christoffel-symbol type inverse-metric contractions and principal-part
 contractions `g^{ab} H_abij`, plus Ricci-coordinate quadratic Christoffel
-contractions, using finite-product, integer-scalar, reciprocal, and division
+contractions and a schematic local Ricci-DeTurck coordinate RHS combining
+those terms, using finite-product, integer-scalar, reciprocal, and division
 closure. The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:

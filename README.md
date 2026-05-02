@@ -368,8 +368,9 @@ packages the canonical stationary local solution attached to
   vector-product entries, finite vector dot products, and bilinear contractions
   through matrices or inverse matrices, including Christoffel-symbol type
   inverse-metric contractions, principal-part contractions `g^{ab} H_abij`,
-  and Ricci-coordinate quadratic Christoffel contractions, from entrywise
-  control. The curvature,
+  Ricci-coordinate quadratic Christoffel contractions, and a schematic local
+  Ricci-DeTurck coordinate RHS combining those terms, from entrywise control.
+  The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric
   symmetry input outright: metric compatibility gives curvature-operator
