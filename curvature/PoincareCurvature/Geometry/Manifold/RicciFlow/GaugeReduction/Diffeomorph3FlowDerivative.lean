@@ -54,6 +54,65 @@ def Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
       ((1 : ℝ →L[ℝ] ℝ).smulRight
         (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)))
 
+/-- Ordinary preferred-chart ODE data for the intrinsic DeTurck gauge-flow
+equation, restricted to times in `s`.
+
+The source-neighborhood clause is the chart-local continuity input used by the
+existence layer: it says the curve stays eventually in the centered chart source
+at the time where the ordinary chart derivative is taken. -/
+def Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ t ∈ s, ∀ x : M,
+    ((fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I ((Φ t) x)).source ∈ 𝓝 t) ∧
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((Φ t) x)) ((Φ τ) x))
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) t
+
+/-- Extract the source-neighborhood input from ordinary preferred-chart ODE
+data. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.eventually_mem_source
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s)
+    {t : ℝ} (ht : t ∈ s) (x : M) :
+    (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I ((Φ t) x)).source ∈ 𝓝 t :=
+  (hchart t ht x).1
+
+/-- Extract the ordinary centered-chart derivative from ordinary preferred-chart
+ODE data. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.hasDerivAt_extChartAt_eval_self
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s)
+    {t : ℝ} (ht : t ∈ s) (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((Φ t) x)) ((Φ τ) x))
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) t :=
+  (hchart t ht x).2
+
+/-- Restrict ordinary preferred-chart ODE data to a smaller time set. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background t)
+    (hst : s ⊆ t) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s := by
+  intro τ hτ x
+  exact hchart τ (hst hτ) x
+
 /-- Ordinary-at-time derivative data on `s` immediately gives the within-set
 derivative data used by the primitive gauge-flow API. -/
 theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
@@ -136,6 +195,21 @@ def ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
   ∀ sol : ChosenIntrinsicDeTurckLocalSolution
       (E := E) (H := H) (I := I) (M := M) ivp,
     Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+      (maps3 sol)
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      sol.1.toIntrinsicDeTurckSolution.timeSet
+
+/-- Fixed-IVP ordinary preferred-chart ODE data for the intrinsic DeTurck gauges
+of all chosen DeTurck solutions of one initial-value problem. -/
+def ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAt
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)) : Prop :=
+  ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn (I := I) (M := M)
       (maps3 sol)
       sol.1.toIntrinsicDeTurckSolution.metric
       sol.1.toIntrinsicDeTurckSolution.background
@@ -243,6 +317,22 @@ def ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily
     ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := E) (H := H) (I := I) (M := M) ivp,
       Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+        (maps3 ivp sol)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background
+        sol.1.toIntrinsicDeTurckSolution.timeSet
+
+/-- Family-level ordinary preferred-chart ODE data for the intrinsic DeTurck
+gauges of all chosen DeTurck solutions. -/
+def ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)) : Prop :=
+  ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+    ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn (I := I) (M := M)
         (maps3 ivp sol)
         sol.1.toIntrinsicDeTurckSolution.metric
         sol.1.toIntrinsicDeTurckSolution.background

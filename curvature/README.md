@@ -577,7 +577,8 @@ now packages the matching intrinsic boundary
       fixed-IVP and theorem-family preferred-chart ODE constructors from the
       same chart-ODE data,
       derivative-family adapters, including an ordinary-on-time-set
-        `ofDerivativeAtFamily` bridge, neighborhood-time upgrades from
+        `ofDerivativeAtFamily` bridge and named source-neighborhood chart-ODE
+        `ofChartDerivativeAt` bridges, neighborhood-time upgrades from
         within-time-set to ordinary-at-time derivative data, and matching
         fixed-IVP `ofDerivative` / `ofDerivativeAt` bridges,
         centered preferred-chart derivative simplifications that expose the

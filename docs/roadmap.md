@@ -725,11 +725,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      diffeomorphism family and anchoring data, so future manifold-flow existence results
       can plug in through either derivative data or existing geometric gauge-flow
       bundles without a separate
-      `SatisfiesGaugeFlowOn` repackaging step. The derivative-view layer also
-       has ordinary-on-time-set derivative-family data and an
-       `ofDerivativeAtFamily` raw-existence bridge for named Picard-interior
-        derivative packages, neighborhood-time upgrades from within-time-set to
-        ordinary-at-time derivative data, monotonicity lemmas for restricting within-time-set
+       `SatisfiesGaugeFlowOn` repackaging step. The derivative-view layer also
+        has ordinary-on-time-set derivative-family data and an
+        `ofDerivativeAtFamily` raw-existence bridge for named Picard-interior
+         derivative packages, named source-neighborhood preferred-chart ODE
+         packages with fixed-IVP and theorem-family `ofChartDerivativeAt`
+         bridges, neighborhood-time upgrades from within-time-set to
+         ordinary-at-time derivative data, monotonicity lemmas for restricting within-time-set
        and ordinary-at-time intrinsic derivative views to smaller time sets, with matching fixed-IVP `ofDerivative` and
        `ofDerivativeAt` bridges. The Banach-model ODE component of
      the positive-dimensional raw-flow construction is now also proof-bearing:

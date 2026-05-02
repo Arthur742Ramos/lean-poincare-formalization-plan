@@ -752,7 +752,12 @@ with `Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily`, and the theorem-family
 `ofDerivativeAtFamily` raw-existence bridge, so named Picard-interior derivative
 data no longer has to be manually weakened to within-set form before entering
-the gauge-flow existence API. The same derivative-view layer now upgrades
+the gauge-flow existence API. It now also has named preferred-chart ODE packages
+`Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn` and
+`ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily`, with fixed-IVP and
+theorem-family `ofChartDerivativeAt` bridges, so source-neighborhood chart ODE
+data can enter raw existence without unpacking into ad hoc constructor
+arguments. The same derivative-view layer now upgrades
 within-time-set derivative data back to ordinary-at-time data whenever the time
 set is a neighborhood at each of its times, with fixed-IVP and theorem-family
 wrappers. Both within-time-set and ordinary-at-time intrinsic derivative views
@@ -762,7 +767,8 @@ same named-derivative symmetry is now present
 for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,
 `IntrinsicDeTurckGaugeFlowExistence.ofDerivative`, and
-`IntrinsicDeTurckGaugeFlowExistence.ofDerivativeAt`.
+`IntrinsicDeTurckGaugeFlowExistence.ofDerivativeAt`, together with the
+fixed-IVP chart-data bridge `IntrinsicDeTurckGaugeFlowExistence.ofChartDerivativeAt`.
 The theorem-family zero-gauge-field constructor now also carries the required
 pullback metric time-derivative proof, so any family whose intrinsic DeTurck
 gauge field vanishes on each solution time set can enter the gauge-reduction
