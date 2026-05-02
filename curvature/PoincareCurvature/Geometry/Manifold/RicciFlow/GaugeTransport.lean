@@ -271,6 +271,19 @@ lemma IsTimeDependentIntegralCurveOn.congr_vectorField
   intro t ht
   simpa [hXY t ht] using hγ t ht
 
+/-- Reinterpret a local time-dependent integral curve for a vector field that agrees along the
+curve near the base time. -/
+lemma IsTimeDependentIntegralCurveAt.congr_vectorField
+    {γ : ℝ → M}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t₀ : ℝ}
+    (hγ : IsTimeDependentIntegralCurveAt (I := I) (M := M) γ X t₀)
+    (hXY : ∀ᶠ t in 𝓝 t₀, X t (γ t) = Y t (γ t)) :
+    IsTimeDependentIntegralCurveAt (I := I) (M := M) γ Y t₀ := by
+  rcases hγ with ⟨s, hs, hγs⟩
+  refine ⟨s ∩ {t | X t (γ t) = Y t (γ t)}, Filter.inter_mem hs hXY, ?_⟩
+  exact (hγs.mono Set.inter_subset_left).congr_vectorField (fun t ht ↦ ht.2)
+
 lemma isTimeDependentIntegralCurveOn_const_of_eq_zero
     (X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
     (s : Set ℝ) (x : M)
@@ -360,6 +373,18 @@ lemma SatisfiesGaugeFlowOn.congr_vectorField
     SatisfiesGaugeFlowOn (I := I) (M := M) Φ Y s := by
   intro x
   exact (hΦ x).congr_vectorField (fun t ht ↦ hXY t ht x)
+
+/-- Reinterpret a local gauge-flow family for a vector field that agrees along the family near the
+base time. -/
+lemma SatisfiesGaugeFlowAt.congr_vectorField
+    {Φ : SmoothSelfMapFamily (I := I) (M := M)}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t₀ : ℝ}
+    (hΦ : SatisfiesGaugeFlowAt (I := I) (M := M) Φ X t₀)
+    (hXY : ∀ᶠ t in 𝓝 t₀, ∀ x : M, X t (Φ t x) = Y t (Φ t x)) :
+    SatisfiesGaugeFlowAt (I := I) (M := M) Φ Y t₀ := by
+  intro x
+  exact (hΦ x).congr_vectorField (hXY.mono fun t ht ↦ ht x)
 
 lemma SmoothSelfMapFamily.id_satisfiesGaugeFlowOn_of_eq_zero
     {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
