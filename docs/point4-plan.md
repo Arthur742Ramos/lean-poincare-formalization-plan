@@ -1256,8 +1256,10 @@ the corresponding time/space radius expression; both closed-domain shapes now
 also package Holder plus one basepoint bound as full `C^{0,α}` control, and
 positive-exponent Holder control on any compact domain now packages as
 `C^{0,α}` by compact-continuous boundedness, with direct proper-space
-closed-ball/cylinder corollaries. The
-abstract
+closed-ball/cylinder corollaries. The new
+`AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves determinant
+closure for finite matrix-valued parabolic `C^{0,α}` functions from entrywise
+control, using finite-product and integer-scalar closure. The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and

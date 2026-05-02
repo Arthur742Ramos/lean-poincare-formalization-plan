@@ -1002,6 +1002,9 @@ bidirectional product ball/closed-ball compatibility for parabolic balls and
 product cylinders, plus basepoint-to-sup bounds and Holder-to-`C^{0,α}`
 packaging on compact domains, with direct proper-space closed-ball/cylinder
 corollaries.
+The separate `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now proves that
+finite matrix determinants preserve parabolic `C^{0,α}` control from entrywise
+control, using the finite-product and integer-scalar closure layer.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build

@@ -139,3 +139,6 @@ compatibility in both directions for parabolic balls and product cylinders, plus
 basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on compact domains,
 with direct proper-space closed-ball/cylinder corollaries, not the
 local-existence theorem itself.
+The separate `RicciFlow/AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves
+parabolic `C^{0,α}` closure for finite matrix determinants from entrywise
+control, using the finite-product and integer-scalar algebraic closure layer.

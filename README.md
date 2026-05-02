@@ -360,10 +360,11 @@ packages the canonical stationary local solution attached to
   basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on compact domains,
   with direct proper-space closed-ball/cylinder corollaries. These primitives do
   not yet supply the
-  Schauder estimates or the Ricci-DeTurck Banach chart. The
-  curvature,
-  time-dependent
-  geometry, intrinsic Ricci-flow, and DeTurck layers now prove the geometric
+  Schauder estimates or the Ricci-DeTurck Banach chart. A separate
+  `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now builds on those
+  primitives to prove parabolic `C^{0,α}` closure of finite matrix
+  determinants from entrywise control. The curvature, time-dependent geometry,
+  intrinsic Ricci-flow, and DeTurck layers now prove the geometric
   symmetry input outright: metric compatibility gives curvature-operator
   skew-adjointness, torsion-freeness gives first Bianchi, the Ricci contraction is
   symmetric for Levi-Civita families, the intrinsic Ricci-flow RHS is symmetric,
