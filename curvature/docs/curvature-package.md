@@ -140,5 +140,7 @@ basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on compact domains,
 with direct proper-space closed-ball/cylinder corollaries, not the
 local-existence theorem itself.
 The separate `RicciFlow/AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves
-parabolic `C^{0,α}` closure for finite matrix determinants from entrywise
-control, using the finite-product and integer-scalar algebraic closure layer.
+parabolic `C^{0,α}` closure for finite matrix determinants, adjugate entries,
+and inverse entries under a determinant lower bound from entrywise control,
+using the finite-product, integer-scalar, reciprocal, and division closure
+layer.

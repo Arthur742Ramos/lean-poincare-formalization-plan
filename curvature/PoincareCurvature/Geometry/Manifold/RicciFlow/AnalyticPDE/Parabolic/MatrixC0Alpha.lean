@@ -2,6 +2,7 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
 set_option linter.unusedSectionVars false
 
@@ -59,7 +60,44 @@ theorem matrix_det {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
   rw [← zsmul_eq_mul]
   rfl
 
+/-- Each adjugate entry of a finite matrix is parabolic `C^{0,α}` when the matrix entries are. -/
+theorem matrix_adjugate_entry {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
+    {M : ℝ × X → Matrix n n A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) (i j : n) :
+    ParabolicC0AlphaOn α (fun z => (M z).adjugate i j) s := by
+  have hdet :
+      ParabolicC0AlphaOn α
+        (fun z => ((M z).updateRow j ((Pi.single i (1 : A)) : n → A)).det) s := by
+    exact matrix_det (M := fun z => (M z).updateRow j ((Pi.single i (1 : A)) : n → A))
+      (fun r c => by
+        by_cases hr : r = j
+        · subst r
+          simpa [Matrix.updateRow] using
+            (ParabolicC0AlphaOn.const (α := α) (s := s)
+              (((Pi.single i (1 : A)) : n → A) c))
+        · simpa [Matrix.updateRow, Function.update_of_ne hr] using hM r c)
+  convert hdet using 1
+  funext z
+  rw [Matrix.adjugate_apply]
+
+/-- Each inverse-matrix entry is parabolic `C^{0,α}` when the matrix entries are and the
+determinant is uniformly bounded away from zero on the domain. -/
+theorem matrix_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i j : n) :
+    ParabolicC0AlphaOn α (fun z => (M z)⁻¹ i j) s := by
+  have hdet_inv : ParabolicC0AlphaOn α (fun z => ((M z).det)⁻¹) s :=
+    (matrix_det (M := M) hM).inv hδpos hdet
+  have hadj : ParabolicC0AlphaOn α (fun z => (M z).adjugate i j) s :=
+    matrix_adjugate_entry (M := M) hM i j
+  have hprod := hdet_inv.mul hadj
+  convert hprod using 1
+  funext z
+  rw [Matrix.inv_def, Ring.inverse_eq_inv]
+  rfl
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow
-
