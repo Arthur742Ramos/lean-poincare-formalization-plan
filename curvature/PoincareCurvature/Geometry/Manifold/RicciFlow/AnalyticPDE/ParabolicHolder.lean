@@ -280,6 +280,12 @@ theorem space_dist_lt_of_mem (hq : q ∈ parabolicCylinder p timeRadius spaceRad
     dist p.2 q.2 < spaceRadius :=
   hq.2
 
+theorem isOpen (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
+    IsOpen (parabolicCylinder p timeRadius spaceRadius) := by
+  simpa [parabolicCylinder] using
+    (((continuous_const.sub continuous_fst).abs.isOpen_preimage (Iio timeRadius) isOpen_Iio).inter
+      ((continuous_const.dist continuous_snd).isOpen_preimage (Iio spaceRadius) isOpen_Iio))
+
 /-- A product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at most
 `R` is contained in the parabolic ball of radius `R`. -/
 theorem subset_ball_of_le_sq (hR : 0 < R) (ht : timeRadius ≤ R ^ 2)
@@ -334,6 +340,12 @@ theorem time_abs_le_of_mem (hq : q ∈ parabolicClosedCylinder p timeRadius spac
 theorem space_dist_le_of_mem (hq : q ∈ parabolicClosedCylinder p timeRadius spaceRadius) :
     dist p.2 q.2 ≤ spaceRadius :=
   hq.2
+
+theorem isClosed (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
+    IsClosed (parabolicClosedCylinder p timeRadius spaceRadius) := by
+  simpa [parabolicClosedCylinder] using
+    ((isClosed_Iic.preimage (continuous_const.sub continuous_fst).abs).inter
+      (isClosed_Iic.preimage (continuous_const.dist continuous_snd)))
 
 /-- A closed product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at
 most `R` is contained in the closed parabolic ball of radius `R`. -/
@@ -438,6 +450,19 @@ theorem add (hu : ParabolicHolderWith C₁ α u s) (hv : ParabolicHolderWith C�
     _ ≤ ‖u p - u q‖ + ‖v p - v q‖ := norm_add_le _ _
     _ ≤ C₁ * dα + C₂ * dα := add_le_add (hu hp hq) (hv hp hq)
     _ = (C₁ + C₂) * dα := by ring
+
+theorem neg (hu : ParabolicHolderWith C α u s) :
+    ParabolicHolderWith C α (fun z => -u z) s := by
+  intro p hp q hq
+  have hsub : (-u p) - (-u q) = -(u p - u q) := by
+    abel
+  calc
+    ‖(-u p) - (-u q)‖ = ‖u p - u q‖ := by rw [hsub, norm_neg]
+    _ ≤ C * (parabolicDistance p q) ^ α := hu hp hq
+
+theorem sub (hu : ParabolicHolderWith C₁ α u s) (hv : ParabolicHolderWith C₂ α v s) :
+    ParabolicHolderWith (C₁ + C₂) α (fun z => u z - v z) s := by
+  simpa [sub_eq_add_neg] using hu.add hv.neg
 
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicHolderWith C α u s) :
@@ -566,6 +591,15 @@ theorem add (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
   rcases hv with ⟨C₂, hC₂, hCv⟩
   exact ⟨C₁ + C₂, add_nonneg hC₁ hC₂, hCu.add hCv⟩
 
+theorem neg (hu : ParabolicHolderOn α u s) :
+    ParabolicHolderOn α (fun z => -u z) s := by
+  rcases hu with ⟨C, hC, hCu⟩
+  exact ⟨C, hC, hCu.neg⟩
+
+theorem sub (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
+    ParabolicHolderOn α (fun z => u z - v z) s := by
+  simpa [sub_eq_add_neg] using hu.add hv.neg
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicHolderOn α u s) :
     ParabolicHolderOn α (fun z => c • u z) s := by
@@ -632,6 +666,18 @@ theorem add (hu : ParabolicBoundedWith B₁ u s) (hv : ParabolicBoundedWith B₂
     ‖u p + v p‖ ≤ ‖u p‖ + ‖v p‖ := norm_add_le _ _
     _ ≤ B₁ + B₂ := add_le_add (hu hp) (hv hp)
 
+theorem neg (hu : ParabolicBoundedWith B u s) :
+    ParabolicBoundedWith B (fun z => -u z) s := by
+  intro p hp
+  simpa using hu hp
+
+theorem sub (hu : ParabolicBoundedWith B₁ u s) (hv : ParabolicBoundedWith B₂ v s) :
+    ParabolicBoundedWith (B₁ + B₂) (fun z => u z - v z) s := by
+  intro p hp
+  calc
+    ‖u p - v p‖ ≤ ‖u p‖ + ‖v p‖ := norm_sub_le _ _
+    _ ≤ B₁ + B₂ := add_le_add (hu hp) (hv hp)
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicBoundedWith B u s) :
     ParabolicBoundedWith (‖c‖ * B) (fun z => c • u z) s := by
@@ -665,6 +711,15 @@ theorem add (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
     (hv : ParabolicC0AlphaWith B₂ H₂ α v s) :
     ParabolicC0AlphaWith (B₁ + B₂) (H₁ + H₂) α (fun z => u z + v z) s :=
   ⟨hu.bounded.add hv.bounded, hu.holder.add hv.holder⟩
+
+theorem neg (hu : ParabolicC0AlphaWith B H α u s) :
+    ParabolicC0AlphaWith B H α (fun z => -u z) s :=
+  ⟨hu.bounded.neg, hu.holder.neg⟩
+
+theorem sub (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
+    (hv : ParabolicC0AlphaWith B₂ H₂ α v s) :
+    ParabolicC0AlphaWith (B₁ + B₂) (H₁ + H₂) α (fun z => u z - v z) s :=
+  ⟨hu.bounded.sub hv.bounded, hu.holder.sub hv.holder⟩
 
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicC0AlphaWith B H α u s) :
@@ -709,6 +764,17 @@ theorem add (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
   rcases hu with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
   rcases hv with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
   exact ⟨B₁ + B₂, add_nonneg hB₁ hB₂, H₁ + H₂, add_nonneg hH₁ hH₂, hBH₁.add hBH₂⟩
+
+theorem neg (hu : ParabolicC0AlphaOn α u s) :
+    ParabolicC0AlphaOn α (fun z => -u z) s := by
+  rcases hu with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B, hB, H, hH, hBH.neg⟩
+
+theorem sub (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    ParabolicC0AlphaOn α (fun z => u z - v z) s := by
+  rcases hu with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
+  rcases hv with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
+  exact ⟨B₁ + B₂, add_nonneg hB₁ hB₂, H₁ + H₂, add_nonneg hH₁ hH₂, hBH₁.sub hBH₂⟩
 
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicC0AlphaOn α u s) :
