@@ -971,10 +971,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           package now expose matching direct-velocity `_self` companions.
           The module also now has an additive
          time/spatial decomposition upgrading that frozen spatial term to the full
-         moving time-space field derivative once the remaining time-difference
-        derivative along the same raw coordinate curve is supplied, and this is
-        wired into the concrete component-derivative package used by the tensor
-         time-regularity endpoints, with a closed-Picard `Ioo` specialization.
+          moving time-space field derivative once the remaining time-difference
+        derivative along the same raw coordinate curve is supplied; its
+        ordinary/within-set abstract component data now has direct-velocity
+        package forms and direct projections to component packages and tensor
+          time-regularity, so this seam no longer forces a public centered
+          `tangentCoordChange` obligation, and it retains the closed-Picard
+          `Ioo` specialization.
          The variational-flow route now discharges the tangent-coordinate-map
          derivative for that formulation, with the concrete
          `pullbackMetricTangentCoordinateMap` derivative extracted as a reusable

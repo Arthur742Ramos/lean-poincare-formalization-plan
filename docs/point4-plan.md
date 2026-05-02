@@ -484,6 +484,10 @@ curve is supplied. That decomposition is also wired into the concrete
 component data now only needs the time-difference derivative for the named
 metric-coordinate field, the tangent-coordinate-map derivative, and the final
 scalar velocity identity including the canonical spatial `fderivWithin` term.
+This abstract time-difference component data now also has ordinary and
+within-set direct-velocity package forms, plus direct projections to the
+concrete component derivative packages and tensor time-regularity, so the raw
+velocity can be preserved through the time/spatial decomposition seam itself.
 This package now routes all the way to tensor time-regularity, including a
 closed-Picard `Ioo` specialization. A variational-flow endpoint now discharges
 the tangent-coordinate-map derivative in this time-difference formulation, so
