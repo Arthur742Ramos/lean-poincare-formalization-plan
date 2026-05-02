@@ -837,7 +837,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
             closed-interval/open-domain and ordinary-interior forms, with
             matching eventual-equality transfer wrappers for local scalar
             identities, plus raw closed-Picard tensor time-regularity routes
-            that consume those operator-domain readouts directly,
+            that consume those operator-domain readouts directly, with
+            continuous product-Picard wrappers for callers starting from the
+            product system `(y, A)`,
            direct product-Picard bridges into scalar-readout,
            metric-coordinate-field, and finite-cover/readout-field tensor
            time-derivative routes, including closed-Picard within-filter

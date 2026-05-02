@@ -12307,6 +12307,181 @@ theorem hasTimeDerivativeOn_Ioo_of_variationalLocalFlowOperatorScalarReadoutWith
       (SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeWithinOn.toPullbackMetricInnerDerivativeOn_Ioo
         (I := I) (M := M) hwithin)
 
+/-- Continuous product Picard-flow version of
+`hasTimeDerivativeOn_Ioo_of_variationalLocalFlowOperatorScalarReadoutOpen`.
+
+The product flow is immediately converted to the variational package, so callers
+whose Picard output is the product system `(y, A)` can use operator-domain
+scalar readouts without choosing a separate variational flow first. -/
+theorem hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowOperatorScalarReadoutOpen
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r R : ℝ≥0}
+    (α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+      (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+      (x₀, (1 : E →L[ℝ] E)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : E →L[ℝ] E)) ∈ closedBall (x₀, (1 : E →L[ℝ] E)) R)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata :
+      let β : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r :=
+        ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball
+      ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (domain : Set (ℝ × E × (E →L[ℝ] E)))
+          (Fscalar : ℝ × E × (E →L[ℝ] E) → ℝ)
+          (Fscalar' : ℝ × E × (E →L[ℝ] E) →L[ℝ] ℝ),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝 t]
+              (fun τ : ℝ ↦ Fscalar (τ, β.flow (xE, τ), β.tangent xE τ)) ∧
+          HasFDerivWithinAt Fscalar Fscalar' domain
+            (t, β.flow (xE, t), β.tangent xE t) ∧
+          IsOpen domain ∧
+          (t, β.flow (xE, t), β.tangent xE t) ∈ domain ∧
+          Fscalar'
+            (1, f t (β.flow (xE, t)),
+              (Df t (β.flow (xE, t))).comp (β.tangent xE t)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowOperatorScalarReadoutOpen
+    (α := ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball)
+    hdata
+
+/-- Closed-Picard continuous product Picard-flow version of
+`hasTimeDerivativeOn_Ioo_of_variationalLocalFlowOperatorScalarReadoutWithinOpen`. -/
+theorem hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowOperatorScalarReadoutWithinOpen
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r R : ℝ≥0}
+    (α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+      (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+      (x₀, (1 : E →L[ℝ] E)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : E →L[ℝ] E)) ∈ closedBall (x₀, (1 : E →L[ℝ] E)) R)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata :
+      let β : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r :=
+        ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball
+      ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (domain : Set (ℝ × E × (E →L[ℝ] E)))
+          (Fscalar : ℝ × E × (E →L[ℝ] E) → ℝ)
+          (Fscalar' : ℝ × E × (E →L[ℝ] E) →L[ℝ] ℝ),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝[Icc tmin tmax] t]
+              (fun τ : ℝ ↦ Fscalar (τ, β.flow (xE, τ), β.tangent xE τ)) ∧
+          HasFDerivWithinAt Fscalar Fscalar' domain
+            (t, β.flow (xE, t), β.tangent xE t) ∧
+          IsOpen domain ∧
+          (t, β.flow (xE, t), β.tangent xE t) ∈ domain ∧
+          Fscalar'
+            (1, f t (β.flow (xE, t)),
+              (Df t (β.flow (xE, t))).comp (β.tangent xE t)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowOperatorScalarReadoutWithinOpen
+    (α := ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball)
+    hdata
+
+/-- Continuous product Picard-flow version of
+`hasTimeDerivativeOn_Ioo_of_variationalLocalFlowOperatorScalarReadout`, where the
+operator derivative domain need not be open. -/
+theorem hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowOperatorScalarReadout
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r R : ℝ≥0}
+    (α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+      (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+      (x₀, (1 : E →L[ℝ] E)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : E →L[ℝ] E)) ∈ closedBall (x₀, (1 : E →L[ℝ] E)) R)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata :
+      let β : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r :=
+        ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball
+      ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (domain : Set (ℝ × E × (E →L[ℝ] E)))
+          (Fscalar : ℝ × E × (E →L[ℝ] E) → ℝ)
+          (Fscalar' : ℝ × E × (E →L[ℝ] E) →L[ℝ] ℝ),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝 t]
+              (fun τ : ℝ ↦ Fscalar (τ, β.flow (xE, τ), β.tangent xE τ)) ∧
+          HasFDerivWithinAt Fscalar Fscalar' domain
+            (t, β.flow (xE, t), β.tangent xE t) ∧
+          (∀ᶠ τ in 𝓝 t, (τ, β.flow (xE, τ), β.tangent xE τ) ∈ domain) ∧
+          Fscalar'
+            (1, f t (β.flow (xE, t)),
+              (Df t (β.flow (xE, t))).comp (β.tangent xE t)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowOperatorScalarReadout
+    (α := ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball)
+    hdata
+
+/-- Closed-Picard continuous product Picard-flow version of
+`hasTimeDerivativeOn_Ioo_of_variationalLocalFlowOperatorScalarReadoutWithin`,
+where the caller supplies within-filter convergence of the product Picard graph. -/
+theorem hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowOperatorScalarReadoutWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r R : ℝ≥0}
+    (α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+      (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+      (x₀, (1 : E →L[ℝ] E)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : E →L[ℝ] E)) ∈ closedBall (x₀, (1 : E →L[ℝ] E)) R)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata :
+      let β : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r :=
+        ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball
+      ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (domain : Set (ℝ × E × (E →L[ℝ] E)))
+          (Fscalar : ℝ × E × (E →L[ℝ] E) → ℝ)
+          (Fscalar' : ℝ × E × (E →L[ℝ] E) →L[ℝ] ℝ),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝[Icc tmin tmax] t]
+              (fun τ : ℝ ↦ Fscalar (τ, β.flow (xE, τ), β.tangent xE τ)) ∧
+          HasFDerivWithinAt Fscalar Fscalar' domain
+            (t, β.flow (xE, t), β.tangent xE t) ∧
+          Filter.Tendsto
+            (fun τ : ℝ ↦ (τ, β.flow (xE, τ), β.tangent xE τ))
+            (𝓝[Icc tmin tmax] t)
+            (𝓝[domain] (t, β.flow (xE, t), β.tangent xE t)) ∧
+          Fscalar'
+            (1, f t (β.flow (xE, t)),
+              (Df t (β.flow (xE, t))).comp (β.tangent xE t)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowOperatorScalarReadoutWithin
+    (α := ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution α hball)
+    hdata
+
 /-- Open-product-domain interior scalar-readout version of
 `hasTimeDerivativeOn_Ioo_of_variationalLocalFlowFieldOpen`.
 

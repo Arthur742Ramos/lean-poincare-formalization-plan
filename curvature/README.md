@@ -317,7 +317,9 @@ now packages the matching intrinsic boundary
         center-trajectory variational local-flow forms, plus matching
         eventual-equality transfer wrappers for local scalar identities; the raw
         closed-Picard tensor route now consumes those `F(t, y, A)` operator-domain
-        readouts directly, with open-domain and explicit graph-convergence forms. An endpoint readout
+        readouts directly, with open-domain and explicit graph-convergence forms
+        and continuous product-Picard wrappers that convert `(y, A)` output to
+        the variational package internally. An endpoint readout
         bridge now transfers the closed-interval geometric-slot variational theorem
        from any locally equal finite-cover metric-coordinate bilinear-form readout,
        matching the Banach readout output shape before interior tensor

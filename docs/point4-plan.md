@@ -412,7 +412,9 @@ center-trajectory variational local-flow forms, plus eventual-equality transfer
 wrappers for locally identified geometric/readout scalars. The raw closed-Picard
 `HasTimeDerivativeOn` route now consumes those operator-domain scalar readouts
 directly, both when the derivative domain is open and when explicit graph
-convergence is supplied. This removes a manual tangent
+convergence is supplied; continuous product-Picard wrappers now perform the
+`(y, A)` to variational-flow conversion internally for the same operator-domain
+routes. This removes a manual tangent
 Lipschitz obligation from the future chart-gluing step and isolates the
 remaining product Picard hypotheses to base-field and linearized-coefficient
 estimates. The same layer now has the closed-ball specialization matching
