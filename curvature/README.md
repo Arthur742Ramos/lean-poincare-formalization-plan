@@ -537,15 +537,17 @@ now packages the matching intrinsic boundary
    `Diffeomorph3GaugeFlowOn` raw-flow API also has arbitrary-vector-field
      identity constructors for subsingleton tangent, subsingleton model, and empty
     manifolds plus pointwise `HasMFDerivAt[s]`, ordinary-on-time-set
-     `HasMFDerivAt`, and unrestricted `HasMFDerivAt` adapters, named
-     derivative-family adapters, including an ordinary-on-time-set
-       `ofDerivativeAtFamily` bridge, neighborhood-time upgrades from
-       within-time-set to ordinary-at-time derivative data, and matching
-       fixed-IVP `ofDerivative` / `ofDerivativeAt` bridges,
-       geometric-to-raw adapters, and direct
-       proof-level `Nonempty` wrappers for the raw geometric/derivative,
-      restriction, and identity-flow constructors, plus matching fixed-IVP
-      and theorem-family intrinsic proof-level wrappers and derivative/local-at-time
+      `HasMFDerivAt`, and unrestricted `HasMFDerivAt` adapters, named
+      derivative-family adapters, including an ordinary-on-time-set
+        `ofDerivativeAtFamily` bridge, neighborhood-time upgrades from
+        within-time-set to ordinary-at-time derivative data, and matching
+        fixed-IVP `ofDerivative` / `ofDerivativeAt` bridges,
+        centered preferred-chart derivative simplifications that expose the
+        actual gauge velocity directly, vector-field agreement transport for
+        raw flows, geometric-to-raw adapters, and direct
+        proof-level `Nonempty` wrappers for the raw geometric/derivative,
+       restriction, and identity-flow constructors, plus matching fixed-IVP
+       and theorem-family intrinsic proof-level wrappers and derivative/local-at-time
       extractors; raw intrinsic gauge-flow existence witnesses now project
      directly to gauge-reduced, intrinsic, and ordinary theorem packages from
     either pulled-back metric time-derivative or scalar inner-product derivative

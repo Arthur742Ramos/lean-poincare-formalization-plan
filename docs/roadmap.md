@@ -666,13 +666,17 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        derivative-data and identity constructors, and the theorem-family layer
        now mirrors it as well, including fixed-IVP extraction and named
        derivative-family constructors. Raw intrinsic gauge-flow existence
-     witnesses now also feed directly into the gauge-reduced, intrinsic, and
-    ordinary theorem-package routes using either pulled-back metric
-    time-derivative proofs or scalar inner-product derivative proofs. The raw
-    flow layer also has fixed-IVP and theorem-family constructors from both
-     pointwise `HasMFDerivAt[s]`, ordinary-on-time-set `HasMFDerivAt`, and
-      unrestricted `HasMFDerivAt` data produced by
-      ODE/integral-curve theorems, named-derivative-family adapters,
+      witnesses now also feed directly into the gauge-reduced, intrinsic, and
+     ordinary theorem-package routes using either pulled-back metric
+     time-derivative proofs or scalar inner-product derivative proofs. The raw
+     flow layer also has fixed-IVP and theorem-family constructors from both
+      pointwise `HasMFDerivAt[s]`, ordinary-on-time-set `HasMFDerivAt`, and
+       unrestricted `HasMFDerivAt` data produced by
+       ODE/integral-curve theorems, named-derivative-family adapters,
+       centered preferred-chart derivative simplifications that expose the
+       gauge velocity directly instead of a redundant `tangentCoordChange I p p
+       p` term, and raw-flow transport across time-dependent vector fields that
+       agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and
      time-set restriction for raw flows with simp readouts for the unchanged
      diffeomorphism family and anchoring data, so future manifold-flow existence results

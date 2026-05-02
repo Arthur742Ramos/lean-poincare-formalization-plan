@@ -750,6 +750,12 @@ They also expose the ordinary-neighborhood versions of the same readouts:
 preferred-chart continuity readout. The same fixed-IVP/theorem-family layer now
 also mirrors raw preferred-chart range eventuality, both at ordinary
 neighborhood-times and relative to the solution time set.
+The raw, fixed-IVP, and theorem-family preferred-chart derivative readouts now
+also have centered-chart simplifications that rewrite the derivative value from
+`tangentCoordChange I p p p (...)` to the actual gauge velocity. This removes a
+recurrent normalization step from downstream scalar gauge-pullback calculations,
+and raw `Diffeomorph3GaugeFlowOn` witnesses can now be transported across
+time-dependent vector fields that agree on the active time set.
 The same raw layer now also has proof-level `Nonempty` wrappers for the
 geometric, within-derivative, ordinary-on-time-set derivative, unrestricted
 derivative, restriction, and identity-flow constructors, letting downstream
