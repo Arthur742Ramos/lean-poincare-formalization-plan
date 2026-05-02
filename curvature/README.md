@@ -380,7 +380,8 @@ now packages the matching intrinsic boundary
         variational tangent-map variants derive the tangent-coordinate
         derivative from the model variational ODE, with finite-cover/readout
         variants supplying the product-domain metric derivative by local
-        equality, the
+        equality and a fully localized geometric-slot form in actual
+        pushed-forward tangent vectors, the
         model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

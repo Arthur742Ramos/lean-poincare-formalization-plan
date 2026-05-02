@@ -685,7 +685,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         variants that derive the tangent-coordinate derivative from the model
         variational ODE and finite-cover/readout variants that supply the
         product-domain `HasFDerivWithinAt` metric derivative by local equality,
-        without being upgraded to global `HasFDerivAt` statements. It also has
+        including a fully localized geometric-slot form in actual pushed-forward
+        tangent vectors, without being upgraded to global `HasFDerivAt`
+        statements. It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and

@@ -240,7 +240,8 @@ within-filter equality form, that synthesize the tangent-coordinate derivative
 from the model variational ODE. Finite-cover/readout fields now have the same
 product-domain entry point: a locally equal two-variable bilinear readout can
 supply the `HasFDerivWithinAt` metric derivative, including for the variational
-ODE routes.
+ODE routes, and the fully localized route now has a geometric-slot form where
+the scalar identity is stated in actual pushed-forward tangent vectors.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
