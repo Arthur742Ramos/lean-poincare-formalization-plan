@@ -673,8 +673,9 @@ now packages the matching intrinsic boundary
       Picard ball is already contained in the Riemannian metric cone, including
       a proof-level `Nonempty` readout. Genuine symmetric-carrier interval closure data
       now exposes the same Banach solution/uniqueness witness directly, including
-      proof-level `Nonempty` readouts for existence, smooth realization, and
-      reverse candidate encoding. Density-based interval-carrier
+      proof-level `Nonempty` readouts for existence, smooth realization,
+      reverse candidate encoding, and a paired Banach solution plus smooth
+      intrinsic DeTurck realization witness. Density-based interval-carrier
       solutions now also transport back to the chart's built-in restricted carrier
       under the terminal-time bound, and the preferred-cover local-bounds route
       now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness

@@ -1236,7 +1236,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       symmetric-carrier interval closure data now
      exposes the same Banach solution/uniqueness witness directly before theorem
       package projection, with proof-level `Nonempty` readouts for existence,
-      smooth realization, and reverse candidate encoding. A
+      smooth realization, reverse candidate encoding, and a paired Banach
+      solution plus smooth intrinsic DeTurck realization witness. A
       density-based interval-carrier solution also now transports back to the
        chart's built-in restricted carrier whenever its terminal time remains
         inside the Picard interval, and the preferred-cover local-bounds route
