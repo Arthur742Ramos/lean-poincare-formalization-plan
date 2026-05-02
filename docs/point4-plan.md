@@ -1263,16 +1263,17 @@ closure, adjugate-entry closure, and inverse-entry closure under a determinant
 lower bound for finite matrix-valued parabolic `C^{0,α}` functions from
 entrywise control, including a compactness bridge from nonvanishing determinants
 to uniform determinant lower bounds and compact-domain inverse-entry and
-schematic RHS variants, plus entrywise and whole-valued closure for matrix
-products, matrix-vector and vector-matrix products, and inverse-matrix vector
-products on both sides under the same determinant lower bound, plus whole
-finite vector/matrix and inverse-matrix packages, finite vector dot products,
-and bilinear contractions through matrices or inverse matrices,
-including Christoffel-symbol type inverse-metric contractions and principal-part
-contractions `g^{ab} H_abij`, plus Ricci-coordinate quadratic Christoffel
-contractions and a schematic local Ricci-DeTurck coordinate RHS combining
-those terms, using finite-product, integer-scalar, reciprocal, and division
-closure. The abstract
+schematic matrix-valued RHS variants, plus entrywise and whole-valued closure
+for matrix products, matrix-vector and vector-matrix products, and
+inverse-matrix vector products on both sides under the same determinant lower
+bound, plus whole finite vector/matrix and inverse-matrix packages, finite
+vector dot products, and bilinear contractions through matrices or inverse
+matrices, including entrywise and whole-array Christoffel-symbol type
+inverse-metric contractions, whole matrix-valued principal-part contractions
+`g^{ab} H_abij`, whole matrix-valued Ricci-coordinate quadratic Christoffel
+contractions, and a whole matrix-valued schematic local Ricci-DeTurck coordinate
+RHS combining those terms, using finite-product, integer-scalar, reciprocal, and
+division closure. The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and

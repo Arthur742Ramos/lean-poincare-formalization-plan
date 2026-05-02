@@ -1008,14 +1008,15 @@ finite matrix determinants, adjugate entries, and inverse entries under a
 determinant lower bound preserve parabolic `C^{0,α}` control from entrywise
 control; compact nonvanishing determinant data now supplies the needed uniform
 determinant lower bound, including compact-domain inverse-entry and schematic
-RHS variants. It also proves entrywise and whole-valued closure for matrix
-products, matrix-vector and vector-matrix products, including inverse-matrix
-vector products on both sides under the same determinant lower bound, whole
-finite vector/matrix and inverse-matrix packages, finite vector dot products,
-and bilinear contractions through matrices or inverse matrices,
-including Christoffel-symbol type inverse-metric contractions and principal-part
-contractions `g^{ab} H_abij`, plus Ricci-coordinate quadratic Christoffel
-contractions and a schematic local Ricci-DeTurck coordinate RHS combining
+matrix-valued RHS variants. It also proves entrywise and whole-valued closure
+for matrix products, matrix-vector and vector-matrix products, including
+inverse-matrix vector products on both sides under the same determinant lower
+bound, whole finite vector/matrix and inverse-matrix packages, finite vector dot
+products, and bilinear contractions through matrices or inverse matrices,
+including entrywise and whole-array Christoffel-symbol type inverse-metric
+contractions, whole matrix-valued principal-part contractions `g^{ab} H_abij`,
+whole matrix-valued Ricci-coordinate quadratic Christoffel contractions, and a
+whole matrix-valued schematic local Ricci-DeTurck coordinate RHS combining
 those terms, using the finite-product, integer-scalar, reciprocal, and division
 closure layer.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.

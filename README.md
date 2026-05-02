@@ -364,14 +364,16 @@ packages the canonical stationary local solution attached to
   primitives to prove parabolic `C^{0,α}` closure of finite matrix
   determinants, adjugate entries, and inverse entries under determinant lower
   bounds, with compact nonvanishing determinant data now supplying such lower
-  bounds and compact-domain inverse/RHS variants, plus entrywise and
-  whole-valued matrix-product, matrix-vector/vector-matrix, and inverse-matrix
-  vector-product closure, whole finite vector/matrix and inverse-matrix
-  packages, finite vector dot products, and bilinear contractions through
-  matrices or inverse matrices, including Christoffel-symbol type
-  inverse-metric contractions, principal-part contractions `g^{ab} H_abij`,
-  Ricci-coordinate quadratic Christoffel contractions, and a schematic local
-  Ricci-DeTurck coordinate RHS combining those terms, from entrywise control.
+  bounds and compact-domain inverse and matrix-valued RHS variants, plus
+  entrywise and whole-valued matrix-product, matrix-vector/vector-matrix, and
+  inverse-matrix vector-product closure, whole finite vector/matrix and
+  inverse-matrix packages, finite vector dot products, and bilinear contractions through
+  matrices or inverse matrices, including entrywise and whole-array
+  Christoffel-symbol type inverse-metric contractions, whole matrix-valued
+  principal-part contractions `g^{ab} H_abij`, whole matrix-valued
+  Ricci-coordinate quadratic Christoffel contractions, and a whole matrix-valued
+  schematic local Ricci-DeTurck coordinate RHS combining those terms, from
+  entrywise control.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric

@@ -360,6 +360,46 @@ theorem matrix_inv_christoffel_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n
     (ParabolicC0AlphaOn.const (α := α) (s := s) ((2 : 𝕜)⁻¹)).mul hcontraction
   simpa [Matrix.mulVec] using hhalf
 
+/-- The full finite Christoffel-symbol type array preserves parabolic `C^{0,α}` control from
+entrywise metric and derivative control, under a determinant lower bound. -/
+theorem matrix_inv_christoffel {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    {D : ℝ × X → n → n → n → 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z => D z i j k) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z i j k =>
+        (2 : 𝕜)⁻¹ *
+          ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+            (D z j k l + D z k j l - D z l j k)) s := by
+  refine ParabolicC0AlphaOn.pi ?_
+  intro i
+  refine ParabolicC0AlphaOn.pi ?_
+  intro j
+  refine ParabolicC0AlphaOn.pi ?_
+  intro k
+  exact matrix_inv_christoffel_entry (M := M) (D := D) hM hD hδpos hdet i j k
+
+/-- Compact-domain Christoffel-symbol type array closure from entrywise control and pointwise
+nonvanishing determinant. -/
+theorem matrix_inv_christoffel_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M : ℝ × X → Matrix n n 𝕜} {D : ℝ × X → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z => D z i j k) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun z i j k =>
+        (2 : 𝕜)⁻¹ *
+          ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+            (D z j k l + D z k j l - D z l j k)) K := by
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  exact matrix_inv_christoffel (M := M) (D := D) hM hD hδpos hdet
+
 /-- Finite inverse-matrix contractions against a four-index coefficient array preserve parabolic
 `C^{0,α}` control. This is the coordinate-algebra pattern for terms such as
 `g^{ab} H_{abij}` in a local Ricci-DeTurck principal part. -/
@@ -387,6 +427,41 @@ theorem matrix_inv_two_index_contract_entry {n p q 𝕜 : Type*} [Fintype n] [De
       (S := (Finset.univ : Finset n))
       (u := fun a z => ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j)
       (fun a _ha => hinner a))
+
+/-- Finite inverse-matrix contractions against a four-index coefficient array package as a
+matrix-valued parabolic `C^{0,α}` function. -/
+theorem matrix_inv_two_index_contract {n p q 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [Fintype p] [Fintype q] [NormedField 𝕜] {δ : ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {T : ℝ × X → n → n → p → q → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hT : ∀ a b i j, ParabolicC0AlphaOn α (fun z => T z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j :
+            Matrix p q 𝕜)) s :=
+  matrix_of_entries fun i j => matrix_inv_two_index_contract_entry hM hT hδpos hdet i j
+
+/-- Compact-domain matrix-valued inverse principal-contraction closure from entrywise control and
+pointwise nonvanishing determinant. -/
+theorem matrix_inv_two_index_contract_of_isCompact_det_ne_zero {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    {K : Set (ℝ × X)} {M : ℝ × X → Matrix n n 𝕜}
+    {T : ℝ × X → n → n → p → q → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) K)
+    (hT : ∀ a b i j, ParabolicC0AlphaOn α (fun z => T z a b i j) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j :
+            Matrix p q 𝕜)) K := by
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  exact matrix_inv_two_index_contract (M := M) (T := T) hM hT hδpos hdet
 
 /-- Ricci-coordinate quadratic Christoffel contractions preserve parabolic `C^{0,α}` control
 from entrywise control of the Christoffel array. -/
@@ -428,6 +503,19 @@ theorem christoffel_quadratic_ricci_entry {n A : Type*} [Fintype n] [NormedRing 
         (u := fun a z => ∑ b : n, Γ z a i b * Γ z b a j)
         (fun a _ha => hrightInner a))
   exact hleft.sub hright
+
+/-- The full finite Ricci-coordinate quadratic Christoffel contraction packages as a
+matrix-valued parabolic `C^{0,α}` function. -/
+theorem christoffel_quadratic_ricci {n A : Type*} [Fintype n] [NormedRing A]
+    {Γ : ℝ × X → n → n → n → A}
+    (hΓ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c) s) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+            (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j) :
+            Matrix n n A)) s :=
+  matrix_of_entries fun i j => christoffel_quadratic_ricci_entry hΓ i j
 
 /-- Schematic local Ricci-DeTurck coordinate right-hand sides preserve parabolic `C^{0,α}`
 control from entrywise control of metric coefficients, first derivative coefficients, and second
@@ -471,6 +559,30 @@ theorem ricciDeTurck_schematic_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n
     christoffel_quadratic_ricci_entry hΓ i j
   simpa [Γ] using hprincipal.add hquadratic
 
+/-- Schematic local Ricci-DeTurck coordinate right-hand sides package as a matrix-valued
+parabolic `C^{0,α}` function from entrywise control, under a determinant lower bound. -/
+theorem ricciDeTurck_schematic {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    {D : ℝ × X → n → n → n → 𝕜} {H : ℝ × X → n → n → n → n → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaOn α (fun z => D z a b c) s)
+    (hH : ∀ a b i j, ParabolicC0AlphaOn α (fun z => H z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          let Γ : n → n → n → 𝕜 := fun a b c =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+                (D z b c l + D z c b l - D z l b c)
+          (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+            ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+              (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) :
+          Matrix n n 𝕜)) s :=
+  matrix_of_entries fun i j =>
+    ricciDeTurck_schematic_entry (M := M) (D := D) (H := H)
+      hM hD hH hδpos hdet i j
+
 /-- Compact-domain version of `ricciDeTurck_schematic_entry`: pointwise nonvanishing of the
 metric determinant supplies the determinant lower bound. -/
 theorem ricciDeTurck_schematic_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
@@ -495,6 +607,33 @@ theorem ricciDeTurck_schematic_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [
     ⟨δ, hδpos, hdet⟩
   exact ricciDeTurck_schematic_entry (M := M) (D := D) (H := H)
     hM hD hH hδpos hdet i j
+
+/-- Compact-domain matrix-valued schematic Ricci-DeTurck RHS closure from entrywise control and
+pointwise nonvanishing determinant. -/
+theorem ricciDeTurck_schematic_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)} {M : ℝ × X → Matrix n n 𝕜}
+    {D : ℝ × X → n → n → n → 𝕜} {H : ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) K)
+    (hD : ∀ a b c, ParabolicC0AlphaOn α (fun z => D z a b c) K)
+    (hH : ∀ a b i j, ParabolicC0AlphaOn α (fun z => H z a b i j) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          let Γ : n → n → n → 𝕜 := fun a b c =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+                (D z b c l + D z c b l - D z l b c)
+          (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+            ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+              (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) :
+          Matrix n n 𝕜)) K := by
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  exact ricciDeTurck_schematic (M := M) (D := D) (H := H)
+    hM hD hH hδpos hdet
 
 end ParabolicC0AlphaOn
 end AnalyticPDE
