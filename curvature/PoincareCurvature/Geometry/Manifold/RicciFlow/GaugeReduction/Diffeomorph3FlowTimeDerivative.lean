@@ -1262,6 +1262,236 @@ theorem center_hasDerivAt_scalarField_time_flow_tangentOperatorWithinOpen_of_mem
   α.hasDerivAt_scalarField_time_flow_tangentOperatorWithinOpen_of_mem_Ioo
     (mem_closedBall_self r.2) ht hF hopen hmem
 
+/-- Eventual-equality transfer form of
+`hasDerivWithinAt_scalarField_time_flow_tangentOperatorWithin`. -/
+theorem hasDerivWithinAt_of_eventuallyEq_scalarField_time_flow_tangentOperatorWithin
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    (heq : scalar =ᶠ[𝓝[Icc tmin tmax] t]
+      fun τ : ℝ ↦ Fscalar (τ, α.flow (x, τ), α.tangent x τ))
+    (heq_t : scalar t = Fscalar (t, α.flow (x, t), α.tangent x t))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x, t), α.tangent x t))
+    (hdomain : Filter.Tendsto
+      (fun τ : ℝ ↦ (τ, α.flow (x, τ), α.tangent x τ))
+      (𝓝[Icc tmin tmax] t)
+      (𝓝[domain] (t, α.flow (x, t), α.tangent x t)))
+    {value : ℝ}
+    (hvalue :
+      Fscalar' (1, f t (α.flow (x, t)),
+        (Df t (α.flow (x, t))).comp (α.tangent x t)) = value) :
+    HasDerivWithinAt scalar value (Icc tmin tmax) t := by
+  have hderiv :=
+    α.hasDerivWithinAt_scalarField_time_flow_tangentOperatorWithin
+      hx ht hF hdomain
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
+/-- Center-trajectory eventual-equality transfer form of
+`center_hasDerivWithinAt_scalarField_time_flow_tangentOperatorWithin`. -/
+theorem center_hasDerivWithinAt_of_eventuallyEq_scalarField_time_flow_tangentOperatorWithin
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    (heq : scalar =ᶠ[𝓝[Icc tmin tmax] t]
+      fun τ : ℝ ↦ Fscalar (τ, α.flow (x₀, τ), α.tangent x₀ τ))
+    (heq_t : scalar t = Fscalar (t, α.flow (x₀, t), α.tangent x₀ t))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x₀, t), α.tangent x₀ t))
+    (hdomain : Filter.Tendsto
+      (fun τ : ℝ ↦ (τ, α.flow (x₀, τ), α.tangent x₀ τ))
+      (𝓝[Icc tmin tmax] t)
+      (𝓝[domain] (t, α.flow (x₀, t), α.tangent x₀ t)))
+    {value : ℝ}
+    (hvalue :
+      Fscalar' (1, f t (α.flow (x₀, t)),
+        (Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) = value) :
+    HasDerivWithinAt scalar value (Icc tmin tmax) t := by
+  have hderiv :=
+    α.center_hasDerivWithinAt_scalarField_time_flow_tangentOperatorWithin
+      ht hF hdomain
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
+/-- Open-interior eventual-equality transfer form of
+`hasDerivAt_scalarField_time_flow_tangentOperatorWithin_of_mem_Ioo`. -/
+theorem hasDerivAt_of_eventuallyEq_scalarField_time_flow_tangentOperatorWithin_of_mem_Ioo
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    (heq : scalar =ᶠ[𝓝 t]
+      fun τ : ℝ ↦ Fscalar (τ, α.flow (x, τ), α.tangent x τ))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x, t), α.tangent x t))
+    (hdomain : ∀ᶠ τ in 𝓝 t, (τ, α.flow (x, τ), α.tangent x τ) ∈ domain)
+    {value : ℝ}
+    (hvalue :
+      Fscalar' (1, f t (α.flow (x, t)),
+        (Df t (α.flow (x, t))).comp (α.tangent x t)) = value) :
+    HasDerivAt scalar value t := by
+  have hderiv :=
+    α.hasDerivAt_scalarField_time_flow_tangentOperatorWithin_of_mem_Ioo
+      hx ht hF hdomain
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq
+
+/-- Center-trajectory open-interior eventual-equality transfer form of
+`center_hasDerivAt_scalarField_time_flow_tangentOperatorWithin_of_mem_Ioo`. -/
+theorem center_hasDerivAt_of_eventuallyEq_scalarField_time_flow_tangentOperatorWithin_of_mem_Ioo
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    (heq : scalar =ᶠ[𝓝 t]
+      fun τ : ℝ ↦ Fscalar (τ, α.flow (x₀, τ), α.tangent x₀ τ))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x₀, t), α.tangent x₀ t))
+    (hdomain : ∀ᶠ τ in 𝓝 t, (τ, α.flow (x₀, τ), α.tangent x₀ τ) ∈ domain)
+    {value : ℝ}
+    (hvalue :
+      Fscalar' (1, f t (α.flow (x₀, t)),
+        (Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) = value) :
+    HasDerivAt scalar value t := by
+  have hderiv :=
+    α.center_hasDerivAt_scalarField_time_flow_tangentOperatorWithin_of_mem_Ioo
+      ht hF hdomain
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq
+
+/-- Eventual-equality transfer form of
+`hasDerivWithinAt_scalarField_time_flow_tangentOperatorWithinOpen`. -/
+theorem hasDerivWithinAt_of_eventuallyEq_scalarField_time_flow_tangentOperatorWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    (heq : scalar =ᶠ[𝓝[Icc tmin tmax] t]
+      fun τ : ℝ ↦ Fscalar (τ, α.flow (x, τ), α.tangent x τ))
+    (heq_t : scalar t = Fscalar (t, α.flow (x, t), α.tangent x t))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x, t), α.tangent x t))
+    (hopen : IsOpen domain)
+    (hmem : (t, α.flow (x, t), α.tangent x t) ∈ domain)
+    {value : ℝ}
+    (hvalue :
+      Fscalar' (1, f t (α.flow (x, t)),
+        (Df t (α.flow (x, t))).comp (α.tangent x t)) = value) :
+    HasDerivWithinAt scalar value (Icc tmin tmax) t := by
+  have hderiv :=
+    α.hasDerivWithinAt_scalarField_time_flow_tangentOperatorWithinOpen
+      hx ht hF hopen hmem
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
+/-- Center-trajectory eventual-equality transfer form of
+`center_hasDerivWithinAt_scalarField_time_flow_tangentOperatorWithinOpen`. -/
+theorem center_hasDerivWithinAt_of_eventuallyEq_scalarField_time_flow_tangentOperatorWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    (heq : scalar =ᶠ[𝓝[Icc tmin tmax] t]
+      fun τ : ℝ ↦ Fscalar (τ, α.flow (x₀, τ), α.tangent x₀ τ))
+    (heq_t : scalar t = Fscalar (t, α.flow (x₀, t), α.tangent x₀ t))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x₀, t), α.tangent x₀ t))
+    (hopen : IsOpen domain)
+    (hmem : (t, α.flow (x₀, t), α.tangent x₀ t) ∈ domain)
+    {value : ℝ}
+    (hvalue :
+      Fscalar' (1, f t (α.flow (x₀, t)),
+        (Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) = value) :
+    HasDerivWithinAt scalar value (Icc tmin tmax) t := by
+  have hderiv :=
+    α.center_hasDerivWithinAt_scalarField_time_flow_tangentOperatorWithinOpen
+      ht hF hopen hmem
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
+/-- Open-interior eventual-equality transfer form of
+`hasDerivAt_scalarField_time_flow_tangentOperatorWithinOpen_of_mem_Ioo`. -/
+theorem hasDerivAt_of_eventuallyEq_scalarField_time_flow_tangentOperatorWithinOpen_of_mem_Ioo
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    (heq : scalar =ᶠ[𝓝 t]
+      fun τ : ℝ ↦ Fscalar (τ, α.flow (x, τ), α.tangent x τ))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x, t), α.tangent x t))
+    (hopen : IsOpen domain)
+    (hmem : (t, α.flow (x, t), α.tangent x t) ∈ domain)
+    {value : ℝ}
+    (hvalue :
+      Fscalar' (1, f t (α.flow (x, t)),
+        (Df t (α.flow (x, t))).comp (α.tangent x t)) = value) :
+    HasDerivAt scalar value t := by
+  have hderiv :=
+    α.hasDerivAt_scalarField_time_flow_tangentOperatorWithinOpen_of_mem_Ioo
+      hx ht hF hopen hmem
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq
+
+/-- Center-trajectory open-interior eventual-equality transfer form of
+`center_hasDerivAt_scalarField_time_flow_tangentOperatorWithinOpen_of_mem_Ioo`. -/
+theorem center_hasDerivAt_of_eventuallyEq_scalarField_time_flow_tangentOperatorWithinOpen_of_mem_Ioo
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    (heq : scalar =ᶠ[𝓝 t]
+      fun τ : ℝ ↦ Fscalar (τ, α.flow (x₀, τ), α.tangent x₀ τ))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain
+      (t, α.flow (x₀, t), α.tangent x₀ t))
+    (hopen : IsOpen domain)
+    (hmem : (t, α.flow (x₀, t), α.tangent x₀ t) ∈ domain)
+    {value : ℝ}
+    (hvalue :
+      Fscalar' (1, f t (α.flow (x₀, t)),
+        (Df t (α.flow (x₀, t))).comp (α.tangent x₀ t)) = value) :
+    HasDerivAt scalar value t := by
+  have hderiv :=
+    α.center_hasDerivAt_scalarField_time_flow_tangentOperatorWithinOpen_of_mem_Ioo
+      ht hF hopen hmem
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq
+
 /-- Ordinary within-domain scalar chain rule along a variational model flow when
 the caller supplies eventual product-graph membership in the derivative domain. -/
 theorem hasDerivAt_scalarField_time_flow_tangent_apply₂Within_of_mem_Ioo

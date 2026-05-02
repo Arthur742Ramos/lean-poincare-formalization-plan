@@ -834,7 +834,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
             overlap uniqueness for those operator and fixed-vector-slot
             derivative-domain tuples, and scalar chain rules for operator-domain
             readouts `F(t, y, A)` along variational local flows in
-            closed-interval/open-domain and ordinary-interior forms,
+            closed-interval/open-domain and ordinary-interior forms, with
+            matching eventual-equality transfer wrappers for local scalar
+            identities,
            direct product-Picard bridges into scalar-readout,
            metric-coordinate-field, and finite-cover/readout-field tensor
            time-derivative routes, including closed-Picard within-filter
