@@ -508,6 +508,31 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   exact (metric_closedBall_subset (p := y) (R := R) (δ := (ε : ℝ))
     (by simpa [ε] using hδ_space) (by simpa [ε] using hδ_time) hR.le) hzball
 
+/-- A compact subset of an open set has one positive parabolic closed-ball radius around every
+one of its points still contained in that open set. -/
+theorem exists_uniform_subset_open_of_isCompact {K U : Set (ℝ × X)}
+    (hK : IsCompact K) (hUopen : IsOpen U) (hKU : K ⊆ U) :
+    ∃ R > 0, ∀ x ∈ K, parabolicClosedBall x R ⊆ U := by
+  rcases hK.exists_cthickening_subset_open hUopen hKU with ⟨δ, hδ, hδU⟩
+  let R : ℝ := min (δ / 2) 1
+  have hRpos : 0 < R := lt_min (half_pos hδ) zero_lt_one
+  have hR_space : R ≤ δ := by
+    unfold R
+    exact (min_le_left _ _).trans (by linarith)
+  have hR_time : R ^ 2 ≤ δ := by
+    have hRle1 : R ≤ 1 := by
+      unfold R
+      exact min_le_right _ _
+    have hsquare : R ^ 2 ≤ R := by
+      nlinarith [hRpos.le, hRle1]
+    exact hsquare.trans hR_space
+  refine ⟨R, hRpos, ?_⟩
+  intro x hx q hq
+  have hqmetric : q ∈ Metric.closedBall x δ :=
+    (subset_metric_closedBall (p := x) (R := R) (ε := δ) hR_space hR_time) hq
+  exact hδU (Metric.mem_cthickening_of_dist_le q x δ K hx
+    (Metric.mem_closedBall.1 hqmetric))
+
 theorem pair_parabolicDistance_le {c p q : ℝ × X}
     (hp : p ∈ parabolicClosedBall c R) (hq : q ∈ parabolicClosedBall c R) :
     parabolicDistance p q ≤ 2 * R := by
@@ -886,6 +911,26 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   exact (metric_closedBall_subset (p := y) (timeRadius := timeRadius)
     (spaceRadius := spaceRadius) (δ := (ε : ℝ))
     (by simpa [ε] using hδ_time) (by simpa [ε] using hδ_space)) hzball
+
+/-- A compact subset of an open set has one positive product-parabolic closed-cylinder radius
+around every one of its points still contained in that open set. -/
+theorem exists_uniform_subset_open_of_isCompact {K U : Set (ℝ × X)}
+    (hK : IsCompact K) (hUopen : IsOpen U) (hKU : K ⊆ U) :
+    ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      ∀ x ∈ K, parabolicClosedCylinder x timeRadius spaceRadius ⊆ U := by
+  rcases hK.exists_cthickening_subset_open hUopen hKU with ⟨δ, hδ, hδU⟩
+  let radius : ℝ := δ / 2
+  have hradius_pos : 0 < radius := half_pos hδ
+  have hradius_le : radius ≤ δ := by
+    unfold radius
+    linarith
+  refine ⟨radius, hradius_pos, radius, hradius_pos, ?_⟩
+  intro x hx q hq
+  have hqmetric : q ∈ Metric.closedBall x δ :=
+    (subset_metric_closedBall (p := x) (timeRadius := radius)
+      (spaceRadius := radius) (ε := δ) hradius_le hradius_le) hq
+  exact hδU (Metric.mem_cthickening_of_dist_le q x δ K hx
+    (Metric.mem_closedBall.1 hqmetric))
 
 /-- A closed product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at
 most `R` is contained in the closed parabolic ball of radius `R`. -/

@@ -1214,8 +1214,9 @@ closure containment for balls/cylinders, proper-space compactness for closed
 balls/cylinders, finite open/closed parabolic ball and cylinder covers of
 compact sets, finite center-dependent open ball/cylinder subcovers subordinate
 to any ambient open set containing a compact set, with matching closed
-balls/cylinders still contained in that open set, and packages `C^{0,α}`-style
-bounded/Hölder control with slice,
+balls/cylinders still contained in that open set, uniform positive closed
+ball/cylinder radii inside such open neighborhoods, and packages
+`C^{0,α}`-style bounded/Hölder control with slice,
 explicit closed-ball/cylinder oscillation, continuity,
 uniform-continuity, estimate monotonicity in the controlling constants, and
 additive/subtractive algebra estimates,
