@@ -879,7 +879,10 @@ Picard cylinder from the uniform initial-data Lipschitz estimate and the
 ODE-derived time continuity of each trajectory, and promotes any Lipschitz local
 flow package to the continuous space-time partial-flow form
 `ContinuousLocalFlowSolution`, so the chart-level output now includes the
-continuity needed before gluing local solutions. Continuous and variational
+continuity needed before gluing local solutions. Both Lipschitz and continuous
+local-flow packages now also expose within-filter space-time continuity and
+eventual-membership readouts on the Picard cylinder, matching chart-domain
+membership arguments where the initial point and time vary together. Continuous and variational
 local-flow packages now expose named base-flow, tangent-map, and vector-slot
 time-slice continuity bridges on the Picard interval, including direct
 within-interval, interior pointwise, and open-interior `ContinuousOn`

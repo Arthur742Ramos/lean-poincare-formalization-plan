@@ -806,7 +806,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       time-slice Lipschitz, continuity, and distance-estimate readouts for
       dependence on the initial point, plus joint space-time continuity on the
       local Picard cylinder and promotion from Lipschitz local flows to the
-      continuous space-time partial-flow form needed for chart gluing, named base-flow, tangent-map,
+      continuous space-time partial-flow form needed for chart gluing, with
+      within-filter space-time continuity and eventual-membership readouts,
+      named base-flow, tangent-map,
         and vector-slot time-slice continuity bridges for continuous/variational
            packages, including direct within-interval and interior pointwise
            continuity readouts, open-interior `ContinuousOn` readouts, and

@@ -553,6 +553,42 @@ theorem flow_continuousOn_spaceTime
   have htri := dist_triangle (α.flow q.1 q.2) (α.flow p.1 q.2) (α.flow p.1 p.2)
   linarith
 
+/-- Pointwise within-space-time continuity of a Lipschitz local-flow package. -/
+theorem flow_continuousWithinAt_spaceTime
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {p : V × ℝ}
+    (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax) :
+    ContinuousWithinAt (fun q : V × ℝ => α.flow q.1 q.2)
+      (closedBall x₀ r ×ˢ Icc tmin tmax) p :=
+  α.flow_continuousOn_spaceTime.continuousWithinAt hp
+
+/-- Coordinate form of space-time continuity for a Lipschitz local-flow package. -/
+theorem flow_continuousWithinAt_spaceTime_at
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousWithinAt (fun q : V × ℝ => α.flow q.1 q.2)
+      (closedBall x₀ r ×ˢ Icc tmin tmax) (x, t) :=
+  α.flow_continuousWithinAt_spaceTime ⟨hx, ht⟩
+
+/-- A Lipschitz local-flow package is eventually in any open target set around a
+space-time endpoint, relative to the Picard cylinder. -/
+theorem flow_eventuallyWithin_mem_of_mem_spaceTime
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {p : V × ℝ}
+    (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow p.1 p.2 ∈ U) :
+    (fun q : V × ℝ => α.flow q.1 q.2) ⁻¹' U ∈
+      𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] p :=
+  (α.flow_continuousWithinAt_spaceTime hp) (hU.mem_nhds hmem)
+
+/-- Coordinate form of the space-time eventual-membership readout for a
+Lipschitz local-flow package. -/
+theorem flow_eventuallyWithin_mem_of_mem_spaceTime_at
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow x t ∈ U) :
+    (fun q : V × ℝ => α.flow q.1 q.2) ⁻¹' U ∈
+      𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] (x, t) :=
+  α.flow_eventuallyWithin_mem_of_mem_spaceTime ⟨hx, ht⟩ hU hmem
+
 /-- A Lipschitz local-flow package is automatically a continuous space-time
 local-flow package. -/
 def toContinuousLocalFlowSolution
@@ -706,6 +742,51 @@ def toLocalFlowSolution (α : ContinuousLocalFlowSolution f t₀ x₀ r) :
 theorem center_initial_eq (α : ContinuousLocalFlowSolution f t₀ x₀ r) :
     α.flow (x₀, t₀) = x₀ :=
   α.initial_eq x₀ (mem_closedBall_self r.2)
+
+/-- Pointwise within-space-time continuity of the continuous local-flow package. -/
+theorem flow_continuousWithinAt_spaceTime
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {p : V × ℝ}
+    (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax) :
+    ContinuousWithinAt α.flow (closedBall x₀ r ×ˢ Icc tmin tmax) p :=
+  α.continuousOn.continuousWithinAt hp
+
+/-- Coordinate form of space-time continuity for the continuous local-flow package. -/
+theorem flow_continuousWithinAt_spaceTime_at
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousWithinAt α.flow (closedBall x₀ r ×ˢ Icc tmin tmax) (x, t) :=
+  α.flow_continuousWithinAt_spaceTime ⟨hx, ht⟩
+
+/-- Center-trajectory specialization of space-time continuity. -/
+theorem center_continuousWithinAt_spaceTime
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousWithinAt α.flow (closedBall x₀ r ×ˢ Icc tmin tmax) (x₀, t) :=
+  α.flow_continuousWithinAt_spaceTime_at (mem_closedBall_self r.2) ht
+
+/-- A continuous local-flow package is eventually in any open target set around a
+space-time endpoint, relative to the Picard cylinder. -/
+theorem flow_eventuallyWithin_mem_of_mem_spaceTime
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {p : V × ℝ}
+    (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow p ∈ U) :
+    α.flow ⁻¹' U ∈ 𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] p :=
+  (α.flow_continuousWithinAt_spaceTime hp) (hU.mem_nhds hmem)
+
+/-- Coordinate form of the space-time eventual-membership readout. -/
+theorem flow_eventuallyWithin_mem_of_mem_spaceTime_at
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x, t) ∈ U) :
+    α.flow ⁻¹' U ∈ 𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] (x, t) :=
+  α.flow_eventuallyWithin_mem_of_mem_spaceTime ⟨hx, ht⟩ hU hmem
+
+/-- Center-trajectory specialization of the space-time eventual-membership readout. -/
+theorem center_eventuallyWithin_mem_of_mem_spaceTime
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x₀, t) ∈ U) :
+    α.flow ⁻¹' U ∈ 𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] (x₀, t) :=
+  α.flow_eventuallyWithin_mem_of_mem_spaceTime_at
+    (mem_closedBall_self r.2) ht hU hmem
 
 /-- The center curve of the continuous space-time flow solves the model ODE. -/
 theorem center_hasDerivWithinAt
