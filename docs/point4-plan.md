@@ -252,7 +252,10 @@ variational local-flow continuity package whenever the derivative domain is open
 and contains the Picard graph endpoint. The raw-coordinate route now has the
 parallel open-product-domain bridge: raw graph convergence is derived from the
 gauge-flow preferred-chart derivative/continuity theorem whenever the domain is
-open around the raw coordinate endpoint.
+open around the raw coordinate endpoint. The same open-domain reduction now
+exists at the lower time-difference component-data layer, including for locally
+equal finite-cover/readout fields, so downstream tensor routes can inherit the
+derived graph convergence without restating it.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow

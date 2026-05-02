@@ -6135,6 +6135,36 @@ theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_hasFDerivAt_
     rw [← htc] at hvalue'
     simpa [spatial, sub_eq_add_neg, add_assoc] using hvalue'
 
+/-- The raw gauge-coordinate space-time graph converges to any open product
+domain containing its endpoint, for an arbitrary gauge-flow time set. -/
+theorem coordinateProductGraph_tendstoWithin_of_isOpen
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    {domain : Set (ℝ × E)}
+    (hopen : IsOpen domain)
+    (hmem : (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∈ domain) :
+    Filter.Tendsto
+      (fun τ : ℝ ↦ (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (𝓝[s] t)
+      (𝓝[domain] (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) := by
+  have htime :
+      ContinuousWithinAt (fun τ : ℝ ↦ τ) s t := by
+    simpa using
+      (continuousWithinAt_id (s := s) (x := t) :
+        ContinuousWithinAt (id : ℝ → ℝ) s t)
+  have hcoord :
+      ContinuousWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) s t :=
+    (G.hasDerivWithinAt_extChartAt_eval ht x).continuousWithinAt
+  have hgraph :
+      ContinuousWithinAt
+        (fun τ : ℝ ↦ (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))) s t :=
+    htime.prodMk hcoord
+  rw [hopen.nhdsWithin_eq hmem]
+  exact hgraph
+
 /-- Domain-restricted direct-velocity version of
 `metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_hasFDerivAt`.
 
@@ -6209,6 +6239,68 @@ theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDeri
         (I := I) (M := M) G ht g x hBfield hdomain
   · simpa [spatial, sub_eq_add_neg, add_assoc] using hvalue
 
+/-- Open-product-domain version of
+`metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDerivWithinAt`.
+
+The metric-coordinate derivative is still domain-restricted, but convergence of
+the raw gauge coordinate graph is derived from gauge-flow continuity once the
+domain is open around the endpoint. -/
+theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDerivWithinAtOpenDomain
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ (domain : Set (ℝ × E))
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (D : E →L[ℝ] E),
+          IsOpen domain ∧
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∈ domain ∧
+          HasFDerivWithinAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield'
+            domain (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t τ x)
+            (D.comp
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x)) s t ∧
+          Bfield' (1, X t ((G.maps3 t) x))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    MetricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf (I := I) (M := M) G g gdot := by
+  refine G.metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDerivWithinAt ?_
+  intro t ht x u v
+  obtain ⟨domain, Bfield', D, hopen, hmem, hBfield, hA, hvalue⟩ := hdata ht x u v
+  refine ⟨domain, Bfield', D, hBfield, ?_, hA, hvalue⟩
+  exact G.coordinateProductGraph_tendstoWithin_of_isOpen ht x hopen hmem
+
 /-- Readout-field product-domain version of
 `metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDerivWithinAt`.
 
@@ -6274,6 +6366,72 @@ theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_eventual
   obtain ⟨domain, Bfield, Bfield', D, hEq, hBfield, hdomain, hA, hvalue⟩ :=
     hdata ht x u v
   refine ⟨domain, Bfield', D, ?_, hdomain, hA, hvalue⟩
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEq
+      (I := I) (M := M) hEq hBfield
+
+/-- Open-product-domain readout-field version of
+`metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_eventuallyEq_hasFDerivWithinAt`.
+
+The finite-cover/readout field supplies the within-domain derivative, while
+openness and endpoint membership derive the raw graph convergence automatically. -/
+theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_eventuallyEq_hasFDerivWithinAtOpenDomain
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ (domain : Set (ℝ × E))
+          (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (D : E →L[ℝ] E),
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+              𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))]
+            Bfield ∧
+          IsOpen domain ∧
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∈ domain ∧
+          HasFDerivWithinAt Bfield Bfield'
+            domain (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t τ x)
+            (D.comp
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x)) s t ∧
+          Bfield' (1, X t ((G.maps3 t) x))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                (D (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    MetricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf (I := I) (M := M) G g gdot := by
+  refine G.metricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf_of_hasFDerivWithinAtOpenDomain ?_
+  intro t ht x u v
+  obtain ⟨domain, Bfield, Bfield', D, hEq, hopen, hmem, hBfield, hA, hvalue⟩ :=
+    hdata ht x u v
+  refine ⟨domain, Bfield', D, hopen, hmem, ?_, hA, hvalue⟩
   exact
     SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEq
       (I := I) (M := M) hEq hBfield

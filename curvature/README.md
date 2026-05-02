@@ -386,7 +386,9 @@ now packages the matching intrinsic boundary
          raw coordinate graph using closed-interval base-flow equality, with an
          open-domain variant deriving model graph convergence from variational
          local-flow continuity and a raw-coordinate open-domain bridge deriving
-         raw graph convergence from preferred-chart gauge-flow continuity, the
+         raw graph convergence from preferred-chart gauge-flow continuity, plus
+         lower time-difference component-data constructors with the same
+         open-domain reduction for direct and readout fields, the
          model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

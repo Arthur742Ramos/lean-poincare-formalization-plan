@@ -692,8 +692,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          derivative domain is open and contains the Picard graph endpoint, model
          graph convergence is derived from variational-flow continuity instead
          of being assumed, and the raw-coordinate route has the parallel
-         open-domain bridge from preferred-chart gauge-flow continuity, all
-         without being upgraded to global `HasFDerivAt`
+         open-domain bridge from preferred-chart gauge-flow continuity. The same
+         open-domain reduction is available at the lower time-difference
+         component-data layer, including locally equal finite-cover/readout
+         fields, all without being upgraded to global `HasFDerivAt`
          statements. It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
