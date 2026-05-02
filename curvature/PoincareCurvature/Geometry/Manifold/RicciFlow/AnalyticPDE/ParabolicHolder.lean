@@ -1148,6 +1148,26 @@ theorem prod {F : Type*} [NormedAddCommGroup F] {D : ℝ} {v : ℝ × X → F}
     ((hu hp hq).trans (mul_le_mul_of_nonneg_right (le_max_left C D) hdα))
     ((hv hp hq).trans (mul_le_mul_of_nonneg_right (le_max_right C D) hdα))
 
+/-- Componentwise finite parabolic Holder estimates package as a Pi-valued Holder estimate with
+summed constants. -/
+theorem pi {ι : Type*} [Fintype ι] {C : ι → ℝ} {u : ℝ × X → ι → E}
+    (hC : ∀ i, 0 ≤ C i)
+    (h : ∀ i, ParabolicHolderWith (C i) α (fun z => u z i) s) :
+    ParabolicHolderWith (∑ i, C i) α u s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  have hdα : 0 ≤ dα := Real.rpow_nonneg (parabolicDistance.nonneg p q) α
+  have hCsum_nonneg : 0 ≤ ∑ i, C i := Finset.sum_nonneg fun i _hi => hC i
+  have hC_le_sum : ∀ i, C i ≤ ∑ j, C j := by
+    intro i
+    exact Finset.single_le_sum (fun j _hj => hC j) (Finset.mem_univ i)
+  have htarget_nonneg : 0 ≤ (∑ i, C i) * dα := mul_nonneg hCsum_nonneg hdα
+  exact (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun i => by
+    have hcomp : ‖u p i - u q i‖ ≤ C i * dα := h i hp hq
+    have hscale : C i * dα ≤ (∑ j, C j) * dα :=
+      mul_le_mul_of_nonneg_right (hC_le_sum i) hdα
+    simpa [Pi.sub_apply, dα] using hcomp.trans hscale
+
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
     (ha : ParabolicHolderWith C α a s) (hδpos : 0 < δ)
     (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
@@ -1552,6 +1572,23 @@ theorem prod {F : Type*} [NormedAddCommGroup F] {v : ℝ × X → F}
   rcases hv with ⟨D, hD, hDv⟩
   exact ⟨max C D, hC.trans (le_max_left C D), hCu.prod hDv⟩
 
+/-- Componentwise finite parabolic Holder control packages as Pi-valued Holder control. -/
+theorem pi {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
+    (h : ∀ i, ParabolicHolderOn α (fun z => u z i) s) :
+    ParabolicHolderOn α u s := by
+  classical
+  let C : ι → ℝ := fun i => Classical.choose (h i)
+  have hCnonneg : ∀ i, 0 ≤ C i := by
+    intro i
+    dsimp [C]
+    exact (Classical.choose_spec (h i)).1
+  have hholder : ∀ i, ParabolicHolderWith (C i) α (fun z => u z i) s := by
+    intro i
+    dsimp [C]
+    exact (Classical.choose_spec (h i)).2
+  exact ⟨∑ i, C i, Finset.sum_nonneg fun i _hi => hCnonneg i,
+    ParabolicHolderWith.pi hCnonneg hholder⟩
+
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {a : ℝ × X → 𝕜} {δ : ℝ}
     (ha : ParabolicHolderOn α a s) (hδpos : 0 < δ)
     (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
@@ -1943,6 +1980,20 @@ theorem prod {F : Type*} [NormedAddCommGroup F] {D : ℝ} {v : ℝ × X → F}
   rw [Prod.norm_mk]
   exact max_le ((hu hp).trans (le_max_left B D)) ((hv hp).trans (le_max_right B D))
 
+/-- Componentwise finite sup-norm bounds package as a Pi-valued sup-norm bound with summed
+constants. -/
+theorem pi {ι : Type*} [Fintype ι] {B : ι → ℝ} {u : ℝ × X → ι → E}
+    (hB : ∀ i, 0 ≤ B i)
+    (h : ∀ i, ParabolicBoundedWith (B i) (fun z => u z i) s) :
+    ParabolicBoundedWith (∑ i, B i) u s := by
+  intro p hp
+  have hBsum_nonneg : 0 ≤ ∑ i, B i := Finset.sum_nonneg fun i _hi => hB i
+  have hB_le_sum : ∀ i, B i ≤ ∑ j, B j := by
+    intro i
+    exact Finset.single_le_sum (fun j _hj => hB j) (Finset.mem_univ i)
+  exact (pi_norm_le_iff_of_nonneg hBsum_nonneg).2 fun i =>
+    (h i hp).trans (hB_le_sum i)
+
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
     (hδpos : 0 < δ) (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
     ParabolicBoundedWith δ⁻¹ (fun z => (a z)⁻¹) s := by
@@ -2089,6 +2140,15 @@ theorem prod {F : Type*} [NormedAddCommGroup F] {B₃ H₃ : ℝ} {v : ℝ × X 
     (hv : ParabolicC0AlphaWith B₃ H₃ α v s) :
     ParabolicC0AlphaWith (max B B₃) (max H H₃) α (fun z => (u z, v z)) s :=
   ⟨hu.bounded.prod hv.bounded, hu.holder.prod hv.holder⟩
+
+/-- Componentwise finite parabolic `C^{0,α}` estimates package as a Pi-valued estimate with
+summed sup and Holder constants. -/
+theorem pi {ι : Type*} [Fintype ι] {B H : ι → ℝ} {u : ℝ × X → ι → E}
+    (hB : ∀ i, 0 ≤ B i) (hH : ∀ i, 0 ≤ H i)
+    (h : ∀ i, ParabolicC0AlphaWith (B i) (H i) α (fun z => u z i) s) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, H i) α u s :=
+  ⟨ParabolicBoundedWith.pi hB fun i => (h i).bounded,
+    ParabolicHolderWith.pi hH fun i => (h i).holder⟩
 
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
     (ha : ParabolicC0AlphaWith B H α a s) (hδpos : 0 < δ)
@@ -2453,28 +2513,9 @@ theorem pi {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
     intro i
     dsimp [B, H]
     exact (Classical.choose_spec (Classical.choose_spec (h i)).2).2
-  have hBsum_nonneg : 0 ≤ ∑ i, B i := Finset.sum_nonneg fun i _hi => hBnonneg i
-  have hHsum_nonneg : 0 ≤ ∑ i, H i := Finset.sum_nonneg fun i _hi => hHnonneg i
-  have hB_le_sum : ∀ i, B i ≤ ∑ j, B j := by
-    intro i
-    exact Finset.single_le_sum (fun j _hj => hBnonneg j) (Finset.mem_univ i)
-  have hH_le_sum : ∀ i, H i ≤ ∑ j, H j := by
-    intro i
-    exact Finset.single_le_sum (fun j _hj => hHnonneg j) (Finset.mem_univ i)
-  refine ⟨∑ i, B i, hBsum_nonneg, ∑ i, H i, hHsum_nonneg, ?_⟩
-  constructor
-  · intro p hp
-    exact (pi_norm_le_iff_of_nonneg hBsum_nonneg).2 fun i =>
-      (hBH i).bounded hp |>.trans (hB_le_sum i)
-  · intro p hp q hq
-    let dα := (parabolicDistance p q) ^ α
-    have hdα : 0 ≤ dα := Real.rpow_nonneg (parabolicDistance.nonneg p q) α
-    have htarget_nonneg : 0 ≤ (∑ i, H i) * dα := mul_nonneg hHsum_nonneg hdα
-    exact (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun i => by
-      have hcomp : ‖u p i - u q i‖ ≤ H i * dα := (hBH i).holder hp hq
-      have hscale : H i * dα ≤ (∑ j, H j) * dα :=
-        mul_le_mul_of_nonneg_right (hH_le_sum i) hdα
-      simpa [Pi.sub_apply, dα] using hcomp.trans hscale
+  refine ⟨∑ i, B i, Finset.sum_nonneg fun i _hi => hBnonneg i,
+    ∑ i, H i, Finset.sum_nonneg fun i _hi => hHnonneg i, ?_⟩
+  exact ParabolicC0AlphaWith.pi hBnonneg hHnonneg hBH
 
 theorem neg (hu : ParabolicC0AlphaOn α u s) :
     ParabolicC0AlphaOn α (fun z => -u z) s := by
