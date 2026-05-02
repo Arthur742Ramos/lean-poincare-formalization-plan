@@ -720,6 +720,10 @@ point and both pushed vector slots in one product domain. The same four-variable
 route now has ordinary open-interior `Ioo` variants, including center-trajectory
 specializations, so interior endpoint routes can consume product-domain scalar
 derivatives without first passing through a closed-interval within derivative.
+Both the closed-interval and open-interior four-variable routes now also have
+within-filter/ordinary eventual-equality transfer forms, so chart-local
+geometric scalar identities can reuse those product-domain derivatives after
+they are identified with the model-coordinate readout near the endpoint.
 
 ### Item 2 — raw `C³` gauge-flow existence on a compact manifold
 

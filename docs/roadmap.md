@@ -721,7 +721,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           four-variable open-domain chain rule for readouts on `(t, y, u, v)`,
           with variational local-flow specializations for
           `(t, flow(t), A(t)u, A(t)v)`, now also in ordinary open-interior `Ioo`
-          form for center and non-center trajectories. It also has
+          form for center and non-center trajectories, with matching
+          within-filter and ordinary eventual-equality transfer forms for
+          chart-local scalar identities. It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and
