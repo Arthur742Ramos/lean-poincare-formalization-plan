@@ -630,9 +630,11 @@ now packages the matching intrinsic boundary
       boundedness hypothesis for continuous Riemannian vector bundles, deriving
       preferred-bilinear smooth approximants and the finite-cover Banach-norm
       approximation theorem from mathlib's
-      `eventually_norm_trivializationAt_lt`, with only the explicit finite-cover
-      inverse bound left as input, leaving the heavy PDE realization module
-      unchanged. The
+      `eventually_norm_trivializationAt_lt`. It also derives the finite-cover
+      inverse bound from compactness of the cover pieces inside their fixed
+      trivialization domains by factoring fixed-center inverses through centered
+      inverse trivializations and continuous coordinate changes, leaving the
+      heavy PDE realization module unchanged. The
    `GaugeReduction.Diffeomorph3FlowTimeDerivative` module exposes the fixed
    non-identity gauge scalar derivative form of the static pullback calculation
    plus its scalar-to-tensor repackaging lemma, and names the remaining dynamic

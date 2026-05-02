@@ -929,8 +929,10 @@ now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives
 `eventually_norm_trivializationAt_lt` from mathlib's Riemannian bundle estimate
 and uses it to produce preferred-bilinear smooth approximants, including the
-finite-cover Banach-norm approximation theorem under the remaining explicit
-finite-cover inverse bound.
+finite-cover Banach-norm approximation theorem. The same module now also
+derives that finite-cover inverse bound from compactness of the cover pieces
+inside their fixed trivialization domains by factoring fixed-center inverses
+through centered inverse trivializations and continuous coordinate changes.
 
 **Suggested decomposition** (multi-session):
 

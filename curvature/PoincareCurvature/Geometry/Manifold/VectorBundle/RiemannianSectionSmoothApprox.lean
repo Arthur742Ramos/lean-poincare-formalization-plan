@@ -271,6 +271,92 @@ theorem eventually_norm_symmL_bilinearFormBundle_trivializationAt_lt_of_isContin
     (F := F) (W := W)
     (eventually_norm_trivializationAt_lt_of_isContinuousRiemannianBundle (F := F) (W := W))
 
+/-- Near any point in a fixed trivialization domain, the inverse map of that fixed
+trivialization is locally bounded.  The proof factors the fixed-center inverse through the
+centered inverse trivialization and a continuous coordinate change. -/
+theorem eventually_norm_fixed_trivializationAt_symmL_lt_of_mem_baseSet
+    [IsContinuousRiemannianBundle (B := M) F W]
+    {x0 x : M} (hx : x ∈ (trivializationAt F W x0).baseSet) :
+    ∃ C > 0, ∀ᶠ y in 𝓝 x, ‖(trivializationAt F W x0).symmL ℝ y‖ < C := by
+  let e0 : _root_.Bundle.Trivialization F (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace F W → M) :=
+    trivializationAt F W x0
+  let ex : _root_.Bundle.Trivialization F (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace F W → M) :=
+    trivializationAt F W x
+  have hxex : x ∈ ex.baseSet := mem_baseSet_trivializationAt F W x
+  obtain ⟨C₁, hC₁pos, hC₁event⟩ := eventually_norm_symmL_trivializationAt_lt (F := F) (E := W) x
+  let D : ℝ := ‖(e0.coordChangeL ℝ ex x : F →L[ℝ] F)‖ + 1
+  have hDpos : 0 < D := by
+    dsimp [D]
+    positivity
+  refine ⟨C₁ * D, mul_pos hC₁pos hDpos, ?_⟩
+  have hinter_mem : e0.baseSet ∩ ex.baseSet ∈ 𝓝 x :=
+    Filter.inter_mem (e0.open_baseSet.mem_nhds hx) (ex.open_baseSet.mem_nhds hxex)
+  have hcoord :
+      ContinuousAt (fun y ↦ (e0.coordChangeL ℝ ex y : F →L[ℝ] F)) x := by
+    exact ((continuousOn_coordChange (R := ℝ) (F := F) (E := W) e0 ex).continuousAt hinter_mem)
+  have hcoord_event :
+      ∀ᶠ y in 𝓝 x, ‖(e0.coordChangeL ℝ ex y : F →L[ℝ] F)‖ < D := by
+    exact ((continuous_norm.continuousAt.comp hcoord).eventually_lt_const (lt_add_one _))
+  filter_upwards [hinter_mem, hC₁event, hcoord_event] with y hy hsymm hcoordBound
+  have hfactor :
+      e0.symmL ℝ y = ex.symmL ℝ y ∘L (e0.coordChangeL ℝ ex y : F →L[ℝ] F) := by
+    ext v
+    have hcoord_eq :=
+      _root_.Bundle.Trivialization.comp_continuousLinearEquivAt_eq_coord_change
+        (R := ℝ) (e := e0) (e' := ex) (b := y) (hb := hy)
+    have hcoord_apply :
+        (e0.coordChangeL ℝ ex y : F →L[ℝ] F) v =
+          ex.continuousLinearEquivAt ℝ y hy.2 (e0.symmL ℝ y v) := by
+      rw [← hcoord_eq]
+      simp
+    rw [ContinuousLinearMap.comp_apply, hcoord_apply]
+    have h := _root_.Bundle.Trivialization.symmL_continuousLinearMapAt
+      (e := ex) (R := ℝ) hy.2 (e0.symmL ℝ y v)
+    simpa [_root_.Bundle.Trivialization.coe_continuousLinearEquivAt_eq (e := ex) hy.2] using h.symm
+  calc
+    ‖e0.symmL ℝ y‖ = ‖ex.symmL ℝ y ∘L (e0.coordChangeL ℝ ex y : F →L[ℝ] F)‖ := by
+      rw [hfactor]
+    _ ≤ ‖ex.symmL ℝ y‖ * ‖(e0.coordChangeL ℝ ex y : F →L[ℝ] F)‖ :=
+      ContinuousLinearMap.opNorm_comp_le _ _
+    _ < C₁ * D := mul_lt_mul'' hsymm hcoordBound (norm_nonneg _) (norm_nonneg _)
+
+/-- On a compact subset of a fixed trivialization domain in a continuous Riemannian vector bundle,
+the inverse fixed trivialization has a uniform operator-norm bound. -/
+theorem exists_uniform_norm_fixed_trivializationAt_symmL_le_of_compact
+    [IsContinuousRiemannianBundle (B := M) F W]
+    {x0 : M} (K : TopologicalSpace.Compacts M)
+    (hK : (K : Set M) ⊆ (trivializationAt F W x0).baseSet) :
+    ∃ C > 0, ∀ x : K, ‖(trivializationAt F W x0).symmL ℝ x.1‖ ≤ C := by
+  classical
+  let e0 : _root_.Bundle.Trivialization F (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace F W → M) :=
+    trivializationAt F W x0
+  have hlocal : ∀ x ∈ (K : Set M), ∃ C > 0, ∀ᶠ y in 𝓝 x, ‖e0.symmL ℝ y‖ < C := by
+    intro x hxK
+    simpa [e0] using
+      eventually_norm_fixed_trivializationAt_symmL_lt_of_mem_baseSet
+        (F := F) (W := W) (x0 := x0) (x := x) (hK hxK)
+  have hlocalK : ∀ x : K, ∃ C > 0, ∀ᶠ y in 𝓝 (x : M), ‖e0.symmL ℝ y‖ < C := by
+    intro x
+    exact hlocal x.1 x.2
+  choose C hCpos hCevent using hlocalK
+  let U : ∀ x ∈ (K : Set M), Set M := fun x hx ↦ {y | ‖e0.symmL ℝ y‖ < C ⟨x, hx⟩}
+  have hU : ∀ x (hx : x ∈ (K : Set M)), U x hx ∈ 𝓝 x := by
+    intro x hxK
+    simpa [U] using hCevent ⟨x, hxK⟩
+  rcases K.isCompact.elim_nhds_subcover' U hU with ⟨t, htcover⟩
+  refine ⟨(∑ x ∈ t, C x) + 1, ?_, ?_⟩
+  · have hsum_nonneg : 0 ≤ ∑ x ∈ t, C x :=
+      Finset.sum_nonneg fun x _hxmem ↦ le_of_lt (hCpos x)
+    linarith
+  · intro x
+    rcases Set.mem_iUnion₂.mp (htcover x.2) with ⟨y, hymem, hyU⟩
+    have hyle : C y ≤ ∑ z ∈ t, C z :=
+      Finset.single_le_sum
+        (fun z _hzmem ↦ le_of_lt (hCpos z)) hymem
+    have hxlt : ‖e0.symmL ℝ x.1‖ < C y := by
+      simpa [U] using hyU
+    exact le_trans (le_of_lt hxlt) (by linarith)
+
 /-- Continuous preferred bilinear-form sections have smooth fiberwise approximants in a continuous
 Riemannian vector bundle.  This discharges the local trivialization-boundedness hypothesis from the
 Riemannian vector-bundle estimate. -/
@@ -329,6 +415,54 @@ theorem exists_dist_lt_preferredBilinear_of_continuousRiemannianBundle_and_symmL
     (F := F) (W := W) x0 s hCpos hC
     (exists_smooth_fiberwise_approx_preferredBilinear_of_continuousRiemannianBundle
       (F := F) (W := W) x0 s)
+
+/-- Smooth approximation in the transported finite-cover Banach norm for preferred bilinear-form
+trivializations in a continuous Riemannian vector bundle.  Both analytic boundedness inputs used by
+the older preferred-cover theorem are discharged here: local coordinate-map boundedness follows from
+the Riemannian bundle estimate, and the finite-cover inverse bound follows from compactness of the
+cover pieces inside their fixed trivialization domains. -/
+theorem exists_dist_lt_preferredBilinear_of_continuousRiemannianBundle
+    [IsContinuousRiemannianBundle (B := M) F W]
+    [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [SecondCountableTopology H] [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    ∀ ε > 0,
+      ∃ u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover,
+        ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+          (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x)) ∧
+        dist s u < ε := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  choose C hCpos hC using fun i ↦
+    exists_uniform_norm_fixed_trivializationAt_symmL_le_of_compact
+      (F := F) (W := W) (x0 := x0 i) (Kc i) (by
+        intro x hx
+        simpa using hKc i hx)
+  let Csum : ℝ := (∑ i : κ, C i) + 1
+  have hCsum_pos : 0 < Csum := by
+    have hsum_nonneg : 0 ≤ ∑ i : κ, C i :=
+      Finset.sum_nonneg fun i _hi ↦ le_of_lt (hCpos i)
+    dsimp [Csum]
+    linarith
+  have hCsum_bound : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ Csum := by
+    intro i x
+    have hi_le : C i ≤ ∑ j : κ, C j :=
+      Finset.single_le_sum (fun j _hj ↦ le_of_lt (hCpos j)) (Finset.mem_univ i)
+    exact (hC i x).trans (by dsimp [Csum]; linarith)
+  exact exists_dist_lt_preferredBilinear_of_continuousRiemannianBundle_and_symmL_opNorm_le
+    (F := F) (W := W) x0 s hCsum_pos hCsum_bound
 
 end PreferredBilinearRiemannianSmoothApprox
 
