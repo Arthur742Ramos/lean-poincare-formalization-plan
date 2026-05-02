@@ -128,6 +128,21 @@ theorem matrix_mulVec_entry {m n A : Type*} [Fintype n] [NormedRing A]
         (fun j _hj => (hM i j).mul (hv j)))
   simpa [Matrix.mulVec] using hsum
 
+/-- Entries of a vector-matrix product are parabolic `C^{0,α}` when the vector components and
+matrix entries are. -/
+theorem matrix_vecMul_entry {m n A : Type*} [Fintype m] [NormedRing A]
+    {v : ℝ × X → m → A} {M : ℝ × X → Matrix m n A}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) (j : n) :
+    ParabolicC0AlphaOn α (fun z => Matrix.vecMul (v z) (M z) j) s := by
+  have hsum : ParabolicC0AlphaOn α (fun z => ∑ i : m, v z i * M z i j) s := by
+    simpa using
+      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset m))
+        (u := fun i z => v z i * M z i j)
+        (fun i _hi => (hv i).mul (hM i j)))
+  simpa [Matrix.vecMul] using hsum
+
 /-- Entries of an inverse-matrix-vector product are parabolic `C^{0,α}` when the matrix entries
 and vector components are, and the determinant is uniformly bounded away from zero. -/
 theorem matrix_inv_mulVec_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
@@ -140,6 +155,19 @@ theorem matrix_inv_mulVec_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [No
   matrix_mulVec_entry
     (M := fun z => (M z)⁻¹) (v := v)
     (fun r c => matrix_inv_entry (M := M) hM hδpos hdet r c) hv i
+
+/-- Entries of a vector-inverse-matrix product are parabolic `C^{0,α}` when the matrix entries
+and vector components are, and the determinant is uniformly bounded away from zero. -/
+theorem matrix_vecMul_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ : ℝ} {v : ℝ × X → n → 𝕜} {M : ℝ × X → Matrix n n 𝕜}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (j : n) :
+    ParabolicC0AlphaOn α (fun z => Matrix.vecMul (v z) (M z)⁻¹ j) s :=
+  matrix_vecMul_entry
+    (v := v) (M := fun z => (M z)⁻¹)
+    hv (fun r c => matrix_inv_entry (M := M) hM hδpos hdet r c) j
 
 end ParabolicC0AlphaOn
 end AnalyticPDE
