@@ -1930,8 +1930,7 @@ theorem nonempty_ofChartDerivative
   ⟨ofChartDerivative maps3 anchored hchart⟩
 
 /-- Fixed-IVP within-time-set preferred-chart ODE data also supplies the existing
-within-time-set derivative-family view, after passing through the raw gauge-flow
-witness. -/
+within-time-set derivative view directly. -/
 theorem derivativeData_ofChartDerivative
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
@@ -1944,10 +1943,9 @@ theorem derivativeData_ofChartDerivative
     (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivative
       (I := I) (M := M) ivp maps3) :
     ChosenIntrinsicDeTurckGaugeFlowDerivative
-      (I := I) (M := M) ivp maps3 := by
-  intro sol t ht x
-  exact ((ofChartDerivative (I := I) (M := M) (ivp := ivp)
-    maps3 anchored hchart).flow sol).hasMFDerivWithinAt ht x
+      (I := I) (M := M) ivp maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivative_of_chartDerivative
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3) hchart
 
 /-- Package fixed-IVP ordinary-at-time named derivative data as raw gauge-flow
 existence data. -/
@@ -2023,8 +2021,8 @@ theorem nonempty_ofChartDerivativeAt
       (E := E) (H := H) (I := I) (M := M) ivp) :=
   ⟨ofChartDerivativeAt maps3 anchored hchart⟩
 
-/-- Fixed-IVP preferred-chart ODE data also supplies the existing within-time-set
-derivative-family view, after passing through the raw gauge-flow witness. -/
+/-- Fixed-IVP ordinary preferred-chart ODE data also supplies the existing
+within-time-set derivative view directly. -/
 theorem derivativeData_ofChartDerivativeAt
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
@@ -2037,10 +2035,11 @@ theorem derivativeData_ofChartDerivativeAt
     (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAt
       (I := I) (M := M) ivp maps3) :
     ChosenIntrinsicDeTurckGaugeFlowDerivative
-      (I := I) (M := M) ivp maps3 := by
-  intro sol t ht x
-  exact ((ofChartDerivativeAt (I := I) (M := M) (ivp := ivp)
-    maps3 anchored hchart).flow sol).hasMFDerivWithinAt ht x
+      (I := I) (M := M) ivp maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivative_of_derivativeAt
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+    (chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_chartDerivativeAt
+      (I := I) (M := M) (ivp := ivp) (maps3 := maps3) hchart)
 
 /-- Chosen-background intrinsic DeTurck solutions have zero intrinsic DeTurck gauge field, so the
 identity diffeomorphism family supplies the raw `C³` gauge-flow existence data for a fixed IVP. -/
@@ -3493,8 +3492,7 @@ theorem nonempty_ofChartDerivativeFamily
   ⟨ofChartDerivativeFamily maps3 anchored hchart⟩
 
 /-- Theorem-family within-time-set preferred-chart ODE data also supplies the
-existing within-time-set derivative-family view, after passing through the raw
-gauge-flow witness. -/
+existing within-time-set derivative-family view directly. -/
 theorem derivativeFamily_ofChartDerivativeFamily
     (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
       ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
@@ -3508,10 +3506,9 @@ theorem derivativeFamily_ofChartDerivativeFamily
     (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily
       (I := I) (M := M) maps3) :
     ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
-      (I := I) (M := M) maps3 := by
-  intro ivp sol t ht x
-  exact ((ofChartDerivativeFamily (I := I) (M := M)
-    maps3 anchored hchart).flow ivp sol).hasMFDerivWithinAt ht x
+      (I := I) (M := M) maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_of_chartDerivativeFamily
+    (I := I) (M := M) (maps3 := maps3) hchart
 
 /-- Package theorem-family ordinary-at-time named derivative data as raw
 gauge-flow existence data.  This is the named derivative-family analogue of
@@ -3592,9 +3589,8 @@ theorem nonempty_ofChartDerivativeAtFamily
       (E := E) (H := H) (I := I) (M := M)) :=
   ⟨ofChartDerivativeAtFamily maps3 anchored hchart⟩
 
-/-- Theorem-family preferred-chart ODE data also supplies the existing
-within-time-set derivative-family view, after passing through the raw
-gauge-flow witness. -/
+/-- Theorem-family ordinary preferred-chart ODE data also supplies the existing
+within-time-set derivative-family view directly. -/
 theorem derivativeFamily_ofChartDerivativeAtFamily
     (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
       ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
@@ -3608,10 +3604,11 @@ theorem derivativeFamily_ofChartDerivativeAtFamily
     (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily
       (I := I) (M := M) maps3) :
     ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
-      (I := I) (M := M) maps3 := by
-  intro ivp sol t ht x
-  exact ((ofChartDerivativeAtFamily (I := I) (M := M)
-    maps3 anchored hchart).flow ivp sol).hasMFDerivWithinAt ht x
+      (I := I) (M := M) maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_of_derivativeAtFamily
+    (I := I) (M := M) (maps3 := maps3)
+    (chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_chartDerivativeAtFamily
+      (I := I) (M := M) (maps3 := maps3) hchart)
 
 /-- Derivative-family data extracted directly from theorem-family raw intrinsic
 DeTurck gauge-flow existence. -/

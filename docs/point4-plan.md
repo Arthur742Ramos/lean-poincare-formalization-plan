@@ -812,6 +812,12 @@ derivative-data readouts back to
 `ChosenIntrinsicDeTurckGaugeFlowDerivative` and
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
 the existing scalar gauge-pullback route after supplying the chart-ODE package.
+The chart-ODE packages themselves now also prove the underlying manifold-curve
+continuity and convert directly to primitive intrinsic manifold derivative data
+in both within-time-set and ordinary-at-time forms, with fixed-IVP and
+theorem-family lifts; the existence-layer derivative readouts now use that
+direct chart-to-manifold bridge instead of passing through a raw gauge-flow
+witness first.
 The primitive derivative views now also round-trip with the geometric
 `SatisfiesGaugeFlowOn` equation, both for fixed-IVP packages and theorem
 families, so either formulation can be recovered without rebuilding the

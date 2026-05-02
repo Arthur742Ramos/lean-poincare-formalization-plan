@@ -761,12 +761,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        `C³` gauge-flow bundles directly. The derivative-view layer also
          has ordinary-on-time-set derivative-family data and an
         `ofDerivativeAtFamily` raw-existence bridge for named Picard-interior
-         derivative packages, named source-neighborhood preferred-chart ODE
-         packages for both within-time-set and ordinary-at-time chart data with
-          fixed-IVP and theorem-family `ofChartDerivative` /
-          `ofChartDerivativeAt` bridges plus derivative-data readouts back to the
-          existing endpoint derivative-family view, and eventual-equality
-           transfers from local model-coordinate curves into both the within-set
+          derivative packages, named source-neighborhood preferred-chart ODE
+          packages for both within-time-set and ordinary-at-time chart data with
+           fixed-IVP and theorem-family `ofChartDerivative` /
+           `ofChartDerivativeAt` bridges plus direct primitive derivative-data
+           readouts back to the existing endpoint derivative-family view, direct
+           lower-level chart-to-manifold derivative bridges, and eventual-equality
+            transfers from local model-coordinate curves into both the within-set
            and ordinary chart-ODE packages, model-vector-field
            RHS-identification adapters that promote manifold or preferred-chart
            derivative packages to the intrinsic derivative views once the model

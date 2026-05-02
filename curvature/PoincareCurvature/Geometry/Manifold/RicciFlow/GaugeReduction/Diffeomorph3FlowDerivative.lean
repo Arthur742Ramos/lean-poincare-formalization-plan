@@ -86,6 +86,38 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.hasDerivWithinAt_extChar
       (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) s t :=
   (hchart t ht x).2
 
+/-- Preferred-chart ODE data gives continuity of the underlying manifold curve
+within the active time set. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.continuousWithinAt_eval_self
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background s)
+    {t : ℝ} (ht : t ∈ s) (x : M) :
+    ContinuousWithinAt (fun τ : ℝ ↦ (Φ τ) x) s t := by
+  let e := extChartAt I ((Φ t) x)
+  have hx : (Φ t) x ∈ e.source := by
+    simpa [e] using mem_extChartAt_source (I := I) ((Φ t) x)
+  have hsymm : ContinuousAt e.symm (e ((Φ t) x)) := by
+    simpa [e] using continuousAt_extChartAt_symm (I := I) ((Φ t) x)
+  have hchart_cont : ContinuousWithinAt (fun τ : ℝ ↦ e ((Φ τ) x)) s t := by
+    simpa [e] using (hchart t ht x).2.continuousWithinAt
+  have hcomp' : ContinuousWithinAt
+      (e.symm ∘ fun τ : ℝ ↦ e ((Φ τ) x)) s t :=
+    ContinuousAt.comp_continuousWithinAt
+      (g := e.symm) (f := fun τ : ℝ ↦ e ((Φ τ) x))
+      (s := s) (x := t) hsymm hchart_cont
+  have hcomp : ContinuousWithinAt
+      (fun τ : ℝ ↦ e.symm (e ((Φ τ) x))) s t := by
+    simpa [Function.comp_def] using hcomp'
+  have hsource' : ∀ᶠ τ in 𝓝[s] t, (Φ τ) x ∈ e.source := by
+    simpa [e] using (hchart t ht x).1
+  exact hcomp.congr_of_eventuallyEq
+    (hsource'.mono fun τ hτ ↦ by simpa [e] using (e.left_inv hτ).symm)
+    (by simpa [e] using (e.left_inv hx).symm)
+
 /-- Build within-time-set preferred-chart ODE data from local coordinate curves
 that are eventually equal, in the within-filter, to the actual centered
 preferred-chart coordinate curves. -/
@@ -187,6 +219,36 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.hasDerivAt_extChartAt_
       (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) t :=
   (hchart t ht x).2
 
+/-- Ordinary preferred-chart ODE data gives ordinary continuity of the
+underlying manifold curve. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.continuousAt_eval_self
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s)
+    {t : ℝ} (ht : t ∈ s) (x : M) :
+    ContinuousAt (fun τ : ℝ ↦ (Φ τ) x) t := by
+  let e := extChartAt I ((Φ t) x)
+  have hx : (Φ t) x ∈ e.source := by
+    simpa [e] using mem_extChartAt_source (I := I) ((Φ t) x)
+  have hsymm : ContinuousAt e.symm (e ((Φ t) x)) := by
+    simpa [e] using continuousAt_extChartAt_symm (I := I) ((Φ t) x)
+  have hchart_cont : ContinuousAt (fun τ : ℝ ↦ e ((Φ τ) x)) t := by
+    simpa [e] using (hchart t ht x).2.continuousAt
+  have hcomp' : ContinuousAt
+      (e.symm ∘ fun τ : ℝ ↦ e ((Φ τ) x)) t :=
+    ContinuousAt.comp
+      (g := e.symm) (f := fun τ : ℝ ↦ e ((Φ τ) x))
+      (x := t) hsymm hchart_cont
+  have hcomp : ContinuousAt (fun τ : ℝ ↦ e.symm (e ((Φ τ) x))) t := by
+    simpa [Function.comp_def] using hcomp'
+  have hsource' : ∀ᶠ τ in 𝓝 t, (Φ τ) x ∈ e.source := by
+    simpa [e] using (hchart t ht x).1
+  exact hcomp.congr_of_eventuallyEq
+    (hsource'.mono fun τ hτ ↦ by simpa [e] using (e.left_inv hτ).symm)
+
 /-- Build within-time-set intrinsic derivative data from derivative data for a model vector field,
 once that vector field is identified with the intrinsic DeTurck gauge field along the flow. -/
 theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_vectorField_eq
@@ -228,6 +290,24 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.of_vectorField_eq
   intro t ht x
   exact ⟨hsource t ht x, by simpa [hY t ht x] using hderiv t ht x⟩
 
+/-- Preferred-chart ODE data directly supplies the primitive intrinsic manifold
+derivative data within the same time set. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_chartDerivativeOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background s) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  rw [HasMFDerivWithinAt]
+  refine ⟨hchart.continuousWithinAt_eval_self ht x, ?_⟩
+  have h := (hchart t ht x).2
+  rw [hasDerivWithinAt_iff_hasFDerivWithinAt] at h
+  simpa [writtenInExtChartAt] using h
+
 /-- Build ordinary intrinsic derivative data from derivative data for a model vector field, once
 that vector field is identified with the intrinsic DeTurck gauge field along the flow. -/
 theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_vectorField_eq
@@ -268,6 +348,24 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_vectorField_eq
       (I := I) (M := M) Φ g background s := by
   intro t ht x
   exact ⟨hsource t ht x, by simpa [hY t ht x] using hderiv t ht x⟩
+
+/-- Ordinary preferred-chart ODE data directly supplies ordinary primitive
+intrinsic manifold derivative data. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_chartDerivativeAtOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  rw [HasMFDerivAt]
+  refine ⟨hchart.continuousAt_eval_self ht x, ?_⟩
+  have h := (hchart t ht x).2
+  rw [hasDerivAt_iff_hasFDerivAt] at h
+  simpa [writtenInExtChartAt] using h
 
 /-- Restrict ordinary preferred-chart ODE data to a smaller time set. -/
 theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.mono
@@ -603,6 +701,36 @@ theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_vectorField_eq
   intro sol
   exact Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_vectorField_eq
     (I := I) (M := M) (Y := Y sol) (hsource sol) (hderiv sol) (hY sol)
+
+/-- Fixed-IVP preferred-chart ODE data directly supplies the primitive intrinsic
+derivative data, without first constructing a raw gauge-flow witness. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivative_of_chartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivative
+      (I := I) (M := M) ivp maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivative
+      (I := I) (M := M) ivp maps3 := by
+  intro sol
+  exact Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_chartDerivativeOn
+    (I := I) (M := M) (hchart sol)
+
+/-- Fixed-IVP ordinary preferred-chart ODE data directly supplies ordinary
+primitive intrinsic derivative data. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_chartDerivativeAt
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAt
+      (I := I) (M := M) ivp maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
+      (I := I) (M := M) ivp maps3 := by
+  intro sol
+  exact Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_chartDerivativeAtOn
+    (I := I) (M := M) (hchart sol)
 
 /-- Ordinary-at-time fixed-IVP derivative data gives the within-set derivative
 view expected by derivative-level gauge-reduction APIs. -/
@@ -1031,6 +1159,36 @@ theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily_of_vectorField_eq
   exact chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_vectorField_eq
     (I := I) (M := M) (ivp := ivp) (maps3 := maps3 ivp)
     (Y ivp) (hsource ivp) (hderiv ivp) (hY ivp)
+
+/-- Family-level preferred-chart ODE data directly supplies primitive intrinsic
+derivative-family data. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_of_chartDerivativeFamily
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily
+      (I := I) (M := M) maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp
+  exact chosenIntrinsicDeTurckGaugeFlowDerivative_of_chartDerivative
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3 ivp) (hchart ivp)
+
+/-- Family-level ordinary preferred-chart ODE data directly supplies ordinary
+primitive intrinsic derivative-family data. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_chartDerivativeAtFamily
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily
+      (I := I) (M := M) maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp
+  exact chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_chartDerivativeAt
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3 ivp) (hchart ivp)
 
 /-- Ordinary-at-time family derivative data gives the within-set derivative-family
 view expected by derivative-level gauge-reduction APIs. -/
