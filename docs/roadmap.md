@@ -1320,7 +1320,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      also expose proof-level smooth-realization witnesses, the self-encoding of
      realized candidates, and proof-level candidate encodings via named
      `nonempty_realization`, `realizationCandidateEncoding`, and
-     `nonempty_candidateEncoding` readouts. The thin raw-gauge route module now
+     `nonempty_candidateEncoding` readouts. The interval raw-gauge route now
+     also pairs any chosen state-preserving Banach solution's smooth realization
+     with the reverse encoding of the realized chosen-background candidate as a
+     single proof-level fiber. The thin raw-gauge route module now
      mirrors its global and interval theorem-package projections as proof-level
      `Nonempty` witnesses for both intrinsic and ordinary compact point-4
      theorem packages, and does the same for the genuine symmetric-carrier
