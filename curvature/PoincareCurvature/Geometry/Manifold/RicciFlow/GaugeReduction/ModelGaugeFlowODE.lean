@@ -1640,6 +1640,138 @@ theorem ofProduct_flow_tangent_eventually_mem_of_mem_spaceTime_Ioo
   (ofProduct_flow_tangent_continuousAt_spaceTime_of_mem_ball_Ioo α hball hx ht)
     (hU.mem_nhds hmem)
 
+/-- Product-derived variational local flows inherit joint space-time continuity
+of the scalar-readout state `(flow, A(t)u, A(t)v)` from the continuous product
+flow. -/
+theorem ofProduct_flow_tangent_apply_pair_continuousOn_spaceTime
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    (u v : V) :
+    ContinuousOn
+      (fun q : V × ℝ =>
+        ((ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 u,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 v))
+      (closedBall x₀ r ×ˢ Icc tmin tmax) := by
+  have hpair := ofProduct_flow_tangent_continuousOn_spaceTime α hball
+  have hflow : ContinuousOn
+      (fun q : V × ℝ => (ofProductContinuousLocalFlowSolution α hball).flow q)
+      (closedBall x₀ r ×ˢ Icc tmin tmax) := hpair.fst
+  have htangent : ContinuousOn
+      (fun q : V × ℝ => (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2)
+      (closedBall x₀ r ×ˢ Icc tmin tmax) := hpair.snd
+  have hu : ContinuousOn
+      (fun q : V × ℝ => (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 u)
+      (closedBall x₀ r ×ˢ Icc tmin tmax) := by
+    simpa using htangent.clm_apply (continuousOn_const (c := u))
+  have hv : ContinuousOn
+      (fun q : V × ℝ => (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 v)
+      (closedBall x₀ r ×ˢ Icc tmin tmax) := by
+    simpa using htangent.clm_apply (continuousOn_const (c := v))
+  exact hflow.prodMk (hu.prodMk hv)
+
+/-- Pointwise within-space-time continuity of the product-derived
+scalar-readout state `(flow, A(t)u, A(t)v)`. -/
+theorem ofProduct_flow_tangent_apply_pair_continuousWithinAt_spaceTime
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    (u v : V) {p : V × ℝ} (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax) :
+    ContinuousWithinAt
+      (fun q : V × ℝ =>
+        ((ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 u,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 v))
+      (closedBall x₀ r ×ˢ Icc tmin tmax) p :=
+  (ofProduct_flow_tangent_apply_pair_continuousOn_spaceTime α hball u v).continuousWithinAt hp
+
+/-- Product-derived scalar-readout states are eventually in any open target set
+around a closed-cylinder space-time endpoint. -/
+theorem ofProduct_flow_tangent_apply_pair_eventuallyWithin_mem_of_mem_spaceTime
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    (u v : V) {p : V × ℝ} (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax)
+    {U : Set (V × V × V)} (hU : IsOpen U)
+    (hmem :
+      ((ofProductContinuousLocalFlowSolution α hball).flow p,
+        (ofProductContinuousLocalFlowSolution α hball).tangent p.1 p.2 u,
+        (ofProductContinuousLocalFlowSolution α hball).tangent p.1 p.2 v) ∈ U) :
+    (fun q : V × ℝ =>
+      ((ofProductContinuousLocalFlowSolution α hball).flow q,
+        (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 u,
+        (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 v)) ⁻¹' U ∈
+      𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] p :=
+  (ofProduct_flow_tangent_apply_pair_continuousWithinAt_spaceTime α hball u v hp)
+    (hU.mem_nhds hmem)
+
+/-- Product-derived scalar-readout states are ordinarily continuous at interior
+points of the open Picard cylinder. -/
+theorem ofProduct_flow_tangent_apply_pair_continuousAt_spaceTime_of_mem_ball_Ioo
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) (u v : V) :
+    ContinuousAt
+      (fun q : V × ℝ =>
+        ((ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 u,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 v))
+      (x, t) :=
+  (ofProduct_flow_tangent_apply_pair_continuousWithinAt_spaceTime α hball u v
+    ⟨ball_subset_closedBall hx, Ioo_subset_Icc_self ht⟩).continuousAt
+      (closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo hx ht)
+
+/-- Product-derived scalar-readout states are continuous on the open Picard
+cylinder. -/
+theorem ofProduct_flow_tangent_apply_pair_continuousOn_spaceTime_Ioo
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    (u v : V) :
+    ContinuousOn
+      (fun q : V × ℝ =>
+        ((ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 u,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 v))
+      (ball x₀ r ×ˢ Ioo tmin tmax) := by
+  intro p hp
+  exact (ofProduct_flow_tangent_apply_pair_continuousAt_spaceTime_of_mem_ball_Ioo
+    α hball hp.1 hp.2 u v).continuousWithinAt
+
+/-- Interior ordinary eventual-membership readout for product-derived
+scalar-readout states. -/
+theorem ofProduct_flow_tangent_apply_pair_eventually_mem_of_mem_spaceTime_Ioo
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) (u v : V)
+    {U : Set (V × V × V)} (hU : IsOpen U)
+    (hmem :
+      ((ofProductContinuousLocalFlowSolution α hball).flow (x, t),
+        (ofProductContinuousLocalFlowSolution α hball).tangent x t u,
+        (ofProductContinuousLocalFlowSolution α hball).tangent x t v) ∈ U) :
+    (fun q : V × ℝ =>
+      ((ofProductContinuousLocalFlowSolution α hball).flow q,
+        (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 u,
+        (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2 v)) ⁻¹' U ∈
+      𝓝 (x, t) :=
+  (ofProduct_flow_tangent_apply_pair_continuousAt_spaceTime_of_mem_ball_Ioo
+    α hball hx ht u v) (hU.mem_nhds hmem)
+
 /-- Product Lipschitz dependence gives Lipschitz dependence of the extracted
 base-flow/tangent-map pair on the base initial point. -/
 theorem ofProduct_flow_tangent_exists_lipschitzOnWith_time

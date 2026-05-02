@@ -1062,7 +1062,9 @@ readouts, and two fixed vector slots have paired readouts for scalar pullback
 calculations depending on both `A(t)u` and `A(t)v`. The same layer now also
 combines the base flow with those two vector slots, giving direct
 Lipschitz/continuity/distance readouts for
-`x ↦ (flow_x(t), A_x(t)u, A_x(t)v)`.
+`x ↦ (flow_x(t), A_x(t)u, A_x(t)v)`. The continuous product-flow extraction now
+also preserves closed-cylinder and open-cylinder space-time continuity/eventual
+membership for the same scalar-readout state.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction

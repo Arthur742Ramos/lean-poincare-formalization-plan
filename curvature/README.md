@@ -680,8 +680,9 @@ now packages the matching intrinsic boundary
         readouts, `(t, flow, tangent)` time-graph readouts, and fixed two-vector-slot
         `(t, flow, A(t)u, A(t)v)` readouts,
         plus base-flow, paired fixed-vector-slot, and combined
-        `(flow, A(t)u, A(t)v)` Lipschitz/continuity/distance estimates
-        extracted from product variational dependence,
+        `(flow, A(t)u, A(t)v)` space-time readouts and
+        Lipschitz/continuity/distance estimates extracted from product
+        variational dependence,
         plus Gronwall uniqueness bridges for packaged and continuous
       space-time model flows; the
       raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
