@@ -1161,6 +1161,62 @@ theorem space_slice (h : ParabolicHolderWith C α u s) {t : ℝ} {x y : X}
     ‖u (t, x) - u (t, y)‖ ≤ C * (dist x y) ^ α := by
   simpa using h hx hy
 
+/-- Local-to-global parabolic Holder control from a parabolic ball cover.  If `K` is covered by
+radius-`r` parabolic balls, `u` is bounded on `K`, and each doubled closed ball carries the same
+local Holder constant, then `u` has a global Holder constant on `K`. -/
+theorem of_parabolicBall_cover_closedBall {B r : ℝ} {K N : Set (ℝ × X)}
+    (hbounded : ParabolicBoundedWith B u K) (hα : 0 < α) (hr : 0 < r)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicBall y r)
+    (hlocal : ∀ y ∈ N, ParabolicHolderWith C α u (parabolicClosedBall y (2 * r))) :
+    ParabolicHolderWith (max C (2 * B / r ^ α)) α u K := by
+  intro p hp q hq
+  let d : ℝ := parabolicDistance p q
+  let D : ℝ := max C (2 * B / r ^ α)
+  change ‖u p - u q‖ ≤ D * d ^ α
+  have hd0 : 0 ≤ d := parabolicDistance.nonneg p q
+  by_cases hsmall : d < r
+  · rcases mem_iUnion.1 (hcover hp) with ⟨y, hy⟩
+    rcases mem_iUnion.1 hy with ⟨hyN, hpball⟩
+    have hr_le_two : r ≤ 2 * r := by nlinarith [hr]
+    have hpclosed : p ∈ parabolicClosedBall y (2 * r) :=
+      (le_of_lt hpball).trans hr_le_two
+    have hqclosed : q ∈ parabolicClosedBall y (2 * r) := by
+      have hlt : parabolicDistance y q < 2 * r := by
+        calc
+          parabolicDistance y q ≤ parabolicDistance y p + parabolicDistance p q :=
+            parabolicDistance.triangle y p q
+          _ < r + r := by
+            exact add_lt_add hpball hsmall
+          _ = 2 * r := by ring
+      exact le_of_lt hlt
+    have hlocalpq : ‖u p - u q‖ ≤ C * d ^ α := by
+      simpa [d] using hlocal y hyN hpclosed hqclosed
+    exact hlocalpq.trans
+      (mul_le_mul_of_nonneg_right (le_max_left C (2 * B / r ^ α))
+        (Real.rpow_nonneg hd0 α))
+  · have hfar : r ≤ d := le_of_not_gt hsmall
+    have hBnonneg : 0 ≤ B := (norm_nonneg (u p)).trans (hbounded hp)
+    have hrpow_pos : 0 < r ^ α := Real.rpow_pos_of_pos hr α
+    have hrpow_le_dpow : r ^ α ≤ d ^ α :=
+      Real.rpow_le_rpow hr.le hfar hα.le
+    have hcoef_nonneg : 0 ≤ 2 * B / r ^ α :=
+      div_nonneg (mul_nonneg (by positivity) hBnonneg) hrpow_pos.le
+    have hdiff : ‖u p - u q‖ ≤ 2 * B := by
+      calc
+        ‖u p - u q‖ ≤ ‖u p‖ + ‖u q‖ := norm_sub_le _ _
+        _ ≤ B + B := add_le_add (hbounded hp) (hbounded hq)
+        _ = 2 * B := by ring
+    have hfar_bound : 2 * B ≤ D * d ^ α := by
+      calc
+        2 * B = (2 * B / r ^ α) * r ^ α := by
+          rw [div_mul_cancel₀ _ hrpow_pos.ne']
+        _ ≤ (2 * B / r ^ α) * d ^ α :=
+          mul_le_mul_of_nonneg_left hrpow_le_dpow hcoef_nonneg
+        _ ≤ D * d ^ α :=
+          mul_le_mul_of_nonneg_right (le_max_right C (2 * B / r ^ α))
+            (Real.rpow_nonneg hd0 α)
+    exact hdiff.trans hfar_bound
+
 /-- A parabolic distance bound upgrades a Holder estimate to a fixed oscillation bound. -/
 theorem norm_sub_le_of_parabolicDistance_le (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C)
     (hα : 0 ≤ α) {p q : ℝ × X} (hp : p ∈ s) (hq : q ∈ s) {R : ℝ}
