@@ -354,7 +354,9 @@ inhabit the refined symmetric positive-definite locus inside that model. The
 smooth-density layer now also proves that every such bundled continuous
 Riemannian metric is in the preferred finite-cover closure of smooth
 symmetric positive-definite sections, with a quantitative readout returning a
-smooth SPD approximant inside any prescribed positive radius. The
+smooth SPD approximant inside any prescribed positive radius; the underlying
+generic theorem now gives the same quantitative smooth-SPD approximant for any
+continuous SPD bilinear-form section. The
 same package now also constructs a transported continuous-linear coordinatewise
 antisymmetric-defect map whose kernel is exactly that symmetric locus, and it
 presents the metric locus as an open subset of the closed symmetric section

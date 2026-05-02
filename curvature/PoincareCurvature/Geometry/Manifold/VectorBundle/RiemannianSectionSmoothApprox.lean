@@ -600,12 +600,59 @@ theorem exists_symmetric_dist_lt_preferredBilinear_of_continuousRiemannianBundle
           (W := W) (fun y ↦ u y) x p q)
   exact ⟨v, hv_symm, hv_smooth, lt_of_le_of_lt hdist_le hudist⟩
 
+/-- Quantitative smooth-SPD density at continuous symmetric positive-definite sections in continuous
+Riemannian vector bundles.
+
+Symmetric smooth approximants are produced by the previous theorem, while positivity is kept by
+approximating inside the open positive-definite locus. -/
+theorem exists_smooth_spd_dist_lt_preferredBilinear_of_continuousRiemannianBundle
+    [IsContinuousRiemannianBundle (B := M) F W]
+    [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [SecondCountableTopology H] [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (hs : s ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∃ u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover,
+      u ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover ∧
+      ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+        (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x)) ∧
+      dist s u < ε := by
+  obtain ⟨δ, hδpos, hδsubset⟩ :=
+    exists_dist_lt_subset_positiveDefiniteLocus
+      (M := M) (F := F) (W := W)
+      x0 (fun i ↦ trivializationAt BilF BilW (x0 i)) (fun _ ↦ rfl)
+      Kc hKc Ko hKo hKoEq hcover hs.2
+  let η : ℝ := min ε δ
+  have hηpos : 0 < η := lt_min hε hδpos
+  obtain ⟨u, hu_symm, hu_smooth, hudist⟩ :=
+    exists_symmetric_dist_lt_preferredBilinear_of_continuousRiemannianBundle
+      (E := E) (H := H) (I := I) (M := M) (F := F) (W := W)
+      x0 s hs.1 η hηpos
+  have hudistε : dist s u < ε := lt_of_lt_of_le hudist (min_le_left ε δ)
+  have hudistδ : dist u s < δ := by
+    rw [dist_comm]
+    exact lt_of_lt_of_le hudist (min_le_right ε δ)
+  exact ⟨u, ⟨hu_symm, hδsubset u hudistδ⟩, hu_smooth, hudistε⟩
+
 /-- Continuous Riemannian vector bundles have smooth symmetric positive-definite sections dense at
 every continuous symmetric positive-definite section in the preferred finite-cover norm.
 
 This is the generic vector-bundle closure theorem behind the Ricci-DeTurck metric-cone density
-route: symmetric smooth approximants are produced by the previous theorem, while positivity is kept
-by approximating inside the open positive-definite locus. -/
+route. -/
 theorem mem_closure_smooth_spd_preferredBilinear_of_continuousRiemannianBundle
     [IsContinuousRiemannianBundle (B := M) F W]
     [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -631,24 +678,12 @@ theorem mem_closure_smooth_spd_preferredBilinear_of_continuousRiemannianBundle
             (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover ∧
           ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
             (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x))}) := by
-  obtain ⟨δ, hδpos, hδsubset⟩ :=
-    exists_dist_lt_subset_positiveDefiniteLocus
-      (M := M) (F := F) (W := W)
-      x0 (fun i ↦ trivializationAt BilF BilW (x0 i)) (fun _ ↦ rfl)
-      Kc hKc Ko hKo hKoEq hcover hs.2
   refine Metric.mem_closure_iff.2 ?_
   intro ε hε
-  let η : ℝ := min ε δ
-  have hηpos : 0 < η := lt_min hε hδpos
-  obtain ⟨u, hu_symm, hu_smooth, hudist⟩ :=
-    exists_symmetric_dist_lt_preferredBilinear_of_continuousRiemannianBundle
-      (E := E) (H := H) (I := I) (M := M) (F := F) (W := W)
-      x0 s hs.1 η hηpos
-  have hudistε : dist s u < ε := lt_of_lt_of_le hudist (min_le_left ε δ)
-  have hudistδ : dist u s < δ := by
-    rw [dist_comm]
-    exact lt_of_lt_of_le hudist (min_le_right ε δ)
-  exact ⟨u, ⟨⟨hu_symm, hδsubset u hudistδ⟩, hu_smooth⟩, hudistε⟩
+  obtain ⟨u, hu_spd, hu_smooth, hudist⟩ :=
+    exists_smooth_spd_dist_lt_preferredBilinear_of_continuousRiemannianBundle
+      (E := E) (H := H) (I := I) (M := M) (F := F) (W := W) x0 s hs hε
+  exact ⟨u, ⟨hu_spd, hu_smooth⟩, hudist⟩
 
 /-- A continuous Riemannian metric, viewed as a preferred finite-cover bilinear-form section, lies in
 the closure of smooth symmetric positive-definite sections. -/

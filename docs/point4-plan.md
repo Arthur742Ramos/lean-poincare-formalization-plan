@@ -1170,11 +1170,13 @@ preferred-cover local-bounds closure theorem now routes through that symmetric
 finite-cover approximation seam before applying positive-definite openness. The
 same module now also packages the generic closure theorem that every continuous
 SPD bilinear-form section in a continuous Riemannian vector bundle lies in the
-closure of smooth SPD sections for the preferred finite-cover norm, together
-with the direct specialization that any bundled continuous Riemannian metric
-itself lies in that smooth-SPD closure when viewed through the preferred
-finite-cover bilinear-form chart, and a quantitative readout that produces a
-smooth SPD approximant inside any prescribed positive preferred-cover radius.
+closure of smooth SPD sections for the preferred finite-cover norm, with the
+core quantitative theorem now returning a smooth SPD approximant to any
+continuous SPD bilinear-form section inside any prescribed positive
+preferred-cover radius. The same layer has the direct specialization that any
+bundled continuous Riemannian metric itself lies in that smooth-SPD closure when
+viewed through the preferred finite-cover bilinear-form chart, plus the
+corresponding metric-level quantitative readout.
 It also derives that finite-cover inverse
 bound from compactness of the cover pieces
 inside their fixed trivialization domains by factoring fixed-center inverses
