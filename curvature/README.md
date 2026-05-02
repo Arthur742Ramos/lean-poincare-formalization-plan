@@ -675,7 +675,9 @@ now packages the matching intrinsic boundary
       now exposes the same Banach solution/uniqueness witness directly, including
       proof-level `Nonempty` readouts for existence, smooth realization,
       reverse candidate encoding, and a paired Banach solution plus smooth
-      intrinsic DeTurck realization witness. Density-based interval-carrier
+      intrinsic DeTurck realization witness, now with a stronger paired witness
+      that also includes the reverse symmetric-carrier encoding of the
+      represented chosen-background candidate. Density-based interval-carrier
       solutions now also transport back to the chart's built-in restricted carrier
       under the terminal-time bound, and the preferred-cover local-bounds route
       now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness

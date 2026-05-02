@@ -1085,7 +1085,9 @@ now mirrors the ambient closure-data proof-level readouts for smooth realization
 and reverse candidate encoding. It now also has a paired proof-level witness that
 chooses a state-preserving Banach solution together with its smooth intrinsic
 DeTurck realization, so downstream callers do not have to coordinate two
-separate `Nonempty` choices. The
+separate `Nonempty` choices, and a stronger paired witness adds the reverse
+symmetric-carrier encoding of the chosen-background candidate represented by
+that realization. The
 density-based interval-carrier solution now transports back to the chart's
 built-in restricted carrier whenever its terminal time stays within the Picard
 interval, giving a solution-level bridge rather than only pointwise vector-field
