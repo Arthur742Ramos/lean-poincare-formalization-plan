@@ -429,7 +429,9 @@ routes, including readouts stated directly on the product state `(y,A)` through
 the final tensor `HasTimeDerivativeOn` bridge. The four-variable scalar-readout
 routes now also accept direct product-state `(t,y,Au,Av)` data in both
 open-domain and explicit-domain forms, the full operator-domain scalar-readout
-routes accept direct product-state `(t,y,A)` data in the same variants, and raw
+routes accept direct product-state `(t,y,A)` data in the same variants, and the
+closed-Picard metric-coordinate-field routes now accept direct product-state
+base/tangent agreement in ordinary and open-domain forms before raw
 closed-Picard wrappers expose both named package bridges and
 `HasTimeDerivativeOn` promotions.
 This removes a manual tangent Lipschitz obligation from the future

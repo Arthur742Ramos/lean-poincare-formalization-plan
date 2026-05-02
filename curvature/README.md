@@ -332,9 +332,11 @@ now packages the matching intrinsic boundary
         operator-coordinate routes (including readouts stated directly on the
         product state `(y,A)` through the final tensor bridge), both
         operator-domain and four-variable scalar-readout routes now accept
-        direct product-state `(t,y,A)` / `(t,y,Au,Av)` data, and the raw
-        closed-Picard API exposes matching named package bridges and
-        `HasTimeDerivativeOn` wrappers. An endpoint readout
+        direct product-state `(t,y,A)` / `(t,y,Au,Av)` data, the
+        closed-Picard metric-coordinate-field routes now accept direct
+        product-state base/tangent agreement in ordinary and open-domain
+        forms, and the raw closed-Picard API exposes matching named package
+        bridges and `HasTimeDerivativeOn` wrappers. An endpoint readout
         bridge now transfers the closed-interval geometric-slot variational theorem
        from any locally equal finite-cover metric-coordinate bilinear-form readout,
        matching the Banach readout output shape before interior tensor
