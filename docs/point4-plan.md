@@ -1227,6 +1227,7 @@ finite-cover Holder patching with automatic local-constant selection,
 matching local-to-global `C^{0,α}` patching theorems, and
 finite-cover `C^{0,α}` patching with automatic local-constant selection, and
 finite-sum closure for explicit Holder, bounded, and `C^{0,α}` controls, and
+finite-sum closure for existential Holder and `C^{0,α}` controls, and
 additive/subtractive algebra estimates,
 including the standard bounded-product estimate for normed-ring-valued
 `C^{0,α}` functions and the corresponding bounded scalar-action estimate on

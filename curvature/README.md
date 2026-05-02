@@ -983,7 +983,8 @@ covers and doubled closed patches, plus its compact uniform-local corollary,
 finite-cover Holder patching with automatic local-constant selection, matching
 local-to-global `C^{0,α}` patching theorems, and finite-cover `C^{0,α}`
 patching with automatic local-constant selection, finite-sum closure for
-explicit Holder, bounded, and `C^{0,α}` controls, and
+explicit Holder, bounded, and `C^{0,α}` controls, finite-sum closure for
+existential Holder and `C^{0,α}` controls, and
 basic linear algebra closure estimates for Hölder and bounded control, together
 with the bounded product estimate for normed-ring-valued `C^{0,α}` functions
 and the corresponding bounded scalar-action estimate for normed-space-valued

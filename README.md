@@ -338,7 +338,8 @@ packages the canonical stationary local solution attached to
   local-constant selection, matching local-to-global `C^{0,α}` patching
   theorems, and finite-cover `C^{0,α}` patching with automatic local-constant
   selection, finite-sum closure for explicit Holder, bounded, and `C^{0,α}`
-  controls, and
+  controls, finite-sum closure for existential Holder and `C^{0,α}` controls,
+  and
   add/subtract/smul closure estimates plus the bounded product estimate for
   normed-ring-valued `C^{0,α}` functions and the corresponding bounded
   scalar-action estimate for normed-space-valued functions, along with closure

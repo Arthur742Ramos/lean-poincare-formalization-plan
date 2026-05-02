@@ -1443,6 +1443,25 @@ theorem add (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
   rcases hv with ⟨C₂, hC₂, hCv⟩
   exact ⟨C₁ + C₂, add_nonneg hC₁ hC₂, hCu.add hCv⟩
 
+theorem sum {ι : Type*} (S : Finset ι) {u : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicHolderOn α (u i) s) :
+    ParabolicHolderOn α (fun z => ∑ i ∈ S, u i z) s := by
+  classical
+  let C : ι → ℝ := fun i => if hi : i ∈ S then Classical.choose (h i hi) else 0
+  have hCnonneg : ∀ i ∈ S, 0 ≤ C i := by
+    intro i hi
+    dsimp [C]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (h i hi)).1
+  have hC :
+      ∀ i ∈ S, ParabolicHolderWith (C i) α (u i) s := by
+    intro i hi
+    dsimp [C]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (h i hi)).2
+  refine ⟨∑ i ∈ S, C i, Finset.sum_nonneg hCnonneg, ?_⟩
+  exact ParabolicHolderWith.sum S hC
+
 theorem neg (hu : ParabolicHolderOn α u s) :
     ParabolicHolderOn α (fun z => -u z) s := by
   rcases hu with ⟨C, hC, hCu⟩
@@ -2035,6 +2054,33 @@ theorem add (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
   rcases hu with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
   rcases hv with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
   exact ⟨B₁ + B₂, add_nonneg hB₁ hB₂, H₁ + H₂, add_nonneg hH₁ hH₂, hBH₁.add hBH₂⟩
+
+theorem sum {ι : Type*} (S : Finset ι) {u : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicC0AlphaOn α (u i) s) :
+    ParabolicC0AlphaOn α (fun z => ∑ i ∈ S, u i z) s := by
+  classical
+  let B : ι → ℝ := fun i => if hi : i ∈ S then Classical.choose (h i hi) else 0
+  let H : ι → ℝ := fun i =>
+    if hi : i ∈ S then Classical.choose (Classical.choose_spec (h i hi)).2 else 0
+  have hBnonneg : ∀ i ∈ S, 0 ≤ B i := by
+    intro i hi
+    dsimp [B]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (h i hi)).1
+  have hHnonneg : ∀ i ∈ S, 0 ≤ H i := by
+    intro i hi
+    dsimp [H]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (Classical.choose_spec (h i hi)).2).1
+  have hBH :
+      ∀ i ∈ S, ParabolicC0AlphaWith (B i) (H i) α (u i) s := by
+    intro i hi
+    dsimp [B, H]
+    rw [dif_pos hi, dif_pos hi]
+    exact (Classical.choose_spec (Classical.choose_spec (h i hi)).2).2
+  refine ⟨∑ i ∈ S, B i, Finset.sum_nonneg hBnonneg,
+    ∑ i ∈ S, H i, Finset.sum_nonneg hHnonneg, ?_⟩
+  exact ParabolicC0AlphaWith.sum S hBH
 
 theorem neg (hu : ParabolicC0AlphaOn α u s) :
     ParabolicC0AlphaOn α (fun z => -u z) s := by
