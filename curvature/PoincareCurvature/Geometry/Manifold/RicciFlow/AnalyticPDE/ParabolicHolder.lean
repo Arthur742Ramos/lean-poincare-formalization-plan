@@ -382,6 +382,43 @@ theorem exists_finset_cover_subset_open_of_isCompact {K U : Set (ℝ × X)}
   · intro x hx
     exact hRsubset x (hNK x hx)
 
+/-- A compact set inside an open set has a finite open parabolic-ball cover whose matching
+closed parabolic balls remain inside that open set. -/
+theorem exists_finset_cover_closedBall_subset_open_of_isCompact {K U : Set (ℝ × X)}
+    (hK : IsCompact K) (hUopen : IsOpen U) (hKU : K ⊆ U) :
+    ∃ N : Finset (ℝ × X),
+      (∀ x ∈ N, x ∈ K) ∧
+      ∃ R : (ℝ × X) → ℝ,
+        (∀ x ∈ N, 0 < R x) ∧
+        (∀ x ∈ N, parabolicClosedBall x (R x) ⊆ U) ∧
+        K ⊆ ⋃ x ∈ N, parabolicBall x (R x) := by
+  classical
+  have hlocal : ∀ x ∈ K, ∃ R > 0, parabolicBall x R ⊆ U := by
+    intro x hx
+    exact exists_subset_of_mem_nhds (hUopen.mem_nhds (hKU hx))
+  let R : ℝ × X → ℝ :=
+    fun x => if hx : x ∈ K then Classical.choose (hlocal x hx) / 2 else 1
+  have hRpos : ∀ x ∈ K, 0 < R x := by
+    intro x hx
+    dsimp [R]
+    rw [dif_pos hx]
+    exact half_pos (Classical.choose_spec (hlocal x hx)).1
+  have hclosed_subset : ∀ x ∈ K, parabolicClosedBall x (R x) ⊆ U := by
+    intro x hx
+    dsimp [R]
+    rw [dif_pos hx]
+    intro q hq
+    exact (Classical.choose_spec (hlocal x hx)).2
+      (lt_of_le_of_lt hq (half_lt_self (Classical.choose_spec (hlocal x hx)).1))
+  rcases hK.elim_nhds_subcover (fun x => parabolicBall x (R x))
+      (fun x hx => mem_nhds (p := x) (R := R x) (hRpos x hx)) with
+    ⟨N, hNK, hcover⟩
+  refine ⟨N, hNK, R, ?_, ?_, hcover⟩
+  · intro x hx
+    exact hRpos x (hNK x hx)
+  · intro x hx
+    exact hclosed_subset x (hNK x hx)
+
 end parabolicBall
 
 namespace parabolicClosedBall
@@ -662,6 +699,59 @@ theorem exists_finset_cover_subset_open_of_isCompact {K U : Set (ℝ × X)}
     exact hspace_pos x (hNK x hx)
   · intro x hx
     exact hcylinder_subset x (hNK x hx)
+
+/-- A compact set inside an open set has a finite open product-parabolic-cylinder cover whose
+matching closed cylinders remain inside that open set. -/
+theorem exists_finset_cover_closedCylinder_subset_open_of_isCompact {K U : Set (ℝ × X)}
+    (hK : IsCompact K) (hUopen : IsOpen U) (hKU : K ⊆ U) :
+    ∃ N : Finset (ℝ × X),
+      (∀ x ∈ N, x ∈ K) ∧
+      ∃ timeRadius spaceRadius : (ℝ × X) → ℝ,
+        (∀ x ∈ N, 0 < timeRadius x) ∧
+        (∀ x ∈ N, 0 < spaceRadius x) ∧
+        (∀ x ∈ N, parabolicClosedCylinder x (timeRadius x) (spaceRadius x) ⊆ U) ∧
+        K ⊆ ⋃ x ∈ N, parabolicCylinder x (timeRadius x) (spaceRadius x) := by
+  classical
+  have hlocal :
+      ∀ x ∈ K, ∃ timeRadius > 0, ∃ spaceRadius > 0,
+        parabolicCylinder x timeRadius spaceRadius ⊆ U := by
+    intro x hx
+    exact exists_subset_of_mem_nhds (hUopen.mem_nhds (hKU hx))
+  let timeRadius : ℝ × X → ℝ :=
+    fun x => if hx : x ∈ K then Classical.choose (hlocal x hx) / 2 else 1
+  let spaceRadius : ℝ × X → ℝ := fun x =>
+    if hx : x ∈ K then Classical.choose (Classical.choose_spec (hlocal x hx)).2 / 2 else 1
+  have htime_pos : ∀ x ∈ K, 0 < timeRadius x := by
+    intro x hx
+    dsimp [timeRadius]
+    rw [dif_pos hx]
+    exact half_pos (Classical.choose_spec (hlocal x hx)).1
+  have hspace_pos : ∀ x ∈ K, 0 < spaceRadius x := by
+    intro x hx
+    dsimp [spaceRadius]
+    rw [dif_pos hx]
+    exact half_pos (Classical.choose_spec (Classical.choose_spec (hlocal x hx)).2).1
+  have hclosed_subset :
+      ∀ x ∈ K, parabolicClosedCylinder x (timeRadius x) (spaceRadius x) ⊆ U := by
+    intro x hx
+    dsimp [timeRadius, spaceRadius]
+    rw [dif_pos hx, dif_pos hx]
+    intro q hq
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal x hx)).2).2
+      ⟨lt_of_le_of_lt hq.1 (half_lt_self (Classical.choose_spec (hlocal x hx)).1),
+        lt_of_le_of_lt hq.2
+          (half_lt_self (Classical.choose_spec (Classical.choose_spec (hlocal x hx)).2).1)⟩
+  rcases hK.elim_nhds_subcover (fun x => parabolicCylinder x (timeRadius x) (spaceRadius x))
+      (fun x hx => mem_nhds (p := x) (timeRadius := timeRadius x)
+        (spaceRadius := spaceRadius x) (htime_pos x hx) (hspace_pos x hx)) with
+    ⟨N, hNK, hcover⟩
+  refine ⟨N, hNK, timeRadius, spaceRadius, ?_, ?_, ?_, hcover⟩
+  · intro x hx
+    exact htime_pos x (hNK x hx)
+  · intro x hx
+    exact hspace_pos x (hNK x hx)
+  · intro x hx
+    exact hclosed_subset x (hNK x hx)
 
 /-- A product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at most
 `R` is contained in the parabolic ball of radius `R`. -/
