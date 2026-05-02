@@ -594,6 +594,20 @@ theorem norm_sub_le_on_closedCylinder (h : ParabolicHolderWith C α u s) (hC : 0
   h.norm_sub_le_of_parabolicDistance_le hC hα hp_s hq_s
     (parabolicClosedCylinder.pair_parabolicDistance_le hp hq)
 
+theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
+    (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C)
+    (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicHolderWith C β u s := by
+  intro p hp q hq
+  let d := parabolicDistance p q
+  have hd0 : 0 ≤ d := parabolicDistance.nonneg p q
+  have hd1 : d ≤ 1 := hdiam hp hq
+  have hpow : d ^ α ≤ d ^ β :=
+    Real.rpow_le_rpow_of_exponent_ge' hd0 hd1 hβ hβα
+  exact (h hp hq).trans (mul_le_mul_of_nonneg_left hpow hC)
+
 /-- Positive-exponent parabolic Holder control implies continuity on the controlled set. -/
 theorem continuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) : ContinuousOn u s := by
   intro p hp
@@ -729,6 +743,14 @@ theorem uniformContinuousOn (h : ParabolicHolderOn α u s) (hα : 0 < α) :
     UniformContinuousOn u s := by
   rcases h with ⟨_C, _hC, hCu⟩
   exact hCu.uniformContinuousOn hα
+
+theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
+    (h : ParabolicHolderOn α u s) (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicHolderOn β u s := by
+  rcases h with ⟨C, hC, hCu⟩
+  exact ⟨C, hC, hCu.mono_exponent_of_parabolicDistance_le_one hC hβ hβα hdiam⟩
 
 end ParabolicHolderOn
 
@@ -897,6 +919,14 @@ theorem uniformContinuousOn (h : ParabolicC0AlphaWith B H α u s) (hα : 0 < α)
     UniformContinuousOn u s :=
   h.holder.uniformContinuousOn hα
 
+theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
+    (h : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H)
+    (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaWith B H β u s :=
+  ⟨h.bounded, h.holder.mono_exponent_of_parabolicDistance_le_one hH hβ hβα hdiam⟩
+
 end ParabolicC0AlphaWith
 
 namespace ParabolicC0AlphaOn
@@ -988,6 +1018,15 @@ domain. -/
 theorem uniformContinuousOn (h : ParabolicC0AlphaOn α u s) (hα : 0 < α) :
     UniformContinuousOn u s :=
   h.holderOn.uniformContinuousOn hα
+
+theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
+    (h : ParabolicC0AlphaOn α u s) (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaOn β u s := by
+  rcases h with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B, hB, H, hH,
+    hBH.mono_exponent_of_parabolicDistance_le_one hH hβ hβα hdiam⟩
 
 end ParabolicC0AlphaOn
 
