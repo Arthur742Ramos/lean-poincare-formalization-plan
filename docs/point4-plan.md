@@ -1264,8 +1264,9 @@ entrywise control, plus entrywise closure for matrix products, matrix-vector
 and vector-matrix products, and inverse-matrix vector products on both sides
 under the same determinant lower bound, plus finite vector dot products and
 bilinear contractions through matrices or inverse matrices, including
-Christoffel-symbol type inverse-metric contractions, using finite-product,
-integer-scalar, reciprocal, and division closure. The abstract
+Christoffel-symbol type inverse-metric contractions and principal-part
+contractions `g^{ab} H_abij`, using finite-product, integer-scalar,
+reciprocal, and division closure. The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and

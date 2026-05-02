@@ -1009,8 +1009,9 @@ control; it also proves entrywise closure for matrix products, matrix-vector and
 vector-matrix products, including inverse-matrix vector products on both sides
 under the same determinant lower bound, finite vector dot products, and
 bilinear contractions through matrices or inverse matrices, including
-Christoffel-symbol type inverse-metric contractions, using the finite-product,
-integer-scalar, reciprocal, and division closure layer.
+Christoffel-symbol type inverse-metric contractions and principal-part
+contractions `g^{ab} H_abij`, using the finite-product, integer-scalar,
+reciprocal, and division closure layer.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build

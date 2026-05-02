@@ -237,6 +237,34 @@ theorem matrix_inv_christoffel_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n
     (ParabolicC0AlphaOn.const (α := α) (s := s) ((2 : 𝕜)⁻¹)).mul hcontraction
   simpa [Matrix.mulVec] using hhalf
 
+/-- Finite inverse-matrix contractions against a four-index coefficient array preserve parabolic
+`C^{0,α}` control. This is the coordinate-algebra pattern for terms such as
+`g^{ab} H_{abij}` in a local Ricci-DeTurck principal part. -/
+theorem matrix_inv_two_index_contract_entry {n p q 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    {T : ℝ × X → n → n → p → q → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hT : ∀ a b i j, ParabolicC0AlphaOn α (fun z => T z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i : p) (j : q) :
+    ParabolicC0AlphaOn α
+      (fun z => ∑ a : n, ∑ b : n,
+        ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j) s := by
+  have hinner : ∀ a : n,
+      ParabolicC0AlphaOn α
+        (fun z => ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j) s := by
+    intro a
+    simpa using
+      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun b z => ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j)
+        (fun b _hb => (matrix_inv_entry (M := M) hM hδpos hdet a b).mul (hT a b i j)))
+  simpa using
+    (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (u := fun a z => ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j)
+      (fun a _ha => hinner a))
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow
