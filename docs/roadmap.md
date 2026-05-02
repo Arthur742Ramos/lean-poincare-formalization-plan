@@ -727,7 +727,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       bundles without a separate
        `SatisfiesGaugeFlowOn` repackaging step. The primitive derivative-view
        packages now also round-trip with the geometric `SatisfiesGaugeFlowOn`
-       equation for both fixed-IVP and theorem-family data. The derivative-view layer also
+       equation for both fixed-IVP and theorem-family data, and anchored
+       primitive derivative data now constructs the corresponding geometric
+       `C³` gauge-flow bundles directly. The derivative-view layer also
          has ordinary-on-time-set derivative-family data and an
         `ofDerivativeAtFamily` raw-existence bridge for named Picard-interior
          derivative packages, named source-neighborhood preferred-chart ODE

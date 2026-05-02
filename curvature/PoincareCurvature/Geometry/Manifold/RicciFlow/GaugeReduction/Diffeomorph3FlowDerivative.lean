@@ -875,6 +875,27 @@ structure ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
 
 namespace ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
 
+/-- Build a fixed-IVP geometric `C^3` gauge-flow bundle from anchoring and
+primitive derivative data. -/
+def ofDerivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (hanchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+        (maps3 sol) ivp.initialTime)
+    (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivative
+      (I := I) (M := M) ivp maps3) :
+    ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  maps3 := maps3
+  anchored := hanchored
+  satisfies := fun sol ↦
+    satisfiesGaugeFlowOn_of_chosenIntrinsicDeTurckGaugeFlowDerivative
+      (I := I) (M := M) hderiv sol
+
 /-- The derivative view of a bundled geometric gauge-flow family for one initial
 value problem. -/
 theorem derivativeData
@@ -1042,6 +1063,28 @@ structure ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily where
         sol.1.toIntrinsicDeTurckSolution.timeSet
 
 namespace ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+
+/-- Build a theorem-family geometric `C^3` gauge-flow bundle from anchoring and
+primitive derivative-family data. -/
+def ofDerivativeFamily
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (hanchored : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+          (maps3 ivp sol) ivp.initialTime)
+    (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+      (I := I) (M := M) maps3) :
+    ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  maps3 := maps3
+  anchored := hanchored
+  satisfies := fun ivp sol ↦
+    satisfiesGaugeFlowOnFamily_of_chosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+      (I := I) (M := M) hderiv ivp sol
 
 /-- Restrict a theorem-family gauge-flow bundle to one initial-value problem. -/
 def forInitialValueProblem

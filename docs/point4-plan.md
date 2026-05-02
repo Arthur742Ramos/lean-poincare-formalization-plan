@@ -772,7 +772,9 @@ the existing scalar gauge-pullback route after supplying the chart-ODE package.
 The primitive derivative views now also round-trip with the geometric
 `SatisfiesGaugeFlowOn` equation, both for fixed-IVP packages and theorem
 families, so either formulation can be recovered without rebuilding the
-pointwise ODE proof.
+pointwise ODE proof. Anchoring plus primitive derivative data now also
+constructs the fixed-IVP and theorem-family geometric `C³` gauge-flow bundles
+directly.
 The same derivative-view layer now upgrades both primitive derivative data and
 preferred-chart ODE data from within-time-set form back to ordinary-at-time form
 whenever the time set is a neighborhood at each of its times, with fixed-IVP and
