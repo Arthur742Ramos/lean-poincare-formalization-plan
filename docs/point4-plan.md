@@ -452,7 +452,8 @@ constructors that feed endpoint and closed-Picard packages; the public
 mirror that direct-velocity interface as well. The variational local-flow
 wrappers that fill the tangent-coordinate derivative from the model tangent ODE
 now have the same direct-velocity and readout-field forms, including when the
-tangent-map identification is only known in the closed-interval within filter.
+tangent-map identification is only known in the closed-interval within filter;
+the open-interior `Ioo` specializations now mirror that direct-velocity API too.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate

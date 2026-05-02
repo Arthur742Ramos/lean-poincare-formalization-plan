@@ -956,7 +956,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          direct-velocity hypotheses, and the public tensor time-regularity
          wrappers for full metric-coordinate Fréchet data mirror that interface,
          including the variational local-flow wrappers that supply the
-         tangent-coordinate derivative from the model tangent ODE.
+         tangent-coordinate derivative from the model tangent ODE and the
+         open-interior `Ioo` specializations.
          The module also now has an additive
          time/spatial decomposition upgrading that frozen spatial term to the full
          moving time-space field derivative once the remaining time-difference

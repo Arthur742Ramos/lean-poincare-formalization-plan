@@ -677,7 +677,8 @@ now packages the matching intrinsic boundary
        accept direct gauge-velocity hypotheses, plus public tensor
        time-regularity wrappers for full metric-coordinate Fréchet data in that
        same form, including variational local-flow wrappers that supply the
-       tangent-coordinate derivative from the model tangent ODE,
+       tangent-coordinate derivative from the model tangent ODE and
+       open-interior `Ioo` specializations,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an
