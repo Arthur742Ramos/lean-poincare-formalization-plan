@@ -4,6 +4,7 @@ public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Paraboli
 public import Mathlib.Analysis.Matrix.Normed
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.LinearAlgebra.Matrix.Symmetric
 
 set_option linter.unusedSectionVars false
 
@@ -102,6 +103,26 @@ theorem matrix_of_entries {m n A : Type*} [Fintype m] [Fintype n] [NormedAddComm
     (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) :
     ParabolicC0AlphaOn α M s :=
   ParabolicC0AlphaOn.pi fun i => ParabolicC0AlphaOn.pi fun j => hM i j
+
+/-- Transposes of finite matrix-valued parabolic `C^{0,α}` functions are parabolic `C^{0,α}`
+from entrywise control. -/
+theorem matrix_transpose {m n A : Type*} [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {M : ℝ × X → Matrix m n A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) :
+    ParabolicC0AlphaOn α (fun z => (M z).transpose) s :=
+  matrix_of_entries fun i j => hM j i
+
+/-- Finite matrix symmetrization preserves parabolic `C^{0,α}` control from entrywise control. -/
+theorem matrix_symmetrize {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
+    {M : ℝ × X → Matrix n n 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) :
+    ParabolicC0AlphaOn α (fun z => (2 : 𝕜)⁻¹ • (M z + (M z).transpose)) s :=
+  ((matrix_of_entries hM).add (matrix_transpose hM)).smul ((2 : 𝕜)⁻¹)
+
+/-- The finite matrix symmetrization is pointwise symmetric. -/
+theorem matrix_symmetrize_isSymm {n 𝕜 : Type*} [NormedField 𝕜] (M : Matrix n n 𝕜) :
+    ((2 : 𝕜)⁻¹ • (M + M.transpose)).IsSymm :=
+  (Matrix.isSymm_add_transpose_self M).smul ((2 : 𝕜)⁻¹)
 
 /-- Each adjugate entry of a finite matrix is parabolic `C^{0,α}` when the matrix entries are. -/
 theorem matrix_adjugate_entry {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]

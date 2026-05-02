@@ -365,10 +365,11 @@ packages the canonical stationary local solution attached to
   determinants, adjugate entries, and inverse entries under determinant lower
   bounds, with compact nonvanishing determinant data now supplying such lower
   bounds and compact-domain inverse and matrix-valued RHS variants, plus
-  entrywise and whole-valued matrix-product, matrix-vector/vector-matrix, and
+  entrywise and whole-valued finite matrix transpose, pointwise
+  symmetrization, matrix-product, matrix-vector/vector-matrix, and
   inverse-matrix vector-product closure, whole finite vector/matrix and
-  inverse-matrix packages, finite vector dot products, and bilinear contractions through
-  matrices or inverse matrices, including entrywise and whole-array
+  inverse-matrix packages, finite vector dot products, and bilinear contractions
+  through matrices or inverse matrices, including entrywise and whole-array
   Christoffel-symbol type inverse-metric contractions, whole matrix-valued
   principal-part contractions `g^{ab} H_abij`, whole matrix-valued
   Ricci-coordinate quadratic Christoffel contractions, and a whole matrix-valued

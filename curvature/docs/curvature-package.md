@@ -146,8 +146,9 @@ and inverse entries under a determinant lower bound from entrywise control,
 including a compactness bridge from nonvanishing determinants to a uniform
 determinant lower bound and compact-domain inverse-entry and schematic
 matrix-valued RHS variants, as well as entrywise and whole-valued closure for
-matrix products, matrix-vector and vector-matrix products, and inverse-matrix
-vector products on both sides under the same determinant lower bound, plus
+finite matrix transpose, pointwise symmetrization, matrix products,
+matrix-vector and vector-matrix products, and inverse-matrix vector products on
+both sides under the same determinant lower bound, plus
 whole finite vector/matrix and inverse-matrix packages, finite vector dot
 products, and bilinear contractions through matrices or inverse matrices,
 including entrywise and whole-array Christoffel-symbol type inverse-metric
