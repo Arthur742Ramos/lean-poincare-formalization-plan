@@ -872,7 +872,8 @@ The first Banach-model ODE bridge for this item is now proof-bearing in
 theorem is packaged as `LocalFlowSolution` and `LipschitzLocalFlowSolution`,
 including the ODE derivative on the closed time interval, initialization on a
 closed ball of initial data, ordinary interior derivative extractors, and
-named continuity on the Picard interval, plus Lipschitz dependence on initial data.
+named continuity on the Picard interval, plus direct time-slice Lipschitz and
+distance-estimate readouts for dependence on initial data.
 It also packages the continuous space-time partial-flow form as
 `ContinuousLocalFlowSolution`, so the chart-level output now includes the
 continuity needed before gluing local solutions. Continuous and variational

@@ -802,8 +802,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent
      Picard-Lindelöf theorem as local model flows with initialization on a
       closed ball, closed-interval ODE derivative data, ordinary interior
-      derivative extractors, named Picard-interval continuity, and Lipschitz
-      dependence on the initial point; it also packages the continuous space-time
+      derivative extractors, named Picard-interval continuity, and direct
+      time-slice Lipschitz and distance-estimate readouts for dependence on the
+      initial point; it also packages the continuous space-time
         partial-flow form needed for chart gluing, named base-flow, tangent-map,
         and vector-slot time-slice continuity bridges for continuous/variational
            packages, including direct within-interval and interior pointwise

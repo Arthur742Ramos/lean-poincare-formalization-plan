@@ -457,6 +457,36 @@ def restrict
     {r' : ℝ≥0} (hr : r' ≤ r) :
     (α.restrict htime ht₀' hr).flow = α.flow := rfl
 
+/-- A packaged Lipschitz local flow gives a Lipschitz time-slice map on the
+initial-data ball at every Picard time. -/
+theorem exists_lipschitzOnWith_time
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ∃ L' : ℝ≥0, LipschitzOnWith L' (fun x => α.flow x t) (closedBall x₀ r) := by
+  obtain ⟨L', hL'⟩ := α.exists_lipschitz_time
+  exact ⟨L', hL' t ht⟩
+
+/-- Interior-time specialization of `exists_lipschitzOnWith_time`. -/
+theorem exists_lipschitzOnWith_time_of_mem_Ioo
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    ∃ L' : ℝ≥0, LipschitzOnWith L' (fun x => α.flow x t) (closedBall x₀ r) :=
+  α.exists_lipschitzOnWith_time (Ioo_subset_Icc_self ht)
+
+/-- A packaged Lipschitz local flow gives a concrete distance estimate between
+two initial points at every Picard time. -/
+theorem exists_dist_flow_le_mul
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {x y : V} (hx : x ∈ closedBall x₀ r) (hy : y ∈ closedBall x₀ r) :
+    ∃ L' : ℝ≥0, dist (α.flow x t) (α.flow y t) ≤ L' * dist x y := by
+  obtain ⟨L', hL'⟩ := α.exists_lipschitzOnWith_time ht
+  exact ⟨L', hL'.dist_le_mul x hx y hy⟩
+
+/-- Interior-time specialization of the packaged local-flow distance estimate. -/
+theorem exists_dist_flow_le_mul_of_mem_Ioo
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {x y : V} (hx : x ∈ closedBall x₀ r) (hy : y ∈ closedBall x₀ r) :
+    ∃ L' : ℝ≥0, dist (α.flow x t) (α.flow y t) ≤ L' * dist x y :=
+  α.exists_dist_flow_le_mul (Ioo_subset_Icc_self ht) hx hy
+
 /-- Restrict a nonempty Lipschitz local-flow existence witness to a smaller
 initial ball and closed time interval. -/
 theorem nonempty_restrict
