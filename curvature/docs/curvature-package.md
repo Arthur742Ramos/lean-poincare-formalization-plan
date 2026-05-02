@@ -122,8 +122,9 @@ variable-radius finite-cover Holder and `C^{0,α}` patching plus compact
 point-dependent- and existential-radius corollaries, finite-sum closure for
 explicit Holder, bounded, and `C^{0,α}` controls, finite-sum closure for
 existential Holder and `C^{0,α}` controls, finite-product closure for
-existential normed-comm-ring-valued `C^{0,α}` controls, product-valued pairing
-closure, integer-scalar closure,
+existential normed-comm-ring-valued `C^{0,α}` controls, finite `Pi` packaging
+from componentwise `C^{0,α}` control, product-valued pairing closure,
+integer-scalar closure,
 additive/subtractive closure estimates, plus the
 bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded

@@ -2432,6 +2432,50 @@ theorem sum {ι : Type*} (S : Finset ι) {u : ι → ℝ × X → E}
     ∑ i ∈ S, H i, Finset.sum_nonneg hHnonneg, ?_⟩
   exact ParabolicC0AlphaWith.sum S hBH
 
+/-- Componentwise parabolic `C^{0,α}` control packages a finite vector-valued function as
+parabolic `C^{0,α}`. -/
+theorem pi {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
+    (h : ∀ i, ParabolicC0AlphaOn α (fun z => u z i) s) :
+    ParabolicC0AlphaOn α u s := by
+  classical
+  let B : ι → ℝ := fun i => Classical.choose (h i)
+  let H : ι → ℝ := fun i => Classical.choose (Classical.choose_spec (h i)).2
+  have hBnonneg : ∀ i, 0 ≤ B i := by
+    intro i
+    dsimp [B]
+    exact (Classical.choose_spec (h i)).1
+  have hHnonneg : ∀ i, 0 ≤ H i := by
+    intro i
+    dsimp [H]
+    exact (Classical.choose_spec (Classical.choose_spec (h i)).2).1
+  have hBH :
+      ∀ i, ParabolicC0AlphaWith (B i) (H i) α (fun z => u z i) s := by
+    intro i
+    dsimp [B, H]
+    exact (Classical.choose_spec (Classical.choose_spec (h i)).2).2
+  have hBsum_nonneg : 0 ≤ ∑ i, B i := Finset.sum_nonneg fun i _hi => hBnonneg i
+  have hHsum_nonneg : 0 ≤ ∑ i, H i := Finset.sum_nonneg fun i _hi => hHnonneg i
+  have hB_le_sum : ∀ i, B i ≤ ∑ j, B j := by
+    intro i
+    exact Finset.single_le_sum (fun j _hj => hBnonneg j) (Finset.mem_univ i)
+  have hH_le_sum : ∀ i, H i ≤ ∑ j, H j := by
+    intro i
+    exact Finset.single_le_sum (fun j _hj => hHnonneg j) (Finset.mem_univ i)
+  refine ⟨∑ i, B i, hBsum_nonneg, ∑ i, H i, hHsum_nonneg, ?_⟩
+  constructor
+  · intro p hp
+    exact (pi_norm_le_iff_of_nonneg hBsum_nonneg).2 fun i =>
+      (hBH i).bounded hp |>.trans (hB_le_sum i)
+  · intro p hp q hq
+    let dα := (parabolicDistance p q) ^ α
+    have hdα : 0 ≤ dα := Real.rpow_nonneg (parabolicDistance.nonneg p q) α
+    have htarget_nonneg : 0 ≤ (∑ i, H i) * dα := mul_nonneg hHsum_nonneg hdα
+    exact (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun i => by
+      have hcomp : ‖u p i - u q i‖ ≤ H i * dα := (hBH i).holder hp hq
+      have hscale : H i * dα ≤ (∑ j, H j) * dα :=
+        mul_le_mul_of_nonneg_right (hH_le_sum i) hdα
+      simpa [Pi.sub_apply, dα] using hcomp.trans hscale
+
 theorem neg (hu : ParabolicC0AlphaOn α u s) :
     ParabolicC0AlphaOn α (fun z => -u z) s := by
   rcases hu with ⟨B, hB, H, hH, hBH⟩
