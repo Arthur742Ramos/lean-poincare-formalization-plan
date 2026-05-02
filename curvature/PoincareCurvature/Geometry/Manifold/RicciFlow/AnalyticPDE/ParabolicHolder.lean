@@ -1124,6 +1124,18 @@ theorem norm (hu : ParabolicHolderWith C α u s) :
       simpa [Real.norm_eq_abs] using abs_norm_sub_norm_le (u p) (u q)
     _ ≤ C * (parabolicDistance p q) ^ α := hu hp hq
 
+theorem zsmul (n : ℤ) (hu : ParabolicHolderWith C α u s) :
+    ParabolicHolderWith (‖n‖ * C) α (fun z => n • u z) s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  have hsub : n • u p - n • u q = n • (u p - u q) := by
+    rw [zsmul_sub]
+  calc
+    ‖n • u p - n • u q‖ = ‖n • (u p - u q)‖ := by rw [hsub]
+    _ ≤ ‖n‖ * ‖u p - u q‖ := norm_zsmul_le n (u p - u q)
+    _ ≤ ‖n‖ * (C * dα) := mul_le_mul_of_nonneg_left (hu hp hq) (norm_nonneg n)
+    _ = (‖n‖ * C) * dα := by ring
+
 theorem prod {F : Type*} [NormedAddCommGroup F] {D : ℝ} {v : ℝ × X → F}
     (hu : ParabolicHolderWith C α u s) (hv : ParabolicHolderWith D α v s) :
     ParabolicHolderWith (max C D) α (fun z => (u z, v z)) s := by
@@ -1528,6 +1540,11 @@ theorem norm (hu : ParabolicHolderOn α u s) :
   rcases hu with ⟨C, hC, hCu⟩
   exact ⟨C, hC, hCu.norm⟩
 
+theorem zsmul (n : ℤ) (hu : ParabolicHolderOn α u s) :
+    ParabolicHolderOn α (fun z => n • u z) s := by
+  rcases hu with ⟨C, hC, hCu⟩
+  exact ⟨‖n‖ * C, mul_nonneg (norm_nonneg n) hC, hCu.zsmul n⟩
+
 theorem prod {F : Type*} [NormedAddCommGroup F] {v : ℝ × X → F}
     (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
     ParabolicHolderOn α (fun z => (u z, v z)) s := by
@@ -1911,6 +1928,13 @@ theorem norm (hu : ParabolicBoundedWith B u s) :
   intro p hp
   simpa [Real.norm_of_nonneg (norm_nonneg (u p))] using hu hp
 
+theorem zsmul (n : ℤ) (hu : ParabolicBoundedWith B u s) :
+    ParabolicBoundedWith (‖n‖ * B) (fun z => n • u z) s := by
+  intro p hp
+  calc
+    ‖n • u p‖ ≤ ‖n‖ * ‖u p‖ := norm_zsmul_le n (u p)
+    _ ≤ ‖n‖ * B := mul_le_mul_of_nonneg_left (hu hp) (norm_nonneg n)
+
 theorem prod {F : Type*} [NormedAddCommGroup F] {D : ℝ} {v : ℝ × X → F}
     (hu : ParabolicBoundedWith B u s) (hv : ParabolicBoundedWith D v s) :
     ParabolicBoundedWith (max B D) (fun z => (u z, v z)) s := by
@@ -2055,6 +2079,10 @@ theorem sub (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
 theorem norm (hu : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaWith B H α (fun z => ‖u z‖) s :=
   ⟨hu.bounded.norm, hu.holder.norm⟩
+
+theorem zsmul (n : ℤ) (hu : ParabolicC0AlphaWith B H α u s) :
+    ParabolicC0AlphaWith (‖n‖ * B) (‖n‖ * H) α (fun z => n • u z) s :=
+  ⟨hu.bounded.zsmul n, hu.holder.zsmul n⟩
 
 theorem prod {F : Type*} [NormedAddCommGroup F] {B₃ H₃ : ℝ} {v : ℝ × X → F}
     (hu : ParabolicC0AlphaWith B H α u s)
@@ -2419,6 +2447,12 @@ theorem norm (hu : ParabolicC0AlphaOn α u s) :
     ParabolicC0AlphaOn α (fun z => ‖u z‖) s := by
   rcases hu with ⟨B, hB, H, hH, hBH⟩
   exact ⟨B, hB, H, hH, hBH.norm⟩
+
+theorem zsmul (n : ℤ) (hu : ParabolicC0AlphaOn α u s) :
+    ParabolicC0AlphaOn α (fun z => n • u z) s := by
+  rcases hu with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨‖n‖ * B, mul_nonneg (norm_nonneg n) hB,
+    ‖n‖ * H, mul_nonneg (norm_nonneg n) hH, hBH.zsmul n⟩
 
 theorem prod {F : Type*} [NormedAddCommGroup F] {v : ℝ × X → F}
     (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :

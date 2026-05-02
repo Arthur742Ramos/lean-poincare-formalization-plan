@@ -341,13 +341,15 @@ packages the canonical stationary local solution attached to
   compact point-dependent- and existential-radius corollaries, finite-sum
   closure for explicit Holder, bounded, and `C^{0,α}` controls,
   finite-sum closure for existential Holder and `C^{0,α}` controls,
-  finite-product closure for existential normed-comm-ring-valued `C^{0,α}` controls,
+  finite-product closure for existential normed-comm-ring-valued `C^{0,α}`
+  controls,
   and
-  add/subtract/smul and product-valued pairing closure estimates plus the
-  bounded product estimate for normed-ring-valued `C^{0,α}` functions and the
-  corresponding bounded scalar-action estimate for normed-space-valued
-  functions, reciprocal closure for normed-field-valued functions bounded away
-  from zero and the corresponding division closure, along with closure
+  add/subtract/smul, integer-scalar, and product-valued pairing closure
+  estimates plus the bounded product estimate for normed-ring-valued
+  `C^{0,α}` functions and the corresponding bounded scalar-action estimate for
+  normed-space-valued functions, reciprocal closure for normed-field-valued
+  functions bounded away from zero and the corresponding division closure,
+  along with closure
   under taking norms, Lipschitz composition on the controlled range, bounded
   `C^{0,α}` composition under range or explicit closed-sup-ball bounds, and
   exponent lowering on unit parabolic-diameter domains with closed-ball and
