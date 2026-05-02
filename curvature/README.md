@@ -627,7 +627,9 @@ now packages the matching intrinsic boundary
         identified with the open Picard interior, matching derivative-view
         handoffs from closed-Picard primitive and chart-ODE data directly to
         ordinary-at-time derivative packages, plus chart-ODE packages, on the
-        same explicit open solution time sets, and time-derivative wrappers that
+        same explicit open solution time sets, with the chart-based raw/fixed-IVP
+        constructors now routed through the primitive derivative handoff, and
+        time-derivative wrappers that
         discharge the neighborhood-of-each-time hypothesis from those `Ioo`
         identifications for coordinate-model, component, field-level, and
         within-set endpoint data, and matching fixed-IVP `ofDerivative` /

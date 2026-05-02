@@ -847,7 +847,9 @@ derivative-view layer now has matching fixed-IVP and theorem-family handoffs
 from closed-Picard primitive and chart-ODE data directly to ordinary-at-time
 derivative packages, plus chart-ODE packages, on those explicit open solution
 time sets, so endpoint scalar routes can consume the Picard data without first
-constructing raw gauge-flow witnesses. The time-derivative layer
+constructing raw gauge-flow witnesses. The chart-based raw and fixed-IVP
+closed-Picard constructors now route through the same primitive derivative
+handoff, keeping the existence path aligned with the derivative-view API. The time-derivative layer
 now also turns those explicit open Picard time-set identifications into the
 neighborhood-of-each-time hypothesis once, and exposes fixed-IVP and
 theorem-family `..._of_timeSet_eq_Ioo` wrappers for coordinate-model,

@@ -943,7 +943,8 @@ theorem nonempty_of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_
 
 /-- Build an intrinsic DeTurck raw gauge-flow witness on the open Picard
 interior from named preferred-chart ODE data proved within the closed Picard
-interval. -/
+interval, by first converting the chart ODE into primitive manifold derivative
+data. -/
 noncomputable def of_intrinsicChartDerivativeOn_Ioo
     {g : MetricFamily (I := I) (M := M)}
     {background : ConnectionFamily (I := I) (M := M)}
@@ -956,13 +957,11 @@ noncomputable def of_intrinsicChartDerivativeOn_Ioo
     Diffeomorph3GaugeFlowOn (I := I) (M := M)
       (intrinsicDeTurckGaugeField (I := I) (M := M) g background)
       (Ioo tmin tmax) t₀ :=
-  of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source
-    (I := I) (M := M)
-    (X := intrinsicDeTurckGaugeField (I := I) (M := M) g background)
-    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+  of_intrinsicDerivativeOn_Ioo (I := I) (M := M)
+    (g := g) (background := background) (tmin := tmin) (tmax := tmax) (t₀ := t₀)
     maps3 anchored
-    (fun t ht x ↦ (hchart t ht x).1)
-    (fun t ht x ↦ (hchart t ht x).2)
+    (Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_chartDerivativeOn
+      (I := I) (M := M) hchart)
 
 /-- Proof-level intrinsic DeTurck raw gauge-flow existence on the open Picard
 interior from named preferred-chart ODE data proved within the closed Picard
@@ -1385,7 +1384,8 @@ theorem nonempty_ofPicardIccDerivative
   ⟨ofPicardIccDerivative maps3 anchored tmin tmax htimeSet hderiv⟩
 
 /-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence on open solution time
-sets from preferred-chart ODE data proved on closed Picard intervals. -/
+sets from preferred-chart ODE data proved on closed Picard intervals, routed
+through the primitive derivative handoff. -/
 noncomputable def ofPicardIccChartDerivative
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
@@ -1408,15 +1408,12 @@ noncomputable def ofPicardIccChartDerivative
         sol.1.toIntrinsicDeTurckSolution.background
         (Icc (tmin sol) (tmax sol))) :
     IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp where
-  flow := fun sol ↦ by
-    have G := Diffeomorph3GaugeFlowOn.of_intrinsicChartDerivativeOn_Ioo
-      (I := I) (M := M)
-      (g := sol.1.toIntrinsicDeTurckSolution.metric)
-      (background := sol.1.toIntrinsicDeTurckSolution.background)
-      (tmin := tmin sol) (tmax := tmax sol) (t₀ := ivp.initialTime)
-      (maps3 sol) (anchored sol) (hchart sol)
-    simpa [htimeSet sol] using G
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  ofPicardIccDerivative (I := I) (M := M) (ivp := ivp)
+    maps3 anchored tmin tmax htimeSet
+    (fun sol ↦
+      Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_chartDerivativeOn
+        (I := I) (M := M) (hchart sol))
 
 /-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence on open solution time
 sets from preferred-chart closed-Picard data, kept as proof-level evidence. -/
