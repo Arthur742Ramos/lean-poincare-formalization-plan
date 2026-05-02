@@ -953,7 +953,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          removing the redundant basepoint `tangentCoordChange` from this layer;
          locally equal readout-field variants plus ordinary-neighborhood and
          within-set component-data constructors now accept the same
-         direct-velocity hypotheses.
+         direct-velocity hypotheses, and the public tensor time-regularity
+         wrappers for full metric-coordinate Fréchet data mirror that interface.
          The module also now has an additive
          time/spatial decomposition upgrading that frozen spatial term to the full
          moving time-space field derivative once the remaining time-difference
