@@ -1055,7 +1055,7 @@ API; the same readouts have ordinary open-cylinder versions on the initial-data
 ball interior and open Picard interval. Product Lipschitz dependence now also
 descends to Lipschitz, continuity, and distance estimates for the extracted
 `(flow, tangent)` pair as a function of the base initial point at each Picard
-time.
+time, together with direct tangent-map projection estimates.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction
