@@ -137,6 +137,18 @@ theorem eventuallyWithin_mem_trivializationAt_eval
     ((trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).open_baseSet.mem_nhds
       (FiberBundle.mem_baseSet_trivializationAt' ((G.maps3 t) x)))
 
+/-- Within the raw gauge-flow time set, the image of a fixed base point
+eventually remains in the preferred chart source centered at its time-`t` image. -/
+theorem eventuallyWithin_mem_extChartAt_source_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s) (x : M) :
+    ∀ᶠ τ in 𝓝[s] t,
+      (G.maps3 τ) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+  (G.continuousWithinAt_eval ht x).preimage_mem_nhdsWithin
+    (extChartAt_source_mem_nhds (I := I) ((G.maps3 t) x))
+
 /-- A raw gauge-flow witness on a closed Picard interval supplies an ordinary
 manifold derivative at interior times. -/
 theorem hasMFDerivAt_of_mem_Ioo
@@ -230,6 +242,18 @@ theorem eventually_mem_trivializationAt_eval_of_mem_Ioo
   (G.continuousAt_eval_of_mem_Ioo ht x).preimage_mem_nhds
     ((trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).open_baseSet.mem_nhds
       (FiberBundle.mem_baseSet_trivializationAt' ((G.maps3 t) x)))
+
+/-- Interior times of a closed-interval raw gauge flow have the preferred-chart
+source membership needed for centered chart ODE formulas. -/
+theorem eventually_mem_extChartAt_source_eval_of_mem_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      (G.maps3 τ) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+  (G.continuousAt_eval_of_mem_Ioo ht x).preimage_mem_nhds
+    (extChartAt_source_mem_nhds (I := I) ((G.maps3 t) x))
 
 /-- A raw gauge-flow witness on a time set gives a local-at-time gauge-flow
 statement whenever the time set is a neighborhood of that time. -/
@@ -327,6 +351,19 @@ theorem eventually_mem_trivializationAt_eval
   (G.continuousAt_eval hs x).preimage_mem_nhds
     ((trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).open_baseSet.mem_nhds
       (FiberBundle.mem_baseSet_trivializationAt' ((G.maps3 t) x)))
+
+/-- Near any time where the raw gauge-flow equation holds on a neighborhood, the
+image of a fixed base point remains in the preferred chart source centered at
+its time-`t` image. -/
+theorem eventually_mem_extChartAt_source_eval
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      (G.maps3 τ) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+  (G.continuousAt_eval hs x).preimage_mem_nhds
+    (extChartAt_source_mem_nhds (I := I) ((G.maps3 t) x))
 
 /-- Package a geometric `SatisfiesGaugeFlowOn` statement as a raw `C^3`
 diffeomorphism gauge-flow witness. -/
@@ -2337,6 +2374,20 @@ theorem eventuallyWithin_mem_trivializationAt_eval
           (((G.flow sol).maps3 t) x)).baseSet :=
   (G.flow sol).eventuallyWithin_mem_trivializationAt_eval ht x
 
+/-- Fixed-IVP raw intrinsic gauge-flow curves eventually remain in the
+preferred chart source within the solution time set. -/
+theorem eventuallyWithin_mem_extChartAt_source_eval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t,
+      ((G.flow sol).maps3 τ) x ∈
+        (extChartAt I (((G.flow sol).maps3 t) x)).source :=
+  (G.flow sol).eventuallyWithin_mem_extChartAt_source_eval ht x
+
 /-- Ordinary pointwise manifold derivative read out directly from fixed-IVP raw
 intrinsic DeTurck gauge-flow existence at neighborhood-times. -/
 theorem hasMFDerivAt
@@ -2432,6 +2483,20 @@ theorem eventually_mem_trivializationAt_eval
         (trivializationAt E (TangentSpace I : M → Type _)
           (((G.flow sol).maps3 t) x)).baseSet :=
   (G.flow sol).eventually_mem_trivializationAt_eval hs x
+
+/-- Fixed-IVP raw intrinsic gauge-flow curves eventually remain in the preferred
+chart source at neighborhood-times. -/
+theorem eventually_mem_extChartAt_source_eval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      ((G.flow sol).maps3 τ) x ∈
+        (extChartAt I (((G.flow sol).maps3 t) x)).source :=
+  (G.flow sol).eventually_mem_extChartAt_source_eval hs x
 
 @[simp] theorem toDiffeomorph3GaugeFlow_maps3
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -3586,6 +3651,20 @@ theorem eventuallyWithin_mem_trivializationAt_eval
           (((G.flow ivp sol).maps3 t) x)).baseSet :=
   (G.forInitialValueProblem ivp).eventuallyWithin_mem_trivializationAt_eval sol ht x
 
+/-- Theorem-family raw intrinsic gauge-flow curves eventually remain in the
+preferred chart source within the solution time set. -/
+theorem eventuallyWithin_mem_extChartAt_source_eval
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t,
+      ((G.flow ivp sol).maps3 τ) x ∈
+        (extChartAt I (((G.flow ivp sol).maps3 t) x)).source :=
+  (G.forInitialValueProblem ivp).eventuallyWithin_mem_extChartAt_source_eval sol ht x
+
 /-- Ordinary pointwise manifold derivative read out directly from theorem-family
 raw intrinsic DeTurck gauge-flow existence at neighborhood-times. -/
 theorem hasMFDerivAt
@@ -3681,6 +3760,20 @@ theorem eventually_mem_trivializationAt_eval
         (trivializationAt E (TangentSpace I : M → Type _)
           (((G.flow ivp sol).maps3 t) x)).baseSet :=
   (G.forInitialValueProblem ivp).eventually_mem_trivializationAt_eval sol hs x
+
+/-- Theorem-family raw intrinsic gauge-flow curves eventually remain in the
+preferred chart source at neighborhood-times. -/
+theorem eventually_mem_extChartAt_source_eval
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      ((G.flow ivp sol).maps3 τ) x ∈
+        (extChartAt I (((G.flow ivp sol).maps3 t) x)).source :=
+  (G.forInitialValueProblem ivp).eventually_mem_extChartAt_source_eval sol hs x
 
 /-- The family-level chosen-background raw flow induces the same anchored gauge as the existing
 identity `C³` gauge attached to a chosen-background solution. -/

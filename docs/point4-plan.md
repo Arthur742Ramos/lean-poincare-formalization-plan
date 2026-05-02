@@ -942,11 +942,13 @@ now mirror those derivative, continuity, and tangent-trivialization readouts
 directly, so downstream chart arguments no longer have to unwrap the raw flow.
 They also expose the ordinary-neighborhood versions of the same readouts:
 `hasMFDerivAt`, `hasDerivAt_extChartAt_eval`,
-`continuousAt_extChartAt_eval`, `continuousAt_eval`, and
-`eventually_mem_trivializationAt_eval`, plus the matching within-time-set
-preferred-chart continuity readout. The same fixed-IVP/theorem-family layer now
-also mirrors raw preferred-chart range eventuality, both at ordinary
-neighborhood-times and relative to the solution time set.
+`continuousAt_extChartAt_eval`, `continuousAt_eval`,
+`eventually_mem_trivializationAt_eval`, and
+`eventually_mem_extChartAt_source_eval`, plus the matching within-time-set
+preferred-chart continuity and source-membership readouts. The same
+fixed-IVP/theorem-family layer now also mirrors raw preferred-chart range and
+source eventuality, both at ordinary neighborhood-times and relative to the
+solution time set.
 The raw, fixed-IVP, and theorem-family preferred-chart derivative readouts now
 also have centered-chart simplifications that rewrite the derivative value from
 `tangentCoordChange I p p p (...)` to the actual gauge velocity. This removes a
