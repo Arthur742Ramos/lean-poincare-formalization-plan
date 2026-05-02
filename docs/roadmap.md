@@ -1330,7 +1330,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      stronger symmetric positive-definite persistence readout and the represented
      continuous Riemannian-metric-valued curve, plus a combined proof-level
      fiber carrying that solution's smooth realization and reverse encoding of
-     the realized chosen-background candidate. The thin raw-gauge
+     the realized chosen-background candidate, all available as a single
+     selected witness. The thin raw-gauge
      route module now
      mirrors its global and interval theorem-package projections as proof-level
      `Nonempty` witnesses for both intrinsic and ordinary compact point-4

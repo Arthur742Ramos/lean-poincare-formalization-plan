@@ -771,7 +771,8 @@ now packages the matching intrinsic boundary
      positive-definite persistence readout and the represented continuous
      Riemannian-metric-valued curve, plus a combined proof-level fiber carrying
      that solution's smooth realization and reverse encoding of the realized
-     chosen-background candidate. The thin
+     chosen-background candidate, all available as a single selected witness.
+     The thin
      raw-gauge route module mirrors its global and interval projections to
      intrinsic and ordinary compact point-4 theorem packages as proof-level
      `Nonempty` witnesses, and does the same for the genuine symmetric-carrier
