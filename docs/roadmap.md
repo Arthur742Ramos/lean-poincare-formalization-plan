@@ -353,7 +353,8 @@ symmetric locus is now closed, and continuous Riemannian metrics are shown to
 inhabit the refined symmetric positive-definite locus inside that model. The
 smooth-density layer now also proves that every such bundled continuous
 Riemannian metric is in the preferred finite-cover closure of smooth
-symmetric positive-definite sections. The
+symmetric positive-definite sections, with a quantitative readout returning a
+smooth SPD approximant inside any prescribed positive radius. The
 same package now also constructs a transported continuous-linear coordinatewise
 antisymmetric-defect map whose kernel is exactly that symmetric locus, and it
 presents the metric locus as an open subset of the closed symmetric section

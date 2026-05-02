@@ -1173,7 +1173,9 @@ SPD bilinear-form section in a continuous Riemannian vector bundle lies in the
 closure of smooth SPD sections for the preferred finite-cover norm, together
 with the direct specialization that any bundled continuous Riemannian metric
 itself lies in that smooth-SPD closure when viewed through the preferred
-finite-cover bilinear-form chart. It also derives that finite-cover inverse
+finite-cover bilinear-form chart, and a quantitative readout that produces a
+smooth SPD approximant inside any prescribed positive preferred-cover radius.
+It also derives that finite-cover inverse
 bound from compactness of the cover pieces
 inside their fixed trivialization domains by factoring fixed-center inverses
 through centered inverse trivializations and continuous coordinate changes.
