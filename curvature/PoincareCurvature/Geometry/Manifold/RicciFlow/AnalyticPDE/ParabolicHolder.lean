@@ -161,6 +161,27 @@ theorem le_of_prod_dist_le {R δ : ℝ} (hδ_space : δ ≤ R) (hδ_time : δ �
     hspace_dist.trans (h.trans hδ_space)
   exact max_le hsqrt hspace
 
+/-- A small closed product-metric distance implies a small open parabolic-distance bound, after
+strictly shrinking the product radius quadratically in the time direction. -/
+theorem lt_of_prod_dist_le {R δ : ℝ} (hδ_space : δ < R) (hδ_time : δ < R ^ 2)
+    (hR : 0 < R) (h : dist p q ≤ δ) : parabolicDistance p q < R := by
+  have htime_dist : dist p.1 q.1 ≤ dist p q := by
+    rw [Prod.dist_eq]
+    exact le_max_left _ _
+  have htime_abs : |p.1 - q.1| < R ^ 2 := by
+    have hlt : dist p.1 q.1 < R ^ 2 :=
+      lt_of_le_of_lt (htime_dist.trans h) hδ_time
+    simpa [Real.dist_eq] using hlt
+  have hsqrt : Real.sqrt |p.1 - q.1| < R := by
+    exact (sq_lt_sq₀ (Real.sqrt_nonneg _) hR.le).1 (by
+      rwa [Real.sq_sqrt (abs_nonneg _)])
+  have hspace_dist : dist p.2 q.2 ≤ dist p q := by
+    rw [Prod.dist_eq]
+    exact le_max_right _ _
+  have hspace : dist p.2 q.2 < R :=
+    lt_of_le_of_lt (hspace_dist.trans h) hδ_space
+  exact max_lt hsqrt hspace
+
 /-- A small parabolic distance bound gives a small ordinary product-metric bound once the time
 radius has been squared. -/
 theorem prod_dist_lt_of_lt {R ε : ℝ} (hR_space : R ≤ ε) (hR_time : R ^ 2 ≤ ε)
@@ -263,6 +284,13 @@ theorem subset_metric_ball {ε : ℝ} (hR_space : R ≤ ε) (hR_time : R ^ 2 ≤
   rw [Metric.mem_ball, dist_comm]
   exact parabolicDistance.prod_dist_lt_of_lt hR_space hR_time hq
 
+theorem metric_closedBall_subset {δ : ℝ} (hδ_space : δ < R) (hδ_time : δ < R ^ 2)
+    (hR : 0 < R) :
+    Metric.closedBall p δ ⊆ parabolicBall p R := by
+  intro q hq
+  rw [Metric.mem_closedBall, dist_comm] at hq
+  exact parabolicDistance.lt_of_prod_dist_le hδ_space hδ_time hR hq
+
 theorem isOpen (p : ℝ × X) (R : ℝ) : IsOpen (parabolicBall p R) := by
   simpa [parabolicBall] using
     (parabolicDistance.continuous_fixed_left p).isOpen_preimage (Iio R) isOpen_Iio
@@ -287,6 +315,37 @@ theorem exists_subset_of_mem_nhds {s : Set (ℝ × X)} (hs : s ∈ 𝓝 p) :
       nlinarith [hRpos.le, hRle1]
     exact hRsq_le.trans hR_space
   exact ⟨R, hRpos, (subset_metric_ball (p := p) hR_space hR_time).trans hεs⟩
+
+theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
+    {R : ℝ} (hR : 0 < R) :
+    ∃ N ⊆ K, N.Finite ∧ K ⊆ ⋃ y ∈ N, parabolicBall y R := by
+  let δ : ℝ := min R (R ^ 2) / 2
+  have hδpos : 0 < δ := by
+    have hR2 : 0 < R ^ 2 := sq_pos_of_pos hR
+    exact half_pos (lt_min hR hR2)
+  have hδ_space : δ < R := by
+    unfold δ
+    exact (half_lt_self (lt_min hR (sq_pos_of_pos hR))).trans_le (min_le_left _ _)
+  have hδ_time : δ < R ^ 2 := by
+    unfold δ
+    exact (half_lt_self (lt_min hR (sq_pos_of_pos hR))).trans_le (min_le_right _ _)
+  let ε : ℝ≥0 := ⟨δ, hδpos.le⟩
+  have hεne : ε ≠ 0 := by
+    intro hε
+    have hδ0 : δ = 0 := by
+      simpa [ε] using congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+    linarith
+  rcases Metric.exists_finite_isCover_of_isCompact (s := K) (ε := ε) hεne hK with
+    ⟨N, hNK, hNfinite, hcover⟩
+  refine ⟨N, hNK, hNfinite, ?_⟩
+  have hcover' : K ⊆ ⋃ y ∈ N, Metric.closedBall y (ε : ℝ) :=
+    hcover.subset_iUnion_closedBall
+  intro z hz
+  rcases mem_iUnion.1 (hcover' hz) with ⟨y, hy⟩
+  rcases mem_iUnion.1 hy with ⟨hyN, hzball⟩
+  refine mem_iUnion.2 ⟨y, mem_iUnion.2 ⟨hyN, ?_⟩⟩
+  exact (metric_closedBall_subset (p := y) (R := R) (δ := (ε : ℝ))
+    (by simpa [ε] using hδ_space) (by simpa [ε] using hδ_time) hR) hzball
 
 end parabolicBall
 

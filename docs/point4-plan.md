@@ -1211,7 +1211,7 @@ topological compatibility with the ordinary product metric including local
 bases by parabolic balls and product cylinders, exact standard ball/cylinder
 identifications, plus closed-to-open shrink inclusions and open-to-closed
 closure containment for balls/cylinders, proper-space compactness for closed
-balls/cylinders, finite parabolic closed-ball covers of compact sets, and
+balls/cylinders, finite open/closed parabolic ball covers of compact sets, and
 packages `C^{0,α}`-style bounded/Hölder control with slice, explicit
 closed-ball/cylinder oscillation, continuity,
 uniform-continuity, estimate monotonicity in the controlling constants, and
