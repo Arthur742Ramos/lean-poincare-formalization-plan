@@ -884,7 +884,8 @@ local-flow packages now also expose within-filter space-time continuity and
 eventual-membership readouts on the Picard cylinder, matching chart-domain
 membership arguments where the initial point and time vary together; at points
 inside the initial-data ball and open Picard interval, those readouts upgrade
-to ordinary neighborhood continuity and eventual membership. Continuous and variational
+to ordinary neighborhood continuity, eventual membership, and `ContinuousOn` on
+the open Picard cylinder. Continuous and variational
 local-flow packages now expose named base-flow, tangent-map, and vector-slot
 time-slice continuity bridges on the Picard interval, including direct
 within-interval, interior pointwise, and open-interior `ContinuousOn`

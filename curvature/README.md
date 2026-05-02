@@ -247,7 +247,8 @@ now packages the matching intrinsic boundary
         continuity theorem on the local Picard cylinder, and a promotion from
         Lipschitz local flows to the continuous space-time partial-flow form
         needed for chart gluing, with within-filter space-time continuity and
-        eventual-membership readouts and ordinary open-cylinder versions, plus the
+        eventual-membership readouts, ordinary open-cylinder versions, and
+        `ContinuousOn` over the open Picard cylinder, plus the
        time-slice continuity bridges for continuous/variational local-flow
         packages, including direct within-interval and interior pointwise
         continuity readouts and open-interior `ContinuousOn` readouts,
@@ -657,7 +658,7 @@ now packages the matching intrinsic boundary
      space-time continuity theorem on the local Picard cylinder, a promotion
      from Lipschitz local flows to continuous space-time partial flows,
      within-filter space-time continuity and eventual-membership readouts with
-     ordinary open-cylinder variants,
+     ordinary open-cylinder variants and `ContinuousOn` over the open cylinder,
      restriction maps to smaller
      Picard intervals and initial balls with matching `Nonempty` wrappers,
      readout simp lemmas for localized flow/tangent maps and forgetful projections,

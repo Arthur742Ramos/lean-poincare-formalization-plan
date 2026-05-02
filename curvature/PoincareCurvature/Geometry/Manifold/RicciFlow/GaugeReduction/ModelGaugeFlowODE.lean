@@ -610,6 +610,14 @@ theorem flow_continuousAt_spaceTime_of_mem_ball_Ioo
     (Ioo_subset_Icc_self ht)).continuousAt
       (closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo hx ht)
 
+/-- A Lipschitz local-flow package is continuous on the open Picard cylinder. -/
+theorem flow_continuousOn_spaceTime_Ioo
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) :
+    ContinuousOn (fun q : V × ℝ => α.flow q.1 q.2)
+      (ball x₀ r ×ˢ Ioo tmin tmax) := by
+  intro p hp
+  exact (α.flow_continuousAt_spaceTime_of_mem_ball_Ioo hp.1 hp.2).continuousWithinAt
+
 /-- Interior space-time eventual-membership readout for a Lipschitz local-flow
 package. -/
 theorem flow_eventually_mem_of_mem_spaceTime_Ioo
@@ -827,6 +835,13 @@ theorem flow_continuousAt_spaceTime_of_mem_ball_Ioo
   (α.flow_continuousWithinAt_spaceTime_at (ball_subset_closedBall hx)
     (Ioo_subset_Icc_self ht)).continuousAt
       (closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo hx ht)
+
+/-- A continuous local-flow package is continuous on the open Picard cylinder. -/
+theorem flow_continuousOn_spaceTime_Ioo
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) :
+    ContinuousOn α.flow (ball x₀ r ×ˢ Ioo tmin tmax) := by
+  intro p hp
+  exact (α.flow_continuousAt_spaceTime_of_mem_ball_Ioo hp.1 hp.2).continuousWithinAt
 
 /-- Interior space-time eventual-membership readout for a continuous local-flow
 package. -/
