@@ -515,7 +515,10 @@ now packages the matching intrinsic boundary
    continuous Riemannian metric, and the packaged Banach solution now exposes one
    metric-valued curve whose local-interval inner products agree with the Banach
    section curve, whose initial value is the original initial metric, and whose
-   common-interval uniqueness follows from Banach uniqueness. For autonomous
+   common-interval uniqueness follows from Banach uniqueness. The smooth-density
+   side also now specializes the preferred finite-cover closure theorem directly
+   to bundled continuous Riemannian metrics, placing each such metric in the
+   closure of smooth symmetric positive-definite sections. For autonomous
    charts, a new local `C^1` reduction also shrinks to an open neighborhood
    inside the positive-definite metric locus and derives the needed local
    Lipschitz bound there, so chart estimates can be proved locally around the

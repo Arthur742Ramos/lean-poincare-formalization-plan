@@ -650,6 +650,42 @@ theorem mem_closure_smooth_spd_preferredBilinear_of_continuousRiemannianBundle
     exact lt_of_lt_of_le hudist (min_le_right ε δ)
   exact ⟨u, ⟨⟨hu_symm, hδsubset u hudistδ⟩, hu_smooth⟩, hudistε⟩
 
+/-- A continuous Riemannian metric, viewed as a preferred finite-cover bilinear-form section, lies in
+the closure of smooth symmetric positive-definite sections. -/
+theorem _root_.Bundle.ContinuousRiemannianMetric.mem_closure_smooth_spd_preferredBilinear
+    [IsContinuousRiemannianBundle (B := M) F W]
+    [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [SecondCountableTopology H] [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (g : _root_.Bundle.ContinuousRiemannianMetric F W) :
+    (⟨g.toSection, g.continuous_toSection⟩ :
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) ∈
+      closure
+        ({u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover |
+            u ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+              (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover ∧
+            ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+              (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x))}) :=
+  mem_closure_smooth_spd_preferredBilinear_of_continuousRiemannianBundle
+    (E := E) (H := H) (I := I) (M := M) (F := F) (W := W) x0
+    (⟨g.toSection, g.continuous_toSection⟩ :
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (mem_symmetricPositiveDefiniteLocus_of_continuousRiemannianMetric
+      (M := M) (F := F) (W := W)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover g)
+
 end PreferredBilinearRiemannianSmoothApprox
 
 end ContinuousSectionSpace
