@@ -346,7 +346,7 @@ packages the canonical stationary local solution attached to
   bounded product estimate for normed-ring-valued `C^{0,α}` functions and the
   corresponding bounded scalar-action estimate for normed-space-valued
   functions, reciprocal closure for normed-field-valued functions bounded away
-  from zero, along with closure
+  from zero and the corresponding division closure, along with closure
   under taking norms, Lipschitz composition on the controlled range, bounded
   `C^{0,α}` composition under range or explicit closed-sup-ball bounds, and
   exponent lowering on unit parabolic-diameter domains with closed-ball and

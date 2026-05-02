@@ -125,10 +125,10 @@ existential Holder and `C^{0,α}` controls, product-valued pairing closure,
 additive/subtractive closure estimates, plus the
 bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded
-scalar-action estimate for normed-space-valued functions, reciprocal closure
-for normed-field-valued functions bounded away from zero, plus closure under
-taking norms, Lipschitz composition on the controlled range, and bounded
-`C^{0,α}` composition under range or explicit closed-sup-ball bounds. This is
+scalar-action estimate for normed-space-valued functions, reciprocal and
+division closure for normed-field-valued functions bounded away from zero,
+plus closure under taking norms, Lipschitz composition on the controlled range,
+and bounded `C^{0,α}` composition under range or explicit closed-sup-ball bounds. This is
 groundwork for the future Schauder and Ricci-DeTurck Banach-chart layer, now
 also including exponent lowering on unit parabolic-diameter domains with
 closed-ball and closed-cylinder specializations across the Holder and

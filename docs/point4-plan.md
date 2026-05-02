@@ -1233,8 +1233,8 @@ existential Holder and `C^{0,α}` controls, and product-valued pairing closure,
 and additive/subtractive algebra estimates,
 including the standard bounded-product estimate for normed-ring-valued
 `C^{0,α}` functions and the corresponding bounded scalar-action estimate on
-normed-space-valued functions, plus reciprocal closure for normed-field-valued
-functions bounded away from zero.
+normed-space-valued functions, plus reciprocal and division closure for
+normed-field-valued functions bounded away from zero.
 This is still only the
 norm/topology vocabulary, with the expected norm-estimate closure, not the
 Schauder estimates or Ricci-DeTurck Banach chart; it also already includes the

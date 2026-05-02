@@ -990,8 +990,8 @@ bounded, and `C^{0,α}` controls, finite-sum closure for existential Holder and
 closure estimates for Hölder and bounded control, together with the bounded
 product estimate for normed-ring-valued `C^{0,α}` functions and the
 corresponding bounded scalar-action estimate for normed-space-valued functions,
-reciprocal closure for normed-field-valued functions bounded away from zero,
-plus closure under taking norms and Lipschitz composition on the
+reciprocal and division closure for normed-field-valued functions bounded away
+from zero, plus closure under taking norms and Lipschitz composition on the
 controlled range, bounded `C^{0,α}` composition under range or
 explicit closed-sup-ball bounds, exponent lowering on unit parabolic-diameter
 domains with closed-ball and closed-cylinder specializations across the Holder

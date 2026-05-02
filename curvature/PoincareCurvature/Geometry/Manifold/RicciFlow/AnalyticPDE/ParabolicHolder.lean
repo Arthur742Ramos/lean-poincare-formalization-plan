@@ -2098,6 +2098,17 @@ theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
           (mul_le_mul (hu.holder hp hq) (hv.bounded hq) (norm_nonneg _) hH₁d_nonneg)
       _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
 
+theorem div {𝕜 : Type*} [NormedField 𝕜] {B₁ B₂ H₁ H₂ δ : ℝ}
+    {a b : ℝ × X → 𝕜} {s : Set (ℝ × X)}
+    (ha : ParabolicC0AlphaWith B₁ H₁ α a s)
+    (hb : ParabolicC0AlphaWith B₂ H₂ α b s)
+    (hB₁ : 0 ≤ B₁) (hδpos : 0 < δ)
+    (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖) :
+    ParabolicC0AlphaWith (B₁ * δ⁻¹)
+      (B₁ * (δ⁻¹ * H₂ * δ⁻¹) + δ⁻¹ * H₁) α (fun z => a z / b z) s := by
+  simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using
+    ha.mul (hb.inv hδpos hδ) hB₁
+
 theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     {B₁ B₂ H₁ H₂ α : ℝ} {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
     (ha : ParabolicC0AlphaWith B₁ H₁ α a s)
@@ -2434,6 +2445,21 @@ theorem mul {A : Type*} [NormedRing A] {u v : ℝ × X → A} {s : Set (ℝ × X
   exact ⟨B₁ * B₂, mul_nonneg hB₁ hB₂,
     B₁ * H₂ + B₂ * H₁, add_nonneg (mul_nonneg hB₁ hH₂) (mul_nonneg hB₂ hH₁),
     hBH₁.mul hBH₂ hB₁⟩
+
+theorem div {𝕜 : Type*} [NormedField 𝕜] {a b : ℝ × X → 𝕜} {δ : ℝ}
+    (ha : ParabolicC0AlphaOn α a s) (hb : ParabolicC0AlphaOn α b s)
+    (hδpos : 0 < δ) (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖) :
+    ParabolicC0AlphaOn α (fun z => a z / b z) s := by
+  rcases ha with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
+  rcases hb with ⟨B₂, _hB₂, H₂, hH₂, hBH₂⟩
+  refine ⟨B₁ * δ⁻¹, mul_nonneg hB₁ (inv_nonneg.mpr hδpos.le),
+    B₁ * (δ⁻¹ * H₂ * δ⁻¹) + δ⁻¹ * H₁, ?_,
+    hBH₁.div hBH₂ hB₁ hδpos hδ⟩
+  exact add_nonneg
+    (mul_nonneg hB₁
+      (mul_nonneg (mul_nonneg (inv_nonneg.mpr hδpos.le) hH₂)
+        (inv_nonneg.mpr hδpos.le)))
+    (mul_nonneg (inv_nonneg.mpr hδpos.le) hH₁)
 
 theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
