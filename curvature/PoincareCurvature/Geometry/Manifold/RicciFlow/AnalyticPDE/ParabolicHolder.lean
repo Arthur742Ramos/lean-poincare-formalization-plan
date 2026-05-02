@@ -681,6 +681,36 @@ theorem boundedWith_of_subset_closedBall {B₀ R : ℝ} {c : ℝ × X}
       add_le_add (mul_le_mul_of_nonneg_left hpow hC) le_rfl
     _ = B₀ + C * R ^ α := by ring
 
+theorem boundedWith_of_subset_closedCylinder {B₀ timeRadius spaceRadius : ℝ}
+    {c : ℝ × X}
+    (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius) (hc : c ∈ s)
+    (huc : ‖u c‖ ≤ B₀) :
+    ParabolicBoundedWith
+      (B₀ + C * (max (Real.sqrt timeRadius) spaceRadius) ^ α) u s := by
+  intro p hp
+  have hpc_cyl : p ∈ parabolicClosedCylinder c timeRadius spaceRadius := hs hp
+  have hpc : parabolicDistance p c ≤ max (Real.sqrt timeRadius) spaceRadius := by
+    have htime : Real.sqrt |p.1 - c.1| ≤ Real.sqrt timeRadius :=
+      Real.sqrt_le_sqrt (by simpa [abs_sub_comm] using hpc_cyl.1)
+    have hspace : dist p.2 c.2 ≤ spaceRadius := by
+      simpa [dist_comm] using hpc_cyl.2
+    change max (Real.sqrt |p.1 - c.1|) (dist p.2 c.2) ≤
+      max (Real.sqrt timeRadius) spaceRadius
+    exact max_le (htime.trans (le_max_left _ _)) (hspace.trans (le_max_right _ _))
+  have hpow : (parabolicDistance p c) ^ α ≤
+      (max (Real.sqrt timeRadius) spaceRadius) ^ α :=
+    Real.rpow_le_rpow (parabolicDistance.nonneg p c) hpc hα
+  have hdecomp : u p = (u p - u c) + u c := by
+    abel
+  calc
+    ‖u p‖ = ‖(u p - u c) + u c‖ := congrArg (fun z : E => ‖z‖) hdecomp
+    _ ≤ ‖u p - u c‖ + ‖u c‖ := norm_add_le _ _
+    _ ≤ C * (parabolicDistance p c) ^ α + B₀ := add_le_add (h hp hc) huc
+    _ ≤ C * (max (Real.sqrt timeRadius) spaceRadius) ^ α + B₀ :=
+      add_le_add (mul_le_mul_of_nonneg_left hpow hC) le_rfl
+    _ = B₀ + C * (max (Real.sqrt timeRadius) spaceRadius) ^ α := by ring
+
 /-- Positive-exponent parabolic Holder control implies continuity on the controlled set. -/
 theorem continuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) : ContinuousOn u s := by
   intro p hp

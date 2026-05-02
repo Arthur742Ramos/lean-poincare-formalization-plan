@@ -327,8 +327,9 @@ packages the canonical stationary local solution attached to
   under taking norms, Lipschitz composition on the controlled range, and
   exponent lowering on unit parabolic-diameter domains, backed by closed-ball
   diameter control, product ball/closed-ball compatibility for parabolic
-  balls and product cylinders, plus a basepoint-to-sup bound on closed
-  parabolic balls. These primitives do not yet supply the
+  balls and product cylinders, plus basepoint-to-sup bounds on closed
+  parabolic balls and closed product cylinders. These primitives do not yet
+  supply the
   Schauder estimates or the Ricci-DeTurck Banach chart. The
   curvature,
   time-dependent
