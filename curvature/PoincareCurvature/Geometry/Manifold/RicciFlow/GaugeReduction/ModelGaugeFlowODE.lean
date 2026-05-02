@@ -1519,6 +1519,65 @@ def ofProductContinuousLocalFlowSolution
     exact hasDerivWithinAt_snd_of_variationalVectorField
       (α.hasDerivWithinAt (x, (1 : V →L[ℝ] V)) (hball x hx) t ht)
 
+/-- Product-derived variational local flows inherit joint space-time continuity
+of the base flow and tangent map from the continuous product flow. -/
+theorem ofProduct_flow_tangent_continuousOn_spaceTime
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    ContinuousOn
+      (fun p : V × ℝ =>
+        ((ofProductContinuousLocalFlowSolution α hball).flow p,
+          (ofProductContinuousLocalFlowSolution α hball).tangent p.1 p.2))
+      (closedBall x₀ r ×ˢ Icc tmin tmax) := by
+  let embed : V × ℝ → (V × (V →L[ℝ] V)) × ℝ :=
+    fun p => ((p.1, (1 : V →L[ℝ] V)), p.2)
+  have hemb : ContinuousOn embed (closedBall x₀ r ×ˢ Icc tmin tmax) :=
+    (by fun_prop : Continuous embed).continuousOn
+  have hmaps : MapsTo embed (closedBall x₀ r ×ˢ Icc tmin tmax)
+      (closedBall (x₀, (1 : V →L[ℝ] V)) R ×ˢ Icc tmin tmax) := by
+    intro p hp
+    exact ⟨hball p.1 hp.1, hp.2⟩
+  simpa [ofProductContinuousLocalFlowSolution, embed] using α.continuousOn.comp hemb hmaps
+
+/-- Pointwise within-space-time continuity of the product-derived
+base-flow/tangent-map pair. -/
+theorem ofProduct_flow_tangent_continuousWithinAt_spaceTime
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {p : V × ℝ} (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax) :
+    ContinuousWithinAt
+      (fun q : V × ℝ =>
+        ((ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2))
+      (closedBall x₀ r ×ˢ Icc tmin tmax) p :=
+  (ofProduct_flow_tangent_continuousOn_spaceTime α hball).continuousWithinAt hp
+
+/-- Product-derived variational local flows are eventually in any open
+base/tangent target set around a space-time endpoint. -/
+theorem ofProduct_flow_tangent_eventuallyWithin_mem_of_mem_spaceTime
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {p : V × ℝ} (hp : p ∈ closedBall x₀ r ×ˢ Icc tmin tmax)
+    {U : Set (V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem :
+      ((ofProductContinuousLocalFlowSolution α hball).flow p,
+        (ofProductContinuousLocalFlowSolution α hball).tangent p.1 p.2) ∈ U) :
+    (fun q : V × ℝ =>
+      ((ofProductContinuousLocalFlowSolution α hball).flow q,
+        (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2)) ⁻¹' U ∈
+      𝓝[closedBall x₀ r ×ˢ Icc tmin tmax] p :=
+  (ofProduct_flow_tangent_continuousWithinAt_spaceTime α hball hp)
+    (hU.mem_nhds hmem)
+
 /-- Extract variational local-flow existence from proof-level continuous product
 flow existence without choosing the product flow at call sites. -/
 theorem nonempty_ofProductContinuousLocalFlowSolution

@@ -1048,6 +1048,9 @@ Picard-Lindelöf on a product Banach
 space to variational tangent data. A continuous local flow for this product
 system, initialized on `(x, 1)` and restricted to a base ball contained in the
 product Picard ball, now extracts directly to `VariationalLocalFlowSolution`.
+That extraction now also exposes joint space-time continuity and
+eventual-membership readouts for the extracted `(flow, tangent)` pair, so the
+continuous product Picard output is not discarded when entering the variational API.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction
