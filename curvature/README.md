@@ -982,8 +982,8 @@ domains with closed-ball and closed-cylinder specializations across the Holder
 and `C^{0,α}` interfaces, and closed-ball diameter control,
 product ball/closed-ball compatibility for parabolic balls and product
 cylinders, plus basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on
-closed parabolic balls and closed product cylinders. It still does not include
-the Schauder estimates or Ricci-DeTurck Banach chart.
+compact domains, closed parabolic balls, and closed product cylinders. It
+still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build
 

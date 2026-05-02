@@ -335,9 +335,9 @@ packages the canonical stationary local solution attached to
   closed-cylinder specializations across the Holder and `C^{0,α}` interfaces,
   backed by closed-ball diameter control, product ball/closed-ball
   compatibility for parabolic balls and product cylinders, plus
-  basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on closed
-  parabolic balls and closed product cylinders. These primitives do not yet
-  supply the
+  basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on compact domains,
+  closed parabolic balls, and closed product cylinders. These primitives do not
+  yet supply the
   Schauder estimates or the Ricci-DeTurck Banach chart. The
   curvature,
   time-dependent

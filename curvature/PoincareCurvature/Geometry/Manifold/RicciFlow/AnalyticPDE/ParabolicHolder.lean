@@ -1037,6 +1037,14 @@ theorem c0AlphaOn_of_subset_closedCylinder {B₀ timeRadius spaceRadius : ℝ}
     add_nonneg hB₀ (mul_nonneg hC (Real.rpow_nonneg hρ α)), C, hC, by
       simpa [ρ] using hCu.c0AlphaWith_of_subset_closedCylinder hC hα hs hc huc⟩
 
+theorem c0AlphaOn_of_isCompact (h : ParabolicHolderOn α u s) (hα : 0 < α)
+    (hs : IsCompact s) :
+    ParabolicC0AlphaOn α u s := by
+  rcases h with ⟨C, hC, hCu⟩
+  rcases hs.exists_bound_of_continuousOn (hCu.continuousOn hα) with ⟨B, hB⟩
+  exact ⟨max B 0, le_max_right _ _, C, hC,
+    ⟨fun p hp => (hB p hp).trans (le_max_left _ _), hCu⟩⟩
+
 end ParabolicHolderOn
 
 namespace ParabolicBoundedWith
