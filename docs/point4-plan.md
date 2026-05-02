@@ -457,6 +457,10 @@ the open-interior `Ioo` specializations now mirror that direct-velocity API too.
 The geometric-slot route, where scalar identities are stated in actual
 pushed-forward tangent vectors, now also has ordinary-neighborhood and
 within-set direct-velocity field-derivative and tensor time-regularity wrappers.
+The closed-Picard `Ioo` geometric-slot specializations now mirror that
+direct-velocity interface, so endpoint and interior callers can both state the
+`Bfield'` scalar identity using the raw velocity `X t (G.maps3 t x)` and the
+actual pushed-forward tangent vectors.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate

@@ -680,7 +680,8 @@ now packages the matching intrinsic boundary
        tangent-coordinate derivative from the model tangent ODE and
        open-interior `Ioo` specializations, plus ordinary-neighborhood
        and within-set geometric-slot wrappers whose scalar identities stay in
-       actual pushed-forward tangent vectors,
+       actual pushed-forward tangent vectors, including the closed-Picard
+       `Ioo` specializations,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an
