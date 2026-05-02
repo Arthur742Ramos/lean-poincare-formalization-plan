@@ -767,9 +767,10 @@ now packages the matching intrinsic boundary
      fiber. The interval raw-gauge route similarly exposes the ambient
      state-preserving Banach solution with terminal-time control and
      common-interval uniqueness, now including the stronger symmetric
-     positive-definite persistence readout, plus a combined proof-level fiber
-     carrying that solution's smooth realization and reverse encoding of the
-     realized chosen-background candidate. The thin
+     positive-definite persistence readout and the represented continuous
+     Riemannian-metric-valued curve, plus a combined proof-level fiber carrying
+     that solution's smooth realization and reverse encoding of the realized
+     chosen-background candidate. The thin
      raw-gauge route module mirrors its global and interval projections to
      intrinsic and ordinary compact point-4 theorem packages as proof-level
      `Nonempty` witnesses, and does the same for the genuine symmetric-carrier
