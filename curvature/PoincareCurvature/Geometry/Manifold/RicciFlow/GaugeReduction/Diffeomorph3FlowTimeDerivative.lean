@@ -11525,6 +11525,147 @@ theorem hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadoutWithinOpen
       (SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeWithinOn.toPullbackMetricInnerDerivativeOn_Ioo
         (I := I) (M := M) hwithin)
 
+/-- Interior scalar-readout route to tensor time-regularity with explicit
+eventual membership of the product graph in the derivative domain.
+
+This removes the openness requirement from
+`hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadoutOpen`; callers may
+instead prove that the model Picard graph is eventually inside the chart/Banach
+domain on which the scalar readout is differentiated. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadout
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (domain : Set (ℝ × E × E × E))
+          (Fscalar : ℝ × E × E × E → ℝ)
+          (Fscalar' : ℝ × E × E × E →L[ℝ] ℝ)
+          (uE vE : E),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝 t]
+              (fun τ : ℝ ↦
+                Fscalar (τ, α.flow (xE, τ),
+                  α.tangent xE τ uE, α.tangent xE τ vE)) ∧
+          HasFDerivWithinAt Fscalar Fscalar' domain
+            (t, α.flow (xE, t), α.tangent xE t uE, α.tangent xE t vE) ∧
+          (∀ᶠ τ in 𝓝 t,
+            (τ, α.flow (xE, τ), α.tangent xE τ uE, α.tangent xE τ vE) ∈ domain) ∧
+          Fscalar'
+            (1, f t (α.flow (xE, t)),
+              (Df t (α.flow (xE, t))) (α.tangent xE t uE),
+              (Df t (α.flow (xE, t))) (α.tangent xE t vE)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) := by
+  refine
+    SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
+      (I := I) (M := M) ?_
+  intro t ht x u v
+  obtain ⟨xE, hxE, domain, Fscalar, Fscalar', uE, vE,
+    hmodel_eq, hF, hdomain, hvalue⟩ := hdata ht x u v
+  have heq :
+      (fun τ : ℝ ↦
+        (g τ).inner ((G.maps3 τ) x)
+          ((G.maps3 τ).pushforwardTangent x u)
+          ((G.maps3 τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+        fun τ : ℝ ↦
+          Fscalar (τ, α.flow (xE, τ),
+            α.tangent xE τ uE, α.tangent xE τ vE) :=
+    (G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
+      (t := t) ht g x u v).trans hmodel_eq
+  have hderiv :=
+    α.hasDerivAt_scalarField_time_flow_tangent_apply₂Within_of_mem_Ioo
+      hxE ht uE vE hF hdomain
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq
+
+/-- Closed-Picard scalar-readout route to tensor time-regularity with explicit
+within-filter convergence of the product graph into the derivative domain.
+
+This is the non-open-domain companion to
+`hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadoutWithinOpen`. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadoutWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (domain : Set (ℝ × E × E × E))
+          (Fscalar : ℝ × E × E × E → ℝ)
+          (Fscalar' : ℝ × E × E × E →L[ℝ] ℝ)
+          (uE vE : E),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝[Icc tmin tmax] t]
+              (fun τ : ℝ ↦
+                Fscalar (τ, α.flow (xE, τ),
+                  α.tangent xE τ uE, α.tangent xE τ vE)) ∧
+          HasFDerivWithinAt Fscalar Fscalar' domain
+            (t, α.flow (xE, t), α.tangent xE t uE, α.tangent xE t vE) ∧
+          Filter.Tendsto
+            (fun τ : ℝ ↦
+              (τ, α.flow (xE, τ), α.tangent xE τ uE, α.tangent xE τ vE))
+            (𝓝[Icc tmin tmax] t)
+            (𝓝[domain] (t, α.flow (xE, t), α.tangent xE t uE, α.tangent xE t vE)) ∧
+          Fscalar'
+            (1, f t (α.flow (xE, t)),
+              (Df t (α.flow (xE, t))) (α.tangent xE t uE),
+              (Df t (α.flow (xE, t))) (α.tangent xE t vE)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) := by
+  have hwithin :
+      SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeWithinOn
+        (I := I) (M := M) G.maps3 g gdot (Icc tmin tmax) := by
+    intro t ht x u v
+    obtain ⟨xE, hxE, domain, Fscalar, Fscalar', uE, vE,
+      hmodel_eq, hF, hdomain, hvalue⟩ := hdata ht x u v
+    have heq :
+        (fun τ : ℝ ↦
+          (g τ).inner ((G.maps3 τ) x)
+            ((G.maps3 τ).pushforwardTangent x u)
+            ((G.maps3 τ).pushforwardTangent x v)) =ᶠ[𝓝[Icc tmin tmax] t]
+          fun τ : ℝ ↦
+            Fscalar (τ, α.flow (xE, τ),
+              α.tangent xE τ uE, α.tangent xE τ vE) :=
+      (G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+        (t := t) ht g x u v).trans hmodel_eq
+    have heq_t :
+        (g t).inner ((G.maps3 t) x)
+            ((G.maps3 t).pushforwardTangent x u)
+            ((G.maps3 t).pushforwardTangent x v) =
+          Fscalar (t, α.flow (xE, t),
+            α.tangent xE t uE, α.tangent xE t vE) :=
+      show t ∈ {τ : ℝ |
+          (g τ).inner ((G.maps3 τ) x)
+              ((G.maps3 τ).pushforwardTangent x u)
+              ((G.maps3 τ).pushforwardTangent x v) =
+            Fscalar (τ, α.flow (xE, τ),
+              α.tangent xE τ uE, α.tangent xE τ vE)} from
+        mem_of_mem_nhdsWithin ht heq
+    have hderiv :=
+      α.hasDerivWithinAt_scalarField_time_flow_tangent_apply₂Within
+        hxE ht uE vE hF hdomain
+    simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+  exact
+    SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
+      (I := I) (M := M)
+      (SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeWithinOn.toPullbackMetricInnerDerivativeOn_Ioo
+        (I := I) (M := M) hwithin)
+
 /-- Closed-Picard raw gauge flow plus a variational model flow identified with
 the raw coordinate curve and tangent-coordinate map within the closed time
 interval reduces interior time-regularity to the Fréchet derivative of the named

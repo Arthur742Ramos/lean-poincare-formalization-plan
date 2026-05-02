@@ -727,7 +727,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           that consume those scalar readouts directly without first repackaging
           them as two-variable bilinear-form fields. The same route also has
           non-open-domain variants driven by explicit product-graph convergence
-          or eventual membership, matching closed Picard/Banach state domains.
+          or eventual membership, plus raw tensor wrappers that consume those
+          closed-domain scalar readouts directly, matching closed Picard/Banach
+          state domains.
           It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
