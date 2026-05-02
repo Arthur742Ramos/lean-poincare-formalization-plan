@@ -811,6 +811,46 @@ theorem _root_.Bundle.ContinuousRiemannianMetric.exists_contMDiffRiemannianMetri
     rfl
   simpa [hsection] using hudist
 
+/-- Smooth Riemannian metrics are dense, in the preferred finite-cover section norm, at every
+continuous Riemannian metric.  This is the bundled metric-locus closure form of the smooth-SPD
+density theorem. -/
+theorem _root_.Bundle.ContinuousRiemannianMetric.mem_closure_contMDiffRiemannianMetric_preferredBilinear
+    [IsContinuousRiemannianBundle (B := M) F W]
+    [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [SecondCountableTopology H] [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (g : _root_.Bundle.ContinuousRiemannianMetric F W) :
+    (⟨g.toSection, g.continuous_toSection⟩ :
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) ∈
+      closure
+        ({s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover |
+            ∃ g' : _root_.Bundle.ContMDiffRiemannianMetric I (2 : ℕ∞) F W,
+              s =
+                (⟨g'.toSection, g'.continuous_toSection⟩ :
+                  ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+                    (fun i => trivializationAt BilF BilW (x0 i))
+                    Kc hKc Ko hKo hKoEq hcover)}) := by
+  refine Metric.mem_closure_iff.2 ?_
+  intro ε hε
+  obtain ⟨g', hgdist⟩ :=
+    g.exists_contMDiffRiemannianMetric_dist_lt_preferredBilinear
+      (E := E) (H := H) (I := I) (M := M) (W := W) x0 hε
+  refine ⟨(⟨g'.toSection, g'.continuous_toSection⟩ :
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover), ?_, hgdist⟩
+  exact ⟨g', rfl⟩
+
 end PreferredBilinearRiemannianSmoothApprox
 
 end ContinuousSectionSpace

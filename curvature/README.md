@@ -523,7 +523,8 @@ now packages the matching intrinsic boundary
    preferred-cover radius; the underlying generic theorem gives the same
    quantitative readout for arbitrary continuous SPD bilinear-form sections,
    and the metric-level readout reifies the approximant as a bundled `C²`
-   Riemannian metric. For autonomous
+   Riemannian metric, with a closure theorem for the image of bundled smooth
+   metrics. For autonomous
    charts, a new local `C^1` reduction also shrinks to an open neighborhood
    inside the positive-definite metric locus and derives the needed local
    Lipschitz bound there, so chart estimates can be proved locally around the

@@ -1178,7 +1178,8 @@ bundled continuous Riemannian metric itself lies in that smooth-SPD closure when
 viewed through the preferred finite-cover bilinear-form chart, plus the
 corresponding metric-level quantitative readout. That readout now reifies the
 approximant as an actual bundled `C²` Riemannian metric, not just as an SPD
-section.
+section, and the same result is packaged as closure of the image of bundled
+`C²` Riemannian metrics in the preferred finite-cover section norm.
 It also derives that finite-cover inverse
 bound from compactness of the cover pieces
 inside their fixed trivialization domains by factoring fixed-center inverses
