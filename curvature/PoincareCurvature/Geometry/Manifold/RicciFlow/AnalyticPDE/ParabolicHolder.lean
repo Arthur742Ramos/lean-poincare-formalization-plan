@@ -46,6 +46,16 @@ theorem space_dist_le (p q : ℝ × X) :
     dist p.2 q.2 ≤ parabolicDistance p q :=
   le_max_right _ _
 
+@[simp] theorem same_time (t : ℝ) (x y : X) :
+    parabolicDistance (t, x) (t, y) = dist x y := by
+  rw [parabolicDistance, sub_self, abs_zero, Real.sqrt_zero]
+  exact max_eq_right (dist_nonneg)
+
+@[simp] theorem same_space (t τ : ℝ) (x : X) :
+    parabolicDistance (t, x) (τ, x) = Real.sqrt |t - τ| := by
+  rw [parabolicDistance, dist_self]
+  exact max_eq_left (Real.sqrt_nonneg _)
+
 /-- A parabolic ball bound controls the spatial distance. -/
 theorem space_dist_le_of_le {R : ℝ} (h : parabolicDistance p q ≤ R) :
     dist p.2 q.2 ≤ R :=
@@ -73,6 +83,18 @@ estimates: spatial radius `R`, time radius `R^2`. -/
 def parabolicClosedBall {X : Type*} [PseudoMetricSpace X] (p : ℝ × X) (R : ℝ) :
     Set (ℝ × X) :=
   {q | parabolicDistance p q ≤ R}
+
+/-- Product parabolic cylinder centered at a time-space point, with independent time and spatial
+radii.  The isotropic parabolic cylinder uses `timeRadius = R ^ 2` and `spaceRadius = R`. -/
+def parabolicCylinder {X : Type*} [PseudoMetricSpace X] (p : ℝ × X)
+    (timeRadius spaceRadius : ℝ) : Set (ℝ × X) :=
+  {q | |p.1 - q.1| < timeRadius ∧ dist p.2 q.2 < spaceRadius}
+
+/-- Closed product parabolic cylinder centered at a time-space point, with independent time and
+spatial radii. -/
+def parabolicClosedCylinder {X : Type*} [PseudoMetricSpace X] (p : ℝ × X)
+    (timeRadius spaceRadius : ℝ) : Set (ℝ × X) :=
+  {q | |p.1 - q.1| ≤ timeRadius ∧ dist p.2 q.2 ≤ spaceRadius}
 
 namespace parabolicBall
 
@@ -106,6 +128,13 @@ theorem time_abs_lt_sq_of_mem (hR : 0 ≤ R) (hq : q ∈ parabolicBall p R) :
       rw [Real.sq_sqrt (abs_nonneg _)]
     _ < R ^ 2 := (sq_lt_sq₀ (Real.sqrt_nonneg _) hR).2 hsqrt
 
+/-- A parabolic ball is contained in the product cylinder with time radius `R^2` and spatial
+radius `R`. -/
+theorem subset_cylinder (hR : 0 ≤ R) :
+    parabolicBall p R ⊆ parabolicCylinder p (R ^ 2) R := by
+  intro q hq
+  exact ⟨time_abs_lt_sq_of_mem hR hq, space_dist_lt_of_mem hq⟩
+
 end parabolicBall
 
 namespace parabolicClosedBall
@@ -131,7 +160,123 @@ theorem time_abs_le_sq_of_mem (hR : 0 ≤ R) (hq : q ∈ parabolicClosedBall p R
     |p.1 - q.1| ≤ R ^ 2 :=
   parabolicDistance.time_abs_le_sq_of_le hR hq
 
+/-- A closed parabolic ball is contained in the closed product cylinder with time radius `R^2`
+and spatial radius `R`. -/
+theorem subset_closedCylinder (hR : 0 ≤ R) :
+    parabolicClosedBall p R ⊆ parabolicClosedCylinder p (R ^ 2) R := by
+  intro q hq
+  exact ⟨time_abs_le_sq_of_mem hR hq, space_dist_le_of_mem hq⟩
+
 end parabolicClosedBall
+
+namespace parabolicCylinder
+
+variable {X : Type*} [PseudoMetricSpace X] {p q : ℝ × X}
+variable {timeRadius timeRadius' spaceRadius spaceRadius' R : ℝ}
+
+@[simp] theorem mem :
+    q ∈ parabolicCylinder p timeRadius spaceRadius ↔
+      |p.1 - q.1| < timeRadius ∧ dist p.2 q.2 < spaceRadius :=
+  Iff.rfl
+
+theorem mono (ht : timeRadius ≤ timeRadius') (hs : spaceRadius ≤ spaceRadius') :
+    parabolicCylinder p timeRadius spaceRadius ⊆
+      parabolicCylinder p timeRadius' spaceRadius' := by
+  intro q hq
+  exact ⟨lt_of_lt_of_le hq.1 ht, lt_of_lt_of_le hq.2 hs⟩
+
+theorem mem_comm :
+    q ∈ parabolicCylinder p timeRadius spaceRadius ↔
+      p ∈ parabolicCylinder q timeRadius spaceRadius := by
+  constructor
+  · intro hq
+    exact ⟨by simpa [abs_sub_comm] using hq.1, by simpa [dist_comm] using hq.2⟩
+  · intro hp
+    exact ⟨by simpa [abs_sub_comm] using hp.1, by simpa [dist_comm] using hp.2⟩
+
+theorem center_mem (ht : 0 < timeRadius) (hs : 0 < spaceRadius) :
+    p ∈ parabolicCylinder p timeRadius spaceRadius := by
+  simp [parabolicCylinder, ht, hs]
+
+theorem time_abs_lt_of_mem (hq : q ∈ parabolicCylinder p timeRadius spaceRadius) :
+    |p.1 - q.1| < timeRadius :=
+  hq.1
+
+theorem space_dist_lt_of_mem (hq : q ∈ parabolicCylinder p timeRadius spaceRadius) :
+    dist p.2 q.2 < spaceRadius :=
+  hq.2
+
+/-- A product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at most
+`R` is contained in the parabolic ball of radius `R`. -/
+theorem subset_ball_of_le_sq (hR : 0 < R) (ht : timeRadius ≤ R ^ 2)
+    (hs : spaceRadius ≤ R) :
+    parabolicCylinder p timeRadius spaceRadius ⊆ parabolicBall p R := by
+  intro q hq
+  change max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2) < R
+  exact max_lt ((Real.sqrt_lt' hR).2 (lt_of_lt_of_le hq.1 ht))
+    (lt_of_lt_of_le hq.2 hs)
+
+/-- The standard product cylinder with time radius `R^2` and spatial radius `R` is exactly small
+enough to sit in the parabolic ball of radius `R`. -/
+theorem subset_ball (hR : 0 < R) :
+    parabolicCylinder p (R ^ 2) R ⊆ parabolicBall p R :=
+  subset_ball_of_le_sq hR le_rfl le_rfl
+
+end parabolicCylinder
+
+namespace parabolicClosedCylinder
+
+variable {X : Type*} [PseudoMetricSpace X] {p q : ℝ × X}
+variable {timeRadius timeRadius' spaceRadius spaceRadius' R : ℝ}
+
+@[simp] theorem mem :
+    q ∈ parabolicClosedCylinder p timeRadius spaceRadius ↔
+      |p.1 - q.1| ≤ timeRadius ∧ dist p.2 q.2 ≤ spaceRadius :=
+  Iff.rfl
+
+theorem mono (ht : timeRadius ≤ timeRadius') (hs : spaceRadius ≤ spaceRadius') :
+    parabolicClosedCylinder p timeRadius spaceRadius ⊆
+      parabolicClosedCylinder p timeRadius' spaceRadius' := by
+  intro q hq
+  exact ⟨le_trans hq.1 ht, le_trans hq.2 hs⟩
+
+theorem mem_comm :
+    q ∈ parabolicClosedCylinder p timeRadius spaceRadius ↔
+      p ∈ parabolicClosedCylinder q timeRadius spaceRadius := by
+  constructor
+  · intro hq
+    exact ⟨by simpa [abs_sub_comm] using hq.1, by simpa [dist_comm] using hq.2⟩
+  · intro hp
+    exact ⟨by simpa [abs_sub_comm] using hp.1, by simpa [dist_comm] using hp.2⟩
+
+theorem center_mem (ht : 0 ≤ timeRadius) (hs : 0 ≤ spaceRadius) :
+    p ∈ parabolicClosedCylinder p timeRadius spaceRadius := by
+  simp [parabolicClosedCylinder, ht, hs]
+
+theorem time_abs_le_of_mem (hq : q ∈ parabolicClosedCylinder p timeRadius spaceRadius) :
+    |p.1 - q.1| ≤ timeRadius :=
+  hq.1
+
+theorem space_dist_le_of_mem (hq : q ∈ parabolicClosedCylinder p timeRadius spaceRadius) :
+    dist p.2 q.2 ≤ spaceRadius :=
+  hq.2
+
+/-- A closed product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at
+most `R` is contained in the closed parabolic ball of radius `R`. -/
+theorem subset_closedBall_of_le_sq (hR : 0 ≤ R) (ht : timeRadius ≤ R ^ 2)
+    (hs : spaceRadius ≤ R) :
+    parabolicClosedCylinder p timeRadius spaceRadius ⊆ parabolicClosedBall p R := by
+  intro q hq
+  change max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2) ≤ R
+  exact max_le ((Real.sqrt_le_left hR).2 (le_trans hq.1 ht)) (le_trans hq.2 hs)
+
+/-- The standard closed product cylinder with time radius `R^2` and spatial radius `R` is exactly
+small enough to sit in the closed parabolic ball of radius `R`. -/
+theorem subset_closedBall (hR : 0 ≤ R) :
+    parabolicClosedCylinder p (R ^ 2) R ⊆ parabolicClosedBall p R :=
+  subset_closedBall_of_le_sq hR le_rfl le_rfl
+
+end parabolicClosedCylinder
 
 /-- Parabolic Holder control with exponent `α` and constant `C` on a set of time-space points. -/
 def ParabolicHolderWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
@@ -188,6 +333,20 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     _ ≤ ‖c‖ * (C * dα) := mul_le_mul_of_nonneg_left (hu hp hq) (norm_nonneg c)
     _ = (‖c‖ * C) * dα := by ring
 
+/-- Restricting a parabolic Holder estimate to a fixed spatial point gives the weighted
+time-slice estimate. -/
+theorem time_slice (h : ParabolicHolderWith C α u s) {t τ : ℝ} {x : X}
+    (ht : (t, x) ∈ s) (hτ : (τ, x) ∈ s) :
+    ‖u (t, x) - u (τ, x)‖ ≤ C * (Real.sqrt |t - τ|) ^ α := by
+  simpa using h ht hτ
+
+/-- Restricting a parabolic Holder estimate to a fixed time gives the ordinary spatial Holder
+estimate. -/
+theorem space_slice (h : ParabolicHolderWith C α u s) {t : ℝ} {x y : X}
+    (hx : (t, x) ∈ s) (hy : (t, y) ∈ s) :
+    ‖u (t, x) - u (t, y)‖ ≤ C * (dist x y) ^ α := by
+  simpa using h hx hy
+
 end ParabolicHolderWith
 
 namespace ParabolicHolderOn
@@ -214,6 +373,21 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     ParabolicHolderOn α (fun z => c • u z) s := by
   rcases hu with ⟨C, hC, hCu⟩
   exact ⟨‖c‖ * C, mul_nonneg (norm_nonneg c) hC, hCu.smul c⟩
+
+/-- A parabolic Holder function has a weighted Holder estimate on every time slice through a
+fixed spatial point. -/
+theorem time_slice (h : ParabolicHolderOn α u s) :
+    ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ C * (Real.sqrt |t - τ|) ^ α := by
+  rcases h with ⟨C, hC, hCu⟩
+  exact ⟨C, hC, fun {t τ x} ht hτ => hCu.time_slice (t := t) (τ := τ) (x := x) ht hτ⟩
+
+/-- A parabolic Holder function has an ordinary Holder estimate on every spatial slice. -/
+theorem space_slice (h : ParabolicHolderOn α u s) :
+    ∃ C ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ C * (dist x y) ^ α := by
+  rcases h with ⟨C, hC, hCu⟩
+  exact ⟨C, hC, fun {t x y} hx hy => hCu.space_slice (t := t) (x := x) (y := y) hx hy⟩
 
 end ParabolicHolderOn
 
