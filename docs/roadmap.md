@@ -688,7 +688,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         and the raw layer now also accepts model-vector-field chart ODE data
         directly after an along-flow RHS identification with the target gauge
         field, including the closed-Picard `Icc` to open-interior `Ioo` form.
-        The same seam includes direct raw, fixed-IVP, and theorem-family source-membership
+        The fixed-IVP intrinsic existence layer now has the matching
+        closed-Picard model-field constructor into
+        `IntrinsicDeTurckGaugeFlowExistence`. The same seam includes direct raw,
+        fixed-IVP, and theorem-family source-membership
         readouts for closed-interval within filters and ordinary neighborhood
          filters plus unrestricted ordinary `HasDerivAt` source-neighborhood
          constructors for raw, fixed-IVP, and theorem-family existence,

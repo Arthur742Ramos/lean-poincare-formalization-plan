@@ -810,8 +810,10 @@ derivatives can enter the named derivative and chart-ODE packages without first
 hand-specializing the RHS at each solution. The raw gauge-flow existence layer
 now also has one-step model-vector-field chart ODE constructors that perform the
 same along-flow RHS rewrite while building `Diffeomorph3GaugeFlowOn`, including
-the closed-Picard `Icc` to open-interior `Ioo` handoff. Those bridges now have
-direct derivative-data readouts back to
+the closed-Picard `Icc` to open-interior `Ioo` handoff, and the fixed-IVP
+intrinsic existence layer now carries that same closed-Picard model-field handoff
+directly to `IntrinsicDeTurckGaugeFlowExistence`. Those bridges now have direct
+derivative-data readouts back to
 `ChosenIntrinsicDeTurckGaugeFlowDerivative` and
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
 the existing scalar gauge-pullback route after supplying the chart-ODE package.
