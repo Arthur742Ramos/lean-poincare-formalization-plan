@@ -3,6 +3,7 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
 public import Mathlib.Topology.MetricSpace.Basic
+public import Mathlib.Topology.MetricSpace.Cover
 public import Mathlib.Topology.MetricSpace.ProperSpace
 
 set_option linter.unusedSectionVars false
@@ -344,6 +345,37 @@ theorem isCompact [ProperSpace X] (p : ℝ × X) (R : ℝ) :
     IsCompact (parabolicClosedBall p R) := by
   exact (isCompact_closedBall p (max R (R ^ 2))).of_isClosed_subset (isClosed p R)
     (subset_metric_closedBall (p := p) (R := R) (le_max_left _ _) (le_max_right _ _))
+
+theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
+    {R : ℝ} (hR : 0 < R) :
+    ∃ N ⊆ K, N.Finite ∧ K ⊆ ⋃ y ∈ N, parabolicClosedBall y R := by
+  let δ : ℝ := min R (R ^ 2) / 2
+  have hδpos : 0 < δ := by
+    have hR2 : 0 < R ^ 2 := sq_pos_of_pos hR
+    exact half_pos (lt_min hR hR2)
+  have hδ_space : δ ≤ R := by
+    unfold δ
+    exact (half_le_self (le_of_lt (lt_min hR (sq_pos_of_pos hR)))).trans (min_le_left _ _)
+  have hδ_time : δ ≤ R ^ 2 := by
+    unfold δ
+    exact (half_le_self (le_of_lt (lt_min hR (sq_pos_of_pos hR)))).trans (min_le_right _ _)
+  let ε : ℝ≥0 := ⟨δ, hδpos.le⟩
+  have hεne : ε ≠ 0 := by
+    intro hε
+    have hδ0 : δ = 0 := by
+      simpa [ε] using congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+    linarith
+  rcases Metric.exists_finite_isCover_of_isCompact (s := K) (ε := ε) hεne hK with
+    ⟨N, hNK, hNfinite, hcover⟩
+  refine ⟨N, hNK, hNfinite, ?_⟩
+  have hcover' : K ⊆ ⋃ y ∈ N, Metric.closedBall y (ε : ℝ) :=
+    hcover.subset_iUnion_closedBall
+  intro z hz
+  rcases mem_iUnion.1 (hcover' hz) with ⟨y, hy⟩
+  rcases mem_iUnion.1 hy with ⟨hyN, hzball⟩
+  refine mem_iUnion.2 ⟨y, mem_iUnion.2 ⟨hyN, ?_⟩⟩
+  exact (metric_closedBall_subset (p := y) (R := R) (δ := (ε : ℝ))
+    (by simpa [ε] using hδ_space) (by simpa [ε] using hδ_time) hR.le) hzball
 
 theorem pair_parabolicDistance_le {c p q : ℝ × X}
     (hp : p ∈ parabolicClosedBall c R) (hq : q ∈ parabolicClosedBall c R) :

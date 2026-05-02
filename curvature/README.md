@@ -969,8 +969,9 @@ regularity. The parabolic PDE layer has proof-bearing groundwork in
 parabolic balls and product cylinders, exact standard ball/cylinder
 identifications, closed-to-open shrink inclusions for balls/cylinders,
 open-to-closed closure containment, proper-space compactness for closed
-balls/cylinders, positive exponent continuity/uniform-continuity consequences,
-explicit closed-ball/cylinder oscillation estimates, estimate monotonicity in
+balls/cylinders, finite parabolic closed-ball covers of compact sets, positive
+exponent continuity/uniform-continuity consequences, explicit
+closed-ball/cylinder oscillation estimates, estimate monotonicity in
 the controlling constants, and
 basic linear algebra closure estimates for Hölder and bounded control, together
 with the bounded product estimate for normed-ring-valued `C^{0,α}` functions
