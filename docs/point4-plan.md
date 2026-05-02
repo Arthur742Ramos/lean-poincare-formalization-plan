@@ -405,7 +405,10 @@ Lipschitz hypothesis plus a uniform `‖Df‖` bound. Product-derived continuous
 flows now also preserve joint space-time continuity/eventual membership for
 that operator tuple on closed and open Picard cylinders, and product Lipschitz
 dependence gives fixed-time Lipschitz/continuity/distance estimates for it as
-the base initial point varies. This removes a manual tangent
+the base initial point varies. The scalar calculus now also has operator-domain
+chain rules for readouts `F(t, y, A)` over `(t, flow(t), tangent(t))`, including
+within-domain/open-domain, closed-interval, ordinary-interior, and
+center-trajectory variational local-flow forms. This removes a manual tangent
 Lipschitz obligation from the future chart-gluing step and isolates the
 remaining product Picard hypotheses to base-field and linearized-coefficient
 estimates. The same layer now has the closed-ball specialization matching

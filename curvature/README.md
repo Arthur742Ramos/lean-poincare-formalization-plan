@@ -311,8 +311,11 @@ now packages the matching intrinsic boundary
        Lipschitz estimate for the full variational vector field, and
         interior/closed-interval uniqueness for the full `(flow, tangent)` pair
         and `(t, flow, tangent)` operator derivative-domain tuple from
-        base-flow uniqueness plus a uniform `‖Df‖` bound. An endpoint readout
-       bridge now transfers the closed-interval geometric-slot variational theorem
+        base-flow uniqueness plus a uniform `‖Df‖` bound. The scalar calculus
+        layer also differentiates readouts stated directly on that operator
+        tuple, with closed-interval, open-domain, ordinary-interior, and
+        center-trajectory variational local-flow forms. An endpoint readout
+        bridge now transfers the closed-interval geometric-slot variational theorem
        from any locally equal finite-cover metric-coordinate bilinear-form readout,
        matching the Banach readout output shape before interior tensor
        time-regularity is derived; direct and readout-field model-coordinate
