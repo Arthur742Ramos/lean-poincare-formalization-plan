@@ -60,6 +60,24 @@ theorem same_space_rpow (t τ : ℝ) (x : X) (α : ℝ) :
     (parabolicDistance (t, x) (τ, x)) ^ α = |t - τ| ^ (α / 2) := by
   rw [same_space, Real.rpow_div_two_eq_sqrt α (abs_nonneg _)]
 
+theorem continuous_fixed_left (p : ℝ × X) : Continuous fun q : ℝ × X =>
+    parabolicDistance p q := by
+  unfold parabolicDistance
+  exact ((continuous_const.sub continuous_fst).abs.sqrt).max
+    (continuous_const.dist continuous_snd)
+
+theorem continuous_fixed_right (q : ℝ × X) : Continuous fun p : ℝ × X =>
+    parabolicDistance p q := by
+  unfold parabolicDistance
+  exact ((continuous_fst.sub continuous_const).abs.sqrt).max
+    (continuous_snd.dist continuous_const)
+
+theorem continuous : Continuous fun pq : (ℝ × X) × (ℝ × X) =>
+    parabolicDistance pq.1 pq.2 := by
+  unfold parabolicDistance
+  exact ((continuous_fst.fst.sub continuous_snd.fst).abs.sqrt).max
+    (continuous_fst.snd.dist continuous_snd.snd)
+
 /-- A parabolic ball bound controls the spatial distance. -/
 theorem space_dist_le_of_le {R : ℝ} (h : parabolicDistance p q ≤ R) :
     dist p.2 q.2 ≤ R :=
@@ -139,6 +157,10 @@ theorem subset_cylinder (hR : 0 ≤ R) :
   intro q hq
   exact ⟨time_abs_lt_sq_of_mem hR hq, space_dist_lt_of_mem hq⟩
 
+theorem isOpen (p : ℝ × X) (R : ℝ) : IsOpen (parabolicBall p R) := by
+  simpa [parabolicBall] using
+    (parabolicDistance.continuous_fixed_left p).isOpen_preimage (Iio R) isOpen_Iio
+
 end parabolicBall
 
 namespace parabolicClosedBall
@@ -170,6 +192,10 @@ theorem subset_closedCylinder (hR : 0 ≤ R) :
     parabolicClosedBall p R ⊆ parabolicClosedCylinder p (R ^ 2) R := by
   intro q hq
   exact ⟨time_abs_le_sq_of_mem hR hq, space_dist_le_of_mem hq⟩
+
+theorem isClosed (p : ℝ × X) (R : ℝ) : IsClosed (parabolicClosedBall p R) := by
+  simpa [parabolicClosedBall] using
+    isClosed_Iic.preimage (parabolicDistance.continuous_fixed_left p)
 
 end parabolicClosedBall
 
