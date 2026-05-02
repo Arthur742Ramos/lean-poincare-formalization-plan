@@ -670,11 +670,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      ordinary theorem-package routes using either pulled-back metric
      time-derivative proofs or scalar inner-product derivative proofs. The raw
       flow layer also has fixed-IVP and theorem-family constructors from both
-       pointwise `HasMFDerivAt[s]`, ordinary-on-time-set `HasMFDerivAt`, and
-        unrestricted `HasMFDerivAt` data produced by
-        ODE/integral-curve theorems, and the raw layer now also accepts the
-        preferred-chart ODE shape directly via continuity plus centered
-        `HasDerivWithinAt`/`HasDerivAt` chart derivatives, named-derivative-family adapters,
+        pointwise `HasMFDerivAt[s]`, ordinary-on-time-set `HasMFDerivAt`, and
+         unrestricted `HasMFDerivAt` data produced by
+         ODE/integral-curve theorems, and the raw, fixed-IVP, and theorem-family
+         layers now also accept the preferred-chart ODE shape directly via
+         continuity plus centered `HasDerivWithinAt`/`HasDerivAt` chart
+         derivatives, named-derivative-family adapters,
          centered preferred-chart derivative simplifications that expose the
          gauge velocity directly instead of a redundant `tangentCoordChange I p p
         p` term, variational model-flow base-velocity readouts that identify
