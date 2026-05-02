@@ -294,6 +294,23 @@ def ParabolicHolderOn {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
     (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
   ∃ C ≥ 0, ParabolicHolderWith C α u s
 
+/-- Uniform sup-norm control on a time-space set.  This is the `C^0` part of the parabolic
+`C^{0,α}` norm package. -/
+def ParabolicBoundedWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (B : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
+  ∀ ⦃p : ℝ × X⦄, p ∈ s → ‖u p‖ ≤ B
+
+/-- Parabolic `C^{0,α}` control with separately named sup and Holder constants. -/
+def ParabolicC0AlphaWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (B H α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
+  ParabolicBoundedWith B u s ∧ ParabolicHolderWith H α u s
+
+/-- A function belongs to the parabolic `C^{0,α}` class on `s` when it has finite sup control and
+finite parabolic Holder control. -/
+def ParabolicC0AlphaOn {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
+  ∃ B ≥ 0, ∃ H ≥ 0, ParabolicC0AlphaWith B H α u s
+
 namespace ParabolicHolderWith
 
 variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
@@ -411,6 +428,116 @@ theorem space_slice (h : ParabolicHolderOn α u s) :
   exact ⟨C, hC, fun {t x y} hx hy => hCu.space_slice (t := t) (x := x) (y := y) hx hy⟩
 
 end ParabolicHolderOn
+
+namespace ParabolicBoundedWith
+
+variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+variable {B B₁ B₂ : ℝ} {u v : ℝ × X → E} {s t : Set (ℝ × X)}
+
+theorem mono_set (h : ParabolicBoundedWith B u s) (hst : t ⊆ s) :
+    ParabolicBoundedWith B u t := by
+  intro p hp
+  exact h (hst hp)
+
+theorem const (c : E) (hB : ‖c‖ ≤ B) :
+    ParabolicBoundedWith B (fun _ : ℝ × X => c) s := by
+  intro _p _hp
+  exact hB
+
+theorem add (hu : ParabolicBoundedWith B₁ u s) (hv : ParabolicBoundedWith B₂ v s) :
+    ParabolicBoundedWith (B₁ + B₂) (fun z => u z + v z) s := by
+  intro p hp
+  calc
+    ‖u p + v p‖ ≤ ‖u p‖ + ‖v p‖ := norm_add_le _ _
+    _ ≤ B₁ + B₂ := add_le_add (hu hp) (hv hp)
+
+theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
+    (c : 𝕜) (hu : ParabolicBoundedWith B u s) :
+    ParabolicBoundedWith (‖c‖ * B) (fun z => c • u z) s := by
+  intro p hp
+  calc
+    ‖c • u p‖ = ‖c‖ * ‖u p‖ := norm_smul c (u p)
+    _ ≤ ‖c‖ * B := mul_le_mul_of_nonneg_left (hu hp) (norm_nonneg c)
+
+end ParabolicBoundedWith
+
+namespace ParabolicC0AlphaWith
+
+variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+variable {B B₁ B₂ H H₁ H₂ α : ℝ} {u v : ℝ × X → E} {s t : Set (ℝ × X)}
+
+theorem bounded (h : ParabolicC0AlphaWith B H α u s) : ParabolicBoundedWith B u s :=
+  h.1
+
+theorem holder (h : ParabolicC0AlphaWith B H α u s) : ParabolicHolderWith H α u s :=
+  h.2
+
+theorem mono_set (h : ParabolicC0AlphaWith B H α u s) (hst : t ⊆ s) :
+    ParabolicC0AlphaWith B H α u t :=
+  ⟨h.bounded.mono_set hst, h.holder.mono_set hst⟩
+
+theorem const (c : E) (hB : ‖c‖ ≤ B) (hH : 0 ≤ H) :
+    ParabolicC0AlphaWith B H α (fun _ : ℝ × X => c) s :=
+  ⟨ParabolicBoundedWith.const c hB, ParabolicHolderWith.const c hH⟩
+
+theorem add (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
+    (hv : ParabolicC0AlphaWith B₂ H₂ α v s) :
+    ParabolicC0AlphaWith (B₁ + B₂) (H₁ + H₂) α (fun z => u z + v z) s :=
+  ⟨hu.bounded.add hv.bounded, hu.holder.add hv.holder⟩
+
+theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
+    (c : 𝕜) (hu : ParabolicC0AlphaWith B H α u s) :
+    ParabolicC0AlphaWith (‖c‖ * B) (‖c‖ * H) α (fun z => c • u z) s :=
+  ⟨hu.bounded.smul c, hu.holder.smul c⟩
+
+end ParabolicC0AlphaWith
+
+namespace ParabolicC0AlphaOn
+
+variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+variable {α : ℝ} {u v : ℝ × X → E} {s t : Set (ℝ × X)}
+
+theorem mono_set (h : ParabolicC0AlphaOn α u s) (hst : t ⊆ s) :
+    ParabolicC0AlphaOn α u t := by
+  rcases h with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B, hB, H, hH, hBH.mono_set hst⟩
+
+theorem boundedOn (h : ParabolicC0AlphaOn α u s) :
+    ∃ B ≥ 0, ParabolicBoundedWith B u s := by
+  rcases h with ⟨B, hB, _H, _hH, hBH⟩
+  exact ⟨B, hB, hBH.bounded⟩
+
+theorem holderOn (h : ParabolicC0AlphaOn α u s) : ParabolicHolderOn α u s := by
+  rcases h with ⟨_B, _hB, H, hH, hBH⟩
+  exact ⟨H, hH, hBH.holder⟩
+
+theorem const (c : E) : ParabolicC0AlphaOn α (fun _ : ℝ × X => c) s :=
+  ⟨‖c‖, norm_nonneg c, 0, le_rfl, ParabolicC0AlphaWith.const c le_rfl le_rfl⟩
+
+theorem add (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    ParabolicC0AlphaOn α (fun z => u z + v z) s := by
+  rcases hu with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
+  rcases hv with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
+  exact ⟨B₁ + B₂, add_nonneg hB₁ hB₂, H₁ + H₂, add_nonneg hH₁ hH₂, hBH₁.add hBH₂⟩
+
+theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
+    (c : 𝕜) (hu : ParabolicC0AlphaOn α u s) :
+    ParabolicC0AlphaOn α (fun z => c • u z) s := by
+  rcases hu with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨‖c‖ * B, mul_nonneg (norm_nonneg c) hB,
+    ‖c‖ * H, mul_nonneg (norm_nonneg c) hH, hBH.smul c⟩
+
+theorem time_slice_half_exponent (h : ParabolicC0AlphaOn α u s) :
+    ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ C * |t - τ| ^ (α / 2) :=
+  h.holderOn.time_slice_half_exponent
+
+theorem space_slice (h : ParabolicC0AlphaOn α u s) :
+    ∃ C ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ C * (dist x y) ^ α :=
+  h.holderOn.space_slice
+
+end ParabolicC0AlphaOn
 
 end AnalyticPDE
 end RicciFlow
