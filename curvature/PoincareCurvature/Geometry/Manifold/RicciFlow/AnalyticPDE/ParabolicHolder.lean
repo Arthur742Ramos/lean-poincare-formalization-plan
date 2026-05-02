@@ -515,6 +515,14 @@ theorem sub (hu : ParabolicHolderWith C₁ α u s) (hv : ParabolicHolderWith C�
     ParabolicHolderWith (C₁ + C₂) α (fun z => u z - v z) s := by
   simpa [sub_eq_add_neg] using hu.add hv.neg
 
+theorem norm (hu : ParabolicHolderWith C α u s) :
+    ParabolicHolderWith C α (fun z => ‖u z‖) s := by
+  intro p hp q hq
+  calc
+    ‖‖u p‖ - ‖u q‖‖ ≤ ‖u p - u q‖ := by
+      simpa [Real.norm_eq_abs] using abs_norm_sub_norm_le (u p) (u q)
+    _ ≤ C * (parabolicDistance p q) ^ α := hu hp hq
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicHolderWith C α u s) :
     ParabolicHolderWith (‖c‖ * C) α (fun z => c • u z) s := by
@@ -651,6 +659,11 @@ theorem sub (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
     ParabolicHolderOn α (fun z => u z - v z) s := by
   simpa [sub_eq_add_neg] using hu.add hv.neg
 
+theorem norm (hu : ParabolicHolderOn α u s) :
+    ParabolicHolderOn α (fun z => ‖u z‖) s := by
+  rcases hu with ⟨C, hC, hCu⟩
+  exact ⟨C, hC, hCu.norm⟩
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicHolderOn α u s) :
     ParabolicHolderOn α (fun z => c • u z) s := by
@@ -729,6 +742,11 @@ theorem sub (hu : ParabolicBoundedWith B₁ u s) (hv : ParabolicBoundedWith B₂
     ‖u p - v p‖ ≤ ‖u p‖ + ‖v p‖ := norm_sub_le _ _
     _ ≤ B₁ + B₂ := add_le_add (hu hp) (hv hp)
 
+theorem norm (hu : ParabolicBoundedWith B u s) :
+    ParabolicBoundedWith B (fun z => ‖u z‖) s := by
+  intro p hp
+  simpa [Real.norm_of_nonneg (norm_nonneg (u p))] using hu hp
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicBoundedWith B u s) :
     ParabolicBoundedWith (‖c‖ * B) (fun z => c • u z) s := by
@@ -771,6 +789,10 @@ theorem sub (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
     (hv : ParabolicC0AlphaWith B₂ H₂ α v s) :
     ParabolicC0AlphaWith (B₁ + B₂) (H₁ + H₂) α (fun z => u z - v z) s :=
   ⟨hu.bounded.sub hv.bounded, hu.holder.sub hv.holder⟩
+
+theorem norm (hu : ParabolicC0AlphaWith B H α u s) :
+    ParabolicC0AlphaWith B H α (fun z => ‖u z‖) s :=
+  ⟨hu.bounded.norm, hu.holder.norm⟩
 
 theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
     {u v : ℝ × X → A} {s : Set (ℝ × X)}
@@ -891,6 +913,11 @@ theorem sub (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
   rcases hu with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
   rcases hv with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
   exact ⟨B₁ + B₂, add_nonneg hB₁ hB₂, H₁ + H₂, add_nonneg hH₁ hH₂, hBH₁.sub hBH₂⟩
+
+theorem norm (hu : ParabolicC0AlphaOn α u s) :
+    ParabolicC0AlphaOn α (fun z => ‖u z‖) s := by
+  rcases hu with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B, hB, H, hH, hBH.norm⟩
 
 theorem mul {A : Type*} [NormedRing A] {u v : ℝ × X → A} {s : Set (ℝ × X)}
     (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :

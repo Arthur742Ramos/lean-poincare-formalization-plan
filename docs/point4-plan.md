@@ -1213,8 +1213,8 @@ with slice, oscillation, continuity, uniform-continuity, and additive
 subtractive algebra estimates, including the standard bounded-product estimate
 for normed-ring-valued `C^{0,α}` functions and the corresponding bounded
 scalar-action estimate on normed-space-valued functions. This is still only the
-norm/topology vocabulary, not the Schauder estimates or Ricci-DeTurck Banach
-chart. The abstract
+norm/topology vocabulary, with the expected norm-estimate closure, not the
+Schauder estimates or Ricci-DeTurck Banach chart. The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and
