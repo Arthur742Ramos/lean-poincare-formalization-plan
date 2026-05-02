@@ -877,22 +877,25 @@ variants of those centered chart-ODE constructors: eventual membership in the
 current preferred chart source, together with the chart derivative, derives the
 manifold-curve continuity input automatically. This is the closer fit for
 chart-local Picard output, where the solution is constructed inside a chosen
-coordinate neighborhood.
+coordinate neighborhood. Those source-neighborhood constructors now also have
+unrestricted ordinary `HasDerivAt` forms, so global-in-time chart ODE output can
+feed raw, fixed-IVP, and theorem-family gauge-flow existence without restating
+the derivative relative to a time set.
 The same
 raw layer now also has proof-level `Nonempty` wrappers for the geometric,
 within-derivative, ordinary-on-time-set derivative, unrestricted derivative,
-restriction, and identity-flow constructors, letting downstream existence
-arguments retain raw gauge-flow existence without choosing a concrete flow
-until needed.
+centered/source-neighborhood chart ODE, restriction, and identity-flow
+constructors, letting downstream existence arguments retain raw gauge-flow
+existence without choosing a concrete flow until needed.
 The fixed-IVP intrinsic DeTurck gauge-flow existence layer mirrors this
 proof-level shape for its derivative-data, ordinary-at-time derivative,
-centered preferred-chart ODE, zero-field identity, chosen-background identity,
-subsingleton, and empty constructors.
+centered/source-neighborhood preferred-chart ODE, zero-field identity,
+chosen-background identity, subsingleton, and empty constructors.
 The theorem-family intrinsic DeTurck gauge-flow existence layer now has the
 same proof-level wrappers, including conversion back down to a fixed IVP and
 the named derivative-family/ordinary-derivative-family constructors, and it now
-also has theorem-family centered preferred-chart ODE constructors and
-`Nonempty` readouts.
+also has theorem-family centered/source-neighborhood preferred-chart ODE
+constructors and `Nonempty` readouts.
 The model ODE uniqueness layer now also has center-trajectory wrappers for
 packaged local flows, continuous space-time local flows, and the full
 variational pair `(flow, tangent)` on both `Ioo` and `Icc`, so basepoint

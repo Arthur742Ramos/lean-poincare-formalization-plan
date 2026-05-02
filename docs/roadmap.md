@@ -677,6 +677,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          continuity plus centered `HasDerivWithinAt`/`HasDerivAt` chart
          derivatives, with source-neighborhood variants that derive manifold
          curve continuity from eventual membership in the centered chart source,
+         now including unrestricted ordinary `HasDerivAt` source-neighborhood
+         constructors for raw, fixed-IVP, and theorem-family existence,
          named-derivative-family adapters,
          centered preferred-chart derivative simplifications that expose the
          gauge velocity directly instead of a redundant `tangentCoordChange I p p

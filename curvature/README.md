@@ -572,7 +572,8 @@ now packages the matching intrinsic boundary
       `HasMFDerivAt`, unrestricted `HasMFDerivAt`, and preferred-chart
       ODE adapters from continuity plus centered chart derivatives, including
       source-neighborhood variants that derive manifold-curve continuity from
-      eventual membership in the centered chart source, named
+      eventual membership in the centered chart source and now include
+      unrestricted ordinary `HasDerivAt` forms, named
       fixed-IVP and theorem-family preferred-chart ODE constructors from the
       same chart-ODE data,
       derivative-family adapters, including an ordinary-on-time-set
