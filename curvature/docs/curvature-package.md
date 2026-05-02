@@ -111,7 +111,9 @@ balls/cylinders still contained in that open set, uniform positive closed
 ball/cylinder radii inside such open neighborhoods,
 continuity/uniform-continuity consequences, explicit
 closed-ball/cylinder oscillation bounds, estimate monotonicity in the
-controlling constants, and additive/subtractive closure estimates, plus the
+controlling constants, constant-preserving localization of open-domain Hölder
+and `C^{0,α}` estimates to uniform closed parabolic patches around compact
+subsets, and additive/subtractive closure estimates, plus the
 bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded
 scalar-action estimate for normed-space-valued functions, plus closure under

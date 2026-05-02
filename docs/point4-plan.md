@@ -1219,6 +1219,8 @@ ball/cylinder radii inside such open neighborhoods, and packages
 `C^{0,α}`-style bounded/Hölder control with slice,
 explicit closed-ball/cylinder oscillation, continuity,
 uniform-continuity, estimate monotonicity in the controlling constants, and
+constant-preserving localization of open-domain Hölder and `C^{0,α}` estimates
+to uniform closed parabolic patches around compact subsets, and
 additive/subtractive algebra estimates,
 including the standard bounded-product estimate for normed-ring-valued
 `C^{0,α}` functions and the corresponding bounded scalar-action estimate on

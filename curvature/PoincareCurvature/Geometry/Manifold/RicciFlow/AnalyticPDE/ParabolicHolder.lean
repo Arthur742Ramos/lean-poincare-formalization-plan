@@ -1040,6 +1040,29 @@ theorem mono_set (h : ParabolicHolderWith C α u s) (hst : t ⊆ s) :
   intro p hp q hq
   exact h (hst hp) (hst hq)
 
+/-- Holder control on an open set localizes, with the same constant, to one uniform closed
+parabolic-ball radius around every point of a compact subset. -/
+theorem exists_uniform_closedBall_of_isCompact_subset_open
+    {K U : Set (ℝ × X)} (h : ParabolicHolderWith C α u U)
+    (hK : IsCompact K) (hUopen : IsOpen U) (hKU : K ⊆ U) :
+    ∃ R > 0, ∀ x ∈ K, ParabolicHolderWith C α u (parabolicClosedBall x R) := by
+  rcases parabolicClosedBall.exists_uniform_subset_open_of_isCompact hK hUopen hKU with
+    ⟨R, hR, hRU⟩
+  exact ⟨R, hR, fun x hx => h.mono_set (hRU x hx)⟩
+
+/-- Holder control on an open set localizes, with the same constant, to one uniform closed
+product-parabolic-cylinder radius around every point of a compact subset. -/
+theorem exists_uniform_closedCylinder_of_isCompact_subset_open
+    {K U : Set (ℝ × X)} (h : ParabolicHolderWith C α u U)
+    (hK : IsCompact K) (hUopen : IsOpen U) (hKU : K ⊆ U) :
+    ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      ∀ x ∈ K, ParabolicHolderWith C α u
+        (parabolicClosedCylinder x timeRadius spaceRadius) := by
+  rcases parabolicClosedCylinder.exists_uniform_subset_open_of_isCompact hK hUopen hKU with
+    ⟨timeRadius, htimeRadius, spaceRadius, hspaceRadius, hRU⟩
+  exact ⟨timeRadius, htimeRadius, spaceRadius, hspaceRadius,
+    fun x hx => h.mono_set (hRU x hx)⟩
+
 theorem mono_const (h : ParabolicHolderWith C α u s) (hCC' : C ≤ C₂) :
     ParabolicHolderWith C₂ α u s := by
   intro p hp q hq
@@ -1563,6 +1586,29 @@ theorem holder (h : ParabolicC0AlphaWith B H α u s) : ParabolicHolderWith H α 
 theorem mono_set (h : ParabolicC0AlphaWith B H α u s) (hst : t ⊆ s) :
     ParabolicC0AlphaWith B H α u t :=
   ⟨h.bounded.mono_set hst, h.holder.mono_set hst⟩
+
+/-- Parabolic `C^{0,α}` control on an open set localizes, with the same constants, to one
+uniform closed parabolic-ball radius around every point of a compact subset. -/
+theorem exists_uniform_closedBall_of_isCompact_subset_open
+    {K U : Set (ℝ × X)} (h : ParabolicC0AlphaWith B H α u U)
+    (hK : IsCompact K) (hUopen : IsOpen U) (hKU : K ⊆ U) :
+    ∃ R > 0, ∀ x ∈ K, ParabolicC0AlphaWith B H α u (parabolicClosedBall x R) := by
+  rcases parabolicClosedBall.exists_uniform_subset_open_of_isCompact hK hUopen hKU with
+    ⟨R, hR, hRU⟩
+  exact ⟨R, hR, fun x hx => h.mono_set (hRU x hx)⟩
+
+/-- Parabolic `C^{0,α}` control on an open set localizes, with the same constants, to one
+uniform closed product-parabolic-cylinder radius around every point of a compact subset. -/
+theorem exists_uniform_closedCylinder_of_isCompact_subset_open
+    {K U : Set (ℝ × X)} (h : ParabolicC0AlphaWith B H α u U)
+    (hK : IsCompact K) (hUopen : IsOpen U) (hKU : K ⊆ U) :
+    ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      ∀ x ∈ K, ParabolicC0AlphaWith B H α u
+        (parabolicClosedCylinder x timeRadius spaceRadius) := by
+  rcases parabolicClosedCylinder.exists_uniform_subset_open_of_isCompact hK hUopen hKU with
+    ⟨timeRadius, htimeRadius, spaceRadius, hspaceRadius, hRU⟩
+  exact ⟨timeRadius, htimeRadius, spaceRadius, hspaceRadius,
+    fun x hx => h.mono_set (hRU x hx)⟩
 
 theorem mono_const (h : ParabolicC0AlphaWith B₁ H₁ α u s)
     (hBB' : B₁ ≤ B₂) (hHH' : H₁ ≤ H₂) :

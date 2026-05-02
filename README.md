@@ -330,8 +330,10 @@ packages the canonical stationary local solution attached to
   closed ball/cylinder radii inside such open neighborhoods, continuity and
   uniform continuity from
   positive Hölder exponent, explicit closed-ball/cylinder oscillation bounds,
-  estimate monotonicity in the controlling constants, and add/subtract/smul
-  closure estimates plus the bounded product estimate for
+  estimate monotonicity in the controlling constants, constant-preserving
+  localization of open-domain Hölder and `C^{0,α}` estimates to uniform closed
+  parabolic patches around compact subsets, and add/subtract/smul closure
+  estimates plus the bounded product estimate for
   normed-ring-valued `C^{0,α}` functions and the corresponding bounded
   scalar-action estimate for normed-space-valued functions, along with closure
   under taking norms, Lipschitz composition on the controlled range, bounded
