@@ -491,6 +491,10 @@ This abstract time-difference component data now also has ordinary and
 within-set direct-velocity package forms, plus direct projections to the
 concrete component derivative packages and tensor time-regularity, so the raw
 velocity can be preserved through the time/spatial decomposition seam itself.
+The variational tangent-map endpoints for this time-difference formulation now
+also have ordinary and closed-interval direct-velocity wrappers, so the
+variational ODE still fills the tangent-map derivative while the scalar
+identity keeps the raw gauge velocity.
 This package now routes all the way to tensor time-regularity, including a
 closed-Picard `Ioo` specialization. A variational-flow endpoint now discharges
 the tangent-coordinate-map derivative in this time-difference formulation, so

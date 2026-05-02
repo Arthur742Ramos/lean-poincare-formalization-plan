@@ -692,7 +692,9 @@ now packages the matching intrinsic boundary
        bilinear-coordinate derivative and ordinary metric-coordinate field
        package `_self` companions, and direct-velocity ordinary/within-set
        abstract time-difference component data packages with projections to
-       component derivatives and tensor time-regularity,
+       component derivatives and tensor time-regularity, plus direct-velocity
+       ordinary and closed-interval variational tangent-map wrappers for that
+       time-difference formulation,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an
