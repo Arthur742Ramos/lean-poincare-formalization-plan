@@ -972,8 +972,9 @@ with the bounded product estimate for normed-ring-valued `C^{0,α}` functions
 and the corresponding bounded scalar-action estimate for normed-space-valued
 functions, plus closure under taking norms and Lipschitz composition on the
 controlled range, exponent lowering on unit parabolic-diameter domains, and
-closed-ball diameter control, product closed-ball compatibility, plus a
-basepoint-to-sup bound on closed parabolic balls. It still does not include the
+closed-ball diameter control, product ball/closed-ball compatibility for
+parabolic balls and product cylinders, plus a basepoint-to-sup bound on closed
+parabolic balls. It still does not include the
 Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build

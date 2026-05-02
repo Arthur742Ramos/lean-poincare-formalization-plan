@@ -373,6 +373,14 @@ theorem mem_nhds (ht : 0 < timeRadius) (hs : 0 < spaceRadius) :
     parabolicCylinder p timeRadius spaceRadius ∈ 𝓝 p :=
   (isOpen p timeRadius spaceRadius).mem_nhds (center_mem ht hs)
 
+theorem subset_metric_ball {ε : ℝ} (ht : timeRadius ≤ ε) (hs : spaceRadius ≤ ε) :
+    parabolicCylinder p timeRadius spaceRadius ⊆ Metric.ball p ε := by
+  intro q hq
+  rw [Metric.mem_ball, Prod.dist_eq]
+  exact max_lt
+    (by simpa [Real.dist_eq, abs_sub_comm] using lt_of_lt_of_le hq.1 ht)
+    (by simpa [dist_comm] using lt_of_lt_of_le hq.2 hs)
+
 /-- A product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at most
 `R` is contained in the parabolic ball of radius `R`. -/
 theorem subset_ball_of_le_sq (hR : 0 < R) (ht : timeRadius ≤ R ^ 2)
@@ -433,6 +441,14 @@ theorem isClosed (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
   simpa [parabolicClosedCylinder] using
     ((isClosed_Iic.preimage (continuous_const.sub continuous_fst).abs).inter
       (isClosed_Iic.preimage (continuous_const.dist continuous_snd)))
+
+theorem subset_metric_closedBall {ε : ℝ} (ht : timeRadius ≤ ε) (hs : spaceRadius ≤ ε) :
+    parabolicClosedCylinder p timeRadius spaceRadius ⊆ Metric.closedBall p ε := by
+  intro q hq
+  rw [Metric.mem_closedBall, Prod.dist_eq]
+  exact max_le
+    (by simpa [Real.dist_eq, abs_sub_comm] using le_trans hq.1 ht)
+    (by simpa [dist_comm] using le_trans hq.2 hs)
 
 /-- A closed product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at
 most `R` is contained in the closed parabolic ball of radius `R`. -/
