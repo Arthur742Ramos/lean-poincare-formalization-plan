@@ -315,7 +315,9 @@ now packages the matching intrinsic boundary
         layer also differentiates readouts stated directly on that operator
         tuple, with closed-interval, open-domain, ordinary-interior, and
         center-trajectory variational local-flow forms, plus matching
-        eventual-equality transfer wrappers for local scalar identities; the raw
+        eventual-equality transfer wrappers for local scalar identities and
+        primitive transfer lemmas for the underlying base-curve operator chain
+        rules; the raw
         closed-Picard tensor route now consumes those `F(t, y, A)` operator-domain
         readouts directly, with open-domain and explicit graph-convergence forms
         and continuous product-Picard wrappers that convert `(y, A)` output to

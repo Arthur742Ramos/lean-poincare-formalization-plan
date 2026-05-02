@@ -835,8 +835,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
             derivative-domain tuples, and scalar chain rules for operator-domain
             readouts `F(t, y, A)` along variational local flows in
             closed-interval/open-domain and ordinary-interior forms, with
-            matching eventual-equality transfer wrappers for local scalar
-            identities, plus raw closed-Picard tensor time-regularity routes
+             matching eventual-equality transfer wrappers for local scalar
+             identities and primitive transfer lemmas for the underlying
+             base-curve operator chain rules, plus raw closed-Picard tensor
+             time-regularity routes
             that consume those operator-domain readouts directly, with
             continuous product-Picard wrappers for callers starting from the
             product system `(y, A)`,

@@ -588,6 +588,109 @@ theorem hasDerivAt_scalarField_time_base_operator_along_curveWithinOpen
       (y := y) (y' := y') (A := A) (A' := A')
       (t := t) (domain := domain) hF hy hA hdomain
 
+/-- Eventual-equality transfer form of
+`hasDerivWithinAt_scalarField_time_base_operator_along_curveWithin`. -/
+theorem hasDerivWithinAt_of_eventuallyEq_scalarField_time_base_operator_along_curveWithin
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    {y : ℝ → V} {y' : V}
+    {A : ℝ → V →L[ℝ] V} {A' : V →L[ℝ] V} {s : Set ℝ} {t : ℝ}
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    (heq : scalar =ᶠ[𝓝[s] t] fun τ : ℝ ↦ Fscalar (τ, y τ, A τ))
+    (heq_t : scalar t = Fscalar (t, y t, A t))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain (t, y t, A t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hA : HasDerivWithinAt A A' s t)
+    (hdomain : Filter.Tendsto (fun τ : ℝ ↦ (τ, y τ, A τ))
+      (𝓝[s] t) (𝓝[domain] (t, y t, A t)))
+    {value : ℝ}
+    (hvalue : Fscalar' (1, y', A') = value) :
+    HasDerivWithinAt scalar value s t := by
+  have hderiv :=
+    hasDerivWithinAt_scalarField_time_base_operator_along_curveWithin
+      (Fscalar := Fscalar) (Fscalar' := Fscalar')
+      (y := y) (y' := y') (A := A) (A' := A')
+      (s := s) (t := t) (domain := domain) hF hy hA hdomain
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
+/-- Open-domain eventual-equality transfer form of
+`hasDerivWithinAt_scalarField_time_base_operator_along_curveWithinOpen`. -/
+theorem hasDerivWithinAt_of_eventuallyEq_scalarField_time_base_operator_along_curveWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    {y : ℝ → V} {y' : V}
+    {A : ℝ → V →L[ℝ] V} {A' : V →L[ℝ] V} {s : Set ℝ} {t : ℝ}
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    (heq : scalar =ᶠ[𝓝[s] t] fun τ : ℝ ↦ Fscalar (τ, y τ, A τ))
+    (heq_t : scalar t = Fscalar (t, y t, A t))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain (t, y t, A t))
+    (hy : HasDerivWithinAt y y' s t)
+    (hA : HasDerivWithinAt A A' s t)
+    (hopen : IsOpen domain) (hmem : (t, y t, A t) ∈ domain)
+    {value : ℝ}
+    (hvalue : Fscalar' (1, y', A') = value) :
+    HasDerivWithinAt scalar value s t := by
+  have hderiv :=
+    hasDerivWithinAt_scalarField_time_base_operator_along_curveWithinOpen
+      (Fscalar := Fscalar) (Fscalar' := Fscalar')
+      (y := y) (y' := y') (A := A) (A' := A')
+      (s := s) (t := t) (domain := domain) hF hy hA hopen hmem
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
+/-- Ordinary eventual-equality transfer form of
+`hasDerivAt_scalarField_time_base_operator_along_curveWithin`. -/
+theorem hasDerivAt_of_eventuallyEq_scalarField_time_base_operator_along_curveWithin
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    {y : ℝ → V} {y' : V}
+    {A : ℝ → V →L[ℝ] V} {A' : V →L[ℝ] V} {t : ℝ}
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    (heq : scalar =ᶠ[𝓝 t] fun τ : ℝ ↦ Fscalar (τ, y τ, A τ))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain (t, y t, A t))
+    (hy : HasDerivAt y y' t)
+    (hA : HasDerivAt A A' t)
+    (hdomain : ∀ᶠ τ in 𝓝 t, (τ, y τ, A τ) ∈ domain)
+    {value : ℝ}
+    (hvalue : Fscalar' (1, y', A') = value) :
+    HasDerivAt scalar value t := by
+  have hderiv :=
+    hasDerivAt_scalarField_time_base_operator_along_curveWithin
+      (Fscalar := Fscalar) (Fscalar' := Fscalar')
+      (y := y) (y' := y') (A := A) (A' := A')
+      (t := t) (domain := domain) hF hy hA hdomain
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq
+
+/-- Ordinary open-domain eventual-equality transfer form of
+`hasDerivAt_scalarField_time_base_operator_along_curveWithinOpen`. -/
+theorem hasDerivAt_of_eventuallyEq_scalarField_time_base_operator_along_curveWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Fscalar : ℝ × V × (V →L[ℝ] V) → ℝ}
+    {Fscalar' : ℝ × V × (V →L[ℝ] V) →L[ℝ] ℝ}
+    {y : ℝ → V} {y' : V}
+    {A : ℝ → V →L[ℝ] V} {A' : V →L[ℝ] V} {t : ℝ}
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V × (V →L[ℝ] V))}
+    (heq : scalar =ᶠ[𝓝 t] fun τ : ℝ ↦ Fscalar (τ, y τ, A τ))
+    (hF : HasFDerivWithinAt Fscalar Fscalar' domain (t, y t, A t))
+    (hy : HasDerivAt y y' t)
+    (hA : HasDerivAt A A' t)
+    (hopen : IsOpen domain) (hmem : (t, y t, A t) ∈ domain)
+    {value : ℝ}
+    (hvalue : Fscalar' (1, y', A') = value) :
+    HasDerivAt scalar value t := by
+  have hderiv :=
+    hasDerivAt_scalarField_time_base_operator_along_curveWithinOpen
+      (Fscalar := Fscalar) (Fscalar' := Fscalar')
+      (y := y) (y' := y') (A := A) (A' := A')
+      (t := t) (domain := domain) hF hy hA hopen hmem
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq
+
 /-- Within-set moving-base coordinate chain rule for
 `Bfield(τ, y(τ)) (A(τ) u) (A(τ) v)`, with the tangent map satisfying
 `A'(t) = D ∘ A(t)`. -/

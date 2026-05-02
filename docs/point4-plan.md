@@ -408,8 +408,11 @@ dependence gives fixed-time Lipschitz/continuity/distance estimates for it as
 the base initial point varies. The scalar calculus now also has operator-domain
 chain rules for readouts `F(t, y, A)` over `(t, flow(t), tangent(t))`, including
 within-domain/open-domain, closed-interval, ordinary-interior, and
-center-trajectory variational local-flow forms, plus eventual-equality transfer
-wrappers for locally identified geometric/readout scalars. The raw closed-Picard
+    center-trajectory variational local-flow forms, plus eventual-equality transfer
+    wrappers for locally identified geometric/readout scalars. The primitive
+    base-curve operator chain rules now also have within-filter and ordinary
+    eventual-equality transfer lemmas, so local scalar identifications can be
+    applied before specializing to a variational-flow package. The raw closed-Picard
 `HasTimeDerivativeOn` route now consumes those operator-domain scalar readouts
 directly, both when the derivative domain is open and when explicit graph
 convergence is supplied; continuous product-Picard wrappers now perform the
