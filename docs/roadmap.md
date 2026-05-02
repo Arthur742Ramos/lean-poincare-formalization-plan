@@ -836,7 +836,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
             readouts `F(t, y, A)` along variational local flows in
             closed-interval/open-domain and ordinary-interior forms, with
             matching eventual-equality transfer wrappers for local scalar
-            identities,
+            identities, plus raw closed-Picard tensor time-regularity routes
+            that consume those operator-domain readouts directly,
            direct product-Picard bridges into scalar-readout,
            metric-coordinate-field, and finite-cover/readout-field tensor
            time-derivative routes, including closed-Picard within-filter
