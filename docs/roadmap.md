@@ -882,7 +882,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        and eventual-membership readouts for the extracted `(flow, tangent)` pair
        on both closed and open Picard cylinders, and product Lipschitz dependence
        descends to Lipschitz/continuity/distance estimates for the extracted
-       pair, tangent-map projection, and fixed tangent-vector slots as functions
+       pair, the base-flow projection, the tangent-map projection, fixed
+       tangent-vector slots, and paired fixed tangent-vector slots as functions
        of the base initial point,
        with an automatic radius-specialized
        constructor when the base radius is bounded by the product radius, plus

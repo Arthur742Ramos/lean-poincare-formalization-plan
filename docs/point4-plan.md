@@ -1056,9 +1056,10 @@ ball interior and open Picard interval. Product Lipschitz dependence now also
 descends to Lipschitz, continuity, and distance estimates for the extracted
 `(flow, tangent)` pair as a function of the base initial point at each Picard
 time, together with direct tangent-map projection estimates.
-Applying the extracted tangent maps to a fixed model vector now has the same
-Lipschitz, continuity, and distance readouts, which is the vector-slot form used
-by scalar pullback calculations.
+The extracted base-flow projection and the extracted tangent maps applied to a
+fixed model vector now have the same Lipschitz, continuity, and distance
+readouts, and two fixed vector slots have paired readouts for scalar pullback
+calculations depending on both `A(t)u` and `A(t)v`.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction
