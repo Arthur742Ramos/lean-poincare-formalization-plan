@@ -950,7 +950,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          raw gauge-flow coordinate curves. Direct `_self` variants of the
          frozen-spatial, total-derivative, and time-difference raw-flow endpoint
          lemmas now expose the gauge velocity itself at the centered chart,
-         removing the redundant basepoint `tangentCoordChange` from this layer.
+         removing the redundant basepoint `tangentCoordChange` from this layer;
+         locally equal readout-field variants and within-set component-data
+         constructors now accept the same direct-velocity hypotheses.
          The module also now has an additive
          time/spatial decomposition upgrading that frozen spatial term to the full
          moving time-space field derivative once the remaining time-difference
