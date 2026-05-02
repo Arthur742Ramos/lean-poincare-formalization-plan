@@ -833,7 +833,9 @@ source-neighborhood facts expected by the within-set and ordinary chart-ODE
 gauge-flow constructors; the variational package now also exposes the same
 eventual-membership readouts for tangent maps and fixed vector slots `A(t) v`,
 so tangent-coordinate chart-domain facts can be transported directly from the
-linearized ODE. The autonomous `C¹`
+linearized ODE. It now also exposes closed-interval and open-interior product
+readouts for `(flow(t), tangent(t))`, matching chart-local derivative domains
+that depend on the base point and tangent map together. The autonomous `C¹`
 local-integral-curve specialization now also returns continuity on its open
 existence interval. Variational local-flow uniqueness now also has direct
 interior and closed-interval vector-slot `A(t) v` bridges derived from

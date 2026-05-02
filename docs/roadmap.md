@@ -772,7 +772,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
            closed-interval within-filter plus interior open-set
            eventual-membership readouts for local, continuous, and variational
           model-flow curves, now including tangent-map and fixed-vector-slot
-          eventual-membership readouts for variational packages, plus the
+          eventual-membership readouts and `(flow, tangent)` product-graph
+          readouts for variational packages, plus the
           autonomous `C¹` integral-curve specialization with
         open-interval continuity and a packaged `LocalFlowSolution` extraction
         on a smaller closed interval, now with a direct localized existence form

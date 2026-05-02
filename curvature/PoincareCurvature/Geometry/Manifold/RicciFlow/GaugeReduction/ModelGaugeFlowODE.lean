@@ -1602,6 +1602,82 @@ theorem center_tangent_eventually_mem_of_mem_Ioo
     (α.tangent x₀) ⁻¹' U ∈ 𝓝 t :=
   α.tangent_eventually_mem_of_mem_Ioo (mem_closedBall_self r.2) ht hU hmem
 
+/-- The base-flow/tangent-map pair is continuous within the Picard interval. -/
+theorem flow_tangent_continuousWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousWithinAt (fun τ : ℝ => (α.flow (x, τ), α.tangent x τ))
+      (Icc tmin tmax) t :=
+  (α.flow_continuousWithinAt hx ht).prodMk (α.tangent_continuousWithinAt hx ht)
+
+/-- Center base-flow/tangent-map pair continuity within the Picard interval. -/
+theorem center_flow_tangent_continuousWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousWithinAt (fun τ : ℝ => (α.flow (x₀, τ), α.tangent x₀ τ))
+      (Icc tmin tmax) t :=
+  α.flow_tangent_continuousWithinAt (mem_closedBall_self r.2) ht
+
+/-- The base-flow/tangent-map pair is eventually, relative to the closed Picard
+interval, in any open product set containing its endpoint value. -/
+theorem flow_tangent_eventuallyWithin_mem_of_mem_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set (V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem : (α.flow (x, t), α.tangent x t) ∈ U) :
+    (fun τ : ℝ => (α.flow (x, τ), α.tangent x τ)) ⁻¹' U ∈
+      𝓝[Icc tmin tmax] t :=
+  (α.flow_tangent_continuousWithinAt hx ht) (hU.mem_nhds hmem)
+
+/-- Center specialization of
+`VariationalLocalFlowSolution.flow_tangent_eventuallyWithin_mem_of_mem_Icc`. -/
+theorem center_flow_tangent_eventuallyWithin_mem_of_mem_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Icc tmin tmax)
+    {U : Set (V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem : (α.flow (x₀, t), α.tangent x₀ t) ∈ U) :
+    (fun τ : ℝ => (α.flow (x₀, τ), α.tangent x₀ τ)) ⁻¹' U ∈
+      𝓝[Icc tmin tmax] t :=
+  α.flow_tangent_eventuallyWithin_mem_of_mem_Icc
+    (mem_closedBall_self r.2) ht hU hmem
+
+/-- The base-flow/tangent-map pair is ordinarily continuous on the open Picard
+interior. -/
+theorem flow_tangent_continuousAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    ContinuousAt (fun τ : ℝ => (α.flow (x, τ), α.tangent x τ)) t :=
+  (α.flow_continuousAt_of_mem_Ioo hx ht).prodMk
+    (α.tangent_continuousAt_of_mem_Ioo hx ht)
+
+/-- Center base-flow/tangent-map pair continuity on the open Picard interior. -/
+theorem center_flow_tangent_continuousAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Ioo tmin tmax) :
+    ContinuousAt (fun τ : ℝ => (α.flow (x₀, τ), α.tangent x₀ τ)) t :=
+  α.flow_tangent_continuousAt_of_mem_Ioo (mem_closedBall_self r.2) ht
+
+/-- The base-flow/tangent-map pair is eventually in any open product set
+containing its interior-time value. -/
+theorem flow_tangent_eventually_mem_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set (V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem : (α.flow (x, t), α.tangent x t) ∈ U) :
+    (fun τ : ℝ => (α.flow (x, τ), α.tangent x τ)) ⁻¹' U ∈ 𝓝 t :=
+  (α.flow_tangent_continuousAt_of_mem_Ioo hx ht) (hU.mem_nhds hmem)
+
+/-- Center specialization of
+`VariationalLocalFlowSolution.flow_tangent_eventually_mem_of_mem_Ioo`. -/
+theorem center_flow_tangent_eventually_mem_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Ioo tmin tmax)
+    {U : Set (V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem : (α.flow (x₀, t), α.tangent x₀ t) ∈ U) :
+    (fun τ : ℝ => (α.flow (x₀, τ), α.tangent x₀ τ)) ⁻¹' U ∈ 𝓝 t :=
+  α.flow_tangent_eventually_mem_of_mem_Ioo
+    (mem_closedBall_self r.2) ht hU hmem
+
 /-- Applying the variational tangent map to a fixed vector gives within-interval
 continuity of the vector-slot time curve. -/
 theorem tangent_apply_continuousWithinAt
