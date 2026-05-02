@@ -4467,10 +4467,99 @@ def CoordinatePullbackMetricFieldDerivativeWithinOn
       HasFDerivAt Bfield Bfield' (t, y t) ∧
       HasDerivWithinAt y y' s t ∧
       HasDerivWithinAt A (D.comp (A t)) s t ∧
-      Bfield' (1, y') (A t uE) (A t vE) +
-          Bfield (t, y t) (D (A t uE)) (A t vE) +
-          Bfield (t, y t) (A t uE) (D (A t vE)) =
-        gdot t x u v
+       Bfield' (1, y') (A t uE) (A t vE) +
+           Bfield (t, y t) (D (A t uE)) (A t vE) +
+           Bfield (t, y t) (A t uE) (D (A t vE)) =
+         gdot t x u v
+
+/-- Within-set operator-domain coordinate derivative data for the named
+coordinate pullback model.
+
+This is the closed-Picard endpoint form for chart/Picard scalar readouts that
+are naturally expressed as `F(t, y, A)` on the full tangent-map operator, rather
+than after specializing to fixed vector slots. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+    ∃ (domain : Set (ℝ × E × (E →L[ℝ] E)))
+      (Fscalar : ℝ × E × (E →L[ℝ] E) → ℝ)
+      (Fscalar' : ℝ × E × (E →L[ℝ] E) →L[ℝ] ℝ)
+      (y : ℝ → E) (y' : E)
+      (A : ℝ → E →L[ℝ] E) (A' : E →L[ℝ] E),
+      pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[𝓝[s] t]
+          (fun τ : ℝ ↦ Fscalar (τ, y τ, A τ)) ∧
+      HasFDerivWithinAt Fscalar Fscalar' domain (t, y t, A t) ∧
+      HasDerivWithinAt y y' s t ∧
+      HasDerivWithinAt A A' s t ∧
+      Filter.Tendsto (fun τ : ℝ ↦ (τ, y τ, A τ)) (𝓝[s] t)
+        (𝓝[domain] (t, y t, A t)) ∧
+      Fscalar' (1, y', A') = gdot t x u v
+
+/-- Open-domain variant of
+`CoordinatePullbackMetricOperatorDerivativeWithinOn`.
+
+The graph convergence into the derivative domain is derived from openness by
+the scalar chain rule, so the package only stores domain membership at the
+endpoint. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+    ∃ (domain : Set (ℝ × E × (E →L[ℝ] E)))
+      (Fscalar : ℝ × E × (E →L[ℝ] E) → ℝ)
+      (Fscalar' : ℝ × E × (E →L[ℝ] E) →L[ℝ] ℝ)
+      (y : ℝ → E) (y' : E)
+      (A : ℝ → E →L[ℝ] E) (A' : E →L[ℝ] E),
+      pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[𝓝[s] t]
+          (fun τ : ℝ ↦ Fscalar (τ, y τ, A τ)) ∧
+      HasFDerivWithinAt Fscalar Fscalar' domain (t, y t, A t) ∧
+      HasDerivWithinAt y y' s t ∧
+      HasDerivWithinAt A A' s t ∧
+      IsOpen domain ∧
+      (t, y t, A t) ∈ domain ∧
+      Fscalar' (1, y', A') = gdot t x u v
+
+/-- Restrict within-set operator-domain coordinate derivative data to a smaller
+time set. -/
+theorem CoordinatePullbackMetricOperatorDerivativeWithinOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hoperator : CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot t)
+    (hst : s ⊆ t) :
+    CoordinatePullbackMetricOperatorDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro τ hτ x u v
+  obtain ⟨domain, Fscalar, Fscalar', y, y', A, A', hmodel, hF, hy, hA,
+    hdomain, hvalue⟩ := hoperator (hst hτ) x u v
+  refine ⟨domain, Fscalar, Fscalar', y, y', A, A', ?_, hF,
+    hy.mono hst, hA.mono hst, ?_, hvalue⟩
+  · exact hmodel.filter_mono (nhdsWithin_mono τ hst)
+  · exact hdomain.mono_left (nhdsWithin_mono τ hst)
+
+/-- Restrict open-domain operator coordinate derivative data to a smaller time
+set. -/
+theorem CoordinatePullbackMetricOperatorDerivativeWithinOnOpen.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hoperator : CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) Φ g gdot t)
+    (hst : s ⊆ t) :
+    CoordinatePullbackMetricOperatorDerivativeWithinOnOpen (I := I) (M := M) Φ g gdot s := by
+  intro τ hτ x u v
+  obtain ⟨domain, Fscalar, Fscalar', y, y', A, A', hmodel, hF, hy, hA,
+    hopen, hmem, hvalue⟩ := hoperator (hst hτ) x u v
+  refine ⟨domain, Fscalar, Fscalar', y, y', A, A', ?_, hF,
+    hy.mono hst, hA.mono hst, hopen, hmem, hvalue⟩
+  exact hmodel.filter_mono (nhdsWithin_mono τ hst)
 
 /-- Restrict within-set field-level coordinate-model derivative data to a
 smaller time set. -/
@@ -5382,6 +5471,132 @@ theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateFieldWithin
     (A := A) (D := D) (s := s) (t := t) uE vE
     heq heq_t hBfield hy hA hvalue
 
+/-- Within-set operator-domain coordinate derivative data plus chart-local
+equality implies the endpoint geometric scalar derivative target directly. -/
+theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hoperator : CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨domain, Fscalar, Fscalar', y, y', A, A', hmodel_eq, hF,
+    hy, hA, hdomain, hvalue⟩ := hoperator ht x u v
+  have heq :
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        fun τ : ℝ ↦ Fscalar (τ, y τ, A τ) :=
+    (hgeom ht x u v).trans hmodel_eq
+  have heq_t :
+      (g t).inner ((Φ t) x)
+          ((Φ t).pushforwardTangent x u)
+          ((Φ t).pushforwardTangent x v) =
+        Fscalar (t, y t, A t) :=
+    show t ∈ {τ : ℝ |
+        (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v) =
+          Fscalar (τ, y τ, A τ)} from
+      mem_of_mem_nhdsWithin ht heq
+  exact
+    hasDerivWithinAt_of_eventuallyEq_scalarField_time_base_operator_along_curveWithin
+      (Fscalar := Fscalar) (Fscalar' := Fscalar') (y := y) (y' := y')
+      (A := A) (A' := A') (s := s) (t := t) (domain := domain)
+      heq heq_t hF hy hA hdomain hvalue
+
+/-- Open-domain operator-coordinate data plus chart-local equality implies the
+endpoint geometric scalar derivative target directly. -/
+theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hoperator : CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨domain, Fscalar, Fscalar', y, y', A, A', hmodel_eq, hF,
+    hy, hA, hopen, hmem, hvalue⟩ := hoperator ht x u v
+  have heq :
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        fun τ : ℝ ↦ Fscalar (τ, y τ, A τ) :=
+    (hgeom ht x u v).trans hmodel_eq
+  have heq_t :
+      (g t).inner ((Φ t) x)
+          ((Φ t).pushforwardTangent x u)
+          ((Φ t).pushforwardTangent x v) =
+        Fscalar (t, y t, A t) :=
+    show t ∈ {τ : ℝ |
+        (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v) =
+          Fscalar (τ, y τ, A τ)} from
+      mem_of_mem_nhdsWithin ht heq
+  exact
+    hasDerivWithinAt_of_eventuallyEq_scalarField_time_base_operator_along_curveWithinOpen
+      (Fscalar := Fscalar) (Fscalar' := Fscalar') (y := y) (y' := y')
+      (A := A) (A' := A') (s := s) (t := t) (domain := domain)
+      heq heq_t hF hy hA hopen hmem hvalue
+
+/-- Closed-interval operator-domain coordinate derivative data gives ordinary
+geometric scalar derivatives on the open interior. -/
+theorem pullbackMetricInnerDerivativeOn_Ioo_of_coordinateOperatorWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hoperator : CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax))
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+        (fun τ : ℝ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[Icc tmin tmax] t]
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot (Ioo tmin tmax) :=
+  (pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithin
+    (I := I) (M := M) hoperator hgeom).toPullbackMetricInnerDerivativeOn_Ioo
+
+/-- Closed-interval open-domain operator-coordinate data gives ordinary
+geometric scalar derivatives on the open interior. -/
+theorem pullbackMetricInnerDerivativeOn_Ioo_of_coordinateOperatorWithinOpen
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hoperator : CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax))
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+        (fun τ : ℝ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[Icc tmin tmax] t]
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot (Ioo tmin tmax) :=
+  (pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
+    (I := I) (M := M) hoperator hgeom).toPullbackMetricInnerDerivativeOn_Ioo
+
 /-- Closed-interval field-level coordinate derivative data gives ordinary
 geometric scalar derivatives on the open interior. -/
 theorem pullbackMetricInnerDerivativeOn_Ioo_of_coordinateFieldWithin
@@ -5594,6 +5809,52 @@ theorem hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricFieldDerivativeWithin
     (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot) (s := Ioo tmin tmax)
     (pullbackMetricInnerDerivativeOn_Ioo_of_coordinateFieldWithin
       (I := I) (M := M) hfield hgeom)
+
+/-- Closed-interval operator-domain coordinate derivative data packages as tensor
+time-regularity on the open interior of the interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricOperatorDerivativeWithinOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hoperator : CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax))
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+        (fun τ : ℝ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[Icc tmin tmax] t]
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (Φ.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
+    (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot) (s := Ioo tmin tmax)
+    (pullbackMetricInnerDerivativeOn_Ioo_of_coordinateOperatorWithin
+      (I := I) (M := M) hoperator hgeom)
+
+/-- Closed-interval open-domain operator-coordinate data packages as tensor
+time-regularity on the open interior of the interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricOperatorDerivativeWithinOnOpen
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (hoperator : CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) Φ g gdot (Icc tmin tmax))
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+        (fun τ : ℝ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[Icc tmin tmax] t]
+          pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (Φ.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
+    (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot) (s := Ioo tmin tmax)
+    (pullbackMetricInnerDerivativeOn_Ioo_of_coordinateOperatorWithinOpen
+      (I := I) (M := M) hoperator hgeom)
 
 /-- A named scalar inner-product derivative obligation packages as the tensor
 time derivative of the gauge-pulled metric family. -/
@@ -6008,6 +6269,40 @@ theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateFieldWithin
     (fun {t} ht x u v ↦ G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
       (t := t) ht g x u v)
 
+/-- Raw gauge-flow within-set operator-domain coordinate data gives the endpoint
+geometric scalar derivative target. -/
+theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithin
+    (I := I) (M := M) hoperator
+    (fun {t} ht x u v ↦ G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+      (t := t) ht g x u v)
+
+/-- Raw gauge-flow within-set open-domain operator-coordinate data gives the
+endpoint geometric scalar derivative target. -/
+theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  SmoothSelfDiffeomorph3Family.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
+    (I := I) (M := M) hoperator
+    (fun {t} ht x u v ↦ G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+      (t := t) ht g x u v)
+
 /-- Raw gauge-flow within-set field-level coordinate data gives tensor
 time-regularity whenever the time set is a neighborhood of each of its times. -/
 theorem hasTimeDerivativeOn_of_coordinateFieldWithin
@@ -6024,6 +6319,40 @@ theorem hasTimeDerivativeOn_of_coordinateFieldWithin
     (I := I) (M := M)
     ((G.pullbackMetricInnerDerivativeWithinOn_of_coordinateFieldWithin
       (I := I) (M := M) hfield).toPullbackMetricInnerDerivativeOn hs)
+
+/-- Raw gauge-flow within-set operator-domain coordinate data gives tensor
+time-regularity whenever the time set is a neighborhood of each of its times. -/
+theorem hasTimeDerivativeOn_of_coordinateOperatorWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
+    (I := I) (M := M)
+    ((G.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithin
+      (I := I) (M := M) hoperator).toPullbackMetricInnerDerivativeOn hs)
+
+/-- Raw gauge-flow within-set open-domain operator-coordinate data gives tensor
+time-regularity whenever the time set is a neighborhood of each of its times. -/
+theorem hasTimeDerivativeOn_of_coordinateOperatorWithinOpen
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
+    (I := I) (M := M)
+    ((G.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
+      (I := I) (M := M) hoperator).toPullbackMetricInnerDerivativeOn hs)
 
 /-- Raw gauge flows supply the moving-base coordinate derivative `y'(t)` in the
 field-level coordinate package at times where the raw time set is a
@@ -13826,6 +14155,42 @@ theorem hasTimeDerivativeOn_Ioo_of_coordinateFieldWithin
       (Ioo tmin tmax) :=
   SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricFieldDerivativeWithinOn
     (I := I) (M := M) hfield
+    (fun {t} ht x u v ↦
+      G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+        (t := t) ht g x u v)
+
+/-- Closed-Picard raw gauge-flow endpoint operator-domain coordinate data gives
+tensor time-regularity on the open interior interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_coordinateOperatorWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot (Icc tmin tmax)) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricOperatorDerivativeWithinOn
+    (I := I) (M := M) hoperator
+    (fun {t} ht x u v ↦
+      G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+        (t := t) ht g x u v)
+
+/-- Closed-Picard raw gauge-flow endpoint open-domain operator-coordinate data
+gives tensor time-regularity on the open interior interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_coordinateOperatorWithinOpen
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) G.maps3 g gdot (Icc tmin tmax)) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricOperatorDerivativeWithinOnOpen
+    (I := I) (M := M) hoperator
     (fun {t} ht x u v ↦
       G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
         (t := t) ht g x u v)

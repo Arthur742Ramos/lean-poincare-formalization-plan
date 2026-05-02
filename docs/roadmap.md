@@ -841,7 +841,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
              time-regularity routes
             that consume those operator-domain readouts directly, with
             continuous product-Picard wrappers for callers starting from the
-            product system `(y, A)`,
+            product system `(y, A)`, and named
+            `CoordinatePullbackMetricOperatorDerivativeWithinOn` /
+            `CoordinatePullbackMetricOperatorDerivativeWithinOnOpen` endpoint
+            coordinate packages with scalar, tensor, raw-flow, and
+            closed-Picard `Ioo` promotion wrappers,
            direct product-Picard bridges into scalar-readout,
            metric-coordinate-field, and finite-cover/readout-field tensor
            time-derivative routes, including closed-Picard within-filter

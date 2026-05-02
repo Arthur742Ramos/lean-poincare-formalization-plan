@@ -417,7 +417,12 @@ within-domain/open-domain, closed-interval, ordinary-interior, and
 directly, both when the derivative domain is open and when explicit graph
 convergence is supplied; continuous product-Picard wrappers now perform the
 `(y, A)` to variational-flow conversion internally for the same operator-domain
-routes. This removes a manual tangent
+routes. The named coordinate package layer now also has
+`CoordinatePullbackMetricOperatorDerivativeWithinOn` and
+`CoordinatePullbackMetricOperatorDerivativeWithinOnOpen`, plus scalar, tensor,
+raw gauge-flow, and closed-Picard `Ioo` promotion wrappers, so the same
+operator-domain readouts can be stored as endpoint coordinate derivative data
+before selecting a final tensor route. This removes a manual tangent
 Lipschitz obligation from the future chart-gluing step and isolates the
 remaining product Picard hypotheses to base-field and linearized-coefficient
 estimates. The same layer now has the closed-ball specialization matching
