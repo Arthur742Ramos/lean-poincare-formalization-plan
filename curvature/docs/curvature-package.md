@@ -105,8 +105,9 @@ for parabolic balls and product cylinders, exact standard ball/cylinder
 identifications, closed-to-open shrink inclusions for balls/cylinders,
 open-to-closed closure containment,
 continuity/uniform-continuity consequences, explicit
-closed-ball/cylinder oscillation bounds, and additive
-and subtractive closure estimates, plus the bounded product estimate for
+closed-ball/cylinder oscillation bounds, estimate monotonicity in the
+controlling constants, and additive/subtractive closure estimates, plus the
+bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded
 scalar-action estimate for normed-space-valued functions, plus closure under
 taking norms, Lipschitz composition on the controlled range, and bounded

@@ -324,7 +324,8 @@ packages the canonical stationary local solution attached to
   closed-to-open shrink inclusions for balls/cylinders,
   open-to-closed closure containment, continuity and uniform continuity from
   positive Hölder exponent, explicit closed-ball/cylinder oscillation bounds,
-  and add/subtract/smul closure estimates plus the bounded product estimate for
+  estimate monotonicity in the controlling constants, and add/subtract/smul
+  closure estimates plus the bounded product estimate for
   normed-ring-valued `C^{0,α}` functions and the corresponding bounded
   scalar-action estimate for normed-space-valued functions, along with closure
   under taking norms, Lipschitz composition on the controlled range, bounded

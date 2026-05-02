@@ -609,6 +609,12 @@ theorem mono_set (h : ParabolicHolderWith C α u s) (hst : t ⊆ s) :
   intro p hp q hq
   exact h (hst hp) (hst hq)
 
+theorem mono_const (h : ParabolicHolderWith C α u s) (hCC' : C ≤ C₂) :
+    ParabolicHolderWith C₂ α u s := by
+  intro p hp q hq
+  exact (h hp hq).trans
+    (mul_le_mul_of_nonneg_right hCC' (Real.rpow_nonneg (parabolicDistance.nonneg p q) α))
+
 theorem const (c : E) (hC : 0 ≤ C) :
     ParabolicHolderWith C α (fun _ : ℝ × X => c) s := by
   intro p _hp q _hq
@@ -1030,6 +1036,11 @@ theorem mono_set (h : ParabolicBoundedWith B u s) (hst : t ⊆ s) :
   intro p hp
   exact h (hst hp)
 
+theorem mono_const (h : ParabolicBoundedWith B₁ u s) (hBB' : B₁ ≤ B₂) :
+    ParabolicBoundedWith B₂ u s := by
+  intro p hp
+  exact (h hp).trans hBB'
+
 theorem const (c : E) (hB : ‖c‖ ≤ B) :
     ParabolicBoundedWith B (fun _ : ℝ × X => c) s := by
   intro _p _hp
@@ -1100,6 +1111,11 @@ theorem holder (h : ParabolicC0AlphaWith B H α u s) : ParabolicHolderWith H α 
 theorem mono_set (h : ParabolicC0AlphaWith B H α u s) (hst : t ⊆ s) :
     ParabolicC0AlphaWith B H α u t :=
   ⟨h.bounded.mono_set hst, h.holder.mono_set hst⟩
+
+theorem mono_const (h : ParabolicC0AlphaWith B₁ H₁ α u s)
+    (hBB' : B₁ ≤ B₂) (hHH' : H₁ ≤ H₂) :
+    ParabolicC0AlphaWith B₂ H₂ α u s :=
+  ⟨h.bounded.mono_const hBB', h.holder.mono_const hHH'⟩
 
 theorem const (c : E) (hB : ‖c‖ ≤ B) (hH : 0 ≤ H) :
     ParabolicC0AlphaWith B H α (fun _ : ℝ × X => c) s :=
