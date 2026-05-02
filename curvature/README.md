@@ -389,7 +389,9 @@ now packages the matching intrinsic boundary
          raw graph convergence from preferred-chart gauge-flow continuity, plus
          lower time-difference component-data constructors with the same
          open-domain reduction for direct and readout fields and public
-         closed-Picard tensor wrappers exposing that open-domain shape, the
+         closed-Picard tensor wrappers exposing that open-domain shape, with
+         variational tangent-map direct/readout tensor routes mirroring the same
+         interface, the
          model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

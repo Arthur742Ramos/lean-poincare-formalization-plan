@@ -257,7 +257,11 @@ exists at the lower time-difference component-data layer, including for locally
 equal finite-cover/readout fields, so downstream tensor routes can inherit the
 derived graph convergence without restating it. Closed-Picard tensor
 time-regularity now also exposes direct open-product-domain wrappers for both
-raw metric-coordinate fields and locally equal readout fields.
+raw metric-coordinate fields and locally equal readout fields. The variational
+tangent-map tensor routes now mirror the same open-domain interface, including
+ordinary-neighborhood and closed-interval tangent-map agreement and readout-field
+forms, so the model tangent ODE can supply the tangent derivative without a
+separate graph-convergence proof.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow

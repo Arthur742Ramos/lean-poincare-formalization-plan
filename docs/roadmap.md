@@ -695,7 +695,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          open-domain bridge from preferred-chart gauge-flow continuity. The same
          open-domain reduction is available at the lower time-difference
          component-data layer, including locally equal finite-cover/readout
-         fields, and at the public closed-Picard tensor wrapper layer, all
+         fields, at the public closed-Picard tensor wrapper layer, and through
+         the variational tangent-map tensor routes (ordinary/within tangent-map
+         agreement, direct/readout fields), all
          without being upgraded to global `HasFDerivAt`
          statements. It also has
         raw-flow transport across
