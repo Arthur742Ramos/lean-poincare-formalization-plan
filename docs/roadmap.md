@@ -886,7 +886,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        tangent-vector slots, paired fixed tangent-vector slots, and the combined
        `(flow, A(t)u, A(t)v)` scalar-readout state as functions of the base
        initial point, with closed/open Picard cylinder space-time continuity and
-       eventual-membership readouts for that scalar-readout state,
+       eventual-membership readouts and direct overlap uniqueness on both
+       `Ioo` and `Icc` for that scalar-readout state,
        with an automatic radius-specialized
        constructor when the base radius is bounded by the product radius, plus
        closed-interval localized variants and proof-level `Nonempty` wrappers

@@ -3393,6 +3393,103 @@ theorem center_flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound
   α.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound β
     (mem_closedBall_self r.2) ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound
 
+/-- Interior overlap uniqueness for the scalar-readout state
+`(flow, A(t)u, A(t)v)`. This is the gluing form used by chart-local scalar
+pullback expressions after full variational-pair uniqueness is known. -/
+theorem flow_tangent_apply_pair_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (u v : V) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t u, α.tangent x t v))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t u, β.tangent x t v))
+      (Ioo tmin tmax) := by
+  have hpair :=
+    α.flow_tangent_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem β hxα hxβ
+      ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound
+  intro t ht
+  have h := hpair ht
+  have hflow : α.flow (x, t) = β.flow (x, t) := congrArg Prod.fst h
+  have htangent : α.tangent x t = β.tangent x t := congrArg Prod.snd h
+  exact Prod.ext hflow
+    (Prod.ext (congrArg (fun A : V →L[ℝ] V => A u) htangent)
+      (congrArg (fun A : V →L[ℝ] V => A v) htangent))
+
+/-- Pointwise interior overlap uniqueness for the scalar-readout state
+`(flow, A(t)u, A(t)v)`. -/
+theorem flow_tangent_apply_pair_eq_of_lipschitzOnWith_opNorm_bound_of_mem_Ioo
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (u v : V) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    (α.flow (x, t), α.tangent x t u, α.tangent x t v) =
+      (β.flow (x, t), β.tangent x t u, β.tangent x t v) :=
+  α.flow_tangent_apply_pair_eqOn_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem β
+    hxα hxβ ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound u v ht
+
+/-- Closed-interval overlap uniqueness for the scalar-readout state
+`(flow, A(t)u, A(t)v)`. -/
+theorem flow_tangent_apply_pair_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (u v : V) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t u, α.tangent x t v))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t u, β.tangent x t v))
+      (Icc tmin tmax) := by
+  have hpair :=
+    α.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem β hxα hxβ
+      ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound
+  intro t ht
+  have h := hpair ht
+  have hflow : α.flow (x, t) = β.flow (x, t) := congrArg Prod.fst h
+  have htangent : α.tangent x t = β.tangent x t := congrArg Prod.snd h
+  exact Prod.ext hflow
+    (Prod.ext (congrArg (fun A : V →L[ℝ] V => A u) htangent)
+      (congrArg (fun A : V →L[ℝ] V => A v) htangent))
+
+/-- Pointwise closed-interval overlap uniqueness for the scalar-readout state
+`(flow, A(t)u, A(t)v)`. -/
+theorem flow_tangent_apply_pair_eq_of_lipschitzOnWith_opNorm_bound_of_mem_Icc
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution f Df t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (u v : V) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    (α.flow (x, t), α.tangent x t u, α.tangent x t v) =
+      (β.flow (x, t), β.tangent x t u, β.tangent x t v) :=
+  α.flow_tangent_apply_pair_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem β
+    hxα hxβ ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound u v ht
+
 end VariationalLocalFlowSolution
 
 namespace IsPicardLindelof

@@ -1064,7 +1064,8 @@ combines the base flow with those two vector slots, giving direct
 Lipschitz/continuity/distance readouts for
 `x ↦ (flow_x(t), A_x(t)u, A_x(t)v)`. The continuous product-flow extraction now
 also preserves closed-cylinder and open-cylinder space-time continuity/eventual
-membership for the same scalar-readout state.
+membership for the same scalar-readout state, and variational overlap uniqueness
+now has direct `Ioo`/`Icc` readouts for that combined state.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction
