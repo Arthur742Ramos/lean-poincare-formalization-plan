@@ -822,6 +822,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
            variational packages, fixed two-vector-slot
            `(t, flow, A(t)u, A(t)v)` readouts, product-derived full
            derivative-domain tuple readouts for scalar pullback domains, and
+           fixed-time Lipschitz/continuity/distance estimates for those
+           derivative-domain tuples,
            direct product-Picard bridges into scalar-readout,
            metric-coordinate-field, and finite-cover/readout-field tensor
            time-derivative routes, including closed-Picard within-filter

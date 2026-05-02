@@ -2287,6 +2287,75 @@ theorem ofProduct_exists_dist_flow_tangent_apply_pair_le_mul
     ofProduct_flow_tangent_apply_pair_exists_lipschitzOnWith_time α hball ht u v
   exact ⟨L', hL'.dist_le_mul x hx y hy⟩
 
+/-- Product Lipschitz dependence also controls the full fixed-time
+derivative-domain tuple `(t, flow(t), A(t)u, A(t)v)` as a function of the base
+initial point. The time coordinate is constant in this estimate. -/
+theorem ofProduct_time_flow_tangent_apply_pair_exists_lipschitzOnWith_time
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) (u v : V) :
+    ∃ L' : ℝ≥0,
+      LipschitzOnWith L'
+        (fun x : V =>
+          (t,
+            (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t),
+            (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t u,
+            (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t v))
+        (closedBall x₀ r) := by
+  obtain ⟨Lstate, hstate⟩ :=
+    ofProduct_flow_tangent_apply_pair_exists_lipschitzOnWith_time α hball ht u v
+  have htime : LipschitzOnWith 0 (fun _x : V => t) (closedBall x₀ r) :=
+    (LipschitzWith.const (α := V) (β := ℝ) t).lipschitzOnWith
+  exact ⟨max 0 Lstate, htime.prodMk hstate⟩
+
+/-- The full fixed-time derivative-domain tuple is continuous in the base
+initial point at each Picard time. -/
+theorem ofProduct_time_flow_tangent_apply_pair_continuousOn_initialBall_time
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) (u v : V) :
+    ContinuousOn
+      (fun x : V =>
+        (t,
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t),
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t u,
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t v))
+      (closedBall x₀ r) := by
+  obtain ⟨_L', hL'⟩ :=
+    ofProduct_time_flow_tangent_apply_pair_exists_lipschitzOnWith_time α hball ht u v
+  exact hL'.continuousOn
+
+/-- Distance estimate for the full fixed-time derivative-domain tuple
+`(t, flow(t), A(t)u, A(t)v)` as the base initial point varies. -/
+theorem ofProduct_exists_dist_time_flow_tangent_apply_pair_le_mul
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) (u v : V)
+    {x y : V} (hx : x ∈ closedBall x₀ r) (hy : y ∈ closedBall x₀ r) :
+    ∃ L' : ℝ≥0,
+      dist
+        (t,
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t),
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t u,
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t v)
+        (t,
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (y, t),
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent y t u,
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent y t v) ≤
+        L' * dist x y := by
+  obtain ⟨L', hL'⟩ :=
+    ofProduct_time_flow_tangent_apply_pair_exists_lipschitzOnWith_time α hball ht u v
+  exact ⟨L', hL'.dist_le_mul x hx y hy⟩
+
 /-- Extract variational local-flow existence from proof-level continuous product
 flow existence without choosing the product flow at call sites. -/
 theorem nonempty_ofProductContinuousLocalFlowSolution

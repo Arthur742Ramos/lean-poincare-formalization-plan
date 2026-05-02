@@ -683,7 +683,8 @@ now packages the matching intrinsic boundary
         `(flow, A(t)u, A(t)v)`, and full derivative-domain tuple
         `(t, flow, A(t)u, A(t)v)` space-time readouts and
         Lipschitz/continuity/distance estimates extracted from product
-        variational dependence, plus overlap uniqueness for that combined
+        variational dependence, now including fixed-time estimates for the
+        full derivative-domain tuple, plus overlap uniqueness for that combined
         scalar-readout state on both `Ioo` and `Icc`, and direct tensor
         time-derivative bridges from continuous product Picard flows to scalar
         readout hypotheses, metric-coordinate field routes, and finite-cover
