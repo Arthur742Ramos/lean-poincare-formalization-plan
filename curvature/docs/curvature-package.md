@@ -147,8 +147,9 @@ including a compactness bridge from nonvanishing determinants to a uniform
 determinant lower bound and compact-domain inverse-entry and schematic RHS
 variants, as well as entrywise closure for matrix products,
 matrix-vector and vector-matrix products, and inverse-matrix vector products on
-both sides under the same determinant lower bound, plus finite vector dot
-products and bilinear contractions through matrices or inverse matrices,
+both sides under the same determinant lower bound, plus whole finite
+vector/matrix and inverse-matrix packages, finite vector dot products, and
+bilinear contractions through matrices or inverse matrices,
 including Christoffel-symbol type inverse-metric contractions and
 principal-part contractions `g^{ab} H_abij`, plus Ricci-coordinate quadratic
 Christoffel contractions,

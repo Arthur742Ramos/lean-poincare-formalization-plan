@@ -366,8 +366,9 @@ packages the canonical stationary local solution attached to
   bounds, with compact nonvanishing determinant data now supplying such lower
   bounds and compact-domain inverse/RHS variants, plus matrix-product,
   matrix-vector/vector-matrix, and inverse-matrix
-  vector-product entries, finite vector dot products, and bilinear contractions
-  through matrices or inverse matrices, including Christoffel-symbol type
+  vector-product entries, whole finite vector/matrix and inverse-matrix
+  packages, finite vector dot products, and bilinear contractions through
+  matrices or inverse matrices, including Christoffel-symbol type
   inverse-metric contractions, principal-part contractions `g^{ab} H_abij`,
   Ricci-coordinate quadratic Christoffel contractions, and a schematic local
   Ricci-DeTurck coordinate RHS combining those terms, from entrywise control.

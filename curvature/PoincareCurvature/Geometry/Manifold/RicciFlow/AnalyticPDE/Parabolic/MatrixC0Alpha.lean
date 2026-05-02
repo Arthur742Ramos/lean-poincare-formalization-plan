@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder
+public import Mathlib.Analysis.Matrix.Normed
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
@@ -17,7 +18,7 @@ so determinant imports do not enlarge the base parabolic Holder module.
 @[expose] public noncomputable section
 
 open Set
-open scoped Topology NNReal BigOperators
+open scoped Topology NNReal BigOperators Matrix.Norms.Elementwise
 
 namespace RicciFlow
 namespace AnalyticPDE
@@ -88,6 +89,20 @@ theorem matrix_det_exists_pos_norm_lower_bound_of_isCompact {n 𝕜 : Type*} [Fi
   exists_pos_norm_lower_bound_of_isCompact_of_continuousOn_ne_zero hK
     ((matrix_det (M := M) hM).continuousOn hα) hdet_ne
 
+/-- Entrywise parabolic `C^{0,α}` control packages a finite vector-valued coefficient family. -/
+theorem vector_of_entries {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {v : ℝ × X → n → A}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z => v z i) s) :
+    ParabolicC0AlphaOn α v s :=
+  ParabolicC0AlphaOn.pi hv
+
+/-- Entrywise parabolic `C^{0,α}` control packages a finite matrix-valued coefficient family. -/
+theorem matrix_of_entries {m n A : Type*} [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {M : ℝ × X → Matrix m n A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) :
+    ParabolicC0AlphaOn α M s :=
+  ParabolicC0AlphaOn.pi fun i => ParabolicC0AlphaOn.pi fun j => hM i j
+
 /-- Each adjugate entry of a finite matrix is parabolic `C^{0,α}` when the matrix entries are. -/
 theorem matrix_adjugate_entry {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
     {M : ℝ × X → Matrix n n A}
@@ -138,6 +153,26 @@ theorem matrix_inv_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n] [
       (K := K) (M := M) hK hα hM hdet_ne with
     ⟨δ, hδpos, hdet⟩
   exact matrix_inv_entry (M := M) hM hδpos hdet i j
+
+/-- A finite inverse-matrix-valued function is parabolic `C^{0,α}` when the matrix entries are and
+the determinant is uniformly bounded away from zero. -/
+theorem matrix_inv {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaOn α (fun z => (M z)⁻¹) s :=
+  matrix_of_entries fun i j => matrix_inv_entry (M := M) hM hδpos hdet i j
+
+/-- Compact-domain inverse-matrix-valued closure from entrywise control and pointwise
+nonvanishing determinant. -/
+theorem matrix_inv_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {K : Set (ℝ × X)} {M : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ParabolicC0AlphaOn α (fun z => (M z)⁻¹) K :=
+  matrix_of_entries fun i j =>
+    matrix_inv_entry_of_isCompact_det_ne_zero hK hα hM hdet_ne i j
 
 /-- Entries of a product of two matrix-valued parabolic `C^{0,α}` functions are
 parabolic `C^{0,α}` when all input entries are. -/

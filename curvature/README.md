@@ -1010,8 +1010,9 @@ control; compact nonvanishing determinant data now supplies the needed uniform
 determinant lower bound, including compact-domain inverse-entry and schematic
 RHS variants. It also proves entrywise closure for matrix products,
 matrix-vector and vector-matrix products, including inverse-matrix vector
-products on both sides under the same determinant lower bound, finite vector
-dot products, and bilinear contractions through matrices or inverse matrices,
+products on both sides under the same determinant lower bound, whole finite
+vector/matrix and inverse-matrix packages, finite vector dot products, and
+bilinear contractions through matrices or inverse matrices,
 including Christoffel-symbol type inverse-metric contractions and principal-part
 contractions `g^{ab} H_abij`, plus Ricci-coordinate quadratic Christoffel
 contractions and a schematic local Ricci-DeTurck coordinate RHS combining
