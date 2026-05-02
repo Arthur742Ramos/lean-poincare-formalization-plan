@@ -94,6 +94,28 @@ theorem time_abs_le_sq_of_le {R : ℝ} (hR : 0 ≤ R) (h : parabolicDistance p q
       rw [Real.sq_sqrt (abs_nonneg _)]
     _ ≤ R ^ 2 := (sq_le_sq₀ (Real.sqrt_nonneg _) hR).2 hsqrt
 
+/-- The parabolic distance satisfies the triangle inequality. -/
+theorem triangle (p q r : ℝ × X) :
+    parabolicDistance p r ≤ parabolicDistance p q + parabolicDistance q r := by
+  change max (Real.sqrt |p.1 - r.1|) (dist p.2 r.2) ≤
+    parabolicDistance p q + parabolicDistance q r
+  have htime_abs : |p.1 - r.1| ≤ |p.1 - q.1| + |q.1 - r.1| := by
+    calc
+      |p.1 - r.1| = |(p.1 - q.1) + (q.1 - r.1)| := by ring_nf
+      _ ≤ |p.1 - q.1| + |q.1 - r.1| := abs_add_le _ _
+  have htime_sqrt :
+      Real.sqrt |p.1 - r.1| ≤ Real.sqrt |p.1 - q.1| + Real.sqrt |q.1 - r.1| := by
+    rw [Real.sqrt_le_left (add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))]
+    nlinarith [htime_abs, Real.sq_sqrt (abs_nonneg (p.1 - q.1)),
+      Real.sq_sqrt (abs_nonneg (q.1 - r.1)),
+      Real.sqrt_nonneg |p.1 - q.1|, Real.sqrt_nonneg |q.1 - r.1|]
+  have htime : Real.sqrt |p.1 - r.1| ≤ parabolicDistance p q + parabolicDistance q r :=
+    htime_sqrt.trans (add_le_add (sqrt_time_le p q) (sqrt_time_le q r))
+  have hspace : dist p.2 r.2 ≤ parabolicDistance p q + parabolicDistance q r :=
+    (dist_triangle p.2 q.2 r.2).trans
+      (add_le_add (space_dist_le p q) (space_dist_le q r))
+  exact max_le htime hspace
+
 /-- Small product-metric distance implies small parabolic distance, after shrinking the product
 radius quadratically in the time direction. -/
 theorem lt_of_prod_dist_lt {R δ : ℝ} (hδ_space : δ ≤ R) (hδ_time : δ ≤ R ^ 2)
