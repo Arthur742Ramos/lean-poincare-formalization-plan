@@ -1682,6 +1682,36 @@ theorem mono_const (h : ParabolicC0AlphaWith B₁ H₁ α u s)
     ParabolicC0AlphaWith B₂ H₂ α u s :=
   ⟨h.bounded.mono_const hBB', h.holder.mono_const hHH'⟩
 
+/-- Local-to-global parabolic `C^{0,α}` control from a parabolic ball cover.  The local bounded
+constant controls the global bounded part, while the Holder constant globalizes through the
+bounded local-to-global Holder estimate. -/
+theorem of_parabolicBall_cover_closedBall {r : ℝ} {K N : Set (ℝ × X)}
+    (hα : 0 < α) (hr : 0 < r)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicBall y r)
+    (hlocal : ∀ y ∈ N, ParabolicC0AlphaWith B H α u (parabolicClosedBall y (2 * r))) :
+    ParabolicC0AlphaWith B (max H (2 * B / r ^ α)) α u K := by
+  have hbounded : ParabolicBoundedWith B u K := by
+    intro p hp
+    rcases mem_iUnion.1 (hcover hp) with ⟨y, hy⟩
+    rcases mem_iUnion.1 hy with ⟨hyN, hpball⟩
+    have hr_le_two : r ≤ 2 * r := by nlinarith [hr]
+    have hpclosed : p ∈ parabolicClosedBall y (2 * r) :=
+      (le_of_lt hpball).trans hr_le_two
+    exact (hlocal y hyN).bounded hpclosed
+  exact ⟨hbounded,
+    ParabolicHolderWith.of_parabolicBall_cover_closedBall (C := H)
+      hbounded hα hr hcover fun y hy => (hlocal y hy).holder⟩
+
+/-- Compact local-to-global parabolic `C^{0,α}` control from uniform local closed-ball estimates. -/
+theorem of_isCompact_of_uniform_local_closedBall {r : ℝ} {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hα : 0 < α) (hr : 0 < r)
+    (hlocal : ∀ y ∈ K, ParabolicC0AlphaWith B H α u (parabolicClosedBall y (2 * r))) :
+    ParabolicC0AlphaWith B (max H (2 * B / r ^ α)) α u K := by
+  rcases parabolicBall.exists_finite_cover_of_isCompact hK hr with
+    ⟨N, hNK, _hNfinite, hcover⟩
+  exact of_parabolicBall_cover_closedBall hα hr hcover
+    (fun y hy => hlocal y (hNK hy))
+
 theorem const (c : E) (hB : ‖c‖ ≤ B) (hH : 0 ≤ H) :
     ParabolicC0AlphaWith B H α (fun _ : ℝ × X => c) s :=
   ⟨ParabolicBoundedWith.const c hB, ParabolicHolderWith.const c hH⟩

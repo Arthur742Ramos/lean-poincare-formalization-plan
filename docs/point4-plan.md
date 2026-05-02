@@ -1223,6 +1223,7 @@ constant-preserving localization of open-domain Hölder and `C^{0,α}` estimates
 to uniform closed parabolic patches around compact subsets, and
 a bounded local-to-global Hölder estimate from parabolic ball covers and
 doubled closed patches, plus its compact uniform-local corollary, and
+matching local-to-global `C^{0,α}` patching theorems, and
 additive/subtractive algebra estimates,
 including the standard bounded-product estimate for normed-ring-valued
 `C^{0,α}` functions and the corresponding bounded scalar-action estimate on
