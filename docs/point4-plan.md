@@ -1068,9 +1068,10 @@ membership for the same scalar-readout state and for the full derivative-domain
 tuple `(t, flow(t), A(t)u, A(t)v)`, and variational overlap uniqueness
 now has direct `Ioo`/`Icc` readouts for that combined state. The tensor
 time-derivative layer can also consume continuous product Picard flows directly
-in the open-domain and explicit-domain scalar-readout routes and in the named
-metric-coordinate field routes, including geometric pushed-vector-slot variants,
-converting the product flow internally to the variational package.
+in the open-domain and explicit-domain scalar-readout routes, in the named
+metric-coordinate field routes, and in the finite-cover/readout-field variants,
+including geometric pushed-vector-slot variants, converting the product flow
+internally to the variational package.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction

@@ -686,8 +686,8 @@ now packages the matching intrinsic boundary
         variational dependence, plus overlap uniqueness for that combined
         scalar-readout state on both `Ioo` and `Icc`, and direct tensor
         time-derivative bridges from continuous product Picard flows to scalar
-        readout hypotheses and metric-coordinate field routes, including
-        geometric pushed-vector-slot variants,
+        readout hypotheses, metric-coordinate field routes, and finite-cover
+        readout-field variants, including geometric pushed-vector-slot variants,
         plus Gronwall uniqueness bridges for packaged and continuous
       space-time model flows; the
       raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual

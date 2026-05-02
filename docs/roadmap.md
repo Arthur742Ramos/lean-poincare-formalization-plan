@@ -822,8 +822,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
            variational packages, fixed two-vector-slot
            `(t, flow, A(t)u, A(t)v)` readouts, product-derived full
            derivative-domain tuple readouts for scalar pullback domains, and
-           direct product-Picard bridges into scalar-readout and
-           metric-coordinate-field tensor time-derivative routes, plus the
+           direct product-Picard bridges into scalar-readout,
+           metric-coordinate-field, and finite-cover/readout-field tensor
+           time-derivative routes, plus the
           autonomous `C¹` integral-curve specialization with
         open-interval continuity and packaged `LocalFlowSolution`,
         `LipschitzLocalFlowSolution`, and `ContinuousLocalFlowSolution`
