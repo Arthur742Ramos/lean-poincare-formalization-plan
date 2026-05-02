@@ -157,6 +157,19 @@ theorem prod_dist_lt_of_lt {R ε : ℝ} (hR_space : R ≤ ε) (hR_time : R ^ 2 �
   rw [Prod.dist_eq]
   exact max_lt htime hspace
 
+/-- A parabolic closed-ball bound gives an ordinary product-metric closed-ball bound once the
+time radius has been squared. -/
+theorem prod_dist_le_of_le {R ε : ℝ} (hR_space : R ≤ ε) (hR_time : R ^ 2 ≤ ε)
+    (h : parabolicDistance p q ≤ R) : dist p q ≤ ε := by
+  have hR : 0 ≤ R := (nonneg p q).trans h
+  have htime_abs : |p.1 - q.1| ≤ R ^ 2 := time_abs_le_sq_of_le hR h
+  have htime : dist p.1 q.1 ≤ ε := by
+    simpa [Real.dist_eq] using le_trans htime_abs hR_time
+  have hspace : dist p.2 q.2 ≤ ε :=
+    le_trans (space_dist_le_of_le h) hR_space
+  rw [Prod.dist_eq]
+  exact max_le htime hspace
+
 end parabolicDistance
 
 /-- Open parabolic ball in time-space. -/
@@ -283,6 +296,12 @@ theorem subset_closedCylinder (hR : 0 ≤ R) :
     parabolicClosedBall p R ⊆ parabolicClosedCylinder p (R ^ 2) R := by
   intro q hq
   exact ⟨time_abs_le_sq_of_mem hR hq, space_dist_le_of_mem hq⟩
+
+theorem subset_metric_closedBall {ε : ℝ} (hR_space : R ≤ ε) (hR_time : R ^ 2 ≤ ε) :
+    parabolicClosedBall p R ⊆ Metric.closedBall p ε := by
+  intro q hq
+  rw [Metric.mem_closedBall, dist_comm]
+  exact parabolicDistance.prod_dist_le_of_le hR_space hR_time hq
 
 theorem isClosed (p : ℝ × X) (R : ℝ) : IsClosed (parabolicClosedBall p R) := by
   simpa [parabolicClosedBall] using

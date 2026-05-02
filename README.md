@@ -326,9 +326,9 @@ packages the canonical stationary local solution attached to
   scalar-action estimate for normed-space-valued functions, along with closure
   under taking norms, Lipschitz composition on the controlled range, and
   exponent lowering on unit parabolic-diameter domains, backed by closed-ball
-  diameter control, plus a basepoint-to-sup bound on closed parabolic balls.
-  These primitives do not yet supply the Schauder estimates or the Ricci-DeTurck
-  Banach chart. The
+  diameter control, product closed-ball compatibility, plus a basepoint-to-sup
+  bound on closed parabolic balls. These primitives do not yet supply the
+  Schauder estimates or the Ricci-DeTurck Banach chart. The
   curvature,
   time-dependent
   geometry, intrinsic Ricci-flow, and DeTurck layers now prove the geometric

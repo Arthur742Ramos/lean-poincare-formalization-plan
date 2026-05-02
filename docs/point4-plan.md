@@ -1218,8 +1218,10 @@ Schauder estimates or Ricci-DeTurck Banach chart; it also already includes the
 basic Lipschitz-composition estimate needed to pass local nonlinear coordinate
 maps through Hölder control and exponent-lowering on unit parabolic-diameter
 domains, with closed-ball diameter estimates supplying that hypothesis after
-shrinking. A basepoint-to-sup estimate now also turns Hölder control on a
-closed parabolic ball into explicit bounded control from one value. The abstract
+shrinking. Closed parabolic balls now also map into ordinary product closed
+balls under the quadratic time-radius control, matching compactness-style local
+arguments. A basepoint-to-sup estimate now turns Hölder control on a closed
+parabolic ball into explicit bounded control from one value. The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and
