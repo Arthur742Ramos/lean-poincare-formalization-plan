@@ -187,6 +187,88 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.hasDerivAt_extChartAt_
       (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) t :=
   (hchart t ht x).2
 
+/-- Build within-time-set intrinsic derivative data from derivative data for a model vector field,
+once that vector field is identified with the intrinsic DeTurck gauge field along the flow. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_vectorField_eq
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt[s] (fun τ : ℝ ↦ (Φ τ) x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t ((Φ t) x))))
+    (hY : ∀ t ∈ s, ∀ x : M,
+      Y t ((Φ t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  simpa [hY t ht x] using hderiv t ht x
+
+/-- Build within-time-set preferred-chart intrinsic ODE data from preferred-chart derivative data
+for a model vector field identified with the intrinsic DeTurck gauge field along the flow. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.of_vectorField_eq
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I ((Φ t) x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((Φ t) x)) ((Φ τ) x))
+        (Y t ((Φ t) x)) s t)
+    (hY : ∀ t ∈ s, ∀ x : M,
+      Y t ((Φ t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  exact ⟨hsource t ht x, by simpa [hY t ht x] using hderiv t ht x⟩
+
+/-- Build ordinary intrinsic derivative data from derivative data for a model vector field, once
+that vector field is identified with the intrinsic DeTurck gauge field along the flow. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_vectorField_eq
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (Φ τ) x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t ((Φ t) x))))
+    (hY : ∀ t ∈ s, ∀ x : M,
+      Y t ((Φ t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  simpa [hY t ht x] using hderiv t ht x
+
+/-- Build ordinary preferred-chart intrinsic ODE data from preferred-chart derivative data for a
+model vector field identified with the intrinsic DeTurck gauge field along the flow. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_vectorField_eq
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I ((Φ t) x)).source ∈ 𝓝 t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((Φ t) x)) ((Φ τ) x))
+        (Y t ((Φ t) x)) t)
+    (hY : ∀ t ∈ s, ∀ x : M,
+      Y t ((Φ t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  exact ⟨hsource t ht x, by simpa [hY t ht x] using hderiv t ht x⟩
+
 /-- Restrict ordinary preferred-chart ODE data to a smaller time set. -/
 theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.mono
     {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}

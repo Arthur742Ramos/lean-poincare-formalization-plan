@@ -800,7 +800,12 @@ eventual-equality transfer lemmas:
 local model-coordinate curves with the right derivative can be used after they
 are identified eventually with the actual centered preferred-chart coordinate
 readout, with the within-set version using the closed-interval within-filter.
-Those bridges now have direct derivative-data readouts back to
+The primitive and chart derivative views now also have model-vector-field
+RHS-identification adapters, in both within-set and ordinary-at-time forms:
+once the model vector field agrees with the intrinsic DeTurck gauge field along
+the flow, its manifold or preferred-chart derivative package is promoted to the
+intrinsic derivative package directly. Those bridges now have direct
+derivative-data readouts back to
 `ChosenIntrinsicDeTurckGaugeFlowDerivative` and
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
 the existing scalar gauge-pullback route after supplying the chart-ODE package.

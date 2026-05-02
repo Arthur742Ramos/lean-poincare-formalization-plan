@@ -763,12 +763,16 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         `ofDerivativeAtFamily` raw-existence bridge for named Picard-interior
          derivative packages, named source-neighborhood preferred-chart ODE
          packages for both within-time-set and ordinary-at-time chart data with
-         fixed-IVP and theorem-family `ofChartDerivative` /
-         `ofChartDerivativeAt` bridges plus derivative-data readouts back to the
-         existing endpoint derivative-family view, and eventual-equality
-          transfers from local model-coordinate curves into both the within-set
-          and ordinary chart-ODE packages, neighborhood-time upgrades from
-          within-time-set to ordinary-at-time primitive derivative and chart-ODE
+          fixed-IVP and theorem-family `ofChartDerivative` /
+          `ofChartDerivativeAt` bridges plus derivative-data readouts back to the
+          existing endpoint derivative-family view, and eventual-equality
+           transfers from local model-coordinate curves into both the within-set
+           and ordinary chart-ODE packages, model-vector-field
+           RHS-identification adapters that promote manifold or preferred-chart
+           derivative packages to the intrinsic derivative views once the model
+           vector field agrees with the intrinsic DeTurck gauge field along the
+           flow, neighborhood-time upgrades from
+           within-time-set to ordinary-at-time primitive derivative and chart-ODE
           data, monotonicity lemmas for restricting within-time-set and
         ordinary-at-time intrinsic derivative views, including chart-ODE views,
         to smaller time sets, and direct closed-Picard `Icc` to open-interior

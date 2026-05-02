@@ -215,11 +215,13 @@ now packages the matching intrinsic boundary
     `GaugeReduction.Diffeomorph3FlowExistence` layer names the raw `C^3`
     diffeomorphism-flow existence witness expected from the manifold ODE theorem
     and converts it into the fixed-IVP and theorem-family geometric gauge-flow
-    bundles, with reverse adapters from existing geometric gauge-flow bundles
-    back to raw existence witnesses. The primitive derivative-view packages now
-    also round-trip with the geometric `SatisfiesGaugeFlowOn` equation for both
-    fixed-IVP and theorem-family data, and anchored primitive derivative data
-    now constructs the corresponding geometric `C³` gauge-flow bundles directly.
+     bundles, with reverse adapters from existing geometric gauge-flow bundles
+     back to raw existence witnesses. The primitive derivative-view packages now
+     also round-trip with the geometric `SatisfiesGaugeFlowOn` equation for both
+     fixed-IVP and theorem-family data, promote model-vector-field derivative
+     data to the intrinsic DeTurck derivative views once the model RHS is
+     identified along the flow, and anchored primitive derivative data now
+     constructs the corresponding geometric `C³` gauge-flow bundles directly.
     It also now has fixed-IVP and theorem-family
     constructors from pointwise `HasMFDerivAt[s]` or unrestricted `HasMFDerivAt`
     integral-curve data, named-derivative-family adapters, plus raw-flow time-set
