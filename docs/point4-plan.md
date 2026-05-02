@@ -769,12 +769,13 @@ Those bridges now have direct derivative-data readouts back to
 `ChosenIntrinsicDeTurckGaugeFlowDerivative` and
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
 the existing scalar gauge-pullback route after supplying the chart-ODE package.
-The same derivative-view layer now upgrades
-within-time-set derivative data back to ordinary-at-time data whenever the time
-set is a neighborhood at each of its times, with fixed-IVP and theorem-family
-wrappers. Both within-time-set and ordinary-at-time intrinsic derivative views
-now also restrict monotonically to smaller time sets, matching the localized
-Picard intervals produced by chart ODE arguments. The
+The same derivative-view layer now upgrades both primitive derivative data and
+preferred-chart ODE data from within-time-set form back to ordinary-at-time form
+whenever the time set is a neighborhood at each of its times, with fixed-IVP and
+theorem-family wrappers. Both within-time-set and ordinary-at-time intrinsic
+derivative views, including the chart-ODE view, now also restrict monotonically
+to smaller time sets, matching the localized Picard intervals produced by chart
+ODE arguments. The
 same named-derivative symmetry is now present
 for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,

@@ -581,9 +581,11 @@ now packages the matching intrinsic boundary
         `ofChartDerivative` / `ofChartDerivativeAt` bridges with
         derivative-data readouts and within-filter/ordinary eventual-equality
         transfers from local model-coordinate curves,
-        neighborhood-time upgrades from
-        within-time-set to ordinary-at-time derivative data, and matching
-        fixed-IVP `ofDerivative` / `ofDerivativeAt` bridges,
+        neighborhood-time upgrades from within-time-set to ordinary-at-time
+        primitive derivative and chart-ODE data, monotone restriction of
+        within-time-set and ordinary-at-time derivative views including
+        chart-ODE views, and matching fixed-IVP `ofDerivative` /
+        `ofDerivativeAt` bridges,
         centered preferred-chart derivative simplifications that expose the
         actual gauge velocity directly, vector-field agreement transport for
         raw flows, geometric-to-raw adapters, and direct

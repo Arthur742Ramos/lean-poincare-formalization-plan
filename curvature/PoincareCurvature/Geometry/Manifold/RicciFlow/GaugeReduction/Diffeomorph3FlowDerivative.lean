@@ -109,6 +109,23 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.of_eventuallyEq
   exact ⟨hsource t ht x,
     (hcoord t ht x).congr_of_eventuallyEq (heq t ht x) (heq_t t ht x)⟩
 
+/-- Restrict within-time-set preferred-chart ODE data to a smaller time set. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background t)
+    (hst : s ⊆ t) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background s := by
+  intro τ hτ x
+  have hsource : (fun σ : ℝ ↦ (Φ σ) x) ⁻¹'
+      (extChartAt I ((Φ τ) x)).source ∈ 𝓝[s] τ :=
+    (nhdsWithin_mono τ hst) (hchart τ (hst hτ) x).1
+  exact ⟨hsource, (hchart τ (hst hτ) x).2.mono hst⟩
+
 /-- Ordinary-at-time derivative form of the intrinsic DeTurck gauge-flow equation
 for a `C^3` diffeomorphism family, restricted to times in `s`.
 
@@ -182,6 +199,24 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.mono
       (I := I) (M := M) Φ g background s := by
   intro τ hτ x
   exact hchart τ (hst hτ) x
+
+/-- Within-time-set preferred-chart ODE data gives ordinary preferred-chart ODE
+data whenever the time set is a neighborhood of each of its times. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_chartDerivativeOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background s)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  have hsource : (fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+      (extChartAt I ((Φ t) x)).source ∈ 𝓝 t := by
+    simpa [nhdsWithin_eq_nhds.2 (hs ht)] using (hchart t ht x).1
+  exact ⟨hsource, (hchart t ht x).2.hasDerivAt (hs ht)⟩
 
 /-- Build ordinary preferred-chart ODE data from local coordinate curves that
 are eventually equal to the actual centered preferred-chart coordinate curves.
@@ -356,6 +391,26 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_derivative
   exact Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_derivativeOn
     (I := I) (M := M) (hderiv sol) (htime sol)
 
+/-- Fixed-IVP within-time-set preferred-chart ODE data gives ordinary
+preferred-chart ODE data whenever each chosen solution time set is a
+neighborhood at its times. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_chartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivative
+      (I := I) (M := M) ivp maps3)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAt
+      (I := I) (M := M) ivp maps3 := by
+  intro sol
+  exact Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_chartDerivativeOn
+    (I := I) (M := M) (hchart sol) (htime sol)
+
 /-- A `C^3` diffeomorphism family satisfying the DeTurck gauge-flow equation
 also provides the primitive pointwise derivative data expected by the
 derivative-level gauge-reduction APIs. -/
@@ -496,6 +551,27 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_derivativeFamily
   intro ivp sol
   exact Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_derivativeOn
     (I := I) (M := M) (hderiv ivp sol) (htime ivp sol)
+
+/-- Family-level within-time-set preferred-chart ODE data gives ordinary
+preferred-chart ODE data whenever each chosen solution time set is a
+neighborhood at its times. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily_of_chartDerivativeFamily
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily
+      (I := I) (M := M) maps3)
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp sol
+  exact Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_chartDerivativeOn
+    (I := I) (M := M) (hchart ivp sol) (htime ivp sol)
 
 /-- Family-level derivative data extracted from geometric `C^3` gauge-flow
 solutions for every chosen DeTurck solution. -/

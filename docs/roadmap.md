@@ -733,10 +733,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          fixed-IVP and theorem-family `ofChartDerivative` /
          `ofChartDerivativeAt` bridges plus derivative-data readouts back to the
          existing endpoint derivative-family view, and eventual-equality
-         transfers from local model-coordinate curves into both the within-set
-         and ordinary chart-ODE packages, neighborhood-time upgrades from within-time-set to
-         ordinary-at-time derivative data, monotonicity lemmas for restricting within-time-set
-       and ordinary-at-time intrinsic derivative views to smaller time sets, with matching fixed-IVP `ofDerivative` and
+          transfers from local model-coordinate curves into both the within-set
+          and ordinary chart-ODE packages, neighborhood-time upgrades from
+          within-time-set to ordinary-at-time primitive derivative and chart-ODE
+          data, monotonicity lemmas for restricting within-time-set and
+        ordinary-at-time intrinsic derivative views, including chart-ODE views, to smaller time sets, with matching fixed-IVP `ofDerivative` and
        `ofDerivativeAt` bridges. The Banach-model ODE component of
      the positive-dimensional raw-flow construction is now also proof-bearing:
      `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent
