@@ -7512,6 +7512,136 @@ theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivW
     hleft, hright]
   exact hvalue
 
+/-- Fully localized product-domain route from variational local-flow data.
+
+This variant transports the product-domain convergence hypothesis from the
+model Picard graph to the raw gauge coordinate graph using the closed-interval
+base-flow identification. The scalar identity is stated in actual pushed-forward
+tangent vectors and uses the model ODE velocity; the theorem rewrites that
+velocity to the raw gauge vector field before applying the domain-restricted
+gauge-pullback route. -/
+theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivWithinAtDomain_variationalLocalFlowWithin_geometricValue_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hlt : tmin < tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+          𝓝[Icc tmin tmax] t] (fun τ : ℝ ↦ α.flow (xE, τ)) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[
+              𝓝[Icc tmin tmax] t] (fun τ : ℝ ↦ α.tangent xE τ) ∧
+        ∃ (domain : Set (ℝ × E))
+          (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)),
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+              𝓝 (t, α.flow (xE, t))]
+            Bfield ∧
+          HasFDerivWithinAt Bfield Bfield' domain (t, α.flow (xE, t)) ∧
+          Filter.Tendsto (fun τ : ℝ ↦ (τ, α.flow (xE, τ)))
+            (𝓝[Icc tmin tmax] t) (𝓝[domain] (t, α.flow (xE, t))) ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)) +
+              (g t).inner ((G.maps3 t) x)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  ((Df t (α.flow (xE, t)))
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                      ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))))
+                ((G.maps3 t).pushforwardTangent x v) +
+              (g t).inner ((G.maps3 t) x)
+                ((G.maps3 t).pushforwardTangent x u)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  ((Df t (α.flow (xE, t)))
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                      ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) := by
+  refine
+    G.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivWithinAtDomain_variationalTangentMapWithin_geometricValue_self
+      α ?_
+  intro t ht x u v
+  obtain ⟨xE, hxE, hbase, hA_eq, domain, Bfield, Bfield', hEq, hBfield,
+    hdomain, hvalue⟩ := hdata ht x u v
+  have hbase_t :
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x) = α.flow (xE, t) :=
+    show t ∈ {τ : ℝ |
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x) = α.flow (xE, τ)} from
+      mem_of_mem_nhdsWithin ht hbase
+  have hbase_t' :
+      I ((chartAt H ((G.maps3 t) x)) ((G.maps3 t) x)) = α.flow (xE, t) := by
+    simpa [extChartAt] using hbase_t
+  have hdomain_raw :
+      Filter.Tendsto
+        (fun τ : ℝ ↦ (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+        (𝓝[Icc tmin tmax] t)
+        (𝓝[domain] (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) := by
+    have hgraph :
+        (fun τ : ℝ ↦ (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))) =ᶠ[
+          𝓝[Icc tmin tmax] t] (fun τ : ℝ ↦ (τ, α.flow (xE, τ))) := by
+      filter_upwards [hbase] with τ hτ
+      exact Prod.ext rfl (by simpa [extChartAt] using hτ)
+    have hraw :=
+      hdomain.congr' hgraph.symm
+    simpa [extChartAt, hbase_t'] using hraw
+  have hvelocity :
+      f t (α.flow (xE, t)) = X t ((G.maps3 t) x) := by
+    have hraw :
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))) (Icc tmin tmax) t :=
+      G.hasDerivWithinAt_extChartAt_eval ht x
+    have hrawAsModel :
+        HasDerivWithinAt (fun τ : ℝ ↦ α.flow (xE, τ))
+          (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x))) (Icc tmin tmax) t :=
+      hraw.congr_of_eventuallyEq hbase.symm hbase_t.symm
+    have hmodel :
+        HasDerivWithinAt (fun τ : ℝ ↦ α.flow (xE, τ))
+          (f t (α.flow (xE, t))) (Icc tmin tmax) t :=
+      α.hasDerivWithinAt xE hxE t ht
+    have hunique : UniqueDiffWithinAt ℝ (Icc tmin tmax) t :=
+      (uniqueDiffOn_Icc hlt).uniqueDiffWithinAt ht
+    have hvel :
+        f t (α.flow (xE, t)) =
+          tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x)) := by
+      calc
+        f t (α.flow (xE, t)) =
+            derivWithin (fun τ : ℝ ↦ α.flow (xE, τ)) (Icc tmin tmax) t :=
+          (hmodel.derivWithin hunique).symm
+        _ = tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+            ((G.maps3 t) x) (X t ((G.maps3 t) x)) :=
+          hrawAsModel.derivWithin hunique
+    have htc :
+        tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+            (X t ((G.maps3 t) x)) =
+          X t ((G.maps3 t) x) :=
+      tangentCoordChange_self (I := I)
+        (x := (G.maps3 t) x) (z := (G.maps3 t) x)
+        (v := X t ((G.maps3 t) x)) (mem_extChartAt_source ((G.maps3 t) x))
+    exact hvel.trans htc
+  refine ⟨xE, hxE, domain, Bfield, Bfield', ?_, ?_, hdomain_raw, hA_eq, ?_⟩
+  · simpa [extChartAt, hbase_t'] using hEq
+  · simpa [extChartAt, hbase_t'] using hBfield
+  · simpa [hvelocity] using hvalue
+
 /-- Readout-field direct-velocity version of
 `hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivAtWithin`.
 -/

@@ -242,6 +242,11 @@ product-domain entry point: a locally equal two-variable bilinear readout can
 supply the `HasFDerivWithinAt` metric derivative, including for the variational
 ODE routes, and the fully localized route now has a geometric-slot form where
 the scalar identity is stated in actual pushed-forward tangent vectors.
+The fully localized product-domain route now also has a variational-local-flow
+form that assumes product-domain convergence only for the model Picard graph;
+closed-interval base-flow equality transports that convergence to the raw
+coordinate graph and rewrites the model ODE velocity to the raw gauge vector
+field before applying the domain-restricted gauge-pullback theorem.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow

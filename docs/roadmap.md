@@ -683,11 +683,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         domains can feed endpoint gauge-pullback calculus and the closed-Picard
         `Ioo` tensor time-regularity route, now with variational tangent-map
         variants that derive the tangent-coordinate derivative from the model
-        variational ODE and finite-cover/readout variants that supply the
-        product-domain `HasFDerivWithinAt` metric derivative by local equality,
-        including a fully localized geometric-slot form in actual pushed-forward
-        tangent vectors, without being upgraded to global `HasFDerivAt`
-        statements. It also has
+         variational ODE and finite-cover/readout variants that supply the
+         product-domain `HasFDerivWithinAt` metric derivative by local equality,
+         including a fully localized geometric-slot form in actual pushed-forward
+         tangent vectors and a variational-local-flow form that transports
+         product-domain convergence from the model Picard graph to the raw
+         coordinate graph by closed-interval base-flow equality, without being
+         upgraded to global `HasFDerivAt`
+         statements. It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and

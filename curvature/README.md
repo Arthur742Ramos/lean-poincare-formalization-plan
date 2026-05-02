@@ -378,11 +378,13 @@ now packages the matching intrinsic boundary
         frozen spatial term from such domain-restricted data before the
         closed-Picard tensor time-regularity route consumes it directly and
         variational tangent-map variants derive the tangent-coordinate
-        derivative from the model variational ODE, with finite-cover/readout
-        variants supplying the product-domain metric derivative by local
-        equality and a fully localized geometric-slot form in actual
-        pushed-forward tangent vectors, the
-        model-coordinate time-difference route also accepting any locally equal
+         derivative from the model variational ODE, with finite-cover/readout
+         variants supplying the product-domain metric derivative by local
+         equality and a fully localized geometric-slot form in actual
+         pushed-forward tangent vectors, plus a variational-local-flow form that
+         transports product-domain convergence from the model Picard graph to the
+         raw coordinate graph using closed-interval base-flow equality, the
+         model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the
         closed-Picard model-velocity time-difference route now deriving the
