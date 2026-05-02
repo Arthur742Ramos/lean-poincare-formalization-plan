@@ -541,6 +541,72 @@ theorem SmoothSelfDiffeomorph3Family.satisfiesGaugeFlowOn_intrinsic_iff_derivati
       (s := s)
       (fun t ht x ↦ hderiv t ht x)
 
+/-- Fixed-IVP derivative data extracted from geometric `C^3` gauge-flow
+solutions for every chosen DeTurck solution. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivative_of_satisfiesGaugeFlowOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (hflow : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SatisfiesGaugeFlowOn (I := I) (M := M)
+        (maps3 sol).toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background)
+        sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivative (I := I) (M := M) ivp maps3 := by
+  intro sol t ht x
+  exact (maps3 sol).hasMFDerivWithinAt_of_satisfiesGaugeFlowOn
+    (I := I) (M := M) (hflow sol) ht x
+
+/-- Fixed-IVP primitive derivative data recovers the geometric
+`SatisfiesGaugeFlowOn` statement for every chosen DeTurck solution. -/
+theorem satisfiesGaugeFlowOn_of_chosenIntrinsicDeTurckGaugeFlowDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivative
+      (I := I) (M := M) ivp maps3)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    SatisfiesGaugeFlowOn (I := I) (M := M)
+      (maps3 sol).toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  exact ((maps3 sol).satisfiesGaugeFlowOn_intrinsic_iff_derivativeOn
+    (I := I) (M := M)
+    (g := sol.1.toIntrinsicDeTurckSolution.metric)
+    (background := sol.1.toIntrinsicDeTurckSolution.background)
+    (s := sol.1.toIntrinsicDeTurckSolution.timeSet)).2 (hderiv sol)
+
+/-- Fixed-IVP primitive derivative data is exactly the geometric intrinsic
+DeTurck gauge-flow equation for every chosen DeTurck solution. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivative_iff_satisfiesGaugeFlowOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivative (I := I) (M := M) ivp maps3 ↔
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SatisfiesGaugeFlowOn (I := I) (M := M)
+          (maps3 sol).toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily
+          (intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background)
+          sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  constructor
+  · intro hderiv sol
+    exact satisfiesGaugeFlowOn_of_chosenIntrinsicDeTurckGaugeFlowDerivative
+      (I := I) (M := M) hderiv sol
+  · exact chosenIntrinsicDeTurckGaugeFlowDerivative_of_satisfiesGaugeFlowOn
+      (I := I) (M := M) maps3
+
 /-- Family-level primitive derivative data for the intrinsic DeTurck gauges of all
 chosen DeTurck solutions. -/
 def ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
@@ -740,6 +806,52 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_of_satisfiesGaugeFlowOn
   intro ivp sol t ht x
   exact (maps3 ivp sol).hasMFDerivWithinAt_of_satisfiesGaugeFlowOn
     (I := I) (M := M) (hflow ivp sol) ht x
+
+/-- Theorem-family primitive derivative data recovers the geometric
+`SatisfiesGaugeFlowOn` statement for every chosen DeTurck solution. -/
+theorem satisfiesGaugeFlowOnFamily_of_chosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+      (I := I) (M := M) maps3)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    SatisfiesGaugeFlowOn (I := I) (M := M)
+      (maps3 ivp sol).toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  exact satisfiesGaugeFlowOn_of_chosenIntrinsicDeTurckGaugeFlowDerivative
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3 ivp)
+    (fun sol ↦ hderiv ivp sol) sol
+
+/-- Theorem-family primitive derivative data is exactly the geometric intrinsic
+DeTurck gauge-flow equation for every chosen DeTurck solution. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_iff_satisfiesGaugeFlowOn
+    (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily (I := I) (M := M) maps3 ↔
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+            (E := E) (H := H) (I := I) (M := M) ivp,
+          SatisfiesGaugeFlowOn (I := I) (M := M)
+            (maps3 ivp sol).toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily
+            (intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background)
+            sol.1.toIntrinsicDeTurckSolution.timeSet := by
+  constructor
+  · intro hderiv ivp sol
+    exact satisfiesGaugeFlowOnFamily_of_chosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+      (I := I) (M := M) hderiv ivp sol
+  · exact chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_of_satisfiesGaugeFlowOn
+      (I := I) (M := M) maps3
 
 /-- A reusable bundle of geometric `C^3` intrinsic DeTurck gauge flows for all
 chosen DeTurck local solutions of a fixed initial-value problem. -/

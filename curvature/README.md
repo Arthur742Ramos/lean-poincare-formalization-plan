@@ -216,7 +216,9 @@ now packages the matching intrinsic boundary
     diffeomorphism-flow existence witness expected from the manifold ODE theorem
     and converts it into the fixed-IVP and theorem-family geometric gauge-flow
     bundles, with reverse adapters from existing geometric gauge-flow bundles
-    back to raw existence witnesses. It also now has fixed-IVP and theorem-family
+    back to raw existence witnesses. The primitive derivative-view packages now
+    also round-trip with the geometric `SatisfiesGaugeFlowOn` equation for both
+    fixed-IVP and theorem-family data. It also now has fixed-IVP and theorem-family
     constructors from pointwise `HasMFDerivAt[s]` or unrestricted `HasMFDerivAt`
     integral-curve data, named-derivative-family adapters, plus raw-flow time-set
      restriction with readout simp lemmas and direct derivative/local-at-time

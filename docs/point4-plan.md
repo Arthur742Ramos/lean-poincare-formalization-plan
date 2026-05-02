@@ -769,6 +769,10 @@ Those bridges now have direct derivative-data readouts back to
 `ChosenIntrinsicDeTurckGaugeFlowDerivative` and
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
 the existing scalar gauge-pullback route after supplying the chart-ODE package.
+The primitive derivative views now also round-trip with the geometric
+`SatisfiesGaugeFlowOn` equation, both for fixed-IVP packages and theorem
+families, so either formulation can be recovered without rebuilding the
+pointwise ODE proof.
 The same derivative-view layer now upgrades both primitive derivative data and
 preferred-chart ODE data from within-time-set form back to ordinary-at-time form
 whenever the time set is a neighborhood at each of its times, with fixed-IVP and
