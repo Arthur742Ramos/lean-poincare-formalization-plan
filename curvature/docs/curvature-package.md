@@ -143,12 +143,13 @@ The separate `RicciFlow/AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves
 parabolic `C^{0,α}` closure for finite matrix determinants, adjugate entries,
 and inverse entries under a determinant lower bound from entrywise control,
 including a compactness bridge from nonvanishing determinants to a uniform
-determinant lower bound, as well as entrywise closure for matrix products,
+determinant lower bound and compact-domain inverse-entry and schematic RHS
+variants, as well as entrywise closure for matrix products,
 matrix-vector and vector-matrix products, and inverse-matrix vector products on
 both sides under the same determinant lower bound, plus finite vector dot
-products and bilinear
-contractions through matrices or inverse matrices, including Christoffel-symbol
-type inverse-metric contractions and principal-part contractions
-`g^{ab} H_abij`, plus Ricci-coordinate quadratic Christoffel contractions,
+products and bilinear contractions through matrices or inverse matrices,
+including Christoffel-symbol type inverse-metric contractions and
+principal-part contractions `g^{ab} H_abij`, plus Ricci-coordinate quadratic
+Christoffel contractions,
 and a schematic local Ricci-DeTurck coordinate RHS combining those terms, using
 the finite-product, integer-scalar, reciprocal, and division closure layer.

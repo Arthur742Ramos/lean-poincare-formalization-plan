@@ -126,6 +126,19 @@ theorem matrix_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedFie
   rw [Matrix.inv_def, Ring.inverse_eq_inv]
   rfl
 
+/-- On a compact time-space set, inverse-matrix entries preserve parabolic `C^{0,α}` control from
+entrywise control and pointwise nonvanishing determinant. -/
+theorem matrix_inv_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {K : Set (ℝ × X)} {M : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) (i j : n) :
+    ParabolicC0AlphaOn α (fun z => (M z)⁻¹ i j) K := by
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  exact matrix_inv_entry (M := M) hM hδpos hdet i j
+
 /-- Entries of a product of two matrix-valued parabolic `C^{0,α}` functions are
 parabolic `C^{0,α}` when all input entries are. -/
 theorem matrix_mul_entry {l m n A : Type*} [Fintype m] [NormedRing A]
@@ -375,6 +388,31 @@ theorem ricciDeTurck_schematic_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n
             (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)) s :=
     christoffel_quadratic_ricci_entry hΓ i j
   simpa [Γ] using hprincipal.add hquadratic
+
+/-- Compact-domain version of `ricciDeTurck_schematic_entry`: pointwise nonvanishing of the
+metric determinant supplies the determinant lower bound. -/
+theorem ricciDeTurck_schematic_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)} {M : ℝ × X → Matrix n n 𝕜}
+    {D : ℝ × X → n → n → n → 𝕜} {H : ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) K)
+    (hD : ∀ a b c, ParabolicC0AlphaOn α (fun z => D z a b c) K)
+    (hH : ∀ a b i j, ParabolicC0AlphaOn α (fun z => H z a b i j) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) (i j : n) :
+    ParabolicC0AlphaOn α
+      (fun z =>
+        let Γ : n → n → n → 𝕜 := fun a b c =>
+          (2 : 𝕜)⁻¹ *
+            ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+              (D z b c l + D z c b l - D z l b c)
+        (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+          ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) K := by
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  exact ricciDeTurck_schematic_entry (M := M) (D := D) (H := H)
+    hM hD hH hδpos hdet i j
 
 end ParabolicC0AlphaOn
 end AnalyticPDE

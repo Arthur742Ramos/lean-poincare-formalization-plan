@@ -1261,12 +1261,12 @@ closed-ball/cylinder corollaries. The new
 closure, adjugate-entry closure, and inverse-entry closure under a determinant
 lower bound for finite matrix-valued parabolic `C^{0,α}` functions from
 entrywise control, including a compactness bridge from nonvanishing determinants
-to uniform determinant lower bounds, plus entrywise closure for matrix products,
+to uniform determinant lower bounds and compact-domain inverse-entry and
+schematic RHS variants, plus entrywise closure for matrix products,
 matrix-vector and vector-matrix products, and inverse-matrix vector products on
 both sides under the same determinant lower bound, plus finite vector dot
-products and
-bilinear contractions through matrices or inverse matrices, including
-Christoffel-symbol type inverse-metric contractions and principal-part
+products and bilinear contractions through matrices or inverse matrices,
+including Christoffel-symbol type inverse-metric contractions and principal-part
 contractions `g^{ab} H_abij`, plus Ricci-coordinate quadratic Christoffel
 contractions and a schematic local Ricci-DeTurck coordinate RHS combining
 those terms, using finite-product, integer-scalar, reciprocal, and division
