@@ -1000,11 +1000,22 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     ‖c • u p‖ = ‖c‖ * ‖u p‖ := norm_smul c (u p)
     _ ≤ ‖c‖ * B := mul_le_mul_of_nonneg_left (hu hp) (norm_nonneg c)
 
+theorem image_subset_closedBall_zero (hu : ParabolicBoundedWith B u s) :
+    u '' s ⊆ Metric.closedBall (0 : E) B := by
+  rintro y ⟨p, hp, rfl⟩
+  simpa [Metric.mem_closedBall, dist_eq_norm] using hu hp
+
 theorem comp_of_range_bound {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ}
     {φ : E → F} (hφ : ∀ y ∈ u '' s, ‖φ y‖ ≤ Bφ) :
     ParabolicBoundedWith Bφ (fun z => φ (u z)) s := by
   intro p hp
   exact hφ (u p) ⟨p, hp, rfl⟩
+
+theorem comp_of_closedBall_bound {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ}
+    {φ : E → F} (hu : ParabolicBoundedWith B u s)
+    (hφ : ∀ y ∈ Metric.closedBall (0 : E) B, ‖φ y‖ ≤ Bφ) :
+    ParabolicBoundedWith Bφ (fun z => φ (u z)) s :=
+  comp_of_range_bound fun y hy => hφ y (hu.image_subset_closedBall_zero hy)
 
 end ParabolicBoundedWith
 
@@ -1121,6 +1132,16 @@ theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ} {K :
     (hφL : LipschitzOnWith K φ (u '' s)) :
     ParabolicC0AlphaWith Bφ ((K : ℝ) * H) α (fun z => φ (u z)) s :=
   ⟨ParabolicBoundedWith.comp_of_range_bound hφB, hu.holder.comp_lipschitzOnWith hφL⟩
+
+theorem comp_lipschitzOnWith_of_closedBall {F : Type*} [NormedAddCommGroup F]
+    {Bφ : ℝ} {K : ℝ≥0} {φ : E → F}
+    (hu : ParabolicC0AlphaWith B H α u s)
+    (hφB : ∀ y ∈ Metric.closedBall (0 : E) B, ‖φ y‖ ≤ Bφ)
+    (hφL : LipschitzOnWith K φ (Metric.closedBall (0 : E) B)) :
+    ParabolicC0AlphaWith Bφ ((K : ℝ) * H) α (fun z => φ (u z)) s :=
+  hu.comp_lipschitzOnWith
+    (fun y hy => hφB y (hu.bounded.image_subset_closedBall_zero hy))
+    (hφL.mono hu.bounded.image_subset_closedBall_zero)
 
 /-- The Holder component of positive-exponent parabolic `C^{0,α}` control gives continuity. -/
 theorem continuousOn (h : ParabolicC0AlphaWith B H α u s) (hα : 0 < α) : ContinuousOn u s :=

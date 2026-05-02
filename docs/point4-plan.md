@@ -1221,9 +1221,10 @@ norm/topology vocabulary, with the expected norm-estimate closure, not the
 Schauder estimates or Ricci-DeTurck Banach chart; it also already includes the
 basic Lipschitz-composition estimate needed to pass local nonlinear coordinate
 maps through Hölder control, the corresponding bounded `C^{0,α}` composition
-result under a range bound, and exponent-lowering on unit parabolic-diameter
-domains, with closed-ball and closed-cylinder specializations across the
-Holder and `C^{0,α}` interfaces supplying that hypothesis after shrinking.
+result under range or closed-sup-ball bounds, and exponent-lowering on unit
+parabolic-diameter domains, with closed-ball and closed-cylinder
+specializations across the Holder and `C^{0,α}` interfaces supplying that
+hypothesis after shrinking.
 Closed parabolic balls now also map into ordinary product closed balls under
 the quadratic time-radius control, and product cylinders map into ordinary
 product balls/closed balls under coordinate radius control, matching
