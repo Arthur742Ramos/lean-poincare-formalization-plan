@@ -1493,6 +1493,57 @@ theorem uniformContinuousOn (h : ParabolicHolderOn α u s) (hα : 0 < α) :
   rcases h with ⟨_C, _hC, hCu⟩
   exact hCu.uniformContinuousOn hα
 
+/-- Local-to-global parabolic Holder control from a finite parabolic ball cover, with local
+Holder constants chosen automatically and summed over the finite cover. -/
+theorem of_finset_parabolicBall_cover_closedBall {B r : ℝ} {K : Set (ℝ × X)}
+    (N : Finset (ℝ × X)) (hbounded : ParabolicBoundedWith B u K)
+    (hα : 0 < α) (hr : 0 < r)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicBall y r)
+    (hlocal : ∀ y ∈ N, ParabolicHolderOn α u (parabolicClosedBall y (2 * r))) :
+    ParabolicHolderOn α u K := by
+  classical
+  let Hc : ℝ × X → ℝ :=
+    fun y => if hy : y ∈ N then Classical.choose (hlocal y hy) else 0
+  have hHnonneg : ∀ y ∈ N, 0 ≤ Hc y := by
+    intro y hy
+    dsimp [Hc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hH :
+      ∀ y ∈ N, ParabolicHolderWith (Hc y) α u (parabolicClosedBall y (2 * r)) := by
+    intro y hy
+    dsimp [Hc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).2
+  let Hsum : ℝ := ∑ y ∈ N, Hc y
+  have hHsum_nonneg : 0 ≤ Hsum := by
+    dsimp [Hsum]
+    exact Finset.sum_nonneg hHnonneg
+  have hH_le_sum : ∀ y ∈ N, Hc y ≤ Hsum := by
+    intro y hy
+    dsimp [Hsum]
+    exact Finset.single_le_sum hHnonneg hy
+  have hlocal_sum :
+      ∀ y ∈ N, ParabolicHolderWith Hsum α u (parabolicClosedBall y (2 * r)) := by
+    intro y hy
+    exact (hH y hy).mono_const (hH_le_sum y hy)
+  refine ⟨max Hsum (2 * B / r ^ α), hHsum_nonneg.trans (le_max_left _ _), ?_⟩
+  exact ParabolicHolderWith.of_parabolicBall_cover_closedBall
+    (B := B) (C := Hsum) hbounded hα hr hcover hlocal_sum
+
+/-- Compact local-to-global parabolic Holder control from local doubled closed-ball estimates,
+with Holder constants chosen automatically from a finite compact subcover. -/
+theorem of_isCompact_of_local_closedBall {B r : ℝ} {K : Set (ℝ × X)}
+    (hbounded : ParabolicBoundedWith B u K) (hK : IsCompact K)
+    (hα : 0 < α) (hr : 0 < r)
+    (hlocal : ∀ y ∈ K, ParabolicHolderOn α u (parabolicClosedBall y (2 * r))) :
+    ParabolicHolderOn α u K := by
+  rcases hK.elim_nhds_subcover (fun y => parabolicBall y r)
+      (fun y _hy => parabolicBall.mem_nhds (p := y) (R := r) hr) with
+    ⟨N, hNK, hcover⟩
+  exact of_finset_parabolicBall_cover_closedBall N hbounded hα hr hcover
+    (fun y hy => hlocal y (hNK y hy))
+
 theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
     (h : ParabolicHolderOn α u s) (hβ : 0 ≤ β) (hβα : β ≤ α)
     (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →

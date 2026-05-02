@@ -334,7 +334,8 @@ packages the canonical stationary local solution attached to
   localization of open-domain Hölder and `C^{0,α}` estimates to uniform closed
   parabolic patches around compact subsets, a bounded local-to-global Hölder
   estimate from parabolic ball covers and doubled closed patches, plus its
-  compact uniform-local corollary, matching local-to-global `C^{0,α}` patching
+  compact uniform-local corollary, finite-cover Holder patching with automatic
+  local-constant selection, matching local-to-global `C^{0,α}` patching
   theorems, and finite-cover `C^{0,α}` patching with automatic local-constant
   selection, and
   add/subtract/smul closure estimates plus the bounded product estimate for
