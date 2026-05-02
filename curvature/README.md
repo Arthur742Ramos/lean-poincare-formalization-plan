@@ -373,7 +373,9 @@ now packages the matching intrinsic boundary
         closed-interval within-filter direct forms that avoid the centered
         `tangentCoordChange`, and with within-domain Fréchet chain-rule and
         time-difference primitives that let chart-local product-domain
-        derivatives feed the same endpoint calculus before the
+        derivatives feed the same endpoint calculus, now including a raw
+        gauge-flow metric-coordinate time-difference bridge that subtracts the
+        frozen spatial term from such domain-restricted data before the
         model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

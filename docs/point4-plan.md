@@ -227,6 +227,9 @@ the centered `tangentCoordChange` term. The endpoint model calculus now also has
 within-domain Fréchet chain rules for moving bilinear-form fields and their
 time-difference subtraction, so local chart/Picard derivatives that are only
 proved on a product domain can feed the gauge-pullback endpoint route directly.
+The raw gauge-flow metric-coordinate time-difference bridge now consumes that
+domain-restricted derivative shape while subtracting the canonical frozen
+spatial contribution and exposing the raw gauge velocity.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
