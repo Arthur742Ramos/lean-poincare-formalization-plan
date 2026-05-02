@@ -1124,6 +1124,18 @@ theorem norm (hu : ParabolicHolderWith C α u s) :
       simpa [Real.norm_eq_abs] using abs_norm_sub_norm_le (u p) (u q)
     _ ≤ C * (parabolicDistance p q) ^ α := hu hp hq
 
+theorem prod {F : Type*} [NormedAddCommGroup F] {D : ℝ} {v : ℝ × X → F}
+    (hu : ParabolicHolderWith C α u s) (hv : ParabolicHolderWith D α v s) :
+    ParabolicHolderWith (max C D) α (fun z => (u z, v z)) s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  have hdα : 0 ≤ dα := Real.rpow_nonneg (parabolicDistance.nonneg p q) α
+  change ‖(u p - u q, v p - v q)‖ ≤ max C D * dα
+  rw [Prod.norm_mk]
+  exact max_le
+    ((hu hp hq).trans (mul_le_mul_of_nonneg_right (le_max_left C D) hdα))
+    ((hv hp hq).trans (mul_le_mul_of_nonneg_right (le_max_right C D) hdα))
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicHolderWith C α u s) :
     ParabolicHolderWith (‖c‖ * C) α (fun z => c • u z) s := by
@@ -1475,6 +1487,13 @@ theorem norm (hu : ParabolicHolderOn α u s) :
     ParabolicHolderOn α (fun z => ‖u z‖) s := by
   rcases hu with ⟨C, hC, hCu⟩
   exact ⟨C, hC, hCu.norm⟩
+
+theorem prod {F : Type*} [NormedAddCommGroup F] {v : ℝ × X → F}
+    (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
+    ParabolicHolderOn α (fun z => (u z, v z)) s := by
+  rcases hu with ⟨C, hC, hCu⟩
+  rcases hv with ⟨D, hD, hDv⟩
+  exact ⟨max C D, hC.trans (le_max_left C D), hCu.prod hDv⟩
 
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicHolderOn α u s) :
@@ -1844,6 +1863,14 @@ theorem norm (hu : ParabolicBoundedWith B u s) :
   intro p hp
   simpa [Real.norm_of_nonneg (norm_nonneg (u p))] using hu hp
 
+theorem prod {F : Type*} [NormedAddCommGroup F] {D : ℝ} {v : ℝ × X → F}
+    (hu : ParabolicBoundedWith B u s) (hv : ParabolicBoundedWith D v s) :
+    ParabolicBoundedWith (max B D) (fun z => (u z, v z)) s := by
+  intro p hp
+  change ‖(u p, v p)‖ ≤ max B D
+  rw [Prod.norm_mk]
+  exact max_le ((hu hp).trans (le_max_left B D)) ((hv hp).trans (le_max_right B D))
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicBoundedWith B u s) :
     ParabolicBoundedWith (‖c‖ * B) (fun z => c • u z) s := by
@@ -1972,6 +1999,12 @@ theorem sub (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
 theorem norm (hu : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaWith B H α (fun z => ‖u z‖) s :=
   ⟨hu.bounded.norm, hu.holder.norm⟩
+
+theorem prod {F : Type*} [NormedAddCommGroup F] {B₃ H₃ : ℝ} {v : ℝ × X → F}
+    (hu : ParabolicC0AlphaWith B H α u s)
+    (hv : ParabolicC0AlphaWith B₃ H₃ α v s) :
+    ParabolicC0AlphaWith (max B B₃) (max H H₃) α (fun z => (u z, v z)) s :=
+  ⟨hu.bounded.prod hv.bounded, hu.holder.prod hv.holder⟩
 
 theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
     {u v : ℝ × X → A} {s : Set (ℝ × X)}
@@ -2313,6 +2346,15 @@ theorem norm (hu : ParabolicC0AlphaOn α u s) :
     ParabolicC0AlphaOn α (fun z => ‖u z‖) s := by
   rcases hu with ⟨B, hB, H, hH, hBH⟩
   exact ⟨B, hB, H, hH, hBH.norm⟩
+
+theorem prod {F : Type*} [NormedAddCommGroup F] {v : ℝ × X → F}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    ParabolicC0AlphaOn α (fun z => (u z, v z)) s := by
+  rcases hu with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
+  rcases hv with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
+  exact ⟨max B₁ B₂, hB₁.trans (le_max_left B₁ B₂), max H₁ H₂,
+    hH₁.trans (le_max_left H₁ H₂),
+    hBH₁.prod hBH₂⟩
 
 theorem mul {A : Type*} [NormedRing A] {u v : ℝ × X → A} {s : Set (ℝ × X)}
     (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :

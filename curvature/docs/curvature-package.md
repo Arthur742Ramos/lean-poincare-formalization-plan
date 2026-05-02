@@ -121,7 +121,7 @@ finite-cover `C^{0,α}` patching with automatic local-constant selection,
 variable-radius finite-cover Holder and `C^{0,α}` patching plus compact
 point-dependent- and existential-radius corollaries, finite-sum closure for
 explicit Holder, bounded, and `C^{0,α}` controls, finite-sum closure for
-existential Holder and `C^{0,α}` controls,
+existential Holder and `C^{0,α}` controls, product-valued pairing closure,
 additive/subtractive closure estimates, plus the
 bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded

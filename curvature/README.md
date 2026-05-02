@@ -986,11 +986,11 @@ patching with automatic local-constant selection, variable-radius finite-cover
 Holder and `C^{0,α}` patching plus compact point-dependent- and
 existential-radius corollaries, finite-sum closure for explicit Holder,
 bounded, and `C^{0,α}` controls, finite-sum closure for existential Holder and
-`C^{0,α}` controls, and
-basic linear algebra closure estimates for Hölder and bounded control, together
-with the bounded product estimate for normed-ring-valued `C^{0,α}` functions
-and the corresponding bounded scalar-action estimate for normed-space-valued
-functions, plus closure under taking norms and Lipschitz composition on the
+`C^{0,α}` controls, product-valued pairing closure, and basic linear algebra
+closure estimates for Hölder and bounded control, together with the bounded
+product estimate for normed-ring-valued `C^{0,α}` functions and the
+corresponding bounded scalar-action estimate for normed-space-valued functions,
+plus closure under taking norms and Lipschitz composition on the
 controlled range, bounded `C^{0,α}` composition under range or
 explicit closed-sup-ball bounds, exponent lowering on unit parabolic-diameter
 domains with closed-ball and closed-cylinder specializations across the Holder
