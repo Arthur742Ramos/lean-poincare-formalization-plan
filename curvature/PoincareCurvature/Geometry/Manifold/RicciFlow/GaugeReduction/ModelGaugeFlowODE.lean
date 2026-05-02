@@ -163,6 +163,22 @@ theorem center_continuousWithinAt
     ContinuousWithinAt (α.flow x₀) (Icc tmin tmax) t :=
   α.flow_continuousWithinAt (mem_closedBall_self r.2) ht
 
+/-- A local model-flow curve is eventually, relative to the closed Picard
+interval, in any open set containing its endpoint value. -/
+theorem flow_eventuallyWithin_mem_of_mem_Icc
+    (α : LocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow x t ∈ U) :
+    (α.flow x) ⁻¹' U ∈ 𝓝[Icc tmin tmax] t :=
+  (α.flow_continuousWithinAt hx ht) (hU.mem_nhds hmem)
+
+/-- Center-curve specialization of `flow_eventuallyWithin_mem_of_mem_Icc`. -/
+theorem center_eventuallyWithin_mem_of_mem_Icc
+    (α : LocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow x₀ t ∈ U) :
+    (α.flow x₀) ⁻¹' U ∈ 𝓝[Icc tmin tmax] t :=
+  α.flow_eventuallyWithin_mem_of_mem_Icc (mem_closedBall_self r.2) ht hU hmem
+
 /-- Every initial point in the local ball has ordinary continuity on the
 interior of the Picard interval. -/
 theorem flow_continuousAt_of_mem_Ioo
@@ -612,6 +628,23 @@ theorem center_continuousWithinAt
     (α : ContinuousLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
     ContinuousWithinAt (fun τ : ℝ => α.flow (x₀, τ)) (Icc tmin tmax) t :=
   α.flow_continuousWithinAt (mem_closedBall_self r.2) ht
+
+/-- A continuous local model-flow time slice is eventually, relative to the
+closed Picard interval, in any open set containing its endpoint value. -/
+theorem flow_eventuallyWithin_mem_of_mem_Icc
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x, t) ∈ U) :
+    (fun τ : ℝ => α.flow (x, τ)) ⁻¹' U ∈ 𝓝[Icc tmin tmax] t :=
+  (α.flow_continuousWithinAt hx ht) (hU.mem_nhds hmem)
+
+/-- Center-time-slice specialization of
+`ContinuousLocalFlowSolution.flow_eventuallyWithin_mem_of_mem_Icc`. -/
+theorem center_eventuallyWithin_mem_of_mem_Icc
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x₀, t) ∈ U) :
+    (fun τ : ℝ => α.flow (x₀, τ)) ⁻¹' U ∈ 𝓝[Icc tmin tmax] t :=
+  α.flow_eventuallyWithin_mem_of_mem_Icc (mem_closedBall_self r.2) ht hU hmem
 
 /-- Each time slice of a continuous space-time local flow is ordinarily
 continuous on the interior of the Picard interval. -/
@@ -1448,6 +1481,24 @@ theorem center_flow_continuousWithinAt
     {t : ℝ} (ht : t ∈ Icc tmin tmax) :
     ContinuousWithinAt (fun τ : ℝ => α.flow (x₀, τ)) (Icc tmin tmax) t :=
   α.flow_continuousWithinAt (mem_closedBall_self r.2) ht
+
+/-- A variational local model-flow base curve is eventually, relative to the
+closed Picard interval, in any open set containing its endpoint value. -/
+theorem flow_eventuallyWithin_mem_of_mem_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x, t) ∈ U) :
+    (fun τ : ℝ => α.flow (x, τ)) ⁻¹' U ∈ 𝓝[Icc tmin tmax] t :=
+  (α.flow_continuousWithinAt hx ht) (hU.mem_nhds hmem)
+
+/-- Center-base-curve specialization of
+`VariationalLocalFlowSolution.flow_eventuallyWithin_mem_of_mem_Icc`. -/
+theorem center_flow_eventuallyWithin_mem_of_mem_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Icc tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x₀, t) ∈ U) :
+    (fun τ : ℝ => α.flow (x₀, τ)) ⁻¹' U ∈ 𝓝[Icc tmin tmax] t :=
+  α.flow_eventuallyWithin_mem_of_mem_Icc (mem_closedBall_self r.2) ht hU hmem
 
 /-- Each base-flow time slice of a variational local flow is ordinarily
 continuous on the interior of the Picard interval. -/
