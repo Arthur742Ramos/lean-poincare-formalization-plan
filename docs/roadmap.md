@@ -852,7 +852,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
             packages, direct product-Picard and product-state bridges into
             operator-domain and four-variable scalar-readout routes, direct
             product-state base/tangent bridges for closed-Picard
-           metric-coordinate-field routes, metric-coordinate-field
+           metric-coordinate-field routes (including geometric pushed-vector
+           slots and finite-cover/readout-field forms), metric-coordinate-field
            product-Picard bridges, and finite-cover/readout-field tensor
            time-derivative routes, including closed-Picard within-filter
            variants, plus the

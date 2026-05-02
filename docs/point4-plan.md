@@ -431,9 +431,9 @@ routes now also accept direct product-state `(t,y,Au,Av)` data in both
 open-domain and explicit-domain forms, the full operator-domain scalar-readout
 routes accept direct product-state `(t,y,A)` data in the same variants, and the
 closed-Picard metric-coordinate-field routes now accept direct product-state
-base/tangent agreement in ordinary and open-domain forms before raw
-closed-Picard wrappers expose both named package bridges and
-`HasTimeDerivativeOn` promotions.
+base/tangent agreement in ordinary, open-domain, geometric pushed-vector-slot,
+and finite-cover/readout-field forms before raw closed-Picard wrappers expose
+both named package bridges and `HasTimeDerivativeOn` promotions.
 This removes a manual tangent Lipschitz obligation from the future
 chart-gluing step and isolates the
 remaining product Picard hypotheses to base-field and linearized-coefficient
