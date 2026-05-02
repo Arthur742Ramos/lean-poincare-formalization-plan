@@ -777,7 +777,9 @@ derivative views, including the chart-ODE view, now also restrict monotonically
 to smaller time sets, matching the localized Picard intervals produced by chart
 ODE arguments. Closed-Picard `Icc` derivative and chart-ODE data now also have
 direct ordinary open-interior `Ioo` upgrade lemmas, matching the standard Picard
-endpoint-to-interior handoff. The
+endpoint-to-interior handoff, and the raw existence API now has a one-step
+constructor producing `Diffeomorph3GaugeFlowOn` on `Ioo tmin tmax` directly from
+centered preferred-chart ODE data proved within `Icc tmin tmax`. The
 same named-derivative symmetry is now present
 for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,
