@@ -330,8 +330,9 @@ now packages the matching intrinsic boundary
         fill those operator-coordinate packages directly from the model ODE
         derivatives, continuous product-Picard wrappers now enter the same named
         operator-coordinate routes (including readouts stated directly on the
-        product state `(y,A)`), and the raw closed-Picard API exposes matching
-        named package bridges and `HasTimeDerivativeOn` wrappers. An endpoint readout
+        product state `(y,A)` through the final tensor bridge), and the raw
+        closed-Picard API exposes matching named package bridges and
+        `HasTimeDerivativeOn` wrappers. An endpoint readout
         bridge now transfers the closed-interval geometric-slot variational theorem
        from any locally equal finite-cover metric-coordinate bilinear-form readout,
        matching the Banach readout output shape before interior tensor

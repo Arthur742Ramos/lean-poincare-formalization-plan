@@ -425,9 +425,9 @@ operator-domain readouts can be stored as endpoint coordinate derivative data
 before selecting a final tensor route. Variational local-flow constructors now
 fill those packages directly from the model base/tangent ODE derivatives,
 continuous product-Picard wrappers now enter the same named operator-coordinate
-routes, including readouts stated directly on the product state `(y,A)`, and
-raw closed-Picard wrappers expose both named package bridges and
-`HasTimeDerivativeOn` promotions.
+routes, including readouts stated directly on the product state `(y,A)` through
+the final tensor `HasTimeDerivativeOn` bridge, and raw closed-Picard wrappers
+expose both named package bridges and `HasTimeDerivativeOn` promotions.
 This removes a manual tangent Lipschitz obligation from the future
 chart-gluing step and isolates the
 remaining product Picard hypotheses to base-field and linearized-coefficient
