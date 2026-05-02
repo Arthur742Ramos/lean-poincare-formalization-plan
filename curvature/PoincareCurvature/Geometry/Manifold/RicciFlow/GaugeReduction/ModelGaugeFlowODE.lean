@@ -1200,6 +1200,13 @@ theorem dist_comp_left_le (D A B : V →L[ℝ] V) :
   have h := D.opNorm_comp_le (A - B)
   simpa [dist_eq_norm, ContinuousLinearMap.comp_sub] using h
 
+/-- Applying two continuous linear maps to a fixed vector is controlled by their
+operator distance. -/
+theorem dist_apply_le_mul (A B : V →L[ℝ] V) (v : V) :
+    dist (A v) (B v) ≤ dist A B * ‖v‖ := by
+  have h := ContinuousLinearMap.le_opNorm (A - B) v
+  simpa [dist_eq_norm, sub_eq_add_neg] using h
+
 /-- The operator norm is bounded on a closed ball by the center norm plus the
 radius. -/
 theorem nnnorm_le_nnnorm_add_radius_of_mem_closedBall
@@ -1759,6 +1766,77 @@ theorem ofProduct_exists_dist_tangent_le_mul
         ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent y t) ≤
         L' * dist x y := by
   obtain ⟨L', hL'⟩ := ofProduct_tangent_exists_lipschitzOnWith_time α hball ht
+  exact ⟨L', hL'.dist_le_mul x hx y hy⟩
+
+/-- Product Lipschitz dependence gives Lipschitz dependence of every extracted
+tangent-map vector slot on the base initial point. -/
+theorem ofProduct_tangent_apply_exists_lipschitzOnWith_time
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) (v : V) :
+    ∃ L' : ℝ≥0,
+      LipschitzOnWith L'
+        (fun x : V =>
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t v)
+        (closedBall x₀ r) := by
+  obtain ⟨L', hL'⟩ := ofProduct_tangent_exists_lipschitzOnWith_time α hball ht
+  refine ⟨L' * ‖v‖₊, ?_⟩
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro x hx y hy
+  have hopen := hL'.dist_le_mul x hx y hy
+  have happ := dist_apply_le_mul
+    ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t)
+    ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent y t) v
+  calc
+    dist
+        ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t v)
+        ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent y t v)
+        ≤ dist
+            ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t)
+            ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent y t) *
+            ‖v‖ := happ
+    _ ≤ ((L' : ℝ) * dist x y) * ‖v‖ := by gcongr
+    _ = (L' * ‖v‖₊ : ℝ≥0) * dist x y := by
+      rw [NNReal.coe_mul, coe_nnnorm]
+      ring
+
+/-- Extracted tangent-map vector slots are continuous in the base initial point
+at each Picard time. -/
+theorem ofProduct_tangent_apply_continuousOn_initialBall_time
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) (v : V) :
+    ContinuousOn
+      (fun x : V =>
+        (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t v)
+      (closedBall x₀ r) := by
+  obtain ⟨_L', hL'⟩ :=
+    ofProduct_tangent_apply_exists_lipschitzOnWith_time α hball ht v
+  exact hL'.continuousOn
+
+/-- Distance estimate for extracted tangent-map vector slots at each Picard
+time. -/
+theorem ofProduct_exists_dist_tangent_apply_le_mul
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) (v : V)
+    {x y : V} (hx : x ∈ closedBall x₀ r) (hy : y ∈ closedBall x₀ r) :
+    ∃ L' : ℝ≥0,
+      dist
+        ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t v)
+        ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent y t v) ≤
+        L' * dist x y := by
+  obtain ⟨L', hL'⟩ :=
+    ofProduct_tangent_apply_exists_lipschitzOnWith_time α hball ht v
   exact ⟨L', hL'.dist_le_mul x hx y hy⟩
 
 /-- Extract variational local-flow existence from proof-level continuous product
