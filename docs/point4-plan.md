@@ -237,7 +237,10 @@ product-domain derivatives no longer need to be upgraded to global
 `HasFDerivAt` before entering the non-identity gauge-pullback route. It now
 also has variational tangent-map routes, including the closed-interval
 within-filter equality form, that synthesize the tangent-coordinate derivative
-from the model variational ODE.
+from the model variational ODE. Finite-cover/readout fields now have the same
+product-domain entry point: a locally equal two-variable bilinear readout can
+supply the `HasFDerivWithinAt` metric derivative, including for the variational
+ODE routes.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
