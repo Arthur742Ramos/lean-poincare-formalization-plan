@@ -244,8 +244,9 @@ now packages the matching intrinsic boundary
         initial data, ordinary interior derivative extractors, named
         Picard-interval continuity, direct time-slice Lipschitz, continuity, and
         distance readouts for dependence on that initial data, a joint space-time
-        continuity theorem on the local Picard cylinder, and the continuous
-       space-time partial-flow form needed for chart gluing, plus the
+        continuity theorem on the local Picard cylinder, and a promotion from
+        Lipschitz local flows to the continuous space-time partial-flow form
+        needed for chart gluing, plus the
        time-slice continuity bridges for continuous/variational local-flow
         packages, including direct within-interval and interior pointwise
         continuity readouts and open-interior `ContinuousOn` readouts,
@@ -652,7 +653,9 @@ now packages the matching intrinsic boundary
      positive-dimensional manifold ODE lift: it packages time-dependent local
      flows, their closed-interval ODE derivative, direct time-slice Lipschitz,
      continuity, and distance readouts for initial-data dependence, a joint
-     space-time continuity theorem on the local Picard cylinder, continuous space-time partial flows, restriction maps to smaller
+     space-time continuity theorem on the local Picard cylinder, a promotion
+     from Lipschitz local flows to continuous space-time partial flows,
+     restriction maps to smaller
      Picard intervals and initial balls with matching `Nonempty` wrappers,
      readout simp lemmas for localized flow/tangent maps and forgetful projections,
       overlap uniqueness for local and

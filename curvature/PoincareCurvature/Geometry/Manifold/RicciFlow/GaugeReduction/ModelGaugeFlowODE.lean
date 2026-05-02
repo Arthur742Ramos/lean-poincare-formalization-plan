@@ -553,6 +553,30 @@ theorem flow_continuousOn_spaceTime
   have htri := dist_triangle (α.flow q.1 q.2) (α.flow p.1 q.2) (α.flow p.1 p.2)
   linarith
 
+/-- A Lipschitz local-flow package is automatically a continuous space-time
+local-flow package. -/
+def toContinuousLocalFlowSolution
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) :
+    ContinuousLocalFlowSolution f t₀ x₀ r where
+  flow p := α.flow p.1 p.2
+  initial_eq := α.initial_eq
+  hasDerivWithinAt := by
+    intro x hx t ht
+    exact α.hasDerivWithinAt x hx t ht
+  continuousOn := α.flow_continuousOn_spaceTime
+
+@[simp] theorem toContinuousLocalFlowSolution_flow
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) :
+    α.toContinuousLocalFlowSolution.flow = fun p : V × ℝ => α.flow p.1 p.2 := rfl
+
+/-- A proof-level Lipschitz local-flow witness automatically gives a continuous
+space-time local-flow witness. -/
+theorem nonempty_toContinuousLocalFlowSolution
+    (hα : Nonempty (LipschitzLocalFlowSolution f t₀ x₀ r)) :
+    Nonempty (ContinuousLocalFlowSolution f t₀ x₀ r) := by
+  rcases hα with ⟨α⟩
+  exact ⟨α.toContinuousLocalFlowSolution⟩
+
 /-- Restrict a nonempty Lipschitz local-flow existence witness to a smaller
 initial ball and closed time interval. -/
 theorem nonempty_restrict
@@ -2673,14 +2697,7 @@ initial-data ball times the closed time interval. -/
 def toContinuousLocalFlowSolution
     (hf : IsPicardLindelof f t₀ x₀ a r L K) :
     ContinuousLocalFlowSolution f t₀ x₀ r :=
-  let h := hf.exists_forall_mem_closedBall_eq_hasDerivWithinAt_continuousOn
-  let α := Classical.choose h
-  let hα := (Classical.choose_spec h).1
-  let hcont := (Classical.choose_spec h).2
-  { flow := α
-    initial_eq := fun x hx => (hα x hx).1
-    hasDerivWithinAt := fun x hx t ht => (hα x hx).2 t ht
-    continuousOn := hcont }
+  (toLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution
 
 /-- Picard-Lindelöf continuous local-flow data, immediately localized to a
 smaller closed time interval and initial ball. -/
