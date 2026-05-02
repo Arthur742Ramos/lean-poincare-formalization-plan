@@ -2461,6 +2461,21 @@ theorem div {𝕜 : Type*} [NormedField 𝕜] {a b : ℝ × X → 𝕜} {δ : �
         (inv_nonneg.mpr hδpos.le)))
     (mul_nonneg (inv_nonneg.mpr hδpos.le) hH₁)
 
+theorem finset_prod {ι A : Type*} [NormedCommRing A] (S : Finset ι)
+    {u : ι → ℝ × X → A}
+    (h : ∀ i ∈ S, ParabolicC0AlphaOn α (u i) s) :
+    ParabolicC0AlphaOn α (fun z => ∏ i ∈ S, u i z) s := by
+  classical
+  revert h
+  refine Finset.induction_on S ?base ?step
+  · intro _h
+    simpa using (ParabolicC0AlphaOn.const (α := α) (s := s) (1 : A))
+  · intro a S ha ih h
+    have ha_c0α : ParabolicC0AlphaOn α (u a) s := h a (by simp [ha])
+    have htail : ParabolicC0AlphaOn α (fun z => ∏ i ∈ S, u i z) s :=
+      ih fun i hi => h i (by simp [hi])
+    simpa [Finset.prod_insert ha] using ha_c0α.mul htail
+
 theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
     (ha : ParabolicC0AlphaOn α a s) (hu : ParabolicC0AlphaOn α u s) :
