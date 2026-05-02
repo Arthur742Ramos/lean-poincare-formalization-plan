@@ -743,9 +743,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         existence constructor that produces `Diffeomorph3GaugeFlowOn` on the
         open Picard interior directly from closed-interval centered chart ODE
         data, including a named intrinsic DeTurck chart-package version, and the
-        parallel raw open-interior constructors from closed-interval manifold
-        derivative data and named intrinsic primitive derivative data, with matching fixed-IVP `ofDerivative` and
-       `ofDerivativeAt` bridges. The Banach-model ODE component of
+         parallel raw open-interior constructors from closed-interval manifold
+         derivative data and named intrinsic primitive derivative data, with
+         fixed-IVP and theorem-family `ofPicardIccDerivative` /
+         `ofPicardIccChartDerivative` wrappers for solution time sets explicitly
+         identified with that open Picard interior, and matching fixed-IVP `ofDerivative` and
+        `ofDerivativeAt` bridges. The Banach-model ODE component of
      the positive-dimensional raw-flow construction is now also proof-bearing:
      `GaugeReduction.ModelGaugeFlowODE` packages mathlib's time-dependent
      Picard-Lindelöf theorem as local model flows with initialization on a

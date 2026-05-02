@@ -589,7 +589,10 @@ now packages the matching intrinsic boundary
         open-interior existence constructor from closed-interval centered chart
         ODE data, including a named intrinsic DeTurck chart-package version, the
         parallel open-interior constructors from closed-interval manifold
-        derivative data and named intrinsic primitive derivative data, and matching fixed-IVP `ofDerivative` /
+        derivative data and named intrinsic primitive derivative data, fixed-IVP
+        and theorem-family `ofPicardIccDerivative` /
+        `ofPicardIccChartDerivative` wrappers for solution time sets explicitly
+        identified with the open Picard interior, and matching fixed-IVP `ofDerivative` /
         `ofDerivativeAt` bridges,
         centered preferred-chart derivative simplifications that expose the
         actual gauge velocity directly, vector-field agreement transport for

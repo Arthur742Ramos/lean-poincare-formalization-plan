@@ -783,8 +783,11 @@ centered preferred-chart ODE data proved within `Icc tmin tmax`, including a
 named intrinsic DeTurck chart-package version. The same raw open-interior
 constructor shape is now available from closed-interval pointwise manifold
 derivative data and from the named intrinsic DeTurck primitive derivative
-package. The
-same named-derivative symmetry is now present
+package. Fixed-IVP and theorem-family wrappers now lift those closed-Picard
+primitive/chart packages directly whenever the chosen solution time set is
+explicitly the open interval `Ioo tmin tmax`, via `ofPicardIccDerivative`,
+`ofPicardIccChartDerivative`, and matching `Nonempty` wrappers. The same
+named-derivative symmetry is now present
 for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,
 `IntrinsicDeTurckGaugeFlowExistence.ofDerivative`, and
