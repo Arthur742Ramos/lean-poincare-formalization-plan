@@ -824,7 +824,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
            derivative-domain tuple readouts for scalar pullback domains, and
            direct product-Picard bridges into scalar-readout,
            metric-coordinate-field, and finite-cover/readout-field tensor
-           time-derivative routes, plus the
+           time-derivative routes, including closed-Picard within-filter
+           variants, plus the
           autonomous `C¹` integral-curve specialization with
         open-interval continuity and packaged `LocalFlowSolution`,
         `LipschitzLocalFlowSolution`, and `ContinuousLocalFlowSolution`

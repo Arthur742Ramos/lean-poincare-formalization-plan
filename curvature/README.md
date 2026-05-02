@@ -687,7 +687,8 @@ now packages the matching intrinsic boundary
         scalar-readout state on both `Ioo` and `Icc`, and direct tensor
         time-derivative bridges from continuous product Picard flows to scalar
         readout hypotheses, metric-coordinate field routes, and finite-cover
-        readout-field variants, including geometric pushed-vector-slot variants,
+        readout-field variants, including closed-Picard within-filter and
+        geometric pushed-vector-slot variants,
         plus Gronwall uniqueness bridges for packaged and continuous
       space-time model flows; the
       raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
