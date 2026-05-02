@@ -366,7 +366,8 @@ packages the canonical stationary local solution attached to
   determinants, adjugate entries, and inverse entries under determinant lower
   bounds, plus matrix-product, matrix-vector/vector-matrix, and inverse-matrix
   vector-product entries, finite vector dot products, and bilinear contractions
-  through matrices or inverse matrices, from entrywise control. The curvature,
+  through matrices or inverse matrices, including Christoffel-symbol type
+  inverse-metric contractions, from entrywise control. The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric
   symmetry input outright: metric compatibility gives curvature-operator

@@ -204,6 +204,39 @@ theorem matrix_inv_bilinear_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [
     ParabolicC0AlphaOn α (fun z => ∑ i : n, v z i * ((M z)⁻¹).mulVec (w z) i) s :=
   vector_dot_entry hv (fun i => matrix_inv_mulVec_entry hM hw hδpos hdet i)
 
+/-- Christoffel-symbol type inverse-metric contractions preserve parabolic `C^{0,α}` control:
+if `M` and the three-index derivative array `D` are controlled entrywise and `det M` is bounded
+away from zero, then each finite contraction
+`(1 / 2) * M⁻¹ᵢˡ (Dⱼₖₗ + Dₖⱼₗ - Dₗⱼₖ)` is controlled. -/
+theorem matrix_inv_christoffel_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    {D : ℝ × X → n → n → n → 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z => D z i j k) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i j k : n) :
+    ParabolicC0AlphaOn α
+      (fun z =>
+        (2 : 𝕜)⁻¹ *
+          ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+            (D z j k l + D z k j l - D z l j k)) s := by
+  have hvec : ∀ l : n,
+      ParabolicC0AlphaOn α (fun z => D z j k l + D z k j l - D z l j k) s := by
+    intro l
+    exact ((hD j k l).add (hD k j l)).sub (hD l j k)
+  have hcontraction :
+      ParabolicC0AlphaOn α
+        (fun z =>
+          ((M z)⁻¹).mulVec (fun l : n => D z j k l + D z k j l - D z l j k) i) s :=
+    matrix_inv_mulVec_entry hM hvec hδpos hdet i
+  have hhalf :
+      ParabolicC0AlphaOn α
+        (fun z =>
+          (2 : 𝕜)⁻¹ *
+            ((M z)⁻¹).mulVec (fun l : n => D z j k l + D z k j l - D z l j k) i) s :=
+    (ParabolicC0AlphaOn.const (α := α) (s := s) ((2 : 𝕜)⁻¹)).mul hcontraction
+  simpa [Matrix.mulVec] using hhalf
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow
