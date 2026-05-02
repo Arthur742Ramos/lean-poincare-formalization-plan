@@ -1210,7 +1210,10 @@ both the global and closed-interval packages:
 `nonempty_candidateEncoding`. These wrappers expose the already-stored smooth
 realization and reverse encoding fields without reproving or destructing the
 closure data, but they do not supply the missing Schauder/parabolic estimates.
-The interval raw-gauge route now also exposes the ambient state-preserving
+The global raw-gauge route now also exposes the ambient state-preserving Banach
+solution with common-interval uniqueness and symmetric positive-definite
+persistence, together with a paired smooth-realization/reverse-encoding fiber.
+The interval raw-gauge route similarly exposes the ambient state-preserving
 Banach solution with terminal-time control and common-interval uniqueness, plus
 a combined proof-level fiber carrying that solution's smooth realization and
 reverse encoding of the realized chosen-background candidate.

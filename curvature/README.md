@@ -760,11 +760,15 @@ now packages the matching intrinsic boundary
      raw-gauge scalar/tensor derivative data directly; the global and interval
      chart-closure records also now expose named `nonempty_realization`,
      `realizationCandidateEncoding`, and `nonempty_candidateEncoding` readouts
-     for their stored realization and reverse-encoding fields. The interval
+     for their stored realization and reverse-encoding fields. The global
      raw-gauge route now also exposes the ambient state-preserving Banach
-     solution with terminal-time control and common-interval uniqueness, plus a
-     combined proof-level fiber carrying that solution's smooth realization and
-     reverse encoding of the realized chosen-background candidate. The thin
+     solution with common-interval uniqueness and symmetric positive-definite
+     persistence, together with a paired smooth-realization/reverse-encoding
+     fiber. The interval raw-gauge route similarly exposes the ambient
+     state-preserving Banach solution with terminal-time control and
+     common-interval uniqueness, plus a combined proof-level fiber carrying that
+     solution's smooth realization and reverse encoding of the realized
+     chosen-background candidate. The thin
      raw-gauge route module mirrors its global and interval projections to
      intrinsic and ordinary compact point-4 theorem packages as proof-level
      `Nonempty` witnesses, and does the same for the genuine symmetric-carrier
