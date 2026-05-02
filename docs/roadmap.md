@@ -960,7 +960,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          open-interior `Ioo` specializations; the geometric-slot route now has
          ordinary-neighborhood and within-set direct-velocity wrappers while
          keeping scalar identities in actual pushed-forward tangent vectors,
-         including closed-Picard `Ioo` specializations.
+         including closed-Picard `Ioo` specializations; the field-level
+         base-coordinate route now also packages the actual coordinate-curve
+         derivative as `X t (G.maps3 t x)`.
          The module also now has an additive
          time/spatial decomposition upgrading that frozen spatial term to the full
          moving time-space field derivative once the remaining time-difference

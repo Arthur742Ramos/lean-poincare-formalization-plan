@@ -461,6 +461,10 @@ The closed-Picard `Ioo` geometric-slot specializations now mirror that
 direct-velocity interface, so endpoint and interior callers can both state the
 `Bfield'` scalar identity using the raw velocity `X t (G.maps3 t x)` and the
 actual pushed-forward tangent vectors.
+The field-level base-coordinate route now also has ordinary-neighborhood and
+closed-Picard `Ioo` direct-velocity wrappers, so callers can package the actual
+coordinate-curve derivative as `X t (G.maps3 t x)` instead of the centered
+`tangentCoordChange`.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate
