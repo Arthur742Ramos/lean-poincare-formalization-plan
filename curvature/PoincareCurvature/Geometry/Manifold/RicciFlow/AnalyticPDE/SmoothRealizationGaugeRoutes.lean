@@ -1461,6 +1461,78 @@ theorem SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.nonempty_banachEvolu
       (M := M) (F := F) (I := I) realization, D.usesChosenBackground sol⟩
   exact ⟨⟨⟨sol, hT, huniq⟩, realization, D.encode candidate⟩⟩
 
+set_option maxHeartbeats 800000 in
+/-- Constructive readout of the strongest symmetric-carrier interval witness:
+choose the Banach solution together with terminal-time control, common-interval
+uniqueness, smooth realization, and reverse encoding. -/
+theorem SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.exists_banachEvolutionLocalSolutionIn_unique_realization_candidateEncoding
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc
+      x0 et het Kc hKc Ko hKo hKoEq hcover chart) :
+    ∃ sol : BanachEvolutionLocalSolutionIn
+      (chart.restrictedSymmetricA
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+      (riemannianMetricLocusSubmodule (M := M) (F := F)
+        (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+      ivp.initialTime
+      (InitialValueProblem.toSymmetricSectionSubmodule
+        (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn
+        (chart.restrictedSymmetricA
+          (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+        (riemannianMetricLocusSubmodule (M := M) (F := F)
+          (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+        ivp.initialTime
+        (InitialValueProblem.toSymmetricSectionSubmodule
+          (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+      EqOn sol.curve sol'.curve
+        (Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime))) ∧
+      Nonempty (Sigma fun realization :
+        (BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp
+        (BanachEvolutionLocalSolutionIn.toAmbientContinuousSectionSpace_of_riemannianMetricLocusSubmodule
+          (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp
+          (chart.restrictedSymmetricA_coe_of_mem
+            (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover) sol)) =>
+        SymmetricSubmoduleCandidateEncodingOnIcc
+          (T := T) x0 et het Kc hKc Ko hKo hKoEq hcover
+          (chart.restrictedSymmetricA
+            (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+          chart.A
+          (chart.restrictedSymmetricA_coe_of_mem
+            (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+          (BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
+            (M := M) (F := F) (I := I) realization)) := by
+  rcases D.exists_unique_banachEvolutionLocalSolutionIn
+      (M := M) (F := F) (I := I) with
+    ⟨sol, hT, huniq⟩
+  let realization := D.realization sol
+  let candidate : ChosenIntrinsicDeTurckLocalSolution
+      (E := F) (H := H) (I := I) (M := M) ivp :=
+    ⟨BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution
+      (M := M) (F := F) (I := I) realization, D.usesChosenBackground sol⟩
+  exact ⟨sol, hT, huniq, ⟨⟨realization, D.encode candidate⟩⟩⟩
+
 /-- Proof-level chosen-background theorem package from symmetric-carrier interval closure data. -/
 theorem SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.nonempty_chosenIntrinsicDeTurckLocalExistenceUniqueness
     {x0 : κ → M}

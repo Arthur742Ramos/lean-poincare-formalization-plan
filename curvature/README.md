@@ -700,7 +700,9 @@ now packages the matching intrinsic boundary
       that also includes the reverse symmetric-carrier encoding of the
       represented chosen-background candidate, and a single-choice strengthening
       that carries terminal-time control and common-interval uniqueness with the
-      same realization/encoding data. Density-based interval-carrier
+      same realization/encoding data, plus an existential readout of the Banach
+      solution with terminal/uniqueness proofs and a nonempty
+      realization/encoding fiber. Density-based interval-carrier
       solutions now also transport back to the chart's built-in restricted carrier
       under the terminal-time bound, and the preferred-cover local-bounds route
       now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness

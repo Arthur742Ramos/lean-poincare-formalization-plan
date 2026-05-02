@@ -1271,7 +1271,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       a stronger paired witness that includes the reverse symmetric-carrier
       encoding of the represented chosen-background candidate, and a
       single-choice strengthening that carries terminal-time control and
-      common-interval uniqueness together with that realization/encoding data. A
+      common-interval uniqueness together with that realization/encoding data,
+      plus an existential readout of the Banach solution with terminal/uniqueness
+      proofs and a nonempty realization/encoding fiber. A
       density-based interval-carrier solution also now transports back to the
        chart's built-in restricted carrier whenever its terminal time remains
         inside the Picard interval, and the preferred-cover local-bounds route

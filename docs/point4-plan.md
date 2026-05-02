@@ -740,6 +740,11 @@ and
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadoutWithin`,
 so closed-domain scalar readouts can now reach `HasTimeDerivativeOn` without an
 artificial openness hypothesis.
+On the Banach chart-closure side, symmetric-carrier interval data now also
+exposes the strongest Banach solution/terminal-bound/uniqueness witness as an
+existential readout with a nonempty smooth-realization-and-reverse-encoding
+fiber, so downstream arguments can access the chosen solution and uniqueness
+proof directly without first destructing the larger `Nonempty` package.
 
 ### Item 2 — raw `C³` gauge-flow existence on a compact manifold
 
