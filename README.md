@@ -364,9 +364,9 @@ packages the canonical stationary local solution attached to
   `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now builds on those
   primitives to prove parabolic `C^{0,α}` closure of finite matrix
   determinants, adjugate entries, and inverse entries under determinant lower
-  bounds, plus matrix-product and matrix-vector-product entries, from entrywise
-  control. The curvature, time-dependent geometry,
-  intrinsic Ricci-flow, and DeTurck layers now prove the geometric
+  bounds, plus matrix-product, matrix-vector-product, and inverse-matrix-vector
+  product entries, from entrywise control. The curvature, time-dependent
+  geometry, intrinsic Ricci-flow, and DeTurck layers now prove the geometric
   symmetry input outright: metric compatibility gives curvature-operator
   skew-adjointness, torsion-freeness gives first Bianchi, the Ricci contraction is
   symmetric for Levi-Civita families, the intrinsic Ricci-flow RHS is symmetric,

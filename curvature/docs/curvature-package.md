@@ -142,6 +142,7 @@ local-existence theorem itself.
 The separate `RicciFlow/AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves
 parabolic `C^{0,α}` closure for finite matrix determinants, adjugate entries,
 and inverse entries under a determinant lower bound from entrywise control,
-as well as entrywise closure for matrix products and matrix-vector products,
+as well as entrywise closure for matrix products, matrix-vector products, and
+inverse-matrix-vector products under the same determinant lower bound,
 using the finite-product, integer-scalar, reciprocal, and division closure
 layer.

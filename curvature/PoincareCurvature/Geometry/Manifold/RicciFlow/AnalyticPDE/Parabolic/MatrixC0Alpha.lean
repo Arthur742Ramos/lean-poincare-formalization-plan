@@ -128,6 +128,19 @@ theorem matrix_mulVec_entry {m n A : Type*} [Fintype n] [NormedRing A]
         (fun j _hj => (hM i j).mul (hv j)))
   simpa [Matrix.mulVec] using hsum
 
+/-- Entries of an inverse-matrix-vector product are parabolic `C^{0,α}` when the matrix entries
+and vector components are, and the determinant is uniformly bounded away from zero. -/
+theorem matrix_inv_mulVec_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜} {v : ℝ × X → n → 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hv : ∀ j, ParabolicC0AlphaOn α (fun z => v z j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i : n) :
+    ParabolicC0AlphaOn α (fun z => ((M z)⁻¹).mulVec (v z) i) s :=
+  matrix_mulVec_entry
+    (M := fun z => (M z)⁻¹) (v := v)
+    (fun r c => matrix_inv_entry (M := M) hM hδpos hdet r c) hv i
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow
