@@ -676,7 +676,8 @@ now packages the matching intrinsic boundary
        ordinary-neighborhood and within-set component-data constructors that
        accept direct gauge-velocity hypotheses, plus public tensor
        time-regularity wrappers for full metric-coordinate Fréchet data in that
-       same form,
+       same form, including variational local-flow wrappers that supply the
+       tangent-coordinate derivative from the model tangent ODE,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an

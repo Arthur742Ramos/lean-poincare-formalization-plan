@@ -449,7 +449,10 @@ same direct-velocity shape is available for locally equal finite-cover/Banach
 readout fields and for both ordinary-neighborhood and within-set component-data
 constructors that feed endpoint and closed-Picard packages; the public
 `HasTimeDerivativeOn` wrappers for full metric-coordinate Fréchet data now
-mirror that direct-velocity interface as well.
+mirror that direct-velocity interface as well. The variational local-flow
+wrappers that fill the tangent-coordinate derivative from the model tangent ODE
+now have the same direct-velocity and readout-field forms, including when the
+tangent-map identification is only known in the closed-interval within filter.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate
