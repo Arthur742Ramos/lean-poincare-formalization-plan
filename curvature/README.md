@@ -409,7 +409,8 @@ now packages the matching intrinsic boundary
            readouts on `(t, y, u, v)` and variational local-flow specializations
            for `(t, flow(t), A(t)u, A(t)v)`, including ordinary open-interior
            `Ioo` variants and matching eventual-equality transfer forms, plus
-           raw tensor wrappers that consume those scalar readouts directly, and the
+           non-open-domain graph-convergence variants and raw tensor wrappers
+           that consume those scalar readouts directly, and the
             model-coordinate time-difference route also accepting any locally equal
          two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

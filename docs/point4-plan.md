@@ -730,7 +730,10 @@ and
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadoutWithinOpen`,
 so local chart/Banach data on `(t, y, A(t)u, A(t)v)` no longer has to be
 repackaged as a two-variable bilinear-form field before producing
-`HasTimeDerivativeOn`.
+`HasTimeDerivativeOn`. The same scalar calculus now also has non-open-domain
+forms where callers supply product-graph convergence/eventual membership into
+the derivative domain directly, matching closed state constraints that arise in
+Picard and Banach chart arguments.
 
 ### Item 2 — raw `C³` gauge-flow existence on a compact manifold
 
