@@ -768,6 +768,49 @@ theorem _root_.Bundle.ContinuousRiemannianMetric.exists_smooth_spd_dist_lt_prefe
   obtain ⟨u, hu, hudist⟩ := hclosure ε hε
   exact ⟨u, hu.1, hu.2, hudist⟩
 
+/-- Bundled metric-density form: every continuous Riemannian metric admits a bundled `C²`
+Riemannian metric approximation in any positive preferred finite-cover radius. -/
+theorem _root_.Bundle.ContinuousRiemannianMetric.exists_contMDiffRiemannianMetric_dist_lt_preferredBilinear
+    [IsContinuousRiemannianBundle (B := M) F W]
+    [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [SecondCountableTopology H] [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (g : _root_.Bundle.ContinuousRiemannianMetric F W)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∃ g' : _root_.Bundle.ContMDiffRiemannianMetric I (2 : ℕ∞) F W,
+      dist
+        (⟨g.toSection, g.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+        (⟨g'.toSection, g'.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) < ε := by
+  obtain ⟨u, hu_spd, hu_smooth, hudist⟩ :=
+    g.exists_smooth_spd_dist_lt_preferredBilinear
+      (E := E) (H := H) (I := I) (M := M) (W := W) x0 hε
+  let g' : _root_.Bundle.ContMDiffRiemannianMetric I (2 : ℕ∞) F W :=
+    _root_.Bundle.ContMDiffRiemannianMetric.ofContinuousSectionSpace
+      (M := M) (F := F) (W := W) (I₀ := I)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+      u hu_spd hu_smooth
+  refine ⟨g', ?_⟩
+  have hsection :
+      (⟨g'.toSection, g'.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) = u := by
+    ext x
+    rfl
+  simpa [hsection] using hudist
+
 end PreferredBilinearRiemannianSmoothApprox
 
 end ContinuousSectionSpace

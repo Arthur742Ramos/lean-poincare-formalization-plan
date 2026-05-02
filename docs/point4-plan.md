@@ -1176,7 +1176,9 @@ continuous SPD bilinear-form section inside any prescribed positive
 preferred-cover radius. The same layer has the direct specialization that any
 bundled continuous Riemannian metric itself lies in that smooth-SPD closure when
 viewed through the preferred finite-cover bilinear-form chart, plus the
-corresponding metric-level quantitative readout.
+corresponding metric-level quantitative readout. That readout now reifies the
+approximant as an actual bundled `C²` Riemannian metric, not just as an SPD
+section.
 It also derives that finite-cover inverse
 bound from compactness of the cover pieces
 inside their fixed trivialization domains by factoring fixed-center inverses

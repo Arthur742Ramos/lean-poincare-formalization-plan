@@ -521,7 +521,9 @@ now packages the matching intrinsic boundary
    closure of smooth symmetric positive-definite sections and exposing a
    quantitative smooth-SPD approximant inside any prescribed positive
    preferred-cover radius; the underlying generic theorem gives the same
-   quantitative readout for arbitrary continuous SPD bilinear-form sections. For autonomous
+   quantitative readout for arbitrary continuous SPD bilinear-form sections,
+   and the metric-level readout reifies the approximant as a bundled `C²`
+   Riemannian metric. For autonomous
    charts, a new local `C^1` reduction also shrinks to an open neighborhood
    inside the positive-definite metric locus and derives the needed local
    Lipschitz bound there, so chart estimates can be proved locally around the

@@ -356,7 +356,8 @@ Riemannian metric is in the preferred finite-cover closure of smooth
 symmetric positive-definite sections, with a quantitative readout returning a
 smooth SPD approximant inside any prescribed positive radius; the underlying
 generic theorem now gives the same quantitative smooth-SPD approximant for any
-continuous SPD bilinear-form section. The
+continuous SPD bilinear-form section, and the metric-level version reifies the
+approximant as a bundled `C²` Riemannian metric. The
 same package now also constructs a transported continuous-linear coordinatewise
 antisymmetric-defect map whose kernel is exactly that symmetric locus, and it
 presents the metric locus as an open subset of the closed symmetric section
