@@ -1089,6 +1089,20 @@ theorem add (hu : ParabolicHolderWith C₁ α u s) (hv : ParabolicHolderWith C�
     _ ≤ C₁ * dα + C₂ * dα := add_le_add (hu hp hq) (hv hp hq)
     _ = (C₁ + C₂) * dα := by ring
 
+theorem sum {ι : Type*} (S : Finset ι) {C : ι → ℝ} {u : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicHolderWith (C i) α (u i) s) :
+    ParabolicHolderWith (∑ i ∈ S, C i) α (fun z => ∑ i ∈ S, u i z) s := by
+  classical
+  revert h
+  refine Finset.induction_on S ?base ?step
+  · intro _h
+    simpa using (ParabolicHolderWith.const (s := s) (C := 0) (α := α) (0 : E) le_rfl)
+  · intro a S ha ih h
+    have ha_holder : ParabolicHolderWith (C a) α (u a) s := h a (by simp [ha])
+    have htail : ParabolicHolderWith (∑ i ∈ S, C i) α (fun z => ∑ i ∈ S, u i z) s :=
+      ih fun i hi => h i (by simp [hi])
+    simpa [Finset.sum_insert ha, add_comm, add_left_comm, add_assoc] using ha_holder.add htail
+
 theorem neg (hu : ParabolicHolderWith C α u s) :
     ParabolicHolderWith C α (fun z => -u z) s := by
   intro p hp q hq
@@ -1646,6 +1660,20 @@ theorem add (hu : ParabolicBoundedWith B₁ u s) (hv : ParabolicBoundedWith B₂
     ‖u p + v p‖ ≤ ‖u p‖ + ‖v p‖ := norm_add_le _ _
     _ ≤ B₁ + B₂ := add_le_add (hu hp) (hv hp)
 
+theorem sum {ι : Type*} (S : Finset ι) {B : ι → ℝ} {u : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicBoundedWith (B i) (u i) s) :
+    ParabolicBoundedWith (∑ i ∈ S, B i) (fun z => ∑ i ∈ S, u i z) s := by
+  classical
+  revert h
+  refine Finset.induction_on S ?base ?step
+  · intro _h
+    simpa using (ParabolicBoundedWith.const (s := s) (B := 0) (0 : E) (by simp))
+  · intro a S ha ih h
+    have ha_bounded : ParabolicBoundedWith (B a) (u a) s := h a (by simp [ha])
+    have htail : ParabolicBoundedWith (∑ i ∈ S, B i) (fun z => ∑ i ∈ S, u i z) s :=
+      ih fun i hi => h i (by simp [hi])
+    simpa [Finset.sum_insert ha, add_comm, add_left_comm, add_assoc] using ha_bounded.add htail
+
 theorem neg (hu : ParabolicBoundedWith B u s) :
     ParabolicBoundedWith B (fun z => -u z) s := by
   intro p hp
@@ -1771,6 +1799,13 @@ theorem add (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
     (hv : ParabolicC0AlphaWith B₂ H₂ α v s) :
     ParabolicC0AlphaWith (B₁ + B₂) (H₁ + H₂) α (fun z => u z + v z) s :=
   ⟨hu.bounded.add hv.bounded, hu.holder.add hv.holder⟩
+
+theorem sum {ι : Type*} (S : Finset ι) {B H : ι → ℝ} {u : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicC0AlphaWith (B i) (H i) α (u i) s) :
+    ParabolicC0AlphaWith (∑ i ∈ S, B i) (∑ i ∈ S, H i) α
+      (fun z => ∑ i ∈ S, u i z) s :=
+  ⟨ParabolicBoundedWith.sum S (fun i hi => (h i hi).bounded),
+    ParabolicHolderWith.sum S (fun i hi => (h i hi).holder)⟩
 
 theorem neg (hu : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaWith B H α (fun z => -u z) s :=
