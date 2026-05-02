@@ -471,6 +471,21 @@ theorem exists_lipschitzOnWith_time_of_mem_Ioo
     ∃ L' : ℝ≥0, LipschitzOnWith L' (fun x => α.flow x t) (closedBall x₀ r) :=
   α.exists_lipschitzOnWith_time (Ioo_subset_Icc_self ht)
 
+/-- A packaged Lipschitz local flow has continuous time-slice maps on the
+initial-data ball. -/
+theorem flow_continuousOn_initialBall
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousOn (fun x => α.flow x t) (closedBall x₀ r) := by
+  obtain ⟨_L', hL'⟩ := α.exists_lipschitzOnWith_time ht
+  exact hL'.continuousOn
+
+/-- Interior-time specialization of time-slice continuity on the initial-data
+ball. -/
+theorem flow_continuousOn_initialBall_of_mem_Ioo
+    (α : LipschitzLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    ContinuousOn (fun x => α.flow x t) (closedBall x₀ r) :=
+  α.flow_continuousOn_initialBall (Ioo_subset_Icc_self ht)
+
 /-- A packaged Lipschitz local flow gives a concrete distance estimate between
 two initial points at every Picard time. -/
 theorem exists_dist_flow_le_mul
