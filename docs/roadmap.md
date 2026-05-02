@@ -690,12 +690,15 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          filters plus unrestricted ordinary `HasDerivAt` source-neighborhood
          constructors for raw, fixed-IVP, and theorem-family existence,
          named-derivative-family adapters,
-         centered preferred-chart derivative simplifications that expose the
-         gauge velocity directly instead of a redundant `tangentCoordChange I p p
-        p` term, variational model-flow base-velocity readouts that identify
-        the model ODE velocity directly with the raw gauge velocity on both
-        ordinary neighborhoods and closed-interval within filters, and
-        within-domain Fréchet chain-rule/time-difference primitives for moving
+          centered preferred-chart derivative simplifications that expose the
+          gauge velocity directly instead of a redundant `tangentCoordChange I p p
+         p` term, variational model-flow base-velocity readouts that identify
+         the model ODE velocity directly with the raw gauge velocity on both
+         ordinary neighborhoods and closed-interval within filters, and
+         local-at-time vector-field congruence for integral curves, gauge-flow
+         statements, and raw `Diffeomorph3GaugeFlowOn` derivative readouts when
+         vector fields agree along the flow near the time, plus
+         within-domain Fréchet chain-rule/time-difference primitives for moving
         bilinear-form fields, so chart-local derivatives restricted to product
         domains can feed endpoint gauge-pullback calculus and the closed-Picard
         `Ioo` tensor time-regularity route, now with variational tangent-map

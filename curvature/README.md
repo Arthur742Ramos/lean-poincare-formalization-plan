@@ -623,7 +623,8 @@ now packages the matching intrinsic boundary
         `ofDerivativeAt` bridges,
         centered preferred-chart derivative simplifications that expose the
         actual gauge velocity directly, vector-field agreement transport for
-        raw flows, geometric-to-raw adapters, and direct
+        raw flows and local-at-time derivative readouts when vector fields agree
+        along the flow near the time, geometric-to-raw adapters, and direct
         proof-level `Nonempty` wrappers for the raw geometric/derivative,
        restriction, and identity-flow constructors, plus matching fixed-IVP
        and theorem-family intrinsic proof-level wrappers and derivative/local-at-time

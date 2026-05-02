@@ -277,6 +277,31 @@ theorem hasMFDerivAt
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
   (G.satisfiesAt hs).hasMFDerivAt x
 
+/-- At a neighborhood time, a raw gauge-flow witness also satisfies any vector field that agrees
+with the original one along the flow in a neighborhood of that time. -/
+theorem satisfiesAt_congr_vectorField
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x)) :
+    SatisfiesGaugeFlowAt (I := I) (M := M)
+      G.maps3.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily Y t :=
+  (G.satisfiesAt hs).congr_vectorField hXY
+
+/-- At a neighborhood time, the pointwise derivative readout can be rewritten to any vector field
+that agrees with the original one along the flow near that time. -/
+theorem hasMFDerivAt_congr_vectorField
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (G.maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (G.maps3 t x))) :=
+  (G.satisfiesAt_congr_vectorField hs hXY).hasMFDerivAt x
+
 /-- At any time where the raw time set is a neighborhood, a raw gauge-flow curve
 has the expected derivative in the preferred chart centered at its time-`t`
 value. -/
