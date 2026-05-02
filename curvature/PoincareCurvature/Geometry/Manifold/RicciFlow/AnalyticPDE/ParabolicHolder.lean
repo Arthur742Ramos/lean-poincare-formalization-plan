@@ -1300,6 +1300,18 @@ theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ} {K :
   exact ⟨Bφ, hBφ, (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH,
     hBH.comp_lipschitzOnWith hφB hφL⟩
 
+theorem comp_lipschitzOnWith_of_closedBall {F : Type*} [NormedAddCommGroup F]
+    {B Bφ : ℝ} {K : ℝ≥0} {φ : E → F}
+    (hu : ParabolicC0AlphaOn α u s) (hBound : ParabolicBoundedWith B u s)
+    (hBφ : 0 ≤ Bφ)
+    (hφB : ∀ y ∈ Metric.closedBall (0 : E) B, ‖φ y‖ ≤ Bφ)
+    (hφL : LipschitzOnWith K φ (Metric.closedBall (0 : E) B)) :
+    ParabolicC0AlphaOn α (fun z => φ (u z)) s := by
+  rcases hu with ⟨_B, _hB, H, hH, hBH⟩
+  exact ⟨Bφ, hBφ, (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH,
+    ⟨hBound.comp_of_closedBall_bound hφB,
+      hBH.holder.comp_lipschitzOnWith (hφL.mono hBound.image_subset_closedBall_zero)⟩⟩
+
 theorem time_slice_half_exponent (h : ParabolicC0AlphaOn α u s) :
     ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
       ‖u (t, x) - u (τ, x)‖ ≤ C * |t - τ| ^ (α / 2) :=

@@ -975,9 +975,9 @@ with the bounded product estimate for normed-ring-valued `C^{0,α}` functions
 and the corresponding bounded scalar-action estimate for normed-space-valued
 functions, plus closure under taking norms and Lipschitz composition on the
 controlled range, bounded `C^{0,α}` composition under range or
-closed-sup-ball bounds, exponent lowering on unit parabolic-diameter domains
-with closed-ball and closed-cylinder specializations across the Holder and
-`C^{0,α}` interfaces, and closed-ball diameter control,
+explicit closed-sup-ball bounds, exponent lowering on unit parabolic-diameter
+domains with closed-ball and closed-cylinder specializations across the Holder
+and `C^{0,α}` interfaces, and closed-ball diameter control,
 product ball/closed-ball compatibility for parabolic balls and product
 cylinders, plus basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on
 closed parabolic balls and closed product cylinders. It still does not include

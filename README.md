@@ -327,7 +327,7 @@ packages the canonical stationary local solution attached to
   normed-ring-valued `C^{0,α}` functions and the corresponding bounded
   scalar-action estimate for normed-space-valued functions, along with closure
   under taking norms, Lipschitz composition on the controlled range, bounded
-  `C^{0,α}` composition under range or closed-sup-ball bounds, and
+  `C^{0,α}` composition under range or explicit closed-sup-ball bounds, and
   exponent lowering on unit parabolic-diameter domains with closed-ball and
   closed-cylinder specializations across the Holder and `C^{0,α}` interfaces,
   backed by closed-ball diameter control, product ball/closed-ball
