@@ -1209,10 +1209,11 @@ first. The first proof-bearing parabolic Hölder primitives now live in
 open/closed balls and product cylinders, proves the triangle inequality,
 topological compatibility with the ordinary product metric including local
 bases by parabolic balls and product cylinders, and packages `C^{0,α}`-style
-bounded/Hölder control with slice, oscillation, continuity, uniform-continuity,
-and additive/subtractive algebra estimates, including the standard
-bounded-product estimate for normed-ring-valued `C^{0,α}` functions and the
-corresponding bounded scalar-action estimate on normed-space-valued functions.
+bounded/Hölder control with slice, explicit closed-ball/cylinder oscillation,
+continuity, uniform-continuity, and additive/subtractive algebra estimates,
+including the standard bounded-product estimate for normed-ring-valued
+`C^{0,α}` functions and the corresponding bounded scalar-action estimate on
+normed-space-valued functions.
 This is still only the
 norm/topology vocabulary, with the expected norm-estimate closure, not the
 Schauder estimates or Ricci-DeTurck Banach chart; it also already includes the

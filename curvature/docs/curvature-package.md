@@ -102,7 +102,7 @@ open. The analytic PDE side has started with proof-bearing parabolic Hölder
 primitives in `RicciFlow/AnalyticPDE/ParabolicHolder.lean`: parabolic distance,
 balls/cylinders, `C^{0,α}` control, product-topology local-base compatibility
 for parabolic balls and product cylinders, continuity/uniform-continuity
-consequences, oscillation bounds, and additive
+consequences, explicit closed-ball/cylinder oscillation bounds, and additive
 and subtractive closure estimates, plus the bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded
 scalar-action estimate for normed-space-valued functions, plus closure under

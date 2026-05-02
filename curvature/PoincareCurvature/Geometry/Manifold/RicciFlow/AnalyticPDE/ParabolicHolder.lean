@@ -648,6 +648,15 @@ theorem norm_sub_le_of_parabolicDistance_le (h : ParabolicHolderWith C α u s) (
     (mul_le_mul_of_nonneg_left
       (Real.rpow_le_rpow (parabolicDistance.nonneg p q) hpq hα) hC)
 
+/-- Oscillation bound for two points lying in the same closed parabolic ball. -/
+theorem norm_sub_le_on_closedBall (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C)
+    (hα : 0 ≤ α) {c p q : ℝ × X} {R : ℝ}
+    (hp_s : p ∈ s) (hq_s : q ∈ s)
+    (hp : p ∈ parabolicClosedBall c R) (hq : q ∈ parabolicClosedBall c R) :
+    ‖u p - u q‖ ≤ C * (2 * R) ^ α :=
+  h.norm_sub_le_of_parabolicDistance_le hC hα hp_s hq_s
+    (parabolicClosedBall.pair_parabolicDistance_le hp hq)
+
 /-- Oscillation bound for two points lying in the same closed product parabolic cylinder. -/
 theorem norm_sub_le_on_closedCylinder (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C)
     (hα : 0 ≤ α) {c p q : ℝ × X} {timeRadius spaceRadius : ℝ}
