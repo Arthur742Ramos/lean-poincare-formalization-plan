@@ -1168,10 +1168,12 @@ continuous bilinear-form sections to symmetric smooth finite-cover approximants
 by fiberwise symmetrization without increasing distance, and the Ricci-DeTurck
 preferred-cover local-bounds closure theorem now routes through that symmetric
 finite-cover approximation seam before applying positive-definite openness. The
-same module now also derives that finite-cover inverse bound from compactness of
-the cover pieces inside their fixed trivialization domains by factoring
-fixed-center inverses through centered inverse trivializations and continuous
-coordinate changes.
+same module now also packages the generic closure theorem that every continuous
+SPD bilinear-form section in a continuous Riemannian vector bundle lies in the
+closure of smooth SPD sections for the preferred finite-cover norm. It also
+derives that finite-cover inverse bound from compactness of the cover pieces
+inside their fixed trivialization domains by factoring fixed-center inverses
+through centered inverse trivializations and continuous coordinate changes.
 
 **Suggested decomposition** (multi-session):
 

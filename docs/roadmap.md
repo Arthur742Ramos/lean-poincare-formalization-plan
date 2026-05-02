@@ -1291,7 +1291,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         smooth finite-cover approximants from symmetric continuous bilinear
         sections by fiberwise symmetrization. The Ricci-DeTurck preferred-cover
         local-bounds closure theorem now consumes this symmetric approximation
-        seam before applying positive-definite openness. It also derives the
+        seam before applying positive-definite openness. The same generic layer
+        now packages continuous SPD bilinear-form sections as limits of smooth
+        SPD sections in the preferred finite-cover norm. It also derives the
         finite-cover inverse bound from compactness of the cover pieces inside
         their fixed trivialization domains, factoring fixed-center inverses
         through centered inverse trivializations and continuous coordinate
