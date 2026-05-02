@@ -879,7 +879,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        `VariationalLocalFlowSolution` on any base ball contained in the product
        Picard ball, and product Picard-Lindelöf hypotheses construct that
        variational package directly while preserving joint space-time continuity
-       and eventual-membership readouts for the extracted `(flow, tangent)` pair,
+       and eventual-membership readouts for the extracted `(flow, tangent)` pair
+       on both closed and open Picard cylinders,
        with an automatic radius-specialized
        constructor when the base radius is bounded by the product radius, plus
        closed-interval localized variants and proof-level `Nonempty` wrappers

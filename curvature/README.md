@@ -296,7 +296,8 @@ now packages the matching intrinsic boundary
         `VariationalLocalFlowSolution` from continuous
         product local flows or product Picard-Lindelöf hypotheses initialized on
         `(x, 1)`, preserving joint space-time continuity and eventual-membership
-        readouts for the extracted `(flow, tangent)` pair, with a
+        readouts for the extracted `(flow, tangent)` pair on closed and open
+        Picard cylinders, with a
         radius-specialized Picard constructor and
         closed-interval localized variants and proof-level `Nonempty` wrappers
         for continuous-product/product-Picard inputs and localized variants for

@@ -1578,6 +1578,61 @@ theorem ofProduct_flow_tangent_eventuallyWithin_mem_of_mem_spaceTime
   (ofProduct_flow_tangent_continuousWithinAt_spaceTime α hball hp)
     (hU.mem_nhds hmem)
 
+/-- Product-derived variational local flows are ordinarily continuous at
+interior points of the open Picard cylinder as `(flow, tangent)` pairs. -/
+theorem ofProduct_flow_tangent_continuousAt_spaceTime_of_mem_ball_Ioo
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
+    ContinuousAt
+      (fun q : V × ℝ =>
+        ((ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2))
+      (x, t) :=
+  (ofProduct_flow_tangent_continuousWithinAt_spaceTime α hball
+    ⟨ball_subset_closedBall hx, Ioo_subset_Icc_self ht⟩).continuousAt
+      (closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo hx ht)
+
+/-- Product-derived variational local flows are continuous as `(flow, tangent)`
+pairs on the open Picard cylinder. -/
+theorem ofProduct_flow_tangent_continuousOn_spaceTime_Ioo
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    ContinuousOn
+      (fun q : V × ℝ =>
+        ((ofProductContinuousLocalFlowSolution α hball).flow q,
+          (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2))
+      (ball x₀ r ×ˢ Ioo tmin tmax) := by
+  intro p hp
+  exact (ofProduct_flow_tangent_continuousAt_spaceTime_of_mem_ball_Ioo
+    α hball hp.1 hp.2).continuousWithinAt
+
+/-- Interior ordinary eventual-membership readout for product-derived
+base-flow/tangent-map pairs. -/
+theorem ofProduct_flow_tangent_eventually_mem_of_mem_spaceTime_Ioo
+    {R : ℝ≥0}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set (V × (V →L[ℝ] V))} (hU : IsOpen U)
+    (hmem :
+      ((ofProductContinuousLocalFlowSolution α hball).flow (x, t),
+        (ofProductContinuousLocalFlowSolution α hball).tangent x t) ∈ U) :
+    (fun q : V × ℝ =>
+      ((ofProductContinuousLocalFlowSolution α hball).flow q,
+        (ofProductContinuousLocalFlowSolution α hball).tangent q.1 q.2)) ⁻¹' U ∈
+      𝓝 (x, t) :=
+  (ofProduct_flow_tangent_continuousAt_spaceTime_of_mem_ball_Ioo α hball hx ht)
+    (hU.mem_nhds hmem)
+
 /-- Extract variational local-flow existence from proof-level continuous product
 flow existence without choosing the product flow at call sites. -/
 theorem nonempty_ofProductContinuousLocalFlowSolution
