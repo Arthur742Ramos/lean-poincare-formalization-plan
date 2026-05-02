@@ -1231,7 +1231,9 @@ product balls/closed balls under coordinate radius control, matching
 compactness-style local arguments. A basepoint-to-sup estimate now turns
 Hölder control on a closed parabolic ball into explicit bounded control from
 one value, and the same estimate is available on closed product cylinders with
-the corresponding time/space radius expression. The abstract
+the corresponding time/space radius expression; both closed-domain shapes now
+also package Holder plus one basepoint bound as full `C^{0,α}` control. The
+abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and

@@ -791,6 +791,21 @@ theorem boundedWith_of_subset_closedCylinder {B₀ timeRadius spaceRadius : ℝ}
       add_le_add (mul_le_mul_of_nonneg_left hpow hC) le_rfl
     _ = B₀ + C * (max (Real.sqrt timeRadius) spaceRadius) ^ α := by ring
 
+theorem c0AlphaWith_of_subset_closedBall {B₀ R : ℝ} {c : ℝ × X}
+    (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hs : s ⊆ parabolicClosedBall c R) (hc : c ∈ s) (huc : ‖u c‖ ≤ B₀) :
+    ParabolicC0AlphaWith (B₀ + C * R ^ α) C α u s :=
+  ⟨h.boundedWith_of_subset_closedBall hC hα hs hc huc, h⟩
+
+theorem c0AlphaWith_of_subset_closedCylinder {B₀ timeRadius spaceRadius : ℝ}
+    {c : ℝ × X}
+    (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius) (hc : c ∈ s)
+    (huc : ‖u c‖ ≤ B₀) :
+    ParabolicC0AlphaWith
+      (B₀ + C * (max (Real.sqrt timeRadius) spaceRadius) ^ α) C α u s :=
+  ⟨h.boundedWith_of_subset_closedCylinder hC hα hs hc huc, h⟩
+
 /-- Positive-exponent parabolic Holder control implies continuity on the controlled set. -/
 theorem continuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) : ContinuousOn u s := by
   intro p hp
@@ -950,6 +965,34 @@ theorem mono_exponent_of_subset_closedCylinder {β timeRadius spaceRadius : ℝ}
     ParabolicHolderOn β u s := by
   rcases h with ⟨C, hC, hCu⟩
   exact ⟨C, hC, hCu.mono_exponent_of_subset_closedCylinder hC hβ hβα hs hdiam⟩
+
+theorem c0AlphaOn_of_subset_closedBall {B₀ R : ℝ} {c : ℝ × X}
+    (h : ParabolicHolderOn α u s) (hα : 0 ≤ α)
+    (hs : s ⊆ parabolicClosedBall c R) (hc : c ∈ s) (huc : ‖u c‖ ≤ B₀) :
+    ParabolicC0AlphaOn α u s := by
+  rcases h with ⟨C, hC, hCu⟩
+  have hR : 0 ≤ R := by
+    simpa using hs hc
+  have hB₀ : 0 ≤ B₀ := (norm_nonneg (u c)).trans huc
+  exact ⟨B₀ + C * R ^ α,
+    add_nonneg hB₀ (mul_nonneg hC (Real.rpow_nonneg hR α)), C, hC,
+    hCu.c0AlphaWith_of_subset_closedBall hC hα hs hc huc⟩
+
+theorem c0AlphaOn_of_subset_closedCylinder {B₀ timeRadius spaceRadius : ℝ}
+    {c : ℝ × X}
+    (h : ParabolicHolderOn α u s) (hα : 0 ≤ α)
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius) (hc : c ∈ s)
+    (huc : ‖u c‖ ≤ B₀) :
+    ParabolicC0AlphaOn α u s := by
+  rcases h with ⟨C, hC, hCu⟩
+  let ρ : ℝ := max (Real.sqrt timeRadius) spaceRadius
+  have hρ : 0 ≤ ρ := by
+    unfold ρ
+    exact le_max_of_le_left (Real.sqrt_nonneg _)
+  have hB₀ : 0 ≤ B₀ := (norm_nonneg (u c)).trans huc
+  exact ⟨B₀ + C * ρ ^ α,
+    add_nonneg hB₀ (mul_nonneg hC (Real.rpow_nonneg hρ α)), C, hC, by
+      simpa [ρ] using hCu.c0AlphaWith_of_subset_closedCylinder hC hα hs hc huc⟩
 
 end ParabolicHolderOn
 
