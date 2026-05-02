@@ -601,10 +601,12 @@ now packages the matching intrinsic boundary
       overlap uniqueness for local and
       continuous base-flow packages plus variational tangent maps and full
        `(flow, tangent)` pairs with different centers/radii, including direct
-       pointwise equality readouts on both `Ioo` and `Icc`, and autonomous
-      `C¹` integral curves with packaged and directly localized
-      `LocalFlowSolution` extraction, plus Gronwall uniqueness bridges for packaged and continuous
-     space-time model flows; the
+        pointwise equality readouts on both `Ioo` and `Icc`, and autonomous
+       `C¹` integral curves with packaged and directly localized
+       `LocalFlowSolution` extraction, open-set eventual-membership readouts for
+       local/continuous/variational model-flow curves on the Picard interior,
+       plus Gronwall uniqueness bridges for packaged and continuous
+      space-time model flows; the
       raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
       tangent-trivialization membership from neighborhood-time flow data, with
        matching within-time-set versions for restricted ODE intervals. The

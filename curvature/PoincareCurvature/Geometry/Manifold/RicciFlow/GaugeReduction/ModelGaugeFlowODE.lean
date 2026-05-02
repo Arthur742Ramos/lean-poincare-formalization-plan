@@ -177,6 +177,23 @@ theorem center_continuousAt_of_mem_Ioo
     ContinuousAt (α.flow x₀) t :=
   α.flow_continuousAt_of_mem_Ioo (mem_closedBall_self r.2) ht
 
+/-- A local model-flow curve is eventually in any open set containing its
+interior-time value.  This is the model-side source-neighborhood readout used
+when a Picard curve is known to lie in a selected chart domain. -/
+theorem flow_eventually_mem_of_mem_Ioo
+    (α : LocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow x t ∈ U) :
+    (α.flow x) ⁻¹' U ∈ 𝓝 t :=
+  (α.flow_continuousAt_of_mem_Ioo hx ht) (hU.mem_nhds hmem)
+
+/-- Center-curve specialization of `flow_eventually_mem_of_mem_Ioo`. -/
+theorem center_eventually_mem_of_mem_Ioo
+    (α : LocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow x₀ t ∈ U) :
+    (α.flow x₀) ⁻¹' U ∈ 𝓝 t :=
+  α.flow_eventually_mem_of_mem_Ioo (mem_closedBall_self r.2) ht hU hmem
+
 /-- Every packaged local model-flow curve is continuous on the Picard interval. -/
 theorem flow_continuousOn
     (α : LocalFlowSolution f t₀ x₀ r) {x : V} (hx : x ∈ closedBall x₀ r) :
@@ -610,6 +627,23 @@ theorem center_continuousAt_of_mem_Ioo
     (α : ContinuousLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) :
     ContinuousAt (fun τ : ℝ => α.flow (x₀, τ)) t :=
   α.flow_continuousAt_of_mem_Ioo (mem_closedBall_self r.2) ht
+
+/-- A continuous local model-flow time slice is eventually in any open set
+containing its interior-time value. -/
+theorem flow_eventually_mem_of_mem_Ioo
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x, t) ∈ U) :
+    (fun τ : ℝ => α.flow (x, τ)) ⁻¹' U ∈ 𝓝 t :=
+  (α.flow_continuousAt_of_mem_Ioo hx ht) (hU.mem_nhds hmem)
+
+/-- Center-time-slice specialization of
+`ContinuousLocalFlowSolution.flow_eventually_mem_of_mem_Ioo`. -/
+theorem center_eventually_mem_of_mem_Ioo
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x₀, t) ∈ U) :
+    (fun τ : ℝ => α.flow (x₀, τ)) ⁻¹' U ∈ 𝓝 t :=
+  α.flow_eventually_mem_of_mem_Ioo (mem_closedBall_self r.2) ht hU hmem
 
 /-- Each time slice of a continuous space-time local flow is continuous on the
 Picard interval. -/
@@ -1430,6 +1464,24 @@ theorem center_flow_continuousAt_of_mem_Ioo
     (ht : t ∈ Ioo tmin tmax) :
     ContinuousAt (fun τ : ℝ => α.flow (x₀, τ)) t :=
   α.flow_continuousAt_of_mem_Ioo (mem_closedBall_self r.2) ht
+
+/-- A variational local model-flow base curve is eventually in any open set
+containing its interior-time value. -/
+theorem flow_eventually_mem_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x, t) ∈ U) :
+    (fun τ : ℝ => α.flow (x, τ)) ⁻¹' U ∈ 𝓝 t :=
+  (α.flow_continuousAt_of_mem_Ioo hx ht) (hU.mem_nhds hmem)
+
+/-- Center-base-curve specialization of
+`VariationalLocalFlowSolution.flow_eventually_mem_of_mem_Ioo`. -/
+theorem center_flow_eventually_mem_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Ioo tmin tmax)
+    {U : Set V} (hU : IsOpen U) (hmem : α.flow (x₀, t) ∈ U) :
+    (fun τ : ℝ => α.flow (x₀, τ)) ⁻¹' U ∈ 𝓝 t :=
+  α.flow_eventually_mem_of_mem_Ioo (mem_closedBall_self r.2) ht hU hmem
 
 /-- Each tangent-map time slice of a variational local flow is continuous within
 the Picard interval. -/

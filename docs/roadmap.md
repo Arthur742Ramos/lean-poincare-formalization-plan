@@ -741,11 +741,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       closed ball, closed-interval ODE derivative data, ordinary interior
       derivative extractors, named Picard-interval continuity, and Lipschitz
       dependence on the initial point; it also packages the continuous space-time
-       partial-flow form needed for chart gluing, named base-flow, tangent-map,
-       and vector-slot time-slice continuity bridges for continuous/variational
-         packages, including direct within-interval and interior pointwise
-         continuity readouts and open-interior `ContinuousOn` readouts, plus the
-         autonomous `C¹` integral-curve specialization with
+        partial-flow form needed for chart gluing, named base-flow, tangent-map,
+        and vector-slot time-slice continuity bridges for continuous/variational
+          packages, including direct within-interval and interior pointwise
+          continuity readouts, open-interior `ContinuousOn` readouts, and
+          interior open-set eventual-membership readouts for local, continuous,
+          and variational model-flow curves, plus the
+          autonomous `C¹` integral-curve specialization with
         open-interval continuity and a packaged `LocalFlowSolution` extraction
         on a smaller closed interval, now with a direct localized existence form
         for any smaller closed interval containing the base time and any smaller

@@ -791,7 +791,10 @@ continuity needed before gluing local solutions. Continuous and variational
 local-flow packages now expose named base-flow, tangent-map, and vector-slot
 time-slice continuity bridges on the Picard interval, including direct
 within-interval, interior pointwise, and open-interior `ContinuousOn`
-readouts, and the autonomous `C¹`
+readouts. Local, continuous, and variational model-flow packages now also expose
+interior open-set eventual-membership readouts, turning continuity plus
+membership in a chart domain into the source-neighborhood facts expected by the
+chart-ODE gauge-flow constructors. The autonomous `C¹`
 local-integral-curve specialization now also returns continuity on its open
 existence interval. Variational local-flow uniqueness now also has direct
 interior and closed-interval vector-slot `A(t) v` bridges derived from
