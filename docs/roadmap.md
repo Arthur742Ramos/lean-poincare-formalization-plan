@@ -681,12 +681,15 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         pointwise `HasMFDerivAt[s]`, ordinary-on-time-set `HasMFDerivAt`, and
          unrestricted `HasMFDerivAt` data produced by
          ODE/integral-curve theorems, and the raw, fixed-IVP, and theorem-family
-         layers now also accept the preferred-chart ODE shape directly via
-         continuity plus centered `HasDerivWithinAt`/`HasDerivAt` chart
-         derivatives, with source-neighborhood variants that derive manifold
-         curve continuity from eventual membership in the centered chart source,
-         now including direct raw, fixed-IVP, and theorem-family source-membership
-         readouts for closed-interval within filters and ordinary neighborhood
+        layers now also accept the preferred-chart ODE shape directly via
+        continuity plus centered `HasDerivWithinAt`/`HasDerivAt` chart
+        derivatives, with source-neighborhood variants that derive manifold
+        curve continuity from eventual membership in the centered chart source,
+        and the raw layer now also accepts model-vector-field chart ODE data
+        directly after an along-flow RHS identification with the target gauge
+        field, including the closed-Picard `Icc` to open-interior `Ioo` form.
+        The same seam includes direct raw, fixed-IVP, and theorem-family source-membership
+        readouts for closed-interval within filters and ordinary neighborhood
          filters plus unrestricted ordinary `HasDerivAt` source-neighborhood
          constructors for raw, fixed-IVP, and theorem-family existence,
          named-derivative-family adapters,

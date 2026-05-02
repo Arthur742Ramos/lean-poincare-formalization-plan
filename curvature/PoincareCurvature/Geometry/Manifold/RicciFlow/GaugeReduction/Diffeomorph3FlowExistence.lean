@@ -684,6 +684,48 @@ theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_sour
   ⟨of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
     maps3 anchored hsource hderiv⟩
 
+/-- Build a raw `C^3` gauge-flow witness from centered preferred-chart ODE
+data for a model vector field, after identifying that model field with the
+target field along the candidate flow. -/
+noncomputable def of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (Y t ((maps3 t) x)) s t)
+    (hY : ∀ t ∈ s, ∀ x : M, Y t ((maps3 t) x) = X t ((maps3 t) x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    maps3 anchored hsource
+    (fun t ht x ↦ by simpa [hY t ht x] using hderiv t ht x)
+
+/-- Proof-level raw `C^3` gauge-flow existence from centered preferred-chart ODE
+data for a model vector field identified with the target field along the
+candidate flow. -/
+theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (Y t ((maps3 t) x)) s t)
+    (hY : ∀ t ∈ s, ∀ x : M, Y t ((maps3 t) x) = X t ((maps3 t) x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq
+    maps3 anchored hsource hderiv hY⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from
 ordinary pointwise manifold derivatives available at each time of `s`.  This
 matches local ODE constructions that first promote a closed-interval derivative
@@ -894,6 +936,48 @@ theorem nonempty_of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
   ⟨of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
     maps3 anchored hsource hderiv⟩
 
+/-- Build a raw `C^3` gauge-flow witness from ordinary centered preferred-chart
+ODE data for a model vector field, after identifying that model field with the
+target field along the candidate flow. -/
+noncomputable def of_hasDerivAtOn_extChartAt_eval_self_of_vectorField_eq
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝 t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (Y t ((maps3 t) x)) t)
+    (hY : ∀ t ∈ s, ∀ x : M, Y t ((maps3 t) x) = X t ((maps3 t) x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
+    (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    maps3 anchored hsource
+    (fun t ht x ↦ by simpa [hY t ht x] using hderiv t ht x)
+
+/-- Proof-level raw `C^3` gauge-flow existence from ordinary centered
+preferred-chart ODE data for a model vector field identified with the target
+field along the candidate flow. -/
+theorem nonempty_of_hasDerivAtOn_extChartAt_eval_self_of_vectorField_eq
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈ 𝓝 t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (Y t ((maps3 t) x)) t)
+    (hY : ∀ t ∈ s, ∀ x : M, Y t ((maps3 t) x) = X t ((maps3 t) x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_hasDerivAtOn_extChartAt_eval_self_of_vectorField_eq
+    maps3 anchored hsource hderiv hY⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on the open Picard
 interior from centered preferred-chart ODE data proved within the closed Picard
 interval. -/
@@ -940,6 +1024,53 @@ theorem nonempty_of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀) :=
   ⟨of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source
     maps3 anchored hsource hderiv⟩
+
+/-- Build a raw `C^3` gauge-flow witness on the open Picard interior from
+closed-interval centered preferred-chart ODE data for a model vector field,
+after identifying that model field with the target field along the candidate
+flow on the closed interval. -/
+noncomputable def of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈
+        𝓝[Icc tmin tmax] t)
+    (hderiv : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (Y t ((maps3 t) x)) (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      Y t ((maps3 t) x) = X t ((maps3 t) x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ :=
+  of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source
+    (I := I) (M := M) (X := X) (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    maps3 anchored hsource
+    (fun t ht x ↦ by simpa [hY t ht x] using hderiv t ht x)
+
+/-- Proof-level raw `C^3` gauge-flow existence on the open Picard interior from
+closed-interval centered preferred-chart ODE data for a model vector field
+identified with the target field along the candidate flow. -/
+theorem nonempty_of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hsource : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' (extChartAt I ((maps3 t) x)).source ∈
+        𝓝[Icc tmin tmax] t)
+    (hderiv : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I ((maps3 t) x)) ((maps3 τ) x))
+        (Y t ((maps3 t) x)) (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      Y t ((maps3 t) x) = X t ((maps3 t) x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀) :=
+  ⟨of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq
+    maps3 anchored hsource hderiv hY⟩
 
 /-- Build an intrinsic DeTurck raw gauge-flow witness on the open Picard
 interior from named preferred-chart ODE data proved within the closed Picard

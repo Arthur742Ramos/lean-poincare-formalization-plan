@@ -807,8 +807,11 @@ the flow, its manifold or preferred-chart derivative package is promoted to the
 intrinsic derivative package directly. The fixed-IVP and theorem-family chosen
 solution packages now mirror the same adapters, so Picard model-vector-field
 derivatives can enter the named derivative and chart-ODE packages without first
-hand-specializing the RHS at each solution. Those bridges now have direct
-derivative-data readouts back to
+hand-specializing the RHS at each solution. The raw gauge-flow existence layer
+now also has one-step model-vector-field chart ODE constructors that perform the
+same along-flow RHS rewrite while building `Diffeomorph3GaugeFlowOn`, including
+the closed-Picard `Icc` to open-interior `Ioo` handoff. Those bridges now have
+direct derivative-data readouts back to
 `ChosenIntrinsicDeTurckGaugeFlowDerivative` and
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
 the existing scalar gauge-pullback route after supplying the chart-ODE package.

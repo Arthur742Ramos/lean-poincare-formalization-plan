@@ -612,13 +612,16 @@ now packages the matching intrinsic boundary
       fixed-IVP, and theorem-family source-membership readouts for both
       closed-interval within filters and ordinary neighborhood filters, plus
       unrestricted ordinary `HasDerivAt` forms, named
-       fixed-IVP and theorem-family preferred-chart ODE constructors from the
-       same chart-ODE data,
-       derivative-family adapters, including an ordinary-on-time-set
-         `ofDerivativeAtFamily` bridge and named source-neighborhood chart-ODE
-         `ofChartDerivative` / `ofChartDerivativeAt` bridges with
-         direct primitive derivative-data readouts, within-filter/ordinary
-         eventual-equality transfers from local model-coordinate curves, and
+        fixed-IVP and theorem-family preferred-chart ODE constructors from the
+        same chart-ODE data,
+        derivative-family adapters, including an ordinary-on-time-set
+          `ofDerivativeAtFamily` bridge and named source-neighborhood chart-ODE
+          `ofChartDerivative` / `ofChartDerivativeAt` bridges with
+          direct raw constructors from model-vector-field chart ODE data once
+          that model field is identified with the target gauge field along the
+          candidate flow, including closed-Picard `Icc` to open-interior `Ioo`,
+          direct primitive derivative-data readouts, within-filter/ordinary
+          eventual-equality transfers from local model-coordinate curves, and
          direct lower-level chart-to-manifold derivative bridges,
          neighborhood-time upgrades from within-time-set to ordinary-at-time
          primitive derivative and chart-ODE data, monotone restriction of
