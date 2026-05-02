@@ -56,6 +56,10 @@ theorem space_dist_le (p q : ℝ × X) :
   rw [parabolicDistance, dist_self]
   exact max_eq_left (Real.sqrt_nonneg _)
 
+theorem same_space_rpow (t τ : ℝ) (x : X) (α : ℝ) :
+    (parabolicDistance (t, x) (τ, x)) ^ α = |t - τ| ^ (α / 2) := by
+  rw [same_space, Real.rpow_div_two_eq_sqrt α (abs_nonneg _)]
+
 /-- A parabolic ball bound controls the spatial distance. -/
 theorem space_dist_le_of_le {R : ℝ} (h : parabolicDistance p q ≤ R) :
     dist p.2 q.2 ≤ R :=
@@ -340,6 +344,14 @@ theorem time_slice (h : ParabolicHolderWith C α u s) {t τ : ℝ} {x : X}
     ‖u (t, x) - u (τ, x)‖ ≤ C * (Real.sqrt |t - τ|) ^ α := by
   simpa using h ht hτ
 
+/-- On fixed spatial points, parabolic `α`-Holder control is ordinary time Holder control with
+exponent `α / 2`. -/
+theorem time_slice_half_exponent (h : ParabolicHolderWith C α u s) {t τ : ℝ} {x : X}
+    (ht : (t, x) ∈ s) (hτ : (τ, x) ∈ s) :
+    ‖u (t, x) - u (τ, x)‖ ≤ C * |t - τ| ^ (α / 2) := by
+  rw [Real.rpow_div_two_eq_sqrt α (abs_nonneg (t - τ))]
+  exact h.time_slice ht hτ
+
 /-- Restricting a parabolic Holder estimate to a fixed time gives the ordinary spatial Holder
 estimate. -/
 theorem space_slice (h : ParabolicHolderWith C α u s) {t : ℝ} {x y : X}
@@ -381,6 +393,15 @@ theorem time_slice (h : ParabolicHolderOn α u s) :
       ‖u (t, x) - u (τ, x)‖ ≤ C * (Real.sqrt |t - τ|) ^ α := by
   rcases h with ⟨C, hC, hCu⟩
   exact ⟨C, hC, fun {t τ x} ht hτ => hCu.time_slice (t := t) (τ := τ) (x := x) ht hτ⟩
+
+/-- A parabolic Holder function has ordinary time Holder control with exponent `α / 2` on every
+time slice through a fixed spatial point. -/
+theorem time_slice_half_exponent (h : ParabolicHolderOn α u s) :
+    ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ C * |t - τ| ^ (α / 2) := by
+  rcases h with ⟨C, hC, hCu⟩
+  exact ⟨C, hC,
+    fun {t τ x} ht hτ => hCu.time_slice_half_exponent (t := t) (τ := τ) (x := x) ht hτ⟩
 
 /-- A parabolic Holder function has an ordinary Holder estimate on every spatial slice. -/
 theorem space_slice (h : ParabolicHolderOn α u s) :
