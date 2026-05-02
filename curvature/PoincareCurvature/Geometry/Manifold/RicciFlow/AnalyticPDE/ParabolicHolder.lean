@@ -381,6 +381,19 @@ theorem subset_metric_ball {ε : ℝ} (ht : timeRadius ≤ ε) (hs : spaceRadius
     (by simpa [Real.dist_eq, abs_sub_comm] using lt_of_lt_of_le hq.1 ht)
     (by simpa [dist_comm] using lt_of_lt_of_le hq.2 hs)
 
+/-- Product parabolic cylinders form a local base for the ordinary product topology. -/
+theorem exists_subset_of_mem_nhds {s : Set (ℝ × X)} (hs : s ∈ 𝓝 p) :
+    ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      parabolicCylinder p timeRadius spaceRadius ⊆ s := by
+  rcases Metric.mem_nhds_iff.1 hs with ⟨ε, hε, hεs⟩
+  let δ : ℝ := ε / 2
+  have hδpos : 0 < δ := half_pos hε
+  have hδle : δ ≤ ε := by
+    unfold δ
+    linarith
+  exact ⟨δ, hδpos, δ, hδpos,
+    (subset_metric_ball (p := p) (timeRadius := δ) (spaceRadius := δ) hδle hδle).trans hεs⟩
+
 /-- A product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at most
 `R` is contained in the parabolic ball of radius `R`. -/
 theorem subset_ball_of_le_sq (hR : 0 < R) (ht : timeRadius ≤ R ^ 2)
