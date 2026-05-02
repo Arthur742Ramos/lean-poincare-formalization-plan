@@ -1324,7 +1324,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      exposes the ambient state-preserving Banach solution with common-interval
      uniqueness and symmetric positive-definite persistence, the represented
      continuous Riemannian-metric-valued curve, and a paired
-     smooth-realization/reverse-encoding fiber. The interval raw-gauge route
+     smooth-realization/reverse-encoding fiber as a single selected witness. The
+     interval raw-gauge route
      similarly exposes the ambient state-preserving Banach solution with
      terminal-time control and common-interval uniqueness, now including the
      stronger symmetric positive-definite persistence readout and the represented
