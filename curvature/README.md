@@ -628,7 +628,8 @@ now packages the matching intrinsic boundary
         open-interior open-set eventual-membership readouts for
         local/continuous/variational model-flow curves and for variational
         tangent maps and fixed vector slots, plus `(flow, tangent)` product-graph
-        readouts and `(t, flow, tangent)` time-graph readouts,
+        readouts, `(t, flow, tangent)` time-graph readouts, and fixed two-vector-slot
+        `(t, flow, A(t)u, A(t)v)` readouts,
         plus Gronwall uniqueness bridges for packaged and continuous
       space-time model flows; the
       raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual

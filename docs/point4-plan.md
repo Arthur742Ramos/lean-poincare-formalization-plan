@@ -836,7 +836,8 @@ so tangent-coordinate chart-domain facts can be transported directly from the
 linearized ODE. It now also exposes closed-interval and open-interior product
 readouts for `(flow(t), tangent(t))`, matching chart-local derivative domains
 that depend on the base point and tangent map together, plus the corresponding
-time-graph readouts for `(t, flow(t), tangent(t))`. The autonomous `C¹`
+time-graph readouts for `(t, flow(t), tangent(t))` and for fixed two-vector
+slots `(t, flow(t), A(t)u, A(t)v)`. The autonomous `C¹`
 local-integral-curve specialization now also returns continuity on its open
 existence interval. Variational local-flow uniqueness now also has direct
 interior and closed-interval vector-slot `A(t) v` bridges derived from

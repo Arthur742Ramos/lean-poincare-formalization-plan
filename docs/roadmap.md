@@ -774,7 +774,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           model-flow curves, now including tangent-map and fixed-vector-slot
           eventual-membership readouts and `(flow, tangent)` product-graph
           readouts, plus `(t, flow, tangent)` time-graph readouts, for
-          variational packages, plus the
+          variational packages, and fixed two-vector-slot
+          `(t, flow, A(t)u, A(t)v)` readouts for scalar pullback domains, plus the
           autonomous `C¹` integral-curve specialization with
         open-interval continuity and a packaged `LocalFlowSolution` extraction
         on a smaller closed interval, now with a direct localized existence form

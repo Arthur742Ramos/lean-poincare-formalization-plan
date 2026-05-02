@@ -1820,6 +1820,93 @@ theorem center_tangent_apply_eventually_mem_of_mem_Ioo
     (fun τ : ℝ => α.tangent x₀ τ v) ⁻¹' U ∈ 𝓝 t :=
   α.tangent_apply_eventually_mem_of_mem_Ioo (mem_closedBall_self r.2) ht v hU hmem
 
+/-- The time/base-flow/two-vector-slot graph is continuous within the Picard interval. -/
+theorem time_flow_tangent_apply₂_continuousWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) (u v : V) :
+    ContinuousWithinAt
+      (fun τ : ℝ => (τ, α.flow (x, τ), α.tangent x τ u, α.tangent x τ v))
+      (Icc tmin tmax) t :=
+  continuousWithinAt_id.prodMk
+    ((α.flow_continuousWithinAt hx ht).prodMk
+      ((α.tangent_apply_continuousWithinAt hx ht u).prodMk
+        (α.tangent_apply_continuousWithinAt hx ht v)))
+
+/-- Center time/base-flow/two-vector-slot graph continuity within the Picard interval. -/
+theorem center_time_flow_tangent_apply₂_continuousWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) (u v : V) :
+    ContinuousWithinAt
+      (fun τ : ℝ => (τ, α.flow (x₀, τ), α.tangent x₀ τ u, α.tangent x₀ τ v))
+      (Icc tmin tmax) t :=
+  α.time_flow_tangent_apply₂_continuousWithinAt (mem_closedBall_self r.2) ht u v
+
+/-- The time/base-flow/two-vector-slot graph is eventually, relative to the
+closed Picard interval, in any open product set containing its endpoint value. -/
+theorem time_flow_tangent_apply₂_eventuallyWithin_mem_of_mem_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) (u v : V)
+    {U : Set (ℝ × V × V × V)} (hU : IsOpen U)
+    (hmem : (t, α.flow (x, t), α.tangent x t u, α.tangent x t v) ∈ U) :
+    (fun τ : ℝ => (τ, α.flow (x, τ), α.tangent x τ u, α.tangent x τ v)) ⁻¹' U ∈
+      𝓝[Icc tmin tmax] t :=
+  (α.time_flow_tangent_apply₂_continuousWithinAt hx ht u v) (hU.mem_nhds hmem)
+
+/-- Center specialization of
+`VariationalLocalFlowSolution.time_flow_tangent_apply₂_eventuallyWithin_mem_of_mem_Icc`. -/
+theorem center_time_flow_tangent_apply₂_eventuallyWithin_mem_of_mem_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Icc tmin tmax) (u v : V)
+    {U : Set (ℝ × V × V × V)} (hU : IsOpen U)
+    (hmem : (t, α.flow (x₀, t), α.tangent x₀ t u, α.tangent x₀ t v) ∈ U) :
+    (fun τ : ℝ => (τ, α.flow (x₀, τ), α.tangent x₀ τ u, α.tangent x₀ τ v)) ⁻¹' U ∈
+      𝓝[Icc tmin tmax] t :=
+  α.time_flow_tangent_apply₂_eventuallyWithin_mem_of_mem_Icc
+    (mem_closedBall_self r.2) ht u v hU hmem
+
+/-- The time/base-flow/two-vector-slot graph is ordinarily continuous on the
+open Picard interior. -/
+theorem time_flow_tangent_apply₂_continuousAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) (u v : V) :
+    ContinuousAt
+      (fun τ : ℝ => (τ, α.flow (x, τ), α.tangent x τ u, α.tangent x τ v)) t :=
+  continuousAt_id.prodMk
+    ((α.flow_continuousAt_of_mem_Ioo hx ht).prodMk
+      ((α.tangent_apply_continuousAt_of_mem_Ioo hx ht u).prodMk
+        (α.tangent_apply_continuousAt_of_mem_Ioo hx ht v)))
+
+/-- Center time/base-flow/two-vector-slot graph continuity on the open Picard interior. -/
+theorem center_time_flow_tangent_apply₂_continuousAt_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (u v : V) :
+    ContinuousAt
+      (fun τ : ℝ => (τ, α.flow (x₀, τ), α.tangent x₀ τ u, α.tangent x₀ τ v)) t :=
+  α.time_flow_tangent_apply₂_continuousAt_of_mem_Ioo (mem_closedBall_self r.2) ht u v
+
+/-- The time/base-flow/two-vector-slot graph is eventually in any open product
+set containing its interior-time value. -/
+theorem time_flow_tangent_apply₂_eventually_mem_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {x : V}
+    (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Ioo tmin tmax) (u v : V)
+    {U : Set (ℝ × V × V × V)} (hU : IsOpen U)
+    (hmem : (t, α.flow (x, t), α.tangent x t u, α.tangent x t v) ∈ U) :
+    (fun τ : ℝ => (τ, α.flow (x, τ), α.tangent x τ u, α.tangent x τ v)) ⁻¹' U ∈
+      𝓝 t :=
+  (α.time_flow_tangent_apply₂_continuousAt_of_mem_Ioo hx ht u v) (hU.mem_nhds hmem)
+
+/-- Center specialization of
+`VariationalLocalFlowSolution.time_flow_tangent_apply₂_eventually_mem_of_mem_Ioo`. -/
+theorem center_time_flow_tangent_apply₂_eventually_mem_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r) {t : ℝ}
+    (ht : t ∈ Ioo tmin tmax) (u v : V)
+    {U : Set (ℝ × V × V × V)} (hU : IsOpen U)
+    (hmem : (t, α.flow (x₀, t), α.tangent x₀ t u, α.tangent x₀ t v) ∈ U) :
+    (fun τ : ℝ => (τ, α.flow (x₀, τ), α.tangent x₀ τ u, α.tangent x₀ τ v)) ⁻¹' U ∈
+      𝓝 t :=
+  α.time_flow_tangent_apply₂_eventually_mem_of_mem_Ioo
+    (mem_closedBall_self r.2) ht u v hU hmem
+
 /-- Each base-flow time slice of a variational local flow is continuous on the
 Picard interval. -/
 theorem flow_continuousOn
