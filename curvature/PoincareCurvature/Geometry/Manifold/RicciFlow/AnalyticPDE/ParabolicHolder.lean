@@ -526,6 +526,16 @@ theorem subset_metric_ball {ε : ℝ} (ht : timeRadius ≤ ε) (hs : spaceRadius
     (by simpa [Real.dist_eq, abs_sub_comm] using lt_of_lt_of_le hq.1 ht)
     (by simpa [dist_comm] using lt_of_lt_of_le hq.2 hs)
 
+theorem metric_closedBall_subset {δ : ℝ}
+    (ht : δ < timeRadius) (hs : δ < spaceRadius) :
+    Metric.closedBall p δ ⊆ parabolicCylinder p timeRadius spaceRadius := by
+  intro q hq
+  rw [Metric.mem_closedBall, dist_comm, Prod.dist_eq] at hq
+  exact ⟨lt_of_le_of_lt (by simpa [Real.dist_eq, abs_sub_comm] using
+      (le_max_left (dist p.1 q.1) (dist p.2 q.2)).trans hq) ht,
+    lt_of_le_of_lt (by simpa using
+      (le_max_right (dist p.1 q.1) (dist p.2 q.2)).trans hq) hs⟩
+
 /-- Product parabolic cylinders form a local base for the ordinary product topology. -/
 theorem exists_subset_of_mem_nhds {s : Set (ℝ × X)} (hs : s ∈ 𝓝 p) :
     ∃ timeRadius > 0, ∃ spaceRadius > 0,
@@ -538,6 +548,36 @@ theorem exists_subset_of_mem_nhds {s : Set (ℝ × X)} (hs : s ∈ 𝓝 p) :
     linarith
   exact ⟨δ, hδpos, δ, hδpos,
     (subset_metric_ball (p := p) (timeRadius := δ) (spaceRadius := δ) hδle hδle).trans hεs⟩
+
+theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
+    (ht : 0 < timeRadius) (hs : 0 < spaceRadius) :
+    ∃ N ⊆ K, N.Finite ∧ K ⊆ ⋃ y ∈ N, parabolicCylinder y timeRadius spaceRadius := by
+  let δ : ℝ := min timeRadius spaceRadius / 2
+  have hδpos : 0 < δ := half_pos (lt_min ht hs)
+  have hδ_time : δ < timeRadius := by
+    unfold δ
+    exact (half_lt_self (lt_min ht hs)).trans_le (min_le_left _ _)
+  have hδ_space : δ < spaceRadius := by
+    unfold δ
+    exact (half_lt_self (lt_min ht hs)).trans_le (min_le_right _ _)
+  let ε : ℝ≥0 := ⟨δ, hδpos.le⟩
+  have hεne : ε ≠ 0 := by
+    intro hε
+    have hδ0 : δ = 0 := by
+      simpa [ε] using congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+    linarith
+  rcases Metric.exists_finite_isCover_of_isCompact (s := K) (ε := ε) hεne hK with
+    ⟨N, hNK, hNfinite, hcover⟩
+  refine ⟨N, hNK, hNfinite, ?_⟩
+  have hcover' : K ⊆ ⋃ y ∈ N, Metric.closedBall y (ε : ℝ) :=
+    hcover.subset_iUnion_closedBall
+  intro z hz
+  rcases mem_iUnion.1 (hcover' hz) with ⟨y, hy⟩
+  rcases mem_iUnion.1 hy with ⟨hyN, hzball⟩
+  refine mem_iUnion.2 ⟨y, mem_iUnion.2 ⟨hyN, ?_⟩⟩
+  exact (metric_closedBall_subset (p := y) (timeRadius := timeRadius)
+    (spaceRadius := spaceRadius) (δ := (ε : ℝ))
+    (by simpa [ε] using hδ_time) (by simpa [ε] using hδ_space)) hzball
 
 /-- A product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at most
 `R` is contained in the parabolic ball of radius `R`. -/
@@ -626,12 +666,52 @@ theorem subset_metric_closedBall {ε : ℝ} (ht : timeRadius ≤ ε) (hs : space
     (by simpa [Real.dist_eq, abs_sub_comm] using le_trans hq.1 ht)
     (by simpa [dist_comm] using le_trans hq.2 hs)
 
+theorem metric_closedBall_subset {δ : ℝ}
+    (ht : δ ≤ timeRadius) (hs : δ ≤ spaceRadius) :
+    Metric.closedBall p δ ⊆ parabolicClosedCylinder p timeRadius spaceRadius := by
+  intro q hq
+  rw [Metric.mem_closedBall, dist_comm, Prod.dist_eq] at hq
+  exact ⟨(by simpa [Real.dist_eq, abs_sub_comm] using
+      ((le_max_left (dist p.1 q.1) (dist p.2 q.2)).trans hq).trans ht),
+    (by simpa using ((le_max_right (dist p.1 q.1) (dist p.2 q.2)).trans hq).trans hs)⟩
+
 theorem isCompact [ProperSpace X] (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
     IsCompact (parabolicClosedCylinder p timeRadius spaceRadius) := by
   exact (isCompact_closedBall p (max timeRadius spaceRadius)).of_isClosed_subset
     (isClosed p timeRadius spaceRadius)
     (subset_metric_closedBall (p := p) (timeRadius := timeRadius) (spaceRadius := spaceRadius)
       (le_max_left _ _) (le_max_right _ _))
+
+theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
+    (ht : 0 < timeRadius) (hs : 0 < spaceRadius) :
+    ∃ N ⊆ K, N.Finite ∧ K ⊆ ⋃ y ∈ N,
+      parabolicClosedCylinder y timeRadius spaceRadius := by
+  let δ : ℝ := min timeRadius spaceRadius / 2
+  have hδpos : 0 < δ := half_pos (lt_min ht hs)
+  have hδ_time : δ ≤ timeRadius := by
+    unfold δ
+    exact (half_le_self (le_of_lt (lt_min ht hs))).trans (min_le_left _ _)
+  have hδ_space : δ ≤ spaceRadius := by
+    unfold δ
+    exact (half_le_self (le_of_lt (lt_min ht hs))).trans (min_le_right _ _)
+  let ε : ℝ≥0 := ⟨δ, hδpos.le⟩
+  have hεne : ε ≠ 0 := by
+    intro hε
+    have hδ0 : δ = 0 := by
+      simpa [ε] using congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+    linarith
+  rcases Metric.exists_finite_isCover_of_isCompact (s := K) (ε := ε) hεne hK with
+    ⟨N, hNK, hNfinite, hcover⟩
+  refine ⟨N, hNK, hNfinite, ?_⟩
+  have hcover' : K ⊆ ⋃ y ∈ N, Metric.closedBall y (ε : ℝ) :=
+    hcover.subset_iUnion_closedBall
+  intro z hz
+  rcases mem_iUnion.1 (hcover' hz) with ⟨y, hy⟩
+  rcases mem_iUnion.1 hy with ⟨hyN, hzball⟩
+  refine mem_iUnion.2 ⟨y, mem_iUnion.2 ⟨hyN, ?_⟩⟩
+  exact (metric_closedBall_subset (p := y) (timeRadius := timeRadius)
+    (spaceRadius := spaceRadius) (δ := (ε : ℝ))
+    (by simpa [ε] using hδ_time) (by simpa [ε] using hδ_space)) hzball
 
 /-- A closed product parabolic cylinder whose time radius is at most `R^2` and spatial radius is at
 most `R` is contained in the closed parabolic ball of radius `R`. -/

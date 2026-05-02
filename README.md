@@ -323,8 +323,8 @@ packages the canonical stationary local solution attached to
   product cylinders, exact standard ball/cylinder identifications,
   closed-to-open shrink inclusions for balls/cylinders,
   open-to-closed closure containment, proper-space compactness for closed
-  balls/cylinders, finite open/closed parabolic ball covers of compact sets,
-  continuity and uniform continuity from
+  balls/cylinders, finite open/closed parabolic ball and cylinder covers of
+  compact sets, continuity and uniform continuity from
   positive Hölder exponent, explicit closed-ball/cylinder oscillation bounds,
   estimate monotonicity in the controlling constants, and add/subtract/smul
   closure estimates plus the bounded product estimate for
