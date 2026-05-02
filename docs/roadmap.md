@@ -845,7 +845,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
             `CoordinatePullbackMetricOperatorDerivativeWithinOn` /
             `CoordinatePullbackMetricOperatorDerivativeWithinOnOpen` endpoint
             coordinate packages with scalar, tensor, raw-flow, and
-            closed-Picard `Ioo` promotion wrappers,
+            closed-Picard `Ioo` promotion wrappers, plus variational local-flow
+            constructors and raw closed-Picard tensor wrappers for those
+            operator-coordinate packages,
            direct product-Picard bridges into scalar-readout,
            metric-coordinate-field, and finite-cover/readout-field tensor
            time-derivative routes, including closed-Picard within-filter

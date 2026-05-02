@@ -326,7 +326,10 @@ now packages the matching intrinsic boundary
         `CoordinatePullbackMetricOperatorDerivativeWithinOnOpen`, with scalar,
         tensor, raw gauge-flow, and closed-Picard `Ioo` promotion wrappers, so a
         chart/Picard readout `F(t,y,A)` can enter the coordinate package layer
-        before choosing a tensor route. An endpoint readout
+        before choosing a tensor route. Variational local-flow constructors now
+        fill those operator-coordinate packages directly from the model ODE
+        derivatives, and the raw closed-Picard API exposes matching
+        `HasTimeDerivativeOn` wrappers. An endpoint readout
         bridge now transfers the closed-interval geometric-slot variational theorem
        from any locally equal finite-cover metric-coordinate bilinear-form readout,
        matching the Banach readout output shape before interior tensor

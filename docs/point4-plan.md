@@ -422,7 +422,9 @@ routes. The named coordinate package layer now also has
 `CoordinatePullbackMetricOperatorDerivativeWithinOnOpen`, plus scalar, tensor,
 raw gauge-flow, and closed-Picard `Ioo` promotion wrappers, so the same
 operator-domain readouts can be stored as endpoint coordinate derivative data
-before selecting a final tensor route. This removes a manual tangent
+before selecting a final tensor route. Variational local-flow constructors now
+fill those packages directly from the model base/tangent ODE derivatives, and
+raw closed-Picard wrappers promote them to `HasTimeDerivativeOn`. This removes a manual tangent
 Lipschitz obligation from the future chart-gluing step and isolates the
 remaining product Picard hypotheses to base-field and linearized-coefficient
 estimates. The same layer now has the closed-ball specialization matching
