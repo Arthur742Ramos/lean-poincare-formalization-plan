@@ -802,6 +802,41 @@ theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
           (mul_le_mul (hu.holder hp hq) (hv.bounded hq) (norm_nonneg _) hH₁d_nonneg)
       _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
 
+theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+    {B₁ B₂ H₁ H₂ α : ℝ} {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
+    (ha : ParabolicC0AlphaWith B₁ H₁ α a s)
+    (hu : ParabolicC0AlphaWith B₂ H₂ α u s)
+    (hB₁ : 0 ≤ B₁) :
+    ParabolicC0AlphaWith (B₁ * B₂) (B₁ * H₂ + B₂ * H₁) α
+      (fun z => a z • u z) s := by
+  constructor
+  · intro p hp
+    rw [norm_smul]
+    exact mul_le_mul (ha.bounded hp) (hu.bounded hp) (norm_nonneg _) hB₁
+  · intro p hp q hq
+    let dα := (parabolicDistance p q) ^ α
+    have hsplit :
+        a p • u p - a q • u q = a p • (u p - u q) + (a p - a q) • u q := by
+      calc
+        a p • u p - a q • u q =
+            (a p • u p - a p • u q) + (a p • u q - a q • u q) := by
+          abel
+        _ = a p • (u p - u q) + (a p - a q) • u q := by
+          rw [smul_sub, sub_smul]
+    have hH₁d_nonneg : 0 ≤ H₁ * dα :=
+      (norm_nonneg (a p - a q)).trans (ha.holder hp hq)
+    calc
+      ‖a p • u p - a q • u q‖
+          = ‖a p • (u p - u q) + (a p - a q) • u q‖ := by rw [hsplit]
+      _ ≤ ‖a p • (u p - u q)‖ + ‖(a p - a q) • u q‖ := norm_add_le _ _
+      _ = ‖a p‖ * ‖u p - u q‖ + ‖a p - a q‖ * ‖u q‖ := by
+        rw [norm_smul, norm_smul]
+      _ ≤ B₁ * (H₂ * dα) + (H₁ * dα) * B₂ :=
+        add_le_add
+          (mul_le_mul (ha.bounded hp) (hu.holder hp hq) (norm_nonneg _) hB₁)
+          (mul_le_mul (ha.holder hp hq) (hu.bounded hq) (norm_nonneg _) hH₁d_nonneg)
+      _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaWith (‖c‖ * B) (‖c‖ * H) α (fun z => c • u z) s :=
@@ -865,6 +900,16 @@ theorem mul {A : Type*} [NormedRing A] {u v : ℝ × X → A} {s : Set (ℝ × X
   exact ⟨B₁ * B₂, mul_nonneg hB₁ hB₂,
     B₁ * H₂ + B₂ * H₁, add_nonneg (mul_nonneg hB₁ hH₂) (mul_nonneg hB₂ hH₁),
     hBH₁.mul hBH₂ hB₁⟩
+
+theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+    {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
+    (ha : ParabolicC0AlphaOn α a s) (hu : ParabolicC0AlphaOn α u s) :
+    ParabolicC0AlphaOn α (fun z => a z • u z) s := by
+  rcases ha with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
+  rcases hu with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
+  exact ⟨B₁ * B₂, mul_nonneg hB₁ hB₂,
+    B₁ * H₂ + B₂ * H₁, add_nonneg (mul_nonneg hB₁ hH₂) (mul_nonneg hB₂ hH₁),
+    hBH₁.smul_fun hBH₂ hB₁⟩
 
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicC0AlphaOn α u s) :
