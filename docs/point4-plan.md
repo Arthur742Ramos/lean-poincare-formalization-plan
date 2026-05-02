@@ -723,7 +723,14 @@ derivatives without first passing through a closed-interval within derivative.
 Both the closed-interval and open-interior four-variable routes now also have
 within-filter/ordinary eventual-equality transfer forms, so chart-local
 geometric scalar identities can reuse those product-domain derivatives after
-they are identified with the model-coordinate readout near the endpoint.
+they are identified with the model-coordinate readout near the endpoint. The
+raw closed-Picard tensor route now consumes those scalar readouts directly via
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadoutOpen`
+and
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadoutWithinOpen`,
+so local chart/Banach data on `(t, y, A(t)u, A(t)v)` no longer has to be
+repackaged as a two-variable bilinear-form field before producing
+`HasTimeDerivativeOn`.
 
 ### Item 2 — raw `C³` gauge-flow existence on a compact manifold
 
