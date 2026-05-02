@@ -246,7 +246,10 @@ The fully localized product-domain route now also has a variational-local-flow
 form that assumes product-domain convergence only for the model Picard graph;
 closed-interval base-flow equality transports that convergence to the raw
 coordinate graph and rewrites the model ODE velocity to the raw gauge vector
-field before applying the domain-restricted gauge-pullback theorem.
+field before applying the domain-restricted gauge-pullback theorem. A further
+open-product-domain form derives the model graph convergence from the
+variational local-flow continuity package whenever the derivative domain is open
+and contains the Picard graph endpoint.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow

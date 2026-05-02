@@ -383,7 +383,9 @@ now packages the matching intrinsic boundary
          equality and a fully localized geometric-slot form in actual
          pushed-forward tangent vectors, plus a variational-local-flow form that
          transports product-domain convergence from the model Picard graph to the
-         raw coordinate graph using closed-interval base-flow equality, the
+         raw coordinate graph using closed-interval base-flow equality, with an
+         open-domain variant deriving model graph convergence from variational
+         local-flow continuity, the
          model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

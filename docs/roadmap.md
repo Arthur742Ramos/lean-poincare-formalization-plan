@@ -688,8 +688,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          including a fully localized geometric-slot form in actual pushed-forward
          tangent vectors and a variational-local-flow form that transports
          product-domain convergence from the model Picard graph to the raw
-         coordinate graph by closed-interval base-flow equality, without being
-         upgraded to global `HasFDerivAt`
+         coordinate graph by closed-interval base-flow equality; when the
+         derivative domain is open and contains the Picard graph endpoint, model
+         graph convergence is derived from variational-flow continuity instead
+         of being assumed, all without being upgraded to global `HasFDerivAt`
          statements. It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
