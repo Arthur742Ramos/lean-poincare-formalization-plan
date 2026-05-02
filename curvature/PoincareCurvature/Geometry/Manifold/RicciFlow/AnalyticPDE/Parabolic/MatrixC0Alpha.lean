@@ -182,6 +182,28 @@ theorem vector_dot_entry {n A : Type*} [Fintype n] [NormedRing A]
       (u := fun i z => v z i * w z i)
       (fun i _hi => (hv i).mul (hw i)))
 
+/-- Finite bilinear matrix contractions `v · (M w)` preserve parabolic `C^{0,α}` control from
+entrywise control. -/
+theorem matrix_bilinear_entry {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
+    {v : ℝ × X → m → A} {M : ℝ × X → Matrix m n A} {w : ℝ × X → n → A}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hw : ∀ j, ParabolicC0AlphaOn α (fun z => w z j) s) :
+    ParabolicC0AlphaOn α (fun z => ∑ i : m, v z i * (M z).mulVec (w z) i) s :=
+  vector_dot_entry hv (fun i => matrix_mulVec_entry hM hw i)
+
+/-- Finite bilinear contractions through an inverse matrix `v · (M⁻¹ w)` preserve parabolic
+`C^{0,α}` control when the matrix determinant is uniformly bounded away from zero. -/
+theorem matrix_inv_bilinear_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ : ℝ} {v : ℝ × X → n → 𝕜} {M : ℝ × X → Matrix n n 𝕜}
+    {w : ℝ × X → n → 𝕜}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hw : ∀ j, ParabolicC0AlphaOn α (fun z => w z j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaOn α (fun z => ∑ i : n, v z i * ((M z)⁻¹).mulVec (w z) i) s :=
+  vector_dot_entry hv (fun i => matrix_inv_mulVec_entry hM hw hδpos hdet i)
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow

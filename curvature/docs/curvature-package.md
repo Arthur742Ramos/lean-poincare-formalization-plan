@@ -144,5 +144,6 @@ parabolic `C^{0,α}` closure for finite matrix determinants, adjugate entries,
 and inverse entries under a determinant lower bound from entrywise control,
 as well as entrywise closure for matrix products, matrix-vector and
 vector-matrix products, and inverse-matrix vector products on both sides under
-the same determinant lower bound, plus finite vector dot products, using the
-finite-product, integer-scalar, reciprocal, and division closure layer.
+the same determinant lower bound, plus finite vector dot products and bilinear
+contractions through matrices or inverse matrices, using the finite-product,
+integer-scalar, reciprocal, and division closure layer.
