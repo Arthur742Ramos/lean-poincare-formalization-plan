@@ -880,7 +880,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        Picard ball, and product Picard-Lindelöf hypotheses construct that
        variational package directly while preserving joint space-time continuity
        and eventual-membership readouts for the extracted `(flow, tangent)` pair
-       on both closed and open Picard cylinders,
+       on both closed and open Picard cylinders, and product Lipschitz dependence
+       descends to Lipschitz/continuity/distance estimates for the extracted
+       pair as a function of the base initial point,
        with an automatic radius-specialized
        constructor when the base radius is bounded by the product radius, plus
        closed-interval localized variants and proof-level `Nonempty` wrappers

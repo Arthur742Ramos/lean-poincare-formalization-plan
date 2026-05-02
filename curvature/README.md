@@ -297,7 +297,8 @@ now packages the matching intrinsic boundary
         product local flows or product Picard-Lindelöf hypotheses initialized on
         `(x, 1)`, preserving joint space-time continuity and eventual-membership
         readouts for the extracted `(flow, tangent)` pair on closed and open
-        Picard cylinders, with a
+        Picard cylinders, plus Lipschitz/continuity/distance estimates for the
+        extracted pair's dependence on the base initial point, with a
         radius-specialized Picard constructor and
         closed-interval localized variants and proof-level `Nonempty` wrappers
         for continuous-product/product-Picard inputs and localized variants for
