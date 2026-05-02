@@ -957,7 +957,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          wrappers for full metric-coordinate Fréchet data mirror that interface,
          including the variational local-flow wrappers that supply the
          tangent-coordinate derivative from the model tangent ODE and the
-         open-interior `Ioo` specializations.
+         open-interior `Ioo` specializations; the geometric-slot route now has
+         ordinary-neighborhood direct-velocity wrappers while keeping scalar
+         identities in actual pushed-forward tangent vectors.
          The module also now has an additive
          time/spatial decomposition upgrading that frozen spatial term to the full
          moving time-space field derivative once the remaining time-difference

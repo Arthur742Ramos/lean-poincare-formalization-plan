@@ -454,6 +454,9 @@ wrappers that fill the tangent-coordinate derivative from the model tangent ODE
 now have the same direct-velocity and readout-field forms, including when the
 tangent-map identification is only known in the closed-interval within filter;
 the open-interior `Ioo` specializations now mirror that direct-velocity API too.
+The geometric-slot route, where scalar identities are stated in actual
+pushed-forward tangent vectors, now also has ordinary-neighborhood
+direct-velocity field-derivative and tensor time-regularity wrappers.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate

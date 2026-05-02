@@ -678,7 +678,9 @@ now packages the matching intrinsic boundary
        time-regularity wrappers for full metric-coordinate Fréchet data in that
        same form, including variational local-flow wrappers that supply the
        tangent-coordinate derivative from the model tangent ODE and
-       open-interior `Ioo` specializations,
+       open-interior `Ioo` specializations, plus ordinary-neighborhood
+       geometric-slot wrappers whose scalar identities stay in actual
+       pushed-forward tangent vectors,
        direct variational endpoint wrappers for `HasDerivWithinAt`
        time-difference data with geometric-slot scalar identities and
        model-velocity rewrites from within-set base-flow agreement, and an
