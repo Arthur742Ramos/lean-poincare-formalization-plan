@@ -958,7 +958,10 @@ time-dependent vector fields that agree on the active time set; the local
 integral-curve and gauge-flow layers now also have near-time vector-field
 congruence, and raw gauge-flow witnesses expose matching local-at-time
 `SatisfiesGaugeFlowAt`, `HasMFDerivAt`, and centered preferred-chart derivative
-readouts when vector fields agree along the flow near that time. The raw
+readouts when vector fields agree along the flow near that time. Closed-Picard
+raw flows now also expose the corresponding open-interior `Ioo` readouts, so
+Picard interval output can replace the vector field locally before extracting
+ordinary manifold or preferred-chart derivatives. The raw
 existence layer now also has preferred-chart ODE constructors:
 `of_hasDerivWithinAt_extChartAt_eval_self` and
 `of_hasDerivAtOn_extChartAt_eval_self` build `Diffeomorph3GaugeFlowOn`

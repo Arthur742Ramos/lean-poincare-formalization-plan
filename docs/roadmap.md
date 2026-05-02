@@ -695,11 +695,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
          p` term, variational model-flow base-velocity readouts that identify
          the model ODE velocity directly with the raw gauge velocity on both
          ordinary neighborhoods and closed-interval within filters, and
-         local-at-time vector-field congruence for integral curves, gauge-flow
-         statements, and raw `Diffeomorph3GaugeFlowOn` derivative readouts when
-         vector fields agree along the flow near the time, including the
-         centered preferred-chart derivative readout, plus
-         within-domain Fréchet chain-rule/time-difference primitives for moving
+          local-at-time vector-field congruence for integral curves, gauge-flow
+          statements, and raw `Diffeomorph3GaugeFlowOn` derivative readouts when
+          vector fields agree along the flow near the time, including the
+          centered preferred-chart derivative readout and closed-Picard `Ioo`
+          specializations of those local-congruence derivative readouts, plus
+          within-domain Fréchet chain-rule/time-difference primitives for moving
         bilinear-form fields, so chart-local derivatives restricted to product
         domains can feed endpoint gauge-pullback calculus and the closed-Picard
         `Ioo` tensor time-regularity route, now with variational tangent-map

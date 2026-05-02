@@ -334,6 +334,34 @@ theorem hasDerivAt_extChartAt_eval_self_congr_vectorField
     (v := Y t ((G.maps3 t) x)) hsrc_ext] at h
   exact h
 
+/-- A closed-interval raw gauge-flow witness gives an ordinary interior derivative for any vector
+field that agrees with the original one along the flow near the interior time. -/
+theorem hasMFDerivAt_congr_vectorField_of_mem_Ioo
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (G.maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (G.maps3 t x))) :=
+  G.hasMFDerivAt_congr_vectorField (Icc_mem_nhds ht.1 ht.2) hXY x
+
+/-- A closed-interval raw gauge-flow witness gives the ordinary interior preferred-chart derivative
+for any vector field that agrees with the original one along the flow near the interior time. -/
+theorem hasDerivAt_extChartAt_eval_self_congr_vectorField_of_mem_Ioo
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (Y t ((G.maps3 t) x)) t :=
+  G.hasDerivAt_extChartAt_eval_self_congr_vectorField
+    (Icc_mem_nhds ht.1 ht.2) hXY x
+
 /-- At any time where the raw time set is a neighborhood, a raw gauge-flow curve
 has the expected derivative in the preferred chart centered at its time-`t`
 value. -/

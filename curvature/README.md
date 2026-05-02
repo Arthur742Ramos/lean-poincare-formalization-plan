@@ -603,12 +603,15 @@ now packages the matching intrinsic boundary
         `ofChartDerivative` / `ofChartDerivativeAt` bridges with
         derivative-data readouts and within-filter/ordinary eventual-equality
         transfers from local model-coordinate curves,
-        neighborhood-time upgrades from within-time-set to ordinary-at-time
-        primitive derivative and chart-ODE data, monotone restriction of
-        within-time-set and ordinary-at-time derivative views including
-        chart-ODE views, direct closed-Picard `Icc` to open-interior `Ioo`
-        upgrades for primitive derivative and chart-ODE data, a raw
-        open-interior existence constructor from closed-interval centered chart
+         neighborhood-time upgrades from within-time-set to ordinary-at-time
+         primitive derivative and chart-ODE data, monotone restriction of
+         within-time-set and ordinary-at-time derivative views including
+         chart-ODE views, direct closed-Picard `Icc` to open-interior `Ioo`
+         upgrades for primitive derivative and chart-ODE data, closed-Picard
+         `Ioo` local-congruence readouts for ordinary manifold and
+         preferred-chart derivatives after locally replacing the vector field
+         along the raw flow, a raw
+         open-interior existence constructor from closed-interval centered chart
         ODE data, including a named intrinsic DeTurck chart-package version, the
         parallel open-interior constructors from closed-interval manifold
         derivative data and named intrinsic primitive derivative data, fixed-IVP
