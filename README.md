@@ -320,8 +320,9 @@ packages the canonical stationary local solution attached to
   proof-bearing: `AnalyticPDE/ParabolicHolder.lean` defines the parabolic
   distance/cylinders and `C^{0,α}` control, proves the parabolic triangle
   inequality, product-topology local-base compatibility for parabolic balls and
-  product cylinders, continuity and uniform continuity from positive Hölder
-  exponent, explicit closed-ball/cylinder oscillation bounds, and
+  product cylinders, closed-to-open shrink inclusions for balls/cylinders,
+  continuity and uniform continuity from positive Hölder exponent, explicit
+  closed-ball/cylinder oscillation bounds, and
   add/subtract/smul closure estimates plus the bounded product estimate for
   normed-ring-valued `C^{0,α}` functions and the corresponding bounded
   scalar-action estimate for normed-space-valued functions, along with closure

@@ -277,6 +277,10 @@ theorem mono (hR : R ≤ R') : parabolicClosedBall p R ⊆ parabolicClosedBall p
   intro q hq
   exact le_trans hq hR
 
+theorem subset_ball (hR : R < R') : parabolicClosedBall p R ⊆ parabolicBall p R' := by
+  intro q hq
+  exact lt_of_le_of_lt hq hR
+
 theorem mem_comm : q ∈ parabolicClosedBall p R ↔ p ∈ parabolicClosedBall q R := by
   rw [mem, mem, parabolicDistance.comm]
 
@@ -427,6 +431,12 @@ theorem mono (ht : timeRadius ≤ timeRadius') (hs : spaceRadius ≤ spaceRadius
       parabolicClosedCylinder p timeRadius' spaceRadius' := by
   intro q hq
   exact ⟨le_trans hq.1 ht, le_trans hq.2 hs⟩
+
+theorem subset_cylinder (ht : timeRadius < timeRadius') (hs : spaceRadius < spaceRadius') :
+    parabolicClosedCylinder p timeRadius spaceRadius ⊆
+      parabolicCylinder p timeRadius' spaceRadius' := by
+  intro q hq
+  exact ⟨lt_of_le_of_lt hq.1 ht, lt_of_le_of_lt hq.2 hs⟩
 
 theorem mem_comm :
     q ∈ parabolicClosedCylinder p timeRadius spaceRadius ↔
