@@ -1217,6 +1217,17 @@ theorem of_parabolicBall_cover_closedBall {B r : ℝ} {K N : Set (ℝ × X)}
             (Real.rpow_nonneg hd0 α)
     exact hdiff.trans hfar_bound
 
+/-- Compact local-to-global parabolic Holder control from uniform local closed-ball estimates. -/
+theorem of_isCompact_of_uniform_local_closedBall {B r : ℝ} {K : Set (ℝ × X)}
+    (hbounded : ParabolicBoundedWith B u K) (hK : IsCompact K)
+    (hα : 0 < α) (hr : 0 < r)
+    (hlocal : ∀ y ∈ K, ParabolicHolderWith C α u (parabolicClosedBall y (2 * r))) :
+    ParabolicHolderWith (max C (2 * B / r ^ α)) α u K := by
+  rcases parabolicBall.exists_finite_cover_of_isCompact hK hr with
+    ⟨N, hNK, _hNfinite, hcover⟩
+  exact of_parabolicBall_cover_closedBall hbounded hα hr hcover
+    (fun y hy => hlocal y (hNK hy))
+
 /-- A parabolic distance bound upgrades a Holder estimate to a fixed oscillation bound. -/
 theorem norm_sub_le_of_parabolicDistance_le (h : ParabolicHolderWith C α u s) (hC : 0 ≤ C)
     (hα : 0 ≤ α) {p q : ℝ × X} (hp : p ∈ s) (hq : q ∈ s) {R : ℝ}
