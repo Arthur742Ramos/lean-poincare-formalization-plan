@@ -327,9 +327,10 @@ packages the canonical stationary local solution attached to
   scalar-action estimate for normed-space-valued functions, along with closure
   under taking norms, Lipschitz composition on the controlled range, and
   exponent lowering on unit parabolic-diameter domains with closed-ball and
-  closed-cylinder specializations, backed by closed-ball diameter control,
-  product ball/closed-ball compatibility for parabolic
-  balls and product cylinders, plus basepoint-to-sup bounds on closed
+  closed-cylinder specializations across the Holder and `C^{0,α}` interfaces,
+  backed by closed-ball diameter control, product ball/closed-ball
+  compatibility for parabolic balls and product cylinders, plus
+  basepoint-to-sup bounds on closed
   parabolic balls and closed product cylinders. These primitives do not yet
   supply the
   Schauder estimates or the Ricci-DeTurck Banach chart. The

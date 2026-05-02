@@ -897,6 +897,22 @@ theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
   rcases h with ⟨C, hC, hCu⟩
   exact ⟨C, hC, hCu.mono_exponent_of_parabolicDistance_le_one hC hβ hβα hdiam⟩
 
+theorem mono_exponent_of_subset_closedBall {β R : ℝ} {c : ℝ × X}
+    (h : ParabolicHolderOn α u s) (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicHolderOn β u s := by
+  rcases h with ⟨C, hC, hCu⟩
+  exact ⟨C, hC, hCu.mono_exponent_of_subset_closedBall hC hβ hβα hs hR⟩
+
+theorem mono_exponent_of_subset_closedCylinder {β timeRadius spaceRadius : ℝ}
+    {c : ℝ × X}
+    (h : ParabolicHolderOn α u s) (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicHolderOn β u s := by
+  rcases h with ⟨C, hC, hCu⟩
+  exact ⟨C, hC, hCu.mono_exponent_of_subset_closedCylinder hC hβ hβα hs hdiam⟩
+
 end ParabolicHolderOn
 
 namespace ParabolicBoundedWith
@@ -1072,6 +1088,22 @@ theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
     ParabolicC0AlphaWith B H β u s :=
   ⟨h.bounded, h.holder.mono_exponent_of_parabolicDistance_le_one hH hβ hβα hdiam⟩
 
+theorem mono_exponent_of_subset_closedBall {β R : ℝ} {c : ℝ × X}
+    (h : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H)
+    (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicC0AlphaWith B H β u s :=
+  ⟨h.bounded, h.holder.mono_exponent_of_subset_closedBall hH hβ hβα hs hR⟩
+
+theorem mono_exponent_of_subset_closedCylinder {β timeRadius spaceRadius : ℝ}
+    {c : ℝ × X}
+    (h : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H)
+    (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicC0AlphaWith B H β u s :=
+  ⟨h.bounded, h.holder.mono_exponent_of_subset_closedCylinder hH hβ hβα hs hdiam⟩
+
 end ParabolicC0AlphaWith
 
 namespace ParabolicC0AlphaOn
@@ -1172,6 +1204,23 @@ theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
   rcases h with ⟨B, hB, H, hH, hBH⟩
   exact ⟨B, hB, H, hH,
     hBH.mono_exponent_of_parabolicDistance_le_one hH hβ hβα hdiam⟩
+
+theorem mono_exponent_of_subset_closedBall {β R : ℝ} {c : ℝ × X}
+    (h : ParabolicC0AlphaOn α u s) (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicC0AlphaOn β u s := by
+  rcases h with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B, hB, H, hH, hBH.mono_exponent_of_subset_closedBall hH hβ hβα hs hR⟩
+
+theorem mono_exponent_of_subset_closedCylinder {β timeRadius spaceRadius : ℝ}
+    {c : ℝ × X}
+    (h : ParabolicC0AlphaOn α u s) (hβ : 0 ≤ β) (hβα : β ≤ α)
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicC0AlphaOn β u s := by
+  rcases h with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B, hB, H, hH,
+    hBH.mono_exponent_of_subset_closedCylinder hH hβ hβα hs hdiam⟩
 
 end ParabolicC0AlphaOn
 
