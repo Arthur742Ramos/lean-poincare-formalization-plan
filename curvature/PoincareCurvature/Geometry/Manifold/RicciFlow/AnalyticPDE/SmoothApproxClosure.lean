@@ -492,6 +492,73 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
       x0 et het Kc hKc Ko hKo hKoEq hcover)
     ha
 
+/-- The IVP's own smooth initial metric installs the continuous Riemannian tangent-bundle structure
+needed by the preferred-cover smooth-density Picard shrink, so callers do not need to provide any
+external Riemannian-bundle hypotheses. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_initialMetric_restrictedSymmetricA_picard
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [SecondCountableTopology H]
+    [ContMDiffVectorBundle 2 F TM I]
+    [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (rhs : SmoothSectionRHSIdentification
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
+    (ha : 0 < a) :
+    let g0 := ivp.initialMetric.toContinuousRiemannianMetric
+    letI : _root_.Bundle.RiemannianBundle TM := ⟨g0.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle (B := M) F TM := inferInstance
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+      ∃ _chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover
+        ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T' a' L Kpic Kstate,
+        0 < a' ∧ a' ≤ a ∧
+          Metric.closedBall
+            (InitialValueProblem.toSymmetricSectionSubmodule
+              (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) (a' : ℝ) ⊆
+            riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+              et Kc hKc Ko hKo hKoEq hcover ∧
+          IsPicardLindelof
+            (SmoothSectionRHSIdentification.restrictedSymmetricA_of_closure_smooth_spd_on_Icc
+              (M := M) (F := F) (I := I)
+              x0 et het Kc hKc Ko hKo hKoEq hcover rhs
+              (closure_smooth_spd_of_metric_locus_preferredBilinear_of_continuousRiemannianBundle
+                (M := M) (F := F) (I := I)
+                x0 et het Kc hKc Ko hKo hKoEq hcover)
+              (fun t ht => chart.lipschitzOn_Icc t ⟨ht.1, le_trans ht.2 hT'le⟩))
+            (tmin := ivp.initialTime) (tmax := T')
+            ⟨ivp.initialTime, ⟨le_rfl, le_of_lt _hT'⟩⟩
+            (InitialValueProblem.toSymmetricSectionSubmodule
+              (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) a' 0 L Kpic := by
+  let g0 := ivp.initialMetric.toContinuousRiemannianMetric
+  letI : _root_.Bundle.RiemannianBundle TM := ⟨g0.toRiemannianMetric⟩
+  haveI : IsContinuousRiemannianBundle (B := M) F TM := inferInstance
+  exact
+    TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_continuousRiemannianBundle_restrictedSymmetricA_picard
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover chart rhs ha
+
 /-- The preferred-cover local-bounds route gives an actual state-preserving Banach solution for the
 interval-scoped density-based specific-RHS carrier after the same metric-cone shrink. This stops short
 of identifying that carrier globally with the ungated chart carrier, but packages the ODE consequence
