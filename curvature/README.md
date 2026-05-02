@@ -392,11 +392,15 @@ now packages the matching intrinsic boundary
           closed-Picard tensor wrappers exposing that open-domain shape, with
           variational tangent-map direct/readout tensor routes mirroring the same
           interface, and now with generic open-domain moving-base bilinear-field
-          chain rules and full-field time-difference lemmas that derive product
-          graph convergence from base-curve within-derivative continuity before
-          the raw gauge-flow scalar endpoint theorem consumes them, the
-          model-coordinate time-difference route also accepting any locally equal
-        two-variable bilinear-form readout for the full field derivative in both
+           chain rules and full-field time-difference lemmas that derive product
+           graph convergence from base-curve within-derivative continuity before
+           the raw gauge-flow scalar endpoint theorem consumes them, the
+           variational local-flow full-field route now also accepting
+           `HasFDerivWithinAt` on an open chart product domain at the model-flow
+           endpoint directly through named metric-coordinate, readout-field, and
+           geometric-slot tensor wrappers, and the
+           model-coordinate time-difference route also accepting any locally equal
+         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the
         closed-Picard model-velocity time-difference route now deriving the
         remaining endpoint `Btime` term directly from full/readout

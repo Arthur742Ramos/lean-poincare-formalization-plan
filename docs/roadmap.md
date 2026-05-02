@@ -703,9 +703,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           within-derivative continuity of the base curve, and the raw
           open-domain scalar time-difference theorem uses that generic proof
           rather than a compatibility wrapper around the older explicit-graph
-          theorem, all
-          without being upgraded to global `HasFDerivAt`
-          statements. It also has
+          theorem. The variational local-flow full-field route now also consumes
+          `HasFDerivWithinAt` on an open chart product domain at the model-flow
+          endpoint directly, with named metric-coordinate-field, readout-field,
+          and geometric-slot tensor wrappers, so local Banach/readout data need
+          not be upgraded to global `HasFDerivAt` statements. It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and

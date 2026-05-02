@@ -268,6 +268,11 @@ graph convergence from the within-derivative/continuity of the base curve. The
 raw gauge-flow open-domain scalar time-difference theorem is now proved through
 that generic calculus, so the open-domain component-data constructors no longer
 rest on a compatibility wrapper around the older explicit-convergence theorem.
+The variational local-flow full-field route now also has open-product-domain
+scalar, named metric-coordinate-field, readout-field, and geometric-slot tensor
+wrappers; these consume `HasFDerivWithinAt` on an open chart product domain at
+the model-flow endpoint directly, without upgrading local Banach/readout data to
+global `HasFDerivAt`.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow

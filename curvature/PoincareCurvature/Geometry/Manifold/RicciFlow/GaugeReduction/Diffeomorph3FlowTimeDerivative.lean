@@ -629,6 +629,79 @@ theorem center_hasDerivWithinAt_bilinearFormField_tangent_apply_apply
   α.hasDerivWithinAt_bilinearFormField_tangent_apply_apply
     (mem_closedBall_self r.2) ht hB u v
 
+/-- Open-domain closed-interval scalar chain rule along a variational model flow.
+
+The bilinear-form field only needs a Fréchet derivative within an open product
+domain containing the model-flow endpoint; graph convergence is derived from the
+packaged flow continuity/derivative data. -/
+theorem hasDerivWithinAt_bilinearFormField_tangent_apply_applyWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {domain : Set (ℝ × V)}
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    (hB : HasFDerivWithinAt Bfield Bfield' domain (t, α.flow (x, t)))
+    (hopen : IsOpen domain) (hmem : (t, α.flow (x, t)) ∈ domain)
+    (u v : V) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        Bfield (τ, α.flow (x, τ))
+          (α.tangent x τ u) (α.tangent x τ v))
+      (Bfield' (1, f t (α.flow (x, t)))
+          (α.tangent x t u) (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          ((Df t (α.flow (x, t))) (α.tangent x t u))
+          (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          (α.tangent x t u)
+          ((Df t (α.flow (x, t))) (α.tangent x t v)))
+      (Icc tmin tmax) t := by
+  exact hasDerivWithinAt_bilinearFormField_apply_apply_along_curveWithinOpen
+    (Bfield := Bfield) (Bfield' := Bfield')
+    (y := fun τ : ℝ ↦ α.flow (x, τ))
+    (y' := f t (α.flow (x, t)))
+    (u := fun τ : ℝ ↦ α.tangent x τ u)
+    (u' := (Df t (α.flow (x, t))) (α.tangent x t u))
+    (v := fun τ : ℝ ↦ α.tangent x τ v)
+    (v' := (Df t (α.flow (x, t))) (α.tangent x t v))
+    (s := Icc tmin tmax) (t := t) (domain := domain)
+    hB (α.hasDerivWithinAt x hx t ht) hopen hmem
+    (α.tangent_apply_hasDerivWithinAt hx ht u)
+    (α.tangent_apply_hasDerivWithinAt hx ht v)
+
+/-- Center-trajectory open-domain closed-interval scalar chain rule along a
+variational model flow. -/
+theorem center_hasDerivWithinAt_bilinearFormField_tangent_apply_applyWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {domain : Set (ℝ × V)}
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    (hB : HasFDerivWithinAt Bfield Bfield' domain (t, α.flow (x₀, t)))
+    (hopen : IsOpen domain) (hmem : (t, α.flow (x₀, t)) ∈ domain)
+    (u v : V) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        Bfield (τ, α.flow (x₀, τ))
+          (α.tangent x₀ τ u) (α.tangent x₀ τ v))
+      (Bfield' (1, f t (α.flow (x₀, t)))
+          (α.tangent x₀ t u) (α.tangent x₀ t v) +
+        Bfield (t, α.flow (x₀, t))
+          ((Df t (α.flow (x₀, t))) (α.tangent x₀ t u))
+          (α.tangent x₀ t v) +
+        Bfield (t, α.flow (x₀, t))
+          (α.tangent x₀ t u)
+          ((Df t (α.flow (x₀, t))) (α.tangent x₀ t v)))
+      (Icc tmin tmax) t :=
+  α.hasDerivWithinAt_bilinearFormField_tangent_apply_applyWithinOpen
+    (mem_closedBall_self r.2) ht hB hopen hmem u v
+
 /-- Eventual-equality transfer form of
 `hasDerivWithinAt_bilinearFormField_tangent_apply_apply`. -/
 theorem hasDerivWithinAt_of_eventuallyEq_bilinearFormField_tangent_apply_apply
@@ -666,6 +739,46 @@ theorem hasDerivWithinAt_of_eventuallyEq_bilinearFormField_tangent_apply_apply
     α.hasDerivWithinAt_bilinearFormField_tangent_apply_apply hx ht hB u v
   simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
 
+/-- Open-domain eventual-equality transfer form of
+`hasDerivWithinAt_bilinearFormField_tangent_apply_applyWithinOpen`. -/
+theorem hasDerivWithinAt_of_eventuallyEq_bilinearFormField_tangent_apply_applyWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V)}
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {u v : V}
+    (heq : scalar =ᶠ[𝓝[Icc tmin tmax] t]
+      fun τ : ℝ ↦
+        Bfield (τ, α.flow (x, τ))
+          (α.tangent x τ u) (α.tangent x τ v))
+    (heq_t :
+      scalar t =
+        Bfield (t, α.flow (x, t))
+          (α.tangent x t u) (α.tangent x t v))
+    (hB : HasFDerivWithinAt Bfield Bfield' domain (t, α.flow (x, t)))
+    (hopen : IsOpen domain) (hmem : (t, α.flow (x, t)) ∈ domain)
+    {value : ℝ}
+    (hvalue :
+      Bfield' (1, f t (α.flow (x, t)))
+          (α.tangent x t u) (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          ((Df t (α.flow (x, t))) (α.tangent x t u))
+          (α.tangent x t v) +
+        Bfield (t, α.flow (x, t))
+          (α.tangent x t u)
+          ((Df t (α.flow (x, t))) (α.tangent x t v)) =
+        value) :
+    HasDerivWithinAt scalar value (Icc tmin tmax) t := by
+  have hderiv :=
+    α.hasDerivWithinAt_bilinearFormField_tangent_apply_applyWithinOpen
+      hx ht hB hopen hmem u v
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
 /-- Center-trajectory eventual-equality transfer form of
 `center_hasDerivWithinAt_bilinearFormField_tangent_apply_apply`. -/
 theorem center_hasDerivWithinAt_of_eventuallyEq_bilinearFormField_tangent_apply_apply
@@ -701,6 +814,46 @@ theorem center_hasDerivWithinAt_of_eventuallyEq_bilinearFormField_tangent_apply_
     HasDerivWithinAt scalar value (Icc tmin tmax) t := by
   have hderiv :=
     α.center_hasDerivWithinAt_bilinearFormField_tangent_apply_apply ht hB u v
+  simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
+
+/-- Center-trajectory open-domain eventual-equality transfer form of
+`center_hasDerivWithinAt_bilinearFormField_tangent_apply_applyWithinOpen`. -/
+theorem center_hasDerivWithinAt_of_eventuallyEq_bilinearFormField_tangent_apply_applyWithinOpen
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    {scalar : ℝ → ℝ}
+    {domain : Set (ℝ × V)}
+    {Bfield : ℝ × V → V →L[ℝ] V →L[ℝ] ℝ}
+    {Bfield' : ℝ × V →L[ℝ] (V →L[ℝ] V →L[ℝ] ℝ)}
+    {u v : V}
+    (heq : scalar =ᶠ[𝓝[Icc tmin tmax] t]
+      fun τ : ℝ ↦
+        Bfield (τ, α.flow (x₀, τ))
+          (α.tangent x₀ τ u) (α.tangent x₀ τ v))
+    (heq_t :
+      scalar t =
+        Bfield (t, α.flow (x₀, t))
+          (α.tangent x₀ t u) (α.tangent x₀ t v))
+    (hB : HasFDerivWithinAt Bfield Bfield' domain (t, α.flow (x₀, t)))
+    (hopen : IsOpen domain) (hmem : (t, α.flow (x₀, t)) ∈ domain)
+    {value : ℝ}
+    (hvalue :
+      Bfield' (1, f t (α.flow (x₀, t)))
+          (α.tangent x₀ t u) (α.tangent x₀ t v) +
+        Bfield (t, α.flow (x₀, t))
+          ((Df t (α.flow (x₀, t))) (α.tangent x₀ t u))
+          (α.tangent x₀ t v) +
+        Bfield (t, α.flow (x₀, t))
+          (α.tangent x₀ t u)
+          ((Df t (α.flow (x₀, t))) (α.tangent x₀ t v)) =
+        value) :
+    HasDerivWithinAt scalar value (Icc tmin tmax) t := by
+  have hderiv :=
+    α.center_hasDerivWithinAt_bilinearFormField_tangent_apply_applyWithinOpen
+      ht hB hopen hmem u v
   simpa [hvalue] using hderiv.congr_of_eventuallyEq heq heq_t
 
 /-- Exact scalar chain rule along a variational model flow.
@@ -10455,6 +10608,87 @@ theorem hasTimeDerivativeOn_Ioo_of_variationalLocalFlowFieldWithin
       G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
         (t := t) ht g x u v)
 
+/-- Open-product-domain version of
+`hasTimeDerivativeOn_Ioo_of_variationalLocalFlowFieldWithin`.
+
+The metric-coordinate field only needs a Fréchet derivative within an open
+product domain containing the model-flow endpoint. The scalar derivative is
+proved directly from the variational ODE chain rule, so callers no longer need
+to upgrade a chart-local readout to a global `HasFDerivAt`. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalLocalFlowFieldWithinOpen
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ (domain : Set (ℝ × E))
+          (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+          (uE vE : E),
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝[Icc tmin tmax] t]
+              (fun τ : ℝ ↦
+                Bfield (τ, α.flow (xE, τ))
+                  (α.tangent xE τ uE) (α.tangent xE τ vE)) ∧
+          HasFDerivWithinAt Bfield Bfield' domain (t, α.flow (xE, t)) ∧
+          IsOpen domain ∧
+          (t, α.flow (xE, t)) ∈ domain ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (α.tangent xE t uE) (α.tangent xE t vE) +
+              Bfield (t, α.flow (xE, t))
+                ((Df t (α.flow (xE, t))) (α.tangent xE t uE))
+                (α.tangent xE t vE) +
+              Bfield (t, α.flow (xE, t))
+                (α.tangent xE t uE)
+                ((Df t (α.flow (xE, t))) (α.tangent xE t vE)) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) := by
+  have hwithin :
+      SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeWithinOn
+        (I := I) (M := M) G.maps3 g gdot (Icc tmin tmax) := by
+    intro t ht x u v
+    obtain ⟨xE, hxE, domain, Bfield, Bfield', uE, vE, hmodel_eq,
+      hBfield, hopen, hmem, hvalue⟩ := hdata ht x u v
+    have heq :
+        (fun τ : ℝ ↦
+          (g τ).inner ((G.maps3 τ) x)
+            ((G.maps3 τ).pushforwardTangent x u)
+            ((G.maps3 τ).pushforwardTangent x v)) =ᶠ[𝓝[Icc tmin tmax] t]
+          fun τ : ℝ ↦
+            Bfield (τ, α.flow (xE, τ))
+              (α.tangent xE τ uE) (α.tangent xE τ vE) :=
+      (G.eventuallyWithinEq_geometric_pullbackMetricInnerCoordinateModel
+        (t := t) ht g x u v).trans hmodel_eq
+    have heq_t :
+        (g t).inner ((G.maps3 t) x)
+            ((G.maps3 t).pushforwardTangent x u)
+            ((G.maps3 t).pushforwardTangent x v) =
+          Bfield (t, α.flow (xE, t))
+            (α.tangent xE t uE) (α.tangent xE t vE) :=
+      show t ∈ {τ : ℝ |
+          (g τ).inner ((G.maps3 τ) x)
+              ((G.maps3 τ).pushforwardTangent x u)
+              ((G.maps3 τ).pushforwardTangent x v) =
+            Bfield (τ, α.flow (xE, τ))
+              (α.tangent xE τ uE) (α.tangent xE τ vE)} from
+        mem_of_mem_nhdsWithin ht heq
+    exact
+      α.hasDerivWithinAt_of_eventuallyEq_bilinearFormField_tangent_apply_applyWithinOpen
+        hxE ht heq heq_t hBfield hopen hmem hvalue
+  exact
+    SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
+      (I := I) (M := M)
+      (SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeWithinOn.toPullbackMetricInnerDerivativeOn_Ioo
+        (I := I) (M := M) hwithin)
+
 /-- Closed-Picard raw gauge flow plus a variational model flow identified with
 the raw coordinate curve and tangent-coordinate map within the closed time
 interval reduces interior time-regularity to the Fréchet derivative of the named
@@ -10548,6 +10782,106 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWit
       filter_upwards [hcomponents, hB, hbase, hA] with τ hcomponentsτ hBτ hbaseτ hAτ
       rw [hcomponentsτ, hBτ, hbaseτ, hAτ])
 
+/-- Open-product-domain version of
+`hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithin`.
+
+This is the named metric-coordinate-field route corresponding to
+`hasTimeDerivativeOn_Ioo_of_variationalLocalFlowFieldWithinOpen`: the local
+chart field is differentiated only within an open product domain at the
+model-flow endpoint. -/
+theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithinOpen
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+            𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ α.flow (xE, τ)) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ α.tangent xE τ) ∧
+        ∃ (domain : Set (ℝ × E))
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)),
+          HasFDerivWithinAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield' domain (t, α.flow (xE, t)) ∧
+          IsOpen domain ∧
+          (t, α.flow (xE, t)) ∈ domain ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (α.tangent xE t
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (α.tangent xE t
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, α.flow (xE, t))
+                ((Df t (α.flow (xE, t)))
+                  (α.tangent xE t
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (α.tangent xE t
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, α.flow (xE, t))
+                (α.tangent xE t
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (xE, t)))
+                  (α.tangent xE t
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowFieldWithinOpen α
+    (by
+      intro t ht x u v
+      obtain ⟨xE, hxE, hbase, hA, domain, Bfield', hBfield,
+        hopen, hmem, hvalue⟩ := hdata ht x u v
+      refine ⟨xE, hxE, domain,
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x),
+        Bfield',
+        SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u,
+        SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v,
+        ?_, hBfield, hopen, hmem, hvalue⟩
+      have hcomponents :
+          SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+              (I := I) (M := M) G.maps3 g t x u v =ᶠ[𝓝[Icc tmin tmax] t]
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                  (I := I) (M := M) G.maps3 g t τ x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t τ x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t τ x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) := by
+        filter_upwards with τ
+        exact SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel_eq_components
+          (I := I) (M := M) G.maps3 g t τ x u v
+      have hB :
+          (fun τ : ℝ ↦
+            SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+              (I := I) (M := M) G.maps3 g t τ x) =ᶠ[𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦
+            SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x)
+              (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))) :=
+        SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap_eventuallyWithinEq_metricBilinearCoordinateField
+          (I := I) (M := M) G.maps3 g (s := Icc tmin tmax) t x
+          (G.eventuallyWithin_mem_trivializationAt_eval ht x)
+      filter_upwards [hcomponents, hB, hbase, hA] with τ hcomponentsτ hBτ hbaseτ hAτ
+      rw [hcomponentsτ, hBτ, hbaseτ, hAτ])
+
 /-- Readout-field version of
 `hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithin`.
 
@@ -10610,6 +10944,82 @@ theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_variationa
   refine ⟨xE, hxE, hbase, hA, Bfield', ?_, ?_⟩
   · exact
       SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+        (I := I) (M := M) hB_eq hBfield
+  · have hB_t :
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) g ((G.maps3 t) x) (t, α.flow (xE, t)) =
+          Bfield (t, α.flow (xE, t)) :=
+      show (t, α.flow (xE, t)) ∈ {p : ℝ × E |
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) g ((G.maps3 t) x) p = Bfield p} from
+        mem_of_mem_nhds hB_eq
+    rw [hB_t]
+    exact hvalue
+
+/-- Open-product-domain readout-field version of
+`hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithinOpen`.
+
+The metric-coordinate derivative may be supplied by any readout field locally
+equal to the named metric-coordinate field, and that readout only needs a
+within-domain Fréchet derivative on an open product domain. -/
+theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_variationalLocalFlowWithinOpen
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+            𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ α.flow (xE, τ)) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ α.tangent xE τ) ∧
+        ∃ (domain : Set (ℝ × E))
+          (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)),
+          (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) g ((G.maps3 t) x)) =ᶠ[𝓝 (t, α.flow (xE, t))]
+              Bfield ∧
+          HasFDerivWithinAt Bfield Bfield' domain (t, α.flow (xE, t)) ∧
+          IsOpen domain ∧
+          (t, α.flow (xE, t)) ∈ domain ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (α.tangent xE t
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (α.tangent xE t
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              Bfield (t, α.flow (xE, t))
+                ((Df t (α.flow (xE, t)))
+                  (α.tangent xE t
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (α.tangent xE t
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              Bfield (t, α.flow (xE, t))
+                (α.tangent xE t
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (xE, t)))
+                  (α.tangent xE t
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) := by
+  refine
+    G.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithinOpen
+      α ?_
+  intro t ht x u v
+  obtain ⟨xE, hxE, hbase, hA, domain, Bfield, Bfield', hB_eq, hBfield,
+    hopen, hmem, hvalue⟩ := hdata ht x u v
+  refine ⟨xE, hxE, hbase, hA, domain, Bfield', ?_, hopen, hmem, ?_⟩
+  · exact
+      SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEq
         (I := I) (M := M) hB_eq hBfield
   · have hB_t :
         SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
@@ -10753,6 +11163,141 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWit
   rw [hleft, hright, hu, hv]
   exact hvalue
 
+/-- Open-product-domain geometric-slot version of
+`hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithinOpen`.
+
+The scalar value is stated in actual pushed-forward tangent vectors while the
+metric-coordinate field derivative is only within an open product domain at the
+model-flow endpoint. -/
+theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithinOpen_geometricValue
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+            𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ α.flow (xE, τ)) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ α.tangent xE τ) ∧
+        ∃ (domain : Set (ℝ × E))
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)),
+          HasFDerivWithinAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield' domain (t, α.flow (xE, t)) ∧
+          IsOpen domain ∧
+          (t, α.flow (xE, t)) ∈ domain ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)) +
+              (g t).inner ((G.maps3 t) x)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  ((Df t (α.flow (xE, t)))
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                      ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))))
+                ((G.maps3 t).pushforwardTangent x v) +
+              (g t).inner ((G.maps3 t) x)
+                ((G.maps3 t).pushforwardTangent x u)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  ((Df t (α.flow (xE, t)))
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                      ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) := by
+  refine
+    G.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithinOpen
+      α ?_
+  intro t ht x u v
+  obtain ⟨xE, hxE, hbase, hA, domain, Bfield', hBfield, hopen, hmem, hvalue⟩ :=
+    hdata ht x u v
+  refine ⟨xE, hxE, hbase, hA, domain, Bfield', hBfield, hopen, hmem, ?_⟩
+  have hbase_t :
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x) = α.flow (xE, t) :=
+    show t ∈ {τ : ℝ |
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x) = α.flow (xE, τ)} from
+      mem_of_mem_nhdsWithin ht hbase
+  have hA_t :
+      SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+          (I := I) (M := M) G.maps3 t t x =
+        α.tangent xE t :=
+    show t ∈ {τ : ℝ |
+      SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+          (I := I) (M := M) G.maps3 t τ x = α.tangent xE τ} from
+      mem_of_mem_nhdsWithin ht hA
+  have hu :
+      α.tangent xE t (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u) =
+        SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+          ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u) := by
+    rw [← hA_t]
+    exact
+      SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_self_sourceTangentCoordinate_eq_targetCoordinate
+        (I := I) (M := M) G.maps3 t x u
+  have hv :
+      α.tangent xE t (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v) =
+        SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+          ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v) := by
+    rw [← hA_t]
+    exact
+      SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_self_sourceTangentCoordinate_eq_targetCoordinate
+        (I := I) (M := M) G.maps3 t x v
+  have hleft :
+      SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x)
+          (t, α.flow (xE, t))
+          ((Df t (α.flow (xE, t)))
+            (α.tangent xE t
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+          (α.tangent xE t
+            (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) =
+        (g t).inner ((G.maps3 t) x)
+          (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+            ((G.maps3 t) x)
+            ((Df t (α.flow (xE, t)))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))))
+          ((G.maps3 t).pushforwardTangent x v) := by
+    rw [← hbase_t, hu, hv,
+      SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_base_apply_eq_tangentVector]
+    simp [SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate,
+      SmoothSelfDiffeomorph3Family.sourceTangentCoordinate]
+  have hright :
+      SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x)
+          (t, α.flow (xE, t))
+          (α.tangent xE t
+            (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+          ((Df t (α.flow (xE, t)))
+            (α.tangent xE t
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+        (g t).inner ((G.maps3 t) x)
+          ((G.maps3 t).pushforwardTangent x u)
+          (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+            ((G.maps3 t) x)
+            ((Df t (α.flow (xE, t)))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) := by
+    rw [← hbase_t, hu, hv,
+      SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_base_apply_eq_tangentVector]
+    simp [SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate,
+      SmoothSelfDiffeomorph3Family.sourceTangentCoordinate]
+  rw [hleft, hright, hu, hv]
+  exact hvalue
+
 /-- Readout-field geometric-slot version of
 `hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithin_geometricValue`. -/
 theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_variationalLocalFlowWithin_geometricValue
@@ -10812,6 +11357,70 @@ theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_variationa
   refine ⟨xE, hxE, hbase, hA, Bfield', ?_, hvalue⟩
   exact
     SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hB_eq hBfield
+
+/-- Open-product-domain readout-field geometric-slot version of
+`hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithinOpen_geometricValue`. -/
+theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_variationalLocalFlowWithinOpen_geometricValue
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+            𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ α.flow (xE, τ)) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ α.tangent xE τ) ∧
+        ∃ (domain : Set (ℝ × E))
+          (Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ)
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)),
+          (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) g ((G.maps3 t) x)) =ᶠ[𝓝 (t, α.flow (xE, t))]
+              Bfield ∧
+          HasFDerivWithinAt Bfield Bfield' domain (t, α.flow (xE, t)) ∧
+          IsOpen domain ∧
+          (t, α.flow (xE, t)) ∈ domain ∧
+          Bfield' (1, f t (α.flow (xE, t)))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))
+              (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)) +
+              (g t).inner ((G.maps3 t) x)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  ((Df t (α.flow (xE, t)))
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                      ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))))
+                ((G.maps3 t).pushforwardTangent x v) +
+              (g t).inner ((G.maps3 t) x)
+                ((G.maps3 t).pushforwardTangent x u)
+                (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+                  ((G.maps3 t) x)
+                  ((Df t (α.flow (xE, t)))
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                      ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) := by
+  refine
+    G.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_variationalLocalFlowWithinOpen_geometricValue
+      α ?_
+  intro t ht x u v
+  obtain ⟨xE, hxE, hbase, hA, domain, Bfield, Bfield', hB_eq, hBfield,
+    hopen, hmem, hvalue⟩ := hdata ht x u v
+  refine ⟨xE, hxE, hbase, hA, domain, Bfield', ?_, hopen, hmem, hvalue⟩
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEq
       (I := I) (M := M) hB_eq hBfield
 
 /-- Closed-Picard-interval raw gauge-flow version of the field-level coordinate
