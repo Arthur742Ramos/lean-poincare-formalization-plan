@@ -1287,7 +1287,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         coordinate-map boundedness hypothesis for continuous Riemannian vector
         bundles, deriving preferred-bilinear smooth approximants and the
         finite-cover Banach-norm approximation theorem from mathlib's
-        `eventually_norm_trivializationAt_lt`. It also derives the finite-cover
+        `eventually_norm_trivializationAt_lt`, and it now produces symmetric
+        smooth finite-cover approximants from symmetric continuous bilinear
+        sections by fiberwise symmetrization. It also derives the finite-cover
         inverse bound from compactness of the cover pieces inside their fixed
         trivialization domains, factoring fixed-center inverses through centered
         inverse trivializations and continuous coordinate changes.

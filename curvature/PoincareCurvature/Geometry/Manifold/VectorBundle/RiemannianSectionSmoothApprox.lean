@@ -464,6 +464,74 @@ theorem exists_dist_lt_preferredBilinear_of_continuousRiemannianBundle
   exact exists_dist_lt_preferredBilinear_of_continuousRiemannianBundle_and_symmL_opNorm_le
     (F := F) (W := W) x0 s hCsum_pos hCsum_bound
 
+/-- Symmetric continuous preferred bilinear-form sections have symmetric smooth approximants in the
+transported finite-cover Banach norm for continuous Riemannian vector bundles.
+
+The proof first uses the Riemannian-bundle smooth-density theorem to find an arbitrary smooth
+bilinear-form approximant, then fiberwise symmetrizes it. The finite-cover symmetrization estimate
+shows that this does not increase distance to the symmetric target. -/
+theorem exists_symmetric_dist_lt_preferredBilinear_of_continuousRiemannianBundle
+    [IsContinuousRiemannianBundle (B := M) F W]
+    [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [SecondCountableTopology H] [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (hs : s ∈ symmetricLocus (M := M) (F := F) (W := W)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    ∀ ε > 0,
+      ∃ u : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover,
+        u ∈ symmetricLocus (M := M) (F := F) (W := W)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover ∧
+        ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+          (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x)) ∧
+        dist s u < ε := by
+  intro ε hε
+  obtain ⟨u, hu_smooth, hudist⟩ :=
+    exists_dist_lt_preferredBilinear_of_continuousRiemannianBundle
+      (E := E) (H := H) (I := I) (M := M) (F := F) (W := W) x0 s ε hε
+  have hu_symm_smooth : ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+      (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x
+        (_root_.Bundle.symmetrizeBilinearSection (W := W) (fun y ↦ u y) x)) :=
+    _root_.Bundle.contMDiff_symmetrizeBilinearSection
+      (W := W) (s := fun y ↦ u y) hu_smooth
+  let v : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover :=
+    ⟨fun x ↦ _root_.Bundle.symmetrizeBilinearSection (W := W) (fun y ↦ u y) x,
+      by
+        change Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x
+          (_root_.Bundle.symmetrizeBilinearSection (W := W) (fun y ↦ u y) x))
+        exact hu_symm_smooth.continuous⟩
+  have hv_symm : v ∈ symmetricLocus (M := M) (F := F) (W := W)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover := by
+    intro x p q
+    exact _root_.Bundle.symmetrizeBilinearSection_forall_symmetric
+      (W := W) (fun y ↦ u y) x p q
+  have hv_smooth : ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
+      (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (v x)) := by
+    simpa [v] using hu_symm_smooth
+  have hdist_le : dist s v ≤ dist s u :=
+    dist_symmetrizeBilinearSection_le_of_symmetric
+      (M := M) (F := F) (W := W)
+      x0 (fun i ↦ trivializationAt BilF BilW (x0 i)) (fun _ ↦ rfl)
+      Kc hKc Ko hKo hKoEq hcover s u v hs (by
+        intro x p q
+        change (_root_.Bundle.symmetrizeBilinearSection
+            (W := W) (fun y ↦ u y) x) p q =
+          ((u x) p q + (u x) q p) / 2
+        exact _root_.Bundle.symmetrizeBilinearSection_apply_apply
+          (W := W) (fun y ↦ u y) x p q)
+  exact ⟨v, hv_symm, hv_smooth, lt_of_le_of_lt hdist_le hudist⟩
+
 end PreferredBilinearRiemannianSmoothApprox
 
 end ContinuousSectionSpace

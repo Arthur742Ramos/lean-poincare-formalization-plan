@@ -715,8 +715,10 @@ now packages the matching intrinsic boundary
       boundedness hypothesis for continuous Riemannian vector bundles, deriving
       preferred-bilinear smooth approximants and the finite-cover Banach-norm
       approximation theorem from mathlib's
-      `eventually_norm_trivializationAt_lt`. It also derives the finite-cover
-      inverse bound from compactness of the cover pieces inside their fixed
+      `eventually_norm_trivializationAt_lt`, and it now upgrades symmetric
+      continuous bilinear sections to symmetric smooth finite-cover approximants
+      by fiberwise symmetrization. It also derives the finite-cover inverse
+      bound from compactness of the cover pieces inside their fixed
       trivialization domains by factoring fixed-center inverses through centered
       inverse trivializations and continuous coordinate changes, leaving the
       heavy PDE realization module unchanged. The
