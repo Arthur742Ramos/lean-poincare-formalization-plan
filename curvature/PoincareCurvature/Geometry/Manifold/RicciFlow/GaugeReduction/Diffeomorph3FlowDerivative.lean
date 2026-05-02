@@ -113,6 +113,28 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.mono
   intro τ hτ x
   exact hchart τ (hst hτ) x
 
+/-- Build ordinary preferred-chart ODE data from local coordinate curves that
+are eventually equal to the actual centered preferred-chart coordinate curves.
+This is the transfer form used after a chart-local Picard solution has been
+identified with the geometric coordinate readout near the time of interest. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_eventuallyEq
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    {coord : ℝ → M → ℝ → E}
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I ((Φ t) x)).source ∈ 𝓝 t)
+    (hcoord : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt (coord t x)
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) t)
+    (heq : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (extChartAt I ((Φ t) x)) ((Φ τ) x)) =ᶠ[𝓝 t] coord t x) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  exact ⟨hsource t ht x, (hcoord t ht x).congr_of_eventuallyEq (heq t ht x)⟩
+
 /-- Ordinary-at-time derivative data on `s` immediately gives the within-set
 derivative data used by the primitive gauge-flow API. -/
 theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn

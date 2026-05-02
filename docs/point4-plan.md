@@ -757,7 +757,10 @@ the gauge-flow existence API. It now also has named preferred-chart ODE packages
 `ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily`, with fixed-IVP and
 theorem-family `ofChartDerivativeAt` bridges, so source-neighborhood chart ODE
 data can enter raw existence without unpacking into ad hoc constructor
-arguments. Those bridges now have direct derivative-data readouts back to
+arguments. The chart-ODE package also has an eventual-equality transfer lemma:
+local model-coordinate curves with the right derivative can be used after they
+are identified eventually with the actual centered preferred-chart coordinate
+readout. Those bridges now have direct derivative-data readouts back to
 `ChosenIntrinsicDeTurckGaugeFlowDerivative` and
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
 the existing scalar gauge-pullback route after supplying the chart-ODE package.
