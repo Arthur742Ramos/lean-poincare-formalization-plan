@@ -441,6 +441,10 @@ Riemannian metric slice. The same result now yields the canonical
 adapter along any chart-centered coordinate curve that stays in the model
 range, and a raw-gauge-flow specialization for the frozen-time spatial
 contribution along `τ ↦ extChartAt I ((G.maps3 t) x) ((G.maps3 τ) x)`.
+The frozen-spatial, additive total-derivative, and time-difference raw-flow
+specializations now also have `_self` variants that simplify the centered
+`tangentCoordChange` at the base chart to the actual gauge velocity
+`X t ((G.maps3 t) x)` before these endpoint calculations are packaged.
 An additive time/spatial decomposition now upgrades this frozen spatial term to
 the full moving `metricBilinearCoordinateField` derivative whenever the
 remaining time-difference derivative along the same raw gauge-flow coordinate

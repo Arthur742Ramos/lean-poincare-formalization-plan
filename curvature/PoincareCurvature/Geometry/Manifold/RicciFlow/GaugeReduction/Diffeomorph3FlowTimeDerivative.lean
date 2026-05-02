@@ -1117,6 +1117,32 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDeriv
     rfl
 
 /-- Frozen-time spatial derivative of the metric-coordinate field along the
+actual coordinate curve supplied by a raw gauge flow, with the centered
+tangent-coordinate change simplified to the gauge velocity. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivAt_along_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      ((fderivWithin ℝ
+        (fun yE : E ↦
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+        (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (X t ((G.maps3 t) x)))
+      t := by
+  exact metricBilinearCoordinateField_fixedTime_hasDerivAt_along_center
+    (I := I) (M := M) g t ((G.maps3 t) x)
+    (G.hasDerivAt_extChartAt_eval_self hs x)
+    (Diffeomorph3GaugeFlowOn.eventually_extChartAt_eval_mem_range
+      (I := I) (M := M) G hs x)
+    rfl
+
+/-- Frozen-time spatial derivative of the metric-coordinate field along the
 actual coordinate curve supplied by a raw gauge flow, relative to the raw time
 set. -/
 theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_eval
@@ -1139,6 +1165,33 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDeriv
   exact metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_center
     (I := I) (M := M) g t ((G.maps3 t) x)
     (G.hasDerivWithinAt_extChartAt_eval ht x)
+    (Diffeomorph3GaugeFlowOn.eventuallyWithin_extChartAt_eval_mem_range
+      (I := I) (M := M) G ht x)
+    rfl
+
+/-- Frozen-time spatial derivative of the metric-coordinate field along the
+actual coordinate curve supplied by a raw gauge flow, relative to the raw time
+set, with the centered tangent-coordinate change simplified to the gauge
+velocity. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      ((fderivWithin ℝ
+        (fun yE : E ↦
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+        (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (X t ((G.maps3 t) x)))
+      s t := by
+  exact metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_center
+    (I := I) (M := M) g t ((G.maps3 t) x)
+    (G.hasDerivWithinAt_extChartAt_eval_self ht x)
     (Diffeomorph3GaugeFlowOn.eventuallyWithin_extChartAt_eval_mem_range
       (I := I) (M := M) G ht x)
     rfl
@@ -1227,6 +1280,50 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_time
       (B := B) (c := c) htime hspace
   simpa [B, c] using hmain
 
+/-- Full metric-coordinate field derivative along a raw gauge-flow coordinate
+curve, with the frozen spatial contribution stated using the gauge velocity
+itself at the centered chart. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_timeDifference_along_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Btime : E →L[ℝ] E →L[ℝ] ℝ}
+    (htime :
+      HasDerivAt
+        (fun τ : ℝ ↦
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+        Btime t) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Btime +
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have hspace : HasDerivAt (fun τ : ℝ ↦ B t (c τ))
+      ((fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+        ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (X t ((G.maps3 t) x))) t := by
+    simpa [B, c] using
+      Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivAt_along_eval_self
+        (I := I) (M := M) G hs g x
+  have hmain :=
+    hasDerivAt_of_timeDifference_and_frozenSpatial
+      (B := B) (c := c) htime hspace
+  simpa [B, c] using hmain
+
 /-- A full Fréchet derivative of the named metric-coordinate field supplies the
 remaining time-difference derivative along a raw gauge-flow coordinate curve,
 after subtracting the frozen spatial derivative already obtained from the
@@ -1279,7 +1376,56 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_has
           ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
           (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
             ((G.maps3 t) x) (X t ((G.maps3 t) x))))
-      hB (G.hasDerivAt_extChartAt_eval hs x) hspace
+       hB (G.hasDerivAt_extChartAt_eval hs x) hspace
+  simpa [B, c] using htime
+
+/-- A full Fréchet derivative of the named metric-coordinate field supplies the
+time-difference derivative along a raw gauge-flow coordinate curve, with both
+moving and frozen spatial derivatives evaluated at the gauge velocity itself. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_hasFDerivAt_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x)) -
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have hspace : HasDerivAt (fun τ : ℝ ↦ B t (c τ))
+      ((fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+        ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (X t ((G.maps3 t) x))) t := by
+    simpa [B, c] using
+      Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivAt_along_eval_self
+        (I := I) (M := M) G hs g x
+  have htime :=
+    hasDerivAt_timeDifference_of_fullField_and_frozenSpatial
+      (B := B) (c := c)
+      (Bfield' := Bfield')
+      (Bspace :=
+        (fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      hB (G.hasDerivAt_extChartAt_eval_self hs x) hspace
   simpa [B, c] using htime
 
 /-- Within-set additive time/spatial decomposition for a field evaluated along a
@@ -1387,6 +1533,39 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_has
       (G.hasDerivWithinAt_extChartAt_eval ht x)
   simpa [B, c] using htime
 
+/-- Endpoint/right-derivative version of the metric-coordinate time-difference
+bridge, with the centered tangent-coordinate change simplified to the gauge
+velocity in the full Fréchet derivative. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x)) -
+        Bfield' (0, X t ((G.maps3 t) x)))
+      s t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have htime :=
+    hasDerivWithinAt_timeDifference_of_fullField
+      (B := B) (c := c) (Bfield' := Bfield') hB
+      (G.hasDerivWithinAt_extChartAt_eval_self ht x)
+  simpa [B, c] using htime
+
 /-- Readout-field endpoint/right-derivative version of
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt`.
 
@@ -1471,6 +1650,50 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_o
       (B := B) (c := c) htime hspace
   simpa [B, c] using hmain
 
+/-- Full metric-coordinate field derivative along a raw gauge-flow coordinate
+curve, relative to the raw time set, with the frozen spatial contribution
+stated using the gauge velocity itself. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_of_timeDifference_along_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Btime : E →L[ℝ] E →L[ℝ] ℝ}
+    (htime :
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+          metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+        Btime s t) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Btime +
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      s t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have hspace : HasDerivWithinAt (fun τ : ℝ ↦ B t (c τ))
+      ((fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+        ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (X t ((G.maps3 t) x))) s t := by
+    simpa [B, c] using
+      Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_eval_self
+        (I := I) (M := M) G ht g x
+  have hmain :=
+    hasDerivWithinAt_of_timeDifference_and_frozenSpatial
+      (B := B) (c := c) htime hspace
+  simpa [B, c] using hmain
+
 /-- Endpoint/right-derivative version of the metric-coordinate time-difference
 bridge that subtracts the canonical frozen-spatial `fderivWithin` term. -/
 theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt_and_frozenSpatial
@@ -1521,7 +1744,55 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_has
           ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
           (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
             ((G.maps3 t) x) (X t ((G.maps3 t) x))))
-      hB (G.hasDerivWithinAt_extChartAt_eval ht x) hspace
+       hB (G.hasDerivWithinAt_extChartAt_eval ht x) hspace
+  simpa [B, c] using htime
+
+/-- Endpoint/right-derivative time-difference bridge subtracting the canonical
+frozen-spatial `fderivWithin` term, with the gauge velocity exposed directly. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivAt_and_frozenSpatial_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x)) -
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      s t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let B : ℝ → E → E →L[ℝ] E →L[ℝ] ℝ := fun τ yE ↦
+    metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) (τ, yE)
+  have hspace : HasDerivWithinAt (fun τ : ℝ ↦ B t (c τ))
+      ((fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+        ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+        (X t ((G.maps3 t) x))) s t := by
+    simpa [B, c] using
+      Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_fixedTime_hasDerivWithinAt_along_eval_self
+        (I := I) (M := M) G ht g x
+  have htime :=
+    hasDerivWithinAt_timeDifference_of_fullField_and_frozenSpatial
+      (B := B) (c := c)
+      (Bfield' := Bfield')
+      (Bspace :=
+        (fderivWithin ℝ (fun yE : E ↦ B t yE) (Set.range I)
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      hB (G.hasDerivWithinAt_extChartAt_eval_self ht x) hspace
   simpa [B, c] using htime
 
 /-- Readout-field version of

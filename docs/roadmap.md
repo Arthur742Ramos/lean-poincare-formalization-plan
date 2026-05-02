@@ -945,11 +945,15 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         identity/static no-spatial-motion cases. On the moving spatial side,
         fixed-time slices of `metricBilinearCoordinateField` are now proved
         `C²` in the preferred extended chart from the hom-bundle coordinate
-        smoothness of each Riemannian metric slice, and this has been extracted
-        as a canonical within-chart `fderivWithin` plus a chain-rule bridge for
-        raw gauge-flow coordinate curves. The module also now has an additive
-        time/spatial decomposition upgrading that frozen spatial term to the full
-        moving time-space field derivative once the remaining time-difference
+         smoothness of each Riemannian metric slice, and this has been extracted
+         as a canonical within-chart `fderivWithin` plus a chain-rule bridge for
+         raw gauge-flow coordinate curves. Direct `_self` variants of the
+         frozen-spatial, total-derivative, and time-difference raw-flow endpoint
+         lemmas now expose the gauge velocity itself at the centered chart,
+         removing the redundant basepoint `tangentCoordChange` from this layer.
+         The module also now has an additive
+         time/spatial decomposition upgrading that frozen spatial term to the full
+         moving time-space field derivative once the remaining time-difference
         derivative along the same raw coordinate curve is supplied, and this is
         wired into the concrete component-derivative package used by the tensor
          time-regularity endpoints, with a closed-Picard `Ioo` specialization.

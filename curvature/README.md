@@ -663,16 +663,19 @@ now packages the matching intrinsic boundary
        time-regularity on the same time set and fixed-IVP/theorem-family/raw-existence
        component-data package lifts, a generic within-set scalar transfer and raw
        endpoint scalar derivative package that upgrades directly to tensor
-      time-regularity on the open interval and restricts to smaller time sets
-      through a raw gauge-flow endpoint
-      wrapper, including variational tangent-map endpoint data with
-      geometric-slot scalar identities, variants where the tangent-map
-      identification is only known in the closed-interval within filter, and an
-      analogous direct `hasFDerivAtWithin` wrapper family that fills in the
-      `HasDerivWithinAt` tangent-coordinate derivative from the variational ODE,
-      direct variational endpoint wrappers for `HasDerivWithinAt`
-      time-difference data with geometric-slot scalar identities and
-      model-velocity rewrites from within-set base-flow agreement, and an
+       time-regularity on the open interval and restricts to smaller time sets
+       through a raw gauge-flow endpoint
+       wrapper, including variational tangent-map endpoint data with
+       geometric-slot scalar identities, variants where the tangent-map
+       identification is only known in the closed-interval within filter, and an
+       analogous direct `hasFDerivAtWithin` wrapper family that fills in the
+       `HasDerivWithinAt` tangent-coordinate derivative from the variational ODE,
+       plus direct-velocity `_self` raw-flow endpoint lemmas for the
+       frozen-spatial, total-derivative, and time-difference metric-coordinate
+       calculations,
+       direct variational endpoint wrappers for `HasDerivWithinAt`
+       time-difference data with geometric-slot scalar identities and
+       model-velocity rewrites from within-set base-flow agreement, and an
       endpoint bridge from full metric-coordinate Fréchet data to the concrete
       `B(τ)` derivative and then to tensor time-regularity. The
       coordinate-level `CoordinatePullbackMetricInnerDerivativeOn` package now
