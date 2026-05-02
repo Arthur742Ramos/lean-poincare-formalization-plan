@@ -330,6 +330,16 @@ theorem pair_parabolicDistance_le_one {c p q : ℝ × X}
 
 end parabolicClosedBall
 
+namespace parabolicBall
+
+variable {X : Type*} [PseudoMetricSpace X] {p : ℝ × X} {R : ℝ}
+
+theorem closure_subset_closedBall :
+    closure (parabolicBall p R) ⊆ parabolicClosedBall p R :=
+  closure_minimal subset_closedBall (parabolicClosedBall.isClosed p R)
+
+end parabolicBall
+
 namespace parabolicCylinder
 
 variable {X : Type*} [PseudoMetricSpace X] {p q : ℝ × X}
@@ -345,6 +355,12 @@ theorem mono (ht : timeRadius ≤ timeRadius') (hs : spaceRadius ≤ spaceRadius
       parabolicCylinder p timeRadius' spaceRadius' := by
   intro q hq
   exact ⟨lt_of_lt_of_le hq.1 ht, lt_of_lt_of_le hq.2 hs⟩
+
+theorem subset_closedCylinder :
+    parabolicCylinder p timeRadius spaceRadius ⊆
+      parabolicClosedCylinder p timeRadius spaceRadius := by
+  intro q hq
+  exact ⟨le_of_lt hq.1, le_of_lt hq.2⟩
 
 theorem mem_comm :
     q ∈ parabolicCylinder p timeRadius spaceRadius ↔
@@ -517,6 +533,18 @@ theorem pair_parabolicDistance_le {c p q : ℝ × X}
   exact max_le (htime.trans (le_max_left _ _)) (hspace.trans (le_max_right _ _))
 
 end parabolicClosedCylinder
+
+namespace parabolicCylinder
+
+variable {X : Type*} [PseudoMetricSpace X] {p : ℝ × X} {timeRadius spaceRadius : ℝ}
+
+theorem closure_subset_closedCylinder :
+    closure (parabolicCylinder p timeRadius spaceRadius) ⊆
+      parabolicClosedCylinder p timeRadius spaceRadius :=
+  closure_minimal subset_closedCylinder
+    (parabolicClosedCylinder.isClosed p timeRadius spaceRadius)
+
+end parabolicCylinder
 
 /-- Parabolic Holder control with exponent `α` and constant `C` on a set of time-space points. -/
 def ParabolicHolderWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]

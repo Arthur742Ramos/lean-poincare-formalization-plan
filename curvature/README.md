@@ -967,8 +967,9 @@ regularity. The parabolic PDE layer has proof-bearing groundwork in
 `AnalyticPDE/ParabolicHolder.lean`: parabolic distance, balls/cylinders,
 `C^{0,α}` control, local-base compatibility with the product topology for both
 parabolic balls and product cylinders, closed-to-open shrink inclusions for
-balls/cylinders, positive exponent continuity/uniform-continuity consequences,
-explicit closed-ball/cylinder oscillation estimates, and
+balls/cylinders, open-to-closed closure containment, positive exponent
+continuity/uniform-continuity consequences, explicit closed-ball/cylinder
+oscillation estimates, and
 basic linear algebra closure estimates for Hölder and bounded control, together
 with the bounded product estimate for normed-ring-valued `C^{0,α}` functions
 and the corresponding bounded scalar-action estimate for normed-space-valued
