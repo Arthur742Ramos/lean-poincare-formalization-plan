@@ -1662,6 +1662,20 @@ theorem of_finset_parabolicBall_cover_closedBall_variable {B : ℝ} {K : Set (�
   exact hpoint.trans
     (mul_le_mul_of_nonneg_right hAyD (Real.rpow_nonneg hd0 α))
 
+/-- Compact local-to-global parabolic Holder control from point-dependent doubled closed-ball
+estimates, with Holder constants and cover radii chosen on a finite compact subcover. -/
+theorem of_isCompact_of_local_closedBall_variable {B : ℝ} {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hbounded : ParabolicBoundedWith B u K) (hα : 0 < α)
+    (R : ℝ × X → ℝ) (hRpos : ∀ y ∈ K, 0 < R y)
+    (hlocal : ∀ y ∈ K, ParabolicHolderOn α u (parabolicClosedBall y (2 * R y))) :
+    ParabolicHolderOn α u K := by
+  rcases hK.elim_nhds_subcover (fun y => parabolicBall y (R y))
+      (fun y hy => parabolicBall.mem_nhds (p := y) (R := R y) (hRpos y hy)) with
+    ⟨N, hNK, hcover⟩
+  exact of_finset_parabolicBall_cover_closedBall_variable N R hbounded hα
+    (fun y hy => hRpos y (hNK y hy)) hcover
+    (fun y hy => hlocal y (hNK y hy))
+
 /-- Compact local-to-global parabolic Holder control from local doubled closed-ball estimates,
 with Holder constants chosen automatically from a finite compact subcover. -/
 theorem of_isCompact_of_local_closedBall {B r : ℝ} {K : Set (ℝ × X)}
@@ -2177,6 +2191,20 @@ theorem of_finset_parabolicBall_cover_closedBall_variable {K : Set (ℝ × X)}
       (fun y hy => (hlocal y hy).holderOn) with
     ⟨H, hHnonneg, hH⟩
   exact ⟨Bsum, hBsum_nonneg, H, hHnonneg, hbounded, hH⟩
+
+/-- Compact local-to-global parabolic `C^{0,α}` control from point-dependent doubled
+closed-ball estimates, with all constants and cover radii chosen on a finite compact subcover. -/
+theorem of_isCompact_of_local_closedBall_variable {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hα : 0 < α) (R : ℝ × X → ℝ)
+    (hRpos : ∀ y ∈ K, 0 < R y)
+    (hlocal : ∀ y ∈ K, ParabolicC0AlphaOn α u (parabolicClosedBall y (2 * R y))) :
+    ParabolicC0AlphaOn α u K := by
+  rcases hK.elim_nhds_subcover (fun y => parabolicBall y (R y))
+      (fun y hy => parabolicBall.mem_nhds (p := y) (R := R y) (hRpos y hy)) with
+    ⟨N, hNK, hcover⟩
+  exact of_finset_parabolicBall_cover_closedBall_variable N R hα
+    (fun y hy => hRpos y (hNK y hy)) hcover
+    (fun y hy => hlocal y (hNK y hy))
 
 /-- Compact local-to-global parabolic `C^{0,α}` control from local doubled closed-ball estimates,
 with all constants chosen automatically from a finite compact subcover. -/
