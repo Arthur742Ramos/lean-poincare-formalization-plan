@@ -733,7 +733,10 @@ repackaged as a two-variable bilinear-form field before producing
 `HasTimeDerivativeOn`. The same scalar calculus now also has non-open-domain
 forms where callers supply product-graph convergence/eventual membership into
 the derivative domain directly, matching closed state constraints that arise in
-Picard and Banach chart arguments. The raw tensor route mirrors that
+Picard and Banach chart arguments; those non-open-domain forms now also have
+within-filter and ordinary eventual-equality transfer companions, so local
+geometric scalar identities can reuse the closed-domain product derivative
+without adding an artificial openness step. The raw tensor route mirrors that
 generalization through
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalLocalFlowScalarReadout`
 and
