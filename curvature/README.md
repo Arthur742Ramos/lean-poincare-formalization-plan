@@ -683,7 +683,9 @@ now packages the matching intrinsic boundary
         `(flow, A(t)u, A(t)v)` space-time readouts and
         Lipschitz/continuity/distance estimates extracted from product
         variational dependence, plus overlap uniqueness for that combined
-        scalar-readout state on both `Ioo` and `Icc`,
+        scalar-readout state on both `Ioo` and `Icc`, and direct tensor
+        time-derivative bridges from continuous product Picard flows to scalar
+        readout hypotheses,
         plus Gronwall uniqueness bridges for packaged and continuous
       space-time model flows; the
       raw-flow API also extracts continuity of `τ ↦ Φ_τ(x)` and eventual
