@@ -716,7 +716,10 @@ sibling of the existing `Diffeomorph3FlowDerivative.lean` and
 four-variable open-domain chain rule for readouts stated directly on
 `(t, y, u, v)`, with variational local-flow specializations for
 `(t, flow(t), A(t)u, A(t)v)`, so local chart derivatives can depend on the base
-point and both pushed vector slots in one product domain.
+point and both pushed vector slots in one product domain. The same four-variable
+route now has ordinary open-interior `Ioo` variants, including center-trajectory
+specializations, so interior endpoint routes can consume product-domain scalar
+derivatives without first passing through a closed-interval within derivative.
 
 ### Item 2 — raw `C³` gauge-flow existence on a compact manifold
 

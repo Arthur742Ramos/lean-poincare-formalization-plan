@@ -407,7 +407,8 @@ now packages the matching intrinsic boundary
            and pushed-forward geometric-slot wrappers, with the lower scalar
            calculus now also exposing a four-variable open-domain chain rule for
            readouts on `(t, y, u, v)` and variational local-flow specializations
-           for `(t, flow(t), A(t)u, A(t)v)`, and the
+           for `(t, flow(t), A(t)u, A(t)v)`, including ordinary open-interior
+           `Ioo` variants, and the
             model-coordinate time-difference route also accepting any locally equal
          two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the

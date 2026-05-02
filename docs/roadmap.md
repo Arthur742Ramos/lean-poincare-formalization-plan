@@ -720,7 +720,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
           geometric-slot wrappers. The lower scalar calculus now also has a
           four-variable open-domain chain rule for readouts on `(t, y, u, v)`,
           with variational local-flow specializations for
-          `(t, flow(t), A(t)u, A(t)v)`. It also has
+          `(t, flow(t), A(t)u, A(t)v)`, now also in ordinary open-interior `Ioo`
+          form for center and non-center trajectories. It also has
         raw-flow transport across
         time-dependent vector fields that agree on the active time set,
      geometric-to-raw adapters, direct derivative/local-at-time extractors, and
