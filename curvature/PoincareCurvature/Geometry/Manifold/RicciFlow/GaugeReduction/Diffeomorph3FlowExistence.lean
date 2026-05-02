@@ -302,6 +302,38 @@ theorem hasMFDerivAt_congr_vectorField
       ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (G.maps3 t x))) :=
   (G.satisfiesAt_congr_vectorField hs hXY).hasMFDerivAt x
 
+/-- At a neighborhood time, the preferred-chart derivative readout can be rewritten to any vector
+field that agrees with the original one along the flow near that time. -/
+theorem hasDerivAt_extChartAt_eval_self_congr_vectorField
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (Y t ((G.maps3 t) x)) t := by
+  have hsrc_ext : (G.maps3 t) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+    mem_extChartAt_source ((G.maps3 t) x)
+  have hsrc : (G.maps3 t) x ∈ (chartAt H ((G.maps3 t) x)).source :=
+    extChartAt_source I ((G.maps3 t) x) ▸ hsrc_ext
+  have h :
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+          (Y t ((G.maps3 t) x))) t := by
+    rw [hasDerivAt_iff_hasFDerivAt, ← hasMFDerivAt_iff_hasFDerivAt]
+    apply (HasMFDerivAt.comp t (hasMFDerivAt_extChartAt (I := I) hsrc)
+      (G.hasMFDerivAt_congr_vectorField hs hXY x)).congr_mfderiv
+    rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton,
+      mfderiv_chartAt_eq_tangentCoordChange hsrc]
+    exact ContinuousLinearMap.comp_toSpanSingleton _ _
+  rw [tangentCoordChange_self (I := I)
+    (x := (G.maps3 t) x) (z := (G.maps3 t) x)
+    (v := Y t ((G.maps3 t) x)) hsrc_ext] at h
+  exact h
+
 /-- At any time where the raw time set is a neighborhood, a raw gauge-flow curve
 has the expected derivative in the preferred chart centered at its time-`t`
 value. -/

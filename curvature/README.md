@@ -624,7 +624,8 @@ now packages the matching intrinsic boundary
         centered preferred-chart derivative simplifications that expose the
         actual gauge velocity directly, vector-field agreement transport for
         raw flows and local-at-time derivative readouts when vector fields agree
-        along the flow near the time, geometric-to-raw adapters, and direct
+        along the flow near the time, including centered preferred-chart
+        derivative readouts, geometric-to-raw adapters, and direct
         proof-level `Nonempty` wrappers for the raw geometric/derivative,
        restriction, and identity-flow constructors, plus matching fixed-IVP
        and theorem-family intrinsic proof-level wrappers and derivative/local-at-time

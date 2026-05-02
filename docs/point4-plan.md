@@ -957,8 +957,8 @@ and raw `Diffeomorph3GaugeFlowOn` witnesses can now be transported across
 time-dependent vector fields that agree on the active time set; the local
 integral-curve and gauge-flow layers now also have near-time vector-field
 congruence, and raw gauge-flow witnesses expose matching local-at-time
-`SatisfiesGaugeFlowAt` and `HasMFDerivAt` readouts when vector fields agree
-along the flow near that time. The raw
+`SatisfiesGaugeFlowAt`, `HasMFDerivAt`, and centered preferred-chart derivative
+readouts when vector fields agree along the flow near that time. The raw
 existence layer now also has preferred-chart ODE constructors:
 `of_hasDerivWithinAt_extChartAt_eval_self` and
 `of_hasDerivAtOn_extChartAt_eval_self` build `Diffeomorph3GaugeFlowOn`
