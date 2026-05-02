@@ -966,8 +966,9 @@ along the gauge flow, and the quasilinear parabolic PDE layer, not bundle
 regularity. The parabolic PDE layer has proof-bearing groundwork in
 `AnalyticPDE/ParabolicHolder.lean`: parabolic distance, balls/cylinders,
 `C^{0,α}` control, local-base compatibility with the product topology for both
-parabolic balls and product cylinders, closed-to-open shrink inclusions for
-balls/cylinders, open-to-closed closure containment, positive exponent
+parabolic balls and product cylinders, exact standard ball/cylinder
+identifications, closed-to-open shrink inclusions for balls/cylinders,
+open-to-closed closure containment, positive exponent
 continuity/uniform-continuity consequences, explicit closed-ball/cylinder
 oscillation estimates, and
 basic linear algebra closure estimates for Hölder and bounded control, together

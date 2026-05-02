@@ -101,8 +101,9 @@ existence/uniqueness theorem is still unproved and therefore point 4 remains
 open. The analytic PDE side has started with proof-bearing parabolic Hölder
 primitives in `RicciFlow/AnalyticPDE/ParabolicHolder.lean`: parabolic distance,
 balls/cylinders, `C^{0,α}` control, product-topology local-base compatibility
-for parabolic balls and product cylinders, closed-to-open shrink inclusions for
-balls/cylinders, open-to-closed closure containment,
+for parabolic balls and product cylinders, exact standard ball/cylinder
+identifications, closed-to-open shrink inclusions for balls/cylinders,
+open-to-closed closure containment,
 continuity/uniform-continuity consequences, explicit
 closed-ball/cylinder oscillation bounds, and additive
 and subtractive closure estimates, plus the bounded product estimate for

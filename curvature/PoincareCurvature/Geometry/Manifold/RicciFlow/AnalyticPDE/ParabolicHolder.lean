@@ -432,6 +432,18 @@ theorem subset_ball (hR : 0 < R) :
 
 end parabolicCylinder
 
+namespace parabolicBall
+
+variable {X : Type*} [PseudoMetricSpace X] {p : ℝ × X} {R : ℝ}
+
+/-- The parabolic ball of radius `R` is the product cylinder with time radius `R^2` and
+spatial radius `R`. -/
+theorem eq_cylinder (hR : 0 < R) :
+    parabolicBall p R = parabolicCylinder p (R ^ 2) R :=
+  subset_antisymm (subset_cylinder hR.le) (parabolicCylinder.subset_ball hR)
+
+end parabolicBall
+
 namespace parabolicClosedCylinder
 
 variable {X : Type*} [PseudoMetricSpace X] {p q : ℝ × X}
@@ -545,6 +557,18 @@ theorem closure_subset_closedCylinder :
     (parabolicClosedCylinder.isClosed p timeRadius spaceRadius)
 
 end parabolicCylinder
+
+namespace parabolicClosedBall
+
+variable {X : Type*} [PseudoMetricSpace X] {p : ℝ × X} {R : ℝ}
+
+/-- The closed parabolic ball of radius `R` is the closed product cylinder with time radius
+`R^2` and spatial radius `R`. -/
+theorem eq_closedCylinder (hR : 0 ≤ R) :
+    parabolicClosedBall p R = parabolicClosedCylinder p (R ^ 2) R :=
+  subset_antisymm (subset_closedCylinder hR) (parabolicClosedCylinder.subset_closedBall hR)
+
+end parabolicClosedBall
 
 /-- Parabolic Holder control with exponent `α` and constant `C` on a set of time-space points. -/
 def ParabolicHolderWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
