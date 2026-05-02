@@ -1005,7 +1005,8 @@ corollaries.
 The separate `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now proves that
 finite matrix determinants, adjugate entries, and inverse entries under a
 determinant lower bound preserve parabolic `C^{0,α}` control from entrywise
-control, using the finite-product, integer-scalar, reciprocal, and division
+control; it also proves entrywise closure for matrix products and matrix-vector
+products, using the finite-product, integer-scalar, reciprocal, and division
 closure layer.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 

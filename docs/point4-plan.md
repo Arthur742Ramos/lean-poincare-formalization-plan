@@ -1260,8 +1260,9 @@ closed-ball/cylinder corollaries. The new
 `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves determinant
 closure, adjugate-entry closure, and inverse-entry closure under a determinant
 lower bound for finite matrix-valued parabolic `C^{0,α}` functions from
-entrywise control, using finite-product, integer-scalar, reciprocal, and
-division closure. The abstract
+entrywise control, plus entrywise closure for matrix products and matrix-vector
+products, using finite-product, integer-scalar, reciprocal, and division
+closure. The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
 `nonempty_realization`, `realizationCandidateEncoding`, and

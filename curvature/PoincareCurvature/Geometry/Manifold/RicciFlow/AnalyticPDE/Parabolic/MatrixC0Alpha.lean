@@ -98,6 +98,36 @@ theorem matrix_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedFie
   rw [Matrix.inv_def, Ring.inverse_eq_inv]
   rfl
 
+/-- Entries of a product of two matrix-valued parabolic `C^{0,α}` functions are
+parabolic `C^{0,α}` when all input entries are. -/
+theorem matrix_mul_entry {l m n A : Type*} [Fintype m] [NormedRing A]
+    {M : ℝ × X → Matrix l m A} {N : ℝ × X → Matrix m n A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) s) (i : l) (j : n) :
+    ParabolicC0AlphaOn α (fun z => (M z * N z) i j) s := by
+  have hsum : ParabolicC0AlphaOn α (fun z => ∑ k : m, M z i k * N z k j) s := by
+    simpa using
+      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset m))
+        (u := fun k z => M z i k * N z k j)
+        (fun k _hk => (hM i k).mul (hN k j)))
+  simpa [Matrix.mul_apply] using hsum
+
+/-- Entries of a matrix-vector product are parabolic `C^{0,α}` when the matrix entries and
+vector components are. -/
+theorem matrix_mulVec_entry {m n A : Type*} [Fintype n] [NormedRing A]
+    {M : ℝ × X → Matrix m n A} {v : ℝ × X → n → A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hv : ∀ j, ParabolicC0AlphaOn α (fun z => v z j) s) (i : m) :
+    ParabolicC0AlphaOn α (fun z => (M z).mulVec (v z) i) s := by
+  have hsum : ParabolicC0AlphaOn α (fun z => ∑ j : n, M z i j * v z j) s := by
+    simpa using
+      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun j z => M z i j * v z j)
+        (fun j _hj => (hM i j).mul (hv j)))
+  simpa [Matrix.mulVec] using hsum
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow
