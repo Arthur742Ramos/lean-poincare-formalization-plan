@@ -426,8 +426,10 @@ before selecting a final tensor route. Variational local-flow constructors now
 fill those packages directly from the model base/tangent ODE derivatives,
 continuous product-Picard wrappers now enter the same named operator-coordinate
 routes, including readouts stated directly on the product state `(y,A)` through
-the final tensor `HasTimeDerivativeOn` bridge, and raw closed-Picard wrappers
-expose both named package bridges and `HasTimeDerivativeOn` promotions.
+the final tensor `HasTimeDerivativeOn` bridge. The four-variable scalar-readout
+routes now also accept direct product-state `(t,y,Au,Av)` data in both
+open-domain and explicit-domain forms, and raw closed-Picard wrappers expose
+both named package bridges and `HasTimeDerivativeOn` promotions.
 This removes a manual tangent Lipschitz obligation from the future
 chart-gluing step and isolates the
 remaining product Picard hypotheses to base-field and linearized-coefficient

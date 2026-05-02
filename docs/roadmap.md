@@ -849,7 +849,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
             constructors, continuous product-Picard bridges, direct product-state
             readout forms through the final tensor bridge, and raw
             closed-Picard package/tensor wrappers for those operator-coordinate
-            packages, direct product-Picard bridges into scalar-readout,
+            packages, direct product-Picard and product-state bridges into scalar-readout,
            metric-coordinate-field, and finite-cover/readout-field tensor
            time-derivative routes, including closed-Picard within-filter
            variants, plus the
