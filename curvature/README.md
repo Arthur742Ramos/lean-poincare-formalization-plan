@@ -587,7 +587,9 @@ now packages the matching intrinsic boundary
         chart-ODE views, direct closed-Picard `Icc` to open-interior `Ioo`
         upgrades for primitive derivative and chart-ODE data, a raw
         open-interior existence constructor from closed-interval centered chart
-        ODE data, including a named intrinsic DeTurck chart-package version, and matching fixed-IVP `ofDerivative` /
+        ODE data, including a named intrinsic DeTurck chart-package version, the
+        parallel open-interior constructors from closed-interval manifold
+        derivative data and named intrinsic primitive derivative data, and matching fixed-IVP `ofDerivative` /
         `ofDerivativeAt` bridges,
         centered preferred-chart derivative simplifications that expose the
         actual gauge velocity directly, vector-field agreement transport for

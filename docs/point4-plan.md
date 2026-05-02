@@ -780,7 +780,10 @@ direct ordinary open-interior `Ioo` upgrade lemmas, matching the standard Picard
 endpoint-to-interior handoff, and the raw existence API now has a one-step
 constructor producing `Diffeomorph3GaugeFlowOn` on `Ioo tmin tmax` directly from
 centered preferred-chart ODE data proved within `Icc tmin tmax`, including a
-named intrinsic DeTurck chart-package version. The
+named intrinsic DeTurck chart-package version. The same raw open-interior
+constructor shape is now available from closed-interval pointwise manifold
+derivative data and from the named intrinsic DeTurck primitive derivative
+package. The
 same named-derivative symmetry is now present
 for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `ChosenIntrinsicDeTurckGaugeFlowDerivativeAt`,

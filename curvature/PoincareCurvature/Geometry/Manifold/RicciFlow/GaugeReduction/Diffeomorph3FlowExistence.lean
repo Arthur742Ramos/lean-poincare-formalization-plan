@@ -353,7 +353,8 @@ theorem nonempty_of_satisfiesGaugeFlowOn
       maps3 t₀)
     (satisfies : SatisfiesGaugeFlowOn (I := I) (M := M)
       maps3.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily X s) :
-    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+    Nonempty
+      (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_satisfiesGaugeFlowOn maps3 anchored satisfies⟩
 
 /-- Reinterpret a raw `C³` gauge-flow witness for an equal vector field along the flow image. -/
@@ -592,6 +593,75 @@ theorem nonempty_of_hasMFDerivAtOn
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (maps3 t x)))) :
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_hasMFDerivAtOn maps3 anchored hderiv⟩
+
+/-- Build a raw `C^3` diffeomorphism gauge-flow witness on the open Picard
+interior from pointwise manifold derivative data proved within the closed
+Picard interval. -/
+noncomputable def of_hasMFDerivWithinAt_Icc
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hderiv : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      HasMFDerivAt[Icc tmin tmax] (fun τ : ℝ ↦ (maps3 τ) x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (maps3 t x)))) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ :=
+  of_hasMFDerivAtOn (I := I) (M := M) (X := X)
+    (s := Ioo tmin tmax) (t₀ := t₀) maps3 anchored
+    (fun t ht x ↦
+      (hderiv t (Ioo_subset_Icc_self ht) x).hasMFDerivAt
+        (Icc_mem_nhds ht.1 ht.2))
+
+/-- Proof-level raw `C^3` gauge-flow existence on the open Picard interior from
+pointwise manifold derivative data proved within the closed Picard interval. -/
+theorem nonempty_of_hasMFDerivWithinAt_Icc
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hderiv : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      HasMFDerivAt[Icc tmin tmax] (fun τ : ℝ ↦ (maps3 τ) x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (maps3 t x)))) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀) :=
+  ⟨of_hasMFDerivWithinAt_Icc maps3 anchored hderiv⟩
+
+/-- Build an intrinsic DeTurck raw gauge-flow witness on the open Picard
+interior from named primitive derivative data proved within the closed Picard
+interval. -/
+noncomputable def of_intrinsicDerivativeOn_Ioo
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hderiv : Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) maps3 g background (Icc tmin tmax)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background)
+      (Ioo tmin tmax) t₀ :=
+  of_hasMFDerivWithinAt_Icc (I := I) (M := M)
+    (X := intrinsicDeTurckGaugeField (I := I) (M := M) g background)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀) maps3 anchored hderiv
+
+/-- Proof-level intrinsic DeTurck raw gauge-flow existence on the open Picard
+interior from named primitive derivative data proved within the closed Picard
+interval. -/
+theorem nonempty_of_intrinsicDerivativeOn_Ioo
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hderiv : Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) maps3 g background (Icc tmin tmax)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background)
+      (Ioo tmin tmax) t₀) :=
+  ⟨of_intrinsicDerivativeOn_Ioo maps3 anchored hderiv⟩
 
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from ordinary
 preferred-chart ODE derivatives available at each time of `s`. -/
