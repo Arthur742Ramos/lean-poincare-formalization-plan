@@ -1564,6 +1564,104 @@ theorem of_finset_parabolicBall_cover_closedBall {B r : ℝ} {K : Set (ℝ × X)
   exact ParabolicHolderWith.of_parabolicBall_cover_closedBall
     (B := B) (C := Hsum) hbounded hα hr hcover hlocal_sum
 
+/-- Local-to-global parabolic Holder control from a finite cover by variable-radius parabolic
+balls.  The local Holder constants and the far-pair boundedness constants are summed over the
+finite cover. -/
+theorem of_finset_parabolicBall_cover_closedBall_variable {B : ℝ} {K : Set (ℝ × X)}
+    (N : Finset (ℝ × X)) (R : ℝ × X → ℝ)
+    (hbounded : ParabolicBoundedWith B u K) (hα : 0 < α)
+    (hRpos : ∀ y ∈ N, 0 < R y)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicBall y (R y))
+    (hlocal : ∀ y ∈ N, ParabolicHolderOn α u (parabolicClosedBall y (2 * R y))) :
+    ParabolicHolderOn α u K := by
+  classical
+  let C : ℝ × X → ℝ := fun y =>
+    if hy : y ∈ N then Classical.choose (hlocal y hy) else 0
+  have hCnonneg : ∀ y ∈ N, 0 ≤ C y := by
+    intro y hy
+    dsimp [C]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hC :
+      ∀ y ∈ N, ParabolicHolderWith (C y) α u (parabolicClosedBall y (2 * R y)) := by
+    intro y hy
+    dsimp [C]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).2
+  let A : ℝ × X → ℝ := fun y =>
+    if hy : y ∈ N then max (C y) (2 * B / (R y) ^ α) else 0
+  have hAnonneg : ∀ y ∈ N, 0 ≤ A y := by
+    intro y hy
+    dsimp [A]
+    rw [if_pos hy]
+    exact (hCnonneg y hy).trans (le_max_left _ _)
+  let D : ℝ := ∑ y ∈ N, A y
+  have hDnonneg : 0 ≤ D := by
+    dsimp [D]
+    exact Finset.sum_nonneg hAnonneg
+  have hA_le_D : ∀ y ∈ N, A y ≤ D := by
+    intro y hy
+    dsimp [D]
+    exact Finset.single_le_sum hAnonneg hy
+  refine ⟨D, hDnonneg, ?_⟩
+  intro p hp q hq
+  let d : ℝ := parabolicDistance p q
+  change ‖u p - u q‖ ≤ D * d ^ α
+  have hd0 : 0 ≤ d := parabolicDistance.nonneg p q
+  rcases mem_iUnion.1 (hcover hp) with ⟨y, hy⟩
+  rcases mem_iUnion.1 hy with ⟨hyN, hpball⟩
+  have hRy : 0 < R y := hRpos y hyN
+  have hAyD : A y ≤ D := hA_le_D y hyN
+  have hRy_le_two : R y ≤ 2 * R y := by linarith
+  have hpclosed : p ∈ parabolicClosedBall y (2 * R y) :=
+    (le_of_lt hpball).trans hRy_le_two
+  have hpoint : ‖u p - u q‖ ≤ A y * d ^ α := by
+    by_cases hsmall : d < R y
+    · have hqclosed : q ∈ parabolicClosedBall y (2 * R y) := by
+        have hlt : parabolicDistance y q < 2 * R y := by
+          calc
+            parabolicDistance y q ≤ parabolicDistance y p + parabolicDistance p q :=
+              parabolicDistance.triangle y p q
+            _ < R y + R y := by
+              exact add_lt_add hpball hsmall
+            _ = 2 * R y := by ring
+        exact le_of_lt hlt
+      have hlocalpq : ‖u p - u q‖ ≤ C y * d ^ α := by
+        simpa [d] using hC y hyN hpclosed hqclosed
+      have hCA : C y ≤ A y := by
+        dsimp [A]
+        rw [if_pos hyN]
+        exact le_max_left _ _
+      exact hlocalpq.trans
+        (mul_le_mul_of_nonneg_right hCA (Real.rpow_nonneg hd0 α))
+    · have hfar : R y ≤ d := le_of_not_gt hsmall
+      have hBnonneg : 0 ≤ B := (norm_nonneg (u p)).trans (hbounded hp)
+      have hrpow_pos : 0 < (R y) ^ α := Real.rpow_pos_of_pos hRy α
+      have hrpow_le_dpow : (R y) ^ α ≤ d ^ α :=
+        Real.rpow_le_rpow hRy.le hfar hα.le
+      have hcoef_nonneg : 0 ≤ 2 * B / (R y) ^ α :=
+        div_nonneg (mul_nonneg (by positivity) hBnonneg) hrpow_pos.le
+      have hdiff : ‖u p - u q‖ ≤ 2 * B := by
+        calc
+          ‖u p - u q‖ ≤ ‖u p‖ + ‖u q‖ := norm_sub_le _ _
+          _ ≤ B + B := add_le_add (hbounded hp) (hbounded hq)
+          _ = 2 * B := by ring
+      have hfar_bound : 2 * B ≤ A y * d ^ α := by
+        calc
+          2 * B = (2 * B / (R y) ^ α) * (R y) ^ α := by
+            rw [div_mul_cancel₀ _ hrpow_pos.ne']
+          _ ≤ (2 * B / (R y) ^ α) * d ^ α :=
+            mul_le_mul_of_nonneg_left hrpow_le_dpow hcoef_nonneg
+          _ ≤ A y * d ^ α := by
+            have hcoefA : 2 * B / (R y) ^ α ≤ A y := by
+              dsimp [A]
+              rw [if_pos hyN]
+              exact le_max_right _ _
+            exact mul_le_mul_of_nonneg_right hcoefA (Real.rpow_nonneg hd0 α)
+      exact hdiff.trans hfar_bound
+  exact hpoint.trans
+    (mul_le_mul_of_nonneg_right hAyD (Real.rpow_nonneg hd0 α))
+
 /-- Compact local-to-global parabolic Holder control from local doubled closed-ball estimates,
 with Holder constants chosen automatically from a finite compact subcover. -/
 theorem of_isCompact_of_local_closedBall {B r : ℝ} {K : Set (ℝ × X)}
@@ -2033,6 +2131,52 @@ theorem of_finset_parabolicBall_cover_closedBall {r : ℝ} {K : Set (ℝ × X)}
     hHsum_nonneg.trans (le_max_left _ _), ?_⟩
   exact ParabolicC0AlphaWith.of_parabolicBall_cover_closedBall
     (B := Bsum) (H := Hsum) hα hr hcover hlocal_sum
+
+/-- Local-to-global parabolic `C^{0,α}` control from a finite cover by variable-radius
+parabolic balls.  The global sup constant is the sum of local sup constants, and the Holder
+constant is supplied by the variable-radius Holder patching theorem. -/
+theorem of_finset_parabolicBall_cover_closedBall_variable {K : Set (ℝ × X)}
+    (N : Finset (ℝ × X)) (R : ℝ × X → ℝ) (hα : 0 < α)
+    (hRpos : ∀ y ∈ N, 0 < R y)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicBall y (R y))
+    (hlocal : ∀ y ∈ N, ParabolicC0AlphaOn α u (parabolicClosedBall y (2 * R y))) :
+    ParabolicC0AlphaOn α u K := by
+  classical
+  let Bc : ℝ × X → ℝ :=
+    fun y => if hy : y ∈ N then Classical.choose (hlocal y hy) else 0
+  have hBnonneg : ∀ y ∈ N, 0 ≤ Bc y := by
+    intro y hy
+    dsimp [Bc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hBlocal :
+      ∀ y ∈ N, ParabolicBoundedWith (Bc y) u (parabolicClosedBall y (2 * R y)) := by
+    intro y hy
+    dsimp [Bc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).2.1
+  let Bsum : ℝ := ∑ y ∈ N, Bc y
+  have hBsum_nonneg : 0 ≤ Bsum := by
+    dsimp [Bsum]
+    exact Finset.sum_nonneg hBnonneg
+  have hB_le_sum : ∀ y ∈ N, Bc y ≤ Bsum := by
+    intro y hy
+    dsimp [Bsum]
+    exact Finset.single_le_sum hBnonneg hy
+  have hbounded : ParabolicBoundedWith Bsum u K := by
+    intro p hp
+    rcases mem_iUnion.1 (hcover hp) with ⟨y, hy⟩
+    rcases mem_iUnion.1 hy with ⟨hyN, hpball⟩
+    have hRy : 0 < R y := hRpos y hyN
+    have hRy_le_two : R y ≤ 2 * R y := by linarith
+    have hpclosed : p ∈ parabolicClosedBall y (2 * R y) :=
+      (le_of_lt hpball).trans hRy_le_two
+    exact (hBlocal y hyN hpclosed).trans (hB_le_sum y hyN)
+  rcases ParabolicHolderOn.of_finset_parabolicBall_cover_closedBall_variable
+      (B := Bsum) N R hbounded hα hRpos hcover
+      (fun y hy => (hlocal y hy).holderOn) with
+    ⟨H, hHnonneg, hH⟩
+  exact ⟨Bsum, hBsum_nonneg, H, hHnonneg, hbounded, hH⟩
 
 /-- Compact local-to-global parabolic `C^{0,α}` control from local doubled closed-ball estimates,
 with all constants chosen automatically from a finite compact subcover. -/
