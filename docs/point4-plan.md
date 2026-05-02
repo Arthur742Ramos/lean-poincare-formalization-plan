@@ -249,7 +249,10 @@ coordinate graph and rewrites the model ODE velocity to the raw gauge vector
 field before applying the domain-restricted gauge-pullback theorem. A further
 open-product-domain form derives the model graph convergence from the
 variational local-flow continuity package whenever the derivative domain is open
-and contains the Picard graph endpoint.
+and contains the Picard graph endpoint. The raw-coordinate route now has the
+parallel open-product-domain bridge: raw graph convergence is derived from the
+gauge-flow preferred-chart derivative/continuity theorem whenever the domain is
+open around the raw coordinate endpoint.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow

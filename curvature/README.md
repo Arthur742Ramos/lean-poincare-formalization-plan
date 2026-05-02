@@ -385,7 +385,8 @@ now packages the matching intrinsic boundary
          transports product-domain convergence from the model Picard graph to the
          raw coordinate graph using closed-interval base-flow equality, with an
          open-domain variant deriving model graph convergence from variational
-         local-flow continuity, the
+         local-flow continuity and a raw-coordinate open-domain bridge deriving
+         raw graph convergence from preferred-chart gauge-flow continuity, the
          model-coordinate time-difference route also accepting any locally equal
         two-variable bilinear-form readout for the full field derivative in both
         model-coordinate and pushed-forward geometric scalar forms, and the
