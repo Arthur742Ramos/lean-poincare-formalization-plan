@@ -7969,6 +7969,103 @@ theorem christoffel_quadratic_ricci_sub_with {n A : Type*} [Fintype n] [NormedRi
     · intro j
       exact christoffel_quadratic_ricci_entry_sub_with hBΓ hBd hΓ hΛ hdiff i j
 
+/-- Differences of quadratic Christoffel Ricci contraction entries preserve existential
+parabolic `C^{0,α}` control from entrywise controls and entrywise difference controls. -/
+theorem christoffel_quadratic_ricci_entry_sub {n A : Type*} [Fintype n] [NormedRing A]
+    {Γ Λ : ℝ × X → n → n → n → A}
+    (hΓ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c) s)
+    (hΛ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Λ z a b c) s)
+    (hdiff : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c - Λ z a b c) s)
+    (i j : n) :
+    ParabolicC0AlphaOn α
+      (fun z =>
+        ((∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+            (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)) -
+          ((∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+            (∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j))) s := by
+  classical
+  have hleftInner : ∀ a ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaOn α
+        (fun z =>
+          (∑ b : n, Γ z a i j * Γ z b a b) -
+            ∑ b : n, Λ z a i j * Λ z b a b) s := by
+    intro a _ha
+    have hterm : ∀ b ∈ (Finset.univ : Finset n),
+        ParabolicC0AlphaOn α
+          (fun z => Γ z a i j * Γ z b a b - Λ z a i j * Λ z b a b) s := by
+      intro b _hb
+      exact (hΓ a i j).mul_sub_mul (hΛ b a b) (hdiff a i j) (hdiff b a b)
+    have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (u := fun b z => Γ z a i j * Γ z b a b - Λ z a i j * Λ z b a b)
+      hterm
+    convert hsum using 1
+    · ext z
+      simp [Finset.sum_sub_distrib]
+  have hleft : ParabolicC0AlphaOn α
+      (fun z =>
+        (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+          ∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) s := by
+    have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (u := fun a z =>
+        (∑ b : n, Γ z a i j * Γ z b a b) -
+          ∑ b : n, Λ z a i j * Λ z b a b)
+      hleftInner
+    simpa [Finset.sum_sub_distrib] using hsum
+  have hrightInner : ∀ a ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaOn α
+        (fun z =>
+          (∑ b : n, Γ z a i b * Γ z b a j) -
+            ∑ b : n, Λ z a i b * Λ z b a j) s := by
+    intro a _ha
+    have hterm : ∀ b ∈ (Finset.univ : Finset n),
+        ParabolicC0AlphaOn α
+          (fun z => Γ z a i b * Γ z b a j - Λ z a i b * Λ z b a j) s := by
+      intro b _hb
+      exact (hΓ a i b).mul_sub_mul (hΛ b a j) (hdiff a i b) (hdiff b a j)
+    have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (u := fun b z => Γ z a i b * Γ z b a j - Λ z a i b * Λ z b a j)
+      hterm
+    convert hsum using 1
+    · ext z
+      simp [Finset.sum_sub_distrib]
+  have hright : ParabolicC0AlphaOn α
+      (fun z =>
+        (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j) -
+          ∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j) s := by
+    have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (u := fun a z =>
+        (∑ b : n, Γ z a i b * Γ z b a j) -
+          ∑ b : n, Λ z a i b * Λ z b a j)
+      hrightInner
+    simpa [Finset.sum_sub_distrib] using hsum
+  have hsub := hleft.sub hright
+  convert hsub using 1
+  ext z
+  abel
+
+/-- Differences of finite quadratic Christoffel Ricci contractions preserve existential
+parabolic `C^{0,α}` control from entrywise controls and entrywise difference controls. -/
+theorem christoffel_quadratic_ricci_sub {n A : Type*} [Fintype n] [NormedRing A]
+    {Γ Λ : ℝ × X → n → n → n → A}
+    (hΓ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c) s)
+    (hΛ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Λ z a b c) s)
+    (hdiff : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c - Λ z a b c) s) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        ((fun i j =>
+          (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+            (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j) :
+            Matrix n n A) -
+          (fun i j =>
+            (∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+              (∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j) :
+              Matrix n n A))) s :=
+  matrix_of_entries fun i j => christoffel_quadratic_ricci_entry_sub hΓ hΛ hdiff i j
+
 /-- Ricci-coordinate quadratic Christoffel contractions are pointwise Lipschitz on bounded
 Christoffel arrays. -/
 theorem christoffel_quadratic_ricci_entry_norm_sub_le {n A : Type*} [Fintype n]
@@ -9245,6 +9342,45 @@ theorem ricciDeTurck_schematic_from_christoffel_sub_with_entrywise {n 𝕜 : Typ
         hMH hMBd hMHd hΓB hΓdB hM hN hMdiff hK hHdiff
         hΓ hΛ hΓdiff hδpos hdetM hdetN i j
 
+/-- The schematic Ricci-DeTurck expression built from supplied Christoffel arrays preserves
+existential parabolic `C^{0,α}` difference control from entrywise primitive differences. -/
+theorem ricciDeTurck_schematic_from_christoffel_sub_entrywise {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {H Kc : ℝ × X → n → n → n → n → 𝕜}
+    {Γ Λ : ℝ × X → n → n → n → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) s)
+    (hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) s)
+    (hKc : ∀ a b i j, ParabolicC0AlphaOn α (fun z => Kc z a b i j) s)
+    (hHdiff : ∀ a b i j,
+      ParabolicC0AlphaOn α (fun z => H z a b i j - Kc z a b i j) s)
+    (hΓ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c) s)
+    (hΛ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Λ z a b c) s)
+    (hΓdiff : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c - Λ z a b c) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (show Matrix n n 𝕜 from fun i j =>
+          (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+            ((∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+              (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j))) -
+        (show Matrix n n 𝕜 from fun i j =>
+          (∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b * Kc z a b i j) +
+            ((∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+              (∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j)))) s := by
+  have hprincipal := matrix_inv_two_index_contract_sub_entrywise
+    (M := M) (N := N) (T := H) (U := Kc)
+    hM hN hMdiff hKc hHdiff hδpos hdetM hdetN
+  have hquad := christoffel_quadratic_ricci_sub (Γ := Γ) (Λ := Λ) hΓ hΛ hΓdiff
+  have hsum := hprincipal.add hquad
+  convert hsum using 1
+  ext z i j
+  simp
+  ring
+
 /-- The finite matrix-valued schematic Ricci-DeTurck coordinate RHS.  This definition names the
 algebraic expression used by the pointwise and time-space Lipschitz estimates. -/
 def ricciDeTurckSchematicMatrix {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
@@ -9455,6 +9591,91 @@ theorem ricciDeTurckSchematicMatrix_sub_with_entrywise_of_isCompact_det_ne_zero
   exact ⟨δ, hδpos, ricciDeTurckSchematicMatrix_sub_with_entrywise
     (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
     hMH hMBd hMHd hDB hDH hDDB hDDH hHB hHH hHBd hHHd
+    hM hN hMdiff hD hE hDdiff hKc hHdiff hδpos hdetM hdetN⟩
+
+/-- The primitive-input schematic Ricci-DeTurck RHS preserves existential parabolic `C^{0,α}`
+difference control from entrywise metric, first-derivative, and second-derivative controls. -/
+theorem ricciDeTurckSchematicMatrix_sub_entrywise {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) s)
+    (hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaOn α (fun z => D z a b c) s)
+    (hE : ∀ a b c, ParabolicC0AlphaOn α (fun z => E z a b c) s)
+    (hDdiff : ∀ a b c,
+      ParabolicC0AlphaOn α (fun z => D z a b c - E z a b c) s)
+    (hKc : ∀ a b i j, ParabolicC0AlphaOn α (fun z => Kc z a b i j) s)
+    (hHdiff : ∀ a b i j,
+      ParabolicC0AlphaOn α (fun z => Hc z a b i j - Kc z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+          ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) s := by
+  classical
+  let Γ : ℝ × X → n → n → n → 𝕜 := fun z a b c =>
+    (2 : 𝕜)⁻¹ *
+      ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+        (D z b c l + D z c b l - D z l b c)
+  let Λ : ℝ × X → n → n → n → 𝕜 := fun z a b c =>
+    (2 : 𝕜)⁻¹ *
+      ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) a l *
+        (E z b c l + E z c b l - E z l b c)
+  have hΓ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Γ z a b c) s := by
+    intro a b c
+    simpa [Γ] using
+      matrix_inv_christoffel_entry (M := M) (D := D) hM hD hδpos hdetM a b c
+  have hΛ : ∀ a b c, ParabolicC0AlphaOn α (fun z => Λ z a b c) s := by
+    intro a b c
+    simpa [Λ] using
+      matrix_inv_christoffel_entry (M := N) (D := E) hN hE hδpos hdetN a b c
+  have hΓdiff : ∀ a b c,
+      ParabolicC0AlphaOn α (fun z => Γ z a b c - Λ z a b c) s := by
+    intro a b c
+    simpa [Γ, Λ] using
+      matrix_inv_christoffel_entry_sub_entrywise (M := M) (N := N) (D := D) (E := E)
+        hM hN hMdiff hE hDdiff hδpos hdetM hdetN a b c
+  simpa [ricciDeTurckSchematicMatrix, Γ, Λ] using
+    ricciDeTurck_schematic_from_christoffel_sub_entrywise
+      (M := M) (N := N) (H := Hc) (Kc := Kc) (Γ := Γ) (Λ := Λ)
+      hM hN hMdiff hKc hHdiff hΓ hΛ hΓdiff hδpos hdetM hdetN
+
+/-- Compact-domain primitive-input schematic Ricci-DeTurck RHS differences preserve existential
+parabolic `C^{0,α}` control from entrywise controls and pointwise nonvanishing determinants. -/
+theorem ricciDeTurckSchematicMatrix_sub_entrywise_of_isCompact_det_ne_zero
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) Kdom)
+    (hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) Kdom)
+    (hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) Kdom)
+    (hD : ∀ a b c, ParabolicC0AlphaOn α (fun z => D z a b c) Kdom)
+    (hE : ∀ a b c, ParabolicC0AlphaOn α (fun z => E z a b c) Kdom)
+    (hDdiff : ∀ a b c,
+      ParabolicC0AlphaOn α (fun z => D z a b c - E z a b c) Kdom)
+    (hKc : ∀ a b i j, ParabolicC0AlphaOn α (fun z => Kc z a b i j) Kdom)
+    (hHdiff : ∀ a b i j,
+      ParabolicC0AlphaOn α (fun z => Hc z a b i j - Kc z a b i j) Kdom)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (N z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) Kdom := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := Kdom) (M := M) (N := N) hKdom hα hM hN hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, ricciDeTurckSchematicMatrix_sub_entrywise
+    (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
     hM hN hMdiff hD hE hDdiff hKc hHdiff hδpos hdetM hdetN⟩
 
 /-- The schematic Ricci-DeTurck coordinate entry is pointwise Lipschitz in the primitive metric,

@@ -1441,9 +1441,9 @@ determinant constant, quantitative compact inverse-action and inverse-bilinear
 estimates, existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls with a compact nonvanishing-det
 adapter for reciprocal determinant differences, existential inverse-entry,
-whole inverse-matrix, inverse-principal contraction, and inverse-Christoffel
-array difference readouts from entrywise difference controls, plus entrywise and
-whole-valued closure
+whole inverse-matrix, inverse-principal contraction, inverse-Christoffel array,
+quadratic Christoffel-Ricci, and primitive schematic RHS difference readouts from
+entrywise difference controls, plus entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit bounded transpose/symmetrization estimates and corresponding
 difference estimates, finite matrix trace, explicit bounded trace and
@@ -1495,8 +1495,8 @@ closed-ball spatial-Lipschitz, and closed-cylinder spatial-Lipschitz
 Gram-entry input forms, compact
 local-frame
 inverse Gram, inverse-principal contraction, and inverse-Gram Christoffel
-arrays, including existential difference readouts for all three from entrywise
-controls, and schematic RHS `C^{0,α}` difference control, including
+arrays, and schematic RHS outputs, including existential difference readouts for
+all four from entrywise controls, and schematic RHS `C^{0,α}` difference control, including
 entrywise-difference inverse Gram, inverse-principal, inverse-Gram Christoffel,
 and schematic RHS bridges, and inverse Gram, inverse-principal contraction,
 inverse-Gram
