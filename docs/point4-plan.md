@@ -1440,9 +1440,9 @@ including finite-family primitive schematic RHS estimates using the same shared
 determinant constant, quantitative compact inverse-action and inverse-bilinear
 estimates, existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls with a compact nonvanishing-det
-adapter for reciprocal determinant differences, existential inverse-entry and
-whole inverse-matrix difference readouts from entrywise difference controls,
-plus entrywise and whole-valued closure
+adapter for reciprocal determinant differences, existential inverse-entry,
+whole inverse-matrix, and inverse-principal contraction difference readouts from
+entrywise difference controls, plus entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit bounded transpose/symmetrization estimates and corresponding
 difference estimates, finite matrix trace, explicit bounded trace and
@@ -1493,9 +1493,9 @@ schematic RHS handoffs with spatial-Hölder, unit-diameter spatial-Lipschitz,
 closed-ball spatial-Lipschitz, and closed-cylinder spatial-Lipschitz
 Gram-entry input forms, compact
 local-frame
-inverse Gram, including an existential inverse-Gram matrix difference readout
-from entrywise controls, inverse-principal contraction, inverse-Gram
-Christoffel, and schematic RHS `C^{0,α}` difference control, including
+inverse Gram and inverse-principal contraction, including existential difference
+readouts for both from entrywise controls, inverse-Gram Christoffel, and
+schematic RHS `C^{0,α}` difference control, including
 entrywise-difference inverse Gram, inverse-principal, inverse-Gram Christoffel,
 and schematic RHS bridges, and inverse Gram, inverse-principal contraction,
 inverse-Gram

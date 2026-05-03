@@ -1052,8 +1052,9 @@ uniform determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
 also exposes existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls, with a compact nonvanishing-det
-adapter for reciprocal determinant differences, plus existential inverse-entry
-and whole inverse-matrix difference readouts from entrywise difference controls. It
+adapter for reciprocal determinant differences, plus existential inverse-entry,
+whole inverse-matrix, and inverse-principal contraction difference readouts from
+entrywise difference controls. It
 also proves entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit bounded transpose/symmetrization estimates and corresponding
@@ -1089,9 +1090,9 @@ parabolic inverse Gram-matrix control and inverse-Gram Christoffel/schematic
 Ricci-DeTurck closure, including spatial-Hölder entry-control variants and
 compact quantitative inverse Gram, inverse-principal contraction, inverse-Gram
 Christoffel, and schematic RHS bridges exposing the determinant lower-bound
-constant, plus compact local-frame inverse Gram, including an existential
-inverse-Gram matrix difference readout from entrywise controls, inverse-principal
-contraction, inverse-Gram Christoffel, and schematic RHS `C^{0,α}` difference
+constant, plus compact local-frame inverse Gram and inverse-principal
+contraction, including existential difference readouts for both from entrywise
+controls, inverse-Gram Christoffel, and schematic RHS `C^{0,α}` difference
 control, and inverse Gram, inverse-principal contraction, inverse-Gram
 Christoffel, and schematic RHS bounded-difference bridges against comparison
 primitive inputs, all with matching spatial-Hölder Gram-entry input forms.

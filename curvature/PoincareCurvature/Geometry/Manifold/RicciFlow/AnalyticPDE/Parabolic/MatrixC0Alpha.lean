@@ -7254,6 +7254,128 @@ theorem matrix_inv_two_index_contract_sub_with_entrywise_of_isCompact_det_ne_zer
     hH hBd hHd hTB hTH hTDB hTDH hM hN hMdiff hU hTdiff
     hδpos hdetM hdetN⟩
 
+/-- One entry of a finite inverse-principal contraction difference has existential parabolic
+`C^{0,α}` control from entrywise metric and coefficient-array difference controls. -/
+theorem matrix_inv_two_index_contract_entry_sub_entrywise {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜} {T U : ℝ × X → n → n → p → q → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) s)
+    (hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) s)
+    (hU : ∀ a b i j, ParabolicC0AlphaOn α (fun z => U z a b i j) s)
+    (hTdiff : ∀ a b i j,
+      ParabolicC0AlphaOn α (fun z => T z a b i j - U z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖)
+    (i : p) (j : q) :
+    ParabolicC0AlphaOn α
+      (fun z =>
+        (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j) -
+          ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b * U z a b i j) s := by
+  classical
+  let invM : n → n → ℝ × X → 𝕜 :=
+    fun a b z => ((M z)⁻¹ : Matrix n n 𝕜) a b
+  let invN : n → n → ℝ × X → 𝕜 :=
+    fun a b z => ((N z)⁻¹ : Matrix n n 𝕜) a b
+  let coeffT : n → n → ℝ × X → 𝕜 := fun a b z => T z a b i j
+  let coeffU : n → n → ℝ × X → 𝕜 := fun a b z => U z a b i j
+  have hinner : ∀ a ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaOn α
+        (fun z =>
+          (∑ b : n, invM a b z * coeffT a b z) -
+            ∑ b : n, invN a b z * coeffU a b z) s := by
+    intro a _ha
+    have hterm : ∀ b ∈ (Finset.univ : Finset n),
+        ParabolicC0AlphaOn α
+          (fun z => invM a b z * coeffT a b z - invN a b z * coeffU a b z) s := by
+      intro b _hb
+      have hinvM : ParabolicC0AlphaOn α (invM a b) s := by
+        simpa [invM] using matrix_inv_entry (M := M) hM hδpos hdetM a b
+      have hinvDiff :
+          ParabolicC0AlphaOn α (fun z => invM a b z - invN a b z) s := by
+        simpa [invM, invN] using
+          matrix_inv_entry_sub (M := M) (N := N)
+            hM hN hMdiff hδpos hdetM hdetN a b
+      have hcoeffU : ParabolicC0AlphaOn α (coeffU a b) s := by
+        simpa [coeffU] using hU a b i j
+      have hcoeffDiff :
+          ParabolicC0AlphaOn α (fun z => coeffT a b z - coeffU a b z) s := by
+        simpa [coeffT, coeffU] using hTdiff a b i j
+      simpa [invM, invN, coeffT, coeffU] using
+        hinvM.mul_sub_mul hcoeffU hinvDiff hcoeffDiff
+    have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (u := fun b z => invM a b z * coeffT a b z - invN a b z * coeffU a b z)
+      hterm
+    convert hsum using 1
+    · ext z
+      simp [Finset.sum_sub_distrib]
+  have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+    (S := (Finset.univ : Finset n))
+    (u := fun a z =>
+      (∑ b : n, invM a b z * coeffT a b z) -
+        ∑ b : n, invN a b z * coeffU a b z)
+    hinner
+  convert hsum using 1
+  · ext z
+    simp [invM, invN, coeffT, coeffU, Finset.sum_sub_distrib]
+
+/-- Finite inverse-principal contraction differences preserve existential parabolic `C^{0,α}`
+control from entrywise metric and coefficient-array difference controls. -/
+theorem matrix_inv_two_index_contract_sub_entrywise {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    {δ : ℝ} {M N : ℝ × X → Matrix n n 𝕜}
+    {T U : ℝ × X → n → n → p → q → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) s)
+    (hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) s)
+    (hU : ∀ a b i j, ParabolicC0AlphaOn α (fun z => U z a b i j) s)
+    (hTdiff : ∀ a b i j,
+      ParabolicC0AlphaOn α (fun z => T z a b i j - U z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        ((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+          T z a b i j) : Matrix p q 𝕜) -
+        ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+          U z a b i j) : Matrix p q 𝕜)) s :=
+  matrix_of_entries fun i j =>
+    matrix_inv_two_index_contract_entry_sub_entrywise (M := M) (N := N) (T := T) (U := U)
+      hM hN hMdiff hU hTdiff hδpos hdetM hdetN i j
+
+/-- Compact-domain finite inverse-principal contraction differences preserve existential
+parabolic `C^{0,α}` control from entrywise controls and pointwise nonvanishing determinants. -/
+theorem matrix_inv_two_index_contract_sub_entrywise_of_isCompact_det_ne_zero
+    {n p q 𝕜 : Type*} [Fintype n] [DecidableEq n] [Fintype p] [Fintype q]
+    [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {T U : ℝ × X → n → n → p → q → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) K)
+    (hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) K)
+    (hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) K)
+    (hU : ∀ a b i j, ParabolicC0AlphaOn α (fun z => U z a b i j) K)
+    (hTdiff : ∀ a b i j,
+      ParabolicC0AlphaOn α (fun z => T z a b i j - U z a b i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × X =>
+          ((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+            T z a b i j) : Matrix p q 𝕜) -
+          ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+            U z a b i j) : Matrix p q 𝕜)) K := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hM hN hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, matrix_inv_two_index_contract_sub_entrywise
+    (M := M) (N := N) (T := T) (U := U)
+    hM hN hMdiff hU hTdiff hδpos hdetM hdetN⟩
+
 /-- Compact-domain matrix-valued inverse principal-contraction closure from entrywise control and
 pointwise nonvanishing determinant. -/
 theorem matrix_inv_two_index_contract_of_isCompact_det_ne_zero {n p q 𝕜 : Type*}
