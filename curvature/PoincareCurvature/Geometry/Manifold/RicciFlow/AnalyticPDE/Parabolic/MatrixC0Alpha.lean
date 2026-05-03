@@ -725,6 +725,44 @@ theorem matrix_of_fst_lipschitzOnWith_with {m n A : Type*} [Fintype m] [Fintype 
   exact ParabolicC0AlphaWith.of_fst_lipschitzOnWith (s := s) (B := B i j) (K := K i j)
     (f := fun t => M t i j) (hB i j) (hL i j)
 
+/-- On a unit parabolic-diameter domain, entrywise time-only Lipschitz control packages a
+finite vector-valued coefficient family as an explicit parabolic `C^{0,α}` estimate for
+every `0 ≤ α ≤ 2`. -/
+theorem vector_of_fst_lipschitzOnWith_with_of_parabolicDistance_le_one {n A : Type*}
+    [Fintype n] [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0}
+    {v : ℝ → n → A}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖v t i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun t => v t i) (Prod.fst '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, (K i : ℝ)) α
+      (fun z : ℝ × X => v z.1) s :=
+  (vector_of_fst_lipschitzOnWith_with hB_nonneg hB hL).mono_exponent_of_parabolicDistance_le_one
+    (Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i))
+    hα_nonneg hα_le_two hdiam
+
+/-- On a unit parabolic-diameter domain, entrywise time-only Lipschitz control packages a
+finite matrix-valued coefficient family as an explicit parabolic `C^{0,α}` estimate for
+every `0 ≤ α ≤ 2`. -/
+theorem matrix_of_fst_lipschitzOnWith_with_of_parabolicDistance_le_one {m n A : Type*}
+    [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : ℝ → Matrix m n A}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖M t i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun t => M t i j) (Prod.fst '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, (K i j : ℝ)) α
+      (fun z : ℝ × X => M z.1) s :=
+  (matrix_of_fst_lipschitzOnWith_with hB_nonneg hB hL).mono_exponent_of_parabolicDistance_le_one
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j))
+    hα_nonneg hα_le_two hdiam
+
 /-- Entrywise time-only boundedness and Holder control package as existential vector-valued
 parabolic `C^{0,α}` control. -/
 theorem vector_of_fst_holder {n A : Type*} [Fintype n] [NormedAddCommGroup A]
@@ -780,6 +818,43 @@ theorem matrix_of_fst_lipschitzOnWith {m n A : Type*} [Fintype m] [Fintype n]
     ∑ i, ∑ j, (K i j : ℝ), Finset.sum_nonneg fun i _hi =>
       Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j),
     matrix_of_fst_lipschitzOnWith_with hB_nonneg hB hL⟩
+
+/-- On a unit parabolic-diameter domain, entrywise time-only Lipschitz control packages a
+finite vector-valued coefficient family as parabolic `C^{0,α}` for every `0 ≤ α ≤ 2`. -/
+theorem vector_of_fst_lipschitzOnWith_of_parabolicDistance_le_one {n A : Type*}
+    [Fintype n] [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0}
+    {v : ℝ → n → A}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖v t i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun t => v t i) (Prod.fst '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => v z.1) s :=
+  ⟨∑ i, B i, Finset.sum_nonneg fun i _hi => hB_nonneg i,
+    ∑ i, (K i : ℝ), Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i),
+    vector_of_fst_lipschitzOnWith_with_of_parabolicDistance_le_one
+      hα_nonneg hα_le_two hB_nonneg hB hL hdiam⟩
+
+/-- On a unit parabolic-diameter domain, entrywise time-only Lipschitz control packages a
+finite matrix-valued coefficient family as parabolic `C^{0,α}` for every `0 ≤ α ≤ 2`. -/
+theorem matrix_of_fst_lipschitzOnWith_of_parabolicDistance_le_one {m n A : Type*}
+    [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : ℝ → Matrix m n A}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖M t i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun t => M t i j) (Prod.fst '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => M z.1) s :=
+  ⟨∑ i, ∑ j, B i j, Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => hB_nonneg i j,
+    ∑ i, ∑ j, (K i j : ℝ), Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j),
+    matrix_of_fst_lipschitzOnWith_with_of_parabolicDistance_le_one
+      hα_nonneg hα_le_two hB_nonneg hB hL hdiam⟩
 
 /-- Entrywise parabolic `C^{0,α}` control packages a finite vector-valued coefficient family. -/
 theorem vector_of_entries {n A : Type*} [Fintype n] [NormedAddCommGroup A]

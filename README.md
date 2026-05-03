@@ -405,7 +405,9 @@ packages the canonical stationary local solution attached to
   `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now builds on those
   primitives to package entrywise quantitative vector/matrix controls, including
   time-only finite vector and matrix coefficient families from ordinary time
-  Hölder/Lipschitz estimates, and to prove explicit bounded `C^{0,α}`
+  Hölder/Lipschitz estimates and explicit unit-parabolic-diameter
+  time-Lipschitz lifts for every `0 ≤ α ≤ 2`, and to prove explicit bounded
+  `C^{0,α}`
   determinant, adjugate-entry,
   inverse-entry, and whole inverse-matrix estimates, plus parabolic `C^{0,α}`
   closure of finite matrix determinants, adjugate entries, and inverse entries
