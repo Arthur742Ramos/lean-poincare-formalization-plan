@@ -1307,6 +1307,7 @@ bounded finite matrices, using a determinant lower bound for inverse
 estimates, and a compactness bridge from
 nonvanishing determinants to uniform determinant lower bounds and compact-domain
 inverse-entry, inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants,
+including quantitative compact inverse-action and inverse-bilinear estimates,
 plus entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit bounded transpose/symmetrization estimates and corresponding

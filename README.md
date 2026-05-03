@@ -402,7 +402,8 @@ packages the canonical stationary local solution attached to
   bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds and
   compact-domain inverse,
-  inverse-action, inverse-bilinear, and matrix-valued RHS variants, plus
+  inverse-action, inverse-bilinear, and matrix-valued RHS variants, including
+  quantitative compact inverse-action and inverse-bilinear estimates, plus
   entrywise and whole-valued finite matrix transpose, pointwise
   symmetrization, explicit bounded transpose/symmetrization estimates and
   corresponding difference estimates, finite matrix trace, explicit bounded

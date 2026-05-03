@@ -3160,6 +3160,32 @@ theorem matrix_inv_mulVec_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
     ⟨δ, hδpos, hdet⟩
   exact matrix_inv_mulVec hM hv hδpos hdet
 
+/-- Compact-domain quantitative inverse-matrix-vector closure from entrywise control and
+pointwise nonvanishing determinant. -/
+theorem matrix_inv_mulVec_with_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {B H : n → n → ℝ} {Bv Hv : n → ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {v : ℝ × X → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ i j, 0 ≤ B i j) (hH : ∀ i j, 0 ≤ H i j)
+    (hBv : ∀ j, 0 ≤ Bv j) (hHv : ∀ j, 0 ≤ Hv j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) K)
+    (hv : ∀ j, ParabolicC0AlphaWith (Bv j) (Hv j) α (fun z => v z j) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (∑ i : n, matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bv i)
+        (∑ i : n, matrixInvMulVecEntryHolderConst (𝕜 := 𝕜) δ B H Bv Hv i)
+        α (fun z : ℝ × X => ((M z)⁻¹).mulVec (v z)) K := by
+  have hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K := by
+    intro i j
+    exact ⟨B i j, hB i j, H i j, hH i j, hM i j⟩
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  exact ⟨δ, hδpos, matrix_inv_mulVec_with (M := M) (v := v)
+    hH hBv hHv hM hv hδpos hdet⟩
+
 /-- Entries of a vector-inverse-matrix product are parabolic `C^{0,α}` when the matrix entries
 and vector components are, and the determinant is uniformly bounded away from zero. -/
 theorem matrix_vecMul_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
@@ -3288,6 +3314,32 @@ theorem matrix_vecMul_inv_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
       (K := K) (M := M) hK hα hM hdet_ne with
     ⟨δ, hδpos, hdet⟩
   exact matrix_vecMul_inv hv hM hδpos hdet
+
+/-- Compact-domain quantitative vector-inverse-matrix closure from entrywise control and
+pointwise nonvanishing determinant. -/
+theorem matrix_vecMul_inv_with_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {Bv Hv : n → ℝ} {B H : n → n → ℝ}
+    {v : ℝ × X → n → 𝕜} {M : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i)
+    (hB : ∀ i j, 0 ≤ B i j) (hH : ∀ i j, 0 ≤ H i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) K)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (∑ j : n, matrixVecMulInvEntryBoundConst (𝕜 := 𝕜) δ Bv B j)
+        (∑ j : n, matrixVecMulInvEntryHolderConst (𝕜 := 𝕜) δ Bv Hv B H j)
+        α (fun z : ℝ × X => Matrix.vecMul (v z) (M z)⁻¹) K := by
+  have hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K := by
+    intro i j
+    exact ⟨B i j, hB i j, H i j, hH i j, hM i j⟩
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  exact ⟨δ, hδpos, matrix_vecMul_inv_with (v := v) (M := M)
+    hBv hHv hH hv hM hδpos hdet⟩
 
 /-- Finite dot products of vector-valued parabolic `C^{0,α}` functions are parabolic
 `C^{0,α}`. -/
@@ -3657,6 +3709,34 @@ theorem matrix_inv_bilinear_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fin
       (K := K) (M := M) hK hα hM hdet_ne with
     ⟨δ, hδpos, hdet⟩
   exact matrix_inv_bilinear_entry hv hM hw hδpos hdet
+
+/-- Compact-domain quantitative bilinear contraction through an inverse matrix, from entrywise
+control and pointwise nonvanishing determinant. -/
+theorem matrix_inv_bilinear_entry_with_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {Bv Hv : n → ℝ} {B H : n → n → ℝ} {Bw Hw : n → ℝ}
+    {v : ℝ × X → n → 𝕜} {M : ℝ × X → Matrix n n 𝕜}
+    {w : ℝ × X → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hBv : ∀ i, 0 ≤ Bv i) (hB : ∀ i j, 0 ≤ B i j)
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) K)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) K)
+    (hw : ∀ j, ParabolicC0AlphaWith (Bw j) (Hw j) α (fun z => w z j) K)
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvBilinearEntryBoundConst (𝕜 := 𝕜) δ Bv B Bw)
+        (matrixInvBilinearEntryHolderConst (𝕜 := 𝕜) δ Bv Hv B H Bw Hw)
+        α (fun z : ℝ × X => ∑ i : n, v z i * ((M z)⁻¹).mulVec (w z) i) K := by
+  have hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K := by
+    intro i j
+    exact ⟨B i j, hB i j, H i j, hH i j, hM i j⟩
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  exact ⟨δ, hδpos, matrix_inv_bilinear_entry_with (M := M) (v := v) (w := w)
+    hBv hH hv hM hw hδpos hdet⟩
 
 /-- Christoffel-symbol type inverse-metric contractions preserve parabolic `C^{0,α}` control:
 if `M` and the three-index derivative array `D` are controlled entrywise and `det M` is bounded
