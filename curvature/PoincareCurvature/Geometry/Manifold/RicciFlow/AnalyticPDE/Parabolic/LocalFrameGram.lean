@@ -161,6 +161,88 @@ theorem localFrameGramMatrix_inv_with_of_spatial_holder_of_timeSpace_isCompact
   exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
     (hB i j) (hGH i j) hα (hholder i j)
 
+/-- Compact local-frame bridge for the function-level bounded difference of inverse Gram
+matrices, comparing the geometric local-frame Gram matrix with an arbitrary comparison matrix
+input. -/
+theorem localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {ηG : ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hGctrl : ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hGbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c,
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 a c‖ ≤ C a c)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG) :
+    ∃ δ > 0,
+      ParabolicBoundedWith (matrixInvMatrixNormLipschitzConst (𝕜 := ℝ) δ C * ηG)
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  have hdetG_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det ≠ 0 := by
+    intro z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) e b (hKbase hz)
+  exact matrix_inv_bounded_sub_le_const_mul_of_isCompact_det_ne_zero
+    (K := K)
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (N := N) hK hα hGctrl hNctrl hdetG_ne hdetN_ne hGbound hNbound hGdiff
+
+/-- Spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C GH : ι → ι → ℝ} {ηG : ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hGholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG) :
+    ∃ δ > 0,
+      ParabolicBoundedWith (matrixInvMatrixNormLipschitzConst (𝕜 := ℝ) δ C * ηG)
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  refine localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hα hKbase ?_ hNctrl hdetN_ne ?_
+    hNbound hGdiff
+  · intro i j
+    exact of_snd_holder (s := K) (α := α)
+      (hC_nonneg i j) (hGH i j) hα.le (hGbound i j) (hGholder i j)
+  · intro z hz a c
+    exact hGbound a c ⟨z, hz, rfl⟩
+
 /-- If the local-frame Gram entries and a four-index coefficient array have parabolic
 `C^{0,α}` control on a compact time-space set contained in a trivialization base, then the
 inverse-principal contraction against the Gram matrix has parabolic `C^{0,α}` control there. -/
