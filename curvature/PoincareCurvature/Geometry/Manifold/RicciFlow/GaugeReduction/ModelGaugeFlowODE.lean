@@ -4146,6 +4146,118 @@ theorem flow_eqOn_common_Icc_of_eqOn_Ioo_of_mem
   rw [closure_Ioo hab]
   exact ht
 
+/-- Closed common-subinterval uniqueness for the full variational pair once the
+base curves have already been identified on the shared open interval. Endpoint
+base equality is supplied by continuity. -/
+theorem flow_tangent_eqOn_common_Icc_of_opNorm_bound_of_mem_of_flow_eqOn_Ioo
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo a b, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.tangent x t ∈ state t) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Icc a b) := by
+  have hab : a ≠ b := ne_of_lt (lt_trans htbase.1 htbase.2)
+  have hflowIcc :
+      EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Icc a b) :=
+    α.flow_eqOn_common_Icc_of_eqOn_Ioo_of_mem β hαtime hβtime hxα hxβ hab hflow_eq
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Icc a b) :=
+    α.tangent_eqOn_common_Icc_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+      htbase hflow_eq hD_bound hα_mem hβ_mem
+  intro t ht
+  exact Prod.ext (hflowIcc ht) (htangent ht)
+
+/-- Pointwise closed common-subinterval uniqueness for the full variational pair
+from open base-flow equality. -/
+theorem flow_tangent_eq_of_opNorm_bound_of_mem_common_Icc_of_flow_eqOn_Ioo
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo a b, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.tangent x t ∈ state t)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    (α.flow (x, t), α.tangent x t) = (β.flow (x, t), β.tangent x t) :=
+  α.flow_tangent_eqOn_common_Icc_of_opNorm_bound_of_mem_of_flow_eqOn_Ioo β
+    hαtime hβtime hxα hxβ htbase hflow_eq hD_bound hα_mem hβ_mem ht
+
+/-- Closed common-subinterval uniqueness for the full derivative-domain tuple
+once the base curves have already been identified on the shared open interval. -/
+theorem time_flow_tangent_eqOn_common_Icc_of_opNorm_bound_of_mem_of_flow_eqOn_Ioo
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo a b, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.tangent x t ∈ state t) :
+    EqOn
+      (fun t : ℝ => (t, α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (t, β.flow (x, t), β.tangent x t))
+      (Icc a b) := by
+  have hpair :=
+    α.flow_tangent_eqOn_common_Icc_of_opNorm_bound_of_mem_of_flow_eqOn_Ioo β
+      hαtime hβtime hxα hxβ htbase hflow_eq hD_bound hα_mem hβ_mem
+  intro t ht
+  exact Prod.ext rfl (hpair ht)
+
+/-- Pointwise closed common-subinterval uniqueness for the full
+derivative-domain tuple from open base-flow equality. -/
+theorem time_flow_tangent_eq_of_opNorm_bound_of_mem_common_Icc_of_flow_eqOn_Ioo
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo a b, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.tangent x t ∈ state t)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    (t, α.flow (x, t), α.tangent x t) =
+      (t, β.flow (x, t), β.tangent x t) :=
+  α.time_flow_tangent_eqOn_common_Icc_of_opNorm_bound_of_mem_of_flow_eqOn_Ioo β
+    hαtime hβtime hxα hxβ htbase hflow_eq hD_bound hα_mem hβ_mem ht
+
 /-- Common-subinterval scalar-readout state uniqueness when the ambient Picard
 intervals may differ and the base curves have already been identified on the
 closed shared interval. -/

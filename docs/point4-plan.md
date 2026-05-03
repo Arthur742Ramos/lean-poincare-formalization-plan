@@ -1017,10 +1017,11 @@ Tangent-map and fixed-vector-slot uniqueness now also have direct
 common-subinterval `Icc`/`Ioo` readouts once the base curves are already
 identified on the shared open interval, matching the two-stage chart-gluing
 route where base flows are glued before tangent data.
-The same base-equality route now packages scalar-state and scalar time-graph
-readouts for `(flow, A(t)u, A(t)v)` and `(t, flow, A(t)u, A(t)v)`, so scalar
-pullback gluing can reuse an existing base-flow equality instead of re-entering
-the base Lipschitz uniqueness theorem.
+The same base-equality route now packages full `(flow, tangent)` and
+`(t, flow, tangent)` closed-overlap readouts, plus scalar-state and scalar
+time-graph readouts for `(flow, A(t)u, A(t)v)` and
+`(t, flow, A(t)u, A(t)v)`, so scalar pullback gluing can reuse an existing
+base-flow equality instead of re-entering the base Lipschitz uniqueness theorem.
 It also upgrades open-overlap base-flow equality to closed-overlap scalar-state
 and scalar time-graph readouts by continuity, via
 `VariationalLocalFlowSolution.flow_eqOn_common_Icc_of_eqOn_Ioo_of_mem` and the
