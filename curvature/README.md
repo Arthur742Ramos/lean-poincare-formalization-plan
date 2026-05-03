@@ -1052,7 +1052,8 @@ uniform determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
 also exposes existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls, with a compact nonvanishing-det
-adapter for reciprocal determinant differences. It
+adapter for reciprocal determinant differences, plus existential inverse-entry
+and whole inverse-matrix difference readouts from entrywise difference controls. It
 also proves entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit bounded transpose/symmetrization estimates and corresponding

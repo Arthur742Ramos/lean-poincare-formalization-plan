@@ -2289,6 +2289,50 @@ theorem matrix_adjugate_entry {n A : Type*} [Fintype n] [DecidableEq n] [NormedC
   funext z
   rw [Matrix.adjugate_apply]
 
+/-- Adjugate-entry differences inherit existential parabolic `C^{0,α}` control from entrywise
+matrix controls and entrywise difference controls. -/
+theorem matrix_adjugate_entry_sub {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] {M N : ℝ × X → Matrix n n A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) s)
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s)
+    (i j : n) :
+    ParabolicC0AlphaOn α (fun z => (M z).adjugate i j - (N z).adjugate i j) s := by
+  let e : n → A := (Pi.single i (1 : A))
+  have hMupd : ∀ r c,
+      ParabolicC0AlphaOn α (fun z => ((M z).updateRow j e) r c) s := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simpa [e, Matrix.updateRow] using
+        (ParabolicC0AlphaOn.const (α := α) (s := s)
+          (((Pi.single i (1 : A)) : n → A) c))
+    · simpa [e, Matrix.updateRow, Function.update_of_ne hr] using hM r c
+  have hNupd : ∀ r c,
+      ParabolicC0AlphaOn α (fun z => ((N z).updateRow j e) r c) s := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simpa [e, Matrix.updateRow] using
+        (ParabolicC0AlphaOn.const (α := α) (s := s)
+          (((Pi.single i (1 : A)) : n → A) c))
+    · simpa [e, Matrix.updateRow, Function.update_of_ne hr] using hN r c
+  have hdiffupd : ∀ r c,
+      ParabolicC0AlphaOn α
+        (fun z => ((M z).updateRow j e) r c - ((N z).updateRow j e) r c) s := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simpa [e, Matrix.updateRow] using
+        (ParabolicC0AlphaOn.const (α := α) (s := s) (0 : A))
+    · simpa [e, Matrix.updateRow, Function.update_of_ne hr] using hdiff r c
+  have hdet :
+      ParabolicC0AlphaOn α
+        (fun z => ((M z).updateRow j e).det - ((N z).updateRow j e).det) s :=
+    matrix_det_sub (M := fun z => (M z).updateRow j e)
+      (N := fun z => (N z).updateRow j e) hMupd hNupd hdiffupd
+  simpa [e, Matrix.adjugate_apply] using hdet
+
 /-- Each inverse-matrix entry is parabolic `C^{0,α}` when the matrix entries are and the
 determinant is uniformly bounded away from zero on the domain. -/
 theorem matrix_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
@@ -2843,6 +2887,41 @@ theorem matrix_inv_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [Norm
   rw [Matrix.inv_def, Ring.inverse_eq_inv]
   rfl
 
+/-- One inverse-matrix entry has existential difference-based parabolic `C^{0,α}` control when
+the two matrices have entrywise controls and a common determinant lower bound. -/
+theorem matrix_inv_entry_sub {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ : ℝ} {M N : ℝ × X → Matrix n n 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) s)
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖)
+    (i j : n) :
+    ParabolicC0AlphaOn α (fun z => (M z)⁻¹ i j - (N z)⁻¹ i j) s := by
+  have hdetM_inv :
+      ParabolicC0AlphaOn α (fun z => ((M z).det)⁻¹) s :=
+    (matrix_det (M := M) hM).inv hδpos hdetM
+  have hdet_inv_diff :
+      ParabolicC0AlphaOn α (fun z => ((M z).det)⁻¹ - ((N z).det)⁻¹) s :=
+    matrix_det_inv_sub (M := M) (N := N) hM hN hdiff hδpos hdetM hdetN
+  have hNadj :
+      ParabolicC0AlphaOn α (fun z => (N z).adjugate i j) s :=
+    matrix_adjugate_entry (M := N) hN i j
+  have hadjdiff :
+      ParabolicC0AlphaOn α (fun z => (M z).adjugate i j - (N z).adjugate i j) s :=
+    matrix_adjugate_entry_sub (M := M) (N := N) hM hN hdiff i j
+  have hprod :
+      ParabolicC0AlphaOn α
+        (fun z =>
+          ((M z).det)⁻¹ * (M z).adjugate i j -
+            ((N z).det)⁻¹ * (N z).adjugate i j) s :=
+    hdetM_inv.mul_sub_mul hNadj hdet_inv_diff hadjdiff
+  convert hprod using 1
+  ext z
+  rw [Matrix.inv_def, Matrix.inv_def, Ring.inverse_eq_inv, Ring.inverse_eq_inv]
+  rfl
+
 /-- One inverse-matrix entry has difference-based parabolic `C^{0,α}` control when the two
 matrices have entrywise controls and a common determinant lower bound. -/
 theorem matrix_inv_entry_sub_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
@@ -3147,6 +3226,21 @@ theorem matrix_inv {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField �
     ParabolicC0AlphaOn α (fun z => (M z)⁻¹) s :=
   matrix_of_entries fun i j => matrix_inv_entry (M := M) hM hδpos hdet i j
 
+/-- Finite inverse-matrix differences have existential entrywise-difference-based parabolic
+`C^{0,α}` control under a common determinant lower bound. -/
+theorem matrix_inv_sub_entrywise {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ : ℝ} {M N : ℝ × X → Matrix n n 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) s)
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaOn α (fun z => (M z)⁻¹ - (N z)⁻¹) s :=
+  matrix_of_entries fun i j => by
+    simpa using matrix_inv_entry_sub (M := M) (N := N)
+      hM hN hdiff hδpos hdetM hdetN i j
+
 /-- Compact-domain inverse-matrix-valued closure from entrywise control and pointwise
 nonvanishing determinant. -/
 theorem matrix_inv_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
@@ -3157,6 +3251,25 @@ theorem matrix_inv_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n] [Decida
     ParabolicC0AlphaOn α (fun z => (M z)⁻¹) K :=
   matrix_of_entries fun i j =>
     matrix_inv_entry_of_isCompact_det_ne_zero hK hα hM hdet_ne i j
+
+/-- Compact-domain inverse-matrix difference control from entrywise controls and pointwise
+nonvanishing determinants. -/
+theorem matrix_inv_sub_entrywise_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) K)
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ParabolicC0AlphaOn α (fun z => (M z)⁻¹ - (N z)⁻¹) K := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hM hN hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, matrix_inv_sub_entrywise (M := M) (N := N)
+    hM hN hdiff hδpos hdetM hdetN⟩
 
 /-- Entries of a product of two matrix-valued parabolic `C^{0,α}` functions are
 parabolic `C^{0,α}` when all input entries are. -/

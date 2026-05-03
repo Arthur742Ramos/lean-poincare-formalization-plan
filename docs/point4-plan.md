@@ -1440,7 +1440,8 @@ including finite-family primitive schematic RHS estimates using the same shared
 determinant constant, quantitative compact inverse-action and inverse-bilinear
 estimates, existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls with a compact nonvanishing-det
-adapter for reciprocal determinant differences,
+adapter for reciprocal determinant differences, existential inverse-entry and
+whole inverse-matrix difference readouts from entrywise difference controls,
 plus entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit bounded transpose/symmetrization estimates and corresponding

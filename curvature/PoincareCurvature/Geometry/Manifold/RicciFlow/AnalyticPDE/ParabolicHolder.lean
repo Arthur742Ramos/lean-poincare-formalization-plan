@@ -3765,6 +3765,25 @@ theorem mul {A : Type*} [NormedRing A] {u v : ℝ × X → A} {s : Set (ℝ × X
     B₁ * H₂ + B₂ * H₁, add_nonneg (mul_nonneg hB₁ hH₂) (mul_nonneg hB₂ hH₁),
     hBH₁.mul hBH₂ hB₁⟩
 
+/-- Product differences preserve existential parabolic `C^{0,α}` control from one left factor,
+one right factor, and controls of the two factor differences. -/
+theorem mul_sub_mul {A : Type*} [NormedRing A] {u u' v v' : ℝ × X → A}
+    (hu : ParabolicC0AlphaOn α u s) (hv' : ParabolicC0AlphaOn α v' s)
+    (hdu : ParabolicC0AlphaOn α (fun z => u z - u' z) s)
+    (hdv : ParabolicC0AlphaOn α (fun z => v z - v' z) s) :
+    ParabolicC0AlphaOn α (fun z => u z * v z - u' z * v' z) s := by
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hBHu⟩
+  rcases hv' with ⟨Bv, hBv, Hv, hHv, hBHv⟩
+  rcases hdu with ⟨Bdu, hBdu, Hdu, hHdu, hBHdu⟩
+  rcases hdv with ⟨Bdv, hBdv, Hdv, hHdv, hBHdv⟩
+  refine ⟨Bu * Bdv + Bdu * Bv, ?_,
+    (Bu * Hdv + Bdv * Hu) + (Bdu * Hv + Bv * Hdu), ?_, ?_⟩
+  · exact add_nonneg (mul_nonneg hBu hBdv) (mul_nonneg hBdu hBv)
+  · exact add_nonneg
+      (add_nonneg (mul_nonneg hBu hHdv) (mul_nonneg hBdv hHu))
+      (add_nonneg (mul_nonneg hBdu hHv) (mul_nonneg hBv hHdu))
+  · exact hBHu.mul_sub_mul hBHv hBHdu hBHdv hBu hBdu
+
 theorem div {𝕜 : Type*} [NormedField 𝕜] {a b : ℝ × X → 𝕜} {δ : ℝ}
     (ha : ParabolicC0AlphaOn α a s) (hb : ParabolicC0AlphaOn α b s)
     (hδpos : 0 < δ) (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖) :

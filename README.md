@@ -461,6 +461,7 @@ packages the canonical stationary local solution attached to
   inverse-matrix, function-level determinant/inverse/matrix-product
   bounded-difference, existential determinant and reciprocal-determinant
   difference `C^{0,α}` readouts with a compact nonvanishing-det adapter,
+  existential inverse-entry and whole inverse-matrix difference readouts,
   inverse-difference `C^{0,α}` control,
   inverse-principal entry Lipschitz,
   bounded Holder entry/matrix estimates, inverse-principal contraction
