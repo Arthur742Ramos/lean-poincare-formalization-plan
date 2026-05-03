@@ -993,7 +993,9 @@ Holder and `C^{0,α}` patching plus compact point-dependent- and
 existential-radius corollaries, finite-sum closure for explicit Holder,
 bounded, and `C^{0,α}` controls, finite-sum closure for existential Holder and
 `C^{0,α}` controls, finite sum-difference closure for fixed-constant and
-existential `C^{0,α}` controls, finite-product and finite-product-difference closure for
+existential `C^{0,α}` controls, finite sum-of-products closure for
+fixed-constant and existential normed-ring-valued `C^{0,α}` controls,
+finite-product and finite-product-difference closure for
 existential normed-comm-ring-valued `C^{0,α}` controls plus an explicit bounded
 `C^{0,α}` finite-product estimate, finite `Pi` packaging across
 bounded, Holder, and `C^{0,α}` controls from componentwise estimates and

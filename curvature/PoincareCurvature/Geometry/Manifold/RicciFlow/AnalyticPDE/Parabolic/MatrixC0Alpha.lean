@@ -3328,12 +3328,11 @@ theorem matrix_mul_entry {l m n A : Type*} [Fintype m] [NormedRing A]
     (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
     (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) s) (i : l) (j : n) :
     ParabolicC0AlphaOn α (fun z => (M z * N z) i j) s := by
-  have hsum : ParabolicC0AlphaOn α (fun z => ∑ k : m, M z i k * N z k j) s := by
-    simpa using
-      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
-        (S := (Finset.univ : Finset m))
-        (u := fun k z => M z i k * N z k j)
-        (fun k _hk => (hM i k).mul (hN k j)))
+  have hsum : ParabolicC0AlphaOn α (fun z => ∑ k : m, M z i k * N z k j) s :=
+    ParabolicC0AlphaOn.finset_sum_mul (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset m))
+      (u := fun k z => M z i k) (v := fun k z => N z k j)
+      (fun k _hk => hM i k) (fun k _hk => hN k j)
   simpa [Matrix.mul_apply] using hsum
 
 /-- Products of finite matrix-valued parabolic `C^{0,α}` functions are parabolic `C^{0,α}` from
@@ -3387,12 +3386,12 @@ theorem matrix_mul_entry_with {l m n A : Type*} [Fintype m] [NormedRing A]
       α (fun z => (M z * N z) i j) s := by
   classical
   simpa [Matrix.mul_apply, matrixMulEntryBoundConst, matrixMulEntryHolderConst] using
-    (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+    (ParabolicC0AlphaWith.finset_sum_mul (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset m))
-      (B := fun k => BM i k * BN k j)
-      (H := fun k => BM i k * HN k j + BN k j * HM i k)
-      (u := fun k z => M z i k * N z k j)
-      (fun k _hk => (hM i k).mul (hN k j) (hBM i k)))
+      (Bu := fun k => BM i k) (Hu := fun k => HM i k)
+      (Bv := fun k => BN k j) (Hv := fun k => HN k j)
+      (u := fun k z => M z i k) (v := fun k z => N z k j)
+      (fun k _hk => hM i k) (fun k _hk => hN k j) (fun k _hk => hBM i k))
 
 /-- Finite matrix products have an explicit matrix-valued bounded parabolic `C^{0,α}` estimate. -/
 theorem matrix_mul_with {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n]

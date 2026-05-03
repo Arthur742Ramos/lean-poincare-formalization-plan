@@ -2722,6 +2722,19 @@ theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
           (mul_le_mul (hu.holder hp hq) (hv.bounded hq) (norm_nonneg _) hH₁d_nonneg)
       _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
 
+/-- Finite sums of products inherit parabolic `C^{0,α}` control from factorwise controls. -/
+theorem finset_sum_mul {ι A : Type*} [NormedRing A] (S : Finset ι)
+    {Bu Hu Bv Hv : ι → ℝ} {α : ℝ} {u v : ι → ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ∀ i ∈ S, ParabolicC0AlphaWith (Bu i) (Hu i) α (u i) s)
+    (hv : ∀ i ∈ S, ParabolicC0AlphaWith (Bv i) (Hv i) α (v i) s)
+    (hBu : ∀ i ∈ S, 0 ≤ Bu i) :
+    ParabolicC0AlphaWith
+      (Finset.sum S fun i => Bu i * Bv i)
+      (Finset.sum S fun i => Bu i * Hv i + Bv i * Hu i) α
+      (fun z => Finset.sum S fun i => u i z * v i z) s :=
+  ParabolicC0AlphaWith.sum (X := X) (E := A) (s := s) (α := α) S
+    (fun i hi => (hu i hi).mul (hv i hi) (hBu i hi))
+
 /-- Reciprocal differences inherit parabolic `C^{0,α}` control from the difference of the
 inputs, under a common pointwise lower bound.  This is the scalar local-Lipschitz form behind
 inverse-metric estimates: the Holder constant depends on the Holder size of `a - b`, not only on
@@ -3788,6 +3801,16 @@ theorem mul {A : Type*} [NormedRing A] {u v : ℝ × X → A} {s : Set (ℝ × X
   exact ⟨B₁ * B₂, mul_nonneg hB₁ hB₂,
     B₁ * H₂ + B₂ * H₁, add_nonneg (mul_nonneg hB₁ hH₂) (mul_nonneg hB₂ hH₁),
     hBH₁.mul hBH₂ hB₁⟩
+
+/-- Finite sums of products preserve existential parabolic `C^{0,α}` control from factorwise
+controls. -/
+theorem finset_sum_mul {ι A : Type*} [NormedRing A] (S : Finset ι)
+    {u v : ι → ℝ × X → A}
+    (hu : ∀ i ∈ S, ParabolicC0AlphaOn α (u i) s)
+    (hv : ∀ i ∈ S, ParabolicC0AlphaOn α (v i) s) :
+    ParabolicC0AlphaOn α (fun z => ∑ i ∈ S, u i z * v i z) s :=
+  ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s) S fun i hi =>
+    (hu i hi).mul (hv i hi)
 
 /-- Product differences preserve existential parabolic `C^{0,α}` control from one left factor,
 one right factor, and controls of the two factor differences. -/
