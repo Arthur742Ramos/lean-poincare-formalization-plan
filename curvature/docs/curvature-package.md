@@ -188,5 +188,6 @@ closure layer. The companion
 `RicciFlow/AnalyticPDE/Parabolic/LocalFrameGram.lean` module bridges compact
 time-space local-frame Gram determinant nonvanishing to parabolic inverse
 Gram-matrix control and inverse-Gram Christoffel/schematic Ricci-DeTurck
-closure, including spatial-Hölder entry-control variants and a compact
-quantitative schematic RHS bridge exposing the determinant lower-bound constant.
+closure, including spatial-Hölder entry-control variants and compact
+quantitative schematic RHS bridges exposing the determinant lower-bound constant,
+including a spatial-Hölder Gram-entry input form.

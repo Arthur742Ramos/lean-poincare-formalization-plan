@@ -1306,8 +1306,9 @@ positive determinant lower bound on compact subsets of a trivialization base.
 The parabolic companion `AnalyticPDE/Parabolic/LocalFrameGram.lean` bridges
 those compact time-space Gram determinant facts to parabolic inverse
 Gram-matrix control and inverse-Gram Christoffel/schematic Ricci-DeTurck
-closure, including spatial-Hölder entry-control variants and a compact
-quantitative schematic RHS bridge exposing the determinant lower-bound constant.
+closure, including spatial-Hölder entry-control variants and compact
+quantitative schematic RHS bridges exposing the determinant lower-bound constant,
+including a spatial-Hölder Gram-entry input form.
 The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
