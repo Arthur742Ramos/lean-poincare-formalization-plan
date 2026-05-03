@@ -1028,9 +1028,10 @@ pointwise determinant Lipschitz control in the elementwise matrix norm, plus
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
 function-level determinant/inverse/matrix-product bounded-difference,
 inverse-difference `C^{0,α}` control, inverse-principal entry Lipschitz,
-bounded Holder entry/matrix estimates, and
-inverse-principal contraction bounded-difference control with a compact-domain
-determinant-lower-bound variant, inverse-Christoffel
+bounded Holder entry/matrix estimates, inverse-principal contraction
+`C^{0,α}` difference control, and inverse-principal contraction
+bounded-difference control with a compact-domain determinant-lower-bound
+variant, inverse-Christoffel
 derivative/metric-side and array-level Lipschitz constants,
 inverse-Christoffel function-level bounded-difference control with a
 compact-domain determinant-lower-bound variant, inverse-Christoffel bounded
@@ -1081,10 +1082,11 @@ parabolic inverse Gram-matrix control and inverse-Gram Christoffel/schematic
 Ricci-DeTurck closure, including spatial-Hölder entry-control variants and
 compact quantitative inverse Gram, inverse-principal contraction, inverse-Gram
 Christoffel, and schematic RHS bridges exposing the determinant lower-bound
-constant, plus compact local-frame inverse Gram `C^{0,α}` difference control
-and inverse Gram, inverse-principal contraction, inverse-Gram Christoffel, and
-schematic RHS bounded-difference bridges against comparison primitive inputs,
-all with matching spatial-Hölder Gram-entry input forms.
+constant, plus compact local-frame inverse Gram and inverse-principal
+contraction `C^{0,α}` difference control, and inverse Gram,
+inverse-principal contraction, inverse-Gram Christoffel, and schematic RHS
+bounded-difference bridges against comparison primitive inputs, all with
+matching spatial-Hölder Gram-entry input forms.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build

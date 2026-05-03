@@ -381,7 +381,8 @@ packages the canonical stationary local solution attached to
   inverse-matrix, function-level determinant/inverse/matrix-product
   bounded-difference, inverse-difference `C^{0,α}` control,
   inverse-principal entry Lipschitz,
-  bounded Holder entry/matrix estimates, and inverse-principal contraction
+  bounded Holder entry/matrix estimates, inverse-principal contraction
+  `C^{0,α}` difference control, and inverse-principal contraction
   bounded-difference control with a compact-domain determinant-lower-bound
   variant,
   inverse-Christoffel derivative/metric-side and array-level Lipschitz constants,
@@ -432,10 +433,11 @@ packages the canonical stationary local solution attached to
   closure, including spatial-Hölder entry-control variants and compact
   quantitative inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel, and schematic RHS bridges exposing the determinant lower-bound
-  constant, plus compact local-frame inverse Gram `C^{0,α}` difference
-  control and inverse Gram, inverse-principal contraction, inverse-Gram
-  Christoffel, and schematic RHS bounded-difference bridges against comparison
-  primitive inputs, all with matching spatial-Hölder Gram-entry input forms.
+  constant, plus compact local-frame inverse Gram and inverse-principal
+  contraction `C^{0,α}` difference control, and inverse Gram,
+  inverse-principal contraction, inverse-Gram Christoffel, and schematic RHS
+  bounded-difference bridges against comparison primitive inputs, all with
+  matching spatial-Hölder Gram-entry input forms.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric

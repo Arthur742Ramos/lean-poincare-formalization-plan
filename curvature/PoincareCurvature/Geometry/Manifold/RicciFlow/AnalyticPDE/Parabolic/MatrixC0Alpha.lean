@@ -4696,6 +4696,134 @@ theorem matrix_inv_two_index_contract_bounded_sub_le_const_of_isCompact_det_ne_z
     (s := K) (δ := δ) (C := C) (TB := TB) (ηM := ηM) (ηT := ηT)
     hTB hM hN hU hMdiff hTdiff hδpos hdetM hdetN
 
+/-- Holder constant for the difference of two finite inverse-principal contractions, using the
+sum of the two individual contraction Holder constants. -/
+def matrixInvTwoIndexContractDiffHolderConst {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    (δ : ℝ) (B H : n → n → ℝ) (TB TH : n → n → p → q → ℝ) : ℝ :=
+  (∑ i : p, ∑ j : q,
+    matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ B H TB TH i j) +
+  (∑ i : p, ∑ j : q,
+    matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ B H TB TH i j)
+
+theorem matrixInvTwoIndexContractDiffHolderConst_nonneg {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    {δ : ℝ} {B H : n → n → ℝ} {TB TH : n → n → p → q → ℝ}
+    (hH : ∀ a b, 0 ≤ H a b) (hδpos : 0 < δ)
+    (hTB : ∀ a b i j, 0 ≤ TB a b i j) (hTH : ∀ a b i j, 0 ≤ TH a b i j) :
+    0 ≤ matrixInvTwoIndexContractDiffHolderConst (𝕜 := 𝕜) δ B H TB TH := by
+  exact add_nonneg
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        matrixInvTwoIndexContractEntryHolderConst_nonneg
+          (𝕜 := 𝕜) hH hδpos hTB hTH i j)
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        matrixInvTwoIndexContractEntryHolderConst_nonneg
+          (𝕜 := 𝕜) hH hδpos hTB hTH i j)
+
+/-- The difference of two finite inverse-principal contractions has parabolic `C^{0,α}` control:
+the sup constant is the existing primitive-input bounded-difference constant, while the Holder
+constant is the sum of the two standalone inverse-principal Holder constants. -/
+theorem matrix_inv_two_index_contract_sub_with {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    {δ : ℝ} {B H : n → n → ℝ} {TB TH : n → n → p → q → ℝ}
+    {ηM : ℝ} {ηT : p → q → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {T U : ℝ × X → n → n → p → q → 𝕜}
+    (hH : ∀ a b, 0 ≤ H a b)
+    (hTB : ∀ a b i j, 0 ≤ TB a b i j) (hTH : ∀ a b i j, 0 ≤ TH a b i j)
+    (hM : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => N z a b) s)
+    (hT : ∀ a b i j, ParabolicC0AlphaWith (TB a b i j) (TH a b i j) α
+      (fun z => T z a b i j) s)
+    (hU : ∀ a b i j, ParabolicC0AlphaWith (TB a b i j) (TH a b i j) α
+      (fun z => U z a b i j) s)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ ηM)
+    (hTdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+      ‖((fun a b => T z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => U z a b i j) : Matrix n n 𝕜)‖ ≤ ηT i j)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaWith
+      (matrixInvTwoIndexContractDiffBoundConst (𝕜 := 𝕜) δ B TB ηM ηT)
+      (matrixInvTwoIndexContractDiffHolderConst (𝕜 := 𝕜) δ B H TB TH)
+      α
+      (fun z : ℝ × X =>
+        ((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+          T z a b i j) : Matrix p q 𝕜) -
+        ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+          U z a b i j) : Matrix p q 𝕜)) s := by
+  have hbounded :
+      ParabolicBoundedWith
+        (matrixInvTwoIndexContractDiffBoundConst (𝕜 := 𝕜) δ B TB ηM ηT)
+        (fun z : ℝ × X =>
+          ((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+            T z a b i j) : Matrix p q 𝕜) -
+          ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+            U z a b i j) : Matrix p q 𝕜)) s := by
+    exact matrix_inv_two_index_contract_bounded_sub_le_const
+      (s := s) (δ := δ) (C := B) (TB := TB) (ηM := ηM) (ηT := ηT)
+      hTB
+      (fun hz hzs a b => (hM a b).bounded hzs)
+      (fun hz hzs a b => (hN a b).bounded hzs)
+      (fun hz hzs a b i j => (hU a b i j).bounded hzs)
+      hMdiff hTdiff hδpos hdetM hdetN
+  have hMT := matrix_inv_two_index_contract_with
+    (M := M) (T := T) hH hTB hTH hM hT hδpos hdetM
+  have hNU := matrix_inv_two_index_contract_with
+    (M := N) (T := U) hH hTB hTH hN hU hδpos hdetN
+  exact ⟨hbounded, by
+    simpa [matrixInvTwoIndexContractDiffHolderConst] using hMT.holder.sub hNU.holder⟩
+
+/-- Compact-domain version of `matrix_inv_two_index_contract_sub_with`: pointwise nonvanishing of
+both metric determinants supplies one common determinant lower bound. -/
+theorem matrix_inv_two_index_contract_sub_with_of_isCompact_det_ne_zero
+    {n p q 𝕜 : Type*} [Fintype n] [DecidableEq n] [Fintype p] [Fintype q]
+    [NormedField 𝕜] {K : Set (ℝ × X)}
+    {B H : n → n → ℝ} {TB TH : n → n → p → q → ℝ}
+    {ηM : ℝ} {ηT : p → q → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {T U : ℝ × X → n → n → p → q → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ a b, 0 ≤ B a b) (hH : ∀ a b, 0 ≤ H a b)
+    (hTB : ∀ a b i j, 0 ≤ TB a b i j) (hTH : ∀ a b i j, 0 ≤ TH a b i j)
+    (hM : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => M z a b) K)
+    (hN : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => N z a b) K)
+    (hT : ∀ a b i j, ParabolicC0AlphaWith (TB a b i j) (TH a b i j) α
+      (fun z => T z a b i j) K)
+    (hU : ∀ a b i j, ParabolicC0AlphaWith (TB a b i j) (TH a b i j) α
+      (fun z => U z a b i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ‖M z - N z‖ ≤ ηM)
+    (hTdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ i j,
+      ‖((fun a b => T z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => U z a b i j) : Matrix n n 𝕜)‖ ≤ ηT i j) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvTwoIndexContractDiffBoundConst (𝕜 := 𝕜) δ B TB ηM ηT)
+        (matrixInvTwoIndexContractDiffHolderConst (𝕜 := 𝕜) δ B H TB TH)
+        α
+        (fun z : ℝ × X =>
+          ((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+            T z a b i j) : Matrix p q 𝕜) -
+          ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+            U z a b i j) : Matrix p q 𝕜)) K := by
+  have hMctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) K := by
+    intro a b
+    exact ⟨B a b, hB a b, H a b, hH a b, hM a b⟩
+  have hNctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) K := by
+    intro a b
+    exact ⟨B a b, hB a b, H a b, hH a b, hN a b⟩
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, matrix_inv_two_index_contract_sub_with
+    (M := M) (N := N) (T := T) (U := U)
+    hH hTB hTH hM hN hT hU hMdiff hTdiff hδpos hdetM hdetN⟩
+
 /-- Compact-domain matrix-valued inverse principal-contraction closure from entrywise control and
 pointwise nonvanishing determinant. -/
 theorem matrix_inv_two_index_contract_of_isCompact_det_ne_zero {n p q 𝕜 : Type*}
