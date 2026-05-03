@@ -2450,6 +2450,66 @@ theorem matrix_inv_bilinear_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [
     ParabolicC0AlphaOn α (fun z => ∑ i : n, v z i * ((M z)⁻¹).mulVec (w z) i) s :=
   vector_dot_entry hv (fun i => matrix_inv_mulVec_entry hM hw hδpos hdet i)
 
+/-- Quantitative sup constant for a finite inverse-bilinear matrix contraction
+`v · (M⁻¹ w)`. -/
+def matrixInvBilinearEntryBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (Bv : n → ℝ) (B : n → n → ℝ) (Bw : n → ℝ) :
+    ℝ :=
+  vectorDotBoundConst Bv (fun i => matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bw i)
+
+/-- Quantitative Holder constant for a finite inverse-bilinear matrix contraction
+`v · (M⁻¹ w)`. -/
+def matrixInvBilinearEntryHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (Bv Hv : n → ℝ) (B H : n → n → ℝ) (Bw Hw : n → ℝ) :
+    ℝ :=
+  vectorDotHolderConst Bv Hv
+    (fun i => matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bw i)
+    (fun i => matrixInvMulVecEntryHolderConst (𝕜 := 𝕜) δ B H Bw Hw i)
+
+theorem matrixInvBilinearEntryBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {Bv : n → ℝ} {B : n → n → ℝ}
+    {Bw : n → ℝ} (hδpos : 0 < δ)
+    (hBv : ∀ i, 0 ≤ Bv i) (hBw : ∀ i, 0 ≤ Bw i) :
+    0 ≤ matrixInvBilinearEntryBoundConst (𝕜 := 𝕜) δ Bv B Bw := by
+  simpa [matrixInvBilinearEntryBoundConst] using
+    (vectorDotBoundConst_nonneg hBv
+      (fun i => matrixInvMulVecEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos hBw i))
+
+theorem matrixInvBilinearEntryHolderConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {Bv Hv : n → ℝ} {B H : n → n → ℝ}
+    {Bw Hw : n → ℝ} (hH : ∀ i j, 0 ≤ H i j) (hδpos : 0 < δ)
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i)
+    (hBw : ∀ i, 0 ≤ Bw i) (hHw : ∀ i, 0 ≤ Hw i) :
+    0 ≤ matrixInvBilinearEntryHolderConst (𝕜 := 𝕜) δ Bv Hv B H Bw Hw := by
+  simpa [matrixInvBilinearEntryHolderConst] using
+    (vectorDotHolderConst_nonneg hBv hHv
+      (fun i => matrixInvMulVecEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos hBw i)
+      (fun i => matrixInvMulVecEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos hBw hHw i))
+
+/-- Finite inverse-bilinear matrix contractions `v · (M⁻¹ w)` have an explicit bounded
+parabolic `C^{0,α}` estimate under a determinant lower bound. -/
+theorem matrix_inv_bilinear_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {Bv Hv : n → ℝ} {B H : n → n → ℝ} {Bw Hw : n → ℝ} {δ : ℝ}
+    {v : ℝ × X → n → 𝕜} {M : ℝ × X → Matrix n n 𝕜}
+    {w : ℝ × X → n → 𝕜}
+    (hBv : ∀ i, 0 ≤ Bv i) (hH : ∀ i j, 0 ≤ H i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hw : ∀ i, ParabolicC0AlphaWith (Bw i) (Hw i) α (fun z => w z i) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaWith
+      (matrixInvBilinearEntryBoundConst (𝕜 := 𝕜) δ Bv B Bw)
+      (matrixInvBilinearEntryHolderConst (𝕜 := 𝕜) δ Bv Hv B H Bw Hw)
+      α (fun z => ∑ i : n, v z i * ((M z)⁻¹).mulVec (w z) i) s := by
+  simpa [matrixInvBilinearEntryBoundConst, matrixInvBilinearEntryHolderConst] using
+    (vector_dot_with (X := X) (α := α) (s := s)
+      (Bv := Bv) (Hv := Hv)
+      (Bw := fun i => matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bw i)
+      (Hw := fun i => matrixInvMulVecEntryHolderConst (𝕜 := 𝕜) δ B H Bw Hw i)
+      (v := v) (w := fun z i => ((M z)⁻¹).mulVec (w z) i)
+      hBv hv
+      (fun i => matrix_inv_mulVec_entry_with (M := M) (v := w) hH hM hw hδpos hdet i))
+
 /-- Compact-domain bilinear contraction through an inverse matrix, from entrywise control and
 pointwise nonvanishing determinant. -/
 theorem matrix_inv_bilinear_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]

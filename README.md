@@ -404,7 +404,8 @@ packages the canonical stationary local solution attached to
   explicit bounded matrix-vector/vector-matrix estimates,
   matrix-vector/vector-matrix product-difference estimates, and
   inverse-matrix vector-product closure, explicit bounded inverse-matrix
-  vector-product estimates on both sides, whole finite vector/matrix and
+  vector-product estimates on both sides, explicit bounded inverse-bilinear
+  contraction estimates, whole finite vector/matrix and
   inverse-matrix packages, finite vector dot products, explicit bounded
   dot-product estimates, dot-product difference estimates, explicit bounded
   finite bilinear-contraction estimates, finite bilinear-contraction difference
