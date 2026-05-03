@@ -1350,7 +1350,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      symmetric-carrier closure, including the metric-cone shrink route. The
      same metric-cone route now also has a single-shrink clipped local readout
      returning both metric equality and canonical chosen-background connection
-     equality on the visible overlap. The
+     equality on the visible overlap, plus a stronger single-shrink handoff that
+     carries the terminal-fit theorem packages and those local readouts together.
+     The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
      Riemannian metric locus, with both subtype and ambient-coordinate coe

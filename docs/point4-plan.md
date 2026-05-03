@@ -1219,7 +1219,10 @@ upgrade the same local metric readout to equality of the canonical
 chosen-background connections on the visible overlap.  The bundled
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localMetricConnectionReadout`
 selects one metric-cone shrink and returns both the clipped metric equality and
-the clipped connection equality on that same visible overlap.
+the clipped connection equality on that same visible overlap.  The stronger
+`RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_localMetricConnectionReadout`
+uses the same selected shrink for the terminal-fit theorem-package handoff and
+for both no-terminal-fit local uniqueness readouts.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
@@ -1464,8 +1467,9 @@ the genuine symmetric carrier, and local uniqueness can now be read on a chosen
 common restricted terminal from shrunk ambient closure data. These local readouts
 now include both metric equality and canonical chosen-background connection
 equality, with a single metric-cone shrink able to return both readouts at once;
-the continuation from these local readouts to full arbitrary-overlap uniqueness
-is still open.
+the same selected shrink can now also carry the terminal-fit theorem-package
+handoff alongside those local readouts. The continuation from these local
+readouts to full arbitrary-overlap uniqueness is still open.
 The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient

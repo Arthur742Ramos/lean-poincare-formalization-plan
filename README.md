@@ -340,7 +340,10 @@ packages the canonical stationary local solution attached to
   connections, with a metric-cone readout that selects the shrink and returns
   the connection equality on the visible overlap, plus a bundled metric-cone
   readout that returns both metric and connection equality from the same selected
-  shrink.
+  shrink. A further single-shrink readout now carries the terminal-fit
+  theorem-package route and both no-terminal-fit local uniqueness readouts
+  together, so downstream closure code no longer has to coordinate separate
+  metric-cone choices for existence packages and local uniqueness.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
