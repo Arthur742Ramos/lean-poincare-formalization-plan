@@ -562,8 +562,9 @@ packages the canonical stationary local solution attached to
   finite-family inverse-Gram
   vector/vector-inverse product, bilinear, inverse-principal, and
   inverse-Christoffel handoffs sharing that same compact determinant lower
-  bound, with the quantitative vector/vector-inverse product handoffs now also
-  accepting those same Gram-entry input forms, finite-family schematic RHS
+  bound, with the quantitative vector/vector-inverse product and bilinear
+  handoffs now also accepting those same Gram-entry input forms, finite-family
+  schematic RHS
   difference and bounded-difference control
   against comparison primitive inputs with one lower bound shared by the Gram and
   comparison metric families, including spatial-Hölder, unit-diameter
