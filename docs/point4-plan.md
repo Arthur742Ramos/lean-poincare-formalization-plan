@@ -1352,7 +1352,8 @@ Holder, and `C^{0,α}` controls from componentwise estimates and
 same-constant projection back to components, and product-valued pairing
 closure, continuous-linear and curried-bilinear-map closure, curried-bilinear
 difference estimates, operator-application closure, and operator-application
-difference estimates with operator-norm constants, and
+difference estimates with operator-norm constants, now in both fixed-constant
+and existential forms, and
 integer-scalar closure,
 and additive/subtractive algebra estimates,
 including the standard bounded-product estimate for normed-ring-valued

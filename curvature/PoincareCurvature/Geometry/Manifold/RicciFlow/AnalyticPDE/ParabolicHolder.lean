@@ -3859,6 +3859,32 @@ theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCo
       (add_nonneg (mul_nonneg hB₁ hH₂) (mul_nonneg hB₂ hH₁))
   · exact hBH₁.continuousLinearMap₂ L hBH₂ hB₁
 
+/-- Differences of curried continuous bilinear-map applications preserve
+existential parabolic `C^{0,α}` control. -/
+theorem continuousLinearMap₂_sub {F G : Type*} [NormedAddCommGroup F] [NormedAddCommGroup G]
+    [NormedSpace ℝ E] [NormedSpace ℝ F] [NormedSpace ℝ G]
+    (L : E →L[ℝ] F →L[ℝ] G)
+    {u u' : ℝ × X → E} {v v' : ℝ × X → F}
+    (hu : ParabolicC0AlphaOn α u s) (hv' : ParabolicC0AlphaOn α v' s)
+    (hdu : ParabolicC0AlphaOn α (fun z => u z - u' z) s)
+    (hdv : ParabolicC0AlphaOn α (fun z => v z - v' z) s) :
+    ParabolicC0AlphaOn α (fun z => L (u z) (v z) - L (u' z) (v' z)) s := by
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hBHu⟩
+  rcases hv' with ⟨Bv, hBv, Hv, hHv, hBHv⟩
+  rcases hdu with ⟨Bdu, hBdu, Hdu, hHdu, hBHdu⟩
+  rcases hdv with ⟨Bdv, hBdv, Hdv, hHdv, hBHdv⟩
+  refine ⟨‖L‖ * Bu * Bdv + ‖L‖ * Bdu * Bv, ?_,
+    ‖L‖ * (Bu * Hdv + Bdv * Hu) + ‖L‖ * (Bdu * Hv + Bv * Hdu), ?_, ?_⟩
+  · exact add_nonneg
+      (mul_nonneg (mul_nonneg (norm_nonneg L) hBu) hBdv)
+      (mul_nonneg (mul_nonneg (norm_nonneg L) hBdu) hBv)
+  · exact add_nonneg
+      (mul_nonneg (norm_nonneg L)
+        (add_nonneg (mul_nonneg hBu hHdv) (mul_nonneg hBdv hHu)))
+      (mul_nonneg (norm_nonneg L)
+        (add_nonneg (mul_nonneg hBdu hHv) (mul_nonneg hBv hHdu)))
+  · exact hBHu.continuousLinearMap₂_sub L hBHv hBHdu hBHdv hBu hBdu
+
 /-- Applying an operator-valued function to a vector-valued function preserves existential
 parabolic `C^{0,α}` control. -/
 theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
@@ -3871,6 +3897,27 @@ theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
   refine ⟨BA * Bv, mul_nonneg hBA hBv, BA * Hv + Bv * HA,
     add_nonneg (mul_nonneg hBA hHv) (mul_nonneg hBv hHA), ?_⟩
   exact hABH.continuousLinearMap_apply hvBH hBA
+
+/-- Differences of operator-valued applications preserve existential
+parabolic `C^{0,α}` control. -/
+theorem continuousLinearMap_apply_sub {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {A A' : ℝ × X → E →L[ℝ] F} {w w' : ℝ × X → E}
+    (hA : ParabolicC0AlphaOn α A s) (hw' : ParabolicC0AlphaOn α w' s)
+    (hAdiff : ParabolicC0AlphaOn α (fun z => A z - A' z) s)
+    (hwdiff : ParabolicC0AlphaOn α (fun z => w z - w' z) s) :
+    ParabolicC0AlphaOn α (fun z => A z (w z) - A' z (w' z)) s := by
+  rcases hA with ⟨BA, hBA, HA, hHA, hABH⟩
+  rcases hw' with ⟨Bw, hBw, Hw, hHw, hwBH⟩
+  rcases hAdiff with ⟨BAd, hBAd, HAd, hHAd, hAdiffBH⟩
+  rcases hwdiff with ⟨Bwd, hBwd, Hwd, hHwd, hwdiffBH⟩
+  refine ⟨BA * Bwd + BAd * Bw, ?_,
+    (BA * Hwd + Bwd * HA) + (BAd * Hw + Bw * HAd), ?_, ?_⟩
+  · exact add_nonneg (mul_nonneg hBA hBwd) (mul_nonneg hBAd hBw)
+  · exact add_nonneg
+      (add_nonneg (mul_nonneg hBA hHwd) (mul_nonneg hBwd hHA))
+      (add_nonneg (mul_nonneg hBAd hHw) (mul_nonneg hBw hHAd))
+  · exact hABH.continuousLinearMap_apply_sub hwBH hAdiffBH hwdiffBH hBA hBAd
 
 theorem time_slice_half_exponent (h : ParabolicC0AlphaOn α u s) :
     ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →

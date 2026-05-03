@@ -998,7 +998,7 @@ bounded, Holder, and `C^{0,α}` controls from componentwise estimates and
 same-constant projection back to components,
 continuous-linear, curried-bilinear-map, curried-bilinear difference,
 operator-application closure, and operator-application difference with
-operator-norm constants,
+operator-norm constants in both fixed-constant and existential forms,
 product-valued pairing closure, and
 integer-scalar and basic linear algebra closure estimates for Hölder and
 bounded control, together with the bounded product estimate for
