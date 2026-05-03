@@ -1305,7 +1305,8 @@ inverse-entry, inverse-action, inverse-bilinear, and schematic matrix-valued RHS
 plus entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit entrywise/whole-matrix product-difference estimates,
-matrix-vector and vector-matrix products, matrix-vector/vector-matrix product-difference
+matrix-vector and vector-matrix products, explicit bounded matrix-vector estimates,
+matrix-vector/vector-matrix product-difference
 estimates, and inverse-matrix vector products on
 both sides under the same determinant lower bound, plus whole finite
 vector/matrix and inverse-matrix packages, finite vector dot products and

@@ -1048,7 +1048,8 @@ inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
 also proves entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit entrywise/whole-matrix product-difference estimates,
-matrix-vector and vector-matrix products, matrix-vector/vector-matrix product-difference
+matrix-vector and vector-matrix products, explicit bounded matrix-vector estimates,
+matrix-vector/vector-matrix product-difference
 estimates, including inverse-matrix vector
 products on both sides under the same determinant lower bound, whole finite
 vector/matrix and inverse-matrix packages, finite vector dot products and

@@ -1529,6 +1529,77 @@ theorem matrix_mulVec {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
     ParabolicC0AlphaOn α (fun z => (M z).mulVec (v z)) s :=
   vector_of_entries fun i => matrix_mulVec_entry hM hv i
 
+/-- Quantitative sup constant for one component of a finite matrix-vector product. -/
+def matrixMulVecEntryBoundConst {m n : Type*} [Fintype n]
+    (BM : m → n → ℝ) (Bv : n → ℝ) (i : m) : ℝ :=
+  Finset.univ.sum fun j : n => BM i j * Bv j
+
+/-- Quantitative Holder constant for one component of a finite matrix-vector product. -/
+def matrixMulVecEntryHolderConst {m n : Type*} [Fintype n]
+    (BM HM : m → n → ℝ) (Bv Hv : n → ℝ) (i : m) : ℝ :=
+  Finset.univ.sum fun j : n => BM i j * Hv j + Bv j * HM i j
+
+theorem matrixMulVecEntryBoundConst_nonneg {m n : Type*} [Fintype n]
+    {BM : m → n → ℝ} {Bv : n → ℝ} (hBM : ∀ i j, 0 ≤ BM i j)
+    (hBv : ∀ j, 0 ≤ Bv j) (i : m) :
+    0 ≤ matrixMulVecEntryBoundConst BM Bv i := by
+  simpa [matrixMulVecEntryBoundConst] using
+    (Finset.sum_nonneg fun j _hj => mul_nonneg (hBM i j) (hBv j))
+
+theorem matrixMulVecEntryHolderConst_nonneg {m n : Type*} [Fintype n]
+    {BM HM : m → n → ℝ} {Bv Hv : n → ℝ} (hBM : ∀ i j, 0 ≤ BM i j)
+    (hHM : ∀ i j, 0 ≤ HM i j) (hBv : ∀ j, 0 ≤ Bv j) (hHv : ∀ j, 0 ≤ Hv j)
+    (i : m) :
+    0 ≤ matrixMulVecEntryHolderConst BM HM Bv Hv i := by
+  simpa [matrixMulVecEntryHolderConst] using
+    (Finset.sum_nonneg fun j _hj =>
+      add_nonneg (mul_nonneg (hBM i j) (hHv j)) (mul_nonneg (hBv j) (hHM i j)))
+
+/-- One component of a finite matrix-vector product has an explicit bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_mulVec_entry_with {m n A : Type*} [Fintype n] [NormedRing A]
+    {BM HM : m → n → ℝ} {Bv Hv : n → ℝ}
+    {M : ℝ × X → Matrix m n A} {v : ℝ × X → n → A}
+    (hBM : ∀ i j, 0 ≤ BM i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (BM i j) (HM i j) α
+      (fun z => M z i j) s)
+    (hv : ∀ j, ParabolicC0AlphaWith (Bv j) (Hv j) α (fun z => v z j) s)
+    (i : m) :
+    ParabolicC0AlphaWith
+      (matrixMulVecEntryBoundConst BM Bv i)
+      (matrixMulVecEntryHolderConst BM HM Bv Hv i)
+      α (fun z => (M z).mulVec (v z) i) s := by
+  classical
+  simpa [Matrix.mulVec, matrixMulVecEntryBoundConst, matrixMulVecEntryHolderConst] using
+    (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (B := fun j => BM i j * Bv j)
+      (H := fun j => BM i j * Hv j + Bv j * HM i j)
+      (u := fun j z => M z i j * v z j)
+      (fun j _hj => (hM i j).mul (hv j) (hBM i j)))
+
+/-- Finite matrix-vector products have an explicit vector-valued bounded parabolic `C^{0,α}`
+estimate. -/
+theorem matrix_mulVec_with {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
+    {BM HM : m → n → ℝ} {Bv Hv : n → ℝ}
+    {M : ℝ × X → Matrix m n A} {v : ℝ × X → n → A}
+    (hBM : ∀ i j, 0 ≤ BM i j) (hHM : ∀ i j, 0 ≤ HM i j)
+    (hBv : ∀ j, 0 ≤ Bv j) (hHv : ∀ j, 0 ≤ Hv j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (BM i j) (HM i j) α
+      (fun z => M z i j) s)
+    (hv : ∀ j, ParabolicC0AlphaWith (Bv j) (Hv j) α (fun z => v z j) s) :
+    ParabolicC0AlphaWith
+      (∑ i : m, matrixMulVecEntryBoundConst BM Bv i)
+      (∑ i : m, matrixMulVecEntryHolderConst BM HM Bv Hv i)
+      α (fun z => (M z).mulVec (v z)) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact matrixMulVecEntryBoundConst_nonneg hBM hBv i
+  · intro i
+    exact matrixMulVecEntryHolderConst_nonneg hBM hHM hBv hHv i
+  · intro i
+    exact matrix_mulVec_entry_with hBM hM hv i
+
 /-- Quantitative sup constant for one component of the difference of two finite
 matrix-vector products. -/
 def matrixMulVecEntrySubBoundConst {m n : Type*} [Fintype n]
