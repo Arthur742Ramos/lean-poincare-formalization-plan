@@ -311,10 +311,11 @@ also has geometric-slot wrappers
 full-field hypotheses can be stated directly in actual pushed-forward tangent
 vectors before being promoted to tensor time-regularity. The fixed-IVP and
 theorem-family geometric DeTurck gauge-flow bundles now also expose within-set
-field-derivative data packages and direct tensor time-regularity projections
-from them, matching the ordinary field-data routes at package level. Raw
-fixed-IVP and theorem-family intrinsic gauge-flow existence witnesses now mirror
-those within-field packages and projections, so endpoint full-field data can be
+field-derivative and operator-domain derivative data packages with direct tensor
+time-regularity projections from them, matching the ordinary field/operator
+routes at package level. Raw fixed-IVP and theorem-family intrinsic gauge-flow
+existence witnesses now mirror those within-field and operator-domain packages
+and projections, so endpoint full-field or product-state operator data can be
 supplied directly at the raw existence layer before promoting to gauge-pulled
 metric time-regularity. It also has within-set chain-rule primitives:
 `hasDerivWithinAt_of_timeDifference_and_frozenSpatial`,

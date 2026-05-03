@@ -22534,6 +22534,34 @@ def CoordinatePullbackMetricFieldDerivativeWithinData
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet
 
+/-- Fixed-IVP within-set operator-domain derivative data for all gauge-pulled
+metrics in a geometric `C^3` DeTurck gauge-flow bundle. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) (G.maps3 sol)
+      sol.1.toIntrinsicDeTurckSolution.metric
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet
+
+/-- Fixed-IVP open-domain operator derivative data for all gauge-pulled metrics
+in a geometric `C^3` DeTurck gauge-flow bundle. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinOpenData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) (G.maps3 sol)
+      sol.1.toIntrinsicDeTurckSolution.metric
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet
+
 /-- Coordinate-level fixed-IVP scalar data implies the named geometric scalar
 derivative data used by the gauge-pulled metric routes. -/
 theorem pullbackMetricInnerDerivativeData_of_coordinate
@@ -22692,6 +22720,56 @@ theorem pullbackMetricInnerDerivativeData_of_componentsWithin
       (I := I) (M := M) (hcomponent sol)
   exact (hwithin ht x u v).hasDerivAt (htime sol ht)
 
+/-- Within-set operator-domain fixed-IVP data implies named scalar data once
+the solution time set is a neighborhood of each of its times. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithin
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData) :
+    G.PullbackMetricInnerDerivativeData := by
+  intro sol
+  let R : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime :=
+    { maps3 := G.maps3 sol
+      anchored := G.anchored sol
+      satisfies := G.satisfies sol }
+  exact (R.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithin
+    (I := I) (M := M) (hoperator sol)).toPullbackMetricInnerDerivativeOn
+      (htime sol)
+
+/-- Open-domain operator fixed-IVP data implies named scalar data once the
+solution time set is a neighborhood of each of its times. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData) :
+    G.PullbackMetricInnerDerivativeData := by
+  intro sol
+  let R : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime :=
+    { maps3 := G.maps3 sol
+      anchored := G.anchored sol
+      satisfies := G.satisfies sol }
+  exact (R.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
+    (I := I) (M := M) (hoperator sol)).toPullbackMetricInnerDerivativeOn
+      (htime sol)
+
 /-- Coordinate-model fixed-IVP data packages directly as the tensor time
 derivative for every gauge-pulled metric in the bundle, provided the solution
 time sets are neighborhoods of their times. -/
@@ -22800,6 +22878,50 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithin
   SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
     (I := I) (M := M)
     ((G.pullbackMetricInnerDerivativeData_of_componentsWithin htime hcomponent) sol)
+
+/-- Within-set operator-domain fixed-IVP data packages directly as the tensor
+time derivative for every gauge-pulled metric in the bundle, provided the
+solution time sets are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
+    (I := I) (M := M)
+    ((G.pullbackMetricInnerDerivativeData_of_operatorWithin htime hoperator) sol)
+
+/-- Open-domain operator fixed-IVP data packages directly as the tensor time
+derivative for every gauge-pulled metric in the bundle, provided the solution
+time sets are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
+    (I := I) (M := M)
+    ((G.pullbackMetricInnerDerivativeData_of_operatorWithinOpen htime hoperator) sol)
 
 /-- Coordinate-level fixed-IVP scalar data packages directly as the tensor time
 derivative for every gauge-pulled metric in the bundle. -/
@@ -22929,6 +23051,22 @@ def CoordinatePullbackMetricFieldDerivativeWithinData
   ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
     (G.forInitialValueProblem ivp).CoordinatePullbackMetricFieldDerivativeWithinData
 
+/-- Theorem-family within-set operator-domain derivative data for all
+gauge-pulled metrics in a geometric `C^3` DeTurck gauge-flow family. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinData
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) : Prop :=
+  ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+    (G.forInitialValueProblem ivp).CoordinatePullbackMetricOperatorDerivativeWithinData
+
+/-- Theorem-family open-domain operator derivative data for all gauge-pulled
+metrics in a geometric `C^3` DeTurck gauge-flow family. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinOpenData
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) : Prop :=
+  ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+    (G.forInitialValueProblem ivp).CoordinatePullbackMetricOperatorDerivativeWithinOpenData
+
 /-- Coordinate-level theorem-family scalar data implies the named geometric
 scalar derivative data used by the gauge-pulled metric routes. -/
 theorem pullbackMetricInnerDerivativeData_of_coordinate
@@ -23029,6 +23167,38 @@ theorem pullbackMetricInnerDerivativeData_of_componentsWithin
   intro ivp
   exact (G.forInitialValueProblem ivp).pullbackMetricInnerDerivativeData_of_componentsWithin
     (I := I) (M := M) (htime ivp) (hcomponent ivp)
+
+/-- Within-set operator-domain theorem-family data implies named scalar data
+once each solution time set is a neighborhood of each of its times. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithin
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData) :
+    G.PullbackMetricInnerDerivativeData := by
+  intro ivp
+  exact (G.forInitialValueProblem ivp).pullbackMetricInnerDerivativeData_of_operatorWithin
+    (I := I) (M := M) (htime ivp) (hoperator ivp)
+
+/-- Open-domain operator theorem-family data implies named scalar data once
+each solution time set is a neighborhood of each of its times. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData) :
+    G.PullbackMetricInnerDerivativeData := by
+  intro ivp
+  exact (G.forInitialValueProblem ivp).pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+    (I := I) (M := M) (htime ivp) (hoperator ivp)
 
 /-- Coordinate-model theorem-family data packages directly as the tensor time
 derivative for every induced gauge-pulled metric, provided the solution time
@@ -23139,6 +23309,50 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithin
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
   (G.forInitialValueProblem ivp).hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithinData
     (I := I) (M := M) (htime ivp) (hcomponent ivp) sol
+
+/-- Within-set operator-domain theorem-family data packages directly as the
+tensor time derivative for every induced gauge-pulled metric, provided the
+solution time sets are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.maps3 ivp sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+    (I := I) (M := M) (htime ivp) (hoperator ivp) sol
+
+/-- Open-domain operator theorem-family data packages directly as the tensor
+time derivative for every induced gauge-pulled metric, provided the solution
+time sets are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.maps3 ivp sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+    (I := I) (M := M) (htime ivp) (hoperator ivp) sol
 
 /-- Coordinate-level theorem-family scalar data packages directly as the tensor
 time derivative for every induced gauge-pulled metric. -/
@@ -23267,6 +23481,22 @@ def CoordinatePullbackMetricFieldDerivativeWithinData
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
   G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricFieldDerivativeWithinData
+
+/-- Fixed-IVP within-set operator-domain derivative data for the geometric
+gauge-flow bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricOperatorDerivativeWithinData
+
+/-- Fixed-IVP open-domain operator derivative data for the geometric gauge-flow
+bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinOpenData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricOperatorDerivativeWithinOpenData
 
 /-- Fixed-IVP open-Picard solution time sets are neighborhoods of each of their
 times.  This discharges the topological input in time-regularity wrappers when
@@ -23421,6 +23651,38 @@ theorem pullbackMetricInnerDerivativeData_of_componentsWithin
   G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_componentsWithin
     (I := I) (M := M) htime hcomponent
 
+/-- Within-set operator-domain fixed-IVP data implies named scalar data for raw
+intrinsic DeTurck gauge-flow existence once solution time sets are
+neighborhoods of their times. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithin
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_operatorWithin
+    (I := I) (M := M) htime hoperator
+
+/-- Open-domain operator fixed-IVP data implies named scalar data for raw
+intrinsic DeTurck gauge-flow existence once solution time sets are
+neighborhoods of their times. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+    (I := I) (M := M) htime hoperator
+
 /-- Open-Picard fixed-IVP within-set field-level data gives the named scalar
 derivative package without a separate neighborhood proof for the solution time
 set. -/
@@ -23458,6 +23720,44 @@ theorem pullbackMetricInnerDerivativeData_of_componentsWithin_of_timeSet_eq_Ioo
     (I := I) (M := M)
     (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
     hcomponent
+
+/-- Open-Picard fixed-IVP within-set operator-domain data gives the named
+scalar derivative package without a separate neighborhood proof for the
+solution time set. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithin_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.pullbackMetricInnerDerivativeData_of_operatorWithin
+    (I := I) (M := M)
+    (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
+    hoperator
+
+/-- Open-Picard fixed-IVP open-domain operator data gives the named scalar
+derivative package without a separate neighborhood proof for the solution time
+set. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithinOpen_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+    (I := I) (M := M)
+    (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
+    hoperator
 
 /-- Raw gauge-flow existence plus coordinate-model data gives the required time
 derivative of the induced gauge-pulled metric, provided solution time sets are
@@ -23568,6 +23868,50 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithin
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
   G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithinData
     (I := I) (M := M) htime hcomponent sol
+
+/-- Raw gauge-flow existence plus within-set operator-domain data gives the
+required time derivative of the induced gauge-pulled metric, provided solution
+time sets are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlow).gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+    (I := I) (M := M) htime hoperator sol
+
+/-- Raw gauge-flow existence plus open-domain operator data gives the required
+time derivative of the induced gauge-pulled metric, provided solution time sets
+are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (htime : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlow).gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+    (I := I) (M := M) htime hoperator sol
 
 /-- Open-Picard fixed-IVP coordinate-model data gives the required time
 derivative without a separate neighborhood proof for the solution time set. -/
@@ -23688,6 +24032,54 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithin
     (I := I) (M := M)
     (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
     hcomponent sol
+
+/-- Open-Picard fixed-IVP within-set operator-domain data gives the required
+time derivative without a separate neighborhood proof for the solution time set. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlow).gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+    (I := I) (M := M)
+    (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
+    hoperator sol
+
+/-- Open-Picard fixed-IVP open-domain operator data gives the required time
+derivative without a separate neighborhood proof for the solution time set. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlow).gauge sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+    (I := I) (M := M)
+    (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
+    hoperator sol
 
 /-- Raw gauge-flow existence plus coordinate-level scalar data gives the
 required time derivative of the induced gauge-pulled metric. -/
@@ -23892,6 +24284,20 @@ def CoordinatePullbackMetricFieldDerivativeWithinData
       (E := E) (H := H) (I := I) (M := M)) : Prop :=
   G.toDiffeomorph3GaugeFlowFamily.CoordinatePullbackMetricFieldDerivativeWithinData
 
+/-- Theorem-family within-set operator-domain derivative data for the geometric
+gauge-flow family induced by raw intrinsic DeTurck gauge-flow existence. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinData
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) : Prop :=
+  G.toDiffeomorph3GaugeFlowFamily.CoordinatePullbackMetricOperatorDerivativeWithinData
+
+/-- Theorem-family open-domain operator derivative data for the geometric
+gauge-flow family induced by raw intrinsic DeTurck gauge-flow existence. -/
+def CoordinatePullbackMetricOperatorDerivativeWithinOpenData
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) : Prop :=
+  G.toDiffeomorph3GaugeFlowFamily.CoordinatePullbackMetricOperatorDerivativeWithinOpenData
+
 /-- Theorem-family open-Picard solution time sets are neighborhoods of each of
 their times.  This discharges the topological input in family-level
 time-regularity wrappers when each solution time set has been identified with
@@ -24043,6 +24449,38 @@ theorem pullbackMetricInnerDerivativeData_of_componentsWithin
   G.toDiffeomorph3GaugeFlowFamily.pullbackMetricInnerDerivativeData_of_componentsWithin
     (I := I) (M := M) htime hcomponent
 
+/-- Within-set operator-domain theorem-family data implies named scalar data
+for raw intrinsic DeTurck gauge-flow existence once each solution time set is a
+neighborhood of each of its times. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithin
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.toDiffeomorph3GaugeFlowFamily.pullbackMetricInnerDerivativeData_of_operatorWithin
+    (I := I) (M := M) htime hoperator
+
+/-- Open-domain operator theorem-family data implies named scalar data for raw
+intrinsic DeTurck gauge-flow existence once each solution time set is a
+neighborhood of each of its times. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.toDiffeomorph3GaugeFlowFamily.pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+    (I := I) (M := M) htime hoperator
+
 /-- Open-Picard theorem-family within-set field-level data gives the named
 scalar derivative package without separate neighborhood proofs for solution
 time sets. -/
@@ -24082,6 +24520,45 @@ theorem pullbackMetricInnerDerivativeData_of_componentsWithin_of_timeSet_eq_Ioo
     (I := I) (M := M)
     (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
     hcomponent
+
+/-- Open-Picard theorem-family within-set operator-domain data gives the named
+scalar derivative package without separate neighborhood proofs for solution
+time sets. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithin_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.pullbackMetricInnerDerivativeData_of_operatorWithin
+    (I := I) (M := M)
+    (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
+    hoperator
+
+/-- Open-Picard theorem-family open-domain operator data gives the named scalar
+derivative package without separate neighborhood proofs for solution time sets. -/
+theorem pullbackMetricInnerDerivativeData_of_operatorWithinOpen_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+    (I := I) (M := M)
+    (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
+    hoperator
 
 /-- Raw theorem-family gauge-flow existence plus coordinate-model data gives the
 required time derivative of every induced gauge-pulled metric, provided solution
@@ -24197,6 +24674,52 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithin
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
   G.toDiffeomorph3GaugeFlowFamily.hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithinData
     (I := I) (M := M) htime hcomponent ivp sol
+
+/-- Raw theorem-family gauge-flow existence plus within-set operator-domain
+data gives the required time derivative of every induced gauge-pulled metric,
+provided solution time sets are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow ivp sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.toDiffeomorph3GaugeFlowFamily.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+    (I := I) (M := M) htime hoperator ivp sol
+
+/-- Raw theorem-family gauge-flow existence plus open-domain operator data gives
+the required time derivative of every induced gauge-pulled metric, provided
+solution time sets are neighborhoods of their times. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow ivp sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.toDiffeomorph3GaugeFlowFamily.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+    (I := I) (M := M) htime hoperator ivp sol
 
 /-- Open-Picard theorem-family coordinate-model data gives the required time
 derivative without separate neighborhood proofs for solution time sets. -/
@@ -24327,6 +24850,59 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithin
     (I := I) (M := M)
     (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
     hcomponent ivp sol
+
+/-- Open-Picard theorem-family within-set operator-domain data gives the
+required time derivative without separate neighborhood proofs for solution time
+sets. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow ivp sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+    (I := I) (M := M)
+    (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
+    hoperator ivp sol
+
+/-- Open-Picard theorem-family open-domain operator data gives the required
+time derivative without separate neighborhood proofs for solution time sets. -/
+theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow ivp sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+    (I := I) (M := M)
+    (G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet)
+    hoperator ivp sol
 
 /-- Raw theorem-family gauge-flow existence plus coordinate-level scalar data
 gives the required time derivative of every induced gauge-pulled metric. -/

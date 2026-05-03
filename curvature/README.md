@@ -273,8 +273,9 @@ now packages the matching intrinsic boundary
           geometric-slot forms,
           same-set raw gauge-flow moving-base field constructors plus readout-field
          and pushed-forward geometric-slot tensor projections,
-          fixed-IVP/theorem-family within-field data packages and projections,
-          matching raw intrinsic gauge-flow existence wrappers,
+          fixed-IVP/theorem-family within-field and operator-domain data
+          packages and projections, matching raw intrinsic gauge-flow existence
+          wrappers,
           generic within-filter transfer for arbitrary `A'`,
       raw-gauge-flow time-set/open-interior continuity helpers plus
       fixed-IVP/theorem-family raw-existence derivative, continuity,
