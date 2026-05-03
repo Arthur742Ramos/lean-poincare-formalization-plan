@@ -6837,6 +6837,81 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_family_
     hK hα hGctrl hNctrl hdetG_ne hdetN_ne hDB hHB hGbound hNbound
     hD hE hKc hηD hGdiff hDdiff hHdiff
 
+/-- Finite-family spatial-Hölder local-frame bridge for function-level bounded differences of
+schematic Ricci-DeTurck coordinate right-hand sides.  The spatial Gram-entry bounds are converted
+to family `C^{0,α}` controls before selecting the shared determinant lower bound. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_family_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {C GH : ρ → ι → ι → ℝ}
+    {DB : ρ → ι → ι → ι → ℝ}
+    {HB : ρ → ι → ι → ι → ι → ℝ}
+    {ηG ηD : ρ → ℝ} {ηH : ρ → ι → ι → ℝ}
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ r i j, 0 ≤ C r i j)
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hNctrl : ∀ r i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N r z i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0)
+    (hDB : ∀ r a c d, 0 ≤ DB r a c d)
+    (hHB : ∀ r a c i j, 0 ≤ HB r a c i j)
+    (hGbound : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤
+        C r i j)
+    (hGholder : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) y i j‖ ≤
+        GH r i j * (dist x y) ^ α)
+    (hNbound : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N r z a c‖ ≤ C r a c)
+    (hD : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D r z a c d‖ ≤ DB r a c d)
+    (hE : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖Earr r z a c d‖ ≤ DB r a c d)
+    (hKc : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c i j,
+      ‖Kc r z a c i j‖ ≤ HB r a c i j)
+    (hηD : ∀ r, 0 ≤ ηD r)
+    (hGdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) -
+        N r z‖ ≤ ηG r)
+    (hDdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D r z a c d - Earr r z a c d‖ ≤ ηD r)
+    (hHdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc r z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc r z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH r i j) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicBoundedWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r) (ηG r) (ηD r) (ηH r))
+          (fun z : ℝ × M =>
+            ricciDeTurckSchematicMatrix
+                (show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+                (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (Earr r z) (Kc r z)) K := by
+  refine
+    localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_family_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hα hKbase ?_ hNctrl hdetN_ne hDB hHB ?_
+      hNbound hD hE hKc hηD hGdiff hDdiff hHdiff
+  · intro r i j
+    exact of_snd_holder (s := K) (α := α)
+      (hC_nonneg r i j) (hGH r i j) hα.le (hGbound r i j) (hGholder r i j)
+  · intro r z hz a c
+    exact hGbound r a c ⟨z, hz, rfl⟩
+
 /-- Spatial-Hölder Gram-entry variant of
 `localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_of_timeSpace_isCompact`. -/
 theorem localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_of_spatial_holder_of_timeSpace_isCompact
