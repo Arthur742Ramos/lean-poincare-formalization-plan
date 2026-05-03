@@ -2814,6 +2814,208 @@ theorem finset_prod {ι A : Type*} [NormedCommRing A] (S : Finset ι)
               (max ‖(1 : A)‖ 1 * (max (B a) 1 * ∏ x ∈ S, max (B x) 1)) := by
               ring
 
+/-- Finite products are locally Lipschitz in parabolic `C^{0,α}` form.  The Holder constant is
+coarse but depends on the factor-difference controls, so it can feed contraction estimates. -/
+theorem finset_prod_sub_prod {ι A : Type*} [NormedCommRing A] (S : Finset ι)
+    {B H Bd Hd : ι → ℝ} {u v : ι → ℝ × X → A}
+    (hH : ∀ i ∈ S, 0 ≤ H i)
+    (hBd : ∀ i ∈ S, 0 ≤ Bd i)
+    (hHd : ∀ i ∈ S, 0 ≤ Hd i)
+    (hu : ∀ i ∈ S, ParabolicC0AlphaWith (B i) (H i) α (u i) s)
+    (hv : ∀ i ∈ S, ParabolicC0AlphaWith (B i) (H i) α (v i) s)
+    (hdiff : ∀ i ∈ S,
+      ParabolicC0AlphaWith (Bd i) (Hd i) α (fun z => u i z - v i z) s) :
+    ParabolicC0AlphaWith
+      ((∑ i ∈ S, Bd i) *
+        (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1))
+      (((∑ i ∈ S, Hd i) + (∑ i ∈ S, H i) * (∑ i ∈ S, Bd i)) *
+        (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1))
+      α (fun z => (∏ i ∈ S, u i z) - ∏ i ∈ S, v i z) s := by
+  classical
+  revert hH hBd hHd hu hv hdiff
+  refine Finset.induction_on S ?base ?step
+  · intro _hH _hBd _hHd _hu _hv _hdiff
+    simpa using
+      (ParabolicC0AlphaWith.const (s := s) (α := α) (B := 0) (H := 0)
+        (0 : A) (by simp) le_rfl)
+  · intro a S ha ih hH hBd hHd hu hv hdiff
+    let Utail : ℝ := max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1
+    let Dtail : ℝ := ∑ i ∈ S, Bd i
+    let Htail : ℝ := ∑ i ∈ S, H i
+    let Hdtail : ℝ := ∑ i ∈ S, Hd i
+    have hBamax_nonneg : 0 ≤ max (B a) 1 := zero_le_one.trans (le_max_right _ _)
+    have hBamax_ge_one : 1 ≤ max (B a) 1 := le_max_right _ _
+    have hUtail_nonneg : 0 ≤ Utail := by
+      dsimp [Utail]
+      exact mul_nonneg (zero_le_one.trans (le_max_right _ _))
+        (Finset.prod_nonneg fun i _hi => zero_le_one.trans (le_max_right (B i) 1))
+    have hDtail_nonneg : 0 ≤ Dtail := by
+      dsimp [Dtail]
+      exact Finset.sum_nonneg fun i hi => hBd i (Finset.mem_insert_of_mem hi)
+    have hHtail_nonneg : 0 ≤ Htail := by
+      dsimp [Htail]
+      exact Finset.sum_nonneg fun i hi => hH i (Finset.mem_insert_of_mem hi)
+    have hHdtail_nonneg : 0 ≤ Hdtail := by
+      dsimp [Hdtail]
+      exact Finset.sum_nonneg fun i hi => hHd i (Finset.mem_insert_of_mem hi)
+    have hBda_nonneg : 0 ≤ Bd a := hBd a (Finset.mem_insert_self a S)
+    have hHa_nonneg : 0 ≤ H a := hH a (Finset.mem_insert_self a S)
+    have hHda_nonneg : 0 ≤ Hd a := hHd a (Finset.mem_insert_self a S)
+    have hau :
+        ParabolicC0AlphaWith (max (B a) 1) (H a) α (u a) s :=
+      (hu a (Finset.mem_insert_self a S)).mono_const (le_max_left _ _) le_rfl
+    have htail_v :
+        ParabolicC0AlphaWith
+          Utail (Htail * Utail) α (fun z => ∏ i ∈ S, v i z) s := by
+      dsimp [Utail, Htail]
+      simpa using
+        (ParabolicC0AlphaWith.finset_prod (X := X) (α := α) (s := s)
+          (S := S) (B := B) (H := H) (u := v)
+          (fun i hi => hH i (Finset.mem_insert_of_mem hi))
+          (fun i hi => hv i (Finset.mem_insert_of_mem hi)))
+    have htail_diff :
+        ParabolicC0AlphaWith
+          (Dtail * Utail)
+          ((Hdtail + Htail * Dtail) * Utail)
+          α (fun z => (∏ i ∈ S, u i z) - ∏ i ∈ S, v i z) s := by
+      dsimp [Utail, Dtail, Htail, Hdtail]
+      simpa using
+        (ih
+          (fun i hi => hH i (Finset.mem_insert_of_mem hi))
+          (fun i hi => hBd i (Finset.mem_insert_of_mem hi))
+          (fun i hi => hHd i (Finset.mem_insert_of_mem hi))
+          (fun i hi => hu i (Finset.mem_insert_of_mem hi))
+          (fun i hi => hv i (Finset.mem_insert_of_mem hi))
+          (fun i hi => hdiff i (Finset.mem_insert_of_mem hi)))
+    have hraw :
+        ParabolicC0AlphaWith
+          (max (B a) 1 * (Dtail * Utail) + Bd a * Utail)
+          ((max (B a) 1 * ((Hdtail + Htail * Dtail) * Utail) +
+              (Dtail * Utail) * H a) +
+            (Bd a * (Htail * Utail) + Utail * Hd a))
+          α
+          (fun z => u a z * (∏ i ∈ S, u i z) -
+            v a z * ∏ i ∈ S, v i z) s :=
+      hau.mul_sub_mul htail_v (hdiff a (Finset.mem_insert_self a S)) htail_diff
+        hBamax_nonneg hBda_nonneg
+    have hB_le :
+        max (B a) 1 * (Dtail * Utail) + Bd a * Utail ≤
+          ((∑ i ∈ insert a S, Bd i) *
+            (max ‖(1 : A)‖ 1 * ∏ i ∈ insert a S, max (B i) 1)) := by
+      rw [Finset.sum_insert ha, Finset.prod_insert ha]
+      dsimp [Dtail, Utail]
+      calc
+        max (B a) 1 * ((∑ i ∈ S, Bd i) *
+              (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)) +
+            Bd a * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)
+            ≤
+          max (B a) 1 * ((∑ i ∈ S, Bd i) *
+              (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)) +
+            max (B a) 1 *
+              (Bd a * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)) := by
+            refine add_le_add (le_rfl) ?_
+            calc
+              Bd a * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)
+                  = 1 * (Bd a *
+                    (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)) := by ring
+              _ ≤ max (B a) 1 *
+                    (Bd a * (max ‖(1 : A)‖ 1 *
+                      ∏ i ∈ S, max (B i) 1)) :=
+                mul_le_mul_of_nonneg_right hBamax_ge_one
+                  (mul_nonneg hBda_nonneg hUtail_nonneg)
+        _ =
+          (Bd a + ∑ i ∈ S, Bd i) *
+            (max ‖(1 : A)‖ 1 * (max (B a) 1 *
+              ∏ i ∈ S, max (B i) 1)) := by
+            ring
+    have hH_le :
+        (max (B a) 1 * ((Hdtail + Htail * Dtail) * Utail) +
+              (Dtail * Utail) * H a) +
+            (Bd a * (Htail * Utail) + Utail * Hd a) ≤
+          (((∑ i ∈ insert a S, Hd i) +
+              (∑ i ∈ insert a S, H i) * (∑ i ∈ insert a S, Bd i)) *
+            (max ‖(1 : A)‖ 1 * ∏ i ∈ insert a S, max (B i) 1)) := by
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, Finset.sum_insert ha,
+        Finset.prod_insert ha]
+      dsimp [Dtail, Htail, Hdtail, Utail]
+      let m : ℝ := max (B a) 1
+      let U : ℝ := max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1
+      let D : ℝ := ∑ i ∈ S, Bd i
+      let G : ℝ := ∑ i ∈ S, H i
+      let E : ℝ := ∑ i ∈ S, Hd i
+      have hm_nonneg : 0 ≤ m := by
+        dsimp [m]
+        exact hBamax_nonneg
+      have hm_ge_one : 1 ≤ m := by
+        dsimp [m]
+        exact hBamax_ge_one
+      have hU_nonneg : 0 ≤ U := by
+        dsimp [U]
+        exact hUtail_nonneg
+      have hD_nonneg : 0 ≤ D := by
+        dsimp [D]
+        exact hDtail_nonneg
+      have hG_nonneg : 0 ≤ G := by
+        dsimp [G]
+        exact hHtail_nonneg
+      have hE_nonneg : 0 ≤ E := by
+        dsimp [E]
+        exact hHdtail_nonneg
+      have hraw_le :
+          (m * ((E + G * D) * U) + (D * U) * H a) +
+              (Bd a * (G * U) + U * Hd a) ≤
+            (m * ((E + G * D) * U) +
+                m * ((D * U) * H a)) +
+              (m * (Bd a * (G * U)) + m * (U * Hd a)) := by
+        refine add_le_add ?_ ?_
+        · refine add_le_add (le_rfl) ?_
+          calc
+            (D * U) * H a = 1 * ((D * U) * H a) := by ring
+            _ ≤ m * ((D * U) * H a) :=
+              mul_le_mul_of_nonneg_right hm_ge_one
+                (mul_nonneg (mul_nonneg hD_nonneg hU_nonneg) hHa_nonneg)
+        · exact add_le_add
+            (by
+              calc
+                Bd a * (G * U) = 1 * (Bd a * (G * U)) := by ring
+                _ ≤ m * (Bd a * (G * U)) :=
+                  mul_le_mul_of_nonneg_right hm_ge_one
+                    (mul_nonneg hBda_nonneg (mul_nonneg hG_nonneg hU_nonneg)))
+            (by
+              calc
+                U * Hd a = 1 * (U * Hd a) := by ring
+                _ ≤ m * (U * Hd a) :=
+                  mul_le_mul_of_nonneg_right hm_ge_one
+                    (mul_nonneg hU_nonneg hHda_nonneg))
+      calc
+        (m * ((E + G * D) * U) + (D * U) * H a) +
+              (Bd a * (G * U) + U * Hd a)
+            ≤
+          (m * ((E + G * D) * U) + m * ((D * U) * H a)) +
+              (m * (Bd a * (G * U)) + m * (U * Hd a)) := hraw_le
+        _ ≤ ((Hd a + E) + (H a + G) * (Bd a + D)) * (m * U) := by
+          have hextra_nonneg : 0 ≤ m * ((H a * Bd a) * U) :=
+            mul_nonneg hm_nonneg (mul_nonneg (mul_nonneg hHa_nonneg hBda_nonneg) hU_nonneg)
+          calc
+            (m * ((E + G * D) * U) + m * ((D * U) * H a)) +
+                (m * (Bd a * (G * U)) + m * (U * Hd a))
+                ≤
+              (m * ((E + G * D) * U) + m * ((D * U) * H a)) +
+                  (m * (Bd a * (G * U)) + m * (U * Hd a)) +
+                m * ((H a * Bd a) * U) := by linarith
+            _ = ((Hd a + E) + (H a + G) * (Bd a + D)) * (m * U) := by
+              ring
+        _ =
+          ((Hd a + ∑ x ∈ S, Hd x) +
+              (H a + ∑ x ∈ S, H x) * (Bd a + ∑ x ∈ S, Bd x)) *
+            (max ‖(1 : A)‖ 1 * (max (B a) 1 *
+              ∏ x ∈ S, max (B x) 1)) := by
+          dsimp [m, U, D, G, E]
+          ring
+    convert (hraw.mono_const hB_le hH_le) using 1
+    ext z
+    simp [Finset.prod_insert ha]
+
 theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     {B₁ B₂ H₁ H₂ α : ℝ} {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
     (ha : ParabolicC0AlphaWith B₁ H₁ α a s)

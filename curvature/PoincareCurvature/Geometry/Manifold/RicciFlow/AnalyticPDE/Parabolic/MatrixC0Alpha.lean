@@ -68,6 +68,44 @@ def matrixDetHolderConst {n A : Type*} [Fintype n] [DecidableEq n] [NormedRing A
   ∑ σ : Equiv.Perm n, ‖(Equiv.Perm.sign σ : ℤ)‖ *
     matrixDetTermHolderConst (A := A) B H σ
 
+/-- The sup constant for a determinant Leibniz-term difference. -/
+def matrixDetTermSubBoundConst {n A : Type*} [Fintype n] [NormedRing A]
+    (B Bd : n → n → ℝ) (σ : Equiv.Perm n) : ℝ :=
+  (∑ i : n, Bd (σ i) i) * matrixDetTermBoundConst (A := A) B σ
+
+/-- The Holder constant for a determinant Leibniz-term difference. -/
+def matrixDetTermSubHolderConst {n A : Type*} [Fintype n] [NormedRing A]
+    (B H Bd Hd : n → n → ℝ) (σ : Equiv.Perm n) : ℝ :=
+  ((∑ i : n, Hd (σ i) i) +
+      (∑ i : n, H (σ i) i) * (∑ i : n, Bd (σ i) i)) *
+    matrixDetTermBoundConst (A := A) B σ
+
+/-- The sup constant for determinant differences. -/
+def matrixDetSubBoundConst {n A : Type*} [Fintype n] [DecidableEq n] [NormedRing A]
+    (B Bd : n → n → ℝ) : ℝ :=
+  ∑ σ : Equiv.Perm n, ‖(Equiv.Perm.sign σ : ℤ)‖ *
+    matrixDetTermSubBoundConst (A := A) B Bd σ
+
+/-- The Holder constant for determinant differences. -/
+def matrixDetSubHolderConst {n A : Type*} [Fintype n] [DecidableEq n] [NormedRing A]
+    (B H Bd Hd : n → n → ℝ) : ℝ :=
+  ∑ σ : Equiv.Perm n, ‖(Equiv.Perm.sign σ : ℤ)‖ *
+    matrixDetTermSubHolderConst (A := A) B H Bd Hd σ
+
+/-- The sup constant for reciprocal determinant differences. -/
+def matrixDetInvSubBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B Bd : n → n → ℝ) : ℝ :=
+  ParabolicC0AlphaWith.invSubBoundConst δ (matrixDetSubBoundConst (A := 𝕜) B Bd)
+
+/-- The Holder constant for reciprocal determinant differences. -/
+def matrixDetInvSubHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B H Bd Hd : n → n → ℝ) : ℝ :=
+  ParabolicC0AlphaWith.invSubHolderConst δ
+    (matrixDetHolderConst (A := 𝕜) B H)
+    (matrixDetHolderConst (A := 𝕜) B H)
+    (matrixDetSubBoundConst (A := 𝕜) B Bd)
+    (matrixDetSubHolderConst (A := 𝕜) B H Bd Hd)
+
 theorem matrixDetTermBoundConst_nonneg {n A : Type*} [Fintype n] [NormedRing A]
     (B : n → n → ℝ) (σ : Equiv.Perm n) :
     0 ≤ matrixDetTermBoundConst (A := A) B σ := by
@@ -92,6 +130,58 @@ theorem matrixDetHolderConst_nonneg {n A : Type*} [Fintype n] [DecidableEq n]
     0 ≤ matrixDetHolderConst (A := A) B H := by
   exact Finset.sum_nonneg fun σ _hσ =>
     mul_nonneg (norm_nonneg _) (matrixDetTermHolderConst_nonneg (A := A) hH σ)
+
+theorem matrixDetTermSubBoundConst_nonneg {n A : Type*} [Fintype n] [NormedRing A]
+    {B Bd : n → n → ℝ} (hBd : ∀ i j, 0 ≤ Bd i j) (σ : Equiv.Perm n) :
+    0 ≤ matrixDetTermSubBoundConst (A := A) B Bd σ := by
+  exact mul_nonneg
+    (Finset.sum_nonneg fun i _hi => hBd (σ i) i)
+    (matrixDetTermBoundConst_nonneg (A := A) B σ)
+
+theorem matrixDetTermSubHolderConst_nonneg {n A : Type*} [Fintype n] [NormedRing A]
+    {B H Bd Hd : n → n → ℝ} (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j) (hHd : ∀ i j, 0 ≤ Hd i j)
+    (σ : Equiv.Perm n) :
+    0 ≤ matrixDetTermSubHolderConst (A := A) B H Bd Hd σ := by
+  exact mul_nonneg
+    (add_nonneg
+      (Finset.sum_nonneg fun i _hi => hHd (σ i) i)
+      (mul_nonneg
+        (Finset.sum_nonneg fun i _hi => hH (σ i) i)
+        (Finset.sum_nonneg fun i _hi => hBd (σ i) i)))
+    (matrixDetTermBoundConst_nonneg (A := A) B σ)
+
+theorem matrixDetSubBoundConst_nonneg {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] {B Bd : n → n → ℝ} (hBd : ∀ i j, 0 ≤ Bd i j) :
+    0 ≤ matrixDetSubBoundConst (A := A) B Bd := by
+  exact Finset.sum_nonneg fun σ _hσ =>
+    mul_nonneg (norm_nonneg _) (matrixDetTermSubBoundConst_nonneg (A := A) hBd σ)
+
+theorem matrixDetSubHolderConst_nonneg {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] {B H Bd Hd : n → n → ℝ} (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j) (hHd : ∀ i j, 0 ≤ Hd i j) :
+    0 ≤ matrixDetSubHolderConst (A := A) B H Bd Hd := by
+  exact Finset.sum_nonneg fun σ _hσ =>
+    mul_nonneg (norm_nonneg _)
+      (matrixDetTermSubHolderConst_nonneg (A := A) hH hBd hHd σ)
+
+theorem matrixDetInvSubBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B Bd : n → n → ℝ}
+    (hδpos : 0 < δ) (hBd : ∀ i j, 0 ≤ Bd i j) :
+    0 ≤ matrixDetInvSubBoundConst (𝕜 := 𝕜) δ B Bd :=
+  ParabolicC0AlphaWith.invSubBoundConst_nonneg hδpos
+    (matrixDetSubBoundConst_nonneg (A := 𝕜) hBd)
+
+theorem matrixDetInvSubHolderConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B H Bd Hd : n → n → ℝ}
+    (hδpos : 0 < δ) (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j) (hHd : ∀ i j, 0 ≤ Hd i j) :
+    0 ≤ matrixDetInvSubHolderConst (𝕜 := 𝕜) δ B H Bd Hd :=
+  ParabolicC0AlphaWith.invSubHolderConst_nonneg hδpos
+    (matrixDetHolderConst_nonneg (A := 𝕜) hH)
+    (matrixDetHolderConst_nonneg (A := 𝕜) hH)
+    (matrixDetSubBoundConst_nonneg (A := 𝕜) hBd)
+    (matrixDetSubHolderConst_nonneg (A := 𝕜) hH hBd hHd)
 
 /-- The determinant of a finite matrix whose entries have explicit parabolic `C^{0,α}` bounds
 has an explicit bounded parabolic `C^{0,α}` estimate.  This is the quantitative version used
@@ -147,6 +237,128 @@ theorem matrix_det_with {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRin
   intro σ _hσ
   rw [← zsmul_eq_mul]
   rfl
+
+/-- Determinant differences inherit parabolic `C^{0,α}` control from entrywise difference
+controls.  The Holder constant depends on the entrywise Holder constants of `M - N`, not merely
+on subtracting two standalone determinant estimates. -/
+theorem matrix_det_sub_with {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
+    {B H Bd Hd : n → n → ℝ} {M N : ℝ × X → Matrix n n A}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j)
+    (hHd : ∀ i j, 0 ≤ Hd i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => N z i j) s)
+    (hdiff : ∀ i j,
+      ParabolicC0AlphaWith (Bd i j) (Hd i j) α (fun z => M z i j - N z i j) s) :
+    ParabolicC0AlphaWith
+      (matrixDetSubBoundConst (A := A) B Bd)
+      (matrixDetSubHolderConst (A := A) B H Bd Hd)
+      α (fun z => (M z).det - (N z).det) s := by
+  classical
+  let termM : Equiv.Perm n → ℝ × X → A :=
+    fun σ z => ((Equiv.Perm.sign σ : ℤ) : A) * ∏ i : n, M z (σ i) i
+  let termN : Equiv.Perm n → ℝ × X → A :=
+    fun σ z => ((Equiv.Perm.sign σ : ℤ) : A) * ∏ i : n, N z (σ i) i
+  have hterm : ∀ σ ∈ (Finset.univ : Finset (Equiv.Perm n)),
+      ParabolicC0AlphaWith
+        (‖(Equiv.Perm.sign σ : ℤ)‖ *
+          matrixDetTermSubBoundConst (A := A) B Bd σ)
+        (‖(Equiv.Perm.sign σ : ℤ)‖ *
+          matrixDetTermSubHolderConst (A := A) B H Bd Hd σ)
+        α (fun z => termM σ z - termN σ z) s := by
+    intro σ _hσ
+    have hprod :
+        ParabolicC0AlphaWith
+          (matrixDetTermSubBoundConst (A := A) B Bd σ)
+          (matrixDetTermSubHolderConst (A := A) B H Bd Hd σ)
+          α
+          (fun z => (∏ i : n, M z (σ i) i) -
+            ∏ i : n, N z (σ i) i) s := by
+      simpa [matrixDetTermSubBoundConst, matrixDetTermSubHolderConst] using
+        (ParabolicC0AlphaWith.finset_prod_sub_prod (X := X) (α := α) (s := s)
+          (S := (Finset.univ : Finset n))
+          (B := fun i => B (σ i) i)
+          (H := fun i => H (σ i) i)
+          (Bd := fun i => Bd (σ i) i)
+          (Hd := fun i => Hd (σ i) i)
+          (u := fun i z => M z (σ i) i)
+          (v := fun i z => N z (σ i) i)
+          (fun i _hi => hH (σ i) i)
+          (fun i _hi => hBd (σ i) i)
+          (fun i _hi => hHd (σ i) i)
+          (fun i _hi => hM (σ i) i)
+          (fun i _hi => hN (σ i) i)
+          (fun i _hi => hdiff (σ i) i))
+    dsimp [termM, termN]
+    simpa [zsmul_eq_mul, mul_sub] using hprod.zsmul (Equiv.Perm.sign σ)
+  have hsum :
+      ParabolicC0AlphaWith
+        (matrixDetSubBoundConst (A := A) B Bd)
+        (matrixDetSubHolderConst (A := A) B H Bd Hd)
+        α (fun z => ∑ σ : Equiv.Perm n, (termM σ z - termN σ z)) s := by
+    simpa [matrixDetSubBoundConst, matrixDetSubHolderConst] using
+      (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset (Equiv.Perm n)))
+        (B := fun σ => ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          matrixDetTermSubBoundConst (A := A) B Bd σ)
+        (H := fun σ => ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          matrixDetTermSubHolderConst (A := A) B H Bd Hd σ)
+        (u := fun σ z => termM σ z - termN σ z) hterm)
+  convert hsum using 1
+  funext z
+  dsimp [termM, termN]
+  rw [Matrix.det_apply, Matrix.det_apply]
+  rw [Finset.sum_sub_distrib]
+  congr 1
+  · apply Finset.sum_congr rfl
+    intro σ _hσ
+    rw [← zsmul_eq_mul]
+    rfl
+  · apply Finset.sum_congr rfl
+    intro σ _hσ
+    rw [← zsmul_eq_mul]
+    rfl
+
+/-- Reciprocal determinant differences inherit parabolic `C^{0,α}` control from entrywise matrix
+difference controls under a common determinant lower bound. -/
+theorem matrix_det_inv_sub_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {B H Bd Hd : n → n → ℝ} {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j)
+    (hHd : ∀ i j, 0 ≤ Hd i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => N z i j) s)
+    (hdiff : ∀ i j,
+      ParabolicC0AlphaWith (Bd i j) (Hd i j) α (fun z => M z i j - N z i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaWith
+      (matrixDetInvSubBoundConst (𝕜 := 𝕜) δ B Bd)
+      (matrixDetInvSubHolderConst (𝕜 := 𝕜) δ B H Bd Hd)
+      α (fun z => ((M z).det)⁻¹ - ((N z).det)⁻¹) s := by
+  have hdetM_with :
+      ParabolicC0AlphaWith
+        (matrixDetBoundConst (A := 𝕜) B)
+        (matrixDetHolderConst (A := 𝕜) B H)
+        α (fun z => (M z).det) s :=
+    matrix_det_with (M := M) hH hM
+  have hdetN_with :
+      ParabolicC0AlphaWith
+        (matrixDetBoundConst (A := 𝕜) B)
+        (matrixDetHolderConst (A := 𝕜) B H)
+        α (fun z => (N z).det) s :=
+    matrix_det_with (M := N) hH hN
+  have hdetdiff :
+      ParabolicC0AlphaWith
+        (matrixDetSubBoundConst (A := 𝕜) B Bd)
+        (matrixDetSubHolderConst (A := 𝕜) B H Bd Hd)
+        α (fun z => (M z).det - (N z).det) s :=
+    matrix_det_sub_with (M := M) (N := N) hH hBd hHd hM hN hdiff
+  simpa [matrixDetInvSubBoundConst, matrixDetInvSubHolderConst] using
+    hdetM_with.inv_sub_inv hdetN_with hdetdiff hδpos hdetM hdetN
+      (matrixDetSubBoundConst_nonneg (A := 𝕜) hBd)
 
 /-- Determinants are pointwise Lipschitz on entrywise bounded finite matrices.  This is the
 finite-dimensional algebra estimate behind local Lipschitz control of determinant terms in chart
