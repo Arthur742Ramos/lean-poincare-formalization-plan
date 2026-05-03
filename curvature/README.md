@@ -519,8 +519,8 @@ now packages the matching intrinsic boundary
    imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
    Picard-Lindelof Banach-evolution local-solution core, open-state
    state-preserving uniqueness, shorter-terminal restriction constructors and
-   interval equation/continuity/state-membership readouts, a positive-definite
-   finite-cover metric-locus bridge, an abstract continuous-linear
+   interval equation/continuity/state-membership/uniqueness readouts, a
+   positive-definite finite-cover metric-locus bridge, an abstract continuous-linear
    symmetry/fixed-locus preservation theorem for later slot-swap symmetry, and a direct continuous-linear
    antisymmetric-defect criterion that keeps solutions in the symmetric
    positive-definite locus once the vector field's coordinatewise defect

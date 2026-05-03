@@ -1163,9 +1163,10 @@ Banach Picard metric curve directly to the weaker time-only dynamic pullback
 interface on both interior and boundary-reduced routes.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
-direct interval equation, continuity, and state-membership readouts for
-state-preserving solutions, so localized Picard/chart arguments can shrink
-solutions without rebuilding the ODE proof.
+direct interval equation, continuity, state-membership, and uniqueness readouts
+for state-preserving solutions, so localized Picard/chart arguments can shrink
+solutions without rebuilding the ODE proof or restating uniqueness on the
+ambient terminal interval.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged

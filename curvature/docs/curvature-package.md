@@ -103,7 +103,7 @@ older connection-parametrized scaffold. The general compact-manifold local
 existence/uniqueness theorem is still unproved and therefore point 4 remains
 open. The analytic evolution layer now also exposes shorter-terminal
 restriction constructors for Banach local solutions, with direct interval
-equation, continuity, and state-membership readouts for state-preserving
+equation, continuity, state-membership, and uniqueness readouts for state-preserving
 solutions. The analytic PDE side has started with proof-bearing parabolic Hölder
 primitives in `RicciFlow/AnalyticPDE/ParabolicHolder.lean`: parabolic distance,
 balls/cylinders, `C^{0,α}` control, product-topology local-base compatibility
