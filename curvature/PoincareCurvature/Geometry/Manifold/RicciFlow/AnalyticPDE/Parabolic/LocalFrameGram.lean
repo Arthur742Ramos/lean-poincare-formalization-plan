@@ -1735,6 +1735,177 @@ theorem localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_spat
   · intro z hz a c
     exact hGbound a c ⟨z, hz, rfl⟩
 
+/-- Unit-diameter spatial-Lipschitz local-frame bridge for the function-level bounded difference
+of inverse-principal contractions. -/
+theorem localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    {HB : ι → ι → ι → ι → ℝ} {ηG : ℝ} {ηH : ι → ι → ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hKc : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c i j, ‖Kc z a c i j‖ ≤ HB a c i j)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG)
+    (hHdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH i j) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (matrixInvTwoIndexContractDiffBoundConst (𝕜 := ℝ) δ C HB ηG ηH)
+        (fun z : ℝ × M =>
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) :
+            Matrix ι ι ℝ) -
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι, ((N z)⁻¹ : Matrix ι ι ℝ) a c *
+              Kc z a c i j) :
+            Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hα_pos hKbase ?_ hNctrl hdetN_ne hHB ?_
+    hNbound hKc hGdiff hHdiff
+  · intro i j
+    exact of_snd_lipschitzOnWith_of_parabolicDistance_le_one
+      (s := K) (α := α) (B := C i j) (K := Lgram i j)
+      hα_pos.le hα_le_one (hC_nonneg i j) (hGbound i j) (hL i j) hdiam
+  · intro z hz a c
+    exact hGbound a c ⟨z, hz, rfl⟩
+
+/-- Closed-parabolic-ball spatial-Lipschitz local-frame bridge for the function-level bounded
+difference of inverse-principal contractions. -/
+theorem localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedBall
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α R : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    {HB : ι → ι → ι → ι → ℝ} {ηG : ℝ} {ηH : ι → ι → ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hKc : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c i j, ‖Kc z a c i j‖ ≤ HB a c i j)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG)
+    (hHdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH i j) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (matrixInvTwoIndexContractDiffBoundConst (𝕜 := ℝ) δ C HB ηG ηH)
+        (fun z : ℝ × M =>
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) :
+            Matrix ι ι ℝ) -
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι, ((N z)⁻¹ : Matrix ι ι ℝ) a c *
+              Kc z a c i j) :
+            Matrix ι ι ℝ)) K := by
+  exact
+    localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase
+      hC_nonneg hNctrl hdetN_ne hHB hGbound hL
+      (by
+        intro p hp q hq
+        exact parabolicClosedBall.pair_parabolicDistance_le_one (hs hp) (hs hq) hR)
+      hNbound hKc hGdiff hHdiff
+
+/-- Closed-parabolic-cylinder spatial-Lipschitz local-frame bridge for the function-level bounded
+difference of inverse-principal contractions. -/
+theorem localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedCylinder
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α timeRadius spaceRadius : ℝ} {c : ℝ × M}
+    (hK : IsCompact K) (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    {HB : ι → ι → ι → ι → ℝ} {ηG : ℝ} {ηH : ι → ι → ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hKc : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c i j, ‖Kc z a c i j‖ ≤ HB a c i j)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG)
+    (hHdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH i j) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (matrixInvTwoIndexContractDiffBoundConst (𝕜 := ℝ) δ C HB ηG ηH)
+        (fun z : ℝ × M =>
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) :
+            Matrix ι ι ℝ) -
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι, ((N z)⁻¹ : Matrix ι ι ℝ) a c *
+              Kc z a c i j) :
+            Matrix ι ι ℝ)) K := by
+  exact
+    localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase
+      hC_nonneg hNctrl hdetN_ne hHB hGbound hL
+      (by
+        intro p hp q hq
+        exact (parabolicClosedCylinder.pair_parabolicDistance_le (hs hp) (hs hq)).trans hdiam)
+      hNbound hKc hGdiff hHdiff
+
 /-- Compact local-frame bridge for parabolic `C^{0,α}` control of inverse-principal contraction
 differences, comparing the geometric local-frame Gram matrix with an arbitrary comparison
 primitive input. -/
