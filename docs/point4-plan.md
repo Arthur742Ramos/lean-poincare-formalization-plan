@@ -1271,9 +1271,9 @@ bound for finite matrix-valued parabolic `C^{0,α}` functions from entrywise
 control, now also with explicit bounded determinant, adjugate-entry, and
 inverse-entry estimates plus a whole inverse-matrix estimate, including a
 pointwise determinant Lipschitz estimate in the elementwise matrix norm,
-named adjugate-entry, inverse-entry, summed whole inverse-matrix, and
-matrix-product matrix-norm Lipschitz constants, plus pointwise
-inverse-principal, inverse-Christoffel, and quadratic-Christoffel
+named adjugate-entry, inverse-entry, summed whole inverse-matrix,
+matrix-product, and inverse-principal entry matrix-norm Lipschitz constants,
+plus pointwise inverse-Christoffel and quadratic-Christoffel
 contraction Lipschitz estimate layer, plus a supplied-Christoffel schematic RHS
 Lipschitz aggregation and primitive-input schematic RHS estimate, on entrywise
 bounded finite matrices, using a determinant lower bound for inverse

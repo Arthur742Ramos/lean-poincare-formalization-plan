@@ -1946,6 +1946,165 @@ theorem matrix_inv_two_index_contract_entry_norm_sub_le {n p q 𝕜 : Type*} [Fi
           TB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b) := by
       rfl
 
+/-- Matrix-norm Lipschitz constant for varying the coefficient array in one entry of the
+finite contraction `M⁻¹ᵃᵇ T_abij`, with the inverse matrix bounded by the determinant lower
+bound and entrywise metric bounds. -/
+def matrixInvTwoIndexContractCoeffDiffConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (C : n → n → ℝ) : ℝ :=
+  ∑ a : n, ∑ b : n, matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b
+
+/-- Matrix-norm Lipschitz constant for varying the metric in one entry of the finite contraction
+`M⁻¹ᵃᵇ T_abij`, with the coefficient array bounded by `TB`. -/
+def matrixInvTwoIndexContractMetricDiffConst {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] (δ : ℝ) (C : n → n → ℝ)
+    (TB : n → n → p → q → ℝ) (i : p) (j : q) : ℝ :=
+  ∑ a : n, ∑ b : n,
+    TB a b i j * matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C a b
+
+theorem matrixInvTwoIndexContractCoeffDiffConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) (C : n → n → ℝ) :
+    0 ≤ matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C := by
+  exact Finset.sum_nonneg fun a _ha =>
+    Finset.sum_nonneg fun b _hb =>
+      matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C a b
+
+theorem matrixInvTwoIndexContractMetricDiffConst_nonneg {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) {C : n → n → ℝ}
+    {TB : n → n → p → q → ℝ} (hTB : ∀ a b i j, 0 ≤ TB a b i j) (i : p) (j : q) :
+    0 ≤ matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C TB i j := by
+  exact Finset.sum_nonneg fun a _ha =>
+    Finset.sum_nonneg fun b _hb =>
+      mul_nonneg (hTB a b i j)
+        (matrixInvEntryMatrixNormLipschitzConst_nonneg (𝕜 := 𝕜) hδpos C a b)
+
+/-- One entry of the finite inverse contraction is Lipschitz in the coefficient-array matrix norm
+and the metric matrix norm, on bounded coefficient arrays and entrywise bounded matrices with a
+common determinant lower bound. -/
+theorem matrix_inv_two_index_contract_entry_norm_sub_le_const {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {TB : n → n → p → q → ℝ} (M N : Matrix n n 𝕜)
+    (T U : n → n → p → q → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hU : ∀ a b i j, ‖U a b i j‖ ≤ TB a b i j)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖)
+    (i : p) (j : q) :
+    ‖(∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+        ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ ≤
+      matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C *
+          ‖((fun a b => T a b i j) : Matrix n n 𝕜) -
+            ((fun a b => U a b i j) : Matrix n n 𝕜)‖ +
+        matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C TB i j * ‖M - N‖ := by
+  classical
+  let coeffDiffNorm : ℝ :=
+    ‖((fun a b => T a b i j) : Matrix n n 𝕜) -
+      ((fun a b => U a b i j) : Matrix n n 𝕜)‖
+  let innerBound : n → ℝ := fun a =>
+    ∑ b : n,
+      (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * coeffDiffNorm +
+        TB a b i j *
+          (matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C a b * ‖M - N‖))
+  have hinner : ∀ a : n,
+      ‖(∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+          ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ ≤ innerBound a := by
+    intro a
+    have hsum :
+        ‖(∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+            ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ ≤
+          ∑ b : n,
+            (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b *
+                ‖T a b i j - U a b i j‖ +
+              TB a b i j * ‖(M⁻¹ : Matrix n n 𝕜) a b -
+                (N⁻¹ : Matrix n n 𝕜) a b‖) := by
+      simpa using
+        (norm_finset_sum_mul_sub_sum_mul_le
+          (S := (Finset.univ : Finset n))
+          (B := fun b => matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b)
+          (D := fun b => TB a b i j)
+          (a := fun b => (M⁻¹ : Matrix n n 𝕜) a b)
+          (b := fun b => T a b i j)
+          (c := fun b => (N⁻¹ : Matrix n n 𝕜) a b)
+          (d := fun b => U a b i j)
+          (fun b _hb => matrix_inv_entry_norm_le M hM hδpos hdetM a b)
+          (fun b _hb => hU a b i j))
+    refine hsum.trans ?_
+    exact Finset.sum_le_sum fun b _hb => by
+      have hTB_nonneg : 0 ≤ TB a b i j := (norm_nonneg _).trans (hU a b i j)
+      have hcoeff_diff :
+          ‖T a b i j - U a b i j‖ ≤ coeffDiffNorm := by
+        simpa [coeffDiffNorm] using
+          Matrix.norm_entry_le_entrywise_sup_norm
+            (((fun a b => T a b i j) : Matrix n n 𝕜) -
+              ((fun a b => U a b i j) : Matrix n n 𝕜)) (i := a) (j := b)
+      have hinv_diff :
+          ‖(M⁻¹ : Matrix n n 𝕜) a b - (N⁻¹ : Matrix n n 𝕜) a b‖ ≤
+            matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C a b * ‖M - N‖ :=
+        matrix_inv_entry_norm_sub_le_const_mul M N hM hN hδpos hdetM hdetN a b
+      exact add_le_add
+        (mul_le_mul_of_nonneg_left hcoeff_diff
+          (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C a b))
+        (mul_le_mul_of_nonneg_left hinv_diff hTB_nonneg)
+  have hnorm :
+      ‖(∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+          ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ ≤
+        ∑ a : n, innerBound a := by
+    calc
+      ‖(∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+          ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ =
+          ‖∑ a : n,
+            ((∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+              ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j)‖ := by
+        rw [Finset.sum_sub_distrib]
+      _ ≤ ∑ a : n,
+          ‖(∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+            ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ :=
+        norm_sum_le _ _
+      _ ≤ ∑ a : n, innerBound a :=
+        Finset.sum_le_sum fun a _ha => hinner a
+  calc
+    ‖(∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+        ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ ≤
+        ∑ a : n, innerBound a := hnorm
+    _ =
+        (∑ a : n, ∑ b : n,
+            matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * coeffDiffNorm) +
+          (∑ a : n, ∑ b : n,
+            TB a b i j *
+              (matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C a b * ‖M - N‖)) := by
+      simp [innerBound, Finset.sum_add_distrib]
+    _ =
+      matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C * coeffDiffNorm +
+        matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C TB i j * ‖M - N‖ := by
+      have hcoeff :
+          (∑ a : n, ∑ b : n,
+              matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * coeffDiffNorm) =
+            matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C * coeffDiffNorm := by
+        simp_rw [matrixInvTwoIndexContractCoeffDiffConst, Finset.sum_mul]
+      have hmetric :
+          (∑ a : n, ∑ b : n,
+              TB a b i j *
+                (matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C a b * ‖M - N‖)) =
+            matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C TB i j * ‖M - N‖ := by
+        calc
+          (∑ a : n, ∑ b : n,
+              TB a b i j *
+                (matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C a b * ‖M - N‖)) =
+              ∑ a : n, ∑ b : n,
+                (TB a b i j *
+                  matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C a b) * ‖M - N‖ := by
+            refine Finset.sum_congr rfl fun a _ha =>
+              Finset.sum_congr rfl fun b _hb => ?_
+            ring
+          _ =
+            matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C TB i j * ‖M - N‖ := by
+            simp_rw [matrixInvTwoIndexContractMetricDiffConst, Finset.sum_mul]
+      rw [hcoeff, hmetric]
+    _ =
+      matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C *
+          ‖((fun a b => T a b i j) : Matrix n n 𝕜) -
+            ((fun a b => U a b i j) : Matrix n n 𝕜)‖ +
+        matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C TB i j * ‖M - N‖ := by
+      rfl
+
 /-- Matrix-valued finite inverse contractions against four-index coefficient arrays are
 pointwise Lipschitz in the elementwise matrix norm. -/
 theorem matrix_inv_two_index_contract_norm_sub_le {n p q 𝕜 : Type*} [Fintype n]
