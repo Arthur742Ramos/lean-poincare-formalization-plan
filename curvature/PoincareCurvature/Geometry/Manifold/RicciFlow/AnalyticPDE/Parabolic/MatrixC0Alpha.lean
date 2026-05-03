@@ -1237,6 +1237,84 @@ theorem matrix_mul {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n] [Normed
     ParabolicC0AlphaOn α (fun z => M z * N z) s :=
   matrix_of_entries fun i j => matrix_mul_entry hM hN i j
 
+/-- Quantitative sup constant for one entry of a finite matrix product. -/
+def matrixMulEntryBoundConst {l m n : Type*} [Fintype m]
+    (BM : l → m → ℝ) (BN : m → n → ℝ) (i : l) (j : n) : ℝ :=
+  Finset.univ.sum fun k : m => BM i k * BN k j
+
+/-- Quantitative Holder constant for one entry of a finite matrix product. -/
+def matrixMulEntryHolderConst {l m n : Type*} [Fintype m]
+    (BM HM : l → m → ℝ) (BN HN : m → n → ℝ) (i : l) (j : n) : ℝ :=
+  Finset.univ.sum fun k : m => BM i k * HN k j + BN k j * HM i k
+
+theorem matrixMulEntryBoundConst_nonneg {l m n : Type*} [Fintype m]
+    {BM : l → m → ℝ} {BN : m → n → ℝ} (hBM : ∀ i k, 0 ≤ BM i k)
+    (hBN : ∀ k j, 0 ≤ BN k j) (i : l) (j : n) :
+    0 ≤ matrixMulEntryBoundConst BM BN i j := by
+  simpa [matrixMulEntryBoundConst] using
+    (Finset.sum_nonneg fun k _hk => mul_nonneg (hBM i k) (hBN k j))
+
+theorem matrixMulEntryHolderConst_nonneg {l m n : Type*} [Fintype m]
+    {BM HM : l → m → ℝ} {BN HN : m → n → ℝ} (hBM : ∀ i k, 0 ≤ BM i k)
+    (hHM : ∀ i k, 0 ≤ HM i k) (hBN : ∀ k j, 0 ≤ BN k j)
+    (hHN : ∀ k j, 0 ≤ HN k j) (i : l) (j : n) :
+    0 ≤ matrixMulEntryHolderConst BM HM BN HN i j := by
+  simpa [matrixMulEntryHolderConst] using
+    (Finset.sum_nonneg fun k _hk =>
+      add_nonneg (mul_nonneg (hBM i k) (hHN k j)) (mul_nonneg (hBN k j) (hHM i k)))
+
+/-- One entry of a finite matrix product has an explicit bounded parabolic `C^{0,α}` estimate. -/
+theorem matrix_mul_entry_with {l m n A : Type*} [Fintype m] [NormedRing A]
+    {BM HM : l → m → ℝ} {BN HN : m → n → ℝ}
+    {M : ℝ × X → Matrix l m A} {N : ℝ × X → Matrix m n A}
+    (hBM : ∀ i k, 0 ≤ BM i k)
+    (hM : ∀ i k, ParabolicC0AlphaWith (BM i k) (HM i k) α
+      (fun z => M z i k) s)
+    (hN : ∀ k j, ParabolicC0AlphaWith (BN k j) (HN k j) α
+      (fun z => N z k j) s)
+    (i : l) (j : n) :
+    ParabolicC0AlphaWith
+      (matrixMulEntryBoundConst BM BN i j)
+      (matrixMulEntryHolderConst BM HM BN HN i j)
+      α (fun z => (M z * N z) i j) s := by
+  classical
+  simpa [Matrix.mul_apply, matrixMulEntryBoundConst, matrixMulEntryHolderConst] using
+    (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset m))
+      (B := fun k => BM i k * BN k j)
+      (H := fun k => BM i k * HN k j + BN k j * HM i k)
+      (u := fun k z => M z i k * N z k j)
+      (fun k _hk => (hM i k).mul (hN k j) (hBM i k)))
+
+/-- Finite matrix products have an explicit matrix-valued bounded parabolic `C^{0,α}` estimate. -/
+theorem matrix_mul_with {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n]
+    [NormedRing A] {BM HM : l → m → ℝ} {BN HN : m → n → ℝ}
+    {M : ℝ × X → Matrix l m A} {N : ℝ × X → Matrix m n A}
+    (hBM : ∀ i k, 0 ≤ BM i k) (hHM : ∀ i k, 0 ≤ HM i k)
+    (hBN : ∀ k j, 0 ≤ BN k j) (hHN : ∀ k j, 0 ≤ HN k j)
+    (hM : ∀ i k, ParabolicC0AlphaWith (BM i k) (HM i k) α
+      (fun z => M z i k) s)
+    (hN : ∀ k j, ParabolicC0AlphaWith (BN k j) (HN k j) α
+      (fun z => N z k j) s) :
+    ParabolicC0AlphaWith
+      (∑ i : l, ∑ j : n, matrixMulEntryBoundConst BM BN i j)
+      (∑ i : l, ∑ j : n, matrixMulEntryHolderConst BM HM BN HN i j)
+      α (fun z => M z * N z) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj => matrixMulEntryBoundConst_nonneg hBM hBN i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      matrixMulEntryHolderConst_nonneg hBM hHM hBN hHN i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact matrixMulEntryBoundConst_nonneg hBM hBN i j
+    · intro j
+      exact matrixMulEntryHolderConst_nonneg hBM hHM hBN hHN i j
+    · intro j
+      exact matrix_mul_entry_with hBM hM hN i j
+
 /-- Quantitative sup constant for one entry of the difference of two finite matrix products. -/
 def matrixMulEntrySubBoundConst {l m n : Type*} [Fintype m]
     (BM : l → m → ℝ) (BN' : m → n → ℝ) (BMd : l → m → ℝ)
