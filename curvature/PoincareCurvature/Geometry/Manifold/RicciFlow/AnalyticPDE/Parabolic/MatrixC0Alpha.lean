@@ -2035,6 +2035,89 @@ theorem matrix_inv_christoffel_entry_norm_sub_le_const {n 𝕜 : Type*} [Fintype
             ring
   exact add_le_add hderiv (le_refl _)
 
+/-- Uniform scalar bound for all entries of the inverse-Christoffel array, in terms of a uniform
+derivative-array difference bound and a metric matrix-norm difference bound. -/
+def matrixInvChristoffelArrayDiffBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (C : n → n → ℝ) (DB : n → n → n → ℝ)
+    (ηD ρ : ℝ) : ℝ :=
+  ∑ a : n, ∑ b : n, ∑ c : n,
+    (matrixInvChristoffelEntryDerivDiffConst (𝕜 := 𝕜) δ C a b c * ηD +
+      matrixInvChristoffelEntryMetricDiffConst (𝕜 := 𝕜) δ C DB a b c * ρ)
+
+theorem matrixInvChristoffelArrayDiffBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} (hDB : ∀ a b c, 0 ≤ DB a b c)
+    {ηD ρ : ℝ} (hηD : 0 ≤ ηD) (hρ : 0 ≤ ρ) :
+    0 ≤ matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ρ := by
+  exact Finset.sum_nonneg fun a _ha =>
+    Finset.sum_nonneg fun b _hb =>
+      Finset.sum_nonneg fun c _hc =>
+        add_nonneg
+          (mul_nonneg
+            (matrixInvChristoffelEntryDerivDiffConst_nonneg (𝕜 := 𝕜) hδpos C a b c)
+            hηD)
+          (mul_nonneg
+            (matrixInvChristoffelEntryMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hDB a b c)
+            hρ)
+
+/-- Every inverse-Christoffel entry is controlled by the summed uniform array-difference bound. -/
+theorem matrix_inv_christoffel_entry_norm_sub_le_array_const {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {ηD : ℝ} (M N : Matrix n n 𝕜) (D E : n → n → n → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hE : ∀ a b c, ‖E a b c‖ ≤ DB a b c)
+    (hηD : 0 ≤ ηD) (hDdiff : ∀ a b c, ‖D a b c - E a b c‖ ≤ ηD)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖)
+    (i j k : n) :
+    ‖((2 : 𝕜)⁻¹ *
+        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l *
+          (D j k l + D k j l - D l j k)) -
+      ((2 : 𝕜)⁻¹ *
+        ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l *
+          (E j k l + E k j l - E l j k))‖ ≤
+      matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ‖M - N‖ := by
+  classical
+  let entryBound : n → n → n → ℝ := fun a b c =>
+    matrixInvChristoffelEntryDerivDiffConst (𝕜 := 𝕜) δ C a b c * ηD +
+      matrixInvChristoffelEntryMetricDiffConst (𝕜 := 𝕜) δ C DB a b c * ‖M - N‖
+  have hDB_nonneg : ∀ a b c, 0 ≤ DB a b c := by
+    intro a b c
+    exact (norm_nonneg _).trans (hE a b c)
+  have hentry :
+      ‖((2 : 𝕜)⁻¹ *
+          ∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l *
+            (D j k l + D k j l - D l j k)) -
+        ((2 : 𝕜)⁻¹ *
+          ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l *
+            (E j k l + E k j l - E l j k))‖ ≤ entryBound i j k := by
+    simpa [entryBound] using
+      matrix_inv_christoffel_entry_norm_sub_le_const
+        M N D E hM hN hE hDdiff hδpos hdetM hdetN i j k
+  have hentry_nonneg : ∀ a b c, 0 ≤ entryBound a b c := by
+    intro a b c
+    exact add_nonneg
+      (mul_nonneg
+        (matrixInvChristoffelEntryDerivDiffConst_nonneg (𝕜 := 𝕜) hδpos C a b c)
+        hηD)
+      (mul_nonneg
+        (matrixInvChristoffelEntryMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hDB_nonneg a b c)
+        (norm_nonneg _))
+  have hle_sum :
+      entryBound i j k ≤ ∑ a : n, ∑ b : n, ∑ c : n, entryBound a b c := by
+    calc
+      entryBound i j k ≤ ∑ c : n, entryBound i j c :=
+        Finset.single_le_sum (fun c _hc => hentry_nonneg i j c) (Finset.mem_univ k)
+      _ ≤ ∑ b : n, ∑ c : n, entryBound i b c :=
+        Finset.single_le_sum
+          (fun b _hb => Finset.sum_nonneg fun c _hc => hentry_nonneg i b c)
+          (Finset.mem_univ j)
+      _ ≤ ∑ a : n, ∑ b : n, ∑ c : n, entryBound a b c :=
+        Finset.single_le_sum
+          (fun a _ha => Finset.sum_nonneg fun b _hb =>
+            Finset.sum_nonneg fun c _hc => hentry_nonneg a b c)
+          (Finset.mem_univ i)
+  exact hentry.trans (hle_sum.trans (by rfl))
+
 theorem matrix_inv_christoffel_entry_norm_le_bound {n 𝕜 : Type*} [Fintype n]
     [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
     {DB : n → n → n → ℝ} (M : Matrix n n 𝕜) (D : n → n → n → 𝕜)

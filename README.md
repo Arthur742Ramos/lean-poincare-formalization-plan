@@ -374,8 +374,9 @@ packages the canonical stationary local solution attached to
   under determinant lower bounds, pointwise determinant Lipschitz control in the
   elementwise matrix norm, named adjugate-entry, inverse-entry, summed whole
   inverse-matrix, matrix-product, inverse-principal entry,
-  inverse-Christoffel derivative/metric-side, and quadratic-Christoffel
-  matrix-norm Lipschitz constants, plus supplied-Christoffel schematic RHS entry and
+  inverse-Christoffel derivative/metric-side and array-level, and
+  quadratic-Christoffel matrix-norm Lipschitz constants, plus
+  supplied-Christoffel schematic RHS entry and
   whole-matrix constants and primitive-input schematic RHS estimate, on entrywise
   bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds and
