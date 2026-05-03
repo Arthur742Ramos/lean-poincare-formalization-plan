@@ -1273,7 +1273,7 @@ inverse-entry estimates plus a whole inverse-matrix estimate, including a
 pointwise determinant, adjugate-entry, inverse-entry, whole inverse-matrix,
 matrix-product, and inverse-principal, inverse-Christoffel, and quadratic-Christoffel
 contraction Lipschitz estimate layer, plus a supplied-Christoffel schematic RHS
-Lipschitz aggregation and primitive-input schematic entry estimate, on entrywise
+Lipschitz aggregation and primitive-input schematic RHS estimate, on entrywise
 bounded finite matrices, using a determinant lower bound for inverse
 estimates, and a compactness bridge from
 nonvanishing determinants to uniform determinant lower bounds and compact-domain

@@ -1021,7 +1021,7 @@ bound preserve parabolic `C^{0,α}` control from entrywise control. It also has
 pointwise determinant, adjugate-entry, inverse-entry, whole inverse-matrix,
 matrix-product, and inverse-principal, inverse-Christoffel, and quadratic-Christoffel
 contraction Lipschitz estimates, plus a supplied-Christoffel schematic RHS
-Lipschitz aggregation and primitive-input schematic entry estimate, on entrywise
+Lipschitz aggregation and primitive-input schematic RHS estimate, on entrywise
 bounded finite matrices, using a determinant lower bound for inverse
 estimates; compact nonvanishing determinant data now supplies the needed
 uniform determinant lower bound, including compact-domain inverse-entry,

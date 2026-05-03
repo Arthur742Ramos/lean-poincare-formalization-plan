@@ -375,7 +375,7 @@ packages the canonical stationary local solution attached to
   inverse-entry, whole inverse-matrix, matrix-product, and
   inverse-principal, inverse-Christoffel, and quadratic-Christoffel contraction
   Lipschitz estimates, plus a supplied-Christoffel schematic RHS Lipschitz
-  aggregation and primitive-input schematic entry estimate, on entrywise bounded
+  aggregation and primitive-input schematic RHS estimate, on entrywise bounded
   finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds and
   compact-domain inverse,

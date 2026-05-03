@@ -157,7 +157,7 @@ determinant lower bound from entrywise control, plus a pointwise determinant,
 adjugate-entry, inverse-entry, whole inverse-matrix, matrix-product, and
 inverse-principal, inverse-Christoffel, and quadratic-Christoffel contraction
 Lipschitz estimate layer, plus a supplied-Christoffel schematic RHS Lipschitz
-aggregation and primitive-input schematic entry estimate, on entrywise bounded
+aggregation and primitive-input schematic RHS estimate, on entrywise bounded
 finite matrices, using a determinant lower bound for inverse estimates,
 including a compactness bridge from nonvanishing determinants to a uniform
 determinant lower bound and compact-domain inverse-entry, inverse-action,
