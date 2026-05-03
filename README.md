@@ -502,9 +502,9 @@ packages the canonical stationary local solution attached to
   Christoffel, and schematic RHS bridges, and inverse Gram, inverse-principal
   contraction, inverse-Gram Christoffel, and schematic RHS bounded-difference
   bridges against comparison primitive inputs, all with matching
-  spatial-Hölder Gram-entry input forms where applicable; the inverse-Gram and
-  schematic RHS bounded-difference, comparison, and entrywise-difference
-  bridges, plus the inverse-principal bounded-difference bridge, now also have
+  spatial-Hölder Gram-entry input forms where applicable; the inverse-Gram,
+  inverse-principal, and schematic RHS bounded-difference, comparison, and
+  entrywise-difference bridges now also have
   unit-diameter, closed-ball, and closed-cylinder spatial-Lipschitz Gram-entry
   variants for `0 < α ≤ 1`.
   The curvature,
