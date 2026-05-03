@@ -126,6 +126,18 @@ def restrictTerminal
     intro t ht
     exact sol.equation_on_Icc_of_le_terminal hT ht
 
+@[simp] theorem restrictTerminal_terminalTime
+    (sol : BanachEvolutionLocalSolution F t₀ u₀)
+    {T : ℝ} (hT₀ : t₀ < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).terminalTime = T :=
+  rfl
+
+@[simp] theorem restrictTerminal_curve
+    (sol : BanachEvolutionLocalSolution F t₀ u₀)
+    {T : ℝ} (hT₀ : t₀ < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).curve = sol.curve :=
+  rfl
+
 theorem eqOn_Icc_of_lipschitz
     {K : ℝ≥0} (hF : ∀ t : ℝ, LipschitzWith K (F t))
     (sol₁ sol₂ : BanachEvolutionLocalSolution F t₀ u₀) :
@@ -223,6 +235,25 @@ def restrictTerminal
   mem_state := by
     intro t ht
     exact sol.mem_state_on_Icc_of_le_terminal hT ht
+
+@[simp] theorem restrictTerminal_terminalTime
+    (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    {T : ℝ} (hT₀ : t₀ < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).terminalTime = T :=
+  rfl
+
+@[simp] theorem restrictTerminal_curve
+    (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    {T : ℝ} (hT₀ : t₀ < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).curve = sol.curve :=
+  rfl
+
+@[simp] theorem restrictTerminal_toBanachEvolutionLocalSolution
+    (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    {T : ℝ} (hT₀ : t₀ < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).toBanachEvolutionLocalSolution =
+      sol.toBanachEvolutionLocalSolution.restrictTerminal hT₀ hT :=
+  rfl
 
 /-- Interior projections of a state-constrained Banach ODE solution satisfy the projected ODE. -/
 theorem continuousLinearMap_hasDerivAt_of_mem_Ioo
