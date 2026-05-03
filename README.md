@@ -371,9 +371,11 @@ packages the canonical stationary local solution attached to
   primitives to prove explicit bounded `C^{0,α}` determinant, adjugate-entry,
   inverse-entry, and whole inverse-matrix estimates, plus parabolic `C^{0,α}`
   closure of finite matrix determinants, adjugate entries, and inverse entries
-  under determinant lower bounds, and a pointwise determinant Lipschitz estimate
-  on entrywise bounded finite matrices, with compact nonvanishing determinant
-  data now supplying such lower bounds and compact-domain inverse,
+  under determinant lower bounds, and pointwise determinant, adjugate-entry,
+  inverse-entry, and whole inverse-matrix Lipschitz estimates on entrywise
+  bounded finite matrices with a determinant lower bound where needed, with
+  compact nonvanishing determinant data now supplying such lower bounds and
+  compact-domain inverse,
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, plus
   entrywise and whole-valued finite matrix transpose, pointwise
   symmetrization, matrix-product, matrix-vector/vector-matrix, and

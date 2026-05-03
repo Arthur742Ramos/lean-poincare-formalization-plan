@@ -225,6 +225,53 @@ theorem matrix_det_norm_sub_le {n A : Type*} [Fintype n] [DecidableEq n] [Normed
             (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1)) :=
       Finset.sum_le_sum hterm
 
+/-- Determinants are pointwise bounded by the quantitative finite product constant. -/
+theorem matrix_det_norm_le {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
+    {C : n → n → ℝ} (M : Matrix n n A)
+    (hM : ∀ i j, ‖M i j‖ ≤ C i j) :
+    ‖M.det‖ ≤ matrixDetBoundConst (A := A) C := by
+  classical
+  let term : Equiv.Perm n → A :=
+    fun σ => ((Equiv.Perm.sign σ : ℤ) : A) * ∏ i : n, M (σ i) i
+  have hdet : M.det = ∑ σ : Equiv.Perm n, term σ := by
+    dsimp [term]
+    rw [Matrix.det_apply]
+    apply Finset.sum_congr rfl
+    intro σ _hσ
+    rw [← zsmul_eq_mul]
+    rfl
+  have hterm : ∀ σ ∈ (Finset.univ : Finset (Equiv.Perm n)),
+      ‖term σ‖ ≤
+        ‖(Equiv.Perm.sign σ : ℤ)‖ * matrixDetTermBoundConst (A := A) C σ := by
+    intro σ _hσ
+    have hprod :
+        ‖∏ i : n, M (σ i) i‖ ≤ matrixDetTermBoundConst (A := A) C σ := by
+      simpa [matrixDetTermBoundConst] using
+        (norm_finset_prod_le_unit_mul_prod_max
+          (A := A) (S := (Finset.univ : Finset n))
+          (C := fun i => C (σ i) i)
+          (a := fun i => M (σ i) i)
+          (fun i _hi => hM (σ i) i))
+    have hterm_zsmul :
+        term σ = (Equiv.Perm.sign σ : ℤ) • (∏ i : n, M (σ i) i) := by
+      dsimp [term]
+      rw [← zsmul_eq_mul]
+    calc
+      ‖term σ‖ = ‖(Equiv.Perm.sign σ : ℤ) • (∏ i : n, M (σ i) i)‖ := by
+        rw [hterm_zsmul]
+      _ ≤ ‖(Equiv.Perm.sign σ : ℤ)‖ * ‖∏ i : n, M (σ i) i‖ :=
+        norm_zsmul_le _ _
+      _ ≤ ‖(Equiv.Perm.sign σ : ℤ)‖ * matrixDetTermBoundConst (A := A) C σ :=
+        mul_le_mul_of_nonneg_left hprod (norm_nonneg _)
+  calc
+    ‖M.det‖ = ‖∑ σ : Equiv.Perm n, term σ‖ := by rw [hdet]
+    _ ≤ ∑ σ : Equiv.Perm n, ‖term σ‖ := norm_sum_le _ _
+    _ ≤ ∑ σ : Equiv.Perm n,
+        ‖(Equiv.Perm.sign σ : ℤ)‖ * matrixDetTermBoundConst (A := A) C σ :=
+      Finset.sum_le_sum hterm
+    _ = matrixDetBoundConst (A := A) C := by
+      rfl
+
 /-- The determinant of a finite matrix whose entries are parabolic `C^{0,α}` functions is
 again parabolic `C^{0,α}`. -/
 theorem matrix_det {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
@@ -390,6 +437,62 @@ theorem matrix_adjugate_entry_with {n A : Type*} [Fintype n] [DecidableEq n]
   funext z
   rw [Matrix.adjugate_apply]
 
+/-- Adjugate entries are pointwise Lipschitz on entrywise bounded finite matrices.  The estimate
+is obtained by applying the determinant Lipschitz bound to the row-replacement matrices defining
+the adjugate entry. -/
+theorem matrix_adjugate_entry_norm_sub_le {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] {C : n → n → ℝ} (M N : Matrix n n A)
+    (hM : ∀ r c, ‖M r c‖ ≤ C r c) (hN : ∀ r c, ‖N r c‖ ≤ C r c)
+    (i j : n) :
+    ‖M.adjugate i j - N.adjugate i j‖ ≤
+      ∑ σ : Equiv.Perm n,
+        ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((∑ r : n,
+              ‖(M.updateRow j ((Pi.single i (1 : A)) : n → A)) (σ r) r -
+                (N.updateRow j ((Pi.single i (1 : A)) : n → A)) (σ r) r‖) *
+            (max ‖(1 : A)‖ 1 *
+              ∏ r : n, max (matrixUpdateRowBoundConst (A := A) C i j (σ r) r) 1)) := by
+  let e : n → A := (Pi.single i (1 : A))
+  have hMupd : ∀ r c, ‖(M.updateRow j e) r c‖ ≤
+      matrixUpdateRowBoundConst (A := A) C i j r c := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow]
+    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+        using hM r c
+  have hNupd : ∀ r c, ‖(N.updateRow j e) r c‖ ≤
+      matrixUpdateRowBoundConst (A := A) C i j r c := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow]
+    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+        using hN r c
+  simpa [e, Matrix.adjugate_apply] using
+    (matrix_det_norm_sub_le
+      (C := matrixUpdateRowBoundConst (A := A) C i j)
+      (M.updateRow j e) (N.updateRow j e) hMupd hNupd)
+
+/-- Adjugate entries are pointwise bounded by the quantitative adjugate-entry constant. -/
+theorem matrix_adjugate_entry_norm_le {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] {C : n → n → ℝ} (M : Matrix n n A)
+    (hM : ∀ r c, ‖M r c‖ ≤ C r c) (i j : n) :
+    ‖M.adjugate i j‖ ≤ matrixAdjugateEntryBoundConst (A := A) C i j := by
+  let e : n → A := (Pi.single i (1 : A))
+  have hMupd : ∀ r c, ‖(M.updateRow j e) r c‖ ≤
+      matrixUpdateRowBoundConst (A := A) C i j r c := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow]
+    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+        using hM r c
+  simpa [e, Matrix.adjugate_apply, matrixAdjugateEntryBoundConst] using
+    (matrix_det_norm_le
+      (C := matrixUpdateRowBoundConst (A := A) C i j)
+      (M.updateRow j e) hMupd)
+
 /-- Each adjugate entry of a finite matrix is parabolic `C^{0,α}` when the matrix entries are. -/
 theorem matrix_adjugate_entry {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
     {M : ℝ × X → Matrix n n A}
@@ -457,6 +560,160 @@ theorem matrixInvEntryHolderConst_nonneg {n 𝕜 : Type*} [Fintype n] [Decidable
       (mul_nonneg
         (mul_nonneg (inv_nonneg.mpr hδpos.le) (matrixDetHolderConst_nonneg (A := 𝕜) hH))
         (inv_nonneg.mpr hδpos.le)))
+
+/-- Pointwise finite-dimensional Lipschitz bound for one inverse-matrix entry.  It depends on
+the two matrices through the determinant and row-replacement adjugate differences. -/
+def matrixInvEntryLipschitzBound {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (C : n → n → ℝ) (M N : Matrix n n 𝕜)
+    (i j : n) : ℝ :=
+  δ⁻¹ *
+    (∑ σ : Equiv.Perm n,
+      ‖(Equiv.Perm.sign σ : ℤ)‖ *
+        ((∑ r : n,
+            ‖(M.updateRow j ((Pi.single i (1 : 𝕜)) : n → 𝕜)) (σ r) r -
+              (N.updateRow j ((Pi.single i (1 : 𝕜)) : n → 𝕜)) (σ r) r‖) *
+          (max ‖(1 : 𝕜)‖ 1 *
+            ∏ r : n, max (matrixUpdateRowBoundConst (A := 𝕜) C i j (σ r) r) 1))) +
+    ((δ⁻¹ * δ⁻¹) *
+      (∑ σ : Equiv.Perm n,
+        ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((∑ r : n, ‖M (σ r) r - N (σ r) r‖) *
+            (max ‖(1 : 𝕜)‖ 1 * ∏ r : n, max (C (σ r) r) 1)))) *
+      matrixAdjugateEntryBoundConst (A := 𝕜) C i j
+
+/-- Inverse-matrix entries are pointwise Lipschitz on entrywise bounded matrices whose
+determinants have a common positive lower bound.  The estimate separates the adjugate variation
+from the reciprocal determinant variation. -/
+theorem matrix_inv_entry_norm_sub_le {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ} (M N : Matrix n n 𝕜)
+    (hM : ∀ r c, ‖M r c‖ ≤ C r c) (hN : ∀ r c, ‖N r c‖ ≤ C r c)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖)
+    (i j : n) :
+    ‖M⁻¹ i j - N⁻¹ i j‖ ≤
+      matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i j := by
+  classical
+  let adjRhs : ℝ :=
+    ∑ σ : Equiv.Perm n,
+      ‖(Equiv.Perm.sign σ : ℤ)‖ *
+        ((∑ r : n,
+            ‖(M.updateRow j ((Pi.single i (1 : 𝕜)) : n → 𝕜)) (σ r) r -
+              (N.updateRow j ((Pi.single i (1 : 𝕜)) : n → 𝕜)) (σ r) r‖) *
+          (max ‖(1 : 𝕜)‖ 1 *
+            ∏ r : n, max (matrixUpdateRowBoundConst (A := 𝕜) C i j (σ r) r) 1))
+  let detRhs : ℝ :=
+    ∑ σ : Equiv.Perm n,
+      ‖(Equiv.Perm.sign σ : ℤ)‖ *
+        ((∑ r : n, ‖M (σ r) r - N (σ r) r‖) *
+          (max ‖(1 : 𝕜)‖ 1 * ∏ r : n, max (C (σ r) r) 1))
+  have hinvδ_nonneg : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  have hdet_lip : ‖M.det - N.det‖ ≤ detRhs := by
+    simpa [detRhs] using matrix_det_norm_sub_le (C := C) M N hM hN
+  have hadj_lip : ‖M.adjugate i j - N.adjugate i j‖ ≤ adjRhs := by
+    simpa [adjRhs] using matrix_adjugate_entry_norm_sub_le (C := C) M N hM hN i j
+  have hdetRhs_nonneg : 0 ≤ detRhs := (norm_nonneg _).trans hdet_lip
+  have hadjRhs_nonneg : 0 ≤ adjRhs := (norm_nonneg _).trans hadj_lip
+  have hadj_boundN :
+      ‖N.adjugate i j‖ ≤ matrixAdjugateEntryBoundConst (A := 𝕜) C i j :=
+    matrix_adjugate_entry_norm_le (C := C) N hN i j
+  have hinv_detM : ‖(M.det)⁻¹‖ ≤ δ⁻¹ := by
+    have hnorm_pos : 0 < ‖M.det‖ := lt_of_lt_of_le hδpos hdetM
+    rw [norm_inv]
+    exact (inv_le_inv₀ hnorm_pos hδpos).2 hdetM
+  have hdet_inv_lip :
+      ‖(M.det)⁻¹ - (N.det)⁻¹‖ ≤ (δ⁻¹ * δ⁻¹) * ‖M.det - N.det‖ := by
+    have hdist := (lipschitzOnWith_inv_of_norm_ge (𝕜 := 𝕜) hδpos).dist_le_mul
+      M.det (show M.det ∈ {a : 𝕜 | δ ≤ ‖a‖} from hdetM)
+      N.det (show N.det ∈ {a : 𝕜 | δ ≤ ‖a‖} from hdetN)
+    simpa [dist_eq_norm, mul_assoc] using hdist
+  have hdet_inv_Rhs :
+      ‖(M.det)⁻¹ - (N.det)⁻¹‖ ≤ (δ⁻¹ * δ⁻¹) * detRhs :=
+    hdet_inv_lip.trans
+      (mul_le_mul_of_nonneg_left hdet_lip (mul_nonneg hinvδ_nonneg hinvδ_nonneg))
+  have hfirst :
+      ‖(M.det)⁻¹‖ * ‖M.adjugate i j - N.adjugate i j‖ ≤ δ⁻¹ * adjRhs :=
+    mul_le_mul hinv_detM hadj_lip (norm_nonneg _) hinvδ_nonneg
+  have hsecond :
+      ‖(M.det)⁻¹ - (N.det)⁻¹‖ * ‖N.adjugate i j‖ ≤
+        ((δ⁻¹ * δ⁻¹) * detRhs) *
+          matrixAdjugateEntryBoundConst (A := 𝕜) C i j := by
+    exact mul_le_mul hdet_inv_Rhs hadj_boundN (norm_nonneg _)
+      (mul_nonneg (mul_nonneg hinvδ_nonneg hinvδ_nonneg) hdetRhs_nonneg)
+  have hentry :
+      M⁻¹ i j - N⁻¹ i j =
+        (M.det)⁻¹ * M.adjugate i j - (N.det)⁻¹ * N.adjugate i j := by
+    rw [Matrix.inv_def, Matrix.inv_def, Ring.inverse_eq_inv, Ring.inverse_eq_inv]
+    rfl
+  have hsplit :
+      (M.det)⁻¹ * M.adjugate i j - (N.det)⁻¹ * N.adjugate i j =
+        (M.det)⁻¹ * (M.adjugate i j - N.adjugate i j) +
+          ((M.det)⁻¹ - (N.det)⁻¹) * N.adjugate i j := by
+    ring
+  calc
+    ‖M⁻¹ i j - N⁻¹ i j‖ =
+        ‖(M.det)⁻¹ * M.adjugate i j - (N.det)⁻¹ * N.adjugate i j‖ := by
+      rw [hentry]
+    _ =
+        ‖(M.det)⁻¹ * (M.adjugate i j - N.adjugate i j) +
+          ((M.det)⁻¹ - (N.det)⁻¹) * N.adjugate i j‖ := by
+      rw [hsplit]
+    _ ≤
+        ‖(M.det)⁻¹ * (M.adjugate i j - N.adjugate i j)‖ +
+          ‖((M.det)⁻¹ - (N.det)⁻¹) * N.adjugate i j‖ :=
+      norm_add_le _ _
+    _ ≤
+        ‖(M.det)⁻¹‖ * ‖M.adjugate i j - N.adjugate i j‖ +
+          (‖(M.det)⁻¹ - (N.det)⁻¹‖ * ‖N.adjugate i j‖) :=
+      add_le_add (norm_mul_le _ _) (norm_mul_le _ _)
+    _ ≤
+        δ⁻¹ * adjRhs +
+          ((δ⁻¹ * δ⁻¹) * detRhs) *
+            matrixAdjugateEntryBoundConst (A := 𝕜) C i j :=
+      add_le_add hfirst hsecond
+    _ = matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i j := by
+      simp [adjRhs, detRhs, matrixInvEntryLipschitzBound]
+
+theorem matrixInvEntryLipschitzBound_nonneg {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ} (M N : Matrix n n 𝕜)
+    (hM : ∀ r c, ‖M r c‖ ≤ C r c) (hN : ∀ r c, ‖N r c‖ ≤ C r c)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖)
+    (i j : n) :
+    0 ≤ matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i j :=
+  (norm_nonneg _).trans (matrix_inv_entry_norm_sub_le M N hM hN hδpos hdetM hdetN i j)
+
+/-- Finite matrix inversion is pointwise Lipschitz in the elementwise matrix norm on entrywise
+bounded matrices whose determinants have a common positive lower bound. -/
+theorem matrix_inv_norm_sub_le {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ} (M N : Matrix n n 𝕜)
+    (hM : ∀ r c, ‖M r c‖ ≤ C r c) (hN : ∀ r c, ‖N r c‖ ≤ C r c)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖) :
+    ‖M⁻¹ - N⁻¹‖ ≤
+      ∑ i : n, ∑ j : n, matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i j := by
+  classical
+  let entryBound : n → n → ℝ :=
+    fun i j => matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i j
+  have hentry : ∀ i j, ‖M⁻¹ i j - N⁻¹ i j‖ ≤ entryBound i j := by
+    intro i j
+    simpa [entryBound] using matrix_inv_entry_norm_sub_le M N hM hN hδpos hdetM hdetN i j
+  have hentry_nonneg : ∀ i j, 0 ≤ entryBound i j := by
+    intro i j
+    exact (norm_nonneg _).trans (hentry i j)
+  have hrow_nonneg : ∀ i, 0 ≤ ∑ j : n, entryBound i j := by
+    intro i
+    exact Finset.sum_nonneg fun j _hj => hentry_nonneg i j
+  have htotal_nonneg : 0 ≤ ∑ i : n, ∑ j : n, entryBound i j :=
+    Finset.sum_nonneg fun i _hi => hrow_nonneg i
+  have hnorm :
+      ‖M⁻¹ - N⁻¹‖ ≤ ∑ i : n, ∑ j : n, entryBound i j := by
+    refine (Matrix.norm_le_iff htotal_nonneg).2 ?_
+    intro i j
+    calc
+      ‖(M⁻¹ - N⁻¹) i j‖ = ‖M⁻¹ i j - N⁻¹ i j‖ := rfl
+      _ ≤ entryBound i j := hentry i j
+      _ ≤ ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hentry_nonneg i k) (Finset.mem_univ j)
+      _ ≤ ∑ i : n, ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
+  simpa [entryBound] using hnorm
 
 /-- Each inverse-matrix entry has an explicit bounded parabolic `C^{0,α}` estimate when the matrix
 entries do and the determinant is uniformly bounded away from zero on the domain. -/
