@@ -1184,7 +1184,11 @@ turns an interval reverse encoding into an encoding of the corresponding
 restricted geometric candidate. The same prefix operation is now available for
 `SymmetricSubmoduleCandidateEncodingOnIcc`, so the genuine symmetric-carrier
 reverse encoding can be shortened without changing the realized smooth metric,
-velocity, or background.
+velocity, or background.  The theorem
+`chosenIntrinsicDeTurckLocalSolution_metric_eq_on_restricted_interval_of_symmetricSubmoduleCandidateEncodingOnIcc`
+now packages the corresponding local uniqueness readout: two chosen-background
+DeTurck candidates agree on `[t₀, S]` once both restricted candidates are encoded
+in the symmetric carrier for the same `S ≤ T`.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
@@ -1415,8 +1419,9 @@ to state future terminal-fit replacements against restricted candidates rather
 than against the full arbitrary candidate interval, and the analytic
 smooth-realization / interval-encoding prefixes now preserve the same
 underlying metric data on the shorter interval, including after descending to
-the genuine symmetric carrier; the continuation/local reverse-encoding theorem
-is still open. The density-based
+the genuine symmetric carrier, and local uniqueness can now be read on a chosen
+common restricted terminal; the continuation/local reverse-encoding theorem is
+still open. The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient
 coordinate coe equality on the Picard interval and Riemannian metric locus,

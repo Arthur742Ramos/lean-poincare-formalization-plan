@@ -5365,6 +5365,171 @@ def SymmetricSubmoduleCandidateEncodingOnIcc.restrictTerminal
     simpa [IntrinsicDeTurckLocalSolution.restrictTerminal] using
       enc.metric_eq htCandidate x u v
 
+/-- Localized symmetric-carrier uniqueness for chosen-background DeTurck candidates.  It only asks
+for reverse encodings of the candidates after both have been restricted to the same shorter
+terminal time `S` inside the chart interval, and concludes metric equality on `[t₀, S]`. -/
+theorem chosenIntrinsicDeTurckLocalSolution_metric_eq_on_restricted_interval_of_symmetricSubmoduleCandidateEncodingOnIcc
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M))
+    {T : ℝ} {Kstate : ℝ≥0}
+    (Asub : ℝ →
+      symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover →
+      symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover)
+    (hcomm : ∀ t x,
+      x ∈ riemannianMetricLocusSubmodule (M := M) (F := F)
+        (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover →
+        (Asub t x :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) =
+          A t (x :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover))
+    (lipschitzOn_Icc : ∀ t ∈ Icc ivp.initialTime T, LipschitzOnWith Kstate (Asub t)
+      (riemannianMetricLocusSubmodule (M := M) (F := F)
+        (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover))
+    (encode :
+      ∀ (candidate : ChosenIntrinsicDeTurckLocalSolution
+          (E := F) (H := H) (I := I) (M := M) ivp)
+        {S : ℝ} (hS₀ : ivp.initialTime < S) (hScandidate : S ≤ candidate.1.terminalTime)
+        (_hSchart : S ≤ T),
+        SymmetricSubmoduleCandidateEncodingOnIcc
+          (T := T) x0 et het Kc hKc Ko hKo hKoEq hcover
+          Asub A hcomm (candidate.1.restrictTerminal hS₀ hScandidate))
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := F) (H := H) (I := I) (M := M) ivp)
+    {S : ℝ} (hS₀ : ivp.initialTime < S)
+    (hS₁ : S ≤ sol₁.1.terminalTime) (hS₂ : S ≤ sol₂.1.terminalTime) (hST : S ≤ T)
+    {t : ℝ} (ht : t ∈ Icc ivp.initialTime S)
+    (x : M) (u v : TangentSpace I x) :
+    metricTensor (I := I) (M := M) sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.1.toIntrinsicDeTurckSolution.metric t x u v := by
+  let enc₁ := encode sol₁ hS₀ hS₁ hST
+  let enc₂ := encode sol₂ hS₀ hS₂ hST
+  have htCandidate₁ :
+      t ∈ Icc ivp.initialTime (sol₁.1.restrictTerminal hS₀ hS₁).terminalTime := by
+    simpa [IntrinsicDeTurckLocalSolution.restrictTerminal] using ht
+  have htCandidate₂ :
+      t ∈ Icc ivp.initialTime (sol₂.1.restrictTerminal hS₀ hS₂).terminalTime := by
+    simpa [IntrinsicDeTurckLocalSolution.restrictTerminal] using ht
+  have hS_enc₁ : S ≤ enc₁.sol.terminalTime := by
+    rw [enc₁.terminal_eq]
+    simp [IntrinsicDeTurckLocalSolution.restrictTerminal]
+  have hS_enc₂ : S ≤ enc₂.sol.terminalTime := by
+    rw [enc₂.terminal_eq]
+    simp [IntrinsicDeTurckLocalSolution.restrictTerminal]
+  have hEq := BanachEvolutionLocalSolutionIn.eqOn_Icc_of_lipschitzOn_Icc_of_le_terminal
+    (F := Asub)
+    (stateSet := riemannianMetricLocusSubmodule (M := M) (F := F)
+      (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ := ivp.initialTime)
+    (u₀ := InitialValueProblem.toSymmetricSectionSubmodule
+      (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp)
+    (K := Kstate) enc₁.sol enc₂.sol hS₀ hS_enc₁ hS_enc₂
+    (fun τ hτ ↦ lipschitzOn_Icc τ ⟨hτ.1, le_trans hτ.2 hST⟩)
+  have htEnc₁ : t ∈ Icc ivp.initialTime enc₁.sol.terminalTime :=
+    ⟨ht.1, le_trans ht.2 hS_enc₁⟩
+  have htEnc₂ : t ∈ Icc ivp.initialTime enc₂.sol.terminalTime :=
+    ⟨ht.1, le_trans ht.2 hS_enc₂⟩
+  have htAmb₁ :
+      t ∈ Icc ivp.initialTime
+        (BanachEvolutionLocalSolutionIn.toAmbientContinuousSectionSpace_of_riemannianMetricLocusSubmodule
+          (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp hcomm enc₁.sol).terminalTime := by
+    simpa [BanachEvolutionLocalSolutionIn.toAmbientContinuousSectionSpace_of_riemannianMetricLocusSubmodule,
+      BanachEvolutionLocalSolutionIn.mapContinuousLinearMapBetween] using htEnc₁
+  have htAmb₂ :
+      t ∈ Icc ivp.initialTime
+        (BanachEvolutionLocalSolutionIn.toAmbientContinuousSectionSpace_of_riemannianMetricLocusSubmodule
+          (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp hcomm enc₂.sol).terminalTime := by
+    simpa [BanachEvolutionLocalSolutionIn.toAmbientContinuousSectionSpace_of_riemannianMetricLocusSubmodule,
+      BanachEvolutionLocalSolutionIn.mapContinuousLinearMapBetween] using htEnc₂
+  have hreal₁ :
+      metricTensor (I := I) (M := M) enc₁.realization.metric t x u v =
+        ((enc₁.sol.curve t :
+          symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) x u v := by
+    simpa [BanachEvolutionLocalSolutionIn.toAmbientContinuousSectionSpace_of_riemannianMetricLocusSubmodule,
+      BanachEvolutionLocalSolutionIn.mapContinuousLinearMapBetween] using
+      enc₁.realization.metric_eq_curve htAmb₁ x u v
+  have hreal₂ :
+      metricTensor (I := I) (M := M) enc₂.realization.metric t x u v =
+        ((enc₂.sol.curve t :
+          symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) x u v := by
+    simpa [BanachEvolutionLocalSolutionIn.toAmbientContinuousSectionSpace_of_riemannianMetricLocusSubmodule,
+      BanachEvolutionLocalSolutionIn.mapContinuousLinearMapBetween] using
+      enc₂.realization.metric_eq_curve htAmb₂ x u v
+  have hcurve :
+      ((enc₁.sol.curve t :
+        symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover) x u v =
+      ((enc₂.sol.curve t :
+        symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover) x u v := by
+    exact congrArg
+      (fun s : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover =>
+        ((s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover) x u v)) (hEq ht)
+  calc
+    metricTensor (I := I) (M := M) sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+        metricTensor (I := I) (M := M) enc₁.realization.metric t x u v := by
+      simpa [IntrinsicDeTurckLocalSolution.restrictTerminal] using
+        enc₁.metric_eq htCandidate₁ x u v
+    _ =
+        ((enc₁.sol.curve t :
+          symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) x u v := hreal₁
+    _ =
+        ((enc₂.sol.curve t :
+          symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover) :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) x u v := hcurve
+    _ = metricTensor (I := I) (M := M) enc₂.realization.metric t x u v := hreal₂.symm
+    _ = metricTensor (I := I) (M := M) sol₂.1.toIntrinsicDeTurckSolution.metric t x u v := by
+      simpa [IntrinsicDeTurckLocalSolution.restrictTerminal] using
+        (enc₂.metric_eq htCandidate₂ x u v).symm
+
 /-- Restrict an ambient candidate encoding to a shrunk interval chart when the encoded candidate
 interval is known to fit inside the smaller chart interval. -/
 def TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.shrink
