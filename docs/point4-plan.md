@@ -1436,12 +1436,14 @@ common determinant lower bound, on entrywise
 bounded finite matrices, using a determinant lower bound for inverse
 estimates, and a compactness bridge from
 nonvanishing determinants to uniform determinant lower bounds, including
-finite-index common determinant lower bounds for compact matrix families, and
+finite-index common determinant lower bounds for compact matrix families,
 finite-family compact inverse estimates using that shared determinant constant,
-and compact-domain inverse-entry, inverse-action, inverse-bilinear, and
-schematic matrix-valued RHS variants,
+matching existential finite-family inverse closures, and compact-domain
+inverse-entry, inverse-action, inverse-bilinear, and schematic matrix-valued RHS
+variants,
 including finite-family primitive schematic RHS estimates using the same shared
-determinant constant, quantitative compact inverse-action and inverse-bilinear
+determinant constant and matching existential finite-family schematic RHS
+closures, quantitative compact inverse-action and inverse-bilinear
 estimates, existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls with a compact nonvanishing-det
 adapter for reciprocal determinant differences, existential inverse-entry,

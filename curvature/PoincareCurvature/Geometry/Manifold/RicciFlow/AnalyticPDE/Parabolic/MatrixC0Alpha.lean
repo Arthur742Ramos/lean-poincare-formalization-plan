@@ -3302,6 +3302,24 @@ theorem matrix_inv_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n] [Decida
   matrix_of_entries fun i j =>
     matrix_inv_entry_of_isCompact_det_ne_zero hK hα hM hdet_ne i j
 
+/-- Compact-domain finite-family inverse-matrix closure from entrywise control and pointwise
+nonvanishing determinants, with one determinant lower bound shared by the family. -/
+theorem matrix_inv_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type*} [Fintype ι]
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M : ι → ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ a i j, ParabolicC0AlphaOn α (fun z => M a z i j) K)
+    (hdet_ne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → (M a z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M a z).det‖) ∧
+      ∀ a, ParabolicC0AlphaOn α (fun z : ℝ × X => (M a z)⁻¹) K := by
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro a
+  exact matrix_inv (M := M a) (hM a) hδpos (hdet a)
+
 /-- Compact-domain inverse-matrix difference control from entrywise controls and pointwise
 nonvanishing determinants. -/
 theorem matrix_inv_sub_entrywise_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
@@ -10563,6 +10581,43 @@ theorem ricciDeTurck_schematic_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintyp
     ⟨δ, hδpos, hdet⟩
   exact ricciDeTurck_schematic (M := M) (D := D) (H := H)
     hM hD hH hδpos hdet
+
+/-- Compact-domain finite-family schematic Ricci-DeTurck RHS closure from entrywise primitive
+controls and pointwise nonvanishing metric determinants, with one determinant lower bound shared
+by the family. -/
+theorem ricciDeTurck_schematic_family_of_isCompact_det_ne_zero
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {M : κ → ℝ × X → Matrix n n 𝕜}
+    {D : κ → ℝ × X → n → n → n → 𝕜}
+    {H : κ → ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K)
+    (hD : ∀ r a b c, ParabolicC0AlphaOn α (fun z => D r z a b c) K)
+    (hH : ∀ r a b i j, ParabolicC0AlphaOn α (fun z => H r z a b i j) K)
+    (hdet_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × X =>
+            (fun i j =>
+              let Γ : n → n → n → 𝕜 := fun a b c =>
+                (2 : 𝕜)⁻¹ *
+                  ∑ l : n, ((M r z)⁻¹ : Matrix n n 𝕜) a l *
+                    (D r z b c l + D r z c b l - D r z l b c)
+              (∑ a : n, ∑ b : n, ((M r z)⁻¹ : Matrix n n 𝕜) a b *
+                  H r z a b i j) +
+                ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+                  (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) :
+              Matrix n n 𝕜)) K := by
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact ricciDeTurck_schematic (M := M r) (D := D r) (H := H r)
+    (hM r) (hD r) (hH r) hδpos (hdet r)
 
 end ParabolicC0AlphaOn
 end AnalyticPDE
