@@ -1346,7 +1346,9 @@ control, now also with quantitative entrywise vector/matrix packaging and
 spatial-only and time-only finite vector/matrix coefficient bridges from
 ordinary Holder/Lipschitz estimates, including explicit unit-parabolic-diameter
 spatial Lipschitz lifts for every `0 ≤ α ≤ 1` and time-Lipschitz lifts for
-every `0 ≤ α ≤ 2`, plus explicit bounded determinant,
+every `0 ≤ α ≤ 2`, now with matching fixed-constant closed-ball and
+closed-cylinder variants for those Lipschitz coefficient bridges, plus explicit
+bounded determinant,
 adjugate-entry, and inverse-entry estimates plus a whole inverse-matrix
 estimate, including a
 pointwise determinant Lipschitz estimate in the elementwise matrix norm,

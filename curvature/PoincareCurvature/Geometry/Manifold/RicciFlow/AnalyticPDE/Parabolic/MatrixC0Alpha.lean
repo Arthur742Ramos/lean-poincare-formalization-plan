@@ -712,6 +712,43 @@ theorem vector_of_snd_lipschitzOnWith_with_of_parabolicDistance_le_one {n A : Ty
     (Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i))
     hα_nonneg hα_le_one hdiam
 
+/-- On a subset of a closed parabolic ball of diameter at most one, entrywise spatial Lipschitz
+control packages a finite vector-valued coefficient family as an explicit parabolic `C^{0,α}`
+estimate for every `0 ≤ α ≤ 1`. -/
+theorem vector_of_snd_lipschitzOnWith_with_of_subset_closedBall {n A : Type*}
+    [Fintype n] [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0}
+    {v : X → n → A} {R : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ‖v x i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun x => v x i) (Prod.snd '' s))
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, (K i : ℝ)) α
+      (fun z : ℝ × X => v z.2) s := by
+  have hbase := vector_of_snd_lipschitzOnWith_with hB_nonneg hB hL
+  exact hbase.mono_exponent_of_subset_closedBall
+    (Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i))
+    hα_nonneg hα_le_one hs hR
+
+/-- On a subset of a closed parabolic cylinder of diameter at most one, entrywise spatial
+Lipschitz control packages a finite vector-valued coefficient family as an explicit parabolic
+`C^{0,α}` estimate for every `0 ≤ α ≤ 1`. -/
+theorem vector_of_snd_lipschitzOnWith_with_of_subset_closedCylinder {n A : Type*}
+    [Fintype n] [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0}
+    {v : X → n → A} {timeRadius spaceRadius : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ‖v x i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun x => v x i) (Prod.snd '' s))
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, (K i : ℝ)) α
+      (fun z : ℝ × X => v z.2) s := by
+  have hbase := vector_of_snd_lipschitzOnWith_with hB_nonneg hB hL
+  exact hbase.mono_exponent_of_subset_closedCylinder
+    (Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i))
+    hα_nonneg hα_le_one hs hdiam
+
 /-- Entrywise spatial boundedness and Holder control package as a matrix-valued parabolic
 `C^{0,α}` estimate for the time-independent lift. -/
 theorem matrix_of_snd_holder_with {m n A : Type*} [Fintype m] [Fintype n]
@@ -763,6 +800,47 @@ theorem matrix_of_snd_lipschitzOnWith_with_of_parabolicDistance_le_one {m n A : 
     (Finset.sum_nonneg fun i _hi =>
       Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j))
     hα_nonneg hα_le_one hdiam
+
+/-- On a subset of a closed parabolic ball of diameter at most one, entrywise spatial Lipschitz
+control packages a finite matrix-valued coefficient family as an explicit parabolic `C^{0,α}`
+estimate for every `0 ≤ α ≤ 1`. -/
+theorem matrix_of_snd_lipschitzOnWith_with_of_subset_closedBall {m n A : Type*}
+    [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : X → Matrix m n A} {R : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ‖M x i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun x => M x i j) (Prod.snd '' s))
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, (K i j : ℝ)) α
+      (fun z : ℝ × X => M z.2) s := by
+  have hbase := matrix_of_snd_lipschitzOnWith_with hB_nonneg hB hL
+  exact hbase.mono_exponent_of_subset_closedBall
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j))
+    hα_nonneg hα_le_one hs hR
+
+/-- On a subset of a closed parabolic cylinder of diameter at most one, entrywise spatial
+Lipschitz control packages a finite matrix-valued coefficient family as an explicit parabolic
+`C^{0,α}` estimate for every `0 ≤ α ≤ 1`. -/
+theorem matrix_of_snd_lipschitzOnWith_with_of_subset_closedCylinder {m n A : Type*}
+    [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : X → Matrix m n A} {timeRadius spaceRadius : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ‖M x i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun x => M x i j) (Prod.snd '' s))
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, (K i j : ℝ)) α
+      (fun z : ℝ × X => M z.2) s := by
+  have hbase := matrix_of_snd_lipschitzOnWith_with hB_nonneg hB hL
+  exact hbase.mono_exponent_of_subset_closedCylinder
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j))
+    hα_nonneg hα_le_one hs hdiam
 
 /-- Entrywise spatial boundedness and Holder control package as existential vector-valued
 parabolic `C^{0,α}` control for the time-independent lift. -/
@@ -954,6 +1032,84 @@ theorem matrix_of_fst_lipschitzOnWith_with_of_parabolicDistance_le_one {m n A : 
     (Finset.sum_nonneg fun i _hi =>
       Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j))
     hα_nonneg hα_le_two hdiam
+
+/-- On a subset of a closed parabolic ball of diameter at most one, entrywise time-only Lipschitz
+control packages a finite vector-valued coefficient family as an explicit parabolic `C^{0,α}`
+estimate for every `0 ≤ α ≤ 2`. -/
+theorem vector_of_fst_lipschitzOnWith_with_of_subset_closedBall {n A : Type*}
+    [Fintype n] [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0}
+    {v : ℝ → n → A} {R : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖v t i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun t => v t i) (Prod.fst '' s))
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, (K i : ℝ)) α
+      (fun z : ℝ × X => v z.1) s := by
+  have hbase := vector_of_fst_lipschitzOnWith_with hB_nonneg hB hL
+  exact hbase.mono_exponent_of_subset_closedBall
+    (Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i))
+    hα_nonneg hα_le_two hs hR
+
+/-- On a subset of a closed parabolic cylinder of diameter at most one, entrywise time-only
+Lipschitz control packages a finite vector-valued coefficient family as an explicit parabolic
+`C^{0,α}` estimate for every `0 ≤ α ≤ 2`. -/
+theorem vector_of_fst_lipschitzOnWith_with_of_subset_closedCylinder {n A : Type*}
+    [Fintype n] [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0}
+    {v : ℝ → n → A} {timeRadius spaceRadius : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖v t i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun t => v t i) (Prod.fst '' s))
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, (K i : ℝ)) α
+      (fun z : ℝ × X => v z.1) s := by
+  have hbase := vector_of_fst_lipschitzOnWith_with hB_nonneg hB hL
+  exact hbase.mono_exponent_of_subset_closedCylinder
+    (Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i))
+    hα_nonneg hα_le_two hs hdiam
+
+/-- On a subset of a closed parabolic ball of diameter at most one, entrywise time-only Lipschitz
+control packages a finite matrix-valued coefficient family as an explicit parabolic `C^{0,α}`
+estimate for every `0 ≤ α ≤ 2`. -/
+theorem matrix_of_fst_lipschitzOnWith_with_of_subset_closedBall {m n A : Type*}
+    [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : ℝ → Matrix m n A} {R : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖M t i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun t => M t i j) (Prod.fst '' s))
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, (K i j : ℝ)) α
+      (fun z : ℝ × X => M z.1) s := by
+  have hbase := matrix_of_fst_lipschitzOnWith_with hB_nonneg hB hL
+  exact hbase.mono_exponent_of_subset_closedBall
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j))
+    hα_nonneg hα_le_two hs hR
+
+/-- On a subset of a closed parabolic cylinder of diameter at most one, entrywise time-only
+Lipschitz control packages a finite matrix-valued coefficient family as an explicit parabolic
+`C^{0,α}` estimate for every `0 ≤ α ≤ 2`. -/
+theorem matrix_of_fst_lipschitzOnWith_with_of_subset_closedCylinder {m n A : Type*}
+    [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : ℝ → Matrix m n A} {timeRadius spaceRadius : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖M t i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun t => M t i j) (Prod.fst '' s))
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, (K i j : ℝ)) α
+      (fun z : ℝ × X => M z.1) s := by
+  have hbase := matrix_of_fst_lipschitzOnWith_with hB_nonneg hB hL
+  exact hbase.mono_exponent_of_subset_closedCylinder
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j))
+    hα_nonneg hα_le_two hs hdiam
 
 /-- Entrywise time-only boundedness and Holder control package as existential vector-valued
 parabolic `C^{0,α}` control. -/
