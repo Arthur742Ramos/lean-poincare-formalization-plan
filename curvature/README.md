@@ -1113,7 +1113,8 @@ entrywise `ParabolicC0AlphaOn` controls sharing the same compact determinant
 lower bound, with matching spatial-Hölder, unit-diameter, closed-ball, and
 closed-cylinder spatial-Lipschitz Gram-entry forms for the inverse-Gram,
 inverse-Gram vector/vector-inverse product, inverse-Gram bilinear,
-inverse-principal, and schematic RHS bridges, quantitative finite-family
+inverse-principal, inverse-Gram Christoffel, and schematic RHS bridges,
+quantitative finite-family
 inverse-Gram vector/vector-inverse product, bilinear, inverse-principal, and
 inverse-Christoffel bridges sharing
 that same lower bound, with the quantitative vector/vector-inverse product and

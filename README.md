@@ -558,8 +558,8 @@ packages the canonical stationary local solution attached to
   schematic RHS handoffs from entrywise `ParabolicC0AlphaOn` controls sharing the same
   compact determinant lower bound, with the inverse-Gram, inverse-Gram
   vector/vector-inverse product, inverse-Gram bilinear, inverse-principal, and
-  schematic RHS handoffs now also accepting those same Gram-entry input forms,
-  quantitative
+  inverse-Gram Christoffel, and schematic RHS handoffs now also accepting those
+  same Gram-entry input forms, quantitative
   finite-family inverse-Gram
   vector/vector-inverse product, bilinear, inverse-principal, and
   inverse-Christoffel handoffs sharing that same compact determinant lower

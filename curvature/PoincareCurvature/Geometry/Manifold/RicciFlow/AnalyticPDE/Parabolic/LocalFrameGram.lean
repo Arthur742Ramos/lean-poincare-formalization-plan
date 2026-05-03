@@ -2014,6 +2014,187 @@ theorem localFrameGramMatrix_inv_christoffel_family_of_entries_of_timeSpace_isCo
       (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
     (D := D r) (hG r) (hD r) hδpos (hdet r)
 
+/-- Finite-family spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_inv_christoffel_family_of_entries_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_christoffel_family_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {GB GH : ρ → ι → ι → ℝ}
+    (hGB : ∀ r i j, 0 ≤ GB r i j)
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hGbound : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤
+        GB r i j)
+    (hGholder : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) y i j‖ ≤
+        GH r i j * (dist x y) ^ α)
+    {D : ρ → ℝ × M → ι → ι → ι → ℝ}
+    (hD : ∀ r i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D r z i j k) K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z i j k =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                    Matrix ι ι ℝ) i l *
+                  (D r z j k l + D r z k j l - D r z l j k)) K := by
+  refine localFrameGramMatrix_inv_christoffel_family_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_ hD
+  intro r i j
+  exact of_snd_holder (s := K) (α := α)
+    (hGB r i j) (hGH r i j) hα (hGbound r i j) (hGholder r i j)
+
+/-- Finite-family unit-diameter spatial-Lipschitz Gram-entry variant of
+`localFrameGramMatrix_inv_christoffel_family_of_entries_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_christoffel_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {GB : ρ → ι → ι → ℝ} {Lgram : ρ → ι → ι → ℝ≥0}
+    (hGB_nonneg : ∀ r i j, 0 ≤ GB r i j)
+    (hGbound : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤
+        GB r i j)
+    (hL : ∀ r i j,
+      LipschitzOnWith (Lgram r i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1)
+    {D : ρ → ℝ × M → ι → ι → ι → ℝ}
+    (hD : ∀ r i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D r z i j k) K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z i j k =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                    Matrix ι ι ℝ) i l *
+                  (D r z j k l + D r z k j l - D r z l j k)) K := by
+  refine localFrameGramMatrix_inv_christoffel_family_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_ hD
+  intro r i j
+  exact of_snd_lipschitzOnWith_of_parabolicDistance_le_one
+    (s := K) (α := α) (B := GB r i j) (K := Lgram r i j)
+    hα_nonneg hα_le_one (hGB_nonneg r i j) (hGbound r i j) (hL r i j) hdiam
+
+/-- Finite-family closed-parabolic-ball spatial-Lipschitz Gram-entry variant of
+`localFrameGramMatrix_inv_christoffel_family_of_entries_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_christoffel_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedBall
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α R : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {GB : ρ → ι → ι → ℝ} {Lgram : ρ → ι → ι → ℝ≥0}
+    (hGB_nonneg : ∀ r i j, 0 ≤ GB r i j)
+    (hGbound : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤
+        GB r i j)
+    (hL : ∀ r i j,
+      LipschitzOnWith (Lgram r i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1)
+    {D : ρ → ℝ × M → ι → ι → ι → ℝ}
+    (hD : ∀ r i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D r z i j k) K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z i j k =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                    Matrix ι ι ℝ) i l *
+                  (D r z j k l + D r z k j l - D r z l j k)) K := by
+  exact
+    localFrameGramMatrix_inv_christoffel_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_nonneg hα_le_one hKbase
+      hGB_nonneg hGbound hL
+      (by
+        intro p hp q hq
+        exact parabolicClosedBall.pair_parabolicDistance_le_one (hs hp) (hs hq) hR)
+      hD
+
+/-- Finite-family closed-parabolic-cylinder spatial-Lipschitz Gram-entry variant of
+`localFrameGramMatrix_inv_christoffel_family_of_entries_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_christoffel_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedCylinder
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α timeRadius spaceRadius : ℝ} {c : ℝ × M}
+    (hK : IsCompact K) (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {GB : ρ → ι → ι → ℝ} {Lgram : ρ → ι → ι → ℝ≥0}
+    (hGB_nonneg : ∀ r i j, 0 ≤ GB r i j)
+    (hGbound : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤
+        GB r i j)
+    (hL : ∀ r i j,
+      LipschitzOnWith (Lgram r i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1)
+    {D : ρ → ℝ × M → ι → ι → ι → ℝ}
+    (hD : ∀ r i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D r z i j k) K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z i j k =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                    Matrix ι ι ℝ) i l *
+                  (D r z j k l + D r z k j l - D r z l j k)) K := by
+  exact
+    localFrameGramMatrix_inv_christoffel_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_nonneg hα_le_one hKbase
+      hGB_nonneg hGbound hL
+      (by
+        intro p hp q hq
+        exact (parabolicClosedCylinder.pair_parabolicDistance_le (hs hp) (hs hq)).trans hdiam)
+      hD
+
 /-- A finite family of inverse-Gram Christoffel-type arrays has explicit bounded parabolic
 `C^{0,α}` estimates from entrywise Gram and derivative-array controls, with one compact Gram
 determinant lower bound shared by the family. -/
