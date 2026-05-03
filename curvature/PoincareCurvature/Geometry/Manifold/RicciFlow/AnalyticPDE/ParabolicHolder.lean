@@ -3784,6 +3784,26 @@ theorem mul_sub_mul {A : Type*} [NormedRing A] {u u' v v' : ℝ × X → A}
       (add_nonneg (mul_nonneg hBdu hHv) (mul_nonneg hBv hHdu))
   · exact hBHu.mul_sub_mul hBHv hBHdu hBHdv hBu hBdu
 
+/-- Finite sums of product differences preserve existential parabolic `C^{0,α}` control from
+factorwise controls and factor-difference controls. -/
+theorem finset_sum_mul_sub_sum_mul {ι A : Type*} [NormedRing A] (S : Finset ι)
+    {u u' v v' : ι → ℝ × X → A}
+    (hu : ∀ i ∈ S, ParabolicC0AlphaOn α (u i) s)
+    (hv' : ∀ i ∈ S, ParabolicC0AlphaOn α (v' i) s)
+    (hdu : ∀ i ∈ S, ParabolicC0AlphaOn α (fun z => u i z - u' i z) s)
+    (hdv : ∀ i ∈ S, ParabolicC0AlphaOn α (fun z => v i z - v' i z) s) :
+    ParabolicC0AlphaOn α
+      (fun z => (∑ i ∈ S, u i z * v i z) - ∑ i ∈ S, u' i z * v' i z) s := by
+  classical
+  have hterm : ∀ i ∈ S,
+      ParabolicC0AlphaOn α (fun z => u i z * v i z - u' i z * v' i z) s := by
+    intro i hi
+    exact (hu i hi).mul_sub_mul (hv' i hi) (hdu i hi) (hdv i hi)
+  have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s) S hterm
+  convert hsum using 1
+  ext z
+  rw [Finset.sum_sub_distrib]
+
 theorem div {𝕜 : Type*} [NormedField 𝕜] {a b : ℝ × X → 𝕜} {δ : ℝ}
     (ha : ParabolicC0AlphaOn α a s) (hb : ParabolicC0AlphaOn α b s)
     (hδpos : 0 < δ) (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖) :

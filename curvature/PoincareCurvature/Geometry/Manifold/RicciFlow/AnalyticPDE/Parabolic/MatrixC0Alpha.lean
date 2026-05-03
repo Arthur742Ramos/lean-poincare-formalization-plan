@@ -6199,22 +6199,22 @@ theorem matrix_inv_christoffel_entry_sub_entrywise {n 𝕜 : Type*} [Fintype n]
     ext z
     simp [comboD, comboE]
     abel
-  have hterm : ∀ l ∈ (Finset.univ : Finset n),
-      ParabolicC0AlphaOn α
-        (fun z => invM l z * comboD l z - invN l z * comboE l z) s := by
-    intro l hl
-    have hinvM : ParabolicC0AlphaOn α (invM l) s := by
-      simpa [invM] using matrix_inv_entry (M := M) hM hδpos hdetM i l
-    have hinvDiff : ParabolicC0AlphaOn α (fun z => invM l z - invN l z) s := by
-      simpa [invM, invN] using
-        matrix_inv_entry_sub (M := M) (N := N)
-          hM hN hMdiff hδpos hdetM hdetN i l
-    simpa [invM, invN, comboD, comboE] using
-      hinvM.mul_sub_mul (hcomboE l hl) hinvDiff (hcomboDiff l hl)
-  have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
-    (S := (Finset.univ : Finset n))
-    (u := fun l z => invM l z * comboD l z - invN l z * comboE l z)
-    hterm
+  have hsum : ParabolicC0AlphaOn α
+      (fun z =>
+        (∑ l : n, invM l z * comboD l z) - ∑ l : n, invN l z * comboE l z) s := by
+    simpa using
+      (ParabolicC0AlphaOn.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun l z => invM l z) (u' := fun l z => invN l z)
+        (v := fun l z => comboD l z) (v' := fun l z => comboE l z)
+        (fun l _hl => by
+          simpa [invM] using matrix_inv_entry (M := M) hM hδpos hdetM i l)
+        hcomboE
+        (fun l _hl => by
+          simpa [invM, invN] using
+            matrix_inv_entry_sub (M := M) (N := N)
+              hM hN hMdiff hδpos hdetM hdetN i l)
+        hcomboDiff)
   have hhalf := hsum.smul ((2 : 𝕜)⁻¹)
   convert hhalf using 1
   · ext z
@@ -7416,31 +7416,21 @@ theorem matrix_inv_two_index_contract_entry_sub_entrywise {n p q 𝕜 : Type*}
           (∑ b : n, invM a b z * coeffT a b z) -
             ∑ b : n, invN a b z * coeffU a b z) s := by
     intro a _ha
-    have hterm : ∀ b ∈ (Finset.univ : Finset n),
-        ParabolicC0AlphaOn α
-          (fun z => invM a b z * coeffT a b z - invN a b z * coeffU a b z) s := by
-      intro b _hb
-      have hinvM : ParabolicC0AlphaOn α (invM a b) s := by
-        simpa [invM] using matrix_inv_entry (M := M) hM hδpos hdetM a b
-      have hinvDiff :
-          ParabolicC0AlphaOn α (fun z => invM a b z - invN a b z) s := by
-        simpa [invM, invN] using
-          matrix_inv_entry_sub (M := M) (N := N)
-            hM hN hMdiff hδpos hdetM hdetN a b
-      have hcoeffU : ParabolicC0AlphaOn α (coeffU a b) s := by
-        simpa [coeffU] using hU a b i j
-      have hcoeffDiff :
-          ParabolicC0AlphaOn α (fun z => coeffT a b z - coeffU a b z) s := by
-        simpa [coeffT, coeffU] using hTdiff a b i j
-      simpa [invM, invN, coeffT, coeffU] using
-        hinvM.mul_sub_mul hcoeffU hinvDiff hcoeffDiff
-    have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
-      (S := (Finset.univ : Finset n))
-      (u := fun b z => invM a b z * coeffT a b z - invN a b z * coeffU a b z)
-      hterm
-    convert hsum using 1
-    · ext z
-      simp [Finset.sum_sub_distrib]
+    simpa using
+      (ParabolicC0AlphaOn.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun b z => invM a b z) (u' := fun b z => invN a b z)
+        (v := fun b z => coeffT a b z) (v' := fun b z => coeffU a b z)
+        (fun b _hb => by
+          simpa [invM] using matrix_inv_entry (M := M) hM hδpos hdetM a b)
+        (fun b _hb => by
+          simpa [coeffU] using hU a b i j)
+        (fun b _hb => by
+          simpa [invM, invN] using
+            matrix_inv_entry_sub (M := M) (N := N)
+              hM hN hMdiff hδpos hdetM hdetN a b)
+        (fun b _hb => by
+          simpa [coeffT, coeffU] using hTdiff a b i j))
   have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
     (S := (Finset.univ : Finset n))
     (u := fun a z =>
@@ -7990,18 +7980,13 @@ theorem christoffel_quadratic_ricci_entry_sub {n A : Type*} [Fintype n] [NormedR
           (∑ b : n, Γ z a i j * Γ z b a b) -
             ∑ b : n, Λ z a i j * Λ z b a b) s := by
     intro a _ha
-    have hterm : ∀ b ∈ (Finset.univ : Finset n),
-        ParabolicC0AlphaOn α
-          (fun z => Γ z a i j * Γ z b a b - Λ z a i j * Λ z b a b) s := by
-      intro b _hb
-      exact (hΓ a i j).mul_sub_mul (hΛ b a b) (hdiff a i j) (hdiff b a b)
-    have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
-      (S := (Finset.univ : Finset n))
-      (u := fun b z => Γ z a i j * Γ z b a b - Λ z a i j * Λ z b a b)
-      hterm
-    convert hsum using 1
-    · ext z
-      simp [Finset.sum_sub_distrib]
+    simpa using
+      (ParabolicC0AlphaOn.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun _b z => Γ z a i j) (u' := fun _b z => Λ z a i j)
+        (v := fun b z => Γ z b a b) (v' := fun b z => Λ z b a b)
+        (fun _b _hb => hΓ a i j) (fun b _hb => hΛ b a b)
+        (fun _b _hb => hdiff a i j) (fun b _hb => hdiff b a b))
   have hleft : ParabolicC0AlphaOn α
       (fun z =>
         (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
@@ -8019,18 +8004,13 @@ theorem christoffel_quadratic_ricci_entry_sub {n A : Type*} [Fintype n] [NormedR
           (∑ b : n, Γ z a i b * Γ z b a j) -
             ∑ b : n, Λ z a i b * Λ z b a j) s := by
     intro a _ha
-    have hterm : ∀ b ∈ (Finset.univ : Finset n),
-        ParabolicC0AlphaOn α
-          (fun z => Γ z a i b * Γ z b a j - Λ z a i b * Λ z b a j) s := by
-      intro b _hb
-      exact (hΓ a i b).mul_sub_mul (hΛ b a j) (hdiff a i b) (hdiff b a j)
-    have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
-      (S := (Finset.univ : Finset n))
-      (u := fun b z => Γ z a i b * Γ z b a j - Λ z a i b * Λ z b a j)
-      hterm
-    convert hsum using 1
-    · ext z
-      simp [Finset.sum_sub_distrib]
+    simpa using
+      (ParabolicC0AlphaOn.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (u := fun b z => Γ z a i b) (u' := fun b z => Λ z a i b)
+        (v := fun b z => Γ z b a j) (v' := fun b z => Λ z b a j)
+        (fun b _hb => hΓ a i b) (fun b _hb => hΛ b a j)
+        (fun b _hb => hdiff a i b) (fun b _hb => hdiff b a j))
   have hright : ParabolicC0AlphaOn α
       (fun z =>
         (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j) -
