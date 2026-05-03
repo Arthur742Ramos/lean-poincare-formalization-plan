@@ -161,7 +161,8 @@ packages the canonical stationary local solution attached to
   routes now expose ordinary theorem-family wrappers alongside the intrinsic
   ones. The derivative-view layer also has fixed-IVP and theorem-family
   closed-Picard handoffs from model-vector-field chart ODE data to the ordinary
-  chart and primitive derivative packages on the open `Ioo` solution interval.
+  chart and primitive derivative packages on the open `Ioo` solution interval,
+  plus ordinary-to-within weakening for chart-ODE derivative data.
   The conditional gauge-reduced package now records the exact non-identity
   gauge obligations whose discharge yields intrinsic and ordinary point-4 theorem
   packages, re-packages the transformed metric as a pulled-back Ricci-DeTurck

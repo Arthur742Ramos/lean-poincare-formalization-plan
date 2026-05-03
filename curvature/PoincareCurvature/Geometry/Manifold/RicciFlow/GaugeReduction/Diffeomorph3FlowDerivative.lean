@@ -435,6 +435,21 @@ theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_derivativeAtOn
   intro t ht x
   exact (hderiv t ht x).hasMFDerivWithinAt
 
+/-- Ordinary preferred-chart ODE data on `s` immediately gives the within-set
+preferred-chart ODE data used by the primitive gauge-flow API. -/
+theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.of_chartDerivativeAtOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  exact ⟨nhdsWithin_le_nhds (hchart t ht x).1,
+    (hchart t ht x).2.hasDerivWithinAt⟩
+
 /-- Within-time-set derivative data gives ordinary-at-time data whenever the
 time set is a neighborhood of each of its times. -/
 theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_derivativeOn
@@ -801,6 +816,21 @@ theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_chartDerivative
   intro sol
   exact Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_chartDerivativeOn
     (I := I) (M := M) (hchart sol) (htime sol)
+
+/-- Ordinary preferred-chart ODE data gives the within-time-set chart package
+expected by derivative-level gauge-reduction APIs. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivative_of_chartDerivativeAt
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAt
+      (I := I) (M := M) ivp maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivative
+      (I := I) (M := M) ivp maps3 := by
+  intro sol
+  exact Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.of_chartDerivativeAtOn
+    (I := I) (M := M) (hchart sol)
 
 /-- Fixed-IVP closed-Picard primitive derivative data gives ordinary-at-time
 derivative data on the chosen open solution time set. -/
@@ -1385,6 +1415,21 @@ theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily_of_chartDerivativ
   intro ivp sol
   exact Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_chartDerivativeOn
     (I := I) (M := M) (hchart ivp sol) (htime ivp sol)
+
+/-- Ordinary preferred-chart ODE-family data gives the within-time-set chart
+package expected by derivative-level gauge-reduction APIs. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily_of_chartDerivativeAtFamily
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (hchart : ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily
+      (I := I) (M := M) maps3) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp
+  exact chosenIntrinsicDeTurckGaugeFlowChartDerivative_of_chartDerivativeAt
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3 ivp) (hchart ivp)
 
 /-- Family-level closed-Picard primitive derivative data gives ordinary-at-time
 derivative data on each chosen open solution time set. -/

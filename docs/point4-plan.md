@@ -859,7 +859,10 @@ continuity and convert directly to primitive intrinsic manifold derivative data
 in both within-time-set and ordinary-at-time forms, with fixed-IVP and
 theorem-family lifts; the existence-layer derivative readouts now use that
 direct chart-to-manifold bridge instead of passing through a raw gauge-flow
-witness first.
+witness first. Ordinary-at-time chart-ODE data can now also be weakened back to
+the within-time-set chart package, mirroring the existing primitive derivative
+weakening and letting callers choose either endpoint package shape without
+reproving source-neighborhood or derivative facts.
 The primitive derivative views now also round-trip with the geometric
 `SatisfiesGaugeFlowOn` equation, both for fixed-IVP packages and theorem
 families, so either formulation can be recovered without rebuilding the
