@@ -1427,7 +1427,9 @@ inverse Gram, inverse-principal, inverse-Gram Christoffel, and schematic RHS
 bridges, and inverse Gram, inverse-principal contraction, inverse-Gram
 Christoffel, and schematic RHS bounded-difference bridges against comparison
 primitive inputs, all with matching spatial-Hölder Gram-entry input forms where
-applicable.
+applicable; the schematic RHS comparison and entrywise-difference `C^{0,α}`
+bridges now also have unit-diameter, closed-ball, and closed-cylinder
+spatial-Lipschitz Gram-entry variants for `0 < α ≤ 1`.
 The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
