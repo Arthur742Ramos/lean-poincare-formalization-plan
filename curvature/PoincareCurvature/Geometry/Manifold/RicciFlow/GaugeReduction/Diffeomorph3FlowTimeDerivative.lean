@@ -11535,6 +11535,39 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference
       (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht) hdata
 
 /-- Closed-Picard-interval specialization of
+`hasTimeDerivativeOn_of_metricCoordinateField_timeDifference` when the ordinary
+time-difference data is supplied on the full closed interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference_Icc
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : MetricCoordinateFieldTimeDifferenceComponentDataOn
+      (I := I) (M := M) G g gdot) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference
+    (MetricCoordinateFieldTimeDifferenceComponentDataOn.mono
+      (I := I) (M := M) G (fun _ ht ↦ Ioo_subset_Icc_self ht) hdata)
+
+/-- Direct-velocity closed-Picard-interval specialization of
+`hasTimeDerivativeOn_of_metricCoordinateField_timeDifference` when the ordinary
+time-difference data is supplied on the full closed interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference_Icc_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : MetricCoordinateFieldTimeDifferenceComponentDataOnSelf
+      (I := I) (M := M) G g gdot) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference_Icc
+    (G.metricCoordinateFieldTimeDifferenceComponentDataOn_of_self hdata)
+
+/-- Closed-Picard-interval specialization of
 `hasTimeDerivativeOn_of_metricCoordinateField_hasFDerivAt` on the open interior
 interval. -/
 theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt

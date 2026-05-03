@@ -586,6 +586,9 @@ The ordinary and within-set time-difference component packages, including their
 direct-velocity variants, now also restrict monotonically along raw gauge-flow
 time-set shrinkage, so closed-Picard localizations can be applied before this
 remaining scalar input is converted to component derivative data.
+The closed-Picard ordinary time-difference tensor route now also has centered
+and direct-velocity variants that accept this data on the full raw `Icc`
+interval and perform the open-interior restriction internally.
 The variational tangent-map endpoints for this time-difference formulation now
 also have ordinary and closed-interval direct-velocity wrappers, so the
 variational ODE still fills the tangent-map derivative while the scalar

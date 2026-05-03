@@ -256,7 +256,9 @@ packages the canonical stationary local solution attached to
   metric-coordinate gauge-pullback route now also consumes product
   Picard-Lindelof hypotheses directly, including open-domain and
   radius-specialized endpoint forms, and its time-difference component data
-  now localizes monotonically under raw gauge-flow time-set restriction;
+  now localizes monotonically under raw gauge-flow time-set restriction, with
+  closed-Picard ordinary time-difference tensor wrappers that accept full-`Icc`
+  data directly;
   model-flow overlap uniqueness now also
   covers common closed subintervals of different ambient Picard intervals for
   local, continuous space-time, full variational `(flow, tangent)`, and
