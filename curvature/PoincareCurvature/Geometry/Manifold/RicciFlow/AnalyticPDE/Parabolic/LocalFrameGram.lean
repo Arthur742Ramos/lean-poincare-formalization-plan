@@ -474,6 +474,132 @@ theorem localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_spatial_holder_of_t
   · intro z hz a c
     exact hGbound a c ⟨z, hz, rfl⟩
 
+/-- Unit-diameter spatial-Lipschitz local-frame bridge for the function-level bounded difference
+of inverse Gram matrices. -/
+theorem localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {ηG : ℝ} {Lgram : ι → ι → ℝ≥0}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG) :
+    ∃ δ > 0,
+      ParabolicBoundedWith (matrixInvMatrixNormLipschitzConst (𝕜 := ℝ) δ C * ηG)
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  refine localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hα_pos hKbase ?_ hNctrl hdetN_ne ?_
+    hNbound hGdiff
+  · intro i j
+    exact of_snd_lipschitzOnWith_of_parabolicDistance_le_one
+      (s := K) (α := α) (B := C i j) (K := Lgram i j)
+      hα_pos.le hα_le_one (hC_nonneg i j) (hGbound i j) (hL i j) hdiam
+  · intro z hz a c
+    exact hGbound a c ⟨z, hz, rfl⟩
+
+/-- Closed-parabolic-ball spatial-Lipschitz local-frame bridge for the function-level bounded
+difference of inverse Gram matrices. -/
+theorem localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedBall
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α R : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {ηG : ℝ} {Lgram : ι → ι → ℝ≥0}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG) :
+    ∃ δ > 0,
+      ParabolicBoundedWith (matrixInvMatrixNormLipschitzConst (𝕜 := ℝ) δ C * ηG)
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  exact
+    localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase
+      hC_nonneg hNctrl hdetN_ne hGbound hL
+      (by
+        intro p hp q hq
+        exact parabolicClosedBall.pair_parabolicDistance_le_one (hs hp) (hs hq) hR)
+      hNbound hGdiff
+
+/-- Closed-parabolic-cylinder spatial-Lipschitz local-frame bridge for the function-level bounded
+difference of inverse Gram matrices. -/
+theorem localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedCylinder
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α timeRadius spaceRadius : ℝ} {c : ℝ × M}
+    (hK : IsCompact K) (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {ηG : ℝ} {Lgram : ι → ι → ℝ≥0}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG) :
+    ∃ δ > 0,
+      ParabolicBoundedWith (matrixInvMatrixNormLipschitzConst (𝕜 := ℝ) δ C * ηG)
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  exact
+    localFrameGramMatrix_inv_bounded_sub_le_const_mul_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase
+      hC_nonneg hNctrl hdetN_ne hGbound hL
+      (by
+        intro p hp q hq
+        exact (parabolicClosedCylinder.pair_parabolicDistance_le (hs hp) (hs hq)).trans hdiam)
+      hNbound hGdiff
+
 /-- Compact local-frame bridge for parabolic `C^{0,α}` control of inverse Gram differences,
 comparing the geometric local-frame Gram matrix with an arbitrary comparison matrix input. -/
 theorem localFrameGramMatrix_inv_sub_with_of_timeSpace_isCompact
@@ -643,6 +769,286 @@ theorem localFrameGramMatrix_inv_sub_with_of_spatial_holder_of_timeSpace_isCompa
   intro i j
   exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
     (hGbound i j) (hGH i j) hα.le (hGholder i j)
+
+/-- Unit-diameter spatial-Lipschitz local-frame bridge for entrywise inverse Gram matrix
+differences. -/
+theorem localFrameGramMatrix_inv_sub_with_entrywise_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C Gd GHd : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hGd : ∀ i j, 0 ≤ Gd i j) (hGHd : ∀ i j, 0 ≤ GHd i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1)
+    (hN : ∀ i j, ParabolicC0AlphaWith (C i j) (Lgram i j : ℝ) α
+      (fun z : ℝ × M => N z i j) K)
+    (hGdiff : ∀ i j,
+      ParabolicC0AlphaWith (Gd i j) (GHd i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j - N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvEntrywiseSubBoundConst (𝕜 := ℝ) δ C Gd)
+        (matrixInvEntrywiseSubHolderConst
+          (𝕜 := ℝ) δ C (fun i j => (Lgram i j : ℝ)) Gd GHd)
+        α
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  refine localFrameGramMatrix_inv_sub_with_entrywise_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hα_pos hKbase hC_nonneg
+    (fun i j => NNReal.coe_nonneg (Lgram i j)) hGd hGHd ?_ hN hGdiff hdetN_ne
+  intro i j
+  exact
+    (ParabolicC0AlphaWith.of_snd_lipschitzOnWith (s := K) (B := C i j)
+      (K := Lgram i j)
+      (f := fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+      (hGbound i j) (hL i j)).mono_exponent_of_parabolicDistance_le_one
+        (NNReal.coe_nonneg (Lgram i j)) hα_pos.le hα_le_one hdiam
+
+/-- Closed-parabolic-ball spatial-Lipschitz local-frame bridge for entrywise inverse Gram matrix
+differences. -/
+theorem localFrameGramMatrix_inv_sub_with_entrywise_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedBall
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α R : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C Gd GHd : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hGd : ∀ i j, 0 ≤ Gd i j) (hGHd : ∀ i j, 0 ≤ GHd i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1)
+    (hN : ∀ i j, ParabolicC0AlphaWith (C i j) (Lgram i j : ℝ) α
+      (fun z : ℝ × M => N z i j) K)
+    (hGdiff : ∀ i j,
+      ParabolicC0AlphaWith (Gd i j) (GHd i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j - N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvEntrywiseSubBoundConst (𝕜 := ℝ) δ C Gd)
+        (matrixInvEntrywiseSubHolderConst
+          (𝕜 := ℝ) δ C (fun i j => (Lgram i j : ℝ)) Gd GHd)
+        α
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  exact
+    localFrameGramMatrix_inv_sub_with_entrywise_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase
+      hC_nonneg hGd hGHd hGbound hL
+      (by
+        intro p hp q hq
+        exact parabolicClosedBall.pair_parabolicDistance_le_one (hs hp) (hs hq) hR)
+      hN hGdiff hdetN_ne
+
+/-- Closed-parabolic-cylinder spatial-Lipschitz local-frame bridge for entrywise inverse Gram
+matrix differences. -/
+theorem localFrameGramMatrix_inv_sub_with_entrywise_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedCylinder
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α timeRadius spaceRadius : ℝ} {c : ℝ × M}
+    (hK : IsCompact K) (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C Gd GHd : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hGd : ∀ i j, 0 ≤ Gd i j) (hGHd : ∀ i j, 0 ≤ GHd i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1)
+    (hN : ∀ i j, ParabolicC0AlphaWith (C i j) (Lgram i j : ℝ) α
+      (fun z : ℝ × M => N z i j) K)
+    (hGdiff : ∀ i j,
+      ParabolicC0AlphaWith (Gd i j) (GHd i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j - N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvEntrywiseSubBoundConst (𝕜 := ℝ) δ C Gd)
+        (matrixInvEntrywiseSubHolderConst
+          (𝕜 := ℝ) δ C (fun i j => (Lgram i j : ℝ)) Gd GHd)
+        α
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  exact
+    localFrameGramMatrix_inv_sub_with_entrywise_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase
+      hC_nonneg hGd hGHd hGbound hL
+      (by
+        intro p hp q hq
+        exact (parabolicClosedCylinder.pair_parabolicDistance_le (hs hp) (hs hq)).trans hdiam)
+      hN hGdiff hdetN_ne
+
+/-- Unit-diameter spatial-Lipschitz local-frame bridge for inverse Gram matrix differences. -/
+theorem localFrameGramMatrix_inv_sub_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {ηG : ℝ} {Lgram : ι → ι → ℝ≥0}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1)
+    (hN : ∀ i j, ParabolicC0AlphaWith (C i j) (Lgram i j : ℝ) α
+      (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvSubBoundConst (𝕜 := ℝ) δ C ηG)
+        (matrixInvSubHolderConst (𝕜 := ℝ) δ C (fun i j => (Lgram i j : ℝ)))
+        α
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  refine localFrameGramMatrix_inv_sub_with_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hα_pos hKbase hC_nonneg
+    (fun i j => NNReal.coe_nonneg (Lgram i j)) ?_ hN hdetN_ne hGdiff
+  intro i j
+  exact
+    (ParabolicC0AlphaWith.of_snd_lipschitzOnWith (s := K) (B := C i j)
+      (K := Lgram i j)
+      (f := fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+      (hGbound i j) (hL i j)).mono_exponent_of_parabolicDistance_le_one
+        (NNReal.coe_nonneg (Lgram i j)) hα_pos.le hα_le_one hdiam
+
+/-- Closed-parabolic-ball spatial-Lipschitz local-frame bridge for inverse Gram matrix
+differences. -/
+theorem localFrameGramMatrix_inv_sub_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedBall
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α R : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {ηG : ℝ} {Lgram : ι → ι → ℝ≥0}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1)
+    (hN : ∀ i j, ParabolicC0AlphaWith (C i j) (Lgram i j : ℝ) α
+      (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvSubBoundConst (𝕜 := ℝ) δ C ηG)
+        (matrixInvSubHolderConst (𝕜 := ℝ) δ C (fun i j => (Lgram i j : ℝ)))
+        α
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  exact
+    localFrameGramMatrix_inv_sub_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase
+      hC_nonneg hGbound hL
+      (by
+        intro p hp q hq
+        exact parabolicClosedBall.pair_parabolicDistance_le_one (hs hp) (hs hq) hR)
+      hN hdetN_ne hGdiff
+
+/-- Closed-parabolic-cylinder spatial-Lipschitz local-frame bridge for inverse Gram matrix
+differences. -/
+theorem localFrameGramMatrix_inv_sub_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedCylinder
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α timeRadius spaceRadius : ℝ} {c : ℝ × M}
+    (hK : IsCompact K) (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {ηG : ℝ} {Lgram : ι → ι → ℝ≥0}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1)
+    (hN : ∀ i j, ParabolicC0AlphaWith (C i j) (Lgram i j : ℝ) α
+      (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvSubBoundConst (𝕜 := ℝ) δ C ηG)
+        (matrixInvSubHolderConst (𝕜 := ℝ) δ C (fun i j => (Lgram i j : ℝ)))
+        α
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ) - (N z)⁻¹) K := by
+  exact
+    localFrameGramMatrix_inv_sub_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase
+      hC_nonneg hGbound hL
+      (by
+        intro p hp q hq
+        exact (parabolicClosedCylinder.pair_parabolicDistance_le (hs hp) (hs hq)).trans hdiam)
+      hN hdetN_ne hGdiff
 
 /-- If the local-frame Gram entries and a vector have parabolic `C^{0,α}` control on a compact
 time-space set contained in a trivialization base, then the inverse-Gram vector product has
