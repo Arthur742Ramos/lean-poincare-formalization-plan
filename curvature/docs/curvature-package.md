@@ -159,9 +159,9 @@ inverse-entry, summed whole inverse-matrix, matrix-product,
 inverse-principal entry Lipschitz and bounded Holder entry/matrix estimates,
 inverse-Christoffel derivative/metric-side and
 array-level Lipschitz constants, inverse-Christoffel bounded Holder entry/array
-estimates, and quadratic-Christoffel matrix-norm Lipschitz constants, plus
-supplied-Christoffel and primitive-input schematic RHS entry and whole-matrix
-constants, on entrywise bounded
+estimates, and quadratic-Christoffel matrix-norm Lipschitz and bounded Holder
+entry/matrix estimates, plus supplied-Christoffel and primitive-input schematic
+RHS entry and whole-matrix constants, on entrywise bounded
 finite matrices, using a determinant lower bound for inverse estimates,
 including a compactness bridge from nonvanishing determinants to a uniform
 determinant lower bound and compact-domain inverse-entry, inverse-action,
@@ -176,7 +176,8 @@ including explicit bounded Holder entry and whole-array estimates for
 Christoffel-symbol type inverse-metric contractions and their entrywise/whole-array
 closure, explicit bounded Holder entry/matrix estimates and whole matrix-valued
 principal-part closure for `g^{ab} H_abij`,
-whole matrix-valued Ricci-coordinate quadratic Christoffel contractions, and a
+whole matrix-valued Ricci-coordinate quadratic Christoffel contractions with
+explicit bounded Holder entry/matrix estimates, and a
 whole matrix-valued schematic local Ricci-DeTurck coordinate RHS combining
 those terms, using the finite-product, integer-scalar, reciprocal, and division
 closure layer. The companion
