@@ -562,7 +562,8 @@ packages the canonical stationary local solution attached to
   bound, finite-family schematic RHS difference and bounded-difference control
   against comparison primitive inputs with one lower bound shared by the Gram and
   comparison metric families, including a spatial-Hölder Gram-entry form for the
-  bounded-difference bridge and a unit-diameter spatial-Lipschitz version, and compact
+  bounded-difference bridge, unit-diameter spatial-Lipschitz version, and closed
+  ball/cylinder spatial-Lipschitz variants, and compact
   local-frame inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel arrays, and schematic RHS outputs, including existential
   difference readouts for all four from entrywise controls, and schematic RHS
