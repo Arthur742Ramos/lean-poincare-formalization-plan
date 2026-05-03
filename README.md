@@ -247,7 +247,10 @@ packages the canonical stationary local solution attached to
   expose reusable single-solution and theorem-family endpoint-to-boundary
   derivative adapters, and the raw global/interval non-identity gauge-flow
   time-derivative theorem-family endpoints now consume only endpoint
-  time-derivative data before the gauge-flow conversion; encoded candidates in
+  time-derivative data before the gauge-flow conversion; the closed-Picard
+  metric-coordinate gauge-pullback route now also consumes product
+  Picard-Lindelof hypotheses directly, including open-domain and
+  radius-specialized endpoint forms; encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The
   same state-set mechanism now also has a

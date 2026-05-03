@@ -925,7 +925,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        eventual-membership readouts and direct overlap uniqueness on both
        `Ioo` and `Icc` for that scalar-readout state, plus direct tensor
        time-derivative bridges from continuous product Picard flows to scalar
-       readout hypotheses,
+       readout hypotheses and direct product-Picard-Lindelöf bridges to the
+       closed-Picard metric-coordinate field routes, including the
+       open-product-domain and radius-specialized endpoint forms,
        with an automatic radius-specialized
        constructor when the base radius is bounded by the product radius, plus
        closed-interval localized variants and proof-level `Nonempty` wrappers
