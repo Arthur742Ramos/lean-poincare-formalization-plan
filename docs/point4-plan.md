@@ -1511,8 +1511,9 @@ handoffs from entrywise `ParabolicC0AlphaOn` controls sharing the same compact
 determinant lower bound, quantitative finite-family inverse-Gram
 vector/vector-inverse product, bilinear, inverse-principal, and
 inverse-Christoffel handoffs sharing that same compact determinant lower bound,
-finite-family schematic RHS difference control against comparison primitive
-inputs with one lower bound shared by the Gram and comparison metric families,
+finite-family schematic RHS difference and bounded-difference control against
+comparison primitive inputs with one lower bound shared by the Gram and
+comparison metric families,
 and compact
 local-frame
 inverse Gram, inverse-principal contraction, and inverse-Gram Christoffel
