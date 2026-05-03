@@ -2745,6 +2745,77 @@ theorem hasDerivWithinAt_extChartAt_eval_self
       sol.1.toIntrinsicDeTurckSolution.timeSet t :=
   (G.flow sol).hasDerivWithinAt_extChartAt_eval_self ht x
 
+/-- Fixed-IVP raw intrinsic gauge-flow derivatives can be rewritten to a
+relative-neighborhood-equal vector field. -/
+theorem hasMFDerivWithinAt_congr_vectorField
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow sol).maps3 τ) x) =
+        Y τ (((G.flow sol).maps3 τ) x))
+    (x : M) :
+    HasMFDerivAt[sol.1.toIntrinsicDeTurckSolution.timeSet]
+      (fun τ : ℝ ↦ ((G.flow sol).maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (((G.flow sol).maps3 t) x))) :=
+  (G.flow sol).hasMFDerivWithinAt_congr_vectorField ht hXY x
+
+/-- Fixed-IVP raw intrinsic gauge-flow preferred-chart derivatives can be
+rewritten to a relative-neighborhood-equal vector field. -/
+theorem hasDerivWithinAt_extChartAt_eval_congr_vectorField
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow sol).maps3 τ) x) =
+        Y τ (((G.flow sol).maps3 τ) x))
+    (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow sol).maps3 t) x))
+        (((G.flow sol).maps3 τ) x))
+      (tangentCoordChange I (((G.flow sol).maps3 t) x) (((G.flow sol).maps3 t) x)
+        (((G.flow sol).maps3 t) x) (Y t (((G.flow sol).maps3 t) x)))
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.flow sol).hasDerivWithinAt_extChartAt_eval_congr_vectorField ht hXY x
+
+/-- Fixed-IVP raw intrinsic gauge-flow centered preferred-chart derivatives can
+be rewritten to a relative-neighborhood-equal vector field. -/
+theorem hasDerivWithinAt_extChartAt_eval_self_congr_vectorField
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow sol).maps3 τ) x) =
+        Y τ (((G.flow sol).maps3 τ) x))
+    (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow sol).maps3 t) x))
+        (((G.flow sol).maps3 τ) x))
+      (Y t (((G.flow sol).maps3 t) x))
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.flow sol).hasDerivWithinAt_extChartAt_eval_self_congr_vectorField ht hXY x
+
 /-- Fixed-IVP raw intrinsic gauge-flow curves are continuous within the solution
 time set in preferred chart coordinates. -/
 theorem continuousWithinAt_extChartAt_eval
@@ -4129,6 +4200,80 @@ theorem hasDerivWithinAt_extChartAt_eval_self
           (((G.flow ivp sol).maps3 t) x))
       sol.1.toIntrinsicDeTurckSolution.timeSet t :=
   (G.forInitialValueProblem ivp).hasDerivWithinAt_extChartAt_eval_self sol ht x
+
+/-- Theorem-family raw intrinsic gauge-flow derivatives can be rewritten to a
+relative-neighborhood-equal vector field. -/
+theorem hasMFDerivWithinAt_congr_vectorField
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow ivp sol).maps3 τ) x) =
+        Y τ (((G.flow ivp sol).maps3 τ) x))
+    (x : M) :
+    HasMFDerivAt[sol.1.toIntrinsicDeTurckSolution.timeSet]
+      (fun τ : ℝ ↦ ((G.flow ivp sol).maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (((G.flow ivp sol).maps3 t) x))) :=
+  (G.forInitialValueProblem ivp).hasMFDerivWithinAt_congr_vectorField sol ht hXY x
+
+/-- Theorem-family raw intrinsic gauge-flow preferred-chart derivatives can be
+rewritten to a relative-neighborhood-equal vector field. -/
+theorem hasDerivWithinAt_extChartAt_eval_congr_vectorField
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow ivp sol).maps3 τ) x) =
+        Y τ (((G.flow ivp sol).maps3 τ) x))
+    (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow ivp sol).maps3 t) x))
+        (((G.flow ivp sol).maps3 τ) x))
+      (tangentCoordChange I (((G.flow ivp sol).maps3 t) x)
+        (((G.flow ivp sol).maps3 t) x) (((G.flow ivp sol).maps3 t) x)
+        (Y t (((G.flow ivp sol).maps3 t) x)))
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.forInitialValueProblem ivp).hasDerivWithinAt_extChartAt_eval_congr_vectorField
+    sol ht hXY x
+
+/-- Theorem-family raw intrinsic gauge-flow centered preferred-chart
+derivatives can be rewritten to a relative-neighborhood-equal vector field. -/
+theorem hasDerivWithinAt_extChartAt_eval_self_congr_vectorField
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow ivp sol).maps3 τ) x) =
+        Y τ (((G.flow ivp sol).maps3 τ) x))
+    (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow ivp sol).maps3 t) x))
+        (((G.flow ivp sol).maps3 τ) x))
+      (Y t (((G.flow ivp sol).maps3 t) x))
+      sol.1.toIntrinsicDeTurckSolution.timeSet t :=
+  (G.forInitialValueProblem ivp).hasDerivWithinAt_extChartAt_eval_self_congr_vectorField
+    sol ht hXY x
 
 /-- Theorem-family raw intrinsic gauge-flow curves are continuous within the
 solution time set in preferred chart coordinates. -/
