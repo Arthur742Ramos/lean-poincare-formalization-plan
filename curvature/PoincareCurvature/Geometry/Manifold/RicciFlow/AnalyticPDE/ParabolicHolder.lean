@@ -1030,6 +1030,46 @@ def ParabolicC0AlphaOn {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E
     (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
   ∃ B ≥ 0, ∃ H ≥ 0, ParabolicC0AlphaWith B H α u s
 
+/-- The reciprocal map is Lipschitz on the set where the norm is bounded below by a
+positive constant.  This scalar estimate is the local model behind reciprocal and inverse-metric
+Lipschitz bounds in chart estimates. -/
+theorem lipschitzOnWith_inv_of_norm_ge {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ}
+    (hδpos : 0 < δ) :
+    LipschitzOnWith
+      ⟨δ⁻¹ * δ⁻¹, mul_nonneg (inv_nonneg.mpr hδpos.le) (inv_nonneg.mpr hδpos.le)⟩
+      (fun a : 𝕜 => a⁻¹) {a : 𝕜 | δ ≤ ‖a‖} := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro a ha b hb
+  have ha_pos : 0 < ‖a‖ := lt_of_lt_of_le hδpos ha
+  have hb_pos : 0 < ‖b‖ := lt_of_lt_of_le hδpos hb
+  have ha_ne : a ≠ 0 := norm_pos_iff.mp ha_pos
+  have hb_ne : b ≠ 0 := norm_pos_iff.mp hb_pos
+  have hinvδ_nonneg : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  have haina : ‖a⁻¹‖ ≤ δ⁻¹ := by
+    rw [norm_inv]
+    exact (inv_le_inv₀ ha_pos hδpos).2 ha
+  have hinvb : ‖b⁻¹‖ ≤ δ⁻¹ := by
+    rw [norm_inv]
+    exact (inv_le_inv₀ hb_pos hδpos).2 hb
+  have hsplit : a⁻¹ - b⁻¹ = -(a⁻¹ * (a - b) * b⁻¹) := by
+    field_simp [ha_ne, hb_ne]
+    ring
+  calc
+    dist (a⁻¹) (b⁻¹) = ‖a⁻¹ - b⁻¹‖ := by rw [dist_eq_norm]
+    _ = ‖-(a⁻¹ * (a - b) * b⁻¹)‖ := by rw [hsplit]
+    _ = ‖a⁻¹ * (a - b) * b⁻¹‖ := norm_neg _
+    _ ≤ ‖a⁻¹‖ * ‖a - b‖ * ‖b⁻¹‖ := by
+      calc
+        ‖a⁻¹ * (a - b) * b⁻¹‖ ≤ ‖a⁻¹ * (a - b)‖ * ‖b⁻¹‖ := norm_mul_le _ _
+        _ ≤ (‖a⁻¹‖ * ‖a - b‖) * ‖b⁻¹‖ :=
+          mul_le_mul_of_nonneg_right (norm_mul_le _ _) (norm_nonneg _)
+    _ ≤ δ⁻¹ * ‖a - b‖ * δ⁻¹ := by
+      have hleft : ‖a⁻¹‖ * ‖a - b‖ ≤ δ⁻¹ * ‖a - b‖ :=
+        mul_le_mul_of_nonneg_right haina (norm_nonneg _)
+      exact mul_le_mul hleft hinvb (norm_nonneg _)
+        (mul_nonneg hinvδ_nonneg (norm_nonneg _))
+    _ = (δ⁻¹ * δ⁻¹) * dist a b := by rw [dist_eq_norm]; ring
+
 namespace ParabolicHolderWith
 
 variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
