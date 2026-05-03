@@ -89,6 +89,39 @@ theorem localFrameGramMatrix_inv_of_spatial_holder_of_timeSpace_isCompact
   exact of_snd_holder (s := K) (α := α)
     (hB_nonneg i j) (hH_nonneg i j) hα (hB i j) (hholder i j)
 
+/-- On a unit parabolic-diameter compact time-space set, spatial Lipschitz estimates for
+local-frame Gram entries lower to parabolic `C^{0,α}` estimates for every `0 ≤ α ≤ 1`,
+and hence give parabolic control of the inverse Gram matrix. -/
+theorem localFrameGramMatrix_inv_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {B : ι → ι → ℝ} {L : ι → ι → ℝ≥0}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ B i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (L i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        ((show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+          Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_inv_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_
+  intro i j
+  exact of_snd_lipschitzOnWith_of_parabolicDistance_le_one
+    (s := K) (α := α) (B := B i j) (K := L i j)
+    hα_nonneg hα_le_one (hB_nonneg i j) (hB i j) (hL i j) hdiam
+
 /-- Quantitative compact local-frame bridge for the inverse Gram matrix.  The geometric Gram
 determinant theorem supplies a positive determinant lower bound `δ`, and the finite-dimensional
 matrix inverse estimate exposes explicit bounded `C^{0,α}` constants. -/
@@ -160,6 +193,50 @@ theorem localFrameGramMatrix_inv_with_of_spatial_holder_of_timeSpace_isCompact
   intro i j
   exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
     (hB i j) (hGH i j) hα (hholder i j)
+
+/-- Quantitative unit-diameter spatial-Lipschitz local-frame bridge for inverse Gram matrices.
+The Lipschitz constants become the explicit parabolic Holder constants after lowering to any
+`0 ≤ α ≤ 1`. -/
+theorem localFrameGramMatrix_inv_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ i : ι, ∑ j : ι, matrixInvEntryBoundConst (𝕜 := ℝ) δ GB i j)
+        (∑ i : ι, ∑ j : ι,
+          matrixInvEntryHolderConst (𝕜 := ℝ) δ GB
+            (fun i j => (Lgram i j : ℝ)) i j)
+        α
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_inv_with_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase (fun i j => NNReal.coe_nonneg (Lgram i j)) ?_
+  intro i j
+  exact
+    (ParabolicC0AlphaWith.of_snd_lipschitzOnWith (s := K) (B := GB i j)
+      (K := Lgram i j)
+      (f := fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+      (hB i j) (hL i j)).mono_exponent_of_parabolicDistance_le_one
+        (NNReal.coe_nonneg (Lgram i j)) hα_nonneg hα_le_one hdiam
 
 /-- Compact local-frame bridge for the function-level bounded difference of inverse Gram
 matrices, comparing the geometric local-frame Gram matrix with an arbitrary comparison matrix
@@ -1957,6 +2034,55 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_of_spatial_holder_of_timeSpa
   exact of_snd_holder (s := K) (α := α)
     (hB_nonneg i j) (hHgram_nonneg i j) hα (hB i j) (hholder i j)
 
+/-- On a unit parabolic-diameter compact time-space set, spatial Lipschitz Gram-entry estimates,
+together with parabolic control of the first- and second-derivative coefficient arrays, give
+parabolic `C^{0,α}` control of the schematic local Ricci-DeTurck RHS for every `0 ≤ α ≤ 1`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {B : ι → ι → ℝ} {L : ι → ι → ℝ≥0}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ B i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (L i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D z i j k) K)
+    (hHc : ∀ a c i j, ParabolicC0AlphaOn α (fun z : ℝ × M => Hc z a c i j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        (fun i j =>
+          let Γ : ι → ι → ι → ℝ := fun a c d =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a l *
+                  (D z c d l + D z d c l - D z l c d)
+          (∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) +
+            ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+              (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+          Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_ricciDeTurck_schematic_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_ hD hHc
+  intro i j
+  exact of_snd_lipschitzOnWith_of_parabolicDistance_le_one
+    (s := K) (α := α) (B := B i j) (K := L i j)
+    hα_nonneg hα_le_one (hB_nonneg i j) (hB i j) (hL i j) hdiam
+
 /-- Quantitative compact local-frame bridge for the schematic local Ricci-DeTurck coordinate
 right-hand side.  The geometric Gram determinant theorem supplies a positive determinant lower
 bound `δ`, and the finite-dimensional parabolic estimate exposes the corresponding explicit
@@ -2098,6 +2224,85 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_with_of_spatial_holder_of_ti
   intro i j
   exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
     (hB i j) (hGH i j) hα (hholder i j)
+
+/-- Quantitative unit-diameter spatial-Lipschitz local-frame bridge for the schematic
+Ricci-DeTurck RHS.  The Gram-entry Lipschitz constants serve as the explicit parabolic Holder
+constants after lowering to any exponent `0 ≤ α ≤ 1`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    {DB DH : ι → ι → ι → ℝ} {HB HH : ι → ι → ι → ι → ℝ}
+    (hDB : ∀ i j k, 0 ≤ DB i j k) (hDH : ∀ i j k, 0 ≤ DH i j k)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j) (hHH : ∀ a c i j, 0 ≤ HH a c i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hDctrl : ∀ i j k,
+      ParabolicC0AlphaWith (DB i j k) (DH i j k) α (fun z : ℝ × M => D z i j k) K)
+    (hHc : ∀ a c i j,
+      ParabolicC0AlphaWith (HB a c i j) (HH a c i j) α
+        (fun z : ℝ × M => Hc z a c i j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ i : ι, ∑ j : ι,
+          (matrixInvTwoIndexContractEntryBoundConst (𝕜 := ℝ) δ GB HB i j +
+            christoffelQuadraticRicciEntryBoundConst
+              (fun a c d =>
+                matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ GB DB a c d)
+              i j))
+        (∑ i : ι, ∑ j : ι,
+          (matrixInvTwoIndexContractEntryHolderConst (𝕜 := ℝ) δ GB
+              (fun i j => (Lgram i j : ℝ)) HB HH i j +
+            christoffelQuadraticRicciEntryHolderConst
+              (fun a c d =>
+                matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ GB DB a c d)
+              (fun a c d =>
+                matrixInvChristoffelEntryHolderConst (𝕜 := ℝ) δ GB
+                  (fun i j => (Lgram i j : ℝ)) DB DH a c d)
+              i j))
+        α
+        (fun z : ℝ × M =>
+          (fun i j =>
+            let Γ : ι → ι → ι → ℝ := fun a c d =>
+              (2 : ℝ)⁻¹ *
+                ∑ l : ι,
+                  ((show Matrix ι ι ℝ from
+                      CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                      Matrix ι ι ℝ) a l *
+                    (D z c d l + D z d c l - D z l c d)
+            (∑ a : ι, ∑ c : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a c * Hc z a c i j) +
+              ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+                (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+            Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_ricciDeTurck_schematic_with_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase
+    (fun i j => NNReal.coe_nonneg (Lgram i j)) hDB hDH hHB hHH ?_ hDctrl hHc
+  intro i j
+  exact
+    (ParabolicC0AlphaWith.of_snd_lipschitzOnWith (s := K) (B := GB i j)
+      (K := Lgram i j)
+      (f := fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+      (hB i j) (hL i j)).mono_exponent_of_parabolicDistance_le_one
+        (NNReal.coe_nonneg (Lgram i j)) hα_nonneg hα_le_one hdiam
 
 /-- Compact local-frame bridge for the function-level bounded difference of two schematic
 Ricci-DeTurck coordinate right-hand sides, one built from the geometric local-frame Gram matrix
