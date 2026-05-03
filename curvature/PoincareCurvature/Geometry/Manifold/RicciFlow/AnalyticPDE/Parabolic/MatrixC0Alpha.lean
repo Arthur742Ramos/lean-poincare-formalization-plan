@@ -1603,6 +1603,101 @@ theorem matrix_inv_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedFiel
     · intro j
       exact matrix_inv_entry_with (M := M) hH hM hδpos hdet i j
 
+/-- Sup constant for the difference of two inverse finite-matrix fields, using a uniform
+matrix-difference bound. -/
+def matrixInvSubBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    (δ : ℝ) (B : n → n → ℝ) (η : ℝ) : ℝ :=
+  matrixInvMatrixNormLipschitzConst (𝕜 := 𝕜) δ B * η
+
+/-- Holder constant for the difference of two inverse finite-matrix fields, using the sum of the
+two inverse Holder constants. -/
+def matrixInvSubHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    (δ : ℝ) (B H : n → n → ℝ) : ℝ :=
+  (∑ i : n, ∑ j : n, matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i j) +
+    (∑ i : n, ∑ j : n, matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i j)
+
+theorem matrixInvSubBoundConst_nonneg {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ η : ℝ} {B : n → n → ℝ}
+    (hδpos : 0 < δ) (hη : 0 ≤ η) :
+    0 ≤ matrixInvSubBoundConst (𝕜 := 𝕜) δ B η := by
+  exact mul_nonneg (matrixInvMatrixNormLipschitzConst_nonneg (𝕜 := 𝕜) hδpos B) hη
+
+theorem matrixInvSubHolderConst_nonneg {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {B H : n → n → ℝ}
+    (hH : ∀ i j, 0 ≤ H i j) (hδpos : 0 < δ) :
+    0 ≤ matrixInvSubHolderConst (𝕜 := 𝕜) δ B H := by
+  exact add_nonneg
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos i j)
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos i j)
+
+/-- The difference of two inverse finite-matrix fields has parabolic `C^{0,α}` control: the sup
+constant uses the inverse Lipschitz bound, while the Holder constant is the sum of the two inverse
+Holder constants. -/
+theorem matrix_inv_sub_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {B H : n → n → ℝ} {δ η : ℝ} {M N : ℝ × X → Matrix n n 𝕜}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => N z i j) s)
+    (hdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ η)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaWith
+      (matrixInvSubBoundConst (𝕜 := 𝕜) δ B η)
+      (matrixInvSubHolderConst (𝕜 := 𝕜) δ B H)
+      α (fun z => (M z)⁻¹ - (N z)⁻¹) s := by
+  have hbounded :
+      ParabolicBoundedWith (matrixInvSubBoundConst (𝕜 := 𝕜) δ B η)
+        (fun z : ℝ × X => (M z)⁻¹ - (N z)⁻¹) s := by
+    simpa [matrixInvSubBoundConst] using
+      (matrix_inv_bounded_sub_le_const_mul
+        (s := s) (δ := δ) (C := B) (η := η)
+        (M := M) (N := N)
+        (by
+          intro z hz i j
+          exact (hM i j).bounded hz)
+        (by
+          intro z hz i j
+          exact (hN i j).bounded hz)
+        hdiff hδpos hdetM hdetN)
+  have hMinv := matrix_inv_with (M := M) hH hM hδpos hdetM
+  have hNinv := matrix_inv_with (M := N) hH hN hδpos hdetN
+  exact ⟨hbounded, by
+    simpa [matrixInvSubHolderConst] using hMinv.holder.sub hNinv.holder⟩
+
+/-- Compact-domain version of `matrix_inv_sub_with`: pointwise nonvanishing of both determinants
+supplies one common determinant lower bound. -/
+theorem matrix_inv_sub_with_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {B H : n → n → ℝ} {η : ℝ} {M N : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ i j, 0 ≤ B i j) (hH : ∀ i j, 0 ≤ H i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) K)
+    (hN : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => N z i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0)
+    (hdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ‖M z - N z‖ ≤ η) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvSubBoundConst (𝕜 := 𝕜) δ B η)
+        (matrixInvSubHolderConst (𝕜 := 𝕜) δ B H)
+        α (fun z : ℝ × X => (M z)⁻¹ - (N z)⁻¹) K := by
+  have hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K := by
+    intro i j
+    exact ⟨B i j, hB i j, H i j, hH i j, hM i j⟩
+  have hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) K := by
+    intro i j
+    exact ⟨B i j, hB i j, H i j, hH i j, hN i j⟩
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, matrix_inv_sub_with (M := M) (N := N)
+    hH hM hN hdiff hδpos hdetM hdetN⟩
+
 /-- On a compact time-space set, inverse-matrix entries preserve parabolic `C^{0,α}` control from
 entrywise control and pointwise nonvanishing determinant. -/
 theorem matrix_inv_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
