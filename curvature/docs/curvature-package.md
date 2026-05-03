@@ -160,7 +160,8 @@ estimates plus a whole inverse-matrix estimate, and parabolic `C^{0,α}` closure
 for finite matrix determinants, adjugate entries, and inverse entries under a
 determinant lower bound from entrywise control, plus pointwise determinant
 Lipschitz control in the elementwise matrix norm, named adjugate-entry,
-inverse-entry, summed whole inverse-matrix, matrix-product,
+inverse-entry, summed whole inverse-matrix, function-level determinant/inverse
+bounded-difference, matrix-product,
 inverse-principal entry Lipschitz and bounded Holder entry/matrix estimates,
 inverse-Christoffel derivative/metric-side and
 array-level Lipschitz constants, inverse-Christoffel bounded Holder entry/array

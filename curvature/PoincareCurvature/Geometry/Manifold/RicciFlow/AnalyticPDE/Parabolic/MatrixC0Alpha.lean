@@ -291,6 +291,20 @@ theorem matrix_det_norm_sub_le_const_mul {n A : Type*} [Fintype n] [DecidableEq 
     _ = matrixDetLipschitzConst (A := A) C * ‖M - N‖ := by
       simp [matrixDetLipschitzConst, Finset.sum_mul, mul_assoc]
 
+/-- Determinants are bounded-difference controlled on a time-space set by a uniform matrix
+difference bound. -/
+theorem matrix_det_bounded_sub_le_const_mul {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] {C : n → n → ℝ} {η : ℝ}
+    {M N : ℝ × X → Matrix n n A}
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j, ‖M z i j‖ ≤ C i j)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j, ‖N z i j‖ ≤ C i j)
+    (hdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ η) :
+    ParabolicBoundedWith (matrixDetLipschitzConst (A := A) C * η)
+      (fun z : ℝ × X => (M z).det - (N z).det) s := by
+  intro z hz
+  exact (matrix_det_norm_sub_le_const_mul (C := C) (M z) (N z) (hM hz) (hN hz)).trans
+    (mul_le_mul_of_nonneg_left (hdiff hz) (matrixDetLipschitzConst_nonneg (A := A) C))
+
 /-- Determinants are pointwise bounded by the quantitative finite product constant. -/
 theorem matrix_det_norm_le {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
     {C : n → n → ℝ} (M : Matrix n n A)
@@ -1003,6 +1017,48 @@ theorem matrix_inv_norm_sub_le_const_mul {n 𝕜 : Type*} [Fintype n] [Decidable
     ‖M⁻¹ - N⁻¹‖ ≤ ∑ i : n, ∑ j : n, entryBound i j := hnorm
     _ = matrixInvMatrixNormLipschitzConst (𝕜 := 𝕜) δ C * ‖M - N‖ := by
       simp [entryBound, entryConst, matrixInvMatrixNormLipschitzConst, Finset.sum_mul]
+
+/-- Matrix inversion is bounded-difference controlled on a time-space set by a uniform matrix
+difference bound and a common determinant lower bound. -/
+theorem matrix_inv_bounded_sub_le_const_mul {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ} {η : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j, ‖M z i j‖ ≤ C i j)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j, ‖N z i j‖ ≤ C i j)
+    (hdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ η)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicBoundedWith (matrixInvMatrixNormLipschitzConst (𝕜 := 𝕜) δ C * η)
+      (fun z : ℝ × X => (M z)⁻¹ - (N z)⁻¹) s := by
+  intro z hz
+  exact (matrix_inv_norm_sub_le_const_mul (δ := δ) (C := C)
+      (M z) (N z) (hM hz) (hN hz) hδpos (hdetM hz) (hdetN hz)).trans
+    (mul_le_mul_of_nonneg_left (hdiff hz)
+      (matrixInvMatrixNormLipschitzConst_nonneg (𝕜 := 𝕜) hδpos C))
+
+/-- Compact-domain version of `matrix_inv_bounded_sub_le_const_mul`: pointwise nonvanishing of
+both determinants supplies a common lower bound. -/
+theorem matrix_inv_bounded_sub_le_const_mul_of_isCompact_det_ne_zero {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {C : n → n → ℝ} {η : ℝ} {M N : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ i j, ‖M z i j‖ ≤ C i j)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ i j, ‖N z i j‖ ≤ C i j)
+    (hdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ‖M z - N z‖ ≤ η) :
+    ∃ δ > 0,
+      ParabolicBoundedWith (matrixInvMatrixNormLipschitzConst (𝕜 := 𝕜) δ C * η)
+        (fun z : ℝ × X => (M z)⁻¹ - (N z)⁻¹) K := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, ?_⟩
+  exact matrix_inv_bounded_sub_le_const_mul
+    (s := K) (δ := δ) (C := C) (η := η) hM hN hdiff hδpos hdetM hdetN
 
 /-- Finite matrix inversion is pointwise Lipschitz in the elementwise matrix norm on entrywise
 bounded matrices whose determinants have a common positive lower bound. -/

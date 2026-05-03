@@ -375,7 +375,8 @@ packages the canonical stationary local solution attached to
   closure of finite matrix determinants, adjugate entries, and inverse entries
   under determinant lower bounds, pointwise determinant Lipschitz control in the
   elementwise matrix norm, named adjugate-entry, inverse-entry, summed whole
-  inverse-matrix, matrix-product, inverse-principal entry Lipschitz and
+  inverse-matrix, function-level determinant/inverse bounded-difference,
+  matrix-product, inverse-principal entry Lipschitz and
   bounded Holder entry/matrix estimates,
   inverse-Christoffel derivative/metric-side and array-level Lipschitz constants,
   inverse-Christoffel bounded Holder entry/array estimates, and
