@@ -54,6 +54,25 @@ theorem hasMFDerivWithinAt
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
   G.satisfies.hasMFDerivWithinAt ht x
 
+/-- Within the raw time set, the pointwise derivative readout can be rewritten
+to any vector field that agrees with the original one along the flow in the
+relative filter at the time. -/
+theorem hasMFDerivWithinAt_congr_vectorField
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (hXY : ∀ᶠ τ in 𝓝[s] t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasMFDerivAt[s] (fun τ : ℝ ↦ (G.maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (G.maps3 t x))) := by
+  have hXYt_all : ∀ x : M, X t (G.maps3 t x) = Y t (G.maps3 t x) :=
+    show t ∈ {τ : ℝ | ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x)} from
+      mem_of_mem_nhdsWithin ht hXY
+  have hXYt : X t (G.maps3 t x) = Y t (G.maps3 t x) :=
+    hXYt_all x
+  simpa [hXYt] using G.hasMFDerivWithinAt ht x
+
 /-- Raw gauge-flow curves have the expected within-time-set derivative in the
 preferred chart centered at their time-`t` value. -/
 theorem hasDerivWithinAt_extChartAt_eval
@@ -76,6 +95,32 @@ theorem hasDerivWithinAt_extChartAt_eval
     mfderiv_chartAt_eq_tangentCoordChange hsrc]
   exact ContinuousLinearMap.comp_toSpanSingleton _ _
 
+/-- Raw gauge-flow curves have the expected within-time-set derivative in the
+preferred chart, with the velocity rewritten by relative-filter agreement of
+vector fields along the flow. -/
+theorem hasDerivWithinAt_extChartAt_eval_congr_vectorField
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (hXY : ∀ᶠ τ in 𝓝[s] t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+        (Y t ((G.maps3 t) x))) s t := by
+  have hsrc_ext : (G.maps3 t) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+    mem_extChartAt_source ((G.maps3 t) x)
+  have hsrc : (G.maps3 t) x ∈ (chartAt H ((G.maps3 t) x)).source :=
+    extChartAt_source I ((G.maps3 t) x) ▸ hsrc_ext
+  rw [hasDerivWithinAt_iff_hasFDerivWithinAt, ← hasMFDerivWithinAt_iff_hasFDerivWithinAt]
+  apply (HasMFDerivWithinAt.comp t (hasMFDerivWithinAt_extChartAt (I := I) hsrc)
+    (G.hasMFDerivWithinAt_congr_vectorField ht hXY x)
+    (Set.subset_preimage_image _ _)).congr_mfderiv
+  rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton,
+    mfderiv_chartAt_eq_tangentCoordChange hsrc]
+  exact ContinuousLinearMap.comp_toSpanSingleton _ _
+
 /-- A raw gauge-flow curve has the expected within-time-set derivative in the preferred chart
 centered at its time-`t` value, simplified with the centered tangent-coordinate change. -/
 theorem hasDerivWithinAt_extChartAt_eval_self
@@ -90,6 +135,25 @@ theorem hasDerivWithinAt_extChartAt_eval_self
   rw [tangentCoordChange_self (I := I)
     (x := (G.maps3 t) x) (z := (G.maps3 t) x)
     (v := X t ((G.maps3 t) x)) (mem_extChartAt_source ((G.maps3 t) x))] at h
+  exact h
+
+/-- A raw gauge-flow curve has the centered within-time-set preferred-chart
+derivative, with the velocity rewritten by relative-filter agreement of vector
+fields along the flow. -/
+theorem hasDerivWithinAt_extChartAt_eval_self_congr_vectorField
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (hXY : ∀ᶠ τ in 𝓝[s] t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (Y t ((G.maps3 t) x)) s t := by
+  have h := G.hasDerivWithinAt_extChartAt_eval_congr_vectorField ht hXY x
+  rw [tangentCoordChange_self (I := I)
+    (x := (G.maps3 t) x) (z := (G.maps3 t) x)
+    (v := Y t ((G.maps3 t) x)) (mem_extChartAt_source ((G.maps3 t) x))] at h
   exact h
 
 /-- A raw gauge-flow witness is continuous within its time set along every base
@@ -490,6 +554,20 @@ def congr_vectorField
   anchored := G.anchored
   satisfies := G.satisfies.congr_vectorField hXY
 
+/-- Reinterpret a raw `C³` gauge-flow witness when two vector fields agree
+along the flow image in the relative time-set filter at each time. -/
+def congr_vectorField_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hXY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+      X τ (G.maps3 τ x) = Y τ (G.maps3 τ x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) Y s t₀ where
+  maps3 := G.maps3
+  anchored := G.anchored
+  satisfies := SatisfiesGaugeFlowOn.congr_vectorField_nhdsWithin
+    (I := I) (M := M) G.satisfies hXY
+
 /-- Reinterpret a raw `C³` gauge-flow witness when two vector fields agree on the time set. -/
 def congr_vectorField_of_eqOn
     {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
@@ -506,6 +584,14 @@ def congr_vectorField_of_eqOn
     (hXY : ∀ t ∈ s, ∀ x : M, X t (G.maps3 t x) = Y t (G.maps3 t x)) :
     (G.congr_vectorField hXY).maps3 = G.maps3 := rfl
 
+@[simp] theorem congr_vectorField_nhdsWithin_maps3
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hXY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+      X τ (G.maps3 τ x) = Y τ (G.maps3 τ x)) :
+    (G.congr_vectorField_nhdsWithin hXY).maps3 = G.maps3 := rfl
+
 @[simp] theorem congr_vectorField_anchored
     {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
     {s : Set ℝ} {t₀ : ℝ}
@@ -513,12 +599,30 @@ def congr_vectorField_of_eqOn
     (hXY : ∀ t ∈ s, ∀ x : M, X t (G.maps3 t x) = Y t (G.maps3 t x)) :
     (G.congr_vectorField hXY).anchored = G.anchored := rfl
 
+@[simp] theorem congr_vectorField_nhdsWithin_anchored
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hXY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+      X τ (G.maps3 τ x) = Y τ (G.maps3 τ x)) :
+    (G.congr_vectorField_nhdsWithin hXY).anchored = G.anchored := rfl
+
 @[simp] theorem congr_vectorField_satisfies
     {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
     {s : Set ℝ} {t₀ : ℝ}
     (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
     (hXY : ∀ t ∈ s, ∀ x : M, X t (G.maps3 t x) = Y t (G.maps3 t x)) :
     (G.congr_vectorField hXY).satisfies = G.satisfies.congr_vectorField hXY := rfl
+
+@[simp] theorem congr_vectorField_nhdsWithin_satisfies
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hXY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+      X τ (G.maps3 τ x) = Y τ (G.maps3 τ x)) :
+    (G.congr_vectorField_nhdsWithin hXY).satisfies =
+      SatisfiesGaugeFlowOn.congr_vectorField_nhdsWithin
+        (I := I) (M := M) G.satisfies hXY := rfl
 
 /-- Transport proof-level raw `C³` gauge-flow existence across vector fields that agree on the
 time set. -/
@@ -530,6 +634,18 @@ theorem nonempty_congr_vectorField_of_eqOn
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) Y s t₀) := by
   rcases hG with ⟨G⟩
   exact ⟨G.congr_vectorField_of_eqOn hXY⟩
+
+/-- Transport proof-level raw `C³` gauge-flow existence across vector fields
+that agree in the relative time-set filter at each time. -/
+theorem nonempty_congr_vectorField_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (hG : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀))
+    (hXY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M, X τ x = Y τ x) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) Y s t₀) := by
+  rcases hG with ⟨G⟩
+  exact ⟨G.congr_vectorField_nhdsWithin
+    (fun t ht ↦ (hXY t ht).mono fun τ hτ x ↦ hτ (G.maps3 τ x))⟩
 
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness from the pointwise
 manifold derivative form produced by ODE/integral-curve theorems. -/

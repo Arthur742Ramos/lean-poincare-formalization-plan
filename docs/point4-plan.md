@@ -1050,7 +1050,10 @@ congruence, and raw gauge-flow witnesses expose matching local-at-time
 readouts when vector fields agree along the flow near that time. Closed-Picard
 raw flows now also expose the corresponding open-interior `Ioo` readouts, so
 Picard interval output can replace the vector field locally before extracting
-ordinary manifold or preferred-chart derivatives. The raw
+ordinary manifold or preferred-chart derivatives. The same vector-field
+replacement is now available directly in the relative time-set filter `𝓝[s] t`,
+with raw within-set manifold, preferred-chart, and centered preferred-chart
+derivative readouts for closed-interval endpoint data. The raw
 existence layer now also has preferred-chart ODE constructors:
 `of_hasDerivWithinAt_extChartAt_eval_self` and
 `of_hasDerivAtOn_extChartAt_eval_self` build `Diffeomorph3GaugeFlowOn`

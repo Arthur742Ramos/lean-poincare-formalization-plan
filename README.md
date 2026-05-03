@@ -208,7 +208,10 @@ packages the canonical stationary local solution attached to
     and converts it into the fixed-IVP and theorem-family geometric gauge-flow
     bundles, while the geometric endpoint data can now replace its bundled
     gauge-flow component by such a raw existence witness at fixed-IVP, global,
-    and interval scope. A thin `AnalyticPDE.SmoothRealization` module names the
+    and interval scope. That raw-flow layer now also rewrites within-time-set
+    manifold and preferred-chart derivative readouts under vector-field
+    agreement in the relative filter `𝓝[s] t`, matching closed-interval Picard
+    endpoint data. A thin `AnalyticPDE.SmoothRealization` module names the
     global/interval PDE closure data that turns a Banach chart solution into a
     smooth chosen-background DeTurck solution and its self-encoding candidate:
     metric realization, boundary time derivatives, chart-RHS/geometric-RHS
