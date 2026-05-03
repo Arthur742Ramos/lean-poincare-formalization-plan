@@ -270,7 +270,9 @@ packages the canonical stationary local solution attached to
   scalar-readout derivative-domain `(t, flow, A(t)u, A(t)v)` packages, with
   open-overlap readouts for base flows, full variational pairs, scalar states,
   and scalar time graphs, pointwise common-interval readouts, and common
-  time-graph/scalar-state compatibility for
+  time-graph/scalar-state compatibility; tangent-map and vector-slot
+  common-subinterval readouts now
+  also handle the case where base curves have already been identified for
   chart gluing; encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The

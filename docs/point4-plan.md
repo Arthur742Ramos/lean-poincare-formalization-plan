@@ -1013,6 +1013,10 @@ The base-flow, full variational-pair, scalar-state, and scalar time-graph
 common-subinterval readouts now also have open-interval `Ioo` forms, so
 chart-gluing arguments can use the visible open overlap directly instead of
 manually restricting closed-overlap equality.
+Tangent-map and fixed-vector-slot uniqueness now also have direct
+common-subinterval `Icc`/`Ioo` readouts once the base curves are already
+identified on the shared open interval, matching the two-stage chart-gluing
+route where base flows are glued before tangent data.
 These are the overlap/localization maps needed before chartwise solutions can be
 glued into a manifold-level flow. Base-flow uniqueness now also has overlap
 forms for `LocalFlowSolution` and `ContinuousLocalFlowSolution`: two packages

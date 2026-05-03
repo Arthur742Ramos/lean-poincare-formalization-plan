@@ -3913,6 +3913,215 @@ theorem center_tangent_apply_eqOn_Icc_of_opNorm_bound
   α.tangent_apply_eqOn_Icc_of_opNorm_bound β (mem_closedBall_self r.2)
     ht₀ hflow_eq hD_bound v
 
+/-- Common-subinterval tangent-map uniqueness when the ambient Picard intervals
+may differ. This is the tangent-only gluing form used after the base curves have
+already been identified on the shared open interval. -/
+theorem tangent_eqOn_common_Icc_of_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo a b, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.tangent x t ∈ state t) :
+    EqOn (α.tangent x) (β.tangent x) (Icc a b) := by
+  let t₀' : Icc a b := ⟨tbase, Ioo_subset_Icc_self htbase⟩
+  let α' : VariationalLocalFlowSolution f Df t₀' xα rα :=
+    α.restrict hαtime (Ioo_subset_Icc_self htbase) le_rfl
+  let β' : VariationalLocalFlowSolution f Df t₀' xβ rβ :=
+    β.restrict hβtime (Ioo_subset_Icc_self htbase) le_rfl
+  have htbase' : (t₀' : ℝ) ∈ Ioo a b := by
+    simpa [t₀'] using htbase
+  have hflow_eq' :
+      EqOn (fun t => α'.flow (x, t)) (fun t => β'.flow (x, t)) (Ioo a b) := by
+    intro t ht
+    simpa [α', β'] using hflow_eq ht
+  have hD_bound' : ∀ t ∈ Ioo a b, ‖Df t (α'.flow (x, t))‖₊ ≤ K := by
+    intro t ht
+    simpa [α'] using hD_bound t ht
+  have hα_mem' : ∀ t ∈ Ioo a b, α'.tangent x t ∈ state t := by
+    intro t ht
+    simpa [α'] using hα_mem t ht
+  have hβ_mem' : ∀ t ∈ Ioo a b, β'.tangent x t ∈ state t := by
+    intro t ht
+    simpa [β'] using hβ_mem t ht
+  have hcommon : EqOn (α'.tangent x) (β'.tangent x) (Icc a b) :=
+    α'.tangent_eqOn_Icc_of_opNorm_bound_of_mem β' hxα hxβ htbase' hflow_eq'
+      hD_bound' hα_mem' hβ_mem'
+  simpa [α', β'] using hcommon
+
+/-- Open common-subinterval tangent-map uniqueness when the ambient Picard
+intervals may differ. -/
+theorem tangent_eqOn_common_Ioo_of_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo a b, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.tangent x t ∈ state t) :
+    EqOn (α.tangent x) (β.tangent x) (Ioo a b) := by
+  have hclosed :=
+    α.tangent_eqOn_common_Icc_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+      htbase hflow_eq hD_bound hα_mem hβ_mem
+  intro t ht
+  exact hclosed (Ioo_subset_Icc_self ht)
+
+/-- Pointwise common-subinterval tangent-map uniqueness. -/
+theorem tangent_eq_of_opNorm_bound_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo a b, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.tangent x t ∈ state t)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    α.tangent x t = β.tangent x t :=
+  α.tangent_eqOn_common_Icc_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+    htbase hflow_eq hD_bound hα_mem hβ_mem ht
+
+/-- Pointwise open common-subinterval tangent-map uniqueness. -/
+theorem tangent_eq_of_opNorm_bound_of_mem_common_Ioo
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo a b, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.tangent x t ∈ state t)
+    {t : ℝ} (ht : t ∈ Ioo a b) :
+    α.tangent x t = β.tangent x t :=
+  α.tangent_eqOn_common_Ioo_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+    htbase hflow_eq hD_bound hα_mem hβ_mem ht
+
+/-- Common-subinterval vector-slot uniqueness for variational tangent maps when
+the ambient Picard intervals may differ. -/
+theorem tangent_apply_eqOn_common_Icc_of_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (v : V) :
+    EqOn (fun t : ℝ => α.tangent x t v) (fun t : ℝ => β.tangent x t v)
+      (Icc a b) := by
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Icc a b) :=
+    α.tangent_eqOn_common_Icc_of_opNorm_bound_of_mem (β := β) (state := fun _ => Set.univ)
+      hαtime hβtime hxα hxβ htbase hflow_eq hD_bound
+      (by intro t ht; simp) (by intro t ht; simp)
+  intro t ht
+  exact congrArg (fun A : V →L[ℝ] V => A v) (htangent ht)
+
+/-- Open common-subinterval vector-slot uniqueness for variational tangent maps
+when the ambient Picard intervals may differ. -/
+theorem tangent_apply_eqOn_common_Ioo_of_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (v : V) :
+    EqOn (fun t : ℝ => α.tangent x t v) (fun t : ℝ => β.tangent x t v)
+      (Ioo a b) := by
+  have hclosed :=
+    α.tangent_apply_eqOn_common_Icc_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+      htbase hflow_eq hD_bound v
+  intro t ht
+  exact hclosed (Ioo_subset_Icc_self ht)
+
+/-- Pointwise common-subinterval vector-slot uniqueness for variational tangent
+maps. -/
+theorem tangent_apply_eq_of_opNorm_bound_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (v : V)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    α.tangent x t v = β.tangent x t v :=
+  α.tangent_apply_eqOn_common_Icc_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+    htbase hflow_eq hD_bound v ht
+
+/-- Pointwise open common-subinterval vector-slot uniqueness for variational
+tangent maps. -/
+theorem tangent_apply_eq_of_opNorm_bound_of_mem_common_Ioo
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (v : V)
+    {t : ℝ} (ht : t ∈ Ioo a b) :
+    α.tangent x t v = β.tangent x t v :=
+  α.tangent_apply_eqOn_common_Ioo_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+    htbase hflow_eq hD_bound v ht
+
 /-- Closed-interval uniqueness for the full variational pair `(flow, tangent)`
 from a base-flow Lipschitz estimate and an operator-norm bound on the linearized
 coefficient.  Overlap form allowing different centers/radii. -/
