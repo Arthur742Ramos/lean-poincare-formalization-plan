@@ -1007,6 +1007,7 @@ explicit closed-sup-ball bounds, global and closed-ball Lipschitz composition
 with automatic composed sup bounds, exponent lowering on unit parabolic-diameter
 domains with closed-ball and closed-cylinder specializations across the Holder
 and `C^{0,α}` interfaces, and closed-ball diameter control,
+pointwise finite-product Lipschitz estimates on factorwise bounded sets,
 bidirectional product ball/closed-ball compatibility for parabolic balls and
 product cylinders, plus basepoint-to-sup bounds and Holder-to-`C^{0,α}`
 packaging on compact domains, with direct proper-space closed-ball/cylinder
@@ -1015,8 +1016,9 @@ The separate `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now proves
 explicit bounded `C^{0,α}` determinant, adjugate-entry, and inverse-entry
 estimates together with a whole inverse-matrix estimate, and that finite matrix
 determinants, adjugate entries, and inverse entries under a determinant lower
-bound preserve parabolic `C^{0,α}` control from entrywise control; compact
-nonvanishing determinant data now supplies the
+bound preserve parabolic `C^{0,α}` control from entrywise control. It also has
+a pointwise determinant Lipschitz estimate on entrywise bounded finite matrices;
+compact nonvanishing determinant data now supplies the
 needed uniform determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
 also proves entrywise and whole-valued closure

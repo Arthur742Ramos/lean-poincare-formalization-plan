@@ -147,6 +147,84 @@ theorem matrix_det_with {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRin
   rw [← zsmul_eq_mul]
   rfl
 
+/-- Determinants are pointwise Lipschitz on entrywise bounded finite matrices.  This is the
+finite-dimensional algebra estimate behind local Lipschitz control of determinant terms in chart
+coordinates. -/
+theorem matrix_det_norm_sub_le {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
+    {C : n → n → ℝ} (M N : Matrix n n A)
+    (hM : ∀ i j, ‖M i j‖ ≤ C i j) (hN : ∀ i j, ‖N i j‖ ≤ C i j) :
+    ‖M.det - N.det‖ ≤
+      ∑ σ : Equiv.Perm n,
+        ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((∑ i : n, ‖M (σ i) i - N (σ i) i‖) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1)) := by
+  classical
+  let termM : Equiv.Perm n → A :=
+    fun σ => ((Equiv.Perm.sign σ : ℤ) : A) * ∏ i : n, M (σ i) i
+  let termN : Equiv.Perm n → A :=
+    fun σ => ((Equiv.Perm.sign σ : ℤ) : A) * ∏ i : n, N (σ i) i
+  have hdetM : M.det = ∑ σ : Equiv.Perm n, termM σ := by
+    dsimp [termM]
+    rw [Matrix.det_apply]
+    apply Finset.sum_congr rfl
+    intro σ _hσ
+    rw [← zsmul_eq_mul]
+    rfl
+  have hdetN : N.det = ∑ σ : Equiv.Perm n, termN σ := by
+    dsimp [termN]
+    rw [Matrix.det_apply]
+    apply Finset.sum_congr rfl
+    intro σ _hσ
+    rw [← zsmul_eq_mul]
+    rfl
+  have hterm : ∀ σ ∈ (Finset.univ : Finset (Equiv.Perm n)),
+      ‖termM σ - termN σ‖ ≤
+        ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((∑ i : n, ‖M (σ i) i - N (σ i) i‖) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1)) := by
+    intro σ _hσ
+    have hprod :
+        ‖(∏ i : n, M (σ i) i) - ∏ i : n, N (σ i) i‖ ≤
+          (∑ i : n, ‖M (σ i) i - N (σ i) i‖) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1) := by
+      simpa using
+        (norm_finset_prod_sub_prod_le_sum_norm_sub_mul_unit_prod_max
+          (A := A) (S := (Finset.univ : Finset n))
+          (C := fun i => C (σ i) i)
+          (a := fun i => M (σ i) i)
+          (b := fun i => N (σ i) i)
+          (fun i _hi => hM (σ i) i)
+          (fun i _hi => hN (σ i) i))
+    have hsub :
+        termM σ - termN σ =
+          (Equiv.Perm.sign σ : ℤ) • ((∏ i : n, M (σ i) i) - ∏ i : n, N (σ i) i) := by
+      dsimp [termM, termN]
+      rw [← zsmul_eq_mul, ← zsmul_eq_mul, zsmul_sub]
+    calc
+      ‖termM σ - termN σ‖ =
+          ‖(Equiv.Perm.sign σ : ℤ) • ((∏ i : n, M (σ i) i) - ∏ i : n, N (σ i) i)‖ := by
+        rw [hsub]
+      _ ≤ ‖(Equiv.Perm.sign σ : ℤ)‖ *
+            ‖(∏ i : n, M (σ i) i) - ∏ i : n, N (σ i) i‖ :=
+        norm_zsmul_le _ _
+      _ ≤ ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((∑ i : n, ‖M (σ i) i - N (σ i) i‖) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1)) :=
+        mul_le_mul_of_nonneg_left hprod (norm_nonneg _)
+  calc
+    ‖M.det - N.det‖ =
+        ‖(∑ σ : Equiv.Perm n, termM σ) - ∑ σ : Equiv.Perm n, termN σ‖ := by
+      rw [hdetM, hdetN]
+    _ = ‖∑ σ : Equiv.Perm n, (termM σ - termN σ)‖ := by
+      rw [Finset.sum_sub_distrib]
+    _ ≤ ∑ σ : Equiv.Perm n, ‖termM σ - termN σ‖ :=
+      norm_sum_le _ _
+    _ ≤ ∑ σ : Equiv.Perm n,
+        ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((∑ i : n, ‖M (σ i) i - N (σ i) i‖) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1)) :=
+      Finset.sum_le_sum hterm
+
 /-- The determinant of a finite matrix whose entries are parabolic `C^{0,α}` functions is
 again parabolic `C^{0,α}`. -/
 theorem matrix_det {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]

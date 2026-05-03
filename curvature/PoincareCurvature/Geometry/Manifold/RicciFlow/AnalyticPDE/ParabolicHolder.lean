@@ -1070,6 +1070,109 @@ theorem lipschitzOnWith_inv_of_norm_ge {𝕜 : Type*} [NormedField 𝕜] {δ : �
         (mul_nonneg hinvδ_nonneg (norm_nonneg _))
     _ = (δ⁻¹ * δ⁻¹) * dist a b := by rw [dist_eq_norm]; ring
 
+/-- A finite product is bounded by the product of factor bounds, with a unit-norm factor that keeps
+the statement valid for normed rings whose unit is not normalized. -/
+theorem norm_finset_prod_le_unit_mul_prod_max {ι A : Type*} [NormedCommRing A]
+    (S : Finset ι) {C : ι → ℝ} {a : ι → A}
+    (ha : ∀ i ∈ S, ‖a i‖ ≤ C i) :
+    ‖∏ i ∈ S, a i‖ ≤ max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1 := by
+  classical
+  revert ha
+  refine Finset.induction_on S ?base ?step
+  · intro _ha
+    simp
+  · intro x S hx ih ha
+    have hx_bound : ‖a x‖ ≤ max (C x) 1 :=
+      (ha x (by simp [hx])).trans (le_max_left _ _)
+    have htail :
+        ‖∏ i ∈ S, a i‖ ≤ max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1 :=
+      ih fun i hi => ha i (by simp [hi])
+    have hx_bound_nonneg : 0 ≤ max (C x) 1 := zero_le_one.trans (le_max_right _ _)
+    calc
+      ‖∏ i ∈ insert x S, a i‖ = ‖a x * ∏ i ∈ S, a i‖ := by
+        rw [Finset.prod_insert hx]
+      _ ≤ ‖a x‖ * ‖∏ i ∈ S, a i‖ := norm_mul_le _ _
+      _ ≤ max (C x) 1 * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1) :=
+        mul_le_mul hx_bound htail (norm_nonneg _) hx_bound_nonneg
+      _ = max ‖(1 : A)‖ 1 * ∏ i ∈ insert x S, max (C i) 1 := by
+        rw [Finset.prod_insert hx]
+        ring
+
+/-- A finite product is Lipschitz, pointwise, on factorwise bounded sets.  The right-hand side is
+deliberately coarse: a sum of factor differences times a product of closed sup bounds. -/
+theorem norm_finset_prod_sub_prod_le_sum_norm_sub_mul_unit_prod_max {ι A : Type*}
+    [NormedCommRing A] (S : Finset ι) {C : ι → ℝ} {a b : ι → A}
+    (ha : ∀ i ∈ S, ‖a i‖ ≤ C i) (hb : ∀ i ∈ S, ‖b i‖ ≤ C i) :
+    ‖(∏ i ∈ S, a i) - ∏ i ∈ S, b i‖ ≤
+      (∑ i ∈ S, ‖a i - b i‖) * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1) := by
+  classical
+  revert ha hb
+  refine Finset.induction_on S ?base ?step
+  · intro _ha _hb
+    simp
+  · intro x S hx ih ha hb
+    have htail :
+        ‖(∏ i ∈ S, a i) - ∏ i ∈ S, b i‖ ≤
+          (∑ i ∈ S, ‖a i - b i‖) *
+            (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1) :=
+      ih (fun i hi => ha i (by simp [hi])) (fun i hi => hb i (by simp [hi]))
+    have hx_bound : ‖a x‖ ≤ max (C x) 1 :=
+      (ha x (by simp [hx])).trans (le_max_left _ _)
+    have hbtail :
+        ‖∏ i ∈ S, b i‖ ≤ max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1 :=
+      norm_finset_prod_le_unit_mul_prod_max S (fun i hi => hb i (by simp [hi]))
+    have hsplit :
+        (∏ i ∈ insert x S, a i) - ∏ i ∈ insert x S, b i =
+          a x * ((∏ i ∈ S, a i) - ∏ i ∈ S, b i) + (a x - b x) * ∏ i ∈ S, b i := by
+      rw [Finset.prod_insert hx, Finset.prod_insert hx]
+      ring
+    have hunit_tail_nonneg : 0 ≤ max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1 :=
+      mul_nonneg (zero_le_one.trans (le_max_right _ _))
+        (Finset.prod_nonneg fun i _hi => zero_le_one.trans (le_max_right (C i) 1))
+    have hsum_tail_nonneg : 0 ≤ ∑ i ∈ S, ‖a i - b i‖ :=
+      Finset.sum_nonneg fun i _hi => norm_nonneg _
+    have hx_max_ge_one : 1 ≤ max (C x) 1 := le_max_right _ _
+    have hdiffx_nonneg : 0 ≤ ‖a x - b x‖ := norm_nonneg _
+    have hdiffx_term :
+        ‖a x - b x‖ * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1) ≤
+          max (C x) 1 *
+            (‖a x - b x‖ * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1)) := by
+      calc
+        ‖a x - b x‖ * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1)
+            = 1 * (‖a x - b x‖ *
+              (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1)) := by ring
+        _ ≤ max (C x) 1 *
+              (‖a x - b x‖ *
+                (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1)) :=
+          mul_le_mul_of_nonneg_right hx_max_ge_one
+            (mul_nonneg hdiffx_nonneg hunit_tail_nonneg)
+    calc
+      ‖(∏ i ∈ insert x S, a i) - ∏ i ∈ insert x S, b i‖
+          = ‖a x * ((∏ i ∈ S, a i) - ∏ i ∈ S, b i) +
+              (a x - b x) * ∏ i ∈ S, b i‖ := by rw [hsplit]
+      _ ≤ ‖a x * ((∏ i ∈ S, a i) - ∏ i ∈ S, b i)‖ +
+            ‖(a x - b x) * ∏ i ∈ S, b i‖ := norm_add_le _ _
+      _ ≤ ‖a x‖ * ‖(∏ i ∈ S, a i) - ∏ i ∈ S, b i‖ +
+            ‖a x - b x‖ * ‖∏ i ∈ S, b i‖ :=
+        add_le_add (norm_mul_le _ _) (norm_mul_le _ _)
+      _ ≤ max (C x) 1 *
+              ((∑ i ∈ S, ‖a i - b i‖) *
+                (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1)) +
+            ‖a x - b x‖ * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1) :=
+        add_le_add
+          (mul_le_mul hx_bound htail (norm_nonneg _) (zero_le_one.trans (le_max_right _ _)))
+          (mul_le_mul_of_nonneg_left hbtail (norm_nonneg _))
+      _ ≤ max (C x) 1 *
+              ((∑ i ∈ S, ‖a i - b i‖) *
+                (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1)) +
+            max (C x) 1 *
+              (‖a x - b x‖ * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (C i) 1)) := by
+        exact add_le_add_right hdiffx_term _
+      _ = (∑ i ∈ insert x S, ‖a i - b i‖) *
+            (max ‖(1 : A)‖ 1 * ∏ i ∈ insert x S, max (C i) 1) := by
+        rw [Finset.sum_insert hx, Finset.prod_insert hx]
+        ring
+
 namespace ParabolicHolderWith
 
 variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]

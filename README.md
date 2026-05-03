@@ -356,7 +356,8 @@ packages the canonical stationary local solution attached to
   Hölder/Lipschitz functions on the spatial projection, bounded
   `C^{0,α}` composition under range or explicit closed-sup-ball bounds,
   global and closed-ball Lipschitz composition with automatic composed sup
-  bounds, and
+  bounds, pointwise finite-product Lipschitz estimates on factorwise bounded
+  sets, and
   exponent lowering on unit parabolic-diameter domains with closed-ball and
   closed-cylinder specializations across the Holder and `C^{0,α}` interfaces,
   backed by closed-ball diameter control, product ball/closed-ball
@@ -370,9 +371,10 @@ packages the canonical stationary local solution attached to
   primitives to prove explicit bounded `C^{0,α}` determinant, adjugate-entry,
   inverse-entry, and whole inverse-matrix estimates, plus parabolic `C^{0,α}`
   closure of finite matrix determinants, adjugate entries, and inverse entries
-  under determinant lower bounds, with compact nonvanishing determinant data now supplying such lower
-  bounds and compact-domain inverse, inverse-action, inverse-bilinear, and
-  matrix-valued RHS variants, plus
+  under determinant lower bounds, and a pointwise determinant Lipschitz estimate
+  on entrywise bounded finite matrices, with compact nonvanishing determinant
+  data now supplying such lower bounds and compact-domain inverse,
+  inverse-action, inverse-bilinear, and matrix-valued RHS variants, plus
   entrywise and whole-valued finite matrix transpose, pointwise
   symmetrization, matrix-product, matrix-vector/vector-matrix, and
   inverse-matrix vector-product closure, whole finite vector/matrix and

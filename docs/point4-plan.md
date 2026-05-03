@@ -1248,7 +1248,8 @@ result under range or explicit closed-sup-ball bounds, global and closed-ball
 Lipschitz composition variants that derive the composed sup bound from the
 input sup bound, direct parabolic
 Hölder/`C^{0,α}` lifts of time-independent spatial Hölder/Lipschitz functions
-on the spatial projection, and exponent-lowering
+on the spatial projection, pointwise finite-product Lipschitz estimates on
+factorwise bounded sets, and exponent-lowering
 on unit parabolic-diameter domains, with closed-ball and closed-cylinder
 specializations across the Holder and `C^{0,α}` interfaces supplying that
 hypothesis after shrinking.
@@ -1268,7 +1269,8 @@ adjugate-entry closure, and inverse-entry closure under a determinant lower
 bound for finite matrix-valued parabolic `C^{0,α}` functions from entrywise
 control, now also with explicit bounded determinant, adjugate-entry, and
 inverse-entry estimates plus a whole inverse-matrix estimate, including a
-compactness bridge from nonvanishing determinants
+pointwise determinant Lipschitz estimate on entrywise bounded finite matrices
+and a compactness bridge from nonvanishing determinants
 to uniform determinant lower bounds and compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants,
 plus entrywise and whole-valued closure
