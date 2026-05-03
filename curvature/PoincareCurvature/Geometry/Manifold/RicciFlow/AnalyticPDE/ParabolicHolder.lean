@@ -1237,6 +1237,21 @@ theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
       mul_le_mul_of_nonneg_left (hu hp hq) (NNReal.coe_nonneg K)
     _ = ((K : ℝ) * C) * dα := by ring
 
+/-- A spatial Lipschitz function, lifted as a time-independent time-space function, is
+parabolic Lipschitz on the time-space set. -/
+theorem of_snd_lipschitzOnWith {K : ℝ≥0} {f : X → E}
+    (hf : LipschitzOnWith K f (Prod.snd '' s)) :
+    ParabolicHolderWith (K : ℝ) 1 (fun z : ℝ × X => f z.2) s := by
+  intro p hp q hq
+  have hpim : p.2 ∈ Prod.snd '' s := ⟨p, hp, rfl⟩
+  have hqim : q.2 ∈ Prod.snd '' s := ⟨q, hq, rfl⟩
+  calc
+    ‖f p.2 - f q.2‖ = dist (f p.2) (f q.2) := by rw [dist_eq_norm]
+    _ ≤ (K : ℝ) * dist p.2 q.2 := hf.dist_le_mul p.2 hpim q.2 hqim
+    _ ≤ (K : ℝ) * parabolicDistance p q :=
+        mul_le_mul_of_nonneg_left (parabolicDistance.space_dist_le p q) (NNReal.coe_nonneg K)
+    _ = (K : ℝ) * (parabolicDistance p q) ^ (1 : ℝ) := by rw [Real.rpow_one]
+
 /-- Restricting a parabolic Holder estimate to a fixed spatial point gives the weighted
 time-slice estimate. -/
 theorem time_slice (h : ParabolicHolderWith C α u s) {t τ : ℝ} {x : X}
@@ -1611,6 +1626,13 @@ theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
   exact ⟨(K : ℝ) * C, mul_nonneg (NNReal.coe_nonneg K) hC,
     hCu.comp_lipschitzOnWith hφ⟩
 
+/-- A spatial Lipschitz function, lifted as a time-independent time-space function, is
+parabolic Holder with exponent `1`. -/
+theorem of_snd_lipschitzOnWith {K : ℝ≥0} {f : X → E}
+    (hf : LipschitzOnWith K f (Prod.snd '' s)) :
+    ParabolicHolderOn 1 (fun z : ℝ × X => f z.2) s :=
+  ⟨(K : ℝ), NNReal.coe_nonneg K, ParabolicHolderWith.of_snd_lipschitzOnWith hf⟩
+
 /-- A parabolic Holder function has a weighted Holder estimate on every time slice through a
 fixed spatial point. -/
 theorem time_slice (h : ParabolicHolderOn α u s) :
@@ -1922,6 +1944,13 @@ theorem mono_const (h : ParabolicBoundedWith B₁ u s) (hBB' : B₁ ≤ B₂) :
   intro p hp
   exact (h hp).trans hBB'
 
+/-- Spatial boundedness on the projection gives boundedness for the time-independent lift. -/
+theorem of_snd {f : X → E}
+    (hf : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ‖f x‖ ≤ B) :
+    ParabolicBoundedWith B (fun z : ℝ × X => f z.2) s := by
+  intro p hp
+  exact hf ⟨p, hp, rfl⟩
+
 theorem const (c : E) (hB : ‖c‖ ≤ B) :
     ParabolicBoundedWith B (fun _ : ℝ × X => c) s := by
   intro _p _hp
@@ -2105,6 +2134,14 @@ theorem of_isCompact_of_uniform_local_closedBall {r : ℝ} {K : Set (ℝ × X)}
 theorem const (c : E) (hB : ‖c‖ ≤ B) (hH : 0 ≤ H) :
     ParabolicC0AlphaWith B H α (fun _ : ℝ × X => c) s :=
   ⟨ParabolicBoundedWith.const c hB, ParabolicHolderWith.const c hH⟩
+
+/-- Spatial boundedness and Lipschitz control on the projection give parabolic `C^{0,1}`
+control for the time-independent lift. -/
+theorem of_snd_lipschitzOnWith {K : ℝ≥0} {f : X → E}
+    (hB : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ‖f x‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.snd '' s)) :
+    ParabolicC0AlphaWith B (K : ℝ) 1 (fun z : ℝ × X => f z.2) s :=
+  ⟨ParabolicBoundedWith.of_snd hB, ParabolicHolderWith.of_snd_lipschitzOnWith hL⟩
 
 theorem add (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
     (hv : ParabolicC0AlphaWith B₂ H₂ α v s) :
@@ -2458,6 +2495,16 @@ theorem of_isCompact_of_local_closedBall {r : ℝ} {K : Set (ℝ × X)}
 
 theorem const (c : E) : ParabolicC0AlphaOn α (fun _ : ℝ × X => c) s :=
   ⟨‖c‖, norm_nonneg c, 0, le_rfl, ParabolicC0AlphaWith.const c le_rfl le_rfl⟩
+
+/-- Spatial boundedness and Lipschitz control on the projection give parabolic `C^{0,1}`
+control for the time-independent lift. -/
+theorem of_snd_lipschitzOnWith {B : ℝ} {K : ℝ≥0} {f : X → E}
+    (hB_nonneg : 0 ≤ B)
+    (hB : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ‖f x‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.snd '' s)) :
+    ParabolicC0AlphaOn 1 (fun z : ℝ × X => f z.2) s :=
+  ⟨B, hB_nonneg, (K : ℝ), NNReal.coe_nonneg K,
+    ParabolicC0AlphaWith.of_snd_lipschitzOnWith hB hL⟩
 
 theorem add (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
     ParabolicC0AlphaOn α (fun z => u z + v z) s := by
