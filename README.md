@@ -501,9 +501,9 @@ packages the canonical stationary local solution attached to
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, including
   finite-family primitive schematic RHS estimates with the same shared
   determinant constant and matching existential finite-family schematic RHS
-  closures, plus finite-family primitive schematic RHS difference closures with
-  one lower bound shared by both metric families, quantitative compact
-  inverse-action and inverse-bilinear
+  closures, plus finite-family primitive schematic RHS difference closures and
+  function-level bounded-difference estimates with one lower bound shared by both
+  metric families, quantitative compact inverse-action and inverse-bilinear
   estimates, plus
   entrywise and whole-valued finite matrix transpose, pointwise
   symmetrization, explicit bounded transpose/symmetrization estimates and
