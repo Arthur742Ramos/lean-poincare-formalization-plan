@@ -2888,6 +2888,34 @@ theorem matrix_inv_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedFiel
     · intro j
       exact matrix_inv_entry_with (M := M) hH hM hδpos hdet i j
 
+/-- A finite family of inverse-matrix-valued functions has explicit bounded parabolic
+`C^{0,α}` estimates with one compact determinant lower bound shared by the whole family. -/
+theorem matrix_inv_family_with_of_isCompact_det_ne_zero {ι n 𝕜 : Type*} [Fintype ι]
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {B H : ι → n → n → ℝ} {M : ι → ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ a i j, 0 ≤ B a i j) (hH : ∀ a i j, 0 ≤ H a i j)
+    (hM : ∀ a i j,
+      ParabolicC0AlphaWith (B a i j) (H a i j) α (fun z => M a z i j) K)
+    (hdet_ne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → (M a z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M a z).det‖) ∧
+      ∀ a,
+        ParabolicC0AlphaWith
+          (∑ i : n, ∑ j : n, matrixInvEntryBoundConst (𝕜 := 𝕜) δ (B a) i j)
+          (∑ i : n, ∑ j : n, matrixInvEntryHolderConst (𝕜 := 𝕜) δ (B a) (H a) i j)
+          α (fun z => (M a z)⁻¹) K := by
+  have hMctrl : ∀ a i j, ParabolicC0AlphaOn α (fun z => M a z i j) K := by
+    intro a i j
+    exact ⟨B a i j, hB a i j, H a i j, hH a i j, hM a i j⟩
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro a
+  exact matrix_inv_with (M := M a) (B := B a) (H := H a) (δ := δ)
+    (hH a) (hM a) hδpos (hdet a)
+
 /-- Sup constant for the difference of two inverse finite-matrix fields, using a uniform
 matrix-difference bound. -/
 def matrixInvSubBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]

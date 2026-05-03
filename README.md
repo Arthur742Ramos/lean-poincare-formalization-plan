@@ -469,7 +469,8 @@ packages the canonical stationary local solution attached to
   bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds,
   including finite-index common determinant lower bounds for compact families,
-  and compact-domain inverse,
+  finite-family compact inverse estimates with the same shared determinant
+  constant, and compact-domain inverse,
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, including
   quantitative compact inverse-action and inverse-bilinear estimates, plus
   entrywise and whole-valued finite matrix transpose, pointwise
@@ -515,7 +516,7 @@ packages the canonical stationary local solution attached to
   inverse-Gram action/bilinear,
   inverse-principal contraction, inverse-Gram Christoffel, and schematic RHS
   bridges exposing the determinant lower-bound constant, plus finite-family
-  local-frame Gram determinant lower-bound handoffs, compact
+  local-frame Gram determinant lower-bound and inverse-estimate handoffs, compact
   local-frame inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel, and schematic RHS `C^{0,α}` difference control, including
   entrywise-difference inverse Gram, inverse-principal, inverse-Gram
