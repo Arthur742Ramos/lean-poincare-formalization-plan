@@ -354,7 +354,8 @@ packages the canonical stationary local solution attached to
   parabolic Hölder/`C^{0,α}` lifts of time-independent spatial
   Hölder/Lipschitz functions on the spatial projection, bounded
   `C^{0,α}` composition under range or explicit closed-sup-ball bounds,
-  global-Lipschitz composition with automatic composed sup bounds, and
+  global and closed-ball Lipschitz composition with automatic composed sup
+  bounds, and
   exponent lowering on unit parabolic-diameter domains with closed-ball and
   closed-cylinder specializations across the Holder and `C^{0,α}` interfaces,
   backed by closed-ball diameter control, product ball/closed-ball

@@ -1002,8 +1002,8 @@ from zero, plus closure under taking norms and Lipschitz composition on the
 controlled range, direct parabolic Hölder/`C^{0,α}` lifts of time-independent
 spatial Hölder/Lipschitz functions on the spatial projection, bounded
 `C^{0,α}` composition under range or
-explicit closed-sup-ball bounds, global-Lipschitz composition with automatic
-composed sup bounds, exponent lowering on unit parabolic-diameter
+explicit closed-sup-ball bounds, global and closed-ball Lipschitz composition
+with automatic composed sup bounds, exponent lowering on unit parabolic-diameter
 domains with closed-ball and closed-cylinder specializations across the Holder
 and `C^{0,α}` interfaces, and closed-ball diameter control,
 bidirectional product ball/closed-ball compatibility for parabolic balls and
