@@ -1212,6 +1212,82 @@ theorem matrix_mul_norm_sub_le {l m n A : Type*} [Fintype l] [Fintype m] [Fintyp
         Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
   simpa [entryBound] using hnorm
 
+/-- Matrix-norm Lipschitz constant for varying the right factor of a matrix product, with the
+left factor bounded entrywise by `BM`. -/
+def matrixMulRightFactorLipschitzConst {l m n : Type*} [Fintype l] [Fintype m]
+    [Fintype n] (BM : l → m → ℝ) : ℝ :=
+  ∑ i : l, ∑ _j : n, ∑ k : m, BM i k
+
+/-- Matrix-norm Lipschitz constant for varying the left factor of a matrix product, with the
+right factor bounded entrywise by `BN`. -/
+def matrixMulLeftFactorLipschitzConst {l m n : Type*} [Fintype l] [Fintype m]
+    [Fintype n] (BN : m → n → ℝ) : ℝ :=
+  ∑ _i : l, ∑ j : n, ∑ k : m, BN k j
+
+theorem matrixMulRightFactorLipschitzConst_nonneg {l m n : Type*} [Fintype l]
+    [Fintype m] [Fintype n] {BM : l → m → ℝ} (hBM : ∀ i k, 0 ≤ BM i k) :
+    0 ≤ matrixMulRightFactorLipschitzConst (n := n) BM := by
+  exact Finset.sum_nonneg fun i _hi =>
+    Finset.sum_nonneg fun _j _hj =>
+      Finset.sum_nonneg fun k _hk => hBM i k
+
+theorem matrixMulLeftFactorLipschitzConst_nonneg {l m n : Type*} [Fintype l]
+    [Fintype m] [Fintype n] {BN : m → n → ℝ} (hBN : ∀ k j, 0 ≤ BN k j) :
+    0 ≤ matrixMulLeftFactorLipschitzConst (l := l) BN := by
+  exact Finset.sum_nonneg fun _i _hi =>
+    Finset.sum_nonneg fun j _hj =>
+      Finset.sum_nonneg fun k _hk => hBN k j
+
+/-- Finite matrix multiplication is Lipschitz in the elementwise matrix norm on bounded
+left/right factors, with separate constants for the two factor differences. -/
+theorem matrix_mul_norm_sub_le_const {l m n A : Type*} [Fintype l] [Fintype m]
+    [Fintype n] [NormedRing A] {BM : l → m → ℝ} {BN : m → n → ℝ}
+    (M M' : Matrix l m A) (N N' : Matrix m n A)
+    (hM : ∀ i k, ‖M i k‖ ≤ BM i k) (hN' : ∀ k j, ‖N' k j‖ ≤ BN k j) :
+    ‖M * N - M' * N'‖ ≤
+      matrixMulRightFactorLipschitzConst (n := n) BM * ‖N - N'‖ +
+        matrixMulLeftFactorLipschitzConst (l := l) BN * ‖M - M'‖ := by
+  have hBM_nonneg : ∀ i k, 0 ≤ BM i k := by
+    intro i k
+    exact (norm_nonneg _).trans (hM i k)
+  have hBN_nonneg : ∀ k j, 0 ≤ BN k j := by
+    intro k j
+    exact (norm_nonneg _).trans (hN' k j)
+  have hbase := matrix_mul_norm_sub_le M M' N N' hM hN'
+  refine hbase.trans ?_
+  calc
+    (∑ i : l, ∑ j : n, ∑ k : m,
+        (BM i k * ‖N k j - N' k j‖ + BN k j * ‖M i k - M' i k‖))
+        ≤
+      ∑ i : l, ∑ j : n, ∑ k : m,
+        (BM i k * ‖N - N'‖ + BN k j * ‖M - M'‖) := by
+      refine Finset.sum_le_sum fun i _hi =>
+        Finset.sum_le_sum fun j _hj =>
+          Finset.sum_le_sum fun k _hk => ?_
+      exact add_le_add
+        (mul_le_mul_of_nonneg_left
+          (by simpa using Matrix.norm_entry_le_entrywise_sup_norm (N - N') (i := k) (j := j))
+          (hBM_nonneg i k))
+        (mul_le_mul_of_nonneg_left
+          (by simpa using Matrix.norm_entry_le_entrywise_sup_norm (M - M') (i := i) (j := k))
+          (hBN_nonneg k j))
+    _ =
+      (∑ i : l, ∑ j : n, ∑ k : m, BM i k * ‖N - N'‖) +
+        (∑ i : l, ∑ j : n, ∑ k : m, BN k j * ‖M - M'‖) := by
+      simp [Finset.sum_add_distrib]
+    _ =
+      matrixMulRightFactorLipschitzConst (n := n) BM * ‖N - N'‖ +
+        matrixMulLeftFactorLipschitzConst (l := l) BN * ‖M - M'‖ := by
+      have hright :
+          (∑ i : l, ∑ j : n, ∑ k : m, BM i k * ‖N - N'‖) =
+            matrixMulRightFactorLipschitzConst (n := n) BM * ‖N - N'‖ := by
+        simp_rw [matrixMulRightFactorLipschitzConst, Finset.sum_mul]
+      have hleft :
+          (∑ i : l, ∑ j : n, ∑ k : m, BN k j * ‖M - M'‖) =
+            matrixMulLeftFactorLipschitzConst (l := l) BN * ‖M - M'‖ := by
+        simp_rw [matrixMulLeftFactorLipschitzConst, Finset.sum_mul]
+      rw [hright, hleft]
+
 /-- Entries of a matrix-vector product are parabolic `C^{0,α}` when the matrix entries and
 vector components are. -/
 theorem matrix_mulVec_entry {m n A : Type*} [Fintype n] [NormedRing A]
