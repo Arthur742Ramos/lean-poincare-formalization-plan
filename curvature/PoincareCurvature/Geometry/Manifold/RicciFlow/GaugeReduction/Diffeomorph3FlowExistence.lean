@@ -366,8 +366,34 @@ theorem hasMFDerivAt_congr_vectorField
       ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (G.maps3 t x))) :=
   (G.satisfiesAt_congr_vectorField hs hXY).hasMFDerivAt x
 
-/-- At a neighborhood time, the preferred-chart derivative readout can be rewritten to any vector
-field that agrees with the original one along the flow near that time. -/
+/-- At a neighborhood time, the preferred-chart derivative readout can be
+rewritten to any vector field that agrees with the original one along the flow
+near that time. -/
+theorem hasDerivAt_extChartAt_eval_congr_vectorField
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+        (Y t ((G.maps3 t) x))) t := by
+  have hsrc_ext : (G.maps3 t) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+    mem_extChartAt_source ((G.maps3 t) x)
+  have hsrc : (G.maps3 t) x ∈ (chartAt H ((G.maps3 t) x)).source :=
+    extChartAt_source I ((G.maps3 t) x) ▸ hsrc_ext
+  rw [hasDerivAt_iff_hasFDerivAt, ← hasMFDerivAt_iff_hasFDerivAt]
+  apply (HasMFDerivAt.comp t (hasMFDerivAt_extChartAt (I := I) hsrc)
+    (G.hasMFDerivAt_congr_vectorField hs hXY x)).congr_mfderiv
+  rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton,
+    mfderiv_chartAt_eq_tangentCoordChange hsrc]
+  exact ContinuousLinearMap.comp_toSpanSingleton _ _
+
+/-- At a neighborhood time, the centered preferred-chart derivative readout can
+be rewritten to any vector field that agrees with the original one along the
+flow near that time. -/
 theorem hasDerivAt_extChartAt_eval_self_congr_vectorField
     {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
     {s : Set ℝ} {t₀ t : ℝ}
@@ -378,21 +404,9 @@ theorem hasDerivAt_extChartAt_eval_self_congr_vectorField
     HasDerivAt
       (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
       (Y t ((G.maps3 t) x)) t := by
+  have h := G.hasDerivAt_extChartAt_eval_congr_vectorField hs hXY x
   have hsrc_ext : (G.maps3 t) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
     mem_extChartAt_source ((G.maps3 t) x)
-  have hsrc : (G.maps3 t) x ∈ (chartAt H ((G.maps3 t) x)).source :=
-    extChartAt_source I ((G.maps3 t) x) ▸ hsrc_ext
-  have h :
-      HasDerivAt
-        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
-        (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
-          (Y t ((G.maps3 t) x))) t := by
-    rw [hasDerivAt_iff_hasFDerivAt, ← hasMFDerivAt_iff_hasFDerivAt]
-    apply (HasMFDerivAt.comp t (hasMFDerivAt_extChartAt (I := I) hsrc)
-      (G.hasMFDerivAt_congr_vectorField hs hXY x)).congr_mfderiv
-    rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton,
-      mfderiv_chartAt_eq_tangentCoordChange hsrc]
-    exact ContinuousLinearMap.comp_toSpanSingleton _ _
   rw [tangentCoordChange_self (I := I)
     (x := (G.maps3 t) x) (z := (G.maps3 t) x)
     (v := Y t ((G.maps3 t) x)) hsrc_ext] at h
@@ -411,8 +425,26 @@ theorem hasMFDerivAt_congr_vectorField_of_mem_Ioo
       ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (G.maps3 t x))) :=
   G.hasMFDerivAt_congr_vectorField (Icc_mem_nhds ht.1 ht.2) hXY x
 
-/-- A closed-interval raw gauge-flow witness gives the ordinary interior preferred-chart derivative
-for any vector field that agrees with the original one along the flow near the interior time. -/
+/-- A closed-interval raw gauge-flow witness gives the ordinary interior
+preferred-chart derivative for any vector field that agrees with the original
+one along the flow near the interior time. -/
+theorem hasDerivAt_extChartAt_eval_congr_vectorField_of_mem_Ioo
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    (ht : t ∈ Ioo tmin tmax)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+        (Y t ((G.maps3 t) x))) t :=
+  G.hasDerivAt_extChartAt_eval_congr_vectorField
+    (Icc_mem_nhds ht.1 ht.2) hXY x
+
+/-- A closed-interval raw gauge-flow witness gives the ordinary interior
+centered preferred-chart derivative for any vector field that agrees with the
+original one along the flow near the interior time. -/
 theorem hasDerivAt_extChartAt_eval_self_congr_vectorField_of_mem_Ioo
     {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
     {tmin tmax t₀ t : ℝ}
@@ -2940,6 +2972,74 @@ theorem hasDerivAt_extChartAt_eval_self
           (((G.flow sol).maps3 t) x)) t :=
   (G.flow sol).hasDerivAt_extChartAt_eval_self hs x
 
+/-- Ordinary fixed-IVP raw intrinsic gauge-flow derivatives can be rewritten to
+a neighborhood-equal vector field. -/
+theorem hasMFDerivAt_congr_vectorField
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow sol).maps3 τ) x) =
+        Y τ (((G.flow sol).maps3 τ) x))
+    (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ ((G.flow sol).maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (((G.flow sol).maps3 t) x))) :=
+  (G.flow sol).hasMFDerivAt_congr_vectorField hs hXY x
+
+/-- Ordinary fixed-IVP raw intrinsic gauge-flow preferred-chart derivatives can
+be rewritten to a neighborhood-equal vector field. -/
+theorem hasDerivAt_extChartAt_eval_congr_vectorField
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow sol).maps3 τ) x) =
+        Y τ (((G.flow sol).maps3 τ) x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow sol).maps3 t) x))
+        (((G.flow sol).maps3 τ) x))
+      (tangentCoordChange I (((G.flow sol).maps3 t) x) (((G.flow sol).maps3 t) x)
+        (((G.flow sol).maps3 t) x) (Y t (((G.flow sol).maps3 t) x))) t :=
+  (G.flow sol).hasDerivAt_extChartAt_eval_congr_vectorField hs hXY x
+
+/-- Ordinary fixed-IVP raw intrinsic gauge-flow centered preferred-chart
+derivatives can be rewritten to a neighborhood-equal vector field. -/
+theorem hasDerivAt_extChartAt_eval_self_congr_vectorField
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow sol).maps3 τ) x) =
+        Y τ (((G.flow sol).maps3 τ) x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow sol).maps3 t) x))
+        (((G.flow sol).maps3 τ) x))
+      (Y t (((G.flow sol).maps3 t) x)) t :=
+  (G.flow sol).hasDerivAt_extChartAt_eval_self_congr_vectorField hs hXY x
+
 /-- Fixed-IVP raw intrinsic gauge-flow curves are ordinarily continuous at
 neighborhood-times in preferred chart coordinates. -/
 theorem continuousAt_extChartAt_eval
@@ -4398,6 +4498,77 @@ theorem hasDerivAt_extChartAt_eval_self
         sol.1.toIntrinsicDeTurckSolution.background t
           (((G.flow ivp sol).maps3 t) x)) t :=
   (G.forInitialValueProblem ivp).hasDerivAt_extChartAt_eval_self sol hs x
+
+/-- Ordinary theorem-family raw intrinsic gauge-flow derivatives can be
+rewritten to a neighborhood-equal vector field. -/
+theorem hasMFDerivAt_congr_vectorField
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow ivp sol).maps3 τ) x) =
+        Y τ (((G.flow ivp sol).maps3 τ) x))
+    (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ ((G.flow ivp sol).maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (((G.flow ivp sol).maps3 t) x))) :=
+  (G.forInitialValueProblem ivp).hasMFDerivAt_congr_vectorField sol hs hXY x
+
+/-- Ordinary theorem-family raw intrinsic gauge-flow preferred-chart
+derivatives can be rewritten to a neighborhood-equal vector field. -/
+theorem hasDerivAt_extChartAt_eval_congr_vectorField
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow ivp sol).maps3 τ) x) =
+        Y τ (((G.flow ivp sol).maps3 τ) x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow ivp sol).maps3 t) x))
+        (((G.flow ivp sol).maps3 τ) x))
+      (tangentCoordChange I (((G.flow ivp sol).maps3 t) x)
+        (((G.flow ivp sol).maps3 t) x) (((G.flow ivp sol).maps3 t) x)
+        (Y t (((G.flow ivp sol).maps3 t) x))) t :=
+  (G.forInitialValueProblem ivp).hasDerivAt_extChartAt_eval_congr_vectorField
+    sol hs hXY x
+
+/-- Ordinary theorem-family raw intrinsic gauge-flow centered preferred-chart
+derivatives can be rewritten to a neighborhood-equal vector field. -/
+theorem hasDerivAt_extChartAt_eval_self_congr_vectorField
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (hs : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow ivp sol).maps3 τ) x) =
+        Y τ (((G.flow ivp sol).maps3 τ) x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow ivp sol).maps3 t) x))
+        (((G.flow ivp sol).maps3 τ) x))
+      (Y t (((G.flow ivp sol).maps3 t) x)) t :=
+  (G.forInitialValueProblem ivp).hasDerivAt_extChartAt_eval_self_congr_vectorField
+    sol hs hXY x
 
 /-- Theorem-family raw intrinsic gauge-flow curves are ordinarily continuous at
 neighborhood-times in preferred chart coordinates. -/
