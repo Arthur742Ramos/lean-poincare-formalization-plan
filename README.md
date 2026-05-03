@@ -401,7 +401,7 @@ packages the canonical stationary local solution attached to
   entrywise and whole-valued finite matrix transpose, pointwise
   symmetrization, matrix-product, explicit entrywise/whole-matrix
   product-difference estimates, matrix-vector/vector-matrix closure,
-  explicit bounded matrix-vector estimates,
+  explicit bounded matrix-vector/vector-matrix estimates,
   matrix-vector/vector-matrix product-difference estimates, and
   inverse-matrix vector-product closure, whole finite vector/matrix and
   inverse-matrix packages, finite vector dot products and dot-product
