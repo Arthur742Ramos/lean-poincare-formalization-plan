@@ -1307,8 +1307,9 @@ The parabolic companion `AnalyticPDE/Parabolic/LocalFrameGram.lean` bridges
 those compact time-space Gram determinant facts to parabolic inverse
 Gram-matrix control and inverse-Gram Christoffel/schematic Ricci-DeTurck
 closure, including spatial-Hölder entry-control variants and compact
-quantitative schematic RHS bridges exposing the determinant lower-bound constant,
-including a spatial-Hölder Gram-entry input form.
+quantitative inverse Gram, inverse-Gram Christoffel, and schematic RHS bridges
+exposing the determinant lower-bound constant, all with matching spatial-Hölder
+Gram-entry input forms.
 The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
