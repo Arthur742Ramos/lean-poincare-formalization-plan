@@ -2,6 +2,7 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
+public import Mathlib.Analysis.Normed.Operator.Basic
 public import Mathlib.Topology.MetricSpace.Basic
 public import Mathlib.Topology.MetricSpace.Cover
 public import Mathlib.Topology.MetricSpace.ProperSpace
@@ -1409,6 +1410,21 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     _ ≤ ‖c‖ * (C * dα) := mul_le_mul_of_nonneg_left (hu hp hq) (norm_nonneg c)
     _ = (‖c‖ * C) * dα := by ring
 
+/-- A continuous linear map preserves parabolic Holder control, with the operator norm multiplying
+the Holder constant. -/
+theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (hu : ParabolicHolderWith C α u s) :
+    ParabolicHolderWith (‖L‖ * C) α (fun z => L (u z)) s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  calc
+    ‖L (u p) - L (u q)‖ = ‖L (u p - u q)‖ := by rw [← map_sub]
+    _ ≤ ‖L‖ * ‖u p - u q‖ := ContinuousLinearMap.le_opNorm L (u p - u q)
+    _ ≤ ‖L‖ * (C * dα) :=
+      mul_le_mul_of_nonneg_left (hu hp hq) (norm_nonneg L)
+    _ = (‖L‖ * C) * dα := by ring
+
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicHolderWith C α u s)
     (hφ : LipschitzOnWith K φ (u '' s)) :
@@ -1847,6 +1863,14 @@ theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
   exact ⟨(K : ℝ) * C, mul_nonneg (NNReal.coe_nonneg K) hC,
     hCu.comp_lipschitzWith hφ⟩
 
+/-- A continuous linear map preserves existential parabolic Holder control. -/
+theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (hu : ParabolicHolderOn α u s) :
+    ParabolicHolderOn α (fun z => L (u z)) s := by
+  rcases hu with ⟨C, hC, hCu⟩
+  exact ⟨‖L‖ * C, mul_nonneg (norm_nonneg L) hC, hCu.continuousLinearMap L⟩
+
 /-- A spatial Holder estimate on the spatial projection lifts to parabolic Holder control for
 the time-independent time-space function. -/
 theorem of_snd_holder {C : ℝ} (hC : 0 ≤ C) (hα : 0 ≤ α) {f : X → E}
@@ -2275,6 +2299,17 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     ‖c • u p‖ = ‖c‖ * ‖u p‖ := norm_smul c (u p)
     _ ≤ ‖c‖ * B := mul_le_mul_of_nonneg_left (hu hp) (norm_nonneg c)
 
+/-- A continuous linear map preserves sup-norm control, with the operator norm multiplying the
+bound. -/
+theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (hu : ParabolicBoundedWith B u s) :
+    ParabolicBoundedWith (‖L‖ * B) (fun z => L (u z)) s := by
+  intro p hp
+  calc
+    ‖L (u p)‖ ≤ ‖L‖ * ‖u p‖ := ContinuousLinearMap.le_opNorm L (u p)
+    _ ≤ ‖L‖ * B := mul_le_mul_of_nonneg_left (hu hp) (norm_nonneg L)
+
 theorem image_subset_closedBall_zero (hu : ParabolicBoundedWith B u s) :
     u '' s ⊆ Metric.closedBall (0 : E) B := by
   rintro y ⟨p, hp, rfl⟩
@@ -2644,6 +2679,14 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaWith (‖c‖ * B) (‖c‖ * H) α (fun z => c • u z) s :=
   ⟨hu.bounded.smul c, hu.holder.smul c⟩
+
+/-- A continuous linear map preserves parabolic `C^{0,α}` control, with the operator norm
+multiplying both the sup and Holder constants. -/
+theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (hu : ParabolicC0AlphaWith B H α u s) :
+    ParabolicC0AlphaWith (‖L‖ * B) (‖L‖ * H) α (fun z => L (u z)) s :=
+  ⟨hu.bounded.continuousLinearMap L, hu.holder.continuousLinearMap L⟩
 
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ} {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicC0AlphaWith B H α u s)
@@ -3103,6 +3146,15 @@ theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
     add_nonneg (norm_nonneg _) (mul_nonneg (NNReal.coe_nonneg K) hB),
     (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH, ?_⟩
   exact hBH.comp_lipschitzWith hφ
+
+/-- A continuous linear map preserves existential parabolic `C^{0,α}` control. -/
+theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (hu : ParabolicC0AlphaOn α u s) :
+    ParabolicC0AlphaOn α (fun z => L (u z)) s := by
+  rcases hu with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨‖L‖ * B, mul_nonneg (norm_nonneg L) hB,
+    ‖L‖ * H, mul_nonneg (norm_nonneg L) hH, hBH.continuousLinearMap L⟩
 
 theorem time_slice_half_exponent (h : ParabolicC0AlphaOn α u s) :
     ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
