@@ -1025,8 +1025,9 @@ entry/matrix estimates, inverse-Christoffel
 derivative/metric-side and array-level Lipschitz constants,
 inverse-Christoffel bounded Holder entry/array estimates, and
 quadratic-Christoffel matrix-norm Lipschitz and bounded Holder entry/matrix
-estimates, plus supplied-Christoffel and primitive-input schematic RHS entry and
-whole-matrix constants, on entrywise
+estimates, supplied-Christoffel schematic bounded Holder entry/matrix estimates,
+plus supplied-Christoffel and primitive-input schematic RHS entry and
+whole-matrix Lipschitz constants, on entrywise
 bounded finite matrices, using a determinant lower bound for inverse
 estimates; compact nonvanishing determinant data now supplies the needed
 uniform determinant lower bound, including compact-domain inverse-entry,
@@ -1042,9 +1043,9 @@ Christoffel-symbol type inverse-metric contractions and their entrywise/whole-ar
 closure, explicit bounded Holder entry/matrix estimates and whole matrix-valued
 principal-part closure for `g^{ab} H_abij`,
 whole matrix-valued Ricci-coordinate quadratic Christoffel contractions with
-explicit bounded Holder entry/matrix estimates, and a
-whole matrix-valued schematic local Ricci-DeTurck coordinate RHS combining
-those terms, using the finite-product, integer-scalar, reciprocal, and division
+explicit bounded Holder entry/matrix estimates, and supplied-Christoffel
+schematic local Ricci-DeTurck RHS entry/matrix bounded Holder estimates and
+whole matrix-valued closure, using the finite-product, integer-scalar, reciprocal, and division
 closure layer. The companion `AnalyticPDE/Parabolic/LocalFrameGram.lean`
 module bridges compact time-space local-frame Gram determinant nonvanishing to
 parabolic inverse Gram-matrix control and inverse-Gram Christoffel/schematic

@@ -378,8 +378,9 @@ packages the canonical stationary local solution attached to
   inverse-Christoffel derivative/metric-side and array-level Lipschitz constants,
   inverse-Christoffel bounded Holder entry/array estimates, and
   quadratic-Christoffel matrix-norm Lipschitz and bounded Holder entry/matrix
+  estimates, supplied-Christoffel schematic bounded Holder entry/matrix
   estimates, plus supplied-Christoffel and primitive-input schematic RHS entry
-  and whole-matrix constants, on entrywise
+  and whole-matrix Lipschitz constants, on entrywise
   bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds and
   compact-domain inverse,
@@ -394,8 +395,8 @@ packages the canonical stationary local solution attached to
   entry/matrix estimates and whole matrix-valued closure for principal-part
   contractions `g^{ab} H_abij`, explicit bounded Holder entry/matrix estimates
   and whole matrix-valued closure for Ricci-coordinate quadratic Christoffel
-  contractions, and a whole matrix-valued
-  schematic local Ricci-DeTurck coordinate RHS combining those terms, from
+  contractions, and supplied-Christoffel schematic local Ricci-DeTurck RHS
+  entry/matrix bounded Holder estimates and whole matrix-valued closure, from
   entrywise control.  The companion
   `AnalyticPDE/Parabolic/LocalFrameGram.lean` module connects compact
   time-space local-frame Gram determinant nonvanishing to parabolic inverse

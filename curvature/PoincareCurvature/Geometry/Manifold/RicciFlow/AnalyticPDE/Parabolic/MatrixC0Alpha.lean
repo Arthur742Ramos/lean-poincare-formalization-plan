@@ -3739,6 +3739,110 @@ theorem ricciDeTurck_schematic_from_christoffel_norm_sub_le_const {n 𝕜 : Type
         Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
   simpa [entryBound] using hnorm
 
+/-- A supplied-Christoffel schematic Ricci-DeTurck coordinate entry has an explicit bounded
+parabolic `C^{0,α}` estimate from explicit metric, principal-coefficient, and Christoffel-array
+estimates. -/
+theorem ricciDeTurck_schematic_from_christoffel_entry_with {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MH : n → n → ℝ} {HB HH : n → n → n → n → ℝ}
+    {ΓB ΓH : n → n → n → ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {H : ℝ × X → n → n → n → n → 𝕜}
+    {Γ : ℝ × X → n → n → n → 𝕜}
+    (hMH : ∀ a b, 0 ≤ MH a b) (hΓB : ∀ a b c, 0 ≤ ΓB a b c)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) s)
+    (hH : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => H z a b i j) s)
+    (hΓ : ∀ a b c, ParabolicC0AlphaWith (ΓB a b c) (ΓH a b c) α
+      (fun z => Γ z a b c) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i j : n) :
+    ParabolicC0AlphaWith
+      (matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ MB HB i j +
+        christoffelQuadraticRicciEntryBoundConst ΓB i j)
+      (matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ MB MH HB HH i j +
+        christoffelQuadraticRicciEntryHolderConst ΓB ΓH i j)
+      α
+      (fun z =>
+        (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+          ((∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+            (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j))) s := by
+  have hprincipal :
+      ParabolicC0AlphaWith
+        (matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ MB HB i j)
+        (matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ MB MH HB HH i j)
+        α
+        (fun z => ∑ a : n, ∑ b : n,
+          ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) s :=
+    matrix_inv_two_index_contract_entry_with (M := M) (T := H)
+      hMH hM hH hδpos hdet i j
+  have hquadratic :
+      ParabolicC0AlphaWith
+        (christoffelQuadraticRicciEntryBoundConst ΓB i j)
+        (christoffelQuadraticRicciEntryHolderConst ΓB ΓH i j)
+        α
+        (fun z =>
+          (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+            (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)) s :=
+    christoffel_quadratic_ricci_entry_with hΓB hΓ i j
+  exact hprincipal.add hquadratic
+
+/-- The supplied-Christoffel schematic Ricci-DeTurck RHS has an explicit matrix-valued bounded
+parabolic `C^{0,α}` estimate from explicit metric, principal-coefficient, and Christoffel-array
+estimates. -/
+theorem ricciDeTurck_schematic_from_christoffel_with {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MH : n → n → ℝ} {HB HH : n → n → n → n → ℝ}
+    {ΓB ΓH : n → n → n → ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {H : ℝ × X → n → n → n → n → 𝕜}
+    {Γ : ℝ × X → n → n → n → 𝕜}
+    (hMH : ∀ a b, 0 ≤ MH a b)
+    (hHB : ∀ a b i j, 0 ≤ HB a b i j) (hHH : ∀ a b i j, 0 ≤ HH a b i j)
+    (hΓB : ∀ a b c, 0 ≤ ΓB a b c) (hΓH : ∀ a b c, 0 ≤ ΓH a b c)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) s)
+    (hH : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => H z a b i j) s)
+    (hΓ : ∀ a b c, ParabolicC0AlphaWith (ΓB a b c) (ΓH a b c) α
+      (fun z => Γ z a b c) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaWith
+      (∑ i : n, ∑ j : n,
+        (matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ MB HB i j +
+          christoffelQuadraticRicciEntryBoundConst ΓB i j))
+      (∑ i : n, ∑ j : n,
+        (matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ MB MH HB HH i j +
+          christoffelQuadraticRicciEntryHolderConst ΓB ΓH i j))
+      α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+            ((∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+              (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)) :
+          Matrix n n 𝕜)) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      add_nonneg
+        (matrixInvTwoIndexContractEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos MB hHB i j)
+        (christoffelQuadraticRicciEntryBoundConst_nonneg hΓB i j)
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      add_nonneg
+        (matrixInvTwoIndexContractEntryHolderConst_nonneg (𝕜 := 𝕜) hMH hδpos hHB hHH i j)
+        (christoffelQuadraticRicciEntryHolderConst_nonneg hΓB hΓH i j)
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact add_nonneg
+        (matrixInvTwoIndexContractEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos MB hHB i j)
+        (christoffelQuadraticRicciEntryBoundConst_nonneg hΓB i j)
+    · intro j
+      exact add_nonneg
+        (matrixInvTwoIndexContractEntryHolderConst_nonneg (𝕜 := 𝕜) hMH hδpos hHB hHH i j)
+        (christoffelQuadraticRicciEntryHolderConst_nonneg hΓB hΓH i j)
+    · intro j
+      exact ricciDeTurck_schematic_from_christoffel_entry_with
+        hMH hΓB hM hH hΓ hδpos hdet i j
+
 /-- The schematic Ricci-DeTurck coordinate entry is pointwise Lipschitz in the primitive metric,
 first-derivative, and second-derivative arrays, on entrywise bounded matrices with a common
 determinant lower bound. -/
