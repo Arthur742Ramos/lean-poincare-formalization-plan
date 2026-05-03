@@ -5,6 +5,7 @@ public import Mathlib.Analysis.Matrix.Normed
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import Mathlib.LinearAlgebra.Matrix.Symmetric
+public import Mathlib.LinearAlgebra.Matrix.Trace
 
 set_option linter.unusedSectionVars false
 
@@ -800,6 +801,83 @@ theorem matrix_symmetrize_sub_with {n 𝕜 : Type*} [Fintype n] [NormedField �
 theorem matrix_symmetrize_isSymm {n 𝕜 : Type*} [NormedField 𝕜] (M : Matrix n n 𝕜) :
     ((2 : 𝕜)⁻¹ • (M + M.transpose)).IsSymm :=
   (Matrix.isSymm_add_transpose_self M).smul ((2 : 𝕜)⁻¹)
+
+/-- Finite matrix traces preserve parabolic `C^{0,α}` control from entrywise control. -/
+theorem matrix_trace {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {M : ℝ × X → Matrix n n A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) :
+    ParabolicC0AlphaOn α (fun z => Matrix.trace (M z)) s := by
+  simpa [Matrix.trace] using
+    (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n)) (u := fun i z => M z i i)
+      (fun i _hi => hM i i))
+
+/-- Quantitative sup constant for a finite matrix trace. -/
+def matrixTraceBoundConst {n : Type*} [Fintype n] (B : n → n → ℝ) : ℝ :=
+  ∑ i : n, B i i
+
+/-- Quantitative Holder constant for a finite matrix trace. -/
+def matrixTraceHolderConst {n : Type*} [Fintype n] (H : n → n → ℝ) : ℝ :=
+  ∑ i : n, H i i
+
+theorem matrixTraceBoundConst_nonneg {n : Type*} [Fintype n] {B : n → n → ℝ}
+    (hB : ∀ i j, 0 ≤ B i j) :
+    0 ≤ matrixTraceBoundConst B := by
+  simpa [matrixTraceBoundConst] using Finset.sum_nonneg fun i _hi => hB i i
+
+theorem matrixTraceHolderConst_nonneg {n : Type*} [Fintype n] {H : n → n → ℝ}
+    (hH : ∀ i j, 0 ≤ H i j) :
+    0 ≤ matrixTraceHolderConst H := by
+  simpa [matrixTraceHolderConst] using Finset.sum_nonneg fun i _hi => hH i i
+
+/-- Finite matrix traces have an explicit bounded parabolic `C^{0,α}` estimate. -/
+theorem matrix_trace_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {B H : n → n → ℝ} {M : ℝ × X → Matrix n n A}
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s) :
+    ParabolicC0AlphaWith
+      (matrixTraceBoundConst B) (matrixTraceHolderConst H)
+      α (fun z => Matrix.trace (M z)) s := by
+  simpa [Matrix.trace, matrixTraceBoundConst, matrixTraceHolderConst] using
+    (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n)) (B := fun i => B i i) (H := fun i => H i i)
+      (u := fun i z => M z i i) (fun i _hi => hM i i))
+
+/-- Quantitative sup constant for a finite matrix trace difference. -/
+def matrixTraceSubBoundConst {n : Type*} [Fintype n] (B : n → n → ℝ) : ℝ :=
+  ∑ i : n, B i i
+
+/-- Quantitative Holder constant for a finite matrix trace difference. -/
+def matrixTraceSubHolderConst {n : Type*} [Fintype n] (H : n → n → ℝ) : ℝ :=
+  ∑ i : n, H i i
+
+theorem matrixTraceSubBoundConst_nonneg {n : Type*} [Fintype n] {B : n → n → ℝ}
+    (hB : ∀ i j, 0 ≤ B i j) :
+    0 ≤ matrixTraceSubBoundConst B := by
+  simpa [matrixTraceSubBoundConst] using Finset.sum_nonneg fun i _hi => hB i i
+
+theorem matrixTraceSubHolderConst_nonneg {n : Type*} [Fintype n] {H : n → n → ℝ}
+    (hH : ∀ i j, 0 ≤ H i j) :
+    0 ≤ matrixTraceSubHolderConst H := by
+  simpa [matrixTraceSubHolderConst] using Finset.sum_nonneg fun i _hi => hH i i
+
+/-- Finite matrix trace differences have an explicit bounded parabolic `C^{0,α}` estimate. -/
+theorem matrix_trace_sub_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {B H : n → n → ℝ} {M M' : ℝ × X → Matrix n n A}
+    (hMd : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α
+      (fun z => M z i j - M' z i j) s) :
+    ParabolicC0AlphaWith
+      (matrixTraceSubBoundConst B) (matrixTraceSubHolderConst H)
+      α (fun z => Matrix.trace (M z) - Matrix.trace (M' z)) s := by
+  have hsum :
+      ParabolicC0AlphaWith
+        (∑ i : n, B i i) (∑ i : n, H i i)
+        α (fun z => ∑ i : n, (M z i i - M' z i i)) s :=
+    ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n)) (B := fun i => B i i) (H := fun i => H i i)
+      (u := fun i z => M z i i - M' z i i) (fun i _hi => hMd i i)
+  convert hsum using 1
+  · ext z
+    simp [Matrix.trace, Finset.sum_sub_distrib]
 
 /-- Entrywise sup constants for replacing row `j` by the `i`th coordinate vector. -/
 def matrixUpdateRowBoundConst {n A : Type*} [DecidableEq n] [NormedRing A]
