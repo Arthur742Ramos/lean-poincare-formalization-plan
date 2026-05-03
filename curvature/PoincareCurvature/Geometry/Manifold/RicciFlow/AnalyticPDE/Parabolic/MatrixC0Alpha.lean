@@ -1933,14 +1933,12 @@ theorem matrix_trace_sub {n A : Type*} [Fintype n] [NormedAddCommGroup A]
     {M N : ℝ × X → Matrix n n A}
     (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s) :
     ParabolicC0AlphaOn α (fun z => Matrix.trace (M z) - Matrix.trace (N z)) s := by
-  have hsum : ParabolicC0AlphaOn α (fun z => ∑ i : n, (M z i i - N z i i)) s := by
-    simpa using
-      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
-        (S := (Finset.univ : Finset n)) (u := fun i z => M z i i - N z i i)
-        (fun i _hi => hdiff i i))
-  convert hsum using 1
-  ext z
-  simp [Matrix.trace, Finset.sum_sub_distrib]
+  have hsum :
+      ParabolicC0AlphaOn α (fun z => (∑ i : n, M z i i) - ∑ i : n, N z i i) s :=
+    ParabolicC0AlphaOn.sum_sub_sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n)) (u := fun i z => M z i i)
+      (v := fun i z => N z i i) (fun i _hi => hdiff i i)
+  simpa [Matrix.trace] using hsum
 
 /-- Quantitative sup constant for a finite matrix trace. -/
 def matrixTraceBoundConst {n : Type*} [Fintype n] (B : n → n → ℝ) : ℝ :=
@@ -2001,13 +1999,11 @@ theorem matrix_trace_sub_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
   have hsum :
       ParabolicC0AlphaWith
         (∑ i : n, B i i) (∑ i : n, H i i)
-        α (fun z => ∑ i : n, (M z i i - M' z i i)) s :=
-    ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+        α (fun z => (∑ i : n, M z i i) - ∑ i : n, M' z i i) s :=
+    ParabolicC0AlphaWith.sum_sub_sum (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset n)) (B := fun i => B i i) (H := fun i => H i i)
-      (u := fun i z => M z i i - M' z i i) (fun i _hi => hMd i i)
-  convert hsum using 1
-  · ext z
-    simp [Matrix.trace, Finset.sum_sub_distrib]
+      (u := fun i z => M z i i) (v := fun i z => M' z i i) (fun i _hi => hMd i i)
+  simpa [Matrix.trace] using hsum
 
 /-- Entrywise sup constants for replacing row `j` by the `i`th coordinate vector. -/
 def matrixUpdateRowBoundConst {n A : Type*} [DecidableEq n] [NormedRing A]

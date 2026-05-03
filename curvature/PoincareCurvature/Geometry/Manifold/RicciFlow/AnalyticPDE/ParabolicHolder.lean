@@ -2606,6 +2606,19 @@ theorem sum {ι : Type*} (S : Finset ι) {B H : ι → ℝ} {u : ι → ℝ × X
   ⟨ParabolicBoundedWith.sum S (fun i hi => (h i hi).bounded),
     ParabolicHolderWith.sum S (fun i hi => (h i hi).holder)⟩
 
+/-- Finite sums of termwise differences inherit parabolic `C^{0,α}` control from the termwise
+difference controls. -/
+theorem sum_sub_sum {ι : Type*} (S : Finset ι) {B H : ι → ℝ}
+    {u v : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicC0AlphaWith (B i) (H i) α (fun z => u i z - v i z) s) :
+    ParabolicC0AlphaWith (∑ i ∈ S, B i) (∑ i ∈ S, H i) α
+      (fun z => (∑ i ∈ S, u i z) - ∑ i ∈ S, v i z) s := by
+  classical
+  have hsum := ParabolicC0AlphaWith.sum (s := s) (α := α) S h
+  convert hsum using 1
+  ext z
+  rw [Finset.sum_sub_distrib]
+
 theorem neg (hu : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaWith B H α (fun z => -u z) s :=
   ⟨hu.bounded.neg, hu.holder.neg⟩
@@ -3666,6 +3679,17 @@ theorem sum {ι : Type*} (S : Finset ι) {u : ι → ℝ × X → E}
   refine ⟨∑ i ∈ S, B i, Finset.sum_nonneg hBnonneg,
     ∑ i ∈ S, H i, Finset.sum_nonneg hHnonneg, ?_⟩
   exact ParabolicC0AlphaWith.sum S hBH
+
+/-- Finite sums of termwise differences preserve existential parabolic `C^{0,α}` control from
+the termwise difference controls. -/
+theorem sum_sub_sum {ι : Type*} (S : Finset ι) {u v : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicC0AlphaOn α (fun z => u i z - v i z) s) :
+    ParabolicC0AlphaOn α (fun z => (∑ i ∈ S, u i z) - ∑ i ∈ S, v i z) s := by
+  classical
+  have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s) S h
+  convert hsum using 1
+  ext z
+  rw [Finset.sum_sub_distrib]
 
 /-- Componentwise parabolic `C^{0,α}` control packages a finite vector-valued function as
 parabolic `C^{0,α}`. -/
