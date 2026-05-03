@@ -255,7 +255,9 @@ packages the canonical stationary local solution attached to
   time-derivative data before the gauge-flow conversion; the closed-Picard
   metric-coordinate gauge-pullback route now also consumes product
   Picard-Lindelof hypotheses directly, including open-domain and
-  radius-specialized endpoint forms; model-flow overlap uniqueness now also
+  radius-specialized endpoint forms, and its time-difference component data
+  now localizes monotonically under raw gauge-flow time-set restriction;
+  model-flow overlap uniqueness now also
   covers common closed subintervals of different ambient Picard intervals for
   local, continuous space-time, full variational `(flow, tangent)`, and
   scalar-readout derivative-domain `(t, flow, A(t)u, A(t)v)` packages, with

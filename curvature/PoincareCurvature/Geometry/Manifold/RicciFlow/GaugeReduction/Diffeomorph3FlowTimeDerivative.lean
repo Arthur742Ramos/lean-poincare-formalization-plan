@@ -8256,6 +8256,82 @@ theorem metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_self
   rw [← htc] at hvalue'
   simpa [MetricCoordinateFieldTimeDifferenceComponentDataWithinOn] using hvalue'
 
+/-- Ordinary time-difference component data restricts to smaller raw
+gauge-flow time sets. -/
+theorem MetricCoordinateFieldTimeDifferenceComponentDataOn.mono
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : MetricCoordinateFieldTimeDifferenceComponentDataOn
+      (I := I) (M := M) G g gdot) :
+    MetricCoordinateFieldTimeDifferenceComponentDataOn
+      (I := I) (M := M) (G.mono hst) g gdot := by
+  intro τ hτ x u v
+  exact hdata (hst hτ) x u v
+
+/-- Direct-velocity ordinary time-difference component data restricts to
+smaller raw gauge-flow time sets. -/
+theorem MetricCoordinateFieldTimeDifferenceComponentDataOnSelf.mono
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : MetricCoordinateFieldTimeDifferenceComponentDataOnSelf
+      (I := I) (M := M) G g gdot) :
+    MetricCoordinateFieldTimeDifferenceComponentDataOnSelf
+      (I := I) (M := M) (G.mono hst) g gdot := by
+  intro τ hτ x u v
+  exact hdata (hst hτ) x u v
+
+/-- Within-set time-difference component data restricts to smaller raw
+gauge-flow time sets. -/
+theorem MetricCoordinateFieldTimeDifferenceComponentDataWithinOn.mono
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : MetricCoordinateFieldTimeDifferenceComponentDataWithinOn
+      (I := I) (M := M) G g gdot) :
+    MetricCoordinateFieldTimeDifferenceComponentDataWithinOn
+      (I := I) (M := M) (G.mono hst) g gdot := by
+  letI : NormedAddCommGroup (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  intro τ hτ x u v
+  obtain ⟨Btime, D, htime, hA, hvalue⟩ := hdata (hst hτ) x u v
+  exact ⟨Btime, D, htime.mono hst, hA.mono hst, hvalue⟩
+
+/-- Direct-velocity within-set time-difference component data restricts to
+smaller raw gauge-flow time sets. -/
+theorem MetricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf.mono
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : MetricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf
+      (I := I) (M := M) G g gdot) :
+    MetricCoordinateFieldTimeDifferenceComponentDataWithinOnSelf
+      (I := I) (M := M) (G.mono hst) g gdot := by
+  letI : NormedAddCommGroup (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  intro τ hτ x u v
+  obtain ⟨Btime, D, htime, hA, hvalue⟩ := hdata (hst hτ) x u v
+  exact ⟨Btime, D, htime.mono hst, hA.mono hst, hvalue⟩
+
 /-- Full Fréchet derivatives of the named metric-coordinate field supply the
 within-set time-difference component data by subtracting the canonical frozen
 spatial `fderivWithin` contribution. -/
