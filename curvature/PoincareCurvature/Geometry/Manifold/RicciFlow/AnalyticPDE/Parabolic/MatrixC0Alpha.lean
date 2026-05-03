@@ -1506,12 +1506,26 @@ theorem vector_of_entries {n A : Type*} [Fintype n] [NormedAddCommGroup A]
     ParabolicC0AlphaOn α v s :=
   ParabolicC0AlphaOn.pi hv
 
+/-- Entrywise difference control packages a finite vector-valued difference. -/
+theorem vector_of_entries_sub {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {v w : ℝ × X → n → A}
+    (hdiff : ∀ i, ParabolicC0AlphaOn α (fun z => v z i - w z i) s) :
+    ParabolicC0AlphaOn α (fun z => v z - w z) s :=
+  vector_of_entries hdiff
+
 /-- Entrywise parabolic `C^{0,α}` control packages a finite matrix-valued coefficient family. -/
 theorem matrix_of_entries {m n A : Type*} [Fintype m] [Fintype n] [NormedAddCommGroup A]
     {M : ℝ × X → Matrix m n A}
     (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) :
     ParabolicC0AlphaOn α M s :=
   ParabolicC0AlphaOn.pi fun i => ParabolicC0AlphaOn.pi fun j => hM i j
+
+/-- Entrywise difference control packages a finite matrix-valued difference. -/
+theorem matrix_of_entries_sub {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {M N : ℝ × X → Matrix m n A}
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s) :
+    ParabolicC0AlphaOn α (fun z => M z - N z) s :=
+  matrix_of_entries hdiff
 
 /-- Transposes of finite matrix-valued parabolic `C^{0,α}` functions are parabolic `C^{0,α}`
 from entrywise control. -/
@@ -1520,6 +1534,15 @@ theorem matrix_transpose {m n A : Type*} [Fintype m] [Fintype n] [NormedAddCommG
     (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) :
     ParabolicC0AlphaOn α (fun z => (M z).transpose) s :=
   matrix_of_entries fun i j => hM j i
+
+/-- Transpose differences preserve existential parabolic `C^{0,α}` control from entrywise
+difference control. -/
+theorem matrix_transpose_sub {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {M N : ℝ × X → Matrix m n A}
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s) :
+    ParabolicC0AlphaOn α (fun z => (M z).transpose - (N z).transpose) s :=
+  matrix_of_entries fun i j => by
+    simpa using hdiff j i
 
 /-- Quantitative sup constant for one entry of a finite matrix transpose. -/
 def matrixTransposeEntryBoundConst {m n : Type*} (B : m → n → ℝ) (i : n) (j : m) :
@@ -1690,6 +1713,22 @@ theorem matrix_symmetrize {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
     (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) :
     ParabolicC0AlphaOn α (fun z => (2 : 𝕜)⁻¹ • (M z + (M z).transpose)) s :=
   ((matrix_of_entries hM).add (matrix_transpose hM)).smul ((2 : 𝕜)⁻¹)
+
+/-- Finite matrix symmetrization differences preserve existential parabolic `C^{0,α}` control
+from entrywise difference control. -/
+theorem matrix_symmetrize_sub {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
+    {M N : ℝ × X → Matrix n n 𝕜}
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s) :
+    ParabolicC0AlphaOn α
+      (fun z => (2 : 𝕜)⁻¹ • (M z + (M z).transpose) -
+        (2 : 𝕜)⁻¹ • (N z + (N z).transpose)) s := by
+  convert ((matrix_of_entries_sub hdiff).add (matrix_transpose_sub hdiff)).smul ((2 : 𝕜)⁻¹)
+      using 1
+  ext z i j
+  change (2 : 𝕜)⁻¹ * (M z i j + M z j i) -
+      (2 : 𝕜)⁻¹ * (N z i j + N z j i) =
+    (2 : 𝕜)⁻¹ * ((M z i j - N z i j) + (M z j i - N z j i))
+  ring
 
 /-- Quantitative sup constant for one entry of finite matrix symmetrization. -/
 def matrixSymmetrizeEntryBoundConst {n 𝕜 : Type*} [NormedField 𝕜]
@@ -1887,6 +1926,21 @@ theorem matrix_trace {n A : Type*} [Fintype n] [NormedAddCommGroup A]
     (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset n)) (u := fun i z => M z i i)
       (fun i _hi => hM i i))
+
+/-- Finite matrix trace differences preserve existential parabolic `C^{0,α}` control from
+entrywise difference control. -/
+theorem matrix_trace_sub {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {M N : ℝ × X → Matrix n n A}
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s) :
+    ParabolicC0AlphaOn α (fun z => Matrix.trace (M z) - Matrix.trace (N z)) s := by
+  have hsum : ParabolicC0AlphaOn α (fun z => ∑ i : n, (M z i i - N z i i)) s := by
+    simpa using
+      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n)) (u := fun i z => M z i i - N z i i)
+        (fun i _hi => hdiff i i))
+  convert hsum using 1
+  ext z
+  simp [Matrix.trace, Finset.sum_sub_distrib]
 
 /-- Quantitative sup constant for a finite matrix trace. -/
 def matrixTraceBoundConst {n : Type*} [Fintype n] (B : n → n → ℝ) : ℝ :=

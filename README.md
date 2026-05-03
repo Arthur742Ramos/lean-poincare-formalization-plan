@@ -496,7 +496,9 @@ packages the canonical stationary local solution attached to
   entrywise and whole-valued finite matrix transpose, pointwise
   symmetrization, explicit bounded transpose/symmetrization estimates and
   corresponding difference estimates, finite matrix trace, explicit bounded
-  trace and trace-difference estimates, matrix-product, explicit bounded
+  trace and trace-difference estimates, existential entrywise-difference
+  readouts for vector/matrix packaging, transpose, symmetrization, and trace,
+  matrix-product, explicit bounded
   entrywise/whole-matrix
   product estimates, explicit entrywise/whole-matrix product-difference estimates,
   matrix-vector/vector-matrix closure,
