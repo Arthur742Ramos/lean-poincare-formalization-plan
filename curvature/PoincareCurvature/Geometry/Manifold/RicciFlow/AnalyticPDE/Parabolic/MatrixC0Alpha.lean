@@ -3843,6 +3843,130 @@ theorem ricciDeTurck_schematic_from_christoffel_with {n 𝕜 : Type*}
       exact ricciDeTurck_schematic_from_christoffel_entry_with
         hMH hΓB hM hH hΓ hδpos hdet i j
 
+/-- The primitive-input schematic Ricci-DeTurck coordinate entry has an explicit bounded
+parabolic `C^{0,α}` estimate from explicit metric, first-derivative, and second-derivative
+coefficient estimates. -/
+theorem ricciDeTurck_schematic_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {MB MH : n → n → ℝ}
+    {DB DH : n → n → n → ℝ} {HB HH : n → n → n → n → ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {D : ℝ × X → n → n → n → 𝕜}
+    {H : ℝ × X → n → n → n → n → 𝕜}
+    (hMH : ∀ a b, 0 ≤ MH a b) (hDB : ∀ a b c, 0 ≤ DB a b c)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) s)
+    (hH : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => H z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i j : n) :
+    ParabolicC0AlphaWith
+      (matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ MB HB i j +
+        christoffelQuadraticRicciEntryBoundConst
+          (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+          i j)
+      (matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ MB MH HB HH i j +
+        christoffelQuadraticRicciEntryHolderConst
+          (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+          (fun a b c => matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ MB MH DB DH a b c)
+          i j)
+      α
+      (fun z =>
+        let Γ : n → n → n → 𝕜 := fun a b c =>
+          (2 : 𝕜)⁻¹ *
+            ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+              (D z b c l + D z c b l - D z l b c)
+        (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+          ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) s := by
+  classical
+  let Γ : ℝ × X → n → n → n → 𝕜 := fun z a b c =>
+    (2 : 𝕜)⁻¹ *
+      ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+        (D z b c l + D z c b l - D z l b c)
+  let ΓB : n → n → n → ℝ := fun a b c =>
+    matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c
+  let ΓH : n → n → n → ℝ := fun a b c =>
+    matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ MB MH DB DH a b c
+  have hΓB_nonneg : ∀ a b c, 0 ≤ ΓB a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos MB hDB a b c
+  have hΓ : ∀ a b c, ParabolicC0AlphaWith (ΓB a b c) (ΓH a b c) α
+      (fun z => Γ z a b c) s := by
+    intro a b c
+    simpa [Γ, ΓB, ΓH] using
+      matrix_inv_christoffel_entry_with (M := M) (D := D)
+        hMH hM hD hδpos hdet a b c
+  simpa [Γ, ΓB, ΓH] using
+    ricciDeTurck_schematic_from_christoffel_entry_with
+      hMH hΓB_nonneg hM hH hΓ hδpos hdet i j
+
+/-- The primitive-input schematic Ricci-DeTurck RHS has an explicit matrix-valued bounded
+parabolic `C^{0,α}` estimate from explicit metric, first-derivative, and second-derivative
+coefficient estimates. -/
+theorem ricciDeTurck_schematic_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {MB MH : n → n → ℝ}
+    {DB DH : n → n → n → ℝ} {HB HH : n → n → n → n → ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {D : ℝ × X → n → n → n → 𝕜}
+    {H : ℝ × X → n → n → n → n → 𝕜}
+    (hMH : ∀ a b, 0 ≤ MH a b) (hDB : ∀ a b c, 0 ≤ DB a b c)
+    (hDH : ∀ a b c, 0 ≤ DH a b c)
+    (hHB : ∀ a b i j, 0 ≤ HB a b i j) (hHH : ∀ a b i j, 0 ≤ HH a b i j)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) s)
+    (hH : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => H z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaWith
+      (∑ i : n, ∑ j : n,
+        (matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ MB HB i j +
+          christoffelQuadraticRicciEntryBoundConst
+            (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+            i j))
+      (∑ i : n, ∑ j : n,
+        (matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ MB MH HB HH i j +
+          christoffelQuadraticRicciEntryHolderConst
+            (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+            (fun a b c =>
+              matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ MB MH DB DH a b c)
+            i j))
+      α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          let Γ : n → n → n → 𝕜 := fun a b c =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+                (D z b c l + D z c b l - D z l b c)
+          (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+            ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+              (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) :
+          Matrix n n 𝕜)) s := by
+  classical
+  let Γ : ℝ × X → n → n → n → 𝕜 := fun z a b c =>
+    (2 : 𝕜)⁻¹ *
+      ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+        (D z b c l + D z c b l - D z l b c)
+  let ΓB : n → n → n → ℝ := fun a b c =>
+    matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c
+  let ΓH : n → n → n → ℝ := fun a b c =>
+    matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ MB MH DB DH a b c
+  have hΓB_nonneg : ∀ a b c, 0 ≤ ΓB a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos MB hDB a b c
+  have hΓH_nonneg : ∀ a b c, 0 ≤ ΓH a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntryHolderConst_nonneg (𝕜 := 𝕜)
+      hMH hδpos hDB hDH a b c
+  have hΓ : ∀ a b c, ParabolicC0AlphaWith (ΓB a b c) (ΓH a b c) α
+      (fun z => Γ z a b c) s := by
+    intro a b c
+    simpa [Γ, ΓB, ΓH] using
+      matrix_inv_christoffel_entry_with (M := M) (D := D)
+        hMH hM hD hδpos hdet a b c
+  simpa [Γ, ΓB, ΓH] using
+    ricciDeTurck_schematic_from_christoffel_with
+      hMH hHB hHH hΓB_nonneg hΓH_nonneg hM hH hΓ hδpos hdet
+
 /-- The schematic Ricci-DeTurck coordinate entry is pointwise Lipschitz in the primitive metric,
 first-derivative, and second-derivative arrays, on entrywise bounded matrices with a common
 determinant lower bound. -/
