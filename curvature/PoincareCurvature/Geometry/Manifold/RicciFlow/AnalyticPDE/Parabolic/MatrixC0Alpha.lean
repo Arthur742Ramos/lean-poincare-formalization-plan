@@ -2078,6 +2078,110 @@ theorem vector_dot_sub_with {n A : Type*} [Fintype n] [NormedRing A]
       (fun i _hi => hvdiff i) (fun i _hi => hwdiff i)
       (fun i _hi => hBv i) (fun i _hi => hBvd i))
 
+/-- Quantitative sup constant for the difference of two finite bilinear matrix contractions
+`v · (M w)`. -/
+def matrixBilinearEntrySubBoundConst {m n : Type*} [Fintype m] [Fintype n]
+    (Bv : m → ℝ) (BM' : m → n → ℝ) (Bw' : n → ℝ) (Bvd : m → ℝ)
+    (BM BMd : m → n → ℝ) (Bwd : n → ℝ) : ℝ :=
+  vectorDotSubBoundConst Bv (fun i => matrixMulVecEntryBoundConst BM' Bw' i) Bvd
+    (fun i => matrixMulVecEntrySubBoundConst BM Bw' BMd Bwd i)
+
+/-- Quantitative Holder constant for the difference of two finite bilinear matrix contractions
+`v · (M w)`. -/
+def matrixBilinearEntrySubHolderConst {m n : Type*} [Fintype m] [Fintype n]
+    (Bv Hv : m → ℝ) (BM' HM' : m → n → ℝ) (Bw' Hw' : n → ℝ)
+    (Bvd Hvd : m → ℝ) (BM HM BMd HMd : m → n → ℝ) (Bwd Hwd : n → ℝ) :
+    ℝ :=
+  vectorDotSubHolderConst Bv Hv
+    (fun i => matrixMulVecEntryBoundConst BM' Bw' i)
+    (fun i => matrixMulVecEntryHolderConst BM' HM' Bw' Hw' i)
+    Bvd Hvd
+    (fun i => matrixMulVecEntrySubBoundConst BM Bw' BMd Bwd i)
+    (fun i => matrixMulVecEntrySubHolderConst BM HM Bw' Hw' BMd HMd Bwd Hwd i)
+
+theorem matrixBilinearEntrySubBoundConst_nonneg {m n : Type*} [Fintype m] [Fintype n]
+    {Bv : m → ℝ} {BM' : m → n → ℝ} {Bw' : n → ℝ} {Bvd : m → ℝ}
+    {BM BMd : m → n → ℝ} {Bwd : n → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hBM' : ∀ i j, 0 ≤ BM' i j)
+    (hBw' : ∀ j, 0 ≤ Bw' j) (hBvd : ∀ i, 0 ≤ Bvd i)
+    (hBM : ∀ i j, 0 ≤ BM i j) (hBMd : ∀ i j, 0 ≤ BMd i j)
+    (hBwd : ∀ j, 0 ≤ Bwd j) :
+    0 ≤ matrixBilinearEntrySubBoundConst Bv BM' Bw' Bvd BM BMd Bwd := by
+  simpa [matrixBilinearEntrySubBoundConst] using
+    (vectorDotSubBoundConst_nonneg hBv
+      (fun i => matrixMulVecEntryBoundConst_nonneg hBM' hBw' i) hBvd
+      (fun i => matrixMulVecEntrySubBoundConst_nonneg hBM hBw' hBMd hBwd i))
+
+theorem matrixBilinearEntrySubHolderConst_nonneg {m n : Type*} [Fintype m] [Fintype n]
+    {Bv Hv : m → ℝ} {BM' HM' : m → n → ℝ} {Bw' Hw' : n → ℝ}
+    {Bvd Hvd : m → ℝ} {BM HM BMd HMd : m → n → ℝ} {Bwd Hwd : n → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i)
+    (hBM' : ∀ i j, 0 ≤ BM' i j) (hHM' : ∀ i j, 0 ≤ HM' i j)
+    (hBw' : ∀ j, 0 ≤ Bw' j) (hHw' : ∀ j, 0 ≤ Hw' j)
+    (hBvd : ∀ i, 0 ≤ Bvd i) (hHvd : ∀ i, 0 ≤ Hvd i)
+    (hBM : ∀ i j, 0 ≤ BM i j) (hHM : ∀ i j, 0 ≤ HM i j)
+    (hBMd : ∀ i j, 0 ≤ BMd i j) (hHMd : ∀ i j, 0 ≤ HMd i j)
+    (hBwd : ∀ j, 0 ≤ Bwd j) (hHwd : ∀ j, 0 ≤ Hwd j) :
+    0 ≤ matrixBilinearEntrySubHolderConst Bv Hv BM' HM' Bw' Hw' Bvd Hvd
+      BM HM BMd HMd Bwd Hwd := by
+  simpa [matrixBilinearEntrySubHolderConst] using
+    (vectorDotSubHolderConst_nonneg hBv hHv
+      (fun i => matrixMulVecEntryBoundConst_nonneg hBM' hBw' i)
+      (fun i => matrixMulVecEntryHolderConst_nonneg hBM' hHM' hBw' hHw' i)
+      hBvd hHvd
+      (fun i => matrixMulVecEntrySubBoundConst_nonneg hBM hBw' hBMd hBwd i)
+      (fun i =>
+        matrixMulVecEntrySubHolderConst_nonneg hBM hHM hBw' hHw' hBMd hHMd hBwd hHwd i))
+
+/-- Differences of finite bilinear matrix contractions have an explicit bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_bilinear_entry_sub_with {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedRing A]
+    {Bv Hv Bvd Hvd : m → ℝ} {BM HM BM' HM' BMd HMd : m → n → ℝ}
+    {Bw' Hw' Bwd Hwd : n → ℝ}
+    {v v' : ℝ × X → m → A} {M M' : ℝ × X → Matrix m n A}
+    {w w' : ℝ × X → n → A}
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaWith (BM i j) (HM i j) α
+      (fun z => M z i j) s)
+    (hM' : ∀ i j, ParabolicC0AlphaWith (BM' i j) (HM' i j) α
+      (fun z => M' z i j) s)
+    (hw' : ∀ j, ParabolicC0AlphaWith (Bw' j) (Hw' j) α (fun z => w' z j) s)
+    (hvdiff : ∀ i, ParabolicC0AlphaWith (Bvd i) (Hvd i) α
+      (fun z => v z i - v' z i) s)
+    (hMdiff : ∀ i j, ParabolicC0AlphaWith (BMd i j) (HMd i j) α
+      (fun z => M z i j - M' z i j) s)
+    (hwdiff : ∀ j, ParabolicC0AlphaWith (Bwd j) (Hwd j) α
+      (fun z => w z j - w' z j) s)
+    (hBv : ∀ i, 0 ≤ Bv i) (hBM : ∀ i j, 0 ≤ BM i j)
+    (hBM' : ∀ i j, 0 ≤ BM' i j) (hBMd : ∀ i j, 0 ≤ BMd i j)
+    (hBvd : ∀ i, 0 ≤ Bvd i) :
+    ParabolicC0AlphaWith
+      (matrixBilinearEntrySubBoundConst Bv BM' Bw' Bvd BM BMd Bwd)
+      (matrixBilinearEntrySubHolderConst Bv Hv BM' HM' Bw' Hw' Bvd Hvd
+        BM HM BMd HMd Bwd Hwd)
+      α (fun z =>
+        (∑ i : m, v z i * (M z).mulVec (w z) i) -
+          ∑ i : m, v' z i * (M' z).mulVec (w' z) i) s := by
+  classical
+  simpa [matrixBilinearEntrySubBoundConst, matrixBilinearEntrySubHolderConst] using
+    (vector_dot_sub_with (X := X) (α := α) (s := s)
+      (Bv := Bv) (Hv := Hv)
+      (Bw' := fun i => matrixMulVecEntryBoundConst BM' Bw' i)
+      (Hw' := fun i => matrixMulVecEntryHolderConst BM' HM' Bw' Hw' i)
+      (Bvd := Bvd) (Hvd := Hvd)
+      (Bwd := fun i => matrixMulVecEntrySubBoundConst BM Bw' BMd Bwd i)
+      (Hwd := fun i => matrixMulVecEntrySubHolderConst BM HM Bw' Hw' BMd HMd Bwd Hwd i)
+      (v := v) (v' := v')
+      (w := fun z i => (M z).mulVec (w z) i)
+      (w' := fun z i => (M' z).mulVec (w' z) i)
+      hv
+      (fun i => matrix_mulVec_entry_with (M := M') (v := w') hBM' hM' hw' i)
+      hvdiff
+      (fun i => matrix_mulVec_entry_sub_with (M := M) (M' := M') (v := w) (v' := w')
+        hM hw' hMdiff hwdiff hBM hBMd i)
+      hBv hBvd)
+
 /-- Finite bilinear matrix contractions `v · (M w)` preserve parabolic `C^{0,α}` control from
 entrywise control. -/
 theorem matrix_bilinear_entry {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
