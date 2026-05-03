@@ -1782,6 +1782,175 @@ def matrixInvChristoffelEntryLipschitzBound {n 𝕜 : Type*} [Fintype n] [Decida
         (DB j k l + DB k j l + DB l j k) *
           matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i l)
 
+/-- Matrix-norm Lipschitz constant for varying the metric in one inverse-Christoffel contraction
+entry, with the derivative array bounded by `DB`. -/
+def matrixInvChristoffelEntryMetricDiffConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (C : n → n → ℝ) (DB : n → n → n → ℝ)
+    (i j k : n) : ℝ :=
+  ‖(2 : 𝕜)⁻¹‖ *
+    ∑ l : n,
+      (DB j k l + DB k j l + DB l j k) *
+        matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C i l
+
+theorem matrixInvChristoffelEntryMetricDiffConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ)
+    {C : n → n → ℝ} {DB : n → n → n → ℝ} (hDB : ∀ a b c, 0 ≤ DB a b c)
+    (i j k : n) :
+    0 ≤ matrixInvChristoffelEntryMetricDiffConst (𝕜 := 𝕜) δ C DB i j k := by
+  exact mul_nonneg (norm_nonneg _)
+    (Finset.sum_nonneg fun l _hl =>
+      mul_nonneg
+        (add_nonneg (add_nonneg (hDB j k l) (hDB k j l)) (hDB l j k))
+        (matrixInvEntryMatrixNormLipschitzConst_nonneg (𝕜 := 𝕜) hδpos C i l))
+
+/-- One inverse-Christoffel entry is Lipschitz in the metric matrix norm, while retaining the
+explicit derivative-array entry differences. -/
+theorem matrix_inv_christoffel_entry_norm_sub_le_metric_const {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} (M N : Matrix n n 𝕜) (D E : n → n → n → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hE : ∀ a b c, ‖E a b c‖ ≤ DB a b c)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖)
+    (i j k : n) :
+    ‖((2 : 𝕜)⁻¹ *
+        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l *
+          (D j k l + D k j l - D l j k)) -
+      ((2 : 𝕜)⁻¹ *
+        ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l *
+          (E j k l + E k j l - E l j k))‖ ≤
+      ‖(2 : 𝕜)⁻¹‖ *
+        ∑ l : n,
+          matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
+            (‖D j k l - E j k l‖ + ‖D k j l - E k j l‖ +
+              ‖D l j k - E l j k‖) +
+        matrixInvChristoffelEntryMetricDiffConst (𝕜 := 𝕜) δ C DB i j k * ‖M - N‖ := by
+  classical
+  let comboD : n → 𝕜 := fun l => D j k l + D k j l - D l j k
+  let comboE : n → 𝕜 := fun l => E j k l + E k j l - E l j k
+  let comboDiffBound : n → ℝ := fun l =>
+    ‖D j k l - E j k l‖ + ‖D k j l - E k j l‖ + ‖D l j k - E l j k‖
+  let comboBound : n → ℝ := fun l => DB j k l + DB k j l + DB l j k
+  let derivPart : ℝ :=
+    ∑ l : n, matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l * comboDiffBound l
+  let metricPart : ℝ :=
+    ∑ l : n,
+      comboBound l * matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C i l
+  let innerBound : ℝ :=
+    derivPart + metricPart * ‖M - N‖
+  have hinner :
+      ‖(∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+          ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l‖ ≤ innerBound := by
+    have hsum :
+        ‖(∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+            ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l‖ ≤
+          ∑ l : n,
+            (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
+                ‖comboD l - comboE l‖ +
+              comboBound l * ‖(M⁻¹ : Matrix n n 𝕜) i l -
+                (N⁻¹ : Matrix n n 𝕜) i l‖) := by
+      simpa using
+        (norm_finset_sum_mul_sub_sum_mul_le
+          (S := (Finset.univ : Finset n))
+          (B := fun l => matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l)
+          (D := comboBound)
+          (a := fun l => (M⁻¹ : Matrix n n 𝕜) i l)
+          (b := comboD)
+          (c := fun l => (N⁻¹ : Matrix n n 𝕜) i l)
+          (d := comboE)
+          (fun l _hl => matrix_inv_entry_norm_le M hM hδpos hdetM i l)
+          (fun l _hl => by
+            simpa [comboE, comboBound] using christoffelDerivativeCombo_norm_le E hE j k l))
+    refine hsum.trans ?_
+    calc
+      (∑ l : n,
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
+            ‖comboD l - comboE l‖ +
+          comboBound l * ‖(M⁻¹ : Matrix n n 𝕜) i l -
+            (N⁻¹ : Matrix n n 𝕜) i l‖)) ≤
+          ∑ l : n,
+            (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l * comboDiffBound l +
+              comboBound l *
+                (matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C i l * ‖M - N‖)) := by
+        refine Finset.sum_le_sum fun l _hl => ?_
+        have hcombo_bound :
+            ‖comboE l‖ ≤ comboBound l := by
+          simpa [comboE, comboBound] using christoffelDerivativeCombo_norm_le E hE j k l
+        have hcombo_bound_nonneg : 0 ≤ comboBound l :=
+          (norm_nonneg _).trans hcombo_bound
+        have hcombo_diff :
+            ‖comboD l - comboE l‖ ≤ comboDiffBound l := by
+          simpa [comboD, comboE, comboDiffBound] using
+            christoffelDerivativeCombo_norm_sub_le D E j k l
+        have hinv_diff :
+            ‖(M⁻¹ : Matrix n n 𝕜) i l - (N⁻¹ : Matrix n n 𝕜) i l‖ ≤
+              matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C i l * ‖M - N‖ :=
+          matrix_inv_entry_norm_sub_le_const_mul M N hM hN hδpos hdetM hdetN i l
+        exact add_le_add
+          (mul_le_mul_of_nonneg_left hcombo_diff
+            (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C i l))
+          (mul_le_mul_of_nonneg_left hinv_diff hcombo_bound_nonneg)
+      _ = innerBound := by
+        have hmetric :
+            (∑ l : n,
+              comboBound l *
+                (matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C i l * ‖M - N‖)) =
+              metricPart * ‖M - N‖ := by
+          calc
+            (∑ l : n,
+              comboBound l *
+                (matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C i l * ‖M - N‖)) =
+                ∑ l : n,
+                  (comboBound l *
+                    matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C i l) * ‖M - N‖ := by
+              refine Finset.sum_congr rfl fun l _hl => ?_
+              ring
+            _ = metricPart * ‖M - N‖ := by
+              simp_rw [metricPart, Finset.sum_mul]
+        rw [Finset.sum_add_distrib, hmetric]
+  have hsplit :
+      ((2 : 𝕜)⁻¹ * (∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l)) -
+        ((2 : 𝕜)⁻¹ * (∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l)) =
+          (2 : 𝕜)⁻¹ *
+            ((∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+              ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l) := by
+    ring
+  have hmetric_const :
+      matrixInvChristoffelEntryMetricDiffConst (𝕜 := 𝕜) δ C DB i j k =
+        ‖(2 : 𝕜)⁻¹‖ * metricPart := by
+    simp [matrixInvChristoffelEntryMetricDiffConst, metricPart, comboBound]
+  calc
+    ‖((2 : 𝕜)⁻¹ *
+        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l *
+          (D j k l + D k j l - D l j k)) -
+      ((2 : 𝕜)⁻¹ *
+        ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l *
+          (E j k l + E k j l - E l j k))‖ =
+        ‖((2 : 𝕜)⁻¹ * (∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l)) -
+          ((2 : 𝕜)⁻¹ * (∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l))‖ := by
+      simp [comboD, comboE]
+    _ = ‖(2 : 𝕜)⁻¹ *
+          ((∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+            ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l)‖ := by
+      rw [hsplit]
+    _ ≤ ‖(2 : 𝕜)⁻¹‖ *
+        ‖(∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+          ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l‖ :=
+      norm_mul_le _ _
+    _ ≤ ‖(2 : 𝕜)⁻¹‖ * innerBound :=
+      mul_le_mul_of_nonneg_left hinner (norm_nonneg _)
+    _ = ‖(2 : 𝕜)⁻¹‖ * derivPart +
+        matrixInvChristoffelEntryMetricDiffConst (𝕜 := 𝕜) δ C DB i j k * ‖M - N‖ := by
+      rw [hmetric_const]
+      simp [innerBound]
+      ring
+    _ = ‖(2 : 𝕜)⁻¹‖ *
+        ∑ l : n,
+          matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
+            (‖D j k l - E j k l‖ + ‖D k j l - E k j l‖ +
+              ‖D l j k - E l j k‖) +
+        matrixInvChristoffelEntryMetricDiffConst (𝕜 := 𝕜) δ C DB i j k * ‖M - N‖ := by
+      simp [derivPart, comboDiffBound]
+
 theorem matrix_inv_christoffel_entry_norm_le_bound {n 𝕜 : Type*} [Fintype n]
     [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
     {DB : n → n → n → ℝ} (M : Matrix n n 𝕜) (D : n → n → n → 𝕜)
