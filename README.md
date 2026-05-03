@@ -399,7 +399,8 @@ packages the canonical stationary local solution attached to
   lifts from ordinary time Hölder exponent `α / 2` to parabolic exponent `α`
   and from time Lipschitz control to parabolic exponent `2`, with direct
   unit-diameter lowering bridges, including fixed-constant
-  `ParabolicC0AlphaWith` lifts from spatial Lipschitz data for every
+  `ParabolicC0AlphaWith` and existential `ParabolicC0AlphaOn` lifts from
+  spatial Lipschitz data for every
   `0 ≤ α ≤ 1` and from time Lipschitz data for every `0 ≤ α ≤ 2`, together
   with closed-ball and closed-cylinder subset variants,
   bounded

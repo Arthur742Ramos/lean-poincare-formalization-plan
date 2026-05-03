@@ -114,10 +114,10 @@ smoothing inside bundle trivializations, and a global smoothing theorem for
 continuous bundle sections constrained to open fiberwise convex subsets of the
 total space, together with an intrinsic fiberwise-`ε` approximation theorem
 for continuous sections of smooth Riemannian vector bundles. The parabolic
-Hölder vocabulary now also includes fixed-constant `C^{0,α}` unit-diameter
-lowering from spatial Lipschitz data for `0 ≤ α ≤ 1` and time Lipschitz data
-for `0 ≤ α ≤ 2`, with closed-ball and closed-cylinder subset variants. The
-section-space
+Hölder vocabulary now also includes fixed-constant and existential `C^{0,α}`
+unit-diameter lowering from spatial Lipschitz data for `0 ≤ α ≤ 1` and time
+Lipschitz data for `0 ≤ α ≤ 2`, with closed-ball and closed-cylinder subset
+variants. The section-space
 side has also been strengthened: continuity can now be checked in local-frame
 coordinates, compact trivialization coordinates can be packaged as
 `ContinuousMap`s, compact overlap identities are proved as coordinate-change
