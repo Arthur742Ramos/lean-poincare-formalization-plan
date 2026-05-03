@@ -2202,6 +2202,37 @@ theorem matrix_inv_sub_with_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n
   exact ⟨δ, hδpos, matrix_inv_sub_with (M := M) (N := N)
     hH hM hN hdiff hδpos hdetM hdetN⟩
 
+/-- Compact-domain version of `matrix_inv_sub_with_entrywise`: pointwise nonvanishing of both
+determinants supplies one common determinant lower bound. -/
+theorem matrix_inv_sub_with_entrywise_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {B H Bd Hd : n → n → ℝ} {M N : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ i j, 0 ≤ B i j) (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j) (hHd : ∀ i j, 0 ≤ Hd i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) K)
+    (hN : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => N z i j) K)
+    (hdiff : ∀ i j,
+      ParabolicC0AlphaWith (Bd i j) (Hd i j) α (fun z => M z i j - N z i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvEntrywiseSubBoundConst (𝕜 := 𝕜) δ B Bd)
+        (matrixInvEntrywiseSubHolderConst (𝕜 := 𝕜) δ B H Bd Hd)
+        α (fun z : ℝ × X => (M z)⁻¹ - (N z)⁻¹) K := by
+  have hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K := by
+    intro i j
+    exact ⟨B i j, hB i j, H i j, hH i j, hM i j⟩
+  have hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) K := by
+    intro i j
+    exact ⟨B i j, hB i j, H i j, hH i j, hN i j⟩
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, matrix_inv_sub_with_entrywise (M := M) (N := N)
+    hH hBd hHd hM hN hdiff hδpos hdetM hdetN⟩
+
 /-- On a compact time-space set, inverse-matrix entries preserve parabolic `C^{0,α}` control from
 entrywise control and pointwise nonvanishing determinant. -/
 theorem matrix_inv_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
