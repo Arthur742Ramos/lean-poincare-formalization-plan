@@ -978,11 +978,14 @@ forgetful projections: restricting a continuous flow and then forgetting to
 `LocalFlowSolution`, or restricting a variational flow and then forgetting to
 continuous/local flow data, is definitionally the same as forgetting first and
 then restricting.
-Base-flow compatibility now also has common-subinterval forms:
+Model-flow compatibility now also has common-subinterval forms:
 `LocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_mem` and
 `ContinuousLocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_mem` prove
 closed-interval overlap equality after restricting two packages with different
-ambient Picard intervals to a shared interval containing the same base time.
+ambient Picard intervals to a shared interval containing the same base time,
+and
+`VariationalLocalFlowSolution.flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem`
+does the same for the full `(flow, tangent)` pair.
 These are the overlap/localization maps needed before chartwise solutions can be
 glued into a manifold-level flow. Base-flow uniqueness now also has overlap
 forms for `LocalFlowSolution` and `ContinuousLocalFlowSolution`: two packages

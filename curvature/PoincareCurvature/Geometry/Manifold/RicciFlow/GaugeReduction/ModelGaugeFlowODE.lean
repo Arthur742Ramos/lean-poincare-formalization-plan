@@ -3832,6 +3832,57 @@ theorem flow_tangent_eq_of_lipschitzOnWith_opNorm_bound_of_mem_Icc
   α.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem β hxα hxβ
     ht₀ hf_lip hα_base_mem hβ_base_mem hD_bound ht
 
+/-- Common-subinterval overlap uniqueness for the full variational pair
+`(flow, tangent)` when the ambient Picard intervals may differ.  This is the
+chart-gluing form obtained by restricting both variational packages to a shared
+closed interval before applying the single-interval base/tangent uniqueness
+theorem. -/
+theorem flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Icc a b) := by
+  let t₀' : Icc a b := ⟨tbase, Ioo_subset_Icc_self htbase⟩
+  let α' : VariationalLocalFlowSolution f Df t₀' xα rα :=
+    α.restrict hαtime (Ioo_subset_Icc_self htbase) le_rfl
+  let β' : VariationalLocalFlowSolution f Df t₀' xβ rβ :=
+    β.restrict hβtime (Ioo_subset_Icc_self htbase) le_rfl
+  have htbase' : (t₀' : ℝ) ∈ Ioo a b := by
+    simpa [t₀'] using htbase
+  have hα_base_mem' : ∀ t ∈ Ioo a b, α'.flow (x, t) ∈ baseState t := by
+    intro t ht
+    simpa [α'] using hα_base_mem t ht
+  have hβ_base_mem' : ∀ t ∈ Ioo a b, β'.flow (x, t) ∈ baseState t := by
+    intro t ht
+    simpa [β'] using hβ_base_mem t ht
+  have hD_bound' : ∀ t ∈ Ioo a b, ‖Df t (α'.flow (x, t))‖₊ ≤ KD := by
+    intro t ht
+    simpa [α'] using hD_bound t ht
+  have hcommon :
+      EqOn
+        (fun t : ℝ => (α'.flow (x, t), α'.tangent x t))
+        (fun t : ℝ => (β'.flow (x, t), β'.tangent x t))
+        (Icc a b) :=
+    α'.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+      β' hxα hxβ htbase' hf_lip hα_base_mem' hβ_base_mem' hD_bound'
+  simpa [α', β'] using hcommon
+
 /-- Closed-interval overlap uniqueness for the full operator derivative-domain
 tuple `(t, flow, tangent)`. -/
 theorem time_flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
