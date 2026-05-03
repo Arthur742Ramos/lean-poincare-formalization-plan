@@ -493,9 +493,11 @@ packages the canonical stationary local solution attached to
   inverse-Gram bilinear contractions, and inverse-Gram Christoffel/schematic
   Ricci-DeTurck closure, including spatial-Hölder entry-control variants,
   unit-parabolic-diameter spatial-Lipschitz entry-control variants for inverse
-  Gram and schematic RHS bridges at every `0 ≤ α ≤ 1`, fixed-constant and
-  existential closed-ball and closed-cylinder spatial-Lipschitz inverse-Gram
-  and schematic RHS variants, and compact quantitative inverse Gram,
+  Gram, inverse-Gram vector/vector-inverse products, inverse-Gram bilinear
+  contractions, and schematic RHS bridges at every `0 ≤ α ≤ 1`,
+  fixed-constant and existential closed-ball and closed-cylinder
+  spatial-Lipschitz inverse-Gram, inverse-Gram action/bilinear, and schematic
+  RHS variants, and compact quantitative inverse Gram,
   inverse-Gram action/bilinear,
   inverse-principal contraction, inverse-Gram Christoffel, and schematic RHS
   bridges exposing the determinant lower-bound constant, plus compact
