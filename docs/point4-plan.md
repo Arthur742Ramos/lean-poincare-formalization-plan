@@ -1387,7 +1387,12 @@ witnesses from a family of symmetric-carrier interval closure data. The same
 closed-interval `RicciDeTurckChartClosureData`. Ambient interval closure data
 now also has proof-level constructors for genuine symmetric-carrier closure,
 both from an explicit restricted-carrier Picard proof and after shrinking into a
-closed ball contained in the Riemannian metric cone. The density-based
+closed ball contained in the Riemannian metric cone. The metric-cone handoff is
+now also bundled in `SmoothRealizationMetricCone`: a positive-radius ambient
+interval closure package selects the standard shrink and, under the same
+terminal-fit compatibility for reverse encodings, returns the genuine symmetric
+closure datum together with chosen-background, intrinsic, and ordinary theorem
+package witnesses. The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient
 coordinate coe equality on the Picard interval and Riemannian metric locus,

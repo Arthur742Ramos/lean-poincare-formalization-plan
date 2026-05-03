@@ -306,7 +306,11 @@ packages the canonical stationary local solution attached to
   ambient Ricci-DeTurck vector field to the genuine symmetric Riemannian Banach
   carrier: geometric RHS symmetry proves tangency to symmetric bilinear forms,
   and the ambient interval Lipschitz estimate descends to the restricted
-  metric-locus vector field.
+  metric-locus vector field. `SmoothRealizationMetricCone.lean` now bundles the
+  positive-radius metric-cone shrink handoff from ambient interval closure data
+  to genuine symmetric-carrier closure data and the chosen-background,
+  intrinsic, and ordinary theorem-package witnesses, while still requiring the
+  reverse-encoding terminal-fit compatibility for the selected shrink.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
