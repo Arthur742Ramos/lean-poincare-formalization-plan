@@ -1009,6 +1009,9 @@ The common-subinterval layer now also exposes direct pointwise readouts for the
 local, continuous, full variational-pair, and scalar-readout conclusions, plus
 common-interval time-graph compatibility for `(t, flow, tangent)` and
 common-interval scalar-state compatibility for `(flow, A(t)u, A(t)v)`.
+The base-flow and full variational-pair common-subinterval readouts now also
+have open-interval `Ioo` forms, so chart-gluing arguments can use the visible
+open overlap directly instead of manually restricting closed-overlap equality.
 These are the overlap/localization maps needed before chartwise solutions can be
 glued into a manifold-level flow. Base-flow uniqueness now also has overlap
 forms for `LocalFlowSolution` and `ContinuousLocalFlowSolution`: two packages
