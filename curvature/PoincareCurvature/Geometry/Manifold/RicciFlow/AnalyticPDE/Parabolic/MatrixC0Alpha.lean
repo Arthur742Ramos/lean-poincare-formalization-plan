@@ -11015,6 +11015,159 @@ theorem ricciDeTurck_schematic_family_of_isCompact_det_ne_zero
   exact ricciDeTurck_schematic (M := M r) (D := D r) (H := H r)
     (hM r) (hD r) (hH r) hδpos (hdet r)
 
+/-- Compact-domain finite-family quantitative schematic Ricci-DeTurck RHS differences from
+bounded primitive-input differences, with one determinant lower bound shared by both metric
+families. -/
+theorem ricciDeTurckSchematicMatrix_sub_with_family_of_isCompact_det_ne_zero
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {MB MH : κ → n → n → ℝ}
+    {DB DH : κ → n → n → n → ℝ}
+    {HB HH : κ → n → n → n → n → ℝ}
+    {ηM ηD : κ → ℝ} {ηH : κ → n → n → ℝ}
+    {M N : κ → ℝ × X → Matrix n n 𝕜}
+    {D E : κ → ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : κ → ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hMB : ∀ r a b, 0 ≤ MB r a b) (hMH : ∀ r a b, 0 ≤ MH r a b)
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hDH : ∀ r a b c, 0 ≤ DH r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hHH : ∀ r a b i j, 0 ≤ HH r a b i j)
+    (hM : ∀ r a b,
+      ParabolicC0AlphaWith (MB r a b) (MH r a b) α (fun z => M r z a b) K)
+    (hN : ∀ r a b,
+      ParabolicC0AlphaWith (MB r a b) (MH r a b) α (fun z => N r z a b) K)
+    (hD : ∀ r a b c,
+      ParabolicC0AlphaWith (DB r a b c) (DH r a b c) α
+        (fun z => D r z a b c) K)
+    (hE : ∀ r a b c,
+      ParabolicC0AlphaWith (DB r a b c) (DH r a b c) α
+        (fun z => E r z a b c) K)
+    (hHc : ∀ r a b i j,
+      ParabolicC0AlphaWith (HB r a b i j) (HH r a b i j) α
+        (fun z => Hc r z a b i j) K)
+    (hKc : ∀ r a b i j,
+      ParabolicC0AlphaWith (HB r a b i j) (HH r a b i j) α
+        (fun z => Kc r z a b i j) K)
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (N r z).det ≠ 0)
+    (hηD : ∀ r, 0 ≤ ηD r)
+    (hMdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ K → ‖M r z - N r z‖ ≤ ηM r)
+    (hDdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ K → ∀ a b c,
+      ‖D r z a b c - E r z a b c‖ ≤ ηD r)
+    (hHdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ K → ∀ i j,
+      ‖((fun a b => Hc r z a b i j) : Matrix n n 𝕜) -
+          ((fun a b => Kc r z a b i j) : Matrix n n 𝕜)‖ ≤ ηH r i j) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := 𝕜) δ (MB r) (DB r) (HB r) (ηM r) (ηD r) (ηH r))
+          (ricciDeTurckSchematicDiffHolderConst
+            (𝕜 := 𝕜) δ (MB r) (MH r) (DB r) (DH r) (HB r) (HH r))
+          α
+          (fun z : ℝ × X =>
+            ricciDeTurckSchematicMatrix (M r z) (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (E r z) (Kc r z)) K := by
+  have hMctrl : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K := by
+    intro r a b
+    exact ⟨MB r a b, hMB r a b, MH r a b, hMH r a b, hM r a b⟩
+  have hNctrl : ∀ r a b, ParabolicC0AlphaOn α (fun z => N r z a b) K := by
+    intro r a b
+    exact ⟨MB r a b, hMB r a b, MH r a b, hMH r a b, hN r a b⟩
+  rcases matrix_det_pair_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, hdetM, hdetN, ?_⟩
+  intro r
+  exact ricciDeTurckSchematicMatrix_sub_with
+    (M := M r) (N := N r) (D := D r) (E := E r) (Hc := Hc r) (Kc := Kc r)
+    (hMH r) (hDB r) (hDH r) (hHB r) (hHH r)
+    (hM r) (hN r) (hD r) (hE r) (hHc r) (hKc r)
+    (hηD r) (hMdiff r) (hDdiff r) (hHdiff r) hδpos (hdetM r) (hdetN r)
+
+/-- Compact-domain finite-family quantitative schematic Ricci-DeTurck RHS differences from
+entrywise primitive-input difference controls, with one determinant lower bound shared by both
+metric families. -/
+theorem ricciDeTurckSchematicMatrix_sub_with_entrywise_family_of_isCompact_det_ne_zero
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {MB MH MBd MHd : κ → n → n → ℝ}
+    {DB DH DDB DDH : κ → n → n → n → ℝ}
+    {HB HH HBd HHd : κ → n → n → n → n → ℝ}
+    {M N : κ → ℝ × X → Matrix n n 𝕜}
+    {D E : κ → ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : κ → ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hMB : ∀ r a b, 0 ≤ MB r a b) (hMH : ∀ r a b, 0 ≤ MH r a b)
+    (hMBd : ∀ r a b, 0 ≤ MBd r a b)
+    (hMHd : ∀ r a b, 0 ≤ MHd r a b)
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hDH : ∀ r a b c, 0 ≤ DH r a b c)
+    (hDDB : ∀ r a b c, 0 ≤ DDB r a b c)
+    (hDDH : ∀ r a b c, 0 ≤ DDH r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hHH : ∀ r a b i j, 0 ≤ HH r a b i j)
+    (hHBd : ∀ r a b i j, 0 ≤ HBd r a b i j)
+    (hHHd : ∀ r a b i j, 0 ≤ HHd r a b i j)
+    (hM : ∀ r a b,
+      ParabolicC0AlphaWith (MB r a b) (MH r a b) α (fun z => M r z a b) K)
+    (hN : ∀ r a b,
+      ParabolicC0AlphaWith (MB r a b) (MH r a b) α (fun z => N r z a b) K)
+    (hMdiff : ∀ r a b,
+      ParabolicC0AlphaWith (MBd r a b) (MHd r a b) α
+        (fun z => M r z a b - N r z a b) K)
+    (hD : ∀ r a b c,
+      ParabolicC0AlphaWith (DB r a b c) (DH r a b c) α
+        (fun z => D r z a b c) K)
+    (hE : ∀ r a b c,
+      ParabolicC0AlphaWith (DB r a b c) (DH r a b c) α
+        (fun z => E r z a b c) K)
+    (hDdiff : ∀ r a b c,
+      ParabolicC0AlphaWith (DDB r a b c) (DDH r a b c) α
+        (fun z => D r z a b c - E r z a b c) K)
+    (hKc : ∀ r a b i j,
+      ParabolicC0AlphaWith (HB r a b i j) (HH r a b i j) α
+        (fun z => Kc r z a b i j) K)
+    (hHdiff : ∀ r a b i j,
+      ParabolicC0AlphaWith (HBd r a b i j) (HHd r a b i j) α
+        (fun z => Hc r z a b i j - Kc r z a b i j) K)
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (ricciDeTurckSchematicEntrywiseSubBoundConst
+            (𝕜 := 𝕜) δ (MB r) (MBd r) (DB r) (DDB r) (HB r) (HBd r))
+          (ricciDeTurckSchematicEntrywiseSubHolderConst
+            (𝕜 := 𝕜) δ (MB r) (MH r) (MBd r) (MHd r) (DB r) (DH r)
+              (DDB r) (DDH r) (HB r) (HH r) (HBd r) (HHd r))
+          α
+          (fun z : ℝ × X =>
+            ricciDeTurckSchematicMatrix (M r z) (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (E r z) (Kc r z)) K := by
+  have hMctrl : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K := by
+    intro r a b
+    exact ⟨MB r a b, hMB r a b, MH r a b, hMH r a b, hM r a b⟩
+  have hNctrl : ∀ r a b, ParabolicC0AlphaOn α (fun z => N r z a b) K := by
+    intro r a b
+    exact ⟨MB r a b, hMB r a b, MH r a b, hMH r a b, hN r a b⟩
+  rcases matrix_det_pair_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, hdetM, hdetN, ?_⟩
+  intro r
+  exact ricciDeTurckSchematicMatrix_sub_with_entrywise
+    (M := M r) (N := N r) (D := D r) (E := E r) (Hc := Hc r) (Kc := Kc r)
+    (hMH r) (hMBd r) (hMHd r) (hDB r) (hDH r) (hDDB r) (hDDH r)
+    (hHB r) (hHH r) (hHBd r) (hHHd r) (hM r) (hN r) (hMdiff r)
+    (hD r) (hE r) (hDdiff r) (hKc r) (hHdiff r) hδpos (hdetM r) (hdetN r)
+
 /-- Compact-domain finite-family schematic Ricci-DeTurck RHS differences preserve existential
 parabolic `C^{0,α}` control from entrywise primitive-input difference controls, with one
 determinant lower bound shared by both metric families. -/

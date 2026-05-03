@@ -1447,8 +1447,9 @@ compact-domain inverse-entry, inverse-action, inverse-bilinear, and schematic
 matrix-valued RHS variants,
 including finite-family primitive schematic RHS estimates using the same shared
 determinant constant and matching existential finite-family schematic RHS
-closures, plus finite-family primitive schematic RHS difference closures and
-function-level bounded-difference estimates with one lower bound shared by both
+closures, plus finite-family primitive schematic RHS difference closures,
+quantitative difference estimates, and function-level bounded-difference
+estimates with one lower bound shared by both
 metric families, quantitative compact inverse-action and inverse-bilinear
 estimates, existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls with a compact nonvanishing-det
@@ -1514,11 +1515,11 @@ schematic RHS handoffs now also
 accepting those same Gram-entry input forms, quantitative finite-family inverse-Gram
 vector/vector-inverse product, bilinear, inverse-principal, and
 inverse-Christoffel handoffs sharing that same compact determinant lower bound,
-with the quantitative vector/vector-inverse product, bilinear, and
+with the quantitative vector/vector-inverse product, bilinear,
 inverse-principal, and inverse-Christoffel handoffs now also accepting those
 same Gram-entry input forms,
 finite-family schematic RHS
-difference and
+quantitative difference, existential difference, and
 bounded-difference control against
 comparison primitive inputs with one lower bound shared by the Gram and
 comparison metric families, including spatial-Hölder, unit-diameter
