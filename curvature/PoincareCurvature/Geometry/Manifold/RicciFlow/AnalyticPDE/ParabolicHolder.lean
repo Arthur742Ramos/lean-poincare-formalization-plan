@@ -3830,6 +3830,19 @@ theorem of_snd_lipschitzOnWith_of_parabolicDistance_le_one {B α : ℝ} {K : ℝ
   (of_snd_lipschitzOnWith (s := s) hB_nonneg hB hL).mono_exponent_of_parabolicDistance_le_one
     hα_nonneg hα_le_one hdiam
 
+/-- On a unit parabolic-diameter domain, a time-only Lipschitz function has parabolic
+`C^{0,α}` control for every `0 ≤ α ≤ 2`. -/
+theorem of_fst_lipschitzOnWith_of_parabolicDistance_le_one {B α : ℝ} {K : ℝ≥0}
+    {f : ℝ → E} (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB_nonneg : 0 ≤ B)
+    (hB : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖f t‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.fst '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => f z.1) s :=
+  (of_fst_lipschitzOnWith (s := s) hB_nonneg hB hL).mono_exponent_of_parabolicDistance_le_one
+    hα_nonneg hα_le_two hdiam
+
 theorem mono_exponent_of_subset_closedBall {β R : ℝ} {c : ℝ × X}
     (h : ParabolicC0AlphaOn α u s) (hβ : 0 ≤ β) (hβα : β ≤ α)
     (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
