@@ -1320,8 +1320,10 @@ closed-ball/cylinder corollaries. The new
 `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves determinant closure,
 adjugate-entry closure, and inverse-entry closure under a determinant lower
 bound for finite matrix-valued parabolic `C^{0,α}` functions from entrywise
-control, now also with explicit bounded determinant, adjugate-entry, and
-inverse-entry estimates plus a whole inverse-matrix estimate, including a
+control, now also with quantitative entrywise vector/matrix packaging and
+time-only finite vector/matrix coefficient bridges from ordinary time
+Hölder/Lipschitz estimates, plus explicit bounded determinant, adjugate-entry,
+and inverse-entry estimates plus a whole inverse-matrix estimate, including a
 pointwise determinant Lipschitz estimate in the elementwise matrix norm,
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
 function-level determinant/inverse/matrix-product bounded-difference,

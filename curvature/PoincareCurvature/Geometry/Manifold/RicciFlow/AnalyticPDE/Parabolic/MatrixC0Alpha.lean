@@ -635,6 +635,152 @@ theorem matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact {n 𝕜 : Type*
   · intro z hz
     exact (min_le_right δM δN).trans (hdetN hz)
 
+/-- Quantitative entrywise parabolic `C^{0,α}` control packages a finite vector-valued
+coefficient family, summing the component constants. -/
+theorem vector_of_entries_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {B H : n → ℝ} {v : ℝ × X → n → A}
+    (hB : ∀ i, 0 ≤ B i) (hH : ∀ i, 0 ≤ H i)
+    (hv : ∀ i, ParabolicC0AlphaWith (B i) (H i) α (fun z => v z i) s) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, H i) α v s :=
+  ParabolicC0AlphaWith.pi hB hH hv
+
+/-- Quantitative entrywise parabolic `C^{0,α}` control packages a finite matrix-valued
+coefficient family, summing the component constants. -/
+theorem matrix_of_entries_with {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B H : m → n → ℝ} {M : ℝ × X → Matrix m n A}
+    (hB : ∀ i j, 0 ≤ B i j) (hH : ∀ i j, 0 ≤ H i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, H i j) α M s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj => hB i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj => hH i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact hB i j
+    · intro j
+      exact hH i j
+    · intro j
+      exact hM i j
+
+/-- Entrywise time-only boundedness and Holder control package as a vector-valued parabolic
+`C^{0,α}` estimate.  The time Holder exponent is `α / 2`, matching parabolic scaling. -/
+theorem vector_of_fst_holder_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {B H : n → ℝ} {v : ℝ → n → A}
+    (hB_nonneg : ∀ i, 0 ≤ B i) (hH_nonneg : ∀ i, 0 ≤ H i) (hα : 0 ≤ α)
+    (hB : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖v t i‖ ≤ B i)
+    (hholder : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ∀ ⦃τ : ℝ⦄,
+      τ ∈ Prod.fst '' s → ‖v t i - v τ i‖ ≤ H i * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, H i) α
+      (fun z : ℝ × X => v z.1) s := by
+  refine vector_of_entries_with hB_nonneg hH_nonneg ?_
+  intro i
+  exact ParabolicC0AlphaWith.of_fst_holder (s := s) (B := B i) (H := H i)
+    (α := α) (f := fun t => v t i) (hB i) (hH_nonneg i) hα (hholder i)
+
+/-- Entrywise time-only boundedness and Lipschitz control package as a vector-valued parabolic
+`C^{0,2}` estimate. -/
+theorem vector_of_fst_lipschitzOnWith_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {B : n → ℝ} {K : n → ℝ≥0} {v : ℝ → n → A}
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖v t i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun t => v t i) (Prod.fst '' s)) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, (K i : ℝ)) 2
+      (fun z : ℝ × X => v z.1) s := by
+  refine vector_of_entries_with hB_nonneg (fun i => NNReal.coe_nonneg (K i)) ?_
+  intro i
+  exact ParabolicC0AlphaWith.of_fst_lipschitzOnWith (s := s) (B := B i) (K := K i)
+    (f := fun t => v t i) (hB i) (hL i)
+
+/-- Entrywise time-only boundedness and Holder control package as a matrix-valued parabolic
+`C^{0,α}` estimate.  The time Holder exponent is `α / 2`, matching parabolic scaling. -/
+theorem matrix_of_fst_holder_with {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B H : m → n → ℝ} {M : ℝ → Matrix m n A}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j) (hH_nonneg : ∀ i j, 0 ≤ H i j)
+    (hα : 0 ≤ α)
+    (hB : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖M t i j‖ ≤ B i j)
+    (hholder : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ∀ ⦃τ : ℝ⦄,
+      τ ∈ Prod.fst '' s → ‖M t i j - M τ i j‖ ≤ H i j * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, H i j) α
+      (fun z : ℝ × X => M z.1) s := by
+  refine matrix_of_entries_with hB_nonneg hH_nonneg ?_
+  intro i j
+  exact ParabolicC0AlphaWith.of_fst_holder (s := s) (B := B i j) (H := H i j)
+    (α := α) (f := fun t => M t i j) (hB i j) (hH_nonneg i j) hα (hholder i j)
+
+/-- Entrywise time-only boundedness and Lipschitz control package as a matrix-valued parabolic
+`C^{0,2}` estimate. -/
+theorem matrix_of_fst_lipschitzOnWith_with {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : ℝ → Matrix m n A}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖M t i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun t => M t i j) (Prod.fst '' s)) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, (K i j : ℝ)) 2
+      (fun z : ℝ × X => M z.1) s := by
+  refine matrix_of_entries_with hB_nonneg (fun i j => NNReal.coe_nonneg (K i j)) ?_
+  intro i j
+  exact ParabolicC0AlphaWith.of_fst_lipschitzOnWith (s := s) (B := B i j) (K := K i j)
+    (f := fun t => M t i j) (hB i j) (hL i j)
+
+/-- Entrywise time-only boundedness and Holder control package as existential vector-valued
+parabolic `C^{0,α}` control. -/
+theorem vector_of_fst_holder {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {B H : n → ℝ} {v : ℝ → n → A}
+    (hB_nonneg : ∀ i, 0 ≤ B i) (hH_nonneg : ∀ i, 0 ≤ H i) (hα : 0 ≤ α)
+    (hB : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖v t i‖ ≤ B i)
+    (hholder : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ∀ ⦃τ : ℝ⦄,
+      τ ∈ Prod.fst '' s → ‖v t i - v τ i‖ ≤ H i * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => v z.1) s :=
+  ⟨∑ i, B i, Finset.sum_nonneg fun i _hi => hB_nonneg i,
+    ∑ i, H i, Finset.sum_nonneg fun i _hi => hH_nonneg i,
+    vector_of_fst_holder_with hB_nonneg hH_nonneg hα hB hholder⟩
+
+/-- Entrywise time-only boundedness and Lipschitz control package as existential vector-valued
+parabolic `C^{0,2}` control. -/
+theorem vector_of_fst_lipschitzOnWith {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {B : n → ℝ} {K : n → ℝ≥0} {v : ℝ → n → A}
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖v t i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun t => v t i) (Prod.fst '' s)) :
+    ParabolicC0AlphaOn 2 (fun z : ℝ × X => v z.1) s :=
+  ⟨∑ i, B i, Finset.sum_nonneg fun i _hi => hB_nonneg i,
+    ∑ i, (K i : ℝ), Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i),
+    vector_of_fst_lipschitzOnWith_with hB_nonneg hB hL⟩
+
+/-- Entrywise time-only boundedness and Holder control package as existential matrix-valued
+parabolic `C^{0,α}` control. -/
+theorem matrix_of_fst_holder {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B H : m → n → ℝ} {M : ℝ → Matrix m n A}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j) (hH_nonneg : ∀ i j, 0 ≤ H i j)
+    (hα : 0 ≤ α)
+    (hB : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖M t i j‖ ≤ B i j)
+    (hholder : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ∀ ⦃τ : ℝ⦄,
+      τ ∈ Prod.fst '' s → ‖M t i j - M τ i j‖ ≤ H i j * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => M z.1) s :=
+  ⟨∑ i, ∑ j, B i j, Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => hB_nonneg i j,
+    ∑ i, ∑ j, H i j, Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => hH_nonneg i j,
+    matrix_of_fst_holder_with hB_nonneg hH_nonneg hα hB hholder⟩
+
+/-- Entrywise time-only boundedness and Lipschitz control package as existential matrix-valued
+parabolic `C^{0,2}` control. -/
+theorem matrix_of_fst_lipschitzOnWith {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : ℝ → Matrix m n A}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖M t i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun t => M t i j) (Prod.fst '' s)) :
+    ParabolicC0AlphaOn 2 (fun z : ℝ × X => M z.1) s :=
+  ⟨∑ i, ∑ j, B i j, Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => hB_nonneg i j,
+    ∑ i, ∑ j, (K i j : ℝ), Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j),
+    matrix_of_fst_lipschitzOnWith_with hB_nonneg hB hL⟩
+
 /-- Entrywise parabolic `C^{0,α}` control packages a finite vector-valued coefficient family. -/
 theorem vector_of_entries {n A : Type*} [Fintype n] [NormedAddCommGroup A]
     {v : ℝ × X → n → A}
