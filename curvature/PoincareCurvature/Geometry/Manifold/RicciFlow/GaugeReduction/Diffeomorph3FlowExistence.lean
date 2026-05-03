@@ -3627,7 +3627,7 @@ theorem nonempty_identityOfGaugeFieldEqZero
       (E := E) (H := H) (I := I) (M := M)) :=
   ⟨identityOfGaugeFieldEqZero hzero⟩
 
-/-- Chosen-background intrinsic DeTurck solutions admit the identity raw `C³` gauge flow for every
+/-- Chosen-background intrinsic DeTurck solutions have the identity raw `C³` gauge flow for every
 initial-value problem. -/
 noncomputable def identityOfChosenBackground :
     IntrinsicDeTurckGaugeFlowExistenceFamily
