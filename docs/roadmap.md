@@ -1348,6 +1348,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      proof-level intrinsic and ordinary theorem-family wrappers. Ambient
      interval closure data also now has proof-level constructors for genuine
      symmetric-carrier closure, including the metric-cone shrink route. The
+     same metric-cone route now also has a single-shrink clipped local readout
+     returning both metric equality and canonical chosen-background connection
+     equality on the visible overlap. The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
      Riemannian metric locus, with both subtype and ambient-coordinate coe

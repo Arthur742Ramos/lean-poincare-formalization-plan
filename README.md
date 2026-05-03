@@ -338,7 +338,9 @@ packages the canonical stationary local solution attached to
   the standard positive-radius metric-cone shrink. The same clipped local route
   now also upgrades metric equality to equality of the canonical chosen-background
   connections, with a metric-cone readout that selects the shrink and returns
-  the connection equality on the visible overlap.
+  the connection equality on the visible overlap, plus a bundled metric-cone
+  readout that returns both metric and connection equality from the same selected
+  shrink.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
