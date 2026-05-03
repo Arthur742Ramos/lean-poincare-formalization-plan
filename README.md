@@ -323,7 +323,9 @@ packages the canonical stationary local solution attached to
   reusing the ambient smooth realization on the restricted symmetric Banach
   interval. A new localized symmetric-carrier uniqueness theorem proves metric
   equality on any shared shorter interval `[t₀, S]` from reverse encodings of
-  the candidates restricted to that same `S ≤ T`.
+  the candidates restricted to that same `S ≤ T`, and shrunk ambient closure
+  data now supplies this local uniqueness readout without requiring the full
+  arbitrary candidate intervals to fit in the shrink.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to

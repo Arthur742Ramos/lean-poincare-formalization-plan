@@ -1188,7 +1188,12 @@ velocity, or background.  The theorem
 `chosenIntrinsicDeTurckLocalSolution_metric_eq_on_restricted_interval_of_symmetricSubmoduleCandidateEncodingOnIcc`
 now packages the corresponding local uniqueness readout: two chosen-background
 DeTurck candidates agree on `[t₀, S]` once both restricted candidates are encoded
-in the symmetric carrier for the same `S ≤ T`.
+in the symmetric carrier for the same `S ≤ T`.  The shrunk ambient closure-data
+theorem
+`RicciDeTurckChartClosureDataOnIcc.metric_eq_on_restricted_interval_of_shrunk_symmetricCarrier`
+derives that readout directly from ambient encodings of the restricted
+candidates, so local uniqueness no longer needs a hypothesis that the full
+candidate intervals fit inside the selected shrink.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
@@ -1420,8 +1425,9 @@ than against the full arbitrary candidate interval, and the analytic
 smooth-realization / interval-encoding prefixes now preserve the same
 underlying metric data on the shorter interval, including after descending to
 the genuine symmetric carrier, and local uniqueness can now be read on a chosen
-common restricted terminal; the continuation/local reverse-encoding theorem is
-still open. The density-based
+common restricted terminal from shrunk ambient closure data; the continuation
+from these local readouts to full arbitrary-overlap uniqueness is still open.
+The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient
 coordinate coe equality on the Picard interval and Riemannian metric locus,

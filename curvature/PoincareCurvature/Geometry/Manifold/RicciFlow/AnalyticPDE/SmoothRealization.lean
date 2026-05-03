@@ -7160,6 +7160,83 @@ def SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.ofShrunkRicciDeTurckChar
         (chart'.restrictedSymmetricA_coe_of_mem
           (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
 
+/-- Local uniqueness readout from shrunk ambient closure data without requiring the full candidate
+intervals to fit in the shrink.  For any common shorter terminal time `S ≤ T'`, the ambient closure
+encodes the two restricted chosen-background candidates, shrinks those encodings, descends them to
+the symmetric carrier, and applies the localized symmetric-carrier uniqueness theorem on
+`[t₀, S]`. -/
+theorem RicciDeTurckChartClosureDataOnIcc.metric_eq_on_restricted_interval_of_shrunk_symmetricCarrier
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : RicciDeTurckChartClosureDataOnIcc x0 et het Kc hKc Ko hKo hKoEq hcover chart)
+    {T' : ℝ} (hT' : ivp.initialTime < T') (hT'le : T' ≤ T)
+    {a' : ℝ≥0} (ha' : a' ≤ a)
+    (htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+      a' - (0 : ℝ≥0))
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := F) (H := H) (I := I) (M := M) ivp)
+    {S : ℝ} (hS₀ : ivp.initialTime < S)
+    (hS₁ : S ≤ sol₁.1.terminalTime) (hS₂ : S ≤ sol₂.1.terminalTime) (hST' : S ≤ T')
+    {t : ℝ} (ht : t ∈ Icc ivp.initialTime S)
+    (x : M) (u v : TangentSpace I x) :
+    metricTensor (I := I) (M := M) sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.1.toIntrinsicDeTurckSolution.metric t x u v := by
+  let chart' := chart.shrink (M := M) (F := F) (I := I) hT' hT'le ha' htime
+  refine
+    chosenIntrinsicDeTurckLocalSolution_metric_eq_on_restricted_interval_of_symmetricSubmoduleCandidateEncodingOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover ivp
+      (chart'.restrictedSymmetricA
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+      chart'.A
+      (chart'.restrictedSymmetricA_coe_of_mem
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+      (chart'.restrictedSymmetricA_lipschitzOn_Icc
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+      ?_ sol₁ sol₂ hS₀ hS₁ hS₂ hST' ht x u v
+  intro candidate S hS₀ hScandidate hSchart
+  let candidateS := candidate.restrictTerminal hS₀ hScandidate
+  let enc := D.encode candidateS
+  have hterminal : enc.sol.terminalTime ≤ T' := by
+    simpa [candidateS, ChosenIntrinsicDeTurckLocalSolution.restrictTerminal,
+      IntrinsicDeTurckLocalSolution.restrictTerminal, enc.terminal_eq] using hSchart
+  let enc' := enc.shrink
+    (M := M) (F := F) (I := I) (x0 := x0) (het := het)
+    hT' hT'le ha' htime hterminal
+  simpa [chart', candidateS, enc'] using
+    enc'.toSymmetricSubmoduleCandidateEncodingOnIcc
+      (M := M) (F := F) (I := I) (x0 := x0) (het := het)
+      (chart'.restrictedSymmetricA
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+      (chart'.restrictedSymmetricA_coe_of_mem
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+
 /-- A positive-radius ambient interval closure can be shrunk to a genuine symmetric-carrier closure
 whose Picard proof and metric-cone containment are derived automatically. The only residual input is
 the unavoidable assertion that the candidates being encoded have intervals fitting inside the chosen
