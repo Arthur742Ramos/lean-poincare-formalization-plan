@@ -89,6 +89,82 @@ theorem localFrameGramMatrix_inv_of_spatial_holder_of_timeSpace_isCompact
   exact of_snd_holder (s := K) (α := α)
     (hB_nonneg i j) (hH_nonneg i j) hα (hB i j) (hholder i j)
 
+/-- If the local-frame Gram entries and a three-index derivative array have parabolic
+`C^{0,α}` control on a compact time-space set contained in a trivialization base, then the
+associated inverse-Gram Christoffel-type contraction has parabolic `C^{0,α}` control there. -/
+theorem localFrameGramMatrix_inv_christoffel_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    (hG : ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D z i j k) K) :
+    ParabolicC0AlphaOn α
+      (fun z i j k =>
+        (2 : ℝ)⁻¹ *
+          ∑ l : ι,
+            ((show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                Matrix ι ι ℝ) i l *
+              (D z j k l + D z k j l - D z l j k)) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  exact matrix_inv_christoffel
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (D := D) hG hD hδpos hdet
+
+/-- If the local-frame Gram entries and the first- and second-derivative coefficient arrays have
+parabolic `C^{0,α}` control on a compact time-space set contained in a trivialization base, then
+the schematic local Ricci-DeTurck coordinate right-hand side has parabolic `C^{0,α}` control
+there.  The Gram determinant lower bound is supplied by the geometric local-frame theorem. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hG : ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D z i j k) K)
+    (hHc : ∀ a b i j, ParabolicC0AlphaOn α (fun z : ℝ × M => Hc z a b i j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        (fun i j =>
+          let Γ : ι → ι → ι → ℝ := fun a c d =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a l *
+                  (D z c d l + D z d c l - D z l c d)
+          (∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) +
+            ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+              (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+          Matrix ι ι ℝ)) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  exact ricciDeTurck_schematic
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (D := D) (H := Hc) hG hD hHc hδpos hdet
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow
