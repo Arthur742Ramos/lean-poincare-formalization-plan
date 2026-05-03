@@ -778,6 +778,32 @@ theorem matrix_det_family_exists_pos_norm_lower_bound_of_isCompact {ι n 𝕜 : 
     (fun a => ((matrix_det (M := M a) (hM a)).continuousOn hα))
     (fun a z hz => hdet_ne a (z := z) hz)
 
+/-- On a compact time-space set, two finite families of finite matrices with parabolic
+`C^{0,α}` entries and nonvanishing determinants have one common positive determinant-norm
+lower bound. -/
+theorem matrix_det_pair_family_exists_pos_norm_lower_bound_of_isCompact {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M N : ι → ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ r i j, ParabolicC0AlphaOn α (fun z => M r z i j) K)
+    (hN : ∀ r i j, ParabolicC0AlphaOn α (fun z => N r z i j) K)
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N r z).det‖) := by
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdetM_ne with
+    ⟨δM, hδM, hdetM⟩
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := N) hK hα hN hdetN_ne with
+    ⟨δN, hδN, hdetN⟩
+  refine ⟨min δM δN, lt_min hδM hδN, ?_, ?_⟩
+  · intro r z hz
+    exact (min_le_left δM δN).trans (hdetM r hz)
+  · intro r z hz
+    exact (min_le_right δM δN).trans (hdetN r hz)
+
 /-- Quantitative entrywise parabolic `C^{0,α}` control packages a finite vector-valued
 coefficient family, summing the component constants. -/
 theorem vector_of_entries_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
@@ -10935,6 +10961,46 @@ theorem ricciDeTurck_schematic_family_of_isCompact_det_ne_zero
   intro r
   exact ricciDeTurck_schematic (M := M r) (D := D r) (H := H r)
     (hM r) (hD r) (hH r) hδpos (hdet r)
+
+/-- Compact-domain finite-family schematic Ricci-DeTurck RHS differences preserve existential
+parabolic `C^{0,α}` control from entrywise primitive-input difference controls, with one
+determinant lower bound shared by both metric families. -/
+theorem ricciDeTurckSchematicMatrix_sub_entrywise_family_of_isCompact_det_ne_zero
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {M N : κ → ℝ × X → Matrix n n 𝕜}
+    {D E : κ → ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : κ → ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K)
+    (hN : ∀ r a b, ParabolicC0AlphaOn α (fun z => N r z a b) K)
+    (hMdiff : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b - N r z a b) K)
+    (hD : ∀ r a b c, ParabolicC0AlphaOn α (fun z => D r z a b c) K)
+    (hE : ∀ r a b c, ParabolicC0AlphaOn α (fun z => E r z a b c) K)
+    (hDdiff : ∀ r a b c,
+      ParabolicC0AlphaOn α (fun z => D r z a b c - E r z a b c) K)
+    (hKc : ∀ r a b i j, ParabolicC0AlphaOn α (fun z => Kc r z a b i j) K)
+    (hHdiff : ∀ r a b i j,
+      ParabolicC0AlphaOn α (fun z => Hc r z a b i j - Kc r z a b i j) K)
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × X =>
+            ricciDeTurckSchematicMatrix (M r z) (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (E r z) (Kc r z)) K := by
+  rcases matrix_det_pair_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hM hN hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, hdetM, hdetN, ?_⟩
+  intro r
+  exact ricciDeTurckSchematicMatrix_sub_entrywise
+    (M := M r) (N := N r) (D := D r) (E := E r) (Hc := Hc r) (Kc := Kc r)
+    (hM r) (hN r) (hMdiff r) (hD r) (hE r) (hDdiff r) (hKc r) (hHdiff r)
+    hδpos (hdetM r) (hdetN r)
 
 end ParabolicC0AlphaOn
 end AnalyticPDE

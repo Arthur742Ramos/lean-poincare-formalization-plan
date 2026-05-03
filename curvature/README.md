@@ -1062,7 +1062,8 @@ existential finite-family inverse, inverse-action, inverse-bilinear,
 inverse-principal, inverse-Christoffel, and primitive schematic RHS closures
 with one shared compact determinant lower bound and quantitative finite-family
 inverse-action, inverse-bilinear, inverse-principal, and inverse-Christoffel
-estimates using that same lower bound. It
+estimates using that same lower bound, plus finite-family primitive schematic
+RHS difference closures with one lower bound shared by both metric families. It
 also exposes existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls, with a compact nonvanishing-det
 adapter for reciprocal determinant differences, plus existential inverse-entry,
@@ -1110,7 +1111,9 @@ inverse-principal, inverse-Gram Christoffel, and schematic RHS bridges from
 entrywise `ParabolicC0AlphaOn` controls sharing the same compact determinant
 lower bound, quantitative finite-family inverse-Gram vector/vector-inverse
 product, bilinear, inverse-principal, and inverse-Christoffel bridges sharing
-that same lower bound, plus compact local-frame inverse Gram,
+that same lower bound, finite-family schematic RHS difference control against
+comparison primitive inputs with one lower bound shared by the Gram and
+comparison metric families, plus compact local-frame inverse Gram,
 inverse-principal contraction,
 inverse-Gram Christoffel arrays, and schematic RHS outputs, including
 existential difference readouts for all four from entrywise controls, and

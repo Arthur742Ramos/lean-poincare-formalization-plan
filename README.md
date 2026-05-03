@@ -501,7 +501,9 @@ packages the canonical stationary local solution attached to
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, including
   finite-family primitive schematic RHS estimates with the same shared
   determinant constant and matching existential finite-family schematic RHS
-  closures, quantitative compact inverse-action and inverse-bilinear
+  closures, plus finite-family primitive schematic RHS difference closures with
+  one lower bound shared by both metric families, quantitative compact
+  inverse-action and inverse-bilinear
   estimates, plus
   entrywise and whole-valued finite matrix transpose, pointwise
   symmetrization, explicit bounded transpose/symmetrization estimates and
@@ -557,7 +559,9 @@ packages the canonical stationary local solution attached to
   compact determinant lower bound, quantitative finite-family inverse-Gram
   vector/vector-inverse product, bilinear, inverse-principal, and
   inverse-Christoffel handoffs sharing that same compact determinant lower
-  bound, and compact
+  bound, finite-family schematic RHS difference control against comparison
+  primitive inputs with one lower bound shared by the Gram and comparison metric
+  families, and compact
   local-frame inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel arrays, and schematic RHS outputs, including existential
   difference readouts for all four from entrywise controls, and schematic RHS

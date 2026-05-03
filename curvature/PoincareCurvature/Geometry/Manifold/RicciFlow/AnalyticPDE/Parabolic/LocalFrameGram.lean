@@ -7196,6 +7196,67 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_entrywise_of_timeSpace_i
     (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
     hK hα hG hN hGdiff hD hEarr hDdiff hKc hHdiff hdetG_ne hdetN_ne
 
+/-- Finite-family compact local-frame bridge for existential parabolic `C^{0,α}` control of
+schematic Ricci-DeTurck RHS differences from entrywise primitive-input difference controls.  One
+determinant lower bound is shared by all local-frame Gram matrices and all comparison matrices. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_entrywise_family_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hG : ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j) K)
+    (hN : ∀ r i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N r z i j) K)
+    (hGdiff : ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j -
+            N r z i j) K)
+    (hD : ∀ r a c d, ParabolicC0AlphaOn α (fun z : ℝ × M => D r z a c d) K)
+    (hEarr : ∀ r a c d, ParabolicC0AlphaOn α (fun z : ℝ × M => Earr r z a c d) K)
+    (hDdiff : ∀ r a c d,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => D r z a c d - Earr r z a c d) K)
+    (hKc : ∀ r a c i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Kc r z a c i j) K)
+    (hHdiff : ∀ r a c i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Hc r z a c i j - Kc r z a c i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × M =>
+            ricciDeTurckSchematicMatrix
+                (show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+                (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (Earr r z) (Kc r z)) K := by
+  have hdetG_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det ≠ 0 := by
+    intro r z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  exact ricciDeTurckSchematicMatrix_sub_entrywise_family_of_isCompact_det_ne_zero
+    (K := K)
+    (M := fun r (z : ℝ × M) =>
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
+    hK hα hG hN hGdiff hD hEarr hDdiff hKc hHdiff hdetG_ne hdetN_ne
+
 /-- Spatial-Hölder Gram-entry variant of
 `localFrameGramMatrix_ricciDeTurck_schematic_sub_with_entrywise_of_timeSpace_isCompact`. -/
 theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_entrywise_of_spatial_holder_of_timeSpace_isCompact
