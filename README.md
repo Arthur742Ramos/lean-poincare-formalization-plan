@@ -491,8 +491,8 @@ packages the canonical stationary local solution attached to
   compact nonvanishing determinant data now supplying such lower bounds,
   including finite-index common determinant lower bounds for compact families,
   finite-family compact inverse estimates with the same shared determinant
-  constant and matching existential finite-family inverse closures, and
-  compact-domain inverse,
+  constant and matching existential finite-family inverse and inverse-action
+  closures, and compact-domain inverse,
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, including
   finite-family primitive schematic RHS estimates with the same shared
   determinant constant and matching existential finite-family schematic RHS

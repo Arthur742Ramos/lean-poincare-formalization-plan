@@ -1438,9 +1438,9 @@ estimates, and a compactness bridge from
 nonvanishing determinants to uniform determinant lower bounds, including
 finite-index common determinant lower bounds for compact matrix families,
 finite-family compact inverse estimates using that shared determinant constant,
-matching existential finite-family inverse closures, and compact-domain
-inverse-entry, inverse-action, inverse-bilinear, and schematic matrix-valued RHS
-variants,
+matching existential finite-family inverse and inverse-action closures, and
+compact-domain inverse-entry, inverse-action, inverse-bilinear, and schematic
+matrix-valued RHS variants,
 including finite-family primitive schematic RHS estimates using the same shared
 determinant constant and matching existential finite-family schematic RHS
 closures, quantitative compact inverse-action and inverse-bilinear

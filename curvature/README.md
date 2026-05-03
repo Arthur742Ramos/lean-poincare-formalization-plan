@@ -1054,8 +1054,8 @@ bounded finite matrices, using a determinant lower bound for inverse
 estimates; compact nonvanishing determinant data now supplies the needed
 uniform determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants, plus
-existential finite-family inverse and primitive schematic RHS closures with one
-shared compact determinant lower bound. It
+existential finite-family inverse, inverse-action, and primitive schematic RHS
+closures with one shared compact determinant lower bound. It
 also exposes existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls, with a compact nonvanishing-det
 adapter for reciprocal determinant differences, plus existential inverse-entry,

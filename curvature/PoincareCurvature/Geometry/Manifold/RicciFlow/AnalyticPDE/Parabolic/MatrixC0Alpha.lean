@@ -4230,6 +4230,26 @@ theorem matrix_inv_mulVec_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
     ⟨δ, hδpos, hdet⟩
   exact matrix_inv_mulVec hM hv hδpos hdet
 
+/-- Compact-domain finite-family inverse-matrix/vector closure from entrywise matrix and vector
+control, with one determinant lower bound shared by the family. -/
+theorem matrix_inv_mulVec_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {M : ι → ℝ × X → Matrix n n 𝕜} {v : ι → ℝ × X → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ a i j, ParabolicC0AlphaOn α (fun z => M a z i j) K)
+    (hv : ∀ a j, ParabolicC0AlphaOn α (fun z => v a z j) K)
+    (hdet_ne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → (M a z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M a z).det‖) ∧
+      ∀ a, ParabolicC0AlphaOn α (fun z : ℝ × X => ((M a z)⁻¹).mulVec (v a z)) K := by
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro a
+  exact matrix_inv_mulVec (M := M a) (v := v a) (hM a) (hv a) hδpos (hdet a)
+
 /-- Compact-domain quantitative inverse-matrix-vector closure from entrywise control and
 pointwise nonvanishing determinant. -/
 theorem matrix_inv_mulVec_with_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
@@ -4384,6 +4404,26 @@ theorem matrix_vecMul_inv_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
       (K := K) (M := M) hK hα hM hdet_ne with
     ⟨δ, hδpos, hdet⟩
   exact matrix_vecMul_inv hv hM hδpos hdet
+
+/-- Compact-domain finite-family vector/inverse-matrix closure from entrywise vector and matrix
+control, with one determinant lower bound shared by the family. -/
+theorem matrix_vecMul_inv_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {v : ι → ℝ × X → n → 𝕜} {M : ι → ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hv : ∀ a i, ParabolicC0AlphaOn α (fun z => v a z i) K)
+    (hM : ∀ a i j, ParabolicC0AlphaOn α (fun z => M a z i j) K)
+    (hdet_ne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → (M a z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M a z).det‖) ∧
+      ∀ a, ParabolicC0AlphaOn α (fun z : ℝ × X => Matrix.vecMul (v a z) (M a z)⁻¹) K := by
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro a
+  exact matrix_vecMul_inv (M := M a) (v := v a) (hv a) (hM a) hδpos (hdet a)
 
 /-- Compact-domain quantitative vector-inverse-matrix closure from entrywise control and
 pointwise nonvanishing determinant. -/
