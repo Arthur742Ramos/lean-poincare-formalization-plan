@@ -403,7 +403,8 @@ packages the canonical stationary local solution attached to
   product-difference estimates, matrix-vector/vector-matrix,
   matrix-vector/vector-matrix product-difference estimates, and
   inverse-matrix vector-product closure, whole finite vector/matrix and
-  inverse-matrix packages, finite vector dot products, and bilinear contractions
+  inverse-matrix packages, finite vector dot products and dot-product
+  difference estimates, and bilinear contractions
   through matrices or inverse matrices, including explicit bounded Holder entry
   and whole-array estimates for Christoffel-symbol type inverse-metric
   contractions and their entrywise/whole-array closure, explicit bounded Holder

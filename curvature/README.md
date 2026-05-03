@@ -1051,7 +1051,8 @@ explicit entrywise/whole-matrix product-difference estimates,
 matrix-vector and vector-matrix products, matrix-vector/vector-matrix product-difference
 estimates, including inverse-matrix vector
 products on both sides under the same determinant lower bound, whole finite
-vector/matrix and inverse-matrix packages, finite vector dot products, and
+vector/matrix and inverse-matrix packages, finite vector dot products and
+dot-product difference estimates, and
 bilinear contractions through matrices or inverse matrices,
 including explicit bounded Holder entry and whole-array estimates for
 Christoffel-symbol type inverse-metric contractions and their entrywise/whole-array

@@ -1876,6 +1876,66 @@ theorem vector_dot_entry {n A : Type*} [Fintype n] [NormedRing A]
       (u := fun i z => v z i * w z i)
       (fun i _hi => (hv i).mul (hw i)))
 
+/-- Quantitative sup constant for the difference of two finite dot products. -/
+def vectorDotSubBoundConst {n : Type*} [Fintype n]
+    (Bv Bw' Bvd Bwd : n → ℝ) : ℝ :=
+  Finset.univ.sum fun i : n => Bv i * Bwd i + Bvd i * Bw' i
+
+/-- Quantitative Holder constant for the difference of two finite dot products. -/
+def vectorDotSubHolderConst {n : Type*} [Fintype n]
+    (Bv Hv Bw' Hw' Bvd Hvd Bwd Hwd : n → ℝ) : ℝ :=
+  Finset.univ.sum fun i : n =>
+    (Bv i * Hwd i + Bwd i * Hv i) + (Bvd i * Hw' i + Bw' i * Hvd i)
+
+theorem vectorDotSubBoundConst_nonneg {n : Type*} [Fintype n]
+    {Bv Bw' Bvd Bwd : n → ℝ} (hBv : ∀ i, 0 ≤ Bv i)
+    (hBw' : ∀ i, 0 ≤ Bw' i) (hBvd : ∀ i, 0 ≤ Bvd i)
+    (hBwd : ∀ i, 0 ≤ Bwd i) :
+    0 ≤ vectorDotSubBoundConst Bv Bw' Bvd Bwd := by
+  simpa [vectorDotSubBoundConst] using
+    (Finset.sum_nonneg fun i _hi =>
+      add_nonneg (mul_nonneg (hBv i) (hBwd i)) (mul_nonneg (hBvd i) (hBw' i)))
+
+theorem vectorDotSubHolderConst_nonneg {n : Type*} [Fintype n]
+    {Bv Hv Bw' Hw' Bvd Hvd Bwd Hwd : n → ℝ} (hBv : ∀ i, 0 ≤ Bv i)
+    (hHv : ∀ i, 0 ≤ Hv i) (hBw' : ∀ i, 0 ≤ Bw' i)
+    (hHw' : ∀ i, 0 ≤ Hw' i) (hBvd : ∀ i, 0 ≤ Bvd i)
+    (hHvd : ∀ i, 0 ≤ Hvd i) (hBwd : ∀ i, 0 ≤ Bwd i)
+    (hHwd : ∀ i, 0 ≤ Hwd i) :
+    0 ≤ vectorDotSubHolderConst Bv Hv Bw' Hw' Bvd Hvd Bwd Hwd := by
+  simpa [vectorDotSubHolderConst] using
+    (Finset.sum_nonneg fun i _hi =>
+      add_nonneg
+        (add_nonneg (mul_nonneg (hBv i) (hHwd i)) (mul_nonneg (hBwd i) (hHv i)))
+        (add_nonneg (mul_nonneg (hBvd i) (hHw' i)) (mul_nonneg (hBw' i) (hHvd i))))
+
+/-- Differences of finite dot products have an explicit bounded parabolic `C^{0,α}` estimate. -/
+theorem vector_dot_sub_with {n A : Type*} [Fintype n] [NormedRing A]
+    {Bv Hv Bw' Hw' Bvd Hvd Bwd Hwd : n → ℝ}
+    {v v' w w' : ℝ × X → n → A}
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hw' : ∀ i, ParabolicC0AlphaWith (Bw' i) (Hw' i) α (fun z => w' z i) s)
+    (hvdiff : ∀ i, ParabolicC0AlphaWith (Bvd i) (Hvd i) α
+      (fun z => v z i - v' z i) s)
+    (hwdiff : ∀ i, ParabolicC0AlphaWith (Bwd i) (Hwd i) α
+      (fun z => w z i - w' z i) s)
+    (hBv : ∀ i, 0 ≤ Bv i) (hBvd : ∀ i, 0 ≤ Bvd i) :
+    ParabolicC0AlphaWith
+      (vectorDotSubBoundConst Bv Bw' Bvd Bwd)
+      (vectorDotSubHolderConst Bv Hv Bw' Hw' Bvd Hvd Bwd Hwd)
+      α (fun z => (∑ i : n, v z i * w z i) - ∑ i : n, v' z i * w' z i) s := by
+  classical
+  simpa [vectorDotSubBoundConst, vectorDotSubHolderConst] using
+    (ParabolicC0AlphaWith.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (Bu := Bv) (Hu := Hv) (Bv := Bw') (Hv := Hw')
+      (Bdu := Bvd) (Hdu := Hvd) (Bdv := Bwd) (Hdv := Hwd)
+      (u := fun i z => v z i) (u' := fun i z => v' z i)
+      (v := fun i z => w z i) (v' := fun i z => w' z i)
+      (fun i _hi => hv i) (fun i _hi => hw' i)
+      (fun i _hi => hvdiff i) (fun i _hi => hwdiff i)
+      (fun i _hi => hBv i) (fun i _hi => hBvd i))
+
 /-- Finite bilinear matrix contractions `v · (M w)` preserve parabolic `C^{0,α}` control from
 entrywise control. -/
 theorem matrix_bilinear_entry {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
