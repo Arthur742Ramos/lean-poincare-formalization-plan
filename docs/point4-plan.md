@@ -847,11 +847,13 @@ same along-flow RHS rewrite while building `Diffeomorph3GaugeFlowOn`, including
 the closed-Picard `Icc` to open-interior `Ioo` handoff, and the fixed-IVP and
 theorem-family intrinsic existence layers now carry that same closed-Picard
 model-field handoff directly to `IntrinsicDeTurckGaugeFlowExistence(.Family)`.
-Those bridges now have direct
-derivative-data readouts back to
-`ChosenIntrinsicDeTurckGaugeFlowDerivative` and
-`ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily`, so endpoint callers can use
-the existing scalar gauge-pullback route after supplying the chart-ODE package.
+The derivative-view layer now also performs this closed-Picard model-field
+handoff directly: fixed-IVP and theorem-family wrappers convert closed-interval
+model-field chart ODE data plus the along-flow intrinsic DeTurck identification
+into ordinary chart and primitive derivative data on the chosen open `Ioo`
+solution time set. Endpoint callers can therefore use the scalar gauge-pullback
+route from the model-field Picard output without first rebuilding an intrinsic
+chart-ODE package by hand.
 The chart-ODE packages themselves now also prove the underlying manifold-curve
 continuity and convert directly to primitive intrinsic manifold derivative data
 in both within-time-set and ordinary-at-time forms, with fixed-IVP and
