@@ -2819,6 +2819,35 @@ theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCo
           (mul_le_mul hLdiff (hv.bounded hq) (norm_nonneg _) hLdiff_nonneg)
       _ = (‖L‖ * (B * H₂ + B₂ * H)) * dα := by ring
 
+/-- Differences of curried continuous bilinear-map applications inherit parabolic `C^{0,α}`
+control from one left input, one right input, and `C^{0,α}` controls of the two input
+differences. -/
+theorem continuousLinearMap₂_sub {F G : Type*} [NormedAddCommGroup F] [NormedAddCommGroup G]
+    [NormedSpace ℝ E] [NormedSpace ℝ F] [NormedSpace ℝ G]
+    (L : E →L[ℝ] F →L[ℝ] G)
+    {Bu Hu Bv Hv Bdu Hdu Bdv Hdv α : ℝ}
+    {u u' : ℝ × X → E} {v v' : ℝ × X → F} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaWith Bu Hu α u s)
+    (hv' : ParabolicC0AlphaWith Bv Hv α v' s)
+    (hdu : ParabolicC0AlphaWith Bdu Hdu α (fun z => u z - u' z) s)
+    (hdv : ParabolicC0AlphaWith Bdv Hdv α (fun z => v z - v' z) s)
+    (hBu : 0 ≤ Bu) (hBdu : 0 ≤ Bdu) :
+    ParabolicC0AlphaWith (‖L‖ * Bu * Bdv + ‖L‖ * Bdu * Bv)
+      (‖L‖ * (Bu * Hdv + Bdv * Hu) + ‖L‖ * (Bdu * Hv + Bv * Hdu)) α
+      (fun z => L (u z) (v z) - L (u' z) (v' z)) s := by
+  have hleft :
+      ParabolicC0AlphaWith (‖L‖ * Bu * Bdv) (‖L‖ * (Bu * Hdv + Bdv * Hu)) α
+        (fun z => L (u z) (v z - v' z)) s := by
+    simpa using hu.continuousLinearMap₂ L hdv hBu
+  have hright :
+      ParabolicC0AlphaWith (‖L‖ * Bdu * Bv) (‖L‖ * (Bdu * Hv + Bv * Hdu)) α
+        (fun z => L (u z - u' z) (v' z)) s := by
+    simpa using hdu.continuousLinearMap₂ L hv' hBdu
+  have hsum := hleft.add hright
+  convert hsum using 1
+  ext z
+  simp [map_sub]
+
 /-- Applying an operator-valued function to a vector-valued function preserves parabolic
 `C^{0,α}` control with the usual product-rule Holder constant. -/
 theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]

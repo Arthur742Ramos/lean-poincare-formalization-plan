@@ -346,7 +346,8 @@ packages the canonical stationary local solution attached to
   controls plus an explicit bounded `C^{0,α}` finite-product estimate, finite `Pi`
   packaging across bounded, Holder, and `C^{0,α}` controls from componentwise
   estimates and same-constant projection back to components, and
-  continuous-linear, curried-bilinear-map, and operator-application closure with operator-norm constants,
+  continuous-linear, curried-bilinear-map, curried-bilinear difference, and
+  operator-application closure with operator-norm constants,
   add/subtract/smul, integer-scalar, and product-valued pairing closure
   estimates plus the bounded product estimate for normed-ring-valued
   `C^{0,α}` functions, two-factor and finite-sum product-difference
