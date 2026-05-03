@@ -1458,7 +1458,8 @@ compact quantitative inverse Gram, inverse-Gram action/bilinear,
 inverse-principal contraction, inverse-Gram Christoffel, and schematic RHS
 bridges exposing the determinant lower-bound constant, plus geometric
 finite-family local-frame Gram determinant lower-bound, inverse-estimate, and
-schematic RHS handoffs with a spatial-Hölder Gram-entry input form, compact
+schematic RHS handoffs with spatial-Hölder and unit-diameter spatial-Lipschitz
+Gram-entry input forms, compact
 local-frame
 inverse Gram, inverse-principal contraction, inverse-Gram Christoffel, and
 schematic RHS `C^{0,α}` difference control, including entrywise-difference
