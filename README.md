@@ -383,7 +383,8 @@ packages the canonical stationary local solution attached to
   estimates, supplied-Christoffel schematic bounded Holder entry/matrix
   estimates, primitive-input schematic bounded Holder entry/matrix estimates,
   plus supplied-Christoffel and primitive-input schematic RHS entry and
-  whole-matrix Lipschitz constants, on entrywise
+  whole-matrix Lipschitz constants and a named function-level
+  bounded-difference package for the primitive schematic matrix RHS, on entrywise
   bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds and
   compact-domain inverse,

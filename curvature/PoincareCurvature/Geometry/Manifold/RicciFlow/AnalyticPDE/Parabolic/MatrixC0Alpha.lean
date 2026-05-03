@@ -2095,6 +2095,23 @@ theorem matrixInvChristoffelArrayDiffBoundConst_nonneg {n 𝕜 : Type*} [Fintype
             (matrixInvChristoffelEntryMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hDB a b c)
             hρ)
 
+/-- The uniform inverse-Christoffel array-difference bound is monotone in the metric
+matrix-difference radius. -/
+theorem matrixInvChristoffelArrayDiffBoundConst_mono_right {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} (hDB : ∀ a b c, 0 ≤ DB a b c)
+    {ηD ρ ρ' : ℝ} (hρ : ρ ≤ ρ') :
+    matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ρ ≤
+      matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ρ' := by
+  classical
+  refine Finset.sum_le_sum fun a _ha => ?_
+  refine Finset.sum_le_sum fun b _hb => ?_
+  refine Finset.sum_le_sum fun c _hc => ?_
+  exact add_le_add_right
+    (mul_le_mul_of_nonneg_left hρ
+      (matrixInvChristoffelEntryMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hDB a b c))
+    _
+
 /-- Every inverse-Christoffel entry is controlled by the summed uniform array-difference bound. -/
 theorem matrix_inv_christoffel_entry_norm_sub_le_array_const {n 𝕜 : Type*} [Fintype n]
     [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
@@ -4395,6 +4412,153 @@ theorem ricciDeTurck_schematic_norm_sub_le_const {n 𝕜 : Type*} [Fintype n]
   simpa [Γ, Λ, ΓB, ηγ] using
     ricciDeTurck_schematic_from_christoffel_norm_sub_le_const
       M N H K Γ Λ hM hN hK hΓbound hΛbound hΓdiff hδpos hdetM hdetN
+
+/-- The finite matrix-valued schematic Ricci-DeTurck coordinate RHS.  This definition names the
+algebraic expression used by the pointwise and time-space Lipschitz estimates. -/
+def ricciDeTurckSchematicMatrix {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (M : Matrix n n 𝕜) (D : n → n → n → 𝕜)
+    (H : n → n → n → n → 𝕜) : Matrix n n 𝕜 :=
+  fun i j =>
+    let Γ : n → n → n → 𝕜 := fun a b c =>
+      (2 : 𝕜)⁻¹ *
+        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) a l * (D b c l + D c b l - D l b c)
+    (∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+      ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+        (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))
+
+/-- Uniform bound used for the function-level schematic Ricci-DeTurck difference estimate. -/
+def ricciDeTurckSchematicDiffBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (C : n → n → ℝ) (DB : n → n → n → ℝ)
+    (HB : n → n → n → n → ℝ) (ηM ηD : ℝ) (ηH : n → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : n,
+    ((matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C * ηH i j +
+        matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C HB i j * ηM) +
+      christoffelQuadraticRicciEntryLipschitzConst
+        (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ C DB a b c)
+        i j *
+        matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ηM)
+
+theorem ricciDeTurckSchematicDiffBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} (hDB : ∀ a b c, 0 ≤ DB a b c)
+    {HB : n → n → n → n → ℝ} (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    {ηM ηD : ℝ} (hηM : 0 ≤ ηM) (hηD : 0 ≤ ηD)
+    {ηH : n → n → ℝ} (hηH : ∀ i j, 0 ≤ ηH i j) :
+    0 ≤ ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB ηM ηD ηH := by
+  classical
+  refine Finset.sum_nonneg fun i _hi => ?_
+  refine Finset.sum_nonneg fun j _hj => ?_
+  have hΓB : ∀ a b c,
+      0 ≤ matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ C DB a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C hDB a b c
+  exact add_nonneg
+    (add_nonneg
+      (mul_nonneg (matrixInvTwoIndexContractCoeffDiffConst_nonneg (𝕜 := 𝕜) hδpos C)
+        (hηH i j))
+      (mul_nonneg
+        (matrixInvTwoIndexContractMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hHB i j)
+        hηM))
+    (mul_nonneg
+      (christoffelQuadraticRicciEntryLipschitzConst_nonneg hΓB i j)
+      (matrixInvChristoffelArrayDiffBoundConst_nonneg (𝕜 := 𝕜) hδpos hDB hηD hηM))
+
+/-- Named version of the primitive schematic Ricci-DeTurck matrix Lipschitz estimate. -/
+theorem ricciDeTurckSchematicMatrix_norm_sub_le_const {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ} {ηD : ℝ}
+    (M N : Matrix n n 𝕜) (D E : n → n → n → 𝕜)
+    (H K : n → n → n → n → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hD : ∀ a b c, ‖D a b c‖ ≤ DB a b c)
+    (hE : ∀ a b c, ‖E a b c‖ ≤ DB a b c)
+    (hK : ∀ a b i j, ‖K a b i j‖ ≤ HB a b i j)
+    (hηD : 0 ≤ ηD) (hDdiff : ∀ a b c, ‖D a b c - E a b c‖ ≤ ηD)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖) :
+    ‖ricciDeTurckSchematicMatrix M D H - ricciDeTurckSchematicMatrix N E K‖ ≤
+      ∑ i : n, ∑ j : n,
+        ((matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C *
+            ‖((fun a b => H a b i j) : Matrix n n 𝕜) -
+              ((fun a b => K a b i j) : Matrix n n 𝕜)‖ +
+          matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C HB i j * ‖M - N‖) +
+          christoffelQuadraticRicciEntryLipschitzConst
+            (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ C DB a b c)
+            i j *
+            matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ‖M - N‖) := by
+  simpa [ricciDeTurckSchematicMatrix] using
+    ricciDeTurck_schematic_norm_sub_le_const
+      (δ := δ) (C := C) (DB := DB) (HB := HB) (ηD := ηD)
+      M N D E H K hM hN hD hE hK hηD hDdiff hδpos hdetM hdetN
+
+/-- Function-level bounded-difference estimate for the finite schematic Ricci-DeTurck RHS.
+It packages the pointwise algebraic Lipschitz estimate into the parabolic sup-norm predicate. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {ηM ηD : ℝ} {ηH : n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {H K : ℝ × X → n → n → n → n → 𝕜}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hD : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖D z a b c‖ ≤ DB a b c)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hK : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j, ‖K z a b i j‖ ≤ HB a b i j)
+    (hηD : 0 ≤ ηD)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ ηM)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖D z a b c - E z a b c‖ ≤ ηD)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+      ‖((fun a b => H z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => K z a b i j) : Matrix n n 𝕜)‖ ≤ ηH i j)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicBoundedWith
+      (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB ηM ηD ηH)
+      (fun z : ℝ × X =>
+        ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+          ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s := by
+  classical
+  intro z hz
+  have hpoint :
+      ‖ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+          ricciDeTurckSchematicMatrix (N z) (E z) (K z)‖ ≤
+        ∑ i : n, ∑ j : n,
+          ((matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C *
+              ‖((fun a b => H z a b i j) : Matrix n n 𝕜) -
+                ((fun a b => K z a b i j) : Matrix n n 𝕜)‖ +
+            matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C HB i j *
+              ‖M z - N z‖) +
+            christoffelQuadraticRicciEntryLipschitzConst
+              (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ C DB a b c)
+              i j *
+              matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ‖M z - N z‖) :=
+    ricciDeTurckSchematicMatrix_norm_sub_le_const
+      (δ := δ) (C := C) (DB := DB) (HB := HB) (ηD := ηD)
+      (M z) (N z) (D z) (E z) (H z) (K z)
+      (hM hz) (hN hz) (hD hz) (hE hz) (hK hz)
+      hηD (hDdiff hz) hδpos (hdetM hz) (hdetN hz)
+  refine hpoint.trans ?_
+  refine Finset.sum_le_sum fun i _hi => ?_
+  refine Finset.sum_le_sum fun j _hj => ?_
+  have hΓB : ∀ a b c,
+      0 ≤ matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ C DB a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C hDB a b c
+  have harray_mono :
+      matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ‖M z - N z‖ ≤
+        matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ηM :=
+    matrixInvChristoffelArrayDiffBoundConst_mono_right
+      (𝕜 := 𝕜) hδpos hDB (hMdiff hz)
+  exact add_le_add
+    (add_le_add
+      (mul_le_mul_of_nonneg_left (hHdiff hz i j)
+        (matrixInvTwoIndexContractCoeffDiffConst_nonneg (𝕜 := 𝕜) hδpos C))
+      (mul_le_mul_of_nonneg_left (hMdiff hz)
+        (matrixInvTwoIndexContractMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hHB i j)))
+    (mul_le_mul_of_nonneg_left harray_mono
+      (christoffelQuadraticRicciEntryLipschitzConst_nonneg hΓB i j))
 
 /-- Schematic local Ricci-DeTurck coordinate right-hand sides preserve parabolic `C^{0,α}`
 control from entrywise control of metric coefficients, first derivative coefficients, and second
