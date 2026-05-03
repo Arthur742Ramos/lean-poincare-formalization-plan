@@ -504,7 +504,8 @@ packages the canonical stationary local solution attached to
   bridges against comparison primitive inputs, all with matching
   spatial-Hölder Gram-entry input forms where applicable; the inverse-Gram,
   inverse-principal, and schematic RHS bounded-difference, comparison, and
-  entrywise-difference bridges now also have
+  entrywise-difference bridges, plus the inverse-Gram Christoffel
+  bounded-difference bridge, now also have
   unit-diameter, closed-ball, and closed-cylinder spatial-Lipschitz Gram-entry
   variants for `0 < α ≤ 1`.
   The curvature,
