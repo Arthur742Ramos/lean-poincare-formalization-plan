@@ -1308,7 +1308,8 @@ explicit entrywise/whole-matrix product-difference estimates,
 matrix-vector and vector-matrix products, explicit bounded matrix-vector/vector-matrix estimates,
 matrix-vector/vector-matrix product-difference
 estimates, and inverse-matrix vector products on
-both sides under the same determinant lower bound, plus whole finite
+both sides under the same determinant lower bound, including explicit bounded
+estimates for both inverse-vector product orders, plus whole finite
 vector/matrix and inverse-matrix packages, finite vector dot products,
 explicit bounded dot-product estimates, dot-product difference estimates,
 explicit bounded finite bilinear-contraction estimates,

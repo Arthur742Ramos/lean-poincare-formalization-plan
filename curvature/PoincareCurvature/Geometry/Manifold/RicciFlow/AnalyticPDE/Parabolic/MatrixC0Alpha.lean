@@ -1922,6 +1922,83 @@ theorem matrix_inv_mulVec {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedFi
     ParabolicC0AlphaOn α (fun z => ((M z)⁻¹).mulVec (v z)) s :=
   vector_of_entries fun i => matrix_inv_mulVec_entry hM hv hδpos hdet i
 
+/-- Quantitative sup constant for one component of an inverse-matrix-vector product. -/
+def matrixInvMulVecEntryBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B : n → n → ℝ) (Bv : n → ℝ) (i : n) : ℝ :=
+  matrixMulVecEntryBoundConst (fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c) Bv i
+
+/-- Quantitative Holder constant for one component of an inverse-matrix-vector product. -/
+def matrixInvMulVecEntryHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B H : n → n → ℝ) (Bv Hv : n → ℝ) (i : n) :
+    ℝ :=
+  matrixMulVecEntryHolderConst
+    (fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c)
+    (fun r c => matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H r c) Bv Hv i
+
+theorem matrixInvMulVecEntryBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B : n → n → ℝ} {Bv : n → ℝ}
+    (hδpos : 0 < δ) (hBv : ∀ j, 0 ≤ Bv j) (i : n) :
+    0 ≤ matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bv i := by
+  simpa [matrixInvMulVecEntryBoundConst] using
+    (matrixMulVecEntryBoundConst_nonneg
+      (fun r c => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B r c) hBv i)
+
+theorem matrixInvMulVecEntryHolderConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B H : n → n → ℝ} {Bv Hv : n → ℝ}
+    (hH : ∀ i j, 0 ≤ H i j) (hδpos : 0 < δ)
+    (hBv : ∀ j, 0 ≤ Bv j) (hHv : ∀ j, 0 ≤ Hv j) (i : n) :
+    0 ≤ matrixInvMulVecEntryHolderConst (𝕜 := 𝕜) δ B H Bv Hv i := by
+  simpa [matrixInvMulVecEntryHolderConst] using
+    (matrixMulVecEntryHolderConst_nonneg
+      (fun r c => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B r c)
+      (fun r c => matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos r c)
+      hBv hHv i)
+
+/-- One component of an inverse-matrix-vector product has an explicit bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_inv_mulVec_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {B H : n → n → ℝ} {Bv Hv : n → ℝ} {δ : ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {v : ℝ × X → n → 𝕜}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hv : ∀ j, ParabolicC0AlphaWith (Bv j) (Hv j) α (fun z => v z j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i : n) :
+    ParabolicC0AlphaWith
+      (matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bv i)
+      (matrixInvMulVecEntryHolderConst (𝕜 := 𝕜) δ B H Bv Hv i)
+      α (fun z => ((M z)⁻¹).mulVec (v z) i) s := by
+  simpa [matrixInvMulVecEntryBoundConst, matrixInvMulVecEntryHolderConst] using
+    (matrix_mulVec_entry_with
+      (M := fun z => (M z)⁻¹) (v := v)
+      (BM := fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c)
+      (HM := fun r c => matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H r c)
+      (Bv := Bv) (Hv := Hv)
+      (fun r c => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B r c)
+      (fun r c => matrix_inv_entry_with (M := M) hH hM hδpos hdet r c)
+      hv i)
+
+/-- Inverse-matrix-vector products have an explicit vector-valued bounded parabolic `C^{0,α}`
+estimate. -/
+theorem matrix_inv_mulVec_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {B H : n → n → ℝ} {Bv Hv : n → ℝ} {δ : ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {v : ℝ × X → n → 𝕜}
+    (hH : ∀ i j, 0 ≤ H i j) (hBv : ∀ j, 0 ≤ Bv j) (hHv : ∀ j, 0 ≤ Hv j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hv : ∀ j, ParabolicC0AlphaWith (Bv j) (Hv j) α (fun z => v z j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaWith
+      (∑ i : n, matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bv i)
+      (∑ i : n, matrixInvMulVecEntryHolderConst (𝕜 := 𝕜) δ B H Bv Hv i)
+      α (fun z => ((M z)⁻¹).mulVec (v z)) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact matrixInvMulVecEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos hBv i
+  · intro i
+    exact matrixInvMulVecEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos hBv hHv i
+  · intro i
+    exact matrix_inv_mulVec_entry_with (M := M) hH hM hv hδpos hdet i
+
 /-- Compact-domain inverse-matrix-vector entry closure from entrywise control and pointwise
 nonvanishing determinant. -/
 theorem matrix_inv_mulVec_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
@@ -1974,6 +2051,82 @@ theorem matrix_vecMul_inv {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedFi
     (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
     ParabolicC0AlphaOn α (fun z => Matrix.vecMul (v z) (M z)⁻¹) s :=
   vector_of_entries fun j => matrix_vecMul_inv_entry hv hM hδpos hdet j
+
+/-- Quantitative sup constant for one component of a vector-inverse-matrix product. -/
+def matrixVecMulInvEntryBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (Bv : n → ℝ) (B : n → n → ℝ) (j : n) : ℝ :=
+  matrixVecMulEntryBoundConst Bv (fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c) j
+
+/-- Quantitative Holder constant for one component of a vector-inverse-matrix product. -/
+def matrixVecMulInvEntryHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (Bv Hv : n → ℝ) (B H : n → n → ℝ) (j : n) :
+    ℝ :=
+  matrixVecMulEntryHolderConst Bv Hv
+    (fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c)
+    (fun r c => matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H r c) j
+
+theorem matrixVecMulInvEntryBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {Bv : n → ℝ} {B : n → n → ℝ}
+    (hδpos : 0 < δ) (hBv : ∀ i, 0 ≤ Bv i) (j : n) :
+    0 ≤ matrixVecMulInvEntryBoundConst (𝕜 := 𝕜) δ Bv B j := by
+  simpa [matrixVecMulInvEntryBoundConst] using
+    (matrixVecMulEntryBoundConst_nonneg hBv
+      (fun r c => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B r c) j)
+
+theorem matrixVecMulInvEntryHolderConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {Bv Hv : n → ℝ} {B H : n → n → ℝ}
+    (hH : ∀ i j, 0 ≤ H i j) (hδpos : 0 < δ)
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i) (j : n) :
+    0 ≤ matrixVecMulInvEntryHolderConst (𝕜 := 𝕜) δ Bv Hv B H j := by
+  simpa [matrixVecMulInvEntryHolderConst] using
+    (matrixVecMulEntryHolderConst_nonneg hBv hHv
+      (fun r c => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B r c)
+      (fun r c => matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos r c) j)
+
+/-- One component of a vector-inverse-matrix product has an explicit bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_vecMul_inv_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {Bv Hv : n → ℝ} {B H : n → n → ℝ} {δ : ℝ}
+    {v : ℝ × X → n → 𝕜} {M : ℝ × X → Matrix n n 𝕜}
+    (hBv : ∀ i, 0 ≤ Bv i) (hH : ∀ i j, 0 ≤ H i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (j : n) :
+    ParabolicC0AlphaWith
+      (matrixVecMulInvEntryBoundConst (𝕜 := 𝕜) δ Bv B j)
+      (matrixVecMulInvEntryHolderConst (𝕜 := 𝕜) δ Bv Hv B H j)
+      α (fun z => Matrix.vecMul (v z) (M z)⁻¹ j) s := by
+  simpa [matrixVecMulInvEntryBoundConst, matrixVecMulInvEntryHolderConst] using
+    (matrix_vecMul_entry_with
+      (v := v) (M := fun z => (M z)⁻¹)
+      (Bv := Bv) (Hv := Hv)
+      (BM := fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c)
+      (HM := fun r c => matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H r c)
+      hBv hv
+      (fun r c => matrix_inv_entry_with (M := M) hH hM hδpos hdet r c)
+      j)
+
+/-- Vector-inverse-matrix products have an explicit vector-valued bounded parabolic `C^{0,α}`
+estimate. -/
+theorem matrix_vecMul_inv_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {Bv Hv : n → ℝ} {B H : n → n → ℝ} {δ : ℝ}
+    {v : ℝ × X → n → 𝕜} {M : ℝ × X → Matrix n n 𝕜}
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i) (hH : ∀ i j, 0 ≤ H i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaWith
+      (∑ j : n, matrixVecMulInvEntryBoundConst (𝕜 := 𝕜) δ Bv B j)
+      (∑ j : n, matrixVecMulInvEntryHolderConst (𝕜 := 𝕜) δ Bv Hv B H j)
+      α (fun z => Matrix.vecMul (v z) (M z)⁻¹) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro j
+    exact matrixVecMulInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos hBv j
+  · intro j
+    exact matrixVecMulInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos hBv hHv j
+  · intro j
+    exact matrix_vecMul_inv_entry_with (v := v) (M := M) hBv hH hv hM hδpos hdet j
 
 /-- Compact-domain vector-inverse-matrix entry closure from entrywise control and pointwise
 nonvanishing determinant. -/
