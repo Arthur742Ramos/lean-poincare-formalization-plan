@@ -375,8 +375,8 @@ packages the canonical stationary local solution attached to
   elementwise matrix norm, named adjugate-entry, inverse-entry, summed whole
   inverse-matrix, matrix-product, inverse-principal entry,
   inverse-Christoffel metric-side, and quadratic-Christoffel matrix-norm
-  Lipschitz constants, plus a supplied-Christoffel schematic RHS entry
-  matrix-norm constant and primitive-input schematic RHS estimate, on entrywise
+  Lipschitz constants, plus supplied-Christoffel schematic RHS entry and
+  whole-matrix constants and primitive-input schematic RHS estimate, on entrywise
   bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds and
   compact-domain inverse,
