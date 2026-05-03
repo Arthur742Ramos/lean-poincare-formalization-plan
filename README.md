@@ -429,11 +429,12 @@ packages the canonical stationary local solution attached to
   time-space local-frame Gram determinant nonvanishing to parabolic inverse
   Gram-matrix control and inverse-Gram Christoffel/schematic Ricci-DeTurck
   closure, including spatial-Hölder entry-control variants and compact
-  quantitative inverse Gram, inverse-Gram Christoffel, and schematic RHS
-  bridges exposing the determinant lower-bound constant, plus compact
-  local-frame inverse-Gram Christoffel and schematic RHS bounded-difference
-  bridges against comparison primitive inputs, all with matching
-  spatial-Hölder Gram-entry input forms.
+  quantitative inverse Gram, inverse-principal contraction, inverse-Gram
+  Christoffel, and schematic RHS bridges exposing the determinant lower-bound
+  constant, plus compact local-frame inverse-principal contraction,
+  inverse-Gram Christoffel, and schematic RHS bounded-difference bridges
+  against comparison primitive inputs, all with matching spatial-Hölder
+  Gram-entry input forms.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric

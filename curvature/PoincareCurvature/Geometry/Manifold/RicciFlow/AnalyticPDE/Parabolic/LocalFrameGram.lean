@@ -161,6 +161,279 @@ theorem localFrameGramMatrix_inv_with_of_spatial_holder_of_timeSpace_isCompact
   exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
     (hB i j) (hGH i j) hα (hholder i j)
 
+/-- If the local-frame Gram entries and a four-index coefficient array have parabolic
+`C^{0,α}` control on a compact time-space set contained in a trivialization base, then the
+inverse-principal contraction against the Gram matrix has parabolic `C^{0,α}` control there. -/
+theorem localFrameGramMatrix_inv_two_index_contract_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hG : ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hHc : ∀ a c i j, ParabolicC0AlphaOn α (fun z : ℝ × M => Hc z a c i j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        (fun i j =>
+          ∑ a : ι, ∑ c : ι,
+            ((show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                Matrix ι ι ℝ) a c * Hc z a c i j :
+          Matrix ι ι ℝ)) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  exact matrix_inv_two_index_contract
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (T := Hc) hG hHc hδpos hdet
+
+/-- Spatial boundedness and spatial Holder estimates for local-frame Gram entries, together with
+parabolic control of a four-index coefficient array, lift to parabolic `C^{0,α}` control of the
+inverse-principal contraction on compact time-space sets contained in a trivialization base. -/
+theorem localFrameGramMatrix_inv_two_index_contract_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {B Hgram : ι → ι → ℝ}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j) (hH_nonneg : ∀ i j, 0 ≤ Hgram i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ B i j)
+    (hholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄, y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        Hgram i j * (dist x y) ^ α)
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hHc : ∀ a c i j, ParabolicC0AlphaOn α (fun z : ℝ × M => Hc z a c i j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        (fun i j =>
+          ∑ a : ι, ∑ c : ι,
+            ((show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                Matrix ι ι ℝ) a c * Hc z a c i j :
+          Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_inv_two_index_contract_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_ hHc
+  intro i j
+  exact of_snd_holder (s := K) (α := α)
+    (hB_nonneg i j) (hH_nonneg i j) hα (hB i j) (hholder i j)
+
+/-- Quantitative compact local-frame bridge for the inverse-principal contraction
+`g^{ab}H_abij`.  The geometric Gram determinant theorem supplies a positive determinant lower
+bound `δ`, and the finite-dimensional inverse-contraction estimate exposes explicit bounded
+`C^{0,α}` constants. -/
+theorem localFrameGramMatrix_inv_two_index_contract_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB GH : ι → ι → ℝ} {HB HH : ι → ι → ι → ι → ℝ}
+    (hGH : ∀ i j, 0 ≤ GH i j)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j) (hHH : ∀ a c i j, 0 ≤ HH a c i j)
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hG : ∀ i j,
+      ParabolicC0AlphaWith (GB i j) (GH i j) α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hHc : ∀ a c i j,
+      ParabolicC0AlphaWith (HB a c i j) (HH a c i j) α
+        (fun z : ℝ × M => Hc z a c i j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ i : ι, ∑ j : ι,
+          matrixInvTwoIndexContractEntryBoundConst (𝕜 := ℝ) δ GB HB i j)
+        (∑ i : ι, ∑ j : ι,
+          matrixInvTwoIndexContractEntryHolderConst (𝕜 := ℝ) δ GB GH HB HH i j)
+        α
+        (fun z : ℝ × M =>
+          (fun i j =>
+            ∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j :
+            Matrix ι ι ℝ)) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  exact matrix_inv_two_index_contract_with
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (T := Hc) hGH hHB hHH hG hHc hδpos hdet
+
+/-- Spatial boundedness and spatial Holder estimates for local-frame Gram entries, together with
+explicit parabolic controls for a four-index coefficient array, yield the quantitative compact
+local-frame inverse-principal contraction estimate. -/
+theorem localFrameGramMatrix_inv_two_index_contract_with_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB GH : ι → ι → ℝ} {HB HH : ι → ι → ι → ι → ℝ}
+    (hGH : ∀ i j, 0 ≤ GH i j)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j) (hHH : ∀ a c i j, 0 ≤ HH a c i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄, y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α)
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hHc : ∀ a c i j,
+      ParabolicC0AlphaWith (HB a c i j) (HH a c i j) α
+        (fun z : ℝ × M => Hc z a c i j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ i : ι, ∑ j : ι,
+          matrixInvTwoIndexContractEntryBoundConst (𝕜 := ℝ) δ GB HB i j)
+        (∑ i : ι, ∑ j : ι,
+          matrixInvTwoIndexContractEntryHolderConst (𝕜 := ℝ) δ GB GH HB HH i j)
+        α
+        (fun z : ℝ × M =>
+          (fun i j =>
+            ∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j :
+            Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_inv_two_index_contract_with_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase hGH hHB hHH ?_ hHc
+  intro i j
+  exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
+    (hB i j) (hGH i j) hα (hholder i j)
+
+/-- Compact local-frame bridge for the function-level bounded difference of inverse-principal
+contractions, comparing the geometric local-frame Gram matrix with an arbitrary comparison
+primitive input. -/
+theorem localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {HB : ι → ι → ι → ι → ℝ}
+    {ηG : ℝ} {ηH : ι → ι → ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hGctrl : ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j)
+    (hGbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c,
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 a c‖ ≤ C a c)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hKc : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c i j, ‖Kc z a c i j‖ ≤ HB a c i j)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG)
+    (hHdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH i j) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (matrixInvTwoIndexContractDiffBoundConst (𝕜 := ℝ) δ C HB ηG ηH)
+        (fun z : ℝ × M =>
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) :
+            Matrix ι ι ℝ) -
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι, ((N z)⁻¹ : Matrix ι ι ℝ) a c *
+              Kc z a c i j) :
+            Matrix ι ι ℝ)) K := by
+  have hdetG_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det ≠ 0 := by
+    intro z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) e b (hKbase hz)
+  exact matrix_inv_two_index_contract_bounded_sub_le_const_of_isCompact_det_ne_zero
+    (K := K)
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (N := N) (T := Hc) (U := Kc)
+    hK hα hGctrl hNctrl hdetG_ne hdetN_ne hHB hGbound hNbound hKc hGdiff hHdiff
+
+/-- Spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C GH : ι → ι → ℝ} {HB : ι → ι → ι → ι → ℝ}
+    {ηG : ℝ} {ηH : ι → ι → ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hGholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hKc : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c i j, ‖Kc z a c i j‖ ≤ HB a c i j)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG)
+    (hHdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH i j) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (matrixInvTwoIndexContractDiffBoundConst (𝕜 := ℝ) δ C HB ηG ηH)
+        (fun z : ℝ × M =>
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) :
+            Matrix ι ι ℝ) -
+          ((fun i j =>
+            ∑ a : ι, ∑ c : ι, ((N z)⁻¹ : Matrix ι ι ℝ) a c *
+              Kc z a c i j) :
+            Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_inv_two_index_contract_bounded_sub_le_const_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hα hKbase ?_ hNctrl hdetN_ne hHB ?_
+    hNbound hKc hGdiff hHdiff
+  · intro i j
+    exact of_snd_holder (s := K) (α := α)
+      (hC_nonneg i j) (hGH i j) hα.le (hGbound i j) (hGholder i j)
+  · intro z hz a c
+    exact hGbound a c ⟨z, hz, rfl⟩
+
 /-- If the local-frame Gram entries and a three-index derivative array have parabolic
 `C^{0,α}` control on a compact time-space set contained in a trivialization base, then the
 associated inverse-Gram Christoffel-type contraction has parabolic `C^{0,α}` control there. -/
