@@ -2090,6 +2090,26 @@ theorem comp_of_closedBall_bound {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ}
     ParabolicBoundedWith Bφ (fun z => φ (u z)) s :=
   comp_of_range_bound fun y hy => hφ y (hu.image_subset_closedBall_zero hy)
 
+theorem comp_lipschitzOnWith_of_closedBall {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicBoundedWith B u s) (hB : 0 ≤ B)
+    (hφ : LipschitzOnWith K φ (Metric.closedBall (0 : E) B)) :
+    ParabolicBoundedWith (‖φ (0 : E)‖ + (K : ℝ) * B) (fun z => φ (u z)) s := by
+  intro p hp
+  have hpball : u p ∈ Metric.closedBall (0 : E) B := hu.image_subset_closedBall_zero ⟨p, hp, rfl⟩
+  have hzeroball : (0 : E) ∈ Metric.closedBall (0 : E) B := by
+    simpa [Metric.mem_closedBall, dist_self] using hB
+  calc
+    ‖φ (u p)‖ = ‖(φ (u p) - φ 0) + φ 0‖ := by rw [sub_add_cancel]
+    _ ≤ ‖φ (u p) - φ 0‖ + ‖φ 0‖ := norm_add_le _ _
+    _ = dist (φ (u p)) (φ 0) + ‖φ 0‖ := by rw [dist_eq_norm]
+    _ ≤ (K : ℝ) * dist (u p) 0 + ‖φ 0‖ := by
+      exact add_le_add_left (hφ.dist_le_mul (u p) hpball 0 hzeroball) _
+    _ = (K : ℝ) * ‖u p‖ + ‖φ 0‖ := by rw [dist_eq_norm, sub_zero]
+    _ ≤ (K : ℝ) * B + ‖φ 0‖ := by
+      exact add_le_add_left
+        (mul_le_mul_of_nonneg_left (hu hp) (NNReal.coe_nonneg K)) _
+    _ = ‖φ (0 : E)‖ + (K : ℝ) * B := by ring
+
 theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicBoundedWith B u s) (hφ : LipschitzWith K φ) :
     ParabolicBoundedWith (‖φ (0 : E)‖ + (K : ℝ) * B) (fun z => φ (u z)) s := by
@@ -2350,6 +2370,15 @@ theorem comp_lipschitzOnWith_of_closedBall {F : Type*} [NormedAddCommGroup F]
   hu.comp_lipschitzOnWith
     (fun y hy => hφB y (hu.bounded.image_subset_closedBall_zero hy))
     (hφL.mono hu.bounded.image_subset_closedBall_zero)
+
+theorem comp_lipschitzOnWith_of_closedBall_auto_bound {F : Type*} [NormedAddCommGroup F]
+    {K : ℝ≥0} {φ : E → F}
+    (hu : ParabolicC0AlphaWith B H α u s) (hB : 0 ≤ B)
+    (hφ : LipschitzOnWith K φ (Metric.closedBall (0 : E) B)) :
+    ParabolicC0AlphaWith (‖φ (0 : E)‖ + (K : ℝ) * B) ((K : ℝ) * H) α
+      (fun z => φ (u z)) s :=
+  ⟨hu.bounded.comp_lipschitzOnWith_of_closedBall hB hφ,
+    hu.holder.comp_lipschitzOnWith (hφ.mono hu.bounded.image_subset_closedBall_zero)⟩
 
 theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicC0AlphaWith B H α u s) (hφ : LipschitzWith K φ) :
@@ -2755,6 +2784,18 @@ theorem comp_lipschitzOnWith_of_closedBall {F : Type*} [NormedAddCommGroup F]
   exact ⟨Bφ, hBφ, (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH,
     ⟨hBound.comp_of_closedBall_bound hφB,
       hBH.holder.comp_lipschitzOnWith (hφL.mono hBound.image_subset_closedBall_zero)⟩⟩
+
+theorem comp_lipschitzOnWith_of_closedBall_auto_bound {F : Type*} [NormedAddCommGroup F]
+    {B : ℝ} {K : ℝ≥0} {φ : E → F}
+    (hu : ParabolicC0AlphaOn α u s) (hBound : ParabolicBoundedWith B u s) (hB : 0 ≤ B)
+    (hφ : LipschitzOnWith K φ (Metric.closedBall (0 : E) B)) :
+    ParabolicC0AlphaOn α (fun z => φ (u z)) s := by
+  rcases hu with ⟨_B, _hB, H, hH, hBH⟩
+  refine ⟨‖φ (0 : E)‖ + (K : ℝ) * B,
+    add_nonneg (norm_nonneg _) (mul_nonneg (NNReal.coe_nonneg K) hB),
+    (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH, ?_⟩
+  exact ⟨hBound.comp_lipschitzOnWith_of_closedBall hB hφ,
+    hBH.holder.comp_lipschitzOnWith (hφ.mono hBound.image_subset_closedBall_zero)⟩
 
 theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicC0AlphaOn α u s) (hφ : LipschitzWith K φ) :
