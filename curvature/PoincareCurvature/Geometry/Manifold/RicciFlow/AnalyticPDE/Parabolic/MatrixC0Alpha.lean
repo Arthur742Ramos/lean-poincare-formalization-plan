@@ -524,6 +524,89 @@ theorem matrix_transpose_with {m n A : Type*} [Fintype m] [Fintype n]
     · intro j
       exact matrix_transpose_entry_with hM i j
 
+/-- Quantitative sup constant for one entry of a finite matrix transpose difference. -/
+def matrixTransposeEntrySubBoundConst {m n : Type*} (B : m → n → ℝ) (i : n) (j : m) :
+    ℝ :=
+  matrixTransposeEntryBoundConst B i j
+
+/-- Quantitative Holder constant for one entry of a finite matrix transpose difference. -/
+def matrixTransposeEntrySubHolderConst {m n : Type*} (H : m → n → ℝ) (i : n) (j : m) :
+    ℝ :=
+  matrixTransposeEntryHolderConst H i j
+
+theorem matrixTransposeEntrySubBoundConst_nonneg {m n : Type*} {B : m → n → ℝ}
+    (hB : ∀ i j, 0 ≤ B i j) (i : n) (j : m) :
+    0 ≤ matrixTransposeEntrySubBoundConst B i j :=
+  matrixTransposeEntryBoundConst_nonneg hB i j
+
+theorem matrixTransposeEntrySubHolderConst_nonneg {m n : Type*} {H : m → n → ℝ}
+    (hH : ∀ i j, 0 ≤ H i j) (i : n) (j : m) :
+    0 ≤ matrixTransposeEntrySubHolderConst H i j :=
+  matrixTransposeEntryHolderConst_nonneg hH i j
+
+/-- One entry of a finite matrix transpose difference has an explicit bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_transpose_entry_sub_with {m n A : Type*} [NormedAddCommGroup A]
+    {B H : m → n → ℝ} {M M' : ℝ × X → Matrix m n A}
+    (hMd : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α
+      (fun z => M z i j - M' z i j) s)
+    (i : n) (j : m) :
+    ParabolicC0AlphaWith
+      (matrixTransposeEntrySubBoundConst B i j)
+      (matrixTransposeEntrySubHolderConst H i j)
+      α (fun z => (M z).transpose i j - (M' z).transpose i j) s := by
+  simpa [matrixTransposeEntrySubBoundConst, matrixTransposeEntrySubHolderConst,
+    matrixTransposeEntryBoundConst, matrixTransposeEntryHolderConst] using hMd j i
+
+/-- Quantitative sup constant for a finite matrix transpose difference. -/
+def matrixTransposeSubBoundConst {m n : Type*} [Fintype m] [Fintype n]
+    (B : m → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : m, matrixTransposeEntrySubBoundConst B i j
+
+/-- Quantitative Holder constant for a finite matrix transpose difference. -/
+def matrixTransposeSubHolderConst {m n : Type*} [Fintype m] [Fintype n]
+    (H : m → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : m, matrixTransposeEntrySubHolderConst H i j
+
+theorem matrixTransposeSubBoundConst_nonneg {m n : Type*} [Fintype m] [Fintype n]
+    {B : m → n → ℝ} (hB : ∀ i j, 0 ≤ B i j) :
+    0 ≤ matrixTransposeSubBoundConst B := by
+  simpa [matrixTransposeSubBoundConst] using
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => matrixTransposeEntrySubBoundConst_nonneg hB i j)
+
+theorem matrixTransposeSubHolderConst_nonneg {m n : Type*} [Fintype m] [Fintype n]
+    {H : m → n → ℝ} (hH : ∀ i j, 0 ≤ H i j) :
+    0 ≤ matrixTransposeSubHolderConst H := by
+  simpa [matrixTransposeSubHolderConst] using
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => matrixTransposeEntrySubHolderConst_nonneg hH i j)
+
+/-- Finite matrix transpose differences have an explicit matrix-valued bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_transpose_sub_with {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B H : m → n → ℝ} {M M' : ℝ × X → Matrix m n A}
+    (hB : ∀ i j, 0 ≤ B i j) (hH : ∀ i j, 0 ≤ H i j)
+    (hMd : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α
+      (fun z => M z i j - M' z i j) s) :
+    ParabolicC0AlphaWith
+      (matrixTransposeSubBoundConst B) (matrixTransposeSubHolderConst H)
+      α (fun z => (M z).transpose - (M' z).transpose) s := by
+  simp only [matrixTransposeSubBoundConst, matrixTransposeSubHolderConst]
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj => matrixTransposeEntrySubBoundConst_nonneg hB i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj => matrixTransposeEntrySubHolderConst_nonneg hH i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact matrixTransposeEntrySubBoundConst_nonneg hB i j
+    · intro j
+      exact matrixTransposeEntrySubHolderConst_nonneg hH i j
+    · intro j
+      simpa using matrix_transpose_entry_sub_with (M := M) (M' := M') hMd i j
+
 /-- Finite matrix symmetrization preserves parabolic `C^{0,α}` control from entrywise control. -/
 theorem matrix_symmetrize {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
     {M : ℝ × X → Matrix n n 𝕜}
@@ -616,6 +699,102 @@ theorem matrix_symmetrize_with {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
       exact matrixSymmetrizeEntryHolderConst_nonneg (𝕜 := 𝕜) hH i j
     · intro j
       exact matrix_symmetrize_entry_with hM i j
+
+/-- Quantitative sup constant for one entry of finite matrix symmetrization difference. -/
+def matrixSymmetrizeEntrySubBoundConst {n 𝕜 : Type*} [NormedField 𝕜]
+    (B : n → n → ℝ) (i j : n) : ℝ :=
+  matrixSymmetrizeEntryBoundConst (𝕜 := 𝕜) B i j
+
+/-- Quantitative Holder constant for one entry of finite matrix symmetrization difference. -/
+def matrixSymmetrizeEntrySubHolderConst {n 𝕜 : Type*} [NormedField 𝕜]
+    (H : n → n → ℝ) (i j : n) : ℝ :=
+  matrixSymmetrizeEntryHolderConst (𝕜 := 𝕜) H i j
+
+theorem matrixSymmetrizeEntrySubBoundConst_nonneg {n 𝕜 : Type*} [NormedField 𝕜]
+    {B : n → n → ℝ} (hB : ∀ i j, 0 ≤ B i j) (i j : n) :
+    0 ≤ matrixSymmetrizeEntrySubBoundConst (𝕜 := 𝕜) B i j :=
+  matrixSymmetrizeEntryBoundConst_nonneg (𝕜 := 𝕜) hB i j
+
+theorem matrixSymmetrizeEntrySubHolderConst_nonneg {n 𝕜 : Type*} [NormedField 𝕜]
+    {H : n → n → ℝ} (hH : ∀ i j, 0 ≤ H i j) (i j : n) :
+    0 ≤ matrixSymmetrizeEntrySubHolderConst (𝕜 := 𝕜) H i j :=
+  matrixSymmetrizeEntryHolderConst_nonneg (𝕜 := 𝕜) hH i j
+
+/-- One entry of finite matrix symmetrization difference has an explicit bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_symmetrize_entry_sub_with {n 𝕜 : Type*} [NormedField 𝕜]
+    {B H : n → n → ℝ} {M M' : ℝ × X → Matrix n n 𝕜}
+    (hMd : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α
+      (fun z => M z i j - M' z i j) s)
+    (i j : n) :
+    ParabolicC0AlphaWith
+      (matrixSymmetrizeEntrySubBoundConst (𝕜 := 𝕜) B i j)
+      (matrixSymmetrizeEntrySubHolderConst (𝕜 := 𝕜) H i j)
+      α (fun z =>
+        ((2 : 𝕜)⁻¹ • (M z + (M z).transpose) -
+          (2 : 𝕜)⁻¹ • (M' z + (M' z).transpose)) i j) s := by
+  convert (((hMd i j).add (hMd j i)).smul ((2 : 𝕜)⁻¹)) using 1
+  ext z
+  change (2 : 𝕜)⁻¹ * (M z i j + M z j i) -
+      (2 : 𝕜)⁻¹ * (M' z i j + M' z j i) =
+    (2 : 𝕜)⁻¹ * ((M z i j - M' z i j) + (M z j i - M' z j i))
+  ring
+
+/-- Quantitative sup constant for finite matrix symmetrization difference. -/
+def matrixSymmetrizeSubBoundConst {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
+    (B : n → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : n, matrixSymmetrizeEntrySubBoundConst (𝕜 := 𝕜) B i j
+
+/-- Quantitative Holder constant for finite matrix symmetrization difference. -/
+def matrixSymmetrizeSubHolderConst {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
+    (H : n → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : n, matrixSymmetrizeEntrySubHolderConst (𝕜 := 𝕜) H i j
+
+theorem matrixSymmetrizeSubBoundConst_nonneg {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
+    {B : n → n → ℝ} (hB : ∀ i j, 0 ≤ B i j) :
+    0 ≤ matrixSymmetrizeSubBoundConst (𝕜 := 𝕜) B := by
+  simpa [matrixSymmetrizeSubBoundConst] using
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        matrixSymmetrizeEntrySubBoundConst_nonneg (𝕜 := 𝕜) hB i j)
+
+theorem matrixSymmetrizeSubHolderConst_nonneg {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
+    {H : n → n → ℝ} (hH : ∀ i j, 0 ≤ H i j) :
+    0 ≤ matrixSymmetrizeSubHolderConst (𝕜 := 𝕜) H := by
+  simpa [matrixSymmetrizeSubHolderConst] using
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        matrixSymmetrizeEntrySubHolderConst_nonneg (𝕜 := 𝕜) hH i j)
+
+/-- Finite matrix symmetrization differences have an explicit matrix-valued bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_symmetrize_sub_with {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
+    {B H : n → n → ℝ} {M M' : ℝ × X → Matrix n n 𝕜}
+    (hB : ∀ i j, 0 ≤ B i j) (hH : ∀ i j, 0 ≤ H i j)
+    (hMd : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α
+      (fun z => M z i j - M' z i j) s) :
+    ParabolicC0AlphaWith
+      (matrixSymmetrizeSubBoundConst (𝕜 := 𝕜) B)
+      (matrixSymmetrizeSubHolderConst (𝕜 := 𝕜) H)
+      α (fun z =>
+        (2 : 𝕜)⁻¹ • (M z + (M z).transpose) -
+          (2 : 𝕜)⁻¹ • (M' z + (M' z).transpose)) s := by
+  simp only [matrixSymmetrizeSubBoundConst, matrixSymmetrizeSubHolderConst]
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      matrixSymmetrizeEntrySubBoundConst_nonneg (𝕜 := 𝕜) hB i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      matrixSymmetrizeEntrySubHolderConst_nonneg (𝕜 := 𝕜) hH i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact matrixSymmetrizeEntrySubBoundConst_nonneg (𝕜 := 𝕜) hB i j
+    · intro j
+      exact matrixSymmetrizeEntrySubHolderConst_nonneg (𝕜 := 𝕜) hH i j
+    · intro j
+      simpa using matrix_symmetrize_entry_sub_with (M := M) (M' := M') hMd i j
 
 /-- The finite matrix symmetrization is pointwise symmetric. -/
 theorem matrix_symmetrize_isSymm {n 𝕜 : Type*} [NormedField 𝕜] (M : Matrix n n 𝕜) :
