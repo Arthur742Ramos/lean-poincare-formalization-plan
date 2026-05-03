@@ -7441,6 +7441,420 @@ theorem ricciDeTurck_schematic_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
     ricciDeTurck_schematic_from_christoffel_with
       hMH hHB hHH hΓB_nonneg hΓH_nonneg hM hH hΓ hδpos hdet
 
+/-- Difference-based sup constant for one supplied-Christoffel schematic Ricci-DeTurck
+coordinate entry. -/
+def ricciDeTurckSchematicFromChristoffelEntrySubBoundConst {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] (δ : ℝ)
+    (MB MBd : n → n → ℝ) (HB HBd : n → n → n → n → ℝ)
+    (ΓB ΛB ΓdB : n → n → n → ℝ) (i j : n) : ℝ :=
+  matrixInvTwoIndexContractEntrySubBoundConst (𝕜 := 𝕜) δ MB MBd HB HBd i j +
+    christoffelQuadraticRicciEntrySubBoundConst ΓB ΛB ΓdB i j
+
+/-- Difference-based Holder constant for one supplied-Christoffel schematic Ricci-DeTurck
+coordinate entry. -/
+def ricciDeTurckSchematicFromChristoffelEntrySubHolderConst {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] (δ : ℝ)
+    (MB MH MBd MHd : n → n → ℝ) (HB HH HBd HHd : n → n → n → n → ℝ)
+    (ΓB ΓH ΛB ΛH ΓdB ΓdH : n → n → n → ℝ) (i j : n) : ℝ :=
+  matrixInvTwoIndexContractEntrySubHolderConst
+      (𝕜 := 𝕜) δ MB MH MBd MHd HB HH HBd HHd i j +
+    christoffelQuadraticRicciEntrySubHolderConst ΓB ΓH ΛB ΛH ΓdB ΓdH i j
+
+/-- Difference-based sup constant for the supplied-Christoffel schematic Ricci-DeTurck matrix. -/
+def ricciDeTurckSchematicFromChristoffelSubBoundConst {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] (δ : ℝ)
+    (MB MBd : n → n → ℝ) (HB HBd : n → n → n → n → ℝ)
+    (ΓB ΛB ΓdB : n → n → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : n,
+    ricciDeTurckSchematicFromChristoffelEntrySubBoundConst
+      (𝕜 := 𝕜) δ MB MBd HB HBd ΓB ΛB ΓdB i j
+
+/-- Difference-based Holder constant for the supplied-Christoffel schematic Ricci-DeTurck
+matrix. -/
+def ricciDeTurckSchematicFromChristoffelSubHolderConst {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] (δ : ℝ)
+    (MB MH MBd MHd : n → n → ℝ) (HB HH HBd HHd : n → n → n → n → ℝ)
+    (ΓB ΓH ΛB ΛH ΓdB ΓdH : n → n → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : n,
+    ricciDeTurckSchematicFromChristoffelEntrySubHolderConst
+      (𝕜 := 𝕜) δ MB MH MBd MHd HB HH HBd HHd ΓB ΓH ΛB ΛH ΓdB ΓdH i j
+
+theorem ricciDeTurckSchematicFromChristoffelEntrySubBoundConst_nonneg {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MBd : n → n → ℝ} {HB HBd : n → n → n → n → ℝ}
+    {ΓB ΛB ΓdB : n → n → n → ℝ} (hδpos : 0 < δ)
+    (hMBd : ∀ a b, 0 ≤ MBd a b) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hHBd : ∀ a b i j, 0 ≤ HBd a b i j)
+    (hΓB : ∀ a b c, 0 ≤ ΓB a b c) (hΛB : ∀ a b c, 0 ≤ ΛB a b c)
+    (hΓdB : ∀ a b c, 0 ≤ ΓdB a b c) (i j : n) :
+    0 ≤ ricciDeTurckSchematicFromChristoffelEntrySubBoundConst
+      (𝕜 := 𝕜) δ MB MBd HB HBd ΓB ΛB ΓdB i j := by
+  exact add_nonneg
+    (matrixInvTwoIndexContractEntrySubBoundConst_nonneg
+      (𝕜 := 𝕜) hδpos hMBd hHB hHBd i j)
+    (christoffelQuadraticRicciEntrySubBoundConst_nonneg hΓB hΛB hΓdB i j)
+
+theorem ricciDeTurckSchematicFromChristoffelEntrySubHolderConst_nonneg {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MH MBd MHd : n → n → ℝ} {HB HH HBd HHd : n → n → n → n → ℝ}
+    {ΓB ΓH ΛB ΛH ΓdB ΓdH : n → n → n → ℝ} (hδpos : 0 < δ)
+    (hMH : ∀ a b, 0 ≤ MH a b) (hMBd : ∀ a b, 0 ≤ MBd a b)
+    (hMHd : ∀ a b, 0 ≤ MHd a b) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hHH : ∀ a b i j, 0 ≤ HH a b i j)
+    (hHBd : ∀ a b i j, 0 ≤ HBd a b i j)
+    (hHHd : ∀ a b i j, 0 ≤ HHd a b i j)
+    (hΓB : ∀ a b c, 0 ≤ ΓB a b c) (hΓH : ∀ a b c, 0 ≤ ΓH a b c)
+    (hΛB : ∀ a b c, 0 ≤ ΛB a b c) (hΛH : ∀ a b c, 0 ≤ ΛH a b c)
+    (hΓdB : ∀ a b c, 0 ≤ ΓdB a b c)
+    (hΓdH : ∀ a b c, 0 ≤ ΓdH a b c) (i j : n) :
+    0 ≤ ricciDeTurckSchematicFromChristoffelEntrySubHolderConst
+      (𝕜 := 𝕜) δ MB MH MBd MHd HB HH HBd HHd ΓB ΓH ΛB ΛH ΓdB ΓdH i j := by
+  exact add_nonneg
+    (matrixInvTwoIndexContractEntrySubHolderConst_nonneg
+      (𝕜 := 𝕜) hδpos hMH hMBd hMHd hHB hHH hHBd hHHd i j)
+    (christoffelQuadraticRicciEntrySubHolderConst_nonneg
+      hΓB hΓH hΛB hΛH hΓdB hΓdH i j)
+
+theorem ricciDeTurckSchematicFromChristoffelSubBoundConst_nonneg {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MBd : n → n → ℝ} {HB HBd : n → n → n → n → ℝ}
+    {ΓB ΛB ΓdB : n → n → n → ℝ} (hδpos : 0 < δ)
+    (hMBd : ∀ a b, 0 ≤ MBd a b) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hHBd : ∀ a b i j, 0 ≤ HBd a b i j)
+    (hΓB : ∀ a b c, 0 ≤ ΓB a b c) (hΛB : ∀ a b c, 0 ≤ ΛB a b c)
+    (hΓdB : ∀ a b c, 0 ≤ ΓdB a b c) :
+    0 ≤ ricciDeTurckSchematicFromChristoffelSubBoundConst
+      (𝕜 := 𝕜) δ MB MBd HB HBd ΓB ΛB ΓdB := by
+  exact Finset.sum_nonneg fun i _hi =>
+    Finset.sum_nonneg fun j _hj =>
+      ricciDeTurckSchematicFromChristoffelEntrySubBoundConst_nonneg
+        (𝕜 := 𝕜) hδpos hMBd hHB hHBd hΓB hΛB hΓdB i j
+
+theorem ricciDeTurckSchematicFromChristoffelSubHolderConst_nonneg {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MH MBd MHd : n → n → ℝ} {HB HH HBd HHd : n → n → n → n → ℝ}
+    {ΓB ΓH ΛB ΛH ΓdB ΓdH : n → n → n → ℝ} (hδpos : 0 < δ)
+    (hMH : ∀ a b, 0 ≤ MH a b) (hMBd : ∀ a b, 0 ≤ MBd a b)
+    (hMHd : ∀ a b, 0 ≤ MHd a b) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hHH : ∀ a b i j, 0 ≤ HH a b i j)
+    (hHBd : ∀ a b i j, 0 ≤ HBd a b i j)
+    (hHHd : ∀ a b i j, 0 ≤ HHd a b i j)
+    (hΓB : ∀ a b c, 0 ≤ ΓB a b c) (hΓH : ∀ a b c, 0 ≤ ΓH a b c)
+    (hΛB : ∀ a b c, 0 ≤ ΛB a b c) (hΛH : ∀ a b c, 0 ≤ ΛH a b c)
+    (hΓdB : ∀ a b c, 0 ≤ ΓdB a b c)
+    (hΓdH : ∀ a b c, 0 ≤ ΓdH a b c) :
+    0 ≤ ricciDeTurckSchematicFromChristoffelSubHolderConst
+      (𝕜 := 𝕜) δ MB MH MBd MHd HB HH HBd HHd ΓB ΓH ΛB ΛH ΓdB ΓdH := by
+  exact Finset.sum_nonneg fun i _hi =>
+    Finset.sum_nonneg fun j _hj =>
+      ricciDeTurckSchematicFromChristoffelEntrySubHolderConst_nonneg
+        (𝕜 := 𝕜) hδpos hMH hMBd hMHd hHB hHH hHBd hHHd
+        hΓB hΓH hΛB hΛH hΓdB hΓdH i j
+
+/-- One supplied-Christoffel schematic Ricci-DeTurck coordinate entry has difference-based
+parabolic `C^{0,α}` control from entrywise metric, principal-coefficient, and Christoffel-array
+difference controls. -/
+theorem ricciDeTurck_schematic_from_christoffel_entry_sub_with_entrywise {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MH MBd MHd : n → n → ℝ} {HB HH HBd HHd : n → n → n → n → ℝ}
+    {ΓB ΓH ΛB ΛH ΓdB ΓdH : n → n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜} {H K : ℝ × X → n → n → n → n → 𝕜}
+    {Γ Λ : ℝ × X → n → n → n → 𝕜}
+    (hMH : ∀ a b, 0 ≤ MH a b)
+    (hMBd : ∀ a b, 0 ≤ MBd a b) (hMHd : ∀ a b, 0 ≤ MHd a b)
+    (hΓB : ∀ a b c, 0 ≤ ΓB a b c)
+    (hΓdB : ∀ a b c, 0 ≤ ΓdB a b c)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => N z a b) s)
+    (hMdiff : ∀ a b,
+      ParabolicC0AlphaWith (MBd a b) (MHd a b) α (fun z => M z a b - N z a b) s)
+    (hK : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => K z a b i j) s)
+    (hHdiff : ∀ a b i j,
+      ParabolicC0AlphaWith (HBd a b i j) (HHd a b i j) α
+        (fun z => H z a b i j - K z a b i j) s)
+    (hΓ : ∀ a b c, ParabolicC0AlphaWith (ΓB a b c) (ΓH a b c) α
+      (fun z => Γ z a b c) s)
+    (hΛ : ∀ a b c, ParabolicC0AlphaWith (ΛB a b c) (ΛH a b c) α
+      (fun z => Λ z a b c) s)
+    (hΓdiff : ∀ a b c,
+      ParabolicC0AlphaWith (ΓdB a b c) (ΓdH a b c) α
+        (fun z => Γ z a b c - Λ z a b c) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖)
+    (i j : n) :
+    ParabolicC0AlphaWith
+      (ricciDeTurckSchematicFromChristoffelEntrySubBoundConst
+        (𝕜 := 𝕜) δ MB MBd HB HBd ΓB ΛB ΓdB i j)
+      (ricciDeTurckSchematicFromChristoffelEntrySubHolderConst
+        (𝕜 := 𝕜) δ MB MH MBd MHd HB HH HBd HHd ΓB ΓH ΛB ΛH ΓdB ΓdH i j)
+      α
+      (fun z =>
+        ((∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+            ((∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+              (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j))) -
+          ((∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b * K z a b i j) +
+            ((∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+              (∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j)))) s := by
+  have hprincipal :
+      ParabolicC0AlphaWith
+        (matrixInvTwoIndexContractEntrySubBoundConst (𝕜 := 𝕜) δ MB MBd HB HBd i j)
+        (matrixInvTwoIndexContractEntrySubHolderConst
+          (𝕜 := 𝕜) δ MB MH MBd MHd HB HH HBd HHd i j)
+        α
+        (fun z =>
+          (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) -
+            ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b * K z a b i j) s :=
+    matrix_inv_two_index_contract_entry_sub_with_entrywise
+      (M := M) (N := N) (T := H) (U := K)
+      hMH hMBd hMHd hM hN hMdiff hK hHdiff hδpos hdetM hdetN i j
+  have hquadratic :
+      ParabolicC0AlphaWith
+        (christoffelQuadraticRicciEntrySubBoundConst ΓB ΛB ΓdB i j)
+        (christoffelQuadraticRicciEntrySubHolderConst ΓB ΓH ΛB ΛH ΓdB ΓdH i j)
+        α
+        (fun z =>
+          ((∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+              (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)) -
+            ((∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+              (∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j))) s :=
+    christoffel_quadratic_ricci_entry_sub_with hΓB hΓdB hΓ hΛ hΓdiff i j
+  have hsum := hprincipal.add hquadratic
+  convert hsum using 1
+  · ext z
+    abel
+
+/-- The supplied-Christoffel schematic Ricci-DeTurck RHS has matrix-valued difference-based
+parabolic `C^{0,α}` control from entrywise metric, principal-coefficient, and Christoffel-array
+difference controls. -/
+theorem ricciDeTurck_schematic_from_christoffel_sub_with_entrywise {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MH MBd MHd : n → n → ℝ} {HB HH HBd HHd : n → n → n → n → ℝ}
+    {ΓB ΓH ΛB ΛH ΓdB ΓdH : n → n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜} {H K : ℝ × X → n → n → n → n → 𝕜}
+    {Γ Λ : ℝ × X → n → n → n → 𝕜}
+    (hMH : ∀ a b, 0 ≤ MH a b)
+    (hMBd : ∀ a b, 0 ≤ MBd a b) (hMHd : ∀ a b, 0 ≤ MHd a b)
+    (hHB : ∀ a b i j, 0 ≤ HB a b i j) (hHH : ∀ a b i j, 0 ≤ HH a b i j)
+    (hHBd : ∀ a b i j, 0 ≤ HBd a b i j)
+    (hHHd : ∀ a b i j, 0 ≤ HHd a b i j)
+    (hΓB : ∀ a b c, 0 ≤ ΓB a b c) (hΓH : ∀ a b c, 0 ≤ ΓH a b c)
+    (hΛB : ∀ a b c, 0 ≤ ΛB a b c) (hΛH : ∀ a b c, 0 ≤ ΛH a b c)
+    (hΓdB : ∀ a b c, 0 ≤ ΓdB a b c)
+    (hΓdH : ∀ a b c, 0 ≤ ΓdH a b c)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => N z a b) s)
+    (hMdiff : ∀ a b,
+      ParabolicC0AlphaWith (MBd a b) (MHd a b) α (fun z => M z a b - N z a b) s)
+    (hK : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => K z a b i j) s)
+    (hHdiff : ∀ a b i j,
+      ParabolicC0AlphaWith (HBd a b i j) (HHd a b i j) α
+        (fun z => H z a b i j - K z a b i j) s)
+    (hΓ : ∀ a b c, ParabolicC0AlphaWith (ΓB a b c) (ΓH a b c) α
+      (fun z => Γ z a b c) s)
+    (hΛ : ∀ a b c, ParabolicC0AlphaWith (ΛB a b c) (ΛH a b c) α
+      (fun z => Λ z a b c) s)
+    (hΓdiff : ∀ a b c,
+      ParabolicC0AlphaWith (ΓdB a b c) (ΓdH a b c) α
+        (fun z => Γ z a b c - Λ z a b c) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaWith
+      (ricciDeTurckSchematicFromChristoffelSubBoundConst
+        (𝕜 := 𝕜) δ MB MBd HB HBd ΓB ΛB ΓdB)
+      (ricciDeTurckSchematicFromChristoffelSubHolderConst
+        (𝕜 := 𝕜) δ MB MH MBd MHd HB HH HBd HHd ΓB ΓH ΛB ΛH ΓdB ΓdH)
+      α
+      (fun z : ℝ × X =>
+        ((fun i j =>
+          (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+            ((∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+              (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)) :
+          Matrix n n 𝕜) -
+          (fun i j =>
+            (∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b * K z a b i j) +
+              ((∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+                (∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j)) :
+            Matrix n n 𝕜))) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      ricciDeTurckSchematicFromChristoffelEntrySubBoundConst_nonneg
+        (𝕜 := 𝕜) hδpos hMBd hHB hHBd hΓB hΛB hΓdB i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      ricciDeTurckSchematicFromChristoffelEntrySubHolderConst_nonneg
+        (𝕜 := 𝕜) hδpos hMH hMBd hMHd hHB hHH hHBd hHHd
+        hΓB hΓH hΛB hΛH hΓdB hΓdH i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact ricciDeTurckSchematicFromChristoffelEntrySubBoundConst_nonneg
+        (𝕜 := 𝕜) hδpos hMBd hHB hHBd hΓB hΛB hΓdB i j
+    · intro j
+      exact ricciDeTurckSchematicFromChristoffelEntrySubHolderConst_nonneg
+        (𝕜 := 𝕜) hδpos hMH hMBd hMHd hHB hHH hHBd hHHd
+        hΓB hΓH hΛB hΛH hΓdB hΓdH i j
+    · intro j
+      exact ricciDeTurck_schematic_from_christoffel_entry_sub_with_entrywise
+        (M := M) (N := N) (H := H) (K := K) (Γ := Γ) (Λ := Λ)
+        hMH hMBd hMHd hΓB hΓdB hM hN hMdiff hK hHdiff
+        hΓ hΛ hΓdiff hδpos hdetM hdetN i j
+
+/-- The finite matrix-valued schematic Ricci-DeTurck coordinate RHS.  This definition names the
+algebraic expression used by the pointwise and time-space Lipschitz estimates. -/
+def ricciDeTurckSchematicMatrix {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (M : Matrix n n 𝕜) (D : n → n → n → 𝕜)
+    (H : n → n → n → n → 𝕜) : Matrix n n 𝕜 :=
+  fun i j =>
+    let Γ : n → n → n → 𝕜 := fun a b c =>
+      (2 : 𝕜)⁻¹ *
+        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) a l * (D b c l + D c b l - D l b c)
+    (∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+      ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+        (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))
+
+/-- Difference-based sup constant for the primitive-input schematic Ricci-DeTurck matrix, using
+entrywise controls on primitive differences. -/
+def ricciDeTurckSchematicEntrywiseSubBoundConst {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] (δ : ℝ)
+    (MB MBd : n → n → ℝ) (DB DDB : n → n → n → ℝ)
+    (HB HBd : n → n → n → n → ℝ) : ℝ :=
+  ricciDeTurckSchematicFromChristoffelSubBoundConst
+    (𝕜 := 𝕜) δ MB MBd HB HBd
+    (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+    (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+    (fun a b c => matrixInvChristoffelEntrySubBoundConst (𝕜 := 𝕜) δ MB MBd DB DDB a b c)
+
+/-- Difference-based Holder constant for the primitive-input schematic Ricci-DeTurck matrix,
+using entrywise controls on primitive differences. -/
+def ricciDeTurckSchematicEntrywiseSubHolderConst {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] (δ : ℝ)
+    (MB MH MBd MHd : n → n → ℝ) (DB DH DDB DDH : n → n → n → ℝ)
+    (HB HH HBd HHd : n → n → n → n → ℝ) : ℝ :=
+  ricciDeTurckSchematicFromChristoffelSubHolderConst
+    (𝕜 := 𝕜) δ MB MH MBd MHd HB HH HBd HHd
+    (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+    (fun a b c =>
+      matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ MB MH DB DH a b c)
+    (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+    (fun a b c =>
+      matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ MB MH DB DH a b c)
+    (fun a b c =>
+      matrixInvChristoffelEntrySubBoundConst (𝕜 := 𝕜) δ MB MBd DB DDB a b c)
+    (fun a b c =>
+      matrixInvChristoffelEntrySubHolderConst
+        (𝕜 := 𝕜) δ MB MH MBd MHd DB DH DDB DDH a b c)
+
+/-- The primitive-input schematic Ricci-DeTurck RHS has matrix-valued difference-based
+parabolic `C^{0,α}` control from entrywise metric, first-derivative, and second-derivative
+difference controls. -/
+theorem ricciDeTurckSchematicMatrix_sub_with_entrywise {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MH MBd MHd : n → n → ℝ} {DB DH DDB DDH : n → n → n → ℝ}
+    {HB HH HBd HHd : n → n → n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hMH : ∀ a b, 0 ≤ MH a b)
+    (hMBd : ∀ a b, 0 ≤ MBd a b) (hMHd : ∀ a b, 0 ≤ MHd a b)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hDH : ∀ a b c, 0 ≤ DH a b c)
+    (hDDB : ∀ a b c, 0 ≤ DDB a b c) (hDDH : ∀ a b c, 0 ≤ DDH a b c)
+    (hHB : ∀ a b i j, 0 ≤ HB a b i j) (hHH : ∀ a b i j, 0 ≤ HH a b i j)
+    (hHBd : ∀ a b i j, 0 ≤ HBd a b i j)
+    (hHHd : ∀ a b i j, 0 ≤ HHd a b i j)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => N z a b) s)
+    (hMdiff : ∀ a b,
+      ParabolicC0AlphaWith (MBd a b) (MHd a b) α (fun z => M z a b - N z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) s)
+    (hE : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => E z a b c) s)
+    (hDdiff : ∀ a b c,
+      ParabolicC0AlphaWith (DDB a b c) (DDH a b c) α
+        (fun z => D z a b c - E z a b c) s)
+    (hKc : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => Kc z a b i j) s)
+    (hHdiff : ∀ a b i j,
+      ParabolicC0AlphaWith (HBd a b i j) (HHd a b i j) α
+        (fun z => Hc z a b i j - Kc z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaWith
+      (ricciDeTurckSchematicEntrywiseSubBoundConst
+        (𝕜 := 𝕜) δ MB MBd DB DDB HB HBd)
+      (ricciDeTurckSchematicEntrywiseSubHolderConst
+        (𝕜 := 𝕜) δ MB MH MBd MHd DB DH DDB DDH HB HH HBd HHd)
+      α
+      (fun z : ℝ × X =>
+        ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+          ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) s := by
+  classical
+  let Γ : ℝ × X → n → n → n → 𝕜 := fun z a b c =>
+    (2 : 𝕜)⁻¹ *
+      ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+        (D z b c l + D z c b l - D z l b c)
+  let Λ : ℝ × X → n → n → n → 𝕜 := fun z a b c =>
+    (2 : 𝕜)⁻¹ *
+      ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) a l *
+        (E z b c l + E z c b l - E z l b c)
+  let ΓB : n → n → n → ℝ := fun a b c =>
+    matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c
+  let ΓH : n → n → n → ℝ := fun a b c =>
+    matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ MB MH DB DH a b c
+  let ΓdB : n → n → n → ℝ := fun a b c =>
+    matrixInvChristoffelEntrySubBoundConst (𝕜 := 𝕜) δ MB MBd DB DDB a b c
+  let ΓdH : n → n → n → ℝ := fun a b c =>
+    matrixInvChristoffelEntrySubHolderConst
+      (𝕜 := 𝕜) δ MB MH MBd MHd DB DH DDB DDH a b c
+  have hΓB_nonneg : ∀ a b c, 0 ≤ ΓB a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos MB hDB a b c
+  have hΓH_nonneg : ∀ a b c, 0 ≤ ΓH a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntryHolderConst_nonneg
+      (𝕜 := 𝕜) hMH hδpos hDB hDH a b c
+  have hΓdB_nonneg : ∀ a b c, 0 ≤ ΓdB a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntrySubBoundConst_nonneg
+      (𝕜 := 𝕜) hδpos hMBd hDB hDDB a b c
+  have hΓdH_nonneg : ∀ a b c, 0 ≤ ΓdH a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntrySubHolderConst_nonneg
+      (𝕜 := 𝕜) hδpos hMH hMBd hMHd hDB hDH hDDB hDDH a b c
+  have hΓ : ∀ a b c, ParabolicC0AlphaWith (ΓB a b c) (ΓH a b c) α
+      (fun z => Γ z a b c) s := by
+    intro a b c
+    simpa [Γ, ΓB, ΓH] using
+      matrix_inv_christoffel_entry_with (M := M) (D := D)
+        hMH hM hD hδpos hdetM a b c
+  have hΛ : ∀ a b c, ParabolicC0AlphaWith (ΓB a b c) (ΓH a b c) α
+      (fun z => Λ z a b c) s := by
+    intro a b c
+    simpa [Λ, ΓB, ΓH] using
+      matrix_inv_christoffel_entry_with (M := N) (D := E)
+        hMH hN hE hδpos hdetN a b c
+  have hΓdiff : ∀ a b c,
+      ParabolicC0AlphaWith (ΓdB a b c) (ΓdH a b c) α
+        (fun z => Γ z a b c - Λ z a b c) s := by
+    intro a b c
+    simpa [Γ, Λ, ΓdB, ΓdH] using
+      matrix_inv_christoffel_entry_sub_with_entrywise
+        (M := M) (N := N) (D := D) (E := E)
+        hMH hMBd hMHd hM hN hMdiff hE hDdiff hδpos hdetM hdetN a b c
+  simpa [ricciDeTurckSchematicMatrix, ricciDeTurckSchematicEntrywiseSubBoundConst,
+    ricciDeTurckSchematicEntrywiseSubHolderConst, Γ, Λ, ΓB, ΓH, ΓdB, ΓdH] using
+    ricciDeTurck_schematic_from_christoffel_sub_with_entrywise
+      (M := M) (N := N) (H := Hc) (K := Kc) (Γ := Γ) (Λ := Λ)
+      hMH hMBd hMHd hHB hHH hHBd hHHd
+      hΓB_nonneg hΓH_nonneg hΓB_nonneg hΓH_nonneg hΓdB_nonneg hΓdH_nonneg
+      hM hN hMdiff hKc hHdiff hΓ hΛ hΓdiff hδpos hdetM hdetN
+
 /-- The schematic Ricci-DeTurck coordinate entry is pointwise Lipschitz in the primitive metric,
 first-derivative, and second-derivative arrays, on entrywise bounded matrices with a common
 determinant lower bound. -/
@@ -7869,19 +8283,6 @@ theorem ricciDeTurck_schematic_norm_sub_le_const {n 𝕜 : Type*} [Fintype n]
   simpa [Γ, Λ, ΓB, ηγ] using
     ricciDeTurck_schematic_from_christoffel_norm_sub_le_const
       M N H K Γ Λ hM hN hK hΓbound hΛbound hΓdiff hδpos hdetM hdetN
-
-/-- The finite matrix-valued schematic Ricci-DeTurck coordinate RHS.  This definition names the
-algebraic expression used by the pointwise and time-space Lipschitz estimates. -/
-def ricciDeTurckSchematicMatrix {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
-    [NormedField 𝕜] (M : Matrix n n 𝕜) (D : n → n → n → 𝕜)
-    (H : n → n → n → n → 𝕜) : Matrix n n 𝕜 :=
-  fun i j =>
-    let Γ : n → n → n → 𝕜 := fun a b c =>
-      (2 : 𝕜)⁻¹ *
-        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) a l * (D b c l + D c b l - D l b c)
-    (∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
-      ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
-        (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))
 
 /-- Uniform bound used for the function-level schematic Ricci-DeTurck difference estimate. -/
 def ricciDeTurckSchematicDiffBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
