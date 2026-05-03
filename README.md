@@ -384,7 +384,10 @@ packages the canonical stationary local solution attached to
   along with closure
   under taking norms, Lipschitz composition on the controlled range, direct
   parabolic Hölder/`C^{0,α}` lifts of time-independent spatial
-  Hölder/Lipschitz functions on the spatial projection, bounded
+  Hölder/Lipschitz functions on the spatial projection, direct time-only
+  lifts from ordinary time Hölder exponent `α / 2` to parabolic exponent `α`
+  and from time Lipschitz control to parabolic exponent `2`,
+  bounded
   `C^{0,α}` composition under range or explicit closed-sup-ball bounds,
   global and closed-ball Lipschitz composition with automatic composed sup
   bounds, pointwise finite-product Lipschitz estimates and finite-sum

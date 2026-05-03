@@ -1475,6 +1475,41 @@ theorem of_snd_lipschitzOnWith {K : ℝ≥0} {f : X → E}
         mul_le_mul_of_nonneg_left (parabolicDistance.space_dist_le p q) (NNReal.coe_nonneg K)
     _ = (K : ℝ) * (parabolicDistance p q) ^ (1 : ℝ) := by rw [Real.rpow_one]
 
+/-- A time-only Holder estimate with exponent `α / 2` lifts to parabolic Holder control with
+exponent `α`. -/
+theorem of_fst_holder (hC : 0 ≤ C) (hα : 0 ≤ α) {f : ℝ → E}
+    (hf : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ∀ ⦃τ : ℝ⦄, τ ∈ Prod.fst '' s →
+      ‖f t - f τ‖ ≤ C * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith C α (fun z : ℝ × X => f z.1) s := by
+  intro p hp q hq
+  have hpim : p.1 ∈ Prod.fst '' s := ⟨p, hp, rfl⟩
+  have hqim : q.1 ∈ Prod.fst '' s := ⟨q, hq, rfl⟩
+  have hpow :
+      |p.1 - q.1| ^ (α / 2) ≤ (parabolicDistance p q) ^ α := by
+    have hsqrt :
+        (Real.sqrt |p.1 - q.1|) ^ α ≤ (parabolicDistance p q) ^ α :=
+      Real.rpow_le_rpow (Real.sqrt_nonneg _) (parabolicDistance.sqrt_time_le p q) hα
+    simpa [Real.rpow_div_two_eq_sqrt α (abs_nonneg (p.1 - q.1))] using hsqrt
+  exact (hf hpim hqim).trans (mul_le_mul_of_nonneg_left hpow hC)
+
+/-- A time-only Lipschitz function lifts to parabolic Holder control with exponent `2`. -/
+theorem of_fst_lipschitzOnWith {K : ℝ≥0} {f : ℝ → E}
+    (hf : LipschitzOnWith K f (Prod.fst '' s)) :
+    ParabolicHolderWith (K : ℝ) 2 (fun z : ℝ × X => f z.1) s := by
+  intro p hp q hq
+  have hpim : p.1 ∈ Prod.fst '' s := ⟨p, hp, rfl⟩
+  have hqim : q.1 ∈ Prod.fst '' s := ⟨q, hq, rfl⟩
+  have htime :
+      |p.1 - q.1| ≤ (parabolicDistance p q) ^ 2 :=
+    parabolicDistance.time_abs_le_sq_of_le (parabolicDistance.nonneg p q) le_rfl
+  calc
+    ‖f p.1 - f q.1‖ = dist (f p.1) (f q.1) := by rw [dist_eq_norm]
+    _ ≤ (K : ℝ) * dist p.1 q.1 := hf.dist_le_mul p.1 hpim q.1 hqim
+    _ = (K : ℝ) * |p.1 - q.1| := by rw [Real.dist_eq]
+    _ ≤ (K : ℝ) * (parabolicDistance p q) ^ 2 :=
+      mul_le_mul_of_nonneg_left htime (NNReal.coe_nonneg K)
+    _ = (K : ℝ) * (parabolicDistance p q) ^ (2 : ℝ) := by rw [Real.rpow_two]
+
 /-- Restricting a parabolic Holder estimate to a fixed spatial point gives the weighted
 time-slice estimate. -/
 theorem time_slice (h : ParabolicHolderWith C α u s) {t τ : ℝ} {x : X}
@@ -1886,6 +1921,21 @@ theorem of_snd_lipschitzOnWith {K : ℝ≥0} {f : X → E}
     ParabolicHolderOn 1 (fun z : ℝ × X => f z.2) s :=
   ⟨(K : ℝ), NNReal.coe_nonneg K, ParabolicHolderWith.of_snd_lipschitzOnWith hf⟩
 
+/-- A time-only Holder estimate with exponent `α / 2` lifts to existential parabolic Holder
+control with exponent `α`. -/
+theorem of_fst_holder {C : ℝ} (hC : 0 ≤ C) (hα : 0 ≤ α) {f : ℝ → E}
+    (hf : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ∀ ⦃τ : ℝ⦄, τ ∈ Prod.fst '' s →
+      ‖f t - f τ‖ ≤ C * |t - τ| ^ (α / 2)) :
+    ParabolicHolderOn α (fun z : ℝ × X => f z.1) s :=
+  ⟨C, hC, ParabolicHolderWith.of_fst_holder hC hα hf⟩
+
+/-- A time-only Lipschitz function lifts to existential parabolic Holder control with exponent
+`2`. -/
+theorem of_fst_lipschitzOnWith {K : ℝ≥0} {f : ℝ → E}
+    (hf : LipschitzOnWith K f (Prod.fst '' s)) :
+    ParabolicHolderOn 2 (fun z : ℝ × X => f z.1) s :=
+  ⟨(K : ℝ), NNReal.coe_nonneg K, ParabolicHolderWith.of_fst_lipschitzOnWith hf⟩
+
 /-- A parabolic Holder function has a weighted Holder estimate on every time slice through a
 fixed spatial point. -/
 theorem time_slice (h : ParabolicHolderOn α u s) :
@@ -2204,6 +2254,13 @@ theorem of_snd {f : X → E}
   intro p hp
   exact hf ⟨p, hp, rfl⟩
 
+/-- Time-only boundedness lifts to a parabolic time-space bound. -/
+theorem of_fst {f : ℝ → E}
+    (hf : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖f t‖ ≤ B) :
+    ParabolicBoundedWith B (fun z : ℝ × X => f z.1) s := by
+  intro p hp
+  exact hf ⟨p, hp, rfl⟩
+
 theorem const (c : E) (hB : ‖c‖ ≤ B) :
     ParabolicBoundedWith B (fun _ : ℝ × X => c) s := by
   intro _p _hp
@@ -2492,6 +2549,24 @@ theorem of_snd_holder {f : X → E}
       ‖f x - f y‖ ≤ H * (dist x y) ^ α) :
     ParabolicC0AlphaWith B H α (fun z : ℝ × X => f z.2) s :=
   ⟨ParabolicBoundedWith.of_snd hB, ParabolicHolderWith.of_snd_holder hH hα hf⟩
+
+/-- Time-only boundedness and Holder control with exponent `α / 2` give parabolic `C^{0,α}`
+control for the time-only lift. -/
+theorem of_fst_holder {f : ℝ → E}
+    (hB : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖f t‖ ≤ B)
+    (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hf : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ∀ ⦃τ : ℝ⦄, τ ∈ Prod.fst '' s →
+      ‖f t - f τ‖ ≤ H * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaWith B H α (fun z : ℝ × X => f z.1) s :=
+  ⟨ParabolicBoundedWith.of_fst hB, ParabolicHolderWith.of_fst_holder hH hα hf⟩
+
+/-- Time-only boundedness and Lipschitz control give parabolic `C^{0,2}` control for the
+time-only lift. -/
+theorem of_fst_lipschitzOnWith {K : ℝ≥0} {f : ℝ → E}
+    (hB : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖f t‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.fst '' s)) :
+    ParabolicC0AlphaWith B (K : ℝ) 2 (fun z : ℝ × X => f z.1) s :=
+  ⟨ParabolicBoundedWith.of_fst hB, ParabolicHolderWith.of_fst_lipschitzOnWith hL⟩
 
 theorem add (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
     (hv : ParabolicC0AlphaWith B₂ H₂ α v s) :
@@ -3454,6 +3529,26 @@ theorem of_snd_holder {B H : ℝ} {f : X → E}
       ‖f x - f y‖ ≤ H * (dist x y) ^ α) :
     ParabolicC0AlphaOn α (fun z : ℝ × X => f z.2) s :=
   ⟨B, hB_nonneg, H, hH_nonneg, ParabolicC0AlphaWith.of_snd_holder hB hH_nonneg hα hf⟩
+
+/-- Time-only boundedness and Holder control with exponent `α / 2` give existential parabolic
+`C^{0,α}` control for the time-only lift. -/
+theorem of_fst_holder {B H : ℝ} {f : ℝ → E}
+    (hB_nonneg : 0 ≤ B) (hH_nonneg : 0 ≤ H) (hα : 0 ≤ α)
+    (hB : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖f t‖ ≤ B)
+    (hf : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ∀ ⦃τ : ℝ⦄, τ ∈ Prod.fst '' s →
+      ‖f t - f τ‖ ≤ H * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => f z.1) s :=
+  ⟨B, hB_nonneg, H, hH_nonneg, ParabolicC0AlphaWith.of_fst_holder hB hH_nonneg hα hf⟩
+
+/-- Time-only boundedness and Lipschitz control give existential parabolic `C^{0,2}` control for
+the time-only lift. -/
+theorem of_fst_lipschitzOnWith {B : ℝ} {K : ℝ≥0} {f : ℝ → E}
+    (hB_nonneg : 0 ≤ B)
+    (hB : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖f t‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.fst '' s)) :
+    ParabolicC0AlphaOn 2 (fun z : ℝ × X => f z.1) s :=
+  ⟨B, hB_nonneg, (K : ℝ), NNReal.coe_nonneg K,
+    ParabolicC0AlphaWith.of_fst_lipschitzOnWith hB hL⟩
 
 theorem add (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
     ParabolicC0AlphaOn α (fun z => u z + v z) s := by
