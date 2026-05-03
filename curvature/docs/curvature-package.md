@@ -191,8 +191,9 @@ matrix-vector/vector-matrix product-difference
 estimates, and inverse-matrix vector products on
 both sides under the same determinant lower bound, plus
 whole finite vector/matrix and inverse-matrix packages, finite vector dot
-products, dot-product difference estimates, finite bilinear-contraction
-difference estimates, and bilinear contractions
+products, explicit bounded dot-product estimates, dot-product difference
+estimates, explicit bounded finite bilinear-contraction estimates,
+finite bilinear-contraction difference estimates, and bilinear contractions
 through matrices or inverse matrices,
 including explicit bounded Holder entry and whole-array estimates for
 Christoffel-symbol type inverse-metric contractions and their entrywise/whole-array

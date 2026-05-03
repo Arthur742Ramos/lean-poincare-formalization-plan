@@ -2018,6 +2018,45 @@ theorem vector_dot_entry {n A : Type*} [Fintype n] [NormedRing A]
       (u := fun i z => v z i * w z i)
       (fun i _hi => (hv i).mul (hw i)))
 
+/-- Quantitative sup constant for a finite dot product. -/
+def vectorDotBoundConst {n : Type*} [Fintype n] (Bv Bw : n → ℝ) : ℝ :=
+  Finset.univ.sum fun i : n => Bv i * Bw i
+
+/-- Quantitative Holder constant for a finite dot product. -/
+def vectorDotHolderConst {n : Type*} [Fintype n] (Bv Hv Bw Hw : n → ℝ) : ℝ :=
+  Finset.univ.sum fun i : n => Bv i * Hw i + Bw i * Hv i
+
+theorem vectorDotBoundConst_nonneg {n : Type*} [Fintype n] {Bv Bw : n → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hBw : ∀ i, 0 ≤ Bw i) :
+    0 ≤ vectorDotBoundConst Bv Bw := by
+  simpa [vectorDotBoundConst] using
+    (Finset.sum_nonneg fun i _hi => mul_nonneg (hBv i) (hBw i))
+
+theorem vectorDotHolderConst_nonneg {n : Type*} [Fintype n] {Bv Hv Bw Hw : n → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i)
+    (hBw : ∀ i, 0 ≤ Bw i) (hHw : ∀ i, 0 ≤ Hw i) :
+    0 ≤ vectorDotHolderConst Bv Hv Bw Hw := by
+  simpa [vectorDotHolderConst] using
+    (Finset.sum_nonneg fun i _hi =>
+      add_nonneg (mul_nonneg (hBv i) (hHw i)) (mul_nonneg (hBw i) (hHv i)))
+
+/-- Finite dot products have an explicit bounded parabolic `C^{0,α}` estimate. -/
+theorem vector_dot_with {n A : Type*} [Fintype n] [NormedRing A]
+    {Bv Hv Bw Hw : n → ℝ} {v w : ℝ × X → n → A}
+    (hBv : ∀ i, 0 ≤ Bv i)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hw : ∀ i, ParabolicC0AlphaWith (Bw i) (Hw i) α (fun z => w z i) s) :
+    ParabolicC0AlphaWith (vectorDotBoundConst Bv Bw) (vectorDotHolderConst Bv Hv Bw Hw)
+      α (fun z => ∑ i : n, v z i * w z i) s := by
+  classical
+  simpa [vectorDotBoundConst, vectorDotHolderConst] using
+    (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (B := fun i => Bv i * Bw i)
+      (H := fun i => Bv i * Hw i + Bw i * Hv i)
+      (u := fun i z => v z i * w z i)
+      (fun i _hi => (hv i).mul (hw i) (hBv i)))
+
 /-- Quantitative sup constant for the difference of two finite dot products. -/
 def vectorDotSubBoundConst {n : Type*} [Fintype n]
     (Bv Bw' Bvd Bwd : n → ℝ) : ℝ :=
@@ -2191,6 +2230,60 @@ theorem matrix_bilinear_entry {m n A : Type*} [Fintype m] [Fintype n] [NormedRin
     (hw : ∀ j, ParabolicC0AlphaOn α (fun z => w z j) s) :
     ParabolicC0AlphaOn α (fun z => ∑ i : m, v z i * (M z).mulVec (w z) i) s :=
   vector_dot_entry hv (fun i => matrix_mulVec_entry hM hw i)
+
+/-- Quantitative sup constant for a finite bilinear matrix contraction `v · (M w)`. -/
+def matrixBilinearEntryBoundConst {m n : Type*} [Fintype m] [Fintype n]
+    (Bv : m → ℝ) (BM : m → n → ℝ) (Bw : n → ℝ) : ℝ :=
+  vectorDotBoundConst Bv (fun i => matrixMulVecEntryBoundConst BM Bw i)
+
+/-- Quantitative Holder constant for a finite bilinear matrix contraction `v · (M w)`. -/
+def matrixBilinearEntryHolderConst {m n : Type*} [Fintype m] [Fintype n]
+    (Bv Hv : m → ℝ) (BM HM : m → n → ℝ) (Bw Hw : n → ℝ) : ℝ :=
+  vectorDotHolderConst Bv Hv (fun i => matrixMulVecEntryBoundConst BM Bw i)
+    (fun i => matrixMulVecEntryHolderConst BM HM Bw Hw i)
+
+theorem matrixBilinearEntryBoundConst_nonneg {m n : Type*} [Fintype m] [Fintype n]
+    {Bv : m → ℝ} {BM : m → n → ℝ} {Bw : n → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hBM : ∀ i j, 0 ≤ BM i j) (hBw : ∀ j, 0 ≤ Bw j) :
+    0 ≤ matrixBilinearEntryBoundConst Bv BM Bw := by
+  simpa [matrixBilinearEntryBoundConst] using
+    (vectorDotBoundConst_nonneg hBv
+      (fun i => matrixMulVecEntryBoundConst_nonneg hBM hBw i))
+
+theorem matrixBilinearEntryHolderConst_nonneg {m n : Type*} [Fintype m] [Fintype n]
+    {Bv Hv : m → ℝ} {BM HM : m → n → ℝ} {Bw Hw : n → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i)
+    (hBM : ∀ i j, 0 ≤ BM i j) (hHM : ∀ i j, 0 ≤ HM i j)
+    (hBw : ∀ j, 0 ≤ Bw j) (hHw : ∀ j, 0 ≤ Hw j) :
+    0 ≤ matrixBilinearEntryHolderConst Bv Hv BM HM Bw Hw := by
+  simpa [matrixBilinearEntryHolderConst] using
+    (vectorDotHolderConst_nonneg hBv hHv
+      (fun i => matrixMulVecEntryBoundConst_nonneg hBM hBw i)
+      (fun i => matrixMulVecEntryHolderConst_nonneg hBM hHM hBw hHw i))
+
+/-- Finite bilinear matrix contractions `v · (M w)` have an explicit bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_bilinear_entry_with {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedRing A]
+    {Bv Hv : m → ℝ} {BM HM : m → n → ℝ} {Bw Hw : n → ℝ}
+    {v : ℝ × X → m → A} {M : ℝ × X → Matrix m n A} {w : ℝ × X → n → A}
+    (hBv : ∀ i, 0 ≤ Bv i) (hBM : ∀ i j, 0 ≤ BM i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaWith (BM i j) (HM i j) α
+      (fun z => M z i j) s)
+    (hw : ∀ j, ParabolicC0AlphaWith (Bw j) (Hw j) α (fun z => w z j) s) :
+    ParabolicC0AlphaWith (matrixBilinearEntryBoundConst Bv BM Bw)
+      (matrixBilinearEntryHolderConst Bv Hv BM HM Bw Hw) α
+      (fun z => ∑ i : m, v z i * (M z).mulVec (w z) i) s := by
+  classical
+  simpa [matrixBilinearEntryBoundConst, matrixBilinearEntryHolderConst] using
+    (vector_dot_with (X := X) (α := α) (s := s)
+      (Bv := Bv) (Hv := Hv)
+      (Bw := fun i => matrixMulVecEntryBoundConst BM Bw i)
+      (Hw := fun i => matrixMulVecEntryHolderConst BM HM Bw Hw i)
+      (v := v) (w := fun z i => (M z).mulVec (w z) i)
+      hBv hv
+      (fun i => matrix_mulVec_entry_with (M := M) (v := w) hBM hM hw i))
 
 /-- Finite bilinear contractions through an inverse matrix `v · (M⁻¹ w)` preserve parabolic
 `C^{0,α}` control when the matrix determinant is uniformly bounded away from zero. -/
