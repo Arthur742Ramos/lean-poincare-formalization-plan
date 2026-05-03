@@ -1610,7 +1610,9 @@ interval, giving a solution-level bridge rather than only pointwise vector-field
 equalities. The preferred-cover local-bounds route now also performs that
 transport internally, returning a chart-carrier `BanachEvolutionLocalSolutionIn`
 witness directly from the smooth-density Picard shrink, plus a proof-level
-`Nonempty` readout for callers that only need existence. At the vector-bundle
+`Nonempty` readout for callers that only need existence and a stronger
+proof-level selected witness that retains terminal-time control and
+common-interval uniqueness. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives

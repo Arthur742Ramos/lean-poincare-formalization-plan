@@ -817,7 +817,9 @@ now packages the matching intrinsic boundary
       under the terminal-time bound, and the preferred-cover local-bounds route
       now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness
       directly from the smooth-density Picard shrink, with a proof-level
-      `Nonempty` readout for callers that only need existence. The vector-bundle
+      `Nonempty` readout for callers that only need existence and a stronger
+      proof-level selected witness that retains terminal-time control and
+      common-interval uniqueness. The vector-bundle
       smooth-approximation layer now also discharges the local coordinate-map
       boundedness hypothesis for continuous Riemannian vector bundles, deriving
       preferred-bilinear smooth approximants and the finite-cover Banach-norm
