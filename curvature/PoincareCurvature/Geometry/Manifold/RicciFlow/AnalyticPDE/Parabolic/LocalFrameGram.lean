@@ -413,6 +413,418 @@ theorem localFrameGramMatrix_inv_sub_with_of_spatial_holder_of_timeSpace_isCompa
   exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
     (hGbound i j) (hGH i j) hα.le (hGholder i j)
 
+/-- If the local-frame Gram entries and a vector have parabolic `C^{0,α}` control on a compact
+time-space set contained in a trivialization base, then the inverse-Gram vector product has
+parabolic `C^{0,α}` control there. -/
+theorem localFrameGramMatrix_inv_mulVec_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {v : ℝ × M → ι → ℝ}
+    (hG : ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hv : ∀ j, ParabolicC0AlphaOn α (fun z : ℝ × M => v z j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        ((show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+          Matrix ι ι ℝ).mulVec (v z)) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  exact matrix_inv_mulVec
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (v := v) hG hv hδpos hdet
+
+/-- Spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_inv_mulVec_of_entries_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_mulVec_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB GH : ι → ι → ℝ} {v : ℝ × M → ι → ℝ}
+    (hGB : ∀ i j, 0 ≤ GB i j) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hGholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α)
+    (hv : ∀ j, ParabolicC0AlphaOn α (fun z : ℝ × M => v z j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        ((show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+          Matrix ι ι ℝ).mulVec (v z)) K := by
+  refine localFrameGramMatrix_inv_mulVec_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_ hv
+  intro i j
+  exact of_snd_holder (s := K) (α := α)
+    (hGB i j) (hGH i j) hα (hGbound i j) (hGholder i j)
+
+/-- Quantitative compact local-frame bridge for inverse-Gram vector products. -/
+theorem localFrameGramMatrix_inv_mulVec_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB GH : ι → ι → ℝ} {Bv Hv : ι → ℝ} {v : ℝ × M → ι → ℝ}
+    (hGH : ∀ i j, 0 ≤ GH i j) (hBv : ∀ j, 0 ≤ Bv j) (hHv : ∀ j, 0 ≤ Hv j)
+    (hG : ∀ i j,
+      ParabolicC0AlphaWith (GB i j) (GH i j) α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hv : ∀ j, ParabolicC0AlphaWith (Bv j) (Hv j) α (fun z : ℝ × M => v z j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ i : ι, matrixInvMulVecEntryBoundConst (𝕜 := ℝ) δ GB Bv i)
+        (∑ i : ι, matrixInvMulVecEntryHolderConst (𝕜 := ℝ) δ GB GH Bv Hv i)
+        α
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ).mulVec (v z)) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  exact matrix_inv_mulVec_with
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (v := v) hGH hBv hHv hG hv hδpos hdet
+
+/-- Spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_inv_mulVec_with_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_mulVec_with_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB GH : ι → ι → ℝ} {Bv Hv : ι → ℝ} {v : ℝ × M → ι → ℝ}
+    (hGH : ∀ i j, 0 ≤ GH i j) (hBv : ∀ j, 0 ≤ Bv j) (hHv : ∀ j, 0 ≤ Hv j)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hGholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α)
+    (hv : ∀ j, ParabolicC0AlphaWith (Bv j) (Hv j) α (fun z : ℝ × M => v z j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ i : ι, matrixInvMulVecEntryBoundConst (𝕜 := ℝ) δ GB Bv i)
+        (∑ i : ι, matrixInvMulVecEntryHolderConst (𝕜 := ℝ) δ GB GH Bv Hv i)
+        α
+        (fun z : ℝ × M =>
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ).mulVec (v z)) K := by
+  refine localFrameGramMatrix_inv_mulVec_with_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase hGH hBv hHv ?_ hv
+  intro i j
+  exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
+    (hGbound i j) (hGH i j) hα (hGholder i j)
+
+/-- If the local-frame Gram entries and a row vector have parabolic `C^{0,α}` control on a
+compact time-space set contained in a trivialization base, then the vector-inverse-Gram product
+has parabolic `C^{0,α}` control there. -/
+theorem localFrameGramMatrix_vecMul_inv_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {v : ℝ × M → ι → ℝ}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z : ℝ × M => v z i) K)
+    (hG : ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        Matrix.vecMul (v z)
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ)) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  exact matrix_vecMul_inv
+    (v := v)
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    hv hG hδpos hdet
+
+/-- Spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_vecMul_inv_of_entries_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_vecMul_inv_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB GH : ι → ι → ℝ} {v : ℝ × M → ι → ℝ}
+    (hGB : ∀ i j, 0 ≤ GB i j) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z : ℝ × M => v z i) K)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hGholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        Matrix.vecMul (v z)
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_vecMul_inv_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase hv ?_
+  intro i j
+  exact of_snd_holder (s := K) (α := α)
+    (hGB i j) (hGH i j) hα (hGbound i j) (hGholder i j)
+
+/-- Quantitative compact local-frame bridge for vector-inverse-Gram products. -/
+theorem localFrameGramMatrix_vecMul_inv_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {Bv Hv : ι → ℝ} {GB GH : ι → ι → ℝ} {v : ℝ × M → ι → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z : ℝ × M => v z i) K)
+    (hG : ∀ i j,
+      ParabolicC0AlphaWith (GB i j) (GH i j) α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ j : ι, matrixVecMulInvEntryBoundConst (𝕜 := ℝ) δ Bv GB j)
+        (∑ j : ι, matrixVecMulInvEntryHolderConst (𝕜 := ℝ) δ Bv Hv GB GH j)
+        α
+        (fun z : ℝ × M =>
+          Matrix.vecMul (v z)
+            ((show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+              Matrix ι ι ℝ)) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  exact matrix_vecMul_inv_with
+    (v := v)
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    hBv hHv hGH hv hG hδpos hdet
+
+/-- Spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_vecMul_inv_with_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_vecMul_inv_with_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {Bv Hv : ι → ℝ} {GB GH : ι → ι → ℝ} {v : ℝ × M → ι → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z : ℝ × M => v z i) K)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hGholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ j : ι, matrixVecMulInvEntryBoundConst (𝕜 := ℝ) δ Bv GB j)
+        (∑ j : ι, matrixVecMulInvEntryHolderConst (𝕜 := ℝ) δ Bv Hv GB GH j)
+        α
+        (fun z : ℝ × M =>
+          Matrix.vecMul (v z)
+            ((show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+              Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_vecMul_inv_with_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase hBv hHv hGH hv ?_
+  intro i j
+  exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
+    (hGbound i j) (hGH i j) hα (hGholder i j)
+
+/-- If the local-frame Gram entries and two vectors have parabolic `C^{0,α}` control on a compact
+time-space set contained in a trivialization base, then the inverse-Gram bilinear contraction has
+parabolic `C^{0,α}` control there. -/
+theorem localFrameGramMatrix_inv_bilinear_entry_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {v w : ℝ × M → ι → ℝ}
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z : ℝ × M => v z i) K)
+    (hG : ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hw : ∀ j, ParabolicC0AlphaOn α (fun z : ℝ × M => w z j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        ∑ i : ι, v z i *
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ).mulVec (w z) i) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  exact matrix_inv_bilinear_entry
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (v := v) (w := w) hv hG hw hδpos hdet
+
+/-- Spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_inv_bilinear_entry_of_entries_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_bilinear_entry_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB GH : ι → ι → ℝ} {v w : ℝ × M → ι → ℝ}
+    (hGB : ∀ i j, 0 ≤ GB i j) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hv : ∀ i, ParabolicC0AlphaOn α (fun z : ℝ × M => v z i) K)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hGholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α)
+    (hw : ∀ j, ParabolicC0AlphaOn α (fun z : ℝ × M => w z j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        ∑ i : ι, v z i *
+          ((show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+            Matrix ι ι ℝ).mulVec (w z) i) K := by
+  refine localFrameGramMatrix_inv_bilinear_entry_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase hv ?_ hw
+  intro i j
+  exact of_snd_holder (s := K) (α := α)
+    (hGB i j) (hGH i j) hα (hGbound i j) (hGholder i j)
+
+/-- Quantitative compact local-frame bridge for inverse-Gram bilinear contractions. -/
+theorem localFrameGramMatrix_inv_bilinear_entry_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {Bv Hv : ι → ℝ} {GB GH : ι → ι → ℝ} {Bw Hw : ι → ℝ}
+    {v w : ℝ × M → ι → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z : ℝ × M => v z i) K)
+    (hG : ∀ i j,
+      ParabolicC0AlphaWith (GB i j) (GH i j) α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hw : ∀ j, ParabolicC0AlphaWith (Bw j) (Hw j) α (fun z : ℝ × M => w z j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (matrixInvBilinearEntryBoundConst (𝕜 := ℝ) δ Bv GB Bw)
+        (matrixInvBilinearEntryHolderConst (𝕜 := ℝ) δ Bv Hv GB GH Bw Hw)
+        α
+        (fun z : ℝ × M =>
+          ∑ i : ι, v z i *
+            ((show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+              Matrix ι ι ℝ).mulVec (w z) i) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  exact matrix_inv_bilinear_entry_with
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (v := v) (w := w) hBv hGH hv hG hw hδpos hdet
+
+/-- Spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_inv_bilinear_entry_with_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_bilinear_entry_with_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {Bv Hv : ι → ℝ} {GB GH : ι → ι → ℝ} {Bw Hw : ι → ℝ}
+    {v w : ℝ × M → ι → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z : ℝ × M => v z i) K)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hGholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α)
+    (hw : ∀ j, ParabolicC0AlphaWith (Bw j) (Hw j) α (fun z : ℝ × M => w z j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (matrixInvBilinearEntryBoundConst (𝕜 := ℝ) δ Bv GB Bw)
+        (matrixInvBilinearEntryHolderConst (𝕜 := ℝ) δ Bv Hv GB GH Bw Hw)
+        α
+        (fun z : ℝ × M =>
+          ∑ i : ι, v z i *
+            ((show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+              Matrix ι ι ℝ).mulVec (w z) i) K := by
+  refine localFrameGramMatrix_inv_bilinear_entry_with_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase hBv hGH hv ?_ hw
+  intro i j
+  exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
+    (hGbound i j) (hGH i j) hα (hGholder i j)
+
 /-- If the local-frame Gram entries and a four-index coefficient array have parabolic
 `C^{0,α}` control on a compact time-space set contained in a trivialization base, then the
 inverse-principal contraction against the Gram matrix has parabolic `C^{0,α}` control there. -/
