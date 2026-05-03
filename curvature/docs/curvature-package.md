@@ -166,4 +166,5 @@ those terms, using the finite-product, integer-scalar, reciprocal, and division
 closure layer. The companion
 `RicciFlow/AnalyticPDE/Parabolic/LocalFrameGram.lean` module bridges compact
 time-space local-frame Gram determinant nonvanishing to parabolic inverse
-Gram-matrix control, including a spatial-Hölder entry-control variant.
+Gram-matrix control and inverse-Gram Christoffel/schematic Ricci-DeTurck
+closure, including spatial-Hölder entry-control variants.

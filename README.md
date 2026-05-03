@@ -381,7 +381,8 @@ packages the canonical stationary local solution attached to
   entrywise control.  The companion
   `AnalyticPDE/Parabolic/LocalFrameGram.lean` module connects compact
   time-space local-frame Gram determinant nonvanishing to parabolic inverse
-  Gram-matrix control, including a spatial-Hölder entry-control variant.
+  Gram-matrix control and inverse-Gram Christoffel/schematic Ricci-DeTurck
+  closure, including spatial-Hölder entry-control variants.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric
