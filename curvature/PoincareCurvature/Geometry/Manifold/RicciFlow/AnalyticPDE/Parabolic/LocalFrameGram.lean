@@ -246,6 +246,78 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_of_spatial_holder_of_timeSpa
   exact of_snd_holder (s := K) (α := α)
     (hB_nonneg i j) (hHgram_nonneg i j) hα (hB i j) (hholder i j)
 
+/-- Quantitative compact local-frame bridge for the schematic local Ricci-DeTurck coordinate
+right-hand side.  The geometric Gram determinant theorem supplies a positive determinant lower
+bound `δ`, and the finite-dimensional parabolic estimate exposes the corresponding explicit
+bounded `C^{0,α}` constants. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB GH : ι → ι → ℝ} {DB DH : ι → ι → ι → ℝ}
+    {HB HH : ι → ι → ι → ι → ℝ}
+    (hGH : ∀ i j, 0 ≤ GH i j)
+    (hDB : ∀ i j k, 0 ≤ DB i j k) (hDH : ∀ i j k, 0 ≤ DH i j k)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j) (hHH : ∀ a c i j, 0 ≤ HH a c i j)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hG : ∀ i j,
+      ParabolicC0AlphaWith (GB i j) (GH i j) α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hDctrl : ∀ i j k,
+      ParabolicC0AlphaWith (DB i j k) (DH i j k) α (fun z : ℝ × M => D z i j k) K)
+    (hHc : ∀ a c i j,
+      ParabolicC0AlphaWith (HB a c i j) (HH a c i j) α
+        (fun z : ℝ × M => Hc z a c i j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ i : ι, ∑ j : ι,
+          (matrixInvTwoIndexContractEntryBoundConst (𝕜 := ℝ) δ GB HB i j +
+            christoffelQuadraticRicciEntryBoundConst
+              (fun a c d =>
+                matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ GB DB a c d)
+              i j))
+        (∑ i : ι, ∑ j : ι,
+          (matrixInvTwoIndexContractEntryHolderConst (𝕜 := ℝ) δ GB GH HB HH i j +
+            christoffelQuadraticRicciEntryHolderConst
+              (fun a c d =>
+                matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ GB DB a c d)
+              (fun a c d =>
+                matrixInvChristoffelEntryHolderConst (𝕜 := ℝ) δ GB GH DB DH a c d)
+              i j))
+        α
+        (fun z : ℝ × M =>
+          (fun i j =>
+            let Γ : ι → ι → ι → ℝ := fun a c d =>
+              (2 : ℝ)⁻¹ *
+                ∑ l : ι,
+                  ((show Matrix ι ι ℝ from
+                      CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                      Matrix ι ι ℝ) a l *
+                    (D z c d l + D z d c l - D z l c d)
+            (∑ a : ι, ∑ c : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a c * Hc z a c i j) +
+              ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+                (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+            Matrix ι ι ℝ)) K := by
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  exact ricciDeTurck_schematic_with
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (D := D) (H := Hc) hGH hDB hDH hHB hHH hG hDctrl hHc hδpos hdet
+
 end ParabolicC0AlphaOn
 end AnalyticPDE
 end RicciFlow

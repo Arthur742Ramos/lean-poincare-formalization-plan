@@ -403,7 +403,9 @@ packages the canonical stationary local solution attached to
   `AnalyticPDE/Parabolic/LocalFrameGram.lean` module connects compact
   time-space local-frame Gram determinant nonvanishing to parabolic inverse
   Gram-matrix control and inverse-Gram Christoffel/schematic Ricci-DeTurck
-  closure, including spatial-Hölder entry-control variants.
+  closure, including spatial-Hölder entry-control variants and a compact
+  quantitative schematic RHS bridge exposing the determinant lower-bound
+  constant.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric

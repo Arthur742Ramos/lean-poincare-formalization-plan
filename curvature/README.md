@@ -1052,7 +1052,9 @@ and division
 closure layer. The companion `AnalyticPDE/Parabolic/LocalFrameGram.lean`
 module bridges compact time-space local-frame Gram determinant nonvanishing to
 parabolic inverse Gram-matrix control and inverse-Gram Christoffel/schematic
-Ricci-DeTurck closure, including spatial-Hölder entry-control variants.
+Ricci-DeTurck closure, including spatial-Hölder entry-control variants and a
+compact quantitative schematic RHS bridge exposing the determinant lower-bound
+constant.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build
