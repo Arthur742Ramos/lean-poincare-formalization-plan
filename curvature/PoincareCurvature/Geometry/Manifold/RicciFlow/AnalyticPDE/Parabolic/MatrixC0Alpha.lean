@@ -1120,6 +1120,19 @@ def matrixAdjugateEntryHolderConst {n A : Type*} [Fintype n] [DecidableEq n]
   matrixDetHolderConst (A := A) (matrixUpdateRowBoundConst (A := A) B i j)
     (matrixUpdateRowHolderConst H j)
 
+/-- The quantitative sup constant used for an adjugate-entry difference. -/
+def matrixAdjugateEntrySubBoundConst {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] (B Bd : n → n → ℝ) (i j : n) : ℝ :=
+  matrixDetSubBoundConst (A := A) (matrixUpdateRowBoundConst (A := A) B i j)
+    (matrixUpdateRowHolderConst Bd j)
+
+/-- The quantitative Holder constant used for an adjugate-entry difference. -/
+def matrixAdjugateEntrySubHolderConst {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] (B H Bd Hd : n → n → ℝ) (i j : n) : ℝ :=
+  matrixDetSubHolderConst (A := A) (matrixUpdateRowBoundConst (A := A) B i j)
+    (matrixUpdateRowHolderConst H j) (matrixUpdateRowHolderConst Bd j)
+    (matrixUpdateRowHolderConst Hd j)
+
 theorem matrixAdjugateEntryBoundConst_nonneg {n A : Type*} [Fintype n] [DecidableEq n]
     [NormedRing A] (B : n → n → ℝ) (i j : n) :
     0 ≤ matrixAdjugateEntryBoundConst (A := A) B i j :=
@@ -1130,6 +1143,24 @@ theorem matrixAdjugateEntryHolderConst_nonneg {n A : Type*} [Fintype n] [Decidab
     0 ≤ matrixAdjugateEntryHolderConst (A := A) B H i j :=
   matrixDetHolderConst_nonneg (A := A)
     (matrixUpdateRowHolderConst_nonneg hH j)
+
+theorem matrixAdjugateEntrySubBoundConst_nonneg {n A : Type*} [Fintype n]
+    [DecidableEq n] [NormedRing A] {B Bd : n → n → ℝ}
+    (hBd : ∀ i j, 0 ≤ Bd i j) (i j : n) :
+    0 ≤ matrixAdjugateEntrySubBoundConst (A := A) B Bd i j :=
+  matrixDetSubBoundConst_nonneg (A := A)
+    (matrixUpdateRowHolderConst_nonneg hBd j)
+
+theorem matrixAdjugateEntrySubHolderConst_nonneg {n A : Type*} [Fintype n]
+    [DecidableEq n] [NormedRing A] {B H Bd Hd : n → n → ℝ}
+    (hH : ∀ i j, 0 ≤ H i j) (hBd : ∀ i j, 0 ≤ Bd i j)
+    (hHd : ∀ i j, 0 ≤ Hd i j) (i j : n) :
+    0 ≤ matrixAdjugateEntrySubHolderConst (A := A) B H Bd Hd i j :=
+  matrixDetSubHolderConst_nonneg (A := A)
+    (matrixUpdateRowHolderConst_nonneg hH j)
+    (matrixUpdateRowHolderConst_nonneg hBd j)
+    (matrixUpdateRowHolderConst_nonneg hHd j)
+
 
 /-- Each adjugate entry has an explicit bounded parabolic `C^{0,α}` estimate when the matrix
 entries do. -/
@@ -1176,6 +1207,85 @@ theorem matrix_adjugate_entry_with {n A : Type*} [Fintype n] [DecidableEq n]
   convert hdet using 1
   funext z
   rw [Matrix.adjugate_apply]
+
+/-- Adjugate-entry differences inherit parabolic `C^{0,α}` control from entrywise matrix
+difference controls. -/
+theorem matrix_adjugate_entry_sub_with {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] {B H Bd Hd : n → n → ℝ} {M N : ℝ × X → Matrix n n A}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j)
+    (hHd : ∀ i j, 0 ≤ Hd i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => N z i j) s)
+    (hdiff : ∀ i j,
+      ParabolicC0AlphaWith (Bd i j) (Hd i j) α (fun z => M z i j - N z i j) s)
+    (i j : n) :
+    ParabolicC0AlphaWith
+      (matrixAdjugateEntrySubBoundConst (A := A) B Bd i j)
+      (matrixAdjugateEntrySubHolderConst (A := A) B H Bd Hd i j)
+      α (fun z => (M z).adjugate i j - (N z).adjugate i j) s := by
+  let e : n → A := (Pi.single i (1 : A))
+  have hHupd : ∀ r c, 0 ≤ matrixUpdateRowHolderConst H j r c :=
+    matrixUpdateRowHolderConst_nonneg hH j
+  have hBdupd : ∀ r c, 0 ≤ matrixUpdateRowHolderConst Bd j r c :=
+    matrixUpdateRowHolderConst_nonneg hBd j
+  have hHdupd : ∀ r c, 0 ≤ matrixUpdateRowHolderConst Hd j r c :=
+    matrixUpdateRowHolderConst_nonneg hHd j
+  have hMupd : ∀ r c,
+      ParabolicC0AlphaWith
+        (matrixUpdateRowBoundConst (A := A) B i j r c)
+        (matrixUpdateRowHolderConst H j r c)
+        α (fun z => ((M z).updateRow j e) r c) s := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow] using
+        (ParabolicC0AlphaWith.const (s := s) (α := α)
+          (((Pi.single i (1 : A)) : n → A) c) le_rfl le_rfl)
+    · simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow,
+        Function.update_of_ne hr, hr] using hM r c
+  have hNupd : ∀ r c,
+      ParabolicC0AlphaWith
+        (matrixUpdateRowBoundConst (A := A) B i j r c)
+        (matrixUpdateRowHolderConst H j r c)
+        α (fun z => ((N z).updateRow j e) r c) s := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow] using
+        (ParabolicC0AlphaWith.const (s := s) (α := α)
+          (((Pi.single i (1 : A)) : n → A) c) le_rfl le_rfl)
+    · simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow,
+        Function.update_of_ne hr, hr] using hN r c
+  have hdiffupd : ∀ r c,
+      ParabolicC0AlphaWith
+        (matrixUpdateRowHolderConst Bd j r c)
+        (matrixUpdateRowHolderConst Hd j r c)
+        α (fun z => ((M z).updateRow j e) r c - ((N z).updateRow j e) r c) s := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simpa [e, matrixUpdateRowHolderConst, Matrix.updateRow] using
+        (ParabolicC0AlphaWith.const (s := s) (α := α) (B := 0) (H := 0)
+          (0 : A) (by simp) le_rfl)
+    · simpa [e, matrixUpdateRowHolderConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+        using hdiff r c
+  have hdet :
+      ParabolicC0AlphaWith
+        (matrixAdjugateEntrySubBoundConst (A := A) B Bd i j)
+        (matrixAdjugateEntrySubHolderConst (A := A) B H Bd Hd i j)
+        α
+        (fun z => ((M z).updateRow j e).det - ((N z).updateRow j e).det) s := by
+    simpa [e, matrixAdjugateEntrySubBoundConst, matrixAdjugateEntrySubHolderConst] using
+      (matrix_det_sub_with
+        (M := fun z => (M z).updateRow j e)
+        (N := fun z => (N z).updateRow j e)
+        (B := matrixUpdateRowBoundConst (A := A) B i j)
+        (H := matrixUpdateRowHolderConst H j)
+        (Bd := matrixUpdateRowHolderConst Bd j)
+        (Hd := matrixUpdateRowHolderConst Hd j)
+        hHupd hBdupd hHdupd hMupd hNupd hdiffupd)
+  simpa [e, Matrix.adjugate_apply] using hdet
 
 /-- Adjugate entries are pointwise Lipschitz on entrywise bounded finite matrices.  The estimate
 is obtained by applying the determinant Lipschitz bound to the row-replacement matrices defining
