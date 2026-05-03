@@ -1515,7 +1515,8 @@ accepting those same Gram-entry input forms, quantitative finite-family inverse-
 vector/vector-inverse product, bilinear, inverse-principal, and
 inverse-Christoffel handoffs sharing that same compact determinant lower bound,
 with the quantitative vector/vector-inverse product, bilinear, and
-inverse-principal handoffs now also accepting those same Gram-entry input forms,
+inverse-principal, and inverse-Christoffel handoffs now also accepting those
+same Gram-entry input forms,
 finite-family schematic RHS
 difference and
 bounded-difference control against

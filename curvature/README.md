@@ -1118,8 +1118,8 @@ quantitative finite-family
 inverse-Gram vector/vector-inverse product, bilinear, inverse-principal, and
 inverse-Christoffel bridges sharing
 that same lower bound, with the quantitative vector/vector-inverse product,
-bilinear, and inverse-principal bridges now also accepting those same
-Gram-entry input forms,
+bilinear, inverse-principal, and inverse-Christoffel bridges now also accepting
+those same Gram-entry input forms,
 finite-family schematic RHS difference and
 bounded-difference control against comparison primitive inputs with one lower
 bound shared by the Gram and comparison metric families, including
