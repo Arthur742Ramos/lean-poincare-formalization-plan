@@ -538,9 +538,10 @@ packages the canonical stationary local solution attached to
   schematic RHS handoffs with spatial-Hölder, unit-diameter spatial-Lipschitz,
   closed-ball spatial-Lipschitz, and closed-cylinder spatial-Lipschitz
   Gram-entry input forms, compact
-  local-frame inverse Gram, inverse-principal contraction, inverse-Gram
-  Christoffel, and schematic RHS `C^{0,α}` difference control, including
-  entrywise-difference inverse Gram, inverse-principal, inverse-Gram
+  local-frame inverse Gram, including an existential inverse-Gram matrix
+  difference readout from entrywise controls, inverse-principal contraction,
+  inverse-Gram Christoffel, and schematic RHS `C^{0,α}` difference control,
+  including entrywise-difference inverse Gram, inverse-principal, inverse-Gram
   Christoffel, and schematic RHS bridges, and inverse Gram, inverse-principal
   contraction, inverse-Gram Christoffel, and schematic RHS bounded-difference
   bridges against comparison primitive inputs, all with matching
