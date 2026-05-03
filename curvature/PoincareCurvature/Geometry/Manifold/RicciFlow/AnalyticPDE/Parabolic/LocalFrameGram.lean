@@ -5386,6 +5386,85 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_family_with_of_timeSpace_isC
     (hGH r) (hDB r) (hDH r) (hHB r) (hHH r)
     (hG r) (hDctrl r) (hHc r) hδpos (hdet r)
 
+/-- Finite-family spatial-Hölder local-frame bridge for the quantitative schematic
+Ricci-DeTurck RHS.  The spatial Gram-entry bounds are packaged into the family
+`C^{0,α}` hypotheses before selecting the shared Gram determinant lower bound. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_family_with_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {GB GH : ρ → ι → ι → ℝ}
+    {DB DH : ρ → ι → ι → ι → ℝ}
+    {HB HH : ρ → ι → ι → ι → ι → ℝ}
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hDB : ∀ r i j k, 0 ≤ DB r i j k) (hDH : ∀ r i j k, 0 ≤ DH r i j k)
+    (hHB : ∀ r a c i j, 0 ≤ HB r a c i j)
+    (hHH : ∀ r a c i j, 0 ≤ HH r a c i j)
+    (hB : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤ GB r i j)
+    (hholder : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) y i j‖ ≤
+        GH r i j * (dist x y) ^ α)
+    {D : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hDctrl : ∀ r i j k,
+      ParabolicC0AlphaWith (DB r i j k) (DH r i j k) α
+        (fun z : ℝ × M => D r z i j k) K)
+    (hHc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Hc r z a c i j) K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (∑ i : ι, ∑ j : ι,
+            (matrixInvTwoIndexContractEntryBoundConst (𝕜 := ℝ) δ (GB r) (HB r) i j +
+              christoffelQuadraticRicciEntryBoundConst
+                (fun a c d =>
+                  matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ (GB r) (DB r) a c d)
+                i j))
+          (∑ i : ι, ∑ j : ι,
+            (matrixInvTwoIndexContractEntryHolderConst (𝕜 := ℝ) δ (GB r) (GH r)
+                (HB r) (HH r) i j +
+              christoffelQuadraticRicciEntryHolderConst
+                (fun a c d =>
+                  matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ (GB r) (DB r) a c d)
+                (fun a c d =>
+                  matrixInvChristoffelEntryHolderConst (𝕜 := ℝ) δ (GB r) (GH r)
+                    (DB r) (DH r) a c d)
+                i j))
+          α
+          (fun z : ℝ × M =>
+            (fun i j =>
+              let Γ : ι → ι → ι → ℝ := fun a c d =>
+                (2 : ℝ)⁻¹ *
+                  ∑ l : ι,
+                    ((show Matrix ι ι ℝ from
+                        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                        Matrix ι ι ℝ) a l *
+                      (D r z c d l + D r z d c l - D r z l c d)
+              (∑ a : ι, ∑ c : ι,
+                  ((show Matrix ι ι ℝ from
+                      CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                      Matrix ι ι ℝ) a c * Hc r z a c i j) +
+                ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+                  (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+              Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_ricciDeTurck_schematic_family_with_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase hGH hDB hDH hHB hHH ?_ hDctrl hHc
+  intro r i j
+  exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
+    (hB r i j) (hGH r i j) hα (hholder r i j)
+
 /-- Spatial boundedness and spatial Holder estimates for local-frame Gram entries, together with
 explicit parabolic controls for the first- and second-derivative coefficient arrays, yield the
 quantitative compact local-frame schematic Ricci-DeTurck estimate. -/

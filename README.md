@@ -519,7 +519,7 @@ packages the canonical stationary local solution attached to
   inverse-principal contraction, inverse-Gram Christoffel, and schematic RHS
   bridges exposing the determinant lower-bound constant, plus geometric
   finite-family local-frame Gram determinant lower-bound, inverse-estimate, and
-  schematic RHS handoffs, compact
+  schematic RHS handoffs with a spatial-Hölder Gram-entry input form, compact
   local-frame inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel, and schematic RHS `C^{0,α}` difference control, including
   entrywise-difference inverse Gram, inverse-principal, inverse-Gram
