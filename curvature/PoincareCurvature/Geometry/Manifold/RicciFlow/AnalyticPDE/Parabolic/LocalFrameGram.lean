@@ -2237,6 +2237,106 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_of_spatial_lipschitzOnWith_o
     (s := K) (α := α) (B := B i j) (K := L i j)
     hα_nonneg hα_le_one (hB_nonneg i j) (hB i j) (hL i j) hdiam
 
+/-- On a compact time-space subset of a closed parabolic ball of diameter at most one, spatial
+Lipschitz Gram-entry estimates and parabolic control of the derivative coefficient arrays give
+parabolic `C^{0,α}` control of the schematic local Ricci-DeTurck RHS for every `0 ≤ α ≤ 1`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedBall
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α R : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {B : ι → ι → ℝ} {L : ι → ι → ℝ≥0}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ B i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (L i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D z i j k) K)
+    (hHc : ∀ a c i j, ParabolicC0AlphaOn α (fun z : ℝ × M => Hc z a c i j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        (fun i j =>
+          let Γ : ι → ι → ι → ℝ := fun a c d =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a l *
+                  (D z c d l + D z d c l - D z l c d)
+          (∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) +
+            ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+              (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+          Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_ricciDeTurck_schematic_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_ hD hHc
+  intro i j
+  exact
+    (of_snd_lipschitzOnWith (s := K) (B := B i j) (K := L i j)
+      (hB_nonneg i j) (hB i j) (hL i j)).mono_exponent_of_subset_closedBall
+        hα_nonneg hα_le_one hs hR
+
+/-- On a compact time-space subset of a closed parabolic cylinder of diameter at most one,
+spatial Lipschitz Gram-entry estimates and parabolic control of the derivative coefficient arrays
+give parabolic `C^{0,α}` control of the schematic local Ricci-DeTurck RHS for every
+`0 ≤ α ≤ 1`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedCylinder
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α timeRadius spaceRadius : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {B : ι → ι → ℝ} {L : ι → ι → ℝ≥0}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ B i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (L i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D z i j k) K)
+    (hHc : ∀ a c i j, ParabolicC0AlphaOn α (fun z : ℝ × M => Hc z a c i j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        (fun i j =>
+          let Γ : ι → ι → ι → ℝ := fun a c d =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a l *
+                  (D z c d l + D z d c l - D z l c d)
+          (∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) +
+            ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+              (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+          Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_ricciDeTurck_schematic_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_ hD hHc
+  intro i j
+  exact
+    (of_snd_lipschitzOnWith (s := K) (B := B i j) (K := L i j)
+      (hB_nonneg i j) (hB i j) (hL i j)).mono_exponent_of_subset_closedCylinder
+        hα_nonneg hα_le_one hs hdiam
+
 /-- Quantitative compact local-frame bridge for the schematic local Ricci-DeTurck coordinate
 right-hand side.  The geometric Gram determinant theorem supplies a positive determinant lower
 bound `δ`, and the finite-dimensional parabolic estimate exposes the corresponding explicit
