@@ -572,8 +572,8 @@ packages the canonical stationary local solution attached to
   against comparison primitive inputs with one lower bound shared by the Gram and
   comparison metric families, including spatial-Hölder, unit-diameter
   spatial-Lipschitz, and closed ball/cylinder spatial-Lipschitz Gram-entry forms
-  for both the entrywise `C^{0,α}` difference bridge and the bounded-difference
-  bridge, and compact
+  for the quantitative difference bridge, the entrywise `C^{0,α}` difference
+  bridge, and the bounded-difference bridge, and compact
   local-frame inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel arrays, and schematic RHS outputs, including existential
   difference readouts for all four from entrywise controls, and schematic RHS

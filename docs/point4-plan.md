@@ -1524,8 +1524,8 @@ bounded-difference control against
 comparison primitive inputs with one lower bound shared by the Gram and
 comparison metric families, including spatial-Hölder, unit-diameter
 spatial-Lipschitz, and closed ball/cylinder spatial-Lipschitz Gram-entry forms
-for both the entrywise `C^{0,α}` difference bridge and the bounded-difference
-bridge,
+for the quantitative difference bridge, the entrywise `C^{0,α}` difference
+bridge, and the bounded-difference bridge,
 and compact
 local-frame
 inverse Gram, inverse-principal contraction, and inverse-Gram Christoffel

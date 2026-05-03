@@ -9919,6 +9919,352 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_timeSpace
     hK hα hC_nonneg hGH hDB hDH hHB hHH hG hN hD hEarr hHc hKc
     hdetG_ne hdetN_ne hηD hGdiff hDdiff hHdiff
 
+/-- Finite-family spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {C GH : ρ → ι → ι → ℝ} {DB DH : ρ → ι → ι → ι → ℝ}
+    {HB HH : ρ → ι → ι → ι → ι → ℝ}
+    {ηG ηD : ρ → ℝ} {ηH : ρ → ι → ι → ℝ}
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ r i j, 0 ≤ C r i j)
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hDB : ∀ r a c d, 0 ≤ DB r a c d)
+    (hDH : ∀ r a c d, 0 ≤ DH r a c d)
+    (hHB : ∀ r a c i j, 0 ≤ HB r a c i j)
+    (hHH : ∀ r a c i j, 0 ≤ HH r a c i j)
+    (hGbound : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤
+        C r i j)
+    (hGholder : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) y i j‖ ≤
+        GH r i j * (dist x y) ^ α)
+    (hN : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (GH r i j) α (fun z : ℝ × M => N r z i j)
+        K)
+    (hD : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => D r z a c d) K)
+    (hEarr : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => Earr r z a c d) K)
+    (hHc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Hc r z a c i j) K)
+    (hKc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Kc r z a c i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0)
+    (hηD : ∀ r, 0 ≤ ηD r)
+    (hGdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) - N r z‖ ≤
+        ηG r)
+    (hDdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D r z a c d - Earr r z a c d‖ ≤ ηD r)
+    (hHdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc r z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc r z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH r i j) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r) (ηG r) (ηD r) (ηH r))
+          (ricciDeTurckSchematicDiffHolderConst
+            (𝕜 := ℝ) δ (C r) (GH r) (DB r) (DH r) (HB r) (HH r))
+          α
+          (fun z : ℝ × M =>
+            ricciDeTurckSchematicMatrix
+                (show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+                (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (Earr r z) (Kc r z)) K := by
+  refine localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hα hKbase hC_nonneg hGH hDB hDH hHB hHH ?_
+    hN hD hEarr hHc hKc hdetN_ne hηD hGdiff hDdiff hHdiff
+  intro r i j
+  exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
+    (hGbound r i j) (hGH r i j) hα.le (hGholder r i j)
+
+/-- Finite-family unit-diameter spatial-Lipschitz Gram-entry variant of
+`localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {C : ρ → ι → ι → ℝ} {Lgram : ρ → ι → ι → ℝ≥0}
+    {DB DH : ρ → ι → ι → ι → ℝ}
+    {HB HH : ρ → ι → ι → ι → ι → ℝ}
+    {ηG ηD : ρ → ℝ} {ηH : ρ → ι → ι → ℝ}
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ r i j, 0 ≤ C r i j)
+    (hDB : ∀ r a c d, 0 ≤ DB r a c d)
+    (hDH : ∀ r a c d, 0 ≤ DH r a c d)
+    (hHB : ∀ r a c i j, 0 ≤ HB r a c i j)
+    (hHH : ∀ r a c i j, 0 ≤ HH r a c i j)
+    (hGbound : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤
+        C r i j)
+    (hL : ∀ r i j,
+      LipschitzOnWith (Lgram r i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j)
+        (Prod.snd '' K))
+    (hdiam : ∀ ⦃p : ℝ × M⦄, p ∈ K → ∀ ⦃q : ℝ × M⦄, q ∈ K →
+      parabolicDistance p q ≤ 1)
+    (hN : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (Lgram r i j : ℝ) α
+        (fun z : ℝ × M => N r z i j) K)
+    (hD : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => D r z a c d) K)
+    (hEarr : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => Earr r z a c d) K)
+    (hHc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Hc r z a c i j) K)
+    (hKc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Kc r z a c i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0)
+    (hηD : ∀ r, 0 ≤ ηD r)
+    (hGdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) - N r z‖ ≤
+        ηG r)
+    (hDdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D r z a c d - Earr r z a c d‖ ≤ ηD r)
+    (hHdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc r z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc r z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH r i j) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r) (ηG r) (ηD r) (ηH r))
+          (ricciDeTurckSchematicDiffHolderConst
+            (𝕜 := ℝ) δ (C r) (fun i j => (Lgram r i j : ℝ)) (DB r) (DH r)
+              (HB r) (HH r))
+          α
+          (fun z : ℝ × M =>
+            ricciDeTurckSchematicMatrix
+                (show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+                (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (Earr r z) (Kc r z)) K := by
+  refine localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hα_pos hKbase hC_nonneg
+    (fun r i j => NNReal.coe_nonneg (Lgram r i j)) hDB hDH hHB hHH ?_
+    hN hD hEarr hHc hKc hdetN_ne hηD hGdiff hDdiff hHdiff
+  intro r i j
+  exact
+    (ParabolicC0AlphaWith.of_snd_lipschitzOnWith (s := K) (B := C r i j)
+      (K := Lgram r i j)
+      (f := fun x : M =>
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j)
+      (hGbound r i j) (hL r i j)).mono_exponent_of_parabolicDistance_le_one
+        (NNReal.coe_nonneg (Lgram r i j)) hα_pos.le hα_le_one hdiam
+
+/-- Finite-family closed-parabolic-ball spatial-Lipschitz Gram-entry variant of
+`localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedBall
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α R : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {C : ρ → ι → ι → ℝ} {Lgram : ρ → ι → ι → ℝ≥0}
+    {DB DH : ρ → ι → ι → ι → ℝ}
+    {HB HH : ρ → ι → ι → ι → ι → ℝ}
+    {ηG ηD : ρ → ℝ} {ηH : ρ → ι → ι → ℝ}
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ r i j, 0 ≤ C r i j)
+    (hDB : ∀ r a c d, 0 ≤ DB r a c d)
+    (hDH : ∀ r a c d, 0 ≤ DH r a c d)
+    (hHB : ∀ r a c i j, 0 ≤ HB r a c i j)
+    (hHH : ∀ r a c i j, 0 ≤ HH r a c i j)
+    (hGbound : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤
+        C r i j)
+    (hL : ∀ r i j,
+      LipschitzOnWith (Lgram r i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1)
+    (hN : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (Lgram r i j : ℝ) α
+        (fun z : ℝ × M => N r z i j) K)
+    (hD : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => D r z a c d) K)
+    (hEarr : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => Earr r z a c d) K)
+    (hHc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Hc r z a c i j) K)
+    (hKc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Kc r z a c i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0)
+    (hηD : ∀ r, 0 ≤ ηD r)
+    (hGdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) - N r z‖ ≤
+        ηG r)
+    (hDdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D r z a c d - Earr r z a c d‖ ≤ ηD r)
+    (hHdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc r z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc r z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH r i j) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r) (ηG r) (ηD r) (ηH r))
+          (ricciDeTurckSchematicDiffHolderConst
+            (𝕜 := ℝ) δ (C r) (fun i j => (Lgram r i j : ℝ)) (DB r) (DH r)
+              (HB r) (HH r))
+          α
+          (fun z : ℝ × M =>
+            ricciDeTurckSchematicMatrix
+                (show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+                (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (Earr r z) (Kc r z)) K := by
+  exact
+    localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase hC_nonneg
+      hDB hDH hHB hHH hGbound hL
+      (by
+        intro p hp q hq
+        exact parabolicClosedBall.pair_parabolicDistance_le_one (hs hp) (hs hq) hR)
+      hN hD hEarr hHc hKc hdetN_ne hηD hGdiff hDdiff hHdiff
+
+/-- Finite-family closed-parabolic-cylinder spatial-Lipschitz Gram-entry variant of
+`localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedCylinder
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α timeRadius spaceRadius : ℝ} {c : ℝ × M}
+    (hK : IsCompact K) (hα_pos : 0 < α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {C : ρ → ι → ι → ℝ} {Lgram : ρ → ι → ι → ℝ≥0}
+    {DB DH : ρ → ι → ι → ι → ℝ}
+    {HB HH : ρ → ι → ι → ι → ι → ℝ}
+    {ηG ηD : ρ → ℝ} {ηH : ρ → ι → ι → ℝ}
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ r i j, 0 ≤ C r i j)
+    (hDB : ∀ r a c d, 0 ≤ DB r a c d)
+    (hDH : ∀ r a c d, 0 ≤ DH r a c d)
+    (hHB : ∀ r a c i j, 0 ≤ HB r a c i j)
+    (hHH : ∀ r a c i j, 0 ≤ HH r a c i j)
+    (hGbound : ∀ r i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j‖ ≤
+        C r i j)
+    (hL : ∀ r i j,
+      LipschitzOnWith (Lgram r i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1)
+    (hN : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (Lgram r i j : ℝ) α
+        (fun z : ℝ × M => N r z i j) K)
+    (hD : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => D r z a c d) K)
+    (hEarr : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => Earr r z a c d) K)
+    (hHc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Hc r z a c i j) K)
+    (hKc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Kc r z a c i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0)
+    (hηD : ∀ r, 0 ≤ ηD r)
+    (hGdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) - N r z‖ ≤
+        ηG r)
+    (hDdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D r z a c d - Earr r z a c d‖ ≤ ηD r)
+    (hHdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc r z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc r z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH r i j) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r) (ηG r) (ηD r) (ηH r))
+          (ricciDeTurckSchematicDiffHolderConst
+            (𝕜 := ℝ) δ (C r) (fun i j => (Lgram r i j : ℝ)) (DB r) (DH r)
+              (HB r) (HH r))
+          α
+          (fun z : ℝ × M =>
+            ricciDeTurckSchematicMatrix
+                (show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+                (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (Earr r z) (Kc r z)) K := by
+  exact
+    localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_pos hα_le_one hKbase hC_nonneg
+      hDB hDH hHB hHH hGbound hL
+      (by
+        intro p hp q hq
+        exact (parabolicClosedCylinder.pair_parabolicDistance_le (hs hp) (hs hq)).trans hdiam)
+      hN hD hEarr hHc hKc hdetN_ne hηD hGdiff hDdiff hHdiff
+
 /-- Finite-family entrywise-difference compact local-frame bridge for quantitative parabolic
 `C^{0,α}` control of schematic Ricci-DeTurck RHS differences, comparing each geometric
 local-frame Gram matrix with an arbitrary comparison primitive input. -/

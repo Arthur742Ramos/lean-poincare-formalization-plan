@@ -1125,8 +1125,9 @@ finite-family schematic RHS quantitative difference, existential difference, and
 bounded-difference control against comparison primitive inputs with one lower
 bound shared by the Gram and comparison metric families, including
 spatial-Hölder, unit-diameter spatial-Lipschitz, and closed ball/cylinder
-spatial-Lipschitz Gram-entry forms for both the entrywise `C^{0,α}` difference
-bridge and the bounded-difference bridge, plus compact local-frame inverse Gram,
+spatial-Lipschitz Gram-entry forms for the quantitative difference bridge, the
+entrywise `C^{0,α}` difference bridge, and the bounded-difference bridge, plus
+compact local-frame inverse Gram,
 inverse-principal contraction,
 inverse-Gram Christoffel arrays, and schematic RHS outputs, including
 existential difference readouts for all four from entrywise controls, and
