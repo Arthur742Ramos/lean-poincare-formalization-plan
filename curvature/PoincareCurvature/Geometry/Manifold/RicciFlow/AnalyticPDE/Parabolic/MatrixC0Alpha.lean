@@ -4250,6 +4250,40 @@ theorem matrix_inv_mulVec_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
   intro a
   exact matrix_inv_mulVec (M := M a) (v := v a) (hM a) (hv a) hδpos (hdet a)
 
+/-- A finite family of inverse-matrix/vector products has explicit vector-valued bounded
+parabolic `C^{0,α}` estimates with one compact determinant lower bound shared by the family. -/
+theorem matrix_inv_mulVec_family_with_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {B H : ι → n → n → ℝ} {Bv Hv : ι → n → ℝ}
+    {M : ι → ℝ × X → Matrix n n 𝕜} {v : ι → ℝ × X → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ a i j, 0 ≤ B a i j) (hH : ∀ a i j, 0 ≤ H a i j)
+    (hBv : ∀ a j, 0 ≤ Bv a j) (hHv : ∀ a j, 0 ≤ Hv a j)
+    (hM : ∀ a i j,
+      ParabolicC0AlphaWith (B a i j) (H a i j) α (fun z => M a z i j) K)
+    (hv : ∀ a j, ParabolicC0AlphaWith (Bv a j) (Hv a j) α
+      (fun z => v a z j) K)
+    (hdet_ne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → (M a z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M a z).det‖) ∧
+      ∀ a,
+        ParabolicC0AlphaWith
+          (∑ i : n, matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ (B a) (Bv a) i)
+          (∑ i : n,
+            matrixInvMulVecEntryHolderConst (𝕜 := 𝕜) δ (B a) (H a) (Bv a) (Hv a) i)
+          α (fun z : ℝ × X => ((M a z)⁻¹).mulVec (v a z)) K := by
+  have hMctrl : ∀ a i j, ParabolicC0AlphaOn α (fun z => M a z i j) K := by
+    intro a i j
+    exact ⟨B a i j, hB a i j, H a i j, hH a i j, hM a i j⟩
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro a
+  exact matrix_inv_mulVec_with (M := M a) (v := v a)
+    (hH a) (hBv a) (hHv a) (hM a) (hv a) hδpos (hdet a)
+
 /-- Compact-domain quantitative inverse-matrix-vector closure from entrywise control and
 pointwise nonvanishing determinant. -/
 theorem matrix_inv_mulVec_with_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
@@ -4424,6 +4458,40 @@ theorem matrix_vecMul_inv_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
   refine ⟨δ, hδpos, hdet, ?_⟩
   intro a
   exact matrix_vecMul_inv (M := M a) (v := v a) (hv a) (hM a) hδpos (hdet a)
+
+/-- A finite family of vector/inverse-matrix products has explicit vector-valued bounded
+parabolic `C^{0,α}` estimates with one compact determinant lower bound shared by the family. -/
+theorem matrix_vecMul_inv_family_with_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {Bv Hv : ι → n → ℝ} {B H : ι → n → n → ℝ}
+    {v : ι → ℝ × X → n → 𝕜} {M : ι → ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hBv : ∀ a i, 0 ≤ Bv a i) (hHv : ∀ a i, 0 ≤ Hv a i)
+    (hB : ∀ a i j, 0 ≤ B a i j) (hH : ∀ a i j, 0 ≤ H a i j)
+    (hv : ∀ a i, ParabolicC0AlphaWith (Bv a i) (Hv a i) α
+      (fun z => v a z i) K)
+    (hM : ∀ a i j,
+      ParabolicC0AlphaWith (B a i j) (H a i j) α (fun z => M a z i j) K)
+    (hdet_ne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → (M a z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M a z).det‖) ∧
+      ∀ a,
+        ParabolicC0AlphaWith
+          (∑ j : n, matrixVecMulInvEntryBoundConst (𝕜 := 𝕜) δ (Bv a) (B a) j)
+          (∑ j : n,
+            matrixVecMulInvEntryHolderConst (𝕜 := 𝕜) δ (Bv a) (Hv a) (B a) (H a) j)
+          α (fun z : ℝ × X => Matrix.vecMul (v a z) (M a z)⁻¹) K := by
+  have hMctrl : ∀ a i j, ParabolicC0AlphaOn α (fun z => M a z i j) K := by
+    intro a i j
+    exact ⟨B a i j, hB a i j, H a i j, hH a i j, hM a i j⟩
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro a
+  exact matrix_vecMul_inv_with (v := v a) (M := M a)
+    (hBv a) (hHv a) (hH a) (hv a) (hM a) hδpos (hdet a)
 
 /-- Compact-domain quantitative vector-inverse-matrix closure from entrywise control and
 pointwise nonvanishing determinant. -/

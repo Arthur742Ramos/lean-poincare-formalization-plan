@@ -234,6 +234,102 @@ theorem localFrameGramMatrix_vecMul_inv_family_of_entries_of_timeSpace_isCompact
       (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
     (v := v r) (hv r) (hG r) hδpos (hdet r)
 
+/-- A finite family of inverse local-frame Gram matrix/vector products has explicit bounded
+parabolic `C^{0,α}` estimates from entrywise vector and Gram controls, with one compact Gram
+determinant lower bound shared by the family. -/
+theorem localFrameGramMatrix_inv_mulVec_family_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {GB GH : ρ → ι → ι → ℝ} {Bv Hv : ρ → ι → ℝ}
+    {v : ρ → ℝ × M → ι → ℝ}
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hBv : ∀ r j, 0 ≤ Bv r j) (hHv : ∀ r j, 0 ≤ Hv r j)
+    (hG : ∀ r i j,
+      ParabolicC0AlphaWith (GB r i j) (GH r i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K)
+    (hv : ∀ r j,
+      ParabolicC0AlphaWith (Bv r j) (Hv r j) α (fun z : ℝ × M => v r z j) K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (∑ i : ι, matrixInvMulVecEntryBoundConst (𝕜 := ℝ) δ (GB r) (Bv r) i)
+          (∑ i : ι,
+            matrixInvMulVecEntryHolderConst (𝕜 := ℝ) δ (GB r) (GH r) (Bv r) (Hv r) i)
+          α
+          (fun z : ℝ × M =>
+            ((show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+              Matrix ι ι ℝ).mulVec (v r z)) K := by
+  rcases localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact matrix_inv_mulVec_with
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (v := v r) (hGH r) (hBv r) (hHv r) (hG r) (hv r) hδpos (hdet r)
+
+/-- A finite family of vector/inverse local-frame Gram matrix products has explicit bounded
+parabolic `C^{0,α}` estimates from entrywise vector and Gram controls, with one compact Gram
+determinant lower bound shared by the family. -/
+theorem localFrameGramMatrix_vecMul_inv_family_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {Bv Hv : ρ → ι → ℝ} {GB GH : ρ → ι → ι → ℝ}
+    {v : ρ → ℝ × M → ι → ℝ}
+    (hBv : ∀ r i, 0 ≤ Bv r i) (hHv : ∀ r i, 0 ≤ Hv r i)
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hv : ∀ r i,
+      ParabolicC0AlphaWith (Bv r i) (Hv r i) α (fun z : ℝ × M => v r z i) K)
+    (hG : ∀ r i j,
+      ParabolicC0AlphaWith (GB r i j) (GH r i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (∑ j : ι, matrixVecMulInvEntryBoundConst (𝕜 := ℝ) δ (Bv r) (GB r) j)
+          (∑ j : ι,
+            matrixVecMulInvEntryHolderConst (𝕜 := ℝ) δ (Bv r) (Hv r) (GB r) (GH r) j)
+          α
+          (fun z : ℝ × M =>
+            Matrix.vecMul (v r z)
+              ((show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                Matrix ι ι ℝ)) K := by
+  rcases localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact matrix_vecMul_inv_with
+    (v := v r)
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (hBv r) (hHv r) (hGH r) (hv r) (hG r) hδpos (hdet r)
+
 /-- A finite family of inverse local-frame Gram bilinear contractions has existential parabolic
 `C^{0,α}` control from entrywise vector and Gram controls, with one compact Gram determinant
 lower bound shared by the family. -/
