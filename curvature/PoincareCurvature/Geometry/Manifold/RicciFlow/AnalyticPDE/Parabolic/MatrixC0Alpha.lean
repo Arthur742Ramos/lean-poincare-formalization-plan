@@ -2930,6 +2930,109 @@ theorem matrix_inv_two_index_contract_norm_sub_le {n p q 𝕜 : Type*} [Fintype 
         Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
   simpa [entryBound] using hnorm
 
+/-- Uniform matrix-valued bound for the finite inverse-principal contraction difference. -/
+def matrixInvTwoIndexContractDiffBoundConst {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    (δ : ℝ) (C : n → n → ℝ) (TB : n → n → p → q → ℝ)
+    (ηM : ℝ) (ηT : p → q → ℝ) : ℝ :=
+  ∑ i : p, ∑ j : q,
+    (matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C * ηT i j +
+      matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C TB i j * ηM)
+
+theorem matrixInvTwoIndexContractDiffBoundConst_nonneg {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    {δ : ℝ} (hδpos : 0 < δ) {C : n → n → ℝ}
+    {TB : n → n → p → q → ℝ} (hTB : ∀ a b i j, 0 ≤ TB a b i j)
+    {ηM : ℝ} (hηM : 0 ≤ ηM) {ηT : p → q → ℝ}
+    (hηT : ∀ i j, 0 ≤ ηT i j) :
+    0 ≤ matrixInvTwoIndexContractDiffBoundConst (𝕜 := 𝕜) δ C TB ηM ηT := by
+  exact Finset.sum_nonneg fun i _hi =>
+    Finset.sum_nonneg fun j _hj =>
+      add_nonneg
+        (mul_nonneg
+          (matrixInvTwoIndexContractCoeffDiffConst_nonneg (𝕜 := 𝕜) hδpos C)
+          (hηT i j))
+        (mul_nonneg
+          (matrixInvTwoIndexContractMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hTB i j)
+          hηM)
+
+/-- Matrix-valued finite inverse-principal contractions are bounded-difference controlled on a
+time-space set by uniform metric and coefficient-array difference bounds. -/
+theorem matrix_inv_two_index_contract_bounded_sub_le_const {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    {δ : ℝ} {C : n → n → ℝ} {TB : n → n → p → q → ℝ}
+    {ηM : ℝ} {ηT : p → q → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {T U : ℝ × X → n → n → p → q → 𝕜}
+    (hTB : ∀ a b i j, 0 ≤ TB a b i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hU : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j, ‖U z a b i j‖ ≤ TB a b i j)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ ηM)
+    (hTdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+      ‖((fun a b => T z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => U z a b i j) : Matrix n n 𝕜)‖ ≤ ηT i j)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicBoundedWith
+      (matrixInvTwoIndexContractDiffBoundConst (𝕜 := 𝕜) δ C TB ηM ηT)
+      (fun z : ℝ × X =>
+        ((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+          T z a b i j) : Matrix p q 𝕜) -
+        ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+          U z a b i j) : Matrix p q 𝕜)) s := by
+  classical
+  intro z hz
+  let entryBound : p → q → ℝ := fun i j =>
+    matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C * ηT i j +
+      matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C TB i j * ηM
+  have hentry : ∀ i j,
+      ‖(∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j) -
+        ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b * U z a b i j‖ ≤
+        entryBound i j := by
+    intro i j
+    have hbase :=
+      matrix_inv_two_index_contract_entry_norm_sub_le_const
+        (δ := δ) (C := C) (TB := TB)
+        (M z) (N z) (T z) (U z) (hM hz) (hN hz) (hU hz) hδpos
+        (hdetM hz) (hdetN hz) i j
+    exact hbase.trans
+      (add_le_add
+        (mul_le_mul_of_nonneg_left (hTdiff hz i j)
+          (matrixInvTwoIndexContractCoeffDiffConst_nonneg (𝕜 := 𝕜) hδpos C))
+        (mul_le_mul_of_nonneg_left (hMdiff hz)
+          (matrixInvTwoIndexContractMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hTB i j)))
+  have hentry_nonneg : ∀ i j, 0 ≤ entryBound i j := by
+    intro i j
+    exact (norm_nonneg _).trans (hentry i j)
+  have hrow_nonneg : ∀ i, 0 ≤ ∑ j : q, entryBound i j := by
+    intro i
+    exact Finset.sum_nonneg fun j _hj => hentry_nonneg i j
+  have htotal_nonneg : 0 ≤ ∑ i : p, ∑ j : q, entryBound i j :=
+    Finset.sum_nonneg fun i _hi => hrow_nonneg i
+  have hnorm :
+      ‖((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+            T z a b i j) : Matrix p q 𝕜) -
+          ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+            U z a b i j) : Matrix p q 𝕜)‖ ≤
+        ∑ i : p, ∑ j : q, entryBound i j := by
+    refine (Matrix.norm_le_iff htotal_nonneg).2 ?_
+    intro i j
+    calc
+      ‖(((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+            T z a b i j) : Matrix p q 𝕜) -
+          ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+            U z a b i j) : Matrix p q 𝕜)) i j‖ =
+          ‖(∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j) -
+            ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b * U z a b i j‖ := rfl
+      _ ≤ entryBound i j := hentry i j
+      _ ≤ ∑ j : q, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hentry_nonneg i k) (Finset.mem_univ j)
+      _ ≤ ∑ i : p, ∑ j : q, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
+  simpa [entryBound, matrixInvTwoIndexContractDiffBoundConst] using hnorm
+
 /-- Compact-domain matrix-valued inverse principal-contraction closure from entrywise control and
 pointwise nonvanishing determinant. -/
 theorem matrix_inv_two_index_contract_of_isCompact_det_ne_zero {n p q 𝕜 : Type*}

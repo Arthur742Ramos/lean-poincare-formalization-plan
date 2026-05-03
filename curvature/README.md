@@ -1024,8 +1024,8 @@ bound preserve parabolic `C^{0,α}` control from entrywise control. It also has
 pointwise determinant Lipschitz control in the elementwise matrix norm, plus
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
 function-level determinant/inverse/matrix-product bounded-difference,
-inverse-principal entry Lipschitz and bounded Holder
-entry/matrix estimates, inverse-Christoffel
+inverse-principal entry Lipschitz, bounded Holder entry/matrix estimates, and
+inverse-principal contraction bounded-difference control, inverse-Christoffel
 derivative/metric-side and array-level Lipschitz constants,
 inverse-Christoffel bounded Holder entry/array estimates, and
 quadratic-Christoffel matrix-norm Lipschitz and bounded Holder entry/matrix
