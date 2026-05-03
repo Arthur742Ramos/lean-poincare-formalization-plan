@@ -2354,6 +2354,88 @@ theorem div {𝕜 : Type*} [NormedField 𝕜] {B₁ B₂ H₁ H₂ δ : ℝ}
   simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using
     ha.mul (hb.inv hδpos hδ) hB₁
 
+/-- A finite product of normed-commutative-ring-valued parabolic `C^{0,α}` functions has an
+explicit bounded `C^{0,α}` estimate.  The estimate uses `max (B i) 1` as a uniform factor so the
+induction has a monotone closed form, and includes the unit norm needed for the empty product. -/
+theorem finset_prod {ι A : Type*} [NormedCommRing A] (S : Finset ι)
+    {B H : ι → ℝ} {u : ι → ℝ × X → A}
+    (hH : ∀ i ∈ S, 0 ≤ H i)
+    (h : ∀ i ∈ S, ParabolicC0AlphaWith (B i) (H i) α (u i) s) :
+    ParabolicC0AlphaWith
+      (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)
+      ((∑ i ∈ S, H i) * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1))
+      α (fun z => ∏ i ∈ S, u i z) s := by
+  classical
+  revert hH h
+  refine Finset.induction_on S ?base ?step
+  · intro _hH _h
+    simpa using
+      (ParabolicC0AlphaWith.const (s := s) (α := α) (B := max ‖(1 : A)‖ 1)
+        (H := 0) (1 : A) (le_max_left _ _) le_rfl)
+  · intro a S ha ih hH h
+    have ha_ctrl : ParabolicC0AlphaWith (B a) (H a) α (u a) s :=
+      h a (by simp [ha])
+    have htail :
+        ParabolicC0AlphaWith
+          (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)
+          ((∑ i ∈ S, H i) * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1))
+          α (fun z => ∏ i ∈ S, u i z) s :=
+      ih
+        (fun i hi => hH i (by simp [hi]))
+        (fun i hi => h i (by simp [hi]))
+    have hBamax_nonneg : 0 ≤ max (B a) 1 := (zero_le_one.trans (le_max_right _ _))
+    have ha_ctrl' : ParabolicC0AlphaWith (max (B a) 1) (H a) α (u a) s :=
+      ha_ctrl.mono_const (le_max_left _ _) le_rfl
+    have hprod := ha_ctrl'.mul htail hBamax_nonneg
+    have hprod' :
+        ParabolicC0AlphaWith
+          (max (B a) 1 * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1))
+          (max (B a) 1 *
+              ((∑ i ∈ S, H i) * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)) +
+            (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1) * H a)
+          α (fun z => ∏ i ∈ insert a S, u i z) s := by
+      simpa [Finset.prod_insert ha] using hprod
+    refine hprod'.mono_const ?_ ?_
+    · rw [Finset.prod_insert ha]
+      ring_nf
+      exact le_refl (max (B a) 1 * max ‖(1 : A)‖ 1 * ∏ x ∈ S, max (B x) 1)
+    · rw [Finset.sum_insert ha, Finset.prod_insert ha]
+      have hHtail_nonneg : 0 ≤ ∑ i ∈ S, H i :=
+        Finset.sum_nonneg fun i hi => hH i (by simp [hi])
+      have hunit_nonneg : 0 ≤ max ‖(1 : A)‖ 1 :=
+        zero_le_one.trans (le_max_right _ _)
+      have hBtail_nonneg : 0 ≤ max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1 :=
+        mul_nonneg hunit_nonneg
+          (Finset.prod_nonneg fun i hi => (zero_le_one.trans (le_max_right (B i) 1)))
+      have hHa_nonneg : 0 ≤ H a := hH a (by simp [ha])
+      have hBamax_ge_one : 1 ≤ max (B a) 1 := le_max_right _ _
+      have hHa_term :
+          (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1) * H a ≤
+            max (B a) 1 *
+              ((max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1) * H a) := by
+        calc
+          (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1) * H a
+              = 1 * ((max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1) * H a) := by ring
+          _ ≤ max (B a) 1 *
+                ((max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1) * H a) :=
+            mul_le_mul_of_nonneg_right hBamax_ge_one
+              (mul_nonneg hBtail_nonneg hHa_nonneg)
+      calc
+        max (B a) 1 *
+              ((∑ i ∈ S, H i) *
+                (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)) +
+            (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1) * H a
+            ≤
+              max (B a) 1 *
+                  ((∑ i ∈ S, H i) *
+                    (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)) +
+                max (B a) 1 *
+                  ((max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1) * H a) := by
+              exact add_le_add_right hHa_term _
+        _ = (H a + ∑ x ∈ S, H x) *
+              (max ‖(1 : A)‖ 1 * (max (B a) 1 * ∏ x ∈ S, max (B x) 1)) := by
+              ring
+
 theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     {B₁ B₂ H₁ H₂ α : ℝ} {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
     (ha : ParabolicC0AlphaWith B₁ H₁ α a s)

@@ -342,7 +342,8 @@ packages the canonical stationary local solution attached to
   closure for explicit Holder, bounded, and `C^{0,α}` controls,
   finite-sum closure for existential Holder and `C^{0,α}` controls,
   finite-product closure for existential normed-comm-ring-valued `C^{0,α}`
-  controls, finite `Pi` packaging across bounded, Holder, and `C^{0,α}`
+  controls plus an explicit bounded `C^{0,α}` finite-product estimate, finite `Pi`
+  packaging across bounded, Holder, and `C^{0,α}`
   controls from componentwise estimates, and
   add/subtract/smul, integer-scalar, and product-valued pairing closure
   estimates plus the bounded product estimate for normed-ring-valued
@@ -366,8 +367,9 @@ packages the canonical stationary local solution attached to
   not yet supply the
   Schauder estimates or the Ricci-DeTurck Banach chart. A separate
   `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now builds on those
-  primitives to prove parabolic `C^{0,α}` closure of finite matrix
-  determinants, adjugate entries, and inverse entries under determinant lower
+  primitives to prove an explicit bounded `C^{0,α}` determinant estimate and
+  parabolic `C^{0,α}` closure of finite matrix determinants, adjugate entries,
+  and inverse entries under determinant lower
   bounds, with compact nonvanishing determinant data now supplying such lower
   bounds and compact-domain inverse, inverse-action, inverse-bilinear, and
   matrix-valued RHS variants, plus

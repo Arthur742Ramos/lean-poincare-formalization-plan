@@ -990,7 +990,8 @@ Holder and `C^{0,α}` patching plus compact point-dependent- and
 existential-radius corollaries, finite-sum closure for explicit Holder,
 bounded, and `C^{0,α}` controls, finite-sum closure for existential Holder and
 `C^{0,α}` controls, finite-product closure for existential
-normed-comm-ring-valued `C^{0,α}` controls, finite `Pi` packaging across
+normed-comm-ring-valued `C^{0,α}` controls plus an explicit bounded
+`C^{0,α}` finite-product estimate, finite `Pi` packaging across
 bounded, Holder, and `C^{0,α}` controls from componentwise estimates,
 product-valued pairing closure, and
 integer-scalar and basic linear algebra closure estimates for Hölder and
@@ -1010,10 +1011,11 @@ bidirectional product ball/closed-ball compatibility for parabolic balls and
 product cylinders, plus basepoint-to-sup bounds and Holder-to-`C^{0,α}`
 packaging on compact domains, with direct proper-space closed-ball/cylinder
 corollaries.
-The separate `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now proves that
-finite matrix determinants, adjugate entries, and inverse entries under a
-determinant lower bound preserve parabolic `C^{0,α}` control from entrywise
-control; compact nonvanishing determinant data now supplies the needed uniform
+The separate `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now proves an
+explicit bounded `C^{0,α}` determinant estimate, and that finite matrix
+determinants, adjugate entries, and inverse entries under a determinant lower
+bound preserve parabolic `C^{0,α}` control from entrywise control; compact
+nonvanishing determinant data now supplies the needed uniform
 determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
 also proves entrywise and whole-valued closure

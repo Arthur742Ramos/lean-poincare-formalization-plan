@@ -45,6 +45,80 @@ theorem exists_pos_norm_lower_bound_of_isCompact_of_continuousOn_ne_zero {E : Ty
     intro z hz
     exact False.elim (hKnonempty ⟨z, hz⟩)
 
+/-- The determinant of a finite matrix whose entries have explicit parabolic `C^{0,α}` bounds
+has an explicit bounded parabolic `C^{0,α}` estimate.  This is the quantitative version used
+before passing to the existential `ParabolicC0AlphaOn` closure theorem. -/
+theorem matrix_det_with {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
+    {B H : n → n → ℝ} {M : ℝ × X → Matrix n n A}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s) :
+    ParabolicC0AlphaWith
+      (∑ σ : Equiv.Perm n,
+        ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
+      (∑ σ : Equiv.Perm n,
+        ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((∑ i : n, H (σ i) i) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)))
+      α (fun z => (M z).det) s := by
+  classical
+  let term : Equiv.Perm n → ℝ × X → A :=
+    fun σ z => ((Equiv.Perm.sign σ : ℤ) : A) * ∏ i : n, M z (σ i) i
+  have hterm : ∀ σ ∈ (Finset.univ : Finset (Equiv.Perm n)),
+      ParabolicC0AlphaWith
+        (‖(Equiv.Perm.sign σ : ℤ)‖ *
+          (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
+        (‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((∑ i : n, H (σ i) i) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)))
+        α (term σ) s := by
+    intro σ _hσ
+    have hprod :
+        ParabolicC0AlphaWith
+          (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)
+          ((∑ i : n, H (σ i) i) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
+          α (fun z => ∏ i : n, M z (σ i) i) s := by
+      simpa using
+        (ParabolicC0AlphaWith.finset_prod (X := X) (α := α) (s := s)
+          (S := (Finset.univ : Finset n))
+          (B := fun i => B (σ i) i)
+          (H := fun i => H (σ i) i)
+          (u := fun i z => M z (σ i) i)
+          (fun i _hi => hH (σ i) i)
+          (fun i _hi => hM (σ i) i))
+    dsimp [term]
+    simpa [zsmul_eq_mul] using hprod.zsmul (Equiv.Perm.sign σ)
+  have hsum :
+      ParabolicC0AlphaWith
+        (∑ σ : Equiv.Perm n,
+          ‖(Equiv.Perm.sign σ : ℤ)‖ *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
+        (∑ σ : Equiv.Perm n,
+          ‖(Equiv.Perm.sign σ : ℤ)‖ *
+            ((∑ i : n, H (σ i) i) *
+              (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)))
+        α (fun z => ∑ σ : Equiv.Perm n, term σ z) s := by
+    simpa using
+      (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset (Equiv.Perm n)))
+        (B := fun σ =>
+          ‖(Equiv.Perm.sign σ : ℤ)‖ *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
+        (H := fun σ =>
+          ‖(Equiv.Perm.sign σ : ℤ)‖ *
+            ((∑ i : n, H (σ i) i) *
+              (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)))
+        (u := term) hterm)
+  convert hsum using 1
+  funext z
+  dsimp [term]
+  rw [Matrix.det_apply]
+  apply Finset.sum_congr rfl
+  intro σ _hσ
+  rw [← zsmul_eq_mul]
+  rfl
+
 /-- The determinant of a finite matrix whose entries are parabolic `C^{0,α}` functions is
 again parabolic `C^{0,α}`. -/
 theorem matrix_det {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]

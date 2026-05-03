@@ -133,7 +133,8 @@ additive/subtractive closure estimates, plus the
 bounded product estimate for
 normed-ring-valued `C^{0,α}` functions and the corresponding bounded
 scalar-action estimate for normed-space-valued functions, reciprocal and
-division closure for normed-field-valued functions bounded away from zero,
+division closure for normed-field-valued functions bounded away from zero, and
+an explicit bounded finite-product `C^{0,α}` estimate,
 plus closure under taking norms, Lipschitz composition on the controlled range,
 direct parabolic Hölder/`C^{0,α}` lifts of time-independent spatial
 Hölder/Lipschitz functions on the spatial projection, and bounded `C^{0,α}`
@@ -147,8 +148,9 @@ basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on compact domains,
 with direct proper-space closed-ball/cylinder corollaries, not the
 local-existence theorem itself.
 The separate `RicciFlow/AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves
-parabolic `C^{0,α}` closure for finite matrix determinants, adjugate entries,
-and inverse entries under a determinant lower bound from entrywise control,
+an explicit bounded `C^{0,α}` determinant estimate and parabolic `C^{0,α}`
+closure for finite matrix determinants, adjugate entries, and inverse entries
+under a determinant lower bound from entrywise control,
 including a compactness bridge from nonvanishing determinants to a uniform
 determinant lower bound and compact-domain inverse-entry, inverse-action,
 inverse-bilinear, and schematic matrix-valued RHS variants, as well as
