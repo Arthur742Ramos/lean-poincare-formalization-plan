@@ -7855,6 +7855,67 @@ theorem ricciDeTurckSchematicMatrix_sub_with_entrywise {n 𝕜 : Type*} [Fintype
       hΓB_nonneg hΓH_nonneg hΓB_nonneg hΓH_nonneg hΓdB_nonneg hΓdH_nonneg
       hM hN hMdiff hKc hHdiff hΓ hΛ hΓdiff hδpos hdetM hdetN
 
+/-- Compact-domain version of `ricciDeTurckSchematicMatrix_sub_with_entrywise`: pointwise
+nonvanishing of both metric determinants supplies one common determinant lower bound. -/
+theorem ricciDeTurckSchematicMatrix_sub_with_entrywise_of_isCompact_det_ne_zero
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)}
+    {MB MH MBd MHd : n → n → ℝ} {DB DH DDB DDH : n → n → n → ℝ}
+    {HB HH HBd HHd : n → n → n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (hMB : ∀ a b, 0 ≤ MB a b) (hMH : ∀ a b, 0 ≤ MH a b)
+    (hMBd : ∀ a b, 0 ≤ MBd a b) (hMHd : ∀ a b, 0 ≤ MHd a b)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hDH : ∀ a b c, 0 ≤ DH a b c)
+    (hDDB : ∀ a b c, 0 ≤ DDB a b c) (hDDH : ∀ a b c, 0 ≤ DDH a b c)
+    (hHB : ∀ a b i j, 0 ≤ HB a b i j) (hHH : ∀ a b i j, 0 ≤ HH a b i j)
+    (hHBd : ∀ a b i j, 0 ≤ HBd a b i j)
+    (hHHd : ∀ a b i j, 0 ≤ HHd a b i j)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) Kdom)
+    (hN : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => N z a b) Kdom)
+    (hMdiff : ∀ a b,
+      ParabolicC0AlphaWith (MBd a b) (MHd a b) α (fun z => M z a b - N z a b)
+        Kdom)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) Kdom)
+    (hE : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => E z a b c) Kdom)
+    (hDdiff : ∀ a b c,
+      ParabolicC0AlphaWith (DDB a b c) (DDH a b c) α
+        (fun z => D z a b c - E z a b c) Kdom)
+    (hKc : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => Kc z a b i j) Kdom)
+    (hHdiff : ∀ a b i j,
+      ParabolicC0AlphaWith (HBd a b i j) (HHd a b i j) α
+        (fun z => Hc z a b i j - Kc z a b i j) Kdom)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (N z).det ≠ 0) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (ricciDeTurckSchematicEntrywiseSubBoundConst
+          (𝕜 := 𝕜) δ MB MBd DB DDB HB HBd)
+        (ricciDeTurckSchematicEntrywiseSubHolderConst
+          (𝕜 := 𝕜) δ MB MH MBd MHd DB DH DDB DDH HB HH HBd HHd)
+        α
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) Kdom := by
+  have hMctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) Kdom := by
+    intro a b
+    exact ⟨MB a b, hMB a b, MH a b, hMH a b, hM a b⟩
+  have hNctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) Kdom := by
+    intro a b
+    exact ⟨MB a b, hMB a b, MH a b, hMH a b, hN a b⟩
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := Kdom) (M := M) (N := N) hKdom hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, ricciDeTurckSchematicMatrix_sub_with_entrywise
+    (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
+    hMH hMBd hMHd hDB hDH hDDB hDDH hHB hHH hHBd hHHd
+    hM hN hMdiff hD hE hDdiff hKc hHdiff hδpos hdetM hdetN⟩
+
 /-- The schematic Ricci-DeTurck coordinate entry is pointwise Lipschitz in the primitive metric,
 first-derivative, and second-derivative arrays, on entrywise bounded matrices with a common
 determinant lower bound. -/

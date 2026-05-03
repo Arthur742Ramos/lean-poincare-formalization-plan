@@ -1540,6 +1540,81 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_of_timeSpace_isComp
     hK hα hC_nonneg hGH hDB hDH hHB hHH hG hN hD hEarr hHc hKc
     hdetG_ne hdetN_ne hηD hGdiff hDdiff hHdiff
 
+/-- Entrywise-difference compact local-frame bridge for parabolic `C^{0,α}` control of schematic
+Ricci-DeTurck RHS differences, comparing the geometric local-frame Gram matrix with an arbitrary
+comparison primitive input. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_entrywise_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C GH Gd GHd : ι → ι → ℝ} {DB DH DDB DDH : ι → ι → ι → ℝ}
+    {HB HH HBd HHd : ι → ι → ι → ι → ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hGd : ∀ i j, 0 ≤ Gd i j) (hGHd : ∀ i j, 0 ≤ GHd i j)
+    (hDB : ∀ a c d, 0 ≤ DB a c d) (hDH : ∀ a c d, 0 ≤ DH a c d)
+    (hDDB : ∀ a c d, 0 ≤ DDB a c d) (hDDH : ∀ a c d, 0 ≤ DDH a c d)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j) (hHH : ∀ a c i j, 0 ≤ HH a c i j)
+    (hHBd : ∀ a c i j, 0 ≤ HBd a c i j)
+    (hHHd : ∀ a c i j, 0 ≤ HHd a c i j)
+    (hG : ∀ i j,
+      ParabolicC0AlphaWith (C i j) (GH i j) α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hN : ∀ i j, ParabolicC0AlphaWith (C i j) (GH i j) α
+      (fun z : ℝ × M => N z i j) K)
+    (hGdiff : ∀ i j,
+      ParabolicC0AlphaWith (Gd i j) (GHd i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j - N z i j) K)
+    (hD : ∀ a c d,
+      ParabolicC0AlphaWith (DB a c d) (DH a c d) α
+        (fun z : ℝ × M => D z a c d) K)
+    (hEarr : ∀ a c d,
+      ParabolicC0AlphaWith (DB a c d) (DH a c d) α
+        (fun z : ℝ × M => Earr z a c d) K)
+    (hDdiff : ∀ a c d,
+      ParabolicC0AlphaWith (DDB a c d) (DDH a c d) α
+        (fun z : ℝ × M => D z a c d - Earr z a c d) K)
+    (hKc : ∀ a c i j,
+      ParabolicC0AlphaWith (HB a c i j) (HH a c i j) α
+        (fun z : ℝ × M => Kc z a c i j) K)
+    (hHdiff : ∀ a c i j,
+      ParabolicC0AlphaWith (HBd a c i j) (HHd a c i j) α
+        (fun z : ℝ × M => Hc z a c i j - Kc z a c i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (ricciDeTurckSchematicEntrywiseSubBoundConst
+          (𝕜 := ℝ) δ C Gd DB DDB HB HBd)
+        (ricciDeTurckSchematicEntrywiseSubHolderConst
+          (𝕜 := ℝ) δ C GH Gd GHd DB DH DDB DDH HB HH HBd HHd)
+        α
+        (fun z : ℝ × M =>
+          ricciDeTurckSchematicMatrix
+              (show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)
+              (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (Earr z) (Kc z)) K := by
+  have hdetG_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det ≠ 0 := by
+    intro z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) e b (hKbase hz)
+  exact ricciDeTurckSchematicMatrix_sub_with_entrywise_of_isCompact_det_ne_zero
+    (Kdom := K)
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
+    hK hα hC_nonneg hGH hGd hGHd hDB hDH hDDB hDDH hHB hHH hHBd hHHd
+    hG hN hGdiff hD hEarr hDdiff hKc hHdiff hdetG_ne hdetN_ne
+
 /-- Spatial-Hölder Gram-entry variant of
 `localFrameGramMatrix_ricciDeTurck_schematic_sub_with_of_timeSpace_isCompact`. -/
 theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_of_spatial_holder_of_timeSpace_isCompact
