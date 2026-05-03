@@ -917,6 +917,11 @@ for a single fixed IVP via `ChosenIntrinsicDeTurckGaugeFlowDerivative`,
 `IntrinsicDeTurckGaugeFlowExistence.ofDerivativeAt`, together with the
 fixed-IVP chart-data bridges `IntrinsicDeTurckGaugeFlowExistence.ofChartDerivative`
 and `IntrinsicDeTurckGaugeFlowExistence.ofChartDerivativeAt`.
+The raw fixed-IVP and theorem-family time-derivative packages now also expose
+the corresponding open-Picard named scalar derivative wrappers for endpoint
+within-field and within-component data, so theorem-package routes that consume
+`PullbackMetricInnerDerivativeData` do not have to detour through tensor
+`HasTimeDerivativeOn` just to discharge the `Ioo` neighborhood proof.
 The theorem-family zero-gauge-field constructor now also carries the required
 pullback metric time-derivative proof, so any family whose intrinsic DeTurck
 gauge field vanishes on each solution time set can enter the gauge-reduction
