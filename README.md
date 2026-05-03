@@ -263,7 +263,9 @@ packages the canonical stationary local solution attached to
   radius-specialized endpoint forms, and its time-difference component data
   now localizes monotonically under raw gauge-flow time-set restriction, with
   closed-Picard ordinary time-difference tensor wrappers that accept full-`Icc`
-  data directly;
+  data directly; product-domain vector-slot scalar readouts now have
+  eventual-equality transfer lemmas for locally equal finite-cover scalar
+  identities, matching the operator-domain readout route;
   model-flow overlap uniqueness now also
   covers common closed subintervals of different ambient Picard intervals for
   local, continuous space-time, full variational `(flow, tangent)`, and

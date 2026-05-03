@@ -333,7 +333,9 @@ now packages the matching intrinsic boundary
         operator-coordinate routes (including readouts stated directly on the
         product state `(y,A)` through the final tensor bridge), both
         operator-domain and four-variable scalar-readout routes now accept
-        direct product-state `(t,y,A)` / `(t,y,Au,Av)` data, the
+        direct product-state `(t,y,A)` / `(t,y,Au,Av)` data, the four-variable
+        route now also has eventual-equality transfer wrappers for locally
+        equal scalar readouts, the
         closed-Picard metric-coordinate-field routes now accept direct
         product-state base/tangent agreement in ordinary, open-domain,
         geometric pushed-vector-slot, and finite-cover/readout-field forms,
