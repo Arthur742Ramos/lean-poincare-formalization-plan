@@ -4621,6 +4621,63 @@ structure BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
     SatisfiesIntrinsicDeTurckEquationAt (I := I) (M := M)
       metric metricVelocity background t
 
+/-- Restrict a smooth intrinsic Ricci-DeTurck realization of a Banach metric-section solution to a
+shorter forward terminal time.  The smooth metric, velocity, and background are unchanged; only the
+interval on which they realize the Banach curve is shortened. -/
+def BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.restrictTerminal
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [T2Space M] [FiniteDimensional ℝ F] [CompleteSpace F]
+    [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    {κ : Type*} [Finite κ]
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp
+      (sol.restrictTerminal hT₀ hT) where
+  metric := realization.metric
+  metricVelocity := realization.metricVelocity
+  background := realization.background
+  metric_eq_curve := by
+    intro t ht x u v
+    have htSol : t ∈ Icc ivp.initialTime sol.terminalTime :=
+      ⟨ht.1, le_trans ht.2 hT⟩
+    simpa [BanachEvolutionLocalSolutionIn.restrictTerminal] using
+      realization.metric_eq_curve htSol x u v
+  hasTimeDerivative := by
+    refine realization.hasTimeDerivative.mono ?_
+    intro t ht
+    exact ⟨ht.1, le_trans ht.2 hT⟩
+  equation := by
+    intro t ht
+    exact realization.equation ⟨ht.1, le_trans ht.2 hT⟩
+
 /-- On the interior of the local interval, a smooth metric whose tensor coefficients realize the
 Banach curve inherits scalar metric-coefficient derivatives from the Banach ODE after applying any
 continuous-linear scalar readout of the section model. -/
@@ -6944,6 +7001,62 @@ def TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.of_chos
         ChosenIntrinsicDeTurckLocalSolution (E := F) (H := H) (I := I) (M := M) ivp).1 :=
   TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.of_smoothRealization
     (M := M) (F := F) (I := I) hterminal realization
+
+/-- Restrict an interval candidate encoding to a shorter candidate terminal time.  The encoded
+Banach solution and smooth realization are restricted to the same shorter interval, and the
+candidate metric is unchanged as a geometric object. -/
+def TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.restrictTerminal
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    {candidate : IntrinsicDeTurckLocalSolution (E := F) (H := H) (I := I) (M := M) ivp}
+    (enc : TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding
+      (M := M) (F := F) (I := I) chart candidate)
+    {T' : ℝ} (hT'₀ : ivp.initialTime < T') (hT' : T' ≤ candidate.terminalTime) :
+    TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding
+      (M := M) (F := F) (I := I) chart
+      (candidate.restrictTerminal hT'₀ hT') := by
+  have hT'sol : T' ≤ enc.sol.terminalTime := by
+    simpa [enc.terminal_eq] using hT'
+  refine
+    { sol := enc.sol.restrictTerminal hT'₀ hT'sol
+      terminal_le_chart := ?_
+      realization := enc.realization.restrictTerminal hT'₀ hT'sol
+      terminal_eq := ?_
+      metric_eq := ?_ }
+  · exact le_trans hT'sol enc.terminal_le_chart
+  · rfl
+  · intro t ht x u v
+    have htCandidate : t ∈ Icc ivp.initialTime candidate.terminalTime :=
+      ⟨ht.1, le_trans (by simpa [IntrinsicDeTurckLocalSolution.restrictTerminal] using ht.2) hT'⟩
+    simpa [IntrinsicDeTurckLocalSolution.restrictTerminal,
+      BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.restrictTerminal] using
+      enc.metric_eq htCandidate x u v
 
 /-- Two intrinsic DeTurck candidates encoded in the same interval-scoped Banach chart have equal
 metric tensors on their common time interval. The terminal-containment fields are exactly the extra

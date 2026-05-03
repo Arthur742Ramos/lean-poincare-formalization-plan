@@ -1175,6 +1175,13 @@ underlying solution object is unchanged. This does not remove the current
 reverse-encoding terminal-fit assumptions by itself, but it supplies the
 candidate-prefix operation needed for a later localized reverse-encoding
 argument.
+The analytic realization layer now preserves those prefixes too:
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.restrictTerminal`
+reuses the same smooth metric, velocity, and background on any shorter Banach
+solution interval, and
+`TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.restrictTerminal`
+turns an interval reverse encoding into an encoding of the corresponding
+restricted geometric candidate.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
@@ -1402,7 +1409,9 @@ terminal-fit compatibility for reverse encodings, returns the genuine symmetric
 closure datum together with chosen-background, intrinsic, and ordinary theorem
 package witnesses. The local-solution prefix constructors now make it possible
 to state future terminal-fit replacements against restricted candidates rather
-than against the full arbitrary candidate interval, but that continuation/local
+than against the full arbitrary candidate interval, and the analytic
+smooth-realization / interval-encoding prefixes now preserve the same
+underlying metric data on the shorter interval; the continuation/local
 reverse-encoding theorem is still open. The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient

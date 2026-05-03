@@ -315,6 +315,10 @@ packages the canonical stationary local solution attached to
   chosen-background DeTurck candidate types now also have proof-bearing
   shorter-terminal restriction constructors, which is the prefix layer needed
   before replacing terminal-fit assumptions by localized candidate encodings.
+  The analytic smooth-realization and interval candidate-encoding layers now
+  preserve these prefixes as well: a smooth Banach realization restricts to a
+  shorter Banach interval, and an interval Ricci-DeTurck candidate encoding
+  restricts to the corresponding shorter geometric candidate.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
