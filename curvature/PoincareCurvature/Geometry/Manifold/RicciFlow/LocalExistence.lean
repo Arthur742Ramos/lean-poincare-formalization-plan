@@ -1264,6 +1264,34 @@ structure LocalSolution (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M
   /-- The initial metric is matched at the initial time. -/
   matchesInitialMetric : MatchesInitialMetric (I := I) (M := M) toSolution ivp
 
+/-- Restrict an ordinary local Ricci-flow solution to any shorter forward terminal time. -/
+def LocalSolution.restrictTerminal
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : LocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    LocalSolution (E := E) (H := H) (I := I) (M := M) ivp where
+  terminalTime := T
+  initial_lt_terminal := hT₀
+  toSolution := sol.toSolution
+  interval_subset := by
+    intro t ht
+    exact sol.interval_subset ⟨ht.1, le_trans ht.2 hT⟩
+  matchesInitialMetric := sol.matchesInitialMetric
+
+@[simp] theorem LocalSolution.restrictTerminal_terminalTime
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : LocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).terminalTime = T :=
+  rfl
+
+@[simp] theorem LocalSolution.restrictTerminal_toSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : LocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).toSolution = sol.toSolution :=
+  rfl
+
 section ChosenLeviCivitaLocal
 
 variable [SigmaCompactSpace M]
@@ -1288,6 +1316,34 @@ structure IntrinsicLocalSolution
   interval_subset : Set.Icc ivp.initialTime terminalTime ⊆ toIntrinsicSolution.timeSet
   /-- The initial metric is matched at the initial time. -/
   matchesInitialMetric : IntrinsicMatchesInitialMetric (I := I) (M := M) toIntrinsicSolution ivp
+
+/-- Restrict an intrinsic local Ricci-flow solution to any shorter forward terminal time. -/
+def IntrinsicLocalSolution.restrictTerminal
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp where
+  terminalTime := T
+  initial_lt_terminal := hT₀
+  toIntrinsicSolution := sol.toIntrinsicSolution
+  interval_subset := by
+    intro t ht
+    exact sol.interval_subset ⟨ht.1, le_trans ht.2 hT⟩
+  matchesInitialMetric := sol.matchesInitialMetric
+
+@[simp] theorem IntrinsicLocalSolution.restrictTerminal_terminalTime
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).terminalTime = T :=
+  rfl
+
+@[simp] theorem IntrinsicLocalSolution.restrictTerminal_toIntrinsicSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).toIntrinsicSolution = sol.toIntrinsicSolution :=
+  rfl
 
 lemma intrinsicLocalSolution_initialTime_mem
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -1314,6 +1370,14 @@ def IntrinsicLocalSolution.toLocalSolution
   interval_subset := sol.interval_subset
   matchesInitialMetric := sol.matchesInitialMetric
 
+@[simp] theorem IntrinsicLocalSolution.restrictTerminal_toLocalSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).toLocalSolution =
+      sol.toLocalSolution.restrictTerminal hT₀ hT :=
+  rfl
+
 /-- Forget the auxiliary connection family from a local solution by rewriting it intrinsically. -/
 def LocalSolution.toIntrinsicLocalSolution
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -1326,6 +1390,14 @@ def LocalSolution.toIntrinsicLocalSolution
   matchesInitialMetric := by
     simpa [IntrinsicMatchesInitialMetric, MatchesInitialMetric]
       using sol.matchesInitialMetric
+
+@[simp] theorem LocalSolution.restrictTerminal_toIntrinsicLocalSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : LocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).toIntrinsicLocalSolution =
+      sol.toIntrinsicLocalSolution.restrictTerminal hT₀ hT :=
+  rfl
 
 end ChosenLeviCivitaLocal
 

@@ -1167,6 +1167,14 @@ direct interval equation, continuity, state-membership, and uniqueness readouts
 for state-preserving solutions, so localized Picard/chart arguments can shrink
 solutions without rebuilding the ODE proof or restating uniqueness on the
 ambient terminal interval.
+The geometric local-solution layer now has the matching shorter-terminal
+restriction constructors for ordinary local Ricci-flow solutions, intrinsic
+local Ricci-flow solutions, intrinsic Ricci-DeTurck local solutions, and the
+chosen-background DeTurck subtype, with simp readouts showing that the
+underlying solution object is unchanged. This does not remove the current
+reverse-encoding terminal-fit assumptions by itself, but it supplies the
+candidate-prefix operation needed for a later localized reverse-encoding
+argument.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
@@ -1392,7 +1400,10 @@ now also bundled in `SmoothRealizationMetricCone`: a positive-radius ambient
 interval closure package selects the standard shrink and, under the same
 terminal-fit compatibility for reverse encodings, returns the genuine symmetric
 closure datum together with chosen-background, intrinsic, and ordinary theorem
-package witnesses. The density-based
+package witnesses. The local-solution prefix constructors now make it possible
+to state future terminal-fit replacements against restricted candidates rather
+than against the full arbitrary candidate interval, but that continuation/local
+reverse-encoding theorem is still open. The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient
 coordinate coe equality on the Picard interval and Riemannian metric locus,

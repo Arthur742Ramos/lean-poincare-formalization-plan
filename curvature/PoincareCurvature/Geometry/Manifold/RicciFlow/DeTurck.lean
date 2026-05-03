@@ -910,6 +910,35 @@ structure IntrinsicDeTurckLocalSolution
   matchesInitialMetric :
     IntrinsicDeTurckMatchesInitialMetric (I := I) (M := M) toIntrinsicDeTurckSolution ivp
 
+/-- Restrict an intrinsic Ricci-DeTurck local solution to any shorter forward terminal time. -/
+def IntrinsicDeTurckLocalSolution.restrictTerminal
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp where
+  terminalTime := T
+  initial_lt_terminal := hT₀
+  toIntrinsicDeTurckSolution := sol.toIntrinsicDeTurckSolution
+  interval_subset := by
+    intro t ht
+    exact sol.interval_subset ⟨ht.1, le_trans ht.2 hT⟩
+  matchesInitialMetric := sol.matchesInitialMetric
+
+@[simp] theorem IntrinsicDeTurckLocalSolution.restrictTerminal_terminalTime
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).terminalTime = T :=
+  rfl
+
+@[simp] theorem IntrinsicDeTurckLocalSolution.restrictTerminal_toIntrinsicDeTurckSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).toIntrinsicDeTurckSolution =
+      sol.toIntrinsicDeTurckSolution :=
+  rfl
+
 lemma intrinsicDeTurckLocalSolution_initialTime_mem
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :
@@ -942,6 +971,17 @@ def IntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution
     simpa [IntrinsicDeTurckMatchesInitialMetric, IntrinsicMatchesInitialMetric,
       MatchesInitialMetric, IntrinsicDeTurckSolution.toIntrinsicSolution, IntrinsicSolution.toSolution]
       using sol.matchesInitialMetric
+
+@[simp] theorem IntrinsicDeTurckLocalSolution.restrictTerminal_toIntrinsicLocalSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      sol.toIntrinsicDeTurckSolution.metric sol.toIntrinsicDeTurckSolution.background)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).toIntrinsicLocalSolution hbackground =
+      (sol.toIntrinsicLocalSolution hbackground).restrictTerminal hT₀ hT :=
+  rfl
 
 /-- On zero-dimensional tangent fibers, an intrinsic Ricci-DeTurck local solution canonically
 determines an intrinsic Ricci-flow local solution for any background connection family. -/
@@ -1541,6 +1581,29 @@ abbrev ChosenIntrinsicDeTurckLocalSolution
     (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :=
   {sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp //
     UsesChosenBackground (I := I) (M := M) sol}
+
+/-- Restrict a chosen-background Ricci-DeTurck local solution to a shorter terminal time. -/
+def ChosenIntrinsicDeTurckLocalSolution.restrictTerminal
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.1.terminalTime) :
+    ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp :=
+  ⟨sol.1.restrictTerminal hT₀ hT, by
+    simpa [IntrinsicDeTurckLocalSolution.restrictTerminal, UsesChosenBackground] using sol.2⟩
+
+@[simp] theorem ChosenIntrinsicDeTurckLocalSolution.restrictTerminal_val
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.1.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).1 = sol.1.restrictTerminal hT₀ hT :=
+  rfl
+
+@[simp] theorem ChosenIntrinsicDeTurckLocalSolution.restrictTerminal_terminalTime
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.1.terminalTime) :
+    (sol.restrictTerminal hT₀ hT).1.terminalTime = T :=
+  rfl
 
 /-- The compact-manifold point-4 theorem package stated with the chosen smooth Levi-Civita family as
 the DeTurck background. -/

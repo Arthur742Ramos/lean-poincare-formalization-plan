@@ -215,7 +215,7 @@ packages the canonical stationary local solution attached to
    `PoincareCurvature.RicciFlowLocalExistence` aggregate now
   imports this gauge-reduction boundary plus the `AnalyticPDE` evolution layer proving the reusable
   Picard-Lindelof Banach-evolution local-solution core, open-state
-  state-preserving uniqueness, shorter-terminal restriction constructors and
+  state-preserving uniqueness, Banach/geometric shorter-terminal restriction constructors and
   interval equation/continuity/state-membership/uniqueness readouts, a
   positive-definite finite-cover metric-locus bridge, an abstract continuous-linear
   symmetry/fixed-locus preservation theorem for later slot-swap symmetry, and a direct continuous-linear
@@ -310,7 +310,11 @@ packages the canonical stationary local solution attached to
   positive-radius metric-cone shrink handoff from ambient interval closure data
   to genuine symmetric-carrier closure data and the chosen-background,
   intrinsic, and ordinary theorem-package witnesses, while still requiring the
-  reverse-encoding terminal-fit compatibility for the selected shrink.
+  reverse-encoding terminal-fit compatibility for the selected shrink; the
+  local Ricci-flow, intrinsic Ricci-flow, intrinsic Ricci-DeTurck, and
+  chosen-background DeTurck candidate types now also have proof-bearing
+  shorter-terminal restriction constructors, which is the prefix layer needed
+  before replacing terminal-fit assumptions by localized candidate encodings.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
