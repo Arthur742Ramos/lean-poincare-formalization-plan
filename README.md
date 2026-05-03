@@ -404,8 +404,9 @@ packages the canonical stationary local solution attached to
   Schauder estimates or the Ricci-DeTurck Banach chart. A separate
   `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now builds on those
   primitives to package entrywise quantitative vector/matrix controls, including
-  time-only finite vector and matrix coefficient families from ordinary time
-  Hölder/Lipschitz estimates and explicit unit-parabolic-diameter
+  spatial-only and time-only finite vector and matrix coefficient families from
+  ordinary Holder/Lipschitz estimates, explicit unit-parabolic-diameter spatial
+  Lipschitz lifts for every `0 ≤ α ≤ 1`, and explicit unit-parabolic-diameter
   time-Lipschitz lifts for every `0 ≤ α ≤ 2`, and to prove explicit bounded
   `C^{0,α}`
   determinant, adjugate-entry,

@@ -665,6 +665,198 @@ theorem matrix_of_entries_with {m n A : Type*} [Fintype m] [Fintype n]
     · intro j
       exact hM i j
 
+/-- Entrywise spatial boundedness and Holder control package as a vector-valued parabolic
+`C^{0,α}` estimate for the time-independent lift. -/
+theorem vector_of_snd_holder_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {B H : n → ℝ} {v : X → n → A}
+    (hB_nonneg : ∀ i, 0 ≤ B i) (hH_nonneg : ∀ i, 0 ≤ H i) (hα : 0 ≤ α)
+    (hB : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ‖v x i‖ ≤ B i)
+    (hholder : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ∀ ⦃y : X⦄,
+      y ∈ Prod.snd '' s → ‖v x i - v y i‖ ≤ H i * dist x y ^ α) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, H i) α
+      (fun z : ℝ × X => v z.2) s := by
+  refine vector_of_entries_with hB_nonneg hH_nonneg ?_
+  intro i
+  exact ParabolicC0AlphaWith.of_snd_holder (s := s) (B := B i) (H := H i)
+    (α := α) (f := fun x => v x i) (hB i) (hH_nonneg i) hα (hholder i)
+
+/-- Entrywise spatial boundedness and Lipschitz control package as a vector-valued
+parabolic `C^{0,1}` estimate for the time-independent lift. -/
+theorem vector_of_snd_lipschitzOnWith_with {n A : Type*} [Fintype n]
+    [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0} {v : X → n → A}
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ‖v x i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun x => v x i) (Prod.snd '' s)) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, (K i : ℝ)) 1
+      (fun z : ℝ × X => v z.2) s := by
+  refine vector_of_entries_with hB_nonneg (fun i => NNReal.coe_nonneg (K i)) ?_
+  intro i
+  exact ParabolicC0AlphaWith.of_snd_lipschitzOnWith (s := s) (B := B i) (K := K i)
+    (f := fun x => v x i) (hB i) (hL i)
+
+/-- On a unit parabolic-diameter domain, entrywise spatial Lipschitz control packages a
+finite vector-valued coefficient family as an explicit parabolic `C^{0,α}` estimate for
+every `0 ≤ α ≤ 1`. -/
+theorem vector_of_snd_lipschitzOnWith_with_of_parabolicDistance_le_one {n A : Type*}
+    [Fintype n] [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0}
+    {v : X → n → A}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ‖v x i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun x => v x i) (Prod.snd '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, B i) (∑ i, (K i : ℝ)) α
+      (fun z : ℝ × X => v z.2) s :=
+  (vector_of_snd_lipschitzOnWith_with hB_nonneg hB hL).mono_exponent_of_parabolicDistance_le_one
+    (Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i))
+    hα_nonneg hα_le_one hdiam
+
+/-- Entrywise spatial boundedness and Holder control package as a matrix-valued parabolic
+`C^{0,α}` estimate for the time-independent lift. -/
+theorem matrix_of_snd_holder_with {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B H : m → n → ℝ} {M : X → Matrix m n A}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j) (hH_nonneg : ∀ i j, 0 ≤ H i j)
+    (hα : 0 ≤ α)
+    (hB : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ‖M x i j‖ ≤ B i j)
+    (hholder : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ∀ ⦃y : X⦄,
+      y ∈ Prod.snd '' s → ‖M x i j - M y i j‖ ≤ H i j * dist x y ^ α) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, H i j) α
+      (fun z : ℝ × X => M z.2) s := by
+  refine matrix_of_entries_with hB_nonneg hH_nonneg ?_
+  intro i j
+  exact ParabolicC0AlphaWith.of_snd_holder (s := s) (B := B i j) (H := H i j)
+    (α := α) (f := fun x => M x i j) (hB i j) (hH_nonneg i j) hα
+    (hholder i j)
+
+/-- Entrywise spatial boundedness and Lipschitz control package as a matrix-valued
+parabolic `C^{0,1}` estimate for the time-independent lift. -/
+theorem matrix_of_snd_lipschitzOnWith_with {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : X → Matrix m n A}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ‖M x i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun x => M x i j) (Prod.snd '' s)) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, (K i j : ℝ)) 1
+      (fun z : ℝ × X => M z.2) s := by
+  refine matrix_of_entries_with hB_nonneg (fun i j => NNReal.coe_nonneg (K i j)) ?_
+  intro i j
+  exact ParabolicC0AlphaWith.of_snd_lipschitzOnWith (s := s) (B := B i j) (K := K i j)
+    (f := fun x => M x i j) (hB i j) (hL i j)
+
+/-- On a unit parabolic-diameter domain, entrywise spatial Lipschitz control packages a
+finite matrix-valued coefficient family as an explicit parabolic `C^{0,α}` estimate for
+every `0 ≤ α ≤ 1`. -/
+theorem matrix_of_snd_lipschitzOnWith_with_of_parabolicDistance_le_one {m n A : Type*}
+    [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : X → Matrix m n A}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ‖M x i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun x => M x i j) (Prod.snd '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaWith (∑ i, ∑ j, B i j) (∑ i, ∑ j, (K i j : ℝ)) α
+      (fun z : ℝ × X => M z.2) s :=
+  (matrix_of_snd_lipschitzOnWith_with hB_nonneg hB hL).mono_exponent_of_parabolicDistance_le_one
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j))
+    hα_nonneg hα_le_one hdiam
+
+/-- Entrywise spatial boundedness and Holder control package as existential vector-valued
+parabolic `C^{0,α}` control for the time-independent lift. -/
+theorem vector_of_snd_holder {n A : Type*} [Fintype n] [NormedAddCommGroup A]
+    {B H : n → ℝ} {v : X → n → A}
+    (hB_nonneg : ∀ i, 0 ≤ B i) (hH_nonneg : ∀ i, 0 ≤ H i) (hα : 0 ≤ α)
+    (hB : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ‖v x i‖ ≤ B i)
+    (hholder : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ∀ ⦃y : X⦄,
+      y ∈ Prod.snd '' s → ‖v x i - v y i‖ ≤ H i * dist x y ^ α) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => v z.2) s :=
+  ⟨∑ i, B i, Finset.sum_nonneg fun i _hi => hB_nonneg i,
+    ∑ i, H i, Finset.sum_nonneg fun i _hi => hH_nonneg i,
+    vector_of_snd_holder_with hB_nonneg hH_nonneg hα hB hholder⟩
+
+/-- Entrywise spatial boundedness and Lipschitz control package as existential vector-valued
+parabolic `C^{0,1}` control for the time-independent lift. -/
+theorem vector_of_snd_lipschitzOnWith {n A : Type*} [Fintype n]
+    [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0} {v : X → n → A}
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ‖v x i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun x => v x i) (Prod.snd '' s)) :
+    ParabolicC0AlphaOn 1 (fun z : ℝ × X => v z.2) s :=
+  ⟨∑ i, B i, Finset.sum_nonneg fun i _hi => hB_nonneg i,
+    ∑ i, (K i : ℝ), Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i),
+    vector_of_snd_lipschitzOnWith_with hB_nonneg hB hL⟩
+
+/-- On a unit parabolic-diameter domain, entrywise spatial Lipschitz control packages a
+finite vector-valued coefficient family as parabolic `C^{0,α}` for every `0 ≤ α ≤ 1`. -/
+theorem vector_of_snd_lipschitzOnWith_of_parabolicDistance_le_one {n A : Type*}
+    [Fintype n] [NormedAddCommGroup A] {B : n → ℝ} {K : n → ℝ≥0}
+    {v : X → n → A}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB_nonneg : ∀ i, 0 ≤ B i)
+    (hB : ∀ i ⦃x : X⦄, x ∈ Prod.snd '' s → ‖v x i‖ ≤ B i)
+    (hL : ∀ i, LipschitzOnWith (K i) (fun x => v x i) (Prod.snd '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => v z.2) s :=
+  ⟨∑ i, B i, Finset.sum_nonneg fun i _hi => hB_nonneg i,
+    ∑ i, (K i : ℝ), Finset.sum_nonneg fun i _hi => NNReal.coe_nonneg (K i),
+    vector_of_snd_lipschitzOnWith_with_of_parabolicDistance_le_one
+      hα_nonneg hα_le_one hB_nonneg hB hL hdiam⟩
+
+/-- Entrywise spatial boundedness and Holder control package as existential matrix-valued
+parabolic `C^{0,α}` control for the time-independent lift. -/
+theorem matrix_of_snd_holder {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B H : m → n → ℝ} {M : X → Matrix m n A}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j) (hH_nonneg : ∀ i j, 0 ≤ H i j)
+    (hα : 0 ≤ α)
+    (hB : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ‖M x i j‖ ≤ B i j)
+    (hholder : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ∀ ⦃y : X⦄,
+      y ∈ Prod.snd '' s → ‖M x i j - M y i j‖ ≤ H i j * dist x y ^ α) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => M z.2) s :=
+  ⟨∑ i, ∑ j, B i j, Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => hB_nonneg i j,
+    ∑ i, ∑ j, H i j, Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => hH_nonneg i j,
+    matrix_of_snd_holder_with hB_nonneg hH_nonneg hα hB hholder⟩
+
+/-- Entrywise spatial boundedness and Lipschitz control package as existential matrix-valued
+parabolic `C^{0,1}` control for the time-independent lift. -/
+theorem matrix_of_snd_lipschitzOnWith {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : X → Matrix m n A}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ‖M x i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun x => M x i j) (Prod.snd '' s)) :
+    ParabolicC0AlphaOn 1 (fun z : ℝ × X => M z.2) s :=
+  ⟨∑ i, ∑ j, B i j, Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => hB_nonneg i j,
+    ∑ i, ∑ j, (K i j : ℝ), Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j),
+    matrix_of_snd_lipschitzOnWith_with hB_nonneg hB hL⟩
+
+/-- On a unit parabolic-diameter domain, entrywise spatial Lipschitz control packages a
+finite matrix-valued coefficient family as parabolic `C^{0,α}` for every `0 ≤ α ≤ 1`. -/
+theorem matrix_of_snd_lipschitzOnWith_of_parabolicDistance_le_one {m n A : Type*}
+    [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {B : m → n → ℝ} {K : m → n → ℝ≥0}
+    {M : X → Matrix m n A}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB_nonneg : ∀ i j, 0 ≤ B i j)
+    (hB : ∀ i j ⦃x : X⦄, x ∈ Prod.snd '' s → ‖M x i j‖ ≤ B i j)
+    (hL : ∀ i j, LipschitzOnWith (K i j) (fun x => M x i j) (Prod.snd '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => M z.2) s :=
+  ⟨∑ i, ∑ j, B i j, Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => hB_nonneg i j,
+    ∑ i, ∑ j, (K i j : ℝ), Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj => NNReal.coe_nonneg (K i j),
+    matrix_of_snd_lipschitzOnWith_with_of_parabolicDistance_le_one
+      hα_nonneg hα_le_one hB_nonneg hB hL hdiam⟩
+
 /-- Entrywise time-only boundedness and Holder control package as a vector-valued parabolic
 `C^{0,α}` estimate.  The time Holder exponent is `α / 2`, matching parabolic scaling. -/
 theorem vector_of_fst_holder_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
