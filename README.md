@@ -460,7 +460,8 @@ packages the canonical stationary local solution attached to
   elementwise matrix norm, named adjugate-entry, inverse-entry, summed whole
   inverse-matrix, function-level determinant/inverse/matrix-product
   bounded-difference, existential determinant and reciprocal-determinant
-  difference `C^{0,α}` readouts, inverse-difference `C^{0,α}` control,
+  difference `C^{0,α}` readouts with a compact nonvanishing-det adapter,
+  inverse-difference `C^{0,α}` control,
   inverse-principal entry Lipschitz,
   bounded Holder entry/matrix estimates, inverse-principal contraction
   `C^{0,α}` difference control, and inverse-principal contraction

@@ -744,6 +744,25 @@ theorem matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact {n 𝕜 : Type*
   · intro z hz
     exact (min_le_right δM δN).trans (hdetN hz)
 
+/-- Compact-domain reciprocal determinant difference control: pointwise
+nonvanishing of both determinants supplies the common determinant lower bound. -/
+theorem matrix_det_inv_sub_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) K)
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ParabolicC0AlphaOn α (fun z => ((M z).det)⁻¹ - ((N z).det)⁻¹) K := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hM hN hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, matrix_det_inv_sub (M := M) (N := N)
+    hM hN hdiff hδpos hdetM hdetN⟩
+
 /-- On a compact time-space set, a finite family of finite matrices with parabolic `C^{0,α}`
 entries and nonvanishing determinants has a common positive determinant-norm lower bound. -/
 theorem matrix_det_family_exists_pos_norm_lower_bound_of_isCompact {ι n 𝕜 : Type*}

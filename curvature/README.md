@@ -1051,7 +1051,8 @@ estimates; compact nonvanishing determinant data now supplies the needed
 uniform determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
 also exposes existential determinant and reciprocal-determinant difference
-readouts from entrywise difference controls. It
+readouts from entrywise difference controls, with a compact nonvanishing-det
+adapter for reciprocal determinant differences. It
 also proves entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit bounded transpose/symmetrization estimates and corresponding
