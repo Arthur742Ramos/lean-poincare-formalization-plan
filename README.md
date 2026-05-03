@@ -493,8 +493,9 @@ packages the canonical stationary local solution attached to
   compact nonvanishing determinant data now supplying such lower bounds,
   including finite-index common determinant lower bounds for compact families,
   finite-family compact inverse estimates with the same shared determinant
-  constant and matching existential finite-family inverse and inverse-action
-  closures, and compact-domain inverse,
+  constant and matching existential finite-family inverse, inverse-action,
+  inverse-bilinear, inverse-principal, and inverse-Christoffel closures, and
+  compact-domain inverse,
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, including
   finite-family primitive schematic RHS estimates with the same shared
   determinant constant and matching existential finite-family schematic RHS
@@ -548,8 +549,9 @@ packages the canonical stationary local solution attached to
   finite-family local-frame Gram determinant lower-bound, inverse-estimate, and
   schematic RHS handoffs with spatial-Hölder, unit-diameter spatial-Lipschitz,
   closed-ball spatial-Lipschitz, and closed-cylinder spatial-Lipschitz
-  Gram-entry input forms, existential finite-family inverse-Gram and schematic
-  RHS handoffs from entrywise `ParabolicC0AlphaOn` controls sharing the same
+  Gram-entry input forms, existential finite-family inverse-Gram,
+  inverse-Gram action/bilinear, inverse-principal, inverse-Gram Christoffel, and
+  schematic RHS handoffs from entrywise `ParabolicC0AlphaOn` controls sharing the same
   compact determinant lower bound, and compact
   local-frame inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel arrays, and schematic RHS outputs, including existential

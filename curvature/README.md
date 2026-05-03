@@ -1056,8 +1056,9 @@ bounded finite matrices, using a determinant lower bound for inverse
 estimates; compact nonvanishing determinant data now supplies the needed
 uniform determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants, plus
-existential finite-family inverse, inverse-action, and primitive schematic RHS
-closures with one shared compact determinant lower bound. It
+existential finite-family inverse, inverse-action, inverse-bilinear,
+inverse-principal, inverse-Christoffel, and primitive schematic RHS closures
+with one shared compact determinant lower bound. It
 also exposes existential determinant and reciprocal-determinant difference
 readouts from entrywise difference controls, with a compact nonvanishing-det
 adapter for reciprocal determinant differences, plus existential inverse-entry,
@@ -1100,7 +1101,8 @@ parabolic inverse Gram-matrix control and inverse-Gram Christoffel/schematic
 Ricci-DeTurck closure, including spatial-Hölder entry-control variants and
 compact quantitative inverse Gram, inverse-principal contraction, inverse-Gram
 Christoffel, and schematic RHS bridges exposing the determinant lower-bound
-constant, existential finite-family inverse-Gram and schematic RHS bridges from
+constant, existential finite-family inverse-Gram, inverse-Gram action/bilinear,
+inverse-principal, inverse-Gram Christoffel, and schematic RHS bridges from
 entrywise `ParabolicC0AlphaOn` controls sharing the same compact determinant
 lower bound, plus compact local-frame inverse Gram, inverse-principal contraction,
 inverse-Gram Christoffel arrays, and schematic RHS outputs, including

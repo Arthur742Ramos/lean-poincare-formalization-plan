@@ -1439,7 +1439,8 @@ estimates, and a compactness bridge from
 nonvanishing determinants to uniform determinant lower bounds, including
 finite-index common determinant lower bounds for compact matrix families,
 finite-family compact inverse estimates using that shared determinant constant,
-matching existential finite-family inverse and inverse-action closures, and
+matching existential finite-family inverse, inverse-action, inverse-bilinear,
+inverse-principal, and inverse-Christoffel closures, and
 compact-domain inverse-entry, inverse-action, inverse-bilinear, and schematic
 matrix-valued RHS variants,
 including finite-family primitive schematic RHS estimates using the same shared
@@ -1500,7 +1501,8 @@ bridges exposing the determinant lower-bound constant, plus geometric
 finite-family local-frame Gram determinant lower-bound, inverse-estimate, and
 schematic RHS handoffs with spatial-Hölder, unit-diameter spatial-Lipschitz,
 closed-ball spatial-Lipschitz, and closed-cylinder spatial-Lipschitz
-Gram-entry input forms, existential finite-family inverse-Gram and schematic RHS
+Gram-entry input forms, existential finite-family inverse-Gram, inverse-Gram
+action/bilinear, inverse-principal, inverse-Gram Christoffel, and schematic RHS
 handoffs from entrywise `ParabolicC0AlphaOn` controls sharing the same compact
 determinant lower bound, and compact
 local-frame
