@@ -1596,6 +1596,200 @@ theorem christoffel_quadratic_ricci {n A : Type*} [Fintype n] [NormedRing A]
             Matrix n n A)) s :=
   matrix_of_entries fun i j => christoffel_quadratic_ricci_entry hΓ i j
 
+/-- Ricci-coordinate quadratic Christoffel contractions are pointwise Lipschitz on bounded
+Christoffel arrays. -/
+theorem christoffel_quadratic_ricci_entry_norm_sub_le {n A : Type*} [Fintype n]
+    [NormedRing A] {BΓ : n → n → n → ℝ} (Γ Λ : n → n → n → A)
+    (hΓ : ∀ a b c, ‖Γ a b c‖ ≤ BΓ a b c)
+    (hΛ : ∀ a b c, ‖Λ a b c‖ ≤ BΓ a b c) (i j : n) :
+    ‖((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+        (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) -
+      ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+        (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))‖ ≤
+      (∑ a : n, ∑ b : n,
+        (BΓ a i j * ‖Γ b a b - Λ b a b‖ +
+          BΓ b a b * ‖Γ a i j - Λ a i j‖)) +
+      (∑ a : n, ∑ b : n,
+        (BΓ a i b * ‖Γ b a j - Λ b a j‖ +
+          BΓ b a j * ‖Γ a i b - Λ a i b‖)) := by
+  classical
+  let leftΓ : A := ∑ a : n, ∑ b : n, Γ a i j * Γ b a b
+  let leftΛ : A := ∑ a : n, ∑ b : n, Λ a i j * Λ b a b
+  let rightΓ : A := ∑ a : n, ∑ b : n, Γ a i b * Γ b a j
+  let rightΛ : A := ∑ a : n, ∑ b : n, Λ a i b * Λ b a j
+  let leftBound : ℝ := ∑ a : n, ∑ b : n,
+    (BΓ a i j * ‖Γ b a b - Λ b a b‖ + BΓ b a b * ‖Γ a i j - Λ a i j‖)
+  let rightBound : ℝ := ∑ a : n, ∑ b : n,
+    (BΓ a i b * ‖Γ b a j - Λ b a j‖ + BΓ b a j * ‖Γ a i b - Λ a i b‖)
+  have hleftInner : ∀ a : n,
+      ‖(∑ b : n, Γ a i j * Γ b a b) - ∑ b : n, Λ a i j * Λ b a b‖ ≤
+        ∑ b : n,
+          (BΓ a i j * ‖Γ b a b - Λ b a b‖ +
+            BΓ b a b * ‖Γ a i j - Λ a i j‖) := by
+    intro a
+    simpa using
+      (norm_finset_sum_mul_sub_sum_mul_le
+        (S := (Finset.univ : Finset n))
+        (B := fun _b => BΓ a i j)
+        (D := fun b => BΓ b a b)
+        (a := fun _b => Γ a i j)
+        (b := fun b => Γ b a b)
+        (c := fun _b => Λ a i j)
+        (d := fun b => Λ b a b)
+        (fun _b _hb => hΓ a i j)
+        (fun b _hb => hΛ b a b))
+  have hleft : ‖leftΓ - leftΛ‖ ≤ leftBound := by
+    calc
+      ‖leftΓ - leftΛ‖ =
+          ‖(∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            ∑ a : n, ∑ b : n, Λ a i j * Λ b a b‖ := by
+        rfl
+      _ = ‖∑ a : n,
+          ((∑ b : n, Γ a i j * Γ b a b) -
+            ∑ b : n, Λ a i j * Λ b a b)‖ := by
+        rw [Finset.sum_sub_distrib]
+      _ ≤ ∑ a : n,
+          ‖(∑ b : n, Γ a i j * Γ b a b) -
+            ∑ b : n, Λ a i j * Λ b a b‖ :=
+        norm_sum_le _ _
+      _ ≤ ∑ a : n, ∑ b : n,
+          (BΓ a i j * ‖Γ b a b - Λ b a b‖ +
+            BΓ b a b * ‖Γ a i j - Λ a i j‖) :=
+        Finset.sum_le_sum fun a _ha => hleftInner a
+      _ = leftBound := by
+        rfl
+  have hrightInner : ∀ a : n,
+      ‖(∑ b : n, Γ a i b * Γ b a j) - ∑ b : n, Λ a i b * Λ b a j‖ ≤
+        ∑ b : n,
+          (BΓ a i b * ‖Γ b a j - Λ b a j‖ +
+            BΓ b a j * ‖Γ a i b - Λ a i b‖) := by
+    intro a
+    simpa using
+      (norm_finset_sum_mul_sub_sum_mul_le
+        (S := (Finset.univ : Finset n))
+        (B := fun b => BΓ a i b)
+        (D := fun b => BΓ b a j)
+        (a := fun b => Γ a i b)
+        (b := fun b => Γ b a j)
+        (c := fun b => Λ a i b)
+        (d := fun b => Λ b a j)
+        (fun b _hb => hΓ a i b)
+        (fun b _hb => hΛ b a j))
+  have hright : ‖rightΓ - rightΛ‖ ≤ rightBound := by
+    calc
+      ‖rightΓ - rightΛ‖ =
+          ‖(∑ a : n, ∑ b : n, Γ a i b * Γ b a j) -
+            ∑ a : n, ∑ b : n, Λ a i b * Λ b a j‖ := by
+        rfl
+      _ = ‖∑ a : n,
+          ((∑ b : n, Γ a i b * Γ b a j) -
+            ∑ b : n, Λ a i b * Λ b a j)‖ := by
+        rw [Finset.sum_sub_distrib]
+      _ ≤ ∑ a : n,
+          ‖(∑ b : n, Γ a i b * Γ b a j) -
+            ∑ b : n, Λ a i b * Λ b a j‖ :=
+        norm_sum_le _ _
+      _ ≤ ∑ a : n, ∑ b : n,
+          (BΓ a i b * ‖Γ b a j - Λ b a j‖ +
+            BΓ b a j * ‖Γ a i b - Λ a i b‖) :=
+        Finset.sum_le_sum fun a _ha => hrightInner a
+      _ = rightBound := by
+        rfl
+  have hsplit :
+      (leftΓ - rightΓ) - (leftΛ - rightΛ) = (leftΓ - leftΛ) - (rightΓ - rightΛ) := by
+    abel
+  calc
+    ‖((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+        (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) -
+      ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+        (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))‖ =
+        ‖(leftΓ - rightΓ) - (leftΛ - rightΛ)‖ := by
+      rfl
+    _ = ‖(leftΓ - leftΛ) - (rightΓ - rightΛ)‖ := by
+      rw [hsplit]
+    _ ≤ ‖leftΓ - leftΛ‖ + ‖rightΓ - rightΛ‖ :=
+      norm_sub_le _ _
+    _ ≤ leftBound + rightBound :=
+      add_le_add hleft hright
+    _ =
+      (∑ a : n, ∑ b : n,
+        (BΓ a i j * ‖Γ b a b - Λ b a b‖ +
+          BΓ b a b * ‖Γ a i j - Λ a i j‖)) +
+      (∑ a : n, ∑ b : n,
+        (BΓ a i b * ‖Γ b a j - Λ b a j‖ +
+          BΓ b a j * ‖Γ a i b - Λ a i b‖)) := by
+      simp [leftBound, rightBound]
+
+/-- The full finite Ricci-coordinate quadratic Christoffel contraction is pointwise Lipschitz in
+the elementwise matrix norm on bounded Christoffel arrays. -/
+theorem christoffel_quadratic_ricci_norm_sub_le {n A : Type*} [Fintype n] [NormedRing A]
+    {BΓ : n → n → n → ℝ} (Γ Λ : n → n → n → A)
+    (hΓ : ∀ a b c, ‖Γ a b c‖ ≤ BΓ a b c)
+    (hΛ : ∀ a b c, ‖Λ a b c‖ ≤ BΓ a b c) :
+    ‖((fun i j =>
+        (∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+          (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) : Matrix n n A) -
+      ((fun i j =>
+        (∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+          (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)) : Matrix n n A)‖ ≤
+      ∑ i : n, ∑ j : n,
+        ((∑ a : n, ∑ b : n,
+          (BΓ a i j * ‖Γ b a b - Λ b a b‖ +
+            BΓ b a b * ‖Γ a i j - Λ a i j‖)) +
+        (∑ a : n, ∑ b : n,
+          (BΓ a i b * ‖Γ b a j - Λ b a j‖ +
+            BΓ b a j * ‖Γ a i b - Λ a i b‖))) := by
+  classical
+  let entryBound : n → n → ℝ := fun i j =>
+    (∑ a : n, ∑ b : n,
+      (BΓ a i j * ‖Γ b a b - Λ b a b‖ +
+        BΓ b a b * ‖Γ a i j - Λ a i j‖)) +
+    (∑ a : n, ∑ b : n,
+      (BΓ a i b * ‖Γ b a j - Λ b a j‖ +
+        BΓ b a j * ‖Γ a i b - Λ a i b‖))
+  have hentry : ∀ i j,
+      ‖((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+          (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) -
+        ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+          (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))‖ ≤ entryBound i j := by
+    intro i j
+    simpa [entryBound] using christoffel_quadratic_ricci_entry_norm_sub_le Γ Λ hΓ hΛ i j
+  have hentry_nonneg : ∀ i j, 0 ≤ entryBound i j := by
+    intro i j
+    exact (norm_nonneg _).trans (hentry i j)
+  have hrow_nonneg : ∀ i, 0 ≤ ∑ j : n, entryBound i j := by
+    intro i
+    exact Finset.sum_nonneg fun j _hj => hentry_nonneg i j
+  have htotal_nonneg : 0 ≤ ∑ i : n, ∑ j : n, entryBound i j :=
+    Finset.sum_nonneg fun i _hi => hrow_nonneg i
+  have hnorm :
+      ‖((fun i j =>
+          (∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) : Matrix n n A) -
+        ((fun i j =>
+          (∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+            (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)) : Matrix n n A)‖ ≤
+        ∑ i : n, ∑ j : n, entryBound i j := by
+    refine (Matrix.norm_le_iff htotal_nonneg).2 ?_
+    intro i j
+    calc
+      ‖(((fun i j =>
+          (∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) : Matrix n n A) -
+        ((fun i j =>
+          (∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+            (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)) : Matrix n n A)) i j‖ =
+          ‖((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+              (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) -
+            ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+              (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))‖ := rfl
+      _ ≤ entryBound i j := hentry i j
+      _ ≤ ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hentry_nonneg i k) (Finset.mem_univ j)
+      _ ≤ ∑ i : n, ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
+  simpa [entryBound] using hnorm
+
 /-- Schematic local Ricci-DeTurck coordinate right-hand sides preserve parabolic `C^{0,α}`
 control from entrywise control of metric coefficients, first derivative coefficients, and second
 derivative coefficients, assuming the metric determinant is bounded away from zero.  The formula

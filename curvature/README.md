@@ -1019,8 +1019,8 @@ estimates together with a whole inverse-matrix estimate, and that finite matrix
 determinants, adjugate entries, and inverse entries under a determinant lower
 bound preserve parabolic `C^{0,α}` control from entrywise control. It also has
 pointwise determinant, adjugate-entry, inverse-entry, whole inverse-matrix,
-matrix-product, and inverse-principal and inverse-Christoffel contraction Lipschitz
-estimates on entrywise bounded finite matrices, using a determinant lower bound for inverse
+matrix-product, and inverse-principal, inverse-Christoffel, and quadratic-Christoffel
+contraction Lipschitz estimates on entrywise bounded finite matrices, using a determinant lower bound for inverse
 estimates; compact nonvanishing determinant data now supplies the needed
 uniform determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
