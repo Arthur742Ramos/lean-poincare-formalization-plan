@@ -1607,12 +1607,12 @@ the same smooth realization and reverse encoding. The
 density-based interval-carrier solution now transports back to the chart's
 built-in restricted carrier whenever its terminal time stays within the Picard
 interval, giving a solution-level bridge rather than only pointwise vector-field
-equalities. The preferred-cover local-bounds route now also performs that
-transport internally, returning a chart-carrier `BanachEvolutionLocalSolutionIn`
-witness directly from the smooth-density Picard shrink, plus a proof-level
-`Nonempty` readout for callers that only need existence and a stronger
-proof-level selected witness that retains terminal-time control and
-common-interval uniqueness. At the vector-bundle
+equalities. The preferred-cover local-bounds and continuous-Riemannian-bundle
+routes now also perform that transport internally, returning chart-carrier
+`BanachEvolutionLocalSolutionIn` witnesses directly from the smooth-density
+Picard shrink; together with the initial-metric specialization, these routes
+all expose both proof-level existence readouts and stronger selected witnesses
+retaining terminal-time control and common-interval uniqueness. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives

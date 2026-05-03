@@ -814,12 +814,12 @@ now packages the matching intrinsic boundary
       solution with terminal/uniqueness proofs and a nonempty
       realization/encoding fiber. Density-based interval-carrier
       solutions now also transport back to the chart's built-in restricted carrier
-      under the terminal-time bound, and the preferred-cover local-bounds route
-      now returns that chart-carrier `BanachEvolutionLocalSolutionIn` witness
-      directly from the smooth-density Picard shrink, with a proof-level
-      `Nonempty` readout for callers that only need existence and a stronger
-      proof-level selected witness that retains terminal-time control and
-      common-interval uniqueness. The vector-bundle
+      under the terminal-time bound, and the preferred-cover local-bounds and
+      continuous-Riemannian-bundle routes now return chart-carrier
+      `BanachEvolutionLocalSolutionIn` witnesses directly from the smooth-density
+      Picard shrink; together with the initial-metric specialization, they expose
+      both proof-level existence readouts and stronger selected witnesses that
+      retain terminal-time control and common-interval uniqueness. The vector-bundle
       smooth-approximation layer now also discharges the local coordinate-map
       boundedness hypothesis for continuous Riemannian vector bundles, deriving
       preferred-bilinear smooth approximants and the finite-cover Banach-norm
