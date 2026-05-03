@@ -1032,7 +1032,8 @@ estimates, supplied-Christoffel schematic bounded Holder entry/matrix estimates,
 primitive-input schematic bounded Holder entry/matrix estimates, plus
 supplied-Christoffel and primitive-input schematic RHS entry and whole-matrix
 Lipschitz constants and a named function-level bounded-difference package for
-the primitive schematic matrix RHS, on entrywise
+the primitive schematic matrix RHS, with a compact-domain variant selecting a
+common determinant lower bound, on entrywise
 bounded finite matrices, using a determinant lower bound for inverse
 estimates; compact nonvanishing determinant data now supplies the needed
 uniform determinant lower bound, including compact-domain inverse-entry,

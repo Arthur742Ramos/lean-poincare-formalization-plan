@@ -383,6 +383,31 @@ theorem matrix_det_exists_pos_norm_lower_bound_of_isCompact {n 𝕜 : Type*} [Fi
   exists_pos_norm_lower_bound_of_isCompact_of_continuousOn_ne_zero hK
     ((matrix_det (M := M) hM).continuousOn hα) hdet_ne
 
+/-- On a compact time-space set, two finite matrices with parabolic `C^{0,α}` entries and
+nonvanishing determinants have a common positive determinant-norm lower bound. -/
+theorem matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M z).det‖) ∧
+      (∀ ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N z).det‖) := by
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdetM_ne with
+    ⟨δM, hδM, hdetM⟩
+  rcases matrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := N) hK hα hN hdetN_ne with
+    ⟨δN, hδN, hdetN⟩
+  refine ⟨min δM δN, lt_min hδM hδN, ?_, ?_⟩
+  · intro z hz
+    exact (min_le_left δM δN).trans (hdetM hz)
+  · intro z hz
+    exact (min_le_right δM δN).trans (hdetN hz)
+
 /-- Entrywise parabolic `C^{0,α}` control packages a finite vector-valued coefficient family. -/
 theorem vector_of_entries {n A : Type*} [Fintype n] [NormedAddCommGroup A]
     {v : ℝ × X → n → A}
@@ -4559,6 +4584,48 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const {n 𝕜 : Type*} [Finty
         (matrixInvTwoIndexContractMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hHB i j)))
     (mul_le_mul_of_nonneg_left harray_mono
       (christoffelQuadraticRicciEntryLipschitzConst_nonneg hΓB i j))
+
+/-- Compact-domain version of `ricciDeTurckSchematicMatrix_bounded_sub_le_const`: pointwise
+nonvanishing of both metric determinants supplies one common determinant lower bound. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_isCompact_det_ne_zero
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)} {C : n → n → ℝ} {DB : n → n → n → ℝ}
+    {HB : n → n → n → n → ℝ} {ηM ηD : ℝ} {ηH : n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) Kdom)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) Kdom)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (N z).det ≠ 0)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hD : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖D z a b c‖ ≤ DB a b c)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hKc : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b i j, ‖Kc z a b i j‖ ≤ HB a b i j)
+    (hηD : 0 ≤ ηD)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ‖M z - N z‖ ≤ ηM)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ i j,
+      ‖((fun a b => Hc z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => Kc z a b i j) : Matrix n n 𝕜)‖ ≤ ηH i j) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB ηM ηD ηH)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) Kdom := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := Kdom) (M := M) (N := N) hKdom hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, ?_⟩
+  exact ricciDeTurckSchematicMatrix_bounded_sub_le_const
+    (s := Kdom) (δ := δ) (C := C) (DB := DB) (HB := HB)
+    (ηM := ηM) (ηD := ηD) (ηH := ηH)
+    hDB hHB hM hN hD hE hKc hηD hMdiff hDdiff hHdiff hδpos hdetM hdetN
 
 /-- Schematic local Ricci-DeTurck coordinate right-hand sides preserve parabolic `C^{0,α}`
 control from entrywise control of metric coefficients, first derivative coefficients, and second
