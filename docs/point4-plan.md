@@ -1196,7 +1196,9 @@ candidates, so local uniqueness no longer needs a hypothesis that the full
 candidate intervals fit inside the selected shrink.  The wrapper
 `RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier`
 chooses the shorter terminal automatically and states the result on
-`[t₀, min (min T₁ T₂) T']`.
+`[t₀, min (min T₁ T₂) T']`.  `SmoothRealizationMetricCone.lean` now exposes
+the same clipped uniqueness readout after selecting the standard positive-radius
+metric-cone shrink, still without a full-candidate terminal-fit hypothesis.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
