@@ -374,7 +374,8 @@ packages the canonical stationary local solution attached to
   under determinant lower bounds, pointwise determinant Lipschitz control in the
   elementwise matrix norm, named adjugate-entry, inverse-entry, summed whole
   inverse-matrix, matrix-product, inverse-principal entry,
-  inverse-Christoffel derivative/metric-side and array-level, and
+  inverse-Christoffel derivative/metric-side and array-level Lipschitz constants,
+  inverse-Christoffel bounded Holder entry/array estimates, and
   quadratic-Christoffel matrix-norm Lipschitz constants, plus supplied-Christoffel
   and primitive-input schematic RHS entry and whole-matrix constants, on entrywise
   bounded finite matrices with a determinant lower bound where needed, with
@@ -385,8 +386,9 @@ packages the canonical stationary local solution attached to
   symmetrization, matrix-product, matrix-vector/vector-matrix, and
   inverse-matrix vector-product closure, whole finite vector/matrix and
   inverse-matrix packages, finite vector dot products, and bilinear contractions
-  through matrices or inverse matrices, including entrywise and whole-array
-  Christoffel-symbol type inverse-metric contractions, whole matrix-valued
+  through matrices or inverse matrices, including explicit bounded Holder entry
+  and whole-array estimates for Christoffel-symbol type inverse-metric
+  contractions and their entrywise/whole-array closure, whole matrix-valued
   principal-part contractions `g^{ab} H_abij`, whole matrix-valued
   Ricci-coordinate quadratic Christoffel contractions, and a whole matrix-valued
   schematic local Ricci-DeTurck coordinate RHS combining those terms, from

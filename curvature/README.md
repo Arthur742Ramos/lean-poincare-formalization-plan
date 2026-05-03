@@ -1021,7 +1021,8 @@ bound preserve parabolic `C^{0,α}` control from entrywise control. It also has
 pointwise determinant Lipschitz control in the elementwise matrix norm, plus
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
 matrix-product, inverse-principal entry, inverse-Christoffel
-derivative/metric-side and array-level, and
+derivative/metric-side and array-level Lipschitz constants,
+inverse-Christoffel bounded Holder entry/array estimates, and
 quadratic-Christoffel matrix-norm Lipschitz constants, plus
 supplied-Christoffel and primitive-input schematic RHS entry and whole-matrix
 constants, on entrywise
@@ -1035,8 +1036,9 @@ matrix-vector and vector-matrix products, including inverse-matrix vector
 products on both sides under the same determinant lower bound, whole finite
 vector/matrix and inverse-matrix packages, finite vector dot products, and
 bilinear contractions through matrices or inverse matrices,
-including entrywise and whole-array Christoffel-symbol type inverse-metric
-contractions, whole matrix-valued principal-part contractions `g^{ab} H_abij`,
+including explicit bounded Holder entry and whole-array estimates for
+Christoffel-symbol type inverse-metric contractions and their entrywise/whole-array
+closure, whole matrix-valued principal-part contractions `g^{ab} H_abij`,
 whole matrix-valued Ricci-coordinate quadratic Christoffel contractions, and a
 whole matrix-valued schematic local Ricci-DeTurck coordinate RHS combining
 those terms, using the finite-product, integer-scalar, reciprocal, and division

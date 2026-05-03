@@ -1770,6 +1770,17 @@ def matrixInvChristoffelEntryBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableE
       matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
         (DB j k l + DB k j l + DB l j k)
 
+/-- Quantitative Holder constant for one inverse-Christoffel contraction entry. -/
+def matrixInvChristoffelEntryHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B H : n → n → ℝ) (DB DH : n → n → n → ℝ)
+    (i j k : n) : ℝ :=
+  ‖(2 : 𝕜)⁻¹‖ *
+    ∑ l : n,
+      (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i l *
+          (DH j k l + DH k j l + DH l j k) +
+        (DB j k l + DB k j l + DB l j k) *
+          matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i l)
+
 /-- Quantitative pointwise Lipschitz bound for one inverse-Christoffel contraction entry. -/
 def matrixInvChristoffelEntryLipschitzBound {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
     [NormedField 𝕜] (δ : ℝ) (C : n → n → ℝ) (DB : n → n → n → ℝ)
@@ -1818,6 +1829,30 @@ theorem matrixInvChristoffelEntryDerivDiffConst_nonneg {n 𝕜 : Type*} [Fintype
     (Finset.sum_nonneg fun l _hl =>
       mul_nonneg (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C i l)
         (by norm_num))
+
+theorem matrixInvChristoffelEntryBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) (C : n → n → ℝ)
+    {DB : n → n → n → ℝ} (hDB : ∀ a b c, 0 ≤ DB a b c) (i j k : n) :
+    0 ≤ matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ C DB i j k := by
+  exact mul_nonneg (norm_nonneg _)
+    (Finset.sum_nonneg fun l _hl =>
+      mul_nonneg (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C i l)
+        (add_nonneg (add_nonneg (hDB j k l) (hDB k j l)) (hDB l j k)))
+
+theorem matrixInvChristoffelEntryHolderConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B H : n → n → ℝ}
+    (hH : ∀ a b, 0 ≤ H a b) (hδpos : 0 < δ)
+    {DB DH : n → n → n → ℝ} (hDB : ∀ a b c, 0 ≤ DB a b c)
+    (hDH : ∀ a b c, 0 ≤ DH a b c) (i j k : n) :
+    0 ≤ matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ B H DB DH i j k := by
+  exact mul_nonneg (norm_nonneg _)
+    (Finset.sum_nonneg fun l _hl =>
+      add_nonneg
+        (mul_nonneg (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B i l)
+          (add_nonneg (add_nonneg (hDH j k l) (hDH k j l)) (hDH l j k)))
+        (mul_nonneg
+          (add_nonneg (add_nonneg (hDB j k l) (hDB k j l)) (hDB l j k))
+          (matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos i l)))
 
 /-- One inverse-Christoffel entry is Lipschitz in the metric matrix norm, while retaining the
 explicit derivative-array entry differences. -/
@@ -2147,6 +2182,131 @@ theorem matrix_inv_christoffel_entry_norm_sub_le_bound {n 𝕜 : Type*} [Fintype
       matrixInvChristoffelEntryLipschitzBound (𝕜 := 𝕜) δ C DB M N D E i j k := by
   simpa [matrixInvChristoffelEntryLipschitzBound] using
     matrix_inv_christoffel_entry_norm_sub_le M N D E hM hN hE hδpos hdetM hdetN i j k
+
+/-- One inverse-Christoffel entry has an explicit bounded parabolic `C^{0,α}` estimate from
+explicit metric-entry and derivative-array estimates. -/
+theorem matrix_inv_christoffel_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {B H : n → n → ℝ} {DB DH : n → n → n → ℝ} {δ : ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {D : ℝ × X → n → n → n → 𝕜}
+    (hH : ∀ a b, 0 ≤ H a b)
+    (hM : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => M z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i j k : n) :
+    ParabolicC0AlphaWith
+      (matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ B DB i j k)
+      (matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ B H DB DH i j k)
+      α
+      (fun z =>
+        (2 : 𝕜)⁻¹ *
+          ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+            (D z j k l + D z k j l - D z l j k)) s := by
+  classical
+  let term : n → ℝ × X → 𝕜 := fun l z =>
+    ((M z)⁻¹ : Matrix n n 𝕜) i l *
+      (D z j k l + D z k j l - D z l j k)
+  have hterm : ∀ l ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaWith
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i l *
+          (DB j k l + DB k j l + DB l j k))
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i l *
+            (DH j k l + DH k j l + DH l j k) +
+          (DB j k l + DB k j l + DB l j k) *
+            matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i l)
+        α (term l) s := by
+    intro l _hl
+    have hinv :
+        ParabolicC0AlphaWith
+          (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i l)
+          (matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i l)
+          α (fun z => ((M z)⁻¹ : Matrix n n 𝕜) i l) s :=
+      matrix_inv_entry_with (M := M) hH hM hδpos hdet i l
+    have hcombo :
+        ParabolicC0AlphaWith
+          (DB j k l + DB k j l + DB l j k)
+          (DH j k l + DH k j l + DH l j k)
+          α (fun z => D z j k l + D z k j l - D z l j k) s := by
+      have hsum := (hD j k l).add (hD k j l)
+      simpa [add_assoc] using hsum.sub (hD l j k)
+    simpa [term] using
+      hinv.mul hcombo (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B i l)
+  have hsum :
+      ParabolicC0AlphaWith
+        (∑ l : n,
+          matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i l *
+            (DB j k l + DB k j l + DB l j k))
+        (∑ l : n,
+          (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i l *
+              (DH j k l + DH k j l + DH l j k) +
+            (DB j k l + DB k j l + DB l j k) *
+              matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i l))
+        α (fun z => ∑ l : n, term l z) s := by
+    simpa using
+      (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (B := fun l => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i l *
+          (DB j k l + DB k j l + DB l j k))
+        (H := fun l =>
+          matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i l *
+              (DH j k l + DH k j l + DH l j k) +
+            (DB j k l + DB k j l + DB l j k) *
+              matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i l)
+        (u := term) hterm)
+  have hhalf :
+      ParabolicC0AlphaWith ‖(2 : 𝕜)⁻¹‖ 0 α (fun _ : ℝ × X => (2 : 𝕜)⁻¹) s :=
+    ParabolicC0AlphaWith.const (s := s) (α := α) (B := ‖(2 : 𝕜)⁻¹‖) (H := 0)
+      ((2 : 𝕜)⁻¹) le_rfl le_rfl
+  simpa [term, matrixInvChristoffelEntryBoundConst, matrixInvChristoffelEntryHolderConst] using
+    hhalf.mul hsum (norm_nonneg _)
+
+/-- The inverse-Christoffel array has an explicit bounded parabolic `C^{0,α}` estimate from
+explicit metric-entry and derivative-array estimates. -/
+theorem matrix_inv_christoffel_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {B H : n → n → ℝ} {DB DH : n → n → n → ℝ} {δ : ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {D : ℝ × X → n → n → n → 𝕜}
+    (hH : ∀ a b, 0 ≤ H a b)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hDH : ∀ a b c, 0 ≤ DH a b c)
+    (hM : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => M z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaWith
+      (∑ i : n, ∑ j : n, ∑ k : n,
+        matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ B DB i j k)
+      (∑ i : n, ∑ j : n, ∑ k : n,
+        matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ B H DB DH i j k)
+      α
+      (fun z i j k =>
+        (2 : 𝕜)⁻¹ *
+          ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+            (D z j k l + D z k j l - D z l j k)) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      Finset.sum_nonneg fun k _hk =>
+        matrixInvChristoffelEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B hDB i j k
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      Finset.sum_nonneg fun k _hk =>
+        matrixInvChristoffelEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos hDB hDH i j k
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact Finset.sum_nonneg fun k _hk =>
+        matrixInvChristoffelEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B hDB i j k
+    · intro j
+      exact Finset.sum_nonneg fun k _hk =>
+        matrixInvChristoffelEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos hDB hDH i j k
+    · intro j
+      refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+      · intro k
+        exact matrixInvChristoffelEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B hDB i j k
+      · intro k
+        exact matrixInvChristoffelEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos hDB hDH i j k
+      · intro k
+        exact matrix_inv_christoffel_entry_with (M := M) (D := D)
+          hH hM hD hδpos hdet i j k
 
 /-- Compact-domain Christoffel-symbol type array closure from entrywise control and pointwise
 nonvanishing determinant. -/
