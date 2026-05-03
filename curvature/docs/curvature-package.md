@@ -126,7 +126,8 @@ point-dependent- and existential-radius corollaries, finite-sum closure for
 explicit Holder, bounded, and `C^{0,α}` controls, finite-sum closure for
 existential Holder and `C^{0,α}` controls, finite-product closure for
 existential normed-comm-ring-valued `C^{0,α}` controls, finite `Pi` packaging
-across bounded, Holder, and `C^{0,α}` controls from componentwise estimates,
+across bounded, Holder, and `C^{0,α}` controls from componentwise estimates
+and same-constant projection back to components,
 product-valued pairing closure,
 integer-scalar closure,
 additive/subtractive closure estimates, plus the

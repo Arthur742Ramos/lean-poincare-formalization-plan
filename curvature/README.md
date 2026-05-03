@@ -992,7 +992,8 @@ bounded, and `C^{0,α}` controls, finite-sum closure for existential Holder and
 `C^{0,α}` controls, finite-product closure for existential
 normed-comm-ring-valued `C^{0,α}` controls plus an explicit bounded
 `C^{0,α}` finite-product estimate, finite `Pi` packaging across
-bounded, Holder, and `C^{0,α}` controls from componentwise estimates,
+bounded, Holder, and `C^{0,α}` controls from componentwise estimates and
+same-constant projection back to components,
 product-valued pairing closure, and
 integer-scalar and basic linear algebra closure estimates for Hölder and
 bounded control, together with the bounded product estimate for

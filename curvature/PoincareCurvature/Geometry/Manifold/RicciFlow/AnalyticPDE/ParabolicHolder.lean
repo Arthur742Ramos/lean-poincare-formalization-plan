@@ -1346,6 +1346,16 @@ theorem pi {ι : Type*} [Fintype ι] {C : ι → ℝ} {u : ℝ × X → ι → E
       mul_le_mul_of_nonneg_right (hC_le_sum i) hdα
     simpa [Pi.sub_apply, dα] using hcomp.trans hscale
 
+/-- A Pi-valued parabolic Holder estimate restricts to each component with the same constant. -/
+theorem eval {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
+    (h : ParabolicHolderWith C α u s) (i : ι) :
+    ParabolicHolderWith C α (fun z => u z i) s := by
+  intro p hp q hq
+  calc
+    ‖u p i - u q i‖ = ‖(u p - u q) i‖ := by simp [Pi.sub_apply]
+    _ ≤ ‖u p - u q‖ := norm_le_pi_norm (u p - u q) i
+    _ ≤ C * (parabolicDistance p q) ^ α := h hp hq
+
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
     (ha : ParabolicHolderWith C α a s) (hδpos : 0 < δ)
     (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
@@ -1801,6 +1811,13 @@ theorem pi {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
   exact ⟨∑ i, C i, Finset.sum_nonneg fun i _hi => hCnonneg i,
     ParabolicHolderWith.pi hCnonneg hholder⟩
 
+/-- A Pi-valued parabolic Holder estimate restricts to each component. -/
+theorem eval {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
+    (h : ParabolicHolderOn α u s) (i : ι) :
+    ParabolicHolderOn α (fun z => u z i) s := by
+  rcases h with ⟨C, hC, hCu⟩
+  exact ⟨C, hC, hCu.eval i⟩
+
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {a : ℝ × X → 𝕜} {δ : ℝ}
     (ha : ParabolicHolderOn α a s) (hδpos : 0 < δ)
     (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
@@ -2235,6 +2252,13 @@ theorem pi {ι : Type*} [Fintype ι] {B : ι → ℝ} {u : ℝ × X → ι → E
   exact (pi_norm_le_iff_of_nonneg hBsum_nonneg).2 fun i =>
     (h i hp).trans (hB_le_sum i)
 
+/-- A Pi-valued sup-norm bound restricts to each component with the same constant. -/
+theorem eval {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
+    (h : ParabolicBoundedWith B u s) (i : ι) :
+    ParabolicBoundedWith B (fun z => u z i) s := by
+  intro p hp
+  exact (norm_le_pi_norm (u p) i).trans (h hp)
+
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
     (hδpos : 0 < δ) (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
     ParabolicBoundedWith δ⁻¹ (fun z => (a z)⁻¹) s := by
@@ -2444,6 +2468,13 @@ theorem pi {ι : Type*} [Fintype ι] {B H : ι → ℝ} {u : ℝ × X → ι →
     ParabolicC0AlphaWith (∑ i, B i) (∑ i, H i) α u s :=
   ⟨ParabolicBoundedWith.pi hB fun i => (h i).bounded,
     ParabolicHolderWith.pi hH fun i => (h i).holder⟩
+
+/-- A Pi-valued parabolic `C^{0,α}` estimate restricts to each component with the same
+constants. -/
+theorem eval {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
+    (h : ParabolicC0AlphaWith B H α u s) (i : ι) :
+    ParabolicC0AlphaWith B H α (fun z => u z i) s :=
+  ⟨h.bounded.eval i, h.holder.eval i⟩
 
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
     (ha : ParabolicC0AlphaWith B H α a s) (hδpos : 0 < δ)
@@ -2928,6 +2959,13 @@ theorem pi {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
   refine ⟨∑ i, B i, Finset.sum_nonneg fun i _hi => hBnonneg i,
     ∑ i, H i, Finset.sum_nonneg fun i _hi => hHnonneg i, ?_⟩
   exact ParabolicC0AlphaWith.pi hBnonneg hHnonneg hBH
+
+/-- A Pi-valued parabolic `C^{0,α}` estimate restricts to each component. -/
+theorem eval {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
+    (h : ParabolicC0AlphaOn α u s) (i : ι) :
+    ParabolicC0AlphaOn α (fun z => u z i) s := by
+  rcases h with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B, hB, H, hH, hBH.eval i⟩
 
 theorem neg (hu : ParabolicC0AlphaOn α u s) :
     ParabolicC0AlphaOn α (fun z => -u z) s := by

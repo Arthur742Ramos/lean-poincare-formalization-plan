@@ -343,8 +343,8 @@ packages the canonical stationary local solution attached to
   finite-sum closure for existential Holder and `C^{0,α}` controls,
   finite-product closure for existential normed-comm-ring-valued `C^{0,α}`
   controls plus an explicit bounded `C^{0,α}` finite-product estimate, finite `Pi`
-  packaging across bounded, Holder, and `C^{0,α}`
-  controls from componentwise estimates, and
+  packaging across bounded, Holder, and `C^{0,α}` controls from componentwise
+  estimates and same-constant projection back to components, and
   add/subtract/smul, integer-scalar, and product-valued pairing closure
   estimates plus the bounded product estimate for normed-ring-valued
   `C^{0,α}` functions and the corresponding bounded scalar-action estimate for
