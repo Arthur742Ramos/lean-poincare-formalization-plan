@@ -1272,7 +1272,8 @@ control, now also with explicit bounded determinant, adjugate-entry, and
 inverse-entry estimates plus a whole inverse-matrix estimate, including a
 pointwise determinant Lipschitz estimate in the elementwise matrix norm,
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
-matrix-product, inverse-principal entry, inverse-Christoffel metric-side, and
+matrix-product, inverse-principal entry, inverse-Christoffel
+derivative/metric-side, and
 quadratic-Christoffel matrix-norm Lipschitz constants, plus a
 supplied-Christoffel schematic RHS entry and whole-matrix constants and
 primitive-input schematic RHS estimate, on entrywise
