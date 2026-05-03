@@ -1655,6 +1655,108 @@ theorem matrix_vecMul {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
     ParabolicC0AlphaOn α (fun z => Matrix.vecMul (v z) (M z)) s :=
   vector_of_entries fun j => matrix_vecMul_entry hv hM j
 
+/-- Quantitative sup constant for one component of the difference of two finite
+vector-matrix products. -/
+def matrixVecMulEntrySubBoundConst {m n : Type*} [Fintype m]
+    (Bv : m → ℝ) (BM' : m → n → ℝ) (Bvd : m → ℝ) (BMd : m → n → ℝ)
+    (j : n) : ℝ :=
+  Finset.univ.sum fun i : m => Bv i * BMd i j + Bvd i * BM' i j
+
+/-- Quantitative Holder constant for one component of the difference of two finite
+vector-matrix products. -/
+def matrixVecMulEntrySubHolderConst {m n : Type*} [Fintype m]
+    (Bv Hv : m → ℝ) (BM' HM' : m → n → ℝ) (Bvd Hvd : m → ℝ)
+    (BMd HMd : m → n → ℝ) (j : n) : ℝ :=
+  Finset.univ.sum fun i : m =>
+    (Bv i * HMd i j + BMd i j * Hv i) +
+      (Bvd i * HM' i j + BM' i j * Hvd i)
+
+theorem matrixVecMulEntrySubBoundConst_nonneg {m n : Type*} [Fintype m]
+    {Bv : m → ℝ} {BM' : m → n → ℝ} {Bvd : m → ℝ} {BMd : m → n → ℝ}
+    (hBv : ∀ i, 0 ≤ Bv i) (hBM' : ∀ i j, 0 ≤ BM' i j)
+    (hBvd : ∀ i, 0 ≤ Bvd i) (hBMd : ∀ i j, 0 ≤ BMd i j) (j : n) :
+    0 ≤ matrixVecMulEntrySubBoundConst Bv BM' Bvd BMd j := by
+  simpa [matrixVecMulEntrySubBoundConst] using
+    (Finset.sum_nonneg fun i _hi =>
+      add_nonneg (mul_nonneg (hBv i) (hBMd i j)) (mul_nonneg (hBvd i) (hBM' i j)))
+
+theorem matrixVecMulEntrySubHolderConst_nonneg {m n : Type*} [Fintype m]
+    {Bv Hv : m → ℝ} {BM' HM' : m → n → ℝ} {Bvd Hvd : m → ℝ}
+    {BMd HMd : m → n → ℝ} (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i)
+    (hBM' : ∀ i j, 0 ≤ BM' i j) (hHM' : ∀ i j, 0 ≤ HM' i j)
+    (hBvd : ∀ i, 0 ≤ Bvd i) (hHvd : ∀ i, 0 ≤ Hvd i)
+    (hBMd : ∀ i j, 0 ≤ BMd i j) (hHMd : ∀ i j, 0 ≤ HMd i j) (j : n) :
+    0 ≤ matrixVecMulEntrySubHolderConst Bv Hv BM' HM' Bvd Hvd BMd HMd j := by
+  simpa [matrixVecMulEntrySubHolderConst] using
+    (Finset.sum_nonneg fun i _hi =>
+      add_nonneg
+        (add_nonneg (mul_nonneg (hBv i) (hHMd i j))
+          (mul_nonneg (hBMd i j) (hHv i)))
+        (add_nonneg (mul_nonneg (hBvd i) (hHM' i j))
+          (mul_nonneg (hBM' i j) (hHvd i))))
+
+/-- One component of the difference of two finite vector-matrix products has an explicit
+bounded parabolic `C^{0,α}` estimate from vector, matrix, and difference estimates. -/
+theorem matrix_vecMul_entry_sub_with {m n A : Type*} [Fintype m] [NormedRing A]
+    {Bv Hv : m → ℝ} {BM' HM' : m → n → ℝ} {Bvd Hvd : m → ℝ}
+    {BMd HMd : m → n → ℝ}
+    {v v' : ℝ × X → m → A} {M M' : ℝ × X → Matrix m n A}
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hM' : ∀ i j, ParabolicC0AlphaWith (BM' i j) (HM' i j) α
+      (fun z => M' z i j) s)
+    (hvdiff : ∀ i, ParabolicC0AlphaWith (Bvd i) (Hvd i) α
+      (fun z => v z i - v' z i) s)
+    (hMdiff : ∀ i j, ParabolicC0AlphaWith (BMd i j) (HMd i j) α
+      (fun z => M z i j - M' z i j) s)
+    (hBv : ∀ i, 0 ≤ Bv i) (hBvd : ∀ i, 0 ≤ Bvd i) (j : n) :
+    ParabolicC0AlphaWith
+      (matrixVecMulEntrySubBoundConst Bv BM' Bvd BMd j)
+      (matrixVecMulEntrySubHolderConst Bv Hv BM' HM' Bvd Hvd BMd HMd j)
+      α (fun z => Matrix.vecMul (v z) (M z) j - Matrix.vecMul (v' z) (M' z) j) s := by
+  classical
+  simpa [Matrix.vecMul, matrixVecMulEntrySubBoundConst, matrixVecMulEntrySubHolderConst] using
+    (ParabolicC0AlphaWith.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset m))
+      (Bu := fun i => Bv i) (Hu := fun i => Hv i)
+      (Bv := fun i => BM' i j) (Hv := fun i => HM' i j)
+      (Bdu := fun i => Bvd i) (Hdu := fun i => Hvd i)
+      (Bdv := fun i => BMd i j) (Hdv := fun i => HMd i j)
+      (u := fun i z => v z i) (u' := fun i z => v' z i)
+      (v := fun i z => M z i j) (v' := fun i z => M' z i j)
+      (fun i _hi => hv i) (fun i _hi => hM' i j)
+      (fun i _hi => hvdiff i) (fun i _hi => hMdiff i j)
+      (fun i _hi => hBv i) (fun i _hi => hBvd i))
+
+/-- Differences of finite vector-matrix products have an explicit vector-valued bounded
+parabolic `C^{0,α}` estimate. -/
+theorem matrix_vecMul_sub_with {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
+    {Bv Hv : m → ℝ} {BM' HM' : m → n → ℝ} {Bvd Hvd : m → ℝ}
+    {BMd HMd : m → n → ℝ}
+    {v v' : ℝ × X → m → A} {M M' : ℝ × X → Matrix m n A}
+    (hBv : ∀ i, 0 ≤ Bv i) (hHv : ∀ i, 0 ≤ Hv i)
+    (hBM' : ∀ i j, 0 ≤ BM' i j) (hHM' : ∀ i j, 0 ≤ HM' i j)
+    (hBvd : ∀ i, 0 ≤ Bvd i) (hHvd : ∀ i, 0 ≤ Hvd i)
+    (hBMd : ∀ i j, 0 ≤ BMd i j) (hHMd : ∀ i j, 0 ≤ HMd i j)
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hM' : ∀ i j, ParabolicC0AlphaWith (BM' i j) (HM' i j) α
+      (fun z => M' z i j) s)
+    (hvdiff : ∀ i, ParabolicC0AlphaWith (Bvd i) (Hvd i) α
+      (fun z => v z i - v' z i) s)
+    (hMdiff : ∀ i j, ParabolicC0AlphaWith (BMd i j) (HMd i j) α
+      (fun z => M z i j - M' z i j) s) :
+    ParabolicC0AlphaWith
+      (∑ j : n, matrixVecMulEntrySubBoundConst Bv BM' Bvd BMd j)
+      (∑ j : n, matrixVecMulEntrySubHolderConst Bv Hv BM' HM' Bvd Hvd BMd HMd j)
+      α (fun z => Matrix.vecMul (v z) (M z) - Matrix.vecMul (v' z) (M' z)) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro j
+    exact matrixVecMulEntrySubBoundConst_nonneg hBv hBM' hBvd hBMd j
+  · intro j
+    exact matrixVecMulEntrySubHolderConst_nonneg hBv hHv hBM' hHM' hBvd hHvd hBMd hHMd j
+  · intro j
+    exact matrix_vecMul_entry_sub_with (v := v) (v' := v') (M := M) (M' := M')
+      hv hM' hvdiff hMdiff hBv hBvd j
+
 /-- Entries of an inverse-matrix-vector product are parabolic `C^{0,α}` when the matrix entries
 and vector components are, and the determinant is uniformly bounded away from zero. -/
 theorem matrix_inv_mulVec_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
