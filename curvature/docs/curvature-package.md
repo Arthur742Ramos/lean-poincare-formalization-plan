@@ -131,8 +131,9 @@ existential Holder and `C^{0,α}` controls, finite-product closure for
 existential normed-comm-ring-valued `C^{0,α}` controls, finite `Pi` packaging
 across bounded, Holder, and `C^{0,α}` controls from componentwise estimates
 and same-constant projection back to components,
-continuous-linear, curried-bilinear-map, curried-bilinear difference, and
-operator-application closure with operator-norm constants,
+continuous-linear, curried-bilinear-map, curried-bilinear difference,
+operator-application closure, and operator-application difference with
+operator-norm constants,
 product-valued pairing closure,
 integer-scalar closure,
 additive/subtractive closure estimates, plus the

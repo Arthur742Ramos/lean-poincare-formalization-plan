@@ -2883,6 +2883,33 @@ theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
           (mul_le_mul (hA.holder hp hq) (hv.bounded hq) (norm_nonneg _) hHAd_nonneg)
       _ = (BA * Hv + Bv * HA) * dα := by ring
 
+/-- Differences of operator-valued applications inherit parabolic `C^{0,α}` control from one
+operator input, one vector input, and `C^{0,α}` controls of the operator and vector differences. -/
+theorem continuousLinearMap_apply_sub {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {A A' : ℝ × X → E →L[ℝ] F} {v v' : ℝ × X → E}
+    {BA HA Bv Hv BAd HAd Bvd Hvd α : ℝ}
+    (hA : ParabolicC0AlphaWith BA HA α A s)
+    (hv' : ParabolicC0AlphaWith Bv Hv α v' s)
+    (hAdiff : ParabolicC0AlphaWith BAd HAd α (fun z => A z - A' z) s)
+    (hvdiff : ParabolicC0AlphaWith Bvd Hvd α (fun z => v z - v' z) s)
+    (hBA : 0 ≤ BA) (hBAd : 0 ≤ BAd) :
+    ParabolicC0AlphaWith (BA * Bvd + BAd * Bv)
+      ((BA * Hvd + Bvd * HA) + (BAd * Hv + Bv * HAd)) α
+      (fun z => A z (v z) - A' z (v' z)) s := by
+  have hleft :
+      ParabolicC0AlphaWith (BA * Bvd) (BA * Hvd + Bvd * HA) α
+        (fun z => A z (v z - v' z)) s :=
+    hA.continuousLinearMap_apply hvdiff hBA
+  have hright :
+      ParabolicC0AlphaWith (BAd * Bv) (BAd * Hv + Bv * HAd) α
+        (fun z => (A z - A' z) (v' z)) s :=
+    hAdiff.continuousLinearMap_apply hv' hBAd
+  have hsum := hleft.add hright
+  convert hsum using 1
+  ext z
+  simp [map_sub]
+
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ} {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicC0AlphaWith B H α u s)
     (hφB : ∀ y ∈ u '' s, ‖φ y‖ ≤ Bφ)
