@@ -3033,6 +3033,43 @@ theorem matrix_inv_two_index_contract_bounded_sub_le_const {n p q 𝕜 : Type*}
         Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
   simpa [entryBound, matrixInvTwoIndexContractDiffBoundConst] using hnorm
 
+/-- Compact-domain version of `matrix_inv_two_index_contract_bounded_sub_le_const`: pointwise
+nonvanishing of both metric determinants supplies one common determinant lower bound. -/
+theorem matrix_inv_two_index_contract_bounded_sub_le_const_of_isCompact_det_ne_zero
+    {n p q 𝕜 : Type*} [Fintype n] [DecidableEq n] [Fintype p] [Fintype q]
+    [NormedField 𝕜] {K : Set (ℝ × X)} {C : n → n → ℝ}
+    {TB : n → n → p → q → ℝ} {ηM : ℝ} {ηT : p → q → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {T U : ℝ × X → n → n → p → q → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0)
+    (hTB : ∀ a b i j, 0 ≤ TB a b i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hU : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ a b i j, ‖U z a b i j‖ ≤ TB a b i j)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ‖M z - N z‖ ≤ ηM)
+    (hTdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ i j,
+      ‖((fun a b => T z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => U z a b i j) : Matrix n n 𝕜)‖ ≤ ηT i j) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (matrixInvTwoIndexContractDiffBoundConst (𝕜 := 𝕜) δ C TB ηM ηT)
+        (fun z : ℝ × X =>
+          ((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+            T z a b i j) : Matrix p q 𝕜) -
+          ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+            U z a b i j) : Matrix p q 𝕜)) K := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, ?_⟩
+  exact matrix_inv_two_index_contract_bounded_sub_le_const
+    (s := K) (δ := δ) (C := C) (TB := TB) (ηM := ηM) (ηT := ηT)
+    hTB hM hN hU hMdiff hTdiff hδpos hdetM hdetN
+
 /-- Compact-domain matrix-valued inverse principal-contraction closure from entrywise control and
 pointwise nonvanishing determinant. -/
 theorem matrix_inv_two_index_contract_of_isCompact_det_ne_zero {n p q 𝕜 : Type*}

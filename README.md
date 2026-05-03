@@ -378,7 +378,8 @@ packages the canonical stationary local solution attached to
   inverse-matrix, function-level determinant/inverse/matrix-product
   bounded-difference, inverse-principal entry Lipschitz,
   bounded Holder entry/matrix estimates, and inverse-principal contraction
-  bounded-difference control,
+  bounded-difference control with a compact-domain determinant-lower-bound
+  variant,
   inverse-Christoffel derivative/metric-side and array-level Lipschitz constants,
   inverse-Christoffel bounded Holder entry/array estimates, and
   quadratic-Christoffel matrix-norm Lipschitz and bounded Holder entry/matrix

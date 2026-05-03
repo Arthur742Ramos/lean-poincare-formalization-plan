@@ -1283,7 +1283,8 @@ pointwise determinant Lipschitz estimate in the elementwise matrix norm,
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
 function-level determinant/inverse/matrix-product bounded-difference,
 inverse-principal entry Lipschitz, bounded Holder entry/matrix estimates, and
-inverse-principal contraction bounded-difference control, inverse-Christoffel
+inverse-principal contraction bounded-difference control with a compact-domain
+determinant-lower-bound variant, inverse-Christoffel
 derivative/metric-side and array-level Lipschitz constants,
 inverse-Christoffel bounded Holder entry/array estimates, and
 quadratic-Christoffel matrix-norm Lipschitz and bounded Holder entry/matrix
