@@ -556,7 +556,8 @@ packages the canonical stationary local solution attached to
   Gram-entry input forms, existential finite-family inverse-Gram,
   inverse-Gram action/bilinear, inverse-principal, inverse-Gram Christoffel, and
   schematic RHS handoffs from entrywise `ParabolicC0AlphaOn` controls sharing the same
-  compact determinant lower bound, quantitative finite-family inverse-Gram
+  compact determinant lower bound, with the schematic RHS handoffs now also
+  accepting those same Gram-entry input forms, quantitative finite-family inverse-Gram
   vector/vector-inverse product, bilinear, inverse-principal, and
   inverse-Christoffel handoffs sharing that same compact determinant lower
   bound, finite-family schematic RHS difference and bounded-difference control
