@@ -722,7 +722,8 @@ now packages the matching intrinsic boundary
         variational dependence, now including fixed-time estimates for the
         full derivative-domain tuple, plus overlap uniqueness for both that
         combined scalar-readout state and the full derivative-domain tuple on
-        `Ioo` and `Icc`, and direct tensor
+        `Ioo` and `Icc`, with closed scalar readouts also available from
+        open-overlap base-flow equality by continuity, and direct tensor
         time-derivative bridges from continuous product Picard flows to scalar
         readout hypotheses, metric-coordinate field routes, and finite-cover
         readout-field variants, including closed-Picard within-filter and
