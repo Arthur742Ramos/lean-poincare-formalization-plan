@@ -1237,6 +1237,20 @@ theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
       mul_le_mul_of_nonneg_left (hu hp hq) (NNReal.coe_nonneg K)
     _ = ((K : ℝ) * C) * dα := by ring
 
+/-- A spatial Holder estimate on the spatial projection lifts to the same parabolic Holder
+estimate for the time-independent time-space function. -/
+theorem of_snd_holder (hC : 0 ≤ C) (hα : 0 ≤ α) {f : X → E}
+    (hf : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ∀ ⦃y : X⦄, y ∈ Prod.snd '' s →
+      ‖f x - f y‖ ≤ C * (dist x y) ^ α) :
+    ParabolicHolderWith C α (fun z : ℝ × X => f z.2) s := by
+  intro p hp q hq
+  have hpim : p.2 ∈ Prod.snd '' s := ⟨p, hp, rfl⟩
+  have hqim : q.2 ∈ Prod.snd '' s := ⟨q, hq, rfl⟩
+  have hpow :
+      (dist p.2 q.2) ^ α ≤ (parabolicDistance p q) ^ α :=
+    Real.rpow_le_rpow dist_nonneg (parabolicDistance.space_dist_le p q) hα
+  exact (hf hpim hqim).trans (mul_le_mul_of_nonneg_left hpow hC)
+
 /-- A spatial Lipschitz function, lifted as a time-independent time-space function, is
 parabolic Lipschitz on the time-space set. -/
 theorem of_snd_lipschitzOnWith {K : ℝ≥0} {f : X → E}
@@ -1625,6 +1639,14 @@ theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
   rcases hu with ⟨C, hC, hCu⟩
   exact ⟨(K : ℝ) * C, mul_nonneg (NNReal.coe_nonneg K) hC,
     hCu.comp_lipschitzOnWith hφ⟩
+
+/-- A spatial Holder estimate on the spatial projection lifts to parabolic Holder control for
+the time-independent time-space function. -/
+theorem of_snd_holder {C : ℝ} (hC : 0 ≤ C) (hα : 0 ≤ α) {f : X → E}
+    (hf : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ∀ ⦃y : X⦄, y ∈ Prod.snd '' s →
+      ‖f x - f y‖ ≤ C * (dist x y) ^ α) :
+    ParabolicHolderOn α (fun z : ℝ × X => f z.2) s :=
+  ⟨C, hC, ParabolicHolderWith.of_snd_holder hC hα hf⟩
 
 /-- A spatial Lipschitz function, lifted as a time-independent time-space function, is
 parabolic Holder with exponent `1`. -/
@@ -2143,6 +2165,16 @@ theorem of_snd_lipschitzOnWith {K : ℝ≥0} {f : X → E}
     ParabolicC0AlphaWith B (K : ℝ) 1 (fun z : ℝ × X => f z.2) s :=
   ⟨ParabolicBoundedWith.of_snd hB, ParabolicHolderWith.of_snd_lipschitzOnWith hL⟩
 
+/-- Spatial boundedness and Holder control on the projection give parabolic `C^{0,α}` control
+for the time-independent lift. -/
+theorem of_snd_holder {f : X → E}
+    (hB : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ‖f x‖ ≤ B)
+    (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hf : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ∀ ⦃y : X⦄, y ∈ Prod.snd '' s →
+      ‖f x - f y‖ ≤ H * (dist x y) ^ α) :
+    ParabolicC0AlphaWith B H α (fun z : ℝ × X => f z.2) s :=
+  ⟨ParabolicBoundedWith.of_snd hB, ParabolicHolderWith.of_snd_holder hH hα hf⟩
+
 theorem add (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
     (hv : ParabolicC0AlphaWith B₂ H₂ α v s) :
     ParabolicC0AlphaWith (B₁ + B₂) (H₁ + H₂) α (fun z => u z + v z) s :=
@@ -2505,6 +2537,16 @@ theorem of_snd_lipschitzOnWith {B : ℝ} {K : ℝ≥0} {f : X → E}
     ParabolicC0AlphaOn 1 (fun z : ℝ × X => f z.2) s :=
   ⟨B, hB_nonneg, (K : ℝ), NNReal.coe_nonneg K,
     ParabolicC0AlphaWith.of_snd_lipschitzOnWith hB hL⟩
+
+/-- Spatial boundedness and Holder control on the projection give parabolic `C^{0,α}` control
+for the time-independent lift. -/
+theorem of_snd_holder {B H : ℝ} {f : X → E}
+    (hB_nonneg : 0 ≤ B) (hH_nonneg : 0 ≤ H) (hα : 0 ≤ α)
+    (hB : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ‖f x‖ ≤ B)
+    (hf : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ∀ ⦃y : X⦄, y ∈ Prod.snd '' s →
+      ‖f x - f y‖ ≤ H * (dist x y) ^ α) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => f z.2) s :=
+  ⟨B, hB_nonneg, H, hH_nonneg, ParabolicC0AlphaWith.of_snd_holder hB hH_nonneg hα hf⟩
 
 theorem add (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
     ParabolicC0AlphaOn α (fun z => u z + v z) s := by

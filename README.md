@@ -351,8 +351,8 @@ packages the canonical stationary local solution attached to
   functions bounded away from zero and the corresponding division closure,
   along with closure
   under taking norms, Lipschitz composition on the controlled range, direct
-  parabolic `C^{0,1}` lifts of time-independent spatial Lipschitz functions on
-  the spatial projection, bounded
+  parabolic Hölder/`C^{0,α}` lifts of time-independent spatial
+  Hölder/Lipschitz functions on the spatial projection, bounded
   `C^{0,α}` composition under range or explicit closed-sup-ball bounds, and
   exponent lowering on unit parabolic-diameter domains with closed-ball and
   closed-cylinder specializations across the Holder and `C^{0,α}` interfaces,
