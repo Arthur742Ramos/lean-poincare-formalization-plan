@@ -1281,7 +1281,7 @@ control, now also with explicit bounded determinant, adjugate-entry, and
 inverse-entry estimates plus a whole inverse-matrix estimate, including a
 pointwise determinant Lipschitz estimate in the elementwise matrix norm,
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
-function-level determinant/inverse bounded-difference, matrix-product,
+function-level determinant/inverse/matrix-product bounded-difference,
 inverse-principal entry Lipschitz and bounded Holder
 entry/matrix estimates, inverse-Christoffel
 derivative/metric-side and array-level Lipschitz constants,

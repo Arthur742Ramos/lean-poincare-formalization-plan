@@ -1369,6 +1369,29 @@ theorem matrix_mul_norm_sub_le_const {l m n A : Type*} [Fintype l] [Fintype m]
         simp_rw [matrixMulLeftFactorLipschitzConst, Finset.sum_mul]
       rw [hright, hleft]
 
+/-- Finite matrix multiplication is bounded-difference controlled on a time-space set by
+separate uniform bounds for the two factor differences. -/
+theorem matrix_mul_bounded_sub_le_const {l m n A : Type*} [Fintype l] [Fintype m]
+    [Fintype n] [NormedRing A] {BM : l → m → ℝ} {BN : m → n → ℝ}
+    {ηM ηN : ℝ} {M M' : ℝ × X → Matrix l m A} {N N' : ℝ × X → Matrix m n A}
+    (hBM : ∀ i k, 0 ≤ BM i k) (hBN : ∀ k j, 0 ≤ BN k j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i k, ‖M z i k‖ ≤ BM i k)
+    (hN' : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ k j, ‖N' z k j‖ ≤ BN k j)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - M' z‖ ≤ ηM)
+    (hNdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖N z - N' z‖ ≤ ηN) :
+    ParabolicBoundedWith
+      (matrixMulRightFactorLipschitzConst (n := n) BM * ηN +
+        matrixMulLeftFactorLipschitzConst (l := l) BN * ηM)
+      (fun z : ℝ × X => M z * N z - M' z * N' z) s := by
+  intro z hz
+  exact (matrix_mul_norm_sub_le_const (BM := BM) (BN := BN)
+      (M z) (M' z) (N z) (N' z) (hM hz) (hN' hz)).trans
+    (add_le_add
+      (mul_le_mul_of_nonneg_left (hNdiff hz)
+        (matrixMulRightFactorLipschitzConst_nonneg (n := n) hBM))
+      (mul_le_mul_of_nonneg_left (hMdiff hz)
+        (matrixMulLeftFactorLipschitzConst_nonneg (l := l) hBN)))
+
 /-- Entries of a matrix-vector product are parabolic `C^{0,α}` when the matrix entries and
 vector components are. -/
 theorem matrix_mulVec_entry {m n A : Type*} [Fintype n] [NormedRing A]

@@ -1023,7 +1023,7 @@ determinants, adjugate entries, and inverse entries under a determinant lower
 bound preserve parabolic `C^{0,α}` control from entrywise control. It also has
 pointwise determinant Lipschitz control in the elementwise matrix norm, plus
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
-function-level determinant/inverse bounded-difference, matrix-product,
+function-level determinant/inverse/matrix-product bounded-difference,
 inverse-principal entry Lipschitz and bounded Holder
 entry/matrix estimates, inverse-Christoffel
 derivative/metric-side and array-level Lipschitz constants,
