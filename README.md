@@ -273,7 +273,8 @@ packages the canonical stationary local solution attached to
   time-graph/scalar-state compatibility; tangent-map and vector-slot
   common-subinterval readouts now
   also handle the case where base curves have already been identified for
-  chart gluing; encoded candidates in
+  chart gluing, and scalar-state/time-graph readouts now reuse that same
+  base-equality route; encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The
   same state-set mechanism now also has a

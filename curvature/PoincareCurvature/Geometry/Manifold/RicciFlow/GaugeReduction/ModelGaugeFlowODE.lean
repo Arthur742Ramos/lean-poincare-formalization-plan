@@ -4122,6 +4122,208 @@ theorem tangent_apply_eq_of_opNorm_bound_of_mem_common_Ioo
   α.tangent_apply_eqOn_common_Ioo_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
     htbase hflow_eq hD_bound v ht
 
+/-- Common-subinterval scalar-readout state uniqueness when the ambient Picard
+intervals may differ and the base curves have already been identified on the
+closed shared interval. -/
+theorem flow_tangent_apply_pair_eqOn_common_Icc_of_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Icc a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (u v : V) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t u, α.tangent x t v))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t u, β.tangent x t v))
+      (Icc a b) := by
+  have hflowIoo : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b) :=
+    fun t ht => hflow_eq (Ioo_subset_Icc_self ht)
+  have hu :=
+    α.tangent_apply_eqOn_common_Icc_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+      htbase hflowIoo hD_bound u
+  have hv :=
+    α.tangent_apply_eqOn_common_Icc_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+      htbase hflowIoo hD_bound v
+  intro t ht
+  exact Prod.ext (hflow_eq ht) (Prod.ext (hu ht) (hv ht))
+
+/-- Open common-subinterval scalar-readout state uniqueness when the ambient
+Picard intervals may differ and the base curves have already been identified on
+the shared open interval. -/
+theorem flow_tangent_apply_pair_eqOn_common_Ioo_of_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (u v : V) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t u, α.tangent x t v))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t u, β.tangent x t v))
+      (Ioo a b) := by
+  have hu :=
+    α.tangent_apply_eqOn_common_Ioo_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+      htbase hflow_eq hD_bound u
+  have hv :=
+    α.tangent_apply_eqOn_common_Ioo_of_opNorm_bound_of_mem β hαtime hβtime hxα hxβ
+      htbase hflow_eq hD_bound v
+  intro t ht
+  exact Prod.ext (hflow_eq ht) (Prod.ext (hu ht) (hv ht))
+
+/-- Pointwise common-subinterval scalar-readout state uniqueness from a
+closed-interval base-flow equality. -/
+theorem flow_tangent_apply_pair_eq_of_opNorm_bound_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Icc a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (u v : V)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    (α.flow (x, t), α.tangent x t u, α.tangent x t v) =
+      (β.flow (x, t), β.tangent x t u, β.tangent x t v) :=
+  α.flow_tangent_apply_pair_eqOn_common_Icc_of_opNorm_bound_of_mem β
+    hαtime hβtime hxα hxβ htbase hflow_eq hD_bound u v ht
+
+/-- Pointwise open common-subinterval scalar-readout state uniqueness from an
+open-interval base-flow equality. -/
+theorem flow_tangent_apply_pair_eq_of_opNorm_bound_of_mem_common_Ioo
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (u v : V)
+    {t : ℝ} (ht : t ∈ Ioo a b) :
+    (α.flow (x, t), α.tangent x t u, α.tangent x t v) =
+      (β.flow (x, t), β.tangent x t u, β.tangent x t v) :=
+  α.flow_tangent_apply_pair_eqOn_common_Ioo_of_opNorm_bound_of_mem β
+    hαtime hβtime hxα hxβ htbase hflow_eq hD_bound u v ht
+
+/-- Common-subinterval scalar-readout time-graph uniqueness from a closed shared
+base-flow equality. -/
+theorem time_flow_tangent_apply_pair_eqOn_common_Icc_of_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Icc a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (u v : V) :
+    EqOn
+      (fun t : ℝ => (t, α.flow (x, t), α.tangent x t u, α.tangent x t v))
+      (fun t : ℝ => (t, β.flow (x, t), β.tangent x t u, β.tangent x t v))
+      (Icc a b) := by
+  have hstate :=
+    α.flow_tangent_apply_pair_eqOn_common_Icc_of_opNorm_bound_of_mem β
+      hαtime hβtime hxα hxβ htbase hflow_eq hD_bound u v
+  intro t ht
+  exact Prod.ext rfl (hstate ht)
+
+/-- Open common-subinterval scalar-readout time-graph uniqueness from an open
+shared base-flow equality. -/
+theorem time_flow_tangent_apply_pair_eqOn_common_Ioo_of_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (u v : V) :
+    EqOn
+      (fun t : ℝ => (t, α.flow (x, t), α.tangent x t u, α.tangent x t v))
+      (fun t : ℝ => (t, β.flow (x, t), β.tangent x t u, β.tangent x t v))
+      (Ioo a b) := by
+  have hstate :=
+    α.flow_tangent_apply_pair_eqOn_common_Ioo_of_opNorm_bound_of_mem β
+      hαtime hβtime hxα hxβ htbase hflow_eq hD_bound u v
+  intro t ht
+  exact Prod.ext rfl (hstate ht)
+
+/-- Pointwise common-subinterval scalar-readout time-graph uniqueness from a
+closed shared base-flow equality. -/
+theorem time_flow_tangent_apply_pair_eq_of_opNorm_bound_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Icc a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (u v : V)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    (t, α.flow (x, t), α.tangent x t u, α.tangent x t v) =
+      (t, β.flow (x, t), β.tangent x t u, β.tangent x t v) :=
+  α.time_flow_tangent_apply_pair_eqOn_common_Icc_of_opNorm_bound_of_mem β
+    hαtime hβtime hxα hxβ htbase hflow_eq hD_bound u v ht
+
+/-- Pointwise open common-subinterval scalar-readout time-graph uniqueness from
+an open shared base-flow equality. -/
+theorem time_flow_tangent_apply_pair_eq_of_opNorm_bound_of_mem_common_Ioo
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Ioo a b))
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ K) (u v : V)
+    {t : ℝ} (ht : t ∈ Ioo a b) :
+    (t, α.flow (x, t), α.tangent x t u, α.tangent x t v) =
+      (t, β.flow (x, t), β.tangent x t u, β.tangent x t v) :=
+  α.time_flow_tangent_apply_pair_eqOn_common_Ioo_of_opNorm_bound_of_mem β
+    hαtime hβtime hxα hxβ htbase hflow_eq hD_bound u v ht
+
 /-- Closed-interval uniqueness for the full variational pair `(flow, tangent)`
 from a base-flow Lipschitz estimate and an operator-norm bound on the linearized
 coefficient.  Overlap form allowing different centers/radii. -/
