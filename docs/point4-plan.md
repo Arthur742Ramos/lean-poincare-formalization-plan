@@ -1320,6 +1320,7 @@ exponent `α / 2` to parabolic exponent `α` and from time Lipschitz control to
 parabolic exponent `2`, with direct unit-diameter lowering bridges, including
 fixed-constant `ParabolicC0AlphaWith` lifts from spatial Lipschitz data for
 every `0 ≤ α ≤ 1` and from time Lipschitz data for every `0 ≤ α ≤ 2`,
+together with closed-ball and closed-cylinder subset variants,
 pointwise finite-product Lipschitz estimates and
 finite-sum Lipschitz estimates for two-factor products on factorwise bounded
 sets, and exponent-lowering

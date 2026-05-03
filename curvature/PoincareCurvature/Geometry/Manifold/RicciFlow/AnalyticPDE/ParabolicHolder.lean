@@ -3364,6 +3364,64 @@ theorem mono_exponent_of_subset_closedCylinder {β timeRadius spaceRadius : ℝ}
     ParabolicC0AlphaWith B H β u s :=
   ⟨h.bounded, h.holder.mono_exponent_of_subset_closedCylinder hH hβ hβα hs hdiam⟩
 
+/-- Spatial boundedness and Lipschitz control on the projection give fixed-constant parabolic
+`C^{0,α}` control on subsets of a closed parabolic ball of diameter at most one. -/
+theorem of_snd_lipschitzOnWith_of_subset_closedBall {K : ℝ≥0} {f : X → E}
+    {R : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ‖f x‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.snd '' s))
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicC0AlphaWith B (K : ℝ) α (fun z : ℝ × X => f z.2) s := by
+  have hbase :=
+    of_snd_lipschitzOnWith (s := s) (B := B) (K := K) (f := f) hB hL
+  exact hbase.mono_exponent_of_subset_closedBall
+    (NNReal.coe_nonneg K) hα_nonneg hα_le_one hs hR
+
+/-- Time-only boundedness and Lipschitz control give fixed-constant parabolic `C^{0,α}` control
+on subsets of a closed parabolic ball of diameter at most one. -/
+theorem of_fst_lipschitzOnWith_of_subset_closedBall {K : ℝ≥0} {f : ℝ → E}
+    {R : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖f t‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.fst '' s))
+    (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
+    ParabolicC0AlphaWith B (K : ℝ) α (fun z : ℝ × X => f z.1) s := by
+  have hbase :=
+    of_fst_lipschitzOnWith (s := s) (B := B) (K := K) (f := f) hB hL
+  exact hbase.mono_exponent_of_subset_closedBall
+    (NNReal.coe_nonneg K) hα_nonneg hα_le_two hs hR
+
+/-- Spatial boundedness and Lipschitz control on the projection give fixed-constant parabolic
+`C^{0,α}` control on subsets of a closed parabolic cylinder of diameter at most one. -/
+theorem of_snd_lipschitzOnWith_of_subset_closedCylinder {K : ℝ≥0} {f : X → E}
+    {timeRadius spaceRadius : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ‖f x‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.snd '' s))
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicC0AlphaWith B (K : ℝ) α (fun z : ℝ × X => f z.2) s := by
+  have hbase :=
+    of_snd_lipschitzOnWith (s := s) (B := B) (K := K) (f := f) hB hL
+  exact hbase.mono_exponent_of_subset_closedCylinder
+    (NNReal.coe_nonneg K) hα_nonneg hα_le_one hs hdiam
+
+/-- Time-only boundedness and Lipschitz control give fixed-constant parabolic `C^{0,α}` control
+on subsets of a closed parabolic cylinder of diameter at most one. -/
+theorem of_fst_lipschitzOnWith_of_subset_closedCylinder {K : ℝ≥0} {f : ℝ → E}
+    {timeRadius spaceRadius : ℝ} {c : ℝ × X}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖f t‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.fst '' s))
+    (hs : s ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1) :
+    ParabolicC0AlphaWith B (K : ℝ) α (fun z : ℝ × X => f z.1) s := by
+  have hbase :=
+    of_fst_lipschitzOnWith (s := s) (B := B) (K := K) (f := f) hB hL
+  exact hbase.mono_exponent_of_subset_closedCylinder
+    (NNReal.coe_nonneg K) hα_nonneg hα_le_two hs hdiam
+
 end ParabolicC0AlphaWith
 
 namespace ParabolicC0AlphaOn

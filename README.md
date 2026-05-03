@@ -400,7 +400,8 @@ packages the canonical stationary local solution attached to
   and from time Lipschitz control to parabolic exponent `2`, with direct
   unit-diameter lowering bridges, including fixed-constant
   `ParabolicC0AlphaWith` lifts from spatial Lipschitz data for every
-  `0 ≤ α ≤ 1` and from time Lipschitz data for every `0 ≤ α ≤ 2`,
+  `0 ≤ α ≤ 1` and from time Lipschitz data for every `0 ≤ α ≤ 2`, together
+  with closed-ball and closed-cylinder subset variants,
   bounded
   `C^{0,α}` composition under range or explicit closed-sup-ball bounds,
   global and closed-ball Lipschitz composition with automatic composed sup
