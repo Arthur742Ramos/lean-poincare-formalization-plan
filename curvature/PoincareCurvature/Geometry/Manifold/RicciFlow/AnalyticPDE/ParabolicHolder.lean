@@ -2568,6 +2568,32 @@ theorem of_fst_lipschitzOnWith {K : ℝ≥0} {f : ℝ → E}
     ParabolicC0AlphaWith B (K : ℝ) 2 (fun z : ℝ × X => f z.1) s :=
   ⟨ParabolicBoundedWith.of_fst hB, ParabolicHolderWith.of_fst_lipschitzOnWith hL⟩
 
+/-- On a unit parabolic-diameter set, spatial boundedness and Lipschitz control on the projection
+give fixed-constant parabolic `C^{0,α}` control for every `0 ≤ α ≤ 1`. -/
+theorem of_snd_lipschitzOnWith_of_parabolicDistance_le_one {K : ℝ≥0} {f : X → E}
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ‖f x‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.snd '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaWith B (K : ℝ) α (fun z : ℝ × X => f z.2) s :=
+  ⟨ParabolicBoundedWith.of_snd hB,
+    (ParabolicHolderWith.of_snd_lipschitzOnWith hL).mono_exponent_of_parabolicDistance_le_one
+      (NNReal.coe_nonneg K) hα_nonneg hα_le_one hdiam⟩
+
+/-- On a unit parabolic-diameter set, time-only boundedness and Lipschitz control give
+fixed-constant parabolic `C^{0,α}` control for every `0 ≤ α ≤ 2`. -/
+theorem of_fst_lipschitzOnWith_of_parabolicDistance_le_one {K : ℝ≥0} {f : ℝ → E}
+    (hα_nonneg : 0 ≤ α) (hα_le_two : α ≤ 2)
+    (hB : ∀ ⦃t : ℝ⦄, t ∈ Prod.fst '' s → ‖f t‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.fst '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaWith B (K : ℝ) α (fun z : ℝ × X => f z.1) s :=
+  ⟨ParabolicBoundedWith.of_fst hB,
+    (ParabolicHolderWith.of_fst_lipschitzOnWith hL).mono_exponent_of_parabolicDistance_le_one
+      (NNReal.coe_nonneg K) hα_nonneg hα_le_two hdiam⟩
+
 theorem add (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
     (hv : ParabolicC0AlphaWith B₂ H₂ α v s) :
     ParabolicC0AlphaWith (B₁ + B₂) (H₁ + H₂) α (fun z => u z + v z) s :=

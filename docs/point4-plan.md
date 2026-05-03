@@ -1317,8 +1317,10 @@ input sup bound, direct parabolic
 Hölder/`C^{0,α}` lifts of time-independent spatial Hölder/Lipschitz functions
 on the spatial projection, direct time-only lifts from ordinary time Hölder
 exponent `α / 2` to parabolic exponent `α` and from time Lipschitz control to
-parabolic exponent `2`, with a direct unit-diameter lowering bridge for every
-`0 ≤ α ≤ 2`, pointwise finite-product Lipschitz estimates and
+parabolic exponent `2`, with direct unit-diameter lowering bridges, including
+fixed-constant `ParabolicC0AlphaWith` lifts from spatial Lipschitz data for
+every `0 ≤ α ≤ 1` and from time Lipschitz data for every `0 ≤ α ≤ 2`,
+pointwise finite-product Lipschitz estimates and
 finite-sum Lipschitz estimates for two-factor products on factorwise bounded
 sets, and exponent-lowering
 on unit parabolic-diameter domains, with closed-ball and closed-cylinder

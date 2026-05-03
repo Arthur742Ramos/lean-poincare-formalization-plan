@@ -397,8 +397,10 @@ packages the canonical stationary local solution attached to
   parabolic Hölder/`C^{0,α}` lifts of time-independent spatial
   Hölder/Lipschitz functions on the spatial projection, direct time-only
   lifts from ordinary time Hölder exponent `α / 2` to parabolic exponent `α`
-  and from time Lipschitz control to parabolic exponent `2`, with a direct
-  unit-diameter lowering bridge for every `0 ≤ α ≤ 2`,
+  and from time Lipschitz control to parabolic exponent `2`, with direct
+  unit-diameter lowering bridges, including fixed-constant
+  `ParabolicC0AlphaWith` lifts from spatial Lipschitz data for every
+  `0 ≤ α ≤ 1` and from time Lipschitz data for every `0 ≤ α ≤ 2`,
   bounded
   `C^{0,α}` composition under range or explicit closed-sup-ball bounds,
   global and closed-ball Lipschitz composition with automatic composed sup
