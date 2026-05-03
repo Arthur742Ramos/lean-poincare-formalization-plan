@@ -1020,10 +1020,10 @@ determinants, adjugate entries, and inverse entries under a determinant lower
 bound preserve parabolic `C^{0,α}` control from entrywise control. It also has
 pointwise determinant Lipschitz control in the elementwise matrix norm, plus
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
-matrix-product, inverse-principal entry, and inverse-Christoffel metric-side
-matrix-norm Lipschitz constants, pointwise quadratic-Christoffel
-contraction Lipschitz estimates, plus a supplied-Christoffel schematic RHS
-Lipschitz aggregation and primitive-input schematic RHS estimate, on entrywise
+matrix-product, inverse-principal entry, inverse-Christoffel metric-side, and
+quadratic-Christoffel matrix-norm Lipschitz constants, plus a
+supplied-Christoffel schematic RHS Lipschitz aggregation and primitive-input
+schematic RHS estimate, on entrywise
 bounded finite matrices, using a determinant lower bound for inverse
 estimates; compact nonvanishing determinant data now supplies the needed
 uniform determinant lower bound, including compact-domain inverse-entry,

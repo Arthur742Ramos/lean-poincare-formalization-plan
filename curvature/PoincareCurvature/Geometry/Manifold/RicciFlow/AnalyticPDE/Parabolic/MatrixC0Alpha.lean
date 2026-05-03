@@ -2536,6 +2536,111 @@ theorem christoffel_quadratic_ricci_entry_norm_sub_le {n A : Type*} [Fintype n]
           BΓ b a j * ‖Γ a i b - Λ a i b‖)) := by
       simp [leftBound, rightBound]
 
+/-- Entrywise Lipschitz constant for the quadratic Christoffel Ricci contraction with respect to
+a uniform entrywise Christoffel-array difference bound. -/
+def christoffelQuadraticRicciEntryLipschitzConst {n : Type*} [Fintype n]
+    (BΓ : n → n → n → ℝ) (i j : n) : ℝ :=
+  ((∑ a : n, ∑ _b : n, BΓ a i j) + (∑ a : n, ∑ b : n, BΓ b a b)) +
+    ((∑ a : n, ∑ b : n, BΓ a i b) + (∑ a : n, ∑ b : n, BΓ b a j))
+
+theorem christoffelQuadraticRicciEntryLipschitzConst_nonneg {n : Type*} [Fintype n]
+    {BΓ : n → n → n → ℝ} (hBΓ : ∀ a b c, 0 ≤ BΓ a b c) (i j : n) :
+    0 ≤ christoffelQuadraticRicciEntryLipschitzConst BΓ i j := by
+  exact add_nonneg
+    (add_nonneg
+      (Finset.sum_nonneg fun a _ha => Finset.sum_nonneg fun b _hb => hBΓ a i j)
+      (Finset.sum_nonneg fun a _ha => Finset.sum_nonneg fun b _hb => hBΓ b a b))
+    (add_nonneg
+      (Finset.sum_nonneg fun a _ha => Finset.sum_nonneg fun b _hb => hBΓ a i b)
+      (Finset.sum_nonneg fun a _ha => Finset.sum_nonneg fun b _hb => hBΓ b a j))
+
+/-- One quadratic Christoffel Ricci contraction entry is Lipschitz with respect to a uniform
+entrywise Christoffel-array difference bound. -/
+theorem christoffel_quadratic_ricci_entry_norm_sub_le_const {n A : Type*} [Fintype n]
+    [NormedRing A] {BΓ : n → n → n → ℝ} {η : ℝ} (Γ Λ : n → n → n → A)
+    (hΓ : ∀ a b c, ‖Γ a b c‖ ≤ BΓ a b c)
+    (hΛ : ∀ a b c, ‖Λ a b c‖ ≤ BΓ a b c)
+    (hdiff : ∀ a b c, ‖Γ a b c - Λ a b c‖ ≤ η) (i j : n) :
+    ‖((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+        (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) -
+      ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+        (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))‖ ≤
+      christoffelQuadraticRicciEntryLipschitzConst BΓ i j * η := by
+  have hBΓ_nonneg : ∀ a b c, 0 ≤ BΓ a b c := by
+    intro a b c
+    exact (norm_nonneg _).trans (hΓ a b c)
+  have hbase := christoffel_quadratic_ricci_entry_norm_sub_le Γ Λ hΓ hΛ i j
+  refine hbase.trans ?_
+  calc
+    (∑ a : n, ∑ b : n,
+        (BΓ a i j * ‖Γ b a b - Λ b a b‖ +
+          BΓ b a b * ‖Γ a i j - Λ a i j‖)) +
+      (∑ a : n, ∑ b : n,
+        (BΓ a i b * ‖Γ b a j - Λ b a j‖ +
+          BΓ b a j * ‖Γ a i b - Λ a i b‖))
+        ≤
+      (∑ a : n, ∑ b : n, (BΓ a i j * η + BΓ b a b * η)) +
+        (∑ a : n, ∑ b : n, (BΓ a i b * η + BΓ b a j * η)) := by
+      exact add_le_add
+        (Finset.sum_le_sum fun a _ha =>
+          Finset.sum_le_sum fun b _hb =>
+            add_le_add
+              (mul_le_mul_of_nonneg_left (hdiff b a b) (hBΓ_nonneg a i j))
+              (mul_le_mul_of_nonneg_left (hdiff a i j) (hBΓ_nonneg b a b)))
+        (Finset.sum_le_sum fun a _ha =>
+          Finset.sum_le_sum fun b _hb =>
+            add_le_add
+              (mul_le_mul_of_nonneg_left (hdiff b a j) (hBΓ_nonneg a i b))
+              (mul_le_mul_of_nonneg_left (hdiff a i b) (hBΓ_nonneg b a j)))
+    _ =
+      christoffelQuadraticRicciEntryLipschitzConst BΓ i j * η := by
+      have h1 :
+          (∑ a : n, ∑ b : n, BΓ a i j * η) =
+            (∑ a : n, ∑ b : n, BΓ a i j) * η := by
+        simp_rw [Finset.sum_mul]
+      have h2 :
+          (∑ a : n, ∑ b : n, BΓ b a b * η) =
+            (∑ a : n, ∑ b : n, BΓ b a b) * η := by
+        simp_rw [Finset.sum_mul]
+      have h3 :
+          (∑ a : n, ∑ b : n, BΓ a i b * η) =
+            (∑ a : n, ∑ b : n, BΓ a i b) * η := by
+        simp_rw [Finset.sum_mul]
+      have h4 :
+          (∑ a : n, ∑ b : n, BΓ b a j * η) =
+            (∑ a : n, ∑ b : n, BΓ b a j) * η := by
+        simp_rw [Finset.sum_mul]
+      calc
+        (∑ a : n, ∑ b : n, (BΓ a i j * η + BΓ b a b * η)) +
+          (∑ a : n, ∑ b : n, (BΓ a i b * η + BΓ b a j * η)) =
+            ((∑ a : n, ∑ b : n, BΓ a i j * η) +
+              (∑ a : n, ∑ b : n, BΓ b a b * η)) +
+            ((∑ a : n, ∑ b : n, BΓ a i b * η) +
+              (∑ a : n, ∑ b : n, BΓ b a j * η)) := by
+          simp [Finset.sum_add_distrib]
+        _ =
+            ((∑ a : n, ∑ b : n, BΓ a i j) * η +
+              (∑ a : n, ∑ b : n, BΓ b a b) * η) +
+            ((∑ a : n, ∑ b : n, BΓ a i b) * η +
+              (∑ a : n, ∑ b : n, BΓ b a j) * η) := by
+          rw [h1, h2, h3, h4]
+        _ = christoffelQuadraticRicciEntryLipschitzConst BΓ i j * η := by
+          simp [christoffelQuadraticRicciEntryLipschitzConst]
+          ring
+
+/-- Matrix-norm Lipschitz constant for the full quadratic Christoffel Ricci contraction with
+respect to a uniform entrywise Christoffel-array difference bound. -/
+def christoffelQuadraticRicciLipschitzConst {n : Type*} [Fintype n]
+    (BΓ : n → n → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : n, christoffelQuadraticRicciEntryLipschitzConst BΓ i j
+
+theorem christoffelQuadraticRicciLipschitzConst_nonneg {n : Type*} [Fintype n]
+    {BΓ : n → n → n → ℝ} (hBΓ : ∀ a b c, 0 ≤ BΓ a b c) :
+    0 ≤ christoffelQuadraticRicciLipschitzConst BΓ := by
+  exact Finset.sum_nonneg fun i _hi =>
+    Finset.sum_nonneg fun j _hj =>
+      christoffelQuadraticRicciEntryLipschitzConst_nonneg hBΓ i j
+
 /-- The full finite Ricci-coordinate quadratic Christoffel contraction is pointwise Lipschitz in
 the elementwise matrix norm on bounded Christoffel arrays. -/
 theorem christoffel_quadratic_ricci_norm_sub_le {n A : Type*} [Fintype n] [NormedRing A]
@@ -2605,6 +2710,79 @@ theorem christoffel_quadratic_ricci_norm_sub_le {n A : Type*} [Fintype n] [Norme
       _ ≤ ∑ i : n, ∑ j : n, entryBound i j :=
         Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
   simpa [entryBound] using hnorm
+
+/-- The full finite Ricci-coordinate quadratic Christoffel contraction is Lipschitz in the
+elementwise matrix norm with respect to a uniform entrywise Christoffel-array difference bound. -/
+theorem christoffel_quadratic_ricci_norm_sub_le_const {n A : Type*} [Fintype n]
+    [NormedRing A] {BΓ : n → n → n → ℝ} {η : ℝ} (Γ Λ : n → n → n → A)
+    (hΓ : ∀ a b c, ‖Γ a b c‖ ≤ BΓ a b c)
+    (hΛ : ∀ a b c, ‖Λ a b c‖ ≤ BΓ a b c)
+    (hη : 0 ≤ η) (hdiff : ∀ a b c, ‖Γ a b c - Λ a b c‖ ≤ η) :
+    ‖((fun i j =>
+        (∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+          (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) : Matrix n n A) -
+      ((fun i j =>
+        (∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+          (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)) : Matrix n n A)‖ ≤
+      christoffelQuadraticRicciLipschitzConst BΓ * η := by
+  classical
+  have hBΓ_nonneg : ∀ a b c, 0 ≤ BΓ a b c := by
+    intro a b c
+    exact (norm_nonneg _).trans (hΓ a b c)
+  let entryBound : n → n → ℝ :=
+    fun i j => christoffelQuadraticRicciEntryLipschitzConst BΓ i j * η
+  have hentry : ∀ i j,
+      ‖((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+          (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) -
+        ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+          (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))‖ ≤ entryBound i j := by
+    intro i j
+    simpa [entryBound] using
+      christoffel_quadratic_ricci_entry_norm_sub_le_const Γ Λ hΓ hΛ hdiff i j
+  have hentry_nonneg : ∀ i j, 0 ≤ entryBound i j := by
+    intro i j
+    exact mul_nonneg (christoffelQuadraticRicciEntryLipschitzConst_nonneg hBΓ_nonneg i j) hη
+  have hrow_nonneg : ∀ i, 0 ≤ ∑ j : n, entryBound i j := by
+    intro i
+    exact Finset.sum_nonneg fun j _hj => hentry_nonneg i j
+  have htotal_nonneg : 0 ≤ ∑ i : n, ∑ j : n, entryBound i j :=
+    Finset.sum_nonneg fun i _hi => hrow_nonneg i
+  have hnorm :
+      ‖((fun i j =>
+          (∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) : Matrix n n A) -
+        ((fun i j =>
+          (∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+            (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)) : Matrix n n A)‖ ≤
+        ∑ i : n, ∑ j : n, entryBound i j := by
+    refine (Matrix.norm_le_iff htotal_nonneg).2 ?_
+    intro i j
+    calc
+      ‖(((fun i j =>
+          (∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) : Matrix n n A) -
+        ((fun i j =>
+          (∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+            (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)) : Matrix n n A)) i j‖ =
+          ‖((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+              (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) -
+            ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+              (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))‖ := rfl
+      _ ≤ entryBound i j := hentry i j
+      _ ≤ ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hentry_nonneg i k) (Finset.mem_univ j)
+      _ ≤ ∑ i : n, ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
+  calc
+    ‖((fun i j =>
+        (∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+          (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) : Matrix n n A) -
+      ((fun i j =>
+        (∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+          (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)) : Matrix n n A)‖ ≤
+        ∑ i : n, ∑ j : n, entryBound i j := hnorm
+    _ = christoffelQuadraticRicciLipschitzConst BΓ * η := by
+      simp_rw [entryBound, christoffelQuadraticRicciLipschitzConst, Finset.sum_mul]
 
 /-- The schematic Ricci-DeTurck coordinate entry built from an inverse principal contraction and
 a supplied Christoffel array is pointwise Lipschitz on bounded inputs.  This is the algebraic

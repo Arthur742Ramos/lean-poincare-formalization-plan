@@ -156,10 +156,10 @@ for finite matrix determinants, adjugate entries, and inverse entries under a
 determinant lower bound from entrywise control, plus pointwise determinant
 Lipschitz control in the elementwise matrix norm, named adjugate-entry,
 inverse-entry, summed whole inverse-matrix, matrix-product,
-inverse-principal entry, and inverse-Christoffel metric-side matrix-norm
-Lipschitz constants, plus pointwise quadratic-Christoffel contraction
-Lipschitz estimate layer, plus a supplied-Christoffel schematic RHS Lipschitz
-aggregation and primitive-input schematic RHS estimate, on entrywise bounded
+inverse-principal entry, inverse-Christoffel metric-side, and
+quadratic-Christoffel matrix-norm Lipschitz constants, plus a
+supplied-Christoffel schematic RHS Lipschitz aggregation and primitive-input
+schematic RHS estimate, on entrywise bounded
 finite matrices, using a determinant lower bound for inverse estimates,
 including a compactness bridge from nonvanishing determinants to a uniform
 determinant lower bound and compact-domain inverse-entry, inverse-action,
