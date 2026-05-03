@@ -250,7 +250,9 @@ packages the canonical stationary local solution attached to
   time-derivative data before the gauge-flow conversion; the closed-Picard
   metric-coordinate gauge-pullback route now also consumes product
   Picard-Lindelof hypotheses directly, including open-domain and
-  radius-specialized endpoint forms; encoded candidates in
+  radius-specialized endpoint forms; model-flow overlap uniqueness now also
+  covers common closed subintervals of different ambient Picard intervals for
+  both local and continuous space-time flow packages; encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The
   same state-set mechanism now also has a

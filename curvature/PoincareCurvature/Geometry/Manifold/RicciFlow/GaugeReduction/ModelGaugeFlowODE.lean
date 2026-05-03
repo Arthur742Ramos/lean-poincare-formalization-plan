@@ -378,6 +378,43 @@ theorem flow_eq_of_lipschitzOnWith_of_mem_Icc
     α.flow x t = β.flow x t :=
   α.eqOn_Icc_of_lipschitzOnWith_of_mem β hxα hxβ ht₀ hf_lip hα_mem hβ_mem ht
 
+/-- Common-subinterval overlap uniqueness for packaged local model flows whose
+ambient Picard intervals may differ.  This is the chart-gluing form obtained by
+restricting both packages to a shared closed interval containing the same base
+time. -/
+theorem eqOn_common_Icc_of_lipschitzOnWith_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : LocalFlowSolution f (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow x t ∈ state t) :
+    EqOn (α.flow x) (β.flow x) (Icc a b) := by
+  let t₀' : Icc a b := ⟨tbase, Ioo_subset_Icc_self htbase⟩
+  let α' : LocalFlowSolution f t₀' xα rα :=
+    α.restrict hαtime (Ioo_subset_Icc_self htbase) le_rfl
+  let β' : LocalFlowSolution f t₀' xβ rβ :=
+    β.restrict hβtime (Ioo_subset_Icc_self htbase) le_rfl
+  have htbase' : (t₀' : ℝ) ∈ Ioo a b := by
+    simpa [t₀'] using htbase
+  have hα_mem' : ∀ t ∈ Ioo a b, α'.flow x t ∈ state t := by
+    intro t ht
+    simpa [α'] using hα_mem t ht
+  have hβ_mem' : ∀ t ∈ Ioo a b, β'.flow x t ∈ state t := by
+    intro t ht
+    simpa [β'] using hβ_mem t ht
+  have hcommon : EqOn (α'.flow x) (β'.flow x) (Icc a b) :=
+    α'.eqOn_Icc_of_lipschitzOnWith_of_mem β' hxα hxβ htbase'
+      hf_lip hα_mem' hβ_mem'
+  simpa [α', β'] using hcommon
+
 /-- Closed-interval uniqueness form for packaged local model flows.  This is the
 version needed when endpoint continuity is available from the within-interval
 ODE statements. -/
@@ -1085,6 +1122,28 @@ theorem eqOn_Icc_of_lipschitzOnWith_of_mem
   LocalFlowSolution.eqOn_Icc_of_lipschitzOnWith_of_mem
     (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
     (x := x) hxα hxβ ht₀ hf_lip hα_mem hβ_mem
+
+/-- Common-subinterval overlap uniqueness for continuous space-time local flows
+whose ambient Picard intervals may differ.  This is the continuous-flow version
+of `LocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_mem`. -/
+theorem eqOn_common_Icc_of_lipschitzOnWith_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : ContinuousLocalFlowSolution f (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : ContinuousLocalFlowSolution f (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t)) (Icc a b) :=
+  LocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_mem
+    (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
+    hαtime hβtime hxα hxβ htbase hf_lip hα_mem hβ_mem
 
 /-- Pointwise closed-interval overlap uniqueness for continuous space-time local
 flows. -/
