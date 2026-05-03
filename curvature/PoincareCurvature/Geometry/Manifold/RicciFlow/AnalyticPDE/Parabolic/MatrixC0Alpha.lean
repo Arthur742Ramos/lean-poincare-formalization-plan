@@ -2327,6 +2327,47 @@ theorem matrix_inv_christoffel_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintyp
     ⟨δ, hδpos, hdet⟩
   exact matrix_inv_christoffel (M := M) (D := D) hM hD hδpos hdet
 
+/-- Quantitative sup constant for one entry of the finite inverse-principal contraction
+`M⁻¹ᵃᵇ T_abij`. -/
+def matrixInvTwoIndexContractEntryBoundConst {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] (δ : ℝ) (B : n → n → ℝ)
+    (TB : n → n → p → q → ℝ) (i : p) (j : q) : ℝ :=
+  ∑ a : n, ∑ b : n,
+    matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TB a b i j
+
+/-- Quantitative Holder constant for one entry of the finite inverse-principal contraction
+`M⁻¹ᵃᵇ T_abij`. -/
+def matrixInvTwoIndexContractEntryHolderConst {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] (δ : ℝ) (B H : n → n → ℝ)
+    (TB TH : n → n → p → q → ℝ) (i : p) (j : q) : ℝ :=
+  ∑ a : n, ∑ b : n,
+    (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TH a b i j +
+      TB a b i j * matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H a b)
+
+theorem matrixInvTwoIndexContractEntryBoundConst_nonneg {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ)
+    (B : n → n → ℝ) {TB : n → n → p → q → ℝ}
+    (hTB : ∀ a b i j, 0 ≤ TB a b i j) (i : p) (j : q) :
+    0 ≤ matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ B TB i j := by
+  exact Finset.sum_nonneg fun a _ha =>
+    Finset.sum_nonneg fun b _hb =>
+      mul_nonneg (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B a b)
+        (hTB a b i j)
+
+theorem matrixInvTwoIndexContractEntryHolderConst_nonneg {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B H : n → n → ℝ}
+    (hH : ∀ a b, 0 ≤ H a b) (hδpos : 0 < δ) {TB TH : n → n → p → q → ℝ}
+    (hTB : ∀ a b i j, 0 ≤ TB a b i j) (hTH : ∀ a b i j, 0 ≤ TH a b i j)
+    (i : p) (j : q) :
+    0 ≤ matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ B H TB TH i j := by
+  exact Finset.sum_nonneg fun a _ha =>
+    Finset.sum_nonneg fun b _hb =>
+      add_nonneg
+        (mul_nonneg (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B a b)
+          (hTH a b i j))
+        (mul_nonneg (hTB a b i j)
+          (matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos a b))
+
 /-- Finite inverse-matrix contractions against a four-index coefficient array preserve parabolic
 `C^{0,α}` control. This is the coordinate-algebra pattern for terms such as
 `g^{ab} H_{abij}` in a local Ricci-DeTurck principal part. -/
@@ -2369,6 +2410,109 @@ theorem matrix_inv_two_index_contract {n p q 𝕜 : Type*} [Fintype n] [Decidabl
           ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j :
             Matrix p q 𝕜)) s :=
   matrix_of_entries fun i j => matrix_inv_two_index_contract_entry hM hT hδpos hdet i j
+
+/-- One entry of a finite inverse-principal contraction has an explicit bounded parabolic
+`C^{0,α}` estimate from explicit metric-entry and coefficient-array estimates. -/
+theorem matrix_inv_two_index_contract_entry_with {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B H : n → n → ℝ}
+    {TB TH : n → n → p → q → ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {T : ℝ × X → n → n → p → q → 𝕜}
+    (hH : ∀ a b, 0 ≤ H a b)
+    (hM : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => M z a b) s)
+    (hT : ∀ a b i j, ParabolicC0AlphaWith (TB a b i j) (TH a b i j) α
+      (fun z => T z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i : p) (j : q) :
+    ParabolicC0AlphaWith
+      (matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ B TB i j)
+      (matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ B H TB TH i j)
+      α
+      (fun z => ∑ a : n, ∑ b : n,
+        ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j) s := by
+  classical
+  let inner : n → ℝ × X → 𝕜 := fun a z =>
+    ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j
+  have hinner : ∀ a ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaWith
+        (∑ b : n, matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TB a b i j)
+        (∑ b : n,
+          (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TH a b i j +
+            TB a b i j * matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H a b))
+        α (inner a) s := by
+    intro a _ha
+    let term : n → ℝ × X → 𝕜 := fun b z =>
+      ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j
+    have hterm : ∀ b ∈ (Finset.univ : Finset n),
+        ParabolicC0AlphaWith
+          (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TB a b i j)
+          (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TH a b i j +
+            TB a b i j * matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H a b)
+          α (term b) s := by
+      intro b _hb
+      have hinv :
+          ParabolicC0AlphaWith
+            (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b)
+            (matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H a b)
+            α (fun z => ((M z)⁻¹ : Matrix n n 𝕜) a b) s :=
+        matrix_inv_entry_with (M := M) hH hM hδpos hdet a b
+      simpa [term] using
+        hinv.mul (hT a b i j) (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B a b)
+    simpa [inner] using
+      (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (B := fun b => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TB a b i j)
+        (H := fun b =>
+          matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TH a b i j +
+            TB a b i j * matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H a b)
+        (u := term) hterm)
+  simpa [inner, matrixInvTwoIndexContractEntryBoundConst,
+    matrixInvTwoIndexContractEntryHolderConst] using
+    (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (B := fun a => ∑ b : n,
+        matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TB a b i j)
+      (H := fun a => ∑ b : n,
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B a b * TH a b i j +
+          TB a b i j * matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H a b))
+      (u := inner) hinner)
+
+/-- Finite inverse-principal contractions package as a matrix-valued explicit bounded parabolic
+`C^{0,α}` estimate. -/
+theorem matrix_inv_two_index_contract_with {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜] {δ : ℝ}
+    {B H : n → n → ℝ} {TB TH : n → n → p → q → ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {T : ℝ × X → n → n → p → q → 𝕜}
+    (hH : ∀ a b, 0 ≤ H a b)
+    (hTB : ∀ a b i j, 0 ≤ TB a b i j) (hTH : ∀ a b i j, 0 ≤ TH a b i j)
+    (hM : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => M z a b) s)
+    (hT : ∀ a b i j, ParabolicC0AlphaWith (TB a b i j) (TH a b i j) α
+      (fun z => T z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaWith
+      (∑ i : p, ∑ j : q, matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ B TB i j)
+      (∑ i : p, ∑ j : q,
+        matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ B H TB TH i j)
+      α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j :
+            Matrix p q 𝕜)) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      matrixInvTwoIndexContractEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B hTB i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      matrixInvTwoIndexContractEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos hTB hTH i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact matrixInvTwoIndexContractEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B hTB i j
+    · intro j
+      exact matrixInvTwoIndexContractEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos hTB hTH i j
+    · intro j
+      exact matrix_inv_two_index_contract_entry_with (M := M) (T := T)
+        hH hM hT hδpos hdet i j
 
 /-- Finite inverse-matrix contractions against a four-index coefficient array are pointwise
 Lipschitz on bounded coefficient arrays and entrywise bounded matrices with a common determinant

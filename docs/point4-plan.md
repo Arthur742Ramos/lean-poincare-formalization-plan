@@ -1272,7 +1272,8 @@ control, now also with explicit bounded determinant, adjugate-entry, and
 inverse-entry estimates plus a whole inverse-matrix estimate, including a
 pointwise determinant Lipschitz estimate in the elementwise matrix norm,
 named adjugate-entry, inverse-entry, summed whole inverse-matrix,
-matrix-product, inverse-principal entry, inverse-Christoffel
+matrix-product, inverse-principal entry Lipschitz and bounded Holder
+entry/matrix estimates, inverse-Christoffel
 derivative/metric-side and array-level Lipschitz constants,
 inverse-Christoffel bounded Holder entry/array estimates, and
 quadratic-Christoffel matrix-norm Lipschitz constants, plus
@@ -1290,9 +1291,10 @@ vector/matrix and inverse-matrix packages, finite vector dot products, and
 bilinear contractions through matrices or inverse matrices, including explicit
 bounded Holder entry and whole-array estimates for Christoffel-symbol type
 inverse-metric contractions and their entrywise/whole-array closure, whole
-matrix-valued principal-part contractions
-`g^{ab} H_abij`, whole matrix-valued Ricci-coordinate quadratic Christoffel
-contractions, and a whole matrix-valued schematic local Ricci-DeTurck coordinate
+matrix-valued principal-part contractions with explicit bounded Holder
+entry/matrix estimates for `g^{ab} H_abij`, whole matrix-valued
+Ricci-coordinate quadratic Christoffel contractions, and a whole matrix-valued
+schematic local Ricci-DeTurck coordinate
 RHS combining those terms, using finite-product, integer-scalar, reciprocal, and
 division closure. On the geometric side, the Levi-Civita local-frame Gram
 matrix layer now also turns pointwise Gram determinant nonvanishing into a
