@@ -153,8 +153,9 @@ The separate `RicciFlow/AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves
 explicit bounded `C^{0,α}` determinant, adjugate-entry, and inverse-entry
 estimates plus a whole inverse-matrix estimate, and parabolic `C^{0,α}` closure
 for finite matrix determinants, adjugate entries, and inverse entries under a
-determinant lower bound from entrywise control, plus a pointwise determinant,
-adjugate-entry, inverse-entry, whole inverse-matrix, matrix-product, and
+determinant lower bound from entrywise control, plus pointwise determinant
+Lipschitz control in the elementwise matrix norm and pointwise adjugate-entry,
+inverse-entry, whole inverse-matrix, matrix-product, and
 inverse-principal, inverse-Christoffel, and quadratic-Christoffel contraction
 Lipschitz estimate layer, plus a supplied-Christoffel schematic RHS Lipschitz
 aggregation and primitive-input schematic RHS estimate, on entrywise bounded

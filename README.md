@@ -371,7 +371,8 @@ packages the canonical stationary local solution attached to
   primitives to prove explicit bounded `C^{0,α}` determinant, adjugate-entry,
   inverse-entry, and whole inverse-matrix estimates, plus parabolic `C^{0,α}`
   closure of finite matrix determinants, adjugate entries, and inverse entries
-  under determinant lower bounds, and pointwise determinant, adjugate-entry,
+  under determinant lower bounds, pointwise determinant Lipschitz control in the
+  elementwise matrix norm, and pointwise adjugate-entry,
   inverse-entry, whole inverse-matrix, matrix-product, and
   inverse-principal, inverse-Christoffel, and quadratic-Christoffel contraction
   Lipschitz estimates, plus a supplied-Christoffel schematic RHS Lipschitz

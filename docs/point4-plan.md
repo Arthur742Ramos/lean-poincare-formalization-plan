@@ -1270,7 +1270,8 @@ adjugate-entry closure, and inverse-entry closure under a determinant lower
 bound for finite matrix-valued parabolic `C^{0,α}` functions from entrywise
 control, now also with explicit bounded determinant, adjugate-entry, and
 inverse-entry estimates plus a whole inverse-matrix estimate, including a
-pointwise determinant, adjugate-entry, inverse-entry, whole inverse-matrix,
+pointwise determinant Lipschitz estimate in the elementwise matrix norm,
+pointwise adjugate-entry, inverse-entry, whole inverse-matrix,
 matrix-product, and inverse-principal, inverse-Christoffel, and quadratic-Christoffel
 contraction Lipschitz estimate layer, plus a supplied-Christoffel schematic RHS
 Lipschitz aggregation and primitive-input schematic RHS estimate, on entrywise

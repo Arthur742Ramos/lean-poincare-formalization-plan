@@ -225,6 +225,72 @@ theorem matrix_det_norm_sub_le {n A : Type*} [Fintype n] [DecidableEq n] [Normed
             (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1)) :=
       Finset.sum_le_sum hterm
 
+/-- Elementwise matrix-norm Lipschitz constant for the determinant on an entrywise bounded set. -/
+def matrixDetLipschitzConst {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
+    (C : n → n → ℝ) : ℝ :=
+  ∑ σ : Equiv.Perm n,
+    ‖(Equiv.Perm.sign σ : ℤ)‖ *
+      ((Fintype.card n : ℝ) *
+        (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1))
+
+theorem matrixDetLipschitzConst_nonneg {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] (C : n → n → ℝ) :
+    0 ≤ matrixDetLipschitzConst (A := A) C := by
+  exact Finset.sum_nonneg fun σ _hσ =>
+    mul_nonneg (norm_nonneg _)
+      (mul_nonneg (Nat.cast_nonneg _)
+        (mul_nonneg (zero_le_one.trans (le_max_right _ _))
+          (Finset.prod_nonneg fun i _hi =>
+            zero_le_one.trans (le_max_right (C (σ i) i) 1))))
+
+/-- Determinants are Lipschitz in the elementwise matrix norm on entrywise bounded finite
+matrices. -/
+theorem matrix_det_norm_sub_le_const_mul {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] {C : n → n → ℝ} (M N : Matrix n n A)
+    (hM : ∀ i j, ‖M i j‖ ≤ C i j) (hN : ∀ i j, ‖N i j‖ ≤ C i j) :
+    ‖M.det - N.det‖ ≤ matrixDetLipschitzConst (A := A) C * ‖M - N‖ := by
+  classical
+  have hbase := matrix_det_norm_sub_le (C := C) M N hM hN
+  have hsum : ∀ σ : Equiv.Perm n,
+      (∑ i : n, ‖M (σ i) i - N (σ i) i‖) ≤
+        (Fintype.card n : ℝ) * ‖M - N‖ := by
+    intro σ
+    calc
+      (∑ i : n, ‖M (σ i) i - N (σ i) i‖) ≤ ∑ _i : n, ‖M - N‖ := by
+        exact Finset.sum_le_sum fun i _hi => by
+          simpa using Matrix.norm_entry_le_entrywise_sup_norm (M - N) (i := σ i) (j := i)
+      _ = (Fintype.card n : ℝ) * ‖M - N‖ := by
+        simp
+  refine hbase.trans ?_
+  calc
+    (∑ σ : Equiv.Perm n,
+        ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((∑ i : n, ‖M (σ i) i - N (σ i) i‖) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1)))
+        ≤
+      ∑ σ : Equiv.Perm n,
+        (‖(Equiv.Perm.sign σ : ℤ)‖ *
+          ((Fintype.card n : ℝ) *
+            (max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1))) * ‖M - N‖ := by
+      refine Finset.sum_le_sum fun σ _hσ => ?_
+      let Lσ : ℝ := max ‖(1 : A)‖ 1 * ∏ i : n, max (C (σ i) i) 1
+      have hLσ_nonneg : 0 ≤ Lσ := by
+        exact mul_nonneg (zero_le_one.trans (le_max_right _ _))
+          (Finset.prod_nonneg fun i _hi => zero_le_one.trans (le_max_right (C (σ i) i) 1))
+      calc
+        ‖(Equiv.Perm.sign σ : ℤ)‖ *
+            ((∑ i : n, ‖M (σ i) i - N (σ i) i‖) * Lσ) ≤
+          ‖(Equiv.Perm.sign σ : ℤ)‖ *
+            (((Fintype.card n : ℝ) * ‖M - N‖) * Lσ) :=
+          mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_right (hsum σ) hLσ_nonneg) (norm_nonneg _)
+        _ =
+          (‖(Equiv.Perm.sign σ : ℤ)‖ *
+            ((Fintype.card n : ℝ) * Lσ)) * ‖M - N‖ := by
+          ring
+    _ = matrixDetLipschitzConst (A := A) C * ‖M - N‖ := by
+      simp [matrixDetLipschitzConst, Finset.sum_mul, mul_assoc]
+
 /-- Determinants are pointwise bounded by the quantitative finite product constant. -/
 theorem matrix_det_norm_le {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
     {C : n → n → ℝ} (M : Matrix n n A)
