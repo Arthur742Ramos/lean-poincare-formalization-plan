@@ -268,8 +268,9 @@ packages the canonical stationary local solution attached to
   covers common closed subintervals of different ambient Picard intervals for
   local, continuous space-time, full variational `(flow, tangent)`, and
   scalar-readout derivative-domain `(t, flow, A(t)u, A(t)v)` packages, with
-  open-overlap readouts for base flows and full variational pairs, pointwise
-  common-interval readouts, and common time-graph/scalar-state compatibility for
+  open-overlap readouts for base flows, full variational pairs, scalar states,
+  and scalar time graphs, pointwise common-interval readouts, and common
+  time-graph/scalar-state compatibility for
   chart gluing; encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The
