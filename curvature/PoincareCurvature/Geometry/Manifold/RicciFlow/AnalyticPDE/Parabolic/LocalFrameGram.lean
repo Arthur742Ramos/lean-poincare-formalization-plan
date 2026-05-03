@@ -121,6 +121,41 @@ theorem localFrameGramMatrix_inv_christoffel_of_entries_of_timeSpace_isCompact
       (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
     (D := D) hG hD hδpos hdet
 
+/-- Spatial boundedness and spatial Holder estimates for local-frame Gram entries, together with
+parabolic control of a three-index derivative array, lift to parabolic `C^{0,α}` control of the
+associated inverse-Gram Christoffel-type contraction on compact time-space sets contained in a
+trivialization base. -/
+theorem localFrameGramMatrix_inv_christoffel_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {B Hc : ι → ι → ℝ}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j) (hH_nonneg : ∀ i j, 0 ≤ Hc i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ B i j)
+    (hholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄, y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        Hc i j * (dist x y) ^ α)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D z i j k) K) :
+    ParabolicC0AlphaOn α
+      (fun z i j k =>
+        (2 : ℝ)⁻¹ *
+          ∑ l : ι,
+            ((show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                Matrix ι ι ℝ) i l *
+              (D z j k l + D z k j l - D z l j k)) K := by
+  refine localFrameGramMatrix_inv_christoffel_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_ hD
+  intro i j
+  exact of_snd_holder (s := K) (α := α)
+    (hB_nonneg i j) (hH_nonneg i j) hα (hB i j) (hholder i j)
+
 /-- If the local-frame Gram entries and the first- and second-derivative coefficient arrays have
 parabolic `C^{0,α}` control on a compact time-space set contained in a trivialization base, then
 the schematic local Ricci-DeTurck coordinate right-hand side has parabolic `C^{0,α}` control
@@ -164,6 +199,52 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_of_entries_of_timeSpace_isCo
     (M := fun z : ℝ × M =>
       (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
     (D := D) (H := Hc) hG hD hHc hδpos hdet
+
+/-- Spatial boundedness and spatial Holder estimates for local-frame Gram entries, together with
+parabolic control of the first- and second-derivative coefficient arrays, lift to parabolic
+`C^{0,α}` control of the schematic local Ricci-DeTurck coordinate right-hand side on compact
+time-space sets contained in a trivialization base. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {B Hgram : ι → ι → ℝ}
+    (hB_nonneg : ∀ i j, 0 ≤ B i j) (hHgram_nonneg : ∀ i j, 0 ≤ Hgram i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ B i j)
+    (hholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄, y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        Hgram i j * (dist x y) ^ α)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hD : ∀ i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D z i j k) K)
+    (hHc : ∀ a c i j, ParabolicC0AlphaOn α (fun z : ℝ × M => Hc z a c i j) K) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        (fun i j =>
+          let Γ : ι → ι → ι → ℝ := fun a c d =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a l *
+                  (D z c d l + D z d c l - D z l c d)
+          (∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) +
+            ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+              (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+          Matrix ι ι ℝ)) K := by
+  refine localFrameGramMatrix_ricciDeTurck_schematic_of_entries_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hKbase ?_ hD hHc
+  intro i j
+  exact of_snd_holder (s := K) (α := α)
+    (hB_nonneg i j) (hHgram_nonneg i j) hα (hB i j) (hholder i j)
 
 end ParabolicC0AlphaOn
 end AnalyticPDE
