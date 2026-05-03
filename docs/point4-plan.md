@@ -1245,7 +1245,8 @@ constants, and operator-application closure, and
 integer-scalar closure,
 and additive/subtractive algebra estimates,
 including the standard bounded-product estimate for normed-ring-valued
-`C^{0,α}` functions and the corresponding bounded scalar-action estimate on
+`C^{0,α}` functions, two-factor and finite-sum product-difference
+`C^{0,α}` estimates, and the corresponding bounded scalar-action estimate on
 normed-space-valued functions, plus reciprocal and division closure for
 normed-field-valued functions bounded away from zero.
 This is still only the

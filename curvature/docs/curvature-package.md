@@ -136,7 +136,8 @@ product-valued pairing closure,
 integer-scalar closure,
 additive/subtractive closure estimates, plus the
 bounded product estimate for
-normed-ring-valued `C^{0,α}` functions and the corresponding bounded
+normed-ring-valued `C^{0,α}` functions, two-factor and finite-sum
+product-difference `C^{0,α}` estimates, and the corresponding bounded
 scalar-action estimate for normed-space-valued functions, reciprocal and
 division closure for normed-field-valued functions bounded away from zero, and
 an explicit bounded finite-product `C^{0,α}` estimate,

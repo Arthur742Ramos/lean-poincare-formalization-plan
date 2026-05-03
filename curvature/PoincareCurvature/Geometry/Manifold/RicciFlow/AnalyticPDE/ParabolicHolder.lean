@@ -2580,6 +2580,61 @@ theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
           (mul_le_mul (hu.holder hp hq) (hv.bounded hq) (norm_nonneg _) hH₁d_nonneg)
       _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
 
+/-- Product differences inherit parabolic `C^{0,α}` control from one left factor, one right
+factor, and `C^{0,α}` controls of the two factor differences. -/
+theorem mul_sub_mul {A : Type*} [NormedRing A]
+    {Bu Hu Bv Hv Bdu Hdu Bdv Hdv α : ℝ}
+    {u u' v v' : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaWith Bu Hu α u s)
+    (hv' : ParabolicC0AlphaWith Bv Hv α v' s)
+    (hdu : ParabolicC0AlphaWith Bdu Hdu α (fun z => u z - u' z) s)
+    (hdv : ParabolicC0AlphaWith Bdv Hdv α (fun z => v z - v' z) s)
+    (hBu : 0 ≤ Bu) (hBdu : 0 ≤ Bdu) :
+    ParabolicC0AlphaWith (Bu * Bdv + Bdu * Bv)
+      ((Bu * Hdv + Bdv * Hu) + (Bdu * Hv + Bv * Hdu)) α
+      (fun z => u z * v z - u' z * v' z) s := by
+  have hleft :
+      ParabolicC0AlphaWith (Bu * Bdv) (Bu * Hdv + Bdv * Hu) α
+        (fun z => u z * (v z - v' z)) s :=
+    hu.mul hdv hBu
+  have hright :
+      ParabolicC0AlphaWith (Bdu * Bv) (Bdu * Hv + Bv * Hdu) α
+        (fun z => (u z - u' z) * v' z) s :=
+    hdu.mul hv' hBdu
+  have hsum := hleft.add hright
+  convert hsum using 1
+  · ext z
+    noncomm_ring
+
+/-- Finite sums of product differences inherit parabolic `C^{0,α}` control from factorwise
+controls and factor-difference controls. -/
+theorem finset_sum_mul_sub_sum_mul {ι A : Type*} [NormedRing A] (S : Finset ι)
+    {Bu Hu Bv Hv Bdu Hdu Bdv Hdv : ι → ℝ} {α : ℝ}
+    {u u' v v' : ι → ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ∀ i ∈ S, ParabolicC0AlphaWith (Bu i) (Hu i) α (u i) s)
+    (hv' : ∀ i ∈ S, ParabolicC0AlphaWith (Bv i) (Hv i) α (v' i) s)
+    (hdu : ∀ i ∈ S,
+      ParabolicC0AlphaWith (Bdu i) (Hdu i) α (fun z => u i z - u' i z) s)
+    (hdv : ∀ i ∈ S,
+      ParabolicC0AlphaWith (Bdv i) (Hdv i) α (fun z => v i z - v' i z) s)
+    (hBu : ∀ i ∈ S, 0 ≤ Bu i) (hBdu : ∀ i ∈ S, 0 ≤ Bdu i) :
+    ParabolicC0AlphaWith
+      (∑ i ∈ S, (Bu i * Bdv i + Bdu i * Bv i))
+      (∑ i ∈ S, ((Bu i * Hdv i + Bdv i * Hu i) +
+        (Bdu i * Hv i + Bv i * Hdu i))) α
+      (fun z => (∑ i ∈ S, u i z * v i z) - ∑ i ∈ S, u' i z * v' i z) s := by
+  classical
+  have hsum := ParabolicC0AlphaWith.sum (s := s) (α := α) S
+    (B := fun i => Bu i * Bdv i + Bdu i * Bv i)
+    (H := fun i => (Bu i * Hdv i + Bdv i * Hu i) +
+      (Bdu i * Hv i + Bv i * Hdu i))
+    (u := fun i z => u i z * v i z - u' i z * v' i z)
+    (fun i hi =>
+      (hu i hi).mul_sub_mul (hv' i hi) (hdu i hi) (hdv i hi) (hBu i hi) (hBdu i hi))
+  convert hsum using 1
+  ext z
+  rw [Finset.sum_sub_distrib]
+
 theorem div {𝕜 : Type*} [NormedField 𝕜] {B₁ B₂ H₁ H₂ δ : ℝ}
     {a b : ℝ × X → 𝕜} {s : Set (ℝ × X)}
     (ha : ParabolicC0AlphaWith B₁ H₁ α a s)

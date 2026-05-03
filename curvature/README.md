@@ -999,7 +999,8 @@ continuous-linear, curried-bilinear-map, and operator-application closure with o
 product-valued pairing closure, and
 integer-scalar and basic linear algebra closure estimates for Hölder and
 bounded control, together with the bounded product estimate for
-normed-ring-valued `C^{0,α}` functions and the corresponding bounded
+normed-ring-valued `C^{0,α}` functions, two-factor and finite-sum
+product-difference `C^{0,α}` estimates, and the corresponding bounded
 scalar-action estimate for normed-space-valued functions,
 reciprocal and division closure for normed-field-valued functions bounded away
 from zero, plus closure under taking norms and Lipschitz composition on the

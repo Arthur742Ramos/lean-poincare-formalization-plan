@@ -349,7 +349,8 @@ packages the canonical stationary local solution attached to
   continuous-linear, curried-bilinear-map, and operator-application closure with operator-norm constants,
   add/subtract/smul, integer-scalar, and product-valued pairing closure
   estimates plus the bounded product estimate for normed-ring-valued
-  `C^{0,α}` functions and the corresponding bounded scalar-action estimate for
+  `C^{0,α}` functions, two-factor and finite-sum product-difference
+  `C^{0,α}` estimates, and the corresponding bounded scalar-action estimate for
   normed-space-valued functions, reciprocal closure for normed-field-valued
   functions bounded away from zero and the corresponding division closure,
   along with closure
