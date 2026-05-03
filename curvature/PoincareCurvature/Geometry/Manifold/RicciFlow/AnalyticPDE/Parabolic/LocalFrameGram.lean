@@ -41,7 +41,7 @@ theorem localFrameGramMatrix_inv_of_entries_of_timeSpace_isCompact
     [ContMDiffVectorBundle 2 E TM I]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
-    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
     (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
     (hG : ∀ i j,
       ParabolicC0AlphaOn α
@@ -52,12 +52,13 @@ theorem localFrameGramMatrix_inv_of_entries_of_timeSpace_isCompact
         ((show Matrix ι ι ℝ from
           CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
           Matrix ι ι ℝ)) K := by
-  exact matrix_inv_of_isCompact_det_ne_zero (K := K)
+  rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  exact matrix_inv (s := K)
     (M := fun z : ℝ × M =>
       (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
-    hK hα hG
-    (fun z hz =>
-      CovariantDerivative.localFrameGramMatrix_det_ne_zero (I := I) (E := E) e b (hKbase hz))
+    hG hδpos hdet
 
 /-- Spatial boundedness and spatial Holder estimates for local-frame Gram entries lift to
 parabolic `C^{0,α}` control of the inverse Gram matrix on compact time-space sets contained in a
@@ -67,7 +68,7 @@ theorem localFrameGramMatrix_inv_of_spatial_holder_of_timeSpace_isCompact
     [ContMDiffVectorBundle 2 E TM I]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
-    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 ≤ α)
     (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
     {B Hc : ι → ι → ℝ}
     (hB_nonneg : ∀ i j, 0 ≤ B i j) (hH_nonneg : ∀ i j, 0 ≤ Hc i j)
@@ -83,10 +84,10 @@ theorem localFrameGramMatrix_inv_of_spatial_holder_of_timeSpace_isCompact
           CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
           Matrix ι ι ℝ)) K := by
   refine localFrameGramMatrix_inv_of_entries_of_timeSpace_isCompact
-    (I := I) (E := E) e b hK hα hKbase ?_
+    (I := I) (E := E) e b hK hKbase ?_
   intro i j
   exact of_snd_holder (s := K) (α := α)
-    (hB_nonneg i j) (hH_nonneg i j) hα.le (hB i j) (hholder i j)
+    (hB_nonneg i j) (hH_nonneg i j) hα (hB i j) (hholder i j)
 
 end ParabolicC0AlphaOn
 end AnalyticPDE
