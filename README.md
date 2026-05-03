@@ -367,9 +367,9 @@ packages the canonical stationary local solution attached to
   not yet supply the
   Schauder estimates or the Ricci-DeTurck Banach chart. A separate
   `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now builds on those
-  primitives to prove an explicit bounded `C^{0,α}` determinant estimate and
-  parabolic `C^{0,α}` closure of finite matrix determinants, adjugate entries,
-  and inverse entries under determinant lower
+  primitives to prove explicit bounded `C^{0,α}` determinant, adjugate-entry,
+  and inverse-entry estimates, plus parabolic `C^{0,α}` closure of finite matrix
+  determinants, adjugate entries, and inverse entries under determinant lower
   bounds, with compact nonvanishing determinant data now supplying such lower
   bounds and compact-domain inverse, inverse-action, inverse-bilinear, and
   matrix-valued RHS variants, plus

@@ -148,9 +148,10 @@ basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on compact domains,
 with direct proper-space closed-ball/cylinder corollaries, not the
 local-existence theorem itself.
 The separate `RicciFlow/AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves
-an explicit bounded `C^{0,α}` determinant estimate and parabolic `C^{0,α}`
-closure for finite matrix determinants, adjugate entries, and inverse entries
-under a determinant lower bound from entrywise control,
+explicit bounded `C^{0,α}` determinant, adjugate-entry, and inverse-entry
+estimates and parabolic `C^{0,α}` closure for finite matrix determinants,
+adjugate entries, and inverse entries under a determinant lower bound from
+entrywise control,
 including a compactness bridge from nonvanishing determinants to a uniform
 determinant lower bound and compact-domain inverse-entry, inverse-action,
 inverse-bilinear, and schematic matrix-valued RHS variants, as well as

@@ -1263,11 +1263,12 @@ also package Holder plus one basepoint bound as full `C^{0,α}` control, and
 positive-exponent Holder control on any compact domain now packages as
 `C^{0,α}` by compact-continuous boundedness, with direct proper-space
 closed-ball/cylinder corollaries. The new
-`AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves determinant
-closure, including an explicit bounded determinant estimate, adjugate-entry
-closure, and inverse-entry closure under a determinant lower bound for finite
-matrix-valued parabolic `C^{0,α}` functions from entrywise control, including
-a compactness bridge from nonvanishing determinants
+`AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module proves determinant closure,
+adjugate-entry closure, and inverse-entry closure under a determinant lower
+bound for finite matrix-valued parabolic `C^{0,α}` functions from entrywise
+control, now also with explicit bounded determinant, adjugate-entry, and
+inverse-entry estimates, including a compactness bridge from nonvanishing
+determinants
 to uniform determinant lower bounds and compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants,
 plus entrywise and whole-valued closure

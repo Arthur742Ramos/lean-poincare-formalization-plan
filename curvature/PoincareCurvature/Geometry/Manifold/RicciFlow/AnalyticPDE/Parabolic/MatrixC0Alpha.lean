@@ -45,6 +45,28 @@ theorem exists_pos_norm_lower_bound_of_isCompact_of_continuousOn_ne_zero {E : Ty
     intro z hz
     exact False.elim (hKnonempty ⟨z, hz⟩)
 
+/-- The sup constant for a single Leibniz-term in the determinant estimate. -/
+def matrixDetTermBoundConst {n A : Type*} [Fintype n] [NormedRing A]
+    (B : n → n → ℝ) (σ : Equiv.Perm n) : ℝ :=
+  max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1
+
+/-- The Holder constant for a single Leibniz-term in the determinant estimate. -/
+def matrixDetTermHolderConst {n A : Type*} [Fintype n] [NormedRing A]
+    (B H : n → n → ℝ) (σ : Equiv.Perm n) : ℝ :=
+  (∑ i : n, H (σ i) i) * matrixDetTermBoundConst (A := A) B σ
+
+/-- The sup constant used by the quantitative finite determinant estimate. -/
+def matrixDetBoundConst {n A : Type*} [Fintype n] [DecidableEq n] [NormedRing A]
+    (B : n → n → ℝ) : ℝ :=
+  ∑ σ : Equiv.Perm n, ‖(Equiv.Perm.sign σ : ℤ)‖ *
+    matrixDetTermBoundConst (A := A) B σ
+
+/-- The Holder constant used by the quantitative finite determinant estimate. -/
+def matrixDetHolderConst {n A : Type*} [Fintype n] [DecidableEq n] [NormedRing A]
+    (B H : n → n → ℝ) : ℝ :=
+  ∑ σ : Equiv.Perm n, ‖(Equiv.Perm.sign σ : ℤ)‖ *
+    matrixDetTermHolderConst (A := A) B H σ
+
 /-- The determinant of a finite matrix whose entries have explicit parabolic `C^{0,α}` bounds
 has an explicit bounded parabolic `C^{0,α}` estimate.  This is the quantitative version used
 before passing to the existential `ParabolicC0AlphaOn` closure theorem. -/
@@ -53,33 +75,23 @@ theorem matrix_det_with {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRin
     (hH : ∀ i j, 0 ≤ H i j)
     (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s) :
     ParabolicC0AlphaWith
-      (∑ σ : Equiv.Perm n,
-        ‖(Equiv.Perm.sign σ : ℤ)‖ *
-          (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
-      (∑ σ : Equiv.Perm n,
-        ‖(Equiv.Perm.sign σ : ℤ)‖ *
-          ((∑ i : n, H (σ i) i) *
-            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)))
+      (matrixDetBoundConst (A := A) B) (matrixDetHolderConst (A := A) B H)
       α (fun z => (M z).det) s := by
   classical
   let term : Equiv.Perm n → ℝ × X → A :=
     fun σ z => ((Equiv.Perm.sign σ : ℤ) : A) * ∏ i : n, M z (σ i) i
   have hterm : ∀ σ ∈ (Finset.univ : Finset (Equiv.Perm n)),
       ParabolicC0AlphaWith
-        (‖(Equiv.Perm.sign σ : ℤ)‖ *
-          (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
-        (‖(Equiv.Perm.sign σ : ℤ)‖ *
-          ((∑ i : n, H (σ i) i) *
-            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)))
+        (‖(Equiv.Perm.sign σ : ℤ)‖ * matrixDetTermBoundConst (A := A) B σ)
+        (‖(Equiv.Perm.sign σ : ℤ)‖ * matrixDetTermHolderConst (A := A) B H σ)
         α (term σ) s := by
     intro σ _hσ
     have hprod :
         ParabolicC0AlphaWith
-          (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)
-          ((∑ i : n, H (σ i) i) *
-            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
+          (matrixDetTermBoundConst (A := A) B σ)
+          (matrixDetTermHolderConst (A := A) B H σ)
           α (fun z => ∏ i : n, M z (σ i) i) s := by
-      simpa using
+      simpa [matrixDetTermBoundConst, matrixDetTermHolderConst] using
         (ParabolicC0AlphaWith.finset_prod (X := X) (α := α) (s := s)
           (S := (Finset.univ : Finset n))
           (B := fun i => B (σ i) i)
@@ -91,24 +103,15 @@ theorem matrix_det_with {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRin
     simpa [zsmul_eq_mul] using hprod.zsmul (Equiv.Perm.sign σ)
   have hsum :
       ParabolicC0AlphaWith
-        (∑ σ : Equiv.Perm n,
-          ‖(Equiv.Perm.sign σ : ℤ)‖ *
-            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
-        (∑ σ : Equiv.Perm n,
-          ‖(Equiv.Perm.sign σ : ℤ)‖ *
-            ((∑ i : n, H (σ i) i) *
-              (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)))
+        (matrixDetBoundConst (A := A) B) (matrixDetHolderConst (A := A) B H)
         α (fun z => ∑ σ : Equiv.Perm n, term σ z) s := by
-    simpa using
+    simpa [matrixDetBoundConst, matrixDetHolderConst] using
       (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
         (S := (Finset.univ : Finset (Equiv.Perm n)))
-        (B := fun σ =>
-          ‖(Equiv.Perm.sign σ : ℤ)‖ *
-            (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1))
-        (H := fun σ =>
-          ‖(Equiv.Perm.sign σ : ℤ)‖ *
-            ((∑ i : n, H (σ i) i) *
-              (max ‖(1 : A)‖ 1 * ∏ i : n, max (B (σ i) i) 1)))
+        (B := fun σ => ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          matrixDetTermBoundConst (A := A) B σ)
+        (H := fun σ => ‖(Equiv.Perm.sign σ : ℤ)‖ *
+          matrixDetTermHolderConst (A := A) B H σ)
         (u := term) hterm)
   convert hsum using 1
   funext z
@@ -198,6 +201,73 @@ theorem matrix_symmetrize_isSymm {n 𝕜 : Type*} [NormedField 𝕜] (M : Matrix
     ((2 : 𝕜)⁻¹ • (M + M.transpose)).IsSymm :=
   (Matrix.isSymm_add_transpose_self M).smul ((2 : 𝕜)⁻¹)
 
+/-- Entrywise sup constants for replacing row `j` by the `i`th coordinate vector. -/
+def matrixUpdateRowBoundConst {n A : Type*} [DecidableEq n] [NormedRing A]
+    (B : n → n → ℝ) (i j : n) : n → n → ℝ :=
+  fun r c => if r = j then ‖((Pi.single i (1 : A)) : n → A) c‖ else B r c
+
+/-- Entrywise Holder constants for replacing row `j` by the constant `i`th coordinate vector. -/
+def matrixUpdateRowHolderConst {n : Type*} [DecidableEq n]
+    (H : n → n → ℝ) (j : n) : n → n → ℝ :=
+  fun r c => if r = j then 0 else H r c
+
+/-- The quantitative sup constant used for an adjugate entry. -/
+def matrixAdjugateEntryBoundConst {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] (B : n → n → ℝ) (i j : n) : ℝ :=
+  matrixDetBoundConst (A := A) (matrixUpdateRowBoundConst (A := A) B i j)
+
+/-- The quantitative Holder constant used for an adjugate entry. -/
+def matrixAdjugateEntryHolderConst {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] (B H : n → n → ℝ) (i j : n) : ℝ :=
+  matrixDetHolderConst (A := A) (matrixUpdateRowBoundConst (A := A) B i j)
+    (matrixUpdateRowHolderConst H j)
+
+/-- Each adjugate entry has an explicit bounded parabolic `C^{0,α}` estimate when the matrix
+entries do. -/
+theorem matrix_adjugate_entry_with {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] {B H : n → n → ℝ} {M : ℝ × X → Matrix n n A}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (i j : n) :
+    ParabolicC0AlphaWith
+      (matrixAdjugateEntryBoundConst (A := A) B i j)
+      (matrixAdjugateEntryHolderConst (A := A) B H i j)
+      α (fun z => (M z).adjugate i j) s := by
+  have hHupd : ∀ r c, 0 ≤ matrixUpdateRowHolderConst H j r c := by
+    intro r c
+    by_cases hr : r = j
+    · simp [matrixUpdateRowHolderConst, hr]
+    · simpa [matrixUpdateRowHolderConst, hr] using hH r c
+  have hMupd : ∀ r c,
+      ParabolicC0AlphaWith
+        (matrixUpdateRowBoundConst (A := A) B i j r c)
+        (matrixUpdateRowHolderConst H j r c)
+        α
+        (fun z => ((M z).updateRow j ((Pi.single i (1 : A)) : n → A)) r c) s := by
+    intro r c
+    by_cases hr : r = j
+    · subst r
+      simpa [matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow] using
+        (ParabolicC0AlphaWith.const (s := s) (α := α)
+          (((Pi.single i (1 : A)) : n → A) c) le_rfl le_rfl)
+    · simpa [matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow,
+        Function.update_of_ne hr, hr] using hM r c
+  have hdet :
+      ParabolicC0AlphaWith
+        (matrixAdjugateEntryBoundConst (A := A) B i j)
+        (matrixAdjugateEntryHolderConst (A := A) B H i j)
+        α
+        (fun z => ((M z).updateRow j ((Pi.single i (1 : A)) : n → A)).det) s := by
+    simpa [matrixAdjugateEntryBoundConst, matrixAdjugateEntryHolderConst] using
+      (matrix_det_with
+        (M := fun z => (M z).updateRow j ((Pi.single i (1 : A)) : n → A))
+        (B := matrixUpdateRowBoundConst (A := A) B i j)
+        (H := matrixUpdateRowHolderConst H j)
+        hHupd hMupd)
+  convert hdet using 1
+  funext z
+  rw [Matrix.adjugate_apply]
+
 /-- Each adjugate entry of a finite matrix is parabolic `C^{0,α}` when the matrix entries are. -/
 theorem matrix_adjugate_entry {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
     {M : ℝ × X → Matrix n n A}
@@ -231,6 +301,42 @@ theorem matrix_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedFie
   have hadj : ParabolicC0AlphaOn α (fun z => (M z).adjugate i j) s :=
     matrix_adjugate_entry (M := M) hM i j
   have hprod := hdet_inv.mul hadj
+  convert hprod using 1
+  funext z
+  rw [Matrix.inv_def, Ring.inverse_eq_inv]
+  rfl
+
+/-- Each inverse-matrix entry has an explicit bounded parabolic `C^{0,α}` estimate when the matrix
+entries do and the determinant is uniformly bounded away from zero on the domain. -/
+theorem matrix_inv_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {B H : n → n → ℝ} {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (i j : n) :
+    ParabolicC0AlphaWith
+      (δ⁻¹ * matrixAdjugateEntryBoundConst (A := 𝕜) B i j)
+      (δ⁻¹ * matrixAdjugateEntryHolderConst (A := 𝕜) B H i j +
+        matrixAdjugateEntryBoundConst (A := 𝕜) B i j *
+          (δ⁻¹ * matrixDetHolderConst (A := 𝕜) B H * δ⁻¹))
+      α (fun z => (M z)⁻¹ i j) s := by
+  have hdet_with :
+      ParabolicC0AlphaWith
+        (matrixDetBoundConst (A := 𝕜) B) (matrixDetHolderConst (A := 𝕜) B H)
+        α (fun z => (M z).det) s :=
+    matrix_det_with (M := M) hH hM
+  have hdet_inv :
+      ParabolicC0AlphaWith δ⁻¹
+        (δ⁻¹ * matrixDetHolderConst (A := 𝕜) B H * δ⁻¹)
+        α (fun z => ((M z).det)⁻¹) s :=
+    hdet_with.inv hδpos hdet
+  have hadj :
+      ParabolicC0AlphaWith
+        (matrixAdjugateEntryBoundConst (A := 𝕜) B i j)
+        (matrixAdjugateEntryHolderConst (A := 𝕜) B H i j)
+        α (fun z => (M z).adjugate i j) s :=
+    matrix_adjugate_entry_with (M := M) hH hM i j
+  have hprod := hdet_inv.mul hadj (inv_nonneg.mpr hδpos.le)
   convert hprod using 1
   funext z
   rw [Matrix.inv_def, Ring.inverse_eq_inv]
