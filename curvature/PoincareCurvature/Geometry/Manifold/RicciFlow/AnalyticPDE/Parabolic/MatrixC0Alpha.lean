@@ -644,6 +644,70 @@ theorem matrix_det {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
   rw [← zsmul_eq_mul]
   rfl
 
+/-- Determinant differences inherit existential parabolic `C^{0,α}` control from entrywise
+controls and entrywise difference controls. -/
+theorem matrix_det_sub {n A : Type*} [Fintype n] [DecidableEq n] [NormedCommRing A]
+    {M N : ℝ × X → Matrix n n A}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) s)
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s) :
+    ParabolicC0AlphaOn α (fun z => (M z).det - (N z).det) s := by
+  classical
+  let termM : Equiv.Perm n → ℝ × X → A :=
+    fun σ z => ((Equiv.Perm.sign σ : ℤ) : A) * ∏ i : n, M z (σ i) i
+  let termN : Equiv.Perm n → ℝ × X → A :=
+    fun σ z => ((Equiv.Perm.sign σ : ℤ) : A) * ∏ i : n, N z (σ i) i
+  have hterm : ∀ σ ∈ (Finset.univ : Finset (Equiv.Perm n)),
+      ParabolicC0AlphaOn α (fun z => termM σ z - termN σ z) s := by
+    intro σ _hσ
+    have hprod :
+        ParabolicC0AlphaOn α
+          (fun z => (∏ i : n, M z (σ i) i) - ∏ i : n, N z (σ i) i) s := by
+      simpa using
+        (ParabolicC0AlphaOn.finset_prod_sub_prod (X := X) (α := α) (s := s)
+          (S := (Finset.univ : Finset n))
+          (u := fun i z => M z (σ i) i)
+          (v := fun i z => N z (σ i) i)
+          (fun i _hi => hM (σ i) i)
+          (fun i _hi => hN (σ i) i)
+          (fun i _hi => hdiff (σ i) i))
+    dsimp [termM, termN]
+    simpa [zsmul_eq_mul, mul_sub] using hprod.zsmul (Equiv.Perm.sign σ)
+  have hsum :
+      ParabolicC0AlphaOn α
+        (fun z => ∑ σ ∈ (Finset.univ : Finset (Equiv.Perm n)),
+          (termM σ z - termN σ z)) s :=
+    ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset (Equiv.Perm n))) hterm
+  convert hsum using 1
+  funext z
+  dsimp [termM, termN]
+  rw [Matrix.det_apply, Matrix.det_apply]
+  rw [Finset.sum_sub_distrib]
+  congr 1
+  · apply Finset.sum_congr rfl
+    intro σ _hσ
+    rw [← zsmul_eq_mul]
+    rfl
+  · apply Finset.sum_congr rfl
+    intro σ _hσ
+    rw [← zsmul_eq_mul]
+    rfl
+
+/-- Reciprocal determinant differences inherit existential parabolic `C^{0,α}` control from
+entrywise matrix controls and a common determinant lower bound. -/
+theorem matrix_det_inv_sub {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {M N : ℝ × X → Matrix n n 𝕜} {δ : ℝ}
+    (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) s)
+    (hdiff : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j - N z i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaOn α (fun z => ((M z).det)⁻¹ - ((N z).det)⁻¹) s :=
+  (matrix_det (M := M) hM).inv_sub_inv (matrix_det (M := N) hN)
+    (matrix_det_sub (M := M) (N := N) hM hN hdiff) hδpos hdetM hdetN
+
 /-- On a compact time-space set, a finite matrix with parabolic `C^{0,α}` entries and nonvanishing
 determinant has determinant norm uniformly bounded away from zero. -/
 theorem matrix_det_exists_pos_norm_lower_bound_of_isCompact {n 𝕜 : Type*} [Fintype n]

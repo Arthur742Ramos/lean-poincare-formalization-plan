@@ -3738,6 +3738,24 @@ theorem inv {𝕜 : Type*} [NormedField 𝕜] {a : ℝ × X → 𝕜} {δ : ℝ}
   refine ⟨δ⁻¹, inv_nonneg.mpr hδpos.le, δ⁻¹ * H * δ⁻¹, ?_, hBH.inv hδpos hδ⟩
   exact mul_nonneg (mul_nonneg (inv_nonneg.mpr hδpos.le) hH) (inv_nonneg.mpr hδpos.le)
 
+/-- Reciprocal differences preserve existential parabolic `C^{0,α}` control
+from a difference control and a common pointwise lower bound. -/
+theorem inv_sub_inv {𝕜 : Type*} [NormedField 𝕜] {a b : ℝ × X → 𝕜} {δ : ℝ}
+    (ha : ParabolicC0AlphaOn α a s) (hb : ParabolicC0AlphaOn α b s)
+    (hdiff : ParabolicC0AlphaOn α (fun z => a z - b z) s)
+    (hδpos : 0 < δ)
+    (hδa : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖)
+    (hδb : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖) :
+    ParabolicC0AlphaOn α (fun z => (a z)⁻¹ - (b z)⁻¹) s := by
+  rcases ha with ⟨_Ba, _hBa, Ha, hHa, hBHa⟩
+  rcases hb with ⟨_Bb, _hBb, Hb, hHb, hBHb⟩
+  rcases hdiff with ⟨Bd, hBd, Hd, hHd, hBHd⟩
+  exact ⟨ParabolicC0AlphaWith.invSubBoundConst δ Bd,
+    ParabolicC0AlphaWith.invSubBoundConst_nonneg hδpos hBd,
+    ParabolicC0AlphaWith.invSubHolderConst δ Ha Hb Bd Hd,
+    ParabolicC0AlphaWith.invSubHolderConst_nonneg hδpos hHa hHb hBd hHd,
+    hBHa.inv_sub_inv hBHb hBHd hδpos hδa hδb hBd⟩
+
 theorem mul {A : Type*} [NormedRing A] {u v : ℝ × X → A} {s : Set (ℝ × X)}
     (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
     ParabolicC0AlphaOn α (fun z => u z * v z) s := by
