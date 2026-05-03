@@ -2709,6 +2709,19 @@ theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
   exact ⟨B, hB, H, hH,
     hBH.mono_exponent_of_parabolicDistance_le_one hH hβ hβα hdiam⟩
 
+/-- On a unit parabolic-diameter domain, a spatial Lipschitz function lifted as a
+time-independent function has parabolic `C^{0,α}` control for every `0 ≤ α ≤ 1`. -/
+theorem of_snd_lipschitzOnWith_of_parabolicDistance_le_one {B α : ℝ} {K : ℝ≥0}
+    {f : X → E} (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hB_nonneg : 0 ≤ B)
+    (hB : ∀ ⦃x : X⦄, x ∈ Prod.snd '' s → ‖f x‖ ≤ B)
+    (hL : LipschitzOnWith K f (Prod.snd '' s))
+    (hdiam : ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
+      parabolicDistance p q ≤ 1) :
+    ParabolicC0AlphaOn α (fun z : ℝ × X => f z.2) s :=
+  (of_snd_lipschitzOnWith (s := s) hB_nonneg hB hL).mono_exponent_of_parabolicDistance_le_one
+    hα_nonneg hα_le_one hdiam
+
 theorem mono_exponent_of_subset_closedBall {β R : ℝ} {c : ℝ × X}
     (h : ParabolicC0AlphaOn α u s) (hβ : 0 ≤ β) (hβα : β ≤ α)
     (hs : s ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1) :
