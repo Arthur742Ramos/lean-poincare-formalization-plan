@@ -1109,7 +1109,7 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
     (hlocalBound : ∀ x : M, ∃ C > 0,
       ∀ᶠ y in 𝓝 x, ‖(trivializationAt F TM x).continuousLinearMapAt ℝ y‖ < C)
     (ha : 0 < a) :
-    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
@@ -1295,7 +1295,7 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
     (rhs : SmoothSectionRHSIdentification
       (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
     (ha : 0 < a) :
-    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
@@ -1479,7 +1479,7 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
     (rhs : SmoothSectionRHSIdentification
       (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
     (ha : 0 < a) :
-    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
@@ -1553,7 +1553,7 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
     (hlocalBound : ∀ x : M, ∃ C > 0,
       ∀ᶠ y in 𝓝 x, ‖(trivializationAt F TM x).continuousLinearMapAt ℝ y‖ < C)
     (ha : 0 < a) :
-    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
@@ -1613,7 +1613,7 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
     (rhs : SmoothSectionRHSIdentification
       (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
     (ha : 0 < a) :
-    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
@@ -1671,7 +1671,7 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
     (rhs : SmoothSectionRHSIdentification
       (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
     (ha : 0 < a) :
-    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
@@ -1730,7 +1730,7 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
     (rhs : SmoothSectionRHSIdentification
       (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
     (ha : 0 < a) :
-    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (hT'le : T' ≤ T),
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
