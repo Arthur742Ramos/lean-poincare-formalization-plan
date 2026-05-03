@@ -1555,6 +1555,27 @@ theorem localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_isCompact
     intro x hx
     exact False.elim (hKnonempty ⟨x, hx⟩)
 
+/-- On a compact time-space set whose spatial projection lies in a local trivialization base, the
+local-frame Gram determinant is uniformly bounded away from zero. -/
+theorem localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} (hK : IsCompact K)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      δ ≤ ‖(show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b z.2).det‖ := by
+  let Kspace : Set M := Prod.snd '' K
+  have hKspace : IsCompact Kspace := hK.image continuous_snd
+  have hKspaceBase : Kspace ⊆ e.baseSet := by
+    rintro x ⟨z, hz, rfl⟩
+    exact hKbase hz
+  rcases localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_isCompact
+      (I := I) (E := E) e b hKspace hKspaceBase with
+    ⟨δ, hδpos, hδ⟩
+  exact ⟨δ, hδpos, fun z hz => hδ ⟨z, hz, rfl⟩⟩
+
 theorem localFrameGramMatrix_isUnit_det
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
