@@ -6982,6 +6982,142 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_isCompact_det_ne_zer
     (ηM := ηM) (ηD := ηD) (ηH := ηH)
     hDB hHB hM hN hD hE hKc hηD hMdiff hDdiff hHdiff hδpos hdetM hdetN
 
+/-- Holder constant for the difference of two primitive-input schematic Ricci-DeTurck RHS matrix
+fields, using the sum of the two individual schematic Holder constants. -/
+def ricciDeTurckSchematicDiffHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (MB MH : n → n → ℝ)
+    (DB DH : n → n → n → ℝ) (HB HH : n → n → n → n → ℝ) : ℝ :=
+  (∑ i : n, ∑ j : n,
+    (matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ MB MH HB HH i j +
+      christoffelQuadraticRicciEntryHolderConst
+        (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+        (fun a b c => matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ MB MH DB DH a b c)
+        i j)) +
+  (∑ i : n, ∑ j : n,
+    (matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ MB MH HB HH i j +
+      christoffelQuadraticRicciEntryHolderConst
+        (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ MB DB a b c)
+        (fun a b c => matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ MB MH DB DH a b c)
+        i j))
+
+/-- The difference of two primitive-input schematic Ricci-DeTurck RHS matrix fields has parabolic
+`C^{0,α}` control: the sup constant is the primitive-input bounded-difference constant and the
+Holder constant is the sum of the two standalone schematic Holder constants. -/
+theorem ricciDeTurckSchematicMatrix_sub_with {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {MB MH : n → n → ℝ} {DB DH : n → n → n → ℝ}
+    {HB HH : n → n → n → n → ℝ} {ηM ηD : ℝ} {ηH : n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hMH : ∀ a b, 0 ≤ MH a b)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hDH : ∀ a b c, 0 ≤ DH a b c)
+    (hHB : ∀ a b i j, 0 ≤ HB a b i j) (hHH : ∀ a b i j, 0 ≤ HH a b i j)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => N z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) s)
+    (hE : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => E z a b c) s)
+    (hHc : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => Hc z a b i j) s)
+    (hKc : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => Kc z a b i j) s)
+    (hηD : 0 ≤ ηD)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ ηM)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+      ‖((fun a b => Hc z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => Kc z a b i j) : Matrix n n 𝕜)‖ ≤ ηH i j)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaWith
+      (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ MB DB HB ηM ηD ηH)
+      (ricciDeTurckSchematicDiffHolderConst (𝕜 := 𝕜) δ MB MH DB DH HB HH)
+      α
+      (fun z : ℝ × X =>
+        ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+          ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) s := by
+  have hbounded :
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ MB DB HB ηM ηD ηH)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) s := by
+    exact ricciDeTurckSchematicMatrix_bounded_sub_le_const
+      (s := s) (δ := δ) (C := MB) (DB := DB) (HB := HB)
+      (ηM := ηM) (ηD := ηD) (ηH := ηH)
+      hDB hHB
+      (fun z hz a b => (hM a b).bounded hz)
+      (fun z hz a b => (hN a b).bounded hz)
+      (fun z hz a b c => (hD a b c).bounded hz)
+      (fun z hz a b c => (hE a b c).bounded hz)
+      (fun z hz a b i j => (hKc a b i j).bounded hz)
+      hηD hMdiff hDdiff hHdiff hδpos hdetM hdetN
+  have hMDH := ricciDeTurck_schematic_with
+    (M := M) (D := D) (H := Hc) hMH hDB hDH hHB hHH hM hD hHc hδpos hdetM
+  have hNEK := ricciDeTurck_schematic_with
+    (M := N) (D := E) (H := Kc) hMH hDB hDH hHB hHH hN hE hKc hδpos hdetN
+  exact ⟨hbounded, by
+    simpa [ricciDeTurckSchematicDiffHolderConst] using hMDH.holder.sub hNEK.holder⟩
+
+/-- Compact-domain version of `ricciDeTurckSchematicMatrix_sub_with`: pointwise nonvanishing of
+both metric determinants supplies one common determinant lower bound. -/
+theorem ricciDeTurckSchematicMatrix_sub_with_of_isCompact_det_ne_zero
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)}
+    {MB MH : n → n → ℝ} {DB DH : n → n → n → ℝ}
+    {HB HH : n → n → n → n → ℝ} {ηM ηD : ℝ} {ηH : n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (hMB : ∀ a b, 0 ≤ MB a b) (hMH : ∀ a b, 0 ≤ MH a b)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hDH : ∀ a b c, 0 ≤ DH a b c)
+    (hHB : ∀ a b i j, 0 ≤ HB a b i j) (hHH : ∀ a b i j, 0 ≤ HH a b i j)
+    (hM : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => M z a b) Kdom)
+    (hN : ∀ a b, ParabolicC0AlphaWith (MB a b) (MH a b) α (fun z => N z a b) Kdom)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) Kdom)
+    (hE : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => E z a b c) Kdom)
+    (hHc : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => Hc z a b i j) Kdom)
+    (hKc : ∀ a b i j, ParabolicC0AlphaWith (HB a b i j) (HH a b i j) α
+      (fun z => Kc z a b i j) Kdom)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (N z).det ≠ 0)
+    (hηD : 0 ≤ ηD)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ‖M z - N z‖ ≤ ηM)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ i j,
+      ‖((fun a b => Hc z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => Kc z a b i j) : Matrix n n 𝕜)‖ ≤ ηH i j) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ MB DB HB ηM ηD ηH)
+        (ricciDeTurckSchematicDiffHolderConst (𝕜 := 𝕜) δ MB MH DB DH HB HH)
+        α
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) Kdom := by
+  have hMctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) Kdom := by
+    intro a b
+    exact ⟨MB a b, hMB a b, MH a b, hMH a b, hM a b⟩
+  have hNctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) Kdom := by
+    intro a b
+    exact ⟨MB a b, hMB a b, MH a b, hMH a b, hN a b⟩
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := Kdom) (M := M) (N := N) hKdom hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, ricciDeTurckSchematicMatrix_sub_with
+    (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
+    hMH hDB hDH hHB hHH hM hN hD hE hHc hKc hηD hMdiff hDdiff hHdiff
+    hδpos hdetM hdetN⟩
+
 /-- Schematic local Ricci-DeTurck coordinate right-hand sides preserve parabolic `C^{0,α}`
 control from entrywise control of metric coefficients, first derivative coefficients, and second
 derivative coefficients, assuming the metric determinant is bounded away from zero.  The formula

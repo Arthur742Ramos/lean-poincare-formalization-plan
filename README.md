@@ -393,10 +393,11 @@ packages the canonical stationary local solution attached to
   quadratic-Christoffel matrix-norm Lipschitz and bounded Holder entry/matrix
   estimates, supplied-Christoffel schematic bounded Holder entry/matrix
   estimates, primitive-input schematic bounded Holder entry/matrix estimates,
-  plus supplied-Christoffel and primitive-input schematic RHS entry and
-  whole-matrix Lipschitz constants and a named function-level
-  bounded-difference package for the primitive schematic matrix RHS, with a
-  compact-domain variant selecting a common determinant lower bound, on entrywise
+  primitive-input schematic RHS `C^{0,α}` difference control, plus
+  supplied-Christoffel and primitive-input schematic RHS entry and whole-matrix
+  Lipschitz constants and a named function-level bounded-difference package for
+  the primitive schematic matrix RHS, with a compact-domain variant selecting a
+  common determinant lower bound, on entrywise
   bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds and
   compact-domain inverse,
@@ -435,10 +436,11 @@ packages the canonical stationary local solution attached to
   quantitative inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel, and schematic RHS bridges exposing the determinant lower-bound
   constant, plus compact local-frame inverse Gram, inverse-principal
-  contraction, and inverse-Gram Christoffel `C^{0,α}` difference control, and
-  inverse Gram, inverse-principal contraction, inverse-Gram Christoffel, and
-  schematic RHS bounded-difference bridges against comparison primitive inputs,
-  all with matching spatial-Hölder Gram-entry input forms.
+  contraction, inverse-Gram Christoffel, and schematic RHS `C^{0,α}`
+  difference control, and inverse Gram, inverse-principal contraction,
+  inverse-Gram Christoffel, and schematic RHS bounded-difference bridges
+  against comparison primitive inputs, all with matching spatial-Hölder
+  Gram-entry input forms.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric
