@@ -2558,6 +2558,159 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_with_of_spatial_lipschitzOnW
       (hB i j) (hL i j)).mono_exponent_of_parabolicDistance_le_one
         (NNReal.coe_nonneg (Lgram i j)) hα_nonneg hα_le_one hdiam
 
+/-- Quantitative closed-parabolic-ball spatial-Lipschitz local-frame bridge for the schematic
+Ricci-DeTurck RHS.  The Gram-entry Lipschitz constants serve as the explicit parabolic Holder
+constants after lowering to any exponent `0 ≤ α ≤ 1`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedBall
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α R : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    {DB DH : ι → ι → ι → ℝ} {HB HH : ι → ι → ι → ι → ℝ}
+    (hDB : ∀ i j k, 0 ≤ DB i j k) (hDH : ∀ i j k, 0 ≤ DH i j k)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j) (hHH : ∀ a c i j, 0 ≤ HH a c i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedBall c R) (hR : 2 * R ≤ 1)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hDctrl : ∀ i j k,
+      ParabolicC0AlphaWith (DB i j k) (DH i j k) α (fun z : ℝ × M => D z i j k) K)
+    (hHc : ∀ a c i j,
+      ParabolicC0AlphaWith (HB a c i j) (HH a c i j) α
+        (fun z : ℝ × M => Hc z a c i j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ i : ι, ∑ j : ι,
+          (matrixInvTwoIndexContractEntryBoundConst (𝕜 := ℝ) δ GB HB i j +
+            christoffelQuadraticRicciEntryBoundConst
+              (fun a c d =>
+                matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ GB DB a c d)
+              i j))
+        (∑ i : ι, ∑ j : ι,
+          (matrixInvTwoIndexContractEntryHolderConst (𝕜 := ℝ) δ GB
+              (fun i j => (Lgram i j : ℝ)) HB HH i j +
+            christoffelQuadraticRicciEntryHolderConst
+              (fun a c d =>
+                matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ GB DB a c d)
+              (fun a c d =>
+                matrixInvChristoffelEntryHolderConst (𝕜 := ℝ) δ GB
+                  (fun i j => (Lgram i j : ℝ)) DB DH a c d)
+              i j))
+        α
+        (fun z : ℝ × M =>
+          (fun i j =>
+            let Γ : ι → ι → ι → ℝ := fun a c d =>
+              (2 : ℝ)⁻¹ *
+                ∑ l : ι,
+                  ((show Matrix ι ι ℝ from
+                      CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                      Matrix ι ι ℝ) a l *
+                    (D z c d l + D z d c l - D z l c d)
+            (∑ a : ι, ∑ c : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a c * Hc z a c i j) +
+              ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+                (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+            Matrix ι ι ℝ)) K := by
+  exact
+    localFrameGramMatrix_ricciDeTurck_schematic_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_nonneg hα_le_one hKbase
+      hDB hDH hHB hHH hB hL
+      (by
+        intro p hp q hq
+        exact parabolicClosedBall.pair_parabolicDistance_le_one (hs hp) (hs hq) hR)
+      hDctrl hHc
+
+/-- Quantitative closed-parabolic-cylinder spatial-Lipschitz local-frame bridge for the schematic
+Ricci-DeTurck RHS.  The Gram-entry Lipschitz constants serve as the explicit parabolic Holder
+constants after lowering to any exponent `0 ≤ α ≤ 1`. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_subset_closedCylinder
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α timeRadius spaceRadius : ℝ} {c : ℝ × M} (hK : IsCompact K)
+    (hα_nonneg : 0 ≤ α) (hα_le_one : α ≤ 1)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {GB : ι → ι → ℝ} {Lgram : ι → ι → ℝ≥0}
+    {DB DH : ι → ι → ι → ℝ} {HB HH : ι → ι → ι → ι → ℝ}
+    (hDB : ∀ i j k, 0 ≤ DB i j k) (hDH : ∀ i j k, 0 ≤ DH i j k)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j) (hHH : ∀ a c i j, 0 ≤ HH a c i j)
+    (hB : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ GB i j)
+    (hL : ∀ i j,
+      LipschitzOnWith (Lgram i j)
+        (fun x : M => CovariantDerivative.localFrameGramMatrix (I := I) e b x i j)
+        (Prod.snd '' K))
+    (hs : K ⊆ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hdiam : max (Real.sqrt (2 * timeRadius)) (2 * spaceRadius) ≤ 1)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hDctrl : ∀ i j k,
+      ParabolicC0AlphaWith (DB i j k) (DH i j k) α (fun z : ℝ × M => D z i j k) K)
+    (hHc : ∀ a c i j,
+      ParabolicC0AlphaWith (HB a c i j) (HH a c i j) α
+        (fun z : ℝ × M => Hc z a c i j) K) :
+    ∃ δ > 0,
+      (∀ ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det‖) ∧
+      ParabolicC0AlphaWith
+        (∑ i : ι, ∑ j : ι,
+          (matrixInvTwoIndexContractEntryBoundConst (𝕜 := ℝ) δ GB HB i j +
+            christoffelQuadraticRicciEntryBoundConst
+              (fun a c d =>
+                matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ GB DB a c d)
+              i j))
+        (∑ i : ι, ∑ j : ι,
+          (matrixInvTwoIndexContractEntryHolderConst (𝕜 := ℝ) δ GB
+              (fun i j => (Lgram i j : ℝ)) HB HH i j +
+            christoffelQuadraticRicciEntryHolderConst
+              (fun a c d =>
+                matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ GB DB a c d)
+              (fun a c d =>
+                matrixInvChristoffelEntryHolderConst (𝕜 := ℝ) δ GB
+                  (fun i j => (Lgram i j : ℝ)) DB DH a c d)
+              i j))
+        α
+        (fun z : ℝ × M =>
+          (fun i j =>
+            let Γ : ι → ι → ι → ℝ := fun a c d =>
+              (2 : ℝ)⁻¹ *
+                ∑ l : ι,
+                  ((show Matrix ι ι ℝ from
+                      CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                      Matrix ι ι ℝ) a l *
+                    (D z c d l + D z d c l - D z l c d)
+            (∑ a : ι, ∑ c : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a c * Hc z a c i j) +
+              ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+                (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+            Matrix ι ι ℝ)) K := by
+  exact
+    localFrameGramMatrix_ricciDeTurck_schematic_with_of_spatial_lipschitzOnWith_of_timeSpace_isCompact_of_parabolicDistance_le_one
+      (I := I) (E := E) e b hK hα_nonneg hα_le_one hKbase
+      hDB hDH hHB hHH hB hL
+      (by
+        intro p hp q hq
+        exact (parabolicClosedCylinder.pair_parabolicDistance_le (hs hp) (hs hq)).trans hdiam)
+      hDctrl hHc
+
 /-- Compact local-frame bridge for the function-level bounded difference of two schematic
 Ricci-DeTurck coordinate right-hand sides, one built from the geometric local-frame Gram matrix
 and one from an arbitrary comparison primitive input.  The local-frame Gram determinant supplies
