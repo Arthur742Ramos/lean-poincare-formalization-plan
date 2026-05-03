@@ -2310,6 +2310,27 @@ theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
     ‖L (u p)‖ ≤ ‖L‖ * ‖u p‖ := ContinuousLinearMap.le_opNorm L (u p)
     _ ≤ ‖L‖ * B := mul_le_mul_of_nonneg_left (hu hp) (norm_nonneg L)
 
+/-- A curried continuous bilinear map preserves sup-norm control, with the operator norm and
+factor bounds multiplying. -/
+theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCommGroup G]
+    [NormedSpace ℝ E] [NormedSpace ℝ F] [NormedSpace ℝ G]
+    {D : ℝ} {v : ℝ × X → F}
+    (L : E →L[ℝ] F →L[ℝ] G)
+    (hu : ParabolicBoundedWith B u s) (hv : ParabolicBoundedWith D v s)
+    (hB : 0 ≤ B) :
+    ParabolicBoundedWith (‖L‖ * B * D) (fun z => L (u z) (v z)) s := by
+  intro p hp
+  have hLup : ‖L (u p)‖ ≤ ‖L‖ * B :=
+    (ContinuousLinearMap.le_opNorm L (u p)).trans
+      (mul_le_mul_of_nonneg_left (hu hp) (norm_nonneg L))
+  have hLup_nonneg : 0 ≤ ‖L‖ * B := mul_nonneg (norm_nonneg L) hB
+  calc
+    ‖L (u p) (v p)‖ ≤ ‖L (u p)‖ * ‖v p‖ :=
+      ContinuousLinearMap.le_opNorm (L (u p)) (v p)
+    _ ≤ (‖L‖ * B) * D :=
+      mul_le_mul hLup (hv hp) (norm_nonneg _) hLup_nonneg
+    _ = ‖L‖ * B * D := by ring
+
 theorem image_subset_closedBall_zero (hu : ParabolicBoundedWith B u s) :
     u '' s ⊆ Metric.closedBall (0 : E) B := by
   rintro y ⟨p, hp, rfl⟩
@@ -2687,6 +2708,49 @@ theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
     (L : E →L[ℝ] F) (hu : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaWith (‖L‖ * B) (‖L‖ * H) α (fun z => L (u z)) s :=
   ⟨hu.bounded.continuousLinearMap L, hu.holder.continuousLinearMap L⟩
+
+/-- A curried continuous bilinear map preserves parabolic `C^{0,α}` control. -/
+theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCommGroup G]
+    [NormedSpace ℝ E] [NormedSpace ℝ F] [NormedSpace ℝ G]
+    {B₂ H₂ : ℝ} {v : ℝ × X → F}
+    (L : E →L[ℝ] F →L[ℝ] G)
+    (hu : ParabolicC0AlphaWith B H α u s)
+    (hv : ParabolicC0AlphaWith B₂ H₂ α v s)
+    (hB : 0 ≤ B) :
+    ParabolicC0AlphaWith (‖L‖ * B * B₂)
+      (‖L‖ * (B * H₂ + B₂ * H)) α (fun z => L (u z) (v z)) s := by
+  constructor
+  · exact hu.bounded.continuousLinearMap₂ L hv.bounded hB
+  · intro p hp q hq
+    let dα := (parabolicDistance p q) ^ α
+    have hsplit :
+        L (u p) (v p) - L (u q) (v q) =
+          L (u p) (v p - v q) + L (u p - u q) (v q) := by
+      simp [map_sub]
+    have hLup : ‖L (u p)‖ ≤ ‖L‖ * B :=
+      (ContinuousLinearMap.le_opNorm L (u p)).trans
+        (mul_le_mul_of_nonneg_left (hu.bounded hp) (norm_nonneg L))
+    have hLup_nonneg : 0 ≤ ‖L‖ * B := mul_nonneg (norm_nonneg L) hB
+    have hHd_nonneg : 0 ≤ H * dα :=
+      (norm_nonneg (u p - u q)).trans (hu.holder hp hq)
+    have hLdiff : ‖L (u p - u q)‖ ≤ ‖L‖ * (H * dα) :=
+      (ContinuousLinearMap.le_opNorm L (u p - u q)).trans
+        (mul_le_mul_of_nonneg_left (hu.holder hp hq) (norm_nonneg L))
+    have hLdiff_nonneg : 0 ≤ ‖L‖ * (H * dα) :=
+      mul_nonneg (norm_nonneg L) hHd_nonneg
+    calc
+      ‖L (u p) (v p) - L (u q) (v q)‖
+          = ‖L (u p) (v p - v q) + L (u p - u q) (v q)‖ := by rw [hsplit]
+      _ ≤ ‖L (u p) (v p - v q)‖ + ‖L (u p - u q) (v q)‖ := norm_add_le _ _
+      _ ≤ ‖L (u p)‖ * ‖v p - v q‖ + ‖L (u p - u q)‖ * ‖v q‖ :=
+        add_le_add
+          (ContinuousLinearMap.le_opNorm (L (u p)) (v p - v q))
+          (ContinuousLinearMap.le_opNorm (L (u p - u q)) (v q))
+      _ ≤ (‖L‖ * B) * (H₂ * dα) + (‖L‖ * (H * dα)) * B₂ :=
+        add_le_add
+          (mul_le_mul hLup (hv.holder hp hq) (norm_nonneg _) hLup_nonneg)
+          (mul_le_mul hLdiff (hv.bounded hq) (norm_nonneg _) hLdiff_nonneg)
+      _ = (‖L‖ * (B * H₂ + B₂ * H)) * dα := by ring
 
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ} {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicC0AlphaWith B H α u s)
@@ -3155,6 +3219,20 @@ theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
   rcases hu with ⟨B, hB, H, hH, hBH⟩
   exact ⟨‖L‖ * B, mul_nonneg (norm_nonneg L) hB,
     ‖L‖ * H, mul_nonneg (norm_nonneg L) hH, hBH.continuousLinearMap L⟩
+
+/-- A curried continuous bilinear map preserves existential parabolic `C^{0,α}` control. -/
+theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCommGroup G]
+    [NormedSpace ℝ E] [NormedSpace ℝ F] [NormedSpace ℝ G]
+    {v : ℝ × X → F} (L : E →L[ℝ] F →L[ℝ] G)
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    ParabolicC0AlphaOn α (fun z => L (u z) (v z)) s := by
+  rcases hu with ⟨B₁, hB₁, H₁, hH₁, hBH₁⟩
+  rcases hv with ⟨B₂, hB₂, H₂, hH₂, hBH₂⟩
+  refine ⟨‖L‖ * B₁ * B₂, ?_, ‖L‖ * (B₁ * H₂ + B₂ * H₁), ?_, ?_⟩
+  · exact mul_nonneg (mul_nonneg (norm_nonneg L) hB₁) hB₂
+  · exact mul_nonneg (norm_nonneg L)
+      (add_nonneg (mul_nonneg hB₁ hH₂) (mul_nonneg hB₂ hH₁))
+  · exact hBH₁.continuousLinearMap₂ L hBH₂ hB₁
 
 theorem time_slice_half_exponent (h : ParabolicC0AlphaOn α u s) :
     ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →

@@ -1240,7 +1240,8 @@ existential normed-comm-ring-valued `C^{0,α}` controls, and an explicit bounded
 finite-product `C^{0,α}` estimate, and finite `Pi` packaging across bounded,
 Holder, and `C^{0,α}` controls from componentwise estimates and
 same-constant projection back to components, and product-valued pairing
-closure, and continuous-linear-map closure with operator-norm constants, and
+closure, and continuous-linear and curried-bilinear-map closure with
+operator-norm constants, and
 integer-scalar closure,
 and additive/subtractive algebra estimates,
 including the standard bounded-product estimate for normed-ring-valued
