@@ -462,6 +462,59 @@ theorem localFrameGramMatrix_inv_two_index_contract_family_of_entries_of_timeSpa
       (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
     (T := Hc r) (hG r) (hHc r) hδpos (hdet r)
 
+/-- A finite family of inverse-principal contractions through local-frame Gram matrices has
+explicit bounded parabolic `C^{0,α}` estimates from entrywise Gram and coefficient controls,
+with one compact Gram determinant lower bound shared by the family. -/
+theorem localFrameGramMatrix_inv_two_index_contract_family_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {GB GH : ρ → ι → ι → ℝ} {HB HH : ρ → ι → ι → ι → ι → ℝ}
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hHB : ∀ r a c i j, 0 ≤ HB r a c i j)
+    (hHH : ∀ r a c i j, 0 ≤ HH r a c i j)
+    {Hc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hG : ∀ r i j,
+      ParabolicC0AlphaWith (GB r i j) (GH r i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K)
+    (hHc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Hc r z a c i j) K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (∑ i : ι, ∑ j : ι,
+            matrixInvTwoIndexContractEntryBoundConst (𝕜 := ℝ) δ (GB r) (HB r) i j)
+          (∑ i : ι, ∑ j : ι,
+            matrixInvTwoIndexContractEntryHolderConst (𝕜 := ℝ) δ (GB r) (GH r) (HB r) (HH r) i j)
+          α
+          (fun z : ℝ × M =>
+            (fun i j =>
+              ∑ a : ι, ∑ c : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                    Matrix ι ι ℝ) a c * Hc r z a c i j :
+              Matrix ι ι ℝ)) K := by
+  rcases localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact matrix_inv_two_index_contract_with
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (T := Hc r) (hGH r) (hHB r) (hHH r) (hG r) (hHc r) hδpos (hdet r)
+
 /-- A finite family of inverse-Gram Christoffel-type arrays has existential parabolic `C^{0,α}`
 control from entrywise Gram and derivative-array controls, with one compact Gram determinant
 lower bound shared by the family. -/
@@ -503,6 +556,59 @@ theorem localFrameGramMatrix_inv_christoffel_family_of_entries_of_timeSpace_isCo
     (M := fun z : ℝ × M =>
       (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
     (D := D r) (hG r) (hD r) hδpos (hdet r)
+
+/-- A finite family of inverse-Gram Christoffel-type arrays has explicit bounded parabolic
+`C^{0,α}` estimates from entrywise Gram and derivative-array controls, with one compact Gram
+determinant lower bound shared by the family. -/
+theorem localFrameGramMatrix_inv_christoffel_family_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {GB GH : ρ → ι → ι → ℝ} {DB DH : ρ → ι → ι → ι → ℝ}
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hDB : ∀ r i j k, 0 ≤ DB r i j k)
+    (hDH : ∀ r i j k, 0 ≤ DH r i j k)
+    {D : ρ → ℝ × M → ι → ι → ι → ℝ}
+    (hG : ∀ r i j,
+      ParabolicC0AlphaWith (GB r i j) (GH r i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K)
+    (hDctrl : ∀ r i j k,
+      ParabolicC0AlphaWith (DB r i j k) (DH r i j k) α
+        (fun z : ℝ × M => D r z i j k) K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (∑ i : ι, ∑ j : ι, ∑ k : ι,
+            matrixInvChristoffelEntryBoundConst (𝕜 := ℝ) δ (GB r) (DB r) i j k)
+          (∑ i : ι, ∑ j : ι, ∑ k : ι,
+            matrixInvChristoffelEntryHolderConst (𝕜 := ℝ) δ (GB r) (GH r) (DB r) (DH r) i j k)
+          α
+          (fun z i j k =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                    Matrix ι ι ℝ) i l *
+                  (D r z j k l + D r z k j l - D r z l j k)) K := by
+  rcases localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact matrix_inv_christoffel_with
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (D := D r) (hGH r) (hDB r) (hDH r) (hG r) (hDctrl r) hδpos (hdet r)
 
 /-- If the local-frame Gram entries have parabolic `C^{0,α}` control on a compact time-space
 set contained in a trivialization base, then the inverse Gram matrix is parabolic `C^{0,α}` there.

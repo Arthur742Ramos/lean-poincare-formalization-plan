@@ -6569,6 +6569,49 @@ theorem matrix_inv_christoffel_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type
   exact matrix_inv_christoffel
     (M := M r) (D := D r) (hM r) (hD r) hδpos (hdet r)
 
+/-- A finite family of inverse-Christoffel arrays has explicit bounded parabolic `C^{0,α}`
+estimates with one compact determinant lower bound shared by the family. -/
+theorem matrix_inv_christoffel_family_with_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {B H : ι → n → n → ℝ} {DB DH : ι → n → n → n → ℝ}
+    {M : ι → ℝ × X → Matrix n n 𝕜}
+    {D : ι → ℝ × X → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ r a b, 0 ≤ B r a b) (hH : ∀ r a b, 0 ≤ H r a b)
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hDH : ∀ r a b c, 0 ≤ DH r a b c)
+    (hM : ∀ r a b,
+      ParabolicC0AlphaWith (B r a b) (H r a b) α (fun z => M r z a b) K)
+    (hD : ∀ r a b c,
+      ParabolicC0AlphaWith (DB r a b c) (DH r a b c) α
+        (fun z => D r z a b c) K)
+    (hdet_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (∑ i : n, ∑ j : n, ∑ k : n,
+            matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ (B r) (DB r) i j k)
+          (∑ i : n, ∑ j : n, ∑ k : n,
+            matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ (B r) (H r) (DB r) (DH r) i j k)
+          α
+          (fun z i j k =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M r z)⁻¹ : Matrix n n 𝕜) i l *
+                (D r z j k l + D r z k j l - D r z l j k)) K := by
+  have hMctrl : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K := by
+    intro r a b
+    exact ⟨B r a b, hB r a b, H r a b, hH r a b, hM r a b⟩
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact matrix_inv_christoffel_with
+    (M := M r) (D := D r)
+    (hH r) (hDB r) (hDH r) (hM r) (hD r) hδpos (hdet r)
+
 /-- Quantitative sup constant for one entry of the finite inverse-principal contraction
 `M⁻¹ᵃᵇ T_abij`. -/
 def matrixInvTwoIndexContractEntryBoundConst {n p q 𝕜 : Type*} [Fintype n]
@@ -7808,6 +7851,52 @@ theorem matrix_inv_two_index_contract_family_of_isCompact_det_ne_zero
   intro r
   exact matrix_inv_two_index_contract
     (M := M r) (T := T r) (hM r) (hT r) hδpos (hdet r)
+
+/-- A finite family of inverse-principal contractions has explicit matrix-valued bounded
+parabolic `C^{0,α}` estimates with one compact determinant lower bound shared by the family. -/
+theorem matrix_inv_two_index_contract_family_with_of_isCompact_det_ne_zero
+    {ι n p q 𝕜 : Type*} [Fintype ι] [Fintype n] [DecidableEq n]
+    [Fintype p] [Fintype q] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {B H : ι → n → n → ℝ} {TB TH : ι → n → n → p → q → ℝ}
+    {M : ι → ℝ × X → Matrix n n 𝕜}
+    {T : ι → ℝ × X → n → n → p → q → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ r a b, 0 ≤ B r a b) (hH : ∀ r a b, 0 ≤ H r a b)
+    (hTB : ∀ r a b i j, 0 ≤ TB r a b i j)
+    (hTH : ∀ r a b i j, 0 ≤ TH r a b i j)
+    (hM : ∀ r a b,
+      ParabolicC0AlphaWith (B r a b) (H r a b) α (fun z => M r z a b) K)
+    (hT : ∀ r a b i j,
+      ParabolicC0AlphaWith (TB r a b i j) (TH r a b i j) α
+        (fun z => T r z a b i j) K)
+    (hdet_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (∑ i : p, ∑ j : q,
+            matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ (B r) (TB r) i j)
+          (∑ i : p, ∑ j : q,
+            matrixInvTwoIndexContractEntryHolderConst
+              (𝕜 := 𝕜) δ (B r) (H r) (TB r) (TH r) i j)
+          α
+          (fun z : ℝ × X =>
+            (fun i j =>
+              ∑ a : n, ∑ b : n, ((M r z)⁻¹ : Matrix n n 𝕜) a b *
+                T r z a b i j :
+              Matrix p q 𝕜)) K := by
+  have hMctrl : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K := by
+    intro r a b
+    exact ⟨B r a b, hB r a b, H r a b, hH r a b, hM r a b⟩
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact matrix_inv_two_index_contract_with
+    (M := M r) (T := T r)
+    (hH r) (hTB r) (hTH r) (hM r) (hT r) hδpos (hdet r)
 
 /-- Quantitative sup constant for one entry of the finite quadratic Christoffel Ricci
 contraction. -/

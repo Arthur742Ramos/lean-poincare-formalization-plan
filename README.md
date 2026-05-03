@@ -492,10 +492,11 @@ packages the canonical stationary local solution attached to
   bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds,
   including finite-index common determinant lower bounds for compact families,
-  finite-family compact inverse, inverse-action, and inverse-bilinear estimates
-  with the same shared determinant constant and matching existential
-  finite-family inverse, inverse-action, inverse-bilinear, inverse-principal,
-  and inverse-Christoffel closures, and
+  finite-family compact inverse, inverse-action, inverse-bilinear,
+  inverse-principal, and inverse-Christoffel estimates with the same shared
+  determinant constant and matching existential finite-family inverse,
+  inverse-action, inverse-bilinear, inverse-principal, and inverse-Christoffel
+  closures, and
   compact-domain inverse,
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, including
   finite-family primitive schematic RHS estimates with the same shared
@@ -554,8 +555,9 @@ packages the canonical stationary local solution attached to
   inverse-Gram action/bilinear, inverse-principal, inverse-Gram Christoffel, and
   schematic RHS handoffs from entrywise `ParabolicC0AlphaOn` controls sharing the same
   compact determinant lower bound, quantitative finite-family inverse-Gram
-  vector/vector-inverse product and bilinear handoffs sharing that same compact
-  determinant lower bound, and compact
+  vector/vector-inverse product, bilinear, inverse-principal, and
+  inverse-Christoffel handoffs sharing that same compact determinant lower
+  bound, and compact
   local-frame inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel arrays, and schematic RHS outputs, including existential
   difference readouts for all four from entrywise controls, and schematic RHS
