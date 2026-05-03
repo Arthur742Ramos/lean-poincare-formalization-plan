@@ -430,8 +430,9 @@ packages the canonical stationary local solution attached to
   Gram-matrix control and inverse-Gram Christoffel/schematic Ricci-DeTurck
   closure, including spatial-Hölder entry-control variants and compact
   quantitative inverse Gram, inverse-Gram Christoffel, and schematic RHS
-  bridges exposing the determinant lower-bound constant, all with matching
-  spatial-Hölder Gram-entry input forms.
+  bridges exposing the determinant lower-bound constant, plus a compact
+  local-frame schematic RHS bounded-difference bridge against comparison
+  primitive inputs, all with matching spatial-Hölder Gram-entry input forms.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric
