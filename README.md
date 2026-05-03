@@ -252,8 +252,8 @@ packages the canonical stationary local solution attached to
   Picard-Lindelof hypotheses directly, including open-domain and
   radius-specialized endpoint forms; model-flow overlap uniqueness now also
   covers common closed subintervals of different ambient Picard intervals for
-  local, continuous space-time, and full variational `(flow, tangent)` packages;
-  encoded candidates in
+  local, continuous space-time, full variational `(flow, tangent)`, and
+  scalar-readout derivative-domain `(t, flow, A(t)u, A(t)v)` packages; encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The
   same state-set mechanism now also has a

@@ -985,7 +985,10 @@ closed-interval overlap equality after restricting two packages with different
 ambient Picard intervals to a shared interval containing the same base time,
 and
 `VariationalLocalFlowSolution.flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem`
-does the same for the full `(flow, tangent)` pair.
+does the same for the full `(flow, tangent)` pair. The scalar-readout derivative
+domain now has the matching common-interval theorem
+`VariationalLocalFlowSolution.time_flow_tangent_apply_pair_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem`
+for `(t, flow, A(t)u, A(t)v)`.
 These are the overlap/localization maps needed before chartwise solutions can be
 glued into a manifold-level flow. Base-flow uniqueness now also has overlap
 forms for `LocalFlowSolution` and `ContinuousLocalFlowSolution`: two packages
