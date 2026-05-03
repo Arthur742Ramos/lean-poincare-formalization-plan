@@ -472,7 +472,9 @@ packages the canonical stationary local solution attached to
   finite-family compact inverse estimates with the same shared determinant
   constant, and compact-domain inverse,
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, including
-  quantitative compact inverse-action and inverse-bilinear estimates, plus
+  finite-family primitive schematic RHS estimates with the same shared
+  determinant constant, quantitative compact inverse-action and inverse-bilinear
+  estimates, plus
   entrywise and whole-valued finite matrix transpose, pointwise
   symmetrization, explicit bounded transpose/symmetrization estimates and
   corresponding difference estimates, finite matrix trace, explicit bounded

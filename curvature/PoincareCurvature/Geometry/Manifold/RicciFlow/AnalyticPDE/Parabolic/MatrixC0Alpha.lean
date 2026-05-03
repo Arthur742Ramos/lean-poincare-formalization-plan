@@ -8463,6 +8463,77 @@ theorem ricciDeTurck_schematic_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
     ricciDeTurck_schematic_from_christoffel_with
       hMH hHB hHH hΓB_nonneg hΓH_nonneg hM hH hΓ hδpos hdet
 
+/-- A finite family of primitive-input schematic Ricci-DeTurck RHS fields has explicit
+matrix-valued bounded parabolic `C^{0,α}` estimates with one compact determinant lower bound
+shared by the whole family. -/
+theorem ricciDeTurck_schematic_family_with_of_isCompact_det_ne_zero
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {MB MH : κ → n → n → ℝ}
+    {DB DH : κ → n → n → n → ℝ}
+    {HB HH : κ → n → n → n → n → ℝ}
+    {M : κ → ℝ × X → Matrix n n 𝕜}
+    {D : κ → ℝ × X → n → n → n → 𝕜}
+    {H : κ → ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hMB : ∀ r a b, 0 ≤ MB r a b) (hMH : ∀ r a b, 0 ≤ MH r a b)
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c) (hDH : ∀ r a b c, 0 ≤ DH r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hHH : ∀ r a b i j, 0 ≤ HH r a b i j)
+    (hM : ∀ r a b,
+      ParabolicC0AlphaWith (MB r a b) (MH r a b) α (fun z => M r z a b) K)
+    (hD : ∀ r a b c,
+      ParabolicC0AlphaWith (DB r a b c) (DH r a b c) α
+        (fun z => D r z a b c) K)
+    (hH : ∀ r a b i j,
+      ParabolicC0AlphaWith (HB r a b i j) (HH r a b i j) α
+        (fun z => H r z a b i j) K)
+    (hdet_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (∑ i : n, ∑ j : n,
+            (matrixInvTwoIndexContractEntryBoundConst (𝕜 := 𝕜) δ (MB r) (HB r) i j +
+              christoffelQuadraticRicciEntryBoundConst
+                (fun a b c =>
+                  matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ (MB r) (DB r) a b c)
+                i j))
+          (∑ i : n, ∑ j : n,
+            (matrixInvTwoIndexContractEntryHolderConst (𝕜 := 𝕜) δ (MB r) (MH r)
+                (HB r) (HH r) i j +
+              christoffelQuadraticRicciEntryHolderConst
+                (fun a b c =>
+                  matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ (MB r) (DB r) a b c)
+                (fun a b c =>
+                  matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ (MB r) (MH r)
+                    (DB r) (DH r) a b c)
+                i j))
+          α
+          (fun z : ℝ × X =>
+            (fun i j =>
+              let Γ : n → n → n → 𝕜 := fun a b c =>
+                (2 : 𝕜)⁻¹ *
+                  ∑ l : n, ((M r z)⁻¹ : Matrix n n 𝕜) a l *
+                    (D r z b c l + D r z c b l - D r z l b c)
+              (∑ a : n, ∑ b : n, ((M r z)⁻¹ : Matrix n n 𝕜) a b *
+                  H r z a b i j) +
+                ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+                  (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) :
+              Matrix n n 𝕜)) K := by
+  have hMctrl : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K := by
+    intro r a b
+    exact ⟨MB r a b, hMB r a b, MH r a b, hMH r a b, hM r a b⟩
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact ricciDeTurck_schematic_with
+    (M := M r) (D := D r) (H := H r)
+    (hMH r) (hDB r) (hDH r) (hHB r) (hHH r)
+    (hM r) (hD r) (hH r) hδpos (hdet r)
+
 /-- Difference-based sup constant for one supplied-Christoffel schematic Ricci-DeTurck
 coordinate entry. -/
 def ricciDeTurckSchematicFromChristoffelEntrySubBoundConst {n 𝕜 : Type*}

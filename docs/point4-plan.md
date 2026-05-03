@@ -1408,7 +1408,9 @@ finite-index common determinant lower bounds for compact matrix families, and
 finite-family compact inverse estimates using that shared determinant constant,
 and compact-domain inverse-entry, inverse-action, inverse-bilinear, and
 schematic matrix-valued RHS variants,
-including quantitative compact inverse-action and inverse-bilinear estimates,
+including finite-family primitive schematic RHS estimates using the same shared
+determinant constant, quantitative compact inverse-action and inverse-bilinear
+estimates,
 plus entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 explicit bounded transpose/symmetrization estimates and corresponding
