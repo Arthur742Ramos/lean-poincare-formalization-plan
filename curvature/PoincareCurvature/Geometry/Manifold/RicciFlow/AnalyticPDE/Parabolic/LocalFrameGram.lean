@@ -42,27 +42,40 @@ theorem localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace
     (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
     [∀ r, MemTrivializationAtlas (e r)]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
-    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
-    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
-    (hG : ∀ r i j,
-      ParabolicC0AlphaOn α
-        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
-        K) :
+    {K : Set (ℝ × M)} (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet) :
     ∃ δ : ℝ, 0 < δ ∧
       ∀ r ⦃z : ℝ × M⦄, z ∈ K →
         δ ≤ ‖(show Matrix ι ι ℝ from
           CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖ := by
-  refine matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
-    (K := K)
-    (M := fun r z =>
-      (show Matrix ι ι ℝ from
-        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
-    hK hα ?_ ?_
-  · intro r i j
-    exact hG r i j
-  · intro r z hz
-    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
-      (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  classical
+  have hcommon :
+      ∀ S : Finset ρ, ∃ δ : ℝ, 0 < δ ∧
+        ∀ r, r ∈ S → ∀ ⦃z : ℝ × M⦄, z ∈ K →
+          δ ≤ ‖(show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖ := by
+    intro S
+    induction S using Finset.induction_on with
+    | empty =>
+        refine ⟨1, by norm_num, ?_⟩
+        intro r hr
+        exact False.elim (by
+          simp at hr)
+    | insert r S hrS ih =>
+        rcases ih with ⟨δS, hδS, hS⟩
+        rcases CovariantDerivative.localFrameGramMatrix_det_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+            (I := I) (E := E) (e r) (b r) hK (hKbase r) with
+          ⟨δr, hδr, hr⟩
+        refine ⟨min δr δS, lt_min hδr hδS, ?_⟩
+        intro q hq z hz
+        rw [Finset.mem_insert] at hq
+        rcases hq with rfl | hq
+        · exact (min_le_left δr δS).trans (hr hz)
+        · exact (min_le_right δr δS).trans (hS q hq hz)
+  rcases hcommon (Finset.univ : Finset ρ) with ⟨δ, hδpos, hδ⟩
+  refine ⟨δ, hδpos, ?_⟩
+  intro r z hz
+  exact hδ r (Finset.mem_univ r) hz
 
 /-- A finite family of inverse local-frame Gram matrices has explicit bounded parabolic
 `C^{0,α}` estimates with one compact Gram determinant lower bound shared by the family. -/
@@ -73,10 +86,10 @@ theorem localFrameGramMatrix_inv_family_with_of_timeSpace_isCompact
     (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
     [∀ r, MemTrivializationAtlas (e r)]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
-    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
     (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
     {GB GH : ρ → ι → ι → ℝ}
-    (hGB : ∀ r i j, 0 ≤ GB r i j) (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
     (hG : ∀ r i j,
       ParabolicC0AlphaWith (GB r i j) (GH r i j) α
         (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
@@ -94,15 +107,16 @@ theorem localFrameGramMatrix_inv_family_with_of_timeSpace_isCompact
             ((show Matrix ι ι ℝ from
               CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
               Matrix ι ι ℝ)) K := by
-  refine matrix_inv_family_with_of_isCompact_det_ne_zero
-    (K := K)
-    (M := fun r z =>
-      (show Matrix ι ι ℝ from
-        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
-    hK hα hGB hGH hG ?_
-  intro r z hz
-  exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
-    (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  rcases localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact matrix_inv_with
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (B := GB r) (H := GH r) (δ := δ)
+    (hGH r) (hG r) hδpos (hdet r)
 
 /-- If the local-frame Gram entries have parabolic `C^{0,α}` control on a compact time-space
 set contained in a trivialization base, then the inverse Gram matrix is parabolic `C^{0,α}` there.
@@ -5299,12 +5313,12 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_family_with_of_timeSpace_isC
     (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
     [∀ r, MemTrivializationAtlas (e r)]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
-    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
     (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
     {GB GH : ρ → ι → ι → ℝ}
     {DB DH : ρ → ι → ι → ι → ℝ}
     {HB HH : ρ → ι → ι → ι → ι → ℝ}
-    (hGB : ∀ r i j, 0 ≤ GB r i j) (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
     (hDB : ∀ r i j k, 0 ≤ DB r i j k) (hDH : ∀ r i j k, 0 ≤ DH r i j k)
     (hHB : ∀ r a c i j, 0 ≤ HB r a c i j)
     (hHH : ∀ r a c i j, 0 ≤ HH r a c i j)
@@ -5360,16 +5374,17 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_family_with_of_timeSpace_isC
                 ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
                   (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
               Matrix ι ι ℝ)) K := by
-  refine ricciDeTurck_schematic_family_with_of_isCompact_det_ne_zero
-    (K := K)
-    (M := fun r z =>
-      (show Matrix ι ι ℝ from
-        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
-    (D := D) (H := Hc)
-    hK hα hGB hGH hDB hDH hHB hHH hG hDctrl hHc ?_
-  intro r z hz
-  exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
-    (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  rcases localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact ricciDeTurck_schematic_with
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (D := D r) (H := Hc r)
+    (hGH r) (hDB r) (hDH r) (hHB r) (hHH r)
+    (hG r) (hDctrl r) (hHc r) hδpos (hdet r)
 
 /-- Spatial boundedness and spatial Holder estimates for local-frame Gram entries, together with
 explicit parabolic controls for the first- and second-derivative coefficient arrays, yield the
