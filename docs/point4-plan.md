@@ -1345,9 +1345,10 @@ finite-cover `C^{0,α}` patching with automatic local-constant selection, and
 variable-radius finite-cover Holder and `C^{0,α}` patching plus compact
 point-dependent- and existential-radius corollaries, and finite-sum closure for
 explicit Holder, bounded, and `C^{0,α}` controls, and finite-sum closure for
-existential Holder and `C^{0,α}` controls, and finite-product closure for
-existential normed-comm-ring-valued `C^{0,α}` controls, and an explicit bounded
-finite-product `C^{0,α}` estimate, and finite `Pi` packaging across bounded,
+existential Holder and `C^{0,α}` controls, and finite-product and
+finite-product-difference closure for existential normed-comm-ring-valued
+`C^{0,α}` controls, and an explicit bounded finite-product `C^{0,α}` estimate,
+and finite `Pi` packaging across bounded,
 Holder, and `C^{0,α}` controls from componentwise estimates and
 same-constant projection back to components, and product-valued pairing
 closure, continuous-linear and curried-bilinear-map closure, curried-bilinear

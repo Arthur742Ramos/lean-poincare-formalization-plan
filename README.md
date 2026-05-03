@@ -405,8 +405,9 @@ packages the canonical stationary local solution attached to
   compact point-dependent- and existential-radius corollaries, finite-sum
   closure for explicit Holder, bounded, and `C^{0,α}` controls,
   finite-sum closure for existential Holder and `C^{0,α}` controls,
-  finite-product closure for existential normed-comm-ring-valued `C^{0,α}`
-  controls plus an explicit bounded `C^{0,α}` finite-product estimate, finite `Pi`
+  finite-product and finite-product-difference closure for existential
+  normed-comm-ring-valued `C^{0,α}` controls plus an explicit bounded `C^{0,α}`
+  finite-product estimate, finite `Pi`
   packaging across bounded, Holder, and `C^{0,α}` controls from componentwise
   estimates and same-constant projection back to components, and
   continuous-linear, curried-bilinear-map, curried-bilinear difference,

@@ -3777,6 +3777,98 @@ theorem finset_prod {ι A : Type*} [NormedCommRing A] (S : Finset ι)
       ih fun i hi => h i (by simp [hi])
     simpa [Finset.prod_insert ha] using ha_c0α.mul htail
 
+/-- Finite product differences preserve existential parabolic `C^{0,α}` control.  The proof
+selects common factor bounds for the two products before applying the fixed-constant estimate. -/
+theorem finset_prod_sub_prod {ι A : Type*} [NormedCommRing A] (S : Finset ι)
+    {u v : ι → ℝ × X → A}
+    (hu : ∀ i ∈ S, ParabolicC0AlphaOn α (u i) s)
+    (hv : ∀ i ∈ S, ParabolicC0AlphaOn α (v i) s)
+    (hdiff : ∀ i ∈ S, ParabolicC0AlphaOn α (fun z => u i z - v i z) s) :
+    ParabolicC0AlphaOn α (fun z => (∏ i ∈ S, u i z) - ∏ i ∈ S, v i z) s := by
+  classical
+  let Bu : ι → ℝ := fun i => if hi : i ∈ S then Classical.choose (hu i hi) else 0
+  let Hu : ι → ℝ := fun i =>
+    if hi : i ∈ S then Classical.choose (Classical.choose_spec (hu i hi)).2 else 0
+  let Bv : ι → ℝ := fun i => if hi : i ∈ S then Classical.choose (hv i hi) else 0
+  let Hv : ι → ℝ := fun i =>
+    if hi : i ∈ S then Classical.choose (Classical.choose_spec (hv i hi)).2 else 0
+  let Bd : ι → ℝ := fun i => if hi : i ∈ S then Classical.choose (hdiff i hi) else 0
+  let Hd : ι → ℝ := fun i =>
+    if hi : i ∈ S then Classical.choose (Classical.choose_spec (hdiff i hi)).2 else 0
+  let B : ι → ℝ := fun i => max (Bu i) (Bv i)
+  let H : ι → ℝ := fun i => max (Hu i) (Hv i)
+  have hBu_nonneg : ∀ i ∈ S, 0 ≤ Bu i := by
+    intro i hi
+    dsimp [Bu]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (hu i hi)).1
+  have hHu_nonneg : ∀ i ∈ S, 0 ≤ Hu i := by
+    intro i hi
+    dsimp [Hu]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (Classical.choose_spec (hu i hi)).2).1
+  have hBv_nonneg : ∀ i ∈ S, 0 ≤ Bv i := by
+    intro i hi
+    dsimp [Bv]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (hv i hi)).1
+  have hHv_nonneg : ∀ i ∈ S, 0 ≤ Hv i := by
+    intro i hi
+    dsimp [Hv]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (Classical.choose_spec (hv i hi)).2).1
+  have hBd_nonneg : ∀ i ∈ S, 0 ≤ Bd i := by
+    intro i hi
+    dsimp [Bd]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (hdiff i hi)).1
+  have hHd_nonneg : ∀ i ∈ S, 0 ≤ Hd i := by
+    intro i hi
+    dsimp [Hd]
+    rw [dif_pos hi]
+    exact (Classical.choose_spec (Classical.choose_spec (hdiff i hi)).2).1
+  have hH_nonneg : ∀ i ∈ S, 0 ≤ H i := by
+    intro i hi
+    exact (hHu_nonneg i hi).trans (le_max_left (Hu i) (Hv i))
+  have hu_with :
+      ∀ i ∈ S, ParabolicC0AlphaWith (B i) (H i) α (u i) s := by
+    intro i hi
+    have hctrl : ParabolicC0AlphaWith (Bu i) (Hu i) α (u i) s := by
+      dsimp [Bu, Hu]
+      rw [dif_pos hi, dif_pos hi]
+      exact (Classical.choose_spec (Classical.choose_spec (hu i hi)).2).2
+    exact hctrl.mono_const (le_max_left (Bu i) (Bv i)) (le_max_left (Hu i) (Hv i))
+  have hv_with :
+      ∀ i ∈ S, ParabolicC0AlphaWith (B i) (H i) α (v i) s := by
+    intro i hi
+    have hctrl : ParabolicC0AlphaWith (Bv i) (Hv i) α (v i) s := by
+      dsimp [Bv, Hv]
+      rw [dif_pos hi, dif_pos hi]
+      exact (Classical.choose_spec (Classical.choose_spec (hv i hi)).2).2
+    exact hctrl.mono_const (le_max_right (Bu i) (Bv i)) (le_max_right (Hu i) (Hv i))
+  have hdiff_with :
+      ∀ i ∈ S, ParabolicC0AlphaWith (Bd i) (Hd i) α (fun z => u i z - v i z) s := by
+    intro i hi
+    dsimp [Bd, Hd]
+    rw [dif_pos hi, dif_pos hi]
+    exact (Classical.choose_spec (Classical.choose_spec (hdiff i hi)).2).2
+  refine ⟨
+    ((∑ i ∈ S, Bd i) * (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)), ?_,
+    (((∑ i ∈ S, Hd i) + (∑ i ∈ S, H i) * (∑ i ∈ S, Bd i)) *
+      (max ‖(1 : A)‖ 1 * ∏ i ∈ S, max (B i) 1)), ?_, ?_⟩
+  · exact mul_nonneg
+      (Finset.sum_nonneg hBd_nonneg)
+      (mul_nonneg (zero_le_one.trans (le_max_right _ _))
+        (Finset.prod_nonneg fun i _hi => zero_le_one.trans (le_max_right (B i) 1)))
+  · exact mul_nonneg
+      (add_nonneg (Finset.sum_nonneg hHd_nonneg)
+        (mul_nonneg (Finset.sum_nonneg hH_nonneg) (Finset.sum_nonneg hBd_nonneg)))
+      (mul_nonneg (zero_le_one.trans (le_max_right _ _))
+        (Finset.prod_nonneg fun i _hi => zero_le_one.trans (le_max_right (B i) 1)))
+  · exact ParabolicC0AlphaWith.finset_prod_sub_prod (X := X) (α := α) (s := s)
+      (S := S) (B := B) (H := H) (Bd := Bd) (Hd := Hd) (u := u) (v := v)
+      hH_nonneg hBd_nonneg hHd_nonneg hu_with hv_with hdiff_with
+
 theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
     (ha : ParabolicC0AlphaOn α a s) (hu : ParabolicC0AlphaOn α u s) :
