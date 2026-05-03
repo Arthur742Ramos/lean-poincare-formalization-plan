@@ -185,6 +185,7 @@ determinant lower bound and compact-domain inverse-entry, inverse-action,
 inverse-bilinear, and schematic matrix-valued RHS variants, as well as
 entrywise and whole-valued closure for
 finite matrix transpose, pointwise symmetrization, matrix products,
+explicit bounded transpose/symmetrization estimates,
 explicit bounded entrywise/whole-matrix product estimates,
 explicit entrywise/whole-matrix product-difference estimates,
 matrix-vector and vector-matrix products, explicit bounded matrix-vector/vector-matrix estimates,
