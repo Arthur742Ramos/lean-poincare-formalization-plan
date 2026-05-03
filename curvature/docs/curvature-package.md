@@ -155,8 +155,8 @@ estimates plus a whole inverse-matrix estimate, and parabolic `C^{0,α}` closure
 for finite matrix determinants, adjugate entries, and inverse entries under a
 determinant lower bound from entrywise control, plus a pointwise determinant,
 adjugate-entry, inverse-entry, whole inverse-matrix, matrix-product, and
-inverse-principal-contraction Lipschitz estimate layer on entrywise bounded
-finite matrices, using a determinant lower bound for inverse estimates,
+inverse-principal and inverse-Christoffel contraction Lipschitz estimate layer on
+entrywise bounded finite matrices, using a determinant lower bound for inverse estimates,
 including a compactness bridge from nonvanishing determinants to a uniform
 determinant lower bound and compact-domain inverse-entry, inverse-action,
 inverse-bilinear, and schematic matrix-valued RHS variants, as well as

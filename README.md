@@ -373,8 +373,8 @@ packages the canonical stationary local solution attached to
   closure of finite matrix determinants, adjugate entries, and inverse entries
   under determinant lower bounds, and pointwise determinant, adjugate-entry,
   inverse-entry, whole inverse-matrix, matrix-product, and
-  inverse-principal-contraction Lipschitz estimates on entrywise bounded finite
-  matrices with a determinant lower bound where needed, with
+  inverse-principal and inverse-Christoffel contraction Lipschitz estimates on
+  entrywise bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds and
   compact-domain inverse,
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, plus

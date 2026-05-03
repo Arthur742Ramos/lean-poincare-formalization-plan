@@ -1173,6 +1173,157 @@ theorem matrix_inv_christoffel {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
   intro k
   exact matrix_inv_christoffel_entry (M := M) (D := D) hM hD hδpos hdet i j k
 
+/-- The Christoffel derivative combination is Lipschitz in its three displayed derivative
+entries. -/
+theorem christoffelDerivativeCombo_norm_sub_le {n A : Type*} [NormedAddCommGroup A]
+    (D E : n → n → n → A) (j k l : n) :
+    ‖(D j k l + D k j l - D l j k) - (E j k l + E k j l - E l j k)‖ ≤
+      ‖D j k l - E j k l‖ + ‖D k j l - E k j l‖ + ‖D l j k - E l j k‖ := by
+  have hsplit :
+      (D j k l + D k j l - D l j k) - (E j k l + E k j l - E l j k) =
+        (D j k l - E j k l) + (D k j l - E k j l) - (D l j k - E l j k) := by
+    abel
+  calc
+    ‖(D j k l + D k j l - D l j k) - (E j k l + E k j l - E l j k)‖ =
+        ‖(D j k l - E j k l) + (D k j l - E k j l) -
+          (D l j k - E l j k)‖ := by
+      rw [hsplit]
+    _ ≤ ‖(D j k l - E j k l) + (D k j l - E k j l)‖ +
+        ‖D l j k - E l j k‖ :=
+      norm_sub_le _ _
+    _ ≤ (‖D j k l - E j k l‖ + ‖D k j l - E k j l‖) +
+        ‖D l j k - E l j k‖ :=
+      add_le_add_left (norm_add_le _ _) _
+    _ = ‖D j k l - E j k l‖ + ‖D k j l - E k j l‖ +
+        ‖D l j k - E l j k‖ := by
+      ring
+
+/-- A bounded derivative array bounds the Christoffel derivative combination. -/
+theorem christoffelDerivativeCombo_norm_le {n A : Type*} [NormedAddCommGroup A]
+    {B : n → n → n → ℝ} (D : n → n → n → A)
+    (hD : ∀ a b c, ‖D a b c‖ ≤ B a b c) (j k l : n) :
+    ‖D j k l + D k j l - D l j k‖ ≤ B j k l + B k j l + B l j k := by
+  calc
+    ‖D j k l + D k j l - D l j k‖ ≤ ‖D j k l + D k j l‖ + ‖D l j k‖ :=
+      norm_sub_le _ _
+    _ ≤ (‖D j k l‖ + ‖D k j l‖) + ‖D l j k‖ :=
+      add_le_add_left (norm_add_le _ _) _
+    _ ≤ (B j k l + B k j l) + B l j k :=
+      add_le_add (add_le_add (hD j k l) (hD k j l)) (hD l j k)
+    _ = B j k l + B k j l + B l j k := by
+      ring
+
+/-- Christoffel-symbol type inverse-metric contractions are pointwise Lipschitz on bounded
+derivative arrays and entrywise bounded matrices with a common determinant lower bound. -/
+theorem matrix_inv_christoffel_entry_norm_sub_le {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} (M N : Matrix n n 𝕜)
+    (D E : n → n → n → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hE : ∀ a b c, ‖E a b c‖ ≤ DB a b c)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖)
+    (i j k : n) :
+    ‖((2 : 𝕜)⁻¹ *
+        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l *
+          (D j k l + D k j l - D l j k)) -
+      ((2 : 𝕜)⁻¹ *
+        ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l *
+          (E j k l + E k j l - E l j k))‖ ≤
+      ‖(2 : 𝕜)⁻¹‖ *
+        ∑ l : n,
+          (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
+              (‖D j k l - E j k l‖ + ‖D k j l - E k j l‖ +
+                ‖D l j k - E l j k‖) +
+            (DB j k l + DB k j l + DB l j k) *
+              matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i l) := by
+  classical
+  let comboD : n → 𝕜 := fun l => D j k l + D k j l - D l j k
+  let comboE : n → 𝕜 := fun l => E j k l + E k j l - E l j k
+  let comboDiffBound : n → ℝ := fun l =>
+    ‖D j k l - E j k l‖ + ‖D k j l - E k j l‖ + ‖D l j k - E l j k‖
+  let comboBound : n → ℝ := fun l => DB j k l + DB k j l + DB l j k
+  let innerBound : ℝ :=
+    ∑ l : n,
+      (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l * comboDiffBound l +
+        comboBound l * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i l)
+  have hinner :
+      ‖(∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+          ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l‖ ≤ innerBound := by
+    have hsum :
+        ‖(∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+            ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l‖ ≤
+          ∑ l : n,
+            (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
+                ‖comboD l - comboE l‖ +
+              comboBound l * ‖(M⁻¹ : Matrix n n 𝕜) i l -
+                (N⁻¹ : Matrix n n 𝕜) i l‖) := by
+      simpa using
+        (norm_finset_sum_mul_sub_sum_mul_le
+          (S := (Finset.univ : Finset n))
+          (B := fun l => matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l)
+          (D := comboBound)
+          (a := fun l => (M⁻¹ : Matrix n n 𝕜) i l)
+          (b := comboD)
+          (c := fun l => (N⁻¹ : Matrix n n 𝕜) i l)
+          (d := comboE)
+          (fun l _hl => matrix_inv_entry_norm_le M hM hδpos hdetM i l)
+          (fun l _hl => by
+            simpa [comboE, comboBound] using christoffelDerivativeCombo_norm_le E hE j k l))
+    refine hsum.trans ?_
+    exact Finset.sum_le_sum fun l _hl => by
+      have hcombo_bound :
+          ‖comboE l‖ ≤ comboBound l := by
+        simpa [comboE, comboBound] using christoffelDerivativeCombo_norm_le E hE j k l
+      have hcombo_bound_nonneg : 0 ≤ comboBound l :=
+        (norm_nonneg _).trans hcombo_bound
+      have hcombo_diff :
+          ‖comboD l - comboE l‖ ≤ comboDiffBound l := by
+        simpa [comboD, comboE, comboDiffBound] using
+          christoffelDerivativeCombo_norm_sub_le D E j k l
+      have hlip :
+          ‖(M⁻¹ : Matrix n n 𝕜) i l - (N⁻¹ : Matrix n n 𝕜) i l‖ ≤
+            matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i l :=
+        matrix_inv_entry_norm_sub_le M N hM hN hδpos hdetM hdetN i l
+      exact add_le_add
+        (mul_le_mul_of_nonneg_left hcombo_diff
+          (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C i l))
+        (mul_le_mul_of_nonneg_left hlip hcombo_bound_nonneg)
+  have hsplit :
+      ((2 : 𝕜)⁻¹ * (∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l)) -
+        ((2 : 𝕜)⁻¹ * (∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l)) =
+          (2 : 𝕜)⁻¹ *
+            ((∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+              ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l) := by
+    ring
+  calc
+    ‖((2 : 𝕜)⁻¹ *
+        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l *
+          (D j k l + D k j l - D l j k)) -
+      ((2 : 𝕜)⁻¹ *
+        ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l *
+          (E j k l + E k j l - E l j k))‖ =
+        ‖((2 : 𝕜)⁻¹ * (∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l)) -
+          ((2 : 𝕜)⁻¹ * (∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l))‖ := by
+      simp [comboD, comboE]
+    _ = ‖(2 : 𝕜)⁻¹ *
+          ((∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+            ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l)‖ := by
+      rw [hsplit]
+    _ ≤ ‖(2 : 𝕜)⁻¹‖ *
+        ‖(∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l) -
+          ∑ l : n, (N⁻¹ : Matrix n n 𝕜) i l * comboE l‖ :=
+      norm_mul_le _ _
+    _ ≤ ‖(2 : 𝕜)⁻¹‖ * innerBound :=
+      mul_le_mul_of_nonneg_left hinner (norm_nonneg _)
+    _ = ‖(2 : 𝕜)⁻¹‖ *
+        ∑ l : n,
+          (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
+              (‖D j k l - E j k l‖ + ‖D k j l - E k j l‖ +
+                ‖D l j k - E l j k‖) +
+            (DB j k l + DB k j l + DB l j k) *
+              matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i l) := by
+      simp [innerBound, comboDiffBound, comboBound]
+
 /-- Compact-domain Christoffel-symbol type array closure from entrywise control and pointwise
 nonvanishing determinant. -/
 theorem matrix_inv_christoffel_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
