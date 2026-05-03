@@ -374,7 +374,8 @@ packages the canonical stationary local solution attached to
   under determinant lower bounds, and pointwise determinant, adjugate-entry,
   inverse-entry, whole inverse-matrix, matrix-product, and
   inverse-principal, inverse-Christoffel, and quadratic-Christoffel contraction
-  Lipschitz estimates on entrywise bounded finite matrices with a determinant lower bound where needed, with
+  Lipschitz estimates, plus a supplied-Christoffel schematic RHS Lipschitz
+  aggregation, on entrywise bounded finite matrices with a determinant lower bound where needed, with
   compact nonvanishing determinant data now supplying such lower bounds and
   compact-domain inverse,
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, plus

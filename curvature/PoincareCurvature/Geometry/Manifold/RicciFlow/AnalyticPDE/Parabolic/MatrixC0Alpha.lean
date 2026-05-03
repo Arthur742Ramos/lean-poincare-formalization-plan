@@ -1324,6 +1324,68 @@ theorem matrix_inv_christoffel_entry_norm_sub_le {n 𝕜 : Type*} [Fintype n]
               matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N i l) := by
       simp [innerBound, comboDiffBound, comboBound]
 
+/-- Christoffel-symbol type inverse-metric contractions are pointwise bounded by the quantitative
+inverse-entry constants and derivative-array bounds. -/
+theorem matrix_inv_christoffel_entry_norm_le {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ} {DB : n → n → n → ℝ}
+    (M : Matrix n n 𝕜) (D : n → n → n → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b)
+    (hD : ∀ a b c, ‖D a b c‖ ≤ DB a b c)
+    (hδpos : 0 < δ) (hdet : δ ≤ ‖M.det‖) (i j k : n) :
+    ‖(2 : 𝕜)⁻¹ *
+        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l *
+          (D j k l + D k j l - D l j k)‖ ≤
+      ‖(2 : 𝕜)⁻¹‖ *
+        ∑ l : n,
+          matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
+            (DB j k l + DB k j l + DB l j k) := by
+  classical
+  let comboD : n → 𝕜 := fun l => D j k l + D k j l - D l j k
+  let comboBound : n → ℝ := fun l => DB j k l + DB k j l + DB l j k
+  let innerBound : ℝ := ∑ l : n,
+    matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l * comboBound l
+  have hterm : ∀ l ∈ (Finset.univ : Finset n),
+      ‖(M⁻¹ : Matrix n n 𝕜) i l * comboD l‖ ≤
+        matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l * comboBound l := by
+    intro l _hl
+    have hinv :
+        ‖(M⁻¹ : Matrix n n 𝕜) i l‖ ≤ matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l :=
+      matrix_inv_entry_norm_le M hM hδpos hdet i l
+    have hcombo : ‖comboD l‖ ≤ comboBound l := by
+      simpa [comboD, comboBound] using christoffelDerivativeCombo_norm_le D hD j k l
+    calc
+      ‖(M⁻¹ : Matrix n n 𝕜) i l * comboD l‖ ≤
+          ‖(M⁻¹ : Matrix n n 𝕜) i l‖ * ‖comboD l‖ :=
+        norm_mul_le _ _
+      _ ≤ matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l * comboBound l :=
+        mul_le_mul hinv hcombo (norm_nonneg _)
+          (matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C i l)
+  have hinner :
+      ‖∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l‖ ≤ innerBound := by
+    calc
+      ‖∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l‖ ≤
+          ∑ l : n, ‖(M⁻¹ : Matrix n n 𝕜) i l * comboD l‖ :=
+        norm_sum_le _ _
+      _ ≤ ∑ l : n, matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l * comboBound l :=
+        Finset.sum_le_sum hterm
+      _ = innerBound := by
+        rfl
+  calc
+    ‖(2 : 𝕜)⁻¹ *
+        ∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l *
+          (D j k l + D k j l - D l j k)‖ =
+        ‖(2 : 𝕜)⁻¹ * ∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l‖ := by
+      simp [comboD]
+    _ ≤ ‖(2 : 𝕜)⁻¹‖ * ‖∑ l : n, (M⁻¹ : Matrix n n 𝕜) i l * comboD l‖ :=
+      norm_mul_le _ _
+    _ ≤ ‖(2 : 𝕜)⁻¹‖ * innerBound :=
+      mul_le_mul_of_nonneg_left hinner (norm_nonneg _)
+    _ = ‖(2 : 𝕜)⁻¹‖ *
+        ∑ l : n,
+          matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i l *
+            (DB j k l + DB k j l + DB l j k) := by
+      simp [innerBound, comboBound]
+
 /-- Compact-domain Christoffel-symbol type array closure from entrywise control and pointwise
 nonvanishing determinant. -/
 theorem matrix_inv_christoffel_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
@@ -1783,6 +1845,185 @@ theorem christoffel_quadratic_ricci_norm_sub_le {n A : Type*} [Fintype n] [Norme
               (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) -
             ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
               (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))‖ := rfl
+      _ ≤ entryBound i j := hentry i j
+      _ ≤ ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hentry_nonneg i k) (Finset.mem_univ j)
+      _ ≤ ∑ i : n, ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
+  simpa [entryBound] using hnorm
+
+/-- The schematic Ricci-DeTurck coordinate entry built from an inverse principal contraction and
+a supplied Christoffel array is pointwise Lipschitz on bounded inputs.  This is the algebraic
+combination step before substituting the inverse-metric Christoffel formula. -/
+theorem ricciDeTurck_schematic_from_christoffel_entry_norm_sub_le {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {HB : n → n → n → n → ℝ} {ΓB : n → n → n → ℝ}
+    (M N : Matrix n n 𝕜) (H K : n → n → n → n → 𝕜)
+    (Γ Λ : n → n → n → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hK : ∀ a b i j, ‖K a b i j‖ ≤ HB a b i j)
+    (hΓ : ∀ a b c, ‖Γ a b c‖ ≤ ΓB a b c)
+    (hΛ : ∀ a b c, ‖Λ a b c‖ ≤ ΓB a b c)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖)
+    (i j : n) :
+    ‖((∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+        ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+          (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) -
+      ((∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j) +
+        ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+          (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)))‖ ≤
+      (∑ a : n, ∑ b : n,
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖H a b i j - K a b i j‖ +
+          HB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b)) +
+      ((∑ a : n, ∑ b : n,
+        (ΓB a i j * ‖Γ b a b - Λ b a b‖ +
+          ΓB b a b * ‖Γ a i j - Λ a i j‖)) +
+      (∑ a : n, ∑ b : n,
+        (ΓB a i b * ‖Γ b a j - Λ b a j‖ +
+          ΓB b a j * ‖Γ a i b - Λ a i b‖))) := by
+  classical
+  let principalM : 𝕜 := ∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j
+  let principalN : 𝕜 := ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j
+  let quadraticΓ : 𝕜 :=
+    (∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+      (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)
+  let quadraticΛ : 𝕜 :=
+    (∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+      (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)
+  let principalBound : ℝ := ∑ a : n, ∑ b : n,
+    (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖H a b i j - K a b i j‖ +
+      HB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b)
+  let quadraticBound : ℝ :=
+    (∑ a : n, ∑ b : n,
+      (ΓB a i j * ‖Γ b a b - Λ b a b‖ +
+        ΓB b a b * ‖Γ a i j - Λ a i j‖)) +
+    (∑ a : n, ∑ b : n,
+      (ΓB a i b * ‖Γ b a j - Λ b a j‖ +
+        ΓB b a j * ‖Γ a i b - Λ a i b‖))
+  have hprincipal : ‖principalM - principalN‖ ≤ principalBound := by
+    simpa [principalM, principalN, principalBound] using
+      matrix_inv_two_index_contract_entry_norm_sub_le M N H K hM hN hK hδpos hdetM hdetN i j
+  have hquadratic : ‖quadraticΓ - quadraticΛ‖ ≤ quadraticBound := by
+    simpa [quadraticΓ, quadraticΛ, quadraticBound] using
+      christoffel_quadratic_ricci_entry_norm_sub_le Γ Λ hΓ hΛ i j
+  have hsplit :
+      (principalM + quadraticΓ) - (principalN + quadraticΛ) =
+        (principalM - principalN) + (quadraticΓ - quadraticΛ) := by
+    abel
+  calc
+    ‖((∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+        ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+          (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) -
+      ((∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j) +
+        ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+          (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)))‖ =
+        ‖(principalM + quadraticΓ) - (principalN + quadraticΛ)‖ := by
+      rfl
+    _ = ‖(principalM - principalN) + (quadraticΓ - quadraticΛ)‖ := by
+      rw [hsplit]
+    _ ≤ ‖principalM - principalN‖ + ‖quadraticΓ - quadraticΛ‖ :=
+      norm_add_le _ _
+    _ ≤ principalBound + quadraticBound :=
+      add_le_add hprincipal hquadratic
+    _ =
+      (∑ a : n, ∑ b : n,
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖H a b i j - K a b i j‖ +
+          HB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b)) +
+      ((∑ a : n, ∑ b : n,
+        (ΓB a i j * ‖Γ b a b - Λ b a b‖ +
+          ΓB b a b * ‖Γ a i j - Λ a i j‖)) +
+      (∑ a : n, ∑ b : n,
+        (ΓB a i b * ‖Γ b a j - Λ b a j‖ +
+          ΓB b a j * ‖Γ a i b - Λ a i b‖))) := by
+      simp [principalBound, quadraticBound]
+
+/-- The matrix-valued schematic Ricci-DeTurck expression built from inverse principal contractions
+and supplied Christoffel arrays is pointwise Lipschitz in the elementwise matrix norm. -/
+theorem ricciDeTurck_schematic_from_christoffel_norm_sub_le {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {HB : n → n → n → n → ℝ} {ΓB : n → n → n → ℝ}
+    (M N : Matrix n n 𝕜) (H K : n → n → n → n → 𝕜)
+    (Γ Λ : n → n → n → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hK : ∀ a b i j, ‖K a b i j‖ ≤ HB a b i j)
+    (hΓ : ∀ a b c, ‖Γ a b c‖ ≤ ΓB a b c)
+    (hΛ : ∀ a b c, ‖Λ a b c‖ ≤ ΓB a b c)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖) :
+    ‖((fun i j =>
+        (∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+          ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) : Matrix n n 𝕜) -
+      ((fun i j =>
+        (∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j) +
+          ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+            (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))) : Matrix n n 𝕜)‖ ≤
+      ∑ i : n, ∑ j : n,
+        ((∑ a : n, ∑ b : n,
+          (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖H a b i j - K a b i j‖ +
+            HB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b)) +
+        ((∑ a : n, ∑ b : n,
+          (ΓB a i j * ‖Γ b a b - Λ b a b‖ +
+            ΓB b a b * ‖Γ a i j - Λ a i j‖)) +
+        (∑ a : n, ∑ b : n,
+          (ΓB a i b * ‖Γ b a j - Λ b a j‖ +
+            ΓB b a j * ‖Γ a i b - Λ a i b‖)))) := by
+  classical
+  let entryBound : n → n → ℝ := fun i j =>
+    (∑ a : n, ∑ b : n,
+      (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖H a b i j - K a b i j‖ +
+        HB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b)) +
+    ((∑ a : n, ∑ b : n,
+      (ΓB a i j * ‖Γ b a b - Λ b a b‖ +
+        ΓB b a b * ‖Γ a i j - Λ a i j‖)) +
+    (∑ a : n, ∑ b : n,
+      (ΓB a i b * ‖Γ b a j - Λ b a j‖ +
+        ΓB b a j * ‖Γ a i b - Λ a i b‖)))
+  have hentry : ∀ i j,
+      ‖((∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+          ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+            (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) -
+        ((∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j) +
+          ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+            (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)))‖ ≤ entryBound i j := by
+    intro i j
+    simpa [entryBound] using
+      ricciDeTurck_schematic_from_christoffel_entry_norm_sub_le
+        M N H K Γ Λ hM hN hK hΓ hΛ hδpos hdetM hdetN i j
+  have hentry_nonneg : ∀ i j, 0 ≤ entryBound i j := by
+    intro i j
+    exact (norm_nonneg _).trans (hentry i j)
+  have hrow_nonneg : ∀ i, 0 ≤ ∑ j : n, entryBound i j := by
+    intro i
+    exact Finset.sum_nonneg fun j _hj => hentry_nonneg i j
+  have htotal_nonneg : 0 ≤ ∑ i : n, ∑ j : n, entryBound i j :=
+    Finset.sum_nonneg fun i _hi => hrow_nonneg i
+  have hnorm :
+      ‖((fun i j =>
+          (∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+            ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+              (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) : Matrix n n 𝕜) -
+        ((fun i j =>
+          (∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j) +
+            ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+              (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))) : Matrix n n 𝕜)‖ ≤
+        ∑ i : n, ∑ j : n, entryBound i j := by
+    refine (Matrix.norm_le_iff htotal_nonneg).2 ?_
+    intro i j
+    calc
+      ‖(((fun i j =>
+          (∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+            ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+              (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) : Matrix n n 𝕜) -
+        ((fun i j =>
+          (∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j) +
+            ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+              (∑ a : n, ∑ b : n, Λ a i b * Λ b a j))) : Matrix n n 𝕜)) i j‖ =
+          ‖((∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+              ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+                (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) -
+            ((∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j) +
+              ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+                (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)))‖ := rfl
       _ ≤ entryBound i j := hentry i j
       _ ≤ ∑ j : n, entryBound i j :=
         Finset.single_le_sum (fun k _hk => hentry_nonneg i k) (Finset.mem_univ j)
