@@ -1007,7 +1007,8 @@ explicit closed-sup-ball bounds, global and closed-ball Lipschitz composition
 with automatic composed sup bounds, exponent lowering on unit parabolic-diameter
 domains with closed-ball and closed-cylinder specializations across the Holder
 and `C^{0,α}` interfaces, and closed-ball diameter control,
-pointwise finite-product Lipschitz estimates on factorwise bounded sets,
+pointwise finite-product Lipschitz estimates and finite-sum Lipschitz estimates
+for two-factor products on factorwise bounded sets,
 bidirectional product ball/closed-ball compatibility for parabolic balls and
 product cylinders, plus basepoint-to-sup bounds and Holder-to-`C^{0,α}`
 packaging on compact domains, with direct proper-space closed-ball/cylinder
@@ -1017,11 +1018,12 @@ explicit bounded `C^{0,α}` determinant, adjugate-entry, and inverse-entry
 estimates together with a whole inverse-matrix estimate, and that finite matrix
 determinants, adjugate entries, and inverse entries under a determinant lower
 bound preserve parabolic `C^{0,α}` control from entrywise control. It also has
-pointwise determinant, adjugate-entry, inverse-entry, and whole inverse-matrix
-Lipschitz estimates on entrywise bounded finite matrices, using a determinant
-lower bound for inverse estimates; compact nonvanishing determinant data now
-supplies the needed uniform determinant lower bound, including compact-domain
-inverse-entry, inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
+pointwise determinant, adjugate-entry, inverse-entry, whole inverse-matrix,
+matrix-product, and inverse-principal-contraction Lipschitz estimates on
+entrywise bounded finite matrices, using a determinant lower bound for inverse
+estimates; compact nonvanishing determinant data now supplies the needed
+uniform determinant lower bound, including compact-domain inverse-entry,
+inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
 also proves entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
 matrix-vector and vector-matrix products, including inverse-matrix vector

@@ -144,7 +144,8 @@ also including exponent lowering on unit parabolic-diameter domains with
 closed-ball and closed-cylinder specializations across the Holder and
 `C^{0,α}` interfaces, closed-ball diameter control, product ball/closed-ball
 compatibility in both directions for parabolic balls and product cylinders,
-pointwise finite-product Lipschitz estimates on factorwise bounded sets, plus
+pointwise finite-product Lipschitz estimates and finite-sum Lipschitz estimates
+for two-factor products on factorwise bounded sets, plus
 basepoint-to-sup bounds and Holder-to-`C^{0,α}` packaging on compact domains,
 with direct proper-space closed-ball/cylinder corollaries, not the
 local-existence theorem itself.
@@ -153,10 +154,11 @@ explicit bounded `C^{0,α}` determinant, adjugate-entry, and inverse-entry
 estimates plus a whole inverse-matrix estimate, and parabolic `C^{0,α}` closure
 for finite matrix determinants, adjugate entries, and inverse entries under a
 determinant lower bound from entrywise control, plus a pointwise determinant,
-adjugate-entry, inverse-entry, and whole inverse-matrix Lipschitz estimate
-layer on entrywise bounded finite matrices, using a determinant lower bound for
-inverse estimates, including a compactness bridge from nonvanishing determinants
-to a uniform determinant lower bound and compact-domain inverse-entry, inverse-action,
+adjugate-entry, inverse-entry, whole inverse-matrix, matrix-product, and
+inverse-principal-contraction Lipschitz estimate layer on entrywise bounded
+finite matrices, using a determinant lower bound for inverse estimates,
+including a compactness bridge from nonvanishing determinants to a uniform
+determinant lower bound and compact-domain inverse-entry, inverse-action,
 inverse-bilinear, and schematic matrix-valued RHS variants, as well as
 entrywise and whole-valued closure for
 finite matrix transpose, pointwise symmetrization, matrix products,

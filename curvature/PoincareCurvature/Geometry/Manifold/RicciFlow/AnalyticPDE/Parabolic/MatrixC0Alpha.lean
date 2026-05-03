@@ -715,6 +715,32 @@ theorem matrix_inv_norm_sub_le {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
         Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
   simpa [entryBound] using hnorm
 
+/-- Inverse-matrix entries are pointwise bounded by the quantitative inverse-entry constant. -/
+theorem matrix_inv_entry_norm_le {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ} (M : Matrix n n 𝕜)
+    (hM : ∀ r c, ‖M r c‖ ≤ C r c)
+    (hδpos : 0 < δ) (hdet : δ ≤ ‖M.det‖) (i j : n) :
+    ‖M⁻¹ i j‖ ≤ matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i j := by
+  have hinvδ_nonneg : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  have hadj_bound :
+      ‖M.adjugate i j‖ ≤ matrixAdjugateEntryBoundConst (A := 𝕜) C i j :=
+    matrix_adjugate_entry_norm_le (C := C) M hM i j
+  have hinv_det : ‖(M.det)⁻¹‖ ≤ δ⁻¹ := by
+    have hnorm_pos : 0 < ‖M.det‖ := lt_of_lt_of_le hδpos hdet
+    rw [norm_inv]
+    exact (inv_le_inv₀ hnorm_pos hδpos).2 hdet
+  have hentry :
+      M⁻¹ i j = (M.det)⁻¹ * M.adjugate i j := by
+    rw [Matrix.inv_def, Ring.inverse_eq_inv]
+    rfl
+  calc
+    ‖M⁻¹ i j‖ = ‖(M.det)⁻¹ * M.adjugate i j‖ := by rw [hentry]
+    _ ≤ ‖(M.det)⁻¹‖ * ‖M.adjugate i j‖ := norm_mul_le _ _
+    _ ≤ δ⁻¹ * matrixAdjugateEntryBoundConst (A := 𝕜) C i j :=
+      mul_le_mul hinv_det hadj_bound (norm_nonneg _) hinvδ_nonneg
+    _ = matrixInvEntryBoundConst (𝕜 := 𝕜) δ C i j := by
+      rfl
+
 /-- Each inverse-matrix entry has an explicit bounded parabolic `C^{0,α}` estimate when the matrix
 entries do and the determinant is uniformly bounded away from zero on the domain. -/
 theorem matrix_inv_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
@@ -830,6 +856,62 @@ theorem matrix_mul {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n] [Normed
     (hN : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) s) :
     ParabolicC0AlphaOn α (fun z => M z * N z) s :=
   matrix_of_entries fun i j => matrix_mul_entry hM hN i j
+
+/-- Entries of finite matrix products are pointwise Lipschitz on bounded left/right factors. -/
+theorem matrix_mul_entry_norm_sub_le {l m n A : Type*} [Fintype m] [NormedRing A]
+    {BM : l → m → ℝ} {BN : m → n → ℝ}
+    (M M' : Matrix l m A) (N N' : Matrix m n A)
+    (hM : ∀ i k, ‖M i k‖ ≤ BM i k) (hN' : ∀ k j, ‖N' k j‖ ≤ BN k j)
+    (i : l) (j : n) :
+    ‖(M * N) i j - (M' * N') i j‖ ≤
+      ∑ k : m, (BM i k * ‖N k j - N' k j‖ + BN k j * ‖M i k - M' i k‖) := by
+  simpa [Matrix.mul_apply] using
+    (norm_finset_sum_mul_sub_sum_mul_le
+      (S := (Finset.univ : Finset m))
+      (B := fun k => BM i k)
+      (D := fun k => BN k j)
+      (a := fun k => M i k)
+      (b := fun k => N k j)
+      (c := fun k => M' i k)
+      (d := fun k => N' k j)
+      (fun k _hk => hM i k)
+      (fun k _hk => hN' k j))
+
+/-- Finite matrix multiplication is pointwise Lipschitz in the elementwise matrix norm on bounded
+left/right factors. -/
+theorem matrix_mul_norm_sub_le {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n]
+    [NormedRing A] {BM : l → m → ℝ} {BN : m → n → ℝ}
+    (M M' : Matrix l m A) (N N' : Matrix m n A)
+    (hM : ∀ i k, ‖M i k‖ ≤ BM i k) (hN' : ∀ k j, ‖N' k j‖ ≤ BN k j) :
+    ‖M * N - M' * N'‖ ≤
+      ∑ i : l, ∑ j : n, ∑ k : m,
+        (BM i k * ‖N k j - N' k j‖ + BN k j * ‖M i k - M' i k‖) := by
+  classical
+  let entryBound : l → n → ℝ :=
+    fun i j => ∑ k : m,
+      (BM i k * ‖N k j - N' k j‖ + BN k j * ‖M i k - M' i k‖)
+  have hentry : ∀ i j, ‖(M * N) i j - (M' * N') i j‖ ≤ entryBound i j := by
+    intro i j
+    simpa [entryBound] using matrix_mul_entry_norm_sub_le M M' N N' hM hN' i j
+  have hentry_nonneg : ∀ i j, 0 ≤ entryBound i j := by
+    intro i j
+    exact (norm_nonneg _).trans (hentry i j)
+  have hrow_nonneg : ∀ i, 0 ≤ ∑ j : n, entryBound i j := by
+    intro i
+    exact Finset.sum_nonneg fun j _hj => hentry_nonneg i j
+  have htotal_nonneg : 0 ≤ ∑ i : l, ∑ j : n, entryBound i j :=
+    Finset.sum_nonneg fun i _hi => hrow_nonneg i
+  have hnorm : ‖M * N - M' * N'‖ ≤ ∑ i : l, ∑ j : n, entryBound i j := by
+    refine (Matrix.norm_le_iff htotal_nonneg).2 ?_
+    intro i j
+    calc
+      ‖(M * N - M' * N') i j‖ = ‖(M * N) i j - (M' * N') i j‖ := rfl
+      _ ≤ entryBound i j := hentry i j
+      _ ≤ ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hentry_nonneg i k) (Finset.mem_univ j)
+      _ ≤ ∑ i : l, ∑ j : n, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
+  simpa [entryBound] using hnorm
 
 /-- Entries of a matrix-vector product are parabolic `C^{0,α}` when the matrix entries and
 vector components are. -/
@@ -1152,6 +1234,142 @@ theorem matrix_inv_two_index_contract {n p q 𝕜 : Type*} [Fintype n] [Decidabl
           ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j :
             Matrix p q 𝕜)) s :=
   matrix_of_entries fun i j => matrix_inv_two_index_contract_entry hM hT hδpos hdet i j
+
+/-- Finite inverse-matrix contractions against a four-index coefficient array are pointwise
+Lipschitz on bounded coefficient arrays and entrywise bounded matrices with a common determinant
+lower bound. -/
+theorem matrix_inv_two_index_contract_entry_norm_sub_le {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {TB : n → n → p → q → ℝ} (M N : Matrix n n 𝕜)
+    (T U : n → n → p → q → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hU : ∀ a b i j, ‖U a b i j‖ ≤ TB a b i j)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖)
+    (i : p) (j : q) :
+    ‖(∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+        ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ ≤
+      ∑ a : n, ∑ b : n,
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖T a b i j - U a b i j‖ +
+          TB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b) := by
+  classical
+  let innerBound : n → ℝ := fun a =>
+    ∑ b : n,
+      (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖T a b i j - U a b i j‖ +
+        TB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b)
+  have hinner : ∀ a : n,
+      ‖(∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+          ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ ≤ innerBound a := by
+    intro a
+    have hsum :
+        ‖(∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+            ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ ≤
+          ∑ b : n,
+            (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b *
+                ‖T a b i j - U a b i j‖ +
+              TB a b i j * ‖(M⁻¹ : Matrix n n 𝕜) a b -
+                (N⁻¹ : Matrix n n 𝕜) a b‖) := by
+      simpa using
+        (norm_finset_sum_mul_sub_sum_mul_le
+          (S := (Finset.univ : Finset n))
+          (B := fun b => matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b)
+          (D := fun b => TB a b i j)
+          (a := fun b => (M⁻¹ : Matrix n n 𝕜) a b)
+          (b := fun b => T a b i j)
+          (c := fun b => (N⁻¹ : Matrix n n 𝕜) a b)
+          (d := fun b => U a b i j)
+          (fun b _hb => matrix_inv_entry_norm_le M hM hδpos hdetM a b)
+          (fun b _hb => hU a b i j))
+    refine hsum.trans ?_
+    exact Finset.sum_le_sum fun b _hb => by
+      have hTB_nonneg : 0 ≤ TB a b i j := (norm_nonneg _).trans (hU a b i j)
+      have hlip :
+          ‖(M⁻¹ : Matrix n n 𝕜) a b - (N⁻¹ : Matrix n n 𝕜) a b‖ ≤
+            matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b :=
+        matrix_inv_entry_norm_sub_le M N hM hN hδpos hdetM hdetN a b
+      exact add_le_add_right (mul_le_mul_of_nonneg_left hlip hTB_nonneg)
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖T a b i j - U a b i j‖)
+  calc
+    ‖(∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+        ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ =
+        ‖∑ a : n,
+          ((∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+            ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j)‖ := by
+      rw [Finset.sum_sub_distrib]
+    _ ≤ ∑ a : n,
+        ‖(∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+          ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ :=
+      norm_sum_le _ _
+    _ ≤ ∑ a : n, innerBound a :=
+      Finset.sum_le_sum fun a _ha => hinner a
+    _ =
+      ∑ a : n, ∑ b : n,
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖T a b i j - U a b i j‖ +
+          TB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b) := by
+      rfl
+
+/-- Matrix-valued finite inverse contractions against four-index coefficient arrays are
+pointwise Lipschitz in the elementwise matrix norm. -/
+theorem matrix_inv_two_index_contract_norm_sub_le {n p q 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜] {δ : ℝ}
+    {C : n → n → ℝ} {TB : n → n → p → q → ℝ} (M N : Matrix n n 𝕜)
+    (T U : n → n → p → q → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hU : ∀ a b i j, ‖U a b i j‖ ≤ TB a b i j)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖) :
+    ‖((fun i j =>
+        ∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) :
+        Matrix p q 𝕜) -
+      ((fun i j =>
+        ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j) :
+        Matrix p q 𝕜)‖ ≤
+      ∑ i : p, ∑ j : q, ∑ a : n, ∑ b : n,
+        (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖T a b i j - U a b i j‖ +
+          TB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b) := by
+  classical
+  let entryBound : p → q → ℝ := fun i j =>
+    ∑ a : n, ∑ b : n,
+      (matrixInvEntryBoundConst (𝕜 := 𝕜) δ C a b * ‖T a b i j - U a b i j‖ +
+        TB a b i j * matrixInvEntryLipschitzBound (𝕜 := 𝕜) δ C M N a b)
+  have hentry : ∀ i j,
+      ‖(∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+          ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ ≤
+        entryBound i j := by
+    intro i j
+    simpa [entryBound] using
+      matrix_inv_two_index_contract_entry_norm_sub_le M N T U hM hN hU hδpos hdetM hdetN i j
+  have hentry_nonneg : ∀ i j, 0 ≤ entryBound i j := by
+    intro i j
+    exact (norm_nonneg _).trans (hentry i j)
+  have hrow_nonneg : ∀ i, 0 ≤ ∑ j : q, entryBound i j := by
+    intro i
+    exact Finset.sum_nonneg fun j _hj => hentry_nonneg i j
+  have htotal_nonneg : 0 ≤ ∑ i : p, ∑ j : q, entryBound i j :=
+    Finset.sum_nonneg fun i _hi => hrow_nonneg i
+  have hnorm :
+      ‖((fun i j =>
+          ∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) :
+          Matrix p q 𝕜) -
+        ((fun i j =>
+          ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j) :
+          Matrix p q 𝕜)‖ ≤
+        ∑ i : p, ∑ j : q, entryBound i j := by
+    refine (Matrix.norm_le_iff htotal_nonneg).2 ?_
+    intro i j
+    calc
+      ‖(((fun i j =>
+          ∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) :
+          Matrix p q 𝕜) -
+        ((fun i j =>
+          ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j) :
+          Matrix p q 𝕜)) i j‖ =
+          ‖(∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * T a b i j) -
+            ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * U a b i j‖ := rfl
+      _ ≤ entryBound i j := hentry i j
+      _ ≤ ∑ j : q, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hentry_nonneg i k) (Finset.mem_univ j)
+      _ ≤ ∑ i : p, ∑ j : q, entryBound i j :=
+        Finset.single_le_sum (fun k _hk => hrow_nonneg k) (Finset.mem_univ i)
+  simpa [entryBound] using hnorm
 
 /-- Compact-domain matrix-valued inverse principal-contraction closure from entrywise control and
 pointwise nonvanishing determinant. -/

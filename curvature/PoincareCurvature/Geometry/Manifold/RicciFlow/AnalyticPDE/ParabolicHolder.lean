@@ -1173,6 +1173,41 @@ theorem norm_finset_prod_sub_prod_le_sum_norm_sub_mul_unit_prod_max {ι A : Type
         rw [Finset.sum_insert hx, Finset.prod_insert hx]
         ring
 
+/-- A two-factor product is pointwise Lipschitz on bounded left/right factors.  The asymmetric
+form matches the standard split `a * b - c * d = a * (b - d) + (a - c) * d`. -/
+theorem norm_mul_sub_mul_le {A : Type*} [NormedRing A] {B D : ℝ} {a b c d : A}
+    (ha : ‖a‖ ≤ B) (hd : ‖d‖ ≤ D) :
+    ‖a * b - c * d‖ ≤ B * ‖b - d‖ + D * ‖a - c‖ := by
+  have hsplit : a * b - c * d = a * (b - d) + (a - c) * d := by
+    noncomm_ring
+  calc
+    ‖a * b - c * d‖ = ‖a * (b - d) + (a - c) * d‖ := by
+      rw [hsplit]
+    _ ≤ ‖a * (b - d)‖ + ‖(a - c) * d‖ := norm_add_le _ _
+    _ ≤ ‖a‖ * ‖b - d‖ + ‖a - c‖ * ‖d‖ :=
+      add_le_add (norm_mul_le _ _) (norm_mul_le _ _)
+    _ ≤ B * ‖b - d‖ + ‖a - c‖ * D := by
+      exact add_le_add
+        (mul_le_mul_of_nonneg_right ha (norm_nonneg _))
+        (mul_le_mul_of_nonneg_left hd (norm_nonneg _))
+    _ = B * ‖b - d‖ + D * ‖a - c‖ := by
+      ring
+
+/-- A finite sum of two-factor products is pointwise Lipschitz on bounded left/right factors. -/
+theorem norm_finset_sum_mul_sub_sum_mul_le {ι A : Type*} [NormedRing A]
+    (S : Finset ι) {B D : ι → ℝ} {a b c d : ι → A}
+    (ha : ∀ i ∈ S, ‖a i‖ ≤ B i) (hd : ∀ i ∈ S, ‖d i‖ ≤ D i) :
+    ‖(∑ i ∈ S, a i * b i) - ∑ i ∈ S, c i * d i‖ ≤
+      ∑ i ∈ S, (B i * ‖b i - d i‖ + D i * ‖a i - c i‖) := by
+  classical
+  calc
+    ‖(∑ i ∈ S, a i * b i) - ∑ i ∈ S, c i * d i‖ =
+        ‖∑ i ∈ S, (a i * b i - c i * d i)‖ := by
+      rw [Finset.sum_sub_distrib]
+    _ ≤ ∑ i ∈ S, ‖a i * b i - c i * d i‖ := norm_sum_le _ _
+    _ ≤ ∑ i ∈ S, (B i * ‖b i - d i‖ + D i * ‖a i - c i‖) :=
+      Finset.sum_le_sum fun i hi => norm_mul_sub_mul_le (ha i hi) (hd i hi)
+
 namespace ParabolicHolderWith
 
 variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
