@@ -113,6 +113,19 @@ theorem continuousOn_Icc_of_le_terminal
   HasDerivWithinAt.continuousOn fun _ ht ↦
     sol.equation_on_Icc_of_le_terminal hT ht
 
+/-- Restrict a Banach evolution local solution to any shorter forward terminal time. -/
+def restrictTerminal
+    (sol : BanachEvolutionLocalSolution F t₀ u₀)
+    {T : ℝ} (hT₀ : t₀ < T) (hT : T ≤ sol.terminalTime) :
+    BanachEvolutionLocalSolution F t₀ u₀ where
+  terminalTime := T
+  initial_lt_terminal := hT₀
+  curve := sol.curve
+  initial_eq := sol.initial_eq
+  equation := by
+    intro t ht
+    exact sol.equation_on_Icc_of_le_terminal hT ht
+
 theorem eqOn_Icc_of_lipschitz
     {K : ℝ≥0} (hF : ∀ t : ℝ, LipschitzWith K (F t))
     (sol₁ sol₂ : BanachEvolutionLocalSolution F t₀ u₀) :
@@ -149,6 +162,51 @@ namespace BanachEvolutionLocalSolutionIn
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
   {F : ℝ → X → X} {stateSet : Set X} {t₀ : ℝ} {u₀ : X}
+
+theorem initial_mem (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀) :
+    t₀ ∈ Icc t₀ sol.terminalTime :=
+  sol.toBanachEvolutionLocalSolution.initial_mem
+
+theorem terminal_mem (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀) :
+    sol.terminalTime ∈ Icc t₀ sol.terminalTime :=
+  sol.toBanachEvolutionLocalSolution.terminal_mem
+
+theorem equation_on_Icc_of_le_terminal
+    (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    {T : ℝ} (hT : T ≤ sol.terminalTime) :
+    ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ T →
+      HasDerivWithinAt sol.curve (F t (sol.curve t)) (Icc t₀ T) t :=
+  sol.toBanachEvolutionLocalSolution.equation_on_Icc_of_le_terminal hT
+
+theorem continuousOn_Icc_of_le_terminal
+    (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    {T : ℝ} (hT : T ≤ sol.terminalTime) :
+    ContinuousOn sol.curve (Icc t₀ T) :=
+  sol.toBanachEvolutionLocalSolution.continuousOn_Icc_of_le_terminal hT
+
+theorem mem_state_on_Icc_of_le_terminal
+    (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    {T : ℝ} (hT : T ≤ sol.terminalTime) :
+    ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ T → sol.curve t ∈ stateSet := by
+  intro t ht
+  exact sol.mem_state ⟨ht.1, le_trans ht.2 hT⟩
+
+/-- Restrict a state-preserving Banach evolution local solution to any shorter forward terminal
+time, preserving both the ODE and the state-set membership proof. -/
+def restrictTerminal
+    (sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    {T : ℝ} (hT₀ : t₀ < T) (hT : T ≤ sol.terminalTime) :
+    BanachEvolutionLocalSolutionIn F stateSet t₀ u₀ where
+  terminalTime := T
+  initial_lt_terminal := hT₀
+  curve := sol.curve
+  initial_eq := sol.initial_eq
+  equation := by
+    intro t ht
+    exact sol.equation_on_Icc_of_le_terminal hT ht
+  mem_state := by
+    intro t ht
+    exact sol.mem_state_on_Icc_of_le_terminal hT ht
 
 /-- Interior projections of a state-constrained Banach ODE solution satisfy the projected ODE. -/
 theorem continuousLinearMap_hasDerivAt_of_mem_Ioo
