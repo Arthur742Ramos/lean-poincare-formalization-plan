@@ -1096,7 +1096,9 @@ parabolic inverse Gram-matrix control and inverse-Gram Christoffel/schematic
 Ricci-DeTurck closure, including spatial-Hölder entry-control variants and
 compact quantitative inverse Gram, inverse-principal contraction, inverse-Gram
 Christoffel, and schematic RHS bridges exposing the determinant lower-bound
-constant, plus compact local-frame inverse Gram, inverse-principal contraction,
+constant, existential finite-family inverse-Gram and schematic RHS bridges from
+entrywise `ParabolicC0AlphaOn` controls sharing the same compact determinant
+lower bound, plus compact local-frame inverse Gram, inverse-principal contraction,
 inverse-Gram Christoffel arrays, and schematic RHS outputs, including
 existential difference readouts for all four from entrywise controls, and
 schematic RHS `C^{0,α}` difference

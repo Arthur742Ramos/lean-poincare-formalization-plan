@@ -1497,7 +1497,9 @@ bridges exposing the determinant lower-bound constant, plus geometric
 finite-family local-frame Gram determinant lower-bound, inverse-estimate, and
 schematic RHS handoffs with spatial-Hölder, unit-diameter spatial-Lipschitz,
 closed-ball spatial-Lipschitz, and closed-cylinder spatial-Lipschitz
-Gram-entry input forms, compact
+Gram-entry input forms, existential finite-family inverse-Gram and schematic RHS
+handoffs from entrywise `ParabolicC0AlphaOn` controls sharing the same compact
+determinant lower bound, and compact
 local-frame
 inverse Gram, inverse-principal contraction, and inverse-Gram Christoffel
 arrays, and schematic RHS outputs, including existential difference readouts for

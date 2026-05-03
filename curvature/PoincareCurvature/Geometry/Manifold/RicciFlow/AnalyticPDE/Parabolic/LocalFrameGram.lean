@@ -118,6 +118,43 @@ theorem localFrameGramMatrix_inv_family_with_of_timeSpace_isCompact
     (B := GB r) (H := GH r) (δ := δ)
     (hGH r) (hG r) hδpos (hdet r)
 
+/-- A finite family of inverse local-frame Gram matrices has existential parabolic `C^{0,α}`
+control from entrywise `C^{0,α}` control, with one compact Gram determinant lower bound shared by
+the family. -/
+theorem localFrameGramMatrix_inv_family_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    (hG : ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × M =>
+            ((show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+              Matrix ι ι ℝ)) K := by
+  rcases localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact matrix_inv
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (hG r) hδpos (hdet r)
+
 /-- If the local-frame Gram entries have parabolic `C^{0,α}` control on a compact time-space
 set contained in a trivialization base, then the inverse Gram matrix is parabolic `C^{0,α}` there.
 -/
@@ -5524,6 +5561,59 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_family_with_of_timeSpace_isC
     (D := D r) (H := Hc r)
     (hGH r) (hDB r) (hDH r) (hHB r) (hHH r)
     (hG r) (hDctrl r) (hHc r) hδpos (hdet r)
+
+/-- A finite family of schematic local Ricci-DeTurck coordinate right-hand sides has existential
+parabolic `C^{0,α}` control from entrywise primitive controls, with one compact local-frame Gram
+determinant lower bound shared by the family. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_family_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {D : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hG : ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K)
+    (hD : ∀ r i j k, ParabolicC0AlphaOn α (fun z : ℝ × M => D r z i j k) K)
+    (hHc : ∀ r a c i j, ParabolicC0AlphaOn α (fun z : ℝ × M => Hc r z a c i j) K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × M =>
+            (fun i j =>
+              let Γ : ι → ι → ι → ℝ := fun a c d =>
+                (2 : ℝ)⁻¹ *
+                  ∑ l : ι,
+                    ((show Matrix ι ι ℝ from
+                        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                        Matrix ι ι ℝ) a l *
+                      (D r z c d l + D r z d c l - D r z l c d)
+              (∑ a : ι, ∑ c : ι,
+                  ((show Matrix ι ι ℝ from
+                      CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                      Matrix ι ι ℝ) a c * Hc r z a c i j) +
+                ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+                  (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+              Matrix ι ι ℝ)) K := by
+  rcases localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro r
+  exact ricciDeTurck_schematic
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (D := D r) (H := Hc r) (hG r) (hD r) (hHc r) hδpos (hdet r)
 
 /-- Finite-family spatial-Hölder local-frame bridge for the quantitative schematic
 Ricci-DeTurck RHS.  The spatial Gram-entry bounds are packaged into the family
