@@ -67,6 +67,31 @@ def matrixDetHolderConst {n A : Type*} [Fintype n] [DecidableEq n] [NormedRing A
   ∑ σ : Equiv.Perm n, ‖(Equiv.Perm.sign σ : ℤ)‖ *
     matrixDetTermHolderConst (A := A) B H σ
 
+theorem matrixDetTermBoundConst_nonneg {n A : Type*} [Fintype n] [NormedRing A]
+    (B : n → n → ℝ) (σ : Equiv.Perm n) :
+    0 ≤ matrixDetTermBoundConst (A := A) B σ := by
+  exact mul_nonneg (zero_le_one.trans (le_max_right _ _))
+    (Finset.prod_nonneg fun i _hi => zero_le_one.trans (le_max_right (B (σ i) i) 1))
+
+theorem matrixDetTermHolderConst_nonneg {n A : Type*} [Fintype n] [NormedRing A]
+    {B H : n → n → ℝ} (hH : ∀ i j, 0 ≤ H i j) (σ : Equiv.Perm n) :
+    0 ≤ matrixDetTermHolderConst (A := A) B H σ := by
+  exact mul_nonneg
+    (Finset.sum_nonneg fun i _hi => hH (σ i) i)
+    (matrixDetTermBoundConst_nonneg (A := A) B σ)
+
+theorem matrixDetBoundConst_nonneg {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] (B : n → n → ℝ) :
+    0 ≤ matrixDetBoundConst (A := A) B := by
+  exact Finset.sum_nonneg fun σ _hσ =>
+    mul_nonneg (norm_nonneg _) (matrixDetTermBoundConst_nonneg (A := A) B σ)
+
+theorem matrixDetHolderConst_nonneg {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] {B H : n → n → ℝ} (hH : ∀ i j, 0 ≤ H i j) :
+    0 ≤ matrixDetHolderConst (A := A) B H := by
+  exact Finset.sum_nonneg fun σ _hσ =>
+    mul_nonneg (norm_nonneg _) (matrixDetTermHolderConst_nonneg (A := A) hH σ)
+
 /-- The determinant of a finite matrix whose entries have explicit parabolic `C^{0,α}` bounds
 has an explicit bounded parabolic `C^{0,α}` estimate.  This is the quantitative version used
 before passing to the existential `ParabolicC0AlphaOn` closure theorem. -/
@@ -211,6 +236,14 @@ def matrixUpdateRowHolderConst {n : Type*} [DecidableEq n]
     (H : n → n → ℝ) (j : n) : n → n → ℝ :=
   fun r c => if r = j then 0 else H r c
 
+theorem matrixUpdateRowHolderConst_nonneg {n : Type*} [DecidableEq n]
+    {H : n → n → ℝ} (hH : ∀ i j, 0 ≤ H i j) (j : n) :
+    ∀ r c, 0 ≤ matrixUpdateRowHolderConst H j r c := by
+  intro r c
+  by_cases hr : r = j
+  · simp [matrixUpdateRowHolderConst, hr]
+  · simpa [matrixUpdateRowHolderConst, hr] using hH r c
+
 /-- The quantitative sup constant used for an adjugate entry. -/
 def matrixAdjugateEntryBoundConst {n A : Type*} [Fintype n] [DecidableEq n]
     [NormedRing A] (B : n → n → ℝ) (i j : n) : ℝ :=
@@ -221,6 +254,17 @@ def matrixAdjugateEntryHolderConst {n A : Type*} [Fintype n] [DecidableEq n]
     [NormedRing A] (B H : n → n → ℝ) (i j : n) : ℝ :=
   matrixDetHolderConst (A := A) (matrixUpdateRowBoundConst (A := A) B i j)
     (matrixUpdateRowHolderConst H j)
+
+theorem matrixAdjugateEntryBoundConst_nonneg {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] (B : n → n → ℝ) (i j : n) :
+    0 ≤ matrixAdjugateEntryBoundConst (A := A) B i j :=
+  matrixDetBoundConst_nonneg (A := A) (matrixUpdateRowBoundConst (A := A) B i j)
+
+theorem matrixAdjugateEntryHolderConst_nonneg {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedRing A] {B H : n → n → ℝ} (hH : ∀ i j, 0 ≤ H i j) (i j : n) :
+    0 ≤ matrixAdjugateEntryHolderConst (A := A) B H i j :=
+  matrixDetHolderConst_nonneg (A := A)
+    (matrixUpdateRowHolderConst_nonneg hH j)
 
 /-- Each adjugate entry has an explicit bounded parabolic `C^{0,α}` estimate when the matrix
 entries do. -/
@@ -306,6 +350,36 @@ theorem matrix_inv_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedFie
   rw [Matrix.inv_def, Ring.inverse_eq_inv]
   rfl
 
+/-- The quantitative sup constant used for an inverse-matrix entry. -/
+def matrixInvEntryBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    (δ : ℝ) (B : n → n → ℝ) (i j : n) : ℝ :=
+  δ⁻¹ * matrixAdjugateEntryBoundConst (A := 𝕜) B i j
+
+/-- The quantitative Holder constant used for an inverse-matrix entry. -/
+def matrixInvEntryHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    (δ : ℝ) (B H : n → n → ℝ) (i j : n) : ℝ :=
+  δ⁻¹ * matrixAdjugateEntryHolderConst (A := 𝕜) B H i j +
+    matrixAdjugateEntryBoundConst (A := 𝕜) B i j *
+      (δ⁻¹ * matrixDetHolderConst (A := 𝕜) B H * δ⁻¹)
+
+theorem matrixInvEntryBoundConst_nonneg {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) (B : n → n → ℝ) (i j : n) :
+    0 ≤ matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i j := by
+  exact mul_nonneg (inv_nonneg.mpr hδpos.le)
+    (matrixAdjugateEntryBoundConst_nonneg (A := 𝕜) B i j)
+
+theorem matrixInvEntryHolderConst_nonneg {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {B H : n → n → ℝ}
+    (hH : ∀ i j, 0 ≤ H i j) (hδpos : 0 < δ) (i j : n) :
+    0 ≤ matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i j := by
+  exact add_nonneg
+    (mul_nonneg (inv_nonneg.mpr hδpos.le)
+      (matrixAdjugateEntryHolderConst_nonneg (A := 𝕜) hH i j))
+    (mul_nonneg (matrixAdjugateEntryBoundConst_nonneg (A := 𝕜) B i j)
+      (mul_nonneg
+        (mul_nonneg (inv_nonneg.mpr hδpos.le) (matrixDetHolderConst_nonneg (A := 𝕜) hH))
+        (inv_nonneg.mpr hδpos.le)))
+
 /-- Each inverse-matrix entry has an explicit bounded parabolic `C^{0,α}` estimate when the matrix
 entries do and the determinant is uniformly bounded away from zero on the domain. -/
 theorem matrix_inv_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
@@ -315,10 +389,8 @@ theorem matrix_inv_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [Norm
     (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
     (i j : n) :
     ParabolicC0AlphaWith
-      (δ⁻¹ * matrixAdjugateEntryBoundConst (A := 𝕜) B i j)
-      (δ⁻¹ * matrixAdjugateEntryHolderConst (A := 𝕜) B H i j +
-        matrixAdjugateEntryBoundConst (A := 𝕜) B i j *
-          (δ⁻¹ * matrixDetHolderConst (A := 𝕜) B H * δ⁻¹))
+      (matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i j)
+      (matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i j)
       α (fun z => (M z)⁻¹ i j) s := by
   have hdet_with :
       ParabolicC0AlphaWith
@@ -331,16 +403,41 @@ theorem matrix_inv_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [Norm
         α (fun z => ((M z).det)⁻¹) s :=
     hdet_with.inv hδpos hdet
   have hadj :
-      ParabolicC0AlphaWith
-        (matrixAdjugateEntryBoundConst (A := 𝕜) B i j)
-        (matrixAdjugateEntryHolderConst (A := 𝕜) B H i j)
-        α (fun z => (M z).adjugate i j) s :=
+    ParabolicC0AlphaWith
+      (matrixAdjugateEntryBoundConst (A := 𝕜) B i j)
+      (matrixAdjugateEntryHolderConst (A := 𝕜) B H i j)
+      α (fun z => (M z).adjugate i j) s :=
     matrix_adjugate_entry_with (M := M) hH hM i j
   have hprod := hdet_inv.mul hadj (inv_nonneg.mpr hδpos.le)
   convert hprod using 1
   funext z
   rw [Matrix.inv_def, Ring.inverse_eq_inv]
   rfl
+
+/-- A finite inverse-matrix-valued function has an explicit bounded parabolic `C^{0,α}` estimate
+when the matrix entries do and the determinant is uniformly bounded away from zero. -/
+theorem matrix_inv_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {B H : n → n → ℝ} {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaWith
+      (∑ i : n, ∑ j : n, matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i j)
+      (∑ i : n, ∑ j : n, matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H i j)
+      α (fun z => (M z)⁻¹) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj => matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B i j
+    · intro j
+      exact matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos i j
+    · intro j
+      exact matrix_inv_entry_with (M := M) hH hM hδpos hdet i j
 
 /-- On a compact time-space set, inverse-matrix entries preserve parabolic `C^{0,α}` control from
 entrywise control and pointwise nonvanishing determinant. -/

@@ -1013,9 +1013,10 @@ packaging on compact domains, with direct proper-space closed-ball/cylinder
 corollaries.
 The separate `AnalyticPDE/Parabolic/MatrixC0Alpha.lean` module now proves
 explicit bounded `C^{0,α}` determinant, adjugate-entry, and inverse-entry
-estimates, and that finite matrix determinants, adjugate entries, and inverse
-entries under a determinant lower bound preserve parabolic `C^{0,α}` control
-from entrywise control; compact nonvanishing determinant data now supplies the
+estimates together with a whole inverse-matrix estimate, and that finite matrix
+determinants, adjugate entries, and inverse entries under a determinant lower
+bound preserve parabolic `C^{0,α}` control from entrywise control; compact
+nonvanishing determinant data now supplies the
 needed uniform determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
 also proves entrywise and whole-valued closure
