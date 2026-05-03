@@ -1199,6 +1199,13 @@ chooses the shorter terminal automatically and states the result on
 `[t₀, min (min T₁ T₂) T']`.  `SmoothRealizationMetricCone.lean` now exposes
 the same clipped uniqueness readout after selecting the standard positive-radius
 metric-cone shrink, still without a full-candidate terminal-fit hypothesis.
+The corresponding connection-level wrappers
+`RicciDeTurckChartClosureDataOnIcc.connection_eq_on_restricted_interval_of_shrunk_symmetricCarrier`,
+`RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier`,
+and
+`RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localConnectionReadout`
+upgrade the same local metric readout to equality of the canonical
+chosen-background connections on the visible overlap.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
@@ -1430,8 +1437,10 @@ than against the full arbitrary candidate interval, and the analytic
 smooth-realization / interval-encoding prefixes now preserve the same
 underlying metric data on the shorter interval, including after descending to
 the genuine symmetric carrier, and local uniqueness can now be read on a chosen
-common restricted terminal from shrunk ambient closure data; the continuation
-from these local readouts to full arbitrary-overlap uniqueness is still open.
+common restricted terminal from shrunk ambient closure data. These local readouts
+now include both metric equality and canonical chosen-background connection
+equality; the continuation from these local readouts to full arbitrary-overlap
+uniqueness is still open.
 The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient

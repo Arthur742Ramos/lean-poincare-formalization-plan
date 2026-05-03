@@ -329,7 +329,10 @@ packages the canonical stationary local solution attached to
   interval version reads this as equality on the whole visible overlap
   `[t₀, min (min T₁ T₂) T']`, and `SmoothRealizationMetricCone.lean` now
   exposes the same no-terminal-fit clipped uniqueness readout directly from
-  the standard positive-radius metric-cone shrink.
+  the standard positive-radius metric-cone shrink. The same clipped local route
+  now also upgrades metric equality to equality of the canonical chosen-background
+  connections, with a metric-cone readout that selects the shrink and returns
+  the connection equality on the visible overlap.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
