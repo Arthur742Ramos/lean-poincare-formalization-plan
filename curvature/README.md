@@ -1057,7 +1057,8 @@ Christoffel-symbol type inverse-metric contractions and their entrywise/whole-ar
 closure, explicit bounded Holder entry/matrix estimates and whole matrix-valued
 principal-part closure for `g^{ab} H_abij`,
 whole matrix-valued Ricci-coordinate quadratic Christoffel contractions with
-explicit bounded Holder entry/matrix estimates, and supplied-Christoffel
+explicit bounded Holder entry/matrix estimates and product-difference bounded
+Holder estimates, and supplied-Christoffel
 schematic local Ricci-DeTurck RHS entry/matrix bounded Holder estimates and
 primitive-input schematic RHS entry/matrix bounded Holder estimates and whole
 matrix-valued closure, using the finite-product, integer-scalar, reciprocal,

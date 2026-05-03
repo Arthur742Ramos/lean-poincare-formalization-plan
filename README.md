@@ -407,9 +407,10 @@ packages the canonical stationary local solution attached to
   and whole-array estimates for Christoffel-symbol type inverse-metric
   contractions and their entrywise/whole-array closure, explicit bounded Holder
   entry/matrix estimates and whole matrix-valued closure for principal-part
-  contractions `g^{ab} H_abij`, explicit bounded Holder entry/matrix estimates
-  and whole matrix-valued closure for Ricci-coordinate quadratic Christoffel
-  contractions, plus supplied-Christoffel and primitive-input schematic local
+  contractions `g^{ab} H_abij`, explicit bounded Holder entry/matrix estimates,
+  product-difference bounded Holder estimates, and whole matrix-valued closure
+  for Ricci-coordinate quadratic Christoffel contractions, plus supplied-Christoffel
+  and primitive-input schematic local
   Ricci-DeTurck RHS entry/matrix bounded Holder estimates and whole
   matrix-valued closure, from
   entrywise control.  The companion

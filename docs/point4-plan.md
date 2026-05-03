@@ -1314,7 +1314,8 @@ inverse-metric contractions and their entrywise/whole-array closure, whole
 matrix-valued principal-part contractions with explicit bounded Holder
 entry/matrix estimates for `g^{ab} H_abij`, whole matrix-valued
 Ricci-coordinate quadratic Christoffel contractions with explicit bounded
-Holder entry/matrix estimates, and supplied-Christoffel schematic local
+Holder entry/matrix estimates and product-difference bounded Holder estimates,
+and supplied-Christoffel schematic local
 Ricci-DeTurck RHS entry/matrix bounded Holder estimates, primitive-input
 schematic RHS entry/matrix bounded Holder estimates, and whole matrix-valued
 closure, using finite-product, integer-scalar, reciprocal, and

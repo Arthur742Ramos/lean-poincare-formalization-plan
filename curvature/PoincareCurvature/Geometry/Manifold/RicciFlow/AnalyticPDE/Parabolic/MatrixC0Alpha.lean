@@ -3500,6 +3500,253 @@ theorem christoffel_quadratic_ricci_with {n A : Type*} [Fintype n] [NormedRing A
     · intro j
       exact christoffel_quadratic_ricci_entry_with hBΓ hΓ i j
 
+/-- Quantitative sup constant for one entry of the difference of two finite quadratic
+Christoffel Ricci contractions. -/
+def christoffelQuadraticRicciEntrySubBoundConst {n : Type*} [Fintype n]
+    (BΓ BΛ Bd : n → n → n → ℝ) (i j : n) : ℝ :=
+  (Finset.univ.sum fun a : n =>
+    Finset.univ.sum fun b : n => BΓ a i j * Bd b a b + Bd a i j * BΛ b a b) +
+    (Finset.univ.sum fun a : n =>
+      Finset.univ.sum fun b : n => BΓ a i b * Bd b a j + Bd a i b * BΛ b a j)
+
+/-- Quantitative Holder constant for one entry of the difference of two finite quadratic
+Christoffel Ricci contractions. -/
+def christoffelQuadraticRicciEntrySubHolderConst {n : Type*} [Fintype n]
+    (BΓ HΓ BΛ HΛ Bd Hd : n → n → n → ℝ) (i j : n) : ℝ :=
+  (Finset.univ.sum fun a : n =>
+    Finset.univ.sum fun b : n =>
+      ((BΓ a i j * Hd b a b + Bd b a b * HΓ a i j) +
+        (Bd a i j * HΛ b a b + BΛ b a b * Hd a i j))) +
+    (Finset.univ.sum fun a : n =>
+      Finset.univ.sum fun b : n =>
+        ((BΓ a i b * Hd b a j + Bd b a j * HΓ a i b) +
+          (Bd a i b * HΛ b a j + BΛ b a j * Hd a i b)))
+
+theorem christoffelQuadraticRicciEntrySubBoundConst_nonneg {n : Type*} [Fintype n]
+    {BΓ BΛ Bd : n → n → n → ℝ} (hBΓ : ∀ a b c, 0 ≤ BΓ a b c)
+    (hBΛ : ∀ a b c, 0 ≤ BΛ a b c) (hBd : ∀ a b c, 0 ≤ Bd a b c)
+    (i j : n) :
+    0 ≤ christoffelQuadraticRicciEntrySubBoundConst BΓ BΛ Bd i j := by
+  simpa [christoffelQuadraticRicciEntrySubBoundConst] using
+    (add_nonneg
+      (Finset.sum_nonneg fun a _ha =>
+        Finset.sum_nonneg fun b _hb =>
+          add_nonneg
+            (mul_nonneg (hBΓ a i j) (hBd b a b))
+            (mul_nonneg (hBd a i j) (hBΛ b a b)))
+      (Finset.sum_nonneg fun a _ha =>
+        Finset.sum_nonneg fun b _hb =>
+          add_nonneg
+            (mul_nonneg (hBΓ a i b) (hBd b a j))
+            (mul_nonneg (hBd a i b) (hBΛ b a j))))
+
+theorem christoffelQuadraticRicciEntrySubHolderConst_nonneg {n : Type*} [Fintype n]
+    {BΓ HΓ BΛ HΛ Bd Hd : n → n → n → ℝ}
+    (hBΓ : ∀ a b c, 0 ≤ BΓ a b c) (hHΓ : ∀ a b c, 0 ≤ HΓ a b c)
+    (hBΛ : ∀ a b c, 0 ≤ BΛ a b c) (hHΛ : ∀ a b c, 0 ≤ HΛ a b c)
+    (hBd : ∀ a b c, 0 ≤ Bd a b c) (hHd : ∀ a b c, 0 ≤ Hd a b c)
+    (i j : n) :
+    0 ≤ christoffelQuadraticRicciEntrySubHolderConst BΓ HΓ BΛ HΛ Bd Hd i j := by
+  simpa [christoffelQuadraticRicciEntrySubHolderConst] using
+    (add_nonneg
+      (Finset.sum_nonneg fun a _ha =>
+        Finset.sum_nonneg fun b _hb =>
+          add_nonneg
+            (add_nonneg
+              (mul_nonneg (hBΓ a i j) (hHd b a b))
+              (mul_nonneg (hBd b a b) (hHΓ a i j)))
+            (add_nonneg
+              (mul_nonneg (hBd a i j) (hHΛ b a b))
+              (mul_nonneg (hBΛ b a b) (hHd a i j))))
+      (Finset.sum_nonneg fun a _ha =>
+        Finset.sum_nonneg fun b _hb =>
+          add_nonneg
+            (add_nonneg
+              (mul_nonneg (hBΓ a i b) (hHd b a j))
+              (mul_nonneg (hBd b a j) (hHΓ a i b)))
+            (add_nonneg
+              (mul_nonneg (hBd a i b) (hHΛ b a j))
+              (mul_nonneg (hBΛ b a j) (hHd a i b)))))
+
+/-- One difference of quadratic Christoffel Ricci contraction entries has an explicit bounded
+parabolic `C^{0,α}` estimate from estimates on one Christoffel array, the other array, and their
+difference. -/
+theorem christoffel_quadratic_ricci_entry_sub_with {n A : Type*} [Fintype n]
+    [NormedRing A] {BΓ HΓ BΛ HΛ Bd Hd : n → n → n → ℝ}
+    {Γ Λ : ℝ × X → n → n → n → A}
+    (hBΓ : ∀ a b c, 0 ≤ BΓ a b c) (hBd : ∀ a b c, 0 ≤ Bd a b c)
+    (hΓ : ∀ a b c, ParabolicC0AlphaWith (BΓ a b c) (HΓ a b c) α
+      (fun z => Γ z a b c) s)
+    (hΛ : ∀ a b c, ParabolicC0AlphaWith (BΛ a b c) (HΛ a b c) α
+      (fun z => Λ z a b c) s)
+    (hdiff : ∀ a b c, ParabolicC0AlphaWith (Bd a b c) (Hd a b c) α
+      (fun z => Γ z a b c - Λ z a b c) s)
+    (i j : n) :
+    ParabolicC0AlphaWith
+      (christoffelQuadraticRicciEntrySubBoundConst BΓ BΛ Bd i j)
+      (christoffelQuadraticRicciEntrySubHolderConst BΓ HΓ BΛ HΛ Bd Hd i j)
+      α
+      (fun z =>
+        ((∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+            (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)) -
+          ((∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+            (∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j))) s := by
+  classical
+  have hleftInner : ∀ a ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaWith
+        (Finset.univ.sum fun b : n => BΓ a i j * Bd b a b + Bd a i j * BΛ b a b)
+        (Finset.univ.sum fun b : n =>
+          ((BΓ a i j * Hd b a b + Bd b a b * HΓ a i j) +
+            (Bd a i j * HΛ b a b + BΛ b a b * Hd a i j)))
+        α
+        (fun z =>
+          (∑ b : n, Γ z a i j * Γ z b a b) -
+            ∑ b : n, Λ z a i j * Λ z b a b) s := by
+    intro a _ha
+    simpa using
+      (ParabolicC0AlphaWith.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (Bu := fun _b => BΓ a i j) (Hu := fun _b => HΓ a i j)
+        (Bv := fun b => BΛ b a b) (Hv := fun b => HΛ b a b)
+        (Bdu := fun _b => Bd a i j) (Hdu := fun _b => Hd a i j)
+        (Bdv := fun b => Bd b a b) (Hdv := fun b => Hd b a b)
+        (u := fun _b z => Γ z a i j) (u' := fun _b z => Λ z a i j)
+        (v := fun b z => Γ z b a b) (v' := fun b z => Λ z b a b)
+        (fun _b _hb => hΓ a i j) (fun b _hb => hΛ b a b)
+        (fun _b _hb => hdiff a i j) (fun b _hb => hdiff b a b)
+        (fun _b _hb => hBΓ a i j) (fun _b _hb => hBd a i j))
+  have hleft :
+      ParabolicC0AlphaWith
+        (Finset.univ.sum fun a : n =>
+          Finset.univ.sum fun b : n => BΓ a i j * Bd b a b + Bd a i j * BΛ b a b)
+        (Finset.univ.sum fun a : n =>
+          Finset.univ.sum fun b : n =>
+          ((BΓ a i j * Hd b a b + Bd b a b * HΓ a i j) +
+            (Bd a i j * HΛ b a b + BΛ b a b * Hd a i j)))
+        α
+        (fun z =>
+          (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+            ∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) s := by
+    have hsum := ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (B := fun a =>
+        Finset.univ.sum fun b : n => BΓ a i j * Bd b a b + Bd a i j * BΛ b a b)
+      (H := fun a => Finset.univ.sum fun b : n =>
+        ((BΓ a i j * Hd b a b + Bd b a b * HΓ a i j) +
+          (Bd a i j * HΛ b a b + BΛ b a b * Hd a i j)))
+      (u := fun a z =>
+        (∑ b : n, Γ z a i j * Γ z b a b) -
+          ∑ b : n, Λ z a i j * Λ z b a b)
+      hleftInner
+    simpa [Finset.sum_sub_distrib] using hsum
+  have hrightInner : ∀ a ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaWith
+        (Finset.univ.sum fun b : n => BΓ a i b * Bd b a j + Bd a i b * BΛ b a j)
+        (Finset.univ.sum fun b : n =>
+          ((BΓ a i b * Hd b a j + Bd b a j * HΓ a i b) +
+            (Bd a i b * HΛ b a j + BΛ b a j * Hd a i b)))
+        α
+        (fun z =>
+          (∑ b : n, Γ z a i b * Γ z b a j) -
+            ∑ b : n, Λ z a i b * Λ z b a j) s := by
+    intro a _ha
+    simpa using
+      (ParabolicC0AlphaWith.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
+        (S := (Finset.univ : Finset n))
+        (Bu := fun b => BΓ a i b) (Hu := fun b => HΓ a i b)
+        (Bv := fun b => BΛ b a j) (Hv := fun b => HΛ b a j)
+        (Bdu := fun b => Bd a i b) (Hdu := fun b => Hd a i b)
+        (Bdv := fun b => Bd b a j) (Hdv := fun b => Hd b a j)
+        (u := fun b z => Γ z a i b) (u' := fun b z => Λ z a i b)
+        (v := fun b z => Γ z b a j) (v' := fun b z => Λ z b a j)
+        (fun b _hb => hΓ a i b) (fun b _hb => hΛ b a j)
+        (fun b _hb => hdiff a i b) (fun b _hb => hdiff b a j)
+        (fun b _hb => hBΓ a i b) (fun b _hb => hBd a i b))
+  have hright :
+      ParabolicC0AlphaWith
+        (Finset.univ.sum fun a : n =>
+          Finset.univ.sum fun b : n => BΓ a i b * Bd b a j + Bd a i b * BΛ b a j)
+        (Finset.univ.sum fun a : n =>
+          Finset.univ.sum fun b : n =>
+          ((BΓ a i b * Hd b a j + Bd b a j * HΓ a i b) +
+            (Bd a i b * HΛ b a j + BΛ b a j * Hd a i b)))
+        α
+        (fun z =>
+          (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j) -
+            ∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j) s := by
+    have hsum := ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (B := fun a =>
+        Finset.univ.sum fun b : n => BΓ a i b * Bd b a j + Bd a i b * BΛ b a j)
+      (H := fun a => Finset.univ.sum fun b : n =>
+        ((BΓ a i b * Hd b a j + Bd b a j * HΓ a i b) +
+          (Bd a i b * HΛ b a j + BΛ b a j * Hd a i b)))
+      (u := fun a z =>
+        (∑ b : n, Γ z a i b * Γ z b a j) -
+          ∑ b : n, Λ z a i b * Λ z b a j)
+      hrightInner
+    simpa [Finset.sum_sub_distrib] using hsum
+  have hsub := hleft.sub hright
+  have hsub' :
+      ParabolicC0AlphaWith
+        (christoffelQuadraticRicciEntrySubBoundConst BΓ BΛ Bd i j)
+        (christoffelQuadraticRicciEntrySubHolderConst BΓ HΓ BΛ HΛ Bd Hd i j)
+        α
+        (fun z =>
+          ((∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+              ∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+            ((∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j) -
+              ∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j)) s := by
+    simpa [christoffelQuadraticRicciEntrySubBoundConst,
+      christoffelQuadraticRicciEntrySubHolderConst] using hsub
+  convert hsub' using 1
+  ext z
+  abel
+
+/-- The full difference of finite quadratic Christoffel Ricci contractions has an explicit
+matrix-valued bounded parabolic `C^{0,α}` estimate. -/
+theorem christoffel_quadratic_ricci_sub_with {n A : Type*} [Fintype n] [NormedRing A]
+    {BΓ HΓ BΛ HΛ Bd Hd : n → n → n → ℝ}
+    {Γ Λ : ℝ × X → n → n → n → A}
+    (hBΓ : ∀ a b c, 0 ≤ BΓ a b c) (hHΓ : ∀ a b c, 0 ≤ HΓ a b c)
+    (hBΛ : ∀ a b c, 0 ≤ BΛ a b c) (hHΛ : ∀ a b c, 0 ≤ HΛ a b c)
+    (hBd : ∀ a b c, 0 ≤ Bd a b c) (hHd : ∀ a b c, 0 ≤ Hd a b c)
+    (hΓ : ∀ a b c, ParabolicC0AlphaWith (BΓ a b c) (HΓ a b c) α
+      (fun z => Γ z a b c) s)
+    (hΛ : ∀ a b c, ParabolicC0AlphaWith (BΛ a b c) (HΛ a b c) α
+      (fun z => Λ z a b c) s)
+    (hdiff : ∀ a b c, ParabolicC0AlphaWith (Bd a b c) (Hd a b c) α
+      (fun z => Γ z a b c - Λ z a b c) s) :
+    ParabolicC0AlphaWith
+      (∑ i : n, ∑ j : n, christoffelQuadraticRicciEntrySubBoundConst BΓ BΛ Bd i j)
+      (∑ i : n, ∑ j : n,
+        christoffelQuadraticRicciEntrySubHolderConst BΓ HΓ BΛ HΛ Bd Hd i j)
+      α
+      (fun z : ℝ × X =>
+        ((fun i j =>
+          (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+            (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j) :
+            Matrix n n A) -
+          (fun i j =>
+            (∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+              (∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j) :
+              Matrix n n A))) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      christoffelQuadraticRicciEntrySubBoundConst_nonneg hBΓ hBΛ hBd i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      christoffelQuadraticRicciEntrySubHolderConst_nonneg hBΓ hHΓ hBΛ hHΛ hBd hHd i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact christoffelQuadraticRicciEntrySubBoundConst_nonneg hBΓ hBΛ hBd i j
+    · intro j
+      exact christoffelQuadraticRicciEntrySubHolderConst_nonneg hBΓ hHΓ hBΛ hHΛ hBd hHd i j
+    · intro j
+      exact christoffel_quadratic_ricci_entry_sub_with hBΓ hBd hΓ hΛ hdiff i j
+
 /-- Ricci-coordinate quadratic Christoffel contractions are pointwise Lipschitz on bounded
 Christoffel arrays. -/
 theorem christoffel_quadratic_ricci_entry_norm_sub_le {n A : Type*} [Fintype n]
