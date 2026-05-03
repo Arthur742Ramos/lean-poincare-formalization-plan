@@ -461,8 +461,8 @@ packages the canonical stationary local solution attached to
   inverse-matrix, function-level determinant/inverse/matrix-product
   bounded-difference, existential determinant and reciprocal-determinant
   difference `C^{0,α}` readouts with a compact nonvanishing-det adapter,
-  existential inverse-entry, whole inverse-matrix, and inverse-principal
-  contraction difference readouts,
+  existential inverse-entry, whole inverse-matrix, inverse-principal contraction,
+  and inverse-Christoffel array difference readouts,
   inverse-difference `C^{0,α}` control,
   inverse-principal entry Lipschitz,
   bounded Holder entry/matrix estimates, inverse-principal contraction
@@ -539,9 +539,9 @@ packages the canonical stationary local solution attached to
   schematic RHS handoffs with spatial-Hölder, unit-diameter spatial-Lipschitz,
   closed-ball spatial-Lipschitz, and closed-cylinder spatial-Lipschitz
   Gram-entry input forms, compact
-  local-frame inverse Gram and inverse-principal contraction, including
-  existential difference readouts for both from entrywise controls, inverse-Gram
-  Christoffel, and schematic RHS `C^{0,α}` difference control,
+  local-frame inverse Gram, inverse-principal contraction, and inverse-Gram
+  Christoffel arrays, including existential difference readouts for all three
+  from entrywise controls, and schematic RHS `C^{0,α}` difference control,
   including entrywise-difference inverse Gram, inverse-principal, inverse-Gram
   Christoffel, and schematic RHS bridges, and inverse Gram, inverse-principal
   contraction, inverse-Gram Christoffel, and schematic RHS bounded-difference

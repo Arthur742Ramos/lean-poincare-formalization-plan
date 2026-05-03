@@ -6156,6 +6156,136 @@ theorem matrix_inv_christoffel_sub_with_entrywise_of_isCompact_det_ne_zero {n �
     hH hBd hHd hDB hDH hDDB hDDH hM hN hMdiff hE hDdiff
     hδpos hdetM hdetN⟩
 
+/-- One inverse-Christoffel entry has existential parabolic `C^{0,α}` difference control from
+entrywise metric and derivative-array difference controls. -/
+theorem matrix_inv_christoffel_entry_sub_entrywise {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜} {D E : ℝ × X → n → n → n → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) s)
+    (hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) s)
+    (hE : ∀ a b c, ParabolicC0AlphaOn α (fun z => E z a b c) s)
+    (hDdiff : ∀ a b c,
+      ParabolicC0AlphaOn α (fun z => D z a b c - E z a b c) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖)
+    (i j k : n) :
+    ParabolicC0AlphaOn α
+      (fun z =>
+        ((2 : 𝕜)⁻¹ *
+          ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+            (D z j k l + D z k j l - D z l j k)) -
+        ((2 : 𝕜)⁻¹ *
+          ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) i l *
+            (E z j k l + E z k j l - E z l j k))) s := by
+  classical
+  let invM : n → ℝ × X → 𝕜 := fun l z => ((M z)⁻¹ : Matrix n n 𝕜) i l
+  let invN : n → ℝ × X → 𝕜 := fun l z => ((N z)⁻¹ : Matrix n n 𝕜) i l
+  let comboD : n → ℝ × X → 𝕜 :=
+    fun l z => D z j k l + D z k j l - D z l j k
+  let comboE : n → ℝ × X → 𝕜 :=
+    fun l z => E z j k l + E z k j l - E z l j k
+  have hcomboE : ∀ l ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaOn α (comboE l) s := by
+    intro l _hl
+    have hsum := (hE j k l).add (hE k j l)
+    simpa [comboE, add_assoc] using hsum.sub (hE l j k)
+  have hcomboDiff : ∀ l ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaOn α (fun z => comboD l z - comboE l z) s := by
+    intro l _hl
+    have hraw := ((hDdiff j k l).add (hDdiff k j l)).sub (hDdiff l j k)
+    convert hraw using 1
+    ext z
+    simp [comboD, comboE]
+    abel
+  have hterm : ∀ l ∈ (Finset.univ : Finset n),
+      ParabolicC0AlphaOn α
+        (fun z => invM l z * comboD l z - invN l z * comboE l z) s := by
+    intro l hl
+    have hinvM : ParabolicC0AlphaOn α (invM l) s := by
+      simpa [invM] using matrix_inv_entry (M := M) hM hδpos hdetM i l
+    have hinvDiff : ParabolicC0AlphaOn α (fun z => invM l z - invN l z) s := by
+      simpa [invM, invN] using
+        matrix_inv_entry_sub (M := M) (N := N)
+          hM hN hMdiff hδpos hdetM hdetN i l
+    simpa [invM, invN, comboD, comboE] using
+      hinvM.mul_sub_mul (hcomboE l hl) hinvDiff (hcomboDiff l hl)
+  have hsum := ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+    (S := (Finset.univ : Finset n))
+    (u := fun l z => invM l z * comboD l z - invN l z * comboE l z)
+    hterm
+  have hhalf := hsum.smul ((2 : 𝕜)⁻¹)
+  convert hhalf using 1
+  · ext z
+    simp [invM, invN, comboD, comboE, smul_eq_mul]
+    ring
+
+/-- Inverse-Christoffel arrays have existential parabolic `C^{0,α}` difference control from
+entrywise metric and derivative-array difference controls. -/
+theorem matrix_inv_christoffel_sub_entrywise {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜} {D E : ℝ × X → n → n → n → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) s)
+    (hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) s)
+    (hE : ∀ a b c, ParabolicC0AlphaOn α (fun z => E z a b c) s)
+    (hDdiff : ∀ a b c,
+      ParabolicC0AlphaOn α (fun z => D z a b c - E z a b c) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (fun i j k =>
+          (2 : 𝕜)⁻¹ *
+            ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+              (D z j k l + D z k j l - D z l j k)) -
+        (fun i j k =>
+          (2 : 𝕜)⁻¹ *
+            ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) i l *
+              (E z j k l + E z k j l - E z l j k))) s := by
+  refine ParabolicC0AlphaOn.pi ?_
+  intro i
+  refine ParabolicC0AlphaOn.pi ?_
+  intro j
+  refine ParabolicC0AlphaOn.pi ?_
+  intro k
+  exact matrix_inv_christoffel_entry_sub_entrywise (M := M) (N := N) (D := D) (E := E)
+    hM hN hMdiff hE hDdiff hδpos hdetM hdetN i j k
+
+/-- Compact-domain inverse-Christoffel arrays have existential parabolic `C^{0,α}` difference
+control from entrywise controls and pointwise nonvanishing determinants. -/
+theorem matrix_inv_christoffel_sub_entrywise_of_isCompact_det_ne_zero {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M N : ℝ × X → Matrix n n 𝕜} {D E : ℝ × X → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) K)
+    (hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) K)
+    (hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) K)
+    (hE : ∀ a b c, ParabolicC0AlphaOn α (fun z => E z a b c) K)
+    (hDdiff : ∀ a b c,
+      ParabolicC0AlphaOn α (fun z => D z a b c - E z a b c) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × X =>
+          (fun i j k =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+                (D z j k l + D z k j l - D z l j k)) -
+          (fun i j k =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) i l *
+                (E z j k l + E z k j l - E z l j k))) K := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hM hN hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, matrix_inv_christoffel_sub_entrywise
+    (M := M) (N := N) (D := D) (E := E)
+    hM hN hMdiff hE hDdiff hδpos hdetM hdetN⟩
+
 /-- Compact-domain Christoffel-symbol type array closure from entrywise control and pointwise
 nonvanishing determinant. -/
 theorem matrix_inv_christoffel_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
