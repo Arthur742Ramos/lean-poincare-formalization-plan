@@ -568,12 +568,14 @@ packages the canonical stationary local solution attached to
   inverse-principal, and inverse-Christoffel handoffs now also accepting those
   same Gram-entry input forms, finite-family
   schematic RHS
-  quantitative difference, existential difference, and bounded-difference control
+  quantitative difference, quantitative entrywise-difference, existential
+  difference, and bounded-difference control
   against comparison primitive inputs with one lower bound shared by the Gram and
   comparison metric families, including spatial-Hölder, unit-diameter
   spatial-Lipschitz, and closed ball/cylinder spatial-Lipschitz Gram-entry forms
-  for the quantitative difference bridge, the entrywise `C^{0,α}` difference
-  bridge, and the bounded-difference bridge, and compact
+  for the quantitative difference and quantitative entrywise-difference bridges,
+  the existential entrywise `C^{0,α}` difference bridge, and the
+  bounded-difference bridge, and compact
   local-frame inverse Gram, inverse-principal contraction, inverse-Gram
   Christoffel arrays, and schematic RHS outputs, including existential
   difference readouts for all four from entrywise controls, and schematic RHS

@@ -1519,13 +1519,14 @@ with the quantitative vector/vector-inverse product, bilinear,
 inverse-principal, and inverse-Christoffel handoffs now also accepting those
 same Gram-entry input forms,
 finite-family schematic RHS
-quantitative difference, existential difference, and
-bounded-difference control against
+quantitative difference, quantitative entrywise-difference, existential
+difference, and bounded-difference control against
 comparison primitive inputs with one lower bound shared by the Gram and
 comparison metric families, including spatial-Hölder, unit-diameter
 spatial-Lipschitz, and closed ball/cylinder spatial-Lipschitz Gram-entry forms
-for the quantitative difference bridge, the entrywise `C^{0,α}` difference
-bridge, and the bounded-difference bridge,
+for the quantitative difference and quantitative entrywise-difference bridges,
+the existential entrywise `C^{0,α}` difference bridge, and the
+bounded-difference bridge,
 and compact
 local-frame
 inverse Gram, inverse-principal contraction, and inverse-Gram Christoffel
