@@ -4913,6 +4913,45 @@ theorem matrix_inv_bilinear_entry_family_of_isCompact_det_ne_zero {ι n 𝕜 : T
   exact matrix_inv_bilinear_entry
     (M := M a) (v := v a) (w := w a) (hv a) (hM a) (hw a) hδpos (hdet a)
 
+/-- A finite family of inverse-bilinear contractions `v · (M⁻¹ w)` has explicit bounded
+parabolic `C^{0,α}` estimates with one compact determinant lower bound shared by the family. -/
+theorem matrix_inv_bilinear_entry_family_with_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {Bv Hv : ι → n → ℝ} {B H : ι → n → n → ℝ} {Bw Hw : ι → n → ℝ}
+    {v : ι → ℝ × X → n → 𝕜} {M : ι → ℝ × X → Matrix n n 𝕜}
+    {w : ι → ℝ × X → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hBv : ∀ a i, 0 ≤ Bv a i) (hB : ∀ a i j, 0 ≤ B a i j)
+    (hH : ∀ a i j, 0 ≤ H a i j)
+    (hv : ∀ a i,
+      ParabolicC0AlphaWith (Bv a i) (Hv a i) α (fun z => v a z i) K)
+    (hM : ∀ a i j,
+      ParabolicC0AlphaWith (B a i j) (H a i j) α (fun z => M a z i j) K)
+    (hw : ∀ a j,
+      ParabolicC0AlphaWith (Bw a j) (Hw a j) α (fun z => w a z j) K)
+    (hdet_ne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → (M a z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M a z).det‖) ∧
+      ∀ a,
+        ParabolicC0AlphaWith
+          (matrixInvBilinearEntryBoundConst (𝕜 := 𝕜) δ (Bv a) (B a) (Bw a))
+          (matrixInvBilinearEntryHolderConst (𝕜 := 𝕜) δ (Bv a) (Hv a)
+            (B a) (H a) (Bw a) (Hw a))
+          α
+          (fun z : ℝ × X => ∑ i : n, v a z i * ((M a z)⁻¹).mulVec (w a z) i) K := by
+  have hMctrl : ∀ a i j, ParabolicC0AlphaOn α (fun z => M a z i j) K := by
+    intro a i j
+    exact ⟨B a i j, hB a i j, H a i j, hH a i j, hM a i j⟩
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hMctrl hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro a
+  exact matrix_inv_bilinear_entry_with
+    (M := M a) (v := v a) (w := w a)
+    (hBv a) (hH a) (hv a) (hM a) (hw a) hδpos (hdet a)
+
 /-- Compact-domain quantitative bilinear contraction through an inverse matrix, from entrywise
 control and pointwise nonvanishing determinant. -/
 theorem matrix_inv_bilinear_entry_with_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]

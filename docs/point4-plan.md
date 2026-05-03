@@ -1438,10 +1438,10 @@ bounded finite matrices, using a determinant lower bound for inverse
 estimates, and a compactness bridge from
 nonvanishing determinants to uniform determinant lower bounds, including
 finite-index common determinant lower bounds for compact matrix families,
-finite-family compact inverse and inverse-action estimates using that shared
-determinant constant, matching existential finite-family inverse,
-inverse-action, inverse-bilinear, inverse-principal, and inverse-Christoffel
-closures, and
+finite-family compact inverse, inverse-action, and inverse-bilinear estimates
+using that shared determinant constant, matching existential finite-family
+inverse, inverse-action, inverse-bilinear, inverse-principal, and
+inverse-Christoffel closures, and
 compact-domain inverse-entry, inverse-action, inverse-bilinear, and schematic
 matrix-valued RHS variants,
 including finite-family primitive schematic RHS estimates using the same shared
@@ -1506,8 +1506,8 @@ Gram-entry input forms, existential finite-family inverse-Gram, inverse-Gram
 action/bilinear, inverse-principal, inverse-Gram Christoffel, and schematic RHS
 handoffs from entrywise `ParabolicC0AlphaOn` controls sharing the same compact
 determinant lower bound, quantitative finite-family inverse-Gram
-vector/vector-inverse product handoffs sharing that same compact determinant
-lower bound, and compact
+vector/vector-inverse product and bilinear handoffs sharing that same compact
+determinant lower bound, and compact
 local-frame
 inverse Gram, inverse-principal contraction, and inverse-Gram Christoffel
 arrays, and schematic RHS outputs, including existential difference readouts for
