@@ -438,10 +438,11 @@ packages the canonical stationary local solution attached to
   Christoffel, and schematic RHS bridges exposing the determinant lower-bound
   constant, plus compact local-frame inverse Gram, inverse-principal
   contraction, inverse-Gram Christoffel, and schematic RHS `C^{0,α}`
-  difference control, including the entrywise-difference schematic RHS bridge,
-  and inverse Gram, inverse-principal contraction, inverse-Gram Christoffel, and
-  schematic RHS bounded-difference bridges against comparison primitive inputs,
-  all with matching spatial-Hölder Gram-entry input forms where applicable.
+  difference control, including entrywise-difference inverse-principal,
+  inverse-Gram Christoffel, and schematic RHS bridges, and inverse Gram,
+  inverse-principal contraction, inverse-Gram Christoffel, and schematic RHS
+  bounded-difference bridges against comparison primitive inputs, all with
+  matching spatial-Hölder Gram-entry input forms where applicable.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric

@@ -1346,10 +1346,11 @@ quantitative inverse Gram, inverse-principal contraction, inverse-Gram
 Christoffel, and schematic RHS bridges exposing the determinant lower-bound
 constant, plus compact local-frame inverse Gram, inverse-principal
 contraction, inverse-Gram Christoffel, and schematic RHS `C^{0,α}` difference
-control, including the entrywise-difference schematic RHS bridge, and inverse
-Gram, inverse-principal contraction, inverse-Gram Christoffel, and schematic RHS
-bounded-difference bridges against comparison primitive inputs, all with matching
-spatial-Hölder Gram-entry input forms where applicable.
+control, including entrywise-difference inverse-principal, inverse-Gram
+Christoffel, and schematic RHS bridges, and inverse Gram, inverse-principal
+contraction, inverse-Gram Christoffel, and schematic RHS bounded-difference
+bridges against comparison primitive inputs, all with matching spatial-Hölder
+Gram-entry input forms where applicable.
 The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
