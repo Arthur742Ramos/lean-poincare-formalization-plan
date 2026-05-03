@@ -1403,7 +1403,9 @@ the primitive schematic matrix RHS, with a compact-domain variant selecting a
 common determinant lower bound, on entrywise
 bounded finite matrices, using a determinant lower bound for inverse
 estimates, and a compactness bridge from
-nonvanishing determinants to uniform determinant lower bounds and compact-domain
+nonvanishing determinants to uniform determinant lower bounds, including
+finite-index common determinant lower bounds for compact matrix families, and
+compact-domain
 inverse-entry, inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants,
 including quantitative compact inverse-action and inverse-bilinear estimates,
 plus entrywise and whole-valued closure
@@ -1451,7 +1453,8 @@ inverse-Gram, inverse-Gram action/bilinear, inverse-principal,
 inverse-Gram Christoffel, and schematic RHS variants, and
 compact quantitative inverse Gram, inverse-Gram action/bilinear,
 inverse-principal contraction, inverse-Gram Christoffel, and schematic RHS
-bridges exposing the determinant lower-bound constant, plus compact local-frame
+bridges exposing the determinant lower-bound constant, plus finite-family
+local-frame Gram determinant lower-bound handoffs, compact local-frame
 inverse Gram, inverse-principal contraction, inverse-Gram Christoffel, and
 schematic RHS `C^{0,α}` difference control, including entrywise-difference
 inverse Gram, inverse-principal, inverse-Gram Christoffel, and schematic RHS

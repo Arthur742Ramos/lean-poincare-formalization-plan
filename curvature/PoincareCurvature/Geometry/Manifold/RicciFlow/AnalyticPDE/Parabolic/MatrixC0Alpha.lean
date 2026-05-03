@@ -46,6 +46,51 @@ theorem exists_pos_norm_lower_bound_of_isCompact_of_continuousOn_ne_zero {E : Ty
     intro z hz
     exact False.elim (hKnonempty ⟨z, hz⟩)
 
+/-- A finite family of continuous nonvanishing functions on a compact time-space set has one
+positive lower bound for all norms in the family. -/
+theorem exists_pos_norm_lower_bound_finset_of_isCompact_of_continuousOn_ne_zero {ι E : Type*}
+    [DecidableEq ι] [NormedAddCommGroup E] {K : Set (ℝ × X)}
+    {f : ι → ℝ × X → E} (S : Finset ι) (hK : IsCompact K)
+    (hf : ∀ a, ContinuousOn (f a) K)
+    (hne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → f a z ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ∀ ⦃a : ι⦄, a ∈ S → ∀ ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖f a z‖ := by
+  classical
+  induction S using Finset.induction_on with
+  | empty =>
+      refine ⟨1, by norm_num, ?_⟩
+      intro a ha
+      exact False.elim (by
+        simp at ha)
+  | insert a S ha ih =>
+      rcases ih with ⟨δS, hδS, hS⟩
+      rcases exists_pos_norm_lower_bound_of_isCompact_of_continuousOn_ne_zero
+          (K := K) (f := f a) hK (hf a) (hne a) with
+        ⟨δa, hδa, ha_bound⟩
+      refine ⟨min δa δS, lt_min hδa hδS, ?_⟩
+      intro b hb z hz
+      rw [Finset.mem_insert] at hb
+      rcases hb with rfl | hb
+      · exact (min_le_left δa δS).trans (ha_bound hz)
+      · exact (min_le_right δa δS).trans (hS hb hz)
+
+/-- A finite-index family of continuous nonvanishing functions on a compact time-space set has
+one positive lower bound for all norms in the family. -/
+theorem exists_pos_norm_lower_bound_fintype_of_isCompact_of_continuousOn_ne_zero {ι E : Type*}
+    [Fintype ι] [NormedAddCommGroup E] {K : Set (ℝ × X)}
+    {f : ι → ℝ × X → E} (hK : IsCompact K)
+    (hf : ∀ a, ContinuousOn (f a) K)
+    (hne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → f a z ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖f a z‖ := by
+  classical
+  rcases exists_pos_norm_lower_bound_finset_of_isCompact_of_continuousOn_ne_zero
+      (K := K) (f := f) (S := Finset.univ) hK hf hne with
+    ⟨δ, hδpos, hδ⟩
+  refine ⟨δ, hδpos, ?_⟩
+  intro a z hz
+  exact hδ (a := a) (Finset.mem_univ a) (z := z) hz
+
 /-- The sup constant for a single Leibniz-term in the determinant estimate. -/
 def matrixDetTermBoundConst {n A : Type*} [Fintype n] [NormedRing A]
     (B : n → n → ℝ) (σ : Equiv.Perm n) : ℝ :=
@@ -634,6 +679,21 @@ theorem matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact {n 𝕜 : Type*
     exact (min_le_left δM δN).trans (hdetM hz)
   · intro z hz
     exact (min_le_right δM δN).trans (hdetN hz)
+
+/-- On a compact time-space set, a finite family of finite matrices with parabolic `C^{0,α}`
+entries and nonvanishing determinants has a common positive determinant-norm lower bound. -/
+theorem matrix_det_family_exists_pos_norm_lower_bound_of_isCompact {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M : ι → ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ a i j, ParabolicC0AlphaOn α (fun z => M a z i j) K)
+    (hdet_ne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → (M a z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M a z).det‖ :=
+  exists_pos_norm_lower_bound_fintype_of_isCompact_of_continuousOn_ne_zero
+    (K := K) (f := fun a z => (M a z).det) hK
+    (fun a => ((matrix_det (M := M a) (hM a)).continuousOn hα))
+    (fun a z hz => hdet_ne a (z := z) hz)
 
 /-- Quantitative entrywise parabolic `C^{0,α}` control packages a finite vector-valued
 coefficient family, summing the component constants. -/

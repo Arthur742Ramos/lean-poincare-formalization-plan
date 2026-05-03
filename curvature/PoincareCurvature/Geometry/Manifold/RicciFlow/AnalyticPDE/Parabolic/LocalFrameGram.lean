@@ -33,6 +33,37 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 
+/-- A finite family of local-frame Gram determinants admits one compact time-space lower bound.
+This is the determinant handoff needed when a finite cover uses several trivializations at once. -/
+theorem localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    (hG : ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖ := by
+  refine matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+    (K := K)
+    (M := fun r z =>
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    hK hα ?_ ?_
+  · intro r i j
+    exact hG r i j
+  · intro r z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) (e r) (b r) (hKbase r hz)
+
 /-- If the local-frame Gram entries have parabolic `C^{0,α}` control on a compact time-space
 set contained in a trivialization base, then the inverse Gram matrix is parabolic `C^{0,α}` there.
 -/
