@@ -1455,6 +1455,38 @@ def matrixInvEntryHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [Norm
     matrixAdjugateEntryBoundConst (A := 𝕜) B i j *
       (δ⁻¹ * matrixDetHolderConst (A := 𝕜) B H * δ⁻¹)
 
+/-- Sup constant for one inverse-matrix entry difference from entrywise matrix-difference
+controls. -/
+def matrixInvEntrySubBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B Bd : n → n → ℝ) (i j : n) : ℝ :=
+  δ⁻¹ * matrixAdjugateEntrySubBoundConst (A := 𝕜) B Bd i j +
+    matrixDetInvSubBoundConst (𝕜 := 𝕜) δ B Bd *
+      matrixAdjugateEntryBoundConst (A := 𝕜) B i j
+
+/-- Holder constant for one inverse-matrix entry difference from entrywise matrix-difference
+controls. -/
+def matrixInvEntrySubHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B H Bd Hd : n → n → ℝ) (i j : n) : ℝ :=
+  (δ⁻¹ * matrixAdjugateEntrySubHolderConst (A := 𝕜) B H Bd Hd i j +
+    matrixAdjugateEntrySubBoundConst (A := 𝕜) B Bd i j *
+      (δ⁻¹ * matrixDetHolderConst (A := 𝕜) B H * δ⁻¹)) +
+    (matrixDetInvSubBoundConst (𝕜 := 𝕜) δ B Bd *
+      matrixAdjugateEntryHolderConst (A := 𝕜) B H i j +
+    matrixAdjugateEntryBoundConst (A := 𝕜) B i j *
+      matrixDetInvSubHolderConst (𝕜 := 𝕜) δ B H Bd Hd)
+
+/-- Sup constant for finite inverse-matrix differences from entrywise matrix-difference
+controls. -/
+def matrixInvEntrywiseSubBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B Bd : n → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : n, matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd i j
+
+/-- Holder constant for finite inverse-matrix differences from entrywise matrix-difference
+controls. -/
+def matrixInvEntrywiseSubHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B H Bd Hd : n → n → ℝ) : ℝ :=
+  ∑ i : n, ∑ j : n, matrixInvEntrySubHolderConst (𝕜 := 𝕜) δ B H Bd Hd i j
+
 theorem matrixInvEntryBoundConst_nonneg {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
     [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) (B : n → n → ℝ) (i j : n) :
     0 ≤ matrixInvEntryBoundConst (𝕜 := 𝕜) δ B i j := by
@@ -1472,6 +1504,53 @@ theorem matrixInvEntryHolderConst_nonneg {n 𝕜 : Type*} [Fintype n] [Decidable
       (mul_nonneg
         (mul_nonneg (inv_nonneg.mpr hδpos.le) (matrixDetHolderConst_nonneg (A := 𝕜) hH))
         (inv_nonneg.mpr hδpos.le)))
+
+theorem matrixInvEntrySubBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B Bd : n → n → ℝ}
+    (hδpos : 0 < δ) (hBd : ∀ i j, 0 ≤ Bd i j) (i j : n) :
+    0 ≤ matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd i j := by
+  exact add_nonneg
+    (mul_nonneg (inv_nonneg.mpr hδpos.le)
+      (matrixAdjugateEntrySubBoundConst_nonneg (A := 𝕜) hBd i j))
+    (mul_nonneg (matrixDetInvSubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd)
+      (matrixAdjugateEntryBoundConst_nonneg (A := 𝕜) B i j))
+
+theorem matrixInvEntrySubHolderConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B H Bd Hd : n → n → ℝ}
+    (hδpos : 0 < δ) (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j) (hHd : ∀ i j, 0 ≤ Hd i j) (i j : n) :
+    0 ≤ matrixInvEntrySubHolderConst (𝕜 := 𝕜) δ B H Bd Hd i j := by
+  have hδnn : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  exact add_nonneg
+    (add_nonneg
+      (mul_nonneg hδnn
+        (matrixAdjugateEntrySubHolderConst_nonneg (A := 𝕜) hH hBd hHd i j))
+      (mul_nonneg
+        (matrixAdjugateEntrySubBoundConst_nonneg (A := 𝕜) hBd i j)
+        (mul_nonneg (mul_nonneg hδnn (matrixDetHolderConst_nonneg (A := 𝕜) hH))
+          hδnn)))
+    (add_nonneg
+      (mul_nonneg (matrixDetInvSubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd)
+        (matrixAdjugateEntryHolderConst_nonneg (A := 𝕜) hH i j))
+      (mul_nonneg (matrixAdjugateEntryBoundConst_nonneg (A := 𝕜) B i j)
+        (matrixDetInvSubHolderConst_nonneg (𝕜 := 𝕜) hδpos hH hBd hHd)))
+
+theorem matrixInvEntrywiseSubBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B Bd : n → n → ℝ}
+    (hδpos : 0 < δ) (hBd : ∀ i j, 0 ≤ Bd i j) :
+    0 ≤ matrixInvEntrywiseSubBoundConst (𝕜 := 𝕜) δ B Bd := by
+  exact Finset.sum_nonneg fun i _hi =>
+    Finset.sum_nonneg fun j _hj =>
+      matrixInvEntrySubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd i j
+
+theorem matrixInvEntrywiseSubHolderConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B H Bd Hd : n → n → ℝ}
+    (hδpos : 0 < δ) (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j) (hHd : ∀ i j, 0 ≤ Hd i j) :
+    0 ≤ matrixInvEntrywiseSubHolderConst (𝕜 := 𝕜) δ B H Bd Hd := by
+  exact Finset.sum_nonneg fun i _hi =>
+    Finset.sum_nonneg fun j _hj =>
+      matrixInvEntrySubHolderConst_nonneg (𝕜 := 𝕜) hδpos hH hBd hHd i j
 
 /-- Pointwise finite-dimensional Lipschitz bound for one inverse-matrix entry.  It depends on
 the two matrices through the determinant and row-replacement adjugate differences. -/
@@ -1899,6 +1978,109 @@ theorem matrix_inv_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [Norm
   funext z
   rw [Matrix.inv_def, Ring.inverse_eq_inv]
   rfl
+
+/-- One inverse-matrix entry has difference-based parabolic `C^{0,α}` control when the two
+matrices have entrywise controls and a common determinant lower bound. -/
+theorem matrix_inv_entry_sub_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {B H Bd Hd : n → n → ℝ} {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j)
+    (hHd : ∀ i j, 0 ≤ Hd i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => N z i j) s)
+    (hdiff : ∀ i j,
+      ParabolicC0AlphaWith (Bd i j) (Hd i j) α (fun z => M z i j - N z i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖)
+    (i j : n) :
+    ParabolicC0AlphaWith
+      (matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd i j)
+      (matrixInvEntrySubHolderConst (𝕜 := 𝕜) δ B H Bd Hd i j)
+      α (fun z => (M z)⁻¹ i j - (N z)⁻¹ i j) s := by
+  have hdetM_with :
+      ParabolicC0AlphaWith
+        (matrixDetBoundConst (A := 𝕜) B)
+        (matrixDetHolderConst (A := 𝕜) B H)
+        α (fun z => (M z).det) s :=
+    matrix_det_with (M := M) hH hM
+  have hdetM_inv :
+      ParabolicC0AlphaWith δ⁻¹
+        (δ⁻¹ * matrixDetHolderConst (A := 𝕜) B H * δ⁻¹)
+        α (fun z => ((M z).det)⁻¹) s :=
+    hdetM_with.inv hδpos hdetM
+  have hdet_inv_diff :
+      ParabolicC0AlphaWith
+        (matrixDetInvSubBoundConst (𝕜 := 𝕜) δ B Bd)
+        (matrixDetInvSubHolderConst (𝕜 := 𝕜) δ B H Bd Hd)
+        α (fun z => ((M z).det)⁻¹ - ((N z).det)⁻¹) s :=
+    matrix_det_inv_sub_with (M := M) (N := N)
+      hH hBd hHd hM hN hdiff hδpos hdetM hdetN
+  have hNadj :
+      ParabolicC0AlphaWith
+        (matrixAdjugateEntryBoundConst (A := 𝕜) B i j)
+        (matrixAdjugateEntryHolderConst (A := 𝕜) B H i j)
+        α (fun z => (N z).adjugate i j) s :=
+    matrix_adjugate_entry_with (M := N) hH hN i j
+  have hadjdiff :
+      ParabolicC0AlphaWith
+        (matrixAdjugateEntrySubBoundConst (A := 𝕜) B Bd i j)
+        (matrixAdjugateEntrySubHolderConst (A := 𝕜) B H Bd Hd i j)
+        α (fun z => (M z).adjugate i j - (N z).adjugate i j) s :=
+    matrix_adjugate_entry_sub_with (M := M) (N := N) hH hBd hHd hM hN hdiff i j
+  have hprod :
+      ParabolicC0AlphaWith
+        (matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd i j)
+        (matrixInvEntrySubHolderConst (𝕜 := 𝕜) δ B H Bd Hd i j)
+        α
+        (fun z =>
+          ((M z).det)⁻¹ * (M z).adjugate i j -
+            ((N z).det)⁻¹ * (N z).adjugate i j) s := by
+    simpa [matrixInvEntrySubBoundConst, matrixInvEntrySubHolderConst] using
+      hdetM_inv.mul_sub_mul hNadj hdet_inv_diff hadjdiff
+        (inv_nonneg.mpr hδpos.le)
+        (matrixDetInvSubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd)
+  convert hprod using 1
+  ext z
+  rw [Matrix.inv_def, Matrix.inv_def, Ring.inverse_eq_inv, Ring.inverse_eq_inv]
+  rfl
+
+/-- Finite inverse-matrix differences have entrywise-difference-based parabolic `C^{0,α}`
+control under a common determinant lower bound. -/
+theorem matrix_inv_sub_with_entrywise {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {B H Bd Hd : n → n → ℝ} {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j)
+    (hHd : ∀ i j, 0 ≤ Hd i j)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => N z i j) s)
+    (hdiff : ∀ i j,
+      ParabolicC0AlphaWith (Bd i j) (Hd i j) α (fun z => M z i j - N z i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaWith
+      (matrixInvEntrywiseSubBoundConst (𝕜 := 𝕜) δ B Bd)
+      (matrixInvEntrywiseSubHolderConst (𝕜 := 𝕜) δ B H Bd Hd)
+      α (fun z => (M z)⁻¹ - (N z)⁻¹) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      matrixInvEntrySubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      matrixInvEntrySubHolderConst_nonneg (𝕜 := 𝕜) hδpos hH hBd hHd i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact matrixInvEntrySubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd i j
+    · intro j
+      exact matrixInvEntrySubHolderConst_nonneg (𝕜 := 𝕜) hδpos hH hBd hHd i j
+    · intro j
+      exact matrix_inv_entry_sub_with (M := M) (N := N)
+        hH hBd hHd hM hN hdiff hδpos hdetM hdetN i j
 
 /-- A finite inverse-matrix-valued function has an explicit bounded parabolic `C^{0,α}` estimate
 when the matrix entries do and the determinant is uniformly bounded away from zero. -/
