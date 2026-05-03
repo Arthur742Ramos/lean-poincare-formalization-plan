@@ -861,6 +861,10 @@ into ordinary chart and primitive derivative data on the chosen open `Ioo`
 solution time set. Endpoint callers can therefore use the scalar gauge-pullback
 route from the model-field Picard output without first rebuilding an intrinsic
 chart-ODE package by hand.
+The same handoff is now available with relative-filter vector-field equality on
+the open `Ioo` interval: both the raw existence constructors and the derivative
+packages can consume model-field data without requiring endpoint pointwise
+equality on all of `Icc`.
 The chart-ODE packages themselves now also prove the underlying manifold-curve
 continuity and convert directly to primitive intrinsic manifold derivative data
 in both within-time-set and ordinary-at-time forms, with fixed-IVP and
