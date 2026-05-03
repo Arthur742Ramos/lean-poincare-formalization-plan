@@ -422,9 +422,9 @@ packages the canonical stationary local solution attached to
   spatial-only and time-only finite vector and matrix coefficient families from
   ordinary Holder/Lipschitz estimates, explicit unit-parabolic-diameter spatial
   Lipschitz lifts for every `0 ≤ α ≤ 1`, and explicit unit-parabolic-diameter
-  time-Lipschitz lifts for every `0 ≤ α ≤ 2`, now with matching fixed-constant
-  closed-ball and closed-cylinder variants for those Lipschitz coefficient
-  bridges, and to prove explicit bounded
+  time-Lipschitz lifts for every `0 ≤ α ≤ 2`, now with matching
+  fixed-constant and existential closed-ball and closed-cylinder variants for
+  those Lipschitz coefficient bridges, and to prove explicit bounded
   `C^{0,α}`
   determinant, adjugate-entry,
   inverse-entry, and whole inverse-matrix estimates, plus parabolic `C^{0,α}`
