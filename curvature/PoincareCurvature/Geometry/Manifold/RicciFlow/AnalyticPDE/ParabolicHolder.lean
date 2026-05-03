@@ -1237,6 +1237,11 @@ theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
       mul_le_mul_of_nonneg_left (hu hp hq) (NNReal.coe_nonneg K)
     _ = ((K : ℝ) * C) * dα := by ring
 
+theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicHolderWith C α u s) (hφ : LipschitzWith K φ) :
+    ParabolicHolderWith ((K : ℝ) * C) α (fun z => φ (u z)) s :=
+  hu.comp_lipschitzOnWith hφ.lipschitzOnWith
+
 /-- A spatial Holder estimate on the spatial projection lifts to the same parabolic Holder
 estimate for the time-independent time-space function. -/
 theorem of_snd_holder (hC : 0 ≤ C) (hα : 0 ≤ α) {f : X → E}
@@ -1639,6 +1644,13 @@ theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
   rcases hu with ⟨C, hC, hCu⟩
   exact ⟨(K : ℝ) * C, mul_nonneg (NNReal.coe_nonneg K) hC,
     hCu.comp_lipschitzOnWith hφ⟩
+
+theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicHolderOn α u s) (hφ : LipschitzWith K φ) :
+    ParabolicHolderOn α (fun z => φ (u z)) s := by
+  rcases hu with ⟨C, hC, hCu⟩
+  exact ⟨(K : ℝ) * C, mul_nonneg (NNReal.coe_nonneg K) hC,
+    hCu.comp_lipschitzWith hφ⟩
 
 /-- A spatial Holder estimate on the spatial projection lifts to parabolic Holder control for
 the time-independent time-space function. -/
@@ -2078,6 +2090,22 @@ theorem comp_of_closedBall_bound {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ}
     ParabolicBoundedWith Bφ (fun z => φ (u z)) s :=
   comp_of_range_bound fun y hy => hφ y (hu.image_subset_closedBall_zero hy)
 
+theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicBoundedWith B u s) (hφ : LipschitzWith K φ) :
+    ParabolicBoundedWith (‖φ (0 : E)‖ + (K : ℝ) * B) (fun z => φ (u z)) s := by
+  intro p hp
+  calc
+    ‖φ (u p)‖ = ‖(φ (u p) - φ 0) + φ 0‖ := by rw [sub_add_cancel]
+    _ ≤ ‖φ (u p) - φ 0‖ + ‖φ 0‖ := norm_add_le _ _
+    _ = dist (φ (u p)) (φ 0) + ‖φ 0‖ := by rw [dist_eq_norm]
+    _ ≤ (K : ℝ) * dist (u p) 0 + ‖φ 0‖ := by
+      exact add_le_add_left (hφ.dist_le_mul (u p) 0) _
+    _ = (K : ℝ) * ‖u p‖ + ‖φ 0‖ := by rw [dist_eq_norm, sub_zero]
+    _ ≤ (K : ℝ) * B + ‖φ 0‖ := by
+      exact add_le_add_left
+        (mul_le_mul_of_nonneg_left (hu hp) (NNReal.coe_nonneg K)) _
+    _ = ‖φ (0 : E)‖ + (K : ℝ) * B := by ring
+
 end ParabolicBoundedWith
 
 namespace ParabolicC0AlphaWith
@@ -2322,6 +2350,12 @@ theorem comp_lipschitzOnWith_of_closedBall {F : Type*} [NormedAddCommGroup F]
   hu.comp_lipschitzOnWith
     (fun y hy => hφB y (hu.bounded.image_subset_closedBall_zero hy))
     (hφL.mono hu.bounded.image_subset_closedBall_zero)
+
+theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicC0AlphaWith B H α u s) (hφ : LipschitzWith K φ) :
+    ParabolicC0AlphaWith (‖φ (0 : E)‖ + (K : ℝ) * B) ((K : ℝ) * H) α
+      (fun z => φ (u z)) s :=
+  ⟨hu.bounded.comp_lipschitzWith hφ, hu.holder.comp_lipschitzWith hφ⟩
 
 /-- The Holder component of positive-exponent parabolic `C^{0,α}` control gives continuity. -/
 theorem continuousOn (h : ParabolicC0AlphaWith B H α u s) (hα : 0 < α) : ContinuousOn u s :=
@@ -2721,6 +2755,15 @@ theorem comp_lipschitzOnWith_of_closedBall {F : Type*} [NormedAddCommGroup F]
   exact ⟨Bφ, hBφ, (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH,
     ⟨hBound.comp_of_closedBall_bound hφB,
       hBH.holder.comp_lipschitzOnWith (hφL.mono hBound.image_subset_closedBall_zero)⟩⟩
+
+theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
+    {φ : E → F} (hu : ParabolicC0AlphaOn α u s) (hφ : LipschitzWith K φ) :
+    ParabolicC0AlphaOn α (fun z => φ (u z)) s := by
+  rcases hu with ⟨B, hB, H, hH, hBH⟩
+  refine ⟨‖φ (0 : E)‖ + (K : ℝ) * B,
+    add_nonneg (norm_nonneg _) (mul_nonneg (NNReal.coe_nonneg K) hB),
+    (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH, ?_⟩
+  exact hBH.comp_lipschitzWith hφ
 
 theorem time_slice_half_exponent (h : ParabolicC0AlphaOn α u s) :
     ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
