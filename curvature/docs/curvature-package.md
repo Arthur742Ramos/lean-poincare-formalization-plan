@@ -158,7 +158,7 @@ Lipschitz control in the elementwise matrix norm, named adjugate-entry,
 inverse-entry, summed whole inverse-matrix, matrix-product,
 inverse-principal entry, inverse-Christoffel metric-side, and
 quadratic-Christoffel matrix-norm Lipschitz constants, plus a
-supplied-Christoffel schematic RHS Lipschitz aggregation and primitive-input
+supplied-Christoffel schematic RHS entry matrix-norm constant and primitive-input
 schematic RHS estimate, on entrywise bounded
 finite matrices, using a determinant lower bound for inverse estimates,
 including a compactness bridge from nonvanishing determinants to a uniform

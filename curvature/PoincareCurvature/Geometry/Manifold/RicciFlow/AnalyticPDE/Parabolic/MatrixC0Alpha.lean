@@ -2869,6 +2869,81 @@ theorem ricciDeTurck_schematic_from_christoffel_entry_norm_sub_le {n 𝕜 : Type
           ΓB b a j * ‖Γ a i b - Λ a i b‖))) := by
       simp [principalBound, quadraticBound]
 
+/-- The schematic Ricci-DeTurck coordinate entry built from an inverse principal contraction and
+a supplied Christoffel array is Lipschitz in the metric matrix norm, the principal coefficient
+matrix norm, and a uniform Christoffel-array entry difference bound. -/
+theorem ricciDeTurck_schematic_from_christoffel_entry_norm_sub_le_const {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {HB : n → n → n → n → ℝ} {ΓB : n → n → n → ℝ} {ηγ : ℝ}
+    (M N : Matrix n n 𝕜) (H K : n → n → n → n → 𝕜)
+    (Γ Λ : n → n → n → 𝕜)
+    (hM : ∀ a b, ‖M a b‖ ≤ C a b) (hN : ∀ a b, ‖N a b‖ ≤ C a b)
+    (hK : ∀ a b i j, ‖K a b i j‖ ≤ HB a b i j)
+    (hΓ : ∀ a b c, ‖Γ a b c‖ ≤ ΓB a b c)
+    (hΛ : ∀ a b c, ‖Λ a b c‖ ≤ ΓB a b c)
+    (hΓdiff : ∀ a b c, ‖Γ a b c - Λ a b c‖ ≤ ηγ)
+    (hδpos : 0 < δ) (hdetM : δ ≤ ‖M.det‖) (hdetN : δ ≤ ‖N.det‖)
+    (i j : n) :
+    ‖((∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+        ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+          (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) -
+      ((∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j) +
+        ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+          (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)))‖ ≤
+      (matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C *
+          ‖((fun a b => H a b i j) : Matrix n n 𝕜) -
+            ((fun a b => K a b i j) : Matrix n n 𝕜)‖ +
+        matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C HB i j * ‖M - N‖) +
+        christoffelQuadraticRicciEntryLipschitzConst ΓB i j * ηγ := by
+  classical
+  let principalM : 𝕜 := ∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j
+  let principalN : 𝕜 := ∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j
+  let quadraticΓ : 𝕜 :=
+    (∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+      (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)
+  let quadraticΛ : 𝕜 :=
+    (∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+      (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)
+  let principalBound : ℝ :=
+    matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C *
+        ‖((fun a b => H a b i j) : Matrix n n 𝕜) -
+          ((fun a b => K a b i j) : Matrix n n 𝕜)‖ +
+      matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C HB i j * ‖M - N‖
+  let quadraticBound : ℝ := christoffelQuadraticRicciEntryLipschitzConst ΓB i j * ηγ
+  have hprincipal : ‖principalM - principalN‖ ≤ principalBound := by
+    simpa [principalM, principalN, principalBound] using
+      matrix_inv_two_index_contract_entry_norm_sub_le_const
+        M N H K hM hN hK hδpos hdetM hdetN i j
+  have hquadratic : ‖quadraticΓ - quadraticΛ‖ ≤ quadraticBound := by
+    simpa [quadraticΓ, quadraticΛ, quadraticBound] using
+      christoffel_quadratic_ricci_entry_norm_sub_le_const Γ Λ hΓ hΛ hΓdiff i j
+  have hsplit :
+      (principalM + quadraticΓ) - (principalN + quadraticΛ) =
+        (principalM - principalN) + (quadraticΓ - quadraticΛ) := by
+    abel
+  calc
+    ‖((∑ a : n, ∑ b : n, (M⁻¹ : Matrix n n 𝕜) a b * H a b i j) +
+        ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+          (∑ a : n, ∑ b : n, Γ a i b * Γ b a j))) -
+      ((∑ a : n, ∑ b : n, (N⁻¹ : Matrix n n 𝕜) a b * K a b i j) +
+        ((∑ a : n, ∑ b : n, Λ a i j * Λ b a b) -
+          (∑ a : n, ∑ b : n, Λ a i b * Λ b a j)))‖ =
+        ‖(principalM + quadraticΓ) - (principalN + quadraticΛ)‖ := by
+      rfl
+    _ = ‖(principalM - principalN) + (quadraticΓ - quadraticΛ)‖ := by
+      rw [hsplit]
+    _ ≤ ‖principalM - principalN‖ + ‖quadraticΓ - quadraticΛ‖ :=
+      norm_add_le _ _
+    _ ≤ principalBound + quadraticBound :=
+      add_le_add hprincipal hquadratic
+    _ =
+      (matrixInvTwoIndexContractCoeffDiffConst (𝕜 := 𝕜) δ C *
+          ‖((fun a b => H a b i j) : Matrix n n 𝕜) -
+            ((fun a b => K a b i j) : Matrix n n 𝕜)‖ +
+        matrixInvTwoIndexContractMetricDiffConst (𝕜 := 𝕜) δ C HB i j * ‖M - N‖) +
+        christoffelQuadraticRicciEntryLipschitzConst ΓB i j * ηγ := by
+      simp [principalBound, quadraticBound]
+
 /-- The matrix-valued schematic Ricci-DeTurck expression built from inverse principal contractions
 and supplied Christoffel arrays is pointwise Lipschitz in the elementwise matrix norm. -/
 theorem ricciDeTurck_schematic_from_christoffel_norm_sub_le {n 𝕜 : Type*}
