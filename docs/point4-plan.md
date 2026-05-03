@@ -1193,7 +1193,10 @@ theorem
 `RicciDeTurckChartClosureDataOnIcc.metric_eq_on_restricted_interval_of_shrunk_symmetricCarrier`
 derives that readout directly from ambient encodings of the restricted
 candidates, so local uniqueness no longer needs a hypothesis that the full
-candidate intervals fit inside the selected shrink.
+candidate intervals fit inside the selected shrink.  The wrapper
+`RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier`
+chooses the shorter terminal automatically and states the result on
+`[t₀, min (min T₁ T₂) T']`.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged

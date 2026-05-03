@@ -325,7 +325,9 @@ packages the canonical stationary local solution attached to
   equality on any shared shorter interval `[t₀, S]` from reverse encodings of
   the candidates restricted to that same `S ≤ T`, and shrunk ambient closure
   data now supplies this local uniqueness readout without requiring the full
-  arbitrary candidate intervals to fit in the shrink.
+  arbitrary candidate intervals to fit in the shrink. A packaged clipped
+  interval version reads this as equality on the whole visible overlap
+  `[t₀, min (min T₁ T₂) T']`.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
