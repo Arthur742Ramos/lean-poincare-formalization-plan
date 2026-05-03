@@ -2550,6 +2550,34 @@ theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
     ParabolicC0AlphaWith δ⁻¹ (δ⁻¹ * H * δ⁻¹) α (fun z => (a z)⁻¹) s :=
   ⟨ParabolicBoundedWith.inv hδpos hδ, ha.holder.inv hδpos hδ⟩
 
+/-- Sup constant for the parabolic `C^{0,α}` difference of two reciprocal functions. -/
+def invSubBoundConst (δ Bd : ℝ) : ℝ :=
+  (δ⁻¹ * Bd) * δ⁻¹
+
+/-- Holder constant for the parabolic `C^{0,α}` difference of two reciprocal functions.  The
+terms are written in product-rule form: first multiply `a⁻¹` with `a - b`, then multiply by
+`b⁻¹`. -/
+def invSubHolderConst (δ Ha Hb Bd Hd : ℝ) : ℝ :=
+  (δ⁻¹ * Bd) * (δ⁻¹ * Hb * δ⁻¹) +
+    δ⁻¹ * (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹))
+
+/-- Nonnegativity of the reciprocal-difference sup constant. -/
+theorem invSubBoundConst_nonneg {δ Bd : ℝ} (hδpos : 0 < δ) (hBd : 0 ≤ Bd) :
+    0 ≤ invSubBoundConst δ Bd := by
+  exact mul_nonneg (mul_nonneg (inv_nonneg.mpr hδpos.le) hBd)
+    (inv_nonneg.mpr hδpos.le)
+
+/-- Nonnegativity of the reciprocal-difference Holder constant. -/
+theorem invSubHolderConst_nonneg {δ Ha Hb Bd Hd : ℝ} (hδpos : 0 < δ)
+    (hHa : 0 ≤ Ha) (hHb : 0 ≤ Hb) (hBd : 0 ≤ Bd) (hHd : 0 ≤ Hd) :
+    0 ≤ invSubHolderConst δ Ha Hb Bd Hd := by
+  have hδnn : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  exact add_nonneg
+    (mul_nonneg (mul_nonneg hδnn hBd) (mul_nonneg (mul_nonneg hδnn hHb) hδnn))
+    (mul_nonneg hδnn
+      (add_nonneg (mul_nonneg hδnn hHd)
+        (mul_nonneg hBd (mul_nonneg (mul_nonneg hδnn hHa) hδnn))))
+
 theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
     {u v : ℝ × X → A} {s : Set (ℝ × X)}
     (hu : ParabolicC0AlphaWith B₁ H₁ α u s)
@@ -2579,6 +2607,64 @@ theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
           (mul_le_mul (hu.bounded hp) (hv.holder hp hq) (norm_nonneg _) hB₁)
           (mul_le_mul (hu.holder hp hq) (hv.bounded hq) (norm_nonneg _) hH₁d_nonneg)
       _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
+
+/-- Reciprocal differences inherit parabolic `C^{0,α}` control from the difference of the
+inputs, under a common pointwise lower bound.  This is the scalar local-Lipschitz form behind
+inverse-metric estimates: the Holder constant depends on the Holder size of `a - b`, not only on
+the two standalone reciprocal Holder constants. -/
+theorem inv_sub_inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ}
+    {a b : ℝ × X → 𝕜} {Ba Ha Bb Hb Bd Hd α : ℝ}
+    (ha : ParabolicC0AlphaWith Ba Ha α a s)
+    (hb : ParabolicC0AlphaWith Bb Hb α b s)
+    (hdiff : ParabolicC0AlphaWith Bd Hd α (fun z => a z - b z) s)
+    (hδpos : 0 < δ)
+    (hδa : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖)
+    (hδb : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖)
+    (hBd : 0 ≤ Bd) :
+    ParabolicC0AlphaWith
+      (invSubBoundConst δ Bd)
+      (invSubHolderConst δ Ha Hb Bd Hd) α
+      (fun z => (a z)⁻¹ - (b z)⁻¹) s := by
+  have hδinv_nonneg : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  have hainv :
+      ParabolicC0AlphaWith δ⁻¹ (δ⁻¹ * Ha * δ⁻¹) α (fun z => (a z)⁻¹) s :=
+    ha.inv hδpos hδa
+  have hbinv :
+      ParabolicC0AlphaWith δ⁻¹ (δ⁻¹ * Hb * δ⁻¹) α (fun z => (b z)⁻¹) s :=
+    hb.inv hδpos hδb
+  have hleft :
+      ParabolicC0AlphaWith (δ⁻¹ * Bd)
+        (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹)) α
+        (fun z => (a z)⁻¹ * (a z - b z)) s :=
+    hainv.mul hdiff hδinv_nonneg
+  have hleftB_nonneg : 0 ≤ δ⁻¹ * Bd := mul_nonneg hδinv_nonneg hBd
+  have hprod :
+      ParabolicC0AlphaWith
+        ((δ⁻¹ * Bd) * δ⁻¹)
+        ((δ⁻¹ * Bd) * (δ⁻¹ * Hb * δ⁻¹) +
+          δ⁻¹ * (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹))) α
+        (fun z => ((a z)⁻¹ * (a z - b z)) * (b z)⁻¹) s :=
+    hleft.mul hbinv hleftB_nonneg
+  have hneg := hprod.neg
+  have hpoint : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      (a z)⁻¹ - (b z)⁻¹ = -(((a z)⁻¹ * (a z - b z)) * (b z)⁻¹) := by
+    intro z hz
+    have ha_ne : a z ≠ 0 := by
+      exact norm_pos_iff.mp (lt_of_lt_of_le hδpos (hδa hz))
+    have hb_ne : b z ≠ 0 := by
+      exact norm_pos_iff.mp (lt_of_lt_of_le hδpos (hδb hz))
+    field_simp [ha_ne, hb_ne]
+    ring
+  constructor
+  · intro p hp
+    change ‖(a p)⁻¹ - (b p)⁻¹‖ ≤ invSubBoundConst δ Bd
+    rw [hpoint hp]
+    simpa [invSubBoundConst] using hneg.bounded hp
+  · intro p hp q hq
+    change ‖((a p)⁻¹ - (b p)⁻¹) - ((a q)⁻¹ - (b q)⁻¹)‖ ≤
+      invSubHolderConst δ Ha Hb Bd Hd * parabolicDistance p q ^ α
+    rw [hpoint hp, hpoint hq]
+    simpa [invSubHolderConst] using hneg.holder hp hq
 
 /-- Product differences inherit parabolic `C^{0,α}` control from one left factor, one right
 factor, and `C^{0,α}` controls of the two factor differences. -/
