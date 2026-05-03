@@ -1280,6 +1280,9 @@ RHS combining those terms, using finite-product, integer-scalar, reciprocal, and
 division closure. On the geometric side, the Levi-Civita local-frame Gram
 matrix layer now also turns pointwise Gram determinant nonvanishing into a
 positive determinant lower bound on compact subsets of a trivialization base.
+The parabolic companion `AnalyticPDE/Parabolic/LocalFrameGram.lean` bridges
+those compact time-space Gram determinant facts to parabolic inverse
+Gram-matrix control, including a spatial-Hölder entry-control variant.
 The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:

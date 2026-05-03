@@ -163,4 +163,7 @@ contractions, whole matrix-valued principal-part contractions `g^{ab} H_abij`,
 whole matrix-valued Ricci-coordinate quadratic Christoffel contractions, and a
 whole matrix-valued schematic local Ricci-DeTurck coordinate RHS combining
 those terms, using the finite-product, integer-scalar, reciprocal, and division
-closure layer.
+closure layer. The companion
+`RicciFlow/AnalyticPDE/Parabolic/LocalFrameGram.lean` module bridges compact
+time-space local-frame Gram determinant nonvanishing to parabolic inverse
+Gram-matrix control, including a spatial-Hölder entry-control variant.

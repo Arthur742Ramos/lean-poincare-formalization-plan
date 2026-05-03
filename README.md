@@ -378,7 +378,10 @@ packages the canonical stationary local solution attached to
   principal-part contractions `g^{ab} H_abij`, whole matrix-valued
   Ricci-coordinate quadratic Christoffel contractions, and a whole matrix-valued
   schematic local Ricci-DeTurck coordinate RHS combining those terms, from
-  entrywise control.
+  entrywise control.  The companion
+  `AnalyticPDE/Parabolic/LocalFrameGram.lean` module connects compact
+  time-space local-frame Gram determinant nonvanishing to parabolic inverse
+  Gram-matrix control, including a spatial-Hölder entry-control variant.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric
