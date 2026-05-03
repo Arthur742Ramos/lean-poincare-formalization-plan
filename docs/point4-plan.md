@@ -989,6 +989,10 @@ does the same for the full `(flow, tangent)` pair. The scalar-readout derivative
 domain now has the matching common-interval theorem
 `VariationalLocalFlowSolution.time_flow_tangent_apply_pair_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem`
 for `(t, flow, A(t)u, A(t)v)`.
+The common-subinterval layer now also exposes direct pointwise readouts for the
+local, continuous, full variational-pair, and scalar-readout conclusions, plus
+common-interval time-graph compatibility for `(t, flow, tangent)` and
+common-interval scalar-state compatibility for `(flow, A(t)u, A(t)v)`.
 These are the overlap/localization maps needed before chartwise solutions can be
 glued into a manifold-level flow. Base-flow uniqueness now also has overlap
 forms for `LocalFlowSolution` and `ContinuousLocalFlowSolution`: two packages

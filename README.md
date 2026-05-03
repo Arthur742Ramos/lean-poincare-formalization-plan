@@ -253,7 +253,9 @@ packages the canonical stationary local solution attached to
   radius-specialized endpoint forms; model-flow overlap uniqueness now also
   covers common closed subintervals of different ambient Picard intervals for
   local, continuous space-time, full variational `(flow, tangent)`, and
-  scalar-readout derivative-domain `(t, flow, A(t)u, A(t)v)` packages; encoded candidates in
+  scalar-readout derivative-domain `(t, flow, A(t)u, A(t)v)` packages, with
+  pointwise common-interval readouts and common time-graph/scalar-state
+  compatibility for chart gluing; encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The
   same state-set mechanism now also has a

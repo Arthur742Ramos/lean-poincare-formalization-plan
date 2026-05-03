@@ -415,6 +415,27 @@ theorem eqOn_common_Icc_of_lipschitzOnWith_of_mem
       hf_lip hα_mem' hβ_mem'
   simpa [α', β'] using hcommon
 
+/-- Pointwise common-subinterval overlap uniqueness for packaged local model
+flows. -/
+theorem flow_eq_of_lipschitzOnWith_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : LocalFlowSolution f (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow x t ∈ state t)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    α.flow x t = β.flow x t :=
+  α.eqOn_common_Icc_of_lipschitzOnWith_of_mem β hαtime hβtime hxα hxβ
+    htbase hf_lip hα_mem hβ_mem ht
+
 /-- Closed-interval uniqueness form for packaged local model flows.  This is the
 version needed when endpoint continuity is available from the within-interval
 ODE statements. -/
@@ -1144,6 +1165,27 @@ theorem eqOn_common_Icc_of_lipschitzOnWith_of_mem
   LocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_mem
     (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
     hαtime hβtime hxα hxβ htbase hf_lip hα_mem hβ_mem
+
+/-- Pointwise common-subinterval overlap uniqueness for continuous space-time
+local flows. -/
+theorem flow_eq_of_lipschitzOnWith_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : ContinuousLocalFlowSolution f (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : ContinuousLocalFlowSolution f (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ state t)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    α.flow (x, t) = β.flow (x, t) :=
+  α.eqOn_common_Icc_of_lipschitzOnWith_of_mem β hαtime hβtime hxα hxβ
+    htbase hf_lip hα_mem hβ_mem ht
 
 /-- Pointwise closed-interval overlap uniqueness for continuous space-time local
 flows. -/
@@ -3883,6 +3925,87 @@ theorem flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
       β' hxα hxβ htbase' hf_lip hα_base_mem' hβ_base_mem' hD_bound'
   simpa [α', β'] using hcommon
 
+/-- Pointwise common-subinterval uniqueness for the full variational pair
+`(flow, tangent)`. -/
+theorem flow_tangent_eq_of_lipschitzOnWith_opNorm_bound_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    (α.flow (x, t), α.tangent x t) = (β.flow (x, t), β.tangent x t) :=
+  α.flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    β hαtime hβtime hxα hxβ htbase hf_lip hα_base_mem hβ_base_mem hD_bound ht
+
+/-- Common-subinterval overlap uniqueness for the full operator
+derivative-domain tuple `(t, flow, tangent)`. -/
+theorem time_flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ KD) :
+    EqOn
+      (fun t : ℝ => (t, α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (t, β.flow (x, t), β.tangent x t))
+      (Icc a b) := by
+  have hpair :
+      EqOn
+        (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+        (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+        (Icc a b) :=
+    α.flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+      β hαtime hβtime hxα hxβ htbase hf_lip hα_base_mem hβ_base_mem hD_bound
+  intro t ht
+  exact Prod.ext rfl (hpair ht)
+
+/-- Pointwise common-subinterval uniqueness for the full operator
+derivative-domain tuple `(t, flow, tangent)`. -/
+theorem time_flow_tangent_eq_of_lipschitzOnWith_opNorm_bound_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    {t : ℝ} (ht : t ∈ Icc a b) :
+    (t, α.flow (x, t), α.tangent x t) = (t, β.flow (x, t), β.tangent x t) :=
+  α.time_flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    β hαtime hβtime hxα hxβ htbase hf_lip hα_base_mem hβ_base_mem hD_bound ht
+
 /-- Closed-interval overlap uniqueness for the full operator derivative-domain
 tuple `(t, flow, tangent)`. -/
 theorem time_flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
@@ -4170,6 +4293,95 @@ theorem time_flow_tangent_apply_pair_eqOn_common_Icc_of_lipschitzOnWith_opNorm_b
     (Prod.ext hflow
       (Prod.ext (congrArg (fun A : V →L[ℝ] V => A u) htangent)
         (congrArg (fun A : V →L[ℝ] V => A v) htangent)))
+
+/-- Common-subinterval overlap uniqueness for the scalar-readout state
+`(flow, A(t)u, A(t)v)` when the ambient Picard intervals may differ. -/
+theorem flow_tangent_apply_pair_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (u v : V) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t u, α.tangent x t v))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t u, β.tangent x t v))
+      (Icc a b) := by
+  have hpair :
+      EqOn
+        (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+        (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+        (Icc a b) :=
+    α.flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+      β hαtime hβtime hxα hxβ htbase hf_lip hα_base_mem hβ_base_mem hD_bound
+  intro t ht
+  have h := hpair ht
+  have hflow : α.flow (x, t) = β.flow (x, t) := congrArg Prod.fst h
+  have htangent : α.tangent x t = β.tangent x t := congrArg Prod.snd h
+  exact Prod.ext hflow
+    (Prod.ext (congrArg (fun A : V →L[ℝ] V => A u) htangent)
+      (congrArg (fun A : V →L[ℝ] V => A v) htangent))
+
+/-- Pointwise common-subinterval overlap uniqueness for the scalar-readout
+state `(flow, A(t)u, A(t)v)`. -/
+theorem flow_tangent_apply_pair_eq_of_lipschitzOnWith_opNorm_bound_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (u v : V) {t : ℝ} (ht : t ∈ Icc a b) :
+    (α.flow (x, t), α.tangent x t u, α.tangent x t v) =
+      (β.flow (x, t), β.tangent x t u, β.tangent x t v) :=
+  α.flow_tangent_apply_pair_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    β hαtime hβtime hxα hxβ htbase hf_lip hα_base_mem hβ_base_mem hD_bound u v ht
+
+/-- Pointwise common-subinterval overlap uniqueness for the full derivative-domain
+tuple `(t, flow, A(t)u, A(t)v)`. -/
+theorem time_flow_tangent_apply_pair_eq_of_lipschitzOnWith_opNorm_bound_of_mem_common_Icc
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (u v : V) {t : ℝ} (ht : t ∈ Icc a b) :
+    (t, α.flow (x, t), α.tangent x t u, α.tangent x t v) =
+      (t, β.flow (x, t), β.tangent x t u, β.tangent x t v) :=
+  α.time_flow_tangent_apply_pair_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
+    β hαtime hβtime hxα hxβ htbase hf_lip hα_base_mem hβ_base_mem hD_bound u v ht
 
 /-- Pointwise closed-interval overlap uniqueness for the full derivative-domain
 tuple `(t, flow, A(t)u, A(t)v)`. -/
