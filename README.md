@@ -318,7 +318,10 @@ packages the canonical stationary local solution attached to
   The analytic smooth-realization and interval candidate-encoding layers now
   preserve these prefixes as well: a smooth Banach realization restricts to a
   shorter Banach interval, and an interval Ricci-DeTurck candidate encoding
-  restricts to the corresponding shorter geometric candidate.
+  restricts to the corresponding shorter geometric candidate. The genuine
+  symmetric-carrier candidate encoding has the same shorter-terminal readout,
+  reusing the ambient smooth realization on the restricted symmetric Banach
+  interval.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
