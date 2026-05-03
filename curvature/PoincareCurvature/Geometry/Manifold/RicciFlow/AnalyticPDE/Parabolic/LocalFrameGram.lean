@@ -992,6 +992,131 @@ theorem localFrameGramMatrix_inv_christoffel_bounded_sub_le_const_of_spatial_hol
   · intro z hz a c
     exact hGbound a c ⟨z, hz, rfl⟩
 
+/-- Compact local-frame bridge for parabolic `C^{0,α}` control of inverse-Gram Christoffel-type
+array differences, comparing the geometric local-frame Gram matrix with an arbitrary comparison
+primitive input. -/
+theorem localFrameGramMatrix_inv_christoffel_sub_with_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C GH : ι → ι → ℝ} {DB DH : ι → ι → ι → ℝ} {ηG ηD : ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ℝ × M → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hDB : ∀ i j k, 0 ≤ DB i j k) (hDH : ∀ i j k, 0 ≤ DH i j k)
+    (hG : ∀ i j,
+      ParabolicC0AlphaWith (C i j) (GH i j) α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hN : ∀ i j, ParabolicC0AlphaWith (C i j) (GH i j) α
+      (fun z : ℝ × M => N z i j) K)
+    (hD : ∀ i j k,
+      ParabolicC0AlphaWith (DB i j k) (DH i j k) α
+        (fun z : ℝ × M => D z i j k) K)
+    (hEarr : ∀ i j k,
+      ParabolicC0AlphaWith (DB i j k) (DH i j k) α
+        (fun z : ℝ × M => Earr z i j k) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hηD : 0 ≤ ηD)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG)
+    (hDdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D z a c d - Earr z a c d‖ ≤ ηD) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvChristoffelArrayDiffBoundConst (𝕜 := ℝ) δ C DB ηD ηG)
+        (matrixInvChristoffelDiffHolderConst (𝕜 := ℝ) δ C GH DB DH)
+        α
+        (fun z : ℝ × M =>
+          (fun i j k =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) i l *
+                  (D z j k l + D z k j l - D z l j k)) -
+          (fun i j k =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι, ((N z)⁻¹ : Matrix ι ι ℝ) i l *
+                (Earr z j k l + Earr z k j l - Earr z l j k))) K := by
+  have hdetG_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det ≠ 0 := by
+    intro z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) e b (hKbase hz)
+  exact matrix_inv_christoffel_sub_with_of_isCompact_det_ne_zero
+    (K := K)
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (N := N) (D := D) (E := Earr)
+    hK hα hC_nonneg hGH hDB hDH hG hN hD hEarr hdetG_ne hdetN_ne
+    hηD hGdiff hDdiff
+
+/-- Spatial-Hölder Gram-entry variant of
+`localFrameGramMatrix_inv_christoffel_sub_with_of_timeSpace_isCompact`. -/
+theorem localFrameGramMatrix_inv_christoffel_sub_with_of_spatial_holder_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C GH : ι → ι → ℝ} {DB DH : ι → ι → ι → ℝ} {ηG ηD : ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ℝ × M → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ i j, 0 ≤ C i j) (hGH : ∀ i j, 0 ≤ GH i j)
+    (hDB : ∀ i j k, 0 ≤ DB i j k) (hDH : ∀ i j k, 0 ≤ DH i j k)
+    (hGbound : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j‖ ≤ C i j)
+    (hGholder : ∀ i j ⦃x : M⦄, x ∈ Prod.snd '' K → ∀ ⦃y : M⦄,
+      y ∈ Prod.snd '' K →
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b x i j -
+          CovariantDerivative.localFrameGramMatrix (I := I) e b y i j‖ ≤
+        GH i j * (dist x y) ^ α)
+    (hN : ∀ i j, ParabolicC0AlphaWith (C i j) (GH i j) α
+      (fun z : ℝ × M => N z i j) K)
+    (hD : ∀ i j k,
+      ParabolicC0AlphaWith (DB i j k) (DH i j k) α
+        (fun z : ℝ × M => D z i j k) K)
+    (hEarr : ∀ i j k,
+      ParabolicC0AlphaWith (DB i j k) (DH i j k) α
+        (fun z : ℝ × M => Earr z i j k) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hηD : 0 ≤ ηD)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ ηG)
+    (hDdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D z a c d - Earr z a c d‖ ≤ ηD) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvChristoffelArrayDiffBoundConst (𝕜 := ℝ) δ C DB ηD ηG)
+        (matrixInvChristoffelDiffHolderConst (𝕜 := ℝ) δ C GH DB DH)
+        α
+        (fun z : ℝ × M =>
+          (fun i j k =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) i l *
+                  (D z j k l + D z k j l - D z l j k)) -
+          (fun i j k =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι, ((N z)⁻¹ : Matrix ι ι ℝ) i l *
+                (Earr z j k l + Earr z k j l - Earr z l j k))) K := by
+  refine localFrameGramMatrix_inv_christoffel_sub_with_of_timeSpace_isCompact
+    (I := I) (E := E) e b hK hα hKbase hC_nonneg hGH hDB hDH ?_
+    hN hD hEarr hdetN_ne hηD hGdiff hDdiff
+  intro i j
+  exact ParabolicC0AlphaWith.of_snd_holder (s := K) (α := α)
+    (hGbound i j) (hGH i j) hα.le (hGholder i j)
+
 /-- If the local-frame Gram entries and the first- and second-derivative coefficient arrays have
 parabolic `C^{0,α}` control on a compact time-space set contained in a trivialization base, then
 the schematic local Ricci-DeTurck coordinate right-hand side has parabolic `C^{0,α}` control

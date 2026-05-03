@@ -4055,6 +4055,141 @@ theorem matrix_inv_christoffel_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
         exact matrix_inv_christoffel_entry_with (M := M) (D := D)
           hH hM hD hδpos hdet i j k
 
+/-- Holder constant for the difference of two inverse-Christoffel arrays, using the sum of the
+two individual inverse-Christoffel Holder constants. -/
+def matrixInvChristoffelDiffHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (B H : n → n → ℝ) (DB DH : n → n → n → ℝ) : ℝ :=
+  (∑ i : n, ∑ j : n, ∑ k : n,
+    matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ B H DB DH i j k) +
+  (∑ i : n, ∑ j : n, ∑ k : n,
+    matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ B H DB DH i j k)
+
+theorem matrixInvChristoffelDiffHolderConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {B H : n → n → ℝ}
+    {DB DH : n → n → n → ℝ} (hH : ∀ a b, 0 ≤ H a b) (hδpos : 0 < δ)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hDH : ∀ a b c, 0 ≤ DH a b c) :
+    0 ≤ matrixInvChristoffelDiffHolderConst (𝕜 := 𝕜) δ B H DB DH := by
+  exact add_nonneg
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        Finset.sum_nonneg fun k _hk =>
+          matrixInvChristoffelEntryHolderConst_nonneg
+            (𝕜 := 𝕜) hH hδpos hDB hDH i j k)
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        Finset.sum_nonneg fun k _hk =>
+          matrixInvChristoffelEntryHolderConst_nonneg
+            (𝕜 := 𝕜) hH hδpos hDB hDH i j k)
+
+/-- The difference of two inverse-Christoffel arrays has parabolic `C^{0,α}` control: the sup
+constant is the primitive-input bounded-difference constant and the Holder constant is the sum of
+the two standalone inverse-Christoffel Holder constants. -/
+theorem matrix_inv_christoffel_sub_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ} {B H : n → n → ℝ} {DB DH : n → n → n → ℝ}
+    {ηM ηD : ℝ} {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    (hH : ∀ a b, 0 ≤ H a b)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hDH : ∀ a b c, 0 ≤ DH a b c)
+    (hM : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => N z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) s)
+    (hE : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => E z a b c) s)
+    (hηD : 0 ≤ ηD)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ ηM)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaWith
+      (matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ B DB ηD ηM)
+      (matrixInvChristoffelDiffHolderConst (𝕜 := 𝕜) δ B H DB DH)
+      α
+      (fun z : ℝ × X =>
+        (fun i j k =>
+          (2 : 𝕜)⁻¹ *
+            ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+              (D z j k l + D z k j l - D z l j k)) -
+        (fun i j k =>
+          (2 : 𝕜)⁻¹ *
+            ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) i l *
+              (E z j k l + E z k j l - E z l j k))) s := by
+  have hbounded :
+      ParabolicBoundedWith
+        (matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ B DB ηD ηM)
+        (fun z : ℝ × X =>
+          (fun i j k =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+                (D z j k l + D z k j l - D z l j k)) -
+          (fun i j k =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) i l *
+                (E z j k l + E z k j l - E z l j k))) s := by
+    exact matrix_inv_christoffel_bounded_sub_le_const
+      (s := s) (δ := δ) (C := B) (DB := DB) (ηM := ηM) (ηD := ηD)
+      (fun z hz a b => (hM a b).bounded hz)
+      (fun z hz a b => (hN a b).bounded hz)
+      (fun z hz a b c => (hE a b c).bounded hz)
+      hηD hMdiff hDdiff hδpos hdetM hdetN
+  have hMD := matrix_inv_christoffel_with
+    (M := M) (D := D) hH hDB hDH hM hD hδpos hdetM
+  have hNE := matrix_inv_christoffel_with
+    (M := N) (D := E) hH hDB hDH hN hE hδpos hdetN
+  exact ⟨hbounded, by
+    simpa [matrixInvChristoffelDiffHolderConst] using hMD.holder.sub hNE.holder⟩
+
+/-- Compact-domain version of `matrix_inv_christoffel_sub_with`: pointwise nonvanishing of both
+metric determinants supplies one common determinant lower bound. -/
+theorem matrix_inv_christoffel_sub_with_of_isCompact_det_ne_zero {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {B H : n → n → ℝ} {DB DH : n → n → n → ℝ} {ηM ηD : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ a b, 0 ≤ B a b) (hH : ∀ a b, 0 ≤ H a b)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hDH : ∀ a b c, 0 ≤ DH a b c)
+    (hM : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => M z a b) K)
+    (hN : ∀ a b, ParabolicC0AlphaWith (B a b) (H a b) α (fun z => N z a b) K)
+    (hD : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => D z a b c) K)
+    (hE : ∀ a b c, ParabolicC0AlphaWith (DB a b c) (DH a b c) α
+      (fun z => E z a b c) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0)
+    (hηD : 0 ≤ ηD)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ‖M z - N z‖ ≤ ηM)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD) :
+    ∃ δ > 0,
+      ParabolicC0AlphaWith
+        (matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ B DB ηD ηM)
+        (matrixInvChristoffelDiffHolderConst (𝕜 := 𝕜) δ B H DB DH)
+        α
+        (fun z : ℝ × X =>
+          (fun i j k =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+                (D z j k l + D z k j l - D z l j k)) -
+          (fun i j k =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) i l *
+                (E z j k l + E z k j l - E z l j k))) K := by
+  have hMctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) K := by
+    intro a b
+    exact ⟨B a b, hB a b, H a b, hH a b, hM a b⟩
+  have hNctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) K := by
+    intro a b
+    exact ⟨B a b, hB a b, H a b, hH a b, hN a b⟩
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  exact ⟨δ, hδpos, matrix_inv_christoffel_sub_with
+    (M := M) (N := N) (D := D) (E := E)
+    hH hDB hDH hM hN hD hE hηD hMdiff hDdiff hδpos hdetM hdetN⟩
+
 /-- Compact-domain Christoffel-symbol type array closure from entrywise control and pointwise
 nonvanishing determinant. -/
 theorem matrix_inv_christoffel_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
