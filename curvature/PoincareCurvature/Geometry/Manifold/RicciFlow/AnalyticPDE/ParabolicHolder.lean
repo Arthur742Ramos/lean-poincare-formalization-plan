@@ -2,7 +2,7 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
-public import Mathlib.Analysis.Normed.Operator.Basic
+public import Mathlib.Analysis.Normed.Operator.NormedSpace
 public import Mathlib.Topology.MetricSpace.Basic
 public import Mathlib.Topology.MetricSpace.Cover
 public import Mathlib.Topology.MetricSpace.ProperSpace
@@ -2331,6 +2331,18 @@ theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCo
       mul_le_mul hLup (hv hp) (norm_nonneg _) hLup_nonneg
     _ = ‖L‖ * B * D := by ring
 
+/-- Applying an operator-valued function to a vector-valued function preserves sup-norm control. -/
+theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {A : ℝ × X → E →L[ℝ] F} {v : ℝ × X → E} {BA Bv : ℝ}
+    (hA : ParabolicBoundedWith BA A s) (hv : ParabolicBoundedWith Bv v s)
+    (hBA : 0 ≤ BA) :
+    ParabolicBoundedWith (BA * Bv) (fun z => A z (v z)) s := by
+  intro p hp
+  calc
+    ‖A p (v p)‖ ≤ ‖A p‖ * ‖v p‖ := ContinuousLinearMap.le_opNorm (A p) (v p)
+    _ ≤ BA * Bv := mul_le_mul (hA hp) (hv hp) (norm_nonneg _) hBA
+
 theorem image_subset_closedBall_zero (hu : ParabolicBoundedWith B u s) :
     u '' s ⊆ Metric.closedBall (0 : E) B := by
   rintro y ⟨p, hp, rfl⟩
@@ -2751,6 +2763,41 @@ theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCo
           (mul_le_mul hLup (hv.holder hp hq) (norm_nonneg _) hLup_nonneg)
           (mul_le_mul hLdiff (hv.bounded hq) (norm_nonneg _) hLdiff_nonneg)
       _ = (‖L‖ * (B * H₂ + B₂ * H)) * dα := by ring
+
+/-- Applying an operator-valued function to a vector-valued function preserves parabolic
+`C^{0,α}` control with the usual product-rule Holder constant. -/
+theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {A : ℝ × X → E →L[ℝ] F} {v : ℝ × X → E}
+    {BA HA Bv Hv : ℝ}
+    (hA : ParabolicC0AlphaWith BA HA α A s)
+    (hv : ParabolicC0AlphaWith Bv Hv α v s)
+    (hBA : 0 ≤ BA) :
+    ParabolicC0AlphaWith (BA * Bv) (BA * Hv + Bv * HA) α
+      (fun z => A z (v z)) s := by
+  constructor
+  · exact hA.bounded.continuousLinearMap_apply hv.bounded hBA
+  · intro p hp q hq
+    let dα := (parabolicDistance p q) ^ α
+    have hsplit :
+        A p (v p) - A q (v q) =
+          A p (v p - v q) + (A p - A q) (v q) := by
+      simp [map_sub]
+    have hHAd_nonneg : 0 ≤ HA * dα :=
+      (norm_nonneg (A p - A q)).trans (hA.holder hp hq)
+    calc
+      ‖A p (v p) - A q (v q)‖ =
+          ‖A p (v p - v q) + (A p - A q) (v q)‖ := by rw [hsplit]
+      _ ≤ ‖A p (v p - v q)‖ + ‖(A p - A q) (v q)‖ := norm_add_le _ _
+      _ ≤ ‖A p‖ * ‖v p - v q‖ + ‖A p - A q‖ * ‖v q‖ :=
+        add_le_add
+          (ContinuousLinearMap.le_opNorm (A p) (v p - v q))
+          (ContinuousLinearMap.le_opNorm (A p - A q) (v q))
+      _ ≤ BA * (Hv * dα) + (HA * dα) * Bv :=
+        add_le_add
+          (mul_le_mul (hA.bounded hp) (hv.holder hp hq) (norm_nonneg _) hBA)
+          (mul_le_mul (hA.holder hp hq) (hv.bounded hq) (norm_nonneg _) hHAd_nonneg)
+      _ = (BA * Hv + Bv * HA) * dα := by ring
 
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ} {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicC0AlphaWith B H α u s)
@@ -3233,6 +3280,19 @@ theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCo
   · exact mul_nonneg (norm_nonneg L)
       (add_nonneg (mul_nonneg hB₁ hH₂) (mul_nonneg hB₂ hH₁))
   · exact hBH₁.continuousLinearMap₂ L hBH₂ hB₁
+
+/-- Applying an operator-valued function to a vector-valued function preserves existential
+parabolic `C^{0,α}` control. -/
+theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {A : ℝ × X → E →L[ℝ] F} {v : ℝ × X → E}
+    (hA : ParabolicC0AlphaOn α A s) (hv : ParabolicC0AlphaOn α v s) :
+    ParabolicC0AlphaOn α (fun z => A z (v z)) s := by
+  rcases hA with ⟨BA, hBA, HA, hHA, hABH⟩
+  rcases hv with ⟨Bv, hBv, Hv, hHv, hvBH⟩
+  refine ⟨BA * Bv, mul_nonneg hBA hBv, BA * Hv + Bv * HA,
+    add_nonneg (mul_nonneg hBA hHv) (mul_nonneg hBv hHA), ?_⟩
+  exact hABH.continuousLinearMap_apply hvBH hBA
 
 theorem time_slice_half_exponent (h : ParabolicC0AlphaOn α u s) :
     ∃ C ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
