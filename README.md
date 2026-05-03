@@ -399,7 +399,8 @@ packages the canonical stationary local solution attached to
   compact-domain inverse,
   inverse-action, inverse-bilinear, and matrix-valued RHS variants, plus
   entrywise and whole-valued finite matrix transpose, pointwise
-  symmetrization, matrix-product, matrix-vector/vector-matrix, and
+  symmetrization, matrix-product, explicit entrywise/whole-matrix
+  product-difference estimates, matrix-vector/vector-matrix, and
   inverse-matrix vector-product closure, whole finite vector/matrix and
   inverse-matrix packages, finite vector dot products, and bilinear contractions
   through matrices or inverse matrices, including explicit bounded Holder entry

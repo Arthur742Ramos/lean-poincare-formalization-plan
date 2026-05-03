@@ -1047,6 +1047,7 @@ uniform determinant lower bound, including compact-domain inverse-entry,
 inverse-action, inverse-bilinear, and schematic matrix-valued RHS variants. It
 also proves entrywise and whole-valued closure
 for finite matrix transpose, pointwise symmetrization, matrix products,
+explicit entrywise/whole-matrix product-difference estimates,
 matrix-vector and vector-matrix products, including inverse-matrix vector
 products on both sides under the same determinant lower bound, whole finite
 vector/matrix and inverse-matrix packages, finite vector dot products, and

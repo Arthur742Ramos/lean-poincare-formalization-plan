@@ -1237,6 +1237,119 @@ theorem matrix_mul {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n] [Normed
     ParabolicC0AlphaOn α (fun z => M z * N z) s :=
   matrix_of_entries fun i j => matrix_mul_entry hM hN i j
 
+/-- Quantitative sup constant for one entry of the difference of two finite matrix products. -/
+def matrixMulEntrySubBoundConst {l m n : Type*} [Fintype m]
+    (BM : l → m → ℝ) (BN' : m → n → ℝ) (BMd : l → m → ℝ)
+    (BNd : m → n → ℝ) (i : l) (j : n) : ℝ :=
+  Finset.univ.sum fun k : m => BM i k * BNd k j + BMd i k * BN' k j
+
+/-- Quantitative Holder constant for one entry of the difference of two finite matrix products. -/
+def matrixMulEntrySubHolderConst {l m n : Type*} [Fintype m]
+    (BM HM : l → m → ℝ) (BN' HN' : m → n → ℝ) (BMd HMd : l → m → ℝ)
+    (BNd HNd : m → n → ℝ) (i : l) (j : n) : ℝ :=
+  Finset.univ.sum fun k : m =>
+    (BM i k * HNd k j + BNd k j * HM i k) +
+      (BMd i k * HN' k j + BN' k j * HMd i k)
+
+theorem matrixMulEntrySubBoundConst_nonneg {l m n : Type*} [Fintype m]
+    {BM : l → m → ℝ} {BN' : m → n → ℝ} {BMd : l → m → ℝ}
+    {BNd : m → n → ℝ} (hBM : ∀ i k, 0 ≤ BM i k)
+    (hBN' : ∀ k j, 0 ≤ BN' k j) (hBMd : ∀ i k, 0 ≤ BMd i k)
+    (hBNd : ∀ k j, 0 ≤ BNd k j) (i : l) (j : n) :
+    0 ≤ matrixMulEntrySubBoundConst BM BN' BMd BNd i j := by
+  simpa [matrixMulEntrySubBoundConst] using
+    (Finset.sum_nonneg fun k _hk =>
+      add_nonneg (mul_nonneg (hBM i k) (hBNd k j)) (mul_nonneg (hBMd i k) (hBN' k j)))
+
+theorem matrixMulEntrySubHolderConst_nonneg {l m n : Type*} [Fintype m]
+    {BM HM : l → m → ℝ} {BN' HN' : m → n → ℝ} {BMd HMd : l → m → ℝ}
+    {BNd HNd : m → n → ℝ} (hBM : ∀ i k, 0 ≤ BM i k)
+    (hHM : ∀ i k, 0 ≤ HM i k) (hBN' : ∀ k j, 0 ≤ BN' k j)
+    (hHN' : ∀ k j, 0 ≤ HN' k j) (hBMd : ∀ i k, 0 ≤ BMd i k)
+    (hHMd : ∀ i k, 0 ≤ HMd i k) (hBNd : ∀ k j, 0 ≤ BNd k j)
+    (hHNd : ∀ k j, 0 ≤ HNd k j) (i : l) (j : n) :
+    0 ≤ matrixMulEntrySubHolderConst BM HM BN' HN' BMd HMd BNd HNd i j := by
+  simpa [matrixMulEntrySubHolderConst] using
+    (Finset.sum_nonneg fun k _hk =>
+      add_nonneg
+        (add_nonneg (mul_nonneg (hBM i k) (hHNd k j))
+          (mul_nonneg (hBNd k j) (hHM i k)))
+        (add_nonneg (mul_nonneg (hBMd i k) (hHN' k j))
+          (mul_nonneg (hBN' k j) (hHMd i k))))
+
+/-- One entry of the difference of two finite matrix products has an explicit bounded parabolic
+`C^{0,α}` estimate from one left factor, one right factor, and factor-difference estimates. -/
+theorem matrix_mul_entry_sub_with {l m n A : Type*} [Fintype m] [NormedRing A]
+    {BM HM : l → m → ℝ} {BN' HN' : m → n → ℝ} {BMd HMd : l → m → ℝ}
+    {BNd HNd : m → n → ℝ}
+    {M M' : ℝ × X → Matrix l m A} {N N' : ℝ × X → Matrix m n A}
+    (hM : ∀ i k, ParabolicC0AlphaWith (BM i k) (HM i k) α
+      (fun z => M z i k) s)
+    (hN' : ∀ k j, ParabolicC0AlphaWith (BN' k j) (HN' k j) α
+      (fun z => N' z k j) s)
+    (hMdiff : ∀ i k, ParabolicC0AlphaWith (BMd i k) (HMd i k) α
+      (fun z => M z i k - M' z i k) s)
+    (hNdiff : ∀ k j, ParabolicC0AlphaWith (BNd k j) (HNd k j) α
+      (fun z => N z k j - N' z k j) s)
+    (hBM : ∀ i k, 0 ≤ BM i k) (hBMd : ∀ i k, 0 ≤ BMd i k) (i : l) (j : n) :
+    ParabolicC0AlphaWith
+      (matrixMulEntrySubBoundConst BM BN' BMd BNd i j)
+      (matrixMulEntrySubHolderConst BM HM BN' HN' BMd HMd BNd HNd i j)
+      α (fun z => (M z * N z - M' z * N' z) i j) s := by
+  classical
+  simpa [Matrix.mul_apply, matrixMulEntrySubBoundConst, matrixMulEntrySubHolderConst] using
+    (ParabolicC0AlphaWith.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset m))
+      (Bu := fun k => BM i k) (Hu := fun k => HM i k)
+      (Bv := fun k => BN' k j) (Hv := fun k => HN' k j)
+      (Bdu := fun k => BMd i k) (Hdu := fun k => HMd i k)
+      (Bdv := fun k => BNd k j) (Hdv := fun k => HNd k j)
+      (u := fun k z => M z i k) (u' := fun k z => M' z i k)
+      (v := fun k z => N z k j) (v' := fun k z => N' z k j)
+      (fun k _hk => hM i k) (fun k _hk => hN' k j)
+      (fun k _hk => hMdiff i k) (fun k _hk => hNdiff k j)
+      (fun k _hk => hBM i k) (fun k _hk => hBMd i k))
+
+/-- Differences of finite matrix products have an explicit matrix-valued bounded parabolic
+`C^{0,α}` estimate from entrywise factor and factor-difference estimates. -/
+theorem matrix_mul_sub_with {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n]
+    [NormedRing A] {BM HM : l → m → ℝ} {BN' HN' : m → n → ℝ}
+    {BMd HMd : l → m → ℝ} {BNd HNd : m → n → ℝ}
+    {M M' : ℝ × X → Matrix l m A} {N N' : ℝ × X → Matrix m n A}
+    (hBM : ∀ i k, 0 ≤ BM i k) (hHM : ∀ i k, 0 ≤ HM i k)
+    (hBN' : ∀ k j, 0 ≤ BN' k j) (hHN' : ∀ k j, 0 ≤ HN' k j)
+    (hBMd : ∀ i k, 0 ≤ BMd i k) (hHMd : ∀ i k, 0 ≤ HMd i k)
+    (hBNd : ∀ k j, 0 ≤ BNd k j) (hHNd : ∀ k j, 0 ≤ HNd k j)
+    (hM : ∀ i k, ParabolicC0AlphaWith (BM i k) (HM i k) α
+      (fun z => M z i k) s)
+    (hN' : ∀ k j, ParabolicC0AlphaWith (BN' k j) (HN' k j) α
+      (fun z => N' z k j) s)
+    (hMdiff : ∀ i k, ParabolicC0AlphaWith (BMd i k) (HMd i k) α
+      (fun z => M z i k - M' z i k) s)
+    (hNdiff : ∀ k j, ParabolicC0AlphaWith (BNd k j) (HNd k j) α
+      (fun z => N z k j - N' z k j) s) :
+    ParabolicC0AlphaWith
+      (∑ i : l, ∑ j : n, matrixMulEntrySubBoundConst BM BN' BMd BNd i j)
+      (∑ i : l, ∑ j : n,
+        matrixMulEntrySubHolderConst BM HM BN' HN' BMd HMd BNd HNd i j)
+      α (fun z => M z * N z - M' z * N' z) s := by
+  refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      matrixMulEntrySubBoundConst_nonneg hBM hBN' hBMd hBNd i j
+  · intro i
+    exact Finset.sum_nonneg fun j _hj =>
+      matrixMulEntrySubHolderConst_nonneg hBM hHM hBN' hHN' hBMd hHMd hBNd hHNd i j
+  · intro i
+    refine ParabolicC0AlphaWith.pi ?_ ?_ ?_
+    · intro j
+      exact matrixMulEntrySubBoundConst_nonneg hBM hBN' hBMd hBNd i j
+    · intro j
+      exact matrixMulEntrySubHolderConst_nonneg hBM hHM hBN' hHN' hBMd hHMd hBNd hHNd i j
+    · intro j
+      exact matrix_mul_entry_sub_with (M := M) (M' := M') (N := N) (N' := N')
+        hM hN' hMdiff hNdiff hBM hBMd i j
+
 /-- Entries of finite matrix products are pointwise Lipschitz on bounded left/right factors. -/
 theorem matrix_mul_entry_norm_sub_le {l m n A : Type*} [Fintype m] [NormedRing A]
     {BM : l → m → ℝ} {BN : m → n → ℝ}
