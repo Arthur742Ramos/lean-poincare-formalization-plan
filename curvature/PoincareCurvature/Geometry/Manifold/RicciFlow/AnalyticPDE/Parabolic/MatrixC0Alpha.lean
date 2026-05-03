@@ -4820,6 +4820,31 @@ theorem matrix_inv_bilinear_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fin
     ⟨δ, hδpos, hdet⟩
   exact matrix_inv_bilinear_entry hv hM hw hδpos hdet
 
+/-- Compact-domain finite-family inverse-bilinear contraction closure from entrywise vector and
+matrix controls, with one determinant lower bound shared by the family. -/
+theorem matrix_inv_bilinear_entry_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {v : ι → ℝ × X → n → 𝕜} {M : ι → ℝ × X → Matrix n n 𝕜}
+    {w : ι → ℝ × X → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hv : ∀ a i, ParabolicC0AlphaOn α (fun z => v a z i) K)
+    (hM : ∀ a i j, ParabolicC0AlphaOn α (fun z => M a z i j) K)
+    (hw : ∀ a j, ParabolicC0AlphaOn α (fun z => w a z j) K)
+    (hdet_ne : ∀ a ⦃z : ℝ × X⦄, z ∈ K → (M a z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ a ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M a z).det‖) ∧
+      ∀ a,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × X => ∑ i : n, v a z i * ((M a z)⁻¹).mulVec (w a z) i) K := by
+  rcases matrix_det_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) hK hα hM hdet_ne with
+    ⟨δ, hδpos, hdet⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  intro a
+  exact matrix_inv_bilinear_entry
+    (M := M a) (v := v a) (w := w a) (hv a) (hM a) (hw a) hδpos (hdet a)
+
 /-- Compact-domain quantitative bilinear contraction through an inverse matrix, from entrywise
 control and pointwise nonvanishing determinant. -/
 theorem matrix_inv_bilinear_entry_with_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
