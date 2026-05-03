@@ -3697,12 +3697,11 @@ theorem matrix_mulVec_entry {m n A : Type*} [Fintype n] [NormedRing A]
     (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s)
     (hv : ∀ j, ParabolicC0AlphaOn α (fun z => v z j) s) (i : m) :
     ParabolicC0AlphaOn α (fun z => (M z).mulVec (v z) i) s := by
-  have hsum : ParabolicC0AlphaOn α (fun z => ∑ j : n, M z i j * v z j) s := by
-    simpa using
-      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
-        (S := (Finset.univ : Finset n))
-        (u := fun j z => M z i j * v z j)
-        (fun j _hj => (hM i j).mul (hv j)))
+  have hsum : ParabolicC0AlphaOn α (fun z => ∑ j : n, M z i j * v z j) s :=
+    ParabolicC0AlphaOn.finset_sum_mul (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset n))
+      (u := fun j z => M z i j) (v := fun j z => v z j)
+      (fun j _hj => hM i j) (fun j _hj => hv j)
   simpa [Matrix.mulVec] using hsum
 
 /-- Matrix-vector products preserve parabolic `C^{0,α}` control from entrywise matrix control and
@@ -3756,12 +3755,12 @@ theorem matrix_mulVec_entry_with {m n A : Type*} [Fintype n] [NormedRing A]
       α (fun z => (M z).mulVec (v z) i) s := by
   classical
   simpa [Matrix.mulVec, matrixMulVecEntryBoundConst, matrixMulVecEntryHolderConst] using
-    (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+    (ParabolicC0AlphaWith.finset_sum_mul (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset n))
-      (B := fun j => BM i j * Bv j)
-      (H := fun j => BM i j * Hv j + Bv j * HM i j)
-      (u := fun j z => M z i j * v z j)
-      (fun j _hj => (hM i j).mul (hv j) (hBM i j)))
+      (Bu := fun j => BM i j) (Hu := fun j => HM i j)
+      (Bv := fun j => Bv j) (Hv := fun j => Hv j)
+      (u := fun j z => M z i j) (v := fun j z => v z j)
+      (fun j _hj => hM i j) (fun j _hj => hv j) (fun j _hj => hBM i j))
 
 /-- Finite matrix-vector products have an explicit vector-valued bounded parabolic `C^{0,α}`
 estimate. -/
@@ -3894,12 +3893,11 @@ theorem matrix_vecMul_entry {m n A : Type*} [Fintype m] [NormedRing A]
     (hv : ∀ i, ParabolicC0AlphaOn α (fun z => v z i) s)
     (hM : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) s) (j : n) :
     ParabolicC0AlphaOn α (fun z => Matrix.vecMul (v z) (M z) j) s := by
-  have hsum : ParabolicC0AlphaOn α (fun z => ∑ i : m, v z i * M z i j) s := by
-    simpa using
-      (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
-        (S := (Finset.univ : Finset m))
-        (u := fun i z => v z i * M z i j)
-        (fun i _hi => (hv i).mul (hM i j)))
+  have hsum : ParabolicC0AlphaOn α (fun z => ∑ i : m, v z i * M z i j) s :=
+    ParabolicC0AlphaOn.finset_sum_mul (X := X) (α := α) (s := s)
+      (S := (Finset.univ : Finset m))
+      (u := fun i z => v z i) (v := fun i z => M z i j)
+      (fun i _hi => hv i) (fun i _hi => hM i j)
   simpa [Matrix.vecMul] using hsum
 
 /-- Vector-matrix products preserve parabolic `C^{0,α}` control from componentwise vector control
@@ -3953,12 +3951,12 @@ theorem matrix_vecMul_entry_with {m n A : Type*} [Fintype m] [NormedRing A]
       α (fun z => Matrix.vecMul (v z) (M z) j) s := by
   classical
   simpa [Matrix.vecMul, matrixVecMulEntryBoundConst, matrixVecMulEntryHolderConst] using
-    (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+    (ParabolicC0AlphaWith.finset_sum_mul (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset m))
-      (B := fun i => Bv i * BM i j)
-      (H := fun i => Bv i * HM i j + BM i j * Hv i)
-      (u := fun i z => v z i * M z i j)
-      (fun i _hi => (hv i).mul (hM i j) (hBv i)))
+      (Bu := fun i => Bv i) (Hu := fun i => Hv i)
+      (Bv := fun i => BM i j) (Hv := fun i => HM i j)
+      (u := fun i z => v z i) (v := fun i z => M z i j)
+      (fun i _hi => hv i) (fun i _hi => hM i j) (fun i _hi => hBv i))
 
 /-- Finite vector-matrix products have an explicit vector-valued bounded parabolic `C^{0,α}`
 estimate. -/
@@ -4403,10 +4401,10 @@ theorem vector_dot_entry {n A : Type*} [Fintype n] [NormedRing A]
     (hw : ∀ i, ParabolicC0AlphaOn α (fun z => w z i) s) :
     ParabolicC0AlphaOn α (fun z => ∑ i : n, v z i * w z i) s := by
   simpa using
-    (ParabolicC0AlphaOn.sum (X := X) (α := α) (s := s)
+    (ParabolicC0AlphaOn.finset_sum_mul (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset n))
-      (u := fun i z => v z i * w z i)
-      (fun i _hi => (hv i).mul (hw i)))
+      (u := fun i z => v z i) (v := fun i z => w z i)
+      (fun i _hi => hv i) (fun i _hi => hw i))
 
 /-- Quantitative sup constant for a finite dot product. -/
 def vectorDotBoundConst {n : Type*} [Fintype n] (Bv Bw : n → ℝ) : ℝ :=
@@ -4440,12 +4438,12 @@ theorem vector_dot_with {n A : Type*} [Fintype n] [NormedRing A]
       α (fun z => ∑ i : n, v z i * w z i) s := by
   classical
   simpa [vectorDotBoundConst, vectorDotHolderConst] using
-    (ParabolicC0AlphaWith.sum (X := X) (α := α) (s := s)
+    (ParabolicC0AlphaWith.finset_sum_mul (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset n))
-      (B := fun i => Bv i * Bw i)
-      (H := fun i => Bv i * Hw i + Bw i * Hv i)
-      (u := fun i z => v z i * w z i)
-      (fun i _hi => (hv i).mul (hw i) (hBv i)))
+      (Bu := fun i => Bv i) (Hu := fun i => Hv i)
+      (Bv := fun i => Bw i) (Hv := fun i => Hw i)
+      (u := fun i z => v z i) (v := fun i z => w z i)
+      (fun i _hi => hv i) (fun i _hi => hw i) (fun i _hi => hBv i))
 
 /-- Quantitative sup constant for the difference of two finite dot products. -/
 def vectorDotSubBoundConst {n : Type*} [Fintype n]
