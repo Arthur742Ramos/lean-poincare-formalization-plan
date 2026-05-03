@@ -2274,6 +2274,107 @@ theorem matrix_inv_christoffel_entry_norm_sub_le_array_const {n 𝕜 : Type*} [F
           (Finset.mem_univ i)
   exact hentry.trans (hle_sum.trans (by rfl))
 
+/-- Function-level bounded-difference estimate for the finite inverse-Christoffel array. -/
+theorem matrix_inv_christoffel_bounded_sub_le_const {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {ηM ηD : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hηD : 0 ≤ ηD)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ ηM)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicBoundedWith
+      (matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ηM)
+      (fun z : ℝ × X =>
+        (fun i j k =>
+          (2 : 𝕜)⁻¹ *
+            ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+              (D z j k l + D z k j l - D z l j k)) -
+        (fun i j k =>
+          (2 : 𝕜)⁻¹ *
+            ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) i l *
+              (E z j k l + E z k j l - E z l j k))) s := by
+  classical
+  intro z hz
+  let Γ : n → n → n → 𝕜 := fun i j k =>
+    (2 : 𝕜)⁻¹ *
+      ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+        (D z j k l + D z k j l - D z l j k)
+  let Λ : n → n → n → 𝕜 := fun i j k =>
+    (2 : 𝕜)⁻¹ *
+      ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) i l *
+        (E z j k l + E z k j l - E z l j k)
+  have hDB_nonneg : ∀ a b c, 0 ≤ DB a b c := by
+    intro a b c
+    exact (norm_nonneg _).trans (hE hz a b c)
+  have hηM : 0 ≤ ηM := (norm_nonneg _).trans (hMdiff hz)
+  have htarget_nonneg :
+      0 ≤ matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ηM :=
+    matrixInvChristoffelArrayDiffBoundConst_nonneg
+      (𝕜 := 𝕜) hδpos hDB_nonneg hηD hηM
+  have hentry : ∀ i j k,
+      ‖Γ i j k - Λ i j k‖ ≤
+        matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ηM := by
+    intro i j k
+    have hbase :=
+      matrix_inv_christoffel_entry_norm_sub_le_array_const
+        (δ := δ) (C := C) (DB := DB) (ηD := ηD)
+        (M z) (N z) (D z) (E z) (hM hz) (hN hz) (hE hz)
+        hηD (hDdiff hz) hδpos (hdetM hz) (hdetN hz) i j k
+    exact hbase.trans
+      (matrixInvChristoffelArrayDiffBoundConst_mono_right
+        (𝕜 := 𝕜) hδpos hDB_nonneg (hMdiff hz))
+  change ‖Γ - Λ‖ ≤ matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ηM
+  exact (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun i =>
+    (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun j =>
+      (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun k => hentry i j k
+
+/-- Compact-domain version of `matrix_inv_christoffel_bounded_sub_le_const`: pointwise
+nonvanishing of both metric determinants supplies one common determinant lower bound. -/
+theorem matrix_inv_christoffel_bounded_sub_le_const_of_isCompact_det_ne_zero {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {C : n → n → ℝ} {DB : n → n → n → ℝ} {ηM ηD : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) K)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) K)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (N z).det ≠ 0)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hηD : 0 ≤ ηD)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ‖M z - N z‖ ≤ ηM)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ K → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ηM)
+        (fun z : ℝ × X =>
+          (fun i j k =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) i l *
+                (D z j k l + D z k j l - D z l j k)) -
+          (fun i j k =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((N z)⁻¹ : Matrix n n 𝕜) i l *
+                (E z j k l + E z k j l - E z l j k))) K := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, ?_⟩
+  exact matrix_inv_christoffel_bounded_sub_le_const
+    (s := K) (δ := δ) (C := C) (DB := DB) (ηM := ηM) (ηD := ηD)
+    hM hN hE hηD hMdiff hDdiff hδpos hdetM hdetN
+
 theorem matrix_inv_christoffel_entry_norm_le_bound {n 𝕜 : Type*} [Fintype n]
     [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
     {DB : n → n → n → ℝ} (M : Matrix n n 𝕜) (D : n → n → n → 𝕜)

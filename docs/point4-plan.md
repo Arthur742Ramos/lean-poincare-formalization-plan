@@ -1286,7 +1286,9 @@ inverse-principal entry Lipschitz, bounded Holder entry/matrix estimates, and
 inverse-principal contraction bounded-difference control with a compact-domain
 determinant-lower-bound variant, inverse-Christoffel
 derivative/metric-side and array-level Lipschitz constants,
-inverse-Christoffel bounded Holder entry/array estimates, and
+inverse-Christoffel function-level bounded-difference control with a
+compact-domain determinant-lower-bound variant, inverse-Christoffel bounded
+Holder entry/array estimates, and
 quadratic-Christoffel matrix-norm Lipschitz and bounded Holder entry/matrix
 estimates, supplied-Christoffel schematic bounded Holder entry/matrix estimates,
 primitive-input schematic bounded Holder entry/matrix estimates, plus
