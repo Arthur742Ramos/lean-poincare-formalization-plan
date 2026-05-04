@@ -5952,6 +5952,48 @@ theorem exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDeri
     hstrict'.mem_toOpenPartialHomeomorph_source,
     hstrict'.image_mem_toOpenPartialHomeomorph_target⟩
 
+/-- C¹-style common-subinterval inverse-function bridge: ordinary spatial
+derivatives near `x`, with derivative `α.tangent y t`, and continuity of this
+derivative map at `x` imply the neighborhood mapping equality for the time
+slice on a visible common open interval. -/
+theorem flow_timeSlice_map_nhds_eq_common_Ioo_of_eventually_hasFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hder : ∀ᶠ y in 𝓝 x,
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) x) :
+    Filter.map (fun y : V => α.flow (y, t)) (𝓝 x) = 𝓝 (α.flow (x, t)) :=
+  α.flow_timeSlice_map_nhds_eq_common_Ioo_of_hasStrictFDerivAt
+    htime htbase hx ht hD_bound
+    (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
+
+/-- C¹-style common-subinterval open-partial-homeomorphism bridge for a time
+slice: ordinary spatial derivatives near `x` plus continuity of the derivative
+map give the strict differentiability input needed by the local inverse theorem
+on a visible common open interval. -/
+theorem exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_eventually_hasFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hder : ∀ᶠ y in 𝓝 x,
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) x) :
+    ∃ φ : OpenPartialHomeomorph V V,
+      (φ : V → V) = (fun y : V => α.flow (y, t)) ∧
+        x ∈ φ.source ∧ α.flow (x, t) ∈ φ.target :=
+  α.exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDerivAt
+    htime htbase hx ht hD_bound
+    (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
+
 /-- Product-Picard convex state-tube criterion for the common-subinterval
 neighborhood-map readout of a forward time slice.  The convex-state hypotheses
 prove strict spatial differentiability on the forward Picard interval, while

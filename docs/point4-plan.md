@@ -1137,6 +1137,12 @@ the time-slice map is supplied and identified with the variational tangent map,
 mapping equality and
 `exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo` packages
 the corresponding local open partial homeomorphism, with common-`Ioo` variants.
+The common-`Ioo` inverse-function readouts now also have the same C¹-style entry
+point as the single-interval route:
+`flow_timeSlice_map_nhds_eq_common_Ioo_of_eventually_hasFDerivAt` and
+`exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_eventually_hasFDerivAt`
+derive the strict derivative input from ordinary nearby spatial derivatives
+and continuity of `y ↦ α.tangent y t`.
 Product Picard convex-state hypotheses, the state-preserving closed-ball
 estimate specialization, and the componentwise closed-ball continuity estimate
 packages now feed those common-`Ioo` time-slice neighborhood-map and local
