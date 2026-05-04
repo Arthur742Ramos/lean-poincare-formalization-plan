@@ -1184,7 +1184,9 @@ now discharge the convex-state membership hypothesis from the product Picard
 state ball and leave only closed-ball estimates for `Df`, Lipschitz `Df`, and
 the state-restricted derivative theorem for `f`. Matching `..._nnnorm_estimates...`
 variants consume the usual `‖Df‖₊ ≤ BD` closed-ball estimate on `Icc` and derive
-the real norm bounds and forward-interval restrictions internally.
+the real norm bounds and forward-interval restrictions internally; the
+`..._of_le_radius` form matches the existing product Picard radius hypothesis
+`r ≤ R`.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
