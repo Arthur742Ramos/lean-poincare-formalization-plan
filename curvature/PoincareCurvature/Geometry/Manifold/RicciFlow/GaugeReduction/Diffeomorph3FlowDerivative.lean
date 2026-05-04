@@ -1546,6 +1546,277 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_picardIccChartDerivative
       (I := I) (M := M) (hchart sol)
   simpa [htimeSet sol] using h
 
+/-- Fixed-IVP closed-Picard fixed-chart ODE data gives ordinary chart-ODE data
+on the chosen open solution time set. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hfixed : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn (I := I) (M := M)
+        (maps3 sol)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background
+        (chartCenter sol) (Icc (tmin sol) (tmax sol))) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAt
+      (I := I) (M := M) ivp maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccChartDerivative
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+    tmin tmax htimeSet
+    (fun sol ↦
+      Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.toChartDerivativeOn
+        (I := I) (M := M) (hfixed sol))
+
+/-- Fixed-IVP closed-Picard fixed-chart ODE data gives ordinary primitive
+derivative data on the chosen open solution time set. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_picardIccFixedChartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hfixed : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn (I := I) (M := M)
+        (maps3 sol)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background
+        (chartCenter sol) (Icc (tmin sol) (tmax sol))) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
+      (I := I) (M := M) ivp maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_chartDerivativeAt
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+    (chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative
+      (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+      chartCenter tmin tmax htimeSet hfixed)
+
+/-- Fixed-IVP closed-Picard fixed-chart ODE data for model vector fields gives
+ordinary chart-ODE data on the chosen open solution time set once those model
+fields are identified with the intrinsic DeTurck gauge fields along the
+candidate flows. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative_of_vectorField_eq
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (Y : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hmem : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (maps3 sol t) x ∈ (extChartAt I (chartCenter sol t x)).source)
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (fun τ : ℝ ↦ (maps3 sol τ) x) ⁻¹'
+            (extChartAt I (chartCenter sol t x)).source ∈
+          𝓝[Icc (tmin sol) (tmax sol)] t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (chartCenter sol t x)) ((maps3 sol τ) x))
+          (tangentCoordChange I ((maps3 sol t) x) (chartCenter sol t x)
+            ((maps3 sol t) x) ((Y sol) t ((maps3 sol t) x)))
+          (Icc (tmin sol) (tmax sol)) t)
+    (hY : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (Y sol) t ((maps3 sol t) x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background t ((maps3 sol t) x)) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAt
+      (I := I) (M := M) ivp maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+    chartCenter tmin tmax htimeSet
+    (fun sol ↦
+      Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.of_vectorField_eq
+        (I := I) (M := M) (hmem sol) (hsource sol) (hderiv sol) (hY sol))
+
+/-- Fixed-IVP closed-Picard fixed-chart ODE data for model vector fields gives
+ordinary primitive derivative data on the chosen open solution time set once
+those model fields are identified with the intrinsic DeTurck gauge fields along
+the candidate flows. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_picardIccFixedChartDerivative_of_vectorField_eq
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (Y : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hmem : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (maps3 sol t) x ∈ (extChartAt I (chartCenter sol t x)).source)
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (fun τ : ℝ ↦ (maps3 sol τ) x) ⁻¹'
+            (extChartAt I (chartCenter sol t x)).source ∈
+          𝓝[Icc (tmin sol) (tmax sol)] t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (chartCenter sol t x)) ((maps3 sol τ) x))
+          (tangentCoordChange I ((maps3 sol t) x) (chartCenter sol t x)
+            ((maps3 sol t) x) ((Y sol) t ((maps3 sol t) x)))
+          (Icc (tmin sol) (tmax sol)) t)
+    (hY : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (Y sol) t ((maps3 sol t) x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background t ((maps3 sol t) x)) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
+      (I := I) (M := M) ivp maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_chartDerivativeAt
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+    (chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative_of_vectorField_eq
+      (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+      chartCenter Y tmin tmax htimeSet hmem hsource hderiv hY)
+
+/-- Fixed-IVP closed-Picard fixed-chart ODE data for model vector fields gives
+ordinary chart-ODE data on the chosen open solution time set once those model
+fields are identified with the intrinsic DeTurck gauge fields in the
+closed-interval relative time filters. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative_of_vectorField_eq_nhdsWithin
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (Y : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hmem : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (maps3 sol t) x ∈ (extChartAt I (chartCenter sol t x)).source)
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (fun τ : ℝ ↦ (maps3 sol τ) x) ⁻¹'
+            (extChartAt I (chartCenter sol t x)).source ∈
+          𝓝[Icc (tmin sol) (tmax sol)] t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (chartCenter sol t x)) ((maps3 sol τ) x))
+          (tangentCoordChange I ((maps3 sol t) x) (chartCenter sol t x)
+            ((maps3 sol t) x) ((Y sol) t ((maps3 sol t) x)))
+          (Icc (tmin sol) (tmax sol)) t)
+    (hY : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol),
+        ∀ᶠ τ in 𝓝[Icc (tmin sol) (tmax sol)] t, ∀ x : M,
+          (Y sol) τ ((maps3 sol τ) x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background τ ((maps3 sol τ) x)) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAt
+      (I := I) (M := M) ivp maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+    chartCenter tmin tmax htimeSet
+    (fun sol ↦
+      Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.of_vectorField_eq_nhdsWithin
+        (I := I) (M := M) (hmem sol) (hsource sol) (hderiv sol) (hY sol))
+
+/-- Fixed-IVP closed-Picard fixed-chart ODE data for model vector fields gives
+ordinary primitive derivative data on the chosen open solution time set once
+those model fields are identified with the intrinsic DeTurck gauge fields in the
+closed-interval relative time filters. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_picardIccFixedChartDerivative_of_vectorField_eq_nhdsWithin
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (Y : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hmem : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (maps3 sol t) x ∈ (extChartAt I (chartCenter sol t x)).source)
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (fun τ : ℝ ↦ (maps3 sol τ) x) ⁻¹'
+            (extChartAt I (chartCenter sol t x)).source ∈
+          𝓝[Icc (tmin sol) (tmax sol)] t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (chartCenter sol t x)) ((maps3 sol τ) x))
+          (tangentCoordChange I ((maps3 sol t) x) (chartCenter sol t x)
+            ((maps3 sol t) x) ((Y sol) t ((maps3 sol t) x)))
+          (Icc (tmin sol) (tmax sol)) t)
+    (hY : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol),
+        ∀ᶠ τ in 𝓝[Icc (tmin sol) (tmax sol)] t, ∀ x : M,
+          (Y sol) τ ((maps3 sol τ) x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background τ ((maps3 sol τ) x)) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
+      (I := I) (M := M) ivp maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_chartDerivativeAt
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+    (chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative_of_vectorField_eq_nhdsWithin
+      (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
+      chartCenter Y tmin tmax htimeSet hmem hsource hderiv hY)
+
 /-- Fixed-IVP closed-Picard preferred-chart ODE data for model vector fields
 gives ordinary chart-ODE data on the chosen open solution time set once those
 model fields are identified with the intrinsic DeTurck gauge fields along the
@@ -2409,6 +2680,323 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_picardIccChartDeriv
   exact chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_picardIccChartDerivative
     (I := I) (M := M) (ivp := ivp)
     (tmin ivp) (tmax ivp) (htimeSet ivp) (hchart ivp)
+
+/-- Family-level closed-Picard fixed-chart ODE data gives ordinary chart-ODE
+data on each chosen open solution time set. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily_of_picardIccFixedChartDerivativeFamily
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hfixed : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn (I := I) (M := M)
+          (maps3 ivp sol)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background
+          (chartCenter ivp sol) (Icc (tmin ivp sol) (tmax ivp sol))) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp
+  exact chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3 ivp)
+    (chartCenter ivp) (tmin ivp) (tmax ivp) (htimeSet ivp) (hfixed ivp)
+
+/-- Family-level closed-Picard fixed-chart ODE data gives ordinary primitive
+derivative-family data on each chosen open solution time set. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_picardIccFixedChartDerivativeFamily
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hfixed : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn (I := I) (M := M)
+          (maps3 ivp sol)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background
+          (chartCenter ivp sol) (Icc (tmin ivp sol) (tmax ivp sol))) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily
+      (I := I) (M := M) maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_chartDerivativeAtFamily
+    (I := I) (M := M) (maps3 := maps3)
+    (chosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily_of_picardIccFixedChartDerivativeFamily
+      (I := I) (M := M) (maps3 := maps3)
+      chartCenter tmin tmax htimeSet hfixed)
+
+/-- Family-level closed-Picard fixed-chart ODE data for model vector fields
+gives ordinary chart-ODE-family data on each chosen open solution time set once
+those model fields are identified with the intrinsic DeTurck gauge fields along
+the corresponding candidate flows. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily_of_picardIccFixedChartDerivativeFamily_of_vectorField_eq
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (Y : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hmem : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (maps3 ivp sol t) x ∈
+            (extChartAt I (chartCenter ivp sol t x)).source)
+    (hsource : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) ⁻¹'
+              (extChartAt I (chartCenter ivp sol t x)).source ∈
+            𝓝[Icc (tmin ivp sol) (tmax ivp sol)] t)
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              (extChartAt I (chartCenter ivp sol t x)) ((maps3 ivp sol τ) x))
+            (tangentCoordChange I ((maps3 ivp sol t) x) (chartCenter ivp sol t x)
+              ((maps3 ivp sol t) x) ((Y ivp sol) t ((maps3 ivp sol t) x)))
+            (Icc (tmin ivp sol) (tmax ivp sol)) t)
+    (hY : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (Y ivp sol) t ((maps3 ivp sol t) x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background t ((maps3 ivp sol t) x)) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp
+  exact chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative_of_vectorField_eq
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3 ivp)
+    (chartCenter ivp) (Y ivp) (tmin ivp) (tmax ivp) (htimeSet ivp)
+    (hmem ivp) (hsource ivp) (hderiv ivp) (hY ivp)
+
+/-- Family-level closed-Picard fixed-chart ODE data for model vector fields
+gives ordinary primitive derivative-family data on each chosen open solution
+time set once those model fields are identified with the intrinsic DeTurck gauge
+fields along the corresponding candidate flows. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_picardIccFixedChartDerivativeFamily_of_vectorField_eq
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (Y : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hmem : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (maps3 ivp sol t) x ∈
+            (extChartAt I (chartCenter ivp sol t x)).source)
+    (hsource : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) ⁻¹'
+              (extChartAt I (chartCenter ivp sol t x)).source ∈
+            𝓝[Icc (tmin ivp sol) (tmax ivp sol)] t)
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              (extChartAt I (chartCenter ivp sol t x)) ((maps3 ivp sol τ) x))
+            (tangentCoordChange I ((maps3 ivp sol t) x) (chartCenter ivp sol t x)
+              ((maps3 ivp sol t) x) ((Y ivp sol) t ((maps3 ivp sol t) x)))
+            (Icc (tmin ivp sol) (tmax ivp sol)) t)
+    (hY : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (Y ivp sol) t ((maps3 ivp sol t) x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background t ((maps3 ivp sol t) x)) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily
+      (I := I) (M := M) maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_chartDerivativeAtFamily
+    (I := I) (M := M) (maps3 := maps3)
+    (chosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily_of_picardIccFixedChartDerivativeFamily_of_vectorField_eq
+      (I := I) (M := M) (maps3 := maps3)
+      chartCenter Y tmin tmax htimeSet hmem hsource hderiv hY)
+
+/-- Family-level closed-Picard fixed-chart ODE data for model vector fields
+gives ordinary chart-ODE-family data on each chosen open solution time set once
+those model fields are identified with the intrinsic DeTurck gauge fields in the
+closed-interval relative time filters. -/
+theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily_of_picardIccFixedChartDerivativeFamily_of_vectorField_eq_nhdsWithin
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (Y : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hmem : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (maps3 ivp sol t) x ∈
+            (extChartAt I (chartCenter ivp sol t x)).source)
+    (hsource : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) ⁻¹'
+              (extChartAt I (chartCenter ivp sol t x)).source ∈
+            𝓝[Icc (tmin ivp sol) (tmax ivp sol)] t)
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              (extChartAt I (chartCenter ivp sol t x)) ((maps3 ivp sol τ) x))
+            (tangentCoordChange I ((maps3 ivp sol t) x) (chartCenter ivp sol t x)
+              ((maps3 ivp sol t) x) ((Y ivp sol) t ((maps3 ivp sol t) x)))
+            (Icc (tmin ivp sol) (tmax ivp sol)) t)
+    (hY : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol),
+          ∀ᶠ τ in 𝓝[Icc (tmin ivp sol) (tmax ivp sol)] t, ∀ x : M,
+            (Y ivp sol) τ ((maps3 ivp sol τ) x) =
+              intrinsicDeTurckGaugeField (I := I) (M := M)
+                sol.1.toIntrinsicDeTurckSolution.metric
+                sol.1.toIntrinsicDeTurckSolution.background τ
+                ((maps3 ivp sol τ) x)) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily
+      (I := I) (M := M) maps3 := by
+  intro ivp
+  exact chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (ivp := ivp) (maps3 := maps3 ivp)
+    (chartCenter ivp) (Y ivp) (tmin ivp) (tmax ivp) (htimeSet ivp)
+    (hmem ivp) (hsource ivp) (hderiv ivp) (hY ivp)
+
+/-- Family-level closed-Picard fixed-chart ODE data for model vector fields
+gives ordinary primitive derivative-family data on each chosen open solution
+time set once those model fields are identified with the intrinsic DeTurck gauge
+fields in the closed-interval relative time filters. -/
+theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_picardIccFixedChartDerivativeFamily_of_vectorField_eq_nhdsWithin
+    {maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    (chartCenter : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp, ℝ → M → M)
+    (Y : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hmem : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (maps3 ivp sol t) x ∈
+            (extChartAt I (chartCenter ivp sol t x)).source)
+    (hsource : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          (fun τ : ℝ ↦ (maps3 ivp sol τ) x) ⁻¹'
+              (extChartAt I (chartCenter ivp sol t x)).source ∈
+            𝓝[Icc (tmin ivp sol) (tmax ivp sol)] t)
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          HasDerivWithinAt
+            (fun τ : ℝ ↦
+              (extChartAt I (chartCenter ivp sol t x)) ((maps3 ivp sol τ) x))
+            (tangentCoordChange I ((maps3 ivp sol t) x) (chartCenter ivp sol t x)
+              ((maps3 ivp sol t) x) ((Y ivp sol) t ((maps3 ivp sol t) x)))
+            (Icc (tmin ivp sol) (tmax ivp sol)) t)
+    (hY : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol),
+          ∀ᶠ τ in 𝓝[Icc (tmin ivp sol) (tmax ivp sol)] t, ∀ x : M,
+            (Y ivp sol) τ ((maps3 ivp sol τ) x) =
+              intrinsicDeTurckGaugeField (I := I) (M := M)
+                sol.1.toIntrinsicDeTurckSolution.metric
+                sol.1.toIntrinsicDeTurckSolution.background τ
+                ((maps3 ivp sol τ) x)) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily
+      (I := I) (M := M) maps3 :=
+  chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_chartDerivativeAtFamily
+    (I := I) (M := M) (maps3 := maps3)
+    (chosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily_of_picardIccFixedChartDerivativeFamily_of_vectorField_eq_nhdsWithin
+      (I := I) (M := M) (maps3 := maps3)
+      chartCenter Y tmin tmax htimeSet hmem hsource hderiv hY)
 
 /-- Family-level closed-Picard preferred-chart ODE data for model vector fields
 gives ordinary chart-ODE-family data on each chosen open solution time set once
