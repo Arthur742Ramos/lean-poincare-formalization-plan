@@ -7966,6 +7966,79 @@ theorem ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_
       (f := f) (Df := Df) (hf := hf) hball hx ht hD_bound hDf_lip hder
 
 /-- `ℝ≥0` closed-ball estimate form of the state-preserving product Picard
+neighborhood-map equality for a forward time slice. -/
+theorem ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_forward_Ioo_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    Filter.map
+        (fun y : V => (ofProductStatePreservingPicardLindelof hf hball).flow (y, t))
+        (𝓝 x) =
+      𝓝 ((ofProductStatePreservingPicardLindelof hf hball).flow (x, t)) := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductStatePreservingPicardLindelof hf hball
+  have hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t)) (α.tangent x t) x := by
+    simpa [α] using
+      ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_of_closedBall_nnnorm_estimates_forward_Icc_of_mem_ball
+        (f := f) (Df := Df) (hf := hf) hball hx ht_forward hD_bound hDf_lip hder
+  have hD_op_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ BD := by
+    intro τ hτ
+    exact hD_bound τ (Ioo_subset_Icc_self hτ) (α.flow (x, τ)) (by
+      simpa [α] using
+        ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall
+          (f := f) (Df := Df) hf hball (ball_subset_closedBall hx)
+          (Ioo_subset_Icc_self hτ))
+  simpa [α] using
+    α.flow_timeSlice_map_nhds_eq_of_hasStrictFDerivAt_Ioo
+      (K := BD) (ball_subset_closedBall hx) ht hD_op_bound hstrict
+
+/-- `r ≤ R` form of the state-preserving product Picard neighborhood-map equality
+with `ℝ≥0` closed-ball estimates. -/
+theorem ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    (hr : r ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    Filter.map
+        (fun y : V =>
+          (ofProductStatePreservingPicardLindelof_of_le_radius hf hr).flow (y, t))
+        (𝓝 x) =
+      𝓝 ((ofProductStatePreservingPicardLindelof_of_le_radius hf hr).flow (x, t)) := by
+  let hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R := by
+    intro x hx
+    rw [mem_closedBall] at hx ⊢
+    calc
+      dist (x, (1 : V →L[ℝ] V)) (x₀, (1 : V →L[ℝ] V))
+          = max (dist x x₀) (dist (1 : V →L[ℝ] V) 1) := by
+            rw [Prod.dist_eq]
+      _ = dist x x₀ := by simp
+      _ ≤ (R : ℝ) := hx.trans (by exact_mod_cast hr)
+  simpa [ofProductStatePreservingPicardLindelof_of_le_radius, hball] using
+    ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_forward_Ioo_of_mem_ball
+      (f := f) (Df := Df) (hf := hf) hball hx ht ht_forward hD_bound hDf_lip hder
+
+/-- `ℝ≥0` closed-ball estimate form of the state-preserving product Picard
 local inverse theorem for a forward time slice. -/
 theorem exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_of_closedBall_nnnorm_estimates_forward_Ioo_of_mem_ball
     [FiniteDimensional ℝ V] [CompleteSpace V]
@@ -8581,6 +8654,44 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_of_identi
         hf_lip hDf_lip hf_bound
         (fun A hA => nnnorm_le_one_add_radius_of_mem_closedBall_one hA)
         hD_bound hf_cont hDf_cont hmul hr hx ht hder
+
+/-- Componentwise closed-ball continuity estimates give the neighborhood-map
+equality for each forward interior time slice of the state-preserving selected
+variational flow, provided the supplied `Df` is the spatial derivative of `f` on
+the same closed ball. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_map_nhds_eq_of_hasFDerivWithinAt_forward_Ioo_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R Kf KD Lf BA BD : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hr : r ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    Filter.map
+        (fun y : V =>
+          (ofProductStatePreservingComponentClosedBallContinuityEstimates
+            hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul hr).flow
+            (y, t))
+        (𝓝 x) =
+      𝓝 ((ofProductStatePreservingComponentClosedBallContinuityEstimates
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul hr).flow
+        (x, t)) := by
+  simpa [ofProductStatePreservingComponentClosedBallContinuityEstimates] using
+    ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
+      (f := f) (Df := Df)
+      (hf :=
+        isPicardLindelof_variationalVectorField_of_component_closedBall_continuity
+          (A₀ := (1 : V →L[ℝ] V)) (r := R)
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul)
+      hr hx ht ht_forward hD_bound hDf_lip hder
 
 /-- Componentwise closed-ball continuity estimates give a local inverse for each
 forward interior time slice of the state-preserving selected variational flow,
