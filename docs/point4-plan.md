@@ -1186,6 +1186,25 @@ and the backward interior neighborhood/open-partial-homeomorphism readouts
 `ofProduct_flow_timeSlice_map_nhds_eq_of_Df_lipschitzOnWith_on_convex_state_backward_Ioo_of_mem_ball`
 and
 `exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_Df_lipschitzOnWith_on_convex_state_backward_Ioo_of_mem_ball`.
+This backward local-inverse bridge now also lifts through the state-preserving
+closed-ball Picard route: the closed-ball estimate forms
+`ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_of_closedBall_estimates_backward_Icc_of_mem_ball`
+and
+`exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_of_closedBall_estimates_backward_Ioo_of_mem_ball`
+discharge convex-state membership from the Picard state ball, while the
+`..._closedBall_nnnorm_estimates_backward...` map/open-local-inverse variants
+consume the usual global `‖Df‖₊ ≤ BD` estimate on `Icc tmin tmax`. The same
+backward readouts are available in the radius-specialized and localized Picard
+forms
+`ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_backward_Ioo_of_le_radius`
+and
+`exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_openPartialHomeomorph_of_closedBall_nnnorm_estimates_backward_Ioo_of_le_radius`.
+Componentwise closed-ball continuity estimates now expose the corresponding
+backward neighborhood-map and open-partial-homeomorphism APIs directly,
+including the operator-ball and identity-ball specializations, via
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_map_nhds_eq_of_hasFDerivWithinAt_backward_Ioo_of_le_radius`
+and
+`exists_ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_openPartialHomeomorph_of_hasFDerivWithinAt_backward_Ioo_of_le_radius`.
 This strict derivative input has now been reduced one step further in the model
 layer: `flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt` uses
 Mathlib's real `C¹`-implies-strict-differentiability theorem, so ordinary
