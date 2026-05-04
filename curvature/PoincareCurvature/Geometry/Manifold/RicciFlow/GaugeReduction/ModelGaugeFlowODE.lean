@@ -4544,6 +4544,59 @@ def spatialRemainder
     (x h : V) (τ : ℝ) : V :=
   α.flow (x + h, τ) - α.flow (x, τ) - α.tangent x τ h
 
+/-- The time derivative forced by the base and variational ODEs for
+`spatialRemainder`.  The remaining differentiability estimate is to bound this
+quantity by `K * ‖spatialRemainder‖ + η(h) * ‖h‖`. -/
+def spatialRemainderDeriv
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (x h : V) (τ : ℝ) : V :=
+  f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+    (((Df τ (α.flow (x, τ))).comp (α.tangent x τ)) h)
+
+/-- The first-order spatial remainder vanishes at the base time whenever both
+initial data lie in the Picard ball. -/
+theorem spatialRemainder_initial_eq
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x h : V} (hx : x ∈ closedBall x₀ r) (hxh : x + h ∈ closedBall x₀ r) :
+    α.spatialRemainder x h (t₀ : ℝ) = 0 := by
+  simp [spatialRemainder, α.initial_eq (x + h) hxh, α.initial_eq x hx,
+    α.tangent_initial_eq x hx]
+
+/-- The first-order spatial remainder is continuous on the closed Picard
+interval whenever both initial data lie in the Picard ball. -/
+theorem spatialRemainder_continuousOn
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x h : V} (hx : x ∈ closedBall x₀ r) (hxh : x + h ∈ closedBall x₀ r) :
+    ContinuousOn (fun τ : ℝ => α.spatialRemainder x h τ) (Icc tmin tmax) :=
+  ((α.flow_continuousOn hxh).sub (α.flow_continuousOn hx)).sub
+    (α.tangent_apply_continuousOn hx h)
+
+/-- Closed-interval derivative of the first-order spatial remainder, obtained
+directly from the base-flow ODE and the variational tangent-map ODE. -/
+theorem spatialRemainder_hasDerivWithinAt
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x h : V} (hx : x ∈ closedBall x₀ r) (hxh : x + h ∈ closedBall x₀ r)
+    {τ : ℝ} (hτ : τ ∈ Icc tmin tmax) :
+    HasDerivWithinAt (fun s : ℝ => α.spatialRemainder x h s)
+      (α.spatialRemainderDeriv x h τ) (Icc tmin tmax) τ := by
+  have hflow_h := α.hasDerivWithinAt (x + h) hxh τ hτ
+  have hflow := α.hasDerivWithinAt x hx τ hτ
+  have htangent := α.tangent_apply_hasDerivWithinAt hx hτ h
+  simpa [spatialRemainder, spatialRemainderDeriv] using
+    (hflow_h.sub hflow).sub htangent
+
+/-- Right-neighborhood derivative of the first-order spatial remainder on the
+left-closed/right-open Picard interval, in the shape required by Mathlib's
+Gronwall theorem. -/
+theorem spatialRemainder_hasDerivWithinAt_Ici_of_mem_Ico
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x h : V} (hx : x ∈ closedBall x₀ r) (hxh : x + h ∈ closedBall x₀ r)
+    {τ : ℝ} (hτ : τ ∈ Ico tmin tmax) :
+    HasDerivWithinAt (fun s : ℝ => α.spatialRemainder x h s)
+      (α.spatialRemainderDeriv x h τ) (Ici τ) τ :=
+  (α.spatialRemainder_hasDerivWithinAt hx hxh (Ico_subset_Icc_self hτ)).mono_of_mem_nhdsWithin
+    (Icc_mem_nhdsGE_of_mem hτ)
+
 /-- Grönwall endpoint form of the first-order remainder criterion.  If the
 remainder is eventually bounded by a zero-initial-error Grönwall bound whose
 forcing is `η(h) * ‖h‖` and `η(h) → 0`, then the fixed-time flow slice has
@@ -4600,6 +4653,65 @@ theorem flow_timeSlice_hasFDerivAt_of_remainder_deriv_bound_Icc
     · simpa [spatialRemainder] using hgr
     · simpa [hinit_h]
   exact α.flow_timeSlice_hasFDerivAt_of_gronwall_remainder_bound_nhds_zero hη hbound
+
+/-- If `x` is an interior point of the Picard initial-data ball, then small
+perturbations `x + h` remain in the closed Picard ball. -/
+theorem eventually_add_mem_closedBall_of_mem_ball
+    {x : V} (hx : x ∈ ball x₀ r) :
+    ∀ᶠ h in 𝓝 (0 : V), x + h ∈ closedBall x₀ r := by
+  have hx0 : ((fun h : V => x + h) 0) ∈ ball x₀ r := by
+    simpa using hx
+  exact (continuousAt_const.add continuousAt_id) (Metric.closedBall_mem_nhds_of_mem hx0)
+
+/-- Forward-time spatial derivative criterion specialized to the concrete
+model-flow remainder.  The only analytic estimate still required here is the
+pointwise bound on `spatialRemainderDeriv`. -/
+theorem flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_forward_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    {η : V → ℝ≥0}
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hmem : ∀ᶠ h in 𝓝 (0 : V), x + h ∈ closedBall x₀ r)
+    (hderiv_bound : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖α.spatialRemainderDeriv x h τ‖ ≤
+          K * ‖α.spatialRemainder x h τ‖ + (η h : ℝ) * ‖h‖) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  refine α.flow_timeSlice_hasFDerivAt_of_remainder_deriv_bound_Icc
+    (a := (t₀ : ℝ)) (b := tmax) (K := K) ht hη ?_ ?_ ?_
+  · filter_upwards [hmem] with h hxh
+    exact (α.spatialRemainder_continuousOn hx hxh).mono
+      (fun τ hτ => ⟨t₀.2.1.trans hτ.1, hτ.2⟩)
+  · filter_upwards [hmem, hderiv_bound] with h hxh hbound_h
+    refine ⟨fun τ : ℝ => α.spatialRemainderDeriv x h τ, ?_, ?_⟩
+    · intro τ hτ
+      exact α.spatialRemainder_hasDerivWithinAt_Ici_of_mem_Ico hx hxh
+        ⟨t₀.2.1.trans hτ.1, hτ.2⟩
+    · exact hbound_h
+  · filter_upwards [hmem] with h hxh
+    exact α.spatialRemainder_initial_eq hx hxh
+
+/-- Interior-basepoint form of the forward-time spatial derivative criterion:
+small-perturbation membership in the closed Picard ball is discharged
+automatically from `x ∈ ball x₀ r`. -/
+theorem flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_forward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    {η : V → ℝ≥0}
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hderiv_bound : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖α.spatialRemainderDeriv x h τ‖ ≤
+          K * ‖α.spatialRemainder x h τ‖ + (η h : ℝ) * ‖h‖) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x :=
+  α.flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_forward_Icc
+    (ball_subset_closedBall hx) ht hη
+    (eventually_add_mem_closedBall_of_mem_ball (x₀ := x₀) (r := r) hx)
+    hderiv_bound
 
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is

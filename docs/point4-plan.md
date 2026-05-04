@@ -1117,7 +1117,14 @@ expression gives the ordinary spatial derivative of the time slice.
 `flow_timeSlice_hasFDerivAt_of_remainder_deriv_bound_Icc` applies Mathlib's
 Gronwall inequality in time: once the concrete remainder curve starts at zero
 and has derivative bounded by `K‖remainder‖ + η(h)‖h‖`, the ordinary spatial
-derivative follows. The corresponding
+derivative follows. The concrete ODE data for this remainder is now exposed:
+`spatialRemainder_initial_eq`, `spatialRemainder_continuousOn`,
+`spatialRemainderDeriv`, and
+`spatialRemainder_hasDerivWithinAt_Ici_of_mem_Ico` discharge the initial,
+continuity, and right-derivative hypotheses. The forward-time wrappers
+`flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_forward_Icc` and
+`..._of_mem_ball` leave only the actual Taylor/Lipschitz bound on
+`spatialRemainderDeriv`. The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
 `ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall`
