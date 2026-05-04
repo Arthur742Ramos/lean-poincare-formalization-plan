@@ -1214,7 +1214,12 @@ lift through the state-preserving Picard closed-ball estimates to
 and
 `exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius`,
 and the componentwise closed-ball continuity layer exposes the matching
-operator-ball and identity-ball common-backward readouts.
+operator-ball and identity-ball common-backward readouts.  The generic
+componentwise backward-common route now also unpacks that local inverse into the
+same gluing-ready concrete patches as the forward route:
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius`
+and
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius`.
 This strict derivative input has now been reduced one step further in the model
 layer: `flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt` uses
 Mathlib's real `C¹`-implies-strict-differentiability theorem, so ordinary
