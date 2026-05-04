@@ -1951,7 +1951,11 @@ pairs the chart-carrier Banach solution/uniqueness witness with ambient
 closure-data metric and connection uniqueness on the same clipped interval,
 plus a prescribed-shorter-terminal companion and a companion that adds
 conditional full-common metric and connection readouts whenever that same
-selected shrink contains the common candidate terminal. At the vector-bundle
+selected shrink contains the common candidate terminal. The prescribed-terminal
+companion now also has a terminal-fit theorem-package handoff on that same
+selected shrink, so continuation arguments can keep the Banach solution,
+ambient metric/connection uniqueness, and conditional point-4 theorem packages
+coordinated by one `T'`/`a'` choice. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives
