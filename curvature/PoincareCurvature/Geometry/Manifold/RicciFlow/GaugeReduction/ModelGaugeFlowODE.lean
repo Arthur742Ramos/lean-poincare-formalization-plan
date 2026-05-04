@@ -121,6 +121,47 @@ theorem gronwallBound_zero_left_eq_mul_forcing (K ε Δ : ℝ) :
   · simp [gronwallBound, hK]
     ring
 
+/-- If the forcing in a zero-initial-error Grönwall bound is
+`η(h) * ‖h‖` with `η(h) → 0`, then the bound is `o(‖h‖)`. -/
+theorem gronwallBound_zero_left_forcing_mul_norm_isLittleO
+    {η : V → ℝ≥0}
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (K Δ : ℝ) :
+    (fun h : V => gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ) =o[𝓝 0]
+      (fun h : V => h) := by
+  rw [Asymptotics.isLittleO_iff]
+  intro c hc
+  let C : ℝ := gronwallBound 0 K 1 Δ
+  by_cases hC : ‖C‖ = 0
+  · have hC0 : C = 0 := norm_eq_zero.mp hC
+    filter_upwards with h
+    have hzero : gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ = 0 := by
+      rw [gronwallBound_zero_left_eq_mul_forcing]
+      change ((η h : ℝ) * ‖h‖) * C = 0
+      rw [hC0, mul_zero]
+    rw [hzero, norm_zero]
+    exact mul_nonneg hc.le (norm_nonneg h)
+  · have hCpos : 0 < ‖C‖ :=
+      lt_of_le_of_ne (norm_nonneg C) (Ne.symm hC)
+    have hsmall : ∀ᶠ h in 𝓝 (0 : V), (η h : ℝ) < c / ‖C‖ :=
+      hη (Iio_mem_nhds (div_pos hc hCpos))
+    filter_upwards [hsmall] with h hh
+    have hηC : (η h : ℝ) * ‖C‖ ≤ c := by
+      exact le_of_lt <| calc
+        (η h : ℝ) * ‖C‖ < (c / ‖C‖) * ‖C‖ :=
+          mul_lt_mul_of_pos_right hh hCpos
+        _ = c := div_mul_cancel₀ c (ne_of_gt hCpos)
+    calc
+      ‖gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ‖
+          = ‖((η h : ℝ) * ‖h‖) * C‖ := by
+            rw [gronwallBound_zero_left_eq_mul_forcing]
+      _ = ((η h : ℝ) * ‖C‖) * ‖h‖ := by
+            rw [norm_mul, norm_mul, Real.norm_of_nonneg (NNReal.coe_nonneg (η h)),
+              Real.norm_of_nonneg (norm_nonneg h)]
+            ring
+      _ ≤ c * ‖h‖ := by
+            gcongr
+
 /-- Project the base ODE from a solution of the product variational system. -/
 theorem hasDerivWithinAt_fst_of_variationalVectorField
     {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
@@ -4495,6 +4536,31 @@ theorem flow_timeSlice_hasFDerivAt_of_remainder_bound_nhds_zero
         ≤ (η h : ℝ) * ‖h‖ := hb
     _ ≤ c * ‖h‖ := by
         gcongr
+
+/-- Grönwall endpoint form of the first-order remainder criterion.  If the
+remainder is eventually bounded by a zero-initial-error Grönwall bound whose
+forcing is `η(h) * ‖h‖` and `η(h) → 0`, then the fixed-time flow slice has
+spatial derivative `α.tangent x t`. -/
+theorem flow_timeSlice_hasFDerivAt_of_gronwall_remainder_bound_nhds_zero
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} {t K Δ : ℝ} {η : V → ℝ≥0}
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hbound : ∀ᶠ h in 𝓝 (0 : V),
+      ‖α.flow (x + h, t) - α.flow (x, t) - α.tangent x t h‖ ≤
+        gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  rw [hasFDerivAt_iff_isLittleO_nhds_zero, Asymptotics.isLittleO_iff]
+  intro c hc
+  have hgr :=
+    (Asymptotics.isLittleO_iff.mp
+      (gronwallBound_zero_left_forcing_mul_norm_isLittleO (V := V) hη K Δ)) hc
+  filter_upwards [hbound, hgr] with h hb hg
+  calc
+    ‖α.flow (x + h, t) - α.flow (x, t) - α.tangent x t h‖
+        ≤ gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ := hb
+    _ ≤ ‖gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ‖ := le_abs_self _
+    _ ≤ c * ‖h‖ := hg
 
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is

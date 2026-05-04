@@ -1107,7 +1107,12 @@ model task is therefore to obtain this estimate from the nonlinear variational
 ODE by Gronwall. The supporting identity
 `gronwallBound_zero_left_eq_mul_forcing` records the linear dependence of
 Mathlib's zero-initial-error Gronwall bound on the forcing term, isolating the
-last algebraic step needed to convert such a bound into `o(‖h‖)`. The corresponding
+last algebraic step needed to convert such a bound into `o(‖h‖)`. That
+conversion is now formalized as
+`gronwallBound_zero_left_forcing_mul_norm_isLittleO`, and
+`flow_timeSlice_hasFDerivAt_of_gronwall_remainder_bound_nhds_zero` consumes the
+result directly: a model-flow remainder bounded by the corresponding Gronwall
+expression gives the ordinary spatial derivative of the time slice. The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
 `ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall`
