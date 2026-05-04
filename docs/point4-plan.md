@@ -1594,7 +1594,10 @@ local model flows whose curves stay in a uniformly Lipschitz state region; the
 Banach ODE layer now also has an order-theoretic bridge from equality on every
 prescribed shorter terminal to equality on the open common interval, plus the
 state-set Lipschitz-on-`Icc` specialization needed when estimates are only known
-on those restricted terminals. The continuous space-time package now forgets to
+on those restricted terminals. The Picard layer also packages the corresponding
+existence theorem: an open state set and restricted-terminal Lipschitz estimates
+produce a state-preserving local solution with terminal control and uniqueness
+on the open common interval. The continuous space-time package now forgets to
 `LocalFlowSolution` and inherits the same uniqueness bridges directly.
 What remains is the genuinely manifold-level lift: pass intrinsic DeTurck vector
 fields to these chartwise Banach ODE hypotheses, prove compatibility/gluing and
@@ -1980,7 +1983,9 @@ same theorem-package handoff, clipped readouts, and conditional full-common
 metric/connection readouts together. The continuation from these local readouts
 to full arbitrary-overlap uniqueness is still open, but the base Banach ODE
 layer now supplies the missing order-theoretic bridge from restricted terminals
-to the open common interval for both bare and state-preserving solutions.
+to the open common interval for both bare and state-preserving solutions, and
+the Picard layer has the matching restricted-estimate existence/uniqueness
+theorem with open-common uniqueness.
 The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient

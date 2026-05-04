@@ -753,6 +753,37 @@ theorem IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isO
     le_trans (min_le_left _ _) hsolT
   exact hLip t ⟨ht.1, le_trans ht.2 hmin_le_T⟩
 
+/-- Picard-Lindelof plus an open state set and Lipschitz bounds on every
+prescribed shorter terminal gives local existence and open-common-interval
+uniqueness. -/
+theorem IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isOpen_restricted_Icc
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
+    {F : ℝ → X → X} {stateSet : Set X} {t₀ T : ℝ} (hT : t₀ < T) {u₀ : X}
+    {a L K Kstate : ℝ≥0}
+    (hF : IsPicardLindelof F (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩ u₀ a 0 L K)
+    (hstate_open : IsOpen stateSet) (hu₀ : u₀ ∈ stateSet)
+    (hLip : ∀ {S : ℝ}, t₀ < S → S ≤ T →
+      ∀ t ∈ Icc t₀ S, LipschitzOnWith Kstate (F t) stateSet) :
+    ∃ sol : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀,
+      sol.terminalTime ≤ T ∧
+      ∀ sol' : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀,
+        EqOn sol.curve sol'.curve (Ico t₀ (min sol.terminalTime sol'.terminalTime)) := by
+  rcases hF.exists_eq_forall_mem_Icc_hasDerivWithinAt₀ with ⟨u, hu_init, hu_eq⟩
+  let baseSol : BanachEvolutionLocalSolution F t₀ u₀ :=
+    { terminalTime := T
+      initial_lt_terminal := hT
+      curve := u
+      initial_eq := hu_init
+      equation := by
+        intro t ht
+        exact hu_eq t ht }
+  rcases baseSol.exists_restrict_in_isOpen hstate_open hu₀ with ⟨sol, hsolT, _hcurve⟩
+  refine ⟨sol, hsolT, fun sol' ↦ ?_⟩
+  exact BanachEvolutionLocalSolutionIn.eqOn_Ico_of_lipschitzOn_Icc_of_le_terminal
+    (F := F) (stateSet := stateSet) (t₀ := t₀) (u₀ := u₀) (K := Kstate) sol sol'
+    (fun hS₀ hS₁ _hS₂ t ht ↦ hLip hS₀ (le_trans hS₁ hsolT) t ht)
+
 /-- A `C^1` autonomous Banach-space vector field admits a forward local solution. This removes
 manual Picard-Lindelof constants from the common autonomous case; a geometric Ricci-DeTurck
 operator can use this once it has been realized as a `C^1` vector field in a Banach chart. -/

@@ -906,7 +906,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       uniqueness routes for the continuous space-time package. The Banach ODE
       layer also now has a continuation bridge from equality on every prescribed
       shorter terminal to equality on the open common interval, and a state-set
-      Lipschitz-on-restricted-`Icc` specialization for local estimates. The same
+      Lipschitz-on-restricted-`Icc` specialization for local estimates. The
+      Picard layer packages the same restricted-estimate hypothesis into a
+      state-preserving local solution with terminal control and open-common
+      uniqueness. The same
       model ODE bridge now packages the tangent-map variational equation
       `A'(t) = Df(t, flow(t)) ∘ A(t)` in `VariationalLocalFlowSolution`, matching
       the remaining coordinate-model `A`-derivative hypothesis, and proves
