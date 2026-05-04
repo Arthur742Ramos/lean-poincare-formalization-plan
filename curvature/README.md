@@ -311,7 +311,8 @@ now packages the matching intrinsic boundary
         the one-step closed-ball estimate constructors, including the
         state-preserving component-continuity and operator/identity-ball routes,
         with matching proof-level `Nonempty` wrappers and direct restricted
-        closed-state-ball readouts. It also proves
+        closed-state-ball readouts, plus restricted common-`Ioo` time-slice
+        neighborhood and local-inverse readouts. It also proves
        the left-composition operator-space Lipschitz estimate, a product-state
        Lipschitz estimate for the full variational vector field, and
         interior/closed-interval uniqueness for the full `(flow, tangent)` pair

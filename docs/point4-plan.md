@@ -1387,7 +1387,9 @@ state-preserving product Picard and component-continuity routes now have the
 same localized constructors and proof-level witnesses, including the
 operator/identity-ball specializations, so shrinking the Picard interval no
 longer loses the direct closed-state-ball readouts used by the inverse-function
-criteria. The ODE package
+criteria. Those localized state-preserving routes now also expose common-`Ioo`
+time-slice neighborhood-map and open-partial-homeomorphism readouts directly,
+so chart-local inverse arguments can stay on the shrunk Picard interval. The ODE package
 now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
 closed-interval and interior vector-slot derivatives for `t ↦ A(t)v` via
