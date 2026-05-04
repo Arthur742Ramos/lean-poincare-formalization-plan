@@ -368,8 +368,9 @@ packages the canonical stationary local solution attached to
   data now supplies this local uniqueness readout without requiring the full
   arbitrary candidate intervals to fit in the shrink. A packaged clipped
   interval version reads this as equality on the whole visible overlap
-  `[t₀, min (min T₁ T₂) T']`, and `SmoothRealizationMetricCone.lean` now
-  exposes the same no-terminal-fit clipped uniqueness readout directly from
+  `[t₀, min (min T₁ T₂) T']`, with a named full-common-interval metric and
+  connection readout when `min T₁ T₂ ≤ T'`; `SmoothRealizationMetricCone.lean` now
+  exposes the no-terminal-fit clipped uniqueness readout directly from
   the standard positive-radius metric-cone shrink. The same clipped local route
   now also upgrades metric equality to equality of the canonical chosen-background
   connections, with a metric-cone readout that selects the shrink and returns

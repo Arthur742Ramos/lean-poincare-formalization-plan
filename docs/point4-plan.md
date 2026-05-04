@@ -1452,12 +1452,16 @@ candidates, so local uniqueness no longer needs a hypothesis that the full
 candidate intervals fit inside the selected shrink.  The wrapper
 `RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier`
 chooses the shorter terminal automatically and states the result on
-`[t₀, min (min T₁ T₂) T']`.  `SmoothRealizationMetricCone.lean` now exposes
-the same clipped uniqueness readout after selecting the standard positive-radius
-metric-cone shrink, still without a full-candidate terminal-fit hypothesis.
+`[t₀, min (min T₁ T₂) T']`.  The companion
+`RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_interval_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier`
+removes the extra clipping when `min T₁ T₂ ≤ T'`.  `SmoothRealizationMetricCone.lean`
+now exposes the same clipped uniqueness readout after selecting the standard
+positive-radius metric-cone shrink, still without a full-candidate terminal-fit
+hypothesis.
 The corresponding connection-level wrappers
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_restricted_interval_of_shrunk_symmetricCarrier`,
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier`,
+`RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_interval_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier`,
 and
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localConnectionReadout`
 upgrade the same local metric readout to equality of the canonical
@@ -1812,10 +1816,12 @@ underlying metric data on the shorter interval, including after descending to
 the genuine symmetric carrier, and local uniqueness can now be read on a chosen
 common restricted terminal from shrunk ambient closure data. These local readouts
 now include both metric equality and canonical chosen-background connection
-equality, with a single metric-cone shrink able to return both readouts at once;
-the same selected shrink can now also carry the terminal-fit theorem-package
-handoff alongside those local readouts. The continuation from these local
-readouts to full arbitrary-overlap uniqueness is still open.
+equality, and the clipped readouts now have full-common-interval companions when
+the chosen shrink covers the two candidate terminals. A single metric-cone
+shrink can return both clipped readouts at once; the same selected shrink can
+now also carry the terminal-fit theorem-package handoff alongside those local
+readouts. The continuation from these local readouts to full arbitrary-overlap
+uniqueness is still open.
 The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient
