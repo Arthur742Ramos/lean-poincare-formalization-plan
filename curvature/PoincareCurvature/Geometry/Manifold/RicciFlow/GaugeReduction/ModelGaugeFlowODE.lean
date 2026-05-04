@@ -6921,6 +6921,66 @@ theorem flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_common_
     (X := X) (Y := V) e₀ e₁ hφ hxsource hxφ
     hSopen hS hxS hTopen hT hxT hcontS hS_lift hT_lift
 
+/-- Common-subinterval constrained chart lift with overlap equality against a
+second chart-lifted model map.  The target constraint `U₁ ⊆ c.source` makes the
+new local image patch land in the common target chart, so common-chart
+coordinate equality on `U₀` transports to equality on the produced source
+neighborhood. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_eqOn_common_Ioo_of_hasStrictFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {X : Type*} [TopologicalSpace X]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ f₀ f₁ c : OpenPartialHomeomorph X V) (G₁ : V → V)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {U₀ U₁ : Set X} {x : X}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (hU₁common : U₁ ⊆ c.source)
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm (α.flow (e₀ x, t)) ∈ U₁)
+    (hother_common : MapsTo (fun z : X ↦ f₁.symm (G₁ (f₀ z))) U₀ c.source)
+    (hcoord : EqOn
+      (fun z : X ↦ c (e₁.symm (α.flow (e₀ z, t))))
+      (fun z : X ↦ c (f₁.symm (G₁ (f₀ z)))) U₀) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ Um ⊆ U₀ ∧
+        IsOpen Wm ∧
+          (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            ContinuousOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um ∧
+              BijOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um Wm ∧
+                EqOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t)))
+                  (fun z : X ↦ f₁.symm (G₁ (f₀ z))) Um := by
+  rcases α.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_common_Ioo_of_hasStrictFDerivAt
+      e₀ e₁ htime htbase hU₀open hU₀source hxU₀ hx ht hD_bound hstrict
+      hU₁open hU₁source htarget hxU₁ with
+    ⟨Um, Wm, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁, hcont, hbij⟩
+  have hflow_common :
+      MapsTo (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um c.source := by
+    intro z hz
+    exact hU₁common (hWmU₁ (hbij.mapsTo hz))
+  have hother_common_Um :
+      MapsTo (fun z : X ↦ f₁.symm (G₁ (f₀ z))) Um c.source := by
+    intro z hz
+    exact hother_common (hUmU₀ hz)
+  have hcoord_Um : EqOn
+      (fun z : X ↦ c (e₁.symm (α.flow (e₀ z, t))))
+      (fun z : X ↦ c (f₁.symm (G₁ (f₀ z)))) Um := by
+    intro z hz
+    exact hcoord (hUmU₀ hz)
+  have heq : EqOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t)))
+      (fun z : X ↦ f₁.symm (G₁ (f₀ z))) Um :=
+    RicciFlow.eqOn_lifted_models_of_common_target_chart_eqOn
+      e₀ e₁ f₀ f₁ c (fun y : V ↦ α.flow (y, t)) G₁
+      hflow_common hother_common_Um hcoord_Um
+  exact ⟨Um, Wm, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+    hcont, hbij, heq⟩
+
 /-- Common-subinterval explicit source ball and target neighborhood for the
 local inverse theorem of a time-slice of a variational local flow. -/
 theorem flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasStrictFDerivAt
@@ -7111,6 +7171,44 @@ theorem flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_common_
     e₀ e₁ htime htbase hU₀open hU₀source hxU₀ hx ht hD_bound
     (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
     hU₁open hU₁source htarget hxU₁
+
+/-- C¹-style constrained chart lift with overlap equality against a second
+chart-lifted model map. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_eqOn_common_Ioo_of_eventually_hasFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {X : Type*} [TopologicalSpace X]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ f₀ f₁ c : OpenPartialHomeomorph X V) (G₁ : V → V)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {U₀ U₁ : Set X} {x : X}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hder : ∀ᶠ y in 𝓝 (e₀ x),
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (hU₁common : U₁ ⊆ c.source)
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm (α.flow (e₀ x, t)) ∈ U₁)
+    (hother_common : MapsTo (fun z : X ↦ f₁.symm (G₁ (f₀ z))) U₀ c.source)
+    (hcoord : EqOn
+      (fun z : X ↦ c (e₁.symm (α.flow (e₀ z, t))))
+      (fun z : X ↦ c (f₁.symm (G₁ (f₀ z)))) U₀) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ Um ⊆ U₀ ∧
+        IsOpen Wm ∧
+          (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            ContinuousOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um ∧
+              BijOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um Wm ∧
+                EqOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t)))
+                  (fun z : X ↦ f₁.symm (G₁ (f₀ z))) Um :=
+  α.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_eqOn_common_Ioo_of_hasStrictFDerivAt
+    e₀ e₁ f₀ f₁ c G₁ htime htbase hU₀open hU₀source hxU₀ hx ht hD_bound
+    (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
+    hU₁open hU₁source hU₁common htarget hxU₁ hother_common hcoord
 
 /-- C¹-style common-subinterval explicit source ball and target neighborhood
 for a time-slice of a variational local flow. -/

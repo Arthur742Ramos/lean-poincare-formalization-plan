@@ -1442,7 +1442,13 @@ with its C¹-style
 `..._of_eventually_hasFDerivAt` variant push those containments through the
 variational time-slice inverse theorem.  These are the local patch shapes
 needed to shrink chartwise Picard slices into visible overlap domains before
-applying equality transport.  The
+applying equality transport.  The variational layer also has the corresponding
+overlap-equality readouts,
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_eqOn_common_Ioo_of_hasStrictFDerivAt`
+and its C¹-style `..._of_eventually_hasFDerivAt` variant: once the target patch
+is constrained inside a common chart source and common-chart coordinates agree
+on the visible source set, the returned local patch carries the resulting
+manifold-side `EqOn` together with `ContinuousOn` and `BijOn`.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
