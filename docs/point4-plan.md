@@ -1512,7 +1512,8 @@ the raw time set, matching the restricted intervals produced by local ODE
 theorems before any neighborhood-of-time strengthening is known. For explicit
 open Picard time sets, the fixed-IVP and theorem-family raw existence APIs now
 combine the `Ioo` identification with those ordinary-time derivative,
-continuity, and chart-source readouts directly; the same no-extra-neighborhood
+continuity, and chart-source readouts directly, in both unsimplified
+preferred-chart and centered chart forms; the same no-extra-neighborhood
 open-Picard layer now includes neighborhood-equal vector-field rewrites and
 tangent-trivialization membership. The raw autonomous interface now
 also runs in both directions: `Diffeomorph3GaugeFlowOn.autonomousIntegralCurveOn`
