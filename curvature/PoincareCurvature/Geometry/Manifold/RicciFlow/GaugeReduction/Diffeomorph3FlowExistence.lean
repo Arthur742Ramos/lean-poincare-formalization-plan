@@ -254,6 +254,28 @@ theorem exists_open_nhds_bijOn_of_openPartialHomeomorph_lifted_model_bijOn
     bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn
       e₀ e₁ G hUt hWt hbij⟩
 
+/-- Continuity of a model map on a chart patch transports to continuity of the
+lifted manifold-side map on the corresponding source-chart patch. -/
+theorem continuousOn_symm_image_of_openPartialHomeomorph_lifted_model
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (G : Y → Y) {U W : Set Y}
+    (hUt : U ⊆ e₀.target) (hWt : W ⊆ e₁.target)
+    (hcont : ContinuousOn G U) (hmaps : MapsTo G U W) :
+    ContinuousOn (fun x : X ↦ e₁.symm (G (e₀ x))) (e₀.symm '' U) := by
+  have hsource : e₀.symm '' U ⊆ e₀.source := by
+    rintro _ ⟨y, hyU, rfl⟩
+    exact e₀.map_target (hUt hyU)
+  have hcont_e₀ : ContinuousOn (fun x : X ↦ e₀ x) (e₀.symm '' U) :=
+    e₀.continuousOn.mono hsource
+  have hmaps_e₀ : MapsTo (fun x : X ↦ e₀ x) (e₀.symm '' U) U := by
+    rintro _ ⟨y, hyU, rfl⟩
+    simpa [e₀.right_inv (hUt hyU)] using hyU
+  have hcont_G :
+      ContinuousOn (fun x : X ↦ G (e₀ x)) (e₀.symm '' U) :=
+    hcont.comp hcont_e₀ hmaps_e₀
+  have hmaps_target : MapsTo (fun x : X ↦ G (e₀ x)) (e₀.symm '' U) e₁.target :=
+    fun _ hx ↦ hWt (hmaps (hmaps_e₀ hx))
+  exact e₁.continuousOn_symm.comp hcont_G hmaps_target
+
 /-- A chart-coordinate equality on a visible patch gives equality of the
 underlying manifold maps once both sides land in the chart source.  This is the
 topological equality transport used by chart-gluing arguments after model

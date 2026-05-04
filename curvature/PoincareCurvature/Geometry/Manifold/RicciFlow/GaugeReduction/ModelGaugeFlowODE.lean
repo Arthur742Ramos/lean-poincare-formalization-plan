@@ -1157,6 +1157,36 @@ theorem center_eventuallyWithin_mem_of_mem_spaceTime
   α.flow_eventuallyWithin_mem_of_mem_spaceTime_at
     (mem_closedBall_self r.2) ht hU hmem
 
+/-- Fixed-time spatial continuity extracted from the space-time continuity of a
+continuous local-flow package. -/
+theorem flow_timeSlice_continuousOn_initial
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ContinuousOn (fun x : V ↦ α.flow (x, t)) (closedBall x₀ r) := by
+  have hpair : ContinuousOn (fun x : V ↦ (x, t)) (closedBall x₀ r) := by
+    simpa using (continuousOn_id.prodMk
+      (continuousOn_const : ContinuousOn (fun _ : V ↦ t) (closedBall x₀ r)))
+  have hmaps : MapsTo (fun x : V ↦ (x, t))
+      (closedBall x₀ r) (closedBall x₀ r ×ˢ Icc tmin tmax) := by
+    intro x hx
+    exact ⟨hx, ht⟩
+  simpa [Function.comp_def] using α.continuousOn.comp hpair hmaps
+
+/-- Chart-lifted continuity for a fixed time slice of a continuous local-flow
+package.  This is the continuity counterpart of the lifted inverse-patch
+readouts used in manifold gluing. -/
+theorem flow_timeSlice_lifted_continuousOn
+    {X : Type*} [TopologicalSpace X]
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r)
+    (e₀ e₁ : OpenPartialHomeomorph X V) {U W : Set V}
+    (hUt : U ⊆ e₀.target) (hUball : U ⊆ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax)
+    (hWt : W ⊆ e₁.target)
+    (hmaps : MapsTo (fun y : V ↦ α.flow (y, t)) U W) :
+    ContinuousOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) (e₀.symm '' U) :=
+  RicciFlow.continuousOn_symm_image_of_openPartialHomeomorph_lifted_model
+    (X := X) (Y := V) e₀ e₁ (fun y : V ↦ α.flow (y, t))
+    hUt hWt ((α.flow_timeSlice_continuousOn_initial ht).mono hUball) hmaps
+
 /-- A continuous local-flow package is ordinarily continuous at interior points
 of the Picard cylinder. -/
 theorem flow_continuousAt_spaceTime_of_mem_ball_Ioo

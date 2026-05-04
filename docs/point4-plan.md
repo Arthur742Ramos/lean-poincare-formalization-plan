@@ -1403,7 +1403,10 @@ defined as `e₁.symm ∘ G ∘ e₀` from a chartwise Picard time-slice `G`.
 domain-shrink and lifted-model steps: a model open partial homeomorphism for
 `G`, source membership in the source chart target, and target membership in the
 target chart target directly produce a manifold-side open `BijOn` patch.  The
-same section now also transports overlap equalities:
+same section now also transports continuity and overlap equalities:
+`continuousOn_symm_image_of_openPartialHomeomorph_lifted_model` lifts
+model-side continuity of `G` on a chart patch to continuity of
+`e₁.symm ∘ G ∘ e₀` on the manifold-side source patch, and
 `eqOn_of_openPartialHomeomorph_coord_eqOn` turns equality in a common target
 chart into equality of the underlying manifold maps, while
 `eqOn_lifted_models_same_target_of_model_eqOn`,
@@ -1416,6 +1419,11 @@ and
 `VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_bijOn_common_Ioo_of_eventually_hasFDerivAt`
 turn the model time-slice local inverse theorem directly into a manifold-side
 open `BijOn` patch for `z ↦ e₁.symm (α.flow (e₀ z, t))`.  The
+continuous local-flow package now also exposes
+`ContinuousLocalFlowSolution.flow_timeSlice_continuousOn_initial` and
+`ContinuousLocalFlowSolution.flow_timeSlice_lifted_continuousOn`, extracting
+fixed-time spatial continuity from the model space-time continuity field and
+transporting it through charts.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
