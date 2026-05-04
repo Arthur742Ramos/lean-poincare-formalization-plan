@@ -1175,7 +1175,14 @@ matching product wrappers
 and
 `exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_Df_lipschitzOnWith_on_convex_state_forward_Ioo_of_mem_ball`
 feed this convex-state package directly into strict differentiability and the
-local inverse-function readouts at interior forward times.
+local inverse-function readouts at interior forward times. For Picard product
+flows selected with state preservation, the closed-ball specializations
+`ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_of_closedBall_estimates_forward_Icc_of_mem_ball`
+and
+`exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_of_closedBall_estimates_forward_Ioo_of_mem_ball`
+now discharge the convex-state membership hypothesis from the product Picard
+state ball and leave only closed-ball estimates for `Df`, Lipschitz `Df`, and
+the state-restricted derivative theorem for `f`.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
