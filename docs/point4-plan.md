@@ -1426,7 +1426,13 @@ continuous local-flow package now also exposes
 `ContinuousLocalFlowSolution.flow_timeSlice_continuousOn_initial` and
 `ContinuousLocalFlowSolution.flow_timeSlice_lifted_continuousOn`, extracting
 fixed-time spatial continuity from the model space-time continuity field and
-transporting it through charts.  The
+transporting it through charts.  The variational inverse-function layer now has
+the matching one-step common-`Ioo` forms
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_common_Ioo_of_hasStrictFDerivAt`
+and
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_common_Ioo_of_eventually_hasFDerivAt`,
+which shrink the source inside the open initial-data ball and return one lifted
+manifold patch carrying both `ContinuousOn` and `BijOn`.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
