@@ -556,8 +556,10 @@ packages the canonical stationary local solution attached to
   for Ricci-coordinate quadratic Christoffel contractions, plus supplied-Christoffel
   and primitive-input schematic local
   Ricci-DeTurck RHS entry/matrix bounded Holder estimates and whole
-  matrix-valued closure, from
-  entrywise control.  The companion
+  matrix-valued closure from entrywise control, plus finite product-cylinder
+  local primitive-estimate bridges that globalize the compact schematic RHS
+  closure before extracting determinant lower bounds, including finite-family
+  variants with one shared lower bound.  The companion
   `AnalyticPDE/Parabolic/LocalFrameGram.lean` module connects compact
   time-space local-frame Gram determinant nonvanishing to parabolic inverse
   Gram-matrix control, inverse-Gram vector/vector-inverse products,

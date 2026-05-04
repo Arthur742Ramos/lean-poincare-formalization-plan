@@ -11081,6 +11081,57 @@ theorem ricciDeTurck_schematic_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintyp
   exact ricciDeTurck_schematic (M := M) (D := D) (H := H)
     hM hD hH hδpos hdet
 
+/-- Local finite product-cylinder primitive estimates globalize the compact-domain schematic
+Ricci-DeTurck RHS closure.  This is the chartwise-local form used before passing to a compact
+determinant lower bound. -/
+theorem ricciDeTurck_schematic_of_finset_parabolicCylinder_cover_closedCylinder_variable
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)} {M : ℝ × X → Matrix n n 𝕜}
+    {D : ℝ × X → n → n → n → 𝕜} {H : ℝ × X → n → n → n → n → 𝕜}
+    (N : Finset (ℝ × X)) (timeRadius spaceRadius : ℝ × X → ℝ)
+    (hK : IsCompact K) (hα : 0 < α)
+    (htime_pos : ∀ y ∈ N, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ N, 0 < spaceRadius y)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicCylinder y (timeRadius y) (spaceRadius y))
+    (hMlocal : ∀ y ∈ N, ∀ a b,
+      ParabolicC0AlphaOn α (fun z => M z a b)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hDlocal : ∀ y ∈ N, ∀ a b c,
+      ParabolicC0AlphaOn α (fun z => D z a b c)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hHlocal : ∀ y ∈ N, ∀ a b i j,
+      ParabolicC0AlphaOn α (fun z => H z a b i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          let Γ : n → n → n → 𝕜 := fun a b c =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+                (D z b c l + D z c b l - D z l b c)
+          (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+            ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+              (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) :
+          Matrix n n 𝕜)) K := by
+  have hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) K := by
+    intro a b
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      N timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hMlocal y hy a b)
+  have hD : ∀ a b c, ParabolicC0AlphaOn α (fun z => D z a b c) K := by
+    intro a b c
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      N timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hDlocal y hy a b c)
+  have hH : ∀ a b i j, ParabolicC0AlphaOn α (fun z => H z a b i j) K := by
+    intro a b i j
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      N timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hHlocal y hy a b i j)
+  exact ricciDeTurck_schematic_of_isCompact_det_ne_zero
+    (M := M) (D := D) (H := H) hK hα hM hD hH hdet_ne
+
 /-- Compact-domain finite-family schematic Ricci-DeTurck RHS closure from entrywise primitive
 controls and pointwise nonvanishing metric determinants, with one determinant lower bound shared
 by the family. -/
@@ -11117,6 +11168,62 @@ theorem ricciDeTurck_schematic_family_of_isCompact_det_ne_zero
   intro r
   exact ricciDeTurck_schematic (M := M r) (D := D r) (H := H r)
     (hM r) (hD r) (hH r) hδpos (hdet r)
+
+/-- Local finite product-cylinder primitive estimates globalize a finite family of compact-domain
+schematic Ricci-DeTurck RHS closures, with one determinant lower bound shared by the family. -/
+theorem ricciDeTurck_schematic_family_of_finset_parabolicCylinder_cover_closedCylinder_variable
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {M : κ → ℝ × X → Matrix n n 𝕜}
+    {D : κ → ℝ × X → n → n → n → 𝕜}
+    {H : κ → ℝ × X → n → n → n → n → 𝕜}
+    (N : Finset (ℝ × X)) (timeRadius spaceRadius : ℝ × X → ℝ)
+    (hK : IsCompact K) (hα : 0 < α)
+    (htime_pos : ∀ y ∈ N, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ N, 0 < spaceRadius y)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicCylinder y (timeRadius y) (spaceRadius y))
+    (hMlocal : ∀ y ∈ N, ∀ r a b,
+      ParabolicC0AlphaOn α (fun z => M r z a b)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hDlocal : ∀ y ∈ N, ∀ r a b c,
+      ParabolicC0AlphaOn α (fun z => D r z a b c)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hHlocal : ∀ y ∈ N, ∀ r a b i j,
+      ParabolicC0AlphaOn α (fun z => H r z a b i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hdet_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × X =>
+            (fun i j =>
+              let Γ : n → n → n → 𝕜 := fun a b c =>
+                (2 : 𝕜)⁻¹ *
+                  ∑ l : n, ((M r z)⁻¹ : Matrix n n 𝕜) a l *
+                    (D r z b c l + D r z c b l - D r z l b c)
+              (∑ a : n, ∑ b : n, ((M r z)⁻¹ : Matrix n n 𝕜) a b *
+                  H r z a b i j) +
+                ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+                  (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) :
+              Matrix n n 𝕜)) K := by
+  have hM : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K := by
+    intro r a b
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      N timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hMlocal y hy r a b)
+  have hD : ∀ r a b c, ParabolicC0AlphaOn α (fun z => D r z a b c) K := by
+    intro r a b c
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      N timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hDlocal y hy r a b c)
+  have hH : ∀ r a b i j, ParabolicC0AlphaOn α (fun z => H r z a b i j) K := by
+    intro r a b i j
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      N timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hHlocal y hy r a b i j)
+  exact ricciDeTurck_schematic_family_of_isCompact_det_ne_zero
+    (M := M) (D := D) (H := H) hK hα hM hD hH hdet_ne
 
 /-- Compact-domain finite-family quantitative schematic Ricci-DeTurck RHS differences from
 bounded primitive-input differences, with one determinant lower bound shared by both metric
