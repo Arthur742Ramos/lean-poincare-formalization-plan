@@ -4692,6 +4692,18 @@ theorem spatialRemainder_hasDerivWithinAt_Ici_of_mem_Ico
   (α.spatialRemainder_hasDerivWithinAt hx hxh (Ico_subset_Icc_self hτ)).mono_of_mem_nhdsWithin
     (Icc_mem_nhdsGE_of_mem hτ)
 
+/-- Left-neighborhood derivative of the first-order spatial remainder on the
+left-open/right-closed Picard interval, in the shape required for backward-time
+Gronwall estimates. -/
+theorem spatialRemainder_hasDerivWithinAt_Iic_of_mem_Ioc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x h : V} (hx : x ∈ closedBall x₀ r) (hxh : x + h ∈ closedBall x₀ r)
+    {τ : ℝ} (hτ : τ ∈ Ioc tmin tmax) :
+    HasDerivWithinAt (fun s : ℝ => α.spatialRemainder x h s)
+      (α.spatialRemainderDeriv x h τ) (Iic τ) τ :=
+  (α.spatialRemainder_hasDerivWithinAt hx hxh (Ioc_subset_Icc_self hτ)).mono_of_mem_nhdsWithin
+    (Icc_mem_nhdsLE_of_mem hτ)
+
 /-- Grönwall endpoint form of the first-order remainder criterion.  If the
 remainder is eventually bounded by a zero-initial-error Grönwall bound whose
 forcing is `η(h) * ‖h‖` and `η(h) → 0`, then the fixed-time flow slice has
@@ -4716,6 +4728,47 @@ theorem flow_timeSlice_hasFDerivAt_of_gronwall_remainder_bound_nhds_zero
         ≤ gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ := hb
     _ ≤ ‖gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ‖ := le_abs_self _
     _ ≤ c * ‖h‖ := hg
+
+/-- Backward-time Grönwall estimate.  If the right endpoint value is bounded
+and the derivative inequality is available from the left, then the norm at any
+earlier point is bounded by the same Grönwall expression with elapsed time
+`b - x`. -/
+theorem norm_le_gronwallBound_of_norm_deriv_left_le
+    {f f' : ℝ → V} {δ K ε : ℝ} {a b : ℝ}
+    (hf : ContinuousOn f (Icc a b))
+    (hf' : ∀ x ∈ Ioc a b, HasDerivWithinAt f (f' x) (Iic x) x)
+    (hb : ‖f b‖ ≤ δ)
+    (bound : ∀ x ∈ Ioc a b, ‖f' x‖ ≤ K * ‖f x‖ + ε) :
+    ∀ x ∈ Icc a b, ‖f x‖ ≤ gronwallBound δ K ε (b - x) := by
+  have hmt1 : MapsTo Neg.neg (Icc (-b) (-a)) (Icc a b) :=
+    fun _ ht => ⟨le_neg.mp ht.2, neg_le.mp ht.1⟩
+  have hmt2 : MapsTo Neg.neg (Ico (-b) (-a)) (Ioc a b) :=
+    fun _ ht => ⟨lt_neg.mp ht.2, neg_le.mp ht.1⟩
+  have hmt3 (t : ℝ) : MapsTo Neg.neg (Ici t) (Iic (-t)) :=
+    fun _ ht' => mem_Iic.mpr (neg_le_neg ht')
+  have hrev_deriv :
+      ∀ y ∈ Ico (-b) (-a),
+        HasDerivWithinAt (fun s : ℝ => f (-s)) (-f' (-y)) (Ici y) y := by
+    intro y hy
+    convert HasFDerivWithinAt.comp_hasDerivWithinAt y (hf' (-y) (hmt2 hy))
+      (hasDerivAt_neg y).hasDerivWithinAt (hmt3 y) using 1
+    simp
+  have hrev_bound :
+      ∀ y ∈ Ico (-b) (-a),
+        ‖-f' (-y)‖ ≤ K * ‖(fun s : ℝ => f (-s)) y‖ + ε := by
+    intro y hy
+    simpa using bound (-y) (hmt2 hy)
+  have hbase : ‖(fun s : ℝ => f (-s)) (-b)‖ ≤ δ := by
+    simpa using hb
+  have hrev :=
+    norm_le_gronwallBound_of_norm_deriv_right_le
+      (f := fun s : ℝ => f (-s)) (f' := fun s : ℝ => -f' (-s))
+      (δ := δ) (K := K) (ε := ε) (a := -b) (b := -a)
+      (hf.comp continuousOn_neg hmt1) hrev_deriv hbase hrev_bound
+  intro x hx
+  have hx' : -x ∈ Icc (-b) (-a) := by
+    exact ⟨neg_le_neg hx.2, neg_le_neg hx.1⟩
+  simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hrev (-x) hx'
 
 /-- Grönwall-in-time criterion for the ordinary spatial derivative of a model
 flow time slice.  It remains to prove the derivative bound for the concrete
@@ -4787,6 +4840,385 @@ theorem flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_forward_Icc
     · exact hbound_h
   · filter_upwards [hmem] with h hxh
     exact α.spatialRemainder_initial_eq hx hxh
+
+/-- Backward-time Grönwall criterion for the ordinary spatial derivative of a
+model flow time slice.  The remainder is initialized at the right endpoint `b`
+and controlled on the interval by left-derivative bounds. -/
+theorem flow_timeSlice_hasFDerivAt_of_remainder_deriv_bound_left_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b t K : ℝ} {x : V} {η : V → ℝ≥0}
+    (ht : t ∈ Icc a b)
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hcont : ∀ᶠ h in 𝓝 (0 : V),
+      ContinuousOn (fun τ : ℝ => α.spatialRemainder x h τ) (Icc a b))
+    (hderiv_bound : ∀ᶠ h in 𝓝 (0 : V), ∃ R' : ℝ → V,
+      (∀ τ ∈ Ioc a b,
+        HasDerivWithinAt (fun s : ℝ => α.spatialRemainder x h s) (R' τ) (Iic τ) τ) ∧
+      (∀ τ ∈ Ioc a b,
+        ‖R' τ‖ ≤ K * ‖α.spatialRemainder x h τ‖ + (η h : ℝ) * ‖h‖))
+    (hterminal : ∀ᶠ h in 𝓝 (0 : V), α.spatialRemainder x h b = 0) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  have hbound : ∀ᶠ h in 𝓝 (0 : V),
+      ‖α.flow (x + h, t) - α.flow (x, t) - α.tangent x t h‖ ≤
+        gronwallBound 0 K ((η h : ℝ) * ‖h‖) (b - t) := by
+    filter_upwards [hcont, hderiv_bound, hterminal] with h hcont_h hderiv_bound_h
+      hterminal_h
+    rcases hderiv_bound_h with ⟨R', hderiv_h, hbound_h⟩
+    have hgr := norm_le_gronwallBound_of_norm_deriv_left_le
+      (f := fun τ : ℝ => α.spatialRemainder x h τ)
+      (f' := R') (δ := 0) (K := K) (ε := (η h : ℝ) * ‖h‖)
+      (a := a) (b := b) hcont_h hderiv_h ?_ hbound_h t ht
+    · simpa [spatialRemainder] using hgr
+    · simpa [hterminal_h]
+  exact α.flow_timeSlice_hasFDerivAt_of_gronwall_remainder_bound_nhds_zero hη hbound
+
+/-- Backward-time spatial derivative criterion specialized to the concrete
+model-flow remainder.  The analytic input is the pointwise bound on
+`spatialRemainderDeriv` over the backward Picard interval. -/
+theorem flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_backward_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ closedBall x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin (t₀ : ℝ))
+    {η : V → ℝ≥0}
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hmem : ∀ᶠ h in 𝓝 (0 : V), x + h ∈ closedBall x₀ r)
+    (hderiv_bound : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖α.spatialRemainderDeriv x h τ‖ ≤
+          K * ‖α.spatialRemainder x h τ‖ + (η h : ℝ) * ‖h‖) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  refine α.flow_timeSlice_hasFDerivAt_of_remainder_deriv_bound_left_Icc
+    (a := tmin) (b := (t₀ : ℝ)) (K := K) ht hη ?_ ?_ ?_
+  · filter_upwards [hmem] with h hxh
+    exact (α.spatialRemainder_continuousOn hx hxh).mono
+      (fun τ hτ => ⟨hτ.1, le_trans hτ.2 t₀.2.2⟩)
+  · filter_upwards [hmem, hderiv_bound] with h hxh hbound_h
+    refine ⟨fun τ : ℝ => α.spatialRemainderDeriv x h τ, ?_, ?_⟩
+    · intro τ hτ
+      exact α.spatialRemainder_hasDerivWithinAt_Iic_of_mem_Ioc hx hxh
+        ⟨hτ.1, le_trans hτ.2 t₀.2.2⟩
+    · exact hbound_h
+  · filter_upwards [hmem] with h hxh
+    exact α.spatialRemainder_initial_eq hx hxh
+
+/-- Interior-basepoint form of the backward-time spatial derivative criterion:
+small-perturbation membership in the closed Picard ball is discharged
+automatically from `x ∈ ball x₀ r`. -/
+theorem flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_backward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin (t₀ : ℝ))
+    {η : V → ℝ≥0}
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hderiv_bound : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖α.spatialRemainderDeriv x h τ‖ ≤
+          K * ‖α.spatialRemainder x h τ‖ + (η h : ℝ) * ‖h‖) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x :=
+  α.flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_backward_Icc
+    (ball_subset_closedBall hx) ht hη
+    (eventually_add_mem_closedBall_of_mem_ball (x₀ := x₀) (r := r) hx)
+    hderiv_bound
+
+/-- Backward-time spatial derivative criterion reduced to the vector-field
+Taylor remainder along the base and perturbed flow curves. -/
+theorem flow_timeSlice_hasFDerivAt_of_fieldRemainder_bound_backward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin (t₀ : ℝ))
+    {η : V → ℝ≥0}
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      ‖Df τ (α.flow (x, τ))‖ ≤ K)
+    (hfield_bound : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+          (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖ ≤
+          (η h : ℝ) * ‖h‖) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  refine α.flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_backward_Icc_of_mem_ball
+    (K := K) hx ht hη ?_
+  filter_upwards [hfield_bound] with h hfield_h
+  intro τ hτ
+  exact α.norm_spatialRemainderDeriv_le_of_fieldRemainder_bound
+    (hD_bound τ hτ) (hfield_h τ hτ)
+
+/-- Derivative oscillation of `Df` along the backward flow chord gives the
+relative Taylor-remainder estimate for the vector field. -/
+theorem eventually_fieldRemainder_bound_backward_Icc_of_Df_sub_bound_on_flow_segment
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} {θ : V → ℝ≥0}
+    (hder : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          HasFDerivWithinAt (f τ) (Df τ z)
+            (segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ))) z)
+    (hDf_sub : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          ‖Df τ z - Df τ (α.flow (x, τ))‖ ≤ (θ h : ℝ)) :
+    ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+          (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖ ≤
+          (θ h : ℝ) * ‖α.flow (x + h, τ) - α.flow (x, τ)‖ := by
+  filter_upwards [hder, hDf_sub] with h hder_h hDf_h
+  intro τ hτ
+  exact norm_fieldRemainder_le_of_Df_sub_bound_on_segment
+    (f := f) (Df := Df) (τ := τ)
+    (x := α.flow (x, τ)) (y := α.flow (x + h, τ)) (C := (θ h : ℝ))
+    (hder_h τ hτ) (hDf_h τ hτ)
+
+/-- Backward-time spatial derivative criterion in a relative Taylor-remainder
+form. -/
+theorem flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_backward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin (t₀ : ℝ))
+    {L : ℝ≥0} {θ : V → ℝ≥0}
+    (hθ : Filter.Tendsto (fun h : V => (θ h : ℝ)) (𝓝 0) (𝓝 0))
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      ‖Df τ (α.flow (x, τ))‖ ≤ K)
+    (hflow_lip : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖)
+    (hfield_relative : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+          (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖ ≤
+          (θ h : ℝ) * ‖α.flow (x + h, τ) - α.flow (x, τ)‖) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  let η : V → ℝ≥0 := fun h => θ h * L
+  have hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0) := by
+    simpa [η, NNReal.coe_mul] using
+      hθ.mul (tendsto_const_nhds (x := (L : ℝ)))
+  refine α.flow_timeSlice_hasFDerivAt_of_fieldRemainder_bound_backward_Icc_of_mem_ball
+    hx ht hη hD_bound ?_
+  filter_upwards [hflow_lip, hfield_relative] with h hflow_h hfield_h
+  intro τ hτ
+  calc
+    ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+        (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖
+        ≤ (θ h : ℝ) * ‖α.flow (x + h, τ) - α.flow (x, τ)‖ :=
+          hfield_h τ hτ
+    _ ≤ (θ h : ℝ) * ((L : ℝ) * ‖h‖) := by
+          exact mul_le_mul_of_nonneg_left (hflow_h τ hτ) (NNReal.coe_nonneg (θ h))
+    _ = (η h : ℝ) * ‖h‖ := by
+          simp [η, NNReal.coe_mul]
+          ring
+
+/-- Backward-time spatial derivative criterion reduced to derivative
+oscillation of `Df` along the flow chord. -/
+theorem flow_timeSlice_hasFDerivAt_of_Df_sub_bound_on_flow_segment_backward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin (t₀ : ℝ))
+    {L : ℝ≥0} {θ : V → ℝ≥0}
+    (hθ : Filter.Tendsto (fun h : V => (θ h : ℝ)) (𝓝 0) (𝓝 0))
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      ‖Df τ (α.flow (x, τ))‖ ≤ K)
+    (hflow_lip : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖)
+    (hder : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          HasFDerivWithinAt (f τ) (Df τ z)
+            (segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ))) z)
+    (hDf_sub : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          ‖Df τ z - Df τ (α.flow (x, τ))‖ ≤ (θ h : ℝ)) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  refine α.flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_backward_Icc_of_mem_ball
+    (L := L) hx ht hθ hD_bound hflow_lip ?_
+  exact α.eventually_fieldRemainder_bound_backward_Icc_of_Df_sub_bound_on_flow_segment
+    hder hDf_sub
+
+/-- A Lipschitz bound for `Df` on a backward state tube containing the flow
+chord turns flow-separation control into derivative-oscillation control along
+that chord. -/
+theorem eventually_Df_sub_bound_on_flow_segment_backward_Icc_of_lipschitzOnWith
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} {KD L : ℝ≥0} {state : ℝ → Set V}
+    (hDf_lip : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      LipschitzOnWith KD (Df τ) (state τ))
+    (hsegment_mem : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)) ⊆ state τ)
+    (hflow_lip : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖) :
+    ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          ‖Df τ z - Df τ (α.flow (x, τ))‖ ≤ ((KD * L : ℝ≥0) : ℝ) * ‖h‖ := by
+  filter_upwards [hsegment_mem, hflow_lip] with h hsegment_h hflow_h
+  intro τ hτ z hz
+  have hbase_mem : α.flow (x, τ) ∈ state τ :=
+    hsegment_h τ hτ (left_mem_segment (𝕜 := ℝ) _ _)
+  have hz_mem : z ∈ state τ := hsegment_h τ hτ hz
+  have hdist :=
+    (hDf_lip τ hτ).dist_le_mul z hz_mem (α.flow (x, τ)) hbase_mem
+  have hzdist :
+      dist z (α.flow (x, τ)) ≤
+        dist (α.flow (x + h, τ)) (α.flow (x, τ)) := by
+    have hzball :=
+      segment_subset_closedBall_left (α.flow (x, τ)) (α.flow (x + h, τ)) hz
+    rw [mem_closedBall] at hzball
+    simpa [dist_comm] using hzball
+  have hflow_dist :
+      dist (α.flow (x + h, τ)) (α.flow (x, τ)) ≤ (L : ℝ) * ‖h‖ := by
+    simpa [dist_eq_norm] using hflow_h τ hτ
+  calc
+    ‖Df τ z - Df τ (α.flow (x, τ))‖
+        = dist (Df τ z) (Df τ (α.flow (x, τ))) := by rw [dist_eq_norm]
+    _ ≤ (KD : ℝ) * dist z (α.flow (x, τ)) := hdist
+    _ ≤ (KD : ℝ) * dist (α.flow (x + h, τ)) (α.flow (x, τ)) := by
+          exact mul_le_mul_of_nonneg_left hzdist (by exact_mod_cast KD.2)
+    _ ≤ (KD : ℝ) * ((L : ℝ) * ‖h‖) := by
+          exact mul_le_mul_of_nonneg_left hflow_dist (by exact_mod_cast KD.2)
+    _ = ((KD * L : ℝ≥0) : ℝ) * ‖h‖ := by
+          simp [NNReal.coe_mul, mul_assoc]
+
+/-- Backward-time spatial derivative criterion using a state-tube Lipschitz
+bound for `Df`, plus segment membership of the flow chord in that tube. -/
+theorem flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_flow_segment_backward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin (t₀ : ℝ))
+    {KD L : ℝ≥0} {state : ℝ → Set V}
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      ‖Df τ (α.flow (x, τ))‖ ≤ K)
+    (hflow_lip : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖)
+    (hDf_lip : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      LipschitzOnWith KD (Df τ) (state τ))
+    (hsegment_mem : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)) ⊆ state τ)
+    (hder : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          HasFDerivWithinAt (f τ) (Df τ z)
+            (segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ))) z) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  let θ : V → ℝ≥0 := fun h => (KD * L) * ‖h‖₊
+  have hθ : Filter.Tendsto (fun h : V => (θ h : ℝ)) (𝓝 0) (𝓝 0) := by
+    simpa [θ, NNReal.coe_mul, mul_assoc] using
+      (tendsto_const_nhds (x := ((KD * L : ℝ≥0) : ℝ))).mul
+        (tendsto_norm_zero : Filter.Tendsto (fun h : V => ‖h‖) (𝓝 0) (𝓝 0))
+  have hDf_sub_real :=
+    α.eventually_Df_sub_bound_on_flow_segment_backward_Icc_of_lipschitzOnWith
+      hDf_lip hsegment_mem hflow_lip
+  have hDf_sub : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          ‖Df τ z - Df τ (α.flow (x, τ))‖ ≤ (θ h : ℝ) := by
+    simpa [θ, NNReal.coe_mul, mul_assoc] using hDf_sub_real
+  exact α.flow_timeSlice_hasFDerivAt_of_Df_sub_bound_on_flow_segment_backward_Icc_of_mem_ball
+    (L := L) hx ht hθ hD_bound hflow_lip hder hDf_sub
+
+/-- If the flow stays in a time-dependent state set for all initial data in the
+Picard ball, then small perturbations of an interior initial point also stay in
+that state set on the backward Picard interval. -/
+theorem eventually_flow_mem_state_backward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r) {state : ℝ → Set V}
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      α.flow (y, τ) ∈ state τ) :
+    ∀ᶠ h in 𝓝 (0 : V), ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      α.flow (x + h, τ) ∈ state τ := by
+  filter_upwards [eventually_add_mem_closedBall_of_mem_ball (x₀ := x₀) (r := r) hx] with
+    h hxh
+  intro τ hτ
+  exact hmem (x + h) hxh τ hτ
+
+/-- Convex state-tube membership turns state preservation of the two endpoint
+flow curves into membership of the whole backward flow chord. -/
+theorem eventually_flow_segment_subset_state_backward_Icc_of_convex_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r) {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Ioc tmin (t₀ : ℝ), Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      α.flow (y, τ) ∈ state τ) :
+    ∀ᶠ h in 𝓝 (0 : V), ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)) ⊆ state τ := by
+  filter_upwards [eventually_add_mem_closedBall_of_mem_ball (x₀ := x₀) (r := r) hx] with
+    h hxh
+  intro τ hτ
+  exact (hconv τ hτ).segment_subset
+    (hmem x (ball_subset_closedBall hx) τ hτ) (hmem (x + h) hxh τ hτ)
+
+/-- A derivative statement on a backward state tube restricts to the flow chord
+once that chord is contained in the tube. -/
+theorem eventually_hasFDerivWithinAt_on_flow_segment_backward_Icc_of_state
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} {state : ℝ → Set V}
+    (hsegment_mem : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)) ⊆ state τ)
+    (hder : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          HasFDerivWithinAt (f τ) (Df τ z)
+            (segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ))) z := by
+  filter_upwards [hsegment_mem] with h hsegment_h
+  intro τ hτ z hz
+  exact (hder τ hτ z (hsegment_h τ hτ hz)).mono (hsegment_h τ hτ)
+
+/-- Backward-time spatial derivative criterion using a convex state tube.  State
+preservation supplies the flow-chord membership, and a derivative statement on
+the state tube supplies the within-segment derivative required by the mean-value
+estimate. -/
+theorem flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin (t₀ : ℝ))
+    {KD L : ℝ≥0} {state : ℝ → Set V}
+    (hflow_lip : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖)
+    (hconv : ∀ τ ∈ Ioc tmin (t₀ : ℝ), Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      α.flow (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  have hD_bound' : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      ‖Df τ (α.flow (x, τ))‖ ≤ K := by
+    intro τ hτ
+    exact hD_bound τ hτ (α.flow (x, τ))
+      (hmem x (ball_subset_closedBall hx) τ hτ)
+  have hsegment_mem :
+      ∀ᶠ h in 𝓝 (0 : V), ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)) ⊆ state τ :=
+    α.eventually_flow_segment_subset_state_backward_Icc_of_convex_of_mem_ball
+      hx hconv hmem
+  have hder_segment :
+      ∀ᶠ h in 𝓝 (0 : V), ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          HasFDerivWithinAt (f τ) (Df τ z)
+            (segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ))) z :=
+    α.eventually_hasFDerivWithinAt_on_flow_segment_backward_Icc_of_state hsegment_mem hder
+  exact α.flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_flow_segment_backward_Icc_of_mem_ball
+    (KD := KD) (L := L) (state := state) hx ht hD_bound' hflow_lip hDf_lip
+    hsegment_mem hder_segment
 
 /-- Interior-basepoint form of the forward-time spatial derivative criterion:
 small-perturbation membership in the closed Picard ball is discharged
@@ -5134,6 +5566,33 @@ theorem ofProduct_eventually_flow_norm_sub_le_mul_forward_Icc_of_mem_ball
   have hdist := (hL τ hτIcc).dist_le_mul (x + h) hxh x hx_closed
   simpa [dist_eq_norm, add_comm, add_left_comm, add_assoc] using hdist
 
+/-- Product-Picard Lipschitz dependence supplies the backward-time flow
+separation estimate required by the relative field-remainder criterion. -/
+theorem ofProduct_eventually_flow_norm_sub_le_mul_backward_Icc_of_mem_ball
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r) :
+    ∃ L : ℝ≥0, ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖(ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x + h, τ) -
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x, τ)‖ ≤
+          (L : ℝ) * ‖h‖ := by
+  obtain ⟨L, hL⟩ := ofProduct_flow_exists_lipschitzOnWith_time_uniform β hball
+  refine ⟨L, ?_⟩
+  have hx_closed : x ∈ closedBall x₀ r := ball_subset_closedBall hx
+  filter_upwards [eventually_add_mem_closedBall_of_mem_ball (x₀ := x₀) (r := r) hx] with
+    h hxh
+  intro τ hτ
+  have hτIcc : τ ∈ Icc tmin tmax :=
+    ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩
+  have hdist := (hL τ hτIcc).dist_le_mul (x + h) hxh x hx_closed
+  simpa [dist_eq_norm, add_comm, add_left_comm, add_assoc] using hdist
+
 /-- Product-Picard version of the relative field-remainder criterion.  The
 flow-separation Lipschitz estimate is supplied by the product Picard package,
 so callers only provide the vector-field Taylor remainder and the base `Df`
@@ -5432,6 +5891,92 @@ theorem ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_conv
     simpa [α] using hy_der
   have hclosed : closedBall x₀ r ∈ 𝓝 x := Metric.closedBall_mem_nhds_of_mem hx
   have ht_all : t ∈ Icc tmin tmax := ⟨le_trans t₀.2.1 ht.1, ht.2⟩
+  have hcont : ContinuousAt (fun y : V => α.tangent y t) x := by
+    simpa [α] using
+      (ofProduct_tangent_continuousOn_initialBall_time β hball ht_all).continuousAt hclosed
+  exact hasStrictFDerivAt_of_hasFDerivAt_of_continuousAt hder_eventually hcont
+
+/-- Product-Picard version of the backward convex state-tube criterion.  The
+product flow supplies Lipschitz dependence on the initial point, while the
+backward convex-state hypotheses prove ordinary spatial differentiability. -/
+theorem ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin (t₀ : ℝ))
+    {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Ioc tmin (t₀ : ℝ), Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    HasFDerivAt
+      (fun y : V =>
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow (y, t))
+      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent x t)
+      x := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  obtain ⟨L, hflow_lip⟩ :=
+    ofProduct_eventually_flow_norm_sub_le_mul_backward_Icc_of_mem_ball β hball hx
+  have hflow_lip' : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖ := by
+    simpa [α] using hflow_lip
+  have hmem' : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      α.flow (y, τ) ∈ state τ := by
+    simpa [α] using hmem
+  simpa [α] using
+    α.flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+      (KD := KD) (L := L) (state := state) hx ht hflow_lip' hconv hmem'
+      hD_bound hDf_lip hder
+
+/-- Product-Picard convex state-tube criterion for strict spatial
+differentiability of a backward time slice at an interior initial point. -/
+theorem ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin (t₀ : ℝ))
+    {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Ioc tmin (t₀ : ℝ), Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    HasStrictFDerivAt
+      (fun y : V =>
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow (y, t))
+      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent x t)
+      x := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  have hopen : ball x₀ r ∈ 𝓝 x := isOpen_ball.mem_nhds hx
+  have hder_eventually : ∀ᶠ y in 𝓝 x,
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y := by
+    filter_upwards [hopen] with y hy
+    have hy_der :=
+      ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+        (β := β) hball hy ht hconv hmem hD_bound hDf_lip hder
+    simpa [α] using hy_der
+  have hclosed : closedBall x₀ r ∈ 𝓝 x := Metric.closedBall_mem_nhds_of_mem hx
+  have ht_all : t ∈ Icc tmin tmax := ⟨ht.1, le_trans ht.2 t₀.2.2⟩
   have hcont : ContinuousAt (fun y : V => α.tangent y t) x := by
     simpa [α] using
       (ofProduct_tangent_continuousOn_initialBall_time β hball ht_all).continuousAt hclosed
@@ -5878,6 +6423,101 @@ theorem exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_Df_lipschitzOnW
     simpa [α] using
       ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball
         (β := β) hball hx ht_forward hconv hmem hD_bound hDf_lip hder
+  have hD_op_bound' : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ Kop := by
+    intro τ hτ
+    simpa [α] using hD_op_bound τ hτ
+  simpa [α] using
+    α.exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
+      (K := Kop) (ball_subset_closedBall hx) ht hD_op_bound' hstrict
+
+/-- Product-Picard convex state-tube criterion for the inverse-function theorem
+readout of a backward time slice.  The convex-state hypotheses prove strict
+spatial differentiability on `Ioc tmin t₀`, while the separate operator-norm
+bound along the base curve makes the variational tangent map invertible. -/
+theorem ofProduct_flow_timeSlice_map_nhds_eq_of_Df_lipschitzOnWith_on_convex_state_backward_Ioo_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {Kop : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hD_op_bound : ∀ τ ∈ Ioo tmin tmax,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ Kop)
+    {K : ℝ} {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Ioc tmin (t₀ : ℝ), Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    Filter.map
+        (fun y : V =>
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (y, t))
+        (𝓝 x) =
+      𝓝 ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (x, t)) := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  have hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t)) (α.tangent x t) x := by
+    simpa [α] using
+      ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+        (β := β) hball hx ht_backward hconv hmem hD_bound hDf_lip hder
+  have hD_op_bound' : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ Kop := by
+    intro τ hτ
+    simpa [α] using hD_op_bound τ hτ
+  simpa [α] using
+    α.flow_timeSlice_map_nhds_eq_of_hasStrictFDerivAt_Ioo
+      (K := Kop) (ball_subset_closedBall hx) ht hD_op_bound' hstrict
+
+/-- Product-Picard convex state-tube criterion for producing the local
+open-partial-homeomorphism associated to a backward time slice. -/
+theorem exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_Df_lipschitzOnWith_on_convex_state_backward_Ioo_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {Kop : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax) (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hD_op_bound : ∀ τ ∈ Ioo tmin tmax,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ Kop)
+    {K : ℝ} {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Ioc tmin (t₀ : ℝ), Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    ∃ φ : OpenPartialHomeomorph V V,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) ∧
+        x ∈ φ.source ∧
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (x, t) ∈ φ.target := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  have hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t)) (α.tangent x t) x := by
+    simpa [α] using
+      ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+        (β := β) hball hx ht_backward hconv hmem hD_bound hDf_lip hder
   have hD_op_bound' : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ Kop := by
     intro τ hτ
     simpa [α] using hD_op_bound τ hτ
