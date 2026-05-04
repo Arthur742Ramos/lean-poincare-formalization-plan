@@ -1398,7 +1398,11 @@ also has the dual lifted-model route,
 `injOn_symm_image_of_openPartialHomeomorph_lifted_model_injOn`,
 `bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn`, and the two
 corresponding `exists_open_nhds_*_lifted_model_*` patch readouts, for maps
-defined as `e₁.symm ∘ G ∘ e₀` from a chartwise Picard time-slice `G`.  The
+defined as `e₁.symm ∘ G ∘ e₀` from a chartwise Picard time-slice `G`.
+`exists_open_nhds_bijOn_of_lifted_openPartialHomeomorph_model` composes the
+domain-shrink and lifted-model steps: a model open partial homeomorphism for
+`G`, source membership in the source chart target, and target membership in the
+target chart target directly produce a manifold-side open `BijOn` patch.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.

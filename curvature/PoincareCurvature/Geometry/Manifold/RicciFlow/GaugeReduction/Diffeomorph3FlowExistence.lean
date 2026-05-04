@@ -254,6 +254,25 @@ theorem exists_open_nhds_bijOn_of_openPartialHomeomorph_lifted_model_bijOn
     bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn
       e₀ e₁ G hUt hWt hbij⟩
 
+/-- Direct chart lift of a model open-partial-homeomorphism inverse patch:
+shrink the model patch to the source and target chart targets, then transport
+the resulting bijective patch through the two charts. -/
+theorem exists_open_nhds_bijOn_of_lifted_openPartialHomeomorph_model
+    (e₀ e₁ : OpenPartialHomeomorph X Y) {G : Y → Y}
+    {φ : OpenPartialHomeomorph Y Y} (hφ : (φ : Y → Y) = G)
+    {x : X} (hxsource : x ∈ e₀.source) (hxφ : e₀ x ∈ φ.source)
+    (hGtarget : G (e₀ x) ∈ e₁.target) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ IsOpen Wm ∧
+        (fun z : X ↦ e₁.symm (G (e₀ z))) x ∈ Wm ∧
+          BijOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um Wm := by
+  rcases exists_open_nhds_bijOn_subset_of_openPartialHomeomorph
+      (X := Y) (g := G) (x := e₀ x) (φ := φ) hφ hxφ
+      e₀.open_target (e₀.map_source hxsource) e₁.open_target hGtarget with
+    ⟨U, W, hUopen, hxU, hUt, hWopen, _hxW, hWt, hbij⟩
+  exact exists_open_nhds_bijOn_of_openPartialHomeomorph_lifted_model_bijOn
+    e₀ e₁ G hxsource hUopen hUt hxU hWopen hWt hbij
+
 end OpenPartialHomeomorphTransport
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
