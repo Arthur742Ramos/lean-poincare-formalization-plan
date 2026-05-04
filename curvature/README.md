@@ -788,7 +788,12 @@ now packages the matching intrinsic boundary
      theorem packages, including intrinsic and ordinary theorem-family witnesses
      from a family of symmetric-carrier interval closure data. Families of global
      and closed-interval `RicciDeTurckChartClosureData` now have the same
-     proof-level intrinsic and ordinary theorem-family wrappers. Ambient interval
+     proof-level intrinsic and ordinary theorem-family wrappers. The global,
+     closed-interval, and genuine symmetric-carrier closure records now also
+     project directly to chosen-background DeTurck theorem families, and the
+     ambient global/closed-interval records expose single-IVP proof-level
+     chosen-background package witnesses before any intrinsic or ordinary
+     projection. Ambient interval
      closure data also now has proof-level constructors for genuine
      symmetric-carrier closure, including the metric-cone shrink route. The
      density-based interval restricted symmetric carrier is now proved equal to

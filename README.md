@@ -372,6 +372,11 @@ packages the canonical stationary local solution attached to
   theorem-package route and both no-terminal-fit local uniqueness readouts
   together, so downstream closure code no longer has to coordinate separate
   metric-cone choices for existence packages and local uniqueness.
+  Global, closed-interval, and genuine symmetric-carrier chart-closure data now
+  also project directly to chosen-background DeTurck theorem families, with
+  single-IVP `Nonempty` readouts for the global and closed-interval closure
+  records, so downstream gauge routes can consume the chosen package without
+  first passing through the intrinsic or ordinary point-4 projections.
   The ordinary, intrinsic,
   chosen-background, gauge-reduced, and scalar-derivative theorem families expose
   package-level connection uniqueness on common intervals. The remaining gap to
