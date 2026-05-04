@@ -1089,6 +1089,19 @@ the time-slice map is supplied and identified with the variational tangent map,
 mapping equality and
 `exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo` packages
 the corresponding local open partial homeomorphism, with common-`Ioo` variants.
+This strict derivative input has now been reduced one step further in the model
+layer: `flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt` uses
+Mathlib's real `C¹`-implies-strict-differentiability theorem, so ordinary
+spatial derivatives of nearby time slices plus continuity of
+`y ↦ α.tangent y t` imply the strict derivative required by the inverse
+function theorem. The corresponding
+`..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
+`C¹` package directly. For product-Picard output, the new
+`ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall`
+and its neighborhood/open-partial-homeomorphism variants obtain tangent-map
+continuity from the existing product-flow Lipschitz dependence, so an ordinary
+spatial derivative proof on the initial-data ball is enough at every interior
+base point of that ball.
 This is a model-level infinitesimal invertibility input, but it still has to be
 lifted through charts and combined with manifold-level flow compatibility before
 producing `C³` diffeomorphism slices.
