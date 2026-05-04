@@ -1226,6 +1226,13 @@ open-partial-homeomorphism package, bijective open patch, and positive
 source-ball patch, via the corresponding
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_*_of_hasFDerivWithinAt_backward_Ioo_of_le_radius`
 family.
+The localized backward bridge now also has the common-`Ioo` overlap forms
+needed when the shrunk Picard interval is used inside a larger chart overlap:
+the state-preserving Picard layer exposes the corresponding
+`ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_*_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius`
+family, and the componentwise closed-ball continuity layer exposes the matching
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_*_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius`
+family.
 This strict derivative input has now been reduced one step further in the model
 layer: `flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt` uses
 Mathlib's real `C¹`-implies-strict-differentiability theorem, so ordinary
