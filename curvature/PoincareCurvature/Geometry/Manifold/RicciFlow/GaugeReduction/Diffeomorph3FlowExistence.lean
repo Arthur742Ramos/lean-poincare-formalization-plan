@@ -689,6 +689,36 @@ theorem eval_eq_of_autonomous_Ioo_boundaryless
     (G₁.maps3 t) x = (G₂.maps3 t) x :=
   G₁.eqOn_eval_of_autonomous_Ioo_boundaryless G₂ ht₀ hX x ht
 
+/-- Time-slice diffeomorphism form of autonomous raw gauge-flow uniqueness on
+an open interval. -/
+theorem eqOn_maps3_of_autonomous_Ioo_boundaryless
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin tmax t₀ : ℝ}
+    (G₁ G₂ :
+      Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) (Ioo tmin tmax) t₀)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X)) :
+    EqOn G₁.maps3 G₂.maps3 (Ioo tmin tmax) := by
+  intro t ht
+  apply DFunLike.ext
+  intro x
+  exact G₁.eval_eq_of_autonomous_Ioo_boundaryless G₂ ht₀ hX ht x
+
+/-- Pointwise time-slice diffeomorphism form of autonomous raw gauge-flow
+uniqueness on an open interval. -/
+theorem maps3_eq_of_autonomous_Ioo_boundaryless
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin tmax t₀ t : ℝ}
+    (G₁ G₂ :
+      Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) (Ioo tmin tmax) t₀)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Ioo tmin tmax) :
+    G₁.maps3 t = G₂.maps3 t :=
+  G₁.eqOn_maps3_of_autonomous_Ioo_boundaryless G₂ ht₀ hX ht
+
 /-- Two anchored raw `C³` autonomous gauge flows for the same `C¹` vector field
 agree on a closed interval once the anchor lies in its interior.  The endpoint
 identification is the continuous extension of Mathlib's boundaryless
@@ -742,6 +772,36 @@ theorem eval_eq_of_autonomous_Icc_boundaryless
     (x : M) :
     (G₁.maps3 t) x = (G₂.maps3 t) x :=
   G₁.eqOn_eval_of_autonomous_Icc_boundaryless G₂ ht₀ hX x ht
+
+/-- Time-slice diffeomorphism form of autonomous raw gauge-flow uniqueness on a
+closed interval with the anchor in the interior. -/
+theorem eqOn_maps3_of_autonomous_Icc_boundaryless
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin tmax t₀ : ℝ}
+    (G₁ G₂ :
+      Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) (Icc tmin tmax) t₀)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X)) :
+    EqOn G₁.maps3 G₂.maps3 (Icc tmin tmax) := by
+  intro t ht
+  apply DFunLike.ext
+  intro x
+  exact G₁.eval_eq_of_autonomous_Icc_boundaryless G₂ ht₀ hX ht x
+
+/-- Pointwise time-slice diffeomorphism form of autonomous raw gauge-flow
+uniqueness on a closed interval with the anchor in the interior. -/
+theorem maps3_eq_of_autonomous_Icc_boundaryless
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin tmax t₀ t : ℝ}
+    (G₁ G₂ :
+      Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) (Icc tmin tmax) t₀)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Icc tmin tmax) :
+    G₁.maps3 t = G₂.maps3 t :=
+  G₁.eqOn_maps3_of_autonomous_Icc_boundaryless G₂ ht₀ hX ht
 
 /-- Reinterpret a raw `C³` gauge-flow witness for an equal vector field along the flow image. -/
 def congr_vectorField

@@ -1494,7 +1494,11 @@ their common open Picard interval. The same bridge now extends this equality to
 closed Picard intervals when the anchor is in the interior:
 `eqOn_eval_of_autonomous_Icc_boundaryless` /
 `eval_eq_of_autonomous_Icc_boundaryless` use raw-flow continuity and
-`closure_Ioo` to identify the endpoint values as well.
+`closure_Ioo` to identify the endpoint values as well. Both the open- and
+closed-interval bridges now also expose `maps3`-level uniqueness readouts
+(`eqOn_maps3_of_autonomous_*_boundaryless` and
+`maps3_eq_of_autonomous_*_boundaryless`), so downstream pullback-family
+arguments can rewrite bundled time-slice diffeomorphisms directly.
 
 **Module location.** The Banach-model bridge lives in
 `Geometry/Manifold/RicciFlow/GaugeReduction/ModelGaugeFlowODE.lean`.  The final
