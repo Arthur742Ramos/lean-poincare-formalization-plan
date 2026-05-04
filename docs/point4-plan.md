@@ -1150,7 +1150,11 @@ oscillation on the flow chord:
 and
 `ofProduct_flow_timeSlice_hasFDerivAt_of_Df_sub_bound_on_flow_segment_forward_Icc_of_mem_ball`
 consume eventual bounds for `‖Df(τ,z)-Df(τ,flow(x,τ))‖` on each segment between
-the base and perturbed flow points.
+the base and perturbed flow points. A further state-tube form,
+`eventually_Df_sub_bound_on_flow_segment_of_lipschitzOnWith` and
+`ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_flow_segment_forward_Icc_of_mem_ball`,
+derives this oscillation bound from a Lipschitz estimate for `Df` on any state
+tube containing the flow chord.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
