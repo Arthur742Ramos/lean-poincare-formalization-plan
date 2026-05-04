@@ -5278,6 +5278,14 @@ def forInitialValueProblem
       (E := E) (H := H) (I := I) (M := M) ivp where
   flow := G.flow ivp
 
+@[simp] theorem forInitialValueProblem_flow
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((G.forInitialValueProblem ivp).flow sol) = G.flow ivp sol := rfl
+
 /-- Restrict proof-level theorem-family raw gauge-flow existence to one
 initial-value problem. -/
 theorem nonempty_forInitialValueProblem

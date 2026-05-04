@@ -2568,6 +2568,38 @@ def gauge
     (t₀ := ivp.initialTime)
     (G.maps3 ivp sol) (G.anchored ivp sol) (G.satisfies ivp sol)
 
+@[simp] theorem forInitialValueProblem_maps3
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((G.forInitialValueProblem ivp).maps3 sol) = G.maps3 ivp sol := rfl
+
+@[simp] theorem forInitialValueProblem_anchored
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((G.forInitialValueProblem ivp).anchored sol) = G.anchored ivp sol := rfl
+
+@[simp] theorem forInitialValueProblem_satisfies
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((G.forInitialValueProblem ivp).satisfies sol) = G.satisfies ivp sol := rfl
+
+@[simp] theorem forInitialValueProblem_gauge
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((G.forInitialValueProblem ivp).gauge sol) = G.gauge ivp sol := rfl
+
 /-- The same anchored gauge, constructed through the derivative-family view.  This
 matches derivative-level APIs whose scalar derivative formula references
 `of_hasMFDerivWithinAt`. -/

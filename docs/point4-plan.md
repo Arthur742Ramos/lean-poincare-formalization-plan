@@ -1529,7 +1529,10 @@ flow-existence packages now also expose constructor readouts for the induced
 fixed-IVP and theorem-family geometric gauge-flow bundles, including the
 underlying `maps3`, anchoring, gauge-flow equation, and anchored gauge object,
 so downstream endpoint arguments can rewrite from raw ODE output to geometric
-gauge data without unfolding the adapters.
+gauge data without unfolding the adapters. The theorem-family geometric and raw
+existence bundles now also expose fixed-IVP restriction readouts, so family
+theorems can specialize to one initial-value problem without leaving hidden
+constructor redexes in later proofs.
 
 **Module location.** The Banach-model bridge lives in
 `Geometry/Manifold/RicciFlow/GaugeReduction/ModelGaugeFlowODE.lean`.  The final
