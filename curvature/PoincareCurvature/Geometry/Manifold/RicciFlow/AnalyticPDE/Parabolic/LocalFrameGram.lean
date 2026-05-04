@@ -8586,6 +8586,62 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_of_finset_parabolicCylinder_
     S timeRadius spaceRadius hK hα htime_pos hspace_pos hcover hGlocal hDlocal hHclocal
     hdet_ne
 
+/-- Point-dependent local product-cylinder primitive estimates for one local frame globalize to
+compact parabolic `C^{0,α}` control of the schematic local Ricci-DeTurck coordinate right-hand
+side.  Compactness chooses the finite subcover internally. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_of_isCompact_of_local_closedCylinder_variable
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    (timeRadius spaceRadius : ℝ × M → ℝ)
+    (htime_pos : ∀ y ∈ K, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ K, 0 < spaceRadius y)
+    {D : ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hGlocal : ∀ y ∈ K, ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hDlocal : ∀ y ∈ K, ∀ i j k,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => D z i j k)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hHclocal : ∀ y ∈ K, ∀ a c i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Hc z a c i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y))) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × M =>
+        (fun i j =>
+          let Γ : ι → ι → ι → ℝ := fun a c d =>
+            (2 : ℝ)⁻¹ *
+              ∑ l : ι,
+                ((show Matrix ι ι ℝ from
+                    CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                    Matrix ι ι ℝ) a l *
+                  (D z c d l + D z d c l - D z l c d)
+          (∑ a : ι, ∑ c : ι,
+              ((show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)⁻¹ :
+                  Matrix ι ι ℝ) a c * Hc z a c i j) +
+            ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+              (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+          Matrix ι ι ℝ)) K := by
+  have hdet_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det ≠ 0 := by
+    intro z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) e b (hKbase hz)
+  exact ricciDeTurck_schematic_of_isCompact_of_local_closedCylinder_variable
+    (K := K)
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (D := D) (H := Hc)
+    hK hα timeRadius spaceRadius htime_pos hspace_pos hGlocal hDlocal hHclocal hdet_ne
+
 /-- Spatial boundedness and spatial Holder estimates for local-frame Gram entries, together with
 parabolic control of the first- and second-derivative coefficient arrays, lift to parabolic
 `C^{0,α}` control of the schematic local Ricci-DeTurck coordinate right-hand side on compact
@@ -11899,6 +11955,74 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_entrywise_of_finset_para
       S timeRadius spaceRadius hK hα htime_pos hspace_pos hcover hGlocal hNlocal
       hGdiffLocal hDlocal hEarrlocal hDdiffLocal hKclocal hHdiffLocal hdetG_ne
       hdetN_ne
+
+/-- Point-dependent local product-cylinder primitive-difference estimates for one local frame
+globalize to compact existential parabolic `C^{0,α}` control of schematic Ricci-DeTurck RHS
+differences. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_entrywise_of_isCompact_of_local_closedCylinder_variable
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    (timeRadius spaceRadius : ℝ × M → ℝ)
+    (htime_pos : ∀ y ∈ K, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ K, 0 < spaceRadius y)
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hGlocal : ∀ y ∈ K, ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hNlocal : ∀ y ∈ K, ∀ i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hGdiffLocal : ∀ y ∈ K, ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j - N z i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hDlocal : ∀ y ∈ K, ∀ a c d,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => D z a c d)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hEarrlocal : ∀ y ∈ K, ∀ a c d,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Earr z a c d)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hDdiffLocal : ∀ y ∈ K, ∀ a c d,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => D z a c d - Earr z a c d)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hKclocal : ∀ y ∈ K, ∀ a c i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Kc z a c i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hHdiffLocal : ∀ y ∈ K, ∀ a c i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Hc z a c i j - Kc z a c i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          ricciDeTurckSchematicMatrix
+              (show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)
+              (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (Earr z) (Kc z)) K := by
+  have hdetG_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det ≠ 0 := by
+    intro z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) e b (hKbase hz)
+  exact
+    ricciDeTurckSchematicMatrix_sub_entrywise_of_isCompact_of_local_closedCylinder_variable
+      (Kdom := K)
+      (M := fun z : ℝ × M =>
+        (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+      (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
+      hK hα timeRadius spaceRadius htime_pos hspace_pos hGlocal hNlocal hGdiffLocal
+      hDlocal hEarrlocal hDdiffLocal hKclocal hHdiffLocal hdetG_ne hdetN_ne
 
 /-- Finite-family compact local-frame bridge for existential parabolic `C^{0,α}` control of
 schematic Ricci-DeTurck RHS differences from entrywise primitive-input difference controls.  One
