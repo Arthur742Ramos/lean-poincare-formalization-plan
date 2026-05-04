@@ -5520,6 +5520,25 @@ theorem exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
   · simpa [← hφ] using φ.mapsTo
   · simpa [← hφ] using φ.injOn
 
+/-- Extract an explicit metric ball inside the source of an
+`OpenPartialHomeomorph`, retaining the target neighborhood, mapping, and
+injectivity readouts for a prescribed forward map. -/
+theorem exists_ball_mapsTo_injOn_of_openPartialHomeomorph
+    {g : V → V} {x y : V} {φ : OpenPartialHomeomorph V V}
+    (hφ : (φ : V → V) = g) (hx : x ∈ φ.source) (hy : y ∈ φ.target) :
+    ∃ ρ > (0 : ℝ), ∃ W : Set V,
+      IsOpen W ∧ y ∈ W ∧ MapsTo g (ball x ρ) W ∧ InjOn g (ball x ρ) := by
+  rcases Metric.isOpen_iff.mp φ.open_source x hx with ⟨ρ, hρ, hρ_source⟩
+  refine ⟨ρ, hρ, φ.target, φ.open_target, hy, ?_, ?_⟩
+  · have hmaps : MapsTo g φ.source φ.target := by
+      simpa [← hφ] using φ.mapsTo
+    intro z hz
+    exact hmaps (hρ_source hz)
+  · have hinj : InjOn g φ.source := by
+      simpa [← hφ] using φ.injOn
+    intro z hz z' hz' hzz'
+    exact hinj (hρ_source hz) (hρ_source hz') hzz'
+
 /-- Open-partial-homeomorphism form of the inverse-function bridge for a
 time-slice of a variational local flow.  The remaining mathematical input is
 the strict spatial derivative of the time-slice map, identified with the
@@ -6067,6 +6086,28 @@ theorem flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_hasStrictFDer
   exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
     (g := fun y : V => α.flow (y, t)) hφ hxφ hyφ
 
+/-- Common-subinterval explicit source ball and target neighborhood for the
+local inverse theorem of a time-slice of a variational local flow. -/
+theorem flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasStrictFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x) :
+    ∃ ρ > (0 : ℝ), ∃ W : Set V,
+      IsOpen W ∧ α.flow (x, t) ∈ W ∧
+        MapsTo (fun y : V => α.flow (y, t)) (ball x ρ) W ∧
+          InjOn (fun y : V => α.flow (y, t)) (ball x ρ) := by
+  rcases α.exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDerivAt
+      htime htbase hx ht hD_bound hstrict with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_ball_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V => α.flow (y, t)) hφ hxφ hyφ
+
 /-- C¹-style common-subinterval inverse-function bridge: ordinary spatial
 derivatives near `x`, with derivative `α.tangent y t`, and continuity of this
 derivative map at `x` imply the neighborhood mapping equality for the time
@@ -6127,6 +6168,27 @@ theorem flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_eventually_ha
         MapsTo (fun y : V => α.flow (y, t)) U W ∧
           InjOn (fun y : V => α.flow (y, t)) U :=
   α.flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_hasStrictFDerivAt
+    htime htbase hx ht hD_bound
+    (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
+
+/-- C¹-style common-subinterval explicit source ball and target neighborhood
+for a time-slice of a variational local flow. -/
+theorem flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_eventually_hasFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hder : ∀ᶠ y in 𝓝 x,
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) x) :
+    ∃ ρ > (0 : ℝ), ∃ W : Set V,
+      IsOpen W ∧ α.flow (x, t) ∈ W ∧
+        MapsTo (fun y : V => α.flow (y, t)) (ball x ρ) W ∧
+          InjOn (fun y : V => α.flow (y, t)) (ball x ρ) :=
+  α.flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasStrictFDerivAt
     htime htbase hx ht hD_bound
     (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
 
@@ -6263,6 +6325,51 @@ theorem ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_has
       (β := β) hball hx htime htbase ht hD_bound hder with
     ⟨φ, hφ, hxφ, hyφ⟩
   exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, t)) hφ hxφ hyφ
+
+/-- Product-Picard C¹-style common-subinterval explicit source ball and target
+neighborhood for a time slice, from ordinary spatial differentiability on the
+initial-data ball. -/
+theorem ofProduct_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasFDerivAt_on_initialBall
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {K : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {a b t : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ K)
+    (hder : ∀ y ∈ closedBall x₀ r,
+      HasFDerivAt
+        (fun z : V =>
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (z, t))
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent
+          y t)
+        y) :
+    ∃ ρ > (0 : ℝ), ∃ W : Set V,
+      IsOpen W ∧
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, t) ∈ W ∧
+        MapsTo
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) (ball x ρ) W ∧
+        InjOn
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) (ball x ρ) := by
+  rcases exists_ofProduct_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasFDerivAt_on_initialBall
+      (β := β) hball hx htime htbase ht hD_bound hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_ball_mapsTo_injOn_of_openPartialHomeomorph
     (g := fun y : V =>
       (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
         (y, t)) hφ hxφ hyφ
