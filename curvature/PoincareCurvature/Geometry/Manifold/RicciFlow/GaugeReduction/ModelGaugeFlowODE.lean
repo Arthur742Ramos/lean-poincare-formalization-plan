@@ -8737,6 +8737,93 @@ theorem exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartial
     exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_of_closedBall_nnnorm_estimates_forward_Ioo_of_mem_ball
       (hf := hf) hball hx ht ht_forward hD_bound hDf_lip hder
 
+/-- Localized `r ≤ R` forward-interior form of the state-preserving product
+Picard neighborhood-map equality with `ℝ≥0` closed-ball estimates. -/
+theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD r' : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    {t : ℝ} (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax')
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    Filter.map
+        (fun y : V =>
+          (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+            hf htime ht₀' hr).flow (y, t))
+        (𝓝 x) =
+      𝓝 ((ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+        hf htime ht₀' hr).flow (x, t)) := by
+  have hle' : tmin' ≤ tmax' := le_trans ht₀'.1 ht₀'.2
+  have htleft : tmin' ∈ Icc tmin' tmax' := ⟨le_rfl, hle'⟩
+  have htright : tmax' ∈ Icc tmin' tmax' := ⟨hle', le_rfl⟩
+  have ht_orig : t ∈ Ioo tmin tmax :=
+    ⟨lt_of_le_of_lt (htime htleft).1 ht.1,
+      lt_of_lt_of_le ht.2 (htime htright).2⟩
+  have ht_forward_orig : t ∈ Icc (t₀ : ℝ) tmax :=
+    ⟨ht_forward.1, le_trans ht_forward.2 (htime htright).2⟩
+  simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
+    ofProductStatePreservingPicardLindelof_restrict,
+    ofProductContinuousLocalFlowSolution_restrict,
+    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
+      (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_forward_orig
+      hD_bound hDf_lip hder
+
+/-- Localized `r ≤ R` forward-interior form of the state-preserving product
+Picard local inverse theorem with `ℝ≥0` closed-ball estimates. -/
+theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_openPartialHomeomorph_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD r' : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    {t : ℝ} (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax')
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    ∃ φ : OpenPartialHomeomorph V V,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+              hf htime ht₀' hr).flow (y, t)) ∧
+        x ∈ φ.source ∧
+          (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+            hf htime ht₀' hr).flow (x, t) ∈ φ.target := by
+  have hle' : tmin' ≤ tmax' := le_trans ht₀'.1 ht₀'.2
+  have htleft : tmin' ∈ Icc tmin' tmax' := ⟨le_rfl, hle'⟩
+  have htright : tmax' ∈ Icc tmin' tmax' := ⟨hle', le_rfl⟩
+  have ht_orig : t ∈ Ioo tmin tmax :=
+    ⟨lt_of_le_of_lt (htime htleft).1 ht.1,
+      lt_of_lt_of_le ht.2 (htime htright).2⟩
+  have ht_forward_orig : t ∈ Icc (t₀ : ℝ) tmax :=
+    ⟨ht_forward.1, le_trans ht_forward.2 (htime htright).2⟩
+  simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
+    ofProductStatePreservingPicardLindelof_restrict,
+    ofProductContinuousLocalFlowSolution_restrict,
+    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
+      (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_forward_orig
+      hD_bound hDf_lip hder
+
 /-- Product Picard-Lindelöf variational flow data, immediately localized to a
 smaller closed time interval. -/
 def ofProductPicardLindelof_restrict

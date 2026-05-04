@@ -1216,7 +1216,11 @@ the real norm bounds and forward-interval restrictions internally; the
 layers now also expose the strict time-slice derivative itself on restricted
 forward intervals, including the operator-ball and identity-ball specializations,
 so later common-interval neighborhood-map and local-inverse wrappers no longer
-hide this differentiability bridge.
+hide this differentiability bridge. The `r ≤ R` localized state-preserving
+Picard route now also exposes the restricted forward-interior neighborhood-map
+and open-partial-homeomorphism readouts directly, so callers using a shrunk time
+interval do not have to unfold the ambient Picard solution to recover the local
+inverse theorem.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
