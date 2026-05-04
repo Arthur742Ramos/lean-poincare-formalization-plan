@@ -1382,7 +1382,12 @@ the Picard time interval before extracting tangent-map data. The one-step
 closed-ball estimate constructors have matching
 localized variants, including the componentwise-continuity and identity/operator
 ball specializations used by chart-local variational estimates, and now expose
-matching proof-level `Nonempty` wrappers for each estimate route. The ODE package
+matching proof-level `Nonempty` wrappers for each estimate route. The
+state-preserving product Picard and component-continuity routes now have the
+same localized constructors and proof-level witnesses, including the
+operator/identity-ball specializations, so shrinking the Picard interval no
+longer loses the closed-state-ball selection used by the inverse-function
+readouts. The ODE package
 now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
 closed-interval and interior vector-slot derivatives for `t ↦ A(t)v` via

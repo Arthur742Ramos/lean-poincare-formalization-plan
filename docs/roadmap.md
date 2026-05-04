@@ -938,7 +938,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        for continuous-product and product Picard inputs, plus localized variants
        and proof-level `Nonempty` wrappers for the one-step closed-ball estimate constructors,
        including the componentwise-continuity and identity/operator ball
-       specializations. The dynamic pullback layer now uses a
+       specializations, and now the state-preserving Picard/component-continuity
+       variants localize with matching `Nonempty` witnesses as well. The dynamic
+       pullback layer now uses a
       variational local flow to discharge the interior `y'(t)` and `A'(t)`
        clauses in `CoordinatePullbackMetricFieldDerivativeOn` and proves the
        exact scalar chain rule for `B(t, y(t))(A(t)u)(A(t)v)` along that flow, so

@@ -284,7 +284,11 @@ packages the canonical stationary local solution attached to
   readouts obtained from an open-overlap base-flow equality by continuity;
   product Picard convex-state, state-preserving closed-ball, and componentwise
   closed-ball continuity estimates now feed the common-`Ioo` time-slice
-  neighborhood-map and local open-partial-homeomorphism readouts directly;
+  neighborhood-map and local open-partial-homeomorphism readouts directly, and
+  the state-preserving product-Picard/component-continuity routes now also have
+  localized constructors and proof-level `Nonempty` wrappers, including the
+  operator/identity-ball specializations, so Picard-interval shrinking retains
+  the closed-state-ball readout;
   encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The
