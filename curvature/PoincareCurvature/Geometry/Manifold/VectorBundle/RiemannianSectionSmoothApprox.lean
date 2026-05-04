@@ -214,7 +214,7 @@ theorem exists_dist_lt_of_smooth_fiberwise_approx_preferredBilinear_of_symmL_opN
     have hdist_comm : dist (s x) (g x) = dist (g x) (s x) := dist_comm _ _
     simpa [u, hdist_comm] using hg x
 
-/-- Symmetric targets admit symmetric smooth approximants in the transported finite-cover Banach
+/-- Symmetric targets have symmetric smooth approximants in the transported finite-cover Banach
 norm whenever arbitrary smooth fiberwise approximants are available and the underlying inverse
 vector-bundle trivializations are uniformly bounded on the cover. -/
 theorem exists_symmetric_dist_lt_of_smooth_fiberwise_approx_preferredBilinear_of_symmL_opNorm_le
