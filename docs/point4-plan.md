@@ -1143,6 +1143,14 @@ Lipschitz readout needed for this automatically:
 `ofProduct_eventually_flow_norm_sub_le_mul_forward_Icc_of_mem_ball`, and
 `ofProduct_flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_forward_Icc_of_mem_ball`
 leave only the relative vector-field Taylor estimate and the base `Df` bound.
+That Taylor input has now been reduced by the mean-value theorem to derivative
+oscillation on the flow chord:
+`norm_fieldRemainder_le_of_Df_sub_bound_on_segment`,
+`eventually_fieldRemainder_bound_forward_Icc_of_Df_sub_bound_on_flow_segment`,
+and
+`ofProduct_flow_timeSlice_hasFDerivAt_of_Df_sub_bound_on_flow_segment_forward_Icc_of_mem_ball`
+consume eventual bounds for `‖Df(τ,z)-Df(τ,flow(x,τ))‖` on each segment between
+the base and perturbed flow points.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new

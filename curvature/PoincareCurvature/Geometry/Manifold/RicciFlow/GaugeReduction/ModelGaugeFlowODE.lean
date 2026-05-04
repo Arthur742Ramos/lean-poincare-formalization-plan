@@ -4635,6 +4635,19 @@ theorem norm_spatialRemainderDeriv_le_of_fieldRemainder_bound
     _ ≤ ε + K * ‖α.spatialRemainder x h τ‖ := add_le_add hfield hD_apply
     _ = K * ‖α.spatialRemainder x h τ‖ + ε := by ring
 
+/-- Mean-value estimate for the vector-field Taylor remainder on the segment
+between two states.  If `Df τ` is the derivative of `f τ` along the segment and
+stays within `C` of its value at the left endpoint, then the first-order field
+remainder is bounded by `C` times the endpoint separation. -/
+theorem norm_fieldRemainder_le_of_Df_sub_bound_on_segment
+    {τ : ℝ} {x y : V} {C : ℝ}
+    (hder : ∀ z ∈ segment ℝ x y,
+      HasFDerivWithinAt (f τ) (Df τ z) (segment ℝ x y) z)
+    (hDf : ∀ z ∈ segment ℝ x y, ‖Df τ z - Df τ x‖ ≤ C) :
+    ‖f τ y - f τ x - (Df τ x) (y - x)‖ ≤ C * ‖y - x‖ :=
+  (convex_segment (𝕜 := ℝ) x y).norm_image_sub_le_of_norm_hasFDerivWithin_le'
+    hder hDf (left_mem_segment (𝕜 := ℝ) x y) (right_mem_segment (𝕜 := ℝ) x y)
+
 /-- The first-order spatial remainder vanishes at the base time whenever both
 initial data lie in the Picard ball. -/
 theorem spatialRemainder_initial_eq
@@ -4819,6 +4832,32 @@ theorem flow_timeSlice_hasFDerivAt_of_fieldRemainder_bound_forward_Icc_of_mem_ba
   exact α.norm_spatialRemainderDeriv_le_of_fieldRemainder_bound
     (hD_bound τ hτ) (hfield_h τ hτ)
 
+/-- Derivative oscillation of `Df` along the flow chord gives the relative
+Taylor-remainder estimate for the vector field. -/
+theorem eventually_fieldRemainder_bound_forward_Icc_of_Df_sub_bound_on_flow_segment
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} {θ : V → ℝ≥0}
+    (hder : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          HasFDerivWithinAt (f τ) (Df τ z)
+            (segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ))) z)
+    (hDf_sub : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          ‖Df τ z - Df τ (α.flow (x, τ))‖ ≤ (θ h : ℝ)) :
+    ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+          (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖ ≤
+          (θ h : ℝ) * ‖α.flow (x + h, τ) - α.flow (x, τ)‖ := by
+  filter_upwards [hder, hDf_sub] with h hder_h hDf_h
+  intro τ hτ
+  exact norm_fieldRemainder_le_of_Df_sub_bound_on_segment
+    (f := f) (Df := Df) (τ := τ)
+    (x := α.flow (x, τ)) (y := α.flow (x + h, τ)) (C := (θ h : ℝ))
+    (hder_h τ hτ) (hDf_h τ hτ)
+
 /-- Forward-time spatial derivative criterion in a relative Taylor-remainder
 form.  A field remainder that is `θ(h)` times the actual flow separation,
 together with a Lipschitz bound of that separation by `L‖h‖`, gives the
@@ -4860,6 +4899,35 @@ theorem flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_forward_Icc_
     _ = (η h : ℝ) * ‖h‖ := by
           simp [η, NNReal.coe_mul]
           ring
+
+/-- Forward-time spatial derivative criterion reduced to derivative oscillation
+of `Df` along the flow chord. -/
+theorem flow_timeSlice_hasFDerivAt_of_Df_sub_bound_on_flow_segment_forward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    {L : ℝ≥0} {θ : V → ℝ≥0}
+    (hθ : Filter.Tendsto (fun h : V => (θ h : ℝ)) (𝓝 0) (𝓝 0))
+    (hD_bound : ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+      ‖Df τ (α.flow (x, τ))‖ ≤ K)
+    (hflow_lip : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖)
+    (hder : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          HasFDerivWithinAt (f τ) (Df τ z)
+            (segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ))) z)
+    (hDf_sub : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          ‖Df τ z - Df τ (α.flow (x, τ))‖ ≤ (θ h : ℝ)) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  refine α.flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_forward_Icc_of_mem_ball
+    (L := L) hx ht hθ hD_bound hflow_lip ?_
+  exact α.eventually_fieldRemainder_bound_forward_Icc_of_Df_sub_bound_on_flow_segment
+    hder hDf_sub
 
 /-- Product-Picard Lipschitz dependence supplies the forward-time flow
 separation estimate required by the relative field-remainder criterion. -/
@@ -4952,6 +5020,82 @@ theorem ofProduct_flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_fo
   simpa [α] using
     α.flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_forward_Icc_of_mem_ball
       (L := L) hx ht hθ hD_bound' hflow_lip' hfield_relative'
+
+/-- Product-Picard version of the segment-derivative-oscillation criterion for
+ordinary spatial differentiability of a time slice.  Product Lipschitz
+dependence supplies the flow-separation bound, while the mean-value estimate
+turns derivative oscillation on each flow chord into the required relative
+Taylor remainder. -/
+theorem ofProduct_flow_timeSlice_hasFDerivAt_of_Df_sub_bound_on_flow_segment_forward_Icc_of_mem_ball
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    {θ : V → ℝ≥0}
+    (hθ : Filter.Tendsto (fun h : V => (θ h : ℝ)) (𝓝 0) (𝓝 0))
+    (hD_bound : ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖ ≤ K)
+    (hder : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ∀ z ∈ segment ℝ
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x, τ))
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x + h, τ)),
+          HasFDerivWithinAt (f τ) (Df τ z)
+            (segment ℝ
+              ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                (x, τ))
+              ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                (x + h, τ))) z)
+    (hDf_sub : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ∀ z ∈ segment ℝ
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x, τ))
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x + h, τ)),
+          ‖Df τ z -
+              Df τ
+                ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                  (x, τ))‖ ≤
+            (θ h : ℝ)) :
+    HasFDerivAt
+      (fun y : V =>
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow (y, t))
+      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent x t)
+      x := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  obtain ⟨L, hflow_lip⟩ :=
+    ofProduct_eventually_flow_norm_sub_le_mul_forward_Icc_of_mem_ball β hball hx
+  have hflow_lip' : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖ := by
+    simpa [α] using hflow_lip
+  have hD_bound' : ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+      ‖Df τ (α.flow (x, τ))‖ ≤ K := by
+    intro τ hτ
+    simpa [α] using hD_bound τ hτ
+  have hder' : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          HasFDerivWithinAt (f τ) (Df τ z)
+            (segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ))) z := by
+    simpa [α] using hder
+  have hDf_sub' : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ∀ z ∈ segment ℝ (α.flow (x, τ)) (α.flow (x + h, τ)),
+          ‖Df τ z - Df τ (α.flow (x, τ))‖ ≤ (θ h : ℝ) := by
+    simpa [α] using hDf_sub
+  simpa [α] using
+    α.flow_timeSlice_hasFDerivAt_of_Df_sub_bound_on_flow_segment_forward_Icc_of_mem_ball
+      (L := L) hx ht hθ hD_bound' hflow_lip' hder' hDf_sub'
 
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is
