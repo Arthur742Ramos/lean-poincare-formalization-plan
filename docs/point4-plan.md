@@ -241,7 +241,10 @@ from the model variational ODE. Finite-cover/readout fields now have the same
 product-domain entry point: a locally equal two-variable bilinear readout can
 supply the `HasFDerivWithinAt` metric derivative, including for the variational
 ODE routes, and the fully localized route now has a geometric-slot form where
-the scalar identity is stated in actual pushed-forward tangent vectors.
+the scalar identity is stated in actual pushed-forward tangent vectors. The
+metric-coordinate Fréchet transfer now also has a relative-filter form, so
+readout equality inside the product derivative domain is enough for the
+open-product-domain time-difference scalar bridge.
 The fully localized product-domain route now also has a variational-local-flow
 form that assumes product-domain convergence only for the model Picard graph;
 closed-interval base-flow equality transports that convergence to the raw

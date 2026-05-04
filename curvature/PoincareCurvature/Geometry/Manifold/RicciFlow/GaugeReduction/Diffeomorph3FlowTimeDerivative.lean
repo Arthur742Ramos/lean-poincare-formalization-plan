@@ -2791,6 +2791,23 @@ theorem metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEq
       Bfield' domain q :=
   hBfield.congr_of_eventuallyEq (hEq.filter_mono nhdsWithin_le_nhds) hEq.eq_of_nhds
 
+/-- A domain-local finite-cover/readout field may supply a within-domain
+Fréchet derivative of the named metric-coordinate field.  This is the
+relative-filter version of
+`metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEq`, for product
+domains where the readout equality is only available inside the domain. -/
+theorem metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEqWithin
+    {g : MetricFamily (I := I) (M := M)} {p : M} {q : ℝ × E}
+    {domain : Set (ℝ × E)}
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq : metricBilinearCoordinateField (I := I) (M := M) g p =ᶠ[𝓝[domain] q] Bfield)
+    (hq : q ∈ domain)
+    (hBfield : HasFDerivWithinAt Bfield Bfield' domain q) :
+    HasFDerivWithinAt (metricBilinearCoordinateField (I := I) (M := M) g p)
+      Bfield' domain q :=
+  hBfield.congr_of_eventuallyEq hEq (hEq.eq_of_nhdsWithin hq)
+
 /-- At a fixed time, the spatial coordinate part of the named
 metric-coordinate field is `C²` in the preferred extended chart. -/
 theorem metricBilinearCoordinateField_fixedTime_contDiffWithinAt
@@ -8983,6 +9000,50 @@ theorem metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_eventua
     (I := I) (M := M) G ht g x hopen hmem
     (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEq
       (I := I) (M := M) hEq hB)
+
+/-- Readout-field open-product-domain scalar endpoint time-difference bridge
+with domain-local readout equality.
+
+This variant matches finite-cover/Banach readouts that are identified with the
+metric-coordinate field only in the derivative product domain. -/
+theorem metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_eventuallyEqWithin_hasFDerivWithinAtOpenDomain_and_frozenSpatial_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {domain : Set (ℝ × E)}
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq :
+      SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+        (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+        𝓝[domain] (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))] Bfield)
+    (hopen : IsOpen domain)
+    (hmem : (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∈ domain)
+    (hB : HasFDerivWithinAt Bfield Bfield'
+      domain (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) g ((G.maps3 t) x)
+          (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x)) -
+        (fderivWithin ℝ
+          (fun yE : E ↦
+            SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x)))
+      s t := by
+  exact
+    metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_of_hasFDerivWithinAtOpenDomain_and_frozenSpatial_self
+      (I := I) (M := M) G ht g x hopen hmem
+      (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivWithinAt_of_eventuallyEqWithin
+        (I := I) (M := M) hEq hmem hB)
 
 /-- Domain-restricted direct-velocity version of
 `metricCoordinateFieldTimeDifferenceComponentDataWithinOn_of_hasFDerivAt`.
