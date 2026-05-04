@@ -1148,8 +1148,8 @@ inverse-Gram vector/vector-inverse product, bilinear, inverse-principal, and
 inverse-Christoffel bridges sharing
 that same lower bound, with the quantitative vector/vector-inverse product,
 bilinear, inverse-principal, and inverse-Christoffel bridges now also accepting
-those same Gram-entry input forms, direct single-frame compact point-local
-product-cylinder primitive-estimate and primitive-difference schematic RHS
+those same Gram-entry input forms, direct single-frame and finite-family compact
+point-local product-cylinder primitive-estimate and primitive-difference schematic RHS
 bridges, single-frame and finite-family finite-cover product-cylinder schematic
 RHS bridges, plus bounded-difference metric-control bridges consuming the matrix
 cover API before selecting the local-frame determinant lower bound,

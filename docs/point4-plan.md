@@ -1749,8 +1749,8 @@ inverse-Christoffel handoffs sharing that same compact determinant lower bound,
 with the quantitative vector/vector-inverse product, bilinear,
 inverse-principal, and inverse-Christoffel handoffs now also accepting those
 same Gram-entry input forms,
-direct single-frame compact point-local product-cylinder primitive-estimate and
-primitive-difference schematic RHS bridges, single-frame and finite-family
+direct single-frame and finite-family compact point-local product-cylinder
+primitive-estimate and primitive-difference schematic RHS bridges, single-frame and finite-family
 finite-cover product-cylinder schematic RHS bridges, plus bounded-difference
 metric-control bridges now consume the matrix cover API before selecting the
 local-frame determinant lower bound,

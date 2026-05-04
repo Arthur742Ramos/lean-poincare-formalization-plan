@@ -9112,6 +9112,71 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_family_of_finset_parabolicCy
     S timeRadius spaceRadius hK hα htime_pos hspace_pos hcover hGlocal hDlocal hHclocal
     hdet_ne
 
+/-- Point-dependent local product-cylinder primitive estimates globalize a finite family of
+local-frame schematic Ricci-DeTurck coordinate right-hand sides, with one compact local-frame Gram
+determinant lower bound shared by the family. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_family_of_isCompact_of_local_closedCylinder_variable
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    (timeRadius spaceRadius : ℝ × M → ℝ)
+    (htime_pos : ∀ y ∈ K, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ K, 0 < spaceRadius y)
+    {D : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hGlocal : ∀ y ∈ K, ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hDlocal : ∀ y ∈ K, ∀ r i j k,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => D r z i j k)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hHclocal : ∀ y ∈ K, ∀ r a c i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Hc r z a c i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y))) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × M =>
+            (fun i j =>
+              let Γ : ι → ι → ι → ℝ := fun a c d =>
+                (2 : ℝ)⁻¹ *
+                  ∑ l : ι,
+                    ((show Matrix ι ι ℝ from
+                        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                        Matrix ι ι ℝ) a l *
+                      (D r z c d l + D r z d c l - D r z l c d)
+              (∑ a : ι, ∑ c : ι,
+                  ((show Matrix ι ι ℝ from
+                      CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+                      Matrix ι ι ℝ) a c * Hc r z a c i j) +
+                ((∑ a : ι, ∑ c : ι, Γ a i j * Γ c a c) -
+                  (∑ a : ι, ∑ c : ι, Γ a i c * Γ c a j)) :
+              Matrix ι ι ℝ)) K := by
+  have hdet_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det ≠ 0 := by
+    intro r z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  exact ricciDeTurck_schematic_family_of_isCompact_of_local_closedCylinder_variable
+    (K := K)
+    (M := fun r (z : ℝ × M) =>
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (D := D) (H := Hc)
+    hK hα timeRadius spaceRadius htime_pos hspace_pos hGlocal hDlocal hHclocal hdet_ne
+
 /-- Finite-family spatial-Hölder local-frame bridge for existential schematic
 Ricci-DeTurck RHS control.  The spatial Gram-entry bounds are packaged into the family
 `C^{0,α}` hypotheses before selecting the shared Gram determinant lower bound. -/
@@ -12162,6 +12227,85 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_entrywise_family_of_fins
           CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
       (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
       S timeRadius spaceRadius hK hα htime_pos hspace_pos hcover hGlocal hNlocal
+      hGdiffLocal hDlocal hEarrlocal hDdiffLocal hKclocal hHdiffLocal hdetG_ne
+      hdetN_ne
+
+/-- Point-dependent local product-cylinder primitive-difference estimates globalize a finite family
+of local-frame schematic Ricci-DeTurck RHS difference closures, with one determinant lower bound
+shared by all local-frame Gram matrices and comparison matrices. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_entrywise_family_of_isCompact_of_local_closedCylinder_variable
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    (timeRadius spaceRadius : ℝ × M → ℝ)
+    (htime_pos : ∀ y ∈ K, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ K, 0 < spaceRadius y)
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hGlocal : ∀ y ∈ K, ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hNlocal : ∀ y ∈ K, ∀ r i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => N r z i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hGdiffLocal : ∀ y ∈ K, ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j -
+            N r z i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hDlocal : ∀ y ∈ K, ∀ r a c d,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => D r z a c d)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hEarrlocal : ∀ y ∈ K, ∀ r a c d,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Earr r z a c d)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hDdiffLocal : ∀ y ∈ K, ∀ r a c d,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => D r z a c d - Earr r z a c d)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hKclocal : ∀ y ∈ K, ∀ r a c i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Kc r z a c i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hHdiffLocal : ∀ y ∈ K, ∀ r a c i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => Hc r z a c i j - Kc r z a c i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × M =>
+            ricciDeTurckSchematicMatrix
+                (show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+                (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (Earr r z) (Kc r z)) K := by
+  have hdetG_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det ≠ 0 := by
+    intro r z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  exact
+    ricciDeTurckSchematicMatrix_sub_entrywise_family_of_isCompact_of_local_closedCylinder_variable
+      (K := K)
+      (M := fun r (z : ℝ × M) =>
+        (show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+      (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
+      hK hα timeRadius spaceRadius htime_pos hspace_pos hGlocal hNlocal
       hGdiffLocal hDlocal hEarrlocal hDdiffLocal hKclocal hHdiffLocal hdetG_ne
       hdetN_ne
 

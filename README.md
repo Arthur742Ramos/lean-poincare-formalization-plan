@@ -589,8 +589,8 @@ packages the canonical stationary local solution attached to
   compact determinant lower bound, with the inverse-Gram, inverse-Gram
   vector/vector-inverse product, inverse-Gram bilinear, inverse-principal, and
   inverse-Gram Christoffel, and schematic RHS handoffs now also accepting those
-  same Gram-entry input forms, direct single-frame compact point-local
-  product-cylinder primitive-estimate and primitive-difference schematic RHS
+  same Gram-entry input forms, direct single-frame and finite-family compact
+  point-local product-cylinder primitive-estimate and primitive-difference schematic RHS
   bridges, single-frame and finite-family finite-cover product-cylinder
   schematic RHS bridges, plus bounded-difference metric-control bridges consuming the
   matrix cover API before selecting the local-frame determinant lower bound, quantitative
