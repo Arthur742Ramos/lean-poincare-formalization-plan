@@ -913,9 +913,12 @@ derivative packages, plus chart-ODE packages, on those explicit open solution
 time sets, so endpoint scalar routes can consume the Picard data without first
 constructing raw gauge-flow witnesses. The chart-based raw and fixed-IVP
 closed-Picard constructors now route through the same primitive derivative
-handoff, keeping the existence path aligned with the derivative-view API. The time-derivative layer
-now also turns those explicit open Picard time-set identifications into the
-neighborhood-of-each-time hypothesis once, and exposes fixed-IVP and
+handoff, keeping the existence path aligned with the derivative-view API. The
+raw existence layer now turns those explicit open Picard time-set
+identifications into the neighborhood-of-each-time hypothesis once, and exposes
+fixed-IVP and theorem-family open-Picard readouts for pointwise manifold
+derivatives, preferred-chart derivatives, continuity, and chart-source control.
+The time-derivative layer consumes that raw fact and exposes fixed-IVP and
 theorem-family `..._of_timeSet_eq_Ioo` wrappers for coordinate-model,
 component, field-level, and within-set endpoint data. The same
 named-derivative symmetry is now present
@@ -1044,10 +1047,46 @@ glued into a manifold-level flow. Base-flow uniqueness now also has overlap
 forms for `LocalFlowSolution` and `ContinuousLocalFlowSolution`: two packages
 with different centers/radii agree on `Ioo` and `Icc` for any initial point in
 both closed balls, assuming the usual common Lipschitz state-region hypotheses.
+The base-flow uniqueness layer now also has a meeting-time form: two packaged
+curves with different base times, centers, and radii agree on the whole closed
+Picard interval if they meet at an interior time and stay in the same Lipschitz
+state region. The corresponding reanchoring lemmas identify a curve from one
+package with a second package based at a later interior time and initialized at
+the first curve's value there. These readouts are available for
+`LocalFlowSolution`, `ContinuousLocalFlowSolution`, and the base component of
+`VariationalLocalFlowSolution`, giving the model-side uniqueness input needed
+to compare forward and reanchored chartwise flow segments. They also have
+common-subinterval forms for packages with different ambient Picard intervals,
+provided both package base times lie in the visible common interval.
+The same uniqueness mechanism now also yields interior time-slice injectivity:
+`LocalFlowSolution.flow_injOn_of_lipschitzOnWith_of_mem_Ioo` and
+`ContinuousLocalFlowSolution.flow_injOn_of_lipschitzOnWith_of_mem_Ioo` show that
+if two initial points in the Picard ball have the same image at an interior time
+and their trajectories remain in a common Lipschitz state region, then the
+initial points are equal. The corresponding
+`flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem` variants first restrict to a
+shared visible closed interval, so chart-gluing arguments can use only the
+state-region hypotheses available on the overlap. Variational local-flow
+packages expose the same base-flow injectivity readouts directly through their
+continuous-flow component. This is the first model-level invertibility input for
+upgrading glued chartwise flows to diffeomorphism slices.
 Variational tangent-map uniqueness has matching overlap forms on `Ioo` and
 `Icc`, plus operator-norm and vector-slot specializations on both intervals, so
 tangent compatibility can also be proved across chart-local packages with
-different centers and radii once the base curves agree. Full variational-pair uniqueness
+different centers and radii once the base curves agree. The same variational
+ODE uniqueness mechanism now also gives tangent-map injectivity at interior
+times: an operator-norm bound for `Df` along the base curve implies
+`Function.Injective (α.tangent x t)` and
+`LinearMap.ker (α.tangent x t) = ⊥`, with center-trajectory and common visible
+`Ioo` interval variants. In finite-dimensional model spaces, this has now been
+upgraded to `LinearMap.range (α.tangent x t) = ⊤` and packaged as
+`V ≃L[ℝ] V` through
+`tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo` and its common-`Ioo`
+and center-trajectory variants. This is a model-level infinitesimal
+invertibility input, but it still has to be lifted through charts and combined
+with manifold-level flow compatibility before producing `C³` diffeomorphism
+slices.
+Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,
 combining base-flow Lipschitz uniqueness and tangent operator-norm uniqueness
@@ -1307,7 +1346,10 @@ needed for that lift: at any time where the time set is a neighborhood, a raw
 membership in the preferred tangent trivialization centered at `Φ_t(x)`. The
 same continuity and chart-membership facts are also available directly within
 the raw time set, matching the restricted intervals produced by local ODE
-theorems before any neighborhood-of-time strengthening is known.
+theorems before any neighborhood-of-time strengthening is known. For explicit
+open Picard time sets, the fixed-IVP and theorem-family raw existence APIs now
+combine the `Ioo` identification with those ordinary-time derivative,
+continuity, and chart-source readouts directly.
 
 **Module location.** The Banach-model bridge lives in
 `Geometry/Manifold/RicciFlow/GaugeReduction/ModelGaugeFlowODE.lean`.  The final

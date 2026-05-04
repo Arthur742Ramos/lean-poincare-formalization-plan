@@ -23876,27 +23876,6 @@ def CoordinatePullbackMetricOperatorDerivativeWithinOpenData
       (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
   G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricOperatorDerivativeWithinOpenData
 
-/-- Fixed-IVP open-Picard solution time sets are neighborhoods of each of their
-times.  This discharges the topological input in time-regularity wrappers when
-the chosen solution time set has been identified with `Ioo tmin tmax`. -/
-theorem timeSet_mem_nhds_of_eq_Ioo
-    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
-    (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
-        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
-    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
-        (E := E) (H := H) (I := I) (M := M) ivp,
-      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol)) :
-    ∀ sol : ChosenIntrinsicDeTurckLocalSolution
-        (E := E) (H := H) (I := I) (M := M) ivp,
-      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
-        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t := by
-  intro sol t ht
-  have ht' : t ∈ Ioo (tmin sol) (tmax sol) := by
-    simpa [htimeSet sol] using ht
-  simpa [htimeSet sol] using (isOpen_Ioo.mem_nhds ht')
-
 /-- Fixed-IVP raw intrinsic gauge-flow coordinate curves eventually lie in the
 preferred chart range at neighborhood-times. -/
 theorem eventually_extChartAt_eval_mem_range
@@ -24675,29 +24654,6 @@ def CoordinatePullbackMetricOperatorDerivativeWithinOpenData
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M)) : Prop :=
   G.toDiffeomorph3GaugeFlowFamily.CoordinatePullbackMetricOperatorDerivativeWithinOpenData
-
-/-- Theorem-family open-Picard solution time sets are neighborhoods of each of
-their times.  This discharges the topological input in family-level
-time-regularity wrappers when each solution time set has been identified with
-`Ioo tmin tmax`. -/
-theorem timeSet_mem_nhds_of_eq_Ioo
-    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
-      (E := E) (H := H) (I := I) (M := M))
-    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
-      ChosenIntrinsicDeTurckLocalSolution
-        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
-    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
-      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
-          (E := E) (H := H) (I := I) (M := M) ivp,
-        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol)) :
-    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
-      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
-          (E := E) (H := H) (I := I) (M := M) ivp,
-      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
-        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t := by
-  intro ivp sol t ht
-  exact (G.forInitialValueProblem ivp).timeSet_mem_nhds_of_eq_Ioo
-    (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht
 
 /-- Theorem-family raw intrinsic gauge-flow coordinate curves eventually lie in
 the preferred chart range at neighborhood-times. -/

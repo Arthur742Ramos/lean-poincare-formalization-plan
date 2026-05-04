@@ -4,6 +4,8 @@ public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffe
 public import Mathlib.Analysis.ODE.PicardLindelof
 public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Normed.Operator.Banach
+public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 
 set_option linter.unusedSectionVars false
 set_option linter.all false
@@ -378,6 +380,118 @@ theorem flow_eq_of_lipschitzOnWith_of_mem_Icc
     α.flow x t = β.flow x t :=
   α.eqOn_Icc_of_lipschitzOnWith_of_mem β hxα hxβ ht₀ hf_lip hα_mem hβ_mem ht
 
+/-- Closed-interval uniqueness for two packaged local model-flow curves that
+meet at an interior time.  The packages may have different base times, centers,
+and radii, as long as both curves are defined on the same Picard interval and
+remain in a common Lipschitz state region. -/
+theorem eqOn_Icc_of_lipschitzOnWith_of_eq_at_time
+    {tα tβ : Icc tmin tmax} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f tα xα rα) (β : LocalFlowSolution f tβ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x y : V} (hxα : x ∈ closedBall xα rα) (hyβ : y ∈ closedBall xβ rβ)
+    {tmeet : ℝ} (htmeet : tmeet ∈ Ioo tmin tmax)
+    (hxy : α.flow x tmeet = β.flow y tmeet)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow y t ∈ state t) :
+    EqOn (α.flow x) (β.flow y) (Icc tmin tmax) := by
+  refine ODE_solution_unique_of_mem_Icc (v := f) (s := state) hf_lip htmeet
+    ?_ ?_ hα_mem ?_ ?_ hβ_mem hxy
+  · exact α.flow_continuousOn hxα
+  · intro t ht
+    exact (α.hasDerivWithinAt x hxα t (Ioo_subset_Icc_self ht)).hasDerivAt
+      (Icc_mem_nhds ht.1 ht.2)
+  · exact β.flow_continuousOn hyβ
+  · intro t ht
+    exact (β.hasDerivWithinAt y hyβ t (Ioo_subset_Icc_self ht)).hasDerivAt
+      (Icc_mem_nhds ht.1 ht.2)
+
+/-- Pointwise form of closed-interval meeting-time uniqueness. -/
+theorem flow_eq_of_lipschitzOnWith_of_eq_at_time_Icc
+    {tα tβ : Icc tmin tmax} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f tα xα rα) (β : LocalFlowSolution f tβ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x y : V} (hxα : x ∈ closedBall xα rα) (hyβ : y ∈ closedBall xβ rβ)
+    {tmeet : ℝ} (htmeet : tmeet ∈ Ioo tmin tmax)
+    (hxy : α.flow x tmeet = β.flow y tmeet)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow y t ∈ state t)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    α.flow x t = β.flow y t :=
+  α.eqOn_Icc_of_lipschitzOnWith_of_eq_at_time β hxα hyβ htmeet hxy
+    hf_lip hα_mem hβ_mem ht
+
+/-- Reanchoring uniqueness: if a second local-flow package is based at an
+interior time and its initial point is the first package's value there, then the
+two packaged curves agree on the whole closed Picard interval. -/
+theorem eqOn_Icc_of_lipschitzOnWith_of_reanchored
+    {tα tβ : Icc tmin tmax} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f tα xα rα) (β : LocalFlowSolution f tβ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα)
+    (hyβ : α.flow x tβ ∈ closedBall xβ rβ)
+    (htβ : (tβ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (α.flow x tβ) t ∈ state t) :
+    EqOn (α.flow x) (β.flow (α.flow x tβ)) (Icc tmin tmax) :=
+  α.eqOn_Icc_of_lipschitzOnWith_of_eq_at_time β hxα hyβ htβ
+    (by simp [β.initial_eq (α.flow x tβ) hyβ]) hf_lip hα_mem hβ_mem
+
+/-- Interior time slices of a packaged local model flow are injective on the
+initial-data ball, provided all relevant trajectories stay in a common state
+region where the vector field is uniformly Lipschitz.  This is the model-space
+invertibility input needed before chartwise flows can be glued into manifold
+diffeomorphism slices. -/
+theorem flow_injOn_of_lipschitzOnWith_of_mem_Ioo
+    (α : LocalFlowSolution f t₀ x₀ r)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hf_lip : ∀ τ ∈ Ioo tmin tmax, LipschitzOnWith K (f τ) (state τ))
+    (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo tmin tmax, α.flow x τ ∈ state τ) :
+    InjOn (fun x => α.flow x t) (closedBall x₀ r) := by
+  intro x hx y hy hxy
+  have hEq : EqOn (α.flow x) (α.flow y) (Icc tmin tmax) := by
+    refine ODE_solution_unique_of_mem_Icc (v := f) (s := state) hf_lip ht
+      ?_ ?_ ?_ ?_ ?_ ?_ hxy
+    · exact α.flow_continuousOn hx
+    · intro τ hτ
+      exact (α.hasDerivWithinAt x hx τ (Ioo_subset_Icc_self hτ)).hasDerivAt
+        (Icc_mem_nhds hτ.1 hτ.2)
+    · intro τ hτ
+      exact hmem x hx τ hτ
+    · exact α.flow_continuousOn hy
+    · intro τ hτ
+      exact (α.hasDerivWithinAt y hy τ (Ioo_subset_Icc_self hτ)).hasDerivAt
+        (Icc_mem_nhds hτ.1 hτ.2)
+    · intro τ hτ
+      exact hmem y hy τ hτ
+  have hbase := hEq (Ioo_subset_Icc_self ht₀)
+  simpa [α.initial_eq x hx, α.initial_eq y hy] using hbase
+
+/-- Common-subinterval form of time-slice injectivity for a packaged local model
+flow.  This is the version used when the state-region hypotheses are only known
+on the visible chart-gluing interval. -/
+theorem flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem
+    (α : LocalFlowSolution f t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) {t : ℝ} (ht : t ∈ Ioo a b)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    (hf_lip : ∀ τ ∈ Ioo a b, LipschitzOnWith K (f τ) (state τ))
+    (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo a b, α.flow x τ ∈ state τ) :
+    InjOn (fun x => α.flow x t) (closedBall x₀ r) := by
+  let tbase' : Icc a b := ⟨(t₀ : ℝ), Ioo_subset_Icc_self htbase⟩
+  let α' : LocalFlowSolution f tbase' x₀ r :=
+    α.restrict htime (Ioo_subset_Icc_self htbase) le_rfl
+  have hmem' :
+      ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo a b, α'.flow x τ ∈ state τ := by
+    intro x hx τ hτ
+    simpa [α'] using hmem x hx τ hτ
+  have hinj : InjOn (fun x => α'.flow x t) (closedBall x₀ r) :=
+    α'.flow_injOn_of_lipschitzOnWith_of_mem_Ioo htbase ht hf_lip hmem'
+  simpa [α'] using hinj
+
 /-- Common-subinterval overlap uniqueness for packaged local model flows whose
 ambient Picard intervals may differ.  This is the chart-gluing form obtained by
 restricting both packages to a shared closed interval containing the same base
@@ -480,6 +594,67 @@ theorem flow_eq_of_lipschitzOnWith_of_mem_common_Ioo
     α.flow x t = β.flow x t :=
   α.eqOn_common_Ioo_of_lipschitzOnWith_of_mem β hαtime hβtime hxα hxβ
     htbase hf_lip hα_mem hβ_mem ht
+
+/-- Common-subinterval meeting-time uniqueness for packaged local model flows
+whose ambient Picard intervals and base times may differ.  Both base times are
+required to lie in the visible common interval so the packages can be restricted
+before applying same-interval uniqueness. -/
+theorem eqOn_common_Icc_of_lipschitzOnWith_of_eq_at_time
+    {aα bα aβ bβ a b tα tβ : ℝ}
+    {htα : tα ∈ Icc aα bα} {htβ : tβ ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f (⟨tα, htα⟩ : Icc aα bα) xα rα)
+    (β : LocalFlowSolution f (⟨tβ, htβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    (htαbase : tα ∈ Ioo a b) (htβbase : tβ ∈ Ioo a b)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x y : V} (hxα : x ∈ closedBall xα rα) (hyβ : y ∈ closedBall xβ rβ)
+    {tmeet : ℝ} (htmeet : tmeet ∈ Ioo a b)
+    (hxy : α.flow x tmeet = β.flow y tmeet)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow y t ∈ state t) :
+    EqOn (α.flow x) (β.flow y) (Icc a b) := by
+  let tα' : Icc a b := ⟨tα, Ioo_subset_Icc_self htαbase⟩
+  let tβ' : Icc a b := ⟨tβ, Ioo_subset_Icc_self htβbase⟩
+  let α' : LocalFlowSolution f tα' xα rα :=
+    α.restrict hαtime (Ioo_subset_Icc_self htαbase) le_rfl
+  let β' : LocalFlowSolution f tβ' xβ rβ :=
+    β.restrict hβtime (Ioo_subset_Icc_self htβbase) le_rfl
+  have hα_mem' : ∀ t ∈ Ioo a b, α'.flow x t ∈ state t := by
+    intro t ht
+    simpa [α'] using hα_mem t ht
+  have hβ_mem' : ∀ t ∈ Ioo a b, β'.flow y t ∈ state t := by
+    intro t ht
+    simpa [β'] using hβ_mem t ht
+  have hxy' : α'.flow x tmeet = β'.flow y tmeet := by
+    simpa [α', β'] using hxy
+  have hEq : EqOn (α'.flow x) (β'.flow y) (Icc a b) :=
+    α'.eqOn_Icc_of_lipschitzOnWith_of_eq_at_time β' hxα hyβ htmeet hxy'
+      hf_lip hα_mem' hβ_mem'
+  simpa [α', β'] using hEq
+
+/-- Common-subinterval reanchoring uniqueness for packaged local model flows. -/
+theorem eqOn_common_Icc_of_lipschitzOnWith_of_reanchored
+    {aα bα aβ bβ a b tα tβ : ℝ}
+    {htα : tα ∈ Icc aα bα} {htβ : tβ ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f (⟨tα, htα⟩ : Icc aα bα) xα rα)
+    (β : LocalFlowSolution f (⟨tβ, htβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    (htαbase : tα ∈ Ioo a b) (htβbase : tβ ∈ Ioo a b)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα)
+    (hyβ : α.flow x tβ ∈ closedBall xβ rβ)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow (α.flow x tβ) t ∈ state t) :
+    EqOn (α.flow x) (β.flow (α.flow x tβ)) (Icc a b) :=
+  α.eqOn_common_Icc_of_lipschitzOnWith_of_eq_at_time β hαtime hβtime
+    htαbase htβbase hxα hyβ htβbase
+    (by simp [β.initial_eq (α.flow x tβ) hyβ]) hf_lip hα_mem hβ_mem
 
 /-- Closed-interval uniqueness form for packaged local model flows.  This is the
 version needed when endpoint continuity is available from the within-interval
@@ -1274,6 +1449,52 @@ theorem flow_eq_of_lipschitzOnWith_of_mem_common_Ioo
   α.eqOn_common_Ioo_of_lipschitzOnWith_of_mem β hαtime hβtime hxα hxβ
     htbase hf_lip hα_mem hβ_mem ht
 
+/-- Common-subinterval meeting-time uniqueness for continuous space-time
+local-flow packages whose ambient Picard intervals and base times may differ. -/
+theorem eqOn_common_Icc_of_lipschitzOnWith_of_eq_at_time
+    {aα bα aβ bβ a b tα tβ : ℝ}
+    {htα : tα ∈ Icc aα bα} {htβ : tβ ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : ContinuousLocalFlowSolution f (⟨tα, htα⟩ : Icc aα bα) xα rα)
+    (β : ContinuousLocalFlowSolution f (⟨tβ, htβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    (htαbase : tα ∈ Ioo a b) (htβbase : tβ ∈ Ioo a b)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x y : V} (hxα : x ∈ closedBall xα rα) (hyβ : y ∈ closedBall xβ rβ)
+    {tmeet : ℝ} (htmeet : tmeet ∈ Ioo a b)
+    (hxy : α.flow (x, tmeet) = β.flow (y, tmeet))
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow (y, t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (y, t)) (Icc a b) :=
+  LocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_eq_at_time
+    (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
+    hαtime hβtime htαbase htβbase hxα hyβ htmeet hxy hf_lip hα_mem hβ_mem
+
+/-- Common-subinterval reanchoring uniqueness for continuous space-time
+local-flow packages. -/
+theorem eqOn_common_Icc_of_lipschitzOnWith_of_reanchored
+    {aα bα aβ bβ a b tα tβ : ℝ}
+    {htα : tα ∈ Icc aα bα} {htβ : tβ ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : ContinuousLocalFlowSolution f (⟨tα, htα⟩ : Icc aα bα) xα rα)
+    (β : ContinuousLocalFlowSolution f (⟨tβ, htβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    (htαbase : tα ∈ Ioo a b) (htβbase : tβ ∈ Ioo a b)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα)
+    (hyβ : α.flow (x, tβ) ∈ closedBall xβ rβ)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow (α.flow (x, tβ), t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (α.flow (x, tβ), t))
+      (Icc a b) :=
+  LocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_reanchored
+    (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
+    hαtime hβtime htαbase htβbase hxα hyβ hf_lip hα_mem hβ_mem
+
 /-- Pointwise closed-interval overlap uniqueness for continuous space-time local
 flows. -/
 theorem flow_eq_of_lipschitzOnWith_of_mem_Icc
@@ -1289,6 +1510,89 @@ theorem flow_eq_of_lipschitzOnWith_of_mem_Icc
     {t : ℝ} (ht : t ∈ Icc tmin tmax) :
     α.flow (x, t) = β.flow (x, t) :=
   α.eqOn_Icc_of_lipschitzOnWith_of_mem β hxα hxβ ht₀ hf_lip hα_mem hβ_mem ht
+
+/-- Closed-interval uniqueness for two continuous space-time local-flow curves
+that meet at an interior time, allowing different base times, centers, and
+radii. -/
+theorem eqOn_Icc_of_lipschitzOnWith_of_eq_at_time
+    {tα tβ : Icc tmin tmax} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : ContinuousLocalFlowSolution f tα xα rα)
+    (β : ContinuousLocalFlowSolution f tβ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x y : V} (hxα : x ∈ closedBall xα rα) (hyβ : y ∈ closedBall xβ rβ)
+    {tmeet : ℝ} (htmeet : tmeet ∈ Ioo tmin tmax)
+    (hxy : α.flow (x, tmeet) = β.flow (y, tmeet))
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (y, t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (y, t)) (Icc tmin tmax) :=
+  LocalFlowSolution.eqOn_Icc_of_lipschitzOnWith_of_eq_at_time
+    (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
+    hxα hyβ htmeet hxy hf_lip hα_mem hβ_mem
+
+/-- Pointwise continuous-flow form of closed-interval meeting-time uniqueness. -/
+theorem flow_eq_of_lipschitzOnWith_of_eq_at_time_Icc
+    {tα tβ : Icc tmin tmax} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : ContinuousLocalFlowSolution f tα xα rα)
+    (β : ContinuousLocalFlowSolution f tβ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x y : V} (hxα : x ∈ closedBall xα rα) (hyβ : y ∈ closedBall xβ rβ)
+    {tmeet : ℝ} (htmeet : tmeet ∈ Ioo tmin tmax)
+    (hxy : α.flow (x, tmeet) = β.flow (y, tmeet))
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (y, t) ∈ state t)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    α.flow (x, t) = β.flow (y, t) :=
+  α.eqOn_Icc_of_lipschitzOnWith_of_eq_at_time β hxα hyβ htmeet hxy
+    hf_lip hα_mem hβ_mem ht
+
+/-- Reanchoring uniqueness for continuous space-time local-flow packages. -/
+theorem eqOn_Icc_of_lipschitzOnWith_of_reanchored
+    {tα tβ : Icc tmin tmax} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : ContinuousLocalFlowSolution f tα xα rα)
+    (β : ContinuousLocalFlowSolution f tβ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα)
+    (hyβ : α.flow (x, tβ) ∈ closedBall xβ rβ)
+    (htβ : (tβ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax,
+      β.flow (α.flow (x, tβ), t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (α.flow (x, tβ), t))
+      (Icc tmin tmax) :=
+  LocalFlowSolution.eqOn_Icc_of_lipschitzOnWith_of_reanchored
+    (α := α.toLocalFlowSolution) (β := β.toLocalFlowSolution)
+    hxα hyβ htβ hf_lip hα_mem hβ_mem
+
+/-- Interior time slices of a continuous space-time local model flow are
+injective on the initial-data ball under the same Lipschitz state-region
+hypotheses as the local-flow uniqueness theorem. -/
+theorem flow_injOn_of_lipschitzOnWith_of_mem_Ioo
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hf_lip : ∀ τ ∈ Ioo tmin tmax, LipschitzOnWith K (f τ) (state τ))
+    (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo tmin tmax, α.flow (x, τ) ∈ state τ) :
+    InjOn (fun x => α.flow (x, t)) (closedBall x₀ r) := by
+  simpa using
+    (α.toLocalFlowSolution.flow_injOn_of_lipschitzOnWith_of_mem_Ioo
+      ht₀ ht hf_lip hmem)
+
+/-- Common-subinterval form of time-slice injectivity for continuous space-time
+local model flows. -/
+theorem flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem
+    (α : ContinuousLocalFlowSolution f t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) {t : ℝ} (ht : t ∈ Ioo a b)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    (hf_lip : ∀ τ ∈ Ioo a b, LipschitzOnWith K (f τ) (state τ))
+    (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo a b, α.flow (x, τ) ∈ state τ) :
+    InjOn (fun x => α.flow (x, t)) (closedBall x₀ r) := by
+  simpa using
+    (α.toLocalFlowSolution.flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem
+      htime htbase ht hf_lip hmem)
 
 /-- Continuous space-time local flows inherit the closed-interval uniqueness
 bridge from `LocalFlowSolution`. -/
@@ -3912,6 +4216,438 @@ theorem center_tangent_apply_eqOn_Icc_of_opNorm_bound
       (Icc tmin tmax) :=
   α.tangent_apply_eqOn_Icc_of_opNorm_bound β (mem_closedBall_self r.2)
     ht₀ hflow_eq hD_bound v
+
+/-- Interior time slices of the base component of a variational local flow are
+injective on the initial-data ball under the same Lipschitz state-region
+hypotheses as the underlying continuous local flow. -/
+theorem flow_injOn_of_lipschitzOnWith_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax) {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hf_lip : ∀ τ ∈ Ioo tmin tmax, LipschitzOnWith K (f τ) (state τ))
+    (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo tmin tmax, α.flow (x, τ) ∈ state τ) :
+    InjOn (fun x => α.flow (x, t)) (closedBall x₀ r) := by
+  simpa using
+    (α.toContinuousLocalFlowSolution.flow_injOn_of_lipschitzOnWith_of_mem_Ioo
+      ht₀ ht hf_lip hmem)
+
+/-- Common-subinterval form of base-flow time-slice injectivity for a
+variational local flow. -/
+theorem flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) {t : ℝ} (ht : t ∈ Ioo a b)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    (hf_lip : ∀ τ ∈ Ioo a b, LipschitzOnWith K (f τ) (state τ))
+    (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo a b, α.flow (x, τ) ∈ state τ) :
+    InjOn (fun x => α.flow (x, t)) (closedBall x₀ r) := by
+  simpa using
+    (α.toContinuousLocalFlowSolution.flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem
+      htime htbase ht hf_lip hmem)
+
+/-- Closed-interval meeting-time uniqueness for the base component of
+variational local-flow packages. -/
+theorem flow_eqOn_Icc_of_lipschitzOnWith_of_eq_at_time
+    {tα tβ : Icc tmin tmax} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df tα xα rα)
+    (β : VariationalLocalFlowSolution f Df tβ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x y : V} (hxα : x ∈ closedBall xα rα) (hyβ : y ∈ closedBall xβ rβ)
+    {tmeet : ℝ} (htmeet : tmeet ∈ Ioo tmin tmax)
+    (hxy : α.flow (x, tmeet) = β.flow (y, tmeet))
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (y, t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (y, t)) (Icc tmin tmax) :=
+  ContinuousLocalFlowSolution.eqOn_Icc_of_lipschitzOnWith_of_eq_at_time
+    (α := α.toContinuousLocalFlowSolution) (β := β.toContinuousLocalFlowSolution)
+    hxα hyβ htmeet hxy hf_lip hα_mem hβ_mem
+
+/-- Pointwise variational-base form of closed-interval meeting-time uniqueness. -/
+theorem flow_eq_of_lipschitzOnWith_of_eq_at_time_Icc
+    {tα tβ : Icc tmin tmax} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df tα xα rα)
+    (β : VariationalLocalFlowSolution f Df tβ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x y : V} (hxα : x ∈ closedBall xα rα) (hyβ : y ∈ closedBall xβ rβ)
+    {tmeet : ℝ} (htmeet : tmeet ∈ Ioo tmin tmax)
+    (hxy : α.flow (x, tmeet) = β.flow (y, tmeet))
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow (y, t) ∈ state t)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    α.flow (x, t) = β.flow (y, t) :=
+  α.flow_eqOn_Icc_of_lipschitzOnWith_of_eq_at_time β hxα hyβ htmeet hxy
+    hf_lip hα_mem hβ_mem ht
+
+/-- Reanchoring uniqueness for the base component of variational local-flow
+packages. -/
+theorem flow_eqOn_Icc_of_lipschitzOnWith_of_reanchored
+    {tα tβ : Icc tmin tmax} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df tα xα rα)
+    (β : VariationalLocalFlowSolution f Df tβ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα)
+    (hyβ : α.flow (x, tβ) ∈ closedBall xβ rβ)
+    (htβ : (tβ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax,
+      β.flow (α.flow (x, tβ), t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (α.flow (x, tβ), t))
+      (Icc tmin tmax) :=
+  ContinuousLocalFlowSolution.eqOn_Icc_of_lipschitzOnWith_of_reanchored
+    (α := α.toContinuousLocalFlowSolution) (β := β.toContinuousLocalFlowSolution)
+    hxα hyβ htβ hf_lip hα_mem hβ_mem
+
+/-- Common-subinterval meeting-time uniqueness for the base component of
+variational local-flow packages whose ambient Picard intervals and base times
+may differ. -/
+theorem flow_eqOn_common_Icc_of_lipschitzOnWith_of_eq_at_time
+    {aα bα aβ bβ a b tα tβ : ℝ}
+    {htα : tα ∈ Icc aα bα} {htβ : tβ ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df (⟨tα, htα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df (⟨tβ, htβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    (htαbase : tα ∈ Ioo a b) (htβbase : tβ ∈ Ioo a b)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x y : V} (hxα : x ∈ closedBall xα rα) (hyβ : y ∈ closedBall xβ rβ)
+    {tmeet : ℝ} (htmeet : tmeet ∈ Ioo a b)
+    (hxy : α.flow (x, tmeet) = β.flow (y, tmeet))
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow (y, t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (y, t)) (Icc a b) :=
+  ContinuousLocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_eq_at_time
+    (α := α.toContinuousLocalFlowSolution) (β := β.toContinuousLocalFlowSolution)
+    hαtime hβtime htαbase htβbase hxα hyβ htmeet hxy hf_lip hα_mem hβ_mem
+
+/-- Common-subinterval reanchoring uniqueness for the base component of
+variational local-flow packages. -/
+theorem flow_eqOn_common_Icc_of_lipschitzOnWith_of_reanchored
+    {aα bα aβ bβ a b tα tβ : ℝ}
+    {htα : tα ∈ Icc aα bα} {htβ : tβ ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df (⟨tα, htα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution f Df (⟨tβ, htβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    (htαbase : tα ∈ Ioo a b) (htβbase : tβ ∈ Ioo a b)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα)
+    (hyβ : α.flow (x, tβ) ∈ closedBall xβ rβ)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow (α.flow (x, tβ), t) ∈ state t) :
+    EqOn (fun t => α.flow (x, t)) (fun t => β.flow (α.flow (x, tβ), t))
+      (Icc a b) :=
+  ContinuousLocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_reanchored
+    (α := α.toContinuousLocalFlowSolution) (β := β.toContinuousLocalFlowSolution)
+    hαtime hβtime htαbase htβbase hxα hyβ hf_lip hα_mem hβ_mem
+
+/-- If an interior-time tangent map kills a vector, then that vector was already
+zero at the initial time.  The proof compares the vector-slot variational ODE
+with the constant-zero solution and propagates equality back across the closed
+Picard interval. -/
+theorem tangent_apply_eq_zero_of_eq_zero_of_opNorm_bound_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    {v : V} (hzero : α.tangent x t v = 0) :
+    v = 0 := by
+  let linField : ℝ → V → V := fun τ w => Df τ (α.flow (x, τ)) w
+  have hEq : EqOn (fun τ : ℝ => α.tangent x τ v) (fun _ : ℝ => (0 : V))
+      (Icc tmin tmax) := by
+    refine ODE_solution_unique_of_mem_Icc (v := linField) (s := fun _ => Set.univ) (K := K)
+      ?_ ht ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    · intro τ hτ
+      exact ((Df τ (α.flow (x, τ))).lipschitz.weaken
+        (hD_bound τ hτ)).lipschitzOnWith
+    · exact α.tangent_apply_continuousOn hx v
+    · intro τ hτ
+      have hderiv := α.tangent_apply_hasDerivAt_of_mem_Ioo hx hτ v
+      simpa [linField, ContinuousLinearMap.comp_apply] using hderiv
+    · intro τ hτ
+      simp
+    · exact continuousOn_const
+    · intro τ hτ
+      simpa [linField] using (hasDerivAt_const (x := τ) (c := (0 : V)))
+    · intro τ hτ
+      simp
+    · simpa using hzero
+  have hbase : α.tangent x (t₀ : ℝ) v = 0 := hEq t₀.2
+  simpa [α.tangent_initial_eq x hx] using hbase
+
+/-- Interior-time variational tangent maps are injective under a uniform
+operator-norm bound for the linearized coefficient along the base curve. -/
+theorem tangent_injective_of_opNorm_bound_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K) :
+    Function.Injective (α.tangent x t) := by
+  intro u v huv
+  have hzero : α.tangent x t (u - v) = 0 := by
+    rw [map_sub, huv, sub_self]
+  exact sub_eq_zero.mp
+    (α.tangent_apply_eq_zero_of_eq_zero_of_opNorm_bound_Ioo hx ht hD_bound hzero)
+
+/-- Kernel form of interior-time tangent-map injectivity. -/
+theorem tangent_ker_eq_bot_of_opNorm_bound_of_mem_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K) :
+    LinearMap.ker (α.tangent x t : V →ₗ[ℝ] V) = ⊥ := by
+  rw [LinearMap.ker_eq_bot']
+  intro v hzero
+  exact α.tangent_apply_eq_zero_of_eq_zero_of_opNorm_bound_Ioo hx ht hD_bound hzero
+
+/-- Finite-dimensional interior tangent maps are surjective once their kernel is
+zero. -/
+theorem tangent_range_eq_top_of_opNorm_bound_of_mem_Ioo
+    [FiniteDimensional ℝ V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K) :
+    LinearMap.range (α.tangent x t : V →ₗ[ℝ] V) = ⊤ :=
+  (LinearMap.ker_eq_bot_iff_range_eq_top).mp
+    (α.tangent_ker_eq_bot_of_opNorm_bound_of_mem_Ioo hx ht hD_bound)
+
+/-- Finite-dimensional interior tangent maps as continuous linear equivalences.
+This is the model-space inverse-function input extracted from the variational
+ODE uniqueness theorem. -/
+noncomputable def tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K) :
+    V ≃L[ℝ] V :=
+  ContinuousLinearEquiv.ofBijective (α.tangent x t)
+    (α.tangent_ker_eq_bot_of_opNorm_bound_of_mem_Ioo hx ht hD_bound)
+    (α.tangent_range_eq_top_of_opNorm_bound_of_mem_Ioo hx ht hD_bound)
+
+@[simp]
+theorem tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo_apply
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (v : V) :
+    α.tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo hx ht hD_bound v =
+      α.tangent x t v :=
+  rfl
+
+/-- Center-trajectory specialization of interior-time tangent-map injectivity. -/
+theorem center_tangent_injective_of_opNorm_bound_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K) :
+    Function.Injective (α.tangent x₀ t) :=
+  α.tangent_injective_of_opNorm_bound_of_mem_Ioo (mem_closedBall_self r.2) ht hD_bound
+
+/-- Center-trajectory kernel form of interior-time tangent-map injectivity. -/
+theorem center_tangent_ker_eq_bot_of_opNorm_bound_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K) :
+    LinearMap.ker (α.tangent x₀ t : V →ₗ[ℝ] V) = ⊥ :=
+  α.tangent_ker_eq_bot_of_opNorm_bound_of_mem_Ioo (mem_closedBall_self r.2) ht hD_bound
+
+/-- Center-trajectory finite-dimensional surjectivity of the tangent map. -/
+theorem center_tangent_range_eq_top_of_opNorm_bound_Ioo
+    [FiniteDimensional ℝ V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K) :
+    LinearMap.range (α.tangent x₀ t : V →ₗ[ℝ] V) = ⊤ :=
+  α.tangent_range_eq_top_of_opNorm_bound_of_mem_Ioo
+    (mem_closedBall_self r.2) ht hD_bound
+
+/-- Center-trajectory tangent map as a continuous linear equivalence. -/
+noncomputable def center_tangent_continuousLinearEquiv_of_opNorm_bound_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K) :
+    V ≃L[ℝ] V :=
+  α.tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo
+    (mem_closedBall_self r.2) ht hD_bound
+
+@[simp]
+theorem center_tangent_continuousLinearEquiv_of_opNorm_bound_Ioo_apply
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K)
+    (v : V) :
+    α.center_tangent_continuousLinearEquiv_of_opNorm_bound_Ioo ht hD_bound v =
+      α.tangent x₀ t v :=
+  rfl
+
+/-- Common-subinterval form of the tangent-map zero-kernel readout. -/
+theorem tangent_apply_eq_zero_of_eq_zero_of_opNorm_bound_common_Ioo
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    {v : V} (hzero : α.tangent x t v = 0) :
+    v = 0 := by
+  let tbase' : Icc a b := ⟨(t₀ : ℝ), Ioo_subset_Icc_self htbase⟩
+  let α' : VariationalLocalFlowSolution f Df tbase' x₀ r :=
+    α.restrict htime (Ioo_subset_Icc_self htbase) le_rfl
+  have hD_bound' : ∀ τ ∈ Ioo a b, ‖Df τ (α'.flow (x, τ))‖₊ ≤ K := by
+    intro τ hτ
+    simpa [α'] using hD_bound τ hτ
+  have hzero' : α'.tangent x t v = 0 := by
+    simpa [α'] using hzero
+  exact α'.tangent_apply_eq_zero_of_eq_zero_of_opNorm_bound_Ioo hx ht hD_bound' hzero'
+
+/-- Common-subinterval form of interior tangent-map injectivity. -/
+theorem tangent_injective_common_Ioo_of_opNorm_bound_of_mem
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K) :
+    Function.Injective (α.tangent x t) := by
+  intro u v huv
+  have hzero : α.tangent x t (u - v) = 0 := by
+    rw [map_sub, huv, sub_self]
+  exact sub_eq_zero.mp
+    (α.tangent_apply_eq_zero_of_eq_zero_of_opNorm_bound_common_Ioo htime htbase hx ht
+      hD_bound hzero)
+
+/-- Kernel form of common-subinterval tangent-map injectivity. -/
+theorem tangent_ker_eq_bot_common_Ioo_of_opNorm_bound_of_mem
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K) :
+    LinearMap.ker (α.tangent x t : V →ₗ[ℝ] V) = ⊥ := by
+  rw [LinearMap.ker_eq_bot']
+  intro v hzero
+  exact α.tangent_apply_eq_zero_of_eq_zero_of_opNorm_bound_common_Ioo
+    htime htbase hx ht hD_bound hzero
+
+/-- Finite-dimensional common-subinterval tangent maps are surjective once
+their kernel is zero. -/
+theorem tangent_range_eq_top_common_Ioo_of_opNorm_bound_of_mem
+    [FiniteDimensional ℝ V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K) :
+    LinearMap.range (α.tangent x t : V →ₗ[ℝ] V) = ⊤ :=
+  (LinearMap.ker_eq_bot_iff_range_eq_top).mp
+    (α.tangent_ker_eq_bot_common_Ioo_of_opNorm_bound_of_mem
+      htime htbase hx ht hD_bound)
+
+/-- Common-subinterval tangent map as a continuous linear equivalence. -/
+noncomputable def tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K) :
+    V ≃L[ℝ] V :=
+  ContinuousLinearEquiv.ofBijective (α.tangent x t)
+    (α.tangent_ker_eq_bot_common_Ioo_of_opNorm_bound_of_mem
+      htime htbase hx ht hD_bound)
+    (α.tangent_range_eq_top_common_Ioo_of_opNorm_bound_of_mem
+      htime htbase hx ht hD_bound)
+
+@[simp]
+theorem tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem_apply
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (v : V) :
+    α.tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem
+        htime htbase hx ht hD_bound v =
+      α.tangent x t v :=
+  rfl
+
+/-- Center-trajectory common-subinterval tangent-map injectivity. -/
+theorem center_tangent_injective_common_Ioo_of_opNorm_bound
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K) :
+    Function.Injective (α.tangent x₀ t) :=
+  α.tangent_injective_common_Ioo_of_opNorm_bound_of_mem htime htbase
+    (mem_closedBall_self r.2) ht hD_bound
+
+/-- Center-trajectory common-subinterval kernel form of tangent-map injectivity. -/
+theorem center_tangent_ker_eq_bot_common_Ioo_of_opNorm_bound
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K) :
+    LinearMap.ker (α.tangent x₀ t : V →ₗ[ℝ] V) = ⊥ :=
+  α.tangent_ker_eq_bot_common_Ioo_of_opNorm_bound_of_mem htime htbase
+    (mem_closedBall_self r.2) ht hD_bound
+
+/-- Center-trajectory common-subinterval finite-dimensional tangent-map
+surjectivity. -/
+theorem center_tangent_range_eq_top_common_Ioo_of_opNorm_bound
+    [FiniteDimensional ℝ V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K) :
+    LinearMap.range (α.tangent x₀ t : V →ₗ[ℝ] V) = ⊤ :=
+  α.tangent_range_eq_top_common_Ioo_of_opNorm_bound_of_mem htime htbase
+    (mem_closedBall_self r.2) ht hD_bound
+
+/-- Center-trajectory common-subinterval tangent map as a continuous linear
+equivalence. -/
+noncomputable def center_tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K) :
+    V ≃L[ℝ] V :=
+  α.tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem
+    htime htbase (mem_closedBall_self r.2) ht hD_bound
+
+@[simp]
+theorem center_tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_apply
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x₀, τ))‖₊ ≤ K)
+    (v : V) :
+    α.center_tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound
+        htime htbase ht hD_bound v =
+      α.tangent x₀ t v :=
+  rfl
 
 /-- Common-subinterval tangent-map uniqueness when the ambient Picard intervals
 may differ. This is the tangent-only gluing form used after the base curves have
