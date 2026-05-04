@@ -842,7 +842,9 @@ or a named geometric gauge-flow bundle can be connected directly to
 Autonomous Mathlib `IsMIntegralCurveOn` data now also has a direct bridge to the
 repository's constant-in-time gauge-flow predicate and raw `C³` gauge-flow
 packaging, with matching local-at-time and all-times-in-set adapters for
-`IsMIntegralCurveAt`, matching the shape of Mathlib integral-curve outputs. The
+`IsMIntegralCurveAt` plus raw `C³` packaging from local integral-curve data at
+every time in the raw time set, matching the shape of Mathlib integral-curve
+outputs. The
 `of_hasMFDerivAtOn` variants match the common Picard-interior shape where the
 ODE construction has ordinary derivatives only for times in the selected open
 time set, not for all real times. The derivative-view layer now mirrors this

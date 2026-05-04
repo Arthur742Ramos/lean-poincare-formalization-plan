@@ -605,6 +605,36 @@ theorem nonempty_of_autonomousIntegralCurves
       (Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s t₀) :=
   ⟨of_autonomousIntegralCurves maps3 anchored hcurves⟩
 
+/-- Package autonomous Mathlib local integral-curve data at every time in `s`
+for a `C³` diffeomorphism family as a raw gauge-flow witness for the
+constant-in-time vector field. -/
+def of_autonomousIntegralCurveAt
+    {X : Π x : M, TangentSpace I x}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hcurves : ∀ t ∈ s, ∀ x : M,
+      IsMIntegralCurveAt (I := I) (fun τ : ℝ ↦ (maps3 τ) x) X t) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s t₀ :=
+  of_satisfiesGaugeFlowOn maps3 anchored (by
+    intro x t ht
+    exact (hcurves t ht x).hasMFDerivAt.hasMFDerivWithinAt)
+
+/-- Proof-level raw `C³` gauge-flow existence from autonomous Mathlib local
+integral-curve data at every time in `s`. -/
+theorem nonempty_of_autonomousIntegralCurveAt
+    {X : Π x : M, TangentSpace I x}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hcurves : ∀ t ∈ s, ∀ x : M,
+      IsMIntegralCurveAt (I := I) (fun τ : ℝ ↦ (maps3 τ) x) X t) :
+    Nonempty
+      (Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s t₀) :=
+  ⟨of_autonomousIntegralCurveAt maps3 anchored hcurves⟩
+
 /-- Reinterpret a raw `C³` gauge-flow witness for an equal vector field along the flow image. -/
 def congr_vectorField
     {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
