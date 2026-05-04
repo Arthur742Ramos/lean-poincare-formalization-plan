@@ -283,7 +283,8 @@ closed-interval open-domain proof and the variational local-flow continuity
 package. These variational routes now also have relative-filter readout-field
 companions for the open product-domain input shape, so finite-cover readout
 equality inside the derivative domain is enough for both tangent-map and
-variational-local-flow tensor handoffs.
+geometric-slot tangent-map handoffs, as well as the variational-local-flow
+tensor handoffs.
 The full-field coordinate derivative route now
 also has a closed-interval package
 `CoordinatePullbackMetricFieldDerivativeWithinOn`, a variational local-flow
