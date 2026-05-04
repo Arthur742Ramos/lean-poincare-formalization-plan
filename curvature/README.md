@@ -233,7 +233,8 @@ now packages the matching intrinsic boundary
      bundled
      gauge-flow component by such a raw existence witness at fixed-IVP, global,
      and interval scope, either from tensor pullback-time-derivative proofs or
-     from named scalar pullback-metric derivative data. The theorem-family zero-gauge-field identity constructor
+     from named scalar or coordinate-level pullback-metric derivative data. The
+     theorem-family zero-gauge-field identity constructor
      now also produces the pulled-back metric time-derivative proof needed by the
      gauge-reduction API directly from pointwise gauge-field vanishing, provides
      the matching named scalar derivative data, plus direct fixed-IVP and

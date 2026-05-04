@@ -926,8 +926,9 @@ within-field and within-component data, so theorem-package routes that consume
 `HasTimeDerivativeOn` just to discharge the `Ioo` neighborhood proof.
 The geometric endpoint data records now mirror this: fixed-IVP, global family,
 and interval family data can replace their bundled gauge-flow component by raw
-gauge-flow existence plus named scalar pullback-metric derivative data, not only
-by a preconverted tensor pullback-time-derivative proof.
+gauge-flow existence plus named scalar or coordinate-level pullback-metric
+derivative data, not only by a preconverted tensor pullback-time-derivative
+proof.
 The theorem-family zero-gauge-field constructor now also carries the required
 pullback metric time-derivative proof, so any family whose intrinsic DeTurck
 gauge field vanishes on each solution time set can enter the gauge-reduction

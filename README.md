@@ -214,8 +214,8 @@ packages the canonical stationary local solution attached to
     bundles, while the geometric endpoint data can now replace its bundled
     gauge-flow component by such a raw existence witness at fixed-IVP, global,
     and interval scope, either from tensor pullback-time-derivative proofs or
-    from the named scalar pullback-metric derivative data. That raw-flow layer
-    now also rewrites within-time-set
+    from named scalar or coordinate-level pullback-metric derivative data. That
+    raw-flow layer now also rewrites within-time-set
     manifold and preferred-chart derivative readouts under vector-field
     agreement in the relative filter `𝓝[s] t`, matching closed-interval Picard
     endpoint data, and the fixed-IVP/theorem-family raw intrinsic existence
