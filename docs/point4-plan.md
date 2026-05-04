@@ -472,8 +472,9 @@ direct component-continuity estimate wrapper, including operator-ball and
 identity-ball specializations, separating differentiability of the selected
 time slice from the finite-dimensional local-inverse packaging. The
 neighborhood-map equality form now also has closed-ball `ℝ≥0` product-Picard and
-component-continuity estimate wrappers, so chart-gluing arguments can consume
-the same estimates without passing through the `OpenPartialHomeomorph` package.
+component-continuity estimate wrappers, including the operator-ball and
+identity-ball forms, so chart-gluing arguments can consume the same estimates
+without passing through the `OpenPartialHomeomorph` package.
 The raw gauge-flow layer now also extracts the model-coordinate derivative of
 the base flow curve itself: `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`
 turns the manifold derivative of `τ ↦ Φ_τ(x)` into a `HasDerivAt` statement for
