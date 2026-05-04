@@ -1579,7 +1579,7 @@ and closed Picard interval cases, the raw autonomous uniqueness layer now also
 chooses the visible overlap automatically as
 `Ioo (max tmin₁ tmin₂) (min tmax₁ tmax₂)` or
 `Icc (max tmin₁ tmin₂) (min tmax₁ tmax₂)` through the new
-`..._overlap` `maps3` readouts. The raw intrinsic
+`..._overlap` pointwise `eval` and bundled `maps3` readouts. The raw intrinsic
 flow-existence packages now also expose constructor readouts for the induced
 fixed-IVP and theorem-family geometric gauge-flow bundles, including the
 underlying `maps3`, anchoring, gauge-flow equation, and anchored gauge object,

@@ -1181,6 +1181,43 @@ theorem maps3_eq_of_autonomous_Ioo_boundaryless_overlap
     G₁.maps3 t = G₂.maps3 t :=
   G₁.eqOn_maps3_of_autonomous_Ioo_boundaryless_overlap G₂ ht₀ hX ht
 
+/-- Pointwise-curve open-overlap form of autonomous raw gauge-flow uniqueness
+for two open Picard intervals. -/
+theorem eqOn_eval_of_autonomous_Ioo_boundaryless_overlap
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin₁ tmax₁ tmin₂ tmax₂ t₀ : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (fun _ ↦ X) (Ioo tmin₁ tmax₁) t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (fun _ ↦ X) (Ioo tmin₂ tmax₂) t₀)
+    (ht₀ : t₀ ∈ Ioo (max tmin₁ tmin₂) (min tmax₁ tmax₂))
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (x : M) :
+    EqOn (fun t : ℝ ↦ (G₁.maps3 t) x) (fun t : ℝ ↦ (G₂.maps3 t) x)
+      (Ioo (max tmin₁ tmin₂) (min tmax₁ tmax₂)) := by
+  intro t ht
+  have hmaps : G₁.maps3 t = G₂.maps3 t :=
+    G₁.maps3_eq_of_autonomous_Ioo_boundaryless_overlap G₂ ht₀ hX ht
+  simpa [hmaps]
+
+/-- Pointwise open-overlap form of autonomous raw gauge-flow uniqueness for
+fixed base points. -/
+theorem eval_eq_of_autonomous_Ioo_boundaryless_overlap
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin₁ tmax₁ tmin₂ tmax₂ t₀ t : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (fun _ ↦ X) (Ioo tmin₁ tmax₁) t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (fun _ ↦ X) (Ioo tmin₂ tmax₂) t₀)
+    (ht₀ : t₀ ∈ Ioo (max tmin₁ tmin₂) (min tmax₁ tmax₂))
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Ioo (max tmin₁ tmin₂) (min tmax₁ tmax₂))
+    (x : M) :
+    (G₁.maps3 t) x = (G₂.maps3 t) x :=
+  G₁.eqOn_eval_of_autonomous_Ioo_boundaryless_overlap G₂ ht₀ hX x ht
+
 /-- Closed-overlap form of autonomous raw gauge-flow uniqueness for two closed
 Picard intervals.  Endpoint equality is inherited from the common closed
 subinterval theorem, with the visible overlap chosen automatically as
@@ -1222,6 +1259,43 @@ theorem maps3_eq_of_autonomous_Icc_boundaryless_overlap
     (ht : t ∈ Icc (max tmin₁ tmin₂) (min tmax₁ tmax₂)) :
     G₁.maps3 t = G₂.maps3 t :=
   G₁.eqOn_maps3_of_autonomous_Icc_boundaryless_overlap G₂ ht₀ hX ht
+
+/-- Pointwise-curve closed-overlap form of autonomous raw gauge-flow uniqueness
+for two closed Picard intervals. -/
+theorem eqOn_eval_of_autonomous_Icc_boundaryless_overlap
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin₁ tmax₁ tmin₂ tmax₂ t₀ : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (fun _ ↦ X) (Icc tmin₁ tmax₁) t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (fun _ ↦ X) (Icc tmin₂ tmax₂) t₀)
+    (ht₀ : t₀ ∈ Ioo (max tmin₁ tmin₂) (min tmax₁ tmax₂))
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (x : M) :
+    EqOn (fun t : ℝ ↦ (G₁.maps3 t) x) (fun t : ℝ ↦ (G₂.maps3 t) x)
+      (Icc (max tmin₁ tmin₂) (min tmax₁ tmax₂)) := by
+  intro t ht
+  have hmaps : G₁.maps3 t = G₂.maps3 t :=
+    G₁.maps3_eq_of_autonomous_Icc_boundaryless_overlap G₂ ht₀ hX ht
+  simpa [hmaps]
+
+/-- Pointwise closed-overlap form of autonomous raw gauge-flow uniqueness for
+fixed base points. -/
+theorem eval_eq_of_autonomous_Icc_boundaryless_overlap
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin₁ tmax₁ tmin₂ tmax₂ t₀ t : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (fun _ ↦ X) (Icc tmin₁ tmax₁) t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (fun _ ↦ X) (Icc tmin₂ tmax₂) t₀)
+    (ht₀ : t₀ ∈ Ioo (max tmin₁ tmin₂) (min tmax₁ tmax₂))
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Icc (max tmin₁ tmin₂) (min tmax₁ tmax₂))
+    (x : M) :
+    (G₁.maps3 t) x = (G₂.maps3 t) x :=
+  G₁.eqOn_eval_of_autonomous_Icc_boundaryless_overlap G₂ ht₀ hX x ht
 
 /-- Reinterpret a raw `C³` gauge-flow witness for an equal vector field along the flow image. -/
 def congr_vectorField
