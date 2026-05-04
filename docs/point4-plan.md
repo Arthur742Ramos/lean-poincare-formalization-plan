@@ -463,7 +463,10 @@ The component-continuity layer now also has state-preserving selected-flow
 constructors, including operator-ball and identity-ball forms, and direct
 forward-time local-inverse wrappers from component closed-ball estimates plus
 the explicit `HasFDerivWithinAt` hypothesis identifying `Df` as the spatial
-derivative of `f`.
+derivative of `f`. The same state-preserving selection now exposes direct
+closed-ball readouts in the `r ≤ R` radius-specialized form and at the
+component-continuity estimate level, so chart applications can reuse the Picard
+state containment without rebuilding the product witness.
 The raw gauge-flow layer now also extracts the model-coordinate derivative of
 the base flow curve itself: `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`
 turns the manifold derivative of `τ ↦ Φ_τ(x)` into a `HasDerivAt` statement for
