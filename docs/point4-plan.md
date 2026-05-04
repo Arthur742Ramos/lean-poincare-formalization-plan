@@ -244,7 +244,8 @@ ODE routes, and the fully localized route now has a geometric-slot form where
 the scalar identity is stated in actual pushed-forward tangent vectors. The
 metric-coordinate Fréchet transfer now also has a relative-filter form, so
 readout equality inside the product derivative domain is enough for the
-open-product-domain time-difference scalar bridge.
+open-product-domain time-difference scalar bridge, its reusable component-data
+package, and the corresponding closed-Picard tensor time-regularity route.
 The fully localized product-domain route now also has a variational-local-flow
 form that assumes product-domain convergence only for the model Picard graph;
 closed-interval base-flow equality transports that convergence to the raw
