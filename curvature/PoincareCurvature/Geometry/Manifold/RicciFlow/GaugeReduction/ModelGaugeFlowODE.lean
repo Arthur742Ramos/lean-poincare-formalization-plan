@@ -2559,6 +2559,29 @@ theorem ofProduct_time_flow_tangent_apply_pair_eventually_mem_of_mem_spaceTime_I
 
 /-- Product Lipschitz dependence gives Lipschitz dependence of the extracted
 base-flow/tangent-map pair on the base initial point. -/
+theorem ofProduct_flow_tangent_exists_lipschitzOnWith_time_uniform
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    ∃ L' : ℝ≥0, ∀ t ∈ Icc tmin tmax,
+      LipschitzOnWith L'
+        (fun x : V =>
+          ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t),
+            (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t))
+        (closedBall x₀ r) := by
+  obtain ⟨L', hL'⟩ := α.exists_lipschitz_time
+  refine ⟨L', ?_⟩
+  intro t ht
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro x hx y hy
+  have h := (hL' t ht).dist_le_mul (x, (1 : V →L[ℝ] V)) (hball x hx)
+    (y, (1 : V →L[ℝ] V)) (hball y hy)
+  simpa [ofProductContinuousLocalFlowSolution, dist_prod_same_right] using h
+
+/-- Fixed-time readout of
+`ofProduct_flow_tangent_exists_lipschitzOnWith_time_uniform`. -/
 theorem ofProduct_flow_tangent_exists_lipschitzOnWith_time
     {R : ℝ≥0}
     (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
@@ -2572,13 +2595,8 @@ theorem ofProduct_flow_tangent_exists_lipschitzOnWith_time
           ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t),
             (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).tangent x t))
         (closedBall x₀ r) := by
-  obtain ⟨L', hL'⟩ := α.exists_lipschitzOnWith_time ht
-  refine ⟨L', ?_⟩
-  refine LipschitzOnWith.of_dist_le_mul ?_
-  intro x hx y hy
-  have h := hL'.dist_le_mul (x, (1 : V →L[ℝ] V)) (hball x hx)
-    (y, (1 : V →L[ℝ] V)) (hball y hy)
-  simpa [ofProductContinuousLocalFlowSolution, dist_prod_same_right] using h
+  obtain ⟨L', hL'⟩ := ofProduct_flow_tangent_exists_lipschitzOnWith_time_uniform α hball
+  exact ⟨L', hL' t ht⟩
 
 /-- The extracted base-flow/tangent-map pair is continuous in the base initial
 point at each Picard time. -/
@@ -2683,24 +2701,23 @@ theorem ofProduct_exists_dist_time_flow_tangent_le_mul
 
 /-- Product Lipschitz dependence gives Lipschitz dependence of the extracted
 base flow on the base initial point. -/
-theorem ofProduct_flow_exists_lipschitzOnWith_time
+theorem ofProduct_flow_exists_lipschitzOnWith_time_uniform
     {R : ℝ≥0}
     (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
       (x₀, (1 : V →L[ℝ] V)) R)
     (hball : ∀ x ∈ closedBall x₀ r,
-      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
-    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
-    ∃ L' : ℝ≥0,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    ∃ L' : ℝ≥0, ∀ t ∈ Icc tmin tmax,
       LipschitzOnWith L'
         (fun x : V =>
           (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t))
         (closedBall x₀ r) := by
-  obtain ⟨L', hL'⟩ :=
-    ofProduct_flow_tangent_exists_lipschitzOnWith_time α hball ht
+  obtain ⟨L', hL'⟩ := ofProduct_flow_tangent_exists_lipschitzOnWith_time_uniform α hball
   refine ⟨L', ?_⟩
+  intro t ht
   refine LipschitzOnWith.of_dist_le_mul ?_
   intro x hx y hy
-  have hpair := hL'.dist_le_mul x hx y hy
+  have hpair := (hL' t ht).dist_le_mul x hx y hy
   have hflow :
       dist
         ((ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t))
@@ -2713,6 +2730,23 @@ theorem ofProduct_flow_exists_lipschitzOnWith_time
     rw [Prod.dist_eq]
     exact le_max_left _ _
   exact le_trans hflow hpair
+
+/-- Fixed-time readout of
+`ofProduct_flow_exists_lipschitzOnWith_time_uniform`. -/
+theorem ofProduct_flow_exists_lipschitzOnWith_time
+    {R : ℝ≥0}
+    (α : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ∃ L' : ℝ≥0,
+      LipschitzOnWith L'
+        (fun x : V =>
+          (ofProductContinuousLocalFlowSolution α.toContinuousLocalFlowSolution hball).flow (x, t))
+        (closedBall x₀ r) := by
+  obtain ⟨L', hL'⟩ := ofProduct_flow_exists_lipschitzOnWith_time_uniform α hball
+  exact ⟨L', hL' t ht⟩
 
 /-- The extracted base flow is continuous in the base initial point at each
 Picard time. -/
@@ -4826,6 +4860,98 @@ theorem flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_forward_Icc_
     _ = (η h : ℝ) * ‖h‖ := by
           simp [η, NNReal.coe_mul]
           ring
+
+/-- Product-Picard Lipschitz dependence supplies the forward-time flow
+separation estimate required by the relative field-remainder criterion. -/
+theorem ofProduct_eventually_flow_norm_sub_le_mul_forward_Icc_of_mem_ball
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r) :
+    ∃ L : ℝ≥0, ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖(ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x + h, τ) -
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x, τ)‖ ≤
+          (L : ℝ) * ‖h‖ := by
+  obtain ⟨L, hL⟩ := ofProduct_flow_exists_lipschitzOnWith_time_uniform β hball
+  refine ⟨L, ?_⟩
+  have hx_closed : x ∈ closedBall x₀ r := ball_subset_closedBall hx
+  filter_upwards [eventually_add_mem_closedBall_of_mem_ball (x₀ := x₀) (r := r) hx] with
+    h hxh
+  intro τ hτ
+  have hτIcc : τ ∈ Icc tmin tmax :=
+    ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩
+  have hdist := (hL τ hτIcc).dist_le_mul (x + h) hxh x hx_closed
+  simpa [dist_eq_norm, add_comm, add_left_comm, add_assoc] using hdist
+
+/-- Product-Picard version of the relative field-remainder criterion.  The
+flow-separation Lipschitz estimate is supplied by the product Picard package,
+so callers only provide the vector-field Taylor remainder and the base `Df`
+bound. -/
+theorem ofProduct_flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_forward_Icc_of_mem_ball
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    {θ : V → ℝ≥0}
+    (hθ : Filter.Tendsto (fun h : V => (θ h : ℝ)) (𝓝 0) (𝓝 0))
+    (hD_bound : ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖ ≤ K)
+    (hfield_relative : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖f τ
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x + h, τ)) -
+          f τ
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x, τ)) -
+          (Df τ
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (x, τ)))
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                (x + h, τ) -
+              (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                (x, τ))‖ ≤
+          (θ h : ℝ) *
+            ‖(ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                (x + h, τ) -
+              (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                (x, τ)‖) :
+    HasFDerivAt
+      (fun y : V =>
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow (y, t))
+      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent x t)
+      x := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  obtain ⟨L, hflow_lip⟩ :=
+    ofProduct_eventually_flow_norm_sub_le_mul_forward_Icc_of_mem_ball β hball hx
+  have hflow_lip' : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖ := by
+    simpa [α] using hflow_lip
+  have hD_bound' : ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+      ‖Df τ (α.flow (x, τ))‖ ≤ K := by
+    intro τ hτ
+    simpa [α] using hD_bound τ hτ
+  have hfield_relative' : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+          (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖ ≤
+          (θ h : ℝ) * ‖α.flow (x + h, τ) - α.flow (x, τ)‖ := by
+    simpa [α] using hfield_relative
+  simpa [α] using
+    α.flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_forward_Icc_of_mem_ball
+      (L := L) hx ht hθ hD_bound' hflow_lip' hfield_relative'
 
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is
