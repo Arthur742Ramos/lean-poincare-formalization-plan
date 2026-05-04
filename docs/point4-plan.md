@@ -1281,6 +1281,13 @@ package into a bijective open patch and into a positive source-ball
 `ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius`
 and
 `ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius`.
+The localized componentwise closed-ball continuity route now has the same
+direct inverse-patch unpacking via
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius`
+and
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius`,
+so chart-local component estimates can feed the inverse patch without dropping
+back to the generic Picard package.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
@@ -1463,7 +1470,9 @@ time-slice neighborhood-map and open-partial-homeomorphism readouts directly,
 so chart-local inverse arguments can stay on the shrunk Picard interval; the
 same restricted closed-ball estimate route now exposes the corresponding
 bijective open patch and positive source-ball `MapsTo`/`InjOn` patch without
-unfolding the `OpenPartialHomeomorph`. The ODE package
+unfolding the `OpenPartialHomeomorph`; the componentwise closed-ball continuity
+route exposes the same two patch forms directly from the chart-local estimates.
+The ODE package
 now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
 closed-interval and interior vector-slot derivatives for `t ↦ A(t)v` via
