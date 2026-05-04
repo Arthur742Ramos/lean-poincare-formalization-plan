@@ -1131,6 +1131,10 @@ inverse-Christoffel bridges sharing
 that same lower bound, with the quantitative vector/vector-inverse product,
 bilinear, inverse-principal, and inverse-Christoffel bridges now also accepting
 those same Gram-entry input forms,
+finite-family inverse-Gram difference bridges against comparison matrix families
+with spatial-Hölder, unit-diameter spatial-Lipschitz, and closed ball/cylinder
+spatial-Lipschitz Gram-entry input forms while keeping one determinant lower
+bound shared by both sides,
 finite-family schematic RHS quantitative difference, quantitative
 entrywise-difference, existential difference, and bounded-difference control
 against comparison primitive inputs with one lower
