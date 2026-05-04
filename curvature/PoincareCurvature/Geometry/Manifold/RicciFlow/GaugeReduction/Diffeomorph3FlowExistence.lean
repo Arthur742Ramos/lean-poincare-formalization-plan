@@ -549,6 +549,173 @@ theorem eventually_mem_extChartAt_source_eval
   (G.continuousAt_eval hs x).preimage_mem_nhds
     (extChartAt_source_mem_nhds (I := I) ((G.maps3 t) x))
 
+/-- Raw open-Picard time sets are neighborhoods of each of their times when the
+abstract time set has been identified with `Ioo tmin tmax`. -/
+theorem timeSet_mem_nhds_of_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t := by
+  intro t ht
+  have ht' : t ∈ Ioo tmin tmax := by
+    simpa [htimeSet] using ht
+  simpa [htimeSet] using (isOpen_Ioo.mem_nhds ht')
+
+/-- Raw open-Picard local-at-time gauge-flow readout without a separate
+neighborhood-of-time hypothesis. -/
+theorem satisfiesAt_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax) (ht : t ∈ s) :
+    SatisfiesGaugeFlowAt (I := I) (M := M)
+      G.maps3.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily X t :=
+  G.satisfiesAt (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht)
+
+/-- Raw open-Picard pointwise manifold derivative readout without a separate
+neighborhood-of-time hypothesis. -/
+theorem hasMFDerivAt_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (G.maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (G.maps3 t x))) :=
+  G.hasMFDerivAt (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
+
+/-- Raw open-Picard preferred-chart derivative readout without a separate
+neighborhood-of-time hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+        (X t ((G.maps3 t) x))) t :=
+  G.hasDerivAt_extChartAt_eval
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
+
+/-- Raw open-Picard pointwise manifold derivative readout rewritten to a
+neighborhood-equal vector field, without a separate neighborhood-of-time
+hypothesis. -/
+theorem hasMFDerivAt_congr_vectorField_of_timeSet_eq_Ioo
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ (G.maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (G.maps3 t x))) :=
+  G.hasMFDerivAt_congr_vectorField
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) hXY x
+
+/-- Raw open-Picard preferred-chart derivative readout rewritten to a
+neighborhood-equal vector field, without a separate neighborhood-of-time
+hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_congr_vectorField_of_timeSet_eq_Ioo
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x) ((G.maps3 t) x)
+        (Y t ((G.maps3 t) x))) t :=
+  G.hasDerivAt_extChartAt_eval_congr_vectorField
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) hXY x
+
+/-- Raw open-Picard centered preferred-chart derivative readout without a
+separate neighborhood-of-time hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_self_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (X t ((G.maps3 t) x)) t :=
+  G.hasDerivAt_extChartAt_eval_self
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
+
+/-- Raw open-Picard centered preferred-chart derivative readout rewritten to a
+neighborhood-equal vector field, without a separate neighborhood-of-time
+hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_self_congr_vectorField_of_timeSet_eq_Ioo
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
+      (Y t ((G.maps3 t) x)) t :=
+  G.hasDerivAt_extChartAt_eval_self_congr_vectorField
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) hXY x
+
+/-- Raw open-Picard continuity of gauge-flow curves in preferred chart
+coordinates, without a separate neighborhood-of-time hypothesis. -/
+theorem continuousAt_extChartAt_eval_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (x : M) :
+    ContinuousAt
+      (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) t :=
+  G.continuousAt_extChartAt_eval
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
+
+/-- Raw open-Picard continuity of gauge-flow curves, without a separate
+neighborhood-of-time hypothesis. -/
+theorem continuousAt_eval_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (x : M) :
+    ContinuousAt (fun τ : ℝ ↦ (G.maps3 τ) x) t :=
+  G.continuousAt_eval (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
+
+/-- Raw open-Picard tangent-trivialization control, without a separate
+neighborhood-of-time hypothesis. -/
+theorem eventually_mem_trivializationAt_eval_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      (G.maps3 τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _) ((G.maps3 t) x)).baseSet :=
+  G.eventually_mem_trivializationAt_eval
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
+
+/-- Raw open-Picard chart-source control, without a separate neighborhood-of-time
+hypothesis. -/
+theorem eventually_mem_extChartAt_source_eval_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      (G.maps3 τ) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
+  G.eventually_mem_extChartAt_source_eval
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
+
 /-- Package a geometric `SatisfiesGaugeFlowOn` statement as a raw `C^3`
 diffeomorphism gauge-flow witness. -/
 def of_satisfiesGaugeFlowOn
@@ -1989,6 +2156,19 @@ def toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn
   AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.ofSatisfiesGaugeFlowOn
     (I := I) (M := M) (g := g) (background := background)
     (s := s) (t₀ := t₀) G.maps3 G.anchored G.satisfies
+
+/-- Proof-level conversion from raw intrinsic DeTurck gauge-flow existence to
+the anchored geometric gauge object used by gauge reduction. -/
+theorem nonempty_toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (hG : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background) s t₀)) :
+    Nonempty (AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      g background s t₀) := by
+  rcases hG with ⟨G⟩
+  exact ⟨G.toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn⟩
 
 @[simp] theorem toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn_maps
     {g : MetricFamily (I := I) (M := M)}
@@ -3508,6 +3688,27 @@ def ofDiffeomorph3GaugeFlow
       (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
       (t₀ := ivp.initialTime)
       (G.maps3 sol) (G.anchored sol) (G.satisfies sol)
+
+/-- Package a fixed-IVP geometric intrinsic DeTurck gauge-flow bundle as
+proof-level raw gauge-flow existence data. -/
+theorem nonempty_ofDiffeomorph3GaugeFlow
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofDiffeomorph3GaugeFlow G⟩
+
+/-- Proof-level conversion from fixed-IVP raw gauge-flow existence data to the
+geometric gauge-flow bundle consumed by endpoint routes. -/
+theorem nonempty_toDiffeomorph3GaugeFlow
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (hG : Nonempty (IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)) :
+    Nonempty (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) := by
+  rcases hG with ⟨G⟩
+  exact ⟨G.toDiffeomorph3GaugeFlow⟩
 
 /-- Package fixed-IVP named derivative data as raw gauge-flow existence data. -/
 noncomputable def ofDerivativeData
@@ -5502,6 +5703,16 @@ theorem nonempty_ofDiffeomorph3GaugeFlowFamily
     Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M)) :=
   ⟨ofDiffeomorph3GaugeFlowFamily G⟩
+
+/-- Proof-level conversion from theorem-family raw gauge-flow existence data to
+the geometric gauge-flow family consumed by endpoint routes. -/
+theorem nonempty_toDiffeomorph3GaugeFlowFamily
+    (hG : Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))) :
+    Nonempty (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) := by
+  rcases hG with ⟨G⟩
+  exact ⟨G.toDiffeomorph3GaugeFlowFamily⟩
 
 /-- Package theorem-family named derivative data as raw gauge-flow existence
 data. -/

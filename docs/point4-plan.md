@@ -839,6 +839,13 @@ family and anchoring data,
 so an ODE construction that already returns pointwise manifold derivative data
 or a named geometric gauge-flow bundle can be connected directly to
 `Diffeomorph3GaugeFlowOn` and `IntrinsicDeTurckGaugeFlowExistenceFamily`.
+The generic raw-flow API now also has open-Picard readouts from an abstract
+time-set equality `s = Ioo tmin tmax`, exposing the local-at-time equation,
+ordinary manifold/preferred-chart derivatives, continuity, and chart/trivialization
+membership without first specializing to fixed-IVP or theorem-family packages.
+Proof-level `Nonempty` transport wrappers now move raw intrinsic gauge-flow
+existence back to the anchored geometric gauge objects and the fixed-IVP/family
+geometric gauge-flow bundles.
 Autonomous Mathlib `IsMIntegralCurveOn` data now also has a direct bridge to the
 repository's constant-in-time gauge-flow predicate and raw `C³` gauge-flow
 packaging, with matching local-at-time and all-times-in-set adapters for
