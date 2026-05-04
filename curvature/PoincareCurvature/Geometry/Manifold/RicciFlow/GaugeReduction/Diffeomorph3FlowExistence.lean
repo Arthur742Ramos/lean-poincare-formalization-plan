@@ -254,6 +254,52 @@ theorem exists_open_nhds_bijOn_of_openPartialHomeomorph_lifted_model_bijOn
     bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn
       e₀ e₁ G hUt hWt hbij⟩
 
+/-- A chart-coordinate equality on a visible patch gives equality of the
+underlying manifold maps once both sides land in the chart source.  This is the
+topological equality transport used by chart-gluing arguments after model
+uniqueness has identified local flows in a common target chart. -/
+theorem eqOn_of_openPartialHomeomorph_coord_eqOn
+    (e : OpenPartialHomeomorph X Y) {F G : X → X} {S : Set X}
+    (hFsource : MapsTo F S e.source) (hGsource : MapsTo G S e.source)
+    (hcoord : EqOn (fun x : X ↦ e (F x)) (fun x : X ↦ e (G x)) S) :
+    EqOn F G S := by
+  intro x hx
+  exact e.injOn (hFsource hx) (hGsource hx) (hcoord hx)
+
+/-- If two chart-lifted model maps have equal target coordinates in the same
+target chart on a manifold patch, then the lifted manifold maps agree there. -/
+theorem eqOn_lifted_models_same_target_of_model_eqOn
+    (e₀ f₀ e₁ : OpenPartialHomeomorph X Y) (G₀ G₁ : Y → Y) {S : Set X}
+    (hcoord : EqOn (fun x : X ↦ G₀ (e₀ x)) (fun x : X ↦ G₁ (f₀ x)) S) :
+    EqOn (fun x : X ↦ e₁.symm (G₀ (e₀ x)))
+      (fun x : X ↦ e₁.symm (G₁ (f₀ x))) S := by
+  intro x hx
+  exact congrArg e₁.symm (hcoord hx)
+
+/-- Model-space equality on a source chart patch transports directly to
+manifold-side equality for the two corresponding lifted maps. -/
+theorem eqOn_symm_image_of_openPartialHomeomorph_lifted_model_eqOn
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (G₀ G₁ : Y → Y) {U : Set Y}
+    (hUt : U ⊆ e₀.target) (heq : EqOn G₀ G₁ U) :
+    EqOn (fun x : X ↦ e₁.symm (G₀ (e₀ x)))
+      (fun x : X ↦ e₁.symm (G₁ (e₀ x))) (e₀.symm '' U) := by
+  rintro _ ⟨y, hyU, rfl⟩
+  simpa [e₀.right_inv (hUt hyU)] using congrArg e₁.symm (heq hyU)
+
+/-- Chart-lifted model maps through different target charts agree on a
+manifold patch once their images lie in a common target chart and their common
+target-chart coordinates agree there. -/
+theorem eqOn_lifted_models_of_common_target_chart_eqOn
+    (e₀ e₁ f₀ f₁ c : OpenPartialHomeomorph X Y) (G₀ G₁ : Y → Y) {S : Set X}
+    (h₀source : MapsTo (fun x : X ↦ e₁.symm (G₀ (e₀ x))) S c.source)
+    (h₁source : MapsTo (fun x : X ↦ f₁.symm (G₁ (f₀ x))) S c.source)
+    (hcoord : EqOn
+      (fun x : X ↦ c (e₁.symm (G₀ (e₀ x))))
+      (fun x : X ↦ c (f₁.symm (G₁ (f₀ x)))) S) :
+    EqOn (fun x : X ↦ e₁.symm (G₀ (e₀ x)))
+      (fun x : X ↦ f₁.symm (G₁ (f₀ x))) S :=
+  eqOn_of_openPartialHomeomorph_coord_eqOn c h₀source h₁source hcoord
+
 /-- Direct chart lift of a model open-partial-homeomorphism inverse patch:
 shrink the model patch to the source and target chart targets, then transport
 the resulting bijective patch through the two charts. -/

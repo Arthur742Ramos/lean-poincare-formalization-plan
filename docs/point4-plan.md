@@ -1403,6 +1403,13 @@ defined as `e₁.symm ∘ G ∘ e₀` from a chartwise Picard time-slice `G`.
 domain-shrink and lifted-model steps: a model open partial homeomorphism for
 `G`, source membership in the source chart target, and target membership in the
 target chart target directly produce a manifold-side open `BijOn` patch.  The
+same section now also transports overlap equalities:
+`eqOn_of_openPartialHomeomorph_coord_eqOn` turns equality in a common target
+chart into equality of the underlying manifold maps, while
+`eqOn_lifted_models_same_target_of_model_eqOn`,
+`eqOn_symm_image_of_openPartialHomeomorph_lifted_model_eqOn`, and
+`eqOn_lifted_models_of_common_target_chart_eqOn` cover the chart-lifted model
+forms expected from local-flow uniqueness on overlaps.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
