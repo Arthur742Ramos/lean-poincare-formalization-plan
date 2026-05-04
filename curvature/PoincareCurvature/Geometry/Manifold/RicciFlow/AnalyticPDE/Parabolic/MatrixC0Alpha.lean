@@ -3280,6 +3280,84 @@ theorem matrix_inv_sub_with_entrywise_of_isCompact_det_ne_zero {n 𝕜 : Type*} 
   exact ⟨δ, hδpos, matrix_inv_sub_with_entrywise (M := M) (N := N)
     hH hBd hHd hM hN hdiff hδpos hdetM hdetN⟩
 
+/-- Compact-domain finite-family version of `matrix_inv_sub_with`: pointwise nonvanishing of
+all determinants supplies one determinant lower bound shared by both matrix families. -/
+theorem matrix_inv_sub_with_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type*} [Fintype ι]
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {B H : ι → n → n → ℝ} {η : ι → ℝ}
+    {M N : ι → ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ r i j, 0 ≤ B r i j) (hH : ∀ r i j, 0 ≤ H r i j)
+    (hM : ∀ r i j,
+      ParabolicC0AlphaWith (B r i j) (H r i j) α (fun z => M r z i j) K)
+    (hN : ∀ r i j,
+      ParabolicC0AlphaWith (B r i j) (H r i j) α (fun z => N r z i j) K)
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (N r z).det ≠ 0)
+    (hdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ K → ‖M r z - N r z‖ ≤ η r) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (matrixInvSubBoundConst (𝕜 := 𝕜) δ (B r) (η r))
+          (matrixInvSubHolderConst (𝕜 := 𝕜) δ (B r) (H r))
+          α (fun z : ℝ × X => (M r z)⁻¹ - (N r z)⁻¹) K := by
+  have hMctrl : ∀ r i j, ParabolicC0AlphaOn α (fun z => M r z i j) K := by
+    intro r i j
+    exact ⟨B r i j, hB r i j, H r i j, hH r i j, hM r i j⟩
+  have hNctrl : ∀ r i j, ParabolicC0AlphaOn α (fun z => N r z i j) K := by
+    intro r i j
+    exact ⟨B r i j, hB r i j, H r i j, hH r i j, hN r i j⟩
+  rcases matrix_det_pair_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, hdetM, hdetN, ?_⟩
+  intro r
+  exact matrix_inv_sub_with (M := M r) (N := N r)
+    (hH r) (hM r) (hN r) (hdiff r) hδpos (hdetM r) (hdetN r)
+
+/-- Compact-domain finite-family version of `matrix_inv_sub_with_entrywise`: pointwise
+nonvanishing of all determinants supplies one determinant lower bound shared by both matrix
+families. -/
+theorem matrix_inv_sub_with_entrywise_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {B H Bd Hd : ι → n → n → ℝ} {M N : ι → ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hB : ∀ r i j, 0 ≤ B r i j) (hH : ∀ r i j, 0 ≤ H r i j)
+    (hBd : ∀ r i j, 0 ≤ Bd r i j) (hHd : ∀ r i j, 0 ≤ Hd r i j)
+    (hM : ∀ r i j,
+      ParabolicC0AlphaWith (B r i j) (H r i j) α (fun z => M r z i j) K)
+    (hN : ∀ r i j,
+      ParabolicC0AlphaWith (B r i j) (H r i j) α (fun z => N r z i j) K)
+    (hdiff : ∀ r i j,
+      ParabolicC0AlphaWith (Bd r i j) (Hd r i j) α
+        (fun z => M r z i j - N r z i j) K)
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (matrixInvEntrywiseSubBoundConst (𝕜 := 𝕜) δ (B r) (Bd r))
+          (matrixInvEntrywiseSubHolderConst (𝕜 := 𝕜) δ (B r) (H r) (Bd r) (Hd r))
+          α (fun z : ℝ × X => (M r z)⁻¹ - (N r z)⁻¹) K := by
+  have hMctrl : ∀ r i j, ParabolicC0AlphaOn α (fun z => M r z i j) K := by
+    intro r i j
+    exact ⟨B r i j, hB r i j, H r i j, hH r i j, hM r i j⟩
+  have hNctrl : ∀ r i j, ParabolicC0AlphaOn α (fun z => N r z i j) K := by
+    intro r i j
+    exact ⟨B r i j, hB r i j, H r i j, hH r i j, hN r i j⟩
+  rcases matrix_det_pair_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, hdetM, hdetN, ?_⟩
+  intro r
+  exact matrix_inv_sub_with_entrywise (M := M r) (N := N r)
+    (hH r) (hBd r) (hHd r) (hM r) (hN r) (hdiff r)
+    hδpos (hdetM r) (hdetN r)
+
 /-- On a compact time-space set, inverse-matrix entries preserve parabolic `C^{0,α}` control from
 entrywise control and pointwise nonvanishing determinant. -/
 theorem matrix_inv_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
@@ -3364,6 +3442,31 @@ theorem matrix_inv_sub_entrywise_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fint
     ⟨δ, hδpos, hdetM, hdetN⟩
   exact ⟨δ, hδpos, matrix_inv_sub_entrywise (M := M) (N := N)
     hM hN hdiff hδpos hdetM hdetN⟩
+
+/-- Compact-domain finite-family inverse-matrix difference control from entrywise existential
+controls and pointwise nonvanishing determinants, with one determinant lower bound shared by both
+matrix families. -/
+theorem matrix_inv_sub_entrywise_family_of_isCompact_det_ne_zero {ι n 𝕜 : Type*}
+    [Fintype ι] [Fintype n] [DecidableEq n] [NormedField 𝕜] {K : Set (ℝ × X)}
+    {M N : ι → ℝ × X → Matrix n n 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hM : ∀ r i j, ParabolicC0AlphaOn α (fun z => M r z i j) K)
+    (hN : ∀ r i j, ParabolicC0AlphaOn α (fun z => N r z i j) K)
+    (hdiff : ∀ r i j, ParabolicC0AlphaOn α (fun z => M r z i j - N r z i j) K)
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α (fun z : ℝ × X => (M r z)⁻¹ - (N r z)⁻¹) K := by
+  rcases matrix_det_pair_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := K) (M := M) (N := N) hK hα hM hN hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, hdetM, hdetN, ?_⟩
+  intro r
+  exact matrix_inv_sub_entrywise (M := M r) (N := N r)
+    (hM r) (hN r) (hdiff r) hδpos (hdetM r) (hdetN r)
 
 /-- Entries of a product of two matrix-valued parabolic `C^{0,α}` functions are
 parabolic `C^{0,α}` when all input entries are. -/

@@ -1649,7 +1649,9 @@ finite-family compact inverse, inverse-action, inverse-bilinear,
 inverse-principal, and inverse-Christoffel estimates using that shared
 determinant constant, matching existential finite-family inverse,
 inverse-action, inverse-bilinear, inverse-principal, and inverse-Christoffel
-closures, and
+closures, finite-family compact inverse-difference and entrywise
+inverse-difference estimates with one lower bound shared by both matrix
+families plus the matching existential entrywise inverse-difference closure, and
 compact-domain inverse-entry, inverse-action, inverse-bilinear, and schematic
 matrix-valued RHS variants,
 including finite-family primitive schematic RHS estimates using the same shared
