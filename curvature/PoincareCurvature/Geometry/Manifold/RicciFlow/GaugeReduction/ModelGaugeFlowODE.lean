@@ -5,6 +5,7 @@ public import Mathlib.Analysis.ODE.PicardLindelof
 public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Analysis.Normed.Operator.Banach
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
 public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 
 set_option linter.unusedSectionVars false
@@ -4444,6 +4445,50 @@ theorem tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo_apply
       α.tangent x t v :=
   rfl
 
+/-- If the time-`t` base-flow slice is strictly differentiable in the initial
+condition with derivative equal to the variational tangent map, then the
+finite-dimensional inverse-function theorem says that the slice maps
+neighborhoods of `x` onto neighborhoods of its value. -/
+theorem flow_timeSlice_map_nhds_eq_of_hasStrictFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x) :
+    Filter.map (fun y : V => α.flow (y, t)) (𝓝 x) = 𝓝 (α.flow (x, t)) := by
+  let e : V ≃L[ℝ] V :=
+    α.tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo hx ht hD_bound
+  have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (e : V →L[ℝ] V) x := by
+    simpa [e] using hstrict
+  exact hstrict'.map_nhds_eq_of_equiv
+
+/-- Open-partial-homeomorphism form of the inverse-function bridge for a
+time-slice of a variational local flow.  The remaining mathematical input is
+the strict spatial derivative of the time-slice map, identified with the
+variational tangent map. -/
+theorem exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x) :
+    ∃ φ : OpenPartialHomeomorph V V,
+      (φ : V → V) = (fun y : V => α.flow (y, t)) ∧
+        x ∈ φ.source ∧ α.flow (x, t) ∈ φ.target := by
+  let e : V ≃L[ℝ] V :=
+    α.tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo hx ht hD_bound
+  have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (e : V →L[ℝ] V) x := by
+    simpa [e] using hstrict
+  refine ⟨hstrict'.toOpenPartialHomeomorph (fun y : V => α.flow (y, t)), rfl,
+    hstrict'.mem_toOpenPartialHomeomorph_source,
+    hstrict'.image_mem_toOpenPartialHomeomorph_target⟩
+
 /-- Center-trajectory specialization of interior-time tangent-map injectivity. -/
 theorem center_tangent_injective_of_opNorm_bound_Ioo
     (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
@@ -4586,6 +4631,52 @@ theorem tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem_apply
         htime htbase hx ht hD_bound v =
       α.tangent x t v :=
   rfl
+
+/-- Common-subinterval inverse-function bridge for a time-slice of a
+variational local flow. -/
+theorem flow_timeSlice_map_nhds_eq_common_Ioo_of_hasStrictFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x) :
+    Filter.map (fun y : V => α.flow (y, t)) (𝓝 x) = 𝓝 (α.flow (x, t)) := by
+  let e : V ≃L[ℝ] V :=
+    α.tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem
+      htime htbase hx ht hD_bound
+  have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (e : V →L[ℝ] V) x := by
+    simpa [e] using hstrict
+  exact hstrict'.map_nhds_eq_of_equiv
+
+/-- Common-subinterval open-partial-homeomorphism bridge for a time-slice of a
+variational local flow. -/
+theorem exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x) :
+    ∃ φ : OpenPartialHomeomorph V V,
+      (φ : V → V) = (fun y : V => α.flow (y, t)) ∧
+        x ∈ φ.source ∧ α.flow (x, t) ∈ φ.target := by
+  let e : V ≃L[ℝ] V :=
+    α.tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem
+      htime htbase hx ht hD_bound
+  have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (e : V →L[ℝ] V) x := by
+    simpa [e] using hstrict
+  refine ⟨hstrict'.toOpenPartialHomeomorph (fun y : V => α.flow (y, t)), rfl,
+    hstrict'.mem_toOpenPartialHomeomorph_source,
+    hstrict'.image_mem_toOpenPartialHomeomorph_target⟩
 
 /-- Center-trajectory common-subinterval tangent-map injectivity. -/
 theorem center_tangent_injective_common_Ioo_of_opNorm_bound

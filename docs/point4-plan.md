@@ -1082,10 +1082,16 @@ times: an operator-norm bound for `Df` along the base curve implies
 upgraded to `LinearMap.range (α.tangent x t) = ⊤` and packaged as
 `V ≃L[ℝ] V` through
 `tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo` and its common-`Ioo`
-and center-trajectory variants. This is a model-level infinitesimal
-invertibility input, but it still has to be lifted through charts and combined
-with manifold-level flow compatibility before producing `C³` diffeomorphism
-slices.
+and center-trajectory variants. The model layer now also connects this to the
+inverse-function theorem: once the still-missing strict spatial derivative of
+the time-slice map is supplied and identified with the variational tangent map,
+`flow_timeSlice_map_nhds_eq_of_hasStrictFDerivAt_Ioo` gives the neighborhood
+mapping equality and
+`exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo` packages
+the corresponding local open partial homeomorphism, with common-`Ioo` variants.
+This is a model-level infinitesimal invertibility input, but it still has to be
+lifted through charts and combined with manifold-level flow compatibility before
+producing `C³` diffeomorphism slices.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,
