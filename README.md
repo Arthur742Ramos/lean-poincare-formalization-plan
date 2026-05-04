@@ -381,7 +381,11 @@ packages the canonical stationary local solution attached to
   shrink. A further single-shrink readout now carries the terminal-fit
   theorem-package route and both no-terminal-fit local uniqueness readouts
   together, so downstream closure code no longer has to coordinate separate
-  metric-cone choices for existence packages and local uniqueness.
+  metric-cone choices for existence packages and local uniqueness. The
+  initial-metric smooth-approximation route now also exposes the selected
+  Picard time-radius proof and pairs its chart-carrier Banach
+  solution/uniqueness witness with closure-data metric and connection readouts
+  on that same clipped shrink.
   Global, closed-interval, and genuine symmetric-carrier chart-closure data now
   also project directly to chosen-background DeTurck theorem families, with
   single-IVP `Nonempty` readouts for the global and closed-interval closure

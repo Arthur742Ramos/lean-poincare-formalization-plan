@@ -833,7 +833,11 @@ now packages the matching intrinsic boundary
       `BanachEvolutionLocalSolutionIn` witnesses directly from the smooth-density
       Picard shrink; together with the initial-metric specialization, they expose
       both proof-level existence readouts and stronger selected witnesses that
-      retain terminal-time control and common-interval uniqueness. The vector-bundle
+      retain terminal-time control and common-interval uniqueness. Those
+      selected chart-carrier witnesses now expose the Picard time-radius proof
+      used to form the shrink, and the initial-metric route has a single-shrink
+      readout pairing its Banach solution/uniqueness witness with closure-data
+      metric and connection uniqueness on the same clipped interval. The vector-bundle
       smooth-approximation layer now also discharges the local coordinate-map
       boundedness hypothesis for continuous Riemannian vector bundles, deriving
       preferred-bilinear smooth approximants and the finite-cover Banach-norm

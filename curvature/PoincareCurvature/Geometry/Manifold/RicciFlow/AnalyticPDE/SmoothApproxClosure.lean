@@ -1110,6 +1110,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
       ∀ᶠ y in 𝓝 x, ‖(trivializationAt F TM x).continuousLinearMapAt ℝ y‖ < C)
     (ha : 0 < a) :
     ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
+      ∃ _htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+        a' - (0 : ℝ≥0),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
@@ -1258,7 +1260,9 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
     exact chart'.restrictedSymmetricA_lipschitzOn_Icc
       (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover
       t ⟨ht.1, le_trans ht.2 (le_trans (min_le_left _ _) hsolDensityT)⟩
-  exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, solChart, hsolDensityT, huniqChart⟩
+  exact
+    ⟨T', a', hT', hT'le, htime, chart', ha'pos, ha'le, hball,
+      solChart, hsolDensityT, huniqChart⟩
 
 /-- Continuous Riemannian tangent bundles give the state-preserving Banach solution for the
 chart-derived restricted symmetric carrier without exposing the finite-cover inverse bound or the
@@ -1296,6 +1300,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
       (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
     (ha : 0 < a) :
     ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
+      ∃ _htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+        a' - (0 : ℝ≥0),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
@@ -1444,7 +1450,9 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
     exact chart'.restrictedSymmetricA_lipschitzOn_Icc
       (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover
       t ⟨ht.1, le_trans ht.2 (le_trans (min_le_left _ _) hsolDensityT)⟩
-  exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, solChart, hsolDensityT, huniqChart⟩
+  exact
+    ⟨T', a', hT', hT'le, htime, chart', ha'pos, ha'le, hball,
+      solChart, hsolDensityT, huniqChart⟩
 
 /-- The IVP's own smooth initial metric supplies the continuous Riemannian tangent-bundle structure
 needed by the preferred-cover smooth-density route, giving a chart-restricted Banach solution without
@@ -1480,6 +1488,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
       (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
     (ha : 0 < a) :
     ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T),
+      ∃ _htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+        a' - (0 : ℝ≥0),
       ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover
@@ -1576,7 +1586,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
       TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_localBounds_chartRestrictedSymmetricA_banachEvolutionLocalSolutionIn
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover chart rhs hCpos hC hlocalBound ha with
-    ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, sol, _hsolT, _huniq⟩
+    ⟨T', a', hT', hT'le, _htime, chart', ha'pos, ha'le, hball,
+      sol, _hsolT, _huniq⟩
   exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, ⟨sol⟩⟩
 
 /-- Terminal-time and uniqueness retaining proof-level chart-carrier Banach solution from the
@@ -1649,7 +1660,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
       TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_localBounds_chartRestrictedSymmetricA_banachEvolutionLocalSolutionIn
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover chart rhs hCpos hC hlocalBound ha with
-    ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, sol, hsolT, huniq⟩
+    ⟨T', a', hT', hT'le, _htime, chart', ha'pos, ha'le, hball,
+      sol, hsolT, huniq⟩
   exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, ⟨⟨sol, hsolT, huniq⟩⟩⟩
 
 /-- Proof-level chart-carrier Banach solution existence over a continuous Riemannian tangent bundle,
@@ -1709,7 +1721,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
       TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_continuousRiemannianBundle_chartRestrictedSymmetricA_banachEvolutionLocalSolutionIn
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover chart rhs ha with
-    ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, sol, _hsolT, _huniq⟩
+    ⟨T', a', hT', hT'le, _htime, chart', ha'pos, ha'le, hball,
+      sol, _hsolT, _huniq⟩
   exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, ⟨sol⟩⟩
 
 /-- Terminal-time and uniqueness retaining proof-level chart-carrier Banach solution over a
@@ -1780,7 +1793,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
       TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_continuousRiemannianBundle_chartRestrictedSymmetricA_banachEvolutionLocalSolutionIn
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover chart rhs ha with
-    ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, sol, hsolT, huniq⟩
+    ⟨T', a', hT', hT'le, _htime, chart', ha'pos, ha'le, hball,
+      sol, hsolT, huniq⟩
   exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, ⟨⟨sol, hsolT, huniq⟩⟩⟩
 
 /-- Proof-level chart-carrier Banach solution existence using the IVP's own smooth initial metric to
@@ -1838,7 +1852,8 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
       TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_initialMetric_chartRestrictedSymmetricA_banachEvolutionLocalSolutionIn
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover chart rhs ha with
-    ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, sol, _hsolT, _huniq⟩
+    ⟨T', a', hT', hT'le, _htime, chart', ha'pos, ha'le, hball,
+      sol, _hsolT, _huniq⟩
   exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, ⟨sol⟩⟩
 
 /-- Terminal-time and uniqueness retaining proof-level chart-carrier Banach solution from the
@@ -1908,8 +1923,114 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.nonempty_metricCone_s
       TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_initialMetric_chartRestrictedSymmetricA_banachEvolutionLocalSolutionIn
         (M := M) (F := F) (I := I)
         x0 et het Kc hKc Ko hKo hKoEq hcover chart rhs ha with
-    ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, sol, hsolT, huniq⟩
+    ⟨T', a', hT', hT'le, _htime, chart', ha'pos, ha'le, hball,
+      sol, hsolT, huniq⟩
   exact ⟨T', a', hT', hT'le, chart', ha'pos, ha'le, hball, ⟨⟨sol, hsolT, huniq⟩⟩⟩
+
+/-- The initial-metric smooth-approximation route can share one selected metric-cone shrink between
+the chart-carrier Banach solution and the ambient closure-data local uniqueness readouts.  The
+solution witness comes from the density-based specific-RHS route transported to the chart's
+restricted carrier; the metric and connection readouts come from the supplied interval closure
+data on that same selected clipped interval. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_initialMetric_chartRestrictedSymmetricA_solution_localMetricConnectionReadout
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [SecondCountableTopology H]
+    [ContMDiffVectorBundle 2 F TM I]
+    [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (D : RicciDeTurckChartClosureDataOnIcc x0 et het Kc hKc Ko hKo hKoEq hcover chart)
+    (rhs : SmoothSectionRHSIdentification
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
+    (ha : 0 < a) :
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T)
+      (_ha' : a' ≤ a)
+      (_htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+        a' - (0 : ℝ≥0)),
+      ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover
+        ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T' a' L Kpic Kstate,
+        0 < a' ∧
+          Metric.closedBall
+            (InitialValueProblem.toSymmetricSectionSubmodule
+              (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) (a' : ℝ) ⊆
+            riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+              et Kc hKc Ko hKo hKoEq hcover ∧
+          (∃ sol : BanachEvolutionLocalSolutionIn
+              (chart'.restrictedSymmetricA
+                (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+              (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+                et Kc hKc Ko hKo hKoEq hcover)
+              ivp.initialTime
+              (InitialValueProblem.toSymmetricSectionSubmodule
+                (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+             sol.terminalTime ≤ T' ∧
+             ∀ sol' : BanachEvolutionLocalSolutionIn
+                (chart'.restrictedSymmetricA
+                  (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+                (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+                  et Kc hKc Ko hKo hKoEq hcover)
+                ivp.initialTime
+                (InitialValueProblem.toSymmetricSectionSubmodule
+                  (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+               EqOn sol.curve sol'.curve
+                 (Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime))) ∧
+          (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+              (E := F) (H := H) (I := I) (M := M) ivp) {t : ℝ},
+            t ∈ Icc ivp.initialTime (min (min sol₁.1.terminalTime sol₂.1.terminalTime) T') →
+            ∀ (x : M) (u v : TM x),
+              metricTensor (I := I) (M := M)
+                sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+                  metricTensor (I := I) (M := M)
+                    sol₂.1.toIntrinsicDeTurckSolution.metric t x u v) ∧
+          (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+              (E := F) (H := H) (I := I) (M := M) ivp) {t : ℝ},
+            t ∈ Icc ivp.initialTime (min (min sol₁.1.terminalTime sol₂.1.terminalTime) T') →
+            ∀ {x : M} {σ : Π y : M, TM y},
+              MDiffAt (T% σ) x →
+              sol₁.1.canonicalConnection
+                (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+                sol₂.1.canonicalConnection
+                  (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2)
+                  t σ x) := by
+  rcases
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_initialMetric_chartRestrictedSymmetricA_banachEvolutionLocalSolutionIn
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover chart rhs ha with
+    ⟨T', a', hT', hT'le, htime, chart', ha'pos, ha'le, hball, sol, hsolT, huniq⟩
+  refine ⟨T', a', hT', hT'le, ha'le, htime, chart', ha'pos, hball, ?_, ?_, ?_⟩
+  · exact ⟨sol, hsolT, huniq⟩
+  · intro sol₁ sol₂ t ht x u v
+    exact
+      RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier
+        (M := M) (F := F) (I := I) (D := D)
+        hT' hT'le ha'le htime sol₁ sol₂ ht x u v
+  · intro sol₁ sol₂ t ht x σ hσ
+    exact
+      RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier
+        (M := M) (F := F) (I := I) (D := D)
+        hT' hT'le ha'le htime sol₁ sol₂ ht hσ
 
 end PreferredSmoothApproxClosure
 
