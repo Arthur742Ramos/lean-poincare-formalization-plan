@@ -2035,6 +2035,49 @@ theorem nonempty_of_hasMFDerivWithinAt
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_hasMFDerivWithinAt maps3 anchored hderiv⟩
 
+/-- Build a raw `C^3` gauge-flow witness directly from mutually inverse `C^3`
+time-slice maps satisfying the pointwise manifold derivative equation. -/
+noncomputable def of_inverse_hasMFDerivWithinAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, Function.LeftInverse (G t) (F t))
+    (hright : ∀ t : ℝ, Function.RightInverse (G t) (F t))
+    (hF : ∀ t : ℝ, ContMDiff I I 3 (F t))
+    (hG : ∀ t : ℝ, ContMDiff I I 3 (G t))
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt[s] (fun τ : ℝ ↦ F τ x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (F t x)))) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  let maps3 := SmoothSelfDiffeomorph3Family.ofInverse
+    (I := I) (M := M) F G hleft hright hF hG
+  of_hasMFDerivWithinAt (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    maps3
+    (SmoothSelfDiffeomorph3Family.ofInverse_anchoredAt
+      (I := I) (M := M) F G hleft hright hF hG hanchored)
+    (fun t ht x ↦ by
+      simpa [maps3] using hderiv t ht x)
+
+/-- Proof-level raw `C^3` gauge-flow existence directly from mutually inverse
+`C^3` time-slice maps satisfying the pointwise manifold derivative equation. -/
+theorem nonempty_of_inverse_hasMFDerivWithinAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, Function.LeftInverse (G t) (F t))
+    (hright : ∀ t : ℝ, Function.RightInverse (G t) (F t))
+    (hF : ∀ t : ℝ, ContMDiff I I 3 (F t))
+    (hG : ∀ t : ℝ, ContMDiff I I 3 (G t))
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt[s] (fun τ : ℝ ↦ F τ x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (F t x)))) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_inverse_hasMFDerivWithinAt
+    (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    F G hleft hright hF hG hanchored hderiv⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness from the preferred-chart
 ODE form of the derivative on the time set.
 

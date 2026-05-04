@@ -1414,7 +1414,13 @@ regularity, rather than constructing the `Diffeomorph` record by hand.  The
 family-level `SmoothSelfDiffeomorph3Family.ofInverse` performs the same
 slice-wise packaging for time-dependent forward/backward maps, and
 `SmoothSelfDiffeomorph3Family.ofInverse_anchoredAt` turns pointwise identity of
-the forward map at the base time into the anchored-family condition.
+the forward map at the base time into the anchored-family condition.  The raw
+existence layer now consumes this package directly through
+`Diffeomorph3GaugeFlowOn.of_inverse_hasMFDerivWithinAt` and
+`Diffeomorph3GaugeFlowOn.nonempty_of_inverse_hasMFDerivWithinAt`: mutually
+inverse `C³` time-slice maps, anchoring, and the pointwise manifold derivative
+equation produce a raw `Diffeomorph3GaugeFlowOn` without a separate manual
+`SmoothSelfDiffeomorph3Family` construction.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,
