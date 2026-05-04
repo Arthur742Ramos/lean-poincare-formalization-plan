@@ -162,9 +162,10 @@ packages the canonical stationary local solution attached to
   ones. The derivative-view layer also has fixed-IVP and theorem-family
   closed-Picard handoffs from model-vector-field chart ODE data to the ordinary
   chart and primitive derivative packages on the open `Ioo` solution interval,
-  including relative-filter model-field identification on `Ioo`, plus matching
-  raw-existence constructors and ordinary-to-within weakening for chart-ODE
-  derivative data. The raw fixed-IVP and theorem-family time-derivative layers
+  including relative-filter model-field identification on `Ioo` and same-time-set
+  relative-filter adapters for primitive and preferred-chart derivative packages,
+  plus matching raw-existence constructors and ordinary-to-within weakening for
+  chart-ODE derivative data. The raw fixed-IVP and theorem-family time-derivative layers
   now also package endpoint within-field/component and operator-domain data
   directly as named scalar pullback-metric derivative data when solution time
   sets are explicit `Ioo` intervals.

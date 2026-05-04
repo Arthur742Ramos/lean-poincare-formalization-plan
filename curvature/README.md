@@ -650,13 +650,14 @@ now packages the matching intrinsic boundary
       closed-interval within filters and ordinary neighborhood filters, plus
       unrestricted ordinary `HasDerivAt` forms, named
         fixed-IVP and theorem-family preferred-chart ODE constructors from the
-        same chart-ODE data,
+          same chart-ODE data,
         derivative-family adapters, including an ordinary-on-time-set
           `ofDerivativeAtFamily` bridge and named source-neighborhood chart-ODE
           `ofChartDerivative` / `ofChartDerivativeAt` bridges with
           direct raw constructors from model-vector-field chart ODE data once
           that model field is identified with the target gauge field along the
-          candidate flow, including closed-Picard `Icc` to open-interior `Ioo`,
+          candidate flow, including same-time-set relative-filter RHS
+          identification and closed-Picard `Icc` to open-interior `Ioo`,
           fixed-IVP and theorem-family closed-Picard constructors carrying that
           same model-field RHS handoff directly to
           `IntrinsicDeTurckGaugeFlowExistence(.Family)`,
