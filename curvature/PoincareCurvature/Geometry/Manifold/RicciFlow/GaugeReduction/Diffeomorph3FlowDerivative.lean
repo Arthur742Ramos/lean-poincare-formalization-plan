@@ -182,6 +182,22 @@ def Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
             (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)))
           s t
 
+/-- Restrict within-time-set fixed-chart ODE data to a smaller time set. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s t : Set ℝ}
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) Φ g background chartCenter t)
+    (hst : s ⊆ t) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) Φ g background chartCenter s := by
+  intro τ hτ x
+  rcases hfixed τ (hst hτ) x with ⟨hmem, hsource, hderiv⟩
+  exact ⟨hmem, (nhdsWithin_mono τ hst) hsource, hderiv.mono hst⟩
+
 /-- Fixed-chart intrinsic ODE data converts to the centered-chart package used
 by the raw gauge-flow existence layer.  The proof composes the fixed-coordinate
 curve with the chart transition into the centered chart and cancels the two
@@ -464,6 +480,42 @@ def Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
           (tangentCoordChange I ((Φ t) x) (chartCenter t x) ((Φ t) x)
             (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)))
           t
+
+/-- Restrict ordinary fixed-chart ODE data to a smaller time set. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s t : Set ℝ}
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) Φ g background chartCenter t)
+    (hst : s ⊆ t) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) Φ g background chartCenter s := by
+  intro τ hτ x
+  exact hfixed τ (hst hτ) x
+
+/-- Within-time-set fixed-chart ODE data gives ordinary fixed-chart ODE data
+whenever the time set is a neighborhood of each of its times. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.of_fixedChartDerivativeOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s : Set ℝ}
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) Φ g background chartCenter s)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) Φ g background chartCenter s := by
+  intro t ht x
+  rcases hfixed t ht x with ⟨hmem, hsource, hderiv⟩
+  have htime : s ∈ 𝓝 t := hs ht
+  have hsource' : (fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+      (extChartAt I (chartCenter t x)).source ∈ 𝓝 t := by
+    simpa [nhdsWithin_eq_nhds.2 htime] using hsource
+  exact ⟨hmem, hsource', hderiv.hasDerivAt htime⟩
 
 /-- Ordinary fixed-chart intrinsic ODE data converts to the ordinary
 centered-chart package. -/
@@ -1025,6 +1077,26 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.of_chartDerivativeOn_I
       (hchart t (Ioo_subset_Icc_self ht) x).1
   exact ⟨hsource, (hchart t (Ioo_subset_Icc_self ht) x).2.hasDerivAt htime⟩
 
+/-- Closed-Picard-interval fixed-chart ODE data gives ordinary fixed-chart ODE
+data on the open Picard interior, preserving the chosen chart centers. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.of_fixedChartDerivativeOn_Ioo
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {tmin tmax : ℝ}
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) Φ g background chartCenter (Icc tmin tmax)) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) Φ g background chartCenter (Ioo tmin tmax) := by
+  intro t ht x
+  have htime : Icc tmin tmax ∈ 𝓝 t := Icc_mem_nhds ht.1 ht.2
+  rcases hfixed t (Ioo_subset_Icc_self ht) x with ⟨hmem, hsource, hderiv⟩
+  have hsource' : (fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+      (extChartAt I (chartCenter t x)).source ∈ 𝓝 t := by
+    simpa [nhdsWithin_eq_nhds.2 htime] using hsource
+  exact ⟨hmem, hsource', hderiv.hasDerivAt htime⟩
+
 /-- Closed-Picard-interval preferred-chart ODE data gives ordinary primitive
 intrinsic derivative data on the open Picard interior. -/
 theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_chartDerivativeOn_Ioo
@@ -1568,13 +1640,15 @@ theorem chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartD
         sol.1.toIntrinsicDeTurckSolution.background
         (chartCenter sol) (Icc (tmin sol) (tmax sol))) :
     ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAt
-      (I := I) (M := M) ivp maps3 :=
-  chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccChartDerivative
-    (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
-    tmin tmax htimeSet
-    (fun sol ↦
-      Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.toChartDerivativeOn
-        (I := I) (M := M) (hfixed sol))
+      (I := I) (M := M) ivp maps3 := by
+  intro sol
+  have hfixedAt :=
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.of_fixedChartDerivativeOn_Ioo
+      (I := I) (M := M) (hfixed sol)
+  have hchart :=
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.toChartDerivativeAtOn
+      (I := I) (M := M) hfixedAt
+  simpa [htimeSet sol] using hchart
 
 /-- Fixed-IVP closed-Picard fixed-chart ODE data gives ordinary primitive
 derivative data on the chosen open solution time set. -/
@@ -1598,12 +1672,15 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_picardIccFixedChartDeriva
         sol.1.toIntrinsicDeTurckSolution.background
         (chartCenter sol) (Icc (tmin sol) (tmax sol))) :
     ChosenIntrinsicDeTurckGaugeFlowDerivativeAt
-      (I := I) (M := M) ivp maps3 :=
-  chosenIntrinsicDeTurckGaugeFlowDerivativeAt_of_chartDerivativeAt
-    (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
-    (chosenIntrinsicDeTurckGaugeFlowChartDerivativeAt_of_picardIccFixedChartDerivative
-      (I := I) (M := M) (ivp := ivp) (maps3 := maps3)
-      chartCenter tmin tmax htimeSet hfixed)
+      (I := I) (M := M) ivp maps3 := by
+  intro sol
+  have hfixedAt :=
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.of_fixedChartDerivativeOn_Ioo
+      (I := I) (M := M) (hfixed sol)
+  have hderiv :=
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_fixedChartDerivativeAtOn
+      (I := I) (M := M) hfixedAt
+  simpa [htimeSet sol] using hderiv
 
 /-- Fixed-IVP closed-Picard fixed-chart ODE data for model vector fields gives
 ordinary chart-ODE data on the chosen open solution time set once those model

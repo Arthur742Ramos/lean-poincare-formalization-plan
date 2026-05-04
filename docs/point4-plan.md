@@ -855,6 +855,10 @@ The fixed-IVP and theorem-family open-Picard layers now lift the same
 fixed-chart derivative, neighborhood-equal vector-field derivative, continuity,
 and source-neighborhood readouts, so finite-cover arguments can stay in a chosen
 chart center after the solution time set is identified with an `Ioo` interval.
+The derivative-view layer now also preserves fixed-chart packages under time-set
+restriction and under the closed-Picard `Icc` to open-interior `Ioo` upgrade, so
+closed-interval chart Picard outputs can be used as ordinary interior ODE data
+without detouring through the centered-chart package.
 The time-derivative layer has matching raw open-Picard bridges from the same
 `s = Ioo tmin tmax` equality, upgrading coordinate model, field, operator, and
 component scalar derivative data to the named pullback-metric derivative and
@@ -1428,6 +1432,10 @@ Raw flows can also package ordinary fixed-chart intrinsic ODE data on any
 `..._congr_vectorField_nhdsWithin_of_timeSet_eq_Ioo` variant; fixed-IVP and
 theorem-family existence witnesses mirror the bundled extractor as
 `fixedChartDerivativeAtData_of_timeSet_eq_Ioo`.
+The derivative package now has the underlying fixed-chart-preserving restriction
+and `Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.of_fixedChartDerivativeOn_Ioo`
+upgrade, so finite-cover Picard data can remain in a chosen chart center before
+being converted to centered-chart or primitive manifold derivative data.
 The raw, fixed-IVP, and theorem-family preferred-chart derivative readouts now
 also have centered-chart simplifications that rewrite the derivative value from
 `tangentCoordChange I p p p (...)` to the actual gauge velocity. This removes a
