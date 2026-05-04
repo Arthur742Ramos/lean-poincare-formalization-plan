@@ -1602,7 +1602,11 @@ on the open common interval. The continuous space-time package now forgets to
 The finite-cover metric-locus layer also has positive-definite and symmetric
 Riemannian-metric-locus specializations of this restricted-estimate theorem, so
 future parabolic estimates can be supplied terminal-by-terminal while still
-returning terminal control and open-common uniqueness.
+returning terminal control and open-common uniqueness. That restricted route now
+lifts through the symmetric positive-definite coordinatewise-defect layer,
+continuous-Riemannian initial data, symmetric time-dependent vector fields, and
+the geometric Ricci-DeTurck RHS package, with reusable restricted-terminal chart
+structures for both coordinatewise-defect and geometric Ricci-DeTurck inputs.
 What remains is the genuinely manifold-level lift: pass intrinsic DeTurck vector
 fields to these chartwise Banach ODE hypotheses, prove compatibility/gluing and
 invertibility of the local flow, and upgrade the result to the bundled `C³`
@@ -1991,7 +1995,9 @@ to the open common interval for both bare and state-preserving solutions, and
 the Picard layer has the matching restricted-estimate existence/uniqueness
 theorem with open-common uniqueness. The same restricted-estimate route is now
 available directly for the finite-cover positive-definite locus and symmetric
-Riemannian metric-locus submodule.
+Riemannian metric-locus submodule, and it now lifts through the finite-cover
+symmetric positive-definite defect carriers and the geometric Ricci-DeTurck
+Banach-chart constructors.
 The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient

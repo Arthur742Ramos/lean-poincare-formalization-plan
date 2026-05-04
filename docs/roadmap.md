@@ -911,7 +911,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       state-preserving local solution with terminal control and open-common
       uniqueness, and the finite-cover positive-definite and symmetric
       Riemannian metric-locus carriers expose that restricted-estimate route
-      directly. The same
+      directly. The route now also passes through the finite-cover symmetric
+      positive-definite defect carriers, continuous-Riemannian initial data,
+      symmetric time-dependent vector fields, and restricted geometric
+      Ricci-DeTurck Banach-chart packages. The same
       model ODE bridge now packages the tangent-map variational equation
       `A'(t) = Df(t, flow(t)) ∘ A(t)` in `VariationalLocalFlowSolution`, matching
       the remaining coordinate-model `A`-derivative hypothesis, and proves
