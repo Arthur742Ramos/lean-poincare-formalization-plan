@@ -870,7 +870,9 @@ equality on all of `Icc`. The primitive and preferred-chart derivative packages
 now also have same-time-set relative-filter RHS-identification adapters at the
 raw, fixed-IVP, and theorem-family levels, so closed/restricted Picard outputs do
 not have to be converted to pointwise RHS equality before entering the named
-derivative views.
+derivative views. The raw fixed-IVP and theorem-family existence layers expose
+matching same-time-set one-step constructors for both within-set and
+ordinary-at-time chart ODE data.
 The chart-ODE packages themselves now also prove the underlying manifold-curve
 continuity and convert directly to primitive intrinsic manifold derivative data
 in both within-time-set and ordinary-at-time forms, with fixed-IVP and
