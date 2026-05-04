@@ -1132,7 +1132,12 @@ vector-field Taylor remainder itself:
 show that a bound for
 `f(τ, flow(x+h,τ)) - f(τ, flow(x,τ)) - Df(τ, flow(x,τ))(flow(x+h,τ)-flow(x,τ))`,
 together with an operator-norm bound for `Df` along the base flow, gives the
-ordinary time-slice derivative. The corresponding
+ordinary time-slice derivative. The relative Taylor-remainder form is now also
+available:
+`flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_forward_Icc_of_mem_ball`
+turns a bound of the field remainder by `θ(h)` times the actual flow separation,
+plus a Lipschitz bound of that separation by `L‖h‖` and `θ(h) → 0`, into the
+same absolute forcing estimate. The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
 `ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall`

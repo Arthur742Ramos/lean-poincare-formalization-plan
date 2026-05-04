@@ -4785,6 +4785,48 @@ theorem flow_timeSlice_hasFDerivAt_of_fieldRemainder_bound_forward_Icc_of_mem_ba
   exact α.norm_spatialRemainderDeriv_le_of_fieldRemainder_bound
     (hD_bound τ hτ) (hfield_h τ hτ)
 
+/-- Forward-time spatial derivative criterion in a relative Taylor-remainder
+form.  A field remainder that is `θ(h)` times the actual flow separation,
+together with a Lipschitz bound of that separation by `L‖h‖`, gives the
+absolute Taylor-remainder bound consumed by
+`flow_timeSlice_hasFDerivAt_of_fieldRemainder_bound_forward_Icc_of_mem_ball`. -/
+theorem flow_timeSlice_hasFDerivAt_of_relative_fieldRemainder_bound_forward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    {L : ℝ≥0} {θ : V → ℝ≥0}
+    (hθ : Filter.Tendsto (fun h : V => (θ h : ℝ)) (𝓝 0) (𝓝 0))
+    (hD_bound : ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+      ‖Df τ (α.flow (x, τ))‖ ≤ K)
+    (hflow_lip : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖α.flow (x + h, τ) - α.flow (x, τ)‖ ≤ (L : ℝ) * ‖h‖)
+    (hfield_relative : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+          (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖ ≤
+          (θ h : ℝ) * ‖α.flow (x + h, τ) - α.flow (x, τ)‖) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  let η : V → ℝ≥0 := fun h => θ h * L
+  have hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0) := by
+    simpa [η, NNReal.coe_mul] using
+      hθ.mul (tendsto_const_nhds (x := (L : ℝ)))
+  refine α.flow_timeSlice_hasFDerivAt_of_fieldRemainder_bound_forward_Icc_of_mem_ball
+    hx ht hη hD_bound ?_
+  filter_upwards [hflow_lip, hfield_relative] with h hflow_h hfield_h
+  intro τ hτ
+  calc
+    ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+        (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖
+        ≤ (θ h : ℝ) * ‖α.flow (x + h, τ) - α.flow (x, τ)‖ :=
+          hfield_h τ hτ
+    _ ≤ (θ h : ℝ) * ((L : ℝ) * ‖h‖) := by
+          exact mul_le_mul_of_nonneg_left (hflow_h τ hτ) (NNReal.coe_nonneg (θ h))
+    _ = (η h : ℝ) * ‖h‖ := by
+          simp [η, NNReal.coe_mul]
+          ring
+
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is
 the model-side bridge that lets Picard arguments target ordinary spatial
