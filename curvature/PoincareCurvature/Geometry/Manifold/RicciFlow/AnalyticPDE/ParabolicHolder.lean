@@ -585,6 +585,49 @@ theorem subset_closedCylinder :
   intro q hq
   exact ⟨le_of_lt hq.1, le_of_lt hq.2⟩
 
+/-- A point in an open product parabolic cylinder lies in the doubled closed cylinder. -/
+theorem mem_closedCylinder_two_of_mem
+    (hq : q ∈ parabolicCylinder p timeRadius spaceRadius) :
+    q ∈ parabolicClosedCylinder p (2 * timeRadius) (2 * spaceRadius) := by
+  have htime_pos : 0 < timeRadius := lt_of_le_of_lt (abs_nonneg _) hq.1
+  have hspace_pos : 0 < spaceRadius := lt_of_le_of_lt dist_nonneg hq.2
+  exact ⟨(le_of_lt hq.1).trans (by linarith),
+    (le_of_lt hq.2).trans (by linarith)⟩
+
+/-- If `p` lies in a product parabolic cylinder and `q` is parabolically close to `p` at the
+smaller of the time and spatial scales, then `q` lies in the doubled closed cylinder. -/
+theorem mem_closedCylinder_two_of_mem_of_parabolicDistance_lt_min_sqrt
+    {c p q : ℝ × X}
+    (hp : p ∈ parabolicCylinder c timeRadius spaceRadius)
+    (hpq : parabolicDistance p q < min (Real.sqrt timeRadius) spaceRadius) :
+    q ∈ parabolicClosedCylinder c (2 * timeRadius) (2 * spaceRadius) := by
+  have htime_pos : 0 < timeRadius := lt_of_le_of_lt (abs_nonneg _) hp.1
+  have hpq_sqrt : Real.sqrt |p.1 - q.1| < Real.sqrt timeRadius :=
+    lt_of_le_of_lt (parabolicDistance.sqrt_time_le p q)
+      (lt_of_lt_of_le hpq (min_le_left _ _))
+  have hpq_time : |p.1 - q.1| < timeRadius := by
+    calc
+      |p.1 - q.1| = (Real.sqrt |p.1 - q.1|) ^ 2 := by
+        rw [Real.sq_sqrt (abs_nonneg _)]
+      _ < (Real.sqrt timeRadius) ^ 2 :=
+        (sq_lt_sq₀ (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)).2 hpq_sqrt
+      _ = timeRadius := Real.sq_sqrt htime_pos.le
+  have htime : |c.1 - q.1| < 2 * timeRadius := by
+    calc
+      |c.1 - q.1| = |(c.1 - p.1) + (p.1 - q.1)| := by ring_nf
+      _ ≤ |c.1 - p.1| + |p.1 - q.1| := abs_add_le _ _
+      _ < timeRadius + timeRadius := add_lt_add hp.1 hpq_time
+      _ = 2 * timeRadius := by ring
+  have hpq_space : dist p.2 q.2 < spaceRadius :=
+    lt_of_le_of_lt (parabolicDistance.space_dist_le p q)
+      (lt_of_lt_of_le hpq (min_le_right _ _))
+  have hspace : dist c.2 q.2 < 2 * spaceRadius := by
+    calc
+      dist c.2 q.2 ≤ dist c.2 p.2 + dist p.2 q.2 := dist_triangle _ _ _
+      _ < spaceRadius + spaceRadius := add_lt_add hp.2 hpq_space
+      _ = 2 * spaceRadius := by ring
+  exact ⟨le_of_lt htime, le_of_lt hspace⟩
+
 theorem mem_comm :
     q ∈ parabolicCylinder p timeRadius spaceRadius ↔
       p ∈ parabolicCylinder q timeRadius spaceRadius := by
@@ -1588,6 +1631,64 @@ theorem of_parabolicBall_cover_closedBall {B r : ℝ} {K N : Set (ℝ × X)}
             (Real.rpow_nonneg hd0 α)
     exact hdiff.trans hfar_bound
 
+/-- Local-to-global parabolic Holder control from a product-parabolic-cylinder cover.  If `K` is
+covered by product cylinders and each doubled closed cylinder carries the same local Holder
+constant, then `u` has a global Holder constant on `K`. -/
+theorem of_parabolicCylinder_cover_closedCylinder {B timeRadius spaceRadius : ℝ}
+    {K N : Set (ℝ × X)}
+    (hbounded : ParabolicBoundedWith B u K) (hα : 0 < α)
+    (htime : 0 < timeRadius) (hspace : 0 < spaceRadius)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicCylinder y timeRadius spaceRadius)
+    (hlocal : ∀ y ∈ N, ParabolicHolderWith C α u
+      (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicHolderWith
+      (max C (2 * B / (min (Real.sqrt timeRadius) spaceRadius) ^ α)) α u K := by
+  intro p hp q hq
+  let r : ℝ := min (Real.sqrt timeRadius) spaceRadius
+  let D : ℝ := max C (2 * B / r ^ α)
+  change ‖u p - u q‖ ≤ D * (parabolicDistance p q) ^ α
+  have hr : 0 < r := by
+    dsimp [r]
+    exact lt_min (Real.sqrt_pos_of_pos htime) hspace
+  let d : ℝ := parabolicDistance p q
+  change ‖u p - u q‖ ≤ D * d ^ α
+  have hd0 : 0 ≤ d := parabolicDistance.nonneg p q
+  by_cases hsmall : d < r
+  · rcases mem_iUnion.1 (hcover hp) with ⟨y, hy⟩
+    rcases mem_iUnion.1 hy with ⟨hyN, hpcy⟩
+    have hpclosed : p ∈ parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius) :=
+      parabolicCylinder.mem_closedCylinder_two_of_mem hpcy
+    have hqclosed : q ∈ parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius) := by
+      exact parabolicCylinder.mem_closedCylinder_two_of_mem_of_parabolicDistance_lt_min_sqrt
+        hpcy (by simpa [d, r] using hsmall)
+    have hlocalpq : ‖u p - u q‖ ≤ C * d ^ α := by
+      simpa [d] using hlocal y hyN hpclosed hqclosed
+    exact hlocalpq.trans
+      (mul_le_mul_of_nonneg_right (le_max_left C (2 * B / r ^ α))
+        (Real.rpow_nonneg hd0 α))
+  · have hfar : r ≤ d := le_of_not_gt hsmall
+    have hBnonneg : 0 ≤ B := (norm_nonneg (u p)).trans (hbounded hp)
+    have hrpow_pos : 0 < r ^ α := Real.rpow_pos_of_pos hr α
+    have hrpow_le_dpow : r ^ α ≤ d ^ α :=
+      Real.rpow_le_rpow hr.le hfar hα.le
+    have hcoef_nonneg : 0 ≤ 2 * B / r ^ α :=
+      div_nonneg (mul_nonneg (by positivity) hBnonneg) hrpow_pos.le
+    have hdiff : ‖u p - u q‖ ≤ 2 * B := by
+      calc
+        ‖u p - u q‖ ≤ ‖u p‖ + ‖u q‖ := norm_sub_le _ _
+        _ ≤ B + B := add_le_add (hbounded hp) (hbounded hq)
+        _ = 2 * B := by ring
+    have hfar_bound : 2 * B ≤ D * d ^ α := by
+      calc
+        2 * B = (2 * B / r ^ α) * r ^ α := by
+          rw [div_mul_cancel₀ _ hrpow_pos.ne']
+        _ ≤ (2 * B / r ^ α) * d ^ α :=
+          mul_le_mul_of_nonneg_left hrpow_le_dpow hcoef_nonneg
+        _ ≤ D * d ^ α :=
+          mul_le_mul_of_nonneg_right (le_max_right C (2 * B / r ^ α))
+            (Real.rpow_nonneg hd0 α)
+    exact hdiff.trans hfar_bound
+
 /-- Compact local-to-global parabolic Holder control from uniform local closed-ball estimates. -/
 theorem of_isCompact_of_uniform_local_closedBall {B r : ℝ} {K : Set (ℝ × X)}
     (hbounded : ParabolicBoundedWith B u K) (hK : IsCompact K)
@@ -1597,6 +1698,21 @@ theorem of_isCompact_of_uniform_local_closedBall {B r : ℝ} {K : Set (ℝ × X)
   rcases parabolicBall.exists_finite_cover_of_isCompact hK hr with
     ⟨N, hNK, _hNfinite, hcover⟩
   exact of_parabolicBall_cover_closedBall hbounded hα hr hcover
+    (fun y hy => hlocal y (hNK hy))
+
+/-- Compact local-to-global parabolic Holder control from uniform local doubled closed-cylinder
+estimates. -/
+theorem of_isCompact_of_uniform_local_closedCylinder {B timeRadius spaceRadius : ℝ}
+    {K : Set (ℝ × X)}
+    (hbounded : ParabolicBoundedWith B u K) (hK : IsCompact K) (hα : 0 < α)
+    (htime : 0 < timeRadius) (hspace : 0 < spaceRadius)
+    (hlocal : ∀ y ∈ K, ParabolicHolderWith C α u
+      (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicHolderWith
+      (max C (2 * B / (min (Real.sqrt timeRadius) spaceRadius) ^ α)) α u K := by
+  rcases parabolicCylinder.exists_finite_cover_of_isCompact hK htime hspace with
+    ⟨N, hNK, _hNfinite, hcover⟩
+  exact of_parabolicCylinder_cover_closedCylinder hbounded hα htime hspace hcover
     (fun y hy => hlocal y (hNK hy))
 
 /-- A parabolic distance bound upgrades a Holder estimate to a fixed oscillation bound. -/
@@ -2010,6 +2126,49 @@ theorem of_finset_parabolicBall_cover_closedBall {B r : ℝ} {K : Set (ℝ × X)
   exact ParabolicHolderWith.of_parabolicBall_cover_closedBall
     (B := B) (C := Hsum) hbounded hα hr hcover hlocal_sum
 
+/-- Local-to-global parabolic Holder control from a finite product-parabolic-cylinder cover, with
+local Holder constants chosen automatically and summed over the finite cover. -/
+theorem of_finset_parabolicCylinder_cover_closedCylinder {B timeRadius spaceRadius : ℝ}
+    {K : Set (ℝ × X)}
+    (N : Finset (ℝ × X)) (hbounded : ParabolicBoundedWith B u K)
+    (hα : 0 < α) (htime : 0 < timeRadius) (hspace : 0 < spaceRadius)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicCylinder y timeRadius spaceRadius)
+    (hlocal : ∀ y ∈ N, ParabolicHolderOn α u
+      (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicHolderOn α u K := by
+  classical
+  let Hc : ℝ × X → ℝ :=
+    fun y => if hy : y ∈ N then Classical.choose (hlocal y hy) else 0
+  have hHnonneg : ∀ y ∈ N, 0 ≤ Hc y := by
+    intro y hy
+    dsimp [Hc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hH :
+      ∀ y ∈ N, ParabolicHolderWith (Hc y) α u
+        (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius)) := by
+    intro y hy
+    dsimp [Hc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).2
+  let Hsum : ℝ := ∑ y ∈ N, Hc y
+  have hHsum_nonneg : 0 ≤ Hsum := by
+    dsimp [Hsum]
+    exact Finset.sum_nonneg hHnonneg
+  have hH_le_sum : ∀ y ∈ N, Hc y ≤ Hsum := by
+    intro y hy
+    dsimp [Hsum]
+    exact Finset.single_le_sum hHnonneg hy
+  have hlocal_sum :
+      ∀ y ∈ N, ParabolicHolderWith Hsum α u
+        (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius)) := by
+    intro y hy
+    exact (hH y hy).mono_const (hH_le_sum y hy)
+  refine ⟨max Hsum (2 * B / (min (Real.sqrt timeRadius) spaceRadius) ^ α),
+    hHsum_nonneg.trans (le_max_left _ _), ?_⟩
+  exact ParabolicHolderWith.of_parabolicCylinder_cover_closedCylinder
+    (B := B) (C := Hsum) hbounded hα htime hspace hcover hlocal_sum
+
 /-- Local-to-global parabolic Holder control from a finite cover by variable-radius parabolic
 balls.  The local Holder constants and the far-pair boundedness constants are summed over the
 finite cover. -/
@@ -2108,6 +2267,106 @@ theorem of_finset_parabolicBall_cover_closedBall_variable {B : ℝ} {K : Set (�
   exact hpoint.trans
     (mul_le_mul_of_nonneg_right hAyD (Real.rpow_nonneg hd0 α))
 
+/-- Local-to-global parabolic Holder control from a finite cover by variable-radius product
+parabolic cylinders.  The local Holder constants and the far-pair boundedness constants are summed
+over the finite cover. -/
+theorem of_finset_parabolicCylinder_cover_closedCylinder_variable {B : ℝ}
+    {K : Set (ℝ × X)}
+    (N : Finset (ℝ × X)) (timeRadius spaceRadius : ℝ × X → ℝ)
+    (hbounded : ParabolicBoundedWith B u K) (hα : 0 < α)
+    (htime_pos : ∀ y ∈ N, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ N, 0 < spaceRadius y)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicCylinder y (timeRadius y) (spaceRadius y))
+    (hlocal : ∀ y ∈ N, ParabolicHolderOn α u
+      (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y))) :
+    ParabolicHolderOn α u K := by
+  classical
+  let C : ℝ × X → ℝ := fun y =>
+    if hy : y ∈ N then Classical.choose (hlocal y hy) else 0
+  let r : ℝ × X → ℝ := fun y => min (Real.sqrt (timeRadius y)) (spaceRadius y)
+  have hCnonneg : ∀ y ∈ N, 0 ≤ C y := by
+    intro y hy
+    dsimp [C]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hC :
+      ∀ y ∈ N, ParabolicHolderWith (C y) α u
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)) := by
+    intro y hy
+    dsimp [C]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).2
+  let A : ℝ × X → ℝ := fun y =>
+    if hy : y ∈ N then max (C y) (2 * B / (r y) ^ α) else 0
+  have hAnonneg : ∀ y ∈ N, 0 ≤ A y := by
+    intro y hy
+    dsimp [A]
+    rw [if_pos hy]
+    exact (hCnonneg y hy).trans (le_max_left _ _)
+  let D : ℝ := ∑ y ∈ N, A y
+  have hDnonneg : 0 ≤ D := by
+    dsimp [D]
+    exact Finset.sum_nonneg hAnonneg
+  have hA_le_D : ∀ y ∈ N, A y ≤ D := by
+    intro y hy
+    dsimp [D]
+    exact Finset.single_le_sum hAnonneg hy
+  refine ⟨D, hDnonneg, ?_⟩
+  intro p hp q hq
+  let d : ℝ := parabolicDistance p q
+  change ‖u p - u q‖ ≤ D * d ^ α
+  have hd0 : 0 ≤ d := parabolicDistance.nonneg p q
+  rcases mem_iUnion.1 (hcover hp) with ⟨y, hy⟩
+  rcases mem_iUnion.1 hy with ⟨hyN, hpcy⟩
+  have hry : 0 < r y := by
+    dsimp [r]
+    exact lt_min (Real.sqrt_pos_of_pos (htime_pos y hyN)) (hspace_pos y hyN)
+  have hAyD : A y ≤ D := hA_le_D y hyN
+  have hpclosed :
+      p ∈ parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y) :=
+    parabolicCylinder.mem_closedCylinder_two_of_mem hpcy
+  have hpoint : ‖u p - u q‖ ≤ A y * d ^ α := by
+    by_cases hsmall : d < r y
+    · have hqclosed :
+          q ∈ parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y) := by
+        exact parabolicCylinder.mem_closedCylinder_two_of_mem_of_parabolicDistance_lt_min_sqrt
+          hpcy (by simpa [d, r] using hsmall)
+      have hlocalpq : ‖u p - u q‖ ≤ C y * d ^ α := by
+        simpa [d] using hC y hyN hpclosed hqclosed
+      have hCA : C y ≤ A y := by
+        dsimp [A]
+        rw [if_pos hyN]
+        exact le_max_left _ _
+      exact hlocalpq.trans
+        (mul_le_mul_of_nonneg_right hCA (Real.rpow_nonneg hd0 α))
+    · have hfar : r y ≤ d := le_of_not_gt hsmall
+      have hBnonneg : 0 ≤ B := (norm_nonneg (u p)).trans (hbounded hp)
+      have hrpow_pos : 0 < (r y) ^ α := Real.rpow_pos_of_pos hry α
+      have hrpow_le_dpow : (r y) ^ α ≤ d ^ α :=
+        Real.rpow_le_rpow hry.le hfar hα.le
+      have hcoef_nonneg : 0 ≤ 2 * B / (r y) ^ α :=
+        div_nonneg (mul_nonneg (by positivity) hBnonneg) hrpow_pos.le
+      have hdiff : ‖u p - u q‖ ≤ 2 * B := by
+        calc
+          ‖u p - u q‖ ≤ ‖u p‖ + ‖u q‖ := norm_sub_le _ _
+          _ ≤ B + B := add_le_add (hbounded hp) (hbounded hq)
+          _ = 2 * B := by ring
+      have hfar_bound : 2 * B ≤ A y * d ^ α := by
+        calc
+          2 * B = (2 * B / (r y) ^ α) * (r y) ^ α := by
+            rw [div_mul_cancel₀ _ hrpow_pos.ne']
+          _ ≤ (2 * B / (r y) ^ α) * d ^ α :=
+            mul_le_mul_of_nonneg_left hrpow_le_dpow hcoef_nonneg
+          _ ≤ A y * d ^ α := by
+            have hcoefA : 2 * B / (r y) ^ α ≤ A y := by
+              dsimp [A]
+              rw [if_pos hyN]
+              exact le_max_right _ _
+            exact mul_le_mul_of_nonneg_right hcoefA (Real.rpow_nonneg hd0 α)
+      exact hdiff.trans hfar_bound
+  exact hpoint.trans
+    (mul_le_mul_of_nonneg_right hAyD (Real.rpow_nonneg hd0 α))
+
 /-- Compact local-to-global parabolic Holder control from point-dependent doubled closed-ball
 estimates, with Holder constants and cover radii chosen on a finite compact subcover. -/
 theorem of_isCompact_of_local_closedBall_variable {B : ℝ} {K : Set (ℝ × X)}
@@ -2144,6 +2403,60 @@ theorem of_isCompact_of_exists_local_closedBall {B : ℝ} {K : Set (ℝ × X)}
     exact (Classical.choose_spec (hlocal y hy)).2
   exact of_isCompact_of_local_closedBall_variable hK hbounded hα R hRpos hlocalR
 
+/-- Compact local-to-global parabolic Holder control from point-dependent doubled closed-cylinder
+estimates, with Holder constants and cover radii chosen on a finite compact subcover. -/
+theorem of_isCompact_of_local_closedCylinder_variable {B : ℝ} {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hbounded : ParabolicBoundedWith B u K) (hα : 0 < α)
+    (timeRadius spaceRadius : ℝ × X → ℝ)
+    (htime_pos : ∀ y ∈ K, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ K, 0 < spaceRadius y)
+    (hlocal : ∀ y ∈ K, ParabolicHolderOn α u
+      (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y))) :
+    ParabolicHolderOn α u K := by
+  rcases hK.elim_nhds_subcover
+      (fun y => parabolicCylinder y (timeRadius y) (spaceRadius y))
+      (fun y hy => parabolicCylinder.mem_nhds (p := y) (timeRadius := timeRadius y)
+        (spaceRadius := spaceRadius y) (htime_pos y hy) (hspace_pos y hy)) with
+    ⟨N, hNK, hcover⟩
+  exact of_finset_parabolicCylinder_cover_closedCylinder_variable N timeRadius spaceRadius
+    hbounded hα
+    (fun y hy => htime_pos y (hNK y hy))
+    (fun y hy => hspace_pos y (hNK y hy)) hcover
+    (fun y hy => hlocal y (hNK y hy))
+
+/-- Compact local-to-global parabolic Holder control from pointwise positive local product-cylinder
+radii, with the radii, cover, and Holder constants chosen automatically. -/
+theorem of_isCompact_of_exists_local_closedCylinder {B : ℝ} {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hbounded : ParabolicBoundedWith B u K) (hα : 0 < α)
+    (hlocal : ∀ y ∈ K, ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      ParabolicHolderOn α u
+        (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicHolderOn α u K := by
+  classical
+  let timeRadius : ℝ × X → ℝ :=
+    fun y => if hy : y ∈ K then Classical.choose (hlocal y hy) else 1
+  let spaceRadius : ℝ × X → ℝ := fun y =>
+    if hy : y ∈ K then Classical.choose (Classical.choose_spec (hlocal y hy)).2 else 1
+  have htime_pos : ∀ y ∈ K, 0 < timeRadius y := by
+    intro y hy
+    dsimp [timeRadius]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hspace_pos : ∀ y ∈ K, 0 < spaceRadius y := by
+    intro y hy
+    dsimp [spaceRadius]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).1
+  have hlocalR :
+      ∀ y ∈ K, ParabolicHolderOn α u
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)) := by
+    intro y hy
+    dsimp [timeRadius, spaceRadius]
+    rw [dif_pos hy, dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).2
+  exact of_isCompact_of_local_closedCylinder_variable hK hbounded hα timeRadius spaceRadius
+    htime_pos hspace_pos hlocalR
+
 /-- Compact local-to-global parabolic Holder control from local doubled closed-ball estimates,
 with Holder constants chosen automatically from a finite compact subcover. -/
 theorem of_isCompact_of_local_closedBall {B r : ℝ} {K : Set (ℝ × X)}
@@ -2155,6 +2468,22 @@ theorem of_isCompact_of_local_closedBall {B r : ℝ} {K : Set (ℝ × X)}
       (fun y _hy => parabolicBall.mem_nhds (p := y) (R := r) hr) with
     ⟨N, hNK, hcover⟩
   exact of_finset_parabolicBall_cover_closedBall N hbounded hα hr hcover
+    (fun y hy => hlocal y (hNK y hy))
+
+/-- Compact local-to-global parabolic Holder control from local doubled closed-cylinder estimates,
+with Holder constants chosen automatically from a finite compact subcover. -/
+theorem of_isCompact_of_local_closedCylinder {B timeRadius spaceRadius : ℝ}
+    {K : Set (ℝ × X)}
+    (hbounded : ParabolicBoundedWith B u K) (hK : IsCompact K) (hα : 0 < α)
+    (htime : 0 < timeRadius) (hspace : 0 < spaceRadius)
+    (hlocal : ∀ y ∈ K, ParabolicHolderOn α u
+      (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicHolderOn α u K := by
+  rcases hK.elim_nhds_subcover (fun y => parabolicCylinder y timeRadius spaceRadius)
+      (fun y _hy => parabolicCylinder.mem_nhds (p := y) (timeRadius := timeRadius)
+        (spaceRadius := spaceRadius) htime hspace) with
+    ⟨N, hNK, hcover⟩
+  exact of_finset_parabolicCylinder_cover_closedCylinder N hbounded hα htime hspace hcover
     (fun y hy => hlocal y (hNK y hy))
 
 theorem mono_exponent_of_parabolicDistance_le_one {β : ℝ}
@@ -2518,6 +2847,29 @@ theorem of_parabolicBall_cover_closedBall {r : ℝ} {K N : Set (ℝ × X)}
     ParabolicHolderWith.of_parabolicBall_cover_closedBall (C := H)
       hbounded hα hr hcover fun y hy => (hlocal y hy).holder⟩
 
+/-- Local-to-global parabolic `C^{0,α}` control from a product-parabolic-cylinder cover.  The
+local bounded constant controls the global bounded part, while the Holder constant globalizes
+through the bounded local-to-global cylinder estimate. -/
+theorem of_parabolicCylinder_cover_closedCylinder {timeRadius spaceRadius : ℝ}
+    {K N : Set (ℝ × X)}
+    (hα : 0 < α) (htime : 0 < timeRadius) (hspace : 0 < spaceRadius)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicCylinder y timeRadius spaceRadius)
+    (hlocal : ∀ y ∈ N, ParabolicC0AlphaWith B H α u
+      (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicC0AlphaWith B
+      (max H (2 * B / (min (Real.sqrt timeRadius) spaceRadius) ^ α)) α u K := by
+  have hbounded : ParabolicBoundedWith B u K := by
+    intro p hp
+    rcases mem_iUnion.1 (hcover hp) with ⟨y, hy⟩
+    rcases mem_iUnion.1 hy with ⟨hyN, hpcy⟩
+    have hpclosed :
+        p ∈ parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius) :=
+      parabolicCylinder.mem_closedCylinder_two_of_mem hpcy
+    exact (hlocal y hyN).bounded hpclosed
+  exact ⟨hbounded,
+    ParabolicHolderWith.of_parabolicCylinder_cover_closedCylinder (C := H)
+      hbounded hα htime hspace hcover fun y hy => (hlocal y hy).holder⟩
+
 /-- Compact local-to-global parabolic `C^{0,α}` control from uniform local closed-ball estimates. -/
 theorem of_isCompact_of_uniform_local_closedBall {r : ℝ} {K : Set (ℝ × X)}
     (hK : IsCompact K) (hα : 0 < α) (hr : 0 < r)
@@ -2526,6 +2878,21 @@ theorem of_isCompact_of_uniform_local_closedBall {r : ℝ} {K : Set (ℝ × X)}
   rcases parabolicBall.exists_finite_cover_of_isCompact hK hr with
     ⟨N, hNK, _hNfinite, hcover⟩
   exact of_parabolicBall_cover_closedBall hα hr hcover
+    (fun y hy => hlocal y (hNK hy))
+
+/-- Compact local-to-global parabolic `C^{0,α}` control from uniform local doubled
+closed-cylinder estimates. -/
+theorem of_isCompact_of_uniform_local_closedCylinder {timeRadius spaceRadius : ℝ}
+    {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hα : 0 < α)
+    (htime : 0 < timeRadius) (hspace : 0 < spaceRadius)
+    (hlocal : ∀ y ∈ K, ParabolicC0AlphaWith B H α u
+      (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicC0AlphaWith B
+      (max H (2 * B / (min (Real.sqrt timeRadius) spaceRadius) ^ α)) α u K := by
+  rcases parabolicCylinder.exists_finite_cover_of_isCompact hK htime hspace with
+    ⟨N, hNK, _hNfinite, hcover⟩
+  exact of_parabolicCylinder_cover_closedCylinder hα htime hspace hcover
     (fun y hy => hlocal y (hNK hy))
 
 theorem const (c : E) (hB : ‖c‖ ≤ B) (hH : 0 ≤ H) :
@@ -3523,6 +3890,65 @@ theorem of_finset_parabolicBall_cover_closedBall {r : ℝ} {K : Set (ℝ × X)}
   exact ParabolicC0AlphaWith.of_parabolicBall_cover_closedBall
     (B := Bsum) (H := Hsum) hα hr hcover hlocal_sum
 
+/-- Local-to-global parabolic `C^{0,α}` control from a finite product-parabolic-cylinder cover,
+with local constants chosen automatically and summed over the finite cover. -/
+theorem of_finset_parabolicCylinder_cover_closedCylinder {timeRadius spaceRadius : ℝ}
+    {K : Set (ℝ × X)}
+    (N : Finset (ℝ × X)) (hα : 0 < α)
+    (htime : 0 < timeRadius) (hspace : 0 < spaceRadius)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicCylinder y timeRadius spaceRadius)
+    (hlocal : ∀ y ∈ N, ParabolicC0AlphaOn α u
+      (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicC0AlphaOn α u K := by
+  classical
+  let Bc : ℝ × X → ℝ :=
+    fun y => if hy : y ∈ N then Classical.choose (hlocal y hy) else 0
+  let Hc : ℝ × X → ℝ := fun y =>
+    if hy : y ∈ N then Classical.choose (Classical.choose_spec (hlocal y hy)).2 else 0
+  have hBnonneg : ∀ y ∈ N, 0 ≤ Bc y := by
+    intro y hy
+    dsimp [Bc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hHnonneg : ∀ y ∈ N, 0 ≤ Hc y := by
+    intro y hy
+    dsimp [Hc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).1
+  have hBH :
+      ∀ y ∈ N, ParabolicC0AlphaWith (Bc y) (Hc y) α u
+        (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius)) := by
+    intro y hy
+    dsimp [Bc, Hc]
+    rw [dif_pos hy, dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).2
+  let Bsum : ℝ := ∑ y ∈ N, Bc y
+  let Hsum : ℝ := ∑ y ∈ N, Hc y
+  have hBsum_nonneg : 0 ≤ Bsum := by
+    dsimp [Bsum]
+    exact Finset.sum_nonneg hBnonneg
+  have hHsum_nonneg : 0 ≤ Hsum := by
+    dsimp [Hsum]
+    exact Finset.sum_nonneg hHnonneg
+  have hB_le_sum : ∀ y ∈ N, Bc y ≤ Bsum := by
+    intro y hy
+    dsimp [Bsum]
+    exact Finset.single_le_sum hBnonneg hy
+  have hH_le_sum : ∀ y ∈ N, Hc y ≤ Hsum := by
+    intro y hy
+    dsimp [Hsum]
+    exact Finset.single_le_sum hHnonneg hy
+  have hlocal_sum :
+      ∀ y ∈ N, ParabolicC0AlphaWith Bsum Hsum α u
+        (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius)) := by
+    intro y hy
+    exact (hBH y hy).mono_const (hB_le_sum y hy) (hH_le_sum y hy)
+  refine ⟨Bsum, hBsum_nonneg,
+    max Hsum (2 * Bsum / (min (Real.sqrt timeRadius) spaceRadius) ^ α),
+    hHsum_nonneg.trans (le_max_left _ _), ?_⟩
+  exact ParabolicC0AlphaWith.of_parabolicCylinder_cover_closedCylinder
+    (B := Bsum) (H := Hsum) hα htime hspace hcover hlocal_sum
+
 /-- Local-to-global parabolic `C^{0,α}` control from a finite cover by variable-radius
 parabolic balls.  The global sup constant is the sum of local sup constants, and the Holder
 constant is supplied by the variable-radius Holder patching theorem. -/
@@ -3569,6 +3995,54 @@ theorem of_finset_parabolicBall_cover_closedBall_variable {K : Set (ℝ × X)}
     ⟨H, hHnonneg, hH⟩
   exact ⟨Bsum, hBsum_nonneg, H, hHnonneg, hbounded, hH⟩
 
+/-- Local-to-global parabolic `C^{0,α}` control from a finite cover by variable-radius product
+parabolic cylinders.  The global sup constant is the sum of local sup constants, and the Holder
+constant is supplied by the variable-radius cylinder Holder patching theorem. -/
+theorem of_finset_parabolicCylinder_cover_closedCylinder_variable {K : Set (ℝ × X)}
+    (N : Finset (ℝ × X)) (timeRadius spaceRadius : ℝ × X → ℝ) (hα : 0 < α)
+    (htime_pos : ∀ y ∈ N, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ N, 0 < spaceRadius y)
+    (hcover : K ⊆ ⋃ y ∈ N, parabolicCylinder y (timeRadius y) (spaceRadius y))
+    (hlocal : ∀ y ∈ N, ParabolicC0AlphaOn α u
+      (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y))) :
+    ParabolicC0AlphaOn α u K := by
+  classical
+  let Bc : ℝ × X → ℝ :=
+    fun y => if hy : y ∈ N then Classical.choose (hlocal y hy) else 0
+  have hBnonneg : ∀ y ∈ N, 0 ≤ Bc y := by
+    intro y hy
+    dsimp [Bc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hBlocal :
+      ∀ y ∈ N, ParabolicBoundedWith (Bc y) u
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)) := by
+    intro y hy
+    dsimp [Bc]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).2.1
+  let Bsum : ℝ := ∑ y ∈ N, Bc y
+  have hBsum_nonneg : 0 ≤ Bsum := by
+    dsimp [Bsum]
+    exact Finset.sum_nonneg hBnonneg
+  have hB_le_sum : ∀ y ∈ N, Bc y ≤ Bsum := by
+    intro y hy
+    dsimp [Bsum]
+    exact Finset.single_le_sum hBnonneg hy
+  have hbounded : ParabolicBoundedWith Bsum u K := by
+    intro p hp
+    rcases mem_iUnion.1 (hcover hp) with ⟨y, hy⟩
+    rcases mem_iUnion.1 hy with ⟨hyN, hpcy⟩
+    have hpclosed :
+        p ∈ parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y) :=
+      parabolicCylinder.mem_closedCylinder_two_of_mem hpcy
+    exact (hBlocal y hyN hpclosed).trans (hB_le_sum y hyN)
+  rcases ParabolicHolderOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      (B := Bsum) N timeRadius spaceRadius hbounded hα htime_pos hspace_pos hcover
+      (fun y hy => (hlocal y hy).holderOn) with
+    ⟨H, hHnonneg, hH⟩
+  exact ⟨Bsum, hBsum_nonneg, H, hHnonneg, hbounded, hH⟩
+
 /-- Compact local-to-global parabolic `C^{0,α}` control from point-dependent doubled
 closed-ball estimates, with all constants and cover radii chosen on a finite compact subcover. -/
 theorem of_isCompact_of_local_closedBall_variable {K : Set (ℝ × X)}
@@ -3605,6 +4079,58 @@ theorem of_isCompact_of_exists_local_closedBall {K : Set (ℝ × X)}
     exact (Classical.choose_spec (hlocal y hy)).2
   exact of_isCompact_of_local_closedBall_variable hK hα R hRpos hlocalR
 
+/-- Compact local-to-global parabolic `C^{0,α}` control from point-dependent doubled
+closed-cylinder estimates, with all constants and cover radii chosen on a finite compact subcover. -/
+theorem of_isCompact_of_local_closedCylinder_variable {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hα : 0 < α) (timeRadius spaceRadius : ℝ × X → ℝ)
+    (htime_pos : ∀ y ∈ K, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ K, 0 < spaceRadius y)
+    (hlocal : ∀ y ∈ K, ParabolicC0AlphaOn α u
+      (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y))) :
+    ParabolicC0AlphaOn α u K := by
+  rcases hK.elim_nhds_subcover
+      (fun y => parabolicCylinder y (timeRadius y) (spaceRadius y))
+      (fun y hy => parabolicCylinder.mem_nhds (p := y) (timeRadius := timeRadius y)
+        (spaceRadius := spaceRadius y) (htime_pos y hy) (hspace_pos y hy)) with
+    ⟨N, hNK, hcover⟩
+  exact of_finset_parabolicCylinder_cover_closedCylinder_variable N timeRadius spaceRadius hα
+    (fun y hy => htime_pos y (hNK y hy))
+    (fun y hy => hspace_pos y (hNK y hy)) hcover
+    (fun y hy => hlocal y (hNK y hy))
+
+/-- Compact local-to-global parabolic `C^{0,α}` control from pointwise positive local
+product-cylinder radii, with the radii, cover, and constants chosen automatically. -/
+theorem of_isCompact_of_exists_local_closedCylinder {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hlocal : ∀ y ∈ K, ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      ParabolicC0AlphaOn α u
+        (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicC0AlphaOn α u K := by
+  classical
+  let timeRadius : ℝ × X → ℝ :=
+    fun y => if hy : y ∈ K then Classical.choose (hlocal y hy) else 1
+  let spaceRadius : ℝ × X → ℝ := fun y =>
+    if hy : y ∈ K then Classical.choose (Classical.choose_spec (hlocal y hy)).2 else 1
+  have htime_pos : ∀ y ∈ K, 0 < timeRadius y := by
+    intro y hy
+    dsimp [timeRadius]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (hlocal y hy)).1
+  have hspace_pos : ∀ y ∈ K, 0 < spaceRadius y := by
+    intro y hy
+    dsimp [spaceRadius]
+    rw [dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).1
+  have hlocalR :
+      ∀ y ∈ K, ParabolicC0AlphaOn α u
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)) := by
+    intro y hy
+    dsimp [timeRadius, spaceRadius]
+    rw [dif_pos hy, dif_pos hy]
+    exact (Classical.choose_spec (Classical.choose_spec (hlocal y hy)).2).2
+  exact of_isCompact_of_local_closedCylinder_variable hK hα timeRadius spaceRadius
+    htime_pos hspace_pos hlocalR
+
 /-- Compact local-to-global parabolic `C^{0,α}` control from local doubled closed-ball estimates,
 with all constants chosen automatically from a finite compact subcover. -/
 theorem of_isCompact_of_local_closedBall {r : ℝ} {K : Set (ℝ × X)}
@@ -3615,6 +4141,22 @@ theorem of_isCompact_of_local_closedBall {r : ℝ} {K : Set (ℝ × X)}
       (fun y _hy => parabolicBall.mem_nhds (p := y) (R := r) hr) with
     ⟨N, hNK, hcover⟩
   exact of_finset_parabolicBall_cover_closedBall N hα hr hcover
+    (fun y hy => hlocal y (hNK y hy))
+
+/-- Compact local-to-global parabolic `C^{0,α}` control from local doubled closed-cylinder
+estimates, with all constants chosen automatically from a finite compact subcover. -/
+theorem of_isCompact_of_local_closedCylinder {timeRadius spaceRadius : ℝ}
+    {K : Set (ℝ × X)}
+    (hK : IsCompact K) (hα : 0 < α)
+    (htime : 0 < timeRadius) (hspace : 0 < spaceRadius)
+    (hlocal : ∀ y ∈ K, ParabolicC0AlphaOn α u
+      (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) :
+    ParabolicC0AlphaOn α u K := by
+  rcases hK.elim_nhds_subcover (fun y => parabolicCylinder y timeRadius spaceRadius)
+      (fun y _hy => parabolicCylinder.mem_nhds (p := y) (timeRadius := timeRadius)
+        (spaceRadius := spaceRadius) htime hspace) with
+    ⟨N, hNK, hcover⟩
+  exact of_finset_parabolicCylinder_cover_closedCylinder N hα htime hspace hcover
     (fun y hy => hlocal y (hNK y hy))
 
 theorem const (c : E) : ParabolicC0AlphaOn α (fun _ : ℝ × X => c) s :=

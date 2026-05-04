@@ -1560,13 +1560,14 @@ explicit closed-ball/cylinder oscillation, continuity,
 uniform-continuity, estimate monotonicity in the controlling constants, and
 constant-preserving localization of open-domain Hölder and `C^{0,α}` estimates
 to uniform closed parabolic patches around compact subsets, and
-a bounded local-to-global Hölder estimate from parabolic ball covers and
-doubled closed patches, plus its compact uniform-local corollary, and
-finite-cover Holder patching with automatic local-constant selection,
-matching local-to-global `C^{0,α}` patching theorems, and
-finite-cover `C^{0,α}` patching with automatic local-constant selection, and
-variable-radius finite-cover Holder and `C^{0,α}` patching plus compact
-point-dependent- and existential-radius corollaries, and finite-sum closure for
+bounded local-to-global Hölder estimates from parabolic ball covers and
+product-cylinder covers with doubled closed patches, plus compact uniform-local
+corollaries, and finite-cover Holder patching with automatic local-constant
+selection for both cover shapes, matching local-to-global `C^{0,α}` patching
+theorems, and finite-cover `C^{0,α}` patching with automatic local-constant
+selection, and variable-radius finite-cover Holder and `C^{0,α}` patching for
+both ball and product-cylinder covers plus compact point-dependent- and
+existential-radius corollaries, and finite-sum closure for
 explicit Holder, bounded, and `C^{0,α}` controls, and finite-sum closure for
 existential Holder and `C^{0,α}` controls, and finite sum-difference closure
 for fixed-constant and existential `C^{0,α}` controls, and finite
