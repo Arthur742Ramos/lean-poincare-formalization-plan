@@ -1212,7 +1212,11 @@ the state-restricted derivative theorem for `f`. Matching `..._nnnorm_estimates.
 variants consume the usual `‖Df‖₊ ≤ BD` closed-ball estimate on `Icc` and derive
 the real norm bounds and forward-interval restrictions internally; the
 `..._of_le_radius` form matches the existing product Picard radius hypothesis
-`r ≤ R`.
+`r ≤ R`. The localized state-preserving Picard and component-continuity estimate
+layers now also expose the strict time-slice derivative itself on restricted
+forward intervals, including the operator-ball and identity-ball specializations,
+so later common-interval neighborhood-map and local-inverse wrappers no longer
+hide this differentiability bridge.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new

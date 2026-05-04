@@ -9660,6 +9660,163 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_of_identi
         (fun A hA => nnnorm_le_one_add_radius_of_mem_closedBall_one hA)
         hD_bound hf_cont hDf_cont hmul hr hx ht hder
 
+/-- Localized `r ≤ R` strict time-slice derivative theorem for a
+state-preserving product Picard flow with `ℝ≥0` closed-ball estimates. -/
+theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_hasStrictFDerivAt_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
+    [CompleteSpace V]
+    {a R L Kpl BD KD r' : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax')
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    HasStrictFDerivAt
+      (fun y : V =>
+        (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+          hf htime ht₀' hr).flow (y, t))
+      ((ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+        hf htime ht₀' hr).tangent x t)
+      x := by
+  have ht_forward : t ∈ Icc (t₀ : ℝ) tmax := by
+    exact ⟨ht.1, (htime ⟨le_trans ht₀'.1 ht.1, ht.2⟩).2⟩
+  simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
+    ofProductStatePreservingPicardLindelof_restrict,
+    ofProductContinuousLocalFlowSolution_restrict,
+    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
+      (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_forward
+      hD_bound hDf_lip hder
+
+/-- Localized componentwise closed-ball continuity estimates give the strict
+spatial derivative of each forward time slice of the state-preserving selected
+variational flow, provided the supplied `Df` is the spatial derivative of `f` on
+the same closed ball. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+    [CompleteSpace V]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax')
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    HasStrictFDerivAt
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t))
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).tangent x t)
+      x := by
+  simpa [ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict] using
+    ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_hasStrictFDerivAt_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
+      (f := f) (Df := Df)
+      (hf :=
+        isPicardLindelof_variationalVectorField_of_component_closedBall_continuity
+          (A₀ := (1 : V →L[ℝ] V)) (r := R)
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul)
+      htime ht₀' hr hx ht hD_bound hDf_lip hder
+
+/-- Localized operator-ball componentwise closed-ball continuity estimates give
+the strict spatial derivative of each forward time slice of the state-preserving
+selected variational flow. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+    [CompleteSpace V]
+    {a R Kf KD Lf BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (‖(1 : V →L[ℝ] V)‖₊ + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax')
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    HasStrictFDerivAt
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+          hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t))
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+        hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).tangent x t)
+      x := by
+  simpa [ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall]
+    using
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+        (BA := ‖(1 : V →L[ℝ] V)‖₊ + a)
+        hf_lip hDf_lip hf_bound
+        (fun A hA => nnnorm_le_nnnorm_add_radius_of_mem_closedBall hA)
+        hD_bound hf_cont hDf_cont hmul htime ht₀' hr hx ht hder
+
+/-- Localized identity-ball componentwise closed-ball continuity estimates give
+the strict spatial derivative of each forward time slice of the state-preserving
+selected variational flow. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+    [CompleteSpace V]
+    {a R Kf KD Lf BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (1 + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax')
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    HasStrictFDerivAt
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+          hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t))
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+        hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).tangent x t)
+      x := by
+  simpa [ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall]
+    using
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+        (BA := 1 + a)
+        hf_lip hDf_lip hf_bound
+        (fun A hA => nnnorm_le_one_add_radius_of_mem_closedBall_one hA)
+        hD_bound hf_cont hDf_cont hmul htime ht₀' hr hx ht hder
+
 /-- Componentwise closed-ball continuity estimates give the neighborhood-map
 equality for each forward interior time slice of the state-preserving selected
 variational flow, provided the supplied `Df` is the spatial derivative of `f` on
