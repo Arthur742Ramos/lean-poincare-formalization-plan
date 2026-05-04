@@ -1118,6 +1118,9 @@ the time-slice map is supplied and identified with the variational tangent map,
 mapping equality and
 `exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo` packages
 the corresponding local open partial homeomorphism, with common-`Ioo` variants.
+Product Picard convex-state hypotheses, and the state-preserving closed-ball
+estimate specialization, now feed those common-`Ioo` time-slice
+neighborhood-map and local open-partial-homeomorphism readouts directly.
 This strict derivative input has now been reduced one step further in the model
 layer: `flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt` uses
 Mathlib's real `C¹`-implies-strict-differentiability theorem, so ordinary
