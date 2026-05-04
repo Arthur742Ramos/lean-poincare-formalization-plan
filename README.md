@@ -287,8 +287,8 @@ packages the canonical stationary local solution attached to
   neighborhood-map and local open-partial-homeomorphism readouts directly, and
   the state-preserving product-Picard/component-continuity routes now also have
   localized constructors and proof-level `Nonempty` wrappers, including the
-  operator/identity-ball specializations, so Picard-interval shrinking retains
-  the closed-state-ball readout;
+  operator/identity-ball specializations, with direct closed-state-ball readouts
+  after Picard-interval shrinking;
   encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The

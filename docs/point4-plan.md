@@ -1386,8 +1386,8 @@ matching proof-level `Nonempty` wrappers for each estimate route. The
 state-preserving product Picard and component-continuity routes now have the
 same localized constructors and proof-level witnesses, including the
 operator/identity-ball specializations, so shrinking the Picard interval no
-longer loses the closed-state-ball selection used by the inverse-function
-readouts. The ODE package
+longer loses the direct closed-state-ball readouts used by the inverse-function
+criteria. The ODE package
 now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
 closed-interval and interior vector-slot derivatives for `t ↦ A(t)v` via
