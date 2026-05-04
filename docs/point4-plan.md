@@ -1410,7 +1410,11 @@ On the final bundling side, `SmoothSelfDiffeomorph3.ofInverse` now packages
 mutually inverse `C³` self-maps into a bundled `SmoothSelfDiffeomorph3`, with
 simp readouts for the forward and inverse maps.  Thus the eventual glued-flow
 upgrade can target forward/backward inverse identities plus `ContMDiff I I 3`
-regularity, rather than constructing the `Diffeomorph` record by hand.
+regularity, rather than constructing the `Diffeomorph` record by hand.  The
+family-level `SmoothSelfDiffeomorph3Family.ofInverse` performs the same
+slice-wise packaging for time-dependent forward/backward maps, and
+`SmoothSelfDiffeomorph3Family.ofInverse_anchoredAt` turns pointwise identity of
+the forward map at the base time into the anchored-family condition.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,

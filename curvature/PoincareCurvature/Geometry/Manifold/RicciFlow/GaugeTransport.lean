@@ -3009,12 +3009,42 @@ def const (φ : SmoothSelfDiffeomorph3 (I := I) (M := M)) :
     SmoothSelfDiffeomorph3Family (I := I) (M := M) :=
   fun _ ↦ φ
 
+/-- Build a `C^3` self-diffeomorphism family from mutually inverse `C^3`
+time-slice maps. -/
+noncomputable def ofInverse
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, Function.LeftInverse (G t) (F t))
+    (hright : ∀ t : ℝ, Function.RightInverse (G t) (F t))
+    (hF : ∀ t : ℝ, ContMDiff I I 3 (F t))
+    (hG : ∀ t : ℝ, ContMDiff I I 3 (G t)) :
+    SmoothSelfDiffeomorph3Family (I := I) (M := M) :=
+  fun t ↦ SmoothSelfDiffeomorph3.ofInverse (I := I) (M := M)
+    (F t) (G t) (hleft t) (hright t) (hF t) (hG t)
+
 @[simp] lemma id_apply (t : ℝ) :
     SmoothSelfDiffeomorph3Family.id (I := I) (M := M) t =
       Diffeomorph.refl I M (3 : WithTop ℕ∞) := rfl
 
 @[simp] lemma const_apply (φ : SmoothSelfDiffeomorph3 (I := I) (M := M)) (t : ℝ) :
     SmoothSelfDiffeomorph3Family.const (I := I) (M := M) φ t = φ := rfl
+
+@[simp] theorem ofInverse_apply_apply
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, Function.LeftInverse (G t) (F t))
+    (hright : ∀ t : ℝ, Function.RightInverse (G t) (F t))
+    (hF : ∀ t : ℝ, ContMDiff I I 3 (F t))
+    (hG : ∀ t : ℝ, ContMDiff I I 3 (G t))
+    (t : ℝ) (x : M) :
+    (ofInverse (I := I) (M := M) F G hleft hright hF hG t) x = F t x := rfl
+
+@[simp] theorem ofInverse_symm_apply
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, Function.LeftInverse (G t) (F t))
+    (hright : ∀ t : ℝ, Function.RightInverse (G t) (F t))
+    (hF : ∀ t : ℝ, ContMDiff I I 3 (F t))
+    (hG : ∀ t : ℝ, ContMDiff I I 3 (G t))
+    (t : ℝ) (x : M) :
+    (ofInverse (I := I) (M := M) F G hleft hright hF hG t).symm x = G t x := rfl
 
 variable (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
 
@@ -3068,6 +3098,19 @@ def AnchoredAt (t₀ : ℝ) : Prop :=
 
 @[simp] lemma id_anchoredAt (t₀ : ℝ) :
     (SmoothSelfDiffeomorph3Family.id (I := I) (M := M)).AnchoredAt t₀ := rfl
+
+theorem ofInverse_anchoredAt
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, Function.LeftInverse (G t) (F t))
+    (hright : ∀ t : ℝ, Function.RightInverse (G t) (F t))
+    (hF : ∀ t : ℝ, ContMDiff I I 3 (F t))
+    (hG : ∀ t : ℝ, ContMDiff I I 3 (G t))
+    {t₀ : ℝ}
+    (hFid : ∀ x : M, F t₀ x = x) :
+    (ofInverse (I := I) (M := M) F G hleft hright hF hG).AnchoredAt t₀ := by
+  apply DFunLike.ext
+  intro x
+  exact hFid x
 
 lemma AnchoredAt.apply
     {t₀ : ℝ}
