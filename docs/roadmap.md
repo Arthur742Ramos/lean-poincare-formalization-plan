@@ -1363,7 +1363,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      the terminal-fit theorem packages, prescribed shorter-terminal
      metric/connection readouts, and conditional full-common readouts; the
      preferred-cover initial-metric route exposes the same combined package
-     alongside the chart-carrier Banach solution.
+     alongside the chart-carrier Banach solution.  The smooth-realization layer
+     also now has a proof bridge from prescribed shorter-terminal uniqueness to
+     open-common-overlap metric and connection uniqueness, with closure-data
+     readouts tied to the same selected-shrink containment hypothesis.
      The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the

@@ -1544,12 +1544,19 @@ candidate intervals fit inside the selected shrink.  The wrapper
 chooses the shorter terminal automatically and states the result on
 `[t₀, min (min T₁ T₂) T']`.  The companion
 `RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_interval_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier`
-removes the extra clipping when `min T₁ T₂ ≤ T'`.  `SmoothRealizationMetricCone.lean`
+removes the extra clipping when `min T₁ T₂ ≤ T'`.  The generic
+`chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_Ico_of_restricted_interval`
+bridge now converts prescribed shorter-terminal uniqueness into uniqueness on
+the open common candidate overlap, and
+`RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_Ico_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier`
+exposes that continuation step for shrunk ambient closure data when the same
+selected shrink contains the common terminal.  `SmoothRealizationMetricCone.lean`
 now exposes the same clipped uniqueness readout after selecting the standard
 positive-radius metric-cone shrink, still without a full-candidate terminal-fit
 hypothesis.
 The corresponding connection-level wrappers
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_restricted_interval_of_shrunk_symmetricCarrier`,
+`RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_Ico_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier`,
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier`,
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_interval_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier`,
 and
@@ -2023,7 +2030,11 @@ coordinated by one `T'`/`a'` choice. The same selected-shrink package now also
 combines that terminal-fit theorem-package handoff with the prescribed
 shorter-terminal readouts and the conditional full-common metric/connection
 readouts, both at the raw metric-cone handoff and at the preferred-cover
-initial-metric smooth-approximation route. At the vector-bundle
+initial-metric smooth-approximation route. The smooth-realization layer now
+also records the order-theoretic open-overlap continuation bridge from
+prescribed shorter-terminal readouts, with metric and connection closure-data
+readouts on `Ico t₀ (min T₁ T₂)` under the existing selected-shrink containment
+hypothesis. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives

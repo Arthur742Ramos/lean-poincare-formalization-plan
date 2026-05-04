@@ -5600,6 +5600,80 @@ theorem chosenIntrinsicDeTurckLocalSolution_metric_eq_on_restricted_interval_of_
       simpa [IntrinsicDeTurckLocalSolution.restrictTerminal] using
         (enc₂.metric_eq htCandidate₂ x u v).symm
 
+/-- If chosen-background DeTurck metric uniqueness is available on every
+prescribed shorter common terminal, then it is available on the open common
+candidate overlap.  This is the order-theoretic continuation bridge from
+restricted-terminal readouts to open-overlap readouts. -/
+theorem chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_Ico_of_restricted_interval
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F] [T2Space M]
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := F) (H := H) (I := I) (M := M) ivp)
+    (hmetric : ∀ {S : ℝ},
+      ivp.initialTime < S → S ≤ sol₁.1.terminalTime → S ≤ sol₂.1.terminalTime →
+      ∀ {t : ℝ}, t ∈ Icc ivp.initialTime S → ∀ (x : M) (u v : TangentSpace I x),
+        metricTensor (I := I) (M := M)
+          sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+            metricTensor (I := I) (M := M)
+              sol₂.1.toIntrinsicDeTurckSolution.metric t x u v)
+    {t : ℝ} (ht : t ∈ Ico ivp.initialTime
+      (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    (x : M) (u v : TangentSpace I x) :
+    metricTensor (I := I) (M := M) sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.1.toIntrinsicDeTurckSolution.metric t x u v := by
+  rcases exists_between ht.2 with ⟨S, htS, hScommon⟩
+  have hS₀ : ivp.initialTime < S := lt_of_le_of_lt ht.1 htS
+  have hS₁ : S ≤ sol₁.1.terminalTime :=
+    le_trans (le_of_lt hScommon) (min_le_left _ _)
+  have hS₂ : S ≤ sol₂.1.terminalTime :=
+    le_trans (le_of_lt hScommon) (min_le_right _ _)
+  have htScc : t ∈ Icc ivp.initialTime S := ⟨ht.1, le_of_lt htS⟩
+  exact hmetric (S := S) hS₀ hS₁ hS₂ (t := t) htScc x u v
+
+/-- Connection-level open-overlap bridge from prescribed shorter-terminal
+canonical-connection uniqueness. -/
+theorem chosenIntrinsicDeTurckLocalSolution_connection_eq_on_common_Ico_of_restricted_interval
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F] [T2Space M]
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := F) (H := H) (I := I) (M := M) ivp)
+    (hconnection : ∀ {S : ℝ},
+      ivp.initialTime < S → S ≤ sol₁.1.terminalTime → S ≤ sol₂.1.terminalTime →
+      ∀ {t : ℝ}, t ∈ Icc ivp.initialTime S →
+      ∀ {x : M} {σ : Π y : M, TangentSpace I y},
+        MDiffAt (T% σ) x →
+        sol₁.1.canonicalConnection
+          (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+          sol₂.1.canonicalConnection
+            (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2) t σ x)
+    {t : ℝ} (ht : t ∈ Ico ivp.initialTime
+      (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    {x : M} {σ : Π y : M, TangentSpace I y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.1.canonicalConnection
+      (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+      sol₂.1.canonicalConnection
+        (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2) t σ x := by
+  rcases exists_between ht.2 with ⟨S, htS, hScommon⟩
+  have hS₀ : ivp.initialTime < S := lt_of_le_of_lt ht.1 htS
+  have hS₁ : S ≤ sol₁.1.terminalTime :=
+    le_trans (le_of_lt hScommon) (min_le_left _ _)
+  have hS₂ : S ≤ sol₂.1.terminalTime :=
+    le_trans (le_of_lt hScommon) (min_le_right _ _)
+  have htScc : t ∈ Icc ivp.initialTime S := ⟨ht.1, le_of_lt htS⟩
+  exact hconnection (S := S) hS₀ hS₁ hS₂ (t := t) htScc hσ
+
 /-- Restrict an ambient candidate encoding to a shrunk interval chart when the encoded candidate
 interval is known to fit inside the smaller chart interval. -/
 def TimeDependentGeometricRicciDeTurckBanachChartOnIcc.CandidateEncoding.shrink
@@ -7307,6 +7381,63 @@ theorem RicciDeTurckChartClosureDataOnIcc.metric_eq_on_restricted_interval_of_sh
       (chart'.restrictedSymmetricA_coe_of_mem
         (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
 
+/-- Local metric uniqueness on the open common candidate overlap, derived from
+the prescribed shorter-terminal readout.  The selected shrink is only used to
+show that each intermediate shorter terminal remains visible in the shrunk
+chart. -/
+theorem RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_Ico_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : RicciDeTurckChartClosureDataOnIcc x0 et het Kc hKc Ko hKo hKoEq hcover chart)
+    {T' : ℝ} (hT' : ivp.initialTime < T') (hT'le : T' ≤ T)
+    {a' : ℝ≥0} (ha' : a' ≤ a)
+    (htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+      a' - (0 : ℝ≥0))
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := F) (H := H) (I := I) (M := M) ivp)
+    (hcommonT : min sol₁.1.terminalTime sol₂.1.terminalTime ≤ T')
+    {t : ℝ}
+    (ht : t ∈ Ico ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    (x : M) (u v : TangentSpace I x) :
+    metricTensor (I := I) (M := M) sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.1.toIntrinsicDeTurckSolution.metric t x u v := by
+  exact
+    chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_Ico_of_restricted_interval
+      (M := M) (F := F) (I := I) sol₁ sol₂
+      (fun {S} hS₀ hS₁ hS₂ {t} htS x u v ↦ by
+        have hST' : S ≤ T' := le_trans (le_min hS₁ hS₂) hcommonT
+        exact
+          RicciDeTurckChartClosureDataOnIcc.metric_eq_on_restricted_interval_of_shrunk_symmetricCarrier
+            (M := M) (F := F) (I := I) (D := D)
+            hT' hT'le ha' htime sol₁ sol₂ hS₀ hS₁ hS₂ hST' (t := t) htS x u v)
+      ht x u v
+
 /-- Local uniqueness from shrunk ambient closure data on the whole common interval visible inside
 the shrink.  This is the packaged form of
 `RicciDeTurckChartClosureDataOnIcc.metric_eq_on_restricted_interval_of_shrunk_symmetricCarrier`
@@ -7480,6 +7611,64 @@ theorem RicciDeTurckChartClosureDataOnIcc.connection_eq_on_restricted_interval_o
         (M := M) (F := F) (I := I) (D := D)
         hT' hT'le ha' htime sol₁ sol₂ hS₀ hS₁ hS₂ hST' ht y u v)
     hσ
+
+/-- Connection-level local uniqueness on the open common candidate overlap,
+derived from the prescribed shorter-terminal connection readout. -/
+theorem RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_Ico_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : RicciDeTurckChartClosureDataOnIcc x0 et het Kc hKc Ko hKo hKoEq hcover chart)
+    {T' : ℝ} (hT' : ivp.initialTime < T') (hT'le : T' ≤ T)
+    {a' : ℝ≥0} (ha' : a' ≤ a)
+    (htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+      a' - (0 : ℝ≥0))
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := F) (H := H) (I := I) (M := M) ivp)
+    (hcommonT : min sol₁.1.terminalTime sol₂.1.terminalTime ≤ T')
+    {t : ℝ}
+    (ht : t ∈ Ico ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    {x : M} {σ : Π y : M, TangentSpace I y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.1.canonicalConnection
+      (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+      sol₂.1.canonicalConnection
+        (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2) t σ x := by
+  exact
+    chosenIntrinsicDeTurckLocalSolution_connection_eq_on_common_Ico_of_restricted_interval
+      (M := M) (F := F) (I := I) sol₁ sol₂
+      (fun {S} hS₀ hS₁ hS₂ {t} htS {x} {σ} hσ ↦ by
+        have hST' : S ≤ T' := le_trans (le_min hS₁ hS₂) hcommonT
+        exact
+          RicciDeTurckChartClosureDataOnIcc.connection_eq_on_restricted_interval_of_shrunk_symmetricCarrier
+            (M := M) (F := F) (I := I) (D := D)
+            hT' hT'le ha' htime sol₁ sol₂ hS₀ hS₁ hS₂ hST' (t := t) htS
+            (x := x) (σ := σ) hσ)
+      ht hσ
 
 /-- Connection-level local uniqueness from shrunk ambient closure data on the whole common interval
 visible inside the shrink. -/
