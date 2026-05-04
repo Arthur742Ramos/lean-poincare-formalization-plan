@@ -30,6 +30,39 @@ section OpenPartialHomeomorphTransport
 
 variable {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
 
+/-- Shrink an `OpenPartialHomeomorph` local inverse patch to prescribed open
+source and target constraints, retaining a bijective open patch for the
+prescribed forward map. -/
+theorem exists_open_nhds_bijOn_subset_of_openPartialHomeomorph
+    {g : X → X} {x : X} {φ : OpenPartialHomeomorph X X}
+    (hφ : (φ : X → X) = g) (hx : x ∈ φ.source)
+    {S T : Set X}
+    (hSopen : IsOpen S) (hxS : x ∈ S)
+    (hTopen : IsOpen T) (hxT : g x ∈ T) :
+    ∃ U W : Set X,
+      IsOpen U ∧ x ∈ U ∧ U ⊆ S ∧
+        IsOpen W ∧ g x ∈ W ∧ W ⊆ T ∧ BijOn g U W := by
+  let U : Set X := φ.source ∩ S ∩ φ ⁻¹' T
+  let W : Set X := φ '' U
+  have hxTφ : φ x ∈ T := by
+    simpa [hφ] using hxT
+  have hUopen : IsOpen U := by
+    have hpre : IsOpen (φ.source ∩ φ ⁻¹' T) := φ.isOpen_inter_preimage hTopen
+    simpa [U, inter_assoc, inter_left_comm, inter_comm] using hpre.inter hSopen
+  have hxU : x ∈ U := ⟨⟨hx, hxS⟩, hxTφ⟩
+  have hUsource : U ⊆ φ.source := fun _ hz ↦ hz.1.1
+  have hUS : U ⊆ S := fun _ hz ↦ hz.1.2
+  have hWopen : IsOpen W := φ.isOpen_image_of_subset_source hUopen hUsource
+  have hxW : g x ∈ W := by
+    refine ⟨x, hxU, ?_⟩
+    simpa [hφ]
+  have hWT : W ⊆ T := by
+    rintro _ ⟨z, hzU, rfl⟩
+    exact hzU.2
+  have hbijφ : BijOn φ U W := (φ.injOn.mono hUsource).bijOn_image
+  exact ⟨U, W, hUopen, hxU, hUS, hWopen, hxW, hWT,
+    hbijφ.congr (fun _ _ ↦ by simpa [hφ])⟩
+
 /-- Transport a model-space `MapsTo` statement through source and target
 partial homeomorphism charts.  The extra source-membership hypothesis records
 that the uncharted map lands in the target chart source on the visible patch. -/

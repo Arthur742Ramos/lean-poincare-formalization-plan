@@ -1380,6 +1380,10 @@ around the base point.  An ordinary spatial derivative proof on the initial-data
 ball is therefore enough at every interior base point of that ball.
 This is a model-level infinitesimal invertibility input.  The purely topological
 chart-transport bridge is now present in `Diffeomorph3FlowExistence.lean`:
+`exists_open_nhds_bijOn_subset_of_openPartialHomeomorph` first shrinks a model
+open-partial-homeomorphism patch to prescribed open source and target
+constraints while retaining an open `BijOn` patch for the prescribed time-slice
+map.
 `mapsTo_symm_image_of_openPartialHomeomorph_model_mapsTo`,
 `injOn_symm_image_of_openPartialHomeomorph_model_injOn`, and
 `bijOn_symm_image_of_openPartialHomeomorph_model_bijOn` transport model
