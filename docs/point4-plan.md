@@ -1142,12 +1142,22 @@ point as the single-interval route:
 `flow_timeSlice_map_nhds_eq_common_Ioo_of_eventually_hasFDerivAt` and
 `exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_eventually_hasFDerivAt`
 derive the strict derivative input from ordinary nearby spatial derivatives
-and continuity of `y ↦ α.tangent y t`. Product Picard flows now lift that
+and continuity of `y ↦ α.tangent y t`. The same local-homeomorphism packages
+can now be unpacked into concrete open source and target neighborhoods with
+`MapsTo` and `InjOn` for the time-slice map:
+`flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasStrictFDerivAt_Ioo`,
+`flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_hasStrictFDerivAt`,
+and the corresponding C¹-style variants expose exactly the local injective
+patch needed by chart-gluing arguments. Product Picard flows now lift that
 C¹-style common-interval criterion directly from ordinary spatial
 differentiability on the initial-data ball through
 `ofProduct_flow_timeSlice_map_nhds_eq_common_Ioo_of_hasFDerivAt_on_initialBall`
 and
 `exists_ofProduct_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasFDerivAt_on_initialBall`.
+They also expose the explicit open-neighborhood `MapsTo`/`InjOn` form through
+`ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasFDerivAt_on_initialBall_Ioo`
+and
+`ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_hasFDerivAt_on_initialBall`.
 Product Picard convex-state hypotheses, the state-preserving closed-ball
 estimate specialization, and the componentwise closed-ball continuity estimate
 packages now feed those common-`Ioo` time-slice neighborhood-map and local
@@ -1256,9 +1266,11 @@ The corresponding
 `C¹` package directly. For product-Picard output, the new
 `ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall`
 and its neighborhood/open-partial-homeomorphism variants obtain tangent-map
-continuity from the existing product-flow Lipschitz dependence, so an ordinary
-spatial derivative proof on the initial-data ball is enough at every interior
-base point of that ball.
+continuity from the existing product-flow Lipschitz dependence; the explicit
+open-neighborhood `MapsTo`/`InjOn` readouts additionally provide a local
+injective source patch and image neighborhood for each interior time-slice.  An
+ordinary spatial derivative proof on the initial-data ball is therefore enough
+at every interior base point of that ball.
 This is a model-level infinitesimal invertibility input, but it still has to be
 lifted through charts and combined with manifold-level flow compatibility before
 producing `C³` diffeomorphism slices.

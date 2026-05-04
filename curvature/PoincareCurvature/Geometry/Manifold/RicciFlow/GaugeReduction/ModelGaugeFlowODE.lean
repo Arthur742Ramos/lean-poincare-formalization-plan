@@ -5508,6 +5508,18 @@ theorem flow_timeSlice_map_nhds_eq_of_eventually_hasFDerivAt_Ioo
   α.flow_timeSlice_map_nhds_eq_of_hasStrictFDerivAt_Ioo hx ht hD_bound
     (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
 
+/-- Extract explicit open source and target neighborhoods from an
+`OpenPartialHomeomorph` whose forward map is a prescribed function. -/
+theorem exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
+    {g : V → V} {x y : V} {φ : OpenPartialHomeomorph V V}
+    (hφ : (φ : V → V) = g) (hx : x ∈ φ.source) (hy : y ∈ φ.target) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧ y ∈ W ∧
+        MapsTo g U W ∧ InjOn g U := by
+  refine ⟨φ.source, φ.target, φ.open_source, hx, φ.open_target, hy, ?_, ?_⟩
+  · simpa [← hφ] using φ.mapsTo
+  · simpa [← hφ] using φ.injOn
+
 /-- Open-partial-homeomorphism form of the inverse-function bridge for a
 time-slice of a variational local flow.  The remaining mathematical input is
 the strict spatial derivative of the time-slice map, identified with the
@@ -5532,6 +5544,26 @@ theorem exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
     hstrict'.mem_toOpenPartialHomeomorph_source,
     hstrict'.image_mem_toOpenPartialHomeomorph_target⟩
 
+/-- Explicit open source and target neighborhoods for the local inverse theorem
+of an interior time-slice of a variational local flow. -/
+theorem flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasStrictFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧ α.flow (x, t) ∈ W ∧
+        MapsTo (fun y : V => α.flow (y, t)) U W ∧
+          InjOn (fun y : V => α.flow (y, t)) U := by
+  rcases α.exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
+      hx ht hD_bound hstrict with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V => α.flow (y, t)) hφ hxφ hyφ
+
 /-- C¹-style open-partial-homeomorphism bridge for a time slice: ordinary
 spatial derivatives near `x` plus continuity of the derivative map give the
 strict differentiability input needed by the inverse-function theorem. -/
@@ -5548,6 +5580,25 @@ theorem exists_flow_timeSlice_openPartialHomeomorph_of_eventually_hasFDerivAt_Io
       (φ : V → V) = (fun y : V => α.flow (y, t)) ∧
         x ∈ φ.source ∧ α.flow (x, t) ∈ φ.target :=
   α.exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo hx ht hD_bound
+    (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
+
+/-- C¹-style explicit open source and target neighborhoods for an interior
+time-slice of a variational local flow. -/
+theorem flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_eventually_hasFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hder : ∀ᶠ y in 𝓝 x,
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) x) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧ α.flow (x, t) ∈ W ∧
+        MapsTo (fun y : V => α.flow (y, t)) U W ∧
+          InjOn (fun y : V => α.flow (y, t)) U :=
+  α.flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasStrictFDerivAt_Ioo
+    hx ht hD_bound
     (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
 
 /-- Product-Picard version of the C¹-to-strict bridge.  The ordinary spatial
@@ -5667,6 +5718,48 @@ theorem exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_hasFDerivAt_on_
   simpa [α] using
     α.exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
       (ball_subset_closedBall hx) ht hD_bound' hstrict
+
+/-- Product-Picard C¹-style explicit open source and target neighborhoods for
+an interior time slice, from ordinary spatial differentiability on the
+initial-data ball. -/
+theorem ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasFDerivAt_on_initialBall_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {K : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ K)
+    (hder : ∀ y ∈ closedBall x₀ r,
+      HasFDerivAt
+        (fun z : V =>
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow (z, t))
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent y t)
+        y) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, t) ∈ W ∧
+        MapsTo
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) U W ∧
+        InjOn
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) U := by
+  rcases exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_hasFDerivAt_on_initialBall_Ioo
+      (β := β) hball hx ht hD_bound hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, t)) hφ hxφ hyφ
 
 /-- Product-Picard convex state-tube criterion for the inverse-function theorem
 readout of a forward time slice.  The convex-state hypotheses prove strict
@@ -5952,6 +6045,28 @@ theorem exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDeri
     hstrict'.mem_toOpenPartialHomeomorph_source,
     hstrict'.image_mem_toOpenPartialHomeomorph_target⟩
 
+/-- Common-subinterval explicit open source and target neighborhoods for the
+local inverse theorem of a time-slice of a variational local flow. -/
+theorem flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_hasStrictFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧ α.flow (x, t) ∈ W ∧
+        MapsTo (fun y : V => α.flow (y, t)) U W ∧
+          InjOn (fun y : V => α.flow (y, t)) U := by
+  rcases α.exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDerivAt
+      htime htbase hx ht hD_bound hstrict with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V => α.flow (y, t)) hφ hxφ hyφ
+
 /-- C¹-style common-subinterval inverse-function bridge: ordinary spatial
 derivatives near `x`, with derivative `α.tangent y t`, and continuity of this
 derivative map at `x` imply the neighborhood mapping equality for the time
@@ -5991,6 +6106,27 @@ theorem exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_eventually_has
       (φ : V → V) = (fun y : V => α.flow (y, t)) ∧
         x ∈ φ.source ∧ α.flow (x, t) ∈ φ.target :=
   α.exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDerivAt
+    htime htbase hx ht hD_bound
+    (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
+
+/-- C¹-style common-subinterval explicit open source and target neighborhoods
+for a time-slice of a variational local flow. -/
+theorem flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_eventually_hasFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hder : ∀ᶠ y in 𝓝 x,
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) x) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧ α.flow (x, t) ∈ W ∧
+        MapsTo (fun y : V => α.flow (y, t)) U W ∧
+          InjOn (fun y : V => α.flow (y, t)) U :=
+  α.flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_hasStrictFDerivAt
     htime htbase hx ht hD_bound
     (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
 
@@ -6085,6 +6221,51 @@ theorem exists_ofProduct_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasF
   simpa [α] using
     α.exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDerivAt
       htime htbase (ball_subset_closedBall hx) ht hD_bound' hstrict
+
+/-- Product-Picard C¹-style common-subinterval explicit open source and target
+neighborhoods for a time slice, from ordinary spatial differentiability on the
+initial-data ball. -/
+theorem ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_hasFDerivAt_on_initialBall
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {K : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {a b t : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ K)
+    (hder : ∀ y ∈ closedBall x₀ r,
+      HasFDerivAt
+        (fun z : V =>
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (z, t))
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent
+          y t)
+        y) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, t) ∈ W ∧
+        MapsTo
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) U W ∧
+        InjOn
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) U := by
+  rcases exists_ofProduct_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasFDerivAt_on_initialBall
+      (β := β) hball hx htime htbase ht hD_bound hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, t)) hφ hxφ hyφ
 
 /-- Product-Picard convex state-tube criterion for the common-subinterval
 neighborhood-map readout of a forward time slice.  The convex-state hypotheses
