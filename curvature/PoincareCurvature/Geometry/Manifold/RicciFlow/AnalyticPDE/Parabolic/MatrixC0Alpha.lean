@@ -10864,6 +10864,64 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_isCompact_det_ne_zer
     (ηM := ηM) (ηD := ηD) (ηH := ηH)
     hDB hHB hM hN hD hE hKc hηD hMdiff hDdiff hHdiff hδpos hdetM hdetN
 
+/-- Local finite product-cylinder metric controls globalize the compact-domain
+function-level bounded-difference estimate for schematic Ricci-DeTurck RHS fields.  The
+nonlinear primitive bounds and difference bounds are still checked on the compact target set. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_finset_parabolicCylinder_cover_closedCylinder_variable
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)} {C : n → n → ℝ} {DB : n → n → n → ℝ}
+    {HB : n → n → n → n → ℝ} {ηM ηD : ℝ} {ηH : n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (S : Finset (ℝ × X)) (timeRadius spaceRadius : ℝ × X → ℝ)
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (htime_pos : ∀ y ∈ S, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ S, 0 < spaceRadius y)
+    (hcover : Kdom ⊆ ⋃ y ∈ S, parabolicCylinder y (timeRadius y) (spaceRadius y))
+    (hMlocal : ∀ y ∈ S, ∀ a b,
+      ParabolicC0AlphaOn α (fun z => M z a b)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hNlocal : ∀ y ∈ S, ∀ a b,
+      ParabolicC0AlphaOn α (fun z => N z a b)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (N z).det ≠ 0)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hD : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖D z a b c‖ ≤ DB a b c)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hKc : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b i j, ‖Kc z a b i j‖ ≤
+      HB a b i j)
+    (hηD : 0 ≤ ηD)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ‖M z - N z‖ ≤ ηM)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ i j,
+      ‖((fun a b => Hc z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => Kc z a b i j) : Matrix n n 𝕜)‖ ≤ ηH i j) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB ηM ηD ηH)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) Kdom := by
+  have hMctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) Kdom := by
+    intro a b
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      S timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hMlocal y hy a b)
+  have hNctrl : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) Kdom := by
+    intro a b
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      S timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hNlocal y hy a b)
+  exact ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_isCompact_det_ne_zero
+    (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
+    hKdom hα hMctrl hNctrl hdetM_ne hdetN_ne hDB hHB hM hN hD hE hKc
+    hηD hMdiff hDdiff hHdiff
+
 /-- Finite-family function-level bounded-difference estimate for schematic Ricci-DeTurck RHS
 fields on a compact time-space set, with one determinant lower bound shared by both metric
 families. -/
@@ -10916,6 +10974,73 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_family_of_isCompact_det
     (ηM := ηM r) (ηD := ηD r) (ηH := ηH r)
     (hDB r) (hHB r) (hM r) (hN r) (hD r) (hE r) (hKc r) (hηD r)
     (hMdiff r) (hDdiff r) (hHdiff r) hδpos (hdetM r) (hdetN r)
+
+/-- Local finite product-cylinder metric controls globalize the finite-family compact-domain
+function-level bounded-difference estimate for schematic Ricci-DeTurck RHS fields, with one
+determinant lower bound shared by both metric families. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_family_of_finset_parabolicCylinder_cover_closedCylinder_variable
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)}
+    {C : κ → n → n → ℝ} {DB : κ → n → n → n → ℝ}
+    {HB : κ → n → n → n → n → ℝ}
+    {ηM ηD : κ → ℝ} {ηH : κ → n → n → ℝ}
+    {M N : κ → ℝ × X → Matrix n n 𝕜}
+    {D E : κ → ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : κ → ℝ × X → n → n → n → n → 𝕜}
+    (S : Finset (ℝ × X)) (timeRadius spaceRadius : ℝ × X → ℝ)
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (htime_pos : ∀ y ∈ S, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ S, 0 < spaceRadius y)
+    (hcover : Kdom ⊆ ⋃ y ∈ S, parabolicCylinder y (timeRadius y) (spaceRadius y))
+    (hMlocal : ∀ y ∈ S, ∀ r a b,
+      ParabolicC0AlphaOn α (fun z => M r z a b)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hNlocal : ∀ y ∈ S, ∀ r a b,
+      ParabolicC0AlphaOn α (fun z => N r z a b)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → (N r z).det ≠ 0)
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hM : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖M r z a b‖ ≤ C r a b)
+    (hN : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖N r z a b‖ ≤ C r a b)
+    (hD : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖D r z a b c‖ ≤
+      DB r a b c)
+    (hE : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖E r z a b c‖ ≤
+      DB r a b c)
+    (hKc : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b i j,
+      ‖Kc r z a b i j‖ ≤ HB r a b i j)
+    (hηD : ∀ r, 0 ≤ ηD r)
+    (hMdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ‖M r z - N r z‖ ≤ ηM r)
+    (hDdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c,
+      ‖D r z a b c - E r z a b c‖ ≤ ηD r)
+    (hHdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ i j,
+      ‖((fun a b => Hc r z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => Kc r z a b i j) : Matrix n n 𝕜)‖ ≤ ηH r i j) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicBoundedWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := 𝕜) δ (C r) (DB r) (HB r) (ηM r) (ηD r) (ηH r))
+          (fun z : ℝ × X =>
+            ricciDeTurckSchematicMatrix (M r z) (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (E r z) (Kc r z)) Kdom := by
+  have hMctrl : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) Kdom := by
+    intro r a b
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      S timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hMlocal y hy r a b)
+  have hNctrl : ∀ r a b, ParabolicC0AlphaOn α (fun z => N r z a b) Kdom := by
+    intro r a b
+    exact ParabolicC0AlphaOn.of_finset_parabolicCylinder_cover_closedCylinder_variable
+      S timeRadius spaceRadius hα htime_pos hspace_pos hcover
+      (fun y hy => hNlocal y hy r a b)
+  exact ricciDeTurckSchematicMatrix_bounded_sub_le_const_family_of_isCompact_det_ne_zero
+    (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
+    hKdom hα hMctrl hNctrl hdetM_ne hdetN_ne hDB hHB hM hN hD hE hKc
+    hηD hMdiff hDdiff hHdiff
 
 /-- Holder constant for the difference of two primitive-input schematic Ricci-DeTurck RHS matrix
 fields, using the sum of the two individual schematic Holder constants. -/

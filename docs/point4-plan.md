@@ -1710,8 +1710,10 @@ Ricci-DeTurck RHS entry/matrix bounded Holder estimates, primitive-input
 schematic RHS entry/matrix bounded Holder estimates, and whole matrix-valued
 closure, plus finite product-cylinder local primitive-estimate and
 primitive-difference bridges that globalize the compact schematic RHS closure and
-RHS difference closure before extracting determinant lower bounds, including
-finite-family variants with one shared lower bound, using finite-product,
+RHS difference closure before extracting determinant lower bounds, plus
+product-cylinder metric-control bridges for the function-level
+bounded-difference estimate, including finite-family variants with one shared
+lower bound, using finite-product,
 integer-scalar, reciprocal, and division closure. On the
 geometric side, the Levi-Civita local-frame Gram
 matrix layer now also turns pointwise Gram determinant nonvanishing into a
@@ -1747,8 +1749,9 @@ with the quantitative vector/vector-inverse product, bilinear,
 inverse-principal, and inverse-Christoffel handoffs now also accepting those
 same Gram-entry input forms,
 direct single-frame and finite-family product-cylinder local primitive-estimate
-and primitive-difference schematic RHS bridges now consume the matrix cover API
-before selecting the local-frame determinant lower bound,
+and primitive-difference schematic RHS bridges plus bounded-difference
+metric-control bridges now consume the matrix cover API before selecting the
+local-frame determinant lower bound,
 quantitative finite-family inverse-Gram handoffs now also keep the shared
 compact determinant lower bound and explicit inverse-entry constants under
 spatial-Hölder, unit-diameter spatial-Lipschitz, and closed ball/cylinder
