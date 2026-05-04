@@ -1154,7 +1154,21 @@ the base and perturbed flow points. A further state-tube form,
 `eventually_Df_sub_bound_on_flow_segment_of_lipschitzOnWith` and
 `ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_flow_segment_forward_Icc_of_mem_ball`,
 derives this oscillation bound from a Lipschitz estimate for `Df` on any state
-tube containing the flow chord.
+tube containing the flow chord. This has now been packaged in the more natural
+convex-state form:
+`eventually_flow_segment_subset_state_forward_Icc_of_convex_of_mem_ball`,
+`eventually_hasFDerivWithinAt_on_flow_segment_of_state`, and
+`ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball`
+derive chord membership, the base `Df` bound, and the within-segment derivative
+from state preservation in a convex tube, a state-tube `Df` bound, a state-tube
+`Df` Lipschitz estimate, and a state-tube derivative theorem for `f`. The
+matching product wrappers
+`ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball`,
+`ofProduct_flow_timeSlice_map_nhds_eq_of_Df_lipschitzOnWith_on_convex_state_forward_Ioo_of_mem_ball`,
+and
+`exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_Df_lipschitzOnWith_on_convex_state_forward_Ioo_of_mem_ball`
+feed this convex-state package directly into strict differentiability and the
+local inverse-function readouts at interior forward times.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
