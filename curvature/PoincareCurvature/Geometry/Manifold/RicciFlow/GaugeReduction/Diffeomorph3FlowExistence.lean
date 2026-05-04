@@ -26,6 +26,107 @@ open scoped Manifold ContDiff Topology
 
 namespace RicciFlow
 
+section OpenPartialHomeomorphTransport
+
+variable {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+
+/-- Transport a model-space `MapsTo` statement through source and target
+partial homeomorphism charts.  The extra source-membership hypothesis records
+that the uncharted map lands in the target chart source on the visible patch. -/
+theorem mapsTo_symm_image_of_openPartialHomeomorph_model_mapsTo
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (F : X → X) {U W : Set Y}
+    (hFsource : MapsTo F (e₀.symm '' U) e₁.source)
+    (hmaps : MapsTo (fun y : Y ↦ e₁ (F (e₀.symm y))) U W) :
+    MapsTo F (e₀.symm '' U) (e₁.symm '' W) := by
+  rintro _ ⟨y, hyU, rfl⟩
+  exact ⟨e₁ (F (e₀.symm y)), hmaps hyU,
+    e₁.left_inv (hFsource ⟨y, hyU, rfl⟩)⟩
+
+/-- Transport model-space injectivity through source and target partial
+homeomorphism charts. -/
+theorem injOn_symm_image_of_openPartialHomeomorph_model_injOn
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (F : X → X) {U : Set Y}
+    (hinj : InjOn (fun y : Y ↦ e₁ (F (e₀.symm y))) U) :
+    InjOn F (e₀.symm '' U) := by
+  rintro _ ⟨y, hyU, rfl⟩ _ ⟨z, hzU, rfl⟩ hF
+  congr 1
+  exact hinj hyU hzU (congrArg e₁ hF)
+
+/-- Transport a model-space bijection through source and target partial
+homeomorphism charts. -/
+theorem bijOn_symm_image_of_openPartialHomeomorph_model_bijOn
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (F : X → X) {U W : Set Y}
+    (hWt : W ⊆ e₁.target)
+    (hFsource : MapsTo F (e₀.symm '' U) e₁.source)
+    (hbij : BijOn (fun y : Y ↦ e₁ (F (e₀.symm y))) U W) :
+    BijOn F (e₀.symm '' U) (e₁.symm '' W) := by
+  refine ⟨
+    mapsTo_symm_image_of_openPartialHomeomorph_model_mapsTo
+      e₀ e₁ F hFsource hbij.mapsTo,
+    injOn_symm_image_of_openPartialHomeomorph_model_injOn
+      e₀ e₁ F hbij.injOn,
+    ?_⟩
+  rintro _ ⟨w, hwW, rfl⟩
+  rcases hbij.surjOn hwW with ⟨y, hyU, hyw⟩
+  refine ⟨e₀.symm y, ⟨y, hyU, rfl⟩, ?_⟩
+  exact (e₁.eq_symm_apply (hFsource ⟨y, hyU, rfl⟩) (hWt hwW)).2 hyw
+
+/-- Convert a chart-conjugated model `MapsTo`/`InjOn` patch into an open local
+manifold-side patch.  This is the pointwise transport used after shrinking a
+Picard patch to lie in the source and target chart domains. -/
+theorem exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph_model_mapsTo_injOn
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (F : X → X) {x : X} {U W : Set Y}
+    (hxsource : x ∈ e₀.source)
+    (hUopen : IsOpen U) (hUt : U ⊆ e₀.target) (hxU : e₀ x ∈ U)
+    (hWopen : IsOpen W) (hWt : W ⊆ e₁.target)
+    (hFsource : MapsTo F (e₀.symm '' U) e₁.source)
+    (hmaps : MapsTo (fun y : Y ↦ e₁ (F (e₀.symm y))) U W)
+    (hinj : InjOn (fun y : Y ↦ e₁ (F (e₀.symm y))) U) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ IsOpen Wm ∧ F x ∈ Wm ∧
+        MapsTo F Um Wm ∧ InjOn F Um := by
+  let Um : Set X := e₀.symm '' U
+  let Wm : Set X := e₁.symm '' W
+  have hxUm : x ∈ Um := ⟨e₀ x, hxU, e₀.left_inv hxsource⟩
+  have hFxWm : F x ∈ Wm := by
+    exact ⟨e₁ (F x), by simpa [e₀.left_inv hxsource] using hmaps hxU,
+      e₁.left_inv (hFsource hxUm)⟩
+  exact ⟨Um, Wm,
+    e₀.isOpen_image_symm_of_subset_target hUopen hUt,
+    hxUm,
+    e₁.isOpen_image_symm_of_subset_target hWopen hWt,
+    hFxWm,
+    mapsTo_symm_image_of_openPartialHomeomorph_model_mapsTo
+      e₀ e₁ F hFsource hmaps,
+    injOn_symm_image_of_openPartialHomeomorph_model_injOn e₀ e₁ F hinj⟩
+
+/-- Convert a chart-conjugated model `BijOn` patch into an open local
+manifold-side bijection patch. -/
+theorem exists_open_nhds_bijOn_of_openPartialHomeomorph_model_bijOn
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (F : X → X) {x : X} {U W : Set Y}
+    (hxsource : x ∈ e₀.source)
+    (hUopen : IsOpen U) (hUt : U ⊆ e₀.target) (hxU : e₀ x ∈ U)
+    (hWopen : IsOpen W) (hWt : W ⊆ e₁.target)
+    (hFsource : MapsTo F (e₀.symm '' U) e₁.source)
+    (hbij : BijOn (fun y : Y ↦ e₁ (F (e₀.symm y))) U W) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ IsOpen Wm ∧ F x ∈ Wm ∧ BijOn F Um Wm := by
+  let Um : Set X := e₀.symm '' U
+  let Wm : Set X := e₁.symm '' W
+  have hxUm : x ∈ Um := ⟨e₀ x, hxU, e₀.left_inv hxsource⟩
+  have hFxWm : F x ∈ Wm := by
+    exact ⟨e₁ (F x), by simpa [e₀.left_inv hxsource] using hbij.mapsTo hxU,
+      e₁.left_inv (hFsource hxUm)⟩
+  exact ⟨Um, Wm,
+    e₀.isOpen_image_symm_of_subset_target hUopen hUt,
+    hxUm,
+    e₁.isOpen_image_symm_of_subset_target hWopen hWt,
+    hFxWm,
+    bijOn_symm_image_of_openPartialHomeomorph_model_bijOn
+      e₀ e₁ F hWt hFsource hbij⟩
+
+end OpenPartialHomeomorphTransport
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M]

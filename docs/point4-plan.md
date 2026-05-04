@@ -1378,9 +1378,19 @@ injective source patch and image neighborhood for each interior time-slice, and
 the ball-source variants shrink that source patch to a positive metric ball
 around the base point.  An ordinary spatial derivative proof on the initial-data
 ball is therefore enough at every interior base point of that ball.
-This is a model-level infinitesimal invertibility input, but it still has to be
-lifted through charts and combined with manifold-level flow compatibility before
-producing `C³` diffeomorphism slices.
+This is a model-level infinitesimal invertibility input.  The purely topological
+chart-transport bridge is now present in `Diffeomorph3FlowExistence.lean`:
+`mapsTo_symm_image_of_openPartialHomeomorph_model_mapsTo`,
+`injOn_symm_image_of_openPartialHomeomorph_model_injOn`, and
+`bijOn_symm_image_of_openPartialHomeomorph_model_bijOn` transport model
+`MapsTo`/`InjOn`/`BijOn` facts through source and target open partial
+homeomorphism charts, while
+`exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph_model_mapsTo_injOn`
+and
+`exists_open_nhds_bijOn_of_openPartialHomeomorph_model_bijOn` return open
+manifold-side patches.  The remaining lift must still supply the chart-domain
+shrinking/source-membership hypotheses and combine these local patches with
+manifold-level flow compatibility before producing `C³` diffeomorphism slices.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,
