@@ -803,6 +803,106 @@ theorem maps3_eq_of_autonomous_Icc_boundaryless
     G₁.maps3 t = G₂.maps3 t :=
   G₁.eqOn_maps3_of_autonomous_Icc_boundaryless G₂ ht₀ hX ht
 
+/-- Common-open-subinterval form of autonomous raw gauge-flow uniqueness.  The
+two raw flows may live on different ambient time sets, as long as both contain
+the visible open Picard interval. -/
+theorem eqOn_eval_of_autonomous_Ioo_boundaryless_of_subset
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {s₁ s₂ : Set ℝ} {tmin tmax t₀ : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₁ t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₂ t₀)
+    (h₁ : Ioo tmin tmax ⊆ s₁)
+    (h₂ : Ioo tmin tmax ⊆ s₂)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (x : M) :
+    EqOn (fun t : ℝ ↦ (G₁.maps3 t) x) (fun t : ℝ ↦ (G₂.maps3 t) x)
+      (Ioo tmin tmax) := by
+  refine isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless
+    (I := I) (t₀ := t₀) ht₀ hX
+    ((G₁.autonomousIntegralCurveOn x).mono h₁)
+    ((G₂.autonomousIntegralCurveOn x).mono h₂) ?_
+  have hG₁ :
+      (G₁.maps3 t₀) x = x :=
+    SmoothSelfDiffeomorph3Family.AnchoredAt.apply
+      (I := I) (M := M) (Φ := G₁.maps3) G₁.anchored x
+  have hG₂ :
+      (G₂.maps3 t₀) x = x :=
+    SmoothSelfDiffeomorph3Family.AnchoredAt.apply
+      (I := I) (M := M) (Φ := G₂.maps3) G₂.anchored x
+  rw [hG₁, hG₂]
+
+/-- Common-open-subinterval time-slice diffeomorphism form of autonomous raw
+gauge-flow uniqueness. -/
+theorem eqOn_maps3_of_autonomous_Ioo_boundaryless_of_subset
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {s₁ s₂ : Set ℝ} {tmin tmax t₀ : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₁ t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₂ t₀)
+    (h₁ : Ioo tmin tmax ⊆ s₁)
+    (h₂ : Ioo tmin tmax ⊆ s₂)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X)) :
+    EqOn G₁.maps3 G₂.maps3 (Ioo tmin tmax) := by
+  intro t ht
+  apply DFunLike.ext
+  intro x
+  exact G₁.eqOn_eval_of_autonomous_Ioo_boundaryless_of_subset G₂
+    h₁ h₂ ht₀ hX x ht
+
+/-- Common-closed-subinterval form of autonomous raw gauge-flow uniqueness.  The
+endpoint equality is obtained by extending the common open-subinterval equality
+using the continuity of both ambient raw flows on the shared closed interval. -/
+theorem eqOn_eval_of_autonomous_Icc_boundaryless_of_subset
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {s₁ s₂ : Set ℝ} {tmin tmax t₀ : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₁ t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₂ t₀)
+    (h₁ : Icc tmin tmax ⊆ s₁)
+    (h₂ : Icc tmin tmax ⊆ s₂)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (x : M) :
+    EqOn (fun t : ℝ ↦ (G₁.maps3 t) x) (fun t : ℝ ↦ (G₂.maps3 t) x)
+      (Icc tmin tmax) := by
+  have hIoo :
+      EqOn (fun t : ℝ ↦ (G₁.maps3 t) x) (fun t : ℝ ↦ (G₂.maps3 t) x)
+        (Ioo tmin tmax) :=
+    G₁.eqOn_eval_of_autonomous_Ioo_boundaryless_of_subset G₂
+      (fun _t ht ↦ h₁ (Ioo_subset_Icc_self ht))
+      (fun _t ht ↦ h₂ (Ioo_subset_Icc_self ht))
+      ht₀ hX x
+  have hne : tmin ≠ tmax := ne_of_lt (lt_trans ht₀.1 ht₀.2)
+  refine Set.EqOn.of_subset_closure hIoo
+    ((G₁.continuousOn_eval x).mono h₁)
+    ((G₂.continuousOn_eval x).mono h₂)
+    (fun _t ht ↦ Ioo_subset_Icc_self ht) ?_
+  intro t ht
+  rw [closure_Ioo hne]
+  exact ht
+
+/-- Common-closed-subinterval time-slice diffeomorphism form of autonomous raw
+gauge-flow uniqueness. -/
+theorem eqOn_maps3_of_autonomous_Icc_boundaryless_of_subset
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {s₁ s₂ : Set ℝ} {tmin tmax t₀ : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₁ t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₂ t₀)
+    (h₁ : Icc tmin tmax ⊆ s₁)
+    (h₂ : Icc tmin tmax ⊆ s₂)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X)) :
+    EqOn G₁.maps3 G₂.maps3 (Icc tmin tmax) := by
+  intro t ht
+  apply DFunLike.ext
+  intro x
+  exact G₁.eqOn_eval_of_autonomous_Icc_boundaryless_of_subset G₂
+    h₁ h₂ ht₀ hX x ht
+
 /-- Reinterpret a raw `C³` gauge-flow witness for an equal vector field along the flow image. -/
 def congr_vectorField
     {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
