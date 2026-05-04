@@ -3564,6 +3564,161 @@ theorem localFrameGramMatrix_inv_sub_entrywise_of_timeSpace_isCompact
       (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
     (N := N) hK hα hG hN hGdiff hdetG_ne hdetN_ne
 
+/-- Finite-family compact local-frame bridge for parabolic `C^{0,α}` control of inverse Gram
+differences, comparing each geometric local-frame Gram matrix with an arbitrary comparison matrix
+input.  One determinant lower bound is shared by every Gram and comparison matrix in the family. -/
+theorem localFrameGramMatrix_inv_sub_with_family_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {C GH : ρ → ι → ι → ℝ} {ηG : ρ → ℝ}
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ r i j, 0 ≤ C r i j) (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hG : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (GH r i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K)
+    (hN : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (GH r i j) α
+        (fun z : ℝ × M => N r z i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0)
+    (hGdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) - N r z‖ ≤
+        ηG r) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (matrixInvSubBoundConst (𝕜 := ℝ) δ (C r) (ηG r))
+          (matrixInvSubHolderConst (𝕜 := ℝ) δ (C r) (GH r))
+          α
+          (fun z : ℝ × M =>
+            ((show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+              Matrix ι ι ℝ) - (N r z)⁻¹) K := by
+  have hdetG_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det ≠ 0 := by
+    intro r z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  exact matrix_inv_sub_with_family_of_isCompact_det_ne_zero
+    (X := M) (ι := ρ) (n := ι) (𝕜 := ℝ) (K := K)
+    (M := fun (r : ρ) (z : ℝ × M) =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (N := N) hK hα hC_nonneg hGH hG hN hdetG_ne hdetN_ne hGdiff
+
+/-- Finite-family entrywise-difference compact local-frame bridge for inverse Gram matrices. -/
+theorem localFrameGramMatrix_inv_sub_with_entrywise_family_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {C GH Gd GHd : ρ → ι → ι → ℝ}
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    (hC_nonneg : ∀ r i j, 0 ≤ C r i j) (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hGd : ∀ r i j, 0 ≤ Gd r i j) (hGHd : ∀ r i j, 0 ≤ GHd r i j)
+    (hG : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (GH r i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K)
+    (hN : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (GH r i j) α
+        (fun z : ℝ × M => N r z i j) K)
+    (hGdiff : ∀ r i j,
+      ParabolicC0AlphaWith (Gd r i j) (GHd r i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j -
+            N r z i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (matrixInvEntrywiseSubBoundConst (𝕜 := ℝ) δ (C r) (Gd r))
+          (matrixInvEntrywiseSubHolderConst (𝕜 := ℝ) δ (C r) (GH r) (Gd r) (GHd r))
+          α
+          (fun z : ℝ × M =>
+            ((show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+              Matrix ι ι ℝ) - (N r z)⁻¹) K := by
+  have hdetG_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det ≠ 0 := by
+    intro r z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  exact matrix_inv_sub_with_entrywise_family_of_isCompact_det_ne_zero
+    (X := M) (ι := ρ) (n := ι) (𝕜 := ℝ) (K := K)
+    (M := fun (r : ρ) (z : ℝ × M) =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (N := N) hK hα hC_nonneg hGH hGd hGHd hG hN hGdiff hdetG_ne hdetN_ne
+
+/-- Finite-family compact local-frame bridge for existential parabolic `C^{0,α}` control of
+inverse Gram matrix differences from entrywise difference controls. -/
+theorem localFrameGramMatrix_inv_sub_entrywise_family_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    (hG : ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K)
+    (hN : ∀ r i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N r z i j) K)
+    (hGdiff : ∀ r i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j -
+            N r z i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × M =>
+            ((show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)⁻¹ :
+              Matrix ι ι ℝ) - (N r z)⁻¹) K := by
+  have hdetG_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det ≠ 0 := by
+    intro r z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  exact matrix_inv_sub_entrywise_family_of_isCompact_det_ne_zero
+    (X := M) (ι := ρ) (n := ι) (𝕜 := ℝ) (K := K)
+    (M := fun (r : ρ) (z : ℝ × M) =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+    (N := N) hK hα hG hN hGdiff hdetG_ne hdetN_ne
+
 /-- Spatial-Hölder Gram-entry variant of
 `localFrameGramMatrix_inv_sub_with_entrywise_of_timeSpace_isCompact`. -/
 theorem localFrameGramMatrix_inv_sub_with_entrywise_of_spatial_holder_of_timeSpace_isCompact
