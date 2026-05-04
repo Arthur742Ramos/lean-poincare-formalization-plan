@@ -1145,7 +1145,9 @@ inverse-Gram vector/vector-inverse product, bilinear, inverse-principal, and
 inverse-Christoffel bridges sharing
 that same lower bound, with the quantitative vector/vector-inverse product,
 bilinear, inverse-principal, and inverse-Christoffel bridges now also accepting
-those same Gram-entry input forms,
+those same Gram-entry input forms, direct single-frame and finite-family
+product-cylinder local primitive-estimate schematic RHS bridges consuming the
+matrix cover API before selecting the local-frame determinant lower bound,
 finite-family inverse-Gram difference bridges against comparison matrix families
 with spatial-Hölder, unit-diameter spatial-Lipschitz, and closed ball/cylinder
 spatial-Lipschitz Gram-entry input forms while keeping one determinant lower
