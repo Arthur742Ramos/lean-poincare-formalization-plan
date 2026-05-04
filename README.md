@@ -560,7 +560,8 @@ packages the canonical stationary local solution attached to
   matrix-valued closure from entrywise control, plus finite product-cylinder
   local primitive-estimate and primitive-difference bridges, and compact
   point-local product-cylinder variants for the same schematic RHS and RHS
-  difference closures, before extracting determinant lower bounds, plus
+  difference closures, including direct existential-radius APIs before
+  extracting determinant lower bounds, plus
   product-cylinder metric-control bridges for
   the function-level bounded-difference estimate, including finite-family
   variants with one shared lower bound.  The companion
@@ -590,8 +591,9 @@ packages the canonical stationary local solution attached to
   vector/vector-inverse product, inverse-Gram bilinear, inverse-principal, and
   inverse-Gram Christoffel, and schematic RHS handoffs now also accepting those
   same Gram-entry input forms, direct single-frame and finite-family compact
-  point-local product-cylinder primitive-estimate and primitive-difference schematic RHS
-  bridges, single-frame and finite-family finite-cover product-cylinder
+  point-local product-cylinder primitive-estimate and primitive-difference
+  schematic RHS bridges with both explicit-radius and existential-radius entry
+  points, single-frame and finite-family finite-cover product-cylinder
   schematic RHS bridges, plus bounded-difference metric-control bridges consuming the
   matrix cover API before selecting the local-frame determinant lower bound, quantitative
   finite-family inverse-Gram

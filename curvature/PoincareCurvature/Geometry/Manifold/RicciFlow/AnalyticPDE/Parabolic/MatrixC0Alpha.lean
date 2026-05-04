@@ -10349,6 +10349,103 @@ theorem ricciDeTurckSchematicMatrix_sub_entrywise_of_isCompact_of_local_closedCy
     (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
     hKdom hα hM hN hMdiff hD hE hDdiff hKc hHdiff hdetM_ne hdetN_ne
 
+/-- Existential point-local product-cylinder primitive-difference estimates globalize the
+compact-domain schematic Ricci-DeTurck RHS difference closure.  This form lets each compact point
+provide its own local cylinder radii. -/
+theorem ricciDeTurckSchematicMatrix_sub_entrywise_of_isCompact_of_exists_local_closedCylinder
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (hlocal : ∀ y ∈ Kdom, ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      (∀ a b,
+        ParabolicC0AlphaOn α (fun z => M z a b)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ a b,
+        ParabolicC0AlphaOn α (fun z => N z a b)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ a b,
+        ParabolicC0AlphaOn α (fun z => M z a b - N z a b)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ a b c,
+        ParabolicC0AlphaOn α (fun z => D z a b c)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ a b c,
+        ParabolicC0AlphaOn α (fun z => E z a b c)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ a b c,
+        ParabolicC0AlphaOn α (fun z => D z a b c - E z a b c)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ a b i j,
+        ParabolicC0AlphaOn α (fun z => Kc z a b i j)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ a b i j,
+        ParabolicC0AlphaOn α (fun z => Hc z a b i j - Kc z a b i j)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))))
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (N z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) Kdom := by
+  have hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) Kdom := by
+    intro a b
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hKdom hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.1 a b⟩)
+  have hN : ∀ a b, ParabolicC0AlphaOn α (fun z => N z a b) Kdom := by
+    intro a b
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hKdom hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.1 a b⟩)
+  have hMdiff : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b - N z a b) Kdom := by
+    intro a b
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hKdom hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.1 a b⟩)
+  have hD : ∀ a b c, ParabolicC0AlphaOn α (fun z => D z a b c) Kdom := by
+    intro a b c
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hKdom hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.2.1 a b c⟩)
+  have hE : ∀ a b c, ParabolicC0AlphaOn α (fun z => E z a b c) Kdom := by
+    intro a b c
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hKdom hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.2.2.1 a b c⟩)
+  have hDdiff : ∀ a b c,
+      ParabolicC0AlphaOn α (fun z => D z a b c - E z a b c) Kdom := by
+    intro a b c
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hKdom hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.2.2.2.1 a b c⟩)
+  have hKc : ∀ a b i j, ParabolicC0AlphaOn α (fun z => Kc z a b i j) Kdom := by
+    intro a b i j
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hKdom hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.2.2.2.2.1 a b i j⟩)
+  have hHdiff : ∀ a b i j,
+      ParabolicC0AlphaOn α (fun z => Hc z a b i j - Kc z a b i j) Kdom := by
+    intro a b i j
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hKdom hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace,
+          hdata.2.2.2.2.2.2.2 a b i j⟩)
+  exact ricciDeTurckSchematicMatrix_sub_entrywise_of_isCompact_det_ne_zero
+    (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
+    hKdom hα hM hN hMdiff hD hE hDdiff hKc hHdiff hdetM_ne hdetN_ne
+
 /-- The schematic Ricci-DeTurck coordinate entry is pointwise Lipschitz in the primitive metric,
 first-derivative, and second-derivative arrays, on entrywise bounded matrices with a common
 determinant lower bound. -/
@@ -11486,6 +11583,57 @@ theorem ricciDeTurck_schematic_of_isCompact_of_local_closedCylinder_variable
   exact ricciDeTurck_schematic_of_isCompact_det_ne_zero
     (M := M) (D := D) (H := H) hK hα hM hD hH hdet_ne
 
+/-- Existential point-local product-cylinder primitive estimates globalize the compact-domain
+schematic Ricci-DeTurck RHS closure.  This form lets each compact point provide its own local
+cylinder radii. -/
+theorem ricciDeTurck_schematic_of_isCompact_of_exists_local_closedCylinder
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)} {M : ℝ × X → Matrix n n 𝕜}
+    {D : ℝ × X → n → n → n → 𝕜} {H : ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hlocal : ∀ y ∈ K, ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      (∀ a b,
+        ParabolicC0AlphaOn α (fun z => M z a b)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ a b c,
+        ParabolicC0AlphaOn α (fun z => D z a b c)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ a b i j,
+        ParabolicC0AlphaOn α (fun z => H z a b i j)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))))
+    (hdet_ne : ∀ ⦃z : ℝ × X⦄, z ∈ K → (M z).det ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          let Γ : n → n → n → 𝕜 := fun a b c =>
+            (2 : 𝕜)⁻¹ *
+              ∑ l : n, ((M z)⁻¹ : Matrix n n 𝕜) a l *
+                (D z b c l + D z c b l - D z l b c)
+          (∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j) +
+            ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+              (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) :
+          Matrix n n 𝕜)) K := by
+  have hM : ∀ a b, ParabolicC0AlphaOn α (fun z => M z a b) K := by
+    intro a b
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.1 a b⟩)
+  have hD : ∀ a b c, ParabolicC0AlphaOn α (fun z => D z a b c) K := by
+    intro a b c
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.1 a b c⟩)
+  have hH : ∀ a b i j, ParabolicC0AlphaOn α (fun z => H z a b i j) K := by
+    intro a b i j
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2 a b i j⟩)
+  exact ricciDeTurck_schematic_of_isCompact_det_ne_zero
+    (M := M) (D := D) (H := H) hK hα hM hD hH hdet_ne
+
 /-- Compact-domain finite-family schematic Ricci-DeTurck RHS closure from entrywise primitive
 controls and pointwise nonvanishing metric determinants, with one determinant lower bound shared
 by the family. -/
@@ -11632,6 +11780,63 @@ theorem ricciDeTurck_schematic_family_of_isCompact_of_local_closedCylinder_varia
     exact ParabolicC0AlphaOn.of_isCompact_of_local_closedCylinder_variable
       hK hα timeRadius spaceRadius htime_pos hspace_pos
       (fun y hy => hHlocal y hy r a b i j)
+  exact ricciDeTurck_schematic_family_of_isCompact_det_ne_zero
+    (M := M) (D := D) (H := H) hK hα hM hD hH hdet_ne
+
+/-- Existential point-local product-cylinder primitive estimates globalize a finite family of
+compact-domain schematic Ricci-DeTurck RHS closures, with one determinant lower bound shared by the
+family. -/
+theorem ricciDeTurck_schematic_family_of_isCompact_of_exists_local_closedCylinder
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {M : κ → ℝ × X → Matrix n n 𝕜}
+    {D : κ → ℝ × X → n → n → n → 𝕜}
+    {H : κ → ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hlocal : ∀ y ∈ K, ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      (∀ r a b,
+        ParabolicC0AlphaOn α (fun z => M r z a b)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ r a b c,
+        ParabolicC0AlphaOn α (fun z => D r z a b c)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ r a b i j,
+        ParabolicC0AlphaOn α (fun z => H r z a b i j)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))))
+    (hdet_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × X =>
+            (fun i j =>
+              let Γ : n → n → n → 𝕜 := fun a b c =>
+                (2 : 𝕜)⁻¹ *
+                  ∑ l : n, ((M r z)⁻¹ : Matrix n n 𝕜) a l *
+                    (D r z b c l + D r z c b l - D r z l b c)
+              (∑ a : n, ∑ b : n, ((M r z)⁻¹ : Matrix n n 𝕜) a b *
+                  H r z a b i j) +
+                ((∑ a : n, ∑ b : n, Γ a i j * Γ b a b) -
+                  (∑ a : n, ∑ b : n, Γ a i b * Γ b a j)) :
+              Matrix n n 𝕜)) K := by
+  have hM : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K := by
+    intro r a b
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.1 r a b⟩)
+  have hD : ∀ r a b c, ParabolicC0AlphaOn α (fun z => D r z a b c) K := by
+    intro r a b c
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.1 r a b c⟩)
+  have hH : ∀ r a b i j, ParabolicC0AlphaOn α (fun z => H r z a b i j) K := by
+    intro r a b i j
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2 r a b i j⟩)
   exact ricciDeTurck_schematic_family_of_isCompact_det_ne_zero
     (M := M) (D := D) (H := H) hK hα hM hD hH hdet_ne
 
@@ -12011,6 +12216,106 @@ theorem ricciDeTurckSchematicMatrix_sub_entrywise_family_of_isCompact_of_local_c
     exact ParabolicC0AlphaOn.of_isCompact_of_local_closedCylinder_variable
       hK hα timeRadius spaceRadius htime_pos hspace_pos
       (fun y hy => hHdiffLocal y hy r a b i j)
+  exact ricciDeTurckSchematicMatrix_sub_entrywise_family_of_isCompact_det_ne_zero
+    (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
+    hK hα hM hN hMdiff hD hE hDdiff hKc hHdiff hdetM_ne hdetN_ne
+
+/-- Existential point-local product-cylinder primitive-difference estimates globalize
+finite-family compact schematic Ricci-DeTurck RHS difference closure, with one determinant lower
+bound shared by both metric families. -/
+theorem ricciDeTurckSchematicMatrix_sub_entrywise_family_of_isCompact_of_exists_local_closedCylinder
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {M N : κ → ℝ × X → Matrix n n 𝕜}
+    {D E : κ → ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : κ → ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hlocal : ∀ y ∈ K, ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      (∀ r a b,
+        ParabolicC0AlphaOn α (fun z => M r z a b)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ r a b,
+        ParabolicC0AlphaOn α (fun z => N r z a b)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ r a b,
+        ParabolicC0AlphaOn α (fun z => M r z a b - N r z a b)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ r a b c,
+        ParabolicC0AlphaOn α (fun z => D r z a b c)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ r a b c,
+        ParabolicC0AlphaOn α (fun z => E r z a b c)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ r a b c,
+        ParabolicC0AlphaOn α (fun z => D r z a b c - E r z a b c)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ r a b i j,
+        ParabolicC0AlphaOn α (fun z => Kc r z a b i j)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ r a b i j,
+        ParabolicC0AlphaOn α (fun z => Hc r z a b i j - Kc r z a b i j)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))))
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (N r z).det ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × X =>
+            ricciDeTurckSchematicMatrix (M r z) (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (E r z) (Kc r z)) K := by
+  have hM : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b) K := by
+    intro r a b
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.1 r a b⟩)
+  have hN : ∀ r a b, ParabolicC0AlphaOn α (fun z => N r z a b) K := by
+    intro r a b
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.1 r a b⟩)
+  have hMdiff : ∀ r a b, ParabolicC0AlphaOn α (fun z => M r z a b - N r z a b) K := by
+    intro r a b
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.1 r a b⟩)
+  have hD : ∀ r a b c, ParabolicC0AlphaOn α (fun z => D r z a b c) K := by
+    intro r a b c
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.2.1 r a b c⟩)
+  have hE : ∀ r a b c, ParabolicC0AlphaOn α (fun z => E r z a b c) K := by
+    intro r a b c
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.2.2.1 r a b c⟩)
+  have hDdiff : ∀ r a b c,
+      ParabolicC0AlphaOn α (fun z => D r z a b c - E r z a b c) K := by
+    intro r a b c
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.2.2.2.1 r a b c⟩)
+  have hKc : ∀ r a b i j, ParabolicC0AlphaOn α (fun z => Kc r z a b i j) K := by
+    intro r a b i j
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace, hdata.2.2.2.2.2.2.1 r a b i j⟩)
+  have hHdiff : ∀ r a b i j,
+      ParabolicC0AlphaOn α (fun z => Hc r z a b i j - Kc r z a b i j) K := by
+    intro r a b i j
+    exact ParabolicC0AlphaOn.of_isCompact_of_exists_local_closedCylinder hK hα
+      (fun y hy => by
+        rcases hlocal y hy with ⟨timeRadius, htime, spaceRadius, hspace, hdata⟩
+        exact ⟨timeRadius, htime, spaceRadius, hspace,
+          hdata.2.2.2.2.2.2.2 r a b i j⟩)
   exact ricciDeTurckSchematicMatrix_sub_entrywise_family_of_isCompact_det_ne_zero
     (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
     hK hα hM hN hMdiff hD hE hDdiff hKc hHdiff hdetM_ne hdetN_ne
