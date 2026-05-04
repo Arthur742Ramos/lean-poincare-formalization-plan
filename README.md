@@ -426,7 +426,8 @@ packages the canonical stationary local solution attached to
   matching local-to-global `C^{0,α}` patching theorems, and finite-cover
   `C^{0,α}` patching with automatic local-constant selection, variable-radius
   finite-cover Holder and `C^{0,α}` patching for both ball and product-cylinder
-  covers plus compact point-dependent- and existential-radius corollaries,
+  covers, including fixed-constant variants that preserve the sup constant and
+  compact point-dependent- and existential-radius Holder-constant readouts,
   finite-sum
   closure for explicit Holder, bounded, and `C^{0,α}` controls,
   finite-sum closure for existential Holder and `C^{0,α}` controls,
