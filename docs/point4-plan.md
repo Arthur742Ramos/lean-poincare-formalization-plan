@@ -1142,7 +1142,12 @@ point as the single-interval route:
 `flow_timeSlice_map_nhds_eq_common_Ioo_of_eventually_hasFDerivAt` and
 `exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_eventually_hasFDerivAt`
 derive the strict derivative input from ordinary nearby spatial derivatives
-and continuity of `y ↦ α.tangent y t`.
+and continuity of `y ↦ α.tangent y t`. Product Picard flows now lift that
+C¹-style common-interval criterion directly from ordinary spatial
+differentiability on the initial-data ball through
+`ofProduct_flow_timeSlice_map_nhds_eq_common_Ioo_of_hasFDerivAt_on_initialBall`
+and
+`exists_ofProduct_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasFDerivAt_on_initialBall`.
 Product Picard convex-state hypotheses, the state-preserving closed-ball
 estimate specialization, and the componentwise closed-ball continuity estimate
 packages now feed those common-`Ioo` time-slice neighborhood-map and local
