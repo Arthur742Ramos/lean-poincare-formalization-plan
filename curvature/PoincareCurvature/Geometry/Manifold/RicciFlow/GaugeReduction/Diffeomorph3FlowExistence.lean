@@ -30,6 +30,37 @@ section OpenPartialHomeomorphTransport
 
 variable {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
 
+/-- A function is continuous on a domain if every point of the domain has an
+open neighborhood on which it agrees with some continuous local readout.  This
+is the topological continuity-gluing bridge used after chartwise Picard
+time-slices have been identified with a candidate manifold map. -/
+theorem continuousOn_of_locally_eqOn_open_continuousOn
+    {F : X → Y} {s : Set X}
+    (h : ∀ x ∈ s, ∃ U : Set X, ∃ G : X → Y,
+      IsOpen U ∧ x ∈ U ∧ ContinuousOn G U ∧ EqOn F G (s ∩ U)) :
+    ContinuousOn F s := by
+  refine continuousOn_of_locally_continuousOn ?_
+  intro x hx
+  rcases h x hx with ⟨U, G, hUopen, hxU, hG, hEq⟩
+  refine ⟨U, hUopen, hxU, ?_⟩
+  exact (hG.mono inter_subset_right).congr hEq
+
+/-- Indexed open-cover version of
+`continuousOn_of_locally_eqOn_open_continuousOn`.  If local readouts are
+continuous on an open cover and agree with a candidate map on the visible
+domain, then the candidate is continuous on that domain. -/
+theorem continuousOn_of_iUnion_open_eqOn_continuousOn
+    {ι : Type*} {F : X → Y} {G : ι → X → Y}
+    {s : Set X} {U : ι → Set X}
+    (hcover : s ⊆ ⋃ i, U i)
+    (hUopen : ∀ i, IsOpen (U i))
+    (hcont : ∀ i, ContinuousOn (G i) (U i))
+    (heq : ∀ i, EqOn F (G i) (s ∩ U i)) :
+    ContinuousOn F s :=
+  continuousOn_of_locally_eqOn_open_continuousOn fun x hx ↦ by
+    rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxU⟩
+    exact ⟨U i, G i, hUopen i, hxU, hcont i, heq i⟩
+
 /-- Shrink an `OpenPartialHomeomorph` local inverse patch to prescribed open
 source and target constraints, retaining a bijective open patch for the
 prescribed forward map. -/

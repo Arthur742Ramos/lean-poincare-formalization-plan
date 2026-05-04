@@ -1449,6 +1449,14 @@ and its C¹-style `..._of_eventually_hasFDerivAt` variant: once the target patch
 is constrained inside a common chart source and common-chart coordinates agree
 on the visible source set, the returned local patch carries the resulting
 manifold-side `EqOn` together with `ContinuousOn` and `BijOn`.  The
+topological existence layer also has continuity-gluing bridges for the next
+step after such compatible patches are chosen:
+`continuousOn_of_locally_eqOn_open_continuousOn` turns pointwise local equality
+to continuous open readouts into continuity of the candidate map on the domain,
+and `continuousOn_of_iUnion_open_eqOn_continuousOn` gives the corresponding
+indexed open-cover form.  These let a finite or locally indexed chart cover
+feed continuity of a glued time-slice without reopening the pointwise
+neighborhood argument.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
