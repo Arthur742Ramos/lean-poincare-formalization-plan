@@ -459,6 +459,11 @@ that no longer asks callers to supply a separate `A`-state norm bound. The
 identity-centered case is simplified further to the explicit bound
 `‖A‖₊ ≤ 1 + a` and the corresponding
 `ofProductComponentClosedBallContinuityEstimates_of_identityBall` constructor.
+The component-continuity layer now also has state-preserving selected-flow
+constructors, including operator-ball and identity-ball forms, and direct
+forward-time local-inverse wrappers from component closed-ball estimates plus
+the explicit `HasFDerivWithinAt` hypothesis identifying `Df` as the spatial
+derivative of `f`.
 The raw gauge-flow layer now also extracts the model-coordinate derivative of
 the base flow curve itself: `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`
 turns the manifold derivative of `τ ↦ Φ_τ(x)` into a `HasDerivAt` statement for
