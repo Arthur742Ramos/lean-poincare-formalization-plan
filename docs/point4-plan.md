@@ -1512,7 +1512,12 @@ returns the same selected-shrink clipped readouts together with the conditional
 full-common-interval metric and connection readouts.  The stronger
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_localMetricConnectionReadout`
 uses the same selected shrink for the terminal-fit theorem-package handoff and
-for both no-terminal-fit local uniqueness readouts, while
+for both no-terminal-fit local uniqueness readouts.  Its restricted-terminal
+companion
+`RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_localRestrictedMetricConnectionReadout`
+uses the same selected shrink for the terminal-fit theorem-package handoff and
+for any prescribed shorter-terminal metric/connection readout needed by
+continuation arguments, while
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_localMetricConnectionReadout_with_fullCommon`
 adds the conditional full-common metric and connection readouts to that same
 single-shrink package.
