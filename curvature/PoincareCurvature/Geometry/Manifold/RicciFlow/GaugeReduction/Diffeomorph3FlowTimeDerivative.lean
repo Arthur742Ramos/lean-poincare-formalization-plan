@@ -21718,6 +21718,281 @@ theorem hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowMetricCoordinateFie
   · simpa [ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductContinuousLocalFlowSolution]
       using hvalue
 
+/-- Product Picard-Lindelöf state version of
+`hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowMetricCoordinateFieldWithinState`.
+
+Callers with product Picard data can state base-flow and tangent-map agreement
+directly against the Picard continuous-flow state. -/
+theorem hasTimeDerivativeOn_Ioo_of_productPicardLindelofMetricCoordinateFieldWithinState
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {a r R L K : ℝ≥0}
+    (hf : IsPicardLindelof
+      (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+      (x₀, (1 : E →L[ℝ] E)) a R L K)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : E →L[ℝ] E)) ∈ closedBall (x₀, (1 : E →L[ℝ] E)) R)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata :
+      let α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+          (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+          (x₀, (1 : E →L[ℝ] E)) R :=
+        ModelGaugeFlowODE.IsPicardLindelof.toContinuousLocalFlowSolution hf
+      ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+            𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ (α.flow ((xE, (1 : E →L[ℝ] E)), τ)).1) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ (α.flow ((xE, (1 : E →L[ℝ] E)), τ)).2) ∧
+        ∃ Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ),
+          HasFDerivAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield' (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1) ∧
+          Bfield' (1, f t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+              ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                ((Df t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                  ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                  ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowMetricCoordinateFieldWithinState
+    (α := ModelGaugeFlowODE.IsPicardLindelof.toContinuousLocalFlowSolution hf) hball hdata
+
+/-- Radius-specialized product Picard-Lindelöf state version of
+`hasTimeDerivativeOn_Ioo_of_productPicardLindelofMetricCoordinateFieldWithinState`. -/
+theorem hasTimeDerivativeOn_Ioo_of_productPicardLindelofMetricCoordinateFieldWithinState_of_le_radius
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {a r R L K : ℝ≥0}
+    (hf : IsPicardLindelof
+      (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+      (x₀, (1 : E →L[ℝ] E)) a R L K)
+    (hr : r ≤ R)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata :
+      let α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+          (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+          (x₀, (1 : E →L[ℝ] E)) R :=
+        ModelGaugeFlowODE.IsPicardLindelof.toContinuousLocalFlowSolution hf
+      ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+            𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ (α.flow ((xE, (1 : E →L[ℝ] E)), τ)).1) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ (α.flow ((xE, (1 : E →L[ℝ] E)), τ)).2) ∧
+        ∃ Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ),
+          HasFDerivAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield' (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1) ∧
+          Bfield' (1, f t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+              ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                ((Df t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                  ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                  ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_productPicardLindelofMetricCoordinateFieldWithinState
+    (hf := hf) (by
+      intro x hx
+      rw [mem_closedBall] at hx ⊢
+      calc
+        dist (x, (1 : E →L[ℝ] E)) (x₀, (1 : E →L[ℝ] E))
+            = max (dist x x₀) (dist (1 : E →L[ℝ] E) 1) := by
+              rw [Prod.dist_eq]
+        _ = dist x x₀ := by simp
+        _ ≤ (R : ℝ) := hx.trans (by exact_mod_cast hr)) hdata
+
+/-- Product Picard-Lindelöf state version of
+`hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowMetricCoordinateFieldWithinOpenState`. -/
+theorem hasTimeDerivativeOn_Ioo_of_productPicardLindelofMetricCoordinateFieldWithinOpenState
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {a r R L K : ℝ≥0}
+    (hf : IsPicardLindelof
+      (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+      (x₀, (1 : E →L[ℝ] E)) a R L K)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : E →L[ℝ] E)) ∈ closedBall (x₀, (1 : E →L[ℝ] E)) R)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata :
+      let α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+          (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+          (x₀, (1 : E →L[ℝ] E)) R :=
+        ModelGaugeFlowODE.IsPicardLindelof.toContinuousLocalFlowSolution hf
+      ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+            𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ (α.flow ((xE, (1 : E →L[ℝ] E)), τ)).1) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ (α.flow ((xE, (1 : E →L[ℝ] E)), τ)).2) ∧
+        ∃ (domain : Set (ℝ × E))
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)),
+          HasFDerivWithinAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield' domain (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1) ∧
+          IsOpen domain ∧
+          (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1) ∈ domain ∧
+          Bfield' (1, f t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+              ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                ((Df t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                  ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                  ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowMetricCoordinateFieldWithinOpenState
+    (α := ModelGaugeFlowODE.IsPicardLindelof.toContinuousLocalFlowSolution hf) hball hdata
+
+/-- Radius-specialized product Picard-Lindelöf state version of
+`hasTimeDerivativeOn_Ioo_of_productPicardLindelofMetricCoordinateFieldWithinOpenState`. -/
+theorem hasTimeDerivativeOn_Ioo_of_productPicardLindelofMetricCoordinateFieldWithinOpenState_of_le_radius
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {a r R L K : ℝ≥0}
+    (hf : IsPicardLindelof
+      (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+      (x₀, (1 : E →L[ℝ] E)) a R L K)
+    (hr : r ≤ R)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata :
+      let α : ModelGaugeFlowODE.ContinuousLocalFlowSolution
+          (ModelGaugeFlowODE.variationalVectorField f Df) τ₀
+          (x₀, (1 : E →L[ℝ] E)) R :=
+        ModelGaugeFlowODE.IsPicardLindelof.toContinuousLocalFlowSolution hf
+      ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+            𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ (α.flow ((xE, (1 : E →L[ℝ] E)), τ)).1) ∧
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝[Icc tmin tmax] t]
+          (fun τ : ℝ ↦ (α.flow ((xE, (1 : E →L[ℝ] E)), τ)).2) ∧
+        ∃ (domain : Set (ℝ × E))
+          (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)),
+          HasFDerivWithinAt
+            (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) g ((G.maps3 t) x))
+            Bfield' domain (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1) ∧
+          IsOpen domain ∧
+          (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1) ∈ domain ∧
+          Bfield' (1, f t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+              ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                ((Df t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                  ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g ((G.maps3 t) x)
+                (t, (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow ((xE, (1 : E →L[ℝ] E)), t)).1)
+                  ((α.flow ((xE, (1 : E →L[ℝ] E)), t)).2
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_productPicardLindelofMetricCoordinateFieldWithinOpenState
+    (hf := hf) (by
+      intro x hx
+      rw [mem_closedBall] at hx ⊢
+      calc
+        dist (x, (1 : E →L[ℝ] E)) (x₀, (1 : E →L[ℝ] E))
+            = max (dist x x₀) (dist (1 : E →L[ℝ] E) 1) := by
+              rw [Prod.dist_eq]
+        _ = dist x x₀ := by simp
+        _ ≤ (R : ℝ) := hx.trans (by exact_mod_cast hr)) hdata
+
 /-- Continuous product Picard-flow version of the closed-interval
 geometric-slot metric-coordinate route. -/
 theorem hasTimeDerivativeOn_Ioo_of_productContinuousLocalFlowMetricCoordinateFieldWithin_geometricValue

@@ -259,8 +259,9 @@ packages the canonical stationary local solution attached to
   time-derivative theorem-family endpoints now consume only endpoint
   time-derivative data before the gauge-flow conversion; the closed-Picard
   metric-coordinate gauge-pullback route now also consumes product
-  Picard-Lindelof hypotheses directly, including open-domain and
-  radius-specialized endpoint forms, and its time-difference component data
+  Picard-Lindelof hypotheses directly, including ordinary/open product-state
+  handoffs and open-domain/radius-specialized endpoint forms, and its
+  time-difference component data
   now localizes monotonically under raw gauge-flow time-set restriction, with
   closed-Picard ordinary time-difference tensor wrappers that accept full-`Icc`
   data directly; product-domain vector-slot scalar readouts now have

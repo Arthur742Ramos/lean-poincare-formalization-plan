@@ -1178,10 +1178,11 @@ including closed-Picard within-filter and geometric pushed-vector-slot variants,
 converting the product flow internally to the variational package.
 The closed-Picard metric-coordinate field routes now also have direct
 product-Picard-Lindelöf wrappers, including the open-product-domain
-`HasFDerivWithinAt` endpoint and the common radius-specialized `r ≤ R` form, so
-chart-local product Picard hypotheses no longer need a caller-side conversion to
-a continuous product flow or separate variational package before proving the
-gauge-pulled metric time derivative.
+`HasFDerivWithinAt` endpoint, ordinary/open product-state handoffs, and the
+common radius-specialized `r ≤ R` form, so chart-local product Picard
+hypotheses no longer need a caller-side conversion to a continuous product flow
+or separate variational package before proving the gauge-pulled metric time
+derivative.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction

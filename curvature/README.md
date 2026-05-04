@@ -339,6 +339,8 @@ now packages the matching intrinsic boundary
         closed-Picard metric-coordinate-field routes now accept direct
         product-state base/tangent agreement in ordinary, open-domain,
         geometric pushed-vector-slot, and finite-cover/readout-field forms,
+        with product Picard-Lindelof state wrappers for the ordinary and
+        open-domain handoffs,
         and the raw closed-Picard API exposes matching named package bridges
         and `HasTimeDerivativeOn` wrappers. An endpoint readout
         bridge now transfers the closed-interval geometric-slot variational theorem
