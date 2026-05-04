@@ -4459,6 +4459,32 @@ theorem flow_timeSlice_hasFDerivAt_of_hasFDerivAt_spaceTime
   have hslice := hF.comp x (hasFDerivAt_prodMk_left (𝕜 := ℝ) x t)
   simpa [hspatial] using hslice
 
+/-- Endpoint first-order remainder criterion for a fixed time slice.  If the
+remainder after subtracting the variational tangent map is bounded by
+`η(h) * ‖h‖` and `η(h) → 0`, then the time slice has Fréchet derivative
+`α.tangent x t` at `x`.  This is the direct endpoint form that a later
+Gronwall estimate can feed. -/
+theorem flow_timeSlice_hasFDerivAt_of_remainder_bound_nhds_zero
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} {t : ℝ} {η : V → ℝ≥0}
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hbound : ∀ᶠ h in 𝓝 (0 : V),
+      ‖α.flow (x + h, t) - α.flow (x, t) - α.tangent x t h‖ ≤
+        (η h : ℝ) * ‖h‖) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  rw [hasFDerivAt_iff_isLittleO_nhds_zero, Asymptotics.isLittleO_iff]
+  intro c hc
+  have hηc : ∀ᶠ h in 𝓝 (0 : V), (η h : ℝ) ≤ c := by
+    filter_upwards [hη (Iio_mem_nhds hc)] with h hh
+    exact le_of_lt hh
+  filter_upwards [hbound, hηc] with h hb hηle
+  calc
+    ‖α.flow (x + h, t) - α.flow (x, t) - α.tangent x t h‖
+        ≤ (η h : ℝ) * ‖h‖ := hb
+    _ ≤ c * ‖h‖ := by
+        gcongr
+
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is
 the model-side bridge that lets Picard arguments target ordinary spatial
