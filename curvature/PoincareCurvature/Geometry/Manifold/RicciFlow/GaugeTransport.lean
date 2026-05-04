@@ -408,6 +408,29 @@ lemma SatisfiesGaugeFlowOn.of_autonomousIntegralCurves
   intro x
   exact IsMIntegralCurveOn.toTimeDependentIntegralCurveOn_const (I := I) (M := M) (hΦ x)
 
+/-- A self-map family whose pointwise curves are autonomous Mathlib local
+integral curves satisfies the local gauge-flow equation for the constant-in-time
+vector field. -/
+lemma SatisfiesGaugeFlowAt.of_autonomousIntegralCurves
+    {Φ : SmoothSelfMapFamily (I := I) (M := M)}
+    {X : Π x : M, TangentSpace I x} {t₀ : ℝ}
+    (hΦ : ∀ x : M, IsMIntegralCurveAt (I := I) (fun t : ℝ ↦ Φ t x) X t₀) :
+    SatisfiesGaugeFlowAt (I := I) (M := M) Φ (fun _ ↦ X) t₀ := by
+  intro x
+  exact IsMIntegralCurveAt.toTimeDependentIntegralCurveAt_const (I := I) (M := M) (hΦ x)
+
+/-- Pointwise autonomous Mathlib local integral curves at every time in a set
+give the constant-in-time gauge-flow equation on that set. -/
+lemma SatisfiesGaugeFlowOn.of_autonomousIntegralCurveAt
+    {Φ : SmoothSelfMapFamily (I := I) (M := M)}
+    {X : Π x : M, TangentSpace I x} {s : Set ℝ}
+    (hΦ : ∀ t ∈ s, ∀ x : M,
+      IsMIntegralCurveAt (I := I) (fun τ : ℝ ↦ Φ τ x) X t) :
+    SatisfiesGaugeFlowOn (I := I) (M := M) Φ (fun _ ↦ X) s := by
+  intro x
+  exact IsMIntegralCurveOn.toTimeDependentIntegralCurveOn_const (I := I) (M := M)
+    (IsMIntegralCurveAt.isMIntegralCurveOn (fun t ht => hΦ t ht x))
+
 /-- Reinterpret a gauge-flow family for an equal vector field along the flow image. -/
 lemma SatisfiesGaugeFlowOn.congr_vectorField
     {Φ : SmoothSelfMapFamily (I := I) (M := M)}
