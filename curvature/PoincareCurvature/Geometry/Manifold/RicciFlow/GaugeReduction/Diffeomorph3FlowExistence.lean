@@ -1,6 +1,8 @@
 module
 
 public import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
+public import Mathlib.Topology.Order.DenselyOrdered
+public import Mathlib.Topology.Separation.Hausdorff
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative
 
 set_option linter.unusedSectionVars false
@@ -686,6 +688,60 @@ theorem eval_eq_of_autonomous_Ioo_boundaryless
     (x : M) :
     (G₁.maps3 t) x = (G₂.maps3 t) x :=
   G₁.eqOn_eval_of_autonomous_Ioo_boundaryless G₂ ht₀ hX x ht
+
+/-- Two anchored raw `C³` autonomous gauge flows for the same `C¹` vector field
+agree on a closed interval once the anchor lies in its interior.  The endpoint
+identification is the continuous extension of Mathlib's boundaryless
+autonomous uniqueness theorem on the open interval. -/
+theorem eqOn_eval_of_autonomous_Icc_boundaryless
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin tmax t₀ : ℝ}
+    (G₁ G₂ :
+      Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) (Icc tmin tmax) t₀)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (x : M) :
+    EqOn (fun t : ℝ ↦ (G₁.maps3 t) x) (fun t : ℝ ↦ (G₂.maps3 t) x)
+      (Icc tmin tmax) := by
+  have hIoo :
+      EqOn (fun t : ℝ ↦ (G₁.maps3 t) x) (fun t : ℝ ↦ (G₂.maps3 t) x)
+        (Ioo tmin tmax) := by
+    refine isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless
+      (I := I) (t₀ := t₀) ht₀ hX
+      ((G₁.autonomousIntegralCurveOn x).mono (fun _t ht ↦ Ioo_subset_Icc_self ht))
+      ((G₂.autonomousIntegralCurveOn x).mono (fun _t ht ↦ Ioo_subset_Icc_self ht)) ?_
+    have h₁ :
+        (G₁.maps3 t₀) x = x :=
+      SmoothSelfDiffeomorph3Family.AnchoredAt.apply
+        (I := I) (M := M) (Φ := G₁.maps3) G₁.anchored x
+    have h₂ :
+        (G₂.maps3 t₀) x = x :=
+      SmoothSelfDiffeomorph3Family.AnchoredAt.apply
+        (I := I) (M := M) (Φ := G₂.maps3) G₂.anchored x
+    rw [h₁, h₂]
+  have hne : tmin ≠ tmax := ne_of_lt (lt_trans ht₀.1 ht₀.2)
+  refine Set.EqOn.of_subset_closure hIoo
+    (G₁.continuousOn_eval x) (G₂.continuousOn_eval x)
+    (fun _t ht ↦ Ioo_subset_Icc_self ht) ?_
+  intro t ht
+  rw [closure_Ioo hne]
+  exact ht
+
+/-- Pointwise form of autonomous raw gauge-flow uniqueness on a closed interval
+with the anchor in the interior. -/
+theorem eval_eq_of_autonomous_Icc_boundaryless
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin tmax t₀ t : ℝ}
+    (G₁ G₂ :
+      Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) (Icc tmin tmax) t₀)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Icc tmin tmax)
+    (x : M) :
+    (G₁.maps3 t) x = (G₂.maps3 t) x :=
+  G₁.eqOn_eval_of_autonomous_Icc_boundaryless G₂ ht₀ hX x ht
 
 /-- Reinterpret a raw `C³` gauge-flow witness for an equal vector field along the flow image. -/
 def congr_vectorField

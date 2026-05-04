@@ -1490,7 +1490,11 @@ extracts Mathlib integral-curve data from a constant-in-time raw gauge flow, and
 `eval_eq_of_autonomous_Ioo_boundaryless` apply Mathlib's boundaryless
 autonomous integral-curve uniqueness theorem to show that two anchored raw
 `C³` autonomous gauge flows for the same `C¹` vector field agree pointwise on
-their common open Picard interval.
+their common open Picard interval. The same bridge now extends this equality to
+closed Picard intervals when the anchor is in the interior:
+`eqOn_eval_of_autonomous_Icc_boundaryless` /
+`eval_eq_of_autonomous_Icc_boundaryless` use raw-flow continuity and
+`closure_Ioo` to identify the endpoint values as well.
 
 **Module location.** The Banach-model bridge lives in
 `Geometry/Manifold/RicciFlow/GaugeReduction/ModelGaugeFlowODE.lean`.  The final
