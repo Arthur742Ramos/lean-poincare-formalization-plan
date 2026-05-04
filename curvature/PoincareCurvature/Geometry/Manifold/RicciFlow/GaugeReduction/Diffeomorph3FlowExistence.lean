@@ -3966,6 +3966,67 @@ theorem hasMFDerivAt_of_timeSet_eq_Ioo
   G.hasMFDerivAt sol
     ((G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet) sol ht) x
 
+/-- Fixed-IVP open-Picard pointwise manifold derivative readout rewritten to a
+neighborhood-equal vector field, without an extra neighborhood-of-time
+hypothesis. -/
+theorem hasMFDerivAt_congr_vectorField_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow sol).maps3 τ) x) =
+        Y τ (((G.flow sol).maps3 τ) x))
+    (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ ((G.flow sol).maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (((G.flow sol).maps3 t) x))) :=
+  G.hasMFDerivAt_congr_vectorField sol
+    ((G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet) sol ht)
+    hXY x
+
+/-- Fixed-IVP open-Picard preferred-chart derivative readout rewritten to a
+neighborhood-equal vector field, without an extra neighborhood-of-time
+hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_congr_vectorField_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow sol).maps3 τ) x) =
+        Y τ (((G.flow sol).maps3 τ) x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow sol).maps3 t) x))
+        (((G.flow sol).maps3 τ) x))
+      (tangentCoordChange I (((G.flow sol).maps3 t) x) (((G.flow sol).maps3 t) x)
+        (((G.flow sol).maps3 t) x) (Y t (((G.flow sol).maps3 t) x))) t :=
+  G.hasDerivAt_extChartAt_eval_congr_vectorField sol
+    ((G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet) sol ht)
+    hXY x
+
 /-- Fixed-IVP open-Picard preferred-chart derivative readout without an extra
 neighborhood-of-time hypothesis. -/
 theorem hasDerivAt_extChartAt_eval_self_of_timeSet_eq_Ioo
@@ -3989,6 +4050,37 @@ theorem hasDerivAt_extChartAt_eval_self_of_timeSet_eq_Ioo
           (((G.flow sol).maps3 t) x)) t :=
   G.hasDerivAt_extChartAt_eval_self sol
     ((G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet) sol ht) x
+
+/-- Fixed-IVP open-Picard centered preferred-chart derivative readout rewritten
+to a neighborhood-equal vector field, without an extra neighborhood-of-time
+hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_self_congr_vectorField_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow sol).maps3 τ) x) =
+        Y τ (((G.flow sol).maps3 τ) x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow sol).maps3 t) x))
+        (((G.flow sol).maps3 τ) x))
+      (Y t (((G.flow sol).maps3 t) x)) t :=
+  G.hasDerivAt_extChartAt_eval_self_congr_vectorField sol
+    ((G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet) sol ht)
+    hXY x
 
 /-- Fixed-IVP open-Picard continuity of raw intrinsic gauge-flow curves in
 preferred chart coordinates. -/
@@ -4025,6 +4117,27 @@ theorem continuousAt_eval_of_timeSet_eq_Ioo
     {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
     ContinuousAt (fun τ : ℝ ↦ ((G.flow sol).maps3 τ) x) t :=
   G.continuousAt_eval sol
+    ((G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet) sol ht) x
+
+/-- Fixed-IVP open-Picard tangent-trivialization control of raw intrinsic
+gauge-flow curves. -/
+theorem eventually_mem_trivializationAt_eval_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      ((G.flow sol).maps3 τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _)
+          (((G.flow sol).maps3 t) x)).baseSet :=
+  G.eventually_mem_trivializationAt_eval sol
     ((G.timeSet_mem_nhds_of_eq_Ioo (I := I) (M := M) tmin tmax htimeSet) sol ht) x
 
 /-- Fixed-IVP open-Picard chart-source control of raw intrinsic gauge-flow
@@ -5999,6 +6112,70 @@ theorem hasMFDerivAt_of_timeSet_eq_Ioo
   (G.forInitialValueProblem ivp).hasMFDerivAt_of_timeSet_eq_Ioo
     (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht x
 
+/-- Theorem-family open-Picard pointwise manifold derivative readout rewritten
+to a neighborhood-equal vector field, without an extra neighborhood-of-time
+hypothesis. -/
+theorem hasMFDerivAt_congr_vectorField_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow ivp sol).maps3 τ) x) =
+        Y τ (((G.flow ivp sol).maps3 τ) x))
+    (x : M) :
+    HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ ((G.flow ivp sol).maps3 τ) x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Y t (((G.flow ivp sol).maps3 t) x))) :=
+  (G.forInitialValueProblem ivp).hasMFDerivAt_congr_vectorField_of_timeSet_eq_Ioo
+    (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht hXY x
+
+/-- Theorem-family open-Picard preferred-chart derivative readout rewritten to
+a neighborhood-equal vector field, without an extra neighborhood-of-time
+hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_congr_vectorField_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow ivp sol).maps3 τ) x) =
+        Y τ (((G.flow ivp sol).maps3 τ) x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow ivp sol).maps3 t) x))
+        (((G.flow ivp sol).maps3 τ) x))
+      (tangentCoordChange I (((G.flow ivp sol).maps3 t) x)
+        (((G.flow ivp sol).maps3 t) x) (((G.flow ivp sol).maps3 t) x)
+        (Y t (((G.flow ivp sol).maps3 t) x))) t :=
+  (G.forInitialValueProblem ivp).hasDerivAt_extChartAt_eval_congr_vectorField_of_timeSet_eq_Ioo
+    (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht hXY x
+
 /-- Theorem-family open-Picard preferred-chart derivative readout without an
 extra neighborhood-of-time hypothesis. -/
 theorem hasDerivAt_extChartAt_eval_self_of_timeSet_eq_Ioo
@@ -6024,6 +6201,38 @@ theorem hasDerivAt_extChartAt_eval_self_of_timeSet_eq_Ioo
           (((G.flow ivp sol).maps3 t) x)) t :=
   (G.forInitialValueProblem ivp).hasDerivAt_extChartAt_eval_self_of_timeSet_eq_Ioo
     (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht x
+
+/-- Theorem-family open-Picard centered preferred-chart derivative readout
+rewritten to a neighborhood-equal vector field, without an extra
+neighborhood-of-time hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_self_congr_vectorField_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background τ
+          (((G.flow ivp sol).maps3 τ) x) =
+        Y τ (((G.flow ivp sol).maps3 τ) x))
+    (x : M) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I (((G.flow ivp sol).maps3 t) x))
+        (((G.flow ivp sol).maps3 τ) x))
+      (Y t (((G.flow ivp sol).maps3 t) x)) t :=
+  (G.forInitialValueProblem ivp).hasDerivAt_extChartAt_eval_self_congr_vectorField_of_timeSet_eq_Ioo
+    (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht hXY x
 
 /-- Theorem-family open-Picard continuity of raw intrinsic gauge-flow curves in
 preferred chart coordinates. -/
@@ -6064,6 +6273,29 @@ theorem continuousAt_eval_of_timeSet_eq_Ioo
     {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
     ContinuousAt (fun τ : ℝ ↦ ((G.flow ivp sol).maps3 τ) x) t :=
   (G.forInitialValueProblem ivp).continuousAt_eval_of_timeSet_eq_Ioo
+    (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht x
+
+/-- Theorem-family open-Picard tangent-trivialization control of raw intrinsic
+gauge-flow curves. -/
+theorem eventually_mem_trivializationAt_eval_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) (x : M) :
+    ∀ᶠ τ in 𝓝 t,
+      ((G.flow ivp sol).maps3 τ) x ∈
+        (trivializationAt E (TangentSpace I : M → Type _)
+          (((G.flow ivp sol).maps3 t) x)).baseSet :=
+  (G.forInitialValueProblem ivp).eventually_mem_trivializationAt_eval_of_timeSet_eq_Ioo
     (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht x
 
 /-- Theorem-family open-Picard chart-source control of raw intrinsic
