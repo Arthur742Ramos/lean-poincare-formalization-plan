@@ -852,6 +852,41 @@ theorem eqOn_maps3_of_autonomous_Ioo_boundaryless_of_subset
   exact G₁.eqOn_eval_of_autonomous_Ioo_boundaryless_of_subset G₂
     h₁ h₂ ht₀ hX x ht
 
+/-- Pointwise common-open-subinterval form of autonomous raw gauge-flow
+uniqueness. -/
+theorem eval_eq_of_autonomous_Ioo_boundaryless_of_subset
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {s₁ s₂ : Set ℝ} {tmin tmax t₀ t : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₁ t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₂ t₀)
+    (h₁ : Ioo tmin tmax ⊆ s₁)
+    (h₂ : Ioo tmin tmax ⊆ s₂)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Ioo tmin tmax)
+    (x : M) :
+    (G₁.maps3 t) x = (G₂.maps3 t) x :=
+  G₁.eqOn_eval_of_autonomous_Ioo_boundaryless_of_subset G₂
+    h₁ h₂ ht₀ hX x ht
+
+/-- Pointwise common-open-subinterval time-slice diffeomorphism form of
+autonomous raw gauge-flow uniqueness. -/
+theorem maps3_eq_of_autonomous_Ioo_boundaryless_of_subset
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {s₁ s₂ : Set ℝ} {tmin tmax t₀ t : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₁ t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₂ t₀)
+    (h₁ : Ioo tmin tmax ⊆ s₁)
+    (h₂ : Ioo tmin tmax ⊆ s₂)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Ioo tmin tmax) :
+    G₁.maps3 t = G₂.maps3 t :=
+  G₁.eqOn_maps3_of_autonomous_Ioo_boundaryless_of_subset G₂
+    h₁ h₂ ht₀ hX ht
+
 /-- Common-closed-subinterval form of autonomous raw gauge-flow uniqueness.  The
 endpoint equality is obtained by extending the common open-subinterval equality
 using the continuity of both ambient raw flows on the shared closed interval. -/
@@ -902,6 +937,41 @@ theorem eqOn_maps3_of_autonomous_Icc_boundaryless_of_subset
   intro x
   exact G₁.eqOn_eval_of_autonomous_Icc_boundaryless_of_subset G₂
     h₁ h₂ ht₀ hX x ht
+
+/-- Pointwise common-closed-subinterval form of autonomous raw gauge-flow
+uniqueness. -/
+theorem eval_eq_of_autonomous_Icc_boundaryless_of_subset
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {s₁ s₂ : Set ℝ} {tmin tmax t₀ t : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₁ t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₂ t₀)
+    (h₁ : Icc tmin tmax ⊆ s₁)
+    (h₂ : Icc tmin tmax ⊆ s₂)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Icc tmin tmax)
+    (x : M) :
+    (G₁.maps3 t) x = (G₂.maps3 t) x :=
+  G₁.eqOn_eval_of_autonomous_Icc_boundaryless_of_subset G₂
+    h₁ h₂ ht₀ hX x ht
+
+/-- Pointwise common-closed-subinterval time-slice diffeomorphism form of
+autonomous raw gauge-flow uniqueness. -/
+theorem maps3_eq_of_autonomous_Icc_boundaryless_of_subset
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {s₁ s₂ : Set ℝ} {tmin tmax t₀ t : ℝ}
+    (G₁ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₁ t₀)
+    (G₂ : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s₂ t₀)
+    (h₁ : Icc tmin tmax ⊆ s₁)
+    (h₂ : Icc tmin tmax ⊆ s₂)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Icc tmin tmax) :
+    G₁.maps3 t = G₂.maps3 t :=
+  G₁.eqOn_maps3_of_autonomous_Icc_boundaryless_of_subset G₂
+    h₁ h₂ ht₀ hX ht
 
 /-- Reinterpret a raw `C³` gauge-flow witness for an equal vector field along the flow image. -/
 def congr_vectorField

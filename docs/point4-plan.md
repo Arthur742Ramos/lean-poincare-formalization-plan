@@ -1522,8 +1522,9 @@ closed-interval bridges now also expose `maps3`-level uniqueness readouts
 arguments can rewrite bundled time-slice diffeomorphisms directly. The same
 autonomous uniqueness is now available on common visible subintervals of two
 possibly different ambient raw time sets via the
-`..._of_subset` open- and closed-interval readouts, matching later chart-gluing
-overlap arguments without first rebuilding restricted raw-flow witnesses.
+`..._of_subset` open- and closed-interval readouts, now including pointwise
+`eval_eq` and `maps3_eq` forms, matching later chart-gluing overlap arguments
+without first rebuilding restricted raw-flow witnesses.
 
 **Module location.** The Banach-model bridge lives in
 `Geometry/Manifold/RicciFlow/GaugeReduction/ModelGaugeFlowODE.lean`.  The final
