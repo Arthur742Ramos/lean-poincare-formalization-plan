@@ -1407,6 +1407,9 @@ same section now also transports continuity and overlap equalities:
 `continuousOn_symm_image_of_openPartialHomeomorph_lifted_model` lifts
 model-side continuity of `G` on a chart patch to continuity of
 `e₁.symm ∘ G ∘ e₀` on the manifold-side source patch, and
+`exists_open_nhds_continuousOn_bijOn_of_lifted_openPartialHomeomorph_model`
+shrinks a model inverse patch inside prescribed source/target chart domains
+and returns a single manifold-side patch carrying both continuity and `BijOn`.
 `eqOn_of_openPartialHomeomorph_coord_eqOn` turns equality in a common target
 chart into equality of the underlying manifold maps, while
 `eqOn_lifted_models_same_target_of_model_eqOn`,

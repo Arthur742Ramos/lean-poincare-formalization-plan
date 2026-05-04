@@ -276,6 +276,46 @@ theorem continuousOn_symm_image_of_openPartialHomeomorph_lifted_model
     fun _ hx ↦ hWt (hmaps (hmaps_e₀ hx))
   exact e₁.continuousOn_symm.comp hcont_G hmaps_target
 
+/-- Shrink a model open-partial-homeomorphism patch inside prescribed source
+and target chart domains, then lift it to a manifold-side patch carrying both
+continuity and bijectivity for the lifted map. -/
+theorem exists_open_nhds_continuousOn_bijOn_of_lifted_openPartialHomeomorph_model
+    (e₀ e₁ : OpenPartialHomeomorph X Y) {G : Y → Y}
+    {φ : OpenPartialHomeomorph Y Y} (hφ : (φ : Y → Y) = G)
+    {x : X} (hxsource : x ∈ e₀.source) (hxφ : e₀ x ∈ φ.source)
+    {S T : Set Y}
+    (hSopen : IsOpen S) (hS : S ⊆ e₀.target) (hxS : e₀ x ∈ S)
+    (hTopen : IsOpen T) (hT : T ⊆ e₁.target) (hxT : G (e₀ x) ∈ T)
+    (hcont : ContinuousOn G S) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ IsOpen Wm ∧
+        (fun z : X ↦ e₁.symm (G (e₀ z))) x ∈ Wm ∧
+          ContinuousOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um ∧
+            BijOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um Wm := by
+  rcases exists_open_nhds_bijOn_subset_of_openPartialHomeomorph
+      (X := Y) (g := G) (x := e₀ x) (φ := φ) hφ hxφ
+      hSopen hxS hTopen hxT with
+    ⟨U, W, hUopen, hxU, hUS, hWopen, _hxW, hWT, hbij⟩
+  have hUt : U ⊆ e₀.target := fun y hy ↦ hS (hUS hy)
+  have hWt : W ⊆ e₁.target := fun y hy ↦ hT (hWT hy)
+  let Um : Set X := e₀.symm '' U
+  let Wm : Set X := e₁.symm '' W
+  have hxUm : x ∈ Um := ⟨e₀ x, hxU, e₀.left_inv hxsource⟩
+  have hFxWm : (fun z : X ↦ e₁.symm (G (e₀ z))) x ∈ Wm :=
+    ⟨G (e₀ x), hbij.mapsTo hxU, rfl⟩
+  have hcont_lift :
+      ContinuousOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um :=
+    continuousOn_symm_image_of_openPartialHomeomorph_lifted_model
+      e₀ e₁ G hUt hWt (hcont.mono hUS) hbij.mapsTo
+  exact ⟨Um, Wm,
+    e₀.isOpen_image_symm_of_subset_target hUopen hUt,
+    hxUm,
+    e₁.isOpen_image_symm_of_subset_target hWopen hWt,
+    hFxWm,
+    hcont_lift,
+    bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn
+      e₀ e₁ G hUt hWt hbij⟩
+
 /-- A chart-coordinate equality on a visible patch gives equality of the
 underlying manifold maps once both sides land in the chart source.  This is the
 topological equality transport used by chart-gluing arguments after model
