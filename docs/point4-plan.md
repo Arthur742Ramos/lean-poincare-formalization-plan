@@ -1900,10 +1900,11 @@ equality, and the clipped readouts now have full-common-interval companions when
 the chosen shrink covers the two candidate terminals. A single metric-cone
 shrink can return both clipped readouts at once; the same selected shrink can
 now also carry the terminal-fit theorem-package handoff alongside those local
-readouts, and a further readout carries the same theorem-package handoff,
-clipped readouts, and conditional full-common metric/connection readouts
-together. The continuation from these local readouts to full arbitrary-overlap
-uniqueness is still open.
+readouts, the terminal-fit theorem-package handoff with arbitrary
+shorter-terminal metric/connection readouts, and a further readout carries the
+same theorem-package handoff, clipped readouts, and conditional full-common
+metric/connection readouts together. The continuation from these local readouts
+to full arbitrary-overlap uniqueness is still open.
 The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient
@@ -1948,9 +1949,9 @@ chart-carrier witnesses now also expose the Picard time-radius proof used to
 form the shrink, and the initial-metric route has a single-shrink readout that
 pairs the chart-carrier Banach solution/uniqueness witness with ambient
 closure-data metric and connection uniqueness on the same clipped interval,
-plus a companion that adds conditional full-common metric and connection
-readouts whenever that same selected shrink contains the common candidate
-terminal. At the vector-bundle
+plus a prescribed-shorter-terminal companion and a companion that adds
+conditional full-common metric and connection readouts whenever that same
+selected shrink contains the common candidate terminal. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives
