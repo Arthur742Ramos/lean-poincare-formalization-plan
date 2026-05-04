@@ -1483,7 +1483,14 @@ the raw time set, matching the restricted intervals produced by local ODE
 theorems before any neighborhood-of-time strengthening is known. For explicit
 open Picard time sets, the fixed-IVP and theorem-family raw existence APIs now
 combine the `Ioo` identification with those ordinary-time derivative,
-continuity, and chart-source readouts directly.
+continuity, and chart-source readouts directly. The raw autonomous interface now
+also runs in both directions: `Diffeomorph3GaugeFlowOn.autonomousIntegralCurveOn`
+extracts Mathlib integral-curve data from a constant-in-time raw gauge flow, and
+`eqOn_eval_of_autonomous_Ioo_boundaryless` /
+`eval_eq_of_autonomous_Ioo_boundaryless` apply Mathlib's boundaryless
+autonomous integral-curve uniqueness theorem to show that two anchored raw
+`C³` autonomous gauge flows for the same `C¹` vector field agree pointwise on
+their common open Picard interval.
 
 **Module location.** The Banach-model bridge lives in
 `Geometry/Manifold/RicciFlow/GaugeReduction/ModelGaugeFlowODE.lean`.  The final

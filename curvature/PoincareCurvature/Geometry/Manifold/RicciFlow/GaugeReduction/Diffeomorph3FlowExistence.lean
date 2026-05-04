@@ -1,6 +1,6 @@
 module
 
-public import Mathlib.Geometry.Manifold.IntegralCurve.Basic
+public import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative
 
 set_option linter.unusedSectionVars false
@@ -634,6 +634,58 @@ theorem nonempty_of_autonomousIntegralCurveAt
     Nonempty
       (Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s t₀) :=
   ⟨of_autonomousIntegralCurveAt maps3 anchored hcurves⟩
+
+/-- Extract Mathlib autonomous integral-curve data from a raw gauge-flow
+witness for a constant-in-time vector field. -/
+theorem autonomousIntegralCurveOn
+    {X : Π x : M, TangentSpace I x}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s t₀)
+    (x : M) :
+    IsMIntegralCurveOn (I := I) (fun t : ℝ ↦ (G.maps3 t) x) X s := by
+  intro t ht
+  simpa using G.satisfies x t ht
+
+/-- Two anchored raw `C³` autonomous gauge flows for the same `C¹` vector field
+agree on the open interval where both solve the ODE. -/
+theorem eqOn_eval_of_autonomous_Ioo_boundaryless
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin tmax t₀ : ℝ}
+    (G₁ G₂ :
+      Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) (Ioo tmin tmax) t₀)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (x : M) :
+    EqOn (fun t : ℝ ↦ (G₁.maps3 t) x) (fun t : ℝ ↦ (G₂.maps3 t) x)
+      (Ioo tmin tmax) := by
+  refine isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless
+    (I := I) (t₀ := t₀) ht₀ hX
+    (G₁.autonomousIntegralCurveOn x)
+    (G₂.autonomousIntegralCurveOn x) ?_
+  have h₁ :
+      (G₁.maps3 t₀) x = x :=
+    SmoothSelfDiffeomorph3Family.AnchoredAt.apply
+      (I := I) (M := M) (Φ := G₁.maps3) G₁.anchored x
+  have h₂ :
+      (G₂.maps3 t₀) x = x :=
+    SmoothSelfDiffeomorph3Family.AnchoredAt.apply
+      (I := I) (M := M) (Φ := G₂.maps3) G₂.anchored x
+  rw [h₁, h₂]
+
+/-- Pointwise form of autonomous raw gauge-flow uniqueness on an open interval. -/
+theorem eval_eq_of_autonomous_Ioo_boundaryless
+    [BoundarylessManifold I M]
+    {X : Π x : M, TangentSpace I x}
+    {tmin tmax t₀ t : ℝ}
+    (G₁ G₂ :
+      Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) (Ioo tmin tmax) t₀)
+    (ht₀ : t₀ ∈ Ioo tmin tmax)
+    (hX : ContMDiff I I.tangent 1 (T% X))
+    (ht : t ∈ Ioo tmin tmax)
+    (x : M) :
+    (G₁.maps3 t) x = (G₂.maps3 t) x :=
+  G₁.eqOn_eval_of_autonomous_Ioo_boundaryless G₂ ht₀ hX x ht
 
 /-- Reinterpret a raw `C³` gauge-flow witness for an equal vector field along the flow image. -/
 def congr_vectorField
