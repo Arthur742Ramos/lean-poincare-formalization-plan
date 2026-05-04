@@ -6560,6 +6560,24 @@ theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_mem_Ioo
     (I := I) (M := M) G.maps3 g t x u v
     (G.eventually_mem_trivializationAt_eval_of_mem_Ioo ht x)
 
+/-- Raw open-Picard chart-local scalar equality without a separate
+neighborhood-of-time hypothesis. -/
+theorem eventuallyEq_geometric_pullbackMetricInnerCoordinateModel_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax) (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M))
+    (x : M) (u v : TangentSpace I x) :
+    (fun τ : ℝ ↦
+      (g τ).inner ((G.maps3 τ) x)
+        ((G.maps3 τ).pushforwardTangent x u)
+        ((G.maps3 τ).pushforwardTangent x v)) =ᶠ[𝓝 t]
+      SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
+        (I := I) (M := M) G.maps3 g t x u v :=
+  G.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) g x u v
+
 /-- For a raw gauge flow whose time set is a neighborhood of each of its times,
 derivative data for the named coordinate model is enough to produce the
 coordinate derivative package for the geometric pullback scalar. -/
@@ -6750,6 +6768,180 @@ theorem hasTimeDerivativeOn_of_coordinateOperatorWithinOpen
     (I := I) (M := M)
     ((G.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
       (I := I) (M := M) hoperator).toPullbackMetricInnerDerivativeOn hs)
+
+/-- Raw open-Picard coordinate-model data gives coordinate-level scalar data
+without a separate neighborhood proof for the time set. -/
+theorem coordinatePullbackMetricInnerDerivativeOn_of_model_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hmodel : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricModelDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricInnerDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  G.coordinatePullbackMetricInnerDerivativeOn_of_model
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hmodel
+
+/-- Raw open-Picard coordinate-model data gives the named geometric scalar
+derivative without a separate neighborhood proof for the time set. -/
+theorem pullbackMetricInnerDerivativeOn_of_coordinateModel_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hmodel : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricModelDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  G.pullbackMetricInnerDerivativeOn_of_coordinateModel
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hmodel
+
+/-- Raw open-Picard coordinate-model data gives tensor time-regularity without a
+separate neighborhood proof for the time set. -/
+theorem hasTimeDerivativeOn_of_coordinateModel_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hmodel : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricModelDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  G.hasTimeDerivativeOn_of_coordinateModel
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hmodel
+
+/-- Raw open-Picard field-level data gives the named geometric scalar derivative
+without a separate neighborhood proof for the time set. -/
+theorem pullbackMetricInnerDerivativeOn_of_coordinateField_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hfield : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricFieldDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  G.pullbackMetricInnerDerivativeOn_of_coordinateField
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hfield
+
+/-- Raw open-Picard field-level data gives tensor time-regularity without a
+separate neighborhood proof for the time set. -/
+theorem hasTimeDerivativeOn_of_coordinateField_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hfield : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricFieldDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  G.hasTimeDerivativeOn_of_coordinateField
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hfield
+
+/-- Raw open-Picard within-set field data gives ordinary named scalar derivative
+data without a separate neighborhood proof for the time set. -/
+theorem pullbackMetricInnerDerivativeOn_of_coordinateFieldWithin_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hfield : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricFieldDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  (G.pullbackMetricInnerDerivativeWithinOn_of_coordinateFieldWithin
+    (I := I) (M := M) hfield).toPullbackMetricInnerDerivativeOn
+      (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet)
+
+/-- Raw open-Picard within-set field data gives tensor time-regularity without a
+separate neighborhood proof for the time set. -/
+theorem hasTimeDerivativeOn_of_coordinateFieldWithin_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hfield : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricFieldDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  G.hasTimeDerivativeOn_of_coordinateFieldWithin
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hfield
+
+/-- Raw open-Picard within-set operator data gives ordinary named scalar
+derivative data without a separate neighborhood proof for the time set. -/
+theorem pullbackMetricInnerDerivativeOn_of_coordinateOperatorWithin_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  (G.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithin
+    (I := I) (M := M) hoperator).toPullbackMetricInnerDerivativeOn
+      (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet)
+
+/-- Raw open-Picard within-set operator data gives tensor time-regularity
+without a separate neighborhood proof for the time set. -/
+theorem hasTimeDerivativeOn_of_coordinateOperatorWithin_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  G.hasTimeDerivativeOn_of_coordinateOperatorWithin
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hoperator
+
+/-- Raw open-Picard open-domain operator data gives ordinary named scalar
+derivative data without a separate neighborhood proof for the time set. -/
+theorem pullbackMetricInnerDerivativeOn_of_coordinateOperatorWithinOpen_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  (G.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
+    (I := I) (M := M) hoperator).toPullbackMetricInnerDerivativeOn
+      (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet)
+
+/-- Raw open-Picard open-domain operator data gives tensor time-regularity
+without a separate neighborhood proof for the time set. -/
+theorem hasTimeDerivativeOn_of_coordinateOperatorWithinOpen_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hoperator : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  G.hasTimeDerivativeOn_of_coordinateOperatorWithinOpen
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hoperator
 
 /-- Raw gauge flows supply the moving-base coordinate derivative `y'(t)` in the
 field-level coordinate package at times where the raw time set is a
@@ -12742,6 +12934,53 @@ theorem hasTimeDerivativeOn_of_coordinateComponentsWithin
     (I := I) (M := M)
     ((G.pullbackMetricInnerDerivativeWithinOn_of_coordinateComponentsWithin
       (I := I) (M := M) hdata).toPullbackMetricInnerDerivativeOn hs)
+
+/-- Raw open-Picard concrete component data gives tensor time-regularity without
+a separate neighborhood proof for the time set. -/
+theorem hasTimeDerivativeOn_of_coordinateComponents_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  G.hasTimeDerivativeOn_of_coordinateComponents
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hdata
+
+/-- Raw open-Picard within-set concrete component data gives ordinary named
+scalar derivative data without a separate neighborhood proof for the time set. -/
+theorem pullbackMetricInnerDerivativeOn_of_coordinateComponentsWithin_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    SmoothSelfDiffeomorph3Family.PullbackMetricInnerDerivativeOn
+      (I := I) (M := M) G.maps3 g gdot s :=
+  (G.pullbackMetricInnerDerivativeWithinOn_of_coordinateComponentsWithin
+    (I := I) (M := M) hdata).toPullbackMetricInnerDerivativeOn
+      (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet)
+
+/-- Raw open-Picard within-set concrete component data gives tensor
+time-regularity without a separate neighborhood proof for the time set. -/
+theorem hasTimeDerivativeOn_of_coordinateComponentsWithin_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) G.maps3 g gdot s) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot s :=
+  G.hasTimeDerivativeOn_of_coordinateComponentsWithin
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet) hdata
 
 /-- Raw gauge-flow endpoint route from closed-interval concrete coordinate
 component derivatives directly to tensor time-regularity on the open interior.
