@@ -1905,7 +1905,10 @@ retaining terminal-time control and common-interval uniqueness. The selected
 chart-carrier witnesses now also expose the Picard time-radius proof used to
 form the shrink, and the initial-metric route has a single-shrink readout that
 pairs the chart-carrier Banach solution/uniqueness witness with ambient
-closure-data metric and connection uniqueness on the same clipped interval. At the vector-bundle
+closure-data metric and connection uniqueness on the same clipped interval,
+plus a companion that adds conditional full-common metric and connection
+readouts whenever that same selected shrink contains the common candidate
+terminal. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives
