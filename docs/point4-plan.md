@@ -1574,9 +1574,12 @@ companion
 uses the same selected shrink for the terminal-fit theorem-package handoff and
 for any prescribed shorter-terminal metric/connection readout needed by
 continuation arguments, while
+`RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_localRestrictedMetricConnectionReadout_with_fullCommon`
+adds the conditional full-common metric and connection readouts to that
+restricted-terminal single-shrink package.  The companion
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_localMetricConnectionReadout_with_fullCommon`
-adds the conditional full-common metric and connection readouts to that same
-single-shrink package.
+packages the clipped no-terminal-fit readouts with the same conditional
+full-common conclusion.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
