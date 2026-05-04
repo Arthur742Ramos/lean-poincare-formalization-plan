@@ -468,8 +468,9 @@ closed-ball readouts in the `r ≤ R` radius-specialized form and at the
 component-continuity estimate level, so chart applications can reuse the Picard
 state containment without rebuilding the product witness. The strict
 time-slice derivative theorem now also has an `r ≤ R` product-Picard form and a
-direct component-continuity estimate wrapper, separating differentiability of
-the selected time slice from the finite-dimensional local-inverse packaging.
+direct component-continuity estimate wrapper, including operator-ball and
+identity-ball specializations, separating differentiability of the selected
+time slice from the finite-dimensional local-inverse packaging.
 The raw gauge-flow layer now also extracts the model-coordinate derivative of
 the base flow curve itself: `Diffeomorph3GaugeFlowOn.hasDerivAt_extChartAt_eval_of_mem_Ioo`
 turns the manifold derivative of `τ ↦ Φ_τ(x)` into a `HasDerivAt` statement for
