@@ -110,6 +110,17 @@ def variationalVectorField
     ℝ → V × (V →L[ℝ] V) → V × (V →L[ℝ] V) :=
   fun t z => (f t z.1, (Df t z.1).comp z.2)
 
+/-- With zero initial error, the Grönwall bound is linear in the forcing
+parameter.  This is the algebraic normalization used to turn a nonlinear
+remainder forcing of size `η(h) * ‖h‖` into an endpoint `o(‖h‖)` estimate. -/
+theorem gronwallBound_zero_left_eq_mul_forcing (K ε Δ : ℝ) :
+    gronwallBound 0 K ε Δ = ε * gronwallBound 0 K 1 Δ := by
+  by_cases hK : K = 0
+  · subst K
+    simp [gronwallBound]
+  · simp [gronwallBound, hK]
+    ring
+
 /-- Project the base ODE from a solution of the product variational system. -/
 theorem hasDerivWithinAt_fst_of_variationalVectorField
     {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}

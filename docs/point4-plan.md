@@ -1104,7 +1104,10 @@ remainder estimate
 `‖flow(x+h,t)-flow(x,t)-tangent(x,t)h‖ ≤ η(h)‖h‖`, with `η(h) → 0`, directly
 into the ordinary spatial derivative of the time slice; the remaining analytic
 model task is therefore to obtain this estimate from the nonlinear variational
-ODE by Gronwall. The corresponding
+ODE by Gronwall. The supporting identity
+`gronwallBound_zero_left_eq_mul_forcing` records the linear dependence of
+Mathlib's zero-initial-error Gronwall bound on the forcing term, isolating the
+last algebraic step needed to convert such a bound into `o(‖h‖)`. The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
 `ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall`
