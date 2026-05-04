@@ -232,7 +232,8 @@ now packages the matching intrinsic boundary
      shape of Mathlib ODE output, and geometric endpoint data can now replace its
      bundled
      gauge-flow component by such a raw existence witness at fixed-IVP, global,
-     and interval scope. The theorem-family zero-gauge-field identity constructor
+     and interval scope, either from tensor pullback-time-derivative proofs or
+     from named scalar pullback-metric derivative data. The theorem-family zero-gauge-field identity constructor
      now also produces the pulled-back metric time-derivative proof needed by the
      gauge-reduction API directly from pointwise gauge-field vanishing, provides
      the matching named scalar derivative data, plus direct fixed-IVP and
