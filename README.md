@@ -282,9 +282,9 @@ packages the canonical stationary local solution attached to
   chart gluing, and full-pair, time-graph, scalar-state, and scalar-time-graph
   readouts now reuse that same base-equality route, including closed scalar
   readouts obtained from an open-overlap base-flow equality by continuity;
-  product Picard convex-state and state-preserving closed-ball estimates now
-  feed the common-`Ioo` time-slice neighborhood-map and local
-  open-partial-homeomorphism readouts directly;
+  product Picard convex-state, state-preserving closed-ball, and componentwise
+  closed-ball continuity estimates now feed the common-`Ioo` time-slice
+  neighborhood-map and local open-partial-homeomorphism readouts directly;
   encoded candidates in
   the same global or interval chart now have a named metric-uniqueness theorem on
   their common interval. The
