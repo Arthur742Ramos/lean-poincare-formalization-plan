@@ -851,6 +851,10 @@ The generic raw-flow API now also has open-Picard readouts from an abstract
 time-set equality `s = Ioo tmin tmax`, exposing the local-at-time equation,
 ordinary manifold/preferred-chart derivatives, continuity, and chart/trivialization
 membership without first specializing to fixed-IVP or theorem-family packages.
+The fixed-IVP and theorem-family open-Picard layers now lift the same
+fixed-chart derivative, neighborhood-equal vector-field derivative, continuity,
+and source-neighborhood readouts, so finite-cover arguments can stay in a chosen
+chart center after the solution time set is identified with an `Ioo` interval.
 The time-derivative layer has matching raw open-Picard bridges from the same
 `s = Ioo tmin tmax` equality, upgrading coordinate model, field, operator, and
 component scalar derivative data to the named pullback-metric derivative and
