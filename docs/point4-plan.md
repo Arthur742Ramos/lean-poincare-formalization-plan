@@ -1710,9 +1710,9 @@ and supplied-Christoffel schematic local
 Ricci-DeTurck RHS entry/matrix bounded Holder estimates, primitive-input
 schematic RHS entry/matrix bounded Holder estimates, and whole matrix-valued
 closure, plus finite product-cylinder local primitive-estimate and
-primitive-difference bridges that globalize the compact schematic RHS closure and
-RHS difference closure before extracting determinant lower bounds, plus
-product-cylinder metric-control bridges for the function-level
+primitive-difference bridges, and compact point-local product-cylinder variants
+for the same schematic RHS and RHS difference closures, before extracting
+determinant lower bounds, plus product-cylinder metric-control bridges for the function-level
 bounded-difference estimate, including finite-family variants with one shared
 lower bound, using finite-product,
 integer-scalar, reciprocal, and division closure. On the

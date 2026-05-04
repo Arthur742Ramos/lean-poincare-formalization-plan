@@ -558,9 +558,10 @@ packages the canonical stationary local solution attached to
   and primitive-input schematic local
   Ricci-DeTurck RHS entry/matrix bounded Holder estimates and whole
   matrix-valued closure from entrywise control, plus finite product-cylinder
-  local primitive-estimate and primitive-difference bridges that globalize the
-  compact schematic RHS closure and RHS difference closure before extracting
-  determinant lower bounds, plus product-cylinder metric-control bridges for
+  local primitive-estimate and primitive-difference bridges, and compact
+  point-local product-cylinder variants for the same schematic RHS and RHS
+  difference closures, before extracting determinant lower bounds, plus
+  product-cylinder metric-control bridges for
   the function-level bounded-difference estimate, including finite-family
   variants with one shared lower bound.  The companion
   `AnalyticPDE/Parabolic/LocalFrameGram.lean` module connects compact
