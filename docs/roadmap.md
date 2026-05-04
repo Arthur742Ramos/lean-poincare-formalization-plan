@@ -909,7 +909,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       Lipschitz-on-restricted-`Icc` specialization for local estimates. The
       Picard layer packages the same restricted-estimate hypothesis into a
       state-preserving local solution with terminal control and open-common
-      uniqueness. The same
+      uniqueness, and the finite-cover positive-definite and symmetric
+      Riemannian metric-locus carriers expose that restricted-estimate route
+      directly. The same
       model ODE bridge now packages the tangent-map variational equation
       `A'(t) = Df(t, flow(t)) ∘ A(t)` in `VariationalLocalFlowSolution`, matching
       the remaining coordinate-model `A`-derivative hypothesis, and proves

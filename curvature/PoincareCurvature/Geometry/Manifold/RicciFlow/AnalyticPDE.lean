@@ -1554,6 +1554,58 @@ theorem exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn_I
       x0 et het Kc hKc Ko hKo hKoEq hcover)
     hg₀ hLip
 
+/-- Interval-scoped positive-definite state-set bridge for local estimates supplied on every
+prescribed shorter terminal.  The conclusion is open-common-interval uniqueness, matching the
+largest interval that can be reconstructed from all shorter closed readouts. -/
+theorem exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn_restricted_Icc
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {g₀ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩ g₀ a 0 L Kpic)
+    (hg₀ : g₀ ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hLip : ∀ {S : ℝ}, t₀ < S → S ≤ T → ∀ t ∈ Icc t₀ S, LipschitzOnWith Kstate
+      (A t) (positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover)) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (positiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+      sol.terminalTime ≤ T ∧
+      ∀ sol' : BanachEvolutionLocalSolutionIn A
+          (positiveDefiniteLocus (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+        EqOn sol.curve sol'.curve (Ico t₀ (min sol.terminalTime sol'.terminalTime)) := by
+  letI : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) := hcomplete
+  exact IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isOpen_restricted_Icc
+    (F := A) (stateSet := positiveDefiniteLocus (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover) hT hA
+    (isOpen_setOf_forall_pos (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover)
+    hg₀ hLip
+
 /-- Interval-scoped symmetric metric-locus bridge retaining the terminal-time bound supplied by
 the Picard interval. -/
 theorem exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lipschitzOn_Icc_terminal_le
@@ -1596,6 +1648,60 @@ theorem exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lips
   letI : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
       et Kc hKc Ko hKo hKoEq hcover) := hcomplete
   exact @IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isOpen_Icc_terminal_le
+    (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedAddCommGroupSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instNormedSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    (instCompleteSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
+    A
+    (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    t₀ T hT g₀ a L Kpic Kstate hA
+    (isOpen_riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover)
+    hg₀ hLip
+
+/-- Interval-scoped symmetric metric-locus bridge for local estimates supplied on every prescribed
+shorter terminal.  It keeps the constructed solution inside the selected Picard interval and gives
+uniqueness on the open common interval. -/
+theorem exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lipschitzOn_restricted_Icc
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    {A : ℝ → symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover →
+      symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {g₀ : symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩ g₀ a 0 L Kpic)
+    (hg₀ : g₀ ∈ riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hLip : ∀ {S : ℝ}, t₀ < S → S ≤ T → ∀ t ∈ Icc t₀ S, LipschitzOnWith Kstate
+      (A t) (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover)) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+      sol.terminalTime ≤ T ∧
+      ∀ sol' : BanachEvolutionLocalSolutionIn A
+          (riemannianMetricLocusSubmodule (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
+        EqOn sol.curve sol'.curve (Ico t₀ (min sol.terminalTime sol'.terminalTime)) := by
+  letI : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) := hcomplete
+  exact @IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isOpen_restricted_Icc
     (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
     (instNormedAddCommGroupSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
     (instNormedSpaceSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)

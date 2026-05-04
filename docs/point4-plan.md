@@ -1599,6 +1599,10 @@ existence theorem: an open state set and restricted-terminal Lipschitz estimates
 produce a state-preserving local solution with terminal control and uniqueness
 on the open common interval. The continuous space-time package now forgets to
 `LocalFlowSolution` and inherits the same uniqueness bridges directly.
+The finite-cover metric-locus layer also has positive-definite and symmetric
+Riemannian-metric-locus specializations of this restricted-estimate theorem, so
+future parabolic estimates can be supplied terminal-by-terminal while still
+returning terminal control and open-common uniqueness.
 What remains is the genuinely manifold-level lift: pass intrinsic DeTurck vector
 fields to these chartwise Banach ODE hypotheses, prove compatibility/gluing and
 invertibility of the local flow, and upgrade the result to the bundled `C³`
@@ -1985,7 +1989,9 @@ to full arbitrary-overlap uniqueness is still open, but the base Banach ODE
 layer now supplies the missing order-theoretic bridge from restricted terminals
 to the open common interval for both bare and state-preserving solutions, and
 the Picard layer has the matching restricted-estimate existence/uniqueness
-theorem with open-common uniqueness.
+theorem with open-common uniqueness. The same restricted-estimate route is now
+available directly for the finite-cover positive-definite locus and symmetric
+Riemannian metric-locus submodule.
 The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient
