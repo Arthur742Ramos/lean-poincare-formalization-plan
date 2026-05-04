@@ -1124,7 +1124,15 @@ derivative follows. The concrete ODE data for this remainder is now exposed:
 continuity, and right-derivative hypotheses. The forward-time wrappers
 `flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_forward_Icc` and
 `..._of_mem_ball` leave only the actual Taylor/Lipschitz bound on
-`spatialRemainderDeriv`. The corresponding
+`spatialRemainderDeriv`. This bound is now algebraically reduced to the
+vector-field Taylor remainder itself:
+`spatialRemainderDeriv_eq_fieldRemainder_add`,
+`norm_spatialRemainderDeriv_le_of_fieldRemainder_bound`, and
+`flow_timeSlice_hasFDerivAt_of_fieldRemainder_bound_forward_Icc_of_mem_ball`
+show that a bound for
+`f(τ, flow(x+h,τ)) - f(τ, flow(x,τ)) - Df(τ, flow(x,τ))(flow(x+h,τ)-flow(x,τ))`,
+together with an operator-norm bound for `Df` along the base flow, gives the
+ordinary time-slice derivative. The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
 `ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall`

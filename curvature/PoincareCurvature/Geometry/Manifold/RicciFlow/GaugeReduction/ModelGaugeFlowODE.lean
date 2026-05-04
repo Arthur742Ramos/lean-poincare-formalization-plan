@@ -4553,6 +4553,54 @@ def spatialRemainderDeriv
   f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
     (((Df τ (α.flow (x, τ))).comp (α.tangent x τ)) h)
 
+/-- Algebraic decomposition of the spatial-remainder derivative into the
+vector-field first-order Taylor remainder plus `Df` applied to the flow
+remainder. -/
+theorem spatialRemainderDeriv_eq_fieldRemainder_add
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (x h : V) (τ : ℝ) :
+    α.spatialRemainderDeriv x h τ =
+      (f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+        (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))) +
+        (Df τ (α.flow (x, τ))) (α.spatialRemainder x h τ) := by
+  simp [spatialRemainderDeriv, spatialRemainder, map_sub]
+
+/-- Norm estimate for the spatial-remainder derivative from a first-order
+Taylor remainder bound for the vector field and an operator-norm bound for
+`Df` along the base flow. -/
+theorem norm_spatialRemainderDeriv_le_of_fieldRemainder_bound
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x h : V} {τ K ε : ℝ}
+    (hD_bound : ‖Df τ (α.flow (x, τ))‖ ≤ K)
+    (hfield : ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+        (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖ ≤ ε) :
+    ‖α.spatialRemainderDeriv x h τ‖ ≤
+      K * ‖α.spatialRemainder x h τ‖ + ε := by
+  let fieldRemainder : V :=
+    f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+      (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))
+  let D : V →L[ℝ] V := Df τ (α.flow (x, τ))
+  have hdecomp : α.spatialRemainderDeriv x h τ =
+      fieldRemainder + D (α.spatialRemainder x h τ) := by
+    simpa [fieldRemainder, D] using
+      α.spatialRemainderDeriv_eq_fieldRemainder_add x h τ
+  have hD_apply :
+      ‖D (α.spatialRemainder x h τ)‖ ≤
+        K * ‖α.spatialRemainder x h τ‖ := by
+    calc
+      ‖D (α.spatialRemainder x h τ)‖
+          ≤ ‖D‖ * ‖α.spatialRemainder x h τ‖ :=
+            ContinuousLinearMap.le_opNorm D (α.spatialRemainder x h τ)
+      _ ≤ K * ‖α.spatialRemainder x h τ‖ := by
+            gcongr
+  calc
+    ‖α.spatialRemainderDeriv x h τ‖
+        = ‖fieldRemainder + D (α.spatialRemainder x h τ)‖ := by
+          rw [hdecomp]
+    _ ≤ ‖fieldRemainder‖ + ‖D (α.spatialRemainder x h τ)‖ := norm_add_le _ _
+    _ ≤ ε + K * ‖α.spatialRemainder x h τ‖ := add_le_add hfield hD_apply
+    _ = K * ‖α.spatialRemainder x h τ‖ + ε := by ring
+
 /-- The first-order spatial remainder vanishes at the base time whenever both
 initial data lie in the Picard ball. -/
 theorem spatialRemainder_initial_eq
@@ -4712,6 +4760,30 @@ theorem flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_forward_Icc_of
     (ball_subset_closedBall hx) ht hη
     (eventually_add_mem_closedBall_of_mem_ball (x₀ := x₀) (r := r) hx)
     hderiv_bound
+
+/-- Forward-time spatial derivative criterion reduced to the vector-field Taylor
+remainder along the base and perturbed flow curves. -/
+theorem flow_timeSlice_hasFDerivAt_of_fieldRemainder_bound_forward_Icc_of_mem_ball
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    {η : V → ℝ≥0}
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hD_bound : ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+      ‖Df τ (α.flow (x, τ))‖ ≤ K)
+    (hfield_bound : ∀ᶠ h in 𝓝 (0 : V),
+      ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+        ‖f τ (α.flow (x + h, τ)) - f τ (α.flow (x, τ)) -
+          (Df τ (α.flow (x, τ))) (α.flow (x + h, τ) - α.flow (x, τ))‖ ≤
+          (η h : ℝ) * ‖h‖) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  refine α.flow_timeSlice_hasFDerivAt_of_spatialRemainderDeriv_bound_forward_Icc_of_mem_ball
+    (K := K) hx ht hη ?_
+  filter_upwards [hfield_bound] with h hfield_h
+  intro τ hτ
+  exact α.norm_spatialRemainderDeriv_le_of_fieldRemainder_bound
+    (hD_bound τ hτ) (hfield_h τ hτ)
 
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is
