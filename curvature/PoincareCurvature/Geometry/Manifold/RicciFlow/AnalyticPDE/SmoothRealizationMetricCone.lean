@@ -291,6 +291,112 @@ theorem RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localMetricCo
         (M := M) (F := F) (I := I) (D := D)
         hT' hT'le ha'le htime sol₁ sol₂ ht hσ
 
+/-- A positive-radius ambient interval closure package selects one standard
+metric-cone shrink and gives both clipped local metric/connection uniqueness
+readouts, plus full-common-interval readouts when the selected shrink contains
+the common candidate terminal. -/
+theorem RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localMetricConnectionReadout_with_fullCommon
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : RicciDeTurckChartClosureDataOnIcc x0 et het Kc hKc Ko hKo hKoEq hcover chart)
+    (ha : 0 < a) :
+    ∃ (T' : ℝ) (a' : ℝ≥0) (hT' : ivp.initialTime < T') (hT'le : T' ≤ T)
+      (ha' : a' ≤ a)
+      (htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+        a' - (0 : ℝ≥0))
+      (hball : Metric.closedBall
+        (InitialValueProblem.toSymmetricSectionSubmodule
+          (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) (a' : ℝ) ⊆
+        riemannianMetricLocusSubmodule (M := M) (F := F)
+          (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover),
+      0 < a' ∧
+        (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+            (E := F) (H := H) (I := I) (M := M) ivp) {t : ℝ},
+          t ∈ Icc ivp.initialTime (min (min sol₁.1.terminalTime sol₂.1.terminalTime) T') →
+          ∀ (x : M) (u v : TangentSpace I x),
+            metricTensor (I := I) (M := M)
+              sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+                metricTensor (I := I) (M := M)
+                  sol₂.1.toIntrinsicDeTurckSolution.metric t x u v) ∧
+        (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+            (E := F) (H := H) (I := I) (M := M) ivp) {t : ℝ},
+          t ∈ Icc ivp.initialTime (min (min sol₁.1.terminalTime sol₂.1.terminalTime) T') →
+          ∀ {x : M} {σ : Π y : M, TangentSpace I y},
+            MDiffAt (T% σ) x →
+            sol₁.1.canonicalConnection
+              (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+              sol₂.1.canonicalConnection
+                (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2)
+                t σ x) ∧
+        (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+            (E := F) (H := H) (I := I) (M := M) ivp),
+          min sol₁.1.terminalTime sol₂.1.terminalTime ≤ T' → ∀ {t : ℝ},
+          t ∈ Icc ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime) →
+          ∀ (x : M) (u v : TangentSpace I x),
+            metricTensor (I := I) (M := M)
+              sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+                metricTensor (I := I) (M := M)
+                  sol₂.1.toIntrinsicDeTurckSolution.metric t x u v) ∧
+        (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+            (E := F) (H := H) (I := I) (M := M) ivp),
+          min sol₁.1.terminalTime sol₂.1.terminalTime ≤ T' → ∀ {t : ℝ},
+          t ∈ Icc ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime) →
+          ∀ {x : M} {σ : Π y : M, TangentSpace I y},
+            MDiffAt (T% σ) x →
+            sol₁.1.canonicalConnection
+              (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+              sol₂.1.canonicalConnection
+                (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2)
+                t σ x) := by
+  rcases chart.exists_metricCone_shrink_parameters
+      (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover ha with
+    ⟨T', a', hT', hT'le, ha'pos, ha'le, htime, hball⟩
+  refine ⟨T', a', hT', hT'le, ha'le, htime, hball, ha'pos, ?_, ?_, ?_, ?_⟩
+  · intro sol₁ sol₂ t ht x u v
+    exact
+      RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier
+        (M := M) (F := F) (I := I) (D := D)
+        hT' hT'le ha'le htime sol₁ sol₂ ht x u v
+  · intro sol₁ sol₂ t ht x σ hσ
+    exact
+      RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier
+        (M := M) (F := F) (I := I) (D := D)
+        hT' hT'le ha'le htime sol₁ sol₂ ht hσ
+  · intro sol₁ sol₂ hcommonT t ht x u v
+    have htclip :
+        t ∈ Icc ivp.initialTime (min (min sol₁.1.terminalTime sol₂.1.terminalTime) T') := by
+      simpa [min_eq_left hcommonT] using ht
+    exact
+      RicciDeTurckChartClosureDataOnIcc.metric_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier
+        (M := M) (F := F) (I := I) (D := D)
+        hT' hT'le ha'le htime sol₁ sol₂ htclip x u v
+  · intro sol₁ sol₂ hcommonT t ht x σ hσ
+    have htclip :
+        t ∈ Icc ivp.initialTime (min (min sol₁.1.terminalTime sol₂.1.terminalTime) T') := by
+      simpa [min_eq_left hcommonT] using ht
+    exact
+      RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_interval_clipped_shrink_of_shrunk_symmetricCarrier
+        (M := M) (F := F) (I := I) (D := D)
+        hT' hT'le ha'le htime sol₁ sol₂ htclip hσ
+
 /-- A positive-radius ambient interval closure package selects one standard metric-cone shrink and
 returns both closure-theorem-package consequences, conditional on terminal fit, and the clipped
 local metric/connection uniqueness readouts, which do not require terminal fit. -/

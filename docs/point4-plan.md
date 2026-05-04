@@ -1468,7 +1468,10 @@ upgrade the same local metric readout to equality of the canonical
 chosen-background connections on the visible overlap.  The bundled
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localMetricConnectionReadout`
 selects one metric-cone shrink and returns both the clipped metric equality and
-the clipped connection equality on that same visible overlap.  The stronger
+the clipped connection equality on that same visible overlap, while
+`RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localMetricConnectionReadout_with_fullCommon`
+returns the same selected-shrink clipped readouts together with the conditional
+full-common-interval metric and connection readouts.  The stronger
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_localMetricConnectionReadout`
 uses the same selected shrink for the terminal-fit theorem-package handoff and
 for both no-terminal-fit local uniqueness readouts.

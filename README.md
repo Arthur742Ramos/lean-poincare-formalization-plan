@@ -371,7 +371,9 @@ packages the canonical stationary local solution attached to
   `[t₀, min (min T₁ T₂) T']`, with a named full-common-interval metric and
   connection readout when `min T₁ T₂ ≤ T'`; `SmoothRealizationMetricCone.lean` now
   exposes the no-terminal-fit clipped uniqueness readout directly from
-  the standard positive-radius metric-cone shrink. The same clipped local route
+  the standard positive-radius metric-cone shrink, including a selected-shrink
+  package that also returns the conditional full-common-interval readouts. The
+  same clipped local route
   now also upgrades metric equality to equality of the canonical chosen-background
   connections, with a metric-cone readout that selects the shrink and returns
   the connection equality on the visible overlap, plus a bundled metric-cone
