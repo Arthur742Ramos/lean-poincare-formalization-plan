@@ -1220,6 +1220,12 @@ same gluing-ready concrete patches as the forward route:
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius`
 and
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius`.
+The same componentwise estimates now also have localized backward-interior
+readouts on a shrunk Picard interval, including the neighborhood-map equality,
+open-partial-homeomorphism package, bijective open patch, and positive
+source-ball patch, via the corresponding
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_*_of_hasFDerivWithinAt_backward_Ioo_of_le_radius`
+family.
 This strict derivative input has now been reduced one step further in the model
 layer: `flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt` uses
 Mathlib's real `C¹`-implies-strict-differentiability theorem, so ordinary
