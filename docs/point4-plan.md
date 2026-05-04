@@ -1655,7 +1655,12 @@ needed for that lift: at any time where the time set is a neighborhood, a raw
 membership in the preferred tangent trivialization centered at `Φ_t(x)`. The
 same continuity and chart-membership facts are also available directly within
 the raw time set, matching the restricted intervals produced by local ODE
-theorems before any neighborhood-of-time strengthening is known. For explicit
+theorems before any neighborhood-of-time strengthening is known. Raw,
+fixed-IVP, and theorem-family gauge-flow witnesses now also expose fixed-chart
+derivative, continuity, vector-field-congruence, and eventual source-membership
+readouts for any preferred chart whose source contains the time-slice image,
+which is the finite-cover shape needed for chartwise model-ODE and overlap
+arguments. For explicit
 open Picard time sets, the fixed-IVP and theorem-family raw existence APIs now
 combine the `Ioo` identification with those ordinary-time derivative,
 continuity, and chart-source readouts directly, in both unsimplified
