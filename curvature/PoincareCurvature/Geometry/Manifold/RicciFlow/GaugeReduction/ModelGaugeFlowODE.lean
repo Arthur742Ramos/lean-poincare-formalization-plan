@@ -4445,6 +4445,20 @@ theorem tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo_apply
       α.tangent x t v :=
   rfl
 
+/-- A full space-time Fréchet derivative of the packaged flow restricts to the
+fixed-time spatial derivative after precomposing with the spatial inclusion
+`v ↦ (v, 0)`.  This is the product-coordinate adapter needed when a smooth
+dependence theorem returns derivatives of `(y, τ) ↦ flow (y, τ)`. -/
+theorem flow_timeSlice_hasFDerivAt_of_hasFDerivAt_spaceTime
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} {t : ℝ} {F' : V × ℝ →L[ℝ] V}
+    (hF : HasFDerivAt α.flow F' (x, t))
+    (hspatial : F'.comp (ContinuousLinearMap.inl ℝ V ℝ) = α.tangent x t) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  have hslice := hF.comp x (hasFDerivAt_prodMk_left (𝕜 := ℝ) x t)
+  simpa [hspatial] using hslice
+
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is
 the model-side bridge that lets Picard arguments target ordinary spatial
@@ -4459,6 +4473,26 @@ theorem flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt
     HasStrictFDerivAt (fun y : V => α.flow (y, t))
       (α.tangent x t : V →L[ℝ] V) x :=
   hasStrictFDerivAt_of_hasFDerivAt_of_continuousAt hder hcont
+
+/-- Space-time derivative form of the `C¹`-to-strict bridge.  If, for nearby
+initial data `y`, the full space-time flow has a Fréchet derivative whose
+spatial component is `α.tangent y t`, then continuity of the tangent map in
+`y` upgrades the fixed-time slice to strict differentiability at `x`. -/
+theorem flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt_spaceTime
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {x : V} {t : ℝ}
+    (hder : ∀ᶠ y in 𝓝 x, ∃ F' : V × ℝ →L[ℝ] V,
+      HasFDerivAt α.flow F' (y, t) ∧
+        F'.comp (ContinuousLinearMap.inl ℝ V ℝ) = α.tangent y t)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) x) :
+    HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  have hslice : ∀ᶠ y in 𝓝 x,
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y := by
+    filter_upwards [hder] with y hy
+    rcases hy with ⟨F', hF, hspatial⟩
+    exact α.flow_timeSlice_hasFDerivAt_of_hasFDerivAt_spaceTime hF hspatial
+  exact α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hslice hcont
 
 /-- If the time-`t` base-flow slice is strictly differentiable in the initial
 condition with derivative equal to the variational tangent map, then the

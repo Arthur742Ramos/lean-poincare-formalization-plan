@@ -1094,7 +1094,11 @@ layer: `flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt` uses
 Mathlib's real `C¹`-implies-strict-differentiability theorem, so ordinary
 spatial derivatives of nearby time slices plus continuity of
 `y ↦ α.tangent y t` imply the strict derivative required by the inverse
-function theorem. The corresponding
+function theorem. `flow_timeSlice_hasFDerivAt_of_hasFDerivAt_spaceTime` and
+`flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt_spaceTime` also
+accept full space-time Fréchet derivatives of `(y, τ) ↦ flow (y, τ)`, extracting
+the fixed-time spatial derivative by precomposing with the spatial inclusion
+`v ↦ (v,0)`. The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
 `ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall`
