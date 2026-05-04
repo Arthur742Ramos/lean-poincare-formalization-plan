@@ -1409,7 +1409,13 @@ chart into equality of the underlying manifold maps, while
 `eqOn_lifted_models_same_target_of_model_eqOn`,
 `eqOn_symm_image_of_openPartialHomeomorph_lifted_model_eqOn`, and
 `eqOn_lifted_models_of_common_target_chart_eqOn` cover the chart-lifted model
-forms expected from local-flow uniqueness on overlaps.  The
+forms expected from local-flow uniqueness on overlaps.  The model ODE layer now
+also composes its common-`Ioo` inverse-function theorem with this chart lift:
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_bijOn_common_Ioo_of_hasStrictFDerivAt`
+and
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_bijOn_common_Ioo_of_eventually_hasFDerivAt`
+turn the model time-slice local inverse theorem directly into a manifold-side
+open `BijOn` patch for `z ↦ e₁.symm (α.flow (e₀ z, t))`.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
