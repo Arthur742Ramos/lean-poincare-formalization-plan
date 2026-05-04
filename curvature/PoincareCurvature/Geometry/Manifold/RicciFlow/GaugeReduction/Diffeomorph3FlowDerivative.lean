@@ -296,6 +296,66 @@ theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.toChartDerivativeOn
   · simpa [y, extChartAt_source] using hsource_center
   · simpa [y] using hcenter
 
+/-- Build within-time-set fixed-chart intrinsic ODE data from fixed-chart
+derivative data for a model vector field identified with the intrinsic DeTurck
+gauge field along the flow. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.of_vectorField_eq
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s : Set ℝ}
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hmem : ∀ t ∈ s, ∀ x : M,
+      (Φ t) x ∈ (extChartAt I (chartCenter t x)).source)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+          (extChartAt I (chartCenter t x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (chartCenter t x)) ((Φ τ) x))
+        (tangentCoordChange I ((Φ t) x) (chartCenter t x) ((Φ t) x)
+          (Y t ((Φ t) x))) s t)
+    (hY : ∀ t ∈ s, ∀ x : M,
+      Y t ((Φ t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) Φ g background chartCenter s := by
+  intro t ht x
+  exact ⟨hmem t ht x, hsource t ht x, by simpa [hY t ht x] using hderiv t ht x⟩
+
+/-- Build within-time-set fixed-chart intrinsic ODE data from fixed-chart
+derivative data for a model vector field identified with the intrinsic DeTurck
+gauge field along the flow in the relative time-set filter. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.of_vectorField_eq_nhdsWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s : Set ℝ}
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hmem : ∀ t ∈ s, ∀ x : M,
+      (Φ t) x ∈ (extChartAt I (chartCenter t x)).source)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+          (extChartAt I (chartCenter t x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (chartCenter t x)) ((Φ τ) x))
+        (tangentCoordChange I ((Φ t) x) (chartCenter t x) ((Φ t) x)
+          (Y t ((Φ t) x))) s t)
+    (hY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+      Y τ ((Φ τ) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background τ ((Φ τ) x)) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) Φ g background chartCenter s := by
+  intro t ht x
+  have hYt_all : ∀ x : M,
+      Y t ((Φ t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x) :=
+    mem_of_mem_nhdsWithin ht (hY t ht)
+  exact ⟨hmem t ht x, hsource t ht x, by simpa [hYt_all x] using hderiv t ht x⟩
+
 /-- Ordinary-at-time derivative form of the intrinsic DeTurck gauge-flow equation
 for a `C^3` diffeomorphism family, restricted to times in `s`.
 
@@ -494,6 +554,66 @@ theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.toChartDerivative
   refine ⟨?_, ?_⟩
   · simpa [y, extChartAt_source] using hsource_center
   · simpa [y] using hcenter
+
+/-- Build ordinary fixed-chart intrinsic ODE data from ordinary fixed-chart
+derivative data for a model vector field identified with the intrinsic DeTurck
+gauge field along the flow. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.of_vectorField_eq
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s : Set ℝ}
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hmem : ∀ t ∈ s, ∀ x : M,
+      (Φ t) x ∈ (extChartAt I (chartCenter t x)).source)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+          (extChartAt I (chartCenter t x)).source ∈ 𝓝 t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I (chartCenter t x)) ((Φ τ) x))
+        (tangentCoordChange I ((Φ t) x) (chartCenter t x) ((Φ t) x)
+          (Y t ((Φ t) x))) t)
+    (hY : ∀ t ∈ s, ∀ x : M,
+      Y t ((Φ t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) Φ g background chartCenter s := by
+  intro t ht x
+  exact ⟨hmem t ht x, hsource t ht x, by simpa [hY t ht x] using hderiv t ht x⟩
+
+/-- Build ordinary fixed-chart intrinsic ODE data from ordinary fixed-chart
+derivative data for a model vector field identified with the intrinsic DeTurck
+gauge field along the flow in the relative time-set filter. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.of_vectorField_eq_nhdsWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s : Set ℝ}
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hmem : ∀ t ∈ s, ∀ x : M,
+      (Φ t) x ∈ (extChartAt I (chartCenter t x)).source)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+          (extChartAt I (chartCenter t x)).source ∈ 𝓝 t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I (chartCenter t x)) ((Φ τ) x))
+        (tangentCoordChange I ((Φ t) x) (chartCenter t x) ((Φ t) x)
+          (Y t ((Φ t) x))) t)
+    (hY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+      Y τ ((Φ τ) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background τ ((Φ τ) x)) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) Φ g background chartCenter s := by
+  intro t ht x
+  have hYt_all : ∀ x : M,
+      Y t ((Φ t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x) :=
+    mem_of_mem_nhdsWithin ht (hY t ht)
+  exact ⟨hmem t ht x, hsource t ht x, by simpa [hYt_all x] using hderiv t ht x⟩
 
 /-- Build within-time-set intrinsic derivative data from derivative data for a model vector field,
 once that vector field is identified with the intrinsic DeTurck gauge field along the flow. -/

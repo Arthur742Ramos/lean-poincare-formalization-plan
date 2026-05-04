@@ -1671,8 +1671,12 @@ feed the raw existence layer through
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccFixedChartDerivative` and
 `IntrinsicDeTurckGaugeFlowExistenceFamily.ofPicardIccFixedChartDerivative`
 expose the same finite-cover handoff for fixed-IVP and theorem-family theorem
-packages. For explicit
-open Picard time sets, the fixed-IVP and theorem-family raw existence APIs now
+packages. The fixed-chart bridge now also accepts auxiliary model-vector-field
+ODE data once that field is identified with the intrinsic DeTurck gauge field
+along the candidate flow: the derivative layer, raw open-Picard constructor,
+fixed-IVP constructor, and theorem-family constructor all expose pointwise and
+closed-interval relative-filter variants of this handoff. For explicit open
+Picard time sets, the fixed-IVP and theorem-family raw existence APIs now
 combine the `Ioo` identification with those ordinary-time derivative,
 continuity, and chart-source readouts directly, in both unsimplified
 preferred-chart and centered chart forms; the same no-extra-neighborhood
