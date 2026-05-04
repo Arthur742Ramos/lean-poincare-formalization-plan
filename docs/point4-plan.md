@@ -1388,9 +1388,16 @@ homeomorphism charts, while
 `exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph_model_mapsTo_injOn`
 and
 `exists_open_nhds_bijOn_of_openPartialHomeomorph_model_bijOn` return open
-manifold-side patches.  The remaining lift must still supply the chart-domain
-shrinking/source-membership hypotheses and combine these local patches with
-manifold-level flow compatibility before producing `C³` diffeomorphism slices.
+manifold-side patches for an already-defined uncharted map.  The same section
+also has the dual lifted-model route,
+`mapsTo_symm_image_of_openPartialHomeomorph_lifted_model_mapsTo`,
+`injOn_symm_image_of_openPartialHomeomorph_lifted_model_injOn`,
+`bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn`, and the two
+corresponding `exists_open_nhds_*_lifted_model_*` patch readouts, for maps
+defined as `e₁.symm ∘ G ∘ e₀` from a chartwise Picard time-slice `G`.  The
+remaining lift must still supply the chart-domain shrinking/source-membership
+hypotheses and combine these local patches with manifold-level flow
+compatibility before producing `C³` diffeomorphism slices.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,

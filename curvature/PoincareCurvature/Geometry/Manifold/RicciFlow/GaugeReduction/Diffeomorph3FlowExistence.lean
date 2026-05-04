@@ -125,6 +125,102 @@ theorem exists_open_nhds_bijOn_of_openPartialHomeomorph_model_bijOn
     bijOn_symm_image_of_openPartialHomeomorph_model_bijOn
       e₀ e₁ F hWt hFsource hbij⟩
 
+/-- If a manifold-side map is defined by pulling a model map back through two
+partial homeomorphism charts, model-space `MapsTo` transports directly. -/
+theorem mapsTo_symm_image_of_openPartialHomeomorph_lifted_model_mapsTo
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (G : Y → Y) {U W : Set Y}
+    (hUt : U ⊆ e₀.target)
+    (hmaps : MapsTo G U W) :
+    MapsTo (fun x : X ↦ e₁.symm (G (e₀ x))) (e₀.symm '' U) (e₁.symm '' W) := by
+  rintro _ ⟨y, hyU, rfl⟩
+  exact ⟨G y, hmaps hyU, by simpa [e₀.right_inv (hUt hyU)]⟩
+
+/-- If a manifold-side map is defined by pulling a model map back through two
+partial homeomorphism charts, model-space injectivity transports directly. -/
+theorem injOn_symm_image_of_openPartialHomeomorph_lifted_model_injOn
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (G : Y → Y) {U W : Set Y}
+    (hUt : U ⊆ e₀.target) (hWt : W ⊆ e₁.target)
+    (hmaps : MapsTo G U W) (hinj : InjOn G U) :
+    InjOn (fun x : X ↦ e₁.symm (G (e₀ x))) (e₀.symm '' U) := by
+  rintro _ ⟨y, hyU, rfl⟩ _ ⟨z, hzU, rfl⟩ hF
+  congr 1
+  apply hinj hyU hzU
+  have hcong := congrArg e₁ hF
+  simpa [e₀.right_inv (hUt hyU), e₀.right_inv (hUt hzU),
+    e₁.right_inv (hWt (hmaps hyU)), e₁.right_inv (hWt (hmaps hzU))] using hcong
+
+/-- If a manifold-side map is defined by pulling a model map back through two
+partial homeomorphism charts, a model-space bijective patch transports
+directly. -/
+theorem bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (G : Y → Y) {U W : Set Y}
+    (hUt : U ⊆ e₀.target) (hWt : W ⊆ e₁.target)
+    (hbij : BijOn G U W) :
+    BijOn (fun x : X ↦ e₁.symm (G (e₀ x))) (e₀.symm '' U) (e₁.symm '' W) := by
+  refine ⟨
+    mapsTo_symm_image_of_openPartialHomeomorph_lifted_model_mapsTo
+      e₀ e₁ G hUt hbij.mapsTo,
+    injOn_symm_image_of_openPartialHomeomorph_lifted_model_injOn
+      e₀ e₁ G hUt hWt hbij.mapsTo hbij.injOn,
+    ?_⟩
+  rintro _ ⟨w, hwW, rfl⟩
+  rcases hbij.surjOn hwW with ⟨y, hyU, hyw⟩
+  refine ⟨e₀.symm y, ⟨y, hyU, rfl⟩, ?_⟩
+  simpa [e₀.right_inv (hUt hyU), hyw]
+
+/-- Open local `MapsTo`/`InjOn` patch for a map obtained by pulling a model map
+back through source and target partial homeomorphism charts. -/
+theorem exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph_lifted_model_mapsTo_injOn
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (G : Y → Y) {x : X} {U W : Set Y}
+    (hxsource : x ∈ e₀.source)
+    (hUopen : IsOpen U) (hUt : U ⊆ e₀.target) (hxU : e₀ x ∈ U)
+    (hWopen : IsOpen W) (hWt : W ⊆ e₁.target)
+    (hmaps : MapsTo G U W) (hinj : InjOn G U) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ IsOpen Wm ∧
+        (fun z : X ↦ e₁.symm (G (e₀ z))) x ∈ Wm ∧
+        MapsTo (fun z : X ↦ e₁.symm (G (e₀ z))) Um Wm ∧
+          InjOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um := by
+  let Um : Set X := e₀.symm '' U
+  let Wm : Set X := e₁.symm '' W
+  have hxUm : x ∈ Um := ⟨e₀ x, hxU, e₀.left_inv hxsource⟩
+  have hFxWm : (fun z : X ↦ e₁.symm (G (e₀ z))) x ∈ Wm :=
+    ⟨G (e₀ x), hmaps hxU, rfl⟩
+  exact ⟨Um, Wm,
+    e₀.isOpen_image_symm_of_subset_target hUopen hUt,
+    hxUm,
+    e₁.isOpen_image_symm_of_subset_target hWopen hWt,
+    hFxWm,
+    mapsTo_symm_image_of_openPartialHomeomorph_lifted_model_mapsTo
+      e₀ e₁ G hUt hmaps,
+    injOn_symm_image_of_openPartialHomeomorph_lifted_model_injOn
+      e₀ e₁ G hUt hWt hmaps hinj⟩
+
+/-- Open local bijection patch for a map obtained by pulling a model map back
+through source and target partial homeomorphism charts. -/
+theorem exists_open_nhds_bijOn_of_openPartialHomeomorph_lifted_model_bijOn
+    (e₀ e₁ : OpenPartialHomeomorph X Y) (G : Y → Y) {x : X} {U W : Set Y}
+    (hxsource : x ∈ e₀.source)
+    (hUopen : IsOpen U) (hUt : U ⊆ e₀.target) (hxU : e₀ x ∈ U)
+    (hWopen : IsOpen W) (hWt : W ⊆ e₁.target)
+    (hbij : BijOn G U W) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ IsOpen Wm ∧
+        (fun z : X ↦ e₁.symm (G (e₀ z))) x ∈ Wm ∧
+          BijOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um Wm := by
+  let Um : Set X := e₀.symm '' U
+  let Wm : Set X := e₁.symm '' W
+  have hxUm : x ∈ Um := ⟨e₀ x, hxU, e₀.left_inv hxsource⟩
+  have hFxWm : (fun z : X ↦ e₁.symm (G (e₀ z))) x ∈ Wm :=
+    ⟨G (e₀ x), hbij.mapsTo hxU, rfl⟩
+  exact ⟨Um, Wm,
+    e₀.isOpen_image_symm_of_subset_target hUopen hUt,
+    hxUm,
+    e₁.isOpen_image_symm_of_subset_target hWopen hWt,
+    hFxWm,
+    bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn
+      e₀ e₁ G hUt hWt hbij⟩
+
 end OpenPartialHomeomorphTransport
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
