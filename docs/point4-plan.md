@@ -1474,7 +1474,10 @@ returns the same selected-shrink clipped readouts together with the conditional
 full-common-interval metric and connection readouts.  The stronger
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_localMetricConnectionReadout`
 uses the same selected shrink for the terminal-fit theorem-package handoff and
-for both no-terminal-fit local uniqueness readouts.
+for both no-terminal-fit local uniqueness readouts, while
+`RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_localMetricConnectionReadout_with_fullCommon`
+adds the conditional full-common metric and connection readouts to that same
+single-shrink package.
 The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
@@ -1823,7 +1826,9 @@ equality, and the clipped readouts now have full-common-interval companions when
 the chosen shrink covers the two candidate terminals. A single metric-cone
 shrink can return both clipped readouts at once; the same selected shrink can
 now also carry the terminal-fit theorem-package handoff alongside those local
-readouts. The continuation from these local readouts to full arbitrary-overlap
+readouts, and a further readout carries the same theorem-package handoff,
+clipped readouts, and conditional full-common metric/connection readouts
+together. The continuation from these local readouts to full arbitrary-overlap
 uniqueness is still open.
 The density-based
 interval-scoped restricted symmetric carrier is now connected back to the

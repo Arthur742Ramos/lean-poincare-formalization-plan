@@ -804,7 +804,10 @@ now packages the matching intrinsic boundary
      chosen-background package witnesses before any intrinsic or ordinary
      projection. Ambient interval
      closure data also now has proof-level constructors for genuine
-     symmetric-carrier closure, including the metric-cone shrink route. The
+     symmetric-carrier closure, including the metric-cone shrink route; the
+     strongest metric-cone readout now carries the terminal-fit theorem-package
+     handoff, clipped metric/connection uniqueness, and conditional full-common
+     metric/connection uniqueness on one selected shrink. The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
      Riemannian metric locus, with both subtype and ambient-coordinate coe
