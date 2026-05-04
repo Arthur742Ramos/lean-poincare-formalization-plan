@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+public import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 public import Mathlib.Geometry.Manifold.LocalDiffeomorph
 public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 public import Mathlib.Geometry.Manifold.VectorField.LieBracket
@@ -252,6 +253,25 @@ lemma IsTimeDependentIntegralCurveOn.of_hasMFDerivWithinAt
     IsTimeDependentIntegralCurveOn (I := I) (M := M) γ X s :=
   hγ
 
+/-- Reinterpret a Mathlib autonomous manifold integral curve as a time-dependent
+integral curve for the constant-in-time vector field. -/
+lemma IsMIntegralCurveOn.toTimeDependentIntegralCurveOn_const
+    {γ : ℝ → M} {X : Π x : M, TangentSpace I x} {s : Set ℝ}
+    (hγ : IsMIntegralCurveOn (I := I) γ X s) :
+    IsTimeDependentIntegralCurveOn (I := I) (M := M) γ (fun _ ↦ X) s := by
+  intro t ht
+  simpa using hγ t ht
+
+/-- Reinterpret a Mathlib autonomous local manifold integral curve as a
+time-dependent local integral curve for the constant-in-time vector field. -/
+lemma IsMIntegralCurveAt.toTimeDependentIntegralCurveAt_const
+    {γ : ℝ → M} {X : Π x : M, TangentSpace I x} {t₀ : ℝ}
+    (hγ : IsMIntegralCurveAt (I := I) γ X t₀) :
+    IsTimeDependentIntegralCurveAt (I := I) (M := M) γ (fun _ ↦ X) t₀ := by
+  rcases isMIntegralCurveAt_iff.mp hγ with ⟨s, hs, hγs⟩
+  exact ⟨s, hs,
+    IsMIntegralCurveOn.toTimeDependentIntegralCurveOn_const (I := I) (M := M) hγs⟩
+
 lemma IsTimeDependentIntegralCurveAt.hasMFDerivAt
     {γ : ℝ → M}
     {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
@@ -377,6 +397,16 @@ lemma SatisfiesGaugeFlowAt.hasMFDerivAt
     HasMFDerivAt 𝓘(ℝ) I (fun τ : ℝ ↦ Φ τ x) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight <| X t (Φ t x)) :=
   (hΦ x).hasMFDerivAt
+
+/-- A self-map family whose pointwise curves are autonomous Mathlib integral
+curves satisfies the gauge-flow equation for the constant-in-time vector field. -/
+lemma SatisfiesGaugeFlowOn.of_autonomousIntegralCurves
+    {Φ : SmoothSelfMapFamily (I := I) (M := M)}
+    {X : Π x : M, TangentSpace I x} {s : Set ℝ}
+    (hΦ : ∀ x : M, IsMIntegralCurveOn (I := I) (fun t : ℝ ↦ Φ t x) X s) :
+    SatisfiesGaugeFlowOn (I := I) (M := M) Φ (fun _ ↦ X) s := by
+  intro x
+  exact IsMIntegralCurveOn.toTimeDependentIntegralCurveOn_const (I := I) (M := M) (hΦ x)
 
 /-- Reinterpret a gauge-flow family for an equal vector field along the flow image. -/
 lemma SatisfiesGaugeFlowOn.congr_vectorField

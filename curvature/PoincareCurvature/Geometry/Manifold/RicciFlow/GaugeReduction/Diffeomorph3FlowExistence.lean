@@ -1,5 +1,6 @@
 module
 
+public import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative
 
 set_option linter.unusedSectionVars false
@@ -574,6 +575,35 @@ theorem nonempty_of_satisfiesGaugeFlowOn
     Nonempty
       (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_satisfiesGaugeFlowOn maps3 anchored satisfies⟩
+
+/-- Package autonomous Mathlib integral-curve data for a `C³` diffeomorphism
+family as a raw gauge-flow witness for the constant-in-time vector field. -/
+def of_autonomousIntegralCurves
+    {X : Π x : M, TangentSpace I x}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hcurves : ∀ x : M,
+      IsMIntegralCurveOn (I := I) (fun t : ℝ ↦ (maps3 t) x) X s) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s t₀ :=
+  of_satisfiesGaugeFlowOn maps3 anchored (by
+    intro x t ht
+    simpa using hcurves x t ht)
+
+/-- Proof-level raw `C³` gauge-flow existence from autonomous Mathlib
+integral-curve data for a `C³` diffeomorphism family. -/
+theorem nonempty_of_autonomousIntegralCurves
+    {X : Π x : M, TangentSpace I x}
+    {s : Set ℝ} {t₀ : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 t₀)
+    (hcurves : ∀ x : M,
+      IsMIntegralCurveOn (I := I) (fun t : ℝ ↦ (maps3 t) x) X s) :
+    Nonempty
+      (Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s t₀) :=
+  ⟨of_autonomousIntegralCurves maps3 anchored hcurves⟩
 
 /-- Reinterpret a raw `C³` gauge-flow witness for an equal vector field along the flow image. -/
 def congr_vectorField
