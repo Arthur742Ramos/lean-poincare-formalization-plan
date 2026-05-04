@@ -1359,6 +1359,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      returning both metric equality and canonical chosen-background connection
      equality on the visible overlap, plus a stronger single-shrink handoff that
      carries the terminal-fit theorem packages and those local readouts together.
+     It also now has a continuation-facing selected-shrink handoff that combines
+     the terminal-fit theorem packages, prescribed shorter-terminal
+     metric/connection readouts, and conditional full-common readouts; the
+     preferred-cover initial-metric route exposes the same combined package
+     alongside the chart-carrier Banach solution.
      The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the

@@ -2261,6 +2261,145 @@ theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shr
   · exact ⟨Dsym.toIntrinsicLocalExistenceUniqueness⟩
   · exact ⟨Dsym.toLocalExistenceUniqueness⟩
 
+/-- The initial-metric smooth-approximation route can keep the strongest
+continuation-facing readouts on a single selected metric-cone shrink: a
+chart-carrier Banach solution, the terminal-fit theorem-package handoff,
+prescribed shorter-terminal metric/connection uniqueness, and full-common
+readouts when the same shrink contains the common candidate terminal. -/
+theorem TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_initialMetric_chartRestrictedSymmetricA_solution_theoremPackages_localRestrictedMetricConnectionReadout_with_fullCommon
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [SecondCountableTopology H]
+    [ContMDiffVectorBundle 2 F TM I]
+    [ContMDiffVectorBundle (2 : ℕ∞) BilF BilW I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (D : RicciDeTurckChartClosureDataOnIcc x0 et het Kc hKc Ko hKo hKoEq hcover chart)
+    (rhs : SmoothSectionRHSIdentification
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover chart.A)
+    (ha : 0 < a) :
+    ∃ (T' : ℝ) (a' : ℝ≥0) (_hT' : ivp.initialTime < T') (_hT'le : T' ≤ T)
+      (_ha' : a' ≤ a)
+      (_htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+        a' - (0 : ℝ≥0)),
+      ∃ chart' : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover
+        ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T' a' L Kpic Kstate,
+        0 < a' ∧
+          Metric.closedBall
+            (InitialValueProblem.toSymmetricSectionSubmodule
+              (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) (a' : ℝ) ⊆
+            riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+              et Kc hKc Ko hKo hKoEq hcover ∧
+          (∃ sol : BanachEvolutionLocalSolutionIn
+              (chart'.restrictedSymmetricA
+                (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+              (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+                et Kc hKc Ko hKo hKoEq hcover)
+              ivp.initialTime
+              (InitialValueProblem.toSymmetricSectionSubmodule
+                (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+             sol.terminalTime ≤ T' ∧
+             ∀ sol' : BanachEvolutionLocalSolutionIn
+                (chart'.restrictedSymmetricA
+                  (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover)
+                (riemannianMetricLocusSubmodule (M := M) (F := F) (W := TM)
+                  et Kc hKc Ko hKo hKoEq hcover)
+                ivp.initialTime
+                (InitialValueProblem.toSymmetricSectionSubmodule
+                  (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp),
+               EqOn sol.curve sol'.curve
+                 (Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime))) ∧
+          (((∀ candidate : ChosenIntrinsicDeTurckLocalSolution
+              (E := F) (H := H) (I := I) (M := M) ivp,
+            (D.encode candidate).sol.terminalTime ≤ T') →
+            Nonempty (ChosenIntrinsicDeTurckLocalExistenceUniqueness
+              (E := F) (H := H) (I := I) (M := M) ivp) ∧
+            Nonempty (IntrinsicLocalExistenceUniqueness
+              (E := F) (H := H) (I := I) (M := M) ivp) ∧
+            Nonempty (LocalExistenceUniqueness
+              (E := F) (H := H) (I := I) (M := M) ivp)) ∧
+          (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+              (E := F) (H := H) (I := I) (M := M) ivp) {S : ℝ},
+            ivp.initialTime < S → S ≤ sol₁.1.terminalTime →
+            S ≤ sol₂.1.terminalTime → S ≤ T' → ∀ {t : ℝ},
+            t ∈ Icc ivp.initialTime S → ∀ (x : M) (u v : TM x),
+              metricTensor (I := I) (M := M)
+                sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+                  metricTensor (I := I) (M := M)
+                    sol₂.1.toIntrinsicDeTurckSolution.metric t x u v) ∧
+          (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+              (E := F) (H := H) (I := I) (M := M) ivp) {S : ℝ},
+            ivp.initialTime < S → S ≤ sol₁.1.terminalTime →
+            S ≤ sol₂.1.terminalTime → S ≤ T' → ∀ {t : ℝ},
+            t ∈ Icc ivp.initialTime S →
+            ∀ {x : M} {σ : Π y : M, TM y},
+              MDiffAt (T% σ) x →
+              sol₁.1.canonicalConnection
+                (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+                sol₂.1.canonicalConnection
+                  (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2)
+                  t σ x) ∧
+          (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+              (E := F) (H := H) (I := I) (M := M) ivp),
+            min sol₁.1.terminalTime sol₂.1.terminalTime ≤ T' → ∀ {t : ℝ},
+            t ∈ Icc ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime) →
+            ∀ (x : M) (u v : TM x),
+              metricTensor (I := I) (M := M)
+                sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+                  metricTensor (I := I) (M := M)
+                    sol₂.1.toIntrinsicDeTurckSolution.metric t x u v) ∧
+          (∀ (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+              (E := F) (H := H) (I := I) (M := M) ivp),
+            min sol₁.1.terminalTime sol₂.1.terminalTime ≤ T' → ∀ {t : ℝ},
+            t ∈ Icc ivp.initialTime (min sol₁.1.terminalTime sol₂.1.terminalTime) →
+            ∀ {x : M} {σ : Π y : M, TM y},
+              MDiffAt (T% σ) x →
+              sol₁.1.canonicalConnection
+                (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+                sol₂.1.canonicalConnection
+                  (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2)
+                  t σ x)) := by
+  rcases
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc.exists_metricCone_shrunk_specificRHS_initialMetric_chartRestrictedSymmetricA_solution_theoremPackages_localRestrictedMetricConnectionReadout
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover chart D rhs ha with
+    ⟨T', a', hT', hT'le, ha'le, htime, chart', ha'pos, hball,
+      hsolution, hpackages, hmetric, hconnection⟩
+  refine
+    ⟨T', a', hT', hT'le, ha'le, htime, chart', ha'pos, hball,
+      hsolution, hpackages, hmetric, hconnection, ?_, ?_⟩
+  · intro sol₁ sol₂ hcommonT t ht x u v
+    exact hmetric sol₁ sol₂
+      (S := min sol₁.1.terminalTime sol₂.1.terminalTime)
+      (lt_min sol₁.1.initial_lt_terminal sol₂.1.initial_lt_terminal)
+      (min_le_left _ _) (min_le_right _ _) hcommonT ht x u v
+  · intro sol₁ sol₂ hcommonT t ht x σ hσ
+    exact hconnection sol₁ sol₂
+      (S := min sol₁.1.terminalTime sol₂.1.terminalTime)
+      (lt_min sol₁.1.initial_lt_terminal sol₂.1.initial_lt_terminal)
+      (min_le_left _ _) (min_le_right _ _) hcommonT ht hσ
+
 /-- The initial-metric smooth-approximation route can use one selected metric-cone shrink for the
 chart-carrier Banach solution, clipped metric/connection uniqueness, and the corresponding
 full-common readouts whenever the selected shrink contains the common candidate terminal. -/

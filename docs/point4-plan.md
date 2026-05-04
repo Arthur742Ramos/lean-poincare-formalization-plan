@@ -2016,7 +2016,11 @@ selected shrink contains the common candidate terminal. The prescribed-terminal
 companion now also has a terminal-fit theorem-package handoff on that same
 selected shrink, so continuation arguments can keep the Banach solution,
 ambient metric/connection uniqueness, and conditional point-4 theorem packages
-coordinated by one `T'`/`a'` choice. At the vector-bundle
+coordinated by one `T'`/`a'` choice. The same selected-shrink package now also
+combines that terminal-fit theorem-package handoff with the prescribed
+shorter-terminal readouts and the conditional full-common metric/connection
+readouts, both at the raw metric-cone handoff and at the preferred-cover
+initial-metric smooth-approximation route. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives
