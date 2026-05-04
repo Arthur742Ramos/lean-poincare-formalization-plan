@@ -1161,7 +1161,10 @@ existential difference readouts for all four from entrywise controls, and
 schematic RHS `C^{0,α}` difference
 control, and inverse Gram, inverse-principal contraction, inverse-Gram
 Christoffel, and schematic RHS bounded-difference bridges against comparison
-primitive inputs, all with matching spatial-Hölder Gram-entry input forms.
+primitive inputs, all with matching spatial-Hölder Gram-entry input forms; the
+single-frame existential schematic RHS entrywise-difference bridge now also has
+direct spatial-Hölder, unit-diameter, closed-ball, and closed-cylinder
+Gram-entry variants for local chart callers.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
 ## Build

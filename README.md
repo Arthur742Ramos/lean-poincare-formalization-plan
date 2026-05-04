@@ -611,7 +611,9 @@ packages the canonical stationary local solution attached to
   inverse-principal, inverse-Gram Christoffel, and schematic RHS
   bounded-difference, comparison, and entrywise-difference bridges now also have
   unit-diameter, closed-ball, and closed-cylinder spatial-Lipschitz Gram-entry
-  variants for `0 < α ≤ 1`.
+  variants for `0 < α ≤ 1`, and the single-frame existential schematic RHS
+  entrywise-difference bridge now has direct spatial-Hölder, unit-diameter,
+  closed-ball, and closed-cylinder Gram-entry variants for local chart callers.
   The curvature,
   time-dependent geometry, intrinsic Ricci-flow, and
   DeTurck layers now prove the geometric

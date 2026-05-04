@@ -1771,7 +1771,11 @@ primitive inputs, all with matching spatial-Hölder Gram-entry input forms where
 applicable; the inverse-Gram, inverse-principal, inverse-Gram Christoffel, and
 schematic RHS bounded-difference, comparison, and entrywise-difference bridges
 now also have unit-diameter, closed-ball, and
-closed-cylinder spatial-Lipschitz Gram-entry variants for `0 < α ≤ 1`.
+closed-cylinder spatial-Lipschitz Gram-entry variants for `0 < α ≤ 1`, and the
+single-frame existential schematic RHS entrywise-difference bridge now has
+direct spatial-Hölder, unit-diameter, closed-ball, and closed-cylinder
+Gram-entry variants instead of requiring callers to package a singleton
+finite family.
 The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
