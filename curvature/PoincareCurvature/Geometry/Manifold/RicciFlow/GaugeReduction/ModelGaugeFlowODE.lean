@@ -9036,6 +9036,84 @@ theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_op
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx htime htbase ht ht_forward
       hD_bound hDf_lip hder
 
+/-- Localized `r ≤ R` common-subinterval state-preserving product Picard
+bijective open-patch readout with `ℝ≥0` closed-ball estimates. -/
+theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD r' : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧
+        (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+          hf htime ht₀' hr).flow (x, t) ∈ W ∧
+        BijOn
+          (fun y : V =>
+            (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+              hf htime ht₀' hr).flow (y, t)) U W := by
+  rcases exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
+      (f := f) (Df := Df) (hf := hf) htime ht₀' hr hx htbase ht ht_forward
+      hD_bound hDf_lip hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_bijOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+        hf htime ht₀' hr).flow (y, t)) hφ hxφ hyφ
+
+/-- Localized `r ≤ R` common-subinterval state-preserving product Picard
+source-ball readout with `ℝ≥0` closed-ball estimates. -/
+theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD r' : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    ∃ ρ > (0 : ℝ), ∃ W : Set V,
+      IsOpen W ∧
+        (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+          hf htime ht₀' hr).flow (x, t) ∈ W ∧
+        MapsTo
+          (fun y : V =>
+            (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+              hf htime ht₀' hr).flow (y, t)) (ball x ρ) W ∧
+        InjOn
+          (fun y : V =>
+            (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+              hf htime ht₀' hr).flow (y, t)) (ball x ρ) := by
+  rcases exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
+      (f := f) (Df := Df) (hf := hf) htime ht₀' hr hx htbase ht ht_forward
+      hD_bound hDf_lip hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_ball_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductStatePreservingPicardLindelof_restrict_of_le_radius
+        hf htime ht₀' hr).flow (y, t)) hφ hxφ hyφ
+
 /-- `ℝ≥0` closed-ball estimate form of the state-preserving product Picard
 strict time-slice derivative theorem.  This matches the operator-norm bounds
 usually produced by closed-ball Picard estimates. -/

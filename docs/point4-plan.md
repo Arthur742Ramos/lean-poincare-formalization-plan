@@ -1275,7 +1275,12 @@ hide this differentiability bridge. The `r ≤ R` localized state-preserving
 Picard route now also exposes the restricted forward-interior neighborhood-map
 and open-partial-homeomorphism readouts directly, so callers using a shrunk time
 interval do not have to unfold the ambient Picard solution to recover the local
-inverse theorem.
+inverse theorem. The same localized route now also unpacks that local inverse
+package into a bijective open patch and into a positive source-ball
+`MapsTo`/`InjOn` patch through
+`ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius`
+and
+`ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius`.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
@@ -1455,7 +1460,10 @@ operator/identity-ball specializations, so shrinking the Picard interval no
 longer loses the direct closed-state-ball readouts used by the inverse-function
 criteria. Those localized state-preserving routes now also expose common-`Ioo`
 time-slice neighborhood-map and open-partial-homeomorphism readouts directly,
-so chart-local inverse arguments can stay on the shrunk Picard interval. The ODE package
+so chart-local inverse arguments can stay on the shrunk Picard interval; the
+same restricted closed-ball estimate route now exposes the corresponding
+bijective open patch and positive source-ball `MapsTo`/`InjOn` patch without
+unfolding the `OpenPartialHomeomorph`. The ODE package
 now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
 closed-interval and interior vector-slot derivatives for `t ↦ A(t)v` via
