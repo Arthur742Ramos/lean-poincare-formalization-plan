@@ -951,7 +951,14 @@ including the ODE derivative on the closed time interval, initialization on a
 closed ball of initial data, ordinary interior derivative extractors, and
 named continuity on the Picard interval, plus direct time-slice Lipschitz,
 continuity, and distance-estimate readouts for dependence on initial data. The
-Lipschitz package now also proves joint space-time continuity on the local
+Picard extraction now also has a state-preserving Lipschitz-flow selection,
+`toStatePreservingLipschitzLocalFlowSolution`, with
+`exists_lipschitzLocalFlowSolution_mem_closedBall` and product variational
+readouts
+`ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall[_forward_Icc]`,
+so the closed Picard state ball can feed convex state-tube hypotheses without
+reconstructing the fixed-point proof. The Lipschitz package now also proves
+joint space-time continuity on the local
 Picard cylinder from the uniform initial-data Lipschitz estimate and the
 ODE-derived time continuity of each trajectory, and promotes any Lipschitz local
 flow package to the continuous space-time partial-flow form

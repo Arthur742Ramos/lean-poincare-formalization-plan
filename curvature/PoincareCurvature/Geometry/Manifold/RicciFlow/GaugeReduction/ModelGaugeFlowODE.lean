@@ -7538,6 +7538,89 @@ theorem nonempty_lipschitzLocalFlowSolution_restrict
       (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
   ⟨toLipschitzLocalFlowSolution_restrict hf htime ht₀' hr⟩
 
+/-- Picard-Lindelöf flow existence with both Lipschitz dependence on initial
+data and the closed-ball state preservation estimate from the fixed-point
+construction.  Mathlib's public Lipschitz-flow theorem keeps the derivative and
+Lipschitz fields; this wrapper keeps the state-membership readout as well. -/
+theorem exists_forall_mem_closedBall_eq_hasDerivWithinAt_lipschitzOnWith_mem_closedBall
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
+    ∃ α : V → ℝ → V,
+      (∀ x ∈ closedBall x₀ r, α x (t₀ : ℝ) = x ∧
+        (∀ t ∈ Icc tmin tmax, α x t ∈ closedBall x₀ a) ∧
+        ∀ t ∈ Icc tmin tmax,
+          HasDerivWithinAt (α x) (f t (α x t)) (Icc tmin tmax) t) ∧
+      ∃ L' : ℝ≥0, ∀ t ∈ Icc tmin tmax,
+        LipschitzOnWith L' (fun x => α x t) (closedBall x₀ r) := by
+  classical
+  have (x : V) (hx : x ∈ closedBall x₀ r) := ODE.FunSpace.exists_isFixedPt_next hf hx
+  choose α hα using this
+  set α' := fun (x : V) => if hx : x ∈ closedBall x₀ r then
+    (α x hx).compProj else 0 with hα'
+  refine ⟨α', fun x hx => ⟨?_, ?_, ?_⟩, ?_⟩
+  · rw [hα']
+    beta_reduce
+    rw [dif_pos hx, ODE.FunSpace.compProj_val, ← hα, ODE.FunSpace.next_apply₀]
+  · intro t ht
+    rw [hα']
+    beta_reduce
+    rw [dif_pos hx]
+    exact (α x hx).compProj_mem_closedBall hf.mul_max_le
+  · intro t ht
+    rw [hα']
+    beta_reduce
+    rw [dif_pos hx, ODE.FunSpace.compProj_apply]
+    apply ODE.hasDerivWithinAt_picard_Icc t₀.2 hf.continuousOn_uncurry
+      ((α x hx).continuous_compProj.continuousOn)
+      (fun _ ht' => (α x hx).compProj_mem_closedBall hf.mul_max_le)
+      x ht |>.congr_of_mem _ ht
+    intro t' ht'
+    nth_rw 1 [← hα]
+    rw [ODE.FunSpace.compProj_of_mem ht', ODE.FunSpace.next_apply]
+  · obtain ⟨L', h⟩ := ODE.FunSpace.exists_forall_closedBall_funSpace_dist_le_mul hf
+    refine ⟨L', fun t ht => LipschitzOnWith.of_dist_le_mul fun x hx y hy => ?_⟩
+    simp_rw [hα']
+    rw [dif_pos hx, dif_pos hy, ODE.FunSpace.compProj_apply, ODE.FunSpace.compProj_apply,
+      ← ODE.FunSpace.toContinuousMap_apply_eq_apply,
+      ← ODE.FunSpace.toContinuousMap_apply_eq_apply]
+    have : Nonempty (Icc tmin tmax) := ⟨t₀⟩
+    apply ContinuousMap.dist_le_iff_of_nonempty.mp
+    exact h x y hx hy (α x hx) (α y hy) (hα x hx) (hα y hy)
+
+/-- A selected Picard-Lindelöf Lipschitz local flow that also preserves the
+closed Picard state ball `closedBall x₀ a`. -/
+def toStatePreservingLipschitzLocalFlowSolution
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
+    LipschitzLocalFlowSolution f t₀ x₀ r :=
+  let h := exists_forall_mem_closedBall_eq_hasDerivWithinAt_lipschitzOnWith_mem_closedBall hf
+  let α := Classical.choose h
+  let hα := (Classical.choose_spec h).1
+  let hLip := (Classical.choose_spec h).2
+  { flow := α
+    initial_eq := fun x hx => (hα x hx).1
+    hasDerivWithinAt := fun x hx t ht => (hα x hx).2.2 t ht
+    exists_lipschitz_time := hLip }
+
+/-- The selected state-preserving Picard-Lindelöf Lipschitz flow stays in the
+closed Picard state ball. -/
+theorem toStatePreservingLipschitzLocalFlowSolution_flow_mem_closedBall
+    (hf : IsPicardLindelof f t₀ x₀ a r L K)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    (toStatePreservingLipschitzLocalFlowSolution hf).flow x t ∈ closedBall x₀ a := by
+  let h := exists_forall_mem_closedBall_eq_hasDerivWithinAt_lipschitzOnWith_mem_closedBall hf
+  let α := Classical.choose h
+  let hα := (Classical.choose_spec h).1
+  exact (hα x hx).2.1 t ht
+
+/-- Proof-level form of the state-preserving Picard-Lindelöf Lipschitz flow. -/
+theorem exists_lipschitzLocalFlowSolution_mem_closedBall
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
+    ∃ α : LipschitzLocalFlowSolution f t₀ x₀ r,
+      ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
+        α.flow x t ∈ closedBall x₀ a :=
+  ⟨toStatePreservingLipschitzLocalFlowSolution hf,
+    fun x hx t ht => toStatePreservingLipschitzLocalFlowSolution_flow_mem_closedBall
+      hf hx ht⟩
+
 /-- Picard-Lindelöf also yields a continuous partial space-time flow on the
 initial-data ball times the closed time interval. -/
 def toContinuousLocalFlowSolution
@@ -7604,6 +7687,65 @@ theorem nonempty_ofProductPicardLindelof
       (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
     Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) :=
   ⟨ofProductPicardLindelof hf hball⟩
+
+/-- Product Picard-Lindelöf variational flow using the state-preserving
+Picard-flow selection, so the product Picard state ball remains available as a
+readout. -/
+def ofProductStatePreservingPicardLindelof
+    [CompleteSpace V]
+    {a R L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
+    VariationalLocalFlowSolution f Df t₀ x₀ r :=
+  ofProductContinuousLocalFlowSolution
+    (IsPicardLindelof.toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution
+    hball
+
+/-- The base component of the state-preserving product Picard variational flow
+stays in the base closed ball inherited from the product Picard state ball. -/
+theorem ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall
+    [CompleteSpace V]
+    {a R L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    (ofProductStatePreservingPicardLindelof hf hball).flow (x, t) ∈
+      closedBall x₀ a := by
+  have hprod :
+      (IsPicardLindelof.toStatePreservingLipschitzLocalFlowSolution hf).flow
+        (x, (1 : V →L[ℝ] V)) t ∈
+          closedBall (x₀, (1 : V →L[ℝ] V)) a :=
+    IsPicardLindelof.toStatePreservingLipschitzLocalFlowSolution_flow_mem_closedBall
+      hf (hball x hx) ht
+  have hprod' :
+      (IsPicardLindelof.toStatePreservingLipschitzLocalFlowSolution hf).flow
+        (x, (1 : V →L[ℝ] V)) t ∈
+          closedBall x₀ (a : ℝ) ×ˢ
+            closedBall (1 : V →L[ℝ] V) (a : ℝ) := by
+    rw [closedBall_prod_same x₀ (1 : V →L[ℝ] V) (a : ℝ)]
+    exact hprod
+  simpa [ofProductStatePreservingPicardLindelof, ofProductContinuousLocalFlowSolution,
+    LipschitzLocalFlowSolution.toContinuousLocalFlowSolution] using hprod'.1
+
+/-- Forward-time form of
+`ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall`. -/
+theorem ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall_forward_Icc
+    [CompleteSpace V]
+    {a R L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L K)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ}
+    (ht : t ∈ Ico (t₀ : ℝ) tmax) :
+    (ofProductStatePreservingPicardLindelof hf hball).flow (x, t) ∈
+      closedBall x₀ a :=
+  ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall
+    hf hball hx ⟨le_trans t₀.2.1 ht.1, le_of_lt ht.2⟩
 
 /-- Product Picard-Lindelöf variational flow data, immediately localized to a
 smaller closed time interval. -/
