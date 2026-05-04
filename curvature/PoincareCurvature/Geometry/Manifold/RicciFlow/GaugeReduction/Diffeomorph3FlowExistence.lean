@@ -848,6 +848,22 @@ theorem hasDerivAt_extChartAt_eval_of_timeSet_eq_Ioo
   G.hasDerivAt_extChartAt_eval
     (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
 
+/-- Raw open-Picard fixed-chart derivative readout without a separate
+neighborhood-of-time hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_of_mem_source_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (p x : M)
+    (hsrc_ext : (G.maps3 t) x ∈ (extChartAt I p).source) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I p) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) p ((G.maps3 t) x)
+        (X t ((G.maps3 t) x))) t :=
+  G.hasDerivAt_extChartAt_eval_of_mem_source
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) p x hsrc_ext
+
 /-- Raw open-Picard pointwise manifold derivative readout rewritten to a
 neighborhood-equal vector field, without a separate neighborhood-of-time
 hypothesis. -/
@@ -881,6 +897,24 @@ theorem hasDerivAt_extChartAt_eval_congr_vectorField_of_timeSet_eq_Ioo
         (Y t ((G.maps3 t) x))) t :=
   G.hasDerivAt_extChartAt_eval_congr_vectorField
     (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) hXY x
+
+/-- Raw open-Picard fixed-chart derivative readout rewritten to a
+neighborhood-equal vector field, without a separate neighborhood-of-time
+hypothesis. -/
+theorem hasDerivAt_extChartAt_eval_congr_vectorField_of_mem_source_of_timeSet_eq_Ioo
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s)
+    (hXY : ∀ᶠ τ in 𝓝 t, ∀ x : M, X τ (G.maps3 τ x) = Y τ (G.maps3 τ x))
+    (p x : M) (hsrc_ext : (G.maps3 t) x ∈ (extChartAt I p).source) :
+    HasDerivAt
+      (fun τ : ℝ ↦ (extChartAt I p) ((G.maps3 τ) x))
+      (tangentCoordChange I ((G.maps3 t) x) p ((G.maps3 t) x)
+        (Y t ((G.maps3 t) x))) t :=
+  G.hasDerivAt_extChartAt_eval_congr_vectorField_of_mem_source
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) hXY p x hsrc_ext
 
 /-- Raw open-Picard centered preferred-chart derivative readout without a
 separate neighborhood-of-time hypothesis. -/
@@ -926,6 +960,20 @@ theorem continuousAt_extChartAt_eval_of_timeSet_eq_Ioo
   G.continuousAt_extChartAt_eval
     (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
 
+/-- Raw open-Picard fixed-chart continuity readout without a separate
+neighborhood-of-time hypothesis. -/
+theorem continuousAt_extChartAt_eval_of_mem_source_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (p x : M)
+    (hsrc_ext : (G.maps3 t) x ∈ (extChartAt I p).source) :
+    ContinuousAt
+      (fun τ : ℝ ↦ (extChartAt I p) ((G.maps3 τ) x)) t :=
+  G.continuousAt_extChartAt_eval_of_mem_source
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) p x hsrc_ext
+
 /-- Raw open-Picard continuity of gauge-flow curves, without a separate
 neighborhood-of-time hypothesis. -/
 theorem continuousAt_eval_of_timeSet_eq_Ioo
@@ -963,6 +1011,61 @@ theorem eventually_mem_extChartAt_source_eval_of_timeSet_eq_Ioo
       (G.maps3 τ) x ∈ (extChartAt I ((G.maps3 t) x)).source :=
   G.eventually_mem_extChartAt_source_eval
     (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) x
+
+/-- Raw open-Picard fixed-chart source control without a separate
+neighborhood-of-time hypothesis. -/
+theorem eventually_mem_extChartAt_source_eval_of_mem_source_of_timeSet_eq_Ioo
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (ht : t ∈ s) (p x : M)
+    (hsrc_ext : (G.maps3 t) x ∈ (extChartAt I p).source) :
+    ∀ᶠ τ in 𝓝 t, (G.maps3 τ) x ∈ (extChartAt I p).source :=
+  G.eventually_mem_extChartAt_source_eval_of_mem_source
+    (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet ht) p x hsrc_ext
+
+/-- Raw open-Picard intrinsic gauge flows supply ordinary fixed-chart ODE data
+on any subset of their open time set. -/
+theorem toIntrinsicFixedChartDerivativeAtOn_of_timeSet_eq_Ioo
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s u : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background) s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (hu : u ⊆ s)
+    (hmem : ∀ t ∈ u, ∀ x : M,
+      (G.maps3 t) x ∈ (extChartAt I (chartCenter t x)).source) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) G.maps3 g background chartCenter u :=
+  G.toIntrinsicFixedChartDerivativeAtOn
+    (fun {t} ht ↦ G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet (hu ht))
+    hmem
+
+/-- Raw open-Picard model-vector-field gauge flows supply ordinary fixed-chart
+intrinsic ODE data on any subset of their open time set once the model field
+agrees with the intrinsic DeTurck field along the flow. -/
+theorem toIntrinsicFixedChartDerivativeAtOn_congr_vectorField_nhdsWithin_of_timeSet_eq_Ioo
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s u : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) Y s t₀)
+    (tmin tmax : ℝ) (htimeSet : s = Ioo tmin tmax)
+    (hu : u ⊆ s)
+    (hmem : ∀ t ∈ u, ∀ x : M,
+      (G.maps3 t) x ∈ (extChartAt I (chartCenter t x)).source)
+    (hY : ∀ t ∈ u, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+      Y τ (G.maps3 τ x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background τ (G.maps3 τ x)) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) G.maps3 g background chartCenter u :=
+  G.toIntrinsicFixedChartDerivativeAtOn_congr_vectorField_nhdsWithin
+    (fun {t} ht ↦ G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet (hu ht))
+    hmem hY
 
 /-- Package a geometric `SatisfiesGaugeFlowOn` statement as a raw `C^3`
 diffeomorphism gauge-flow witness. -/
@@ -4939,6 +5042,34 @@ theorem timeSet_mem_nhds_of_eq_Ioo
     simpa [htimeSet sol] using ht
   simpa [htimeSet sol] using (isOpen_Ioo.mem_nhds ht')
 
+/-- Fixed-IVP open-Picard ordinary fixed-chart derivative data on any subset of
+the chosen solution's open time set. -/
+theorem fixedChartDerivativeAtData_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (chartCenter : ℝ → M → M) {u : Set ℝ}
+    (hu : u ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hmem : ∀ t ∈ u, ∀ x : M,
+      ((G.flow sol).maps3 t) x ∈ (extChartAt I (chartCenter t x)).source) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn (I := I) (M := M)
+      (G.flow sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      chartCenter u :=
+  G.fixedChartDerivativeAtData sol chartCenter
+    (fun {t} ht ↦
+      (G.timeSet_mem_nhds_of_eq_Ioo
+        (I := I) (M := M) tmin tmax htimeSet) sol (hu ht))
+    hmem
+
 /-- Ordinary pointwise manifold derivative read out directly from fixed-IVP raw
 intrinsic DeTurck gauge-flow existence at neighborhood-times. -/
 theorem hasMFDerivAt
@@ -7532,6 +7663,34 @@ theorem timeSet_mem_nhds_of_eq_Ioo
   intro ivp sol t ht
   exact (G.forInitialValueProblem ivp).timeSet_mem_nhds_of_eq_Ioo
     (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht
+
+/-- Theorem-family open-Picard ordinary fixed-chart derivative data on any
+subset of the chosen solution's open time set. -/
+theorem fixedChartDerivativeAtData_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (chartCenter : ℝ → M → M) {u : Set ℝ}
+    (hu : u ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hmem : ∀ t ∈ u, ∀ x : M,
+      ((G.flow ivp sol).maps3 t) x ∈ (extChartAt I (chartCenter t x)).source) :
+    Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn (I := I) (M := M)
+      (G.flow ivp sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      chartCenter u :=
+  (G.forInitialValueProblem ivp).fixedChartDerivativeAtData_of_timeSet_eq_Ioo
+    (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp)
+    sol chartCenter hu hmem
 
 /-- Ordinary pointwise manifold derivative read out directly from theorem-family
 raw intrinsic DeTurck gauge-flow existence at neighborhood-times. -/

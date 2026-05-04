@@ -1406,6 +1406,17 @@ identified with the intrinsic DeTurck field along the flow. The fixed-IVP raw
 existence package mirrors these as `fixedChartDerivativeData` and
 `fixedChartDerivativeAtData`, removing another manual unpacking step between
 manifold raw flows and the finite-cover fixed-chart ODE records.
+The open-Picard specialization now includes the same fixed-chart readouts:
+`hasDerivAt_extChartAt_eval_of_mem_source_of_timeSet_eq_Ioo`,
+`hasDerivAt_extChartAt_eval_congr_vectorField_of_mem_source_of_timeSet_eq_Ioo`,
+`continuousAt_extChartAt_eval_of_mem_source_of_timeSet_eq_Ioo`, and
+`eventually_mem_extChartAt_source_eval_of_mem_source_of_timeSet_eq_Ioo`.
+Raw flows can also package ordinary fixed-chart intrinsic ODE data on any
+`u ⊆ s` directly from `s = Ioo tmin tmax` via
+`toIntrinsicFixedChartDerivativeAtOn_of_timeSet_eq_Ioo` and the
+`..._congr_vectorField_nhdsWithin_of_timeSet_eq_Ioo` variant; fixed-IVP and
+theorem-family existence witnesses mirror the bundled extractor as
+`fixedChartDerivativeAtData_of_timeSet_eq_Ioo`.
 The raw, fixed-IVP, and theorem-family preferred-chart derivative readouts now
 also have centered-chart simplifications that rewrite the derivative value from
 `tangentCoordChange I p p p (...)` to the actual gauge velocity. This removes a
