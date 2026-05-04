@@ -1122,10 +1122,11 @@ explicit bounded Holder entry/matrix estimates and product-difference bounded
 Holder estimates, and supplied-Christoffel
 schematic local Ricci-DeTurck RHS entry/matrix bounded Holder estimates and
 primitive-input schematic RHS entry/matrix bounded Holder estimates and whole
-matrix-valued closure, plus finite product-cylinder local primitive-estimate
-bridges that globalize the compact schematic RHS closure before extracting
-determinant lower bounds, including finite-family variants with one shared lower
-bound, using the finite-product, integer-scalar, reciprocal, and division
+matrix-valued closure, plus finite product-cylinder local primitive-estimate and
+primitive-difference bridges that globalize the compact schematic RHS closure and
+RHS difference closure before extracting determinant lower bounds, including
+finite-family variants with one shared lower bound, using the finite-product,
+integer-scalar, reciprocal, and division
 closure layer. The companion `AnalyticPDE/Parabolic/LocalFrameGram.lean`
 module bridges compact time-space local-frame Gram determinant nonvanishing to
 parabolic inverse Gram-matrix control and inverse-Gram Christoffel/schematic

@@ -1708,10 +1708,11 @@ Holder entry/matrix estimates and product-difference bounded Holder estimates,
 and supplied-Christoffel schematic local
 Ricci-DeTurck RHS entry/matrix bounded Holder estimates, primitive-input
 schematic RHS entry/matrix bounded Holder estimates, and whole matrix-valued
-closure, plus finite product-cylinder local primitive-estimate bridges that
-globalize the compact schematic RHS closure before extracting determinant lower
-bounds, including finite-family variants with one shared lower bound, using
-finite-product, integer-scalar, reciprocal, and division closure. On the
+closure, plus finite product-cylinder local primitive-estimate and
+primitive-difference bridges that globalize the compact schematic RHS closure and
+RHS difference closure before extracting determinant lower bounds, including
+finite-family variants with one shared lower bound, using finite-product,
+integer-scalar, reciprocal, and division closure. On the
 geometric side, the Levi-Civita local-frame Gram
 matrix layer now also turns pointwise Gram determinant nonvanishing into a
 positive determinant lower bound on compact subsets of a trivialization base.
