@@ -1228,6 +1228,10 @@ same gluing-ready concrete patches as the forward route:
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius`
 and
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius`.
+The operator-ball and identity-ball backward-common componentwise routes now
+expose the same two concrete inverse-patch readouts, so callers using the
+specialized tangent-operator estimates do not have to unfold the common
+`OpenPartialHomeomorph`.
 The same componentwise estimates now also have localized backward-interior
 readouts on a shrunk Picard interval, including the neighborhood-map equality,
 open-partial-homeomorphism package, bijective open patch, and positive
@@ -1240,7 +1244,8 @@ the state-preserving Picard layer exposes the corresponding
 `ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_*_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius`
 family, and the componentwise closed-ball continuity layer exposes the matching
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_*_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius`
-family.
+family, including operator-ball and identity-ball concrete inverse-patch
+specializations.
 This strict derivative input has now been reduced one step further in the model
 layer: `flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt` uses
 Mathlib's real `C¹`-implies-strict-differentiability theorem, so ordinary
@@ -1352,13 +1357,16 @@ interfaces used by chart-gluing arguments:
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius`
 and
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius`.
+The forward operator-ball and identity-ball componentwise routes expose the
+same concrete readouts directly.
 The localized componentwise closed-ball continuity route now has the same
 direct inverse-patch unpacking via
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius`
 and
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius`,
-so chart-local component estimates can feed the inverse patch without dropping
-back to the generic Picard package.
+including the operator-ball and identity-ball specializations, so chart-local
+component estimates can feed the inverse patch without dropping back to the
+generic Picard package.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
@@ -1575,7 +1583,9 @@ so chart-local inverse arguments can stay on the shrunk Picard interval; the
 same restricted closed-ball estimate route now exposes the corresponding
 bijective open patch and positive source-ball `MapsTo`/`InjOn` patch without
 unfolding the `OpenPartialHomeomorph`; the componentwise closed-ball continuity
-route exposes the same two patch forms directly from the chart-local estimates.
+route exposes the same two patch forms directly from the chart-local estimates,
+including the operator/identity-ball specializations on common forward and
+backward intervals.
 The ODE package
 now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
