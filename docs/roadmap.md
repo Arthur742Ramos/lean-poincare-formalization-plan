@@ -903,8 +903,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
       packages,
       and Gronwall uniqueness bridges for packaged
       local model flows on open and closed Picard intervals, including direct
-      uniqueness routes for the continuous space-time package. The same model
-      ODE bridge now packages the tangent-map variational equation
+      uniqueness routes for the continuous space-time package. The Banach ODE
+      layer also now has a continuation bridge from equality on every prescribed
+      shorter terminal to equality on the open common interval, and a state-set
+      Lipschitz-on-restricted-`Icc` specialization for local estimates. The same
+      model ODE bridge now packages the tangent-map variational equation
       `A'(t) = Df(t, flow(t)) ∘ A(t)` in `VariationalLocalFlowSolution`, matching
       the remaining coordinate-model `A`-derivative hypothesis, and proves
       closed-interval/interior vector-slot derivative forms for `t ↦ A(t)v` plus

@@ -173,6 +173,22 @@ theorem eqOn_Icc_of_lipschitz_of_le_terminal
     exact ⟨ht.1, le_min (by simpa [sol₁T] using ht.2) (by simpa [sol₂T] using ht.2)⟩
   simpa [sol₁T, sol₂T] using hEq ht'
 
+/-- Order-theoretic continuation bridge: if equality is available on every
+prescribed shorter common terminal, then it holds on the open common interval. -/
+theorem eqOn_Ico_of_eqOn_Icc_of_le_terminal
+    (sol₁ sol₂ : BanachEvolutionLocalSolution F t₀ u₀)
+    (hEq : ∀ {T : ℝ}, t₀ < T → T ≤ sol₁.terminalTime → T ≤ sol₂.terminalTime →
+      EqOn sol₁.curve sol₂.curve (Icc t₀ T)) :
+    EqOn sol₁.curve sol₂.curve (Ico t₀ (min sol₁.terminalTime sol₂.terminalTime)) := by
+  intro t ht
+  rcases exists_between ht.2 with ⟨T, htT, hTcommon⟩
+  have hT₀ : t₀ < T := lt_of_le_of_lt ht.1 htT
+  have hT₁ : T ≤ sol₁.terminalTime :=
+    le_trans (le_of_lt hTcommon) (min_le_left _ _)
+  have hT₂ : T ≤ sol₂.terminalTime :=
+    le_trans (le_of_lt hTcommon) (min_le_right _ _)
+  exact hEq hT₀ hT₁ hT₂ ⟨ht.1, le_of_lt htT⟩
+
 end BanachEvolutionLocalSolution
 
 /-- A forward Banach-space local solution whose values are known to stay in a prescribed state
@@ -371,6 +387,30 @@ theorem eqOn_Icc_of_lipschitzOn_Icc_of_le_terminal
       dsimp [sol₁T, sol₂T]
       exact min_le_left T T
     exact hF t ⟨ht.1, le_trans ht.2 hmin_le_T⟩
+
+/-- Order-theoretic continuation bridge for state-preserving solutions: if
+equality is available on every prescribed shorter common terminal, then it
+holds on the open common interval. -/
+theorem eqOn_Ico_of_eqOn_Icc_of_le_terminal
+    (sol₁ sol₂ : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    (hEq : ∀ {T : ℝ}, t₀ < T → T ≤ sol₁.terminalTime → T ≤ sol₂.terminalTime →
+      EqOn sol₁.curve sol₂.curve (Icc t₀ T)) :
+    EqOn sol₁.curve sol₂.curve (Ico t₀ (min sol₁.terminalTime sol₂.terminalTime)) := by
+  exact BanachEvolutionLocalSolution.eqOn_Ico_of_eqOn_Icc_of_le_terminal
+    sol₁.toBanachEvolutionLocalSolution sol₂.toBanachEvolutionLocalSolution hEq
+
+/-- State-set uniqueness on the open common interval when the Lipschitz bound is
+available on every prescribed shorter common terminal interval. -/
+theorem eqOn_Ico_of_lipschitzOn_Icc_of_le_terminal
+    {K : ℝ≥0}
+    (sol₁ sol₂ : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    (hF : ∀ {T : ℝ}, t₀ < T → T ≤ sol₁.terminalTime → T ≤ sol₂.terminalTime →
+      ∀ t ∈ Icc t₀ T, LipschitzOnWith K (F t) stateSet) :
+    EqOn sol₁.curve sol₂.curve (Ico t₀ (min sol₁.terminalTime sol₂.terminalTime)) := by
+  exact eqOn_Ico_of_eqOn_Icc_of_le_terminal sol₁ sol₂ (fun hT₀ hT₁ hT₂ ↦
+    eqOn_Icc_of_lipschitzOn_Icc_of_le_terminal (F := F) (stateSet := stateSet)
+      (t₀ := t₀) (u₀ := u₀) (K := K) sol₁ sol₂ hT₀ hT₁ hT₂
+      (hF hT₀ hT₁ hT₂))
 
 /-- A continuous linear map between Banach state spaces transports state-preserving solutions,
 provided it maps the state set to the target state set, maps the initial condition, and commutes

@@ -1591,8 +1591,11 @@ The same module also records the
 autonomous `C¹` local-integral-curve specialization and Gronwall-based
 uniqueness bridges on the open and closed Picard time intervals for two packaged
 local model flows whose curves stay in a uniformly Lipschitz state region; the
-continuous space-time package now forgets to `LocalFlowSolution` and inherits
-the same uniqueness bridges directly.
+Banach ODE layer now also has an order-theoretic bridge from equality on every
+prescribed shorter terminal to equality on the open common interval, plus the
+state-set Lipschitz-on-`Icc` specialization needed when estimates are only known
+on those restricted terminals. The continuous space-time package now forgets to
+`LocalFlowSolution` and inherits the same uniqueness bridges directly.
 What remains is the genuinely manifold-level lift: pass intrinsic DeTurck vector
 fields to these chartwise Banach ODE hypotheses, prove compatibility/gluing and
 invertibility of the local flow, and upgrade the result to the bundled `C³`
@@ -1975,7 +1978,9 @@ readouts, the terminal-fit theorem-package handoff with arbitrary
 shorter-terminal metric/connection readouts, and a further readout carries the
 same theorem-package handoff, clipped readouts, and conditional full-common
 metric/connection readouts together. The continuation from these local readouts
-to full arbitrary-overlap uniqueness is still open.
+to full arbitrary-overlap uniqueness is still open, but the base Banach ODE
+layer now supplies the missing order-theoretic bridge from restricted terminals
+to the open common interval for both bare and state-preserving solutions.
 The density-based
 interval-scoped restricted symmetric carrier is now connected back to the
 chart's built-in restricted carrier by both a subtype equality and an ambient
