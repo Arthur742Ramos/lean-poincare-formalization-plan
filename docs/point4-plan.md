@@ -1432,7 +1432,17 @@ the matching one-step common-`Ioo` forms
 and
 `VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_common_Ioo_of_eventually_hasFDerivAt`,
 which shrink the source inside the open initial-data ball and return one lifted
-manifold patch carrying both `ContinuousOn` and `BijOn`.  The
+manifold patch carrying both `ContinuousOn` and `BijOn`.  The same lift now has
+overlap-ready constrained forms:
+`exists_open_nhds_continuousOn_bijOn_subset_of_lifted_openPartialHomeomorph_model`
+records prescribed manifold-side source and target containments after the
+model patch has been chosen inside suitable chart images, and
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_common_Ioo_of_hasStrictFDerivAt`
+with its C¹-style
+`..._of_eventually_hasFDerivAt` variant push those containments through the
+variational time-slice inverse theorem.  These are the local patch shapes
+needed to shrink chartwise Picard slices into visible overlap domains before
+applying equality transport.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
