@@ -159,6 +159,143 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.mono
     (nhdsWithin_mono τ hst) (hchart τ (hst hτ) x).1
   exact ⟨hsource, (hchart τ (hst hτ) x).2.mono hst⟩
 
+/-- Within-time-set fixed-chart ODE data for the intrinsic DeTurck
+gauge-flow equation.
+
+The chart center may depend on the time and base point.  This is the finite-cover
+Picard shape: the coordinate curve is differentiated in a prescribed chart whose
+source contains the endpoint, and the velocity is the intrinsic vector field
+transported into that fixed chart. -/
+def Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (chartCenter : ℝ → M → M)
+    (s : Set ℝ) : Prop :=
+  ∀ t ∈ s, ∀ x : M,
+    ((Φ t) x ∈ (extChartAt I (chartCenter t x)).source) ∧
+      ((fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+          (extChartAt I (chartCenter t x)).source ∈ 𝓝[s] t) ∧
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (chartCenter t x)) ((Φ τ) x))
+          (tangentCoordChange I ((Φ t) x) (chartCenter t x) ((Φ t) x)
+            (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)))
+          s t
+
+/-- Fixed-chart intrinsic ODE data converts to the centered-chart package used
+by the raw gauge-flow existence layer.  The proof composes the fixed-coordinate
+curve with the chart transition into the centered chart and cancels the two
+tangent-coordinate changes. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.toChartDerivativeOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s : Set ℝ}
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) Φ g background chartCenter s) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  let y : M := (Φ t) x
+  let p : M := chartCenter t x
+  rcases hfixed t ht x with ⟨hsrcp, hsourcep, hderivp⟩
+  have hsrcy : y ∈ (extChartAt I y).source := by
+    simpa [y] using mem_extChartAt_source (I := I) y
+  let Xty : TangentSpace I y :=
+    intrinsicDeTurckGaugeField (I := I) (M := M) g background t y
+  have hvel :
+      tangentCoordChange I p y y (tangentCoordChange I y p y Xty) = Xty := by
+    rw [tangentCoordChange_comp (I := I) (w := y) (x := p) (y := y) (z := y)
+      (v := Xty) ⟨⟨hsrcy, hsrcp⟩, hsrcy⟩]
+    rw [tangentCoordChange_self (I := I) (x := y) (z := y) (v := Xty) hsrcy]
+  have htransition :
+      HasFDerivWithinAt ((extChartAt I y) ∘ (extChartAt I p).symm)
+        (tangentCoordChange I p y y) (range I) ((extChartAt I p) y) :=
+    hasFDerivWithinAt_tangentCoordChange (I := I) (x := p) (y := y) (z := y)
+      ⟨hsrcp, hsrcy⟩
+  let sourceSet : Set ℝ :=
+    (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I p).source
+  have hmaps :
+      MapsTo (fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x))
+        (s ∩ sourceSet) (range I) := by
+    intro τ hτ
+    exact extChartAt_target_subset_range p
+      ((extChartAt I p).map_source (by simpa [sourceSet] using hτ.2))
+  have hcomp :
+      HasDerivWithinAt
+        (((extChartAt I y) ∘ (extChartAt I p).symm) ∘
+          (fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x)))
+        (tangentCoordChange I p y y
+          (tangentCoordChange I y p y
+            (intrinsicDeTurckGaugeField (I := I) (M := M) g background t y)))
+        (s ∩ sourceSet) t := by
+    simpa [y, p, Xty] using
+      htransition.comp_hasDerivWithinAt t (hderivp.mono inter_subset_left) hmaps
+  have heq_restricted :
+      (fun τ : ℝ ↦ (extChartAt I y) ((Φ τ) x)) =ᶠ[𝓝[s ∩ sourceSet] t]
+        (((extChartAt I y) ∘ (extChartAt I p).symm) ∘
+          (fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x))) := by
+    filter_upwards [self_mem_nhdsWithin] with τ hτ
+    have hτsrc : (Φ τ) x ∈ (extChartAt I p).source := by
+      simpa [sourceSet] using hτ.2
+    simpa [Function.comp_def] using
+      congrArg (fun z : M ↦ (extChartAt I y) z)
+        ((extChartAt I p).left_inv hτsrc).symm
+  have heq_t :
+      (extChartAt I y) ((Φ t) x) =
+        (((extChartAt I y) ∘ (extChartAt I p).symm) ∘
+          (fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x))) t := by
+    simpa [Function.comp_def, y] using
+      congrArg (fun z : M ↦ (extChartAt I y) z)
+        ((extChartAt I p).left_inv hsrcp).symm
+  have hcenter_restricted :
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I y) ((Φ τ) x))
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t y)
+        (s ∩ sourceSet) t := by
+    exact (hcomp.congr_of_eventuallyEq heq_restricted heq_t).congr_deriv (by
+      change tangentCoordChange I p y y (tangentCoordChange I y p y Xty) = Xty
+      exact hvel)
+  have hsourceSet : s ∩ sourceSet ∈ 𝓝[s] t := by
+    exact Filter.inter_mem self_mem_nhdsWithin (by simpa [sourceSet, p] using hsourcep)
+  have hcenter :
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I y) ((Φ τ) x))
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t y) s t :=
+    hcenter_restricted.mono_of_mem_nhdsWithin hsourceSet
+  have hmanifold_cont :
+      ContinuousWithinAt (fun τ : ℝ ↦ (Φ τ) x) s t := by
+    have hsymm : ContinuousAt (extChartAt I p).symm ((extChartAt I p) y) :=
+      continuousAt_extChartAt_symm' (I := I) hsrcp
+    have hcoord : ContinuousWithinAt
+        (fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x)) s t :=
+      hderivp.continuousWithinAt
+    have hcomp' : ContinuousWithinAt
+        ((extChartAt I p).symm ∘
+          fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x)) s t :=
+      ContinuousAt.comp_continuousWithinAt
+        (g := (extChartAt I p).symm)
+        (f := fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x))
+        (s := s) (x := t) hsymm hcoord
+    have hcomp_mfld : ContinuousWithinAt
+        (fun τ : ℝ ↦ (extChartAt I p).symm ((extChartAt I p) ((Φ τ) x))) s t := by
+      simpa [Function.comp_def] using hcomp'
+    have hsourcep_eventually :
+        ∀ᶠ τ in 𝓝[s] t, (Φ τ) x ∈ (extChartAt I p).source := by
+      simpa [p] using hsourcep
+    exact hcomp_mfld.congr_of_eventuallyEq
+      (hsourcep_eventually.mono fun τ hτ ↦ by
+        simpa using ((extChartAt I p).left_inv hτ).symm)
+      (by simpa [y] using ((extChartAt I p).left_inv hsrcp).symm)
+  have hsource_center :
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I y).source ∈ 𝓝[s] t :=
+    hmanifold_cont.preimage_mem_nhdsWithin
+      ((isOpen_extChartAt_source (I := I) y).mem_nhds hsrcy)
+  refine ⟨?_, ?_⟩
+  · simpa [y, extChartAt_source] using hsource_center
+  · simpa [y] using hcenter
+
 /-- Ordinary-at-time derivative form of the intrinsic DeTurck gauge-flow equation
 for a `C^3` diffeomorphism family, restricted to times in `s`.
 
@@ -248,6 +385,115 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.continuousAt_eval_self
     simpa [e] using (hchart t ht x).1
   exact hcomp.congr_of_eventuallyEq
     (hsource'.mono fun τ hτ ↦ by simpa [e] using (e.left_inv hτ).symm)
+
+/-- Ordinary-at-time fixed-chart ODE data for the intrinsic DeTurck gauge-flow
+equation.  This is the open-time version of
+`Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn`. -/
+def Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (chartCenter : ℝ → M → M)
+    (s : Set ℝ) : Prop :=
+  ∀ t ∈ s, ∀ x : M,
+    ((Φ t) x ∈ (extChartAt I (chartCenter t x)).source) ∧
+      ((fun τ : ℝ ↦ (Φ τ) x) ⁻¹'
+          (extChartAt I (chartCenter t x)).source ∈ 𝓝 t) ∧
+        HasDerivAt
+          (fun τ : ℝ ↦ (extChartAt I (chartCenter t x)) ((Φ τ) x))
+          (tangentCoordChange I ((Φ t) x) (chartCenter t x) ((Φ t) x)
+            (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)))
+          t
+
+/-- Ordinary fixed-chart intrinsic ODE data converts to the ordinary
+centered-chart package. -/
+theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.toChartDerivativeAtOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s : Set ℝ}
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) Φ g background chartCenter s) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) Φ g background s := by
+  intro t ht x
+  let y : M := (Φ t) x
+  let p : M := chartCenter t x
+  rcases hfixed t ht x with ⟨hsrcp, hsourcep, hderivp⟩
+  have hsrcy : y ∈ (extChartAt I y).source := by
+    simpa [y] using mem_extChartAt_source (I := I) y
+  let Xty : TangentSpace I y :=
+    intrinsicDeTurckGaugeField (I := I) (M := M) g background t y
+  have hvel :
+      tangentCoordChange I p y y (tangentCoordChange I y p y Xty) = Xty := by
+    rw [tangentCoordChange_comp (I := I) (w := y) (x := p) (y := y) (z := y)
+      (v := Xty) ⟨⟨hsrcy, hsrcp⟩, hsrcy⟩]
+    rw [tangentCoordChange_self (I := I) (x := y) (z := y) (v := Xty) hsrcy]
+  have htransition :
+      HasFDerivWithinAt ((extChartAt I y) ∘ (extChartAt I p).symm)
+        (tangentCoordChange I p y y) (range I) ((extChartAt I p) y) :=
+    hasFDerivWithinAt_tangentCoordChange (I := I) (x := p) (y := y) (z := y)
+      ⟨hsrcp, hsrcy⟩
+  have hsourcep_eventually :
+      ∀ᶠ τ in 𝓝 t, (Φ τ) x ∈ (extChartAt I p).source := by
+    simpa [p] using hsourcep
+  have hmaps :
+      ∀ᶠ τ in 𝓝 t,
+        (extChartAt I p) ((Φ τ) x) ∈ range I :=
+    hsourcep_eventually.mono fun τ hτ ↦
+      extChartAt_target_subset_range p ((extChartAt I p).map_source hτ)
+  have hcomp :
+      HasDerivAt
+        (((extChartAt I y) ∘ (extChartAt I p).symm) ∘
+          (fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x)))
+        (tangentCoordChange I p y y
+          (tangentCoordChange I y p y
+            (intrinsicDeTurckGaugeField (I := I) (M := M) g background t y)))
+        t := by
+    simpa [y, p, Xty] using htransition.comp_hasDerivAt t hderivp hmaps
+  have heq :
+      (fun τ : ℝ ↦ (extChartAt I y) ((Φ τ) x)) =ᶠ[𝓝 t]
+        (((extChartAt I y) ∘ (extChartAt I p).symm) ∘
+          (fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x))) :=
+    hsourcep_eventually.mono fun τ hτsrc ↦ by
+      simpa [Function.comp_def] using
+        congrArg (fun z : M ↦ (extChartAt I y) z)
+          ((extChartAt I p).left_inv hτsrc).symm
+  have hcenter :
+      HasDerivAt
+        (fun τ : ℝ ↦ (extChartAt I y) ((Φ τ) x))
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t y) t := by
+    exact (hcomp.congr_of_eventuallyEq heq).congr_deriv (by
+      change tangentCoordChange I p y y (tangentCoordChange I y p y Xty) = Xty
+      exact hvel)
+  have hmanifold_cont :
+      ContinuousAt (fun τ : ℝ ↦ (Φ τ) x) t := by
+    have hsymm : ContinuousAt (extChartAt I p).symm ((extChartAt I p) y) :=
+      continuousAt_extChartAt_symm' (I := I) hsrcp
+    have hcoord : ContinuousAt
+        (fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x)) t :=
+      hderivp.continuousAt
+    have hcomp' : ContinuousAt
+        ((extChartAt I p).symm ∘
+          fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x)) t :=
+      ContinuousAt.comp
+        (g := (extChartAt I p).symm)
+        (f := fun τ : ℝ ↦ (extChartAt I p) ((Φ τ) x))
+        (x := t) hsymm hcoord
+    have hcomp_mfld : ContinuousAt
+        (fun τ : ℝ ↦ (extChartAt I p).symm ((extChartAt I p) ((Φ τ) x))) t := by
+      simpa [Function.comp_def] using hcomp'
+    exact hcomp_mfld.congr_of_eventuallyEq
+      (hsourcep_eventually.mono fun τ hτ ↦ by
+        simpa using ((extChartAt I p).left_inv hτ).symm)
+  have hsource_center :
+      (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I y).source ∈ 𝓝 t :=
+    hmanifold_cont.preimage_mem_nhds
+      ((isOpen_extChartAt_source (I := I) y).mem_nhds hsrcy)
+  refine ⟨?_, ?_⟩
+  · simpa [y, extChartAt_source] using hsource_center
+  · simpa [y] using hcenter
 
 /-- Build within-time-set intrinsic derivative data from derivative data for a model vector field,
 once that vector field is identified with the intrinsic DeTurck gauge field along the flow. -/
@@ -359,6 +605,21 @@ theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_chartDerivativeOn
   rw [hasDerivWithinAt_iff_hasFDerivWithinAt] at h
   simpa [writtenInExtChartAt] using h
 
+/-- Fixed-chart intrinsic ODE data directly supplies the primitive intrinsic
+manifold derivative data within the same time set. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_fixedChartDerivativeOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s : Set ℝ}
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) Φ g background chartCenter s) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) Φ g background s :=
+  Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_chartDerivativeOn
+    (I := I) (M := M) hfixed.toChartDerivativeOn
+
 /-- Build ordinary intrinsic derivative data from derivative data for a model vector field, once
 that vector field is identified with the intrinsic DeTurck gauge field along the flow. -/
 theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_vectorField_eq
@@ -468,6 +729,21 @@ theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_chartDerivativeAtOn
   have h := (hchart t ht x).2
   rw [hasDerivAt_iff_hasFDerivAt] at h
   simpa [writtenInExtChartAt] using h
+
+/-- Ordinary fixed-chart intrinsic ODE data directly supplies primitive
+ordinary intrinsic manifold derivative data. -/
+theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_fixedChartDerivativeAtOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {chartCenter : ℝ → M → M}
+    {s : Set ℝ}
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn
+      (I := I) (M := M) Φ g background chartCenter s) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+      (I := I) (M := M) Φ g background s :=
+  Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_chartDerivativeAtOn
+    (I := I) (M := M) hfixed.toChartDerivativeAtOn
 
 /-- Restrict ordinary preferred-chart ODE data to a smaller time set. -/
 theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.mono

@@ -1660,7 +1660,18 @@ fixed-IVP, and theorem-family gauge-flow witnesses now also expose fixed-chart
 derivative, continuity, vector-field-congruence, and eventual source-membership
 readouts for any preferred chart whose source contains the time-slice image,
 which is the finite-cover shape needed for chartwise model-ODE and overlap
-arguments. For explicit
+arguments.  The derivative layer now has the matching proof-bearing input
+package: `Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn` and its
+ordinary-time analogue accept closed-Picard ODE data in a chosen chart center
+`chartCenter t x`, prove the chart-transition conversion to the centered
+`Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn` packages by composing with
+the fixed-to-centered chart change and canceling `tangentCoordChange`, and then
+feed the raw existence layer through
+`Diffeomorph3GaugeFlowOn.of_intrinsicFixedChartDerivativeOn_Ioo`.
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccFixedChartDerivative` and
+`IntrinsicDeTurckGaugeFlowExistenceFamily.ofPicardIccFixedChartDerivative`
+expose the same finite-cover handoff for fixed-IVP and theorem-family theorem
+packages. For explicit
 open Picard time sets, the fixed-IVP and theorem-family raw existence APIs now
 combine the `Ioo` identification with those ordinary-time derivative,
 continuity, and chart-source readouts directly, in both unsimplified
