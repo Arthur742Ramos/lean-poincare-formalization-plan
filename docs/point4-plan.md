@@ -1388,6 +1388,24 @@ preferred-chart continuity and source-membership readouts. The same
 fixed-IVP/theorem-family layer now also mirrors raw preferred-chart range and
 source eventuality, both at ordinary neighborhood-times and relative to the
 solution time set.
+The raw gauge-flow layer now also exposes ordinary fixed-chart derivatives,
+continuity, and chart-source eventuality in any preferred chart whose source
+contains the time-`t` image:
+`hasDerivAt_extChartAt_eval_of_mem_source`,
+`hasDerivAt_extChartAt_eval_congr_vectorField_of_mem_source`,
+`continuousAt_extChartAt_eval_of_mem_source`, and
+`eventually_mem_extChartAt_source_eval_of_mem_source`. Consequently a raw
+intrinsic DeTurck flow can be repackaged directly as
+`Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn` or as the ordinary
+`Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn` on any open-time
+subdomain where the raw time set is a neighborhood, via
+`Diffeomorph3GaugeFlowOn.toIntrinsicFixedChartDerivativeOn` and
+`Diffeomorph3GaugeFlowOn.toIntrinsicFixedChartDerivativeAtOn`; the
+`..._congr_vectorField_nhdsWithin` variants cover chart-model vector fields
+identified with the intrinsic DeTurck field along the flow. The fixed-IVP raw
+existence package mirrors these as `fixedChartDerivativeData` and
+`fixedChartDerivativeAtData`, removing another manual unpacking step between
+manifold raw flows and the finite-cover fixed-chart ODE records.
 The raw, fixed-IVP, and theorem-family preferred-chart derivative readouts now
 also have centered-chart simplifications that rewrite the derivative value from
 `tangentCoordChange I p p p (...)` to the actual gauge velocity. This removes a
