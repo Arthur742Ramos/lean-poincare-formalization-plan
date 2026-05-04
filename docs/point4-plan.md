@@ -1524,7 +1524,12 @@ autonomous uniqueness is now available on common visible subintervals of two
 possibly different ambient raw time sets via the
 `..._of_subset` open- and closed-interval readouts, now including pointwise
 `eval_eq` and `maps3_eq` forms, matching later chart-gluing overlap arguments
-without first rebuilding restricted raw-flow witnesses.
+without first rebuilding restricted raw-flow witnesses. The raw intrinsic
+flow-existence packages now also expose constructor readouts for the induced
+fixed-IVP and theorem-family geometric gauge-flow bundles, including the
+underlying `maps3`, anchoring, gauge-flow equation, and anchored gauge object,
+so downstream endpoint arguments can rewrite from raw ODE output to geometric
+gauge data without unfolding the adapters.
 
 **Module location.** The Banach-model bridge lives in
 `Geometry/Manifold/RicciFlow/GaugeReduction/ModelGaugeFlowODE.lean`.  The final
