@@ -4537,6 +4537,13 @@ theorem flow_timeSlice_hasFDerivAt_of_remainder_bound_nhds_zero
     _ ≤ c * ‖h‖ := by
         gcongr
 
+/-- The first-order spatial remainder of a model flow time curve at base
+initial point `x`, perturbation `h`, and time `τ`. -/
+def spatialRemainder
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (x h : V) (τ : ℝ) : V :=
+  α.flow (x + h, τ) - α.flow (x, τ) - α.tangent x τ h
+
 /-- Grönwall endpoint form of the first-order remainder criterion.  If the
 remainder is eventually bounded by a zero-initial-error Grönwall bound whose
 forcing is `η(h) * ‖h‖` and `η(h) → 0`, then the fixed-time flow slice has
@@ -4561,6 +4568,38 @@ theorem flow_timeSlice_hasFDerivAt_of_gronwall_remainder_bound_nhds_zero
         ≤ gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ := hb
     _ ≤ ‖gronwallBound 0 K ((η h : ℝ) * ‖h‖) Δ‖ := le_abs_self _
     _ ≤ c * ‖h‖ := hg
+
+/-- Grönwall-in-time criterion for the ordinary spatial derivative of a model
+flow time slice.  It remains to prove the derivative bound for the concrete
+nonlinear remainder curve; once supplied, this theorem turns it into the
+Fréchet derivative of the fixed-time flow map. -/
+theorem flow_timeSlice_hasFDerivAt_of_remainder_deriv_bound_Icc
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {a b t K : ℝ} {x : V} {η : V → ℝ≥0}
+    (ht : t ∈ Icc a b)
+    (hη : Filter.Tendsto (fun h : V => (η h : ℝ)) (𝓝 0) (𝓝 0))
+    (hcont : ∀ᶠ h in 𝓝 (0 : V),
+      ContinuousOn (fun τ : ℝ => α.spatialRemainder x h τ) (Icc a b))
+    (hderiv_bound : ∀ᶠ h in 𝓝 (0 : V), ∃ R' : ℝ → V,
+      (∀ τ ∈ Ico a b,
+        HasDerivWithinAt (fun s : ℝ => α.spatialRemainder x h s) (R' τ) (Ici τ) τ) ∧
+      (∀ τ ∈ Ico a b,
+        ‖R' τ‖ ≤ K * ‖α.spatialRemainder x h τ‖ + (η h : ℝ) * ‖h‖))
+    (hinit : ∀ᶠ h in 𝓝 (0 : V), α.spatialRemainder x h a = 0) :
+    HasFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x := by
+  have hbound : ∀ᶠ h in 𝓝 (0 : V),
+      ‖α.flow (x + h, t) - α.flow (x, t) - α.tangent x t h‖ ≤
+        gronwallBound 0 K ((η h : ℝ) * ‖h‖) (t - a) := by
+    filter_upwards [hcont, hderiv_bound, hinit] with h hcont_h hderiv_bound_h hinit_h
+    rcases hderiv_bound_h with ⟨R', hderiv_h, hbound_h⟩
+    have hgr := norm_le_gronwallBound_of_norm_deriv_right_le
+      (f := fun τ : ℝ => α.spatialRemainder x h τ)
+      (f' := R') (δ := 0) (K := K) (ε := (η h : ℝ) * ‖h‖)
+      (a := a) (b := b) hcont_h hderiv_h ?_ hbound_h t ht
+    · simpa [spatialRemainder] using hgr
+    · simpa [hinit_h]
+  exact α.flow_timeSlice_hasFDerivAt_of_gronwall_remainder_bound_nhds_zero hη hbound
 
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is

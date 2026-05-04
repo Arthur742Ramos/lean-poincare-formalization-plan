@@ -1112,7 +1112,12 @@ conversion is now formalized as
 `gronwallBound_zero_left_forcing_mul_norm_isLittleO`, and
 `flow_timeSlice_hasFDerivAt_of_gronwall_remainder_bound_nhds_zero` consumes the
 result directly: a model-flow remainder bounded by the corresponding Gronwall
-expression gives the ordinary spatial derivative of the time slice. The corresponding
+expression gives the ordinary spatial derivative of the time slice.
+`spatialRemainder` now names this nonlinear first-order error, and
+`flow_timeSlice_hasFDerivAt_of_remainder_deriv_bound_Icc` applies Mathlib's
+Gronwall inequality in time: once the concrete remainder curve starts at zero
+and has derivative bounded by `K‖remainder‖ + η(h)‖h‖`, the ordinary spatial
+derivative follows. The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
 `ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall`
