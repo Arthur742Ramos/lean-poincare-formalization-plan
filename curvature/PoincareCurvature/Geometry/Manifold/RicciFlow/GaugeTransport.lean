@@ -2411,6 +2411,37 @@ abbrev SmoothSelfDiffeomorph3 := M ≃ₘ^3⟮I, I⟯ M
 
 namespace SmoothSelfDiffeomorph3
 
+/-- Bundle mutually inverse `C^3` self-maps as a `C^3` self-diffeomorphism. -/
+noncomputable def ofInverse
+    (f g : M → M)
+    (hleft : Function.LeftInverse g f)
+    (hright : Function.RightInverse g f)
+    (hf : ContMDiff I I 3 f) (hg : ContMDiff I I 3 g) :
+    SmoothSelfDiffeomorph3 (I := I) (M := M) where
+  toEquiv :=
+    { toFun := f
+      invFun := g
+      left_inv := hleft
+      right_inv := hright }
+  contMDiff_toFun := hf
+  contMDiff_invFun := hg
+
+@[simp] theorem ofInverse_apply
+    (f g : M → M)
+    (hleft : Function.LeftInverse g f)
+    (hright : Function.RightInverse g f)
+    (hf : ContMDiff I I 3 f) (hg : ContMDiff I I 3 g)
+    (x : M) :
+    ofInverse (I := I) (M := M) f g hleft hright hf hg x = f x := rfl
+
+@[simp] theorem ofInverse_symm_apply
+    (f g : M → M)
+    (hleft : Function.LeftInverse g f)
+    (hright : Function.RightInverse g f)
+    (hf : ContMDiff I I 3 f) (hg : ContMDiff I I 3 g)
+    (x : M) :
+    (ofInverse (I := I) (M := M) f g hleft hright hf hg).symm x = g x := rfl
+
 variable (φ : SmoothSelfDiffeomorph3 (I := I) (M := M))
 
 local notation "TStar" => (fun x : M ↦ TM x →L[ℝ] ℝ)

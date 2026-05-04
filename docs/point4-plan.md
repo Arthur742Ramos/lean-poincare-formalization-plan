@@ -1406,6 +1406,11 @@ target chart target directly produce a manifold-side open `BijOn` patch.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
+On the final bundling side, `SmoothSelfDiffeomorph3.ofInverse` now packages
+mutually inverse `C³` self-maps into a bundled `SmoothSelfDiffeomorph3`, with
+simp readouts for the forward and inverse maps.  Thus the eventual glued-flow
+upgrade can target forward/backward inverse identities plus `ContMDiff I I 3`
+regularity, rather than constructing the `Diffeomorph` record by hand.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,
