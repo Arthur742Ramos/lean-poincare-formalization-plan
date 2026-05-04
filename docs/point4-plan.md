@@ -1495,6 +1495,10 @@ chosen-background connections on the visible overlap.  The bundled
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localMetricConnectionReadout`
 selects one metric-cone shrink and returns both the clipped metric equality and
 the clipped connection equality on that same visible overlap, while
+`RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localRestrictedMetricConnectionReadout`
+uses the same selected-shrink data to expose metric and connection uniqueness
+on any prescribed shorter terminal contained in both candidate intervals and
+the selected shrink.  The wrapper
 `RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_localMetricConnectionReadout_with_fullCommon`
 returns the same selected-shrink clipped readouts together with the conditional
 full-common-interval metric and connection readouts.  The stronger
