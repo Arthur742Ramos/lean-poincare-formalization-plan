@@ -213,6 +213,9 @@ their product-difference forms, now also have single-radius norm-ball variants
 using the existing quantitative product constants. Inverse-matrix-vector and
 vector-inverse-matrix products, together with their difference forms, now have
 the same single-radius packaging under a common determinant lower bound.
+Finite vector dot products, bilinear contractions `v · M w`, and inverse
+bilinear contractions `v · M⁻¹ w`, including the corresponding difference
+forms, now also live in the same single-radius norm-ball API.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric

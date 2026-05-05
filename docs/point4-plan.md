@@ -2701,8 +2701,10 @@ matrix-vector products, and vector-matrix products, together with their
 product-difference forms, now also have single-radius variants using the
 existing quantitative product constants. Inverse-matrix-vector and
 vector-inverse-matrix products, together with their difference forms, now have
-the same single-radius packaging under a common determinant lower bound. It is
-still below the
+the same single-radius packaging under a common determinant lower bound.
+Finite vector dot products, bilinear contractions `v · M w`, and inverse
+bilinear contractions `v · M⁻¹ w`, including the corresponding difference
+forms, now also live in the same single-radius norm-ball API. It is still below the
 actual `C^{2+α,1+α/2}` norm and Schauder estimate.
 
 **Suggested decomposition** (multi-session):

@@ -5650,6 +5650,393 @@ theorem matrix_inv_bilinear_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq
       hBv hv
       (fun i => matrix_inv_mulVec_entry_with (M := M) (v := w) hH hM hw hδpos hdet i))
 
+/-- Quantitative sup constant for the difference of two finite inverse-bilinear contractions
+`v · (M⁻¹ w)`. -/
+def matrixInvBilinearEntrySubBoundConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (Bv : n → ℝ) (B : n → n → ℝ) (Bw' : n → ℝ)
+    (Bvd : n → ℝ) (Bd : n → n → ℝ) (Bwd : n → ℝ) : ℝ :=
+  vectorDotSubBoundConst Bv
+    (fun i => matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bw' i) Bvd
+    (fun i =>
+      matrixMulVecEntrySubBoundConst
+        (fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c) Bw'
+        (fun r c => matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd r c) Bwd i)
+
+/-- Quantitative Holder constant for the difference of two finite inverse-bilinear contractions
+`v · (M⁻¹ w)`. -/
+def matrixInvBilinearEntrySubHolderConst {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] (δ : ℝ) (Bv Hv : n → ℝ) (B H : n → n → ℝ)
+    (Bw' Hw' : n → ℝ) (Bvd Hvd : n → ℝ) (Bd Hd : n → n → ℝ)
+    (Bwd Hwd : n → ℝ) : ℝ :=
+  vectorDotSubHolderConst Bv Hv
+    (fun i => matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bw' i)
+    (fun i => matrixInvMulVecEntryHolderConst (𝕜 := 𝕜) δ B H Bw' Hw' i)
+    Bvd Hvd
+    (fun i =>
+      matrixMulVecEntrySubBoundConst
+        (fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c) Bw'
+        (fun r c => matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd r c) Bwd i)
+    (fun i =>
+      matrixMulVecEntrySubHolderConst
+        (fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c)
+        (fun r c => matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H r c) Bw' Hw'
+        (fun r c => matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd r c)
+        (fun r c => matrixInvEntrySubHolderConst (𝕜 := 𝕜) δ B H Bd Hd r c)
+        Bwd Hwd i)
+
+theorem matrixInvBilinearEntrySubBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {Bv : n → ℝ} {B : n → n → ℝ}
+    {Bw' : n → ℝ} {Bvd : n → ℝ} {Bd : n → n → ℝ} {Bwd : n → ℝ}
+    (hδpos : 0 < δ) (hBv : ∀ i, 0 ≤ Bv i) (hBw' : ∀ i, 0 ≤ Bw' i)
+    (hBvd : ∀ i, 0 ≤ Bvd i) (hBd : ∀ i j, 0 ≤ Bd i j)
+    (hBwd : ∀ i, 0 ≤ Bwd i) :
+    0 ≤ matrixInvBilinearEntrySubBoundConst (𝕜 := 𝕜) δ Bv B Bw' Bvd Bd Bwd := by
+  simpa [matrixInvBilinearEntrySubBoundConst] using
+    (vectorDotSubBoundConst_nonneg hBv
+      (fun i => matrixInvMulVecEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos hBw' i)
+      hBvd
+      (fun i =>
+        matrixMulVecEntrySubBoundConst_nonneg
+          (fun r c => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B r c)
+          hBw'
+          (fun r c => matrixInvEntrySubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd r c)
+          hBwd i))
+
+theorem matrixInvBilinearEntrySubHolderConst_nonneg {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {Bv Hv : n → ℝ} {B H : n → n → ℝ}
+    {Bw' Hw' : n → ℝ} {Bvd Hvd : n → ℝ} {Bd Hd : n → n → ℝ}
+    {Bwd Hwd : n → ℝ} (hδpos : 0 < δ) (hBv : ∀ i, 0 ≤ Bv i)
+    (hHv : ∀ i, 0 ≤ Hv i) (hH : ∀ i j, 0 ≤ H i j)
+    (hBw' : ∀ i, 0 ≤ Bw' i) (hHw' : ∀ i, 0 ≤ Hw' i)
+    (hBvd : ∀ i, 0 ≤ Bvd i) (hHvd : ∀ i, 0 ≤ Hvd i)
+    (hBd : ∀ i j, 0 ≤ Bd i j) (hHd : ∀ i j, 0 ≤ Hd i j)
+    (hBwd : ∀ i, 0 ≤ Bwd i) (hHwd : ∀ i, 0 ≤ Hwd i) :
+    0 ≤ matrixInvBilinearEntrySubHolderConst
+      (𝕜 := 𝕜) δ Bv Hv B H Bw' Hw' Bvd Hvd Bd Hd Bwd Hwd := by
+  simpa [matrixInvBilinearEntrySubHolderConst] using
+    (vectorDotSubHolderConst_nonneg hBv hHv
+      (fun i => matrixInvMulVecEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos hBw' i)
+      (fun i => matrixInvMulVecEntryHolderConst_nonneg (𝕜 := 𝕜)
+        hH hδpos hBw' hHw' i)
+      hBvd hHvd
+      (fun i =>
+        matrixMulVecEntrySubBoundConst_nonneg
+          (fun r c => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B r c)
+          hBw'
+          (fun r c => matrixInvEntrySubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd r c)
+          hBwd i)
+      (fun i =>
+        matrixMulVecEntrySubHolderConst_nonneg
+          (fun r c => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B r c)
+          (fun r c => matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hH hδpos r c)
+          hBw' hHw'
+          (fun r c => matrixInvEntrySubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd r c)
+          (fun r c =>
+            matrixInvEntrySubHolderConst_nonneg (𝕜 := 𝕜) hδpos hH hBd hHd r c)
+          hBwd hHwd i))
+
+/-- Differences of finite inverse-bilinear contractions `v · (M⁻¹ w)` have an explicit bounded
+parabolic `C^{0,α}` estimate under a common determinant lower bound. -/
+theorem matrix_inv_bilinear_entry_sub_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {Bv Hv Bvd Hvd : n → ℝ} {B H Bd Hd : n → n → ℝ}
+    {Bw' Hw' Bwd Hwd : n → ℝ} {δ : ℝ}
+    {v v' : ℝ × X → n → 𝕜} {M N : ℝ × X → Matrix n n 𝕜}
+    {w w' : ℝ × X → n → 𝕜}
+    (hv : ∀ i, ParabolicC0AlphaWith (Bv i) (Hv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaWith (B i j) (H i j) α (fun z => N z i j) s)
+    (hw' : ∀ i, ParabolicC0AlphaWith (Bw' i) (Hw' i) α (fun z => w' z i) s)
+    (hvdiff : ∀ i, ParabolicC0AlphaWith (Bvd i) (Hvd i) α
+      (fun z => v z i - v' z i) s)
+    (hMdiff : ∀ i j, ParabolicC0AlphaWith (Bd i j) (Hd i j) α
+      (fun z => M z i j - N z i j) s)
+    (hwdiff : ∀ i, ParabolicC0AlphaWith (Bwd i) (Hwd i) α
+      (fun z => w z i - w' z i) s)
+    (hBv : ∀ i, 0 ≤ Bv i) (hH : ∀ i j, 0 ≤ H i j)
+    (hBd : ∀ i j, 0 ≤ Bd i j) (hHd : ∀ i j, 0 ≤ Hd i j)
+    (hBvd : ∀ i, 0 ≤ Bvd i) (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaWith
+      (matrixInvBilinearEntrySubBoundConst (𝕜 := 𝕜) δ Bv B Bw' Bvd Bd Bwd)
+      (matrixInvBilinearEntrySubHolderConst
+        (𝕜 := 𝕜) δ Bv Hv B H Bw' Hw' Bvd Hvd Bd Hd Bwd Hwd)
+      α (fun z =>
+        (∑ i : n, v z i * ((M z)⁻¹).mulVec (w z) i) -
+          ∑ i : n, v' z i * ((N z)⁻¹).mulVec (w' z) i) s := by
+  classical
+  simpa [matrixInvBilinearEntrySubBoundConst, matrixInvBilinearEntrySubHolderConst] using
+    (vector_dot_sub_with (X := X) (α := α) (s := s)
+      (Bv := Bv) (Hv := Hv)
+      (Bw' := fun i => matrixInvMulVecEntryBoundConst (𝕜 := 𝕜) δ B Bw' i)
+      (Hw' := fun i => matrixInvMulVecEntryHolderConst (𝕜 := 𝕜) δ B H Bw' Hw' i)
+      (Bvd := Bvd) (Hvd := Hvd)
+      (Bwd := fun i =>
+        matrixMulVecEntrySubBoundConst
+          (fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c) Bw'
+          (fun r c => matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd r c) Bwd i)
+      (Hwd := fun i =>
+        matrixMulVecEntrySubHolderConst
+          (fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c)
+          (fun r c => matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H r c) Bw' Hw'
+          (fun r c => matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd r c)
+          (fun r c => matrixInvEntrySubHolderConst (𝕜 := 𝕜) δ B H Bd Hd r c)
+          Bwd Hwd i)
+      (v := v) (v' := v')
+      (w := fun z i => ((M z)⁻¹).mulVec (w z) i)
+      (w' := fun z i => ((N z)⁻¹).mulVec (w' z) i)
+      hv
+      (fun i => matrix_inv_mulVec_entry_with (M := N) (v := w') hH hN hw' hδpos hdetN i)
+      hvdiff
+      (fun i =>
+        matrix_mulVec_entry_sub_with
+          (M := fun z => (M z)⁻¹) (M' := fun z => (N z)⁻¹) (v := w) (v' := w')
+          (BM := fun r c => matrixInvEntryBoundConst (𝕜 := 𝕜) δ B r c)
+          (HM := fun r c => matrixInvEntryHolderConst (𝕜 := 𝕜) δ B H r c)
+          (Bv' := Bw') (Hv' := Hw')
+          (BMd := fun r c => matrixInvEntrySubBoundConst (𝕜 := 𝕜) δ B Bd r c)
+          (HMd := fun r c => matrixInvEntrySubHolderConst (𝕜 := 𝕜) δ B H Bd Hd r c)
+          (Bvd := Bwd) (Hvd := Hwd)
+          (fun r c => matrix_inv_entry_with (M := M) hH hM hδpos hdetM r c)
+          hw'
+          (fun r c =>
+            matrix_inv_entry_sub_with
+              (M := M) (N := N) hH hBd hHd hM hN hMdiff hδpos hdetM hdetN r c)
+          hwdiff
+          (fun r c => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B r c)
+          (fun r c => matrixInvEntrySubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd r c)
+          i)
+      hBv hBvd)
+
+end ParabolicC0AlphaOn
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Componentwise single-radius control packages finite dot products with the corresponding
+quantitative product radius. -/
+theorem vector_dot_of_entries {n A : Type*} [Fintype n] [NormedRing A]
+    {Rv Rw : n → ℝ} {v w : ℝ × X → n → A}
+    (hv : ∀ i, ParabolicC0AlphaNormLe (Rv i) α (fun z => v z i) s)
+    (hw : ∀ i, ParabolicC0AlphaNormLe (Rw i) α (fun z => w z i) s) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.vectorDotBoundConst Rv Rw +
+        ParabolicC0AlphaOn.vectorDotHolderConst Rv Rv Rw Rw)
+      α (fun z => ∑ i : n, v z i * w z i) s := by
+  have hRv : ∀ i, 0 ≤ Rv i := fun i => (hv i).nonneg
+  have hRw : ∀ i, 0 ≤ Rw i := fun i => (hw i).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.vectorDotBoundConst_nonneg hRv hRw)
+    (ParabolicC0AlphaOn.vectorDotHolderConst_nonneg hRv hRv hRw hRw)
+    (ParabolicC0AlphaOn.vector_dot_with
+      (v := v) (w := w) (Bv := Rv) (Hv := Rv) (Bw := Rw) (Hw := Rw)
+      hRv
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv i))
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hw i)))
+
+/-- Componentwise single-radius controls of two vector pairs and their differences package finite
+dot-product differences with the corresponding quantitative product-difference radius. -/
+theorem vector_dot_sub_of_entries {n A : Type*} [Fintype n] [NormedRing A]
+    {Rv Rw' Rvd Rwd : n → ℝ} {v v' w w' : ℝ × X → n → A}
+    (hv : ∀ i, ParabolicC0AlphaNormLe (Rv i) α (fun z => v z i) s)
+    (hw' : ∀ i, ParabolicC0AlphaNormLe (Rw' i) α (fun z => w' z i) s)
+    (hvdiff : ∀ i, ParabolicC0AlphaNormLe (Rvd i) α
+      (fun z => v z i - v' z i) s)
+    (hwdiff : ∀ i, ParabolicC0AlphaNormLe (Rwd i) α
+      (fun z => w z i - w' z i) s) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.vectorDotSubBoundConst Rv Rw' Rvd Rwd +
+        ParabolicC0AlphaOn.vectorDotSubHolderConst Rv Rv Rw' Rw' Rvd Rvd Rwd Rwd)
+      α (fun z => (∑ i : n, v z i * w z i) - ∑ i : n, v' z i * w' z i) s := by
+  have hRv : ∀ i, 0 ≤ Rv i := fun i => (hv i).nonneg
+  have hRw' : ∀ i, 0 ≤ Rw' i := fun i => (hw' i).nonneg
+  have hRvd : ∀ i, 0 ≤ Rvd i := fun i => (hvdiff i).nonneg
+  have hRwd : ∀ i, 0 ≤ Rwd i := fun i => (hwdiff i).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.vectorDotSubBoundConst_nonneg hRv hRw' hRvd hRwd)
+    (ParabolicC0AlphaOn.vectorDotSubHolderConst_nonneg
+      hRv hRv hRw' hRw' hRvd hRvd hRwd hRwd)
+    (ParabolicC0AlphaOn.vector_dot_sub_with
+      (v := v) (v' := v') (w := w) (w' := w')
+      (Bv := Rv) (Hv := Rv) (Bw' := Rw') (Hw' := Rw')
+      (Bvd := Rvd) (Hvd := Rvd) (Bwd := Rwd) (Hwd := Rwd)
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv i))
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hw' i))
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hvdiff i))
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hwdiff i))
+      hRv hRvd)
+
+/-- Componentwise vector control and entrywise matrix control package finite bilinear matrix
+contractions with the corresponding quantitative product radius. -/
+theorem matrix_bilinear_entry_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedRing A] {Rv : m → ℝ} {RM : m → n → ℝ} {Rw : n → ℝ}
+    {v : ℝ × X → m → A} {M : ℝ × X → Matrix m n A} {w : ℝ × X → n → A}
+    (hv : ∀ i, ParabolicC0AlphaNormLe (Rv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (RM i j) α (fun z => M z i j) s)
+    (hw : ∀ j, ParabolicC0AlphaNormLe (Rw j) α (fun z => w z j) s) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.matrixBilinearEntryBoundConst Rv RM Rw +
+        ParabolicC0AlphaOn.matrixBilinearEntryHolderConst Rv Rv RM RM Rw Rw)
+      α (fun z => ∑ i : m, v z i * (M z).mulVec (w z) i) s := by
+  have hRv : ∀ i, 0 ≤ Rv i := fun i => (hv i).nonneg
+  have hRM : ∀ i j, 0 ≤ RM i j := fun i j => (hM i j).nonneg
+  have hRw : ∀ j, 0 ≤ Rw j := fun j => (hw j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.matrixBilinearEntryBoundConst_nonneg hRv hRM hRw)
+    (ParabolicC0AlphaOn.matrixBilinearEntryHolderConst_nonneg
+      hRv hRv hRM hRM hRw hRw)
+    (ParabolicC0AlphaOn.matrix_bilinear_entry_with
+      (v := v) (M := M) (w := w) (Bv := Rv) (Hv := Rv)
+      (BM := RM) (HM := RM) (Bw := Rw) (Hw := Rw)
+      hRv hRM
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv i))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j))
+      (fun j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hw j)))
+
+/-- Componentwise and entrywise single-radius controls of two bilinear matrix-contraction inputs
+and their differences package the bilinear-contraction difference radius. -/
+theorem matrix_bilinear_entry_sub_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedRing A] {Rv Rvd : m → ℝ} {RM RM' RMd : m → n → ℝ}
+    {Rw' Rwd : n → ℝ}
+    {v v' : ℝ × X → m → A} {M M' : ℝ × X → Matrix m n A}
+    {w w' : ℝ × X → n → A}
+    (hv : ∀ i, ParabolicC0AlphaNormLe (Rv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (RM i j) α (fun z => M z i j) s)
+    (hM' : ∀ i j, ParabolicC0AlphaNormLe (RM' i j) α (fun z => M' z i j) s)
+    (hw' : ∀ j, ParabolicC0AlphaNormLe (Rw' j) α (fun z => w' z j) s)
+    (hvdiff : ∀ i, ParabolicC0AlphaNormLe (Rvd i) α
+      (fun z => v z i - v' z i) s)
+    (hMdiff : ∀ i j, ParabolicC0AlphaNormLe (RMd i j) α
+      (fun z => M z i j - M' z i j) s)
+    (hwdiff : ∀ j, ParabolicC0AlphaNormLe (Rwd j) α
+      (fun z => w z j - w' z j) s) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.matrixBilinearEntrySubBoundConst
+          Rv RM' Rw' Rvd RM RMd Rwd +
+        ParabolicC0AlphaOn.matrixBilinearEntrySubHolderConst
+          Rv Rv RM' RM' Rw' Rw' Rvd Rvd RM RM RMd RMd Rwd Rwd)
+      α (fun z =>
+        (∑ i : m, v z i * (M z).mulVec (w z) i) -
+          ∑ i : m, v' z i * (M' z).mulVec (w' z) i) s := by
+  have hRv : ∀ i, 0 ≤ Rv i := fun i => (hv i).nonneg
+  have hRM : ∀ i j, 0 ≤ RM i j := fun i j => (hM i j).nonneg
+  have hRM' : ∀ i j, 0 ≤ RM' i j := fun i j => (hM' i j).nonneg
+  have hRw' : ∀ j, 0 ≤ Rw' j := fun j => (hw' j).nonneg
+  have hRvd : ∀ i, 0 ≤ Rvd i := fun i => (hvdiff i).nonneg
+  have hRMd : ∀ i j, 0 ≤ RMd i j := fun i j => (hMdiff i j).nonneg
+  have hRwd : ∀ j, 0 ≤ Rwd j := fun j => (hwdiff j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.matrixBilinearEntrySubBoundConst_nonneg
+      hRv hRM' hRw' hRvd hRM hRMd hRwd)
+    (ParabolicC0AlphaOn.matrixBilinearEntrySubHolderConst_nonneg
+      hRv hRv hRM' hRM' hRw' hRw' hRvd hRvd hRM hRM hRMd hRMd hRwd hRwd)
+    (ParabolicC0AlphaOn.matrix_bilinear_entry_sub_with
+      (v := v) (v' := v') (M := M) (M' := M') (w := w) (w' := w')
+      (Bv := Rv) (Hv := Rv) (BM := RM) (HM := RM) (BM' := RM') (HM' := RM')
+      (Bw' := Rw') (Hw' := Rw') (Bvd := Rvd) (Hvd := Rvd)
+      (BMd := RMd) (HMd := RMd) (Bwd := Rwd) (Hwd := Rwd)
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv i))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM' i j))
+      (fun j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hw' j))
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hvdiff i))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hMdiff i j))
+      (fun j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hwdiff j))
+      hRv hRM hRM' hRMd hRvd)
+
+/-- Componentwise vector control, entrywise matrix control, and a determinant lower bound package
+finite inverse-bilinear contractions with the corresponding quantitative radius. -/
+theorem matrix_inv_bilinear_entry_of_entries {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {Rv : n → ℝ} {R : n → n → ℝ} {Rw : n → ℝ} {δ : ℝ}
+    {v : ℝ × X → n → 𝕜} {M : ℝ × X → Matrix n n 𝕜}
+    {w : ℝ × X → n → 𝕜}
+    (hv : ∀ i, ParabolicC0AlphaNormLe (Rv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => M z i j) s)
+    (hw : ∀ j, ParabolicC0AlphaNormLe (Rw j) α (fun z => w z j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.matrixInvBilinearEntryBoundConst (𝕜 := 𝕜) δ Rv R Rw +
+        ParabolicC0AlphaOn.matrixInvBilinearEntryHolderConst
+          (𝕜 := 𝕜) δ Rv Rv R R Rw Rw)
+      α (fun z => ∑ i : n, v z i * ((M z)⁻¹).mulVec (w z) i) s := by
+  have hRv : ∀ i, 0 ≤ Rv i := fun i => (hv i).nonneg
+  have hR : ∀ i j, 0 ≤ R i j := fun i j => (hM i j).nonneg
+  have hRw : ∀ j, 0 ≤ Rw j := fun j => (hw j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.matrixInvBilinearEntryBoundConst_nonneg
+      (𝕜 := 𝕜) hδpos hRv hRw)
+    (ParabolicC0AlphaOn.matrixInvBilinearEntryHolderConst_nonneg
+      (𝕜 := 𝕜) hR hδpos hRv hRv hRw hRw)
+    (ParabolicC0AlphaOn.matrix_inv_bilinear_entry_with
+      (v := v) (M := M) (w := w) (Bv := Rv) (Hv := Rv) (B := R) (H := R)
+      (Bw := Rw) (Hw := Rw)
+      hRv hR
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv i))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j))
+      (fun j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hw j))
+      hδpos hdet)
+
+/-- Componentwise and entrywise single-radius controls of two inverse-bilinear inputs, plus a
+common determinant lower bound, package the inverse-bilinear contraction difference radius. -/
+theorem matrix_inv_bilinear_entry_sub_of_entries {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {Rv Rvd : n → ℝ} {R Rd : n → n → ℝ} {Rw' Rwd : n → ℝ}
+    {δ : ℝ} {v v' : ℝ × X → n → 𝕜} {M N : ℝ × X → Matrix n n 𝕜}
+    {w w' : ℝ × X → n → 𝕜}
+    (hv : ∀ i, ParabolicC0AlphaNormLe (Rv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => N z i j) s)
+    (hw' : ∀ i, ParabolicC0AlphaNormLe (Rw' i) α (fun z => w' z i) s)
+    (hvdiff : ∀ i, ParabolicC0AlphaNormLe (Rvd i) α
+      (fun z => v z i - v' z i) s)
+    (hMdiff : ∀ i j, ParabolicC0AlphaNormLe (Rd i j) α
+      (fun z => M z i j - N z i j) s)
+    (hwdiff : ∀ i, ParabolicC0AlphaNormLe (Rwd i) α
+      (fun z => w z i - w' z i) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.matrixInvBilinearEntrySubBoundConst
+          (𝕜 := 𝕜) δ Rv R Rw' Rvd Rd Rwd +
+        ParabolicC0AlphaOn.matrixInvBilinearEntrySubHolderConst
+          (𝕜 := 𝕜) δ Rv Rv R R Rw' Rw' Rvd Rvd Rd Rd Rwd Rwd)
+      α (fun z =>
+        (∑ i : n, v z i * ((M z)⁻¹).mulVec (w z) i) -
+          ∑ i : n, v' z i * ((N z)⁻¹).mulVec (w' z) i) s := by
+  have hRv : ∀ i, 0 ≤ Rv i := fun i => (hv i).nonneg
+  have hR : ∀ i j, 0 ≤ R i j := fun i j => (hM i j).nonneg
+  have hRw' : ∀ i, 0 ≤ Rw' i := fun i => (hw' i).nonneg
+  have hRvd : ∀ i, 0 ≤ Rvd i := fun i => (hvdiff i).nonneg
+  have hRd : ∀ i j, 0 ≤ Rd i j := fun i j => (hMdiff i j).nonneg
+  have hRwd : ∀ i, 0 ≤ Rwd i := fun i => (hwdiff i).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.matrixInvBilinearEntrySubBoundConst_nonneg
+      (𝕜 := 𝕜) hδpos hRv hRw' hRvd hRd hRwd)
+    (ParabolicC0AlphaOn.matrixInvBilinearEntrySubHolderConst_nonneg
+      (𝕜 := 𝕜) hδpos hRv hRv hR hRw' hRw' hRvd hRvd hRd hRd hRwd hRwd)
+    (ParabolicC0AlphaOn.matrix_inv_bilinear_entry_sub_with
+      (v := v) (v' := v') (M := M) (N := N) (w := w) (w' := w')
+      (Bv := Rv) (Hv := Rv) (Bvd := Rvd) (Hvd := Rvd)
+      (B := R) (H := R) (Bd := Rd) (Hd := Rd)
+      (Bw' := Rw') (Hw' := Rw') (Bwd := Rwd) (Hwd := Rwd)
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv i))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hN i j))
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hw' i))
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hvdiff i))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hMdiff i j))
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hwdiff i))
+      hRv hR hRd hRd hRvd hδpos hdetM hdetN)
+
+end ParabolicC0AlphaNormLe
+
+namespace ParabolicC0AlphaOn
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
 /-- Compact-domain bilinear contraction through an inverse matrix, from entrywise control and
 pointwise nonvanishing determinant. -/
 theorem matrix_inv_bilinear_entry_of_isCompact_det_ne_zero {n 𝕜 : Type*} [Fintype n]
