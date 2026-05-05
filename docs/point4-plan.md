@@ -1450,6 +1450,8 @@ overlap-ready constrained forms:
 `exists_open_nhds_continuousOn_bijOn_subset_of_lifted_openPartialHomeomorph_model`
 records prescribed manifold-side source and target containments after the
 model patch has been chosen inside suitable chart images, and
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_of_hasStrictFDerivAt_Ioo`,
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_of_eventually_hasFDerivAt_Ioo`,
 `VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_common_Ioo_of_hasStrictFDerivAt`
 with its C¹-style
 `..._of_eventually_hasFDerivAt` variant push those containments through the
