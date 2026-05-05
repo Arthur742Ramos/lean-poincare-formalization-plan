@@ -1386,7 +1386,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      alongside the chart-carrier Banach solution.  The smooth-realization layer
      also now has a proof bridge from prescribed shorter-terminal uniqueness to
      open-common-overlap metric and connection uniqueness, with closure-data
-     readouts tied to the same selected-shrink containment hypothesis.
+     readouts tied to the same selected-shrink containment hypothesis. The
+     DeTurck/smooth-realization stack also closes chosen-background open-common
+     metric equality to the closed common interval using the stored
+     time-derivative continuity, and upgrades that closed metric equality to
+     canonical connection equality.
      The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the

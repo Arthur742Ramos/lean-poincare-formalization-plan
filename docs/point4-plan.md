@@ -2388,7 +2388,10 @@ initial-metric smooth-approximation route. The smooth-realization layer now
 also records the order-theoretic open-overlap continuation bridge from
 prescribed shorter-terminal readouts, with metric and connection closure-data
 readouts on `Ico t₀ (min T₁ T₂)` under the existing selected-shrink containment
-hypothesis. At the vector-bundle
+hypothesis. The DeTurck/smooth-realization stack now also closes any
+chosen-background open-common metric readout to the closed common interval by
+continuity from the stored time derivatives, and promotes that closed metric
+equality to canonical connection equality. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives
