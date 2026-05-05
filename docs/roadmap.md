@@ -216,9 +216,12 @@ scalar multiplication with the expected radius bounds. The existential
 `ParabolicC2AlphaOn` class now forms a real submodule of all coordinate
 time-space functions and reads back to `ParabolicC0AlphaOn` for values; the
 full higher radius bounds the value-level `C^{0,α}` norm, and the submodule has
-a linear forgetful map into the existing `C^{0,α}` submodule. It also exposes
-the induced compact value readouts on single compact pieces and finite compact
-families, including linear readout maps, sup-norm bounds from
+a linear forgetful map into the existing `C^{0,α}` submodule. Higher norm balls
+now also expose value-level pointwise norm and distance estimates, positive-
+exponent continuity and uniform continuity, and continuous-linear-image
+`C^{0,α}` norm-ball controls. The higher submodule also exposes the induced
+compact value readouts on single compact pieces and finite compact families,
+including linear readout maps, sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, and the corresponding
 `LipschitzOnWith` handoffs; the finite compact-family value readout also
 determines higher-parabolic functions on covered domains and is injective when

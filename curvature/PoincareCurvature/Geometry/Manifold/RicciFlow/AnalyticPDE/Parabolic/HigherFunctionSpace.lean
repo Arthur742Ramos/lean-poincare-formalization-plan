@@ -296,6 +296,37 @@ theorem value_c0AlphaNormLe_self (h : ParabolicC2AlphaNormLe N α u s) :
   have hNu_le : Nu ≤ N := by linarith
   exact hu.mono_const hNu_le
 
+/-- The higher single radius controls the pointwise value norm on the domain. -/
+theorem norm_le (h : ParabolicC2AlphaNormLe N α u s) ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    ‖u z‖ ≤ N :=
+  h.value_c0AlphaNormLe_self.norm_le hz
+
+/-- A higher single-radius bound on a difference gives the corresponding pointwise value
+distance bound. -/
+theorem dist_le_of_sub {v : ℝ × X → E}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    dist (u z) (v z) ≤ N :=
+  h.value_c0AlphaNormLe_self.dist_le_of_sub hz
+
+/-- Continuous-linear value readouts of a higher single-radius norm ball inherit value-level
+`C^{0,α}` control. -/
+theorem value_continuousLinearMap_c0AlphaNormLe {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ F] (L : E →L[ℝ] F) (h : ParabolicC2AlphaNormLe N α u s) :
+    ParabolicC0AlphaNormLe (‖L‖ * N) α (fun z => L (u z)) s :=
+  h.value_c0AlphaNormLe_self.continuousLinearMap L
+
+/-- Positive-exponent higher norm-ball control gives value-level continuity on the domain. -/
+theorem continuousOn (h : ParabolicC2AlphaNormLe N α u s) (hα : 0 < α) :
+    ContinuousOn u s :=
+  h.value_c0AlphaNormLe_self.continuousOn hα
+
+/-- Positive-exponent higher norm-ball control gives value-level uniform continuity on the
+domain. -/
+theorem uniformContinuousOn (h : ParabolicC2AlphaNormLe N α u s) (hα : 0 < α) :
+    UniformContinuousOn u s :=
+  h.value_c0AlphaNormLe_self.uniformContinuousOn hα
+
 theorem exists_secondJet (h : ParabolicC2AlphaNormLe N α u s) :
     ∃ J : ParabolicSecondJet u s,
       (∃ Nx ≥ 0, ParabolicC0AlphaNormLe Nx α J.spaceDeriv s) ∧
@@ -351,6 +382,14 @@ theorem c0AlphaOn (h : ParabolicC2AlphaOn α u s) :
     ParabolicC0AlphaOn α u s := by
   rcases h with ⟨N, _hN, hN⟩
   exact hN.value_c0AlphaOn
+
+theorem continuousOn (h : ParabolicC2AlphaOn α u s) (hα : 0 < α) :
+    ContinuousOn u s :=
+  h.c0AlphaOn.continuousOn hα
+
+theorem uniformContinuousOn (h : ParabolicC2AlphaOn α u s) (hα : 0 < α) :
+    UniformContinuousOn u s :=
+  h.c0AlphaOn.uniformContinuousOn hα
 
 theorem const (c : E) : ParabolicC2AlphaOn α (fun _ : ℝ × X => c) s :=
   of_normLe (ParabolicC2AlphaNormLe.const (X := X) (α := α) (s := s) c)
