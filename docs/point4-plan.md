@@ -2073,9 +2073,9 @@ same-constant projection back to components, and product-valued pairing
 closure, continuous-linear closure, standalone Holder-level curried-bilinear
 closure from separate bounded and Holder controls, standalone Holder-level
 operator-application closure from separate operator/vector bounded and Holder
-controls, curried-bilinear-map closure, curried-bilinear difference estimates,
-operator-application closure, bounded and Holder-level operator-application
-difference primitives, and
+controls, curried-bilinear-map closure, bounded and Holder-level
+curried-bilinear difference primitives, operator-application closure, bounded
+and Holder-level operator-application difference primitives, and
 operator-application difference estimates with operator-norm constants, now in
 both fixed-constant and existential forms, and
 integer-scalar closure,

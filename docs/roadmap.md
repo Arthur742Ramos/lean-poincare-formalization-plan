@@ -118,7 +118,8 @@ Hölder vocabulary now also includes fixed-constant and existential `C^{0,α}`
 unit-diameter lowering from spatial Lipschitz data for `0 ≤ α ≤ 1` and time
 Lipschitz data for `0 ≤ α ≤ 2`, with closed-ball and closed-cylinder subset
 variants, plus a standalone Holder-level curried-bilinear product-rule estimate
-from separate bounded and Holder controls and a standalone Holder-level
+from separate bounded and Holder controls, bounded and Holder-level
+curried-bilinear difference primitives, and a standalone Holder-level
 operator-application estimate from separate operator/vector bounded and Holder
 controls. The same layer now also has bounded and Holder-level
 operator-application difference primitives for comparing two operator/vector
