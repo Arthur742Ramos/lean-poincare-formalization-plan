@@ -2650,7 +2650,12 @@ coarser shared-radius schematic RHS estimate directly, with a matching
 local-frame Gram-coordinate finite-cover form; the raw point-dependent and
 existential local-cylinder variants now have the same coarser shared-radius
 handoff, and the local-frame Gram-coordinate layer has matching point-dependent
-and existential local-cylinder forms. The interval
+and existential local-cylinder forms. The finite-family compact-domain,
+finite product-cylinder cover, point-dependent local-cylinder, and existential
+local-cylinder shared-radius estimates now also have coarser-primitive-constant
+forms in both the raw matrix and local-frame Gram-coordinate layers, so a finite
+cover can keep sharper memberwise primitive estimates while exporting one
+larger Picard/Lipschitz chart constant per member. The interval
 Banach-chart constructor now also has a real-constant coordinate-Lipschitz
 entry point, so those matrix constants no longer need to be prepackaged as
 `ℝ≥0` by callers. This is a

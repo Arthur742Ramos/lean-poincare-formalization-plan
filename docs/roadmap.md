@@ -177,7 +177,11 @@ matching compact local-frame Gram-coordinate handoffs, and the raw finite
 product-cylinder cover bridge now has the coarser shared-radius form together
 with its local-frame Gram-coordinate counterpart. The raw point-dependent and
 existential local-cylinder variants now expose the same coarser shared-radius
-handoff, with matching local-frame Gram-coordinate forms.
+handoff, with matching local-frame Gram-coordinate forms. The finite-family
+compact-domain and product-cylinder shared-radius estimates now also carry this
+coarser-primitive-constant promotion in both the raw matrix and local-frame
+Gram-coordinate layers, preserving sharper memberwise primitive bounds while
+exporting the coarser constants consumed by common Picard/Lipschitz charts.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric
@@ -1550,7 +1554,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         finite-cover inverse bound from compactness of the cover pieces inside
         their fixed trivialization domains, factoring fixed-center inverses
         through centered inverse trivializations and continuous coordinate
-        changes.
+        changes. The finite-family compact-domain, finite product-cylinder,
+        point-dependent local-cylinder, and existential local-cylinder
+        shared-radius schematic RHS estimates now also accept sharper
+        memberwise primitive constants and export coarser chart constants, in
+        both the raw matrix and local-frame Gram-coordinate layers.
       What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence
