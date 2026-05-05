@@ -2737,7 +2737,9 @@ Pi-valued exact-sum norm-ball packaging. It now also converts entrywise higher
 primitive difference controls with radii linear in a shared radius into the
 linear-radius `ParabolicBoundedWith` schematic RHS estimate and the
 compact-coordinate readout `LipschitzOnWith` bridge for any parabolic
-`C^{0,α}` vector field agreeing with that RHS on the state set. Radii linear in
+`C^{0,α}` vector field agreeing with that RHS on the state set, including a
+coarser exported-constant variant for sharper entrywise higher primitive
+controls. Radii linear in
 `dist u v` give the matrix-norm/array primitive bounds needed by the existing
 schematic RHS state-space `LipschitzOnWith` theorem, with a matching
 finite-family wrapper, Pi-valued finite-product `C^{0,α}` and Lipschitz

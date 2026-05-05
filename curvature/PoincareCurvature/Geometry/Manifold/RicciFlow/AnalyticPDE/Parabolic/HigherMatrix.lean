@@ -303,6 +303,69 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_higher_pr
     hDB hHB hMbound hNbound hDbound hEbound hKbound hKDsum hR
     hMdiff_bound hDdiff_bound hHdiff_bound hδpos hdetM hdetN
 
+/-- Linear-radius bounded schematic Ricci-DeTurck RHS difference estimate from higher primitive
+controls with coarser exported constants. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_higher_primitive_normLe_of_le
+    {n : Type*} [Fintype n] [DecidableEq n]
+    {δ R KM KD : ℝ} {KH : n → n → ℝ}
+    {KM0 : n → n → ℝ} {KD0 : n → n → n → ℝ}
+    {KH0 : n → n → n → n → ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {M N : ℝ × X → Matrix n n ℝ}
+    {D E : ℝ × X → n → n → n → ℝ}
+    {H K : ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM0_nonneg : ∀ a b, 0 ≤ KM0 a b)
+    (hKD0_nonneg : ∀ a b c, 0 ≤ KD0 a b c)
+    (hKH0_nonneg : ∀ a b i j, 0 ≤ KH0 a b i j)
+    (hKM_le : (∑ a, ∑ b, KM0 a b) ≤ KM)
+    (hKD_le : (∑ a, ∑ b, ∑ c, KD0 a b c) ≤ KD)
+    (hKH_le : ∀ i j, (∑ a, ∑ b, KH0 a b i j) ≤ KH i j)
+    (hR : 0 ≤ R)
+    (hM : ∀ a b, ParabolicC2AlphaNormLe (C a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC2AlphaNormLe (C a b) α (fun z => N z a b) s)
+    (hD : ∀ a b c, ParabolicC2AlphaNormLe (DB a b c) α (fun z => D z a b c) s)
+    (hE : ∀ a b c, ParabolicC2AlphaNormLe (DB a b c) α (fun z => E z a b c) s)
+    (hK : ∀ a b i j, ParabolicC2AlphaNormLe (HB a b i j) α
+      (fun z => K z a b i j) s)
+    (hMdiff : ∀ a b, ParabolicC2AlphaNormLe (KM0 a b * R) α
+      (fun z => M z a b - N z a b) s)
+    (hDdiff : ∀ a b c, ParabolicC2AlphaNormLe (KD0 a b c * R) α
+      (fun z => D z a b c - E z a b c) s)
+    (hHdiff : ∀ a b i j, ParabolicC2AlphaNormLe (KH0 a b i j * R) α
+      (fun z => H z a b i j - K z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicBoundedWith
+      (ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+          (𝕜 := ℝ) δ C DB HB KM KD KH * R)
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s := by
+  have hbase :
+      ParabolicBoundedWith
+        (ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ C DB HB
+            (∑ a, ∑ b, KM0 a b)
+            (∑ a, ∑ b, ∑ c, KD0 a b c)
+            (fun i j => ∑ a, ∑ b, KH0 a b i j) * R)
+        (fun z : ℝ × X =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+            ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s :=
+    ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_higher_primitive_normLe
+      (X := X) (α := α) (s := s) (δ := δ) (R := R)
+      (KM := KM0) (KD := KD0) (KH := KH0)
+      (C := C) (DB := DB) (HB := HB)
+      (M := M) (N := N) (D := D) (E := E) (H := H) (K := K)
+      hDB hHB hKM0_nonneg hKD0_nonneg hKH0_nonneg hR
+      hM hN hD hE hK hMdiff hDdiff hHdiff hδpos hdetM hdetN
+  exact hbase.mono_const
+    (mul_le_mul_of_nonneg_right
+      (ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_mono
+        (𝕜 := ℝ) hδpos hDB hHB hKM_le hKD_le hKH_le)
+      hR)
+
 /-- Compact-coordinate readout Lipschitz bridge for a state-space vector field that agrees with
 the schematic Ricci-DeTurck RHS on the state set.  The analytic input remains the higher primitive
 entry control; the output is the finite compact-family readout used by parabolic chart estimates. -/
@@ -386,6 +449,88 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_of_high
       (hM hu) (hM hv) (hD hu) (hD hv) (hH hv)
       (hMdiff hu hv) (hDdiff hu hv) (hHdiff hu hv)
       hδpos (hdet hu) (hdet hv)
+  intro z hz
+  simpa [hAeq hu z, hAeq hv z] using hraw hz
+
+/-- Compact-coordinate readout Lipschitz bridge from higher primitive controls with coarser
+exported constants.  Entrywise higher difference controls may use sharp constants, while the
+finite compact readout is stated with any larger primitive constants. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_of_higher_primitive_normLe_of_le
+    {ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {δ KM KD : ℝ} {KH : n → n → ℝ}
+    {KM0 : n → n → ℝ} {KD0 : n → n → n → ℝ}
+    {KH0 : n → n → n → n → ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : Y → ℝ × X → Matrix n n ℝ}
+    {D : Y → ℝ × X → n → n → n → ℝ}
+    {H : Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM0_nonneg : ∀ a b, 0 ≤ KM0 a b)
+    (hKD0_nonneg : ∀ a b c, 0 ≤ KD0 a b c)
+    (hKH0_nonneg : ∀ a b i j, 0 ≤ KH0 a b i j)
+    (hKM_nonneg : 0 ≤ KM) (hKD_nonneg : 0 ≤ KD)
+    (hKH_nonneg : ∀ i j, 0 ≤ KH i j)
+    (hKM_le : (∑ a, ∑ b, KM0 a b) ≤ KM)
+    (hKD_le : (∑ a, ∑ b, ∑ c, KD0 a b c) ≤ KD)
+    (hKH_le : ∀ i j, (∑ a, ∑ b, KH0 a b i j) ≤ KH i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C a b) α (fun z => M u z a b) s)
+    (hD : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB a b c) α (fun z => D u z a b c) s)
+    (hH : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB a b i j) α (fun z => H u z a b i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM0 a b * dist u v) α
+        (fun z => M u z a b - M v z a b) s)
+    (hDdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD0 a b c * dist u v) α
+        (fun z => D u z a b c - D v z a b c) s)
+    (hHdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH0 a b i j * dist u v) α
+        (fun z => H u z a b i j - H v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M u z) (D u z) (H u z)) :
+    LipschitzOnWith
+      ⟨ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+          (𝕜 := ℝ) δ C DB HB KM KD KH,
+        ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+          (𝕜 := ℝ) hδpos hDB hHB hKM_nonneg hKD_nonneg hKH_nonneg⟩
+      (fun u : Y =>
+        parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A u))
+      stateSet := by
+  refine parabolicC0AlphaSubmodule.lipschitzOnWith_toCompactCoordFamily_of_bounded_sub
+    (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+    Kdom hKdom hα ?_
+  intro u hu v hv
+  have hraw :
+      ParabolicBoundedWith
+        (ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ C DB HB KM KD KH * dist u v)
+        (fun z : ℝ × X =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+              (M u z) (D u z) (H u z) -
+            ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+              (M v z) (D v z) (H v z)) s := by
+    exact
+      ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_higher_primitive_normLe_of_le
+        (X := X) (α := α) (s := s) (δ := δ) (R := dist u v)
+        (KM0 := KM0) (KD0 := KD0) (KH0 := KH0)
+        (KM := KM) (KD := KD) (KH := KH) (C := C) (DB := DB) (HB := HB)
+        (M := M u) (N := M v) (D := D u) (E := D v) (H := H u) (K := H v)
+        hDB hHB hKM0_nonneg hKD0_nonneg hKH0_nonneg hKM_le hKD_le hKH_le
+        dist_nonneg (hM hu) (hM hv) (hD hu) (hD hv) (hH hv)
+        (hMdiff hu hv) (hDdiff hu hv) (hHdiff hu hv)
+        hδpos (hdet hu) (hdet hv)
   intro z hz
   simpa [hAeq hu z, hAeq hv z] using hraw hz
 

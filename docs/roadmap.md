@@ -244,7 +244,9 @@ norm-ball packaging. Higher entrywise difference controls whose radii are
 linear in a shared radius now also feed the linear-radius `ParabolicBoundedWith`
 schematic RHS estimate and the compact-coordinate readout `LipschitzOnWith`
 bridge for any parabolic `C^{0,α}` vector field agreeing with that RHS on the
-state set. Radii linear in a state-space distance also sum to matrix-norm
+state set; the same compact-coordinate bridge now accepts sharper entrywise
+higher primitive constants while exporting coarser schematic RHS constants.
+Radii linear in a state-space distance also sum to matrix-norm
 primitive difference bounds and feed the existing schematic RHS state-space
 `LipschitzOnWith` bridges, including finite-family and coarser exported-constant
 wrappers; the finite-family bridges now package all schematic RHS coordinates
