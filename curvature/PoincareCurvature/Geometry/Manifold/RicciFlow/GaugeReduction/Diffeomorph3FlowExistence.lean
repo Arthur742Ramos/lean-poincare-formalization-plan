@@ -40,6 +40,27 @@ theorem eqOn_of_iUnion_eqOn
   rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxU⟩
   exact heq i ⟨hx, hxU⟩
 
+/-- A canonical global map obtained by choosing one local readout on an indexed
+cover.  Outside the covered locus it falls back to `default`; on covered
+domains, compatibility on overlaps makes the choice independent. -/
+noncomputable def gluedMapOf_iUnion {ι : Type*}
+    (default : X → Y) (U : ι → Set X) (Fₗ : ι → X → Y) : X → Y :=
+  fun x ↦ by
+    classical
+    exact if hx : ∃ i, x ∈ U i then Fₗ (Classical.choose hx) x else default x
+
+/-- The canonical glued map agrees with each local readout on that readout's
+visible set, provided the local readouts agree on pairwise overlaps. -/
+theorem gluedMapOf_iUnion_eqOn
+    {ι : Type*} {default : X → Y} {U : ι → Set X} {Fₗ : ι → X → Y}
+    (hcompat : ∀ i j, EqOn (Fₗ i) (Fₗ j) (U i ∩ U j)) :
+    ∀ i, EqOn (gluedMapOf_iUnion default U Fₗ) (Fₗ i) (U i) := by
+  classical
+  intro i x hxU
+  have hxcover : ∃ j, x ∈ U j := ⟨i, hxU⟩
+  rw [gluedMapOf_iUnion, dif_pos hxcover]
+  exact hcompat (Classical.choose hxcover) i ⟨Classical.choose_spec hxcover, hxU⟩
+
 /-- A function is continuous on a domain if every point of the domain has an
 open neighborhood on which it agrees with some continuous local readout.  This
 is the topological continuity-gluing bridge used after chartwise Picard
