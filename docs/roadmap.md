@@ -1396,7 +1396,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      The Banach ODE layer now has the matching endpoint-closure module
      `AnalyticPDE/BanachEndpointClosure.lean`: restricted-terminal equality and
      restricted-estimate Picard uniqueness close on the full common closed
-     interval by within-interval continuity.
+     interval by within-interval continuity, including the finite-cover
+     positive-definite locus and symmetric Riemannian metric-locus restricted
+     bridges.
      The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the

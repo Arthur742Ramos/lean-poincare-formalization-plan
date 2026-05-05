@@ -1915,7 +1915,10 @@ state-set Lipschitz-on-`Icc` specialization needed when estimates are only known
 on those restricted terminals. `AnalyticPDE/BanachEndpointClosure.lean` closes
 that bridge to the common closed interval using within-interval continuity of
 the Banach ODE curves, and gives the corresponding restricted-estimate
-Picard-Lindelof existence theorem with closed-common uniqueness. The continuous space-time package now forgets to
+Picard-Lindelof existence theorem with closed-common uniqueness. The same leaf
+module lifts this endpoint-closed restricted-estimate readout to the
+finite-cover positive-definite locus and the symmetric Riemannian metric-locus
+submodule. The continuous space-time package now forgets to
 `LocalFlowSolution` and inherits the same uniqueness bridges directly.
 The finite-cover metric-locus layer also has positive-definite and symmetric
 Riemannian-metric-locus specializations of this restricted-estimate theorem, so
