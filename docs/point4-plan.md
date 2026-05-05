@@ -2735,9 +2735,11 @@ single-radius schematic Ricci-DeTurck RHS difference theorem. The direct
 schematic RHS constant is named at the higher layer and has finite-family and
 Pi-valued exact-sum norm-ball packaging. It now also converts entrywise higher
 primitive difference controls with radii linear in a shared radius into the
-linear-radius `ParabolicBoundedWith` schematic RHS estimate, while radii linear
-in `dist u v` give the matrix-norm/array primitive bounds needed by the
-existing schematic RHS state-space `LipschitzOnWith` theorem, with a matching
+linear-radius `ParabolicBoundedWith` schematic RHS estimate and the
+compact-coordinate readout `LipschitzOnWith` bridge for any parabolic
+`C^{0,α}` vector field agreeing with that RHS on the state set. Radii linear in
+`dist u v` give the matrix-norm/array primitive bounds needed by the existing
+schematic RHS state-space `LipschitzOnWith` theorem, with a matching
 finite-family wrapper, Pi-valued finite-product `C^{0,α}` and Lipschitz
 packaging of all family coordinates, and matching coarser exported-constant
 variants.
