@@ -2322,6 +2322,57 @@ theorem SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.nonempty_localExiste
     Nonempty (LocalExistenceUniqueness (E := F) (H := H) (I := I) (M := M) ivp) :=
   ⟨D.toLocalExistenceUniqueness⟩
 
+/-- Ambient interval closure data yields the chosen-background, intrinsic, and
+ordinary point-4 theorem packages without any terminal-fit hypothesis when the
+original Picard closed ball is already contained in the Riemannian metric cone.
+In this case the chart-derived symmetric carrier is built on the original
+interval, so arbitrary reverse-encoded candidate intervals only need their
+existing chart terminal bound. -/
+theorem RicciDeTurckChartClosureDataOnIcc.nonempty_theoremPackages_of_closedBall_subset_riemannianMetricLocus
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : RicciDeTurckChartClosureDataOnIcc x0 et het Kc hKc Ko hKo hKoEq hcover chart)
+    (hball : Metric.closedBall
+      (InitialValueProblem.toSymmetricSectionSubmodule
+        (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) a ⊆
+      riemannianMetricLocusSubmodule (M := M) (F := F)
+        (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover) :
+    Nonempty (ChosenIntrinsicDeTurckLocalExistenceUniqueness
+        (E := F) (H := H) (I := I) (M := M) ivp) ∧
+      Nonempty (IntrinsicLocalExistenceUniqueness
+        (E := F) (H := H) (I := I) (M := M) ivp) ∧
+      Nonempty (LocalExistenceUniqueness
+        (E := F) (H := H) (I := I) (M := M) ivp) := by
+  let Dsym : SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc
+      x0 et het Kc hKc Ko hKo hKoEq hcover chart :=
+    SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.ofRicciDeTurckChartClosureDataOnIcc
+      (M := M) (F := F) (I := I) (D := D)
+      (chart.restrictedSymmetricA_picard_of_closedBall_subset_riemannianMetricLocus
+        (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover hball)
+  constructor
+  · exact ⟨Dsym.toChosenIntrinsicDeTurckLocalExistenceUniqueness⟩
+  constructor
+  · exact ⟨Dsym.toIntrinsicLocalExistenceUniqueness⟩
+  · exact ⟨Dsym.toLocalExistenceUniqueness⟩
+
 /-- Ambient interval closure data, after the standard metric-cone shrink to the genuine symmetric
 carrier, yields the chosen-background, intrinsic, and ordinary point-4 theorem packages as one
 proof-level witness.  The only remaining compatibility input is that encoded candidates fit inside
