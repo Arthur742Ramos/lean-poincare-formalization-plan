@@ -225,8 +225,9 @@ packages the canonical stationary local solution attached to
     endpoint data, and the fixed-IVP/theorem-family raw intrinsic existence
     packages mirror those readouts. It also constructs canonical glued
     forward/backward slices for time-dependent compatible open covers from a
-    source-persistence hypothesis, with a finite-cover local-readout variant
-    that promotes per-patch relative-filter equality to the uniform field
+    source-persistence hypothesis, including a pointwise persistence form for
+    the global-field route and a finite-cover local-readout variant that
+    promotes per-patch relative-filter equality to the uniform field
     identification needed by the raw gauge-flow endpoint. A thin
     `AnalyticPDE.SmoothRealization`
     module names the

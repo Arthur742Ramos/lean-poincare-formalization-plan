@@ -1548,7 +1548,12 @@ raw layer now also has the time-dependent compatible-cover bridge
 and proof-level `nonempty_...`: canonical glued forward/backward slices are
 built from compatible local readouts on the time-slice cover, while a
 closed-Picard source-persistence hypothesis supplies the relative-filter
-equality with the base-time patch.  Its finite-cover local-readout companion
+equality with the base-time patch.  The global-field route also has the
+pointwise-source variant
+`Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
+so continuity and chart-derivative gluing can use per-base-point persistence
+instead of uniform inclusion of the whole selected patch.  Its finite-cover
+local-readout companion
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality
 into the uniform vector-field-identification handoff needed for all base
