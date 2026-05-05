@@ -2709,7 +2709,11 @@ expected radius bounds. Its existential `ParabolicC2AlphaOn` class now forms a
 real submodule of all coordinate time-space functions and reads back to
 `ParabolicC0AlphaOn` for the value component; the full `C^{2+α,1+α/2}` radius
 also bounds the value-level `C^{0,α}` norm, and the submodule has a linear
-forgetful map into the existing `C^{0,α}` submodule. Second jets,
+forgetful map into the existing `C^{0,α}` submodule. The higher submodule now
+also inherits compact value readouts from that forgetful map: single compact
+pieces, finite compact families, and the linear finite-cover readout all have
+sup-norm bounds from `ParabolicC2AlphaNormLe` difference balls, plus matching
+`LipschitzOnWith` estimates for pairwise higher-norm controls. Second jets,
 `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher submodule now
 also restrict to smaller time-space domains.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for

@@ -442,6 +442,200 @@ theorem toC0AlphaSubmoduleLinearMap_apply
     toC0AlphaSubmoduleLinearMap (X := X) (E := E) (α := α) (s := s) u z = u z :=
   rfl
 
+/-- Read a coordinate parabolic `C^{2+α,1+α/2}` function as a continuous map on a compact
+time-space piece, using its value-level `C^{0,α}` component. -/
+def toContinuousMap {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) : C(K, E) :=
+  parabolicC0AlphaSubmodule.toContinuousMap
+    (X := X) (E := E) (α := α) (s := s) hK hα
+    (toC0AlphaSubmoduleLinearMap (X := X) (E := E) (α := α) (s := s) u)
+
+@[simp]
+theorem toContinuousMap_apply {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) (z : K) :
+    toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u z = u z.1 :=
+  rfl
+
+/-- Compact-piece value readout of a coordinate parabolic `C^{2+α,1+α/2}` function as a
+linear map. -/
+def toContinuousMapLinearMap {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α) :
+    parabolicC2AlphaSubmodule X E α s →ₗ[ℝ] C(K, E) where
+  toFun := toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα
+  map_add' := by
+    intro u v
+    ext z
+    rfl
+  map_smul' := by
+    intro c u
+    ext z
+    rfl
+
+@[simp]
+theorem toContinuousMapLinearMap_apply {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    toContinuousMapLinearMap (X := X) (E := E) (α := α) (s := s) hK hα u =
+      toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u :=
+  rfl
+
+/-- A single-radius `C^{2+α,1+α/2}` bound on a difference controls the compact value
+readout sup norm. -/
+theorem norm_toContinuousMap_sub_le_of_normLe {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s) :
+    ‖toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u -
+        toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα v‖ ≤ N := by
+  have h0 :
+      ParabolicC0AlphaNormLe N α
+        (fun z =>
+          toC0AlphaSubmoduleLinearMap (X := X) (E := E) (α := α) (s := s) u z -
+            toC0AlphaSubmoduleLinearMap (X := X) (E := E) (α := α) (s := s) v z) s := by
+    simpa using h.value_c0AlphaNormLe_self
+  simpa [toContinuousMap] using
+    parabolicC0AlphaSubmodule.norm_toContinuousMap_sub_le_of_normLe
+      (X := X) (E := E) (α := α) (s := s) hK hα h0
+
+/-- Pairwise single-radius `C^{2+α,1+α/2}` difference estimates give a Lipschitz estimate
+for one compact value readout. -/
+theorem lipschitzOnWith_toContinuousMap_of_normLe_sub {Y : Type*} [PseudoMetricSpace Y]
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0} {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC2AlphaNormLe ((L : ℝ) * dist u v) α (fun z => A u z - A v z) s) :
+    LipschitzOnWith L
+      (fun u : Y => toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hnorm := norm_toContinuousMap_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) hK hα (h hu hv)
+  simpa [dist_eq_norm] using hnorm
+
+/-- Read a coordinate parabolic `C^{2+α,1+α/2}` function on every compact piece of a chosen
+cover, using its value-level `C^{0,α}` component. -/
+def toCompactCoordFamily {κ : Type*} (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) : ∀ i, C(Kc i, E) :=
+  fun i => toContinuousMap (X := X) (E := E) (α := α) (s := s) (hKc i) hα u
+
+@[simp]
+theorem toCompactCoordFamily_apply {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) (i : κ) (z : Kc i) :
+    toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i z =
+      u z.1 :=
+  rfl
+
+/-- Finite-cover value readout as a linear map from coordinate parabolic
+`C^{2+α,1+α/2}` functions into compact continuous-map pieces. -/
+def toCompactCoordFamilyLinearMap {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α) :
+    parabolicC2AlphaSubmodule X E α s →ₗ[ℝ] (∀ i, C(Kc i, E)) where
+  toFun := toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  map_add' := by
+    intro u v
+    ext i z
+    rfl
+  map_smul' := by
+    intro c u
+    ext i z
+    rfl
+
+@[simp]
+theorem toCompactCoordFamilyLinearMap_apply {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u =
+      toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u :=
+  rfl
+
+/-- A single-radius `C^{2+α,1+α/2}` difference bound controls each compact-family value
+readout. -/
+theorem norm_toCompactCoordFamily_sub_le_of_normLe {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s) (i : κ) :
+    ‖toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i -
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i‖ ≤ N :=
+  norm_toContinuousMap_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) (hKc i) hα h
+
+/-- A single-radius `C^{2+α,1+α/2}` difference bound controls the finite product of
+compact-family value readouts in the product sup norm. -/
+theorem norm_toCompactCoordFamily_family_sub_le_of_normLe {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s) :
+    ‖toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u -
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v‖ ≤ N := by
+  refine (pi_norm_le_iff_of_nonneg h.nonneg).2 fun i => ?_
+  exact norm_toCompactCoordFamily_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα h i
+
+/-- Pairwise single-radius `C^{2+α,1+α/2}` difference estimates give a Lipschitz estimate
+for the finite product of compact-family value readouts. -/
+theorem lipschitzOnWith_toCompactCoordFamily_of_normLe_sub {Y κ : Type*}
+    [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0} {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC2AlphaNormLe ((L : ℝ) * dist u v) α (fun z => A u z - A v z) s) :
+    LipschitzOnWith L
+      (fun u : Y =>
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hnorm := norm_toCompactCoordFamily_family_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv)
+  simpa [dist_eq_norm] using hnorm
+
+/-- The linear compact-family value readout inherits the same finite product sup-norm
+estimate from `C^{2+α,1+α/2}` difference control. -/
+theorem norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s) :
+    ‖toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u -
+      toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα v‖ ≤ N := by
+  simpa using norm_toCompactCoordFamily_family_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα h
+
+/-- Pairwise single-radius `C^{2+α,1+α/2}` difference estimates give a Lipschitz estimate
+for the linear finite-cover value readout. -/
+theorem lipschitzOnWith_toCompactCoordFamilyLinearMap_of_normLe_sub {Y κ : Type*}
+    [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0} {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC2AlphaNormLe ((L : ℝ) * dist u v) α (fun z => A u z - A v z) s) :
+    LipschitzOnWith L
+      (fun u : Y =>
+        toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hnorm := norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv)
+  simpa [dist_eq_norm] using hnorm
+
 /-- Restriction to a smaller set as a linear map between coordinate parabolic
 `C^{2+α,1+α/2}` spaces. -/
 def restrictLinearMap {t : Set (ℝ × X)} (hst : t ⊆ s) :
