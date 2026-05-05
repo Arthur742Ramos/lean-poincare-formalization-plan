@@ -1458,7 +1458,13 @@ to continuous open readouts into continuity of the candidate map on the domain,
 and `continuousOn_of_iUnion_open_eqOn_continuousOn` gives the corresponding
 indexed open-cover form.  These let a finite or locally indexed chart cover
 feed continuity of a glued time-slice without reopening the pointwise
-neighborhood argument.  The same topological gluing block now includes
+neighborhood argument.  The same block now also includes pointwise temporal
+continuity gluing:
+`continuousWithinAt_eval_of_iUnion_eventuallyEqOn_continuousWithinAt` and
+`continuousWithinAt_eval_of_iUnion_eqOn_continuousWithinAt` transfer
+`ContinuousWithinAt (fun τ ↦ local τ x) s t` from a local readout covering the
+base point to the glued map `F`, matching the continuity input of the
+source-membership-free Picard endpoint.  The same topological gluing block now includes
 `leftInvOn_of_iUnion_eqOn_leftInvOn` and
 `rightInvOn_of_iUnion_eqOn_rightInvOn`, which turn local forward/backward
 inverse identities plus equality of the global candidates with local readouts

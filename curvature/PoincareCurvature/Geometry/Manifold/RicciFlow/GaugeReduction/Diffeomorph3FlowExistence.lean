@@ -71,6 +71,37 @@ theorem continuousOn_of_iUnion_open_eqOn_continuousOn
     rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxU⟩
     exact ⟨U i, G i, hUopen i, hxU, hcont i, heq i⟩
 
+/-- Pointwise time-continuity glues from a local readout covering the base
+point, provided the glued time slices agree with that readout in the relative
+time filter and agree at the base time.  This is the temporal analogue of the
+open-cover continuity gluing used for fixed time slices. -/
+theorem continuousWithinAt_eval_of_iUnion_eventuallyEqOn_continuousWithinAt
+    {ι : Type*} {F : ℝ → X → Y} {G : ι → ℝ → X → Y}
+    {s : Set ℝ} {t : ℝ} {U : ι → Set X} {x : X}
+    (hcover : x ∈ ⋃ i, U i)
+    (hcont : ∀ i, ContinuousWithinAt (fun τ : ℝ ↦ G i τ x) s t)
+    (heq : ∀ i, ∀ᶠ τ in 𝓝[s] t, EqOn (F τ) (G i τ) (U i))
+    (heq_t : ∀ i, EqOn (F t) (G i t) (U i)) :
+    ContinuousWithinAt (fun τ : ℝ ↦ F τ x) s t := by
+  rcases Set.mem_iUnion.mp hcover with ⟨i, hxU⟩
+  exact (hcont i).congr_of_eventuallyEq
+    ((heq i).mono fun τ hτ ↦ hτ hxU)
+    (heq_t i hxU)
+
+/-- Pointwise time-continuity glues from local readouts when the glued time
+slices agree with the readouts on the chosen cover for all times. -/
+theorem continuousWithinAt_eval_of_iUnion_eqOn_continuousWithinAt
+    {ι : Type*} {F : ℝ → X → Y} {G : ι → ℝ → X → Y}
+    {s : Set ℝ} {t : ℝ} {U : ι → Set X} {x : X}
+    (hcover : x ∈ ⋃ i, U i)
+    (hcont : ∀ i, ContinuousWithinAt (fun τ : ℝ ↦ G i τ x) s t)
+    (heq : ∀ i, ∀ τ : ℝ, EqOn (F τ) (G i τ) (U i)) :
+    ContinuousWithinAt (fun τ : ℝ ↦ F τ x) s t :=
+  continuousWithinAt_eval_of_iUnion_eventuallyEqOn_continuousWithinAt
+    hcover hcont
+    (fun i ↦ Filter.Eventually.of_forall fun τ ↦ heq i τ)
+    (fun i ↦ heq i t)
+
 /-- Glue left-inverse identities across an indexed cover when the global
 forward/backward candidates agree with the local forward/backward readouts on
 the relevant visible sets. -/
