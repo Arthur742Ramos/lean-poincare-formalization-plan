@@ -694,7 +694,11 @@ now factors the schematic Ricci-DeTurck bounded-difference constants through a
 shared comparison radius, including finite-family estimates with one compact
 determinant lower bound, and `LocalFrameGram` exposes both single-frame and
 finite-family compact local-frame versions for Gram-matrix coordinate RHS
-differences. The same public layer
+differences. Those linear-radius estimates now also have local finite-cover,
+point-dependent local-cylinder, and existential point-local cylinder variants
+in both the raw matrix and local-frame Gram layers, so compact coordinate
+Lipschitz checks can consume local parabolic-cylinder regularity data directly.
+The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
 Levi-Civita correction ingredients (`toDual`, fiberwise composition,

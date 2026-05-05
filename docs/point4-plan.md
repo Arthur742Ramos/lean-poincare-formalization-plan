@@ -2527,9 +2527,11 @@ the schematic RHS differs by `ricciDeTurckSchematicDiffBoundConst * radius`.
 The same linear-radius estimate now has a finite-family form sharing one compact
 determinant lower bound across all matrix families. `LocalFrameGram` lifts both
 the single-frame and finite-family estimates to compact local-frame Gram
-coordinates. This is a coordinate Lipschitz bridge toward the fibrewise RHS
-hypothesis above, not a Schauder estimate or the actual Banach-chart
-construction.
+coordinates. The raw matrix and local-frame layers now also expose the same
+linear-radius handoff after finite product-cylinder covers, point-dependent
+local cylinders, and existential point-local cylinder data. This is a
+coordinate Lipschitz bridge toward the fibrewise RHS hypothesis above, not a
+Schauder estimate or the actual Banach-chart construction.
 
 **Suggested decomposition** (multi-session):
 
