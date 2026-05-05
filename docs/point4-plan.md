@@ -2205,8 +2205,9 @@ primitive-difference bridges, and compact point-local product-cylinder variants
 for the same schematic RHS and RHS difference closures, including direct
 existential-radius APIs before extracting determinant lower bounds, plus
 product-cylinder metric-control bridges for the function-level
-bounded-difference estimate, including finite-family variants with one shared
-lower bound, using finite-product,
+bounded-difference estimate, including finite-cover, compact point-local,
+direct existential-radius, and finite-family variants with one shared lower
+bound, using finite-product,
 integer-scalar, reciprocal, and division closure. On the
 geometric side, the Levi-Civita local-frame Gram
 matrix layer now also turns pointwise Gram determinant nonvanishing into a
@@ -2244,9 +2245,10 @@ same Gram-entry input forms,
 direct single-frame and finite-family compact point-local product-cylinder
 primitive-estimate and primitive-difference schematic RHS bridges with both
 explicit-radius and existential-radius entry points, single-frame and finite-family
-finite-cover product-cylinder schematic RHS bridges, plus bounded-difference
-metric-control bridges now consume the matrix cover API before selecting the
-local-frame determinant lower bound,
+finite-cover product-cylinder schematic RHS bridges, plus finite-cover, compact
+point-local, and existential-radius bounded-difference metric-control bridges
+now consume the matrix APIs before selecting the local-frame determinant lower
+bound,
 quantitative finite-family inverse-Gram handoffs now also keep the shared
 compact determinant lower bound and explicit inverse-entry constants under
 spatial-Hölder, unit-diameter spatial-Lipschitz, and closed ball/cylinder

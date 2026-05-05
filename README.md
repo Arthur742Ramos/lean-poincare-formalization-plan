@@ -568,8 +568,9 @@ packages the canonical stationary local solution attached to
   difference closures, including direct existential-radius APIs before
   extracting determinant lower bounds, plus
   product-cylinder metric-control bridges for
-  the function-level bounded-difference estimate, including finite-family
-  variants with one shared lower bound.  The companion
+  the function-level bounded-difference estimate, including finite-cover,
+  compact point-local, direct existential-radius, and finite-family variants
+  with one shared lower bound.  The companion
   `AnalyticPDE/Parabolic/LocalFrameGram.lean` module connects compact
   time-space local-frame Gram determinant nonvanishing to parabolic inverse
   Gram-matrix control, inverse-Gram vector/vector-inverse products,
@@ -599,8 +600,9 @@ packages the canonical stationary local solution attached to
   point-local product-cylinder primitive-estimate and primitive-difference
   schematic RHS bridges with both explicit-radius and existential-radius entry
   points, single-frame and finite-family finite-cover product-cylinder
-  schematic RHS bridges, plus bounded-difference metric-control bridges consuming the
-  matrix cover API before selecting the local-frame determinant lower bound, quantitative
+  schematic RHS bridges, plus finite-cover, compact point-local, and
+  existential-radius bounded-difference metric-control bridges consuming the
+  matrix APIs before selecting the local-frame determinant lower bound, quantitative
   finite-family inverse-Gram
   vector/vector-inverse product, bilinear, inverse-principal, and
   inverse-Christoffel handoffs sharing that same compact determinant lower
