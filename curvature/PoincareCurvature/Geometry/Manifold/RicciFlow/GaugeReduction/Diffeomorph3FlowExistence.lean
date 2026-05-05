@@ -4477,6 +4477,127 @@ theorem nonempty_ofPicardIccChartDerivative_of_vectorField_eq_nhdsWithin
   ⟨ofPicardIccChartDerivative_of_vectorField_eq_nhdsWithin
     maps3 anchored Y tmin tmax htimeSet hsource hderiv hY⟩
 
+/-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence on open solution time
+sets from globally glued inverse slices and closed-Picard preferred-chart ODE
+data for model vector fields, after identifying those fields with the
+intrinsic DeTurck gauge fields in the relative open-interval filters. -/
+noncomputable def ofPicardIccChartDerivative_of_inverseOn_univ_vectorField_eq_nhdsWithin
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (F G : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ℝ → M → M)
+    (hleft : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, LeftInvOn (G sol t) (F sol t) Set.univ)
+    (hright : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, RightInvOn (G sol t) (F sol t) Set.univ)
+    (hF : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ContMDiffOn I I 3 (F sol t) Set.univ)
+    (hG : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ContMDiffOn I I 3 (G sol t) Set.univ)
+    (hanchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ x : M, F sol ivp.initialTime x = x)
+    (Y : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (fun τ : ℝ ↦ F sol τ x) ⁻¹' (extChartAt I (F sol t x)).source ∈
+          𝓝[Icc (tmin sol) (tmax sol)] t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (F sol t x)) (F sol τ x))
+          ((Y sol) t (F sol t x)) (Icc (tmin sol) (tmax sol)) t)
+    (hY : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Ioo (tmin sol) (tmax sol),
+        ∀ᶠ τ in 𝓝[Ioo (tmin sol) (tmax sol)] t, ∀ x : M,
+          (Y sol) τ (F sol τ x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background τ (F sol τ x)) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  flow := fun sol ↦ by
+    have raw :=
+      Diffeomorph3GaugeFlowOn.of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+        (I := I) (M := M)
+        (X := intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background)
+        (Y := Y sol)
+        (tmin := tmin sol) (tmax := tmax sol) (t₀ := ivp.initialTime)
+        (F sol) (G sol) (hleft sol) (hright sol) (hF sol) (hG sol)
+        (hanchored sol) (hsource sol) (hderiv sol) (hY sol)
+    simpa [htimeSet sol] using raw
+
+/-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from globally glued
+inverse slices, closed-Picard chart ODE data, and relative-filter field
+equality, kept as proof-level evidence. -/
+theorem nonempty_ofPicardIccChartDerivative_of_inverseOn_univ_vectorField_eq_nhdsWithin
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (F G : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ℝ → M → M)
+    (hleft : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, LeftInvOn (G sol t) (F sol t) Set.univ)
+    (hright : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, RightInvOn (G sol t) (F sol t) Set.univ)
+    (hF : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ContMDiffOn I I 3 (F sol t) Set.univ)
+    (hG : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ContMDiffOn I I 3 (G sol t) Set.univ)
+    (hanchored : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ x : M, F sol ivp.initialTime x = x)
+    (Y : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hsource : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        (fun τ : ℝ ↦ F sol τ x) ⁻¹' (extChartAt I (F sol t x)).source ∈
+          𝓝[Icc (tmin sol) (tmax sol)] t)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M,
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (F sol t x)) (F sol τ x))
+          ((Y sol) t (F sol t x)) (Icc (tmin sol) (tmax sol)) t)
+    (hY : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Ioo (tmin sol) (tmax sol),
+        ∀ᶠ τ in 𝓝[Ioo (tmin sol) (tmax sol)] t, ∀ x : M,
+          (Y sol) τ (F sol τ x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background τ (F sol τ x)) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofPicardIccChartDerivative_of_inverseOn_univ_vectorField_eq_nhdsWithin
+    F G hleft hright hF hG hanchored Y tmin tmax htimeSet hsource hderiv hY⟩
+
 /-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from centered
 preferred-chart ODE data on each local solution's time set. -/
 noncomputable def of_hasDerivWithinAt_extChartAt_eval_self

@@ -1507,7 +1507,15 @@ Picard shape where the chart ODE is proved on a closed interval and the raw
 flow lives on its interior, the endpoint
 `Diffeomorph3GaugeFlowOn.of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 now performs the same glued-slice handoff from `Icc` preferred-chart derivative
-data to an `Ioo` raw gauge flow.
+data to an `Ioo` raw gauge flow.  The fixed-IVP intrinsic existence layer now
+consumes exactly that glued-slice shape through
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_inverseOn_univ_vectorField_eq_nhdsWithin`
+and its proof-level
+`nonempty_ofPicardIccChartDerivative_of_inverseOn_univ_vectorField_eq_nhdsWithin`,
+so a future finite-cover construction can pass the glued forward/backward
+slices, inverse identities, `C³` regularity on `Set.univ`, closed-interval
+chart derivatives, and relative intrinsic-field identification directly into
+the fixed-IVP witness.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,
