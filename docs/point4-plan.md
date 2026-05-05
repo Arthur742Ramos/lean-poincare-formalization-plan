@@ -1771,7 +1771,8 @@ feed the lifted `C^3` local gluing patch: strict differentiability and
 invertibility are discharged from the closed-ball Picard data, while the
 fixed-time `C³` input can now be supplied either directly or by a full
 space-time `C³` hypothesis on the selected model flow. Operator-ball and
-identity-ball lifted forms expose the standard tangent-bound specializations.
+identity-ball lifted forms expose the standard tangent-bound specializations,
+now also with direct space-time `C³` variants.
 The lifted local-gluing layer and the product/forward localized Picard handoffs
 now expose direct space-time-regularity entry points for both the basic patch
 and overlap-equality patch, reducing the fixed-time `C³` input by slicing a full
