@@ -287,7 +287,8 @@ packages the canonical stationary local solution attached to
   time-slice neighborhood-map, local open-partial-homeomorphism, and open
   bijective-patch readouts directly, including chart-lifted open-bijective and
   continuity-carrying patches with prescribed source/target variants plus
-  local inverse-identity/overlap-equality readouts and positive source-ball patches for
+  local inverse-identity/overlap-equality and `C^3` gluing readouts plus
+  positive source-ball patches for
   radius-shrinking chart arguments, and
   the state-preserving product-Picard/component-continuity routes now also have
   localized constructors and proof-level `Nonempty` wrappers, including the
