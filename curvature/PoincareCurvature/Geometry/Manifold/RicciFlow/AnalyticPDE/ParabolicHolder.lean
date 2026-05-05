@@ -1468,6 +1468,51 @@ theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
       mul_le_mul_of_nonneg_left (hu hp hq) (norm_nonneg L)
     _ = (‖L‖ * C) * dα := by ring
 
+/-- A curried continuous bilinear map preserves parabolic Holder control when the two
+inputs are separately bounded.  This is the standalone Holder part of the product-rule
+estimate used by parabolic `C^{0,α}` calculus. -/
+theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCommGroup G]
+    [NormedSpace ℝ E] [NormedSpace ℝ F] [NormedSpace ℝ G]
+    {B Bv Hv : ℝ} {v : ℝ × X → F}
+    (L : E →L[ℝ] F →L[ℝ] G)
+    (hu : ParabolicHolderWith C α u s)
+    (hv : ParabolicHolderWith Hv α v s)
+    (hBu : ParabolicBoundedWith B u s)
+    (hBv : ParabolicBoundedWith Bv v s)
+    (hB : 0 ≤ B) :
+    ParabolicHolderWith (‖L‖ * (B * Hv + Bv * C)) α
+      (fun z => L (u z) (v z)) s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  have hsplit :
+      L (u p) (v p) - L (u q) (v q) =
+        L (u p) (v p - v q) + L (u p - u q) (v q) := by
+    simp [map_sub]
+  have hLup : ‖L (u p)‖ ≤ ‖L‖ * B :=
+    (ContinuousLinearMap.le_opNorm L (u p)).trans
+      (mul_le_mul_of_nonneg_left (hBu hp) (norm_nonneg L))
+  have hLup_nonneg : 0 ≤ ‖L‖ * B := mul_nonneg (norm_nonneg L) hB
+  have hCd_nonneg : 0 ≤ C * dα :=
+    (norm_nonneg (u p - u q)).trans (hu hp hq)
+  have hLdiff : ‖L (u p - u q)‖ ≤ ‖L‖ * (C * dα) :=
+    (ContinuousLinearMap.le_opNorm L (u p - u q)).trans
+      (mul_le_mul_of_nonneg_left (hu hp hq) (norm_nonneg L))
+  have hLdiff_nonneg : 0 ≤ ‖L‖ * (C * dα) :=
+    mul_nonneg (norm_nonneg L) hCd_nonneg
+  calc
+    ‖L (u p) (v p) - L (u q) (v q)‖
+        = ‖L (u p) (v p - v q) + L (u p - u q) (v q)‖ := by rw [hsplit]
+    _ ≤ ‖L (u p) (v p - v q)‖ + ‖L (u p - u q) (v q)‖ := norm_add_le _ _
+    _ ≤ ‖L (u p)‖ * ‖v p - v q‖ + ‖L (u p - u q)‖ * ‖v q‖ :=
+        add_le_add
+          (ContinuousLinearMap.le_opNorm (L (u p)) (v p - v q))
+          (ContinuousLinearMap.le_opNorm (L (u p - u q)) (v q))
+    _ ≤ (‖L‖ * B) * (Hv * dα) + (‖L‖ * (C * dα)) * Bv :=
+        add_le_add
+          (mul_le_mul hLup (hv hp hq) (norm_nonneg _) hLup_nonneg)
+          (mul_le_mul hLdiff (hBv hq) (norm_nonneg _) hLdiff_nonneg)
+    _ = (‖L‖ * (B * Hv + Bv * C)) * dα := by ring
+
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicHolderWith C α u s)
     (hφ : LipschitzOnWith K φ (u '' s)) :
@@ -3862,36 +3907,7 @@ theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCo
       (‖L‖ * (B * H₂ + B₂ * H)) α (fun z => L (u z) (v z)) s := by
   constructor
   · exact hu.bounded.continuousLinearMap₂ L hv.bounded hB
-  · intro p hp q hq
-    let dα := (parabolicDistance p q) ^ α
-    have hsplit :
-        L (u p) (v p) - L (u q) (v q) =
-          L (u p) (v p - v q) + L (u p - u q) (v q) := by
-      simp [map_sub]
-    have hLup : ‖L (u p)‖ ≤ ‖L‖ * B :=
-      (ContinuousLinearMap.le_opNorm L (u p)).trans
-        (mul_le_mul_of_nonneg_left (hu.bounded hp) (norm_nonneg L))
-    have hLup_nonneg : 0 ≤ ‖L‖ * B := mul_nonneg (norm_nonneg L) hB
-    have hHd_nonneg : 0 ≤ H * dα :=
-      (norm_nonneg (u p - u q)).trans (hu.holder hp hq)
-    have hLdiff : ‖L (u p - u q)‖ ≤ ‖L‖ * (H * dα) :=
-      (ContinuousLinearMap.le_opNorm L (u p - u q)).trans
-        (mul_le_mul_of_nonneg_left (hu.holder hp hq) (norm_nonneg L))
-    have hLdiff_nonneg : 0 ≤ ‖L‖ * (H * dα) :=
-      mul_nonneg (norm_nonneg L) hHd_nonneg
-    calc
-      ‖L (u p) (v p) - L (u q) (v q)‖
-          = ‖L (u p) (v p - v q) + L (u p - u q) (v q)‖ := by rw [hsplit]
-      _ ≤ ‖L (u p) (v p - v q)‖ + ‖L (u p - u q) (v q)‖ := norm_add_le _ _
-      _ ≤ ‖L (u p)‖ * ‖v p - v q‖ + ‖L (u p - u q)‖ * ‖v q‖ :=
-        add_le_add
-          (ContinuousLinearMap.le_opNorm (L (u p)) (v p - v q))
-          (ContinuousLinearMap.le_opNorm (L (u p - u q)) (v q))
-      _ ≤ (‖L‖ * B) * (H₂ * dα) + (‖L‖ * (H * dα)) * B₂ :=
-        add_le_add
-          (mul_le_mul hLup (hv.holder hp hq) (norm_nonneg _) hLup_nonneg)
-          (mul_le_mul hLdiff (hv.bounded hq) (norm_nonneg _) hLdiff_nonneg)
-      _ = (‖L‖ * (B * H₂ + B₂ * H)) * dα := by ring
+  · exact hu.holder.continuousLinearMap₂ L hv.holder hu.bounded hv.bounded hB
 
 /-- Differences of curried continuous bilinear-map applications inherit parabolic `C^{0,α}`
 control from one left input, one right input, and `C^{0,α}` controls of the two input

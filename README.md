@@ -444,7 +444,9 @@ packages the canonical stationary local solution attached to
   finite-product estimate, finite `Pi`
   packaging across bounded, Holder, and `C^{0,α}` controls from componentwise
   estimates and same-constant projection back to components, and
-  continuous-linear, curried-bilinear-map, curried-bilinear difference,
+  continuous-linear closure, standalone Holder-level curried-bilinear closure
+  from separate bounded and Holder controls, curried-bilinear-map and
+  curried-bilinear difference,
   operator-application closure, and operator-application difference with
   operator-norm constants in both fixed-constant and existential forms,
   add/subtract/smul, integer-scalar, and product-valued pairing closure
