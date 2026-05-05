@@ -207,8 +207,11 @@ their compact sup-norm differences, including the finite product readout norm,
 are controlled by the same single-radius `C^{0,α}` difference bound. Pairwise
 norm-ball difference estimates also now yield `LipschitzOnWith` estimates for
 single compact-piece, finite compact-family, and linear finite-cover readouts.
-The
-matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
+The first coordinate higher-parabolic module now defines time and spatial
+slices, genuine parabolic second-jet derivative witnesses, and a
+`ParabolicC2AlphaNormLe` predicate controlling the value, spatial derivative,
+spatial Hessian, and time derivative by `C^{0,α}` norm balls.
+The matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
 same norm-ball language. Determinant and determinant-difference estimates now
 also have entrywise single-radius variants using the existing quantitative

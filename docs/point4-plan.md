@@ -2697,6 +2697,12 @@ norm, are now bounded by the same single-radius `C^{0,α}` difference control,
 and pairwise norm-ball difference estimates now promote directly to
 `LipschitzOnWith` estimates for single compact-piece, finite compact-family,
 and linear finite-cover readouts.
+`AnalyticPDE/Parabolic/HigherFunctionSpace.lean` now begins the coordinate
+`C^{2+α,1+α/2}` layer: it defines time and spatial slices, packages a genuine
+parabolic second jet with time, spatial, and second-spatial derivative
+witnesses on those slices, and defines a single-radius
+`ParabolicC2AlphaNormLe` predicate whose radius dominates the value, spatial
+derivative, spatial Hessian, and time-derivative `C^{0,α}` norm-ball controls.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
 the same single-radius control, plus determinant and determinant-difference
 single-radius variants using the existing quantitative determinant constants.
