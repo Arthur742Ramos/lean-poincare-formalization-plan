@@ -1516,6 +1516,13 @@ so a future finite-cover construction can pass the glued forward/backward
 slices, inverse identities, `C³` regularity on `Set.univ`, closed-interval
 chart derivatives, and relative intrinsic-field identification directly into
 the fixed-IVP witness.
+The centered chart-source membership needed by that raw endpoint can now also
+be discharged from time-continuity of the glued trajectory:
+`preimage_extChartAt_source_self_mem_nhdsWithin_of_continuousWithinAt` packages
+the general source-neighborhood consequence, and
+`Diffeomorph3GaugeFlowOn.of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin`
+uses it to replace the manual source-membership input by
+`ContinuousWithinAt (fun τ ↦ F τ x) (Icc tmin tmax) t`.
 The theorem-family layer mirrors the same handoff through
 `IntrinsicDeTurckGaugeFlowExistenceFamily.ofPicardIccChartDerivative_of_inverseOn_univ_vectorField_eq_nhdsWithin`
 and its proof-level

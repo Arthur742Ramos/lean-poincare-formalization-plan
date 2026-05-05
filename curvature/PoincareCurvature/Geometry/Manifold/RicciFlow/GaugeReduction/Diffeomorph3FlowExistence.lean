@@ -556,6 +556,24 @@ theorem contMDiffOn_of_iUnion_open_eqOn_contMDiffOn
     rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxU⟩
     exact ⟨U i, G i, hUopen i, hxU, hcont i, heq i⟩
 
+/-- A within-time continuous manifold curve is eventually in any preferred
+chart source that contains its value at the base time. -/
+theorem preimage_extChartAt_source_mem_nhdsWithin_of_continuousWithinAt
+    {s : Set ℝ} {γ : ℝ → M} {t : ℝ} {p : M}
+    (hγ : ContinuousWithinAt γ s t)
+    (hsrc : γ t ∈ (extChartAt I p).source) :
+    γ ⁻¹' (extChartAt I p).source ∈ 𝓝[s] t :=
+  hγ.preimage_mem_nhdsWithin ((isOpen_extChartAt_source (I := I) p).mem_nhds hsrc)
+
+/-- A within-time continuous manifold curve is eventually in the preferred
+chart source centered at its value at the base time. -/
+theorem preimage_extChartAt_source_self_mem_nhdsWithin_of_continuousWithinAt
+    {s : Set ℝ} {γ : ℝ → M} {t : ℝ}
+    (hγ : ContinuousWithinAt γ s t) :
+    γ ⁻¹' (extChartAt I (γ t)).source ∈ 𝓝[s] t :=
+  preimage_extChartAt_source_mem_nhdsWithin_of_continuousWithinAt
+    (I := I) (M := M) hγ (mem_extChartAt_source (I := I) (γ t))
+
 /-- A concrete `C^3` diffeomorphism flow for a time-dependent vector field on a
 time set, anchored at a base time.  This is the raw object expected from the
 future manifold ODE-flow existence theorem. -/
@@ -3290,6 +3308,64 @@ theorem nonempty_of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_
     (I := I) (M := M) (X := X) (Y := Y)
     (tmin := tmin) (tmax := tmax) (t₀ := t₀)
     F G hleft hright hF hG hanchored hsource hderiv hY⟩
+
+/-- Build a raw `C^3` gauge-flow witness on the open Picard interval from
+globally glued inverse slices and closed-Picard centered preferred-chart ODE
+data, deriving centered chart-source membership from within-time continuity of
+the glued forward slice. -/
+noncomputable def of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hcont : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      ContinuousWithinAt (fun τ : ℝ ↦ F τ x) (Icc tmin tmax) t)
+    (hderiv : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (Y t (F t x)) (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
+      Y τ (F τ x) = X τ (F τ x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ :=
+  of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    F G hleft hright hF hG hanchored
+    (fun t ht x ↦
+      preimage_extChartAt_source_self_mem_nhdsWithin_of_continuousWithinAt
+        (I := I) (M := M) (s := Icc tmin tmax)
+        (γ := fun τ : ℝ ↦ F τ x) (t := t) (hcont t ht x))
+    hderiv hY
+
+/-- Proof-level raw `C^3` gauge-flow existence on the open Picard interval from
+globally glued inverse slices, closed-Picard centered preferred-chart ODE data,
+and within-time continuity of the glued forward slice. -/
+theorem nonempty_of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hcont : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      ContinuousWithinAt (fun τ : ℝ ↦ F τ x) (Icc tmin tmax) t)
+    (hderiv : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (Y t (F t x)) (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
+      Y τ (F τ x) = X τ (F τ x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀) :=
+  ⟨of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    F G hleft hright hF hG hanchored hcont hderiv hY⟩
 
 /-- Build an intrinsic DeTurck raw gauge-flow witness on the open Picard
 interior from named preferred-chart ODE data proved within the closed Picard
