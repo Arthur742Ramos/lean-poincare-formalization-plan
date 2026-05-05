@@ -1451,6 +1451,8 @@ on the visible source set, the returned local patch carries the resulting
 manifold-side `EqOn` together with `ContinuousOn` and `BijOn`.  The
 topological existence layer also has continuity-gluing bridges for the next
 step after such compatible patches are chosen:
+`eqOn_of_iUnion_eqOn` globalizes local equality across an indexed cover of the
+visible domain,
 `continuousOn_of_locally_eqOn_open_continuousOn` turns pointwise local equality
 to continuous open readouts into continuity of the candidate map on the domain,
 and `continuousOn_of_iUnion_open_eqOn_continuousOn` gives the corresponding

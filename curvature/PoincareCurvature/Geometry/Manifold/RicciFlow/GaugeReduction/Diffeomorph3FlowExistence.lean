@@ -30,6 +30,16 @@ section OpenPartialHomeomorphTransport
 
 variable {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
 
+/-- Glue pointwise equality across an indexed cover of a visible domain. -/
+theorem eqOn_of_iUnion_eqOn
+    {ι : Type*} {F G : X → Y} {s : Set X} {U : ι → Set X}
+    (hcover : s ⊆ ⋃ i, U i)
+    (heq : ∀ i, EqOn F G (s ∩ U i)) :
+    EqOn F G s := by
+  intro x hx
+  rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxU⟩
+  exact heq i ⟨hx, hxU⟩
+
 /-- A function is continuous on a domain if every point of the domain has an
 open neighborhood on which it agrees with some continuous local readout.  This
 is the topological continuity-gluing bridge used after chartwise Picard
