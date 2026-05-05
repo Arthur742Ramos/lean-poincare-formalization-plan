@@ -1912,10 +1912,12 @@ local model flows whose curves stay in a uniformly Lipschitz state region; the
 Banach ODE layer now also has an order-theoretic bridge from equality on every
 prescribed shorter terminal to equality on the open common interval, plus the
 state-set Lipschitz-on-`Icc` specialization needed when estimates are only known
-on those restricted terminals. `AnalyticPDE/BanachEndpointClosure.lean` closes
-that bridge to the common closed interval using within-interval continuity of
-the Banach ODE curves, and gives the corresponding restricted-estimate
-Picard-Lindelof existence theorem with closed-common uniqueness. The same leaf
+on those restricted terminals. `AnalyticPDE/BanachEndpointClosure.lean` now
+also closes any already-established open-common Banach equality to the common
+closed interval using within-interval continuity of the Banach ODE curves, and
+closes the restricted-terminal bridge the same way. It gives the corresponding
+restricted-estimate Picard-Lindelof existence theorem with closed-common
+uniqueness. The same leaf
 module lifts this endpoint-closed restricted-estimate readout to the
 finite-cover positive-definite locus and the symmetric Riemannian metric-locus
 submodule, to the symmetric positive-definite defect-carrier routes, and to the

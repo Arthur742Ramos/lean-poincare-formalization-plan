@@ -1395,8 +1395,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      canonical connection equality.
      The Banach ODE layer now has the matching endpoint-closure module
      `AnalyticPDE/BanachEndpointClosure.lean`: restricted-terminal equality and
-     restricted-estimate Picard uniqueness close on the full common closed
-     interval by within-interval continuity, including the finite-cover
+     already-established open-common equality both close on the full common
+     closed interval by within-interval continuity, and restricted-estimate
+     Picard uniqueness inherits the same closed-common conclusion, including the finite-cover
      positive-definite locus, symmetric positive-definite defect-carrier, and
      symmetric time-dependent vector-field routes and the symmetric Riemannian
      metric-locus restricted bridge, plus the

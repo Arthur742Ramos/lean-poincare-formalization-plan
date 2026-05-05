@@ -47,6 +47,31 @@ namespace BanachEvolutionLocalSolution
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
   {F : ℝ → X → X} {t₀ : ℝ} {u₀ : X}
 
+/-- Closed-interval continuation bridge from an already-established open common
+interval equality. -/
+theorem eqOn_Icc_of_eqOn_Ico
+    (sol₁ sol₂ : BanachEvolutionLocalSolution F t₀ u₀)
+    (hEq : EqOn sol₁.curve sol₂.curve
+      (Ico t₀ (min sol₁.terminalTime sol₂.terminalTime))) :
+    EqOn sol₁.curve sol₂.curve
+      (Icc t₀ (min sol₁.terminalTime sol₂.terminalTime)) := by
+  let Tcommon := min sol₁.terminalTime sol₂.terminalTime
+  intro t ht
+  by_cases htlt : t < Tcommon
+  · exact hEq ⟨ht.1, htlt⟩
+  · have ht_eq : t = Tcommon :=
+      le_antisymm (by simpa [Tcommon] using ht.2) (le_of_not_gt htlt)
+    subst t
+    have hT₀ : t₀ < Tcommon := by
+      exact lt_min sol₁.initial_lt_terminal sol₂.initial_lt_terminal
+    have hcont₁ : ContinuousWithinAt sol₁.curve (Icc t₀ Tcommon) Tcommon := by
+      exact (sol₁.continuousOn_Icc_of_le_terminal (min_le_left _ _)).continuousWithinAt
+        ⟨le_of_lt hT₀, le_rfl⟩
+    have hcont₂ : ContinuousWithinAt sol₂.curve (Icc t₀ Tcommon) Tcommon := by
+      exact (sol₂.continuousOn_Icc_of_le_terminal (min_le_right _ _)).continuousWithinAt
+        ⟨le_of_lt hT₀, le_rfl⟩
+    exact eq_of_continuousWithinAt_Icc_of_eqOn_Ico hT₀ hcont₁ hcont₂ hEq
+
 /-- Closed-interval continuation bridge: if equality is available on every
 prescribed shorter common terminal, continuity of the Banach ODE curves closes
 the equality at the common terminal. -/
@@ -79,6 +104,17 @@ namespace BanachEvolutionLocalSolutionIn
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
   {F : ℝ → X → X} {stateSet : Set X} {t₀ : ℝ} {u₀ : X}
+
+/-- Closed-interval continuation bridge for state-preserving solutions from an
+already-established open common interval equality. -/
+theorem eqOn_Icc_of_eqOn_Ico
+    (sol₁ sol₂ : BanachEvolutionLocalSolutionIn F stateSet t₀ u₀)
+    (hEq : EqOn sol₁.curve sol₂.curve
+      (Ico t₀ (min sol₁.terminalTime sol₂.terminalTime))) :
+    EqOn sol₁.curve sol₂.curve
+      (Icc t₀ (min sol₁.terminalTime sol₂.terminalTime)) := by
+  exact BanachEvolutionLocalSolution.eqOn_Icc_of_eqOn_Ico
+    sol₁.toBanachEvolutionLocalSolution sol₂.toBanachEvolutionLocalSolution hEq
 
 /-- Closed-interval continuation bridge for state-preserving solutions. -/
 theorem eqOn_Icc_of_eqOn_Icc_of_le_terminal
