@@ -1578,7 +1578,12 @@ on the actual time-slice patches `U τ i`, so this local-field route no longer
 needs finite-cover promotion when the local equality is available at the
 current time.  The fixed-IVP intrinsic layer exposes the same handoff through
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_localReadouts_vectorField_eq_nhdsWithin`
-and proof-level `nonempty_...`.  Its finite-cover
+and proof-level `nonempty_...`.  The theorem-family raw existence layer now
+also has the generic assembly bridge
+`IntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem`, with a
+proof-level equivalence between family existence and fixed-IVP existence for
+all initial-value problems, so fixed-IVP pointwise/local handoffs do not need
+bespoke family mirrors before they can feed theorem-family routes.  Its finite-cover
 local-readout companion
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality

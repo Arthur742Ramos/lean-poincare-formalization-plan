@@ -13201,6 +13201,28 @@ theorem nonempty_identityOfIsEmpty
       (E := E) (H := H) (I := I) (M := M)) :=
   ⟨identityOfIsEmpty⟩
 
+/-- Assemble theorem-family raw gauge-flow existence from fixed-IVP raw
+gauge-flow existence data for every initial-value problem.  This lets
+fixed-IVP handoffs feed the theorem-family layer without duplicating each long
+constructor signature. -/
+noncomputable def of_forInitialValueProblem
+    (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      IntrinsicDeTurckGaugeFlowExistence
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  flow := fun ivp sol ↦ (G ivp).flow sol
+
+@[simp] theorem of_forInitialValueProblem_flow
+    (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      IntrinsicDeTurckGaugeFlowExistence
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((of_forInitialValueProblem (I := I) (M := M) G).flow ivp sol) =
+      (G ivp).flow sol := rfl
+
 /-- Restrict theorem-family raw gauge-flow existence data to one initial-value
 problem. -/
 def forInitialValueProblem
@@ -13229,6 +13251,31 @@ theorem nonempty_forInitialValueProblem
       (E := E) (H := H) (I := I) (M := M) ivp) := by
   rcases hG with ⟨G⟩
   exact ⟨G.forInitialValueProblem ivp⟩
+
+/-- Assemble proof-level theorem-family raw gauge-flow existence from
+proof-level fixed-IVP raw gauge-flow existence for every initial-value problem. -/
+theorem nonempty_of_forInitialValueProblem
+    (hG : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (IntrinsicDeTurckGaugeFlowExistence
+        (E := E) (H := H) (I := I) (M := M) ivp)) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) := by
+  classical
+  exact ⟨of_forInitialValueProblem (I := I) (M := M)
+    (fun ivp ↦ Classical.choice (hG ivp))⟩
+
+/-- Theorem-family raw gauge-flow existence is equivalent to fixed-IVP raw
+gauge-flow existence for every initial-value problem. -/
+theorem nonempty_iff_forall_nonempty_forInitialValueProblem :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) ↔
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (IntrinsicDeTurckGaugeFlowExistence
+        (E := E) (H := H) (I := I) (M := M) ivp) := by
+  constructor
+  · intro hG ivp
+    exact nonempty_forInitialValueProblem (I := I) (M := M) hG ivp
+  · exact nonempty_of_forInitialValueProblem (I := I) (M := M)
 
 /-- Turn theorem-family raw intrinsic gauge-flow existence data into the
 geometric gauge-flow family consumed by endpoint routes. -/
