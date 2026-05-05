@@ -4262,6 +4262,22 @@ theorem nonempty_of_timeDependent_iUnion_gluedSlices_hasDerivWithinAt_Icc_extCha
     hFEqRight hleftLocal hrightLocal hFLocal hGLocal hanchoredLocal
     hFEqWithin hcontLocal hderivLocal hY⟩
 
+/-- Finite-cover helper for the uniform relative-filter equality required by
+the local-readout time-dependent-cover constructor.  Per-index equality in the
+closed-interval relative filter implies simultaneous equality for all indices
+in the open-interval relative filter. -/
+theorem timeDependent_iUnion_hFEqWithinAll_of_finite
+    {ι : Type*} [Finite ι] {tmin tmax : ℝ}
+    {F : ℝ → M → M} {Fₗ : ι → ℝ → M → M} {U : ℝ → ι → Set M}
+    (hFEqWithin : ∀ t ∈ Icc tmin tmax, ∀ i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, EqOn (F τ) (Fₗ i τ) (U t i)) :
+    ∀ t ∈ Ioo tmin tmax,
+      ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ i, EqOn (F τ) (Fₗ i τ) (U t i) := by
+  intro t ht
+  exact Filter.eventually_all.2 fun i ↦
+    (hFEqWithin t (Ioo_subset_Icc_self ht) i).filter_mono
+      (nhdsWithin_mono t Ioo_subset_Icc_self)
+
 /-- Build a raw `C^3` gauge-flow witness from global glued forward/backward
 slices and local readouts on time-dependent open covers when the
 preferred-chart derivative and vector-field-identification hypotheses are
