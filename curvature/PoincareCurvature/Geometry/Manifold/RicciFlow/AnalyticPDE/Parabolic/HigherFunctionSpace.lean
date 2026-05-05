@@ -152,6 +152,28 @@ def smul (c : ℝ) (J : ParabolicSecondJet u s) :
     intro z hz
     simpa [Pi.smul_apply] using (J.hasSpaceSecondDeriv hz).fun_const_smul c
 
+/-- Restrict a parabolic second jet to a smaller time-space domain. -/
+def restrict {t : Set (ℝ × X)} (J : ParabolicSecondJet u s) (hst : t ⊆ s) :
+    ParabolicSecondJet u t where
+  timeDeriv := J.timeDeriv
+  spaceDeriv := J.spaceDeriv
+  spaceSecondDeriv := J.spaceSecondDeriv
+  hasTimeDeriv := by
+    intro z hz
+    refine (J.hasTimeDeriv (hst hz)).mono ?_
+    intro τ hτ
+    exact hst hτ
+  hasSpaceDeriv := by
+    intro z hz
+    refine (J.hasSpaceDeriv (hst hz)).mono ?_
+    intro x hx
+    exact hst hx
+  hasSpaceSecondDeriv := by
+    intro z hz
+    refine (J.hasSpaceSecondDeriv (hst hz)).mono ?_
+    intro x hx
+    exact hst hx
+
 end ParabolicSecondJet
 
 /-- Coordinate parabolic `C^{2+α,1+α/2}` single-radius control.
@@ -207,6 +229,13 @@ theorem mono_const (h : ParabolicC2AlphaNormLe N α u s) (hNN : N ≤ N') :
   rcases h with
     ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
   exact ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum.trans hNN, hu, hx, hxx, ht⟩
+
+theorem mono_set {t : Set (ℝ × X)} (h : ParabolicC2AlphaNormLe N α u s) (hst : t ⊆ s) :
+    ParabolicC2AlphaNormLe N α u t := by
+  rcases h with
+    ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
+  exact ⟨J.restrict hst, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum,
+    hu.mono_set hst, hx.mono_set hst, hxx.mono_set hst, ht.mono_set hst⟩
 
 theorem add {v : ℝ × X → E} {M : ℝ}
     (hu : ParabolicC2AlphaNormLe N α u s) (hv : ParabolicC2AlphaNormLe M α v s) :
@@ -351,6 +380,11 @@ theorem smul (c : ℝ) (hu : ParabolicC2AlphaOn α u s) :
   rcases hu with ⟨N, hN, huN⟩
   exact ⟨‖c‖ * N, mul_nonneg (norm_nonneg c) hN, huN.smul c⟩
 
+theorem mono_set {t : Set (ℝ × X)} (h : ParabolicC2AlphaOn α u s) (hst : t ⊆ s) :
+    ParabolicC2AlphaOn α u t := by
+  rcases h with ⟨N, hN, hNu⟩
+  exact ⟨N, hN, hNu.mono_set hst⟩
+
 end ParabolicC2AlphaOn
 
 /-- Coordinate parabolic `C^{2+α,1+α/2}` functions form a real submodule of all time-space
@@ -406,6 +440,26 @@ def toC0AlphaSubmoduleLinearMap :
 theorem toC0AlphaSubmoduleLinearMap_apply
     (u : parabolicC2AlphaSubmodule X E α s) (z : ℝ × X) :
     toC0AlphaSubmoduleLinearMap (X := X) (E := E) (α := α) (s := s) u z = u z :=
+  rfl
+
+/-- Restriction to a smaller set as a linear map between coordinate parabolic
+`C^{2+α,1+α/2}` spaces. -/
+def restrictLinearMap {t : Set (ℝ × X)} (hst : t ⊆ s) :
+    parabolicC2AlphaSubmodule X E α s →ₗ[ℝ] parabolicC2AlphaSubmodule X E α t where
+  toFun u := ⟨u.1, u.2.mono_set hst⟩
+  map_add' := by
+    intro u v
+    ext z
+    rfl
+  map_smul' := by
+    intro c u
+    ext z
+    rfl
+
+@[simp]
+theorem restrictLinearMap_apply {t : Set (ℝ × X)} (hst : t ⊆ s)
+    (u : parabolicC2AlphaSubmodule X E α s) (z : ℝ × X) :
+    restrictLinearMap (X := X) (E := E) (α := α) hst u z = u z :=
   rfl
 
 end parabolicC2AlphaSubmodule
