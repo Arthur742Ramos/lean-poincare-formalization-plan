@@ -70,6 +70,22 @@ namespace ParabolicSecondJet
 
 variable {u : ℝ × X → E} {s : Set (ℝ × X)}
 
+/-- Constant parabolic second jet. -/
+def const (c : E) : ParabolicSecondJet (fun _ : ℝ × X => c) s where
+  timeDeriv := fun _ => 0
+  spaceDeriv := fun _ => 0
+  spaceSecondDeriv := fun _ => 0
+  hasTimeDeriv := by
+    intro z _hz
+    simpa using hasDerivWithinAt_const (𝕜 := ℝ) z.1 (timeSliceDomain s z.2) c
+  hasSpaceDeriv := by
+    intro z _hz
+    simpa using hasFDerivWithinAt_const (𝕜 := ℝ) c z.2 (spaceSliceDomain s z.1)
+  hasSpaceSecondDeriv := by
+    intro z _hz
+    simpa using
+      hasFDerivWithinAt_const (𝕜 := ℝ) (0 : X →L[ℝ] E) z.2 (spaceSliceDomain s z.1)
+
 theorem timeDeriv_hasDerivWithinAt (J : ParabolicSecondJet u s)
     ⦃z : ℝ × X⦄ (hz : z ∈ s) :
     HasDerivWithinAt (fun t : ℝ => u (t, z.2)) (J.timeDeriv z)
@@ -169,6 +185,22 @@ theorem of_secondJet {J : ParabolicSecondJet u s} {Nu Nx Nxx Nt : ℝ}
     (ht : ParabolicC0AlphaNormLe Nt α J.timeDeriv s) :
     ParabolicC2AlphaNormLe (Nu + Nx + Nxx + Nt) α u s := by
   exact ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, le_rfl, hu, hx, hxx, ht⟩
+
+theorem const (c : E) :
+    ParabolicC2AlphaNormLe ‖c‖ α (fun _ : ℝ × X => c) s := by
+  refine ⟨ParabolicSecondJet.const (X := X) (s := s) c, ‖c‖, norm_nonneg c,
+    0, le_rfl, 0, le_rfl, 0, le_rfl, ?_, ?_, ?_, ?_, ?_⟩
+  · simp
+  · exact ParabolicC0AlphaNormLe.const (X := X) (α := α) (s := s) c
+  · exact ParabolicC0AlphaNormLe.zero (X := X) (E := X →L[ℝ] E) (α := α) (s := s)
+  · exact
+      ParabolicC0AlphaNormLe.zero
+        (X := X) (E := X →L[ℝ] (X →L[ℝ] E)) (α := α) (s := s)
+  · exact ParabolicC0AlphaNormLe.zero (X := X) (E := E) (α := α) (s := s)
+
+theorem zero :
+    ParabolicC2AlphaNormLe 0 α (fun _ : ℝ × X => (0 : E)) s := by
+  simpa using (const (X := X) (E := E) (α := α) (s := s) (0 : E))
 
 theorem mono_const (h : ParabolicC2AlphaNormLe N α u s) (hNN : N ≤ N') :
     ParabolicC2AlphaNormLe N' α u s := by
