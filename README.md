@@ -231,7 +231,9 @@ packages the canonical stationary local solution attached to
     `timeDependent_iUnion_pointwiseSource_of_open_preimage_continuousWithinAt`
     supplies the pointwise persistence condition from open preimage patches and
     pointwise time-continuity, with an indexed local-readout companion for
-    patchwise maps.  A finite-cover local-readout variant
+    patchwise maps; `gluedMapOf_iUnion_eventually_eq_of_pointwiseSource` then
+    packages the relative-filter equality between the canonical glued map and
+    the selected local readout.  A finite-cover local-readout variant
     promotes per-patch relative-filter equality to the uniform field
     identification needed by the raw gauge-flow endpoint. A thin
     `AnalyticPDE.SmoothRealization`

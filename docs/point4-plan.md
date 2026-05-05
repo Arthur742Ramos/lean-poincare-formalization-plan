@@ -1562,7 +1562,11 @@ intrinsic witness without separately unpacking raw-flow hypotheses.  The helper
 derives the pointwise source-persistence input when the patches are open
 preimages along pointwise time-continuous trajectories, and
 `timeDependent_iUnion_pointwiseSource_of_indexed_open_preimage_continuousWithinAt`
-does the same for patchwise local readouts.  Its finite-cover
+does the same for patchwise local readouts.  The bridge
+`gluedMapOf_iUnion_eventually_eq_of_pointwiseSource` now packages the
+eventual equality between the canonical glued map and the selected local
+readout, and the raw pointwise-source constructor uses it for continuity and
+preferred-chart derivative transfer.  Its finite-cover
 local-readout companion
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality

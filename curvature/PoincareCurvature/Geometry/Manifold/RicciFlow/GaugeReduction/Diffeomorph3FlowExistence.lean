@@ -61,6 +61,27 @@ theorem gluedMapOf_iUnion_eqOn
   rw [gluedMapOf_iUnion, dif_pos hxcover]
   exact hcompat (Classical.choose hxcover) i ⟨Classical.choose_spec hxcover, hxU⟩
 
+/-- Pointwise source persistence lets a time-dependent canonical glued map
+agree eventually with the local readout that contains the base point. -/
+theorem gluedMapOf_iUnion_eventually_eq_of_pointwiseSource
+    {ι : Type*} {default : ℝ → X → Y} {U : ℝ → ι → Set X}
+    {Fₗ : ι → ℝ → X → Y} {s : Set ℝ}
+    (hcompat : ∀ τ : ℝ, ∀ i j, EqOn (Fₗ i τ) (Fₗ j τ) (U τ i ∩ U τ j))
+    (hsource : ∀ t ∈ s, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[s] t, x ∈ U τ i) :
+    ∀ t ∈ s, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[s] t,
+        gluedMapOf_iUnion (default τ) (U τ) (fun j ↦ Fₗ j τ) x = Fₗ i τ x := by
+  intro t ht i x hx
+  have hEq : ∀ τ : ℝ, ∀ i,
+      EqOn (gluedMapOf_iUnion (default τ) (U τ) (fun j ↦ Fₗ j τ))
+        (Fₗ i τ) (U τ i) := by
+    intro τ
+    exact gluedMapOf_iUnion_eqOn
+      (default := default τ) (U := U τ) (Fₗ := fun j ↦ Fₗ j τ)
+      (hcompat τ)
+  exact (hsource t ht i x hx).mono fun τ hτ ↦ hEq τ i hτ
+
 /-- A function is continuous on a domain if every point of the domain has an
 open neighborhood on which it agrees with some continuous local readout.  This
 is the topological continuity-gluing bridge used after chartwise Picard
@@ -4616,6 +4637,12 @@ noncomputable def of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_
     simpa [F] using
       (gluedMapOf_iUnion_eqOn
         (default := defaultF t) (U := U t) (Fₗ := fun i ↦ Fₗ i t) (hFcompat t))
+  have hFEqPoint : ∀ t ∈ Icc tmin tmax, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, F τ x = Fₗ i τ x := by
+    simpa [F] using
+      (gluedMapOf_iUnion_eventually_eq_of_pointwiseSource
+        (default := defaultF) (U := U) (Fₗ := Fₗ) (s := Icc tmin tmax)
+        hFcompat hUwithinPoint)
   have hGEq : ∀ t : ℝ, ∀ i, EqOn (G t) (Gₗ i t) (V t i) := by
     intro t
     simpa [G] using
@@ -4675,7 +4702,7 @@ noncomputable def of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_
     (fun t ht x ↦ by
       rcases Set.mem_iUnion.mp (hUcover t (Set.mem_univ x)) with ⟨i, hxU⟩
       exact (hcontLocal i t ht x hxU).congr_of_eventuallyEq
-        ((hUwithinPoint t ht i x hxU).mono fun τ hτ ↦ hFEq τ i hτ)
+        (hFEqPoint t ht i x hxU)
         (hFEq t i hxU))
     (fun t ht x ↦ by
       rcases Set.mem_iUnion.mp (hUcover t (Set.mem_univ x)) with ⟨i, hxU⟩
@@ -4683,7 +4710,7 @@ noncomputable def of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_
         (I := I) (M := M) (F := F) (G := Fₗ i)
         (s := Icc tmin tmax) (t := t) (x := x) (p := F t x)
         (by simpa [F] using hderivLocal i t ht x hxU)
-        ((hUwithinPoint t ht i x hxU).mono fun τ hτ ↦ hFEq τ i hτ)
+        (hFEqPoint t ht i x hxU)
         (hFEq t i hxU))
     (fun t ht ↦ by
       simpa [F] using hY t ht)
