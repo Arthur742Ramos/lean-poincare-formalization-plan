@@ -425,6 +425,36 @@ theorem exists_uniform_norm_fixed_trivializationAt_symmL_le_of_compact
       simpa [U] using hyU
     exact le_trans (le_of_lt hxlt) (by linarith)
 
+/-- A finite family of compact subsets of preferred trivialization domains admits one uniform
+operator-norm bound for all inverse preferred trivializations.  This is the finite-cover
+compactness input used by both smooth-density and finite-cover Lipschitz handoffs. -/
+theorem exists_uniform_norm_preferred_trivializationAt_symmL_le_of_finite_compact_cover
+    [IsContinuousRiemannianBundle (B := M) F W]
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt F W (x0 i)).baseSet) :
+    ∃ C > 0, ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  choose C hCpos hC using fun i ↦
+    exists_uniform_norm_fixed_trivializationAt_symmL_le_of_compact
+      (F := F) (W := W) (x0 := x0 i) (Kc i) (hKc i)
+  let Csum : ℝ := (∑ i : κ, C i) + 1
+  have hCsum_pos : 0 < Csum := by
+    have hsum_nonneg : 0 ≤ ∑ i : κ, C i :=
+      Finset.sum_nonneg fun i _hi ↦ le_of_lt (hCpos i)
+    dsimp [Csum]
+    linarith
+  have hCsum_bound : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ Csum := by
+    intro i x
+    have hi_le : C i ≤ ∑ j : κ, C j :=
+      Finset.single_le_sum (fun j _hj ↦ le_of_lt (hCpos j)) (Finset.mem_univ i)
+    exact (hC i x).trans (by dsimp [Csum]; linarith)
+  exact ⟨Csum, hCsum_pos, hCsum_bound⟩
+
 /-- Continuous preferred bilinear-form sections have smooth fiberwise approximants in a continuous
 Riemannian vector bundle.  This discharges the local trivialization-boundedness hypothesis from the
 Riemannian vector-bundle estimate. -/
@@ -510,25 +540,10 @@ theorem exists_dist_lt_preferredBilinear_of_continuousRiemannianBundle
         ContMDiff I (I.prod 𝓘(ℝ, BilF)) 2
           (fun x ↦ _root_.Bundle.TotalSpace.mk' BilF x (u x)) ∧
         dist s u < ε := by
-  classical
-  letI : Fintype κ := Fintype.ofFinite κ
-  choose C hCpos hC using fun i ↦
-    exists_uniform_norm_fixed_trivializationAt_symmL_le_of_compact
-      (F := F) (W := W) (x0 := x0 i) (Kc i) (by
-        intro x hx
-        simpa using hKc i hx)
-  let Csum : ℝ := (∑ i : κ, C i) + 1
-  have hCsum_pos : 0 < Csum := by
-    have hsum_nonneg : 0 ≤ ∑ i : κ, C i :=
-      Finset.sum_nonneg fun i _hi ↦ le_of_lt (hCpos i)
-    dsimp [Csum]
-    linarith
-  have hCsum_bound : ∀ i (x : Kc i),
-      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ Csum := by
-    intro i x
-    have hi_le : C i ≤ ∑ j : κ, C j :=
-      Finset.single_le_sum (fun j _hj ↦ le_of_lt (hCpos j)) (Finset.mem_univ i)
-    exact (hC i x).trans (by dsimp [Csum]; linarith)
+  obtain ⟨Csum, hCsum_pos, hCsum_bound⟩ :=
+    exists_uniform_norm_preferred_trivializationAt_symmL_le_of_finite_compact_cover
+      (F := F) (W := W) (x0 := x0)
+      (Kc := Kc) (fun i x hx => by simpa using hKc i hx)
   exact exists_dist_lt_preferredBilinear_of_continuousRiemannianBundle_and_symmL_opNorm_le
     (F := F) (W := W) x0 s hCsum_pos hCsum_bound
 

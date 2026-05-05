@@ -667,7 +667,9 @@ Lipschitz estimates into `LipschitzOnWith` estimates for section-space maps and
 has a preferred-bilinear specialization that multiplies a fibrewise Lipschitz
 constant by the square of the preferred inverse-trivialization bound, including
 variants for covers supplied as `et` plus `et i = trivializationAt ...`, matching
-the Ricci-DeTurck Banach-chart records. The same public layer
+the Ricci-DeTurck Banach-chart records. The finite-cover inverse-trivialization
+bound used by those estimates is now named separately as a compactness theorem,
+so chart callers can obtain the shared constant without replaying the smooth-density proof. The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
 Levi-Civita correction ingredients (`toDual`, fiberwise composition,

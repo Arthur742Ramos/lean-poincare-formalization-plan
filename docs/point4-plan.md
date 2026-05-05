@@ -2454,7 +2454,10 @@ specializes this for preferred bilinear-form charts:
 form combine a fibrewise Lipschitz estimate with the squared preferred
 inverse-trivialization bound. The corresponding `_of_eq_trivializationAt`
 variants accept the existing chart-record shape with an arbitrary cover `et`
-and proof `et i = trivializationAt ...`. These are still handoff theorems; they do not
+and proof `et i = trivializationAt ...`. The compactness lemma
+`exists_uniform_norm_preferred_trivializationAt_symmL_le_of_finite_compact_cover`
+now provides the shared finite-cover inverse-trivialization bound consumed by
+both smooth-density and Lipschitz handoffs. These are still handoff theorems; they do not
 prove the Ricci-DeTurck Schauder estimates or construct the missing Banach chart.
 It also derives that finite-cover inverse
 bound from compactness of the cover pieces
