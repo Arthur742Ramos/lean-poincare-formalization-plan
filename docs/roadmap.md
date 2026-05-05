@@ -118,7 +118,9 @@ Hölder vocabulary now also includes fixed-constant and existential `C^{0,α}`
 unit-diameter lowering from spatial Lipschitz data for `0 ≤ α ≤ 1` and time
 Lipschitz data for `0 ≤ α ≤ 2`, with closed-ball and closed-cylinder subset
 variants, plus a standalone Holder-level curried-bilinear product-rule estimate
-from separate bounded and Holder controls. The parabolic matrix/local-frame Gram
+from separate bounded and Holder controls and a standalone Holder-level
+operator-application estimate from separate operator/vector bounded and Holder
+controls. The parabolic matrix/local-frame Gram
 stack now also has compact
 point-local product-cylinder bounded-difference metric-control bridges for the
 primitive schematic Ricci-DeTurck RHS, including finite-family forms with one

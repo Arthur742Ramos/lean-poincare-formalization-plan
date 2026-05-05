@@ -2071,8 +2071,10 @@ and finite `Pi` packaging across bounded,
 Holder, and `C^{0,α}` controls from componentwise estimates and
 same-constant projection back to components, and product-valued pairing
 closure, continuous-linear closure, standalone Holder-level curried-bilinear
-closure from separate bounded and Holder controls, curried-bilinear-map closure,
-curried-bilinear difference estimates, operator-application closure, and
+closure from separate bounded and Holder controls, standalone Holder-level
+operator-application closure from separate operator/vector bounded and Holder
+controls, curried-bilinear-map closure, curried-bilinear difference estimates,
+operator-application closure, and
 operator-application difference estimates with operator-norm constants, now in
 both fixed-constant and existential forms, and
 integer-scalar closure,

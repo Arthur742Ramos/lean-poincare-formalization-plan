@@ -1513,6 +1513,40 @@ theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F] [NormedAddCo
           (mul_le_mul hLdiff (hBv hq) (norm_nonneg _) hLdiff_nonneg)
     _ = (‖L‖ * (B * Hv + Bv * C)) * dα := by ring
 
+/-- Applying an operator-valued function to a vector-valued function preserves parabolic Holder
+control when the operator and vector fields are separately bounded. -/
+theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {A : ℝ × X → E →L[ℝ] F} {v : ℝ × X → E}
+    {BA HA Bv Hv : ℝ}
+    (hA : ParabolicHolderWith HA α A s)
+    (hv : ParabolicHolderWith Hv α v s)
+    (hAb : ParabolicBoundedWith BA A s)
+    (hvb : ParabolicBoundedWith Bv v s)
+    (hBA : 0 ≤ BA) :
+    ParabolicHolderWith (BA * Hv + Bv * HA) α (fun z => A z (v z)) s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  have hsplit :
+      A p (v p) - A q (v q) =
+        A p (v p - v q) + (A p - A q) (v q) := by
+    simp [map_sub]
+  have hHAd_nonneg : 0 ≤ HA * dα :=
+    (norm_nonneg (A p - A q)).trans (hA hp hq)
+  calc
+    ‖A p (v p) - A q (v q)‖ =
+        ‖A p (v p - v q) + (A p - A q) (v q)‖ := by rw [hsplit]
+    _ ≤ ‖A p (v p - v q)‖ + ‖(A p - A q) (v q)‖ := norm_add_le _ _
+    _ ≤ ‖A p‖ * ‖v p - v q‖ + ‖A p - A q‖ * ‖v q‖ :=
+        add_le_add
+          (ContinuousLinearMap.le_opNorm (A p) (v p - v q))
+          (ContinuousLinearMap.le_opNorm (A p - A q) (v q))
+    _ ≤ BA * (Hv * dα) + (HA * dα) * Bv :=
+        add_le_add
+          (mul_le_mul (hAb hp) (hv hp hq) (norm_nonneg _) hBA)
+          (mul_le_mul (hA hp hq) (hvb hq) (norm_nonneg _) hHAd_nonneg)
+    _ = (BA * Hv + Bv * HA) * dα := by ring
+
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicHolderWith C α u s)
     (hφ : LipschitzOnWith K φ (u '' s)) :
@@ -3951,27 +3985,7 @@ theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
       (fun z => A z (v z)) s := by
   constructor
   · exact hA.bounded.continuousLinearMap_apply hv.bounded hBA
-  · intro p hp q hq
-    let dα := (parabolicDistance p q) ^ α
-    have hsplit :
-        A p (v p) - A q (v q) =
-          A p (v p - v q) + (A p - A q) (v q) := by
-      simp [map_sub]
-    have hHAd_nonneg : 0 ≤ HA * dα :=
-      (norm_nonneg (A p - A q)).trans (hA.holder hp hq)
-    calc
-      ‖A p (v p) - A q (v q)‖ =
-          ‖A p (v p - v q) + (A p - A q) (v q)‖ := by rw [hsplit]
-      _ ≤ ‖A p (v p - v q)‖ + ‖(A p - A q) (v q)‖ := norm_add_le _ _
-      _ ≤ ‖A p‖ * ‖v p - v q‖ + ‖A p - A q‖ * ‖v q‖ :=
-        add_le_add
-          (ContinuousLinearMap.le_opNorm (A p) (v p - v q))
-          (ContinuousLinearMap.le_opNorm (A p - A q) (v q))
-      _ ≤ BA * (Hv * dα) + (HA * dα) * Bv :=
-        add_le_add
-          (mul_le_mul (hA.bounded hp) (hv.holder hp hq) (norm_nonneg _) hBA)
-          (mul_le_mul (hA.holder hp hq) (hv.bounded hq) (norm_nonneg _) hHAd_nonneg)
-      _ = (BA * Hv + Bv * HA) * dα := by ring
+  · exact hA.holder.continuousLinearMap_apply hv.holder hA.bounded hv.bounded hBA
 
 /-- Differences of operator-valued applications inherit parabolic `C^{0,α}` control from one
 operator input, one vector input, and `C^{0,α}` controls of the operator and vector differences. -/
