@@ -1531,7 +1531,14 @@ full-interval handoffs through
 and
 `ofProduct_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_of_hasFDerivAt_on_initialBall_Ioo_of_contDiffAt_spaceTime`,
 so product-flow callers no longer have to manually unfold the extracted
-variational local flow to reach the `C^3` gluing patch.  These ingredients now assemble into a local-cover raw-flow endpoint,
+variational local flow to reach the `C^3` gluing patch.  The
+state-preserving component closed-ball common-subinterval handoff now also has
+backward space-time-regularity variants
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius_of_contDiffAt_spaceTime`
+and
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius_of_contDiffAt_spaceTime`,
+so backward/inverse patches can consume full space-time `C^3` regularity
+directly rather than a pre-sliced fixed-time proof.  These ingredients now assemble into a local-cover raw-flow endpoint,
 `Diffeomorph3GaugeFlowOn.of_iUnion_gluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 with proof-level `nonempty_...`: global glued forward/backward slices plus
 local open-cover readouts carrying inverse identities, slice regularity,
