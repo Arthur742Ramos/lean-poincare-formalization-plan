@@ -2693,7 +2693,10 @@ pieces and compact piece families, with determination on the covered set and
 injectivity for global compact-piece covers. This is the finite-cover
 `C^{0,α}` analogue of the existing continuous-section compact-readout layer;
 compact readout sup-norm differences, including the finite product readout
-norm, are now bounded by the same single-radius `C^{0,α}` difference control.
+norm, are now bounded by the same single-radius `C^{0,α}` difference control,
+and pairwise norm-ball difference estimates now promote directly to
+`LipschitzOnWith` estimates for single compact-piece, finite compact-family,
+and linear finite-cover readouts.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
 the same single-radius control, plus determinant and determinant-difference
 single-radius variants using the existing quantitative determinant constants.

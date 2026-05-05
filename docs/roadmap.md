@@ -204,7 +204,10 @@ compact-piece families, matching the finite-cover shape used by the existing
 continuous-section Banach model; those readouts determine functions on the
 covered set, are injective when the compact pieces cover all time-space, and
 their compact sup-norm differences, including the finite product readout norm,
-are controlled by the same single-radius `C^{0,α}` difference bound. The
+are controlled by the same single-radius `C^{0,α}` difference bound. Pairwise
+norm-ball difference estimates also now yield `LipschitzOnWith` estimates for
+single compact-piece, finite compact-family, and linear finite-cover readouts.
+The
 matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
 same norm-ball language. Determinant and determinant-difference estimates now

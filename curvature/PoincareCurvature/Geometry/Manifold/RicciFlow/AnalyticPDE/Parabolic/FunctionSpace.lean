@@ -51,6 +51,19 @@ theorem c0AlphaWith_self (h : ParabolicC0AlphaNormLe N α u s) :
   have hH_le : H ≤ N := by linarith
   exact hBH.mono_const hB_le hH_le
 
+/-- The single radius controls the pointwise norm on the domain. -/
+theorem norm_le (h : ParabolicC0AlphaNormLe N α u s) ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    ‖u z‖ ≤ N := by
+  rcases h with ⟨B, hB, H, hH, hsum, hBH⟩
+  have hB_le : B ≤ N := by linarith
+  exact (hBH.bounded hz).trans hB_le
+
+/-- A single-radius bound on a difference gives the corresponding pointwise distance bound. -/
+theorem dist_le_of_sub (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    dist (u z) (v z) ≤ N := by
+  simpa [dist_eq_norm] using h.norm_le hz
+
 theorem of_c0AlphaWith {B H : ℝ} (hB : 0 ≤ B) (hH : 0 ≤ H)
     (h : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaNormLe (B + H) α u s :=
@@ -324,6 +337,23 @@ theorem norm_toContinuousMap_sub_le_of_normLe {K : TopologicalSpace.Compacts (�
     _ ≤ B := hctrl.bounded hz
     _ ≤ N := hB_le_N
 
+/-- Pairwise single-radius `C^{0,α}` difference estimates give a Lipschitz estimate for one
+compact-piece readout. -/
+theorem lipschitzOnWith_toContinuousMap_of_normLe_sub {Y : Type*} [PseudoMetricSpace Y]
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0} {A : Y → parabolicC0AlphaSubmodule X E α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC0AlphaNormLe ((L : ℝ) * dist u v) α (fun z => A u z - A v z) s) :
+    LipschitzOnWith L
+      (fun u : Y => toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hnorm := norm_toContinuousMap_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) hK hα (h hu hv)
+  simpa [dist_eq_norm] using hnorm
+
 /-- Read a parabolic `C^{0,α}` function on every compact piece of a chosen cover. -/
 def toCompactCoordFamily {κ : Type*} (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
     (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
@@ -389,6 +419,25 @@ theorem norm_toCompactCoordFamily_family_sub_le_of_normLe {κ : Type*} [Fintype 
   exact norm_toCompactCoordFamily_sub_le_of_normLe
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα h i
 
+/-- Pairwise single-radius `C^{0,α}` difference estimates give a Lipschitz estimate for the
+finite product of compact-family readouts. -/
+theorem lipschitzOnWith_toCompactCoordFamily_of_normLe_sub {Y κ : Type*}
+    [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0} {A : Y → parabolicC0AlphaSubmodule X E α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC0AlphaNormLe ((L : ℝ) * dist u v) α (fun z => A u z - A v z) s) :
+    LipschitzOnWith L
+      (fun u : Y =>
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hnorm := norm_toCompactCoordFamily_family_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv)
+  simpa [dist_eq_norm] using hnorm
+
 /-- The linear compact-family readout inherits the same finite product sup-norm estimate. -/
 theorem norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe {κ : Type*} [Fintype κ]
     (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
@@ -401,6 +450,26 @@ theorem norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe {κ : Type*} [Fintyp
         Kc hKc hα v‖ ≤ N := by
   simpa using norm_toCompactCoordFamily_family_sub_le_of_normLe
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα h
+
+/-- Pairwise single-radius `C^{0,α}` difference estimates give a Lipschitz estimate for the
+linear finite-cover readout. -/
+theorem lipschitzOnWith_toCompactCoordFamilyLinearMap_of_normLe_sub {Y κ : Type*}
+    [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0} {A : Y → parabolicC0AlphaSubmodule X E α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC0AlphaNormLe ((L : ℝ) * dist u v) α (fun z => A u z - A v z) s) :
+    LipschitzOnWith L
+      (fun u : Y =>
+        toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hnorm := norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv)
+  simpa [dist_eq_norm] using hnorm
 
 /-- Equality of all compact-piece readouts identifies the two functions on the covered set. -/
 theorem eqOn_of_toCompactCoordFamily_eq {κ : Type*}
