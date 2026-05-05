@@ -3222,6 +3222,75 @@ theorem nonempty_of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_
   ⟨of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
     maps3 anchored hsource hderiv hY⟩
 
+/-- Build a raw `C^3` gauge-flow witness on the open Picard interval from
+globally glued inverse slices and closed-Picard centered preferred-chart ODE
+data for a locally equal readout vector field. -/
+noncomputable def of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hsource : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      (fun τ : ℝ ↦ F τ x) ⁻¹' (extChartAt I (F t x)).source ∈
+        𝓝[Icc tmin tmax] t)
+    (hderiv : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (Y t (F t x)) (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
+      Y τ (F τ x) = X τ (F τ x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ := by
+  let hleft' : ∀ t : ℝ, Function.LeftInverse (G t) (F t) :=
+    fun t x ↦ hleft t (Set.mem_univ x)
+  let hright' : ∀ t : ℝ, Function.RightInverse (G t) (F t) :=
+    fun t x ↦ hright t (Set.mem_univ x)
+  let hF' : ∀ t : ℝ, ContMDiff I I 3 (F t) :=
+    fun t ↦ by simpa [contMDiffOn_univ] using hF t
+  let hG' : ∀ t : ℝ, ContMDiff I I 3 (G t) :=
+    fun t ↦ by simpa [contMDiffOn_univ] using hG t
+  let maps3 := SmoothSelfDiffeomorph3Family.ofInverse
+    (I := I) (M := M) F G hleft' hright' hF' hG'
+  exact of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    maps3
+    (SmoothSelfDiffeomorph3Family.ofInverse_anchoredAt
+      (I := I) (M := M) F G hleft' hright' hF' hG' hanchored)
+    (fun t ht x ↦ by simpa [maps3] using hsource t ht x)
+    (fun t ht x ↦ by simpa [maps3] using hderiv t ht x)
+    (fun t ht ↦ by simpa [maps3] using hY t ht)
+
+/-- Proof-level raw `C^3` gauge-flow existence on the open Picard interval from
+globally glued inverse slices and closed-Picard centered preferred-chart ODE
+data for a locally equal readout vector field. -/
+theorem nonempty_of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hsource : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      (fun τ : ℝ ↦ F τ x) ⁻¹' (extChartAt I (F t x)).source ∈
+        𝓝[Icc tmin tmax] t)
+    (hderiv : ∀ t ∈ Icc tmin tmax, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (Y t (F t x)) (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
+      Y τ (F τ x) = X τ (F τ x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀) :=
+  ⟨of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    F G hleft hright hF hG hanchored hsource hderiv hY⟩
+
 /-- Build an intrinsic DeTurck raw gauge-flow witness on the open Picard
 interior from named preferred-chart ODE data proved within the closed Picard
 interval, by first converting the chart ODE into primitive manifold derivative

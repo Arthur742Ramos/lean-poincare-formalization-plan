@@ -1502,7 +1502,12 @@ inverse identities and `C³` slice regularity on `Set.univ`.  A further
 relative-filter readout-field variant,
 `Diffeomorph3GaugeFlowOn.of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
 combines the same glued-slice endpoint with locally equal finite-cover/Banach
-vector-field identifications before producing the raw gauge flow.
+vector-field identifications before producing the raw gauge flow.  For the
+Picard shape where the chart ODE is proved on a closed interval and the raw
+flow lives on its interior, the endpoint
+`Diffeomorph3GaugeFlowOn.of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+now performs the same glued-slice handoff from `Icc` preferred-chart derivative
+data to an `Ioo` raw gauge flow.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,
