@@ -1589,11 +1589,14 @@ source-persistence variant
 `Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
 which derives the pointwise patch persistence from fixed open target patches
 and local time-continuity before invoking the same glued-flow constructor.  The
-fixed-IVP intrinsic layer exposes the same handoff through
+fixed-IVP intrinsic layer now exposes the global-field open-preimage handoff
+through
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_vectorField_eq_nhdsWithin`
+with proof-level `nonempty_...`, and exposes the local-readout handoffs through
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_localReadouts_vectorField_eq_nhdsWithin`
-and the open-preimage variant
-`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_of_localReadouts_vectorField_eq_nhdsWithin`,
-both with proof-level `nonempty_...`.  The theorem-family raw existence layer now
+and
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_of_localReadouts_vectorField_eq_nhdsWithin`.
+The theorem-family raw existence layer now
 also has the generic assembly bridge
 `IntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem`, with a
 proof-level equivalence between family existence and fixed-IVP existence for
