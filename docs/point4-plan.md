@@ -1162,8 +1162,9 @@ routes additionally expose genuine bijective open patches through
 `flow_timeSlice_exists_open_nhds_bijOn_of_eventually_hasFDerivAt_Ioo`,
 `flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasStrictFDerivAt` and
 `flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_eventually_hasFDerivAt`.
-The common-`Ioo` route also has
-ball-source forms,
+The full-interval and common-`Ioo` routes also have ball-source forms,
+`flow_timeSlice_exists_ball_mapsTo_injOn_of_hasStrictFDerivAt_Ioo`,
+`flow_timeSlice_exists_ball_mapsTo_injOn_of_eventually_hasFDerivAt_Ioo`,
 `flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasStrictFDerivAt`
 and
 `flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_eventually_hasFDerivAt`,
@@ -1183,7 +1184,9 @@ open-patch readouts through
 `ofProduct_flow_timeSlice_exists_open_nhds_bijOn_of_hasFDerivAt_on_initialBall_Ioo`
 and
 `ofProduct_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasFDerivAt_on_initialBall`.
-The product common-interval path likewise has
+The product full-interval and common-interval paths likewise have
+`ofProduct_flow_timeSlice_exists_ball_mapsTo_injOn_of_hasFDerivAt_on_initialBall_Ioo`
+and
 `ofProduct_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasFDerivAt_on_initialBall`,
 so radius-shrinking chart arguments can use a ball source immediately.
 Product Picard convex-state hypotheses, the state-preserving closed-ball

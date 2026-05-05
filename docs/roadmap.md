@@ -983,14 +983,14 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        including the componentwise-continuity and identity/operator ball
        specializations, and now the state-preserving Picard/component-continuity
        variants localize with matching `Nonempty` witnesses and direct
-        closed-state-ball readouts, plus full- and restricted common-`Ioo`
-        time-slice neighborhood, local-inverse, and open bijective-patch
-        readouts, and the product convex-state
-        route now also has the backward-time Grönwall, strict-derivative,
-        neighborhood-map, and open-partial-homeomorphism readouts for time slices
-        with `t ≤ t₀`, lifted through the state-preserving Picard closed-ball
-        and componentwise-continuity estimate wrappers, including common-`Ioo`
-        overlap forms for backward time slices, as well. The dynamic pullback layer now uses a
+       closed-state-ball readouts, plus full- and restricted common-`Ioo`
+       time-slice neighborhood, local-inverse, and open bijective-patch
+       readouts with positive source-ball forms, and the product convex-state
+       route now also has the backward-time Grönwall, strict-derivative,
+       neighborhood-map, and open-partial-homeomorphism readouts for time slices
+       with `t ≤ t₀`, lifted through the state-preserving Picard closed-ball
+       and componentwise-continuity estimate wrappers, including common-`Ioo`
+       overlap forms for backward time slices, as well. The dynamic pullback layer now uses a
       variational local flow to discharge the interior `y'(t)` and `A'(t)`
        clauses in `CoordinatePullbackMetricFieldDerivativeOn` and proves the
        exact scalar chain rule for `B(t, y(t))(A(t)u)(A(t)v)` along that flow, so
