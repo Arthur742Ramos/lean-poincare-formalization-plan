@@ -483,6 +483,114 @@ theorem exists_open_nhds_continuousOn_bijOn_subset_of_lifted_openPartialHomeomor
     bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn
       e₀ e₁ G hUt hWt hbij⟩
 
+/-- Shrink a lifted model inverse patch inside prescribed model chart domains,
+retaining the lifted inverse readout and its local left/right inverse
+identities.  This is the inverse-identity companion to
+`exists_open_nhds_continuousOn_bijOn_subset_of_lifted_openPartialHomeomorph_model`:
+the returned backward map is the chart lift of `φ.symm`, where `φ` is the
+model-space open partial homeomorphism whose forward map is `G`. -/
+theorem exists_open_nhds_continuousOn_bijOn_inverseOn_subset_of_lifted_openPartialHomeomorph_model
+    (e₀ e₁ : OpenPartialHomeomorph X Y) {G : Y → Y}
+    {φ : OpenPartialHomeomorph Y Y} (hφ : (φ : Y → Y) = G)
+    {x : X} (hxsource : x ∈ e₀.source) (hxφ : e₀ x ∈ φ.source)
+    {S T : Set Y}
+    (hSopen : IsOpen S) (hS : S ⊆ e₀.target) (hxS : e₀ x ∈ S)
+    (hTopen : IsOpen T) (hT : T ⊆ e₁.target) (hxT : G (e₀ x) ∈ T)
+    (hcont : ContinuousOn G S)
+    {Sx Tx : Set X}
+    (hSx : e₀.symm '' S ⊆ Sx) (hTx : e₁.symm '' T ⊆ Tx) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ Um ⊆ Sx ∧
+        IsOpen Wm ∧
+          (fun z : X ↦ e₁.symm (G (e₀ z))) x ∈ Wm ∧ Wm ⊆ Tx ∧
+            ContinuousOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um ∧
+              BijOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um Wm ∧
+                LeftInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+                  (fun z : X ↦ e₁.symm (G (e₀ z))) Um ∧
+                  RightInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+                    (fun z : X ↦ e₁.symm (G (e₀ z))) Wm := by
+  let U : Set Y := φ.source ∩ S ∩ φ ⁻¹' T
+  let W : Set Y := φ '' U
+  have hxTφ : φ (e₀ x) ∈ T := by
+    simpa [hφ] using hxT
+  have hUopen : IsOpen U := by
+    have hpre : IsOpen (φ.source ∩ φ ⁻¹' T) := φ.isOpen_inter_preimage hTopen
+    simpa [U, inter_assoc, inter_left_comm, inter_comm] using hpre.inter hSopen
+  have hxU : e₀ x ∈ U := ⟨⟨hxφ, hxS⟩, hxTφ⟩
+  have hUsource : U ⊆ φ.source := fun _ hz ↦ hz.1.1
+  have hUS : U ⊆ S := fun _ hz ↦ hz.1.2
+  have hWopen : IsOpen W := φ.isOpen_image_of_subset_source hUopen hUsource
+  have hWT : W ⊆ T := by
+    rintro _ ⟨z, hzU, rfl⟩
+    exact hzU.2
+  have hUt : U ⊆ e₀.target := fun y hy ↦ hS (hUS hy)
+  have hWt : W ⊆ e₁.target := fun y hy ↦ hT (hWT hy)
+  have hbijφ : BijOn φ U W := (φ.injOn.mono hUsource).bijOn_image
+  have hbij : BijOn G U W :=
+    hbijφ.congr (fun _ _ ↦ by simpa [hφ])
+  let Um : Set X := e₀.symm '' U
+  let Wm : Set X := e₁.symm '' W
+  have hxUm : x ∈ Um := ⟨e₀ x, hxU, e₀.left_inv hxsource⟩
+  have hUmSx : Um ⊆ Sx := by
+    rintro _ ⟨y, hyU, rfl⟩
+    exact hSx ⟨y, hUS hyU, rfl⟩
+  have hFxWm : (fun z : X ↦ e₁.symm (G (e₀ z))) x ∈ Wm :=
+    ⟨G (e₀ x), hbij.mapsTo hxU, rfl⟩
+  have hWmTx : Wm ⊆ Tx := by
+    rintro _ ⟨y, hyW, rfl⟩
+    exact hTx ⟨y, hWT hyW, rfl⟩
+  have hcont_lift :
+      ContinuousOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um :=
+    continuousOn_symm_image_of_openPartialHomeomorph_lifted_model
+      e₀ e₁ G hUt hWt (hcont.mono hUS) hbij.mapsTo
+  have hbij_lift :
+      BijOn (fun z : X ↦ e₁.symm (G (e₀ z))) Um Wm :=
+    bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn
+      e₀ e₁ G hUt hWt hbij
+  have hleft : LeftInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+      (fun z : X ↦ e₁.symm (G (e₀ z))) Um := by
+    rintro _ ⟨y, hyU, rfl⟩
+    have hytarget : y ∈ e₀.target := hUt hyU
+    have hGyW : G y ∈ W := hbij.mapsTo hyU
+    have hGytarget : G y ∈ e₁.target := hWt hGyW
+    calc
+      (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+          ((fun z : X ↦ e₁.symm (G (e₀ z))) (e₀.symm y))
+          = e₀.symm (φ.symm (G y)) := by
+            simp [e₀.right_inv hytarget, e₁.right_inv hGytarget]
+      _ = e₀.symm (φ.symm (φ y)) := by
+            simpa [hφ]
+      _ = e₀.symm y := by
+            rw [φ.left_inv (hUsource hyU)]
+  have hright : RightInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+      (fun z : X ↦ e₁.symm (G (e₀ z))) Wm := by
+    rintro _ ⟨y, hyW, rfl⟩
+    rcases hyW with ⟨u, huU, rfl⟩
+    have hutarget : u ∈ e₀.target := hUt huU
+    have hφutarget : φ u ∈ e₁.target := hWt ⟨u, huU, rfl⟩
+    calc
+      (fun z : X ↦ e₁.symm (G (e₀ z)))
+          ((fun z : X ↦ e₀.symm (φ.symm (e₁ z))) (e₁.symm (φ u)))
+          = e₁.symm (G (e₀ (e₀.symm (φ.symm (φ u))))) := by
+            simp [e₁.right_inv hφutarget]
+      _ = e₁.symm (G (e₀ (e₀.symm u))) := by
+            rw [φ.left_inv (hUsource huU)]
+      _ = e₁.symm (G u) := by
+            rw [e₀.right_inv hutarget]
+      _ = e₁.symm (φ u) := by
+            simpa [hφ]
+  exact ⟨Um, Wm,
+    e₀.isOpen_image_symm_of_subset_target hUopen hUt,
+    hxUm,
+    hUmSx,
+    e₁.isOpen_image_symm_of_subset_target hWopen hWt,
+    hFxWm,
+    hWmTx,
+    hcont_lift,
+    hbij_lift,
+    hleft,
+    hright⟩
+
 /-- A chart-coordinate equality on a visible patch gives equality of the
 underlying manifold maps once both sides land in the chart source.  This is the
 topological equality transport used by chart-gluing arguments after model
