@@ -1488,7 +1488,12 @@ endpoint.  These ingredients now assemble into a local-cover raw-flow endpoint,
 with proof-level `nonempty_...`: global glued forward/backward slices plus
 local open-cover readouts carrying inverse identities, slice regularity,
 time-continuity, anchoredness, chart derivatives, and relative vector-field
-identification produce the raw open-Picard gauge flow directly.  The
+identification produce the raw open-Picard gauge flow directly.  The fixed-IVP
+intrinsic layer now exposes the same local-cover shape as
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_iUnion_gluedSlices_vectorField_eq_nhdsWithin`
+and its proof-level `nonempty_...`, so per-solution cover data feeds the
+intrinsic witness without manually deriving global inverse, smoothness,
+continuity, and derivative hypotheses first.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
