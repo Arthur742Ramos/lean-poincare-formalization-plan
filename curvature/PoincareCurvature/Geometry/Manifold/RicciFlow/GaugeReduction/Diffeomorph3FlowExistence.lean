@@ -142,6 +142,36 @@ theorem rightInvOn_of_iUnion_eqOn_rightInvOn
     _ = Fₗ i (Gₗ i y) := by rw [hG i hyV']
     _ = y := hinv i hyV'
 
+/-- If two local forward maps agree on the overlap of their source patches,
+then their local inverse readouts agree on the image of that overlap under the
+first forward map. -/
+theorem eqOn_localInverses_on_left_image_inter_of_eqOn_forward
+    {F₀ F₁ : X → Y} {G₀ G₁ : Y → X} {U₀ U₁ : Set X}
+    (hF : EqOn F₀ F₁ (U₀ ∩ U₁))
+    (hleft₀ : LeftInvOn G₀ F₀ U₀)
+    (hleft₁ : LeftInvOn G₁ F₁ U₁) :
+    EqOn G₀ G₁ (F₀ '' (U₀ ∩ U₁)) := by
+  rintro _ ⟨x, hx, rfl⟩
+  calc
+    G₀ (F₀ x) = x := hleft₀ hx.1
+    _ = G₁ (F₁ x) := (hleft₁ hx.2).symm
+    _ = G₁ (F₀ x) := by rw [hF hx]
+
+/-- If two local forward maps agree on the overlap of their source patches,
+then their local inverse readouts agree on the image of that overlap under the
+second forward map. -/
+theorem eqOn_localInverses_on_right_image_inter_of_eqOn_forward
+    {F₀ F₁ : X → Y} {G₀ G₁ : Y → X} {U₀ U₁ : Set X}
+    (hF : EqOn F₀ F₁ (U₀ ∩ U₁))
+    (hleft₀ : LeftInvOn G₀ F₀ U₀)
+    (hleft₁ : LeftInvOn G₁ F₁ U₁) :
+    EqOn G₀ G₁ (F₁ '' (U₀ ∩ U₁)) := by
+  rintro _ ⟨x, hx, rfl⟩
+  calc
+    G₀ (F₁ x) = G₀ (F₀ x) := by rw [hF hx]
+    _ = x := hleft₀ hx.1
+    _ = G₁ (F₁ x) := (hleft₁ hx.2).symm
+
 /-- Shrink an `OpenPartialHomeomorph` local inverse patch to prescribed open
 source and target constraints, retaining a bijective open patch for the
 prescribed forward map. -/
