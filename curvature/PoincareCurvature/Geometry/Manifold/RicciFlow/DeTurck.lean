@@ -1730,6 +1730,91 @@ theorem chosenIntrinsicDeTurckLocalSolution_connection_eq_on_common_interval_of_
         (I := I) (M := M) sol₁ sol₂ hmetric ht y u v)
     hσ
 
+/-- If chosen-background DeTurck metric uniqueness is available on every
+prescribed shorter common terminal, then it is available on the open common
+candidate overlap.  This is the order-theoretic continuation bridge from
+restricted-terminal readouts to open-overlap readouts. -/
+theorem chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_Ico_of_restricted_interval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hmetric : ∀ {S : ℝ},
+      ivp.initialTime < S → S ≤ sol₁.1.terminalTime → S ≤ sol₂.1.terminalTime →
+      ∀ {t : ℝ}, t ∈ Set.Icc ivp.initialTime S → ∀ (x : M) (u v : TM x),
+        metricTensor (I := I) (M := M)
+          sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+            metricTensor (I := I) (M := M)
+              sol₂.1.toIntrinsicDeTurckSolution.metric t x u v)
+    {t : ℝ} (ht : t ∈ Set.Ico ivp.initialTime
+      (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.1.toIntrinsicDeTurckSolution.metric t x u v := by
+  rcases exists_between ht.2 with ⟨S, htS, hScommon⟩
+  have hS₀ : ivp.initialTime < S := lt_of_le_of_lt ht.1 htS
+  have hS₁ : S ≤ sol₁.1.terminalTime :=
+    le_trans (le_of_lt hScommon) (min_le_left _ _)
+  have hS₂ : S ≤ sol₂.1.terminalTime :=
+    le_trans (le_of_lt hScommon) (min_le_right _ _)
+  have htScc : t ∈ Set.Icc ivp.initialTime S := ⟨ht.1, le_of_lt htS⟩
+  exact hmetric hS₀ hS₁ hS₂ htScc x u v
+
+/-- Restricted-terminal metric uniqueness closes all the way to the common
+terminal: the open-overlap continuation bridge supplies equality from the left,
+and time-continuity of local solutions supplies the endpoint. -/
+theorem chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_interval_of_restricted_interval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hmetric : ∀ {S : ℝ},
+      ivp.initialTime < S → S ≤ sol₁.1.terminalTime → S ≤ sol₂.1.terminalTime →
+      ∀ {t : ℝ}, t ∈ Set.Icc ivp.initialTime S → ∀ (x : M) (u v : TM x),
+        metricTensor (I := I) (M := M)
+          sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+            metricTensor (I := I) (M := M)
+              sol₂.1.toIntrinsicDeTurckSolution.metric t x u v)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime
+      (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    (x : M) (u v : TM x) :
+    metricTensor (I := I) (M := M) sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+      metricTensor (I := I) (M := M) sol₂.1.toIntrinsicDeTurckSolution.metric t x u v := by
+  exact
+    chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_interval_of_common_Ico
+      (I := I) (M := M) sol₁ sol₂
+      (fun {τ} hτ y w z =>
+        chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_Ico_of_restricted_interval
+          (I := I) (M := M) sol₁ sol₂ hmetric hτ y w z)
+      ht x u v
+
+/-- Restricted-terminal metric uniqueness also gives closed-common canonical
+connection uniqueness for chosen-background DeTurck solutions. -/
+theorem
+    chosenIntrinsicDeTurckLocalSolution_connection_eq_on_common_interval_of_restricted_interval_metric
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hmetric : ∀ {S : ℝ},
+      ivp.initialTime < S → S ≤ sol₁.1.terminalTime → S ≤ sol₂.1.terminalTime →
+      ∀ {t : ℝ}, t ∈ Set.Icc ivp.initialTime S → ∀ (x : M) (u v : TM x),
+        metricTensor (I := I) (M := M)
+          sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+            metricTensor (I := I) (M := M)
+              sol₂.1.toIntrinsicDeTurckSolution.metric t x u v)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime
+      (min sol₁.1.terminalTime sol₂.1.terminalTime))
+    {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
+    sol₁.1.canonicalConnection
+      (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₁.1 sol₁.2) t σ x =
+      sol₂.1.canonicalConnection
+        (usesChosenBackground_isLeviCivita (I := I) (M := M) sol₂.1 sol₂.2) t σ x := by
+  exact
+    chosenIntrinsicDeTurckLocalSolution_connection_eq_on_common_interval_of_common_Ico_metric
+      (I := I) (M := M) sol₁ sol₂
+      (fun {τ} hτ y u v =>
+        chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_Ico_of_restricted_interval
+          (I := I) (M := M) sol₁ sol₂ hmetric hτ y u v)
+      ht hσ
+
 /-- Convert the intrinsic compact theorem package to the chosen-background DeTurck one. -/
 def IntrinsicLocalExistenceUniqueness.toChosenIntrinsicDeTurck
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}

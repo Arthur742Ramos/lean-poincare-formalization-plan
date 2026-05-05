@@ -1859,6 +1859,13 @@ selected shrink contains the common terminal.  `SmoothRealizationMetricCone.lean
 now exposes the same clipped uniqueness readout after selecting the standard
 positive-radius metric-cone shrink, still without a full-candidate terminal-fit
 hypothesis.
+The DeTurck layer now also has the closed-common version of that generic
+continuation bridge:
+`chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_interval_of_restricted_interval`
+derives equality on the whole common closed interval from prescribed
+shorter-terminal metric readouts, and
+`chosenIntrinsicDeTurckLocalSolution_connection_eq_on_common_interval_of_restricted_interval_metric`
+upgrades the same metric input to closed-common canonical connection equality.
 The corresponding connection-level wrappers
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_restricted_interval_of_shrunk_symmetricCarrier`,
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_Ico_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier`,
@@ -2390,8 +2397,9 @@ prescribed shorter-terminal readouts, with metric and connection closure-data
 readouts on `Ico t₀ (min T₁ T₂)` under the existing selected-shrink containment
 hypothesis. The DeTurck/smooth-realization stack now also closes any
 chosen-background open-common metric readout to the closed common interval by
-continuity from the stored time derivatives, and promotes that closed metric
-equality to canonical connection equality. At the vector-bundle
+continuity from the stored time derivatives, turns prescribed shorter-terminal
+metric readouts into closed-common metric equality, and promotes those metric
+readouts to canonical connection equality. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives
