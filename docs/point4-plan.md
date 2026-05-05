@@ -1438,7 +1438,9 @@ continuous local-flow package now also exposes
 `ContinuousLocalFlowSolution.flow_timeSlice_lifted_continuousOn`, extracting
 fixed-time spatial continuity from the model space-time continuity field and
 transporting it through charts.  The variational inverse-function layer now has
-the matching one-step common-`Ioo` forms
+the matching one-step full-interval and common-`Ioo` forms
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_of_hasStrictFDerivAt_Ioo`,
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_of_eventually_hasFDerivAt_Ioo`,
 `VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_common_Ioo_of_hasStrictFDerivAt`
 and
 `VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_common_Ioo_of_eventually_hasFDerivAt`,

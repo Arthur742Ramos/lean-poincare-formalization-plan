@@ -985,8 +985,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        variants localize with matching `Nonempty` witnesses and direct
        closed-state-ball readouts, plus full- and restricted common-`Ioo`
        time-slice neighborhood, local-inverse, and open bijective-patch
-       readouts with chart-lifted open-bijective patches and positive
-       source-ball forms, and the product convex-state
+       readouts with chart-lifted open-bijective and continuity-carrying
+       patches plus positive source-ball forms, and the product convex-state
        route now also has the backward-time Grönwall, strict-derivative,
        neighborhood-map, and open-partial-homeomorphism readouts for time slices
        with `t ≤ t₀`, lifted through the state-preserving Picard closed-ball
