@@ -192,7 +192,8 @@ The parabolic function-space layer has now also started: a single-radius
 `ParabolicC0AlphaNormLe` predicate packages the sum of the bounded and Holder
 constants and is closed under zero, constants, addition, subtraction, negation,
 finite sums, finite Pi-valued packaging, norm, scalar multiplication,
-continuous linear maps, products, set restriction, and radius enlargement;
+continuous linear maps, products, Lipschitz nonlinear composition, set
+restriction, and radius enlargement;
 `ParabolicC0AlphaOn` functions form a real submodule of all time-space
 functions, positive-exponent members read linearly as `ContinuousMap`s on
 compact time-space pieces, and the same readout is packaged over arbitrary
