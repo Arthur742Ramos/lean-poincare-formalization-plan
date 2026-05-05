@@ -3210,6 +3210,75 @@ theorem matrix_inv_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedFiel
     · intro j
       exact matrix_inv_entry_with (M := M) hH hM hδpos hdet i j
 
+end ParabolicC0AlphaOn
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Entrywise single-radius control and a determinant lower bound package inverse matrices with
+the corresponding quantitative inverse-matrix radius. -/
+theorem matrix_inv_of_entries {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {R : n → n → ℝ} {δ : ℝ} {M : ℝ × X → Matrix n n 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaNormLe
+      ((∑ i : n, ∑ j : n, ParabolicC0AlphaOn.matrixInvEntryBoundConst
+          (𝕜 := 𝕜) δ R i j) +
+        (∑ i : n, ∑ j : n, ParabolicC0AlphaOn.matrixInvEntryHolderConst
+          (𝕜 := 𝕜) δ R R i j))
+      α (fun z => (M z)⁻¹) s := by
+  have hR : ∀ i j, 0 ≤ R i j := fun i j => (hM i j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        ParabolicC0AlphaOn.matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos R i j)
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        ParabolicC0AlphaOn.matrixInvEntryHolderConst_nonneg (𝕜 := 𝕜) hR hδpos i j)
+    (ParabolicC0AlphaOn.matrix_inv_with (M := M) (B := R) (H := R) (δ := δ)
+      hR (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j))
+      hδpos hdet)
+
+/-- Entrywise single-radius control of two matrices and their difference, plus a common
+determinant lower bound, packages inverse-matrix differences with the corresponding quantitative
+inverse-difference radius. -/
+theorem matrix_inv_sub_of_entries {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {R Rd : n → n → ℝ} {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => N z i j) s)
+    (hdiff : ∀ i j, ParabolicC0AlphaNormLe (Rd i j) α
+      (fun z => M z i j - N z i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.matrixInvEntrywiseSubBoundConst (𝕜 := 𝕜) δ R Rd +
+        ParabolicC0AlphaOn.matrixInvEntrywiseSubHolderConst (𝕜 := 𝕜) δ R R Rd Rd)
+      α (fun z => (M z)⁻¹ - (N z)⁻¹) s := by
+  have hR : ∀ i j, 0 ≤ R i j := fun i j => (hM i j).nonneg
+  have hRd : ∀ i j, 0 ≤ Rd i j := fun i j => (hdiff i j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.matrixInvEntrywiseSubBoundConst_nonneg (𝕜 := 𝕜) hδpos hRd)
+    (ParabolicC0AlphaOn.matrixInvEntrywiseSubHolderConst_nonneg
+      (𝕜 := 𝕜) hδpos hR hRd hRd)
+    (ParabolicC0AlphaOn.matrix_inv_sub_with_entrywise
+      (M := M) (N := N) (B := R) (H := R) (Bd := Rd) (Hd := Rd)
+      hR hRd hRd
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hN i j))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hdiff i j))
+      hδpos hdetM hdetN)
+
+end ParabolicC0AlphaNormLe
+
+namespace ParabolicC0AlphaOn
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
 /-- A finite family of inverse-matrix-valued functions has explicit bounded parabolic
 `C^{0,α}` estimates with one compact determinant lower bound shared by the whole family. -/
 theorem matrix_inv_family_with_of_isCompact_det_ne_zero {ι n 𝕜 : Type*} [Fintype ι]

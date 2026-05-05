@@ -2695,7 +2695,9 @@ norm, are now bounded by the same single-radius `C^{0,α}` difference control.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
 the same single-radius control, plus determinant and determinant-difference
 single-radius variants using the existing quantitative determinant constants.
-It is still below the actual `C^{2+α,1+α/2}` norm and Schauder estimate.
+Inverse matrices and inverse-matrix differences now have matching
+single-radius variants under a determinant lower bound. It is still below the
+actual `C^{2+α,1+α/2}` norm and Schauder estimate.
 
 **Suggested decomposition** (multi-session):
 
