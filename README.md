@@ -240,7 +240,9 @@ packages the canonical stationary local solution attached to
     glued-slice layer also has a local-readout pointwise-source constructor
     whose vector-field handoff is stated on the actual time-slice patches
     `U τ i`, avoiding the finite-cover uniform equality requirement when local
-    field identification is already available at the current time.  A
+    field identification is already available at the current time; the
+    fixed-IVP intrinsic package exposes this local-readout pointwise-source
+    route directly.  A
     finite-cover
     local-readout variant
     promotes per-patch relative-filter equality to the uniform field

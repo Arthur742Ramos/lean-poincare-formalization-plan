@@ -1576,7 +1576,9 @@ handoffs.  The local-readout pointwise-source raw constructor
 uses the same source-persistence route but states vector-field identification
 on the actual time-slice patches `U τ i`, so this local-field route no longer
 needs finite-cover promotion when the local equality is available at the
-current time.  Its finite-cover
+current time.  The fixed-IVP intrinsic layer exposes the same handoff through
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_localReadouts_vectorField_eq_nhdsWithin`
+and proof-level `nonempty_...`.  Its finite-cover
 local-readout companion
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality
