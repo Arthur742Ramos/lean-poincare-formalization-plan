@@ -253,6 +253,8 @@ schematic RHS estimate and the compact-coordinate readout `LipschitzOnWith`
 bridge for any parabolic `C^{0,α}` vector field agreeing with that RHS on the
 state set; the same compact-coordinate bridge now accepts sharper entrywise
 higher primitive constants while exporting coarser schematic RHS constants.
+Those coarser compact-readout estimates now also unpack to pointwise
+compact-coordinate distance bounds with the same schematic RHS constant.
 Radii linear in a state-space distance also sum to matrix-norm
 primitive difference bounds and feed the existing schematic RHS state-space
 `LipschitzOnWith` bridges, including finite-family and coarser exported-constant

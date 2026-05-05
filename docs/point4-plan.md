@@ -2746,7 +2746,8 @@ linear-radius `ParabolicBoundedWith` schematic RHS estimate and the
 compact-coordinate readout `LipschitzOnWith` bridge for any parabolic
 `C^{0,α}` vector field agreeing with that RHS on the state set, including a
 coarser exported-constant variant for sharper entrywise higher primitive
-controls. Radii linear in
+controls. That coarser compact readout now also unpacks to pointwise
+compact-coordinate distance bounds with the same schematic RHS constant. Radii linear in
 `dist u v` give the matrix-norm/array primitive bounds needed by the existing
 schematic RHS state-space `LipschitzOnWith` theorem, with a matching
 finite-family wrapper, Pi-valued finite-product `C^{0,α}` and Lipschitz
