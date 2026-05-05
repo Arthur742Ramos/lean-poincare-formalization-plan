@@ -2542,7 +2542,8 @@ bridges have matching single-family and finite-family coarser-constant forms.
 The compact-domain determinant-extraction variants now expose the same coarser
 bounded-difference and shared-radius RHS estimates, and the compact local-frame
 Gram-coordinate bridges lift those coarser constants through the geometric Gram
-readout. The interval
+readout. The raw finite product-cylinder cover bridge now also exposes the
+coarser shared-radius schematic RHS estimate directly. The interval
 Banach-chart constructor now also has a real-constant coordinate-Lipschitz
 entry point, so those matrix constants no longer need to be prepackaged as
 `ℝ≥0` by callers. This is a
