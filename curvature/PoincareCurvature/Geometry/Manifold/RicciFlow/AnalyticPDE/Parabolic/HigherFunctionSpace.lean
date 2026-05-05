@@ -260,6 +260,13 @@ theorem value_c0AlphaNormLe (h : ParabolicC2AlphaNormLe N α u s) :
     ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
   exact ⟨Nu, hNu, hu⟩
 
+theorem value_c0AlphaNormLe_self (h : ParabolicC2AlphaNormLe N α u s) :
+    ParabolicC0AlphaNormLe N α u s := by
+  rcases h with
+    ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
+  have hNu_le : Nu ≤ N := by linarith
+  exact hu.mono_const hNu_le
+
 theorem exists_secondJet (h : ParabolicC2AlphaNormLe N α u s) :
     ∃ J : ParabolicSecondJet u s,
       (∃ Nx ≥ 0, ParabolicC0AlphaNormLe Nx α J.spaceDeriv s) ∧
@@ -271,8 +278,7 @@ theorem exists_secondJet (h : ParabolicC2AlphaNormLe N α u s) :
 
 theorem value_c0AlphaOn (h : ParabolicC2AlphaNormLe N α u s) :
     ParabolicC0AlphaOn α u s := by
-  rcases h.value_c0AlphaNormLe with ⟨Nu, _hNu, hu⟩
-  exact hu.c0AlphaOn
+  exact h.value_c0AlphaNormLe_self.c0AlphaOn
 
 theorem exists_timeDeriv (h : ParabolicC2AlphaNormLe N α u s) :
     ∃ Dt : ℝ × X → E,
@@ -381,6 +387,26 @@ theorem mem_iff {u : (ℝ × X) → E} :
 theorem c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
     ParabolicC0AlphaOn α (u : (ℝ × X) → E) s :=
   u.2.c0AlphaOn
+
+/-- Forget a coordinate parabolic `C^{2+α,1+α/2}` function to its value-level
+`C^{0,α}` function. -/
+def toC0AlphaSubmoduleLinearMap :
+    parabolicC2AlphaSubmodule X E α s →ₗ[ℝ] parabolicC0AlphaSubmodule X E α s where
+  toFun u := ⟨u.1, u.2.c0AlphaOn⟩
+  map_add' := by
+    intro u v
+    ext z
+    rfl
+  map_smul' := by
+    intro c u
+    ext z
+    rfl
+
+@[simp]
+theorem toC0AlphaSubmoduleLinearMap_apply
+    (u : parabolicC2AlphaSubmodule X E α s) (z : ℝ × X) :
+    toC0AlphaSubmoduleLinearMap (X := X) (E := E) (α := α) (s := s) u z = u z :=
+  rfl
 
 end parabolicC2AlphaSubmodule
 
