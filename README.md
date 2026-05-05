@@ -228,7 +228,9 @@ packages the canonical stationary local solution attached to
     source-persistence hypothesis, including a pointwise persistence form for
     the global-field route.  The fixed-IVP intrinsic existence package now
     consumes that pointwise-persistence compatible-cover route directly, while
-    a finite-cover local-readout variant
+    `timeDependent_iUnion_pointwiseSource_of_open_preimage_continuousWithinAt`
+    supplies the pointwise persistence condition from open preimage patches and
+    pointwise time-continuity.  A finite-cover local-readout variant
     promotes per-patch relative-filter equality to the uniform field
     identification needed by the raw gauge-flow endpoint. A thin
     `AnalyticPDE.SmoothRealization`

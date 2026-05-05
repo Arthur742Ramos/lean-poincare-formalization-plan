@@ -123,6 +123,25 @@ theorem continuousWithinAt_eval_of_iUnion_eqOn_continuousWithinAt
     (fun i ↦ Filter.Eventually.of_forall fun τ ↦ heq i τ)
     (fun i ↦ heq i t)
 
+/-- If time-dependent source patches are preimages of fixed open target patches
+along pointwise time-continuous trajectories, membership in a base-time patch
+persists in the relative time filter.  This supplies the pointwise
+source-persistence hypothesis used by compatible glued-slice constructors. -/
+theorem timeDependent_iUnion_pointwiseSource_of_open_preimage_continuousWithinAt
+    {ι : Type*} {F : ℝ → X → Y} {s : Set ℝ}
+    {U : ℝ → ι → Set X} {V : ι → Set Y}
+    (hU : ∀ τ i x, x ∈ U τ i ↔ F τ x ∈ V i)
+    (hVopen : ∀ i, IsOpen (V i))
+    (hcont : ∀ t ∈ s, ∀ i, ∀ x ∈ U t i,
+      ContinuousWithinAt (fun τ : ℝ ↦ F τ x) s t) :
+    ∀ t ∈ s, ∀ i, ∀ x ∈ U t i, ∀ᶠ τ in 𝓝[s] t, x ∈ U τ i := by
+  intro t ht i x hx
+  have hFx : F t x ∈ V i := (hU t i x).1 hx
+  filter_upwards
+    [(hcont t ht i x hx).preimage_mem_nhdsWithin ((hVopen i).mem_nhds hFx)]
+    with τ hτ
+  exact (hU τ i x).2 hτ
+
 /-- Glue left-inverse identities across an indexed cover when the global
 forward/backward candidates agree with the local forward/backward readouts on
 the relevant visible sets. -/
