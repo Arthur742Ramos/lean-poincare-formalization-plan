@@ -204,9 +204,10 @@ compact-piece families, matching the finite-cover shape used by the existing
 continuous-section Banach model; those readouts determine functions on the
 covered set, are injective when the compact pieces cover all time-space, and
 their compact sup-norm differences, including the finite product readout norm,
-are controlled by the same single-radius `C^{0,α}` difference bound. Pairwise
-norm-ball difference estimates also now yield `LipschitzOnWith` estimates for
-single compact-piece, finite compact-family, and linear finite-cover readouts.
+are controlled by the same single-radius `C^{0,α}` difference bound and by
+sup-bound-only difference estimates. Pairwise norm-ball and sup-bound
+difference estimates also now yield `LipschitzOnWith` estimates for single
+compact-piece, finite compact-family, and linear finite-cover readouts.
 The first coordinate higher-parabolic module now defines time and spatial
 slices, genuine parabolic second-jet derivative witnesses, and a
 `ParabolicC2AlphaNormLe` predicate controlling the value, spatial derivative,
@@ -240,9 +241,10 @@ entry controls feed the direct schematic Ricci-DeTurck RHS `C^{0,α}` estimate
 and its single-radius difference estimate. The direct schematic RHS constant is
 named at the higher layer and has finite-family and Pi-valued exact-sum
 norm-ball packaging. Higher entrywise difference controls whose radii are
-linear in a state-space distance now also sum to matrix-norm primitive
-difference bounds and feed the existing schematic RHS state-space
-`LipschitzOnWith` bridges, including finite-family and coarser
+linear in a shared radius now also feed the linear-radius `ParabolicBoundedWith`
+schematic RHS estimate, while radii linear in a state-space distance sum to
+matrix-norm primitive difference bounds and feed the existing schematic RHS
+state-space `LipschitzOnWith` bridges, including finite-family and coarser
 exported-constant wrappers; the finite-family bridges now package all
 schematic RHS coordinates as Pi-valued `C^{0,α}` readouts and as one Pi-valued
 state-space Lipschitz map with the finite sum of the coordinate constants, in

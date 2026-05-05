@@ -210,6 +210,99 @@ private theorem entry_le_triple_sum {n : Type*} [Fintype n] [DecidableEq n]
       (Finset.mem_univ a)
   exact hentry_le_c.trans (hc_le_b.trans hb_le_a)
 
+/-- Linear-radius bounded schematic Ricci-DeTurck RHS difference estimate from higher parabolic
+primitive controls.  This is the `C⁰` readout form of the higher matrix Lipschitz estimate: the
+entrywise higher difference balls are summed into matrix/array primitive difference constants
+before the existing pointwise schematic RHS bound is applied. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_higher_primitive_normLe
+    {n : Type*} [Fintype n] [DecidableEq n]
+    {δ R : ℝ} {KM : n → n → ℝ} {KD : n → n → n → ℝ}
+    {KH : n → n → n → n → ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {M N : ℝ × X → Matrix n n ℝ}
+    {D E : ℝ × X → n → n → n → ℝ}
+    {H K : ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM : ∀ a b, 0 ≤ KM a b) (hKD : ∀ a b c, 0 ≤ KD a b c)
+    (hKH : ∀ a b i j, 0 ≤ KH a b i j) (hR : 0 ≤ R)
+    (hM : ∀ a b, ParabolicC2AlphaNormLe (C a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC2AlphaNormLe (C a b) α (fun z => N z a b) s)
+    (hD : ∀ a b c, ParabolicC2AlphaNormLe (DB a b c) α (fun z => D z a b c) s)
+    (hE : ∀ a b c, ParabolicC2AlphaNormLe (DB a b c) α (fun z => E z a b c) s)
+    (hK : ∀ a b i j, ParabolicC2AlphaNormLe (HB a b i j) α
+      (fun z => K z a b i j) s)
+    (hMdiff : ∀ a b, ParabolicC2AlphaNormLe (KM a b * R) α
+      (fun z => M z a b - N z a b) s)
+    (hDdiff : ∀ a b c, ParabolicC2AlphaNormLe (KD a b c * R) α
+      (fun z => D z a b c - E z a b c) s)
+    (hHdiff : ∀ a b i j, ParabolicC2AlphaNormLe (KH a b i j * R) α
+      (fun z => H z a b i j - K z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicBoundedWith
+      (ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+          (𝕜 := ℝ) δ C DB HB
+          (∑ a, ∑ b, KM a b)
+          (∑ a, ∑ b, ∑ c, KD a b c)
+          (fun i j => ∑ a, ∑ b, KH a b i j) * R)
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s := by
+  have hKMsum : 0 ≤ ∑ a, ∑ b, KM a b :=
+    Finset.sum_nonneg fun a _ha => Finset.sum_nonneg fun b _hb => hKM a b
+  have hKDsum : 0 ≤ ∑ a, ∑ b, ∑ c, KD a b c :=
+    Finset.sum_nonneg fun a _ha =>
+      Finset.sum_nonneg fun b _hb => Finset.sum_nonneg fun c _hc => hKD a b c
+  have hKHsum : ∀ i j, 0 ≤ ∑ a, ∑ b, KH a b i j := fun i j =>
+    Finset.sum_nonneg fun a _ha => Finset.sum_nonneg fun b _hb => hKH a b i j
+  have hMbound : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖M z a b‖ ≤ C a b := by
+    intro z hz a b
+    exact (hM a b).norm_le hz
+  have hNbound : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖N z a b‖ ≤ C a b := by
+    intro z hz a b
+    exact (hN a b).norm_le hz
+  have hDbound : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖D z a b c‖ ≤ DB a b c := by
+    intro z hz a b c
+    exact (hD a b c).norm_le hz
+  have hEbound : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖E z a b c‖ ≤ DB a b c := by
+    intro z hz a b c
+    exact (hE a b c).norm_le hz
+  have hKbound : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j, ‖K z a b i j‖ ≤ HB a b i j := by
+    intro z hz a b i j
+    exact (hK a b i j).norm_le hz
+  have hMdiff_bound : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      ‖M z - N z‖ ≤ (∑ a, ∑ b, KM a b) * R := by
+    intro z hz
+    exact matrix_norm_sub_le_sum_mul_of_entries
+      (X := X) (α := α) (s := s) (K := KM) (M := M) (N := N)
+      hKM hR hMdiff hz
+  have hDdiff_bound : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ (∑ a, ∑ b, ∑ c, KD a b c) * R := by
+    intro z hz a b c
+    have hentry : ‖D z a b c - E z a b c‖ ≤ KD a b c * R := by
+      simpa [dist_eq_norm] using (hDdiff a b c).dist_le_of_sub hz
+    exact hentry.trans (mul_le_mul_of_nonneg_right (entry_le_triple_sum hKD a b c) hR)
+  have hHdiff_bound : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+      ‖((fun a b => H z a b i j) : Matrix n n ℝ) -
+          ((fun a b => K z a b i j) : Matrix n n ℝ)‖ ≤
+        (∑ a, ∑ b, KH a b i j) * R := by
+    intro z hz i j
+    exact matrix_norm_sub_le_sum_mul_of_entries
+      (X := X) (α := α) (s := s) (K := fun a b => KH a b i j)
+      (M := fun z : ℝ × X => (fun a b => H z a b i j))
+      (N := fun z : ℝ × X => (fun a b => K z a b i j))
+      (fun a b => hKH a b i j) hR (fun a b => hHdiff a b i j) hz
+  exact ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius
+    (X := X) (s := s) (δ := δ) (R := R)
+    (KM := ∑ a, ∑ b, KM a b)
+    (KD := ∑ a, ∑ b, ∑ c, KD a b c)
+    (KH := fun i j => ∑ a, ∑ b, KH a b i j)
+    (C := C) (DB := DB) (HB := HB)
+    (M := M) (N := N) (D := D) (E := E) (H := H) (K := K)
+    hDB hHB hMbound hNbound hDbound hEbound hKbound hKDsum hR
+    hMdiff_bound hDdiff_bound hHdiff_bound hδpos hdetM hdetN
+
 /-- Higher parabolic entry controls supply the primitive entrywise hypotheses for the
 single-radius schematic Ricci-DeTurck RHS difference estimate. -/
 theorem ricciDeTurckSchematicMatrix_sub_entrywise_of_entries {n : Type*}

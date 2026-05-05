@@ -2694,9 +2694,9 @@ injectivity for global compact-piece covers. This is the finite-cover
 `C^{0,α}` analogue of the existing continuous-section compact-readout layer;
 compact readout sup-norm differences, including the finite product readout
 norm, are now bounded by the same single-radius `C^{0,α}` difference control,
-and pairwise norm-ball difference estimates now promote directly to
-`LipschitzOnWith` estimates for single compact-piece, finite compact-family,
-and linear finite-cover readouts.
+and by sup-bound-only difference estimates; pairwise norm-ball and sup-bound
+difference estimates now promote directly to `LipschitzOnWith` estimates for
+single compact-piece, finite compact-family, and linear finite-cover readouts.
 `AnalyticPDE/Parabolic/HigherFunctionSpace.lean` now begins the coordinate
 `C^{2+α,1+α/2}` layer: it defines time and spatial slices, packages a genuine
 parabolic second jet with time, spatial, and second-spatial derivative
@@ -2734,8 +2734,9 @@ feed the direct schematic Ricci-DeTurck RHS `C^{0,α}` estimate and the existing
 single-radius schematic Ricci-DeTurck RHS difference theorem. The direct
 schematic RHS constant is named at the higher layer and has finite-family and
 Pi-valued exact-sum norm-ball packaging. It now also converts entrywise higher
-primitive difference controls with radii
-linear in `dist u v` into the matrix-norm/array primitive bounds needed by the
+primitive difference controls with radii linear in a shared radius into the
+linear-radius `ParabolicBoundedWith` schematic RHS estimate, while radii linear
+in `dist u v` give the matrix-norm/array primitive bounds needed by the
 existing schematic RHS state-space `LipschitzOnWith` theorem, with a matching
 finite-family wrapper, Pi-valued finite-product `C^{0,α}` and Lipschitz
 packaging of all family coordinates, and matching coarser exported-constant
