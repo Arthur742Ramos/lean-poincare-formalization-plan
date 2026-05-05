@@ -174,7 +174,8 @@ state-space `LipschitzOnWith` coordinate bridges in single-family and
 finite-family forms. Compact-domain determinant-extraction variants now feed
 the same coarser bounded-difference and shared-radius RHS estimates, with
 matching compact local-frame Gram-coordinate handoffs, and the raw finite
-product-cylinder cover bridge now has the coarser shared-radius form.
+product-cylinder cover bridge now has the coarser shared-radius form together
+with its local-frame Gram-coordinate counterpart.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric

@@ -710,7 +710,8 @@ bounded-difference, shared-radius, and state-space `LipschitzOnWith` estimates
 expose that coarsening directly, including finite-family coordinate forms and
 compact-domain determinant-extraction variants, and the compact local-frame
 Gram-coordinate bridges now lift the same coarser constants. The raw finite
-product-cylinder cover bridge also has a coarser shared-radius form.
+product-cylinder cover bridge also has a coarser shared-radius form, with a
+matching local-frame Gram-coordinate version.
 The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
