@@ -2719,6 +2719,72 @@ theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhds
   ⟨of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
     maps3 anchored hsource hderiv hY⟩
 
+/-- Build a raw `C^3` gauge-flow witness from globally glued inverse slices
+and centered preferred-chart ODE data for a locally equal readout vector field.
+This combines the open-cover gluing endpoint with the relative-filter
+vector-field congruence used by finite-cover Banach readouts. -/
+noncomputable def of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ F τ x) ⁻¹' (extChartAt I (F t x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (Y t (F t x)) s t)
+    (hY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+      Y τ (F τ x) = X τ (F τ x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ := by
+  let hleft' : ∀ t : ℝ, Function.LeftInverse (G t) (F t) :=
+    fun t x ↦ hleft t (Set.mem_univ x)
+  let hright' : ∀ t : ℝ, Function.RightInverse (G t) (F t) :=
+    fun t x ↦ hright t (Set.mem_univ x)
+  let hF' : ∀ t : ℝ, ContMDiff I I 3 (F t) :=
+    fun t ↦ by simpa [contMDiffOn_univ] using hF t
+  let hG' : ∀ t : ℝ, ContMDiff I I 3 (G t) :=
+    fun t ↦ by simpa [contMDiffOn_univ] using hG t
+  let maps3 := SmoothSelfDiffeomorph3Family.ofInverse
+    (I := I) (M := M) F G hleft' hright' hF' hG'
+  exact of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y) (s := s) (t₀ := t₀)
+    maps3
+    (SmoothSelfDiffeomorph3Family.ofInverse_anchoredAt
+      (I := I) (M := M) F G hleft' hright' hF' hG' hanchored)
+    (fun t ht x ↦ by simpa [maps3] using hsource t ht x)
+    (fun t ht x ↦ by simpa [maps3] using hderiv t ht x)
+    (fun t ht ↦ by simpa [maps3] using hY t ht)
+
+/-- Proof-level raw `C^3` gauge-flow existence from globally glued inverse
+slices and centered preferred-chart ODE data for a locally equal readout vector
+field. -/
+theorem nonempty_of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ F τ x) ⁻¹' (extChartAt I (F t x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (Y t (F t x)) s t)
+    (hY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+      Y τ (F τ x) = X τ (F τ x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y) (s := s) (t₀ := t₀)
+    F G hleft hright hF hG hanchored hsource hderiv hY⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness on `s` from
 ordinary pointwise manifold derivatives available at each time of `s`.  This
 matches local ODE constructions that first promote a closed-interval derivative
