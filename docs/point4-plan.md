@@ -1483,7 +1483,12 @@ identified with the glued self-map on an open cover can supply `ContMDiffOn`
 regularity directly.  The time-slice wrapper
 `contMDiffOn_univ_timeSlice_of_iUnion_open_eqOn_contMDiffOn` packages the
 `Set.univ` form needed by the glued forward/backward maps in the raw Picard
-endpoint.  The
+endpoint.  These ingredients now assemble into a local-cover raw-flow endpoint,
+`Diffeomorph3GaugeFlowOn.of_iUnion_gluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+with proof-level `nonempty_...`: global glued forward/backward slices plus
+local open-cover readouts carrying inverse identities, slice regularity,
+time-continuity, anchoredness, chart derivatives, and relative vector-field
+identification produce the raw open-Picard gauge flow directly.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
