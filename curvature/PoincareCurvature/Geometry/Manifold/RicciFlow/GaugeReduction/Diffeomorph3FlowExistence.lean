@@ -144,6 +144,22 @@ theorem continuousWithinAt_eval_of_iUnion_eqOn_continuousWithinAt
     (fun i ↦ Filter.Eventually.of_forall fun τ ↦ heq i τ)
     (fun i ↦ heq i t)
 
+/-- Pointwise time-continuity glues across a time-dependent indexed cover when
+the selected base-time patch persists for the base point in the relative time
+filter. -/
+theorem continuousWithinAt_eval_of_timeDependent_iUnion_pointwiseSource_continuousWithinAt
+    {ι : Type*} {F : ℝ → X → Y} {G : ι → ℝ → X → Y}
+    {s : Set ℝ} {t : ℝ} {U : ℝ → ι → Set X} {x : X}
+    (hcover : x ∈ ⋃ i, U t i)
+    (hcont : ∀ i, x ∈ U t i → ContinuousWithinAt (fun τ : ℝ ↦ G i τ x) s t)
+    (heq : ∀ τ : ℝ, ∀ i, EqOn (F τ) (G i τ) (U τ i))
+    (hsource : ∀ i, x ∈ U t i → ∀ᶠ τ in 𝓝[s] t, x ∈ U τ i) :
+    ContinuousWithinAt (fun τ : ℝ ↦ F τ x) s t := by
+  rcases Set.mem_iUnion.mp hcover with ⟨i, hxU⟩
+  exact (hcont i hxU).congr_of_eventuallyEq
+    ((hsource i hxU).mono fun τ hτ ↦ heq τ i hτ)
+    (heq t i hxU)
+
 /-- If time-dependent source patches are preimages of fixed open target patches
 along pointwise time-continuous trajectories, membership in a base-time patch
 persists in the relative time filter.  This supplies the pointwise
@@ -1267,6 +1283,24 @@ theorem hasDerivWithinAt_extChartAt_eval_of_iUnion_eqOn
     (I := I) (M := M) hcover hderiv
     (fun i ↦ Filter.Eventually.of_forall fun τ ↦ heq i τ)
     (fun i ↦ heq i t)
+
+/-- Transfer a preferred-chart time derivative across a time-dependent indexed
+cover when the selected base-time patch persists for the base point in the
+relative time filter. -/
+theorem hasDerivWithinAt_extChartAt_eval_of_timeDependent_iUnion_pointwiseSource
+    {ι : Type*} {F : ℝ → M → M} {G : ι → ℝ → M → M}
+    {s : Set ℝ} {t : ℝ} {U : ℝ → ι → Set M} {x p : M} {v : E}
+    (hcover : x ∈ ⋃ i, U t i)
+    (hderiv : ∀ i, x ∈ U t i →
+      HasDerivWithinAt (fun τ : ℝ ↦ (extChartAt I p) (G i τ x)) v s t)
+    (heq : ∀ τ : ℝ, ∀ i, EqOn (F τ) (G i τ) (U τ i))
+    (hsource : ∀ i, x ∈ U t i → ∀ᶠ τ in 𝓝[s] t, x ∈ U τ i) :
+    HasDerivWithinAt (fun τ : ℝ ↦ (extChartAt I p) (F τ x)) v s t := by
+  rcases Set.mem_iUnion.mp hcover with ⟨i, hxU⟩
+  exact hasDerivWithinAt_extChartAt_eval_of_eventuallyEq
+    (I := I) (M := M) (hderiv i hxU)
+    ((hsource i hxU).mono fun τ hτ ↦ heq τ i hτ)
+    (heq t i hxU)
 
 /-- A concrete `C^3` diffeomorphism flow for a time-dependent vector field on a
 time set, anchored at a base time.  This is the raw object expected from the
@@ -4637,12 +4671,6 @@ noncomputable def of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_
     simpa [F] using
       (gluedMapOf_iUnion_eqOn
         (default := defaultF t) (U := U t) (Fₗ := fun i ↦ Fₗ i t) (hFcompat t))
-  have hFEqPoint : ∀ t ∈ Icc tmin tmax, ∀ i, ∀ x ∈ U t i,
-      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, F τ x = Fₗ i τ x := by
-    simpa [F] using
-      (gluedMapOf_iUnion_eventually_eq_of_pointwiseSource
-        (default := defaultF) (U := U) (Fₗ := Fₗ) (s := Icc tmin tmax)
-        hFcompat hUwithinPoint)
   have hGEq : ∀ t : ℝ, ∀ i, EqOn (G t) (Gₗ i t) (V t i) := by
     intro t
     simpa [G] using
@@ -4699,19 +4727,21 @@ noncomputable def of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_
       calc
         F t₀ x = Fₗ i t₀ x := hFEq t₀ i hxU
         _ = x := hanchoredLocal i x hxU)
-    (fun t ht x ↦ by
-      rcases Set.mem_iUnion.mp (hUcover t (Set.mem_univ x)) with ⟨i, hxU⟩
-      exact (hcontLocal i t ht x hxU).congr_of_eventuallyEq
-        (hFEqPoint t ht i x hxU)
-        (hFEq t i hxU))
-    (fun t ht x ↦ by
-      rcases Set.mem_iUnion.mp (hUcover t (Set.mem_univ x)) with ⟨i, hxU⟩
-      exact hasDerivWithinAt_extChartAt_eval_of_eventuallyEq
-        (I := I) (M := M) (F := F) (G := Fₗ i)
-        (s := Icc tmin tmax) (t := t) (x := x) (p := F t x)
-        (by simpa [F] using hderivLocal i t ht x hxU)
-        (hFEqPoint t ht i x hxU)
-        (hFEq t i hxU))
+    (fun t ht x ↦
+      continuousWithinAt_eval_of_timeDependent_iUnion_pointwiseSource_continuousWithinAt
+        (F := F) (G := Fₗ) (s := Icc tmin tmax) (t := t) (U := U) (x := x)
+        (hUcover t (Set.mem_univ x))
+        (fun i hxU ↦ hcontLocal i t ht x hxU)
+        hFEq
+        (fun i hxU ↦ hUwithinPoint t ht i x hxU))
+    (fun t ht x ↦
+      hasDerivWithinAt_extChartAt_eval_of_timeDependent_iUnion_pointwiseSource
+        (I := I) (M := M) (F := F) (G := Fₗ)
+        (s := Icc tmin tmax) (t := t) (U := U) (x := x) (p := F t x)
+        (hUcover t (Set.mem_univ x))
+        (fun i hxU ↦ by simpa [F] using hderivLocal i t ht x hxU)
+        hFEq
+        (fun i hxU ↦ hUwithinPoint t ht i x hxU))
     (fun t ht ↦ by
       simpa [F] using hY t ht)
 

@@ -737,7 +737,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        patchwise maps, and
        `gluedMapOf_iUnion_eventually_eq_of_pointwiseSource` packages the
        resulting relative-filter equality between the glued map and selected
-       local readout, while the finite-cover local-readout variant derives the uniform
+       local readout. The generic pointwise-source continuity and
+       preferred-chart derivative transfer lemmas expose that same handoff for
+       downstream gluing arguments, while the finite-cover local-readout variant derives the uniform
        field-identification handoff from per-index data. The fixed-IVP
        intrinsic DeTurck existence layer mirrors that proof-level shape for its
        derivative-data and identity constructors, and the theorem-family layer

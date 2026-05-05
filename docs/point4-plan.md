@@ -1565,8 +1565,13 @@ preimages along pointwise time-continuous trajectories, and
 does the same for patchwise local readouts.  The bridge
 `gluedMapOf_iUnion_eventually_eq_of_pointwiseSource` now packages the
 eventual equality between the canonical glued map and the selected local
-readout, and the raw pointwise-source constructor uses it for continuity and
-preferred-chart derivative transfer.  Its finite-cover
+readout.  The new
+`continuousWithinAt_eval_of_timeDependent_iUnion_pointwiseSource_continuousWithinAt`
+and
+`hasDerivWithinAt_extChartAt_eval_of_timeDependent_iUnion_pointwiseSource`
+lemmas expose the corresponding continuity and preferred-chart derivative
+transfers, and the raw pointwise-source constructor now uses those generic
+handoffs.  Its finite-cover
 local-readout companion
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality
