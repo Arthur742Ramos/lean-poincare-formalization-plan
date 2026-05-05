@@ -6197,6 +6197,96 @@ theorem ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_conv
       (ofProduct_tangent_continuousOn_initialBall_time β hball ht_all).continuousAt hclosed
   exact hasStrictFDerivAt_of_hasFDerivAt_of_continuousAt hder_eventually hcont
 
+/-- Product-Picard convex state-tube criterion for ordinary spatial
+differentiability on the whole closed Picard interval.  The proof dispatches
+the selected time to the forward or backward Grönwall criterion internally, so
+callers can state the state-tube hypotheses once on `Icc tmin tmax`. -/
+theorem ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_Icc_of_mem_ball
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin tmax)
+    {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Icc tmin tmax, Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Icc tmin tmax,
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ state τ, ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax, LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    HasFDerivAt
+      (fun y : V =>
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow (y, t))
+      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent x t)
+      x := by
+  by_cases ht_left : t ≤ (t₀ : ℝ)
+  · exact
+      ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+        (β := β) hball hx ⟨ht.1, ht_left⟩
+        (fun τ hτ => hconv τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩)
+        (fun y hy τ hτ => hmem y hy τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩)
+        (fun τ hτ z hz => hD_bound τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩ z hz)
+        (fun τ hτ => hDf_lip τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩)
+        (fun τ hτ z hz => hder τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩ z hz)
+  · have ht_right : (t₀ : ℝ) ≤ t := le_of_lt (lt_of_not_ge ht_left)
+    exact
+      ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball
+        (β := β) hball hx ⟨ht_right, ht.2⟩
+        (fun τ hτ => hconv τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩)
+        (fun y hy τ hτ => hmem y hy τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩)
+        (fun τ hτ z hz => hD_bound τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩ z hz)
+        (fun τ hτ => hDf_lip τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩)
+        (fun τ hτ z hz => hder τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩ z hz)
+
+/-- Product-Picard convex state-tube criterion for strict spatial
+differentiability on the whole closed Picard interval.  This is the
+whole-interval companion to the forward and backward strict-differentiability
+criteria. -/
+theorem ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_Icc_of_mem_ball
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {t K : ℝ} (ht : t ∈ Icc tmin tmax)
+    {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Icc tmin tmax, Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Icc tmin tmax,
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ state τ, ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax, LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    HasStrictFDerivAt
+      (fun y : V =>
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow (y, t))
+      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent x t)
+      x := by
+  by_cases ht_left : t ≤ (t₀ : ℝ)
+  · exact
+      ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+        (β := β) hball hx ⟨ht.1, ht_left⟩
+        (fun τ hτ => hconv τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩)
+        (fun y hy τ hτ => hmem y hy τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩)
+        (fun τ hτ z hz => hD_bound τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩ z hz)
+        (fun τ hτ => hDf_lip τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩)
+        (fun τ hτ z hz => hder τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩ z hz)
+  · have ht_right : (t₀ : ℝ) ≤ t := le_of_lt (lt_of_not_ge ht_left)
+    exact
+      ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball
+        (β := β) hball hx ⟨ht_right, ht.2⟩
+        (fun τ hτ => hconv τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩)
+        (fun y hy τ hτ => hmem y hy τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩)
+        (fun τ hτ z hz => hD_bound τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩ z hz)
+        (fun τ hτ => hDf_lip τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩)
+        (fun τ hτ z hz => hder τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩ z hz)
+
 /-- A `C¹`-style spatial derivative package for a fixed time slice upgrades to
 the strict differentiability required by the inverse-function theorem.  This is
 the model-side bridge that lets Picard arguments target ordinary spatial

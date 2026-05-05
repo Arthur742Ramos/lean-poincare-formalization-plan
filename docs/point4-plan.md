@@ -1220,6 +1220,13 @@ and the backward interior neighborhood/open-partial-homeomorphism readouts
 `ofProduct_flow_timeSlice_map_nhds_eq_of_Df_lipschitzOnWith_on_convex_state_backward_Ioo_of_mem_ball`
 and
 `exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_Df_lipschitzOnWith_on_convex_state_backward_Ioo_of_mem_ball`.
+The product-Picard convex-state route now also has whole-closed-interval
+ordinary and strict differentiability bridges,
+`ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_Icc_of_mem_ball`
+and
+`ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_Icc_of_mem_ball`,
+which internalize the forward/backward time split and let later gauge-flow
+arguments state the convex state-tube hypotheses once on `Icc tmin tmax`.
 This backward local-inverse bridge now also lifts through the state-preserving
 closed-ball Picard route: the closed-ball estimate forms
 `ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_of_closedBall_estimates_backward_Icc_of_mem_ball`
