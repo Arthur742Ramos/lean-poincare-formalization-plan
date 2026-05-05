@@ -394,6 +394,60 @@ theorem matrix_det_sub_with {n A : Type*} [Fintype n] [DecidableEq n] [NormedCom
     rw [← zsmul_eq_mul]
     rfl
 
+end ParabolicC0AlphaOn
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Entrywise single-radius control packages the determinant with the corresponding quantitative
+determinant radius. -/
+theorem matrix_det_of_entries {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] {N : n → n → ℝ} {M : ℝ × X → Matrix n n A}
+    (h : ∀ i j, ParabolicC0AlphaNormLe (N i j) α (fun z => M z i j) s) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.matrixDetBoundConst (A := A) N +
+        ParabolicC0AlphaOn.matrixDetHolderConst (A := A) N N)
+      α (fun z => (M z).det) s := by
+  have hN : ∀ i j, 0 ≤ N i j := fun i j => (h i j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.matrixDetBoundConst_nonneg (A := A) N)
+    (ParabolicC0AlphaOn.matrixDetHolderConst_nonneg (A := A) hN)
+    (ParabolicC0AlphaOn.matrix_det_with (M := M) (B := N) (H := N) hN fun i j =>
+      ParabolicC0AlphaNormLe.c0AlphaWith_self (h i j))
+
+/-- Entrywise single-radius control of two matrices and their difference packages determinant
+differences with the corresponding quantitative determinant-difference radius. -/
+theorem matrix_det_sub_of_entries {n A : Type*} [Fintype n] [DecidableEq n]
+    [NormedCommRing A] {R Rd : n → n → ℝ} {M N : ℝ × X → Matrix n n A}
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => M z i j) s)
+    (hN : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => N z i j) s)
+    (hdiff : ∀ i j, ParabolicC0AlphaNormLe (Rd i j) α
+      (fun z => M z i j - N z i j) s) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.matrixDetSubBoundConst (A := A) R Rd +
+        ParabolicC0AlphaOn.matrixDetSubHolderConst (A := A) R R Rd Rd)
+      α (fun z => (M z).det - (N z).det) s := by
+  have hR : ∀ i j, 0 ≤ R i j := fun i j => (hM i j).nonneg
+  have hRd : ∀ i j, 0 ≤ Rd i j := fun i j => (hdiff i j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.matrixDetSubBoundConst_nonneg (A := A) hRd)
+    (ParabolicC0AlphaOn.matrixDetSubHolderConst_nonneg (A := A) hR hRd hRd)
+    (ParabolicC0AlphaOn.matrix_det_sub_with (M := M) (N := N)
+      (B := R) (H := R) (Bd := Rd) (Hd := Rd)
+      hR hRd hRd
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hN i j))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hdiff i j)))
+
+end ParabolicC0AlphaNormLe
+
+namespace ParabolicC0AlphaOn
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
 /-- Reciprocal determinant differences inherit parabolic `C^{0,α}` control from entrywise matrix
 difference controls under a common determinant lower bound. -/
 theorem matrix_det_inv_sub_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n]

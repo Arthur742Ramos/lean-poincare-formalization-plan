@@ -44,6 +44,13 @@ theorem c0AlphaOn (h : ParabolicC0AlphaNormLe N α u s) :
   rcases h with ⟨B, hB, H, hH, _, hBH⟩
   exact ⟨B, hB, H, hH, hBH⟩
 
+theorem c0AlphaWith_self (h : ParabolicC0AlphaNormLe N α u s) :
+    ParabolicC0AlphaWith N N α u s := by
+  rcases h with ⟨B, hB, H, hH, hsum, hBH⟩
+  have hB_le : B ≤ N := by linarith
+  have hH_le : H ≤ N := by linarith
+  exact hBH.mono_const hB_le hH_le
+
 theorem of_c0AlphaWith {B H : ℝ} (hB : 0 ≤ B) (hH : 0 ≤ H)
     (h : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaNormLe (B + H) α u s :=

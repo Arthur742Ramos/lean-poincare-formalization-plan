@@ -2693,8 +2693,9 @@ injectivity for global compact-piece covers. This is the finite-cover
 compact readout sup-norm differences, including the finite product readout
 norm, are now bounded by the same single-radius `C^{0,α}` difference control.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
-the same single-radius control. It is still below the actual
-`C^{2+α,1+α/2}` norm and Schauder estimate.
+the same single-radius control, plus determinant and determinant-difference
+single-radius variants using the existing quantitative determinant constants.
+It is still below the actual `C^{2+α,1+α/2}` norm and Schauder estimate.
 
 **Suggested decomposition** (multi-session):
 

@@ -204,7 +204,9 @@ their compact sup-norm differences, including the finite product readout norm,
 are controlled by the same single-radius `C^{0,α}` difference bound. The
 matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
-same norm-ball language.
+same norm-ball language. Determinant and determinant-difference estimates now
+also have entrywise single-radius variants using the existing quantitative
+determinant constants.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric
