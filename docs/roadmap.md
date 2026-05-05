@@ -188,6 +188,13 @@ primitive-difference promotion for compact sets, finite product-cylinder
 covers, point-dependent local cylinders, and existential local cylinders while
 preserving their Holder constants, with matching local-frame Gram-coordinate
 bridges.
+The parabolic function-space layer has now also started: `ParabolicC0AlphaOn`
+functions form a real submodule of all time-space functions, positive-exponent
+members read linearly as `ContinuousMap`s on compact time-space pieces, and the
+same readout is packaged over arbitrary compact-piece families, matching the
+finite-cover shape used by the existing continuous-section Banach model; those
+readouts determine functions on the covered set and are injective when the
+compact pieces cover all time-space.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric
