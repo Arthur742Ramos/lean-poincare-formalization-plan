@@ -11506,6 +11506,57 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_isCompact_det_ne_zer
     (ηM := ηM) (ηD := ηD) (ηH := ηH)
     hDB hHB hM hN hD hE hKc hηD hMdiff hDdiff hHdiff hδpos hdetM hdetN
 
+/-- Compact-domain version of
+`ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_primitive_le`: determinant nonvanishing
+supplies the common determinant lower bound, while primitive differences proved with sharper
+constants are consumed by coarser shared constants. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_isCompact_det_ne_zero_of_primitive_le
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)} {C : n → n → ℝ} {DB : n → n → n → ℝ}
+    {HB : n → n → n → n → ℝ} {ηM0 ηD0 ηM ηD : ℝ}
+    {ηH0 ηH : n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) Kdom)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) Kdom)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (N z).det ≠ 0)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hηM : ηM0 ≤ ηM) (hηD : ηD0 ≤ ηD)
+    (hηH : ∀ i j, ηH0 i j ≤ ηH i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hD : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖D z a b c‖ ≤ DB a b c)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hKc : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b i j, ‖Kc z a b i j‖ ≤
+      HB a b i j)
+    (hηD0 : 0 ≤ ηD0)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ‖M z - N z‖ ≤ ηM0)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD0)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ i j,
+      ‖((fun a b => Hc z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => Kc z a b i j) : Matrix n n 𝕜)‖ ≤ ηH0 i j) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB ηM ηD ηH)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) Kdom := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := Kdom) (M := M) (N := N) hKdom hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, ?_⟩
+  exact ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_primitive_le
+    (s := Kdom) (δ := δ) (C := C) (DB := DB) (HB := HB)
+    (ηM0 := ηM0) (ηD0 := ηD0) (ηH0 := ηH0)
+    (ηM := ηM) (ηD := ηD) (ηH := ηH)
+    (M := M) (N := N) (D := D) (E := E) (H := Hc) (K := Kc)
+    hDB hHB hηM hηD hηH hM hN hD hE hKc hηD0 hMdiff hDdiff hHdiff
+    hδpos hdetM hdetN
+
 /-- Compact-domain Lipschitz form of `ricciDeTurckSchematicMatrix_bounded_sub_le_const`: after
 selecting the common determinant lower bound, primitive differences controlled by constants times
 one radius give the schematic RHS difference with the same radius factored out. -/
@@ -11550,6 +11601,55 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_isCompact
     (R := R) (KM := KM) (KD := KD) (KH := KH)
     (M := M) (N := N) (D := D) (E := E) (H := Hc) (K := Kc)
     hDB hHB hM hN hD hE hKc hKD hR hMdiff hDdiff hHdiff hδpos hdetM hdetN
+
+/-- Compact-domain linear-radius schematic RHS estimate with coarser primitive Lipschitz
+constants.  The determinant lower bound is extracted from compactness before the coarser shared
+constant is applied. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_isCompact_det_ne_zero_of_primitive_le
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)} {C : n → n → ℝ} {DB : n → n → n → ℝ}
+    {HB : n → n → n → n → ℝ} {R KM0 KD0 KM KD : ℝ}
+    {KH0 KH : n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) Kdom)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) Kdom)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (N z).det ≠ 0)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM : KM0 ≤ KM) (hKD : KD0 ≤ KD) (hKH : ∀ i j, KH0 i j ≤ KH i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hD : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖D z a b c‖ ≤ DB a b c)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hKc : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b i j, ‖Kc z a b i j‖ ≤
+      HB a b i j)
+    (hKD0 : 0 ≤ KD0) (hR : 0 ≤ R)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ‖M z - N z‖ ≤ KM0 * R)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ KD0 * R)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ i j,
+      ‖((fun a b => Hc z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => Kc z a b i j) : Matrix n n 𝕜)‖ ≤ KH0 i j * R) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH * R)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) Kdom := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := Kdom) (M := M) (N := N) hKdom hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, ?_⟩
+  exact ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_primitive_le
+    (s := Kdom) (δ := δ) (C := C) (DB := DB) (HB := HB)
+    (R := R) (KM0 := KM0) (KD0 := KD0) (KH0 := KH0)
+    (KM := KM) (KD := KD) (KH := KH)
+    (M := M) (N := N) (D := D) (E := E) (H := Hc) (K := Kc)
+    hDB hHB hKM hKD hKH hM hN hD hE hKc hKD0 hR hMdiff hDdiff hHdiff
+    hδpos hdetM hdetN
 
 /-- Local finite product-cylinder metric controls globalize the compact-domain
 function-level bounded-difference estimate for schematic Ricci-DeTurck RHS fields.  The

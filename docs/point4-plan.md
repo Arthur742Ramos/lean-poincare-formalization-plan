@@ -2539,7 +2539,8 @@ coarser shared bounds without reopening the formulas. The function-level
 bounded-difference and shared-radius schematic RHS estimates now carry this
 coarsening step directly, and the state-space `LipschitzOnWith` coordinate
 bridges have matching single-family and finite-family coarser-constant forms.
-The interval
+The compact-domain determinant-extraction variants now expose the same coarser
+bounded-difference and shared-radius RHS estimates. The interval
 Banach-chart constructor now also has a real-constant coordinate-Lipschitz
 entry point, so those matrix constants no longer need to be prepackaged as
 `ℝ≥0` by callers. This is a

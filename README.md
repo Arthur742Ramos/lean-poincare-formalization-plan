@@ -707,7 +707,8 @@ monotone in primitive metric, derivative, and principal-coefficient radii, so
 finite-cover chart arguments can pass from local constants to coarser shared
 bounds without re-expanding the schematic RHS formula; the function-level
 bounded-difference, shared-radius, and state-space `LipschitzOnWith` estimates
-expose that coarsening directly, including finite-family coordinate forms.
+expose that coarsening directly, including finite-family coordinate forms and
+compact-domain determinant-extraction variants.
 The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
