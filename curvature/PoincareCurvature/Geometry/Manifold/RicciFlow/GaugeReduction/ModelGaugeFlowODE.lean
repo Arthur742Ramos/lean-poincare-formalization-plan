@@ -7127,6 +7127,54 @@ theorem flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasStrictFDerivAt
   exact exists_open_nhds_bijOn_of_openPartialHomeomorph
     (g := fun y : V => α.flow (y, t)) hφ hxφ hyφ
 
+/-- Chart lift of the full-interval inverse-function bridge: an interior model
+time-slice local inverse patch transports through source and target charts to a
+manifold-side open bijective patch. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_bijOn_of_hasStrictFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {X : Type*} [TopologicalSpace X]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ : OpenPartialHomeomorph X V)
+    {K : ℝ≥0} {x : X} (hxsource : x ∈ e₀.source)
+    (hx : e₀ x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x))
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ IsOpen Wm ∧
+        (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧
+          BijOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um Wm := by
+  rcases α.exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
+      hx ht hD_bound hstrict with
+    ⟨φ, hφ, hxφ, _hyφ⟩
+  exact RicciFlow.exists_open_nhds_bijOn_of_lifted_openPartialHomeomorph_model
+    (X := X) (Y := V) e₀ e₁ hφ hxsource hxφ htarget
+
+/-- C¹-style chart lift of the full-interval inverse-function bridge. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_bijOn_of_eventually_hasFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {X : Type*} [TopologicalSpace X]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ : OpenPartialHomeomorph X V)
+    {K : ℝ≥0} {x : X} (hxsource : x ∈ e₀.source)
+    (hx : e₀ x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hder : ∀ᶠ y in 𝓝 (e₀ x),
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) (e₀ x))
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target) :
+    ∃ Um Wm : Set X,
+      IsOpen Um ∧ x ∈ Um ∧ IsOpen Wm ∧
+        (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧
+          BijOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um Wm :=
+  α.flow_timeSlice_exists_lifted_open_nhds_bijOn_of_hasStrictFDerivAt_Ioo
+    e₀ e₁ hxsource hx ht hD_bound
+    (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
+    htarget
+
 /-- Common-subinterval chart lift of the inverse-function bridge: an interior
 model time-slice local inverse patch transports through source and target
 charts to a manifold-side open bijective patch. -/

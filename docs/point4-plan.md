@@ -1424,7 +1424,10 @@ chart into equality of the underlying manifold maps, while
 `eqOn_symm_image_of_openPartialHomeomorph_lifted_model_eqOn`, and
 `eqOn_lifted_models_of_common_target_chart_eqOn` cover the chart-lifted model
 forms expected from local-flow uniqueness on overlaps.  The model ODE layer now
-also composes its common-`Ioo` inverse-function theorem with this chart lift:
+also composes its full-interval and common-`Ioo` inverse-function theorems with
+this chart lift:
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_bijOn_of_hasStrictFDerivAt_Ioo`,
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_bijOn_of_eventually_hasFDerivAt_Ioo`,
 `VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_bijOn_common_Ioo_of_hasStrictFDerivAt`
 and
 `VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_bijOn_common_Ioo_of_eventually_hasFDerivAt`

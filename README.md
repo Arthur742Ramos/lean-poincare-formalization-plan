@@ -285,8 +285,9 @@ packages the canonical stationary local solution attached to
   product Picard convex-state, state-preserving closed-ball, and componentwise
   closed-ball continuity estimates now feed the full- and common-`Ioo`
   time-slice neighborhood-map, local open-partial-homeomorphism, and open
-  bijective-patch readouts directly, with positive source-ball patches for
-  radius-shrinking chart arguments, and
+  bijective-patch readouts directly, including chart-lifted open-bijective
+  patches and positive source-ball patches for radius-shrinking chart
+  arguments, and
   the state-preserving product-Picard/component-continuity routes now also have
   localized constructors and proof-level `Nonempty` wrappers, including the
   operator/identity-ball specializations, with direct closed-state-ball readouts
