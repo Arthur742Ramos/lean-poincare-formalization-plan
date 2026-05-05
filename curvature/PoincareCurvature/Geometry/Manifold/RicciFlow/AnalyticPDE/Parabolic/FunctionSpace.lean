@@ -369,6 +369,32 @@ theorem norm_toCompactCoordFamily_sub_le_of_normLe {κ : Type*}
   norm_toContinuousMap_sub_le_of_normLe
     (X := X) (E := E) (α := α) (s := s) (hKc i) hα h
 
+/-- A single-radius `C^{0,α}` difference bound controls the finite product of compact-family
+readouts in the product sup norm. -/
+theorem norm_toCompactCoordFamily_family_sub_le_of_normLe {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) :
+    ‖toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u -
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v‖ ≤ N := by
+  refine (pi_norm_le_iff_of_nonneg h.nonneg).2 fun i => ?_
+  exact norm_toCompactCoordFamily_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα h i
+
+/-- The linear compact-family readout inherits the same finite product sup-norm estimate. -/
+theorem norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) :
+    ‖toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u -
+      toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα v‖ ≤ N := by
+  simpa using norm_toCompactCoordFamily_family_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα h
+
 /-- Equality of all compact-piece readouts identifies the two functions on the covered set. -/
 theorem eqOn_of_toCompactCoordFamily_eq {κ : Type*}
     {Kc : κ → TopologicalSpace.Compacts (ℝ × X)}
