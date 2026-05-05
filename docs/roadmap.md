@@ -744,6 +744,12 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        time-slice patches `U τ i`, and the fixed-IVP intrinsic package exposes
        that route directly, while the finite-cover local-readout variant derives the uniform
        field-identification handoff from per-index data. The fixed-IVP
+       intrinsic package now also exposes that finite time-dependent
+       compatible-cover local-readout shape directly through
+       `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`
+       and its proof-level `nonempty_...` companion, so compact finite-cover
+       data no longer has to manually instantiate the raw glued-flow endpoint
+       for every local solution. The fixed-IVP
        intrinsic DeTurck existence layer mirrors that proof-level shape for its
        derivative-data and identity constructors, and the theorem-family layer
        now mirrors it as well, including fixed-IVP extraction and named
