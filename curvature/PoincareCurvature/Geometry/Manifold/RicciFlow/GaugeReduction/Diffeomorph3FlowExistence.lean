@@ -516,6 +516,36 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
   [SigmaCompactSpace M]
 
+/-- A manifold self-map is `C^n` on a domain if every point of the domain has
+an open neighborhood on which it agrees with a `C^n` local readout.  This is
+the regularity-gluing analogue of
+`continuousOn_of_locally_eqOn_open_continuousOn`, aimed at the eventual `C³`
+time-slice construction. -/
+theorem contMDiffOn_of_locally_eqOn_open_contMDiffOn
+    {n : WithTop ℕ∞} {F : M → M} {s : Set M}
+    (h : ∀ x ∈ s, ∃ U : Set M, ∃ G : M → M,
+      IsOpen U ∧ x ∈ U ∧ ContMDiffOn I I n G U ∧ EqOn F G (s ∩ U)) :
+    ContMDiffOn I I n F s := by
+  refine contMDiffOn_of_locally_contMDiffOn ?_
+  intro x hx
+  rcases h x hx with ⟨U, G, hUopen, hxU, hG, hEq⟩
+  refine ⟨U, hUopen, hxU, ?_⟩
+  exact (hG.mono inter_subset_right).congr fun y hy ↦ hEq hy
+
+/-- Indexed open-cover version of
+`contMDiffOn_of_locally_eqOn_open_contMDiffOn` for manifold self-maps. -/
+theorem contMDiffOn_of_iUnion_open_eqOn_contMDiffOn
+    {ι : Type*} {n : WithTop ℕ∞} {F : M → M} {G : ι → M → M}
+    {s : Set M} {U : ι → Set M}
+    (hcover : s ⊆ ⋃ i, U i)
+    (hUopen : ∀ i, IsOpen (U i))
+    (hcont : ∀ i, ContMDiffOn I I n (G i) (U i))
+    (heq : ∀ i, EqOn F (G i) (s ∩ U i)) :
+    ContMDiffOn I I n F s :=
+  contMDiffOn_of_locally_eqOn_open_contMDiffOn fun x hx ↦ by
+    rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxU⟩
+    exact ⟨U i, G i, hUopen i, hxU, hcont i, heq i⟩
+
 /-- A concrete `C^3` diffeomorphism flow for a time-dependent vector field on a
 time set, anchored at a base time.  This is the raw object expected from the
 future manifold ODE-flow existence theorem. -/

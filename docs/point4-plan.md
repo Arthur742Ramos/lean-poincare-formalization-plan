@@ -1461,7 +1461,12 @@ neighborhood argument.  The same topological gluing block now includes
 `rightInvOn_of_iUnion_eqOn_rightInvOn`, which turn local forward/backward
 inverse identities plus equality of the global candidates with local readouts
 on the relevant image sets into global left- and right-inverse identities over
-covered domains.  The
+covered domains.  For the later smooth slice upgrade, the manifold layer now
+also has the corresponding `C^n` regularity-gluing forms
+`contMDiffOn_of_locally_eqOn_open_contMDiffOn` and
+`contMDiffOn_of_iUnion_open_eqOn_contMDiffOn`, so local chart readouts that are
+identified with the glued self-map on an open cover can supply `ContMDiffOn`
+regularity directly.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
