@@ -220,6 +220,9 @@ The inverse-Christoffel array and its entrywise-difference estimate now also
 have single-radius norm-ball variants under a common determinant lower bound.
 The inverse-principal contractions `g^{ab}T_abij` now have matching
 single-radius direct and entrywise-difference variants.
+The primitive-input schematic Ricci-DeTurck matrix itself now has direct and
+entrywise-difference single-radius variants assembled from those component
+estimates.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric

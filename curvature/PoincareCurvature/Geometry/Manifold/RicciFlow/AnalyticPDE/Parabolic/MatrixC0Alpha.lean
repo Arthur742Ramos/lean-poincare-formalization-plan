@@ -11303,6 +11303,195 @@ theorem ricciDeTurckSchematicMatrix_sub_with_entrywise {n 𝕜 : Type*} [Fintype
       hΓB_nonneg hΓH_nonneg hΓB_nonneg hΓH_nonneg hΓdB_nonneg hΓdH_nonneg
       hM hN hMdiff hKc hHdiff hΓ hΛ hΓdiff hδpos hdetM hdetN
 
+end ParabolicC0AlphaOn
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Entrywise primitive metric, first-derivative, and second-derivative controls, together with a
+determinant lower bound, package the schematic Ricci-DeTurck RHS with the corresponding
+single-radius `C^{0,α}` bound. -/
+theorem ricciDeTurck_schematic_of_entries {n 𝕜 : Type*} [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {R : n → n → ℝ} {RD : n → n → n → ℝ}
+    {RH : n → n → n → n → ℝ} {δ : ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {D : ℝ × X → n → n → n → 𝕜}
+    {H : ℝ × X → n → n → n → n → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaNormLe (R a b) α (fun z => M z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaNormLe (RD a b c) α (fun z => D z a b c) s)
+    (hH : ∀ a b i j, ParabolicC0AlphaNormLe (RH a b i j) α
+      (fun z => H z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaNormLe
+      ((∑ i : n, ∑ j : n,
+          (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryBoundConst
+              (𝕜 := 𝕜) δ R RH i j +
+            ParabolicC0AlphaOn.christoffelQuadraticRicciEntryBoundConst
+              (fun a b c =>
+                ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst
+                  (𝕜 := 𝕜) δ R RD a b c)
+              i j)) +
+        (∑ i : n, ∑ j : n,
+          (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryHolderConst
+              (𝕜 := 𝕜) δ R R RH RH i j +
+            ParabolicC0AlphaOn.christoffelQuadraticRicciEntryHolderConst
+              (fun a b c =>
+                ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst
+                  (𝕜 := 𝕜) δ R RD a b c)
+              (fun a b c =>
+                ParabolicC0AlphaOn.matrixInvChristoffelEntryHolderConst
+                  (𝕜 := 𝕜) δ R R RD RD a b c)
+              i j)))
+      α
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M z) (D z) (H z)) s := by
+  have hR : ∀ a b, 0 ≤ R a b := fun a b => (hM a b).nonneg
+  have hRD : ∀ a b c, 0 ≤ RD a b c := fun a b c => (hD a b c).nonneg
+  have hRH : ∀ a b i j, 0 ≤ RH a b i j := fun a b i j => (hH a b i j).nonneg
+  have hΓB : ∀ a b c,
+      0 ≤ ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst
+        (𝕜 := 𝕜) δ R RD a b c := by
+    intro a b c
+    exact ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst_nonneg
+      (𝕜 := 𝕜) hδpos R hRD a b c
+  have hΓH : ∀ a b c,
+      0 ≤ ParabolicC0AlphaOn.matrixInvChristoffelEntryHolderConst
+        (𝕜 := 𝕜) δ R R RD RD a b c := by
+    intro a b c
+    exact ParabolicC0AlphaOn.matrixInvChristoffelEntryHolderConst_nonneg
+      (𝕜 := 𝕜) hR hδpos hRD hRD a b c
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        add_nonneg
+          (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryBoundConst_nonneg
+            (𝕜 := 𝕜) hδpos R hRH i j)
+          (ParabolicC0AlphaOn.christoffelQuadraticRicciEntryBoundConst_nonneg
+            hΓB i j))
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        add_nonneg
+          (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryHolderConst_nonneg
+            (𝕜 := 𝕜) hR hδpos hRH hRH i j)
+          (ParabolicC0AlphaOn.christoffelQuadraticRicciEntryHolderConst_nonneg
+            hΓB hΓH i j))
+    (by
+      simpa [ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix] using
+        (ParabolicC0AlphaOn.ricciDeTurck_schematic_with
+          (M := M) (D := D) (H := H) (MB := R) (MH := R)
+          (DB := RD) (DH := RD) (HB := RH) (HH := RH)
+          hR hRD hRD hRH hRH
+          (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM a b))
+          (fun a b c => ParabolicC0AlphaNormLe.c0AlphaWith_self (hD a b c))
+          (fun a b i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hH a b i j))
+          hδpos hdet))
+
+/-- Entrywise primitive controls, primitive difference controls, and a common determinant lower
+bound package schematic Ricci-DeTurck RHS differences with the corresponding single-radius
+`C^{0,α}` bound. -/
+theorem ricciDeTurckSchematicMatrix_sub_entrywise_of_entries {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {R Rd : n → n → ℝ} {RD RDd : n → n → n → ℝ}
+    {RH RHd : n → n → n → n → ℝ} {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {H K : ℝ × X → n → n → n → n → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaNormLe (R a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaNormLe (R a b) α (fun z => N z a b) s)
+    (hMdiff : ∀ a b, ParabolicC0AlphaNormLe (Rd a b) α
+      (fun z => M z a b - N z a b) s)
+    (hD : ∀ a b c, ParabolicC0AlphaNormLe (RD a b c) α (fun z => D z a b c) s)
+    (hE : ∀ a b c, ParabolicC0AlphaNormLe (RD a b c) α (fun z => E z a b c) s)
+    (hDdiff : ∀ a b c, ParabolicC0AlphaNormLe (RDd a b c) α
+      (fun z => D z a b c - E z a b c) s)
+    (hK : ∀ a b i j, ParabolicC0AlphaNormLe (RH a b i j) α
+      (fun z => K z a b i j) s)
+    (hHdiff : ∀ a b i j, ParabolicC0AlphaNormLe (RHd a b i j) α
+      (fun z => H z a b i j - K z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.ricciDeTurckSchematicEntrywiseSubBoundConst
+          (𝕜 := 𝕜) δ R Rd RD RDd RH RHd +
+        ParabolicC0AlphaOn.ricciDeTurckSchematicEntrywiseSubHolderConst
+          (𝕜 := 𝕜) δ R R Rd Rd RD RD RDd RDd RH RH RHd RHd)
+      α
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s := by
+  have hR : ∀ a b, 0 ≤ R a b := fun a b => (hM a b).nonneg
+  have hRd : ∀ a b, 0 ≤ Rd a b := fun a b => (hMdiff a b).nonneg
+  have hRD : ∀ a b c, 0 ≤ RD a b c := fun a b c => (hD a b c).nonneg
+  have hRDd : ∀ a b c, 0 ≤ RDd a b c := fun a b c => (hDdiff a b c).nonneg
+  have hRH : ∀ a b i j, 0 ≤ RH a b i j := fun a b i j => (hK a b i j).nonneg
+  have hRHd : ∀ a b i j, 0 ≤ RHd a b i j := fun a b i j => (hHdiff a b i j).nonneg
+  let ΓB : n → n → n → ℝ := fun a b c =>
+    ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ R RD a b c
+  let ΓH : n → n → n → ℝ := fun a b c =>
+    ParabolicC0AlphaOn.matrixInvChristoffelEntryHolderConst (𝕜 := 𝕜) δ R R RD RD a b c
+  let ΓdB : n → n → n → ℝ := fun a b c =>
+    ParabolicC0AlphaOn.matrixInvChristoffelEntrySubBoundConst
+      (𝕜 := 𝕜) δ R Rd RD RDd a b c
+  let ΓdH : n → n → n → ℝ := fun a b c =>
+    ParabolicC0AlphaOn.matrixInvChristoffelEntrySubHolderConst
+      (𝕜 := 𝕜) δ R R Rd Rd RD RD RDd RDd a b c
+  have hΓB : ∀ a b c, 0 ≤ ΓB a b c := by
+    intro a b c
+    exact ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst_nonneg
+      (𝕜 := 𝕜) hδpos R hRD a b c
+  have hΓH : ∀ a b c, 0 ≤ ΓH a b c := by
+    intro a b c
+    exact ParabolicC0AlphaOn.matrixInvChristoffelEntryHolderConst_nonneg
+      (𝕜 := 𝕜) hR hδpos hRD hRD a b c
+  have hΓdB : ∀ a b c, 0 ≤ ΓdB a b c := by
+    intro a b c
+    exact ParabolicC0AlphaOn.matrixInvChristoffelEntrySubBoundConst_nonneg
+      (𝕜 := 𝕜) hδpos hRd hRD hRDd a b c
+  have hΓdH : ∀ a b c, 0 ≤ ΓdH a b c := by
+    intro a b c
+    exact ParabolicC0AlphaOn.matrixInvChristoffelEntrySubHolderConst_nonneg
+      (𝕜 := 𝕜) hδpos hR hRd hRd hRD hRD hRDd hRDd a b c
+  have hB_nonneg :
+      0 ≤ ParabolicC0AlphaOn.ricciDeTurckSchematicEntrywiseSubBoundConst
+        (𝕜 := 𝕜) δ R Rd RD RDd RH RHd := by
+    simpa [ParabolicC0AlphaOn.ricciDeTurckSchematicEntrywiseSubBoundConst, ΓB, ΓdB]
+      using
+        (ParabolicC0AlphaOn.ricciDeTurckSchematicFromChristoffelSubBoundConst_nonneg
+          (𝕜 := 𝕜) hδpos hRd hRH hRHd hΓB hΓB hΓdB)
+  have hH_nonneg :
+      0 ≤ ParabolicC0AlphaOn.ricciDeTurckSchematicEntrywiseSubHolderConst
+        (𝕜 := 𝕜) δ R R Rd Rd RD RD RDd RDd RH RH RHd RHd := by
+    simpa [ParabolicC0AlphaOn.ricciDeTurckSchematicEntrywiseSubHolderConst,
+      ΓB, ΓH, ΓdB, ΓdH] using
+        (ParabolicC0AlphaOn.ricciDeTurckSchematicFromChristoffelSubHolderConst_nonneg
+          (𝕜 := 𝕜) hδpos hR hRd hRd hRH hRH hRHd hRHd
+          hΓB hΓH hΓB hΓH hΓdB hΓdH)
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith hB_nonneg hH_nonneg
+    (ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix_sub_with_entrywise
+      (M := M) (N := N) (D := D) (E := E) (Hc := H) (Kc := K)
+      (MB := R) (MH := R) (MBd := Rd) (MHd := Rd)
+      (DB := RD) (DH := RD) (DDB := RDd) (DDH := RDd)
+      (HB := RH) (HH := RH) (HBd := RHd) (HHd := RHd)
+      hR hRd hRd hRD hRD hRDd hRDd hRH hRH hRHd hRHd
+      (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM a b))
+      (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hN a b))
+      (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hMdiff a b))
+      (fun a b c => ParabolicC0AlphaNormLe.c0AlphaWith_self (hD a b c))
+      (fun a b c => ParabolicC0AlphaNormLe.c0AlphaWith_self (hE a b c))
+      (fun a b c => ParabolicC0AlphaNormLe.c0AlphaWith_self (hDdiff a b c))
+      (fun a b i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hK a b i j))
+      (fun a b i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hHdiff a b i j))
+      hδpos hdetM hdetN)
+
+end ParabolicC0AlphaNormLe
+
+namespace ParabolicC0AlphaOn
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
 /-- Compact-domain version of `ricciDeTurckSchematicMatrix_sub_with_entrywise`: pointwise
 nonvanishing of both metric determinants supplies one common determinant lower bound. -/
 theorem ricciDeTurckSchematicMatrix_sub_with_entrywise_of_isCompact_det_ne_zero
