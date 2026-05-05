@@ -230,7 +230,8 @@ packages the canonical stationary local solution attached to
     consumes that pointwise-persistence compatible-cover route directly, while
     `timeDependent_iUnion_pointwiseSource_of_open_preimage_continuousWithinAt`
     supplies the pointwise persistence condition from open preimage patches and
-    pointwise time-continuity.  A finite-cover local-readout variant
+    pointwise time-continuity, with an indexed local-readout companion for
+    patchwise maps.  A finite-cover local-readout variant
     promotes per-patch relative-filter equality to the uniform field
     identification needed by the raw gauge-flow endpoint. A thin
     `AnalyticPDE.SmoothRealization`

@@ -733,7 +733,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        route directly, and
        `timeDependent_iUnion_pointwiseSource_of_open_preimage_continuousWithinAt`
        supplies the pointwise persistence input from open preimage patches plus
-       pointwise time-continuity, while the finite-cover local-readout variant derives the uniform
+       pointwise time-continuity, with an indexed local-readout companion for
+       patchwise maps, while the finite-cover local-readout variant derives the uniform
        field-identification handoff from per-index data. The fixed-IVP
        intrinsic DeTurck existence layer mirrors that proof-level shape for its
        derivative-data and identity constructors, and the theorem-family layer

@@ -142,6 +142,25 @@ theorem timeDependent_iUnion_pointwiseSource_of_open_preimage_continuousWithinAt
     with τ hτ
   exact (hU τ i x).2 hτ
 
+/-- Indexed-readout version of
+`timeDependent_iUnion_pointwiseSource_of_open_preimage_continuousWithinAt`.
+This is the form used when each cover patch has its own local time-dependent
+map. -/
+theorem timeDependent_iUnion_pointwiseSource_of_indexed_open_preimage_continuousWithinAt
+    {ι : Type*} {F : ι → ℝ → X → Y} {s : Set ℝ}
+    {U : ℝ → ι → Set X} {V : ι → Set Y}
+    (hU : ∀ τ i x, x ∈ U τ i ↔ F i τ x ∈ V i)
+    (hVopen : ∀ i, IsOpen (V i))
+    (hcont : ∀ t ∈ s, ∀ i, ∀ x ∈ U t i,
+      ContinuousWithinAt (fun τ : ℝ ↦ F i τ x) s t) :
+    ∀ t ∈ s, ∀ i, ∀ x ∈ U t i, ∀ᶠ τ in 𝓝[s] t, x ∈ U τ i := by
+  intro t ht i x hx
+  have hFx : F i t x ∈ V i := (hU t i x).1 hx
+  filter_upwards
+    [(hcont t ht i x hx).preimage_mem_nhdsWithin ((hVopen i).mem_nhds hFx)]
+    with τ hτ
+  exact (hU τ i x).2 hτ
+
 /-- Glue left-inverse identities across an indexed cover when the global
 forward/backward candidates agree with the local forward/backward readouts on
 the relevant visible sets. -/
