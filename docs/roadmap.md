@@ -237,7 +237,10 @@ existing finite-dimensional matrix estimates: entrywise `C^{2+α,1+α/2}` contro
 package matrix- and finite-Pi-valued `C^{0,α}` controls, matrix-valued higher
 norm balls project to entry `C^{0,α}` norm balls, and higher primitive
 entry controls feed the single-radius schematic Ricci-DeTurck RHS difference
-estimate directly.
+estimate directly. Higher entrywise difference controls whose radii are linear
+in a state-space distance now also sum to matrix-norm primitive difference
+bounds and feed the existing schematic RHS state-space `LipschitzOnWith`
+bridges, including a finite-family wrapper.
 The matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
 same norm-ball language. Determinant and determinant-difference estimates now
