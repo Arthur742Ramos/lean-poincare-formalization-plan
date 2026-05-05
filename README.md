@@ -283,8 +283,9 @@ packages the canonical stationary local solution attached to
   readouts now reuse that same base-equality route, including closed scalar
   readouts obtained from an open-overlap base-flow equality by continuity;
   product Picard convex-state, state-preserving closed-ball, and componentwise
-  closed-ball continuity estimates now feed the common-`Ioo` time-slice
-  neighborhood-map and local open-partial-homeomorphism readouts directly, and
+  closed-ball continuity estimates now feed the full- and common-`Ioo`
+  time-slice neighborhood-map, local open-partial-homeomorphism, and open
+  bijective-patch readouts directly, and
   the state-preserving product-Picard/component-continuity routes now also have
   localized constructors and proof-level `Nonempty` wrappers, including the
   operator/identity-ball specializations, with direct closed-state-ball readouts

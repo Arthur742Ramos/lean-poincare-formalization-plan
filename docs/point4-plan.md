@@ -1156,8 +1156,10 @@ can now be unpacked into concrete open source and target neighborhoods with
 `flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasStrictFDerivAt_Ioo`,
 `flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_hasStrictFDerivAt`,
 and the corresponding C¹-style variants expose exactly the local injective
-patch needed by chart-gluing arguments. The common-`Ioo` route additionally
-exposes genuine bijective open patches through
+patch needed by chart-gluing arguments. The full-interval and common-`Ioo`
+routes additionally expose genuine bijective open patches through
+`flow_timeSlice_exists_open_nhds_bijOn_of_hasStrictFDerivAt_Ioo`,
+`flow_timeSlice_exists_open_nhds_bijOn_of_eventually_hasFDerivAt_Ioo`,
 `flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasStrictFDerivAt` and
 `flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_eventually_hasFDerivAt`.
 The common-`Ioo` route also has
@@ -1176,7 +1178,10 @@ They also expose the explicit open-neighborhood `MapsTo`/`InjOn` form through
 `ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasFDerivAt_on_initialBall_Ioo`
 and
 `ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_hasFDerivAt_on_initialBall`.
-The product common-interval path has the matching bijective open-patch readout
+The product full-interval and common-interval paths have matching bijective
+open-patch readouts through
+`ofProduct_flow_timeSlice_exists_open_nhds_bijOn_of_hasFDerivAt_on_initialBall_Ioo`
+and
 `ofProduct_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasFDerivAt_on_initialBall`.
 The product common-interval path likewise has
 `ofProduct_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_hasFDerivAt_on_initialBall`,

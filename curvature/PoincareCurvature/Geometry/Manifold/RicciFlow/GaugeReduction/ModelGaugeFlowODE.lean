@@ -6353,6 +6353,25 @@ theorem flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasStrictFDerivAt_Ioo
   exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
     (g := fun y : V => α.flow (y, t)) hφ hxφ hyφ
 
+/-- Open source and target neighborhoods on which an interior time-slice of a
+variational local flow is bijective. -/
+theorem flow_timeSlice_exists_open_nhds_bijOn_of_hasStrictFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent x t : V →L[ℝ] V) x) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧ α.flow (x, t) ∈ W ∧
+        BijOn (fun y : V => α.flow (y, t)) U W := by
+  rcases α.exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
+      hx ht hD_bound hstrict with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_bijOn_of_openPartialHomeomorph
+    (g := fun y : V => α.flow (y, t)) hφ hxφ hyφ
+
 /-- C¹-style open-partial-homeomorphism bridge for a time slice: ordinary
 spatial derivatives near `x` plus continuity of the derivative map give the
 strict differentiability input needed by the inverse-function theorem. -/
@@ -6387,6 +6406,24 @@ theorem flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_eventually_hasFDerivAt_I
         MapsTo (fun y : V => α.flow (y, t)) U W ∧
           InjOn (fun y : V => α.flow (y, t)) U :=
   α.flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasStrictFDerivAt_Ioo
+    hx ht hD_bound
+    (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
+
+/-- C¹-style open source and target neighborhoods on which an interior
+time-slice of a variational local flow is bijective. -/
+theorem flow_timeSlice_exists_open_nhds_bijOn_of_eventually_hasFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {K : ℝ≥0} {x : V} (hx : x ∈ closedBall x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ K)
+    (hder : ∀ᶠ y in 𝓝 x,
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) x) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧ α.flow (x, t) ∈ W ∧
+        BijOn (fun y : V => α.flow (y, t)) U W :=
+  α.flow_timeSlice_exists_open_nhds_bijOn_of_hasStrictFDerivAt_Ioo
     hx ht hD_bound
     (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
 
@@ -6546,6 +6583,44 @@ theorem ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_of_hasFDerivAt_on
       (β := β) hball hx ht hD_bound hder with
     ⟨φ, hφ, hxφ, hyφ⟩
   exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, t)) hφ hxφ hyφ
+
+/-- Product-Picard C¹-style open source and target neighborhoods on which an
+interior time slice is bijective, from ordinary spatial differentiability on
+the initial-data ball. -/
+theorem ofProduct_flow_timeSlice_exists_open_nhds_bijOn_of_hasFDerivAt_on_initialBall_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {K : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ K)
+    (hder : ∀ y ∈ closedBall x₀ r,
+      HasFDerivAt
+        (fun z : V =>
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow (z, t))
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent y t)
+        y) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, t) ∈ W ∧
+        BijOn
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) U W := by
+  rcases exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_hasFDerivAt_on_initialBall_Ioo
+      (β := β) hball hx ht hD_bound hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_bijOn_of_openPartialHomeomorph
     (g := fun y : V =>
       (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
         (y, t)) hφ hxφ hyφ
