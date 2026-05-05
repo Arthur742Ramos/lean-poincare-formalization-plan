@@ -2464,7 +2464,11 @@ preferred-cover fields from a fibrewise estimate alone.
 `timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallFiberDistLe`
 then packages an interval-scoped geometric Ricci-DeTurck Banach chart while
 choosing `Kstate` from Picard data, geometric identification, and that fibrewise
-estimate. These are still handoff theorems; they do not
+estimate. The reverse preferred-cover bridge now also converts compact
+bilinear-coordinate RHS bounds into the required fibrewise estimate, and
+`timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallCoordDistLe`
+packages the corresponding interval chart constructor directly from coordinate
+readout bounds. These are still handoff theorems; they do not
 prove the Ricci-DeTurck Schauder estimates or construct the missing Banach chart.
 It also derives that finite-cover inverse
 bound from compactness of the cover pieces

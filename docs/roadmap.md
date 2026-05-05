@@ -1469,7 +1469,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         combined into an existential time-family Lipschitz-constant bridge.
         `SmoothApproxClosure` now uses that bridge to package an
         interval-scoped geometric Ricci-DeTurck Banach chart from Picard data,
-        geometric identification, and fibrewise Lipschitz estimates. The Ricci-DeTurck preferred-cover
+        geometric identification, and fibrewise Lipschitz estimates. The
+        preferred-cover reverse bridge now also converts compact bilinear
+        coordinate readout bounds into those fibrewise estimates and exposes the
+        matching interval chart constructor for coordinate RHS data. The Ricci-DeTurck preferred-cover
         local-bounds closure theorem now consumes this symmetric approximation
         seam before applying positive-definite openness. The same generic layer
         now packages continuous SPD bilinear-form sections as limits of smooth

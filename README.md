@@ -673,7 +673,10 @@ and the smooth-approximation layer now combines it with the fibrewise estimate
 handoff to produce an existential section-space Lipschitz constant for
 time-family preferred-cover fields. The Ricci-DeTurck smooth-closure layer now
 uses that to build an interval Banach-chart package while choosing `Kstate`
-from fibrewise estimates. On the parabolic-coordinate side, `MatrixC0Alpha`
+from fibrewise estimates. The reverse preferred-cover bridge now also turns
+compact bilinear-coordinate RHS estimates into the required fibrewise estimate,
+and `SmoothApproxClosure` packages the corresponding interval chart constructor
+from coordinate readout bounds. On the parabolic-coordinate side, `MatrixC0Alpha`
 now factors the schematic Ricci-DeTurck bounded-difference constants through a
 shared comparison radius, including finite-family estimates with one compact
 determinant lower bound, and `LocalFrameGram` exposes both single-frame and

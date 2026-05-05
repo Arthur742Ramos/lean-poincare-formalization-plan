@@ -114,6 +114,241 @@ theorem preferredBilinear_symmL_opNorm_le_of_linearMapAt_opNorm_le
       _ = (((C * C) * ‖B‖) * ‖u‖) * ‖v‖ := by ring
   simpa [A] using hA
 
+/-- Coordinate control on a preferred finite cover gives pointwise fibrewise control for
+bilinear-form sections.  This is the reverse direction of the finite-cover norm bridge: it turns
+local bilinear-coordinate estimates, such as local-frame RHS matrix estimates after coordinate
+identification, into the fibrewise distance estimate consumed by geometric Banach-chart builders. -/
+theorem preferredBilinear_fiber_dist_le_of_coord_dist_le_of_linearMapAt_opNorm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s t : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    {C K : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).continuousLinearMapAt ℝ x.1‖ ≤ C)
+    (hcoord : ∀ i (x : Kc i),
+      dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover s).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover t).1 i x)
+        ≤ K) :
+    ∀ x : M, dist (s x) (t x) ≤ (C * C) * K := by
+  classical
+  intro x
+  letI : Fintype κ := Fintype.ofFinite κ
+  have hxcover : x ∈ ⋃ i, (Kc i : Set M) := by
+    simp [hcover]
+  rcases Set.mem_iUnion.mp hxcover with ⟨i, hxi⟩
+  let xK : Kc i := ⟨x, hxi⟩
+  let eCoord :=
+    equivCompatibleCoordFamilySubmodule
+      (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover
+  let tb := trivializationAt BilF BilW (x0 i)
+  let A : BilF →L[ℝ] BilW x := (trivializationAt BilF BilW (x0 i)).symmL ℝ x
+  have hxBil : x ∈ tb.baseSet := hKc i hxi
+  have hxW : x ∈ (trivializationAt F W (x0 i)).baseSet := by
+    simpa [tb] using hxBil
+  have hscoord :
+      (eCoord s).1 i xK =
+        (trivializationAt BilF BilW (x0 i)).continuousLinearMapAt ℝ x (s x) := by
+    simp [eCoord, equivCompatibleCoordFamilySubmodule, toSubtype,
+      continuousSectionEquivCompatibleCoordFamilySubmodule,
+      continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
+      compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
+      Bundle.Trivialization.linearMapAt_apply, hxW, xK]
+  have htcoord :
+      (eCoord t).1 i xK =
+        (trivializationAt BilF BilW (x0 i)).continuousLinearMapAt ℝ x (t x) := by
+    simp [eCoord, equivCompatibleCoordFamilySubmodule, toSubtype,
+      continuousSectionEquivCompatibleCoordFamilySubmodule,
+      continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
+      compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
+      Bundle.Trivialization.linearMapAt_apply, hxW, xK]
+  have hsrec : A ((eCoord s).1 i xK) = s x := by
+    dsimp [A]
+    rw [hscoord]
+    exact (trivializationAt BilF BilW (x0 i)).symmL_continuousLinearMapAt
+      (R := ℝ) hxBil (s x)
+  have htrec : A ((eCoord t).1 i xK) = t x := by
+    dsimp [A]
+    rw [htcoord]
+    exact (trivializationAt BilF BilW (x0 i)).symmL_continuousLinearMapAt
+      (R := ℝ) hxBil (t x)
+  have hA : ‖A‖ ≤ C * C := by
+    simpa [A] using
+      preferredBilinear_symmL_opNorm_le_of_linearMapAt_opNorm_le
+        (F := F) (W := W) (x0 := x0 i) (x := x) hxW hC0 (hC i xK)
+  calc
+    dist (s x) (t x) =
+        dist (A ((eCoord s).1 i xK)) (A ((eCoord t).1 i xK)) := by
+          rw [hsrec, htrec]
+    _ ≤ ‖A‖ * dist ((eCoord s).1 i xK) ((eCoord t).1 i xK) :=
+        ContinuousLinearMap.dist_le_opNorm A ((eCoord s).1 i xK) ((eCoord t).1 i xK)
+    _ ≤ (C * C) * dist ((eCoord s).1 i xK) ((eCoord t).1 i xK) :=
+        mul_le_mul_of_nonneg_right hA dist_nonneg
+    _ ≤ (C * C) * K :=
+        mul_le_mul_of_nonneg_left (hcoord i xK) (mul_nonneg hC0 hC0)
+
+/-- A coordinatewise Lipschitz estimate for a preferred-cover bilinear vector field gives the
+fibrewise Lipschitz estimate needed before applying the finite-cover section-space norm bridge. -/
+theorem preferredBilinear_forall_fiber_dist_le_of_forall_coord_dist_le_of_linearMapAt_opNorm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)}
+    {A : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    {C Kcoord : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).continuousLinearMapAt ℝ x.1‖ ≤ C)
+    (hcoord : ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ i (x : Kc i),
+        dist
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := ℝ) (F := BilF) (V := BilW)
+              (fun i => trivializationAt BilF BilW (x0 i))
+              Kc hKc Ko hKo hKoEq hcover (A s)).1 i x)
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := ℝ) (F := BilF) (V := BilW)
+              (fun i => trivializationAt BilF BilW (x0 i))
+              Kc hKc Ko hKo hKoEq hcover (A t)).1 i x)
+          ≤ Kcoord * dist s t) :
+  ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet → ∀ x : M,
+      dist ((A s) x) ((A t) x) ≤ ((C * C) * Kcoord) * dist s t := by
+  intro s hs t ht x
+  have hfiber :=
+    preferredBilinear_fiber_dist_le_of_coord_dist_le_of_linearMapAt_opNorm_le
+      (M := M) (F := F) (W := W) (x0 := x0)
+      (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+      (hKoEq := hKoEq) (hcover := hcover)
+      (s := A s) (t := A t)
+      (C := C) (K := Kcoord * dist s t) hC0 hC
+      (fun i x => hcoord hs ht i x) x
+  calc
+    dist ((A s) x) ((A t) x) ≤ (C * C) * (Kcoord * dist s t) := hfiber
+    _ = ((C * C) * Kcoord) * dist s t := by ring
+
+/-- Time-parameterized version of
+`preferredBilinear_forall_fiber_dist_le_of_forall_coord_dist_le_of_linearMapAt_opNorm_le`. -/
+theorem preferredBilinear_forall_fiber_dist_le_family_of_forall_coord_dist_le_of_linearMapAt_opNorm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {τ : Type*} {timeSet : Set τ}
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)}
+    {A : τ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    {C Kcoord : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).continuousLinearMapAt ℝ x.1‖ ≤ C)
+    (hcoord : ∀ τ, τ ∈ timeSet → ∀ ⦃s⦄, s ∈ stateSet →
+      ∀ ⦃t⦄, t ∈ stateSet → ∀ i (x : Kc i),
+        dist
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := ℝ) (F := BilF) (V := BilW)
+              (fun i => trivializationAt BilF BilW (x0 i))
+              Kc hKc Ko hKo hKoEq hcover (A τ s)).1 i x)
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := ℝ) (F := BilF) (V := BilW)
+              (fun i => trivializationAt BilF BilW (x0 i))
+              Kc hKc Ko hKo hKoEq hcover (A τ t)).1 i x)
+          ≤ Kcoord * dist s t) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ x : M, dist ((A τ s) x) ((A τ t) x) ≤
+        ((C * C) * Kcoord) * dist s t := by
+  intro τ hτ
+  exact preferredBilinear_forall_fiber_dist_le_of_forall_coord_dist_le_of_linearMapAt_opNorm_le
+    (M := M) (F := F) (W := W) (x0 := x0)
+    (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+    (hKoEq := hKoEq) (hcover := hcover)
+    (stateSet := stateSet) (A := A τ)
+    (C := C) (Kcoord := Kcoord) hC0 hC
+    (fun s hs t ht i x => hcoord τ hτ hs ht i x)
+
+/-- Preferred-cover equality version of
+`preferredBilinear_forall_fiber_dist_le_family_of_forall_coord_dist_le_of_linearMapAt_opNorm_le`.
+This is the shape used by Ricci-DeTurck Banach-chart records, where the cover is carried as an
+abstract `et` together with `het : et i = trivializationAt ...`. -/
+theorem preferredBilinear_forall_fiber_dist_le_family_of_forall_coord_dist_le_of_eq_trivializationAt
+    {κ : Type*} [Finite κ] [T2Space M]
+    {τ : Type*} {timeSet : Set τ}
+    (x0 : κ → M)
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {A : τ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover}
+    {C Kcoord : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).continuousLinearMapAt ℝ x.1‖ ≤ C)
+    (hcoord : ∀ τ, τ ∈ timeSet → ∀ ⦃s⦄, s ∈ stateSet →
+      ∀ ⦃t⦄, t ∈ stateSet → ∀ i (x : Kc i),
+        dist
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover (A τ s)).1 i x)
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover (A τ t)).1 i x)
+          ≤ Kcoord * dist s t) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ x : M, dist ((A τ s) x) ((A τ t) x) ≤
+        ((C * C) * Kcoord) * dist s t := by
+  have het_fun : et = fun i => trivializationAt BilF BilW (x0 i) := funext het
+  subst et
+  exact
+    preferredBilinear_forall_fiber_dist_le_family_of_forall_coord_dist_le_of_linearMapAt_opNorm_le
+      (M := M) (F := F) (W := W) (x0 := x0)
+      (timeSet := timeSet) (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+      (hKoEq := hKoEq) (hcover := hcover)
+      (stateSet := stateSet) (A := A)
+      (C := C) (Kcoord := Kcoord) hC0 hC hcoord
+
 /-- A local bound for the underlying vector-bundle trivialization gives the local inverse-bound
 needed to smooth bilinear-form sections. -/
 theorem eventually_norm_symmL_bilinearFormBundle_trivializationAt_lt_of_eventually_norm_trivializationAt_lt
