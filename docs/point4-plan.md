@@ -1583,9 +1583,12 @@ current time.  The raw local-readout route now also has the open-preimage
 source-persistence variant
 `Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
 which derives the pointwise patch persistence from fixed open target patches
-and local time-continuity before invoking the same glued-flow constructor.  The fixed-IVP intrinsic layer exposes the same handoff through
+and local time-continuity before invoking the same glued-flow constructor.  The
+fixed-IVP intrinsic layer exposes the same handoff through
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_localReadouts_vectorField_eq_nhdsWithin`
-and proof-level `nonempty_...`.  The theorem-family raw existence layer now
+and the open-preimage variant
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_of_localReadouts_vectorField_eq_nhdsWithin`,
+both with proof-level `nonempty_...`.  The theorem-family raw existence layer now
 also has the generic assembly bridge
 `IntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem`, with a
 proof-level equivalence between family existence and fixed-IVP existence for
