@@ -739,7 +739,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        resulting relative-filter equality between the glued map and selected
        local readout. The generic pointwise-source continuity and
        preferred-chart derivative transfer lemmas expose that same handoff for
-       downstream gluing arguments, while the finite-cover local-readout variant derives the uniform
+       downstream gluing arguments. A local-readout pointwise-source raw
+       constructor now accepts vector-field identification on the actual
+       time-slice patches `U τ i`, while the finite-cover local-readout variant derives the uniform
        field-identification handoff from per-index data. The fixed-IVP
        intrinsic DeTurck existence layer mirrors that proof-level shape for its
        derivative-data and identity constructors, and the theorem-family layer

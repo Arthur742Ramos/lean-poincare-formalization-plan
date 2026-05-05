@@ -1571,7 +1571,12 @@ and
 `hasDerivWithinAt_extChartAt_eval_of_timeDependent_iUnion_pointwiseSource`
 lemmas expose the corresponding continuity and preferred-chart derivative
 transfers, and the raw pointwise-source constructor now uses those generic
-handoffs.  Its finite-cover
+handoffs.  The local-readout pointwise-source raw constructor
+`Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+uses the same source-persistence route but states vector-field identification
+on the actual time-slice patches `U τ i`, so this local-field route no longer
+needs finite-cover promotion when the local equality is available at the
+current time.  Its finite-cover
 local-readout companion
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality

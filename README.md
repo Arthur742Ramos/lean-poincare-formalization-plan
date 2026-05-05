@@ -236,7 +236,12 @@ packages the canonical stationary local solution attached to
     the selected local readout.  The generic
     `...timeDependent_iUnion_pointwiseSource...` continuity and
     preferred-chart derivative transfer lemmas now expose the same
-    pointwise-source handoff outside the raw constructor.  A finite-cover
+    pointwise-source handoff outside the raw constructor.  The raw compatible
+    glued-slice layer also has a local-readout pointwise-source constructor
+    whose vector-field handoff is stated on the actual time-slice patches
+    `U τ i`, avoiding the finite-cover uniform equality requirement when local
+    field identification is already available at the current time.  A
+    finite-cover
     local-readout variant
     promotes per-patch relative-filter equality to the uniform field
     identification needed by the raw gauge-flow endpoint. A thin
