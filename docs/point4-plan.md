@@ -1516,7 +1516,13 @@ and
 `VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_of_hasStrictFDerivAt_Ioo_of_contDiffAt_spaceTime`,
 so an interior full-interval Picard slice can expose the same forward/backward
 local inverse identities, `C^3` regularity, and overlap equality as the
-common-subinterval handoff.  These ingredients now assemble into a local-cover raw-flow endpoint,
+common-subinterval handoff.  Product-Picard output now has matching
+full-interval handoffs through
+`ofProduct_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_of_hasFDerivAt_on_initialBall_Ioo`
+and
+`ofProduct_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_of_hasFDerivAt_on_initialBall_Ioo_of_contDiffAt_spaceTime`,
+so product-flow callers no longer have to manually unfold the extracted
+variational local flow to reach the `C^3` gluing patch.  These ingredients now assemble into a local-cover raw-flow endpoint,
 `Diffeomorph3GaugeFlowOn.of_iUnion_gluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 with proof-level `nonempty_...`: global glued forward/backward slices plus
 local open-cover readouts carrying inverse identities, slice regularity,
