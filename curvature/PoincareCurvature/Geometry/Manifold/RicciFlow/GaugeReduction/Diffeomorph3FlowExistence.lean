@@ -1034,6 +1034,71 @@ theorem lifted_model_local_gluing_data_of_openPartialHomeomorph
       e₀ e₁ hφ hUsource hUt hW hWt
   exact ⟨hUmopen, hWmopen, hFmaps, hGmaps, hbijLift, hFsmooth, hGsmooth, hleft, hright⟩
 
+/-- Standard selected-shrink form of
+`lifted_model_local_gluing_data_of_openPartialHomeomorph`.  The model source is
+shrunk to the open set `φ.source ∩ S ∩ φ ⁻¹' T`, so the lifted source and target
+patches lie inside prescribed manifold neighborhoods while retaining the local
+gluing data needed by the compatible glued-slice constructors. -/
+theorem exists_open_nhds_local_gluing_data_subset_of_lifted_openPartialHomeomorph_model
+    {n : WithTop ℕ∞} [hn : ENat.LEInfty n]
+    (e₀ e₁ : OpenPartialHomeomorph M H) {G : H → H}
+    {φ : OpenPartialHomeomorph H H} (hφ : (φ : H → H) = G)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    {x : M} (hxsource : x ∈ e₀.source) (hxφ : e₀ x ∈ φ.source)
+    {S T : Set H}
+    (hSopen : IsOpen S) (hS : S ⊆ e₀.target) (hxS : e₀ x ∈ S)
+    (hTopen : IsOpen T) (hT : T ⊆ e₁.target) (hxT : G (e₀ x) ∈ T)
+    (hG : ContMDiffOn I I n G S)
+    (hφsymm : ContMDiffOn I I n (fun y : H ↦ φ.symm y) T)
+    {Sx Tx : Set M}
+    (hSx : e₀.symm '' S ⊆ Sx) (hTx : e₁.symm '' T ⊆ Tx) :
+    ∃ Um Wm : Set M,
+      IsOpen Um ∧ x ∈ Um ∧ Um ⊆ Sx ∧
+        IsOpen Wm ∧
+          (fun z : M ↦ e₁.symm (G (e₀ z))) x ∈ Wm ∧ Wm ⊆ Tx ∧
+            MapsTo (fun z : M ↦ e₁.symm (G (e₀ z))) (Set.univ ∩ Um) Wm ∧
+              MapsTo (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) (Set.univ ∩ Wm) Um ∧
+                BijOn (fun z : M ↦ e₁.symm (G (e₀ z))) Um Wm ∧
+                  ContMDiffOn I I n (fun z : M ↦ e₁.symm (G (e₀ z))) Um ∧
+                    ContMDiffOn I I n (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Wm ∧
+                      LeftInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                        (fun z : M ↦ e₁.symm (G (e₀ z))) Um ∧
+                        RightInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                          (fun z : M ↦ e₁.symm (G (e₀ z))) Wm := by
+  let U : Set H := φ.source ∩ S ∩ φ ⁻¹' T
+  let W : Set H := φ '' U
+  have hxTφ : φ (e₀ x) ∈ T := by
+    simpa [hφ] using hxT
+  have hUopen : IsOpen U := by
+    have hpre : IsOpen (φ.source ∩ φ ⁻¹' T) := φ.isOpen_inter_preimage hTopen
+    simpa [U, inter_assoc, inter_left_comm, inter_comm] using hpre.inter hSopen
+  have hxU : e₀ x ∈ U := ⟨⟨hxφ, hxS⟩, hxTφ⟩
+  have hUsource : U ⊆ φ.source := fun _ hz ↦ hz.1.1
+  have hUS : U ⊆ S := fun _ hz ↦ hz.1.2
+  have hWT : W ⊆ T := by
+    rintro _ ⟨z, hzU, rfl⟩
+    exact hzU.2
+  have hUt : U ⊆ e₀.target := fun y hy ↦ hS (hUS hy)
+  have hWt : W ⊆ e₁.target := fun y hy ↦ hT (hWT hy)
+  rcases lifted_model_local_gluing_data_of_openPartialHomeomorph
+      (I := I) e₀ e₁ hφ he₀ he₁ hUopen hUsource hUt rfl hWt
+      (hG.mono hUS) (hφsymm.mono hWT) with
+    ⟨hUmopen, hWmopen, hFmaps, hGmaps, hbij, hFsmooth, hGsmooth, hleft, hright⟩
+  let Um : Set M := e₀.symm '' U
+  let Wm : Set M := e₁.symm '' W
+  have hxUm : x ∈ Um := ⟨e₀ x, hxU, e₀.left_inv hxsource⟩
+  have hUmSx : Um ⊆ Sx := by
+    rintro _ ⟨y, hyU, rfl⟩
+    exact hSx ⟨y, hUS hyU, rfl⟩
+  have hFxWm : (fun z : M ↦ e₁.symm (G (e₀ z))) x ∈ Wm :=
+    hFmaps ⟨Set.mem_univ x, hxUm⟩
+  have hWmTx : Wm ⊆ Tx := by
+    rintro _ ⟨y, hyW, rfl⟩
+    exact hTx ⟨y, hWT hyW, rfl⟩
+  exact ⟨Um, Wm, hUmopen, hxUm, hUmSx, hWmopen, hFxWm, hWmTx,
+    hFmaps, hGmaps, hbij, hFsmooth, hGsmooth, hleft, hright⟩
+
 /-- A manifold self-map is `C^n` on a domain if every point of the domain has
 an open neighborhood on which it agrees with a `C^n` local readout.  This is
 the regularity-gluing analogue of
