@@ -605,6 +605,51 @@ theorem preimage_extChartAt_source_self_mem_nhdsWithin_of_continuousWithinAt
   preimage_extChartAt_source_mem_nhdsWithin_of_continuousWithinAt
     (I := I) (M := M) hγ (mem_extChartAt_source (I := I) (γ t))
 
+/-- Transfer a preferred-chart time derivative from a local readout to a glued
+map that agrees with it in the relative time filter at the base point. -/
+theorem hasDerivWithinAt_extChartAt_eval_of_eventuallyEq
+    {s : Set ℝ} {F G : ℝ → M → M} {t : ℝ} {x p : M} {v : E}
+    (hderiv : HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I p) (G τ x)) v s t)
+    (heq : ∀ᶠ τ in 𝓝[s] t, F τ x = G τ x)
+    (heq_t : F t x = G t x) :
+    HasDerivWithinAt (fun τ : ℝ ↦ (extChartAt I p) (F τ x)) v s t :=
+  hderiv.congr_of_eventuallyEq
+    (heq.mono fun τ hτ ↦ congrArg (fun y : M ↦ (extChartAt I p) y) hτ)
+    (congrArg (fun y : M ↦ (extChartAt I p) y) heq_t)
+
+/-- Transfer a preferred-chart time derivative from whichever local readout in
+an indexed cover contains the base point. -/
+theorem hasDerivWithinAt_extChartAt_eval_of_iUnion_eventuallyEqOn
+    {ι : Type*} {F : ℝ → M → M} {G : ι → ℝ → M → M}
+    {s : Set ℝ} {t : ℝ} {U : ι → Set M} {x p : M} {v : E}
+    (hcover : x ∈ ⋃ i, U i)
+    (hderiv : ∀ i, HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I p) (G i τ x)) v s t)
+    (heq : ∀ i, ∀ᶠ τ in 𝓝[s] t, EqOn (F τ) (G i τ) (U i))
+    (heq_t : ∀ i, EqOn (F t) (G i t) (U i)) :
+    HasDerivWithinAt (fun τ : ℝ ↦ (extChartAt I p) (F τ x)) v s t := by
+  rcases Set.mem_iUnion.mp hcover with ⟨i, hxU⟩
+  exact hasDerivWithinAt_extChartAt_eval_of_eventuallyEq
+    (I := I) (M := M) (hderiv i)
+    ((heq i).mono fun τ hτ ↦ hτ hxU)
+    (heq_t i hxU)
+
+/-- Transfer a preferred-chart time derivative from local readouts when the
+glued time slices agree with the readouts on the chosen cover for all times. -/
+theorem hasDerivWithinAt_extChartAt_eval_of_iUnion_eqOn
+    {ι : Type*} {F : ℝ → M → M} {G : ι → ℝ → M → M}
+    {s : Set ℝ} {t : ℝ} {U : ι → Set M} {x p : M} {v : E}
+    (hcover : x ∈ ⋃ i, U i)
+    (hderiv : ∀ i, HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I p) (G i τ x)) v s t)
+    (heq : ∀ i, ∀ τ : ℝ, EqOn (F τ) (G i τ) (U i)) :
+    HasDerivWithinAt (fun τ : ℝ ↦ (extChartAt I p) (F τ x)) v s t :=
+  hasDerivWithinAt_extChartAt_eval_of_iUnion_eventuallyEqOn
+    (I := I) (M := M) hcover hderiv
+    (fun i ↦ Filter.Eventually.of_forall fun τ ↦ heq i τ)
+    (fun i ↦ heq i t)
+
 /-- A concrete `C^3` diffeomorphism flow for a time-dependent vector field on a
 time set, anchored at a base time.  This is the raw object expected from the
 future manifold ODE-flow existence theorem. -/

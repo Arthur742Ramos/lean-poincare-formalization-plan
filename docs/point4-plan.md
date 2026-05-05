@@ -1464,7 +1464,13 @@ continuity gluing:
 `continuousWithinAt_eval_of_iUnion_eqOn_continuousWithinAt` transfer
 `ContinuousWithinAt (fun τ ↦ local τ x) s t` from a local readout covering the
 base point to the glued map `F`, matching the continuity input of the
-source-membership-free Picard endpoint.  The same topological gluing block now includes
+source-membership-free Picard endpoint.  The matching preferred-chart
+derivative transfer is also available through
+`hasDerivWithinAt_extChartAt_eval_of_eventuallyEq`,
+`hasDerivWithinAt_extChartAt_eval_of_iUnion_eventuallyEqOn`, and
+`hasDerivWithinAt_extChartAt_eval_of_iUnion_eqOn`, so local chart ODE
+derivatives can be pushed to the glued forward slice after overlap equality has
+identified the relevant readout.  The same topological gluing block now includes
 `leftInvOn_of_iUnion_eqOn_leftInvOn` and
 `rightInvOn_of_iUnion_eqOn_rightInvOn`, which turn local forward/backward
 inverse identities plus equality of the global candidates with local readouts
