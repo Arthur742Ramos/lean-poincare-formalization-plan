@@ -12888,6 +12888,168 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
     hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr hx
     ⟨le_trans ht₀'.1 ht.1, le_of_lt ht.2⟩
 
+/-- Localized state-preserving componentwise closed-ball estimates give
+closed-overlap uniqueness of two selected variational Picard packages whose
+model vector fields and linearizations agree on the common closed state ball.
+
+The conclusion is stated for the actual selected flows so chart-overlap callers
+can use the wrapper without unfolding the Picard choices. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_tangent_eqOn_Icc_of_vectorField_eqOn
+    [CompleteSpace V]
+    {g : ℝ → V → V} {Dg : ℝ → V → V →L[ℝ] V}
+    {a R Kf KD Lf BA BD Kg KDg Lg BAg BDg r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul_f : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hg_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kg (g t) (closedBall x₀ a))
+    (hDg_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KDg (Dg t) (closedBall x₀ a))
+    (hg_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖g t y‖ ≤ Lg)
+    (hB_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BAg)
+    (hDg_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Dg t y‖₊ ≤ BDg)
+    (hg_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => g t y) (Icc tmin tmax))
+    (hDg_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Dg t y) (Icc tmin tmax))
+    (hmul_g : (max Lg (BDg * BAg)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ closedBall x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax')
+    (hg_eq : ∀ t ∈ Ioo tmin' tmax', ∀ y ∈ closedBall x₀ a, g t y = f t y)
+    (hDg_eq : ∀ t ∈ Ioo tmin' tmax', ∀ y ∈ closedBall x₀ a, Dg t y = Df t y) :
+    let α : VariationalLocalFlowSolution f Df
+        (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul_f
+        htime ht₀' hr
+    let β : VariationalLocalFlowSolution g Dg
+        (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hg_lip hDg_lip hg_bound hB_bound hDg_bound hg_cont hDg_cont hmul_g
+        htime ht₀' hr
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Icc tmin' tmax') := by
+  let α : VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+      hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul_f
+      htime ht₀' hr
+  let β : VariationalLocalFlowSolution g Dg
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+      hg_lip hDg_lip hg_bound hB_bound hDg_bound hg_cont hDg_cont hmul_g
+      htime ht₀' hr
+  change
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Icc tmin' tmax')
+  have hα_mem : ∀ t ∈ Ioo tmin' tmax', α.flow (x, t) ∈ closedBall x₀ a := by
+    intro t ht
+    simpa [α] using
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_mem_base_closedBall
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul_f
+        htime ht₀' hr hx (Ioo_subset_Icc_self ht)
+  have hβ_mem : ∀ t ∈ Ioo tmin' tmax', β.flow (x, t) ∈ closedBall x₀ a := by
+    intro t ht
+    simpa [β] using
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_mem_base_closedBall
+        (f := g) (Df := Dg)
+        hg_lip hDg_lip hg_bound hB_bound hDg_bound hg_cont hDg_cont hmul_g
+        htime ht₀' hr hx (Ioo_subset_Icc_self ht)
+  have hD_bound' : ∀ t ∈ Ioo tmin' tmax', ‖Df t (α.flow (x, t))‖₊ ≤ BD := by
+    intro t ht
+    exact hD_bound t (htime (Ioo_subset_Icc_self ht)) (α.flow (x, t)) (hα_mem t ht)
+  have hDg_eq' : ∀ t ∈ Ioo tmin' tmax',
+      Dg t (β.flow (x, t)) = Df t (β.flow (x, t)) := by
+    intro t ht
+    exact hDg_eq t ht (β.flow (x, t)) (hβ_mem t ht)
+  exact
+    α.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem_of_vectorField_eqOn
+      β hx hx htbase
+      (fun t ht => hf_lip t (htime (Ioo_subset_Icc_self ht)))
+      hα_mem hβ_mem hD_bound' hg_eq hDg_eq'
+
+/-- Open-interval version of
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_tangent_eqOn_Icc_of_vectorField_eqOn`. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_tangent_eqOn_Ioo_of_vectorField_eqOn
+    [CompleteSpace V]
+    {g : ℝ → V → V} {Dg : ℝ → V → V →L[ℝ] V}
+    {a R Kf KD Lf BA BD Kg KDg Lg BAg BDg r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul_f : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (hg_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kg (g t) (closedBall x₀ a))
+    (hDg_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KDg (Dg t) (closedBall x₀ a))
+    (hg_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖g t y‖ ≤ Lg)
+    (hB_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BAg)
+    (hDg_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Dg t y‖₊ ≤ BDg)
+    (hg_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => g t y) (Icc tmin tmax))
+    (hDg_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Dg t y) (Icc tmin tmax))
+    (hmul_g : (max Lg (BDg * BAg)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ closedBall x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax')
+    (hg_eq : ∀ t ∈ Ioo tmin' tmax', ∀ y ∈ closedBall x₀ a, g t y = f t y)
+    (hDg_eq : ∀ t ∈ Ioo tmin' tmax', ∀ y ∈ closedBall x₀ a, Dg t y = Df t y) :
+    let α : VariationalLocalFlowSolution f Df
+        (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul_f
+        htime ht₀' hr
+    let β : VariationalLocalFlowSolution g Dg
+        (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hg_lip hDg_lip hg_bound hB_bound hDg_bound hg_cont hDg_cont hmul_g
+        htime ht₀' hr
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Ioo tmin' tmax') := by
+  let α : VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+      hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul_f
+      htime ht₀' hr
+  let β : VariationalLocalFlowSolution g Dg
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+      hg_lip hDg_lip hg_bound hB_bound hDg_bound hg_cont hDg_cont hmul_g
+      htime ht₀' hr
+  change
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Ioo tmin' tmax')
+  have hclosed :
+      EqOn
+        (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+        (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+        (Icc tmin' tmax') := by
+    simpa [α, β] using
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_tangent_eqOn_Icc_of_vectorField_eqOn
+        (g := g) (Dg := Dg)
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul_f
+        hg_lip hDg_lip hg_bound hB_bound hDg_bound hg_cont hDg_cont hmul_g
+        htime ht₀' hr hx htbase hg_eq hDg_eq
+  intro t ht
+  exact hclosed (Ioo_subset_Icc_self ht)
+
 /-- Componentwise closed-ball continuity estimates give the strict spatial
 derivative of each forward time slice of the state-preserving selected
 variational flow, provided the supplied `Df` is the spatial derivative of `f` on
