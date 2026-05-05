@@ -3536,6 +3536,88 @@ theorem preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le
     (C := C) hC0 hC (K := K)
     (fun s hs t ht x => hfiber τ hτ hs ht x)
 
+/-- Version of `preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le` for a cover `et`
+known pointwise to be the preferred bilinear-form trivialization cover.  This is the shape carried
+by the Ricci-DeTurck Banach-chart records. -/
+theorem preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le_of_eq_trivializationAt
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {A : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {C : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C)
+    {K : NNReal}
+    (hfiber : ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet → ∀ x : M,
+      dist ((A s) x) ((A t) x) ≤ (K : ℝ) * dist s t) :
+    LipschitzOnWith
+      ⟨(C * C) * (K : ℝ), mul_nonneg (mul_nonneg hC0 hC0) (NNReal.coe_nonneg K)⟩
+      A stateSet := by
+  have het_fun : et = fun i => trivializationAt BilF BilW (x0 i) := funext het
+  subst et
+  exact preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le
+    (M := M) (F := F) (W := W) (x0 := x0)
+    (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+    (hKoEq := hKoEq) (hcover := hcover)
+    (stateSet := stateSet) (A := A)
+    (C := C) hC0 hC (K := K) hfiber
+
+/-- Time-family version of
+`preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le_of_eq_trivializationAt`. -/
+theorem preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le_of_eq_trivializationAt
+    {κ : Type*} [Finite κ] [T2Space M]
+    {τ : Type*} {timeSet : Set τ}
+    (x0 : κ → M)
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {A : τ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover}
+    {C : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C)
+    {K : NNReal}
+    (hfiber : ∀ τ, τ ∈ timeSet → ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ x : M, dist ((A τ s) x) ((A τ t) x) ≤ (K : ℝ) * dist s t) :
+    ∀ τ ∈ timeSet,
+      LipschitzOnWith
+        ⟨(C * C) * (K : ℝ), mul_nonneg (mul_nonneg hC0 hC0) (NNReal.coe_nonneg K)⟩
+        (A τ) stateSet := by
+  have het_fun : et = fun i => trivializationAt BilF BilW (x0 i) := funext het
+  subst et
+  exact preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le
+    (M := M) (F := F) (W := W) (x0 := x0)
+    (timeSet := timeSet) (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+    (hKoEq := hKoEq) (hcover := hcover)
+    (stateSet := stateSet) (A := A)
+    (C := C) hC0 hC (K := K) hfiber
+
 end PreferredBilinearNormControl
 
 end ContinuousSectionSpace

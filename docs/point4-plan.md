@@ -2452,7 +2452,9 @@ time-family variant, which turn compact coordinate-readout estimates into
 specializes this for preferred bilinear-form charts:
 `preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le` and its time-family
 form combine a fibrewise Lipschitz estimate with the squared preferred
-inverse-trivialization bound. These are still handoff theorems; they do not
+inverse-trivialization bound. The corresponding `_of_eq_trivializationAt`
+variants accept the existing chart-record shape with an arbitrary cover `et`
+and proof `et i = trivializationAt ...`. These are still handoff theorems; they do not
 prove the Ricci-DeTurck Schauder estimates or construct the missing Banach chart.
 It also derives that finite-cover inverse
 bound from compactness of the cover pieces
