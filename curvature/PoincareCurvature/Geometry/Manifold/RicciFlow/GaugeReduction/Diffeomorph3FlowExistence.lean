@@ -856,6 +856,50 @@ theorem contMDiffOn_symm_image_of_maximalAtlas_lifted_model
   exact contMDiffOn_symm_image_of_openPartialHomeomorph_lifted_model
     (I := I) e₀ e₁ G hUt hWt he₀smooth hG he₁smooth hmaps
 
+/-- Smoothness of the lifted inverse readout associated to a model open partial
+homeomorphism.  If `W = φ '' U`, then the backward chart lift
+`e₀.symm ∘ φ.symm ∘ e₁` is `C^n` on the lifted target patch. -/
+theorem contMDiffOn_symm_image_of_openPartialHomeomorph_lifted_model_inverse
+    {n : WithTop ℕ∞} (e₀ e₁ : OpenPartialHomeomorph M H)
+    {φ : OpenPartialHomeomorph H H} {U W : Set H}
+    (hUsource : U ⊆ φ.source) (hUt : U ⊆ e₀.target)
+    (hWt : W ⊆ e₁.target) (hW : W = φ '' U)
+    (he₁ : ContMDiffOn I I n (fun x : M ↦ e₁ x) (e₁.symm '' W))
+    (hφsymm : ContMDiffOn I I n (fun y : H ↦ φ.symm y) W)
+    (he₀symm : ContMDiffOn I I n (fun y : H ↦ e₀.symm y) U) :
+    ContMDiffOn I I n (fun x : M ↦ e₀.symm (φ.symm (e₁ x))) (e₁.symm '' W) := by
+  have hmaps : MapsTo (fun y : H ↦ φ.symm y) W U := by
+    intro y hyW
+    have hyφ : y ∈ φ '' U := by simpa [hW] using hyW
+    rcases hyφ with ⟨u, huU, rfl⟩
+    simpa [φ.left_inv (hUsource huU)] using huU
+  exact contMDiffOn_symm_image_of_openPartialHomeomorph_lifted_model
+    (I := I) e₁ e₀ (fun y : H ↦ φ.symm y) hWt hUt he₁ hφsymm he₀symm hmaps
+
+/-- Atlas-member specialization of
+`contMDiffOn_symm_image_of_openPartialHomeomorph_lifted_model_inverse`. -/
+theorem contMDiffOn_symm_image_of_maximalAtlas_lifted_model_inverse
+    {n : WithTop ℕ∞} [hn : ENat.LEInfty n]
+    (e₀ e₁ : OpenPartialHomeomorph M H) {φ : OpenPartialHomeomorph H H}
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    {U W : Set H}
+    (hUsource : U ⊆ φ.source) (hUt : U ⊆ e₀.target)
+    (hWt : W ⊆ e₁.target) (hW : W = φ '' U)
+    (hφsymm : ContMDiffOn I I n (fun y : H ↦ φ.symm y) W) :
+    ContMDiffOn I I n (fun x : M ↦ e₀.symm (φ.symm (e₁ x))) (e₁.symm '' W) := by
+  have he₁source : e₁.symm '' W ⊆ e₁.source := by
+    rintro _ ⟨y, hyW, rfl⟩
+    exact e₁.map_target (hWt hyW)
+  have he₁smooth : ContMDiffOn I I n (fun x : M ↦ e₁ x) (e₁.symm '' W) :=
+    ((contMDiffOn_of_mem_maximalAtlas (I := I) (n := (∞ : WithTop ℕ∞)) he₁).of_le
+      hn.out).mono he₁source
+  have he₀symm : ContMDiffOn I I n (fun y : H ↦ e₀.symm y) U :=
+    ((contMDiffOn_symm_of_mem_maximalAtlas (I := I) (n := (∞ : WithTop ℕ∞)) he₀).of_le
+      hn.out).mono hUt
+  exact contMDiffOn_symm_image_of_openPartialHomeomorph_lifted_model_inverse
+    (I := I) e₀ e₁ hUsource hUt hWt hW he₁smooth hφsymm he₀symm
+
 /-- A manifold self-map is `C^n` on a domain if every point of the domain has
 an open neighborhood on which it agrees with a `C^n` local readout.  This is
 the regularity-gluing analogue of
