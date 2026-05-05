@@ -8193,6 +8193,99 @@ theorem ofProduct_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subse
       hstrict (by simpa [α] using hGdiff) hU₁open hU₁source
       (by simpa [α] using htarget) (by simpa [α] using hxU₁)
 
+/-- Product-Picard handoff to the lifted `C^3` local gluing patch from full
+space-time regularity of the extracted variational model flow. -/
+theorem ofProduct_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasFDerivAt_on_initialBall_of_contDiffAt_spaceTime
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {K : ℝ≥0} {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {a b t : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (e₀ x, τ))‖₊ ≤ K)
+    (hder : ∀ y ∈ closedBall x₀ r,
+      HasFDerivAt
+        (fun z : V =>
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (z, t))
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent
+          y t)
+        y)
+    (hGdiff_spaceTime : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+      (e₀ x, t))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) ∧
+        IsOpen Um ∧ x ∈ Um ∧ Um ⊆ U₀ ∧
+          IsOpen Wm ∧
+            (fun z : M ↦ e₁.symm
+              ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+              MapsTo
+                (fun z : M ↦ e₁.symm
+                  ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                    (e₀ z, t))) (Set.univ ∩ Um) Wm ∧
+                MapsTo (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) (Set.univ ∩ Wm) Um ∧
+                  BijOn
+                    (fun z : M ↦ e₁.symm
+                      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                        (e₀ z, t))) Um Wm ∧
+                    ContMDiffOn (𝓘(ℝ, V)) (𝓘(ℝ, V)) 3
+                      (fun z : M ↦ e₁.symm
+                        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                          (e₀ z, t))) Um ∧
+                      ContMDiffOn (𝓘(ℝ, V)) (𝓘(ℝ, V)) 3
+                        (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Wm ∧
+                        LeftInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                          (fun z : M ↦ e₁.symm
+                            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                              (e₀ z, t))) Um ∧
+                          RightInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                            (fun z : M ↦ e₁.symm
+                              ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                                (e₀ z, t))) Wm := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  have hstrict : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x) := by
+    simpa [α] using
+      ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall
+        (β := β) hball hx (htime (Ioo_subset_Icc_self ht)) hder
+  have hD_bound' : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K := by
+    intro τ hτ
+    simpa [α] using hD_bound τ hτ
+  simpa [α] using
+    α.flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasStrictFDerivAt_of_contDiffAt_spaceTime
+      e₀ e₁ he₀ he₁ htime htbase hU₀open hU₀source hxU₀ hx ht hD_bound'
+      hstrict (by simpa [α] using hGdiff_spaceTime) hU₁open hU₁source
+      (by simpa [α] using htarget) (by simpa [α] using hxU₁)
+
 /-- Product-Picard convex state-tube criterion for the common-subinterval
 neighborhood-map readout of a forward time slice.  The convex-state hypotheses
 prove strict spatial differentiability on the forward Picard interval, while
