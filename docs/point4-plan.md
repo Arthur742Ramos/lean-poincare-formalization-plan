@@ -2730,12 +2730,14 @@ submodule now also restrict to smaller time-space domains.
 higher-to-matrix handoff: entrywise `C^{2+α,1+α/2}` controls package
 matrix-valued and finite-Pi-valued `C^{0,α}` controls, matrix-valued higher norm
 balls project to entry `C^{0,α}` norm balls, and higher primitive entry controls
-feed the existing single-radius schematic Ricci-DeTurck RHS difference theorem.
-It now also converts entrywise higher primitive difference controls with radii
+feed the direct schematic Ricci-DeTurck RHS `C^{0,α}` estimate and the existing
+single-radius schematic Ricci-DeTurck RHS difference theorem. It now also
+converts entrywise higher primitive difference controls with radii
 linear in `dist u v` into the matrix-norm/array primitive bounds needed by the
 existing schematic RHS state-space `LipschitzOnWith` theorem, with a matching
-finite-family wrapper, a Pi-valued finite-product Lipschitz packaging of all
-family coordinates, and matching coarser exported-constant variants.
+finite-family wrapper, Pi-valued finite-product `C^{0,α}` and Lipschitz
+packaging of all family coordinates, and matching coarser exported-constant
+variants.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
 the same single-radius control, plus determinant and determinant-difference
 single-radius variants using the existing quantitative determinant constants.

@@ -56,6 +56,49 @@ theorem pi_c0AlphaNormLe_of_entries {ι A : Type*} [Fintype ι]
   ParabolicC0AlphaNormLe.pi (X := X) (α := α) (s := s)
     (N := N) (u := u) fun i => (h i).value_c0AlphaNormLe_self
 
+/-- Entrywise higher primitive metric, first-derivative, and second-derivative controls feed
+the existing quantitative schematic Ricci-DeTurck RHS `C^{0,α}` estimate. -/
+theorem ricciDeTurckSchematicMatrix_of_entries {n : Type*} [Fintype n] [DecidableEq n]
+    {R : n → n → ℝ} {RD : n → n → n → ℝ}
+    {RH : n → n → n → n → ℝ} {δ : ℝ}
+    {M : ℝ × X → Matrix n n ℝ}
+    {D : ℝ × X → n → n → n → ℝ}
+    {H : ℝ × X → n → n → n → n → ℝ}
+    (hM : ∀ a b, ParabolicC2AlphaNormLe (R a b) α (fun z => M z a b) s)
+    (hD : ∀ a b c, ParabolicC2AlphaNormLe (RD a b c) α (fun z => D z a b c) s)
+    (hH : ∀ a b i j, ParabolicC2AlphaNormLe (RH a b i j) α
+      (fun z => H z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaNormLe
+      ((∑ i : n, ∑ j : n,
+          (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryBoundConst
+              (𝕜 := ℝ) δ R RH i j +
+            ParabolicC0AlphaOn.christoffelQuadraticRicciEntryBoundConst
+              (fun a b c =>
+                ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst
+                  (𝕜 := ℝ) δ R RD a b c)
+              i j)) +
+        (∑ i : n, ∑ j : n,
+          (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryHolderConst
+              (𝕜 := ℝ) δ R R RH RH i j +
+            ParabolicC0AlphaOn.christoffelQuadraticRicciEntryHolderConst
+              (fun a b c =>
+                ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst
+                  (𝕜 := ℝ) δ R RD a b c)
+              (fun a b c =>
+                ParabolicC0AlphaOn.matrixInvChristoffelEntryHolderConst
+                  (𝕜 := ℝ) δ R R RD RD a b c)
+              i j)))
+      α
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M z) (D z) (H z)) s := by
+  exact ParabolicC0AlphaNormLe.ricciDeTurck_schematic_of_entries
+    (M := M) (D := D) (H := H) (R := R) (RD := RD) (RH := RH) (δ := δ)
+    (fun a b => (hM a b).value_c0AlphaNormLe_self)
+    (fun a b c => (hD a b c).value_c0AlphaNormLe_self)
+    (fun a b i j => (hH a b i j).value_c0AlphaNormLe_self)
+    hδpos hdet
+
 /-- Entrywise higher parabolic difference controls with radii linear in a shared scalar give a
 pointwise matrix-norm difference bound with the summed entry radius. -/
 theorem matrix_norm_sub_le_sum_mul_of_entries {m n : Type*}
@@ -681,6 +724,90 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_pi_family_of_higher_primitiv
   exact hentry.trans (mul_le_mul_of_nonneg_right hr_le_sum dist_nonneg)
 
 end ParabolicC2AlphaNormLe
+
+namespace ParabolicC2AlphaOn
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Entrywise higher parabolic membership packages as matrix-valued `C^{0,α}` membership. -/
+theorem matrix_c0AlphaOn_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A]
+    {M : ℝ × X → Matrix m n A}
+    (h : ∀ i j, ParabolicC2AlphaOn α (fun z => M z i j) s) :
+    ParabolicC0AlphaOn α M s :=
+  ParabolicC0AlphaOn.matrix_of_entries fun i j => (h i j).c0AlphaOn
+
+/-- Finite Pi-valued value-level `C^{0,α}` membership from coordinatewise higher parabolic
+membership. -/
+theorem pi_c0AlphaOn_of_entries {ι A : Type*} [Fintype ι]
+    [NormedAddCommGroup A] [NormedSpace ℝ A]
+    {u : ℝ × X → ι → A}
+    (h : ∀ i, ParabolicC2AlphaOn α (fun z => u z i) s) :
+    ParabolicC0AlphaOn α u s :=
+  ParabolicC0AlphaOn.pi fun i => (h i).c0AlphaOn
+
+/-- Direct higher-regularity handoff for the schematic Ricci-DeTurck coordinate RHS.  Higher
+primitive controls provide the value-level `C^{0,α}` hypotheses of the matrix closure theorem. -/
+theorem ricciDeTurckSchematicMatrix_c0AlphaOn_of_entries {n : Type*}
+    [Fintype n] [DecidableEq n] {δ : ℝ}
+    {M : ℝ × X → Matrix n n ℝ}
+    {D : ℝ × X → n → n → n → ℝ}
+    {H : ℝ × X → n → n → n → n → ℝ}
+    (hM : ∀ a b, ParabolicC2AlphaOn α (fun z => M z a b) s)
+    (hD : ∀ a b c, ParabolicC2AlphaOn α (fun z => D z a b c) s)
+    (hH : ∀ a b i j, ParabolicC2AlphaOn α (fun z => H z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M z) (D z) (H z)) s := by
+  simpa [ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix] using
+    (ParabolicC0AlphaOn.ricciDeTurck_schematic
+      (M := M) (D := D) (H := H)
+      (fun a b => (hM a b).c0AlphaOn)
+      (fun a b c => (hD a b c).c0AlphaOn)
+      (fun a b i j => (hH a b i j).c0AlphaOn)
+      hδpos hdet)
+
+/-- Finite-family direct higher-regularity handoff for schematic Ricci-DeTurck RHS coordinates. -/
+theorem ricciDeTurckSchematicMatrix_c0AlphaOn_family_of_entries {κ n : Type*}
+    [Fintype n] [DecidableEq n] {δ : ℝ}
+    {M : κ → ℝ × X → Matrix n n ℝ}
+    {D : κ → ℝ × X → n → n → n → ℝ}
+    {H : κ → ℝ × X → n → n → n → n → ℝ}
+    (hM : ∀ r a b, ParabolicC2AlphaOn α (fun z => M r z a b) s)
+    (hD : ∀ r a b c, ParabolicC2AlphaOn α (fun z => D r z a b c) s)
+    (hH : ∀ r a b i j, ParabolicC2AlphaOn α (fun z => H r z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∀ r, ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M r z) (D r z) (H r z)) s := by
+  intro r
+  exact ricciDeTurckSchematicMatrix_c0AlphaOn_of_entries
+    (M := M r) (D := D r) (H := H r)
+    (hM r) (hD r) (hH r) hδpos (hdet r)
+
+/-- Pi-valued finite-family direct higher-regularity handoff for schematic Ricci-DeTurck RHS
+coordinates. -/
+theorem ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_entries {κ n : Type*}
+    [Fintype κ] [Fintype n] [DecidableEq n] {δ : ℝ}
+    {M : κ → ℝ × X → Matrix n n ℝ}
+    {D : κ → ℝ × X → n → n → n → ℝ}
+    {H : κ → ℝ × X → n → n → n → n → ℝ}
+    (hM : ∀ r a b, ParabolicC2AlphaOn α (fun z => M r z a b) s)
+    (hD : ∀ r a b c, ParabolicC2AlphaOn α (fun z => D r z a b c) s)
+    (hH : ∀ r a b i j, ParabolicC2AlphaOn α (fun z => H r z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X => fun r : κ =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M r z) (D r z) (H r z)) s :=
+  ParabolicC0AlphaOn.pi fun r =>
+    ricciDeTurckSchematicMatrix_c0AlphaOn_family_of_entries
+      (M := M) (D := D) (H := H) hM hD hH hδpos hdet r
+
+end ParabolicC2AlphaOn
 
 end AnalyticPDE
 end RicciFlow

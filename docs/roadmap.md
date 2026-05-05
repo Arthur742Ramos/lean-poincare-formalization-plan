@@ -236,14 +236,15 @@ domains.
 existing finite-dimensional matrix estimates: entrywise `C^{2+α,1+α/2}` controls
 package matrix- and finite-Pi-valued `C^{0,α}` controls, matrix-valued higher
 norm balls project to entry `C^{0,α}` norm balls, and higher primitive
-entry controls feed the single-radius schematic Ricci-DeTurck RHS difference
-estimate directly. Higher entrywise difference controls whose radii are linear
+entry controls feed the direct schematic Ricci-DeTurck RHS `C^{0,α}` estimate
+and its single-radius difference estimate. Higher entrywise difference controls whose radii are linear
 in a state-space distance now also sum to matrix-norm primitive difference
 bounds and feed the existing schematic RHS state-space `LipschitzOnWith`
 bridges, including finite-family and coarser exported-constant wrappers; the
-finite-family bridge now also packages all schematic RHS coordinates as one
-Pi-valued state-space Lipschitz map with the finite sum of the coordinate
-constants, in both exact-sum and coarser exported-constant forms.
+finite-family bridges now package all schematic RHS coordinates as Pi-valued
+`C^{0,α}` readouts and as one Pi-valued state-space Lipschitz map with the
+finite sum of the coordinate constants, in both exact-sum and coarser
+exported-constant forms.
 The matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
 same norm-ball language. Determinant and determinant-difference estimates now
