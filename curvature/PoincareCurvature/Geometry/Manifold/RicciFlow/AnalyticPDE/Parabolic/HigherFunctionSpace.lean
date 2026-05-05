@@ -152,6 +152,31 @@ def smul (c : ℝ) (J : ParabolicSecondJet u s) :
     intro z hz
     simpa [Pi.smul_apply] using (J.hasSpaceSecondDeriv hz).fun_const_smul c
 
+/-- Compose a parabolic second jet with a continuous linear value map. -/
+def continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (J : ParabolicSecondJet u s) :
+    ParabolicSecondJet (fun z : ℝ × X => L (u z)) s where
+  timeDeriv := fun z => L (J.timeDeriv z)
+  spaceDeriv := fun z => L.comp (J.spaceDeriv z)
+  spaceSecondDeriv := fun z =>
+    (ContinuousLinearMap.compL ℝ X (X →L[ℝ] E) (X →L[ℝ] F)
+      (ContinuousLinearMap.compL ℝ X E F L)) (J.spaceSecondDeriv z)
+  hasTimeDeriv := by
+    intro z hz
+    have hcomp :=
+      L.hasFDerivAt.comp_hasFDerivWithinAt z.1 (J.hasTimeDeriv hz).hasFDerivWithinAt
+    simpa [Function.comp] using hcomp.hasDerivWithinAt
+  hasSpaceDeriv := by
+    intro z hz
+    have hcomp := L.hasFDerivAt.comp_hasFDerivWithinAt z.2 (J.hasSpaceDeriv hz)
+    simpa [Function.comp] using hcomp
+  hasSpaceSecondDeriv := by
+    intro z hz
+    let A : (X →L[ℝ] E) →L[ℝ] (X →L[ℝ] F) :=
+      ContinuousLinearMap.compL ℝ X E F L
+    have hcomp := A.hasFDerivAt.comp_hasFDerivWithinAt z.2 (J.hasSpaceSecondDeriv hz)
+    simpa [Function.comp, A] using hcomp
+
 /-- Restrict a parabolic second jet to a smaller time-space domain. -/
 def restrict {t : Set (ℝ × X)} (J : ParabolicSecondJet u s) (hst : t ⊆ s) :
     ParabolicSecondJet u t where
