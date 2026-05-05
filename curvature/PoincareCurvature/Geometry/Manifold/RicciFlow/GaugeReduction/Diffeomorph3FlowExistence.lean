@@ -423,6 +423,61 @@ theorem mapsTo_symm_image_of_openPartialHomeomorph_lifted_model_inverse_mapsTo
     _ = e₀.symm (φ.symm (e₁ (e₁.symm (φ u)))) := by
       rw [e₁.right_inv (hWt hφuW)]
 
+/-- Left-inverse identity for a chart-lifted model open partial homeomorphism
+and its lifted inverse on an explicit source patch. -/
+theorem leftInvOn_symm_image_of_openPartialHomeomorph_lifted_model_inverse
+    (e₀ e₁ : OpenPartialHomeomorph X Y) {G : Y → Y}
+    {φ : OpenPartialHomeomorph Y Y} (hφ : (φ : Y → Y) = G)
+    {U W : Set Y}
+    (hUsource : U ⊆ φ.source) (hUt : U ⊆ e₀.target)
+    (hW : W = φ '' U) (hWt : W ⊆ e₁.target) :
+    LeftInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+      (fun z : X ↦ e₁.symm (G (e₀ z))) (e₀.symm '' U) := by
+  rintro _ ⟨y, hyU, rfl⟩
+  have hytarget : y ∈ e₀.target := hUt hyU
+  have hGyW : G y ∈ W := by
+    rw [← hφ, hW]
+    exact ⟨y, hyU, rfl⟩
+  have hGytarget : G y ∈ e₁.target := hWt hGyW
+  calc
+    (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+        ((fun z : X ↦ e₁.symm (G (e₀ z))) (e₀.symm y))
+        = e₀.symm (φ.symm (G y)) := by
+          simp [e₀.right_inv hytarget, e₁.right_inv hGytarget]
+    _ = e₀.symm (φ.symm (φ y)) := by
+          simpa [hφ]
+    _ = e₀.symm y := by
+          rw [φ.left_inv (hUsource hyU)]
+
+/-- Right-inverse identity for a chart-lifted model open partial homeomorphism
+and its lifted inverse on an explicit target patch. -/
+theorem rightInvOn_symm_image_of_openPartialHomeomorph_lifted_model_inverse
+    (e₀ e₁ : OpenPartialHomeomorph X Y) {G : Y → Y}
+    {φ : OpenPartialHomeomorph Y Y} (hφ : (φ : Y → Y) = G)
+    {U W : Set Y}
+    (hUsource : U ⊆ φ.source) (hUt : U ⊆ e₀.target)
+    (hW : W = φ '' U) (hWt : W ⊆ e₁.target) :
+    RightInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+      (fun z : X ↦ e₁.symm (G (e₀ z))) (e₁.symm '' W) := by
+  rintro _ ⟨y, hyW, rfl⟩
+  have hyφ : y ∈ φ '' U := by simpa [hW] using hyW
+  rcases hyφ with ⟨u, huU, rfl⟩
+  have hutarget : u ∈ e₀.target := hUt huU
+  have hφutarget : φ u ∈ e₁.target := hWt (by
+    rw [hW]
+    exact ⟨u, huU, rfl⟩)
+  calc
+    (fun z : X ↦ e₁.symm (G (e₀ z)))
+        ((fun z : X ↦ e₀.symm (φ.symm (e₁ z))) (e₁.symm (φ u)))
+        = e₁.symm (G (e₀ (e₀.symm (φ.symm (φ u))))) := by
+          simp [e₁.right_inv hφutarget]
+    _ = e₁.symm (G (e₀ (e₀.symm u))) := by
+          rw [φ.left_inv (hUsource huU)]
+    _ = e₁.symm (G u) := by
+          rw [e₀.right_inv hutarget]
+    _ = e₁.symm (φ u) := by
+          simpa [hφ]
+
 /-- If a manifold-side map is defined by pulling a model map back through two
 partial homeomorphism charts, model-space injectivity transports directly. -/
 theorem injOn_symm_image_of_openPartialHomeomorph_lifted_model_injOn
