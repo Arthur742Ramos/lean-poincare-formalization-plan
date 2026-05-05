@@ -421,6 +421,109 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_family_of_higher_primitive_n
     (hM r) (hD r) (hH r) (hMdiff r) (hDdiff r) (hHdiff r)
     hδpos (hdet r) hz
 
+/-- Pi-valued finite-family state-space Lipschitz bridge from higher parabolic primitive
+controls.  The Lipschitz constant is the finite sum of the coordinate schematic constants, so the
+whole family can be consumed as one finite-product coordinate readout. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_pi_family_of_higher_primitive_normLe
+    {κ Y n : Type*} [Fintype κ] [DecidableEq κ] [PseudoMetricSpace Y]
+    [Fintype n] [DecidableEq n]
+    {δ : ℝ} {KM : κ → n → n → ℝ} {KD : κ → n → n → n → ℝ}
+    {KH : κ → n → n → n → n → ℝ} {C : κ → n → n → ℝ}
+    {DB : κ → n → n → n → ℝ} {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    {D : κ → Y → ℝ × X → n → n → n → ℝ}
+    {H : κ → Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM : ∀ r a b, 0 ≤ KM r a b) (hKD : ∀ r a b c, 0 ≤ KD r a b c)
+    (hKH : ∀ r a b i j, 0 ≤ KH r a b i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C r a b) α (fun z => M r u z a b) s)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB r a b c) α (fun z => D r u z a b c) s)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB r a b i j) α (fun z => H r u z a b i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM r a b * dist u v) α
+        (fun z => M r u z a b - M r v z a b) s)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD r a b c * dist u v) α
+        (fun z => D r u z a b c - D r v z a b c) s)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH r a b i j * dist u v) α
+        (fun z => H r u z a b i j - H r v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖) :
+    ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      LipschitzOnWith
+        ⟨∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r)
+            (∑ a, ∑ b, KM r a b)
+            (∑ a, ∑ b, ∑ c, KD r a b c)
+            (fun i j => ∑ a, ∑ b, KH r a b i j),
+          Finset.sum_nonneg fun r _hr =>
+            ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+              (𝕜 := ℝ) hδpos (hDB r) (hHB r)
+              (Finset.sum_nonneg fun a _ha =>
+                Finset.sum_nonneg fun b _hb => hKM r a b)
+              (Finset.sum_nonneg fun a _ha =>
+                Finset.sum_nonneg fun b _hb =>
+                  Finset.sum_nonneg fun c _hc => hKD r a b c)
+              (fun i j =>
+                Finset.sum_nonneg fun a _ha =>
+                  Finset.sum_nonneg fun b _hb => hKH r a b i j)⟩
+        (fun u : Y => fun r =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M r u z) (D r u z) (H r u z))
+        stateSet := by
+  intro z hz
+  let Kcoord : κ → ℝ := fun r =>
+    ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+      (𝕜 := ℝ) δ (C r) (DB r) (HB r)
+      (∑ a, ∑ b, KM r a b)
+      (∑ a, ∑ b, ∑ c, KD r a b c)
+      (fun i j => ∑ a, ∑ b, KH r a b i j)
+  have hKcoord_nonneg : ∀ r, 0 ≤ Kcoord r := fun r =>
+    ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+      (𝕜 := ℝ) hδpos (hDB r) (hHB r)
+      (Finset.sum_nonneg fun a _ha => Finset.sum_nonneg fun b _hb => hKM r a b)
+      (Finset.sum_nonneg fun a _ha =>
+        Finset.sum_nonneg fun b _hb =>
+          Finset.sum_nonneg fun c _hc => hKD r a b c)
+      (fun i j =>
+        Finset.sum_nonneg fun a _ha =>
+          Finset.sum_nonneg fun b _hb => hKH r a b i j)
+  have hcoord : ∀ r,
+      LipschitzOnWith
+        ⟨Kcoord r, hKcoord_nonneg r⟩
+        (fun u : Y => ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r u z) (D r u z) (H r u z))
+        stateSet := by
+    intro r
+    exact ricciDeTurckSchematicMatrix_lipschitzOnWith_family_of_higher_primitive_normLe
+      (X := X) (α := α) (s := s) (δ := δ)
+      (KM := KM) (KD := KD) (KH := KH) (C := C) (DB := DB) (HB := HB)
+      (stateSet := stateSet) (M := M) (D := D) (H := H)
+      hDB hHB hKM hKD hKH hM hD hH hMdiff hDdiff hHdiff hδpos hdet r hz
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hsum_nonneg : 0 ≤ ∑ r, Kcoord r :=
+    Finset.sum_nonneg fun r _hr => hKcoord_nonneg r
+  rw [dist_eq_norm]
+  refine (pi_norm_le_iff_of_nonneg (mul_nonneg hsum_nonneg dist_nonneg)).2 fun r => ?_
+  have hr := (hcoord r).dist_le_mul u hu v hv
+  have hr_le_sum : Kcoord r ≤ ∑ r, Kcoord r :=
+    Finset.single_le_sum (fun r' _hr' => hKcoord_nonneg r') (Finset.mem_univ r)
+  have hentry :
+      ‖ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r u z) (D r u z) (H r u z) -
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r v z) (D r v z) (H r v z)‖ ≤ Kcoord r * dist u v := by
+    simpa [dist_eq_norm] using hr
+  exact hentry.trans (mul_le_mul_of_nonneg_right hr_le_sum dist_nonneg)
+
 /-- Finite-family state-space Lipschitz bridge from higher primitive controls with coarser
 exported constants for each family member. -/
 theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_family_of_higher_primitive_normLe_of_le
