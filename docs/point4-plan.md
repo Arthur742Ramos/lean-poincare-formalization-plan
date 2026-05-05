@@ -1480,7 +1480,10 @@ also has the corresponding `C^n` regularity-gluing forms
 `contMDiffOn_of_locally_eqOn_open_contMDiffOn` and
 `contMDiffOn_of_iUnion_open_eqOn_contMDiffOn`, so local chart readouts that are
 identified with the glued self-map on an open cover can supply `ContMDiffOn`
-regularity directly.  The
+regularity directly.  The time-slice wrapper
+`contMDiffOn_univ_timeSlice_of_iUnion_open_eqOn_contMDiffOn` packages the
+`Set.univ` form needed by the glued forward/backward maps in the raw Picard
+endpoint.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.

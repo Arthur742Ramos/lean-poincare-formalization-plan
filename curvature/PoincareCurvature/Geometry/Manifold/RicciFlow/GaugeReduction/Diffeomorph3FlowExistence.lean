@@ -587,6 +587,23 @@ theorem contMDiffOn_of_iUnion_open_eqOn_contMDiffOn
     rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxU⟩
     exact ⟨U i, G i, hUopen i, hxU, hcont i, heq i⟩
 
+/-- Time-slice version of `contMDiffOn_of_iUnion_open_eqOn_contMDiffOn` on
+`Set.univ`.  If every local readout is `C^n` on its open patch for every time
+and the glued time-slice agrees with those readouts on the cover, then every
+glued time-slice is globally `C^n` on `Set.univ`. -/
+theorem contMDiffOn_univ_timeSlice_of_iUnion_open_eqOn_contMDiffOn
+    {ι : Type*} {n : WithTop ℕ∞} {F : ℝ → M → M}
+    {G : ι → ℝ → M → M} {U : ι → Set M}
+    (hcover : Set.univ ⊆ ⋃ i, U i)
+    (hUopen : ∀ i, IsOpen (U i))
+    (hcont : ∀ t : ℝ, ∀ i, ContMDiffOn I I n (G i t) (U i))
+    (heq : ∀ t : ℝ, ∀ i, EqOn (F t) (G i t) (U i)) :
+    ∀ t : ℝ, ContMDiffOn I I n (F t) Set.univ := fun t ↦
+  contMDiffOn_of_iUnion_open_eqOn_contMDiffOn
+    (I := I) (M := M) (s := Set.univ) (U := U) hcover hUopen
+    (fun i ↦ hcont t i)
+    (fun i x hx ↦ heq t i hx.2)
+
 /-- A within-time continuous manifold curve is eventually in any preferred
 chart source that contains its value at the base time. -/
 theorem preimage_extChartAt_source_mem_nhdsWithin_of_continuousWithinAt
