@@ -1579,7 +1579,11 @@ handoffs.  The local-readout pointwise-source raw constructor
 uses the same source-persistence route but states vector-field identification
 on the actual time-slice patches `U τ i`, so this local-field route no longer
 needs finite-cover promotion when the local equality is available at the
-current time.  The fixed-IVP intrinsic layer exposes the same handoff through
+current time.  The raw local-readout route now also has the open-preimage
+source-persistence variant
+`Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
+which derives the pointwise patch persistence from fixed open target patches
+and local time-continuity before invoking the same glued-flow constructor.  The fixed-IVP intrinsic layer exposes the same handoff through
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_localReadouts_vectorField_eq_nhdsWithin`
 and proof-level `nonempty_...`.  The theorem-family raw existence layer now
 also has the generic assembly bridge
