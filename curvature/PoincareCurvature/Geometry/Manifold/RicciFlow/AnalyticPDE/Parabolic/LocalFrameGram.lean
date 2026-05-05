@@ -10820,6 +10820,77 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_mul_rad
       hdetG_ne hdetN_ne hDB hHB hGbound hNbound hD hE hKc hKD hR hGdiff
       hDdiff hHdiff
 
+/-- Point-dependent local product-cylinder metric controls globalize the compact local-frame
+shared-radius schematic RHS estimate while allowing sharper primitive Lipschitz constants to be
+promoted to coarser shared constants. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_mul_radius_of_isCompact_of_local_closedCylinder_variable_of_primitive_le
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    (timeRadius spaceRadius : ℝ × M → ℝ)
+    (htime_pos : ∀ y ∈ K, 0 < timeRadius y)
+    (hspace_pos : ∀ y ∈ K, 0 < spaceRadius y)
+    {C : ι → ι → ℝ} {DB : ι → ι → ι → ℝ}
+    {HB : ι → ι → ι → ι → ℝ} {R KG0 KD0 KG KD : ℝ}
+    {KH0 KH : ι → ι → ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hGlocal : ∀ y ∈ K, ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hNlocal : ∀ y ∈ K, ∀ i j,
+      ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j)
+        (parabolicClosedCylinder y (2 * timeRadius y) (2 * spaceRadius y)))
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hDB : ∀ a c d, 0 ≤ DB a c d)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j)
+    (hKG : KG0 ≤ KG) (hKD : KD0 ≤ KD) (hKH : ∀ i j, KH0 i j ≤ KH i j)
+    (hGbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c,
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 a c‖ ≤ C a c)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hD : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d, ‖D z a c d‖ ≤ DB a c d)
+    (hE : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d, ‖Earr z a c d‖ ≤ DB a c d)
+    (hKc : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c i j, ‖Kc z a c i j‖ ≤
+      HB a c i j)
+    (hKD0 : 0 ≤ KD0) (hR : 0 ≤ R)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ KG0 * R)
+    (hDdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D z a c d - Earr z a c d‖ ≤ KD0 * R)
+    (hHdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc z a c i j) : Matrix ι ι ℝ)‖ ≤ KH0 i j * R) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := ℝ) δ C DB HB KG KD KH * R)
+        (fun z : ℝ × M =>
+          ricciDeTurckSchematicMatrix
+              (show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)
+              (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (Earr z) (Kc z)) K := by
+  have hdetG_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det ≠ 0 := by
+    intro z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) e b (hKbase hz)
+  exact
+    ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_isCompact_of_local_closedCylinder_variable_of_primitive_le
+      (Kdom := K)
+      (M := fun z : ℝ × M =>
+        (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+      (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
+      hK hα timeRadius spaceRadius htime_pos hspace_pos hGlocal hNlocal hdetG_ne
+      hdetN_ne hDB hHB hKG hKD hKH hGbound hNbound hD hE hKc hKD0 hR hGdiff
+      hDdiff hHdiff
+
 /-- Existential point-local product-cylinder metric controls globalize the compact local-frame
 linear-radius function-level bounded-difference estimate for schematic Ricci-DeTurck coordinate
 RHS fields. -/
@@ -10885,6 +10956,74 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_mul_rad
       (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
       hK hα hlocal hdetG_ne hdetN_ne hDB hHB hGbound hNbound hD hE hKc
       hKD hR hGdiff hDdiff hHdiff
+
+/-- Existential point-local product-cylinder metric controls globalize the compact local-frame
+shared-radius schematic RHS estimate while allowing sharper primitive Lipschitz constants to be
+promoted to coarser shared constants. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_mul_radius_of_isCompact_of_exists_local_closedCylinder_of_primitive_le
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {DB : ι → ι → ι → ℝ}
+    {HB : ι → ι → ι → ι → ℝ} {R KG0 KD0 KG KD : ℝ}
+    {KH0 KH : ι → ι → ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hlocal : ∀ y ∈ K, ∃ timeRadius > 0, ∃ spaceRadius > 0,
+      (∀ i j,
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))) ∧
+      (∀ i j,
+        ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j)
+          (parabolicClosedCylinder y (2 * timeRadius) (2 * spaceRadius))))
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hDB : ∀ a c d, 0 ≤ DB a c d)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j)
+    (hKG : KG0 ≤ KG) (hKD : KD0 ≤ KD) (hKH : ∀ i j, KH0 i j ≤ KH i j)
+    (hGbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c,
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 a c‖ ≤ C a c)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hD : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d, ‖D z a c d‖ ≤ DB a c d)
+    (hE : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d, ‖Earr z a c d‖ ≤ DB a c d)
+    (hKc : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c i j, ‖Kc z a c i j‖ ≤
+      HB a c i j)
+    (hKD0 : 0 ≤ KD0) (hR : 0 ≤ R)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ KG0 * R)
+    (hDdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D z a c d - Earr z a c d‖ ≤ KD0 * R)
+    (hHdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc z a c i j) : Matrix ι ι ℝ)‖ ≤ KH0 i j * R) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := ℝ) δ C DB HB KG KD KH * R)
+        (fun z : ℝ × M =>
+          ricciDeTurckSchematicMatrix
+              (show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)
+              (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (Earr z) (Kc z)) K := by
+  have hdetG_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det ≠ 0 := by
+    intro z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) e b (hKbase hz)
+  exact
+    ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_isCompact_of_exists_local_closedCylinder_of_primitive_le
+      (Kdom := K)
+      (M := fun z : ℝ × M =>
+        (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+      (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
+      hK hα hlocal hdetG_ne hdetN_ne hDB hHB hKG hKD hKH hGbound hNbound hD hE
+      hKc hKD0 hR hGdiff hDdiff hHdiff
 
 /-- Finite-family compact local-frame bridge for function-level bounded differences of schematic
 Ricci-DeTurck coordinate right-hand sides.  One determinant lower bound is shared by all

@@ -712,7 +712,8 @@ compact-domain determinant-extraction variants, and the compact local-frame
 Gram-coordinate bridges now lift the same coarser constants. The raw finite
 product-cylinder cover bridge also has a coarser shared-radius form, with a
 matching local-frame Gram-coordinate version, and the raw point-dependent and
-existential local-cylinder variants expose the same coarser handoff.
+existential local-cylinder variants expose the same coarser handoff together
+with matching local-frame Gram-coordinate forms.
 The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the

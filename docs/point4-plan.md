@@ -2546,7 +2546,8 @@ readout. The raw finite product-cylinder cover bridge now also exposes the
 coarser shared-radius schematic RHS estimate directly, with a matching
 local-frame Gram-coordinate finite-cover form; the raw point-dependent and
 existential local-cylinder variants now have the same coarser shared-radius
-handoff. The interval
+handoff, and the local-frame Gram-coordinate layer has matching point-dependent
+and existential local-cylinder forms. The interval
 Banach-chart constructor now also has a real-constant coordinate-Lipschitz
 entry point, so those matrix constants no longer need to be prepackaged as
 `ℝ≥0` by callers. This is a
