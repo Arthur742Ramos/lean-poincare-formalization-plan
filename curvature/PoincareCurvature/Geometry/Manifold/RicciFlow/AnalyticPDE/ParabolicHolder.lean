@@ -1547,6 +1547,36 @@ theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
           (mul_le_mul (hA hp hq) (hvb hq) (norm_nonneg _) hHAd_nonneg)
     _ = (BA * Hv + Bv * HA) * dα := by ring
 
+/-- Differences of operator-valued applications inherit parabolic Holder control from one
+operator input, one vector input, and Holder controls of the operator and vector differences. -/
+theorem continuousLinearMap_apply_sub {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {A A' : ℝ × X → E →L[ℝ] F} {v v' : ℝ × X → E}
+    {BA HA Bv Hv BAd HAd Bvd Hvd : ℝ}
+    (hA : ParabolicHolderWith HA α A s)
+    (hv' : ParabolicHolderWith Hv α v' s)
+    (hAdiff : ParabolicHolderWith HAd α (fun z => A z - A' z) s)
+    (hvdiff : ParabolicHolderWith Hvd α (fun z => v z - v' z) s)
+    (hAb : ParabolicBoundedWith BA A s)
+    (hvb' : ParabolicBoundedWith Bv v' s)
+    (hAdb : ParabolicBoundedWith BAd (fun z => A z - A' z) s)
+    (hvdb : ParabolicBoundedWith Bvd (fun z => v z - v' z) s)
+    (hBA : 0 ≤ BA) (hBAd : 0 ≤ BAd) :
+    ParabolicHolderWith ((BA * Hvd + Bvd * HA) + (BAd * Hv + Bv * HAd)) α
+      (fun z => A z (v z) - A' z (v' z)) s := by
+  have hleft :
+      ParabolicHolderWith (BA * Hvd + Bvd * HA) α
+        (fun z => A z (v z - v' z)) s :=
+    hA.continuousLinearMap_apply hvdiff hAb hvdb hBA
+  have hright :
+      ParabolicHolderWith (BAd * Hv + Bv * HAd) α
+        (fun z => (A z - A' z) (v' z)) s :=
+    hAdiff.continuousLinearMap_apply hv' hAdb hvb' hBAd
+  have hsum := hleft.add hright
+  convert hsum using 1
+  ext z
+  simp [map_sub]
+
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicHolderWith C α u s)
     (hφ : LipschitzOnWith K φ (u '' s)) :
@@ -2960,6 +2990,30 @@ theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F]
     ‖A p (v p)‖ ≤ ‖A p‖ * ‖v p‖ := ContinuousLinearMap.le_opNorm (A p) (v p)
     _ ≤ BA * Bv := mul_le_mul (hA hp) (hv hp) (norm_nonneg _) hBA
 
+/-- Differences of operator-valued applications inherit sup-norm control from one operator
+input, one vector input, and bounded controls of the operator and vector differences. -/
+theorem continuousLinearMap_apply_sub {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {A A' : ℝ × X → E →L[ℝ] F} {v v' : ℝ × X → E}
+    {BA Bv BAd Bvd : ℝ}
+    (hA : ParabolicBoundedWith BA A s)
+    (hv' : ParabolicBoundedWith Bv v' s)
+    (hAdiff : ParabolicBoundedWith BAd (fun z => A z - A' z) s)
+    (hvdiff : ParabolicBoundedWith Bvd (fun z => v z - v' z) s)
+    (hBA : 0 ≤ BA) (hBAd : 0 ≤ BAd) :
+    ParabolicBoundedWith (BA * Bvd + BAd * Bv)
+      (fun z => A z (v z) - A' z (v' z)) s := by
+  have hleft :
+      ParabolicBoundedWith (BA * Bvd) (fun z => A z (v z - v' z)) s :=
+    hA.continuousLinearMap_apply hvdiff hBA
+  have hright :
+      ParabolicBoundedWith (BAd * Bv) (fun z => (A z - A' z) (v' z)) s :=
+    hAdiff.continuousLinearMap_apply hv' hBAd
+  have hsum := hleft.add hright
+  convert hsum using 1
+  ext z
+  simp [map_sub]
+
 theorem image_subset_closedBall_zero (hu : ParabolicBoundedWith B u s) :
     u '' s ⊆ Metric.closedBall (0 : E) B := by
   rintro y ⟨p, hp, rfl⟩
@@ -4001,18 +4055,11 @@ theorem continuousLinearMap_apply_sub {F : Type*} [NormedAddCommGroup F]
     ParabolicC0AlphaWith (BA * Bvd + BAd * Bv)
       ((BA * Hvd + Bvd * HA) + (BAd * Hv + Bv * HAd)) α
       (fun z => A z (v z) - A' z (v' z)) s := by
-  have hleft :
-      ParabolicC0AlphaWith (BA * Bvd) (BA * Hvd + Bvd * HA) α
-        (fun z => A z (v z - v' z)) s :=
-    hA.continuousLinearMap_apply hvdiff hBA
-  have hright :
-      ParabolicC0AlphaWith (BAd * Bv) (BAd * Hv + Bv * HAd) α
-        (fun z => (A z - A' z) (v' z)) s :=
-    hAdiff.continuousLinearMap_apply hv' hBAd
-  have hsum := hleft.add hright
-  convert hsum using 1
-  ext z
-  simp [map_sub]
+  constructor
+  · exact hA.bounded.continuousLinearMap_apply_sub hv'.bounded hAdiff.bounded
+      hvdiff.bounded hBA hBAd
+  · exact hA.holder.continuousLinearMap_apply_sub hv'.holder hAdiff.holder
+      hvdiff.holder hA.bounded hv'.bounded hAdiff.bounded hvdiff.bounded hBA hBAd
 
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F] {Bφ : ℝ} {K : ℝ≥0}
     {φ : E → F} (hu : ParabolicC0AlphaWith B H α u s)
