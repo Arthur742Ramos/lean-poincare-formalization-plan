@@ -1522,7 +1522,11 @@ be discharged from time-continuity of the glued trajectory:
 the general source-neighborhood consequence, and
 `Diffeomorph3GaugeFlowOn.of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin`
 uses it to replace the manual source-membership input by
-`ContinuousWithinAt (fun τ ↦ F τ x) (Icc tmin tmax) t`.
+`ContinuousWithinAt (fun τ ↦ F τ x) (Icc tmin tmax) t`.  Fixed-IVP and
+theorem-family intrinsic existence now expose the same continuity-based
+handoff through their
+`...of_inverseOn_univ_continuousWithinAt_vectorField_eq_nhdsWithin` constructors
+and proof-level `nonempty_...` forms.
 The theorem-family layer mirrors the same handoff through
 `IntrinsicDeTurckGaugeFlowExistenceFamily.ofPicardIccChartDerivative_of_inverseOn_univ_vectorField_eq_nhdsWithin`
 and its proof-level
