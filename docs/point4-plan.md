@@ -2704,7 +2704,9 @@ vector-inverse-matrix products, together with their difference forms, now have
 the same single-radius packaging under a common determinant lower bound.
 Finite vector dot products, bilinear contractions `v · M w`, and inverse
 bilinear contractions `v · M⁻¹ w`, including the corresponding difference
-forms, now also live in the same single-radius norm-ball API. It is still below the
+forms, now also live in the same single-radius norm-ball API. The
+inverse-Christoffel array and its entrywise-difference estimate now also have
+single-radius norm-ball variants under a common determinant lower bound. It is still below the
 actual `C^{2+α,1+α/2}` norm and Schauder estimate.
 
 **Suggested decomposition** (multi-session):
