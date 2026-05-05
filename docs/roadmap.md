@@ -1393,6 +1393,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      readouts into closed-common metric equality and full chosen-background
      fixed-IVP/family theorem packages, and upgrades those metric readouts to
      canonical connection equality.
+     The Banach ODE layer now has the matching endpoint-closure module
+     `AnalyticPDE/BanachEndpointClosure.lean`: restricted-terminal equality and
+     restricted-estimate Picard uniqueness close on the full common closed
+     interval by within-interval continuity.
      The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the

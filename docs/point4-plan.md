@@ -1912,10 +1912,10 @@ local model flows whose curves stay in a uniformly Lipschitz state region; the
 Banach ODE layer now also has an order-theoretic bridge from equality on every
 prescribed shorter terminal to equality on the open common interval, plus the
 state-set Lipschitz-on-`Icc` specialization needed when estimates are only known
-on those restricted terminals. The Picard layer also packages the corresponding
-existence theorem: an open state set and restricted-terminal Lipschitz estimates
-produce a state-preserving local solution with terminal control and uniqueness
-on the open common interval. The continuous space-time package now forgets to
+on those restricted terminals. `AnalyticPDE/BanachEndpointClosure.lean` closes
+that bridge to the common closed interval using within-interval continuity of
+the Banach ODE curves, and gives the corresponding restricted-estimate
+Picard-Lindelof existence theorem with closed-common uniqueness. The continuous space-time package now forgets to
 `LocalFlowSolution` and inherits the same uniqueness bridges directly.
 The finite-cover metric-locus layer also has positive-definite and symmetric
 Riemannian-metric-locus specializations of this restricted-estimate theorem, so
