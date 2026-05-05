@@ -56,6 +56,31 @@ theorem pi_c0AlphaNormLe_of_entries {ι A : Type*} [Fintype ι]
   ParabolicC0AlphaNormLe.pi (X := X) (α := α) (s := s)
     (N := N) (u := u) fun i => (h i).value_c0AlphaNormLe_self
 
+/-- The exported single-radius `C^{0,α}` constant for the primitive-input schematic
+Ricci-DeTurck matrix estimate after higher entry controls are projected to value-level controls. -/
+def ricciDeTurckSchematicMatrixBoundConst {n : Type*} [Fintype n] [DecidableEq n]
+    (δ : ℝ) (R : n → n → ℝ) (RD : n → n → n → ℝ)
+    (RH : n → n → n → n → ℝ) : ℝ :=
+  ((∑ i : n, ∑ j : n,
+      (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryBoundConst
+          (𝕜 := ℝ) δ R RH i j +
+        ParabolicC0AlphaOn.christoffelQuadraticRicciEntryBoundConst
+          (fun a b c =>
+            ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst
+              (𝕜 := ℝ) δ R RD a b c)
+          i j)) +
+    (∑ i : n, ∑ j : n,
+      (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryHolderConst
+          (𝕜 := ℝ) δ R R RH RH i j +
+        ParabolicC0AlphaOn.christoffelQuadraticRicciEntryHolderConst
+          (fun a b c =>
+            ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst
+              (𝕜 := ℝ) δ R RD a b c)
+          (fun a b c =>
+            ParabolicC0AlphaOn.matrixInvChristoffelEntryHolderConst
+              (𝕜 := ℝ) δ R R RD RD a b c)
+          i j)))
+
 /-- Entrywise higher primitive metric, first-derivative, and second-derivative controls feed
 the existing quantitative schematic Ricci-DeTurck RHS `C^{0,α}` estimate. -/
 theorem ricciDeTurckSchematicMatrix_of_entries {n : Type*} [Fintype n] [DecidableEq n]
@@ -70,25 +95,7 @@ theorem ricciDeTurckSchematicMatrix_of_entries {n : Type*} [Fintype n] [Decidabl
       (fun z => H z a b i j) s)
     (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
     ParabolicC0AlphaNormLe
-      ((∑ i : n, ∑ j : n,
-          (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryBoundConst
-              (𝕜 := ℝ) δ R RH i j +
-            ParabolicC0AlphaOn.christoffelQuadraticRicciEntryBoundConst
-              (fun a b c =>
-                ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst
-                  (𝕜 := ℝ) δ R RD a b c)
-              i j)) +
-        (∑ i : n, ∑ j : n,
-          (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryHolderConst
-              (𝕜 := ℝ) δ R R RH RH i j +
-            ParabolicC0AlphaOn.christoffelQuadraticRicciEntryHolderConst
-              (fun a b c =>
-                ParabolicC0AlphaOn.matrixInvChristoffelEntryBoundConst
-                  (𝕜 := ℝ) δ R RD a b c)
-              (fun a b c =>
-                ParabolicC0AlphaOn.matrixInvChristoffelEntryHolderConst
-                  (𝕜 := ℝ) δ R R RD RD a b c)
-              i j)))
+      (ricciDeTurckSchematicMatrixBoundConst (n := n) δ R RD RH)
       α
       (fun z : ℝ × X =>
         ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M z) (D z) (H z)) s := by
@@ -98,6 +105,65 @@ theorem ricciDeTurckSchematicMatrix_of_entries {n : Type*} [Fintype n] [Decidabl
     (fun a b c => (hD a b c).value_c0AlphaNormLe_self)
     (fun a b i j => (hH a b i j).value_c0AlphaNormLe_self)
     hδpos hdet
+
+/-- Finite-family direct schematic Ricci-DeTurck RHS `C^{0,α}` estimates from entrywise higher
+primitive controls. -/
+theorem ricciDeTurckSchematicMatrix_family_of_entries {κ n : Type*}
+    [Fintype n] [DecidableEq n]
+    {R : κ → n → n → ℝ} {RD : κ → n → n → n → ℝ}
+    {RH : κ → n → n → n → n → ℝ} {δ : ℝ}
+    {M : κ → ℝ × X → Matrix n n ℝ}
+    {D : κ → ℝ × X → n → n → n → ℝ}
+    {H : κ → ℝ × X → n → n → n → n → ℝ}
+    (hM : ∀ r a b, ParabolicC2AlphaNormLe (R r a b) α (fun z => M r z a b) s)
+    (hD : ∀ r a b c, ParabolicC2AlphaNormLe (RD r a b c) α
+      (fun z => D r z a b c) s)
+    (hH : ∀ r a b i j, ParabolicC2AlphaNormLe (RH r a b i j) α
+      (fun z => H r z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∀ r, ParabolicC0AlphaNormLe
+      (ricciDeTurckSchematicMatrixBoundConst (n := n) δ (R r) (RD r) (RH r))
+      α
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M r z) (D r z) (H r z)) s := by
+  intro r
+  exact ricciDeTurckSchematicMatrix_of_entries
+    (X := X) (α := α) (s := s) (δ := δ)
+    (R := R r) (RD := RD r) (RH := RH r)
+    (M := M r) (D := D r) (H := H r)
+    (hM r) (hD r) (hH r) hδpos (hdet r)
+
+/-- Pi-valued finite-family direct schematic Ricci-DeTurck RHS `C^{0,α}` estimate from entrywise
+higher primitive controls. -/
+theorem ricciDeTurckSchematicMatrix_pi_family_of_entries {κ n : Type*}
+    [Fintype κ] [Fintype n] [DecidableEq n]
+    {R : κ → n → n → ℝ} {RD : κ → n → n → n → ℝ}
+    {RH : κ → n → n → n → n → ℝ} {δ : ℝ}
+    {M : κ → ℝ × X → Matrix n n ℝ}
+    {D : κ → ℝ × X → n → n → n → ℝ}
+    {H : κ → ℝ × X → n → n → n → n → ℝ}
+    (hM : ∀ r a b, ParabolicC2AlphaNormLe (R r a b) α (fun z => M r z a b) s)
+    (hD : ∀ r a b c, ParabolicC2AlphaNormLe (RD r a b c) α
+      (fun z => D r z a b c) s)
+    (hH : ∀ r a b i j, ParabolicC2AlphaNormLe (RH r a b i j) α
+      (fun z => H r z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ParabolicC0AlphaNormLe
+      (∑ r, ricciDeTurckSchematicMatrixBoundConst (n := n) δ (R r) (RD r) (RH r))
+      α
+      (fun z : ℝ × X => fun r : κ =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M r z) (D r z) (H r z)) s :=
+  ParabolicC0AlphaNormLe.pi (X := X) (α := α) (s := s)
+    (N := fun r =>
+      ricciDeTurckSchematicMatrixBoundConst (n := n) δ (R r) (RD r) (RH r))
+    (u := fun z : ℝ × X => fun r : κ =>
+      ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix (M r z) (D r z) (H r z))
+    (ricciDeTurckSchematicMatrix_family_of_entries
+      (X := X) (α := α) (s := s) (δ := δ)
+      (R := R) (RD := RD) (RH := RH) (M := M) (D := D) (H := H)
+      hM hD hH hδpos hdet)
 
 /-- Entrywise higher parabolic difference controls with radii linear in a shared scalar give a
 pointwise matrix-norm difference bound with the summed entry radius. -/

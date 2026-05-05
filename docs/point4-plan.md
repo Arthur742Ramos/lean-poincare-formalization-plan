@@ -2731,8 +2731,10 @@ higher-to-matrix handoff: entrywise `C^{2+α,1+α/2}` controls package
 matrix-valued and finite-Pi-valued `C^{0,α}` controls, matrix-valued higher norm
 balls project to entry `C^{0,α}` norm balls, and higher primitive entry controls
 feed the direct schematic Ricci-DeTurck RHS `C^{0,α}` estimate and the existing
-single-radius schematic Ricci-DeTurck RHS difference theorem. It now also
-converts entrywise higher primitive difference controls with radii
+single-radius schematic Ricci-DeTurck RHS difference theorem. The direct
+schematic RHS constant is named at the higher layer and has finite-family and
+Pi-valued exact-sum norm-ball packaging. It now also converts entrywise higher
+primitive difference controls with radii
 linear in `dist u v` into the matrix-norm/array primitive bounds needed by the
 existing schematic RHS state-space `LipschitzOnWith` theorem, with a matching
 finite-family wrapper, Pi-valued finite-product `C^{0,α}` and Lipschitz
