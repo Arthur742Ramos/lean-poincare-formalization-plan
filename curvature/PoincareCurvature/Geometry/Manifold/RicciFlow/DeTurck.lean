@@ -1815,6 +1815,30 @@ theorem
           (I := I) (M := M) sol₁ sol₂ hmetric hτ y u v)
       ht hσ
 
+/-- Build the chosen-background DeTurck theorem package from existence and
+metric uniqueness on every prescribed shorter common terminal. -/
+def ChosenIntrinsicDeTurckLocalExistenceUniqueness.ofRestrictedMetricReadout
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (hexists : Nonempty (ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp))
+    (hmetric : ∀ sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ {S : ℝ},
+        ivp.initialTime < S → S ≤ sol₁.1.terminalTime → S ≤ sol₂.1.terminalTime →
+        ∀ {t : ℝ}, t ∈ Set.Icc ivp.initialTime S → ∀ (x : M) (u v : TM x),
+          metricTensor (I := I) (M := M)
+            sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+              metricTensor (I := I) (M := M)
+                sol₂.1.toIntrinsicDeTurckSolution.metric t x u v) :
+    ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  exists_solution := hexists
+  unique_metric := by
+    intro sol₁ sol₂ t ht x u v
+    exact
+      chosenIntrinsicDeTurckLocalSolution_metric_eq_on_common_interval_of_restricted_interval
+        (I := I) (M := M) sol₁ sol₂ (hmetric sol₁ sol₂) ht x u v
+
 /-- Convert the intrinsic compact theorem package to the chosen-background DeTurck one. -/
 def IntrinsicLocalExistenceUniqueness.toChosenIntrinsicDeTurck
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}

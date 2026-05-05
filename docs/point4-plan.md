@@ -1866,6 +1866,10 @@ derives equality on the whole common closed interval from prescribed
 shorter-terminal metric readouts, and
 `chosenIntrinsicDeTurckLocalSolution_connection_eq_on_common_interval_of_restricted_interval_metric`
 upgrades the same metric input to closed-common canonical connection equality.
+The constructor
+`ChosenIntrinsicDeTurckLocalExistenceUniqueness.ofRestrictedMetricReadout`
+then packages existence plus those restricted-terminal metric readouts as the
+full chosen-background DeTurck theorem package.
 The corresponding connection-level wrappers
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_restricted_interval_of_shrunk_symmetricCarrier`,
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_Ico_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier`,
@@ -2398,8 +2402,9 @@ readouts on `Ico t₀ (min T₁ T₂)` under the existing selected-shrink contai
 hypothesis. The DeTurck/smooth-realization stack now also closes any
 chosen-background open-common metric readout to the closed common interval by
 continuity from the stored time derivatives, turns prescribed shorter-terminal
-metric readouts into closed-common metric equality, and promotes those metric
-readouts to canonical connection equality. At the vector-bundle
+metric readouts into closed-common metric equality and full chosen-background
+theorem packages, and promotes those metric readouts to canonical connection
+equality. At the vector-bundle
 smooth-approximation layer, the local coordinate-map boundedness hypothesis is
 now discharged for continuous Riemannian vector bundles:
 `RiemannianSectionSmoothApprox` derives

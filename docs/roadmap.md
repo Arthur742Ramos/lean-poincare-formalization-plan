@@ -1390,8 +1390,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      DeTurck/smooth-realization stack also closes chosen-background open-common
      metric equality to the closed common interval using the stored
      time-derivative continuity, turns prescribed shorter-terminal metric
-     readouts into closed-common metric equality, and upgrades those metric
-     readouts to canonical connection equality.
+     readouts into closed-common metric equality and full chosen-background
+     theorem packages, and upgrades those metric readouts to canonical
+     connection equality.
      The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
