@@ -1,6 +1,6 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace
 public import Mathlib.Analysis.Matrix.Normed
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
@@ -24,6 +24,36 @@ open scoped Topology NNReal BigOperators Matrix.Norms.Elementwise
 
 namespace RicciFlow
 namespace AnalyticPDE
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Entrywise single-radius parabolic `C^{0,α}` control packages as matrix-valued control, with
+the matrix radius the sum of the entry radii. -/
+theorem matrix_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] {N : m → n → ℝ} {M : ℝ × X → Matrix m n A}
+    (h : ∀ i j, ParabolicC0AlphaNormLe (N i j) α (fun z => M z i j) s) :
+    ParabolicC0AlphaNormLe (∑ i, ∑ j, N i j) α M s := by
+  simpa using
+    (ParabolicC0AlphaNormLe.pi (X := X) (F := n → A) (α := α) (s := s)
+      (N := fun i => ∑ j, N i j) (u := fun z i j => M z i j) fun i =>
+        ParabolicC0AlphaNormLe.pi (X := X) (F := A) (α := α) (s := s)
+          (N := N i) (u := fun z j => M z i j) (h i))
+
+/-- A matrix-valued single-radius parabolic `C^{0,α}` control projects to each entry with the
+same radius. -/
+theorem matrix_apply {m n A : Type*} [Fintype m] [Fintype n] [NormedAddCommGroup A]
+    {N : ℝ} {M : ℝ × X → Matrix m n A}
+    (h : ParabolicC0AlphaNormLe N α M s) (i : m) (j : n) :
+    ParabolicC0AlphaNormLe N α (fun z => M z i j) s := by
+  rcases h with ⟨B, hB, H, hH, hsum, hctrl⟩
+  exact ⟨B, hB, H, hH, hsum,
+    ParabolicC0AlphaWith.eval (ParabolicC0AlphaWith.eval hctrl i) j⟩
+
+end ParabolicC0AlphaNormLe
+
 namespace ParabolicC0AlphaOn
 
 variable {X : Type*} [PseudoMetricSpace X]

@@ -201,7 +201,10 @@ compact-piece families, matching the finite-cover shape used by the existing
 continuous-section Banach model; those readouts determine functions on the
 covered set, are injective when the compact pieces cover all time-space, and
 their compact sup-norm differences, including the finite product readout norm,
-are controlled by the same single-radius `C^{0,α}` difference bound.
+are controlled by the same single-radius `C^{0,α}` difference bound. The
+matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
+that single-radius control, so matrix estimates can consume and produce the
+same norm-ball language.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric
