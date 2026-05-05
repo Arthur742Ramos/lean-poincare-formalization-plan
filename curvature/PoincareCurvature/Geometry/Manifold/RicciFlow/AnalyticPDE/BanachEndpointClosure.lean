@@ -19,7 +19,7 @@ below add the endpoint using within-interval continuity of the ODE curves.
 @[expose] public noncomputable section
 
 open Set
-open scoped NNReal Topology
+open scoped Bundle Manifold ContDiff NNReal Topology
 
 namespace RicciFlow
 namespace AnalyticPDE
@@ -343,6 +343,225 @@ theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_coordwiseDefect_isPic
         (M := M) (F := F) (W := W)
         x0 et het Kc hKc Ko hKo hKoEq hcover)
       hdefect_A
+
+/-- Continuous-Riemannian-metric initial-data version of the endpoint-closed
+restricted-terminal coordinatewise-defect bridge. -/
+theorem exists_unique_from_continuousRiemannianMetric_of_coordwiseDefect_isPicardLindelof_lipschitzOn_restricted_Icc_closed
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F W)
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩
+      (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover) a 0 L Kpic)
+    (hLip : ∀ {S : ℝ}, t₀ < S → S ≤ T → ∀ t ∈ Icc t₀ S, LipschitzOnWith Kstate
+      (A t) (positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover))
+    (hdefect_A : ∀ t x, x ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover →
+      _root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap
+        (F := F) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover (A t x) = 0) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (positiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+            et Kc hKc Ko hKo hKoEq hcover),
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn A
+          (positiveDefiniteLocus (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀
+          (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover),
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover := by
+  exact
+    exists_unique_in_symmetricPositiveDefiniteLocus_of_coordwiseDefect_isPicardLindelof_lipschitzOn_restricted_Icc_closed
+      (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete hT hA
+      (mem_symmetricPositiveDefiniteLocus_of_continuousRiemannianMetric
+        (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover g₀)
+      hLip hdefect_A
+
+/-- Continuous-Riemannian-metric initial-data version of the endpoint-closed
+restricted-terminal non-autonomous symmetric-vector-field bridge. -/
+theorem exists_unique_from_continuousRiemannianMetric_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn_restricted_Icc_closed
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover))
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F W)
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩
+      (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover) a 0 L Kpic)
+    (hLip : ∀ {S : ℝ}, t₀ < S → S ≤ T → ∀ t ∈ Icc t₀ S, LipschitzOnWith Kstate
+      (A t) (positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover))
+    (hA_symm : ∀ t x, x ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover →
+      A t x ∈ symmetricLocus (M := M) (F := F) (W := W)
+        et Kc hKc Ko hKo hKoEq hcover) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (positiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover) t₀
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+            et Kc hKc Ko hKo hKoEq hcover),
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn A
+          (positiveDefiniteLocus (M := M) (F := F) (W := W)
+            et Kc hKc Ko hKo hKoEq hcover) t₀
+          (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover),
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover := by
+  exact
+    exists_unique_from_continuousRiemannianMetric_of_coordwiseDefect_isPicardLindelof_lipschitzOn_restricted_Icc_closed
+      (M := M) (F := F) (W := W)
+      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete g₀ hT hA hLip
+      (by
+        intro t x hx
+        exact (_root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff
+          (M := M) (F := F) (W := W)
+          x0 et het Kc hKc Ko hKo hKoEq hcover (A t x)).2 (hA_symm t x hx))
+
+/-- Endpoint-closed restricted-terminal time-dependent Ricci-DeTurck Banach-chart bridge. -/
+theorem exists_unique_from_continuousRiemannianMetric_of_timeDependent_geometricRicciDeTurckRHS_isPicardLindelof_lipschitzOn_restricted_Icc_closed
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover))
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _))
+    {A : ℝ →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {a L Kpic Kstate : ℝ≥0}
+    (hA : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩
+      (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover) a 0 L Kpic)
+    (hLip : ∀ {S : ℝ}, t₀ < S → S ≤ T → ∀ t ∈ Icc t₀ S, LipschitzOnWith Kstate
+      (A t) (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+        et Kc hKc Ko hKo hKoEq hcover))
+    (hA_geometric : ∀ τ s, s ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ∃ (g : MetricFamily (I := I) (M := M))
+        (background : ConnectionFamily (I := I) (M := M)),
+        ∀ (x : M) (u v : TangentSpace I x),
+          A τ s x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background τ x u v) :
+    ∃ sol : BanachEvolutionLocalSolutionIn A
+        (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover) t₀
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover),
+      sol.terminalTime ≤ T ∧
+      (∀ sol' : BanachEvolutionLocalSolutionIn A
+          (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+            et Kc hKc Ko hKo hKoEq hcover) t₀
+          (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover),
+        EqOn sol.curve sol'.curve
+          (Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime →
+        sol.curve t ∈ symmetricPositiveDefiniteLocus
+          (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+          et Kc hKc Ko hKo hKoEq hcover := by
+  exact
+    exists_unique_from_continuousRiemannianMetric_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn_restricted_Icc_closed
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete g₀ hT hA hLip
+      (by
+        intro τ s hs
+        rcases hA_geometric τ s hs with ⟨g, background, hAeq⟩
+        intro x u v
+        calc
+          A τ s x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background τ x u v :=
+            hAeq x u v
+          _ = intrinsicRicciDeTurckRHS (I := I) (M := M) g background τ x v u :=
+            intrinsicRicciDeTurckRHS_symm (I := I) (M := M) g background τ x u v
+          _ = A τ s x v u := (hAeq x v u).symm)
 
 /-- Endpoint-closed symmetric metric-locus bridge for local estimates supplied
 on every prescribed shorter terminal. -/
