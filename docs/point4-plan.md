@@ -631,6 +631,15 @@ identity keeps the raw gauge velocity. The pushed-forward geometric-slot
 variants for the same time-difference endpoints now mirror that direct-velocity
 shape, preserving scalar identities in actual tangent vectors without exposing
 the centered chart change.
+The closed-Picard variational-local-flow full-field/time-difference endpoints
+now also have direct raw-velocity geometric-slot forms,
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifferenceWithin_hasFDerivAt_variationalLocalFlowWithin_geometricValue_self`
+and
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_timeDifferenceWithin_hasFDerivAt_variationalLocalFlowWithin_geometricValue_self`,
+so finite-cover readouts at the variational base point can keep
+`X t (G.maps3 t x)` in the scalar identity while closed-interval base-flow
+agreement is used only to move the derivative endpoint to the raw centered
+chart.
 This package now routes all the way to tensor time-regularity, including a
 closed-Picard `Ioo` specialization. A variational-flow endpoint now discharges
 the tangent-coordinate-map derivative in this time-difference formulation, so

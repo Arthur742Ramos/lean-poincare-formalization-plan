@@ -1338,6 +1338,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
               now derives the raw gauge velocity from within-time-set agreement
               with the variational local flow, so endpoint scalar identities can
               be stated using the model ODE vector field `f(t, y(t))`. The
+              closed-Picard full-field/time-difference route now also exposes
+              direct raw-velocity geometric-slot companions,
+              `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifferenceWithin_hasFDerivAt_variationalLocalFlowWithin_geometricValue_self`
+              and
+              `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_timeDifferenceWithin_hasFDerivAt_variationalLocalFlowWithin_geometricValue_self`,
+              for finite-cover readouts whose scalar identity is already stated
+              with `X t (G.maps3 t x)`. The
               matching `..._tangentWithin...` variants keep both base-flow and
               tangent-map identifications in the closed-interval within filter,
               matching Picard endpoint outputs before any neighborhood-time
