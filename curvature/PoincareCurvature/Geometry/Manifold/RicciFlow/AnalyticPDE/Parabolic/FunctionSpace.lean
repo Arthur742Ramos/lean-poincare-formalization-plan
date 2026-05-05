@@ -23,6 +23,107 @@ open scoped Topology
 namespace RicciFlow
 namespace AnalyticPDE
 
+/-- Single-radius parabolic `C^{0,α}` control.  The radius `N` dominates the sum of a sup
+constant and a Holder constant.  This is the closed-ball predicate for the eventual
+`C^{0,α}` norm, kept constructive so later estimates can choose explicit constants. -/
+def ParabolicC0AlphaNormLe {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (N α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
+  ∃ B ≥ 0, ∃ H ≥ 0, B + H ≤ N ∧ ParabolicC0AlphaWith B H α u s
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+variable {N N₁ N₂ α : ℝ} {u v : ℝ × X → E} {s t : Set (ℝ × X)}
+
+theorem nonneg (h : ParabolicC0AlphaNormLe N α u s) : 0 ≤ N := by
+  rcases h with ⟨B, hB, H, hH, hBH, _⟩
+  exact (add_nonneg hB hH).trans hBH
+
+theorem c0AlphaOn (h : ParabolicC0AlphaNormLe N α u s) :
+    ParabolicC0AlphaOn α u s := by
+  rcases h with ⟨B, hB, H, hH, _, hBH⟩
+  exact ⟨B, hB, H, hH, hBH⟩
+
+theorem of_c0AlphaWith {B H : ℝ} (hB : 0 ≤ B) (hH : 0 ≤ H)
+    (h : ParabolicC0AlphaWith B H α u s) :
+    ParabolicC0AlphaNormLe (B + H) α u s :=
+  ⟨B, hB, H, hH, le_rfl, h⟩
+
+theorem exists_of_c0AlphaOn (h : ParabolicC0AlphaOn α u s) :
+    ∃ N ≥ 0, ParabolicC0AlphaNormLe N α u s := by
+  rcases h with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B + H, add_nonneg hB hH, of_c0AlphaWith hB hH hBH⟩
+
+theorem mono_const (h : ParabolicC0AlphaNormLe N₁ α u s) (hNN : N₁ ≤ N₂) :
+    ParabolicC0AlphaNormLe N₂ α u s := by
+  rcases h with ⟨B, hB, H, hH, hsum, hBH⟩
+  exact ⟨B, hB, H, hH, hsum.trans hNN, hBH⟩
+
+theorem mono_set (h : ParabolicC0AlphaNormLe N α u s) (hst : t ⊆ s) :
+    ParabolicC0AlphaNormLe N α u t := by
+  rcases h with ⟨B, hB, H, hH, hsum, hBH⟩
+  exact ⟨B, hB, H, hH, hsum, hBH.mono_set hst⟩
+
+theorem zero :
+    ParabolicC0AlphaNormLe 0 α (fun _ : ℝ × X => (0 : E)) s := by
+  refine ⟨0, le_rfl, 0, le_rfl, by simp, ?_⟩
+  simpa using
+    (ParabolicC0AlphaWith.const (X := X) (E := E) (α := α) (s := s) (0 : E)
+      (by simp) le_rfl)
+
+theorem const (c : E) :
+    ParabolicC0AlphaNormLe ‖c‖ α (fun _ : ℝ × X => c) s := by
+  refine ⟨‖c‖, norm_nonneg c, 0, le_rfl, by simp, ?_⟩
+  exact ParabolicC0AlphaWith.const (X := X) (α := α) (s := s) c le_rfl le_rfl
+
+theorem add (hu : ParabolicC0AlphaNormLe N₁ α u s)
+    (hv : ParabolicC0AlphaNormLe N₂ α v s) :
+    ParabolicC0AlphaNormLe (N₁ + N₂) α (fun z => u z + v z) s := by
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hu_sum, hu_ctrl⟩
+  rcases hv with ⟨Bv, hBv, Hv, hHv, hv_sum, hv_ctrl⟩
+  refine ⟨Bu + Bv, add_nonneg hBu hBv, Hu + Hv, add_nonneg hHu hHv, ?_,
+    hu_ctrl.add hv_ctrl⟩
+  linarith
+
+theorem neg (hu : ParabolicC0AlphaNormLe N α u s) :
+    ParabolicC0AlphaNormLe N α (fun z => -u z) s := by
+  rcases hu with ⟨B, hB, H, hH, hsum, hctrl⟩
+  exact ⟨B, hB, H, hH, hsum, hctrl.neg⟩
+
+theorem sub (hu : ParabolicC0AlphaNormLe N₁ α u s)
+    (hv : ParabolicC0AlphaNormLe N₂ α v s) :
+    ParabolicC0AlphaNormLe (N₁ + N₂) α (fun z => u z - v z) s := by
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hu_sum, hu_ctrl⟩
+  rcases hv with ⟨Bv, hBv, Hv, hHv, hv_sum, hv_ctrl⟩
+  refine ⟨Bu + Bv, add_nonneg hBu hBv, Hu + Hv, add_nonneg hHu hHv, ?_,
+    hu_ctrl.sub hv_ctrl⟩
+  linarith
+
+theorem norm (hu : ParabolicC0AlphaNormLe N α u s) :
+    ParabolicC0AlphaNormLe N α (fun z => ‖u z‖) s := by
+  rcases hu with ⟨B, hB, H, hH, hsum, hctrl⟩
+  exact ⟨B, hB, H, hH, hsum, hctrl.norm⟩
+
+theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
+    (c : 𝕜) (hu : ParabolicC0AlphaNormLe N α u s) :
+    ParabolicC0AlphaNormLe (‖c‖ * N) α (fun z => c • u z) s := by
+  rcases hu with ⟨B, hB, H, hH, hsum, hctrl⟩
+  refine ⟨‖c‖ * B, mul_nonneg (norm_nonneg c) hB,
+    ‖c‖ * H, mul_nonneg (norm_nonneg c) hH, ?_, hctrl.smul c⟩
+  calc
+    ‖c‖ * B + ‖c‖ * H = ‖c‖ * (B + H) := by ring
+    _ ≤ ‖c‖ * N := mul_le_mul_of_nonneg_left hsum (norm_nonneg c)
+
+theorem continuousOn (h : ParabolicC0AlphaNormLe N α u s) (hα : 0 < α) :
+    ContinuousOn u s :=
+  h.c0AlphaOn.continuousOn hα
+
+theorem uniformContinuousOn (h : ParabolicC0AlphaNormLe N α u s) (hα : 0 < α) :
+    UniformContinuousOn u s :=
+  h.c0AlphaOn.uniformContinuousOn hα
+
+end ParabolicC0AlphaNormLe
+
 /-- Scalar multiples and sums of parabolic `C^{0,α}` functions form a real submodule of all
 time-space functions. -/
 def parabolicC0AlphaSubmodule

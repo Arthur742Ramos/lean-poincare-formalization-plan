@@ -2680,13 +2680,16 @@ coordinate Lipschitz bridge toward the fibrewise RHS hypothesis above, not a
 Schauder estimate or the actual Banach-chart construction.
 The first function-space module for this item is now
 `AnalyticPDE/Parabolic/FunctionSpace.lean`: it packages
-`ParabolicC0AlphaOn` as a real submodule of all time-space functions, proves
-restriction to smaller domains as a linear map, and gives positive-exponent
-linear readouts into `ContinuousMap`s on compact time-space pieces and compact
-piece families, with determination on the covered set and injectivity for
-global compact-piece covers. This is the finite-cover `C^{0,α}` analogue of the
-existing continuous-section compact-readout layer; it is still below the
-actual `C^{2+α,1+α/2}` norm and Schauder estimate.
+single-radius `ParabolicC0AlphaNormLe` balls from bounded plus Holder
+constants and proves the expected algebra, restriction, continuity, and uniform
+continuity rules. It also packages `ParabolicC0AlphaOn` as a real submodule of
+all time-space functions, proves restriction to smaller domains as a linear
+map, and gives positive-exponent linear readouts into `ContinuousMap`s on
+compact time-space pieces and compact piece families, with determination on the
+covered set and injectivity for global compact-piece covers. This is the
+finite-cover `C^{0,α}` analogue of the existing continuous-section
+compact-readout layer; it is still below the actual `C^{2+α,1+α/2}` norm and
+Schauder estimate.
 
 **Suggested decomposition** (multi-session):
 
