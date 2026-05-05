@@ -3835,6 +3835,89 @@ theorem matrix_mul_sub_with {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n
       exact matrix_mul_entry_sub_with (M := M) (M' := M') (N := N) (N' := N')
         hM hN' hMdiff hNdiff hBM hBMd i j
 
+end ParabolicC0AlphaOn
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Entrywise single-radius control of two finite matrices packages matrix multiplication with the
+corresponding quantitative product radius. -/
+theorem matrix_mul_of_entries {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n]
+    [NormedRing A] {RM : l → m → ℝ} {RN : m → n → ℝ}
+    {M : ℝ × X → Matrix l m A} {N : ℝ × X → Matrix m n A}
+    (hM : ∀ i k, ParabolicC0AlphaNormLe (RM i k) α (fun z => M z i k) s)
+    (hN : ∀ k j, ParabolicC0AlphaNormLe (RN k j) α (fun z => N z k j) s) :
+    ParabolicC0AlphaNormLe
+      ((∑ i : l, ∑ j : n,
+          ParabolicC0AlphaOn.matrixMulEntryBoundConst RM RN i j) +
+        (∑ i : l, ∑ j : n,
+          ParabolicC0AlphaOn.matrixMulEntryHolderConst RM RM RN RN i j))
+      α (fun z => M z * N z) s := by
+  have hRM : ∀ i k, 0 ≤ RM i k := fun i k => (hM i k).nonneg
+  have hRN : ∀ k j, 0 ≤ RN k j := fun k j => (hN k j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        ParabolicC0AlphaOn.matrixMulEntryBoundConst_nonneg hRM hRN i j)
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        ParabolicC0AlphaOn.matrixMulEntryHolderConst_nonneg hRM hRM hRN hRN i j)
+    (ParabolicC0AlphaOn.matrix_mul_with
+      (M := M) (N := N) (BM := RM) (HM := RM) (BN := RN) (HN := RN)
+      hRM hRM hRN hRN
+      (fun i k => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i k))
+      (fun k j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hN k j)))
+
+/-- Entrywise single-radius control of product factors and their differences packages matrix
+product differences with the corresponding quantitative product-difference radius. -/
+theorem matrix_mul_sub_of_entries {l m n A : Type*} [Fintype l] [Fintype m] [Fintype n]
+    [NormedRing A] {RM : l → m → ℝ} {RN' : m → n → ℝ}
+    {RMd : l → m → ℝ} {RNd : m → n → ℝ}
+    {M M' : ℝ × X → Matrix l m A} {N N' : ℝ × X → Matrix m n A}
+    (hM : ∀ i k, ParabolicC0AlphaNormLe (RM i k) α (fun z => M z i k) s)
+    (hN' : ∀ k j, ParabolicC0AlphaNormLe (RN' k j) α (fun z => N' z k j) s)
+    (hMdiff : ∀ i k, ParabolicC0AlphaNormLe (RMd i k) α
+      (fun z => M z i k - M' z i k) s)
+    (hNdiff : ∀ k j, ParabolicC0AlphaNormLe (RNd k j) α
+      (fun z => N z k j - N' z k j) s) :
+    ParabolicC0AlphaNormLe
+      ((∑ i : l, ∑ j : n,
+          ParabolicC0AlphaOn.matrixMulEntrySubBoundConst RM RN' RMd RNd i j) +
+        (∑ i : l, ∑ j : n,
+          ParabolicC0AlphaOn.matrixMulEntrySubHolderConst
+            RM RM RN' RN' RMd RMd RNd RNd i j))
+      α (fun z => M z * N z - M' z * N' z) s := by
+  have hRM : ∀ i k, 0 ≤ RM i k := fun i k => (hM i k).nonneg
+  have hRN' : ∀ k j, 0 ≤ RN' k j := fun k j => (hN' k j).nonneg
+  have hRMd : ∀ i k, 0 ≤ RMd i k := fun i k => (hMdiff i k).nonneg
+  have hRNd : ∀ k j, 0 ≤ RNd k j := fun k j => (hNdiff k j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        ParabolicC0AlphaOn.matrixMulEntrySubBoundConst_nonneg hRM hRN' hRMd hRNd i j)
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        ParabolicC0AlphaOn.matrixMulEntrySubHolderConst_nonneg
+          hRM hRM hRN' hRN' hRMd hRMd hRNd hRNd i j)
+    (ParabolicC0AlphaOn.matrix_mul_sub_with
+      (M := M) (M' := M') (N := N) (N' := N')
+      (BM := RM) (HM := RM) (BN' := RN') (HN' := RN')
+      (BMd := RMd) (HMd := RMd) (BNd := RNd) (HNd := RNd)
+      hRM hRM hRN' hRN' hRMd hRMd hRNd hRNd
+      (fun i k => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i k))
+      (fun k j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hN' k j))
+      (fun i k => ParabolicC0AlphaNormLe.c0AlphaWith_self (hMdiff i k))
+      (fun k j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hNdiff k j)))
+
+end ParabolicC0AlphaNormLe
+
+namespace ParabolicC0AlphaOn
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
 /-- Entries of finite matrix products are pointwise Lipschitz on bounded left/right factors. -/
 theorem matrix_mul_entry_norm_sub_le {l m n A : Type*} [Fintype m] [NormedRing A]
     {BM : l → m → ℝ} {BN : m → n → ℝ}
