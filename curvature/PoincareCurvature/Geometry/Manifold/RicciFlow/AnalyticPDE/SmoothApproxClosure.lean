@@ -358,6 +358,88 @@ theorem closure_smooth_spd_of_metric_locus_preferredBilinear_of_continuousRieman
         (fun i ↦ trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
       hspd
 
+/-- Build an interval-scoped Ricci-DeTurck Banach chart from Picard data, geometric
+identification, and a fibrewise Lipschitz estimate.  The continuous Riemannian tangent-bundle
+structure supplies the finite-cover inverse-trivialization bound, so the chart's section-space
+Lipschitz constant is chosen existentially instead of being an explicit input. -/
+def timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallFiberDistLe
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F TM I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [_root_.Bundle.RiemannianBundle TM]
+    [IsContinuousRiemannianBundle (B := M) F TM]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F TM)
+    {A : ℝ →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {a L Kpic Kfiber : ℝ≥0}
+    (picard : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩
+      (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover) a 0 L Kpic)
+    (hfiber : ∀ τ, τ ∈ Icc t₀ T → ∀ ⦃s⦄, s ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+      ∀ ⦃t⦄, t ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+      ∀ x : M, @dist (BilW x)
+        (ContinuousLinearMap.toPseudoMetricSpace
+          (𝕜 := ℝ) (𝕜₂ := ℝ) (E := TM x) (F := TM x →L[ℝ] ℝ)
+          (σ₁₂ := RingHom.id ℝ)).toDist
+        ((A τ s) x) ((A τ t) x) ≤ (Kfiber : ℝ) * dist s t)
+    (geometric : ∀ τ s, s ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+      ∃ (g : MetricFamily (I := I) (M := M))
+        (background : ConnectionFamily (I := I) (M := M)),
+        ∀ (x : M) (u v : TangentSpace I x),
+          A τ s x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background τ x u v) :
+    Σ Kstate : ℝ≥0,
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate := by
+  let hKstate : ∃ Kstate : ℝ≥0,
+      ∀ τ ∈ Icc t₀ T,
+        LipschitzOnWith Kstate (A τ)
+          (positiveDefiniteLocus
+            (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover) :=
+    exists_preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le
+      (M := M) (F := F) (W := TM) (x0 := x0)
+      (timeSet := Icc t₀ T) (et := et) het
+      (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+      (hKoEq := hKoEq) (hcover := hcover)
+      (stateSet := positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover)
+      (A := A) (K := Kfiber) hfiber
+  let Kstate : ℝ≥0 := Classical.choose hKstate
+  have hLip : ∀ τ ∈ Icc t₀ T,
+      LipschitzOnWith Kstate (A τ)
+        (positiveDefiniteLocus
+          (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover) :=
+    Classical.choose_spec hKstate
+  exact ⟨Kstate,
+    { A := A
+      hT := hT
+      picard := picard
+      lipschitzOn_Icc := hLip
+      geometric := geometric }⟩
+
 /-- Interval Ricci-DeTurck charts can use the preferred-cover smooth-density theorem directly in the
 Picard shrink step.  The remaining density inputs are the finite-cover inverse bound used by the
 transported Banach norm and the local tangent-trivialization bound used to smooth bilinear sections. -/

@@ -2460,7 +2460,11 @@ now provides the shared finite-cover inverse-trivialization bound consumed by
 both smooth-density and Lipschitz handoffs, and
 `exists_preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le`
 uses it to produce an existential `LipschitzOnWith` constant for time-family
-preferred-cover fields from a fibrewise estimate alone. These are still handoff theorems; they do not
+preferred-cover fields from a fibrewise estimate alone.
+`timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallFiberDistLe`
+then packages an interval-scoped geometric Ricci-DeTurck Banach chart while
+choosing `Kstate` from Picard data, geometric identification, and that fibrewise
+estimate. These are still handoff theorems; they do not
 prove the Ricci-DeTurck Schauder estimates or construct the missing Banach chart.
 It also derives that finite-cover inverse
 bound from compactness of the cover pieces

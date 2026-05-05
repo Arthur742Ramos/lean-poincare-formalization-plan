@@ -671,7 +671,9 @@ the Ricci-DeTurck Banach-chart records. The finite-cover inverse-trivialization
 bound used by those estimates is now named separately as a compactness theorem,
 and the smooth-approximation layer now combines it with the fibrewise estimate
 handoff to produce an existential section-space Lipschitz constant for
-time-family preferred-cover fields. The same public layer
+time-family preferred-cover fields. The Ricci-DeTurck smooth-closure layer now
+uses that to build an interval Banach-chart package while choosing `Kstate`
+from fibrewise estimates. The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
 Levi-Civita correction ingredients (`toDual`, fiberwise composition,
