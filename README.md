@@ -698,6 +698,9 @@ differences. Those linear-radius estimates now also have local finite-cover,
 point-dependent local-cylinder, and existential point-local cylinder variants
 in both the raw matrix and local-frame Gram layers, so compact coordinate
 Lipschitz checks can consume local parabolic-cylinder regularity data directly.
+The raw matrix layer also turns primitive state-space Lipschitz bounds, with a
+uniform determinant lower bound, into `LipschitzOnWith` statements for each
+schematic RHS coordinate and for finite RHS families.
 The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the

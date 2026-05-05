@@ -2529,7 +2529,10 @@ determinant lower bound across all matrix families. `LocalFrameGram` lifts both
 the single-frame and finite-family estimates to compact local-frame Gram
 coordinates. The raw matrix and local-frame layers now also expose the same
 linear-radius handoff after finite product-cylinder covers, point-dependent
-local cylinders, and existential point-local cylinder data. This is a
+local cylinders, and existential point-local cylinder data. `MatrixC0Alpha`
+also converts primitive state-space Lipschitz hypotheses and a uniform
+determinant lower bound into pointwise `LipschitzOnWith` estimates for the
+schematic RHS coordinate map, including finite-family form. This is a
 coordinate Lipschitz bridge toward the fibrewise RHS hypothesis above, not a
 Schauder estimate or the actual Banach-chart construction.
 

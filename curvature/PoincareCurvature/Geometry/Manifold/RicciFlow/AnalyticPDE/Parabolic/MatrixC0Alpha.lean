@@ -11086,6 +11086,117 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius {n 𝕜 : Ty
       hδpos hdetM hdetN
   simpa [ricciDeTurckSchematicDiffBoundConst_mul_radius] using hbase
 
+/-- State-space Lipschitz bridge for the finite schematic Ricci-DeTurck RHS.  If the primitive
+matrix, first-derivative, and principal-coefficient inputs are Lipschitz on a state set with
+constants `KM`, `KD`, and `KH`, and one determinant lower bound works for every state in the set,
+then each time-space coordinate of the schematic RHS is Lipschitz on that state set. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le
+    {Y n 𝕜 : Type*} [PseudoMetricSpace Y] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ KM KD : ℝ} {KH : n → n → ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {M : Y → ℝ × X → Matrix n n 𝕜}
+    {D : Y → ℝ × X → n → n → n → 𝕜}
+    {H : Y → ℝ × X → n → n → n → n → 𝕜}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM : 0 ≤ KM) (hKD : 0 ≤ KD) (hKH : ∀ i j, 0 ≤ KH i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b,
+      ‖M u z a b‖ ≤ C a b)
+    (hD : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D u z a b c‖ ≤ DB a b c)
+    (hH : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j,
+      ‖H u z a b i j‖ ≤ HB a b i j)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M u z - M v z‖ ≤ KM * dist u v)
+    (hDdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+        ‖D u z a b c - D v z a b c‖ ≤ KD * dist u v)
+    (hHdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+        ‖((fun a b => H u z a b i j) : Matrix n n 𝕜) -
+          ((fun a b => H v z a b i j) : Matrix n n 𝕜)‖ ≤ KH i j * dist u v)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖) :
+    ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      LipschitzOnWith
+        ⟨ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH,
+          ricciDeTurckSchematicDiffBoundConst_nonneg
+            (𝕜 := 𝕜) hδpos hDB hHB hKM hKD hKH⟩
+        (fun u : Y => ricciDeTurckSchematicMatrix (M u z) (D u z) (H u z))
+        stateSet := by
+  intro z hz
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hbounded :
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH *
+          dist u v)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M u z) (D u z) (H u z) -
+            ricciDeTurckSchematicMatrix (M v z) (D v z) (H v z)) s := by
+    exact ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius
+      (s := s) (δ := δ) (C := C) (DB := DB) (HB := HB)
+      (R := dist u v) (KM := KM) (KD := KD) (KH := KH)
+      (M := M u) (N := M v) (D := D u) (E := D v) (H := H u) (K := H v)
+      hDB hHB (hM hu) (hM hv) (hD hu) (hD hv) (hH hv) hKD dist_nonneg
+      (hMdiff hu hv) (hDdiff hu hv) (hHdiff hu hv) hδpos (hdet hu) (hdet hv)
+  simpa [dist_eq_norm] using hbounded hz
+
+/-- Finite-family version of
+`ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le`: one uniform determinant lower
+bound works for every state and every family member, and each family member gets its own primitive
+Lipschitz constants. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_family_of_primitive_dist_le
+    {κ Y n 𝕜 : Type*} [Fintype κ] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ}
+    {KM KD : κ → ℝ} {KH : κ → n → n → ℝ}
+    {C : κ → n → n → ℝ} {DB : κ → n → n → n → ℝ}
+    {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {M : κ → Y → ℝ × X → Matrix n n 𝕜}
+    {D : κ → Y → ℝ × X → n → n → n → 𝕜}
+    {H : κ → Y → ℝ × X → n → n → n → n → 𝕜}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM : ∀ r, 0 ≤ KM r) (hKD : ∀ r, 0 ≤ KD r)
+    (hKH : ∀ r i j, 0 ≤ KH r i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b,
+      ‖M r u z a b‖ ≤ C r a b)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D r u z a b c‖ ≤ DB r a b c)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j,
+      ‖H r u z a b i j‖ ≤ HB r a b i j)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M r u z - M r v z‖ ≤ KM r * dist u v)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+        ‖D r u z a b c - D r v z a b c‖ ≤ KD r * dist u v)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+        ‖((fun a b => H r u z a b i j) : Matrix n n 𝕜) -
+          ((fun a b => H r v z a b i j) : Matrix n n 𝕜)‖ ≤
+            KH r i j * dist u v)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖) :
+    ∀ r ⦃z : ℝ × X⦄, z ∈ s →
+      LipschitzOnWith
+        ⟨ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := 𝕜) δ (C r) (DB r) (HB r) (KM r) (KD r) (KH r),
+          ricciDeTurckSchematicDiffBoundConst_nonneg
+            (𝕜 := 𝕜) hδpos (hDB r) (hHB r) (hKM r) (hKD r) (hKH r)⟩
+        (fun u : Y => ricciDeTurckSchematicMatrix (M r u z) (D r u z) (H r u z))
+        stateSet := by
+  intro r z hz
+  exact ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le
+    (s := s) (δ := δ) (C := C r) (DB := DB r) (HB := HB r)
+    (KM := KM r) (KD := KD r) (KH := KH r)
+    (stateSet := stateSet) (M := M r) (D := D r) (H := H r)
+    (hDB r) (hHB r) (hKM r) (hKD r) (hKH r)
+    (hM r) (hD r) (hH r) (hMdiff r) (hDdiff r) (hHdiff r) hδpos (hdet r)
+    hz
+
 /-- Compact-domain version of `ricciDeTurckSchematicMatrix_bounded_sub_le_const`: pointwise
 nonvanishing of both metric determinants supplies one common determinant lower bound. -/
 theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_isCompact_det_ne_zero
