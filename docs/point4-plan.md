@@ -2445,6 +2445,15 @@ corresponding metric-level quantitative readout. That readout now reifies the
 approximant as an actual bundled `C²` Riemannian metric, not just as an SPD
 section, and the same result is packaged as closure of the image of bundled
 `C²` Riemannian metrics in the preferred finite-cover section norm.
+`ContinuousSection` now also has generic finite-cover Lipschitz handoffs,
+`ContinuousSectionSpace.lipschitzOnWith_of_forall_coord_dist_le` and its
+time-family variant, which turn compact coordinate-readout estimates into
+`LipschitzOnWith` hypotheses on section-space vector fields. `RiemannianSection`
+specializes this for preferred bilinear-form charts:
+`preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le` and its time-family
+form combine a fibrewise Lipschitz estimate with the squared preferred
+inverse-trivialization bound. These are still handoff theorems; they do not
+prove the Ricci-DeTurck Schauder estimates or construct the missing Banach chart.
 It also derives that finite-cover inverse
 bound from compactness of the cover pieces
 inside their fixed trivialization domains by factoring fixed-center inverses

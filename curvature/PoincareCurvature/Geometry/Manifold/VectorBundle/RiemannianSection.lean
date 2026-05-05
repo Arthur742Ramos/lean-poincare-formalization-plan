@@ -3436,6 +3436,106 @@ theorem exists_dist_lt_of_forall_fiber_dist_lt_preferredBilinear_of_symmL_opNorm
     (hKoEq := hKoEq) (hcover := hcover)
     (C := C) hCpos.le hC s u
 
+/-- A preferred bilinear-form section-space vector field is Lipschitz in the transported
+finite-cover norm once its fibrewise values are Lipschitz and the preferred inverse
+trivializations are uniformly bounded.  The resulting section-space Lipschitz constant is the
+fibrewise constant multiplied by the square of the trivialization bound. -/
+theorem preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)}
+    {A : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    {C : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C)
+    {K : NNReal}
+    (hfiber : ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet → ∀ x : M,
+      dist ((A s) x) ((A t) x) ≤ (K : ℝ) * dist s t) :
+    LipschitzOnWith
+      ⟨(C * C) * (K : ℝ), mul_nonneg (mul_nonneg hC0 hC0) (NNReal.coe_nonneg K)⟩
+      A stateSet := by
+  let Ksection : NNReal :=
+    ⟨(C * C) * (K : ℝ), mul_nonneg (mul_nonneg hC0 hC0) (NNReal.coe_nonneg K)⟩
+  change LipschitzOnWith Ksection A stateSet
+  refine lipschitzOnWith_of_forall_coord_dist_le
+    (𝕜 := ℝ) (F := BilF) (V := BilW)
+    (et := fun i => trivializationAt BilF BilW (x0 i))
+    (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+    (hKoEq := hKoEq) (hcover := hcover)
+    (stateSet := stateSet) (A := A) (L := Ksection) ?_
+  intro s hs t ht i x
+  calc
+    dist
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover (A s)).1 i x)
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover (A t)).1 i x)
+        ≤ (C * C) * dist ((A s) x.1) ((A t) x.1) :=
+          preferredBilinear_coord_dist_le_of_symmL_opNorm_le
+            (M := M) (F := F) (W := W) (x0 := x0)
+            (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+            (hKoEq := hKoEq) (hcover := hcover)
+            (C := C) hC0 hC (A s) (A t) i x
+    _ ≤ (C * C) * ((K : ℝ) * dist s t) :=
+          mul_le_mul_of_nonneg_left (hfiber hs ht x.1) (mul_nonneg hC0 hC0)
+    _ = (Ksection : ℝ) * dist s t := by
+          simp [Ksection]
+          ring
+
+/-- Time-parameterized preferred-bilinear version of
+`preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le`. -/
+theorem preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {τ : Type*} {timeSet : Set τ}
+    (x0 : κ → M)
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆
+      (trivializationAt BilF BilW (x0 i)).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)}
+    {A : τ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    {C : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      ‖(trivializationAt F W (x0 i)).symmL ℝ x.1‖ ≤ C)
+    {K : NNReal}
+    (hfiber : ∀ τ, τ ∈ timeSet → ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ x : M, dist ((A τ s) x) ((A τ t) x) ≤ (K : ℝ) * dist s t) :
+    ∀ τ ∈ timeSet,
+      LipschitzOnWith
+        ⟨(C * C) * (K : ℝ), mul_nonneg (mul_nonneg hC0 hC0) (NNReal.coe_nonneg K)⟩
+        (A τ) stateSet := by
+  intro τ hτ
+  exact preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le
+    (M := M) (F := F) (W := W) (x0 := x0)
+    (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+    (hKoEq := hKoEq) (hcover := hcover)
+    (stateSet := stateSet) (A := A τ)
+    (C := C) hC0 hC (K := K)
+    (fun s hs t ht x => hfiber τ hτ hs ht x)
+
 end PreferredBilinearNormControl
 
 end ContinuousSectionSpace

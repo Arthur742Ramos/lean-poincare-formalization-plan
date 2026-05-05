@@ -1573,6 +1573,83 @@ theorem dist_le_of_forall_coord_dist_le
   intro i
   exact (ContinuousMap.dist_le hC).2 (hcoord i)
 
+/-- Coordinatewise finite-cover Lipschitz estimates imply a `LipschitzOnWith` estimate for a
+section-space map in the transported finite-cover norm.  This is the norm-level handoff needed when
+local chart estimates control every compact coordinate readout of a vector field. -/
+theorem lipschitzOnWith_of_forall_coord_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {A : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {L : NNReal}
+    (hcoord : ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ i (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t)).1 i x)
+          ≤ (L : ℝ) * dist s t) :
+    LipschitzOnWith L A stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro s hs t ht
+  exact dist_le_of_forall_coord_dist_le
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+    (s := A s) (t := A t)
+    (mul_nonneg (NNReal.coe_nonneg L) dist_nonneg)
+    (fun i x => hcoord hs ht i x)
+
+/-- Time-parameterized version of
+`ContinuousSectionSpace.lipschitzOnWith_of_forall_coord_dist_le`: coordinatewise finite-cover
+estimates on each time slice produce the corresponding family of section-space Lipschitz
+estimates. -/
+theorem lipschitzOnWith_family_of_forall_coord_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {τ : Type*} {timeSet : Set τ}
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {A : τ →
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover}
+    {L : NNReal}
+    (hcoord : ∀ τ, τ ∈ timeSet → ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ i (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A τ s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A τ t)).1 i x)
+          ≤ (L : ℝ) * dist s t) :
+    ∀ τ ∈ timeSet, LipschitzOnWith L (A τ) stateSet := by
+  intro τ hτ
+  exact lipschitzOnWith_of_forall_coord_dist_le
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+    (stateSet := stateSet) (A := A τ) (L := L)
+    (fun s hs t ht i x => hcoord τ hτ hs ht i x)
+
 /-- Strict coordinatewise control yields strict control in the transported finite-cover section
 norm. -/
 theorem dist_lt_of_forall_coord_dist_lt

@@ -661,7 +661,11 @@ symmetric locus is closed there, and a transported continuous-linear
 coordinatewise antisymmetric-defect map has exactly that symmetric locus as its
 kernel. Continuous Riemannian metrics land in the refined symmetric
 positive-definite locus inside that model. In particular, the metric locus is now
-packaged as an open subset of the closed symmetric section subtype. The same public layer
+packaged as an open subset of the closed symmetric section subtype. The same
+finite-cover section model now also turns coordinatewise compact-readout
+Lipschitz estimates into `LipschitzOnWith` estimates for section-space maps and
+has a preferred-bilinear specialization that multiplies a fibrewise Lipschitz
+constant by the square of the preferred inverse-trivialization bound. The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
 Levi-Civita correction ingredients (`toDual`, fiberwise composition,
