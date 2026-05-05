@@ -8,6 +8,7 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.HigherFunctionSpace
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.HigherMatrix
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.MatrixC0Alpha
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.LocalFrameGram
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothRealization

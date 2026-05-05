@@ -228,6 +228,12 @@ determines higher-parabolic functions on covered domains and is injective when
 the compact pieces cover all time-space. Second jets, norm balls, existential
 membership, and the higher submodule now also restrict to smaller time-space
 domains.
+`AnalyticPDE/Parabolic/HigherMatrix.lean` now connects this higher layer to the
+existing finite-dimensional matrix estimates: entrywise `C^{2+α,1+α/2}` controls
+package matrix- and finite-Pi-valued `C^{0,α}` controls, matrix-valued higher
+norm balls project to entry `C^{0,α}` norm balls, and higher primitive
+entry controls feed the single-radius schematic Ricci-DeTurck RHS difference
+estimate directly.
 The matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
 same norm-ball language. Determinant and determinant-difference estimates now

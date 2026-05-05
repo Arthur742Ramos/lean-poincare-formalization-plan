@@ -2721,6 +2721,11 @@ compact-family value readouts determines higher-parabolic functions on covered
 domains and gives injectivity when the compact pieces cover all time-space.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
+`AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct
+higher-to-matrix handoff: entrywise `C^{2+α,1+α/2}` controls package
+matrix-valued and finite-Pi-valued `C^{0,α}` controls, matrix-valued higher norm
+balls project to entry `C^{0,α}` norm balls, and higher primitive entry controls
+feed the existing single-radius schematic Ricci-DeTurck RHS difference theorem.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
 the same single-radius control, plus determinant and determinant-difference
 single-radius variants using the existing quantitative determinant constants.
