@@ -434,6 +434,139 @@ theorem flow_eq_of_lipschitzOnWith_of_mem_Icc
     α.flow x t = β.flow x t :=
   α.eqOn_Icc_of_lipschitzOnWith_of_mem β hxα hxβ ht₀ hf_lip hα_mem hβ_mem ht
 
+/-- Interior overlap uniqueness for two packaged local model flows whose vector
+fields agree on the common state region containing the two curves.  The
+Lipschitz bound is stated for the first vector field; the second ODE is
+rewritten by `hg_eq` on the overlap. -/
+theorem eqOn_Ioo_of_lipschitzOnWith_of_mem_of_vectorField_eqOn
+    {g : ℝ → V → V} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f t₀ xα rα) (β : LocalFlowSolution g t₀ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow x t ∈ state t)
+    (hg_eq : ∀ t ∈ Ioo tmin tmax, ∀ y ∈ state t, g t y = f t y) :
+    EqOn (α.flow x) (β.flow x) (Ioo tmin tmax) := by
+  refine ODE_solution_unique_of_mem_Ioo (v := f) (s := state) hf_lip ht₀ ?_ ?_ ?_
+  · intro t ht
+    exact
+      ⟨(α.hasDerivWithinAt x hxα t (Ioo_subset_Icc_self ht)).hasDerivAt
+          (Icc_mem_nhds ht.1 ht.2),
+        hα_mem t ht⟩
+  · intro t ht
+    have hβderiv :=
+      (β.hasDerivWithinAt x hxβ t (Ioo_subset_Icc_self ht)).hasDerivAt
+        (Icc_mem_nhds ht.1 ht.2)
+    rw [hg_eq t ht (β.flow x t) (hβ_mem t ht)] at hβderiv
+    exact ⟨hβderiv, hβ_mem t ht⟩
+  · rw [α.initial_eq x hxα, β.initial_eq x hxβ]
+
+/-- Closed-interval overlap uniqueness for two packaged local model flows whose
+vector fields agree on the common state region containing the two curves. -/
+theorem eqOn_Icc_of_lipschitzOnWith_of_mem_of_vectorField_eqOn
+    {g : ℝ → V → V} {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f t₀ xα rα) (β : LocalFlowSolution g t₀ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.flow x t ∈ state t)
+    (hg_eq : ∀ t ∈ Ioo tmin tmax, ∀ y ∈ state t, g t y = f t y) :
+    EqOn (α.flow x) (β.flow x) (Icc tmin tmax) := by
+  refine ODE_solution_unique_of_mem_Icc (v := f) (s := state) hf_lip ht₀ ?_ ?_
+    hα_mem ?_ ?_ hβ_mem ?_
+  · exact HasDerivWithinAt.continuousOn (fun t ht => α.hasDerivWithinAt x hxα t ht)
+  · intro t ht
+    exact (α.hasDerivWithinAt x hxα t (Ioo_subset_Icc_self ht)).hasDerivAt
+      (Icc_mem_nhds ht.1 ht.2)
+  · exact HasDerivWithinAt.continuousOn (fun t ht => β.hasDerivWithinAt x hxβ t ht)
+  · intro t ht
+    have hβderiv :=
+      (β.hasDerivWithinAt x hxβ t (Ioo_subset_Icc_self ht)).hasDerivAt
+        (Icc_mem_nhds ht.1 ht.2)
+    rw [hg_eq t ht (β.flow x t) (hβ_mem t ht)] at hβderiv
+    exact hβderiv
+  · rw [α.initial_eq x hxα, β.initial_eq x hxβ]
+
+/-- Open common-subinterval overlap uniqueness for two packaged local model
+flows whose ambient Picard intervals may differ and whose vector fields agree on
+the visible common state region. -/
+theorem eqOn_common_Ioo_of_lipschitzOnWith_of_mem_of_vectorField_eqOn
+    {g : ℝ → V → V}
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : LocalFlowSolution g (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow x t ∈ state t)
+    (hg_eq : ∀ t ∈ Ioo a b, ∀ y ∈ state t, g t y = f t y) :
+    EqOn (α.flow x) (β.flow x) (Ioo a b) := by
+  let t₀' : Icc a b := ⟨tbase, Ioo_subset_Icc_self htbase⟩
+  let α' : LocalFlowSolution f t₀' xα rα :=
+    α.restrict hαtime (Ioo_subset_Icc_self htbase) le_rfl
+  let β' : LocalFlowSolution g t₀' xβ rβ :=
+    β.restrict hβtime (Ioo_subset_Icc_self htbase) le_rfl
+  have htbase' : (t₀' : ℝ) ∈ Ioo a b := by
+    simpa [t₀'] using htbase
+  have hα_mem' : ∀ t ∈ Ioo a b, α'.flow x t ∈ state t := by
+    intro t ht
+    simpa [α'] using hα_mem t ht
+  have hβ_mem' : ∀ t ∈ Ioo a b, β'.flow x t ∈ state t := by
+    intro t ht
+    simpa [β'] using hβ_mem t ht
+  have hcommon : EqOn (α'.flow x) (β'.flow x) (Ioo a b) :=
+    α'.eqOn_Ioo_of_lipschitzOnWith_of_mem_of_vectorField_eqOn β'
+      hxα hxβ htbase' hf_lip hα_mem' hβ_mem' hg_eq
+  simpa [α', β'] using hcommon
+
+/-- Closed common-subinterval overlap uniqueness for two packaged local model
+flows whose ambient Picard intervals may differ and whose vector fields agree on
+the visible common state region. -/
+theorem eqOn_common_Icc_of_lipschitzOnWith_of_mem_of_vectorField_eqOn
+    {g : ℝ → V → V}
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : LocalFlowSolution f (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : LocalFlowSolution g (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {K : ℝ≥0} {state : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ t ∈ Ioo a b, α.flow x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo a b, β.flow x t ∈ state t)
+    (hg_eq : ∀ t ∈ Ioo a b, ∀ y ∈ state t, g t y = f t y) :
+    EqOn (α.flow x) (β.flow x) (Icc a b) := by
+  let t₀' : Icc a b := ⟨tbase, Ioo_subset_Icc_self htbase⟩
+  let α' : LocalFlowSolution f t₀' xα rα :=
+    α.restrict hαtime (Ioo_subset_Icc_self htbase) le_rfl
+  let β' : LocalFlowSolution g t₀' xβ rβ :=
+    β.restrict hβtime (Ioo_subset_Icc_self htbase) le_rfl
+  have htbase' : (t₀' : ℝ) ∈ Ioo a b := by
+    simpa [t₀'] using htbase
+  have hα_mem' : ∀ t ∈ Ioo a b, α'.flow x t ∈ state t := by
+    intro t ht
+    simpa [α'] using hα_mem t ht
+  have hβ_mem' : ∀ t ∈ Ioo a b, β'.flow x t ∈ state t := by
+    intro t ht
+    simpa [β'] using hβ_mem t ht
+  have hcommon : EqOn (α'.flow x) (β'.flow x) (Icc a b) :=
+    α'.eqOn_Icc_of_lipschitzOnWith_of_mem_of_vectorField_eqOn β'
+      hxα hxβ htbase' hf_lip hα_mem' hβ_mem' hg_eq
+  simpa [α', β'] using hcommon
+
 /-- Closed-interval uniqueness for two packaged local model-flow curves that
 meet at an interior time.  The packages may have different base times, centers,
 and radii, as long as both curves are defined on the same Picard interval and
@@ -4241,6 +4374,46 @@ theorem tangent_eqOn_Icc_of_opNorm_bound_of_mem
     (fun t ht =>
       ((lipschitzWith_leftComp (Df t (α.flow (x, t)))).weaken (hD_bound t ht)).lipschitzOnWith)
     hα_mem hβ_mem
+
+/-- Closed-interval tangent-map uniqueness for two variational local flows whose
+linearized vector fields agree along the second base curve.  The operator-norm
+bound and Lipschitz estimate are stated for the first linearization; the second
+tangent ODE is rewritten by `hDg_eq`. -/
+theorem tangent_eqOn_Icc_of_opNorm_bound_of_mem_of_linearization_eqOn
+    {g : ℝ → V → V} {Dg : ℝ → V → V →L[ℝ] V}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution g Dg t₀ xβ rβ)
+    {K : ℝ≥0} {state : ℝ → Set (V →L[ℝ] V)}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hflow_eq : EqOn (fun t => α.flow (x, t)) (fun t => β.flow (x, t))
+      (Ioo tmin tmax))
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ K)
+    (hα_mem : ∀ t ∈ Ioo tmin tmax, α.tangent x t ∈ state t)
+    (hβ_mem : ∀ t ∈ Ioo tmin tmax, β.tangent x t ∈ state t)
+    (hDg_eq : ∀ t ∈ Ioo tmin tmax,
+      Dg t (β.flow (x, t)) = Df t (β.flow (x, t))) :
+    EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) := by
+  refine ODE_solution_unique_of_mem_Icc
+    (v := fun (t : ℝ) (A : V →L[ℝ] V) => (Df t (α.flow (x, t))).comp A)
+    (s := state)
+    (fun t ht =>
+      ((lipschitzWith_leftComp (Df t (α.flow (x, t)))).weaken
+        (hD_bound t ht)).lipschitzOnWith)
+    ht₀ ?_ ?_ hα_mem ?_ ?_ hβ_mem ?_
+  · exact HasDerivWithinAt.continuousOn
+      (fun t ht => α.tangent_hasDerivWithinAt x hxα t ht)
+  · intro t ht
+    exact α.tangent_hasDerivAt_of_mem_Ioo hxα ht
+  · exact HasDerivWithinAt.continuousOn
+      (fun t ht => β.tangent_hasDerivWithinAt x hxβ t ht)
+  · intro t ht
+    have hβderiv := β.tangent_hasDerivAt_of_mem_Ioo hxβ ht
+    rw [hDg_eq t ht,
+      show β.flow (x, t) = α.flow (x, t) from (hflow_eq ht).symm] at hβderiv
+    exact hβderiv
+  · rw [α.tangent_initial_eq x hxα, β.tangent_initial_eq x hxβ]
 
 /-- Pointwise closed-interval tangent-map uniqueness when the linearized
 operators are uniformly bounded on the interior. -/
@@ -8769,6 +8942,50 @@ theorem flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
   intro t ht
   exact Prod.ext (hflowIcc ht) (htangent ht)
 
+/-- Closed-interval uniqueness for the full variational pair `(flow, tangent)`
+when the second variational system has compatible model and linearized vector
+fields on the common state region.  This is the chart-overlap form needed when
+two selected Picard packages are written in locally compatible model
+coordinates. -/
+theorem flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem_of_vectorField_eqOn
+    {g : ℝ → V → V} {Dg : ℝ → V → V →L[ℝ] V}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df t₀ xα rα)
+    (β : VariationalLocalFlowSolution g Dg t₀ xβ rβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo tmin tmax, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (hg_eq : ∀ t ∈ Ioo tmin tmax, ∀ y ∈ baseState t, g t y = f t y)
+    (hDg_eq : ∀ t ∈ Ioo tmin tmax,
+      Dg t (β.flow (x, t)) = Df t (β.flow (x, t))) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Icc tmin tmax) := by
+  have hflowIcc' :
+      EqOn
+        ((α.toContinuousLocalFlowSolution.toLocalFlowSolution).flow x)
+        ((β.toContinuousLocalFlowSolution.toLocalFlowSolution).flow x)
+        (Icc tmin tmax) :=
+    (α.toContinuousLocalFlowSolution.toLocalFlowSolution).eqOn_Icc_of_lipschitzOnWith_of_mem_of_vectorField_eqOn
+        (β.toContinuousLocalFlowSolution.toLocalFlowSolution)
+        hxα hxβ ht₀ hf_lip hα_base_mem hβ_base_mem hg_eq
+  have hflowIcc : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
+      (Icc tmin tmax) := by
+    simpa [ContinuousLocalFlowSolution.toLocalFlowSolution] using hflowIcc'
+  have hflowIoo : EqOn (fun t : ℝ => α.flow (x, t)) (fun t : ℝ => β.flow (x, t))
+      (Ioo tmin tmax) := fun t ht => hflowIcc (Ioo_subset_Icc_self ht)
+  have htangent : EqOn (α.tangent x) (β.tangent x) (Icc tmin tmax) :=
+    α.tangent_eqOn_Icc_of_opNorm_bound_of_mem_of_linearization_eqOn
+      (β := β) (state := fun _ => Set.univ) hxα hxβ ht₀ hflowIoo hD_bound
+      (by intro t ht; simp) (by intro t ht; simp) hDg_eq
+  intro t ht
+  exact Prod.ext (hflowIcc ht) (htangent ht)
+
 /-- Pointwise closed-interval uniqueness for the full variational pair
 `(flow, tangent)`. -/
 theorem flow_tangent_eq_of_lipschitzOnWith_opNorm_bound_of_mem_Icc
@@ -8838,6 +9055,63 @@ theorem flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
       β' hxα hxβ htbase' hf_lip hα_base_mem' hβ_base_mem' hD_bound'
   simpa [α', β'] using hcommon
 
+/-- Common-subinterval overlap uniqueness for the full variational pair when
+the ambient Picard intervals may differ and the second selected model system is
+compatible with the first on the visible common state region. -/
+theorem flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem_of_vectorField_eqOn
+    {g : ℝ → V → V} {Dg : ℝ → V → V →L[ℝ] V}
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution g Dg
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (hg_eq : ∀ t ∈ Ioo a b, ∀ y ∈ baseState t, g t y = f t y)
+    (hDg_eq : ∀ t ∈ Ioo a b, Dg t (β.flow (x, t)) = Df t (β.flow (x, t))) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Icc a b) := by
+  let t₀' : Icc a b := ⟨tbase, Ioo_subset_Icc_self htbase⟩
+  let α' : VariationalLocalFlowSolution f Df t₀' xα rα :=
+    α.restrict hαtime (Ioo_subset_Icc_self htbase) le_rfl
+  let β' : VariationalLocalFlowSolution g Dg t₀' xβ rβ :=
+    β.restrict hβtime (Ioo_subset_Icc_self htbase) le_rfl
+  have htbase' : (t₀' : ℝ) ∈ Ioo a b := by
+    simpa [t₀'] using htbase
+  have hα_base_mem' : ∀ t ∈ Ioo a b, α'.flow (x, t) ∈ baseState t := by
+    intro t ht
+    simpa [α'] using hα_base_mem t ht
+  have hβ_base_mem' : ∀ t ∈ Ioo a b, β'.flow (x, t) ∈ baseState t := by
+    intro t ht
+    simpa [β'] using hβ_base_mem t ht
+  have hD_bound' : ∀ t ∈ Ioo a b, ‖Df t (α'.flow (x, t))‖₊ ≤ KD := by
+    intro t ht
+    simpa [α'] using hD_bound t ht
+  have hDg_eq' : ∀ t ∈ Ioo a b,
+      Dg t (β'.flow (x, t)) = Df t (β'.flow (x, t)) := by
+    intro t ht
+    simpa [β'] using hDg_eq t ht
+  have hcommon :
+      EqOn
+        (fun t : ℝ => (α'.flow (x, t), α'.tangent x t))
+        (fun t : ℝ => (β'.flow (x, t), β'.tangent x t))
+        (Icc a b) :=
+    α'.flow_tangent_eqOn_Icc_of_lipschitzOnWith_opNorm_bound_of_mem_of_vectorField_eqOn
+      β' hxα hxβ htbase' hf_lip hα_base_mem' hβ_base_mem' hD_bound'
+      hg_eq hDg_eq'
+  simpa [α', β'] using hcommon
+
 /-- Open common-subinterval overlap uniqueness for the full variational pair
 `(flow, tangent)` when the ambient Picard intervals may differ. -/
 theorem flow_tangent_eqOn_common_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem
@@ -8864,6 +9138,40 @@ theorem flow_tangent_eqOn_common_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem
   have hclosed :=
     α.flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem
       β hαtime hβtime hxα hxβ htbase hf_lip hα_base_mem hβ_base_mem hD_bound
+  intro t ht
+  exact hclosed (Ioo_subset_Icc_self ht)
+
+/-- Open common-subinterval overlap uniqueness for the full variational pair
+when the second selected model system is compatible with the first on the
+visible common state region. -/
+theorem flow_tangent_eqOn_common_Ioo_of_lipschitzOnWith_opNorm_bound_of_mem_of_vectorField_eqOn
+    {g : ℝ → V → V} {Dg : ℝ → V → V →L[ℝ] V}
+    {aα bα aβ bβ a b tbase : ℝ}
+    {htbaseα : tbase ∈ Icc aα bα} {htbaseβ : tbase ∈ Icc aβ bβ}
+    {xα xβ : V} {rα rβ : ℝ≥0}
+    (α : VariationalLocalFlowSolution f Df
+      (⟨tbase, htbaseα⟩ : Icc aα bα) xα rα)
+    (β : VariationalLocalFlowSolution g Dg
+      (⟨tbase, htbaseβ⟩ : Icc aβ bβ) xβ rβ)
+    (hαtime : Icc a b ⊆ Icc aα bα)
+    (hβtime : Icc a b ⊆ Icc aβ bβ)
+    {Kf KD : ℝ≥0} {baseState : ℝ → Set V}
+    {x : V} (hxα : x ∈ closedBall xα rα) (hxβ : x ∈ closedBall xβ rβ)
+    (htbase : tbase ∈ Ioo a b)
+    (hf_lip : ∀ t ∈ Ioo a b, LipschitzOnWith Kf (f t) (baseState t))
+    (hα_base_mem : ∀ t ∈ Ioo a b, α.flow (x, t) ∈ baseState t)
+    (hβ_base_mem : ∀ t ∈ Ioo a b, β.flow (x, t) ∈ baseState t)
+    (hD_bound : ∀ t ∈ Ioo a b, ‖Df t (α.flow (x, t))‖₊ ≤ KD)
+    (hg_eq : ∀ t ∈ Ioo a b, ∀ y ∈ baseState t, g t y = f t y)
+    (hDg_eq : ∀ t ∈ Ioo a b, Dg t (β.flow (x, t)) = Df t (β.flow (x, t))) :
+    EqOn
+      (fun t : ℝ => (α.flow (x, t), α.tangent x t))
+      (fun t : ℝ => (β.flow (x, t), β.tangent x t))
+      (Ioo a b) := by
+  have hclosed :=
+    α.flow_tangent_eqOn_common_Icc_of_lipschitzOnWith_opNorm_bound_of_mem_of_vectorField_eqOn
+      β hαtime hβtime hxα hxβ htbase hf_lip hα_base_mem hβ_base_mem hD_bound
+      hg_eq hDg_eq
   intro t ht
   exact hclosed (Ioo_subset_Icc_self ht)
 
