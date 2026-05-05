@@ -182,10 +182,12 @@ compact-domain and product-cylinder bounded-difference and shared-radius
 estimates now also carry this coarser-primitive-constant promotion in both the
 raw matrix and local-frame Gram-coordinate layers, preserving sharper
 memberwise primitive bounds while exporting the coarser constants consumed by
-common Picard/Lipschitz charts. The compact finite-family quantitative
-`C^{0,α}` schematic RHS difference estimate now has the same coarser
-primitive-difference promotion while preserving its Holder constant, with a
-matching compact local-frame Gram-coordinate bridge.
+common Picard/Lipschitz charts. The finite-family quantitative `C^{0,α}`
+schematic RHS difference estimates now have the same coarser
+primitive-difference promotion for compact sets, finite product-cylinder
+covers, point-dependent local cylinders, and existential local cylinders while
+preserving their Holder constants, with matching local-frame Gram-coordinate
+bridges.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric
@@ -1563,10 +1565,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         bounded-difference and shared-radius schematic RHS estimates now also
         accept sharper memberwise primitive constants and export coarser chart
         constants, in both the raw matrix and local-frame Gram-coordinate
-        layers. The compact finite-family quantitative `C^{0,α}` schematic
-        RHS difference estimate now exposes the same coarser primitive
-        promotion while keeping the Holder constant unchanged, again with a
-        compact local-frame Gram-coordinate handoff.
+        layers. The finite-family quantitative `C^{0,α}` schematic RHS
+        difference estimates now expose the same coarser primitive promotion
+        for compact sets, finite product-cylinder covers, point-dependent local
+        cylinders, and existential local cylinders while keeping the Holder
+        constants unchanged, again with local-frame Gram-coordinate handoffs.
       What still
      remains is the geometric-analysis specialization for positive-dimensional
     non-identity gauges: that scalar chain-rule proof, an actual existence

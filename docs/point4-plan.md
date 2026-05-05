@@ -2656,10 +2656,11 @@ local-cylinder bounded-difference and shared-radius estimates now also have
 coarser-primitive-constant forms in both the raw matrix and local-frame
 Gram-coordinate layers, so a finite cover can keep sharper memberwise primitive
 estimates while exporting one larger Picard/Lipschitz chart constant per member.
-The compact finite-family quantitative `C^{0,α}` schematic RHS difference
-estimate now also has the same coarser primitive-difference promotion while
-preserving its Holder constant, with a matching compact local-frame
-Gram-coordinate bridge. The interval
+The finite-family quantitative `C^{0,α}` schematic RHS difference estimates
+now also have the same coarser primitive-difference promotion for compact
+sets, finite product-cylinder covers, point-dependent local cylinders, and
+existential local cylinders while preserving their Holder constants, with
+matching local-frame Gram-coordinate bridges. The interval
 Banach-chart constructor now also has a real-constant coordinate-Lipschitz
 entry point, so those matrix constants no longer need to be prepackaged as
 `ℝ≥0` by callers. This is a
