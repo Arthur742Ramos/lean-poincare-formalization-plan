@@ -208,7 +208,8 @@ same norm-ball language. Determinant and determinant-difference estimates now
 also have entrywise single-radius variants using the existing quantitative
 determinant constants, and inverse matrices/inverse-matrix differences have the
 matching single-radius variants under a determinant lower bound. Finite matrix
-products and product differences now also have single-radius norm-ball variants
+products, matrix-vector products, and vector-matrix products, together with
+their product-difference forms, now also have single-radius norm-ball variants
 using the existing quantitative product constants.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial

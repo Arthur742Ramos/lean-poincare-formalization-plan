@@ -4465,6 +4465,146 @@ theorem matrix_vecMul_sub_with {m n A : Type*} [Fintype m] [Fintype n] [NormedRi
     exact matrix_vecMul_entry_sub_with (v := v) (v' := v') (M := M) (M' := M')
       hv hM' hvdiff hMdiff hBv hBvd j
 
+end ParabolicC0AlphaOn
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Entrywise single-radius control of a finite matrix and componentwise single-radius control of
+a finite vector package matrix-vector multiplication with the corresponding quantitative product
+radius. -/
+theorem matrix_mulVec_of_entries {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
+    {RM : m → n → ℝ} {Rv : n → ℝ}
+    {M : ℝ × X → Matrix m n A} {v : ℝ × X → n → A}
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (RM i j) α (fun z => M z i j) s)
+    (hv : ∀ j, ParabolicC0AlphaNormLe (Rv j) α (fun z => v z j) s) :
+    ParabolicC0AlphaNormLe
+      ((∑ i : m, ParabolicC0AlphaOn.matrixMulVecEntryBoundConst RM Rv i) +
+        (∑ i : m, ParabolicC0AlphaOn.matrixMulVecEntryHolderConst RM RM Rv Rv i))
+      α (fun z => (M z).mulVec (v z)) s := by
+  have hRM : ∀ i j, 0 ≤ RM i j := fun i j => (hM i j).nonneg
+  have hRv : ∀ j, 0 ≤ Rv j := fun j => (hv j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (Finset.sum_nonneg fun i _hi =>
+      ParabolicC0AlphaOn.matrixMulVecEntryBoundConst_nonneg hRM hRv i)
+    (Finset.sum_nonneg fun i _hi =>
+      ParabolicC0AlphaOn.matrixMulVecEntryHolderConst_nonneg hRM hRM hRv hRv i)
+    (ParabolicC0AlphaOn.matrix_mulVec_with
+      (M := M) (v := v) (BM := RM) (HM := RM) (Bv := Rv) (Hv := Rv)
+      hRM hRM hRv hRv
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j))
+      (fun j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv j)))
+
+/-- Entrywise single-radius control of matrix-vector factors and their differences packages
+matrix-vector product differences with the corresponding quantitative product-difference
+radius. -/
+theorem matrix_mulVec_sub_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedRing A] {RM : m → n → ℝ} {Rv' : n → ℝ}
+    {RMd : m → n → ℝ} {Rvd : n → ℝ}
+    {M M' : ℝ × X → Matrix m n A} {v v' : ℝ × X → n → A}
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (RM i j) α (fun z => M z i j) s)
+    (hv' : ∀ j, ParabolicC0AlphaNormLe (Rv' j) α (fun z => v' z j) s)
+    (hMdiff : ∀ i j, ParabolicC0AlphaNormLe (RMd i j) α
+      (fun z => M z i j - M' z i j) s)
+    (hvdiff : ∀ j, ParabolicC0AlphaNormLe (Rvd j) α
+      (fun z => v z j - v' z j) s) :
+    ParabolicC0AlphaNormLe
+      ((∑ i : m, ParabolicC0AlphaOn.matrixMulVecEntrySubBoundConst RM Rv' RMd Rvd i) +
+        (∑ i : m, ParabolicC0AlphaOn.matrixMulVecEntrySubHolderConst
+          RM RM Rv' Rv' RMd RMd Rvd Rvd i))
+      α (fun z => (M z).mulVec (v z) - (M' z).mulVec (v' z)) s := by
+  have hRM : ∀ i j, 0 ≤ RM i j := fun i j => (hM i j).nonneg
+  have hRv' : ∀ j, 0 ≤ Rv' j := fun j => (hv' j).nonneg
+  have hRMd : ∀ i j, 0 ≤ RMd i j := fun i j => (hMdiff i j).nonneg
+  have hRvd : ∀ j, 0 ≤ Rvd j := fun j => (hvdiff j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (Finset.sum_nonneg fun i _hi =>
+      ParabolicC0AlphaOn.matrixMulVecEntrySubBoundConst_nonneg hRM hRv' hRMd hRvd i)
+    (Finset.sum_nonneg fun i _hi =>
+      ParabolicC0AlphaOn.matrixMulVecEntrySubHolderConst_nonneg
+        hRM hRM hRv' hRv' hRMd hRMd hRvd hRvd i)
+    (ParabolicC0AlphaOn.matrix_mulVec_sub_with
+      (M := M) (M' := M') (v := v) (v' := v')
+      (BM := RM) (HM := RM) (Bv' := Rv') (Hv' := Rv')
+      (BMd := RMd) (HMd := RMd) (Bvd := Rvd) (Hvd := Rvd)
+      hRM hRM hRv' hRv' hRMd hRMd hRvd hRvd
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j))
+      (fun j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv' j))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hMdiff i j))
+      (fun j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hvdiff j)))
+
+/-- Componentwise single-radius control of a finite vector and entrywise single-radius control of
+a finite matrix package vector-matrix multiplication with the corresponding quantitative product
+radius. -/
+theorem matrix_vecMul_of_entries {m n A : Type*} [Fintype m] [Fintype n] [NormedRing A]
+    {Rv : m → ℝ} {RM : m → n → ℝ}
+    {v : ℝ × X → m → A} {M : ℝ × X → Matrix m n A}
+    (hv : ∀ i, ParabolicC0AlphaNormLe (Rv i) α (fun z => v z i) s)
+    (hM : ∀ i j, ParabolicC0AlphaNormLe (RM i j) α (fun z => M z i j) s) :
+    ParabolicC0AlphaNormLe
+      ((∑ j : n, ParabolicC0AlphaOn.matrixVecMulEntryBoundConst Rv RM j) +
+        (∑ j : n, ParabolicC0AlphaOn.matrixVecMulEntryHolderConst Rv Rv RM RM j))
+      α (fun z => Matrix.vecMul (v z) (M z)) s := by
+  have hRv : ∀ i, 0 ≤ Rv i := fun i => (hv i).nonneg
+  have hRM : ∀ i j, 0 ≤ RM i j := fun i j => (hM i j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (Finset.sum_nonneg fun j _hj =>
+      ParabolicC0AlphaOn.matrixVecMulEntryBoundConst_nonneg hRv hRM j)
+    (Finset.sum_nonneg fun j _hj =>
+      ParabolicC0AlphaOn.matrixVecMulEntryHolderConst_nonneg hRv hRv hRM hRM j)
+    (ParabolicC0AlphaOn.matrix_vecMul_with
+      (v := v) (M := M) (Bv := Rv) (Hv := Rv) (BM := RM) (HM := RM)
+      hRv hRv hRM hRM
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv i))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM i j)))
+
+/-- Componentwise and entrywise single-radius control of vector-matrix factors and their
+differences packages vector-matrix product differences with the corresponding quantitative
+product-difference radius. -/
+theorem matrix_vecMul_sub_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedRing A] {Rv : m → ℝ} {RM' : m → n → ℝ}
+    {Rvd : m → ℝ} {RMd : m → n → ℝ}
+    {v v' : ℝ × X → m → A} {M M' : ℝ × X → Matrix m n A}
+    (hv : ∀ i, ParabolicC0AlphaNormLe (Rv i) α (fun z => v z i) s)
+    (hM' : ∀ i j, ParabolicC0AlphaNormLe (RM' i j) α (fun z => M' z i j) s)
+    (hvdiff : ∀ i, ParabolicC0AlphaNormLe (Rvd i) α
+      (fun z => v z i - v' z i) s)
+    (hMdiff : ∀ i j, ParabolicC0AlphaNormLe (RMd i j) α
+      (fun z => M z i j - M' z i j) s) :
+    ParabolicC0AlphaNormLe
+      ((∑ j : n, ParabolicC0AlphaOn.matrixVecMulEntrySubBoundConst Rv RM' Rvd RMd j) +
+        (∑ j : n, ParabolicC0AlphaOn.matrixVecMulEntrySubHolderConst
+          Rv Rv RM' RM' Rvd Rvd RMd RMd j))
+      α (fun z => Matrix.vecMul (v z) (M z) - Matrix.vecMul (v' z) (M' z)) s := by
+  have hRv : ∀ i, 0 ≤ Rv i := fun i => (hv i).nonneg
+  have hRM' : ∀ i j, 0 ≤ RM' i j := fun i j => (hM' i j).nonneg
+  have hRvd : ∀ i, 0 ≤ Rvd i := fun i => (hvdiff i).nonneg
+  have hRMd : ∀ i j, 0 ≤ RMd i j := fun i j => (hMdiff i j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (Finset.sum_nonneg fun j _hj =>
+      ParabolicC0AlphaOn.matrixVecMulEntrySubBoundConst_nonneg hRv hRM' hRvd hRMd j)
+    (Finset.sum_nonneg fun j _hj =>
+      ParabolicC0AlphaOn.matrixVecMulEntrySubHolderConst_nonneg
+        hRv hRv hRM' hRM' hRvd hRvd hRMd hRMd j)
+    (ParabolicC0AlphaOn.matrix_vecMul_sub_with
+      (v := v) (v' := v') (M := M) (M' := M')
+      (Bv := Rv) (Hv := Rv) (BM' := RM') (HM' := RM')
+      (Bvd := Rvd) (Hvd := Rvd) (BMd := RMd) (HMd := RMd)
+      hRv hRv hRM' hRM' hRvd hRvd hRMd hRMd
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hv i))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM' i j))
+      (fun i => ParabolicC0AlphaNormLe.c0AlphaWith_self (hvdiff i))
+      (fun i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hMdiff i j)))
+
+end ParabolicC0AlphaNormLe
+
+namespace ParabolicC0AlphaOn
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
 /-- Entries of an inverse-matrix-vector product are parabolic `C^{0,α}` when the matrix entries
 and vector components are, and the determinant is uniformly bounded away from zero. -/
 theorem matrix_inv_mulVec_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
