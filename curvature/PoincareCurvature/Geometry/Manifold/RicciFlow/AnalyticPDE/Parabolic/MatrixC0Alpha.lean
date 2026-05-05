@@ -14257,6 +14257,80 @@ theorem ricciDeTurckSchematicMatrix_sub_with_family_of_isCompact_det_ne_zero
     (hM r) (hN r) (hD r) (hE r) (hHc r) (hKc r)
     (hηD r) (hMdiff r) (hDdiff r) (hHdiff r) hδpos (hdetM r) (hdetN r)
 
+/-- Compact-domain finite-family quantitative schematic RHS differences with coarser primitive
+difference constants.  The determinant lower bound and Holder constant are unchanged, while the
+bounded-difference constant is promoted from sharper memberwise primitive constants to coarser
+chart constants. -/
+theorem ricciDeTurckSchematicMatrix_sub_with_family_of_isCompact_det_ne_zero_of_primitive_le
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {K : Set (ℝ × X)}
+    {MB MH : κ → n → n → ℝ}
+    {DB DH : κ → n → n → n → ℝ}
+    {HB HH : κ → n → n → n → n → ℝ}
+    {ηM0 ηD0 ηM ηD : κ → ℝ} {ηH0 ηH : κ → n → n → ℝ}
+    {M N : κ → ℝ × X → Matrix n n 𝕜}
+    {D E : κ → ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : κ → ℝ × X → n → n → n → n → 𝕜}
+    (hK : IsCompact K) (hα : 0 < α)
+    (hMB : ∀ r a b, 0 ≤ MB r a b) (hMH : ∀ r a b, 0 ≤ MH r a b)
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hDH : ∀ r a b c, 0 ≤ DH r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hHH : ∀ r a b i j, 0 ≤ HH r a b i j)
+    (hM : ∀ r a b,
+      ParabolicC0AlphaWith (MB r a b) (MH r a b) α (fun z => M r z a b) K)
+    (hN : ∀ r a b,
+      ParabolicC0AlphaWith (MB r a b) (MH r a b) α (fun z => N r z a b) K)
+    (hD : ∀ r a b c,
+      ParabolicC0AlphaWith (DB r a b c) (DH r a b c) α
+        (fun z => D r z a b c) K)
+    (hE : ∀ r a b c,
+      ParabolicC0AlphaWith (DB r a b c) (DH r a b c) α
+        (fun z => E r z a b c) K)
+    (hHc : ∀ r a b i j,
+      ParabolicC0AlphaWith (HB r a b i j) (HH r a b i j) α
+        (fun z => Hc r z a b i j) K)
+    (hKc : ∀ r a b i j,
+      ParabolicC0AlphaWith (HB r a b i j) (HH r a b i j) α
+        (fun z => Kc r z a b i j) K)
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ K → (N r z).det ≠ 0)
+    (hηM : ∀ r, ηM0 r ≤ ηM r) (hηD : ∀ r, ηD0 r ≤ ηD r)
+    (hηH : ∀ r i j, ηH0 r i j ≤ ηH r i j)
+    (hηD0 : ∀ r, 0 ≤ ηD0 r)
+    (hMdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ K → ‖M r z - N r z‖ ≤ ηM0 r)
+    (hDdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ K → ∀ a b c,
+      ‖D r z a b c - E r z a b c‖ ≤ ηD0 r)
+    (hHdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ K → ∀ i j,
+      ‖((fun a b => Hc r z a b i j) : Matrix n n 𝕜) -
+          ((fun a b => Kc r z a b i j) : Matrix n n 𝕜)‖ ≤ ηH0 r i j) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := 𝕜) δ (MB r) (DB r) (HB r) (ηM r) (ηD r) (ηH r))
+          (ricciDeTurckSchematicDiffHolderConst
+            (𝕜 := 𝕜) δ (MB r) (MH r) (DB r) (DH r) (HB r) (HH r))
+          α
+          (fun z : ℝ × X =>
+            ricciDeTurckSchematicMatrix (M r z) (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (E r z) (Kc r z)) K := by
+  rcases ricciDeTurckSchematicMatrix_sub_with_family_of_isCompact_det_ne_zero
+      (K := K) (MB := MB) (MH := MH) (DB := DB) (DH := DH)
+      (HB := HB) (HH := HH) (ηM := ηM0) (ηD := ηD0) (ηH := ηH0)
+      (M := M) (N := N) (D := D) (E := E) (Hc := Hc) (Kc := Kc)
+      hK hα hMB hMH hDB hDH hHB hHH hM hN hD hE hHc hKc
+      hdetM_ne hdetN_ne hηD0 hMdiff hDdiff hHdiff with
+    ⟨δ, hδpos, hdetM, hdetN, hctrl⟩
+  refine ⟨δ, hδpos, hdetM, hdetN, ?_⟩
+  intro r
+  exact (hctrl r).mono_const
+    (ricciDeTurckSchematicDiffBoundConst_mono
+      (𝕜 := 𝕜) hδpos (hDB r) (hHB r) (hηM r) (hηD r) (hηH r))
+    le_rfl
+
 /-- Local finite product-cylinder quantitative primitive estimates globalize finite-family
 compact-domain schematic Ricci-DeTurck RHS difference estimates, with one determinant lower bound
 shared by both metric families. -/

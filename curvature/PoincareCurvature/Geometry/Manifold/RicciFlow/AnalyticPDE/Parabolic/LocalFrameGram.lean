@@ -13379,6 +13379,98 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_timeSpace
     hK hα hC_nonneg hGH hDB hDH hHB hHH hG hN hD hEarr hHc hKc
     hdetG_ne hdetN_ne hηD hGdiff hDdiff hHdiff
 
+/-- Finite-family compact local-frame bridge for quantitative parabolic `C^{0,α}` control of
+schematic Ricci-DeTurck RHS differences with coarser primitive difference constants.  The
+local-frame Gram determinant supplies the first determinant hypothesis, and the Holder constant is
+unchanged while the bounded-difference constant is promoted to coarser chart constants. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_timeSpace_isCompact_of_primitive_le
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ r ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    {C GH : ρ → ι → ι → ℝ} {DB DH : ρ → ι → ι → ι → ℝ}
+    {HB HH : ρ → ι → ι → ι → ι → ℝ}
+    {ηG0 ηD0 ηG ηD : ρ → ℝ} {ηH0 ηH : ρ → ι → ι → ℝ}
+    {N : ρ → ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ρ → ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ρ → ℝ × M → ι → ι → ι → ι → ℝ}
+    (hC_nonneg : ∀ r i j, 0 ≤ C r i j)
+    (hGH : ∀ r i j, 0 ≤ GH r i j)
+    (hDB : ∀ r a c d, 0 ≤ DB r a c d)
+    (hDH : ∀ r a c d, 0 ≤ DH r a c d)
+    (hHB : ∀ r a c i j, 0 ≤ HB r a c i j)
+    (hHH : ∀ r a c i j, 0 ≤ HH r a c i j)
+    (hG : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (GH r i j) α
+        (fun z : ℝ × M =>
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2 i j)
+        K)
+    (hN : ∀ r i j,
+      ParabolicC0AlphaWith (C r i j) (GH r i j) α (fun z : ℝ × M => N r z i j)
+        K)
+    (hD : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => D r z a c d) K)
+    (hEarr : ∀ r a c d,
+      ParabolicC0AlphaWith (DB r a c d) (DH r a c d) α
+        (fun z : ℝ × M => Earr r z a c d) K)
+    (hHc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Hc r z a c i j) K)
+    (hKc : ∀ r a c i j,
+      ParabolicC0AlphaWith (HB r a c i j) (HH r a c i j) α
+        (fun z : ℝ × M => Kc r z a c i j) K)
+    (hdetN_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K → (N r z).det ≠ 0)
+    (hηG : ∀ r, ηG0 r ≤ ηG r) (hηD : ∀ r, ηD0 r ≤ ηD r)
+    (hηH : ∀ r i j, ηH0 r i j ≤ ηH r i j)
+    (hηD0 : ∀ r, 0 ≤ ηD0 r)
+    (hGdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) - N r z‖ ≤
+        ηG0 r)
+    (hDdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D r z a c d - Earr r z a c d‖ ≤ ηD0 r)
+    (hHdiff : ∀ r ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc r z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc r z a c i j) : Matrix ι ι ℝ)‖ ≤ ηH0 r i j) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (∀ r ⦃z : ℝ × M⦄, z ∈ K → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicC0AlphaWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r) (ηG r) (ηD r) (ηH r))
+          (ricciDeTurckSchematicDiffHolderConst
+            (𝕜 := ℝ) δ (C r) (GH r) (DB r) (DH r) (HB r) (HH r))
+          α
+          (fun z : ℝ × M =>
+            ricciDeTurckSchematicMatrix
+                (show Matrix ι ι ℝ from
+                  CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+                (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (Earr r z) (Kc r z)) K := by
+  have hdetG_ne : ∀ r ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det ≠ 0 := by
+    intro r z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) (e r) (b r) (hKbase r hz)
+  exact
+    ricciDeTurckSchematicMatrix_sub_with_family_of_isCompact_det_ne_zero_of_primitive_le
+      (K := K)
+      (M := fun r (z : ℝ × M) =>
+        (show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+      (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
+      hK hα hC_nonneg hGH hDB hDH hHB hHH hG hN hD hEarr hHc hKc
+      hdetG_ne hdetN_ne hηG hηD hηH hηD0 hGdiff hDdiff hHdiff
+
 /-- Local finite product-cylinder finite-family local-frame bridge for quantitative parabolic
 `C^{0,α}` control of schematic Ricci-DeTurck RHS differences. -/
 theorem localFrameGramMatrix_ricciDeTurck_schematic_sub_with_family_of_finset_parabolicCylinder_cover_closedCylinder_variable
