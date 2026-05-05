@@ -114,6 +114,73 @@ theorem RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_symmetricCarr
   · exact ⟨Dsym.toIntrinsicLocalExistenceUniqueness⟩
   · exact ⟨Dsym.toLocalExistenceUniqueness⟩
 
+/-- A positive-radius ambient interval closure package selects the standard metric-cone shrink and
+returns the compact theorem packages without any terminal-fit hypothesis.  The terminal-fit
+assumption is needed only for the stronger handoff to an actual shrunk symmetric-carrier closure
+datum. -/
+theorem RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_and_conditional_symmetricCarrier
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    {chart : TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate}
+    (D : RicciDeTurckChartClosureDataOnIcc x0 et het Kc hKc Ko hKo hKoEq hcover chart)
+    (ha : 0 < a) :
+    ∃ (T' : ℝ) (a' : ℝ≥0) (hT' : ivp.initialTime < T') (hT'le : T' ≤ T)
+      (ha' : a' ≤ a)
+      (htime : L * max (T' - ivp.initialTime) (ivp.initialTime - ivp.initialTime) ≤
+        a' - (0 : ℝ≥0))
+      (hball : Metric.closedBall
+        (InitialValueProblem.toSymmetricSectionSubmodule
+          (M := M) x0 et het Kc hKc Ko hKo hKoEq hcover ivp) (a' : ℝ) ⊆
+        riemannianMetricLocusSubmodule (M := M) (F := F)
+          (W := (TangentSpace I : M → Type _)) et Kc hKc Ko hKo hKoEq hcover),
+      0 < a' ∧
+        Nonempty (ChosenIntrinsicDeTurckLocalExistenceUniqueness
+          (E := F) (H := H) (I := I) (M := M) ivp) ∧
+        Nonempty (IntrinsicLocalExistenceUniqueness
+          (E := F) (H := H) (I := I) (M := M) ivp) ∧
+        Nonempty (LocalExistenceUniqueness
+          (E := F) (H := H) (I := I) (M := M) ivp) ∧
+        ((∀ candidate : ChosenIntrinsicDeTurckLocalSolution
+            (E := F) (H := H) (I := I) (M := M) ivp,
+          (D.encode candidate).sol.terminalTime ≤ T') →
+          let chart' := chart.shrink (M := M) (F := F) (I := I) hT' hT'le ha' htime
+          ∃ Dsym : SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc
+            x0 et het Kc hKc Ko hKo hKoEq hcover chart',
+            True) := by
+  rcases chart.exists_metricCone_shrink_parameters
+      (M := M) (F := F) (I := I) x0 et het Kc hKc Ko hKo hKoEq hcover ha with
+    ⟨T', a', hT', hT'le, ha'pos, ha'le, htime, hball⟩
+  refine
+    ⟨T', a', hT', hT'le, ha'le, htime, hball, ha'pos,
+      ?_, ?_, ?_, ?_⟩
+  · exact ⟨D.toChosenIntrinsicDeTurckLocalExistenceUniqueness⟩
+  · exact ⟨D.toIntrinsicLocalExistenceUniqueness⟩
+  · exact ⟨D.toLocalExistenceUniqueness⟩
+  · intro hencode_terminal
+    let chart' := chart.shrink (M := M) (F := F) (I := I) hT' hT'le ha'le htime
+    refine ⟨?_, trivial⟩
+    exact
+      SymmetricSubmoduleRicciDeTurckChartClosureDataOnIcc.ofShrunkRicciDeTurckChartClosureDataOnIcc
+        (M := M) (F := F) (I := I) (D := D)
+        hT' hT'le ha'le htime hball hencode_terminal
+
 /-- A positive-radius ambient interval closure package also selects the standard metric-cone shrink
 and gives the clipped local uniqueness readout on that shrink, without requiring full arbitrary
 candidate intervals to fit inside the selected interval. -/

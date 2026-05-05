@@ -1375,6 +1375,10 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      returning both metric equality and canonical chosen-background connection
      equality on the visible overlap, plus a stronger single-shrink handoff that
      carries the terminal-fit theorem packages and those local readouts together.
+     A companion handoff now selects the same kind of shrink while exposing the
+     chosen-background, intrinsic, and ordinary theorem packages unconditionally
+     from the ambient closure data; only the genuine shrunk symmetric-carrier
+     closure datum remains behind the terminal-fit hypothesis.
      It also now has a continuation-facing selected-shrink handoff that combines
      the terminal-fit theorem packages, prescribed shorter-terminal
      metric/connection readouts, and conditional full-common readouts; the

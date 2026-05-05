@@ -2301,9 +2301,13 @@ now also bundled in `SmoothRealizationMetricCone`: a positive-radius ambient
 interval closure package selects the standard shrink and, under the same
 terminal-fit compatibility for reverse encodings, returns the genuine symmetric
 closure datum together with chosen-background, intrinsic, and ordinary theorem
-package witnesses. The local-solution prefix constructors now make it possible
-to state future terminal-fit replacements against restricted candidates rather
-than against the full arbitrary candidate interval, and the analytic
+package witnesses. The companion
+`RicciDeTurckChartClosureDataOnIcc.exists_metricCone_shrunk_theoremPackages_and_conditional_symmetricCarrier`
+keeps the theorem-package witnesses unconditional from the ambient closure data;
+the terminal-fit hypothesis is isolated only to constructing the shrunk genuine
+symmetric-carrier closure datum. The local-solution prefix constructors now make
+it possible to state future terminal-fit replacements against restricted
+candidates rather than against the full arbitrary candidate interval, and the analytic
 smooth-realization / interval-encoding prefixes now preserve the same
 underlying metric data on the shorter interval, including after descending to
 the genuine symmetric carrier, and local uniqueness can now be read on a chosen
