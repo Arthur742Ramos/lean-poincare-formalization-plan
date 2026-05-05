@@ -1547,7 +1547,14 @@ backward space-time-regularity variants
 and
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius_of_contDiffAt_spaceTime`,
 so backward/inverse patches can consume full space-time `C^3` regularity
-directly rather than a pre-sliced fixed-time proof.  These ingredients now assemble into a local-cover raw-flow endpoint,
+directly rather than a pre-sliced fixed-time proof.  The same backward
+space-time handoff now has identity-ball specializations,
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius_of_contDiffAt_spaceTime`
+and
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius_of_contDiffAt_spaceTime`,
+so product Picard data initialized at the identity tangent component no longer
+has to carry an explicit operator-ball bound to produce backward local gluing
+patches.  These ingredients now assemble into a local-cover raw-flow endpoint,
 `Diffeomorph3GaugeFlowOn.of_iUnion_gluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 with proof-level `nonempty_...`: global glued forward/backward slices plus
 local open-cover readouts carrying inverse identities, slice regularity,
