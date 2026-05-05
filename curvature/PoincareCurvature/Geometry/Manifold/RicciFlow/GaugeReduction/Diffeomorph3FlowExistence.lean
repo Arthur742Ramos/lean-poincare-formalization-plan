@@ -955,6 +955,85 @@ theorem contMDiffOn_symm_image_of_maximalAtlas_lifted_model_inverse
   exact contMDiffOn_symm_image_of_openPartialHomeomorph_lifted_model_inverse
     (I := I) e₀ e₁ hUsource hUt hWt hW he₁smooth hφsymm he₀symm
 
+/-- A model open-partial-homeomorphism patch lifted through atlas charts supplies
+the local forward/backward data needed by compatible manifold gluing: open
+source and target patches, forward and backward `MapsTo`, bijectivity,
+`C^n` regularity of both lifted slices, and local inverse identities. -/
+theorem lifted_model_local_gluing_data_of_openPartialHomeomorph
+    {n : WithTop ℕ∞} [hn : ENat.LEInfty n]
+    (e₀ e₁ : OpenPartialHomeomorph M H) {G : H → H}
+    {φ : OpenPartialHomeomorph H H} (hφ : (φ : H → H) = G)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    {U W : Set H}
+    (hUopen : IsOpen U) (hUsource : U ⊆ φ.source) (hUt : U ⊆ e₀.target)
+    (hW : W = φ '' U) (hWt : W ⊆ e₁.target)
+    (hG : ContMDiffOn I I n G U)
+    (hφsymm : ContMDiffOn I I n (fun y : H ↦ φ.symm y) W) :
+    IsOpen (e₀.symm '' U) ∧
+      IsOpen (e₁.symm '' W) ∧
+        MapsTo (fun z : M ↦ e₁.symm (G (e₀ z))) (Set.univ ∩ e₀.symm '' U)
+          (e₁.symm '' W) ∧
+          MapsTo (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) (Set.univ ∩ e₁.symm '' W)
+            (e₀.symm '' U) ∧
+            BijOn (fun z : M ↦ e₁.symm (G (e₀ z))) (e₀.symm '' U) (e₁.symm '' W) ∧
+              ContMDiffOn I I n (fun z : M ↦ e₁.symm (G (e₀ z))) (e₀.symm '' U) ∧
+                ContMDiffOn I I n (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                  (e₁.symm '' W) ∧
+                  LeftInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                    (fun z : M ↦ e₁.symm (G (e₀ z))) (e₀.symm '' U) ∧
+                    RightInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                      (fun z : M ↦ e₁.symm (G (e₀ z))) (e₁.symm '' W) := by
+  have hWopen : IsOpen W := by
+    simpa [hW] using φ.isOpen_image_of_subset_source hUopen hUsource
+  have hUmopen : IsOpen (e₀.symm '' U) :=
+    e₀.isOpen_image_symm_of_subset_target hUopen hUt
+  have hWmopen : IsOpen (e₁.symm '' W) :=
+    e₁.isOpen_image_symm_of_subset_target hWopen hWt
+  have hmapsModel : MapsTo G U W := by
+    intro y hyU
+    rw [← hφ, hW]
+    exact ⟨y, hyU, rfl⟩
+  have hbijφ : BijOn (fun y : H ↦ φ y) U W := by
+    simpa [hW] using (φ.injOn.mono hUsource).bijOn_image
+  have hbijModel : BijOn G U W :=
+    hbijφ.congr (fun _ _ ↦ by simpa [hφ])
+  have hFmaps :
+      MapsTo (fun z : M ↦ e₁.symm (G (e₀ z))) (Set.univ ∩ e₀.symm '' U)
+        (e₁.symm '' W) := by
+    intro z hz
+    exact mapsTo_symm_image_of_openPartialHomeomorph_lifted_model_mapsTo
+      e₀ e₁ G hUt hmapsModel hz.2
+  have hGmaps :
+      MapsTo (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) (Set.univ ∩ e₁.symm '' W)
+        (e₀.symm '' U) := by
+    intro z hz
+    exact mapsTo_symm_image_of_openPartialHomeomorph_lifted_model_inverse_mapsTo
+      e₀ e₁ hUsource hW hWt hz.2
+  have hbijLift :
+      BijOn (fun z : M ↦ e₁.symm (G (e₀ z))) (e₀.symm '' U) (e₁.symm '' W) :=
+    bijOn_symm_image_of_openPartialHomeomorph_lifted_model_bijOn
+      e₀ e₁ G hUt hWt hbijModel
+  have hFsmooth :
+      ContMDiffOn I I n (fun z : M ↦ e₁.symm (G (e₀ z))) (e₀.symm '' U) :=
+    contMDiffOn_symm_image_of_maximalAtlas_lifted_model
+      (I := I) e₀ e₁ G he₀ he₁ hUt hWt hG hmapsModel
+  have hGsmooth :
+      ContMDiffOn I I n (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) (e₁.symm '' W) :=
+    contMDiffOn_symm_image_of_maximalAtlas_lifted_model_inverse
+      (I := I) e₀ e₁ he₀ he₁ hUsource hUt hWt hW hφsymm
+  have hleft :
+      LeftInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+        (fun z : M ↦ e₁.symm (G (e₀ z))) (e₀.symm '' U) :=
+    leftInvOn_symm_image_of_openPartialHomeomorph_lifted_model_inverse
+      e₀ e₁ hφ hUsource hUt hW hWt
+  have hright :
+      RightInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+        (fun z : M ↦ e₁.symm (G (e₀ z))) (e₁.symm '' W) :=
+    rightInvOn_symm_image_of_openPartialHomeomorph_lifted_model_inverse
+      e₀ e₁ hφ hUsource hUt hW hWt
+  exact ⟨hUmopen, hWmopen, hFmaps, hGmaps, hbijLift, hFsmooth, hGsmooth, hleft, hright⟩
+
 /-- A manifold self-map is `C^n` on a domain if every point of the domain has
 an open neighborhood on which it agrees with a `C^n` local readout.  This is
 the regularity-gluing analogue of
