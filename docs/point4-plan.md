@@ -2535,7 +2535,9 @@ determinant lower bound into pointwise `LipschitzOnWith` estimates for the
 schematic RHS coordinate map, including finite-family form. It also proves
 monotonicity of the inverse-Christoffel array and schematic RHS constants in
 their primitive radii, so finite-cover arguments can replace local constants by
-coarser shared bounds without reopening the formulas. The interval
+coarser shared bounds without reopening the formulas. The function-level
+bounded-difference and shared-radius schematic RHS estimates now carry this
+coarsening step directly. The interval
 Banach-chart constructor now also has a real-constant coordinate-Lipschitz
 entry point, so those matrix constants no longer need to be prepackaged as
 `ℝ≥0` by callers. This is a

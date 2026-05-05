@@ -11089,6 +11089,54 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const {n 𝕜 : Type*} [Finty
     (mul_le_mul_of_nonneg_left harray_mono
       (christoffelQuadraticRicciEntryLipschitzConst_nonneg hΓB i j))
 
+/-- Function-level schematic Ricci-DeTurck RHS estimate with coarser primitive
+difference constants.  This lets local primitive estimates proved with sharper constants be
+consumed by a shared finite-cover constant. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_primitive_le
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ : ℝ}
+    {C : n → n → ℝ} {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {ηM0 ηD0 ηM ηD : ℝ} {ηH0 ηH : n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {H K : ℝ × X → n → n → n → n → 𝕜}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hηM : ηM0 ≤ ηM) (hηD : ηD0 ≤ ηD)
+    (hηH : ∀ i j, ηH0 i j ≤ ηH i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hD : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖D z a b c‖ ≤ DB a b c)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hK : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j, ‖K z a b i j‖ ≤ HB a b i j)
+    (hηD0 : 0 ≤ ηD0)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ ηM0)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ ηD0)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+      ‖((fun a b => H z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => K z a b i j) : Matrix n n 𝕜)‖ ≤ ηH0 i j)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicBoundedWith
+      (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB ηM ηD ηH)
+      (fun z : ℝ × X =>
+        ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+          ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s := by
+  have hbase :
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB ηM0 ηD0 ηH0)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s :=
+    ricciDeTurckSchematicMatrix_bounded_sub_le_const
+      (s := s) (δ := δ) (C := C) (DB := DB) (HB := HB)
+      (ηM := ηM0) (ηD := ηD0) (ηH := ηH0)
+      (M := M) (N := N) (D := D) (E := E) (H := H) (K := K)
+      hDB hHB hM hN hD hE hK hηD0 hMdiff hDdiff hHdiff hδpos hdetM hdetN
+  exact hbase.mono_const
+    (ricciDeTurckSchematicDiffBoundConst_mono
+      (𝕜 := 𝕜) hδpos hDB hHB hηM hηD hηH)
+
 /-- Function-level Lipschitz form of the finite schematic Ricci-DeTurck RHS estimate.  If the
 primitive metric, first-derivative, and principal-coefficient inputs differ by fixed constants
 times one shared radius, then the schematic RHS differs by one named constant times that radius. -/
@@ -11134,6 +11182,55 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius {n 𝕜 : Ty
       hDB hHB hM hN hD hE hK (mul_nonneg hKD hR) hMdiff hDdiff hHdiff
       hδpos hdetM hdetN
   simpa [ricciDeTurckSchematicDiffBoundConst_mul_radius] using hbase
+
+/-- Linear-radius schematic Ricci-DeTurck RHS estimate with coarser primitive Lipschitz
+constants.  This is the shared-radius form used when finite-cover local constants are replaced by
+larger chart constants before entering a common Picard/Lipschitz estimate. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_primitive_le
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ R : ℝ}
+    {KM0 KD0 KM KD : ℝ} {KH0 KH : n → n → ℝ}
+    {C : n → n → ℝ} {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {H K : ℝ × X → n → n → n → n → 𝕜}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM : KM0 ≤ KM) (hKD : KD0 ≤ KD) (hKH : ∀ i j, KH0 i j ≤ KH i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hD : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖D z a b c‖ ≤ DB a b c)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hK : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j, ‖K z a b i j‖ ≤ HB a b i j)
+    (hKD0 : 0 ≤ KD0) (hR : 0 ≤ R)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ KM0 * R)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ KD0 * R)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+      ‖((fun a b => H z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => K z a b i j) : Matrix n n 𝕜)‖ ≤ KH0 i j * R)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicBoundedWith
+      (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH * R)
+      (fun z : ℝ × X =>
+        ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+          ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s := by
+  have hbase :
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM0 KD0 KH0 * R)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s :=
+    ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius
+      (s := s) (δ := δ) (C := C) (DB := DB) (HB := HB)
+      (R := R) (KM := KM0) (KD := KD0) (KH := KH0)
+      (M := M) (N := N) (D := D) (E := E) (H := H) (K := K)
+      hDB hHB hM hN hD hE hK hKD0 hR hMdiff hDdiff hHdiff hδpos hdetM hdetN
+  exact hbase.mono_const
+    (mul_le_mul_of_nonneg_right
+      (ricciDeTurckSchematicDiffBoundConst_mono
+        (𝕜 := 𝕜) hδpos hDB hHB hKM hKD hKH)
+      hR)
 
 /-- State-space Lipschitz bridge for the finite schematic Ricci-DeTurck RHS.  If the primitive
 matrix, first-derivative, and principal-coefficient inputs are Lipschitz on a state set with
