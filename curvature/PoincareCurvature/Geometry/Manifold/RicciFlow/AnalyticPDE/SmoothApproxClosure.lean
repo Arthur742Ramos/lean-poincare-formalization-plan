@@ -525,6 +525,80 @@ def timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallCoordDistLe
         simpa [Kfiber] using hfiber' τ hτ hs ht x)
       geometric
 
+/-- Real-constant variant of
+`timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallCoordDistLe`.  This is the form used by
+coordinate estimates whose Lipschitz constant is first produced as a nonnegative real number, such
+as the finite schematic Ricci-DeTurck matrix constants. -/
+def timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallCoordDistLeReal
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F TM I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [_root_.Bundle.RiemannianBundle TM]
+    [IsContinuousRiemannianBundle (B := M) F TM]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F TM)
+    {A : ℝ →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {a L Kpic : ℝ≥0} {Kcoord : ℝ} (hKcoord : 0 ≤ Kcoord)
+    {C : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      @norm (TM x.1 →L[ℝ] F) ContinuousLinearMap.hasOpNorm
+        ((trivializationAt F TM (x0 i)).continuousLinearMapAt ℝ x.1) ≤ C)
+    (picard : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩
+      (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover) a 0 L Kpic)
+    (hcoord : ∀ τ, τ ∈ Icc t₀ T → ∀ ⦃s⦄, s ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+      ∀ ⦃t⦄, t ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+      ∀ i (x : Kc i),
+        dist
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover (A τ s)).1 i x)
+            ((equivCompatibleCoordFamilySubmodule
+              (𝕜 := ℝ) (F := BilF) (V := BilW)
+              et Kc hKc Ko hKo hKoEq hcover (A τ t)).1 i x)
+          ≤ Kcoord * dist s t)
+    (geometric : ∀ τ s, s ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+      ∃ (g : MetricFamily (I := I) (M := M))
+        (background : ConnectionFamily (I := I) (M := M)),
+        ∀ (x : M) (u v : TangentSpace I x),
+          A τ s x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background τ x u v) :
+    Σ Kstate : ℝ≥0,
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate := by
+  let KcoordNN : ℝ≥0 := ⟨Kcoord, hKcoord⟩
+  exact timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallCoordDistLe
+    (M := M) (F := F) (I := I)
+    x0 et het Kc hKc Ko hKo hKoEq hcover g₀ hT
+    (A := A) (a := a) (L := L) (Kpic := Kpic) (Kcoord := KcoordNN)
+    hC0 hC picard
+    (fun τ hτ s hs t ht i x => by
+      simpa [KcoordNN] using hcoord τ hτ hs ht i x)
+    geometric
+
 /-- Interval Ricci-DeTurck charts can use the preferred-cover smooth-density theorem directly in the
 Picard shrink step.  The remaining density inputs are the finite-cover inverse bound used by the
 transported Banach norm and the local tangent-trivialization bound used to smooth bilinear sections. -/
