@@ -2441,6 +2441,66 @@ theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_hasDerivWithinAt_extChartAt_eval_self maps3 anchored hcont hderiv⟩
 
+/-- Build a raw `C^3` gauge-flow witness from globally glued inverse slices
+and centered preferred-chart derivative data for the forward map.  The inverse
+and regularity hypotheses are stated on `Set.univ`, matching the output of the
+open-cover gluing layer. -/
+noncomputable def of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hcont : ∀ t ∈ s, ∀ x : M,
+      ContinuousWithinAt (fun τ : ℝ ↦ F τ x) s t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (X t (F t x)) s t) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ := by
+  let hleft' : ∀ t : ℝ, Function.LeftInverse (G t) (F t) :=
+    fun t x ↦ hleft t (Set.mem_univ x)
+  let hright' : ∀ t : ℝ, Function.RightInverse (G t) (F t) :=
+    fun t x ↦ hright t (Set.mem_univ x)
+  let hF' : ∀ t : ℝ, ContMDiff I I 3 (F t) :=
+    fun t ↦ by simpa [contMDiffOn_univ] using hF t
+  let hG' : ∀ t : ℝ, ContMDiff I I 3 (G t) :=
+    fun t ↦ by simpa [contMDiffOn_univ] using hG t
+  let maps3 := SmoothSelfDiffeomorph3Family.ofInverse
+    (I := I) (M := M) F G hleft' hright' hF' hG'
+  exact of_hasDerivWithinAt_extChartAt_eval_self
+    (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    maps3
+    (SmoothSelfDiffeomorph3Family.ofInverse_anchoredAt
+      (I := I) (M := M) F G hleft' hright' hF' hG' hanchored)
+    (fun t ht x ↦ by simpa [maps3] using hcont t ht x)
+    (fun t ht x ↦ by simpa [maps3] using hderiv t ht x)
+
+/-- Proof-level raw `C^3` gauge-flow existence from globally glued inverse
+slices and centered preferred-chart derivative data. -/
+theorem nonempty_of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hcont : ∀ t ∈ s, ∀ x : M,
+      ContinuousWithinAt (fun τ : ℝ ↦ F τ x) s t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (X t (F t x)) s t) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self
+    (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    F G hleft hright hF hG hanchored hcont hderiv⟩
+
 /-- A centered preferred-chart derivative gives continuity of the manifold
 curve, provided the curve is eventually in the source of the centered chart. -/
 theorem continuousWithinAt_eval_of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
@@ -2513,6 +2573,66 @@ theorem nonempty_of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_sour
     Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
   ⟨of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
     maps3 anchored hsource hderiv⟩
+
+/-- Build a raw `C^3` gauge-flow witness from globally glued inverse slices
+and centered preferred-chart derivative data, deriving manifold-curve
+continuity from eventual membership in the centered chart source. -/
+noncomputable def of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ F τ x) ⁻¹' (extChartAt I (F t x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (X t (F t x)) s t) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ := by
+  let hleft' : ∀ t : ℝ, Function.LeftInverse (G t) (F t) :=
+    fun t x ↦ hleft t (Set.mem_univ x)
+  let hright' : ∀ t : ℝ, Function.RightInverse (G t) (F t) :=
+    fun t x ↦ hright t (Set.mem_univ x)
+  let hF' : ∀ t : ℝ, ContMDiff I I 3 (F t) :=
+    fun t ↦ by simpa [contMDiffOn_univ] using hF t
+  let hG' : ∀ t : ℝ, ContMDiff I I 3 (G t) :=
+    fun t ↦ by simpa [contMDiffOn_univ] using hG t
+  let maps3 := SmoothSelfDiffeomorph3Family.ofInverse
+    (I := I) (M := M) F G hleft' hright' hF' hG'
+  exact of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    maps3
+    (SmoothSelfDiffeomorph3Family.ofInverse_anchoredAt
+      (I := I) (M := M) F G hleft' hright' hF' hG' hanchored)
+    (fun t ht x ↦ by simpa [maps3] using hsource t ht x)
+    (fun t ht x ↦ by simpa [maps3] using hderiv t ht x)
+
+/-- Proof-level raw `C^3` gauge-flow existence from globally glued inverse
+slices and centered preferred-chart derivative data plus eventual source
+membership. -/
+theorem nonempty_of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hsource : ∀ t ∈ s, ∀ x : M,
+      (fun τ : ℝ ↦ F τ x) ⁻¹' (extChartAt I (F t x)).source ∈ 𝓝[s] t)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t x)) (F τ x))
+        (X t (F t x)) s t) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    F G hleft hright hF hG hanchored hsource hderiv⟩
 
 /-- Build a raw `C^3` gauge-flow witness from centered preferred-chart ODE
 data for a model vector field, after identifying that model field with the

@@ -1492,7 +1492,13 @@ accepts the direct output of the gluing layer through
 `Diffeomorph3GaugeFlowOn.nonempty_of_inverseOn_univ_hasMFDerivWithinAt`: inverse
 identities and `ContMDiffOn` regularity stated on `Set.univ` are converted to
 the global inverse and `ContMDiff` hypotheses expected by the bundled
-diffeomorphism-family constructor.
+diffeomorphism-family constructor.  The same glued-slice endpoint is now
+available for preferred-chart ODE data through
+`Diffeomorph3GaugeFlowOn.of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self`
+and its proof-level `nonempty_...` form, plus the eventual-chart-source variant
+`..._of_eventually_mem_source`; these consume chart-coordinate derivatives of
+the forward map `F` directly after the open-cover gluing layer has supplied
+inverse identities and `C³` slice regularity on `Set.univ`.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,
