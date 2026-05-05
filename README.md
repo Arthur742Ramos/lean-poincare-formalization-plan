@@ -702,7 +702,10 @@ The raw matrix layer also turns primitive state-space Lipschitz bounds, with a
 uniform determinant lower bound, into `LipschitzOnWith` statements for each
 schematic RHS coordinate and for finite RHS families; `SmoothApproxClosure`
 now has the matching real-constant coordinate-Lipschitz constructor for the
-interval Ricci-DeTurck Banach-chart package.
+interval Ricci-DeTurck Banach-chart package. The same raw constants are now
+monotone in primitive metric, derivative, and principal-coefficient radii, so
+finite-cover chart arguments can pass from local constants to coarser shared
+bounds without re-expanding the schematic RHS formula.
 The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the

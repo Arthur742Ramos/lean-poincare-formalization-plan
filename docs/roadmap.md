@@ -166,6 +166,9 @@ finite-cover/point-local cylinder variants in both layers, plus state-space
 `LipschitzOnWith` bridges for schematic RHS coordinates under primitive
 Lipschitz and determinant-lower-bound hypotheses, and the smooth-closure
 interval chart constructor now accepts those real coordinate constants directly.
+The named inverse-Christoffel array and schematic RHS constants are also
+monotone in their primitive radii, allowing finite-cover arguments to pass from
+local constants to coarser shared bounds.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric

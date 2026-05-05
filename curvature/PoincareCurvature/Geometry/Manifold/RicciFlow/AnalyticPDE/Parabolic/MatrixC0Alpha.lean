@@ -5849,6 +5849,24 @@ theorem matrixInvChristoffelArrayDiffBoundConst_mono_right {n 𝕜 : Type*} [Fin
       (matrixInvChristoffelEntryMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hDB a b c))
     _
 
+/-- The uniform inverse-Christoffel array-difference bound is monotone in both primitive
+difference radii. -/
+theorem matrixInvChristoffelArrayDiffBoundConst_mono {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} (hDB : ∀ a b c, 0 ≤ DB a b c)
+    {ηD ηD' ρ ρ' : ℝ} (hηD : ηD ≤ ηD') (hρ : ρ ≤ ρ') :
+    matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ρ ≤
+      matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD' ρ' := by
+  classical
+  refine Finset.sum_le_sum fun a _ha => ?_
+  refine Finset.sum_le_sum fun b _hb => ?_
+  refine Finset.sum_le_sum fun c _hc => ?_
+  exact add_le_add
+    (mul_le_mul_of_nonneg_left hηD
+      (matrixInvChristoffelEntryDerivDiffConst_nonneg (𝕜 := 𝕜) hδpos C a b c))
+    (mul_le_mul_of_nonneg_left hρ
+      (matrixInvChristoffelEntryMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hDB a b c))
+
 /-- Every inverse-Christoffel entry is controlled by the summed uniform array-difference bound. -/
 theorem matrix_inv_christoffel_entry_norm_sub_le_array_const {n 𝕜 : Type*} [Fintype n]
     [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
@@ -10942,6 +10960,37 @@ theorem ricciDeTurckSchematicDiffBoundConst_mul_radius {n 𝕜 : Type*} [Fintype
   refine Finset.sum_congr rfl fun i _hi => ?_
   refine Finset.sum_congr rfl fun j _hj => ?_
   ring
+
+/-- The schematic Ricci-DeTurck matrix difference constant is monotone in the metric,
+first-derivative, and principal-coefficient primitive difference radii. -/
+theorem ricciDeTurckSchematicDiffBoundConst_mono {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] {δ : ℝ} (hδpos : 0 < δ) {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} (hDB : ∀ a b c, 0 ≤ DB a b c)
+    {HB : n → n → n → n → ℝ} (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    {ηM ηM' ηD ηD' : ℝ} {ηH ηH' : n → n → ℝ}
+    (hηM : ηM ≤ ηM') (hηD : ηD ≤ ηD')
+    (hηH : ∀ i j, ηH i j ≤ ηH' i j) :
+    ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB ηM ηD ηH ≤
+      ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB ηM' ηD' ηH' := by
+  classical
+  refine Finset.sum_le_sum fun i _hi => ?_
+  refine Finset.sum_le_sum fun j _hj => ?_
+  have hΓB : ∀ a b c,
+      0 ≤ matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ C DB a b c := by
+    intro a b c
+    exact matrixInvChristoffelEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos C hDB a b c
+  have harray_mono :
+      matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ηM ≤
+        matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD' ηM' :=
+    matrixInvChristoffelArrayDiffBoundConst_mono (𝕜 := 𝕜) hδpos hDB hηD hηM
+  exact add_le_add
+    (add_le_add
+      (mul_le_mul_of_nonneg_left (hηH i j)
+        (matrixInvTwoIndexContractCoeffDiffConst_nonneg (𝕜 := 𝕜) hδpos C))
+      (mul_le_mul_of_nonneg_left hηM
+        (matrixInvTwoIndexContractMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hHB i j)))
+    (mul_le_mul_of_nonneg_left harray_mono
+      (christoffelQuadraticRicciEntryLipschitzConst_nonneg hΓB i j))
 
 /-- Named version of the primitive schematic Ricci-DeTurck matrix Lipschitz estimate. -/
 theorem ricciDeTurckSchematicMatrix_norm_sub_le_const {n 𝕜 : Type*} [Fintype n]
