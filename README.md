@@ -223,7 +223,12 @@ packages the canonical stationary local solution attached to
     manifold and preferred-chart derivative readouts under vector-field
     agreement in the relative filter `𝓝[s] t`, matching closed-interval Picard
     endpoint data, and the fixed-IVP/theorem-family raw intrinsic existence
-    packages mirror those readouts. A thin `AnalyticPDE.SmoothRealization`
+    packages mirror those readouts. It also constructs canonical glued
+    forward/backward slices for time-dependent compatible open covers from a
+    source-persistence hypothesis, with a finite-cover local-readout variant
+    that promotes per-patch relative-filter equality to the uniform field
+    identification needed by the raw gauge-flow endpoint. A thin
+    `AnalyticPDE.SmoothRealization`
     module names the
     global/interval PDE closure data that turns a Banach chart solution into a
     smooth chosen-background DeTurck solution and its self-encoding candidate:

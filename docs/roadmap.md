@@ -722,7 +722,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        proof-level `Nonempty` wrappers for geometric, within-derivative,
        ordinary-on-time-set derivative, unrestricted derivative, restriction,
        and identity-flow constructors, so later ODE existence arguments can
-       stay proof-level until a concrete gauge flow is required. The fixed-IVP
+       stay proof-level until a concrete gauge flow is required. It now also
+       has a time-dependent compatible-cover glued-slice bridge: canonical
+       global forward/backward slices are built by `gluedMapOf_iUnion`, and a
+       closed-Picard source-persistence hypothesis supplies the relative-filter
+       equality needed by the raw local-cover endpoint; the finite-cover
+       local-readout variant derives the uniform field-identification handoff
+       from per-index data. The fixed-IVP
        intrinsic DeTurck existence layer mirrors that proof-level shape for its
        derivative-data and identity constructors, and the theorem-family layer
        now mirrors it as well, including fixed-IVP extraction and named

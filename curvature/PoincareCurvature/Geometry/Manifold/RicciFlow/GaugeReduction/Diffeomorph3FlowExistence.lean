@@ -4388,6 +4388,270 @@ theorem nonempty_of_timeDependent_iUnion_gluedSlices_of_local_hasDerivWithinAt_I
     hFEqRight hleftLocal hrightLocal hFLocal hGLocal hanchoredLocal hFEqWithin
     hFEqWithinAll hcontLocal hderivLocal hYLocal⟩
 
+/-- Build a raw `C^3` gauge-flow witness from compatible local readouts on
+time-dependent open covers, constructing the global forward/backward slices
+canonically via `gluedMapOf_iUnion`.
+
+The additional `hUwithin` hypothesis is the temporal source-persistence bridge:
+the source patch chosen at the base time remains inside the corresponding patch
+for nearby times in the closed Picard relative filter.  This turns slice-wise
+canonical gluing into the relative-filter equality required by the lower-level
+time-dependent-cover endpoint. -/
+noncomputable def of_timeDependent_iUnion_compatibleGluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M)
+    (hUcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, V t i)
+    (hUopen : ∀ t : ℝ, ∀ i, IsOpen (U t i))
+    (hVopen : ∀ t : ℝ, ∀ i, IsOpen (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hFmaps : ∀ t : ℝ, ∀ i, MapsTo (Fₗ i t) (Set.univ ∩ U t i) (V t i))
+    (hGmaps : ∀ t : ℝ, ∀ i, MapsTo (Gₗ i t) (Set.univ ∩ V t i) (U t i))
+    (hUwithin : ∀ t ∈ Icc tmin tmax, ∀ i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, U t i ⊆ U τ i)
+    (hleftLocal : ∀ t : ℝ, ∀ i,
+      LeftInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ U t i))
+    (hrightLocal : ∀ t : ℝ, ∀ i,
+      RightInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ V t i))
+    (hFLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Fₗ i t) (U t i))
+    (hGLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Gₗ i t) (V t i))
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          (extChartAt I
+            ((gluedMapOf_iUnion (defaultF t) (U t) (fun j ↦ Fₗ j t)) x))
+            (Fₗ i τ x))
+        (Y t ((gluedMapOf_iUnion (defaultF t) (U t) (fun j ↦ Fₗ j t)) x))
+        (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
+      Y τ ((gluedMapOf_iUnion (defaultF τ) (U τ) (fun i ↦ Fₗ i τ)) x) =
+        X τ ((gluedMapOf_iUnion (defaultF τ) (U τ) (fun i ↦ Fₗ i τ)) x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ := by
+  let F : ℝ → M → M := fun t ↦ gluedMapOf_iUnion (defaultF t) (U t) (fun i ↦ Fₗ i t)
+  let G : ℝ → M → M := fun t ↦ gluedMapOf_iUnion (defaultG t) (V t) (fun i ↦ Gₗ i t)
+  have hFEq : ∀ t : ℝ, ∀ i, EqOn (F t) (Fₗ i t) (U t i) := by
+    intro t
+    simpa [F] using
+      (gluedMapOf_iUnion_eqOn
+        (default := defaultF t) (U := U t) (Fₗ := fun i ↦ Fₗ i t) (hFcompat t))
+  have hGEq : ∀ t : ℝ, ∀ i, EqOn (G t) (Gₗ i t) (V t i) := by
+    intro t
+    simpa [G] using
+      (gluedMapOf_iUnion_eqOn
+        (default := defaultG t) (U := V t) (Fₗ := fun i ↦ Gₗ i t) (hGcompat t))
+  have hGEqLeft : ∀ t : ℝ, ∀ i,
+      EqOn (G t) (Gₗ i t) ((F t) '' (Set.univ ∩ U t i)) := by
+    intro t i y hy
+    rcases hy with ⟨x, hx, rfl⟩
+    have hFx : F t x = Fₗ i t x := hFEq t i hx.2
+    have hV : F t x ∈ V t i := by
+      rw [hFx]
+      exact hFmaps t i hx
+    exact hGEq t i hV
+  have hFEqRight : ∀ t : ℝ, ∀ i,
+      EqOn (F t) (Fₗ i t) ((G t) '' (Set.univ ∩ V t i)) := by
+    intro t i x hx
+    rcases hx with ⟨y, hy, rfl⟩
+    have hGy : G t y = Gₗ i t y := hGEq t i hy.2
+    have hU : G t y ∈ U t i := by
+      rw [hGy]
+      exact hGmaps t i hy
+    exact hFEq t i hU
+  have hFEqWithin : ∀ t ∈ Icc tmin tmax, ∀ i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, EqOn (F τ) (Fₗ i τ) (U t i) := by
+    intro t ht i
+    filter_upwards [hUwithin t ht i] with τ hτ x hx
+    exact hFEq τ i (hτ hx)
+  exact of_timeDependent_iUnion_gluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    F G Fₗ Gₗ U V hUcover hVcover hUopen hVopen hFEq hGEqLeft hGEq
+    hFEqRight hleftLocal hrightLocal hFLocal hGLocal hanchoredLocal
+    hFEqWithin hcontLocal
+    (fun i t ht x hxU ↦ by
+      simpa [F] using hderivLocal i t ht x hxU)
+    (fun t ht ↦ by
+      simpa [F] using hY t ht)
+
+/-- Proof-level raw `C^3` gauge-flow existence from compatible local readouts
+on time-dependent open covers, with canonical glued slices. -/
+theorem nonempty_of_timeDependent_iUnion_compatibleGluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M)
+    (hUcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, V t i)
+    (hUopen : ∀ t : ℝ, ∀ i, IsOpen (U t i))
+    (hVopen : ∀ t : ℝ, ∀ i, IsOpen (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hFmaps : ∀ t : ℝ, ∀ i, MapsTo (Fₗ i t) (Set.univ ∩ U t i) (V t i))
+    (hGmaps : ∀ t : ℝ, ∀ i, MapsTo (Gₗ i t) (Set.univ ∩ V t i) (U t i))
+    (hUwithin : ∀ t ∈ Icc tmin tmax, ∀ i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, U t i ⊆ U τ i)
+    (hleftLocal : ∀ t : ℝ, ∀ i,
+      LeftInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ U t i))
+    (hrightLocal : ∀ t : ℝ, ∀ i,
+      RightInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ V t i))
+    (hFLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Fₗ i t) (U t i))
+    (hGLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Gₗ i t) (V t i))
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          (extChartAt I
+            ((gluedMapOf_iUnion (defaultF t) (U t) (fun j ↦ Fₗ j t)) x))
+            (Fₗ i τ x))
+        (Y t ((gluedMapOf_iUnion (defaultF t) (U t) (fun j ↦ Fₗ j t)) x))
+        (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
+      Y τ ((gluedMapOf_iUnion (defaultF τ) (U τ) (fun i ↦ Fₗ i τ)) x) =
+        X τ ((gluedMapOf_iUnion (defaultF τ) (U τ) (fun i ↦ Fₗ i τ)) x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀) :=
+  ⟨of_timeDependent_iUnion_compatibleGluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    defaultF defaultG Fₗ Gₗ U V hUcover hVcover hUopen hVopen
+    hFcompat hGcompat hFmaps hGmaps hUwithin hleftLocal hrightLocal hFLocal
+    hGLocal hanchoredLocal hcontLocal hderivLocal hY⟩
+
+/-- Build a raw `C^3` gauge-flow witness from compatible local readouts on a
+finite time-dependent open cover, with derivative and vector-field
+identification hypotheses stated against the local forward readouts.
+
+The finite index type promotes per-patch relative-filter equality to the
+uniform equality needed to identify the vector field along the canonically glued
+global slice for all base points. -/
+noncomputable def of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {ι : Type*} [Finite ι]
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M)
+    (hUcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, V t i)
+    (hUopen : ∀ t : ℝ, ∀ i, IsOpen (U t i))
+    (hVopen : ∀ t : ℝ, ∀ i, IsOpen (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hFmaps : ∀ t : ℝ, ∀ i, MapsTo (Fₗ i t) (Set.univ ∩ U t i) (V t i))
+    (hGmaps : ∀ t : ℝ, ∀ i, MapsTo (Gₗ i t) (Set.univ ∩ V t i) (U t i))
+    (hUwithin : ∀ t ∈ Icc tmin tmax, ∀ i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, U t i ⊆ U τ i)
+    (hleftLocal : ∀ t : ℝ, ∀ i,
+      LeftInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ U t i))
+    (hrightLocal : ∀ t : ℝ, ∀ i,
+      RightInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ V t i))
+    (hFLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Fₗ i t) (U t i))
+    (hGLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Gₗ i t) (V t i))
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) (Icc tmin tmax) t)
+    (hYLocal : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U t i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ := by
+  let F : ℝ → M → M := fun t ↦ gluedMapOf_iUnion (defaultF t) (U t) (fun i ↦ Fₗ i t)
+  let G : ℝ → M → M := fun t ↦ gluedMapOf_iUnion (defaultG t) (V t) (fun i ↦ Gₗ i t)
+  have hFEq : ∀ t : ℝ, ∀ i, EqOn (F t) (Fₗ i t) (U t i) := by
+    intro t
+    simpa [F] using
+      (gluedMapOf_iUnion_eqOn
+        (default := defaultF t) (U := U t) (Fₗ := fun i ↦ Fₗ i t) (hFcompat t))
+  have hGEq : ∀ t : ℝ, ∀ i, EqOn (G t) (Gₗ i t) (V t i) := by
+    intro t
+    simpa [G] using
+      (gluedMapOf_iUnion_eqOn
+        (default := defaultG t) (U := V t) (Fₗ := fun i ↦ Gₗ i t) (hGcompat t))
+  have hGEqLeft : ∀ t : ℝ, ∀ i,
+      EqOn (G t) (Gₗ i t) ((F t) '' (Set.univ ∩ U t i)) := by
+    intro t i y hy
+    rcases hy with ⟨x, hx, rfl⟩
+    have hFx : F t x = Fₗ i t x := hFEq t i hx.2
+    have hV : F t x ∈ V t i := by
+      rw [hFx]
+      exact hFmaps t i hx
+    exact hGEq t i hV
+  have hFEqRight : ∀ t : ℝ, ∀ i,
+      EqOn (F t) (Fₗ i t) ((G t) '' (Set.univ ∩ V t i)) := by
+    intro t i x hx
+    rcases hx with ⟨y, hy, rfl⟩
+    have hGy : G t y = Gₗ i t y := hGEq t i hy.2
+    have hU : G t y ∈ U t i := by
+      rw [hGy]
+      exact hGmaps t i hy
+    exact hFEq t i hU
+  have hFEqWithin : ∀ t ∈ Icc tmin tmax, ∀ i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, EqOn (F τ) (Fₗ i τ) (U t i) := by
+    intro t ht i
+    filter_upwards [hUwithin t ht i] with τ hτ x hx
+    exact hFEq τ i (hτ hx)
+  exact of_timeDependent_iUnion_gluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    F G Fₗ Gₗ U V hUcover hVcover hUopen hVopen hFEq hGEqLeft hGEq
+    hFEqRight hleftLocal hrightLocal hFLocal hGLocal hanchoredLocal
+    hFEqWithin
+    (timeDependent_iUnion_hFEqWithinAll_of_finite
+      (F := F) (Fₗ := Fₗ) (U := U) hFEqWithin)
+    hcontLocal hderivLocal hYLocal
+
+/-- Proof-level raw `C^3` gauge-flow existence from compatible local readouts
+on a finite time-dependent open cover, with local derivative and
+vector-field-identification hypotheses. -/
+theorem nonempty_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {ι : Type*} [Finite ι]
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M)
+    (hUcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, V t i)
+    (hUopen : ∀ t : ℝ, ∀ i, IsOpen (U t i))
+    (hVopen : ∀ t : ℝ, ∀ i, IsOpen (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hFmaps : ∀ t : ℝ, ∀ i, MapsTo (Fₗ i t) (Set.univ ∩ U t i) (V t i))
+    (hGmaps : ∀ t : ℝ, ∀ i, MapsTo (Gₗ i t) (Set.univ ∩ V t i) (U t i))
+    (hUwithin : ∀ t ∈ Icc tmin tmax, ∀ i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, U t i ⊆ U τ i)
+    (hleftLocal : ∀ t : ℝ, ∀ i,
+      LeftInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ U t i))
+    (hrightLocal : ∀ t : ℝ, ∀ i,
+      RightInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ V t i))
+    (hFLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Fₗ i t) (U t i))
+    (hGLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Gₗ i t) (V t i))
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) (Icc tmin tmax) t)
+    (hYLocal : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U t i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀) :=
+  ⟨of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    defaultF defaultG Fₗ Gₗ U V hUcover hVcover hUopen hVopen
+    hFcompat hGcompat hFmaps hGmaps hUwithin hleftLocal hrightLocal hFLocal
+    hGLocal hanchoredLocal hcontLocal hderivLocal hYLocal⟩
+
 /-- Build a raw `C^3` gauge-flow witness from compatible local readouts by
 constructing the global forward/backward slices canonically via
 `gluedMapOf_iUnion`.  The local maps only need to agree on overlaps and map

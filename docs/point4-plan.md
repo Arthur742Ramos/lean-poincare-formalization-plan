@@ -1543,6 +1543,16 @@ this as
 `IntrinsicDeTurckGaugeFlowExistenceFamily.ofPicardIccChartDerivative_of_iUnion_gluedSlices_vectorField_eq_nhdsWithin`
 with a matching proof-level `nonempty_...`, exposing the same gluing-ready
 input uniformly across all IVPs.  The
+raw layer now also has the time-dependent compatible-cover bridge
+`Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+and proof-level `nonempty_...`: canonical glued forward/backward slices are
+built from compatible local readouts on the time-slice cover, while a
+closed-Picard source-persistence hypothesis supplies the relative-filter
+equality with the base-time patch.  Its finite-cover local-readout companion
+`Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality
+into the uniform vector-field-identification handoff needed for all base
+points.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
