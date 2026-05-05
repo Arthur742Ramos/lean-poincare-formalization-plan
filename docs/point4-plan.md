@@ -2611,7 +2611,10 @@ section, and the same result is packaged as closure of the image of bundled
 `ContinuousSection` now also has generic finite-cover Lipschitz handoffs,
 `ContinuousSectionSpace.lipschitzOnWith_of_forall_coord_dist_le` and its
 time-family variant, which turn compact coordinate-readout estimates into
-`LipschitzOnWith` hypotheses on section-space vector fields. `RiemannianSection`
+`LipschitzOnWith` hypotheses on section-space vector fields. The same layer now
+also unpacks finite coordinate-family `LipschitzOnWith` readouts to the
+pointwise compact-coordinate distance estimates required by local chart
+constructors, again with a time-family variant. `RiemannianSection`
 specializes this for preferred bilinear-form charts:
 `preferredBilinear_lipschitzOnWith_of_forall_fiber_dist_le` and its time-family
 form combine a fibrewise Lipschitz estimate with the squared preferred

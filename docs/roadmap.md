@@ -151,7 +151,10 @@ Lipschitz estimates now also upgrade to `LipschitzOnWith` estimates on this
 finite-cover section space, with a preferred-bilinear version that combines a
 fibrewise Lipschitz estimate with the square of the preferred
 inverse-trivialization bound and equality-cover variants matching the existing
-`et`/`het` Banach-chart records. The finite-cover inverse-trivialization bound
+`et`/`het` Banach-chart records. Finite coordinate-family `LipschitzOnWith`
+readouts can also be unpacked back to the pointwise compact-coordinate distance
+bounds consumed by local chart handoffs, including time-family form.
+The finite-cover inverse-trivialization bound
 is now also factored as a standalone compactness theorem and combined with the
 fibrewise handoff to produce an existential section-space Lipschitz constant for
 time-family preferred-cover fields; the smooth-closure layer uses this to build
