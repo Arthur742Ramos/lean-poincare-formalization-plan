@@ -163,6 +163,76 @@ theorem rightInvOn_of_iUnion_eqOn_rightInvOn
     _ = Fₗ i (Gₗ i y) := by rw [hG i hyV']
     _ = y := hinv i hyV'
 
+/-- Canonically glued compatible local forward/backward readouts are left
+inverse on a covered source domain when each local forward readout maps its
+source patch into the corresponding backward patch. -/
+theorem leftInvOn_gluedMapOf_iUnion
+    {ι : Type*} {defaultF : X → Y} {defaultG : Y → X}
+    {Fₗ : ι → X → Y} {Gₗ : ι → Y → X}
+    {s : Set X} {U : ι → Set X} {V : ι → Set Y}
+    (hcover : s ⊆ ⋃ i, U i)
+    (hFcompat : ∀ i j, EqOn (Fₗ i) (Fₗ j) (U i ∩ U j))
+    (hGcompat : ∀ i j, EqOn (Gₗ i) (Gₗ j) (V i ∩ V j))
+    (hmaps : ∀ i, MapsTo (Fₗ i) (s ∩ U i) (V i))
+    (hleft : ∀ i, LeftInvOn (Gₗ i) (Fₗ i) (s ∩ U i)) :
+    LeftInvOn (gluedMapOf_iUnion defaultG V Gₗ)
+      (gluedMapOf_iUnion defaultF U Fₗ) s := by
+  let F := gluedMapOf_iUnion defaultF U Fₗ
+  let G := gluedMapOf_iUnion defaultG V Gₗ
+  have hFEq : ∀ i, EqOn F (Fₗ i) (U i) := by
+    simpa [F] using
+      (gluedMapOf_iUnion_eqOn (default := defaultF) (U := U) (Fₗ := Fₗ) hFcompat)
+  have hGEq : ∀ i, EqOn G (Gₗ i) (V i) := by
+    simpa [G] using
+      (gluedMapOf_iUnion_eqOn (default := defaultG) (U := V) (Fₗ := Gₗ) hGcompat)
+  exact leftInvOn_of_iUnion_eqOn_leftInvOn
+    (F := F) (G := G) (Fₗ := Fₗ) (Gₗ := Gₗ)
+    (s := s) (U := U) hcover
+    (fun i x hx ↦ hFEq i hx.2)
+    (fun i y hy ↦ by
+      rcases hy with ⟨x, hx, rfl⟩
+      have hFx : F x = Fₗ i x := hFEq i hx.2
+      have hV : F x ∈ V i := by
+        rw [hFx]
+        exact hmaps i hx
+      exact hGEq i hV)
+    hleft
+
+/-- Canonically glued compatible local forward/backward readouts are right
+inverse on a covered target domain when each local backward readout maps its
+target patch into the corresponding forward patch. -/
+theorem rightInvOn_gluedMapOf_iUnion
+    {ι : Type*} {defaultF : X → Y} {defaultG : Y → X}
+    {Fₗ : ι → X → Y} {Gₗ : ι → Y → X}
+    {t : Set Y} {U : ι → Set X} {V : ι → Set Y}
+    (hcover : t ⊆ ⋃ i, V i)
+    (hFcompat : ∀ i j, EqOn (Fₗ i) (Fₗ j) (U i ∩ U j))
+    (hGcompat : ∀ i j, EqOn (Gₗ i) (Gₗ j) (V i ∩ V j))
+    (hmaps : ∀ i, MapsTo (Gₗ i) (t ∩ V i) (U i))
+    (hright : ∀ i, RightInvOn (Gₗ i) (Fₗ i) (t ∩ V i)) :
+    RightInvOn (gluedMapOf_iUnion defaultG V Gₗ)
+      (gluedMapOf_iUnion defaultF U Fₗ) t := by
+  let F := gluedMapOf_iUnion defaultF U Fₗ
+  let G := gluedMapOf_iUnion defaultG V Gₗ
+  have hFEq : ∀ i, EqOn F (Fₗ i) (U i) := by
+    simpa [F] using
+      (gluedMapOf_iUnion_eqOn (default := defaultF) (U := U) (Fₗ := Fₗ) hFcompat)
+  have hGEq : ∀ i, EqOn G (Gₗ i) (V i) := by
+    simpa [G] using
+      (gluedMapOf_iUnion_eqOn (default := defaultG) (U := V) (Fₗ := Gₗ) hGcompat)
+  exact rightInvOn_of_iUnion_eqOn_rightInvOn
+    (F := F) (G := G) (Fₗ := Fₗ) (Gₗ := Gₗ)
+    (t := t) (V := V) hcover
+    (fun i y hy ↦ hGEq i hy.2)
+    (fun i x hx ↦ by
+      rcases hx with ⟨y, hy, rfl⟩
+      have hGy : G y = Gₗ i y := hGEq i hy.2
+      have hU : G y ∈ U i := by
+        rw [hGy]
+        exact hmaps i hy
+      exact hFEq i hU)
+    hright
+
 /-- If two local forward maps agree on the overlap of their source patches,
 then their local inverse readouts agree on the image of that overlap under the
 first forward map. -/
