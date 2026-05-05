@@ -123,7 +123,8 @@ curried-bilinear difference primitives, and a standalone Holder-level
 operator-application estimate from separate operator/vector bounded and Holder
 controls. The same layer now also has bounded and Holder-level
 operator-application difference primitives for comparing two operator/vector
-inputs. The parabolic matrix/local-frame Gram
+inputs, and bounded and Holder-level normed-ring product/product-difference
+primitives below the `C^{0,α}` wrappers. The parabolic matrix/local-frame Gram
 stack now also has compact
 point-local product-cylinder bounded-difference metric-control bridges for the
 primitive schematic Ricci-DeTurck RHS, including finite-family forms with one

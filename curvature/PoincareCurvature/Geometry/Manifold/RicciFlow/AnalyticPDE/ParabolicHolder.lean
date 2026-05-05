@@ -1400,6 +1400,64 @@ theorem eval {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
     _ ≤ ‖u p - u q‖ := norm_le_pi_norm (u p - u q) i
     _ ≤ C * (parabolicDistance p q) ^ α := h hp hq
 
+/-- Products of normed-ring-valued functions preserve parabolic Holder control when the two
+factors are separately bounded. -/
+theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
+    {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicHolderWith H₁ α u s)
+    (hv : ParabolicHolderWith H₂ α v s)
+    (hBu : ParabolicBoundedWith B₁ u s)
+    (hBv : ParabolicBoundedWith B₂ v s)
+    (hB₁ : 0 ≤ B₁) :
+    ParabolicHolderWith (B₁ * H₂ + B₂ * H₁) α (fun z => u z * v z) s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  have hsplit :
+      u p * v p - u q * v q = u p * (v p - v q) + (u p - u q) * v q := by
+    noncomm_ring
+  have hH₁d_nonneg : 0 ≤ H₁ * dα :=
+    (norm_nonneg (u p - u q)).trans (hu hp hq)
+  calc
+    ‖u p * v p - u q * v q‖ =
+        ‖u p * (v p - v q) + (u p - u q) * v q‖ := by rw [hsplit]
+    _ ≤ ‖u p * (v p - v q)‖ + ‖(u p - u q) * v q‖ := norm_add_le _ _
+    _ ≤ ‖u p‖ * ‖v p - v q‖ + ‖u p - u q‖ * ‖v q‖ :=
+      add_le_add (norm_mul_le _ _) (norm_mul_le _ _)
+    _ ≤ B₁ * (H₂ * dα) + (H₁ * dα) * B₂ :=
+      add_le_add
+        (mul_le_mul (hBu hp) (hv hp hq) (norm_nonneg _) hB₁)
+        (mul_le_mul (hu hp hq) (hBv hq) (norm_nonneg _) hH₁d_nonneg)
+    _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
+
+/-- Product differences inherit parabolic Holder control from one left factor, one right factor,
+and Holder controls of the two factor differences. -/
+theorem mul_sub_mul {A : Type*} [NormedRing A]
+    {Bu Hu Bv Hv Bdu Hdu Bdv Hdv α : ℝ}
+    {u u' v v' : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicHolderWith Hu α u s)
+    (hv' : ParabolicHolderWith Hv α v' s)
+    (hdu : ParabolicHolderWith Hdu α (fun z => u z - u' z) s)
+    (hdv : ParabolicHolderWith Hdv α (fun z => v z - v' z) s)
+    (hBu : ParabolicBoundedWith Bu u s)
+    (hBv' : ParabolicBoundedWith Bv v' s)
+    (hBdu : ParabolicBoundedWith Bdu (fun z => u z - u' z) s)
+    (hBdv : ParabolicBoundedWith Bdv (fun z => v z - v' z) s)
+    (hBu_nonneg : 0 ≤ Bu) (hBdu_nonneg : 0 ≤ Bdu) :
+    ParabolicHolderWith ((Bu * Hdv + Bdv * Hu) + (Bdu * Hv + Bv * Hdu)) α
+      (fun z => u z * v z - u' z * v' z) s := by
+  have hleft :
+      ParabolicHolderWith (Bu * Hdv + Bdv * Hu) α
+        (fun z => u z * (v z - v' z)) s :=
+    hu.mul hdv hBu hBdv hBu_nonneg
+  have hright :
+      ParabolicHolderWith (Bdu * Hv + Bv * Hdu) α
+        (fun z => (u z - u' z) * v' z) s :=
+    hdu.mul hv' hBdu hBv' hBdu_nonneg
+  have hsum := hleft.add hright
+  convert hsum using 1
+  ext z
+  noncomm_ring
+
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
     (ha : ParabolicHolderWith C α a s) (hδpos : 0 < δ)
     (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
@@ -2962,6 +3020,40 @@ theorem eval {ι : Type*} [Fintype ι] {u : ℝ × X → ι → E}
   intro p hp
   exact (norm_le_pi_norm (u p) i).trans (h hp)
 
+/-- Products of normed-ring-valued functions preserve sup-norm control. -/
+theorem mul {A : Type*} [NormedRing A] {B₁ B₂ : ℝ}
+    {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicBoundedWith B₁ u s)
+    (hv : ParabolicBoundedWith B₂ v s)
+    (hB₁ : 0 ≤ B₁) :
+    ParabolicBoundedWith (B₁ * B₂) (fun z => u z * v z) s := by
+  intro p hp
+  exact (norm_mul_le (u p) (v p)).trans
+    (mul_le_mul (hu hp) (hv hp) (norm_nonneg _) hB₁)
+
+/-- Product differences inherit sup-norm control from one left factor, one right factor, and
+bounded controls of the two factor differences. -/
+theorem mul_sub_mul {A : Type*} [NormedRing A]
+    {Bu Bv Bdu Bdv : ℝ}
+    {u u' v v' : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicBoundedWith Bu u s)
+    (hv' : ParabolicBoundedWith Bv v' s)
+    (hdu : ParabolicBoundedWith Bdu (fun z => u z - u' z) s)
+    (hdv : ParabolicBoundedWith Bdv (fun z => v z - v' z) s)
+    (hBu : 0 ≤ Bu) (hBdu : 0 ≤ Bdu) :
+    ParabolicBoundedWith (Bu * Bdv + Bdu * Bv)
+      (fun z => u z * v z - u' z * v' z) s := by
+  have hleft :
+      ParabolicBoundedWith (Bu * Bdv) (fun z => u z * (v z - v' z)) s :=
+    hu.mul hdv hBu
+  have hright :
+      ParabolicBoundedWith (Bdu * Bv) (fun z => (u z - u' z) * v' z) s :=
+    hdu.mul hv' hBdu
+  have hsum := hleft.add hright
+  convert hsum using 1
+  ext z
+  noncomm_ring
+
 theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
     (hδpos : 0 < δ) (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
     ParabolicBoundedWith δ⁻¹ (fun z => (a z)⁻¹) s := by
@@ -3551,27 +3643,8 @@ theorem mul {A : Type*} [NormedRing A] {B₁ B₂ H₁ H₂ α : ℝ}
     ParabolicC0AlphaWith (B₁ * B₂) (B₁ * H₂ + B₂ * H₁) α
       (fun z => u z * v z) s := by
   constructor
-  · intro p hp
-    exact (norm_mul_le (u p) (v p)).trans
-      (mul_le_mul (hu.bounded hp) (hv.bounded hp) (norm_nonneg _) hB₁)
-  · intro p hp q hq
-    let dα := (parabolicDistance p q) ^ α
-    have hsplit :
-        u p * v p - u q * v q = u p * (v p - v q) + (u p - u q) * v q := by
-      noncomm_ring
-    have hH₁d_nonneg : 0 ≤ H₁ * dα :=
-      (norm_nonneg (u p - u q)).trans (hu.holder hp hq)
-    calc
-      ‖u p * v p - u q * v q‖
-          = ‖u p * (v p - v q) + (u p - u q) * v q‖ := by rw [hsplit]
-      _ ≤ ‖u p * (v p - v q)‖ + ‖(u p - u q) * v q‖ := norm_add_le _ _
-      _ ≤ ‖u p‖ * ‖v p - v q‖ + ‖u p - u q‖ * ‖v q‖ :=
-        add_le_add (norm_mul_le _ _) (norm_mul_le _ _)
-      _ ≤ B₁ * (H₂ * dα) + (H₁ * dα) * B₂ :=
-        add_le_add
-          (mul_le_mul (hu.bounded hp) (hv.holder hp hq) (norm_nonneg _) hB₁)
-          (mul_le_mul (hu.holder hp hq) (hv.bounded hq) (norm_nonneg _) hH₁d_nonneg)
-      _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
+  · exact hu.bounded.mul hv.bounded hB₁
+  · exact hu.holder.mul hv.holder hu.bounded hv.bounded hB₁
 
 /-- Finite sums of products inherit parabolic `C^{0,α}` control from factorwise controls. -/
 theorem finset_sum_mul {ι A : Type*} [NormedRing A] (S : Finset ι)
@@ -3657,18 +3730,10 @@ theorem mul_sub_mul {A : Type*} [NormedRing A]
     ParabolicC0AlphaWith (Bu * Bdv + Bdu * Bv)
       ((Bu * Hdv + Bdv * Hu) + (Bdu * Hv + Bv * Hdu)) α
       (fun z => u z * v z - u' z * v' z) s := by
-  have hleft :
-      ParabolicC0AlphaWith (Bu * Bdv) (Bu * Hdv + Bdv * Hu) α
-        (fun z => u z * (v z - v' z)) s :=
-    hu.mul hdv hBu
-  have hright :
-      ParabolicC0AlphaWith (Bdu * Bv) (Bdu * Hv + Bv * Hdu) α
-        (fun z => (u z - u' z) * v' z) s :=
-    hdu.mul hv' hBdu
-  have hsum := hleft.add hright
-  convert hsum using 1
-  · ext z
-    noncomm_ring
+  constructor
+  · exact hu.bounded.mul_sub_mul hv'.bounded hdu.bounded hdv.bounded hBu hBdu
+  · exact hu.holder.mul_sub_mul hv'.holder hdu.holder hdv.holder hu.bounded
+      hv'.bounded hdu.bounded hdv.bounded hBu hBdu
 
 /-- Finite sums of product differences inherit parabolic `C^{0,α}` control from factorwise
 controls and factor-difference controls. -/
