@@ -4536,6 +4536,33 @@ def CoordinatePullbackMetricModelDerivativeOn
           B t (A t uE) (D (A t vE)) =
         gdot t x u v
 
+/-- Within-set coordinate-model derivative data for the named coordinate
+pullback scalar.
+
+This is the closed-Picard endpoint analogue of
+`CoordinatePullbackMetricModelDerivativeOn`: the coordinate model is identified
+only in the relative time filter and the moving bilinear form and tangent
+operator have within-set derivatives. -/
+def CoordinatePullbackMetricModelDerivativeWithinOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+    ∃ (B : ℝ → E →L[ℝ] E →L[ℝ] ℝ)
+      (B' : E →L[ℝ] E →L[ℝ] ℝ)
+      (A : ℝ → E →L[ℝ] E)
+      (D : E →L[ℝ] E)
+      (uE vE : E),
+      pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v =ᶠ[
+          𝓝[s] t] (fun τ : ℝ ↦ B τ (A τ uE) (A τ vE)) ∧
+      HasDerivWithinAt B B' s t ∧
+      HasDerivWithinAt A (D.comp (A t)) s t ∧
+      B' (A t uE) (A t vE) +
+          B t (D (A t uE)) (A t vE) +
+          B t (A t uE) (D (A t vE)) =
+        gdot t x u v
+
 /-- Field-level sufficient data for the named coordinate-model derivative.
 
 This splits the remaining model derivative into a moving bilinear-form field
@@ -4681,6 +4708,28 @@ theorem CoordinatePullbackMetricOperatorDerivativeWithinOnOpen.mono
     hy.mono hst, hA.mono hst, hopen, hmem, hvalue⟩
   exact hmodel.filter_mono (nhdsWithin_mono τ hst)
 
+/-- Restrict within-set coordinate-model derivative data to a smaller time set. -/
+theorem CoordinatePullbackMetricModelDerivativeWithinOn.mono
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s t : Set ℝ}
+    (hmodel : CoordinatePullbackMetricModelDerivativeWithinOn (I := I) (M := M)
+      Φ g gdot t)
+    (hst : s ⊆ t) :
+    CoordinatePullbackMetricModelDerivativeWithinOn (I := I) (M := M)
+      Φ g gdot s := by
+  letI : NormedAddCommGroup (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  intro τ hτ x u v
+  obtain ⟨B, B', A, D, uE, vE, hmodel_eq, hB, hA, hvalue⟩ :=
+    hmodel (hst hτ) x u v
+  refine ⟨B, B', A, D, uE, vE, ?_, hB.mono hst, hA.mono hst, hvalue⟩
+  exact hmodel_eq.filter_mono (nhdsWithin_mono τ hst)
+
 /-- Restrict within-set field-level coordinate-model derivative data to a
 smaller time set. -/
 theorem CoordinatePullbackMetricFieldDerivativeWithinOn.mono
@@ -4804,6 +4853,26 @@ theorem CoordinatePullbackMetricComponentDerivativeOn.mono
     CoordinatePullbackMetricComponentDerivativeOn (I := I) (M := M) Φ g gdot s := by
   intro τ hτ x u v
   exact hdata (hst hτ) x u v
+
+/-- Concrete component-derivative form of the within-set coordinate-model
+derivative package. -/
+theorem coordinatePullbackMetricModelDerivativeWithinOn_of_components
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hdata : CoordinatePullbackMetricComponentDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot s) :
+    CoordinatePullbackMetricModelDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨B', D, hB, hA, hvalue⟩ := hdata ht x u v
+  refine ⟨(fun τ : ℝ ↦ pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x),
+    B', (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x),
+    D, sourceTangentCoordinate (I := I) x u, sourceTangentCoordinate (I := I) x v,
+    ?_, hB, hA, hvalue⟩
+  filter_upwards with τ
+  exact pullbackMetricInnerCoordinateModel_eq_components
+    (I := I) (M := M) Φ g t τ x u v
 
 /-- Concrete component-derivative form of
 `CoordinatePullbackMetricModelDerivativeOn`.
@@ -5680,6 +5749,47 @@ theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateComponentWithin
       (B := B) (B' := B') (A := A) (D := D)
       (u := uE) (v := vE) heq heq_t hB hA hvalue
 
+/-- Within-set coordinate-model derivative data plus chart-local equality
+implies the endpoint geometric scalar derivative target. -/
+theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateModelWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hmodel : CoordinatePullbackMetricModelDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot s)
+    (hgeom : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M, ∀ u v : TangentSpace I x,
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
+    PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨B, B', A, D, uE, vE, hmodel_eq, hB, hA, hvalue⟩ := hmodel ht x u v
+  have heq :
+      (fun τ : ℝ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
+        (fun τ : ℝ ↦ B τ (A τ uE) (A τ vE)) :=
+    (hgeom ht x u v).trans hmodel_eq
+  have heq_t :
+      (g t).inner ((Φ t) x)
+          ((Φ t).pushforwardTangent x u)
+          ((Φ t).pushforwardTangent x v) =
+        B t (A t uE) (A t vE) :=
+    show t ∈ {τ : ℝ |
+        (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v) =
+          B τ (A τ uE) (A τ vE)} from
+      mem_of_mem_nhdsWithin ht heq
+  exact
+    hasDerivWithinAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp_deriv
+      (B := B) (B' := B') (A := A) (D := D)
+      (u := uE) (v := vE) heq heq_t hB hA hvalue
+
 /-- A raw within-set scalar derivative package upgrades to ordinary scalar
 derivatives at times where the set is a neighborhood. -/
 theorem PullbackMetricInnerDerivativeWithinOn.toPullbackMetricInnerDerivativeOn
@@ -5757,6 +5867,26 @@ theorem coordinatePullbackMetricModelDerivativeOn_of_field
     hasDerivAt_bilinearFormField_along_curve
       (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y') (t := t)
       hBfield hy,
+    hA, hvalue⟩
+
+/-- Within-set field-level moving-bilinear-form derivative data implies
+within-set derivative data for the named coordinate model. -/
+theorem coordinatePullbackMetricModelDerivativeWithinOn_of_fieldWithin
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hfield : CoordinatePullbackMetricFieldDerivativeWithinOn
+      (I := I) (M := M) Φ g gdot s) :
+    CoordinatePullbackMetricModelDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨Bfield, Bfield', y, y', A, D, uE, vE, hmodel_eq,
+    hBfield, hy, hA, hvalue⟩ := hfield ht x u v
+  exact ⟨fun τ : ℝ ↦ Bfield (τ, y τ), Bfield' (1, y'), A, D, uE, vE,
+    hmodel_eq,
+    hasDerivWithinAt_bilinearFormField_along_curve
+      (Bfield := Bfield) (Bfield' := Bfield') (y := y) (y' := y')
+      (s := s) (t := t) hBfield hy,
     hA, hvalue⟩
 
 /-- Restrict coordinate-model scalar pullback derivative data to a smaller time

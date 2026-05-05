@@ -291,7 +291,13 @@ also has a closed-interval package
 constructor for it, and direct endpoint-to-interior scalar promotion theorems,
 so Picard endpoint base-flow/tangent-map derivatives plus a full
 metric-coordinate Fréchet derivative can feed the geometric scalar target
-without repackaging through frozen-time component data. Raw
+without repackaging through frozen-time component data.
+The endpoint coordinate-model layer now also has the named package
+`CoordinatePullbackMetricModelDerivativeWithinOn`, monotone time-set
+restriction, component and field-level constructors, and a direct promotion
+`pullbackMetricInnerDerivativeWithinOn_of_coordinateModelWithin`, matching the
+ordinary coordinate-model layer before passing to the geometric scalar target.
+Raw
 `Diffeomorph3GaugeFlowOn` witnesses now expose the same endpoint full-field
 route directly, including a one-step variational local-flow wrapper to tensor
 time-regularity on `Ioo tmin tmax`; the same route now also has concrete and

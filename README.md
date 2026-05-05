@@ -168,7 +168,10 @@ packages the canonical stationary local solution attached to
   chart-ODE derivative data. The raw fixed-IVP and theorem-family time-derivative layers
   now also package endpoint within-field/component and operator-domain data
   directly as named scalar pullback-metric derivative data when solution time
-  sets are explicit `Ioo` intervals.
+  sets are explicit `Ioo` intervals. The closed-Picard scalar layer also names
+  `CoordinatePullbackMetricModelDerivativeWithinOn`, the endpoint analogue of
+  the ordinary coordinate-model derivative package, with component/field
+  constructors and direct promotion to the within-set geometric scalar target.
   The conditional gauge-reduced package now records the exact non-identity
   gauge obligations whose discharge yields intrinsic and ordinary point-4 theorem
   packages, re-packages the transformed metric as a pulled-back Ricci-DeTurck

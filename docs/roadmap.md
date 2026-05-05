@@ -1098,7 +1098,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        named coordinate model that promotes directly to the geometric scalar
        target and tensor `HasTimeDerivativeOn`, including raw-gauge-flow wrappers
        and fixed-IVP/theorem-family/raw-existence bundle lifts with explicit
-       time-set neighborhood hypotheses. The concrete moving-coordinate
+       time-set neighborhood hypotheses. Its within-set endpoint analogue
+       `CoordinatePullbackMetricModelDerivativeWithinOn` now gives the same
+       coordinate-model layer for closed-Picard/right-derivative data, with
+       monotone restriction and component/field constructors before promotion to
+       the endpoint geometric scalar target. The concrete moving-coordinate
        components inside that named scalar are now also exposed as
        `pullbackMetricBilinearCoordinateMap` and
        `pullbackMetricTangentCoordinateMap`, with a component-derivative theorem
