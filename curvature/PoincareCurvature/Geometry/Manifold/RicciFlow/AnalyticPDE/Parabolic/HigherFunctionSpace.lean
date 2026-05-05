@@ -277,6 +277,23 @@ theorem add {v : ℝ × X → E} {M : ℝ}
   · simpa [ParabolicSecondJet.add] using hxxu.add hxxv
   · simpa [ParabolicSecondJet.add] using htu.add htv
 
+theorem finset_sum {ι : Type*} (S : Finset ι) {N : ι → ℝ}
+    {u : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicC2AlphaNormLe (N i) α (u i) s) :
+    ParabolicC2AlphaNormLe (∑ i ∈ S, N i) α
+      (fun z => ∑ i ∈ S, u i z) s := by
+  classical
+  induction S using Finset.induction_on with
+  | empty =>
+      simpa using (zero (X := X) (E := E) (α := α) (s := s))
+  | insert a S ha ih =>
+      have ha_ctrl : ParabolicC2AlphaNormLe (N a) α (u a) s := h a (by simp)
+      have hS_ctrl : ParabolicC2AlphaNormLe (∑ i ∈ S, N i) α
+          (fun z => ∑ i ∈ S, u i z) s := by
+        exact ih fun i hi => h i (by simp [hi])
+      have hadd := add ha_ctrl hS_ctrl
+      simpa [Finset.sum_insert, ha] using hadd
+
 theorem neg (h : ParabolicC2AlphaNormLe N α u s) :
     ParabolicC2AlphaNormLe N α (fun z : ℝ × X => -u z) s := by
   rcases h with
@@ -482,6 +499,20 @@ theorem add (hu : ParabolicC2AlphaOn α u s) (hv : ParabolicC2AlphaOn α v s) :
   rcases hu with ⟨Nu, hNu, huN⟩
   rcases hv with ⟨Nv, hNv, hvN⟩
   exact ⟨Nu + Nv, add_nonneg hNu hNv, huN.add hvN⟩
+
+theorem finset_sum {ι : Type*} (S : Finset ι) {u : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicC2AlphaOn α (u i) s) :
+    ParabolicC2AlphaOn α (fun z => ∑ i ∈ S, u i z) s := by
+  classical
+  induction S using Finset.induction_on with
+  | empty =>
+      simpa using (zero (X := X) (E := E) (α := α) (s := s))
+  | insert a S ha ih =>
+      have ha_ctrl : ParabolicC2AlphaOn α (u a) s := h a (by simp)
+      have hS_ctrl : ParabolicC2AlphaOn α (fun z => ∑ i ∈ S, u i z) s := by
+        exact ih fun i hi => h i (by simp [hi])
+      have hadd := add ha_ctrl hS_ctrl
+      simpa [Finset.sum_insert, ha] using hadd
 
 theorem neg (hu : ParabolicC2AlphaOn α u s) :
     ParabolicC2AlphaOn α (fun z : ℝ × X => -u z) s := by

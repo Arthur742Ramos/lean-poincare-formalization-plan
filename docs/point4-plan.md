@@ -2709,8 +2709,8 @@ witnesses on those slices, and defines a single-radius
 `ParabolicC2AlphaNormLe` predicate whose radius dominates the value, spatial
 derivative, spatial Hessian, and time-derivative `C^{0,α}` norm-ball controls;
 this higher predicate already has constant and zero constructors and is closed
-under addition, negation, subtraction, and scalar multiplication with the
-expected radius bounds. Chosen parabolic second jets now also compose with
+under addition, finite sums, negation, subtraction, and scalar multiplication
+with the expected radius bounds. Chosen parabolic second jets now also compose with
 continuous linear value maps, transforming the time, spatial, and second-spatial
 derivative witnesses componentwise. Its existential `ParabolicC2AlphaOn` class now forms a
 real submodule of all coordinate time-space functions and reads back to

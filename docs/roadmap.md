@@ -217,8 +217,8 @@ The first coordinate higher-parabolic module now defines time and spatial
 slices, genuine parabolic second-jet derivative witnesses, and a
 `ParabolicC2AlphaNormLe` predicate controlling the value, spatial derivative,
 spatial Hessian, and time derivative by `C^{0,α}` norm balls; it has constant
-and zero constructors and is closed under addition, negation, subtraction, and
-scalar multiplication with the expected radius bounds. Chosen parabolic second
+and zero constructors and is closed under addition, finite sums, negation,
+subtraction, and scalar multiplication with the expected radius bounds. Chosen parabolic second
 jets also compose with continuous linear value maps, with the time, spatial,
 and second-spatial derivative witnesses transformed componentwise. The existential
 `ParabolicC2AlphaOn` class now forms a real submodule of all coordinate
