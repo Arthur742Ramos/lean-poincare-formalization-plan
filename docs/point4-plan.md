@@ -2702,7 +2702,9 @@ and linear finite-cover readouts.
 parabolic second jet with time, spatial, and second-spatial derivative
 witnesses on those slices, and defines a single-radius
 `ParabolicC2AlphaNormLe` predicate whose radius dominates the value, spatial
-derivative, spatial Hessian, and time-derivative `C^{0,α}` norm-ball controls.
+derivative, spatial Hessian, and time-derivative `C^{0,α}` norm-ball controls;
+this higher predicate is already closed under addition, negation, subtraction,
+and scalar multiplication with the expected radius bounds.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
 the same single-radius control, plus determinant and determinant-difference
 single-radius variants using the existing quantitative determinant constants.

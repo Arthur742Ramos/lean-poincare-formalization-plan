@@ -2,6 +2,9 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace
 public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.FDeriv.Add
 
 set_option linter.unusedSectionVars false
 
@@ -85,6 +88,54 @@ theorem spaceSecondDeriv_hasFDerivWithinAt (J : ParabolicSecondJet u s)
       (spaceSliceDomain s z.1) z.2 :=
   J.hasSpaceSecondDeriv hz
 
+/-- Sum of two parabolic second jets, with derivative witnesses added componentwise. -/
+def add {v : ℝ × X → E} (Ju : ParabolicSecondJet u s) (Jv : ParabolicSecondJet v s) :
+    ParabolicSecondJet (fun z : ℝ × X => u z + v z) s where
+  timeDeriv := fun z => Ju.timeDeriv z + Jv.timeDeriv z
+  spaceDeriv := fun z => Ju.spaceDeriv z + Jv.spaceDeriv z
+  spaceSecondDeriv := fun z => Ju.spaceSecondDeriv z + Jv.spaceSecondDeriv z
+  hasTimeDeriv := by
+    intro z hz
+    simpa using (Ju.hasTimeDeriv hz).add (Jv.hasTimeDeriv hz)
+  hasSpaceDeriv := by
+    intro z hz
+    simpa using (Ju.hasSpaceDeriv hz).add (Jv.hasSpaceDeriv hz)
+  hasSpaceSecondDeriv := by
+    intro z hz
+    simpa [Pi.add_apply] using (Ju.hasSpaceSecondDeriv hz).add (Jv.hasSpaceSecondDeriv hz)
+
+/-- Negation of a parabolic second jet. -/
+def neg (J : ParabolicSecondJet u s) :
+    ParabolicSecondJet (fun z : ℝ × X => -u z) s where
+  timeDeriv := fun z => -J.timeDeriv z
+  spaceDeriv := fun z => -J.spaceDeriv z
+  spaceSecondDeriv := fun z => -J.spaceSecondDeriv z
+  hasTimeDeriv := by
+    intro z hz
+    simpa using (J.hasTimeDeriv hz).fun_neg
+  hasSpaceDeriv := by
+    intro z hz
+    simpa using (J.hasSpaceDeriv hz).fun_neg
+  hasSpaceSecondDeriv := by
+    intro z hz
+    simpa using (J.hasSpaceSecondDeriv hz).fun_neg
+
+/-- Scalar multiplication of a parabolic second jet. -/
+def smul (c : ℝ) (J : ParabolicSecondJet u s) :
+    ParabolicSecondJet (fun z : ℝ × X => c • u z) s where
+  timeDeriv := fun z => c • J.timeDeriv z
+  spaceDeriv := fun z => c • J.spaceDeriv z
+  spaceSecondDeriv := fun z => c • J.spaceSecondDeriv z
+  hasTimeDeriv := by
+    intro z hz
+    simpa using HasDerivWithinAt.fun_const_smul c (J.hasTimeDeriv hz)
+  hasSpaceDeriv := by
+    intro z hz
+    simpa using (J.hasSpaceDeriv hz).fun_const_smul c
+  hasSpaceSecondDeriv := by
+    intro z hz
+    simpa [Pi.smul_apply] using (J.hasSpaceSecondDeriv hz).fun_const_smul c
+
 end ParabolicSecondJet
 
 /-- Coordinate parabolic `C^{2+α,1+α/2}` single-radius control.
@@ -124,6 +175,52 @@ theorem mono_const (h : ParabolicC2AlphaNormLe N α u s) (hNN : N ≤ N') :
   rcases h with
     ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
   exact ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum.trans hNN, hu, hx, hxx, ht⟩
+
+theorem add {v : ℝ × X → E} {M : ℝ}
+    (hu : ParabolicC2AlphaNormLe N α u s) (hv : ParabolicC2AlphaNormLe M α v s) :
+    ParabolicC2AlphaNormLe (N + M) α (fun z : ℝ × X => u z + v z) s := by
+  rcases hu with
+    ⟨Ju, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsumu, huu, hxu, hxxu, htu⟩
+  rcases hv with
+    ⟨Jv, Mu, hMu, Mx, hMx, Mxx, hMxx, Mt, hMt, hsumv, huv, hxv, hxxv, htv⟩
+  refine ⟨Ju.add Jv, Nu + Mu, add_nonneg hNu hMu, Nx + Mx, add_nonneg hNx hMx,
+    Nxx + Mxx, add_nonneg hNxx hMxx, Nt + Mt, add_nonneg hNt hMt, ?_, ?_, ?_, ?_, ?_⟩
+  · linarith
+  · simpa using huu.add huv
+  · simpa [ParabolicSecondJet.add] using hxu.add hxv
+  · simpa [ParabolicSecondJet.add] using hxxu.add hxxv
+  · simpa [ParabolicSecondJet.add] using htu.add htv
+
+theorem neg (h : ParabolicC2AlphaNormLe N α u s) :
+    ParabolicC2AlphaNormLe N α (fun z : ℝ × X => -u z) s := by
+  rcases h with
+    ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
+  exact ⟨J.neg, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum,
+    hu.neg, by simpa [ParabolicSecondJet.neg] using hx.neg,
+    by simpa [ParabolicSecondJet.neg] using hxx.neg,
+    by simpa [ParabolicSecondJet.neg] using ht.neg⟩
+
+theorem sub {v : ℝ × X → E} {M : ℝ}
+    (hu : ParabolicC2AlphaNormLe N α u s) (hv : ParabolicC2AlphaNormLe M α v s) :
+    ParabolicC2AlphaNormLe (N + M) α (fun z : ℝ × X => u z - v z) s := by
+  simpa [sub_eq_add_neg] using hu.add hv.neg
+
+theorem smul (c : ℝ) (h : ParabolicC2AlphaNormLe N α u s) :
+    ParabolicC2AlphaNormLe (‖c‖ * N) α (fun z : ℝ × X => c • u z) s := by
+  rcases h with
+    ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
+  refine ⟨J.smul c, ‖c‖ * Nu, mul_nonneg (norm_nonneg c) hNu,
+    ‖c‖ * Nx, mul_nonneg (norm_nonneg c) hNx,
+    ‖c‖ * Nxx, mul_nonneg (norm_nonneg c) hNxx,
+    ‖c‖ * Nt, mul_nonneg (norm_nonneg c) hNt, ?_, ?_, ?_, ?_, ?_⟩
+  · calc
+      ‖c‖ * Nu + ‖c‖ * Nx + ‖c‖ * Nxx + ‖c‖ * Nt =
+          ‖c‖ * (Nu + Nx + Nxx + Nt) := by ring
+      _ ≤ ‖c‖ * N := mul_le_mul_of_nonneg_left hsum (norm_nonneg c)
+  · simpa using hu.smul (𝕜 := ℝ) c
+  · simpa [ParabolicSecondJet.smul] using hx.smul (𝕜 := ℝ) c
+  · simpa [ParabolicSecondJet.smul] using hxx.smul (𝕜 := ℝ) c
+  · simpa [ParabolicSecondJet.smul] using ht.smul (𝕜 := ℝ) c
 
 theorem value_c0AlphaNormLe (h : ParabolicC2AlphaNormLe N α u s) :
     ∃ Nu ≥ 0, ParabolicC0AlphaNormLe Nu α u s := by
