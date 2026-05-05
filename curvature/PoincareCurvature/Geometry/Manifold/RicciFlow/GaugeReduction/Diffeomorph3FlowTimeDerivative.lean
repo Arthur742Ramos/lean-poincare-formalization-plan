@@ -4708,6 +4708,27 @@ theorem CoordinatePullbackMetricOperatorDerivativeWithinOnOpen.mono
     hy.mono hst, hA.mono hst, hopen, hmem, hvalue⟩
   exact hmodel.filter_mono (nhdsWithin_mono τ hst)
 
+/-- Open-domain operator coordinate derivative data supplies the general
+within-domain package by deriving the product-graph convergence from openness
+and endpoint membership. -/
+theorem CoordinatePullbackMetricOperatorDerivativeWithinOnOpen.toWithinOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hoperator : CoordinatePullbackMetricOperatorDerivativeWithinOnOpen
+      (I := I) (M := M) Φ g gdot s) :
+    CoordinatePullbackMetricOperatorDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  obtain ⟨domain, Fscalar, Fscalar', y, y', A, A', hmodel, hF,
+    hy, hA, hopen, hmem, hvalue⟩ := hoperator ht x u v
+  refine ⟨domain, Fscalar, Fscalar', y, y', A, A', hmodel, hF, hy, hA, ?_,
+    hvalue⟩
+  have hgraph : ContinuousWithinAt (fun τ : ℝ ↦ (τ, y τ, A τ)) s t :=
+    continuousWithinAt_id.prodMk (hy.continuousWithinAt.prodMk hA.continuousWithinAt)
+  rw [hopen.nhdsWithin_eq hmem]
+  exact hgraph
+
 /-- Restrict within-set coordinate-model derivative data to a smaller time set. -/
 theorem CoordinatePullbackMetricModelDerivativeWithinOn.mono
     {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
@@ -6074,32 +6095,8 @@ theorem pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
           ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
         pullbackMetricInnerCoordinateModel (I := I) (M := M) Φ g t x u v) :
     PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
-  intro t ht x u v
-  obtain ⟨domain, Fscalar, Fscalar', y, y', A, A', hmodel_eq, hF,
-    hy, hA, hopen, hmem, hvalue⟩ := hoperator ht x u v
-  have heq :
-      (fun τ : ℝ ↦
-        (g τ).inner ((Φ τ) x)
-          ((Φ τ).pushforwardTangent x u)
-          ((Φ τ).pushforwardTangent x v)) =ᶠ[𝓝[s] t]
-        fun τ : ℝ ↦ Fscalar (τ, y τ, A τ) :=
-    (hgeom ht x u v).trans hmodel_eq
-  have heq_t :
-      (g t).inner ((Φ t) x)
-          ((Φ t).pushforwardTangent x u)
-          ((Φ t).pushforwardTangent x v) =
-        Fscalar (t, y t, A t) :=
-    show t ∈ {τ : ℝ |
-        (g τ).inner ((Φ τ) x)
-            ((Φ τ).pushforwardTangent x u)
-            ((Φ τ).pushforwardTangent x v) =
-          Fscalar (τ, y τ, A τ)} from
-      mem_of_mem_nhdsWithin ht heq
-  exact
-    hasDerivWithinAt_of_eventuallyEq_scalarField_time_base_operator_along_curveWithinOpen
-      (Fscalar := Fscalar) (Fscalar' := Fscalar') (y := y) (y' := y')
-      (A := A) (A' := A') (s := s) (t := t) (domain := domain)
-      heq heq_t hF hy hA hopen hmem hvalue
+  exact pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithin
+    (I := I) (M := M) hoperator.toWithinOn hgeom
 
 /-- Closed-interval operator-domain coordinate derivative data gives ordinary
 geometric scalar derivatives on the open interior. -/
