@@ -2699,7 +2699,10 @@ Inverse matrices and inverse-matrix differences now have matching
 single-radius variants under a determinant lower bound. Finite matrix products,
 matrix-vector products, and vector-matrix products, together with their
 product-difference forms, now also have single-radius variants using the
-existing quantitative product constants. It is still below the
+existing quantitative product constants. Inverse-matrix-vector and
+vector-inverse-matrix products, together with their difference forms, now have
+the same single-radius packaging under a common determinant lower bound. It is
+still below the
 actual `C^{2+α,1+α/2}` norm and Schauder estimate.
 
 **Suggested decomposition** (multi-session):

@@ -210,7 +210,9 @@ determinant constants, and inverse matrices/inverse-matrix differences have the
 matching single-radius variants under a determinant lower bound. Finite matrix
 products, matrix-vector products, and vector-matrix products, together with
 their product-difference forms, now also have single-radius norm-ball variants
-using the existing quantitative product constants.
+using the existing quantitative product constants. Inverse-matrix-vector and
+vector-inverse-matrix products, together with their difference forms, now have
+the same single-radius packaging under a common determinant lower bound.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric
