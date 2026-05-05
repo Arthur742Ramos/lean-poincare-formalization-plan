@@ -1586,7 +1586,11 @@ also has the generic assembly bridge
 `IntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem`, with a
 proof-level equivalence between family existence and fixed-IVP existence for
 all initial-value problems, so fixed-IVP pointwise/local handoffs do not need
-bespoke family mirrors before they can feed theorem-family routes.  Its finite-cover
+bespoke family mirrors before they can feed theorem-family routes.  The
+geometric `C³` gauge-flow family layer now has the same fixed-IVP assembly and
+proof-level equivalence, and the raw/geometric fixed-IVP and theorem-family
+conversions have simp round trips and field readouts, so future compact ODE
+output can enter either package boundary without manual repackaging.  Its finite-cover
 local-readout companion
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality

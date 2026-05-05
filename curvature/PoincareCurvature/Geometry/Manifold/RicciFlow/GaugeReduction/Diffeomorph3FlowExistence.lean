@@ -9143,6 +9143,47 @@ def ofDiffeomorph3GaugeFlow
       (t₀ := ivp.initialTime)
       (G.maps3 sol) (G.anchored sol) (G.satisfies sol)
 
+@[simp] theorem ofDiffeomorph3GaugeFlow_flow_maps3
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((ofDiffeomorph3GaugeFlow (I := I) (M := M) G).flow sol).maps3 =
+      G.maps3 sol := rfl
+
+@[simp] theorem ofDiffeomorph3GaugeFlow_flow_anchored
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((ofDiffeomorph3GaugeFlow (I := I) (M := M) G).flow sol).anchored =
+      G.anchored sol := rfl
+
+@[simp] theorem ofDiffeomorph3GaugeFlow_flow_satisfies
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((ofDiffeomorph3GaugeFlow (I := I) (M := M) G).flow sol).satisfies =
+      G.satisfies sol := rfl
+
+@[simp] theorem toDiffeomorph3GaugeFlow_ofDiffeomorph3GaugeFlow
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    (ofDiffeomorph3GaugeFlow (I := I) (M := M) G).toDiffeomorph3GaugeFlow =
+      G := rfl
+
+@[simp] theorem ofDiffeomorph3GaugeFlow_toDiffeomorph3GaugeFlow
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ofDiffeomorph3GaugeFlow (I := I) (M := M) G.toDiffeomorph3GaugeFlow =
+      G := rfl
+
 /-- Package a fixed-IVP geometric intrinsic DeTurck gauge-flow bundle as
 proof-level raw gauge-flow existence data. -/
 theorem nonempty_ofDiffeomorph3GaugeFlow
@@ -13348,6 +13389,53 @@ def ofDiffeomorph3GaugeFlowFamily
     (IntrinsicDeTurckGaugeFlowExistence.ofDiffeomorph3GaugeFlow
       (E := E) (H := H) (I := I) (M := M)
       (G.forInitialValueProblem ivp)).flow sol
+
+@[simp] theorem ofDiffeomorph3GaugeFlowFamily_flow_maps3
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((ofDiffeomorph3GaugeFlowFamily (I := I) (M := M) G).flow ivp sol).maps3 =
+      G.maps3 ivp sol := rfl
+
+@[simp] theorem ofDiffeomorph3GaugeFlowFamily_flow_anchored
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((ofDiffeomorph3GaugeFlowFamily (I := I) (M := M) G).flow ivp sol).anchored =
+      G.anchored ivp sol := rfl
+
+@[simp] theorem ofDiffeomorph3GaugeFlowFamily_flow_satisfies
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((ofDiffeomorph3GaugeFlowFamily (I := I) (M := M) G).flow ivp sol).satisfies =
+      G.satisfies ivp sol := rfl
+
+@[simp] theorem forInitialValueProblem_ofDiffeomorph3GaugeFlowFamily
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (ofDiffeomorph3GaugeFlowFamily (I := I) (M := M) G).forInitialValueProblem ivp =
+      IntrinsicDeTurckGaugeFlowExistence.ofDiffeomorph3GaugeFlow
+        (I := I) (M := M) (G.forInitialValueProblem ivp) := rfl
+
+@[simp] theorem toDiffeomorph3GaugeFlowFamily_ofDiffeomorph3GaugeFlowFamily
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    (ofDiffeomorph3GaugeFlowFamily (I := I) (M := M) G).toDiffeomorph3GaugeFlowFamily =
+      G := rfl
+
+@[simp] theorem ofDiffeomorph3GaugeFlowFamily_toDiffeomorph3GaugeFlowFamily
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    ofDiffeomorph3GaugeFlowFamily (I := I) (M := M) G.toDiffeomorph3GaugeFlowFamily =
+      G := rfl
 
 /-- Package a theorem-family geometric intrinsic DeTurck gauge-flow bundle as
 proof-level raw gauge-flow existence data. -/

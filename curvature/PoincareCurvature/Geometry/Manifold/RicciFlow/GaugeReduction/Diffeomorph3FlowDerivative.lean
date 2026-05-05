@@ -3601,6 +3601,99 @@ def forInitialValueProblem
   anchored := G.anchored ivp
   satisfies := G.satisfies ivp
 
+/-- Assemble theorem-family geometric gauge-flow data from fixed-IVP geometric
+gauge-flow data for every initial-value problem. -/
+def of_forInitialValueProblem
+    (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  maps3 := fun ivp sol ↦ (G ivp).maps3 sol
+  anchored := fun ivp sol ↦ (G ivp).anchored sol
+  satisfies := fun ivp sol ↦ (G ivp).satisfies sol
+
+@[simp] theorem of_forInitialValueProblem_maps3
+    (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((of_forInitialValueProblem (I := I) (M := M) G).maps3 ivp sol) =
+      (G ivp).maps3 sol := rfl
+
+@[simp] theorem of_forInitialValueProblem_anchored
+    (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((of_forInitialValueProblem (I := I) (M := M) G).anchored ivp sol) =
+      (G ivp).anchored sol := rfl
+
+@[simp] theorem of_forInitialValueProblem_satisfies
+    (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ((of_forInitialValueProblem (I := I) (M := M) G).satisfies ivp sol) =
+      (G ivp).satisfies sol := rfl
+
+@[simp] theorem forInitialValueProblem_of_forInitialValueProblem
+    (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (of_forInitialValueProblem (I := I) (M := M) G).forInitialValueProblem ivp =
+      G ivp := rfl
+
+@[simp] theorem of_forInitialValueProblem_forInitialValueProblem
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    of_forInitialValueProblem (I := I) (M := M)
+      (fun ivp ↦ G.forInitialValueProblem ivp) = G := rfl
+
+/-- Restrict proof-level theorem-family geometric gauge-flow data to one
+initial-value problem. -/
+theorem nonempty_forInitialValueProblem
+    (hG : Nonempty (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Nonempty (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) := by
+  rcases hG with ⟨G⟩
+  exact ⟨G.forInitialValueProblem ivp⟩
+
+/-- Assemble proof-level theorem-family geometric gauge-flow data from
+proof-level fixed-IVP geometric gauge-flow data for every initial-value
+problem. -/
+theorem nonempty_of_forInitialValueProblem
+    (hG : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+        (E := E) (H := H) (I := I) (M := M) ivp)) :
+    Nonempty (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) := by
+  classical
+  exact ⟨of_forInitialValueProblem (I := I) (M := M)
+    (fun ivp ↦ Classical.choice (hG ivp))⟩
+
+/-- Theorem-family geometric gauge-flow data is equivalent to fixed-IVP
+geometric gauge-flow data for every initial-value problem. -/
+theorem nonempty_iff_forall_nonempty_forInitialValueProblem :
+    Nonempty (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M)) ↔
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+        (E := E) (H := H) (I := I) (M := M) ivp) := by
+  constructor
+  · intro hG ivp
+    exact nonempty_forInitialValueProblem (I := I) (M := M) hG ivp
+  · exact nonempty_of_forInitialValueProblem (I := I) (M := M)
+
 /-- The derivative-family view of a bundled geometric gauge-flow family. -/
 theorem derivativeFamily
     (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
