@@ -2083,8 +2083,9 @@ and additive/subtractive algebra estimates,
 including bounded and Holder-level normed-ring product/product-difference
 primitives, the standard bounded-product estimate for normed-ring-valued
 `C^{0,α}` functions, two-factor and finite-sum product-difference `C^{0,α}`
-estimates, and the corresponding bounded scalar-action estimate on
-normed-space-valued functions, plus reciprocal and division closure for
+estimates, bounded and Holder-level scalar-action primitives, and the
+corresponding bounded scalar-action estimate on normed-space-valued functions,
+plus reciprocal and division closure for
 normed-field-valued functions bounded away from zero.
 This is still only the
 norm/topology vocabulary, with the expected norm-estimate closure, not the

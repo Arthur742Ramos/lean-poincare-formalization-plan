@@ -1511,6 +1511,41 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     _ ≤ ‖c‖ * (C * dα) := mul_le_mul_of_nonneg_left (hu hp hq) (norm_nonneg c)
     _ = (‖c‖ * C) * dα := by ring
 
+/-- Variable scalar action preserves parabolic Holder control when the scalar and vector
+fields are separately bounded. -/
+theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+    {B₁ B₂ H₁ H₂ α : ℝ} {a : ℝ × X → 𝕜} {u : ℝ × X → F}
+    {s : Set (ℝ × X)}
+    (ha : ParabolicHolderWith H₁ α a s)
+    (hu : ParabolicHolderWith H₂ α u s)
+    (hBa : ParabolicBoundedWith B₁ a s)
+    (hBu : ParabolicBoundedWith B₂ u s)
+    (hB₁ : 0 ≤ B₁) :
+    ParabolicHolderWith (B₁ * H₂ + B₂ * H₁) α (fun z => a z • u z) s := by
+  intro p hp q hq
+  let dα := (parabolicDistance p q) ^ α
+  have hsplit :
+      a p • u p - a q • u q = a p • (u p - u q) + (a p - a q) • u q := by
+    calc
+      a p • u p - a q • u q =
+          (a p • u p - a p • u q) + (a p • u q - a q • u q) := by
+        abel
+      _ = a p • (u p - u q) + (a p - a q) • u q := by
+        rw [smul_sub, sub_smul]
+  have hH₁d_nonneg : 0 ≤ H₁ * dα :=
+    (norm_nonneg (a p - a q)).trans (ha hp hq)
+  calc
+    ‖a p • u p - a q • u q‖ =
+        ‖a p • (u p - u q) + (a p - a q) • u q‖ := by rw [hsplit]
+    _ ≤ ‖a p • (u p - u q)‖ + ‖(a p - a q) • u q‖ := norm_add_le _ _
+    _ = ‖a p‖ * ‖u p - u q‖ + ‖a p - a q‖ * ‖u q‖ := by
+      rw [norm_smul, norm_smul]
+    _ ≤ B₁ * (H₂ * dα) + (H₁ * dα) * B₂ :=
+      add_le_add
+        (mul_le_mul (hBa hp) (hu hp hq) (norm_nonneg _) hB₁)
+        (mul_le_mul (ha hp hq) (hBu hq) (norm_nonneg _) hH₁d_nonneg)
+    _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
+
 /-- A continuous linear map preserves parabolic Holder control, with the operator norm multiplying
 the Holder constant. -/
 theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
@@ -3070,6 +3105,17 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     ‖c • u p‖ = ‖c‖ * ‖u p‖ := norm_smul c (u p)
     _ ≤ ‖c‖ * B := mul_le_mul_of_nonneg_left (hu hp) (norm_nonneg c)
 
+/-- Variable scalar action preserves sup-norm control. -/
+theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+    {B₁ B₂ : ℝ} {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
+    (ha : ParabolicBoundedWith B₁ a s)
+    (hu : ParabolicBoundedWith B₂ u s)
+    (hB₁ : 0 ≤ B₁) :
+    ParabolicBoundedWith (B₁ * B₂) (fun z => a z • u z) s := by
+  intro p hp
+  rw [norm_smul]
+  exact mul_le_mul (ha hp) (hu hp) (norm_nonneg _) hB₁
+
 /-- A continuous linear map preserves sup-norm control, with the operator norm multiplying the
 bound. -/
 theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F]
@@ -4067,32 +4113,8 @@ theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F] [Nor
     ParabolicC0AlphaWith (B₁ * B₂) (B₁ * H₂ + B₂ * H₁) α
       (fun z => a z • u z) s := by
   constructor
-  · intro p hp
-    rw [norm_smul]
-    exact mul_le_mul (ha.bounded hp) (hu.bounded hp) (norm_nonneg _) hB₁
-  · intro p hp q hq
-    let dα := (parabolicDistance p q) ^ α
-    have hsplit :
-        a p • u p - a q • u q = a p • (u p - u q) + (a p - a q) • u q := by
-      calc
-        a p • u p - a q • u q =
-            (a p • u p - a p • u q) + (a p • u q - a q • u q) := by
-          abel
-        _ = a p • (u p - u q) + (a p - a q) • u q := by
-          rw [smul_sub, sub_smul]
-    have hH₁d_nonneg : 0 ≤ H₁ * dα :=
-      (norm_nonneg (a p - a q)).trans (ha.holder hp hq)
-    calc
-      ‖a p • u p - a q • u q‖
-          = ‖a p • (u p - u q) + (a p - a q) • u q‖ := by rw [hsplit]
-      _ ≤ ‖a p • (u p - u q)‖ + ‖(a p - a q) • u q‖ := norm_add_le _ _
-      _ = ‖a p‖ * ‖u p - u q‖ + ‖a p - a q‖ * ‖u q‖ := by
-        rw [norm_smul, norm_smul]
-      _ ≤ B₁ * (H₂ * dα) + (H₁ * dα) * B₂ :=
-        add_le_add
-          (mul_le_mul (ha.bounded hp) (hu.holder hp hq) (norm_nonneg _) hB₁)
-          (mul_le_mul (ha.holder hp hq) (hu.bounded hq) (norm_nonneg _) hH₁d_nonneg)
-      _ = (B₁ * H₂ + B₂ * H₁) * dα := by ring
+  · exact ha.bounded.smul_fun hu.bounded hB₁
+  · exact ha.holder.smul_fun hu.holder ha.bounded hu.bounded hB₁
 
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicC0AlphaWith B H α u s) :
