@@ -401,6 +401,28 @@ theorem mapsTo_symm_image_of_openPartialHomeomorph_lifted_model_mapsTo
   rintro _ ⟨y, hyU, rfl⟩
   exact ⟨G y, hmaps hyU, by simpa [e₀.right_inv (hUt hyU)]⟩
 
+/-- The inverse of a model open partial homeomorphism, lifted through source
+and target charts, maps the lifted target image back to the lifted source
+image.  This is the local backward `MapsTo` fact used by compatible
+forward/backward gluing. -/
+theorem mapsTo_symm_image_of_openPartialHomeomorph_lifted_model_inverse_mapsTo
+    (e₀ e₁ : OpenPartialHomeomorph X Y) {φ : OpenPartialHomeomorph Y Y}
+    {U W : Set Y}
+    (hUsource : U ⊆ φ.source) (hW : W = φ '' U) (hWt : W ⊆ e₁.target) :
+    MapsTo (fun x : X ↦ e₀.symm (φ.symm (e₁ x))) (e₁.symm '' W) (e₀.symm '' U) := by
+  rintro _ ⟨y, hyW, rfl⟩
+  have hyφ : y ∈ φ '' U := by simpa [hW] using hyW
+  rcases hyφ with ⟨u, huU, rfl⟩
+  have hφuW : φ u ∈ W := by
+    rw [hW]
+    exact ⟨u, huU, rfl⟩
+  refine ⟨u, huU, ?_⟩
+  calc
+    e₀.symm u = e₀.symm (φ.symm (φ u)) := by
+      rw [φ.left_inv (hUsource huU)]
+    _ = e₀.symm (φ.symm (e₁ (e₁.symm (φ u)))) := by
+      rw [e₁.right_inv (hWt hφuW)]
+
 /-- If a manifold-side map is defined by pulling a model map back through two
 partial homeomorphism charts, model-space injectivity transports directly. -/
 theorem injOn_symm_image_of_openPartialHomeomorph_lifted_model_injOn
