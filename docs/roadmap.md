@@ -255,7 +255,8 @@ state set; the same compact-coordinate bridge now accepts sharper entrywise
 higher primitive constants while exporting coarser schematic RHS constants.
 Those coarser compact-readout estimates now also unpack to pointwise
 compact-coordinate distance bounds with the same schematic RHS constant,
-including finite-family form for indexed frame/cover data.
+including finite-family forms with either memberwise constants or one shared
+finite-sum constant for indexed frame/cover data.
 Radii linear in a state-space distance also sum to matrix-norm
 primitive difference bounds and feed the existing schematic RHS state-space
 `LipschitzOnWith` bridges, including finite-family and coarser exported-constant
