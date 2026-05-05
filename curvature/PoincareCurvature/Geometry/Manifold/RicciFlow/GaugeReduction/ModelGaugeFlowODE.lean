@@ -7332,6 +7332,113 @@ theorem flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_of_even
     (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
     hU₁open hU₁source htarget hxU₁
 
+/-- Full-interval constrained chart lift with continuity, bijectivity, and the
+lifted inverse readout for a time-slice of a variational local flow.  This
+keeps the `OpenPartialHomeomorph` inverse produced by the inverse-function
+bridge, so downstream manifold gluing can use local left/right inverse
+identities directly. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_inverseOn_subset_of_hasStrictFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {X : Type*} [TopologicalSpace X]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ : OpenPartialHomeomorph X V)
+    {K : ℝ≥0} {U₀ U₁ : Set X} {x : X}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm (α.flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set X,
+      (φ : V → V) = (fun y : V ↦ α.flow (y, t)) ∧
+        IsOpen Um ∧ x ∈ Um ∧ Um ⊆ U₀ ∧
+          IsOpen Wm ∧
+            (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+              ContinuousOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um ∧
+                BijOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um Wm ∧
+                  LeftInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+                    (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um ∧
+                    RightInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+                      (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Wm := by
+  have hxsource : x ∈ e₀.source := hU₀source hxU₀
+  have htIcc : t ∈ Icc tmin tmax := Ioo_subset_Icc_self ht
+  rcases α.exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
+      (ball_subset_closedBall hx) ht hD_bound hstrict with
+    ⟨φ, hφ, hxφ, _hyφ⟩
+  let S : Set V := e₀ '' U₀ ∩ ball x₀ r
+  have hSopen : IsOpen S :=
+    (e₀.isOpen_image_of_subset_source hU₀open hU₀source).inter isOpen_ball
+  have hS : S ⊆ e₀.target := by
+    rintro _ ⟨⟨z, hzU₀, rfl⟩, _hzball⟩
+    exact e₀.map_source (hU₀source hzU₀)
+  have hxS : e₀ x ∈ S := ⟨⟨x, hxU₀, rfl⟩, hx⟩
+  let T : Set V := e₁ '' U₁
+  have hTopen : IsOpen T := e₁.isOpen_image_of_subset_source hU₁open hU₁source
+  have hT : T ⊆ e₁.target := by
+    rintro _ ⟨z, hzU₁, rfl⟩
+    exact e₁.map_source (hU₁source hzU₁)
+  have hxT : α.flow (e₀ x, t) ∈ T := by
+    refine ⟨e₁.symm (α.flow (e₀ x, t)), hxU₁, ?_⟩
+    exact e₁.right_inv htarget
+  have hcont_closed :
+      ContinuousOn (fun y : V ↦ α.flow (y, t)) (closedBall x₀ r) := by
+    simpa using
+      (α.toContinuousLocalFlowSolution.flow_timeSlice_continuousOn_initial htIcc)
+  have hcontS : ContinuousOn (fun y : V ↦ α.flow (y, t)) S :=
+    hcont_closed.mono (fun _ hy ↦ ball_subset_closedBall hy.2)
+  have hS_lift : e₀.symm '' S ⊆ U₀ := by
+    rintro _ ⟨y, hyS, rfl⟩
+    rcases hyS.1 with ⟨z, hzU₀, rfl⟩
+    simpa [e₀.left_inv (hU₀source hzU₀)] using hzU₀
+  have hT_lift : e₁.symm '' T ⊆ U₁ := by
+    rintro _ ⟨y, hyT, rfl⟩
+    rcases hyT with ⟨z, hzU₁, rfl⟩
+    simpa [e₁.left_inv (hU₁source hzU₁)] using hzU₁
+  rcases RicciFlow.exists_open_nhds_continuousOn_bijOn_inverseOn_subset_of_lifted_openPartialHomeomorph_model
+      (X := X) (Y := V) e₀ e₁ hφ hxsource hxφ
+      hSopen hS hxS hTopen hT hxT hcontS hS_lift hT_lift with
+    ⟨Um, Wm, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+      hcont, hbij, hleft, hright⟩
+  exact ⟨φ, Um, Wm, hφ, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+    hcont, hbij, hleft, hright⟩
+
+/-- C¹-style full-interval constrained chart lift with continuity, bijectivity,
+and the lifted inverse readout. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_inverseOn_subset_of_eventually_hasFDerivAt_Ioo
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {X : Type*} [TopologicalSpace X]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ : OpenPartialHomeomorph X V)
+    {K : ℝ≥0} {U₀ U₁ : Set X} {x : X}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_bound : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hder : ∀ᶠ y in 𝓝 (e₀ x),
+      HasFDerivAt (fun z : V => α.flow (z, t)) (α.tangent y t) y)
+    (hcont : ContinuousAt (fun y : V => α.tangent y t) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm (α.flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set X,
+      (φ : V → V) = (fun y : V ↦ α.flow (y, t)) ∧
+        IsOpen Um ∧ x ∈ Um ∧ Um ⊆ U₀ ∧
+          IsOpen Wm ∧
+            (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+              ContinuousOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um ∧
+                BijOn (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um Wm ∧
+                  LeftInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+                    (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Um ∧
+                    RightInvOn (fun z : X ↦ e₀.symm (φ.symm (e₁ z)))
+                      (fun z : X ↦ e₁.symm (α.flow (e₀ z, t))) Wm :=
+  α.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_inverseOn_subset_of_hasStrictFDerivAt_Ioo
+    e₀ e₁ hU₀open hU₀source hxU₀ hx ht hD_bound
+    (α.flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt hder hcont)
+    hU₁open hU₁source htarget hxU₁
+
 /-- Common-subinterval chart lift of the inverse-function bridge: an interior
 model time-slice local inverse patch transports through source and target
 charts to a manifold-side open bijective patch. -/

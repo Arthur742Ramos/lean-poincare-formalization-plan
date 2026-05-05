@@ -1455,7 +1455,12 @@ model patch has been chosen inside suitable chart images, and
 `VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_subset_common_Ioo_of_hasStrictFDerivAt`
 with its C¹-style
 `..._of_eventually_hasFDerivAt` variant push those containments through the
-variational time-slice inverse theorem.  These are the local patch shapes
+variational time-slice inverse theorem.  The full-interval constrained lift also
+has the matching local inverse-identity readouts
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_inverseOn_subset_of_hasStrictFDerivAt_Ioo`
+and
+`VariationalLocalFlowSolution.flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_inverseOn_subset_of_eventually_hasFDerivAt_Ioo`.
+These are the local patch shapes
 needed to shrink chartwise Picard slices into visible overlap domains before
 applying equality transport.  The variational layer also has the corresponding
 overlap-equality readouts,
