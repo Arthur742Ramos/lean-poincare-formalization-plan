@@ -4576,6 +4576,17 @@ theorem flow_timeSlice_hasFDerivAt_of_hasFDerivAt_spaceTime
   have hslice := hF.comp x (hasFDerivAt_prodMk_left (𝕜 := ℝ) x t)
   simpa [hspatial] using hslice
 
+/-- Space-time `C^n` regularity of a variational model flow restricts to
+`C^n` regularity of the fixed-time slice in the initial coordinate. -/
+theorem flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {n : WithTop ℕ∞} {x : V} {t : ℝ}
+    (hF : ContDiffAt ℝ n α.flow (x, t)) :
+    ContDiffAt ℝ n (fun y : V => α.flow (y, t)) x := by
+  simpa using
+    hF.comp x
+      ((contDiff_prodMk_left (𝕜 := ℝ) (n := n) (E := V) (F := ℝ) t).contDiffAt)
+
 /-- Endpoint first-order remainder criterion for a fixed time slice.  If the
 remainder after subtracting the variational tangent map is bounded by
 `η(h) * ‖h‖` and `η(h) → 0`, then the time slice has Fréchet derivative
