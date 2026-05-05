@@ -2352,6 +2352,49 @@ theorem nonempty_of_inverse_hasMFDerivWithinAt
     (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
     F G hleft hright hF hG hanchored hderiv⟩
 
+/-- Build a raw `C^3` gauge-flow witness from inverse identities and
+regularity stated on `Set.univ`.  This is the endpoint shape produced by the
+open-cover gluing lemmas above. -/
+noncomputable def of_inverseOn_univ_hasMFDerivWithinAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt[s] (fun τ : ℝ ↦ F τ x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (F t x)))) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
+  of_inverse_hasMFDerivWithinAt (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    F G
+    (fun t x ↦ hleft t (Set.mem_univ x))
+    (fun t x ↦ hright t (Set.mem_univ x))
+    (fun t ↦ by simpa [contMDiffOn_univ] using hF t)
+    (fun t ↦ by simpa [contMDiffOn_univ] using hG t)
+    hanchored hderiv
+
+/-- Proof-level raw `C^3` gauge-flow existence from inverse identities and
+regularity stated on `Set.univ`. -/
+theorem nonempty_of_inverseOn_univ_hasMFDerivWithinAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (F G : ℝ → M → M)
+    (hleft : ∀ t : ℝ, LeftInvOn (G t) (F t) Set.univ)
+    (hright : ∀ t : ℝ, RightInvOn (G t) (F t) Set.univ)
+    (hF : ∀ t : ℝ, ContMDiffOn I I 3 (F t) Set.univ)
+    (hG : ∀ t : ℝ, ContMDiffOn I I 3 (G t) Set.univ)
+    (hanchored : ∀ x : M, F t₀ x = x)
+    (hderiv : ∀ t ∈ s, ∀ x : M,
+      HasMFDerivAt[s] (fun τ : ℝ ↦ F τ x) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (F t x)))) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀) :=
+  ⟨of_inverseOn_univ_hasMFDerivWithinAt
+    (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
+    F G hleft hright hF hG hanchored hderiv⟩
+
 /-- Build a raw `C^3` diffeomorphism gauge-flow witness from the preferred-chart
 ODE form of the derivative on the time set.
 

@@ -1486,7 +1486,13 @@ existence layer now consumes this package directly through
 `Diffeomorph3GaugeFlowOn.nonempty_of_inverse_hasMFDerivWithinAt`: mutually
 inverse `C³` time-slice maps, anchoring, and the pointwise manifold derivative
 equation produce a raw `Diffeomorph3GaugeFlowOn` without a separate manual
-`SmoothSelfDiffeomorph3Family` construction.
+`SmoothSelfDiffeomorph3Family` construction.  The raw-flow endpoint now also
+accepts the direct output of the gluing layer through
+`Diffeomorph3GaugeFlowOn.of_inverseOn_univ_hasMFDerivWithinAt` and
+`Diffeomorph3GaugeFlowOn.nonempty_of_inverseOn_univ_hasMFDerivWithinAt`: inverse
+identities and `ContMDiffOn` regularity stated on `Set.univ` are converted to
+the global inverse and `ContMDiff` hypotheses expected by the bundled
+diffeomorphism-family constructor.
 Full variational-pair uniqueness
 now has overlap forms on both `Ioo` and `Icc`, plus pointwise equality readouts
 for the base, continuous, tangent, vector-slot, and full pair conclusions,
