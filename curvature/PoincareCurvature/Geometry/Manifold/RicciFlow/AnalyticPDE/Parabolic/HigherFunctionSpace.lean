@@ -742,6 +742,38 @@ theorem lipschitzOnWith_toCompactCoordFamily_of_normLe_sub {Y κ : Type*}
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv)
   simpa [dist_eq_norm] using hnorm
 
+/-- A finite compact-family value-readout Lipschitz estimate gives pointwise compact-coordinate
+distance estimates. -/
+theorem forall_compactCoord_dist_le_of_toCompactCoordFamily_lipschitzOnWith {Y κ : Type*}
+    [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0} {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (h : LipschitzOnWith L
+      (fun u : Y =>
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      stateSet) :
+    ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i (z : Kc i),
+      dist
+        (toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα (A u) i z)
+        (toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα (A v) i z)
+        ≤ (L : ℝ) * dist u v := by
+  intro u hu v hv i z
+  have hC : 0 ≤ (L : ℝ) * dist u v :=
+    mul_nonneg (NNReal.coe_nonneg L) dist_nonneg
+  have hdist := h.dist_le_mul u hu v hv
+  have hi :
+      dist
+        (toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα (A u) i)
+        (toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα (A v) i)
+        ≤ (L : ℝ) * dist u v :=
+    (dist_pi_le_iff hC).1 hdist i
+  exact (ContinuousMap.dist_le hC).1 hi z
+
 /-- The linear compact-family value readout inherits the same finite product sup-norm
 estimate from `C^{2+α,1+α/2}` difference control. -/
 theorem norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe {κ : Type*} [Fintype κ]

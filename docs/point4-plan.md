@@ -2699,7 +2699,9 @@ compact readout sup-norm differences, including the finite product readout
 norm, are now bounded by the same single-radius `C^{0,α}` difference control,
 and by sup-bound-only difference estimates; pairwise norm-ball and sup-bound
 difference estimates now promote directly to `LipschitzOnWith` estimates for
-single compact-piece, finite compact-family, and linear finite-cover readouts.
+single compact-piece, finite compact-family, and linear finite-cover readouts,
+with finite compact-family `LipschitzOnWith` estimates unpacking to pointwise
+compact-coordinate distance bounds.
 `AnalyticPDE/Parabolic/HigherFunctionSpace.lean` now begins the coordinate
 `C^{2+α,1+α/2}` layer: it defines time and spatial slices, packages a genuine
 parabolic second jet with time, spatial, and second-spatial derivative
@@ -2726,7 +2728,9 @@ linear finite-cover readout all have sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, plus matching
 `LipschitzOnWith` estimates for pairwise higher-norm controls; equality of all
 compact-family value readouts determines higher-parabolic functions on covered
-domains and gives injectivity when the compact pieces cover all time-space.
+domains and gives injectivity when the compact pieces cover all time-space, and
+finite compact-family value `LipschitzOnWith` estimates unpack to pointwise
+compact-coordinate distance bounds.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct
