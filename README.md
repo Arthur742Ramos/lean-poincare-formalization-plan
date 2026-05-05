@@ -458,8 +458,9 @@ packages the canonical stationary local solution attached to
   functions, two-factor and finite-sum product-difference `C^{0,α}` estimates,
   bounded and Holder-level scalar-action primitives, and the corresponding
   bounded scalar-action estimate for normed-space-valued functions, reciprocal
-  closure for normed-field-valued
-  functions bounded away from zero and the corresponding division closure,
+  closure plus bounded and Holder-level reciprocal-difference primitives for
+  normed-field-valued functions bounded away from zero and the corresponding
+  division closure,
   along with closure
   under taking norms, Lipschitz composition on the controlled range, direct
   parabolic Hölder/`C^{0,α}` lifts of time-independent spatial

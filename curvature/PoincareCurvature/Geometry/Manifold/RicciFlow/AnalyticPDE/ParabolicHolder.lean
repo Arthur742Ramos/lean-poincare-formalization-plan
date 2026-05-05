@@ -1498,6 +1498,74 @@ theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
       exact mul_le_mul hleft hinvq (norm_nonneg _) (mul_nonneg hinvδ_nonneg hCd_nonneg)
     _ = (δ⁻¹ * C * δ⁻¹) * dα := by ring
 
+/-- Reciprocal differences inherit parabolic Holder control from the difference of the inputs,
+under a common pointwise lower bound. -/
+theorem inv_sub_inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ}
+    {a b : ℝ × X → 𝕜} {Ha Hb Bd Hd α : ℝ}
+    (ha : ParabolicHolderWith Ha α a s)
+    (hb : ParabolicHolderWith Hb α b s)
+    (hdiff : ParabolicHolderWith Hd α (fun z => a z - b z) s)
+    (hbdiff : ParabolicBoundedWith Bd (fun z => a z - b z) s)
+    (hδpos : 0 < δ)
+    (hδa : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖)
+    (hδb : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖)
+    (hBd : 0 ≤ Bd) :
+    ParabolicHolderWith
+      ((δ⁻¹ * Bd) * (δ⁻¹ * Hb * δ⁻¹) +
+        δ⁻¹ * (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹))) α
+      (fun z => (a z)⁻¹ - (b z)⁻¹) s := by
+  have hδinv_nonneg : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  have hainv :
+      ParabolicHolderWith (δ⁻¹ * Ha * δ⁻¹) α (fun z => (a z)⁻¹) s :=
+    ha.inv hδpos hδa
+  have hbinv :
+      ParabolicHolderWith (δ⁻¹ * Hb * δ⁻¹) α (fun z => (b z)⁻¹) s :=
+    hb.inv hδpos hδb
+  have hainv_bounded :
+      ParabolicBoundedWith δ⁻¹ (fun z => (a z)⁻¹) s := by
+    intro p hp
+    have hp_norm_pos : 0 < ‖a p‖ := lt_of_lt_of_le hδpos (hδa hp)
+    rw [norm_inv]
+    exact (inv_le_inv₀ hp_norm_pos hδpos).2 (hδa hp)
+  have hbinv_bounded :
+      ParabolicBoundedWith δ⁻¹ (fun z => (b z)⁻¹) s := by
+    intro p hp
+    have hp_norm_pos : 0 < ‖b p‖ := lt_of_lt_of_le hδpos (hδb hp)
+    rw [norm_inv]
+    exact (inv_le_inv₀ hp_norm_pos hδpos).2 (hδb hp)
+  have hleft :
+      ParabolicHolderWith (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹)) α
+        (fun z => (a z)⁻¹ * (a z - b z)) s :=
+    hainv.mul hdiff hainv_bounded hbdiff hδinv_nonneg
+  have hleft_bounded :
+      ParabolicBoundedWith (δ⁻¹ * Bd) (fun z => (a z)⁻¹ * (a z - b z)) s := by
+    intro p hp
+    exact (norm_mul_le ((a p)⁻¹) (a p - b p)).trans
+      (mul_le_mul (hainv_bounded hp) (hbdiff hp) (norm_nonneg _) hδinv_nonneg)
+  have hleftB_nonneg : 0 ≤ δ⁻¹ * Bd := mul_nonneg hδinv_nonneg hBd
+  have hprod :
+      ParabolicHolderWith
+        ((δ⁻¹ * Bd) * (δ⁻¹ * Hb * δ⁻¹) +
+          δ⁻¹ * (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹))) α
+        (fun z => ((a z)⁻¹ * (a z - b z)) * (b z)⁻¹) s :=
+    hleft.mul hbinv hleft_bounded hbinv_bounded hleftB_nonneg
+  have hneg := hprod.neg
+  have hpoint : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      (a z)⁻¹ - (b z)⁻¹ = -(((a z)⁻¹ * (a z - b z)) * (b z)⁻¹) := by
+    intro z hz
+    have ha_ne : a z ≠ 0 := by
+      exact norm_pos_iff.mp (lt_of_lt_of_le hδpos (hδa hz))
+    have hb_ne : b z ≠ 0 := by
+      exact norm_pos_iff.mp (lt_of_lt_of_le hδpos (hδb hz))
+    field_simp [ha_ne, hb_ne]
+    ring
+  intro p hp q hq
+  change ‖((a p)⁻¹ - (b p)⁻¹) - ((a q)⁻¹ - (b q)⁻¹)‖ ≤
+    ((δ⁻¹ * Bd) * (δ⁻¹ * Hb * δ⁻¹) +
+      δ⁻¹ * (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹))) * parabolicDistance p q ^ α
+  rw [hpoint hp, hpoint hq]
+  simpa using hneg hp hq
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicHolderWith C α u s) :
     ParabolicHolderWith (‖c‖ * C) α (fun z => c • u z) s := by
@@ -3097,6 +3165,47 @@ theorem inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ} {a : ℝ × X → 𝕜}
   rw [norm_inv]
   exact (inv_le_inv₀ hp_norm_pos hδpos).2 (hδ hp)
 
+/-- Reciprocal differences inherit sup-norm control from the difference of the inputs, under a
+common pointwise lower bound. -/
+theorem inv_sub_inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ}
+    {a b : ℝ × X → 𝕜} {Bd : ℝ}
+    (hdiff : ParabolicBoundedWith Bd (fun z => a z - b z) s)
+    (hδpos : 0 < δ)
+    (hδa : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖)
+    (hδb : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖)
+    (hBd : 0 ≤ Bd) :
+    ParabolicBoundedWith ((δ⁻¹ * Bd) * δ⁻¹)
+      (fun z => (a z)⁻¹ - (b z)⁻¹) s := by
+  have hδinv_nonneg : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  have hainv :
+      ParabolicBoundedWith δ⁻¹ (fun z => (a z)⁻¹) s :=
+    ParabolicBoundedWith.inv hδpos hδa
+  have hbinv :
+      ParabolicBoundedWith δ⁻¹ (fun z => (b z)⁻¹) s :=
+    ParabolicBoundedWith.inv hδpos hδb
+  have hleft :
+      ParabolicBoundedWith (δ⁻¹ * Bd) (fun z => (a z)⁻¹ * (a z - b z)) s :=
+    hainv.mul hdiff hδinv_nonneg
+  have hleftB_nonneg : 0 ≤ δ⁻¹ * Bd := mul_nonneg hδinv_nonneg hBd
+  have hprod :
+      ParabolicBoundedWith ((δ⁻¹ * Bd) * δ⁻¹)
+        (fun z => ((a z)⁻¹ * (a z - b z)) * (b z)⁻¹) s :=
+    hleft.mul hbinv hleftB_nonneg
+  have hneg := hprod.neg
+  have hpoint : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      (a z)⁻¹ - (b z)⁻¹ = -(((a z)⁻¹ * (a z - b z)) * (b z)⁻¹) := by
+    intro z hz
+    have ha_ne : a z ≠ 0 := by
+      exact norm_pos_iff.mp (lt_of_lt_of_le hδpos (hδa hz))
+    have hb_ne : b z ≠ 0 := by
+      exact norm_pos_iff.mp (lt_of_lt_of_le hδpos (hδb hz))
+    field_simp [ha_ne, hb_ne]
+    ring
+  intro p hp
+  change ‖(a p)⁻¹ - (b p)⁻¹‖ ≤ (δ⁻¹ * Bd) * δ⁻¹
+  rw [hpoint hp]
+  simpa using hneg hp
+
 theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
     (c : 𝕜) (hu : ParabolicBoundedWith B u s) :
     ParabolicBoundedWith (‖c‖ * B) (fun z => c • u z) s := by
@@ -3722,46 +3831,10 @@ theorem inv_sub_inv {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ}
       (invSubBoundConst δ Bd)
       (invSubHolderConst δ Ha Hb Bd Hd) α
       (fun z => (a z)⁻¹ - (b z)⁻¹) s := by
-  have hδinv_nonneg : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
-  have hainv :
-      ParabolicC0AlphaWith δ⁻¹ (δ⁻¹ * Ha * δ⁻¹) α (fun z => (a z)⁻¹) s :=
-    ha.inv hδpos hδa
-  have hbinv :
-      ParabolicC0AlphaWith δ⁻¹ (δ⁻¹ * Hb * δ⁻¹) α (fun z => (b z)⁻¹) s :=
-    hb.inv hδpos hδb
-  have hleft :
-      ParabolicC0AlphaWith (δ⁻¹ * Bd)
-        (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹)) α
-        (fun z => (a z)⁻¹ * (a z - b z)) s :=
-    hainv.mul hdiff hδinv_nonneg
-  have hleftB_nonneg : 0 ≤ δ⁻¹ * Bd := mul_nonneg hδinv_nonneg hBd
-  have hprod :
-      ParabolicC0AlphaWith
-        ((δ⁻¹ * Bd) * δ⁻¹)
-        ((δ⁻¹ * Bd) * (δ⁻¹ * Hb * δ⁻¹) +
-          δ⁻¹ * (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹))) α
-        (fun z => ((a z)⁻¹ * (a z - b z)) * (b z)⁻¹) s :=
-    hleft.mul hbinv hleftB_nonneg
-  have hneg := hprod.neg
-  have hpoint : ∀ ⦃z : ℝ × X⦄, z ∈ s →
-      (a z)⁻¹ - (b z)⁻¹ = -(((a z)⁻¹ * (a z - b z)) * (b z)⁻¹) := by
-    intro z hz
-    have ha_ne : a z ≠ 0 := by
-      exact norm_pos_iff.mp (lt_of_lt_of_le hδpos (hδa hz))
-    have hb_ne : b z ≠ 0 := by
-      exact norm_pos_iff.mp (lt_of_lt_of_le hδpos (hδb hz))
-    field_simp [ha_ne, hb_ne]
-    ring
   constructor
-  · intro p hp
-    change ‖(a p)⁻¹ - (b p)⁻¹‖ ≤ invSubBoundConst δ Bd
-    rw [hpoint hp]
-    simpa [invSubBoundConst] using hneg.bounded hp
-  · intro p hp q hq
-    change ‖((a p)⁻¹ - (b p)⁻¹) - ((a q)⁻¹ - (b q)⁻¹)‖ ≤
-      invSubHolderConst δ Ha Hb Bd Hd * parabolicDistance p q ^ α
-    rw [hpoint hp, hpoint hq]
-    simpa [invSubHolderConst] using hneg.holder hp hq
+  · simpa [invSubBoundConst] using hdiff.bounded.inv_sub_inv hδpos hδa hδb hBd
+  · simpa [invSubHolderConst] using
+      ha.holder.inv_sub_inv hb.holder hdiff.holder hdiff.bounded hδpos hδa hδb hBd
 
 /-- Product differences inherit parabolic `C^{0,α}` control from one left factor, one right
 factor, and `C^{0,α}` controls of the two factor differences. -/

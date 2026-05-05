@@ -125,8 +125,9 @@ controls. The same layer now also has bounded and Holder-level
 operator-application difference primitives for comparing two operator/vector
 inputs, and bounded and Holder-level normed-ring product/product-difference
 primitives below the `C^{0,α}` wrappers. Variable scalar action likewise now
-has bounded and Holder-level primitives below its `C^{0,α}` wrapper. The
-parabolic matrix/local-frame Gram
+has bounded and Holder-level primitives below its `C^{0,α}` wrapper, and
+reciprocal differences now expose bounded and Holder-level primitives below the
+inverse-metric `C^{0,α}` estimate. The parabolic matrix/local-frame Gram
 stack now also has compact
 point-local product-cylinder bounded-difference metric-control bridges for the
 primitive schematic Ricci-DeTurck RHS, including finite-family forms with one
