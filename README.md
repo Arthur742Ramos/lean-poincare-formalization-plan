@@ -675,8 +675,10 @@ time-family preferred-cover fields. The Ricci-DeTurck smooth-closure layer now
 uses that to build an interval Banach-chart package while choosing `Kstate`
 from fibrewise estimates. On the parabolic-coordinate side, `MatrixC0Alpha`
 now factors the schematic Ricci-DeTurck bounded-difference constants through a
-shared comparison radius, and `LocalFrameGram` exposes the compact local-frame
-version for Gram-matrix coordinate RHS differences. The same public layer
+shared comparison radius, including finite-family estimates with one compact
+determinant lower bound, and `LocalFrameGram` exposes both single-frame and
+finite-family compact local-frame versions for Gram-matrix coordinate RHS
+differences. The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
 Levi-Civita correction ingredients (`toDual`, fiberwise composition,

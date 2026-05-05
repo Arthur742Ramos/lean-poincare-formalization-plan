@@ -2474,9 +2474,12 @@ through centered inverse trivializations and continuous coordinate changes.
 Ricci-DeTurck matrix estimate: when the primitive metric, first-derivative, and
 principal-coefficient inputs differ by fixed constants times one shared radius,
 the schematic RHS differs by `ricciDeTurckSchematicDiffBoundConst * radius`.
-`LocalFrameGram` lifts that estimate to compact local-frame Gram coordinates.
-This is a coordinate Lipschitz bridge toward the fibrewise RHS hypothesis above,
-not a Schauder estimate or the actual Banach-chart construction.
+The same linear-radius estimate now has a finite-family form sharing one compact
+determinant lower bound across all matrix families. `LocalFrameGram` lifts both
+the single-frame and finite-family estimates to compact local-frame Gram
+coordinates. This is a coordinate Lipschitz bridge toward the fibrewise RHS
+hypothesis above, not a Schauder estimate or the actual Banach-chart
+construction.
 
 **Suggested decomposition** (multi-session):
 

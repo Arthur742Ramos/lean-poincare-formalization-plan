@@ -11398,6 +11398,63 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_family_of_isCompact_det
     (hDB r) (hHB r) (hM r) (hN r) (hD r) (hE r) (hKc r) (hηD r)
     (hMdiff r) (hDdiff r) (hHdiff r) hδpos (hdetM r) (hdetN r)
 
+/-- Finite-family linear-radius version of
+`ricciDeTurckSchematicMatrix_bounded_sub_le_const_family_of_isCompact_det_ne_zero`.  One compact
+determinant lower bound is shared by all family members, and each schematic RHS difference keeps a
+single common comparison radius factored out. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_family_mul_radius_of_isCompact_det_ne_zero
+    {κ n 𝕜 : Type*} [Fintype κ] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)}
+    {C : κ → n → n → ℝ} {DB : κ → n → n → n → ℝ}
+    {HB : κ → n → n → n → n → ℝ}
+    {R : ℝ} {KM KD : κ → ℝ} {KH : κ → n → n → ℝ}
+    {M N : κ → ℝ × X → Matrix n n 𝕜}
+    {D E : κ → ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : κ → ℝ × X → n → n → n → n → 𝕜}
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (hMctrl : ∀ r i j, ParabolicC0AlphaOn α (fun z => M r z i j) Kdom)
+    (hNctrl : ∀ r i j, ParabolicC0AlphaOn α (fun z => N r z i j) Kdom)
+    (hdetM_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → (M r z).det ≠ 0)
+    (hdetN_ne : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → (N r z).det ≠ 0)
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hM : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖M r z a b‖ ≤ C r a b)
+    (hN : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖N r z a b‖ ≤ C r a b)
+    (hD : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖D r z a b c‖ ≤
+      DB r a b c)
+    (hE : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖E r z a b c‖ ≤
+      DB r a b c)
+    (hKc : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b i j,
+      ‖Kc r z a b i j‖ ≤ HB r a b i j)
+    (hKD : ∀ r, 0 ≤ KD r) (hR : 0 ≤ R)
+    (hMdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ‖M r z - N r z‖ ≤ KM r * R)
+    (hDdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c,
+      ‖D r z a b c - E r z a b c‖ ≤ KD r * R)
+    (hHdiff : ∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ i j,
+      ‖((fun a b => Hc r z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => Kc r z a b i j) : Matrix n n 𝕜)‖ ≤ KH r i j * R) :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → δ ≤ ‖(M r z).det‖) ∧
+      (∀ r ⦃z : ℝ × X⦄, z ∈ Kdom → δ ≤ ‖(N r z).det‖) ∧
+      ∀ r,
+        ParabolicBoundedWith
+          (ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := 𝕜) δ (C r) (DB r) (HB r) (KM r) (KD r) (KH r) * R)
+          (fun z : ℝ × X =>
+            ricciDeTurckSchematicMatrix (M r z) (D r z) (Hc r z) -
+              ricciDeTurckSchematicMatrix (N r z) (E r z) (Kc r z)) Kdom := by
+  rcases matrix_det_pair_family_exists_pos_norm_lower_bound_of_isCompact
+      (K := Kdom) (M := M) (N := N) hKdom hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, hdetM, hdetN, ?_⟩
+  intro r
+  exact ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius
+    (s := Kdom) (δ := δ) (C := C r) (DB := DB r) (HB := HB r)
+    (R := R) (KM := KM r) (KD := KD r) (KH := KH r)
+    (M := M r) (N := N r) (D := D r) (E := E r) (H := Hc r) (K := Kc r)
+    (hDB r) (hHB r) (hM r) (hN r) (hD r) (hE r) (hKc r) (hKD r) hR
+    (hMdiff r) (hDdiff r) (hHdiff r) hδpos (hdetM r) (hdetN r)
+
 /-- Local finite product-cylinder metric controls globalize the finite-family compact-domain
 function-level bounded-difference estimate for schematic Ricci-DeTurck RHS fields, with one
 determinant lower bound shared by both metric families. -/
