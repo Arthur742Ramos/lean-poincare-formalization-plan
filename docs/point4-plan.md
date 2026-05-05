@@ -2448,7 +2448,9 @@ closed-cylinder spatial-Lipschitz Gram-entry variants for `0 < α ≤ 1`, and th
 single-frame existential schematic RHS entrywise-difference bridge now has
 direct spatial-Hölder, unit-diameter, closed-ball, and closed-cylinder
 Gram-entry variants instead of requiring callers to package a singleton
-finite family.
+finite family, and the single-frame compact entrywise-difference bridge now
+also produces a `ParabolicC0AlphaNormLe` norm-ball bound for the schematic RHS
+difference after extracting one shared compact determinant lower bound.
 The abstract
 closure-data interface itself now has named readouts for
 both the global and closed-interval packages:
@@ -2710,7 +2712,11 @@ single-radius norm-ball variants under a common determinant lower bound, and
 the inverse-principal contractions `g^{ab}T_abij` now have matching
 single-radius direct and entrywise-difference variants. The primitive-input
 schematic Ricci-DeTurck matrix itself now has direct and entrywise-difference
-single-radius variants assembled from those component estimates. It is still below the
+single-radius variants assembled from those component estimates. The compact
+local-frame Gram layer now also lifts the entrywise-difference primitive RHS
+estimate into this norm-ball API for one geometric frame against arbitrary
+comparison primitive inputs, extracting one shared determinant lower bound for
+the Gram and comparison matrices from compactness first. It is still below the
 actual `C^{2+α,1+α/2}` norm and Schauder estimate.
 
 **Suggested decomposition** (multi-session):

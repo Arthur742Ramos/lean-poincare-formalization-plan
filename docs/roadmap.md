@@ -187,7 +187,10 @@ schematic RHS difference estimates now have the same coarser
 primitive-difference promotion for compact sets, finite product-cylinder
 covers, point-dependent local cylinders, and existential local cylinders while
 preserving their Holder constants, with matching local-frame Gram-coordinate
-bridges.
+bridges. The compact local-frame Gram-coordinate layer now also lifts the
+primitive entrywise-difference schematic RHS estimate into the single-radius
+norm-ball API for one geometric frame against arbitrary comparison primitive
+inputs.
 The parabolic function-space layer has now also started: a single-radius
 `ParabolicC0AlphaNormLe` predicate packages the sum of the bounded and Holder
 constants and is closed under zero, constants, addition, subtraction, negation,
@@ -222,7 +225,10 @@ The inverse-principal contractions `g^{ab}T_abij` now have matching
 single-radius direct and entrywise-difference variants.
 The primitive-input schematic Ricci-DeTurck matrix itself now has direct and
 entrywise-difference single-radius variants assembled from those component
-estimates.
+estimates. The compact local-frame Gram layer also has the corresponding
+entrywise-difference norm-ball bridge for one geometric Gram matrix against
+arbitrary comparison primitive inputs, with the shared determinant lower bound
+chosen by compactness before applying the matrix estimate.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric
