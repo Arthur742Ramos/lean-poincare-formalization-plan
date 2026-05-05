@@ -8899,6 +8899,110 @@ theorem matrix_inv_two_index_contract_sub_with {n p q 𝕜 : Type*} [Fintype n]
   exact ⟨hbounded, by
     simpa [matrixInvTwoIndexContractDiffHolderConst] using hMT.holder.sub hNU.holder⟩
 
+end ParabolicC0AlphaOn
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Entrywise metric control, coefficient-array control, and a determinant lower bound package
+finite inverse-principal contractions with the corresponding single-radius `C^{0,α}` bound. -/
+theorem matrix_inv_two_index_contract_of_entries {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    {R : n → n → ℝ} {RT : n → n → p → q → ℝ} {δ : ℝ}
+    {M : ℝ × X → Matrix n n 𝕜} {T : ℝ × X → n → n → p → q → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaNormLe (R a b) α (fun z => M z a b) s)
+    (hT : ∀ a b i j,
+      ParabolicC0AlphaNormLe (RT a b i j) α (fun z => T z a b i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaNormLe
+      ((∑ i : p, ∑ j : q,
+          ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryBoundConst
+            (𝕜 := 𝕜) δ R RT i j) +
+        (∑ i : p, ∑ j : q,
+          ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryHolderConst
+            (𝕜 := 𝕜) δ R R RT RT i j))
+      α
+      (fun z : ℝ × X =>
+        (fun i j =>
+          ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * T z a b i j :
+            Matrix p q 𝕜)) s := by
+  have hR : ∀ a b, 0 ≤ R a b := fun a b => (hM a b).nonneg
+  have hRT : ∀ a b i j, 0 ≤ RT a b i j := fun a b i j => (hT a b i j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryBoundConst_nonneg
+          (𝕜 := 𝕜) hδpos R hRT i j)
+    (Finset.sum_nonneg fun i _hi =>
+      Finset.sum_nonneg fun j _hj =>
+        ParabolicC0AlphaOn.matrixInvTwoIndexContractEntryHolderConst_nonneg
+          (𝕜 := 𝕜) hR hδpos hRT hRT i j)
+    (ParabolicC0AlphaOn.matrix_inv_two_index_contract_with
+      (M := M) (T := T) (B := R) (H := R) (TB := RT) (TH := RT)
+      hR hRT hRT
+      (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM a b))
+      (fun a b i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hT a b i j))
+      hδpos hdet)
+
+/-- Entrywise metric controls, coefficient-array controls, their differences, and a common
+determinant lower bound package finite inverse-principal contraction differences with the
+corresponding single-radius `C^{0,α}` bound. -/
+theorem matrix_inv_two_index_contract_sub_entrywise_of_entries {n p q 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [Fintype p] [Fintype q] [NormedField 𝕜]
+    {R Rd : n → n → ℝ} {RT RTd : n → n → p → q → ℝ} {δ : ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜} {T U : ℝ × X → n → n → p → q → 𝕜}
+    (hM : ∀ a b, ParabolicC0AlphaNormLe (R a b) α (fun z => M z a b) s)
+    (hN : ∀ a b, ParabolicC0AlphaNormLe (R a b) α (fun z => N z a b) s)
+    (hMdiff : ∀ a b, ParabolicC0AlphaNormLe (Rd a b) α
+      (fun z => M z a b - N z a b) s)
+    (hU : ∀ a b i j,
+      ParabolicC0AlphaNormLe (RT a b i j) α (fun z => U z a b i j) s)
+    (hTdiff : ∀ a b i j, ParabolicC0AlphaNormLe (RTd a b i j) α
+      (fun z => T z a b i j - U z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntrywiseSubBoundConst
+          (𝕜 := 𝕜) δ R Rd RT RTd +
+        ParabolicC0AlphaOn.matrixInvTwoIndexContractEntrywiseSubHolderConst
+          (𝕜 := 𝕜) δ R R Rd Rd RT RT RTd RTd)
+      α
+      (fun z : ℝ × X =>
+        ((fun i j => ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b *
+          T z a b i j) : Matrix p q 𝕜) -
+        ((fun i j => ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b *
+          U z a b i j) : Matrix p q 𝕜)) s := by
+  have hR : ∀ a b, 0 ≤ R a b := fun a b => (hM a b).nonneg
+  have hRd : ∀ a b, 0 ≤ Rd a b := fun a b => (hMdiff a b).nonneg
+  have hRT : ∀ a b i j, 0 ≤ RT a b i j := fun a b i j => (hU a b i j).nonneg
+  have hRTd : ∀ a b i j, 0 ≤ RTd a b i j := fun a b i j => (hTdiff a b i j).nonneg
+  exact ParabolicC0AlphaNormLe.of_c0AlphaWith
+    (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntrywiseSubBoundConst_nonneg
+      (𝕜 := 𝕜) hδpos hRd hRT hRTd)
+    (ParabolicC0AlphaOn.matrixInvTwoIndexContractEntrywiseSubHolderConst_nonneg
+      (𝕜 := 𝕜) hδpos hR hRd hRd hRT hRT hRTd hRTd)
+    (ParabolicC0AlphaOn.matrix_inv_two_index_contract_sub_with_entrywise
+      (M := M) (N := N) (T := T) (U := U)
+      (B := R) (H := R) (Bd := Rd) (Hd := Rd)
+      (TB := RT) (TH := RT) (TDB := RTd) (TDH := RTd)
+      hR hRd hRd hRT hRT hRTd hRTd
+      (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM a b))
+      (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hN a b))
+      (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hMdiff a b))
+      (fun a b i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hU a b i j))
+      (fun a b i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hTdiff a b i j))
+      hδpos hdetM hdetN)
+
+end ParabolicC0AlphaNormLe
+
+namespace ParabolicC0AlphaOn
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
 /-- Compact-domain version of `matrix_inv_two_index_contract_sub_with`: pointwise nonvanishing of
 both metric determinants supplies one common determinant lower bound. -/
 theorem matrix_inv_two_index_contract_sub_with_of_isCompact_det_ne_zero

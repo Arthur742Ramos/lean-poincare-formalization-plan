@@ -2706,7 +2706,9 @@ Finite vector dot products, bilinear contractions `v · M w`, and inverse
 bilinear contractions `v · M⁻¹ w`, including the corresponding difference
 forms, now also live in the same single-radius norm-ball API. The
 inverse-Christoffel array and its entrywise-difference estimate now also have
-single-radius norm-ball variants under a common determinant lower bound. It is still below the
+single-radius norm-ball variants under a common determinant lower bound, and
+the inverse-principal contractions `g^{ab}T_abij` now have matching
+single-radius direct and entrywise-difference variants. It is still below the
 actual `C^{2+α,1+α/2}` norm and Schauder estimate.
 
 **Suggested decomposition** (multi-session):
