@@ -219,9 +219,11 @@ full higher radius bounds the value-level `C^{0,α}` norm, and the submodule has
 a linear forgetful map into the existing `C^{0,α}` submodule. Higher norm balls
 now also expose value-level pointwise norm and distance estimates, positive-
 exponent continuity and uniform continuity, and continuous-linear-image
-`C^{0,α}` norm-ball controls. The higher submodule also exposes the induced
-compact value readouts on single compact pieces and finite compact families,
-including linear readout maps, sup-norm bounds from
+`C^{0,α}` norm-ball controls. Existential higher membership and the higher
+submodule now also expose time, spatial, and second-spatial derivative
+witnesses with value-level `C^{0,α}` controls. The higher submodule also
+exposes the induced compact value readouts on single compact pieces and finite
+compact families, including linear readout maps, sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, and the corresponding
 `LipschitzOnWith` handoffs; the finite compact-family value readout also
 determines higher-parabolic functions on covered domains and is injective when

@@ -391,6 +391,61 @@ theorem uniformContinuousOn (h : ParabolicC2AlphaOn α u s) (hα : 0 < α) :
     UniformContinuousOn u s :=
   h.c0AlphaOn.uniformContinuousOn hα
 
+theorem exists_secondJet (h : ParabolicC2AlphaOn α u s) :
+    ∃ J : ParabolicSecondJet u s,
+      (∃ Nx ≥ 0, ParabolicC0AlphaNormLe Nx α J.spaceDeriv s) ∧
+      (∃ Nxx ≥ 0, ParabolicC0AlphaNormLe Nxx α J.spaceSecondDeriv s) ∧
+      (∃ Nt ≥ 0, ParabolicC0AlphaNormLe Nt α J.timeDeriv s) := by
+  rcases h with ⟨N, _hN, hNu⟩
+  exact hNu.exists_secondJet
+
+theorem exists_timeDeriv (h : ParabolicC2AlphaOn α u s) :
+    ∃ Dt : ℝ × X → E,
+      (∀ ⦃z : ℝ × X⦄, z ∈ s →
+        HasDerivWithinAt (fun t : ℝ => u (t, z.2)) (Dt z)
+          (timeSliceDomain s z.2) z.1) ∧
+      ∃ Nt ≥ 0, ParabolicC0AlphaNormLe Nt α Dt s := by
+  rcases h with ⟨N, _hN, hNu⟩
+  exact hNu.exists_timeDeriv
+
+theorem exists_spaceDeriv (h : ParabolicC2AlphaOn α u s) :
+    ∃ Dx : ℝ × X → X →L[ℝ] E,
+      (∀ ⦃z : ℝ × X⦄, z ∈ s →
+        HasFDerivWithinAt (fun x : X => u (z.1, x)) (Dx z)
+          (spaceSliceDomain s z.1) z.2) ∧
+      ∃ Nx ≥ 0, ParabolicC0AlphaNormLe Nx α Dx s := by
+  rcases h with ⟨N, _hN, hNu⟩
+  exact hNu.exists_spaceDeriv
+
+theorem exists_spaceSecondDeriv (h : ParabolicC2AlphaOn α u s) :
+    ∃ J : ParabolicSecondJet u s,
+      ∃ Nxx ≥ 0, ParabolicC0AlphaNormLe Nxx α J.spaceSecondDeriv s := by
+  rcases h with ⟨N, _hN, hNu⟩
+  exact hNu.exists_spaceSecondDeriv
+
+theorem exists_timeDeriv_c0AlphaOn (h : ParabolicC2AlphaOn α u s) :
+    ∃ Dt : ℝ × X → E,
+      (∀ ⦃z : ℝ × X⦄, z ∈ s →
+        HasDerivWithinAt (fun t : ℝ => u (t, z.2)) (Dt z)
+          (timeSliceDomain s z.2) z.1) ∧
+      ParabolicC0AlphaOn α Dt s := by
+  rcases h.exists_timeDeriv with ⟨Dt, hDt, Nt, _hNt, hNt⟩
+  exact ⟨Dt, hDt, hNt.c0AlphaOn⟩
+
+theorem exists_spaceDeriv_c0AlphaOn (h : ParabolicC2AlphaOn α u s) :
+    ∃ Dx : ℝ × X → X →L[ℝ] E,
+      (∀ ⦃z : ℝ × X⦄, z ∈ s →
+        HasFDerivWithinAt (fun x : X => u (z.1, x)) (Dx z)
+          (spaceSliceDomain s z.1) z.2) ∧
+      ParabolicC0AlphaOn α Dx s := by
+  rcases h.exists_spaceDeriv with ⟨Dx, hDx, Nx, _hNx, hNx⟩
+  exact ⟨Dx, hDx, hNx.c0AlphaOn⟩
+
+theorem exists_spaceSecondDeriv_c0AlphaOn (h : ParabolicC2AlphaOn α u s) :
+    ∃ J : ParabolicSecondJet u s, ParabolicC0AlphaOn α J.spaceSecondDeriv s := by
+  rcases h.exists_spaceSecondDeriv with ⟨J, Nxx, _hNxx, hNxx⟩
+  exact ⟨J, hNxx.c0AlphaOn⟩
+
 theorem const (c : E) : ParabolicC2AlphaOn α (fun _ : ℝ × X => c) s :=
   of_normLe (ParabolicC2AlphaNormLe.const (X := X) (α := α) (s := s) c)
 
@@ -460,6 +515,27 @@ theorem mem_iff {u : (ℝ × X) → E} :
 theorem c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
     ParabolicC0AlphaOn α (u : (ℝ × X) → E) s :=
   u.2.c0AlphaOn
+
+theorem exists_timeDeriv (u : parabolicC2AlphaSubmodule X E α s) :
+    ∃ Dt : ℝ × X → E,
+      (∀ ⦃z : ℝ × X⦄, z ∈ s →
+        HasDerivWithinAt (fun t : ℝ => u (t, z.2)) (Dt z)
+          (timeSliceDomain s z.2) z.1) ∧
+      ParabolicC0AlphaOn α Dt s :=
+  u.2.exists_timeDeriv_c0AlphaOn
+
+theorem exists_spaceDeriv (u : parabolicC2AlphaSubmodule X E α s) :
+    ∃ Dx : ℝ × X → X →L[ℝ] E,
+      (∀ ⦃z : ℝ × X⦄, z ∈ s →
+        HasFDerivWithinAt (fun x : X => u (z.1, x)) (Dx z)
+          (spaceSliceDomain s z.1) z.2) ∧
+      ParabolicC0AlphaOn α Dx s :=
+  u.2.exists_spaceDeriv_c0AlphaOn
+
+theorem exists_spaceSecondDeriv (u : parabolicC2AlphaSubmodule X E α s) :
+    ∃ J : ParabolicSecondJet (u : (ℝ × X) → E) s,
+      ParabolicC0AlphaOn α J.spaceSecondDeriv s :=
+  u.2.exists_spaceSecondDeriv_c0AlphaOn
 
 /-- Forget a coordinate parabolic `C^{2+α,1+α/2}` function to its value-level
 `C^{0,α}` function. -/

@@ -2712,9 +2712,12 @@ also bounds the value-level `C^{0,α}` norm, and the submodule has a linear
 forgetful map into the existing `C^{0,α}` submodule. Higher norm balls now
 also give value-level pointwise norm and distance readouts, positive-exponent
 continuity and uniform-continuity readouts, and continuous-linear-image
-`C^{0,α}` norm-ball controls. The higher submodule also inherits compact value
-readouts from that forgetful map: single compact pieces, finite compact
-families, and the linear finite-cover readout all have sup-norm bounds from
+`C^{0,α}` norm-ball controls. Existential higher membership and the higher
+submodule now also expose actual time, spatial, and second-spatial derivative
+witnesses with value-level `C^{0,α}` controls, without choosing a canonical
+derivative map. The higher submodule also inherits compact value readouts from
+that forgetful map: single compact pieces, finite compact families, and the
+linear finite-cover readout all have sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, plus matching
 `LipschitzOnWith` estimates for pairwise higher-norm controls; equality of all
 compact-family value readouts determines higher-parabolic functions on covered
