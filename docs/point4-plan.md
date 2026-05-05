@@ -1771,9 +1771,10 @@ feed the lifted `C^3` local gluing patch: strict differentiability and
 invertibility are discharged from the closed-ball Picard data, while the
 remaining hypothesis is precisely local `ContDiffAt ℝ 3` regularity of the
 selected model time-slice. Operator-ball and identity-ball lifted forms expose
-the standard tangent-bound specializations, and a separate model-flow lemma
-reduces time-slice `C^n` regularity to space-time `C^n` regularity when such a
-smooth-dependence theorem is available.
+the standard tangent-bound specializations. The lifted local-gluing layer now
+also exposes direct space-time-regularity entry points for both the basic patch
+and overlap-equality patch, reducing the fixed-time `C³` input by slicing a full
+space-time `C³` model flow at the selected endpoint.
 The ODE package
 now also supplies ordinary interior time
 derivatives for both the base flow `y(t)` and tangent map `A(t)`, including
