@@ -243,7 +243,7 @@ bounds and feed the existing schematic RHS state-space `LipschitzOnWith`
 bridges, including finite-family and coarser exported-constant wrappers; the
 finite-family bridge now also packages all schematic RHS coordinates as one
 Pi-valued state-space Lipschitz map with the finite sum of the coordinate
-constants.
+constants, in both exact-sum and coarser exported-constant forms.
 The matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
 same norm-ball language. Determinant and determinant-difference estimates now
