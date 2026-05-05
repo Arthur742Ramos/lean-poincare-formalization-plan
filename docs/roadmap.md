@@ -220,8 +220,11 @@ a linear forgetful map into the existing `C^{0,α}` submodule. It also exposes
 the induced compact value readouts on single compact pieces and finite compact
 families, including linear readout maps, sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, and the corresponding
-`LipschitzOnWith` handoffs. Second jets, norm balls, existential membership,
-and the higher submodule now also restrict to smaller time-space domains.
+`LipschitzOnWith` handoffs; the finite compact-family value readout also
+determines higher-parabolic functions on covered domains and is injective when
+the compact pieces cover all time-space. Second jets, norm balls, existential
+membership, and the higher submodule now also restrict to smaller time-space
+domains.
 The matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
 same norm-ball language. Determinant and determinant-difference estimates now

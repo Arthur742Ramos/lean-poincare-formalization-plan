@@ -2713,9 +2713,11 @@ forgetful map into the existing `C^{0,α}` submodule. The higher submodule now
 also inherits compact value readouts from that forgetful map: single compact
 pieces, finite compact families, and the linear finite-cover readout all have
 sup-norm bounds from `ParabolicC2AlphaNormLe` difference balls, plus matching
-`LipschitzOnWith` estimates for pairwise higher-norm controls. Second jets,
-`ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher submodule now
-also restrict to smaller time-space domains.
+`LipschitzOnWith` estimates for pairwise higher-norm controls; equality of all
+compact-family value readouts determines higher-parabolic functions on covered
+domains and gives injectivity when the compact pieces cover all time-space.
+Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
+submodule now also restrict to smaller time-space domains.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
 the same single-radius control, plus determinant and determinant-difference
 single-radius variants using the existing quantitative determinant constants.

@@ -636,6 +636,44 @@ theorem lipschitzOnWith_toCompactCoordFamilyLinearMap_of_normLe_sub {Y κ : Type
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv)
   simpa [dist_eq_norm] using hnorm
 
+/-- Equality of all compact-piece value readouts identifies two coordinate parabolic
+`C^{2+α,1+α/2}` functions on the covered set. -/
+theorem eqOn_of_toCompactCoordFamily_eq {κ : Type*}
+    {Kc : κ → TopologicalSpace.Compacts (ℝ × X)}
+    {hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s} {hα : 0 < α}
+    (hcover : s ⊆ ⋃ i, (Kc i : Set (ℝ × X)))
+    {u v : parabolicC2AlphaSubmodule X E α s}
+    (h :
+      toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u =
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v) :
+    EqOn u v s := by
+  intro z hz
+  rcases mem_iUnion.mp (hcover hz) with ⟨i, hzi⟩
+  have hz_eq :
+      toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i ⟨z, hzi⟩ =
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i ⟨z, hzi⟩ := by
+    rw [h]
+  simpa using hz_eq
+
+/-- Compact value readout is injective on coordinate parabolic `C^{2+α,1+α/2}` functions
+when the chosen compact pieces cover all time-space. -/
+theorem toCompactCoordFamily_injective_of_iUnion_eq_univ {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    Function.Injective
+      (toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα) := by
+  intro u v h
+  ext z
+  have hzcover : z ∈ ⋃ i, (Kc i : Set (ℝ × X)) := by
+    simp [hcover]
+  rcases mem_iUnion.mp hzcover with ⟨i, hzi⟩
+  have hz_eq :
+      toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i ⟨z, hzi⟩ =
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i ⟨z, hzi⟩ := by
+    rw [h]
+  simpa using hz_eq
+
 /-- Restriction to a smaller set as a linear map between coordinate parabolic
 `C^{2+α,1+α/2}` spaces. -/
 def restrictLinearMap {t : Set (ℝ × X)} (hst : t ⊆ s) :
