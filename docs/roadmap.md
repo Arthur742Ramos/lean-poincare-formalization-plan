@@ -199,7 +199,9 @@ functions, positive-exponent members read linearly as `ContinuousMap`s on
 compact time-space pieces, and the same readout is packaged over arbitrary
 compact-piece families, matching the finite-cover shape used by the existing
 continuous-section Banach model; those readouts determine functions on the
-covered set and are injective when the compact pieces cover all time-space.
+covered set, are injective when the compact pieces cover all time-space, and
+their compact sup-norm differences are controlled by the same single-radius
+`C^{0,α}` difference bound.
 The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric

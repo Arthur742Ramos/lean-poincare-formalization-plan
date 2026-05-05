@@ -2690,7 +2690,9 @@ positive-exponent linear readouts into `ContinuousMap`s on compact time-space
 pieces and compact piece families, with determination on the covered set and
 injectivity for global compact-piece covers. This is the finite-cover
 `C^{0,α}` analogue of the existing continuous-section compact-readout layer;
-it is still below the actual `C^{2+α,1+α/2}` norm and Schauder estimate.
+compact readout sup-norm differences are now bounded by the same single-radius
+`C^{0,α}` difference control. It is still below the actual
+`C^{2+α,1+α/2}` norm and Schauder estimate.
 
 **Suggested decomposition** (multi-session):
 

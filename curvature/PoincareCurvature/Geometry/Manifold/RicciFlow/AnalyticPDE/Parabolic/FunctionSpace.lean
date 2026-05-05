@@ -294,6 +294,29 @@ theorem toContinuousMapLinearMap_apply {K : TopologicalSpace.Compacts (ℝ × X)
       toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u :=
   rfl
 
+/-- A single-radius `C^{0,α}` bound on a difference controls the compact readout sup norm. -/
+theorem norm_toContinuousMap_sub_le_of_normLe {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) :
+    ‖toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u -
+        toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα v‖ ≤ N := by
+  rcases h with ⟨B, hB, H, hH, hsum, hctrl⟩
+  have hN : 0 ≤ N := (add_nonneg hB hH).trans hsum
+  have hB_le_N : B ≤ N := by linarith
+  refine (ContinuousMap.norm_le
+    (f := toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u -
+      toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα v) hN).mpr ?_
+  intro z
+  have hz : z.1 ∈ s := hK z.2
+  calc
+    ‖(toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u -
+        toContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα v) z‖ =
+        ‖u z.1 - v z.1‖ := by
+          rfl
+    _ ≤ B := hctrl.bounded hz
+    _ ≤ N := hB_le_N
+
 /-- Read a parabolic `C^{0,α}` function on every compact piece of a chosen cover. -/
 def toCompactCoordFamily {κ : Type*} (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
     (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
@@ -334,6 +357,17 @@ theorem toCompactCoordFamilyLinearMap_apply {κ : Type*}
         Kc hKc hα u =
       toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u :=
   rfl
+
+/-- A single-radius `C^{0,α}` bound on a difference controls each compact-family readout. -/
+theorem norm_toCompactCoordFamily_sub_le_of_normLe {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) (i : κ) :
+    ‖toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i -
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i‖ ≤ N :=
+  norm_toContinuousMap_sub_le_of_normLe
+    (X := X) (E := E) (α := α) (s := s) (hKc i) hα h
 
 /-- Equality of all compact-piece readouts identifies the two functions on the covered set. -/
 theorem eqOn_of_toCompactCoordFamily_eq {κ : Type*}
