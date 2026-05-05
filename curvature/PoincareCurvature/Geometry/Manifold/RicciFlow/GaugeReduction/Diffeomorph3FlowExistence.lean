@@ -4792,6 +4792,106 @@ theorem nonempty_of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_h
     hFLocal hGLocal hanchoredLocal hcontLocal hderivLocal hY⟩
 
 /-- Build a raw `C^3` gauge-flow witness from compatible local readouts on
+time-dependent open covers when the global-vector-field route's source
+persistence is supplied by fixed open target patches along the local forward
+readouts. -/
+noncomputable def of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (hUcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, V t i)
+    (hUopen : ∀ t : ℝ, ∀ i, IsOpen (U t i))
+    (hVopen : ∀ t : ℝ, ∀ i, IsOpen (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hFmaps : ∀ t : ℝ, ∀ i, MapsTo (Fₗ i t) (Set.univ ∩ U t i) (V t i))
+    (hGmaps : ∀ t : ℝ, ∀ i, MapsTo (Gₗ i t) (Set.univ ∩ V t i) (U t i))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (hleftLocal : ∀ t : ℝ, ∀ i,
+      LeftInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ U t i))
+    (hrightLocal : ∀ t : ℝ, ∀ i,
+      RightInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ V t i))
+    (hFLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Fₗ i t) (U t i))
+    (hGLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Gₗ i t) (V t i))
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          (extChartAt I
+            ((gluedMapOf_iUnion (defaultF t) (U t) (fun j ↦ Fₗ j t)) x))
+            (Fₗ i τ x))
+        (Y t ((gluedMapOf_iUnion (defaultF t) (U t) (fun j ↦ Fₗ j t)) x))
+        (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
+      Y τ ((gluedMapOf_iUnion (defaultF τ) (U τ) (fun i ↦ Fₗ i τ)) x) =
+        X τ ((gluedMapOf_iUnion (defaultF τ) (U τ) (fun i ↦ Fₗ i τ)) x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ :=
+  of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    defaultF defaultG Fₗ Gₗ U V hUcover hVcover hUopen hVopen
+    hFcompat hGcompat hFmaps hGmaps
+    (timeDependent_iUnion_pointwiseSource_of_indexed_open_preimage_continuousWithinAt
+      (F := Fₗ) (s := Icc tmin tmax) (U := U) (V := W)
+      hUpreimage hWopen
+      (fun t ht i x hx ↦ hcontLocal i t ht x hx))
+    hleftLocal hrightLocal hFLocal hGLocal hanchoredLocal hcontLocal
+    hderivLocal hY
+
+/-- Proof-level raw `C^3` gauge-flow existence from compatible local readouts
+on time-dependent open covers, with global vector-field identification and
+source persistence derived from fixed open target patches. -/
+theorem nonempty_of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (hUcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, V t i)
+    (hUopen : ∀ t : ℝ, ∀ i, IsOpen (U t i))
+    (hVopen : ∀ t : ℝ, ∀ i, IsOpen (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hFmaps : ∀ t : ℝ, ∀ i, MapsTo (Fₗ i t) (Set.univ ∩ U t i) (V t i))
+    (hGmaps : ∀ t : ℝ, ∀ i, MapsTo (Gₗ i t) (Set.univ ∩ V t i) (U t i))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (hleftLocal : ∀ t : ℝ, ∀ i,
+      LeftInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ U t i))
+    (hrightLocal : ∀ t : ℝ, ∀ i,
+      RightInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ V t i))
+    (hFLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Fₗ i t) (U t i))
+    (hGLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Gₗ i t) (V t i))
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          (extChartAt I
+            ((gluedMapOf_iUnion (defaultF t) (U t) (fun j ↦ Fₗ j t)) x))
+            (Fₗ i τ x))
+        (Y t ((gluedMapOf_iUnion (defaultF t) (U t) (fun j ↦ Fₗ j t)) x))
+        (Icc tmin tmax) t)
+    (hY : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
+      Y τ ((gluedMapOf_iUnion (defaultF τ) (U τ) (fun i ↦ Fₗ i τ)) x) =
+        X τ ((gluedMapOf_iUnion (defaultF τ) (U τ) (fun i ↦ Fₗ i τ)) x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀) :=
+  ⟨of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    defaultF defaultG Fₗ Gₗ U V W hUcover hVcover hUopen hVopen hFcompat
+    hGcompat hFmaps hGmaps hUpreimage hWopen hleftLocal hrightLocal hFLocal
+    hGLocal hanchoredLocal hcontLocal hderivLocal hY⟩
+
+/-- Build a raw `C^3` gauge-flow witness from compatible local readouts on
 time-dependent open covers with pointwise source persistence, when the
 preferred-chart derivative and vector-field-identification hypotheses are
 stated against local forward readouts.  Unlike the finite-cover local-readout

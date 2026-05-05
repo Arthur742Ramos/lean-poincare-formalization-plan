@@ -1574,7 +1574,12 @@ and
 `hasDerivWithinAt_extChartAt_eval_of_timeDependent_iUnion_pointwiseSource`
 lemmas expose the corresponding continuity and preferred-chart derivative
 transfers, and the raw pointwise-source constructor now uses those generic
-handoffs.  The local-readout pointwise-source raw constructor
+handoffs.  The global-field pointwise-source raw route now also has the
+open-preimage source-persistence variant
+`Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
+so callers can derive source persistence from fixed open target patches when
+the vector-field identification is already stated along the glued slice.  The
+local-readout pointwise-source raw constructor
 `Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses the same source-persistence route but states vector-field identification
 on the actual time-slice patches `U τ i`, so this local-field route no longer
