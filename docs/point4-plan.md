@@ -1456,7 +1456,12 @@ to continuous open readouts into continuity of the candidate map on the domain,
 and `continuousOn_of_iUnion_open_eqOn_continuousOn` gives the corresponding
 indexed open-cover form.  These let a finite or locally indexed chart cover
 feed continuity of a glued time-slice without reopening the pointwise
-neighborhood argument.  The
+neighborhood argument.  The same topological gluing block now includes
+`leftInvOn_of_iUnion_eqOn_leftInvOn` and
+`rightInvOn_of_iUnion_eqOn_rightInvOn`, which turn local forward/backward
+inverse identities plus equality of the global candidates with local readouts
+on the relevant image sets into global left- and right-inverse identities over
+covered domains.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.

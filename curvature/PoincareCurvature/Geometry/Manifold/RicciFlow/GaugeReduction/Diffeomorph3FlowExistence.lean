@@ -61,6 +61,46 @@ theorem continuousOn_of_iUnion_open_eqOn_continuousOn
     rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxU⟩
     exact ⟨U i, G i, hUopen i, hxU, hcont i, heq i⟩
 
+/-- Glue left-inverse identities across an indexed cover when the global
+forward/backward candidates agree with the local forward/backward readouts on
+the relevant visible sets. -/
+theorem leftInvOn_of_iUnion_eqOn_leftInvOn
+    {ι : Type*} {F : X → Y} {G : Y → X}
+    {Fₗ : ι → X → Y} {Gₗ : ι → Y → X}
+    {s : Set X} {U : ι → Set X}
+    (hcover : s ⊆ ⋃ i, U i)
+    (hF : ∀ i, EqOn F (Fₗ i) (s ∩ U i))
+    (hG : ∀ i, EqOn G (Gₗ i) (F '' (s ∩ U i)))
+    (hinv : ∀ i, LeftInvOn (Gₗ i) (Fₗ i) (s ∩ U i)) :
+    LeftInvOn G F s := by
+  intro x hx
+  rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxU⟩
+  have hxU' : x ∈ s ∩ U i := ⟨hx, hxU⟩
+  calc
+    G (F x) = Gₗ i (F x) := hG i ⟨x, hxU', rfl⟩
+    _ = Gₗ i (Fₗ i x) := by rw [hF i hxU']
+    _ = x := hinv i hxU'
+
+/-- Glue right-inverse identities across an indexed cover when the global
+forward/backward candidates agree with the local forward/backward readouts on
+the relevant visible sets. -/
+theorem rightInvOn_of_iUnion_eqOn_rightInvOn
+    {ι : Type*} {F : X → Y} {G : Y → X}
+    {Fₗ : ι → X → Y} {Gₗ : ι → Y → X}
+    {t : Set Y} {V : ι → Set Y}
+    (hcover : t ⊆ ⋃ i, V i)
+    (hG : ∀ i, EqOn G (Gₗ i) (t ∩ V i))
+    (hF : ∀ i, EqOn F (Fₗ i) (G '' (t ∩ V i)))
+    (hinv : ∀ i, RightInvOn (Gₗ i) (Fₗ i) (t ∩ V i)) :
+    RightInvOn G F t := by
+  intro y hy
+  rcases Set.mem_iUnion.mp (hcover hy) with ⟨i, hyV⟩
+  have hyV' : y ∈ t ∩ V i := ⟨hy, hyV⟩
+  calc
+    F (G y) = Fₗ i (G y) := hF i ⟨y, hyV', rfl⟩
+    _ = Fₗ i (Gₗ i y) := by rw [hG i hyV']
+    _ = y := hinv i hyV'
+
 /-- Shrink an `OpenPartialHomeomorph` local inverse patch to prescribed open
 source and target constraints, retaining a bijective open patch for the
 prescribed forward map. -/
