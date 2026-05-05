@@ -141,7 +141,9 @@ finite-cover section space, with a preferred-bilinear version that combines a
 fibrewise Lipschitz estimate with the square of the preferred
 inverse-trivialization bound and equality-cover variants matching the existing
 `et`/`het` Banach-chart records. The finite-cover inverse-trivialization bound
-is now also factored as a standalone compactness theorem. The internal Ricci-flow scaffold has
+is now also factored as a standalone compactness theorem and combined with the
+fibrewise handoff to produce an existential section-space Lipschitz constant for
+time-family preferred-cover fields. The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric
 family gives a local stationary Ricci-flow solution
@@ -1456,7 +1458,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
         layer now also has the coordinate-readout-to-`LipschitzOnWith` handoff
         and its preferred-bilinear fibrewise specialization, including the
         `et`/`het` cover shape carried by the chart APIs, and the shared
-        finite-cover inverse-trivialization bound is named separately. The Ricci-DeTurck preferred-cover
+        finite-cover inverse-trivialization bound is named separately and
+        combined into an existential time-family Lipschitz-constant bridge. The Ricci-DeTurck preferred-cover
         local-bounds closure theorem now consumes this symmetric approximation
         seam before applying positive-definite openness. The same generic layer
         now packages continuous SPD bilinear-form sections as limits of smooth

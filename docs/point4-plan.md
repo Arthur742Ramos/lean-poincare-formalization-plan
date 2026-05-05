@@ -2457,7 +2457,10 @@ variants accept the existing chart-record shape with an arbitrary cover `et`
 and proof `et i = trivializationAt ...`. The compactness lemma
 `exists_uniform_norm_preferred_trivializationAt_symmL_le_of_finite_compact_cover`
 now provides the shared finite-cover inverse-trivialization bound consumed by
-both smooth-density and Lipschitz handoffs. These are still handoff theorems; they do not
+both smooth-density and Lipschitz handoffs, and
+`exists_preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le`
+uses it to produce an existential `LipschitzOnWith` constant for time-family
+preferred-cover fields from a fibrewise estimate alone. These are still handoff theorems; they do not
 prove the Ricci-DeTurck Schauder estimates or construct the missing Banach chart.
 It also derives that finite-cover inverse
 bound from compactness of the cover pieces

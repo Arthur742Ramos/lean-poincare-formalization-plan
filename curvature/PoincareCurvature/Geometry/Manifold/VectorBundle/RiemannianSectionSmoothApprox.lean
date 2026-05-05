@@ -455,6 +455,52 @@ theorem exists_uniform_norm_preferred_trivializationAt_symmL_le_of_finite_compac
     exact (hC i x).trans (by dsimp [Csum]; linarith)
   exact ⟨Csum, hCsum_pos, hCsum_bound⟩
 
+/-- In a continuous Riemannian vector bundle, a time-family of preferred bilinear-form section
+fields with a fibrewise Lipschitz estimate has some finite-cover section-space Lipschitz constant.
+This combines the compact finite-cover inverse-trivialization bound with the preferred-bilinear
+Lipschitz handoff in the `et`/`het` cover shape used by chart records. -/
+theorem exists_preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le
+    [IsContinuousRiemannianBundle (B := M) F W]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {τ : Type*} {timeSet : Set τ}
+    (x0 : κ → M)
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {A : τ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover}
+    {K : NNReal}
+    (hfiber : ∀ τ, τ ∈ timeSet → ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ x : M, dist ((A τ s) x) ((A τ t) x) ≤ (K : ℝ) * dist s t) :
+    ∃ Ksection : NNReal, ∀ τ ∈ timeSet, LipschitzOnWith Ksection (A τ) stateSet := by
+  obtain ⟨C, hCpos, hC⟩ :=
+    exists_uniform_norm_preferred_trivializationAt_symmL_le_of_finite_compact_cover
+      (F := F) (W := W) (x0 := x0)
+      (Kc := Kc) (fun i x hx => by simpa [het i] using hKc i hx)
+  let Ksection : NNReal :=
+    ⟨(C * C) * (K : ℝ), mul_nonneg (mul_nonneg hCpos.le hCpos.le) (NNReal.coe_nonneg K)⟩
+  refine ⟨Ksection, ?_⟩
+  change ∀ τ ∈ timeSet, LipschitzOnWith Ksection (A τ) stateSet
+  exact preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le_of_eq_trivializationAt
+    (M := M) (F := F) (W := W) (x0 := x0) (timeSet := timeSet)
+    (et := et) het
+    (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo)
+    (hKoEq := hKoEq) (hcover := hcover)
+    (stateSet := stateSet) (A := A)
+    (C := C) hCpos.le hC (K := K) hfiber
+
 /-- Continuous preferred bilinear-form sections have smooth fiberwise approximants in a continuous
 Riemannian vector bundle.  This discharges the local trivialization-boundedness hypothesis from the
 Riemannian vector-bundle estimate. -/

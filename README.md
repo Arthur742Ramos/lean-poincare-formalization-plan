@@ -669,7 +669,9 @@ constant by the square of the preferred inverse-trivialization bound, including
 variants for covers supplied as `et` plus `et i = trivializationAt ...`, matching
 the Ricci-DeTurck Banach-chart records. The finite-cover inverse-trivialization
 bound used by those estimates is now named separately as a compactness theorem,
-so chart callers can obtain the shared constant without replaying the smooth-density proof. The same public layer
+and the smooth-approximation layer now combines it with the fibrewise estimate
+handoff to produce an existential section-space Lipschitz constant for
+time-family preferred-cover fields. The same public layer
 now also proves existence of global `C^1` affine connections on `C^2` bundle
 data and provides the first section-level `C^1` regularity lemmas for the
 Levi-Civita correction ingredients (`toDual`, fiberwise composition,
