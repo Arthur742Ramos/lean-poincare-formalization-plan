@@ -85,6 +85,23 @@ theorem add (hu : ParabolicC0AlphaNormLe N₁ α u s)
     hu_ctrl.add hv_ctrl⟩
   linarith
 
+theorem finset_sum {ι : Type*} (S : Finset ι) {N : ι → ℝ}
+    {u : ι → ℝ × X → E}
+    (h : ∀ i ∈ S, ParabolicC0AlphaNormLe (N i) α (u i) s) :
+    ParabolicC0AlphaNormLe (∑ i ∈ S, N i) α
+      (fun z => ∑ i ∈ S, u i z) s := by
+  classical
+  induction S using Finset.induction_on with
+  | empty =>
+      simpa using (zero (X := X) (E := E) (α := α) (s := s))
+  | insert a S ha ih =>
+      have ha_ctrl : ParabolicC0AlphaNormLe (N a) α (u a) s := h a (by simp)
+      have hS_ctrl : ParabolicC0AlphaNormLe (∑ i ∈ S, N i) α
+          (fun z => ∑ i ∈ S, u i z) s := by
+        exact ih fun i hi => h i (by simp [hi])
+      have hadd := add ha_ctrl hS_ctrl
+      simpa [Finset.sum_insert, ha] using hadd
+
 theorem neg (hu : ParabolicC0AlphaNormLe N α u s) :
     ParabolicC0AlphaNormLe N α (fun z => -u z) s := by
   rcases hu with ⟨B, hB, H, hH, hsum, hctrl⟩
@@ -113,6 +130,50 @@ theorem smul {𝕜 : Type*} [NormedField 𝕜] [NormedSpace 𝕜 E]
   calc
     ‖c‖ * B + ‖c‖ * H = ‖c‖ * (B + H) := by ring
     _ ≤ ‖c‖ * N := mul_le_mul_of_nonneg_left hsum (norm_nonneg c)
+
+theorem continuousLinearMap {F : Type*} [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (hu : ParabolicC0AlphaNormLe N α u s) :
+    ParabolicC0AlphaNormLe (‖L‖ * N) α (fun z => L (u z)) s := by
+  rcases hu with ⟨B, hB, H, hH, hsum, hctrl⟩
+  refine ⟨‖L‖ * B, mul_nonneg (norm_nonneg L) hB,
+    ‖L‖ * H, mul_nonneg (norm_nonneg L) hH, ?_, hctrl.continuousLinearMap L⟩
+  calc
+    ‖L‖ * B + ‖L‖ * H = ‖L‖ * (B + H) := by ring
+    _ ≤ ‖L‖ * N := mul_le_mul_of_nonneg_left hsum (norm_nonneg L)
+
+theorem pi {ι F : Type*} [Fintype ι] [NormedAddCommGroup F]
+    {N : ι → ℝ} {u : ℝ × X → ι → F}
+    (h : ∀ i, ParabolicC0AlphaNormLe (N i) α (fun z => u z i) s) :
+    ParabolicC0AlphaNormLe (∑ i, N i) α u s := by
+  classical
+  choose B hB H hH hsum hctrl using h
+  refine ⟨∑ i, B i, Finset.sum_nonneg fun i _ => hB i,
+    ∑ i, H i, Finset.sum_nonneg fun i _ => hH i, ?_,
+    ParabolicC0AlphaWith.pi (X := X) (E := F) (α := α) (s := s)
+      (B := B) (H := H) hB hH hctrl⟩
+  calc
+    (∑ i, B i) + ∑ i, H i = ∑ i, (B i + H i) := by
+      rw [Finset.sum_add_distrib]
+    _ ≤ ∑ i, N i := Finset.sum_le_sum fun i _ => hsum i
+
+theorem mul {A : Type*} [NormedRing A] {N₁ N₂ α : ℝ}
+    {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaNormLe N₁ α u s)
+    (hv : ParabolicC0AlphaNormLe N₂ α v s) :
+    ParabolicC0AlphaNormLe (N₁ * N₂) α (fun z => u z * v z) s := by
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hu_sum, hu_ctrl⟩
+  rcases hv with ⟨Bv, hBv, Hv, hHv, hv_sum, hv_ctrl⟩
+  have hNu : 0 ≤ N₁ := (add_nonneg hBu hHu).trans hu_sum
+  refine ⟨Bu * Bv, mul_nonneg hBu hBv, Bu * Hv + Bv * Hu,
+    add_nonneg (mul_nonneg hBu hHv) (mul_nonneg hBv hHu), ?_,
+    hu_ctrl.mul hv_ctrl hBu⟩
+  have hleft :
+      Bu * Bv + (Bu * Hv + Bv * Hu) ≤ (Bu + Hu) * (Bv + Hv) := by
+    nlinarith [mul_nonneg hHu hHv]
+  have hright : (Bu + Hu) * (Bv + Hv) ≤ N₁ * N₂ :=
+    mul_le_mul hu_sum hv_sum (add_nonneg hBv hHv) hNu
+  exact hleft.trans hright
 
 theorem continuousOn (h : ParabolicC0AlphaNormLe N α u s) (hα : 0 < α) :
     ContinuousOn u s :=
