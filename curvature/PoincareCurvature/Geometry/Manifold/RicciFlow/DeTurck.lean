@@ -1886,6 +1886,29 @@ structure ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily where
       ChosenIntrinsicDeTurckLocalExistenceUniqueness
         (E := E) (H := H) (I := I) (M := M) ivp
 
+/-- Build the chosen-background DeTurck theorem family from uniform existence
+and metric uniqueness on every prescribed shorter common terminal. -/
+def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.ofRestrictedMetricReadout
+    (hexists : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp))
+    (hmetric :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol₁ sol₂ : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ {S : ℝ},
+        ivp.initialTime < S → S ≤ sol₁.1.terminalTime → S ≤ sol₂.1.terminalTime →
+        ∀ {t : ℝ}, t ∈ Set.Icc ivp.initialTime S → ∀ (x : M) (u v : TM x),
+          metricTensor (I := I) (M := M)
+            sol₁.1.toIntrinsicDeTurckSolution.metric t x u v =
+              metricTensor (I := I) (M := M)
+                sol₂.1.toIntrinsicDeTurckSolution.metric t x u v) :
+    ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    ChosenIntrinsicDeTurckLocalExistenceUniqueness.ofRestrictedMetricReadout
+      (I := I) (M := M) (hexists ivp) (hmetric ivp)
+
 def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsic
     (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
       (E := E) (H := H) (I := I) (M := M)) :

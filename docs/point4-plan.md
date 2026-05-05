@@ -1869,7 +1869,9 @@ upgrades the same metric input to closed-common canonical connection equality.
 The constructor
 `ChosenIntrinsicDeTurckLocalExistenceUniqueness.ofRestrictedMetricReadout`
 then packages existence plus those restricted-terminal metric readouts as the
-full chosen-background DeTurck theorem package.
+full chosen-background DeTurck theorem package; the family-level constructor
+`ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.ofRestrictedMetricReadout`
+does the same uniformly over all initial-value problems.
 The corresponding connection-level wrappers
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_restricted_interval_of_shrunk_symmetricCarrier`,
 `RicciDeTurckChartClosureDataOnIcc.connection_eq_on_common_Ico_of_common_terminal_le_shrink_of_shrunk_symmetricCarrier`,
