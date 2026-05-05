@@ -300,5 +300,89 @@ theorem exists_spaceSecondDeriv (h : ParabolicC2AlphaNormLe N α u s) :
 
 end ParabolicC2AlphaNormLe
 
+/-- Coordinate parabolic `C^{2+α,1+α/2}` membership with some finite single-radius control. -/
+def ParabolicC2AlphaOn (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
+  ∃ N ≥ 0, ParabolicC2AlphaNormLe N α u s
+
+namespace ParabolicC2AlphaOn
+
+variable {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+
+theorem of_normLe {N : ℝ} (h : ParabolicC2AlphaNormLe N α u s) :
+    ParabolicC2AlphaOn α u s :=
+  ⟨N, h.nonneg, h⟩
+
+theorem c0AlphaOn (h : ParabolicC2AlphaOn α u s) :
+    ParabolicC0AlphaOn α u s := by
+  rcases h with ⟨N, _hN, hN⟩
+  exact hN.value_c0AlphaOn
+
+theorem const (c : E) : ParabolicC2AlphaOn α (fun _ : ℝ × X => c) s :=
+  of_normLe (ParabolicC2AlphaNormLe.const (X := X) (α := α) (s := s) c)
+
+theorem zero : ParabolicC2AlphaOn α (fun _ : ℝ × X => (0 : E)) s :=
+  of_normLe (ParabolicC2AlphaNormLe.zero (X := X) (E := E) (α := α) (s := s))
+
+theorem add (hu : ParabolicC2AlphaOn α u s) (hv : ParabolicC2AlphaOn α v s) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => u z + v z) s := by
+  rcases hu with ⟨Nu, hNu, huN⟩
+  rcases hv with ⟨Nv, hNv, hvN⟩
+  exact ⟨Nu + Nv, add_nonneg hNu hNv, huN.add hvN⟩
+
+theorem neg (hu : ParabolicC2AlphaOn α u s) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => -u z) s := by
+  rcases hu with ⟨N, hN, huN⟩
+  exact ⟨N, hN, huN.neg⟩
+
+theorem sub (hu : ParabolicC2AlphaOn α u s) (hv : ParabolicC2AlphaOn α v s) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => u z - v z) s := by
+  rcases hu with ⟨Nu, hNu, huN⟩
+  rcases hv with ⟨Nv, hNv, hvN⟩
+  exact ⟨Nu + Nv, add_nonneg hNu hNv, huN.sub hvN⟩
+
+theorem smul (c : ℝ) (hu : ParabolicC2AlphaOn α u s) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => c • u z) s := by
+  rcases hu with ⟨N, hN, huN⟩
+  exact ⟨‖c‖ * N, mul_nonneg (norm_nonneg c) hN, huN.smul c⟩
+
+end ParabolicC2AlphaOn
+
+/-- Coordinate parabolic `C^{2+α,1+α/2}` functions form a real submodule of all time-space
+functions. -/
+def parabolicC2AlphaSubmodule
+    (X E : Type*) [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (α : ℝ) (s : Set (ℝ × X)) : Submodule ℝ ((ℝ × X) → E) where
+  carrier := {u | ParabolicC2AlphaOn α u s}
+  zero_mem' := by
+    simpa using (ParabolicC2AlphaOn.zero (X := X) (E := E) (α := α) (s := s))
+  add_mem' := by
+    intro u v hu hv
+    simpa [Pi.add_apply] using
+      (ParabolicC2AlphaOn.add (X := X) (E := E) (α := α) (s := s) hu hv)
+  smul_mem' := by
+    intro c u hu
+    simpa [Pi.smul_apply] using
+      (ParabolicC2AlphaOn.smul (X := X) (E := E) (α := α) (s := s) c hu)
+
+namespace parabolicC2AlphaSubmodule
+
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+instance :
+    CoeFun (parabolicC2AlphaSubmodule X E α s) (fun _ => (ℝ × X) → E) :=
+  ⟨fun u => u.1⟩
+
+@[simp]
+theorem mem_iff {u : (ℝ × X) → E} :
+    u ∈ parabolicC2AlphaSubmodule X E α s ↔ ParabolicC2AlphaOn α u s :=
+  Iff.rfl
+
+theorem c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
+    ParabolicC0AlphaOn α (u : (ℝ × X) → E) s :=
+  u.2.c0AlphaOn
+
+end parabolicC2AlphaSubmodule
+
 end AnalyticPDE
 end RicciFlow

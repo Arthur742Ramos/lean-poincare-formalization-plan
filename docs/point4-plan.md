@@ -2705,7 +2705,9 @@ witnesses on those slices, and defines a single-radius
 derivative, spatial Hessian, and time-derivative `C^{0,α}` norm-ball controls;
 this higher predicate already has constant and zero constructors and is closed
 under addition, negation, subtraction, and scalar multiplication with the
-expected radius bounds.
+expected radius bounds. Its existential `ParabolicC2AlphaOn` class now forms a
+real submodule of all coordinate time-space functions and reads back to
+`ParabolicC0AlphaOn` for the value component.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
 the same single-radius control, plus determinant and determinant-difference
 single-radius variants using the existing quantitative determinant constants.

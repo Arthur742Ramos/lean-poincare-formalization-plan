@@ -212,7 +212,9 @@ slices, genuine parabolic second-jet derivative witnesses, and a
 `ParabolicC2AlphaNormLe` predicate controlling the value, spatial derivative,
 spatial Hessian, and time derivative by `C^{0,α}` norm balls; it has constant
 and zero constructors and is closed under addition, negation, subtraction, and
-scalar multiplication with the expected radius bounds.
+scalar multiplication with the expected radius bounds. The existential
+`ParabolicC2AlphaOn` class now forms a real submodule of all coordinate
+time-space functions and reads back to `ParabolicC0AlphaOn` for values.
 The matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
 same norm-ball language. Determinant and determinant-difference estimates now
