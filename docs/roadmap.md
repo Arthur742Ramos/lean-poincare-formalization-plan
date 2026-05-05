@@ -240,7 +240,7 @@ entry controls feed the single-radius schematic Ricci-DeTurck RHS difference
 estimate directly. Higher entrywise difference controls whose radii are linear
 in a state-space distance now also sum to matrix-norm primitive difference
 bounds and feed the existing schematic RHS state-space `LipschitzOnWith`
-bridges, including a finite-family wrapper.
+bridges, including finite-family and coarser exported-constant wrappers.
 The matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
 that single-radius control, so matrix estimates can consume and produce the
 same norm-ball language. Determinant and determinant-difference estimates now
