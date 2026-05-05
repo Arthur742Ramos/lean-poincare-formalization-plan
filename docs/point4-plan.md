@@ -2470,6 +2470,13 @@ It also derives that finite-cover inverse
 bound from compactness of the cover pieces
 inside their fixed trivialization domains by factoring fixed-center inverses
 through centered inverse trivializations and continuous coordinate changes.
+`MatrixC0Alpha` now also names the linear-radius form of the schematic
+Ricci-DeTurck matrix estimate: when the primitive metric, first-derivative, and
+principal-coefficient inputs differ by fixed constants times one shared radius,
+the schematic RHS differs by `ricciDeTurckSchematicDiffBoundConst * radius`.
+`LocalFrameGram` lifts that estimate to compact local-frame Gram coordinates.
+This is a coordinate Lipschitz bridge toward the fibrewise RHS hypothesis above,
+not a Schauder estimate or the actual Banach-chart construction.
 
 **Suggested decomposition** (multi-session):
 

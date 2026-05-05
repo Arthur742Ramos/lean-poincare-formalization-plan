@@ -144,7 +144,12 @@ inverse-trivialization bound and equality-cover variants matching the existing
 is now also factored as a standalone compactness theorem and combined with the
 fibrewise handoff to produce an existential section-space Lipschitz constant for
 time-family preferred-cover fields; the smooth-closure layer uses this to build
-an interval Banach-chart package while choosing `Kstate` from fibrewise estimates. The internal Ricci-flow scaffold has
+an interval Banach-chart package while choosing `Kstate` from fibrewise
+estimates. The parabolic matrix layer now also has a linear-radius schematic
+Ricci-DeTurck RHS estimate: primitive metric, first-derivative, and
+principal-coefficient differences bounded by fixed constants times one shared
+radius give the coordinate RHS difference bounded by one named constant times
+that radius, with a compact local-frame Gram-matrix wrapper. The internal Ricci-flow scaffold has
 also gained a first genuine theorem in this direction: for Ricci-flat initial
 data equipped with a chosen `C^1` Levi-Civita connection, the constant metric
 family gives a local stationary Ricci-flow solution

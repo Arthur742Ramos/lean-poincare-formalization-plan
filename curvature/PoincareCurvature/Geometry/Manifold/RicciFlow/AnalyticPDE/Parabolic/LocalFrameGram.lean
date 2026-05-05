@@ -10211,6 +10211,68 @@ theorem localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_of_time
     hK hα hGctrl hNctrl hdetG_ne hdetN_ne hDB hHB hGbound hNbound
     hD hE hKc hηD hGdiff hDdiff hHdiff
 
+/-- Compact local-frame Lipschitz bridge for schematic Ricci-DeTurck coordinate RHS fields.
+Primitive metric, first-derivative, and principal-coefficient differences controlled by fixed
+constants times one shared radius give an RHS difference estimate with that same radius factored
+out.  This is the finite-matrix estimate in local-frame Gram coordinates. -/
+theorem localFrameGramMatrix_ricciDeTurck_schematic_bounded_sub_le_const_mul_radius_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [ContMDiffVectorBundle 2 E TM I]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {K : Set (ℝ × M)} {α : ℝ} (hK : IsCompact K) (hα : 0 < α)
+    (hKbase : ∀ ⦃z : ℝ × M⦄, z ∈ K → z.2 ∈ e.baseSet)
+    {C : ι → ι → ℝ} {DB : ι → ι → ι → ℝ}
+    {HB : ι → ι → ι → ι → ℝ} {R KG KD : ℝ} {KH : ι → ι → ℝ}
+    {N : ℝ × M → Matrix ι ι ℝ}
+    {D Earr : ℝ × M → ι → ι → ι → ℝ}
+    {Hc Kc : ℝ × M → ι → ι → ι → ι → ℝ}
+    (hGctrl : ∀ i j,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × M => CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 i j)
+        K)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × M => N z i j) K)
+    (hdetN_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K → (N z).det ≠ 0)
+    (hDB : ∀ a c d, 0 ≤ DB a c d)
+    (hHB : ∀ a c i j, 0 ≤ HB a c i j)
+    (hGbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c,
+      ‖CovariantDerivative.localFrameGramMatrix (I := I) e b z.2 a c‖ ≤ C a c)
+    (hNbound : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c, ‖N z a c‖ ≤ C a c)
+    (hD : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d, ‖D z a c d‖ ≤ DB a c d)
+    (hE : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d, ‖Earr z a c d‖ ≤ DB a c d)
+    (hKc : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c i j, ‖Kc z a c i j‖ ≤ HB a c i j)
+    (hKD : 0 ≤ KD) (hR : 0 ≤ R)
+    (hGdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) e b z.2) - N z‖ ≤ KG * R)
+    (hDdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ a c d,
+      ‖D z a c d - Earr z a c d‖ ≤ KD * R)
+    (hHdiff : ∀ ⦃z : ℝ × M⦄, z ∈ K → ∀ i j,
+      ‖((fun a c => Hc z a c i j) : Matrix ι ι ℝ) -
+          ((fun a c => Kc z a c i j) : Matrix ι ι ℝ)‖ ≤ KH i j * R) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := ℝ) δ C DB HB KG KD KH * R)
+        (fun z : ℝ × M =>
+          ricciDeTurckSchematicMatrix
+              (show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) e b z.2)
+              (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (Earr z) (Kc z)) K := by
+  have hdetG_ne : ∀ ⦃z : ℝ × M⦄, z ∈ K →
+      (show Matrix ι ι ℝ from
+        CovariantDerivative.localFrameGramMatrix (I := I) e b z.2).det ≠ 0 := by
+    intro z hz
+    exact CovariantDerivative.localFrameGramMatrix_det_ne_zero
+      (I := I) (E := E) e b (hKbase hz)
+  exact ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_isCompact_det_ne_zero
+    (Kdom := K)
+    (M := fun z : ℝ × M =>
+      (show Matrix ι ι ℝ from CovariantDerivative.localFrameGramMatrix (I := I) e b z.2))
+    (N := N) (D := D) (E := Earr) (Hc := Hc) (Kc := Kc)
+    hK hα hGctrl hNctrl hdetG_ne hdetN_ne hDB hHB hGbound hNbound
+    hD hE hKc hKD hR hGdiff hDdiff hHdiff
+
 /-- Local finite product-cylinder metric controls globalize the compact local-frame
 function-level bounded-difference estimate for schematic Ricci-DeTurck coordinate RHS fields.
 The primitive bounds and differences are still checked on the compact target set. -/

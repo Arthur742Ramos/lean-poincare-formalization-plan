@@ -5818,6 +5818,20 @@ theorem matrixInvChristoffelArrayDiffBoundConst_nonneg {n 𝕜 : Type*} [Fintype
             (matrixInvChristoffelEntryMetricDiffConst_nonneg (𝕜 := 𝕜) hδpos hDB a b c)
             hρ)
 
+/-- The uniform inverse-Christoffel array-difference constant is linear in a shared comparison
+radius when both primitive difference radii are multiples of that radius. -/
+theorem matrixInvChristoffelArrayDiffBoundConst_mul_radius {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] (δ : ℝ) (C : n → n → ℝ)
+    (DB : n → n → n → ℝ) (KD KM R : ℝ) :
+    matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB (KD * R) (KM * R) =
+      matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB KD KM * R := by
+  classical
+  simp_rw [matrixInvChristoffelArrayDiffBoundConst, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun a _ha => ?_
+  refine Finset.sum_congr rfl fun b _hb => ?_
+  refine Finset.sum_congr rfl fun c _hc => ?_
+  ring
+
 /-- The uniform inverse-Christoffel array-difference bound is monotone in the metric
 matrix-difference radius. -/
 theorem matrixInvChristoffelArrayDiffBoundConst_mono_right {n 𝕜 : Type*} [Fintype n]
@@ -10912,6 +10926,23 @@ theorem ricciDeTurckSchematicDiffBoundConst_nonneg {n 𝕜 : Type*} [Fintype n]
       (christoffelQuadraticRicciEntryLipschitzConst_nonneg hΓB i j)
       (matrixInvChristoffelArrayDiffBoundConst_nonneg (𝕜 := 𝕜) hδpos hDB hηD hηM))
 
+/-- The schematic Ricci-DeTurck matrix difference constant is linear in a shared comparison
+radius when the metric, first-derivative, and principal-coefficient difference radii are all
+multiples of that radius. -/
+theorem ricciDeTurckSchematicDiffBoundConst_mul_radius {n 𝕜 : Type*} [Fintype n]
+    [DecidableEq n] [NormedField 𝕜] (δ : ℝ) (C : n → n → ℝ)
+    (DB : n → n → n → ℝ) (HB : n → n → n → n → ℝ)
+    (KM KD : ℝ) (KH : n → n → ℝ) (R : ℝ) :
+    ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB
+        (KM * R) (KD * R) (fun i j => KH i j * R) =
+      ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH * R := by
+  classical
+  simp_rw [ricciDeTurckSchematicDiffBoundConst,
+    matrixInvChristoffelArrayDiffBoundConst_mul_radius, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun i _hi => ?_
+  refine Finset.sum_congr rfl fun j _hj => ?_
+  ring
+
 /-- Named version of the primitive schematic Ricci-DeTurck matrix Lipschitz estimate. -/
 theorem ricciDeTurckSchematicMatrix_norm_sub_le_const {n 𝕜 : Type*} [Fintype n]
     [DecidableEq n] [NormedField 𝕜] {δ : ℝ} {C : n → n → ℝ}
@@ -11009,6 +11040,52 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const {n 𝕜 : Type*} [Finty
     (mul_le_mul_of_nonneg_left harray_mono
       (christoffelQuadraticRicciEntryLipschitzConst_nonneg hΓB i j))
 
+/-- Function-level Lipschitz form of the finite schematic Ricci-DeTurck RHS estimate.  If the
+primitive metric, first-derivative, and principal-coefficient inputs differ by fixed constants
+times one shared radius, then the schematic RHS differs by one named constant times that radius. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius {n 𝕜 : Type*}
+    [Fintype n] [DecidableEq n] [NormedField 𝕜] {δ R KM KD : ℝ}
+    {KH : n → n → ℝ} {C : n → n → ℝ} {DB : n → n → n → ℝ}
+    {HB : n → n → n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {H K : ℝ × X → n → n → n → n → 𝕜}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hD : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖D z a b c‖ ≤ DB a b c)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hK : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j, ‖K z a b i j‖ ≤ HB a b i j)
+    (hKD : 0 ≤ KD) (hR : 0 ≤ R)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M z - N z‖ ≤ KM * R)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ KD * R)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+      ‖((fun a b => H z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => K z a b i j) : Matrix n n 𝕜)‖ ≤ KH i j * R)
+    (hδpos : 0 < δ)
+    (hdetM : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖)
+    (hdetN : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(N z).det‖) :
+    ParabolicBoundedWith
+      (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH * R)
+      (fun z : ℝ × X =>
+        ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+          ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s := by
+  have hbase :
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB
+          (KM * R) (KD * R) (fun i j => KH i j * R))
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (H z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (K z)) s :=
+    ricciDeTurckSchematicMatrix_bounded_sub_le_const
+      (s := s) (δ := δ) (C := C) (DB := DB) (HB := HB)
+      (ηM := KM * R) (ηD := KD * R) (ηH := fun i j => KH i j * R)
+      (M := M) (N := N) (D := D) (E := E) (H := H) (K := K)
+      hDB hHB hM hN hD hE hK (mul_nonneg hKD hR) hMdiff hDdiff hHdiff
+      hδpos hdetM hdetN
+  simpa [ricciDeTurckSchematicDiffBoundConst_mul_radius] using hbase
+
 /-- Compact-domain version of `ricciDeTurckSchematicMatrix_bounded_sub_le_const`: pointwise
 nonvanishing of both metric determinants supplies one common determinant lower bound. -/
 theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_isCompact_det_ne_zero
@@ -11050,6 +11127,51 @@ theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_of_isCompact_det_ne_zer
     (s := Kdom) (δ := δ) (C := C) (DB := DB) (HB := HB)
     (ηM := ηM) (ηD := ηD) (ηH := ηH)
     hDB hHB hM hN hD hE hKc hηD hMdiff hDdiff hHdiff hδpos hdetM hdetN
+
+/-- Compact-domain Lipschitz form of `ricciDeTurckSchematicMatrix_bounded_sub_le_const`: after
+selecting the common determinant lower bound, primitive differences controlled by constants times
+one radius give the schematic RHS difference with the same radius factored out. -/
+theorem ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_isCompact_det_ne_zero
+    {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {Kdom : Set (ℝ × X)} {C : n → n → ℝ} {DB : n → n → n → ℝ}
+    {HB : n → n → n → n → ℝ} {R KM KD : ℝ} {KH : n → n → ℝ}
+    {M N : ℝ × X → Matrix n n 𝕜}
+    {D E : ℝ × X → n → n → n → 𝕜}
+    {Hc Kc : ℝ × X → n → n → n → n → 𝕜}
+    (hKdom : IsCompact Kdom) (hα : 0 < α)
+    (hMctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => M z i j) Kdom)
+    (hNctrl : ∀ i j, ParabolicC0AlphaOn α (fun z => N z i j) Kdom)
+    (hdetM_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (M z).det ≠ 0)
+    (hdetN_ne : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → (N z).det ≠ 0)
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hM : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖M z a b‖ ≤ C a b)
+    (hN : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b, ‖N z a b‖ ≤ C a b)
+    (hD : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖D z a b c‖ ≤ DB a b c)
+    (hE : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c, ‖E z a b c‖ ≤ DB a b c)
+    (hKc : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b i j, ‖Kc z a b i j‖ ≤
+      HB a b i j)
+    (hKD : 0 ≤ KD) (hR : 0 ≤ R)
+    (hMdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ‖M z - N z‖ ≤ KM * R)
+    (hDdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ a b c,
+      ‖D z a b c - E z a b c‖ ≤ KD * R)
+    (hHdiff : ∀ ⦃z : ℝ × X⦄, z ∈ Kdom → ∀ i j,
+      ‖((fun a b => Hc z a b i j) : Matrix n n 𝕜) -
+        ((fun a b => Kc z a b i j) : Matrix n n 𝕜)‖ ≤ KH i j * R) :
+    ∃ δ > 0,
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH * R)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M z) (D z) (Hc z) -
+            ricciDeTurckSchematicMatrix (N z) (E z) (Kc z)) Kdom := by
+  rcases matrix_det_pair_exists_pos_norm_lower_bound_of_isCompact
+      (K := Kdom) (M := M) (N := N) hKdom hα hMctrl hNctrl hdetM_ne hdetN_ne with
+    ⟨δ, hδpos, hdetM, hdetN⟩
+  refine ⟨δ, hδpos, ?_⟩
+  exact ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius
+    (s := Kdom) (δ := δ) (C := C) (DB := DB) (HB := HB)
+    (R := R) (KM := KM) (KD := KD) (KH := KH)
+    (M := M) (N := N) (D := D) (E := E) (H := Hc) (K := Kc)
+    hDB hHB hM hN hD hE hKc hKD hR hMdiff hDdiff hHdiff hδpos hdetM hdetN
 
 /-- Local finite product-cylinder metric controls globalize the compact-domain
 function-level bounded-difference estimate for schematic Ricci-DeTurck RHS fields.  The
