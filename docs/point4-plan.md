@@ -1919,6 +1919,7 @@ Picard-Lindelof existence theorem with closed-common uniqueness. The same leaf
 module lifts this endpoint-closed restricted-estimate readout to the
 finite-cover positive-definite locus and the symmetric Riemannian metric-locus
 submodule, to the symmetric positive-definite defect-carrier routes, and to the
+finite-cover symmetric time-dependent vector-field route, as well as the
 continuous-Riemannian/geometric Ricci-DeTurck restricted Banach-chart bridge.
 The concrete restricted coordinatewise-defect and geometric Ricci-DeTurck chart
 records now expose `_closed` extractors with closed-common `Icc` uniqueness

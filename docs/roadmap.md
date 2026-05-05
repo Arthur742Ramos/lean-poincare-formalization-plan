@@ -1398,7 +1398,8 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      restricted-estimate Picard uniqueness close on the full common closed
      interval by within-interval continuity, including the finite-cover
      positive-definite locus, symmetric positive-definite defect-carrier, and
-     symmetric Riemannian metric-locus restricted bridges, plus the
+     symmetric time-dependent vector-field routes and the symmetric Riemannian
+     metric-locus restricted bridge, plus the
      continuous-Riemannian/geometric Ricci-DeTurck restricted Banach-chart
      bridge and concrete restricted chart-record `_closed` extractors.
      The
