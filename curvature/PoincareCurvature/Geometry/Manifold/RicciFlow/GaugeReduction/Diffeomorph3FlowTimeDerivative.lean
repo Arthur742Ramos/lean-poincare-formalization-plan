@@ -23900,6 +23900,17 @@ def CoordinatePullbackMetricOperatorDerivativeWithinOpenData
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet
 
+/-- Open-domain operator fixed-IVP data supplies the general within-domain
+operator data by deriving graph convergence from openness at each solution. -/
+theorem coordinatePullbackMetricOperatorDerivativeWithinData_of_operatorWithinOpen
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData) :
+    G.CoordinatePullbackMetricOperatorDerivativeWithinData := by
+  intro sol
+  exact (hoperator sol).toWithinOn
+
 /-- Coordinate-level fixed-IVP scalar data implies the named geometric scalar
 derivative data used by the gauge-pulled metric routes. -/
 theorem pullbackMetricInnerDerivativeData_of_coordinate
@@ -24094,19 +24105,9 @@ theorem pullbackMetricInnerDerivativeData_of_operatorWithinOpen
       ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
         sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
     (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData) :
-    G.PullbackMetricInnerDerivativeData := by
-  intro sol
-  let R : Diffeomorph3GaugeFlowOn (I := I) (M := M)
-      (intrinsicDeTurckGaugeField (I := I) (M := M)
-        sol.1.toIntrinsicDeTurckSolution.metric
-        sol.1.toIntrinsicDeTurckSolution.background)
-      sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime :=
-    { maps3 := G.maps3 sol
-      anchored := G.anchored sol
-      satisfies := G.satisfies sol }
-  exact (R.pullbackMetricInnerDerivativeWithinOn_of_coordinateOperatorWithinOpen
-    (I := I) (M := M) (hoperator sol)).toPullbackMetricInnerDerivativeOn
-      (htime sol)
+    G.PullbackMetricInnerDerivativeData :=
+  G.pullbackMetricInnerDerivativeData_of_operatorWithin htime
+    (G.coordinatePullbackMetricOperatorDerivativeWithinData_of_operatorWithinOpen hoperator)
 
 /-- Coordinate-model fixed-IVP data packages directly as the tensor time
 derivative for every gauge-pulled metric in the bundle, provided the solution
@@ -24257,9 +24258,8 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinO
       ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  SmoothSelfDiffeomorph3Family.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeOn
-    (I := I) (M := M)
-    ((G.pullbackMetricInnerDerivativeData_of_operatorWithinOpen htime hoperator) sol)
+  G.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData htime
+    (G.coordinatePullbackMetricOperatorDerivativeWithinData_of_operatorWithinOpen hoperator) sol
 
 /-- Coordinate-level fixed-IVP scalar data packages directly as the tensor time
 derivative for every gauge-pulled metric in the bundle. -/

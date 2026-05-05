@@ -437,7 +437,10 @@ routes. The named coordinate package layer now also has
 `CoordinatePullbackMetricOperatorDerivativeWithinOnOpen`, plus scalar, tensor,
 raw gauge-flow, and closed-Picard `Ioo` promotion wrappers, so the same
 operator-domain readouts can be stored as endpoint coordinate derivative data
-before selecting a final tensor route. Variational local-flow constructors now
+before selecting a final tensor route. The open-domain operator package now
+lowers to the explicit within-domain package by deriving product-graph
+convergence from openness, and the fixed-IVP derivative-data layer exposes the
+same conversion for bundled gauge-flow data. Variational local-flow constructors now
 fill those packages directly from the model base/tangent ODE derivatives,
 continuous product-Picard wrappers now enter the same named operator-coordinate
 routes, including readouts stated directly on the product state `(y,A)` through
