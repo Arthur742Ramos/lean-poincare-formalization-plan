@@ -1769,10 +1769,11 @@ including the operator/identity-ball specializations on common forward and
 backward intervals. The same forward restricted componentwise estimates now
 feed the lifted `C^3` local gluing patch: strict differentiability and
 invertibility are discharged from the closed-ball Picard data, while the
-remaining hypothesis is precisely local `ContDiffAt ℝ 3` regularity of the
-selected model time-slice. Operator-ball and identity-ball lifted forms expose
-the standard tangent-bound specializations. The lifted local-gluing layer now
-also exposes direct space-time-regularity entry points for both the basic patch
+fixed-time `C³` input can now be supplied either directly or by a full
+space-time `C³` hypothesis on the selected model flow. Operator-ball and
+identity-ball lifted forms expose the standard tangent-bound specializations.
+The lifted local-gluing layer and the product/forward localized Picard handoffs
+now expose direct space-time-regularity entry points for both the basic patch
 and overlap-equality patch, reducing the fixed-time `C³` input by slicing a full
 space-time `C³` model flow at the selected endpoint.
 The ODE package
