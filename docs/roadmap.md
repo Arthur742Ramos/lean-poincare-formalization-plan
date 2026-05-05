@@ -1050,7 +1050,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        overlap forms for backward time slices, as well. It now also exposes
        whole-closed-interval ordinary and strict differentiability bridges for
        product-Picard convex-state hypotheses, internalizing the forward/backward
-       time split for callers that work on `Icc tmin tmax`. The dynamic pullback layer now uses a
+       time split for callers that work on `Icc tmin tmax`, together with the
+       corresponding interior neighborhood-map and open-partial-homeomorphism
+       readouts. The dynamic pullback layer now uses a
       variational local flow to discharge the interior `y'(t)` and `A'(t)`
        clauses in `CoordinatePullbackMetricFieldDerivativeOn` and proves the
        exact scalar chain rule for `B(t, y(t))(A(t)u)(A(t)v)` along that flow, so

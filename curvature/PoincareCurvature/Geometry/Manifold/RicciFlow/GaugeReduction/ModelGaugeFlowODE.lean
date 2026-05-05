@@ -6796,6 +6796,100 @@ theorem ofProduct_flow_timeSlice_exists_ball_mapsTo_injOn_of_hasFDerivAt_on_init
         (y, t)) hφ hxφ hyφ
 
 /-- Product-Picard convex state-tube criterion for the inverse-function theorem
+readout of any interior time slice.  The convex-state hypotheses are stated
+once on the whole closed Picard interval; the strict derivative bridge handles
+the forward/backward split internally. -/
+theorem ofProduct_flow_timeSlice_map_nhds_eq_of_Df_lipschitzOnWith_on_convex_state_Ioo_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {Kop : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_op_bound : ∀ τ ∈ Ioo tmin tmax,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ Kop)
+    {K : ℝ} {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Icc tmin tmax, Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Icc tmin tmax,
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ state τ, ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax, LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    Filter.map
+        (fun y : V =>
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (y, t))
+        (𝓝 x) =
+      𝓝 ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (x, t)) := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  have hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t)) (α.tangent x t) x := by
+    simpa [α] using
+      ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_Icc_of_mem_ball
+        (β := β) hball hx (Ioo_subset_Icc_self ht)
+        hconv hmem hD_bound hDf_lip hder
+  have hD_op_bound' : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ Kop := by
+    intro τ hτ
+    simpa [α] using hD_op_bound τ hτ
+  simpa [α] using
+    α.flow_timeSlice_map_nhds_eq_of_hasStrictFDerivAt_Ioo
+      (K := Kop) (ball_subset_closedBall hx) ht hD_op_bound' hstrict
+
+/-- Product-Picard convex state-tube criterion for producing the local
+open-partial-homeomorphism associated to any interior time slice, with the
+state-tube hypotheses stated on the whole closed Picard interval. -/
+theorem exists_ofProduct_flow_timeSlice_openPartialHomeomorph_of_Df_lipschitzOnWith_on_convex_state_Ioo_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {Kop : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo tmin tmax)
+    (hD_op_bound : ∀ τ ∈ Ioo tmin tmax,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ Kop)
+    {K : ℝ} {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Icc tmin tmax, Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Icc tmin tmax,
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ state τ, ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax, LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    ∃ φ : OpenPartialHomeomorph V V,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) ∧
+        x ∈ φ.source ∧
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (x, t) ∈ φ.target := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  have hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t)) (α.tangent x t) x := by
+    simpa [α] using
+      ofProduct_flow_timeSlice_hasStrictFDerivAt_of_Df_lipschitzOnWith_on_convex_state_Icc_of_mem_ball
+        (β := β) hball hx (Ioo_subset_Icc_self ht)
+        hconv hmem hD_bound hDf_lip hder
+  have hD_op_bound' : ∀ τ ∈ Ioo tmin tmax, ‖Df τ (α.flow (x, τ))‖₊ ≤ Kop := by
+    intro τ hτ
+    simpa [α] using hD_op_bound τ hτ
+  simpa [α] using
+    α.exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
+      (K := Kop) (ball_subset_closedBall hx) ht hD_op_bound' hstrict
+
+/-- Product-Picard convex state-tube criterion for the inverse-function theorem
 readout of a forward time slice.  The convex-state hypotheses prove strict
 spatial differentiability, while the separate operator-norm bound along the base
 curve makes the variational tangent map invertible. -/
