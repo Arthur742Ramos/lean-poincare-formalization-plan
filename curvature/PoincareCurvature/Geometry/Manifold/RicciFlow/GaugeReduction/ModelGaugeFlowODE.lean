@@ -5,6 +5,7 @@ public import Mathlib.Analysis.ODE.PicardLindelof
 public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Analysis.Normed.Operator.Banach
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
 public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 
@@ -24,7 +25,7 @@ passing to charts.
 @[expose] public noncomputable section
 
 open Metric Set
-open scoped NNReal Topology
+open scoped NNReal Topology Manifold ContDiff
 
 namespace RicciFlow
 
@@ -6995,6 +6996,165 @@ theorem flow_timeSlice_exists_lifted_open_nhds_continuousOn_bijOn_inverseOn_subs
       hcont, hbij, hleft, hright⟩
   exact ⟨φ, Um, Wm, hφ, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
     hcont, hbij, hleft, hright⟩
+
+/-- A `C^3` model time-slice with an invertible derivative at the selected
+initial point yields the full lifted local gluing patch: forward and inverse
+maps, local inverse identities, and `C^3` regularity of both lifted manifold
+slices after shrinking inside prescribed source and target chart domains. -/
+theorem exists_open_nhds_local_gluing_data_subset_of_contDiffAt_model
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    (e₀ e₁ : OpenPartialHomeomorph M V) {G : V → V}
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    {A : V ≃L[ℝ] V}
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞) G (e₀ x))
+    (hGderiv : HasFDerivAt G (A : V →L[ℝ] V) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget : G (e₀ x) ∈ e₁.target)
+    (hxU₁ : e₁.symm (G (e₀ x)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) = G ∧
+        IsOpen Um ∧ x ∈ Um ∧ Um ⊆ U₀ ∧
+          IsOpen Wm ∧
+            (fun z : M ↦ e₁.symm (G (e₀ z))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+              MapsTo (fun z : M ↦ e₁.symm (G (e₀ z))) (Set.univ ∩ Um) Wm ∧
+                MapsTo (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) (Set.univ ∩ Wm) Um ∧
+                  BijOn (fun z : M ↦ e₁.symm (G (e₀ z))) Um Wm ∧
+                    ContMDiffOn (𝓘(ℝ, V)) (𝓘(ℝ, V)) 3
+                      (fun z : M ↦ e₁.symm (G (e₀ z))) Um ∧
+                      ContMDiffOn (𝓘(ℝ, V)) (𝓘(ℝ, V)) 3
+                        (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Wm ∧
+                        LeftInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                          (fun z : M ↦ e₁.symm (G (e₀ z))) Um ∧
+                          RightInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                            (fun z : M ↦ e₁.symm (G (e₀ z))) Wm := by
+  have hthree_ne_zero : (3 : WithTop ℕ∞) ≠ 0 := by norm_num
+  let φ : OpenPartialHomeomorph V V :=
+    hGdiff.toOpenPartialHomeomorph G hGderiv hthree_ne_zero
+  have hφ : (φ : V → V) = G := by
+    rfl
+  have hxsource : x ∈ e₀.source := hU₀source hxU₀
+  have hxφ : e₀ x ∈ φ.source := by
+    simpa [φ] using
+      (hGdiff.mem_toOpenPartialHomeomorph_source hGderiv hthree_ne_zero)
+  rcases hGdiff.contDiffOn (m := (3 : WithTop ℕ∞)) le_rfl (by simp) with
+    ⟨Sg₀, hSg₀nhds, hGdiffSg₀⟩
+  rcases _root_.mem_nhds_iff.mp hSg₀nhds with ⟨Sg, hSgsub, hSgopen, hxSg⟩
+  have hGdiffSg : ContDiffOn ℝ (3 : WithTop ℕ∞) G Sg :=
+    hGdiffSg₀.mono hSgsub
+  have hφsymmAt :
+      ContDiffAt ℝ (3 : WithTop ℕ∞) (fun y : V ↦ φ.symm y) (G (e₀ x)) := by
+    simpa [φ, ContDiffAt.localInverse, HasStrictFDerivAt.localInverse] using
+      (hGdiff.to_localInverse hGderiv hthree_ne_zero)
+  rcases hφsymmAt.contDiffOn (m := (3 : WithTop ℕ∞)) le_rfl (by simp) with
+    ⟨Tg₀, hTg₀nhds, hφsymmTg₀⟩
+  rcases _root_.mem_nhds_iff.mp hTg₀nhds with ⟨Tg, hTgsub, hTgopen, hxTg⟩
+  have hφsymmTg : ContDiffOn ℝ (3 : WithTop ℕ∞) (fun y : V ↦ φ.symm y) Tg :=
+    hφsymmTg₀.mono hTgsub
+  let S : Set V := e₀ '' U₀ ∩ Sg
+  let T : Set V := e₁ '' U₁ ∩ Tg
+  have hSopen : IsOpen S :=
+    (e₀.isOpen_image_of_subset_source hU₀open hU₀source).inter hSgopen
+  have hS : S ⊆ e₀.target := by
+    rintro y ⟨hy, _⟩
+    rcases hy with ⟨z, hzU₀, rfl⟩
+    exact e₀.map_source (hU₀source hzU₀)
+  have hxS : e₀ x ∈ S := ⟨⟨x, hxU₀, rfl⟩, hxSg⟩
+  have hTopen : IsOpen T :=
+    (e₁.isOpen_image_of_subset_source hU₁open hU₁source).inter hTgopen
+  have hT : T ⊆ e₁.target := by
+    rintro y ⟨hy, _⟩
+    rcases hy with ⟨z, hzU₁, rfl⟩
+    exact e₁.map_source (hU₁source hzU₁)
+  have hxT : G (e₀ x) ∈ T := by
+    exact ⟨⟨e₁.symm (G (e₀ x)), hxU₁, e₁.right_inv htarget⟩, hxTg⟩
+  have hGmdiff :
+      ContMDiffOn (𝓘(ℝ, V)) (𝓘(ℝ, V)) (3 : WithTop ℕ∞) G S :=
+    (hGdiffSg.mono (fun _ hy ↦ hy.2)).contMDiffOn
+  have hφsymmMdiff :
+      ContMDiffOn (𝓘(ℝ, V)) (𝓘(ℝ, V)) (3 : WithTop ℕ∞)
+        (fun y : V ↦ φ.symm y) T :=
+    (hφsymmTg.mono (fun _ hy ↦ hy.2)).contMDiffOn
+  have hS_lift : e₀.symm '' S ⊆ U₀ := by
+    rintro _ ⟨y, hyS, rfl⟩
+    rcases hyS.1 with ⟨z, hzU₀, rfl⟩
+    simpa [e₀.left_inv (hU₀source hzU₀)] using hzU₀
+  have hT_lift : e₁.symm '' T ⊆ U₁ := by
+    rintro _ ⟨y, hyT, rfl⟩
+    rcases hyT.1 with ⟨z, hzU₁, rfl⟩
+    simpa [e₁.left_inv (hU₁source hzU₁)] using hzU₁
+  rcases RicciFlow.exists_open_nhds_local_gluing_data_subset_of_lifted_openPartialHomeomorph_model
+      (I := 𝓘(ℝ, V)) e₀ e₁ hφ he₀ he₁ hxsource hxφ
+      hSopen hS hxS hTopen hT hxT hGmdiff hφsymmMdiff hS_lift hT_lift with
+    ⟨Um, Wm, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁, hFmaps,
+      hGmaps, hbij, hFsmooth, hGsmooth, hleft, hright⟩
+  exact ⟨φ, Um, Wm, hφ, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+    hFmaps, hGmaps, hbij, hFsmooth, hGsmooth, hleft, hright⟩
+
+/-- Common-subinterval version of
+`exists_open_nhds_local_gluing_data_subset_of_contDiffAt_model` for a
+variational model flow.  The variational tangent equation supplies the
+invertible derivative; the remaining smoothness input is local `C^3`
+regularity of the model time-slice at the selected initial coordinate. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasStrictFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x))
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V ↦ α.flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm (α.flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) = (fun y : V ↦ α.flow (y, t)) ∧
+        IsOpen Um ∧ x ∈ Um ∧ Um ⊆ U₀ ∧
+          IsOpen Wm ∧
+            (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+              MapsTo (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) (Set.univ ∩ Um) Wm ∧
+                MapsTo (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) (Set.univ ∩ Wm) Um ∧
+                  BijOn (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) Um Wm ∧
+                    ContMDiffOn (𝓘(ℝ, V)) (𝓘(ℝ, V)) 3
+                      (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) Um ∧
+                      ContMDiffOn (𝓘(ℝ, V)) (𝓘(ℝ, V)) 3
+                        (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Wm ∧
+                        LeftInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                          (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) Um ∧
+                          RightInvOn (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+                            (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) Wm := by
+  let A : V ≃L[ℝ] V :=
+    α.tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem
+      htime htbase (ball_subset_closedBall hx) ht hD_bound
+  have hderiv : HasFDerivAt (fun y : V ↦ α.flow (y, t)) (A : V →L[ℝ] V) (e₀ x) := by
+    have hstrict' : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
+        (A : V →L[ℝ] V) (e₀ x) := by
+      simpa [A] using hstrict
+    exact hstrict'.hasFDerivAt
+  exact exists_open_nhds_local_gluing_data_subset_of_contDiffAt_model
+    (M := M) e₀ e₁ he₀ he₁ hU₀open hU₀source hxU₀ hGdiff hderiv
+    hU₁open hU₁source htarget hxU₁
 
 /-- Common-subinterval constrained chart lift with overlap equality against a
 second chart-lifted model map.  The target constraint `U₁ ⊆ c.source` makes the
