@@ -120,7 +120,10 @@ Lipschitz data for `0 ≤ α ≤ 2`, with closed-ball and closed-cylinder subset
 variants. The parabolic matrix/local-frame Gram stack now also has compact
 point-local product-cylinder bounded-difference metric-control bridges for the
 primitive schematic Ricci-DeTurck RHS, including finite-family forms with one
-shared determinant lower bound. The section-space
+shared determinant lower bound, and finite-cover, compact point-local, and
+existential-radius quantitative `sub_with` bridges carrying the patched
+finite-cover Holder constants through single-frame and finite-family
+local-frame Gram inputs. The section-space
 side has also been strengthened: continuity can now be checked in local-frame
 coordinates, compact trivialization coordinates can be packaged as
 `ContinuousMap`s, compact overlap identities are proved as coordinate-change
