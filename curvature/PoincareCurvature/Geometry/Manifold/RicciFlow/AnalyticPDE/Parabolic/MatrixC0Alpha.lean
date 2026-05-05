@@ -11289,6 +11289,67 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le
       (hMdiff hu hv) (hDdiff hu hv) (hHdiff hu hv) hδpos (hdet hu) (hdet hv)
   simpa [dist_eq_norm] using hbounded hz
 
+/-- State-space Lipschitz bridge for the finite schematic Ricci-DeTurck RHS with coarser
+primitive Lipschitz constants.  The primitive estimates may be proved with sharper constants
+`KM0`, `KD0`, and `KH0`, while the resulting coordinate Lipschitz constant is formed from larger
+shared constants `KM`, `KD`, and `KH`. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le_of_le
+    {Y n 𝕜 : Type*} [PseudoMetricSpace Y] [Fintype n] [DecidableEq n] [NormedField 𝕜]
+    {δ KM0 KD0 KM KD : ℝ} {KH0 KH : n → n → ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {M : Y → ℝ × X → Matrix n n 𝕜}
+    {D : Y → ℝ × X → n → n → n → 𝕜}
+    {H : Y → ℝ × X → n → n → n → n → 𝕜}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM_nonneg : 0 ≤ KM) (hKD_nonneg : 0 ≤ KD) (hKH_nonneg : ∀ i j, 0 ≤ KH i j)
+    (hKM : KM0 ≤ KM) (hKD : KD0 ≤ KD) (hKH : ∀ i j, KH0 i j ≤ KH i j)
+    (hKD0 : 0 ≤ KD0)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b,
+      ‖M u z a b‖ ≤ C a b)
+    (hD : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D u z a b c‖ ≤ DB a b c)
+    (hH : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j,
+      ‖H u z a b i j‖ ≤ HB a b i j)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M u z - M v z‖ ≤ KM0 * dist u v)
+    (hDdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+        ‖D u z a b c - D v z a b c‖ ≤ KD0 * dist u v)
+    (hHdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+        ‖((fun a b => H u z a b i j) : Matrix n n 𝕜) -
+          ((fun a b => H v z a b i j) : Matrix n n 𝕜)‖ ≤ KH0 i j * dist u v)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖) :
+    ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      LipschitzOnWith
+        ⟨ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH,
+          ricciDeTurckSchematicDiffBoundConst_nonneg
+            (𝕜 := 𝕜) hδpos hDB hHB hKM_nonneg hKD_nonneg hKH_nonneg⟩
+        (fun u : Y => ricciDeTurckSchematicMatrix (M u z) (D u z) (H u z))
+        stateSet := by
+  intro z hz
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hbounded :
+      ParabolicBoundedWith
+        (ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH *
+          dist u v)
+        (fun z : ℝ × X =>
+          ricciDeTurckSchematicMatrix (M u z) (D u z) (H u z) -
+            ricciDeTurckSchematicMatrix (M v z) (D v z) (H v z)) s := by
+    exact ricciDeTurckSchematicMatrix_bounded_sub_le_const_mul_radius_of_primitive_le
+      (s := s) (δ := δ) (C := C) (DB := DB) (HB := HB)
+      (R := dist u v) (KM0 := KM0) (KD0 := KD0) (KH0 := KH0)
+      (KM := KM) (KD := KD) (KH := KH)
+      (M := M u) (N := M v) (D := D u) (E := D v) (H := H u) (K := H v)
+      hDB hHB hKM hKD hKH (hM hu) (hM hv) (hD hu) (hD hv) (hH hv)
+      hKD0 dist_nonneg (hMdiff hu hv) (hDdiff hu hv) (hHdiff hu hv)
+      hδpos (hdet hu) (hdet hv)
+  simpa [dist_eq_norm] using hbounded hz
+
 /-- Finite-family version of
 `ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le`: one uniform determinant lower
 bound works for every state and every family member, and each family member gets its own primitive
@@ -11340,6 +11401,66 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_family_of_primitive_dist_le
     (KM := KM r) (KD := KD r) (KH := KH r)
     (stateSet := stateSet) (M := M r) (D := D r) (H := H r)
     (hDB r) (hHB r) (hKM r) (hKD r) (hKH r)
+    (hM r) (hD r) (hH r) (hMdiff r) (hDdiff r) (hHdiff r) hδpos (hdet r)
+    hz
+
+/-- Finite-family version of
+`ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le_of_le`: each family member may
+prove primitive Lipschitz estimates with sharper local constants, while the exported coordinate
+Lipschitz constant uses larger shared constants for that member. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_family_of_primitive_dist_le_of_le
+    {κ Y n 𝕜 : Type*} [Fintype κ] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    [NormedField 𝕜] {δ : ℝ}
+    {KM0 KD0 KM KD : κ → ℝ} {KH0 KH : κ → n → n → ℝ}
+    {C : κ → n → n → ℝ} {DB : κ → n → n → n → ℝ}
+    {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {M : κ → Y → ℝ × X → Matrix n n 𝕜}
+    {D : κ → Y → ℝ × X → n → n → n → 𝕜}
+    {H : κ → Y → ℝ × X → n → n → n → n → 𝕜}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM_nonneg : ∀ r, 0 ≤ KM r) (hKD_nonneg : ∀ r, 0 ≤ KD r)
+    (hKH_nonneg : ∀ r i j, 0 ≤ KH r i j)
+    (hKM : ∀ r, KM0 r ≤ KM r) (hKD : ∀ r, KD0 r ≤ KD r)
+    (hKH : ∀ r i j, KH0 r i j ≤ KH r i j)
+    (hKD0 : ∀ r, 0 ≤ KD0 r)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b,
+      ‖M r u z a b‖ ≤ C r a b)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+      ‖D r u z a b c‖ ≤ DB r a b c)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b i j,
+      ‖H r u z a b i j‖ ≤ HB r a b i j)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ‖M r u z - M r v z‖ ≤ KM0 r * dist u v)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ a b c,
+        ‖D r u z a b c - D r v z a b c‖ ≤ KD0 r * dist u v)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ ⦃z : ℝ × X⦄, z ∈ s → ∀ i j,
+        ‖((fun a b => H r u z a b i j) : Matrix n n 𝕜) -
+          ((fun a b => H r v z a b i j) : Matrix n n 𝕜)‖ ≤
+            KH0 r i j * dist u v)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖) :
+    ∀ r ⦃z : ℝ × X⦄, z ∈ s →
+      LipschitzOnWith
+        ⟨ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := 𝕜) δ (C r) (DB r) (HB r) (KM r) (KD r) (KH r),
+          ricciDeTurckSchematicDiffBoundConst_nonneg
+            (𝕜 := 𝕜) hδpos (hDB r) (hHB r)
+            (hKM_nonneg r) (hKD_nonneg r) (hKH_nonneg r)⟩
+        (fun u : Y => ricciDeTurckSchematicMatrix (M r u z) (D r u z) (H r u z))
+        stateSet := by
+  intro r z hz
+  exact ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le_of_le
+    (s := s) (δ := δ) (C := C r) (DB := DB r) (HB := HB r)
+    (KM0 := KM0 r) (KD0 := KD0 r) (KH0 := KH0 r)
+    (KM := KM r) (KD := KD r) (KH := KH r)
+    (stateSet := stateSet) (M := M r) (D := D r) (H := H r)
+    (hDB r) (hHB r) (hKM_nonneg r) (hKD_nonneg r) (hKH_nonneg r)
+    (hKM r) (hKD r) (hKH r) (hKD0 r)
     (hM r) (hD r) (hH r) (hMdiff r) (hDdiff r) (hHdiff r) hδpos (hdet r)
     hz
 
