@@ -1400,7 +1400,7 @@ hypothesis). That regularity gap is now closed as well: the package proves the
      positive-definite locus, symmetric positive-definite defect-carrier, and
      symmetric Riemannian metric-locus restricted bridges, plus the
      continuous-Riemannian/geometric Ricci-DeTurck restricted Banach-chart
-     bridge.
+     bridge and concrete restricted chart-record `_closed` extractors.
      The
      density-based interval restricted symmetric carrier is now proved equal to
      the chart's built-in restricted carrier on the Picard interval and the
