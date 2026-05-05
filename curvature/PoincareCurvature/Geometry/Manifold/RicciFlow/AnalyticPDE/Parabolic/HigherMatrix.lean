@@ -615,6 +615,75 @@ theorem ricciDeTurckSchematicMatrix_compactCoord_dist_le_of_higher_primitive_nor
       (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
       Kdom hKdom hα hLip)
 
+/-- Finite-family pointwise compact-coordinate distance estimates for schematic Ricci-DeTurck RHS
+readouts from higher primitive controls with coarser exported constants. -/
+theorem ricciDeTurckSchematicMatrix_compactCoord_dist_le_family_of_higher_primitive_normLe_of_le
+    {κ ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {δ : ℝ} {KM KD : κ → ℝ} {KH : κ → n → n → ℝ}
+    {KM0 : κ → n → n → ℝ} {KD0 : κ → n → n → n → ℝ}
+    {KH0 : κ → n → n → n → n → ℝ} {C : κ → n → n → ℝ}
+    {DB : κ → n → n → n → ℝ} {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : κ → Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    {D : κ → Y → ℝ × X → n → n → n → ℝ}
+    {H : κ → Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM0_nonneg : ∀ r a b, 0 ≤ KM0 r a b)
+    (hKD0_nonneg : ∀ r a b c, 0 ≤ KD0 r a b c)
+    (hKH0_nonneg : ∀ r a b i j, 0 ≤ KH0 r a b i j)
+    (hKM_nonneg : ∀ r, 0 ≤ KM r) (hKD_nonneg : ∀ r, 0 ≤ KD r)
+    (hKH_nonneg : ∀ r i j, 0 ≤ KH r i j)
+    (hKM_le : ∀ r, (∑ a, ∑ b, KM0 r a b) ≤ KM r)
+    (hKD_le : ∀ r, (∑ a, ∑ b, ∑ c, KD0 r a b c) ≤ KD r)
+    (hKH_le : ∀ r i j, (∑ a, ∑ b, KH0 r a b i j) ≤ KH r i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C r a b) α (fun z => M r u z a b) s)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB r a b c) α (fun z => D r u z a b c) s)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB r a b i j) α (fun z => H r u z a b i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM0 r a b * dist u v) α
+        (fun z => M r u z a b - M r v z a b) s)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD0 r a b c * dist u v) α
+        (fun z => D r u z a b c - D r v z a b c) s)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH0 r a b i j * dist u v) α
+        (fun z => H r u z a b i j - H r v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A r u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r u z) (D r u z) (H r u z)) :
+    ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i (z : Kdom i),
+      dist
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A r u) i z)
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A r v) i z)
+        ≤ ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r) (KM r) (KD r) (KH r) * dist u v := by
+  intro r
+  exact ricciDeTurckSchematicMatrix_compactCoord_dist_le_of_higher_primitive_normLe_of_le
+    (X := X) (α := α) (s := s) Kdom hKdom hα
+    (KM0 := KM0 r) (KD0 := KD0 r) (KH0 := KH0 r)
+    (KM := KM r) (KD := KD r) (KH := KH r)
+    (C := C r) (DB := DB r) (HB := HB r)
+    (stateSet := stateSet) (A := A r) (M := M r) (D := D r) (H := H r)
+    (hDB r) (hHB r) (hKM0_nonneg r) (hKD0_nonneg r) (hKH0_nonneg r)
+    (hKM_nonneg r) (hKD_nonneg r) (hKH_nonneg r)
+    (hKM_le r) (hKD_le r) (hKH_le r)
+    (hM r) (hD r) (hH r) (hMdiff r) (hDdiff r) (hHdiff r)
+    hδpos (hdet r) (hAeq r)
+
 /-- Higher parabolic entry controls supply the primitive entrywise hypotheses for the
 single-radius schematic Ricci-DeTurck RHS difference estimate. -/
 theorem ricciDeTurckSchematicMatrix_sub_entrywise_of_entries {n : Type*}
