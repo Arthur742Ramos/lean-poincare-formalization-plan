@@ -728,8 +728,9 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        closed-Picard source-persistence hypothesis supplies the relative-filter
        equality needed by the raw local-cover endpoint. A pointwise
        source-persistence variant handles the global-field route without
-       requiring uniform inclusion of the whole base-time patch, while the
-       finite-cover local-readout variant derives the uniform
+       requiring uniform inclusion of the whole base-time patch. The fixed-IVP
+       intrinsic existence package now consumes that pointwise compatible-cover
+       route directly, while the finite-cover local-readout variant derives the uniform
        field-identification handoff from per-index data. The fixed-IVP
        intrinsic DeTurck existence layer mirrors that proof-level shape for its
        derivative-data and identity constructors, and the theorem-family layer

@@ -226,7 +226,9 @@ packages the canonical stationary local solution attached to
     packages mirror those readouts. It also constructs canonical glued
     forward/backward slices for time-dependent compatible open covers from a
     source-persistence hypothesis, including a pointwise persistence form for
-    the global-field route and a finite-cover local-readout variant that
+    the global-field route.  The fixed-IVP intrinsic existence package now
+    consumes that pointwise-persistence compatible-cover route directly, while
+    a finite-cover local-readout variant
     promotes per-patch relative-filter equality to the uniform field
     identification needed by the raw gauge-flow endpoint. A thin
     `AnalyticPDE.SmoothRealization`

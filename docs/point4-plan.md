@@ -1552,7 +1552,12 @@ equality with the base-time patch.  The global-field route also has the
 pointwise-source variant
 `Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
 so continuity and chart-derivative gluing can use per-base-point persistence
-instead of uniform inclusion of the whole selected patch.  Its finite-cover
+instead of uniform inclusion of the whole selected patch.  The fixed-IVP
+intrinsic package now exposes the same pointwise-source compatible-cover route
+through
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_vectorField_eq_nhdsWithin`
+and proof-level `nonempty_...`, so per-solution glued-cover data feeds the
+intrinsic witness without separately unpacking raw-flow hypotheses.  Its finite-cover
 local-readout companion
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality
