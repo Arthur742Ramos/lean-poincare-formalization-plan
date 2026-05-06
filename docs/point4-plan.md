@@ -2283,11 +2283,14 @@ neighborhood `EqOn` statement for a time slice into the required
 `𝓝[range I]` model-coordinate eventual equality, and
 `pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventually_eqOn_variationalFlow_hasFDerivWithinAt_fixedChart`
 packages that conversion with the variational model-flow spatial derivative.
-Thus the remaining dynamic obligations are narrowed to proving the needed local
-`EqOn` data for the selected gauge maps from the gluing/Picard construction,
-supplying the corresponding model-flow spatial derivative hypotheses from the
-Picard/variational estimates, and proving the scalar velocity identity from the
-selected gauge-flow/PDE construction. The
+The quantified component-level route is also available as
+`pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel_eqOn`,
+so downstream scalar selectors can now consume manifold-side `EqOn` gluing data
+directly. Thus the remaining dynamic obligations are narrowed to proving the
+needed local `EqOn` data for the selected gauge maps from the gluing/Picard
+construction, supplying the corresponding model-flow spatial derivative
+hypotheses from the Picard/variational estimates, and proving the scalar
+velocity identity from the selected gauge-flow/PDE construction. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational

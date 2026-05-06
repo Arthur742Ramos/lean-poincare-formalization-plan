@@ -6063,6 +6063,43 @@ theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMa
     pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_variationalFlow_hasFDerivWithinAt_fixedChart
       (I := I) (M := M) Φ α t x xE hmodel
 
+/-- Local manifold `EqOn` gluing data with the selected variational model flow,
+plus spatial derivatives of that model flow, supplies the tangent-map derivative
+data needed by component-level gauge-pullback APIs. -/
+theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel_eqOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0} {s : Set ℝ}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hsIoo : s ⊆ Ioo tmin tmax)
+    (hA_model : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∀ᶠ τ in 𝓝 t,
+          (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+            (∃ U : Set M,
+              U ∈ 𝓝 x ∧
+                EqOn
+                  (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+                  (fun z : M ↦ α.flow ((extChartAt I x) z, τ)) U) ∧
+            HasFDerivWithinAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) (range I) ((extChartAt I x) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ D : E →L[ℝ] E,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t := by
+  refine pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap
+    (I := I) (M := M) (Φ := Φ) α hsIoo ?_
+  intro t ht x
+  obtain ⟨xE, hxE, hmodel⟩ := hA_model ht x
+  refine ⟨xE, hxE, ?_⟩
+  exact
+    pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventually_eqOn_variationalFlow_hasFDerivWithinAt_fixedChart
+      (I := I) (M := M) Φ α t x xE hmodel
+
 /-- Closed-interval/right-derivative version of
 `pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`.
 
