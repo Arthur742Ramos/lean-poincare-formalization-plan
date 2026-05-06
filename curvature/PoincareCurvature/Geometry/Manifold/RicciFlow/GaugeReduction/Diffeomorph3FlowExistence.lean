@@ -1404,6 +1404,33 @@ theorem restrict_target_preimage {n : WithTop ℕ∞} {F G : M → M}
       intro y hy
       exact hy.2)
 
+/-- Restrict a local gluing patch so both moving patches are fixed preimages:
+the source is `F ⁻¹' W` and the target is `G ⁻¹' Z`.  The compatibility
+assumptions say these preimages lie inside the opposite fixed patches, so the
+local inverse identities prove the restricted maps land in the new patches. -/
+theorem restrict_preimages {n : WithTop ℕ∞} {F G : M → M}
+    {U V W Z : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V)
+    (hWopen : IsOpen W) (hZopen : IsOpen Z)
+    (hWsub : W ⊆ V) (hZsub : Z ⊆ U)
+    (hFpreOpen : IsOpen (F ⁻¹' W)) (hGpreOpen : IsOpen (G ⁻¹' Z))
+    (hFpreSubZ : F ⁻¹' W ⊆ Z) (hGpreSubW : G ⁻¹' Z ⊆ W) :
+    LocalGluingData (I := I) (M := M) n F G (F ⁻¹' W) (G ⁻¹' Z) := by
+  have hFpreSubU : F ⁻¹' W ⊆ U := fun x hx ↦ hZsub (hFpreSubZ hx)
+  have hGpreSubV : G ⁻¹' Z ⊆ V := fun y hy ↦ hWsub (hGpreSubW hy)
+  exact
+    h.mono hFpreOpen hGpreOpen hFpreSubU hGpreSubV
+      (by
+        intro x hx
+        show G (F x) ∈ Z
+        simpa [h.left_invOn ⟨Set.mem_univ x, hFpreSubU hx.2⟩] using
+          hFpreSubZ hx.2)
+      (by
+        intro y hy
+        show F (G y) ∈ W
+        simpa [h.right_invOn ⟨Set.mem_univ y, hGpreSubV hy.2⟩] using
+          hGpreSubW hy.2)
+
 /-- If source patches cover at a base time and the local forward readouts are
 anchored there, the target patches cover at the same time. -/
 theorem target_cover_at_of_source_cover_anchor
