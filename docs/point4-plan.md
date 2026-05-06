@@ -2232,10 +2232,17 @@ and
 `metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_mem_interior_target_K_Ico`
 build the selected compact curve from ordinary or relative eventual membership,
 with interior membership making the eventual-membership witnesses automatic.
-The remaining non-identity gauge work is therefore the end-to-end construction
-and packaging of compact overlap pieces `K` with `K ⊆ Kc i`, `K` inside the
-target trivialization domain, and the gauge point in `interior K`, alongside the
-full local-existence integration and PDE estimates.
+The compact-overlap selection step is now packaged one level higher:
+`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_mem_interior_Kc_target_overlap_Ioo`
+and
+`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_mem_interior_Kc_target_overlap_Ico`
+use local compactness of the finite-dimensional manifold to choose such a
+compact `K` whenever the gauge point is already in `interior (Kc i)`. Thus the
+target-domain overlap no longer has to be supplied by callers. The remaining
+non-identity gauge work is to provide finite-cover data or local refinements
+whose compact pieces have interiors covering the gauge image points, and then
+integrate these scalar route theorems with the full local-existence and PDE
+estimate layers.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts

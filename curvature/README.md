@@ -1015,10 +1015,13 @@ now packages the matching intrinsic boundary
        and right-sided wrappers now build the selected compact curve from
        ordinary or relative eventual membership in that overlap piece, and
        interior-membership variants make those eventual-membership witnesses
-       automatic. The remaining non-identity gauge task is to construct and
-       package compact overlap pieces inside a finite-cover member and the
-       target trivialization domain, with the gauge point in the overlap
-       interior, alongside the full Ricci-DeTurck Banach chart/PDE estimates.
+       automatic. The route now also has wrappers that select the compact
+       overlap piece internally from local compactness whenever the gauge point
+       lies in `interior (Kc i)`, so callers no longer supply the target-domain
+       compact by hand. The remaining non-identity gauge task is to supply
+       finite-cover data or local refinements with interior coverage of the
+       gauge image points, alongside the full Ricci-DeTurck Banach chart/PDE
+       estimates.
        Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
