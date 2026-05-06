@@ -1799,7 +1799,10 @@ has corresponding
 single chartwise ODE time-slice can be selected as a named local gluing package;
 the corresponding `..._localGluingData_subset_eqOn_...` adapters retain the
 shrunk source overlap equality against another chart readout for forward
-compatibility.  The remaining lift must still supply the chart-domain
+compatibility.  The common-subinterval variants now have the same
+`LocalGluingData` and overlap-equality packages, so compact subinterval
+selection no longer has to unpack the long inverse-function tuple before
+feeding finite-cover gluing.  The remaining lift must still supply the chart-domain
 shrinking/source-membership hypotheses and combine these local patches with
 manifold-level flow compatibility before producing `C³` diffeomorphism slices.
 On the final bundling side, `SmoothSelfDiffeomorph3.ofInverse` now packages

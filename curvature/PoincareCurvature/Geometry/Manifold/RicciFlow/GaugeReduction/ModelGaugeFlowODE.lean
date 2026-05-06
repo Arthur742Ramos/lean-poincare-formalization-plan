@@ -8611,6 +8611,98 @@ theorem flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_I
       hstrict (α.flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime hGdiff_spaceTime)
       hU₁open hU₁source htarget hxU₁
 
+/-- Common-subinterval lifted `LocalGluingData` for a variational model flow. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasStrictFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x))
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V ↦ α.flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm (α.flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) = (fun y : V ↦ α.flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm (α.flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  rcases α.flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasStrictFDerivAt
+      e₀ e₁ he₀ he₁ htime htbase hU₀open hU₀source hxU₀ hx ht hD_bound
+      hstrict hGdiff hU₁open hU₁source htarget hxU₁ with
+    ⟨φ, Um, Wm, hφ, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+      hFmaps, hGmaps, _hbij, hFsmooth, hGsmooth, hleft, hright⟩
+  refine ⟨φ, Um, Wm, hφ, hxUm, hUmU₀, hFxWm, hWmU₁, ?_⟩
+  exact
+    { source_open := hUmopen
+      target_open := hWmopen
+      forward_mapsTo := hFmaps
+      backward_mapsTo := hGmaps
+      forward_contMDiffOn := hFsmooth
+      backward_contMDiffOn := hGsmooth
+      left_invOn := by
+        intro z hz
+        exact hleft hz.2
+      right_invOn := by
+        intro z hz
+        exact hright hz.2 }
+
+/-- Common-subinterval lifted `LocalGluingData` from space-time regularity of
+the variational model flow. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasStrictFDerivAt_of_contDiffAt_spaceTime
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x))
+    (hGdiff_spaceTime : ContDiffAt ℝ (3 : WithTop ℕ∞) α.flow (e₀ x, t))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm (α.flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) = (fun y : V ↦ α.flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm (α.flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  exact
+    α.flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasStrictFDerivAt
+      e₀ e₁ he₀ he₁ htime htbase hU₀open hU₀source hxU₀ hx ht hD_bound
+      hstrict (α.flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime hGdiff_spaceTime)
+      hU₁open hU₁source htarget hxU₁
+
 /-- Common-subinterval lifted local gluing data with overlap equality against a
 second chart-lifted model map.  The produced source patch inherits the
 coordinate overlap equality, while retaining the full `C^3` forward/backward
@@ -8743,6 +8835,117 @@ theorem flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_com
                               (fun z : M ↦ f₁.symm (G₁ (f₀ z))) Um := by
   exact
     α.flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasStrictFDerivAt
+      e₀ e₁ f₀ f₁ c he₀ he₁ G₁ htime htbase hU₀open hU₀source hxU₀
+      hx ht hD_bound hstrict
+      (α.flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime hGdiff_spaceTime)
+      hU₁open hU₁source hU₁common htarget hxU₁ hother_common hcoord
+
+/-- Common-subinterval lifted `LocalGluingData` with overlap equality against a
+second chart-lifted model map. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasStrictFDerivAt
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ f₀ f₁ c : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (G₁ : V → V)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x))
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V ↦ α.flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (hU₁common : U₁ ⊆ c.source)
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm (α.flow (e₀ x, t)) ∈ U₁)
+    (hother_common : MapsTo (fun z : M ↦ f₁.symm (G₁ (f₀ z))) U₀ c.source)
+    (hcoord : EqOn
+      (fun z : M ↦ c (e₁.symm (α.flow (e₀ z, t))))
+      (fun z : M ↦ c (f₁.symm (G₁ (f₀ z)))) U₀) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) = (fun y : V ↦ α.flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm (α.flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm ∧
+              EqOn (fun z : M ↦ e₁.symm (α.flow (e₀ z, t)))
+                (fun z : M ↦ f₁.symm (G₁ (f₀ z))) Um := by
+  rcases α.flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasStrictFDerivAt
+      e₀ e₁ f₀ f₁ c he₀ he₁ G₁ htime htbase hU₀open hU₀source hxU₀
+      hx ht hD_bound hstrict hGdiff hU₁open hU₁source hU₁common htarget hxU₁
+      hother_common hcoord with
+    ⟨φ, Um, Wm, hφ, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+      hFmaps, hGmaps, _hbij, hFsmooth, hGsmooth, hleft, hright, heq⟩
+  refine ⟨φ, Um, Wm, hφ, hxUm, hUmU₀, hFxWm, hWmU₁, ?_, heq⟩
+  exact
+    { source_open := hUmopen
+      target_open := hWmopen
+      forward_mapsTo := hFmaps
+      backward_mapsTo := hGmaps
+      forward_contMDiffOn := hFsmooth
+      backward_contMDiffOn := hGsmooth
+      left_invOn := by
+        intro z hz
+        exact hleft hz.2
+      right_invOn := by
+        intro z hz
+        exact hright hz.2 }
+
+/-- Common-subinterval lifted `LocalGluingData` with overlap equality from
+space-time regularity of the variational model flow. -/
+theorem flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasStrictFDerivAt_of_contDiffAt_spaceTime
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    (α : VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (e₀ e₁ f₀ f₁ c : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (G₁ : V → V)
+    {a b : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b)
+    {K : ℝ≥0} {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {t : ℝ} (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K)
+    (hstrict : HasStrictFDerivAt (fun y : V => α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x))
+    (hGdiff_spaceTime : ContDiffAt ℝ (3 : WithTop ℕ∞) α.flow (e₀ x, t))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (hU₁common : U₁ ⊆ c.source)
+    (htarget : α.flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm (α.flow (e₀ x, t)) ∈ U₁)
+    (hother_common : MapsTo (fun z : M ↦ f₁.symm (G₁ (f₀ z))) U₀ c.source)
+    (hcoord : EqOn
+      (fun z : M ↦ c (e₁.symm (α.flow (e₀ z, t))))
+      (fun z : M ↦ c (f₁.symm (G₁ (f₀ z)))) U₀) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) = (fun y : V ↦ α.flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm (α.flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm (α.flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm ∧
+              EqOn (fun z : M ↦ e₁.symm (α.flow (e₀ z, t)))
+                (fun z : M ↦ f₁.symm (G₁ (f₀ z))) Um := by
+  exact
+    α.flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasStrictFDerivAt
       e₀ e₁ f₀ f₁ c he₀ he₁ G₁ htime htbase hU₀open hU₀source hxU₀
       hx ht hD_bound hstrict
       (α.flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime hGdiff_spaceTime)
