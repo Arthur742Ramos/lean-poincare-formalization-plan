@@ -1700,6 +1700,12 @@ fixed open target-preimage patches.  The ambient-time-set variant
 `Diffeomorph3GaugeFlowOn.of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 restricts local continuity and derivative data from a larger solution time set
 to the chosen closed Picard interval using the interval-subset proof.  The
+compact raw existence theorem
+`Diffeomorph3GaugeFlowOn.exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+now combines compact subcover selection, source/target cover persistence inside
+the ambient time set, ambient local regularity, and the open-preimage
+local-gluing route to produce a raw gauge-flow witness on a small symmetric
+`Ioo` interval.  The
 fixed-IVP intrinsic
 layer now exposes the same finite-cover shape
 as
