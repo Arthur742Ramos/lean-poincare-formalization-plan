@@ -2246,7 +2246,19 @@ and
 also select the cover index from
 `(⋃ i, interior (Kc i : Set M)) = Set.univ`, so the scalar route consumes the
 refined compact cover directly at both open-interior and right-sided endpoint
-times. At the
+times. The open-interior selector now feeds the first downstream
+non-identity-gauge component package:
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_interior_cover_target_overlap_Ioo`
+turns the selected scalar derivative into
+`SmoothSelfDiffeomorph3Family.CoordinatePullbackMetricComponentDerivativeOn`
+once the tangent-coordinate-map derivative and final scalar velocity identity
+are supplied, and
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_interior_cover_target_overlap_Ioo`
+lifts that component package to tensor `HasTimeDerivativeOn` for the raw
+gauge-pulled realized metric. Thus the finite-cover selector is now connected
+to the named tensor time-regularity route; the remaining dynamic obligations
+are the tangent-map derivative data and the scalar velocity identity from the
+selected gauge-flow/PDE construction. At the
 cover-construction level,
 `exists_compact_subset_interior_cover_inter_open` chooses an index and compact
 overlap from an interior-covering compact family and an open target patch, while
@@ -2266,10 +2278,11 @@ trivialization-base specialization
 `exists_interior_compact_trivialization_cover_with_intersections_of_compact_cover`
 packages the same refinement directly for finite families of
 `Bundle.Trivialization.baseSet`s. The
-remaining non-identity gauge work is to use that refined chart data end to end
-inside the selected Banach chart/gauge-flow constructions, and then integrate
-these scalar route theorems with the full local-existence and PDE estimate
-layers.
+remaining non-identity gauge work is to prove and supply those tangent-map and
+velocity identities from the selected gauge-flow/PDE construction, use the
+refined chart data end to end inside the selected Banach chart/gauge-flow
+constructions, and then integrate these route theorems with the full
+local-existence and PDE estimate layers.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts

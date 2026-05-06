@@ -1020,8 +1020,12 @@ now packages the matching intrinsic boundary
        lies in `interior (Kc i)`, so callers no longer supply the target-domain
        compact by hand; cover-level gauge wrappers now also select the cover
        index directly from an interior-covering compact family at both
-       open-interior and right-sided endpoint times. Cover-level selection and
-       shrinking lemmas now choose
+       open-interior and right-sided endpoint times. The open-interior
+       selector now also feeds a non-identity raw-gauge component-derivative
+       package and a tensor `HasTimeDerivativeOn` route for the realized
+       gauge-pulled metric, provided the tangent-coordinate-map derivative data
+       and final scalar velocity identity are supplied. Cover-level selection
+       and shrinking lemmas now choose
        an index plus compact overlap from an interior-covering compact family
        and turn finite open covers of compact sets into compact subordinate
        pieces whose interiors still cover; compatibility bridges turn interior
@@ -1034,8 +1038,9 @@ now packages the matching intrinsic boundary
        package directly for finite families of `Bundle.Trivialization`
        base sets. The remaining non-identity gauge task is to use that
        refined chart data end to end inside the selected Banach chart/gauge-flow
-       constructions, alongside the full Ricci-DeTurck Banach chart/PDE
-       estimates.
+       constructions, prove the tangent-map and scalar velocity obligations
+       from the selected gauge-flow/PDE construction, and supply the full
+       Ricci-DeTurck Banach chart/PDE estimates.
        Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
