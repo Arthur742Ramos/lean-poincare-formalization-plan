@@ -2256,9 +2256,15 @@ are supplied, and
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_interior_cover_target_overlap_Ioo`
 lifts that component package to tensor `HasTimeDerivativeOn` for the raw
 gauge-pulled realized metric. Thus the finite-cover selector is now connected
-to the named tensor time-regularity route; the remaining dynamic obligations
-are the tangent-map derivative data and the scalar velocity identity from the
-selected gauge-flow/PDE construction. At the
+to the named tensor time-regularity route. The tangent-map derivative datum
+now has a generic variational bridge,
+`SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap`:
+an eventual identification with a `VariationalLocalFlowSolution` tangent map on
+any `s ⊆ Ioo tmin tmax` gives the required quantified
+`∃ D, HasDerivAt ... (D.comp A(t)) t` package. Thus the remaining dynamic
+obligations are to construct/supply that variational tangent-map identification
+and prove the scalar velocity identity from the selected gauge-flow/PDE
+construction. At the
 cover-construction level,
 `exists_compact_subset_interior_cover_inter_open` chooses an index and compact
 overlap from an interior-covering compact family and an open target patch, while

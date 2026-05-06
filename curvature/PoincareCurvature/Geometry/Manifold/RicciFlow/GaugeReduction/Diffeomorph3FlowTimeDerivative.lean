@@ -5645,6 +5645,34 @@ theorem pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap
     hAderiv.congr_of_eventuallyEq hA_eq
   simpa [hA_t] using hAconcrete
 
+/-- A quantified variational tangent-map selector supplies the derivative data
+needed by component-level gauge-pullback APIs on any subset of the open model
+flow interval. -/
+theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0} {s : Set ℝ}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hsIoo : s ⊆ Ioo tmin tmax)
+    (hA_eq : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        (fun τ : ℝ ↦
+          pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ D : E →L[ℝ] E,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t := by
+  intro t ht x
+  obtain ⟨xE, hxE, hAeq⟩ := hA_eq ht x
+  refine ⟨Df t (α.flow (xE, t)), ?_⟩
+  exact pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap
+    (I := I) (M := M) (Φ := Φ) α hxE (hsIoo ht) x hAeq
+
 /-- Closed-interval/right-derivative version of
 `pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`.
 

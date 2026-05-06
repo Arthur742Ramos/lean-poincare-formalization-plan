@@ -1024,7 +1024,11 @@ now packages the matching intrinsic boundary
        selector now also feeds a non-identity raw-gauge component-derivative
        package and a tensor `HasTimeDerivativeOn` route for the realized
        gauge-pulled metric, provided the tangent-coordinate-map derivative data
-       and final scalar velocity identity are supplied. Cover-level selection
+       and final scalar velocity identity are supplied; the tangent-coordinate
+       derivative datum can now be filled from
+       `SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap`
+       once the concrete gauge tangent map is identified locally with a
+       `VariationalLocalFlowSolution` tangent map. Cover-level selection
        and shrinking lemmas now choose
        an index plus compact overlap from an interior-covering compact family
        and turn finite open covers of compact sets into compact subordinate
@@ -1038,8 +1042,9 @@ now packages the matching intrinsic boundary
        package directly for finite families of `Bundle.Trivialization`
        base sets. The remaining non-identity gauge task is to use that
        refined chart data end to end inside the selected Banach chart/gauge-flow
-       constructions, prove the tangent-map and scalar velocity obligations
-       from the selected gauge-flow/PDE construction, and supply the full
+       constructions, supply the variational tangent-map identification and
+       prove the scalar velocity obligation from the selected gauge-flow/PDE
+       construction, and supply the full
        Ricci-DeTurck Banach chart/PDE estimates.
        Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
