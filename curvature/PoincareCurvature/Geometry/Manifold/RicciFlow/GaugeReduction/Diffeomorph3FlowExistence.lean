@@ -198,6 +198,18 @@ theorem timeDependent_iUnion_pointwiseSource_of_indexed_open_preimage_continuous
     with τ hτ
   exact (hU τ i x).2 hτ
 
+/-- Extract an explicit open real interval from a relative neighborhood. -/
+theorem exists_Ioo_inter_subset_of_mem_nhdsWithin
+    {s P : Set ℝ} {t : ℝ} (hP : P ∈ 𝓝[s] t) :
+    ∃ ε : ℝ, 0 < ε ∧ Ioo (t - ε) (t + ε) ∩ s ⊆ P := by
+  rcases Metric.mem_nhdsWithin_iff.mp hP with ⟨ε, hεpos, hεsub⟩
+  refine ⟨ε, hεpos, ?_⟩
+  rintro τ ⟨hτIoo, hτs⟩
+  have hτball : τ ∈ Metric.ball t ε := by
+    rw [Metric.mem_ball, Real.dist_eq, abs_sub_lt_iff]
+    constructor <;> linarith [hτIoo.1, hτIoo.2]
+  exact hεsub ⟨hτball, hτs⟩
+
 /-- A finite time-dependent cover remains a cover in the relative time filter if
 each base-time patch is eventually contained in its time-moved counterpart.
 This is the cover-level companion to the per-index source-persistence
@@ -213,6 +225,25 @@ theorem timeDependent_iUnion_cover_eventually_of_finite_subset
   filter_upwards [hwithinAll] with τ hτ x hx
   rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxi⟩
   exact Set.mem_iUnion.mpr ⟨i, hτ i hxi⟩
+
+/-- Interval form of `timeDependent_iUnion_cover_eventually_of_finite_subset`:
+after finite patch persistence is known in a relative time filter, there is an
+explicit open time interval around the base time on which every time still has
+the selected patches as a cover, relative to the ambient time set. -/
+theorem timeDependent_iUnion_cover_exists_Ioo_of_finite_subset
+    {ι : Type*} [Finite ι] {s : Set ℝ} {t : ℝ}
+    {U : ℝ → ι → Set X}
+    (hcover : Set.univ ⊆ ⋃ i, U t i)
+    (hwithin : ∀ i, ∀ᶠ τ in 𝓝[s] t, U t i ⊆ U τ i) :
+    ∃ ε : ℝ, 0 < ε ∧
+      ∀ ⦃τ : ℝ⦄, τ ∈ Ioo (t - ε) (t + ε) → τ ∈ s →
+        Set.univ ⊆ ⋃ i, U τ i := by
+  rcases exists_Ioo_inter_subset_of_mem_nhdsWithin
+      (timeDependent_iUnion_cover_eventually_of_finite_subset hcover hwithin) with
+    ⟨ε, hεpos, hεsub⟩
+  refine ⟨ε, hεpos, ?_⟩
+  intro τ hτIoo hτs
+  exact hεsub ⟨hτIoo, hτs⟩
 
 /-- Glue left-inverse identities across an indexed cover when the global
 forward/backward candidates agree with the local forward/backward readouts on

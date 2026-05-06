@@ -1670,7 +1670,11 @@ into the uniform vector-field-identification handoff needed for all base
 points.  The helper `timeDependent_iUnion_cover_eventually_of_finite_subset`
 now gives the matching cover-level persistence statement: a finite base-time
 cover remains a cover in the relative time filter once every selected patch is
-eventually contained in its time-moved counterpart.  The fixed-IVP intrinsic
+eventually contained in its time-moved counterpart.  Its interval form
+`timeDependent_iUnion_cover_exists_Ioo_of_finite_subset`, based on the generic
+real-line extraction helper `exists_Ioo_inter_subset_of_mem_nhdsWithin`, turns
+that relative-filter cover persistence into an explicit open time interval
+around the base time.  The fixed-IVP intrinsic
 layer now exposes the same finite-cover shape
 as
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`
