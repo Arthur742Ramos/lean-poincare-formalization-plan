@@ -2245,10 +2245,14 @@ overlap from an interior-covering compact family and an open target patch, while
 `exists_compacts_interior_cover_of_finite_open_cover` and its compact-space
 `univ` variant record the standard shrinking step: a finite open cover of a
 compact set can be replaced by compact subordinate pieces whose interiors still
-cover. The remaining non-identity gauge work is to connect the actual
-finite-cover chart data to such an interior-covering construction or local
-refinement, and then integrate these scalar route theorems with the full
-local-existence and PDE estimate layers.
+cover. The compatibility bridges
+`iUnion_compacts_eq_univ_of_iUnion_interior_eq_univ` and
+`compactSpace_of_finite_compact_cover` let that stronger cover data feed the
+existing ordinary `hcover` finite-cover APIs and expose compactness carried by a
+finite compact cover of `univ`. The remaining non-identity gauge work is to
+connect the actual finite-cover chart data to such an interior-covering
+construction or local refinement, and then integrate these scalar route
+theorems with the full local-existence and PDE estimate layers.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts

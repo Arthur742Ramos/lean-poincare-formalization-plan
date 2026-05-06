@@ -1021,8 +1021,10 @@ now packages the matching intrinsic boundary
        compact by hand. Cover-level selection and shrinking lemmas now choose
        an index plus compact overlap from an interior-covering compact family
        and turn finite open covers of compact sets into compact subordinate
-       pieces whose interiors still cover. The remaining non-identity gauge
-       task is to connect the actual finite-cover chart data to that
+       pieces whose interiors still cover; compatibility bridges turn interior
+       cover data back into the ordinary `hcover` shape and expose compactness
+       from any finite compact cover of `univ`. The remaining non-identity
+       gauge task is to connect the actual finite-cover chart data to that
        interior-covering construction or to local refinements, alongside the
        full Ricci-DeTurck Banach chart/PDE estimates.
        Two thin extension

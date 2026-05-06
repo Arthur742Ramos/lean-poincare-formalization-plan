@@ -274,6 +274,41 @@ theorem exists_compact_subset_interior_cover_inter_open
     ⟨K, hpK, hKsubKc, hKsubU⟩
   exact ⟨i, K, hpK, hKsubKc, hKsubU⟩
 
+/-- An interior-covering compact family is, in particular, an ordinary compact
+cover.  This keeps stronger cover data compatible with the existing
+finite-cover section-space APIs. -/
+theorem iUnion_compacts_eq_univ_of_iUnion_interior_eq_univ
+    {X : Type*} [TopologicalSpace X] {ι : Type*} {Kc : ι → TopologicalSpace.Compacts X}
+    (hcover_int : (⋃ i, interior (Kc i : Set X)) = Set.univ) :
+    (⋃ i, (Kc i : Set X)) = Set.univ := by
+  refine eq_univ_of_univ_subset ?_
+  intro x _hx
+  have hx : x ∈ ⋃ i, interior (Kc i : Set X) := by
+    rw [hcover_int]
+    exact Set.mem_univ x
+  rcases Set.mem_iUnion.mp hx with ⟨i, hxi⟩
+  exact Set.mem_iUnion.mpr ⟨i, interior_subset hxi⟩
+
+/-- A finite cover of the whole space by compact sets makes the whole space
+compact.  Existing finite-cover chart hypotheses therefore carry compactness
+as data, even when no `CompactSpace` instance has been installed. -/
+theorem isCompact_univ_of_finite_compact_cover
+    {X : Type*} [TopologicalSpace X] {ι : Type*} [Finite ι]
+    (Kc : ι → TopologicalSpace.Compacts X)
+    (hcover : (⋃ i, (Kc i : Set X)) = Set.univ) :
+    IsCompact (Set.univ : Set X) := by
+  simpa [hcover] using
+    (isCompact_iUnion (f := fun i ↦ (Kc i : Set X)) fun i ↦ (Kc i).isCompact)
+
+/-- Instance-valued version of
+`isCompact_univ_of_finite_compact_cover`. -/
+theorem compactSpace_of_finite_compact_cover
+    {X : Type*} [TopologicalSpace X] {ι : Type*} [Finite ι]
+    (Kc : ι → TopologicalSpace.Compacts X)
+    (hcover : (⋃ i, (Kc i : Set X)) = Set.univ) :
+    CompactSpace X :=
+  isCompact_univ_iff.1 (isCompact_univ_of_finite_compact_cover Kc hcover)
+
 /-- A finite open cover of a compact set admits compact cores subordinate to
 the open patches whose interiors still cover the original compact set.  This
 is the cover-level topological input needed to replace plain compact cover
