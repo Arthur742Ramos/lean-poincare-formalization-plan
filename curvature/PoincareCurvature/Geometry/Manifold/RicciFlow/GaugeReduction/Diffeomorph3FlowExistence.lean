@@ -1741,6 +1741,77 @@ theorem exists_finset_subtype_timeDependent_iUnion_compatible_sourceTarget_openP
   · intro i
     exact hZopen i
 
+/-- Paired fixed-preimage finite-subcover selection with a closed time interval
+chosen inside the ambient time set.  The selected finite subtype preserves both
+fixed source/target preimage descriptions and gives synchronized source and
+target covers throughout the returned interval. -/
+theorem exists_finset_subtype_timeDependent_iUnion_compatible_sourceTarget_openPreimage_Icc_subset_timeSet_cover_of_iUnion_at
+    [CompactSpace M] {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (W Z : ι → Set M) (timeSet : Set ℝ) (t₀ : ℝ)
+    (htimeSet : timeSet ∈ 𝓝 t₀)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t) (G i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (F i t) (F j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (G i t) (G j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ F i τ x ∈ W i)
+    (hVpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ V τ i ↔ G i τ x ∈ Z i)
+    (hWopen : ∀ i, IsOpen (W i)) (hZopen : ∀ i, IsOpen (Z i))
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hVcover : Set.univ ⊆ ⋃ i, V t₀ i)
+    (hWcover : Set.univ ⊆ ⋃ i, W i)
+    (hZcover : Set.univ ⊆ ⋃ i, Z i)
+    (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i)
+    (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i) :
+    ∃ s : Finset ι, ∃ ε : ℝ,
+      0 < ε ∧
+        Icc (t₀ - ε) (t₀ + ε) ⊆ timeSet ∧
+          Set.univ ⊆ ⋃ i : {i // i ∈ s}, U t₀ i ∧
+            Set.univ ⊆ ⋃ i : {i // i ∈ s}, V t₀ i ∧
+              (∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) →
+                Set.univ ⊆ ⋃ i : {i // i ∈ s}, U τ i) ∧
+                (∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) →
+                  Set.univ ⊆ ⋃ i : {i // i ∈ s}, V τ i) ∧
+                  Set.univ ⊆ ⋃ i : {i // i ∈ s}, W i ∧
+                    Set.univ ⊆ ⋃ i : {i // i ∈ s}, Z i ∧
+                      (∀ t : ℝ, ∀ i : {i // i ∈ s},
+                        LocalGluingData (I := I) (M := M) n
+                          (F i t) (G i t) (U t i) (V t i)) ∧
+                        (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                          EqOn (F i t) (F j t) (U t i ∩ U t j)) ∧
+                          (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                            EqOn (G i t) (G j t) (V t i ∩ V t j)) ∧
+                            (∀ τ : ℝ, ∀ i : {i // i ∈ s}, ∀ x : M,
+                              x ∈ U τ i ↔ F i τ x ∈ W i) ∧
+                              (∀ τ : ℝ, ∀ i : {i // i ∈ s}, ∀ x : M,
+                                x ∈ V τ i ↔ G i τ x ∈ Z i) ∧
+                                (∀ i : {i // i ∈ s}, IsOpen (W i)) ∧
+                                  (∀ i : {i // i ∈ s}, IsOpen (Z i)) := by
+  rcases exists_finset_subtype_timeDependent_iUnion_compatible_sourceTarget_openPreimage_of_iUnion_at
+      (I := I) (M := M) F G U V W Z hlocal hFcompat hGcompat
+      hUpreimage hVpreimage hWopen hZopen t₀ hUcover hVcover hWcover
+      hZcover with
+    ⟨s, hUsubcover, hVsubcover, hWsubcover, hZsubcover, hlocal_sub,
+      hFcompat_sub, hGcompat_sub, hUpreimage_sub, hVpreimage_sub, hWopen_sub,
+      hZopen_sub⟩
+  have hUwithin_sub : ∀ i : {i // i ∈ s},
+      ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i := fun i ↦ hUwithin i
+  have hVwithin_sub : ∀ i : {i // i ∈ s},
+      ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i := fun i ↦ hVwithin i
+  rcases timeDependent_iUnion₂_cover_exists_Icc_subset_of_finite_subset
+      (timeSet := timeSet) (t := t₀)
+      (U := fun τ (i : {i // i ∈ s}) ↦ U τ i)
+      (V := fun τ (i : {i // i ∈ s}) ↦ V τ i)
+      htimeSet hUsubcover hVsubcover hUwithin_sub hVwithin_sub with
+    ⟨ε, hεpos, hIcc_subset, hcover_Icc⟩
+  refine ⟨s, ε, hεpos, hIcc_subset, hUsubcover, hVsubcover, ?_, ?_,
+    hWsubcover, hZsubcover, hlocal_sub, hFcompat_sub, hGcompat_sub,
+    hUpreimage_sub, hVpreimage_sub, hWopen_sub, hZopen_sub⟩
+  · intro τ hτIcc
+    exact (hcover_Icc hτIcc).1
+  · intro τ hτIcc
+    exact (hcover_Icc hτIcc).2
+
 /-- Compactness restricts a time-dependent compatible local-gluing family to a
 finite subtype selected at a base time, and finite source/target persistence
 then produces one closed time interval on which the selected source and target
