@@ -1683,9 +1683,13 @@ finite-cover layer now also packages per-slice inverse-function output as
 `LocalGluingData`, with
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 projecting those named patches into the compatible glued-flow constructor.  The
-remaining lift must still supply the chart-domain shrinking/source-membership
-hypotheses and combine these local patches with manifold-level flow
-compatibility before producing `C³` diffeomorphism slices.
+fixed-IVP and theorem-family intrinsic layers now expose matching
+`..._finite_timeDependent_iUnion_localGluingData_...` wrappers, so later compact
+manifold arguments can pass named local inverse-function packages through every
+finite-cover boundary without separately projecting openness, maps-to, inverse,
+and `C³` fields.  The remaining lift must still supply the chart-domain
+shrinking/source-membership hypotheses and combine these local patches with
+manifold-level flow compatibility before producing `C³` diffeomorphism slices.
 On the final bundling side, `SmoothSelfDiffeomorph3.ofInverse` now packages
 mutually inverse `C³` self-maps into a bundled `SmoothSelfDiffeomorph3`, with
 simp readouts for the forward and inverse maps.  Thus the eventual glued-flow

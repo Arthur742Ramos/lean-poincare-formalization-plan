@@ -8655,6 +8655,166 @@ theorem nonempty_ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compa
     hYLocal⟩
 
 /-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from compatible local
+readouts on a finite time-dependent open cover supplied by named
+`LocalGluingData` patches. -/
+noncomputable def ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+    {ι : Type*} [Finite ι]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (defaultF defaultG : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ℝ → M → M)
+    (Fₗ Gₗ : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ι → ℝ → M → M)
+    (U V : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ℝ → ι → Set M)
+    (hUcover : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, Set.univ ⊆ ⋃ i, U sol t i)
+    (hVcover : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, Set.univ ⊆ ⋃ i, V sol t i)
+    (hlocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ∀ i,
+        LocalGluingData (I := I) (M := M) 3
+          (Fₗ sol i t) (Gₗ sol i t) (U sol t i) (V sol t i))
+    (hFcompat : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ∀ i j, EqOn (Fₗ sol i t) (Fₗ sol j t)
+        (U sol t i ∩ U sol t j))
+    (hGcompat : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ∀ i j, EqOn (Gₗ sol i t) (Gₗ sol j t)
+        (V sol t i ∩ V sol t j))
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (hUwithin : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ i,
+        ∀ᶠ τ in 𝓝[Icc (tmin sol) (tmax sol)] t, U sol t i ⊆ U sol τ i)
+    (hanchoredLocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ i, ∀ x ∈ U sol ivp.initialTime i, Fₗ sol i ivp.initialTime x = x)
+    (Y : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hcontLocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ i, ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M, x ∈ U sol t i →
+        ContinuousWithinAt (fun τ : ℝ ↦ Fₗ sol i τ x)
+          (Icc (tmin sol) (tmax sol)) t)
+    (hderivLocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ i, ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M, x ∈ U sol t i →
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (Fₗ sol i t x)) (Fₗ sol i τ x))
+          ((Y sol) t (Fₗ sol i t x)) (Icc (tmin sol) (tmax sol)) t)
+    (hYLocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Ioo (tmin sol) (tmax sol),
+        ∀ᶠ τ in 𝓝[Ioo (tmin sol) (tmax sol)] t,
+          ∀ i, ∀ x : M, x ∈ U sol t i →
+            (Y sol) τ (Fₗ sol i τ x) =
+              intrinsicDeTurckGaugeField (I := I) (M := M)
+                sol.1.toIntrinsicDeTurckSolution.metric
+                sol.1.toIntrinsicDeTurckSolution.background τ (Fₗ sol i τ x)) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_localReadouts_vectorField_eq_nhdsWithin
+    defaultF defaultG Fₗ Gₗ U V hUcover hVcover
+    (fun sol t i ↦ (hlocal sol t i).source_open)
+    (fun sol t i ↦ (hlocal sol t i).target_open)
+    hFcompat hGcompat
+    (fun sol t i ↦ (hlocal sol t i).forward_mapsTo)
+    (fun sol t i ↦ (hlocal sol t i).backward_mapsTo)
+    tmin tmax hUwithin
+    (fun sol t i ↦ (hlocal sol t i).left_invOn)
+    (fun sol t i ↦ (hlocal sol t i).right_invOn)
+    (fun sol t i ↦ (hlocal sol t i).forward_contMDiffOn)
+    (fun sol t i ↦ (hlocal sol t i).backward_contMDiffOn)
+    hanchoredLocal Y htimeSet hcontLocal hderivLocal hYLocal
+
+/-- Fixed-IVP finite local-gluing-data gauge-flow existence, kept as proof-level
+evidence. -/
+theorem nonempty_ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+    {ι : Type*} [Finite ι]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (defaultF defaultG : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ℝ → M → M)
+    (Fₗ Gₗ : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ι → ℝ → M → M)
+    (U V : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ℝ → ι → Set M)
+    (hUcover : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, Set.univ ⊆ ⋃ i, U sol t i)
+    (hVcover : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, Set.univ ⊆ ⋃ i, V sol t i)
+    (hlocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ∀ i,
+        LocalGluingData (I := I) (M := M) 3
+          (Fₗ sol i t) (Gₗ sol i t) (U sol t i) (V sol t i))
+    (hFcompat : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ∀ i j, EqOn (Fₗ sol i t) (Fₗ sol j t)
+        (U sol t i ∩ U sol t j))
+    (hGcompat : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t : ℝ, ∀ i j, EqOn (Gₗ sol i t) (Gₗ sol j t)
+        (V sol t i ∩ V sol t j))
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (hUwithin : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ i,
+        ∀ᶠ τ in 𝓝[Icc (tmin sol) (tmax sol)] t, U sol t i ⊆ U sol τ i)
+    (hanchoredLocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ i, ∀ x ∈ U sol ivp.initialTime i, Fₗ sol i ivp.initialTime x = x)
+    (Y : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (hcontLocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ i, ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M, x ∈ U sol t i →
+        ContinuousWithinAt (fun τ : ℝ ↦ Fₗ sol i τ x)
+          (Icc (tmin sol) (tmax sol)) t)
+    (hderivLocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ i, ∀ t ∈ Icc (tmin sol) (tmax sol), ∀ x : M, x ∈ U sol t i →
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (Fₗ sol i t x)) (Fₗ sol i τ x))
+          ((Y sol) t (Fₗ sol i t x)) (Icc (tmin sol) (tmax sol)) t)
+    (hYLocal : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Ioo (tmin sol) (tmax sol),
+        ∀ᶠ τ in 𝓝[Ioo (tmin sol) (tmax sol)] t,
+          ∀ i, ∀ x : M, x ∈ U sol t i →
+            (Y sol) τ (Fₗ sol i τ x) =
+              intrinsicDeTurckGaugeField (I := I) (M := M)
+                sol.1.toIntrinsicDeTurckSolution.metric
+                sol.1.toIntrinsicDeTurckSolution.background τ (Fₗ sol i τ x)) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+    defaultF defaultG Fₗ Gₗ U V hUcover hVcover hlocal hFcompat hGcompat
+    tmin tmax hUwithin hanchoredLocal Y htimeSet hcontLocal hderivLocal
+    hYLocal⟩
+
+/-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from compatible local
 readouts on indexed open covers, with global forward/backward slices
 constructed canonically by `gluedMapOf_iUnion`. -/
 noncomputable def ofPicardIccChartDerivative_of_iUnion_compatibleGluedSlices_vectorField_eq_nhdsWithin
@@ -13234,6 +13394,206 @@ theorem nonempty_ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compa
     defaultF defaultG Fₗ Gₗ U V hUcover hVcover hUopen hVopen hFcompat
     hGcompat hFmaps hGmaps tmin tmax hUwithin hleftLocal hrightLocal
     hFLocal hGLocal hanchoredLocal Y htimeSet hcontLocal hderivLocal
+    hYLocal⟩
+
+/-- Theorem-family raw intrinsic DeTurck gauge-flow existence from compatible
+local readouts on finite time-dependent open covers supplied by named
+`LocalGluingData` patches.  This is the family-level form of
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin`. -/
+noncomputable def ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+    {ι : Type*} [Finite ι]
+    (defaultF defaultG :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+            (E := E) (H := H) (I := I) (M := M) ivp,
+          ℝ → M → M)
+    (Fₗ Gₗ : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ι → ℝ → M → M)
+    (U V : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ℝ → ι → Set M)
+    (hUcover : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, Set.univ ⊆ ⋃ i, U ivp sol t i)
+    (hVcover : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, Set.univ ⊆ ⋃ i, V ivp sol t i)
+    (hlocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, ∀ i,
+          LocalGluingData (I := I) (M := M) 3
+            (Fₗ ivp sol i t) (Gₗ ivp sol i t)
+            (U ivp sol t i) (V ivp sol t i))
+    (hFcompat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, ∀ i j, EqOn (Fₗ ivp sol i t) (Fₗ ivp sol j t)
+          (U ivp sol t i ∩ U ivp sol t j))
+    (hGcompat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, ∀ i j, EqOn (Gₗ ivp sol i t) (Gₗ ivp sol j t)
+          (V ivp sol t i ∩ V ivp sol t j))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (hUwithin : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ i,
+          ∀ᶠ τ in 𝓝[Icc (tmin ivp sol) (tmax ivp sol)] t,
+            U ivp sol t i ⊆ U ivp sol τ i)
+    (hanchoredLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ i, ∀ x ∈ U ivp sol ivp.initialTime i,
+          Fₗ ivp sol i ivp.initialTime x = x)
+    (Y : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hcontLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ i, ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          x ∈ U ivp sol t i →
+            ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp sol i τ x)
+              (Icc (tmin ivp sol) (tmax ivp sol)) t)
+    (hderivLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ i, ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          x ∈ U ivp sol t i →
+            HasDerivWithinAt
+              (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp sol i t x)) (Fₗ ivp sol i τ x))
+              ((Y ivp sol) t (Fₗ ivp sol i t x))
+              (Icc (tmin ivp sol) (tmax ivp sol)) t)
+    (hYLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Ioo (tmin ivp sol) (tmax ivp sol),
+          ∀ᶠ τ in 𝓝[Ioo (tmin ivp sol) (tmax ivp sol)] t,
+            ∀ i, ∀ x : M, x ∈ U ivp sol t i →
+              (Y ivp sol) τ (Fₗ ivp sol i τ x) =
+                intrinsicDeTurckGaugeField (I := I) (M := M)
+                  sol.1.toIntrinsicDeTurckSolution.metric
+                  sol.1.toIntrinsicDeTurckSolution.background τ (Fₗ ivp sol i τ x)) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  flow := fun ivp sol ↦
+    (IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+        (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
+        (defaultF ivp) (defaultG ivp) (Fₗ ivp) (Gₗ ivp) (U ivp) (V ivp)
+        (hUcover ivp) (hVcover ivp) (hlocal ivp) (hFcompat ivp)
+        (hGcompat ivp) (tmin ivp) (tmax ivp) (hUwithin ivp)
+        (hanchoredLocal ivp) (Y ivp) (htimeSet ivp) (hcontLocal ivp)
+        (hderivLocal ivp) (hYLocal ivp)).flow sol
+
+/-- Theorem-family finite local-gluing-data gauge-flow existence, kept as
+proof-level evidence. -/
+theorem nonempty_ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+    {ι : Type*} [Finite ι]
+    (defaultF defaultG :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+            (E := E) (H := H) (I := I) (M := M) ivp,
+          ℝ → M → M)
+    (Fₗ Gₗ : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ι → ℝ → M → M)
+    (U V : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ℝ → ι → Set M)
+    (hUcover : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, Set.univ ⊆ ⋃ i, U ivp sol t i)
+    (hVcover : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, Set.univ ⊆ ⋃ i, V ivp sol t i)
+    (hlocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, ∀ i,
+          LocalGluingData (I := I) (M := M) 3
+            (Fₗ ivp sol i t) (Gₗ ivp sol i t)
+            (U ivp sol t i) (V ivp sol t i))
+    (hFcompat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, ∀ i j, EqOn (Fₗ ivp sol i t) (Fₗ ivp sol j t)
+          (U ivp sol t i ∩ U ivp sol t j))
+    (hGcompat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t : ℝ, ∀ i j, EqOn (Gₗ ivp sol i t) (Gₗ ivp sol j t)
+          (V ivp sol t i ∩ V ivp sol t j))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (hUwithin : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ i,
+          ∀ᶠ τ in 𝓝[Icc (tmin ivp sol) (tmax ivp sol)] t,
+            U ivp sol t i ⊆ U ivp sol τ i)
+    (hanchoredLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ i, ∀ x ∈ U ivp sol ivp.initialTime i,
+          Fₗ ivp sol i ivp.initialTime x = x)
+    (Y : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (hcontLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ i, ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          x ∈ U ivp sol t i →
+            ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp sol i τ x)
+              (Icc (tmin ivp sol) (tmax ivp sol)) t)
+    (hderivLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ i, ∀ t ∈ Icc (tmin ivp sol) (tmax ivp sol), ∀ x : M,
+          x ∈ U ivp sol t i →
+            HasDerivWithinAt
+              (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp sol i t x)) (Fₗ ivp sol i τ x))
+              ((Y ivp sol) t (Fₗ ivp sol i t x))
+              (Icc (tmin ivp sol) (tmax ivp sol)) t)
+    (hYLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Ioo (tmin ivp sol) (tmax ivp sol),
+          ∀ᶠ τ in 𝓝[Ioo (tmin ivp sol) (tmax ivp sol)] t,
+            ∀ i, ∀ x : M, x ∈ U ivp sol t i →
+              (Y ivp sol) τ (Fₗ ivp sol i τ x) =
+                intrinsicDeTurckGaugeField (I := I) (M := M)
+                  sol.1.toIntrinsicDeTurckSolution.metric
+                  sol.1.toIntrinsicDeTurckSolution.background τ (Fₗ ivp sol i τ x)) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :=
+  ⟨ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+    defaultF defaultG Fₗ Gₗ U V hUcover hVcover hlocal hFcompat hGcompat
+    tmin tmax hUwithin hanchoredLocal Y htimeSet hcontLocal hderivLocal
     hYLocal⟩
 
 /-- Theorem-family raw intrinsic DeTurck gauge-flow existence from compatible
