@@ -1746,12 +1746,17 @@ named `timeSet`.  The raw-flow bridge now also has
 `IntrinsicDeTurckLocalSolution.nonempty_rawGaugeFlowOn_restrictTimeSet` and
 `..._restrictSymmetricIcc`, so a compact raw witness on the selected interval
 immediately repackages as a witness for the restricted local solution.  The
-remaining compact packaging step is to thread those restricted witnesses through
-the selected fixed-IVP/theorem-family solutions and `ofRawGaugeFlowOn`.  The
-fixed-IVP and theorem-family intrinsic layers now also expose
-`ofRawGaugeFlowOn` with proof-level `nonempty_ofRawGaugeFlowOn`, packaging raw
-witnesses on named time sets once those sets have been identified with the
-chosen local-solution time sets.  The
+selected raw-flow layer now packages exactly that fixed-IVP and theorem-family
+handoff as `SelectedIntrinsicDeTurckGaugeFlowExistence` and
+`SelectedIntrinsicDeTurckGaugeFlowExistenceFamily`: callers provide one selected
+restricted chosen DeTurck solution, identify its exact named time set with the
+raw compact interval via `ofRawGaugeFlowOn`, and then project directly to
+gauge-reducible, intrinsic, or ordinary theorem packages once the selected
+gauge-pulled metric time derivative or scalar inner-derivative data is supplied.
+The older all-candidates fixed-IVP and theorem-family intrinsic layers also
+continue to expose `ofRawGaugeFlowOn` with proof-level
+`nonempty_ofRawGaugeFlowOn`, packaging raw witnesses on named time sets once
+those sets have been identified with every chosen local-solution time set.  The
 fixed-IVP intrinsic
 layer now exposes the same finite-cover shape
 as

@@ -720,10 +720,15 @@ now packages the matching intrinsic boundary
     now repackage directly for the restricted local solution via
     `nonempty_rawGaugeFlowOn_restrictTimeSet` and
     `nonempty_rawGaugeFlowOn_restrictSymmetricIcc`. The fixed-IVP and
-    theorem-family intrinsic layers now also have `ofRawGaugeFlowOn` /
-    `nonempty_ofRawGaugeFlowOn` adapters for raw witnesses on named time sets,
-    so after callers thread those restricted witnesses through selected
-    solutions, the raw witnesses cross the intrinsic boundary directly. The new
+    theorem-family intrinsic layers now also have selected raw-flow packages
+    `SelectedIntrinsicDeTurckGaugeFlowExistence` and
+    `SelectedIntrinsicDeTurckGaugeFlowExistenceFamily`, with
+    `ofRawGaugeFlowOn` / `nonempty_ofRawGaugeFlowOn` adapters and direct
+    selected-solution projections to gauge-reducible, intrinsic, and ordinary
+    theorem packages once the selected gauge-pulled metric time derivative or
+    scalar inner-derivative data is supplied. The older all-candidates
+    `ofRawGaugeFlowOn` adapters remain available for raw witnesses on every
+    chosen local-solution time set. The new
     `GaugeReduction.ModelGaugeFlowODE` module now isolates the
     Banach-model Picard-Lindelöf local-flow theorem needed before the remaining
      positive-dimensional manifold ODE lift: it packages time-dependent local
@@ -1020,12 +1025,12 @@ velocity against genuine target Ricci data as
 `GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_neg_two_intrinsicRicciTensor`
 and its local-interval companion, after the pulled-back background connection is
 identified as Levi-Civita for the transformed metric. Point 4 still remains
-open because the missing pieces are threading the exact DeTurck time-set
-restrictions and compact raw ODE/gluing output through selected fixed-IVP and
-theorem-family solution packages, feeding the resulting chosen packages through
-`ofRawGaugeFlowOn`, the remaining positive-dimensional scalar
-time-regularity input for non-identity gauge-pulled metrics, and the quasilinear
-parabolic PDE layer, not bundle regularity. The
+open: the selected raw-flow package bridge for exact restricted DeTurck time
+sets is now in place, but the full arbitrary compact-manifold proof still needs
+the remaining positive-dimensional scalar time-regularity input for non-identity
+gauge-pulled metrics, the end-to-end compact construction that supplies those
+selected witnesses, and the quasilinear parabolic PDE layer, not bundle
+regularity. The
 parabolic PDE layer has proof-bearing groundwork in
 `AnalyticPDE/ParabolicHolder.lean`: parabolic distance, balls/cylinders,
 `C^{0,α}` control, local-base compatibility with the product topology for both

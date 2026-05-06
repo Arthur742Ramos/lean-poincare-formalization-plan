@@ -10029,6 +10029,454 @@ theorem nonempty_toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn
 
 end Diffeomorph3GaugeFlowOn
 
+/-- Raw intrinsic DeTurck `C^3` gauge-flow data for one selected chosen
+DeTurck local solution of a fixed initial-value problem.
+
+This is the fixed-IVP handoff shape produced by compact small-interval ODE
+constructions: after the analytic DeTurck solution has been restricted to the
+exact interval on which the raw flow exists, only that selected solution needs
+to be gauge-reduced. -/
+structure SelectedIntrinsicDeTurckGaugeFlowExistence
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) where
+  solution :
+    ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp
+  flow :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        solution.1.toIntrinsicDeTurckSolution.metric
+        solution.1.toIntrinsicDeTurckSolution.background)
+      solution.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime
+
+namespace SelectedIntrinsicDeTurckGaugeFlowExistence
+
+/-- The anchored geometric gauge associated to a selected raw intrinsic
+DeTurck gauge-flow witness. -/
+def gauge
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      G.solution.1.toIntrinsicDeTurckSolution.metric
+      G.solution.1.toIntrinsicDeTurckSolution.background
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime :=
+  G.flow.toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn
+
+@[simp] theorem gauge_maps
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    G.gauge.maps = G.flow.maps3 := rfl
+
+@[simp] theorem gauge_anchored
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    G.gauge.anchored = G.flow.anchored := rfl
+
+@[simp] theorem gauge_follows
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    G.gauge.follows = G.flow.satisfies := rfl
+
+/-- Fixed-IVP selected raw gauge-flow existence from a raw flow on a named time
+set identified with the selected solution's exact time set. -/
+noncomputable def ofRawGaugeFlowOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = s)
+    (hflow : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      s ivp.initialTime)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  solution := sol
+  flow := by
+    classical
+    simpa [htimeSet] using Classical.choice hflow
+
+/-- Proof-level fixed-IVP selected raw gauge-flow existence from a raw flow on a
+named time set. -/
+theorem nonempty_ofRawGaugeFlowOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = s)
+    (hflow : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      s ivp.initialTime)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofRawGaugeFlowOn sol s htimeSet hflow⟩
+
+/-- Scalar time-derivative data for the metric pulled back by a selected raw
+intrinsic DeTurck gauge flow. -/
+def PullbackMetricInnerDerivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+    ∀ x : M, ∀ u v : TangentSpace I x,
+      HasDerivAt
+        (fun τ ↦
+          (G.solution.1.toIntrinsicDeTurckSolution.metric τ).inner ((G.gauge.maps τ) x)
+            ((G.gauge.maps τ).pushforwardTangent x u)
+            ((G.gauge.maps τ).pushforwardTangent x v))
+        (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+          G.gauge t x u v) t
+
+/-- Selected scalar inner-product derivative data gives the tensor
+time-derivative package required by gauge reduction. -/
+theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (G.gauge.maps.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.solution.1.gaugeCorrectedPullbackMetric_hasTimeDerivativeOn_of_inner_hasDerivAt
+    G.gauge hinner
+
+end SelectedIntrinsicDeTurckGaugeFlowExistence
+
+/-- Theorem-family selected raw intrinsic DeTurck `C^3` gauge-flow data: one
+selected chosen DeTurck local solution, and one raw flow for that selected
+solution, for every initial-value problem. -/
+structure SelectedIntrinsicDeTurckGaugeFlowExistenceFamily where
+  solution :
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp
+  flow :
+    ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          (solution ivp).1.toIntrinsicDeTurckSolution.metric
+          (solution ivp).1.toIntrinsicDeTurckSolution.background)
+        (solution ivp).1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime
+
+namespace SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+
+/-- Restrict theorem-family selected raw gauge-flow data to one
+initial-value problem. -/
+def forInitialValueProblem
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  solution := G.solution ivp
+  flow := G.flow ivp
+
+/-- Assemble theorem-family selected raw gauge-flow data from fixed-IVP selected
+raw gauge-flow data for every initial-value problem. -/
+def of_forInitialValueProblem
+    (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      SelectedIntrinsicDeTurckGaugeFlowExistence
+        (E := E) (H := H) (I := I) (M := M) ivp) :
+    SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  solution := fun ivp ↦ (G ivp).solution
+  flow := fun ivp ↦ (G ivp).flow
+
+@[simp] theorem forInitialValueProblem_solution
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (G.forInitialValueProblem ivp).solution = G.solution ivp := rfl
+
+@[simp] theorem forInitialValueProblem_flow
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (G.forInitialValueProblem ivp).flow = G.flow ivp := rfl
+
+@[simp] theorem forInitialValueProblem_of_forInitialValueProblem
+    (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      SelectedIntrinsicDeTurckGaugeFlowExistence
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (of_forInitialValueProblem (I := I) (M := M) G).forInitialValueProblem ivp =
+      G ivp := rfl
+
+@[simp] theorem of_forInitialValueProblem_forInitialValueProblem
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    of_forInitialValueProblem (I := I) (M := M)
+      (fun ivp ↦ G.forInitialValueProblem ivp) = G := rfl
+
+/-- The anchored geometric gauge associated to a theorem-family selected raw
+intrinsic DeTurck gauge-flow witness. -/
+def gauge
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.background
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime :=
+  (G.forInitialValueProblem ivp).gauge
+
+@[simp] theorem gauge_maps
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    (G.gauge ivp).maps = (G.flow ivp).maps3 := rfl
+
+/-- Theorem-family selected raw gauge-flow existence from raw flows on named
+time sets identified with the selected solutions' exact time sets. -/
+noncomputable def ofRawGaugeFlowOn
+    (sol : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Set ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      (sol ivp).1.toIntrinsicDeTurckSolution.timeSet = s ivp)
+    (hflow : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          (sol ivp).1.toIntrinsicDeTurckSolution.metric
+          (sol ivp).1.toIntrinsicDeTurckSolution.background)
+        (s ivp) ivp.initialTime)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  of_forInitialValueProblem (I := I) (M := M)
+    (fun ivp ↦
+      SelectedIntrinsicDeTurckGaugeFlowExistence.ofRawGaugeFlowOn
+        (I := I) (M := M) (sol ivp) (s ivp) (htimeSet ivp) (hflow ivp))
+
+/-- Proof-level theorem-family selected raw gauge-flow existence from raw flows
+on named time sets. -/
+theorem nonempty_ofRawGaugeFlowOn
+    (sol : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Set ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      (sol ivp).1.toIntrinsicDeTurckSolution.timeSet = s ivp)
+    (hflow : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          (sol ivp).1.toIntrinsicDeTurckSolution.metric
+          (sol ivp).1.toIntrinsicDeTurckSolution.background)
+        (s ivp) ivp.initialTime)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :=
+  ⟨ofRawGaugeFlowOn sol s htimeSet hflow⟩
+
+/-- Theorem-family scalar time-derivative data for the metrics pulled back by
+the selected raw intrinsic DeTurck gauge flows. -/
+def PullbackMetricInnerDerivativeData
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) : Prop :=
+  ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+    (G.forInitialValueProblem ivp).PullbackMetricInnerDerivativeData
+
+/-- Theorem-family selected scalar inner-product derivative data gives the
+tensor time-derivative package required by gauge reduction for each selected
+solution. -/
+theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hinner : G.PullbackMetricInnerDerivativeData)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.gauge ivp).maps.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
+    (hinner ivp)
+
+end SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+
+/-- A fixed-IVP chosen-background DeTurck theorem package becomes
+gauge-reducible from one selected raw intrinsic `C^3` gauge-flow witness and a
+time derivative proof for the selected gauge-pulled metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducible_viaSelectedGaugeFlowExistenceTimeDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : HasTimeDerivativeOn (I := I) (M := M)
+      (G.gauge.maps.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toGaugeReducible_ofDiffeomorph3Gauge
+    G.solution G.gauge hpullDerivative
+
+/-- Fixed-IVP intrinsic Ricci-flow projection from one selected raw intrinsic
+`C^3` gauge-flow witness and a time derivative proof for the selected
+gauge-pulled metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaSelectedGaugeFlowExistenceTimeDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : HasTimeDerivativeOn (I := I) (M := M)
+      (G.gauge.maps.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toGaugeReducible_viaSelectedGaugeFlowExistenceTimeDerivative
+    G hpullDerivative).toIntrinsic
+
+/-- Fixed-IVP ordinary Ricci-flow projection from one selected raw intrinsic
+`C^3` gauge-flow witness and a time derivative proof for the selected
+gauge-pulled metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaSelectedGaugeFlowExistenceTimeDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : HasTimeDerivativeOn (I := I) (M := M)
+      (G.gauge.maps.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toIntrinsic_viaSelectedGaugeFlowExistenceTimeDerivative
+    G hpullDerivative).toOrdinary
+
+/-- A fixed-IVP chosen-background DeTurck theorem package becomes
+gauge-reducible from one selected raw intrinsic `C^3` gauge-flow witness and
+scalar derivative data for the selected gauge-pulled metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducible_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toGaugeReducible_viaSelectedGaugeFlowExistenceTimeDerivative
+    G (G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner)
+
+/-- A fixed-IVP chosen-background DeTurck theorem package becomes
+scalar-derivative gauge-reducible from one selected raw intrinsic `C^3`
+gauge-flow witness and scalar derivative data for the selected gauge-pulled
+metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toInnerDerivativeGaugeReducible_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    InnerDerivativeGaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toInnerDerivativeGaugeReducible_ofDiffeomorph3GaugeInnerDerivative
+    G.solution G.gauge hinner
+
+/-- A theorem family of chosen-background DeTurck packages becomes
+gauge-reducible from selected raw intrinsic `C^3` gauge-flow witnesses and time
+derivative proofs for the selected gauge-pulled metrics. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReducible_viaSelectedGaugeFlowExistenceTimeDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hpullDerivative :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        HasTimeDerivativeOn (I := I) (M := M)
+          ((G.gauge ivp).maps.pullbackMetricFamily
+            (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+          ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            (G.gauge ivp))
+          (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    (pkg.package ivp).toGaugeReducible_viaSelectedGaugeFlowExistenceTimeDerivative
+      (G.forInitialValueProblem ivp) (hpullDerivative ivp)
+
+/-- Intrinsic Ricci-flow theorem-family projection from selected raw intrinsic
+`C^3` gauge-flow witnesses and time derivative proofs for the selected
+gauge-pulled metrics. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaSelectedGaugeFlowExistenceTimeDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hpullDerivative :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        HasTimeDerivativeOn (I := I) (M := M)
+          ((G.gauge ivp).maps.pullbackMetricFamily
+            (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+          ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            (G.gauge ivp))
+          (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaSelectedGaugeFlowExistenceTimeDerivative
+    G hpullDerivative).toIntrinsicFamily
+
+/-- Ordinary Ricci-flow theorem-family projection from selected raw intrinsic
+`C^3` gauge-flow witnesses and time derivative proofs for the selected
+gauge-pulled metrics. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily_viaSelectedGaugeFlowExistenceTimeDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hpullDerivative :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        HasTimeDerivativeOn (I := I) (M := M)
+          ((G.gauge ivp).maps.pullbackMetricFamily
+            (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+          ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            (G.gauge ivp))
+          (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toIntrinsicFamily_viaSelectedGaugeFlowExistenceTimeDerivative
+    G hpullDerivative).toOrdinary
+
+/-- A theorem family of chosen-background DeTurck packages becomes
+gauge-reducible from selected raw intrinsic `C^3` gauge-flow witnesses and
+scalar derivative data for the selected gauge-pulled metrics. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReducible_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  pkg.toGaugeReducible_viaSelectedGaugeFlowExistenceTimeDerivative
+    G (G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner)
+
+/-- A theorem family of chosen-background DeTurck packages becomes
+scalar-derivative gauge-reducible from selected raw intrinsic `C^3` gauge-flow
+witnesses and scalar derivative data for the selected gauge-pulled metrics. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toInnerDerivativeGaugeReducible_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    InnerDerivativeGaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    (pkg.package ivp).toInnerDerivativeGaugeReducible_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+      (G.forInitialValueProblem ivp) (hinner ivp)
+
 /-- Reinterpret a raw intrinsic DeTurck gauge-flow witness on a named smaller
 time set as a witness for the local solution restricted to that exact time set.
 
