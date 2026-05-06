@@ -10117,6 +10117,91 @@ theorem nonempty_ofRawGaugeFlowOn
       (E := E) (H := H) (I := I) (M := M) ivp) :=
   ⟨ofRawGaugeFlowOn sol s htimeSet hflow⟩
 
+/-- Fixed-IVP selected raw gauge-flow existence after restricting a chosen
+DeTurck solution to a named smaller time set. -/
+noncomputable def ofRawGaugeFlowOn_restrictTimeSet
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      s ivp.initialTime)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  solution := sol.restrictTimeSet s hT₀ hinterval hsub
+  flow := by
+    classical
+    simpa [ChosenIntrinsicDeTurckLocalSolution.restrictTimeSet,
+      IntrinsicDeTurckLocalSolution.restrictTimeSet,
+      IntrinsicDeTurckSolution.restrictTimeSet] using Classical.choice hflow
+
+/-- Proof-level fixed-IVP selected raw gauge-flow existence after restricting a
+chosen DeTurck solution to a named smaller time set. -/
+theorem nonempty_ofRawGaugeFlowOn_restrictTimeSet
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      s ivp.initialTime)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofRawGaugeFlowOn_restrictTimeSet sol s hT₀ hinterval hsub hflow⟩
+
+/-- Fixed-IVP selected raw gauge-flow existence after restricting a chosen
+DeTurck solution to a closed symmetric compact interval around the initial
+time. -/
+noncomputable def ofRawGaugeFlowOn_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) ivp.initialTime)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  solution := sol.restrictSymmetricIcc hε hsub
+  flow := by
+    classical
+    simpa [ChosenIntrinsicDeTurckLocalSolution.restrictSymmetricIcc,
+      IntrinsicDeTurckLocalSolution.restrictSymmetricIcc,
+      IntrinsicDeTurckLocalSolution.restrictTimeSet,
+      IntrinsicDeTurckSolution.restrictTimeSet] using Classical.choice hflow
+
+/-- Proof-level fixed-IVP selected raw gauge-flow existence after restricting a
+chosen DeTurck solution to a closed symmetric compact interval around the
+initial time. -/
+theorem nonempty_ofRawGaugeFlowOn_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) ivp.initialTime)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofRawGaugeFlowOn_restrictSymmetricIcc sol hε hsub hflow⟩
+
 /-- Scalar time-derivative data for the metric pulled back by a selected raw
 intrinsic DeTurck gauge flow. -/
 def PullbackMetricInnerDerivativeData
@@ -10275,6 +10360,111 @@ theorem nonempty_ofRawGaugeFlowOn
     Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M)) :=
   ⟨ofRawGaugeFlowOn sol s htimeSet hflow⟩
+
+/-- Theorem-family selected raw gauge-flow existence after restricting each
+selected chosen DeTurck solution to a named smaller time set. -/
+noncomputable def ofRawGaugeFlowOn_restrictTimeSet
+    (sol : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Set ℝ)
+    (T : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M), ℝ)
+    (hT₀ : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ivp.initialTime < T ivp)
+    (hinterval : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Icc ivp.initialTime (T ivp) ⊆ s ivp)
+    (hsub : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      s ivp ⊆ (sol ivp).1.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          (sol ivp).1.toIntrinsicDeTurckSolution.metric
+          (sol ivp).1.toIntrinsicDeTurckSolution.background)
+        (s ivp) ivp.initialTime)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  of_forInitialValueProblem (I := I) (M := M)
+    (fun ivp ↦
+      SelectedIntrinsicDeTurckGaugeFlowExistence.ofRawGaugeFlowOn_restrictTimeSet
+        (I := I) (M := M) (sol ivp) (s ivp) (hT₀ ivp)
+        (hinterval ivp) (hsub ivp) (hflow ivp))
+
+/-- Proof-level theorem-family selected raw gauge-flow existence after
+restricting each selected chosen DeTurck solution to a named smaller time set. -/
+theorem nonempty_ofRawGaugeFlowOn_restrictTimeSet
+    (sol : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Set ℝ)
+    (T : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M), ℝ)
+    (hT₀ : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ivp.initialTime < T ivp)
+    (hinterval : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Icc ivp.initialTime (T ivp) ⊆ s ivp)
+    (hsub : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      s ivp ⊆ (sol ivp).1.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          (sol ivp).1.toIntrinsicDeTurckSolution.metric
+          (sol ivp).1.toIntrinsicDeTurckSolution.background)
+        (s ivp) ivp.initialTime)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :=
+  ⟨ofRawGaugeFlowOn_restrictTimeSet sol s T hT₀ hinterval hsub hflow⟩
+
+/-- Theorem-family selected raw gauge-flow existence after restricting each
+selected chosen DeTurck solution to a closed symmetric compact interval around
+the initial time. -/
+noncomputable def ofRawGaugeFlowOn_restrictSymmetricIcc
+    (sol : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (ε : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M), ℝ)
+    (hε : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      0 < ε ivp)
+    (hsub : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ⊆
+        (sol ivp).1.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          (sol ivp).1.toIntrinsicDeTurckSolution.metric
+          (sol ivp).1.toIntrinsicDeTurckSolution.background)
+        (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp))
+        ivp.initialTime)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  of_forInitialValueProblem (I := I) (M := M)
+    (fun ivp ↦
+      SelectedIntrinsicDeTurckGaugeFlowExistence.ofRawGaugeFlowOn_restrictSymmetricIcc
+        (I := I) (M := M) (sol ivp) (hε ivp) (hsub ivp) (hflow ivp))
+
+/-- Proof-level theorem-family selected raw gauge-flow existence after
+restricting each selected chosen DeTurck solution to a closed symmetric compact
+interval around the initial time. -/
+theorem nonempty_ofRawGaugeFlowOn_restrictSymmetricIcc
+    (sol : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (ε : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M), ℝ)
+    (hε : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      0 < ε ivp)
+    (hsub : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ⊆
+        (sol ivp).1.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          (sol ivp).1.toIntrinsicDeTurckSolution.metric
+          (sol ivp).1.toIntrinsicDeTurckSolution.background)
+        (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp))
+        ivp.initialTime)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :=
+  ⟨ofRawGaugeFlowOn_restrictSymmetricIcc sol ε hε hsub hflow⟩
 
 /-- Theorem-family scalar time-derivative data for the metrics pulled back by
 the selected raw intrinsic DeTurck gauge flows. -/

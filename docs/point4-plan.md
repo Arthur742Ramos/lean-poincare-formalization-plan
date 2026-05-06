@@ -1753,6 +1753,11 @@ restricted chosen DeTurck solution, identify its exact named time set with the
 raw compact interval via `ofRawGaugeFlowOn`, and then project directly to
 gauge-reducible, intrinsic, or ordinary theorem packages once the selected
 gauge-pulled metric time derivative or scalar inner-derivative data is supplied.
+It also has `ofRawGaugeFlowOn_restrictTimeSet` and
+`ofRawGaugeFlowOn_restrictSymmetricIcc`, with proof-level `nonempty_...`
+versions, so callers can start from an ambient chosen DeTurck solution plus the
+raw flow on the restricted interval and obtain the selected package in one
+step.
 The older all-candidates fixed-IVP and theorem-family intrinsic layers also
 continue to expose `ofRawGaugeFlowOn` with proof-level
 `nonempty_ofRawGaugeFlowOn`, packaging raw witnesses on named time sets once

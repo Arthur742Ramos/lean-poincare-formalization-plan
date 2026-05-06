@@ -724,6 +724,9 @@ now packages the matching intrinsic boundary
     `SelectedIntrinsicDeTurckGaugeFlowExistence` and
     `SelectedIntrinsicDeTurckGaugeFlowExistenceFamily`, with
     `ofRawGaugeFlowOn` / `nonempty_ofRawGaugeFlowOn` adapters and direct
+    `ofRawGaugeFlowOn_restrictTimeSet` / `ofRawGaugeFlowOn_restrictSymmetricIcc`
+    constructors for starting from an ambient chosen solution plus a raw flow on
+    the restricted interval, as well as
     selected-solution projections to gauge-reducible, intrinsic, and ordinary
     theorem packages once the selected gauge-pulled metric time derivative or
     scalar inner-derivative data is supplied. The older all-candidates
