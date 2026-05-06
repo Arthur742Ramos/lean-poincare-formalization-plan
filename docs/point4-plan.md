@@ -1707,7 +1707,11 @@ time-dependent companion
 selects the finite subtype from one time-slice cover while preserving the
 selected patches' `LocalGluingData` and overlap compatibility for every time,
 so later compact patch selection does not lose its all-time local ODE data when
-the finite indices are chosen at the base slice.  The
+the finite indices are chosen at the base slice.  Its open-preimage companion
+`LocalGluingData.exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_of_iUnion_at`
+also includes a finite cover by the fixed open target-preimage patches `W` and
+preserves the restricted `hUpreimage`/`hWopen` data, matching the source
+persistence route used by the open-preimage local-gluing constructors.  The
 fixed-IVP and theorem-family intrinsic layers now expose matching
 `..._finite_timeDependent_iUnion_localGluingData_...` wrappers, so later compact
 manifold arguments can pass named local inverse-function packages through every

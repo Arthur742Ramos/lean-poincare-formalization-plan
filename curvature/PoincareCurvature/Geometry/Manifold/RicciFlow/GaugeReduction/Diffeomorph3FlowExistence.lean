@@ -1087,6 +1087,71 @@ theorem exists_finset_subtype_timeDependent_iUnion_compatible_of_iUnion_at
     (fun t i j ↦ hFcompat t i j),
     (fun t i j ↦ hGcompat t i j)⟩
 
+/-- Compactness restricts a time-dependent compatible local-gluing family and a
+fixed open-preimage target cover to one finite subtype selected at a base time.
+The selected subtype covers the base-time source and target patches and the
+fixed target-preimage patches, while preserving all-time local gluing data,
+overlap compatibility, and the open-preimage source description. -/
+theorem exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_of_iUnion_at
+    [CompactSpace M] {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → ℝ → M → M) (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t) (G i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (F i t) (F j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (G i t) (G j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ F i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (t₀ : ℝ)
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hVcover : Set.univ ⊆ ⋃ i, V t₀ i)
+    (hWcover : Set.univ ⊆ ⋃ i, W i) :
+    ∃ s : Finset ι,
+      Set.univ ⊆ ⋃ i : {i // i ∈ s}, U t₀ i ∧
+        Set.univ ⊆ ⋃ i : {i // i ∈ s}, V t₀ i ∧
+          Set.univ ⊆ ⋃ i : {i // i ∈ s}, W i ∧
+            (∀ t : ℝ, ∀ i : {i // i ∈ s},
+              LocalGluingData (I := I) (M := M) n
+                (F i t) (G i t) (U t i) (V t i)) ∧
+              (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                EqOn (F i t) (F j t) (U t i ∩ U t j)) ∧
+                (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                  EqOn (G i t) (G j t) (V t i ∩ V t j)) ∧
+                  (∀ τ : ℝ, ∀ i : {i // i ∈ s}, ∀ x : M,
+                    x ∈ U τ i ↔ F i τ x ∈ W i) ∧
+                    (∀ i : {i // i ∈ s}, IsOpen (W i)) := by
+  classical
+  rcases isCompact_univ.elim_finite_subcover (U t₀)
+      (fun i ↦ (hlocal t₀ i).source_open) hUcover with
+    ⟨sU, hsUcover⟩
+  rcases isCompact_univ.elim_finite_subcover (V t₀)
+      (fun i ↦ (hlocal t₀ i).target_open) hVcover with
+    ⟨sV, hsVcover⟩
+  rcases isCompact_univ.elim_finite_subcover W hWopen hWcover with
+    ⟨sW, hsWcover⟩
+  refine ⟨(sU ∪ sV) ∪ sW, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro x hx
+    rcases Set.mem_iUnion₂.mp (hsUcover hx) with ⟨i, hi, hxi⟩
+    exact Set.mem_iUnion.mpr
+      ⟨⟨i, Finset.mem_union.mpr (Or.inl (Finset.mem_union.mpr (Or.inl hi)))⟩, hxi⟩
+  · intro x hx
+    rcases Set.mem_iUnion₂.mp (hsVcover hx) with ⟨i, hi, hxi⟩
+    exact Set.mem_iUnion.mpr
+      ⟨⟨i, Finset.mem_union.mpr (Or.inl (Finset.mem_union.mpr (Or.inr hi)))⟩, hxi⟩
+  · intro x hx
+    rcases Set.mem_iUnion₂.mp (hsWcover hx) with ⟨i, hi, hxi⟩
+    exact Set.mem_iUnion.mpr
+      ⟨⟨i, Finset.mem_union.mpr (Or.inr hi)⟩, hxi⟩
+  · intro t i
+    exact hlocal t i
+  · intro t i j
+    exact hFcompat t i j
+  · intro t i j
+    exact hGcompat t i j
+  · intro τ i x
+    exact hUpreimage τ i x
+  · intro i
+    exact hWopen i
+
 end LocalGluingData
 
 /-- Smoothness of a model map transports through source and target chart
