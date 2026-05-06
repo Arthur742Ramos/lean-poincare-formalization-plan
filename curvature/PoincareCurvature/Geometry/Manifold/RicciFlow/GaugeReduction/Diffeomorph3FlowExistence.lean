@@ -1258,6 +1258,71 @@ theorem exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_of_iU
   · intro i
     exact hWopen i
 
+/-- Compactness restricts a time-dependent compatible local-gluing family to a
+finite subtype selected at a base time, and finite source/target persistence
+then produces one closed time interval on which the selected source and target
+patches still cover.
+
+This is the compact-cover handoff for interval-local raw gauge-flow
+constructors: it keeps the restricted `LocalGluingData`, overlap compatibility,
+and open-preimage data, while also returning synchronized `Icc` source and
+target covers for the finite subtype. -/
+theorem exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_Icc_cover_of_iUnion_at
+    [CompactSpace M] {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → ℝ → M → M) (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (timeSet : Set ℝ) (t₀ : ℝ)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t) (G i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (F i t) (F j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (G i t) (G j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ F i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hVcover : Set.univ ⊆ ⋃ i, V t₀ i)
+    (hWcover : Set.univ ⊆ ⋃ i, W i)
+    (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i)
+    (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i) :
+    ∃ s : Finset ι, ∃ ε : ℝ,
+      0 < ε ∧
+        Set.univ ⊆ ⋃ i : {i // i ∈ s}, U t₀ i ∧
+          Set.univ ⊆ ⋃ i : {i // i ∈ s}, V t₀ i ∧
+            (∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) → τ ∈ timeSet →
+              Set.univ ⊆ ⋃ i : {i // i ∈ s}, U τ i) ∧
+              (∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) → τ ∈ timeSet →
+                Set.univ ⊆ ⋃ i : {i // i ∈ s}, V τ i) ∧
+                Set.univ ⊆ ⋃ i : {i // i ∈ s}, W i ∧
+                  (∀ t : ℝ, ∀ i : {i // i ∈ s},
+                    LocalGluingData (I := I) (M := M) n
+                      (F i t) (G i t) (U t i) (V t i)) ∧
+                    (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                      EqOn (F i t) (F j t) (U t i ∩ U t j)) ∧
+                      (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                        EqOn (G i t) (G j t) (V t i ∩ V t j)) ∧
+                        (∀ τ : ℝ, ∀ i : {i // i ∈ s}, ∀ x : M,
+                          x ∈ U τ i ↔ F i τ x ∈ W i) ∧
+                          (∀ i : {i // i ∈ s}, IsOpen (W i)) := by
+  rcases exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_of_iUnion_at
+      (I := I) (M := M) F G U V W hlocal hFcompat hGcompat hUpreimage
+      hWopen t₀ hUcover hVcover hWcover with
+    ⟨s, hUsubcover, hVsubcover, hWsubcover, hlocal_sub, hFcompat_sub,
+      hGcompat_sub, hUpreimage_sub, hWopen_sub⟩
+  have hUwithin_sub : ∀ i : {i // i ∈ s},
+      ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i := fun i ↦ hUwithin i
+  have hVwithin_sub : ∀ i : {i // i ∈ s},
+      ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i := fun i ↦ hVwithin i
+  rcases timeDependent_iUnion₂_cover_exists_Icc_of_finite_subset
+      (s := timeSet) (t := t₀)
+      (U := fun τ (i : {i // i ∈ s}) ↦ U τ i)
+      (V := fun τ (i : {i // i ∈ s}) ↦ V τ i)
+      hUsubcover hVsubcover hUwithin_sub hVwithin_sub with
+    ⟨ε, hεpos, hcover_Icc⟩
+  refine ⟨s, ε, hεpos, hUsubcover, hVsubcover, ?_, ?_, hWsubcover,
+    hlocal_sub, hFcompat_sub, hGcompat_sub, hUpreimage_sub, hWopen_sub⟩
+  · intro τ hτIcc hτtime
+    exact (hcover_Icc hτIcc hτtime).1
+  · intro τ hτIcc hτtime
+    exact (hcover_Icc hτIcc hτtime).2
+
 end LocalGluingData
 
 /-- Smoothness of a model map transports through source and target chart

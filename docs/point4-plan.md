@@ -1736,6 +1736,12 @@ the finite indices are chosen at the base slice.  Its open-preimage companion
 also includes a finite cover by the fixed open target-preimage patches `W` and
 preserves the restricted `hUpreimage`/`hWopen` data, matching the source
 persistence route used by the open-preimage local-gluing constructors.  The
+strengthened
+`LocalGluingData.exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_Icc_cover_of_iUnion_at`
+combines that compact subcover selection with finite source/target persistence
+to return one positive closed time interval on which the selected source and
+target patches still cover, while preserving the same local gluing,
+compatibility, and open-preimage data.  The
 fixed-IVP and theorem-family intrinsic layers now expose matching
 `..._finite_timeDependent_iUnion_localGluingData_...` wrappers, so later compact
 manifold arguments can pass named local inverse-function packages through every
