@@ -1016,10 +1016,12 @@ now packages the matching intrinsic boundary
        for raw time sets contained in `Ici t`. The right-sided route now also
        has a time-set-relative compact-membership wrapper, so the selected
        compact curve can be built from eventual membership in `𝓝[s] t` and kept
-       constant off the raw time set. The remaining non-identity gauge task is
-       to construct and package those compact-membership witnesses inside the
-       local existence route, alongside the full Ricci-DeTurck Banach chart/PDE
-       estimates. Two thin extension
+       constant off the raw time set. Interior-membership variants now make
+       those eventual-membership witnesses automatic when the chosen compact
+       piece contains the gauge point in its interior. The remaining non-identity
+       gauge task is to construct and package compact pieces with the needed
+       interior coverage inside the local existence route, alongside the full
+       Ricci-DeTurck Banach chart/PDE estimates. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`
