@@ -2195,16 +2195,27 @@ and
 These lemmas differentiate the time-difference
 `coord(sol.curve τ)(x τ) - coord(sol.curve t)(x τ)` at a moving compact
 coordinate point directly from the Banach derivative in sup norm. They remove
-the need to rebuild this time-difference from scalar fixed-point readouts, but
-still require the final geometric/equality step that identifies the
-finite-cover coordinate component with the raw gauge-flow
-`metricBilinearCoordinateField` along the selected moving chart curve.
+the need to rebuild this time-difference from scalar fixed-point readouts.
 The smooth-realization wrappers
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_coordBilinearFormReadoutMap_timeDifference_hasDerivAt_of_mem_Ioo`
 and
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_coordBilinearFormReadoutMap_timeDifference_hasDerivWithinAt_Ici_of_mem_Ico`
 now perform the intermediate transfer from `sol.curve` to the realized smooth
 metric section using `metric_toContinuousSection_eq_curve`.
+`SmoothRealizationGaugeRoutes` now also proves the geometric identification:
+`metric_coordBilinearFormReadoutMap_eq_metricBilinearCoordinateField` rewrites a
+preferred finite-cover bilinear coordinate readout as the raw
+`metricBilinearCoordinateField`, and
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_coord_mem_Ioo`
+transfers the moving time-difference derivative to that raw coordinate field.
+The raw gauge-flow wrapper
+`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_coord_mem_Ioo`
+then combines this time-difference derivative with the existing frozen-spatial
+raw-flow term, provided a selected compact chart curve represents
+`τ ↦ G.maps3 τ x` near `t` and the preferred finite-cover center is
+`G.maps3 t x`. The remaining non-identity gauge work is therefore the
+end-to-end construction/selection of those compact chart curves and witnesses
+inside the local existence package, not the readout-to-field equality itself.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts

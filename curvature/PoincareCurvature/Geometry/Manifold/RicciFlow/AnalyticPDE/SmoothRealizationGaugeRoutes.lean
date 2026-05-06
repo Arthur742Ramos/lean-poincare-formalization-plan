@@ -5,6 +5,7 @@ public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffe
 
 set_option linter.unusedSectionVars false
 set_option linter.all false
+set_option maxHeartbeats 1000000
 set_option synthInstance.maxHeartbeats 100000
 
 /-!
@@ -37,6 +38,167 @@ local instance gaugeRoutesBilFNormedAddCommGroup : NormedAddCommGroup BilF :=
 
 local instance gaugeRoutesBilFNormedSpace : NormedSpace ℝ BilF :=
   (inferInstance : NormedSpace ℝ (F →L[ℝ] F →L[ℝ] ℝ))
+
+private theorem continuousMap_moving_eval_sub_const_hasDerivWithinAt
+    {K : Type*} [TopologicalSpace K] [CompactSpace K]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {u : ℝ → C(K, E)} {u' : C(K, E)} {s : Set ℝ} {t : ℝ}
+    (hu : HasDerivWithinAt u u' s t)
+    {x : ℝ → K} (hx : Filter.Tendsto x (𝓝[s] t) (𝓝 (x t))) :
+    HasDerivWithinAt (fun τ : ℝ ↦ u τ (x τ) - u t (x τ)) (u' (x t)) s t := by
+  have hrem :
+      (fun τ : ℝ ↦ (u τ - u t - (τ - t) • u') (x τ)) =o[𝓝[s] t]
+        fun τ : ℝ ↦ τ - t := by
+    refine Asymptotics.IsLittleO.of_bound ?_
+    intro c hc
+    filter_upwards [Asymptotics.IsLittleO.bound hu.isLittleO hc] with τ hτ
+    exact (ContinuousMap.norm_coe_le_norm (u τ - u t - (τ - t) • u') (x τ)).trans hτ
+  have hderiv_eval_tendsto :
+      Filter.Tendsto (fun τ : ℝ ↦ u' (x τ) - u' (x t)) (𝓝[s] t) (𝓝 0) := by
+    have hu'_tendsto :
+        Filter.Tendsto (fun y : K ↦ u' y) (𝓝 (x t)) (𝓝 (u' (x t))) :=
+      map_continuousAt u' (x t)
+    have hconst :
+        Filter.Tendsto (fun _ : ℝ ↦ u' (x t)) (𝓝[s] t) (𝓝 (u' (x t))) :=
+      tendsto_const_nhds
+    simpa using (hu'_tendsto.comp hx).sub hconst
+  have hderiv_eval :
+      (fun τ : ℝ ↦ u' (x τ) - u' (x t)) =o[𝓝[s] t]
+        fun _ : ℝ ↦ (1 : ℝ) :=
+    (Asymptotics.isLittleO_one_iff ℝ).2 hderiv_eval_tendsto
+  have htime :
+      (fun τ : ℝ ↦ τ - t) =O[𝓝[s] t] fun τ : ℝ ↦ τ - t :=
+    Asymptotics.isBigO_refl _ _
+  have hmove :
+      (fun τ : ℝ ↦ (τ - t) • (u' (x τ) - u' (x t))) =o[𝓝[s] t]
+        fun τ : ℝ ↦ τ - t := by
+    simpa using htime.smul_isLittleO hderiv_eval
+  have htotal :
+      (fun τ : ℝ ↦
+        (u τ - u t - (τ - t) • u') (x τ) +
+          (τ - t) • (u' (x τ) - u' (x t))) =o[𝓝[s] t]
+        fun τ : ℝ ↦ τ - t :=
+    hrem.add hmove
+  refine HasDerivWithinAt.of_isLittleO ?_
+  simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm, smul_sub] using htotal
+
+private theorem continuousMap_moving_eval_sub_const_hasDerivAt
+    {K : Type*} [TopologicalSpace K] [CompactSpace K]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {u : ℝ → C(K, E)} {u' : C(K, E)} {t : ℝ}
+    (hu : HasDerivAt u u' t)
+    {x : ℝ → K} (hx : Filter.Tendsto x (𝓝 t) (𝓝 (x t))) :
+    HasDerivAt (fun τ : ℝ ↦ u τ (x τ) - u t (x τ)) (u' (x t)) t := by
+  rw [← hasDerivWithinAt_univ] at hu ⊢
+  exact continuousMap_moving_eval_sub_const_hasDerivWithinAt hu (by simpa using hx)
+
+section MovingCoordinateHelpers
+
+variable {W : M → Type*} [TopologicalSpace (_root_.Bundle.TotalSpace F W)]
+  [∀ x, TopologicalSpace (W x)]
+  [∀ x, AddCommGroup (W x)] [∀ x, Module ℝ (W x)]
+  [FiberBundle F W] [VectorBundle ℝ F W]
+
+local notation "BilW" => (_root_.Bundle.BilinearFormBundle (V := W))
+
+private theorem coordBilinearFormReadoutMap_timeDifference_hasDerivAt_of_mem_Ioo_forGaugeRoutes
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {t₀ : ℝ}
+    {g₀ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover}
+    (sol : BanachEvolutionLocalSolutionIn A stateSet t₀ g₀)
+    (i : κ) {x : ℝ → Kc i}
+    {t : ℝ} (ht : t ∈ Ioo t₀ sol.terminalTime)
+    (hx : Filter.Tendsto x (𝓝 t) (𝓝 (x t))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve τ)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve t)).1 i (x τ))
+      ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (x t)) t := by
+  let L :
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →L[ℝ] C(Kc i, BilF) :=
+    (ContinuousLinearMap.proj i).comp
+      (((compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) et Kc hKc Ko hKo).subtypeL).comp
+        (toCompatibleCoordFamilySubmoduleContinuousLinearMap
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover))
+  have hcomponent :
+      HasDerivAt (fun τ : ℝ ↦ L (sol.curve τ)) (L (A t (sol.curve t))) t :=
+    BanachEvolutionLocalSolutionIn.continuousLinearMap_hasDerivAt_of_mem_Ioo
+      (F := A) (stateSet := stateSet) L sol ht
+  simpa [L] using continuousMap_moving_eval_sub_const_hasDerivAt hcomponent hx
+
+private theorem coordBilinearFormReadoutMap_timeDifference_hasDerivWithinAt_Ici_of_mem_Ico_forGaugeRoutes
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {t₀ : ℝ}
+    {g₀ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover}
+    (sol : BanachEvolutionLocalSolutionIn A stateSet t₀ g₀)
+    (i : κ) {x : ℝ → Kc i}
+    {t : ℝ} (ht : t ∈ Ico t₀ sol.terminalTime)
+    (hx : Filter.Tendsto x (𝓝[Ici t] t) (𝓝 (x t))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve τ)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve t)).1 i (x τ))
+      ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (x t)) (Ici t) t := by
+  let L :
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →L[ℝ] C(Kc i, BilF) :=
+    (ContinuousLinearMap.proj i).comp
+      (((compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) et Kc hKc Ko hKo).subtypeL).comp
+        (toCompatibleCoordFamilySubmoduleContinuousLinearMap
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover))
+  have hcomponent :
+      HasDerivWithinAt (fun τ : ℝ ↦ L (sol.curve τ))
+        (L (A t (sol.curve t))) (Ici t) t :=
+    BanachEvolutionLocalSolutionIn.continuousLinearMap_hasDerivWithinAt_Ici_of_mem_Ico
+      (F := A) (stateSet := stateSet) L sol ht
+  simpa [L] using continuousMap_moving_eval_sub_const_hasDerivWithinAt hcomponent hx
+
+end MovingCoordinateHelpers
 
 section GlobalClosure
 
@@ -487,6 +649,452 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricB
       (M := M) (F := F) (I := I) x0 het ht p
       (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p u)
       (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p v)
+
+/-- A finite-cover bilinear coordinate readout of a smooth metric section is the
+named raw metric-coordinate field centered at the same preferred
+trivialization point. -/
+theorem metric_coordBilinearFormReadoutMap_eq_metricBilinearCoordinateField
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (g : MetricFamily (I := I) (M := M)) (τ : ℝ) (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule
+      (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover
+      (⟨(g τ).toContinuousRiemannianMetric.toSection,
+        (g τ).toContinuousRiemannianMetric.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover)).1 i x =
+      SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+        (I := I) (M := M) g (x0 i)
+        (τ, (extChartAt I (x0 i)) x.1) := by
+  ext uE vE
+  let TM := (TangentSpace I : M → Type _)
+  have hKpref :
+      (Kc i : Set M) ⊆
+        (trivializationAt BilF
+          (_root_.Bundle.BilinearFormBundle (V := TM)) (x0 i)).baseSet := by
+    simpa [TM, het i] using hKc i
+  have hxbase : x.1 ∈ (trivializationAt F TM (x0 i)).baseSet := by
+    simpa [TM] using hKpref x.2
+  have hsrc_ext : x.1 ∈ (extChartAt I (x0 i)).source := by
+    simpa [TM, extChartAt_source] using hxbase
+  have hy :
+      (extChartAt I (x0 i)).symm ((extChartAt I (x0 i)) x.1) = x.1 := by
+    exact PartialEquiv.left_inv _ hsrc_ext
+  change
+    (et i ⟨x.1, (g τ).inner x.1⟩).2 uE vE =
+      SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+        (I := I) (M := M) g (x0 i)
+        (τ, (extChartAt I (x0 i)) x.1) uE vE
+  rw [het i]
+  change
+    (ContinuousLinearMap.inCoordinates F TM (F →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      (x0 i) x.1 (x0 i) x.1 ((g τ).inner x.1) uE) vE =
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+      (I := I) (M := M) g (x0 i)
+      (τ, (extChartAt I (x0 i)) x.1) uE vE
+  change
+    (ContinuousLinearMap.inCoordinates F TM (F →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      (x0 i) x.1 (x0 i) x.1 ((g τ).inner x.1) uE) vE =
+    (ContinuousLinearMap.inCoordinates F TM (F →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      (x0 i)
+      ((extChartAt I (x0 i)).symm ((extChartAt I (x0 i)) x.1))
+      (x0 i)
+      ((extChartAt I (x0 i)).symm ((extChartAt I (x0 i)) x.1))
+      ((g τ).inner ((extChartAt I (x0 i)).symm ((extChartAt I (x0 i)) x.1))) uE) vE
+  rw [hy]
+
+/-- Interior moving-point time-difference derivative for the raw
+metric-coordinate field, obtained from the Banach section norm through the
+preferred finite-cover coordinate chart. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_coord_mem_Ioo
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    (i : κ) {x : ℝ → Kc i}
+    {t : ℝ} (ht : t ∈ Ioo ivp.initialTime sol.terminalTime)
+    (hx : Filter.Tendsto x (𝓝 t) (𝓝 (x t))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric (x0 i)
+          (τ, (extChartAt I (x0 i)) (x τ).1) -
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric (x0 i)
+          (t, (extChartAt I (x0 i)) (x τ).1))
+      ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (x t)) t := by
+  have hproj :
+      HasDerivAt
+        (fun τ : ℝ ↦
+          (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (sol.curve τ)).1 i (x τ) -
+          (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (sol.curve t)).1 i (x τ))
+        ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (A t (sol.curve t))).1 i (x t)) t :=
+    coordBilinearFormReadoutMap_timeDifference_hasDerivAt_of_mem_Ioo_forGaugeRoutes
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _)) sol i ht hx
+  have hmetric_curve :
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric τ).toContinuousRiemannianMetric.toSection,
+            (realization.metric τ).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric t).toContinuousRiemannianMetric.toSection,
+            (realization.metric t).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ)) =ᶠ[𝓝 t]
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve τ)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve t)).1 i (x τ)) := by
+    filter_upwards [Icc_mem_nhds ht.1 ht.2] with τ hτ
+    rw [realization.metric_toContinuousSection_eq_curve hτ,
+      realization.metric_toContinuousSection_eq_curve (Ioo_subset_Icc_self ht)]
+  have hmetric_coord := hproj.congr_of_eventuallyEq hmetric_curve
+  have hEq :
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric (x0 i)
+          (τ, (extChartAt I (x0 i)) (x τ).1) -
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric (x0 i)
+          (t, (extChartAt I (x0 i)) (x τ).1)) =ᶠ[𝓝 t]
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric τ).toContinuousRiemannianMetric.toSection,
+            (realization.metric τ).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric t).toContinuousRiemannianMetric.toSection,
+            (realization.metric t).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ)) := by
+    filter_upwards with τ
+    rw [← metric_coordBilinearFormReadoutMap_eq_metricBilinearCoordinateField
+        (I := I) (M := M) (F := F) het realization.metric τ i (x τ),
+      ← metric_coordBilinearFormReadoutMap_eq_metricBilinearCoordinateField
+        (I := I) (M := M) (F := F) het realization.metric t i (x τ)]
+  exact hmetric_coord.congr_of_eventuallyEq hEq
+
+/-- One-sided endpoint version of
+`metricBilinearCoordinateField_timeDifference_hasDerivAt_of_coord_mem_Ioo`. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_Ici_of_coord_mem_Ico
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    (i : κ) {x : ℝ → Kc i}
+    {t : ℝ} (ht : t ∈ Ico ivp.initialTime sol.terminalTime)
+    (hx : Filter.Tendsto x (𝓝[Ici t] t) (𝓝 (x t))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric (x0 i)
+          (τ, (extChartAt I (x0 i)) (x τ).1) -
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric (x0 i)
+          (t, (extChartAt I (x0 i)) (x τ).1))
+      ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (x t)) (Ici t) t := by
+  have hproj :
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (sol.curve τ)).1 i (x τ) -
+          (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (sol.curve t)).1 i (x τ))
+        ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (A t (sol.curve t))).1 i (x t)) (Ici t) t :=
+    coordBilinearFormReadoutMap_timeDifference_hasDerivWithinAt_Ici_of_mem_Ico_forGaugeRoutes
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _)) sol i ht hx
+  have hmetric_curve :
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric τ).toContinuousRiemannianMetric.toSection,
+            (realization.metric τ).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric t).toContinuousRiemannianMetric.toSection,
+            (realization.metric t).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ)) =ᶠ[𝓝[Ici t] t]
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve τ)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve t)).1 i (x τ)) := by
+    filter_upwards [Icc_mem_nhdsGE_of_mem ht] with τ hτ
+    rw [realization.metric_toContinuousSection_eq_curve hτ,
+      realization.metric_toContinuousSection_eq_curve (Ico_subset_Icc_self ht)]
+  have hmetric_coord :=
+    hproj.congr_of_eventuallyEq_of_mem hmetric_curve (Set.mem_Ici.mpr le_rfl)
+  have hEq :
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric (x0 i)
+          (τ, (extChartAt I (x0 i)) (x τ).1) -
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric (x0 i)
+          (t, (extChartAt I (x0 i)) (x τ).1)) =ᶠ[𝓝[Ici t] t]
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric τ).toContinuousRiemannianMetric.toSection,
+            (realization.metric τ).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric t).toContinuousRiemannianMetric.toSection,
+            (realization.metric t).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ)) := by
+    filter_upwards with τ
+    rw [← metric_coordBilinearFormReadoutMap_eq_metricBilinearCoordinateField
+        (I := I) (M := M) (F := F) het realization.metric τ i (x τ),
+      ← metric_coordBilinearFormReadoutMap_eq_metricBilinearCoordinateField
+        (I := I) (M := M) (F := F) het realization.metric t i (x τ)]
+  exact hmetric_coord.congr_of_eventuallyEq_of_mem hEq (Set.mem_Ici.mpr le_rfl)
+
+/-- Full raw gauge-flow metric-coordinate derivative obtained from the Banach
+moving time-difference bridge, once the gauge path has been represented in a
+preferred compact coordinate chart centered at the time-`t` image. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_coord_mem_Ioo
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {gaugeInitialTime t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s gaugeInitialTime)
+    (hs : s ∈ 𝓝 t)
+    (ht : t ∈ Ioo ivp.initialTime sol.terminalTime)
+    (i : κ) (x : M)
+    (hcenter : x0 i = (G.maps3 t) x)
+    {xK : ℝ → Kc i}
+    (hxK : Filter.Tendsto xK (𝓝 t) (𝓝 (xK t)))
+    (hxK_eval : (fun τ : ℝ ↦ (xK τ).1) =ᶠ[𝓝 t]
+      fun τ : ℝ ↦ (G.maps3 τ) x) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (xK t)) +
+        (fderivWithin ℝ
+          (fun yE : F ↦
+            SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+              (I := I) (M := M) realization.metric ((G.maps3 t) x) (t, yE))
+          (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+          (X t ((G.maps3 t) x))) t := by
+  have htime_coord :=
+    realization.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_coord_mem_Ioo
+      (M := M) (F := F) (I := I) het i ht hxK
+  have htime :
+      HasDerivAt
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) realization.metric ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) realization.metric ((G.maps3 t) x)
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (xK t)) t := by
+    have hEq :
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) realization.metric ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) -
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) realization.metric ((G.maps3 t) x)
+            (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))) =ᶠ[𝓝 t]
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) realization.metric (x0 i)
+            (τ, (extChartAt I (x0 i)) (xK τ).1) -
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) realization.metric (x0 i)
+            (t, (extChartAt I (x0 i)) (xK τ).1)) := by
+      filter_upwards [hxK_eval] with τ hτ
+      rw [← hcenter, ← hτ]
+    exact htime_coord.congr_of_eventuallyEq hEq
+  simpa using
+    SmoothSelfDiffeomorph3Family.Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_timeDifference_along_eval_self
+      (I := I) (M := M) G hs realization.metric x htime
 
 /-- The smooth realization supplies the raw identity-gauge scalar derivative
 obligation on the open Banach interval, with the Banach chart right-hand side

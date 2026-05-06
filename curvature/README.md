@@ -1006,10 +1006,14 @@ now packages the matching intrinsic boundary
        `HasDerivAt.continuousMap_moving_eval_sub_const` and the
        `coordBilinearFormReadoutMap_timeDifference` wrappers, including the
        `SmoothIntrinsicDeTurckRealization` transfer to the realized metric
-       section. The remaining
-       non-identity gauge task is to connect that section-norm bridge, or the
-       full positive-dimensional `metricBilinearCoordinateField`
-       Fréchet/readout route, to the selected raw gauge-flow realization. Two thin extension
+       section. `SmoothRealizationGaugeRoutes` now identifies the preferred
+       finite-cover readout with `metricBilinearCoordinateField`, transfers the
+       moving time-difference derivative to that raw coordinate field, and feeds
+       it into the raw gauge-flow moving-base derivative once a selected compact
+       chart curve represents `τ ↦ G.maps3 τ x` near `t`. The remaining
+       non-identity gauge task is to construct and package those selected
+       compact-chart witnesses inside the local existence route, alongside the
+       full Ricci-DeTurck Banach chart/PDE estimates. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`
