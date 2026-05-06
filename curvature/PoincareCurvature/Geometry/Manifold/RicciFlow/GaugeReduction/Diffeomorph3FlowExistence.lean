@@ -1446,6 +1446,46 @@ theorem restrict_preimages {n : WithTop ℕ∞} {F G : M → M}
         simpa [h.right_invOn ⟨Set.mem_univ y, hGpreSubV hy.2⟩] using
           hGpreSubW hy.2)
 
+/-- Family-level paired preimage restriction.  If every local gluing patch can
+be shrunk to fixed source/target preimages, then the restricted family keeps
+the local gluing data and the forward/backward overlap compatibilities. -/
+theorem timeDependent_restrict_preimages
+    {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (W Z : ι → Set M)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t) (G i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (F i t) (F j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (G i t) (G j t) (V t i ∩ V t j))
+    (hWopen : ∀ i, IsOpen (W i)) (hZopen : ∀ i, IsOpen (Z i))
+    (hWsub : ∀ t i, W i ⊆ V t i)
+    (hZsub : ∀ t i, Z i ⊆ U t i)
+    (hFpreOpen : ∀ t i, IsOpen ((F i t) ⁻¹' W i))
+    (hGpreOpen : ∀ t i, IsOpen ((G i t) ⁻¹' Z i))
+    (hFpreSubZ : ∀ t i, (F i t) ⁻¹' W i ⊆ Z i)
+    (hGpreSubW : ∀ t i, (G i t) ⁻¹' Z i ⊆ W i) :
+    (∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) n
+        (F i t) (G i t) ((F i t) ⁻¹' W i) ((G i t) ⁻¹' Z i)) ∧
+      (∀ t : ℝ, ∀ i j,
+        EqOn (F i t) (F j t)
+          (((F i t) ⁻¹' W i) ∩ ((F j t) ⁻¹' W j))) ∧
+        (∀ t : ℝ, ∀ i j,
+          EqOn (G i t) (G j t)
+            (((G i t) ⁻¹' Z i) ∩ ((G j t) ⁻¹' Z j))) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro t i
+    exact
+      (hlocal t i).restrict_preimages (hWopen i) (hZopen i)
+        (hWsub t i) (hZsub t i) (hFpreOpen t i) (hGpreOpen t i)
+        (hFpreSubZ t i) (hGpreSubW t i)
+  · intro t i j x hx
+    exact hFcompat t i j
+      ⟨hZsub t i (hFpreSubZ t i hx.1), hZsub t j (hFpreSubZ t j hx.2)⟩
+  · intro t i j x hx
+    exact hGcompat t i j
+      ⟨hWsub t i (hGpreSubW t i hx.1), hWsub t j (hGpreSubW t j hx.2)⟩
+
 /-- If source patches cover at a base time and the local forward readouts are
 anchored there, the target patches cover at the same time. -/
 theorem target_cover_at_of_source_cover_anchor
