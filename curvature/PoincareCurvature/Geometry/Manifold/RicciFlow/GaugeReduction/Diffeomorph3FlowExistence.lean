@@ -337,6 +337,20 @@ theorem timeDependent_iUnion_cover_eventually_of_finite_subset
   rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxi⟩
   exact Set.mem_iUnion.mpr ⟨i, hτ i hxi⟩
 
+/-- A finite compact-core cover remains a cover in the relative time filter if
+each core is eventually contained in the corresponding moving patch. -/
+theorem timeDependent_iUnion_cover_eventually_of_finite_core_subset
+    {ι : Type*} [Finite ι] {s : Set ℝ} {t : ℝ}
+    {K : ι → Set X} {U : ℝ → ι → Set X}
+    (hcover : Set.univ ⊆ ⋃ i, K i)
+    (hwithin : ∀ i, ∀ᶠ τ in 𝓝[s] t, K i ⊆ U τ i) :
+    ∀ᶠ τ in 𝓝[s] t, Set.univ ⊆ ⋃ i, U τ i := by
+  have hwithinAll : ∀ᶠ τ in 𝓝[s] t, ∀ i, K i ⊆ U τ i :=
+    Filter.eventually_all.2 hwithin
+  filter_upwards [hwithinAll] with τ hτ x hx
+  rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxi⟩
+  exact Set.mem_iUnion.mpr ⟨i, hτ i hxi⟩
+
 /-- Interval form of `timeDependent_iUnion_cover_eventually_of_finite_subset`:
 after finite patch persistence is known in a relative time filter, there is an
 explicit open time interval around the base time on which every time still has
@@ -375,6 +389,53 @@ theorem timeDependent_iUnion_cover_exists_Icc_of_finite_subset
   refine ⟨ε, hεpos, ?_⟩
   intro τ hτIcc hτs
   exact hεsub ⟨hτIcc, hτs⟩
+
+/-- Compact-core source-cover persistence from fixed target-preimage patches
+and space-time continuity, with the closed interval chosen inside the ambient
+time set. -/
+theorem timeDependent_iUnion_cover_exists_Icc_subset_of_finite_compact_openPreimage_continuousWithinAt_prod
+    {ι : Type*} [Finite ι] {timeSet : Set ℝ} {t₀ : ℝ}
+    {F : ι → ℝ → X → Y} {U : ℝ → ι → Set X}
+    {W : ι → Set Y} {K : ι → Set X}
+    (htimeSet : timeSet ∈ 𝓝 t₀)
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : X, x ∈ U τ i ↔ F i τ x ∈ W i)
+    (hKcompact : ∀ i, IsCompact (K i))
+    (hWopen : ∀ i, IsOpen (W i))
+    (hKcover : Set.univ ⊆ ⋃ i, K i)
+    (hKbase : ∀ i, K i ⊆ U t₀ i)
+    (hcont : ∀ i, ∀ x ∈ K i,
+      ContinuousWithinAt (fun p : ℝ × X ↦ F i p.1 p.2)
+        (timeSet ×ˢ Set.univ) (t₀, x)) :
+    ∃ ε : ℝ, 0 < ε ∧
+      Icc (t₀ - ε) (t₀ + ε) ⊆ timeSet ∧
+        ∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) →
+          Set.univ ⊆ ⋃ i, U τ i := by
+  have hwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, K i ⊆ U τ i := by
+    intro i
+    exact
+      isCompact_eventually_subset_of_open_preimage_continuousWithinAt_prod
+        (s := timeSet) (a := t₀) (K := K i)
+        (U := fun τ ↦ U τ i) (F := fun τ x ↦ F i τ x) (V := W i)
+        (fun τ x ↦ hUpreimage τ i x) (hKcompact i) (hWopen i)
+        (hKbase i) (hcont i)
+  have hcover_event : ∀ᶠ τ in 𝓝[timeSet] t₀, Set.univ ⊆ ⋃ i, U τ i :=
+    timeDependent_iUnion_cover_eventually_of_finite_core_subset
+      (s := timeSet) (t := t₀) (K := K) (U := U) hKcover hwithin
+  rcases exists_Icc_subset_of_mem_nhds htimeSet with
+    ⟨εT, hεTpos, hTsub⟩
+  rcases exists_Icc_inter_subset_of_mem_nhdsWithin hcover_event with
+    ⟨εC, hεCpos, hCsub⟩
+  refine ⟨min εT εC, lt_min hεTpos hεCpos, ?_, ?_⟩
+  · intro τ hτIcc
+    have hτT : τ ∈ Icc (t₀ - εT) (t₀ + εT) := by
+      constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_left εT εC]
+    exact hTsub hτT
+  · intro τ hτIcc
+    have hτC : τ ∈ Icc (t₀ - εC) (t₀ + εC) := by
+      constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_right εT εC]
+    have hτT : τ ∈ Icc (t₀ - εT) (t₀ + εT) := by
+      constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_left εT εC]
+    exact hCsub ⟨hτC, hTsub hτT⟩
 
 /-- Simultaneous closed-interval persistence for finite source and target
 covers.  This packages the common compactness handoff needed by interval-local
