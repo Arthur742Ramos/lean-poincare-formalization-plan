@@ -2295,8 +2295,12 @@ smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
 tangent-map identification and states the remaining scalar identity in actual
-pushed-forward tangent-vector slots using `Df t (α.flow (xE, t))`. At the
-cover-construction level,
+pushed-forward tangent-vector slots using `Df t (α.flow (xE, t))`. Its
+fixed-chart-gluing companion,
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_fixedChartModel_eqOn_interior_cover_target_overlap_Ioo_geometricValue`,
+derives the tangent-map identification from local manifold `EqOn` gluing data
+and the variational model-flow spatial derivative before entering the same
+component package. At the cover-construction level,
 `exists_compact_subset_interior_cover_inter_open` chooses an index and compact
 overlap from an interior-covering compact family and an open target patch, while
 `exists_compacts_interior_cover_of_finite_open_cover` and its compact-space
