@@ -321,6 +321,26 @@ theorem isCompact_eventually_subset_of_open_preimage_continuousWithinAt_prod
   exact eventually_nhds_mapsTo_of_continuousWithinAt_prod
     (hcont x hx) hVopen ((hU a x).1 (hbase hx))
 
+/-- A finite open cover of a compact set admits compact closed cores subordinate
+to the original patches and still covering the compact set. -/
+theorem exists_compact_closure_core_cover_of_iUnion
+    [T2Space X] [LocallyCompactSpace X]
+    {ι : Type*} [Finite ι] {s : Set X} {U : ι → Set X}
+    (hs : IsCompact s) (hUopen : ∀ i, IsOpen (U i))
+    (hcover : s ⊆ ⋃ i, U i) :
+    ∃ K : ι → Set X,
+      s ⊆ ⋃ i, K i ∧ (∀ i, IsCompact (K i)) ∧ (∀ i, K i ⊆ U i) := by
+  have hfinite : ∀ x ∈ s, {i | x ∈ U i}.Finite := by
+    intro _x _hx
+    exact Set.finite_univ.subset (by intro i _hi; exact Set.mem_univ i)
+  rcases exists_subset_iUnion_closure_subset_t2space
+      (s := s) (u := U) hs hUopen hfinite hcover with
+    ⟨V, hVcover, _hVopen, hVclosure, hVcompact⟩
+  refine ⟨fun i ↦ closure (V i), ?_, hVcompact, hVclosure⟩
+  intro x hx
+  rcases Set.mem_iUnion.mp (hVcover hx) with ⟨i, hxi⟩
+  exact Set.mem_iUnion.mpr ⟨i, subset_closure hxi⟩
+
 /-- A finite time-dependent cover remains a cover in the relative time filter if
 each base-time patch is eventually contained in its time-moved counterpart.
 This is the cover-level companion to the per-index source-persistence
@@ -6577,6 +6597,68 @@ theorem exists_Ioo_gaugeFlow_of_finite_timeSet_compactCore_openPreimage_localGlu
             (nhdsWithin_mono t hIoo_subset_timeSet)] with τ hYτ
         intro i x hx
         exact hYτ i x hx)
+
+/-- Finite-family raw `C^3` gauge-flow existence on a compact manifold from
+base-time source cover data.  Compact closed cores subordinate to the base-time
+source and target patches are selected automatically by the shrinking lemma;
+their persistence is then derived from fixed target-preimage descriptions and
+space-time continuity. -/
+theorem exists_Ioo_gaugeFlow_of_finite_compact_timeSet_iUnion_openPreimage_localGluingData_of_spaceTime_continuous_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    [CompactSpace M] {ι : Type*} [Finite ι]
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {timeSet : Set ℝ} {t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W Z : ι → Set M)
+    (htimeSet : timeSet ∈ 𝓝 t₀)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hVpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ V τ i ↔ Gₗ i τ x ∈ Z i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (hZopen : ∀ i, IsOpen (Z i))
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hUspaceCont : ∀ i, ∀ x ∈ U t₀ i,
+      ContinuousWithinAt (fun p : ℝ × M ↦ Fₗ i p.1 p.2)
+        (timeSet ×ˢ Set.univ) (t₀, x))
+    (hVspaceCont : ∀ i, ∀ x ∈ V t₀ i,
+      ContinuousWithinAt (fun p : ℝ × M ↦ Gₗ i p.1 p.2)
+        (timeSet ×ˢ Set.univ) (t₀, x))
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ timeSet, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) timeSet t)
+    (hderivLocal : ∀ i, ∀ t ∈ timeSet, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) timeSet t)
+    (hYLocal : ∀ t ∈ timeSet, ∀ᶠ τ in 𝓝[timeSet] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    ∃ ε : ℝ, 0 < ε ∧
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X
+        (Ioo (t₀ - ε) (t₀ + ε)) t₀) := by
+  have hVcover : Set.univ ⊆ ⋃ i, V t₀ i :=
+    LocalGluingData.target_cover_at_of_source_cover_anchor
+      (I := I) (M := M) (n := 3) (F := Fₗ) (G := Gₗ) (U := U) (V := V)
+      (t₀ := t₀) (fun i ↦ hlocal t₀ i) hUcover hanchoredLocal
+  rcases exists_compact_closure_core_cover_of_iUnion
+      (s := (Set.univ : Set M)) (U := U t₀) isCompact_univ
+      (fun i ↦ (hlocal t₀ i).source_open) hUcover with
+    ⟨KU, hKUcover, hKUcompact, hKUbase⟩
+  rcases exists_compact_closure_core_cover_of_iUnion
+      (s := (Set.univ : Set M)) (U := V t₀) isCompact_univ
+      (fun i ↦ (hlocal t₀ i).target_open) hVcover with
+    ⟨KV, hKVcover, hKVcompact, hKVbase⟩
+  exact
+    exists_Ioo_gaugeFlow_of_finite_timeSet_compactCore_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+      (I := I) (M := M) (X := X) (Y := Y)
+      (timeSet := timeSet) (t₀ := t₀)
+      defaultF defaultG Fₗ Gₗ U V W Z KU KV htimeSet hlocal hFcompat
+      hGcompat hUpreimage hVpreimage hKUcompact hKVcompact hWopen hZopen
+      hKUcover hKVcover hKUbase hKVbase
+      (fun i x hx ↦ hUspaceCont i x (hKUbase i hx))
+      (fun i x hx ↦ hVspaceCont i x (hKVbase i hx))
+      hanchoredLocal hcontLocal hderivLocal hYLocal
 
 /-- Compact raw `C^3` gauge-flow existence on a small symmetric interval from
 ambient-time local gluing data.
