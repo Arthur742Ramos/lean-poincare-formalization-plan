@@ -1528,6 +1528,38 @@ theorem forward_anchor_at_of_backward_anchor
     ∀ i, ∀ x ∈ U t₀ i, F i t₀ x = x :=
   fun i ↦ (hlocal i).forward_anchor_of_backward_anchor (hanchored i)
 
+/-- A base-time source cover plus forward anchoring supplies the target cover
+and both fixed preimage covers for paired open-preimage data. -/
+theorem target_and_fixed_preimage_covers_at_of_source_cover_anchor
+    {ι : Type*} {n : WithTop ℕ∞} {F G : ι → ℝ → M → M}
+    {U V : ℝ → ι → Set M} {W Z : ι → Set M} {t₀ : ℝ}
+    (hlocal : ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t₀) (G i t₀) (U t₀ i) (V t₀ i))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ F i τ x ∈ W i)
+    (hVpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ V τ i ↔ G i τ x ∈ Z i)
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hanchored : ∀ i, ∀ x ∈ U t₀ i, F i t₀ x = x) :
+    (Set.univ ⊆ ⋃ i, V t₀ i) ∧
+      (Set.univ ⊆ ⋃ i, W i) ∧
+        (Set.univ ⊆ ⋃ i, Z i) := by
+  have hVcover : Set.univ ⊆ ⋃ i, V t₀ i :=
+    target_cover_at_of_source_cover_anchor
+      (I := I) (M := M) (n := n) (F := F) (G := G) (U := U) (V := V)
+      (t₀ := t₀) hlocal hUcover hanchored
+  have hWcover : Set.univ ⊆ ⋃ i, W i :=
+    _root_.RicciFlow.timeDependent_iUnion_target_cover_of_indexed_open_preimage_anchor
+      (F := F) (U := U) (W := W) (t₀ := t₀)
+      hUpreimage hUcover hanchored
+  have hGanchored : ∀ i, ∀ x ∈ V t₀ i, G i t₀ x = x :=
+    backward_anchor_at_of_forward_anchor
+      (I := I) (M := M) (n := n) (F := F) (G := G) (U := U) (V := V)
+      (t₀ := t₀) hlocal hanchored
+  have hZcover : Set.univ ⊆ ⋃ i, Z i :=
+    _root_.RicciFlow.timeDependent_iUnion_source_cover_of_indexed_open_preimage_anchor
+      (G := G) (V := V) (Z := Z) (t₀ := t₀)
+      hVpreimage hVcover hGanchored
+  exact ⟨hVcover, hWcover, hZcover⟩
+
 /-- The forward map in a `LocalGluingData` patch is a bijection from its source
 patch to its target patch. -/
 theorem forward_bijOn {n : WithTop ℕ∞} {F G : M → M} {U V : Set M}
@@ -1861,6 +1893,60 @@ theorem exists_finset_subtype_timeDependent_iUnion_compatible_sourceTarget_openP
     exact (hcover_Icc hτIcc).1
   · intro τ hτIcc
     exact (hcover_Icc hτIcc).2
+
+/-- Paired fixed-preimage interval selection from only a base-time source cover.
+The target cover and both fixed preimage covers are derived from local gluing
+data and forward anchoring at the base time. -/
+theorem exists_finset_subtype_timeDependent_iUnion_compatible_sourceTarget_openPreimage_Icc_subset_timeSet_cover_of_source_iUnion_at
+    [CompactSpace M] {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (W Z : ι → Set M) (timeSet : Set ℝ) (t₀ : ℝ)
+    (htimeSet : timeSet ∈ 𝓝 t₀)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t) (G i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (F i t) (F j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (G i t) (G j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ F i τ x ∈ W i)
+    (hVpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ V τ i ↔ G i τ x ∈ Z i)
+    (hWopen : ∀ i, IsOpen (W i)) (hZopen : ∀ i, IsOpen (Z i))
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i)
+    (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i)
+    (hanchored : ∀ i, ∀ x ∈ U t₀ i, F i t₀ x = x) :
+    ∃ s : Finset ι, ∃ ε : ℝ,
+      0 < ε ∧
+        Icc (t₀ - ε) (t₀ + ε) ⊆ timeSet ∧
+          Set.univ ⊆ ⋃ i : {i // i ∈ s}, U t₀ i ∧
+            Set.univ ⊆ ⋃ i : {i // i ∈ s}, V t₀ i ∧
+              (∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) →
+                Set.univ ⊆ ⋃ i : {i // i ∈ s}, U τ i) ∧
+                (∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) →
+                  Set.univ ⊆ ⋃ i : {i // i ∈ s}, V τ i) ∧
+                  Set.univ ⊆ ⋃ i : {i // i ∈ s}, W i ∧
+                    Set.univ ⊆ ⋃ i : {i // i ∈ s}, Z i ∧
+                      (∀ t : ℝ, ∀ i : {i // i ∈ s},
+                        LocalGluingData (I := I) (M := M) n
+                          (F i t) (G i t) (U t i) (V t i)) ∧
+                        (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                          EqOn (F i t) (F j t) (U t i ∩ U t j)) ∧
+                          (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                            EqOn (G i t) (G j t) (V t i ∩ V t j)) ∧
+                            (∀ τ : ℝ, ∀ i : {i // i ∈ s}, ∀ x : M,
+                              x ∈ U τ i ↔ F i τ x ∈ W i) ∧
+                              (∀ τ : ℝ, ∀ i : {i // i ∈ s}, ∀ x : M,
+                                x ∈ V τ i ↔ G i τ x ∈ Z i) ∧
+                                (∀ i : {i // i ∈ s}, IsOpen (W i)) ∧
+                                  (∀ i : {i // i ∈ s}, IsOpen (Z i)) := by
+  rcases target_and_fixed_preimage_covers_at_of_source_cover_anchor
+      (I := I) (M := M) (n := n) (F := F) (G := G) (U := U) (V := V)
+      (W := W) (Z := Z) (t₀ := t₀) (fun i ↦ hlocal t₀ i)
+      hUpreimage hVpreimage hUcover hanchored with
+    ⟨hVcover, hWcover, hZcover⟩
+  exact
+    exists_finset_subtype_timeDependent_iUnion_compatible_sourceTarget_openPreimage_Icc_subset_timeSet_cover_of_iUnion_at
+      (I := I) (M := M) F G U V W Z timeSet t₀ htimeSet hlocal hFcompat
+      hGcompat hUpreimage hVpreimage hWopen hZopen hUcover hVcover hWcover
+      hZcover hUwithin hVwithin
 
 /-- Compactness restricts a time-dependent compatible local-gluing family to a
 finite subtype selected at a base time, and finite source/target persistence
