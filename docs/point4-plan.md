@@ -1690,10 +1690,14 @@ finite-cover boundary without separately projecting openness, maps-to, inverse,
 and `C³` fields.  The lifted chart helper now also has a selected-shrink
 `exists_open_nhds_localGluingData_subset_of_lifted_openPartialHomeomorph_model`
 form, keeping the cover-selection membership/subset facts while packaging the
-per-slice inverse-function output directly.  The remaining lift must still
-supply the chart-domain shrinking/source-membership hypotheses and combine
-these local patches with manifold-level flow compatibility before producing
-`C³` diffeomorphism slices.
+per-slice inverse-function output directly.  The model-space Picard layer now
+has corresponding
+`exists_open_nhds_localGluingData_subset_of_contDiffAt_model` and
+`flow_timeSlice_exists_lifted_open_nhds_localGluingData_...` adapters, so a
+single chartwise ODE time-slice can be selected as a named local gluing package.
+The remaining lift must still supply the chart-domain shrinking/source-membership
+hypotheses and combine these local patches with manifold-level flow compatibility
+before producing `C³` diffeomorphism slices.
 On the final bundling side, `SmoothSelfDiffeomorph3.ofInverse` now packages
 mutually inverse `C³` self-maps into a bundled `SmoothSelfDiffeomorph3`, with
 simp readouts for the forward and inverse maps.  Thus the eventual glued-flow
