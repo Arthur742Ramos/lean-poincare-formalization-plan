@@ -443,6 +443,28 @@ theorem exists_interior_compact_cover_with_intersections_of_compact_cover
     compactCoverIntersections_eq Kc,
     hcover_int, hcover⟩
 
+/-- Trivialization-specialized refinement package.  An ordinary finite compact
+cover subordinate to a finite family of trivialization base sets can be
+replaced by an interior-covering compact cover subordinate to those same base
+sets, with exact compact pairwise overlaps. -/
+theorem exists_interior_compact_trivialization_cover_with_intersections_of_compact_cover
+    {X Fiber Z : Type*} [TopologicalSpace X] [T2Space X] [LocallyCompactSpace X]
+    [TopologicalSpace Fiber] [TopologicalSpace Z] {proj : Z → X}
+    {ι : Type*} [Finite ι]
+    (et : ι → _root_.Bundle.Trivialization Fiber proj)
+    (Kc₀ : ι → TopologicalSpace.Compacts X)
+    (hKc₀ : ∀ i, (Kc₀ i : Set X) ⊆ (et i).baseSet)
+    (hcover₀ : (⋃ i, (Kc₀ i : Set X)) = Set.univ) :
+    ∃ (Kc : ι → TopologicalSpace.Compacts X)
+      (Ko : ι → ι → TopologicalSpace.Compacts X),
+      (∀ i, (Kc i : Set X) ⊆ (et i).baseSet) ∧
+        (∀ i j, (Ko i j : Set X) ⊆ (Kc i : Set X) ∩ (Kc j : Set X)) ∧
+        (∀ i j, (Ko i j : Set X) = (Kc i : Set X) ∩ (Kc j : Set X)) ∧
+        (⋃ i, interior (Kc i : Set X)) = Set.univ ∧
+        (⋃ i, (Kc i : Set X)) = Set.univ :=
+  exists_interior_compact_cover_with_intersections_of_compact_cover
+    (U := fun i ↦ (et i).baseSet) Kc₀ hKc₀ hcover₀ fun i ↦ (et i).open_baseSet
+
 private noncomputable def compactCurveOfEventuallyMemOnSet
     (K : Set M) (y : ℝ → M) (s : Set ℝ) (t : ℝ) (hy_t : y t ∈ K) : ℝ → K :=
   by

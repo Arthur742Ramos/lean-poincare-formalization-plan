@@ -2253,7 +2253,11 @@ finite compact cover of `univ`. The refinement bridge
 `exists_interior_compact_cover_with_intersections_of_compact_cover` now turns an
 ordinary finite compact chart cover subordinate to finite open patches into an
 interior-covering compact cover subordinate to the same patches, with canonical
-pairwise compact overlaps supplied by `compactCoverIntersections`. The
+pairwise compact overlaps supplied by `compactCoverIntersections`. Its
+trivialization-base specialization
+`exists_interior_compact_trivialization_cover_with_intersections_of_compact_cover`
+packages the same refinement directly for finite families of
+`Bundle.Trivialization.baseSet`s. The
 remaining non-identity gauge work is to use that refined chart data end to end
 inside the selected Banach chart/gauge-flow constructions, and then integrate
 these scalar route theorems with the full local-existence and PDE estimate

@@ -1027,7 +1027,9 @@ now packages the matching intrinsic boundary
        an ordinary finite compact chart cover subordinate to finite open
        patches into an interior-covering compact cover subordinate to the same
        patches, with canonical compact overlaps supplied as exact pairwise
-       intersections. The remaining non-identity gauge task is to use that
+       intersections; a trivialization-base specialization provides the same
+       package directly for finite families of `Bundle.Trivialization`
+       base sets. The remaining non-identity gauge task is to use that
        refined chart data end to end inside the selected Banach chart/gauge-flow
        constructions, alongside the full Ricci-DeTurck Banach chart/PDE
        estimates.
