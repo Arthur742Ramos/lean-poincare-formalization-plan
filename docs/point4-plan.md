@@ -2276,11 +2276,18 @@ and
 `pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel`
 consume local equality with the selected variational model flow plus the
 model-flow spatial derivative, producing the same tangent-coordinate derivative
-package. Thus the remaining dynamic obligations are narrowed to proving that
-the selected gauge maps are locally equal to the variational model flow in the
-fixed chart, supplying the corresponding model-flow spatial derivative
-hypotheses from the Picard/variational estimates, and proving the scalar
-velocity identity from the selected gauge-flow/PDE construction. The
+package. The local-equality input can now be supplied as manifold-side gluing
+data:
+`fixedChartModel_eventuallyEq_nhdsWithin_range_of_eqOn_source` converts a
+neighborhood `EqOn` statement for a time slice into the required
+`𝓝[range I]` model-coordinate eventual equality, and
+`pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventually_eqOn_variationalFlow_hasFDerivWithinAt_fixedChart`
+packages that conversion with the variational model-flow spatial derivative.
+Thus the remaining dynamic obligations are narrowed to proving the needed local
+`EqOn` data for the selected gauge maps from the gluing/Picard construction,
+supplying the corresponding model-flow spatial derivative hypotheses from the
+Picard/variational estimates, and proving the scalar velocity identity from the
+selected gauge-flow/PDE construction. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational

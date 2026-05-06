@@ -4739,6 +4739,33 @@ theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_hasFDerivWithinAt_fix
   exact pullbackMetricTangentCoordinateMap_eq_of_hasFDerivWithinAt_fixedChart
     (I := I) (M := M) Φ t τ x (A τ) hτ.1 hτ.2
 
+/-- A manifold-neighborhood `EqOn` statement for a fixed time slice gives the
+model-coordinate eventual equality required by the fixed-chart tangent bridge.
+
+This is the conversion used after local gluing data identifies a manifold
+time-slice with a model flow on an open neighborhood of the source point. -/
+theorem fixedChartModel_eventuallyEq_nhdsWithin_range_of_eqOn_source
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M) (model : E → E) {U : Set M}
+    (hU : U ∈ 𝓝 x)
+    (heq : EqOn
+      (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+      (fun z : M ↦ model ((extChartAt I x) z)) U) :
+    (fun y : E ↦ (extChartAt I ((Φ t) x)) ((Φ τ) ((extChartAt I x).symm y)))
+        =ᶠ[𝓝[range I] ((extChartAt I x) x)] model := by
+  have hpre :
+      (extChartAt I x).symm ⁻¹' U ∈ 𝓝[range I] ((extChartAt I x) x) := by
+    simpa using
+      (extChartAt_preimage_mem_nhdsWithin (I := I) (x := x) (s := univ) (t := U)
+        (by simpa using hU))
+  filter_upwards [hpre, extChartAt_target_mem_nhdsWithin (I := I) x] with y hyU hyTarget
+  have hy := heq hyU
+  calc
+    (extChartAt I ((Φ t) x)) ((Φ τ) ((extChartAt I x).symm y))
+        = model ((extChartAt I x) ((extChartAt I x).symm y)) := hy
+    _ = model y := by
+      rw [(extChartAt I x).right_inv hyTarget]
+
 /-- If the fixed-chart representative of the time-`τ` slice is locally equal
 to a model map whose spatial derivative is known, then the concrete
 tangent-coordinate component is eventually that model derivative. -/
@@ -4762,6 +4789,31 @@ theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_model_ha
   exact hτ.2.2.congr_of_eventuallyEq hτ.2.1
     (hτ.2.1.eq_of_nhdsWithin (by simpa [z₀] using hz₀_range))
 
+/-- Eventual local manifold `EqOn` gluing data to a model map is enough to
+select the model derivative for the fixed-chart tangent coordinate. -/
+theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventually_eqOn_model_hasFDerivWithinAt_fixedChart
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t : ℝ) (x : M) (model : ℝ → E → E) (A : ℝ → E →L[ℝ] E)
+    (hmodel : ∀ᶠ τ in 𝓝 t,
+      (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+        (∃ U : Set M,
+          U ∈ 𝓝 x ∧
+            EqOn
+              (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+              (fun z : M ↦ model τ ((extChartAt I x) z)) U) ∧
+        HasFDerivWithinAt (model τ) (A τ) (range I) ((extChartAt I x) x)) :
+    (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+        =ᶠ[𝓝 t] A := by
+  refine pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_model_hasFDerivWithinAt_fixedChart
+    (I := I) (M := M) Φ t x model A ?_
+  filter_upwards [hmodel] with τ hτ
+  rcases hτ with ⟨hsource, hlocal, hderiv⟩
+  rcases hlocal with ⟨U, hU, heq⟩
+  exact ⟨hsource,
+    fixedChartModel_eventuallyEq_nhdsWithin_range_of_eqOn_source
+      (I := I) (M := M) Φ t τ x (model τ) hU heq,
+    hderiv⟩
+
 /-- Variational-flow specialization of
 `pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_model_hasFDerivWithinAt_fixedChart`. -/
 theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_variationalFlow_hasFDerivWithinAt_fixedChart
@@ -4782,6 +4834,31 @@ theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_variatio
   exact pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_model_hasFDerivWithinAt_fixedChart
     (I := I) (M := M) Φ t x (fun τ y ↦ α.flow (y, τ))
     (fun τ : ℝ ↦ α.tangent xE τ) hmodel
+
+/-- Variational-flow specialization with local manifold `EqOn` gluing data
+instead of already converted model-coordinate eventual equality. -/
+theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventually_eqOn_variationalFlow_hasFDerivWithinAt_fixedChart
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (t : ℝ) (x : M) (xE : E)
+    (hmodel : ∀ᶠ τ in 𝓝 t,
+      (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+        (∃ U : Set M,
+          U ∈ 𝓝 x ∧
+            EqOn
+              (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+              (fun z : M ↦ α.flow ((extChartAt I x) z, τ)) U) ∧
+        HasFDerivWithinAt (fun y : E ↦ α.flow (y, τ))
+          (α.tangent xE τ) (range I) ((extChartAt I x) x)) :
+    (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+        =ᶠ[𝓝 t] (fun τ : ℝ ↦ α.tangent xE τ) := by
+  exact
+    pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventually_eqOn_model_hasFDerivWithinAt_fixedChart
+      (I := I) (M := M) Φ t x (fun τ y ↦ α.flow (y, τ))
+      (fun τ : ℝ ↦ α.tangent xE τ) hmodel
 
 /-- Ordinary eventual fixed-chart spatial derivative data supplies the same
 eventual identification for `A(τ)`. -/
