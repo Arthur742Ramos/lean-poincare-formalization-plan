@@ -1210,7 +1210,12 @@ so radius-shrinking chart arguments can use a ball source immediately.
 Product Picard convex-state hypotheses, the state-preserving closed-ball
 estimate specialization, and the componentwise closed-ball continuity estimate
 packages now feed those common-`Ioo` time-slice neighborhood-map and local
-open-partial-homeomorphism readouts directly.
+open-partial-homeomorphism readouts directly. The common-`Ioo` convex-state
+product route now also unpacks the forward and backward open-partial-homeomorphism
+packages into explicit open source and target neighborhoods with `MapsTo` and
+`InjOn`, via
+`ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball`
+and its backward analogue.
 The product-Picard convex-state route now also has the backward-time half of this
 local-inverse bridge: a left-endpoint Grönwall estimate feeds
 `flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball`,

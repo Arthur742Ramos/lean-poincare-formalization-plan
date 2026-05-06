@@ -9556,6 +9556,56 @@ theorem exists_ofProduct_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_Df_l
     α.exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDerivAt
       htime htbase (ball_subset_closedBall hx) ht hD_op_bound' hstrict
 
+/-- Product-Picard convex state-tube criterion for explicit common-subinterval
+open source and target neighborhoods of a forward time slice. -/
+theorem ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {Kop : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {a b t : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) (ht : t ∈ Ioo a b)
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hD_op_bound : ∀ τ ∈ Ioo a b,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ Kop)
+    {K : ℝ} {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Ico (t₀ : ℝ) tmax, Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Ico (t₀ : ℝ) tmax, ∀ z ∈ state τ,
+      ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Ico (t₀ : ℝ) tmax,
+      LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Ico (t₀ : ℝ) tmax, ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧
+        IsOpen W ∧
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (x, t) ∈ W ∧
+          MapsTo
+            (fun y : V =>
+              (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                (y, t)) U W ∧
+            InjOn
+              (fun y : V =>
+                (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                  (y, t)) U := by
+  rcases exists_ofProduct_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball
+      (β := β) hball hx htime htbase ht ht_forward hD_op_bound
+      hconv hmem hD_bound hDf_lip hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, t)) hφ hxφ hyφ
+
 /-- Product-Picard convex state-tube criterion for the common-subinterval
 neighborhood-map readout of a backward time slice.  The convex-state hypotheses
 prove strict spatial differentiability on the backward Picard interval, while
@@ -9655,6 +9705,56 @@ theorem exists_ofProduct_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_Df_l
   simpa [α] using
     α.exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDerivAt
       htime htbase (ball_subset_closedBall hx) ht hD_op_bound' hstrict
+
+/-- Product-Picard convex state-tube criterion for explicit common-subinterval
+open source and target neighborhoods of a backward time slice. -/
+theorem ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {Kop : ℝ≥0} {x : V} (hx : x ∈ ball x₀ r)
+    {a b t : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) (ht : t ∈ Ioo a b)
+    (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hD_op_bound : ∀ τ ∈ Ioo a b,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (x, τ))‖₊ ≤ Kop)
+    {K : ℝ} {KD : ℝ≥0} {state : ℝ → Set V}
+    (hconv : ∀ τ ∈ Ioc tmin (t₀ : ℝ), Convex ℝ (state τ))
+    (hmem : ∀ y ∈ closedBall x₀ r, ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, τ) ∈ state τ)
+    (hD_bound : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      ‖Df τ z‖ ≤ K)
+    (hDf_lip : ∀ τ ∈ Ioc tmin (t₀ : ℝ),
+      LipschitzOnWith KD (Df τ) (state τ))
+    (hder : ∀ τ ∈ Ioc tmin (t₀ : ℝ), ∀ z ∈ state τ,
+      HasFDerivWithinAt (f τ) (Df τ z) (state τ) z) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧
+        IsOpen W ∧
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (x, t) ∈ W ∧
+          MapsTo
+            (fun y : V =>
+              (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                (y, t)) U W ∧
+            InjOn
+              (fun y : V =>
+                (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                  (y, t)) U := by
+  rcases exists_ofProduct_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball
+      (β := β) hball hx htime htbase ht ht_backward hD_op_bound
+      hconv hmem hD_bound hDf_lip hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (y, t)) hφ hxφ hyφ
 
 /-- Center-trajectory common-subinterval tangent-map injectivity. -/
 theorem center_tangent_injective_common_Ioo_of_opNorm_bound
