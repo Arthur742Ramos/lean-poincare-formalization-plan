@@ -16540,6 +16540,86 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
           hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul)
       htime ht₀' hr hx htbase ht ht_backward hD_bound hDf_lip hder
 
+/-- Localized operator-ball componentwise closed-ball continuity estimates give
+the neighborhood-map equality on a common backward interior time subinterval. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall_flow_timeSlice_map_nhds_eq_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R Kf KD Lf BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (‖(1 : V →L[ℝ] V)‖₊ + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    Filter.map
+        (fun y : V =>
+          (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+            hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr).flow
+            (y, t))
+        (𝓝 x) =
+      𝓝 ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+        hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr).flow
+        (x, t)) := by
+  simpa [ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall]
+    using
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_map_nhds_eq_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+        (BA := ‖(1 : V →L[ℝ] V)‖₊ + a)
+        hf_lip hDf_lip hf_bound
+        (fun A hA => nnnorm_le_nnnorm_add_radius_of_mem_closedBall hA)
+        hD_bound hf_cont hDf_cont hmul htime ht₀' hr hx htbase ht ht_backward hder
+
+/-- Localized identity-ball componentwise closed-ball continuity estimates give
+the neighborhood-map equality on a common backward interior time subinterval. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall_flow_timeSlice_map_nhds_eq_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R Kf KD Lf BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (1 + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    Filter.map
+        (fun y : V =>
+          (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+            hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr).flow
+            (y, t))
+        (𝓝 x) =
+      𝓝 ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+        hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr).flow
+        (x, t)) := by
+  simpa [ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall]
+    using
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_map_nhds_eq_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+        (BA := 1 + a)
+        hf_lip hDf_lip hf_bound
+        (fun A hA => nnnorm_le_one_add_radius_of_mem_closedBall_one hA)
+        hD_bound hf_cont hDf_cont hmul htime ht₀' hr hx htbase ht ht_backward hder
+
 /-- Localized componentwise closed-ball continuity estimates give a local
 inverse on a common backward interior time subinterval of the state-preserving
 selected variational flow. -/
