@@ -702,7 +702,12 @@ now packages the matching intrinsic boundary
       extractors; raw intrinsic gauge-flow existence witnesses now project
      directly to gauge-reduced, intrinsic, and ordinary theorem packages from
     either pulled-back metric time-derivative or scalar inner-product derivative
-    data. The new `GaugeReduction.ModelGaugeFlowODE` module now isolates the
+    data. The compact open-preimage local-gluing raw existence API now also has
+    endpoint-retaining `Icc` companions for finite compact-core, finite
+    compact-manifold, arbitrary compact-subcover, restricted-pair preimage, and
+    ambient local-gluing inputs, so compact ODE output can keep closed Picard
+    endpoints through the raw gauge-flow boundary. The new
+    `GaugeReduction.ModelGaugeFlowODE` module now isolates the
     Banach-model Picard-Lindelöf local-flow theorem needed before the remaining
      positive-dimensional manifold ODE lift: it packages time-dependent local
      flows, their closed-interval ODE derivative, direct time-slice Lipschitz,

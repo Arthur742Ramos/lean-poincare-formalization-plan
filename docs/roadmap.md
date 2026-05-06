@@ -872,8 +872,13 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        local-readout routes now also have closed-interval companions that return
        `Icc` raw and fixed-IVP intrinsic witnesses; the theorem-family layer
        mirrors the global glued-slice closed route, while local-readout
-       fixed-IVP witnesses can use the generic family assembly bridge. The fixed-IVP
-       intrinsic DeTurck existence layer mirrors that proof-level shape for its
+       fixed-IVP witnesses can use the generic family assembly bridge. Compact
+        open-preimage local-gluing raw existence now also has endpoint-retaining
+        `Icc` companions for the finite compact-core, finite compact-manifold,
+        arbitrary compact-subcover, restricted-pair preimage, and ambient
+        local-gluing routes, so compact ODE output can avoid discarding closed
+        Picard endpoints at the raw boundary. The fixed-IVP
+        intrinsic DeTurck existence layer mirrors that proof-level shape for its
        derivative-data and identity constructors, and the theorem-family layer
        now mirrors it as well, including fixed-IVP extraction and named
        derivative-family constructors. Raw intrinsic gauge-flow existence
