@@ -1648,8 +1648,16 @@ preimages along pointwise time-continuous trajectories, and
 `timeDependent_iUnion_pointwiseSource_of_indexed_open_preimage_continuousWithinAt`
 does the same for patchwise local readouts.  The bridge
 `gluedMapOf_iUnion_eventually_eq_of_pointwiseSource` now packages the
-eventual equality between the canonical glued map and the selected local
-readout.  The new
+eventual pointwise equality between the canonical glued map and the selected
+local readout, while
+`gluedMapOf_iUnion_eventually_nhds_eqOn_of_pointwiseSource_open` and its
+relative-time-set form
+`gluedMapOf_iUnion_eventually_nhds_eqOn_of_pointwiseSource_openOn` upgrade that
+to eventual equality on an actual open neighborhood of the base point.  The
+raw local-readout constructor now also exposes
+`Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_eventually_nhds_eqOn`,
+which states the same local `EqOn` readout directly for the constructed
+`G.maps3` witness.  The new
 `continuousWithinAt_eval_of_timeDependent_iUnion_pointwiseSource_continuousWithinAt`
 and
 `hasDerivWithinAt_extChartAt_eval_of_timeDependent_iUnion_pointwiseSource`

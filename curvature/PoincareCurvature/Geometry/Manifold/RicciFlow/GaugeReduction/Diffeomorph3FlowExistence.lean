@@ -82,6 +82,50 @@ theorem gluedMapOf_iUnion_eventually_eq_of_pointwiseSource
       (hcompat τ)
   exact (hsource t ht i x hx).mono fun τ hτ ↦ hEq τ i hτ
 
+/-- Pointwise source persistence and open local patches let a time-dependent
+canonical glued map agree eventually with the chosen local readout on an
+actual neighborhood of the base point. -/
+theorem gluedMapOf_iUnion_eventually_nhds_eqOn_of_pointwiseSource_open
+    {ι : Type*} {default : ℝ → X → Y} {U : ℝ → ι → Set X}
+    {Fₗ : ι → ℝ → X → Y} {s : Set ℝ}
+    (hcompat : ∀ τ : ℝ, ∀ i j, EqOn (Fₗ i τ) (Fₗ j τ) (U τ i ∩ U τ j))
+    (hUopen : ∀ τ : ℝ, ∀ i, IsOpen (U τ i))
+    (hsource : ∀ t ∈ s, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[s] t, x ∈ U τ i) :
+    ∀ t ∈ s, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[s] t,
+        U τ i ∈ 𝓝 x ∧
+          EqOn (gluedMapOf_iUnion (default τ) (U τ) (fun j ↦ Fₗ j τ))
+            (Fₗ i τ) (U τ i) := by
+  intro t ht i x hx
+  filter_upwards [hsource t ht i x hx] with τ hτ
+  exact ⟨(hUopen τ i).mem_nhds hτ,
+    (gluedMapOf_iUnion_eqOn
+      (default := default τ) (U := U τ) (Fₗ := fun j ↦ Fₗ j τ)
+      (hcompat τ)) i⟩
+
+/-- Relative-time-set version of
+`gluedMapOf_iUnion_eventually_nhds_eqOn_of_pointwiseSource_open`, for local
+readouts and covers only controlled on the time set. -/
+theorem gluedMapOf_iUnion_eventually_nhds_eqOn_of_pointwiseSource_openOn
+    {ι : Type*} {default : ℝ → X → Y} {U : ℝ → ι → Set X}
+    {Fₗ : ι → ℝ → X → Y} {s : Set ℝ}
+    (hcompat : ∀ τ ∈ s, ∀ i j, EqOn (Fₗ i τ) (Fₗ j τ) (U τ i ∩ U τ j))
+    (hUopen : ∀ τ ∈ s, ∀ i, IsOpen (U τ i))
+    (hsource : ∀ t ∈ s, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[s] t, x ∈ U τ i) :
+    ∀ t ∈ s, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[s] t,
+        U τ i ∈ 𝓝 x ∧
+          EqOn (gluedMapOf_iUnion (default τ) (U τ) (fun j ↦ Fₗ j τ))
+            (Fₗ i τ) (U τ i) := by
+  intro t ht i x hx
+  filter_upwards [hsource t ht i x hx, self_mem_nhdsWithin] with τ hτ hτs
+  exact ⟨(hUopen τ hτs i).mem_nhds hτ,
+    (gluedMapOf_iUnion_eqOn
+      (default := default τ) (U := U τ) (Fₗ := fun j ↦ Fₗ j τ)
+      (hcompat τ hτs)) i⟩
+
 /-- A function is continuous on a domain if every point of the domain has an
 open neighborhood on which it agrees with some continuous local readout.  This
 is the topological continuity-gluing bridge used after chartwise Picard
@@ -6868,6 +6912,68 @@ theorem nonempty_of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_o
     defaultF defaultG Fₗ Gₗ U V hUcover hVcover hUopen hVopen hFcompat
     hGcompat hFmaps hGmaps hUwithinPoint hleftLocal hrightLocal hFLocal
     hGLocal hanchoredLocal hcontLocal hderivLocal hYLocal⟩
+
+/-- The gauge-flow witness produced by the compatible local-readout constructor
+is eventually locally equal to the selected local readout near any base point
+that lies in that local source patch. -/
+theorem of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_eventually_nhds_eqOn
+    {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M)
+    (hUcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, V t i)
+    (hUopen : ∀ t : ℝ, ∀ i, IsOpen (U t i))
+    (hVopen : ∀ t : ℝ, ∀ i, IsOpen (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hFmaps : ∀ t : ℝ, ∀ i, MapsTo (Fₗ i t) (Set.univ ∩ U t i) (V t i))
+    (hGmaps : ∀ t : ℝ, ∀ i, MapsTo (Gₗ i t) (Set.univ ∩ V t i) (U t i))
+    (hUwithinPoint : ∀ t ∈ Icc tmin tmax, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, x ∈ U τ i)
+    (hleftLocal : ∀ t : ℝ, ∀ i,
+      LeftInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ U t i))
+    (hrightLocal : ∀ t : ℝ, ∀ i,
+      RightInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ V t i))
+    (hFLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Fₗ i t) (U t i))
+    (hGLocal : ∀ t : ℝ, ∀ i, ContMDiffOn I I 3 (Gₗ i t) (V t i))
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) (Icc tmin tmax) t)
+    (hYLocal : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    ∀ t ∈ Icc tmin tmax, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t,
+        U τ i ∈ 𝓝 x ∧
+          EqOn
+            (fun z : M ↦
+              ((of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+                (I := I) (M := M) (X := X) (Y := Y)
+                (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+                defaultF defaultG Fₗ Gₗ U V hUcover hVcover hUopen hVopen
+                hFcompat hGcompat hFmaps hGmaps hUwithinPoint hleftLocal
+                hrightLocal hFLocal hGLocal hanchoredLocal hcontLocal
+                hderivLocal hYLocal).maps3 τ) z)
+            (Fₗ i τ) (U τ i) := by
+  intro t ht i x hx
+  have hglued :=
+    gluedMapOf_iUnion_eventually_nhds_eqOn_of_pointwiseSource_open
+      (default := defaultF) (U := U) (Fₗ := Fₗ)
+      (s := Icc tmin tmax) hFcompat hUopen hUwithinPoint t ht i x hx
+  filter_upwards [hglued] with τ hτ
+  refine ⟨hτ.1, ?_⟩
+  intro z hz
+  simpa
+    [of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin]
+    using hτ.2 hz
 
 /-- Build a raw `C^3` gauge-flow witness on the closed Picard interval from
 compatible local readouts on time-dependent open covers with pointwise source
