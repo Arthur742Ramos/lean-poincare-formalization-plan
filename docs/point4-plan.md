@@ -1674,6 +1674,11 @@ with proof-level
 `nonempty_ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`,
 so compact finite-cover local readouts can feed the intrinsic witness without
 manually unpacking the raw glued flow for each local solution.  The
+theorem-family layer now mirrors that finite time-dependent compatible-cover
+shape as
+`IntrinsicDeTurckGaugeFlowExistenceFamily.ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`
+with matching proof-level `nonempty_...`, so a compact finite-cover
+construction can be supplied uniformly over all initial-value problems.  The
 remaining lift must still supply the chart-domain shrinking/source-membership
 hypotheses and combine these local patches with manifold-level flow
 compatibility before producing `C³` diffeomorphism slices.
