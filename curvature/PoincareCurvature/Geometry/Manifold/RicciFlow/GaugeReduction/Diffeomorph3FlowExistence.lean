@@ -1478,6 +1478,56 @@ theorem source_cover_at_of_target_cover_anchor
   have hGxU : G i t₀ x ∈ U t₀ i := (hlocal i).backward_mapsTo_target hxV
   simpa [hanchored i x hxV] using hGxU
 
+/-- If the forward readout is anchored on the source patch, the backward
+readout is anchored on the target patch. -/
+theorem backward_anchor_of_forward_anchor {n : WithTop ℕ∞} {F G : M → M}
+    {U V : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V)
+    (hanchored : ∀ x ∈ U, F x = x) :
+    ∀ y ∈ V, G y = y := by
+  intro y hy
+  have hGyU : G y ∈ U := h.backward_mapsTo_target hy
+  have hFGy : F (G y) = G y := hanchored (G y) hGyU
+  calc
+    G y = F (G y) := hFGy.symm
+    _ = y := h.right_invOn ⟨Set.mem_univ y, hy⟩
+
+/-- If the backward readout is anchored on the target patch, the forward
+readout is anchored on the source patch. -/
+theorem forward_anchor_of_backward_anchor {n : WithTop ℕ∞} {F G : M → M}
+    {U V : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V)
+    (hanchored : ∀ y ∈ V, G y = y) :
+    ∀ x ∈ U, F x = x := by
+  intro x hx
+  have hFxV : F x ∈ V := h.forward_mapsTo_source hx
+  have hGFx : G (F x) = F x := hanchored (F x) hFxV
+  calc
+    F x = G (F x) := hGFx.symm
+    _ = x := h.left_invOn ⟨Set.mem_univ x, hx⟩
+
+/-- Time-dependent family form of
+`LocalGluingData.backward_anchor_of_forward_anchor` at a selected base time. -/
+theorem backward_anchor_at_of_forward_anchor
+    {ι : Type*} {n : WithTop ℕ∞} {F G : ι → ℝ → M → M}
+    {U V : ℝ → ι → Set M} {t₀ : ℝ}
+    (hlocal : ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t₀) (G i t₀) (U t₀ i) (V t₀ i))
+    (hanchored : ∀ i, ∀ x ∈ U t₀ i, F i t₀ x = x) :
+    ∀ i, ∀ y ∈ V t₀ i, G i t₀ y = y :=
+  fun i ↦ (hlocal i).backward_anchor_of_forward_anchor (hanchored i)
+
+/-- Time-dependent family form of
+`LocalGluingData.forward_anchor_of_backward_anchor` at a selected base time. -/
+theorem forward_anchor_at_of_backward_anchor
+    {ι : Type*} {n : WithTop ℕ∞} {F G : ι → ℝ → M → M}
+    {U V : ℝ → ι → Set M} {t₀ : ℝ}
+    (hlocal : ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t₀) (G i t₀) (U t₀ i) (V t₀ i))
+    (hanchored : ∀ i, ∀ y ∈ V t₀ i, G i t₀ y = y) :
+    ∀ i, ∀ x ∈ U t₀ i, F i t₀ x = x :=
+  fun i ↦ (hlocal i).forward_anchor_of_backward_anchor (hanchored i)
+
 /-- The forward map in a `LocalGluingData` patch is a bijection from its source
 patch to its target patch. -/
 theorem forward_bijOn {n : WithTop ℕ∞} {F G : M → M} {U V : Set M}
