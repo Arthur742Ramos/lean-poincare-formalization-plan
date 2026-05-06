@@ -1687,7 +1687,12 @@ non-finite raw open-preimage route has the matching
 `Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 adapter, so source persistence from fixed open target patches can be combined
 with named local inverse-function packages without manually projecting the
-openness, maps-to, inverse, and `C³` fields.  The
+openness, maps-to, inverse, and `C³` fields.  The fixed-IVP intrinsic layer now
+has the corresponding
+`IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin`
+wrapper with proof-level `nonempty_...`, so per-solution local gluing packages
+can cross the intrinsic boundary on the same open-preimage source-persistence
+hypotheses.  The
 package also recovers forward/backward `BijOn` facts from its maps-to and local
 inverse fields, so older inverse-function outputs that need bijectivity can be
 used without storing an additional independent field.  It also has a compactness
