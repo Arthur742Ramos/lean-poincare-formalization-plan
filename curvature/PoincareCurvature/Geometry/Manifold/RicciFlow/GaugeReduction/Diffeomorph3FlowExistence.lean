@@ -8542,6 +8542,80 @@ theorem exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingD
         intro i x hx
         exact hYτ i x hx)
 
+/-- Compact raw `C^3` gauge-flow existence on a small closed symmetric
+interval from ambient-time local gluing data.
+
+This is the endpoint-retaining companion to
+`exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`. -/
+theorem exists_Icc_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    [CompactSpace M] {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {timeSet : Set ℝ} {t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (htimeSet : timeSet ∈ 𝓝 t₀)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i)
+    (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ timeSet, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) timeSet t)
+    (hderivLocal : ∀ i, ∀ t ∈ timeSet, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) timeSet t)
+    (hYLocal : ∀ t ∈ timeSet, ∀ᶠ τ in 𝓝[timeSet] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    ∃ ε : ℝ, 0 < ε ∧
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X
+        (Icc (t₀ - ε) (t₀ + ε)) t₀) := by
+  have hVcover : Set.univ ⊆ ⋃ i, V t₀ i :=
+    LocalGluingData.target_cover_at_of_source_cover_anchor
+      (I := I) (M := M) (n := 3) (F := Fₗ) (G := Gₗ) (U := U) (V := V)
+      (t₀ := t₀) (fun i ↦ hlocal t₀ i) hUcover hanchoredLocal
+  have hWcover : Set.univ ⊆ ⋃ i, W i :=
+    _root_.RicciFlow.timeDependent_iUnion_target_cover_of_indexed_open_preimage_anchor
+      (F := Fₗ) (U := U) (W := W) (t₀ := t₀)
+      hUpreimage hUcover hanchoredLocal
+  rcases LocalGluingData.exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_Icc_subset_timeSet_cover_of_iUnion_at
+      (I := I) (M := M) Fₗ Gₗ U V W timeSet t₀ htimeSet hlocal hFcompat
+      hGcompat hUpreimage hWopen hUcover hVcover hWcover hUwithin hVwithin with
+    ⟨s, ε, hεpos, hIcc_subset, _hUsubcover_t₀, _hVsubcover_t₀, hUcover_Icc,
+      hVcover_Icc, _hWsubcover, hlocal_sub, hFcompat_sub, hGcompat_sub,
+      hUpreimage_sub, hWopen_sub⟩
+  refine ⟨ε, hεpos, ?_⟩
+  have ht₀Icc : t₀ ∈ Icc (t₀ - ε) (t₀ + ε) := by
+    constructor <;> linarith
+  exact
+    nonempty_of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc
+      (I := I) (M := M) (X := X) (Y := Y)
+      (timeSet := timeSet) (tmin := t₀ - ε) (tmax := t₀ + ε) (t₀ := t₀)
+      defaultF defaultG (fun i : {i // i ∈ s} ↦ Fₗ i)
+      (fun i : {i // i ∈ s} ↦ Gₗ i)
+      (fun τ (i : {i // i ∈ s}) ↦ U τ i)
+      (fun τ (i : {i // i ∈ s}) ↦ V τ i)
+      (fun i : {i // i ∈ s} ↦ W i)
+      hIcc_subset
+      (fun t ht ↦ hUcover_Icc ht)
+      (fun t ht ↦ hVcover_Icc ht)
+      (fun t _ht i ↦ hlocal_sub t i)
+      (fun t _ht i j ↦ hFcompat_sub t i j)
+      (fun t _ht i j ↦ hGcompat_sub t i j)
+      hUpreimage_sub hWopen_sub ht₀Icc
+      (fun i x hx ↦ hanchoredLocal i x hx)
+      (fun i t ht x hx ↦ hcontLocal i t (hIcc_subset ht) x hx)
+      (fun i t ht x hx ↦ hderivLocal i t (hIcc_subset ht) x hx)
+      (fun t ht ↦ by
+        filter_upwards [hYLocal t ht] with τ hYτ
+        intro i x hx
+        exact hYτ i x hx)
+
 /-- Build a raw `C^3` gauge-flow witness from compatible local readouts on a
 finite time-dependent open cover, with derivative and vector-field
 identification hypotheses stated against the local forward readouts.
