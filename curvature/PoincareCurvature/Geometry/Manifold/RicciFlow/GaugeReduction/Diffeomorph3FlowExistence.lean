@@ -1662,6 +1662,85 @@ theorem exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_of_iU
   · intro i
     exact hWopen i
 
+/-- Compactness restricts a time-dependent compatible local-gluing family and
+fixed source/target open-preimage covers to one finite subtype selected at a
+base time.  This paired version preserves both fixed-preimage descriptions,
+which is the finite-cover handoff for constructors using `F ⁻¹' W` and
+`G ⁻¹' Z` moving patches. -/
+theorem exists_finset_subtype_timeDependent_iUnion_compatible_sourceTarget_openPreimage_of_iUnion_at
+    [CompactSpace M] {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (W Z : ι → Set M)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t) (G i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (F i t) (F j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (G i t) (G j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ F i τ x ∈ W i)
+    (hVpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ V τ i ↔ G i τ x ∈ Z i)
+    (hWopen : ∀ i, IsOpen (W i)) (hZopen : ∀ i, IsOpen (Z i))
+    (t₀ : ℝ)
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hVcover : Set.univ ⊆ ⋃ i, V t₀ i)
+    (hWcover : Set.univ ⊆ ⋃ i, W i)
+    (hZcover : Set.univ ⊆ ⋃ i, Z i) :
+    ∃ s : Finset ι,
+      Set.univ ⊆ ⋃ i : {i // i ∈ s}, U t₀ i ∧
+        Set.univ ⊆ ⋃ i : {i // i ∈ s}, V t₀ i ∧
+          Set.univ ⊆ ⋃ i : {i // i ∈ s}, W i ∧
+            Set.univ ⊆ ⋃ i : {i // i ∈ s}, Z i ∧
+              (∀ t : ℝ, ∀ i : {i // i ∈ s},
+                LocalGluingData (I := I) (M := M) n
+                  (F i t) (G i t) (U t i) (V t i)) ∧
+                (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                  EqOn (F i t) (F j t) (U t i ∩ U t j)) ∧
+                  (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                    EqOn (G i t) (G j t) (V t i ∩ V t j)) ∧
+                    (∀ τ : ℝ, ∀ i : {i // i ∈ s}, ∀ x : M,
+                      x ∈ U τ i ↔ F i τ x ∈ W i) ∧
+                      (∀ τ : ℝ, ∀ i : {i // i ∈ s}, ∀ x : M,
+                        x ∈ V τ i ↔ G i τ x ∈ Z i) ∧
+                        (∀ i : {i // i ∈ s}, IsOpen (W i)) ∧
+                          (∀ i : {i // i ∈ s}, IsOpen (Z i)) := by
+  classical
+  rcases exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_of_iUnion_at
+      (I := I) (M := M) F G U V W hlocal hFcompat hGcompat hUpreimage
+      hWopen t₀ hUcover hVcover hWcover with
+    ⟨s, hUsubcover, hVsubcover, hWsubcover, hlocal_sub, hFcompat_sub,
+      hGcompat_sub, hUpreimage_sub, hWopen_sub⟩
+  rcases isCompact_univ.elim_finite_subcover Z hZopen hZcover with
+    ⟨sZ, hsZcover⟩
+  refine ⟨s ∪ sZ, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro x hx
+    rcases Set.mem_iUnion.mp (hUsubcover hx) with ⟨i, hxi⟩
+    exact Set.mem_iUnion.mpr
+      ⟨⟨i, Finset.mem_union.mpr (Or.inl i.2)⟩, hxi⟩
+  · intro x hx
+    rcases Set.mem_iUnion.mp (hVsubcover hx) with ⟨i, hxi⟩
+    exact Set.mem_iUnion.mpr
+      ⟨⟨i, Finset.mem_union.mpr (Or.inl i.2)⟩, hxi⟩
+  · intro x hx
+    rcases Set.mem_iUnion.mp (hWsubcover hx) with ⟨i, hxi⟩
+    exact Set.mem_iUnion.mpr
+      ⟨⟨i, Finset.mem_union.mpr (Or.inl i.2)⟩, hxi⟩
+  · intro x hx
+    rcases Set.mem_iUnion₂.mp (hsZcover hx) with ⟨i, hi, hxi⟩
+    exact Set.mem_iUnion.mpr
+      ⟨⟨i, Finset.mem_union.mpr (Or.inr hi)⟩, hxi⟩
+  · intro t i
+    exact hlocal t i
+  · intro t i j
+    exact hFcompat t i j
+  · intro t i j
+    exact hGcompat t i j
+  · intro τ i x
+    exact hUpreimage τ i x
+  · intro τ i x
+    exact hVpreimage τ i x
+  · intro i
+    exact hWopen i
+  · intro i
+    exact hZopen i
+
 /-- Compactness restricts a time-dependent compatible local-gluing family to a
 finite subtype selected at a base time, and finite source/target persistence
 then produces one closed time interval on which the selected source and target
