@@ -1584,10 +1584,10 @@ and
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius_of_contDiffAt_spaceTime`,
 so product Picard data can use either the natural operator-radius tangent bound
 or the identity-radius specialization to produce backward local gluing patches.
-The common non-overlap backward gluing patch also has fixed-time `C^3`
-operator-ball and identity-ball specializations, so callers that already have a
-time-slice `ContDiffAt` proof need not route through full space-time
-regularity.
+The common backward gluing patches now also have fixed-time `C^3` operator-ball
+and identity-ball specializations, including the overlap-`EqOn` local-gluing
+data, so callers that already have a time-slice `ContDiffAt` proof need not
+route through full space-time regularity.
 These ingredients now assemble into a local-cover raw-flow endpoint,
 `Diffeomorph3GaugeFlowOn.of_iUnion_gluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 with proof-level `nonempty_...`: global glued forward/backward slices plus
