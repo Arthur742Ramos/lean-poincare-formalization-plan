@@ -1365,6 +1365,45 @@ theorem mono {n : WithTop ℕ∞} {F G : M → M} {U V U' V' : Set M}
     intro x hx
     exact h.right_invOn ⟨hx.1, hV' hx.2⟩
 
+/-- Restrict a local gluing patch by replacing the source with the preimage of
+a smaller target patch.  The backward map automatically lands in the restricted
+source because the local right-inverse identity holds on the target patch. -/
+theorem restrict_source_preimage {n : WithTop ℕ∞} {F G : M → M}
+    {U V W : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V)
+    (hWopen : IsOpen W) (hWsub : W ⊆ V)
+    (hpreOpen : IsOpen (F ⁻¹' W)) (hpreSub : F ⁻¹' W ⊆ U) :
+    LocalGluingData (I := I) (M := M) n F G (F ⁻¹' W) W :=
+  h.mono hpreOpen hWopen hpreSub hWsub
+    (by
+      intro x hx
+      exact hx.2)
+    (by
+      intro y hy
+      have hyV : y ∈ V := hWsub hy.2
+      show F (G y) ∈ W
+      simpa [h.right_invOn ⟨Set.mem_univ y, hyV⟩] using hy.2)
+
+/-- Restrict a local gluing patch by replacing the target with the preimage of
+a smaller source patch under the backward map.  The forward map automatically
+lands in the restricted target because the local left-inverse identity holds on
+the source patch. -/
+theorem restrict_target_preimage {n : WithTop ℕ∞} {F G : M → M}
+    {U V Z : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V)
+    (hZopen : IsOpen Z) (hZsub : Z ⊆ U)
+    (hpreOpen : IsOpen (G ⁻¹' Z)) (hpreSub : G ⁻¹' Z ⊆ V) :
+    LocalGluingData (I := I) (M := M) n F G Z (G ⁻¹' Z) :=
+  h.mono hZopen hpreOpen hZsub hpreSub
+    (by
+      intro x hx
+      have hxU : x ∈ U := hZsub hx.2
+      show G (F x) ∈ Z
+      simpa [h.left_invOn ⟨Set.mem_univ x, hxU⟩] using hx.2)
+    (by
+      intro y hy
+      exact hy.2)
+
 /-- If source patches cover at a base time and the local forward readouts are
 anchored there, the target patches cover at the same time. -/
 theorem target_cover_at_of_source_cover_anchor
