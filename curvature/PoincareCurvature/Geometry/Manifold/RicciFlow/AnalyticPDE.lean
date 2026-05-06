@@ -26,6 +26,66 @@ open scoped Bundle Manifold ContDiff NNReal Topology
 namespace RicciFlow
 namespace AnalyticPDE
 
+/-- A derivative in the compact-open sup norm differentiates a time-difference
+after evaluation at a moving point.  The spatial curve only has to be continuous
+at the time in question: the section derivative controls the first-order
+remainder uniformly on the compact domain, and continuity of the derivative
+section supplies the value at the limiting point. -/
+theorem HasDerivWithinAt.continuousMap_moving_eval_sub_const
+    {K : Type*} [TopologicalSpace K] [CompactSpace K]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {u : ℝ → C(K, E)} {u' : C(K, E)} {s : Set ℝ} {t : ℝ}
+    (hu : HasDerivWithinAt u u' s t)
+    {x : ℝ → K} (hx : Filter.Tendsto x (𝓝[s] t) (𝓝 (x t))) :
+    HasDerivWithinAt (fun τ : ℝ ↦ u τ (x τ) - u t (x τ)) (u' (x t)) s t := by
+  have hrem :
+      (fun τ : ℝ ↦ (u τ - u t - (τ - t) • u') (x τ)) =o[𝓝[s] t]
+        fun τ : ℝ ↦ τ - t := by
+    refine Asymptotics.IsLittleO.of_bound ?_
+    intro c hc
+    filter_upwards [Asymptotics.IsLittleO.bound hu.isLittleO hc] with τ hτ
+    exact (ContinuousMap.norm_coe_le_norm (u τ - u t - (τ - t) • u') (x τ)).trans hτ
+  have hderiv_eval_tendsto :
+      Filter.Tendsto (fun τ : ℝ ↦ u' (x τ) - u' (x t)) (𝓝[s] t) (𝓝 0) := by
+    have hu'_tendsto :
+        Filter.Tendsto (fun y : K ↦ u' y) (𝓝 (x t)) (𝓝 (u' (x t))) :=
+      map_continuousAt u' (x t)
+    have hconst :
+        Filter.Tendsto (fun _ : ℝ ↦ u' (x t)) (𝓝[s] t) (𝓝 (u' (x t))) :=
+      tendsto_const_nhds
+    simpa using (hu'_tendsto.comp hx).sub hconst
+  have hderiv_eval :
+      (fun τ : ℝ ↦ u' (x τ) - u' (x t)) =o[𝓝[s] t]
+        fun _ : ℝ ↦ (1 : ℝ) :=
+    (Asymptotics.isLittleO_one_iff ℝ).2 hderiv_eval_tendsto
+  have htime :
+      (fun τ : ℝ ↦ τ - t) =O[𝓝[s] t] fun τ : ℝ ↦ τ - t :=
+    Asymptotics.isBigO_refl _ _
+  have hmove :
+      (fun τ : ℝ ↦ (τ - t) • (u' (x τ) - u' (x t))) =o[𝓝[s] t]
+        fun τ : ℝ ↦ τ - t := by
+    simpa using htime.smul_isLittleO hderiv_eval
+  have htotal :
+      (fun τ : ℝ ↦
+        (u τ - u t - (τ - t) • u') (x τ) +
+          (τ - t) • (u' (x τ) - u' (x t))) =o[𝓝[s] t]
+        fun τ : ℝ ↦ τ - t :=
+    hrem.add hmove
+  refine HasDerivWithinAt.of_isLittleO ?_
+  simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm, smul_sub] using htotal
+
+/-- Unrestricted version of
+`HasDerivWithinAt.continuousMap_moving_eval_sub_const`. -/
+theorem HasDerivAt.continuousMap_moving_eval_sub_const
+    {K : Type*} [TopologicalSpace K] [CompactSpace K]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {u : ℝ → C(K, E)} {u' : C(K, E)} {t : ℝ}
+    (hu : HasDerivAt u u' t)
+    {x : ℝ → K} (hx : Filter.Tendsto x (𝓝 t) (𝓝 (x t))) :
+    HasDerivAt (fun τ : ℝ ↦ u τ (x τ) - u t (x τ)) (u' (x t)) t := by
+  rw [← hasDerivWithinAt_univ] at hu ⊢
+  exact HasDerivWithinAt.continuousMap_moving_eval_sub_const hu (by simpa using hx)
+
 /-- A forward local solution of a Banach-space evolution equation
 `d u / dt = F t u` with initial value `u t₀ = u₀`. -/
 structure BanachEvolutionLocalSolution
@@ -1044,6 +1104,109 @@ theorem BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_hasDerivWithi
   simpa [L] using
     (BanachEvolutionLocalSolutionIn.continuousLinearMap_hasDerivWithinAt_Ici_of_mem_Ico
       (F := A) (stateSet := stateSet) L sol ht)
+
+/-- Interior moving-point version of
+`BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_hasDerivAt_of_mem_Ioo`.
+The finite-cover Banach derivative is first read as a whole compact coordinate
+component, so the time-difference may be evaluated at a moving compact point
+without differentiating the point curve. -/
+theorem BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_timeDifference_hasDerivAt_of_mem_Ioo
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {t₀ : ℝ}
+    {g₀ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover}
+    (sol : BanachEvolutionLocalSolutionIn A stateSet t₀ g₀)
+    (i : κ) {x : ℝ → Kc i}
+    {t : ℝ} (ht : t ∈ Ioo t₀ sol.terminalTime)
+    (hx : Filter.Tendsto x (𝓝 t) (𝓝 (x t))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve τ)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve t)).1 i (x τ))
+      ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (x t)) t := by
+  let L :
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →L[ℝ] C(Kc i, BilF) :=
+    (ContinuousLinearMap.proj i).comp
+      (((compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) et Kc hKc Ko hKo).subtypeL).comp
+        (toCompatibleCoordFamilySubmoduleContinuousLinearMap
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover))
+  have hcomponent :
+      HasDerivAt (fun τ : ℝ ↦ L (sol.curve τ)) (L (A t (sol.curve t))) t :=
+    BanachEvolutionLocalSolutionIn.continuousLinearMap_hasDerivAt_of_mem_Ioo
+      (F := A) (stateSet := stateSet) L sol ht
+  simpa [L] using HasDerivAt.continuousMap_moving_eval_sub_const hcomponent hx
+
+/-- Right-interval moving-point version of
+`BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_hasDerivWithinAt_Ici_of_mem_Ico`. -/
+theorem BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_timeDifference_hasDerivWithinAt_Ici_of_mem_Ico
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {t₀ : ℝ}
+    {g₀ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover}
+    (sol : BanachEvolutionLocalSolutionIn A stateSet t₀ g₀)
+    (i : κ) {x : ℝ → Kc i}
+    {t : ℝ} (ht : t ∈ Ico t₀ sol.terminalTime)
+    (hx : Filter.Tendsto x (𝓝[Ici t] t) (𝓝 (x t))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve τ)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve t)).1 i (x τ))
+      ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (x t)) (Ici t) t := by
+  let L :
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →L[ℝ] C(Kc i, BilF) :=
+    (ContinuousLinearMap.proj i).comp
+      (((compatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) et Kc hKc Ko hKo).subtypeL).comp
+        (toCompatibleCoordFamilySubmoduleContinuousLinearMap
+          (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover))
+  have hcomponent :
+      HasDerivWithinAt (fun τ : ℝ ↦ L (sol.curve τ)) (L (A t (sol.curve t))) (Ici t) t :=
+    BanachEvolutionLocalSolutionIn.continuousLinearMap_hasDerivWithinAt_Ici_of_mem_Ico
+      (F := A) (stateSet := stateSet) L sol ht
+  simpa [L] using HasDerivWithinAt.continuousMap_moving_eval_sub_const hcomponent hx
 
 /-- Each scalar bilinear-coordinate component of a finite-cover Banach metric-section solution
 satisfies the projected ODE.  This removes the last abstract readout from coordinate-level

@@ -1000,9 +1000,14 @@ now packages the matching intrinsic boundary
        coordinate, coordinate-model, and field-level data now restrict to smaller
        time sets or lift through fixed-IVP, theorem-family, and raw-existence
        gauge-flow APIs, with explicit neighborhood-time hypotheses on the
-       model/field bundle routes. This leaves the full positive-dimensional
-       `metricBilinearCoordinateField` Fréchet/readout derivative itself as the
-       remaining primitive time-regularity input. Two thin extension
+       model/field bundle routes. The finite-cover analytic layer now also
+       proves the moving compact-coordinate time-difference directly from the
+       Banach section derivative in sup norm via
+       `HasDerivAt.continuousMap_moving_eval_sub_const` and the
+       `coordBilinearFormReadoutMap_timeDifference` wrappers. The remaining
+       non-identity gauge task is to connect that section-norm bridge, or the
+       full positive-dimensional `metricBilinearCoordinateField`
+       Fréchet/readout route, to the selected raw gauge-flow realization. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`

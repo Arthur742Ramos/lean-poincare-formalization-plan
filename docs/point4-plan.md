@@ -565,6 +565,12 @@ of the non-identity gauge calculation is discharged once the named
 time-direction part of that derivative is now formalized directly from
 `HasTimeDerivativeAt` / `HasTimeDerivativeOn`; the remaining positive-dimensional
 field derivative is the moving spatial-coordinate part.
+In parallel, the finite-cover Banach-section route now proves the moving
+time-difference directly in the section norm once the selected compact
+coordinate readout is identified with the metric realization. That route avoids
+reconstructing the time-difference from fixed-point scalar readouts, but it has
+not yet been connected end-to-end to the raw gauge-flow
+`metricBilinearCoordinateField` construction.
 The same centered formula now applies to any coordinate curve that is eventually
 stationary at the chart center, covering the no-spatial-motion case needed by
 identity/static gauges.
@@ -2178,6 +2184,21 @@ it to tangent vectors; matching one-sided `HasDerivWithinAt` variants on
 `Ici t` are also available at the Picard interval endpoints.  This connects the
 Banach Picard metric curve directly to the weaker time-only dynamic pullback
 interface on both interior and boundary-reduced routes.
+The same finite-cover layer now also has the section-norm moving-evaluation
+bridge
+`HasDerivAt.continuousMap_moving_eval_sub_const` /
+`HasDerivWithinAt.continuousMap_moving_eval_sub_const`, plus the concrete
+metric-section wrappers
+`BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_timeDifference_hasDerivAt_of_mem_Ioo`
+and
+`BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_timeDifference_hasDerivWithinAt_Ici_of_mem_Ico`.
+These lemmas differentiate the time-difference
+`coord(sol.curve τ)(x τ) - coord(sol.curve t)(x τ)` at a moving compact
+coordinate point directly from the Banach derivative in sup norm. They remove
+the need to rebuild this time-difference from scalar fixed-point readouts, but
+still require the geometric realization/equality step that identifies the
+finite-cover coordinate component with the raw gauge-flow
+`metricBilinearCoordinateField` along the selected moving chart curve.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts
