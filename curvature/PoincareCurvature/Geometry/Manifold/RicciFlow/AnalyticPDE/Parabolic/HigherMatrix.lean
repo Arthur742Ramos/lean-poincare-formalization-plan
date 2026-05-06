@@ -22,6 +22,29 @@ open scoped Topology NNReal BigOperators Matrix.Norms.Elementwise
 namespace RicciFlow
 namespace AnalyticPDE
 
+/-- Continuous linear insertion of one matrix entry. -/
+def matrixSingleContinuousLinearMap {m n A : Type*} [Fintype m] [Fintype n]
+    [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A]
+    (i : m) (j : n) : A →L[ℝ] Matrix m n A :=
+  (ContinuousLinearMap.single ℝ (fun _ : m => n → A) i).comp
+    (ContinuousLinearMap.single ℝ (fun _ : n => A) j)
+
+@[simp]
+theorem matrixSingleContinuousLinearMap_apply {m n A : Type*} [Fintype m] [Fintype n]
+    [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A]
+    (i : m) (j : n) (a : A) :
+    matrixSingleContinuousLinearMap (m := m) (n := n) (A := A) i j a =
+      Matrix.single i j a := by
+  ext i' j'
+  change (Pi.single i (Pi.single j a) : m → n → A) i' j' = Matrix.single i j a i' j'
+  by_cases hi : i' = i
+  · subst i'
+    by_cases hj : j' = j
+    · subst j'
+      simp [Matrix.single]
+    · simp [Matrix.single, hj, Ne.symm hj]
+  · simp [Matrix.single, hi, Ne.symm hi]
+
 namespace ParabolicC2AlphaNormLe
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
@@ -61,6 +84,41 @@ theorem matrix_apply_c2AlphaNormLe {m n A : Type*} [Fintype m] [Fintype n]
     (ContinuousLinearMap.proj j : (n → A) →L[ℝ] A).comp
       (ContinuousLinearMap.proj i : Matrix m n A →L[ℝ] n → A)
   simpa [L] using h.continuousLinearMap L
+
+/-- Entrywise full higher parabolic controls assemble into a matrix-valued full higher
+parabolic norm ball by inserting entries and summing them. -/
+theorem matrix_c2AlphaNormLe_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A]
+    {N : m → n → ℝ} {M : ℝ × X → Matrix m n A}
+    (h : ∀ i j, ParabolicC2AlphaNormLe (N i j) α (fun z => M z i j) s) :
+    ParabolicC2AlphaNormLe
+      (∑ p : m × n,
+        continuousLinearMapRadius (X := X) (E := A)
+          (matrixSingleContinuousLinearMap (m := m) (n := n) (A := A) p.1 p.2) *
+          N p.1 p.2) α M s := by
+  classical
+  let L : m × n → A →L[ℝ] Matrix m n A := fun p =>
+    matrixSingleContinuousLinearMap (m := m) (n := n) (A := A) p.1 p.2
+  have hsum := finset_sum (X := X) (E := Matrix m n A) (α := α) (s := s)
+    (S := Finset.univ)
+    (N := fun p : m × n =>
+      continuousLinearMapRadius (X := X) (E := A) (L p) * N p.1 p.2)
+    (u := fun p z => L p (M z p.1 p.2)) ?_
+  · have hfun :
+        (fun z : ℝ × X => ∑ p : m × n, L p (M z p.1 p.2)) = M := by
+      funext z
+      calc
+        (∑ p : m × n, L p (M z p.1 p.2))
+            = ∑ p : m × n, Matrix.single p.1 p.2 (M z p.1 p.2) := by
+                apply Finset.sum_congr rfl
+                intro p _hp
+                simp [L]
+        _ = M z := by
+                rw [← Finset.univ_product_univ, Finset.sum_product]
+                exact (Matrix.matrix_eq_sum_single (M z)).symm
+    simpa [hfun] using hsum
+  · intro p _hp
+    exact (h p.1 p.2).continuousLinearMap (L p)
 
 /-- Finite Pi-valued value-level `C^{0,α}` control from entrywise higher parabolic
 single-radius controls. -/
@@ -1392,6 +1450,18 @@ theorem matrix_apply_c2AlphaOn {m n A : Type*} [Fintype m] [Fintype n]
     (ContinuousLinearMap.proj j : (n → A) →L[ℝ] A).comp
       (ContinuousLinearMap.proj i : Matrix m n A →L[ℝ] n → A)
   simpa [L] using h.continuousLinearMap L
+
+/-- Entrywise higher parabolic membership assembles into matrix-valued higher parabolic
+membership. -/
+theorem matrix_c2AlphaOn_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A]
+    {M : ℝ × X → Matrix m n A}
+    (h : ∀ i j, ParabolicC2AlphaOn α (fun z => M z i j) s) :
+    ParabolicC2AlphaOn α M s := by
+  classical
+  choose N _hN hN using h
+  exact of_normLe (ParabolicC2AlphaNormLe.matrix_c2AlphaNormLe_of_entries
+    (X := X) (α := α) (s := s) (N := N) (M := M) hN)
 
 /-- Finite Pi-valued value-level `C^{0,α}` membership from coordinatewise higher parabolic
 membership. -/
