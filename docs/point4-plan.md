@@ -1905,7 +1905,10 @@ product-Picard-Lindelöf wrappers, including the open-product-domain
 common radius-specialized `r ≤ R` form, so chart-local product Picard
 hypotheses no longer need a caller-side conversion to a continuous product flow
 or separate variational package before proving the gauge-pulled metric time
-derivative.
+derivative. The geometric pushed-vector-slot closed-Picard endpoints now also
+have direct product-Picard-Lindelöf and `r ≤ R` wrappers, in both ordinary
+metric-coordinate and open-product-domain forms, so final scalar identities
+written in actual tangent vectors can start from the Picard package directly.
 Consequently, a Picard-Lindelöf hypothesis for the product variational system
 also constructs `VariationalLocalFlowSolution` directly after the same base-ball
 restriction, with a specialized constructor that discharges this restriction
