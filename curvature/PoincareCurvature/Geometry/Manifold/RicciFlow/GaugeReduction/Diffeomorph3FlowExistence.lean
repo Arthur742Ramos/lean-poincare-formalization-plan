@@ -954,6 +954,52 @@ structure LocalGluingData
   left_invOn : LeftInvOn G F (Set.univ ∩ U)
   right_invOn : RightInvOn G F (Set.univ ∩ V)
 
+namespace LocalGluingData
+
+theorem forward_mapsTo_source {n : WithTop ℕ∞} {F G : M → M} {U V : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V) :
+    MapsTo F U V := by
+  intro x hx
+  exact h.forward_mapsTo ⟨Set.mem_univ x, hx⟩
+
+theorem backward_mapsTo_target {n : WithTop ℕ∞} {F G : M → M} {U V : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V) :
+    MapsTo G V U := by
+  intro y hy
+  exact h.backward_mapsTo ⟨Set.mem_univ y, hy⟩
+
+/-- The forward map in a `LocalGluingData` patch is a bijection from its source
+patch to its target patch. -/
+theorem forward_bijOn {n : WithTop ℕ∞} {F G : M → M} {U V : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V) :
+    BijOn F U V := by
+  refine ⟨h.forward_mapsTo_source, ?_, ?_⟩
+  · intro x hx y hy hxy
+    calc
+      x = G (F x) := (h.left_invOn ⟨Set.mem_univ x, hx⟩).symm
+      _ = G (F y) := by rw [hxy]
+      _ = y := h.left_invOn ⟨Set.mem_univ y, hy⟩
+  · intro y hy
+    refine ⟨G y, h.backward_mapsTo_target hy, ?_⟩
+    exact h.right_invOn ⟨Set.mem_univ y, hy⟩
+
+/-- The backward map in a `LocalGluingData` patch is a bijection from the target
+patch back to the source patch. -/
+theorem backward_bijOn {n : WithTop ℕ∞} {F G : M → M} {U V : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V) :
+    BijOn G V U := by
+  refine ⟨h.backward_mapsTo_target, ?_, ?_⟩
+  · intro y hy y' hy' hyy'
+    calc
+      y = F (G y) := (h.right_invOn ⟨Set.mem_univ y, hy⟩).symm
+      _ = F (G y') := by rw [hyy']
+      _ = y' := h.right_invOn ⟨Set.mem_univ y', hy'⟩
+  · intro x hx
+    refine ⟨F x, h.forward_mapsTo_source hx, ?_⟩
+    exact h.left_invOn ⟨Set.mem_univ x, hx⟩
+
+end LocalGluingData
+
 /-- Smoothness of a model map transports through source and target chart
 partials once the chart maps are smooth on the visible patches.  This is the
 `ContMDiffOn` counterpart of the lifted-model continuity bridge above, aimed
