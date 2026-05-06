@@ -2299,7 +2299,16 @@ For gluing outputs stated as equality of manifold-valued lifted maps,
 `fixedChartModel_eqOn_of_lifted_eqOn_source` and
 `fixedChartModel_eventuallyEq_nhdsWithin_range_of_lifted_eqOn_source` first push
 the equality through the fixed target chart, assuming the model values stay in
-that chart target.
+that chart target.  The new
+`fixedChartModel_eqOn_of_readout_lifted_eqOn_source`,
+`fixedChartModel_exists_nhds_eqOn_of_readout_lifted_eqOn_source`, and
+`fixedChartModel_eventually_exists_nhds_eqOn_of_eventually_readout_lifted_eqOn_source`
+compose that lifted model equality with the constructed-flow/local-readout
+equality exposed by the pointwise-source constructors, producing the exact
+local fixed-chart `EqOn` existential expected by `hA_model`.  The filter helper
+`eventually_nhds_of_eventually_nhdsWithin_Icc_of_mem_Ioo` also records the
+standard upgrade from closed-Picard relative eventuals to ordinary eventuals at
+interior times.
 The quantified component-level route is also available as
 `pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel_eqOn`,
 so downstream scalar selectors can now consume manifold-side `EqOn` gluing data

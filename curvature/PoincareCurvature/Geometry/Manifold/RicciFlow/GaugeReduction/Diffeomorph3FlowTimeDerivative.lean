@@ -28,6 +28,23 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
   [SigmaCompactSpace M]
 
+/-- A relative eventual statement upgrades to an ordinary-neighborhood eventual
+statement when the restricting set is itself a neighborhood of the base point. -/
+theorem eventually_nhds_of_eventually_nhdsWithin_of_mem_nhds
+    {X : Type*} [TopologicalSpace X] {s : Set X} {x : X} {p : X → Prop}
+    (hs : s ∈ 𝓝 x) (h : ∀ᶠ y in 𝓝[s] x, p y) :
+    ∀ᶠ y in 𝓝 x, p y := by
+  simpa [nhdsWithin_eq_nhds.2 hs] using h
+
+/-- At an interior point of a closed real interval, `𝓝[Icc a b] t` eventual
+statements are ordinary `𝓝 t` eventual statements. -/
+theorem eventually_nhds_of_eventually_nhdsWithin_Icc_of_mem_Ioo
+    {a b t : ℝ} {p : ℝ → Prop} (ht : t ∈ Ioo a b)
+    (h : ∀ᶠ τ in 𝓝[Icc a b] t, p τ) :
+    ∀ᶠ τ in 𝓝 t, p τ := by
+  refine eventually_nhds_of_eventually_nhdsWithin_of_mem_nhds ?_ h
+  exact Filter.mem_of_superset (isOpen_Ioo.mem_nhds ht) Ioo_subset_Icc_self
+
 /-- Model-space scalar chain rule for a time-dependent bilinear form evaluated on
 two time-dependent vector paths.  This is the finite-dimensional algebraic core
 of the dynamic gauge-pullback derivative calculation. -/
@@ -4789,6 +4806,77 @@ theorem fixedChartModel_eqOn_of_lifted_eqOn_source
           exact congrArg (fun w : M ↦ (extChartAt I ((Φ t) x)) w) (heq hz)
     _ = model ((extChartAt I x) z) := by
           rw [(extChartAt I ((Φ t) x)).right_inv (hmodel_target z hz)]
+
+/-- If the constructed slice agrees with a selected local readout, and that
+readout agrees with a lifted model map, then the constructed slice agrees with
+the model map after applying the fixed target chart. -/
+theorem fixedChartModel_eqOn_of_readout_lifted_eqOn_source
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M) (F : M → M) (model : E → E) {U V : Set M}
+    (hmodel_target : ∀ z ∈ U ∩ V,
+      model ((extChartAt I x) z) ∈ (extChartAt I ((Φ t) x)).target)
+    (hreadout : EqOn (fun z : M ↦ (Φ τ) z) F U)
+    (hlift : EqOn F
+      (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+        (model ((extChartAt I x) z))) V) :
+    EqOn
+      (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+      (fun z : M ↦ model ((extChartAt I x) z)) (U ∩ V) := by
+  refine fixedChartModel_eqOn_of_lifted_eqOn_source
+    (I := I) (M := M) Φ t τ x model hmodel_target ?_
+  intro z hz
+  calc
+    (Φ τ) z = F z := hreadout hz.1
+    _ = (extChartAt I ((Φ t) x)).symm (model ((extChartAt I x) z)) :=
+      hlift hz.2
+
+/-- Neighborhood version of
+`fixedChartModel_eqOn_of_readout_lifted_eqOn_source`.  The output has exactly
+the existential local `EqOn` shape used by the variational tangent-map bridge. -/
+theorem fixedChartModel_exists_nhds_eqOn_of_readout_lifted_eqOn_source
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M) (F : M → M) (model : E → E) {U V : Set M}
+    (hU : U ∈ 𝓝 x) (hV : V ∈ 𝓝 x)
+    (hmodel_target : ∀ z ∈ U ∩ V,
+      model ((extChartAt I x) z) ∈ (extChartAt I ((Φ t) x)).target)
+    (hreadout : EqOn (fun z : M ↦ (Φ τ) z) F U)
+    (hlift : EqOn F
+      (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+        (model ((extChartAt I x) z))) V) :
+    ∃ W : Set M, W ∈ 𝓝 x ∧
+      EqOn
+        (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+        (fun z : M ↦ model ((extChartAt I x) z)) W := by
+  refine ⟨U ∩ V, Filter.inter_mem hU hV, ?_⟩
+  exact fixedChartModel_eqOn_of_readout_lifted_eqOn_source
+    (I := I) (M := M) Φ t τ x F model hmodel_target hreadout hlift
+
+/-- Eventual local readout equality and eventual lifted model equality combine
+to the local fixed-chart `EqOn` event consumed by tangent-map model bridges. -/
+theorem fixedChartModel_eventually_exists_nhds_eqOn_of_eventually_readout_lifted_eqOn_source
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t : ℝ) (x : M) (F : ℝ → M → M) (model : ℝ → E → E)
+    {l : Filter ℝ}
+    (hreadout : ∀ᶠ τ in l,
+      ∃ U : Set M, U ∈ 𝓝 x ∧ EqOn (fun z : M ↦ (Φ τ) z) (F τ) U)
+    (hlift : ∀ᶠ τ in l,
+      ∃ V : Set M, V ∈ 𝓝 x ∧
+        (∀ z ∈ V,
+          model τ ((extChartAt I x) z) ∈ (extChartAt I ((Φ t) x)).target) ∧
+        EqOn (F τ)
+          (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+            (model τ ((extChartAt I x) z))) V) :
+    ∀ᶠ τ in l,
+      ∃ W : Set M, W ∈ 𝓝 x ∧
+        EqOn
+          (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+          (fun z : M ↦ model τ ((extChartAt I x) z)) W := by
+  filter_upwards [hreadout, hlift] with τ hτreadout hτlift
+  rcases hτreadout with ⟨U, hU, hreadoutU⟩
+  rcases hτlift with ⟨V, hV, htarget, hliftV⟩
+  exact fixedChartModel_exists_nhds_eqOn_of_readout_lifted_eqOn_source
+    (I := I) (M := M) Φ t τ x (F τ) (model τ) hU hV
+    (fun z hz ↦ htarget z hz.2) hreadoutU hliftV
 
 /-- A manifold-neighborhood lifted `EqOn` statement for a fixed time slice gives
 the model-coordinate eventual equality required by the fixed-chart tangent
