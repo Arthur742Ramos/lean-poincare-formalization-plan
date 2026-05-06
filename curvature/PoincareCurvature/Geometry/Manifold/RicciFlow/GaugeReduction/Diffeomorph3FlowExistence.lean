@@ -1447,6 +1447,22 @@ theorem target_cover_at_of_source_cover_anchor
   have hFxV : F i t₀ x ∈ V t₀ i := (hlocal i).forward_mapsTo_source hxU
   simpa [hanchored i x hxU] using hFxV
 
+/-- If target patches cover at a base time and the local backward readouts are
+anchored there, the source patches cover at the same time. -/
+theorem source_cover_at_of_target_cover_anchor
+    {ι : Type*} {n : WithTop ℕ∞} {F G : ι → ℝ → M → M}
+    {U V : ℝ → ι → Set M} {t₀ : ℝ}
+    (hlocal : ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t₀) (G i t₀) (U t₀ i) (V t₀ i))
+    (hVcover : Set.univ ⊆ ⋃ i, V t₀ i)
+    (hanchored : ∀ i, ∀ x ∈ V t₀ i, G i t₀ x = x) :
+    Set.univ ⊆ ⋃ i, U t₀ i := by
+  intro x hx
+  rcases Set.mem_iUnion.mp (hVcover hx) with ⟨i, hxV⟩
+  refine Set.mem_iUnion.mpr ⟨i, ?_⟩
+  have hGxU : G i t₀ x ∈ U t₀ i := (hlocal i).backward_mapsTo_target hxV
+  simpa [hanchored i x hxV] using hGxU
+
 /-- The forward map in a `LocalGluingData` patch is a bijection from its source
 patch to its target patch. -/
 theorem forward_bijOn {n : WithTop ℕ∞} {F G : M → M} {U V : Set M}
