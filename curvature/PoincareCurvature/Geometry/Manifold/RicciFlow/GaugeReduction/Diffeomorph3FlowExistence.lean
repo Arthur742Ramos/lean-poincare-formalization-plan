@@ -7159,6 +7159,72 @@ theorem exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingD
         filter_upwards [hYLocal t ht] with τ hYτ i x hx
         exact hYτ i x hx)
 
+/-- Compact raw `C^3` gauge-flow existence from local gluing patches that are
+first restricted to paired fixed-preimage patches.  This is the handoff from
+ordinary local inverse-function output to the compact constructor whose moving
+source and target patches are exactly `Fₗ i τ ⁻¹' W i` and `Gₗ i τ ⁻¹' Z i`. -/
+theorem exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_restrictedPairPreimage_localGluingData_of_spaceTime_continuous_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    [CompactSpace M] {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {timeSet : Set ℝ} {t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W Z : ι → Set M)
+    (htimeSet : timeSet ∈ 𝓝 t₀)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hWopen : ∀ i, IsOpen (W i))
+    (hZopen : ∀ i, IsOpen (Z i))
+    (hWsub : ∀ t i, W i ⊆ V t i)
+    (hZsub : ∀ t i, Z i ⊆ U t i)
+    (hFpreOpen : ∀ t i, IsOpen ((Fₗ i t) ⁻¹' W i))
+    (hGpreOpen : ∀ t i, IsOpen ((Gₗ i t) ⁻¹' Z i))
+    (hFpreSubZ : ∀ t i, (Fₗ i t) ⁻¹' W i ⊆ Z i)
+    (hGpreSubW : ∀ t i, (Gₗ i t) ⁻¹' Z i ⊆ W i)
+    (hUcover : Set.univ ⊆ ⋃ i, (Fₗ i t₀) ⁻¹' W i)
+    (hUspaceCont : ∀ i, ∀ x ∈ U t₀ i,
+      ContinuousWithinAt (fun p : ℝ × M ↦ Fₗ i p.1 p.2)
+        (timeSet ×ˢ Set.univ) (t₀, x))
+    (hVspaceCont : ∀ i, ∀ x ∈ V t₀ i,
+      ContinuousWithinAt (fun p : ℝ × M ↦ Gₗ i p.1 p.2)
+        (timeSet ×ˢ Set.univ) (t₀, x))
+    (hanchoredLocal : ∀ i, ∀ x ∈ (Fₗ i t₀) ⁻¹' W i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ timeSet, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) timeSet t)
+    (hderivLocal : ∀ i, ∀ t ∈ timeSet, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) timeSet t)
+    (hYLocal : ∀ t ∈ timeSet, ∀ᶠ τ in 𝓝[timeSet] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    ∃ ε : ℝ, 0 < ε ∧
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X
+        (Ioo (t₀ - ε) (t₀ + ε)) t₀) := by
+  rcases LocalGluingData.timeDependent_restrict_preimages
+      (I := I) (M := M) Fₗ Gₗ U V W Z hlocal hFcompat hGcompat
+      hWopen hZopen hWsub hZsub hFpreOpen hGpreOpen hFpreSubZ hGpreSubW with
+    ⟨hlocal_pre, hFcompat_pre, hGcompat_pre⟩
+  exact
+    exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_spaceTime_continuous_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+      (I := I) (M := M) (X := X) (Y := Y)
+      (timeSet := timeSet) (t₀ := t₀)
+      defaultF defaultG Fₗ Gₗ
+      (fun τ i ↦ (Fₗ i τ) ⁻¹' W i)
+      (fun τ i ↦ (Gₗ i τ) ⁻¹' Z i)
+      W Z htimeSet hlocal_pre hFcompat_pre hGcompat_pre
+      (fun _τ _i _x ↦ Iff.rfl)
+      (fun _τ _i _x ↦ Iff.rfl)
+      hWopen hZopen hUcover
+      (fun i x hx ↦ hUspaceCont i x (hZsub t₀ i (hFpreSubZ t₀ i hx)))
+      (fun i x hx ↦ hVspaceCont i x (hWsub t₀ i (hGpreSubW t₀ i hx)))
+      hanchoredLocal
+      (fun i t ht x hx ↦ hcontLocal i t ht x (hZsub t i (hFpreSubZ t i hx)))
+      (fun i t ht x hx ↦ hderivLocal i t ht x (hZsub t i (hFpreSubZ t i hx)))
+      (fun t ht ↦ by
+        filter_upwards [hYLocal t ht] with τ hYτ i x hx
+        exact hYτ i x (hZsub τ i (hFpreSubZ τ i hx)))
+
 /-- Compact raw `C^3` gauge-flow existence on a small symmetric interval from
 ambient-time local gluing data.
 
