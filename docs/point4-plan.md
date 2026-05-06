@@ -1215,7 +1215,9 @@ product route now also unpacks the forward and backward open-partial-homeomorphi
 packages into explicit open source and target neighborhoods with `MapsTo` and
 `InjOn`, via
 `ofProduct_flow_timeSlice_exists_open_nhds_mapsTo_injOn_common_Ioo_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball`
-and its backward analogue.
+and its backward analogue. The same forward/backward convex-state common-`Ioo`
+route now also has open `BijOn` patch readouts and positive source-ball
+`MapsTo`/`InjOn` readouts.
 The product-Picard convex-state route now also has the backward-time half of this
 local-inverse bridge: a left-endpoint Grönwall estimate feeds
 `flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_backward_Icc_of_mem_ball`,
