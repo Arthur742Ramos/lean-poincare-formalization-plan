@@ -1018,10 +1018,12 @@ now packages the matching intrinsic boundary
        automatic. The route now also has wrappers that select the compact
        overlap piece internally from local compactness whenever the gauge point
        lies in `interior (Kc i)`, so callers no longer supply the target-domain
-       compact by hand. The remaining non-identity gauge task is to supply
-       finite-cover data or local refinements with interior coverage of the
-       gauge image points, alongside the full Ricci-DeTurck Banach chart/PDE
-       estimates.
+       compact by hand. A cover-level shrinking lemma now also turns finite
+       open covers of compact sets into compact subordinate pieces whose
+       interiors still cover. The remaining non-identity gauge task is to
+       connect the actual finite-cover chart data to that interior-covering
+       construction or to local refinements, alongside the full Ricci-DeTurck
+       Banach chart/PDE estimates.
        Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`

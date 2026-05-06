@@ -253,6 +253,50 @@ private theorem exists_compact_subset_interior_inter_open
   · intro y hy
     exact (hKsub hy).2
 
+/-- A finite open cover of a compact set admits compact cores subordinate to
+the open patches whose interiors still cover the original compact set.  This
+is the cover-level topological input needed to replace plain compact cover
+membership by interior compact-cover membership. -/
+theorem exists_compacts_interior_cover_of_finite_open_cover
+    {X : Type*} [TopologicalSpace X] [T2Space X] [LocallyCompactSpace X]
+    {ι : Type*} [Finite ι] {s : Set X} {U : ι → Set X}
+    (hs : IsCompact s) (hUopen : ∀ i, IsOpen (U i))
+    (hcover : s ⊆ ⋃ i, U i) :
+    ∃ K : ι → TopologicalSpace.Compacts X,
+      s ⊆ ⋃ i, interior (K i : Set X) ∧ ∀ i, (K i : Set X) ⊆ U i := by
+  have hfinite : ∀ x ∈ s, {i | x ∈ U i}.Finite := by
+    intro _x _hx
+    exact Set.finite_univ.subset (by intro i _hi; exact Set.mem_univ i)
+  rcases exists_subset_iUnion_closure_subset_t2space
+      (s := s) (u := U) hs hUopen hfinite hcover with
+    ⟨V, hVcover, hVopen, hVclosure, hVcompact⟩
+  let K : ι → TopologicalSpace.Compacts X := fun i ↦ ⟨closure (V i), hVcompact i⟩
+  refine ⟨K, ?_, ?_⟩
+  · intro x hx
+    rcases Set.mem_iUnion.mp (hVcover hx) with ⟨i, hxi⟩
+    refine Set.mem_iUnion.mpr ⟨i, ?_⟩
+    change x ∈ interior (closure (V i))
+    exact mem_interior_iff_mem_nhds.2
+      (Filter.mem_of_superset ((hVopen i).mem_nhds hxi) subset_closure)
+  · intro i
+    change closure (V i) ⊆ U i
+    exact hVclosure i
+
+/-- Whole-space version of
+`exists_compacts_interior_cover_of_finite_open_cover` for compact spaces. -/
+theorem exists_compacts_interior_univ_cover_of_finite_open_cover
+    {X : Type*} [TopologicalSpace X] [T2Space X] [LocallyCompactSpace X] [CompactSpace X]
+    {ι : Type*} [Finite ι] {U : ι → Set X}
+    (hUopen : ∀ i, IsOpen (U i)) (hcover : (⋃ i, U i) = Set.univ) :
+    ∃ K : ι → TopologicalSpace.Compacts X,
+      (⋃ i, interior (K i : Set X)) = Set.univ ∧ ∀ i, (K i : Set X) ⊆ U i := by
+  have hcover' : (Set.univ : Set X) ⊆ ⋃ i, U i := by
+    simpa [hcover]
+  rcases exists_compacts_interior_cover_of_finite_open_cover
+      (s := (Set.univ : Set X)) (U := U) isCompact_univ hUopen hcover' with
+    ⟨K, hKcover, hKsub⟩
+  exact ⟨K, eq_univ_of_univ_subset hKcover, hKsub⟩
+
 private noncomputable def compactCurveOfEventuallyMemOnSet
     (K : Set M) (y : ℝ → M) (s : Set ℝ) (t : ℝ) (hy_t : y t ∈ K) : ℝ → K :=
   by

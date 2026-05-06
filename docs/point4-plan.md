@@ -2238,11 +2238,15 @@ and
 `metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_mem_interior_Kc_target_overlap_Ico`
 use local compactness of the finite-dimensional manifold to choose such a
 compact `K` whenever the gauge point is already in `interior (Kc i)`. Thus the
-target-domain overlap no longer has to be supplied by callers. The remaining
-non-identity gauge work is to provide finite-cover data or local refinements
-whose compact pieces have interiors covering the gauge image points, and then
-integrate these scalar route theorems with the full local-existence and PDE
-estimate layers.
+target-domain overlap no longer has to be supplied by callers. At the
+cover-construction level,
+`exists_compacts_interior_cover_of_finite_open_cover` and its compact-space
+`univ` variant now record the standard shrinking step: a finite open cover of a
+compact set can be replaced by compact subordinate pieces whose interiors still
+cover. The remaining non-identity gauge work is to connect the actual
+finite-cover chart data to such an interior-covering construction or local
+refinement, and then integrate these scalar route theorems with the full
+local-existence and PDE estimate layers.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts
