@@ -994,7 +994,9 @@ now packages the matching intrinsic boundary
        direct product-chain-rule bridge from full `metricBilinearCoordinateField`
        Fréchet/readout data to the derivative along the actual raw coordinate
        curve and then to the concrete moving `B(τ)` component, with
-       direct-velocity, readout-field, and within-set variants. The
+       direct-velocity, readout-field, and within-set variants; the ordinary
+       concrete component package now has the corresponding full/readout
+       metric-coordinate constructors. The
        coordinate, coordinate-model, and field-level data now restrict to smaller
        time sets or lift through fixed-IVP, theorem-family, and raw-existence
        gauge-flow APIs, with explicit neighborhood-time hypotheses on the
