@@ -2264,7 +2264,11 @@ any `s ⊆ Ioo tmin tmax` gives the required quantified
 `∃ D, HasDerivAt ... (D.comp A(t)) t` package. Thus the remaining dynamic
 obligations are to construct/supply that variational tangent-map identification
 and prove the scalar velocity identity from the selected gauge-flow/PDE
-construction. At the
+construction. The smooth-realization route also has the specialized bridge
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
+which combines the interior-cover scalar selector with that variational
+tangent-map identification and states the remaining scalar identity in actual
+pushed-forward tangent-vector slots using `Df t (α.flow (xE, t))`. At the
 cover-construction level,
 `exists_compact_subset_interior_cover_inter_open` chooses an index and compact
 overlap from an interior-covering compact family and an open target patch, while

@@ -1028,7 +1028,12 @@ now packages the matching intrinsic boundary
        derivative datum can now be filled from
        `SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap`
        once the concrete gauge tangent map is identified locally with a
-       `VariationalLocalFlowSolution` tangent map. Cover-level selection
+       `VariationalLocalFlowSolution` tangent map. A specialized
+       smooth-realization bridge,
+       `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
+       now combines that variational tangent-map identification with the
+       interior-cover scalar selector and leaves only a geometric-slot scalar
+       identity using `Df t (α.flow (xE, t))`. Cover-level selection
        and shrinking lemmas now choose
        an index plus compact overlap from an interior-covering compact family
        and turn finite open covers of compact sets into compact subordinate
@@ -1043,8 +1048,8 @@ now packages the matching intrinsic boundary
        base sets. The remaining non-identity gauge task is to use that
        refined chart data end to end inside the selected Banach chart/gauge-flow
        constructions, supply the variational tangent-map identification and
-       prove the scalar velocity obligation from the selected gauge-flow/PDE
-       construction, and supply the full
+       prove the remaining geometric-slot scalar velocity obligation from the
+       selected gauge-flow/PDE construction, and supply the full
        Ricci-DeTurck Banach chart/PDE estimates.
        Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
