@@ -1137,6 +1137,28 @@ theorem backward_mapsTo_target {n : WithTop ℕ∞} {F G : M → M} {U V : Set M
   intro y hy
   exact h.backward_mapsTo ⟨Set.mem_univ y, hy⟩
 
+/-- Restrict a local gluing patch to smaller open source and target patches,
+provided the forward and backward maps still land in the restricted patches. -/
+theorem mono {n : WithTop ℕ∞} {F G : M → M} {U V U' V' : Set M}
+    (h : LocalGluingData (I := I) (M := M) n F G U V)
+    (hU'open : IsOpen U') (hV'open : IsOpen V')
+    (hU' : U' ⊆ U) (hV' : V' ⊆ V)
+    (hFmaps : MapsTo F (Set.univ ∩ U') V')
+    (hGmaps : MapsTo G (Set.univ ∩ V') U') :
+    LocalGluingData (I := I) (M := M) n F G U' V' where
+  source_open := hU'open
+  target_open := hV'open
+  forward_mapsTo := hFmaps
+  backward_mapsTo := hGmaps
+  forward_contMDiffOn := h.forward_contMDiffOn.mono hU'
+  backward_contMDiffOn := h.backward_contMDiffOn.mono hV'
+  left_invOn := by
+    intro x hx
+    exact h.left_invOn ⟨hx.1, hU' hx.2⟩
+  right_invOn := by
+    intro x hx
+    exact h.right_invOn ⟨hx.1, hV' hx.2⟩
+
 /-- If source patches cover at a base time and the local forward readouts are
 anchored there, the target patches cover at the same time. -/
 theorem target_cover_at_of_source_cover_anchor
