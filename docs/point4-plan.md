@@ -1742,9 +1742,12 @@ both the raw witness and the certificate needed to restrict the ambient DeTurck
 solution to the same closed symmetric interval.  The intrinsic DeTurck local
 solution records now have exact `restrictTimeSet` and `restrictSymmetricIcc`
 constructors, with chosen-background wrappers and simp lemmas for the resulting
-named `timeSet`; the remaining compact packaging step is to apply those
-restrictions to the selected fixed-IVP/theorem-family solutions and use the
-resulting time-set equalities when feeding `ofRawGaugeFlowOn`.  The
+named `timeSet`.  The raw-flow bridge now also has
+`IntrinsicDeTurckLocalSolution.nonempty_rawGaugeFlowOn_restrictTimeSet` and
+`..._restrictSymmetricIcc`, so a compact raw witness on the selected interval
+immediately repackages as a witness for the restricted local solution.  The
+remaining compact packaging step is to thread those restricted witnesses through
+the selected fixed-IVP/theorem-family solutions and `ofRawGaugeFlowOn`.  The
 fixed-IVP and theorem-family intrinsic layers now also expose
 `ofRawGaugeFlowOn` with proof-level `nonempty_ofRawGaugeFlowOn`, packaging raw
 witnesses on named time sets once those sets have been identified with the

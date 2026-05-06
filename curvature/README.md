@@ -716,11 +716,14 @@ now packages the matching intrinsic boundary
     `restrictTimeSet` and `restrictSymmetricIcc` constructors, including
     chosen-background wrappers and simp lemmas for the resulting `timeSet`, so
     compact intervals can be reflected in the named solution package rather than
-    only in its terminal time. The fixed-IVP and theorem-family intrinsic layers
-    now also have `ofRawGaugeFlowOn` / `nonempty_ofRawGaugeFlowOn` adapters for
-    raw witnesses on named time sets, so after callers apply those restrictions
-    and discharge the remaining time-set equality bookkeeping, the raw witnesses
-    cross the intrinsic boundary directly. The new
+    only in its terminal time, and raw-flow witnesses on those compact intervals
+    now repackage directly for the restricted local solution via
+    `nonempty_rawGaugeFlowOn_restrictTimeSet` and
+    `nonempty_rawGaugeFlowOn_restrictSymmetricIcc`. The fixed-IVP and
+    theorem-family intrinsic layers now also have `ofRawGaugeFlowOn` /
+    `nonempty_ofRawGaugeFlowOn` adapters for raw witnesses on named time sets,
+    so after callers thread those restricted witnesses through selected
+    solutions, the raw witnesses cross the intrinsic boundary directly. The new
     `GaugeReduction.ModelGaugeFlowODE` module now isolates the
     Banach-model Picard-Lindelöf local-flow theorem needed before the remaining
      positive-dimensional manifold ODE lift: it packages time-dependent local
@@ -1017,10 +1020,10 @@ velocity against genuine target Ricci data as
 `GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_neg_two_intrinsicRicciTensor`
 and its local-interval companion, after the pulled-back background connection is
 identified as Levi-Civita for the transformed metric. Point 4 still remains
-open because the missing pieces are applying the exact DeTurck time-set
-restriction constructors to compact local ODE/gluing output, feeding the
-resulting chosen packages through `ofRawGaugeFlowOn` with the required
-interval/time-set equalities, the remaining positive-dimensional scalar
+open because the missing pieces are threading the exact DeTurck time-set
+restrictions and compact raw ODE/gluing output through selected fixed-IVP and
+theorem-family solution packages, feeding the resulting chosen packages through
+`ofRawGaugeFlowOn`, the remaining positive-dimensional scalar
 time-regularity input for non-identity gauge-pulled metrics, and the quasilinear
 parabolic PDE layer, not bundle regularity. The
 parabolic PDE layer has proof-bearing groundwork in

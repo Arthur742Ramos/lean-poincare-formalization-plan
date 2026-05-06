@@ -10029,6 +10029,55 @@ theorem nonempty_toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn
 
 end Diffeomorph3GaugeFlowOn
 
+/-- Reinterpret a raw intrinsic DeTurck gauge-flow witness on a named smaller
+time set as a witness for the local solution restricted to that exact time set.
+
+The vector field is unchanged because `restrictTimeSet` keeps the metric and
+background families unchanged; the target time set reduces definitionally to
+the supplied set. -/
+theorem IntrinsicDeTurckLocalSolution.nonempty_rawGaugeFlowOn_restrictTimeSet
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Set.Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.toIntrinsicDeTurckSolution.metric
+        sol.toIntrinsicDeTurckSolution.background) s ivp.initialTime)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        (sol.restrictTimeSet s hT₀ hinterval hsub).toIntrinsicDeTurckSolution.metric
+        (sol.restrictTimeSet s hT₀ hinterval hsub).toIntrinsicDeTurckSolution.background)
+      (sol.restrictTimeSet s hT₀ hinterval hsub).toIntrinsicDeTurckSolution.timeSet
+      ivp.initialTime) := by
+  simpa [IntrinsicDeTurckLocalSolution.restrictTimeSet,
+    IntrinsicDeTurckSolution.restrictTimeSet] using hflow
+
+/-- Reinterpret a raw intrinsic DeTurck gauge-flow witness on a compact
+symmetric interval as a witness for the local solution restricted to that exact
+closed interval. -/
+theorem IntrinsicDeTurckLocalSolution.nonempty_rawGaugeFlowOn_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.toIntrinsicDeTurckSolution.timeSet)
+    (hflow : Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.toIntrinsicDeTurckSolution.metric
+        sol.toIntrinsicDeTurckSolution.background)
+      (Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) ivp.initialTime)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        (sol.restrictSymmetricIcc hε hsub).toIntrinsicDeTurckSolution.metric
+        (sol.restrictSymmetricIcc hε hsub).toIntrinsicDeTurckSolution.background)
+      (sol.restrictSymmetricIcc hε hsub).toIntrinsicDeTurckSolution.timeSet
+      ivp.initialTime) := by
+  simpa [IntrinsicDeTurckLocalSolution.restrictSymmetricIcc,
+    IntrinsicDeTurckLocalSolution.restrictTimeSet,
+    IntrinsicDeTurckSolution.restrictTimeSet] using hflow
+
 /-- Raw intrinsic DeTurck `C^3` gauge-flow existence data for every chosen
 DeTurck local solution of a fixed initial-value problem. -/
 structure IntrinsicDeTurckGaugeFlowExistence
