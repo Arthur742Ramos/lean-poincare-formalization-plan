@@ -1696,7 +1696,11 @@ covers known only on `Icc tmin tmax`.  The matching
 `..._localGluingData_pointwiseSource_...` and
 `..._openPreimage_localGluingData_...` adapters preserve the named
 local-inverse-function package and derive pointwise source persistence from
-fixed open target-preimage patches.  The fixed-IVP intrinsic
+fixed open target-preimage patches.  The ambient-time-set variant
+`Diffeomorph3GaugeFlowOn.of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+restricts local continuity and derivative data from a larger solution time set
+to the chosen closed Picard interval using the interval-subset proof.  The
+fixed-IVP intrinsic
 layer now exposes the same finite-cover shape
 as
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`

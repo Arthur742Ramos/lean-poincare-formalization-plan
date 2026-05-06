@@ -6185,6 +6185,84 @@ theorem nonempty_of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_loc
     hGcompat hUpreimage hWopen ht₀ hanchoredLocal hcontLocal hderivLocal
     hYLocal⟩
 
+/-- Build a raw `C^3` gauge-flow witness from interval-local compatible
+`LocalGluingData` readouts when local continuity and derivative data are stated
+relative to a larger ambient time set containing the closed Picard interval. -/
+noncomputable def of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {timeSet : Set ℝ} {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (hIcc_subset : Icc tmin tmax ⊆ timeSet)
+    (hUcover : ∀ t ∈ Icc tmin tmax, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t ∈ Icc tmin tmax, Set.univ ⊆ ⋃ i, V t i)
+    (hlocal : ∀ t ∈ Icc tmin tmax, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t ∈ Icc tmin tmax, ∀ i j, EqOn (Fₗ i t) (Fₗ j t)
+      (U t i ∩ U t j))
+    (hGcompat : ∀ t ∈ Icc tmin tmax, ∀ i j, EqOn (Gₗ i t) (Gₗ j t)
+      (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (ht₀ : t₀ ∈ Icc tmin tmax)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) timeSet t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) timeSet t)
+    (hYLocal : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ :=
+  of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    defaultF defaultG Fₗ Gₗ U V W hUcover hVcover hlocal hFcompat
+    hGcompat hUpreimage hWopen ht₀ hanchoredLocal
+    (fun i t ht x hx ↦ (hcontLocal i t ht x hx).mono hIcc_subset)
+    (fun i t ht x hx ↦ (hderivLocal i t ht x hx).mono hIcc_subset)
+    hYLocal
+
+/-- Proof-level raw `C^3` gauge-flow existence from interval-local compatible
+`LocalGluingData` readouts with local regularity stated on an ambient time set
+containing the closed Picard interval. -/
+theorem nonempty_of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {timeSet : Set ℝ} {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (hIcc_subset : Icc tmin tmax ⊆ timeSet)
+    (hUcover : ∀ t ∈ Icc tmin tmax, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t ∈ Icc tmin tmax, Set.univ ⊆ ⋃ i, V t i)
+    (hlocal : ∀ t ∈ Icc tmin tmax, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t ∈ Icc tmin tmax, ∀ i j, EqOn (Fₗ i t) (Fₗ j t)
+      (U t i ∩ U t j))
+    (hGcompat : ∀ t ∈ Icc tmin tmax, ∀ i j, EqOn (Gₗ i t) (Gₗ j t)
+      (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (ht₀ : t₀ ∈ Icc tmin tmax)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) timeSet t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) timeSet t)
+    (hYLocal : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀) :=
+  ⟨of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    (I := I) (M := M) (X := X) (Y := Y)
+    (timeSet := timeSet) (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+    defaultF defaultG Fₗ Gₗ U V W hIcc_subset hUcover hVcover hlocal
+    hFcompat hGcompat hUpreimage hWopen ht₀ hanchoredLocal hcontLocal
+    hderivLocal hYLocal⟩
+
 /-- Build a raw `C^3` gauge-flow witness from compatible local readouts on a
 finite time-dependent open cover, with derivative and vector-field
 identification hypotheses stated against the local forward readouts.
