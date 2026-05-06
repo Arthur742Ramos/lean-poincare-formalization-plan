@@ -1674,7 +1674,13 @@ eventually contained in its time-moved counterpart.  Its interval form
 `timeDependent_iUnion_cover_exists_Ioo_of_finite_subset`, based on the generic
 real-line extraction helper `exists_Ioo_inter_subset_of_mem_nhdsWithin`, turns
 that relative-filter cover persistence into an explicit open time interval
-around the base time.  The raw gauge-flow layer now has an interval-cover
+around the base time.  The closed-interval companions
+`exists_Icc_inter_subset_of_mem_nhdsWithin`,
+`timeDependent_iUnion_cover_exists_Icc_of_finite_subset`, and
+`timeDependent_iUnion₂_cover_exists_Icc_of_finite_subset` shrink that
+neighborhood to an `Icc` interval and synchronize finite source and target
+cover persistence, matching the interval-local raw gauge-flow constructors.
+The raw gauge-flow layer now has an interval-cover
 fallback constructor
 `Diffeomorph3GaugeFlowOn.of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`:
 it adds an identity `Option.none` patch outside the closed Picard interval and
