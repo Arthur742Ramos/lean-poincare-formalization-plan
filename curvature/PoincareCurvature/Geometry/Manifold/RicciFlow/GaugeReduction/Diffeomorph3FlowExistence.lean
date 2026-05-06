@@ -269,6 +269,24 @@ theorem isCompact_eventually_subset_of_forall_eventually_nhds_subset
   rcases Set.mem_iUnion.mp hxUnion with ⟨hxt, hyN⟩
   exact ha x hxt hyN
 
+/-- Compact source-persistence through a fixed target-preimage description.
+Once each compact point has a neighborhood whose images eventually remain in
+the fixed target patch, the whole compact source core eventually lies in the
+moving preimage patch. -/
+theorem isCompact_eventually_subset_of_open_preimage_forall_eventually_nhds_mapsTo
+    {α : Type*} {l : Filter α} {K : Set X} {U : α → Set X}
+    {F : α → X → Y} {V : Set Y}
+    (hU : ∀ a x, x ∈ U a ↔ F a x ∈ V)
+    (hK : IsCompact K)
+    (h : ∀ x ∈ K, ∃ N ∈ 𝓝 x, ∀ᶠ a in l, MapsTo (F a) N V) :
+    ∀ᶠ a in l, K ⊆ U a := by
+  refine isCompact_eventually_subset_of_forall_eventually_nhds_subset hK ?_
+  intro x hx
+  rcases h x hx with ⟨N, hN, hNmaps⟩
+  refine ⟨N, hN, ?_⟩
+  filter_upwards [hNmaps] with a ha y hyN
+  exact (hU a y).2 (ha hyN)
+
 /-- A finite time-dependent cover remains a cover in the relative time filter if
 each base-time patch is eventually contained in its time-moved counterpart.
 This is the cover-level companion to the per-index source-persistence
