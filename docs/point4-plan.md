@@ -1809,6 +1809,11 @@ finite-cover route can request named local packages directly from the ODE
 estimate layer.  The remaining lift must still supply the chart-domain
 shrinking/source-membership hypotheses and combine these local patches with
 manifold-level flow compatibility before producing `C³` diffeomorphism slices.
+On the gauge-transport side, the reduced solution has now crossed from the
+transported-background equation to genuine target Ricci data: the transformed
+velocity is exposed directly as
+`GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_neg_two_intrinsicRicciTensor`
+on the source time set and by a local-interval companion.
 On the final bundling side, `SmoothSelfDiffeomorph3.ofInverse` now packages
 mutually inverse `C³` self-maps into a bundled `SmoothSelfDiffeomorph3`, with
 simp readouts for the forward and inverse maps.  Thus the eventual glued-flow

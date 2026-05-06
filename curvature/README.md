@@ -998,11 +998,15 @@ proves that `leviCivitaConnection` preserves
 `C^1` Levi-Civita existence. It also proves that local-frame Gram determinants
 are uniformly bounded away from zero on compact subsets of a trivialization
 base, connecting the pointwise Gram determinant nonvanishing theorem to compact
-lower-bound data. Point 4 still remains open because the missing
-pieces are now the extension-independence upgrade from the current raw
-curvature/Ricci transport formulas to genuine target Levi-Civita/Ricci data
-along the gauge flow, and the quasilinear parabolic PDE layer, not bundle
-regularity. The parabolic PDE layer has proof-bearing groundwork in
+lower-bound data. The gauge-reduction layer now also exposes the transformed
+velocity against genuine target Ricci data as
+`GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_neg_two_intrinsicRicciTensor`
+and its local-interval companion, after the pulled-back background connection is
+identified as Levi-Civita for the transformed metric. Point 4 still remains
+open because the missing pieces are the compact raw `C^3` gauge-flow
+construction, the remaining positive-dimensional scalar time-regularity input
+for non-identity gauge-pulled metrics, and the quasilinear parabolic PDE layer,
+not bundle regularity. The parabolic PDE layer has proof-bearing groundwork in
 `AnalyticPDE/ParabolicHolder.lean`: parabolic distance, balls/cylinders,
 `C^{0,α}` control, local-base compatibility with the product topology for both
 parabolic balls and product cylinders, exact standard ball/cylinder

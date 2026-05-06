@@ -4875,6 +4875,39 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_intrin
   sol.transformed_velocity_eq_intrinsicRicciFlowRHS
     (sol.localInterval_subset_timeSet ht) x u v
 
+/-- The transformed velocity is the genuine intrinsic Ricci-flow velocity of
+the transformed metric, written directly as `-2 Ric`. -/
+theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_neg_two_intrinsicRicciTensor
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : GaugeReducedIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ sol.source.toIntrinsicDeTurckSolution.timeSet)
+    (x : M) (u v : TM x) :
+    sol.transformedVelocity t x u v =
+      (-2 : ℝ) *
+        intrinsicRicciTensor (I := I) (M := M) sol.transformedMetric t x u v := by
+  calc
+    sol.transformedVelocity t x u v =
+        intrinsicRicciFlowRHS (I := I) (M := M) sol.transformedMetric t x u v :=
+      sol.transformed_velocity_eq_intrinsicRicciFlowRHS ht x u v
+    _ = (-2 : ℝ) *
+        intrinsicRicciTensor (I := I) (M := M) sol.transformedMetric t x u v := by
+      rfl
+
+/-- Local-interval form of
+`GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_neg_two_intrinsicRicciTensor`. -/
+theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_neg_two_intrinsicRicciTensor_on_localInterval
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : GaugeReducedIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (ht : t ∈ Set.Icc ivp.initialTime sol.source.terminalTime)
+    (x : M) (u v : TM x) :
+    sol.transformedVelocity t x u v =
+      (-2 : ℝ) *
+        intrinsicRicciTensor (I := I) (M := M) sol.transformedMetric t x u v :=
+  sol.transformed_velocity_eq_neg_two_intrinsicRicciTensor
+    (sol.localInterval_subset_timeSet ht) x u v
+
 theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_pullbackBackgroundRicciFlowRHS
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (sol : GaugeReducedIntrinsicDeTurckLocalSolution
