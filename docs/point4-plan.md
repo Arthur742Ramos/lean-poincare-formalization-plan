@@ -2726,8 +2726,10 @@ higher-coordinate projections for finite Pi-valued functions. Existential
 higher membership and the higher
 submodule now also expose actual time, spatial, and second-spatial derivative
 witnesses with value-level `C^{0,α}` controls, without choosing a canonical
-derivative map. The higher submodule also has finite-Pi coordinate projection
-maps and inherits compact value readouts from that forgetful map: single
+derivative map, and the norm-ball layer can coarsen one chosen second jet's
+value and derivative components to the same `C^{0,α}` radius. The higher
+submodule also has finite-Pi coordinate projection maps and inherits compact
+value readouts from that forgetful map: single
 compact pieces, finite compact families, and the linear finite-cover readout
 all have sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, plus matching

@@ -233,7 +233,9 @@ continuity, continuous-linear-image `C^{0,α}` norm-ball controls, and full
 higher-coordinate projections for finite Pi-valued functions. Existential
 higher membership and the higher submodule now also expose time, spatial, and
 second-spatial derivative witnesses with value-level `C^{0,α}` controls. The
-higher submodule also has finite-Pi coordinate projection maps and
+higher norm-ball layer can coarsen one chosen second jet's value and derivative
+components to the same `C^{0,α}` radius. The higher submodule also has
+finite-Pi coordinate projection maps and
 exposes the induced compact value readouts on single compact pieces and finite
 compact families, including linear readout maps, sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, and the corresponding

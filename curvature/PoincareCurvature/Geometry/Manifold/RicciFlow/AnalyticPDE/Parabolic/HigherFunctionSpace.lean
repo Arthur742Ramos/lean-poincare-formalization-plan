@@ -422,6 +422,23 @@ theorem value_c0AlphaNormLe_self (h : ParabolicC2AlphaNormLe N α u s) :
   have hNu_le : Nu ≤ N := by linarith
   exact hu.mono_const hNu_le
 
+/-- A higher single-radius bound supplies one chosen second jet whose value and derivative
+components are all controlled by the same higher radius at the `C^{0,α}` level. -/
+theorem exists_secondJet_c0AlphaNormLe_self (h : ParabolicC2AlphaNormLe N α u s) :
+    ∃ J : ParabolicSecondJet u s,
+      ParabolicC0AlphaNormLe N α u s ∧
+        ParabolicC0AlphaNormLe N α J.spaceDeriv s ∧
+          ParabolicC0AlphaNormLe N α J.spaceSecondDeriv s ∧
+            ParabolicC0AlphaNormLe N α J.timeDeriv s := by
+  rcases h with
+    ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
+  have hNu_le : Nu ≤ N := by linarith
+  have hNx_le : Nx ≤ N := by linarith
+  have hNxx_le : Nxx ≤ N := by linarith
+  have hNt_le : Nt ≤ N := by linarith
+  exact ⟨J, hu.mono_const hNu_le, hx.mono_const hNx_le,
+    hxx.mono_const hNxx_le, ht.mono_const hNt_le⟩
+
 /-- The higher single radius controls the pointwise value norm on the domain. -/
 theorem norm_le (h : ParabolicC2AlphaNormLe N α u s) ⦃z : ℝ × X⦄ (hz : z ∈ s) :
     ‖u z‖ ≤ N :=
@@ -524,6 +541,18 @@ theorem exists_secondJet (h : ParabolicC2AlphaOn α u s) :
       (∃ Nt ≥ 0, ParabolicC0AlphaNormLe Nt α J.timeDeriv s) := by
   rcases h with ⟨N, _hN, hNu⟩
   exact hNu.exists_secondJet
+
+/-- Higher parabolic membership supplies one chosen second jet whose value and derivative
+components are all `C^{0,α}`. -/
+theorem exists_secondJet_c0AlphaOn (h : ParabolicC2AlphaOn α u s) :
+    ∃ J : ParabolicSecondJet u s,
+      ParabolicC0AlphaOn α u s ∧
+        ParabolicC0AlphaOn α J.spaceDeriv s ∧
+          ParabolicC0AlphaOn α J.spaceSecondDeriv s ∧
+            ParabolicC0AlphaOn α J.timeDeriv s := by
+  rcases h with ⟨N, _hN, hNu⟩
+  rcases hNu.exists_secondJet_c0AlphaNormLe_self with ⟨J, hu, hx, hxx, ht⟩
+  exact ⟨J, hu.c0AlphaOn, hx.c0AlphaOn, hxx.c0AlphaOn, ht.c0AlphaOn⟩
 
 theorem exists_timeDeriv (h : ParabolicC2AlphaOn α u s) :
     ∃ Dt : ℝ × X → E,
@@ -703,6 +732,16 @@ theorem piApplyLinearMap_apply {ι F : Type*} [Fintype ι] [NormedAddCommGroup F
 theorem c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
     ParabolicC0AlphaOn α (u : (ℝ × X) → E) s :=
   u.2.c0AlphaOn
+
+/-- A higher submodule element has a chosen second jet whose value and derivative components
+are all `C^{0,α}`. -/
+theorem exists_secondJet_c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
+    ∃ J : ParabolicSecondJet (u : (ℝ × X) → E) s,
+      ParabolicC0AlphaOn α (u : (ℝ × X) → E) s ∧
+        ParabolicC0AlphaOn α J.spaceDeriv s ∧
+          ParabolicC0AlphaOn α J.spaceSecondDeriv s ∧
+            ParabolicC0AlphaOn α J.timeDeriv s :=
+  u.2.exists_secondJet_c0AlphaOn
 
 theorem exists_timeDeriv (u : parabolicC2AlphaSubmodule X E α s) :
     ∃ Dt : ℝ × X → E,
