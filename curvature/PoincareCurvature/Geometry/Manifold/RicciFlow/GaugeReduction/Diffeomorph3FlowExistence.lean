@@ -213,6 +213,21 @@ theorem timeDependent_iUnion_target_cover_of_indexed_open_preimage_anchor
   have hFxW : F i t₀ x ∈ W i := (hUpreimage t₀ i x).1 hxU
   simpa [hanchored i x hxU] using hFxW
 
+/-- If base-time target patches cover and their local backward readouts are
+anchored, fixed source-preimage patches cover automatically. -/
+theorem timeDependent_iUnion_source_cover_of_indexed_open_preimage_anchor
+    {ι : Type*} {G : ι → ℝ → X → X}
+    {V : ℝ → ι → Set X} {Z : ι → Set X} {t₀ : ℝ}
+    (hVpreimage : ∀ τ : ℝ, ∀ i, ∀ x : X, x ∈ V τ i ↔ G i τ x ∈ Z i)
+    (hVcover : Set.univ ⊆ ⋃ i, V t₀ i)
+    (hanchored : ∀ i, ∀ x ∈ V t₀ i, G i t₀ x = x) :
+    Set.univ ⊆ ⋃ i, Z i := by
+  intro x hx
+  rcases Set.mem_iUnion.mp (hVcover hx) with ⟨i, hxV⟩
+  refine Set.mem_iUnion.mpr ⟨i, ?_⟩
+  have hGxZ : G i t₀ x ∈ Z i := (hVpreimage t₀ i x).1 hxV
+  simpa [hanchored i x hxV] using hGxZ
+
 /-- Extract an explicit open real interval from a relative neighborhood. -/
 theorem exists_Ioo_inter_subset_of_mem_nhdsWithin
     {s P : Set ℝ} {t : ℝ} (hP : P ∈ 𝓝[s] t) :
