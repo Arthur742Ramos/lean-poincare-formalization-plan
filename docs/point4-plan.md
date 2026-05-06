@@ -2261,10 +2261,20 @@ now has a generic variational bridge,
 `SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap`:
 an eventual identification with a `VariationalLocalFlowSolution` tangent map on
 any `s ⊆ Ioo tmin tmax` gives the required quantified
-`∃ D, HasDerivAt ... (D.comp A(t)) t` package. Thus the remaining dynamic
-obligations are to construct/supply that variational tangent-map identification
-and prove the scalar velocity identity from the selected gauge-flow/PDE
-construction. The smooth-realization route also has the specialized bridge
+`∃ D, HasDerivAt ... (D.comp A(t)) t` package. That eventual identification
+can now itself be produced from fixed-chart spatial derivative data:
+`pullbackMetricTangentCoordinateMap_eq_fderivWithin_fixedChart` identifies the
+concrete tangent-coordinate map with the `fderivWithin` of
+`extChartAt I ((Φ t) x) ∘ Φ τ ∘ (extChartAt I x).symm`, while
+`pullbackMetricTangentCoordinateMap_eventuallyEq_of_hasFDerivWithinAt_fixedChart`
+and
+`pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChart`
+package the corresponding eventual and quantified variational selectors. Thus
+the remaining dynamic obligations are narrowed to supplying the chartwise
+spatial derivative of the selected gauge maps from the variational model-flow
+construction and proving the scalar velocity identity from the selected
+gauge-flow/PDE construction. The smooth-realization route also has the
+specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
 tangent-map identification and states the remaining scalar identity in actual
