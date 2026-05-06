@@ -287,6 +287,40 @@ theorem isCompact_eventually_subset_of_open_preimage_forall_eventually_nhds_maps
   filter_upwards [hNmaps] with a ha y hyN
   exact (hU a y).2 (ha hyN)
 
+/-- Space-time continuity gives a spatial neighborhood whose points all map
+into a fixed open target patch for nearby times. -/
+theorem eventually_nhds_mapsTo_of_continuousWithinAt_prod
+    {α : Type*} [TopologicalSpace α] {s : Set α} {a : α}
+    {F : α → X → Y} {V : Set Y} {x : X}
+    (hcont : ContinuousWithinAt (fun p : α × X ↦ F p.1 p.2)
+      (s ×ˢ Set.univ) (a, x))
+    (hVopen : IsOpen V) (hxV : F a x ∈ V) :
+    ∃ N ∈ 𝓝 x, ∀ᶠ a' in 𝓝[s] a, MapsTo (F a') N V := by
+  have hpre : (fun p : α × X ↦ F p.1 p.2) ⁻¹' V ∈
+      𝓝[s ×ˢ Set.univ] (a, x) :=
+    hcont.preimage_mem_nhdsWithin (hVopen.mem_nhds hxV)
+  rcases mem_nhdsWithin_prod_iff.mp hpre with ⟨A, hA, N, hN, hsub⟩
+  refine ⟨N, by simpa using hN, ?_⟩
+  filter_upwards [hA] with a' haA y hyN
+  exact hsub (Set.mk_mem_prod haA hyN)
+
+/-- Compact source-persistence through fixed target-preimage patches from
+space-time continuity.  If a compact core lies in the base-time preimage patch,
+then it lies in the corresponding moving preimage patch for nearby times. -/
+theorem isCompact_eventually_subset_of_open_preimage_continuousWithinAt_prod
+    {α : Type*} [TopologicalSpace α] {s : Set α} {a : α}
+    {K : Set X} {U : α → Set X} {F : α → X → Y} {V : Set Y}
+    (hU : ∀ a x, x ∈ U a ↔ F a x ∈ V)
+    (hK : IsCompact K) (hVopen : IsOpen V) (hbase : K ⊆ U a)
+    (hcont : ∀ x ∈ K,
+      ContinuousWithinAt (fun p : α × X ↦ F p.1 p.2) (s ×ˢ Set.univ) (a, x)) :
+    ∀ᶠ a' in 𝓝[s] a, K ⊆ U a' := by
+  refine isCompact_eventually_subset_of_open_preimage_forall_eventually_nhds_mapsTo
+    hU hK ?_
+  intro x hx
+  exact eventually_nhds_mapsTo_of_continuousWithinAt_prod
+    (hcont x hx) hVopen ((hU a x).1 (hbase hx))
+
 /-- A finite time-dependent cover remains a cover in the relative time filter if
 each base-time patch is eventually contained in its time-moved counterpart.
 This is the cover-level companion to the per-index source-persistence
