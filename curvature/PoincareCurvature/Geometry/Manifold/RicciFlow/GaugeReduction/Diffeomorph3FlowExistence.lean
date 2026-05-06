@@ -7528,6 +7528,105 @@ theorem nonempty_of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSour
     hGcompat hFmaps hGmaps hUwithinPoint hleftLocal hrightLocal hFLocal
     hGLocal ht₀ hanchoredLocal hcontLocal hderivLocal hYLocal⟩
 
+/-- The interval-cover fallback constructor is locally equal to the original
+selected local readout on the closed Picard interval, despite using an
+`Option.none` identity patch outside that interval. -/
+theorem of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_eventually_nhds_eqOn
+    {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M)
+    (hUcover : ∀ t ∈ Icc tmin tmax, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t ∈ Icc tmin tmax, Set.univ ⊆ ⋃ i, V t i)
+    (hUopen : ∀ t ∈ Icc tmin tmax, ∀ i, IsOpen (U t i))
+    (hVopen : ∀ t ∈ Icc tmin tmax, ∀ i, IsOpen (V t i))
+    (hFcompat : ∀ t ∈ Icc tmin tmax, ∀ i j, EqOn (Fₗ i t) (Fₗ j t)
+      (U t i ∩ U t j))
+    (hGcompat : ∀ t ∈ Icc tmin tmax, ∀ i j, EqOn (Gₗ i t) (Gₗ j t)
+      (V t i ∩ V t j))
+    (hFmaps : ∀ t ∈ Icc tmin tmax, ∀ i,
+      MapsTo (Fₗ i t) (Set.univ ∩ U t i) (V t i))
+    (hGmaps : ∀ t ∈ Icc tmin tmax, ∀ i,
+      MapsTo (Gₗ i t) (Set.univ ∩ V t i) (U t i))
+    (hUwithinPoint : ∀ t ∈ Icc tmin tmax, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, x ∈ U τ i)
+    (hleftLocal : ∀ t ∈ Icc tmin tmax, ∀ i,
+      LeftInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ U t i))
+    (hrightLocal : ∀ t ∈ Icc tmin tmax, ∀ i,
+      RightInvOn (Gₗ i t) (Fₗ i t) (Set.univ ∩ V t i))
+    (hFLocal : ∀ t ∈ Icc tmin tmax, ∀ i, ContMDiffOn I I 3 (Fₗ i t) (U t i))
+    (hGLocal : ∀ t ∈ Icc tmin tmax, ∀ i, ContMDiffOn I I 3 (Gₗ i t) (V t i))
+    (ht₀ : t₀ ∈ Icc tmin tmax)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) (Icc tmin tmax) t)
+    (hYLocal : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    ∀ t ∈ Icc tmin tmax, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t,
+        U τ i ∈ 𝓝 x ∧
+          EqOn
+            (fun z : M ↦
+              ((of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+                (I := I) (M := M) (X := X) (Y := Y)
+                (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+                defaultF defaultG Fₗ Gₗ U V hUcover hVcover hUopen hVopen
+                hFcompat hGcompat hFmaps hGmaps hUwithinPoint hleftLocal
+                hrightLocal hFLocal hGLocal ht₀ hanchoredLocal hcontLocal
+                hderivLocal hYLocal).maps3 τ) z)
+            (Fₗ i τ) (U τ i) := by
+  intro t ht i x hx
+  filter_upwards [hUwithinPoint t ht i x hx, self_mem_nhdsWithin] with τ hτ hτIcc
+  refine ⟨(hUopen τ hτIcc i).mem_nhds hτ, ?_⟩
+  intro z hz
+  let Fₑ : Option ι → ℝ → M → M := fun i t ↦
+    match i with
+    | none => fun x ↦ x
+    | some i => Fₗ i t
+  let T : Set ℝ := Icc tmin tmax
+  let Uₑ : ℝ → Option ι → Set M := fun t i ↦
+    if ht : t ∈ T then
+      match i with
+      | none => ∅
+      | some i => U t i
+    else
+      match i with
+      | none => Set.univ
+      | some _ => ∅
+  have hτT : τ ∈ T := by simpa [T] using hτIcc
+  have hcompatₑ :
+      ∀ a b, EqOn (Fₑ a τ) (Fₑ b τ) (Uₑ τ a ∩ Uₑ τ b) := by
+    intro a b y hy
+    cases a with
+    | none => simp [Uₑ, hτT] at hy
+    | some a =>
+      cases b with
+      | none => simp [Uₑ, hτT] at hy
+      | some b =>
+        have hy' : y ∈ U τ a ∩ U τ b := by simpa [Uₑ, hτT] using hy
+        simpa [Fₑ] using hFcompat τ hτIcc a b hy'
+  have hzₑ : z ∈ Uₑ τ (some i) := by
+    simpa [Uₑ, hτT] using hz
+  have hEqₑ :
+      gluedMapOf_iUnion (defaultF τ) (Uₑ τ) (fun j ↦ Fₑ j τ) z = Fₗ i τ z := by
+    simpa [Fₑ] using
+      (gluedMapOf_iUnion_eqOn
+        (default := defaultF τ) (U := Uₑ τ) (Fₗ := fun j ↦ Fₑ j τ)
+        hcompatₑ) (some i) (x := z) hzₑ
+  simpa
+    [of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      Fₑ, Uₑ, T, hτT]
+    using hEqₑ
+
 /-- Build a raw `C^3` gauge-flow witness on the closed Picard interval from
 compatible local readouts whose time-dependent covers are only known on that
 closed interval.

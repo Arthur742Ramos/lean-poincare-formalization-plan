@@ -1741,7 +1741,11 @@ fallback constructor
 it adds an identity `Option.none` patch outside the closed Picard interval and
 empty fallback patches inside, so the existing all-time
 `SmoothSelfDiffeomorph3Family.ofInverse` assembly can consume source and target
-covers known only on `Icc tmin tmax`.  The matching
+covers known only on `Icc tmin tmax`.  Its
+`..._eventually_nhds_eqOn` readout theorem removes that fallback patch again
+inside the closed interval, exposing eventual local `EqOn` between the
+constructed `G.maps3` and the original selected local readout on `U τ i`.  The
+matching
 `..._localGluingData_pointwiseSource_...` and
 `..._openPreimage_localGluingData_...` adapters preserve the named
 local-inverse-function package and derive pointwise source persistence from
