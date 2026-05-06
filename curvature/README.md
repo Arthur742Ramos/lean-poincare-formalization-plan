@@ -706,7 +706,11 @@ now packages the matching intrinsic boundary
     endpoint-retaining `Icc` companions for finite compact-core, finite
     compact-manifold, arbitrary compact-subcover, restricted-pair preimage, and
     ambient local-gluing inputs, so compact ODE output can keep closed Picard
-    endpoints through the raw gauge-flow boundary. The new
+    endpoints through the raw gauge-flow boundary. The ambient local-gluing
+    compact route now also has pointwise-family `Ioo`/`Icc` adapters that choose
+    a positive radius for each member of an arbitrary family, exposing the exact
+    small-interval shape produced by the compact shrink before any fixed-IVP
+    chosen-time-set repackaging. The new
     `GaugeReduction.ModelGaugeFlowODE` module now isolates the
     Banach-model Picard-Lindelöf local-flow theorem needed before the remaining
      positive-dimensional manifold ODE lift: it packages time-dependent local
@@ -1003,10 +1007,11 @@ velocity against genuine target Ricci data as
 `GaugeReducedIntrinsicDeTurckLocalSolution.transformed_velocity_eq_neg_two_intrinsicRicciTensor`
 and its local-interval companion, after the pulled-back background connection is
 identified as Levi-Civita for the transformed metric. Point 4 still remains
-open because the missing pieces are the compact raw `C^3` gauge-flow
-construction, the remaining positive-dimensional scalar time-regularity input
-for non-identity gauge-pulled metrics, and the quasilinear parabolic PDE layer,
-not bundle regularity. The parabolic PDE layer has proof-bearing groundwork in
+open because the missing pieces are the lift from compact small-interval raw
+`C^3` gauge-flow witnesses to the fixed chosen DeTurck solution time sets, the
+remaining positive-dimensional scalar time-regularity input for non-identity
+gauge-pulled metrics, and the quasilinear parabolic PDE layer, not bundle
+regularity. The parabolic PDE layer has proof-bearing groundwork in
 `AnalyticPDE/ParabolicHolder.lean`: parabolic distance, balls/cylinders,
 `C^{0,α}` control, local-base compatibility with the product topology for both
 parabolic balls and product cylinders, exact standard ball/cylinder

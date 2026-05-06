@@ -8880,6 +8880,124 @@ theorem exists_Icc_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingD
         intro i x hx
         exact hYτ i x hx)
 
+/-- Pointwise-family compact raw `C^3` gauge-flow existence on small symmetric
+open intervals from ambient-time local gluing data.
+
+This packages the compact constructor over an arbitrary family index, choosing a
+positive radius for each member.  The result is intentionally a family of small
+raw intervals rather than a fixed-IVP `IntrinsicDeTurckGaugeFlowExistence`,
+because the compact constructor itself shrinks the time set. -/
+theorem exists_Ioo_gaugeFlow_family_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    [CompactSpace M] {α ι : Type*}
+    (X Y : α → CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (timeSet : α → Set ℝ) (t₀ : α → ℝ)
+    (defaultF defaultG : α → ℝ → M → M)
+    (Fₗ Gₗ : α → ι → ℝ → M → M)
+    (U V : α → ℝ → ι → Set M) (W : α → ι → Set M)
+    (htimeSet : ∀ a, timeSet a ∈ 𝓝 (t₀ a))
+    (hlocal : ∀ a, ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ a i t) (Gₗ a i t)
+        (U a t i) (V a t i))
+    (hFcompat : ∀ a, ∀ t : ℝ, ∀ i j,
+      EqOn (Fₗ a i t) (Fₗ a j t) (U a t i ∩ U a t j))
+    (hGcompat : ∀ a, ∀ t : ℝ, ∀ i j,
+      EqOn (Gₗ a i t) (Gₗ a j t) (V a t i ∩ V a t j))
+    (hUpreimage : ∀ a, ∀ τ : ℝ, ∀ i, ∀ x : M,
+      x ∈ U a τ i ↔ Fₗ a i τ x ∈ W a i)
+    (hWopen : ∀ a i, IsOpen (W a i))
+    (hUcover : ∀ a, Set.univ ⊆ ⋃ i, U a (t₀ a) i)
+    (hUwithin : ∀ a i, ∀ᶠ τ in 𝓝[timeSet a] (t₀ a),
+      U a (t₀ a) i ⊆ U a τ i)
+    (hVwithin : ∀ a i, ∀ᶠ τ in 𝓝[timeSet a] (t₀ a),
+      V a (t₀ a) i ⊆ V a τ i)
+    (hanchoredLocal : ∀ a i, ∀ x ∈ U a (t₀ a) i, Fₗ a i (t₀ a) x = x)
+    (hcontLocal : ∀ a i, ∀ t ∈ timeSet a, ∀ x : M, x ∈ U a t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ a i τ x) (timeSet a) t)
+    (hderivLocal : ∀ a i, ∀ t ∈ timeSet a, ∀ x : M, x ∈ U a t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ a i t x)) (Fₗ a i τ x))
+        ((Y a) t (Fₗ a i t x)) (timeSet a) t)
+    (hYLocal : ∀ a, ∀ t ∈ timeSet a, ∀ᶠ τ in 𝓝[timeSet a] t,
+      ∀ i, ∀ x : M, x ∈ U a τ i →
+        (Y a) τ (Fₗ a i τ x) = (X a) τ (Fₗ a i τ x)) :
+    ∃ ε : α → ℝ, (∀ a, 0 < ε a) ∧
+      ∀ a, Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) (X a)
+        (Ioo (t₀ a - ε a) (t₀ a + ε a)) (t₀ a)) := by
+  classical
+  let hraw : ∀ a, ∃ ε : ℝ, 0 < ε ∧
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) (X a)
+        (Ioo (t₀ a - ε) (t₀ a + ε)) (t₀ a)) := fun a ↦
+    exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+      (I := I) (M := M) (X := X a) (Y := Y a)
+      (timeSet := timeSet a) (t₀ := t₀ a)
+      (defaultF a) (defaultG a) (Fₗ a) (Gₗ a) (U a) (V a) (W a)
+      (htimeSet a) (hlocal a) (hFcompat a) (hGcompat a) (hUpreimage a)
+      (hWopen a) (hUcover a) (hUwithin a) (hVwithin a)
+      (hanchoredLocal a) (hcontLocal a) (hderivLocal a) (hYLocal a)
+  refine ⟨fun a ↦ Classical.choose (hraw a), ?_, ?_⟩
+  · intro a
+    exact (Classical.choose_spec (hraw a)).1
+  · intro a
+    exact (Classical.choose_spec (hraw a)).2
+
+/-- Pointwise-family compact raw `C^3` gauge-flow existence on small closed
+symmetric intervals from ambient-time local gluing data.
+
+This is the endpoint-retaining companion to
+`exists_Ioo_gaugeFlow_family_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`. -/
+theorem exists_Icc_gaugeFlow_family_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    [CompactSpace M] {α ι : Type*}
+    (X Y : α → CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (timeSet : α → Set ℝ) (t₀ : α → ℝ)
+    (defaultF defaultG : α → ℝ → M → M)
+    (Fₗ Gₗ : α → ι → ℝ → M → M)
+    (U V : α → ℝ → ι → Set M) (W : α → ι → Set M)
+    (htimeSet : ∀ a, timeSet a ∈ 𝓝 (t₀ a))
+    (hlocal : ∀ a, ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ a i t) (Gₗ a i t)
+        (U a t i) (V a t i))
+    (hFcompat : ∀ a, ∀ t : ℝ, ∀ i j,
+      EqOn (Fₗ a i t) (Fₗ a j t) (U a t i ∩ U a t j))
+    (hGcompat : ∀ a, ∀ t : ℝ, ∀ i j,
+      EqOn (Gₗ a i t) (Gₗ a j t) (V a t i ∩ V a t j))
+    (hUpreimage : ∀ a, ∀ τ : ℝ, ∀ i, ∀ x : M,
+      x ∈ U a τ i ↔ Fₗ a i τ x ∈ W a i)
+    (hWopen : ∀ a i, IsOpen (W a i))
+    (hUcover : ∀ a, Set.univ ⊆ ⋃ i, U a (t₀ a) i)
+    (hUwithin : ∀ a i, ∀ᶠ τ in 𝓝[timeSet a] (t₀ a),
+      U a (t₀ a) i ⊆ U a τ i)
+    (hVwithin : ∀ a i, ∀ᶠ τ in 𝓝[timeSet a] (t₀ a),
+      V a (t₀ a) i ⊆ V a τ i)
+    (hanchoredLocal : ∀ a i, ∀ x ∈ U a (t₀ a) i, Fₗ a i (t₀ a) x = x)
+    (hcontLocal : ∀ a i, ∀ t ∈ timeSet a, ∀ x : M, x ∈ U a t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ a i τ x) (timeSet a) t)
+    (hderivLocal : ∀ a i, ∀ t ∈ timeSet a, ∀ x : M, x ∈ U a t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ a i t x)) (Fₗ a i τ x))
+        ((Y a) t (Fₗ a i t x)) (timeSet a) t)
+    (hYLocal : ∀ a, ∀ t ∈ timeSet a, ∀ᶠ τ in 𝓝[timeSet a] t,
+      ∀ i, ∀ x : M, x ∈ U a τ i →
+        (Y a) τ (Fₗ a i τ x) = (X a) τ (Fₗ a i τ x)) :
+    ∃ ε : α → ℝ, (∀ a, 0 < ε a) ∧
+      ∀ a, Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) (X a)
+        (Icc (t₀ a - ε a) (t₀ a + ε a)) (t₀ a)) := by
+  classical
+  let hraw : ∀ a, ∃ ε : ℝ, 0 < ε ∧
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) (X a)
+        (Icc (t₀ a - ε) (t₀ a + ε)) (t₀ a)) := fun a ↦
+    exists_Icc_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+      (I := I) (M := M) (X := X a) (Y := Y a)
+      (timeSet := timeSet a) (t₀ := t₀ a)
+      (defaultF a) (defaultG a) (Fₗ a) (Gₗ a) (U a) (V a) (W a)
+      (htimeSet a) (hlocal a) (hFcompat a) (hGcompat a) (hUpreimage a)
+      (hWopen a) (hUcover a) (hUwithin a) (hVwithin a)
+      (hanchoredLocal a) (hcontLocal a) (hderivLocal a) (hYLocal a)
+  refine ⟨fun a ↦ Classical.choose (hraw a), ?_, ?_⟩
+  · intro a
+    exact (Classical.choose_spec (hraw a)).1
+  · intro a
+    exact (Classical.choose_spec (hraw a)).2
+
 /-- Build a raw `C^3` gauge-flow witness from compatible local readouts on a
 finite time-dependent open cover, with derivative and vector-field
 identification hypotheses stated against the local forward readouts.

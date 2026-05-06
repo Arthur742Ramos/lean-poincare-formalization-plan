@@ -1729,7 +1729,13 @@ the fixed target-preimage cover from the base-time source cover and anchored
 local readouts. The finite compact-core, finite compact-manifold,
 arbitrary-compact-subcover, and restricted-pair preimage routes now have matching
 `exists_Icc_gaugeFlow_...` companions, so compact ODE output can keep endpoints
-through the raw open-preimage local-gluing boundary.  The
+through the raw open-preimage local-gluing boundary.  The ambient local-gluing
+compact route now also has pointwise-family adapters,
+`Diffeomorph3GaugeFlowOn.exists_Ioo_gaugeFlow_family_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+and
+`Diffeomorph3GaugeFlowOn.exists_Icc_gaugeFlow_family_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
+which choose a positive radius for each family member and expose the raw
+small-interval witnesses before any fixed-IVP chosen-time-set repackaging.  The
 fixed-IVP intrinsic
 layer now exposes the same finite-cover shape
 as
