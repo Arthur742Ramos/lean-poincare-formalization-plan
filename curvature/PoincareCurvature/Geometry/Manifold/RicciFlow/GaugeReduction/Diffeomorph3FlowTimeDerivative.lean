@@ -4037,6 +4037,262 @@ theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_has
     SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
       (I := I) (M := M) hEq hB
 
+/-- A full Fréchet derivative of the named metric-coordinate field directly
+differentiates that field along the raw gauge-flow coordinate curve.  This is
+the primitive product-chain-rule step behind the full-field route. -/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield'
+        (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+          ((G.maps3 t) x) (X t ((G.maps3 t) x))))
+      t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let c' : E :=
+    tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+      ((G.maps3 t) x) (X t ((G.maps3 t) x))
+  have hpair : HasDerivAt (fun τ : ℝ ↦ (τ, c τ)) (1, c') t := by
+    simpa [c, c'] using (hasDerivAt_id t).prodMk
+      (G.hasDerivAt_extChartAt_eval hs x)
+  simpa [c, c', Function.comp_def] using
+    (HasFDerivAt.comp_hasDerivAt
+      (x := t)
+      (l := fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      (l' := Bfield') (f := fun τ : ℝ ↦ (τ, c τ)) hB hpair)
+
+/-- Direct-velocity version of
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt`.
+-/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x))) t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let c' : E := X t ((G.maps3 t) x)
+  have hpair : HasDerivAt (fun τ : ℝ ↦ (τ, c τ)) (1, c') t := by
+    simpa [c, c'] using (hasDerivAt_id t).prodMk
+      (G.hasDerivAt_extChartAt_eval_self hs x)
+  simpa [c, c', Function.comp_def] using
+    (HasFDerivAt.comp_hasDerivAt
+      (x := t)
+      (l := fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      (l' := Bfield') (f := fun τ : ℝ ↦ (τ, c τ)) hB hpair)
+
+/-- Readout-field version of
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt`.
+-/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_eventuallyEq
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq :
+      metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+        𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))] Bfield)
+    (hB : HasFDerivAt Bfield Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield'
+        (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+          ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+      ) t := by
+  refine
+    Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt
+      (I := I) (M := M) G hs g x ?_
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hEq hB
+
+/-- Readout-field direct-velocity version of
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt_self`.
+-/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_eventuallyEq_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (hs : s ∈ 𝓝 t)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq :
+      metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+        𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))] Bfield)
+    (hB : HasFDerivAt Bfield Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x))) t := by
+  refine
+    Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt_self
+      (I := I) (M := M) G hs g x ?_
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hEq hB
+
+/-- Within-set version of
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt`.
+-/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_of_hasFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield'
+        (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+          ((G.maps3 t) x) (X t ((G.maps3 t) x))))
+      s t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let c' : E :=
+    tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+      ((G.maps3 t) x) (X t ((G.maps3 t) x))
+  have hpair : HasDerivWithinAt (fun τ : ℝ ↦ (τ, c τ)) (1, c') s t := by
+    simpa [c, c'] using (hasDerivWithinAt_id t s).prodMk
+      (G.hasDerivWithinAt_extChartAt_eval ht x)
+  simpa [c, c', Function.comp_def] using
+    (HasFDerivAt.comp_hasDerivWithinAt
+      (x := t)
+      (l := fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      (l' := Bfield') (f := fun τ : ℝ ↦ (τ, c τ)) hB hpair)
+
+/-- Direct-velocity within-set version of
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt_self`.
+-/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_of_hasFDerivAt_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hB : HasFDerivAt
+      (fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x))) s t := by
+  let c : ℝ → E := fun τ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)
+  let c' : E := X t ((G.maps3 t) x)
+  have hpair : HasDerivWithinAt (fun τ : ℝ ↦ (τ, c τ)) (1, c') s t := by
+    simpa [c, c'] using (hasDerivWithinAt_id t s).prodMk
+      (G.hasDerivWithinAt_extChartAt_eval_self ht x)
+  simpa [c, c', Function.comp_def] using
+    (HasFDerivAt.comp_hasDerivWithinAt
+      (x := t)
+      (l := fun q : ℝ × E ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) q)
+      (l' := Bfield') (f := fun τ : ℝ ↦ (τ, c τ)) hB hpair)
+
+/-- Readout-field within-set version of
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_eventuallyEq`.
+-/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_of_eventuallyEq
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq :
+      metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+        𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))] Bfield)
+    (hB : HasFDerivAt Bfield Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield'
+        (1, tangentCoordChange I ((G.maps3 t) x) ((G.maps3 t) x)
+          ((G.maps3 t) x) (X t ((G.maps3 t) x)))
+      ) s t := by
+  refine
+    Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_of_hasFDerivAt
+      (I := I) (M := M) G ht g x ?_
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hEq hB
+
+/-- Readout-field direct-velocity within-set version of
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_eventuallyEq_self`.
+-/
+theorem Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_of_eventuallyEq_self
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (ht : t ∈ s)
+    (g : MetricFamily (I := I) (M := M)) (x : M)
+    {Bfield : ℝ × E → E →L[ℝ] E →L[ℝ] ℝ}
+    {Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)}
+    (hEq :
+      metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x) =ᶠ[
+        𝓝 (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))] Bfield)
+    (hB : HasFDerivAt Bfield Bfield'
+      (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g ((G.maps3 t) x)
+          (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+      (Bfield' (1, X t ((G.maps3 t) x))) s t := by
+  refine
+    Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivWithinAt_of_hasFDerivAt_self
+      (I := I) (M := M) G ht g x ?_
+  exact
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_hasFDerivAt_of_eventuallyEq
+      (I := I) (M := M) hEq hB
+
 /-- Near a time where the gauge image remains in the preferred chart, the
 concrete moving bilinear component is the two-variable metric-coordinate field
 evaluated along the coordinate curve of the moved base point. -/

@@ -990,12 +990,16 @@ now packages the matching intrinsic boundary
         vector slots while accepting a
         direct `HasDerivAt B B' t` proof for the already-composed coordinate
        readout, and raw closed-Picard gauge flows expose that route directly on
-       the open interior interval. The
+       the open interior interval. The raw gauge-flow layer also now has a
+       direct product-chain-rule bridge from full `metricBilinearCoordinateField`
+       Fréchet/readout data to the derivative along the actual raw coordinate
+       curve, with direct-velocity and within-set variants. The
        coordinate, coordinate-model, and field-level data now restrict to smaller
        time sets or lift through fixed-IVP, theorem-family, and raw-existence
        gauge-flow APIs, with explicit neighborhood-time hypotheses on the
-       model/field bundle routes. This leaves one primitive
-    positive-dimensional time-regularity input. Two thin extension
+       model/field bundle routes. This leaves the full positive-dimensional
+       `metricBilinearCoordinateField` Fréchet/readout derivative itself as the
+       remaining primitive time-regularity input. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`

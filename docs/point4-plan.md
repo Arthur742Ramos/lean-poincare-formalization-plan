@@ -708,6 +708,15 @@ Its readout-field variant
 transfers a Fréchet derivative from any locally equal two-variable bilinear-form
 readout to `metricBilinearCoordinateField` through the same named bridge,
 matching the finite-cover Banach readout shape more closely.
+The direct full-field product-chain-rule primitive is now named as well:
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt`
+and
+`Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_eventuallyEq`,
+with direct-velocity `_self` versions and matching within-set companions. These
+differentiate the raw gauge-flow coordinate curve through the named
+`metricBilinearCoordinateField` once a full two-variable Fréchet/readout
+derivative has already been supplied. They intentionally do not supply that
+remaining positive-dimensional Fréchet/readout derivative.
 At the primitive decomposition level, the theorem
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_eventuallyEq`
 now lets a locally equal finite-cover/Banach readout supply the full field
