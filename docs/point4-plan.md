@@ -2764,8 +2764,10 @@ finite-family wrapper, Pi-valued finite-product `C^{0,α}` and Lipschitz
 packaging of all family coordinates, and matching coarser exported-constant
 variants.
 The matrix layer also has entrywise-to-matrix and matrix-to-entry bridges for
-the same single-radius control, plus determinant and determinant-difference
-single-radius variants using the existing quantitative determinant constants.
+the same single-radius control, including matrix-valued higher difference
+bounds and submodule-level matrix assembly/projection linear maps, plus
+determinant and determinant-difference single-radius variants using the
+existing quantitative determinant constants.
 Inverse matrices and inverse-matrix differences now have matching
 single-radius variants under a determinant lower bound. Finite matrix products,
 matrix-vector products, and vector-matrix products, together with their

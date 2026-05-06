@@ -272,9 +272,11 @@ as Pi-valued `C^{0,α}` readouts and as one Pi-valued state-space Lipschitz map
 with the finite sum of the coordinate constants, in both exact-sum and coarser
 exported-constant forms.
 The matrix layer also exposes entrywise-to-matrix and matrix-to-entry bridges for
-that single-radius control, so matrix estimates can consume and produce the
-same norm-ball language. Determinant and determinant-difference estimates now
-also have entrywise single-radius variants using the existing quantitative
+that single-radius control, including matrix-valued higher difference bounds and
+submodule-level matrix assembly/projection linear maps, so matrix estimates can
+consume and produce the same norm-ball language. Determinant and
+determinant-difference estimates now also have entrywise single-radius variants
+using the existing quantitative
 determinant constants, and inverse matrices/inverse-matrix differences have the
 matching single-radius variants under a determinant lower bound. Finite matrix
 products, matrix-vector products, and vector-matrix products, together with

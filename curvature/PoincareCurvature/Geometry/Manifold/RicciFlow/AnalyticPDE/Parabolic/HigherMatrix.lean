@@ -120,6 +120,24 @@ theorem matrix_c2AlphaNormLe_of_entries {m n A : Type*} [Fintype m] [Fintype n]
   · intro p _hp
     exact (h p.1 p.2).continuousLinearMap (L p)
 
+/-- Entrywise full higher parabolic controls for a matrix difference assemble into a
+matrix-valued full higher parabolic difference bound. -/
+theorem matrix_sub_c2AlphaNormLe_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A]
+    {R : m → n → ℝ} {M N : ℝ × X → Matrix m n A}
+    (h : ∀ i j, ParabolicC2AlphaNormLe (R i j) α
+      (fun z => M z i j - N z i j) s) :
+    ParabolicC2AlphaNormLe
+      (∑ p : m × n,
+        continuousLinearMapRadius (X := X) (E := A)
+          (matrixSingleContinuousLinearMap (m := m) (n := n) (A := A) p.1 p.2) *
+          R p.1 p.2) α
+      (fun z : ℝ × X => M z - N z) s := by
+  classical
+  simpa [Pi.sub_apply] using
+    matrix_c2AlphaNormLe_of_entries (X := X) (α := α) (s := s)
+      (N := R) (M := fun z : ℝ × X => M z - N z) h
+
 /-- Finite Pi-valued value-level `C^{0,α}` control from entrywise higher parabolic
 single-radius controls. -/
 theorem pi_c0AlphaNormLe_of_entries {ι A : Type*} [Fintype ι]
@@ -1463,6 +1481,18 @@ theorem matrix_c2AlphaOn_of_entries {m n A : Type*} [Fintype m] [Fintype n]
   exact of_normLe (ParabolicC2AlphaNormLe.matrix_c2AlphaNormLe_of_entries
     (X := X) (α := α) (s := s) (N := N) (M := M) hN)
 
+/-- Entrywise higher parabolic membership for a matrix difference assembles into
+matrix-valued higher parabolic membership. -/
+theorem matrix_sub_c2AlphaOn_of_entries {m n A : Type*} [Fintype m] [Fintype n]
+    [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A]
+    {M N : ℝ × X → Matrix m n A}
+    (h : ∀ i j, ParabolicC2AlphaOn α (fun z => M z i j - N z i j) s) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => M z - N z) s := by
+  classical
+  simpa [Pi.sub_apply] using
+    matrix_c2AlphaOn_of_entries (X := X) (α := α) (s := s)
+      (M := fun z : ℝ × X => M z - N z) h
+
 /-- Finite Pi-valued value-level `C^{0,α}` membership from coordinatewise higher parabolic
 membership. -/
 theorem pi_c0AlphaOn_of_entries {ι A : Type*} [Fintype ι]
@@ -1533,6 +1563,54 @@ theorem ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_entries {κ n : Type*
       (M := M) (D := D) (H := H) hM hD hH hδpos hdet r
 
 end ParabolicC2AlphaOn
+
+namespace parabolicC2AlphaSubmodule
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Coordinate projection from a matrix-valued higher parabolic submodule. -/
+def matrixApplyLinearMap {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A] (i : m) (j : n) :
+    parabolicC2AlphaSubmodule X (Matrix m n A) α s →ₗ[ℝ]
+      parabolicC2AlphaSubmodule X A α s :=
+  continuousLinearMap (X := X) (E := Matrix m n A) (α := α) (s := s)
+    ((ContinuousLinearMap.proj j : (n → A) →L[ℝ] A).comp
+      (ContinuousLinearMap.proj i : Matrix m n A →L[ℝ] n → A))
+
+@[simp]
+theorem matrixApplyLinearMap_apply {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A] (i : m) (j : n)
+    (u : parabolicC2AlphaSubmodule X (Matrix m n A) α s) (z : ℝ × X) :
+    matrixApplyLinearMap (X := X) (α := α) (s := s) i j u z = u z i j :=
+  rfl
+
+/-- Assemble matrix-valued higher parabolic submodule elements from their entries. -/
+def matrixOfEntriesLinearMap {m n A : Type*} [Fintype m] [Fintype n]
+    [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A] :
+    (m → n → parabolicC2AlphaSubmodule X A α s) →ₗ[ℝ]
+      parabolicC2AlphaSubmodule X (Matrix m n A) α s where
+  toFun u := ⟨fun z i j => u i j z,
+    ParabolicC2AlphaOn.matrix_c2AlphaOn_of_entries
+      (X := X) (α := α) (s := s) fun i j => (u i j).2⟩
+  map_add' := by
+    intro u v
+    ext z i j
+    rfl
+  map_smul' := by
+    intro c u
+    ext z i j
+    rfl
+
+@[simp]
+theorem matrixOfEntriesLinearMap_apply {m n A : Type*} [Fintype m] [Fintype n]
+    [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A]
+    (u : m → n → parabolicC2AlphaSubmodule X A α s) (z : ℝ × X)
+    (i : m) (j : n) :
+    matrixOfEntriesLinearMap (X := X) (α := α) (s := s) u z i j = u i j z :=
+  rfl
+
+end parabolicC2AlphaSubmodule
 
 end AnalyticPDE
 end RicciFlow
