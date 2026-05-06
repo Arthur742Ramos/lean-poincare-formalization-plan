@@ -1052,6 +1052,41 @@ theorem exists_finset_subtype_iUnion_compatible_of_iUnion
   exact ⟨s, hUsubcover, hVsubcover, hlocal_sub,
     (fun i j ↦ hFcompat i j), (fun i j ↦ hGcompat i j)⟩
 
+/-- Compactness restricts a time-dependent compatible source-and-target covering
+family at one selected time to a finite subtype, while preserving the packaged
+local gluing data and overlap compatibility for every time on the selected
+indices. -/
+theorem exists_finset_subtype_timeDependent_iUnion_compatible_of_iUnion_at
+    [CompactSpace M] {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t) (G i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (F i t) (F j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (G i t) (G j t) (V t i ∩ V t j))
+    (t₀ : ℝ)
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hVcover : Set.univ ⊆ ⋃ i, V t₀ i) :
+    ∃ s : Finset ι,
+      Set.univ ⊆ ⋃ i : {i // i ∈ s}, U t₀ i ∧
+        Set.univ ⊆ ⋃ i : {i // i ∈ s}, V t₀ i ∧
+          (∀ t : ℝ, ∀ i : {i // i ∈ s},
+            LocalGluingData (I := I) (M := M) n
+              (F i t) (G i t) (U t i) (V t i)) ∧
+            (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+              EqOn (F i t) (F j t) (U t i ∩ U t j)) ∧
+              (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                EqOn (G i t) (G j t) (V t i ∩ V t j)) := by
+  rcases exists_finset_subtype_iUnion_compatible_of_iUnion
+      (I := I) (M := M) (F := fun i ↦ F i t₀) (G := fun i ↦ G i t₀)
+      (U := U t₀) (V := V t₀) (fun i ↦ hlocal t₀ i)
+      (fun i j ↦ hFcompat t₀ i j) (fun i j ↦ hGcompat t₀ i j)
+      hUcover hVcover with
+    ⟨s, hUsubcover, hVsubcover, _hlocal_t₀, _hFcompat_t₀, _hGcompat_t₀⟩
+  exact ⟨s, hUsubcover, hVsubcover,
+    (fun t i ↦ hlocal t i),
+    (fun t i j ↦ hFcompat t i j),
+    (fun t i j ↦ hGcompat t i j)⟩
+
 end LocalGluingData
 
 /-- Smoothness of a model map transports through source and target chart
