@@ -868,7 +868,11 @@ hypothesis). That regularity gap is now closed as well: the package proves the
        `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`
        and its proof-level `nonempty_...` companion, so compact finite-cover
        data no longer has to manually instantiate the raw glued-flow endpoint
-       for every local solution. The fixed-IVP
+       for every local solution. The generic moving-cover glued-slice and
+       local-readout routes now also have closed-interval companions that return
+       `Icc` raw and fixed-IVP intrinsic witnesses; the theorem-family layer
+       mirrors the global glued-slice closed route, while local-readout
+       fixed-IVP witnesses can use the generic family assembly bridge. The fixed-IVP
        intrinsic DeTurck existence layer mirrors that proof-level shape for its
        derivative-data and identity constructors, and the theorem-family layer
        now mirrors it as well, including fixed-IVP extraction and named

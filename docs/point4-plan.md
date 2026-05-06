@@ -1653,6 +1653,23 @@ with proof-level `nonempty_...`, and exposes the local-readout handoffs through
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_localReadouts_vectorField_eq_nhdsWithin`
 and
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_timeDependent_iUnion_compatibleGluedSlices_openPreimage_of_localReadouts_vectorField_eq_nhdsWithin`.
+The generic moving-cover route now also has endpoint-retaining closed-interval
+companions.  At the raw level,
+`Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_gluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc`
+and
+`Diffeomorph3GaugeFlowOn.of_timeDependent_iUnion_gluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc`
+produce `Icc` gauge-flow witnesses rather than immediately discarding the
+endpoints, and
+`timeDependent_iUnion_hFEqWithinAll_on_Icc_of_finite` supplies the finite-cover
+uniform relative-filter handoff on the same closed interval.  The fixed-IVP
+intrinsic layer exposes both the global glued-slice and local-readout closed
+forms as
+`IntrinsicDeTurckGaugeFlowExistence.ofClosedPicardIccChartDerivative_of_timeDependent_iUnion_gluedSlices_vectorField_eq_nhdsWithin`
+and
+`IntrinsicDeTurckGaugeFlowExistence.ofClosedPicardIccChartDerivative_of_timeDependent_iUnion_gluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`;
+the theorem-family layer has the corresponding global glued-slice closed
+constructor, while local-readout fixed-IVP output can pass through the generic
+family assembly bridge below.
 The theorem-family raw existence layer now
 also has the generic assembly bridge
 `IntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem`, with a
