@@ -1018,7 +1018,10 @@ now packages the matching intrinsic boundary
        automatic. The route now also has wrappers that select the compact
        overlap piece internally from local compactness whenever the gauge point
        lies in `interior (Kc i)`, so callers no longer supply the target-domain
-       compact by hand. Cover-level selection and shrinking lemmas now choose
+       compact by hand; cover-level gauge wrappers now also select the cover
+       index directly from an interior-covering compact family at both
+       open-interior and right-sided endpoint times. Cover-level selection and
+       shrinking lemmas now choose
        an index plus compact overlap from an interior-covering compact family
        and turn finite open covers of compact sets into compact subordinate
        pieces whose interiors still cover; compatibility bridges turn interior

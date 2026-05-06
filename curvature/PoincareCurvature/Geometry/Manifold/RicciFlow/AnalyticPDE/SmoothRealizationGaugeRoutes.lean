@@ -2173,6 +2173,97 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricB
     realization.metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_mem_interior_target_K_Ioo
       (M := M) (F := F) (I := I) G hs ht i K x hK_sub_Kc hK_sub_target hKmem_int'
 
+/-- Open-interval target-centered raw gauge derivative from an
+interior-covering compact family.  The wrapper selects both the finite-cover
+index and the smaller compact overlap with the target trivialization at the
+time-`t` gauge point. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_interior_cover_target_overlap_Ioo
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (hcover_int : (⋃ i, interior (Kc i : Set M)) = Set.univ)
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {gaugeInitialTime t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s gaugeInitialTime)
+    (hs : s ∈ 𝓝 t)
+    (ht : t ∈ Ioo ivp.initialTime sol.terminalTime)
+    (x : M) :
+    ∃ (i : κ) (K : TopologicalSpace.Compacts M)
+      (hK_sub_Kc : (K : Set M) ⊆ (Kc i : Set M))
+      (hK_sub_target : (K : Set M) ⊆
+        (trivializationAt BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          ((G.maps3 t) x)).baseSet)
+      (hKmem_int : (G.maps3 t) x ∈ interior (K : Set M)),
+      HasDerivAt
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) realization.metric ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+        ((targetBilinearCoordReadoutContinuousLinearMap
+            (I := I) (M := M) (F := F) (et := et) (Kc := Kc) (hKc := hKc)
+            (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+            ((G.maps3 t) x) i K hK_sub_Kc hK_sub_target
+            (A t (sol.curve t))
+            (⟨(G.maps3 t) x, interior_subset hKmem_int⟩ : K)) +
+          (fderivWithin ℝ
+            (fun yE : F ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) realization.metric ((G.maps3 t) x) (t, yE))
+            (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+            (X t ((G.maps3 t) x))) t := by
+  haveI : LocallyCompactSpace M := Manifold.locallyCompact_of_finiteDimensional (I := I)
+  let p : M := (G.maps3 t) x
+  let U : Set M :=
+    (trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) p).baseSet
+  have hpU : p ∈ U := by
+    simpa [U] using
+      (mem_baseSet_trivializationAt BilF
+        (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) p)
+  have hUopen : IsOpen U := by
+    simpa [U] using
+      (trivializationAt BilF
+        (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) p).open_baseSet
+  rcases exists_compact_subset_interior_cover_inter_open
+      (M := M) (p := p) (Kc := Kc) hcover_int hUopen hpU with
+    ⟨i, K, hKmem_int, hK_sub_Kc, hK_sub_U⟩
+  have hK_sub_target : (K : Set M) ⊆
+      (trivializationAt BilF
+        (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        ((G.maps3 t) x)).baseSet := by
+    simpa [p, U] using hK_sub_U
+  have hKmem_int' : (G.maps3 t) x ∈ interior (K : Set M) := by
+    simpa [p] using hKmem_int
+  refine ⟨i, K, hK_sub_Kc, hK_sub_target, hKmem_int', ?_⟩
+  simpa using
+    realization.metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_mem_interior_target_K_Ioo
+      (M := M) (F := F) (I := I) G hs ht i K x hK_sub_Kc hK_sub_target hKmem_int'
+
 /-- Open-interval raw gauge-flow metric-coordinate derivative from eventual
 membership in one preferred compact cover piece.  This builds the selected
 compact chart curve internally from the eventual membership witness. -/
@@ -2860,6 +2951,98 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricB
   have hKmem_int' : (G.maps3 t) x ∈ interior (K : Set M) := by
     simpa [p] using hKmem_int
   refine ⟨K, hK_sub_Kc, hK_sub_target, hKmem_int', ?_⟩
+  simpa using
+    realization.metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_mem_interior_target_K_Ico
+      (M := M) (F := F) (I := I) G htG hs_sub ht i K x hK_sub_Kc hK_sub_target
+      hKmem_int'
+
+/-- Right-sided target-centered raw gauge derivative from an interior-covering
+compact family.  This is the endpoint analogue of
+`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_interior_cover_target_overlap_Ioo`. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_interior_cover_target_overlap_Ico
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (hcover_int : (⋃ i, interior (Kc i : Set M)) = Set.univ)
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {gaugeInitialTime t : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s gaugeInitialTime)
+    (htG : t ∈ s)
+    (hs_sub : s ⊆ Ici t)
+    (ht : t ∈ Ico ivp.initialTime sol.terminalTime)
+    (x : M) :
+    ∃ (i : κ) (K : TopologicalSpace.Compacts M)
+      (hK_sub_Kc : (K : Set M) ⊆ (Kc i : Set M))
+      (hK_sub_target : (K : Set M) ⊆
+        (trivializationAt BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          ((G.maps3 t) x)).baseSet)
+      (hKmem_int : (G.maps3 t) x ∈ interior (K : Set M)),
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+            (I := I) (M := M) realization.metric ((G.maps3 t) x)
+            (τ, (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)))
+        ((targetBilinearCoordReadoutContinuousLinearMap
+            (I := I) (M := M) (F := F) (et := et) (Kc := Kc) (hKc := hKc)
+            (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+            ((G.maps3 t) x) i K hK_sub_Kc hK_sub_target
+            (A t (sol.curve t))
+            (⟨(G.maps3 t) x, interior_subset hKmem_int⟩ : K)) +
+          (fderivWithin ℝ
+            (fun yE : F ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) realization.metric ((G.maps3 t) x) (t, yE))
+            (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+            (X t ((G.maps3 t) x))) s t := by
+  haveI : LocallyCompactSpace M := Manifold.locallyCompact_of_finiteDimensional (I := I)
+  let p : M := (G.maps3 t) x
+  let U : Set M :=
+    (trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) p).baseSet
+  have hpU : p ∈ U := by
+    simpa [U] using
+      (mem_baseSet_trivializationAt BilF
+        (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) p)
+  have hUopen : IsOpen U := by
+    simpa [U] using
+      (trivializationAt BilF
+        (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) p).open_baseSet
+  rcases exists_compact_subset_interior_cover_inter_open
+      (M := M) (p := p) (Kc := Kc) hcover_int hUopen hpU with
+    ⟨i, K, hKmem_int, hK_sub_Kc, hK_sub_U⟩
+  have hK_sub_target : (K : Set M) ⊆
+      (trivializationAt BilF
+        (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        ((G.maps3 t) x)).baseSet := by
+    simpa [p, U] using hK_sub_U
+  have hKmem_int' : (G.maps3 t) x ∈ interior (K : Set M) := by
+    simpa [p] using hKmem_int
+  refine ⟨i, K, hK_sub_Kc, hK_sub_target, hKmem_int', ?_⟩
   simpa using
     realization.metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_mem_interior_target_K_Ico
       (M := M) (F := F) (I := I) G htG hs_sub ht i K x hK_sub_Kc hK_sub_target

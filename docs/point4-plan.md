@@ -2239,6 +2239,14 @@ and
 use local compactness of the finite-dimensional manifold to choose such a
 compact `K` whenever the gauge point is already in `interior (Kc i)`. Thus the
 target-domain overlap no longer has to be supplied by callers. At the
+interior-cover level,
+`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_interior_cover_target_overlap_Ioo`
+and
+`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_interior_cover_target_overlap_Ico`
+also select the cover index from
+`(⋃ i, interior (Kc i : Set M)) = Set.univ`, so the scalar route consumes the
+refined compact cover directly at both open-interior and right-sided endpoint
+times. At the
 cover-construction level,
 `exists_compact_subset_interior_cover_inter_open` chooses an index and compact
 overlap from an interior-covering compact family and an open target patch, while
