@@ -2213,7 +2213,10 @@ The raw gauge-flow wrapper
 then combines this time-difference derivative with the existing frozen-spatial
 raw-flow term, provided a selected compact chart curve represents
 `τ ↦ G.maps3 τ x` near `t` and the preferred finite-cover center is
-`G.maps3 t x`. The remaining non-identity gauge work is therefore the
+`G.maps3 t x`. The right-sided companion
+`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_coord_mem_Ico`
+does the same for endpoint/restricted raw time sets `s ⊆ Ici t`, using the
+one-sided Banach derivative. The remaining non-identity gauge work is therefore the
 end-to-end construction/selection of those compact chart curves and witnesses
 inside the local existence package, not the readout-to-field equality itself.
 The reusable Banach evolution layer now also has shorter-terminal restriction

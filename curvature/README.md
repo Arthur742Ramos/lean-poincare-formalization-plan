@@ -1010,7 +1010,8 @@ now packages the matching intrinsic boundary
        finite-cover readout with `metricBilinearCoordinateField`, transfers the
        moving time-difference derivative to that raw coordinate field, and feeds
        it into the raw gauge-flow moving-base derivative once a selected compact
-       chart curve represents `τ ↦ G.maps3 τ x` near `t`. The remaining
+       chart curve represents `τ ↦ G.maps3 τ x` near `t`, with a matching
+       right-sided endpoint variant for raw time sets contained in `Ici t`. The remaining
        non-identity gauge task is to construct and package those selected
        compact-chart witnesses inside the local existence route, alongside the
        full Ricci-DeTurck Banach chart/PDE estimates. Two thin extension
