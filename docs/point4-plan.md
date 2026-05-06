@@ -2196,9 +2196,15 @@ These lemmas differentiate the time-difference
 `coord(sol.curve τ)(x τ) - coord(sol.curve t)(x τ)` at a moving compact
 coordinate point directly from the Banach derivative in sup norm. They remove
 the need to rebuild this time-difference from scalar fixed-point readouts, but
-still require the geometric realization/equality step that identifies the
+still require the final geometric/equality step that identifies the
 finite-cover coordinate component with the raw gauge-flow
 `metricBilinearCoordinateField` along the selected moving chart curve.
+The smooth-realization wrappers
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_coordBilinearFormReadoutMap_timeDifference_hasDerivAt_of_mem_Ioo`
+and
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_coordBilinearFormReadoutMap_timeDifference_hasDerivWithinAt_Ici_of_mem_Ico`
+now perform the intermediate transfer from `sol.curve` to the realized smooth
+metric section using `metric_toContinuousSection_eq_curve`.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts

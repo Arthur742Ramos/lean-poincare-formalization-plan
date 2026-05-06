@@ -1004,7 +1004,9 @@ now packages the matching intrinsic boundary
        proves the moving compact-coordinate time-difference directly from the
        Banach section derivative in sup norm via
        `HasDerivAt.continuousMap_moving_eval_sub_const` and the
-       `coordBilinearFormReadoutMap_timeDifference` wrappers. The remaining
+       `coordBilinearFormReadoutMap_timeDifference` wrappers, including the
+       `SmoothIntrinsicDeTurckRealization` transfer to the realized metric
+       section. The remaining
        non-identity gauge task is to connect that section-norm bridge, or the
        full positive-dimensional `metricBilinearCoordinateField`
        Fréchet/readout route, to the selected raw gauge-flow realization. Two thin extension

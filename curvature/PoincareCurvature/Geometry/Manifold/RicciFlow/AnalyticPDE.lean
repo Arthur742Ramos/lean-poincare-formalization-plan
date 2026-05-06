@@ -6410,6 +6410,249 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_
     rw [realization.metric_toContinuousSection_eq_curve (Ico_subset_Icc_self ht)]
   exact hproj.congr_of_eventuallyEq hEq hEq_t
 
+/-- Moving-point time-difference version of
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_coordBilinearFormReadoutMap_hasDerivAt_of_mem_Ioo`.
+The Banach curve supplies the derivative in the compact coordinate norm, and
+the smooth realization equality transfers the time-difference to the realized
+metric section near the base time. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_coordBilinearFormReadoutMap_timeDifference_hasDerivAt_of_mem_Ioo
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [T2Space M] [FiniteDimensional ℝ F] [CompleteSpace F]
+    [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    {κ : Type*} [Finite κ]
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    (i : κ) {x : ℝ → Kc i}
+    {t : ℝ} (ht : t ∈ Ioo ivp.initialTime sol.terminalTime)
+    (hx : Filter.Tendsto x (𝓝 t) (𝓝 (x t))) :
+    HasDerivAt
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric τ).toContinuousRiemannianMetric.toSection,
+            (realization.metric τ).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric t).toContinuousRiemannianMetric.toSection,
+            (realization.metric t).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ))
+      ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (x t)) t := by
+  have hproj :
+      HasDerivAt
+        (fun τ : ℝ ↦
+          (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (sol.curve τ)).1 i (x τ) -
+          (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (sol.curve t)).1 i (x τ))
+        ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (A t (sol.curve t))).1 i (x t)) t :=
+    BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_timeDifference_hasDerivAt_of_mem_Ioo
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _)) sol i ht hx
+  have hEq :
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric τ).toContinuousRiemannianMetric.toSection,
+            (realization.metric τ).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric t).toContinuousRiemannianMetric.toSection,
+            (realization.metric t).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ))
+        =ᶠ[𝓝 t]
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve τ)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve t)).1 i (x τ)) := by
+    filter_upwards [Icc_mem_nhds ht.1 ht.2] with τ hτ
+    rw [realization.metric_toContinuousSection_eq_curve hτ,
+      realization.metric_toContinuousSection_eq_curve (Ioo_subset_Icc_self ht)]
+  exact hproj.congr_of_eventuallyEq hEq
+
+/-- One-sided moving-point version of
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_coordBilinearFormReadoutMap_timeDifference_hasDerivAt_of_mem_Ioo`. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_coordBilinearFormReadoutMap_timeDifference_hasDerivWithinAt_Ici_of_mem_Ico
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [T2Space M] [FiniteDimensional ℝ F] [CompleteSpace F]
+    [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    {κ : Type*} [Finite κ]
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    (i : κ) {x : ℝ → Kc i}
+    {t : ℝ} (ht : t ∈ Ico ivp.initialTime sol.terminalTime)
+    (hx : Filter.Tendsto x (𝓝[Ici t] t) (𝓝 (x t))) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric τ).toContinuousRiemannianMetric.toSection,
+            (realization.metric τ).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric t).toContinuousRiemannianMetric.toSection,
+            (realization.metric t).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ))
+      ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (A t (sol.curve t))).1 i (x t)) (Ici t) t := by
+  have hproj :
+      HasDerivWithinAt
+        (fun τ : ℝ ↦
+          (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (sol.curve τ)).1 i (x τ) -
+          (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (sol.curve t)).1 i (x τ))
+        ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover
+            (A t (sol.curve t))).1 i (x t)) (Ici t) t :=
+    BanachEvolutionLocalSolutionIn.coordBilinearFormReadoutMap_timeDifference_hasDerivWithinAt_Ici_of_mem_Ico
+      (M := M) (F := F) (W := (TangentSpace I : M → Type _)) sol i ht hx
+  have hEq :
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric τ).toContinuousRiemannianMetric.toSection,
+            (realization.metric τ).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (⟨(realization.metric t).toContinuousRiemannianMetric.toSection,
+            (realization.metric t).toContinuousRiemannianMetric.continuous_toSection⟩ :
+            ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+              (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+              et Kc hKc Ko hKo hKoEq hcover)).1 i (x τ))
+        =ᶠ[𝓝[Ici t] t]
+      (fun τ : ℝ ↦
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve τ)).1 i (x τ) -
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := BilF)
+          (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+          et Kc hKc Ko hKo hKoEq hcover
+          (sol.curve t)).1 i (x τ)) := by
+    filter_upwards [Icc_mem_nhdsGE_of_mem ht] with τ hτ
+    rw [realization.metric_toContinuousSection_eq_curve hτ,
+      realization.metric_toContinuousSection_eq_curve (Ico_subset_Icc_self ht)]
+  exact hproj.congr_of_eventuallyEq_of_mem hEq (Set.mem_Ici.mpr le_rfl)
+
 /-- Coordinate components of the smooth metric realization inherit the projected Banach ODE on the
 interior of the local interval. -/
 theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metric_coordBilinearFormReadout_hasDerivAt_of_mem_Ioo
