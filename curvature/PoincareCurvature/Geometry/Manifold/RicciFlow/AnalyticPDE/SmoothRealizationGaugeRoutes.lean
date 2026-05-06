@@ -353,6 +353,96 @@ theorem exists_compacts_interior_univ_cover_of_finite_open_cover
     ⟨K, hKcover, hKsub⟩
   exact ⟨K, eq_univ_of_univ_subset hKcover, hKsub⟩
 
+/-- The canonical compact overlap family attached to a compact cover. -/
+noncomputable def compactCoverIntersections
+    {X : Type*} [TopologicalSpace X] [T2Space X] {ι : Type*}
+    (Kc : ι → TopologicalSpace.Compacts X) :
+    ι → ι → TopologicalSpace.Compacts X :=
+  fun i j ↦ Kc i ⊓ Kc j
+
+@[simp] theorem compactCoverIntersections_coe
+    {X : Type*} [TopologicalSpace X] [T2Space X] {ι : Type*}
+    (Kc : ι → TopologicalSpace.Compacts X) (i j : ι) :
+    (compactCoverIntersections Kc i j : Set X) =
+      (Kc i : Set X) ∩ (Kc j : Set X) := by
+  rfl
+
+/-- The canonical compact overlap family is subordinate to pairwise
+intersections. -/
+theorem compactCoverIntersections_subset
+    {X : Type*} [TopologicalSpace X] [T2Space X] {ι : Type*}
+    (Kc : ι → TopologicalSpace.Compacts X) :
+    ∀ i j, (compactCoverIntersections Kc i j : Set X) ⊆
+      (Kc i : Set X) ∩ (Kc j : Set X) := by
+  intro i j x hx
+  simpa [compactCoverIntersections] using hx
+
+/-- The canonical compact overlap family is exactly the pairwise
+intersection family expected by the finite-cover section-space API. -/
+theorem compactCoverIntersections_eq
+    {X : Type*} [TopologicalSpace X] [T2Space X] {ι : Type*}
+    (Kc : ι → TopologicalSpace.Compacts X) :
+    ∀ i j, (compactCoverIntersections Kc i j : Set X) =
+      (Kc i : Set X) ∩ (Kc j : Set X) := by
+  intro i j
+  rfl
+
+/-- An ordinary finite compact cover subordinate to finite open patches can be
+replaced by a compact cover subordinate to the same patches whose interiors
+cover the whole space.  The original compact cover supplies compactness of the
+ambient space, so callers do not need a separate `CompactSpace` instance. -/
+theorem exists_interior_compact_cover_subordinate_of_compact_cover
+    {X : Type*} [TopologicalSpace X] [T2Space X] [LocallyCompactSpace X]
+    {ι : Type*} [Finite ι] {U : ι → Set X}
+    (Kc₀ : ι → TopologicalSpace.Compacts X)
+    (hKc₀ : ∀ i, (Kc₀ i : Set X) ⊆ U i)
+    (hcover₀ : (⋃ i, (Kc₀ i : Set X)) = Set.univ)
+    (hUopen : ∀ i, IsOpen (U i)) :
+    ∃ Kc : ι → TopologicalSpace.Compacts X,
+      (⋃ i, interior (Kc i : Set X)) = Set.univ ∧
+        (⋃ i, (Kc i : Set X)) = Set.univ ∧ ∀ i, (Kc i : Set X) ⊆ U i := by
+  letI : CompactSpace X := compactSpace_of_finite_compact_cover Kc₀ hcover₀
+  have hUcover : (⋃ i, U i) = Set.univ := by
+    refine eq_univ_of_univ_subset ?_
+    intro x _hx
+    have hxK : x ∈ ⋃ i, (Kc₀ i : Set X) := by
+      rw [hcover₀]
+      exact Set.mem_univ x
+    rcases Set.mem_iUnion.mp hxK with ⟨i, hxi⟩
+    exact Set.mem_iUnion.mpr ⟨i, hKc₀ i hxi⟩
+  rcases exists_compacts_interior_univ_cover_of_finite_open_cover
+      (U := U) hUopen hUcover with
+    ⟨Kc, hcover_int, hKc⟩
+  exact ⟨Kc, hcover_int,
+    iUnion_compacts_eq_univ_of_iUnion_interior_eq_univ hcover_int, hKc⟩
+
+/-- Full finite-cover refinement package: from an ordinary compact chart cover
+subordinate to finite open patches, build an interior-covering compact cover
+subordinate to the same patches together with the exact pairwise compact
+overlaps required by the section-space compatibility API. -/
+theorem exists_interior_compact_cover_with_intersections_of_compact_cover
+    {X : Type*} [TopologicalSpace X] [T2Space X] [LocallyCompactSpace X]
+    {ι : Type*} [Finite ι] {U : ι → Set X}
+    (Kc₀ : ι → TopologicalSpace.Compacts X)
+    (hKc₀ : ∀ i, (Kc₀ i : Set X) ⊆ U i)
+    (hcover₀ : (⋃ i, (Kc₀ i : Set X)) = Set.univ)
+    (hUopen : ∀ i, IsOpen (U i)) :
+    ∃ (Kc : ι → TopologicalSpace.Compacts X)
+      (Ko : ι → ι → TopologicalSpace.Compacts X),
+      (∀ i, (Kc i : Set X) ⊆ U i) ∧
+        (∀ i j, (Ko i j : Set X) ⊆ (Kc i : Set X) ∩ (Kc j : Set X)) ∧
+        (∀ i j, (Ko i j : Set X) = (Kc i : Set X) ∩ (Kc j : Set X)) ∧
+        (⋃ i, interior (Kc i : Set X)) = Set.univ ∧
+        (⋃ i, (Kc i : Set X)) = Set.univ := by
+  rcases exists_interior_compact_cover_subordinate_of_compact_cover
+      (U := U) Kc₀ hKc₀ hcover₀ hUopen with
+    ⟨Kc, hcover_int, hcover, hKc⟩
+  let Ko : ι → ι → TopologicalSpace.Compacts X := compactCoverIntersections Kc
+  exact ⟨Kc, Ko, hKc,
+    compactCoverIntersections_subset Kc,
+    compactCoverIntersections_eq Kc,
+    hcover_int, hcover⟩
+
 private noncomputable def compactCurveOfEventuallyMemOnSet
     (K : Set M) (y : ℝ → M) (s : Set ℝ) (t : ℝ) (hy_t : y t ∈ K) : ℝ → K :=
   by

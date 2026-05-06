@@ -2249,10 +2249,15 @@ cover. The compatibility bridges
 `iUnion_compacts_eq_univ_of_iUnion_interior_eq_univ` and
 `compactSpace_of_finite_compact_cover` let that stronger cover data feed the
 existing ordinary `hcover` finite-cover APIs and expose compactness carried by a
-finite compact cover of `univ`. The remaining non-identity gauge work is to
-connect the actual finite-cover chart data to such an interior-covering
-construction or local refinement, and then integrate these scalar route
-theorems with the full local-existence and PDE estimate layers.
+finite compact cover of `univ`. The refinement bridge
+`exists_interior_compact_cover_with_intersections_of_compact_cover` now turns an
+ordinary finite compact chart cover subordinate to finite open patches into an
+interior-covering compact cover subordinate to the same patches, with canonical
+pairwise compact overlaps supplied by `compactCoverIntersections`. The
+remaining non-identity gauge work is to use that refined chart data end to end
+inside the selected Banach chart/gauge-flow constructions, and then integrate
+these scalar route theorems with the full local-existence and PDE estimate
+layers.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts

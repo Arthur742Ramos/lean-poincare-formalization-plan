@@ -1023,10 +1023,14 @@ now packages the matching intrinsic boundary
        and turn finite open covers of compact sets into compact subordinate
        pieces whose interiors still cover; compatibility bridges turn interior
        cover data back into the ordinary `hcover` shape and expose compactness
-       from any finite compact cover of `univ`. The remaining non-identity
-       gauge task is to connect the actual finite-cover chart data to that
-       interior-covering construction or to local refinements, alongside the
-       full Ricci-DeTurck Banach chart/PDE estimates.
+       from any finite compact cover of `univ`. A refinement bridge now turns
+       an ordinary finite compact chart cover subordinate to finite open
+       patches into an interior-covering compact cover subordinate to the same
+       patches, with canonical compact overlaps supplied as exact pairwise
+       intersections. The remaining non-identity gauge task is to use that
+       refined chart data end to end inside the selected Banach chart/gauge-flow
+       constructions, alongside the full Ricci-DeTurck Banach chart/PDE
+       estimates.
        Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
