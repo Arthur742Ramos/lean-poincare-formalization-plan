@@ -12711,6 +12711,75 @@ theorem exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartial
   · intro τ hτ
     exact hder τ ⟨le_trans t₀.2.1 hτ.1, le_of_lt hτ.2⟩
 
+/-- Common-subinterval state-preserving product Picard bijective open-patch
+readout for a forward time slice with `ℝ≥0` closed-ball estimates. -/
+theorem ofProductStatePreservingPicardLindelof_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {tlo thi t : ℝ} (htime : Icc tlo thi ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo tlo thi) (ht : t ∈ Ioo tlo thi)
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧
+        (ofProductStatePreservingPicardLindelof hf hball).flow (x, t) ∈ W ∧
+        BijOn
+          (fun y : V => (ofProductStatePreservingPicardLindelof hf hball).flow (y, t))
+          U W := by
+  rcases exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_mem_ball
+      (f := f) (Df := Df) (hf := hf) hball hx htime htbase ht ht_forward
+      hD_bound hDf_lip hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_bijOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductStatePreservingPicardLindelof hf hball).flow (y, t)) hφ hxφ hyφ
+
+/-- Common-subinterval state-preserving product Picard positive source-ball
+readout for a forward time slice with `ℝ≥0` closed-ball estimates. -/
+theorem ofProductStatePreservingPicardLindelof_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {tlo thi t : ℝ} (htime : Icc tlo thi ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo tlo thi) (ht : t ∈ Ioo tlo thi)
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    ∃ ρ > (0 : ℝ), ∃ W : Set V,
+      IsOpen W ∧
+        (ofProductStatePreservingPicardLindelof hf hball).flow (x, t) ∈ W ∧
+        MapsTo
+          (fun y : V => (ofProductStatePreservingPicardLindelof hf hball).flow (y, t))
+          (ball x ρ) W ∧
+        InjOn
+          (fun y : V => (ofProductStatePreservingPicardLindelof hf hball).flow (y, t))
+          (ball x ρ) := by
+  rcases exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_mem_ball
+      (f := f) (Df := Df) (hf := hf) hball hx htime htbase ht ht_forward
+      hD_bound hDf_lip hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_ball_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductStatePreservingPicardLindelof hf hball).flow (y, t)) hφ hxφ hyφ
+
 /-- `r ≤ R` common-subinterval form of the state-preserving product Picard
 local inverse theorem with `ℝ≥0` closed-ball estimates. -/
 theorem exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
@@ -13017,6 +13086,75 @@ theorem exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartial
     exact hDf_lip τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩
   · intro τ hτ
     exact hder τ ⟨le_of_lt hτ.1, le_trans hτ.2 t₀.2.2⟩
+
+/-- Common-subinterval state-preserving product Picard bijective open-patch
+readout for a backward time slice with `ℝ≥0` closed-ball estimates. -/
+theorem ofProductStatePreservingPicardLindelof_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {tlo thi t : ℝ} (htime : Icc tlo thi ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo tlo thi) (ht : t ∈ Ioo tlo thi)
+    (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    ∃ U W : Set V,
+      IsOpen U ∧ x ∈ U ∧ IsOpen W ∧
+        (ofProductStatePreservingPicardLindelof hf hball).flow (x, t) ∈ W ∧
+        BijOn
+          (fun y : V => (ofProductStatePreservingPicardLindelof hf hball).flow (y, t))
+          U W := by
+  rcases exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_mem_ball
+      (f := f) (Df := Df) (hf := hf) hball hx htime htbase ht ht_backward
+      hD_bound hDf_lip hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_open_nhds_bijOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductStatePreservingPicardLindelof hf hball).flow (y, t)) hφ hxφ hyφ
+
+/-- Common-subinterval state-preserving product Picard positive source-ball
+readout for a backward time slice with `ℝ≥0` closed-ball estimates. -/
+theorem ofProductStatePreservingPicardLindelof_flow_timeSlice_exists_ball_mapsTo_injOn_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_mem_ball
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R L Kpl BD KD : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) a R L Kpl)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {x : V} (hx : x ∈ ball x₀ r)
+    {tlo thi t : ℝ} (htime : Icc tlo thi ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo tlo thi) (ht : t ∈ Ioo tlo thi)
+    (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hD_bound : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      ‖Df τ z‖₊ ≤ BD)
+    (hDf_lip : ∀ τ ∈ Icc tmin tmax,
+      LipschitzOnWith KD (Df τ) (closedBall x₀ a))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    ∃ ρ > (0 : ℝ), ∃ W : Set V,
+      IsOpen W ∧
+        (ofProductStatePreservingPicardLindelof hf hball).flow (x, t) ∈ W ∧
+        MapsTo
+          (fun y : V => (ofProductStatePreservingPicardLindelof hf hball).flow (y, t))
+          (ball x ρ) W ∧
+        InjOn
+          (fun y : V => (ofProductStatePreservingPicardLindelof hf hball).flow (y, t))
+          (ball x ρ) := by
+  rcases exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_mem_ball
+      (f := f) (Df := Df) (hf := hf) hball hx htime htbase ht ht_backward
+      hD_bound hDf_lip hder with
+    ⟨φ, hφ, hxφ, hyφ⟩
+  exact exists_ball_mapsTo_injOn_of_openPartialHomeomorph
+    (g := fun y : V =>
+      (ofProductStatePreservingPicardLindelof hf hball).flow (y, t)) hφ hxφ hyφ
 
 /-- `r ≤ R` common-subinterval form of the state-preserving product Picard
 local inverse theorem with `ℝ≥0` closed-ball estimates, for a backward time

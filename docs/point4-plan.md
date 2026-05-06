@@ -1266,7 +1266,10 @@ lift through the state-preserving Picard closed-ball estimates to
 `ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius`
 and
 `exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius`,
-and the componentwise closed-ball continuity layer exposes the matching
+while the non-localized state-preserving closed-ball route now also exposes
+forward and backward common-`Ioo` open `BijOn` patches and positive source-ball
+`MapsTo`/`InjOn` patches directly from the same `ℝ≥0` estimates. The
+componentwise closed-ball continuity layer exposes the matching
 operator-ball and identity-ball common-backward readouts.  The generic
 componentwise backward-common route now also unpacks that local inverse into the
 same gluing-ready concrete patches as the forward route:
