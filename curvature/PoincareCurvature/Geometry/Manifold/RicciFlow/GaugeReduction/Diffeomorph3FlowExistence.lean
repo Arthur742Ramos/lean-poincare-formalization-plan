@@ -248,6 +248,27 @@ theorem exists_Icc_subset_of_mem_nhds
   rw [Metric.mem_ball, Real.dist_eq, abs_sub_lt_iff]
   constructor <;> linarith [hτIcc.1, hτIcc.2, hεpos]
 
+/-- Compactness upgrades local-neighborhood persistence to persistence of the
+whole compact set.  This is the quantifier-swap used after a compact source
+core has been covered by neighborhoods whose members persist in a
+time-dependent patch family. -/
+theorem isCompact_eventually_subset_of_forall_eventually_nhds_subset
+    {α : Type*} {l : Filter α} {K : Set X} {U : α → Set X}
+    (hK : IsCompact K)
+    (h : ∀ x ∈ K, ∃ N ∈ 𝓝 x, ∀ᶠ a in l, N ⊆ U a) :
+    ∀ᶠ a in l, K ⊆ U a := by
+  choose N hNnhds hNev using h
+  rcases hK.elim_nhds_subcover' N hNnhds with ⟨t, htcover⟩
+  have hAll : ∀ᶠ a in l, ∀ x : {x // x ∈ K},
+      x ∈ t → N x x.property ⊆ U a := by
+    rw [Finset.eventually_all]
+    intro x _hx
+    exact hNev x x.property
+  filter_upwards [hAll] with a ha y hyK
+  rcases Set.mem_iUnion.mp (htcover hyK) with ⟨x, hxUnion⟩
+  rcases Set.mem_iUnion.mp hxUnion with ⟨hxt, hyN⟩
+  exact ha x hxt hyN
+
 /-- A finite time-dependent cover remains a cover in the relative time filter if
 each base-time patch is eventually contained in its time-moved counterpart.
 This is the cover-level companion to the per-index source-persistence
