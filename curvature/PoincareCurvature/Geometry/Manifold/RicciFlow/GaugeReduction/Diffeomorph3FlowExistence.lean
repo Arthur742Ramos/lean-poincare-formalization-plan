@@ -437,6 +437,58 @@ theorem timeDependent_iUnion_cover_exists_Icc_subset_of_finite_compact_openPreim
       constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_left εT εC]
     exact hCsub ⟨hτC, hTsub hτT⟩
 
+/-- Simultaneous compact-core source and target cover persistence from fixed
+target-preimage descriptions and space-time continuity, with one closed
+interval chosen inside the ambient time set. -/
+theorem timeDependent_iUnion₂_cover_exists_Icc_subset_of_finite_compact_openPreimage_continuousWithinAt_prod
+    {ι : Type*} [Finite ι] {timeSet : Set ℝ} {t₀ : ℝ}
+    {F₁ F₂ : ι → ℝ → X → Y} {U₁ U₂ : ℝ → ι → Set X}
+    {W₁ W₂ : ι → Set Y} {K₁ K₂ : ι → Set X}
+    (htimeSet : timeSet ∈ 𝓝 t₀)
+    (hU₁preimage : ∀ τ : ℝ, ∀ i, ∀ x : X,
+      x ∈ U₁ τ i ↔ F₁ i τ x ∈ W₁ i)
+    (hU₂preimage : ∀ τ : ℝ, ∀ i, ∀ x : X,
+      x ∈ U₂ τ i ↔ F₂ i τ x ∈ W₂ i)
+    (hK₁compact : ∀ i, IsCompact (K₁ i))
+    (hK₂compact : ∀ i, IsCompact (K₂ i))
+    (hW₁open : ∀ i, IsOpen (W₁ i))
+    (hW₂open : ∀ i, IsOpen (W₂ i))
+    (hK₁cover : Set.univ ⊆ ⋃ i, K₁ i)
+    (hK₂cover : Set.univ ⊆ ⋃ i, K₂ i)
+    (hK₁base : ∀ i, K₁ i ⊆ U₁ t₀ i)
+    (hK₂base : ∀ i, K₂ i ⊆ U₂ t₀ i)
+    (hcont₁ : ∀ i, ∀ x ∈ K₁ i,
+      ContinuousWithinAt (fun p : ℝ × X ↦ F₁ i p.1 p.2)
+        (timeSet ×ˢ Set.univ) (t₀, x))
+    (hcont₂ : ∀ i, ∀ x ∈ K₂ i,
+      ContinuousWithinAt (fun p : ℝ × X ↦ F₂ i p.1 p.2)
+        (timeSet ×ˢ Set.univ) (t₀, x)) :
+    ∃ ε : ℝ, 0 < ε ∧
+      Icc (t₀ - ε) (t₀ + ε) ⊆ timeSet ∧
+        ∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) →
+          (Set.univ ⊆ ⋃ i, U₁ τ i) ∧ (Set.univ ⊆ ⋃ i, U₂ τ i) := by
+  rcases timeDependent_iUnion_cover_exists_Icc_subset_of_finite_compact_openPreimage_continuousWithinAt_prod
+      (timeSet := timeSet) (t₀ := t₀) (F := F₁) (U := U₁)
+      (W := W₁) (K := K₁) htimeSet hU₁preimage hK₁compact
+      hW₁open hK₁cover hK₁base hcont₁ with
+    ⟨ε₁, hε₁pos, hIcc₁subset, hU₁cover⟩
+  rcases timeDependent_iUnion_cover_exists_Icc_subset_of_finite_compact_openPreimage_continuousWithinAt_prod
+      (timeSet := timeSet) (t₀ := t₀) (F := F₂) (U := U₂)
+      (W := W₂) (K := K₂) htimeSet hU₂preimage hK₂compact
+      hW₂open hK₂cover hK₂base hcont₂ with
+    ⟨ε₂, hε₂pos, hIcc₂subset, hU₂cover⟩
+  refine ⟨min ε₁ ε₂, lt_min hε₁pos hε₂pos, ?_, ?_⟩
+  · intro τ hτIcc
+    have hτ₁ : τ ∈ Icc (t₀ - ε₁) (t₀ + ε₁) := by
+      constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_left ε₁ ε₂]
+    exact hIcc₁subset hτ₁
+  · intro τ hτIcc
+    have hτ₁ : τ ∈ Icc (t₀ - ε₁) (t₀ + ε₁) := by
+      constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_left ε₁ ε₂]
+    have hτ₂ : τ ∈ Icc (t₀ - ε₂) (t₀ + ε₂) := by
+      constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_right ε₁ ε₂]
+    exact ⟨hU₁cover hτ₁, hU₂cover hτ₂⟩
+
 /-- Simultaneous closed-interval persistence for finite source and target
 covers.  This packages the common compactness handoff needed by interval-local
 gluing constructors, where both selected source patches and selected target
