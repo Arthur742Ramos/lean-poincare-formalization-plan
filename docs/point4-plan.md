@@ -2207,33 +2207,35 @@ metric section using `metric_toContinuousSection_eq_curve`.
 preferred finite-cover bilinear coordinate readout as the raw
 `metricBilinearCoordinateField`, and
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_timeDifference_hasDerivAt_of_coord_mem_Ioo`
-transfers the moving time-difference derivative to that raw coordinate field.
-The raw gauge-flow wrapper
-`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_coord_mem_Ioo`
-then combines this time-difference derivative with the existing frozen-spatial
-raw-flow term, provided a selected compact chart curve represents
-`τ ↦ G.maps3 τ x` near `t` and the preferred finite-cover center is
-`G.maps3 t x`. The open-interval convenience theorem
-`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_eventually_mem_Kc_Ioo`
-builds that selected compact curve internally from eventual membership of
-`G.maps3 τ x` in the chosen compact cover piece. The right-sided companion
-`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_coord_mem_Ico`
-does the same for endpoint/restricted raw time sets `s ⊆ Ici t`, using the
-one-sided Banach derivative. A second right-sided wrapper,
-`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_coord_mem_timeSet_Ico`,
-only requires the selected compact curve to agree with the gauge orbit in the
-relative filter `𝓝[s] t`, and
-`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_eventually_mem_Kc_Ico`
-builds that curve internally from compact-piece membership in `𝓝[s] t` by
-keeping it constant off the raw time set. The interior-membership variants
-`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_mem_interior_Kc_Ioo`
+transfers the moving time-difference derivative to that raw coordinate field
+when the finite-cover center is the raw gauge center. The stronger
+target-centered bridge removes that center-equality requirement:
+`targetBilinearCoordReadoutContinuousLinearMap` restricts a finite-cover
+component to a smaller compact set and changes bilinear-form coordinates to the
+trivialization centered at the time-`t` gauge image, while
+`metric_targetBilinearCoordReadout_eq_metricBilinearCoordinateField` identifies
+that changed readout with the raw coordinate field. The time-difference wrappers
+`metricBilinearCoordinateField_timeDifference_hasDerivAt_of_target_coord_mem_Ioo`
 and
-`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_mem_interior_Kc_Ico`
-now show that these eventual-membership witnesses are automatic once the chosen
-compact piece contains the time-`t` gauge point in its interior. The remaining
-non-identity gauge work is therefore the end-to-end construction/selection of
-compact pieces with the needed interior coverage inside the local existence
-package, not the readout-to-field equality itself.
+`metricBilinearCoordinateField_timeDifference_hasDerivWithinAt_Ici_of_target_coord_mem_Ico`
+then feed the Banach derivative through this target-centered compact readout.
+The raw gauge-flow wrappers
+`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_target_coord_mem_Ioo`
+and
+`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_target_coord_mem_timeSet_Ico`
+combine that target-centered time-difference term with the existing
+frozen-spatial raw-flow derivative. Their convenience forms
+`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_eventually_mem_target_K_Ioo`,
+`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_mem_interior_target_K_Ioo`,
+`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_eventually_mem_target_K_Ico`,
+and
+`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_mem_interior_target_K_Ico`
+build the selected compact curve from ordinary or relative eventual membership,
+with interior membership making the eventual-membership witnesses automatic.
+The remaining non-identity gauge work is therefore the end-to-end construction
+and packaging of compact overlap pieces `K` with `K ⊆ Kc i`, `K` inside the
+target trivialization domain, and the gauge point in `interior K`, alongside the
+full local-existence integration and PDE estimates.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts

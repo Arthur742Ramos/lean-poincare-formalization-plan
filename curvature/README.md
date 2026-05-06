@@ -1006,22 +1006,20 @@ now packages the matching intrinsic boundary
        `HasDerivAt.continuousMap_moving_eval_sub_const` and the
        `coordBilinearFormReadoutMap_timeDifference` wrappers, including the
        `SmoothIntrinsicDeTurckRealization` transfer to the realized metric
-       section. `SmoothRealizationGaugeRoutes` now identifies the preferred
-       finite-cover readout with `metricBilinearCoordinateField`, transfers the
-       moving time-difference derivative to that raw coordinate field, and feeds
-       it into the raw gauge-flow moving-base derivative once a selected compact
-       chart curve represents `τ ↦ G.maps3 τ x` near `t`, with a matching
-       open-interval theorem that builds the selected curve from eventual
-       membership in one compact cover piece and right-sided endpoint variants
-       for raw time sets contained in `Ici t`. The right-sided route now also
-       has a time-set-relative compact-membership wrapper, so the selected
-       compact curve can be built from eventual membership in `𝓝[s] t` and kept
-       constant off the raw time set. Interior-membership variants now make
-       those eventual-membership witnesses automatic when the chosen compact
-       piece contains the gauge point in its interior. The remaining non-identity
-       gauge task is to construct and package compact pieces with the needed
-       interior coverage inside the local existence route, alongside the full
-       Ricci-DeTurck Banach chart/PDE estimates. Two thin extension
+       section. `SmoothRealizationGaugeRoutes` now identifies finite-cover
+       readouts with `metricBilinearCoordinateField`, including a target-centered
+       compact readout that restricts one finite-cover component to a smaller
+       compact overlap piece and changes coordinates to the trivialization
+       centered at `G.maps3 t x`. This removes the previous fixed-cover-center
+       equality requirement from the raw gauge moving-base derivative. Ordinary
+       and right-sided wrappers now build the selected compact curve from
+       ordinary or relative eventual membership in that overlap piece, and
+       interior-membership variants make those eventual-membership witnesses
+       automatic. The remaining non-identity gauge task is to construct and
+       package compact overlap pieces inside a finite-cover member and the
+       target trivialization domain, with the gauge point in the overlap
+       interior, alongside the full Ricci-DeTurck Banach chart/PDE estimates.
+       Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`
