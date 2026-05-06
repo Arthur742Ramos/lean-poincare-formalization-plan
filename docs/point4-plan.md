@@ -1674,7 +1674,17 @@ eventually contained in its time-moved counterpart.  Its interval form
 `timeDependent_iUnion_cover_exists_Ioo_of_finite_subset`, based on the generic
 real-line extraction helper `exists_Ioo_inter_subset_of_mem_nhdsWithin`, turns
 that relative-filter cover persistence into an explicit open time interval
-around the base time.  The fixed-IVP intrinsic
+around the base time.  The raw gauge-flow layer now has an interval-cover
+fallback constructor
+`Diffeomorph3GaugeFlowOn.of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`:
+it adds an identity `Option.none` patch outside the closed Picard interval and
+empty fallback patches inside, so the existing all-time
+`SmoothSelfDiffeomorph3Family.ofInverse` assembly can consume source and target
+covers known only on `Icc tmin tmax`.  The matching
+`..._localGluingData_pointwiseSource_...` and
+`..._openPreimage_localGluingData_...` adapters preserve the named
+local-inverse-function package and derive pointwise source persistence from
+fixed open target-preimage patches.  The fixed-IVP intrinsic
 layer now exposes the same finite-cover shape
 as
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`
