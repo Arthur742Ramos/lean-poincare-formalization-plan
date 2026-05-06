@@ -253,6 +253,27 @@ private theorem exists_compact_subset_interior_inter_open
   · intro y hy
     exact (hKsub hy).2
 
+/-- If the interiors of a compact family cover and the target patch is open,
+one can choose both the compact-family index and a smaller compact neighborhood
+inside the selected family member and the target patch. -/
+theorem exists_compact_subset_interior_cover_inter_open
+    [LocallyCompactSpace M] {ι : Type*} {Kc : ι → TopologicalSpace.Compacts M}
+    {p : M} {U : Set M}
+    (hcover_int : (⋃ i, interior (Kc i : Set M)) = Set.univ)
+    (hUopen : IsOpen U) (hpU : p ∈ U) :
+    ∃ (i : ι) (K : TopologicalSpace.Compacts M),
+      p ∈ interior (K : Set M) ∧
+        (K : Set M) ⊆ (Kc i : Set M) ∧ (K : Set M) ⊆ U := by
+  have hpcover : p ∈ ⋃ i, interior (Kc i : Set M) := by
+    rw [hcover_int]
+    exact Set.mem_univ p
+  rcases Set.mem_iUnion.mp hpcover with ⟨i, hpKc⟩
+  rcases exists_compact_subset_interior_inter_open
+      (M := M) (p := p) (K₀ := (Kc i : Set M)) (U := U)
+      hpKc hUopen hpU with
+    ⟨K, hpK, hKsubKc, hKsubU⟩
+  exact ⟨i, K, hpK, hKsubKc, hKsubU⟩
+
 /-- A finite open cover of a compact set admits compact cores subordinate to
 the open patches whose interiors still cover the original compact set.  This
 is the cover-level topological input needed to replace plain compact cover

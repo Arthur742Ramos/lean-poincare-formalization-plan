@@ -2240,8 +2240,10 @@ use local compactness of the finite-dimensional manifold to choose such a
 compact `K` whenever the gauge point is already in `interior (Kc i)`. Thus the
 target-domain overlap no longer has to be supplied by callers. At the
 cover-construction level,
+`exists_compact_subset_interior_cover_inter_open` chooses an index and compact
+overlap from an interior-covering compact family and an open target patch, while
 `exists_compacts_interior_cover_of_finite_open_cover` and its compact-space
-`univ` variant now record the standard shrinking step: a finite open cover of a
+`univ` variant record the standard shrinking step: a finite open cover of a
 compact set can be replaced by compact subordinate pieces whose interiors still
 cover. The remaining non-identity gauge work is to connect the actual
 finite-cover chart data to such an interior-covering construction or local
