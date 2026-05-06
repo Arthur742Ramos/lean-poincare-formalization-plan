@@ -1747,7 +1747,10 @@ strengthened
 combines that compact subcover selection with finite source/target persistence
 to return one positive closed time interval on which the selected source and
 target patches still cover, while preserving the same local gluing,
-compatibility, and open-preimage data.  The
+compatibility, and open-preimage data.  Its
+`..._Icc_subset_timeSet_cover_...` companion also chooses the closed interval
+inside the ambient time set, so later raw-constructor calls can use the covers
+without carrying a separate `τ ∈ timeSet` premise.  The
 fixed-IVP and theorem-family intrinsic layers now expose matching
 `..._finite_timeDependent_iUnion_localGluingData_...` wrappers, so later compact
 manifold arguments can pass named local inverse-function packages through every

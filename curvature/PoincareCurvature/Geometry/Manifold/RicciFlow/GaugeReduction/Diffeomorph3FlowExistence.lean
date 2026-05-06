@@ -1371,6 +1371,70 @@ theorem exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_Icc_c
   · intro τ hτIcc hτtime
     exact (hcover_Icc hτIcc hτtime).2
 
+/-- Compact finite-subcover selection with a closed time interval chosen inside
+the ambient time set.  Compared with
+`exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_Icc_cover_of_iUnion_at`,
+the returned interval is a subset of `timeSet`, so the source and target cover
+readouts have no extra relative-time side condition. -/
+theorem exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_Icc_subset_timeSet_cover_of_iUnion_at
+    [CompactSpace M] {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → ℝ → M → M) (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (timeSet : Set ℝ) (t₀ : ℝ)
+    (htimeSet : timeSet ∈ 𝓝 t₀)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t) (G i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (F i t) (F j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (G i t) (G j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ F i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hVcover : Set.univ ⊆ ⋃ i, V t₀ i)
+    (hWcover : Set.univ ⊆ ⋃ i, W i)
+    (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i)
+    (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i) :
+    ∃ s : Finset ι, ∃ ε : ℝ,
+      0 < ε ∧
+        Icc (t₀ - ε) (t₀ + ε) ⊆ timeSet ∧
+          Set.univ ⊆ ⋃ i : {i // i ∈ s}, U t₀ i ∧
+            Set.univ ⊆ ⋃ i : {i // i ∈ s}, V t₀ i ∧
+              (∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) →
+                Set.univ ⊆ ⋃ i : {i // i ∈ s}, U τ i) ∧
+                (∀ ⦃τ : ℝ⦄, τ ∈ Icc (t₀ - ε) (t₀ + ε) →
+                  Set.univ ⊆ ⋃ i : {i // i ∈ s}, V τ i) ∧
+                  Set.univ ⊆ ⋃ i : {i // i ∈ s}, W i ∧
+                    (∀ t : ℝ, ∀ i : {i // i ∈ s},
+                      LocalGluingData (I := I) (M := M) n
+                        (F i t) (G i t) (U t i) (V t i)) ∧
+                      (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                        EqOn (F i t) (F j t) (U t i ∩ U t j)) ∧
+                        (∀ t : ℝ, ∀ i j : {i // i ∈ s},
+                          EqOn (G i t) (G j t) (V t i ∩ V t j)) ∧
+                          (∀ τ : ℝ, ∀ i : {i // i ∈ s}, ∀ x : M,
+                            x ∈ U τ i ↔ F i τ x ∈ W i) ∧
+                            (∀ i : {i // i ∈ s}, IsOpen (W i)) := by
+  rcases exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_of_iUnion_at
+      (I := I) (M := M) F G U V W hlocal hFcompat hGcompat hUpreimage
+      hWopen t₀ hUcover hVcover hWcover with
+    ⟨s, hUsubcover, hVsubcover, hWsubcover, hlocal_sub, hFcompat_sub,
+      hGcompat_sub, hUpreimage_sub, hWopen_sub⟩
+  have hUwithin_sub : ∀ i : {i // i ∈ s},
+      ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i := fun i ↦ hUwithin i
+  have hVwithin_sub : ∀ i : {i // i ∈ s},
+      ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i := fun i ↦ hVwithin i
+  rcases timeDependent_iUnion₂_cover_exists_Icc_subset_of_finite_subset
+      (timeSet := timeSet) (t := t₀)
+      (U := fun τ (i : {i // i ∈ s}) ↦ U τ i)
+      (V := fun τ (i : {i // i ∈ s}) ↦ V τ i)
+      htimeSet hUsubcover hVsubcover hUwithin_sub hVwithin_sub with
+    ⟨ε, hεpos, hIcc_subset, hcover_Icc⟩
+  refine ⟨s, ε, hεpos, hIcc_subset, hUsubcover, hVsubcover, ?_, ?_,
+    hWsubcover, hlocal_sub, hFcompat_sub, hGcompat_sub, hUpreimage_sub,
+    hWopen_sub⟩
+  · intro τ hτIcc
+    exact (hcover_Icc hτIcc).1
+  · intro τ hτIcc
+    exact (hcover_Icc hτIcc).2
+
 end LocalGluingData
 
 /-- Smoothness of a model map transports through source and target chart
