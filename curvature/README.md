@@ -1012,11 +1012,14 @@ now packages the matching intrinsic boundary
        it into the raw gauge-flow moving-base derivative once a selected compact
        chart curve represents `τ ↦ G.maps3 τ x` near `t`, with a matching
        open-interval theorem that builds the selected curve from eventual
-       membership in one compact cover piece and a matching right-sided
-       endpoint variant for raw time sets contained in `Ici t`. The remaining
-       non-identity gauge task is to construct and package those selected
-       compact-chart witnesses inside the local existence route, alongside the
-       full Ricci-DeTurck Banach chart/PDE estimates. Two thin extension
+       membership in one compact cover piece and right-sided endpoint variants
+       for raw time sets contained in `Ici t`. The right-sided route now also
+       has a time-set-relative compact-membership wrapper, so the selected
+       compact curve can be built from eventual membership in `𝓝[s] t` and kept
+       constant off the raw time set. The remaining non-identity gauge task is
+       to construct and package those compact-membership witnesses inside the
+       local existence route, alongside the full Ricci-DeTurck Banach chart/PDE
+       estimates. Two thin extension
    modules also fill API gaps: `LocalExistence/RankOneDeTurck.lean` provides
    `chosenIntrinsicDeTurckLocalExistenceUniqueness(.Family)_of_finrank_le_one`
    and the model-space synonym, while `LocalExistence/IsEmptyDeTurckFamily.lean`

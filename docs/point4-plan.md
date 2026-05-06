@@ -2219,9 +2219,16 @@ builds that selected compact curve internally from eventual membership of
 `G.maps3 τ x` in the chosen compact cover piece. The right-sided companion
 `metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_coord_mem_Ico`
 does the same for endpoint/restricted raw time sets `s ⊆ Ici t`, using the
-one-sided Banach derivative. The remaining non-identity gauge work is therefore the
-end-to-end construction/selection of those compact chart curves and witnesses
-inside the local existence package, not the readout-to-field equality itself.
+one-sided Banach derivative. A second right-sided wrapper,
+`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_coord_mem_timeSet_Ico`,
+only requires the selected compact curve to agree with the gauge orbit in the
+relative filter `𝓝[s] t`, and
+`metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_eventually_mem_Kc_Ico`
+builds that curve internally from compact-piece membership in `𝓝[s] t` by
+keeping it constant off the raw time set. The remaining non-identity gauge work
+is therefore the end-to-end construction/selection of those compact chart
+membership witnesses inside the local existence package, not the
+readout-to-field equality itself.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts
