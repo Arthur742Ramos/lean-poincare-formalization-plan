@@ -1689,7 +1689,9 @@ used without storing an additional independent field.  It also has a compactness
 subcover lemma
 `LocalGluingData.exists_finset_subtype_iUnion_of_iUnion`, which restricts any
 source-and-target covering local-gluing family to a finite subtype while
-preserving the packaged data.  The
+preserving the packaged data; the companion
+`LocalGluingData.exists_finset_subtype_iUnion_compatible_of_iUnion` carries
+forward/backward overlap compatibility through the same finite restriction.  The
 fixed-IVP and theorem-family intrinsic layers now expose matching
 `..._finite_timeDependent_iUnion_localGluingData_...` wrappers, so later compact
 manifold arguments can pass named local inverse-function packages through every

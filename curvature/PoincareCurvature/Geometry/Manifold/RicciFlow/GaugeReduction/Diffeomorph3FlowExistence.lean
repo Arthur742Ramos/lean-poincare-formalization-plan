@@ -1028,6 +1028,30 @@ theorem exists_finset_subtype_iUnion_of_iUnion
   · intro i
     exact hlocal i
 
+/-- Compactness restricts a compatible source-and-target covering family of
+local gluing patches to a finite subtype, preserving both the packaged local
+data and the overlap compatibility hypotheses. -/
+theorem exists_finset_subtype_iUnion_compatible_of_iUnion
+    [CompactSpace M] {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → M → M) (U V : ι → Set M)
+    (hlocal : ∀ i, LocalGluingData (I := I) (M := M) n (F i) (G i) (U i) (V i))
+    (hFcompat : ∀ i j, EqOn (F i) (F j) (U i ∩ U j))
+    (hGcompat : ∀ i j, EqOn (G i) (G j) (V i ∩ V j))
+    (hUcover : Set.univ ⊆ ⋃ i, U i)
+    (hVcover : Set.univ ⊆ ⋃ i, V i) :
+    ∃ s : Finset ι,
+      Set.univ ⊆ ⋃ i : {i // i ∈ s}, U i ∧
+        Set.univ ⊆ ⋃ i : {i // i ∈ s}, V i ∧
+          (∀ i : {i // i ∈ s},
+            LocalGluingData (I := I) (M := M) n (F i) (G i) (U i) (V i)) ∧
+            (∀ i j : {i // i ∈ s}, EqOn (F i) (F j) (U i ∩ U j)) ∧
+              (∀ i j : {i // i ∈ s}, EqOn (G i) (G j) (V i ∩ V j)) := by
+  rcases exists_finset_subtype_iUnion_of_iUnion
+      (I := I) (M := M) F G U V hlocal hUcover hVcover with
+    ⟨s, hUsubcover, hVsubcover, hlocal_sub⟩
+  exact ⟨s, hUsubcover, hVsubcover, hlocal_sub,
+    (fun i j ↦ hFcompat i j), (fun i j ↦ hGcompat i j)⟩
+
 end LocalGluingData
 
 /-- Smoothness of a model map transports through source and target chart
