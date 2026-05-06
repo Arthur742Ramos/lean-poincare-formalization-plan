@@ -1736,6 +1736,15 @@ and
 `Diffeomorph3GaugeFlowOn.exists_Icc_gaugeFlow_family_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
 which choose a positive radius for each family member and expose the raw
 small-interval witnesses before any fixed-IVP chosen-time-set repackaging.  The
+matching `_with_Icc_subset_...` family adapters additionally return
+`Icc (t₀ a - ε a) (t₀ a + ε a) ⊆ timeSet a`, so the compact shrink supplies
+both the raw witness and the certificate needed to restrict the ambient DeTurck
+solution to the same closed symmetric interval.  The intrinsic DeTurck local
+solution records now have exact `restrictTimeSet` and `restrictSymmetricIcc`
+constructors, with chosen-background wrappers and simp lemmas for the resulting
+named `timeSet`; the remaining compact packaging step is to apply those
+restrictions to the selected fixed-IVP/theorem-family solutions and use the
+resulting time-set equalities when feeding `ofRawGaugeFlowOn`.  The
 fixed-IVP and theorem-family intrinsic layers now also expose
 `ofRawGaugeFlowOn` with proof-level `nonempty_ofRawGaugeFlowOn`, packaging raw
 witnesses on named time sets once those sets have been identified with the

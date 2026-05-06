@@ -740,6 +740,47 @@ lemma intrinsicDeTurckSolution_equation
       sol.metric sol.metricVelocity sol.background t :=
   sol.isRicciDeTurck.2 ht
 
+/-- Restrict an intrinsic Ricci-DeTurck solution to a smaller time set.  The
+metric, velocity, and background families are unchanged; only the equation
+domain is narrowed. -/
+def IntrinsicDeTurckSolution.restrictTimeSet
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (s : Set ℝ) (hsub : s ⊆ sol.timeSet) :
+    IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M) where
+  timeSet := s
+  metric := sol.metric
+  metricVelocity := sol.metricVelocity
+  background := sol.background
+  isRicciDeTurck := by
+    refine ⟨(intrinsicDeTurckSolution_hasTimeDerivativeOn
+      (I := I) (M := M) sol).mono hsub, ?_⟩
+    intro t ht
+    exact intrinsicDeTurckSolution_equation (I := I) (M := M) sol (hsub ht)
+
+@[simp] theorem IntrinsicDeTurckSolution.restrictTimeSet_timeSet
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (s : Set ℝ) (hsub : s ⊆ sol.timeSet) :
+    (sol.restrictTimeSet s hsub).timeSet = s :=
+  rfl
+
+@[simp] theorem IntrinsicDeTurckSolution.restrictTimeSet_metric
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (s : Set ℝ) (hsub : s ⊆ sol.timeSet) :
+    (sol.restrictTimeSet s hsub).metric = sol.metric :=
+  rfl
+
+@[simp] theorem IntrinsicDeTurckSolution.restrictTimeSet_metricVelocity
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (s : Set ℝ) (hsub : s ⊆ sol.timeSet) :
+    (sol.restrictTimeSet s hsub).metricVelocity = sol.metricVelocity :=
+  rfl
+
+@[simp] theorem IntrinsicDeTurckSolution.restrictTimeSet_background
+    (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
+    (s : Set ℝ) (hsub : s ⊆ sol.timeSet) :
+    (sol.restrictTimeSet s hsub).background = sol.background :=
+  rfl
+
 theorem IntrinsicDeTurckSolution.metricVelocity_eq_zero_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)]
     (sol : IntrinsicDeTurckSolution (E := E) (H := H) (I := I) (M := M))
@@ -924,6 +965,41 @@ def IntrinsicDeTurckLocalSolution.restrictTerminal
     exact sol.interval_subset ⟨ht.1, le_trans ht.2 hT⟩
   matchesInitialMetric := sol.matchesInitialMetric
 
+/-- Restrict an intrinsic Ricci-DeTurck local solution to a specified smaller
+time set and terminal time.  This is stronger than `restrictTerminal`: the
+underlying solution record also has its `timeSet` replaced by the named set. -/
+def IntrinsicDeTurckLocalSolution.restrictTimeSet
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Set.Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.toIntrinsicDeTurckSolution.timeSet) :
+    IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp where
+  terminalTime := T
+  initial_lt_terminal := hT₀
+  toIntrinsicDeTurckSolution := sol.toIntrinsicDeTurckSolution.restrictTimeSet s hsub
+  interval_subset := hinterval
+  matchesInitialMetric := by
+    simpa [IntrinsicDeTurckMatchesInitialMetric,
+      IntrinsicDeTurckSolution.restrictTimeSet] using sol.matchesInitialMetric
+
+/-- Restrict a local Ricci-DeTurck solution to a symmetric closed time interval
+around the initial time. -/
+def IntrinsicDeTurckLocalSolution.restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.toIntrinsicDeTurckSolution.timeSet) :
+    IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp :=
+  sol.restrictTimeSet (Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε))
+    (T := ivp.initialTime + ε)
+    (by linarith)
+    (by
+      intro t ht
+      exact ⟨by linarith [ht.1, hε], ht.2⟩)
+    hsub
+
 @[simp] theorem IntrinsicDeTurckLocalSolution.restrictTerminal_terminalTime
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
@@ -937,6 +1013,53 @@ def IntrinsicDeTurckLocalSolution.restrictTerminal
     {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.terminalTime) :
     (sol.restrictTerminal hT₀ hT).toIntrinsicDeTurckSolution =
       sol.toIntrinsicDeTurckSolution :=
+  rfl
+
+@[simp] theorem IntrinsicDeTurckLocalSolution.restrictTimeSet_terminalTime
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Set.Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictTimeSet s hT₀ hinterval hsub).terminalTime = T :=
+  rfl
+
+@[simp] theorem IntrinsicDeTurckLocalSolution.restrictTimeSet_toIntrinsicDeTurckSolution
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Set.Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictTimeSet s hT₀ hinterval hsub).toIntrinsicDeTurckSolution =
+      sol.toIntrinsicDeTurckSolution.restrictTimeSet s hsub :=
+  rfl
+
+@[simp] theorem IntrinsicDeTurckLocalSolution.restrictTimeSet_timeSet
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Set.Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictTimeSet s hT₀ hinterval hsub).toIntrinsicDeTurckSolution.timeSet = s :=
+  rfl
+
+@[simp] theorem IntrinsicDeTurckLocalSolution.restrictSymmetricIcc_terminalTime
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictSymmetricIcc hε hsub).terminalTime = ivp.initialTime + ε :=
+  rfl
+
+@[simp] theorem IntrinsicDeTurckLocalSolution.restrictSymmetricIcc_timeSet
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictSymmetricIcc hε hsub).toIntrinsicDeTurckSolution.timeSet =
+      Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) :=
   rfl
 
 lemma intrinsicDeTurckLocalSolution_initialTime_mem
@@ -1591,6 +1714,35 @@ def ChosenIntrinsicDeTurckLocalSolution.restrictTerminal
   ⟨sol.1.restrictTerminal hT₀ hT, by
     simpa [IntrinsicDeTurckLocalSolution.restrictTerminal, UsesChosenBackground] using sol.2⟩
 
+/-- Restrict a chosen-background Ricci-DeTurck local solution to a named smaller
+time set.  The chosen-background condition is preserved because the metric and
+background families are unchanged. -/
+def ChosenIntrinsicDeTurckLocalSolution.restrictTimeSet
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Set.Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp :=
+  ⟨sol.1.restrictTimeSet s hT₀ hinterval hsub, by
+    simpa [IntrinsicDeTurckLocalSolution.restrictTimeSet,
+      IntrinsicDeTurckSolution.restrictTimeSet, UsesChosenBackground] using sol.2⟩
+
+/-- Restrict a chosen-background Ricci-DeTurck local solution to a symmetric
+closed time interval around the initial time. -/
+def ChosenIntrinsicDeTurckLocalSolution.restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp :=
+  ⟨IntrinsicDeTurckLocalSolution.restrictSymmetricIcc
+      (I := I) (M := M) sol.1 hε hsub, by
+    simpa [IntrinsicDeTurckLocalSolution.restrictSymmetricIcc,
+      IntrinsicDeTurckLocalSolution.restrictTimeSet,
+      IntrinsicDeTurckSolution.restrictTimeSet, UsesChosenBackground] using sol.2⟩
+
 @[simp] theorem ChosenIntrinsicDeTurckLocalSolution.restrictTerminal_val
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
@@ -1603,6 +1755,64 @@ def ChosenIntrinsicDeTurckLocalSolution.restrictTerminal
     (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
     {T : ℝ} (hT₀ : ivp.initialTime < T) (hT : T ≤ sol.1.terminalTime) :
     (sol.restrictTerminal hT₀ hT).1.terminalTime = T :=
+  rfl
+
+@[simp] theorem ChosenIntrinsicDeTurckLocalSolution.restrictTimeSet_val
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Set.Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictTimeSet s hT₀ hinterval hsub).1 =
+      sol.1.restrictTimeSet s hT₀ hinterval hsub :=
+  rfl
+
+@[simp] theorem ChosenIntrinsicDeTurckLocalSolution.restrictTimeSet_terminalTime
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Set.Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictTimeSet s hT₀ hinterval hsub).1.terminalTime = T :=
+  rfl
+
+@[simp] theorem ChosenIntrinsicDeTurckLocalSolution.restrictTimeSet_timeSet
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (s : Set ℝ) {T : ℝ} (hT₀ : ivp.initialTime < T)
+    (hinterval : Set.Icc ivp.initialTime T ⊆ s)
+    (hsub : s ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictTimeSet s hT₀ hinterval hsub).1.toIntrinsicDeTurckSolution.timeSet = s :=
+  rfl
+
+@[simp] theorem ChosenIntrinsicDeTurckLocalSolution.restrictSymmetricIcc_val
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictSymmetricIcc hε hsub).1 =
+      IntrinsicDeTurckLocalSolution.restrictSymmetricIcc
+        (I := I) (M := M) sol.1 hε hsub :=
+  rfl
+
+@[simp] theorem ChosenIntrinsicDeTurckLocalSolution.restrictSymmetricIcc_terminalTime
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictSymmetricIcc hε hsub).1.terminalTime = ivp.initialTime + ε :=
+  rfl
+
+@[simp] theorem ChosenIntrinsicDeTurckLocalSolution.restrictSymmetricIcc_timeSet
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    (sol.restrictSymmetricIcc hε hsub).1.toIntrinsicDeTurckSolution.timeSet =
+      Set.Icc (ivp.initialTime - ε) (ivp.initialTime + ε) :=
   rfl
 
 /-- The compact-manifold point-4 theorem package stated with the chosen smooth Levi-Civita family as
