@@ -1294,6 +1294,10 @@ family, and the componentwise closed-ball continuity layer exposes the matching
 `ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_*_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius`
 family, including operator-ball and identity-ball concrete inverse-patch
 specializations.
+The localized operator-ball and identity-ball backward-common componentwise
+routes now also expose the actual `OpenPartialHomeomorph` witnesses, matching
+the forward route and letting glued inverse-slice arguments keep the same local
+inverse object without unpacking through concrete open or ball patches first.
 This strict derivative input has now been reduced one step further in the model
 layer: `flow_timeSlice_hasStrictFDerivAt_of_eventually_hasFDerivAt` uses
 Mathlib's real `C¹`-implies-strict-differentiability theorem, so ordinary
