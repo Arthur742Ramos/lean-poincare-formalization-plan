@@ -2213,7 +2213,10 @@ The raw gauge-flow wrapper
 then combines this time-difference derivative with the existing frozen-spatial
 raw-flow term, provided a selected compact chart curve represents
 `τ ↦ G.maps3 τ x` near `t` and the preferred finite-cover center is
-`G.maps3 t x`. The right-sided companion
+`G.maps3 t x`. The open-interval convenience theorem
+`metricBilinearCoordinateField_hasDerivAt_along_gauge_eval_of_eventually_mem_Kc_Ioo`
+builds that selected compact curve internally from eventual membership of
+`G.maps3 τ x` in the chosen compact cover piece. The right-sided companion
 `metricBilinearCoordinateField_hasDerivWithinAt_along_gauge_eval_of_coord_mem_Ico`
 does the same for endpoint/restricted raw time sets `s ⊆ Ici t`, using the
 one-sided Banach derivative. The remaining non-identity gauge work is therefore the
