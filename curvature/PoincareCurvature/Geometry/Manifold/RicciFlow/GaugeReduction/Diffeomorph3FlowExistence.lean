@@ -1137,6 +1137,22 @@ theorem backward_mapsTo_target {n : WithTop ℕ∞} {F G : M → M} {U V : Set M
   intro y hy
   exact h.backward_mapsTo ⟨Set.mem_univ y, hy⟩
 
+/-- If source patches cover at a base time and the local forward readouts are
+anchored there, the target patches cover at the same time. -/
+theorem target_cover_at_of_source_cover_anchor
+    {ι : Type*} {n : WithTop ℕ∞} {F G : ι → ℝ → M → M}
+    {U V : ℝ → ι → Set M} {t₀ : ℝ}
+    (hlocal : ∀ i,
+      LocalGluingData (I := I) (M := M) n (F i t₀) (G i t₀) (U t₀ i) (V t₀ i))
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hanchored : ∀ i, ∀ x ∈ U t₀ i, F i t₀ x = x) :
+    Set.univ ⊆ ⋃ i, V t₀ i := by
+  intro x hx
+  rcases Set.mem_iUnion.mp (hUcover hx) with ⟨i, hxU⟩
+  refine Set.mem_iUnion.mpr ⟨i, ?_⟩
+  have hFxV : F i t₀ x ∈ V t₀ i := (hlocal i).forward_mapsTo_source hxU
+  simpa [hanchored i x hxU] using hFxV
+
 /-- The forward map in a `LocalGluingData` patch is a bijection from its source
 patch to its target patch. -/
 theorem forward_bijOn {n : WithTop ℕ∞} {F G : M → M} {U V : Set M}
@@ -6285,8 +6301,8 @@ This combines compact finite-subcover selection, source/target cover
 persistence inside the ambient time set, and the interval-local open-preimage
 raw constructor.  It is the direct handoff from chartwise local inverse-function
 packages to a raw gauge-flow witness, before any fixed-IVP or theorem-family
-repackaging.  The fixed target-preimage cover is derived from the base-time
-source cover and the anchoring hypotheses. -/
+repackaging.  The base-time target cover and fixed target-preimage cover are
+derived from the base-time source cover and the anchoring hypotheses. -/
 theorem exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
     [CompactSpace M] {ι : Type*}
     {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
@@ -6301,7 +6317,6 @@ theorem exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingD
     (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
     (hWopen : ∀ i, IsOpen (W i))
     (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
-    (hVcover : Set.univ ⊆ ⋃ i, V t₀ i)
     (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i)
     (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i)
     (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
@@ -6316,6 +6331,10 @@ theorem exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingD
     ∃ ε : ℝ, 0 < ε ∧
       Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X
         (Ioo (t₀ - ε) (t₀ + ε)) t₀) := by
+  have hVcover : Set.univ ⊆ ⋃ i, V t₀ i :=
+    LocalGluingData.target_cover_at_of_source_cover_anchor
+      (I := I) (M := M) (n := 3) (F := Fₗ) (G := Gₗ) (U := U) (V := V)
+      (t₀ := t₀) (fun i ↦ hlocal t₀ i) hUcover hanchoredLocal
   have hWcover : Set.univ ⊆ ⋃ i, W i :=
     _root_.RicciFlow.timeDependent_iUnion_target_cover_of_indexed_open_preimage_anchor
       (F := Fₗ) (U := U) (W := W) (t₀ := t₀)

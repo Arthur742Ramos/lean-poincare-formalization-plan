@@ -1705,8 +1705,9 @@ compact raw existence theorem
 now combines compact subcover selection, source/target cover persistence inside
 the ambient time set, ambient local regularity, and the open-preimage
 local-gluing route to produce a raw gauge-flow witness on a small symmetric
-`Ioo` interval, deriving the fixed target-preimage cover from the base-time
-source cover and anchored local readouts.  The
+`Ioo` interval, deriving the base-time target cover and the fixed
+target-preimage cover from the base-time source cover and anchored local
+readouts.  The
 fixed-IVP intrinsic
 layer now exposes the same finite-cover shape
 as
