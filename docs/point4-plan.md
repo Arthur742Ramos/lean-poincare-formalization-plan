@@ -1736,6 +1736,10 @@ and
 `Diffeomorph3GaugeFlowOn.exists_Icc_gaugeFlow_family_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
 which choose a positive radius for each family member and expose the raw
 small-interval witnesses before any fixed-IVP chosen-time-set repackaging.  The
+fixed-IVP and theorem-family intrinsic layers now also expose
+`ofRawGaugeFlowOn` with proof-level `nonempty_ofRawGaugeFlowOn`, packaging raw
+witnesses on named time sets once those sets have been identified with the
+chosen local-solution time sets.  The
 fixed-IVP intrinsic
 layer now exposes the same finite-cover shape
 as

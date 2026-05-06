@@ -9896,6 +9896,53 @@ structure IntrinsicDeTurckGaugeFlowExistence
 
 namespace IntrinsicDeTurckGaugeFlowExistence
 
+/-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from already-built
+raw flows on named time sets, together with identifications of those sets with
+the chosen local-solution time sets.
+
+This is the direct adapter for compact small-interval raw existence packages
+after a caller has restricted or selected local solutions whose time sets are
+the produced intervals. -/
+noncomputable def ofRawGaugeFlowOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (s : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → Set ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = s sol)
+    (hflow : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background)
+        (s sol) ivp.initialTime)) :
+    IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  flow := fun sol ↦ by
+    classical
+    simpa [htimeSet sol] using Classical.choice (hflow sol)
+
+/-- Proof-level fixed-IVP raw intrinsic DeTurck gauge-flow existence from raw
+flows on named time sets. -/
+theorem nonempty_ofRawGaugeFlowOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (s : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → Set ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = s sol)
+    (hflow : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background)
+        (s sol) ivp.initialTime)) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofRawGaugeFlowOn s htimeSet hflow⟩
+
 /-- Fixed-IVP raw intrinsic DeTurck gauge-flow existence from pointwise
 manifold derivative data.  This is the adapter expected when an ODE theorem
 directly returns `HasMFDerivAt[s]` integral-curve witnesses. -/
@@ -16180,6 +16227,54 @@ structure IntrinsicDeTurckGaugeFlowExistenceFamily where
         sol.1.toIntrinsicDeTurckSolution.timeSet ivp.initialTime
 
 namespace IntrinsicDeTurckGaugeFlowExistenceFamily
+
+/-- Theorem-family raw intrinsic DeTurck gauge-flow existence from already-built
+raw flows on named time sets, together with identifications of those sets with
+the chosen local-solution time sets. -/
+noncomputable def ofRawGaugeFlowOn
+    (s : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → Set ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = s ivp sol)
+    (hflow : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+          (intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background)
+          (s ivp sol) ivp.initialTime)) :
+    IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  flow := fun ivp sol ↦
+    (IntrinsicDeTurckGaugeFlowExistence.ofRawGaugeFlowOn
+      (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
+      (s ivp) (htimeSet ivp) (hflow ivp)).flow sol
+
+/-- Proof-level theorem-family raw intrinsic DeTurck gauge-flow existence from
+raw flows on named time sets. -/
+theorem nonempty_ofRawGaugeFlowOn
+    (s : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → Set ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = s ivp sol)
+    (hflow : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M)
+          (intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background)
+          (s ivp sol) ivp.initialTime)) :
+    Nonempty (IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :=
+  ⟨ofRawGaugeFlowOn s htimeSet hflow⟩
 
 /-- Theorem-family raw intrinsic DeTurck gauge-flow existence from pointwise
 manifold derivative data.  This is the family-level adapter expected from a
