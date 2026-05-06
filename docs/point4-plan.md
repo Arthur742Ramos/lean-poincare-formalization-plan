@@ -1745,6 +1745,14 @@ covers known only on `Icc tmin tmax`.  Its
 `..._eventually_nhds_eqOn` readout theorem removes that fallback patch again
 inside the closed interval, exposing eventual local `EqOn` between the
 constructed `G.maps3` and the original selected local readout on `U τ i`.  The
+interval-local `LocalGluingData` pointwise-source and open-preimage wrappers now
+expose the same equality through
+`Diffeomorph3GaugeFlowOn.of_Icc_timeDependent_iUnion_localGluingData_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_eventually_nhds_eqOn`
+and
+`Diffeomorph3GaugeFlowOn.of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_eventually_nhds_eqOn`,
+so Picard inverse-function outputs packaged as `LocalGluingData` no longer have
+to unfold the raw compatible-slices constructor just to recover the local
+readout agreement.  The
 matching
 `..._localGluingData_pointwiseSource_...` and
 `..._openPreimage_localGluingData_...` adapters preserve the named
