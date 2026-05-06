@@ -1687,9 +1687,13 @@ fixed-IVP and theorem-family intrinsic layers now expose matching
 `..._finite_timeDependent_iUnion_localGluingData_...` wrappers, so later compact
 manifold arguments can pass named local inverse-function packages through every
 finite-cover boundary without separately projecting openness, maps-to, inverse,
-and `C³` fields.  The remaining lift must still supply the chart-domain
-shrinking/source-membership hypotheses and combine these local patches with
-manifold-level flow compatibility before producing `C³` diffeomorphism slices.
+and `C³` fields.  The lifted chart helper now also has a selected-shrink
+`exists_open_nhds_localGluingData_subset_of_lifted_openPartialHomeomorph_model`
+form, keeping the cover-selection membership/subset facts while packaging the
+per-slice inverse-function output directly.  The remaining lift must still
+supply the chart-domain shrinking/source-membership hypotheses and combine
+these local patches with manifold-level flow compatibility before producing
+`C³` diffeomorphism slices.
 On the final bundling side, `SmoothSelfDiffeomorph3.ofInverse` now packages
 mutually inverse `C³` self-maps into a bundled `SmoothSelfDiffeomorph3`, with
 simp readouts for the forward and inverse maps.  Thus the eventual glued-flow

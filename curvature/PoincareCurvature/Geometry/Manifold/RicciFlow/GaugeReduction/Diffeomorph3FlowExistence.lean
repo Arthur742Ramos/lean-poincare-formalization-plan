@@ -1125,6 +1125,40 @@ theorem lifted_model_local_gluing_data_of_openPartialHomeomorph
       e₀ e₁ hφ hUsource hUt hW hWt
   exact ⟨hUmopen, hWmopen, hFmaps, hGmaps, hbijLift, hFsmooth, hGsmooth, hleft, hright⟩
 
+/-- A model open-partial-homeomorphism patch lifted through atlas charts,
+packaged as `LocalGluingData`. -/
+theorem lifted_model_localGluingData_of_openPartialHomeomorph
+    {n : WithTop ℕ∞} [hn : ENat.LEInfty n]
+    (e₀ e₁ : OpenPartialHomeomorph M H) {G : H → H}
+    {φ : OpenPartialHomeomorph H H} (hφ : (φ : H → H) = G)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    {U W : Set H}
+    (hUopen : IsOpen U) (hUsource : U ⊆ φ.source) (hUt : U ⊆ e₀.target)
+    (hW : W = φ '' U) (hWt : W ⊆ e₁.target)
+    (hG : ContMDiffOn I I n G U)
+    (hφsymm : ContMDiffOn I I n (fun y : H ↦ φ.symm y) W) :
+    LocalGluingData (I := I) (M := M) n
+      (fun z : M ↦ e₁.symm (G (e₀ z)))
+      (fun z : M ↦ e₀.symm (φ.symm (e₁ z)))
+      (e₀.symm '' U) (e₁.symm '' W) := by
+  rcases lifted_model_local_gluing_data_of_openPartialHomeomorph
+      (I := I) e₀ e₁ hφ he₀ he₁ hUopen hUsource hUt hW hWt hG hφsymm with
+    ⟨hUmopen, hWmopen, hFmaps, hGmaps, _hbij, hFsmooth, hGsmooth, hleft, hright⟩
+  exact
+    { source_open := hUmopen
+      target_open := hWmopen
+      forward_mapsTo := hFmaps
+      backward_mapsTo := hGmaps
+      forward_contMDiffOn := hFsmooth
+      backward_contMDiffOn := hGsmooth
+      left_invOn := by
+        intro z hz
+        exact hleft hz.2
+      right_invOn := by
+        intro z hz
+        exact hright hz.2 }
+
 /-- Standard selected-shrink form of
 `lifted_model_local_gluing_data_of_openPartialHomeomorph`.  The model source is
 shrunk to the open set `φ.source ∩ S ∩ φ ⁻¹' T`, so the lifted source and target
@@ -1189,6 +1223,50 @@ theorem exists_open_nhds_local_gluing_data_subset_of_lifted_openPartialHomeomorp
     exact hTx ⟨y, hWT hyW, rfl⟩
   exact ⟨Um, Wm, hUmopen, hxUm, hUmSx, hWmopen, hFxWm, hWmTx,
     hFmaps, hGmaps, hbij, hFsmooth, hGsmooth, hleft, hright⟩
+
+/-- Standard selected-shrink form of
+`lifted_model_localGluingData_of_openPartialHomeomorph`.  This keeps the
+membership and containment facts needed for cover selection while packaging the
+slice inverse-function output as `LocalGluingData`. -/
+theorem exists_open_nhds_localGluingData_subset_of_lifted_openPartialHomeomorph_model
+    {n : WithTop ℕ∞} [hn : ENat.LEInfty n]
+    (e₀ e₁ : OpenPartialHomeomorph M H) {G : H → H}
+    {φ : OpenPartialHomeomorph H H} (hφ : (φ : H → H) = G)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M)
+    {x : M} (hxsource : x ∈ e₀.source) (hxφ : e₀ x ∈ φ.source)
+    {S T : Set H}
+    (hSopen : IsOpen S) (hS : S ⊆ e₀.target) (hxS : e₀ x ∈ S)
+    (hTopen : IsOpen T) (hT : T ⊆ e₁.target) (hxT : G (e₀ x) ∈ T)
+    (hG : ContMDiffOn I I n G S)
+    (hφsymm : ContMDiffOn I I n (fun y : H ↦ φ.symm y) T)
+    {Sx Tx : Set M}
+    (hSx : e₀.symm '' S ⊆ Sx) (hTx : e₁.symm '' T ⊆ Tx) :
+    ∃ Um Wm : Set M,
+      x ∈ Um ∧ Um ⊆ Sx ∧
+        (fun z : M ↦ e₁.symm (G (e₀ z))) x ∈ Wm ∧ Wm ⊆ Tx ∧
+          LocalGluingData (I := I) (M := M) n
+            (fun z : M ↦ e₁.symm (G (e₀ z)))
+            (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  rcases exists_open_nhds_local_gluing_data_subset_of_lifted_openPartialHomeomorph_model
+      (I := I) e₀ e₁ hφ he₀ he₁ hxsource hxφ hSopen hS hxS hTopen hT hxT
+      hG hφsymm hSx hTx with
+    ⟨Um, Wm, hUmopen, hxUm, hUmSx, hWmopen, hFxWm, hWmTx,
+      hFmaps, hGmaps, _hbij, hFsmooth, hGsmooth, hleft, hright⟩
+  refine ⟨Um, Wm, hxUm, hUmSx, hFxWm, hWmTx, ?_⟩
+  exact
+    { source_open := hUmopen
+      target_open := hWmopen
+      forward_mapsTo := hFmaps
+      backward_mapsTo := hGmaps
+      forward_contMDiffOn := hFsmooth
+      backward_contMDiffOn := hGsmooth
+      left_invOn := by
+        intro z hz
+        exact hleft hz.2
+      right_invOn := by
+        intro z hz
+        exact hright hz.2 }
 
 /-- A manifold self-map is `C^n` on a domain if every point of the domain has
 an open neighborhood on which it agrees with a `C^n` local readout.  This is
