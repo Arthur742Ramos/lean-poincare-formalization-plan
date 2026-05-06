@@ -198,6 +198,22 @@ theorem timeDependent_iUnion_pointwiseSource_of_indexed_open_preimage_continuous
     with τ hτ
   exact (hU τ i x).2 hτ
 
+/-- A finite time-dependent cover remains a cover in the relative time filter if
+each base-time patch is eventually contained in its time-moved counterpart.
+This is the cover-level companion to the per-index source-persistence
+hypotheses used by finite compatible-cover constructors. -/
+theorem timeDependent_iUnion_cover_eventually_of_finite_subset
+    {ι : Type*} [Finite ι] {s : Set ℝ} {t : ℝ}
+    {U : ℝ → ι → Set X}
+    (hcover : Set.univ ⊆ ⋃ i, U t i)
+    (hwithin : ∀ i, ∀ᶠ τ in 𝓝[s] t, U t i ⊆ U τ i) :
+    ∀ᶠ τ in 𝓝[s] t, Set.univ ⊆ ⋃ i, U τ i := by
+  have hwithinAll : ∀ᶠ τ in 𝓝[s] t, ∀ i, U t i ⊆ U τ i :=
+    Filter.eventually_all.2 hwithin
+  filter_upwards [hwithinAll] with τ hτ x hx
+  rcases Set.mem_iUnion.mp (hcover hx) with ⟨i, hxi⟩
+  exact Set.mem_iUnion.mpr ⟨i, hτ i hxi⟩
+
 /-- Glue left-inverse identities across an indexed cover when the global
 forward/backward candidates agree with the local forward/backward readouts on
 the relevant visible sets. -/

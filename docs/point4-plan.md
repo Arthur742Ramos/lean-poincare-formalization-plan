@@ -1667,7 +1667,11 @@ local-readout companion
 `Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_compatibleGluedSlices_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 uses `timeDependent_iUnion_hFEqWithinAll_of_finite` to turn per-index equality
 into the uniform vector-field-identification handoff needed for all base
-points.  The fixed-IVP intrinsic layer now exposes the same finite-cover shape
+points.  The helper `timeDependent_iUnion_cover_eventually_of_finite_subset`
+now gives the matching cover-level persistence statement: a finite base-time
+cover remains a cover in the relative time filter once every selected patch is
+eventually contained in its time-moved counterpart.  The fixed-IVP intrinsic
+layer now exposes the same finite-cover shape
 as
 `IntrinsicDeTurckGaugeFlowExistence.ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_compatibleGluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`
 with proof-level
