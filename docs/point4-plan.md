@@ -2721,13 +2721,15 @@ submodule has linear maps for both continuous-linear value composition and
 forgetful inclusion into the existing `C^{0,α}` submodule. Higher norm balls
 now also give value-level pointwise norm and distance readouts,
 positive-exponent continuity and uniform-continuity readouts, and
-continuous-linear-image `C^{0,α}` norm-ball controls. Existential higher
-membership and the higher
+continuous-linear-image `C^{0,α}` norm-ball controls, plus full
+higher-coordinate projections for finite Pi-valued functions. Existential
+higher membership and the higher
 submodule now also expose actual time, spatial, and second-spatial derivative
 witnesses with value-level `C^{0,α}` controls, without choosing a canonical
-derivative map. The higher submodule also inherits compact value readouts from
-that forgetful map: single compact pieces, finite compact families, and the
-linear finite-cover readout all have sup-norm bounds from
+derivative map. The higher submodule also has finite-Pi coordinate projection
+maps and inherits compact value readouts from that forgetful map: single
+compact pieces, finite compact families, and the linear finite-cover readout
+all have sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, plus matching
 `LipschitzOnWith` estimates for pairwise higher-norm controls; equality of all
 compact-family value readouts determines higher-parabolic functions on covered
@@ -2739,11 +2741,12 @@ submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct
 higher-to-matrix handoff: entrywise `C^{2+α,1+α/2}` controls package
 matrix-valued and finite-Pi-valued `C^{0,α}` controls, matrix-valued higher norm
-balls project to entry `C^{0,α}` norm balls, and higher primitive entry controls
-feed the direct schematic Ricci-DeTurck RHS `C^{0,α}` estimate and the existing
-single-radius schematic Ricci-DeTurck RHS difference theorem. The direct
-schematic RHS constant is named at the higher layer and has finite-family and
-Pi-valued exact-sum norm-ball packaging. It now also converts entrywise higher
+balls project to entries both as full higher norm balls and as entry
+`C^{0,α}` norm balls, and higher primitive entry controls feed the direct
+schematic Ricci-DeTurck RHS `C^{0,α}` estimate and the existing single-radius
+schematic Ricci-DeTurck RHS difference theorem. The direct schematic RHS
+constant is named at the higher layer and has finite-family and Pi-valued
+exact-sum norm-ball packaging. It now also converts entrywise higher
 primitive difference controls with radii linear in a shared radius into the
 linear-radius `ParabolicBoundedWith` schematic RHS estimate and the
 compact-coordinate readout `LipschitzOnWith` bridge for any parabolic

@@ -46,6 +46,22 @@ theorem matrix_apply {m n A : Type*} [Fintype m] [Fintype n]
     ParabolicC0AlphaNormLe N α (fun z => M z i j) s :=
   h.value_c0AlphaNormLe_self.matrix_apply i j
 
+/-- A matrix-valued higher parabolic norm ball projects to each entry as a full higher
+parabolic norm ball. -/
+theorem matrix_apply_c2AlphaNormLe {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A]
+    {N : ℝ} {M : ℝ × X → Matrix m n A}
+    (h : ParabolicC2AlphaNormLe N α M s) (i : m) (j : n) :
+    ParabolicC2AlphaNormLe
+      (continuousLinearMapRadius (X := X) (E := Matrix m n A)
+        ((ContinuousLinearMap.proj j : (n → A) →L[ℝ] A).comp
+          (ContinuousLinearMap.proj i : Matrix m n A →L[ℝ] n → A)) * N) α
+      (fun z : ℝ × X => M z i j) s := by
+  let L : Matrix m n A →L[ℝ] A :=
+    (ContinuousLinearMap.proj j : (n → A) →L[ℝ] A).comp
+      (ContinuousLinearMap.proj i : Matrix m n A →L[ℝ] n → A)
+  simpa [L] using h.continuousLinearMap L
+
 /-- Finite Pi-valued value-level `C^{0,α}` control from entrywise higher parabolic
 single-radius controls. -/
 theorem pi_c0AlphaNormLe_of_entries {ι A : Type*} [Fintype ι]
@@ -1364,6 +1380,18 @@ theorem matrix_c0AlphaOn_of_entries {m n A : Type*} [Fintype m] [Fintype n]
     (h : ∀ i j, ParabolicC2AlphaOn α (fun z => M z i j) s) :
     ParabolicC0AlphaOn α M s :=
   ParabolicC0AlphaOn.matrix_of_entries fun i j => (h i j).c0AlphaOn
+
+/-- A matrix-valued higher parabolic function projects to each entry as a higher parabolic
+function. -/
+theorem matrix_apply_c2AlphaOn {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A]
+    {M : ℝ × X → Matrix m n A}
+    (h : ParabolicC2AlphaOn α M s) (i : m) (j : n) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => M z i j) s := by
+  let L : Matrix m n A →L[ℝ] A :=
+    (ContinuousLinearMap.proj j : (n → A) →L[ℝ] A).comp
+      (ContinuousLinearMap.proj i : Matrix m n A →L[ℝ] n → A)
+  simpa [L] using h.continuousLinearMap L
 
 /-- Finite Pi-valued value-level `C^{0,α}` membership from coordinatewise higher parabolic
 membership. -/

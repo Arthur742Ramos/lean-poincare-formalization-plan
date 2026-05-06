@@ -399,6 +399,16 @@ theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ 
         using hxx_comp)
   · simpa [ParabolicSecondJet.continuousLinearMap] using ht.continuousLinearMap L
 
+/-- A full higher parabolic norm ball for a finite Pi-valued function projects to each
+coordinate as a full higher parabolic norm ball. -/
+theorem pi_apply {ι F : Type*} [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {u : ℝ × X → ι → F} (h : ParabolicC2AlphaNormLe N α u s) (i : ι) :
+    ParabolicC2AlphaNormLe
+      (continuousLinearMapRadius (X := X) (E := ι → F)
+        (ContinuousLinearMap.proj i : (ι → F) →L[ℝ] F) * N) α
+      (fun z : ℝ × X => u z i) s := by
+  simpa using h.continuousLinearMap (ContinuousLinearMap.proj i : (ι → F) →L[ℝ] F)
+
 theorem value_c0AlphaNormLe (h : ParabolicC2AlphaNormLe N α u s) :
     ∃ Nu ≥ 0, ParabolicC0AlphaNormLe Nu α u s := by
   rcases h with
@@ -610,6 +620,13 @@ theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ 
   rcases hu with ⟨N, hN, huN⟩
   exact ⟨_, (huN.continuousLinearMap L).nonneg, huN.continuousLinearMap L⟩
 
+/-- A finite Pi-valued higher parabolic function projects to each coordinate as a higher
+parabolic function. -/
+theorem pi_apply {ι F : Type*} [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {u : ℝ × X → ι → F} (hu : ParabolicC2AlphaOn α u s) (i : ι) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => u z i) s := by
+  simpa using hu.continuousLinearMap (ContinuousLinearMap.proj i : (ι → F) →L[ℝ] F)
+
 theorem mono_set {t : Set (ℝ × X)} (h : ParabolicC2AlphaOn α u s) (hst : t ⊆ s) :
     ParabolicC2AlphaOn α u t := by
   rcases h with ⟨N, hN, hNu⟩
@@ -666,6 +683,21 @@ def continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (L : E →L[ℝ] F) (u : parabolicC2AlphaSubmodule X E α s) (z : ℝ × X) :
     continuousLinearMap (X := X) (E := E) (α := α) (s := s) L u z = L (u z) :=
+  rfl
+
+/-- Coordinate projection from a finite Pi-valued higher parabolic submodule. -/
+def piApplyLinearMap {ι F : Type*} [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (i : ι) :
+    parabolicC2AlphaSubmodule X (ι → F) α s →ₗ[ℝ]
+      parabolicC2AlphaSubmodule X F α s :=
+  continuousLinearMap (X := X) (E := ι → F) (α := α) (s := s)
+    (ContinuousLinearMap.proj i : (ι → F) →L[ℝ] F)
+
+@[simp]
+theorem piApplyLinearMap_apply {ι F : Type*} [Fintype ι] [NormedAddCommGroup F]
+    [NormedSpace ℝ F] (i : ι) (u : parabolicC2AlphaSubmodule X (ι → F) α s)
+    (z : ℝ × X) :
+    piApplyLinearMap (X := X) (α := α) (s := s) i u z = u z i :=
   rfl
 
 theorem c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :

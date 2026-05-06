@@ -229,10 +229,11 @@ value-level `C^{0,α}` norm, and the submodule has linear maps for both
 continuous-linear value composition and forgetful inclusion into the existing
 `C^{0,α}` submodule. Higher norm balls now also expose value-level pointwise
 norm and distance estimates, positive-exponent continuity and uniform
-continuity, and continuous-linear-image `C^{0,α}` norm-ball controls.
-Existential higher membership and the higher submodule now also expose time,
-spatial, and second-spatial derivative witnesses with value-level `C^{0,α}`
-controls. The higher submodule also
+continuity, continuous-linear-image `C^{0,α}` norm-ball controls, and full
+higher-coordinate projections for finite Pi-valued functions. Existential
+higher membership and the higher submodule now also expose time, spatial, and
+second-spatial derivative witnesses with value-level `C^{0,α}` controls. The
+higher submodule also has finite-Pi coordinate projection maps and
 exposes the induced compact value readouts on single compact pieces and finite
 compact families, including linear readout maps, sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, and the corresponding
@@ -246,9 +247,10 @@ domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now connects this higher layer to the
 existing finite-dimensional matrix estimates: entrywise `C^{2+α,1+α/2}` controls
 package matrix- and finite-Pi-valued `C^{0,α}` controls, matrix-valued higher
-norm balls project to entry `C^{0,α}` norm balls, and higher primitive
-entry controls feed the direct schematic Ricci-DeTurck RHS `C^{0,α}` estimate
-and its single-radius difference estimate. The direct schematic RHS constant is
+norm balls project to entries both as full higher norm balls and as entry
+`C^{0,α}` norm balls, and higher primitive entry controls feed the direct
+schematic Ricci-DeTurck RHS `C^{0,α}` estimate and its single-radius difference
+estimate. The direct schematic RHS constant is
 named at the higher layer and has finite-family and Pi-valued exact-sum
 norm-ball packaging. Higher entrywise difference controls whose radii are
 linear in a shared radius now also feed the linear-radius `ParabolicBoundedWith`
