@@ -530,6 +530,10 @@ The raw gauge-flow bridge
 `Diffeomorph3GaugeFlowOn.coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField`
 now consumes this: it automatically constructs the field-level scalar model
 equality from the concrete `B(τ)`/`A(τ)` formulas and the raw coordinate curve.
+The concrete component consumer is named too:
+`Diffeomorph3GaugeFlowOn.pullbackMetricBilinearCoordinateMap_hasDerivAt_of_metricCoordinateField_hasFDerivAt`
+transfers the full field derivative to the actual moving `B(τ)` map at
+neighborhood-times, with direct-velocity and finite-cover/readout companions.
 The remaining local inputs are therefore the Fréchet derivative of
 `metricBilinearCoordinateField`, the derivative of the concrete tangent
 coordinate map, and the scalar velocity identity. Base-time simplification

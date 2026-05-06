@@ -993,7 +993,8 @@ now packages the matching intrinsic boundary
        the open interior interval. The raw gauge-flow layer also now has a
        direct product-chain-rule bridge from full `metricBilinearCoordinateField`
        Fréchet/readout data to the derivative along the actual raw coordinate
-       curve, with direct-velocity and within-set variants. The
+       curve and then to the concrete moving `B(τ)` component, with
+       direct-velocity, readout-field, and within-set variants. The
        coordinate, coordinate-model, and field-level data now restrict to smaller
        time sets or lift through fixed-IVP, theorem-family, and raw-existence
        gauge-flow APIs, with explicit neighborhood-time hypotheses on the
