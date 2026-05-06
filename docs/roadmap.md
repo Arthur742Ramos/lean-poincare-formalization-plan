@@ -218,18 +218,21 @@ slices, genuine parabolic second-jet derivative witnesses, and a
 `ParabolicC2AlphaNormLe` predicate controlling the value, spatial derivative,
 spatial Hessian, and time derivative by `C^{0,α}` norm balls; it has constant
 and zero constructors and is closed under addition, finite sums, negation,
-subtraction, and scalar multiplication with the expected radius bounds. Chosen parabolic second
-jets also compose with continuous linear value maps, with the time, spatial,
-and second-spatial derivative witnesses transformed componentwise. The existential
+subtraction, scalar multiplication, and continuous-linear value maps with
+explicit radius bounds. Chosen parabolic second jets also compose with
+continuous linear value maps, with the time, spatial, and second-spatial
+derivative witnesses transformed componentwise. The existential
 `ParabolicC2AlphaOn` class now forms a real submodule of all coordinate
-time-space functions and reads back to `ParabolicC0AlphaOn` for values; the
-full higher radius bounds the value-level `C^{0,α}` norm, and the submodule has
-a linear forgetful map into the existing `C^{0,α}` submodule. Higher norm balls
-now also expose value-level pointwise norm and distance estimates, positive-
-exponent continuity and uniform continuity, and continuous-linear-image
-`C^{0,α}` norm-ball controls. Existential higher membership and the higher
-submodule now also expose time, spatial, and second-spatial derivative
-witnesses with value-level `C^{0,α}` controls. The higher submodule also
+time-space functions, is closed under continuous-linear value maps, and reads
+back to `ParabolicC0AlphaOn` for values; the full higher radius bounds the
+value-level `C^{0,α}` norm, and the submodule has linear maps for both
+continuous-linear value composition and forgetful inclusion into the existing
+`C^{0,α}` submodule. Higher norm balls now also expose value-level pointwise
+norm and distance estimates, positive-exponent continuity and uniform
+continuity, and continuous-linear-image `C^{0,α}` norm-ball controls.
+Existential higher membership and the higher submodule now also expose time,
+spatial, and second-spatial derivative witnesses with value-level `C^{0,α}`
+controls. The higher submodule also
 exposes the induced compact value readouts on single compact pieces and finite
 compact families, including linear readout maps, sup-norm bounds from
 `ParabolicC2AlphaNormLe` difference balls, and the corresponding

@@ -325,6 +325,80 @@ theorem smul (c : ℝ) (h : ParabolicC2AlphaNormLe N α u s) :
   · simpa [ParabolicSecondJet.smul] using hxx.smul (𝕜 := ℝ) c
   · simpa [ParabolicSecondJet.smul] using ht.smul (𝕜 := ℝ) c
 
+/-- Radius multiplier for composing a higher parabolic function with a continuous linear
+value map.  The spatial first- and second-derivative components both use postcomposition by
+`L` on `X →L[ℝ] E`. -/
+def continuousLinearMapRadius {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) : ℝ :=
+  ‖L‖ + ‖ContinuousLinearMap.compL ℝ X E F L‖ +
+    ‖ContinuousLinearMap.compL ℝ X E F L‖ + ‖L‖
+
+theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (h : ParabolicC2AlphaNormLe N α u s) :
+    ParabolicC2AlphaNormLe
+      (continuousLinearMapRadius (X := X) (E := E) L * N) α
+      (fun z : ℝ × X => L (u z)) s := by
+  rcases h with
+    ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
+  let Lx : (X →L[ℝ] E) →L[ℝ] X →L[ℝ] F :=
+    ContinuousLinearMap.compL ℝ X E F L
+  have hxx_comp : ParabolicC0AlphaNormLe (‖Lx‖ * Nxx) α
+      (fun z : ℝ × X => Lx.comp (J.spaceSecondDeriv z)) s := by
+    rcases hxx with ⟨Bxx, hBxx, Hxx, hHxx, hxx_sum, hxx_ctrl⟩
+    refine ⟨‖Lx‖ * Bxx, mul_nonneg (norm_nonneg Lx) hBxx,
+      ‖Lx‖ * Hxx, mul_nonneg (norm_nonneg Lx) hHxx, ?_, ?_⟩
+    · calc
+        ‖Lx‖ * Bxx + ‖Lx‖ * Hxx = ‖Lx‖ * (Bxx + Hxx) := by ring
+        _ ≤ ‖Lx‖ * Nxx := mul_le_mul_of_nonneg_left hxx_sum (norm_nonneg Lx)
+    · constructor
+      · intro p hp
+        exact (Lx.opNorm_comp_le (J.spaceSecondDeriv p)).trans
+          (mul_le_mul_of_nonneg_left (hxx_ctrl.bounded hp) (norm_nonneg Lx))
+      · intro p hp q hq
+        calc
+          ‖Lx.comp (J.spaceSecondDeriv p) - Lx.comp (J.spaceSecondDeriv q)‖ =
+              ‖Lx.comp (J.spaceSecondDeriv p - J.spaceSecondDeriv q)‖ := by
+            congr 1
+            ext x y
+            simp [Pi.sub_apply]
+          _ ≤ ‖Lx‖ * ‖J.spaceSecondDeriv p - J.spaceSecondDeriv q‖ :=
+            Lx.opNorm_comp_le (J.spaceSecondDeriv p - J.spaceSecondDeriv q)
+          _ ≤ ‖Lx‖ * (Hxx * (parabolicDistance p q) ^ α) :=
+            mul_le_mul_of_nonneg_left (hxx_ctrl.holder hp hq) (norm_nonneg Lx)
+          _ = (‖Lx‖ * Hxx) * (parabolicDistance p q) ^ α := by ring
+  refine ⟨J.continuousLinearMap L, ‖L‖ * Nu, mul_nonneg (norm_nonneg L) hNu,
+    ‖Lx‖ * Nx, mul_nonneg (norm_nonneg Lx) hNx,
+    ‖Lx‖ * Nxx, mul_nonneg (norm_nonneg Lx) hNxx,
+    ‖L‖ * Nt, mul_nonneg (norm_nonneg L) hNt, ?_, ?_, ?_, ?_, ?_⟩
+  · calc
+      ‖L‖ * Nu + ‖Lx‖ * Nx + ‖Lx‖ * Nxx + ‖L‖ * Nt ≤
+          ‖L‖ * N + ‖Lx‖ * N + ‖Lx‖ * N + ‖L‖ * N := by
+        have hNu_le : Nu ≤ N := by linarith
+        have hNx_le : Nx ≤ N := by linarith
+        have hNxx_le : Nxx ≤ N := by linarith
+        have hNt_le : Nt ≤ N := by linarith
+        have hNu_bound : ‖L‖ * Nu ≤ ‖L‖ * N :=
+          mul_le_mul_of_nonneg_left hNu_le (norm_nonneg L)
+        have hNx_bound : ‖Lx‖ * Nx ≤ ‖Lx‖ * N :=
+          mul_le_mul_of_nonneg_left hNx_le (norm_nonneg Lx)
+        have hNxx_bound : ‖Lx‖ * Nxx ≤ ‖Lx‖ * N :=
+          mul_le_mul_of_nonneg_left hNxx_le (norm_nonneg Lx)
+        have hNt_bound : ‖L‖ * Nt ≤ ‖L‖ * N :=
+          mul_le_mul_of_nonneg_left hNt_le (norm_nonneg L)
+        linarith
+      _ = continuousLinearMapRadius (X := X) (E := E) L * N := by
+        simp [continuousLinearMapRadius, Lx]
+        ring
+  · simpa using hu.continuousLinearMap L
+  · exact (by
+      have hxL : ParabolicC0AlphaNormLe (‖Lx‖ * Nx) α (fun z => Lx (J.spaceDeriv z)) s :=
+        hx.continuousLinearMap Lx
+      simpa [ParabolicSecondJet.continuousLinearMap, Lx] using hxL)
+  · exact (by
+      simpa [ParabolicSecondJet.continuousLinearMap, Lx, ContinuousLinearMap.comp_apply]
+        using hxx_comp)
+  · simpa [ParabolicSecondJet.continuousLinearMap] using ht.continuousLinearMap L
+
 theorem value_c0AlphaNormLe (h : ParabolicC2AlphaNormLe N α u s) :
     ∃ Nu ≥ 0, ParabolicC0AlphaNormLe Nu α u s := by
   rcases h with
@@ -530,6 +604,12 @@ theorem smul (c : ℝ) (hu : ParabolicC2AlphaOn α u s) :
   rcases hu with ⟨N, hN, huN⟩
   exact ⟨‖c‖ * N, mul_nonneg (norm_nonneg c) hN, huN.smul c⟩
 
+theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (hu : ParabolicC2AlphaOn α u s) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => L (u z)) s := by
+  rcases hu with ⟨N, hN, huN⟩
+  exact ⟨_, (huN.continuousLinearMap L).nonneg, huN.continuousLinearMap L⟩
+
 theorem mono_set {t : Set (ℝ × X)} (h : ParabolicC2AlphaOn α u s) (hst : t ⊆ s) :
     ParabolicC2AlphaOn α u t := by
   rcases h with ⟨N, hN, hNu⟩
@@ -567,6 +647,26 @@ instance :
 theorem mem_iff {u : (ℝ × X) → E} :
     u ∈ parabolicC2AlphaSubmodule X E α s ↔ ParabolicC2AlphaOn α u s :=
   Iff.rfl
+
+/-- Compose coordinate parabolic `C^{2+α,1+α/2}` functions with a continuous linear value map. -/
+def continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) :
+    parabolicC2AlphaSubmodule X E α s →ₗ[ℝ] parabolicC2AlphaSubmodule X F α s where
+  toFun u := ⟨fun z => L (u z), ParabolicC2AlphaOn.continuousLinearMap L u.2⟩
+  map_add' := by
+    intro u v
+    ext z
+    simp
+  map_smul' := by
+    intro c u
+    ext z
+    simp
+
+@[simp]
+theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (u : parabolicC2AlphaSubmodule X E α s) (z : ℝ × X) :
+    continuousLinearMap (X := X) (E := E) (α := α) (s := s) L u z = L (u z) :=
+  rfl
 
 theorem c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
     ParabolicC0AlphaOn α (u : (ℝ × X) → E) s :=
