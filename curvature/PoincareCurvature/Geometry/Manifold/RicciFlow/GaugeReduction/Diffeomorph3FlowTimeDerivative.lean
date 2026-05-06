@@ -4739,6 +4739,50 @@ theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_hasFDerivWithinAt_fix
   exact pullbackMetricTangentCoordinateMap_eq_of_hasFDerivWithinAt_fixedChart
     (I := I) (M := M) Φ t τ x (A τ) hτ.1 hτ.2
 
+/-- If the fixed-chart representative of the time-`τ` slice is locally equal
+to a model map whose spatial derivative is known, then the concrete
+tangent-coordinate component is eventually that model derivative. -/
+theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_model_hasFDerivWithinAt_fixedChart
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t : ℝ) (x : M) (model : ℝ → E → E) (A : ℝ → E →L[ℝ] E)
+    (hmodel : ∀ᶠ τ in 𝓝 t,
+      (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+        (fun y : E ↦ (extChartAt I ((Φ t) x)) ((Φ τ) ((extChartAt I x).symm y)))
+          =ᶠ[𝓝[range I] ((extChartAt I x) x)] model τ ∧
+        HasFDerivWithinAt (model τ) (A τ) (range I) ((extChartAt I x) x)) :
+    (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+        =ᶠ[𝓝 t] A := by
+  refine pullbackMetricTangentCoordinateMap_eventuallyEq_of_hasFDerivWithinAt_fixedChart
+    (I := I) (M := M) Φ t x A ?_
+  let z₀ : E := (extChartAt I x) x
+  have hz₀_range : z₀ ∈ range I := by
+    exact extChartAt_target_subset_range x (by simpa [z₀] using mem_extChartAt_target (I := I) x)
+  filter_upwards [hmodel] with τ hτ
+  refine ⟨hτ.1, ?_⟩
+  exact hτ.2.2.congr_of_eventuallyEq hτ.2.1
+    (hτ.2.1.eq_of_nhdsWithin (by simpa [z₀] using hz₀_range))
+
+/-- Variational-flow specialization of
+`pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_model_hasFDerivWithinAt_fixedChart`. -/
+theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_variationalFlow_hasFDerivWithinAt_fixedChart
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (t : ℝ) (x : M) (xE : E)
+    (hmodel : ∀ᶠ τ in 𝓝 t,
+      (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+        (fun y : E ↦ (extChartAt I ((Φ t) x)) ((Φ τ) ((extChartAt I x).symm y)))
+          =ᶠ[𝓝[range I] ((extChartAt I x) x)] (fun y : E ↦ α.flow (y, τ)) ∧
+        HasFDerivWithinAt (fun y : E ↦ α.flow (y, τ))
+          (α.tangent xE τ) (range I) ((extChartAt I x) x)) :
+    (fun τ : ℝ ↦ pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+        =ᶠ[𝓝 t] (fun τ : ℝ ↦ α.tangent xE τ) := by
+  exact pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_model_hasFDerivWithinAt_fixedChart
+    (I := I) (M := M) Φ t x (fun τ y ↦ α.flow (y, τ))
+    (fun τ : ℝ ↦ α.tangent xE τ) hmodel
+
 /-- Ordinary eventual fixed-chart spatial derivative data supplies the same
 eventual identification for `A(τ)`. -/
 theorem pullbackMetricTangentCoordinateMap_eventuallyEq_of_hasFDerivAt_fixedChart
@@ -5905,6 +5949,42 @@ theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMa
   refine ⟨xE, hxE, ?_⟩
   exact pullbackMetricTangentCoordinateMap_eventuallyEq_of_hasFDerivAt_fixedChart
     (I := I) (M := M) Φ t x (fun τ : ℝ ↦ α.tangent xE τ) hfixed
+
+/-- Local fixed-chart equality with the selected variational model flow, plus
+spatial derivatives of that model flow, supplies the tangent-map derivative
+data needed by component-level gauge-pullback APIs. -/
+theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0} {s : Set ℝ}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hsIoo : s ⊆ Ioo tmin tmax)
+    (hA_model : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∀ᶠ τ in 𝓝 t,
+          (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+            (fun y : E ↦
+              (extChartAt I ((Φ t) x)) ((Φ τ) ((extChartAt I x).symm y)))
+              =ᶠ[𝓝[range I] ((extChartAt I x) x)]
+                (fun y : E ↦ α.flow (y, τ)) ∧
+            HasFDerivWithinAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) (range I) ((extChartAt I x) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ D : E →L[ℝ] E,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t := by
+  refine pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap
+    (I := I) (M := M) (Φ := Φ) α hsIoo ?_
+  intro t ht x
+  obtain ⟨xE, hxE, hmodel⟩ := hA_model ht x
+  refine ⟨xE, hxE, ?_⟩
+  exact
+    pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_variationalFlow_hasFDerivWithinAt_fixedChart
+      (I := I) (M := M) Φ α t x xE hmodel
 
 /-- Closed-interval/right-derivative version of
 `pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`.

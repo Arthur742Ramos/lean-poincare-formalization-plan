@@ -2269,12 +2269,19 @@ concrete tangent-coordinate map with the `fderivWithin` of
 `pullbackMetricTangentCoordinateMap_eventuallyEq_of_hasFDerivWithinAt_fixedChart`
 and
 `pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChart`
-package the corresponding eventual and quantified variational selectors. Thus
-the remaining dynamic obligations are narrowed to supplying the chartwise
-spatial derivative of the selected gauge maps from the variational model-flow
-construction and proving the scalar velocity identity from the selected
-gauge-flow/PDE construction. The smooth-realization route also has the
-specialized bridge
+package the corresponding eventual and quantified variational selectors. The
+next layer is now also present:
+`pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventuallyEq_variationalFlow_hasFDerivWithinAt_fixedChart`
+and
+`pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel`
+consume local equality with the selected variational model flow plus the
+model-flow spatial derivative, producing the same tangent-coordinate derivative
+package. Thus the remaining dynamic obligations are narrowed to proving that
+the selected gauge maps are locally equal to the variational model flow in the
+fixed chart, supplying the corresponding model-flow spatial derivative
+hypotheses from the Picard/variational estimates, and proving the scalar
+velocity identity from the selected gauge-flow/PDE construction. The
+smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
 tangent-map identification and states the remaining scalar identity in actual
