@@ -221,6 +221,18 @@ theorem exists_Icc_inter_subset_of_mem_nhdsWithin
   refine hεsub ⟨?_, hτs⟩
   constructor <;> linarith [hτIcc.1, hτIcc.2, hεpos]
 
+/-- Extract an explicit closed real interval contained in an ordinary
+neighborhood of a base time. -/
+theorem exists_Icc_subset_of_mem_nhds
+    {s : Set ℝ} {t : ℝ} (hs : s ∈ 𝓝 t) :
+    ∃ ε : ℝ, 0 < ε ∧ Icc (t - ε) (t + ε) ⊆ s := by
+  rcases Metric.mem_nhds_iff.mp hs with ⟨ε, hεpos, hεsub⟩
+  refine ⟨ε / 2, by linarith, ?_⟩
+  intro τ hτIcc
+  apply hεsub
+  rw [Metric.mem_ball, Real.dist_eq, abs_sub_lt_iff]
+  constructor <;> linarith [hτIcc.1, hτIcc.2, hεpos]
+
 /-- A finite time-dependent cover remains a cover in the relative time filter if
 each base-time patch is eventually contained in its time-moved counterpart.
 This is the cover-level companion to the per-index source-persistence
@@ -303,6 +315,42 @@ theorem timeDependent_iUnion₂_cover_exists_Icc_of_finite_subset
   have hτV : τ ∈ Icc (t - εV) (t + εV) := by
     constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_right εU εV]
   exact ⟨hUsub hτU hτs, hVsub hτV hτs⟩
+
+/-- Simultaneous closed-interval persistence for finite source and target
+covers, with the closed interval chosen inside the ambient time set.  This
+removes the relative-time side condition from
+`timeDependent_iUnion₂_cover_exists_Icc_of_finite_subset`, matching raw
+constructors whose Picard interval is already a subset of the ambient time set. -/
+theorem timeDependent_iUnion₂_cover_exists_Icc_subset_of_finite_subset
+    {ι : Type*} [Finite ι] {timeSet : Set ℝ} {t : ℝ}
+    {U V : ℝ → ι → Set X}
+    (htimeSet : timeSet ∈ 𝓝 t)
+    (hUcover : Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : Set.univ ⊆ ⋃ i, V t i)
+    (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t, U t i ⊆ U τ i)
+    (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t, V t i ⊆ V τ i) :
+    ∃ ε : ℝ, 0 < ε ∧
+      Icc (t - ε) (t + ε) ⊆ timeSet ∧
+        ∀ ⦃τ : ℝ⦄, τ ∈ Icc (t - ε) (t + ε) →
+          (Set.univ ⊆ ⋃ i, U τ i) ∧ (Set.univ ⊆ ⋃ i, V τ i) := by
+  rcases exists_Icc_subset_of_mem_nhds htimeSet with
+    ⟨εT, hεTpos, hTsub⟩
+  rcases timeDependent_iUnion₂_cover_exists_Icc_of_finite_subset
+      (s := timeSet) (t := t) (U := U) (V := V)
+      hUcover hVcover hUwithin hVwithin with
+    ⟨εC, hεCpos, hcover_sub⟩
+  refine ⟨min εT εC, lt_min hεTpos hεCpos, ?_, ?_⟩
+  · intro τ hτIcc
+    have hτT : τ ∈ Icc (t - εT) (t + εT) := by
+      constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_left εT εC]
+    exact hTsub hτT
+  · intro τ hτIcc
+    have hτT : τ ∈ Icc (t - εT) (t + εT) := by
+      constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_left εT εC]
+    have hτtime : τ ∈ timeSet := hTsub hτT
+    have hτC : τ ∈ Icc (t - εC) (t + εC) := by
+      constructor <;> linarith [hτIcc.1, hτIcc.2, min_le_right εT εC]
+    exact hcover_sub hτC hτtime
 
 /-- Glue left-inverse identities across an indexed cover when the global
 forward/backward candidates agree with the local forward/backward readouts on

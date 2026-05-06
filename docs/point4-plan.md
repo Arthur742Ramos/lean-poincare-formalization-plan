@@ -1680,6 +1680,12 @@ around the base time.  The closed-interval companions
 `timeDependent_iUnion₂_cover_exists_Icc_of_finite_subset` shrink that
 neighborhood to an `Icc` interval and synchronize finite source and target
 cover persistence, matching the interval-local raw gauge-flow constructors.
+The ordinary-neighborhood form `exists_Icc_subset_of_mem_nhds` and the
+time-set-subset cover package
+`timeDependent_iUnion₂_cover_exists_Icc_subset_of_finite_subset` choose the
+closed interval inside the ambient time set, removing the relative-time side
+condition when feeding raw constructors whose Picard interval is already
+contained in that ambient set.
 The raw gauge-flow layer now has an interval-cover
 fallback constructor
 `Diffeomorph3GaugeFlowOn.of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`:
