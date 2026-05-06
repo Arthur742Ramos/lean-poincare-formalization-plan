@@ -9896,6 +9896,155 @@ theorem ofProduct_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subse
       hstrict (by simpa [α] using hGdiff_spaceTime) hU₁open hU₁source
       (by simpa [α] using htarget) (by simpa [α] using hxU₁)
 
+/-- Product-Picard common-subinterval handoff to packaged lifted
+`LocalGluingData`. -/
+theorem ofProduct_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivAt_on_initialBall
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {K : ℝ≥0} {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {a b t : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (e₀ x, τ))‖₊ ≤ K)
+    (hder : ∀ y ∈ closedBall x₀ r,
+      HasFDerivAt
+        (fun z : V =>
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (z, t))
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent
+          y t)
+        y)
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                  (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  have hstrict : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x) := by
+    simpa [α] using
+      ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall
+        (β := β) hball hx (htime (Ioo_subset_Icc_self ht)) hder
+  have hD_bound' : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K := by
+    intro τ hτ
+    simpa [α] using hD_bound τ hτ
+  simpa [α] using
+    α.flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasStrictFDerivAt
+      e₀ e₁ he₀ he₁ htime htbase hU₀open hU₀source hxU₀ hx ht hD_bound'
+      hstrict (by simpa [α] using hGdiff) hU₁open hU₁source
+      (by simpa [α] using htarget) (by simpa [α] using hxU₁)
+
+/-- Product-Picard common-subinterval packaged lifted `LocalGluingData` from
+space-time regularity of the extracted variational model flow. -/
+theorem ofProduct_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivAt_on_initialBall_of_contDiffAt_spaceTime
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {R : ℝ≥0}
+    (β : LipschitzLocalFlowSolution (variationalVectorField f Df) t₀
+      (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ y ∈ closedBall x₀ r,
+      (y, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {K : ℝ≥0} {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r)
+    {a b t : ℝ} (htime : Icc a b ⊆ Icc tmin tmax)
+    (htbase : (t₀ : ℝ) ∈ Ioo a b) (ht : t ∈ Ioo a b)
+    (hD_bound : ∀ τ ∈ Ioo a b,
+      ‖Df τ
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+          (e₀ x, τ))‖₊ ≤ K)
+    (hder : ∀ y ∈ closedBall x₀ r,
+      HasFDerivAt
+        (fun z : V =>
+          (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+            (z, t))
+        ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).tangent
+          y t)
+        y)
+    (hGdiff_spaceTime : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+      (e₀ x, t))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+        (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+              (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball).flow
+                  (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  let α : VariationalLocalFlowSolution f Df t₀ x₀ r :=
+    ofProductContinuousLocalFlowSolution β.toContinuousLocalFlowSolution hball
+  have hstrict : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
+      (α.tangent (e₀ x) t : V →L[ℝ] V) (e₀ x) := by
+    simpa [α] using
+      ofProduct_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivAt_on_initialBall
+        (β := β) hball hx (htime (Ioo_subset_Icc_self ht)) hder
+  have hD_bound' : ∀ τ ∈ Ioo a b, ‖Df τ (α.flow (e₀ x, τ))‖₊ ≤ K := by
+    intro τ hτ
+    simpa [α] using hD_bound τ hτ
+  simpa [α] using
+    α.flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasStrictFDerivAt_of_contDiffAt_spaceTime
+      e₀ e₁ he₀ he₁ htime htbase hU₀open hU₀source hxU₀ hx ht hD_bound'
+      hstrict (by simpa [α] using hGdiff_spaceTime) hU₁open hU₁source
+      (by simpa [α] using htarget) (by simpa [α] using hxU₁)
+
 /-- Product-Picard convex state-tube criterion for the common-subinterval
 neighborhood-map readout of a forward time slice.  The convex-state hypotheses
 prove strict spatial differentiability on the forward Picard interval, while
@@ -17671,6 +17820,172 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
       hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr hU₀open hU₀source hxU₀
       hx htbase ht ht_backward hder hGdiff hU₁open hU₁source htarget hxU₁
 
+/-- Backward localized componentwise closed-ball estimates give packaged
+lifted `LocalGluingData` on a common interior time slice. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  rcases
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+        (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr hU₀open hU₀source hxU₀
+        hx htbase ht ht_backward hder hGdiff hU₁open hU₁source htarget hxU₁ with
+    ⟨φ, Um, Wm, hφ, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+      hFmaps, hGmaps, _hbij, hFsmooth, hGsmooth, hleft, hright⟩
+  refine ⟨φ, Um, Wm, hφ, hxUm, hUmU₀, hFxWm, hWmU₁, ?_⟩
+  exact
+    { source_open := hUmopen
+      target_open := hWmopen
+      forward_mapsTo := hFmaps
+      backward_mapsTo := hGmaps
+      forward_contMDiffOn := hFsmooth
+      backward_contMDiffOn := hGsmooth
+      left_invOn := by
+        intro z hz
+        exact hleft hz.2
+      right_invOn := by
+        intro z hz
+        exact hright hz.2 }
+
+/-- Backward localized componentwise closed-ball estimates give packaged
+lifted `LocalGluingData` from space-time regularity of the selected flow. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius_of_contDiffAt_spaceTime
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff_spaceTime : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  let α : VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+      hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+      htime ht₀' hr
+  have hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x) := by
+    simpa [α] using
+      α.flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime
+        (by simpa [α] using hGdiff_spaceTime)
+  exact
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+      (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+      hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr hU₀open hU₀source hxU₀
+      hx htbase ht ht_backward hder hGdiff hU₁open hU₁source htarget hxU₁
+
 /-- Localized componentwise closed-ball continuity estimates give the lifted
 `C^3` local gluing patch with overlap equality for a common backward interior
 time slice.  The selected state-preserving Picard flow supplies the local
@@ -17921,6 +18236,205 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
         (by simpa [α] using hGdiff_spaceTime)
   exact
     ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+      (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+      hf_cont hDf_cont hmul e₀ e₁ f₀ f₁ c he₀ he₁ G₁ htime ht₀' hr
+      hU₀open hU₀source hxU₀ hx htbase ht ht_backward hder hGdiff hU₁open
+      hU₁source hU₁common htarget hxU₁ hother_common hcoord
+
+/-- Backward localized componentwise closed-ball estimates give packaged
+lifted `LocalGluingData` with overlap equality on a common interior time
+slice. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ f₀ f₁ c : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (G₁ : V → V)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (hU₁common : U₁ ⊆ c.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁)
+    (hother_common : MapsTo (fun z : M ↦ f₁.symm (G₁ (f₀ z))) U₀ c.source)
+    (hcoord : EqOn
+      (fun z : M ↦ c (e₁.symm
+        ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (e₀ z, t))))
+      (fun z : M ↦ c (f₁.symm (G₁ (f₀ z)))) U₀) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm ∧
+              EqOn
+                (fun z : M ↦ e₁.symm
+                  ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                    hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                    htime ht₀' hr).flow (e₀ z, t)))
+                (fun z : M ↦ f₁.symm (G₁ (f₀ z))) Um := by
+  rcases
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+        (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul e₀ e₁ f₀ f₁ c he₀ he₁ G₁ htime ht₀' hr
+        hU₀open hU₀source hxU₀ hx htbase ht ht_backward hder hGdiff hU₁open
+        hU₁source hU₁common htarget hxU₁ hother_common hcoord with
+    ⟨φ, Um, Wm, hφ, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+      hFmaps, hGmaps, _hbij, hFsmooth, hGsmooth, hleft, hright, heq⟩
+  refine ⟨φ, Um, Wm, hφ, hxUm, hUmU₀, hFxWm, hWmU₁, ?_, heq⟩
+  exact
+    { source_open := hUmopen
+      target_open := hWmopen
+      forward_mapsTo := hFmaps
+      backward_mapsTo := hGmaps
+      forward_contMDiffOn := hFsmooth
+      backward_contMDiffOn := hGsmooth
+      left_invOn := by
+        intro z hz
+        exact hleft hz.2
+      right_invOn := by
+        intro z hz
+        exact hright hz.2 }
+
+/-- Backward localized componentwise closed-ball estimates give packaged
+lifted `LocalGluingData` with overlap equality from space-time regularity. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius_of_contDiffAt_spaceTime
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ f₀ f₁ c : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (G₁ : V → V)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_backward : t ∈ Icc tmin (t₀ : ℝ))
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff_spaceTime : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (hU₁common : U₁ ⊆ c.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁)
+    (hother_common : MapsTo (fun z : M ↦ f₁.symm (G₁ (f₀ z))) U₀ c.source)
+    (hcoord : EqOn
+      (fun z : M ↦ c (e₁.symm
+        ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (e₀ z, t))))
+      (fun z : M ↦ c (f₁.symm (G₁ (f₀ z)))) U₀) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm ∧
+              EqOn
+                (fun z : M ↦ e₁.symm
+                  ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                    hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                    htime ht₀' hr).flow (e₀ z, t)))
+                (fun z : M ↦ f₁.symm (G₁ (f₀ z))) Um := by
+  let α : VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+      hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+      htime ht₀' hr
+  have hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x) := by
+    simpa [α] using
+      α.flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime
+        (by simpa [α] using hGdiff_spaceTime)
+  exact
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
       (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
       hf_cont hDf_cont hmul e₀ e₁ f₀ f₁ c he₀ he₁ G₁ htime ht₀' hr
       hU₀open hU₀source hxU₀ hx htbase ht ht_backward hder hGdiff hU₁open
@@ -19603,6 +20117,172 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
       hD_bound' hstrict (by simpa [α] using hGdiff_spaceTime) hU₁open hU₁source
       (by simpa [α] using htarget) (by simpa [α] using hxU₁)
 
+/-- Forward localized componentwise closed-ball estimates give packaged
+lifted `LocalGluingData` on a common interior time slice. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  rcases
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+        (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr hU₀open hU₀source hxU₀
+        hx htbase ht ht_forward hder hGdiff hU₁open hU₁source htarget hxU₁ with
+    ⟨φ, Um, Wm, hφ, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+      hFmaps, hGmaps, _hbij, hFsmooth, hGsmooth, hleft, hright⟩
+  refine ⟨φ, Um, Wm, hφ, hxUm, hUmU₀, hFxWm, hWmU₁, ?_⟩
+  exact
+    { source_open := hUmopen
+      target_open := hWmopen
+      forward_mapsTo := hFmaps
+      backward_mapsTo := hGmaps
+      forward_contMDiffOn := hFsmooth
+      backward_contMDiffOn := hGsmooth
+      left_invOn := by
+        intro z hz
+        exact hleft hz.2
+      right_invOn := by
+        intro z hz
+        exact hright hz.2 }
+
+/-- Forward localized componentwise closed-ball estimates give packaged lifted
+`LocalGluingData` from space-time regularity of the selected flow. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius_of_contDiffAt_spaceTime
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff_spaceTime : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  let α : VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+      hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+      htime ht₀' hr
+  have hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x) := by
+    simpa [α] using
+      α.flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime
+        (by simpa [α] using hGdiff_spaceTime)
+  exact
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+      (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+      hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr hU₀open hU₀source hxU₀
+      hx htbase ht ht_forward hder hGdiff hU₁open hU₁source htarget hxU₁
+
 /-- Localized componentwise closed-ball continuity estimates give the lifted
 `C^3` local gluing patch with overlap equality against a second chart-lifted
 model map.  The selected state-preserving Picard flow supplies the local
@@ -19866,6 +20546,205 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
         (by simpa [α] using hGdiff_spaceTime)
   exact
     ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+      (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+      hf_cont hDf_cont hmul e₀ e₁ f₀ f₁ c he₀ he₁ G₁ htime ht₀' hr
+      hU₀open hU₀source hxU₀ hx htbase ht ht_forward hder hGdiff hU₁open
+      hU₁source hU₁common htarget hxU₁ hother_common hcoord
+
+/-- Forward localized componentwise closed-ball estimates give packaged
+lifted `LocalGluingData` with overlap equality on a common interior time
+slice. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ f₀ f₁ c : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (G₁ : V → V)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (hU₁common : U₁ ⊆ c.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁)
+    (hother_common : MapsTo (fun z : M ↦ f₁.symm (G₁ (f₀ z))) U₀ c.source)
+    (hcoord : EqOn
+      (fun z : M ↦ c (e₁.symm
+        ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (e₀ z, t))))
+      (fun z : M ↦ c (f₁.symm (G₁ (f₀ z)))) U₀) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm ∧
+              EqOn
+                (fun z : M ↦ e₁.symm
+                  ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                    hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                    htime ht₀' hr).flow (e₀ z, t)))
+                (fun z : M ↦ f₁.symm (G₁ (f₀ z))) Um := by
+  rcases
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+        (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul e₀ e₁ f₀ f₁ c he₀ he₁ G₁ htime ht₀' hr
+        hU₀open hU₀source hxU₀ hx htbase ht ht_forward hder hGdiff hU₁open
+        hU₁source hU₁common htarget hxU₁ hother_common hcoord with
+    ⟨φ, Um, Wm, hφ, hUmopen, hxUm, hUmU₀, hWmopen, hFxWm, hWmU₁,
+      hFmaps, hGmaps, _hbij, hFsmooth, hGsmooth, hleft, hright, heq⟩
+  refine ⟨φ, Um, Wm, hφ, hxUm, hUmU₀, hFxWm, hWmU₁, ?_, heq⟩
+  exact
+    { source_open := hUmopen
+      target_open := hWmopen
+      forward_mapsTo := hFmaps
+      backward_mapsTo := hGmaps
+      forward_contMDiffOn := hFsmooth
+      backward_contMDiffOn := hGsmooth
+      left_invOn := by
+        intro z hz
+        exact hleft hz.2
+      right_invOn := by
+        intro z hz
+        exact hright hz.2 }
+
+/-- Forward localized componentwise closed-ball estimates give packaged
+lifted `LocalGluingData` with overlap equality from space-time regularity. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius_of_contDiffAt_spaceTime
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ f₀ f₁ c : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (G₁ : V → V)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff_spaceTime : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (hU₁common : U₁ ⊆ c.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁)
+    (hother_common : MapsTo (fun z : M ↦ f₁.symm (G₁ (f₀ z))) U₀ c.source)
+    (hcoord : EqOn
+      (fun z : M ↦ c (e₁.symm
+        ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (e₀ z, t))))
+      (fun z : M ↦ c (f₁.symm (G₁ (f₀ z)))) U₀) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm ∧
+              EqOn
+                (fun z : M ↦ e₁.symm
+                  ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                    hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                    htime ht₀' hr).flow (e₀ z, t)))
+                (fun z : M ↦ f₁.symm (G₁ (f₀ z))) Um := by
+  let α : VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+      hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+      htime ht₀' hr
+  have hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x) := by
+    simpa [α] using
+      α.flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime
+        (by simpa [α] using hGdiff_spaceTime)
+  exact
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
       (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
       hf_cont hDf_cont hmul e₀ e₁ f₀ f₁ c he₀ he₁ G₁ htime ht₀' hr
       hU₀open hU₀source hxU₀ hx htbase ht ht_forward hder hGdiff hU₁open

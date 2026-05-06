@@ -1802,7 +1802,11 @@ shrunk source overlap equality against another chart readout for forward
 compatibility.  The common-subinterval variants now have the same
 `LocalGluingData` and overlap-equality packages, so compact subinterval
 selection no longer has to unpack the long inverse-function tuple before
-feeding finite-cover gluing.  The remaining lift must still supply the chart-domain
+feeding finite-cover gluing.  The product-Picard common-subinterval handoff and
+the main forward/backward state-preserving component closed-ball routes now
+expose the same package shape, including overlap-equality forms, so the compact
+finite-cover route can request named local packages directly from the ODE
+estimate layer.  The remaining lift must still supply the chart-domain
 shrinking/source-membership hypotheses and combine these local patches with
 manifold-level flow compatibility before producing `C³` diffeomorphism slices.
 On the final bundling side, `SmoothSelfDiffeomorph3.ofInverse` now packages
