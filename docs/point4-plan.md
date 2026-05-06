@@ -2283,6 +2283,11 @@ neighborhood `EqOn` statement for a time slice into the required
 `𝓝[range I]` model-coordinate eventual equality, and
 `pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventually_eqOn_variationalFlow_hasFDerivWithinAt_fixedChart`
 packages that conversion with the variational model-flow spatial derivative.
+For gluing outputs stated as equality of manifold-valued lifted maps,
+`fixedChartModel_eqOn_of_lifted_eqOn_source` and
+`fixedChartModel_eventuallyEq_nhdsWithin_range_of_lifted_eqOn_source` first push
+the equality through the fixed target chart, assuming the model values stay in
+that chart target.
 The quantified component-level route is also available as
 `pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel_eqOn`,
 so downstream scalar selectors can now consume manifold-side `EqOn` gluing data

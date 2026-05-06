@@ -4766,6 +4766,50 @@ theorem fixedChartModel_eventuallyEq_nhdsWithin_range_of_eqOn_source
     _ = model y := by
       rw [(extChartAt I x).right_inv hyTarget]
 
+/-- A local equality of manifold-valued maps lifted from a fixed target chart
+can be pushed through that target chart, provided the model values stay in the
+target chart's model target. -/
+theorem fixedChartModel_eqOn_of_lifted_eqOn_source
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M) (model : E → E) {U : Set M}
+    (hmodel_target : ∀ z ∈ U,
+      model ((extChartAt I x) z) ∈ (extChartAt I ((Φ t) x)).target)
+    (heq : EqOn
+      (fun z : M ↦ (Φ τ) z)
+      (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+        (model ((extChartAt I x) z))) U) :
+    EqOn
+      (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+      (fun z : M ↦ model ((extChartAt I x) z)) U := by
+  intro z hz
+  calc
+    (extChartAt I ((Φ t) x)) ((Φ τ) z)
+        = (extChartAt I ((Φ t) x))
+            ((extChartAt I ((Φ t) x)).symm (model ((extChartAt I x) z))) := by
+          exact congrArg (fun w : M ↦ (extChartAt I ((Φ t) x)) w) (heq hz)
+    _ = model ((extChartAt I x) z) := by
+          rw [(extChartAt I ((Φ t) x)).right_inv (hmodel_target z hz)]
+
+/-- A manifold-neighborhood lifted `EqOn` statement for a fixed time slice gives
+the model-coordinate eventual equality required by the fixed-chart tangent
+bridge, once the model values are known to lie in the target chart. -/
+theorem fixedChartModel_eventuallyEq_nhdsWithin_range_of_lifted_eqOn_source
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M) (model : E → E) {U : Set M}
+    (hU : U ∈ 𝓝 x)
+    (hmodel_target : ∀ z ∈ U,
+      model ((extChartAt I x) z) ∈ (extChartAt I ((Φ t) x)).target)
+    (heq : EqOn
+      (fun z : M ↦ (Φ τ) z)
+      (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+        (model ((extChartAt I x) z))) U) :
+    (fun y : E ↦ (extChartAt I ((Φ t) x)) ((Φ τ) ((extChartAt I x).symm y)))
+        =ᶠ[𝓝[range I] ((extChartAt I x) x)] model := by
+  exact fixedChartModel_eventuallyEq_nhdsWithin_range_of_eqOn_source
+    (I := I) (M := M) Φ t τ x model hU
+    (fixedChartModel_eqOn_of_lifted_eqOn_source
+      (I := I) (M := M) Φ t τ x model hmodel_target heq)
+
 /-- If the fixed-chart representative of the time-`τ` slice is locally equal
 to a model map whose spatial derivative is known, then the concrete
 tangent-coordinate component is eventually that model derivative. -/
