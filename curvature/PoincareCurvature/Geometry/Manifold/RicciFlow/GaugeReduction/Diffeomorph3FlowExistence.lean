@@ -998,6 +998,36 @@ theorem backward_bijOn {n : WithTop ℕ∞} {F G : M → M} {U V : Set M}
     refine ⟨F x, h.forward_mapsTo_source hx, ?_⟩
     exact h.left_invOn ⟨Set.mem_univ x, hx⟩
 
+/-- Compactness restricts a source-and-target covering family of local gluing
+patches to a finite subtype, preserving the packaged local data. -/
+theorem exists_finset_subtype_iUnion_of_iUnion
+    [CompactSpace M] {ι : Type*} {n : WithTop ℕ∞}
+    (F G : ι → M → M) (U V : ι → Set M)
+    (hlocal : ∀ i, LocalGluingData (I := I) (M := M) n (F i) (G i) (U i) (V i))
+    (hUcover : Set.univ ⊆ ⋃ i, U i)
+    (hVcover : Set.univ ⊆ ⋃ i, V i) :
+    ∃ s : Finset ι,
+      Set.univ ⊆ ⋃ i : {i // i ∈ s}, U i ∧
+        Set.univ ⊆ ⋃ i : {i // i ∈ s}, V i ∧
+          ∀ i : {i // i ∈ s},
+            LocalGluingData (I := I) (M := M) n (F i) (G i) (U i) (V i) := by
+  classical
+  rcases isCompact_univ.elim_finite_subcover U
+      (fun i ↦ (hlocal i).source_open) hUcover with
+    ⟨sU, hsUcover⟩
+  rcases isCompact_univ.elim_finite_subcover V
+      (fun i ↦ (hlocal i).target_open) hVcover with
+    ⟨sV, hsVcover⟩
+  refine ⟨sU ∪ sV, ?_, ?_, ?_⟩
+  · intro x hx
+    rcases Set.mem_iUnion₂.mp (hsUcover hx) with ⟨i, hi, hxi⟩
+    exact Set.mem_iUnion.mpr ⟨⟨i, Finset.mem_union.mpr (Or.inl hi)⟩, hxi⟩
+  · intro x hx
+    rcases Set.mem_iUnion₂.mp (hsVcover hx) with ⟨i, hi, hxi⟩
+    exact Set.mem_iUnion.mpr ⟨⟨i, Finset.mem_union.mpr (Or.inr hi)⟩, hxi⟩
+  · intro i
+    exact hlocal i
+
 end LocalGluingData
 
 /-- Smoothness of a model map transports through source and target chart

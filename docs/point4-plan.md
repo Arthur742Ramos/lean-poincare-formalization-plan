@@ -1685,7 +1685,11 @@ finite-cover layer now also packages per-slice inverse-function output as
 projecting those named patches into the compatible glued-flow constructor.  The
 package also recovers forward/backward `BijOn` facts from its maps-to and local
 inverse fields, so older inverse-function outputs that need bijectivity can be
-used without storing an additional independent field.  The
+used without storing an additional independent field.  It also has a compactness
+subcover lemma
+`LocalGluingData.exists_finset_subtype_iUnion_of_iUnion`, which restricts any
+source-and-target covering local-gluing family to a finite subtype while
+preserving the packaged data.  The
 fixed-IVP and theorem-family intrinsic layers now expose matching
 `..._finite_timeDependent_iUnion_localGluingData_...` wrappers, so later compact
 manifold arguments can pass named local inverse-function packages through every
