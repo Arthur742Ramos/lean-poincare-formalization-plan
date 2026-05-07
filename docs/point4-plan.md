@@ -2607,6 +2607,15 @@ The Lie-correction bridge now consumes this route via
 so the raw spatial/tangent correction theorem can discharge the DeTurck-vector
 `MDiffAt` input from slicewise smoothness of the background connection, not only
 from the Levi-Civita zero case.
+The smooth-realization route now exposes the same smooth-background discharge at
+the chart-RHS Lie-correction and tensor time-regularity layers:
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection_of_contMDiffCovariantDerivative_background`,
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection_of_contMDiffCovariantDerivative_background`,
+and
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection_of_contMDiffCovariantDerivative_background`.
+These keep the chart-RHS, readout/Picard derivative, and coordinate
+Lie-correction inputs explicit while removing the separate DeTurck-vector
+`MDiffAt` hypothesis from callers with smooth background slices.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
