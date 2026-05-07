@@ -1829,7 +1829,10 @@ dispatches the selected restricted Picard time slice to the forward or backward
 strict-derivative estimate, and
 `ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_eventually_flow_timeSlice_hasFDerivAt_of_hasFDerivWithinAt_Ioo_of_le_radius`
 turns this into the ordinary-neighborhood eventual `HasFDerivAt` input needed by
-the new readout route.  The
+the new readout route, and
+`ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_source_eventually_flow_timeSlice_hasFDerivAt_of_hasFDerivWithinAt_Ioo_of_le_radius`
+packages the same Picard estimate directly in the source-coordinate form
+consumed by the fixed-IVP indexed readout-data bridge.  The
 matching
 `..._localGluingData_pointwiseSource_...` and
 `..._openPreimage_localGluingData_...` adapters preserve the named

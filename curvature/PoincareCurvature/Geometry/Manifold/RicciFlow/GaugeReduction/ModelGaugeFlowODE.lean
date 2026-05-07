@@ -15946,6 +15946,46 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
       hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
       htime ht₀' hr hx hτ hder).hasFDerivAt
 
+/-- Source-coordinate form of
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_eventually_flow_timeSlice_hasFDerivAt_of_hasFDerivWithinAt_Ioo_of_le_radius`.
+This is the exact model-flow derivative input expected by the fixed-IVP
+readout/mem-ball bridge. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_source_eventually_flow_timeSlice_hasFDerivAt_of_hasFDerivWithinAt_Ioo_of_le_radius
+    [CompleteSpace V]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin' tmax' →
+      ∀ ⦃x : V⦄, x ∈ ball x₀ r' →
+        ∀ᶠ τ in 𝓝 t,
+          HasFDerivAt
+            (fun y : V =>
+              (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont
+                hmul htime ht₀' hr).flow (y, τ))
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont
+              hmul htime ht₀' hr).tangent x τ)
+            x := by
+  intro t ht x hx
+  exact
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_eventually_flow_timeSlice_hasFDerivAt_of_hasFDerivWithinAt_Ioo_of_le_radius
+      hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+      htime ht₀' hr hx ht hder
+
 /-- Componentwise closed-ball continuity estimates give the neighborhood-map
 equality for each forward interior time slice of the state-preserving selected
 variational flow, provided the supplied `Df` is the spatial derivative of `f` on
