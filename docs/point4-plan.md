@@ -2517,7 +2517,14 @@ Levi-Civita derivative of `intrinsicDeTurckGaugeField`. The underlying
 raw-gauge bridge is
 `Diffeomorph3GaugeFlowOn.Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection`,
 which isolates the remaining coordinate chain-rule calculation from the
-DeTurck sign algebra.
+DeTurck sign algebra. The same interface is available at the tensor route
+level through
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection`
+and its closed-source-cover companion
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection`,
+so callers can pass indexed readout/Picard derivative data, chart-RHS
+identification, `MDiffAt` regularity, and the pre-sign Lie-correction identity
+directly to obtain the gauge-corrected pullback time derivative.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
