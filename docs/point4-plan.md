@@ -1812,7 +1812,10 @@ and
 `..._readout_mem_ball_lifted_eqOn_hasFDerivAt`, so a gauge-flow witness can
 consume local readout equality, target membership or target-neighborhood
 continuity, and time-only metric component derivatives without first packaging
-the tangent-map equality manually.  The same closed-Picard readout/mem-ball
+the tangent-map equality manually.  The raw source-coordinate endpoint
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn`
+adds the indexed-cover/Picard-derivative variant at this level too.  The same
+closed-Picard readout/mem-ball
 shape is now named at the fixed-IVP geometric layer as
 `ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.VariationalTangentMapReadoutMemBallDerivativeDataOnIoo`,
 with
