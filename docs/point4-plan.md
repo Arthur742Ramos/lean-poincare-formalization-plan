@@ -1770,7 +1770,13 @@ and
 `SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_lifted_eqOn_hasFDerivAt`;
 these let Picard output prove target membership, lifted equality, and ordinary
 time-slice spatial derivatives separately before feeding the existing
-within-derivative readout route.  The
+within-derivative readout route.  On the model side,
+`ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_Icc_of_le_radius`
+dispatches the selected restricted Picard time slice to the forward or backward
+strict-derivative estimate, and
+`ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_eventually_flow_timeSlice_hasFDerivAt_of_hasFDerivWithinAt_Ioo_of_le_radius`
+turns this into the ordinary-neighborhood eventual `HasFDerivAt` input needed by
+the new readout route.  The
 matching
 `..._localGluingData_pointwiseSource_...` and
 `..._openPreimage_localGluingData_...` adapters preserve the named
