@@ -188,6 +188,59 @@ theorem intrinsicDeTurckOneForm_eq_zero_of_subsingleton_tangent
     rfl
   simp [hEnd]
 
+/-- Local-frame scalar components of the intrinsic DeTurck one-form suffice to
+prove `C¹` regularity of the one-form section. -/
+theorem intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
+    (hcoeff : ∀ i,
+      ContMDiffOn I 𝓘(ℝ) 1
+        (fun x ↦ intrinsicDeTurckOneForm (I := I) (M := M)
+          g background t x (e.localFrame b i x)) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun y : M ↦ TM y →L[ℝ] ℝ) x
+        (intrinsicDeTurckOneForm (I := I) (M := M) g background t x)) u := by
+  let eLine : Trivialization ℝ (TotalSpace.proj : TotalSpace ℝ (fun _ : M ↦ ℝ) → M) :=
+    Bundle.Trivial.trivialization M ℝ
+  letI : MemTrivializationAtlas eLine := by
+    constructor
+    change Bundle.Trivial.trivialization M ℝ ∈ ({Bundle.Trivial.trivialization M ℝ} : Set _)
+    simp
+  let eStar :
+      Trivialization (E →L[ℝ] ℝ)
+        (TotalSpace.proj : TotalSpace (E →L[ℝ] ℝ) (fun x : M ↦ TM x →L[ℝ] ℝ) → M) :=
+    e.continuousLinearMap (σ := RingHom.id ℝ) eLine
+  have huStar : u ⊆ eStar.baseSet := by
+    intro x hx
+    simp [eStar, eLine, hu' hx]
+  refine (contMDiffOn_iff_localFrame_coeff
+    (I := I) (e := eStar) (b := CovariantDerivative.continuousDualBasis b)
+    (s := intrinsicDeTurckOneForm (I := I) (M := M) g background t)
+    (t := u) (k := (1 : WithTop ℕ∞)) hu huStar).2 ?_
+  intro i
+  refine ContMDiffOn.congr (hcoeff i) ?_
+  intro x hx
+  have hxE : x ∈ e.baseSet := hu' hx
+  have hxStar : x ∈ eStar.baseSet := huStar hx
+  rw [show ((LinearMap.piApply
+      (eStar.localFrame_coeff I (CovariantDerivative.continuousDualBasis b) i))
+      (intrinsicDeTurckOneForm (I := I) (M := M) g background t)) x =
+        eStar.localFrame_coeff I (CovariantDerivative.continuousDualBasis b) i x
+          (intrinsicDeTurckOneForm (I := I) (M := M) g background t x) by rfl,
+    Bundle.Trivialization.localFrame_coeff_eq_coeff
+      (I := I) (e := eStar) (b := CovariantDerivative.continuousDualBasis b)
+      (s := intrinsicDeTurckOneForm (I := I) (M := M) g background t)
+      (hxe := hxStar) (i := i),
+    CovariantDerivative.continuousDualBasis_repr]
+  simp [eStar, eLine, Bundle.Trivialization.continuousLinearMap_apply,
+    Bundle.Trivialization.basisAt, hxE]
+
 /-- The intrinsic DeTurck vector field obtained by raising the intrinsic DeTurck one-form with the
 evolving metric. -/
 def intrinsicDeTurckVectorField

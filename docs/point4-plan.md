@@ -2569,6 +2569,12 @@ section. What remains for the full non-Levi-Civita/background case is to prove
 that local one-form regularity from the connection-difference trace
 construction and the available smoothness of the metric and background
 connection.
+That local one-form regularity now has a first componentwise packaging step:
+`intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply` reduces `C¹`
+one-form-section regularity on a chart-local open set to scalar smoothness of
+the local-frame evaluations `ω_x(e_i(x))`. The remaining hard input is therefore
+the connection-difference trace calculation proving those scalar component
+facts from the chosen Levi-Civita family and the background connection.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
