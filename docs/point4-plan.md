@@ -2504,7 +2504,12 @@ the first identifies the target-centered readout of an arbitrary Banach RHS
 section at the target center, and the second turns the route's local `hvalue`
 obligation into exactly two geometric identities, namely chart-RHS equals
 smooth metric velocity and the spatial plus tangent-map coordinate terms equal
-the negative intrinsic DeTurck correction at the gauge image. The
+the negative intrinsic DeTurck correction at the gauge image. The first of
+those two inputs now has the direct bridge
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricVelocity_eq_chartRHS_of_chartRHS_eq_intrinsic`,
+which derives the smooth metric-velocity/chart-RHS equality from the
+realization equation and a pointwise identification of the Banach chart RHS with
+the intrinsic Ricci-DeTurck RHS. The
 readout/mem-ball route now also
 has closed-interval local-gluing readout lemmas, a source-coordinate Picard
 derivative package, component and raw source-derivative endpoints, and the

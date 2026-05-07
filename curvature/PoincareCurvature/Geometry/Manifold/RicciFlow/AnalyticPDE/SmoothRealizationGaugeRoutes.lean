@@ -4203,6 +4203,49 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTime
     (fun {t} ht ↦ hsource_cover (t := t) (Ioo_subset_Icc_self (hsModel ht)))
     hreadout hflow_deriv hdata hvalue
 
+/-- Convert a chart-RHS identification with the intrinsic Ricci-DeTurck RHS into
+the metric-velocity equality needed by the scalar gauge adapter. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricVelocity_eq_chartRHS_of_chartRHS_eq_intrinsic
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    (hchartRHS_eq_intrinsic : ∀ ⦃t : ℝ⦄,
+      t ∈ Icc ivp.initialTime sol.terminalTime → ∀ x : M,
+        ∀ u v : TangentSpace I x,
+          A t (sol.curve t) x u v =
+            intrinsicRicciDeTurckRHS (I := I) (M := M)
+              realization.metric realization.background t x u v) :
+    ∀ ⦃t : ℝ⦄, t ∈ Icc ivp.initialTime sol.terminalTime → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+        realization.metricVelocity t x u v = A t (sol.curve t) x u v := by
+  intro t ht x u v
+  exact (realization.equation ht x u v).trans
+    (hchartRHS_eq_intrinsic ht x u v).symm
+
 /-- Pointwise scalar-value adapter for the readout/variational tangent-map
 route.
 
