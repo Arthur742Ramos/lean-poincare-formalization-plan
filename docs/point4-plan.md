@@ -2666,6 +2666,11 @@ and the theorem-family analogue now discharge that model-flow spatial
 derivative input directly from the state-preserving component closed-ball
 continuity estimates, leaving the compact source cover/readout and the
 lifted-model/value hypotheses as the selected-route inputs.
+The smooth-realization tensor route has the matching closed-interval finite-cover
+wrapper
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`,
+so Banach finite-cover readouts can also consume the selected Picard estimates
+without restating the source-coordinate derivative hypothesis.
 The compact local-gluing existence layer now retains those selected certificates
 too:
 `SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_with_finiteSubcover_Icc_subset_cover_readout_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
