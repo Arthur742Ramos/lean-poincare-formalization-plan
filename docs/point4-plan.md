@@ -1864,6 +1864,13 @@ compact raw existence theorems
 and
 `Diffeomorph3GaugeFlowOn.exists_Icc_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 now combine compact subcover selection, source/target cover persistence inside
+the chosen Picard interval, and raw gauge-flow construction.  The finite-core
+selected witness
+`Diffeomorph3GaugeFlowOn.exists_Icc_gaugeFlow_with_readout_of_finite_timeSet_compactCore_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+keeps the chosen `Icc` raw flow and its indexed local readout equality together,
+so downstream time-derivative routes do not have to recover readout evidence
+from a bare `Nonempty` witness.  More broadly, the compact raw existence
+theorems combine
 the ambient time set, ambient local regularity, and the open-preimage
 local-gluing route to produce raw gauge-flow witnesses on small symmetric `Ioo`
 and endpoint-retaining `Icc` intervals, deriving the base-time target cover and
