@@ -26,6 +26,60 @@ namespace AnalyticPDE
 def parabolicCoordinateUnitVector (n : Type*) [DecidableEq n] (i : n) : n → ℝ :=
   Pi.single i 1
 
+/-- Read a first spatial derivative in an arbitrary spatial direction. -/
+def firstDerivativeVectorReadout {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] (v : X) :
+    (X →L[ℝ] E) →L[ℝ] E :=
+  (ContinuousLinearMap.apply ℝ E) v
+
+@[simp]
+theorem firstDerivativeVectorReadout_apply {X E : Type*}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] (v : X) (L : X →L[ℝ] E) :
+    firstDerivativeVectorReadout (X := X) (E := E) v L = L v :=
+  rfl
+
+/-- Read a second spatial derivative in two arbitrary spatial directions. -/
+def secondDerivativeVectorReadout {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] (v w : X) :
+    (X →L[ℝ] (X →L[ℝ] E)) →L[ℝ] E :=
+  (firstDerivativeVectorReadout (X := X) (E := E) w).comp
+    ((ContinuousLinearMap.apply ℝ (X →L[ℝ] E)) v)
+
+@[simp]
+theorem secondDerivativeVectorReadout_apply {X E : Type*}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] (v w : X)
+    (B : X →L[ℝ] (X →L[ℝ] E)) :
+    secondDerivativeVectorReadout (X := X) (E := E) v w B = B v w :=
+  rfl
+
+/-- Operator norm of the first-derivative arbitrary-vector readout. -/
+def firstDerivativeVectorReadoutOpNorm {X : Type*} [NormedAddCommGroup X]
+    [NormedSpace ℝ X] (v : X) : ℝ :=
+  ContinuousLinearMap.opNorm
+    (𝕜 := ℝ) (𝕜₂ := ℝ) (E := (X →L[ℝ] ℝ)) (F := ℝ)
+    (firstDerivativeVectorReadout (X := X) (E := ℝ) v)
+
+/-- Operator norm of the second-derivative arbitrary-vector readout. -/
+def secondDerivativeVectorReadoutOpNorm {X : Type*} [NormedAddCommGroup X]
+    [NormedSpace ℝ X] (v w : X) : ℝ :=
+  ContinuousLinearMap.opNorm
+    (𝕜 := ℝ) (𝕜₂ := ℝ) (E := (X →L[ℝ] (X →L[ℝ] ℝ))) (F := ℝ)
+    (secondDerivativeVectorReadout (X := X) (E := ℝ) v w)
+
+/-- First-derivative coefficient radii obtained by reading a finite family of spatial
+directions from metric-entry second jets. -/
+def firstDerivativeVectorRadius {X ι : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (v : ι → X) (R : ι → ι → ℝ) : ι → ι → ι → ℝ :=
+  fun a i j => firstDerivativeVectorReadoutOpNorm (X := X) (v a) * R i j
+
+/-- Second-derivative coefficient radii obtained by reading a finite family of spatial
+directions from metric-entry second jets. -/
+def secondDerivativeVectorRadius {X ι : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (v : ι → X) (R : ι → ι → ℝ) : ι → ι → ι → ι → ℝ :=
+  fun a b i j => secondDerivativeVectorReadoutOpNorm (X := X) (v a) (v b) * R i j
+
 /-- Read a first spatial derivative in one coordinate direction. -/
 def firstDerivativeCoordinateReadout {n E : Type*} [Fintype n] [DecidableEq n]
     [NormedAddCommGroup E] [NormedSpace ℝ E] (i : n) :
@@ -357,6 +411,110 @@ theorem ricciDeTurckSchematicMatrix_pi_family_of_entries {κ n : Type*}
       (X := X) (α := α) (s := s) (δ := δ)
       (R := R) (RD := RD) (RH := RH) (M := M) (D := D) (H := H)
       hM hD hH hδpos hdet)
+
+set_option maxHeartbeats 1000000 in
+/-- A metric with entrywise higher parabolic control supplies its own first- and
+second-derivative primitive arrays by reading chosen second jets against a finite family of
+spatial directions.  This removes the separate `D`/`H` primitive hypotheses for the direct
+schematic Ricci-DeTurck `C^{0,α}` estimate on any normed spatial model. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries_directions {n : Type*}
+    [Fintype n] [DecidableEq n] (v : n → X)
+    {R : n → n → ℝ} {δ : ℝ} {s : Set (ℝ × X)}
+    {M : ℝ × X → Matrix n n ℝ}
+    (hM : ∀ i j, ParabolicC2AlphaNormLe (R i j) α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ∃ J : ∀ i j, ParabolicSecondJet (fun z : ℝ × X => M z i j) s,
+      ParabolicC0AlphaNormLe
+        (ricciDeTurckSchematicMatrixBoundConst (n := n) δ R
+          (firstDerivativeVectorRadius (X := X) v R)
+          (secondDerivativeVectorRadius (X := X) v R))
+        α
+        (fun z : ℝ × X =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M z)
+            (fun a i j => (J i j).spaceDeriv z (v a))
+            (fun a b i j => (J i j).spaceSecondDeriv z (v a) (v b))) s := by
+  classical
+  choose J Nu hNu Nx hNx Nxx hNxx Nt hNt hsum hMval hJx hJxx hJt using hM
+  refine ⟨J, ?_⟩
+  have hM0 : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => M z i j) s := by
+    intro i j
+    have hNu_le : Nu i j ≤ R i j := by
+      linarith [hNu i j, hNx i j, hNxx i j, hNt i j, hsum i j]
+    exact (hMval i j).mono_const hNu_le
+  have hD : ∀ a i j,
+      ParabolicC0AlphaNormLe (firstDerivativeVectorRadius (X := X) v R a i j) α
+        (fun z : ℝ × X => (J i j).spaceDeriv z (v a)) s := by
+    intro a i j
+    have hNx_le : Nx i j ≤ R i j := by
+      linarith [hNu i j, hNx i j, hNxx i j, hNt i j, hsum i j]
+    have hspace : ParabolicC0AlphaNormLe (R i j) α (J i j).spaceDeriv s :=
+      (hJx i j).mono_const hNx_le
+    have hx :=
+      hspace.continuousLinearMap_opNorm
+        (firstDerivativeVectorReadout (X := X) (E := ℝ) (v a))
+    simpa [firstDerivativeVectorRadius, firstDerivativeVectorReadoutOpNorm] using hx
+  have hH : ∀ a b i j,
+      ParabolicC0AlphaNormLe (secondDerivativeVectorRadius (X := X) v R a b i j) α
+        (fun z : ℝ × X => (J i j).spaceSecondDeriv z (v a) (v b)) s := by
+    intro a b i j
+    have hNxx_le : Nxx i j ≤ R i j := by
+      linarith [hNu i j, hNx i j, hNxx i j, hNt i j, hsum i j]
+    have hsecond : ParabolicC0AlphaNormLe (R i j) α (J i j).spaceSecondDeriv s :=
+      (hJxx i j).mono_const hNxx_le
+    have hxx :=
+      hsecond.continuousLinearMap_opNorm
+        (secondDerivativeVectorReadout (X := X) (E := ℝ) (v a) (v b))
+    simpa [secondDerivativeVectorRadius, secondDerivativeVectorReadoutOpNorm] using hxx
+  simpa [ricciDeTurckSchematicMatrixBoundConst] using
+    (ParabolicC0AlphaNormLe.ricciDeTurck_schematic_of_entries
+      (X := X) (α := α) (s := s) (𝕜 := ℝ) (δ := δ)
+      (R := R) (RD := firstDerivativeVectorRadius (X := X) v R)
+      (RH := secondDerivativeVectorRadius (X := X) v R)
+      (M := M)
+      (D := fun z a i j => (J i j).spaceDeriv z (v a))
+      (H := fun z a b i j => (J i j).spaceSecondDeriv z (v a) (v b))
+      hM0 hD hH hδpos hdet)
+
+set_option maxHeartbeats 1000000 in
+/-- Finite-family version of
+`exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries_directions`, packaged as one
+Pi-valued `C^{0,α}` estimate for the family of schematic Ricci-DeTurck RHS fields. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries_directions
+    {κ n : Type*} [Fintype κ] [Fintype n] [DecidableEq n] (v : n → X)
+    {R : κ → n → n → ℝ} {δ : ℝ} {s : Set (ℝ × X)}
+    {M : κ → ℝ × X → Matrix n n ℝ}
+    (hM : ∀ r i j, ParabolicC2AlphaNormLe (R r i j) α (fun z => M r z i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∃ J : ∀ r i j, ParabolicSecondJet (fun z : ℝ × X => M r z i j) s,
+      ParabolicC0AlphaNormLe
+        (∑ r, ricciDeTurckSchematicMatrixBoundConst (n := n) δ (R r)
+          (firstDerivativeVectorRadius (X := X) v (R r))
+          (secondDerivativeVectorRadius (X := X) v (R r)))
+        α
+        (fun z : ℝ × X => fun r : κ =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M r z)
+            (fun a i j => (J r i j).spaceDeriv z (v a))
+            (fun a b i j => (J r i j).spaceSecondDeriv z (v a) (v b))) s := by
+  classical
+  choose J hJ using fun r =>
+    exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries_directions
+      (X := X) (α := α) (v := v) (R := R r) (δ := δ) (s := s) (M := M r)
+      (hM r) hδpos (hdet r)
+  refine ⟨J, ?_⟩
+  exact ParabolicC0AlphaNormLe.pi (X := X) (α := α) (s := s)
+    (N := fun r =>
+      ricciDeTurckSchematicMatrixBoundConst (n := n) δ (R r)
+        (firstDerivativeVectorRadius (X := X) v (R r))
+        (secondDerivativeVectorRadius (X := X) v (R r)))
+    (u := fun z : ℝ × X => fun r : κ =>
+      ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r z)
+        (fun a i j => (J r i j).spaceDeriv z (v a))
+        (fun a b i j => (J r i j).spaceSecondDeriv z (v a) (v b)))
+    hJ
 
 set_option maxHeartbeats 1000000 in
 /-- A metric with entrywise higher parabolic control supplies its own coordinate first- and
@@ -1911,6 +2069,58 @@ theorem ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_entries {κ n : Type*
   ParabolicC0AlphaOn.pi fun r =>
     ricciDeTurckSchematicMatrix_c0AlphaOn_family_of_entries
       (M := M) (D := D) (H := H) hM hD hH hδpos hdet r
+
+set_option maxHeartbeats 1000000 in
+/-- Qualitative higher-regularity version of
+`exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries_directions`: entrywise higher
+membership of a metric supplies chosen second jets whose finite-direction derivative arrays make
+the schematic Ricci-DeTurck RHS `C^{0,α}`. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_metric_entries_directions
+    {n : Type*} [Fintype n] [DecidableEq n] (v : n → X)
+    {δ : ℝ} {s : Set (ℝ × X)}
+    {M : ℝ × X → Matrix n n ℝ}
+    (hM : ∀ i j, ParabolicC2AlphaOn α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ∃ J : ∀ i j, ParabolicSecondJet (fun z : ℝ × X => M z i j) s,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × X =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M z)
+            (fun a i j => (J i j).spaceDeriv z (v a))
+            (fun a b i j => (J i j).spaceSecondDeriv z (v a) (v b))) s := by
+  classical
+  choose R _hR_nonneg hR using hM
+  rcases
+    ParabolicC2AlphaNormLe.exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries_directions
+      (X := X) (α := α) (v := v) (R := R) (δ := δ) (s := s) (M := M)
+      hR hδpos hdet with
+    ⟨J, hJ⟩
+  exact ⟨J, hJ.c0AlphaOn⟩
+
+set_option maxHeartbeats 1000000 in
+/-- Pi-valued finite-family qualitative higher-regularity version of
+`exists_secondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries_directions`. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_metric_entries_directions
+    {κ n : Type*} [Fintype κ] [Fintype n] [DecidableEq n] (v : n → X)
+    {δ : ℝ} {s : Set (ℝ × X)}
+    {M : κ → ℝ × X → Matrix n n ℝ}
+    (hM : ∀ r i j, ParabolicC2AlphaOn α (fun z => M r z i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∃ J : ∀ r i j, ParabolicSecondJet (fun z : ℝ × X => M r z i j) s,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × X => fun r : κ =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M r z)
+            (fun a i j => (J r i j).spaceDeriv z (v a))
+            (fun a b i j => (J r i j).spaceSecondDeriv z (v a) (v b))) s := by
+  classical
+  choose J hJ using fun r =>
+    exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_metric_entries_directions
+      (X := X) (α := α) (v := v) (δ := δ) (s := s) (M := M r) (hM r)
+      hδpos (hdet r)
+  refine ⟨J, ?_⟩
+  exact ParabolicC0AlphaOn.pi hJ
 
 set_option maxHeartbeats 1000000 in
 /-- Qualitative higher-regularity version of

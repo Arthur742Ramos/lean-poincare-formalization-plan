@@ -3497,7 +3497,16 @@ metric-entry second jets, using coordinate-direction continuous-linear
 readouts, and feeds those derived arrays into the direct schematic
 Ricci-DeTurck `C^{0,α}` estimate, including a Pi-valued finite-family package
 for finite cover products; the same bridge is available from qualitative
-`ParabolicC2AlphaOn` membership when explicit radii are not needed. It now also
+`ParabolicC2AlphaOn` membership when explicit radii are not needed. The
+second-jet readout bridge now also accepts an arbitrary finite family of
+spatial directions in any normed model, with quantitative and qualitative
+finite-family packaging, so tangent-frame or chart-basis directions no longer
+have to be encoded as coordinate unit vectors. `HigherLocalFrameGram.lean`
+specializes that finite-direction bridge to compact local-frame Gram matrices
+on a normed-vector chart model: entrywise higher Gram controls choose second
+jets, read first and second primitive arrays along the local-frame basis, and
+extract the compact Gram determinant lower bound before applying the schematic
+Ricci-DeTurck RHS estimate. It now also
 converts entrywise higher
 primitive difference controls with radii linear in a shared radius into the
 linear-radius `ParabolicBoundedWith` schematic RHS estimate and the
