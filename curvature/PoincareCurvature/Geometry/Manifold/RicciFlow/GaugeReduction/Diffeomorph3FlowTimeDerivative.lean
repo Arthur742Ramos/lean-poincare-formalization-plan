@@ -18969,6 +18969,147 @@ theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents
     (SmoothSelfDiffeomorph3Family.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap
       (I := I) (M := M) (Φ := G.maps3) (g := g) (gdot := gdot) α hdata)
 
+/-- Closed-Picard raw gauge flow plus time-only concrete `B(τ)` derivatives and
+readout-local lifted variational tangent-map data gives interior
+time-regularity for the gauge-pulled metric family. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_target_lifted_eqOn_hasFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ F : ℝ → M → M,
+        ∃ B' : E →L[ℝ] E →L[ℝ] ℝ,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t τ x)
+            B' t ∧
+          (∀ᶠ τ in 𝓝 t,
+            HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) ((extChartAt I x) x)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ U : Set M, U ∈ 𝓝 x ∧
+              EqOn (fun z : M ↦ (G.maps3 τ) z) (F τ) U) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ V : Set M, V ∈ 𝓝 x ∧
+              ∀ z ∈ V,
+                α.flow ((extChartAt I x) z, τ) ∈
+                  (extChartAt I ((G.maps3 t) x)).target) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (F τ)
+                (fun z : M ↦ (extChartAt I ((G.maps3 t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W) ∧
+          B'
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                ((Df t (α.flow (xE, t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) G.maps3 t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (xE, t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) G.maps3 t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_coordinateComponents
+    (SmoothSelfDiffeomorph3Family.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_target_lifted_eqOn_hasFDerivAt
+      (I := I) (M := M) (Φ := G.maps3) (g := g) (gdot := gdot) α hdata)
+
+/-- Version of
+`hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_target_lifted_eqOn_hasFDerivAt`
+where target membership is recovered from interior Picard space-time continuity
+and a target-neighborhood condition at the base point. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ F : ℝ → M → M,
+        ∃ B' : E →L[ℝ] E →L[ℝ] ℝ,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t τ x)
+            B' t ∧
+          (∀ᶠ τ in 𝓝 t,
+            HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) ((extChartAt I x) x)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ U : Set M, U ∈ 𝓝 x ∧
+              EqOn (fun z : M ↦ (G.maps3 τ) z) (F τ) U) ∧
+          (extChartAt I x) x ∈ ball x₀ r ∧
+          (extChartAt I ((G.maps3 t) x)).target ∈
+            𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (F τ)
+                (fun z : M ↦ (extChartAt I ((G.maps3 t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W) ∧
+          B'
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                ((Df t (α.flow (xE, t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) G.maps3 t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.maps3 g t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (xE, t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) G.maps3 t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M) (G.maps3.pullbackMetricFamily g) gdot
+      (Ioo tmin tmax) :=
+  G.hasTimeDerivativeOn_Ioo_of_coordinateComponents
+    (SmoothSelfDiffeomorph3Family.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_lifted_eqOn_hasFDerivAt
+      (I := I) (M := M) (Φ := G.maps3) (g := g) (gdot := gdot) α hdata)
+
 /-- Closed-Picard raw gauge flow plus closed-interval time-only concrete
 `B(τ)` derivatives and a variational tangent-map identification gives interior
 time-regularity for the gauge-pulled metric family.

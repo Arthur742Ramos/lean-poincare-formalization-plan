@@ -1793,7 +1793,15 @@ layer now consumes those readout equalities directly through
 and
 `..._readout_mem_ball_lifted_eqOn_hasFDerivAt`, combining time-only bilinear
 coordinate derivatives with the readout-local tangent-map identification while
-leaving the explicit variational `Df` value formula intact.  On the model side,
+leaving the explicit variational `Df` value formula intact.  The raw
+`Diffeomorph3GaugeFlowOn` API now exposes the matching interior
+time-regularity endpoints
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_target_lifted_eqOn_hasFDerivAt`
+and
+`..._readout_mem_ball_lifted_eqOn_hasFDerivAt`, so a gauge-flow witness can
+consume local readout equality, target membership or target-neighborhood
+continuity, and time-only metric component derivatives without first packaging
+the tangent-map equality manually.  On the model side,
 `ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_Icc_of_le_radius`
 dispatches the selected restricted Picard time slice to the forward or backward
 strict-derivative estimate, and
