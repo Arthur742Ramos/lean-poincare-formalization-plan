@@ -1945,6 +1945,10 @@ gauge-pulled metric time derivative or scalar inner-derivative data is supplied.
 The selected layer also records the scalar/tensor time-derivative equivalence,
 so endpoint projections can consume or recover the selected scalar derivative
 package without unfolding the gauge-pulled metric theorem.
+Its time-derivative interface now accepts selected coordinate-level,
+coordinate-model, concrete-component, and field-level scalar derivative data,
+including explicit open-Picard `Ioo` neighborhood discharges, and converts those
+inputs directly to the selected scalar package.
 It also has `ofRawGaugeFlowOn_restrictTimeSet` and
 `ofRawGaugeFlowOn_restrictSymmetricIcc`, with proof-level `nonempty_...`
 versions, so callers can start from an ambient chosen DeTurck solution plus the
