@@ -2550,6 +2550,12 @@ Levi-Civita-background route
 so callers no longer need to pass a separate DeTurck-vector `MDiffAt` package
 in that case; the chart-level Lie-correction identity remains the real
 coordinate calculation.
+The same discharge is now exposed at the smooth-realization scalar-selector
+level by
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection_of_isLeviCivita`,
+which keeps the chart-RHS and coordinate Lie-correction hypotheses explicit
+while deriving the DeTurck-vector regularity input from the Levi-Civita
+background hypothesis.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
