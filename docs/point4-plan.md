@@ -1752,7 +1752,13 @@ and
 `Diffeomorph3GaugeFlowOn.of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_eventually_nhds_eqOn`,
 so Picard inverse-function outputs packaged as `LocalGluingData` no longer have
 to unfold the raw compatible-slices constructor just to recover the local
-readout agreement.  The
+readout agreement.  Their interior-time companions
+`..._localGluingData_pointwiseSource_..._eventually_nhds_exists_eqOn_of_mem_Ioo`
+and
+`..._openPreimage_localGluingData_..._eventually_nhds_exists_eqOn_of_mem_Ioo`
+upgrade the closed-Picard relative eventual to ordinary `𝓝 t` and package the
+selected patch existentially, matching the readout input expected by the
+readout-lifted tangent-map route.  The
 matching
 `..._localGluingData_pointwiseSource_...` and
 `..._openPreimage_localGluingData_...` adapters preserve the named
