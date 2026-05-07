@@ -2488,7 +2488,11 @@ and
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`,
 which choose the finite-cover readout internally and derive the lifted
 target-chart input from Picard ball membership, model-flow space-time
-continuity, and the target-chart neighborhood condition. The readout/mem-ball route now also
+continuity, and the target-chart neighborhood condition.  The tensor route also
+has the closed-cover companion
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`,
+so compact selected witnesses can keep their source cover on `Icc tmin tmax`
+while the smooth-realization theorem runs on the open active time set. The readout/mem-ball route now also
 has closed-interval local-gluing readout lemmas, a source-coordinate Picard
 derivative package, component and raw source-derivative endpoints, and the
 fixed-IVP indexed data bridge.  The remaining dynamic obligations are therefore
