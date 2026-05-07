@@ -1953,6 +1953,10 @@ For compact Picard output, the selected interface also accepts within-set
 component, field, and operator data on a closed `Icc` time set and returns
 tensor time-regularity on the open interior `Ioo`, matching the endpoint shape
 of closed-interval chart ODE constructions.
+The same selected closed-Picard interface now also exposes the readout-local
+variational tangent-map handoff, so Banach/Picard tangent-map data can feed the
+selected gauge-pulled metric time derivative without reintroducing the
+all-candidate solution parameter.
 It also has `ofRawGaugeFlowOn_restrictTimeSet` and
 `ofRawGaugeFlowOn_restrictSymmetricIcc`, with proof-level `nonempty_...`
 versions, so callers can start from an ambient chosen DeTurck solution plus the
