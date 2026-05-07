@@ -17495,6 +17495,21 @@ noncomputable def ofDerivativeData
   of_hasMFDerivWithinAt (I := I) (M := M) (ivp := ivp)
     maps3 anchored hflowDeriv
 
+/-- Centered preferred-chart derivative data extracted directly from fixed-IVP
+raw intrinsic DeTurck gauge-flow existence. -/
+theorem chartDerivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn (I := I) (M := M)
+      (G.flow sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.flow sol).toIntrinsicChartDerivativeOn
+
 /-- Derivative-family data extracted directly from fixed-IVP raw intrinsic
 DeTurck gauge-flow existence. -/
 theorem derivativeData
@@ -17507,9 +17522,44 @@ theorem derivativeData
       (G.flow sol).maps3
       sol.1.toIntrinsicDeTurckSolution.metric
       sol.1.toIntrinsicDeTurckSolution.background
-      sol.1.toIntrinsicDeTurckSolution.timeSet := by
-  intro t ht x
-  exact (G.flow sol).hasMFDerivWithinAt ht x
+      sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.flow sol).toIntrinsicDerivativeOn
+
+/-- Ordinary centered preferred-chart derivative data extracted from fixed-IVP
+raw intrinsic DeTurck gauge-flow existence on any time subset where the
+solution time set is a neighborhood of each time. -/
+theorem chartDerivativeAtData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {u : Set ℝ}
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ u → sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn (I := I) (M := M)
+      (G.flow sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      u :=
+  (G.flow sol).toIntrinsicChartDerivativeAtOn hs
+
+/-- Ordinary primitive derivative data extracted from fixed-IVP raw intrinsic
+DeTurck gauge-flow existence on any time subset where the solution time set is a
+neighborhood of each time. -/
+theorem derivativeAtData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {u : Set ℝ}
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ u → sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+      (G.flow sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      u :=
+  (G.flow sol).toIntrinsicDerivativeAtOn hs
 
 /-- Fixed-chart derivative data extracted directly from fixed-IVP raw intrinsic
 DeTurck gauge-flow existence, for any chart-center choice whose sources contain
@@ -17842,6 +17892,56 @@ theorem timeSet_mem_nhds_of_eq_Ioo
   have ht' : t ∈ Ioo (tmin sol) (tmax sol) := by
     simpa [htimeSet sol] using ht
   simpa [htimeSet sol] using (isOpen_Ioo.mem_nhds ht')
+
+/-- Fixed-IVP open-Picard ordinary centered preferred-chart derivative data on
+any subset of the chosen solution's open time set. -/
+theorem chartDerivativeAtData_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {u : Set ℝ}
+    (hu : u ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn (I := I) (M := M)
+      (G.flow sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      u :=
+  G.chartDerivativeAtData sol
+    (fun {t} ht ↦
+      (G.timeSet_mem_nhds_of_eq_Ioo
+        (I := I) (M := M) tmin tmax htimeSet) sol (hu ht))
+
+/-- Fixed-IVP open-Picard ordinary primitive derivative data on any subset of
+the chosen solution's open time set. -/
+theorem derivativeAtData_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin sol) (tmax sol))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {u : Set ℝ}
+    (hu : u ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+      (G.flow sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      u :=
+  G.derivativeAtData sol
+    (fun {t} ht ↦
+      (G.timeSet_mem_nhds_of_eq_Ioo
+        (I := I) (M := M) tmin tmax htimeSet) sol (hu ht))
 
 /-- Fixed-IVP open-Picard ordinary fixed-chart derivative data on any subset of
 the chosen solution's open time set. -/
@@ -23202,6 +23302,16 @@ theorem derivativeFamily_ofChartDerivativeAtFamily
     (chosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily_of_chartDerivativeAtFamily
       (I := I) (M := M) (maps3 := maps3) hchart)
 
+/-- Centered preferred-chart derivative-family data extracted directly from
+theorem-family raw intrinsic DeTurck gauge-flow existence. -/
+theorem chartDerivativeFamily
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeFamily (I := I) (M := M)
+      (fun ivp sol ↦ (G.flow ivp sol).maps3) := by
+  intro ivp sol
+  exact (G.forInitialValueProblem ivp).chartDerivativeData sol
+
 /-- Derivative-family data extracted directly from theorem-family raw intrinsic
 DeTurck gauge-flow existence. -/
 theorem derivativeFamily
@@ -23211,6 +23321,38 @@ theorem derivativeFamily
       (fun ivp sol ↦ (G.flow ivp sol).maps3) := by
   intro ivp sol
   exact (G.forInitialValueProblem ivp).derivativeData sol
+
+/-- Ordinary centered preferred-chart derivative-family data extracted from
+theorem-family raw intrinsic DeTurck gauge-flow existence whenever each chosen
+solution time set is a neighborhood of each of its times. -/
+theorem chartDerivativeAtFamily
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily (I := I) (M := M)
+      (fun ivp sol ↦ (G.flow ivp sol).maps3) := by
+  intro ivp sol
+  exact (G.forInitialValueProblem ivp).chartDerivativeAtData sol (htime ivp sol)
+
+/-- Ordinary primitive derivative-family data extracted from theorem-family raw
+intrinsic DeTurck gauge-flow existence whenever each chosen solution time set is
+a neighborhood of each of its times. -/
+theorem derivativeAtFamily
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily (I := I) (M := M)
+      (fun ivp sol ↦ (G.flow ivp sol).maps3) := by
+  intro ivp sol
+  exact (G.forInitialValueProblem ivp).derivativeAtData sol (htime ivp sol)
 
 /-- Pointwise manifold derivative read out directly from theorem-family raw
 intrinsic DeTurck gauge-flow existence. -/
@@ -23512,6 +23654,88 @@ theorem timeSet_mem_nhds_of_eq_Ioo
   intro ivp sol t ht
   exact (G.forInitialValueProblem ivp).timeSet_mem_nhds_of_eq_Ioo
     (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol ht
+
+/-- Theorem-family open-Picard ordinary centered preferred-chart derivative
+data for every chosen solution time set. -/
+theorem chartDerivativeAtFamily_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol)) :
+    ChosenIntrinsicDeTurckGaugeFlowChartDerivativeAtFamily (I := I) (M := M)
+      (fun ivp sol ↦ (G.flow ivp sol).maps3) :=
+  G.chartDerivativeAtFamily (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet)
+
+/-- Theorem-family open-Picard ordinary primitive derivative data for every
+chosen solution time set. -/
+theorem derivativeAtFamily_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol)) :
+    ChosenIntrinsicDeTurckGaugeFlowDerivativeAtFamily (I := I) (M := M)
+      (fun ivp sol ↦ (G.flow ivp sol).maps3) :=
+  G.derivativeAtFamily (G.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet)
+
+/-- Theorem-family open-Picard ordinary centered preferred-chart derivative
+data on any subset of the chosen solution's open time set. -/
+theorem chartDerivativeAtData_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {u : Set ℝ}
+    (hu : u ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn (I := I) (M := M)
+      (G.flow ivp sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      u :=
+  (G.forInitialValueProblem ivp).chartDerivativeAtData_of_timeSet_eq_Ioo
+    (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol hu
+
+/-- Theorem-family open-Picard ordinary primitive derivative data on any subset
+of the chosen solution's open time set. -/
+theorem derivativeAtData_of_timeSet_eq_Ioo
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp sol) (tmax ivp sol))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {u : Set ℝ}
+    (hu : u ⊆ sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+      (G.flow ivp sol).maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      u :=
+  (G.forInitialValueProblem ivp).derivativeAtData_of_timeSet_eq_Ioo
+    (I := I) (M := M) (tmin ivp) (tmax ivp) (htimeSet ivp) sol hu
 
 /-- Theorem-family open-Picard ordinary fixed-chart derivative data on any
 subset of the chosen solution's open time set. -/
