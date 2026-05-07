@@ -2811,7 +2811,10 @@ consume the named centered derivative interfaces without first choosing an
 auxiliary fixed chart. The fixed-IVP and theorem-family raw existence bundles
 now lift those same centered packages, including the ordinary-at-time variants
 under the open-time-set neighborhood hypothesis and the explicit `Ioo`
-open-Picard specialization. The derivative layer now has the matching proof-bearing
+open-Picard specialization; the geometric fixed-IVP and theorem-family
+`ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow` bundles expose the same centered
+readouts through the raw-adapter route, so endpoint arguments can stay at the
+geometric gauge-flow interface. The derivative layer now has the matching proof-bearing
 input package: `Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn` and its
 ordinary-time analogue accept closed-Picard ODE data in a chosen chart center
 `chartCenter t x`, prove the chart-transition conversion to the centered
