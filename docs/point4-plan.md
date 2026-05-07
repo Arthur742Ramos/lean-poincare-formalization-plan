@@ -2496,14 +2496,24 @@ continuity, and the target-chart neighborhood condition.  The tensor route also
 has the closed-cover companion
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`,
 so compact selected witnesses can keep their source cover on `Icc tmin tmax`
-while the smooth-realization theorem runs on the open active time set. The readout/mem-ball route now also
+while the smooth-realization theorem runs on the open active time set. The
+same layer now has a proof-bearing scalar-value adapter,
+`targetBilinearCoordReadoutContinuousLinearMap_apply_self_eq` plus
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_correction`:
+the first identifies the target-centered readout of an arbitrary Banach RHS
+section at the target center, and the second turns the route's local `hvalue`
+obligation into exactly two geometric identities, namely chart-RHS equals
+smooth metric velocity and the spatial plus tangent-map coordinate terms equal
+the negative intrinsic DeTurck correction at the gauge image. The
+readout/mem-ball route now also
 has closed-interval local-gluing readout lemmas, a source-coordinate Picard
 derivative package, component and raw source-derivative endpoints, and the
 fixed-IVP indexed data bridge.  The remaining dynamic obligations are therefore
 narrowed to instantiating those packaged readout and Picard-derivative inputs
 for the selected gauge-flow construction, proving the lifted model equality in
 the exact target charts selected by the time-derivative route, and proving the
-scalar velocity identity from the selected gauge-flow/PDE construction. The
+spatial/tangent correction identity from the selected gauge-flow/PDE
+construction. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational

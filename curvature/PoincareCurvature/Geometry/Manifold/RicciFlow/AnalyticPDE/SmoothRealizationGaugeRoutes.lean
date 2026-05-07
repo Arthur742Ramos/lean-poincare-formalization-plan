@@ -1226,6 +1226,54 @@ theorem metric_targetBilinearCoordReadout_eq_metricBilinearCoordinateField
       ((g τ).inner ((extChartAt I p).symm ((extChartAt I p) x.1))) uE) vE
   rw [hy]
 
+/-- At the target center, the target-centered compact readout of an arbitrary
+bilinear-form section is just the section evaluated on the corresponding
+target-centered tangent coordinates. -/
+theorem targetBilinearCoordReadoutContinuousLinearMap_apply_self_eq
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (p : M) (i : κ) (K : TopologicalSpace.Compacts M)
+    (hK_sub_Kc : (K : Set M) ⊆ (Kc i : Set M))
+    (hK_sub_target : (K : Set M) ⊆
+      (trivializationAt BilF
+        (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) p).baseSet)
+    (hpK : p ∈ (K : Set M))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)
+    (uE vE : F) :
+    targetBilinearCoordReadoutContinuousLinearMap
+        (I := I) (M := M) (F := F) (et := et) (Kc := Kc) (hKc := hKc)
+        (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+        p i K hK_sub_Kc hK_sub_target s (⟨p, hpK⟩ : K) uE vE =
+      s p
+        (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p uE)
+        (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p vE) := by
+  rw [targetBilinearCoordReadoutContinuousLinearMap_apply_eq_coordContinuousMap
+    (I := I) (M := M) (F := F) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+    p i K hK_sub_Kc hK_sub_target]
+  let TM := (TangentSpace I : M → Type _)
+  change
+    (ContinuousLinearMap.inCoordinates F TM (F →L[ℝ] ℝ) (fun y : M => TM y →L[ℝ] ℝ)
+      p p p p (s p) uE) vE =
+      s p
+        (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p uE)
+        (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p vE)
+  erw [_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
+    (F := F) (W := TM) (x0 := p) (x := p)
+    (FiberBundle.mem_baseSet_trivializationAt' p) (s p) uE vE]
+  rfl
+
 /-- Interior moving-point time-difference derivative for the raw
 metric-coordinate field, obtained from the Banach section norm through the
 preferred finite-cover coordinate chart. -/
@@ -4154,6 +4202,232 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTime
     (M := M) (F := F) (I := I) hcover_int G hs hsIoo α hsModel Fₗ U
     (fun {t} ht ↦ hsource_cover (t := t) (Ioo_subset_Icc_self (hsModel ht)))
     hreadout hflow_deriv hdata hvalue
+
+/-- Pointwise scalar-value adapter for the readout/variational tangent-map
+route.
+
+The large non-identity gauge route asks for a scalar `hvalue` in local
+coordinates.  This lemma reduces that obligation to two geometric identities:
+the Banach chart RHS is the declared smooth metric velocity, and the spatial
+plus tangent-map coordinate terms equal the negative DeTurck correction at the
+gauge image. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_correction
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {gaugeInitialTime : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s gaugeInitialTime)
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → F → F} {Df : ℝ → F → F →L[ℝ] F}
+    {x₀ : F} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      realization.metric realization.background (Icc ivp.initialTime sol.terminalTime)
+      ivp.initialTime)
+    (hgauge_maps : gauge3.maps = G.maps3)
+    (hsIcc : s ⊆ Icc ivp.initialTime sol.terminalTime)
+    (hvelocity_eq_chartRHS : ∀ ⦃t : ℝ⦄,
+      t ∈ Icc ivp.initialTime sol.terminalTime → ∀ x : M,
+        ∀ u v : TangentSpace I x,
+          realization.metricVelocity t x u v = A t (sol.curve t) x u v)
+    (hcorrection : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+      ∀ xE : F, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pu : TangentSpace I p := (G.maps3 t).pushforwardTangent x u
+         let pv : TangentSpace I p := (G.maps3 t).pushforwardTangent x v
+         let cu : F :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pu
+         let cv : F :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pv
+         (fderivWithin ℝ
+            (fun yE : F ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) realization.metric p (t, yE))
+            (Set.range I) ((extChartAt I p) p))
+            (X t p) cu cv +
+          (realization.metric t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cu)) pv +
+          (realization.metric t).inner p pu
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cv)) =
+          -intrinsicDeTurckCorrection (I := I) (M := M)
+            realization.metric realization.background t p pu pv)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+      ∀ (i : κ) (K : TopologicalSpace.Compacts M)
+        (hK_sub_Kc : (K : Set M) ⊆ (Kc i : Set M))
+        (hK_sub_target : (K : Set M) ⊆
+          (trivializationAt BilF
+            (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            ((G.maps3 t) x)).baseSet)
+        (hKmem_int : (G.maps3 t) x ∈ interior (K : Set M)),
+      ∀ xE : F, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let B' : F →L[ℝ] F →L[ℝ] ℝ :=
+          (targetBilinearCoordReadoutContinuousLinearMap
+            (I := I) (M := M) (F := F) (et := et) (Kc := Kc) (hKc := hKc)
+            (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+            ((G.maps3 t) x) i K hK_sub_Kc hK_sub_target
+            (A t (sol.curve t))
+            (⟨(G.maps3 t) x, interior_subset hKmem_int⟩ : K)) +
+          (fderivWithin ℝ
+            (fun yE : F ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) realization.metric ((G.maps3 t) x) (t, yE))
+            (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+            (X t ((G.maps3 t) x));
+        B'
+          (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+            ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))
+          (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+            ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)) +
+          (realization.metric t).inner ((G.maps3 t) x)
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+              ((G.maps3 t) x)
+              ((Df t (α.flow (xE, t)))
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                  ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))))
+            ((G.maps3 t).pushforwardTangent x v) +
+          (realization.metric t).inner ((G.maps3 t) x)
+            ((G.maps3 t).pushforwardTangent x u)
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+              ((G.maps3 t) x)
+              ((Df t (α.flow (xE, t)))
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                  ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) =
+        realization.toIntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+          gauge3 t x u v) := by
+  intro t ht x u v i K hK_sub_Kc hK_sub_target hKmem_int xE hxE hAeq
+  let source := realization.toIntrinsicDeTurckLocalSolution
+  let p : M := (G.maps3 t) x
+  let pu : TangentSpace I p := (G.maps3 t).pushforwardTangent x u
+  let pv : TangentSpace I p := (G.maps3 t).pushforwardTangent x v
+  let cu : F := SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pu
+  let cv : F := SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pv
+  let Btime : F →L[ℝ] F →L[ℝ] ℝ :=
+    targetBilinearCoordReadoutContinuousLinearMap
+      (I := I) (M := M) (F := F) (et := et) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+      p i K hK_sub_Kc hK_sub_target (A t (sol.curve t))
+      (⟨p, interior_subset hKmem_int⟩ : K)
+  let Bspace : F →L[ℝ] F →L[ℝ] ℝ :=
+    (fderivWithin ℝ
+      (fun yE : F ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric p (t, yE))
+      (Set.range I) ((extChartAt I p) p)) (X t p)
+  let left : ℝ :=
+    (realization.metric t).inner p
+      (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+        ((Df t (α.flow (xE, t))) cu)) pv
+  let right : ℝ :=
+    (realization.metric t).inner p pu
+      (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+        ((Df t (α.flow (xE, t))) cv))
+  let correction : ℝ :=
+    intrinsicDeTurckCorrection (I := I) (M := M)
+      realization.metric realization.background t p pu pv
+  have htarget : Btime cu cv = realization.metricVelocity t p pu pv := by
+    calc
+      Btime cu cv =
+          A t (sol.curve t) p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p cu)
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p cv) := by
+        simpa [Btime, p, cu, cv] using
+          targetBilinearCoordReadoutContinuousLinearMap_apply_self_eq
+            (I := I) (M := M) (F := F) (et := et) (Kc := Kc) (hKc := hKc)
+            (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+            p i K hK_sub_Kc hK_sub_target (interior_subset hKmem_int)
+            (A t (sol.curve t)) cu cv
+      _ = A t (sol.curve t) p pu pv := by
+        simp [cu, cv]
+      _ = realization.metricVelocity t p pu pv := by
+        exact (hvelocity_eq_chartRHS (hsIcc ht) p pu pv).symm
+  have hcorr : Bspace cu cv + left + right = -correction := by
+    simpa [Bspace, left, right, correction, p, pu, pv, cu, cv] using
+      hcorrection ht x u v xE hxE hAeq
+  have hcorrected :
+      source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3 t x u v =
+        realization.metricVelocity t p pu pv - correction := by
+    have hbase :
+        source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3 t x u v =
+          source.toIntrinsicDeTurckSolution.metricVelocity t ((gauge3.maps t) x)
+              ((gauge3.maps t).pushforwardTangent x u)
+              ((gauge3.maps t).pushforwardTangent x v) -
+            intrinsicDeTurckCorrection (I := I) (M := M)
+              source.toIntrinsicDeTurckSolution.metric
+              source.toIntrinsicDeTurckSolution.background t
+              ((gauge3.maps t) x)
+              ((gauge3.maps t).pushforwardTangent x u)
+              ((gauge3.maps t).pushforwardTangent x v) := by
+      rw [IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_apply]
+      rw [source.pullbackSourceDeTurckCorrectionOfDiffeomorph3Gauge_eq_sourceDeTurckCorrection
+        gauge3 t x u v]
+    calc
+      source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3 t x u v =
+          source.toIntrinsicDeTurckSolution.metricVelocity t ((gauge3.maps t) x)
+              ((gauge3.maps t).pushforwardTangent x u)
+              ((gauge3.maps t).pushforwardTangent x v) -
+            intrinsicDeTurckCorrection (I := I) (M := M)
+              source.toIntrinsicDeTurckSolution.metric
+              source.toIntrinsicDeTurckSolution.background t
+              ((gauge3.maps t) x)
+              ((gauge3.maps t).pushforwardTangent x u)
+              ((gauge3.maps t).pushforwardTangent x v) := hbase
+      _ = realization.metricVelocity t p pu pv - correction := by
+        rw [hgauge_maps]
+        simp [source, p, pu, pv, correction,
+          BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.toIntrinsicDeTurckLocalSolution]
+  change
+    (let B' : F →L[ℝ] F →L[ℝ] ℝ := Btime + Bspace
+     B' cu cv + left + right) =
+      source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3 t x u v
+  calc
+    (let B' : F →L[ℝ] F →L[ℝ] ℝ := Btime + Bspace
+     B' cu cv + left + right) =
+        Btime cu cv + (Bspace cu cv + left + right) := by
+      simp [Btime, Bspace]
+      ring
+    _ = realization.metricVelocity t p pu pv + (-correction) := by
+      rw [htarget, hcorr]
+    _ = realization.metricVelocity t p pu pv - correction := by
+      ring
+    _ = source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3 t x u v :=
+      hcorrected.symm
 
 /-- Interior-cover target-overlap scalar derivatives, tangent-map derivative
 data, and the scalar velocity identity give tensor time-regularity for the
