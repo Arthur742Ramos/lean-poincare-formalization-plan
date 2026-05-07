@@ -22,6 +22,107 @@ open scoped Topology NNReal BigOperators Matrix.Norms.Elementwise
 namespace RicciFlow
 namespace AnalyticPDE
 
+/-- Coordinate direction in a finite coordinate model. -/
+def parabolicCoordinateUnitVector (n : Type*) [DecidableEq n] (i : n) : n → ℝ :=
+  Pi.single i 1
+
+/-- Read a first spatial derivative in one coordinate direction. -/
+def firstDerivativeCoordinateReadout {n E : Type*} [Fintype n] [DecidableEq n]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] (i : n) :
+    ((n → ℝ) →L[ℝ] E) →L[ℝ] E :=
+  (ContinuousLinearMap.apply ℝ E) (parabolicCoordinateUnitVector n i)
+
+@[simp]
+theorem firstDerivativeCoordinateReadout_apply {n E : Type*} [Fintype n] [DecidableEq n]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] (i : n)
+    (L : (n → ℝ) →L[ℝ] E) :
+    firstDerivativeCoordinateReadout (n := n) (E := E) i L =
+      L (parabolicCoordinateUnitVector n i) :=
+  rfl
+
+/-- Read a second spatial derivative in two coordinate directions. -/
+def secondDerivativeCoordinateReadout {n E : Type*} [Fintype n] [DecidableEq n]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] (i j : n) :
+    ((n → ℝ) →L[ℝ] ((n → ℝ) →L[ℝ] E)) →L[ℝ] E :=
+  (firstDerivativeCoordinateReadout (n := n) (E := E) j).comp
+    ((ContinuousLinearMap.apply ℝ ((n → ℝ) →L[ℝ] E)) (parabolicCoordinateUnitVector n i))
+
+@[simp]
+theorem secondDerivativeCoordinateReadout_apply {n E : Type*} [Fintype n] [DecidableEq n]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] (i j : n)
+    (B : (n → ℝ) →L[ℝ] ((n → ℝ) →L[ℝ] E)) :
+    secondDerivativeCoordinateReadout (n := n) (E := E) i j B =
+      B (parabolicCoordinateUnitVector n i) (parabolicCoordinateUnitVector n j) :=
+  rfl
+
+/-- Operator norm of the first-derivative coordinate readout. -/
+def firstDerivativeCoordinateReadoutOpNorm {n : Type*} [Fintype n] [DecidableEq n]
+    (i : n) : ℝ :=
+  ContinuousLinearMap.opNorm
+    (𝕜 := ℝ) (𝕜₂ := ℝ) (E := ((n → ℝ) →L[ℝ] ℝ)) (F := ℝ)
+    (firstDerivativeCoordinateReadout (n := n) (E := ℝ) i)
+
+/-- Operator norm of the second-derivative coordinate readout. -/
+def secondDerivativeCoordinateReadoutOpNorm {n : Type*} [Fintype n] [DecidableEq n]
+    (i j : n) : ℝ :=
+  ContinuousLinearMap.opNorm
+    (𝕜 := ℝ) (𝕜₂ := ℝ)
+    (E := ((n → ℝ) →L[ℝ] ((n → ℝ) →L[ℝ] ℝ))) (F := ℝ)
+    (secondDerivativeCoordinateReadout (n := n) (E := ℝ) i j)
+
+/-- First-derivative coefficient radii obtained by reading coordinate directions from
+metric-entry second jets. -/
+def firstDerivativeCoordinateRadius {n : Type*} [Fintype n] [DecidableEq n]
+    (R : n → n → ℝ) : n → n → n → ℝ :=
+  fun a i j => firstDerivativeCoordinateReadoutOpNorm (n := n) a * R i j
+
+/-- Second-derivative coefficient radii obtained by reading coordinate directions from
+metric-entry second jets. -/
+def secondDerivativeCoordinateRadius {n : Type*} [Fintype n] [DecidableEq n]
+    (R : n → n → ℝ) : n → n → n → n → ℝ :=
+  fun a b i j => secondDerivativeCoordinateReadoutOpNorm (n := n) a b * R i j
+
+namespace ParabolicC0AlphaNormLe
+
+variable {X E F : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+  [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
+variable {N α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+
+/-- A continuous linear map preserves a single-radius parabolic `C^{0,α}` bound, stated with
+`ContinuousLinearMap.opNorm` so it can be used for iterated operator-valued spaces without
+typeclass search for the normed structure on the map space. -/
+theorem continuousLinearMap_opNorm (L : E →L[ℝ] F)
+    (hu : ParabolicC0AlphaNormLe N α u s) :
+    ParabolicC0AlphaNormLe (ContinuousLinearMap.opNorm L * N) α
+      (fun z => L (u z)) s := by
+  rcases hu with ⟨B, hB, H, hH, hsum, hctrl⟩
+  refine ⟨ContinuousLinearMap.opNorm L * B,
+    mul_nonneg (ContinuousLinearMap.opNorm_nonneg L) hB,
+    ContinuousLinearMap.opNorm L * H,
+    mul_nonneg (ContinuousLinearMap.opNorm_nonneg L) hH, ?_, ?_⟩
+  · calc
+      ContinuousLinearMap.opNorm L * B + ContinuousLinearMap.opNorm L * H =
+          ContinuousLinearMap.opNorm L * (B + H) := by ring
+      _ ≤ ContinuousLinearMap.opNorm L * N :=
+          mul_le_mul_of_nonneg_left hsum (ContinuousLinearMap.opNorm_nonneg L)
+  · constructor
+    · intro z hz
+      calc
+        ‖L (u z)‖ ≤ ContinuousLinearMap.opNorm L * ‖u z‖ :=
+          ContinuousLinearMap.le_opNorm L (u z)
+        _ ≤ ContinuousLinearMap.opNorm L * B :=
+          mul_le_mul_of_nonneg_left (hctrl.bounded hz) (ContinuousLinearMap.opNorm_nonneg L)
+    · intro p hp q hq
+      calc
+        ‖L (u p) - L (u q)‖ = ‖L (u p - u q)‖ := by rw [← map_sub]
+        _ ≤ ContinuousLinearMap.opNorm L * ‖u p - u q‖ :=
+          ContinuousLinearMap.le_opNorm L (u p - u q)
+        _ ≤ ContinuousLinearMap.opNorm L * (H * parabolicDistance p q ^ α) :=
+          mul_le_mul_of_nonneg_left (hctrl.holder hp hq) (ContinuousLinearMap.opNorm_nonneg L)
+        _ = (ContinuousLinearMap.opNorm L * H) * parabolicDistance p q ^ α := by ring
+
+end ParabolicC0AlphaNormLe
+
 /-- Continuous linear insertion of one matrix entry. -/
 def matrixSingleContinuousLinearMap {m n A : Type*} [Fintype m] [Fintype n]
     [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A]
@@ -256,6 +357,77 @@ theorem ricciDeTurckSchematicMatrix_pi_family_of_entries {κ n : Type*}
       (X := X) (α := α) (s := s) (δ := δ)
       (R := R) (RD := RD) (RH := RH) (M := M) (D := D) (H := H)
       hM hD hH hδpos hdet)
+
+set_option maxHeartbeats 1000000 in
+/-- A metric with entrywise higher parabolic control supplies its own coordinate first- and
+second-derivative primitive arrays through chosen second jets.  This removes the separate
+`D`/`H` primitive hypotheses for the direct schematic Ricci-DeTurck `C^{0,α}` estimate when the
+spatial model is the finite coordinate space `n → ℝ`. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries {n : Type*}
+    [Fintype n] [DecidableEq n]
+    {R : n → n → ℝ} {δ : ℝ} {s : Set (ℝ × (n → ℝ))}
+    {M : ℝ × (n → ℝ) → Matrix n n ℝ}
+    (hM : ∀ i j, ParabolicC2AlphaNormLe (R i j) α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × (n → ℝ)⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ∃ J : ∀ i j, ParabolicSecondJet (fun z : ℝ × (n → ℝ) => M z i j) s,
+      ParabolicC0AlphaNormLe
+        (ricciDeTurckSchematicMatrixBoundConst (n := n) δ R
+          (firstDerivativeCoordinateRadius (n := n) R)
+          (secondDerivativeCoordinateRadius (n := n) R))
+        α
+        (fun z : ℝ × (n → ℝ) =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M z)
+            (fun a i j => (J i j).spaceDeriv z (parabolicCoordinateUnitVector n a))
+            (fun a b i j =>
+              (J i j).spaceSecondDeriv z
+                (parabolicCoordinateUnitVector n a) (parabolicCoordinateUnitVector n b))) s := by
+  classical
+  choose J Nu hNu Nx hNx Nxx hNxx Nt hNt hsum hMval hJx hJxx hJt using hM
+  refine ⟨J, ?_⟩
+  have hM0 : ∀ i j, ParabolicC0AlphaNormLe (R i j) α (fun z => M z i j) s := by
+    intro i j
+    have hNu_le : Nu i j ≤ R i j := by
+      linarith [hNu i j, hNx i j, hNxx i j, hNt i j, hsum i j]
+    exact (hMval i j).mono_const hNu_le
+  have hD : ∀ a i j,
+      ParabolicC0AlphaNormLe (firstDerivativeCoordinateRadius (n := n) R a i j) α
+        (fun z : ℝ × (n → ℝ) =>
+          (J i j).spaceDeriv z (parabolicCoordinateUnitVector n a)) s := by
+    intro a i j
+    have hNx_le : Nx i j ≤ R i j := by
+      linarith [hNu i j, hNx i j, hNxx i j, hNt i j, hsum i j]
+    have hspace : ParabolicC0AlphaNormLe (R i j) α (J i j).spaceDeriv s :=
+      (hJx i j).mono_const hNx_le
+    have hx :=
+      hspace.continuousLinearMap_opNorm
+        (firstDerivativeCoordinateReadout (n := n) (E := ℝ) a)
+    simpa [firstDerivativeCoordinateRadius, firstDerivativeCoordinateReadoutOpNorm] using hx
+  have hH : ∀ a b i j,
+      ParabolicC0AlphaNormLe (secondDerivativeCoordinateRadius (n := n) R a b i j) α
+        (fun z : ℝ × (n → ℝ) =>
+          (J i j).spaceSecondDeriv z
+            (parabolicCoordinateUnitVector n a) (parabolicCoordinateUnitVector n b)) s := by
+    intro a b i j
+    have hNxx_le : Nxx i j ≤ R i j := by
+      linarith [hNu i j, hNx i j, hNxx i j, hNt i j, hsum i j]
+    have hsecond : ParabolicC0AlphaNormLe (R i j) α (J i j).spaceSecondDeriv s :=
+      (hJxx i j).mono_const hNxx_le
+    have hxx :=
+      hsecond.continuousLinearMap_opNorm
+        (secondDerivativeCoordinateReadout (n := n) (E := ℝ) a b)
+    simpa [secondDerivativeCoordinateRadius, secondDerivativeCoordinateReadoutOpNorm] using hxx
+  simpa [ricciDeTurckSchematicMatrixBoundConst] using
+    (ParabolicC0AlphaNormLe.ricciDeTurck_schematic_of_entries
+      (X := n → ℝ) (α := α) (s := s) (𝕜 := ℝ) (δ := δ)
+      (R := R) (RD := firstDerivativeCoordinateRadius (n := n) R)
+      (RH := secondDerivativeCoordinateRadius (n := n) R)
+      (M := M)
+      (D := fun z a i j => (J i j).spaceDeriv z (parabolicCoordinateUnitVector n a))
+      (H := fun z a b i j =>
+        (J i j).spaceSecondDeriv z
+          (parabolicCoordinateUnitVector n a) (parabolicCoordinateUnitVector n b))
+      hM0 hD hH hδpos hdet)
 
 /-- Entrywise higher parabolic difference controls with radii linear in a shared scalar give a
 pointwise matrix-norm difference bound with the summed entry radius. -/

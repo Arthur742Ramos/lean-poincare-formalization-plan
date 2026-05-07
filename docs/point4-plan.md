@@ -3491,7 +3491,11 @@ balls project to entries both as full higher norm balls and as entry
 schematic Ricci-DeTurck RHS `C^{0,α}` estimate and the existing single-radius
 schematic Ricci-DeTurck RHS difference theorem. The direct schematic RHS
 constant is named at the higher layer and has finite-family and Pi-valued
-exact-sum norm-ball packaging. It now also converts entrywise higher
+exact-sum norm-ball packaging. For finite coordinate models it now also reads
+the first- and second-spatial derivative primitive arrays directly from chosen
+metric-entry second jets, using coordinate-direction continuous-linear
+readouts, and feeds those derived arrays into the direct schematic
+Ricci-DeTurck `C^{0,α}` estimate. It now also converts entrywise higher
 primitive difference controls with radii linear in a shared radius into the
 linear-radius `ParabolicBoundedWith` schematic RHS estimate and the
 compact-coordinate readout `LipschitzOnWith` bridge for any parabolic
