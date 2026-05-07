@@ -1758,7 +1758,19 @@ and
 `..._openPreimage_localGluingData_..._eventually_nhds_exists_eqOn_of_mem_Ioo`
 upgrade the closed-Picard relative eventual to ordinary `𝓝 t` and package the
 selected patch existentially, matching the readout input expected by the
-readout-lifted tangent-map route.  The
+readout-lifted tangent-map route.  The readout-lifted tangent-map layer now also
+has the synchronization helper
+`SmoothSelfDiffeomorph3Family.eventually_readout_lifted_eqOn_of_eventually_target_and_eqOn`,
+its literal-lift specialization
+`SmoothSelfDiffeomorph3Family.eventually_readout_lifted_eqOn_refl_of_eventually_target`,
+and the ordinary-derivative adapters
+`SmoothSelfDiffeomorph3Family.eventually_hasFDerivWithinAt_range_of_eventually_hasFDerivAt`,
+`SmoothSelfDiffeomorph3Family.fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDerivAt_of_eventually_readout_lifted_eqOn`,
+and
+`SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_lifted_eqOn_hasFDerivAt`;
+these let Picard output prove target membership, lifted equality, and ordinary
+time-slice spatial derivatives separately before feeding the existing
+within-derivative readout route.  The
 matching
 `..._localGluingData_pointwiseSource_...` and
 `..._openPreimage_localGluingData_...` adapters preserve the named
