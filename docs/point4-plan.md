@@ -2432,12 +2432,14 @@ scalar-selector layer,
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`
 now offers the same readout-lifted input shape while preserving the existing
 geometric-slot scalar identity. Thus downstream scalar selectors can consume
-manifold-side `EqOn` gluing data directly. The remaining dynamic obligations are
-narrowed to proving the
-needed local `EqOn` data for the selected gauge maps from the gluing/Picard
-construction, supplying the corresponding model-flow spatial derivative
-hypotheses from the Picard/variational estimates, and proving the scalar
-velocity identity from the selected gauge-flow/PDE construction. The
+manifold-side `EqOn` gluing data directly. The readout/mem-ball route now also
+has closed-interval local-gluing readout lemmas, a source-coordinate Picard
+derivative package, component and raw source-derivative endpoints, and the
+fixed-IVP indexed data bridge.  The remaining dynamic obligations are therefore
+narrowed to instantiating those packaged readout and Picard-derivative inputs
+for the selected gauge-flow construction, proving the lifted model equality in
+the exact target charts selected by the time-derivative route, and proving the
+scalar velocity identity from the selected gauge-flow/PDE construction. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
