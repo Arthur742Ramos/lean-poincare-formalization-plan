@@ -3496,7 +3496,9 @@ the first- and second-spatial derivative primitive arrays directly from chosen
 metric-entry second jets, using coordinate-direction continuous-linear
 readouts, and feeds those derived arrays into the direct schematic
 Ricci-DeTurck `C^{0,α}` estimate, including a Pi-valued finite-family package
-for finite cover products. It now also converts entrywise higher
+for finite cover products; the same bridge is available from qualitative
+`ParabolicC2AlphaOn` membership when explicit radii are not needed. It now also
+converts entrywise higher
 primitive difference controls with radii linear in a shared radius into the
 linear-radius `ParabolicBoundedWith` schematic RHS estimate and the
 compact-coordinate readout `LipschitzOnWith` bridge for any parabolic

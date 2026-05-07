@@ -1912,6 +1912,60 @@ theorem ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_entries {κ n : Type*
     ricciDeTurckSchematicMatrix_c0AlphaOn_family_of_entries
       (M := M) (D := D) (H := H) hM hD hH hδpos hdet r
 
+set_option maxHeartbeats 1000000 in
+/-- Qualitative higher-regularity version of
+`exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries`: entrywise higher membership of a
+finite-coordinate metric supplies chosen second jets whose coordinate derivative arrays make the
+schematic Ricci-DeTurck RHS `C^{0,α}`. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_metric_entries
+    {n : Type*} [Fintype n] [DecidableEq n]
+    {δ : ℝ} {s : Set (ℝ × (n → ℝ))}
+    {M : ℝ × (n → ℝ) → Matrix n n ℝ}
+    (hM : ∀ i j, ParabolicC2AlphaOn α (fun z => M z i j) s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × (n → ℝ)⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ∃ J : ∀ i j, ParabolicSecondJet (fun z : ℝ × (n → ℝ) => M z i j) s,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × (n → ℝ) =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M z)
+            (fun a i j => (J i j).spaceDeriv z (parabolicCoordinateUnitVector n a))
+            (fun a b i j =>
+              (J i j).spaceSecondDeriv z
+                (parabolicCoordinateUnitVector n a) (parabolicCoordinateUnitVector n b))) s := by
+  classical
+  choose R _hR_nonneg hR using hM
+  rcases
+    ParabolicC2AlphaNormLe.exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries
+      (α := α) (R := R) (δ := δ) (s := s) (M := M) hR hδpos hdet with
+    ⟨J, hJ⟩
+  exact ⟨J, hJ.c0AlphaOn⟩
+
+set_option maxHeartbeats 1000000 in
+/-- Pi-valued finite-family qualitative higher-regularity version of
+`exists_secondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries`. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_metric_entries
+    {κ n : Type*} [Fintype κ] [Fintype n] [DecidableEq n]
+    {δ : ℝ} {s : Set (ℝ × (n → ℝ))}
+    {M : κ → ℝ × (n → ℝ) → Matrix n n ℝ}
+    (hM : ∀ r i j, ParabolicC2AlphaOn α (fun z => M r z i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × (n → ℝ)⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∃ J : ∀ r i j, ParabolicSecondJet (fun z : ℝ × (n → ℝ) => M r z i j) s,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × (n → ℝ) => fun r : κ =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M r z)
+            (fun a i j => (J r i j).spaceDeriv z (parabolicCoordinateUnitVector n a))
+            (fun a b i j =>
+              (J r i j).spaceSecondDeriv z
+                (parabolicCoordinateUnitVector n a) (parabolicCoordinateUnitVector n b))) s := by
+  classical
+  choose J hJ using fun r =>
+    exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_metric_entries
+      (α := α) (δ := δ) (s := s) (M := M r) (hM r) hδpos (hdet r)
+  refine ⟨J, ?_⟩
+  exact ParabolicC0AlphaOn.pi hJ
+
 end ParabolicC2AlphaOn
 
 namespace parabolicC2AlphaSubmodule
