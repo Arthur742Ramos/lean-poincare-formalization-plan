@@ -1793,7 +1793,13 @@ layer now consumes those readout equalities directly through
 and
 `..._readout_mem_ball_lifted_eqOn_hasFDerivAt`, combining time-only bilinear
 coordinate derivatives with the readout-local tangent-map identification while
-leaving the explicit variational `Df` value formula intact.  The raw
+leaving the explicit variational `Df` value formula intact.  The indexed-cover
+companion
+`SmoothSelfDiffeomorph3Family.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_lifted_eqOn_hasFDerivAt`
+now chooses the patch containing each base point from an `iUnion` cover, so
+finite-cover and compact local-gluing outputs can keep their local readout,
+lifted model equality, and scalar value hypotheses indexed by patch until the
+final component derivative package is assembled.  The raw
 `Diffeomorph3GaugeFlowOn` API now exposes the matching interior
 time-regularity endpoints
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_target_lifted_eqOn_hasFDerivAt`

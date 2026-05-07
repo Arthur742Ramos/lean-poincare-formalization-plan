@@ -7325,6 +7325,78 @@ theorem coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_r
       (I := I) (M := M) Φ α ht x xE F hderiv hreadout hxball
       htarget_nhds heq
 
+/-- Indexed-cover version of
+`coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_lifted_eqOn_hasFDerivAt`.
+The cover chooses the local readout containing the base point, so callers using
+finite or compact local-gluing output can keep their hypotheses indexed by
+patch. -/
+theorem coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_lifted_eqOn_hasFDerivAt
+    {ι : Type*}
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (Fₗ : ι → ℝ → M → M)
+    (U : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (fun z : M ↦ (Φ τ) z) (Fₗ i τ) W)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i → ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ B' : E →L[ℝ] E →L[ℝ] ℝ,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x)
+            B' t ∧
+          (∀ᶠ τ in 𝓝 t,
+            HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) ((extChartAt I x) x)) ∧
+          (extChartAt I x) x ∈ ball x₀ r ∧
+          (extChartAt I ((Φ t) x)).target ∈
+            𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (Fₗ i τ)
+                (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W) ∧
+          B'
+              (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                (sourceTangentCoordinate (I := I) x u))
+              (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                (sourceTangentCoordinate (I := I) x v)) +
+              pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
+                ((Df t (α.flow (xE, t)))
+                  (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                    (sourceTangentCoordinate (I := I) x u)))
+                (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                  (sourceTangentCoordinate (I := I) x v)) +
+              pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
+                (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                  (sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (xE, t)))
+                  (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                    (sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    CoordinatePullbackMetricComponentDerivativeOn (I := I) (M := M) Φ g gdot
+      (Ioo tmin tmax) := by
+  refine
+    coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_lifted_eqOn_hasFDerivAt
+      (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot) α ?_
+  intro t ht x u v
+  rcases Set.mem_iUnion.mp ((hcover ht) (by trivial : x ∈ (Set.univ : Set M))) with
+    ⟨i, hxi⟩
+  obtain ⟨xE, hxE, B', hB, hderiv, hxball, htarget_nhds, heq, hvalue⟩ :=
+    hdata ht i x hxi u v
+  exact ⟨xE, hxE, Fₗ i, B', hB, hderiv, hreadout ht i x hxi, hxball,
+    htarget_nhds, heq, hvalue⟩
+
 /-- Closed-interval component derivative package supplied by a variational
 tangent-map identification.
 
