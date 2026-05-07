@@ -7571,6 +7571,74 @@ theorem coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_r
   · exact hflow_deriv ht hxball
   · simpa using hvalue
 
+/-- Closed-interval-cover variant of
+`coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn`.
+
+Compact selected gauge-flow witnesses expose source covers on the closed Picard
+interval.  This wrapper restricts that cover to the open interior before
+entering the component derivative route. -/
+theorem coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn
+    {ι : Type*}
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (Fₗ : ι → ℝ → M → M)
+    (U : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (fun z : M ↦ (Φ τ) z) (Fₗ i τ) W)
+    (hflow_deriv : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ ⦃xE : E⦄, xE ∈ ball x₀ r →
+        ∀ᶠ τ in 𝓝 t,
+          HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+            (α.tangent xE τ) xE)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i → ∀ u v : TangentSpace I x,
+        ∃ B' : E →L[ℝ] E →L[ℝ] ℝ,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t τ x)
+            B' t ∧
+          (extChartAt I x) x ∈ ball x₀ r ∧
+          (extChartAt I ((Φ t) x)).target ∈
+            𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (Fₗ i τ)
+                (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W) ∧
+          B'
+              (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                (sourceTangentCoordinate (I := I) x u))
+              (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                (sourceTangentCoordinate (I := I) x v)) +
+              pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
+                ((Df t (α.flow (((extChartAt I x) x), t)))
+                  (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                    (sourceTangentCoordinate (I := I) x u)))
+                (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                  (sourceTangentCoordinate (I := I) x v)) +
+              pullbackMetricBilinearCoordinateMap (I := I) (M := M) Φ g t t x
+                (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                  (sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (((extChartAt I x) x), t)))
+                  (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x
+                    (sourceTangentCoordinate (I := I) x v))) =
+            gdot t x u v) :
+    CoordinatePullbackMetricComponentDerivativeOn (I := I) (M := M) Φ g gdot
+      (Ioo tmin tmax) :=
+  coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn
+    (I := I) (M := M) (Φ := Φ) (g := g) (gdot := gdot) α Fₗ U
+    (fun {t} ht ↦ hcover (t := t) (Ioo_subset_Icc_self ht))
+    hreadout hflow_deriv hdata
+
 /-- Closed-interval component derivative package supplied by a variational
 tangent-map identification.
 

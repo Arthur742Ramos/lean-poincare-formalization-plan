@@ -1900,7 +1900,11 @@ underlying tangent-map layer now has the same indexed-cover handoff through
 and its closed-interval-cover companion
 `..._readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn`, so
 selected compact finite covers can feed the tangent-coordinate derivative route
-before metric-component scalar data is introduced.  More broadly, the compact
+before metric-component scalar data is introduced.  The component-level route
+now mirrors this closed-cover handoff via
+`SmoothSelfDiffeomorph3Family.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn`,
+so the same selected `Icc` source cover can feed the scalar pullback-metric
+component package.  More broadly, the compact
 raw existence
 theorems combine
 the ambient time set, ambient local regularity, and the open-preimage
