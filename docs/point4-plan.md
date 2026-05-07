@@ -1799,7 +1799,12 @@ companion
 now chooses the patch containing each base point from an `iUnion` cover, so
 finite-cover and compact local-gluing outputs can keep their local readout,
 lifted model equality, and scalar value hypotheses indexed by patch until the
-final component derivative package is assembled.  The raw
+final component derivative package is assembled.  Its source-coordinate
+companion
+`SmoothSelfDiffeomorph3Family.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn`
+uses the common Picard-estimate `HasFDerivAt` input directly, so indexed local
+scalar data no longer needs to repeat the model-flow spatial derivative at each
+patch.  The raw
 `Diffeomorph3GaugeFlowOn` API now exposes the matching interior
 time-regularity endpoints
 `Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_target_lifted_eqOn_hasFDerivAt`
