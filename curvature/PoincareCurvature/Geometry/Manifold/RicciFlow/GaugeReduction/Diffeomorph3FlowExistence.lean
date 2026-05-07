@@ -2618,6 +2618,44 @@ structure Diffeomorph3GaugeFlowOn
 
 namespace Diffeomorph3GaugeFlowOn
 
+/-- Restrict the time set of a raw `C³` gauge-flow witness.  The underlying
+`C³` diffeomorphism family and anchoring are unchanged; only the
+`SatisfiesGaugeFlowOn` proof is restricted monotonically. -/
+def restrictTimeSet
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ where
+  maps3 := G.maps3
+  anchored := G.anchored
+  satisfies := SatisfiesGaugeFlowOn.mono (I := I) (M := M) G.satisfies hst
+
+@[simp]
+theorem restrictTimeSet_maps3
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X t t₀)
+    (hst : s ⊆ t) :
+    (G.restrictTimeSet hst).maps3 = G.maps3 :=
+  rfl
+
+/-- Open-interior restriction of a raw closed-Picard gauge-flow witness. -/
+def restrictIooOfIcc
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀) :
+    Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ :=
+  G.restrictTimeSet Ioo_subset_Icc_self
+
+@[simp]
+theorem restrictIooOfIcc_maps3
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Icc tmin tmax) t₀) :
+    G.restrictIooOfIcc.maps3 = G.maps3 :=
+  rfl
+
 /-- Extract the pointwise manifold derivative statement from a raw `C^3`
 gauge-flow witness on its time set. -/
 theorem hasMFDerivWithinAt
