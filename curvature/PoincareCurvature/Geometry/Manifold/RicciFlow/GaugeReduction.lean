@@ -99,6 +99,32 @@ abbrev intrinsicDeTurckGaugeField
     CovariantDerivative.TimeDependentVectorField (I := I) (M := M) :=
   fun t x ↦ -intrinsicDeTurckVectorField (I := I) (M := M) g background t x
 
+/-- Pointwise differentiability of the intrinsic DeTurck vector field transfers
+to the reverse gauge field. -/
+theorem intrinsicDeTurckGaugeField_mdiffAt_of_intrinsicDeTurckVectorField_mdiffAt
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {t : ℝ} {x : M}
+    (hW : MDiffAt (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x) :
+    MDiffAt (T%
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) x := by
+  simpa [intrinsicDeTurckGaugeField] using mdifferentiableAt_neg_section hW
+
+/-- Global version of
+`intrinsicDeTurckGaugeField_mdiffAt_of_intrinsicDeTurckVectorField_mdiffAt`. -/
+theorem intrinsicDeTurckGaugeField_mdiff_of_intrinsicDeTurckVectorField_mdiff
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {t : ℝ}
+    (hW : MDiff (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t))) :
+    MDiff (T%
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) := by
+  intro x
+  exact intrinsicDeTurckGaugeField_mdiffAt_of_intrinsicDeTurckVectorField_mdiffAt
+    (I := I) (M := M) g background (hW x)
+
 /-- With a Levi-Civita background, the reverse intrinsic DeTurck gauge field
 vanishes. -/
 theorem intrinsicDeTurckGaugeField_eq_zero_of_isLeviCivita
