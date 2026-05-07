@@ -2602,6 +2602,11 @@ and
 derive the DeTurck vector-field differentiability directly from
 `ContMDiffCovariantDerivative (background t) 1`; the chosen Levi-Civita slice is
 localized automatically using the existing smooth-slice theorem.
+The Lie-correction bridge now consumes this route via
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection_of_contMDiffCovariantDerivative_background`,
+so the raw spatial/tangent correction theorem can discharge the DeTurck-vector
+`MDiffAt` input from slicewise smoothness of the background connection, not only
+from the Levi-Civita zero case.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
