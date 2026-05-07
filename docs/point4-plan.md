@@ -1787,7 +1787,13 @@ eventual-equality forms
 `..._readout_target_lifted_eqOn_hasFDerivAt`, and
 `..._readout_mem_ball_lifted_eqOn_hasFDerivAt`; these preserve the concrete
 identification with `α.tangent xE τ` for component routes whose value formula
-still needs the explicit `Df t (α.flow (xE,t))` coefficient.  On the model side,
+still needs the explicit `Df t (α.flow (xE,t))` coefficient.  The component
+layer now consumes those readout equalities directly through
+`SmoothSelfDiffeomorph3Family.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_target_lifted_eqOn_hasFDerivAt`
+and
+`..._readout_mem_ball_lifted_eqOn_hasFDerivAt`, combining time-only bilinear
+coordinate derivatives with the readout-local tangent-map identification while
+leaving the explicit variational `Df` value formula intact.  On the model side,
 `ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_Icc_of_le_radius`
 dispatches the selected restricted Picard time slice to the forward or backward
 strict-derivative estimate, and
