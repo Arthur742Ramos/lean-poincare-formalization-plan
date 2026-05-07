@@ -88,12 +88,16 @@ theorem pullbackByDiffeomorph3_unique_connection
 
 end ChosenIntrinsicDeTurckLocalExistenceUniqueness
 
-/-- The time-dependent vector field driving the intrinsic DeTurck gauge. -/
+/-- The time-dependent vector field driving the intrinsic DeTurck pullback gauge.
+
+This is the reverse DeTurck vector field: differentiating a pullback by this
+flow subtracts the DeTurck Lie-derivative correction from the source
+Ricci-DeTurck velocity. -/
 abbrev intrinsicDeTurckGaugeField
     (g : MetricFamily (I := I) (M := M))
     (background : ConnectionFamily (I := I) (M := M)) :
     CovariantDerivative.TimeDependentVectorField (I := I) (M := M) :=
-  intrinsicDeTurckVectorField (I := I) (M := M) g background
+  fun t x ↦ -intrinsicDeTurckVectorField (I := I) (M := M) g background t x
 
 @[simp] theorem intrinsicDeTurckTraceEndomorphism_eq_connectionDifferenceTraceEndomorphism
     (g : MetricFamily (I := I) (M := M))
@@ -252,7 +256,7 @@ theorem SmoothSelfDiffeomorph3Family.trace_pullbackChosenLeviCivita_background_e
     SmoothSelfDiffeomorph3Family.traceOneForm_pullbackChosenLeviCivita_background_apply
       (I := I) (M := M) Φ g background w
 
-/-- A smooth self-map family follows the intrinsic DeTurck gauge field on `s`. -/
+/-- A smooth self-map family follows the reverse intrinsic DeTurck gauge field on `s`. -/
 def FollowsIntrinsicDeTurckOn
     (Φ : SmoothSelfMapFamily (I := I) (M := M))
     (g : MetricFamily (I := I) (M := M))
@@ -317,7 +321,7 @@ lemma FollowsIntrinsicDeTurckOn.hasMFDerivAt
   exact hΦ x t ht
 
 /-- An anchored DeTurck gauge family on `s` consists of a smooth self-map family that agrees with
-the identity at the base time and follows the intrinsic DeTurck vector field on `s`. -/
+the identity at the base time and follows the reverse intrinsic DeTurck vector field on `s`. -/
 structure AnchoredIntrinsicDeTurckGaugeOn
     (g : MetricFamily (I := I) (M := M))
     (background : ConnectionFamily (I := I) (M := M))
@@ -1525,8 +1529,8 @@ theorem IntrinsicDeTurckLocalSolution.diffeomorph3Gauge_hasMFDerivAt_pulledBackS
     HasMFDerivAt[source.toIntrinsicDeTurckSolution.timeSet]
       (fun τ : ℝ ↦ gauge3.maps.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily τ x) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight
-        ((gauge3.maps t).pushforwardTangent x
-          (source.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t x))) := by
+        (-((gauge3.maps t).pushforwardTangent x
+          (source.pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t x)))) := by
   have hvec :=
     source.pushforward_pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge gauge3 t x
   rw [hvec]
@@ -4175,10 +4179,10 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.gauge_hasMFDerivAt_pullbackSou
     HasMFDerivAt[sol.source.toIntrinsicDeTurckSolution.timeSet]
       (fun τ : ℝ ↦ sol.gauge.maps.toSmoothSelfMapFamily τ x) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight
-        ((sol.gauge.maps t).pushforwardTangent x
+        (-((sol.gauge.maps t).pushforwardTangent x
           (letI : Bundle.RiemannianBundle TM := ⟨(sol.transformedMetric t).toRiemannianMetric⟩
            CovariantDerivative.rieszMap (I := I) x
-            (sol.pulledBackSourceDeTurckOneForm t x)))) := by
+            (sol.pulledBackSourceDeTurckOneForm t x))))) := by
   have hvec := sol.pushforward_riesz_pullbackSourceDeTurckOneForm t x
   simpa [intrinsicDeTurckGaugeField,
     GaugeReducedIntrinsicDeTurckLocalSolution.pulledBackSourceDeTurckOneForm, hvec] using
@@ -4193,10 +4197,10 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.gauge_hasMFDerivAt_pullbackSou
     HasMFDerivAt[Set.Icc ivp.initialTime sol.source.terminalTime]
       (fun τ : ℝ ↦ sol.gauge.maps.toSmoothSelfMapFamily τ x) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight
-        ((sol.gauge.maps t).pushforwardTangent x
+        (-((sol.gauge.maps t).pushforwardTangent x
           (letI : Bundle.RiemannianBundle TM := ⟨(sol.transformedMetric t).toRiemannianMetric⟩
            CovariantDerivative.rieszMap (I := I) x
-            (sol.pulledBackSourceDeTurckOneForm t x)))) := by
+            (sol.pulledBackSourceDeTurckOneForm t x))))) := by
   have hvec := sol.pushforward_riesz_pullbackSourceDeTurckOneForm t x
   simpa [intrinsicDeTurckGaugeField,
     GaugeReducedIntrinsicDeTurckLocalSolution.pulledBackSourceDeTurckOneForm, hvec] using
@@ -4211,8 +4215,8 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.gauge_hasMFDerivAt_pulledBackS
     HasMFDerivAt[sol.source.toIntrinsicDeTurckSolution.timeSet]
       (fun τ : ℝ ↦ sol.gauge.maps.toSmoothSelfMapFamily τ x) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight
-        ((sol.gauge.maps t).pushforwardTangent x
-          (sol.pulledBackSourceDeTurckVectorField t x))) := by
+        (-((sol.gauge.maps t).pushforwardTangent x
+          (sol.pulledBackSourceDeTurckVectorField t x)))) := by
   simpa [GaugeReducedIntrinsicDeTurckLocalSolution.pulledBackSourceDeTurckVectorField] using
     sol.gauge_hasMFDerivAt_pullbackSourceDeTurckOneForm ht x
 
@@ -4225,8 +4229,8 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.gauge_hasMFDerivAt_pulledBackS
     HasMFDerivAt[Set.Icc ivp.initialTime sol.source.terminalTime]
       (fun τ : ℝ ↦ sol.gauge.maps.toSmoothSelfMapFamily τ x) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight
-        ((sol.gauge.maps t).pushforwardTangent x
-          (sol.pulledBackSourceDeTurckVectorField t x))) := by
+        (-((sol.gauge.maps t).pushforwardTangent x
+          (sol.pulledBackSourceDeTurckVectorField t x)))) := by
   simpa [GaugeReducedIntrinsicDeTurckLocalSolution.pulledBackSourceDeTurckVectorField] using
     sol.gauge_hasMFDerivAt_pullbackSourceDeTurckOneForm_localInterval ht x
 

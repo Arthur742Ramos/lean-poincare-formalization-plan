@@ -936,7 +936,7 @@ are identified eventually with the actual centered preferred-chart coordinate
 readout, with the within-set version using the closed-interval within-filter.
 The primitive and chart derivative views now also have model-vector-field
 RHS-identification adapters, in both within-set and ordinary-at-time forms:
-once the model vector field agrees with the intrinsic DeTurck gauge field along
+once the model vector field agrees with the reverse intrinsic DeTurck gauge field along
 the flow, its manifold or preferred-chart derivative package is promoted to the
 intrinsic derivative package directly. The fixed-IVP and theorem-family chosen
 solution packages now mirror the same adapters, so Picard model-vector-field
@@ -2509,7 +2509,11 @@ those two inputs now has the direct bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricVelocity_eq_chartRHS_of_chartRHS_eq_intrinsic`,
 which derives the smooth metric-velocity/chart-RHS equality from the
 realization equation and a pointwise identification of the Banach chart RHS with
-the intrinsic Ricci-DeTurck RHS. The
+the intrinsic Ricci-DeTurck RHS. The gauge-flow sign convention has also been
+aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
+negative intrinsic DeTurck vector field, so differentiating the pullback gauge
+subtracts exactly the intrinsic DeTurck correction appearing in
+`gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge`. The
 readout/mem-ball route now also
 has closed-interval local-gluing readout lemmas, a source-coordinate Picard
 derivative package, component and raw source-derivative endpoints, and the
@@ -2702,7 +2706,7 @@ feed the raw existence layer through
 `IntrinsicDeTurckGaugeFlowExistenceFamily.ofPicardIccFixedChartDerivative`
 expose the same finite-cover handoff for fixed-IVP and theorem-family theorem
 packages. The fixed-chart bridge now also accepts auxiliary model-vector-field
-ODE data once that field is identified with the intrinsic DeTurck gauge field
+ODE data once that field is identified with the reverse intrinsic DeTurck gauge field
 along the candidate flow: the derivative layer, raw open-Picard constructor,
 fixed-IVP constructor, and theorem-family constructor all expose pointwise and
 closed-interval relative-filter variants of this handoff. The derivative-family
