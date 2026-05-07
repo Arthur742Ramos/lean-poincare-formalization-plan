@@ -6299,6 +6299,54 @@ theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMa
     pullbackMetricTangentCoordinateMap_eventuallyEq_of_eventually_eqOn_variationalFlow_hasFDerivWithinAt_fixedChart
       (I := I) (M := M) Φ α t x xE hmodel
 
+/-- Readout-local gluing equality with a lifted variational model flow, plus
+source membership and spatial derivatives of that model flow, supplies the
+tangent-map derivative data needed by component-level gauge-pullback APIs.
+
+This is the form matched by the raw gluing constructors: the global slice is
+locally equal to a selected local readout, and that readout is locally equal to
+the chart-lifted Picard model flow. -/
+theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_lifted_eqOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0} {s : Set ℝ}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hsIoo : s ⊆ Ioo tmin tmax)
+    (hA_readout : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ F : ℝ → M → M,
+          (∀ᶠ τ in 𝓝 t,
+            (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+              HasFDerivWithinAt (fun y : E ↦ α.flow (y, τ))
+                (α.tangent xE τ) (range I) ((extChartAt I x) x)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ U : Set M, U ∈ 𝓝 x ∧
+              EqOn (fun z : M ↦ (Φ τ) z) (F τ) U) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ V : Set M, V ∈ 𝓝 x ∧
+              (∀ z ∈ V,
+                α.flow ((extChartAt I x) z, τ) ∈
+                  (extChartAt I ((Φ t) x)).target) ∧
+              EqOn (F τ)
+                (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) V)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ D : E →L[ℝ] E,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t := by
+  refine pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel_eqOn
+    (I := I) (M := M) (Φ := Φ) α hsIoo ?_
+  intro t ht x
+  obtain ⟨xE, hxE, F, hsource_deriv, hreadout, hlift⟩ := hA_readout ht x
+  refine ⟨xE, hxE, ?_⟩
+  exact
+    fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn_source
+      (I := I) (M := M) Φ α t x xE F hsource_deriv hreadout hlift
+
 /-- Closed-interval/right-derivative version of
 `pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`.
 

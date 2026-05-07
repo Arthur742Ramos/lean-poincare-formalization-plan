@@ -2323,8 +2323,15 @@ with source membership and model spatial derivative data into the full eventual
 triple used by the fixed-chart `hA_model` routes.
 The quantified component-level route is also available as
 `pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel_eqOn`,
-so downstream scalar selectors can now consume manifold-side `EqOn` gluing data
-directly. Thus the remaining dynamic obligations are narrowed to proving the
+and the readout-lifted companion
+`pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_lifted_eqOn`
+accepts the three Picard/gluing eventuals before fixed-chart composition.  At
+the smooth-realization scalar-selector layer,
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`
+now offers the same readout-lifted input shape while preserving the existing
+geometric-slot scalar identity. Thus downstream scalar selectors can consume
+manifold-side `EqOn` gluing data directly. The remaining dynamic obligations are
+narrowed to proving the
 needed local `EqOn` data for the selected gauge maps from the gluing/Picard
 construction, supplying the corresponding model-flow spatial derivative
 hypotheses from the Picard/variational estimates, and proving the scalar
