@@ -2537,6 +2537,13 @@ connection is already Levi-Civita for the evolving metric. The general
 non-Levi-Civita/background regularity theorem for
 `intrinsicDeTurckVectorField` remains open and is still required for the full
 chosen-background gauge-flow construction.
+At the reverse-gauge layer, the corresponding actual gauge-field API is now
+also explicit:
+`intrinsicDeTurckGaugeField_eq_zero_of_isLeviCivita`,
+`intrinsicDeTurckGaugeField_mdiffAt_of_isLeviCivita`,
+`intrinsicDeTurckGaugeField_mdiff_of_isLeviCivita`, and the
+Levi-Civita-specialized Lie-correction theorem
+`intrinsicDeTurckGaugeField_lieCorrection_eq_neg_intrinsicDeTurckCorrection_of_isLeviCivita`.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge

@@ -99,6 +99,54 @@ abbrev intrinsicDeTurckGaugeField
     CovariantDerivative.TimeDependentVectorField (I := I) (M := M) :=
   fun t x ↦ -intrinsicDeTurckVectorField (I := I) (M := M) g background t x
 
+/-- With a Levi-Civita background, the reverse intrinsic DeTurck gauge field
+vanishes. -/
+theorem intrinsicDeTurckGaugeField_eq_zero_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background) :
+    intrinsicDeTurckGaugeField (I := I) (M := M) g background = 0 := by
+  funext t x
+  have hW :
+      intrinsicDeTurckVectorField (I := I) (M := M) g background = 0 :=
+    intrinsicDeTurckVectorField_eq_zero_of_isLeviCivita
+      (I := I) (M := M) g background hbackground
+  simpa [intrinsicDeTurckGaugeField] using congrFun (congrFun hW t) x
+
+/-- With a Levi-Civita background, the reverse intrinsic DeTurck gauge field
+has the pointwise differentiability required by gauge-flow arguments. -/
+theorem intrinsicDeTurckGaugeField_mdiffAt_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (t : ℝ) (x : M) :
+    MDiffAt (T%
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) x := by
+  have hX :
+      intrinsicDeTurckGaugeField (I := I) (M := M) g background t = 0 := by
+    exact congrArg (fun X => X t)
+      (intrinsicDeTurckGaugeField_eq_zero_of_isLeviCivita
+        (I := I) (M := M) g background hbackground)
+  rw [hX]
+  simpa [Bundle.zeroSection] using
+    (mdifferentiableAt_zeroSection (𝕜 := ℝ) (F := E) (E := TM) (x := x))
+
+/-- Global version of
+`intrinsicDeTurckGaugeField_mdiffAt_of_isLeviCivita`. -/
+theorem intrinsicDeTurckGaugeField_mdiff_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (t : ℝ) :
+    MDiff (T%
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) := by
+  intro x
+  exact intrinsicDeTurckGaugeField_mdiffAt_of_isLeviCivita
+    (I := I) (M := M) g background hbackground t x
+
 /-- The reverse DeTurck gauge field contributes the negative of the intrinsic
 DeTurck correction once the Lie-derivative slots are written with the
 Levi-Civita derivative of the gauge field.
@@ -159,6 +207,29 @@ theorem intrinsicDeTurckGaugeField_lieCorrection_eq_neg_intrinsicDeTurckCorrecti
     exact map_neg ((g t).inner x u) (cov W x v)
   rw [hneg_left, hneg_right]
   abel
+
+/-- Levi-Civita-background specialization of
+`intrinsicDeTurckGaugeField_lieCorrection_eq_neg_intrinsicDeTurckCorrection`,
+with the DeTurck vector-field differentiability input discharged by the zero
+section bridge. -/
+theorem intrinsicDeTurckGaugeField_lieCorrection_eq_neg_intrinsicDeTurckCorrection_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (t : ℝ) (x : M) (u v : TM x) :
+    (g t).inner x
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) x u) v +
+      (g t).inner x u
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) x v) =
+      -intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v := by
+  exact
+    intrinsicDeTurckGaugeField_lieCorrection_eq_neg_intrinsicDeTurckCorrection
+      (I := I) (M := M) g background t x u v
+      (intrinsicDeTurckVectorField_mdiffAt_of_isLeviCivita
+        (I := I) (M := M) g background hbackground t x)
 
 @[simp] theorem intrinsicDeTurckTraceEndomorphism_eq_connectionDifferenceTraceEndomorphism
     (g : MetricFamily (I := I) (M := M))
