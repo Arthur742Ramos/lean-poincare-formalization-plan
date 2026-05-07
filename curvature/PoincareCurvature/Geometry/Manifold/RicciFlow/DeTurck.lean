@@ -171,6 +171,37 @@ def intrinsicDeTurckOneForm
           (I := I) (M := M) g background t x w).toLinearMap := by
   simp [intrinsicDeTurckOneForm]
 
+/-- In a local frame, evaluating the intrinsic DeTurck one-form on a frame vector is the
+finite trace sum of the diagonal connection-difference coefficients. -/
+theorem intrinsicDeTurckOneForm_apply_localFrame_eq_sum_localFrame_coeff
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {x : M} (hx : x ∈ e.baseSet) (i : ι) :
+    intrinsicDeTurckOneForm (I := I) (M := M) g background t x
+        (e.localFrame b i x) =
+      ∑ j, e.localFrame_coeff I b j x
+        ((CovariantDerivative.difference
+          ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+          (e.localFrame b j x)) (e.localFrame b i x)) := by
+  have hcoeff : ∀ (j : ι) (v : TM x),
+      e.localFrame_coeff I b j x v = (e.basisAt b hx).repr v j := by
+    intro j v
+    let he := e.isLocalFrameOn_localFrame_baseSet I 1 b
+    have hbasis : e.basisAt b hx = he.toBasisAt hx := by
+      ext k
+      simp [IsLocalFrameOn.toBasisAt, Bundle.Trivialization.localFrame,
+        Bundle.Trivialization.basisAt, hx]
+    simp [Bundle.Trivialization.localFrame_coeff, IsLocalFrameOn.coeff, hx, hbasis]
+  rw [intrinsicDeTurckOneForm_apply]
+  rw [LinearMap.trace_eq_matrix_trace ℝ (e.basisAt b hx)]
+  simp [Matrix.trace, LinearMap.toMatrix_apply,
+    Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := b) hx,
+    hcoeff]
+
 /-- On zero-dimensional tangent fibers, the intrinsic DeTurck one-form vanishes. -/
 theorem intrinsicDeTurckOneForm_eq_zero_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)]
@@ -240,6 +271,83 @@ theorem intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply
     CovariantDerivative.continuousDualBasis_repr]
   simp [eStar, eLine, Bundle.Trivialization.continuousLinearMap_apply,
     Bundle.Trivialization.basisAt, hxE]
+
+/-- Local diagonal connection-difference coefficients imply `C¹` regularity of each scalar
+local-frame evaluation of the intrinsic DeTurck one-form. -/
+theorem intrinsicDeTurckOneForm_localFrame_apply_contMDiffOn_of_connectionDifference_coeff
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {u : Set M} (hu' : u ⊆ e.baseSet)
+    (hcoeff : ∀ i j,
+      ContMDiffOn I 𝓘(ℝ) 1
+        (fun x ↦ e.localFrame_coeff I b j x
+          ((CovariantDerivative.difference
+            ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+            (e.localFrame b j x)) (e.localFrame b i x))) u) :
+    ∀ i, ContMDiffOn I 𝓘(ℝ) 1
+      (fun x ↦ intrinsicDeTurckOneForm (I := I) (M := M)
+        g background t x (e.localFrame b i x)) u := by
+  intro i
+  have hsum :
+      ∀ s : Finset ι,
+        ContMDiffOn I 𝓘(ℝ) 1
+          (fun x ↦ s.sum fun j ↦ e.localFrame_coeff I b j x
+            ((CovariantDerivative.difference
+              ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+              (e.localFrame b j x)) (e.localFrame b i x))) u := by
+    intro s
+    refine Finset.induction_on s ?_ ?_
+    · simpa using (contMDiffOn_const :
+        ContMDiffOn I 𝓘(ℝ) 1 (fun _ : M ↦ (0 : ℝ)) u)
+    · intro j s hj hs
+      have hadd :
+          ContMDiffOn I 𝓘(ℝ) 1
+            (fun x ↦
+              e.localFrame_coeff I b j x
+                ((CovariantDerivative.difference
+                  ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+                  (e.localFrame b j x)) (e.localFrame b i x)) +
+              s.sum (fun j' ↦ e.localFrame_coeff I b j' x
+                ((CovariantDerivative.difference
+                  ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+                  (e.localFrame b j' x)) (e.localFrame b i x)))) u :=
+        (hcoeff i j).add hs
+      refine ContMDiffOn.congr hadd ?_
+      intro x hx
+      simp [Finset.sum_insert, hj]
+  refine ContMDiffOn.congr (hsum Finset.univ) ?_
+  intro x hx
+  exact intrinsicDeTurckOneForm_apply_localFrame_eq_sum_localFrame_coeff
+    (I := I) (M := M) g background t e b (hu' hx) i
+
+/-- Local diagonal connection-difference coefficient regularity packages into `C¹` regularity of the
+intrinsic DeTurck one-form section. -/
+theorem intrinsicDeTurckOneForm_contMDiffOn_of_connectionDifference_coeff
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
+    (hcoeff : ∀ i j,
+      ContMDiffOn I 𝓘(ℝ) 1
+        (fun x ↦ e.localFrame_coeff I b j x
+          ((CovariantDerivative.difference
+            ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+            (e.localFrame b j x)) (e.localFrame b i x))) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun y : M ↦ TM y →L[ℝ] ℝ) x
+        (intrinsicDeTurckOneForm (I := I) (M := M) g background t x)) u := by
+  exact intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply
+    (I := I) (M := M) g background t e b hu hu'
+    (intrinsicDeTurckOneForm_localFrame_apply_contMDiffOn_of_connectionDifference_coeff
+      (I := I) (M := M) g background t e b hu' hcoeff)
 
 /-- The intrinsic DeTurck vector field obtained by raising the intrinsic DeTurck one-form with the
 evolving metric. -/
@@ -346,6 +454,35 @@ theorem intrinsicDeTurckVectorField_mdiffAt_of_contMDiffOn_intrinsicDeTurckOneFo
             (intrinsicDeTurckOneForm (I := I) (M := M) g background t y))) x :=
     (hW x hx).contMDiffAt (hu.mem_nhds hx)
   simpa [intrinsicDeTurckVectorField] using hWat.mdifferentiableAt one_ne_zero
+
+/-- Local diagonal connection-difference coefficient regularity implies differentiability of the
+raised intrinsic DeTurck vector field at points of the coordinate patch. -/
+theorem intrinsicDeTurckVectorField_mdiffAt_of_connectionDifference_coeff
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
+    (hcoeff : ∀ i j,
+      ContMDiffOn I 𝓘(ℝ) 1
+        (fun x ↦ e.localFrame_coeff I b j x
+          ((CovariantDerivative.difference
+            ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+            (e.localFrame b j x)) (e.localFrame b i x))) u)
+    {x : M} (hx : x ∈ u) :
+    MDiffAt (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x := by
+  have hω :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+        (fun y ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+          (E := fun z : M ↦ TM z →L[ℝ] ℝ) y
+          (intrinsicDeTurckOneForm (I := I) (M := M) g background t y)) u :=
+    intrinsicDeTurckOneForm_contMDiffOn_of_connectionDifference_coeff
+      (I := I) (M := M) g background t e b hu hu' hcoeff
+  exact intrinsicDeTurckVectorField_mdiffAt_of_contMDiffOn_intrinsicDeTurckOneForm
+    (I := I) (M := M) g background t e b hu hu' hω hx
 
 /-- Global version of
 `intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm`. -/

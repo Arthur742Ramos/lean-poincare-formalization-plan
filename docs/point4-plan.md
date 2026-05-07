@@ -2575,6 +2575,16 @@ one-form-section regularity on a chart-local open set to scalar smoothness of
 the local-frame evaluations `ω_x(e_i(x))`. The remaining hard input is therefore
 the connection-difference trace calculation proving those scalar component
 facts from the chosen Levi-Civita family and the background connection.
+The trace calculation has now been exposed at the local-frame level:
+`intrinsicDeTurckOneForm_apply_localFrame_eq_sum_localFrame_coeff` rewrites the
+scalar evaluation as a finite sum of diagonal connection-difference
+coefficients, and
+`intrinsicDeTurckOneForm_contMDiffOn_of_connectionDifference_coeff` plus
+`intrinsicDeTurckVectorField_mdiffAt_of_connectionDifference_coeff` package
+`C¹` regularity of those diagonal coefficients into one-form and raised-vector
+regularity. The next proof obligation is to derive those coefficient
+smoothness hypotheses from the slicewise `ContMDiffCovariantDerivative`
+packages for the chosen Levi-Civita and background connections.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
