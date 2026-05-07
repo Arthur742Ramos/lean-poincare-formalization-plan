@@ -251,6 +251,49 @@ theorem intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm
     (hW x hxbase).contMDiffAt (e.open_baseSet.mem_nhds hxbase)
   simpa [intrinsicDeTurckVectorField] using hWat.mdifferentiableAt one_ne_zero
 
+/-- Local version of
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm`. -/
+theorem intrinsicDeTurckVectorField_mdiffAt_of_contMDiffOn_intrinsicDeTurckOneForm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
+    (hω : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun y : M ↦ TM y →L[ℝ] ℝ) x
+        (intrinsicDeTurckOneForm (I := I) (M := M) g background t x)) u)
+    {x : M} (hx : x ∈ u) :
+    MDiffAt (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x := by
+  classical
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  have hxbase : x ∈ e.baseSet := hu' hx
+  have hωon :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+        (fun y ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+          (E := fun z : M ↦ TM z →L[ℝ] ℝ) y
+          (intrinsicDeTurckOneForm (I := I) (M := M) g background t y)) u :=
+    hω
+  have hW :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+        (fun y ↦ TotalSpace.mk' E y
+          (CovariantDerivative.rieszMap (I := I) y
+            (intrinsicDeTurckOneForm (I := I) (M := M) g background t y))) u :=
+    CovariantDerivative.contMDiffOn_rieszMap_section
+      (I := I) (E := E) (M := M) (e := e) (b := b)
+      hu hu' hωon
+  have hWat :
+      ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1
+        (fun y ↦ TotalSpace.mk' E y
+          (CovariantDerivative.rieszMap (I := I) y
+            (intrinsicDeTurckOneForm (I := I) (M := M) g background t y))) x :=
+    (hW x hx).contMDiffAt (hu.mem_nhds hx)
+  simpa [intrinsicDeTurckVectorField] using hWat.mdifferentiableAt one_ne_zero
+
 /-- Global version of
 `intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm`. -/
 theorem intrinsicDeTurckVectorField_mdiff_of_contMDiff_intrinsicDeTurckOneForm

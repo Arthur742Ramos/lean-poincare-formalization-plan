@@ -2559,13 +2559,16 @@ background hypothesis.
 Independently of the Levi-Civita zero case, the DeTurck layer now has the
 general conditional Riesz bridge
 `intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm`
-and its global wrapper
+with the chart-local form
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiffOn_intrinsicDeTurckOneForm`
+and the global wrapper
 `intrinsicDeTurckVectorField_mdiff_of_contMDiff_intrinsicDeTurckOneForm`:
 `C¹` regularity of the traced intrinsic DeTurck one-form at a fixed time
 implies the required differentiability of the raised DeTurck vector-field
 section. What remains for the full non-Levi-Civita/background case is to prove
-that one-form regularity from the connection-difference trace construction and
-the available smoothness of the metric and background connection.
+that local one-form regularity from the connection-difference trace
+construction and the available smoothness of the metric and background
+connection.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
