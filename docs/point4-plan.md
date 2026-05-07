@@ -2654,12 +2654,17 @@ subtracts exactly the intrinsic DeTurck correction appearing in
 readout/mem-ball route now also
 has closed-interval local-gluing readout lemmas, a source-coordinate Picard
 derivative package, component and raw source-derivative endpoints, and the
-fixed-IVP indexed data bridge.  The remaining dynamic obligations are therefore
-narrowed to instantiating those packaged readout and Picard-derivative inputs
-for the selected gauge-flow construction, proving the lifted model equality in
-the exact target charts selected by the time-derivative route, and proving the
-spatial/tangent correction identity from the selected gauge-flow/PDE
-construction. The
+fixed-IVP indexed data bridge.  The selected raw gauge-flow layer now also has
+the compact-witness endpoint
+`SelectedIntrinsicDeTurckGaugeFlowExistence.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_of_timeSet_eq_Icc`,
+and the theorem-family analogue, which combine a closed-interval finite source
+cover, selected local readout equality, model-flow spatial derivative data, and
+the lifted-model/value hypotheses into the selected tensor time derivative.
+The remaining dynamic obligations are therefore narrowed to supplying those
+compact-witness hypotheses from the selected gauge-flow construction, proving
+the lifted model equality in the exact target charts selected by the
+time-derivative route, and proving the spatial/tangent correction identity from
+the selected gauge-flow/PDE construction. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
