@@ -11845,6 +11845,103 @@ theorem nonempty_ofPicardIccFixedChartDerivative_of_vectorField_eq_nhdsWithin
   ⟨ofPicardIccFixedChartDerivative_of_vectorField_eq_nhdsWithin
     sol maps3 anchored htimeSet hmem hsource hderiv hY⟩
 
+/-- Fixed-IVP selected raw gauge-flow existence on one selected open Picard
+time set from compatible local readouts on a finite time-dependent open cover,
+with each time-slice supplied as named `LocalGluingData`. -/
+noncomputable def ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+    {ι : Type*} [Finite ι]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (defaultF defaultG : ℝ → M → M)
+    (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M)
+    (hUcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, V t i)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hUwithin : ∀ t ∈ Icc tmin tmax, ∀ i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, U t i ⊆ U τ i)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U ivp.initialTime i,
+      Fₗ i ivp.initialTime x = x)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) (Icc tmin tmax) t)
+    (hYLocal : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U t i →
+        Y τ (Fₗ i τ x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background τ (Fₗ i τ x)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  solution := sol
+  flow := by
+    have raw : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background)
+        (Ioo tmin tmax) ivp.initialTime :=
+      Diffeomorph3GaugeFlowOn.of_finite_timeDependent_iUnion_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+        (I := I) (M := M)
+        (X := intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background)
+        (Y := Y) (tmin := tmin) (tmax := tmax)
+        (t₀ := ivp.initialTime)
+        defaultF defaultG Fₗ Gₗ U V hUcover hVcover hlocal hFcompat hGcompat
+        hUwithin hanchoredLocal hcontLocal hderivLocal hYLocal
+    simpa [htimeSet] using raw
+
+/-- Proof-level selected raw gauge-flow existence from compatible finite local
+readouts supplied as named `LocalGluingData` patches. -/
+theorem nonempty_ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+    {ι : Type*} [Finite ι]
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax : ℝ}
+    (defaultF defaultG : ℝ → M → M)
+    (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M)
+    (hUcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t : ℝ, Set.univ ⊆ ⋃ i, V t i)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hUwithin : ∀ t ∈ Icc tmin tmax, ∀ i,
+      ∀ᶠ τ in 𝓝[Icc tmin tmax] t, U t i ⊆ U τ i)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U ivp.initialTime i,
+      Fₗ i ivp.initialTime x = x)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) (Icc tmin tmax) t)
+    (hYLocal : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U t i →
+        Y τ (Fₗ i τ x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background τ (Fₗ i τ x)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofPicardIccChartDerivative_of_finite_timeDependent_iUnion_localGluingData_of_localReadouts_vectorField_eq_nhdsWithin
+    sol defaultF defaultG Fₗ Gₗ U V hUcover hVcover hlocal hFcompat hGcompat
+    hUwithin hanchoredLocal htimeSet hcontLocal hderivLocal hYLocal⟩
+
 /-- Fixed-IVP selected raw gauge-flow existence from a raw flow on a named time
 set identified with the selected solution's exact time set. -/
 noncomputable def ofRawGaugeFlowOn
