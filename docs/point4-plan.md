@@ -1817,7 +1817,13 @@ data are lifted through fixed-IVP, theorem-family, and raw intrinsic gauge-flow
 existence wrappers.  Callers with `timeSet = Icc tmin tmax` can therefore keep
 finite-cover or compact local-gluing outputs indexed until the package-level
 API invokes the new raw endpoint and obtains the interior `Ioo` tensor time
-derivative directly.  On the model side,
+derivative directly.  The companion
+`ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentMapReadoutMemBallDerivativeDataOnIoo_of_iUnion_source_hasFDerivAt`
+factors the model-flow spatial derivative out of the indexed local scalar data:
+Picard estimates can now supply one source-coordinate eventual `HasFDerivAt`
+input, while each local patch only carries the metric-component time
+derivative, source-ball membership, target-neighborhood fact, lifted readout
+equality, and final scalar velocity identity.  On the model side,
 `ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_Icc_of_le_radius`
 dispatches the selected restricted Picard time slice to the forward or backward
 strict-derivative estimate, and

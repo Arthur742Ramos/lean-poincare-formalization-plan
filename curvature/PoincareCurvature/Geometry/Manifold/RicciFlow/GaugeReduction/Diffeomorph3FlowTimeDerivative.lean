@@ -27016,6 +27016,92 @@ theorem variationalTangentMapReadoutMemBallDerivativeDataOnIoo_of_iUnion
   exact ⟨xE, hxE, Fₗ i, B', hB, hderiv, hreadout ht i x hxi, hxball,
     htarget_nhds, heq, hvalue⟩
 
+/-- Build the fixed-IVP indexed readout/mem-ball data when the model-flow
+spatial derivative is supplied once at source coordinates.  The indexed local
+data then only needs to carry the time derivative of the metric component, the
+source ball/target-neighborhood facts, the lifted readout equality, and the
+final scalar velocity identity. -/
+theorem variationalTangentMapReadoutMemBallDerivativeDataOnIoo_of_iUnion_source_hasFDerivAt
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ι : Type*} {tmin tmax : ℝ}
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (Fₗ : ι → ℝ → M → M)
+    (U : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (fun z : M ↦ (G.maps3 sol τ) z) (Fₗ i τ) W)
+    (hflow_deriv : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ ⦃xE : E⦄, xE ∈ ball x₀ r →
+        ∀ᶠ τ in 𝓝 t,
+          HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+            (α.tangent xE τ) xE)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i → ∀ u v : TangentSpace I x,
+        ∃ B' : E →L[ℝ] E →L[ℝ] ℝ,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) (G.maps3 sol)
+                sol.1.toIntrinsicDeTurckSolution.metric t τ x)
+            B' t ∧
+          (extChartAt I x) x ∈ ball x₀ r ∧
+          (extChartAt I (((G.maps3 sol) t) x)).target ∈
+            𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (Fₗ i τ)
+                (fun z : M ↦ (extChartAt I (((G.maps3 sol) t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W) ∧
+          B'
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) (G.maps3 sol) t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) (G.maps3 sol) t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) (G.maps3 sol)
+                sol.1.toIntrinsicDeTurckSolution.metric t t x
+                ((Df t (α.flow (((extChartAt I x) x), t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) (G.maps3 sol) t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) (G.maps3 sol) t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) (G.maps3 sol)
+                sol.1.toIntrinsicDeTurckSolution.metric t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) (G.maps3 sol) t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (((extChartAt I x) x), t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) (G.maps3 sol) t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol) t x u v) :
+    G.VariationalTangentMapReadoutMemBallDerivativeDataOnIoo sol tmin tmax α := by
+  refine
+    G.variationalTangentMapReadoutMemBallDerivativeDataOnIoo_of_iUnion
+      sol α Fₗ U hcover hreadout ?_
+  intro t ht i x hxi u v
+  obtain ⟨B', hB, hxball, htarget_nhds, heq, hvalue⟩ :=
+    hdata ht i x hxi u v
+  refine ⟨(extChartAt I x) x, ball_subset_closedBall hxball, B', hB, ?_,
+    hxball, htarget_nhds, heq, ?_⟩
+  · exact hflow_deriv ht hxball
+  · simpa using hvalue
+
 /-- Fixed-IVP closed-Picard readout-local tangent-map data gives the interior
 time derivative of the gauge-pulled metric, after identifying the chosen
 solution time set with the closed Picard interval. -/
