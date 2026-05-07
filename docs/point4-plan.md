@@ -1855,7 +1855,10 @@ raw flows consumed by the source-coordinate time-derivative endpoint.  The
 ambient-time-set variant
 `Diffeomorph3GaugeFlowOn.of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 restricts local continuity and derivative data from a larger solution time set
-to the chosen closed Picard interval using the interval-subset proof.  The
+to the chosen closed Picard interval using the interval-subset proof, and its
+closed-interval readout companion
+`Diffeomorph3GaugeFlowOn.of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc_eventually_nhds_exists_eqOn_of_mem_Ioo`
+preserves the local readout equality for the resulting `Icc` raw flow.  The
 compact raw existence theorems
 `Diffeomorph3GaugeFlowOn.exists_Ioo_gaugeFlow_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 and
