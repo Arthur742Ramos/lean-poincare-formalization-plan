@@ -2525,6 +2525,18 @@ and its closed-source-cover companion
 so callers can pass indexed readout/Picard derivative data, chart-RHS
 identification, `MDiffAt` regularity, and the pre-sign Lie-correction identity
 directly to obtain the gauge-corrected pullback time derivative.
+The exact `MDiffAt` hypothesis in that interface is now supplied in the
+Levi-Civita-background case by
+`intrinsicDeTurckVectorField_mdiffAt_of_isLeviCivita`, with the global wrapper
+`intrinsicDeTurckVectorField_mdiff_of_isLeviCivita`: the intrinsic DeTurck
+vector field is identified with the zero section through
+`intrinsicDeTurckVectorField_eq_zero_of_isLeviCivita`, and zero-section
+regularity closes the differentiability input. This is the proof-bearing
+regularity bridge needed by the Lie-correction sign route when the background
+connection is already Levi-Civita for the evolving metric. The general
+non-Levi-Civita/background regularity theorem for
+`intrinsicDeTurckVectorField` remains open and is still required for the full
+chosen-background gauge-flow construction.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge

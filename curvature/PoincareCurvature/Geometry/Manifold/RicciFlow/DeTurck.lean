@@ -490,6 +490,40 @@ theorem intrinsicDeTurckVectorField_eq_zero_of_isLeviCivita
       (I := I) (M := M) g background hbackground t x
   simp [intrinsicDeTurckVectorField, hone]
 
+/-- With a Levi-Civita background, the intrinsic DeTurck vector field is the zero
+section, hence it satisfies the pointwise differentiability hypothesis needed
+by covariant-derivative and Lie-correction arguments. -/
+theorem intrinsicDeTurckVectorField_mdiffAt_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (t : ℝ) (x : M) :
+    MDiffAt (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x := by
+  have hW :
+      intrinsicDeTurckVectorField (I := I) (M := M) g background t = 0 := by
+    exact congrArg (fun W => W t)
+      (intrinsicDeTurckVectorField_eq_zero_of_isLeviCivita
+        (I := I) (M := M) g background hbackground)
+  rw [hW]
+  simpa [Bundle.zeroSection] using
+    (mdifferentiableAt_zeroSection (𝕜 := ℝ) (F := E) (E := TM) (x := x))
+
+/-- Global version of
+`intrinsicDeTurckVectorField_mdiffAt_of_isLeviCivita`. -/
+theorem intrinsicDeTurckVectorField_mdiff_of_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hbackground : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (t : ℝ) :
+    MDiff (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) := by
+  intro x
+  exact intrinsicDeTurckVectorField_mdiffAt_of_isLeviCivita
+    (I := I) (M := M) g background hbackground t x
+
 theorem intrinsicDeTurckCorrection_eq_zero_of_isLeviCivita
     (g : MetricFamily (I := I) (M := M))
     (background : ConnectionFamily (I := I) (M := M))
