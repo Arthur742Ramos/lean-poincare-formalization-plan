@@ -2585,6 +2585,16 @@ coefficients, and
 regularity. The next proof obligation is to derive those coefficient
 smoothness hypotheses from the slicewise `ContMDiffCovariantDerivative`
 packages for the chosen Levi-Civita and background connections.
+That derivation is now also packaged locally:
+`connectionDifference_localFrame_coeff_contMDiffOn` proves the smoothness of
+local-frame coefficients of a difference of two tangent covariant derivatives
+from `ContMDiffCovariantDerivativeOn` hypotheses, and the intrinsic wrappers
+`intrinsicDeTurckOneForm_contMDiffOn_of_contMDiffCovariantDerivativeOn` and
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivativeOn` consume
+the chosen-Levi-Civita/background slices directly. The residual gap is no
+longer the trace algebra, but the local production of those
+`ContMDiffCovariantDerivativeOn` packages for the relevant slices in the
+chart-local gauge-flow setting.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
