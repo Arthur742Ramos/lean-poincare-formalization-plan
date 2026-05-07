@@ -2316,7 +2316,11 @@ equality exposed by the pointwise-source constructors, producing the exact
 local fixed-chart `EqOn` existential expected by `hA_model`.  The filter helper
 `eventually_nhds_of_eventually_nhdsWithin_Icc_of_mem_Ioo` also records the
 standard upgrade from closed-Picard relative eventuals to ordinary eventuals at
-interior times.
+interior times.  The companion
+`fixedChartModel_eventually_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn_source`
+and its variational-flow specialization package that local `EqOn` together
+with source membership and model spatial derivative data into the full eventual
+triple used by the fixed-chart `hA_model` routes.
 The quantified component-level route is also available as
 `pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel_eqOn`,
 so downstream scalar selectors can now consume manifold-side `EqOn` gluing data
