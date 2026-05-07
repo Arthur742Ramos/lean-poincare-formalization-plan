@@ -1942,6 +1942,9 @@ restricted chosen DeTurck solution, identify its exact named time set with the
 raw compact interval via `ofRawGaugeFlowOn`, and then project directly to
 gauge-reducible, intrinsic, or ordinary theorem packages once the selected
 gauge-pulled metric time derivative or scalar inner-derivative data is supplied.
+The selected layer also records the scalar/tensor time-derivative equivalence,
+so endpoint projections can consume or recover the selected scalar derivative
+package without unfolding the gauge-pulled metric theorem.
 It also has `ofRawGaugeFlowOn_restrictTimeSet` and
 `ofRawGaugeFlowOn_restrictSymmetricIcc`, with proof-level `nonempty_...`
 versions, so callers can start from an ambient chosen DeTurck solution plus the

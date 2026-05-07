@@ -11710,6 +11710,39 @@ theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
   G.solution.1.gaugeCorrectedPullbackMetric_hasTimeDerivativeOn_of_inner_hasDerivAt
     G.gauge hinner
 
+/-- The tensor time-derivative package for the selected gauge-pulled metric
+recovers the scalar inner-product derivative data. -/
+theorem pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hpullDerivative : HasTimeDerivativeOn (I := I) (M := M)
+      (G.gauge.maps.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet) :
+    G.PullbackMetricInnerDerivativeData := by
+  intro t ht x u v
+  simpa using
+    G.solution.1.gaugeCorrectedPullbackMetric_inner_hasDerivAt_of_hasTimeDerivativeOn
+      G.gauge hpullDerivative ht x u v
+
+/-- Selected scalar inner-product derivative data is equivalent to the tensor
+time-derivative package required by gauge reduction. -/
+theorem pullbackMetricInnerDerivativeData_iff_hasTimeDerivativeOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    G.PullbackMetricInnerDerivativeData ↔
+      HasTimeDerivativeOn (I := I) (M := M)
+        (G.gauge.maps.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+        (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+        G.solution.1.toIntrinsicDeTurckSolution.timeSet := by
+  constructor
+  · intro hinner
+    exact G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner
+  · intro hpullDerivative
+    exact G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn hpullDerivative
+
 end SelectedIntrinsicDeTurckGaugeFlowExistence
 
 /-- Theorem-family selected raw intrinsic DeTurck `C^3` gauge-flow data: one
@@ -12069,6 +12102,43 @@ theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
   (G.forInitialValueProblem ivp).hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
     (hinner ivp)
 
+/-- The tensor time-derivative packages for a theorem-family selected raw
+gauge-flow witness recover the selected scalar inner-product derivative data. -/
+theorem pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hpullDerivative :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        HasTimeDerivativeOn (I := I) (M := M)
+          ((G.gauge ivp).maps.pullbackMetricFamily
+            (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+          ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            (G.gauge ivp))
+          (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet) :
+    G.PullbackMetricInnerDerivativeData := by
+  intro ivp
+  exact (G.forInitialValueProblem ivp).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (hpullDerivative ivp)
+
+/-- Theorem-family selected scalar inner-product derivative data is equivalent
+to the tensor time-derivative packages required by gauge reduction. -/
+theorem pullbackMetricInnerDerivativeData_iff_hasTimeDerivativeOn
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) :
+    G.PullbackMetricInnerDerivativeData ↔
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        HasTimeDerivativeOn (I := I) (M := M)
+          ((G.gauge ivp).maps.pullbackMetricFamily
+            (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+          ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            (G.gauge ivp))
+          (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet := by
+  constructor
+  · intro hinner ivp
+    exact G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner ivp
+  · intro hpullDerivative
+    exact G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn hpullDerivative
+
 end SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
 
 /-- A fixed-IVP chosen-background DeTurck theorem package becomes
@@ -12137,6 +12207,34 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducibl
       (E := E) (H := H) (I := I) (M := M) ivp :=
   pkg.toGaugeReducible_viaSelectedGaugeFlowExistenceTimeDerivative
     G (G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner)
+
+/-- Fixed-IVP intrinsic Ricci-flow projection from one selected raw intrinsic
+`C^3` gauge-flow witness and scalar derivative data for the selected
+gauge-pulled metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toGaugeReducible_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    G hinner).toIntrinsic
+
+/-- Fixed-IVP ordinary Ricci-flow projection from one selected raw intrinsic
+`C^3` gauge-flow witness and scalar derivative data for the selected
+gauge-pulled metric. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (pkg.toIntrinsic_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    G hinner).toOrdinary
 
 /-- A fixed-IVP chosen-background DeTurck theorem package becomes
 scalar-derivative gauge-reducible from one selected raw intrinsic `C^3`
@@ -12229,6 +12327,32 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeRe
       (E := E) (H := H) (I := I) (M := M) :=
   pkg.toGaugeReducible_viaSelectedGaugeFlowExistenceTimeDerivative
     G (G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData hinner)
+
+/-- Intrinsic Ricci-flow theorem-family projection from selected raw intrinsic
+`C^3` gauge-flow witnesses and scalar derivative data for the selected
+gauge-pulled metrics. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toIntrinsicFamily_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toGaugeReducible_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    G hinner).toIntrinsicFamily
+
+/-- Ordinary Ricci-flow theorem-family projection from selected raw intrinsic
+`C^3` gauge-flow witnesses and scalar derivative data for the selected
+gauge-pulled metrics. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinaryFamily_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hinner : G.PullbackMetricInnerDerivativeData) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (pkg.toIntrinsicFamily_viaSelectedGaugeFlowExistencePullbackMetricInnerDerivative
+    G hinner).toOrdinary
 
 /-- A theorem family of chosen-background DeTurck packages becomes
 scalar-derivative gauge-reducible from selected raw intrinsic `C^3` gauge-flow
