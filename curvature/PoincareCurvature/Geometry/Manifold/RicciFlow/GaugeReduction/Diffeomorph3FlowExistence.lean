@@ -11462,6 +11462,102 @@ def gauge
       (E := E) (H := H) (I := I) (M := M) ivp) :
     G.gauge.follows = G.flow.satisfies := rfl
 
+/-- Centered preferred-chart derivative data extracted from a selected raw
+intrinsic DeTurck gauge-flow witness. -/
+theorem chartDerivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn (I := I) (M := M)
+      G.flow.maps3
+      G.solution.1.toIntrinsicDeTurckSolution.metric
+      G.solution.1.toIntrinsicDeTurckSolution.background
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.flow.toIntrinsicChartDerivativeOn
+
+/-- Primitive derivative data extracted from a selected raw intrinsic DeTurck
+gauge-flow witness. -/
+theorem derivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn (I := I) (M := M)
+      G.flow.maps3
+      G.solution.1.toIntrinsicDeTurckSolution.metric
+      G.solution.1.toIntrinsicDeTurckSolution.background
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.flow.toIntrinsicDerivativeOn
+
+/-- Ordinary centered preferred-chart derivative data extracted from a selected
+raw intrinsic DeTurck gauge-flow witness on any time subset where the selected
+solution time set is a neighborhood of each time. -/
+theorem chartDerivativeAtData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {u : Set ℝ}
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ u → G.solution.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn (I := I) (M := M)
+      G.flow.maps3
+      G.solution.1.toIntrinsicDeTurckSolution.metric
+      G.solution.1.toIntrinsicDeTurckSolution.background
+      u :=
+  G.flow.toIntrinsicChartDerivativeAtOn hs
+
+/-- Ordinary primitive derivative data extracted from a selected raw intrinsic
+DeTurck gauge-flow witness on any time subset where the selected solution time
+set is a neighborhood of each time. -/
+theorem derivativeAtData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {u : Set ℝ}
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ u → G.solution.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+      G.flow.maps3
+      G.solution.1.toIntrinsicDeTurckSolution.metric
+      G.solution.1.toIntrinsicDeTurckSolution.background
+      u :=
+  G.flow.toIntrinsicDerivativeAtOn hs
+
+/-- Open-Picard ordinary centered preferred-chart derivative data extracted from
+a selected raw intrinsic DeTurck gauge-flow witness on any subset of the
+selected solution time set. -/
+theorem chartDerivativeAtData_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ℝ)
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    {u : Set ℝ}
+    (hu : u ⊆ G.solution.1.toIntrinsicDeTurckSolution.timeSet) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn (I := I) (M := M)
+      G.flow.maps3
+      G.solution.1.toIntrinsicDeTurckSolution.metric
+      G.solution.1.toIntrinsicDeTurckSolution.background
+      u :=
+  G.chartDerivativeAtData
+    (fun {t} ht ↦ G.flow.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet (hu ht))
+
+/-- Open-Picard ordinary primitive derivative data extracted from a selected raw
+intrinsic DeTurck gauge-flow witness on any subset of the selected solution time
+set. -/
+theorem derivativeAtData_of_timeSet_eq_Ioo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ℝ)
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    {u : Set ℝ}
+    (hu : u ⊆ G.solution.1.toIntrinsicDeTurckSolution.timeSet) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+      G.flow.maps3
+      G.solution.1.toIntrinsicDeTurckSolution.metric
+      G.solution.1.toIntrinsicDeTurckSolution.background
+      u :=
+  G.derivativeAtData
+    (fun {t} ht ↦ G.flow.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet (hu ht))
+
 /-- Fixed-IVP selected raw gauge-flow existence from a raw flow on a named time
 set identified with the selected solution's exact time set. -/
 noncomputable def ofRawGaugeFlowOn
@@ -11699,6 +11795,106 @@ def gauge
       (E := E) (H := H) (I := I) (M := M))
     (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
     (G.gauge ivp).maps = (G.flow ivp).maps3 := rfl
+
+/-- Centered preferred-chart derivative data extracted from a theorem-family
+selected raw intrinsic DeTurck gauge-flow witness. -/
+theorem chartDerivativeData
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn (I := I) (M := M)
+      (G.flow ivp).maps3
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.background
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).chartDerivativeData
+
+/-- Primitive derivative data extracted from a theorem-family selected raw
+intrinsic DeTurck gauge-flow witness. -/
+theorem derivativeData
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn (I := I) (M := M)
+      (G.flow ivp).maps3
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.background
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).derivativeData
+
+/-- Ordinary centered preferred-chart derivative data extracted from a
+theorem-family selected raw intrinsic DeTurck gauge-flow witness whenever each
+selected solution time set is a neighborhood of each selected time. -/
+theorem chartDerivativeAtData
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ ⦃t : ℝ⦄, t ∈ (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet →
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn (I := I) (M := M)
+      (G.flow ivp).maps3
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.background
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).chartDerivativeAtData (htime ivp)
+
+/-- Ordinary primitive derivative data extracted from a theorem-family selected
+raw intrinsic DeTurck gauge-flow witness whenever each selected solution time
+set is a neighborhood of each selected time. -/
+theorem derivativeAtData
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (htime : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ ⦃t : ℝ⦄, t ∈ (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet →
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+      (G.flow ivp).maps3
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.background
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).derivativeAtData (htime ivp)
+
+/-- Open-Picard ordinary centered preferred-chart derivative data extracted from
+a theorem-family selected raw intrinsic DeTurck gauge-flow witness on any subset
+of the selected solution time set. -/
+theorem chartDerivativeAtData_of_timeSet_eq_Ioo
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : InitialValueProblem (E := E) (H := H) (I := I) (M := M) → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp) (tmax ivp))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    {u : Set ℝ}
+    (hu : u ⊆ (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn (I := I) (M := M)
+      (G.flow ivp).maps3
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.background
+      u :=
+  (G.forInitialValueProblem ivp).chartDerivativeAtData_of_timeSet_eq_Ioo
+    (tmin ivp) (tmax ivp) (htimeSet ivp) hu
+
+/-- Open-Picard ordinary primitive derivative data extracted from a
+theorem-family selected raw intrinsic DeTurck gauge-flow witness on any subset
+of the selected solution time set. -/
+theorem derivativeAtData_of_timeSet_eq_Ioo
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (tmin tmax : InitialValueProblem (E := E) (H := H) (I := I) (M := M) → ℝ)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet = Ioo (tmin ivp) (tmax ivp))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    {u : Set ℝ}
+    (hu : u ⊆ (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn (I := I) (M := M)
+      (G.flow ivp).maps3
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.background
+      u :=
+  (G.forInitialValueProblem ivp).derivativeAtData_of_timeSet_eq_Ioo
+    (tmin ivp) (tmax ivp) (htimeSet ivp) hu
 
 /-- Theorem-family selected raw gauge-flow existence from raw flows on named
 time sets identified with the selected solutions' exact time sets. -/
