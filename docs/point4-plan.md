@@ -2477,8 +2477,11 @@ separate fixed-target source-membership input.  At the smooth-realization
 scalar-selector layer,
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`
 now offers the same readout-lifted input shape while preserving the existing
-geometric-slot scalar identity. Thus downstream scalar selectors can consume
-manifold-side `EqOn` gluing data directly. The readout/mem-ball route now also
+geometric-slot scalar identity. Its tensor-level companion
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`
+promotes that component package to `HasTimeDerivativeOn` using the raw
+gauge-flow coordinate/geometric equality, so downstream scalar selectors can
+consume manifold-side `EqOn` gluing data directly. The readout/mem-ball route now also
 has closed-interval local-gluing readout lemmas, a source-coordinate Picard
 derivative package, component and raw source-derivative endpoints, and the
 fixed-IVP indexed data bridge.  The remaining dynamic obligations are therefore
