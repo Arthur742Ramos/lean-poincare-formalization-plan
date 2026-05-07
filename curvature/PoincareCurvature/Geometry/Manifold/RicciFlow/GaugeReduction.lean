@@ -99,6 +99,67 @@ abbrev intrinsicDeTurckGaugeField
     CovariantDerivative.TimeDependentVectorField (I := I) (M := M) :=
   fun t x ↦ -intrinsicDeTurckVectorField (I := I) (M := M) g background t x
 
+/-- The reverse DeTurck gauge field contributes the negative of the intrinsic
+DeTurck correction once the Lie-derivative slots are written with the
+Levi-Civita derivative of the gauge field.
+
+The differentiability hypothesis is only used to apply the covariant-derivative
+constant-scalar rule to the section
+`intrinsicDeTurckVectorField g background t`. -/
+theorem intrinsicDeTurckGaugeField_lieCorrection_eq_neg_intrinsicDeTurckCorrection
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x)
+    (hW : MDiffAt (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x) :
+    (g t).inner x
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) x u) v +
+      (g t).inner x u
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) x v) =
+      -intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v := by
+  let cov := (chosenLeviCivitaFamily (I := I) (M := M) g) t
+  let W : Π y : M, TM y :=
+    intrinsicDeTurckVectorField (I := I) (M := M) g background t
+  have hcov_neg :
+      cov (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) x =
+        (-1 : ℝ) • cov W x := by
+    simpa [cov, W, intrinsicDeTurckGaugeField] using
+      (IsCovariantDerivativeOn.smul_const
+        (F := E) (V := TM)
+        (hcov := cov.isCovariantDerivativeOnUniv)
+        (a := (-1 : ℝ)) (σ := W) (x := x) (hσ := by simpa [W] using hW))
+  have hcov_neg_u :
+      cov (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) x u =
+        -cov W x u := by
+    simpa using congrArg (fun A : TM x →L[ℝ] TM x ↦ A u) hcov_neg
+  have hcov_neg_v :
+      cov (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) x v =
+        -cov W x v := by
+    simpa using congrArg (fun A : TM x →L[ℝ] TM x ↦ A v) hcov_neg
+  rw [hcov_neg_u, hcov_neg_v]
+  change
+    ((g t).inner x (-(cov W x u))) v + ((g t).inner x u) (-(cov W x v)) =
+      -(((g t).inner x (cov W x u)) v + ((g t).inner x u) (cov W x v))
+  have hneg_left :
+      ((g t).inner x (-(cov W x u))) v =
+        -((g t).inner x (cov W x u)) v := by
+    have hneg_left_map :
+        (g t).inner x (-(cov W x u)) =
+          -((g t).inner x (cov W x u)) := by
+      exact map_neg ((g t).inner x) (cov W x u)
+    calc
+      ((g t).inner x (-(cov W x u))) v =
+          (-((g t).inner x (cov W x u))) v := by rw [hneg_left_map]
+      _ = -((g t).inner x (cov W x u)) v := rfl
+  have hneg_right :
+      ((g t).inner x u) (-(cov W x v)) =
+        -((g t).inner x u) (cov W x v) := by
+    exact map_neg ((g t).inner x u) (cov W x v)
+  rw [hneg_left, hneg_right]
+  abel
+
 @[simp] theorem intrinsicDeTurckTraceEndomorphism_eq_connectionDifferenceTraceEndomorphism
     (g : MetricFamily (I := I) (M := M))
     (background : ConnectionFamily (I := I) (M := M))

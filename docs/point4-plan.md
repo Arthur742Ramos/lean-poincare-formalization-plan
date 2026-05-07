@@ -2509,6 +2509,15 @@ the gauge image. The scalar adapter now uses the direct bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricVelocity_eq_chartRHS_of_chartRHS_eq_intrinsic`,
 internally, deriving the smooth metric-velocity/chart-RHS equality from the
 realization equation and that pointwise chart-RHS/intrinsic-RHS identification.
+The smooth-realization layer also has the narrower Lie-correction wrapper
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection`,
+which derives the signed correction input from `MDiffAt` regularity of the
+intrinsic DeTurck vector-field section and a coordinate identity with the
+Levi-Civita derivative of `intrinsicDeTurckGaugeField`. The underlying
+raw-gauge bridge is
+`Diffeomorph3GaugeFlowOn.Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection`,
+which isolates the remaining coordinate chain-rule calculation from the
+DeTurck sign algebra.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
