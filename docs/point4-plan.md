@@ -1965,6 +1965,12 @@ It also has `ofRawGaugeFlowOn_restrictTimeSet` and
 versions, so callers can start from an ambient chosen DeTurck solution plus the
 raw flow on the restricted interval and obtain the selected package in one
 step.
+For open-Picard selected time sets, the selected raw-flow existence package now
+also has direct single-solution constructors from closed-`Icc` primitive
+derivative, centered-chart derivative, and fixed-chart ODE data, with matching
+proof-level `Nonempty` forms, so compact Picard output no longer has to be
+promoted to an all-candidates raw-flow family before selecting the solution to
+gauge-reduce.
 The older all-candidates fixed-IVP and theorem-family intrinsic layers also
 continue to expose `ofRawGaugeFlowOn` with proof-level
 `nonempty_ofRawGaugeFlowOn`, packaging raw witnesses on named time sets once

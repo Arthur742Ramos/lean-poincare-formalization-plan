@@ -11558,6 +11558,145 @@ theorem derivativeAtData_of_timeSet_eq_Ioo
   G.derivativeAtData
     (fun {t} ht ↦ G.flow.timeSet_mem_nhds_of_eq_Ioo tmin tmax htimeSet (hu ht))
 
+/-- Fixed-IVP selected raw gauge-flow existence on one selected open Picard
+time set from closed-Picard primitive derivative data. -/
+noncomputable def ofPicardIccDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 ivp.initialTime)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    (hderiv : Diffeomorph3IntrinsicGaugeFlowDerivativeOn (I := I) (M := M)
+      maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      (Icc tmin tmax)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp where
+  solution := sol
+  flow := by
+    have hflow : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background)
+        (Ioo tmin tmax) ivp.initialTime :=
+      Diffeomorph3GaugeFlowOn.of_intrinsicDerivativeOn_Ioo
+        (I := I) (M := M)
+        (g := sol.1.toIntrinsicDeTurckSolution.metric)
+        (background := sol.1.toIntrinsicDeTurckSolution.background)
+        (tmin := tmin) (tmax := tmax) (t₀ := ivp.initialTime)
+        maps3 anchored hderiv
+    simpa [htimeSet] using hflow
+
+/-- Proof-level selected raw gauge-flow existence on one selected open Picard
+time set from closed-Picard primitive derivative data. -/
+theorem nonempty_ofPicardIccDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 ivp.initialTime)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    (hderiv : Diffeomorph3IntrinsicGaugeFlowDerivativeOn (I := I) (M := M)
+      maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      (Icc tmin tmax)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofPicardIccDerivative sol maps3 anchored htimeSet hderiv⟩
+
+/-- Fixed-IVP selected raw gauge-flow existence on one selected open Picard
+time set from closed-Picard centered preferred-chart derivative data. -/
+noncomputable def ofPicardIccChartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 ivp.initialTime)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn (I := I) (M := M)
+      maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      (Icc tmin tmax)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  ofPicardIccDerivative (I := I) (M := M) sol maps3 anchored htimeSet
+    (Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_chartDerivativeOn
+      (I := I) (M := M) hchart)
+
+/-- Proof-level selected raw gauge-flow existence on one selected open Picard
+time set from closed-Picard centered preferred-chart derivative data. -/
+theorem nonempty_ofPicardIccChartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 ivp.initialTime)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    (hchart : Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn (I := I) (M := M)
+      maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      (Icc tmin tmax)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofPicardIccChartDerivative sol maps3 anchored htimeSet hchart⟩
+
+/-- Fixed-IVP selected raw gauge-flow existence on one selected open Picard
+time set from closed-Picard fixed-chart ODE data. -/
+noncomputable def ofPicardIccFixedChartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {chartCenter : ℝ → M → M}
+    {tmin tmax : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 ivp.initialTime)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      chartCenter (Icc tmin tmax)) :
+    SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  ofPicardIccChartDerivative (I := I) (M := M) sol maps3 anchored htimeSet
+    (Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.toChartDerivativeOn
+      (I := I) (M := M) hfixed)
+
+/-- Proof-level selected raw gauge-flow existence on one selected open Picard
+time set from closed-Picard fixed-chart ODE data. -/
+theorem nonempty_ofPicardIccFixedChartDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {chartCenter : ℝ → M → M}
+    {tmin tmax : ℝ}
+    (maps3 : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (anchored : SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
+      maps3 ivp.initialTime)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Ioo tmin tmax)
+    (hfixed : Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn
+      (I := I) (M := M) maps3
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background
+      chartCenter (Icc tmin tmax)) :
+    Nonempty (SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨ofPicardIccFixedChartDerivative sol maps3 anchored htimeSet hfixed⟩
+
 /-- Fixed-IVP selected raw gauge-flow existence from a raw flow on a named time
 set identified with the selected solution's exact time set. -/
 noncomputable def ofRawGaugeFlowOn
