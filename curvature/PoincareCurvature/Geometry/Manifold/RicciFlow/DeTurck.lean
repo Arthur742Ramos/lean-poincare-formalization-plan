@@ -618,6 +618,54 @@ theorem intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivativeOn
   exact intrinsicDeTurckVectorField_mdiffAt_of_connectionDifference_coeff
     (I := I) (M := M) g background t e b hu hu' hcoeff hx
 
+/-- A globally `C¹` background connection slice gives differentiability of the raised intrinsic
+DeTurck vector field at every point of that fixed time slice. -/
+theorem intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) :
+    MDiffAt (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x := by
+  classical
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  let e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M) :=
+    trivializationAt E TM x
+  letI : MemTrivializationAtlas e := by infer_instance
+  let b := Module.finBasis ℝ E
+  have hxbase : x ∈ e.baseSet := mem_baseSet_trivializationAt E TM x
+  have hchosenOn :
+      ContMDiffCovariantDerivativeOn E 1
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t).toFun e.baseSet := by
+    letI : CovariantDerivative.ContMDiffCovariantDerivative
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t) 1 :=
+      CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+        (I := I) (M := M) g t
+    exact CovariantDerivative.contMDiffCovariantDerivativeOn_of_contMDiffCovariantDerivative
+      (I := I) (E := E) (u := e.baseSet) e.open_baseSet
+  have hbackgroundOn :
+      ContMDiffCovariantDerivativeOn E 1 (background t).toFun e.baseSet := by
+    letI : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1 := hbackground
+    exact CovariantDerivative.contMDiffCovariantDerivativeOn_of_contMDiffCovariantDerivative
+      (I := I) (E := E) (u := e.baseSet) e.open_baseSet
+  exact intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivativeOn
+    (I := I) (M := M) g background t e b e.open_baseSet (subset_refl _)
+    hchosenOn hbackgroundOn hxbase
+
+/-- Fixed-time global version of
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background`. -/
+theorem intrinsicDeTurckVectorField_mdiff_of_contMDiffCovariantDerivative_background
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    MDiff (T% (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) := by
+  intro x
+  exact intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background
+    (I := I) (M := M) g background t hbackground x
+
 /-- Global version of
 `intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm`. -/
 theorem intrinsicDeTurckVectorField_mdiff_of_contMDiff_intrinsicDeTurckOneForm

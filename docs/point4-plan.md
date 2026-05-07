@@ -2595,6 +2595,13 @@ the chosen-Levi-Civita/background slices directly. The residual gap is no
 longer the trace algebra, but the local production of those
 `ContMDiffCovariantDerivativeOn` packages for the relevant slices in the
 chart-local gauge-flow setting.
+The fixed-time route has also been globalized for smooth background slices:
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background`
+and
+`intrinsicDeTurckVectorField_mdiff_of_contMDiffCovariantDerivative_background`
+derive the DeTurck vector-field differentiability directly from
+`ContMDiffCovariantDerivative (background t) 1`; the chosen Levi-Civita slice is
+localized automatically using the existing smooth-slice theorem.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
