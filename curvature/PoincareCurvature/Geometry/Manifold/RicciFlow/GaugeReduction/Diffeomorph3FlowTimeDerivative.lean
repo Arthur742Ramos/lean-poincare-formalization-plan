@@ -30839,6 +30839,117 @@ theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_b
     (G.variationalTangentMapReadoutMemBallDerivativeDataOnIoo_of_iUnion_Icc_cover_source_hasFDerivAt
       α Fₗ U hcover hreadout hflow_deriv hdata)
 
+/-- Selected compact-witness tensor time derivative with the
+state-preserving closed-ball Picard estimates supplying the model-flow
+source-coordinate derivative.
+
+Compared with
+`hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_of_timeSet_eq_Icc`,
+callers no longer provide `hflow_deriv`: it is derived from the selected
+restricted componentwise Picard flow. -/
+theorem hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_timeSet_eq_Icc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    {tmin0 tmax0 : ℝ} {tbase : Icc tmin0 tmax0}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {a R Kf KD Lf BA BD r : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin0 tmax0, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin0 tmax0, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin0 tmax0, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : E →L[ℝ] E) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin0 tmax0, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a,
+      ContinuousOn (fun t : ℝ => f t y) (Icc tmin0 tmax0))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a,
+      ContinuousOn (fun t : ℝ => Df t y) (Icc tmin0 tmax0))
+    (hmul : (max Lf (BD * BA)) * max (tmax0 - tbase) (tbase - tmin0) ≤ a - R)
+    (htime : Icc tmin tmax ⊆ Icc tmin0 tmax0)
+    (htbase : (tbase : ℝ) ∈ Icc tmin tmax)
+    (hr : r ≤ R)
+    (hder : ∀ τ ∈ Icc tmin0 tmax0, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df
+      (⟨(tbase : ℝ), htbase⟩ : Icc tmin tmax) x₀ r)
+    (hα : α =
+      ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        (t₀ := tbase) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul htime htbase hr)
+    {ι : Type*}
+    (Fₗ : ι → ℝ → M → M)
+    (U : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (fun z : M ↦ (G.flow.maps3 τ) z) (Fₗ i τ) W)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i → ∀ u v : TangentSpace I x,
+        ∃ B' : E →L[ℝ] E →L[ℝ] ℝ,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.flow.maps3
+                G.solution.1.toIntrinsicDeTurckSolution.metric t τ x)
+            B' t ∧
+          (extChartAt I x) x ∈ ball x₀ r ∧
+          (extChartAt I ((G.flow.maps3 t) x)).target ∈
+            𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (Fₗ i τ)
+                (fun z : M ↦ (extChartAt I ((G.flow.maps3 t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W) ∧
+          B'
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.flow.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) G.flow.maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.flow.maps3
+                G.solution.1.toIntrinsicDeTurckSolution.metric t t x
+                ((Df t (α.flow (((extChartAt I x) x), t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) G.flow.maps3 t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.flow.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) G.flow.maps3
+                G.solution.1.toIntrinsicDeTurckSolution.metric t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) G.flow.maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (((extChartAt I x) x), t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) G.flow.maps3 t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+              G.gauge t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo tmin tmax) := by
+  have hflow_deriv : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ ⦃xE : E⦄, xE ∈ ball x₀ r →
+        ∀ᶠ τ in 𝓝 t,
+          HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+            (α.tangent xE τ) xE := by
+    simpa [hα] using
+      (ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_source_eventually_flow_timeSlice_hasFDerivAt_of_hasFDerivWithinAt_Ioo_of_le_radius
+        (t₀ := tbase) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul htime htbase hr hder)
+  exact
+    G.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_of_timeSet_eq_Icc
+      htimeSet α Fₗ U hcover hreadout hflow_deriv hdata
+
 end SelectedIntrinsicDeTurckGaugeFlowExistence
 
 namespace SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
@@ -31246,6 +31357,106 @@ theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_b
       (Ioo tmin tmax) :=
   (G.forInitialValueProblem ivp).hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_of_timeSet_eq_Icc
     htimeSet α Fₗ U hcover hreadout hflow_deriv hdata
+
+/-- Theorem-family compact-witness route with the state-preserving closed-ball
+Picard estimates supplying the selected model-flow source-coordinate
+derivative. -/
+theorem hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_timeSet_eq_Icc
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    {tmin tmax : ℝ}
+    (htimeSet : (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet =
+      Icc tmin tmax)
+    {tmin0 tmax0 : ℝ} {tbase : Icc tmin0 tmax0}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {a R Kf KD Lf BA BD r : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin0 tmax0, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin0 tmax0, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin0 tmax0, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : E →L[ℝ] E) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin0 tmax0, ∀ y ∈ closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a,
+      ContinuousOn (fun t : ℝ => f t y) (Icc tmin0 tmax0))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a,
+      ContinuousOn (fun t : ℝ => Df t y) (Icc tmin0 tmax0))
+    (hmul : (max Lf (BD * BA)) * max (tmax0 - tbase) (tbase - tmin0) ≤ a - R)
+    (htime : Icc tmin tmax ⊆ Icc tmin0 tmax0)
+    (htbase : (tbase : ℝ) ∈ Icc tmin tmax)
+    (hr : r ≤ R)
+    (hder : ∀ τ ∈ Icc tmin0 tmax0, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df
+      (⟨(tbase : ℝ), htbase⟩ : Icc tmin tmax) x₀ r)
+    (hα : α =
+      ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        (t₀ := tbase) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul htime htbase hr)
+    {ι : Type*}
+    (Fₗ : ι → ℝ → M → M)
+    (U : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (fun z : M ↦ ((G.flow ivp).maps3 τ) z) (Fₗ i τ) W)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i → ∀ u v : TangentSpace I x,
+        ∃ B' : E →L[ℝ] E →L[ℝ] ℝ,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) (G.flow ivp).maps3
+                (G.solution ivp).1.toIntrinsicDeTurckSolution.metric t τ x)
+            B' t ∧
+          (extChartAt I x) x ∈ ball x₀ r ∧
+          (extChartAt I (((G.flow ivp).maps3 t) x)).target ∈
+            𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (Fₗ i τ)
+                (fun z : M ↦ (extChartAt I (((G.flow ivp).maps3 t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W) ∧
+          B'
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) (G.flow ivp).maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) (G.flow ivp).maps3 t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) (G.flow ivp).maps3
+                (G.solution ivp).1.toIntrinsicDeTurckSolution.metric t t x
+                ((Df t (α.flow (((extChartAt I x) x), t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) (G.flow ivp).maps3 t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) (G.flow ivp).maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) (G.flow ivp).maps3
+                (G.solution ivp).1.toIntrinsicDeTurckSolution.metric t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) (G.flow ivp).maps3 t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (((extChartAt I x) x), t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) (G.flow ivp).maps3 t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            (G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+              (G.gauge ivp) t x u v) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      (Ioo tmin tmax) :=
+  (G.forInitialValueProblem ivp).hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_timeSet_eq_Icc
+    htimeSet hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont
+    hmul htime htbase hr hder α hα Fₗ U hcover hreadout hdata
 
 end SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
 

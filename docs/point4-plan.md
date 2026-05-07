@@ -2660,6 +2660,12 @@ the compact-witness endpoint
 and the theorem-family analogue, which combine a closed-interval finite source
 cover, selected local readout equality, model-flow spatial derivative data, and
 the lifted-model/value hypotheses into the selected tensor time derivative.
+The Picard-estimate-specialized endpoints
+`SelectedIntrinsicDeTurckGaugeFlowExistence.hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_timeSet_eq_Icc`
+and the theorem-family analogue now discharge that model-flow spatial
+derivative input directly from the state-preserving component closed-ball
+continuity estimates, leaving the compact source cover/readout and the
+lifted-model/value hypotheses as the selected-route inputs.
 The compact local-gluing existence layer now retains those selected certificates
 too:
 `SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_with_finiteSubcover_Icc_subset_cover_readout_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
@@ -2667,10 +2673,10 @@ constructs the restricted selected raw gauge-flow witness while preserving the
 finite source subcover, the closed-interval subset proof, and the selected
 local readout equality.
 The remaining dynamic obligations are therefore narrowed to supplying those
-compact-witness hypotheses from the selected gauge-flow construction, proving
-the lifted model equality in the exact target charts selected by the
-time-derivative route, and proving the spatial/tangent correction identity from
-the selected gauge-flow/PDE construction. The
+compact-witness cover/readout certificates from the selected gauge-flow
+construction, proving the lifted model equality in the exact target charts
+selected by the time-derivative route, and proving the spatial/tangent
+correction identity from the selected gauge-flow/PDE construction. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
