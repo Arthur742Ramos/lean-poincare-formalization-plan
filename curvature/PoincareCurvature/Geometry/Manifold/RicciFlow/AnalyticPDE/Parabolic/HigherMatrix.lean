@@ -429,6 +429,50 @@ theorem exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries {n : Type
           (parabolicCoordinateUnitVector n a) (parabolicCoordinateUnitVector n b))
       hM0 hD hH hδpos hdet)
 
+set_option maxHeartbeats 1000000 in
+/-- Finite-family version of
+`exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries`, packaged as one Pi-valued
+`C^{0,α}` estimate for the family of schematic Ricci-DeTurck coordinate RHS fields. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries
+    {κ n : Type*} [Fintype κ] [Fintype n] [DecidableEq n]
+    {R : κ → n → n → ℝ} {δ : ℝ} {s : Set (ℝ × (n → ℝ))}
+    {M : κ → ℝ × (n → ℝ) → Matrix n n ℝ}
+    (hM : ∀ r i j, ParabolicC2AlphaNormLe (R r i j) α (fun z => M r z i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × (n → ℝ)⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∃ J : ∀ r i j, ParabolicSecondJet (fun z : ℝ × (n → ℝ) => M r z i j) s,
+      ParabolicC0AlphaNormLe
+        (∑ r, ricciDeTurckSchematicMatrixBoundConst (n := n) δ (R r)
+          (firstDerivativeCoordinateRadius (n := n) (R r))
+          (secondDerivativeCoordinateRadius (n := n) (R r)))
+        α
+        (fun z : ℝ × (n → ℝ) => fun r : κ =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M r z)
+            (fun a i j => (J r i j).spaceDeriv z (parabolicCoordinateUnitVector n a))
+            (fun a b i j =>
+              (J r i j).spaceSecondDeriv z
+                (parabolicCoordinateUnitVector n a) (parabolicCoordinateUnitVector n b))) s := by
+  classical
+  choose J hJ using fun r =>
+    exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries
+      (α := α) (R := R r) (δ := δ) (s := s) (M := M r)
+      (hM r) hδpos (hdet r)
+  refine ⟨J, ?_⟩
+  exact ParabolicC0AlphaNormLe.pi (X := n → ℝ) (α := α) (s := s)
+    (N := fun r =>
+      ricciDeTurckSchematicMatrixBoundConst (n := n) δ (R r)
+        (firstDerivativeCoordinateRadius (n := n) (R r))
+        (secondDerivativeCoordinateRadius (n := n) (R r)))
+    (u := fun z : ℝ × (n → ℝ) => fun r : κ =>
+      ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r z)
+        (fun a i j => (J r i j).spaceDeriv z (parabolicCoordinateUnitVector n a))
+        (fun a b i j =>
+          (J r i j).spaceSecondDeriv z
+            (parabolicCoordinateUnitVector n a) (parabolicCoordinateUnitVector n b)))
+    hJ
+
 /-- Entrywise higher parabolic difference controls with radii linear in a shared scalar give a
 pointwise matrix-norm difference bound with the summed entry radius. -/
 theorem matrix_norm_sub_le_sum_mul_of_entries {m n : Type*}
