@@ -6976,6 +6976,106 @@ theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMa
     eventually_variationalFlow_extChartAt_mem_target_of_mem_ball_Ioo
       (I := I) (M := M) Φ α hxball (hsIoo ht) htarget_nhds
 
+/-- Indexed-cover tangent-map derivative route where the variational model-flow
+spatial derivative is supplied once at source coordinates.
+
+The finite cover selects the local readout used near each base point; the
+remaining local data only has to provide source-ball membership, the target
+chart neighborhood, and the lifted readout equality. -/
+theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn
+    {ι : Type*}
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0} {s : Set ℝ}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hsIoo : s ⊆ Ioo tmin tmax)
+    (Fₗ : ι → ℝ → M → M)
+    (U : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ s → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (fun z : M ↦ (Φ τ) z) (Fₗ i τ) W)
+    (hflow_deriv : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ ⦃xE : E⦄, xE ∈ ball x₀ r →
+        ∀ᶠ τ in 𝓝 t,
+          HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+            (α.tangent xE τ) xE)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        (extChartAt I x) x ∈ ball x₀ r ∧
+        (extChartAt I ((Φ t) x)).target ∈
+          𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (Fₗ i τ)
+              (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+                (α.flow ((extChartAt I x) z, τ))) W) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ D : E →L[ℝ] E,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t := by
+  refine
+    pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_mem_ball_lifted_eqOn_hasFDerivAt
+      (I := I) (M := M) (Φ := Φ) α hsIoo ?_
+  intro t ht x
+  rcases Set.mem_iUnion.mp ((hcover ht) (by trivial : x ∈ (Set.univ : Set M))) with
+    ⟨i, hxi⟩
+  obtain ⟨hxball, htarget_nhds, heq⟩ := hdata ht i x hxi
+  refine ⟨(extChartAt I x) x, ball_subset_closedBall hxball, Fₗ i, ?_,
+    hreadout ht i x hxi, hxball, htarget_nhds, heq⟩
+  exact hflow_deriv ht hxball
+
+/-- Closed-interval-cover variant of
+`pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn`. -/
+theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn
+    {ι : Type*}
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0} {s : Set ℝ}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hsIoo : s ⊆ Ioo tmin tmax)
+    (Fₗ : ι → ℝ → M → M)
+    (U : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (fun z : M ↦ (Φ τ) z) (Fₗ i τ) W)
+    (hflow_deriv : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ ⦃xE : E⦄, xE ∈ ball x₀ r →
+        ∀ᶠ τ in 𝓝 t,
+          HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+            (α.tangent xE τ) xE)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        (extChartAt I x) x ∈ ball x₀ r ∧
+        (extChartAt I ((Φ t) x)).target ∈
+          𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (Fₗ i τ)
+              (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+                (α.flow ((extChartAt I x) z, τ))) W) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ D : E →L[ℝ] E,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t :=
+  pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn
+    (I := I) (M := M) (Φ := Φ) α hsIoo Fₗ U
+    (fun {t} ht ↦ hcover (t := t) (Ioo_subset_Icc_self (hsIoo ht)))
+    hreadout hflow_deriv hdata
+
 /-- Closed-interval/right-derivative version of
 `pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`.
 

@@ -1894,8 +1894,13 @@ now has matching closed-interval-cover entry points
 and
 `ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentMapReadoutMemBallDerivativeDataOnIoo_of_iUnion_Icc_cover_source_hasFDerivAt`,
 which restrict that `Icc` source-cover certificate to the open interior before
-invoking the existing readout-local source-coordinate derivative routes.  More
-broadly, the compact
+invoking the existing readout-local source-coordinate derivative routes.  The
+underlying tangent-map layer now has the same indexed-cover handoff through
+`SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn`
+and its closed-interval-cover companion
+`..._readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn`, so
+selected compact finite covers can feed the tangent-coordinate derivative route
+before metric-component scalar data is introduced.  More broadly, the compact
 raw existence
 theorems combine
 the ambient time set, ambient local regularity, and the open-preimage
