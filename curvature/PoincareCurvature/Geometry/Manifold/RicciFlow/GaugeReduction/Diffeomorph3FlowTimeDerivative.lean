@@ -30813,6 +30813,32 @@ theorem hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricOperatorDerivativeWit
   (G.forInitialValueProblem ivp).hasTimeDerivativeOn_Ioo_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData_of_timeSet_eq_Icc
     (htimeSet ivp) (hoperator ivp)
 
+/-- Theorem-family selected raw gauge-flow witnesses plus closed-Picard
+readout-local tangent-map data give tensor time-regularity for one selected
+gauge-pulled metric. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    {tmin tmax : ℝ}
+    (htimeSet : (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet =
+      Icc tmin tmax)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hdata :
+      (G.forInitialValueProblem ivp).VariationalTangentMapReadoutMemBallDerivativeDataOnIoo
+        tmin tmax α) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      (Ioo tmin tmax) :=
+  (G.forInitialValueProblem ivp).hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+    htimeSet α hdata
+
 end SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
 
 /-- A theorem-family chosen-background DeTurck package becomes gauge-reducible
