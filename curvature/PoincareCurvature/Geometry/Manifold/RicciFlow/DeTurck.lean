@@ -208,6 +208,65 @@ def intrinsicDeTurckVectorField
       exact CovariantDerivative.rieszMap (I := I) x
         (intrinsicDeTurckOneForm (I := I) (M := M) g background t x) := rfl
 
+/-- If the traced intrinsic DeTurck one-form is `C¹` at a fixed time, then
+raising it with the time-slice metric gives a differentiable intrinsic DeTurck
+vector-field section. -/
+theorem intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hω : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun y : M ↦ TM y →L[ℝ] ℝ) x
+        (intrinsicDeTurckOneForm (I := I) (M := M) g background t x)))
+    (x : M) :
+    MDiffAt (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x := by
+  classical
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  let e := trivializationAt E TM x
+  letI : MemTrivializationAtlas e := by infer_instance
+  let b := Module.finBasis ℝ E
+  have hxbase : x ∈ e.baseSet := mem_baseSet_trivializationAt E TM x
+  have hωon :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+        (fun y ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+          (E := fun z : M ↦ TM z →L[ℝ] ℝ) y
+          (intrinsicDeTurckOneForm (I := I) (M := M) g background t y)) e.baseSet :=
+    hω.contMDiffOn
+  have hW :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+        (fun y ↦ TotalSpace.mk' E y
+          (CovariantDerivative.rieszMap (I := I) y
+            (intrinsicDeTurckOneForm (I := I) (M := M) g background t y))) e.baseSet :=
+    CovariantDerivative.contMDiffOn_rieszMap_section
+      (I := I) (E := E) (M := M) (e := e) (b := b)
+      e.open_baseSet (by intro y hy; exact hy) hωon
+  have hWat :
+      ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1
+        (fun y ↦ TotalSpace.mk' E y
+          (CovariantDerivative.rieszMap (I := I) y
+            (intrinsicDeTurckOneForm (I := I) (M := M) g background t y))) x :=
+    (hW x hxbase).contMDiffAt (e.open_baseSet.mem_nhds hxbase)
+  simpa [intrinsicDeTurckVectorField] using hWat.mdifferentiableAt one_ne_zero
+
+/-- Global version of
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm`. -/
+theorem intrinsicDeTurckVectorField_mdiff_of_contMDiff_intrinsicDeTurckOneForm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hω : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun y : M ↦ TM y →L[ℝ] ℝ) x
+        (intrinsicDeTurckOneForm (I := I) (M := M) g background t x))) :
+    MDiff (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) := by
+  intro x
+  exact intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm
+    (I := I) (M := M) g background t hω x
+
 /-- On zero-dimensional tangent fibers, the intrinsic DeTurck vector field vanishes. -/
 theorem intrinsicDeTurckVectorField_eq_zero_of_subsingleton_tangent
     [∀ x : M, Subsingleton (TM x)]
