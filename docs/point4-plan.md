@@ -1781,7 +1781,13 @@ lifted readout route, with variational-flow, interior-Picard, and boundaryless
 `..._readout_continuousAt_lifted_eqOn_hasFDerivAt`, and
 `..._readout_mem_ball_lifted_eqOn_hasFDerivAt`, so callers can supply target
 membership, target-neighborhood continuity, or interior Picard ball data
-separately from the lifted `EqOn` proof.  On the model side,
+separately from the lifted `EqOn` proof.  The same readout inputs now also have
+eventual-equality forms
+`SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_eventuallyEq_of_variationalTangentMap_readout_lifted_eqOn_hasFDerivAt`,
+`..._readout_target_lifted_eqOn_hasFDerivAt`, and
+`..._readout_mem_ball_lifted_eqOn_hasFDerivAt`; these preserve the concrete
+identification with `α.tangent xE τ` for component routes whose value formula
+still needs the explicit `Df t (α.flow (xE,t))` coefficient.  On the model side,
 `ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_Icc_of_le_radius`
 dispatches the selected restricted Picard time slice to the forward or backward
 strict-derivative estimate, and
