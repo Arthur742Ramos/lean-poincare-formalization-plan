@@ -3461,6 +3461,8 @@ and reads back to `ParabolicC0AlphaOn` for the value component; the full
 submodule has linear maps for both continuous-linear value composition and
 forgetful inclusion into the existing `C^{0,α}` submodule. Higher norm balls
 now also give value-level pointwise norm and distance readouts,
+chosen-second-jet pointwise bounds for the value, spatial derivative, second
+spatial derivative, and time derivative under one common higher radius,
 positive-exponent continuity and uniform-continuity readouts, and
 continuous-linear-image `C^{0,α}` norm-ball controls, plus full
 higher-coordinate projections for finite Pi-valued functions. Existential

@@ -439,6 +439,21 @@ theorem exists_secondJet_c0AlphaNormLe_self (h : ParabolicC2AlphaNormLe N α u s
   exact ⟨J, hu.mono_const hNu_le, hx.mono_const hNx_le,
     hxx.mono_const hNxx_le, ht.mono_const hNt_le⟩
 
+/-- A higher single-radius bound supplies one chosen second jet whose value and
+derivative components are pointwise bounded by the same higher radius. -/
+theorem exists_secondJet_norm_le_self (h : ParabolicC2AlphaNormLe N α u s) :
+    ∃ J : ParabolicSecondJet u s,
+      (∀ ⦃z : ℝ × X⦄, z ∈ s → ‖u z‖ ≤ N) ∧
+        (∀ ⦃z : ℝ × X⦄, z ∈ s → ‖J.spaceDeriv z‖ ≤ N) ∧
+          (∀ ⦃z : ℝ × X⦄, z ∈ s → ‖J.spaceSecondDeriv z‖ ≤ N) ∧
+            (∀ ⦃z : ℝ × X⦄, z ∈ s → ‖J.timeDeriv z‖ ≤ N) := by
+  rcases h.exists_secondJet_c0AlphaNormLe_self with ⟨J, hu, hx, hxx, ht⟩
+  exact ⟨J,
+    (fun {_z} hz ↦ hu.norm_le hz),
+    (fun {_z} hz ↦ hx.norm_le hz),
+    (fun {_z} hz ↦ hxx.norm_le hz),
+    (fun {_z} hz ↦ ht.norm_le hz)⟩
+
 /-- The higher single radius controls the pointwise value norm on the domain. -/
 theorem norm_le (h : ParabolicC2AlphaNormLe N α u s) ⦃z : ℝ × X⦄ (hz : z ∈ s) :
     ‖u z‖ ≤ N :=
@@ -553,6 +568,19 @@ theorem exists_secondJet_c0AlphaOn (h : ParabolicC2AlphaOn α u s) :
   rcases h with ⟨N, _hN, hNu⟩
   rcases hNu.exists_secondJet_c0AlphaNormLe_self with ⟨J, hu, hx, hxx, ht⟩
   exact ⟨J, hu.c0AlphaOn, hx.c0AlphaOn, hxx.c0AlphaOn, ht.c0AlphaOn⟩
+
+/-- Higher parabolic membership supplies one chosen second jet and one common
+finite bound for the value, spatial derivative, second spatial derivative, and
+time derivative components. -/
+theorem exists_secondJet_norm_le (h : ParabolicC2AlphaOn α u s) :
+    ∃ N ≥ 0, ∃ J : ParabolicSecondJet u s,
+      (∀ ⦃z : ℝ × X⦄, z ∈ s → ‖u z‖ ≤ N) ∧
+        (∀ ⦃z : ℝ × X⦄, z ∈ s → ‖J.spaceDeriv z‖ ≤ N) ∧
+          (∀ ⦃z : ℝ × X⦄, z ∈ s → ‖J.spaceSecondDeriv z‖ ≤ N) ∧
+            (∀ ⦃z : ℝ × X⦄, z ∈ s → ‖J.timeDeriv z‖ ≤ N) := by
+  rcases h with ⟨N, hN, hNu⟩
+  rcases hNu.exists_secondJet_norm_le_self with ⟨J, hu, hx, hxx, ht⟩
+  exact ⟨N, hN, J, hu, hx, hxx, ht⟩
 
 theorem exists_timeDeriv (h : ParabolicC2AlphaOn α u s) :
     ∃ Dt : ℝ × X → E,
