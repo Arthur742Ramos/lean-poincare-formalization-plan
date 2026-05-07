@@ -3295,6 +3295,64 @@ theorem eventually_mem_extChartAt_source_eval_of_mem_source
   (G.continuousAt_eval hs x).preimage_mem_nhds
     ((isOpen_extChartAt_source (I := I) p).mem_nhds hsrc_ext)
 
+/-- A raw intrinsic DeTurck gauge-flow witness supplies centered preferred-chart
+ODE data on its time set. -/
+theorem toIntrinsicChartDerivativeOn
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background) s t₀) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn
+      (I := I) (M := M) G.maps3 g background s := by
+  intro t ht x
+  exact ⟨G.eventuallyWithin_mem_extChartAt_source_eval ht x,
+    by simpa using G.hasDerivWithinAt_extChartAt_eval_self ht x⟩
+
+/-- A raw intrinsic DeTurck gauge-flow witness supplies primitive intrinsic
+manifold derivative data on its time set. -/
+theorem toIntrinsicDerivativeOn
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background) s t₀) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeOn
+      (I := I) (M := M) G.maps3 g background s :=
+  Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_chartDerivativeOn
+    (I := I) (M := M) G.toIntrinsicChartDerivativeOn
+
+/-- A raw intrinsic DeTurck gauge-flow witness supplies ordinary centered
+preferred-chart ODE data on any time subset where the raw time set is a
+neighborhood of each selected time. -/
+theorem toIntrinsicChartDerivativeAtOn
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s u : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background) s t₀)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ u → s ∈ 𝓝 t) :
+    Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn
+      (I := I) (M := M) G.maps3 g background u := by
+  intro t ht x
+  exact ⟨G.eventually_mem_extChartAt_source_eval (hs ht) x,
+    by simpa using G.hasDerivAt_extChartAt_eval_self (hs ht) x⟩
+
+/-- A raw intrinsic DeTurck gauge-flow witness supplies ordinary primitive
+intrinsic manifold derivative data on any time subset where the raw time set is a
+neighborhood of each selected time. -/
+theorem toIntrinsicDerivativeAtOn
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s u : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background) s t₀)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ u → s ∈ 𝓝 t) :
+    Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
+      (I := I) (M := M) G.maps3 g background u :=
+  Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_chartDerivativeAtOn
+    (I := I) (M := M) (G.toIntrinsicChartDerivativeAtOn hs)
+
 /-- A raw intrinsic DeTurck gauge-flow witness supplies fixed-chart intrinsic
 ODE data on its time set, for any chart-center choice whose sources contain the
 corresponding flow images. -/

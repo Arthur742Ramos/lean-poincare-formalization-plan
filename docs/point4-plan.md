@@ -2801,8 +2801,15 @@ fixed-IVP, and theorem-family gauge-flow witnesses now also expose fixed-chart
 derivative, continuity, vector-field-congruence, and eventual source-membership
 readouts for any preferred chart whose source contains the time-slice image,
 which is the finite-cover shape needed for chartwise model-ODE and overlap
-arguments.  The derivative layer now has the matching proof-bearing input
-package: `Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn` and its
+arguments. Raw intrinsic DeTurck gauge-flow witnesses now also expose the
+centered preferred-chart and primitive intrinsic derivative packages directly via
+`Diffeomorph3GaugeFlowOn.toIntrinsicChartDerivativeOn`,
+`Diffeomorph3GaugeFlowOn.toIntrinsicDerivativeOn`,
+`Diffeomorph3GaugeFlowOn.toIntrinsicChartDerivativeAtOn`, and
+`Diffeomorph3GaugeFlowOn.toIntrinsicDerivativeAtOn`, so downstream arguments can
+consume the named centered derivative interfaces without first choosing an
+auxiliary fixed chart. The derivative layer now has the matching proof-bearing
+input package: `Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn` and its
 ordinary-time analogue accept closed-Picard ODE data in a chosen chart center
 `chartCenter t x`, prove the chart-transition conversion to the centered
 `Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn` packages by composing with
