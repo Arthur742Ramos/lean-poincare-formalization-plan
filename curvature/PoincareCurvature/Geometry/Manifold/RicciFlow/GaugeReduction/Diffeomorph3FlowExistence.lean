@@ -8483,6 +8483,70 @@ theorem nonempty_of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_loc
     hGcompat hUpreimage hWopen ht₀ hanchoredLocal hcontLocal hderivLocal
     hYLocal⟩
 
+/-- Interior-time ordinary-neighborhood readout equality for the closed-interval
+open-preimage `LocalGluingData` constructor.  This is the `Icc`-time-set
+counterpart of
+`of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_eventually_nhds_exists_eqOn_of_mem_Ioo`. -/
+theorem of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc_eventually_nhds_exists_eqOn_of_mem_Ioo
+    {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (hUcover : ∀ t ∈ Icc tmin tmax, Set.univ ⊆ ⋃ i, U t i)
+    (hVcover : ∀ t ∈ Icc tmin tmax, Set.univ ⊆ ⋃ i, V t i)
+    (hlocal : ∀ t ∈ Icc tmin tmax, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t ∈ Icc tmin tmax, ∀ i j, EqOn (Fₗ i t) (Fₗ j t)
+      (U t i ∩ U t j))
+    (hGcompat : ∀ t ∈ Icc tmin tmax, ∀ i j, EqOn (Gₗ i t) (Gₗ j t)
+      (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (ht₀ : t₀ ∈ Icc tmin tmax)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) (Icc tmin tmax) t)
+    (hderivLocal : ∀ i, ∀ t ∈ Icc tmin tmax, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) (Icc tmin tmax) t)
+    (hYLocal : ∀ t ∈ Icc tmin tmax, ∀ᶠ τ in 𝓝[Icc tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    ∀ t ∈ Ioo tmin tmax, ∀ i, ∀ x ∈ U t i,
+      ∀ᶠ τ in 𝓝 t,
+        ∃ W' : Set M, W' ∈ 𝓝 x ∧
+          EqOn
+            (fun z : M ↦
+              ((of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc
+                (I := I) (M := M) (X := X) (Y := Y)
+                (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+                defaultF defaultG Fₗ Gₗ U V W hUcover hVcover hlocal hFcompat
+                hGcompat hUpreimage hWopen ht₀ hanchoredLocal hcontLocal
+                hderivLocal hYLocal).maps3 τ) z)
+            (Fₗ i τ) W' := by
+  intro t ht i x hx
+  have hYIoo : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x) := by
+    intro s hs
+    exact (hYLocal s (Ioo_subset_Icc_self hs)).filter_mono
+      (nhdsWithin_mono s Ioo_subset_Icc_self)
+  have hreadout :=
+    of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_eventually_nhds_exists_eqOn_of_mem_Ioo
+      (I := I) (M := M) (X := X) (Y := Y)
+      (tmin := tmin) (tmax := tmax) (t₀ := t₀)
+      defaultF defaultG Fₗ Gₗ U V W hUcover hVcover hlocal hFcompat
+      hGcompat hUpreimage hWopen ht₀ hanchoredLocal hcontLocal hderivLocal
+      hYIoo t ht i x hx
+  simpa
+    [of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_Icc_timeDependent_iUnion_localGluingData_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_Icc_timeDependent_iUnion_localGluingData_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin]
+    using hreadout
+
 /-- Build a raw `C^3` gauge-flow witness from interval-local compatible
 `LocalGluingData` readouts when local continuity and derivative data are stated
 relative to a larger ambient time set containing the closed Picard interval. -/

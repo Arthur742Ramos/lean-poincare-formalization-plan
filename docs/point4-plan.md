@@ -1845,7 +1845,12 @@ matching
 `..._localGluingData_pointwiseSource_...` and
 `..._openPreimage_localGluingData_...` adapters preserve the named
 local-inverse-function package and derive pointwise source persistence from
-fixed open target-preimage patches.  The ambient-time-set variant
+fixed open target-preimage patches.  The closed-interval open-preimage readout
+lemma
+`Diffeomorph3GaugeFlowOn.of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc_eventually_nhds_exists_eqOn_of_mem_Ioo`
+now exposes the same ordinary-neighborhood local readout equality for the
+`Icc` raw flow consumed by the source-coordinate time-derivative endpoint.  The
+ambient-time-set variant
 `Diffeomorph3GaugeFlowOn.of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 restricts local continuity and derivative data from a larger solution time set
 to the chosen closed Picard interval using the interval-subset proof.  The
