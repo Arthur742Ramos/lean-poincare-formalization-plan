@@ -1957,6 +1957,9 @@ The same selected fixed-IVP and theorem-family closed-Picard interfaces now
 also expose the readout-local variational tangent-map handoff, so Banach/Picard
 tangent-map data can feed the selected gauge-pulled metric time derivative
 without reintroducing the all-candidate solution parameter.
+The selected fixed-IVP package has matching `iUnion` and closed-`Icc` source
+cover constructors, including the source-coordinate `HasFDerivAt` variant used
+by compact local variational-flow output.
 It also has `ofRawGaugeFlowOn_restrictTimeSet` and
 `ofRawGaugeFlowOn_restrictSymmetricIcc`, with proof-level `nonempty_...`
 versions, so callers can start from an ambient chosen DeTurck solution plus the
