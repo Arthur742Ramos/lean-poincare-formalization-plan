@@ -119,6 +119,26 @@ theorem hasDerivWithinAt_bilinearForm_apply_apply
     hfirst.clm_apply hv
   simpa [ContinuousLinearMap.add_apply, add_assoc] using hsecond
 
+/-- Applying the within Fréchet derivative of a bilinear-form-valued map to two
+constant slots is the same as differentiating the scalar slot evaluation. -/
+theorem fderivWithin_bilinearForm_apply_apply_const
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {s : Set V} {x : V} {B : V → V →L[ℝ] V →L[ℝ] ℝ}
+    (hB : DifferentiableWithinAt ℝ B s x) (hs : UniqueDiffWithinAt ℝ s x)
+    (X u v : V) :
+    (fderivWithin ℝ (fun y : V ↦ B y u v) s x) X =
+      (fderivWithin ℝ B s x) X u v := by
+  have hconstu : DifferentiableWithinAt ℝ (fun _ : V ↦ u) s x :=
+    differentiableWithinAt_const u
+  have hconstv : DifferentiableWithinAt ℝ (fun _ : V ↦ v) s x :=
+    differentiableWithinAt_const v
+  have hBu : DifferentiableWithinAt ℝ (fun y : V ↦ B y u) s x :=
+    hB.clm_apply hconstu
+  have hderivBu := fderivWithin_clm_apply hs hB hconstu
+  have hderivBuv := fderivWithin_clm_apply hs hBu hconstv
+  rw [hderivBuv, hderivBu]
+  simp [ContinuousLinearMap.flip_apply]
+
 /-- Within-set model-space chain rule for `B(t) (A(t) u) (A(t) v)`, the
 closed-interval coordinate form of a pulled-back metric component. -/
 theorem hasDerivWithinAt_bilinearForm_linear_apply_apply
@@ -2571,6 +2591,71 @@ theorem hasDerivAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp_deriv
     (B := B) (B' := B') (A := A) (D := D) (t := t) hB hA u v).congr_of_eventuallyEq
       heq
 
+/-- At the center of an extended chart, the exterior derivative of a scalar
+manifold function is the within Fréchet derivative of its chart expression. -/
+theorem extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_center
+    {φ : M → ℝ} {p : M} (hφ : MDiffAt φ p) (X : TangentSpace I p) :
+    extDerivFun (I := I) φ p X =
+      fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) p φ) (Set.range I)
+        ((extChartAt I p) p) X := by
+  let z : E := (extChartAt I p) p
+  have hz : z ∈ Set.range I := by
+    simp [z]
+  have hzsymm : (extChartAt I p).symm z = p := by
+    simp [z]
+  have hφ' : HasMFDerivAt I 𝓘(ℝ) φ ((extChartAt I p).symm z)
+      (mfderiv I 𝓘(ℝ) φ p) := by
+    convert hφ.hasMFDerivAt using 1
+  have hcomp :
+      HasMFDerivWithinAt 𝓘(ℝ, E) 𝓘(ℝ) (φ ∘ (extChartAt I p).symm)
+        (Set.range I) z
+        ((mfderiv I 𝓘(ℝ) φ p).comp
+          (mfderivWithin 𝓘(ℝ, E) I (extChartAt I p).symm (Set.range I) z)) := by
+    simpa [z] using
+      (HasMFDerivAt.comp_hasMFDerivWithinAt
+        (f := (extChartAt I p).symm) (s := Set.range I) (x := z)
+        hφ'
+        (mdifferentiableWithinAt_extChartAt_symm
+          (mem_extChartAt_target (I := I) p)).hasMFDerivWithinAt)
+  have hderiv :
+      fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) p φ) (Set.range I) z =
+        (((mfderiv I 𝓘(ℝ) φ p).comp
+          (mfderivWithin 𝓘(ℝ, E) I (extChartAt I p).symm (Set.range I) z)) :
+            E →L[ℝ] ℝ) := by
+    simpa [writtenInExtChartAt, z] using
+      hcomp.hasFDerivWithinAt.fderivWithin (I.uniqueDiffOn.uniqueDiffWithinAt hz)
+  rw [hderiv]
+  rw [mfderivWithin_range_extChartAt_symm]
+  change (mfderiv I 𝓘(ℝ) φ p) X =
+    (((mfderiv I 𝓘(ℝ) φ p).comp (ContinuousLinearMap.id ℝ E)) : E →L[ℝ] ℝ) X
+  rw [ContinuousLinearMap.comp_apply]
+  congr 1
+
+/-- Metric compatibility of the chosen Levi-Civita slice, specialized to the
+canonical `extend` sections through two tangent vectors. -/
+theorem chosenLeviCivitaFamily_extDerivFun_inner_extend_eq
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
+    (X u v : TangentSpace I p) :
+    extDerivFun (I := I)
+        (fun y : M ↦ (g t).inner y
+          (FiberBundle.extend E u y) (FiberBundle.extend E v y)) p X =
+      (g t).inner p
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (FiberBundle.extend E u) p X) v +
+      (g t).inner p u
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (FiberBundle.extend E v) p X) := by
+  let TM := (TangentSpace I : M → Type _)
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  have hlevi : (((chosenLeviCivitaFamily (I := I) (M := M) g) t)).IsLeviCivita := by
+    exact (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M) g) t
+  have hu : MDiffAt (T% (FiberBundle.extend E u)) p := by
+    simpa using FiberBundle.mdifferentiableAt_extend (I := I) (F := E) u
+  have hv : MDiffAt (T% (FiberBundle.extend E v)) p := by
+    simpa using FiberBundle.mdifferentiableAt_extend (I := I) (F := E) v
+  simpa using hlevi.2 (x := p) (σ := FiberBundle.extend E u)
+    (τ := FiberBundle.extend E v) hu hv X
+
 namespace SmoothSelfDiffeomorph3Family
 
 /-- The scalar derivative obligation for a `C^3` time-dependent diffeomorphism
@@ -4443,6 +4528,126 @@ theorem metricBilinearCoordinateField_base_sourceTangentCoordinate_eq
       (g t).inner p u v := by
   rw [metricBilinearCoordinateField_base_apply_eq]
   simp [sourceTangentCoordinate]
+
+/-- In the source chart of the center point, the metric-coordinate field
+evaluated on centered source tangent coordinates is the metric applied to the
+canonical `extend` sections generated by those tangent vectors. -/
+theorem metricBilinearCoordinateField_apply_sourceTangentCoordinate_eq_inner_extend
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p y : M)
+    (hy : y ∈ (extChartAt I p).source)
+    (u v : TangentSpace I p) :
+    metricBilinearCoordinateField (I := I) (M := M) g p
+        (t, (extChartAt I p) y)
+        (sourceTangentCoordinate (I := I) p u)
+        (sourceTangentCoordinate (I := I) p v) =
+      (g t).inner y (FiberBundle.extend E u y) (FiberBundle.extend E v y) := by
+  let TM := (TangentSpace I : M → Type _)
+  have hbase : y ∈ (trivializationAt E TM p).baseSet := by
+    simpa [TM, TangentBundle.trivializationAt_baseSet, extChartAt_source] using hy
+  have hy' : (extChartAt I p).symm ((extChartAt I p) y) = y :=
+    PartialEquiv.left_inv _ hy
+  change
+    (ContinuousLinearMap.inCoordinates E TM (E →L[ℝ] ℝ) (fun y : M ↦ TM y →L[ℝ] ℝ)
+      p ((extChartAt I p).symm ((extChartAt I p) y))
+      p ((extChartAt I p).symm ((extChartAt I p) y))
+      ((g t).inner ((extChartAt I p).symm ((extChartAt I p) y)))
+        (sourceTangentCoordinate (I := I) p u))
+        (sourceTangentCoordinate (I := I) p v) =
+      (g t).inner y (FiberBundle.extend E u y) (FiberBundle.extend E v y)
+  rw [hy']
+  erw [_root_.Bundle.trivializationAt_bilinearFormBundle_apply_eq
+    (F := E) (W := TM) (x0 := p) (x := y)
+    hbase ((g t).inner y)
+    (sourceTangentCoordinate (I := I) p u)
+    (sourceTangentCoordinate (I := I) p v)]
+  simp [sourceTangentCoordinate, FiberBundle.extend]
+
+/-- Fixed-time spatial derivative of the metric-coordinate field at the chart
+center, evaluated on centered source tangent coordinates, rewritten as the
+exterior derivative of the metric on the canonical `extend` sections. -/
+theorem metricBilinearCoordinateField_fixedTime_fderivWithin_sourceTangentCoordinate_eq_extDerivFun_extend
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
+    (X u v : TangentSpace I p) :
+    (fderivWithin ℝ
+      (fun yE : E ↦ metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+      (Set.range I) ((extChartAt I p) p)) X
+        (sourceTangentCoordinate (I := I) p u)
+        (sourceTangentCoordinate (I := I) p v) =
+      extDerivFun (I := I)
+        (fun y : M ↦ (g t).inner y
+          (FiberBundle.extend E u y) (FiberBundle.extend E v y)) p X := by
+  let z : E := (extChartAt I p) p
+  let cu : E := sourceTangentCoordinate (I := I) p u
+  let cv : E := sourceTangentCoordinate (I := I) p v
+  let B : E → E →L[ℝ] E →L[ℝ] ℝ :=
+    fun yE ↦ metricBilinearCoordinateField (I := I) (M := M) g p (t, yE)
+  let φ : M → ℝ :=
+    fun y ↦ (g t).inner y (FiberBundle.extend E u y) (FiberBundle.extend E v y)
+  have hBderiv : DifferentiableWithinAt ℝ B (Set.range I) z := by
+    exact (metricBilinearCoordinateField_fixedTime_hasFDerivWithinAt
+      (I := I) (M := M) g t p).differentiableWithinAt
+  have hslot :
+      (fderivWithin ℝ (fun yE : E ↦ B yE cu cv) (Set.range I) z) X =
+        (fderivWithin ℝ B (Set.range I) z) X cu cv :=
+    fderivWithin_bilinearForm_apply_apply_const hBderiv
+      (I.uniqueDiffOn.uniqueDiffWithinAt (by simp [z])) X cu cv
+  have hEq :
+      (fun yE : E ↦ B yE cu cv) =ᶠ[𝓝[Set.range I] z]
+        writtenInExtChartAt I 𝓘(ℝ) p φ := by
+    filter_upwards [extChartAt_target_mem_nhdsWithin p] with yE hyE
+    let y : M := (extChartAt I p).symm yE
+    have hy : y ∈ (extChartAt I p).source := (extChartAt I p).map_target hyE
+    have hyE_eq : (extChartAt I p) y = yE := by
+      simpa [y] using PartialEquiv.right_inv (extChartAt I p) hyE
+    calc
+      B yE cu cv = B ((extChartAt I p) y) cu cv := by rw [hyE_eq]
+      _ = φ y := by
+        simpa [B, φ, cu, cv] using
+          (metricBilinearCoordinateField_apply_sourceTangentCoordinate_eq_inner_extend
+            (I := I) (M := M) g t p y hy u v)
+      _ = writtenInExtChartAt I 𝓘(ℝ) p φ yE := by
+        rfl
+  have hfd_eq :
+      fderivWithin ℝ (fun yE : E ↦ B yE cu cv) (Set.range I) z =
+        fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) p φ) (Set.range I) z := by
+    exact hEq.fderivWithin_eq_of_mem (by simp [z])
+  have hφ_mdiff : MDiffAt φ p := by
+    let TM := (TangentSpace I : M → Type _)
+    letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+    have hu : MDiffAt (T% (FiberBundle.extend E u)) p := by
+      simpa using FiberBundle.mdifferentiableAt_extend (I := I) (F := E) u
+    have hv : MDiffAt (T% (FiberBundle.extend E v)) p := by
+      simpa using FiberBundle.mdifferentiableAt_extend (I := I) (F := E) v
+    simpa [φ] using CovariantDerivative.mdiffAt_inner_sections
+      (I := I) (E := E) (M := M) (x := p)
+      (σ := FiberBundle.extend E u) (τ := FiberBundle.extend E v) hu hv
+  rw [← hslot]
+  rw [hfd_eq]
+  exact (extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_center
+    (I := I) hφ_mdiff X).symm
+
+/-- Fixed-time spatial derivative of the metric-coordinate field at the chart
+center, rewritten through metric compatibility of the chosen Levi-Civita slice
+on the canonical `extend` sections. -/
+theorem metricBilinearCoordinateField_fixedTime_fderivWithin_sourceTangentCoordinate_eq_chosenLeviCivita_extend
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
+    (X u v : TangentSpace I p) :
+    (fderivWithin ℝ
+      (fun yE : E ↦ metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+      (Set.range I) ((extChartAt I p) p)) X
+        (sourceTangentCoordinate (I := I) p u)
+        (sourceTangentCoordinate (I := I) p v) =
+      (g t).inner p
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (FiberBundle.extend E u) p X) v +
+      (g t).inner p u
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (FiberBundle.extend E v) p X) := by
+  rw [
+    metricBilinearCoordinateField_fixedTime_fderivWithin_sourceTangentCoordinate_eq_extDerivFun_extend
+      (I := I) (M := M) g t p X u v]
+  exact chosenLeviCivitaFamily_extDerivFun_inner_extend_eq
+    (I := I) (M := M) g t p X u v
 
 /-- The time-direction derivative of the named metric-coordinate field at the
 chart center is exactly the tensor time derivative of the metric.  This isolates
