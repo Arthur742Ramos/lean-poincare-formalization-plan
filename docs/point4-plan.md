@@ -1801,7 +1801,13 @@ and
 `..._readout_mem_ball_lifted_eqOn_hasFDerivAt`, so a gauge-flow witness can
 consume local readout equality, target membership or target-neighborhood
 continuity, and time-only metric component derivatives without first packaging
-the tangent-map equality manually.  On the model side,
+the tangent-map equality manually.  The same closed-Picard readout/mem-ball
+shape is now named at the fixed-IVP geometric layer as
+`ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.VariationalTangentMapReadoutMemBallDerivativeDataOnIoo`
+and lifted through fixed-IVP, theorem-family, and raw intrinsic gauge-flow
+existence wrappers, so callers with `timeSet = Icc tmin tmax` can invoke the
+new raw endpoint from package-level APIs and obtain the interior `Ioo` tensor
+time derivative directly.  On the model side,
 `ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_Icc_of_le_radius`
 dispatches the selected restricted Picard time slice to the forward or backward
 strict-derivative estimate, and

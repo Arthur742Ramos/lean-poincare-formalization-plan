@@ -26794,6 +26794,109 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinO
   G.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData htime
     (G.coordinatePullbackMetricOperatorDerivativeWithinData_of_operatorWithinOpen hoperator) sol
 
+/-- Fixed-IVP readout-local component-derivative hypotheses for an interior
+closed-Picard interval.  The metric component is differentiated in time, while
+the tangent map is supplied through a local readout equality plus the Picard
+ball/target-neighborhood bridge. -/
+def VariationalTangentMapReadoutMemBallDerivativeDataOnIoo
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (tmin tmax : ℝ)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ F : ℝ → M → M,
+        ∃ B' : E →L[ℝ] E →L[ℝ] ℝ,
+          HasDerivAt
+            (fun τ : ℝ ↦
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) (G.maps3 sol)
+                sol.1.toIntrinsicDeTurckSolution.metric t τ x)
+            B' t ∧
+          (∀ᶠ τ in 𝓝 t,
+            HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) ((extChartAt I x) x)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ U : Set M, U ∈ 𝓝 x ∧
+              EqOn (fun z : M ↦ (G.maps3 sol τ) z) (F τ) U) ∧
+          (extChartAt I x) x ∈ ball x₀ r ∧
+          (extChartAt I (((G.maps3 sol) t) x)).target ∈
+            𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (F τ)
+                (fun z : M ↦ (extChartAt I (((G.maps3 sol) t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W) ∧
+          B'
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) (G.maps3 sol) t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+              (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                (I := I) (M := M) (G.maps3 sol) t t x
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) (G.maps3 sol)
+                sol.1.toIntrinsicDeTurckSolution.metric t t x
+                ((Df t (α.flow (xE, t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) (G.maps3 sol) t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u)))
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) (G.maps3 sol) t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v)) +
+              SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap
+                (I := I) (M := M) (G.maps3 sol)
+                sol.1.toIntrinsicDeTurckSolution.metric t t x
+                (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                  (I := I) (M := M) (G.maps3 sol) t t x
+                  (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x u))
+                ((Df t (α.flow (xE, t)))
+                  (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+                    (I := I) (M := M) (G.maps3 sol) t t x
+                    (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) x v))) =
+            sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol) t x u v
+
+/-- Fixed-IVP closed-Picard readout-local tangent-map data gives the interior
+time derivative of the gauge-pulled metric, after identifying the chosen
+solution time set with the closed Picard interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hdata : G.VariationalTangentMapReadoutMemBallDerivativeDataOnIoo
+      sol tmin tmax α) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+      (Ioo tmin tmax) := by
+  let R : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background)
+      (Icc tmin tmax) ivp.initialTime :=
+    { maps3 := G.maps3 sol
+      anchored := G.anchored sol
+      satisfies := by
+        simpa [htimeSet] using G.satisfies sol }
+  simpa [R] using
+    R.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt
+      (I := I) (M := M) α hdata
+
 /-- Coordinate-level fixed-IVP scalar data packages directly as the tensor time
 derivative for every gauge-pulled metric in the bundle. -/
 theorem hasTimeDerivativeOn_of_coordinatePullbackMetricInnerDerivativeData
@@ -27224,6 +27327,31 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinO
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
   (G.forInitialValueProblem ivp).hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
     (I := I) (M := M) (htime ivp) (hoperator ivp) sol
+
+/-- Theorem-family closed-Picard readout-local tangent-map data gives the
+interior time derivative of one gauge-pulled metric, after identifying that
+solution's time set with the closed Picard interval. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hdata :
+      (G.forInitialValueProblem ivp).VariationalTangentMapReadoutMemBallDerivativeDataOnIoo
+        sol tmin tmax α) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.maps3 ivp sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge ivp sol))
+      (Ioo tmin tmax) :=
+  (G.forInitialValueProblem ivp).hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+    (I := I) (M := M) sol htimeSet α hdata
 
 /-- Coordinate-level theorem-family scalar data packages directly as the tensor
 time derivative for every induced gauge-pulled metric. -/
@@ -27762,6 +27890,33 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinO
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
   G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
     (I := I) (M := M) htime hoperator sol
+
+/-- Raw fixed-IVP gauge-flow existence plus closed-Picard readout-local
+tangent-map data gives the interior time derivative of one induced
+gauge-pulled metric. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hdata :
+      G.toDiffeomorph3GaugeFlow.VariationalTangentMapReadoutMemBallDerivativeDataOnIoo
+        sol tmin tmax α) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlow).gauge sol))
+      (Ioo tmin tmax) := by
+  simpa using
+    G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+      (I := I) (M := M) sol htimeSet α hdata
 
 /-- Open-Picard fixed-IVP coordinate-model data gives the required time
 derivative without a separate neighborhood proof for the solution time set. -/
@@ -28547,6 +28702,33 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinO
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
   G.toDiffeomorph3GaugeFlowFamily.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
     (I := I) (M := M) htime hoperator ivp sol
+
+/-- Raw theorem-family gauge-flow existence plus closed-Picard readout-local
+tangent-map data gives the interior time derivative of one induced
+gauge-pulled metric. -/
+theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hdata :
+      (G.toDiffeomorph3GaugeFlowFamily.forInitialValueProblem ivp).VariationalTangentMapReadoutMemBallDerivativeDataOnIoo
+        sol tmin tmax α) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (((G.flow ivp sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
+      (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol))
+      (Ioo tmin tmax) := by
+  simpa using
+    G.toDiffeomorph3GaugeFlowFamily.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+      (I := I) (M := M) ivp sol htimeSet α hdata
 
 /-- Open-Picard theorem-family coordinate-model data gives the required time
 derivative without separate neighborhood proofs for solution time sets. -/
