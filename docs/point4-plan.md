@@ -1971,6 +1971,9 @@ derivative, centered-chart derivative, and fixed-chart ODE data, with matching
 proof-level `Nonempty` forms, so compact Picard output no longer has to be
 promoted to an all-candidates raw-flow family before selecting the solution to
 gauge-reduce.
+The same selected fixed-chart route now accepts model-vector-field ODE data with
+either pointwise or closed-interval relative-filter identification with the
+intrinsic DeTurck gauge field along the selected candidate flow.
 The older all-candidates fixed-IVP and theorem-family intrinsic layers also
 continue to expose `ofRawGaugeFlowOn` with proof-level
 `nonempty_ofRawGaugeFlowOn`, packaging raw witnesses on named time sets once
