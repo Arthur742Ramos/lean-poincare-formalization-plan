@@ -23712,7 +23712,7 @@ dynamic gauge-pullback calculation.  Once the coordinate chain-rule terms have
 been identified with the Levi-Civita derivative of
 `intrinsicDeTurckGaugeField`, the reverse sign convention rewrites them to the
 negative intrinsic DeTurck correction. -/
-theorem Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection
+theorem spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection
     {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
     {s : Set ℝ} {t₀ : ℝ}
     (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)

@@ -4649,9 +4649,9 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variati
                 ((Df t (α.flow (xE, t))) cv)) =
             -intrinsicDeTurckCorrection (I := I) (M := M)
               realization.metric realization.background t p pu pv) :=
-    Diffeomorph3GaugeFlowOn.Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection
+    G.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection
       (I := I) (M := M)
-      G realization.metric realization.background α hDeTurckVector_mdiff hlieCorrection
+      realization.metric realization.background α hDeTurckVector_mdiff hlieCorrection
   exact
     realization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_correction
       G α gauge3 hgauge_maps hsIcc hchartRHS_eq_intrinsic hcorrection

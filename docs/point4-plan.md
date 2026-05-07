@@ -2515,7 +2515,7 @@ which derives the signed correction input from `MDiffAt` regularity of the
 intrinsic DeTurck vector-field section and a coordinate identity with the
 Levi-Civita derivative of `intrinsicDeTurckGaugeField`. The underlying
 raw-gauge bridge is
-`Diffeomorph3GaugeFlowOn.Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection`,
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection`,
 which isolates the remaining coordinate chain-rule calculation from the
 DeTurck sign algebra. The same interface is available at the tensor route
 level through
