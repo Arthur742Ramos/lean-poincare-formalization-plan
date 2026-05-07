@@ -4251,9 +4251,9 @@ route.
 
 The large non-identity gauge route asks for a scalar `hvalue` in local
 coordinates.  This lemma reduces that obligation to two geometric identities:
-the Banach chart RHS is the declared smooth metric velocity, and the spatial
-plus tangent-map coordinate terms equal the negative DeTurck correction at the
-gauge image. -/
+the Banach chart RHS is the intrinsic Ricci-DeTurck RHS of the smooth
+realization, and the spatial plus tangent-map coordinate terms equal the
+negative DeTurck correction at the gauge image. -/
 theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_correction
     {et : κ → _root_.Bundle.Trivialization BilF
       (_root_.Bundle.TotalSpace.proj :
@@ -4294,10 +4294,12 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variati
       ivp.initialTime)
     (hgauge_maps : gauge3.maps = G.maps3)
     (hsIcc : s ⊆ Icc ivp.initialTime sol.terminalTime)
-    (hvelocity_eq_chartRHS : ∀ ⦃t : ℝ⦄,
+    (hchartRHS_eq_intrinsic : ∀ ⦃t : ℝ⦄,
       t ∈ Icc ivp.initialTime sol.terminalTime → ∀ x : M,
         ∀ u v : TangentSpace I x,
-          realization.metricVelocity t x u v = A t (sol.curve t) x u v)
+          A t (sol.curve t) x u v =
+            intrinsicRicciDeTurckRHS (I := I) (M := M)
+              realization.metric realization.background t x u v)
     (hcorrection : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
       ∀ u v : TangentSpace I x,
       ∀ xE : F, xE ∈ Metric.closedBall x₀ r →
@@ -4404,6 +4406,11 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variati
   let correction : ℝ :=
     intrinsicDeTurckCorrection (I := I) (M := M)
       realization.metric realization.background t p pu pv
+  have hvelocity_eq_chartRHS :
+      ∀ ⦃t : ℝ⦄, t ∈ Icc ivp.initialTime sol.terminalTime → ∀ x : M,
+        ∀ u v : TangentSpace I x,
+          realization.metricVelocity t x u v = A t (sol.curve t) x u v :=
+    realization.metricVelocity_eq_chartRHS_of_chartRHS_eq_intrinsic hchartRHS_eq_intrinsic
   have htarget : Btime cu cv = realization.metricVelocity t p pu pv := by
     calc
       Btime cu cv =

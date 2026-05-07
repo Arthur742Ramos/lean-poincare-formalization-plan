@@ -2502,14 +2502,14 @@ same layer now has a proof-bearing scalar-value adapter,
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_correction`:
 the first identifies the target-centered readout of an arbitrary Banach RHS
 section at the target center, and the second turns the route's local `hvalue`
-obligation into exactly two geometric identities, namely chart-RHS equals
-smooth metric velocity and the spatial plus tangent-map coordinate terms equal
-the negative intrinsic DeTurck correction at the gauge image. The first of
-those two inputs now has the direct bridge
+obligation into exactly two geometric identities, namely chart-RHS equals the
+intrinsic Ricci-DeTurck RHS of the smooth realization and the spatial plus
+tangent-map coordinate terms equal the negative intrinsic DeTurck correction at
+the gauge image. The scalar adapter now uses the direct bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricVelocity_eq_chartRHS_of_chartRHS_eq_intrinsic`,
-which derives the smooth metric-velocity/chart-RHS equality from the
-realization equation and a pointwise identification of the Banach chart RHS with
-the intrinsic Ricci-DeTurck RHS. The gauge-flow sign convention has also been
+internally, deriving the smooth metric-velocity/chart-RHS equality from the
+realization equation and that pointwise chart-RHS/intrinsic-RHS identification.
+The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
 subtracts exactly the intrinsic DeTurck correction appearing in
