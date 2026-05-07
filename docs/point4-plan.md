@@ -1770,7 +1770,18 @@ and
 `SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_lifted_eqOn_hasFDerivAt`;
 these let Picard output prove target membership, lifted equality, and ordinary
 time-slice spatial derivatives separately before feeding the existing
-within-derivative readout route.  On the model side,
+within-derivative readout route.  The target-membership input now has a
+continuity bridge:
+`SmoothSelfDiffeomorph3Family.eventually_extChartAt_model_mem_target_of_continuousAt`
+turns space-time model continuity and an ordinary target-neighborhood condition
+at the base point into the eventual local target membership needed by the
+lifted readout route, with variational-flow, interior-Picard, and boundaryless
+`..._of_mem_target` conveniences.  The same layer now also exposes
+`SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_target_lifted_eqOn_hasFDerivAt`,
+`..._readout_continuousAt_lifted_eqOn_hasFDerivAt`, and
+`..._readout_mem_ball_lifted_eqOn_hasFDerivAt`, so callers can supply target
+membership, target-neighborhood continuity, or interior Picard ball data
+separately from the lifted `EqOn` proof.  On the model side,
 `ModelGaugeFlowODE.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_hasStrictFDerivAt_of_hasFDerivWithinAt_Icc_of_le_radius`
 dispatches the selected restricted Picard time slice to the forward or backward
 strict-derivative estimate, and

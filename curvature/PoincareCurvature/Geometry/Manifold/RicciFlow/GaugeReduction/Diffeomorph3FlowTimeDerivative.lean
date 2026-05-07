@@ -4854,6 +4854,153 @@ theorem fixedChartModel_source_mem_of_readout_lifted_eqOn_source
   rw [hΦ]
   exact (extChartAt I ((Φ t) x)).map_target hmodel_target_x
 
+/-- Space-time continuity of a model readout gives a manifold neighborhood
+whose nearby time slices land in the fixed target chart. -/
+theorem eventually_extChartAt_model_mem_target_of_continuousAt
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t : ℝ) (x : M) {model : E × ℝ → E}
+    (hcont : ContinuousAt model (((extChartAt I x) x), t))
+    (htarget_nhds :
+      (extChartAt I ((Φ t) x)).target ∈
+        𝓝 (model (((extChartAt I x) x), t))) :
+    ∀ᶠ τ in 𝓝 t,
+      ∃ V : Set M, V ∈ 𝓝 x ∧
+        ∀ z ∈ V,
+          model ((extChartAt I x) z, τ) ∈ (extChartAt I ((Φ t) x)).target := by
+  have hpair :
+      ContinuousAt
+        (fun p : M × ℝ ↦ ((extChartAt I x) p.1, p.2)) (x, t) := by
+    simpa using
+      (continuousAt_extChartAt (I := I) x).prodMap' continuousAt_id
+  have hcomp :
+      ContinuousAt
+        (fun p : M × ℝ ↦ model ((extChartAt I x) p.1, p.2)) (x, t) := by
+    simpa [Function.comp_def] using
+      ContinuousAt.comp (x := (x, t)) hcont hpair
+  have hpre :
+      (fun p : M × ℝ ↦ model ((extChartAt I x) p.1, p.2)) ⁻¹'
+          (extChartAt I ((Φ t) x)).target ∈ 𝓝 (x, t) :=
+    hcomp htarget_nhds
+  rcases mem_nhds_prod_iff.mp hpre with ⟨V, hV, T, hT, hsub⟩
+  filter_upwards [hT] with τ hτ
+  refine ⟨V, hV, ?_⟩
+  intro z hz
+  exact hsub (Set.mk_mem_prod hz hτ)
+
+/-- Boundaryless specialization of
+`eventually_extChartAt_model_mem_target_of_continuousAt`, where membership in
+the target chart is an ordinary neighborhood condition. -/
+theorem eventually_extChartAt_model_mem_target_of_continuousAt_of_mem_target
+    [I.Boundaryless]
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t : ℝ) (x : M) {model : E × ℝ → E}
+    (hcont : ContinuousAt model (((extChartAt I x) x), t))
+    (hbase :
+      model (((extChartAt I x) x), t) ∈ (extChartAt I ((Φ t) x)).target) :
+    ∀ᶠ τ in 𝓝 t,
+      ∃ V : Set M, V ∈ 𝓝 x ∧
+        ∀ z ∈ V,
+          model ((extChartAt I x) z, τ) ∈ (extChartAt I ((Φ t) x)).target := by
+  exact
+    eventually_extChartAt_model_mem_target_of_continuousAt
+      (I := I) (M := M) Φ t x hcont
+      (extChartAt_target_mem_nhds' (I := I) hbase)
+
+/-- Variational-flow specialization of
+`eventually_extChartAt_model_mem_target_of_continuousAt`. -/
+theorem eventually_variationalFlow_extChartAt_mem_target_of_continuousAt
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (t : ℝ) (x : M)
+    (hcont : ContinuousAt α.flow (((extChartAt I x) x), t))
+    (htarget_nhds :
+      (extChartAt I ((Φ t) x)).target ∈
+        𝓝 (α.flow (((extChartAt I x) x), t))) :
+    ∀ᶠ τ in 𝓝 t,
+      ∃ V : Set M, V ∈ 𝓝 x ∧
+        ∀ z ∈ V,
+          α.flow ((extChartAt I x) z, τ) ∈
+            (extChartAt I ((Φ t) x)).target := by
+  exact
+    eventually_extChartAt_model_mem_target_of_continuousAt
+      (I := I) (M := M) Φ t x (model := fun p : E × ℝ ↦ α.flow p)
+      hcont htarget_nhds
+
+/-- Boundaryless variational-flow specialization of
+`eventually_extChartAt_model_mem_target_of_continuousAt_of_mem_target`. -/
+theorem eventually_variationalFlow_extChartAt_mem_target_of_continuousAt_of_mem_target
+    [I.Boundaryless]
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (t : ℝ) (x : M)
+    (hcont : ContinuousAt α.flow (((extChartAt I x) x), t))
+    (hbase :
+      α.flow (((extChartAt I x) x), t) ∈ (extChartAt I ((Φ t) x)).target) :
+    ∀ᶠ τ in 𝓝 t,
+      ∃ V : Set M, V ∈ 𝓝 x ∧
+        ∀ z ∈ V,
+          α.flow ((extChartAt I x) z, τ) ∈
+            (extChartAt I ((Φ t) x)).target := by
+  exact
+    eventually_variationalFlow_extChartAt_mem_target_of_continuousAt
+      (I := I) (M := M) Φ α t x hcont
+      (extChartAt_target_mem_nhds' (I := I) hbase)
+
+/-- Interior Picard-cylinder specialization of the variational-flow target
+membership bridge. -/
+theorem eventually_variationalFlow_extChartAt_mem_target_of_mem_ball_Ioo
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} {x : M}
+    (hx : (extChartAt I x) x ∈ ball x₀ r) (ht : t ∈ Ioo tmin tmax)
+    (htarget_nhds :
+      (extChartAt I ((Φ t) x)).target ∈
+        𝓝 (α.flow (((extChartAt I x) x), t))) :
+    ∀ᶠ τ in 𝓝 t,
+      ∃ V : Set M, V ∈ 𝓝 x ∧
+        ∀ z ∈ V,
+          α.flow ((extChartAt I x) z, τ) ∈
+            (extChartAt I ((Φ t) x)).target := by
+  have hcont : ContinuousAt α.flow (((extChartAt I x) x), t) := by
+    simpa using
+      (α.toContinuousLocalFlowSolution.flow_continuousAt_spaceTime_of_mem_ball_Ioo
+        (x := (extChartAt I x) x) (t := t) hx ht)
+  exact
+    eventually_variationalFlow_extChartAt_mem_target_of_continuousAt
+      (I := I) (M := M) Φ α t x hcont htarget_nhds
+
+/-- Boundaryless interior Picard-cylinder specialization of the variational-flow
+target-membership bridge. -/
+theorem eventually_variationalFlow_extChartAt_mem_target_of_mem_ball_Ioo_of_mem_target
+    [I.Boundaryless]
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    {t : ℝ} {x : M}
+    (hx : (extChartAt I x) x ∈ ball x₀ r) (ht : t ∈ Ioo tmin tmax)
+    (hbase :
+      α.flow (((extChartAt I x) x), t) ∈ (extChartAt I ((Φ t) x)).target) :
+    ∀ᶠ τ in 𝓝 t,
+      ∃ V : Set M, V ∈ 𝓝 x ∧
+        ∀ z ∈ V,
+          α.flow ((extChartAt I x) z, τ) ∈
+            (extChartAt I ((Φ t) x)).target := by
+  exact
+    eventually_variationalFlow_extChartAt_mem_target_of_mem_ball_Ioo
+      (I := I) (M := M) Φ α hx ht
+      (extChartAt_target_mem_nhds' (I := I) hbase)
+
 /-- Separate local target-membership and lifted-readout equality statements
 can be synchronized on an intersection of neighborhoods, producing the exact
 eventual lifted input used by the readout-to-fixed-chart bridges. -/
@@ -6590,6 +6737,142 @@ theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMa
   refine ⟨xE, hxE, F, ?_, hreadout, hlift⟩
   exact eventually_hasFDerivWithinAt_range_of_eventually_hasFDerivAt
     (I := I) hderiv
+
+/-- Readout-local lifted variational model flow route with separate target
+membership and lifted equality inputs.  This packages the synchronization step
+before invoking
+`pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_lifted_eqOn_hasFDerivAt`. -/
+theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_target_lifted_eqOn_hasFDerivAt
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0} {s : Set ℝ}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hsIoo : s ⊆ Ioo tmin tmax)
+    (hA_readout : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ F : ℝ → M → M,
+          (∀ᶠ τ in 𝓝 t,
+            HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) ((extChartAt I x) x)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ U : Set M, U ∈ 𝓝 x ∧
+              EqOn (fun z : M ↦ (Φ τ) z) (F τ) U) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ V : Set M, V ∈ 𝓝 x ∧
+              ∀ z ∈ V,
+                α.flow ((extChartAt I x) z, τ) ∈
+                  (extChartAt I ((Φ t) x)).target) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (F τ)
+                (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ D : E →L[ℝ] E,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t := by
+  refine
+    pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_lifted_eqOn_hasFDerivAt
+      (I := I) (M := M) (Φ := Φ) α hsIoo ?_
+  intro t ht x
+  obtain ⟨xE, hxE, F, hderiv, hreadout, htarget, heq⟩ := hA_readout ht x
+  refine ⟨xE, hxE, F, hderiv, hreadout, ?_⟩
+  exact
+    eventually_readout_lifted_eqOn_of_eventually_target_and_eqOn
+      (I := I) (M := M) Φ t x F (fun τ y ↦ α.flow (y, τ))
+      htarget heq
+
+/-- Readout-local lifted variational model flow route where target membership
+is supplied by space-time continuity and an ordinary target-neighborhood input. -/
+theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_continuousAt_lifted_eqOn_hasFDerivAt
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0} {s : Set ℝ}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hsIoo : s ⊆ Ioo tmin tmax)
+    (hA_readout : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ F : ℝ → M → M,
+          (∀ᶠ τ in 𝓝 t,
+            HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) ((extChartAt I x) x)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ U : Set M, U ∈ 𝓝 x ∧
+              EqOn (fun z : M ↦ (Φ τ) z) (F τ) U) ∧
+          ContinuousAt α.flow (((extChartAt I x) x), t) ∧
+          (extChartAt I ((Φ t) x)).target ∈
+            𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (F τ)
+                (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ D : E →L[ℝ] E,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t := by
+  refine
+    pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_target_lifted_eqOn_hasFDerivAt
+      (I := I) (M := M) (Φ := Φ) α hsIoo ?_
+  intro t ht x
+  obtain ⟨xE, hxE, F, hderiv, hreadout, hcont, htarget_nhds, heq⟩ := hA_readout ht x
+  refine ⟨xE, hxE, F, hderiv, hreadout, ?_, heq⟩
+  exact
+    eventually_variationalFlow_extChartAt_mem_target_of_continuousAt
+      (I := I) (M := M) Φ α t x hcont htarget_nhds
+
+/-- Interior Picard-cylinder version of
+`pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_continuousAt_lifted_eqOn_hasFDerivAt`.
+The required target-membership continuity is extracted from the variational
+flow package. -/
+theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_mem_ball_lifted_eqOn_hasFDerivAt
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0} {s : Set ℝ}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (hsIoo : s ⊆ Ioo tmin tmax)
+    (hA_readout : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ xE : E, xE ∈ closedBall x₀ r ∧
+        ∃ F : ℝ → M → M,
+          (∀ᶠ τ in 𝓝 t,
+            HasFDerivAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) ((extChartAt I x) x)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ U : Set M, U ∈ 𝓝 x ∧
+              EqOn (fun z : M ↦ (Φ τ) z) (F τ) U) ∧
+          (extChartAt I x) x ∈ ball x₀ r ∧
+          (extChartAt I ((Φ t) x)).target ∈
+            𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+          (∀ᶠ τ in 𝓝 t,
+            ∃ W : Set M, W ∈ 𝓝 x ∧
+              EqOn (F τ)
+                (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+                  (α.flow ((extChartAt I x) z, τ))) W)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ D : E →L[ℝ] E,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t τ x)
+          (D.comp
+            (pullbackMetricTangentCoordinateMap (I := I) (M := M) Φ t t x)) t := by
+  refine
+    pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_target_lifted_eqOn_hasFDerivAt
+      (I := I) (M := M) (Φ := Φ) α hsIoo ?_
+  intro t ht x
+  obtain ⟨xE, hxE, F, hderiv, hreadout, hxball, htarget_nhds, heq⟩ := hA_readout ht x
+  refine ⟨xE, hxE, F, hderiv, hreadout, ?_, heq⟩
+  exact
+    eventually_variationalFlow_extChartAt_mem_target_of_mem_ball_Ioo
+      (I := I) (M := M) Φ α hxball (hsIoo ht) htarget_nhds
 
 /-- Closed-interval/right-derivative version of
 `pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`.
