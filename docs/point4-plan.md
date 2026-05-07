@@ -2544,6 +2544,12 @@ also explicit:
 `intrinsicDeTurckGaugeField_mdiff_of_isLeviCivita`, and the
 Levi-Civita-specialized Lie-correction theorem
 `intrinsicDeTurckGaugeField_lieCorrection_eq_neg_intrinsicDeTurckCorrection_of_isLeviCivita`.
+The raw spatial/tangent correction bridge now also has the corresponding
+Levi-Civita-background route
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection_of_isLeviCivita`,
+so callers no longer need to pass a separate DeTurck-vector `MDiffAt` package
+in that case; the chart-level Lie-correction identity remains the real
+coordinate calculation.
 The gauge-flow sign convention has also been
 aligned with this scalar target: `intrinsicDeTurckGaugeField` is now the
 negative intrinsic DeTurck vector field, so differentiating the pullback gauge
