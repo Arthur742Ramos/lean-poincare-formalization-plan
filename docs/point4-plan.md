@@ -2320,13 +2320,20 @@ interior times.  The companion
 `fixedChartModel_eventually_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn_source`
 and its variational-flow specialization package that local `EqOn` together
 with source membership and model spatial derivative data into the full eventual
-triple used by the fixed-chart `hA_model` routes.
+triple used by the fixed-chart `hA_model` routes.  A lighter companion now
+derives that source membership from the readout equality, lifted equality, and
+target-chart membership itself:
+`fixedChartModel_source_mem_of_readout_lifted_eqOn_source`,
+`fixedChartModel_eventually_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn`,
+and
+`fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn`.
 The quantified component-level route is also available as
 `pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel_eqOn`,
 and the readout-lifted companion
 `pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_lifted_eqOn`
-accepts the three Picard/gluing eventuals before fixed-chart composition.  At
-the smooth-realization scalar-selector layer,
+accepts the Picard/gluing eventuals before fixed-chart composition without a
+separate fixed-target source-membership input.  At the smooth-realization
+scalar-selector layer,
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`
 now offers the same readout-lifted input shape while preserving the existing
 geometric-slot scalar identity. Thus downstream scalar selectors can consume

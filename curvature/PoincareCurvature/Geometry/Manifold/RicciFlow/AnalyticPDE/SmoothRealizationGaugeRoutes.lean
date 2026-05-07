@@ -3496,7 +3496,9 @@ data for a lifted variational model flow supply the concrete component
 derivative package.
 
 This is the form matched by Picard/local-gluing constructions before the
-selected local readout has been pushed through the fixed target chart. -/
+selected local readout has been pushed through the fixed target chart.  Source
+membership in the fixed target chart is derived from the lifted equality and
+target-chart membership. -/
 theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_readout_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue
     {et : κ → _root_.Bundle.Trivialization BilF
       (_root_.Bundle.TotalSpace.proj :
@@ -3541,9 +3543,8 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordin
       ∃ xE : F, xE ∈ Metric.closedBall x₀ r ∧
         ∃ Fₗ : ℝ → M → M,
           (∀ᶠ τ in 𝓝 t,
-            (G.maps3 τ) x ∈ (extChartAt I ((G.maps3 t) x)).source ∧
-              HasFDerivWithinAt (fun y : F ↦ α.flow (y, τ))
-                (α.tangent xE τ) (Set.range I) ((extChartAt I x) x)) ∧
+            HasFDerivWithinAt (fun y : F ↦ α.flow (y, τ))
+              (α.tangent xE τ) (Set.range I) ((extChartAt I x) x)) ∧
           (∀ᶠ τ in 𝓝 t,
             ∃ U : Set M, U ∈ 𝓝 x ∧
               EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ τ) U) ∧
@@ -3608,11 +3609,11 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordin
     realization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_fixedChartModel_eqOn_interior_cover_target_overlap_Ioo_geometricValue
       (M := M) (F := F) (I := I) hcover_int G hs hsIoo α hsModel ?_ hvalue
   intro t ht x
-  obtain ⟨xE, hxE, Fₗ, hsource_deriv, hreadout, hlift⟩ := hA_readout ht x
+  obtain ⟨xE, hxE, Fₗ, hderiv, hreadout, hlift⟩ := hA_readout ht x
   refine ⟨xE, hxE, ?_⟩
   exact
-    SmoothSelfDiffeomorph3Family.fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn_source
-      (I := I) (M := M) G.maps3 α t x xE Fₗ hsource_deriv hreadout hlift
+    SmoothSelfDiffeomorph3Family.fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn
+      (I := I) (M := M) G.maps3 α t x xE Fₗ hderiv hreadout hlift
 
 /-- Interior-cover target-overlap scalar derivatives, tangent-map derivative
 data, and the scalar velocity identity give tensor time-regularity for the

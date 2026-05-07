@@ -4830,6 +4830,30 @@ theorem fixedChartModel_eqOn_of_readout_lifted_eqOn_source
     _ = (extChartAt I ((Φ t) x)).symm (model ((extChartAt I x) z)) :=
       hlift hz.2
 
+/-- If the constructed slice agrees with a selected readout at `x`, and that
+readout is the target-chart inverse of a model value lying in the target chart,
+then the constructed slice lies in the fixed target chart source. -/
+theorem fixedChartModel_source_mem_of_readout_lifted_eqOn_source
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M) (F : M → M) (model : E → E) {U V : Set M}
+    (hxU : x ∈ U) (hxV : x ∈ V)
+    (hmodel_target_x :
+      model ((extChartAt I x) x) ∈ (extChartAt I ((Φ t) x)).target)
+    (hreadout : EqOn (fun z : M ↦ (Φ τ) z) F U)
+    (hlift : EqOn F
+      (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+        (model ((extChartAt I x) z))) V) :
+    (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source := by
+  have hΦ :
+      (Φ τ) x =
+        (extChartAt I ((Φ t) x)).symm (model ((extChartAt I x) x)) := by
+    calc
+      (Φ τ) x = F x := hreadout hxU
+      _ = (extChartAt I ((Φ t) x)).symm (model ((extChartAt I x) x)) :=
+        hlift hxV
+  rw [hΦ]
+  exact (extChartAt I ((Φ t) x)).map_target hmodel_target_x
+
 /-- Neighborhood version of
 `fixedChartModel_eqOn_of_readout_lifted_eqOn_source`.  The output has exactly
 the existential local `EqOn` shape used by the variational tangent-map bridge. -/
@@ -4910,6 +4934,48 @@ theorem fixedChartModel_eventually_source_exists_nhds_eqOn_hasFDerivWithinAt_of_
   filter_upwards [hsource_deriv, hlocal] with τ hτ hτlocal
   exact ⟨hτ.1, hτlocal, hτ.2⟩
 
+/-- Eventual readout/lifted-model equality derives the fixed target-chart source
+membership itself; only the model spatial derivative has to be supplied
+separately. -/
+theorem fixedChartModel_eventually_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t : ℝ) (x : M) (F : ℝ → M → M) (model : ℝ → E → E)
+    (A : ℝ → E →L[ℝ] E) {l : Filter ℝ}
+    (hderiv : ∀ᶠ τ in l,
+      HasFDerivWithinAt (model τ) (A τ) (range I) ((extChartAt I x) x))
+    (hreadout : ∀ᶠ τ in l,
+      ∃ U : Set M, U ∈ 𝓝 x ∧ EqOn (fun z : M ↦ (Φ τ) z) (F τ) U)
+    (hlift : ∀ᶠ τ in l,
+      ∃ V : Set M, V ∈ 𝓝 x ∧
+        (∀ z ∈ V,
+          model τ ((extChartAt I x) z) ∈ (extChartAt I ((Φ t) x)).target) ∧
+        EqOn (F τ)
+          (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+            (model τ ((extChartAt I x) z))) V) :
+    ∀ᶠ τ in l,
+      (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+        (∃ W : Set M, W ∈ 𝓝 x ∧
+          EqOn
+            (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+            (fun z : M ↦ model τ ((extChartAt I x) z)) W) ∧
+        HasFDerivWithinAt (model τ) (A τ) (range I) ((extChartAt I x) x) := by
+  have hsource_deriv : ∀ᶠ τ in l,
+      (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+        HasFDerivWithinAt (model τ) (A τ) (range I) ((extChartAt I x) x) := by
+    filter_upwards [hderiv, hreadout, hlift] with τ hτderiv hτreadout hτlift
+    rcases hτreadout with ⟨U, hU, hreadoutU⟩
+    rcases hτlift with ⟨V, hV, htarget, hliftV⟩
+    have hxU : x ∈ U := mem_of_mem_nhds hU
+    have hxV : x ∈ V := mem_of_mem_nhds hV
+    exact ⟨
+      fixedChartModel_source_mem_of_readout_lifted_eqOn_source
+        (I := I) (M := M) Φ t τ x (F τ) (model τ) hxU hxV
+        (htarget x hxV) hreadoutU hliftV,
+      hτderiv⟩
+  exact
+    fixedChartModel_eventually_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn_source
+      (I := I) (M := M) Φ t x F model A hsource_deriv hreadout hlift
+
 /-- Variational-flow specialization of
 `fixedChartModel_eventually_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn_source`. -/
 theorem fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn_source
@@ -4944,6 +5010,40 @@ theorem fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDeriv
     fixedChartModel_eventually_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn_source
       (I := I) (M := M) Φ t x F (fun τ y ↦ α.flow (y, τ))
       (fun τ : ℝ ↦ α.tangent xE τ) hsource_deriv hreadout hlift
+
+/-- Variational-flow specialization where the fixed target-chart source
+membership is derived from the readout/lifted-model equality. -/
+theorem fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df t₀ x₀ r)
+    (t : ℝ) (x : M) (xE : E) (F : ℝ → M → M) {l : Filter ℝ}
+    (hderiv : ∀ᶠ τ in l,
+      HasFDerivWithinAt (fun y : E ↦ α.flow (y, τ))
+        (α.tangent xE τ) (range I) ((extChartAt I x) x))
+    (hreadout : ∀ᶠ τ in l,
+      ∃ U : Set M, U ∈ 𝓝 x ∧ EqOn (fun z : M ↦ (Φ τ) z) (F τ) U)
+    (hlift : ∀ᶠ τ in l,
+      ∃ V : Set M, V ∈ 𝓝 x ∧
+        (∀ z ∈ V,
+          α.flow ((extChartAt I x) z, τ) ∈ (extChartAt I ((Φ t) x)).target) ∧
+        EqOn (F τ)
+          (fun z : M ↦ (extChartAt I ((Φ t) x)).symm
+            (α.flow ((extChartAt I x) z, τ))) V) :
+    ∀ᶠ τ in l,
+      (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
+        (∃ W : Set M, W ∈ 𝓝 x ∧
+          EqOn
+            (fun z : M ↦ (extChartAt I ((Φ t) x)) ((Φ τ) z))
+            (fun z : M ↦ α.flow ((extChartAt I x) z, τ)) W) ∧
+        HasFDerivWithinAt (fun y : E ↦ α.flow (y, τ))
+          (α.tangent xE τ) (range I) ((extChartAt I x) x) := by
+  exact
+    fixedChartModel_eventually_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn
+      (I := I) (M := M) Φ t x F (fun τ y ↦ α.flow (y, τ))
+      (fun τ : ℝ ↦ α.tangent xE τ) hderiv hreadout hlift
 
 /-- A manifold-neighborhood lifted `EqOn` statement for a fixed time slice gives
 the model-coordinate eventual equality required by the fixed-chart tangent
@@ -6300,12 +6400,13 @@ theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMa
       (I := I) (M := M) Φ α t x xE hmodel
 
 /-- Readout-local gluing equality with a lifted variational model flow, plus
-source membership and spatial derivatives of that model flow, supplies the
-tangent-map derivative data needed by component-level gauge-pullback APIs.
+spatial derivatives of that model flow, supplies the tangent-map derivative data
+needed by component-level gauge-pullback APIs.
 
 This is the form matched by the raw gluing constructors: the global slice is
 locally equal to a selected local readout, and that readout is locally equal to
-the chart-lifted Picard model flow. -/
+the chart-lifted Picard model flow.  Source membership in the fixed target chart
+is derived from the lifted equality and target-chart membership. -/
 theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_readout_lifted_eqOn
     {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
     {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
@@ -6317,9 +6418,8 @@ theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMa
       ∃ xE : E, xE ∈ closedBall x₀ r ∧
         ∃ F : ℝ → M → M,
           (∀ᶠ τ in 𝓝 t,
-            (Φ τ) x ∈ (extChartAt I ((Φ t) x)).source ∧
-              HasFDerivWithinAt (fun y : E ↦ α.flow (y, τ))
-                (α.tangent xE τ) (range I) ((extChartAt I x) x)) ∧
+            HasFDerivWithinAt (fun y : E ↦ α.flow (y, τ))
+              (α.tangent xE τ) (range I) ((extChartAt I x) x)) ∧
           (∀ᶠ τ in 𝓝 t,
             ∃ U : Set M, U ∈ 𝓝 x ∧
               EqOn (fun z : M ↦ (Φ τ) z) (F τ) U) ∧
@@ -6341,11 +6441,11 @@ theorem pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMa
   refine pullbackMetricTangentCoordinateMap_derivativesOn_of_variationalTangentMap_fixedChartModel_eqOn
     (I := I) (M := M) (Φ := Φ) α hsIoo ?_
   intro t ht x
-  obtain ⟨xE, hxE, F, hsource_deriv, hreadout, hlift⟩ := hA_readout ht x
+  obtain ⟨xE, hxE, F, hderiv, hreadout, hlift⟩ := hA_readout ht x
   refine ⟨xE, hxE, ?_⟩
   exact
-    fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn_source
-      (I := I) (M := M) Φ α t x xE F hsource_deriv hreadout hlift
+    fixedChartModel_eventually_variational_source_exists_nhds_eqOn_hasFDerivWithinAt_of_eventually_readout_lifted_eqOn
+      (I := I) (M := M) Φ α t x xE F hderiv hreadout hlift
 
 /-- Closed-interval/right-derivative version of
 `pullbackMetricTangentCoordinateMap_hasDerivAt_of_variationalTangentMap`.
