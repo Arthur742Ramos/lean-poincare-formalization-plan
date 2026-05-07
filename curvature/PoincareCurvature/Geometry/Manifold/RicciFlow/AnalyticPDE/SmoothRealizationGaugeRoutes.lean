@@ -5611,6 +5611,161 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTime
       hreadout hflow_deriv hdata gauge3 hgauge_maps hchartRHS_eq_intrinsic
       hbackground hlieCorrection
 
+/-- Smooth-background, closed-interval finite-cover gauge-corrected route with
+the state-preserving closed-ball Picard estimates supplying the model-flow
+source-coordinate derivative. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection_of_contMDiffCovariantDerivative_background
+    {ι : Type*}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (hcover_int : (⋃ i, interior (Kc i : Set M)) = Set.univ)
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {gaugeInitialTime : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s gaugeInitialTime)
+    (hs : ∀ ⦃t : ℝ⦄, t ∈ s → s ∈ 𝓝 t)
+    (hsIoo : s ⊆ Ioo ivp.initialTime sol.terminalTime)
+    {tmin tmax : ℝ} {tmin0 tmax0 : ℝ} {tbase : Icc tmin0 tmax0}
+    {f : ℝ → F → F} {Df : ℝ → F → F →L[ℝ] F}
+    {x₀ : F} {a R Kf KD Lf BA BD r : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin0 tmax0,
+      LipschitzOnWith Kf (f t) (Metric.closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin0 tmax0,
+      LipschitzOnWith KD (Df t) (Metric.closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin0 tmax0, ∀ y ∈ Metric.closedBall x₀ a,
+      ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ Metric.closedBall (1 : F →L[ℝ] F) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin0 tmax0, ∀ y ∈ Metric.closedBall x₀ a,
+      ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ Metric.closedBall x₀ a,
+      ContinuousOn (fun t : ℝ => f t y) (Icc tmin0 tmax0))
+    (hDf_cont : ∀ y ∈ Metric.closedBall x₀ a,
+      ContinuousOn (fun t : ℝ => Df t y) (Icc tmin0 tmax0))
+    (hmul : (max Lf (BD * BA)) * max (tmax0 - tbase) (tbase - tmin0) ≤ a - R)
+    (htime : Icc tmin tmax ⊆ Icc tmin0 tmax0)
+    (htbase : (tbase : ℝ) ∈ Icc tmin tmax)
+    (hr : r ≤ R)
+    (hder : ∀ τ ∈ Icc tmin0 tmax0, ∀ z ∈ Metric.closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (Metric.closedBall x₀ a) z)
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df
+      (⟨(tbase : ℝ), htbase⟩ : Icc tmin tmax) x₀ r)
+    (hα : α =
+      ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        (t₀ := tbase) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul htime htbase hr)
+    (hsModel : s ⊆ Ioo tmin tmax)
+    (Fₗ : ι → ℝ → M → M)
+    (U : ℝ → ι → Set M)
+    (hsource_cover : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ i τ) W)
+    (hdata : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        (extChartAt I x) x ∈ Metric.ball x₀ r ∧
+        (extChartAt I ((G.maps3 t) x)).target ∈
+          𝓝 (α.flow (((extChartAt I x) x), t)) ∧
+        ∀ᶠ τ in 𝓝 t,
+          ∃ W : Set M, W ∈ 𝓝 x ∧
+            EqOn (Fₗ i τ)
+              (fun z : M ↦ (extChartAt I ((G.maps3 t) x)).symm
+                (α.flow ((extChartAt I x) z, τ))) W)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      realization.metric realization.background (Icc ivp.initialTime sol.terminalTime)
+      ivp.initialTime)
+    (hgauge_maps : gauge3.maps = G.maps3)
+    (hchartRHS_eq_intrinsic : ∀ ⦃t : ℝ⦄,
+      t ∈ Icc ivp.initialTime sol.terminalTime → ∀ x : M,
+        ∀ u v : TangentSpace I x,
+          A t (sol.curve t) x u v =
+            intrinsicRicciDeTurckRHS (I := I) (M := M)
+              realization.metric realization.background t x u v)
+    (hbackground : ∀ ⦃t : ℝ⦄, t ∈ s →
+      CovariantDerivative.ContMDiffCovariantDerivative (realization.background t) 1)
+    (hlieCorrection : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+      ∀ xE : F, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pu : TangentSpace I p := (G.maps3 t).pushforwardTangent x u
+         let pv : TangentSpace I p := (G.maps3 t).pushforwardTangent x v
+         let cu : F := SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pu
+         let cv : F := SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pv
+         (fderivWithin ℝ
+            (fun yE : F ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) realization.metric p (t, yE))
+            (Set.range I) ((extChartAt I p) p))
+            (X t p) cu cv +
+          (realization.metric t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cu)) pv +
+          (realization.metric t).inner p pu
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cv)) =
+          (realization.metric t).inner p
+            (((chosenLeviCivitaFamily (I := I) (M := M) realization.metric) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M)
+                realization.metric realization.background t) p pu) pv +
+          (realization.metric t).inner p pu
+            (((chosenLeviCivitaFamily (I := I) (M := M) realization.metric) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M)
+                realization.metric realization.background t) p pv))) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (G.maps3.pullbackMetricFamily realization.metric)
+      (realization.toIntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        gauge3) s := by
+  have hflow_deriv : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ ⦃xE : F⦄, xE ∈ Metric.ball x₀ r →
+        ∀ᶠ τ in 𝓝 t,
+          HasFDerivAt (fun y : F ↦ α.flow (y, τ))
+            (α.tangent xE τ) xE := by
+    have hsource : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+        ∀ ⦃xE : F⦄, xE ∈ Metric.ball x₀ r →
+          ∀ᶠ τ in 𝓝 t,
+            HasFDerivAt (fun y : F ↦ α.flow (y, τ))
+              (α.tangent xE τ) xE := by
+      simpa [hα] using
+        (ModelGaugeFlowODE.VariationalLocalFlowSolution.ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_source_eventually_flow_timeSlice_hasFDerivAt_of_hasFDerivWithinAt_Ioo_of_le_radius
+          (t₀ := tbase) hf_lip hDf_lip hf_bound hA_bound hD_bound
+          hf_cont hDf_cont hmul htime htbase hr hder)
+    intro t ht xE hxE
+    exact hsource (hsModel ht) hxE
+  exact
+    realization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection_of_contMDiffCovariantDerivative_background
+      (M := M) (F := F) (I := I) hcover_int G hs hsIoo α hsModel Fₗ U
+      hsource_cover hreadout hflow_deriv hdata gauge3 hgauge_maps
+      hchartRHS_eq_intrinsic hbackground hlieCorrection
+
 /-- Interior-cover target-overlap scalar derivatives, tangent-map derivative
 data, and the scalar velocity identity give tensor time-regularity for the
 non-identity raw gauge pullback on any open time set inside the Banach
