@@ -517,6 +517,46 @@ theorem exists_secondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries
     hJ
 
 set_option maxHeartbeats 1000000 in
+/-- Finite-family version of
+`exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries_directions` where each family
+member has its own finite direction frame. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries_family_directions
+    {κ n : Type*} [Fintype κ] [Fintype n] [DecidableEq n] (v : κ → n → X)
+    {R : κ → n → n → ℝ} {δ : ℝ} {s : Set (ℝ × X)}
+    {M : κ → ℝ × X → Matrix n n ℝ}
+    (hM : ∀ r i j, ParabolicC2AlphaNormLe (R r i j) α (fun z => M r z i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∃ J : ∀ r i j, ParabolicSecondJet (fun z : ℝ × X => M r z i j) s,
+      ParabolicC0AlphaNormLe
+        (∑ r, ricciDeTurckSchematicMatrixBoundConst (n := n) δ (R r)
+          (firstDerivativeVectorRadius (X := X) (v r) (R r))
+          (secondDerivativeVectorRadius (X := X) (v r) (R r)))
+        α
+        (fun z : ℝ × X => fun r : κ =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M r z)
+            (fun a i j => (J r i j).spaceDeriv z (v r a))
+            (fun a b i j => (J r i j).spaceSecondDeriv z (v r a) (v r b))) s := by
+  classical
+  choose J hJ using fun r =>
+    exists_secondJet_ricciDeTurckSchematicMatrix_of_metric_entries_directions
+      (X := X) (α := α) (v := v r) (R := R r) (δ := δ) (s := s) (M := M r)
+      (hM r) hδpos (hdet r)
+  refine ⟨J, ?_⟩
+  exact ParabolicC0AlphaNormLe.pi (X := X) (α := α) (s := s)
+    (N := fun r =>
+      ricciDeTurckSchematicMatrixBoundConst (n := n) δ (R r)
+        (firstDerivativeVectorRadius (X := X) (v r) (R r))
+        (secondDerivativeVectorRadius (X := X) (v r) (R r)))
+    (u := fun z : ℝ × X => fun r : κ =>
+      ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r z)
+        (fun a i j => (J r i j).spaceDeriv z (v r a))
+        (fun a b i j => (J r i j).spaceSecondDeriv z (v r a) (v r b)))
+    hJ
+
+set_option maxHeartbeats 1000000 in
 /-- A metric with entrywise higher parabolic control supplies its own coordinate first- and
 second-derivative primitive arrays through chosen second jets.  This removes the separate
 `D`/`H` primitive hypotheses for the direct schematic Ricci-DeTurck `C^{0,α}` estimate when the
@@ -2118,6 +2158,31 @@ theorem exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_metr
   choose J hJ using fun r =>
     exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_metric_entries_directions
       (X := X) (α := α) (v := v) (δ := δ) (s := s) (M := M r) (hM r)
+      hδpos (hdet r)
+  refine ⟨J, ?_⟩
+  exact ParabolicC0AlphaOn.pi hJ
+
+set_option maxHeartbeats 1000000 in
+/-- Pi-valued finite-family qualitative higher-regularity version of
+`exists_secondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries_family_directions`. -/
+theorem exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_metric_entries_family_directions
+    {κ n : Type*} [Fintype κ] [Fintype n] [DecidableEq n] (v : κ → n → X)
+    {δ : ℝ} {s : Set (ℝ × X)}
+    {M : κ → ℝ × X → Matrix n n ℝ}
+    (hM : ∀ r i j, ParabolicC2AlphaOn α (fun z => M r z i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∃ J : ∀ r i j, ParabolicSecondJet (fun z : ℝ × X => M r z i j) s,
+      ParabolicC0AlphaOn α
+        (fun z : ℝ × X => fun r : κ =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M r z)
+            (fun a i j => (J r i j).spaceDeriv z (v r a))
+            (fun a b i j => (J r i j).spaceSecondDeriv z (v r a) (v r b))) s := by
+  classical
+  choose J hJ using fun r =>
+    exists_secondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_metric_entries_directions
+      (X := X) (α := α) (v := v r) (δ := δ) (s := s) (M := M r) (hM r)
       hδpos (hdet r)
   refine ⟨J, ?_⟩
   exact ParabolicC0AlphaOn.pi hJ

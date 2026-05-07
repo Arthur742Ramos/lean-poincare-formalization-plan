@@ -3506,7 +3506,8 @@ specializes that finite-direction bridge to compact local-frame Gram matrices
 on a normed-vector chart model: entrywise higher Gram controls choose second
 jets, read first and second primitive arrays along the local-frame basis, and
 extract the compact Gram determinant lower bound before applying the schematic
-Ricci-DeTurck RHS estimate. It now also
+Ricci-DeTurck RHS estimate; the same specialization is available for finite
+families of frames with one shared compact determinant lower bound. It now also
 converts entrywise higher
 primitive difference controls with radii linear in a shared radius into the
 linear-radius `ParabolicBoundedWith` schematic RHS estimate and the

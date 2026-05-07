@@ -84,6 +84,59 @@ theorem exists_secondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_of_ent
     ⟨J, hJ⟩
   exact ⟨J, δ, hδpos, hdet, hJ⟩
 
+set_option maxHeartbeats 1000000 in
+/-- Finite-family compact local-frame Gram bridge with second-jet primitive arrays.  One compact
+Gram determinant lower bound is shared across the finite frame family, while each family member
+reads its chosen second jets along its own local-frame basis. -/
+theorem exists_secondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_pi_family_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TE]
+    [ContMDiffVectorBundle 2 E TE I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TE → E))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × E)} {α : ℝ} {R : ρ → ι → ι → ℝ}
+    (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × E⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    (hG : ∀ r i j,
+      ParabolicC2AlphaNormLe (R r i j) α
+        (fun z : ℝ × E =>
+          (show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) i j) K) :
+    ∃ J : ∀ r i j,
+        ParabolicSecondJet
+          (fun z : ℝ × E =>
+            (show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) i j) K,
+      ∃ δ > 0,
+        (∀ r ⦃z : ℝ × E⦄, z ∈ K →
+          δ ≤ ‖(show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+        ParabolicC0AlphaNormLe
+          (∑ r, ricciDeTurckSchematicMatrixBoundConst (n := ι) δ (R r)
+            (firstDerivativeVectorRadius (X := E) (fun a : ι => b r a) (R r))
+            (secondDerivativeVectorRadius (X := E) (fun a : ι => b r a) (R r)))
+          α
+          (fun z : ℝ × E => fun r : ρ =>
+            ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+              (show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+              (fun a i j => (J r i j).spaceDeriv z (b r a))
+              (fun a c i j => (J r i j).spaceSecondDeriv z (b r a) (b r c))) K := by
+  rcases
+    ParabolicC0AlphaOn.localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  rcases
+    ParabolicC2AlphaNormLe.exists_secondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries_family_directions
+      (X := E) (α := α) (v := fun r a => b r a) (R := R) (δ := δ) (s := K)
+      (M := fun r z =>
+        (show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2))
+      hG hδpos hdet with
+    ⟨J, hJ⟩
+  exact ⟨J, δ, hδpos, hdet, hJ⟩
+
 end ParabolicC2AlphaNormLe
 
 namespace ParabolicC2AlphaOn
@@ -134,6 +187,49 @@ theorem exists_secondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_c0Alph
   choose R _hR_nonneg hR using hG
   rcases
     ParabolicC2AlphaNormLe.exists_secondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_of_entries_of_timeSpace_isCompact
+      (I := I) e b (K := K) (α := α) (R := R) hK hKbase hR with
+    ⟨J, δ, hδpos, hdet, hJ⟩
+  exact ⟨J, δ, hδpos, hdet, hJ.c0AlphaOn⟩
+
+set_option maxHeartbeats 1000000 in
+/-- Qualitative finite-family compact local-frame Gram bridge with second-jet primitive arrays.
+This is the membership-only version of
+`ParabolicC2AlphaNormLe.exists_secondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_pi_family_of_entries_of_timeSpace_isCompact`. -/
+theorem exists_secondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TE]
+    [ContMDiffVectorBundle 2 E TE I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TE → E))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × E)} {α : ℝ}
+    (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × E⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    (hG : ∀ r i j,
+      ParabolicC2AlphaOn α
+        (fun z : ℝ × E =>
+          (show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) i j) K) :
+    ∃ J : ∀ r i j,
+        ParabolicSecondJet
+          (fun z : ℝ × E =>
+            (show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) i j) K,
+      ∃ δ > 0,
+        (∀ r ⦃z : ℝ × E⦄, z ∈ K →
+          δ ≤ ‖(show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+        ParabolicC0AlphaOn α
+          (fun z : ℝ × E => fun r : ρ =>
+            ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+              (show Matrix ι ι ℝ from
+                CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+              (fun a i j => (J r i j).spaceDeriv z (b r a))
+              (fun a c i j => (J r i j).spaceSecondDeriv z (b r a) (b r c))) K := by
+  classical
+  choose R _hR_nonneg hR using hG
+  rcases
+    ParabolicC2AlphaNormLe.exists_secondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_pi_family_of_entries_of_timeSpace_isCompact
       (I := I) e b (K := K) (α := α) (R := R) hK hKbase hR with
     ⟨J, δ, hδpos, hdet, hJ⟩
   exact ⟨J, δ, hδpos, hdet, hJ.c0AlphaOn⟩
