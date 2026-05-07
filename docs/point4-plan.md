@@ -1888,7 +1888,14 @@ and
 which keep the selected finite source cover on the whole closed interval, the
 ambient interval-subset certificate, the raw `Icc` gauge flow, and the local
 readout equality in one package.  This matches the cover/readout hypotheses of
-the raw source-coordinate time-derivative endpoint.  More broadly, the compact
+the raw source-coordinate time-derivative endpoint.  The time-derivative layer
+now has matching closed-interval-cover entry points
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn`
+and
+`ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentMapReadoutMemBallDerivativeDataOnIoo_of_iUnion_Icc_cover_source_hasFDerivAt`,
+which restrict that `Icc` source-cover certificate to the open interior before
+invoking the existing readout-local source-coordinate derivative routes.  More
+broadly, the compact
 raw existence
 theorems combine
 the ambient time set, ambient local regularity, and the open-preimage
