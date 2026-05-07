@@ -1880,7 +1880,16 @@ and the pointwise family wrapper
 `Diffeomorph3GaugeFlowOn.exists_Icc_gaugeFlow_family_with_finiteSubcover_readout_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`.
 For arbitrary index types these wrappers return the selected `Finset` and state
 the readout over its subtype, matching the finite cover actually used by the
-glued raw flow.  More broadly, the compact raw existence
+glued raw flow.  The ambient-time compact route now also has stronger
+cover-preserving selected witnesses
+`Diffeomorph3GaugeFlowOn.exists_Icc_gaugeFlow_with_finiteSubcover_Icc_subset_cover_readout_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+and
+`Diffeomorph3GaugeFlowOn.exists_Icc_gaugeFlow_family_with_finiteSubcover_Icc_subset_cover_readout_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
+which keep the selected finite source cover on the whole closed interval, the
+ambient interval-subset certificate, the raw `Icc` gauge flow, and the local
+readout equality in one package.  This matches the cover/readout hypotheses of
+the raw source-coordinate time-derivative endpoint.  More broadly, the compact
+raw existence
 theorems combine
 the ambient time set, ambient local regularity, and the open-preimage
 local-gluing route to produce raw gauge-flow witnesses on small symmetric `Ioo`

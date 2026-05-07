@@ -9868,6 +9868,115 @@ theorem exists_Icc_gaugeFlow_with_finiteSubcover_readout_of_compact_timeSet_iUni
         exact hYτ i x hx)
       t ht i x hx
 
+/-- Compact raw `C^3` gauge-flow existence from ambient-time local gluing data,
+retaining the selected finite subcover, the interval source-cover certificate,
+the ambient interval-subset certificate, and the local readout equality.
+
+This is the compact witness shape needed by readout-local time-derivative
+routes: the same selected finite cover supplies both the source-cover
+hypothesis and the readout equality for the chosen closed Picard flow. -/
+theorem exists_Icc_gaugeFlow_with_finiteSubcover_Icc_subset_cover_readout_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    [CompactSpace M] {ι : Type*}
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {timeSet : Set ℝ} {t₀ : ℝ}
+    (defaultF defaultG : ℝ → M → M) (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (htimeSet : timeSet ∈ 𝓝 t₀)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (hUcover : Set.univ ⊆ ⋃ i, U t₀ i)
+    (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, U t₀ i ⊆ U τ i)
+    (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[timeSet] t₀, V t₀ i ⊆ V τ i)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U t₀ i, Fₗ i t₀ x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ timeSet, ∀ x : M, x ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x) timeSet t)
+    (hderivLocal : ∀ i, ∀ t ∈ timeSet, ∀ x : M, x ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+        (Y t (Fₗ i t x)) timeSet t)
+    (hYLocal : ∀ t ∈ timeSet, ∀ᶠ τ in 𝓝[timeSet] t,
+      ∀ i, ∀ x : M, x ∈ U τ i → Y τ (Fₗ i τ x) = X τ (Fₗ i τ x)) :
+    ∃ s : Finset ι, ∃ ε : ℝ, 0 < ε ∧
+      Icc (t₀ - ε) (t₀ + ε) ⊆ timeSet ∧
+      (∀ t ∈ Icc (t₀ - ε) (t₀ + ε),
+        Set.univ ⊆ ⋃ i : {i // i ∈ s}, U t i) ∧
+      ∃ G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X
+          (Icc (t₀ - ε) (t₀ + ε)) t₀,
+        ∀ t ∈ Ioo (t₀ - ε) (t₀ + ε), ∀ i : {i // i ∈ s}, ∀ x ∈ U t i,
+          ∀ᶠ τ in 𝓝 t,
+            ∃ W' : Set M, W' ∈ 𝓝 x ∧
+              EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ i τ) W' := by
+  have hVcover : Set.univ ⊆ ⋃ i, V t₀ i :=
+    LocalGluingData.target_cover_at_of_source_cover_anchor
+      (I := I) (M := M) (n := 3) (F := Fₗ) (G := Gₗ) (U := U) (V := V)
+      (t₀ := t₀) (fun i ↦ hlocal t₀ i) hUcover hanchoredLocal
+  have hWcover : Set.univ ⊆ ⋃ i, W i :=
+    _root_.RicciFlow.timeDependent_iUnion_target_cover_of_indexed_open_preimage_anchor
+      (F := Fₗ) (U := U) (W := W) (t₀ := t₀)
+      hUpreimage hUcover hanchoredLocal
+  rcases LocalGluingData.exists_finset_subtype_timeDependent_iUnion_compatible_openPreimage_Icc_subset_timeSet_cover_of_iUnion_at
+      (I := I) (M := M) Fₗ Gₗ U V W timeSet t₀ htimeSet hlocal hFcompat
+      hGcompat hUpreimage hWopen hUcover hVcover hWcover hUwithin hVwithin with
+    ⟨s, ε, hεpos, hIcc_subset, _hUsubcover_t₀, _hVsubcover_t₀, hUcover_Icc,
+      hVcover_Icc, _hWsubcover, hlocal_sub, hFcompat_sub, hGcompat_sub,
+      hUpreimage_sub, hWopen_sub⟩
+  have ht₀Icc : t₀ ∈ Icc (t₀ - ε) (t₀ + ε) := by
+    constructor <;> linarith
+  let G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X
+      (Icc (t₀ - ε) (t₀ + ε)) t₀ :=
+    of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc
+      (I := I) (M := M) (X := X) (Y := Y)
+      (timeSet := timeSet) (tmin := t₀ - ε) (tmax := t₀ + ε) (t₀ := t₀)
+      defaultF defaultG (fun i : {i // i ∈ s} ↦ Fₗ i)
+      (fun i : {i // i ∈ s} ↦ Gₗ i)
+      (fun τ (i : {i // i ∈ s}) ↦ U τ i)
+      (fun τ (i : {i // i ∈ s}) ↦ V τ i)
+      (fun i : {i // i ∈ s} ↦ W i)
+      hIcc_subset
+      (fun t ht ↦ hUcover_Icc ht)
+      (fun t ht ↦ hVcover_Icc ht)
+      (fun t _ht i ↦ hlocal_sub t i)
+      (fun t _ht i j ↦ hFcompat_sub t i j)
+      (fun t _ht i j ↦ hGcompat_sub t i j)
+      hUpreimage_sub hWopen_sub ht₀Icc
+      (fun i x hx ↦ hanchoredLocal i x hx)
+      (fun i t ht x hx ↦ hcontLocal i t (hIcc_subset ht) x hx)
+      (fun i t ht x hx ↦ hderivLocal i t (hIcc_subset ht) x hx)
+      (fun t ht ↦ by
+        filter_upwards [hYLocal t ht] with τ hYτ
+        intro i x hx
+        exact hYτ i x hx)
+  refine ⟨s, ε, hεpos, hIcc_subset, hUcover_Icc, G, ?_⟩
+  intro t ht i x hx
+  simpa [G] using
+    of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc_eventually_nhds_exists_eqOn_of_mem_Ioo
+      (I := I) (M := M) (X := X) (Y := Y)
+      (timeSet := timeSet) (tmin := t₀ - ε) (tmax := t₀ + ε) (t₀ := t₀)
+      defaultF defaultG (fun i : {i // i ∈ s} ↦ Fₗ i)
+      (fun i : {i // i ∈ s} ↦ Gₗ i)
+      (fun τ (i : {i // i ∈ s}) ↦ U τ i)
+      (fun τ (i : {i // i ∈ s}) ↦ V τ i)
+      (fun i : {i // i ∈ s} ↦ W i)
+      hIcc_subset
+      (fun t ht ↦ hUcover_Icc ht)
+      (fun t ht ↦ hVcover_Icc ht)
+      (fun t _ht i ↦ hlocal_sub t i)
+      (fun t _ht i j ↦ hFcompat_sub t i j)
+      (fun t _ht i j ↦ hGcompat_sub t i j)
+      hUpreimage_sub hWopen_sub ht₀Icc
+      (fun i x hx ↦ hanchoredLocal i x hx)
+      (fun i t ht x hx ↦ hcontLocal i t (hIcc_subset ht) x hx)
+      (fun i t ht x hx ↦ hderivLocal i t (hIcc_subset ht) x hx)
+      (fun t ht ↦ by
+        filter_upwards [hYLocal t ht] with τ hYτ
+        intro i x hx
+        exact hYτ i x hx)
+      t ht i x hx
+
 /-- Pointwise-family compact raw `C^3` gauge-flow existence on small symmetric
 open intervals from ambient-time local gluing data.
 
@@ -10071,6 +10180,109 @@ theorem exists_Icc_gaugeFlow_family_with_finiteSubcover_readout_of_compact_timeS
     exact (hspec a).1
   · intro a
     exact (hspec a).2
+
+/-- Pointwise-family compact raw `C^3` gauge-flow existence on small closed
+symmetric intervals, retaining for each family member the selected finite
+subcover, interval source-cover certificate, ambient interval-subset
+certificate, and local readout equality. -/
+theorem exists_Icc_gaugeFlow_family_with_finiteSubcover_Icc_subset_cover_readout_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    [CompactSpace M] {α ι : Type*}
+    (X Y : α → CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (timeSet : α → Set ℝ) (t₀ : α → ℝ)
+    (defaultF defaultG : α → ℝ → M → M)
+    (Fₗ Gₗ : α → ι → ℝ → M → M)
+    (U V : α → ℝ → ι → Set M) (W : α → ι → Set M)
+    (htimeSet : ∀ a, timeSet a ∈ 𝓝 (t₀ a))
+    (hlocal : ∀ a, ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ a i t) (Gₗ a i t)
+        (U a t i) (V a t i))
+    (hFcompat : ∀ a, ∀ t : ℝ, ∀ i j,
+      EqOn (Fₗ a i t) (Fₗ a j t) (U a t i ∩ U a t j))
+    (hGcompat : ∀ a, ∀ t : ℝ, ∀ i j,
+      EqOn (Gₗ a i t) (Gₗ a j t) (V a t i ∩ V a t j))
+    (hUpreimage : ∀ a, ∀ τ : ℝ, ∀ i, ∀ x : M,
+      x ∈ U a τ i ↔ Fₗ a i τ x ∈ W a i)
+    (hWopen : ∀ a i, IsOpen (W a i))
+    (hUcover : ∀ a, Set.univ ⊆ ⋃ i, U a (t₀ a) i)
+    (hUwithin : ∀ a i, ∀ᶠ τ in 𝓝[timeSet a] (t₀ a),
+      U a (t₀ a) i ⊆ U a τ i)
+    (hVwithin : ∀ a i, ∀ᶠ τ in 𝓝[timeSet a] (t₀ a),
+      V a (t₀ a) i ⊆ V a τ i)
+    (hanchoredLocal : ∀ a i, ∀ x ∈ U a (t₀ a) i, Fₗ a i (t₀ a) x = x)
+    (hcontLocal : ∀ a i, ∀ t ∈ timeSet a, ∀ x : M, x ∈ U a t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ a i τ x) (timeSet a) t)
+    (hderivLocal : ∀ a i, ∀ t ∈ timeSet a, ∀ x : M, x ∈ U a t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ a i t x)) (Fₗ a i τ x))
+        ((Y a) t (Fₗ a i t x)) (timeSet a) t)
+    (hYLocal : ∀ a, ∀ t ∈ timeSet a, ∀ᶠ τ in 𝓝[timeSet a] t,
+      ∀ i, ∀ x : M, x ∈ U a τ i →
+        (Y a) τ (Fₗ a i τ x) = (X a) τ (Fₗ a i τ x)) :
+    ∃ s : α → Finset ι, ∃ ε : α → ℝ, (∀ a, 0 < ε a) ∧
+      (∀ a, Icc (t₀ a - ε a) (t₀ a + ε a) ⊆ timeSet a) ∧
+      (∀ a, ∀ t ∈ Icc (t₀ a - ε a) (t₀ a + ε a),
+        Set.univ ⊆ ⋃ i : {i // i ∈ s a}, U a t i) ∧
+      ∀ a, ∃ G : Diffeomorph3GaugeFlowOn (I := I) (M := M) (X a)
+          (Icc (t₀ a - ε a) (t₀ a + ε a)) (t₀ a),
+        ∀ t ∈ Ioo (t₀ a - ε a) (t₀ a + ε a),
+          ∀ i : {i // i ∈ s a}, ∀ x ∈ U a t i,
+            ∀ᶠ τ in 𝓝 t,
+              ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ a i τ) W' := by
+  classical
+  let hraw : ∀ a, ∃ s : Finset ι, ∃ ε : ℝ, 0 < ε ∧
+      Icc (t₀ a - ε) (t₀ a + ε) ⊆ timeSet a ∧
+      (∀ t ∈ Icc (t₀ a - ε) (t₀ a + ε),
+        Set.univ ⊆ ⋃ i : {i // i ∈ s}, U a t i) ∧
+      ∃ G : Diffeomorph3GaugeFlowOn (I := I) (M := M) (X a)
+          (Icc (t₀ a - ε) (t₀ a + ε)) (t₀ a),
+        ∀ t ∈ Ioo (t₀ a - ε) (t₀ a + ε), ∀ i : {i // i ∈ s},
+          ∀ x ∈ U a t i,
+            ∀ᶠ τ in 𝓝 t,
+              ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ a i τ) W' := fun a ↦
+    exists_Icc_gaugeFlow_with_finiteSubcover_Icc_subset_cover_readout_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+      (I := I) (M := M) (X := X a) (Y := Y a)
+      (timeSet := timeSet a) (t₀ := t₀ a)
+      (defaultF a) (defaultG a) (Fₗ a) (Gₗ a) (U a) (V a) (W a)
+      (htimeSet a) (hlocal a) (hFcompat a) (hGcompat a) (hUpreimage a)
+      (hWopen a) (hUcover a) (hUwithin a) (hVwithin a)
+      (hanchoredLocal a) (hcontLocal a) (hderivLocal a) (hYLocal a)
+  let s : α → Finset ι := fun a ↦ Classical.choose (hraw a)
+  let hraw_s : ∀ a, ∃ ε : ℝ, 0 < ε ∧
+      Icc (t₀ a - ε) (t₀ a + ε) ⊆ timeSet a ∧
+      (∀ t ∈ Icc (t₀ a - ε) (t₀ a + ε),
+        Set.univ ⊆ ⋃ i : {i // i ∈ s a}, U a t i) ∧
+      ∃ G : Diffeomorph3GaugeFlowOn (I := I) (M := M) (X a)
+          (Icc (t₀ a - ε) (t₀ a + ε)) (t₀ a),
+        ∀ t ∈ Ioo (t₀ a - ε) (t₀ a + ε), ∀ i : {i // i ∈ s a},
+          ∀ x ∈ U a t i,
+            ∀ᶠ τ in 𝓝 t,
+              ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ a i τ) W' := fun a ↦
+    Classical.choose_spec (hraw a)
+  let ε : α → ℝ := fun a ↦ Classical.choose (hraw_s a)
+  have hspec : ∀ a, 0 < ε a ∧
+      Icc (t₀ a - ε a) (t₀ a + ε a) ⊆ timeSet a ∧
+      (∀ t ∈ Icc (t₀ a - ε a) (t₀ a + ε a),
+        Set.univ ⊆ ⋃ i : {i // i ∈ s a}, U a t i) ∧
+      ∃ G : Diffeomorph3GaugeFlowOn (I := I) (M := M) (X a)
+          (Icc (t₀ a - ε a) (t₀ a + ε a)) (t₀ a),
+        ∀ t ∈ Ioo (t₀ a - ε a) (t₀ a + ε a), ∀ i : {i // i ∈ s a},
+          ∀ x ∈ U a t i,
+            ∀ᶠ τ in 𝓝 t,
+              ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ a i τ) W' := fun a ↦
+    Classical.choose_spec (hraw_s a)
+  refine ⟨s, ε, ?_, ?_, ?_, ?_⟩
+  · intro a
+    exact (hspec a).1
+  · intro a
+    exact (hspec a).2.1
+  · intro a t ht
+    exact (hspec a).2.2.1 t ht
+  · intro a
+    exact (hspec a).2.2.2
 
 /-- Pointwise-family compact raw `C^3` gauge-flow existence on small symmetric
 open intervals, also exposing the closed symmetric interval as a subset of the
