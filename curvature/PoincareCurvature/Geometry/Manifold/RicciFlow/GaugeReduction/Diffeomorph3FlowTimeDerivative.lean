@@ -34109,6 +34109,38 @@ theorem deTurckVector_mdiffAt_of_contMDiffCovariantDerivative_background
       G.solution.1.toIntrinsicDeTurckSolution.background t
       (hbackground ht) p
 
+/-- Transport ambient smooth-background regularity through a selected
+restricted-symmetric solution equality, then produce the selected flow's
+intrinsic DeTurck-vector `MDiffAt` hypothesis. -/
+theorem deTurckVector_mdiffAt_of_solution_eq_restrictSymmetricIcc_of_contMDiffCovariantDerivative_background
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hbackground : ∀ ⦃t : ℝ⦄,
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        CovariantDerivative.ContMDiffCovariantDerivative
+          (sol.1.toIntrinsicDeTurckSolution.background t) 1) :
+    ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ∀ p : M,
+        MDiffAt (T%
+          (intrinsicDeTurckVectorField (I := I) (M := M)
+            G.solution.1.toIntrinsicDeTurckSolution.metric
+            G.solution.1.toIntrinsicDeTurckSolution.background t)) p := by
+  intro t ht p
+  simpa [hGsol] using
+    intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background
+      (I := I) (M := M)
+      sol.1.toIntrinsicDeTurckSolution.metric
+      sol.1.toIntrinsicDeTurckSolution.background t
+      (hbackground
+        (G.mem_timeSet_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol ht)) p
+
 /-- Restrict ambient local Picard flow solutions to the selected finite
 subcover and selected restricted-symmetric time set. -/
 def localFlowSolution_subtype_of_solution_eq_restrictSymmetricIcc

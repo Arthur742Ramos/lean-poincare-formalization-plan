@@ -2773,7 +2773,11 @@ thread the tautological `hXeq` hypothesis. The selected smooth-background
 variant ending in `_of_contMDiffCovariantDerivative_background` now also
 derives the DeTurck-vector `MDiffAt` input from slicewise
 `ContMDiffCovariantDerivative (background t) 1`, via
-`SelectedIntrinsicDeTurckGaugeFlowExistence.deTurckVector_mdiffAt_of_contMDiffCovariantDerivative_background`.
+`SelectedIntrinsicDeTurckGaugeFlowExistence.deTurckVector_mdiffAt_of_contMDiffCovariantDerivative_background`;
+the restricted-symmetric transport
+`SelectedIntrinsicDeTurckGaugeFlowExistence.deTurckVector_mdiffAt_of_solution_eq_restrictSymmetricIcc_of_contMDiffCovariantDerivative_background`
+lets compact callers keep that smooth-background hypothesis on the ambient
+chosen solution and move it to the selected closed interval when needed.
 The selected correction layer also has an interior compact-readout route,
 `SelectedIntrinsicDeTurckGaugeFlowExistence.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_Icc_cover_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_Ioo_of_timeSet_eq_Icc`,
 and its smooth-background variant ending in
