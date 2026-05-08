@@ -2742,8 +2742,10 @@ returns those transported certificates directly. The companion adapters
 `continuousWithinAt_Icc_subtype_of_solution_eq_restrictSymmetricIcc`, and
 `hasDerivWithinAt_Icc_subtype_of_solution_eq_restrictSymmetricIcc` restrict the
 constructor's ambient local gluing, continuity, and chart-derivative inputs to
-the selected finite subcover and closed interval. The selected raw flow now also
-exposes the
+the selected finite subcover and closed interval, while
+`SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cover_readout_localData_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+packages all of those route-shaped certificates together. The selected raw flow
+now also exposes the
 pointwise correction-route `hXeq` certificate as
 `SelectedIntrinsicDeTurckGaugeFlowExistence.flow_vectorField_eq_intrinsicDeTurckGaugeField`,
 since its driving vector field is definitionally the intrinsic DeTurck gauge

@@ -12796,6 +12796,104 @@ theorem exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cov
       G.auxiliaryEqAlong_of_solution_eq_restrictSymmetricIcc sol hε hsub
         hGsol hYAlong
 
+/-- Route-shaped compact selected raw gauge-flow witness, additionally
+returning the selected local-gluing, continuity, and chart-derivative data on
+the selected closed interval.
+
+This packages the finite selected cover/readout certificates from the compact
+construction together with the local data transports consumed by local
+Picard/gluing correction routes. -/
+theorem exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cover_readout_localData_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    [CompactSpace M] {ι : Type*}
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (defaultF defaultG : ℝ → M → M)
+    (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 ivp.initialTime)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (hUcover : Set.univ ⊆ ⋃ i, U ivp.initialTime i)
+    (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet]
+      ivp.initialTime, U ivp.initialTime i ⊆ U τ i)
+    (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet]
+      ivp.initialTime, V ivp.initialTime i ⊆ V τ i)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U ivp.initialTime i,
+      Fₗ i ivp.initialTime x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet,
+      ∀ x : M, x ∈ U t i →
+        ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x)
+          sol.1.toIntrinsicDeTurckSolution.timeSet t)
+    (hderivLocal : ∀ i, ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet,
+      ∀ x : M, x ∈ U t i →
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+          (Y t (Fₗ i t x)) sol.1.toIntrinsicDeTurckSolution.timeSet t)
+    (hYLocal : ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet,
+      ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t,
+        ∀ i, ∀ x : M, x ∈ U τ i →
+          Y τ (Fₗ i τ x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background τ (Fₗ i τ x)) :
+    ∃ s : Finset ι, ∃ ε : ℝ, ∃ hε : 0 < ε,
+      ∃ hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+          sol.1.toIntrinsicDeTurckSolution.timeSet,
+        (∀ t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε),
+          Set.univ ⊆ ⋃ i : {i // i ∈ s}, U t i) ∧
+        ∃ G : SelectedIntrinsicDeTurckGaugeFlowExistence
+            (E := E) (H := H) (I := I) (M := M) ivp,
+          G.solution = sol.restrictSymmetricIcc hε hsub ∧
+          G.solution.1.toIntrinsicDeTurckSolution.timeSet =
+            Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ∧
+          (∀ t ∈ Ioo (ivp.initialTime - ε) (ivp.initialTime + ε),
+            ∀ i : {i // i ∈ s}, ∀ x ∈ U t i,
+              ∀ᶠ τ in 𝓝 t,
+                ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                  EqOn (fun z : M ↦ (G.flow.maps3 τ) z) (Fₗ i τ) W') ∧
+          (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+            ∀ i : {i // i ∈ s},
+              LocalGluingData (I := I) (M := M) 3
+                (Fₗ i t) (Gₗ i t) (U t i) (V t i)) ∧
+          (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+            ∀ i : {i // i ∈ s}, ∀ x : M, x ∈ U t i →
+              ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x)
+                (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) t) ∧
+          (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+            ∀ i : {i // i ∈ s}, ∀ x : M, x ∈ U t i →
+              HasDerivWithinAt
+                (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+                (Y t (Fₗ i t x))
+                (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) t) ∧
+          (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+            ∀ᶠ τ in 𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+              ∀ x : M,
+                Y τ ((G.flow.maps3 τ) x) =
+                  intrinsicDeTurckGaugeField (I := I) (M := M)
+                    G.solution.1.toIntrinsicDeTurckSolution.metric
+                    G.solution.1.toIntrinsicDeTurckSolution.background τ
+                    ((G.flow.maps3 τ) x)) := by
+  rcases
+    exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cover_readout_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+      (I := I) (M := M) sol defaultF defaultG Fₗ Gₗ U V W htimeSet
+      hlocal hFcompat hGcompat hUpreimage hWopen hUcover hUwithin hVwithin
+      hanchoredLocal hcontLocal hderivLocal hYLocal with
+    ⟨s, ε, hε, hsub, hcover, G, hGsol, htime, hreadout, hYAlong⟩
+  refine ⟨s, ε, hε, hsub, hcover, G, hGsol, htime, hreadout, ?_, ?_, ?_, hYAlong⟩
+  · exact G.localGluingData_subtype Fₗ Gₗ U V hlocal
+  · exact
+      G.continuousWithinAt_Icc_subtype_of_solution_eq_restrictSymmetricIcc
+        sol Fₗ U hε hsub hGsol hcontLocal
+  · exact
+      G.hasDerivWithinAt_Icc_subtype_of_solution_eq_restrictSymmetricIcc
+        sol Fₗ U hε hsub hGsol hderivLocal
+
 /-- Scalar time-derivative data for the metric pulled back by a selected raw
 intrinsic DeTurck gauge flow. -/
 def PullbackMetricInnerDerivativeData
