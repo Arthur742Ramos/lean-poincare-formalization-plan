@@ -2702,6 +2702,12 @@ lifted-model/value hypotheses as the selected-route inputs. The fixed-IVP
 restricted-symmetric companion ending in
 `_of_solution_eq_restrictSymmetricIcc` now derives the selected closed interval
 certificate internally for the same state-preserving Picard-estimate route.
+The selected compact-constructor wrapper
+`SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_compact_iUnion_openPreimage_localGluingData`
+now goes one step further: it constructs the restricted selected raw gauge-flow
+witness, consumes the finite source cover/readout certificates internally, and
+leaves the remaining state-preserving Picard and lifted local tensor derivative
+obligations in the `IccStatePreservingTensorDerivativeData` package.
 The theorem-family restricted-symmetric companion mirrors this after fixing one
 selected `ivp`, so family-level compact Picard callers can avoid restating the
 closed-interval certificate too.
