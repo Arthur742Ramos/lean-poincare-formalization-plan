@@ -2739,6 +2739,14 @@ and
 which convert local eventual equality of `f t` with
 `VectorField.mpullbackWithin ... (Y t)` through `(extChartAt I p).symm` into
 the explicit `tangentCoordChange` `EqOn` shape used downstream. The derivative
+layer now also exposes the derivative-uniqueness entry point
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_mpullbackWithin_of_common_derivatives`
+and its `EqOn` package
+`Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_common_derivatives`:
+if a common local coordinate curve has within-time-set derivative `f t y` from
+the Picard model and the auxiliary fixed-chart velocity from the manifold
+readout, then the local Picard-model-to-auxiliary `mpullbackWithin` equality
+follows directly. The derivative
 layer also has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn`,
 which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the

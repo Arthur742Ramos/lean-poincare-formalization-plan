@@ -24544,6 +24544,51 @@ theorem vectorField_eq_intrinsicDeTurckGaugeField_of_eventuallyEq_along_maps3_nh
   rw [hmap] at h
   exact h
 
+/-- Derivative-uniqueness bridge from local Picard/readout curves to the
+centered-chart pullback form of a model vector field.
+
+If the same local coordinate curve has within-time-set derivative `f t y` from
+the Picard ODE and derivative equal to the fixed-chart expression of an
+auxiliary manifold vector field, then `f t` agrees locally with the manifold
+pullback of that auxiliary field through the centered inverse chart. -/
+theorem model_vectorField_eventuallyEq_mpullbackWithin_of_common_derivatives
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {f : ℝ → E → E} {t : ℝ} (p : M)
+    (huniq : UniqueDiffWithinAt ℝ s t)
+    {W : Set E}
+    (hW : W ∈ 𝓝[Set.range I] ((extChartAt I p) p))
+    {γ : E → ℝ → E}
+    (hmodel : ∀ y ∈ W,
+      HasDerivWithinAt (fun τ : ℝ ↦ γ y τ) (f t y) s t)
+    (hreadout : ∀ y ∈ W,
+      HasDerivWithinAt (fun τ : ℝ ↦ γ y τ)
+        (let q : M := (extChartAt I p).symm y
+         tangentCoordChange I q p q (Y t q)) s t) :
+    (f t) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)]
+      (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+        (Y t) (Set.range I)) := by
+  have hEqTangent :
+      (f t) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)]
+      (fun y : E =>
+        let q : M := (extChartAt I p).symm y
+        tangentCoordChange I q p q (Y t q)) := by
+    filter_upwards [hW] with y hy
+    calc
+      f t y = derivWithin (fun τ : ℝ ↦ γ y τ) s t := by
+        exact ((hmodel y hy).derivWithin huniq).symm
+      _ = (let q : M := (extChartAt I p).symm y
+          tangentCoordChange I q p q (Y t q)) := by
+        exact (hreadout y hy).derivWithin huniq
+  have hpull :
+      (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+        (Y t) (Set.range I)) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)]
+      (fun y : E =>
+        let q : M := (extChartAt I p).symm y
+        tangentCoordChange I q p q (Y t q)) :=
+    SmoothSelfDiffeomorph3Family.mpullbackWithin_extChartAt_symm_eventuallyEq_tangentCoordChange
+      (I := I) (M := M) p (Y t)
+  exact hEqTangent.trans hpull.symm
+
 /-- A local centered-chart model field equality with the manifold pullback of an
 auxiliary vector field gives the explicit `tangentCoordChange` `EqOn` shape
 used by the closed-ball correction route.
@@ -24584,6 +24629,38 @@ theorem model_vectorField_eqOn_tangentCoordChange_of_eventuallyEq_mpullbackWithi
             let q : M := (extChartAt I p).symm y
             tangentCoordChange I q p q (Y t q)) y},
       hEq, fun y hy ↦ hy⟩
+
+/-- `EqOn` package of
+`model_vectorField_eventuallyEq_mpullbackWithin_of_common_derivatives`.
+
+This is the immediate handoff shape for compact finite-cover readouts after the
+local Picard/readout derivative comparison has been discharged. -/
+theorem model_vectorField_eqOn_tangentCoordChange_of_common_derivatives
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {f : ℝ → E → E} {t : ℝ} (p : M)
+    (huniq : UniqueDiffWithinAt ℝ s t)
+    {W : Set E}
+    (hW : W ∈ 𝓝[Set.range I] ((extChartAt I p) p))
+    {γ : E → ℝ → E}
+    (hmodel : ∀ y ∈ W,
+      HasDerivWithinAt (fun τ : ℝ ↦ γ y τ) (f t y) s t)
+    (hreadout : ∀ y ∈ W,
+      HasDerivWithinAt (fun τ : ℝ ↦ γ y τ)
+        (let q : M := (extChartAt I p).symm y
+         tangentCoordChange I q p q (Y t q)) s t) :
+    ∃ W' : Set E,
+      W' ∈ 𝓝[Set.range I] ((extChartAt I p) p) ∧
+      Set.EqOn (f t)
+        (fun y : E =>
+          let q : M := (extChartAt I p).symm y
+          tangentCoordChange I q p q (Y t q))
+        W' := by
+  exact
+    model_vectorField_eqOn_tangentCoordChange_of_eventuallyEq_mpullbackWithin
+      (I := I) (M := M) (Y := Y) (f := f) (t := t) p
+      (model_vectorField_eventuallyEq_mpullbackWithin_of_common_derivatives
+        (I := I) (M := M) (Y := Y) (f := f) (s := s) (t := t)
+        p huniq hW hmodel hreadout)
 
 /-- Patch-local centered-chart pullback identities provide the explicit
 `tangentCoordChange` `EqOn` hypotheses required by the compact readout bridge. -/
