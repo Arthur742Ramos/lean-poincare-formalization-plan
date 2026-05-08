@@ -2672,6 +2672,11 @@ the compact-witness endpoint
 and the theorem-family analogue, which combine a closed-interval finite source
 cover, selected local readout equality, model-flow spatial derivative data, and
 the lifted-model/value hypotheses into the selected tensor time derivative.
+The restricted-symmetric endpoint
+`SelectedIntrinsicDeTurckGaugeFlowExistence.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_solution_eq_restrictSymmetricIcc`
+now derives the selected `timeSet = Icc` certificate internally, so compact
+selected witnesses can feed the tensor route directly once the readout-local
+derivative data package has been built.
 The Picard-estimate-specialized endpoints
 `SelectedIntrinsicDeTurckGaugeFlowExistence.hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_timeSet_eq_Icc`
 and the theorem-family analogue now discharge that model-flow spatial
