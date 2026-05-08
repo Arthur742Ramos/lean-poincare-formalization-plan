@@ -5627,6 +5627,191 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variati
           hlocalData hsourceLocal hballLocal hmodelEqLocal hderivLocal))
       hY
 
+/-- Compact-witness scalar route with the patch-local model-field input
+discharged from current-time anchored local Picard flows, deriving source
+persistence from readout continuity and model/readout eventual equality from
+patch-local `EqOn` on the Picard time set. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_eqOn_of_eventuallyEq_along_maps3_nhdsWithin
+    {ι : Type*}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {gaugeInitialTime : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s gaugeInitialTime)
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → F → F} {Df : ℝ → F → F →L[ℝ] F}
+    {x₀ : F} {r a : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      realization.metric realization.background (Icc ivp.initialTime sol.terminalTime)
+      ivp.initialTime)
+    (hgauge_maps : gauge3.maps = G.maps3)
+    (hsIcc : s ⊆ Icc ivp.initialTime sol.terminalTime)
+    (hchartRHS_eq_intrinsic : ∀ ⦃t : ℝ⦄,
+      t ∈ Icc ivp.initialTime sol.terminalTime → ∀ x : M,
+        ∀ u v : TangentSpace I x,
+          A t (sol.curve t) x u v =
+            intrinsicRicciDeTurckRHS (I := I) (M := M)
+              realization.metric realization.background t x u v)
+    {tmin₁ tmax₁ : ℝ}
+    (hDeTurckVector_mdiff : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ p : M,
+      MDiffAt (T%
+        (intrinsicDeTurckVectorField (I := I) (M := M)
+          realization.metric realization.background t)) p)
+    (hXeq : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      X t ((G.maps3 t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          realization.metric realization.background t ((G.maps3 t) x))
+    (htime : s ⊆ Icc tmin₁ tmax₁)
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : F, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+          𝓝[s] t] (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hball : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : F, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        α.flow (xE, t) ∈ Metric.ball x₀ a)
+    (hder : ∀ τ ∈ Icc tmin₁ tmax₁, ∀ z ∈ Metric.closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (Metric.closedBall x₀ a) z)
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (hsource_cover : ∀ ⦃t : ℝ⦄, t ∈ s → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ x : M, x ∈ U t i →
+      ∀ᶠ τ in 𝓝 t, ∃ W' : Set M, W' ∈ 𝓝 x ∧
+        EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ i τ) W')
+    {tminLocal tmaxLocal : ℝ}
+    (hltLocal : tminLocal < tmaxLocal)
+    (hsLocal : s ⊆ Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ), t ∈ s → ι → M → F)
+    (rLocal : ∀ (t : ℝ), t ∈ s → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ) (ht : t ∈ s) (i : ι) (x : M),
+      ModelGaugeFlowODE.LocalFlowSolution f
+        (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+        (x₀Local t ht i x) (rLocal t ht i x))
+    (hlocalData : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hcontLocal : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ z : M, z ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ z) (Icc tminLocal tmaxLocal) t)
+    (hballLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M), x ∈ U t i →
+      ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+          (extChartAt I (Fₗ i t x)).symm ⁻¹'
+            (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+        y ∈ Metric.closedBall (x₀Local t ht i x) (rLocal t ht i x))
+    (hmodelEqOnLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          Set.EqOn
+            (fun τ : ℝ ↦
+              (extChartAt I (Fₗ i t x))
+                (Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y))))
+            (fun τ : ℝ ↦ (β t ht i x).flow y τ) (Icc tminLocal tmaxLocal))
+    (hderivLocal : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ z : M, z ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t z)) (Fₗ i τ z))
+        (Y t (Fₗ i t z)) (Icc tminLocal tmaxLocal) t)
+    (hY : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+        Y τ ((G.maps3 τ) x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            realization.metric realization.background τ ((G.maps3 τ) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+      ∀ (i : κ) (K : TopologicalSpace.Compacts M)
+        (hK_sub_Kc : (K : Set M) ⊆ (Kc i : Set M))
+        (hK_sub_target : (K : Set M) ⊆
+          (trivializationAt BilF
+            (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            ((G.maps3 t) x)).baseSet)
+        (hKmem_int : (G.maps3 t) x ∈ interior (K : Set M)),
+      ∀ xE : F, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let B' : F →L[ℝ] F →L[ℝ] ℝ :=
+          (targetBilinearCoordReadoutContinuousLinearMap
+            (I := I) (M := M) (F := F) (et := et) (Kc := Kc) (hKc := hKc)
+            (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+            ((G.maps3 t) x) i K hK_sub_Kc hK_sub_target
+            (A t (sol.curve t))
+            (⟨(G.maps3 t) x, interior_subset hKmem_int⟩ : K)) +
+          (fderivWithin ℝ
+            (fun yE : F ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) realization.metric ((G.maps3 t) x) (t, yE))
+            (Set.range I) ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)))
+            (X t ((G.maps3 t) x));
+        B'
+          (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+            ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))
+          (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+            ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)) +
+          (realization.metric t).inner ((G.maps3 t) x)
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+              ((G.maps3 t) x)
+              ((Df t (α.flow (xE, t)))
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                  ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x u))))
+            ((G.maps3 t).pushforwardTangent x v) +
+          (realization.metric t).inner ((G.maps3 t) x)
+            ((G.maps3 t).pushforwardTangent x u)
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I)
+              ((G.maps3 t) x)
+              ((Df t (α.flow (xE, t)))
+                (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I)
+                  ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) =
+        realization.toIntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+          gauge3 t x u v) := by
+  exact
+    realization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_eventuallyEq_along_maps3_nhdsWithin
+      G α gauge3 hgauge_maps hsIcc hchartRHS_eq_intrinsic hDeTurckVector_mdiff
+      hXeq htime hbase hball hder Fₗ Gₗ U V hsource_cover hreadout
+      hltLocal hsLocal x₀Local rLocal β hlocalData
+      (Diffeomorph3GaugeFlowOn.iUnion_readout_source_extChartAt_mem_nhdsWithin_of_localGluingData_continuousWithinAt
+        (I := I) (M := M) (timeSet := Icc tminLocal tmaxLocal) (s := s)
+        Fₗ Gₗ U V hlocalData hcontLocal)
+      hballLocal
+      (Diffeomorph3GaugeFlowOn.iUnion_readout_model_eventuallyEq_nhdsWithin_of_eqOn
+        (I := I) (M := M) (timeSet := Icc tminLocal tmaxLocal) (s := s)
+        Fₗ Gₗ U V (fun t ht i x y τ ↦ (β t ht i x).flow y τ)
+        hmodelEqOnLocal)
+      hderivLocal hY
+
 /-- Levi-Civita-background specialization of
 `variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection`.
 The DeTurck-vector `MDiffAt` input is discharged by the zero-section
