@@ -2733,10 +2733,13 @@ source cover and readout equality. The selected raw flow now also exposes the
 pointwise correction-route `hXeq` certificate as
 `SelectedIntrinsicDeTurckGaugeFlowExistence.flow_vectorField_eq_intrinsicDeTurckGaugeField`,
 since its driving vector field is definitionally the intrinsic DeTurck gauge
-field. The remaining local-field proof is therefore
-the Picard-model-to-auxiliary fixed-chart input, not the flow equality from the
-auxiliary field to the intrinsic field. This input can now be supplied in the
-more geometric centered-chart pullback form: the derivative layer has
+field. The selected correction layer now consumes that certificate directly via
+`SelectedIntrinsicDeTurckGaugeFlowExistence.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`,
+so selected local Picard/gluing correction routes no longer require callers to
+thread the tautological `hXeq` hypothesis. The remaining local-field proof is
+therefore the Picard-model-to-auxiliary fixed-chart input, not the flow equality
+from the auxiliary field to the intrinsic field. This input can now be supplied
+in the more geometric centered-chart pullback form: the derivative layer has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_eventuallyEq_mpullbackWithin`
 and
 `Diffeomorph3GaugeFlowOn.model_vectorField_local_eqOn_tangentCoordChange_of_eventuallyEq_mpullbackWithin`,
@@ -2864,7 +2867,11 @@ target membership of the model values. The tensor-level companion
 now feeds that lifted-input scalar correction identity into the indexed
 readout-lifted `HasTimeDerivativeOn` route, so the smooth gauge-corrected
 tensor endpoint can use local Picard/gluing correction data instead of an
-explicit Lie-correction scalar hypothesis. The smooth-realization route also
+explicit Lie-correction scalar hypothesis. Its intrinsic-gauge specialization
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_of_intrinsicDeTurckGaugeField`
+also removes the separate pointwise vector-field equality when the raw flow is
+already driven by the smooth realization's intrinsic DeTurck gauge field. The
+smooth-realization route also
 has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
@@ -2897,7 +2904,9 @@ remaining non-identity gauge work is to prove and supply those tangent-map and
 velocity identities from the selected gauge-flow/PDE construction, use the
 refined chart data end to end inside the selected Banach chart/gauge-flow
 constructions, and then integrate these route theorems with the full
-local-existence and PDE estimate layers.
+local-existence and PDE estimate layers; the selected/raw intrinsic
+vector-field equality itself is now an internal route input rather than a
+remaining caller obligation.
 The reusable Banach evolution layer now also has shorter-terminal restriction
 constructors for both unconstrained and state-preserving local solutions, plus
 direct interval equation, continuity, state-membership, and uniqueness readouts
