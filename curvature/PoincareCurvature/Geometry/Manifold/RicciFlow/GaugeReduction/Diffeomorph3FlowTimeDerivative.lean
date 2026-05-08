@@ -19,6 +19,43 @@ full chain-rule identity for a time-dependent diffeomorphism family.
 open Metric Set
 open scoped Manifold ContDiff Topology NNReal
 
+namespace VectorField
+
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+
+/-- In model space, the Lie bracket with a constant vector field on the left is
+the directional derivative of the other field. -/
+theorem lieBracketWithin_const_left_eq_fderivWithin
+    (V : E → E) (s : Set E) (x v : E) :
+    lieBracketWithin 𝕜 (fun _ : E => v) V s x =
+      fderivWithin 𝕜 V s x v := by
+  simp [lieBracketWithin]
+
+/-- In model space, the Lie bracket with a constant vector field on the right is
+minus the directional derivative of the other field. -/
+theorem lieBracketWithin_const_right_eq_neg_fderivWithin
+    (V : E → E) (s : Set E) (x v : E) :
+    lieBracketWithin 𝕜 V (fun _ : E => v) s x =
+      -fderivWithin 𝕜 V s x v := by
+  simp [lieBracketWithin]
+
+/-- Global version of `lieBracketWithin_const_left_eq_fderivWithin`. -/
+theorem lieBracket_const_left_eq_fderiv
+    (V : E → E) (x v : E) :
+    lieBracket 𝕜 (fun _ : E => v) V x =
+      fderiv 𝕜 V x v := by
+  simp [lieBracket]
+
+/-- Global version of `lieBracketWithin_const_right_eq_neg_fderivWithin`. -/
+theorem lieBracket_const_right_eq_neg_fderiv
+    (V : E → E) (x v : E) :
+    lieBracket 𝕜 V (fun _ : E => v) x =
+      -fderiv 𝕜 V x v := by
+  simp [lieBracket]
+
+end VectorField
+
 namespace RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
