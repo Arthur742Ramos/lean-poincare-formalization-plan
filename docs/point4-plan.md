@@ -2692,6 +2692,9 @@ lifted-model/value hypotheses as the selected-route inputs. The fixed-IVP
 restricted-symmetric companion ending in
 `_of_solution_eq_restrictSymmetricIcc` now derives the selected closed interval
 certificate internally for the same state-preserving Picard-estimate route.
+The theorem-family restricted-symmetric companion mirrors this after fixing one
+selected `ivp`, so family-level compact Picard callers can avoid restating the
+closed-interval certificate too.
 The smooth-realization tensor route has the matching closed-interval finite-cover
 wrapper
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`,
