@@ -12641,6 +12641,79 @@ theorem auxiliaryEqAlong_of_solution_eq_restrictSymmetricIcc
   simpa [hGsol] using
     hYAlong t (by simpa [hGsol] using ht)
 
+/-- Transport selected restricted-symmetric time membership back to the
+ambient chosen solution time set. -/
+def mem_timeSet_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    {t : ℝ} (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet) :
+    t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet :=
+  hsub (by simpa [hGsol] using ht)
+
+/-- Restrict an ambient local Picard time-interval inclusion to the selected
+restricted-symmetric solution time set. -/
+def timeSet_subset_Icc_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    {tminLocal tmaxLocal : ℝ}
+    (hsLocal : sol.1.toIntrinsicDeTurckSolution.timeSet ⊆
+      Icc tminLocal tmaxLocal) :
+    G.solution.1.toIntrinsicDeTurckSolution.timeSet ⊆
+      Icc tminLocal tmaxLocal := fun {_t} ht =>
+  hsLocal (G.mem_timeSet_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol ht)
+
+/-- Restrict ambient local Picard centers to the selected finite subcover and
+selected restricted-symmetric time set. -/
+def x0Local_subtype_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ι : Type*} {s : Finset ι}
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (x₀Local : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → E) :
+    ∀ (t : ℝ), t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+      {i // i ∈ s} → M → E := fun t ht i x =>
+  x₀Local t (G.mem_timeSet_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol ht) i x
+
+/-- Restrict ambient local Picard radii to the selected finite subcover and
+selected restricted-symmetric time set. -/
+def rLocal_subtype_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ι : Type*} {s : Finset ι}
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (rLocal : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → NNReal) :
+    ∀ (t : ℝ), t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+      {i // i ∈ s} → M → NNReal := fun t ht i x =>
+  rLocal t (G.mem_timeSet_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol ht) i x
+
 /-- Restrict ambient local-gluing data to the selected finite subcover and
 selected solution time set. -/
 theorem localGluingData_subtype
@@ -12713,6 +12786,49 @@ theorem hasDerivWithinAt_Icc_subtype_of_solution_eq_restrictSymmetricIcc
   have htIcc : t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) := by
     simpa [hGsol] using ht
   exact (hderivLocal i t (hsub htIcc) x hx).mono hsub
+
+/-- Restrict ambient Picard closed-ball certificates to the selected finite
+subcover and selected restricted-symmetric time set. -/
+theorem ballLocal_subtype_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ι : Type*} {s : Finset ι}
+    (Fₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (x₀Local : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → E)
+    (rLocal : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → NNReal)
+    (hballLocal : ∀ ⦃t : ℝ⦄
+      (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          y ∈ Metric.closedBall (x₀Local t ht i x) (rLocal t ht i x)) :
+    ∀ ⦃t : ℝ⦄
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : {i // i ∈ s}) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          y ∈ Metric.closedBall
+            ((G.x0Local_subtype_of_solution_eq_restrictSymmetricIcc
+              sol hε hsub hGsol x₀Local) t ht i x)
+            ((G.rLocal_subtype_of_solution_eq_restrictSymmetricIcc
+              sol hε hsub hGsol rLocal) t ht i x) := by
+  intro t ht i x hx y hy
+  simpa [x0Local_subtype_of_solution_eq_restrictSymmetricIcc,
+    rLocal_subtype_of_solution_eq_restrictSymmetricIcc] using
+    hballLocal
+      (G.mem_timeSet_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol ht)
+      i x hx y hy
 
 /-- Route-shaped compact selected raw gauge-flow witness on a restricted closed
 symmetric interval.

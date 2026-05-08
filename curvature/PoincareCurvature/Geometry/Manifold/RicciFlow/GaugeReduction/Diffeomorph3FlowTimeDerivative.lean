@@ -34109,6 +34109,150 @@ theorem deTurckVector_mdiffAt_of_contMDiffCovariantDerivative_background
       G.solution.1.toIntrinsicDeTurckSolution.background t
       (hbackground ht) p
 
+/-- Restrict ambient local Picard flow solutions to the selected finite
+subcover and selected restricted-symmetric time set. -/
+def localFlowSolution_subtype_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ι : Type*} {s : Finset ι}
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    {tminLocal tmaxLocal : ℝ} {f : ℝ → E → E}
+    (hsLocal : sol.1.toIntrinsicDeTurckSolution.timeSet ⊆
+      Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → E)
+    (rLocal : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ) (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M),
+        ModelGaugeFlowODE.LocalFlowSolution f
+          (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+          (x₀Local t ht i x) (rLocal t ht i x)) :
+    ∀ (t : ℝ) (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : {i // i ∈ s}) (x : M),
+        ModelGaugeFlowODE.LocalFlowSolution f
+          (⟨t, G.timeSet_subset_Icc_of_solution_eq_restrictSymmetricIcc
+              sol hε hsub hGsol hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+          ((G.x0Local_subtype_of_solution_eq_restrictSymmetricIcc
+              sol hε hsub hGsol x₀Local) t ht i x)
+          ((G.rLocal_subtype_of_solution_eq_restrictSymmetricIcc
+              sol hε hsub hGsol rLocal) t ht i x) := fun t ht i x =>
+  β t (G.mem_timeSet_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol ht) i x
+
+/-- Restrict ambient lifted Picard/readout equalities to the selected finite
+subcover and selected restricted-symmetric time set. -/
+theorem modelLiftedEqOn_subtype_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ι : Type*} {s : Finset ι}
+    {tminLocal tmaxLocal : ℝ} {f : ℝ → E → E}
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hsLocal : sol.1.toIntrinsicDeTurckSolution.timeSet ⊆
+      Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → E)
+    (rLocal : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ) (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M),
+        ModelGaugeFlowODE.LocalFlowSolution f
+          (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+          (x₀Local t ht i x) (rLocal t ht i x))
+    (hmodelLiftedEqOn : ∀ ⦃t : ℝ⦄
+      (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          Set.EqOn
+            (fun τ : ℝ ↦
+              Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y)))
+            (fun τ : ℝ ↦
+              (extChartAt I (Fₗ i t x)).symm ((β t ht i x).flow y τ))
+            (Icc tminLocal tmaxLocal)) :
+    ∀ ⦃t : ℝ⦄
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : {i // i ∈ s}) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          Set.EqOn
+            (fun τ : ℝ ↦
+              Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y)))
+            (fun τ : ℝ ↦
+              (extChartAt I (Fₗ i t x)).symm
+                (((G.localFlowSolution_subtype_of_solution_eq_restrictSymmetricIcc
+                  sol hε hsub hGsol hsLocal x₀Local rLocal β) t ht i x).flow y τ))
+            (Icc tminLocal tmaxLocal) := by
+  intro t ht i x hx y hy
+  simpa [localFlowSolution_subtype_of_solution_eq_restrictSymmetricIcc] using
+    hmodelLiftedEqOn
+      (G.mem_timeSet_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol ht)
+      i x hx y hy
+
+/-- Restrict ambient Picard target-chart membership certificates to the
+selected finite subcover and selected restricted-symmetric time set. -/
+theorem modelTarget_subtype_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ι : Type*} {s : Finset ι}
+    {tminLocal tmaxLocal : ℝ} {f : ℝ → E → E}
+    (Fₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hsLocal : sol.1.toIntrinsicDeTurckSolution.timeSet ⊆
+      Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → E)
+    (rLocal : ∀ (t : ℝ),
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ) (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M),
+        ModelGaugeFlowODE.LocalFlowSolution f
+          (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+          (x₀Local t ht i x) (rLocal t ht i x))
+    (hmodelTarget : ∀ ⦃t : ℝ⦄
+      (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          ∀ τ ∈ Icc tminLocal tmaxLocal, (β t ht i x).flow y τ ∈
+            (extChartAt I (Fₗ i t x)).target) :
+    ∀ ⦃t : ℝ⦄
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : {i // i ∈ s}) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          ∀ τ ∈ Icc tminLocal tmaxLocal,
+            ((G.localFlowSolution_subtype_of_solution_eq_restrictSymmetricIcc
+              sol hε hsub hGsol hsLocal x₀Local rLocal β) t ht i x).flow y τ ∈
+              (extChartAt I (Fₗ i t x)).target := by
+  intro t ht i x hx y hy τ hτ
+  simpa [localFlowSolution_subtype_of_solution_eq_restrictSymmetricIcc] using
+    hmodelTarget
+      (G.mem_timeSet_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol ht)
+      i x hx y hy τ hτ
+
 /-- Selected compact-readout correction route with the selected intrinsic
 gauge-flow vector-field equality supplied internally.
 

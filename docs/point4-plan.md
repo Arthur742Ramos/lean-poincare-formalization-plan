@@ -2743,6 +2743,18 @@ returns those transported certificates directly. The companion adapters
 `hasDerivWithinAt_Icc_subtype_of_solution_eq_restrictSymmetricIcc` restrict the
 constructor's ambient local gluing, continuity, and chart-derivative inputs to
 the selected finite subcover and closed interval, while
+`mem_timeSet_of_solution_eq_restrictSymmetricIcc`,
+`timeSet_subset_Icc_of_solution_eq_restrictSymmetricIcc`,
+`x0Local_subtype_of_solution_eq_restrictSymmetricIcc`,
+`rLocal_subtype_of_solution_eq_restrictSymmetricIcc`, and
+`ballLocal_subtype_of_solution_eq_restrictSymmetricIcc` carry the ambient
+closed-ball Picard centers, radii, and state certificates through the same
+selected restriction. The model-ODE layer has the matching
+`localFlowSolution_subtype_of_solution_eq_restrictSymmetricIcc`,
+`modelLiftedEqOn_subtype_of_solution_eq_restrictSymmetricIcc`, and
+`modelTarget_subtype_of_solution_eq_restrictSymmetricIcc` adapters, so selected
+finite-subcover Picard output can keep its local flow, lifted equality, and
+target-chart membership certificates without rebuilding them by hand. The
 `SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cover_readout_localData_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 packages all of those route-shaped certificates together. The selected raw flow
 now also exposes the
