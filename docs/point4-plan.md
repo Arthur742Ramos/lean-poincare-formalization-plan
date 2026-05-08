@@ -2755,6 +2755,11 @@ selected restriction. The model-ODE layer has the matching
 `modelTarget_subtype_of_solution_eq_restrictSymmetricIcc` adapters, so selected
 finite-subcover Picard output can keep its local flow, lifted equality, and
 target-chart membership certificates without rebuilding them by hand. The
+selected correction layer now uses those adapters in the interior compact
+caller
+`SelectedIntrinsicDeTurckGaugeFlowExistence.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_Icc_cover_readout_localGluingData_ambientLocalFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_Ioo_of_solution_eq_restrictSymmetricIcc`,
+which accepts ambient selected-solution Picard model data and transports it to
+the finite subcover before entering the local Picard correction route. The
 `SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cover_readout_localData_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 packages all of those route-shaped certificates together. The selected raw flow
 now also exposes the
