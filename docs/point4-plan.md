@@ -2736,7 +2736,12 @@ since its driving vector field is definitionally the intrinsic DeTurck gauge
 field. The selected correction layer now consumes that certificate directly via
 `SelectedIntrinsicDeTurckGaugeFlowExistence.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`,
 so selected local Picard/gluing correction routes no longer require callers to
-thread the tautological `hXeq` hypothesis. The remaining local-field proof is
+thread the tautological `hXeq` hypothesis. The selected smooth-background
+variant ending in `_of_contMDiffCovariantDerivative_background` now also
+derives the DeTurck-vector `MDiffAt` input from slicewise
+`ContMDiffCovariantDerivative (background t) 1`, via
+`SelectedIntrinsicDeTurckGaugeFlowExistence.deTurckVector_mdiffAt_of_contMDiffCovariantDerivative_background`.
+The remaining local-field proof is
 therefore the Picard-model-to-auxiliary fixed-chart input, not the flow equality
 from the auxiliary field to the intrinsic field. This input can now be supplied
 in the more geometric centered-chart pullback form: the derivative layer has
