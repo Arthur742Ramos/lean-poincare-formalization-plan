@@ -2746,7 +2746,16 @@ and its `EqOn` package
 if a common local coordinate curve has within-time-set derivative `f t y` from
 the Picard model and the auxiliary fixed-chart velocity from the manifold
 readout, then the local Picard-model-to-auxiliary `mpullbackWithin` equality
-follows directly. The derivative
+follows directly. The derivative-view layer has the complementary chart
+transition
+`hasDerivWithinAt_extChartAt_eval_of_hasDerivWithinAt_extChartAt_eval_self`,
+which transports centered readout derivatives to any fixed chart whose source
+contains the endpoint. Combining that with a `LocalGluingData` inverse slice,
+the derivative layer now has
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_common_derivatives`,
+which derives the same local `mpullbackWithin` equality from local inverse
+readouts, centered auxiliary derivatives, and Picard/model derivatives in the
+fixed chart. The derivative
 layer also has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn`,
 which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the

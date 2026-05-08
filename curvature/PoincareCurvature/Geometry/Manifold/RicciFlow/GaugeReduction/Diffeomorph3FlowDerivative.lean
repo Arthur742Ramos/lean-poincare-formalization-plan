@@ -86,6 +86,78 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.hasDerivWithinAt_extChar
       (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)) s t :=
   (hchart t ht x).2
 
+/-- A centered preferred-chart derivative for a manifold curve can be rewritten
+in any fixed preferred chart whose source contains the endpoint.
+
+This is the local-readout direction complementary to
+`Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.toChartDerivativeOn`:
+it composes the centered coordinate curve with the chart transition from the
+centered chart at `q` to the fixed chart at `p`. -/
+theorem hasDerivWithinAt_extChartAt_eval_of_hasDerivWithinAt_extChartAt_eval_self
+    {s : Set ℝ} {γ : ℝ → M} {t : ℝ} {p q : M}
+    {v : TangentSpace I q}
+    (hq : γ t = q)
+    (hsrcp : q ∈ (extChartAt I p).source)
+    (hsourceq : γ ⁻¹' (extChartAt I q).source ∈ 𝓝[s] t)
+    (hderivq : HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I q) (γ τ)) v s t) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦ (extChartAt I p) (γ τ))
+      (tangentCoordChange I q p q v) s t := by
+  have hsrcq : q ∈ (extChartAt I q).source := by
+    simpa using mem_extChartAt_source (I := I) q
+  have htransition :
+      HasFDerivWithinAt ((extChartAt I p) ∘ (extChartAt I q).symm)
+        (tangentCoordChange I q p q) (range I) ((extChartAt I q) q) :=
+    hasFDerivWithinAt_tangentCoordChange (I := I) (x := q) (y := p) (z := q)
+      ⟨hsrcq, hsrcp⟩
+  let sourceSet : Set ℝ := γ ⁻¹' (extChartAt I q).source
+  have hmaps :
+      MapsTo (fun τ : ℝ ↦ (extChartAt I q) (γ τ))
+        (s ∩ sourceSet) (range I) := by
+    intro τ hτ
+    exact extChartAt_target_subset_range q
+      ((extChartAt I q).map_source (by simpa [sourceSet] using hτ.2))
+  have htransition_at :
+      HasFDerivWithinAt ((extChartAt I p) ∘ (extChartAt I q).symm)
+        (tangentCoordChange I q p q) (range I)
+        ((fun τ : ℝ ↦ (extChartAt I q) (γ τ)) t) := by
+    simpa [hq] using htransition
+  have hcomp :
+      HasDerivWithinAt
+        (((extChartAt I p) ∘ (extChartAt I q).symm) ∘
+          (fun τ : ℝ ↦ (extChartAt I q) (γ τ)))
+        (tangentCoordChange I q p q v) (s ∩ sourceSet) t := by
+    exact htransition_at.comp_hasDerivWithinAt t
+      (hderivq.mono inter_subset_left) hmaps
+  have heq_restricted :
+      (fun τ : ℝ ↦ (extChartAt I p) (γ τ)) =ᶠ[𝓝[s ∩ sourceSet] t]
+        (((extChartAt I p) ∘ (extChartAt I q).symm) ∘
+          (fun τ : ℝ ↦ (extChartAt I q) (γ τ))) := by
+    filter_upwards [self_mem_nhdsWithin] with τ hτ
+    have hτsrc : γ τ ∈ (extChartAt I q).source := by
+      simpa [sourceSet] using hτ.2
+    simpa [Function.comp_def] using
+      congrArg (fun z : M ↦ (extChartAt I p) z)
+        ((extChartAt I q).left_inv hτsrc).symm
+  have heq_t :
+      (extChartAt I p) (γ t) =
+        (((extChartAt I p) ∘ (extChartAt I q).symm) ∘
+          (fun τ : ℝ ↦ (extChartAt I q) (γ τ))) t := by
+    have htSrc : γ t ∈ (extChartAt I q).source := by
+      simpa [hq] using hsrcq
+    simpa [Function.comp_def] using
+      congrArg (fun z : M ↦ (extChartAt I p) z)
+        ((extChartAt I q).left_inv htSrc).symm
+  have hfixed_restricted :
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I p) (γ τ))
+        (tangentCoordChange I q p q v) (s ∩ sourceSet) t :=
+    hcomp.congr_of_eventuallyEq heq_restricted heq_t
+  have hsourceSet : s ∩ sourceSet ∈ 𝓝[s] t := by
+    exact Filter.inter_mem self_mem_nhdsWithin (by simpa [sourceSet] using hsourceq)
+  exact hfixed_restricted.mono_of_mem_nhdsWithin hsourceSet
+
 /-- Preferred-chart ODE data gives continuity of the underlying manifold curve
 within the active time set. -/
 theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.continuousWithinAt_eval_self
