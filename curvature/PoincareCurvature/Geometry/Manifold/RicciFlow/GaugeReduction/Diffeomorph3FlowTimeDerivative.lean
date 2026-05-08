@@ -24544,6 +24544,57 @@ theorem vectorField_eq_intrinsicDeTurckGaugeField_of_eventuallyEq_along_maps3_nh
   rw [hmap] at h
   exact h
 
+/-- Transfer a local fixed-chart identification of the Picard model vector
+field from selected local readouts to the glued gauge flow.
+
+The compact selected-flow constructors retain a finite source cover and local
+readout equality for `(G.maps3 τ)` against `Fₗ i τ`.  If the Picard vector
+field is identified with an auxiliary manifold field `Y` in the fixed chart
+centered at each selected readout value `Fₗ i t x`, this lemma rewrites the
+same local `EqOn` statement with the center `(G.maps3 t) x` required by the
+closed-ball correction route. -/
+theorem model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ} {ι : Type*}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (Fₗ : ι → ℝ → M → M) (U : ℝ → ι → Set M)
+    {f : ℝ → E → E}
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ s → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ x : M, x ∈ U t i →
+      ∀ᶠ τ in 𝓝 t, ∃ W' : Set M, W' ∈ 𝓝 x ∧
+        EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ i τ) W')
+    (hfLocal : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ x : M, x ∈ U t i →
+      ∃ W : Set E,
+        W ∈ 𝓝[Set.range I] ((extChartAt I (Fₗ i t x)) (Fₗ i t x)) ∧
+        Set.EqOn (f t)
+          (fun y : E =>
+            let p : M := Fₗ i t x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q (Y t q))
+          W) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ W : Set E,
+        W ∈ 𝓝[Set.range I]
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+        Set.EqOn (f t)
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q (Y t q))
+          W := by
+  intro t ht x
+  have hxcover : x ∈ ⋃ i, U t i := hcover ht (Set.mem_univ x)
+  rcases Set.mem_iUnion.mp hxcover with ⟨i, hxi⟩
+  rcases mem_of_mem_nhds (hreadout ht i x hxi) with ⟨W', hW', hW'eq⟩
+  have hxW' : x ∈ W' := mem_of_mem_nhds hW'
+  have hcenter : (G.maps3 t) x = Fₗ i t x := hW'eq hxW'
+  rcases hfLocal ht i x hxi with ⟨W, hW, hWeq⟩
+  refine ⟨W, ?_, ?_⟩
+  · rw [hcenter]
+    exact hW
+  · rw [hcenter]
+    exact hWeq
+
 /-- If the Picard model vector field agrees locally with an auxiliary manifold
 vector field in the fixed target chart, and that auxiliary field agrees with
 the intrinsic DeTurck gauge field along the diffeomorphism images in the

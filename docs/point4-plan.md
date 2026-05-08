@@ -2731,7 +2731,13 @@ and the selected fixed-IVP endpoint
 now return that auxiliary-along-flow equality alongside the selected finite
 source cover and readout equality. The remaining local-field proof is therefore
 the Picard-model-to-auxiliary fixed-chart `EqOn` input, not the flow equality
-from the auxiliary field to the intrinsic field. The signed correction layer
+from the auxiliary field to the intrinsic field. The derivative layer now also
+has
+`Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn`,
+which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the
+selected local readout center `Fₗ i t x` to the actual glued-flow center
+`(G.maps3 t) x` using the retained finite source cover and local readout
+equality. The signed correction layer
 also has the direct auxiliary-field adapter
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin`,
 which composes the auxiliary fixed-chart `EqOn` and the auxiliary-along-flow
