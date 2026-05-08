@@ -2788,7 +2788,11 @@ deriving source persistence from readout continuity. The compact correction
 layer also has
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_eventuallyEq_along_maps3_nhdsWithin`,
 which combines that indexed Picard/local-gluing discharge with the existing
-finite-cover readout correction route. The derivative layer also has
+finite-cover readout correction route. Its
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
+companion consumes the natural Picard output shape directly: source persistence
+comes from local readout continuity and the model/readout identification is
+only a patch-local `EqOn` on the Picard time set. The derivative layer also has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn`,
 which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the
 selected local readout center `Fₗ i t x` to the actual glued-flow center
