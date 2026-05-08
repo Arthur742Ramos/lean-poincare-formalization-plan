@@ -2927,6 +2927,50 @@ theorem mpullbackWithin_extChartAt_symm_extend_eventuallyEq_const
   exact ContinuousLinearMap.IsInvertible.inverse_apply_self
     (isInvertible_mfderivWithin_extChartAt_symm (I := I) hy) cw
 
+/-- Pulling an arbitrary vector field back through the centered inverse chart is
+locally the usual fixed-chart tangent-coordinate expression. -/
+theorem mpullbackWithin_extChartAt_symm_eventuallyEq_tangentCoordChange
+    (p : M) (Y : ∀ q : M, TangentSpace I q) :
+    (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm Y (Set.range I))
+      =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)]
+      (fun y : E =>
+        let q : M := (extChartAt I p).symm y
+        tangentCoordChange I q p q (Y q)) := by
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) (by simp)
+  filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) p] with y hy
+  let I1 : NormedAddCommGroup (TangentSpace 𝓘(ℝ, E) y) :=
+    inferInstanceAs (NormedAddCommGroup E)
+  let _I2 : NormedSpace ℝ (TangentSpace 𝓘(ℝ, E) y) := ‹NormedSpace ℝ E›
+  simp only [VectorField.mpullbackWithin_apply]
+  let q : M := (extChartAt I p).symm y
+  have hqsrcp : q ∈ (extChartAt I p).source := by
+    simpa [q] using (extChartAt I p).map_target hy
+  have hqsrcq : q ∈ (extChartAt I q).source := by
+    simp
+  have hyq : (extChartAt I p) q = y := by
+    simpa [q] using (extChartAt I p).right_inv hy
+  have hqsrcp_chart : q ∈ (chartAt H p).source := by
+    simpa [extChartAt_source] using hqsrcp
+  have hAeq :
+      mfderivWithin (𝓘(ℝ, E)) I (extChartAt I p).symm (Set.range I) y =
+        tangentCoordChange I p q q := by
+    rw [← hyq]
+    rw [← TangentBundle.symmL_trivializationAt (I := I) (x₀ := p) (x := q)]
+    · rw [TangentBundle.symmL_trivializationAt_eq_core (I := I) (b₀ := p) (b := q)
+        hqsrcp_chart]
+    · simpa [extChartAt_source] using hqsrcp
+  have hcomp :
+      tangentCoordChange I p q q (tangentCoordChange I q p q (Y q)) = Y q := by
+    rw [tangentCoordChange_comp (I := I) (w := q) (x := p) (y := q) (z := q)
+      (v := Y q)]
+    · exact tangentCoordChange_self (I := I) (x := q) (z := q) (v := Y q) hqsrcq
+    · exact ⟨⟨hqsrcq, hqsrcp⟩, hqsrcq⟩
+  exact (ContinuousLinearMap.IsInvertible.inverse_apply_eq
+    (isInvertible_mfderivWithin_extChartAt_symm (I := I) hy)).2 (by
+      rw [hAeq]
+      exact hcomp.symm)
+
 /-- A manifold Lie bracket against the canonical constant-coordinate extension
 reduces to the model directional derivative of the chart-coordinate expression
 of the other vector field. -/
@@ -24380,6 +24424,70 @@ theorem tangentVectorOfCoordinate_Df_eq_mlieBracket_of_chartCoordinate_fderivWit
         (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p
   rw [hDf]
   exact hBracket.symm
+
+/-- Canonical fixed-chart version of
+`tangentVectorOfCoordinate_Df_eq_mlieBracket_of_chartCoordinate_fderivWithin`.
+
+The only remaining model-side input is that `Df` differentiates the actual
+fixed-chart coordinate expression of the intrinsic DeTurck gauge field. -/
+theorem tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderivWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hDfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p := (G.maps3 t).pushforwardTangent x w
+         let cw : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pw
+         (Df t (α.flow (xE, t))) cw =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) cw)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p := (G.maps3 t).pushforwardTangent x w
+         let cw : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pw
+         SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cw) =
+            VectorField.mlieBracket I
+              (FiberBundle.extend E pw)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p) := by
+  let V : ℝ → M → E → E := fun t p y =>
+    let q : M := (extChartAt I p).symm y
+    tangentCoordChange I q p q
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q)
+  refine
+    G.tangentVectorOfCoordinate_Df_eq_mlieBracket_of_chartCoordinate_fderivWithin
+      g background α V ?_ ?_
+  · intro t ht p
+    simpa [V] using
+      SmoothSelfDiffeomorph3Family.mpullbackWithin_extChartAt_symm_eventuallyEq_tangentCoordChange
+        (I := I) (M := M) p
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)
+  · intro t ht x w xE hxE hAeq
+    simpa [V] using hDfCoord ht x w xE hxE hAeq
 
 /-- Torsion-free reduction of the tangent-map slot: it is enough to identify
 the model linearization with the Lie bracket of the canonical constant
