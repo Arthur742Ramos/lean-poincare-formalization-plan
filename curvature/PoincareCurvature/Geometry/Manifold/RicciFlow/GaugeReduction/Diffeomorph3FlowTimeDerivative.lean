@@ -24515,6 +24515,75 @@ theorem tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderiv
   · intro t ht x w xE hxE hAeq
     simpa [V] using hDfCoord ht x w xE hxE hAeq
 
+/-- A local `EqOn` identification of the Picard model vector field at the fixed
+chart center gives the `hfCoord` eventual equality used by the model
+linearization bridge.
+
+The Picard handoff naturally identifies `f t` on a model neighborhood of
+`(extChartAt I p) p`, where `p = (G.maps3 t) x`.  The variational tangent-map
+route carries the base-coordinate equality only in the relative time filter; this
+lemma extracts its value at `t` and transports the local field equality to the
+active Picard point `α.flow (xE, t)`. -/
+theorem model_vectorField_eventuallyEq_tangentCoordChange_of_eventuallyEqWithin_base_of_eqOn_nhdsWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+          𝓝[s] t] (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hfEqOn : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ U : Set E,
+        U ∈ 𝓝[Set.range I]
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+        Set.EqOn (f t)
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+          U) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (f t) =ᶠ[𝓝[Set.range I] (α.flow (xE, t))]
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q)) := by
+  intro t ht x w xE hxE hAeq
+  let p : M := (G.maps3 t) x
+  have hbase_t :
+      (extChartAt I p) p = α.flow (xE, t) := by
+    have hbase_t' :
+        (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x) = α.flow (xE, t) :=
+      show t ∈ {τ : ℝ |
+        (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x) = α.flow (xE, τ)} from
+        mem_of_mem_nhdsWithin ht (hbase ht x w xE hxE hAeq)
+    simpa [p] using hbase_t'
+  rcases hfEqOn ht x with ⟨U, hU, hUeq⟩
+  have hUnhds : U ∈ 𝓝[Set.range I] (α.flow (xE, t)) := by
+    rw [← hbase_t]
+    simpa [p] using hU
+  filter_upwards [hUnhds] with y hy
+  exact hUeq hy
+
 /-- Build the canonical fixed-chart `Df` hypothesis from Picard model
 derivative data.
 
