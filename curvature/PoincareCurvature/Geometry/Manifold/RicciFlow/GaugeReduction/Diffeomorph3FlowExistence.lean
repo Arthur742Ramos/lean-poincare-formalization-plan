@@ -13407,6 +13407,393 @@ theorem nonempty_ofRawGaugeFlowOn_restrictSymmetricIcc
       (E := E) (H := H) (I := I) (M := M)) :=
   ⟨ofRawGaugeFlowOn_restrictSymmetricIcc sol ε hε hsub hflow⟩
 
+/-- Theorem-family route-shaped compact selected raw gauge-flow witnesses,
+retaining for each initial-value problem the selected finite subcover, the
+restricted closed interval, local readout equality, and the local data consumed
+by closed-Picard correction routes. -/
+theorem exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cover_readout_localData_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+    [CompactSpace M] {ι : Type*}
+    (sol : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (Y : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (defaultF defaultG :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ℝ → M → M)
+    (Fₗ Gₗ :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ι → ℝ → M → M)
+    (U V :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ℝ → ι → Set M)
+    (W : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ι → Set M)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      (sol ivp).1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 ivp.initialTime)
+    (hlocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ t : ℝ, ∀ i,
+        LocalGluingData (I := I) (M := M) 3
+          (Fₗ ivp i t) (Gₗ ivp i t) (U ivp t i) (V ivp t i))
+    (hFcompat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ t : ℝ, ∀ i j, EqOn (Fₗ ivp i t) (Fₗ ivp j t)
+        (U ivp t i ∩ U ivp t j))
+    (hGcompat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ t : ℝ, ∀ i j, EqOn (Gₗ ivp i t) (Gₗ ivp j t)
+        (V ivp t i ∩ V ivp t j))
+    (hUpreimage : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ τ : ℝ, ∀ i, ∀ x : M,
+        x ∈ U ivp τ i ↔ Fₗ ivp i τ x ∈ W ivp i)
+    (hWopen : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, IsOpen (W ivp i))
+    (hUcover : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Set.univ ⊆ ⋃ i, U ivp ivp.initialTime i)
+    (hUwithin : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, ∀ᶠ τ in 𝓝[(sol ivp).1.toIntrinsicDeTurckSolution.timeSet]
+        ivp.initialTime, U ivp ivp.initialTime i ⊆ U ivp τ i)
+    (hVwithin : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, ∀ᶠ τ in 𝓝[(sol ivp).1.toIntrinsicDeTurckSolution.timeSet]
+        ivp.initialTime, V ivp ivp.initialTime i ⊆ V ivp τ i)
+    (hanchoredLocal :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ∀ i, ∀ x ∈ U ivp ivp.initialTime i,
+          Fₗ ivp i ivp.initialTime x = x)
+    (hcontLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, ∀ t ∈ (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+        ∀ x : M, x ∈ U ivp t i →
+          ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp i τ x)
+            (sol ivp).1.toIntrinsicDeTurckSolution.timeSet t)
+    (hderivLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, ∀ t ∈ (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+        ∀ x : M, x ∈ U ivp t i →
+          HasDerivWithinAt
+            (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp i t x)) (Fₗ ivp i τ x))
+            ((Y ivp) t (Fₗ ivp i t x))
+            (sol ivp).1.toIntrinsicDeTurckSolution.timeSet t)
+    (hYLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ t ∈ (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+        ∀ᶠ τ in 𝓝[(sol ivp).1.toIntrinsicDeTurckSolution.timeSet] t,
+          ∀ i, ∀ x : M, x ∈ U ivp τ i →
+            (Y ivp) τ (Fₗ ivp i τ x) =
+              intrinsicDeTurckGaugeField (I := I) (M := M)
+                (sol ivp).1.toIntrinsicDeTurckSolution.metric
+                (sol ivp).1.toIntrinsicDeTurckSolution.background τ
+                (Fₗ ivp i τ x)) :
+    ∃ s : InitialValueProblem (E := E) (H := H) (I := I) (M := M) → Finset ι,
+      ∃ ε : InitialValueProblem (E := E) (H := H) (I := I) (M := M) → ℝ,
+        ∃ hε : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+          0 < ε ivp,
+          ∃ hsub : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+            Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ⊆
+              (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+            (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+              ∀ t ∈ Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp),
+                Set.univ ⊆ ⋃ i : {i // i ∈ s ivp}, U ivp t i) ∧
+            ∃ G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+                (E := E) (H := H) (I := I) (M := M),
+              (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+                G.solution ivp = (sol ivp).restrictSymmetricIcc (hε ivp) (hsub ivp)) ∧
+              (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+                (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet =
+                  Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) ∧
+              (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+                ∀ t ∈ Ioo (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp),
+                  ∀ i : {i // i ∈ s ivp}, ∀ x ∈ U ivp t i,
+                    ∀ᶠ τ in 𝓝 t,
+                      ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                        EqOn (fun z : M ↦ ((G.flow ivp).maps3 τ) z)
+                          (Fₗ ivp i τ) W') ∧
+              (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+                ∀ ⦃t : ℝ⦄, t ∈ (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet →
+                  ∀ i : {i // i ∈ s ivp},
+                    LocalGluingData (I := I) (M := M) 3
+                      (Fₗ ivp i t) (Gₗ ivp i t) (U ivp t i) (V ivp t i)) ∧
+              (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+                ∀ ⦃t : ℝ⦄, t ∈ (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet →
+                  ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+                    ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp i τ x)
+                      (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+              (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+                ∀ ⦃t : ℝ⦄, t ∈ (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet →
+                  ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+                    HasDerivWithinAt
+                      (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp i t x)) (Fₗ ivp i τ x))
+                      ((Y ivp) t (Fₗ ivp i t x))
+                      (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+              (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+                ∀ ⦃t : ℝ⦄, t ∈ (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet →
+                  ∀ᶠ τ in 𝓝[(G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet] t,
+                    ∀ x : M,
+                      (Y ivp) τ (((G.flow ivp).maps3 τ) x) =
+                        intrinsicDeTurckGaugeField (I := I) (M := M)
+                          (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
+                          (G.solution ivp).1.toIntrinsicDeTurckSolution.background τ
+                          (((G.flow ivp).maps3 τ) x)) := by
+  classical
+  let hraw : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∃ s : Finset ι, ∃ ε : ℝ, ∃ hε : 0 < ε,
+        ∃ hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+            (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+          (∀ t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε),
+            Set.univ ⊆ ⋃ i : {i // i ∈ s}, U ivp t i) ∧
+          ∃ G : SelectedIntrinsicDeTurckGaugeFlowExistence
+              (E := E) (H := H) (I := I) (M := M) ivp,
+            G.solution = (sol ivp).restrictSymmetricIcc hε hsub ∧
+            G.solution.1.toIntrinsicDeTurckSolution.timeSet =
+              Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ∧
+            (∀ t ∈ Ioo (ivp.initialTime - ε) (ivp.initialTime + ε),
+              ∀ i : {i // i ∈ s}, ∀ x ∈ U ivp t i,
+                ∀ᶠ τ in 𝓝 t,
+                  ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                    EqOn (fun z : M ↦ (G.flow.maps3 τ) z) (Fₗ ivp i τ) W') ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ i : {i // i ∈ s},
+                LocalGluingData (I := I) (M := M) 3
+                  (Fₗ ivp i t) (Gₗ ivp i t) (U ivp t i) (V ivp t i)) ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ i : {i // i ∈ s}, ∀ x : M, x ∈ U ivp t i →
+                ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp i τ x)
+                  (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) t) ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ i : {i // i ∈ s}, ∀ x : M, x ∈ U ivp t i →
+                HasDerivWithinAt
+                  (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp i t x)) (Fₗ ivp i τ x))
+                  ((Y ivp) t (Fₗ ivp i t x))
+                  (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) t) ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ᶠ τ in 𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+                ∀ x : M,
+                  (Y ivp) τ ((G.flow.maps3 τ) x) =
+                    intrinsicDeTurckGaugeField (I := I) (M := M)
+                      G.solution.1.toIntrinsicDeTurckSolution.metric
+                      G.solution.1.toIntrinsicDeTurckSolution.background τ
+                      ((G.flow.maps3 τ) x)) := fun ivp ↦
+    SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cover_readout_localData_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin
+      (I := I) (M := M) (sol ivp) (defaultF ivp) (defaultG ivp)
+      (Fₗ ivp) (Gₗ ivp) (U ivp) (V ivp) (W ivp) (htimeSet ivp)
+      (hlocal ivp) (hFcompat ivp) (hGcompat ivp) (hUpreimage ivp)
+      (hWopen ivp) (hUcover ivp) (hUwithin ivp) (hVwithin ivp)
+      (hanchoredLocal ivp) (hcontLocal ivp) (hderivLocal ivp)
+      (hYLocal ivp)
+  let s : InitialValueProblem (E := E) (H := H) (I := I) (M := M) → Finset ι :=
+    fun ivp ↦ Classical.choose (hraw ivp)
+  let hraw_s : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∃ ε : ℝ, ∃ hε : 0 < ε,
+        ∃ hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+            (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+          (∀ t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε),
+            Set.univ ⊆ ⋃ i : {i // i ∈ s ivp}, U ivp t i) ∧
+          ∃ G : SelectedIntrinsicDeTurckGaugeFlowExistence
+              (E := E) (H := H) (I := I) (M := M) ivp,
+            G.solution = (sol ivp).restrictSymmetricIcc hε hsub ∧
+            G.solution.1.toIntrinsicDeTurckSolution.timeSet =
+              Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ∧
+            (∀ t ∈ Ioo (ivp.initialTime - ε) (ivp.initialTime + ε),
+              ∀ i : {i // i ∈ s ivp}, ∀ x ∈ U ivp t i,
+                ∀ᶠ τ in 𝓝 t,
+                  ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                    EqOn (fun z : M ↦ (G.flow.maps3 τ) z) (Fₗ ivp i τ) W') ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ i : {i // i ∈ s ivp},
+                LocalGluingData (I := I) (M := M) 3
+                  (Fₗ ivp i t) (Gₗ ivp i t) (U ivp t i) (V ivp t i)) ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+                ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp i τ x)
+                  (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) t) ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+                HasDerivWithinAt
+                  (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp i t x)) (Fₗ ivp i τ x))
+                  ((Y ivp) t (Fₗ ivp i t x))
+                  (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) t) ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ᶠ τ in 𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+                ∀ x : M,
+                  (Y ivp) τ ((G.flow.maps3 τ) x) =
+                    intrinsicDeTurckGaugeField (I := I) (M := M)
+                      G.solution.1.toIntrinsicDeTurckSolution.metric
+                      G.solution.1.toIntrinsicDeTurckSolution.background τ
+                      ((G.flow.maps3 τ) x)) := fun ivp ↦
+    Classical.choose_spec (hraw ivp)
+  let ε : InitialValueProblem (E := E) (H := H) (I := I) (M := M) → ℝ :=
+    fun ivp ↦ Classical.choose (hraw_s ivp)
+  let hraw_ε : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∃ hε : 0 < ε ivp,
+        ∃ hsub : Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ⊆
+            (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+          (∀ t ∈ Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp),
+            Set.univ ⊆ ⋃ i : {i // i ∈ s ivp}, U ivp t i) ∧
+          ∃ G : SelectedIntrinsicDeTurckGaugeFlowExistence
+              (E := E) (H := H) (I := I) (M := M) ivp,
+            G.solution = (sol ivp).restrictSymmetricIcc hε hsub ∧
+            G.solution.1.toIntrinsicDeTurckSolution.timeSet =
+              Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ∧
+            (∀ t ∈ Ioo (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp),
+              ∀ i : {i // i ∈ s ivp}, ∀ x ∈ U ivp t i,
+                ∀ᶠ τ in 𝓝 t,
+                  ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                    EqOn (fun z : M ↦ (G.flow.maps3 τ) z) (Fₗ ivp i τ) W') ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ i : {i // i ∈ s ivp},
+                LocalGluingData (I := I) (M := M) 3
+                  (Fₗ ivp i t) (Gₗ ivp i t) (U ivp t i) (V ivp t i)) ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+                ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp i τ x)
+                  (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+                HasDerivWithinAt
+                  (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp i t x)) (Fₗ ivp i τ x))
+                  ((Y ivp) t (Fₗ ivp i t x))
+                  (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+            (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+              ∀ᶠ τ in 𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+                ∀ x : M,
+                  (Y ivp) τ ((G.flow.maps3 τ) x) =
+                    intrinsicDeTurckGaugeField (I := I) (M := M)
+                      G.solution.1.toIntrinsicDeTurckSolution.metric
+                      G.solution.1.toIntrinsicDeTurckSolution.background τ
+                      ((G.flow.maps3 τ) x)) := fun ivp ↦
+    Classical.choose_spec (hraw_s ivp)
+  let hε : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      0 < ε ivp := fun ivp ↦ Classical.choose (hraw_ε ivp)
+  let hraw_hε : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∃ hsub : Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ⊆
+          (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+        (∀ t ∈ Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp),
+          Set.univ ⊆ ⋃ i : {i // i ∈ s ivp}, U ivp t i) ∧
+        ∃ G : SelectedIntrinsicDeTurckGaugeFlowExistence
+            (E := E) (H := H) (I := I) (M := M) ivp,
+          G.solution = (sol ivp).restrictSymmetricIcc (hε ivp) hsub ∧
+          G.solution.1.toIntrinsicDeTurckSolution.timeSet =
+            Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ∧
+          (∀ t ∈ Ioo (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp),
+            ∀ i : {i // i ∈ s ivp}, ∀ x ∈ U ivp t i,
+              ∀ᶠ τ in 𝓝 t,
+                ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                  EqOn (fun z : M ↦ (G.flow.maps3 τ) z) (Fₗ ivp i τ) W') ∧
+          (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+            ∀ i : {i // i ∈ s ivp},
+              LocalGluingData (I := I) (M := M) 3
+                (Fₗ ivp i t) (Gₗ ivp i t) (U ivp t i) (V ivp t i)) ∧
+          (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+            ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+              ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp i τ x)
+                (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+          (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+            ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+              HasDerivWithinAt
+                (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp i t x)) (Fₗ ivp i τ x))
+                ((Y ivp) t (Fₗ ivp i t x))
+                (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+          (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+            ∀ᶠ τ in 𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+              ∀ x : M,
+                (Y ivp) τ ((G.flow.maps3 τ) x) =
+                  intrinsicDeTurckGaugeField (I := I) (M := M)
+                    G.solution.1.toIntrinsicDeTurckSolution.metric
+                    G.solution.1.toIntrinsicDeTurckSolution.background τ
+                    ((G.flow.maps3 τ) x)) := fun ivp ↦
+    Classical.choose_spec (hraw_ε ivp)
+  let hsub : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ⊆
+        (sol ivp).1.toIntrinsicDeTurckSolution.timeSet :=
+    fun ivp ↦ Classical.choose (hraw_hε ivp)
+  let hspec : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      (∀ t ∈ Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp),
+        Set.univ ⊆ ⋃ i : {i // i ∈ s ivp}, U ivp t i) ∧
+      ∃ G : SelectedIntrinsicDeTurckGaugeFlowExistence
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        G.solution = (sol ivp).restrictSymmetricIcc (hε ivp) (hsub ivp) ∧
+        G.solution.1.toIntrinsicDeTurckSolution.timeSet =
+          Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ∧
+        (∀ t ∈ Ioo (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp),
+          ∀ i : {i // i ∈ s ivp}, ∀ x ∈ U ivp t i,
+            ∀ᶠ τ in 𝓝 t,
+              ∃ W' : Set M, W' ∈ 𝓝 x ∧
+                EqOn (fun z : M ↦ (G.flow.maps3 τ) z) (Fₗ ivp i τ) W') ∧
+        (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+          ∀ i : {i // i ∈ s ivp},
+            LocalGluingData (I := I) (M := M) 3
+              (Fₗ ivp i t) (Gₗ ivp i t) (U ivp t i) (V ivp t i)) ∧
+        (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+          ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+            ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp i τ x)
+              (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+        (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+          ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+            HasDerivWithinAt
+              (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp i t x)) (Fₗ ivp i τ x))
+              ((Y ivp) t (Fₗ ivp i t x))
+              (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+        (∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+          ∀ᶠ τ in 𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+            ∀ x : M,
+              (Y ivp) τ ((G.flow.maps3 τ) x) =
+                intrinsicDeTurckGaugeField (I := I) (M := M)
+                  G.solution.1.toIntrinsicDeTurckSolution.metric
+                  G.solution.1.toIntrinsicDeTurckSolution.background τ
+                  ((G.flow.maps3 τ) x)) := fun ivp ↦
+    Classical.choose_spec (hraw_hε ivp)
+  let Givp : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      SelectedIntrinsicDeTurckGaugeFlowExistence
+        (E := E) (H := H) (I := I) (M := M) ivp :=
+    fun ivp ↦ Classical.choose (hspec ivp).2
+  have hGivp : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      (Givp ivp).solution = (sol ivp).restrictSymmetricIcc (hε ivp) (hsub ivp) ∧
+      (Givp ivp).solution.1.toIntrinsicDeTurckSolution.timeSet =
+        Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ∧
+      (∀ t ∈ Ioo (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp),
+        ∀ i : {i // i ∈ s ivp}, ∀ x ∈ U ivp t i,
+          ∀ᶠ τ in 𝓝 t,
+            ∃ W' : Set M, W' ∈ 𝓝 x ∧
+              EqOn (fun z : M ↦ ((Givp ivp).flow.maps3 τ) z) (Fₗ ivp i τ) W') ∧
+      (∀ ⦃t : ℝ⦄, t ∈ (Givp ivp).solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ i : {i // i ∈ s ivp},
+          LocalGluingData (I := I) (M := M) 3
+            (Fₗ ivp i t) (Gₗ ivp i t) (U ivp t i) (V ivp t i)) ∧
+      (∀ ⦃t : ℝ⦄, t ∈ (Givp ivp).solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+          ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp i τ x)
+            (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+      (∀ ⦃t : ℝ⦄, t ∈ (Givp ivp).solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ i : {i // i ∈ s ivp}, ∀ x : M, x ∈ U ivp t i →
+          HasDerivWithinAt
+            (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp i t x)) (Fₗ ivp i τ x))
+            ((Y ivp) t (Fₗ ivp i t x))
+            (Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) t) ∧
+      (∀ ⦃t : ℝ⦄, t ∈ (Givp ivp).solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ᶠ τ in 𝓝[(Givp ivp).solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+          ∀ x : M,
+            (Y ivp) τ (((Givp ivp).flow.maps3 τ) x) =
+              intrinsicDeTurckGaugeField (I := I) (M := M)
+                (Givp ivp).solution.1.toIntrinsicDeTurckSolution.metric
+                (Givp ivp).solution.1.toIntrinsicDeTurckSolution.background τ
+                (((Givp ivp).flow.maps3 τ) x)) := fun ivp ↦
+    Classical.choose_spec (hspec ivp).2
+  let G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+    of_forInitialValueProblem (I := I) (M := M) Givp
+  refine ⟨s, ε, hε, hsub, ?_, G, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro ivp t ht
+    exact (hspec ivp).1 t ht
+  · intro ivp
+    simpa [G] using (hGivp ivp).1
+  · intro ivp
+    simpa [G] using (hGivp ivp).2.1
+  · intro ivp t ht i x hx
+    simpa [G] using (hGivp ivp).2.2.1 t ht i x hx
+  · intro ivp t ht i
+    simpa [G] using (hGivp ivp).2.2.2.1 ht i
+  · intro ivp t ht i x hx
+    simpa [G] using (hGivp ivp).2.2.2.2.1 ht i x hx
+  · intro ivp t ht i x hx
+    simpa [G] using (hGivp ivp).2.2.2.2.2.1 ht i x hx
+  · intro ivp t ht
+    simpa [G] using (hGivp ivp).2.2.2.2.2.2 ht
+
 /-- Theorem-family scalar time-derivative data for the metrics pulled back by
 the selected raw intrinsic DeTurck gauge flows. -/
 def PullbackMetricInnerDerivativeData

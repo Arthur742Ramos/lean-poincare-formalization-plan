@@ -1987,6 +1987,15 @@ intrinsic DeTurck gauge field along the selected candidate flow.
 It also has a finite time-dependent `LocalGluingData` local-readout constructor,
 so compatible local inverse-function outputs can assemble a selected raw flow
 on the selected open Picard time set directly.
+The selected theorem-family layer now also has the compact restricted-symmetric
+route-data wrapper
+`SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cover_readout_localData_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`,
+which chooses the finite subcover, closed interval, selected restricted raw
+flow, local readout equality, local `LocalGluingData`, continuity, chart-ODE
+data, and auxiliary-field equality uniformly over all initial-value problems.
+Thus theorem-family gauge-reduction routes no longer have to repeat the
+fixed-IVP compact-selection destructuring before entering the selected
+time-derivative interfaces.
 The older all-candidates fixed-IVP and theorem-family intrinsic layers also
 continue to expose `ofRawGaugeFlowOn` with proof-level
 `nonempty_ofRawGaugeFlowOn`, packaging raw witnesses on named time sets once
