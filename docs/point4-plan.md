@@ -2749,12 +2749,21 @@ also has the direct auxiliary-field adapter
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin`,
 which composes the auxiliary fixed-chart `EqOn` and the auxiliary-along-flow
 certificate into the intrinsic fixed-chart `EqOn` before entering the existing
-closed-ball correction route. The smooth-realization scalar layer has the
+closed-ball correction route. Its compact-witness companion
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
+first uses the retained finite source cover and selected local readout
+equality to transport the patch-local Picard-model/auxiliary-field `EqOn` to
+the glued-flow chart center, then applies that same auxiliary-field correction
+adapter. The smooth-realization scalar layer has the
 matching auxiliary-field endpoint
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin`,
 which derives the intrinsic fixed-chart `EqOn` from the auxiliary model-field
 `EqOn` plus the retained along-flow certificate before applying the existing
-closed-ball scalar route. The
+closed-ball scalar route. Its compact-witness companion
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
+first transports the patch-local Picard-model/auxiliary-field `EqOn` through
+the selected finite source cover and local readout equality, then applies the
+same scalar auxiliary-field route. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
