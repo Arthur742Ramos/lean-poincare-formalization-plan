@@ -2769,7 +2769,13 @@ the indexed finite-cover handoff
 which packages current-time anchored local Picard flows, local gluing data,
 source persistence, model/readout equality, and centered auxiliary derivatives
 into exactly the `hfLocal` pullback-field hypothesis consumed by the compact
-correction theorem. The compact correction layer also has
+correction theorem. The source-persistence input can now itself be discharged
+from local readout time-continuity via
+`Diffeomorph3GaugeFlowOn.localGluingData_source_extChartAt_mem_nhdsWithin_of_continuousWithinAt`
+and the indexed package
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_continuousWithinAt`,
+matching compact local-gluing constructors that already retain
+`ContinuousWithinAt` readouts. The compact correction layer also has
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_eventuallyEq_along_maps3_nhdsWithin`,
 which combines that indexed Picard/local-gluing discharge with the existing
 finite-cover readout correction route. The derivative layer also has
