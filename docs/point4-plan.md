@@ -2759,7 +2759,11 @@ fixed chart. Its model-curve wrapper
 `Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_eventuallyEq_modelDerivative`
 replaces the fixed-chart derivative input by eventual equality with any model
 coordinate curve whose derivative is `f t y`, matching the natural Picard
-handoff. The derivative
+handoff. The Picard-flow specialization
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_localFlowSolution`
+uses `ModelGaugeFlowODE.LocalFlowSolution.hasDerivWithinAt` and `initial_eq`
+when the local Picard flow is anchored at the current time, so the remaining
+model input is just fixed-chart eventual equality with `α.flow y`. The derivative
 layer also has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn`,
 which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the

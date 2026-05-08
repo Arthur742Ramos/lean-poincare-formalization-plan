@@ -24714,6 +24714,72 @@ theorem model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_eventu
   intro y hy
   exact (hmodelDeriv y hy).congr_of_eventuallyEq (hmodelEq y hy) (hmodelEq_t y hy)
 
+/-- Local-gluing Picard-flow version of
+`model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_eventuallyEq_modelDerivative`.
+
+When the model coordinate curve is a `ModelGaugeFlowODE.LocalFlowSolution`
+anchored at the current time, the model derivative is exactly `f t y` by the
+ODE and `initial_eq`.  The only model/readout input left is eventual equality
+of the fixed-chart local readout curve with the Picard flow. -/
+theorem model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_localFlowSolution
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {t : ℝ} {x₀ : E} {r : ℝ≥0} (p : M)
+    (α : ModelGaugeFlowODE.LocalFlowSolution f τ₀ x₀ r)
+    (huniq : UniqueDiffWithinAt ℝ (Icc tmin tmax) t)
+    (ht : t ∈ Icc tmin tmax)
+    (hτ₀ : (τ₀ : ℝ) = t)
+    {F G : ℝ → M → M} {U V : Set M}
+    (hlocal : LocalGluingData (I := I) (M := M) 3 (F t) (G t) U V)
+    (hpV : p ∈ V)
+    (hsource : ∀ q : M, q ∈ V ∩ (extChartAt I p).source →
+      (fun τ : ℝ ↦ F τ (G t q)) ⁻¹' (extChartAt I q).source ∈
+        𝓝[Icc tmin tmax] t)
+    (hball : ∀ y ∈ (extChartAt I p).target ∩
+        (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source),
+      y ∈ closedBall x₀ r)
+    (hmodelEq : ∀ y ∈ (extChartAt I p).target ∩
+        (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source),
+      (fun τ : ℝ ↦
+        (extChartAt I p) (F τ (G t ((extChartAt I p).symm y)))) =ᶠ[
+          𝓝[Icc tmin tmax] t] (fun τ : ℝ ↦ α.flow y τ))
+    (hderivLocal : ∀ z ∈ U,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t z)) (F τ z))
+        (Y t (F t z)) (Icc tmin tmax) t) :
+    (f t) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)]
+      (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+        (Y t) (Set.range I)) := by
+  refine
+    model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_eventuallyEq_modelDerivative
+      (I := I) (M := M) (Y := Y) (f := f) (s := Icc tmin tmax) (t := t)
+      p huniq hlocal hpV hsource (β := fun y τ ↦ α.flow y τ) ?_ hmodelEq ?_
+      hderivLocal
+  · intro y hy
+    have hinit : α.flow y t = y := by
+      rw [← hτ₀]
+      exact α.initial_eq y (hball y hy)
+    exact (α.hasDerivWithinAt y (hball y hy) t ht).congr_deriv (by rw [hinit])
+  · intro y hy
+    let q : M := (extChartAt I p).symm y
+    have hyTarget : y ∈ (extChartAt I p).target := hy.1
+    have hqVsrc : q ∈ V ∩ (extChartAt I p).source := by
+      simpa [q] using hy.2
+    have hqV : q ∈ V := hqVsrc.1
+    have hFt : F t (G t q) = q := by
+      simpa using hlocal.right_invOn ⟨Set.mem_univ q, hqV⟩
+    have hchart_q : (extChartAt I p) q = y := by
+      simpa [q] using (extChartAt I p).right_inv hyTarget
+    have hinit : α.flow y t = y := by
+      rw [← hτ₀]
+      exact α.initial_eq y (hball y hy)
+    calc
+      (extChartAt I p) (F t (G t ((extChartAt I p).symm y)))
+          = (extChartAt I p) q := by
+            simpa [q] using congrArg (fun z : M ↦ (extChartAt I p) z) hFt
+      _ = y := hchart_q
+      _ = α.flow y t := hinit.symm
+
 /-- A local centered-chart model field equality with the manifold pullback of an
 auxiliary vector field gives the explicit `tangentCoordChange` `EqOn` shape
 used by the closed-ball correction route.
