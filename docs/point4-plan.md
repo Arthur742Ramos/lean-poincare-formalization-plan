@@ -2763,8 +2763,16 @@ handoff. The Picard-flow specialization
 `Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_localFlowSolution`
 uses `ModelGaugeFlowODE.LocalFlowSolution.hasDerivWithinAt` and `initial_eq`
 when the local Picard flow is anchored at the current time, so the remaining
-model input is just fixed-chart eventual equality with `α.flow y`. The derivative
-layer also has
+model input is just fixed-chart eventual equality with `α.flow y`. This now has
+the indexed finite-cover handoff
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution`,
+which packages current-time anchored local Picard flows, local gluing data,
+source persistence, model/readout equality, and centered auxiliary derivatives
+into exactly the `hfLocal` pullback-field hypothesis consumed by the compact
+correction theorem. The compact correction layer also has
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_eventuallyEq_along_maps3_nhdsWithin`,
+which combines that indexed Picard/local-gluing discharge with the existing
+finite-cover readout correction route. The derivative layer also has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn`,
 which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the
 selected local readout center `Fₗ i t x` to the actual glued-flow center

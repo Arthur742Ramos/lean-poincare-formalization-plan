@@ -24780,6 +24780,72 @@ theorem model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_localF
       _ = y := hchart_q
       _ = α.flow y t := hinit.symm
 
+/-- Indexed finite-cover form of
+`model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_localFlowSolution`.
+
+For each visible source point in a selected local readout, a Picard model flow
+anchored at the current time identifies the local model vector field with the
+centered-chart pullback of the auxiliary manifold vector field.  This is the
+`hfLocal` shape consumed by the compact correction route. -/
+theorem model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {ι : Type*}
+    {tminLocal tmaxLocal : ℝ} {f : ℝ → E → E}
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (hltLocal : tminLocal < tmaxLocal)
+    (hsLocal : s ⊆ Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ), t ∈ s → ι → M → E)
+    (rLocal : ∀ (t : ℝ), t ∈ s → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ) (ht : t ∈ s) (i : ι) (x : M),
+      ModelGaugeFlowODE.LocalFlowSolution f
+        (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+        (x₀Local t ht i x) (rLocal t ht i x))
+    (hlocalData : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hsourceLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ q : M, q ∈ V t i ∩ (extChartAt I (Fₗ i t x)).source →
+          (fun τ : ℝ ↦ Fₗ i τ (Gₗ i t q)) ⁻¹' (extChartAt I q).source ∈
+            𝓝[Icc tminLocal tmaxLocal] t)
+    (hballLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M), x ∈ U t i →
+      ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+          (extChartAt I (Fₗ i t x)).symm ⁻¹'
+            (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+        y ∈ Metric.closedBall (x₀Local t ht i x) (rLocal t ht i x))
+    (hmodelEqLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          (fun τ : ℝ ↦
+            (extChartAt I (Fₗ i t x))
+              (Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y)))) =ᶠ[
+                𝓝[Icc tminLocal tmaxLocal] t]
+              (fun τ : ℝ ↦ (β t ht i x).flow y τ))
+    (hderivLocal : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ z : M, z ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t z)) (Fₗ i τ z))
+        (Y t (Fₗ i t z)) (Icc tminLocal tmaxLocal) t) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ x : M, x ∈ U t i →
+      (f t) =ᶠ[𝓝[Set.range I] ((extChartAt I (Fₗ i t x)) (Fₗ i t x))]
+        (VectorField.mpullbackWithin (𝓘(ℝ, E)) I
+          (extChartAt I (Fₗ i t x)).symm (Y t) (Set.range I)) := by
+  intro t ht i x hx
+  have huniq : UniqueDiffWithinAt ℝ (Icc tminLocal tmaxLocal) t :=
+    (uniqueDiffOn_Icc hltLocal).uniqueDiffWithinAt (hsLocal ht)
+  have hpV : Fₗ i t x ∈ V t i :=
+    (hlocalData ht i).forward_mapsTo_source hx
+  exact
+    model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_localFlowSolution
+      (I := I) (M := M) (Y := Y) (tmin := tminLocal) (tmax := tmaxLocal)
+      (τ₀ := ⟨t, hsLocal ht⟩) (f := f) (t := t)
+      (x₀ := x₀Local t ht i x) (r := rLocal t ht i x)
+      (Fₗ i t x) (β t ht i x) huniq (hsLocal ht) rfl
+      (F := Fₗ i) (G := Gₗ i) (U := U t i) (V := V t i)
+      (hlocalData ht i) hpV (hsourceLocal ht i x hx)
+      (hballLocal ht i x hx) (hmodelEqLocal ht i x hx)
+      (hderivLocal ht i)
+
 /-- A local centered-chart model field equality with the manifold pullback of an
 auxiliary vector field gives the explicit `tangentCoordChange` `EqOn` shape
 used by the closed-ball correction route.
@@ -26953,6 +27019,136 @@ theorem spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBa
       Fₗ U hcover hreadout
       (model_vectorField_local_eqOn_tangentCoordChange_of_eventuallyEq_mpullbackWithin
         (I := I) (M := M) (Y := Y) (s := s) Fₗ U hfLocal)
+      hY
+
+/-- Compact selected-readout correction route with the patch-local pullback
+field equality discharged from local Picard model flows.
+
+This combines
+`model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution`
+with
+`spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_mpullbackWithin_of_eventuallyEq_along_maps3_nhdsWithin`.
+Callers provide local `LocalGluingData`, a current-time anchored model flow for
+each selected readout/source point, and local readout/model equality; the finite
+cover correction theorem receives the resulting `hfLocal` hypothesis. -/
+theorem spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_eventuallyEq_along_maps3_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ} {ι : Type*}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r a : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {tmin₁ tmax₁ : ℝ}
+    (hDeTurckVector_mdiff : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ p : M,
+      MDiffAt (T%
+        (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) p)
+    (hXeq : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      X t ((G.maps3 t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((G.maps3 t) x))
+    (htime : s ⊆ Icc tmin₁ tmax₁)
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+          𝓝[s] t] (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hball : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        α.flow (xE, t) ∈ Metric.ball x₀ a)
+    (hder : ∀ τ ∈ Icc tmin₁ tmax₁, ∀ z ∈ Metric.closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (Metric.closedBall x₀ a) z)
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ s → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ x : M, x ∈ U t i →
+      ∀ᶠ τ in 𝓝 t, ∃ W' : Set M, W' ∈ 𝓝 x ∧
+        EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ i τ) W')
+    {tminLocal tmaxLocal : ℝ}
+    (hltLocal : tminLocal < tmaxLocal)
+    (hsLocal : s ⊆ Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ), t ∈ s → ι → M → E)
+    (rLocal : ∀ (t : ℝ), t ∈ s → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ) (ht : t ∈ s) (i : ι) (x : M),
+      ModelGaugeFlowODE.LocalFlowSolution f
+        (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+        (x₀Local t ht i x) (rLocal t ht i x))
+    (hlocalData : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hsourceLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ q : M, q ∈ V t i ∩ (extChartAt I (Fₗ i t x)).source →
+          (fun τ : ℝ ↦ Fₗ i τ (Gₗ i t q)) ⁻¹' (extChartAt I q).source ∈
+            𝓝[Icc tminLocal tmaxLocal] t)
+    (hballLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M), x ∈ U t i →
+      ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+          (extChartAt I (Fₗ i t x)).symm ⁻¹'
+            (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+        y ∈ Metric.closedBall (x₀Local t ht i x) (rLocal t ht i x))
+    (hmodelEqLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          (fun τ : ℝ ↦
+            (extChartAt I (Fₗ i t x))
+              (Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y)))) =ᶠ[
+                𝓝[Icc tminLocal tmaxLocal] t]
+              (fun τ : ℝ ↦ (β t ht i x).flow y τ))
+    (hderivLocal : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ z : M, z ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t z)) (Fₗ i τ z))
+        (Y t (Fₗ i t z)) (Icc tminLocal tmaxLocal) t)
+    (hY : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+        Y τ ((G.maps3 τ) x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            g background τ ((G.maps3 τ) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pu : TangentSpace I p := (G.maps3 t).pushforwardTangent x u
+         let pv : TangentSpace I p := (G.maps3 t).pushforwardTangent x v
+         let cu : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pu
+         let cv : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pv
+         (fderivWithin ℝ
+            (fun yE : E ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g p (t, yE))
+            (Set.range I) ((extChartAt I p) p))
+            (X t p) cu cv +
+          (g t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cu)) pv +
+          (g t).inner p pu
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cv)) =
+          -intrinsicDeTurckCorrection (I := I) (M := M)
+            g background t p pu pv) := by
+  exact
+    G.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_mpullbackWithin_of_eventuallyEq_along_maps3_nhdsWithin
+      g background α hDeTurckVector_mdiff hXeq htime hbase hball hder
+      Fₗ U hcover hreadout
+      (model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution
+        (I := I) (M := M) (Y := Y) (s := s) (f := f)
+        Fₗ Gₗ U V hltLocal hsLocal x₀Local rLocal β
+        hlocalData hsourceLocal hballLocal hmodelEqLocal hderivLocal)
       hY
 
 /-- Levi-Civita-background specialization of
