@@ -2730,9 +2730,16 @@ and the selected fixed-IVP endpoint
 `SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_with_finiteSubcover_Icc_subset_cover_readout_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 now return that auxiliary-along-flow equality alongside the selected finite
 source cover and readout equality. The remaining local-field proof is therefore
-the Picard-model-to-auxiliary fixed-chart `EqOn` input, not the flow equality
-from the auxiliary field to the intrinsic field. The derivative layer now also
-has
+the Picard-model-to-auxiliary fixed-chart input, not the flow equality from the
+auxiliary field to the intrinsic field. This input can now be supplied in the
+more geometric centered-chart pullback form: the derivative layer has
+`Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_eventuallyEq_mpullbackWithin`
+and
+`Diffeomorph3GaugeFlowOn.model_vectorField_local_eqOn_tangentCoordChange_of_eventuallyEq_mpullbackWithin`,
+which convert local eventual equality of `f t` with
+`VectorField.mpullbackWithin ... (Y t)` through `(extChartAt I p).symm` into
+the explicit `tangentCoordChange` `EqOn` shape used downstream. The derivative
+layer also has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn`,
 which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the
 selected local readout center `Fₗ i t x` to the actual glued-flow center
@@ -2754,7 +2761,11 @@ closed-ball correction route. Its compact-witness companion
 first uses the retained finite source cover and selected local readout
 equality to transport the patch-local Picard-model/auxiliary-field `EqOn` to
 the glued-flow chart center, then applies that same auxiliary-field correction
-adapter. The smooth-realization scalar layer has the
+adapter. Its centered-chart pullback companion
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_mpullbackWithin_of_eventuallyEq_along_maps3_nhdsWithin`
+first converts the patch-local `mpullbackWithin` equality into that `EqOn`
+form, then follows the same compact finite-cover/readout route. The
+smooth-realization scalar layer has the
 matching auxiliary-field endpoint
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin`,
 which derives the intrinsic fixed-chart `EqOn` from the auxiliary model-field
