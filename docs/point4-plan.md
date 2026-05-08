@@ -2740,7 +2740,11 @@ selected local readout center `Fₗ i t x` to the actual glued-flow center
 equality. Its composed intrinsic companion
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_intrinsic_of_iUnion_readout_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
 then combines that transferred patch-local model-field proof with the retained
-auxiliary-along-flow equality. The signed correction layer
+auxiliary-along-flow equality. The active-Picard-point companion
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_tangentCoordChange_intrinsic_of_iUnion_readout_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
+additionally uses the base-coordinate equality to transport the resulting
+neighborhood to `α.flow (xE, t)`, producing the `hfCoord` shape consumed by the
+closed-ball `Df` route. The signed correction layer
 also has the direct auxiliary-field adapter
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin`,
 which composes the auxiliary fixed-chart `EqOn` and the auxiliary-along-flow
