@@ -2729,7 +2729,13 @@ witness endpoint
 and the selected fixed-IVP endpoint
 `SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_with_finiteSubcover_Icc_subset_cover_readout_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 now return that auxiliary-along-flow equality alongside the selected finite
-source cover and readout equality. The selected raw flow now also exposes the
+source cover and readout equality. The adapters
+`SelectedIntrinsicDeTurckGaugeFlowExistence.timeSet_eq_Icc_of_solution_eq_restrictSymmetricIcc`
+and
+`SelectedIntrinsicDeTurckGaugeFlowExistence.auxiliaryEqAlong_of_solution_eq_restrictSymmetricIcc`
+transport the selected construction's explicit `Icc` time-set and auxiliary
+equality certificates to the selected solution time-set shape consumed by the
+correction routes. The selected raw flow now also exposes the
 pointwise correction-route `hXeq` certificate as
 `SelectedIntrinsicDeTurckGaugeFlowExistence.flow_vectorField_eq_intrinsicDeTurckGaugeField`,
 since its driving vector field is definitionally the intrinsic DeTurck gauge

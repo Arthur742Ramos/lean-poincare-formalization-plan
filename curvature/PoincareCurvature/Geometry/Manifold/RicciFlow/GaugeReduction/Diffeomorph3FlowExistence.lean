@@ -12591,6 +12591,56 @@ theorem exists_restrictSymmetricIcc_with_finiteSubcover_Icc_subset_cover_readout
     simpa [G] using hreadout t ht i x hx
   · simpa [G] using hYAlong
 
+/-- The selected restricted-symmetric construction exposes its solution time set
+as the closed symmetric interval. -/
+theorem timeSet_eq_Icc_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub) :
+    G.solution.1.toIntrinsicDeTurckSolution.timeSet =
+      Icc (ivp.initialTime - ε) (ivp.initialTime + ε) := by
+  simpa [hGsol]
+
+/-- Transport the auxiliary-field equality returned by the restricted
+selected construction from the explicit `Icc` to the selected solution time
+set. -/
+theorem auxiliaryEqAlong_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hYAlong : ∀ t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε),
+      ∀ᶠ τ in 𝓝[Icc (ivp.initialTime - ε) (ivp.initialTime + ε)] t,
+        ∀ x : M,
+          Y τ ((G.flow.maps3 τ) x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background τ
+              ((G.flow.maps3 τ) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+      ∀ᶠ τ in 𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+        ∀ x : M,
+          Y τ ((G.flow.maps3 τ) x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              G.solution.1.toIntrinsicDeTurckSolution.metric
+              G.solution.1.toIntrinsicDeTurckSolution.background τ
+              ((G.flow.maps3 τ) x) := by
+  intro t ht
+  simpa [hGsol] using
+    hYAlong t (by simpa [hGsol] using ht)
+
 /-- Scalar time-derivative data for the metric pulled back by a selected raw
 intrinsic DeTurck gauge flow. -/
 def PullbackMetricInnerDerivativeData
