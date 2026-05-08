@@ -2855,9 +2855,13 @@ patch-local `EqOn` on the Picard time set supplies the model/readout equality.
 Its lifted-input companion
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
 accepts the selected Picard output before chart cancellation, again requiring
-target membership of the model values.
-The
-smooth-realization route also has the specialized bridge
+target membership of the model values. The tensor-level companion
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn`
+now feeds that lifted-input scalar correction identity into the indexed
+readout-lifted `HasTimeDerivativeOn` route, so the smooth gauge-corrected
+tensor endpoint can use local Picard/gluing correction data instead of an
+explicit Lie-correction scalar hypothesis. The smooth-realization route also
+has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
 tangent-map identification and states the remaining scalar identity in actual
