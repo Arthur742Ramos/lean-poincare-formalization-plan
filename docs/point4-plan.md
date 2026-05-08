@@ -1111,9 +1111,10 @@ then restricting.
 The operator-ball and identity-ball state-preserving Picard specializations now
 also expose the forward common-interior lifted chart patch as bundled
 `LocalGluingData`, including the full space-time regularity variants. Their
-overlap/`EqOn` variants likewise return the bundled local data together with
-the same-source-patch readout equality, so compact raw-flow gluing constructors
-can consume these Picard outputs directly without rebuilding the local inverse
+overlap/`EqOn` variants, both from time-slice regularity and full space-time
+regularity, likewise return the bundled local data together with the
+same-source-patch readout equality, so compact raw-flow gluing constructors can
+consume these Picard outputs directly without rebuilding the local inverse
 package from the unbundled maps-to/inverse/smoothness fields.
 Model-flow compatibility now also has common-subinterval forms:
 `LocalFlowSolution.eqOn_common_Icc_of_lipschitzOnWith_of_mem` and
