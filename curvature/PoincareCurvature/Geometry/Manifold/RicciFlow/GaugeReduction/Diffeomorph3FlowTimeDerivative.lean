@@ -34426,6 +34426,390 @@ theorem spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBa
       x₀Local rLocal β hlocalData hcontLocal hballLocal hmodelLiftedEqOn
       hmodelTarget hderivLocal hY
 
+/-- Interior compact-readout correction route for a selected raw intrinsic
+DeTurck gauge-flow witness whose selected solution time set is a closed
+Picard interval.
+
+This variant is shaped for compact constructors: the source cover is supplied
+on the closed `Icc`, the selected readout only on the open interior `Ioo`, and
+the local Picard/gluing data remain indexed by the selected closed time set.
+The proof restricts the selected raw flow to the open interior before invoking
+the raw local Picard correction route. -/
+theorem spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_Icc_cover_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_Ioo_of_timeSet_eq_Icc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {ι : Type*}
+    {tmin tmax : ℝ}
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r a : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {tmin₁ tmax₁ : ℝ}
+    (hDeTurckVector_mdiff : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ∀ p : M,
+        MDiffAt (T%
+          (intrinsicDeTurckVectorField (I := I) (M := M)
+            G.solution.1.toIntrinsicDeTurckSolution.metric
+            G.solution.1.toIntrinsicDeTurckSolution.background t)) p)
+    (htime : Icc tmin tmax ⊆ Icc tmin₁ tmax₁)
+    (hbase : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+        ∀ w : TangentSpace I x,
+        ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+          (fun τ : ℝ ↦
+            SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+              (I := I) (M := M) G.flow.maps3 t τ x) =ᶠ[𝓝 t]
+            (fun τ : ℝ ↦ α.tangent xE τ) →
+          (fun τ : ℝ ↦ (extChartAt I ((G.flow.maps3 t) x)) ((G.flow.maps3 τ) x)) =ᶠ[
+            𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t]
+            (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hball : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+        ∀ w : TangentSpace I x,
+        ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+          (fun τ : ℝ ↦
+            SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+              (I := I) (M := M) G.flow.maps3 t τ x) =ᶠ[𝓝 t]
+            (fun τ : ℝ ↦ α.tangent xE τ) →
+          α.flow (xE, t) ∈ Metric.ball x₀ a)
+    (hder : ∀ τ ∈ Icc tmin₁ tmax₁, ∀ z ∈ Metric.closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (Metric.closedBall x₀ a) z)
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t, ∃ W' : Set M, W' ∈ 𝓝 x ∧
+          EqOn (fun z : M ↦ (G.flow.maps3 τ) z) (Fₗ i τ) W')
+    {tminLocal tmaxLocal : ℝ}
+    (hltLocal : tminLocal < tmaxLocal)
+    (hsLocal : G.solution.1.toIntrinsicDeTurckSolution.timeSet ⊆
+      Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ),
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ι → M → E)
+    (rLocal : ∀ (t : ℝ),
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ)
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M),
+        ModelGaugeFlowODE.LocalFlowSolution f
+          (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+          (x₀Local t ht i x) (rLocal t ht i x))
+    (hlocalData : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ∀ i,
+        LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hcontLocal : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ i, ∀ z : M, z ∈ U t i →
+          ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ z) (Icc tminLocal tmaxLocal) t)
+    (hballLocal : ∀ ⦃t : ℝ⦄
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          y ∈ Metric.closedBall (x₀Local t ht i x) (rLocal t ht i x))
+    (hmodelLiftedEqOn : ∀ ⦃t : ℝ⦄
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          Set.EqOn
+            (fun τ : ℝ ↦
+              Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y)))
+            (fun τ : ℝ ↦
+              (extChartAt I (Fₗ i t x)).symm ((β t ht i x).flow y τ))
+            (Icc tminLocal tmaxLocal))
+    (hmodelTarget : ∀ ⦃t : ℝ⦄
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          ∀ τ ∈ Icc tminLocal tmaxLocal, (β t ht i x).flow y τ ∈
+            (extChartAt I (Fₗ i t x)).target)
+    (hderivLocal : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ i, ∀ z : M, z ∈ U t i →
+          HasDerivWithinAt
+            (fun τ : ℝ ↦ (extChartAt I (Fₗ i t z)) (Fₗ i τ z))
+            (Y t (Fₗ i t z)) (Icc tminLocal tmaxLocal) t)
+    (hY : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ᶠ τ in 𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+          ∀ x : M,
+            Y τ ((G.flow.maps3 τ) x) =
+              intrinsicDeTurckGaugeField (I := I) (M := M)
+                G.solution.1.toIntrinsicDeTurckSolution.metric
+                G.solution.1.toIntrinsicDeTurckSolution.background τ
+                ((G.flow.maps3 τ) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.flow.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.flow.maps3 t) x
+         let pu : TangentSpace I p := (G.flow.maps3 t).pushforwardTangent x u
+         let pv : TangentSpace I p := (G.flow.maps3 t).pushforwardTangent x v
+         let cu : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pu
+         let cv : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pv
+         (fderivWithin ℝ
+            (fun yE : E ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M)
+                G.solution.1.toIntrinsicDeTurckSolution.metric p (t, yE))
+            (Set.range I) ((extChartAt I p) p))
+            (intrinsicDeTurckGaugeField (I := I) (M := M)
+              G.solution.1.toIntrinsicDeTurckSolution.metric
+              G.solution.1.toIntrinsicDeTurckSolution.background t p) cu cv +
+          (G.solution.1.toIntrinsicDeTurckSolution.metric t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cu)) pv +
+          (G.solution.1.toIntrinsicDeTurckSolution.metric t).inner p pu
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cv)) =
+          -intrinsicDeTurckCorrection (I := I) (M := M)
+            G.solution.1.toIntrinsicDeTurckSolution.metric
+            G.solution.1.toIntrinsicDeTurckSolution.background t p pu pv) := by
+  let hsolIoo : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet := fun {t} ht => by
+    simpa [htimeSet] using Ioo_subset_Icc_self ht
+  let hsLocalIoo : Ioo tmin tmax ⊆ Icc tminLocal tmaxLocal := fun {t} ht =>
+    hsLocal (hsolIoo ht)
+  have hbaseIoo : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.flow.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (fun τ : ℝ ↦ (extChartAt I ((G.flow.maps3 t) x)) ((G.flow.maps3 τ) x)) =ᶠ[
+          𝓝[Ioo tmin tmax] t] (fun τ : ℝ ↦ α.flow (xE, τ)) := by
+    intro t ht x w xE hxE htangent
+    have hclosed := hbase (hsolIoo ht) x w xE hxE htangent
+    have hclosedIcc :
+        (fun τ : ℝ ↦ (extChartAt I ((G.flow.maps3 t) x)) ((G.flow.maps3 τ) x)) =ᶠ[
+          𝓝[Icc tmin tmax] t] (fun τ : ℝ ↦ α.flow (xE, τ)) := by
+      simpa [htimeSet] using hclosed
+    exact
+      (eventually_nhds_of_eventually_nhdsWithin_Icc_of_mem_Ioo ht
+        hclosedIcc).filter_mono nhdsWithin_le_nhds
+  have hYIoo : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
+        Y τ ((G.flow.maps3 τ) x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            G.solution.1.toIntrinsicDeTurckSolution.metric
+            G.solution.1.toIntrinsicDeTurckSolution.background τ
+            ((G.flow.maps3 τ) x) := by
+    intro t ht
+    have hclosed := hY (hsolIoo ht)
+    have hclosedIcc : ∀ᶠ τ in 𝓝[Icc tmin tmax] t, ∀ x : M,
+        Y τ ((G.flow.maps3 τ) x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            G.solution.1.toIntrinsicDeTurckSolution.metric
+            G.solution.1.toIntrinsicDeTurckSolution.background τ
+            ((G.flow.maps3 τ) x) := by
+      simpa [htimeSet] using hclosed
+    exact
+      (eventually_nhds_of_eventually_nhdsWithin_Icc_of_mem_Ioo ht
+        hclosedIcc).filter_mono nhdsWithin_le_nhds
+  let R : Diffeomorph3GaugeFlowOn (I := I) (M := M)
+      (intrinsicDeTurckGaugeField (I := I) (M := M)
+        G.solution.1.toIntrinsicDeTurckSolution.metric
+        G.solution.1.toIntrinsicDeTurckSolution.background)
+      (Icc tmin tmax) ivp.initialTime :=
+    { maps3 := G.flow.maps3
+      anchored := G.flow.anchored
+      satisfies := by
+        simpa [htimeSet] using G.flow.satisfies }
+  exact
+    R.restrictIooOfIcc.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_of_eventuallyEq_along_maps3_nhdsWithin
+      G.solution.1.toIntrinsicDeTurckSolution.metric
+      G.solution.1.toIntrinsicDeTurckSolution.background α
+      (fun {t} ht p => hDeTurckVector_mdiff (hsolIoo ht) p)
+      (fun {_t} _ht _x => rfl)
+      (fun {t} ht => htime (Ioo_subset_Icc_self ht))
+      hbaseIoo
+      (fun {t} ht x w xE hxE htangent => hball (hsolIoo ht) x w xE hxE htangent)
+      hder Fₗ Gₗ U V
+      (fun {t} ht => hcover (Ioo_subset_Icc_self ht)) hreadout
+      hltLocal hsLocalIoo
+      (fun t ht i x => x₀Local t (hsolIoo ht) i x)
+      (fun t ht i x => rLocal t (hsolIoo ht) i x)
+      (fun t ht i x => β t (hsolIoo ht) i x)
+      (fun {t} ht i => hlocalData (hsolIoo ht) i)
+      (fun {t} ht i z hz => hcontLocal (hsolIoo ht) i z hz)
+      (fun {t} ht i x hx => hballLocal (hsolIoo ht) i x hx)
+      (fun {t} ht i x hx => hmodelLiftedEqOn (hsolIoo ht) i x hx)
+      (fun {t} ht i x hx => hmodelTarget (hsolIoo ht) i x hx)
+      (fun {t} ht i z hz => hderivLocal (hsolIoo ht) i z hz)
+      hYIoo
+
+/-- Smooth-background specialization of the interior compact-readout selected
+correction route on a closed selected Picard interval. -/
+theorem spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_Icc_cover_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_Ioo_of_timeSet_eq_Icc_of_contMDiffCovariantDerivative_background
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {ι : Type*}
+    {tmin tmax : ℝ}
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r a : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {tmin₁ tmax₁ : ℝ}
+    (hbackground : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+        CovariantDerivative.ContMDiffCovariantDerivative
+          (G.solution.1.toIntrinsicDeTurckSolution.background t) 1)
+    (htime : Icc tmin tmax ⊆ Icc tmin₁ tmax₁)
+    (hbase : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+        ∀ w : TangentSpace I x,
+        ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+          (fun τ : ℝ ↦
+            SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+              (I := I) (M := M) G.flow.maps3 t τ x) =ᶠ[𝓝 t]
+            (fun τ : ℝ ↦ α.tangent xE τ) →
+          (fun τ : ℝ ↦ (extChartAt I ((G.flow.maps3 t) x)) ((G.flow.maps3 τ) x)) =ᶠ[
+            𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t]
+            (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hball : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+        ∀ w : TangentSpace I x,
+        ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+          (fun τ : ℝ ↦
+            SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+              (I := I) (M := M) G.flow.maps3 t τ x) =ᶠ[𝓝 t]
+            (fun τ : ℝ ↦ α.tangent xE τ) →
+          α.flow (xE, t) ∈ Metric.ball x₀ a)
+    (hder : ∀ τ ∈ Icc tmin₁ tmax₁, ∀ z ∈ Metric.closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (Metric.closedBall x₀ a) z)
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax →
+      Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax →
+      ∀ i, ∀ x : M, x ∈ U t i →
+        ∀ᶠ τ in 𝓝 t, ∃ W' : Set M, W' ∈ 𝓝 x ∧
+          EqOn (fun z : M ↦ (G.flow.maps3 τ) z) (Fₗ i τ) W')
+    {tminLocal tmaxLocal : ℝ}
+    (hltLocal : tminLocal < tmaxLocal)
+    (hsLocal : G.solution.1.toIntrinsicDeTurckSolution.timeSet ⊆
+      Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ),
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ι → M → E)
+    (rLocal : ∀ (t : ℝ),
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ)
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M),
+        ModelGaugeFlowODE.LocalFlowSolution f
+          (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+          (x₀Local t ht i x) (rLocal t ht i x))
+    (hlocalData : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ∀ i,
+        LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hcontLocal : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ i, ∀ z : M, z ∈ U t i →
+          ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ z) (Icc tminLocal tmaxLocal) t)
+    (hballLocal : ∀ ⦃t : ℝ⦄
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          y ∈ Metric.closedBall (x₀Local t ht i x) (rLocal t ht i x))
+    (hmodelLiftedEqOn : ∀ ⦃t : ℝ⦄
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          Set.EqOn
+            (fun τ : ℝ ↦
+              Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y)))
+            (fun τ : ℝ ↦
+              (extChartAt I (Fₗ i t x)).symm ((β t ht i x).flow y τ))
+            (Icc tminLocal tmaxLocal))
+    (hmodelTarget : ∀ ⦃t : ℝ⦄
+      (ht : t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet)
+      (i : ι) (x : M), x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          ∀ τ ∈ Icc tminLocal tmaxLocal, (β t ht i x).flow y τ ∈
+            (extChartAt I (Fₗ i t x)).target)
+    (hderivLocal : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ i, ∀ z : M, z ∈ U t i →
+          HasDerivWithinAt
+            (fun τ : ℝ ↦ (extChartAt I (Fₗ i t z)) (Fₗ i τ z))
+            (Y t (Fₗ i t z)) (Icc tminLocal tmaxLocal) t)
+    (hY : ∀ ⦃t : ℝ⦄,
+      t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ᶠ τ in 𝓝[G.solution.1.toIntrinsicDeTurckSolution.timeSet] t,
+          ∀ x : M,
+            Y τ ((G.flow.maps3 τ) x) =
+              intrinsicDeTurckGaugeField (I := I) (M := M)
+                G.solution.1.toIntrinsicDeTurckSolution.metric
+                G.solution.1.toIntrinsicDeTurckSolution.background τ
+                ((G.flow.maps3 τ) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ Ioo tmin tmax → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.flow.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.flow.maps3 t) x
+         let pu : TangentSpace I p := (G.flow.maps3 t).pushforwardTangent x u
+         let pv : TangentSpace I p := (G.flow.maps3 t).pushforwardTangent x v
+         let cu : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pu
+         let cv : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pv
+         (fderivWithin ℝ
+            (fun yE : E ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M)
+                G.solution.1.toIntrinsicDeTurckSolution.metric p (t, yE))
+            (Set.range I) ((extChartAt I p) p))
+            (intrinsicDeTurckGaugeField (I := I) (M := M)
+              G.solution.1.toIntrinsicDeTurckSolution.metric
+              G.solution.1.toIntrinsicDeTurckSolution.background t p) cu cv +
+          (G.solution.1.toIntrinsicDeTurckSolution.metric t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cu)) pv +
+          (G.solution.1.toIntrinsicDeTurckSolution.metric t).inner p pu
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cv)) =
+          -intrinsicDeTurckCorrection (I := I) (M := M)
+            G.solution.1.toIntrinsicDeTurckSolution.metric
+            G.solution.1.toIntrinsicDeTurckSolution.background t p pu pv) := by
+  exact
+    G.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_Icc_cover_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_Ioo_of_timeSet_eq_Icc
+      htimeSet α
+      (fun {t} ht p =>
+        intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background
+          (I := I) (M := M)
+          G.solution.1.toIntrinsicDeTurckSolution.metric
+          G.solution.1.toIntrinsicDeTurckSolution.background t
+          (hbackground ht) p)
+      htime hbase hball hder Fₗ Gₗ U V hcover hreadout hltLocal
+      hsLocal x₀Local rLocal β hlocalData hcontLocal hballLocal
+      hmodelLiftedEqOn hmodelTarget hderivLocal hY
+
 /-- Coordinate-level scalar derivative data for the selected gauge-pulled
 metric associated to a selected raw intrinsic DeTurck gauge-flow witness. -/
 def CoordinatePullbackMetricInnerDerivativeData

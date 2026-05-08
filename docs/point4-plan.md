@@ -2757,6 +2757,14 @@ variant ending in `_of_contMDiffCovariantDerivative_background` now also
 derives the DeTurck-vector `MDiffAt` input from slicewise
 `ContMDiffCovariantDerivative (background t) 1`, via
 `SelectedIntrinsicDeTurckGaugeFlowExistence.deTurckVector_mdiffAt_of_contMDiffCovariantDerivative_background`.
+The selected correction layer also has an interior compact-readout route,
+`SelectedIntrinsicDeTurckGaugeFlowExistence.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_Icc_cover_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_Ioo_of_timeSet_eq_Icc`,
+and its smooth-background variant ending in
+`_of_contMDiffCovariantDerivative_background`. These wrappers match the compact
+constructor handoff more closely: the finite source cover is supplied on the
+closed selected `Icc`, readout is needed only on the open `Ioo`, and the local
+Picard/gluing data remain indexed by the selected closed time set while the
+proof internally restricts the raw flow to the open interior.
 The remaining local-field proof is
 therefore the Picard-model-to-auxiliary fixed-chart input, not the flow equality
 from the auxiliary field to the intrinsic field. This input can now be supplied
