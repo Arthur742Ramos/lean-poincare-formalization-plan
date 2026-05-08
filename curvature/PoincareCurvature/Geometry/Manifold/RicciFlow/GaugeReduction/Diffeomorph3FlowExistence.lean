@@ -12641,6 +12641,79 @@ theorem auxiliaryEqAlong_of_solution_eq_restrictSymmetricIcc
   simpa [hGsol] using
     hYAlong t (by simpa [hGsol] using ht)
 
+/-- Restrict ambient local-gluing data to the selected finite subcover and
+selected solution time set. -/
+theorem localGluingData_subtype
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ι : Type*} {s : Finset ι}
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i)) :
+    ∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+      ∀ i : {i // i ∈ s},
+        LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i) := by
+  intro t _ht i
+  exact hlocal t i
+
+/-- Restrict ambient local readout continuity to the selected closed symmetric
+interval and finite subcover. -/
+theorem continuousWithinAt_Icc_subtype_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ι : Type*} {s : Finset ι}
+    (Fₗ : ι → ℝ → M → M) (U : ℝ → ι → Set M)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hcontLocal : ∀ i, ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet,
+      ∀ x : M, x ∈ U t i →
+        ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x)
+          sol.1.toIntrinsicDeTurckSolution.timeSet t) :
+    ∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+      ∀ i : {i // i ∈ s}, ∀ x : M, x ∈ U t i →
+        ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x)
+          (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) t := by
+  intro t ht i x hx
+  have htIcc : t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) := by
+    simpa [hGsol] using ht
+  exact (hcontLocal i t (hsub htIcc) x hx).mono hsub
+
+/-- Restrict ambient local chart-derivative data to the selected closed
+symmetric interval and finite subcover. -/
+theorem hasDerivWithinAt_Icc_subtype_of_solution_eq_restrictSymmetricIcc
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {ι : Type*} {s : Finset ι}
+    (Fₗ : ι → ℝ → M → M) (U : ℝ → ι → Set M)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hderivLocal : ∀ i, ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet,
+      ∀ x : M, x ∈ U t i →
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+          (Y t (Fₗ i t x)) sol.1.toIntrinsicDeTurckSolution.timeSet t) :
+    ∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet →
+      ∀ i : {i // i ∈ s}, ∀ x : M, x ∈ U t i →
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+          (Y t (Fₗ i t x)) (Icc (ivp.initialTime - ε) (ivp.initialTime + ε)) t := by
+  intro t ht i x hx
+  have htIcc : t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) := by
+    simpa [hGsol] using ht
+  exact (hderivLocal i t (hsub htIcc) x hx).mono hsub
+
 /-- Route-shaped compact selected raw gauge-flow witness on a restricted closed
 symmetric interval.
 
