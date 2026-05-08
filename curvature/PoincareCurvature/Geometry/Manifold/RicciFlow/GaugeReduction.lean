@@ -125,6 +125,36 @@ theorem intrinsicDeTurckGaugeField_mdiff_of_intrinsicDeTurckVectorField_mdiff
   exact intrinsicDeTurckGaugeField_mdiffAt_of_intrinsicDeTurckVectorField_mdiffAt
     (I := I) (M := M) g background (hW x)
 
+/-- Smooth-background specialization of
+`intrinsicDeTurckGaugeField_mdiffAt_of_intrinsicDeTurckVectorField_mdiffAt`. -/
+theorem intrinsicDeTurckGaugeField_mdiffAt_of_contMDiffCovariantDerivative_background
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hbackground :
+      CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) :
+    MDiffAt (T%
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) x := by
+  exact intrinsicDeTurckGaugeField_mdiffAt_of_intrinsicDeTurckVectorField_mdiffAt
+    (I := I) (M := M) g background
+    (intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background
+      (I := I) (M := M) g background t hbackground x)
+
+/-- Global smooth-background specialization of
+`intrinsicDeTurckGaugeField_mdiff_of_intrinsicDeTurckVectorField_mdiff`. -/
+theorem intrinsicDeTurckGaugeField_mdiff_of_contMDiffCovariantDerivative_background
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hbackground :
+      CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    MDiff (T%
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) := by
+  intro x
+  exact intrinsicDeTurckGaugeField_mdiffAt_of_contMDiffCovariantDerivative_background
+    (I := I) (M := M) g background t hbackground x
+
 /-- With a Levi-Civita background, the reverse intrinsic DeTurck gauge field
 vanishes. -/
 theorem intrinsicDeTurckGaugeField_eq_zero_of_isLeviCivita
