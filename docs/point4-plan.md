@@ -2780,6 +2780,11 @@ now also be supplied as an `EqOn` statement on the Picard time set:
 `Diffeomorph3GaugeFlowOn.iUnion_readout_model_eventuallyEq_nhdsWithin_of_eqOn`
 converts that readout-local `EqOn` into the exact within-filter eventual
 equality, while
+`Diffeomorph3GaugeFlowOn.iUnion_readout_model_eqOn_of_lifted_model_eqOn`
+pushes a manifold-side lifted Picard/readout equality through the selected
+target chart, using target membership of the model values to produce that
+readout-local chart `EqOn`,
+and
 `Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_eqOn`
 and
 `Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_continuousWithinAt_of_eqOn`

@@ -24826,6 +24826,55 @@ theorem iUnion_readout_source_extChartAt_mem_nhdsWithin_of_localGluingData_conti
       (t := t) (p := Fₗ i t x) (U := U t i) (V := V t i)
       (hlocalData ht i) (hcontLocal ht i) q hq
 
+/-- Convert a lifted manifold-side Picard/readout equality into the
+target-chart model equality expected by the local Picard pullback bridge.
+
+The input identifies the selected local readout with
+`(extChartAt I p).symm (β τ)` on the Picard time set; target-chart membership
+of `β τ` then lets the preferred chart cancel the lifted expression. -/
+theorem iUnion_readout_model_eqOn_of_lifted_model_eqOn
+    {timeSet s : Set ℝ} {ι : Type*}
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (β : ∀ (t : ℝ), t ∈ s → ι → M → E → ℝ → E)
+    (hmodelLiftedEqOn : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          Set.EqOn
+            (fun τ : ℝ ↦
+              Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y)))
+            (fun τ : ℝ ↦
+              (extChartAt I (Fₗ i t x)).symm (β t ht i x y τ)) timeSet)
+    (hmodelTarget : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          ∀ τ ∈ timeSet, β t ht i x y τ ∈
+            (extChartAt I (Fₗ i t x)).target) :
+    ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M), x ∈ U t i →
+      ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+          (extChartAt I (Fₗ i t x)).symm ⁻¹'
+            (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+        Set.EqOn
+          (fun τ : ℝ ↦
+            (extChartAt I (Fₗ i t x))
+              (Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y))))
+          (β t ht i x y) timeSet := by
+  intro t ht i x hx y hy τ hτ
+  calc
+    (extChartAt I (Fₗ i t x))
+        (Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y)))
+        =
+          (extChartAt I (Fₗ i t x))
+            ((extChartAt I (Fₗ i t x)).symm (β t ht i x y τ)) := by
+            exact congrArg (fun q : M ↦ (extChartAt I (Fₗ i t x)) q)
+              (hmodelLiftedEqOn ht i x hx y hy hτ)
+    _ = β t ht i x y τ := by
+      exact (extChartAt I (Fₗ i t x)).right_inv
+        (hmodelTarget ht i x hx y hy τ hτ)
+
 /-- Convert a patch-local model/readout equality on the Picard time set into
 the within-filter eventual equality used by the local Picard pullback bridge. -/
 theorem iUnion_readout_model_eventuallyEq_nhdsWithin_of_eqOn
