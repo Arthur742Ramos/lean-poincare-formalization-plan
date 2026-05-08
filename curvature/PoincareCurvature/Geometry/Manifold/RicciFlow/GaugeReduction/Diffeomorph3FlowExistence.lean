@@ -11754,6 +11754,22 @@ def gauge
       (E := E) (H := H) (I := I) (M := M) ivp) :
     G.gauge.follows = G.flow.satisfies := rfl
 
+/-- The selected raw gauge flow is driven by the intrinsic DeTurck gauge field,
+in the pointwise form consumed by the correction routes. -/
+theorem flow_vectorField_eq_intrinsicDeTurckGaugeField
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    ∀ ⦃t : ℝ⦄, t ∈ G.solution.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        G.solution.1.toIntrinsicDeTurckSolution.metric
+        G.solution.1.toIntrinsicDeTurckSolution.background t ((G.flow.maps3 t) x) =
+      intrinsicDeTurckGaugeField (I := I) (M := M)
+        G.solution.1.toIntrinsicDeTurckSolution.metric
+        G.solution.1.toIntrinsicDeTurckSolution.background t ((G.flow.maps3 t) x) := by
+  intro t _ht x
+  rfl
+
 /-- Centered preferred-chart derivative data extracted from a selected raw
 intrinsic DeTurck gauge-flow witness. -/
 theorem chartDerivativeData
