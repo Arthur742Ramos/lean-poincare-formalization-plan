@@ -2707,7 +2707,16 @@ Picard point `α.flow (xE, t)`, using the relative base-coordinate equality to
 transport the neighborhood. The closed-ball `Df`, Lie-correction, signed
 correction, and smooth scalar routes now consume that fixed-center `EqOn`
 form directly, so the remaining local-field obligation can be stated at the
-fixed chart center selected by the compact witness. The
+fixed chart center selected by the compact witness. This boundary has also
+been split through
+`Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin`:
+if the Picard model field is locally equal to the fixed-chart expression of the
+auxiliary readout vector field, and that auxiliary field agrees with the
+intrinsic DeTurck gauge field along the diffeomorphism images in the relative
+time filter, then the fixed-center intrinsic `EqOn` follows. Thus the remaining
+model-field proof can target the actual local Picard/vector-field readout
+rather than duplicating the intrinsic DeTurck expression at every downstream
+correction route. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
