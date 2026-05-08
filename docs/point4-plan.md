@@ -2716,7 +2716,22 @@ intrinsic DeTurck gauge field along the diffeomorphism images in the relative
 time filter, then the fixed-center intrinsic `EqOn` follows. Thus the remaining
 model-field proof can target the actual local Picard/vector-field readout
 rather than duplicating the intrinsic DeTurck expression at every downstream
-correction route. The
+correction route. The compact local-gluing constructor now preserves this
+auxiliary-field handoff too:
+`Diffeomorph3GaugeFlowOn.of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc_eqOn_of_mem_Icc`
+records pointwise equality of the constructed `maps3` slice with each selected
+local readout on its actual source patch, and
+`Diffeomorph3GaugeFlowOn.of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc_eventuallyEq_along_maps3_nhdsWithin`
+uses that source-patch equality to turn `hYLocal` into relative-filter equality
+of the auxiliary field with the target field along `maps3`. The raw compact
+witness endpoint
+`Diffeomorph3GaugeFlowOn.exists_Icc_gaugeFlow_with_finiteSubcover_Icc_subset_cover_readout_auxiliaryEqAlong_of_compact_timeSet_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_timeSet_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+and the selected fixed-IVP endpoint
+`SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_with_finiteSubcover_Icc_subset_cover_readout_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
+now return that auxiliary-along-flow equality alongside the selected finite
+source cover and readout equality. The remaining local-field proof is therefore
+the Picard-model-to-auxiliary fixed-chart `EqOn` input, not the flow equality
+from the auxiliary field to the intrinsic field. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
