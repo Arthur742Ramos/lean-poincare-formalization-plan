@@ -2791,7 +2791,14 @@ smooth-background companion ending in
 `_of_contMDiffCovariantDerivative_background` also transports the ambient
 background regularity before entering that route. The
 `SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cover_readout_localData_auxiliaryEqAlong_of_compact_iUnion_openPreimage_localGluingData_of_local_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
-packages all of those route-shaped certificates together. The selected raw flow
+packages all of those route-shaped certificates together. The selected
+time-derivative layer now has the compact smooth-background correction wrapper
+`SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_compact_iUnion_openPreimage_localGluingData_of_localFlowSolution_lifted_model_eqOn_of_contMDiffCovariantDerivative_background`:
+it constructs the restricted selected raw gauge-flow witness, consumes the
+finite cover/readout/local-gluing/continuity/derivative/auxiliary certificates
+internally, and leaves callers with the selected-interval
+`IccSpatialCorrectionLocalData` package for the remaining Picard ball,
+lifted-model equality, and target-chart obligations. The selected raw flow
 now also exposes the
 pointwise correction-route `hXeq` certificate as
 `SelectedIntrinsicDeTurckGaugeFlowExistence.flow_vectorField_eq_intrinsicDeTurckGaugeField`,
