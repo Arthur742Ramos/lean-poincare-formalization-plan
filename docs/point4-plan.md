@@ -2682,7 +2682,10 @@ The Picard-estimate-specialized endpoints
 and the theorem-family analogue now discharge that model-flow spatial
 derivative input directly from the state-preserving component closed-ball
 continuity estimates, leaving the compact source cover/readout and the
-lifted-model/value hypotheses as the selected-route inputs.
+lifted-model/value hypotheses as the selected-route inputs. The fixed-IVP
+restricted-symmetric companion ending in
+`_of_solution_eq_restrictSymmetricIcc` now derives the selected closed interval
+certificate internally for the same state-preserving Picard-estimate route.
 The smooth-realization tensor route has the matching closed-interval finite-cover
 wrapper
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_interior_cover_target_overlap_Ioo_geometricValue`,
