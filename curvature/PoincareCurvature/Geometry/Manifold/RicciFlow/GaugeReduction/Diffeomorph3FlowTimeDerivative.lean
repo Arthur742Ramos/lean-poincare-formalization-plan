@@ -24348,6 +24348,32 @@ theorem Diffeomorph3GaugeFlowOn.lieCorrection_of_intrinsicDeTurckGaugeField_eq_z
   rw [hspace, hleftU, hleftV, hrightU, hrightV]
   simp
 
+/-- Model-side derivative identification on the chart range.
+
+If a Picard vector field `f` has spatial derivative `L` on a local model domain
+`S`, the domain contains a relative neighborhood of the chart range at `y`, and
+`f` agrees there with a canonical coordinate vector field `V`, then `L` is the
+`range I` derivative of `V`.  This is the calculus handoff from model ODE data
+to the canonical fixed-chart derivative used in the Lie-bracket slot. -/
+theorem modelLinearization_eq_fderivWithin_range_of_hasFDerivWithinAt_of_eventuallyEq
+    {S : Set E} {f V : E → E} {L : E →L[ℝ] E} {y : E}
+    (hy : y ∈ Set.range I)
+    (hder : HasFDerivWithinAt f L S y)
+    (hS : S ∈ 𝓝[Set.range I] y)
+    (heq : f =ᶠ[𝓝[Set.range I] y] V) :
+    L = fderivWithin ℝ V (Set.range I) y := by
+  have hder_range : HasFDerivWithinAt f L (Set.range I) y :=
+    hder.mono_of_mem_nhdsWithin hS
+  have hunique : UniqueDiffWithinAt ℝ (Set.range I) y :=
+    I.uniqueDiffOn.uniqueDiffWithinAt hy
+  have hL : fderivWithin ℝ f (Set.range I) y = L :=
+    hder_range.fderivWithin hunique
+  have hcongr :
+      fderivWithin ℝ f (Set.range I) y =
+        fderivWithin ℝ V (Set.range I) y :=
+    heq.fderivWithin_eq_of_mem hy
+  exact hL.symm.trans hcongr
+
 /-- Chart-coordinate bridge for the tangent-map Lie-bracket slot.
 
 If `V t p` is the centered chart-coordinate expression of the intrinsic
@@ -24488,6 +24514,107 @@ theorem tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderiv
         (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)
   · intro t ht x w xE hxE hAeq
     simpa [V] using hDfCoord ht x w xE hxE hAeq
+
+/-- Build the canonical fixed-chart `Df` hypothesis from Picard model
+derivative data.
+
+The hypotheses record the remaining model-side identifications: the selected
+model base point is the fixed-chart coordinate of the gauge-flow image, the
+Picard derivative is valid on a local model domain containing a relative
+neighborhood of the chart range, and the Picard vector field agrees there with
+the canonical coordinate expression of the intrinsic DeTurck gauge field. -/
+theorem tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEq
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {S : Set E}
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        α.flow (xE, t) = (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))
+    (hder : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        HasFDerivWithinAt (f t) (Df t (α.flow (xE, t))) S (α.flow (xE, t)))
+    (hdomain : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        S ∈ 𝓝[Set.range I] (α.flow (xE, t)))
+    (hfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (f t) =ᶠ[𝓝[Set.range I] (α.flow (xE, t))]
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p := (G.maps3 t).pushforwardTangent x w
+         let cw : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pw
+         (Df t (α.flow (xE, t))) cw =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) cw) := by
+  intro t ht x w xE hxE hAeq
+  let p : M := (G.maps3 t) x
+  let pw : TangentSpace I p := (G.maps3 t).pushforwardTangent x w
+  let cw : E := SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pw
+  let y : E := α.flow (xE, t)
+  let V : E → E := fun z =>
+    let q : M := (extChartAt I p).symm z
+    tangentCoordChange I q p q
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q)
+  have hybase : y = (extChartAt I p) p := by
+    simpa [y, p] using hbase ht x w xE hxE hAeq
+  have hyrange : y ∈ Set.range I := by
+    rw [hybase]
+    exact extChartAt_target_subset_range p
+      ((extChartAt I p).map_source (mem_extChartAt_source (I := I) p))
+  have hlin :
+      Df t y = fderivWithin ℝ V (Set.range I) y :=
+    modelLinearization_eq_fderivWithin_range_of_hasFDerivWithinAt_of_eventuallyEq
+      (I := I) (y := y) hyrange
+      (by simpa [y] using hder ht x w xE hxE hAeq)
+      (by simpa [y] using hdomain ht x w xE hxE hAeq)
+      (by simpa [V, y, p] using hfCoord ht x w xE hxE hAeq)
+  have hlin_apply :
+      (Df t y) cw = (fderivWithin ℝ V (Set.range I) y) cw :=
+    congrArg (fun L : E →L[ℝ] E => L cw) hlin
+  simpa [p, pw, cw, y, V, hybase] using hlin_apply
 
 /-- Torsion-free reduction of the tangent-map slot: it is enough to identify
 the model linearization with the Lie bracket of the canonical constant
