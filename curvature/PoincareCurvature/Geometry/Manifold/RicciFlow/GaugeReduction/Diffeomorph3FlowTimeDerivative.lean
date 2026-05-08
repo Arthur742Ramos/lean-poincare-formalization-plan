@@ -2832,6 +2832,161 @@ noncomputable def tangentVectorOfCoordinate
     FiberBundle.mem_baseSet_trivializationAt' x
   ((trivializationAt E TM x).continuousLinearEquivAt ℝ x hx).symm uE
 
+/-- The source tangent coordinate map is the manifold derivative of the
+centered extended chart at its base point. -/
+theorem sourceTangentCoordinate_eq_mfderiv_extChartAt_self_apply
+    (x : M) (u : TangentSpace I x) :
+    sourceTangentCoordinate (I := I) x u =
+      (mfderiv I (𝓘(ℝ, E)) (extChartAt I x) x) u := by
+  rw [sourceTangentCoordinate]
+  change
+    (((trivializationAt E (TangentSpace I) x).continuousLinearEquivAt ℝ x
+      (FiberBundle.mem_baseSet_trivializationAt' x) : TangentSpace I x →L[ℝ] E) u) =
+        (mfderiv I (𝓘(ℝ, E)) (extChartAt I x) x) u
+  rw [Bundle.Trivialization.coe_continuousLinearEquivAt_eq']
+  rw [TangentBundle.continuousLinearMapAt_trivializationAt]
+  · rfl
+  · simp
+
+/-- Converting a centered model tangent coordinate back to a tangent vector is
+the manifold derivative of the inverse extended chart within the model range. -/
+theorem tangentVectorOfCoordinate_eq_mfderivWithin_extChartAt_symm_apply
+    (x : M) (uE : E) :
+    tangentVectorOfCoordinate (I := I) x uE =
+      (mfderivWithin (𝓘(ℝ, E)) I (extChartAt I x).symm (Set.range I)
+        ((extChartAt I x) x)) uE := by
+  rw [tangentVectorOfCoordinate]
+  change
+    ((((trivializationAt E (TangentSpace I) x).continuousLinearEquivAt ℝ x
+      (FiberBundle.mem_baseSet_trivializationAt' x)).symm : E →L[ℝ] TangentSpace I x) uE) =
+        (mfderivWithin (𝓘(ℝ, E)) I (extChartAt I x).symm (Set.range I)
+          ((extChartAt I x) x)) uE
+  rw [Bundle.Trivialization.symm_continuousLinearEquivAt_eq']
+  rw [TangentBundle.symmL_trivializationAt]
+  · rfl
+  · simp
+
+/-- The centered coordinate-to-tangent map is also the inverse of the manifold
+derivative of the centered extended chart at the base point. -/
+theorem tangentVectorOfCoordinate_eq_mfderiv_extChartAt_self_inverse_apply
+    (x : M) (uE : E) :
+    tangentVectorOfCoordinate (I := I) x uE =
+      (mfderiv I (𝓘(ℝ, E)) (extChartAt I x) x).inverse uE := by
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) (by simp)
+  rw [tangentVectorOfCoordinate]
+  change
+    ((((trivializationAt E (TangentSpace I) x).continuousLinearEquivAt ℝ x
+      (FiberBundle.mem_baseSet_trivializationAt' x)).symm : E →L[ℝ] TangentSpace I x) uE) =
+        (mfderiv I (𝓘(ℝ, E)) (extChartAt I x) x).inverse uE
+  rw [Bundle.Trivialization.symm_continuousLinearEquivAt_eq']
+  rw [TangentBundle.symmL_trivializationAt]
+  · rw [mfderiv_extChartAt_self, mfderivWithin_range_extChartAt_symm]
+    have hid : (ContinuousLinearMap.id ℝ (TangentSpace I x)).IsInvertible := by
+      exact ⟨ContinuousLinearEquiv.refl ℝ (TangentSpace I x), rfl⟩
+    symm
+    exact (ContinuousLinearMap.IsInvertible.inverse_apply_eq hid).2 rfl
+  · simp
+
+/-- Pulling the canonical `extend` section back through the centered inverse
+chart gives the constant model vector field with the corresponding centered
+tangent coordinate. -/
+theorem mpullbackWithin_extChartAt_symm_extend_eventuallyEq_const
+    (p : M) (pw : TangentSpace I p) :
+    (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+      (FiberBundle.extend E pw) (Set.range I)) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)]
+      (fun _ : E => sourceTangentCoordinate (I := I) p pw) := by
+  let cw : E := sourceTangentCoordinate (I := I) p pw
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) (by simp)
+  change
+    (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+      (FiberBundle.extend E pw) (Set.range I)) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)]
+      (fun _ : E => cw)
+  filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) p] with y hy
+  let I1 : NormedAddCommGroup (TangentSpace 𝓘(ℝ, E) y) :=
+    inferInstanceAs (NormedAddCommGroup E)
+  let _I2 : NormedSpace ℝ (TangentSpace 𝓘(ℝ, E) y) := ‹NormedSpace ℝ E›
+  simp only [VectorField.mpullbackWithin_apply]
+  let q : M := (extChartAt I p).symm y
+  have hqsrc : q ∈ (extChartAt I p).source := by
+    simpa [q] using (extChartAt I p).map_target hy
+  have hyq : (extChartAt I p) q = y := by
+    simpa [q] using (extChartAt I p).right_inv hy
+  have hext :
+      FiberBundle.extend E pw q =
+        ((trivializationAt E (TangentSpace I) p).symmL ℝ q) cw := by
+    simp [cw, FiberBundle.extend, sourceTangentCoordinate]
+  have hsymmL :
+      ((trivializationAt E (TangentSpace I) p).symmL ℝ q) =
+        mfderivWithin (𝓘(ℝ, E)) I (extChartAt I p).symm (Set.range I) y := by
+    rw [TangentBundle.symmL_trivializationAt (I := I) (x₀ := p) (x := q)]
+    · rw [hyq]
+    · simpa [extChartAt_source] using hqsrc
+  rw [hext, hsymmL]
+  exact ContinuousLinearMap.IsInvertible.inverse_apply_self
+    (isInvertible_mfderivWithin_extChartAt_symm (I := I) hy) cw
+
+/-- A manifold Lie bracket against the canonical constant-coordinate extension
+reduces to the model directional derivative of the chart-coordinate expression
+of the other vector field. -/
+theorem mlieBracket_extend_eq_tangentVectorOfCoordinate_fderivWithin_of_eventuallyEq_mpullbackWithin
+    (p : M) (pw : TangentSpace I p)
+    (Y : ∀ q : M, TangentSpace I q) (V : E → E)
+    (hY : (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm Y (Set.range I))
+        =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)] V) :
+    VectorField.mlieBracket I (FiberBundle.extend E pw) Y p =
+      tangentVectorOfCoordinate (I := I) p
+        ((fderivWithin ℝ V (Set.range I) ((extChartAt I p) p))
+          (sourceTangentCoordinate (I := I) p pw)) := by
+  let cw : E := sourceTangentCoordinate (I := I) p pw
+  let z : E := (fderivWithin ℝ V (Set.range I) ((extChartAt I p) p)) cw
+  have htan :
+      tangentVectorOfCoordinate (I := I) p z =
+        (mfderiv I (𝓘(ℝ, E)) (extChartAt I p) p).inverse z :=
+    tangentVectorOfCoordinate_eq_mfderiv_extChartAt_self_inverse_apply
+      (I := I) p z
+  have hconst :
+      (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+        (FiberBundle.extend E pw) (Set.range I))
+          =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)] (fun _ : E => cw) := by
+    simpa [cw] using
+      mpullbackWithin_extChartAt_symm_extend_eventuallyEq_const (I := I) p pw
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) (by simp)
+  have hy0range : (extChartAt I p) p ∈ Set.range I := by
+    exact extChartAt_target_subset_range p (mem_extChartAt_target (I := I) p)
+  have hconst0 :
+      VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+          (FiberBundle.extend E pw) (Set.range I) ((extChartAt I p) p) = cw :=
+    hconst.self_of_nhdsWithin hy0range
+  have hY0 :
+      VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm Y (Set.range I)
+          ((extChartAt I p) p) = V ((extChartAt I p) p) :=
+    hY.self_of_nhdsWithin hy0range
+  let y0 : E := (extChartAt I p) p
+  let Vext :=
+    VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+      (FiberBundle.extend E pw) (Set.range I)
+  let VY :=
+    VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm Y (Set.range I)
+  have hLie :
+      VectorField.lieBracketWithin ℝ Vext VY (Set.range I) y0 =
+        fderivWithin ℝ V (Set.range I) y0 cw := by
+    have hbr := Filter.EventuallyEq.lieBracketWithin_vectorField_eq
+      (𝕜 := ℝ) (s := Set.range I) (x := y0)
+      (V₁ := Vext) (V := fun _ : E => cw) (W₁ := VY) (W := V)
+      hconst hconst0 hY hY0
+    simpa [Vext, VY, y0, VectorField.lieBracketWithin] using hbr
+  have hmain :
+      VectorField.mlieBracket I (FiberBundle.extend E pw) Y p =
+        (mfderiv I (𝓘(ℝ, E)) (extChartAt I p) p).inverse z := by
+    rw [VectorField.mlieBracket, VectorField.mlieBracketWithin_apply]
+    simpa [Vext, VY, y0, z] using congrArg
+      (fun a : E => (mfderiv I (𝓘(ℝ, E)) (extChartAt I p) p).inverse a) hLie
+  rw [hmain]
+  exact htan.symm
+
 @[simp]
 theorem tangentVectorOfCoordinate_sourceTangentCoordinate
     (x : M) (u : TangentSpace I x) :
@@ -24148,6 +24303,83 @@ theorem Diffeomorph3GaugeFlowOn.lieCorrection_of_intrinsicDeTurckGaugeField_eq_z
           (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p pv)
   rw [hspace, hleftU, hleftV, hrightU, hrightV]
   simp
+
+/-- Chart-coordinate bridge for the tangent-map Lie-bracket slot.
+
+If `V t p` is the centered chart-coordinate expression of the intrinsic
+DeTurck gauge field near `p`, and the model linearization `Df` agrees with the
+`range I` directional derivative of this expression in the corresponding
+coordinate direction, then the variational tangent-map slot is exactly the
+manifold Lie bracket with the canonical constant-coordinate extension. -/
+theorem tangentVectorOfCoordinate_Df_eq_mlieBracket_of_chartCoordinate_fderivWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (V : ℝ → M → E → E)
+    (hGaugeCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ p : M,
+      (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)
+        (Set.range I)) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)] V t p)
+    (hDfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p := (G.maps3 t).pushforwardTangent x w
+         let cw : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pw
+         (Df t (α.flow (xE, t))) cw =
+          (fderivWithin ℝ (V t p) (Set.range I) ((extChartAt I p) p)) cw)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p := (G.maps3 t).pushforwardTangent x w
+         let cw : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pw
+         SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cw) =
+            VectorField.mlieBracket I
+              (FiberBundle.extend E pw)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p) := by
+  intro t ht x w xE hxE hAeq
+  let p : M := (G.maps3 t) x
+  let pw : TangentSpace I p := (G.maps3 t).pushforwardTangent x w
+  let cw : E := SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pw
+  have hDf :
+      (Df t (α.flow (xE, t))) cw =
+        (fderivWithin ℝ (V t p) (Set.range I) ((extChartAt I p) p)) cw := by
+    simpa [p, pw, cw] using hDfCoord ht x w xE hxE hAeq
+  have hBracket :
+      VectorField.mlieBracket I (FiberBundle.extend E pw)
+          (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p =
+        SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+          ((fderivWithin ℝ (V t p) (Set.range I) ((extChartAt I p) p)) cw) := by
+    exact
+      SmoothSelfDiffeomorph3Family.mlieBracket_extend_eq_tangentVectorOfCoordinate_fderivWithin_of_eventuallyEq_mpullbackWithin
+        (I := I) (M := M) p pw
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)
+        (V t p) (hGaugeCoord ht p)
+  change
+    SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+        ((Df t (α.flow (xE, t))) cw) =
+      VectorField.mlieBracket I (FiberBundle.extend E pw)
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p
+  rw [hDf]
+  exact hBracket.symm
 
 /-- Torsion-free reduction of the tangent-map slot: it is enough to identify
 the model linearization with the Lie bracket of the canonical constant
