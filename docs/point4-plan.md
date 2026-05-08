@@ -2552,10 +2552,15 @@ specialization
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin`,
 and the smooth-realization scalar selector exposes it via
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin`.
-That route replaces the pre-sign Lie-correction hypothesis with the concrete
+The route also now has fixed-center `EqOn` specializations:
+`Diffeomorph3GaugeFlowOn.lieCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_nhdsWithin`,
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_nhdsWithin`,
+and
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_nhdsWithin`.
+Those routes replace the pre-sign Lie-correction hypothesis with the concrete
 closed-ball Picard derivative, relative base-coordinate equality, strict active
-ball membership, raw gauge-field equality, and local fixed-chart model-field
-identification. The same interface is available at the tensor route level through
+ball membership, raw gauge-field equality, and a local fixed-chart `EqOn`
+model-field identification. The same interface is available at the tensor route level through
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection`
 and its closed-source-cover companion
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection`,
@@ -2699,8 +2704,10 @@ model-field part of that last item, the helper
 now turns the natural local `EqOn` statement for `f t` around the fixed chart
 center `(extChartAt I p) p` into the `hfCoord` eventual equality at the active
 Picard point `α.flow (xE, t)`, using the relative base-coordinate equality to
-transport the neighborhood. Thus the remaining local-field obligation can be
-stated at the fixed chart center selected by the compact witness. The
+transport the neighborhood. The closed-ball `Df`, Lie-correction, signed
+correction, and smooth scalar routes now consume that fixed-center `EqOn`
+form directly, so the remaining local-field obligation can be stated at the
+fixed chart center selected by the compact witness. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
