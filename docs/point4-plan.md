@@ -2696,9 +2696,9 @@ finite source subcover, the closed-interval subset proof, and the selected
 local readout equality.
 The remaining dynamic obligations are therefore narrowed to supplying those
 compact-witness cover/readout certificates from the selected gauge-flow
-construction, proving the lifted model equality in the exact target charts
-selected by the time-derivative route, and proving the spatial/tangent
-correction identity from the selected gauge-flow/PDE construction. For the
+construction, supplying the lifted manifold equality and target-membership facts
+for the exact target charts selected by the time-derivative route, and proving
+the spatial/tangent correction identity from the selected gauge-flow/PDE construction. For the
 model-field part of that last item, the helper
 `Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_tangentCoordChange_of_eventuallyEqWithin_base_of_eqOn_nhdsWithin`
 now turns the natural local `EqOn` statement for `f t` around the fixed chart
@@ -2779,17 +2779,24 @@ matching compact local-gluing constructors that already retain
 now also be supplied as an `EqOn` statement on the Picard time set:
 `Diffeomorph3GaugeFlowOn.iUnion_readout_model_eventuallyEq_nhdsWithin_of_eqOn`
 converts that readout-local `EqOn` into the exact within-filter eventual
-equality, while
+equality. The lifted-input bridge
 `Diffeomorph3GaugeFlowOn.iUnion_readout_model_eqOn_of_lifted_model_eqOn`
 pushes a manifold-side lifted Picard/readout equality through the selected
 target chart, using target membership of the model values to produce that
-readout-local chart `EqOn`,
+readout-local chart `EqOn`; its filter-level companion
+`Diffeomorph3GaugeFlowOn.iUnion_readout_model_eventuallyEq_nhdsWithin_of_lifted_model_eqOn`
+provides the corresponding within-filter equality directly. The matching
+model-vector-field wrappers
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_lifted_model_eqOn`
 and
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn`
+feed lifted equality plus target membership into the indexed local
+Picard/local-gluing handoff. The chart-`EqOn` wrappers
 `Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_eqOn`
 and
 `Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_continuousWithinAt_of_eqOn`
-combine it with the indexed local Picard/local-gluing handoff, optionally
-deriving source persistence from readout continuity. The compact correction
+still combine chart `EqOn` with the indexed local Picard/local-gluing handoff,
+optionally deriving source persistence from readout continuity. The compact correction
 layer also has
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_eventuallyEq_along_maps3_nhdsWithin`,
 which combines that indexed Picard/local-gluing discharge with the existing
@@ -2797,7 +2804,10 @@ finite-cover readout correction route. Its
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
 companion consumes the natural Picard output shape directly: source persistence
 comes from local readout continuity and the model/readout identification is
-only a patch-local `EqOn` on the Picard time set. The derivative layer also has
+only a patch-local `EqOn` on the Picard time set. Its lifted-input companion
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
+uses the same route after converting lifted equality plus target membership to
+that patch-local chart `EqOn`. The derivative layer also has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn`,
 which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the
 selected local readout center `Fₗ i t x` to the actual glued-flow center
@@ -2842,6 +2852,10 @@ output to the finite-cover `EqOn` field hypothesis. Its
 companion consumes the same natural Picard output shape as the raw compact
 correction route: local readout continuity supplies source persistence and a
 patch-local `EqOn` on the Picard time set supplies the model/readout equality.
+Its lifted-input companion
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_lifted_model_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
+accepts the selected Picard output before chart cancellation, again requiring
+target membership of the model values.
 The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
