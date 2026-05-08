@@ -2775,7 +2775,17 @@ from local readout time-continuity via
 and the indexed package
 `Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_continuousWithinAt`,
 matching compact local-gluing constructors that already retain
-`ContinuousWithinAt` readouts. The compact correction layer also has
+`ContinuousWithinAt` readouts. The patch-local Picard/model equality input can
+now also be supplied as an `EqOn` statement on the Picard time set:
+`Diffeomorph3GaugeFlowOn.iUnion_readout_model_eventuallyEq_nhdsWithin_of_eqOn`
+converts that readout-local `EqOn` into the exact within-filter eventual
+equality, while
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_eqOn`
+and
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_continuousWithinAt_of_eqOn`
+combine it with the indexed local Picard/local-gluing handoff, optionally
+deriving source persistence from readout continuity. The compact correction
+layer also has
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_eventuallyEq_along_maps3_nhdsWithin`,
 which combines that indexed Picard/local-gluing discharge with the existing
 finite-cover readout correction route. The derivative layer also has

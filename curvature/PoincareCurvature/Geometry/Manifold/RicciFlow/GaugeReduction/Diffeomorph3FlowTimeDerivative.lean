@@ -24826,6 +24826,34 @@ theorem iUnion_readout_source_extChartAt_mem_nhdsWithin_of_localGluingData_conti
       (t := t) (p := Fₗ i t x) (U := U t i) (V := V t i)
       (hlocalData ht i) (hcontLocal ht i) q hq
 
+/-- Convert a patch-local model/readout equality on the Picard time set into
+the within-filter eventual equality used by the local Picard pullback bridge. -/
+theorem iUnion_readout_model_eventuallyEq_nhdsWithin_of_eqOn
+    {timeSet s : Set ℝ} {ι : Type*}
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (β : ∀ (t : ℝ), t ∈ s → ι → M → E → ℝ → E)
+    (hmodelEqOnLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          Set.EqOn
+            (fun τ : ℝ ↦
+              (extChartAt I (Fₗ i t x))
+                (Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y))))
+            (β t ht i x y) timeSet) :
+    ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M), x ∈ U t i →
+      ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+          (extChartAt I (Fₗ i t x)).symm ⁻¹'
+            (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+        (fun τ : ℝ ↦
+          (extChartAt I (Fₗ i t x))
+            (Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y)))) =ᶠ[
+              𝓝[timeSet] t] β t ht i x y := by
+  intro t ht i x hx y hy
+  filter_upwards [self_mem_nhdsWithin] with τ hτ
+  exact hmodelEqOnLocal ht i x hx y hy hτ
+
 /-- Indexed finite-cover form of
 `model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_localFlowSolution`.
 
@@ -24892,6 +24920,62 @@ theorem model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGl
       (hballLocal ht i x hx) (hmodelEqLocal ht i x hx)
       (hderivLocal ht i)
 
+/-- Indexed finite-cover Picard/local-gluing handoff when the model/readout
+identification is available as a patch-local `EqOn` on the Picard time set. -/
+theorem model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_eqOn
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {ι : Type*}
+    {tminLocal tmaxLocal : ℝ} {f : ℝ → E → E}
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (hltLocal : tminLocal < tmaxLocal)
+    (hsLocal : s ⊆ Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ), t ∈ s → ι → M → E)
+    (rLocal : ∀ (t : ℝ), t ∈ s → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ) (ht : t ∈ s) (i : ι) (x : M),
+      ModelGaugeFlowODE.LocalFlowSolution f
+        (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+        (x₀Local t ht i x) (rLocal t ht i x))
+    (hlocalData : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hsourceLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ q : M, q ∈ V t i ∩ (extChartAt I (Fₗ i t x)).source →
+          (fun τ : ℝ ↦ Fₗ i τ (Gₗ i t q)) ⁻¹' (extChartAt I q).source ∈
+            𝓝[Icc tminLocal tmaxLocal] t)
+    (hballLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M), x ∈ U t i →
+      ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+          (extChartAt I (Fₗ i t x)).symm ⁻¹'
+            (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+        y ∈ Metric.closedBall (x₀Local t ht i x) (rLocal t ht i x))
+    (hmodelEqOnLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          Set.EqOn
+            (fun τ : ℝ ↦
+              (extChartAt I (Fₗ i t x))
+                (Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y))))
+            (fun τ : ℝ ↦ (β t ht i x).flow y τ) (Icc tminLocal tmaxLocal))
+    (hderivLocal : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ z : M, z ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t z)) (Fₗ i τ z))
+        (Y t (Fₗ i t z)) (Icc tminLocal tmaxLocal) t) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ x : M, x ∈ U t i →
+      (f t) =ᶠ[𝓝[Set.range I] ((extChartAt I (Fₗ i t x)) (Fₗ i t x))]
+        (VectorField.mpullbackWithin (𝓘(ℝ, E)) I
+          (extChartAt I (Fₗ i t x)).symm (Y t) (Set.range I)) := by
+  exact
+    model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution
+      (I := I) (M := M) (Y := Y) (s := s) (f := f)
+      Fₗ Gₗ U V hltLocal hsLocal x₀Local rLocal β hlocalData hsourceLocal
+      hballLocal
+      (iUnion_readout_model_eventuallyEq_nhdsWithin_of_eqOn
+        (I := I) (M := M) (timeSet := Icc tminLocal tmaxLocal) (s := s)
+        Fₗ Gₗ U V (fun t ht i x y τ ↦ (β t ht i x).flow y τ)
+        hmodelEqOnLocal)
+      hderivLocal
+
 /-- Indexed finite-cover Picard/local-gluing handoff with source persistence
 derived from local readout time-continuity. -/
 theorem model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_continuousWithinAt
@@ -24942,6 +25026,58 @@ theorem model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGl
         (I := I) (M := M) (timeSet := Icc tminLocal tmaxLocal) (s := s)
         Fₗ Gₗ U V hlocalData hcontLocal)
       hballLocal hmodelEqLocal hderivLocal
+
+/-- Indexed finite-cover Picard/local-gluing handoff with both source
+persistence and model/readout eventual equality discharged from local
+continuity and patch-local `EqOn` data. -/
+theorem model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_continuousWithinAt_of_eqOn
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {ι : Type*}
+    {tminLocal tmaxLocal : ℝ} {f : ℝ → E → E}
+    (Fₗ Gₗ : ι → ℝ → M → M) (U V : ℝ → ι → Set M)
+    (hltLocal : tminLocal < tmaxLocal)
+    (hsLocal : s ⊆ Icc tminLocal tmaxLocal)
+    (x₀Local : ∀ (t : ℝ), t ∈ s → ι → M → E)
+    (rLocal : ∀ (t : ℝ), t ∈ s → ι → M → ℝ≥0)
+    (β : ∀ (t : ℝ) (ht : t ∈ s) (i : ι) (x : M),
+      ModelGaugeFlowODE.LocalFlowSolution f
+        (⟨t, hsLocal ht⟩ : Icc tminLocal tmaxLocal)
+        (x₀Local t ht i x) (rLocal t ht i x))
+    (hlocalData : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hcontLocal : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ z : M, z ∈ U t i →
+      ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ z) (Icc tminLocal tmaxLocal) t)
+    (hballLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M), x ∈ U t i →
+      ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+          (extChartAt I (Fₗ i t x)).symm ⁻¹'
+            (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+        y ∈ Metric.closedBall (x₀Local t ht i x) (rLocal t ht i x))
+    (hmodelEqOnLocal : ∀ ⦃t : ℝ⦄ (ht : t ∈ s) (i : ι) (x : M),
+      x ∈ U t i →
+        ∀ y ∈ (extChartAt I (Fₗ i t x)).target ∩
+            (extChartAt I (Fₗ i t x)).symm ⁻¹'
+              (V t i ∩ (extChartAt I (Fₗ i t x)).source),
+          Set.EqOn
+            (fun τ : ℝ ↦
+              (extChartAt I (Fₗ i t x))
+                (Fₗ i τ (Gₗ i t ((extChartAt I (Fₗ i t x)).symm y))))
+            (fun τ : ℝ ↦ (β t ht i x).flow y τ) (Icc tminLocal tmaxLocal))
+    (hderivLocal : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ z : M, z ∈ U t i →
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (Fₗ i t z)) (Fₗ i τ z))
+        (Y t (Fₗ i t z)) (Icc tminLocal tmaxLocal) t) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ x : M, x ∈ U t i →
+      (f t) =ᶠ[𝓝[Set.range I] ((extChartAt I (Fₗ i t x)) (Fₗ i t x))]
+        (VectorField.mpullbackWithin (𝓘(ℝ, E)) I
+          (extChartAt I (Fₗ i t x)).symm (Y t) (Set.range I)) := by
+  exact
+    model_vectorField_eventuallyEq_iUnion_readout_mpullbackWithin_of_localGluingData_localFlowSolution_of_eqOn
+      (I := I) (M := M) (Y := Y) (s := s) (f := f)
+      Fₗ Gₗ U V hltLocal hsLocal x₀Local rLocal β hlocalData
+      (iUnion_readout_source_extChartAt_mem_nhdsWithin_of_localGluingData_continuousWithinAt
+        (I := I) (M := M) (timeSet := Icc tminLocal tmaxLocal) (s := s)
+        Fₗ Gₗ U V hlocalData hcontLocal)
+      hballLocal hmodelEqOnLocal hderivLocal
 
 /-- A local centered-chart model field equality with the manifold pullback of an
 auxiliary vector field gives the explicit `tangentCoordChange` `EqOn` shape
