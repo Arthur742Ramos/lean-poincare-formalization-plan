@@ -2755,7 +2755,11 @@ the derivative layer now has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_common_derivatives`,
 which derives the same local `mpullbackWithin` equality from local inverse
 readouts, centered auxiliary derivatives, and Picard/model derivatives in the
-fixed chart. The derivative
+fixed chart. Its model-curve wrapper
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_eventuallyEq_modelDerivative`
+replaces the fixed-chart derivative input by eventual equality with any model
+coordinate curve whose derivative is `f t y`, matching the natural Picard
+handoff. The derivative
 layer also has
 `Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn`,
 which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the

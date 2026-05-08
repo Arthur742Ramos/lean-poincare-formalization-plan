@@ -24605,7 +24605,8 @@ theorem model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_common
     (hpV : p ∈ V)
     (hsource : ∀ q : M, q ∈ V ∩ (extChartAt I p).source →
       (fun τ : ℝ ↦ F τ (G t q)) ⁻¹' (extChartAt I q).source ∈ 𝓝[s] t)
-    (hmodel : ∀ y ∈ (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source),
+    (hmodel : ∀ y ∈ (extChartAt I p).target ∩
+        (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source),
       HasDerivWithinAt
         (fun τ : ℝ ↦
           (extChartAt I p) (F τ (G t ((extChartAt I p).symm y))))
@@ -24617,14 +24618,19 @@ theorem model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_common
     (f t) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)]
       (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
         (Y t) (Set.range I)) := by
-  let W : Set E := (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source)
+  let W : Set E := (extChartAt I p).target ∩
+    (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source)
   have htarget_nhds : V ∩ (extChartAt I p).source ∈ 𝓝 p := by
     exact Filter.inter_mem (hlocal.target_open.mem_nhds hpV)
       (extChartAt_source_mem_nhds (I := I) p)
-  have hW : W ∈ 𝓝[Set.range I] ((extChartAt I p) p) := by
-    simpa [W] using
+  have hpre : (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source) ∈
+      𝓝[Set.range I] ((extChartAt I p) p) := by
+    simpa using
       (extChartAt_preimage_mem_nhdsWithin (I := I) (x := p) (s := univ)
         (t := V ∩ (extChartAt I p).source) (by simpa using htarget_nhds))
+  have hW : W ∈ 𝓝[Set.range I] ((extChartAt I p) p) := by
+    simpa [W] using
+      Filter.inter_mem (extChartAt_target_mem_nhdsWithin (I := I) p) hpre
   refine
     model_vectorField_eventuallyEq_mpullbackWithin_of_common_derivatives
       (I := I) (M := M) (Y := Y) (f := f) (s := s) (t := t)
@@ -24636,7 +24642,7 @@ theorem model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_common
     let q : M := (extChartAt I p).symm y
     let z : M := G t q
     have hqVsrc : q ∈ V ∩ (extChartAt I p).source := by
-      simpa [W, q] using hy
+      simpa [W, q] using hy.2
     have hqV : q ∈ V := hqVsrc.1
     have hqsrcp : q ∈ (extChartAt I p).source := hqVsrc.2
     have hzU : z ∈ U := by
@@ -24666,6 +24672,47 @@ theorem model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_common
         (I := I) (M := M) (s := s) (γ := fun τ : ℝ ↦ F τ z)
         (t := t) (p := p) (q := q) hFt hqsrcp (hsource q hqVsrc) hcenter
     simpa [q, z] using hfixed
+
+/-- Local-gluing model-flow version of
+`model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_common_derivatives`.
+
+Instead of requiring the fixed-chart Picard derivative directly, this wrapper
+accepts a model coordinate curve `β y` that has derivative `f t y` and is
+eventually equal to the fixed-chart local readout curve. -/
+theorem model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_eventuallyEq_modelDerivative
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {f : ℝ → E → E} {t : ℝ} (p : M)
+    {F G : ℝ → M → M} {U V : Set M}
+    (huniq : UniqueDiffWithinAt ℝ s t)
+    (hlocal : LocalGluingData (I := I) (M := M) 3 (F t) (G t) U V)
+    (hpV : p ∈ V)
+    (hsource : ∀ q : M, q ∈ V ∩ (extChartAt I p).source →
+      (fun τ : ℝ ↦ F τ (G t q)) ⁻¹' (extChartAt I q).source ∈ 𝓝[s] t)
+    {β : E → ℝ → E}
+    (hmodelDeriv : ∀ y ∈ (extChartAt I p).target ∩
+        (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source),
+      HasDerivWithinAt (β y) (f t y) s t)
+    (hmodelEq : ∀ y ∈ (extChartAt I p).target ∩
+        (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source),
+      (fun τ : ℝ ↦
+        (extChartAt I p) (F τ (G t ((extChartAt I p).symm y)))) =ᶠ[𝓝[s] t]
+          β y)
+    (hmodelEq_t : ∀ y ∈ (extChartAt I p).target ∩
+        (extChartAt I p).symm ⁻¹' (V ∩ (extChartAt I p).source),
+      (extChartAt I p) (F t (G t ((extChartAt I p).symm y))) = β y t)
+    (hderivLocal : ∀ z ∈ U,
+      HasDerivWithinAt
+        (fun τ : ℝ ↦ (extChartAt I (F t z)) (F τ z))
+        (Y t (F t z)) s t) :
+    (f t) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)]
+      (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+        (Y t) (Set.range I)) := by
+  refine
+    model_vectorField_eventuallyEq_mpullbackWithin_of_localGluingData_common_derivatives
+      (I := I) (M := M) (Y := Y) (f := f) (s := s) (t := t)
+      p huniq hlocal hpV hsource ?_ hderivLocal
+  intro y hy
+  exact (hmodelDeriv y hy).congr_of_eventuallyEq (hmodelEq y hy) (hmodelEq_t y hy)
 
 /-- A local centered-chart model field equality with the manifold pullback of an
 auxiliary vector field gives the explicit `tangentCoordChange` `EqOn` shape
