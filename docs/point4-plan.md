@@ -2547,8 +2547,15 @@ Levi-Civita derivative of `intrinsicDeTurckGaugeField`. The underlying
 raw-gauge bridge is
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_lieCorrection`,
 which isolates the remaining coordinate chain-rule calculation from the
-DeTurck sign algebra. The same interface is available at the tensor route
-level through
+DeTurck sign algebra. The raw bridge now also has the closed-ball Picard
+specialization
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin`,
+and the smooth-realization scalar selector exposes it via
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin`.
+That route replaces the pre-sign Lie-correction hypothesis with the concrete
+closed-ball Picard derivative, relative base-coordinate equality, strict active
+ball membership, raw gauge-field equality, and local fixed-chart model-field
+identification. The same interface is available at the tensor route level through
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection`
 and its closed-source-cover companion
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.hasTimeDerivativeOn_of_variationalTangentMap_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_interior_cover_target_overlap_Ioo_gaugeCorrectedPullbackVelocity_of_chartRHS_lieCorrection`,
@@ -2686,7 +2693,14 @@ The remaining dynamic obligations are therefore narrowed to supplying those
 compact-witness cover/readout certificates from the selected gauge-flow
 construction, proving the lifted model equality in the exact target charts
 selected by the time-derivative route, and proving the spatial/tangent
-correction identity from the selected gauge-flow/PDE construction. The
+correction identity from the selected gauge-flow/PDE construction. For the
+model-field part of that last item, the helper
+`Diffeomorph3GaugeFlowOn.model_vectorField_eventuallyEq_tangentCoordChange_of_eventuallyEqWithin_base_of_eqOn_nhdsWithin`
+now turns the natural local `EqOn` statement for `f t` around the fixed chart
+center `(extChartAt I p) p` into the `hfCoord` eventual equality at the active
+Picard point `α.flow (xE, t)`, using the relative base-coordinate equality to
+transport the neighborhood. Thus the remaining local-field obligation can be
+stated at the fixed chart center selected by the compact witness. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
