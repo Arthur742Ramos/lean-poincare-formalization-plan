@@ -2677,6 +2677,10 @@ The restricted-symmetric endpoint
 now derives the selected `timeSet = Icc` certificate internally, so compact
 selected witnesses can feed the tensor route directly once the readout-local
 derivative data package has been built.
+Its compact finite-cover companion
+`SelectedIntrinsicDeTurckGaugeFlowExistence.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_of_solution_eq_restrictSymmetricIcc`
+does the same for callers that already carry the source-cover derivative
+package.
 The Picard-estimate-specialized endpoints
 `SelectedIntrinsicDeTurckGaugeFlowExistence.hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_timeSet_eq_Icc`
 and the theorem-family analogue now discharge that model-flow spatial
