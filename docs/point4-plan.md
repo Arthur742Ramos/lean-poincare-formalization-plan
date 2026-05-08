@@ -2737,7 +2737,10 @@ has
 which transfers a patch-local Picard-model/auxiliary-field `EqOn` from the
 selected local readout center `Fₗ i t x` to the actual glued-flow center
 `(G.maps3 t) x` using the retained finite source cover and local readout
-equality. The signed correction layer
+equality. Its composed intrinsic companion
+`Diffeomorph3GaugeFlowOn.model_vectorField_eqOn_tangentCoordChange_intrinsic_of_iUnion_readout_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
+then combines that transferred patch-local model-field proof with the retained
+auxiliary-along-flow equality. The signed correction layer
 also has the direct auxiliary-field adapter
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin`,
 which composes the auxiliary fixed-chart `EqOn` and the auxiliary-along-flow

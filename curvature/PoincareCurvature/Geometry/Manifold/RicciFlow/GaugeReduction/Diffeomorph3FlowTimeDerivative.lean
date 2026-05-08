@@ -24651,6 +24651,62 @@ theorem model_vectorField_eqOn_tangentCoordChange_of_eqOn_vectorField_of_eventua
         (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q) := by
       rw [hYq]
 
+/-- Patch-local model-vector-field identifications transfer through the glued
+readouts and the auxiliary-field equality along the flow to the intrinsic
+fixed-chart `EqOn` used by the closed-ball correction route. -/
+theorem model_vectorField_eqOn_tangentCoordChange_intrinsic_of_iUnion_readout_eqOn_of_eventuallyEq_along_maps3_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ} {ι : Type*}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (Fₗ : ι → ℝ → M → M) (U : ℝ → ι → Set M)
+    {f : ℝ → E → E}
+    (hcover : ∀ ⦃t : ℝ⦄, t ∈ s → Set.univ ⊆ ⋃ i, U t i)
+    (hreadout : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ x : M, x ∈ U t i →
+      ∀ᶠ τ in 𝓝 t, ∃ W' : Set M, W' ∈ 𝓝 x ∧
+        EqOn (fun z : M ↦ (G.maps3 τ) z) (Fₗ i τ) W')
+    (hfLocal : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ i, ∀ x : M, x ∈ U t i →
+      ∃ W : Set E,
+        W ∈ 𝓝[Set.range I] ((extChartAt I (Fₗ i t x)) (Fₗ i t x)) ∧
+        Set.EqOn (f t)
+          (fun y : E =>
+            let p : M := Fₗ i t x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q (Y t q))
+          W)
+    (hY : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+        Y τ ((G.maps3 τ) x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            g background τ ((G.maps3 τ) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ W : Set E,
+        W ∈ 𝓝[Set.range I]
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+        Set.EqOn (f t)
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+          W := by
+  have hfY : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ W : Set E,
+        W ∈ 𝓝[Set.range I]
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+        Set.EqOn (f t)
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q (Y t q))
+          W :=
+    G.model_vectorField_eqOn_tangentCoordChange_of_iUnion_readout_eqOn
+      Fₗ U hcover hreadout hfLocal
+  exact
+    G.model_vectorField_eqOn_tangentCoordChange_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin
+      g background hfY hY
+
 /-- A local `EqOn` identification of the Picard model vector field at the fixed
 chart center gives the `hfCoord` eventual equality used by the model
 linearization bridge.
