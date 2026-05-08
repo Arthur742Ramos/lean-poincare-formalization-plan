@@ -24515,6 +24515,91 @@ theorem tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderiv
   · intro t ht x w xE hxE hAeq
     simpa [V] using hDfCoord ht x w xE hxE hAeq
 
+/-- Relative-filter equality of an auxiliary vector field with the intrinsic
+DeTurck gauge field along the diffeomorphism images gives pointwise equality
+everywhere at the base time, using surjectivity of each diffeomorphism slice. -/
+theorem vectorField_eq_intrinsicDeTurckGaugeField_of_eventuallyEq_along_maps3_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (hY : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+        Y τ ((G.maps3 τ) x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            g background τ ((G.maps3 τ) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ q : M,
+      Y t q =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t q := by
+  intro t ht q
+  have hYt : ∀ x : M,
+      Y t ((G.maps3 t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M)
+          g background t ((G.maps3 t) x) :=
+    mem_of_mem_nhdsWithin ht (hY ht)
+  have hmap : (G.maps3 t) ((G.maps3 t).symm q) = q :=
+    (G.maps3 t).apply_symm_apply q
+  have h := hYt ((G.maps3 t).symm q)
+  rw [hmap] at h
+  exact h
+
+/-- If the Picard model vector field agrees locally with an auxiliary manifold
+vector field in the fixed target chart, and that auxiliary field agrees with
+the intrinsic DeTurck gauge field along the diffeomorphism images in the
+relative time filter, then the fixed-center `EqOn` hypothesis used by the
+closed-ball correction route follows. -/
+theorem model_vectorField_eqOn_tangentCoordChange_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin
+    {X Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {f : ℝ → E → E}
+    (hfY : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ U : Set E,
+        U ∈ 𝓝[Set.range I]
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+        Set.EqOn (f t)
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q (Y t q))
+          U)
+    (hY : ∀ ⦃t : ℝ⦄, t ∈ s →
+      ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
+        Y τ ((G.maps3 τ) x) =
+          intrinsicDeTurckGaugeField (I := I) (M := M)
+            g background τ ((G.maps3 τ) x)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ U : Set E,
+        U ∈ 𝓝[Set.range I]
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+        Set.EqOn (f t)
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+          U := by
+  intro t ht x
+  rcases hfY ht x with ⟨U, hU, hUeq⟩
+  refine ⟨U, hU, ?_⟩
+  intro y hy
+  let p : M := (G.maps3 t) x
+  let q : M := (extChartAt I p).symm y
+  have hYq :
+      Y t q =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t q :=
+    G.vectorField_eq_intrinsicDeTurckGaugeField_of_eventuallyEq_along_maps3_nhdsWithin
+      g background hY ht q
+  calc
+    f t y = tangentCoordChange I q p q (Y t q) := by
+      simpa [p, q] using hUeq hy
+    _ = tangentCoordChange I q p q
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q) := by
+      rw [hYq]
+
 /-- A local `EqOn` identification of the Picard model vector field at the fixed
 chart center gives the `hfCoord` eventual equality used by the model
 linearization bridge.
