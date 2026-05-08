@@ -2731,7 +2731,12 @@ and the selected fixed-IVP endpoint
 now return that auxiliary-along-flow equality alongside the selected finite
 source cover and readout equality. The remaining local-field proof is therefore
 the Picard-model-to-auxiliary fixed-chart `EqOn` input, not the flow equality
-from the auxiliary field to the intrinsic field. The
+from the auxiliary field to the intrinsic field. The signed correction layer
+also has the direct auxiliary-field adapter
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin`,
+which composes the auxiliary fixed-chart `EqOn` and the auxiliary-along-flow
+certificate into the intrinsic fixed-chart `EqOn` before entering the existing
+closed-ball correction route. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
