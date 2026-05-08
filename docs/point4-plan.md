@@ -2681,6 +2681,8 @@ Its compact finite-cover companion
 `SelectedIntrinsicDeTurckGaugeFlowExistence.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_iUnion_Icc_cover_source_hasFDerivAt_lifted_eqOn_of_solution_eq_restrictSymmetricIcc`
 does the same for callers that already carry the source-cover derivative
 package.
+The theorem-family restricted companion exposes the same handoff after fixing
+one `ivp` inside a selected existence family.
 The Picard-estimate-specialized endpoints
 `SelectedIntrinsicDeTurckGaugeFlowExistence.hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_timeSet_eq_Icc`
 and the theorem-family analogue now discharge that model-flow spatial
