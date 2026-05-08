@@ -25348,6 +25348,101 @@ theorem lieCorrection_of_model_hasFDerivWithinAt_of_eventuallyEqWithin
       (G.tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEqWithin
         g background α hbase hder hdomain hfCoord)
 
+/-- Lie-correction data from closed-ball Picard model derivative estimates.
+
+This is the closed-ball specialization of
+`lieCorrection_of_model_hasFDerivWithinAt_of_eventuallyEqWithin`: the Picard
+derivative is supplied on `Metric.closedBall x₀ a` over an ambient time
+interval, and strict active-point membership in `Metric.ball x₀ a` supplies the
+relative domain-neighborhood compatibility. -/
+theorem lieCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r a : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {tmin₁ tmax₁ : ℝ}
+    (hXeq : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      X t ((G.maps3 t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((G.maps3 t) x))
+    (hGauge_mdiff : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ p : M,
+      MDiffAt (T%
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) p)
+    (htime : s ⊆ Icc tmin₁ tmax₁)
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+          𝓝[s] t] (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hball : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        α.flow (xE, t) ∈ Metric.ball x₀ a)
+    (hder : ∀ τ ∈ Icc tmin₁ tmax₁, ∀ z ∈ Metric.closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (Metric.closedBall x₀ a) z)
+    (hfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (f t) =ᶠ[𝓝[Set.range I] (α.flow (xE, t))]
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pu : TangentSpace I p := (G.maps3 t).pushforwardTangent x u
+         let pv : TangentSpace I p := (G.maps3 t).pushforwardTangent x v
+         let cu : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pu
+         let cv : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pv
+         (fderivWithin ℝ
+            (fun yE : E ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g p (t, yE))
+            (Set.range I) ((extChartAt I p) p))
+            (X t p) cu cv +
+          (g t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cu)) pv +
+          (g t).inner p pu
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cv)) =
+          (g t).inner p
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p pu) pv +
+          (g t).inner p pu
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p pv)) := by
+  exact
+    G.lieCorrection_of_tangentCoordChange_fderivWithin
+      g background α hXeq hGauge_mdiff
+      (G.tangentCoordChange_DfCoord_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin
+        g background α htime hbase hball hder hfCoord)
+
 /-- Lie-derivative coordinate correction rewritten with the reverse intrinsic
 DeTurck gauge sign.
 
