@@ -24990,6 +24990,85 @@ theorem lieCorrection_of_tangentVectorOfCoordinate_Df_eq_mlieBracket
       (G.tangentVectorOfCoordinate_Df_eq_cov_sub_extend_of_tangentVectorOfCoordinate_Df_eq_mlieBracket
         g background α hXeq hGauge_mdiff hDfBracket)
 
+/-- Lie-correction data from the canonical fixed-chart `Df` identification.
+
+This is the direct handoff from the model-side derivative bridge to the scalar
+gauge-pullback routes that still ask for `hlieCorrection`: once `Df`
+differentiates the fixed-chart coordinate expression of the reverse intrinsic
+DeTurck gauge field, the tangent-map slot becomes the required Lie bracket and
+the torsion-free correction supplies the stated Levi-Civita terms. -/
+theorem lieCorrection_of_tangentCoordChange_fderivWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hXeq : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      X t ((G.maps3 t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((G.maps3 t) x))
+    (hGauge_mdiff : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ p : M,
+      MDiffAt (T%
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) p)
+    (hDfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p := (G.maps3 t).pushforwardTangent x w
+         let cw : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pw
+         (Df t (α.flow (xE, t))) cw =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) cw)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ u v : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pu : TangentSpace I p := (G.maps3 t).pushforwardTangent x u
+         let pv : TangentSpace I p := (G.maps3 t).pushforwardTangent x v
+         let cu : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pu
+         let cv : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pv
+         (fderivWithin ℝ
+            (fun yE : E ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g p (t, yE))
+            (Set.range I) ((extChartAt I p) p))
+            (X t p) cu cv +
+          (g t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cu)) pv +
+          (g t).inner p pu
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) cv)) =
+          (g t).inner p
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p pu) pv +
+          (g t).inner p pu
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p pv)) := by
+  exact
+    G.lieCorrection_of_tangentVectorOfCoordinate_Df_eq_mlieBracket
+      g background α hXeq hGauge_mdiff
+      (G.tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderivWithin
+        g background α hDfCoord)
+
 /-- Lie-derivative coordinate correction rewritten with the reverse intrinsic
 DeTurck gauge sign.
 
