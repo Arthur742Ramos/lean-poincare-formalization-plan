@@ -24616,6 +24616,91 @@ theorem tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEq
     congrArg (fun L : E →L[ℝ] E => L cw) hlin
   simpa [p, pw, cw, y, V, hybase] using hlin_apply
 
+/-- Relative-time-set variant of
+`tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEq`.
+
+This is the form matched by closed-Picard and open-Picard handoffs: the
+base-coordinate curve is identified with the selected variational model flow in
+the `𝓝[s] t` filter, so the point equality needed by the model derivative
+bridge follows from `t ∈ s`. -/
+theorem tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEqWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {S : Set E}
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+          𝓝[s] t] (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hder : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        HasFDerivWithinAt (f t) (Df t (α.flow (xE, t))) S (α.flow (xE, t)))
+    (hdomain : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        S ∈ 𝓝[Set.range I] (α.flow (xE, t)))
+    (hfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (f t) =ᶠ[𝓝[Set.range I] (α.flow (xE, t))]
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p := (G.maps3 t).pushforwardTangent x w
+         let cw : E :=
+          SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p pw
+         (Df t (α.flow (xE, t))) cw =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) cw) := by
+  refine
+    G.tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEq
+      g background α ?_ hder hdomain hfCoord
+  intro t ht x w xE hxE hAeq
+  have hbase_t :
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x) = α.flow (xE, t) :=
+    show t ∈ {τ : ℝ |
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x) = α.flow (xE, τ)} from
+      mem_of_mem_nhdsWithin ht (hbase ht x w xE hxE hAeq)
+  exact hbase_t.symm
+
 /-- Torsion-free reduction of the tangent-map slot: it is enough to identify
 the model linearization with the Lie bracket of the canonical constant
 coordinate vector field and the reverse DeTurck gauge field.
