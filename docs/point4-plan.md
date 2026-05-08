@@ -2807,7 +2807,12 @@ closed-ball scalar route. Its compact-witness companion
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
 first transports the patch-local Picard-model/auxiliary-field `EqOn` through
 the selected finite source cover and local readout equality, then applies the
-same scalar auxiliary-field route. The
+same scalar auxiliary-field route. Its local Picard/gluing counterpart
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_iUnion_readout_localGluingData_localFlowSolution_of_eventuallyEq_along_maps3_nhdsWithin`
+first derives that patch-local `EqOn` from current-time anchored
+`ModelGaugeFlowODE.LocalFlowSolution` data and `LocalGluingData`, so smooth
+realization scalar routes no longer need callers to hand-convert local Picard
+output to the finite-cover `EqOn` field hypothesis. The
 smooth-realization route also has the specialized bridge
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.coordinatePullbackMetricComponentDerivativeOn_of_variationalTangentMap_interior_cover_target_overlap_Ioo_geometricValue`,
 which combines the interior-cover scalar selector with that variational
