@@ -20969,6 +20969,79 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
       hU₁open hU₁source htarget hxU₁
 
 /-- Operator-ball specialization of the forward localized lifted `C^3` gluing
+patch, packaged as `LocalGluingData`. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (‖(1 : V →L[ℝ] V)‖₊ + a))) *
+      max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+          hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+        hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr).flow
+        (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+        hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr).flow
+        (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+              hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+              hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall
+                  hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  simpa [ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall]
+    using
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+        (BA := ‖(1 : V →L[ℝ] V)‖₊ + a)
+        hf_lip hDf_lip hf_bound
+        (fun A hA => nnnorm_le_nnnorm_add_radius_of_mem_closedBall hA)
+        hD_bound hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr
+        hU₀open hU₀source hxU₀ hx htbase ht ht_forward hder hGdiff
+        hU₁open hU₁source htarget hxU₁
+
+/-- Operator-ball specialization of the forward localized lifted `C^3` gluing
 patch from full space-time regularity. -/
 theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_operatorBall_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius_of_contDiffAt_spaceTime
     [FiniteDimensional ℝ V] [CompleteSpace V]
@@ -21373,6 +21446,78 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
   simpa [ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall]
     using
       ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+        (BA := 1 + a)
+        hf_lip hDf_lip hf_bound
+        (fun A hA => nnnorm_le_one_add_radius_of_mem_closedBall_one hA)
+      hD_bound hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr
+      hU₀open hU₀source hxU₀ hx htbase ht ht_forward hder hGdiff
+      hU₁open hU₁source htarget hxU₁
+
+/-- Identity-ball specialization of the forward localized lifted `C^3` gluing
+patch, packaged as `LocalGluingData`. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * (1 + a))) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (ht_forward : t ∈ Icc (t₀ : ℝ) tmax)
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+          hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+        hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr).flow
+        (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+        hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul htime ht₀' hr).flow
+        (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+              hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+              hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall
+                  hf_lip hDf_lip hf_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  simpa [ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_of_identityBall]
+    using
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
         (BA := 1 + a)
         hf_lip hDf_lip hf_bound
         (fun A hA => nnnorm_le_one_add_radius_of_mem_closedBall_one hA)
