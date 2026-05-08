@@ -54,6 +54,39 @@ theorem lieBracket_const_right_eq_neg_fderiv
       -fderiv 𝕜 V x v := by
   simp [lieBracket]
 
+/-- Model-manifold version of `lieBracketWithin_const_left_eq_fderivWithin`. -/
+theorem mlieBracketWithin_model_const_left_eq_fderivWithin
+    (V : E → E) (s : Set E) (x v : E) :
+    mlieBracketWithin (𝓘(𝕜, E)) (fun _ : E => v) V s x =
+      fderivWithin 𝕜 V s x v := by
+  rw [mlieBracketWithin_eq_lieBracketWithin]
+  exact lieBracketWithin_const_left_eq_fderivWithin (𝕜 := 𝕜) V s x v
+
+/-- Model-manifold version of
+`lieBracketWithin_const_right_eq_neg_fderivWithin`. -/
+theorem mlieBracketWithin_model_const_right_eq_neg_fderivWithin
+    (V : E → E) (s : Set E) (x v : E) :
+    mlieBracketWithin (𝓘(𝕜, E)) V (fun _ : E => v) s x =
+      -fderivWithin 𝕜 V s x v := by
+  rw [mlieBracketWithin_eq_lieBracketWithin]
+  exact lieBracketWithin_const_right_eq_neg_fderivWithin (𝕜 := 𝕜) V s x v
+
+/-- Global model-manifold version of `lieBracket_const_left_eq_fderiv`. -/
+theorem mlieBracket_model_const_left_eq_fderiv
+    (V : E → E) (x v : E) :
+    mlieBracket (𝓘(𝕜, E)) (fun _ : E => v) V x =
+      fderiv 𝕜 V x v := by
+  rw [mlieBracket, mlieBracketWithin_eq_lieBracketWithin, lieBracketWithin_univ]
+  exact lieBracket_const_left_eq_fderiv (𝕜 := 𝕜) V x v
+
+/-- Global model-manifold version of `lieBracket_const_right_eq_neg_fderiv`. -/
+theorem mlieBracket_model_const_right_eq_neg_fderiv
+    (V : E → E) (x v : E) :
+    mlieBracket (𝓘(𝕜, E)) V (fun _ : E => v) x =
+      -fderiv 𝕜 V x v := by
+  rw [mlieBracket, mlieBracketWithin_eq_lieBracketWithin, lieBracketWithin_univ]
+  exact lieBracket_const_right_eq_neg_fderiv (𝕜 := 𝕜) V x v
+
 end VectorField
 
 namespace RicciFlow
