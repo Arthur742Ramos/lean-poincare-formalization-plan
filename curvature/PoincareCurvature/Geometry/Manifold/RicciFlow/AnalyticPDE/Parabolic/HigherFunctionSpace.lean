@@ -693,6 +693,20 @@ theorem norm_le (h : ParabolicC2AlphaNormLe N α u s) ⦃z : ℝ × X⦄ (hz : z
     ‖u z‖ ≤ N :=
   h.value_c0AlphaNormLe_self.norm_le hz
 
+/-- A higher single-radius bound gives value-level time-slice Holder control with the parabolic
+half exponent. -/
+theorem time_slice_half_exponent (h : ParabolicC2AlphaNormLe N α u s)
+    {t τ : ℝ} {x : X} (ht : (t, x) ∈ s) (hτ : (τ, x) ∈ s) :
+    ‖u (t, x) - u (τ, x)‖ ≤ N * |t - τ| ^ (α / 2) :=
+  h.value_c0AlphaNormLe_self.time_slice_half_exponent ht hτ
+
+/-- A higher single-radius bound restricts to value-level spatial Holder control on each fixed
+time slice. -/
+theorem space_slice (h : ParabolicC2AlphaNormLe N α u s)
+    {t : ℝ} {x y : X} (hx : (t, x) ∈ s) (hy : (t, y) ∈ s) :
+    ‖u (t, x) - u (t, y)‖ ≤ N * (dist x y) ^ α :=
+  h.value_c0AlphaNormLe_self.space_slice hx hy
+
 /-- A higher single-radius bound on a difference gives the corresponding pointwise value
 distance bound. -/
 theorem dist_le_of_sub {v : ℝ × X → E}

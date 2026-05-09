@@ -3819,6 +3819,9 @@ compact-coordinate distance bounds. Those time-space compact-coordinate bounds
 now also restrict to fixed-time spatial compact readouts whenever the chosen
 time-space compact pieces cover each requested time slice, giving the direct
 bridge from parabolic readouts to spatial Banach-chart coordinate estimates.
+Single-radius `C^{0,α}` norm balls now also project directly to exact-radius
+parabolic Holder control, including fixed-space time-slice estimates with
+exponent `α / 2` and fixed-time spatial Holder estimates with exponent `α`.
 The compact-piece layer now also constructs the canonical product pieces
 `Kt × Kxᵢ`, with an `Icc t₀ T` specialization, and proves both their domain
 containment criterion and the fixed-time spatial slice cover property. It also
@@ -3849,7 +3852,8 @@ product-state differences, and continuous-linear value maps, and reads back to
 submodule has linear maps for continuous-linear value composition,
 product-valued pairing on product submodules, and forgetful inclusion into the
 existing `C^{0,α}` submodule. Higher norm balls
-now also give value-level pointwise norm and distance readouts,
+now also give value-level pointwise norm, distance, and exact-radius time- and
+space-slice Holder readouts,
 chosen-second-jet pointwise bounds for the value, spatial derivative, second
 spatial derivative, and time derivative under one common higher radius,
 positive-exponent continuity and uniform-continuity readouts, and
