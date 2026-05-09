@@ -4000,7 +4000,8 @@ is available for finite families and Pi-valued finite products, with either one
 shared direction family or member-dependent direction families. The
 state-space Lipschitz bridge can now be invoked directly with those
 deterministic matrix-entry chosen jets, including the finite-coordinate
-specialization with coordinate-radius constants, so chart estimates that use
+specialization with coordinate-radius constants and finite-family/Pi-valued
+forms for family-dependent direction readouts, so chart estimates that use
 higher matrix submodule elements do not need a separate caller-supplied jet
 family. The
 second-jet readout bridge now also accepts an arbitrary finite family of
