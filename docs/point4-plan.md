@@ -2806,7 +2806,10 @@ in
 `exists_restrictSymmetricIcc_pullbackMetricInnerDerivativeData_and_spatial_tangent_correction_of_statePreservingTensorSpatialCorrectionData_of_compact_iUnion_openPreimage_localGluingData_of_contMDiffCovariantDerivative_background`
 return the selected scalar package and the spatial correction for the same
 state-preserving Picard witness once the two endpoint tensor derivatives are
-supplied.
+supplied. The selected endpoint-gluing layer also accepts endpoint
+inner-product derivative facts directly, using the single-time pullback
+scalar/tensor conversion to produce the tensor endpoint data internally before
+returning `PullbackMetricInnerDerivativeData`.
 The theorem-family analogue now performs the same same-witness assembly
 uniformly over all initial-value problems, returning one selected gauge-flow
 family with both per-IVP continuations.
