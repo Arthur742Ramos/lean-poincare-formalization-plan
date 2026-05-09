@@ -326,6 +326,34 @@ theorem pi_dist_le_sum_mul_of_entries {ι F : Type*} [Fintype ι]
     pi_norm_sub_le_sum_mul_of_entries
       (X := X) (α := α) (s := s) hK hR h hz
 
+/-- Componentwise `C^{0,α}` difference controls with radii linear in a shared
+scalar give a finite-Pi closed-ball membership bound. -/
+theorem pi_mem_closedBall_sum_mul_of_entries {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {R : ℝ} {K : ι → ℝ} {u v : ℝ × X → ι → F}
+    (hK : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    u z ∈ Metric.closedBall (v z) ((∑ i, K i) * R) := by
+  simpa [Metric.mem_closedBall] using
+    pi_dist_le_sum_mul_of_entries
+      (X := X) (α := α) (s := s) hK hR h hz
+
+/-- Product-domain finite-Pi closed-ball membership bound from componentwise
+`C^{0,α}` difference controls. -/
+theorem pi_mem_closedBall_sum_mul_of_entries_prod_subset {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {R : ℝ} {K : ι → ℝ} {u v : ℝ × X → ι → F}
+    (hK : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t : ℝ} (ht : t ∈ timeSet) {x : X} (hx : x ∈ spaceSet) :
+    u (t, x) ∈ Metric.closedBall (v (t, x)) ((∑ i, K i) * R) :=
+  pi_mem_closedBall_sum_mul_of_entries
+    (X := X) (α := α) (s := s) hK hR h (hst ⟨ht, hx⟩)
+
 theorem of_c0AlphaWith {B H : ℝ} (hB : 0 ≤ B) (hH : 0 ≤ H)
     (h : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaNormLe (B + H) α u s :=
