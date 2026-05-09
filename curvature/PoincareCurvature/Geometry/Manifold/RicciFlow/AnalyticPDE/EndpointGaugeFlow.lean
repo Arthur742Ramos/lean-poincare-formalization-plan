@@ -367,6 +367,39 @@ theorem EndpointDerivativeGaugeFlowFamilyData.toInnerDerivativeGaugeReducibleFam
     D.background D.metric_eq_curve D.initial_hasTimeDerivative D.terminal_hasTimeDerivative
     D.chartRHS_eq_intrinsic D.hbackground D.encode D.maps3 D.anchored D.hflowDeriv D.hderiv
 
+/-- Bundled global endpoint derivative gauge-flow data yields the chosen-background
+Ricci-DeTurck theorem family before gauge reduction. -/
+theorem EndpointDerivativeGaugeFlowFamilyData.toChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (D : EndpointDerivativeGaugeFlowFamilyData (I := I)
+      (x0 := x0) (et := et) (het := het) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)) :
+    ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := F) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    (D.toInnerDerivativeGaugeReducibleFamily.package ivp).chosen_package
+
 /-- Bundled global endpoint derivative gauge-flow data projects to the compact intrinsic
 Ricci-flow theorem family. -/
 theorem EndpointDerivativeGaugeFlowFamilyData.toIntrinsicLocalExistenceUniquenessFamily
@@ -754,6 +787,39 @@ theorem EndpointDerivativeGaugeFlowFamilyDataOnIcc.toInnerDerivativeGaugeReducib
     (M := M) (F := F) (I := I) D.T D.a D.L D.Kpic D.Kstate D.chart D.metric
     D.background D.metric_eq_curve D.initial_hasTimeDerivative D.terminal_hasTimeDerivative
     D.chartRHS_eq_intrinsic D.hbackground D.encode D.maps3 D.anchored D.hflowDeriv D.hderiv
+
+/-- Bundled interval endpoint derivative gauge-flow data yields the chosen-background
+Ricci-DeTurck theorem family before gauge reduction. -/
+theorem EndpointDerivativeGaugeFlowFamilyDataOnIcc.toChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [CompleteSpace F]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {x0 : κ → M}
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i)}
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (D : EndpointDerivativeGaugeFlowFamilyDataOnIcc (I := I)
+      (x0 := x0) (et := et) (het := het) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)) :
+    ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := F) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    (D.toInnerDerivativeGaugeReducibleFamily.package ivp).chosen_package
 
 /-- Bundled interval endpoint derivative gauge-flow data projects to the compact intrinsic
 Ricci-flow theorem family. -/
