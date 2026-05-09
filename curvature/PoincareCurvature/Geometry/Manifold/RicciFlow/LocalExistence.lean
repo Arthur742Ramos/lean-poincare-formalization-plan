@@ -870,6 +870,22 @@ lemma HasTimeDerivativeOn.of_Ioo_endpoints
   · simpa [htb] using hb
   exact hIoo ⟨lt_of_le_of_ne ht.1 (Ne.symm hta), lt_of_le_of_ne ht.2 htb⟩
 
+/-- Time-derivative data on the open interior of a closed interval, together
+with derivative data at every non-interior boundary point of that closed
+interval, gives time-derivative data on the whole closed interval. -/
+lemma HasTimeDerivativeOn.of_Ioo_boundary
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {a b : ℝ}
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M) g gdot (Set.Ioo a b))
+    (hboundary : ∀ ⦃t : ℝ⦄, t ∈ Set.Icc a b → t ∉ Set.Ioo a b →
+      HasTimeDerivativeAt (I := I) (M := M) g gdot t) :
+    HasTimeDerivativeOn (I := I) (M := M) g gdot (Set.Icc a b) := by
+  intro t ht
+  by_cases htInterior : t ∈ Set.Ioo a b
+  · exact hIoo htInterior
+  · exact hboundary ht htInterior
+
 /-- The Ricci-flow equation at a single time, written for the metric tensor. -/
 def SatisfiesEquationAt
     (g : MetricFamily (I := I) (M := M))

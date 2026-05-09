@@ -101,6 +101,9 @@ It also has closed-interval gluing wrappers at that same API, accepting
 interior `Ioo` tensor time-regularity plus either tensor endpoint derivatives
 or scalar endpoint inner-product derivatives to produce time-regularity on the
 intrinsic solution's `Icc` time set.
+The same DeTurck-local API now accepts boundary-shaped endpoint data, matching
+the Banach/PDE convention of supplying derivatives at closed-interval points
+outside the open `Ioo` interior.
 
 **What still has to be done.** This scalar derivative is a chain-rule
 calculation that splits into three pieces (time derivative of `g`,
