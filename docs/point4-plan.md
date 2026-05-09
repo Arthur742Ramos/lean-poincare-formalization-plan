@@ -723,6 +723,13 @@ Its readout-field variant
 transfers a Fréchet derivative from any locally equal two-variable bilinear-form
 readout to `metricBilinearCoordinateField` through the same named bridge,
 matching the finite-cover Banach readout shape more closely.
+The localized open-product-domain local-flow route now also has the
+relative-filter readout form
+`Diffeomorph3GaugeFlowOn.hasTimeDerivativeOn_Ioo_of_eventuallyEqWithin_metricCoordinateField_hasFDerivWithinAtOpenDomain_variationalLocalFlowWithin_geometricValue_self`.
+This lets finite-cover readouts agree with the named metric-coordinate field
+only inside the same open product domain used for the Fréchet derivative, while
+the existing base-flow agreement still transports the model endpoint and raw
+gauge velocity.
 The direct full-field product-chain-rule primitive is now named as well:
 `Diffeomorph3GaugeFlowOn.metricBilinearCoordinateField_hasDerivAt_of_hasFDerivAt`
 and
