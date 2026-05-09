@@ -617,6 +617,11 @@ and
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_nhdsWithin`,
 so fixed-center local `EqOn` Picard data can reach the signed correction while
 keeping arbitrary centered model slots through the correction proof.  The
+auxiliary-field wrapper
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_vectorField_of_eventuallyEq_along_maps3_nhdsWithin`
+extends this one layer toward the compact finite-cover handoff by consuming the
+patch-local auxiliary vector-field `EqOn` plus the along-flow intrinsic-field
+certificate directly in model slots.  The
 smooth scalar endpoint also has
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_modelSlotSignedCorrection`,
 which consumes a signed correction already stated in model slots and performs
