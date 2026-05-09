@@ -177,6 +177,20 @@ theorem pi {ι F : Type*} [Fintype ι] [NormedAddCommGroup F]
       rw [Finset.sum_add_distrib]
     _ ≤ ∑ i, N i := Finset.sum_le_sum fun i _ => hsum i
 
+theorem prod {F : Type*} [NormedAddCommGroup F] {v : ℝ × X → F}
+    (hu : ParabolicC0AlphaNormLe N₁ α u s)
+    (hv : ParabolicC0AlphaNormLe N₂ α v s) :
+    ParabolicC0AlphaNormLe (N₁ + N₂) α (fun z => (u z, v z)) s := by
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hu_sum, hu_ctrl⟩
+  rcases hv with ⟨Bv, hBv, Hv, hHv, hv_sum, hv_ctrl⟩
+  refine ⟨max Bu Bv, hBu.trans (le_max_left Bu Bv),
+    max Hu Hv, hHu.trans (le_max_left Hu Hv), ?_, hu_ctrl.prod hv_ctrl⟩
+  have hBmax : max Bu Bv ≤ Bu + Bv := by
+    exact max_le (le_add_of_nonneg_right hBv) (le_add_of_nonneg_left hBu)
+  have hHmax : max Hu Hv ≤ Hu + Hv := by
+    exact max_le (le_add_of_nonneg_right hHv) (le_add_of_nonneg_left hHu)
+  linarith
+
 theorem mul {A : Type*} [NormedRing A] {N₁ N₂ α : ℝ}
     {u v : ℝ × X → A} {s : Set (ℝ × X)}
     (hu : ParabolicC0AlphaNormLe N₁ α u s)
@@ -194,6 +208,290 @@ theorem mul {A : Type*} [NormedRing A] {N₁ N₂ α : ℝ}
   have hright : (Bu + Hu) * (Bv + Hv) ≤ N₁ * N₂ :=
     mul_le_mul hu_sum hv_sum (add_nonneg hBv hHv) hNu
   exact hleft.trans hright
+
+theorem smul_fun {𝕜 F : Type*} [NormedField 𝕜] [NormedAddCommGroup F]
+    [NormedSpace 𝕜 F] {N₁ N₂ α : ℝ}
+    {a : ℝ × X → 𝕜} {u : ℝ × X → F} {s : Set (ℝ × X)}
+    (ha : ParabolicC0AlphaNormLe N₁ α a s)
+    (hu : ParabolicC0AlphaNormLe N₂ α u s) :
+    ParabolicC0AlphaNormLe (N₁ * N₂) α (fun z => a z • u z) s := by
+  rcases ha with ⟨Ba, hBa, Ha, hHa, ha_sum, ha_ctrl⟩
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hu_sum, hu_ctrl⟩
+  have hNa : 0 ≤ N₁ := (add_nonneg hBa hHa).trans ha_sum
+  refine ⟨Ba * Bu, mul_nonneg hBa hBu, Ba * Hu + Bu * Ha,
+    add_nonneg (mul_nonneg hBa hHu) (mul_nonneg hBu hHa), ?_,
+    ha_ctrl.smul_fun hu_ctrl hBa⟩
+  have hleft : Ba * Bu + (Ba * Hu + Bu * Ha) ≤ (Ba + Ha) * (Bu + Hu) := by
+    nlinarith [mul_nonneg hHa hHu]
+  have hright : (Ba + Ha) * (Bu + Hu) ≤ N₁ * N₂ :=
+    mul_le_mul ha_sum hu_sum (add_nonneg hBu hHu) hNa
+  exact hleft.trans hright
+
+theorem mul_sub_mul {A : Type*} [NormedRing A]
+    {Nu Nv Ndu Ndv α : ℝ} {u u' v v' : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaNormLe Nu α u s)
+    (hv' : ParabolicC0AlphaNormLe Nv α v' s)
+    (hdu : ParabolicC0AlphaNormLe Ndu α (fun z => u z - u' z) s)
+    (hdv : ParabolicC0AlphaNormLe Ndv α (fun z => v z - v' z) s) :
+    ParabolicC0AlphaNormLe (Nu * Ndv + Ndu * Nv) α
+      (fun z => u z * v z - u' z * v' z) s := by
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hu_sum, hu_ctrl⟩
+  rcases hv' with ⟨Bv, hBv, Hv, hHv, hv_sum, hv_ctrl⟩
+  rcases hdu with ⟨Bdu, hBdu, Hdu, hHdu, hdu_sum, hdu_ctrl⟩
+  rcases hdv with ⟨Bdv, hBdv, Hdv, hHdv, hdv_sum, hdv_ctrl⟩
+  refine ⟨Bu * Bdv + Bdu * Bv,
+    add_nonneg (mul_nonneg hBu hBdv) (mul_nonneg hBdu hBv),
+    (Bu * Hdv + Bdv * Hu) + (Bdu * Hv + Bv * Hdu), ?_, ?_,
+    hu_ctrl.mul_sub_mul hv_ctrl hdu_ctrl hdv_ctrl hBu hBdu⟩
+  · exact add_nonneg
+      (add_nonneg (mul_nonneg hBu hHdv) (mul_nonneg hBdv hHu))
+      (add_nonneg (mul_nonneg hBdu hHv) (mul_nonneg hBv hHdu))
+  · have hNu : 0 ≤ Nu := (add_nonneg hBu hHu).trans hu_sum
+    have hNdu : 0 ≤ Ndu := (add_nonneg hBdu hHdu).trans hdu_sum
+    have hleft :
+        (Bu * Bdv + Bdu * Bv) +
+            ((Bu * Hdv + Bdv * Hu) + (Bdu * Hv + Bv * Hdu)) ≤
+          (Bu + Hu) * (Bdv + Hdv) + (Bdu + Hdu) * (Bv + Hv) := by
+      nlinarith [mul_nonneg hHu hHdv, mul_nonneg hHdu hHv]
+    have hright₁ : (Bu + Hu) * (Bdv + Hdv) ≤ Nu * Ndv :=
+      mul_le_mul hu_sum hdv_sum (add_nonneg hBdv hHdv) hNu
+    have hright₂ : (Bdu + Hdu) * (Bv + Hv) ≤ Ndu * Nv :=
+      mul_le_mul hdu_sum hv_sum (add_nonneg hBv hHv) hNdu
+    linarith
+
+theorem inv {𝕜 : Type*} [NormedField 𝕜] {a : ℝ × X → 𝕜} {δ N α : ℝ}
+    {s : Set (ℝ × X)}
+    (ha : ParabolicC0AlphaNormLe N α a s) (hδpos : 0 < δ)
+    (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖) :
+    ParabolicC0AlphaNormLe (δ⁻¹ + δ⁻¹ * N * δ⁻¹) α (fun z => (a z)⁻¹) s := by
+  rcases ha with ⟨B, hB, H, hH, hsum, hctrl⟩
+  have hδnn : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  refine ⟨δ⁻¹, hδnn, δ⁻¹ * H * δ⁻¹,
+    mul_nonneg (mul_nonneg hδnn hH) hδnn, ?_, hctrl.inv hδpos hδ⟩
+  have hH_le_N : H ≤ N := by linarith
+  have hholder_le : δ⁻¹ * H * δ⁻¹ ≤ δ⁻¹ * N * δ⁻¹ :=
+    mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hH_le_N hδnn) hδnn
+  linarith
+
+theorem inv_sub_inv {𝕜 : Type*} [NormedField 𝕜]
+    {a b : ℝ × X → 𝕜} {Na Nb Nd δ α : ℝ} {s : Set (ℝ × X)}
+    (ha : ParabolicC0AlphaNormLe Na α a s)
+    (hb : ParabolicC0AlphaNormLe Nb α b s)
+    (hdiff : ParabolicC0AlphaNormLe Nd α (fun z => a z - b z) s)
+    (hδpos : 0 < δ)
+    (hδa : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖)
+    (hδb : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖) :
+    ParabolicC0AlphaNormLe
+      (ParabolicC0AlphaWith.invSubBoundConst δ Nd +
+        ParabolicC0AlphaWith.invSubHolderConst δ Na Nb Nd Nd)
+      α (fun z => (a z)⁻¹ - (b z)⁻¹) s := by
+  rcases ha with ⟨Ba, hBa, Ha, hHa, ha_sum, ha_ctrl⟩
+  rcases hb with ⟨Bb, hBb, Hb, hHb, hb_sum, hb_ctrl⟩
+  rcases hdiff with ⟨Bd, hBd, Hd, hHd, hdiff_sum, hdiff_ctrl⟩
+  have hδnn : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  have hNa : 0 ≤ Na := (add_nonneg hBa hHa).trans ha_sum
+  have hNb : 0 ≤ Nb := (add_nonneg hBb hHb).trans hb_sum
+  have hNd : 0 ≤ Nd := (add_nonneg hBd hHd).trans hdiff_sum
+  have hHa_le : Ha ≤ Na := by linarith
+  have hHb_le : Hb ≤ Nb := by linarith
+  have hBd_le : Bd ≤ Nd := by linarith
+  have hHd_le : Hd ≤ Nd := by linarith
+  have hBterm :
+      (δ⁻¹ * Bd) * δ⁻¹ ≤ (δ⁻¹ * Nd) * δ⁻¹ :=
+    mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hBd_le hδnn) hδnn
+  have hHb_factor :
+      δ⁻¹ * Hb * δ⁻¹ ≤ δ⁻¹ * Nb * δ⁻¹ :=
+    mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hHb_le hδnn) hδnn
+  have hHterm₁ :
+      (δ⁻¹ * Bd) * (δ⁻¹ * Hb * δ⁻¹) ≤
+        (δ⁻¹ * Nd) * (δ⁻¹ * Nb * δ⁻¹) := by
+    exact mul_le_mul
+      (mul_le_mul_of_nonneg_left hBd_le hδnn) hHb_factor
+      (mul_nonneg (mul_nonneg hδnn hHb) hδnn) (mul_nonneg hδnn hNd)
+  have hHd_factor : δ⁻¹ * Hd ≤ δ⁻¹ * Nd :=
+    mul_le_mul_of_nonneg_left hHd_le hδnn
+  have hHa_factor :
+      δ⁻¹ * Ha * δ⁻¹ ≤ δ⁻¹ * Na * δ⁻¹ :=
+    mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hHa_le hδnn) hδnn
+  have hHterm₂_inner :
+      δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹) ≤
+        δ⁻¹ * Nd + Nd * (δ⁻¹ * Na * δ⁻¹) := by
+    refine add_le_add hHd_factor ?_
+    exact mul_le_mul hBd_le hHa_factor
+      (mul_nonneg (mul_nonneg hδnn hHa) hδnn) hNd
+  have hHterm₂ :
+      δ⁻¹ * (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹)) ≤
+        δ⁻¹ * (δ⁻¹ * Nd + Nd * (δ⁻¹ * Na * δ⁻¹)) :=
+    mul_le_mul_of_nonneg_left hHterm₂_inner hδnn
+  refine ⟨ParabolicC0AlphaWith.invSubBoundConst δ Bd,
+    ParabolicC0AlphaWith.invSubBoundConst_nonneg hδpos hBd,
+    ParabolicC0AlphaWith.invSubHolderConst δ Ha Hb Bd Hd,
+    ParabolicC0AlphaWith.invSubHolderConst_nonneg hδpos hHa hHb hBd hHd, ?_,
+    ha_ctrl.inv_sub_inv hb_ctrl hdiff_ctrl hδpos hδa hδb hBd⟩
+  dsimp [ParabolicC0AlphaWith.invSubBoundConst,
+    ParabolicC0AlphaWith.invSubHolderConst]
+  linarith
+
+theorem div {𝕜 : Type*} [NormedField 𝕜] {a b : ℝ × X → 𝕜}
+    {N₁ N₂ δ α : ℝ} {s : Set (ℝ × X)}
+    (ha : ParabolicC0AlphaNormLe N₁ α a s)
+    (hb : ParabolicC0AlphaNormLe N₂ α b s)
+    (hδpos : 0 < δ) (hδ : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖) :
+    ParabolicC0AlphaNormLe
+      (N₁ * δ⁻¹ + (N₁ * (δ⁻¹ * N₂ * δ⁻¹) + δ⁻¹ * N₁)) α
+      (fun z => a z / b z) s := by
+  rcases ha with ⟨Ba, hBa, Ha, hHa, ha_sum, ha_ctrl⟩
+  rcases hb with ⟨Bb, hBb, Hb, hHb, hb_sum, hb_ctrl⟩
+  have hδnn : 0 ≤ δ⁻¹ := inv_nonneg.mpr hδpos.le
+  have hN₁ : 0 ≤ N₁ := (add_nonneg hBa hHa).trans ha_sum
+  have hN₂ : 0 ≤ N₂ := (add_nonneg hBb hHb).trans hb_sum
+  have hBa_le : Ba ≤ N₁ := by linarith
+  have hHa_le : Ha ≤ N₁ := by linarith
+  have hHb_le : Hb ≤ N₂ := by linarith
+  refine ⟨Ba * δ⁻¹, mul_nonneg hBa hδnn,
+    Ba * (δ⁻¹ * Hb * δ⁻¹) + δ⁻¹ * Ha, ?_, ?_,
+    ha_ctrl.div hb_ctrl hBa hδpos hδ⟩
+  · exact add_nonneg
+      (mul_nonneg hBa (mul_nonneg (mul_nonneg hδnn hHb) hδnn))
+      (mul_nonneg hδnn hHa)
+  · have hBterm : Ba * δ⁻¹ ≤ N₁ * δ⁻¹ :=
+      mul_le_mul_of_nonneg_right hBa_le hδnn
+    have hHb_factor : δ⁻¹ * Hb * δ⁻¹ ≤ δ⁻¹ * N₂ * δ⁻¹ :=
+      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hHb_le hδnn) hδnn
+    have hHterm₁ : Ba * (δ⁻¹ * Hb * δ⁻¹) ≤ N₁ * (δ⁻¹ * N₂ * δ⁻¹) := by
+      exact mul_le_mul hBa_le hHb_factor
+        (mul_nonneg (mul_nonneg hδnn hHb) hδnn) hN₁
+    have hHterm₂ : δ⁻¹ * Ha ≤ δ⁻¹ * N₁ :=
+      mul_le_mul_of_nonneg_left hHa_le hδnn
+    linarith
+
+theorem continuousLinearMap₂ {F G : Type*} [NormedAddCommGroup F]
+    [NormedAddCommGroup G] [NormedSpace ℝ E] [NormedSpace ℝ F] [NormedSpace ℝ G]
+    {N₁ N₂ α : ℝ} {v : ℝ × X → F} {s : Set (ℝ × X)}
+    (L : E →L[ℝ] F →L[ℝ] G)
+    (hu : ParabolicC0AlphaNormLe N₁ α u s)
+    (hv : ParabolicC0AlphaNormLe N₂ α v s) :
+    ParabolicC0AlphaNormLe (‖L‖ * N₁ * N₂) α (fun z => L (u z) (v z)) s := by
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hu_sum, hu_ctrl⟩
+  rcases hv with ⟨Bv, hBv, Hv, hHv, hv_sum, hv_ctrl⟩
+  have hNu : 0 ≤ N₁ := (add_nonneg hBu hHu).trans hu_sum
+  refine ⟨‖L‖ * Bu * Bv, mul_nonneg (mul_nonneg (norm_nonneg L) hBu) hBv,
+    ‖L‖ * (Bu * Hv + Bv * Hu),
+    mul_nonneg (norm_nonneg L)
+      (add_nonneg (mul_nonneg hBu hHv) (mul_nonneg hBv hHu)), ?_,
+    hu_ctrl.continuousLinearMap₂ L hv_ctrl hBu⟩
+  have hleft : Bu * Bv + (Bu * Hv + Bv * Hu) ≤ (Bu + Hu) * (Bv + Hv) := by
+    nlinarith [mul_nonneg hHu hHv]
+  have hright : (Bu + Hu) * (Bv + Hv) ≤ N₁ * N₂ :=
+    mul_le_mul hu_sum hv_sum (add_nonneg hBv hHv) hNu
+  calc
+    ‖L‖ * Bu * Bv + ‖L‖ * (Bu * Hv + Bv * Hu) =
+        ‖L‖ * (Bu * Bv + (Bu * Hv + Bv * Hu)) := by ring
+    _ ≤ ‖L‖ * ((Bu + Hu) * (Bv + Hv)) :=
+        mul_le_mul_of_nonneg_left hleft (norm_nonneg L)
+    _ ≤ ‖L‖ * (N₁ * N₂) := mul_le_mul_of_nonneg_left hright (norm_nonneg L)
+    _ = ‖L‖ * N₁ * N₂ := by ring
+
+theorem continuousLinearMap₂_sub {F G : Type*} [NormedAddCommGroup F]
+    [NormedAddCommGroup G] [NormedSpace ℝ E] [NormedSpace ℝ F] [NormedSpace ℝ G]
+    (L : E →L[ℝ] F →L[ℝ] G)
+    {Nu Nv Ndu Ndv α : ℝ} {u u' : ℝ × X → E} {v v' : ℝ × X → F}
+    {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaNormLe Nu α u s)
+    (hv' : ParabolicC0AlphaNormLe Nv α v' s)
+    (hdu : ParabolicC0AlphaNormLe Ndu α (fun z => u z - u' z) s)
+    (hdv : ParabolicC0AlphaNormLe Ndv α (fun z => v z - v' z) s) :
+    ParabolicC0AlphaNormLe (‖L‖ * (Nu * Ndv + Ndu * Nv)) α
+      (fun z => L (u z) (v z) - L (u' z) (v' z)) s := by
+  rcases hu with ⟨Bu, hBu, Hu, hHu, hu_sum, hu_ctrl⟩
+  rcases hv' with ⟨Bv, hBv, Hv, hHv, hv_sum, hv_ctrl⟩
+  rcases hdu with ⟨Bdu, hBdu, Hdu, hHdu, hdu_sum, hdu_ctrl⟩
+  rcases hdv with ⟨Bdv, hBdv, Hdv, hHdv, hdv_sum, hdv_ctrl⟩
+  refine ⟨‖L‖ * Bu * Bdv + ‖L‖ * Bdu * Bv, ?_,
+    ‖L‖ * (Bu * Hdv + Bdv * Hu) + ‖L‖ * (Bdu * Hv + Bv * Hdu), ?_, ?_,
+    hu_ctrl.continuousLinearMap₂_sub L hv_ctrl hdu_ctrl hdv_ctrl hBu hBdu⟩
+  · exact add_nonneg
+      (mul_nonneg (mul_nonneg (norm_nonneg L) hBu) hBdv)
+      (mul_nonneg (mul_nonneg (norm_nonneg L) hBdu) hBv)
+  · exact add_nonneg
+      (mul_nonneg (norm_nonneg L)
+        (add_nonneg (mul_nonneg hBu hHdv) (mul_nonneg hBdv hHu)))
+      (mul_nonneg (norm_nonneg L)
+        (add_nonneg (mul_nonneg hBdu hHv) (mul_nonneg hBv hHdu)))
+  · have hNu : 0 ≤ Nu := (add_nonneg hBu hHu).trans hu_sum
+    have hNdu : 0 ≤ Ndu := (add_nonneg hBdu hHdu).trans hdu_sum
+    have hleft :
+        (Bu * Bdv + Bdu * Bv) +
+            ((Bu * Hdv + Bdv * Hu) + (Bdu * Hv + Bv * Hdu)) ≤
+          (Bu + Hu) * (Bdv + Hdv) + (Bdu + Hdu) * (Bv + Hv) := by
+      nlinarith [mul_nonneg hHu hHdv, mul_nonneg hHdu hHv]
+    have hright₁ : (Bu + Hu) * (Bdv + Hdv) ≤ Nu * Ndv :=
+      mul_le_mul hu_sum hdv_sum (add_nonneg hBdv hHdv) hNu
+    have hright₂ : (Bdu + Hdu) * (Bv + Hv) ≤ Ndu * Nv :=
+      mul_le_mul hdu_sum hv_sum (add_nonneg hBv hHv) hNdu
+    calc
+      (‖L‖ * Bu * Bdv + ‖L‖ * Bdu * Bv) +
+          (‖L‖ * (Bu * Hdv + Bdv * Hu) + ‖L‖ * (Bdu * Hv + Bv * Hdu)) =
+        ‖L‖ *
+          ((Bu * Bdv + Bdu * Bv) +
+            ((Bu * Hdv + Bdv * Hu) + (Bdu * Hv + Bv * Hdu))) := by ring
+      _ ≤ ‖L‖ * ((Bu + Hu) * (Bdv + Hdv) + (Bdu + Hdu) * (Bv + Hv)) :=
+        mul_le_mul_of_nonneg_left hleft (norm_nonneg L)
+      _ ≤ ‖L‖ * (Nu * Ndv + Ndu * Nv) :=
+        mul_le_mul_of_nonneg_left (add_le_add hright₁ hright₂) (norm_nonneg L)
+
+theorem continuousLinearMap_apply {F : Type*} [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {NA Nv α : ℝ} {A : ℝ × X → E →L[ℝ] F} {v : ℝ × X → E}
+    {s : Set (ℝ × X)}
+    (hA : ParabolicC0AlphaNormLe NA α A s)
+    (hv : ParabolicC0AlphaNormLe Nv α v s) :
+    ParabolicC0AlphaNormLe (NA * Nv) α (fun z => A z (v z)) s := by
+  rcases hA with ⟨BA, hBA, HA, hHA, hA_sum, hA_ctrl⟩
+  rcases hv with ⟨Bv, hBv, Hv, hHv, hv_sum, hv_ctrl⟩
+  have hNA : 0 ≤ NA := (add_nonneg hBA hHA).trans hA_sum
+  refine ⟨BA * Bv, mul_nonneg hBA hBv, BA * Hv + Bv * HA,
+    add_nonneg (mul_nonneg hBA hHv) (mul_nonneg hBv hHA), ?_,
+    hA_ctrl.continuousLinearMap_apply hv_ctrl hBA⟩
+  have hleft : BA * Bv + (BA * Hv + Bv * HA) ≤ (BA + HA) * (Bv + Hv) := by
+    nlinarith [mul_nonneg hHA hHv]
+  have hright : (BA + HA) * (Bv + Hv) ≤ NA * Nv :=
+    mul_le_mul hA_sum hv_sum (add_nonneg hBv hHv) hNA
+  exact hleft.trans hright
+
+theorem continuousLinearMap_apply_sub {F : Type*} [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {NA Nv NAd Nvd α : ℝ} {A A' : ℝ × X → E →L[ℝ] F}
+    {v v' : ℝ × X → E} {s : Set (ℝ × X)}
+    (hA : ParabolicC0AlphaNormLe NA α A s)
+    (hv' : ParabolicC0AlphaNormLe Nv α v' s)
+    (hAdiff : ParabolicC0AlphaNormLe NAd α (fun z => A z - A' z) s)
+    (hvdiff : ParabolicC0AlphaNormLe Nvd α (fun z => v z - v' z) s) :
+    ParabolicC0AlphaNormLe (NA * Nvd + NAd * Nv) α
+      (fun z => A z (v z) - A' z (v' z)) s := by
+  rcases hA with ⟨BA, hBA, HA, hHA, hA_sum, hA_ctrl⟩
+  rcases hv' with ⟨Bv, hBv, Hv, hHv, hv_sum, hv_ctrl⟩
+  rcases hAdiff with ⟨BAd, hBAd, HAd, hHAd, hAd_sum, hAd_ctrl⟩
+  rcases hvdiff with ⟨Bvd, hBvd, Hvd, hHvd, hvd_sum, hvd_ctrl⟩
+  refine ⟨BA * Bvd + BAd * Bv,
+    add_nonneg (mul_nonneg hBA hBvd) (mul_nonneg hBAd hBv),
+    (BA * Hvd + Bvd * HA) + (BAd * Hv + Bv * HAd), ?_, ?_,
+    hA_ctrl.continuousLinearMap_apply_sub hv_ctrl hAd_ctrl hvd_ctrl hBA hBAd⟩
+  · exact add_nonneg
+      (add_nonneg (mul_nonneg hBA hHvd) (mul_nonneg hBvd hHA))
+      (add_nonneg (mul_nonneg hBAd hHv) (mul_nonneg hBv hHAd))
+  · have hNA : 0 ≤ NA := (add_nonneg hBA hHA).trans hA_sum
+    have hNAd : 0 ≤ NAd := (add_nonneg hBAd hHAd).trans hAd_sum
+    have hleft :
+        (BA * Bvd + BAd * Bv) +
+            ((BA * Hvd + Bvd * HA) + (BAd * Hv + Bv * HAd)) ≤
+          (BA + HA) * (Bvd + Hvd) + (BAd + HAd) * (Bv + Hv) := by
+      nlinarith [mul_nonneg hHA hHvd, mul_nonneg hHAd hHv]
+    have hright₁ : (BA + HA) * (Bvd + Hvd) ≤ NA * Nvd :=
+      mul_le_mul hA_sum hvd_sum (add_nonneg hBvd hHvd) hNA
+    have hright₂ : (BAd + HAd) * (Bv + Hv) ≤ NAd * Nv :=
+      mul_le_mul hAd_sum hv_sum (add_nonneg hBv hHv) hNAd
+    linarith
 
 theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F]
     {Bφ : ℝ} {K : ℝ≥0} {φ : E → F}
