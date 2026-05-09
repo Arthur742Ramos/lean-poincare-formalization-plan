@@ -3845,7 +3845,10 @@ Pi-valued higher norm-ball assembly from component controls, including
 difference controls, with pointwise finite-Pi norm and distance bounds from
 componentwise higher difference controls whose radii are linear in a shared
 scalar, and corresponding compact-piece and finite compact-family readout
-sup-norm bounds for finite Pi-valued higher functions. Existential
+sup-norm bounds for finite Pi-valued higher functions; the same componentwise
+finite-Pi hypotheses now also promote directly to `LipschitzOnWith` estimates
+for single compact-piece and finite compact-family readouts with the summed
+NNReal component constant. Existential
 higher membership and the higher
 submodule now also expose actual time, spatial, and second-spatial derivative
 witnesses with value-level `C^{0,α}` controls, without choosing a canonical

@@ -1237,6 +1237,30 @@ theorem lipschitzOnWith_toContinuousMap_of_normLe_sub {Y : Type*} [PseudoMetricS
     (X := X) (E := E) (α := α) (s := s) hK hα (h hu hv)
   simpa [dist_eq_norm] using hnorm
 
+/-- Componentwise higher difference estimates with finite Pi constants give a Lipschitz
+estimate for one compact value readout of a finite Pi-valued higher parabolic function. -/
+theorem lipschitzOnWith_toContinuousMap_pi_of_component_normLe_sub
+    {Y ι F : Type*} [PseudoMetricSpace Y] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {Kc : TopologicalSpace.Compacts (ℝ × X)}
+    (hKc : (Kc : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} (K : ι → ℝ≥0)
+    {A : Y → parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i,
+      ParabolicC2AlphaNormLe ((K i : ℝ) * dist u v) α
+        (fun z => A u z i - A v z i) s) :
+    LipschitzOnWith (∑ i, K i)
+      (fun u : Y =>
+        toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hnorm := norm_toContinuousMap_pi_sub_le_sum_mul_of_entries
+    (X := X) (α := α) (s := s) hKc hα
+    (K := fun i => (K i : ℝ)) (R := dist u v)
+    (fun i => NNReal.coe_nonneg (K i)) dist_nonneg (fun i => h hu hv i)
+  simpa [dist_eq_norm, NNReal.coe_sum] using hnorm
+
 /-- Read a coordinate parabolic `C^{2+α,1+α/2}` function on every compact piece of a chosen
 cover, using its value-level `C^{0,α}` component. -/
 def toCompactCoordFamily {κ : Type*} (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
@@ -1346,6 +1370,32 @@ theorem lipschitzOnWith_toCompactCoordFamily_of_normLe_sub {Y κ : Type*}
   have hnorm := norm_toCompactCoordFamily_family_sub_le_of_normLe
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv)
   simpa [dist_eq_norm] using hnorm
+
+/-- Componentwise higher difference estimates with finite Pi constants give a Lipschitz
+estimate for the finite compact-family value readout of a finite Pi-valued higher parabolic
+function. -/
+theorem lipschitzOnWith_toCompactCoordFamily_pi_of_component_normLe_sub
+    {Y κ ι F : Type*} [PseudoMetricSpace Y] [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} (K : ι → ℝ≥0)
+    {A : Y → parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i,
+      ParabolicC2AlphaNormLe ((K i : ℝ) * dist u v) α
+        (fun z => A u z i - A v z i) s) :
+    LipschitzOnWith (∑ i, K i)
+      (fun u : Y =>
+        toCompactCoordFamily (X := X) (E := ι → F) (α := α) (s := s)
+          Kc hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hnorm := norm_toCompactCoordFamily_pi_family_sub_le_sum_mul_of_entries
+    (X := X) (α := α) (s := s) Kc hKc hα
+    (K := fun i => (K i : ℝ)) (R := dist u v)
+    (fun i => NNReal.coe_nonneg (K i)) dist_nonneg (fun i => h hu hv i)
+  simpa [dist_eq_norm, NNReal.coe_sum] using hnorm
 
 /-- A finite compact-family value-readout Lipschitz estimate gives pointwise compact-coordinate
 distance estimates. -/
