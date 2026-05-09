@@ -557,6 +557,48 @@ theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ 
         using hxx_comp)
   · simpa [ParabolicSecondJet.continuousLinearMap] using ht.continuousLinearMap L
 
+/-- Entrywise full higher parabolic controls assemble into a finite Pi-valued
+full higher parabolic norm ball by inserting coordinates and summing them. -/
+theorem pi {ι F : Type*} [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {N : ι → ℝ} {u : ℝ × X → ι → F}
+    (h : ∀ i, ParabolicC2AlphaNormLe (N i) α (fun z => u z i) s) :
+    ParabolicC2AlphaNormLe
+      (∑ i,
+        continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * N i) α u s := by
+  classical
+  let L : ι → F →L[ℝ] ι → F := fun i =>
+    ContinuousLinearMap.single ℝ (fun _ : ι => F) i
+  have hsum := finset_sum (X := X) (E := ι → F) (α := α) (s := s)
+    (S := Finset.univ)
+    (N := fun i : ι => continuousLinearMapRadius (X := X) (E := F) (L i) * N i)
+    (u := fun i z => L i (u z i)) ?_
+  · have hfun : (fun z : ℝ × X => ∑ i, L i (u z i)) = u := by
+      funext z
+      simpa [L] using
+        (ContinuousLinearMap.sum_comp_single (R := ℝ) (φ := fun _ : ι => F)
+          (ContinuousLinearMap.id ℝ (ι → F)) (u z))
+    simpa [L] using (hfun ▸ hsum)
+  · intro i _hi
+    exact (h i).continuousLinearMap (L i)
+
+/-- Entrywise full higher parabolic controls for a finite Pi-valued difference
+assemble into a Pi-valued full higher parabolic difference bound. -/
+theorem pi_sub_pi {ι F : Type*} [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {N : ι → ℝ} {u v : ℝ × X → ι → F}
+    (h : ∀ i, ParabolicC2AlphaNormLe (N i) α (fun z => u z i - v z i) s) :
+    ParabolicC2AlphaNormLe
+      (∑ i,
+        continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * N i) α
+      (fun z : ℝ × X => u z - v z) s := by
+  classical
+  simpa [Pi.sub_apply] using
+    pi (X := X) (α := α) (s := s) (N := N)
+      (u := fun z : ℝ × X => u z - v z) h
+
 /-- A full higher parabolic norm ball for a finite Pi-valued function projects to each
 coordinate as a full higher parabolic norm ball. -/
 theorem pi_apply {ι F : Type*} [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -850,6 +892,30 @@ theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ 
   rcases hu with ⟨N, hN, huN⟩
   exact ⟨_, (huN.continuousLinearMap L).nonneg, huN.continuousLinearMap L⟩
 
+/-- Entrywise higher parabolic membership assembles into finite Pi-valued higher
+parabolic membership. -/
+theorem pi {ι F : Type*} [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {u : ℝ × X → ι → F}
+    (h : ∀ i, ParabolicC2AlphaOn α (fun z => u z i) s) :
+    ParabolicC2AlphaOn α u s := by
+  classical
+  choose N _hN hN using h
+  exact of_normLe (ParabolicC2AlphaNormLe.pi
+    (X := X) (α := α) (s := s) (N := N) (u := u) hN)
+
+/-- Entrywise higher parabolic membership for a finite Pi-valued difference
+assembles into Pi-valued higher parabolic membership. -/
+theorem pi_sub_pi {ι F : Type*} [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {u v : ℝ × X → ι → F}
+    (h : ∀ i, ParabolicC2AlphaOn α (fun z => u z i - v z i) s) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => u z - v z) s := by
+  classical
+  simpa [Pi.sub_apply] using
+    pi (X := X) (α := α) (s := s)
+      (u := fun z : ℝ × X => u z - v z) h
+
 /-- A finite Pi-valued higher parabolic function projects to each coordinate as a higher
 parabolic function. -/
 theorem pi_apply {ι F : Type*} [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -948,6 +1014,29 @@ theorem piApplyLinearMap_apply {ι F : Type*} [Fintype ι] [NormedAddCommGroup F
     [NormedSpace ℝ F] (i : ι) (u : parabolicC2AlphaSubmodule X (ι → F) α s)
     (z : ℝ × X) :
     piApplyLinearMap (X := X) (α := α) (s := s) i u z = u z i :=
+  rfl
+
+/-- Assemble finite Pi-valued higher parabolic submodule elements from their components. -/
+def piOfComponentsLinearMap {ι F : Type*} [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] :
+    (ι → parabolicC2AlphaSubmodule X F α s) →ₗ[ℝ]
+      parabolicC2AlphaSubmodule X (ι → F) α s where
+  toFun u := ⟨fun z i => u i z,
+    ParabolicC2AlphaOn.pi (X := X) (α := α) (s := s) fun i => (u i).2⟩
+  map_add' := by
+    intro u v
+    ext z i
+    rfl
+  map_smul' := by
+    intro c u
+    ext z i
+    rfl
+
+@[simp]
+theorem piOfComponentsLinearMap_apply {ι F : Type*} [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (u : ι → parabolicC2AlphaSubmodule X F α s) (z : ℝ × X) (i : ι) :
+    piOfComponentsLinearMap (X := X) (α := α) (s := s) u z i = u i z :=
   rfl
 
 theorem c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
