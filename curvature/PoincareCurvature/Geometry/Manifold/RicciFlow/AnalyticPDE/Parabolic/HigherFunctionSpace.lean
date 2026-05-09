@@ -707,6 +707,28 @@ theorem space_slice (h : ParabolicC2AlphaNormLe N α u s)
     ‖u (t, x) - u (t, y)‖ ≤ N * (dist x y) ^ α :=
   h.value_c0AlphaNormLe_self.space_slice hx hy
 
+/-- Product-domain pointwise value readout of a higher single-radius bound. -/
+theorem norm_le_of_prod_subset (h : ParabolicC2AlphaNormLe N α u s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t : ℝ} (ht : t ∈ timeSet) {x : X} (hx : x ∈ spaceSet) :
+    ‖u (t, x)‖ ≤ N :=
+  h.value_c0AlphaNormLe_self.norm_le_of_prod_subset hst ht hx
+
+/-- Product-domain time-slice value readout of a higher single-radius bound. -/
+theorem time_slice_half_exponent_of_prod_subset (h : ParabolicC2AlphaNormLe N α u s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t τ : ℝ} (ht : t ∈ timeSet) (hτ : τ ∈ timeSet)
+    {x : X} (hx : x ∈ spaceSet) :
+    ‖u (t, x) - u (τ, x)‖ ≤ N * |t - τ| ^ (α / 2) :=
+  h.value_c0AlphaNormLe_self.time_slice_half_exponent_of_prod_subset hst ht hτ hx
+
+/-- Product-domain fixed-time spatial Holder value readout of a higher single-radius bound. -/
+theorem space_slice_of_prod_subset (h : ParabolicC2AlphaNormLe N α u s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t : ℝ} (ht : t ∈ timeSet) {x y : X} (hx : x ∈ spaceSet) (hy : y ∈ spaceSet) :
+    ‖u (t, x) - u (t, y)‖ ≤ N * (dist x y) ^ α :=
+  h.value_c0AlphaNormLe_self.space_slice_of_prod_subset hst ht hx hy
+
 /-- A higher single-radius bound on a difference gives the corresponding pointwise value
 distance bound. -/
 theorem dist_le_of_sub {v : ℝ × X → E}

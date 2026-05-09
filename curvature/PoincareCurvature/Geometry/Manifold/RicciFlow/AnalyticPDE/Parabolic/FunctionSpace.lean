@@ -219,6 +219,29 @@ theorem space_slice (h : ParabolicC0AlphaNormLe N α u s)
     ‖u (t, x) - u (t, y)‖ ≤ N * (dist x y) ^ α :=
   h.holder.space_slice hx hy
 
+/-- Product-domain pointwise readout of a single-radius parabolic `C^{0,α}` bound. -/
+theorem norm_le_of_prod_subset (h : ParabolicC0AlphaNormLe N α u s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t : ℝ} (ht : t ∈ timeSet) {x : X} (hx : x ∈ spaceSet) :
+    ‖u (t, x)‖ ≤ N :=
+  h.norm_le (hst ⟨ht, hx⟩)
+
+/-- Product-domain time-slice readout of a single-radius parabolic `C^{0,α}` bound. -/
+theorem time_slice_half_exponent_of_prod_subset (h : ParabolicC0AlphaNormLe N α u s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t τ : ℝ} (ht : t ∈ timeSet) (hτ : τ ∈ timeSet)
+    {x : X} (hx : x ∈ spaceSet) :
+    ‖u (t, x) - u (τ, x)‖ ≤ N * |t - τ| ^ (α / 2) :=
+  h.time_slice_half_exponent (hst ⟨ht, hx⟩) (hst ⟨hτ, hx⟩)
+
+/-- Product-domain fixed-time spatial Holder readout of a single-radius parabolic `C^{0,α}`
+bound. -/
+theorem space_slice_of_prod_subset (h : ParabolicC0AlphaNormLe N α u s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t : ℝ} (ht : t ∈ timeSet) {x y : X} (hx : x ∈ spaceSet) (hy : y ∈ spaceSet) :
+    ‖u (t, x) - u (t, y)‖ ≤ N * (dist x y) ^ α :=
+  h.space_slice (hst ⟨ht, hx⟩) (hst ⟨ht, hy⟩)
+
 /-- A single-radius bound on a difference gives the corresponding pointwise distance bound. -/
 theorem dist_le_of_sub (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s)
     ⦃z : ℝ × X⦄ (hz : z ∈ s) :
