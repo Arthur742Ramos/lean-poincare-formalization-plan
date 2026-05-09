@@ -3656,6 +3656,186 @@ theorem finiteCoverChosenSecondJet_timeDeriv_lipschitzOnWith {κ : Type*} [Finty
     finiteCoverChosenSecondJet_timeDeriv_dist_le
       (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u v
 
+/-- Fixed-time spatial value readout estimate for the combined finite-cover chosen second-jet
+seminorm, after the time-space compact pieces cover the requested spatial slices. -/
+theorem finiteCoverChosenSecondJet_value_timeSlice_spatial_dist_le
+    {η κ : Type*} [Fintype κ]
+    (Kdom : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (stateSet : Set (parabolicC2AlphaSubmodule X E α s))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : parabolicC2AlphaSubmodule X E α s⦄,
+      u ∈ stateSet → ∀ ⦃v : parabolicC2AlphaSubmodule X E α s⦄, v ∈ stateSet →
+        ∀ i (x : Kx i), dist (u (τ, x.1)) (v (τ, x.1)) ≤ dist u v := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace
+  have hLip : ∀ τ, τ ∈ timeSet →
+      LipschitzOnWith (1 : ℝ≥0)
+        (fun u : parabolicC2AlphaSubmodule X E α s =>
+          toCompactCoordFamily
+            (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα u)
+        stateSet := by
+    intro _τ _hτ
+    simpa using
+      finiteCoverChosenSecondJet_value_lipschitzOnWith
+        (X := X) (E := E) (α := α) (s := s)
+        Kdom hKdom hα htime hspace stateSet
+  have h := forall_timeSlice_spatial_dist_le_of_toCompactCoordFamily_lipschitzOnWith
+    (X := X) (E := E) (α := α) (s := s)
+    Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+    (A := fun _τ u => u) hLip hcover
+  simpa [one_mul] using h
+
+/-- Fixed-time spatial chosen-spatial-derivative readout estimate for the combined finite-cover
+chosen second-jet seminorm. -/
+theorem finiteCoverChosenSecondJet_spaceDeriv_timeSlice_spatial_dist_le
+    {η κ : Type*} [Fintype κ]
+    (Kdom : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (stateSet : Set (parabolicC2AlphaSubmodule X E α s))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : parabolicC2AlphaSubmodule X E α s⦄,
+      u ∈ stateSet → ∀ ⦃v : parabolicC2AlphaSubmodule X E α s⦄, v ∈ stateSet →
+        ∀ i (x : Kx i),
+          dist
+            ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceDeriv
+              (τ, x.1))
+            ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) v).spaceDeriv
+              (τ, x.1)) ≤ dist u v := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace
+  have hLip : ∀ τ, τ ∈ timeSet →
+      LipschitzOnWith (1 : ℝ≥0)
+        (fun u : parabolicC2AlphaSubmodule X E α s =>
+          chosenSpaceDerivToCompactCoordFamily
+            (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα u)
+        stateSet := by
+    intro _τ _hτ
+    simpa using
+      finiteCoverChosenSecondJet_spaceDeriv_lipschitzOnWith
+        (X := X) (E := E) (α := α) (s := s)
+        Kdom hKdom hα htime hspace stateSet
+  have h := forall_timeSlice_spatial_dist_le_of_chosenSpaceDerivToCompactCoordFamily_lipschitzOnWith
+    (X := X) (E := E) (α := α) (s := s)
+    Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+    (A := fun _τ u => u) hLip hcover
+  simpa [one_mul] using h
+
+/-- Fixed-time spatial chosen-second-spatial-derivative readout estimate for the combined
+finite-cover chosen second-jet seminorm. -/
+theorem finiteCoverChosenSecondJet_spaceSecondDeriv_timeSlice_spatial_dist_le
+    {η κ : Type*} [Fintype κ]
+    (Kdom : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (stateSet : Set (parabolicC2AlphaSubmodule X E α s))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : parabolicC2AlphaSubmodule X E α s⦄,
+      u ∈ stateSet → ∀ ⦃v : parabolicC2AlphaSubmodule X E α s⦄, v ∈ stateSet →
+        ∀ i (x : Kx i),
+          dist
+            ((chosenSecondJet (X := X) (E := E) (α := α) (s := s)
+              u).spaceSecondDeriv (τ, x.1))
+            ((chosenSecondJet (X := X) (E := E) (α := α) (s := s)
+              v).spaceSecondDeriv (τ, x.1)) ≤ dist u v := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace
+  have hLip : ∀ τ, τ ∈ timeSet →
+      LipschitzOnWith (1 : ℝ≥0)
+        (fun u : parabolicC2AlphaSubmodule X E α s =>
+          chosenSpaceSecondDerivToCompactCoordFamily
+            (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα u)
+        stateSet := by
+    intro _τ _hτ
+    simpa using
+      finiteCoverChosenSecondJet_spaceSecondDeriv_lipschitzOnWith
+        (X := X) (E := E) (α := α) (s := s)
+        Kdom hKdom hα htime hspace stateSet
+  have h :=
+    forall_timeSlice_spatial_dist_le_of_chosenSpaceSecondDerivToCompactCoordFamily_lipschitzOnWith
+      (X := X) (E := E) (α := α) (s := s)
+      Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+      (A := fun _τ u => u) hLip hcover
+  simpa [one_mul] using h
+
+/-- Fixed-time spatial chosen-time-derivative readout estimate for the combined finite-cover
+chosen second-jet seminorm. -/
+theorem finiteCoverChosenSecondJet_timeDeriv_timeSlice_spatial_dist_le
+    {η κ : Type*} [Fintype κ]
+    (Kdom : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (stateSet : Set (parabolicC2AlphaSubmodule X E α s))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : parabolicC2AlphaSubmodule X E α s⦄,
+      u ∈ stateSet → ∀ ⦃v : parabolicC2AlphaSubmodule X E α s⦄, v ∈ stateSet →
+        ∀ i (x : Kx i),
+          dist
+            ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv
+              (τ, x.1))
+            ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) v).timeDeriv
+              (τ, x.1)) ≤ dist u v := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace
+  have hLip : ∀ τ, τ ∈ timeSet →
+      LipschitzOnWith (1 : ℝ≥0)
+        (fun u : parabolicC2AlphaSubmodule X E α s =>
+          chosenTimeDerivToCompactCoordFamily
+            (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα u)
+        stateSet := by
+    intro _τ _hτ
+    simpa using
+      finiteCoverChosenSecondJet_timeDeriv_lipschitzOnWith
+        (X := X) (E := E) (α := α) (s := s)
+        Kdom hKdom hα htime hspace stateSet
+  have h := forall_timeSlice_spatial_dist_le_of_chosenTimeDerivToCompactCoordFamily_lipschitzOnWith
+    (X := X) (E := E) (α := α) (s := s)
+    Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+    (A := fun _τ u => u) hLip hcover
+  simpa [one_mul] using h
+
 /-- Restriction to a smaller set as a linear map between coordinate parabolic
 `C^{2+α,1+α/2}` spaces. -/
 def restrictLinearMap {t : Set (ℝ × X)} (hst : t ⊆ s) :
