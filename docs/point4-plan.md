@@ -580,7 +580,11 @@ the spatial/tangent-map cancellation algebra via
 `metricBilinearCoordinateField_spatial_tangentMapCorrection_modelSlots_eq`, so
 Picard/readout linearization hypotheses stated directly on arbitrary centered
 model slots can feed the DeTurck correction calculation before specializing to
-geometric tangent vectors.
+geometric tangent vectors.  The raw variational correction route now consumes
+that algebra through
+`Diffeomorph3GaugeFlowOn.lieCorrection_modelSlots_of_tangentVectorOfCoordinate_Df_eq_cov_sub_extend`,
+allowing the local `Df` identification to be stated on raw model coordinates
+instead of only on `sourceTangentCoordinate` slots.
 The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent

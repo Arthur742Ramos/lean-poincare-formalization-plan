@@ -26521,6 +26521,90 @@ theorem tangentVectorOfCoordinate_Df_eq_cov_sub_extend_of_tangentVectorOfCoordin
     rw [hpw, ← hXpt]
   simpa [p, pw, cw, cov, Y] using hBracket.trans hBracket_eq
 
+/-- Lie-correction reduction with arbitrary centered model-coordinate slots.
+
+This is the model-slot analogue of
+`lieCorrection_of_tangentVectorOfCoordinate_Df_eq_cov_sub_extend`: the
+linearized model flow may be identified with the covariant derivative
+difference on every `wE : E`, and the conclusion keeps the scalar correction
+identity in model slots until a later caller specializes them. -/
+theorem lieCorrection_modelSlots_of_tangentVectorOfCoordinate_Df_eq_cov_sub_extend
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hDf : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p :=
+          SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE
+         SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) wE) =
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p pw) -
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (FiberBundle.extend E pw) p (X t p)))) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ uE vE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         (fderivWithin ℝ
+            (fun yE : E ↦
+              SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+                (I := I) (M := M) g p (t, yE))
+            (Set.range I) ((extChartAt I p) p))
+            (X t p) uE vE +
+          (g t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) uE))
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p vE) +
+          (g t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p uE)
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) vE)) =
+          (g t).inner p
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p
+              (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p uE))
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p vE) +
+          (g t).inner p
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p uE)
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p
+              (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p vE))) := by
+  intro t ht x uE vE xE hxE hAeq
+  let p : M := (G.maps3 t) x
+  let D : E →L[ℝ] E := Df t (α.flow (xE, t))
+  let Y : ∀ q : M, TangentSpace I q :=
+    intrinsicDeTurckGaugeField (I := I) (M := M) g background t
+  have hD : ∀ wE : E,
+      SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p (D wE) =
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          Y p (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE)) -
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (FiberBundle.extend E
+            (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE))
+          p (X t p)) := by
+    intro wE
+    simpa [p, D, Y] using hDf ht x wE xE hxE hAeq
+  simpa [p, D, Y] using
+    SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField_spatial_tangentMapCorrection_modelSlots_eq
+      (I := I) (M := M) g t p (X t p) Y D hD uE vE
+
 /-- The raw coordinate Lie-correction identity follows once each variational
 tangent-map `Df` slot is identified with the difference between differentiating
 the gauge vector field in that slot and differentiating the canonical `extend`
