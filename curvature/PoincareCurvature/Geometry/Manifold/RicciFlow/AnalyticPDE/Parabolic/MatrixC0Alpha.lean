@@ -16829,5 +16829,54 @@ theorem ricciDeTurckSchematicMatrix_sub_entrywise_family_of_isCompact_of_exists_
     hK hα hM hN hMdiff hD hE hDdiff hKc hHdiff hdetM_ne hdetN_ne
 
 end ParabolicC0AlphaOn
+
+namespace parabolicC0AlphaSubmodule
+
+variable {X : Type*} [PseudoMetricSpace X]
+variable {α : ℝ} {s : Set (ℝ × X)}
+
+/-- Coordinate projection from a matrix-valued parabolic `C^{0,α}` submodule. -/
+def matrixApplyLinearMap {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A] (i : m) (j : n) :
+    parabolicC0AlphaSubmodule X (Matrix m n A) α s →ₗ[ℝ]
+      parabolicC0AlphaSubmodule X A α s :=
+  continuousLinearMap (X := X) (E := Matrix m n A) (α := α) (s := s)
+    ((ContinuousLinearMap.proj j : (n → A) →L[ℝ] A).comp
+      (ContinuousLinearMap.proj i : Matrix m n A →L[ℝ] n → A))
+
+@[simp]
+theorem matrixApplyLinearMap_apply {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A] (i : m) (j : n)
+    (u : parabolicC0AlphaSubmodule X (Matrix m n A) α s) (z : ℝ × X) :
+    matrixApplyLinearMap (X := X) (α := α) (s := s) i j u z = u z i j :=
+  rfl
+
+/-- Assemble matrix-valued parabolic `C^{0,α}` submodule elements from their entries. -/
+def matrixOfEntriesLinearMap {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A] :
+    (m → n → parabolicC0AlphaSubmodule X A α s) →ₗ[ℝ]
+      parabolicC0AlphaSubmodule X (Matrix m n A) α s where
+  toFun u := ⟨fun z i j => u i j z,
+    ParabolicC0AlphaOn.matrix_of_entries (X := X) (α := α) (s := s)
+      fun i j => (u i j).2⟩
+  map_add' := by
+    intro u v
+    ext z i j
+    rfl
+  map_smul' := by
+    intro c u
+    ext z i j
+    rfl
+
+@[simp]
+theorem matrixOfEntriesLinearMap_apply {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A]
+    (u : m → n → parabolicC0AlphaSubmodule X A α s) (z : ℝ × X)
+    (i : m) (j : n) :
+    matrixOfEntriesLinearMap (X := X) (α := α) (s := s) u z i j = u i j z :=
+  rfl
+
+end parabolicC0AlphaSubmodule
+
 end AnalyticPDE
 end RicciFlow
