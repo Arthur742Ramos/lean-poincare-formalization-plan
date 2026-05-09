@@ -1443,6 +1443,26 @@ theorem norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe {κ : Type*} [Fintyp
   simpa using norm_toCompactCoordFamily_family_sub_le_of_normLe
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα h
 
+/-- The linear finite-cover value readout inherits the finite-Pi componentwise
+summed-radius estimate. -/
+theorem norm_toCompactCoordFamilyLinearMap_pi_sub_le_sum_mul_of_entries
+    {κ ι F : Type*} [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC2AlphaSubmodule X (ι → F) α s}
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    ‖toCompactCoordFamilyLinearMap (X := X) (E := ι → F) (α := α) (s := s)
+        Kc hKc hα u -
+      toCompactCoordFamilyLinearMap (X := X) (E := ι → F) (α := α) (s := s)
+        Kc hKc hα v‖ ≤
+      (∑ i, K i) * R := by
+  simpa using norm_toCompactCoordFamily_pi_family_sub_le_sum_mul_of_entries
+    (X := X) (α := α) (s := s) Kc hKc hα hK_nonneg hR h
+
 /-- Pairwise single-radius `C^{2+α,1+α/2}` difference estimates give a Lipschitz estimate
 for the linear finite-cover value readout. -/
 theorem lipschitzOnWith_toCompactCoordFamilyLinearMap_of_normLe_sub {Y κ : Type*}
@@ -1462,6 +1482,32 @@ theorem lipschitzOnWith_toCompactCoordFamilyLinearMap_of_normLe_sub {Y κ : Type
   have hnorm := norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv)
   simpa [dist_eq_norm] using hnorm
+
+/-- Componentwise higher difference estimates with finite Pi constants give a Lipschitz
+estimate for the linear finite-cover value readout of a finite Pi-valued higher parabolic
+function. -/
+theorem lipschitzOnWith_toCompactCoordFamilyLinearMap_pi_of_component_normLe_sub
+    {Y κ ι F : Type*} [PseudoMetricSpace Y] [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} (K : ι → ℝ≥0)
+    {A : Y → parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i,
+      ParabolicC2AlphaNormLe ((K i : ℝ) * dist u v) α
+        (fun z => A u z i - A v z i) s) :
+    LipschitzOnWith (∑ i, K i)
+      (fun u : Y =>
+        toCompactCoordFamilyLinearMap (X := X) (E := ι → F) (α := α) (s := s)
+          Kc hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hnorm := norm_toCompactCoordFamilyLinearMap_pi_sub_le_sum_mul_of_entries
+    (X := X) (α := α) (s := s) Kc hKc hα
+    (K := fun i => (K i : ℝ)) (R := dist u v)
+    (fun i => NNReal.coe_nonneg (K i)) dist_nonneg (fun i => h hu hv i)
+  simpa [dist_eq_norm, NNReal.coe_sum] using hnorm
 
 /-- Equality of all compact-piece value readouts identifies two coordinate parabolic
 `C^{2+α,1+α/2}` functions on the covered set. -/
