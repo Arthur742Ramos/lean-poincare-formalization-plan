@@ -2765,6 +2765,15 @@ spatial-correction continuation for that same selected interval.
 The theorem-family analogue now performs the same same-witness assembly
 uniformly over all initial-value problems, returning one selected gauge-flow
 family with both per-IVP continuations.
+The joint package
+`SelectedIntrinsicDeTurckGaugeFlowExistence.IccStatePreservingTensorSpatialCorrectionData`
+now ties those two local inputs to the same state-preserving Picard witness:
+its spatial-correction field is indexed by the `α` already selected by the
+tensor derivative package.  The fixed-IVP and theorem-family compact wrappers
+ending in
+`exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_and_spatial_tangent_correction_of_statePreservingTensorSpatialCorrectionData_of_compact_iUnion_openPreimage_localGluingData_of_contMDiffCovariantDerivative_background`
+therefore return a single dependent continuation that produces both the tensor
+time derivative and the spatial correction for that same Picard witness.
 The theorem-family compact wrapper
 `SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_compact_iUnion_openPreimage_localGluingData`
 now performs the same selected compact construction uniformly over all initial
