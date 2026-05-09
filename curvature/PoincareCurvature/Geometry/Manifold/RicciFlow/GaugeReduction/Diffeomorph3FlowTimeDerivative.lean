@@ -37513,6 +37513,99 @@ theorem exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_and_spatial_tangent_
   intro f Df x₀ a R Kf KD Lf BA BD r data
   exact ⟨hTensor data.tensor, hSpatial data.tensor.α data.spatial⟩
 
+/-- Compact selected raw-flow construction packaged with a joint scalar-data
+and spatial-correction continuation.
+
+This is the closed-time-set version of
+`exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_and_spatial_tangent_correction_of_statePreservingTensorSpatialCorrectionData_of_compact_iUnion_openPreimage_localGluingData_of_contMDiffCovariantDerivative_background`:
+the continuation still obtains the interior tensor derivative from the compact
+Picard package, but it also consumes endpoint tensor derivatives and returns the
+selected scalar inner-derivative package used by theorem-package projections. -/
+theorem exists_restrictSymmetricIcc_pullbackMetricInnerDerivativeData_and_spatial_tangent_correction_of_statePreservingTensorSpatialCorrectionData_of_compact_iUnion_openPreimage_localGluingData_of_contMDiffCovariantDerivative_background
+    [CompactSpace M] {ι : Type*}
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {Y : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (defaultF defaultG : ℝ → M → M)
+    (Fₗ Gₗ : ι → ℝ → M → M)
+    (U V : ℝ → ι → Set M) (W : ι → Set M)
+    (htimeSet : sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 ivp.initialTime)
+    (hlocal : ∀ t : ℝ, ∀ i,
+      LocalGluingData (I := I) (M := M) 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i))
+    (hFcompat : ∀ t : ℝ, ∀ i j, EqOn (Fₗ i t) (Fₗ j t) (U t i ∩ U t j))
+    (hGcompat : ∀ t : ℝ, ∀ i j, EqOn (Gₗ i t) (Gₗ j t) (V t i ∩ V t j))
+    (hUpreimage : ∀ τ : ℝ, ∀ i, ∀ x : M, x ∈ U τ i ↔ Fₗ i τ x ∈ W i)
+    (hWopen : ∀ i, IsOpen (W i))
+    (hUcover : Set.univ ⊆ ⋃ i, U ivp.initialTime i)
+    (hUwithin : ∀ i, ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet]
+      ivp.initialTime, U ivp.initialTime i ⊆ U τ i)
+    (hVwithin : ∀ i, ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet]
+      ivp.initialTime, V ivp.initialTime i ⊆ V τ i)
+    (hanchoredLocal : ∀ i, ∀ x ∈ U ivp.initialTime i,
+      Fₗ i ivp.initialTime x = x)
+    (hcontLocal : ∀ i, ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet,
+      ∀ x : M, x ∈ U t i →
+        ContinuousWithinAt (fun τ : ℝ ↦ Fₗ i τ x)
+          sol.1.toIntrinsicDeTurckSolution.timeSet t)
+    (hderivLocal : ∀ i, ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet,
+      ∀ x : M, x ∈ U t i →
+        HasDerivWithinAt
+          (fun τ : ℝ ↦ (extChartAt I (Fₗ i t x)) (Fₗ i τ x))
+          (Y t (Fₗ i t x)) sol.1.toIntrinsicDeTurckSolution.timeSet t)
+    (hYLocal : ∀ t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet,
+      ∀ᶠ τ in 𝓝[sol.1.toIntrinsicDeTurckSolution.timeSet] t,
+        ∀ i, ∀ x : M, x ∈ U τ i →
+          Y τ (Fₗ i τ x) =
+            intrinsicDeTurckGaugeField (I := I) (M := M)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background τ (Fₗ i τ x))
+    (hbackground : ∀ ⦃t : ℝ⦄,
+      t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        CovariantDerivative.ContMDiffCovariantDerivative
+          (sol.1.toIntrinsicDeTurckSolution.background t) 1) :
+    ∃ ε : ℝ, ∃ hε : 0 < ε,
+      ∃ hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+          sol.1.toIntrinsicDeTurckSolution.timeSet,
+        ∃ G : SelectedIntrinsicDeTurckGaugeFlowExistence
+            (E := E) (H := H) (I := I) (M := M) ivp,
+          G.solution = sol.restrictSymmetricIcc hε hsub ∧
+          G.solution.1.toIntrinsicDeTurckSolution.timeSet =
+            Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ∧
+          (∀ {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+              {x₀ : E} {a R Kf KD Lf BA BD r : ℝ≥0},
+            (data : IccStatePreservingTensorSpatialCorrectionData
+              (I := I) (M := M) G Fₗ Gₗ U V (ε := ε)
+              (f := f) (Df := Df) (x₀ := x₀) (a := a) (R := R)
+              (Kf := Kf) (KD := KD) (Lf := Lf) (BA := BA)
+              (BD := BD) (r := r)) →
+            HasTimeDerivativeAt (I := I) (M := M)
+              (G.flow.maps3.pullbackMetricFamily
+                G.solution.1.toIntrinsicDeTurckSolution.metric)
+              (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+              (ivp.initialTime - ε) →
+            HasTimeDerivativeAt (I := I) (M := M)
+              (G.flow.maps3.pullbackMetricFamily
+                G.solution.1.toIntrinsicDeTurckSolution.metric)
+              (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+              (ivp.initialTime + ε) →
+            G.PullbackMetricInnerDerivativeData ∧
+            IccSpatialCorrectionConclusion (I := I) (M := M)
+              G (ε := ε) data.tensor.α) := by
+  rcases
+    exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_and_spatial_tangent_correction_of_statePreservingTensorSpatialCorrectionData_of_compact_iUnion_openPreimage_localGluingData_of_contMDiffCovariantDerivative_background
+      (I := I) (M := M) sol defaultF defaultG Fₗ Gₗ U V W htimeSet
+      hlocal hFcompat hGcompat hUpreimage hWopen hUcover hUwithin hVwithin
+      hanchoredLocal hcontLocal hderivLocal hYLocal hbackground with
+    ⟨ε, hε, hsub, G, hGsol, hGtime, hcont⟩
+  refine ⟨ε, hε, hsub, G, hGsol, hGtime, ?_⟩
+  intro f Df x₀ a R Kf KD Lf BA BD r data hleft hright
+  rcases hcont data with ⟨hIoo, hSpatial⟩
+  exact
+    ⟨G.pullbackMetricInnerDerivativeData_of_solution_eq_restrictSymmetricIcc_of_Ioo_endpoints
+      sol hε hsub hGsol hIoo hleft hright,
+      hSpatial⟩
+
 end SelectedIntrinsicDeTurckGaugeFlowExistence
 
 namespace SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
@@ -38957,6 +39050,141 @@ theorem exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_and_spatial_tangent_
   refine ⟨ε, hε, hsub, G, hGsol, hGtime, ?_⟩
   intro ivp f Df x₀ a R Kf KD Lf BA BD r data
   exact ⟨hTensor ivp data.tensor, hSpatial ivp data.tensor.α data.spatial⟩
+
+/-- Theorem-family compact selected raw-flow construction packaged with a joint
+scalar-data and spatial-correction continuation.
+
+For each initial-value problem, the continuation combines the compact
+open-interior tensor route with caller-supplied endpoint derivatives and returns
+the selected scalar inner-derivative package used by theorem-package
+projections, together with the spatial correction for the same Picard witness. -/
+theorem exists_restrictSymmetricIcc_pullbackMetricInnerDerivativeData_and_spatial_tangent_correction_of_statePreservingTensorSpatialCorrectionData_of_compact_iUnion_openPreimage_localGluingData_of_contMDiffCovariantDerivative_background
+    [CompactSpace M] {ι : Type*}
+    (sol : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp)
+    (Y : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      CovariantDerivative.TimeDependentVectorField (I := I) (M := M))
+    (defaultF defaultG :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ℝ → M → M)
+    (Fₗ Gₗ :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ι → ℝ → M → M)
+    (U V :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ℝ → ι → Set M)
+    (W : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ι → Set M)
+    (htimeSet : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      (sol ivp).1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 ivp.initialTime)
+    (hlocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ t : ℝ, ∀ i,
+        LocalGluingData (I := I) (M := M) 3
+          (Fₗ ivp i t) (Gₗ ivp i t) (U ivp t i) (V ivp t i))
+    (hFcompat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ t : ℝ, ∀ i j, EqOn (Fₗ ivp i t) (Fₗ ivp j t)
+        (U ivp t i ∩ U ivp t j))
+    (hGcompat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ t : ℝ, ∀ i j, EqOn (Gₗ ivp i t) (Gₗ ivp j t)
+        (V ivp t i ∩ V ivp t j))
+    (hUpreimage : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ τ : ℝ, ∀ i, ∀ x : M,
+        x ∈ U ivp τ i ↔ Fₗ ivp i τ x ∈ W ivp i)
+    (hWopen : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, IsOpen (W ivp i))
+    (hUcover : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Set.univ ⊆ ⋃ i, U ivp ivp.initialTime i)
+    (hUwithin : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, ∀ᶠ τ in 𝓝[(sol ivp).1.toIntrinsicDeTurckSolution.timeSet]
+        ivp.initialTime, U ivp ivp.initialTime i ⊆ U ivp τ i)
+    (hVwithin : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, ∀ᶠ τ in 𝓝[(sol ivp).1.toIntrinsicDeTurckSolution.timeSet]
+        ivp.initialTime, V ivp ivp.initialTime i ⊆ V ivp τ i)
+    (hanchoredLocal :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ∀ i, ∀ x ∈ U ivp ivp.initialTime i,
+          Fₗ ivp i ivp.initialTime x = x)
+    (hcontLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, ∀ t ∈ (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+        ∀ x : M, x ∈ U ivp t i →
+          ContinuousWithinAt (fun τ : ℝ ↦ Fₗ ivp i τ x)
+            (sol ivp).1.toIntrinsicDeTurckSolution.timeSet t)
+    (hderivLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ i, ∀ t ∈ (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+        ∀ x : M, x ∈ U ivp t i →
+          HasDerivWithinAt
+            (fun τ : ℝ ↦ (extChartAt I (Fₗ ivp i t x)) (Fₗ ivp i τ x))
+            ((Y ivp) t (Fₗ ivp i t x))
+            (sol ivp).1.toIntrinsicDeTurckSolution.timeSet t)
+    (hYLocal : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ t ∈ (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+        ∀ᶠ τ in 𝓝[(sol ivp).1.toIntrinsicDeTurckSolution.timeSet] t,
+          ∀ i, ∀ x : M, x ∈ U ivp τ i →
+            (Y ivp) τ (Fₗ ivp i τ x) =
+              intrinsicDeTurckGaugeField (I := I) (M := M)
+                (sol ivp).1.toIntrinsicDeTurckSolution.metric
+                (sol ivp).1.toIntrinsicDeTurckSolution.background τ
+                (Fₗ ivp i τ x))
+    (hbackground :
+      ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        ∀ ⦃t : ℝ⦄,
+          t ∈ (sol ivp).1.toIntrinsicDeTurckSolution.timeSet →
+            CovariantDerivative.ContMDiffCovariantDerivative
+              ((sol ivp).1.toIntrinsicDeTurckSolution.background t) 1) :
+    ∃ ε : InitialValueProblem (E := E) (H := H) (I := I) (M := M) → ℝ,
+      ∃ hε : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+        0 < ε ivp,
+        ∃ hsub : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+          Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) ⊆
+            (sol ivp).1.toIntrinsicDeTurckSolution.timeSet,
+          ∃ G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+              (E := E) (H := H) (I := I) (M := M),
+            (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+              G.solution ivp = (sol ivp).restrictSymmetricIcc (hε ivp) (hsub ivp)) ∧
+            (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+              (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet =
+                Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp)) ∧
+            (∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+              ∀ {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+                {x₀ : E} {a R Kf KD Lf BA BD r : ℝ≥0},
+                (data :
+                  SelectedIntrinsicDeTurckGaugeFlowExistence.IccStatePreservingTensorSpatialCorrectionData
+                    (I := I) (M := M)
+                    (G.forInitialValueProblem ivp) (Fₗ ivp) (Gₗ ivp)
+                    (U ivp) (V ivp) (ε := ε ivp)
+                    (f := f) (Df := Df) (x₀ := x₀) (a := a)
+                    (R := R) (Kf := Kf) (KD := KD) (Lf := Lf)
+                    (BA := BA) (BD := BD) (r := r)) →
+                HasTimeDerivativeAt (I := I) (M := M)
+                  ((G.flow ivp).maps3.pullbackMetricFamily
+                    (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+                  ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+                    (G.gauge ivp))
+                  (ivp.initialTime - ε ivp) →
+                HasTimeDerivativeAt (I := I) (M := M)
+                  ((G.flow ivp).maps3.pullbackMetricFamily
+                    (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+                  ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+                    (G.gauge ivp))
+                  (ivp.initialTime + ε ivp) →
+                (G.forInitialValueProblem ivp).PullbackMetricInnerDerivativeData ∧
+                SelectedIntrinsicDeTurckGaugeFlowExistence.IccSpatialCorrectionConclusion
+                  (I := I) (M := M)
+                  (G.forInitialValueProblem ivp) (ε := ε ivp) data.tensor.α) := by
+  rcases
+    exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_and_spatial_tangent_correction_of_statePreservingTensorSpatialCorrectionData_of_compact_iUnion_openPreimage_localGluingData_of_contMDiffCovariantDerivative_background
+      (I := I) (M := M) sol Y defaultF defaultG Fₗ Gₗ U V W htimeSet
+      hlocal hFcompat hGcompat hUpreimage hWopen hUcover hUwithin hVwithin
+      hanchoredLocal hcontLocal hderivLocal hYLocal hbackground with
+    ⟨ε, hε, hsub, G, hGsol, hGtime, hcont⟩
+  refine ⟨ε, hε, hsub, G, hGsol, hGtime, ?_⟩
+  intro ivp f Df x₀ a R Kf KD Lf BA BD r data hleft hright
+  rcases hcont ivp data with ⟨hIoo, hSpatial⟩
+  exact
+    ⟨(G.forInitialValueProblem ivp).pullbackMetricInnerDerivativeData_of_solution_eq_restrictSymmetricIcc_of_Ioo_endpoints
+      (sol ivp) (hε ivp) (hsub ivp) (hGsol ivp) hIoo hleft hright,
+      hSpatial⟩
 
 end SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
 

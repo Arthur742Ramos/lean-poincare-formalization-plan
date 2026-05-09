@@ -2794,7 +2794,13 @@ same fixed-IVP and theorem-family endpoint-gluing routes now also project
 directly to `PullbackMetricInnerDerivativeData`, so selected compact `Ioo`
 tensor output plus endpoint tensor derivatives can feed the existing
 scalar-derivative theorem-package projections without an extra manual
-conversion step.
+conversion step. The compact same-witness continuations now expose that
+conversion directly as well: the fixed-IVP and theorem-family wrappers ending
+in
+`exists_restrictSymmetricIcc_pullbackMetricInnerDerivativeData_and_spatial_tangent_correction_of_statePreservingTensorSpatialCorrectionData_of_compact_iUnion_openPreimage_localGluingData_of_contMDiffCovariantDerivative_background`
+return the selected scalar package and the spatial correction for the same
+state-preserving Picard witness once the two endpoint tensor derivatives are
+supplied.
 The theorem-family analogue now performs the same same-witness assembly
 uniformly over all initial-value problems, returning one selected gauge-flow
 family with both per-IVP continuations.
