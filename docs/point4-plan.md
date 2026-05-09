@@ -3565,6 +3565,9 @@ The global raw-gauge route now also exposes the ambient state-preserving Banach
 solution with common-interval uniqueness and symmetric positive-definite
 persistence, the represented continuous Riemannian-metric-valued curve, and a
 paired smooth-realization/reverse-encoding fiber as a single selected witness.
+It also exposes the same paired smooth-realization/reverse-encoding fiber for
+any already-chosen global Banach solution, matching the existing interval
+fixed-solution readout.
 The selected metric curve is unique on common Banach existence intervals.
 The interval raw-gauge route similarly exposes the ambient state-preserving
 Banach solution with terminal-time control and common-interval uniqueness, now
