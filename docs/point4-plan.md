@@ -3963,8 +3963,8 @@ finite-cover value seminormed/normed carrier induced by compact-family value
 readouts, including definitional norm/distance readback, a separated normed
 additive-group structure for global compact-piece covers, and direct/symmetric
 closed-ball readouts from higher difference balls, including finite-coordinate
-finite-Pi variants with radii `Kᵢ * R`. This is only the value-readout carrier,
-not the full `C^{2+α,1+α/2}` Banach norm or a completeness theorem.
+finite-Pi value variants with radii `Kᵢ * R`. This is only the value-readout
+carrier, not the full `C^{2+α,1+α/2}` Banach norm or a completeness theorem.
 It also exposes noncanonical chosen-second-jet readouts as lower
 `C^{0,α}` submodule elements for the spatial derivative, second spatial
 derivative, and time derivative. These wrappers only make the existential jet
@@ -4023,9 +4023,10 @@ consume norm-ball difference estimates in the same metric-neighborhood shape
 used by the geometric chart layer. The lower and higher finite-cover value
 seminorms and the combined finite-cover chosen-second-jet seminorm now also
 have direct and symmetric closed-ball readouts from those norm-ball difference
-estimates, including finite-coordinate value variants and the separated
-all-cover normed variants. They do not make the derivative choice canonical or
-upgrade this compact-family jet seminorm into the full
+estimates, including finite-coordinate value variants, combined chosen-jet
+variants with coordinate-insertion radii, and the separated all-cover normed
+variants. They do not make the derivative choice canonical or upgrade this
+compact-family jet seminorm into the full
 `C^{2+α,1+α/2}` Banach
 norm, Schauder estimate, or completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher

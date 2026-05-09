@@ -4537,6 +4537,208 @@ theorem finiteCoverChosenSecondJet_mem_closedBall_symm_of_normLe_sub_unique_ofCo
       (X := X) (E := E) (α := α) (s := s)
       Kc hKc hα htime hspace hcover h
 
+/-- Componentwise finite-Pi higher difference controls assemble into a combined finite-cover
+chosen second-jet distance bound. The radius records the coordinate-insertion constants needed
+to turn the component bounds into one Pi-valued higher norm ball. -/
+theorem finiteCoverChosenSecondJet_dist_le_pi_of_component_normLe_sub_unique
+    {κ ι F : Type*} [Fintype κ] [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace
+    dist u v ≤
+      (∑ i,
+        ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * R := by
+  classical
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace
+  have hpi :
+      ParabolicC2AlphaNormLe
+        ((∑ i,
+          ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+            (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * R) α
+        (fun z : ℝ × X => u z - v z) s :=
+    ParabolicC2AlphaNormLe.pi_sub_pi_mul_radius
+      (X := X) (α := α) (s := s) (K := K) (R := R)
+      (u := fun z : ℝ × X => u z) (v := fun z : ℝ × X => v z) h
+  simpa using
+    finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα hpi htime hspace
+
+/-- Componentwise finite-Pi higher difference controls give closed-ball membership for the
+combined finite-cover chosen second-jet seminorm. -/
+theorem finiteCoverChosenSecondJet_mem_closedBall_pi_of_component_normLe_sub_unique
+    {κ ι F : Type*} [Fintype κ] [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace
+    u ∈ Metric.closedBall v
+      ((∑ i,
+        ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * R) := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace
+  simpa [Metric.mem_closedBall] using
+    finiteCoverChosenSecondJet_dist_le_pi_of_component_normLe_sub_unique
+      (X := X) (α := α) (s := s) Kc hKc hα h htime hspace
+
+/-- Symmetric closed-ball membership for the combined finite-cover chosen second-jet seminorm
+from componentwise finite-Pi higher difference controls. -/
+theorem finiteCoverChosenSecondJet_mem_closedBall_symm_pi_of_component_normLe_sub_unique
+    {κ ι F : Type*} [Fintype κ] [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace
+    v ∈ Metric.closedBall u
+      ((∑ i,
+        ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * R) := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace
+  simpa [Metric.mem_closedBall, dist_comm] using
+    finiteCoverChosenSecondJet_dist_le_pi_of_component_normLe_sub_unique
+      (X := X) (α := α) (s := s) Kc hKc hα h htime hspace
+
+/-- Componentwise finite-Pi higher difference controls assemble into a separated all-cover
+combined finite-cover chosen second-jet distance bound. -/
+theorem finiteCoverChosenSecondJet_dist_le_pi_of_component_normLe_sub_unique_ofCover
+    {κ ι F : Type*} [Fintype κ] [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := ι → F) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    dist u v ≤
+      (∑ i,
+        ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * R := by
+  classical
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace hcover
+  have hpi :
+      ParabolicC2AlphaNormLe
+        ((∑ i,
+          ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+            (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * R) α
+        (fun z : ℝ × X => u z - v z) s :=
+    ParabolicC2AlphaNormLe.pi_sub_pi_mul_radius
+      (X := X) (α := α) (s := s) (K := K) (R := R)
+      (u := fun z : ℝ × X => u z) (v := fun z : ℝ × X => v z) h
+  simpa using
+    finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique_ofCover
+      (X := X) (E := ι → F) (α := α) (s := s)
+      Kc hKc hα htime hspace hcover hpi
+
+/-- Componentwise finite-Pi higher difference controls give closed-ball membership for the
+separated all-cover combined finite-cover chosen second-jet norm. -/
+theorem finiteCoverChosenSecondJet_mem_closedBall_pi_of_component_normLe_sub_unique_ofCover
+    {κ ι F : Type*} [Fintype κ] [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := ι → F) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    u ∈ Metric.closedBall v
+      ((∑ i,
+        ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * R) := by
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace hcover
+  simpa [Metric.mem_closedBall] using
+    finiteCoverChosenSecondJet_dist_le_pi_of_component_normLe_sub_unique_ofCover
+      (X := X) (α := α) (s := s) Kc hKc hα htime hspace hcover h
+
+/-- Symmetric closed-ball membership for the separated all-cover combined finite-cover chosen
+second-jet norm from componentwise finite-Pi higher difference controls. -/
+theorem finiteCoverChosenSecondJet_mem_closedBall_symm_pi_of_component_normLe_sub_unique_ofCover
+    {κ ι F : Type*} [Fintype κ] [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := ι → F) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    v ∈ Metric.closedBall u
+      ((∑ i,
+        ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * R) := by
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace hcover
+  simpa [Metric.mem_closedBall, dist_comm] using
+    finiteCoverChosenSecondJet_dist_le_pi_of_component_normLe_sub_unique_ofCover
+      (X := X) (α := α) (s := s) Kc hKc hα htime hspace hcover h
+
 /-- Pairwise higher difference estimates give a Lipschitz estimate in the induced combined
 finite-cover chosen second-jet seminorm. -/
 theorem lipschitzOnWith_finiteCoverChosenSecondJet_of_normLe_sub_unique
