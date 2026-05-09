@@ -3876,7 +3876,11 @@ higher membership and the higher
 submodule now also expose actual time, spatial, and second-spatial derivative
 witnesses with value-level `C^{0,α}` controls, without choosing a canonical
 derivative map, and the norm-ball layer can coarsen one chosen second jet's
-value and derivative components to the same `C^{0,α}` radius. The higher
+value and derivative components to the same `C^{0,α}` radius. Chosen second
+jets now also identify their stored time and spatial derivatives with the
+canonical `derivWithin`/`fderivWithin` on unique-differentiability slices, and
+any two chosen jets have the same time, spatial, and second-spatial derivative
+fields there. The higher
 submodule also has finite-Pi coordinate projection and component-assembly maps,
 and inherits compact value readouts from that forgetful map: single
 compact pieces, finite compact families, and the linear finite-cover readout

@@ -117,6 +117,64 @@ theorem spaceSecondDeriv_hasFDerivWithinAt (J : ParabolicSecondJet u s)
       (spaceSliceDomain s z.1) z.2 :=
   J.hasSpaceSecondDeriv hz
 
+theorem timeDeriv_eq_derivWithin (J : ParabolicSecondJet u s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s)
+    (hunique : UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1) :
+    J.timeDeriv z = derivWithin (fun t : ℝ => u (t, z.2)) (timeSliceDomain s z.2) z.1 :=
+  ((J.hasTimeDeriv hz).derivWithin hunique).symm
+
+theorem spaceDeriv_eq_fderivWithin (J : ParabolicSecondJet u s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s)
+    (hunique : UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    J.spaceDeriv z =
+      fderivWithin ℝ (fun x : X => u (z.1, x)) (spaceSliceDomain s z.1) z.2 :=
+  ((J.hasSpaceDeriv hz).fderivWithin hunique).symm
+
+theorem spaceSecondDeriv_eq_fderivWithin (J : ParabolicSecondJet u s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s)
+    (hunique : UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    J.spaceSecondDeriv z =
+      fderivWithin ℝ (fun x : X => J.spaceDeriv (z.1, x))
+        (spaceSliceDomain s z.1) z.2 :=
+  ((J.hasSpaceSecondDeriv hz).fderivWithin hunique).symm
+
+theorem timeDeriv_eq_of_unique (J K : ParabolicSecondJet u s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s)
+    (hunique : UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1) :
+    J.timeDeriv z = K.timeDeriv z :=
+  hunique.eq_deriv _ (J.hasTimeDeriv hz) (K.hasTimeDeriv hz)
+
+theorem spaceDeriv_eq_of_unique (J K : ParabolicSecondJet u s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s)
+    (hunique : UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    J.spaceDeriv z = K.spaceDeriv z :=
+  hunique.eq (J.hasSpaceDeriv hz) (K.hasSpaceDeriv hz)
+
+theorem spaceDeriv_eqOn_of_unique (J K : ParabolicSecondJet u s) {t : ℝ}
+    (hunique : ∀ ⦃x : X⦄, (t, x) ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s t) x) :
+    EqOn (fun x : X => J.spaceDeriv (t, x)) (fun x : X => K.spaceDeriv (t, x))
+      (spaceSliceDomain s t) := by
+  intro x hx
+  exact J.spaceDeriv_eq_of_unique K hx (hunique hx)
+
+theorem spaceSecondDeriv_eq_of_unique (J K : ParabolicSecondJet u s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s)
+    (hunique : ∀ ⦃x : X⦄, (z.1, x) ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) x) :
+    J.spaceSecondDeriv z = K.spaceSecondDeriv z := by
+  have hEqOn :
+      EqOn (fun x : X => J.spaceDeriv (z.1, x))
+        (fun x : X => K.spaceDeriv (z.1, x)) (spaceSliceDomain s z.1) :=
+    J.spaceDeriv_eqOn_of_unique K hunique
+  have hz_space : z.2 ∈ spaceSliceDomain s z.1 := by
+    simpa [spaceSliceDomain] using hz
+  have hK :
+      HasFDerivWithinAt (fun x : X => J.spaceDeriv (z.1, x))
+        (K.spaceSecondDeriv z) (spaceSliceDomain s z.1) z.2 :=
+    (K.hasSpaceSecondDeriv hz).congr hEqOn (hEqOn hz_space)
+  exact (hunique hz).eq (J.hasSpaceSecondDeriv hz) hK
+
 /-- Sum of two parabolic second jets, with derivative witnesses added componentwise. -/
 def add {v : ℝ × X → E} (Ju : ParabolicSecondJet u s) (Jv : ParabolicSecondJet v s) :
     ParabolicSecondJet (fun z : ℝ × X => u z + v z) s where
