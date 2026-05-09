@@ -593,7 +593,13 @@ adapter now exposes this directly as
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_modelSlotCorrection`,
 which feeds the model-slot signed correction into the finite-cover `hvalue`
 route while specializing to source coordinates only at the final component
-handoff.
+handoff.  Upstream, the Picard fixed-chart `Df` bridge now also has
+model-slot variants
+`Diffeomorph3GaugeFlowOn.tangentCoordChange_DfCoord_modelSlots_of_model_hasFDerivWithinAt_of_eventuallyEq`,
+`Diffeomorph3GaugeFlowOn.tangentCoordChange_DfCoord_modelSlots_of_model_hasFDerivWithinAt_of_eventuallyEqWithin`,
+and their closed-ball / fixed-center `EqOn` specializations, so closed-Picard
+model derivative data can produce `Df` identities on arbitrary centered model
+directions before entering the correction route.
 The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent

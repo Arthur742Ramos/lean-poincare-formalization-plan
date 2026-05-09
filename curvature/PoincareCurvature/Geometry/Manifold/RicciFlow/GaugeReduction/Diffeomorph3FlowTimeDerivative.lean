@@ -26189,6 +26189,100 @@ theorem tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEq
     congrArg (fun L : E →L[ℝ] E => L cw) hlin
   simpa [p, pw, cw, y, V, hybase] using hlin_apply
 
+/-- Model-slot version of
+`tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEq`.
+
+The Picard derivative hypotheses are the same as in the source-coordinate
+version, but the resulting `Df` identification is stated for an arbitrary
+centered model direction `wE`. -/
+theorem tangentCoordChange_DfCoord_modelSlots_of_model_hasFDerivWithinAt_of_eventuallyEq
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {S : Set E}
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        α.flow (xE, t) = (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))
+    (hder : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        HasFDerivWithinAt (f t) (Df t (α.flow (xE, t))) S (α.flow (xE, t)))
+    (hdomain : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        S ∈ 𝓝[Set.range I] (α.flow (xE, t)))
+    (hfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (f t) =ᶠ[𝓝[Set.range I] (α.flow (xE, t))]
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         (Df t (α.flow (xE, t))) wE =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) wE) := by
+  intro t ht x wE xE hxE hAeq
+  let p : M := (G.maps3 t) x
+  let y : E := α.flow (xE, t)
+  let V : E → E := fun z =>
+    let q : M := (extChartAt I p).symm z
+    tangentCoordChange I q p q
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q)
+  have hybase : y = (extChartAt I p) p := by
+    simpa [y, p] using hbase ht x 0 xE hxE hAeq
+  have hyrange : y ∈ Set.range I := by
+    rw [hybase]
+    exact extChartAt_target_subset_range p
+      ((extChartAt I p).map_source (mem_extChartAt_source (I := I) p))
+  have hlin :
+      Df t y = fderivWithin ℝ V (Set.range I) y :=
+    modelLinearization_eq_fderivWithin_range_of_hasFDerivWithinAt_of_eventuallyEq
+      (I := I) (y := y) hyrange
+      (by simpa [y] using hder ht x 0 xE hxE hAeq)
+      (by simpa [y] using hdomain ht x 0 xE hxE hAeq)
+      (by simpa [V, y, p] using hfCoord ht x 0 xE hxE hAeq)
+  have hlin_apply :
+      (Df t y) wE = (fderivWithin ℝ V (Set.range I) y) wE :=
+    congrArg (fun L : E →L[ℝ] E => L wE) hlin
+  simpa [p, y, V, hybase] using hlin_apply
+
 /-- Relative-time-set variant of
 `tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEq`.
 
@@ -26265,6 +26359,86 @@ theorem tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEqWit
             (Set.range I) ((extChartAt I p) p)) cw) := by
   refine
     G.tangentCoordChange_DfCoord_of_model_hasFDerivWithinAt_of_eventuallyEq
+      g background α ?_ hder hdomain hfCoord
+  intro t ht x w xE hxE hAeq
+  have hbase_t :
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x) = α.flow (xE, t) :=
+    show t ∈ {τ : ℝ |
+      (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x) = α.flow (xE, τ)} from
+      mem_of_mem_nhdsWithin ht (hbase ht x w xE hxE hAeq)
+  exact hbase_t.symm
+
+/-- Relative-time-set model-slot variant of
+`tangentCoordChange_DfCoord_modelSlots_of_model_hasFDerivWithinAt_of_eventuallyEq`.
+
+This keeps the closed-Picard base-flow agreement in the `𝓝[s] t` filter while
+producing a `Df` identity on arbitrary centered model directions. -/
+theorem tangentCoordChange_DfCoord_modelSlots_of_model_hasFDerivWithinAt_of_eventuallyEqWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {S : Set E}
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+          𝓝[s] t] (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hder : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        HasFDerivWithinAt (f t) (Df t (α.flow (xE, t))) S (α.flow (xE, t)))
+    (hdomain : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        S ∈ 𝓝[Set.range I] (α.flow (xE, t)))
+    (hfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (f t) =ᶠ[𝓝[Set.range I] (α.flow (xE, t))]
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         (Df t (α.flow (xE, t))) wE =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) wE) := by
+  refine
+    G.tangentCoordChange_DfCoord_modelSlots_of_model_hasFDerivWithinAt_of_eventuallyEq
       g background α ?_ hder hdomain hfCoord
   intro t ht x w xE hxE hAeq
   have hbase_t :
@@ -26354,6 +26528,80 @@ theorem tangentCoordChange_DfCoord_of_closedBall_model_hasFDerivWithinAt_of_even
     exact nhdsWithin_le_nhds
       (Metric.closedBall_mem_nhds_of_mem (hball ht x w xE hxE hAeq))
 
+/-- Closed-ball Picard derivative specialization with arbitrary centered model
+directions.
+
+This is the model-slot analogue of
+`tangentCoordChange_DfCoord_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin`. -/
+theorem tangentCoordChange_DfCoord_modelSlots_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r a : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {tmin₁ tmax₁ : ℝ}
+    (htime : s ⊆ Icc tmin₁ tmax₁)
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+          𝓝[s] t] (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hball : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        α.flow (xE, t) ∈ Metric.ball x₀ a)
+    (hder : ∀ τ ∈ Icc tmin₁ tmax₁, ∀ z ∈ Metric.closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (Metric.closedBall x₀ a) z)
+    (hfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (f t) =ᶠ[𝓝[Set.range I] (α.flow (xE, t))]
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         (Df t (α.flow (xE, t))) wE =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) wE) := by
+  refine
+    G.tangentCoordChange_DfCoord_modelSlots_of_model_hasFDerivWithinAt_of_eventuallyEqWithin
+      g background α (S := Metric.closedBall x₀ a) hbase ?_ ?_ hfCoord
+  · intro t ht x w xE hxE hAeq
+    exact hder t (htime ht) (α.flow (xE, t))
+      (ball_subset_closedBall (hball ht x w xE hxE hAeq))
+  · intro t ht x w xE hxE hAeq
+    exact nhdsWithin_le_nhds
+      (Metric.closedBall_mem_nhds_of_mem (hball ht x w xE hxE hAeq))
+
 /-- Closed-ball Picard derivative specialization whose local model vector-field
 identification is stated as an `EqOn` near the fixed chart center.
 
@@ -26423,6 +26671,71 @@ theorem tangentCoordChange_DfCoord_of_closedBall_model_hasFDerivWithinAt_of_even
             (Set.range I) ((extChartAt I p) p)) cw) := by
   exact
     G.tangentCoordChange_DfCoord_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin
+      g background α htime hbase hball hder
+      (G.model_vectorField_eventuallyEq_tangentCoordChange_of_eventuallyEqWithin_base_of_eqOn_nhdsWithin
+        g background α hbase hfEqOn)
+
+/-- Closed-ball model-slot `Df` bridge with the model vector field identified
+by local `EqOn` data near the fixed chart center. -/
+theorem tangentCoordChange_DfCoord_modelSlots_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_nhdsWithin
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r a : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    {tmin₁ tmax₁ : ℝ}
+    (htime : s ⊆ Icc tmin₁ tmax₁)
+    (hbase : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) =ᶠ[
+          𝓝[s] t] (fun τ : ℝ ↦ α.flow (xE, τ)))
+    (hball : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ w : TangentSpace I x,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        α.flow (xE, t) ∈ Metric.ball x₀ a)
+    (hder : ∀ τ ∈ Icc tmin₁ tmax₁, ∀ z ∈ Metric.closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (Metric.closedBall x₀ a) z)
+    (hfEqOn : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∃ U : Set E,
+        U ∈ 𝓝[Set.range I]
+          ((extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x)) ∧
+        Set.EqOn (f t)
+          (fun y : E =>
+            let p : M := (G.maps3 t) x
+            let q : M := (extChartAt I p).symm y
+            tangentCoordChange I q p q
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+          U) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         (Df t (α.flow (xE, t))) wE =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) wE) := by
+  exact
+    G.tangentCoordChange_DfCoord_modelSlots_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin
       g background α htime hbase hball hder
       (G.model_vectorField_eventuallyEq_tangentCoordChange_of_eventuallyEqWithin_base_of_eqOn_nhdsWithin
         g background α hbase hfEqOn)
