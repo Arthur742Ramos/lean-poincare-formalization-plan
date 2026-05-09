@@ -1748,9 +1748,10 @@ forms as
 `IntrinsicDeTurckGaugeFlowExistence.ofClosedPicardIccChartDerivative_of_timeDependent_iUnion_gluedSlices_vectorField_eq_nhdsWithin`
 and
 `IntrinsicDeTurckGaugeFlowExistence.ofClosedPicardIccChartDerivative_of_timeDependent_iUnion_gluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`;
-the theorem-family layer has the corresponding global glued-slice closed
-constructor, while local-readout fixed-IVP output can pass through the generic
-family assembly bridge below.
+the theorem-family layer has both corresponding closed constructors, including
+`IntrinsicDeTurckGaugeFlowExistenceFamily.ofClosedPicardIccChartDerivative_of_timeDependent_iUnion_gluedSlices_of_localReadouts_vectorField_eq_nhdsWithin`,
+assembled over the fixed-IVP closed local-readout route so compact Picard
+callers can stay at the family boundary.
 The theorem-family raw existence layer now
 also has the generic assembly bridge
 `IntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem`, with a
