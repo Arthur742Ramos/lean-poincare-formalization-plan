@@ -2757,6 +2757,11 @@ now goes one step further: it constructs the restricted selected raw gauge-flow
 witness, consumes the finite source cover/readout certificates internally, and
 leaves the remaining state-preserving Picard and lifted local tensor derivative
 obligations in the `IccStatePreservingTensorDerivativeData` package.
+The fixed-IVP compact endpoint now also has a same-witness combined form,
+`SelectedIntrinsicDeTurckGaugeFlowExistence.exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_and_spatial_tangent_correction_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_compact_iUnion_openPreimage_localGluingData_of_contMDiffCovariantDerivative_background`,
+which selects one restricted raw gauge-flow witness and returns both the
+state-preserving tensor time-derivative continuation and the smooth-background
+spatial-correction continuation for that same selected interval.
 The theorem-family compact wrapper
 `SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_compact_iUnion_openPreimage_localGluingData`
 now performs the same selected compact construction uniformly over all initial
