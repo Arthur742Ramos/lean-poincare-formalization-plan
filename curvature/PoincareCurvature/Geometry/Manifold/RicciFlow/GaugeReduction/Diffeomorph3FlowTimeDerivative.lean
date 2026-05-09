@@ -8405,6 +8405,18 @@ theorem PullbackMetricInnerDerivativeWithinOn.toPullbackMetricInnerDerivativeOn_
   exact (hwithin (Ioo_subset_Icc_self ht) x u v).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
 
+/-- Ordinary scalar derivative data can be viewed as within-set scalar derivative data on the
+same time set. -/
+theorem PullbackMetricInnerDerivativeOn.toWithinOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hinner : PullbackMetricInnerDerivativeOn (I := I) (M := M) Φ g gdot s) :
+    PullbackMetricInnerDerivativeWithinOn (I := I) (M := M) Φ g gdot s := by
+  intro t ht x u v
+  exact (hinner ht x u v).hasDerivWithinAt
+
 /-- Restrict endpoint scalar pullback derivative data to a smaller time set. -/
 theorem PullbackMetricInnerDerivativeWithinOn.mono
     {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
