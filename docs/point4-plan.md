@@ -3956,7 +3956,9 @@ coordinate-space specialization stated directly with those radii. The same
 chosen-jet state-space bridge now has memberwise finite-family and Pi-valued
 finite-product forms, using the finite sum of the member schematic constants,
 and those Pi-valued finite products now also feed compact-family and linear
-finite-cover readout `LipschitzOnWith` wrappers.
+finite-cover readout `LipschitzOnWith` wrappers, plus pointwise compact
+coordinate and fixed-time spatial readouts under the same time-space cover
+hypotheses.
 The exact and coarser compact readouts now also unpack to pointwise
 compact-coordinate distance bounds with the same schematic RHS constant,
 including finite-family forms with either memberwise constants or one shared
