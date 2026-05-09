@@ -3921,7 +3921,11 @@ for finite cover products; the same bridge is available from qualitative
 second-jet readout bridge now also accepts an arbitrary finite family of
 spatial directions in any normed model, with quantitative and qualitative
 finite-family packaging, so tangent-frame or chart-basis directions no longer
-have to be encoded as coordinate unit vectors. `HigherLocalFrameGram.lean`
+have to be encoded as coordinate unit vectors. Under unique-differentiability
+of the time and spatial slices, caller-supplied metric-entry second jets and
+entrywise higher difference balls now also give a state-space
+`LipschitzOnWith` estimate for the schematic RHS read through any such finite
+direction family. `HigherLocalFrameGram.lean`
 specializes that finite-direction bridge to compact local-frame Gram matrices
 on a normed-vector chart model: entrywise higher Gram controls choose second
 jets, read first and second primitive arrays along the local-frame basis, and

@@ -74,11 +74,25 @@ def firstDerivativeVectorRadius {X ι : Type*} [NormedAddCommGroup X] [NormedSpa
     (v : ι → X) (R : ι → ι → ℝ) : ι → ι → ι → ℝ :=
   fun a i j => firstDerivativeVectorReadoutOpNorm (X := X) (v a) * R i j
 
+theorem firstDerivativeVectorRadius_nonneg {X ι : Type*}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (v : ι → X) {R : ι → ι → ℝ} (hR : ∀ i j, 0 ≤ R i j) :
+    ∀ a i j, 0 ≤ firstDerivativeVectorRadius (X := X) v R a i j := by
+  intro a i j
+  exact mul_nonneg (ContinuousLinearMap.opNorm_nonneg _) (hR i j)
+
 /-- Second-derivative coefficient radii obtained by reading a finite family of spatial
 directions from metric-entry second jets. -/
 def secondDerivativeVectorRadius {X ι : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
     (v : ι → X) (R : ι → ι → ℝ) : ι → ι → ι → ι → ℝ :=
   fun a b i j => secondDerivativeVectorReadoutOpNorm (X := X) (v a) (v b) * R i j
+
+theorem secondDerivativeVectorRadius_nonneg {X ι : Type*}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (v : ι → X) {R : ι → ι → ℝ} (hR : ∀ i j, 0 ≤ R i j) :
+    ∀ a b i j, 0 ≤ secondDerivativeVectorRadius (X := X) v R a b i j := by
+  intro a b i j
+  exact mul_nonneg (ContinuousLinearMap.opNorm_nonneg _) (hR i j)
 
 /-- Read a first spatial derivative in one coordinate direction. -/
 def firstDerivativeCoordinateReadout {n E : Type*} [Fintype n] [DecidableEq n]
@@ -2216,6 +2230,162 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_higher_primitive_normLe
     (stateSet := stateSet) (M := M) (D := D) (H := H)
     hDB hHB hKMsum hKDsum hKHsum
     hMbound hDbound hHbound hMdiff_bound hDdiff_bound hHdiff_bound hδpos hdet
+
+/-- State-space Lipschitz bridge for the schematic Ricci-DeTurck RHS when the first- and
+second-derivative primitives are read from caller-supplied second jets of the metric entries.
+Unique-differentiability of the time and spatial slices transports the higher norm-ball controls
+to those chosen jets. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_metric_entries_directions_of_unique
+    {Y n : Type*} [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (ξ : n → X)
+    {δ : ℝ} {C KM : n → n → ℝ} {stateSet : Set Y}
+    {M : Y → ℝ × X → Matrix n n ℝ}
+    (J : ∀ u : Y, ∀ i j,
+      ParabolicSecondJet (fun z : ℝ × X => M u z i j) s)
+    (hC : ∀ i j, 0 ≤ C i j) (hKM : ∀ i j, 0 ≤ KM i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C i j) α (fun z => M u z i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM i j * dist u v) α
+        (fun z => M u z i j - M v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖) :
+    ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      LipschitzOnWith
+        ⟨ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ C
+            (firstDerivativeVectorRadius (X := X) ξ C)
+            (secondDerivativeVectorRadius (X := X) ξ C)
+            (∑ i, ∑ j, KM i j)
+            (∑ a, ∑ i, ∑ j, firstDerivativeVectorRadius (X := X) ξ KM a i j)
+            (fun i j => ∑ a, ∑ b,
+              secondDerivativeVectorRadius (X := X) ξ KM a b i j),
+          by
+            exact ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+              (𝕜 := ℝ) hδpos
+              (firstDerivativeVectorRadius_nonneg (X := X) ξ hC)
+              (secondDerivativeVectorRadius_nonneg (X := X) ξ hC)
+              (Finset.sum_nonneg fun i _hi => Finset.sum_nonneg fun j _hj => hKM i j)
+              (Finset.sum_nonneg fun a _ha =>
+                Finset.sum_nonneg fun i _hi =>
+                  Finset.sum_nonneg fun j _hj =>
+                    firstDerivativeVectorRadius_nonneg (X := X) ξ hKM a i j)
+              (fun i j =>
+                Finset.sum_nonneg fun a _ha =>
+                  Finset.sum_nonneg fun b _hb =>
+                    secondDerivativeVectorRadius_nonneg (X := X) ξ hKM a b i j)⟩
+        (fun u : Y => ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M u z)
+          (fun a i j => (J u i j).spaceDeriv z (ξ a))
+          (fun a b i j => (J u i j).spaceSecondDeriv z (ξ a) (ξ b)))
+        stateSet := by
+  have hDB_nonneg :
+      ∀ a i j, 0 ≤ firstDerivativeVectorRadius (X := X) ξ C a i j :=
+    firstDerivativeVectorRadius_nonneg (X := X) ξ hC
+  have hHB_nonneg :
+      ∀ a b i j, 0 ≤ secondDerivativeVectorRadius (X := X) ξ C a b i j :=
+    secondDerivativeVectorRadius_nonneg (X := X) ξ hC
+  have hKMsum : 0 ≤ ∑ i, ∑ j, KM i j :=
+    Finset.sum_nonneg fun i _hi => Finset.sum_nonneg fun j _hj => hKM i j
+  have hKDentry_nonneg :
+      ∀ a i j, 0 ≤ firstDerivativeVectorRadius (X := X) ξ KM a i j :=
+    firstDerivativeVectorRadius_nonneg (X := X) ξ hKM
+  have hKDsum :
+      0 ≤ ∑ a, ∑ i, ∑ j, firstDerivativeVectorRadius (X := X) ξ KM a i j :=
+    Finset.sum_nonneg fun a _ha =>
+      Finset.sum_nonneg fun i _hi =>
+        Finset.sum_nonneg fun j _hj => hKDentry_nonneg a i j
+  have hKHentry_nonneg :
+      ∀ a b i j, 0 ≤ secondDerivativeVectorRadius (X := X) ξ KM a b i j :=
+    secondDerivativeVectorRadius_nonneg (X := X) ξ hKM
+  have hKHsum :
+      ∀ i j, 0 ≤ ∑ a, ∑ b, secondDerivativeVectorRadius (X := X) ξ KM a b i j :=
+    fun i j =>
+      Finset.sum_nonneg fun a _ha =>
+        Finset.sum_nonneg fun b _hb => hKHentry_nonneg a b i j
+  refine ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le
+    (X := X) (s := s) (δ := δ) (C := C)
+    (DB := firstDerivativeVectorRadius (X := X) ξ C)
+    (HB := secondDerivativeVectorRadius (X := X) ξ C)
+    (KM := ∑ i, ∑ j, KM i j)
+    (KD := ∑ a, ∑ i, ∑ j, firstDerivativeVectorRadius (X := X) ξ KM a i j)
+    (KH := fun i j => ∑ a, ∑ b,
+      secondDerivativeVectorRadius (X := X) ξ KM a b i j)
+    (stateSet := stateSet) (M := M)
+    (D := fun u z a i j => (J u i j).spaceDeriv z (ξ a))
+    (H := fun u z a b i j => (J u i j).spaceSecondDeriv z (ξ a) (ξ b))
+    hDB_nonneg hHB_nonneg hKMsum hKDsum hKHsum ?_ ?_ ?_ ?_ ?_ ?_ hδpos hdet
+  · intro u hu z hz i j
+    exact (hM hu i j).norm_le hz
+  · intro u hu z hz a i j
+    have hctrl := (hM hu i j).secondJet_c0AlphaNormLe_self_of_unique
+      (J u i j) htime hspace
+    have hread := hctrl.2.1.continuousLinearMap
+      (firstDerivativeVectorReadout (X := X) (E := ℝ) (ξ a))
+    simpa [firstDerivativeVectorRadius, firstDerivativeVectorReadoutOpNorm] using
+      hread.norm_le hz
+  · intro u hu z hz a b i j
+    have hctrl := (hM hu i j).secondJet_c0AlphaNormLe_self_of_unique
+      (J u i j) htime hspace
+    have hread := hctrl.2.2.1.continuousLinearMap
+      (secondDerivativeVectorReadout (X := X) (E := ℝ) (ξ a) (ξ b))
+    simpa [secondDerivativeVectorRadius, secondDerivativeVectorReadoutOpNorm] using
+      hread.norm_le hz
+  · intro u hu v hv z hz
+    exact matrix_norm_sub_le_sum_mul_of_entries
+      (X := X) (α := α) (s := s) (K := KM) (M := M u) (N := M v)
+      hKM dist_nonneg (hMdiff hu hv) hz
+  · intro u hu v hv z hz a i j
+    have hctrl := (hMdiff hu hv i j).secondJet_sub_c0AlphaNormLe_self_of_unique
+      (J u i j) (J v i j) htime hspace
+    have hread := hctrl.2.1.continuousLinearMap
+      (firstDerivativeVectorReadout (X := X) (E := ℝ) (ξ a))
+    have hentry :
+        ‖(J u i j).spaceDeriv z (ξ a) - (J v i j).spaceDeriv z (ξ a)‖ ≤
+          firstDerivativeVectorRadius (X := X) ξ KM a i j * dist u v := by
+      simpa [firstDerivativeVectorRadius, firstDerivativeVectorReadoutOpNorm, mul_assoc]
+        using hread.norm_le hz
+    exact hentry.trans
+      (mul_le_mul_of_nonneg_right
+        (entry_le_triple_sum hKDentry_nonneg a i j) dist_nonneg)
+  · intro u hu v hv z hz i j
+    have htarget_nonneg :
+        0 ≤ (∑ a, ∑ b, secondDerivativeVectorRadius (X := X) ξ KM a b i j) *
+          dist u v :=
+      mul_nonneg (hKHsum i j) dist_nonneg
+    refine (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun a => ?_
+    refine (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun b => ?_
+    have hctrl := (hMdiff hu hv i j).secondJet_sub_c0AlphaNormLe_self_of_unique
+      (J u i j) (J v i j) htime hspace
+    have hread := hctrl.2.2.1.continuousLinearMap
+      (secondDerivativeVectorReadout (X := X) (E := ℝ) (ξ a) (ξ b))
+    have hentry :
+        ‖(J u i j).spaceSecondDeriv z (ξ a) (ξ b) -
+          (J v i j).spaceSecondDeriv z (ξ a) (ξ b)‖ ≤
+          secondDerivativeVectorRadius (X := X) ξ KM a b i j * dist u v := by
+      simpa [secondDerivativeVectorRadius, secondDerivativeVectorReadoutOpNorm,
+        Pi.sub_apply, mul_assoc] using hread.norm_le hz
+    have hentry_le_sum :
+        secondDerivativeVectorRadius (X := X) ξ KM a b i j ≤
+          ∑ a, ∑ b, secondDerivativeVectorRadius (X := X) ξ KM a b i j := by
+      have hentry_le_b :
+          secondDerivativeVectorRadius (X := X) ξ KM a b i j ≤
+            ∑ b, secondDerivativeVectorRadius (X := X) ξ KM a b i j :=
+        Finset.single_le_sum (fun b' _hb' => hKHentry_nonneg a b' i j)
+          (Finset.mem_univ b)
+      have hb_le_a :
+          (∑ b, secondDerivativeVectorRadius (X := X) ξ KM a b i j) ≤
+            ∑ a, ∑ b, secondDerivativeVectorRadius (X := X) ξ KM a b i j :=
+        Finset.single_le_sum
+          (fun a' _ha' => Finset.sum_nonneg fun b' _hb' => hKHentry_nonneg a' b' i j)
+          (Finset.mem_univ a)
+      exact hentry_le_b.trans hb_le_a
+    exact hentry.trans (mul_le_mul_of_nonneg_right hentry_le_sum dist_nonneg)
 
 /-- State-space Lipschitz bridge from higher parabolic primitive controls with coarser exported
 constants.  Entrywise higher difference controls may be proved with sharper constants; the
