@@ -209,8 +209,6 @@ theorem exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn_r
     (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
     (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
     [FiniteDimensional ℝ F] [Nontrivial F]
-    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-      et Kc hKc Ko hKo hKoEq hcover))
     {A : ℝ →
       ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
         et Kc hKc Ko hKo hKoEq hcover →
@@ -236,8 +234,6 @@ theorem exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn_r
             et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
         EqOn sol.curve sol'.curve
           (Icc t₀ (min sol.terminalTime sol'.terminalTime)) := by
-  letI : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-      et Kc hKc Ko hKo hKoEq hcover) := hcomplete
   exact IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isOpen_restricted_Icc_closed
     (F := A) (stateSet := positiveDefiniteLocus (M := M) (F := F) (W := W)
       et Kc hKc Ko hKo hKoEq hcover) hT hA
@@ -261,8 +257,6 @@ theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_linearDefect_isPicard
     (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
     (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
     [FiniteDimensional ℝ F] [Nontrivial F]
-    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-      et Kc hKc Ko hKo hKoEq hcover))
     {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
         et Kc hKc Ko hKo hKoEq hcover →
       ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
@@ -301,7 +295,7 @@ theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_linearDefect_isPicard
           et Kc hKc Ko hKo hKoEq hcover := by
   rcases exists_unique_in_positiveDefiniteLocus_of_isPicardLindelof_lipschitzOn_restricted_Icc_closed
       (M := M) (F := F) (W := W)
-      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete hT hA hg₀.2 hLip with
+      x0 et het Kc hKc Ko hKo hKoEq hcover hT hA hg₀.2 hLip with
     ⟨sol, hsolT, huniq⟩
   have hdefect :
       ∀ ⦃t : ℝ⦄, t ∈ Icc t₀ sol.terminalTime → C (sol.curve t) = 0 :=
@@ -333,8 +327,6 @@ theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_coordwiseDefect_isPic
     (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
     (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
     [FiniteDimensional ℝ F] [Nontrivial F]
-    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-      et Kc hKc Ko hKo hKoEq hcover))
     {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
         et Kc hKc Ko hKo hKoEq hcover →
       ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
@@ -371,7 +363,7 @@ theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_coordwiseDefect_isPic
   exact
     exists_unique_in_symmetricPositiveDefiniteLocus_of_linearDefect_isPicardLindelof_lipschitzOn_restricted_Icc_closed
       (M := M) (F := F) (W := W)
-      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete hT hA hg₀ hLip
+      x0 et het Kc hKc Ko hKo hKoEq hcover hT hA hg₀ hLip
       (_root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap
         (F := F) (V := BilW)
           et Kc hKc Ko hKo hKoEq hcover)
@@ -396,8 +388,6 @@ theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_symmetricTimeDependen
     (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
     (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
     [FiniteDimensional ℝ F] [Nontrivial F]
-    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-      et Kc hKc Ko hKo hKoEq hcover))
     {A : ℝ →
       ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
         et Kc hKc Ko hKo hKoEq hcover →
@@ -433,7 +423,7 @@ theorem exists_unique_in_symmetricPositiveDefiniteLocus_of_symmetricTimeDependen
   exact
     exists_unique_in_symmetricPositiveDefiniteLocus_of_coordwiseDefect_isPicardLindelof_lipschitzOn_restricted_Icc_closed
       (M := M) (F := F) (W := W)
-      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete hT hA hg₀ hLip
+      x0 et het Kc hKc Ko hKo hKoEq hcover hT hA hg₀ hLip
       (by
         intro t x hx
         exact (_root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff
@@ -456,8 +446,6 @@ theorem exists_unique_from_continuousRiemannianMetric_of_coordwiseDefect_isPicar
     (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
     (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
     [FiniteDimensional ℝ F] [Nontrivial F]
-    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-      et Kc hKc Ko hKo hKoEq hcover))
     (g₀ : _root_.Bundle.ContinuousRiemannianMetric F W)
     {A : ℝ →
       ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
@@ -500,7 +488,7 @@ theorem exists_unique_from_continuousRiemannianMetric_of_coordwiseDefect_isPicar
   exact
     exists_unique_in_symmetricPositiveDefiniteLocus_of_coordwiseDefect_isPicardLindelof_lipschitzOn_restricted_Icc_closed
       (M := M) (F := F) (W := W)
-      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete hT hA
+      x0 et het Kc hKc Ko hKo hKoEq hcover hT hA
       (mem_symmetricPositiveDefiniteLocus_of_continuousRiemannianMetric
         (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover g₀)
       hLip hdefect_A
@@ -521,8 +509,6 @@ theorem exists_unique_from_continuousRiemannianMetric_of_symmetricTimeDependentV
     (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
     (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
     [FiniteDimensional ℝ F] [Nontrivial F]
-    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-      et Kc hKc Ko hKo hKoEq hcover))
     (g₀ : _root_.Bundle.ContinuousRiemannianMetric F W)
     {A : ℝ →
       ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
@@ -564,7 +550,7 @@ theorem exists_unique_from_continuousRiemannianMetric_of_symmetricTimeDependentV
   exact
     exists_unique_from_continuousRiemannianMetric_of_coordwiseDefect_isPicardLindelof_lipschitzOn_restricted_Icc_closed
       (M := M) (F := F) (W := W)
-      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete g₀ hT hA hLip
+      x0 et het Kc hKc Ko hKo hKoEq hcover g₀ hT hA hLip
       (by
         intro t x hx
         exact (_root_.PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace.coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff
@@ -594,9 +580,6 @@ theorem exists_unique_from_continuousRiemannianMetric_of_timeDependent_geometric
     (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
     (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
     [FiniteDimensional ℝ F] [Nontrivial F]
-    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
-      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
-      et Kc hKc Ko hKo hKoEq hcover))
     (g₀ : _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _))
     {A : ℝ →
         ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
@@ -647,7 +630,7 @@ theorem exists_unique_from_continuousRiemannianMetric_of_timeDependent_geometric
   exact
     exists_unique_from_continuousRiemannianMetric_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn_restricted_Icc_closed
       (M := M) (F := F) (W := (TangentSpace I : M → Type _))
-      x0 et het Kc hKc Ko hKo hKoEq hcover hcomplete g₀ hT hA hLip
+      x0 et het Kc hKc Ko hKo hKoEq hcover g₀ hT hA hLip
       (by
         intro τ s hs
         rcases hA_geometric τ s hs with ⟨g, background, hAeq⟩
@@ -700,7 +683,7 @@ theorem TimeDependentCoordwiseDefectMetricBanachChartRestrictedIcc.exists_unique
   exact
     exists_unique_from_continuousRiemannianMetric_of_coordwiseDefect_isPicardLindelof_lipschitzOn_restricted_Icc_closed
       (M := M) (F := F) (W := W)
-      x0 et het Kc hKc Ko hKo hKoEq hcover inferInstance g₀
+      x0 et het Kc hKc Ko hKo hKoEq hcover g₀
       chart.hT chart.picard chart.lipschitzOn_restricted_Icc chart.coordwiseDefect
 
 /-- Endpoint-closed extractor from a restricted-terminal geometric Ricci-DeTurck Banach chart. -/
@@ -772,8 +755,6 @@ theorem exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lips
     (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
     (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
     [FiniteDimensional ℝ F] [Nontrivial F]
-    (hcomplete : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-      et Kc hKc Ko hKo hKoEq hcover))
     {A : ℝ → symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover →
       symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover}
     {t₀ T : ℝ} (hT : t₀ < T)
@@ -795,8 +776,6 @@ theorem exists_unique_in_riemannianMetricLocusSubmodule_of_isPicardLindelof_lips
             et Kc hKc Ko hKo hKoEq hcover) t₀ g₀,
         EqOn sol.curve sol'.curve
           (Icc t₀ (min sol.terminalTime sol'.terminalTime)) := by
-  letI : CompleteSpace (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
-      et Kc hKc Ko hKo hKoEq hcover) := hcomplete
   exact @IsPicardLindelof.exists_unique_banachEvolutionLocalSolutionIn_of_mem_isOpen_restricted_Icc_closed
     (symmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)
     (instNormedAddCommGroupSymmetricSectionSubmodule et Kc hKc Ko hKo hKoEq hcover)

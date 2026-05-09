@@ -3214,6 +3214,10 @@ finite-cover positive-definite locus and the symmetric Riemannian metric-locus
 submodule, to the symmetric positive-definite defect-carrier routes, and to the
 finite-cover symmetric time-dependent vector-field route, as well as the
 continuous-Riemannian/geometric Ricci-DeTurck restricted Banach-chart bridge.
+These endpoint-closed metric-locus bridges now rely on the finite-cover
+`ContinuousSectionSpace` completeness instance directly, so downstream chart
+constructors no longer have to thread an explicit ambient `hcomplete`
+argument through this leaf module.
 The concrete restricted coordinatewise-defect and geometric Ricci-DeTurck chart
 records now expose `_closed` extractors with closed-common `Icc` uniqueness
 directly. The continuous space-time package now forgets to
