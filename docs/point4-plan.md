@@ -3943,18 +3943,20 @@ single seminormed additive-group and real normed-space structure with
 definitional norm and distance readback to that product readout. If the compact
 pieces cover all time-space, the value projection makes that combined readout
 injective and upgrades the induced structure to a separated normed additive
-group with a paired real normed-space structure. The same combined readout has
-component norm and distance projection bounds for the value, chosen spatial
-derivative, chosen second spatial derivative, and chosen time derivative
-compact-family readouts; the combined readout and each component readout are
-also packaged as `1`-Lipschitz on arbitrary state sets for that induced
-seminorm. The same chosen derivative Lipschitz readouts now also restrict to
-fixed-time spatial compact readouts whenever the chosen time-space compact
-family covers the requested spatial slices, and the combined seminorm now has
-direct fixed-time spatial value and chosen-derivative distance estimates under
-the same cover hypothesis. They do not make the derivative choice canonical or
-upgrade this compact-family jet seminorm into the full `C^{2+α,1+α/2}` Banach
-norm, Schauder estimate, or completeness content.
+group with a paired real normed-space structure; equality of the combined
+readout also identifies the underlying functions on any subset covered by the
+compact pieces. The same combined readout has component norm and distance
+projection bounds for the value, chosen spatial derivative, chosen second
+spatial derivative, and chosen time derivative compact-family readouts; the
+combined readout and each component readout are also packaged as `1`-Lipschitz
+on arbitrary state sets for that induced seminorm. The same chosen derivative
+Lipschitz readouts now also restrict to fixed-time spatial compact readouts
+whenever the chosen time-space compact family covers the requested spatial
+slices, and the combined seminorm now has direct fixed-time spatial value and
+chosen-derivative distance estimates under the same cover hypothesis. They do
+not make the derivative choice canonical or upgrade this compact-family jet
+seminorm into the full `C^{2+α,1+α/2}` Banach norm, Schauder estimate, or
+completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct

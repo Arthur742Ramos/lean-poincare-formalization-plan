@@ -3236,6 +3236,50 @@ structure on the higher parabolic submodule. -/
     (chosenSecondJetFiniteCoverReadoutLinearMap
       (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace)
 
+/-- Equality of the combined finite-cover chosen second-jet readouts identifies the underlying
+higher parabolic functions on any subset covered by the compact pieces. -/
+theorem eqOn_subset_of_chosenSecondJetFiniteCoverReadout_eq {κ : Type*}
+    {Kc : κ → TopologicalSpace.Compacts (ℝ × X)}
+    {hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s} {hα : 0 < α}
+    {htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1}
+    {hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2}
+    {t : Set (ℝ × X)} (hcover : t ⊆ ⋃ i, (Kc i : Set (ℝ × X)))
+    {u v : parabolicC2AlphaSubmodule X E α s}
+    (h :
+      chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u =
+        chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace v) :
+    EqOn u v t := by
+  refine eqOn_subset_of_toCompactCoordFamily_eq
+    (X := X) (E := E) (α := α) (s := s)
+    (Kc := Kc) (hKc := hKc) (hα := hα) hcover ?_
+  have hvalue := congrArg (fun w =>
+    ((w : chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc).1.1)) h
+  simpa [chosenSecondJetFiniteCoverReadoutLinearMap_apply] using hvalue
+
+/-- Equality of the combined finite-cover chosen second-jet readouts identifies the underlying
+higher parabolic functions on the covered domain. -/
+theorem eqOn_of_chosenSecondJetFiniteCoverReadout_eq {κ : Type*}
+    {Kc : κ → TopologicalSpace.Compacts (ℝ × X)}
+    {hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s} {hα : 0 < α}
+    {htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1}
+    {hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2}
+    (hcover : s ⊆ ⋃ i, (Kc i : Set (ℝ × X)))
+    {u v : parabolicC2AlphaSubmodule X E α s}
+    (h :
+      chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u =
+        chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace v) :
+    EqOn u v s :=
+  eqOn_subset_of_chosenSecondJetFiniteCoverReadout_eq
+    (X := X) (E := E) (α := α) (s := s) hcover h
+
 /-- If the compact pieces cover all time-space, the combined finite-cover chosen second-jet
 readout is injective.  The value component already separates functions on such a cover. -/
 theorem chosenSecondJetFiniteCoverReadout_injective_of_iUnion_eq_univ
@@ -3251,11 +3295,10 @@ theorem chosenSecondJetFiniteCoverReadout_injective_of_iUnion_eq_univ
       (chosenSecondJetFiniteCoverReadoutLinearMap
         (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace) := by
   intro u v huv
-  refine toCompactCoordFamily_injective_of_iUnion_eq_univ
-    (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover ?_
-  have hvalue := congrArg (fun w =>
-    ((w : chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc).1.1)) huv
-  simpa [chosenSecondJetFiniteCoverReadoutLinearMap_apply] using hvalue
+  ext z
+  exact eqOn_subset_of_chosenSecondJetFiniteCoverReadout_eq
+    (X := X) (E := E) (α := α) (s := s)
+    (t := Set.univ) (by simp [hcover]) huv (Set.mem_univ z)
 
 /-- If the compact pieces cover all time-space, the combined finite-cover chosen second-jet
 readout induces a separated normed additive-group structure. -/
