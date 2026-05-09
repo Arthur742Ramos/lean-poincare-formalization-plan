@@ -1827,6 +1827,18 @@ noncomputable local instance chosenSpaceSecondDerivContinuousMapPseudoMetricSpac
   @ContinuousMap.instPseudoMetricSpace K (X →L[ℝ] (X →L[ℝ] E))
     inferInstance inferInstance inferInstance
 
+noncomputable local instance chosenSpaceSecondDerivContinuousMapSeminormedAddCommGroup
+    {K : TopologicalSpace.Compacts (ℝ × X)} :
+    SeminormedAddCommGroup C(K, X →L[ℝ] (X →L[ℝ] E)) :=
+  @ContinuousMap.instSeminormedAddCommGroup K (X →L[ℝ] (X →L[ℝ] E))
+    inferInstance inferInstance inferInstance
+
+noncomputable local instance chosenSpaceSecondDerivContinuousMapNormedSpace
+    {K : TopologicalSpace.Compacts (ℝ × X)} :
+    NormedSpace ℝ C(K, X →L[ℝ] (X →L[ℝ] E)) :=
+  @ContinuousMap.normedSpace K (X →L[ℝ] (X →L[ℝ] E))
+    inferInstance inferInstance inferInstance ℝ inferInstance inferInstance
+
 /-- Pairwise higher difference estimates give a Lipschitz estimate for the finite compact-family
 readout of chosen spatial derivatives, provided the derivative choice is unique on the slices. -/
 theorem lipschitzOnWith_chosenSpaceDerivToCompactCoordFamily_of_normLe_sub_unique
@@ -2818,6 +2830,203 @@ theorem finiteCoverValue_dist_eq {κ : Type*} [Fintype κ]
           Kc hKc hα u)
         (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
           Kc hKc hα v) :=
+  rfl
+
+/-- The finite compact-family chosen spatial-derivative readout induces a seminormed additive
+group structure on the higher parabolic submodule. -/
+@[reducible] noncomputable def finiteCoverChosenSpaceDerivSeminormedAddCommGroup
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+  SeminormedAddCommGroup.induced
+    (parabolicC2AlphaSubmodule X E α s) (∀ i, C(Kc i, X →L[ℝ] E))
+    (chosenSpaceDerivToCompactCoordFamilyLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace)
+
+/-- The finite compact-family chosen spatial-derivative readout induces a seminormed real vector
+space structure on the higher parabolic submodule. -/
+@[reducible] noncomputable def finiteCoverChosenSpaceDerivNormedSpace
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    @NormedSpace ℝ (parabolicC2AlphaSubmodule X E α s) _
+      (finiteCoverChosenSpaceDerivSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace) :=
+  NormedSpace.induced ℝ
+    (parabolicC2AlphaSubmodule X E α s) (∀ i, C(Kc i, X →L[ℝ] E))
+    (chosenSpaceDerivToCompactCoordFamilyLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace)
+
+/-- With the finite-cover chosen-spatial-derivative seminormed structure, the norm is
+definitionally the chosen derivative compact-family readout norm. -/
+theorem finiteCoverChosenSpaceDeriv_norm_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSpaceDerivSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace
+    ‖u‖ =
+      ‖chosenSpaceDerivToCompactCoordFamilyLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u‖ :=
+  rfl
+
+/-- With the finite-cover chosen-spatial-derivative seminormed structure, distance is
+definitionally the chosen derivative compact-family readout distance. -/
+theorem finiteCoverChosenSpaceDeriv_dist_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (u v : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSpaceDerivSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace
+    dist u v =
+      dist
+        (chosenSpaceDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u)
+        (chosenSpaceDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace v) :=
+  rfl
+
+/-- The finite compact-family chosen second-spatial-derivative readout induces a seminormed
+additive-group structure on the higher parabolic submodule. -/
+@[reducible] noncomputable def finiteCoverChosenSpaceSecondDerivSeminormedAddCommGroup
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+  SeminormedAddCommGroup.induced
+    (parabolicC2AlphaSubmodule X E α s)
+    (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E)))
+    (chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace)
+
+/-- The finite compact-family chosen second-spatial-derivative readout induces a seminormed real
+vector-space structure on the higher parabolic submodule. -/
+@[reducible] noncomputable def finiteCoverChosenSpaceSecondDerivNormedSpace
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    @NormedSpace ℝ (parabolicC2AlphaSubmodule X E α s) _
+      (finiteCoverChosenSpaceSecondDerivSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace) :=
+  NormedSpace.induced ℝ
+    (parabolicC2AlphaSubmodule X E α s)
+    (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E)))
+    (chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace)
+
+/-- With the finite-cover chosen-second-spatial-derivative seminormed structure, the norm is
+definitionally the chosen derivative compact-family readout norm. -/
+theorem finiteCoverChosenSpaceSecondDeriv_norm_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSpaceSecondDerivSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace
+    ‖u‖ =
+      ‖chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u‖ :=
+  rfl
+
+/-- With the finite-cover chosen-second-spatial-derivative seminormed structure, distance is
+definitionally the chosen derivative compact-family readout distance. -/
+theorem finiteCoverChosenSpaceSecondDeriv_dist_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (u v : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSpaceSecondDerivSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace
+    dist u v =
+      dist
+        (chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u)
+        (chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace v) :=
+  rfl
+
+/-- The finite compact-family chosen time-derivative readout induces a seminormed additive-group
+structure on the higher parabolic submodule. -/
+@[reducible] noncomputable def finiteCoverChosenTimeDerivSeminormedAddCommGroup
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1) :
+    SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+  SeminormedAddCommGroup.induced
+    (parabolicC2AlphaSubmodule X E α s) (∀ i, C(Kc i, E))
+    (chosenTimeDerivToCompactCoordFamilyLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime)
+
+/-- The finite compact-family chosen time-derivative readout induces a seminormed real vector-space
+structure on the higher parabolic submodule. -/
+@[reducible] noncomputable def finiteCoverChosenTimeDerivNormedSpace
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1) :
+    @NormedSpace ℝ (parabolicC2AlphaSubmodule X E α s) _
+      (finiteCoverChosenTimeDerivSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime) :=
+  NormedSpace.induced ℝ
+    (parabolicC2AlphaSubmodule X E α s) (∀ i, C(Kc i, E))
+    (chosenTimeDerivToCompactCoordFamilyLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime)
+
+/-- With the finite-cover chosen-time-derivative seminormed structure, the norm is definitionally
+the chosen derivative compact-family readout norm. -/
+theorem finiteCoverChosenTimeDeriv_norm_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenTimeDerivSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime
+    ‖u‖ =
+      ‖chosenTimeDerivToCompactCoordFamilyLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime u‖ :=
+  rfl
+
+/-- With the finite-cover chosen-time-derivative seminormed structure, distance is definitionally
+the chosen derivative compact-family readout distance. -/
+theorem finiteCoverChosenTimeDeriv_dist_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (u v : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenTimeDerivSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime
+    dist u v =
+      dist
+        (chosenTimeDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime u)
+        (chosenTimeDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime v) :=
   rfl
 
 /-- Restriction to a smaller set as a linear map between coordinate parabolic
