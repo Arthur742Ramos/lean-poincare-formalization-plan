@@ -2906,6 +2906,149 @@ theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_metric_entries_
     (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
     (A := A) (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet hAeq
 
+/-- Pi-valued compact-coordinate readout Lipschitz bridge for a finite family of chosen-jet
+schematic Ricci-DeTurck RHS coordinates.  This is the finite-product version consumed by chart
+handoffs whose compact readout values are finite families of matrices. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_pi_family_of_metric_entries_family_directions_of_unique
+    {κ ι Y n : Type*} [Fintype κ] [DecidableEq κ] [Fintype ι]
+    [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (ξ : κ → n → X)
+    {δ : ℝ} {C KM : κ → n → n → ℝ} {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (κ → Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    (J : ∀ r : κ, ∀ u : Y, ∀ i j,
+      ParabolicSecondJet (fun z : ℝ × X => M r u z i j) s)
+    (hC : ∀ r i j, 0 ≤ C r i j) (hKM : ∀ r i j, 0 ≤ KM r i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C r i j) α (fun z => M r u z i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM r i j * dist u v) α
+        (fun z => M r u z i j - M r v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = fun r =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r u z)
+          (fun a i j => (J r u i j).spaceDeriv z (ξ r a))
+          (fun a b i j => (J r u i j).spaceSecondDeriv z (ξ r a) (ξ r b))) :
+    LipschitzOnWith
+      ⟨∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+          (𝕜 := ℝ) δ (C r)
+          (firstDerivativeVectorRadius (X := X) (ξ r) (C r))
+          (secondDerivativeVectorRadius (X := X) (ξ r) (C r))
+          (∑ i, ∑ j, KM r i j)
+          (∑ a, ∑ i, ∑ j,
+            firstDerivativeVectorRadius (X := X) (ξ r) (KM r) a i j)
+          (fun i j => ∑ a, ∑ b,
+            secondDerivativeVectorRadius (X := X) (ξ r) (KM r) a b i j),
+        Finset.sum_nonneg fun r _hr =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+            (𝕜 := ℝ) hδpos
+            (firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+            (secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+            (Finset.sum_nonneg fun i _hi =>
+              Finset.sum_nonneg fun j _hj => hKM r i j)
+            (Finset.sum_nonneg fun a _ha =>
+              Finset.sum_nonneg fun i _hi =>
+                Finset.sum_nonneg fun j _hj =>
+                  firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r) a i j)
+            (fun i j =>
+              Finset.sum_nonneg fun a _ha =>
+                Finset.sum_nonneg fun b _hb =>
+                  secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r) a b i j)⟩
+      (fun u : Y =>
+        parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := κ → Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A u))
+      stateSet := by
+  refine parabolicC0AlphaSubmodule.lipschitzOnWith_toCompactCoordFamily_of_bounded_sub
+    (X := X) (E := κ → Matrix n n ℝ) (α := α) (s := s)
+    Kdom hKdom hα ?_
+  intro u hu v hv z hz
+  have hLipz :=
+    ricciDeTurckSchematicMatrix_lipschitzOnWith_pi_family_of_metric_entries_family_directions_of_unique
+      (X := X) (α := α) (s := s) ξ
+      (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
+      (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet hz
+  have hdist := hLipz.dist_le_mul u hu v hv
+  simpa [dist_eq_norm, hAeq hu z, hAeq hv z] using hdist
+
+/-- Linear finite-cover readout version of
+`ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_pi_family_of_metric_entries_family_directions_of_unique`. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamilyLinearMap_pi_family_of_metric_entries_family_directions_of_unique
+    {κ ι Y n : Type*} [Fintype κ] [DecidableEq κ] [Fintype ι]
+    [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (ξ : κ → n → X)
+    {δ : ℝ} {C KM : κ → n → n → ℝ} {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (κ → Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    (J : ∀ r : κ, ∀ u : Y, ∀ i j,
+      ParabolicSecondJet (fun z : ℝ × X => M r u z i j) s)
+    (hC : ∀ r i j, 0 ≤ C r i j) (hKM : ∀ r i j, 0 ≤ KM r i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C r i j) α (fun z => M r u z i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM r i j * dist u v) α
+        (fun z => M r u z i j - M r v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = fun r =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r u z)
+          (fun a i j => (J r u i j).spaceDeriv z (ξ r a))
+          (fun a b i j => (J r u i j).spaceSecondDeriv z (ξ r a) (ξ r b))) :
+    LipschitzOnWith
+      ⟨∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+          (𝕜 := ℝ) δ (C r)
+          (firstDerivativeVectorRadius (X := X) (ξ r) (C r))
+          (secondDerivativeVectorRadius (X := X) (ξ r) (C r))
+          (∑ i, ∑ j, KM r i j)
+          (∑ a, ∑ i, ∑ j,
+            firstDerivativeVectorRadius (X := X) (ξ r) (KM r) a i j)
+          (fun i j => ∑ a, ∑ b,
+            secondDerivativeVectorRadius (X := X) (ξ r) (KM r) a b i j),
+        Finset.sum_nonneg fun r _hr =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+            (𝕜 := ℝ) hδpos
+            (firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+            (secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+            (Finset.sum_nonneg fun i _hi =>
+              Finset.sum_nonneg fun j _hj => hKM r i j)
+            (Finset.sum_nonneg fun a _ha =>
+              Finset.sum_nonneg fun i _hi =>
+                Finset.sum_nonneg fun j _hj =>
+                  firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r) a i j)
+            (fun i j =>
+              Finset.sum_nonneg fun a _ha =>
+                Finset.sum_nonneg fun b _hb =>
+                  secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r) a b i j)⟩
+      (fun u : Y =>
+        parabolicC0AlphaSubmodule.toCompactCoordFamilyLinearMap
+          (X := X) (E := κ → Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A u))
+      stateSet := by
+  simpa using
+    ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_pi_family_of_metric_entries_family_directions_of_unique
+      (X := X) (α := α) (s := s) Kdom hKdom hα ξ
+      (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
+      (A := A) (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet hAeq
+
 /-- State-space Lipschitz bridge from higher parabolic primitive controls with coarser exported
 constants.  Entrywise higher difference controls may be proved with sharper constants; the
 resulting schematic RHS Lipschitz constant is formed from any larger primitive constants accepted
