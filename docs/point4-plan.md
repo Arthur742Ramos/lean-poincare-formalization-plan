@@ -3842,7 +3842,9 @@ positive-exponent continuity and uniform-continuity readouts, and
 continuous-linear-image `C^{0,α}` norm-ball controls, plus full
 higher-coordinate projections for finite Pi-valued functions and finite
 Pi-valued higher norm-ball assembly from component controls, including
-difference controls. Existential
+difference controls, with pointwise finite-Pi norm and distance bounds from
+componentwise higher difference controls whose radii are linear in a shared
+scalar. Existential
 higher membership and the higher
 submodule now also expose actual time, spatial, and second-spatial derivative
 witnesses with value-level `C^{0,α}` controls, without choosing a canonical
