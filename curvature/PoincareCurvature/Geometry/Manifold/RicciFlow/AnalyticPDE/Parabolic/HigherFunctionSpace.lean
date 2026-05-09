@@ -918,6 +918,20 @@ theorem pi_dist_le_sum_mul_of_entries {ι F : Type*} [Fintype ι]
     pi_norm_sub_le_sum_mul_of_entries
       (X := X) (α := α) (s := s) hK hR h hz
 
+/-- Product-domain finite-Pi distance bound from componentwise higher difference controls
+with radii linear in a shared scalar. -/
+theorem pi_dist_le_sum_mul_of_entries_prod_subset {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {R : ℝ} {K : ι → ℝ} {u v : ℝ × X → ι → F}
+    (hK : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t : ℝ} (ht : t ∈ timeSet) {x : X} (hx : x ∈ spaceSet) :
+    dist (u (t, x)) (v (t, x)) ≤ (∑ i, K i) * R :=
+  pi_dist_le_sum_mul_of_entries
+    (X := X) (α := α) (s := s) hK hR h (hst ⟨ht, hx⟩)
+
 /-- Componentwise higher difference controls with radii linear in a shared
 scalar give a finite-Pi closed-ball membership bound. -/
 theorem pi_mem_closedBall_sum_mul_of_entries {ι F : Type*} [Fintype ι]
@@ -929,6 +943,20 @@ theorem pi_mem_closedBall_sum_mul_of_entries {ι F : Type*} [Fintype ι]
     ⦃z : ℝ × X⦄ (hz : z ∈ s) :
     u z ∈ Metric.closedBall (v z) ((∑ i, K i) * R) := by
   simpa [Metric.mem_closedBall] using
+    pi_dist_le_sum_mul_of_entries
+      (X := X) (α := α) (s := s) hK hR h hz
+
+/-- Componentwise higher difference controls with radii linear in a shared
+scalar give the symmetric finite-Pi closed-ball membership bound. -/
+theorem pi_mem_closedBall_symm_sum_mul_of_entries {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {R : ℝ} {K : ι → ℝ} {u v : ℝ × X → ι → F}
+    (hK : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    v z ∈ Metric.closedBall (u z) ((∑ i, K i) * R) := by
+  simpa [Metric.mem_closedBall, dist_comm] using
     pi_dist_le_sum_mul_of_entries
       (X := X) (α := α) (s := s) hK hR h hz
 
@@ -944,6 +972,20 @@ theorem pi_mem_closedBall_sum_mul_of_entries_prod_subset {ι F : Type*} [Fintype
     {t : ℝ} (ht : t ∈ timeSet) {x : X} (hx : x ∈ spaceSet) :
     u (t, x) ∈ Metric.closedBall (v (t, x)) ((∑ i, K i) * R) :=
   pi_mem_closedBall_sum_mul_of_entries
+    (X := X) (α := α) (s := s) hK hR h (hst ⟨ht, hx⟩)
+
+/-- Product-domain symmetric finite-Pi closed-ball membership bound from componentwise
+higher difference controls. -/
+theorem pi_mem_closedBall_symm_sum_mul_of_entries_prod_subset {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {R : ℝ} {K : ι → ℝ} {u v : ℝ × X → ι → F}
+    (hK : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t : ℝ} (ht : t ∈ timeSet) {x : X} (hx : x ∈ spaceSet) :
+    v (t, x) ∈ Metric.closedBall (u (t, x)) ((∑ i, K i) * R) :=
+  pi_mem_closedBall_symm_sum_mul_of_entries
     (X := X) (α := α) (s := s) hK hR h (hst ⟨ht, hx⟩)
 
 /-- Continuous-linear value readouts of a higher single-radius norm ball inherit value-level
