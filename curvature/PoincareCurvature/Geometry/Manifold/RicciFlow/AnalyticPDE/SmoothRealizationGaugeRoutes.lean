@@ -963,6 +963,126 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricB
       (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p u)
       (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p v)
 
+/-- One-sided endpoint version with a coordinate curve that is stationary at
+the chart center along the right-time filter.
+
+This is the smooth-realization counterpart of the raw within-filter stationary
+center bridge: Banach chart callers may replace the literal center coordinate
+by any model curve eventually equal to that center on `Ici t`. -/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_hasDerivWithinAt_Ici_chartRHS_of_eventuallyEq_center_of_mem_Ico
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (x0 : κ → M)
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    {t : ℝ} (ht : t ∈ Ico ivp.initialTime sol.terminalTime)
+    (p : M) {y : ℝ → F}
+    (hy : y =ᶠ[𝓝[Ici t] t] fun _ : ℝ ↦ (extChartAt I p) p)
+    (hy_t : y t = (extChartAt I p) p)
+    (uE vE : F) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric p
+          (τ, y τ) uE vE)
+      (A t (sol.curve t) p
+        (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p uE)
+        (SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p vE))
+      (Ici t) t := by
+  have hcenter :=
+    realization.metricBilinearCoordinateField_base_hasDerivWithinAt_Ici_chartRHS_of_mem_Ico
+      (M := M) (F := F) (I := I) x0 het ht p uE vE
+  have hEq :
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric p
+          (τ, y τ) uE vE) =ᶠ[𝓝[Ici t] t]
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric p
+          (τ, (extChartAt I p) p) uE vE) := by
+    filter_upwards [hy] with τ hτ
+    rw [hτ]
+  exact hcenter.congr_of_eventuallyEq hEq (by rw [hy_t])
+
+/-- Tangent-vector-slot version of
+`metricBilinearCoordinateField_hasDerivWithinAt_Ici_chartRHS_of_eventuallyEq_center_of_mem_Ico`.
+-/
+theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.metricBilinearCoordinateField_sourceTangentCoordinate_hasDerivWithinAt_Ici_chartRHS_of_eventuallyEq_center_of_mem_Ico
+    {et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {sol : BanachEvolutionLocalSolutionIn A stateSet ivp.initialTime
+      (InitialValueProblem.toContinuousSectionSpace
+        (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)}
+    (x0 : κ → M)
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    (realization : BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization
+      (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp sol)
+    {t : ℝ} (ht : t ∈ Ico ivp.initialTime sol.terminalTime)
+    (p : M) {y : ℝ → F}
+    (hy : y =ᶠ[𝓝[Ici t] t] fun _ : ℝ ↦ (extChartAt I p) p)
+    (hy_t : y t = (extChartAt I p) p)
+    (u v : TangentSpace I p) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+          (I := I) (M := M) realization.metric p
+          (τ, y τ)
+          (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p u)
+          (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p v))
+      (A t (sol.curve t) p u v) (Ici t) t := by
+  simpa using
+    realization.metricBilinearCoordinateField_hasDerivWithinAt_Ici_chartRHS_of_eventuallyEq_center_of_mem_Ico
+      (M := M) (F := F) (I := I) x0 het ht p hy hy_t
+      (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p u)
+      (SmoothSelfDiffeomorph3Family.sourceTangentCoordinate (I := I) p v)
+
 /-- A finite-cover bilinear coordinate readout of a smooth metric section is the
 named raw metric-coordinate field centered at the same preferred
 trivialization point. -/

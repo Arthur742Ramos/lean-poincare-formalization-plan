@@ -793,6 +793,11 @@ The centered metric-coordinate bridge also reaches the closed-left endpoint:
 `metricBilinearCoordinateField_base_hasDerivWithinAt_Ici_chartRHS_of_mem_Ico`
 and its `sourceTangentCoordinate` variant expose the Banach chart RHS as a
 right derivative on `Ici t` throughout `Ico ivp.initialTime sol.terminalTime`.
+The same one-sided endpoint now also accepts model-coordinate curves that are
+stationary at the chart center along the right-time filter:
+`metricBilinearCoordinateField_hasDerivWithinAt_Ici_chartRHS_of_eventuallyEq_center_of_mem_Ico`
+and its `sourceTangentCoordinate` variant transfer the centered chart-RHS
+derivative across `𝓝[Ici t] t` eventual equality plus the base-time equality.
 The subsingleton-tangent case is already closed for arbitrary geometric `C³`
 DeTurck gauge-flow families by componentwise vanishing, including direct
 gauge-reduced, intrinsic, and ordinary theorem-package projections and
