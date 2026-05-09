@@ -1602,6 +1602,25 @@ theorem lipschitzOnWith_toCompactCoordFamilyLinearMap_pi_of_component_normLe_sub
   simpa [dist_eq_norm, NNReal.coe_sum] using hnorm
 
 /-- Equality of all compact-piece value readouts identifies two coordinate parabolic
+`C^{2+α,1+α/2}` functions on any covered subset. -/
+theorem eqOn_subset_of_toCompactCoordFamily_eq {κ : Type*}
+    {Kc : κ → TopologicalSpace.Compacts (ℝ × X)}
+    {hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s} {hα : 0 < α}
+    {t : Set (ℝ × X)} (hcover : t ⊆ ⋃ i, (Kc i : Set (ℝ × X)))
+    {u v : parabolicC2AlphaSubmodule X E α s}
+    (h :
+      toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u =
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v) :
+    EqOn u v t := by
+  intro z hz
+  rcases mem_iUnion.mp (hcover hz) with ⟨i, hzi⟩
+  have hz_eq :
+      toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i ⟨z, hzi⟩ =
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i ⟨z, hzi⟩ := by
+    rw [h]
+  simpa using hz_eq
+
+/-- Equality of all compact-piece value readouts identifies two coordinate parabolic
 `C^{2+α,1+α/2}` functions on the covered set. -/
 theorem eqOn_of_toCompactCoordFamily_eq {κ : Type*}
     {Kc : κ → TopologicalSpace.Compacts (ℝ × X)}
@@ -1611,14 +1630,44 @@ theorem eqOn_of_toCompactCoordFamily_eq {κ : Type*}
     (h :
       toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u =
         toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v) :
-    EqOn u v s := by
-  intro z hz
-  rcases mem_iUnion.mp (hcover hz) with ⟨i, hzi⟩
-  have hz_eq :
-      toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i ⟨z, hzi⟩ =
-        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i ⟨z, hzi⟩ := by
-    rw [h]
-  simpa using hz_eq
+    EqOn u v s :=
+  eqOn_subset_of_toCompactCoordFamily_eq
+    (X := X) (E := E) (α := α) (s := s) hcover h
+
+/-- Product compact value readouts determine higher parabolic functions on `Kt × U` whenever `U`
+is covered by the spatial compact family. -/
+theorem eqOn_timeSpaceProduct_of_toCompactCoordFamily_eq {κ : Type*}
+    (Kt : TopologicalSpace.Compacts ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    {hKc : ∀ i, (timeSpaceProductCompactFamily Kt Kx i : Set (ℝ × X)) ⊆ s}
+    {hα : 0 < α} {U : Set X} (hU : U ⊆ ⋃ i, (Kx i : Set X))
+    {u v : parabolicC2AlphaSubmodule X E α s}
+    (h :
+      toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+          (timeSpaceProductCompactFamily Kt Kx) hKc hα u =
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+          (timeSpaceProductCompactFamily Kt Kx) hKc hα v) :
+    EqOn u v ((Kt : Set ℝ) ×ˢ U) :=
+  eqOn_subset_of_toCompactCoordFamily_eq
+    (X := X) (E := E) (α := α) (s := s)
+    (Kc := timeSpaceProductCompactFamily Kt Kx) (hKc := hKc) (hα := hα)
+    (timeSpaceProductCompactFamily_product_subset_iUnion_of_subset Kt Kx hU) h
+
+/-- Interval product compact value readouts determine higher parabolic functions on
+`Icc t₀ T × U` whenever `U` is covered by the spatial compact family. -/
+theorem eqOn_timeSpaceIccProduct_of_toCompactCoordFamily_eq {κ : Type*}
+    (t₀ T : ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    {hKc : ∀ i, (timeSpaceIccCompactFamily t₀ T Kx i : Set (ℝ × X)) ⊆ s}
+    {hα : 0 < α} {U : Set X} (hU : U ⊆ ⋃ i, (Kx i : Set X))
+    {u v : parabolicC2AlphaSubmodule X E α s}
+    (h :
+      toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+          (timeSpaceIccCompactFamily t₀ T Kx) hKc hα u =
+        toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+          (timeSpaceIccCompactFamily t₀ T Kx) hKc hα v) :
+    EqOn u v (Icc t₀ T ×ˢ U) :=
+  eqOn_timeSpaceProduct_of_toCompactCoordFamily_eq
+    (X := X) (E := E) (α := α) (s := s)
+    (timeIccCompact t₀ T) Kx (hKc := hKc) (hα := hα) hU h
 
 /-- Compact value readout is injective on coordinate parabolic `C^{2+α,1+α/2}` functions
 when the chosen compact pieces cover all time-space. -/

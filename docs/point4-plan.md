@@ -3883,7 +3883,9 @@ finite compact-family value `LipschitzOnWith` estimates unpack to pointwise
 compact-coordinate distance bounds. Those higher compact-coordinate distance
 and finite-family `LipschitzOnWith` readouts now also restrict to fixed-time
 spatial compact readouts whenever the chosen time-space compact pieces cover
-each requested time slice.
+each requested time slice. The higher compact-family readout determination layer
+now also has subset, `Kt × U`, and `Icc t₀ T × U` product-domain forms matching
+the lower `C^{0,α}` readout API.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct
