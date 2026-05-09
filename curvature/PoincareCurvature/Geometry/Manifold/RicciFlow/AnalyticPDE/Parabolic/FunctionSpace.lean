@@ -1317,6 +1317,19 @@ theorem forall_compactCoord_dist_le_of_toCompactCoordFamily_lipschitzOnWith {Y �
     (dist_pi_le_iff hC).1 hdist i
   exact (ContinuousMap.dist_le hC).1 hi z
 
+/-- A global time-space compact-family cover covers every requested fixed-time spatial slice. -/
+theorem timeSlice_spatial_cover_of_iUnion_eq_univ {κ ι : Type*}
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (Kx : κ → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    (hcover : (⋃ j, (Kdom j : Set (ℝ × X))) = Set.univ) :
+    ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
+  intro τ _hτ i x
+  have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
+    simp [hcover]
+  exact Set.mem_iUnion.mp hz
+
 /-- Pointwise compact-coordinate estimates on time-space compact pieces give fixed-time spatial
 readout estimates whenever the selected time-space pieces cover each requested time slice.  This is
 the bridge from parabolic compact readouts to spatial coordinate hypotheses in Banach chart
@@ -1374,6 +1387,58 @@ theorem forall_timeSlice_spatial_dist_le_of_toCompactCoordFamily_lipschitzOnWith
   intro τ hτ
   exact forall_compactCoord_dist_le_of_toCompactCoordFamily_lipschitzOnWith
     (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα (hLip τ hτ)
+
+/-- Pointwise compact-coordinate estimates on a global time-space compact-family cover give
+fixed-time spatial readout estimates on every requested spatial slice. -/
+theorem forall_timeSlice_spatial_dist_le_of_forall_compactCoord_dist_le_ofCover
+    {Y κ ι : Type*} [PseudoMetricSpace Y]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : κ → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ} {stateSet : Set Y} {K : ℝ}
+    {A : ℝ → Y → parabolicC0AlphaSubmodule X E α s}
+    (hcompact : ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet →
+      ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ j (z : Kdom j),
+        dist
+          (toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+            Kdom hKdom hα (A τ u) j z)
+          (toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+            Kdom hKdom hα (A τ v) j z)
+          ≤ K * dist u v)
+    (hcover : (⋃ j, (Kdom j : Set (ℝ × X))) = Set.univ) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A τ u (τ, x.1)) (A τ v (τ, x.1)) ≤ K * dist u v :=
+  forall_timeSlice_spatial_dist_le_of_forall_compactCoord_dist_le
+    (X := X) (E := E) (α := α) (s := s)
+    Kdom hKdom hα Kx hcompact
+    (timeSlice_spatial_cover_of_iUnion_eq_univ
+      (X := X) Kdom Kx (timeSet := timeSet) hcover)
+
+/-- A time-dependent finite compact-family readout Lipschitz estimate on a global time-space cover
+gives fixed-time spatial readout estimates on every requested spatial slice. -/
+theorem forall_timeSlice_spatial_dist_le_of_toCompactCoordFamily_lipschitzOnWith_ofCover
+    {Y κ ι : Type*} [PseudoMetricSpace Y] [Fintype ι]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : κ → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ} {stateSet : Set Y} {L : ℝ≥0}
+    {A : ℝ → Y → parabolicC0AlphaSubmodule X E α s}
+    (hLip : ∀ τ, τ ∈ timeSet →
+      LipschitzOnWith L
+        (fun u : Y =>
+          toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+            Kdom hKdom hα (A τ u))
+        stateSet)
+    (hcover : (⋃ j, (Kdom j : Set (ℝ × X))) = Set.univ) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A τ u (τ, x.1)) (A τ v (τ, x.1)) ≤ (L : ℝ) * dist u v :=
+  forall_timeSlice_spatial_dist_le_of_toCompactCoordFamily_lipschitzOnWith
+    (X := X) (E := E) (α := α) (s := s)
+    Kdom hKdom hα Kx hLip
+    (timeSlice_spatial_cover_of_iUnion_eq_univ
+      (X := X) Kdom Kx (timeSet := timeSet) hcover)
 
 /-- The linear compact-family readout inherits the same finite product sup-norm estimate. -/
 theorem norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe {κ : Type*} [Fintype κ]
@@ -1836,12 +1901,6 @@ theorem finiteCoverValue_timeSlice_spatial_dist_le_ofCover
   letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
     finiteCoverValueNormedAddCommGroupOfCover
       (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα hcover
-  have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
-      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
-    intro τ _hτ i x
-    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
-      simp [hcover]
-    exact Set.mem_iUnion.mp hz
   have hLip : ∀ τ, τ ∈ timeSet →
       LipschitzOnWith (1 : ℝ≥0)
         (fun u : parabolicC0AlphaSubmodule X E α s =>
@@ -1852,10 +1911,10 @@ theorem finiteCoverValue_timeSlice_spatial_dist_le_ofCover
     simpa using
       finiteCoverValue_readout_lipschitzOnWith_ofCover
         (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα hcover stateSet
-  have h := forall_timeSlice_spatial_dist_le_of_toCompactCoordFamily_lipschitzOnWith
+  have h := forall_timeSlice_spatial_dist_le_of_toCompactCoordFamily_lipschitzOnWith_ofCover
     (X := X) (E := E) (α := α) (s := s)
     Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
-    (A := fun _τ u => u) hLip hcoverSlices
+    (A := fun _τ u => u) hLip hcover
   simpa [one_mul] using h
 
 end parabolicC0AlphaSubmodule

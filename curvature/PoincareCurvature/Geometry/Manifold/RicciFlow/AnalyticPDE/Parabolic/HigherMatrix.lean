@@ -2951,11 +2951,9 @@ theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_metric_entries_
               (fun i j => ∑ a, ∑ b,
                 secondDerivativeVectorRadius (X := X) ξ KM a b i j) * dist u v := by
   have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
-      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
-    intro τ _hτ i x
-    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
-      simp [hcover]
-    exact Set.mem_iUnion.mp hz
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) :=
+    parabolicC0AlphaSubmodule.timeSlice_spatial_cover_of_iUnion_eq_univ
+      (X := X) Kdom Kx (timeSet := timeSet) hcover
   exact
     ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_metric_entries_directions_of_unique
       (X := X) (α := α) (s := s) Kdom hKdom hα Kx ξ
@@ -3283,11 +3281,9 @@ theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_pi_family_of_metri
                 secondDerivativeVectorRadius (X := X) (ξ r) (KM r) a b i j)) *
             dist u v := by
   have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
-      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
-    intro τ _hτ i x
-    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
-      simp [hcover]
-    exact Set.mem_iUnion.mp hz
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) :=
+    parabolicC0AlphaSubmodule.timeSlice_spatial_cover_of_iUnion_eq_univ
+      (X := X) Kdom Kx (timeSet := timeSet) hcover
   exact
     ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_pi_family_of_metric_entries_family_directions_of_unique
       (X := X) (α := α) (s := s) Kdom hKdom hα Kx ξ

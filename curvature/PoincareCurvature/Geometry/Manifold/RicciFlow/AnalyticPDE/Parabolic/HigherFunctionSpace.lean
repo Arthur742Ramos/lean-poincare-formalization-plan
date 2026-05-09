@@ -4489,11 +4489,9 @@ theorem finiteCoverChosenSecondJet_value_timeSlice_spatial_dist_le_ofCover
     finiteCoverChosenSecondJetNormedAddCommGroupOfCover
       (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace hcover
   have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
-      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
-    intro τ _hτ i x
-    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
-      simp [hcover]
-    exact Set.mem_iUnion.mp hz
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) :=
+    parabolicC0AlphaSubmodule.timeSlice_spatial_cover_of_iUnion_eq_univ
+      (X := X) Kdom Kx (timeSet := timeSet) hcover
   have hLip : ∀ τ, τ ∈ timeSet →
       LipschitzOnWith (1 : ℝ≥0)
         (fun u : parabolicC2AlphaSubmodule X E α s =>
@@ -4541,11 +4539,9 @@ theorem finiteCoverChosenSecondJet_spaceDeriv_timeSlice_spatial_dist_le_ofCover
     finiteCoverChosenSecondJetNormedAddCommGroupOfCover
       (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace hcover
   have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
-      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
-    intro τ _hτ i x
-    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
-      simp [hcover]
-    exact Set.mem_iUnion.mp hz
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) :=
+    parabolicC0AlphaSubmodule.timeSlice_spatial_cover_of_iUnion_eq_univ
+      (X := X) Kdom Kx (timeSet := timeSet) hcover
   have hLip : ∀ τ, τ ∈ timeSet →
       LipschitzOnWith (1 : ℝ≥0)
         (fun u : parabolicC2AlphaSubmodule X E α s =>
@@ -4593,11 +4589,9 @@ theorem finiteCoverChosenSecondJet_spaceSecondDeriv_timeSlice_spatial_dist_le_of
     finiteCoverChosenSecondJetNormedAddCommGroupOfCover
       (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace hcover
   have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
-      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
-    intro τ _hτ i x
-    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
-      simp [hcover]
-    exact Set.mem_iUnion.mp hz
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) :=
+    parabolicC0AlphaSubmodule.timeSlice_spatial_cover_of_iUnion_eq_univ
+      (X := X) Kdom Kx (timeSet := timeSet) hcover
   have hLip : ∀ τ, τ ∈ timeSet →
       LipschitzOnWith (1 : ℝ≥0)
         (fun u : parabolicC2AlphaSubmodule X E α s =>
@@ -4646,11 +4640,9 @@ theorem finiteCoverChosenSecondJet_timeDeriv_timeSlice_spatial_dist_le_ofCover
     finiteCoverChosenSecondJetNormedAddCommGroupOfCover
       (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα htime hspace hcover
   have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
-      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
-    intro τ _hτ i x
-    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
-      simp [hcover]
-    exact Set.mem_iUnion.mp hz
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) :=
+    parabolicC0AlphaSubmodule.timeSlice_spatial_cover_of_iUnion_eq_univ
+      (X := X) Kdom Kx (timeSet := timeSet) hcover
   have hLip : ∀ τ, τ ∈ timeSet →
       LipschitzOnWith (1 : ℝ≥0)
         (fun u : parabolicC2AlphaSubmodule X E α s =>
