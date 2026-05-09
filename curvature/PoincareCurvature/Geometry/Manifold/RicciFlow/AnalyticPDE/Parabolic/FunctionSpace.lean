@@ -198,6 +198,16 @@ theorem holder (h : ParabolicC0AlphaNormLe N α u s) :
     ParabolicHolderWith N α u s :=
   h.c0AlphaWith_self.holder
 
+theorem congr (h : ParabolicC0AlphaNormLe N α u s) (huv : EqOn v u s) :
+    ParabolicC0AlphaNormLe N α v s := by
+  rcases h with ⟨B, hB, H, hH, hsum, hBH⟩
+  refine ⟨B, hB, H, hH, hsum, ?_⟩
+  exact ⟨
+    (fun {_p} hp => by
+      simpa [huv hp] using hBH.bounded hp),
+    (fun {_p} hp {_q} hq => by
+      simpa [huv hp, huv hq] using hBH.holder hp hq)⟩
+
 /-- The single radius controls the pointwise norm on the domain. -/
 theorem norm_le (h : ParabolicC0AlphaNormLe N α u s) ⦃z : ℝ × X⦄ (hz : z ∈ s) :
     ‖u z‖ ≤ N := by

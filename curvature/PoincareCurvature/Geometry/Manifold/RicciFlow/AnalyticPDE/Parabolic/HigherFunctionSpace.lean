@@ -731,6 +731,25 @@ theorem exists_secondJet_c0AlphaNormLe_self (h : ParabolicC2AlphaNormLe N α u s
   exact ⟨J, hu.mono_const hNu_le, hx.mono_const hNx_le,
     hxx.mono_const hNxx_le, ht.mono_const hNt_le⟩
 
+/-- On unique-differentiability slices, the higher norm-ball derivative controls may be
+transported from the existentially chosen second jet to any caller-supplied second jet. -/
+theorem secondJet_c0AlphaNormLe_self_of_unique (h : ParabolicC2AlphaNormLe N α u s)
+    (J : ParabolicSecondJet u s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    ParabolicC0AlphaNormLe N α u s ∧
+      ParabolicC0AlphaNormLe N α J.spaceDeriv s ∧
+        ParabolicC0AlphaNormLe N α J.spaceSecondDeriv s ∧
+          ParabolicC0AlphaNormLe N α J.timeDeriv s := by
+  rcases h.exists_secondJet_c0AlphaNormLe_self with ⟨K, hu, hx, hxx, ht⟩
+  refine ⟨hu, ?_, ?_, ?_⟩
+  · exact hx.congr fun z hz => J.spaceDeriv_eq_of_unique K hz (hspace hz)
+  · exact hxx.congr fun z hz =>
+      J.spaceSecondDeriv_eq_of_unique K hz (fun {x} hx => hspace (z := (z.1, x)) hx)
+  · exact ht.congr fun z hz => J.timeDeriv_eq_of_unique K hz (htime hz)
+
 /-- A higher single-radius bound supplies one chosen second jet whose value and
 derivative components are pointwise bounded by the same higher radius. -/
 theorem exists_secondJet_norm_le_self (h : ParabolicC2AlphaNormLe N α u s) :
