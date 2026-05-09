@@ -1452,6 +1452,13 @@ and
 including the operator-ball and identity-ball specializations, so chart-local
 component estimates can feed the inverse patch without dropping back to the
 generic Picard package.
+The localized componentwise closed-ball continuity route now also has a
+direction-free common-`Ioo` local-inverse wrapper,
+`exists_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasFDerivWithinAt_Icc_of_le_radius`,
+which dispatches internally to the forward or backward closed-interval theorem
+according to the selected time.  Compact symmetric Picard intervals can
+therefore request the model `OpenPartialHomeomorph` witness without exposing a
+separate time-direction split at each call site.
 The corresponding
 `..._of_eventually_hasFDerivAt_Ioo` inverse-function wrappers consume that
 `C¹` package directly. For product-Picard output, the new
@@ -1622,6 +1629,15 @@ the same fixed-time and space-time backward inverse-function data as bundled
 Thus callers that already have a time-slice `ContDiffAt` proof need not route
 through full space-time regularity, and callers with space-time regularity still
 avoid unpacking the inverse-function tuple.
+The restricted state-preserving componentwise bundled common-patch handoff now
+also has direction-free all-`Icc` wrappers,
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_Icc_of_le_radius`
+and
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_Icc_of_le_radius_of_contDiffAt_spaceTime`.
+These wrappers keep compact gluing callers on one selected closed interval
+while consuming either fixed-time `C^3` regularity or the natural space-time
+regularity proof and dispatching internally to the correct forward/backward
+common-`Ioo` gluing package.
 These ingredients now assemble into a local-cover raw-flow endpoint,
 `Diffeomorph3GaugeFlowOn.of_iUnion_gluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 with proof-level `nonempty_...`: global glued forward/backward slices plus

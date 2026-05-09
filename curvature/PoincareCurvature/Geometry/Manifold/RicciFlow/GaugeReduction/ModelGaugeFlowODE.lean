@@ -20552,6 +20552,52 @@ theorem exists_ofProductStatePreservingComponentClosedBallContinuityEstimates_re
           hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul)
       htime ht₀' hr hx htbase ht ht_forward hD_bound hDf_lip hder
 
+/-- Localized componentwise closed-ball continuity estimates give a local
+inverse on a common interior time subinterval of the state-preserving selected
+variational flow.  This all-interval wrapper dispatches to the forward or
+backward common-`Ioo` local inverse according to the selected time. -/
+theorem exists_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasFDerivWithinAt_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {x : V} (hx : x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z) :
+    ∃ φ : OpenPartialHomeomorph V V,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ φ.source ∧
+          (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+            hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+            htime ht₀' hr).flow (x, t) ∈ φ.target := by
+  have htIcc' : t ∈ Icc tmin' tmax' := ⟨le_of_lt ht.1, le_of_lt ht.2⟩
+  have htIcc : t ∈ Icc tmin tmax := htime htIcc'
+  by_cases ht_left : t ≤ (t₀ : ℝ)
+  · exact
+      exists_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr hx htbase ht ⟨htIcc.1, ht_left⟩ hder
+  · have ht_right : (t₀ : ℝ) ≤ t := le_of_lt (lt_of_not_ge ht_left)
+    exact
+      exists_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr hx htbase ht ⟨ht_right, htIcc.2⟩ hder
+
 /-- Localized componentwise closed-ball continuity estimates give a bijective
 open patch for a common forward interior time slice. -/
 theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_open_nhds_bijOn_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
@@ -20960,6 +21006,85 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
         intro z hz
         exact hright hz.2 }
 
+/-- Localized componentwise closed-ball estimates give packaged lifted
+`LocalGluingData` on a common interior time slice.  This all-interval wrapper
+dispatches to the forward or backward common-`Ioo` gluing package according to
+the selected time. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_Icc_of_le_radius
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  have htIcc' : t ∈ Icc tmin' tmax' := ⟨le_of_lt ht.1, le_of_lt ht.2⟩
+  have htIcc : t ∈ Icc tmin tmax := htime htIcc'
+  by_cases ht_left : t ≤ (t₀ : ℝ)
+  · exact
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_backward_Icc_of_le_radius
+        (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr hU₀open hU₀source hxU₀
+        hx htbase ht ⟨htIcc.1, ht_left⟩ hder hGdiff hU₁open hU₁source htarget hxU₁
+  · have ht_right : (t₀ : ℝ) ≤ t := le_of_lt (lt_of_not_ge ht_left)
+    exact
+      ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius
+        (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+        hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr hU₀open hU₀source hxU₀
+        hx htbase ht ⟨ht_right, htIcc.2⟩ hder hGdiff hU₁open hU₁source htarget hxU₁
+
 /-- Forward localized componentwise closed-ball estimates give packaged lifted
 `LocalGluingData` from space-time regularity of the selected flow. -/
 theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_forward_Icc_of_le_radius_of_contDiffAt_spaceTime
@@ -21040,6 +21165,88 @@ theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_
       (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
       hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr hU₀open hU₀source hxU₀
       hx htbase ht ht_forward hder hGdiff hU₁open hU₁source htarget hxU₁
+
+/-- Localized componentwise closed-ball estimates give packaged lifted
+`LocalGluingData` from space-time regularity of the selected flow.  This
+all-interval wrapper dispatches through the fixed-time gluing package after
+extracting time-slice `C^3` regularity. -/
+theorem ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_Icc_of_le_radius_of_contDiffAt_spaceTime
+    [FiniteDimensional ℝ V] [CompleteSpace V]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace V M] [T2Space M]
+    [IsManifold (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M]
+    [ContMDiffVectorBundle (2 : WithTop ℕ∞) V
+      (fun x : M ↦ TangentSpace (𝓘(ℝ, V)) x) (𝓘(ℝ, V))]
+    [SigmaCompactSpace M]
+    {a R Kf KD Lf BA BD r' : ℝ≥0}
+    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
+    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
+    (hf_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖f t y‖ ≤ Lf)
+    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
+    (hf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => f t y) (Icc tmin tmax))
+    (hDf_cont : ∀ y ∈ closedBall x₀ a, ContinuousOn (fun t : ℝ => Df t y) (Icc tmin tmax))
+    (hmul : (max Lf (BD * BA)) * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
+    (e₀ e₁ : OpenPartialHomeomorph M V)
+    (he₀ : e₀ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    (he₁ : e₁ ∈ IsManifold.maximalAtlas (𝓘(ℝ, V)) (∞ : WithTop ℕ∞) M)
+    {tmin' tmax' t : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    (hr : r' ≤ R)
+    {U₀ U₁ : Set M} {x : M}
+    (hU₀open : IsOpen U₀) (hU₀source : U₀ ⊆ e₀.source) (hxU₀ : x ∈ U₀)
+    (hx : e₀ x ∈ ball x₀ r')
+    (htbase : (t₀ : ℝ) ∈ Ioo tmin' tmax') (ht : t ∈ Ioo tmin' tmax')
+    (hder : ∀ τ ∈ Icc tmin tmax, ∀ z ∈ closedBall x₀ a,
+      HasFDerivWithinAt (f τ) (Df τ z) (closedBall x₀ a) z)
+    (hGdiff_spaceTime : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t))
+    (hU₁open : IsOpen U₁) (hU₁source : U₁ ⊆ e₁.source)
+    (htarget :
+      (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t) ∈ e₁.target)
+    (hxU₁ : e₁.symm
+      ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+        hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+        htime ht₀' hr).flow (e₀ x, t)) ∈ U₁) :
+    ∃ φ : OpenPartialHomeomorph V V, ∃ Um Wm : Set M,
+      (φ : V → V) =
+          (fun y : V =>
+            (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (y, t)) ∧
+        x ∈ Um ∧ Um ⊆ U₀ ∧
+          (fun z : M ↦ e₁.symm
+            ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+              hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+              htime ht₀' hr).flow (e₀ z, t))) x ∈ Wm ∧ Wm ⊆ U₁ ∧
+            LocalGluingData (I := 𝓘(ℝ, V)) (M := M) 3
+              (fun z : M ↦ e₁.symm
+                ((ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+                  hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+                  htime ht₀' hr).flow (e₀ z, t)))
+              (fun z : M ↦ e₀.symm (φ.symm (e₁ z))) Um Wm := by
+  let α : VariationalLocalFlowSolution f Df
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+      hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+      htime ht₀' hr
+  have hGdiff : ContDiffAt ℝ (3 : WithTop ℕ∞)
+      (fun y : V =>
+        (ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict
+          hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
+          htime ht₀' hr).flow (y, t)) (e₀ x) := by
+    simpa [α] using
+      α.flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime
+        (by simpa [α] using hGdiff_spaceTime)
+  exact
+    ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_common_Ioo_of_hasFDerivWithinAt_Icc_of_le_radius
+      (f := f) (Df := Df) hf_lip hDf_lip hf_bound hA_bound hD_bound
+      hf_cont hDf_cont hmul e₀ e₁ he₀ he₁ htime ht₀' hr hU₀open hU₀source hxU₀
+      hx htbase ht hder hGdiff hU₁open hU₁source htarget hxU₁
 
 /-- Localized componentwise closed-ball continuity estimates give the lifted
 `C^3` local gluing patch with overlap equality against a second chart-lifted
