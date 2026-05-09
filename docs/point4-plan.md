@@ -3913,6 +3913,11 @@ finite-cover value seminormed/normed carrier induced by compact-family value
 readouts, including a separated normed additive-group structure for global
 compact-piece covers. This is only the value-readout carrier, not the full
 `C^{2+α,1+α/2}` Banach norm or a completeness theorem.
+It also exposes noncanonical chosen-second-jet readouts as lower
+`C^{0,α}` submodule elements for the spatial derivative, second spatial
+derivative, and time derivative. These wrappers only make the existential jet
+choice reusable by downstream compact-readout APIs; they do not make the
+derivative choice canonical or add Schauder/completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct

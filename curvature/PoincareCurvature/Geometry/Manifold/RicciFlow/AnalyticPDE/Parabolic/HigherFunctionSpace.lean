@@ -1271,6 +1271,86 @@ theorem exists_secondJet_c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
             ParabolicC0AlphaOn α J.timeDeriv s :=
   u.2.exists_secondJet_c0AlphaOn
 
+/-- A noncanonical coherent second jet chosen for a higher parabolic submodule element.  On
+unique-differentiability slices this agrees with any other chosen jet by the uniqueness lemmas
+above. -/
+noncomputable def chosenSecondJet (u : parabolicC2AlphaSubmodule X E α s) :
+    ParabolicSecondJet (u : (ℝ × X) → E) s :=
+  Classical.choose (exists_secondJet_c0AlphaOn (X := X) (E := E) (α := α) (s := s) u)
+
+theorem chosenSecondJet_spec (u : parabolicC2AlphaSubmodule X E α s) :
+    ParabolicC0AlphaOn α (u : (ℝ × X) → E) s ∧
+      ParabolicC0AlphaOn α (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceDeriv s ∧
+        ParabolicC0AlphaOn α
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceSecondDeriv s ∧
+          ParabolicC0AlphaOn α
+            (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv s :=
+  Classical.choose_spec
+    (exists_secondJet_c0AlphaOn (X := X) (E := E) (α := α) (s := s) u)
+
+theorem chosenSecondJet_value_c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
+    ParabolicC0AlphaOn α (u : (ℝ × X) → E) s :=
+  (chosenSecondJet_spec (X := X) (E := E) (α := α) (s := s) u).1
+
+theorem chosenSecondJet_spaceDeriv_c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
+    ParabolicC0AlphaOn α
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceDeriv s :=
+  (chosenSecondJet_spec (X := X) (E := E) (α := α) (s := s) u).2.1
+
+theorem chosenSecondJet_spaceSecondDeriv_c0AlphaOn
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    ParabolicC0AlphaOn α
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceSecondDeriv s :=
+  (chosenSecondJet_spec (X := X) (E := E) (α := α) (s := s) u).2.2.1
+
+theorem chosenSecondJet_timeDeriv_c0AlphaOn (u : parabolicC2AlphaSubmodule X E α s) :
+    ParabolicC0AlphaOn α
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv s :=
+  (chosenSecondJet_spec (X := X) (E := E) (α := α) (s := s) u).2.2.2
+
+/-- The chosen spatial derivative as a lower parabolic `C^{0,α}` submodule element. -/
+noncomputable def chosenSpaceDerivC0AlphaSubmodule
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    parabolicC0AlphaSubmodule X (X →L[ℝ] E) α s :=
+  ⟨(chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceDeriv,
+    chosenSecondJet_spaceDeriv_c0AlphaOn (X := X) (E := E) (α := α) (s := s) u⟩
+
+@[simp]
+theorem chosenSpaceDerivC0AlphaSubmodule_apply
+    (u : parabolicC2AlphaSubmodule X E α s) (z : ℝ × X) :
+    chosenSpaceDerivC0AlphaSubmodule (X := X) (E := E) (α := α) (s := s) u z =
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceDeriv z :=
+  rfl
+
+/-- The chosen second spatial derivative as a lower parabolic `C^{0,α}` submodule element. -/
+noncomputable def chosenSpaceSecondDerivC0AlphaSubmodule
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    parabolicC0AlphaSubmodule X (X →L[ℝ] (X →L[ℝ] E)) α s :=
+  ⟨(chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceSecondDeriv,
+    chosenSecondJet_spaceSecondDeriv_c0AlphaOn
+      (X := X) (E := E) (α := α) (s := s) u⟩
+
+@[simp]
+theorem chosenSpaceSecondDerivC0AlphaSubmodule_apply
+    (u : parabolicC2AlphaSubmodule X E α s) (z : ℝ × X) :
+    chosenSpaceSecondDerivC0AlphaSubmodule (X := X) (E := E) (α := α) (s := s) u z =
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceSecondDeriv z :=
+  rfl
+
+/-- The chosen time derivative as a lower parabolic `C^{0,α}` submodule element. -/
+noncomputable def chosenTimeDerivC0AlphaSubmodule
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    parabolicC0AlphaSubmodule X E α s :=
+  ⟨(chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv,
+    chosenSecondJet_timeDeriv_c0AlphaOn (X := X) (E := E) (α := α) (s := s) u⟩
+
+@[simp]
+theorem chosenTimeDerivC0AlphaSubmodule_apply
+    (u : parabolicC2AlphaSubmodule X E α s) (z : ℝ × X) :
+    chosenTimeDerivC0AlphaSubmodule (X := X) (E := E) (α := α) (s := s) u z =
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv z :=
+  rfl
+
 theorem exists_timeDeriv (u : parabolicC2AlphaSubmodule X E α s) :
     ∃ Dt : ℝ × X → E,
       (∀ ⦃z : ℝ × X⦄, z ∈ s →
