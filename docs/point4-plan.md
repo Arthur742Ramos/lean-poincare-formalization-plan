@@ -2825,6 +2825,10 @@ The compact same-witness wrappers now have matching `endpointInner` variants,
 so fixed-IVP and theorem-family compact callers can keep endpoint obligations
 in scalar inner-product form all the way to the returned scalar package and
 spatial correction.
+They also have matching `boundary` and `boundaryInner` compact continuations,
+so closed-Picard callers can provide derivative data uniformly at
+closed-interval points outside the open interior rather than splitting it into
+left and right endpoint hypotheses.
 The selected fixed-IVP and theorem-family gluing layers now also accept
 boundary-shaped endpoint data, both as tensor `HasTimeDerivativeAt` facts and
 as scalar inner-product derivatives, and return either the full selected tensor
