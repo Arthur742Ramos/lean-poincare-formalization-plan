@@ -971,7 +971,11 @@ model-field chart ODE data plus the along-flow intrinsic DeTurck identification
 into ordinary chart and primitive derivative data on the chosen open `Ioo`
 solution time set. Endpoint callers can therefore use the scalar gauge-pullback
 route from the model-field Picard output without first rebuilding an intrinsic
-chart-ODE package by hand.
+chart-ODE package by hand. The raw gauge-flow theorem-package handoff now also
+preserves scalar inner-derivative structure directly: fixed-IVP and theorem-family
+chosen DeTurck packages can project to the scalar-derivative gauge-reducible
+package from raw intrinsic gauge-flow existence plus scalar pullback-metric
+derivative data, without detouring through the weaker gauge-reducible package.
 The same handoff is now available with relative-filter vector-field equality on
 the open `Ioo` interval: both the raw existence constructors and the derivative
 packages can consume model-field data without requiring endpoint pointwise

@@ -27249,6 +27249,37 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toOrdinar
     LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
   (pkg.toIntrinsicFamily_viaGaugeFieldEqZero hzero).toOrdinary
 
+/-- A chosen-background DeTurck theorem family becomes scalar-derivative
+gauge-reducible directly from raw intrinsic `C^3` gauge-flow existence data and
+scalar inner-product derivative proofs. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toInnerDerivativeGaugeReducible_viaGaugeFlowExistenceInnerDerivative
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (hderiv : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+          ∀ x : M, ∀ u v : TangentSpace I x,
+            HasDerivAt
+              (fun τ ↦
+                (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                  ((((G.toDiffeomorph3GaugeFlowFamily).maps3 ivp sol) τ) x)
+                  ((((G.toDiffeomorph3GaugeFlowFamily).maps3 ivp sol) τ).pushforwardTangent
+                    x u)
+                  ((((G.toDiffeomorph3GaugeFlowFamily).maps3 ivp sol) τ).pushforwardTangent
+                    x v))
+              (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+                ((G.toDiffeomorph3GaugeFlowFamily).gauge ivp sol) t x u v) t) :
+    InnerDerivativeGaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) :=
+  pkg.toInnerDerivativeGaugeReducible_viaDiffeomorph3GaugeFlowInnerDerivative
+    (G.toDiffeomorph3GaugeFlowFamily).maps3
+    (G.toDiffeomorph3GaugeFlowFamily).anchored
+    (G.toDiffeomorph3GaugeFlowFamily).satisfies
+    hderiv
+
 /-- A chosen-background DeTurck theorem family becomes gauge-reducible directly from raw
 intrinsic `C^3` gauge-flow existence data and scalar inner-product derivative proofs. -/
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeReducible_viaGaugeFlowExistenceInnerDerivative
@@ -27438,6 +27469,35 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaG
           sol.1.toIntrinsicDeTurckSolution.background t x = 0) :
     LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
   (pkg.toIntrinsic_viaGaugeFieldEqZero hzero).toOrdinary
+
+/-- A fixed-IVP chosen-background DeTurck theorem package becomes
+scalar-derivative gauge-reducible directly from raw intrinsic `C^3` gauge-flow
+existence data and scalar inner-product derivative proofs. -/
+noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toInnerDerivativeGaugeReducible_viaGaugeFlowExistenceInnerDerivative
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
+        ∀ x : M, ∀ u v : TangentSpace I x,
+          HasDerivAt
+            (fun τ ↦
+              (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
+                ((((G.toDiffeomorph3GaugeFlow).maps3 sol) τ) x)
+                ((((G.toDiffeomorph3GaugeFlow).maps3 sol) τ).pushforwardTangent x u)
+                ((((G.toDiffeomorph3GaugeFlow).maps3 sol) τ).pushforwardTangent x v))
+            (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+              ((G.toDiffeomorph3GaugeFlow).gauge sol) t x u v) t) :
+    InnerDerivativeGaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  pkg.toInnerDerivativeGaugeReducible_viaDiffeomorph3GaugeFlowInnerDerivative
+    (G.toDiffeomorph3GaugeFlow).maps3
+    (G.toDiffeomorph3GaugeFlow).anchored
+    (G.toDiffeomorph3GaugeFlow).satisfies
+    hderiv
 
 /-- A fixed-IVP chosen-background DeTurck theorem package becomes gauge-reducible directly from
 raw intrinsic `C^3` gauge-flow existence data and scalar inner-product derivative proofs. -/
