@@ -3931,9 +3931,11 @@ including pointwise compact-coordinate difference bounds for their readouts.
 Those chosen spatial-derivative, second-spatial-derivative, and time-derivative
 compact-family bounds now also lift to `LipschitzOnWith` estimates from
 pairwise higher-norm controls, with pointwise compact-coordinate unpacking from
-the resulting Lipschitz hypotheses. They do not make the derivative choice
-canonical or add a linear finite-cover derivative norm, Schauder estimate, or
-completeness content.
+the resulting Lipschitz hypotheses. The same chosen derivative Lipschitz
+readouts now also restrict to fixed-time spatial compact readouts whenever the
+chosen time-space compact family covers the requested spatial slices. They do
+not make the derivative choice canonical or add a linear finite-cover derivative
+norm, Schauder estimate, or completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct
