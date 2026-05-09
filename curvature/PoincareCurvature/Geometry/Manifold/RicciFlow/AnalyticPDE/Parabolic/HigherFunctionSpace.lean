@@ -4,6 +4,7 @@ public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Paraboli
 public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Analysis.Calculus.FDeriv.Add
 
 set_option linter.unusedSectionVars false
@@ -151,6 +152,45 @@ def smul (c : ℝ) (J : ParabolicSecondJet u s) :
   hasSpaceSecondDeriv := by
     intro z hz
     simpa [Pi.smul_apply] using (J.hasSpaceSecondDeriv hz).fun_const_smul c
+
+/-- Difference of two parabolic second jets, with derivative witnesses subtracted
+componentwise. -/
+def sub {v : ℝ × X → E} (Ju : ParabolicSecondJet u s) (Jv : ParabolicSecondJet v s) :
+    ParabolicSecondJet (fun z : ℝ × X => u z - v z) s := by
+  simpa [sub_eq_add_neg] using Ju.add Jv.neg
+
+/-- Product of two parabolic second jets, with derivative witnesses paired componentwise. -/
+def prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {v : ℝ × X → F}
+    (Ju : ParabolicSecondJet u s) (Jv : ParabolicSecondJet v s) :
+    ParabolicSecondJet (fun z : ℝ × X => (u z, v z)) s where
+  timeDeriv := fun z => (Ju.timeDeriv z, Jv.timeDeriv z)
+  spaceDeriv := fun z => (Ju.spaceDeriv z).prod (Jv.spaceDeriv z)
+  spaceSecondDeriv := fun z =>
+    let Lprod :
+        ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F) :=
+      (ContinuousLinearMap.prodL ℝ :
+        ((X →L[ℝ] E) × (X →L[ℝ] F)) ≃L[ℝ] (X →L[ℝ] E × F))
+    Lprod.comp ((Ju.spaceSecondDeriv z).prod (Jv.spaceSecondDeriv z))
+  hasTimeDeriv := by
+    intro z hz
+    exact HasDerivWithinAt.prodMk (Ju.hasTimeDeriv hz) (Jv.hasTimeDeriv hz)
+  hasSpaceDeriv := by
+    intro z hz
+    simpa using (Ju.hasSpaceDeriv hz).prodMk (Jv.hasSpaceDeriv hz)
+  hasSpaceSecondDeriv := by
+    intro z hz
+    let Lprod :
+        ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F) :=
+      (ContinuousLinearMap.prodL ℝ :
+        ((X →L[ℝ] E) × (X →L[ℝ] F)) ≃L[ℝ] (X →L[ℝ] E × F))
+    have hpair :
+        HasFDerivWithinAt
+          (fun x : X => (Ju.spaceDeriv (z.1, x), Jv.spaceDeriv (z.1, x)))
+          ((Ju.spaceSecondDeriv z).prod (Jv.spaceSecondDeriv z))
+          (spaceSliceDomain s z.1) z.2 := by
+      exact (Ju.hasSpaceSecondDeriv hz).prodMk (Jv.hasSpaceSecondDeriv hz)
+    have hcomp := Lprod.hasFDerivAt.comp_hasFDerivWithinAt z.2 hpair
+    simpa [Function.comp, Lprod] using hcomp
 
 /-- Compose a parabolic second jet with a continuous linear value map. -/
 def continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]

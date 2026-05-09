@@ -3817,7 +3817,8 @@ this higher predicate already has constant and zero constructors and is closed
 under addition, finite sums, negation, subtraction, scalar multiplication, and
 continuous-linear value maps with explicit radius bounds. Chosen parabolic
 second jets now also compose with continuous linear value maps, transforming
-the time, spatial, and second-spatial derivative witnesses componentwise. Its
+the time, spatial, and second-spatial derivative witnesses componentwise; they
+also support componentwise subtraction and product pairing. Its
 existential `ParabolicC2AlphaOn` class now forms a real submodule of all
 coordinate time-space functions, is closed under continuous-linear value maps,
 and reads back to `ParabolicC0AlphaOn` for the value component; the full
