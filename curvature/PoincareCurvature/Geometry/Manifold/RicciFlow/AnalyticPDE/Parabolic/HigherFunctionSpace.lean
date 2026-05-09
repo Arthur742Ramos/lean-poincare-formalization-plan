@@ -3067,6 +3067,29 @@ noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetSeminormedAd
     inferInstance
   infer_instance
 
+noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetNormedAddCommGroup
+    {κ : Type*} [Fintype κ] (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    NormedAddCommGroup
+      (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc) := by
+  dsimp [chosenSecondJetFiniteCoverReadoutTarget]
+  letI : (i : κ) → NormedAddCommGroup C(Kc i, E) := fun _ => inferInstance
+  letI : (i : κ) → NormedAddCommGroup C(Kc i, X →L[ℝ] E) := fun _ =>
+    inferInstance
+  letI : (i : κ) → NormedAddCommGroup C(Kc i, X →L[ℝ] (X →L[ℝ] E)) :=
+    fun i => @ContinuousMap.instNormedAddCommGroup (Kc i) inferInstance inferInstance
+      (X →L[ℝ] (X →L[ℝ] E)) inferInstance
+  letI : NormedAddCommGroup (∀ i, C(Kc i, E)) := Pi.normedAddCommGroup
+  letI : NormedAddCommGroup (∀ i, C(Kc i, X →L[ℝ] E)) := Pi.normedAddCommGroup
+  letI : NormedAddCommGroup
+      (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := Pi.normedAddCommGroup
+  letI : NormedAddCommGroup
+      ((∀ i, C(Kc i, E)) × (∀ i, C(Kc i, X →L[ℝ] E))) :=
+    inferInstance
+  letI : NormedAddCommGroup
+      ((∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) × (∀ i, C(Kc i, E))) :=
+    inferInstance
+  exact Prod.normedAddCommGroup
+
 noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetNormedSpace
     {κ : Type*} [Fintype κ] (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
     NormedSpace ℝ (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc) := by
@@ -3207,6 +3230,68 @@ structure on the higher parabolic submodule. -/
     @NormedSpace ℝ (parabolicC2AlphaSubmodule X E α s) _
       (finiteCoverChosenSecondJetSeminormedAddCommGroup
         (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace) :=
+  NormedSpace.induced ℝ
+    (parabolicC2AlphaSubmodule X E α s)
+    (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc)
+    (chosenSecondJetFiniteCoverReadoutLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace)
+
+/-- If the compact pieces cover all time-space, the combined finite-cover chosen second-jet
+readout is injective.  The value component already separates functions on such a cover. -/
+theorem chosenSecondJetFiniteCoverReadout_injective_of_iUnion_eq_univ
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    Function.Injective
+      (chosenSecondJetFiniteCoverReadoutLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace) := by
+  intro u v huv
+  refine toCompactCoordFamily_injective_of_iUnion_eq_univ
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover ?_
+  have hvalue := congrArg (fun w =>
+    ((w : chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc).1.1)) huv
+  simpa [chosenSecondJetFiniteCoverReadoutLinearMap_apply] using hvalue
+
+/-- If the compact pieces cover all time-space, the combined finite-cover chosen second-jet
+readout induces a separated normed additive-group structure. -/
+@[reducible] noncomputable def finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+  NormedAddCommGroup.induced
+    (parabolicC2AlphaSubmodule X E α s)
+    (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc)
+    (chosenSecondJetFiniteCoverReadoutLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace)
+    (chosenSecondJetFiniteCoverReadout_injective_of_iUnion_eq_univ
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace hcover)
+
+/-- The real vector-space structure paired with
+`finiteCoverChosenSecondJetNormedAddCommGroupOfCover`. -/
+@[reducible] noncomputable def finiteCoverChosenSecondJetNormedSpaceOfCover
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    @NormedSpace ℝ (parabolicC2AlphaSubmodule X E α s) _
+      (finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover).toSeminormedAddCommGroup :=
   NormedSpace.induced ℝ
     (parabolicC2AlphaSubmodule X E α s)
     (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc)
