@@ -3481,6 +3481,41 @@ theorem finiteCoverChosenTimeDeriv_dist_eq {κ : Type*} [Fintype κ]
           (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime v) :=
   rfl
 
+/-- The chosen spatial-derivative finite-cover readout target is complete when
+the value model is complete. This records target-space completeness only, not
+closedness of any induced readout image. -/
+theorem finiteCoverChosenSpaceDerivReadoutTarget_completeSpace
+    {κ : Type*} [Fintype κ] [CompleteSpace E]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    CompleteSpace (∀ i, C(Kc i, X →L[ℝ] E)) := by
+  letI : CompleteSpace (X →L[ℝ] E) := inferInstance
+  exact
+    parabolicC0AlphaSubmodule.finiteCoverValueReadoutTarget_completeSpace
+      (X := X) (E := X →L[ℝ] E) Kc
+
+/-- The chosen second-spatial-derivative finite-cover readout target is complete
+when the value model is complete. This records target-space completeness only,
+not closedness of any induced readout image. -/
+theorem finiteCoverChosenSpaceSecondDerivReadoutTarget_completeSpace
+    {κ : Type*} [Fintype κ] [CompleteSpace E]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    CompleteSpace (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := by
+  letI : CompleteSpace (X →L[ℝ] E) := inferInstance
+  letI : CompleteSpace (X →L[ℝ] (X →L[ℝ] E)) := inferInstance
+  exact
+    parabolicC0AlphaSubmodule.finiteCoverValueReadoutTarget_completeSpace
+      (X := X) (E := X →L[ℝ] (X →L[ℝ] E)) Kc
+
+/-- The chosen time-derivative finite-cover readout target is complete when the
+value model is complete. This records target-space completeness only, not
+closedness of any induced readout image. -/
+theorem finiteCoverChosenTimeDerivReadoutTarget_completeSpace
+    {κ : Type*} [Fintype κ] [CompleteSpace E]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    CompleteSpace (∀ i, C(Kc i, E)) :=
+  parabolicC0AlphaSubmodule.finiteCoverValueReadoutTarget_completeSpace
+    (X := X) (E := E) Kc
+
 /-- Product target for finite-cover readouts of a value and its chosen parabolic second jet.  This
 is still a compact-family sup readout, not a full parabolic Hölder norm. -/
 abbrev chosenSecondJetFiniteCoverReadoutTarget {κ : Type*}
@@ -3604,20 +3639,15 @@ noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetCompleteSpac
       (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := Pi.normedAddCommGroup
   letI : CompleteSpace (X →L[ℝ] E) := inferInstance
   letI : CompleteSpace (X →L[ℝ] (X →L[ℝ] E)) := inferInstance
-  letI : (i : κ) → CompleteSpace C(Kc i, E) := fun i =>
-    (completeSpace_congr
-      (ContinuousMap.isUniformEmbedding_equivBoundedOfCompact (Kc i) E)).2 inferInstance
-  letI : (i : κ) → CompleteSpace C(Kc i, X →L[ℝ] E) := fun i =>
-    (completeSpace_congr
-      (ContinuousMap.isUniformEmbedding_equivBoundedOfCompact (Kc i) (X →L[ℝ] E))).2
-        inferInstance
-  letI : (i : κ) → CompleteSpace C(Kc i, X →L[ℝ] (X →L[ℝ] E)) := fun i =>
-    (completeSpace_congr
-      (ContinuousMap.isUniformEmbedding_equivBoundedOfCompact (Kc i)
-        (X →L[ℝ] (X →L[ℝ] E)))).2 inferInstance
-  letI : CompleteSpace (∀ i, C(Kc i, E)) := inferInstance
-  letI : CompleteSpace (∀ i, C(Kc i, X →L[ℝ] E)) := inferInstance
-  letI : CompleteSpace (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := inferInstance
+  letI : CompleteSpace (∀ i, C(Kc i, E)) :=
+    parabolicC0AlphaSubmodule.finiteCoverValueReadoutTarget_completeSpace
+      (X := X) (E := E) Kc
+  letI : CompleteSpace (∀ i, C(Kc i, X →L[ℝ] E)) :=
+    finiteCoverChosenSpaceDerivReadoutTarget_completeSpace
+      (X := X) (E := E) Kc
+  letI : CompleteSpace (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) :=
+    finiteCoverChosenSpaceSecondDerivReadoutTarget_completeSpace
+      (X := X) (E := E) Kc
   infer_instance
 
 /-- Combined finite-cover readout of a higher parabolic function and its chosen second-jet

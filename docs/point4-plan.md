@@ -3978,7 +3978,10 @@ closed-ball readouts from higher difference balls, including finite-coordinate
 finite-Pi value variants with radii `Kᵢ * R` and matching `LipschitzOnWith`
 forms with the summed `ℝ≥0` component constant. This is only the value-readout
 carrier, not the full `C^{2+α,1+α/2}` Banach norm or a completeness theorem.
-It also exposes noncanonical chosen-second-jet readouts as lower
+The underlying finite-cover value readout product target is now recorded as
+complete when the value model is complete; this is target-space completeness
+only and not a completeness claim for the induced carrier. It also exposes
+noncanonical chosen-second-jet readouts as lower
 `C^{0,α}` submodule elements for the spatial derivative, second spatial
 derivative, and time derivative. These wrappers only make the existential jet
 choice reusable by downstream compact-readout APIs, and the same chosen
@@ -3995,7 +3998,8 @@ linear maps on compact pieces contained in the domain, and each of the chosen
 spatial-derivative, second-spatial-derivative, and time-derivative readouts now
 induces its own finite-cover seminormed additive-group and real normed-space
 structure with definitional norm and distance readback to the compact-family
-readout. The value and chosen-derivative readouts are also bundled into one
+readout, and each chosen-derivative finite-cover product target is recorded as
+complete when the value model is complete. The value and chosen-derivative readouts are also bundled into one
 combined finite-cover chosen-second-jet compact readout linear map, inducing a
 single seminormed additive-group and real normed-space structure with
 definitional norm and distance readback to that product readout. The combined

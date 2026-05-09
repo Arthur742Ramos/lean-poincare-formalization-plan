@@ -1738,6 +1738,18 @@ theorem toCompactCoordFamily_injective_of_iUnion_eq_univ {κ : Type*}
     rw [h]
   simpa using hz_eq
 
+/-- The finite-cover value readout product target is complete when the value
+model is complete. This is only completeness of the ambient compact-readout
+target, not of the induced readout-image carrier. -/
+theorem finiteCoverValueReadoutTarget_completeSpace {κ : Type*}
+    [Fintype κ] [CompleteSpace E]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    CompleteSpace (∀ i, C(Kc i, E)) := by
+  letI : (i : κ) → CompleteSpace C(Kc i, E) := fun i =>
+    (completeSpace_congr
+      (ContinuousMap.isUniformEmbedding_equivBoundedOfCompact (Kc i) E)).2 inferInstance
+  infer_instance
+
 /-- The finite compact-family value readout induces a seminormed additive-group structure on the
 lower parabolic submodule.  This is only a finite-cover readout norm; it is separated only when the
 chosen compact pieces determine the underlying functions. -/
