@@ -4102,6 +4102,58 @@ theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_of_metric_entries
       (X := n → ℝ) (α := α) (s := s) (parabolicCoordinateUnitVector n)
       (R := R) (δ := δ) M hM htime hspace hδpos hdet
 
+set_option maxHeartbeats 1000000 in
+/-- Pi-valued finite-family quantitative chosen-entry-jet handoff for the schematic
+Ricci-DeTurck RHS with family-dependent direction readouts. -/
+theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries_family_directions_of_unique
+    {κ n : Type*} [Fintype κ] [Fintype n] [DecidableEq n] (v : κ → n → X)
+    {R : κ → n → n → ℝ} {δ : ℝ}
+    (M : κ → parabolicC2AlphaSubmodule X (Matrix n n ℝ) α s)
+    (hM : ∀ r i j, ParabolicC2AlphaNormLe (R r i j) α
+      (fun z : ℝ × X => M r z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ParabolicC0AlphaNormLe
+      (∑ r, ParabolicC2AlphaNormLe.ricciDeTurckSchematicMatrixBoundConst
+        (n := n) δ (R r)
+        (firstDerivativeVectorRadius (X := X) (v r) (R r))
+        (secondDerivativeVectorRadius (X := X) (v r) (R r)))
+      α
+      (fun z : ℝ × X => fun r : κ =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r z)
+          (fun a i j =>
+            (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M r)).spaceDeriv
+              z (v r a))
+          (fun a b i j =>
+            (chosenMatrixEntrySecondJet
+              (X := X) (α := α) (s := s) i j (M r)).spaceSecondDeriv
+                z (v r a) (v r b))) s := by
+  exact ParabolicC0AlphaNormLe.pi (X := X) (α := α) (s := s)
+    (N := fun r =>
+      ParabolicC2AlphaNormLe.ricciDeTurckSchematicMatrixBoundConst
+        (n := n) δ (R r)
+        (firstDerivativeVectorRadius (X := X) (v r) (R r))
+        (secondDerivativeVectorRadius (X := X) (v r) (R r)))
+    (u := fun z : ℝ × X => fun r : κ =>
+      ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r z)
+        (fun a i j =>
+          (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M r)).spaceDeriv
+            z (v r a))
+        (fun a b i j =>
+          (chosenMatrixEntrySecondJet
+            (X := X) (α := α) (s := s) i j (M r)).spaceSecondDeriv
+              z (v r a) (v r b)))
+    fun r =>
+      chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_of_metric_entries_directions_of_unique
+        (X := X) (α := α) (s := s) (v r)
+        (R := R r) (δ := δ) (M r) (hM r) htime hspace hδpos (hdet r)
+
 /-- State-space Lipschitz bridge for the chosen-entry-jet schematic Ricci-DeTurck RHS.
 
 This specializes

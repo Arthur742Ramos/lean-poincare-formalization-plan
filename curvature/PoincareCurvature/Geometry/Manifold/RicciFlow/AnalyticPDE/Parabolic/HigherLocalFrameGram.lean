@@ -204,6 +204,79 @@ theorem exists_secondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_pi_fam
     ⟨J, hJ⟩
   exact ⟨J, δ, hδpos, hdet, hJ⟩
 
+set_option maxHeartbeats 1000000 in
+/-- Quantitative deterministic chosen-entry-jet finite-family compact local-frame Gram bridge.
+The compact determinant lower bound is shared across the frame family, while each assembled
+Gram matrix reads its chosen entry jets along its own local-frame basis. -/
+theorem chosenMatrixEntrySecondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_pi_family_of_entries_of_timeSpace_isCompact_of_unique
+    [IsContMDiffRiemannianBundle I 2 E TE]
+    [ContMDiffVectorBundle 2 E TE I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TE → E))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × E)} {α : ℝ} {R : ρ → ι → ι → ℝ}
+    (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × E⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    (hG : ∀ r i j,
+      ParabolicC2AlphaNormLe (R r i j) α
+        (fun z : ℝ × E =>
+          (show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) i j) K)
+    (htime : ∀ ⦃z : ℝ × E⦄, z ∈ K →
+      UniqueDiffWithinAt ℝ (timeSliceDomain K z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × E⦄, z ∈ K →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain K z.1) z.2) :
+    ∃ δ > 0,
+      (∀ r ⦃z : ℝ × E⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (let G : ρ → parabolicC2AlphaSubmodule E (Matrix ι ι ℝ) α K :=
+        fun r =>
+          ⟨fun z : ℝ × E =>
+            (show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2),
+            ParabolicC2AlphaOn.matrix_c2AlphaOn_of_entries
+              (X := E) (α := α) (s := K)
+              (fun i j => ParabolicC2AlphaOn.of_normLe (hG r i j))⟩
+       ParabolicC0AlphaNormLe
+        (∑ r, ricciDeTurckSchematicMatrixBoundConst (n := ι) δ (R r)
+          (firstDerivativeVectorRadius (X := E) (fun a : ι => b r a) (R r))
+          (secondDerivativeVectorRadius (X := E) (fun a : ι => b r a) (R r)))
+        α
+        (fun z : ℝ × E => fun r : ρ =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+            (fun a i j =>
+              (parabolicC2AlphaSubmodule.chosenMatrixEntrySecondJet
+                (X := E) (α := α) (s := K) i j (G r)).spaceDeriv z (b r a))
+            (fun a c i j =>
+              (parabolicC2AlphaSubmodule.chosenMatrixEntrySecondJet
+                (X := E) (α := α) (s := K) i j (G r)).spaceSecondDeriv
+                  z (b r a) (b r c))) K) := by
+  rcases
+    ParabolicC0AlphaOn.localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  let G : ρ → parabolicC2AlphaSubmodule E (Matrix ι ι ℝ) α K :=
+    fun r =>
+      ⟨fun z : ℝ × E =>
+        (show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2),
+        ParabolicC2AlphaOn.matrix_c2AlphaOn_of_entries
+          (X := E) (α := α) (s := K)
+          (fun i j => ParabolicC2AlphaOn.of_normLe (hG r i j))⟩
+  have hG_norm : ∀ r i j,
+      ParabolicC2AlphaNormLe (R r i j) α (fun z : ℝ × E => G r z i j) K := by
+    intro r i j
+    simpa [G] using hG r i j
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  simpa [G] using
+    parabolicC2AlphaSubmodule.chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_pi_family_of_metric_entries_family_directions_of_unique
+      (X := E) (α := α) (s := K) (v := fun r a => b r a)
+      (R := R) (δ := δ) G hG_norm htime hspace hδpos hdet
+
 end ParabolicC2AlphaNormLe
 
 namespace ParabolicC2AlphaOn
