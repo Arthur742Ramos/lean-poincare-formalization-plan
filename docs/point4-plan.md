@@ -1638,6 +1638,13 @@ These wrappers keep compact gluing callers on one selected closed interval
 while consuming either fixed-time `C^3` regularity or the natural space-time
 regularity proof and dispatching internally to the correct forward/backward
 common-`Ioo` gluing package.
+The retained same-source overlap-equality handoff now has the same
+direction-free shape through
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_Icc_of_le_radius`
+and
+`ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_eqOn_common_Ioo_of_hasFDerivWithinAt_Icc_of_le_radius_of_contDiffAt_spaceTime`,
+so compact Picard overlap readouts can carry their `EqOn` proof through the
+same selected closed interval without exposing a time-direction split.
 These ingredients now assemble into a local-cover raw-flow endpoint,
 `Diffeomorph3GaugeFlowOn.of_iUnion_gluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin`
 with proof-level `nonempty_...`: global glued forward/backward slices plus
