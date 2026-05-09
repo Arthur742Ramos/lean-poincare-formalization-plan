@@ -3341,6 +3341,49 @@ readout induces a separated normed additive-group structure. -/
     (chosenSecondJetFiniteCoverReadoutLinearMap
       (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace)
 
+/-- With the separated all-cover combined finite-cover chosen second-jet normed structure, the
+norm is definitionally the combined compact-family readout norm. -/
+theorem finiteCoverChosenSecondJet_norm_eq_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    ‖u‖ =
+      ‖chosenSecondJetFiniteCoverReadoutLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u‖ :=
+  rfl
+
+/-- With the separated all-cover combined finite-cover chosen second-jet normed structure,
+distance is definitionally the combined compact-family readout distance. -/
+theorem finiteCoverChosenSecondJet_dist_eq_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    (u v : parabolicC2AlphaSubmodule X E α s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    dist u v =
+      dist
+        (chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u)
+        (chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace v) :=
+  rfl
+
 /-- With the combined finite-cover chosen second-jet seminormed structure, the norm is
 definitionally the combined compact-family readout norm. -/
 theorem finiteCoverChosenSecondJet_norm_eq {κ : Type*} [Fintype κ]

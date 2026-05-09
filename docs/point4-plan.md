@@ -3943,9 +3943,10 @@ single seminormed additive-group and real normed-space structure with
 definitional norm and distance readback to that product readout. If the compact
 pieces cover all time-space, the value projection makes that combined readout
 injective and upgrades the induced structure to a separated normed additive
-group with a paired real normed-space structure; equality of the combined
-readout also identifies the underlying functions on any subset covered by the
-compact pieces. The same combined readout has component norm and distance
+group with a paired real normed-space structure and definitional norm/distance
+readback to the same product readout; equality of the combined readout also
+identifies the underlying functions on any subset covered by the compact
+pieces. The same combined readout has component norm and distance
 projection bounds for the value, chosen spatial derivative, chosen second
 spatial derivative, and chosen time derivative compact-family readouts; the
 combined readout and each component readout are also packaged as `1`-Lipschitz
