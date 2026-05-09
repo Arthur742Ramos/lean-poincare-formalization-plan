@@ -258,6 +258,42 @@ theorem dist_le_of_sub (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s)
     dist (u z) (v z) ≤ N := by
   simpa [dist_eq_norm] using h.norm_le hz
 
+/-- Componentwise `C^{0,α}` difference controls with radii linear in a shared scalar give a
+pointwise finite-Pi norm difference bound with the summed component radius. -/
+theorem pi_norm_sub_le_sum_mul_of_entries {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {R : ℝ} {K : ι → ℝ} {u v : ℝ × X → ι → F}
+    (hK : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    ‖u z - v z‖ ≤ (∑ i, K i) * R := by
+  have hsum_nonneg : 0 ≤ ∑ i, K i :=
+    Finset.sum_nonneg fun i _hi => hK i
+  have htarget_nonneg : 0 ≤ (∑ i, K i) * R :=
+    mul_nonneg hsum_nonneg hR
+  refine (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun i => ?_
+  have hentry : ‖u z i - v z i‖ ≤ K i * R := by
+    simpa [dist_eq_norm] using (h i).dist_le_of_sub hz
+  have hentry_le_sum : K i ≤ ∑ i, K i :=
+    Finset.single_le_sum (fun i' _hi' => hK i') (Finset.mem_univ i)
+  exact (by
+    simpa [Pi.sub_apply] using hentry.trans (mul_le_mul_of_nonneg_right hentry_le_sum hR))
+
+/-- Componentwise `C^{0,α}` difference controls with radii linear in a shared scalar give a
+pointwise finite-Pi distance bound with the summed component radius. -/
+theorem pi_dist_le_sum_mul_of_entries {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {R : ℝ} {K : ι → ℝ} {u v : ℝ × X → ι → F}
+    (hK : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    dist (u z) (v z) ≤ (∑ i, K i) * R := by
+  simpa [dist_eq_norm] using
+    pi_norm_sub_le_sum_mul_of_entries
+      (X := X) (α := α) (s := s) hK hR h hz
+
 theorem of_c0AlphaWith {B H : ℝ} (hB : 0 ≤ B) (hH : 0 ≤ H)
     (h : ParabolicC0AlphaWith B H α u s) :
     ParabolicC0AlphaNormLe (B + H) α u s :=
@@ -967,21 +1003,30 @@ theorem norm_toContinuousMap_pi_sub_le_sum_mul_of_entries
     {ι F : Type*} [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
     {R : ℝ} {K : ι → ℝ}
     {u v : parabolicC0AlphaSubmodule X (ι → F) α s}
-    (_hK_nonneg : ∀ i, 0 ≤ K i) (_hR : 0 ≤ R)
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
     (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
       (fun z => u z i - v z i) s) :
     ‖toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα u -
         toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα v‖ ≤
       (∑ i, K i) * R := by
-  have hpi :
-      ParabolicC0AlphaNormLe ((∑ i, K i) * R) α (fun z => u z - v z) s := by
-    simpa [Pi.sub_apply, Finset.sum_mul] using
-      (ParabolicC0AlphaNormLe.pi
-        (X := X) (α := α) (s := s) (F := F)
-        (N := fun i => K i * R)
-        (u := fun z : ℝ × X => fun i => u z i - v z i) h)
-  exact norm_toContinuousMap_sub_le_of_normLe
-    (X := X) (E := ι → F) (α := α) (s := s) hKc hα hpi
+  have hsum_nonneg : 0 ≤ ∑ i, K i :=
+    Finset.sum_nonneg fun i _hi => hK_nonneg i
+  have htarget_nonneg : 0 ≤ (∑ i, K i) * R :=
+    mul_nonneg hsum_nonneg hR
+  refine (ContinuousMap.norm_le
+    (f := toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα u -
+      toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα v)
+    htarget_nonneg).mpr ?_
+  intro z
+  have hz : z.1 ∈ s := hKc z.2
+  calc
+    ‖(toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα u -
+        toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα v) z‖ =
+        ‖u z.1 - v z.1‖ := by
+          rfl
+    _ ≤ (∑ i, K i) * R :=
+        ParabolicC0AlphaNormLe.pi_norm_sub_le_sum_mul_of_entries
+          (X := X) (α := α) (s := s) hK_nonneg hR h hz
 
 /-- A sup-bound on a difference controls the compact readout sup norm.  This lower-level
 readout is useful when an estimate gives only the `C⁰` part of the parabolic norm. -/

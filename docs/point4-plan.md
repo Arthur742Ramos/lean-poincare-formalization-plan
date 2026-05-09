@@ -3812,13 +3812,13 @@ finite-cover
 compact readout sup-norm differences, including the finite product readout
 norm, are now bounded by the same single-radius `C^{0,α}` difference control,
 and by sup-bound-only difference estimates; finite Pi-valued `C^{0,α}` functions
-now also have componentwise summed-radius compact-piece, finite compact-family,
-and linear finite-cover readout estimates, with matching `LipschitzOnWith`
-forms. Pairwise norm-ball and sup-bound difference estimates now promote
-directly to `LipschitzOnWith` estimates for single compact-piece, finite
-compact-family, and linear finite-cover readouts, with finite compact-family
-`LipschitzOnWith` estimates unpacking to pointwise compact-coordinate distance
-bounds. Those time-space compact-coordinate bounds
+now also have componentwise summed-radius pointwise norm/distance readouts and
+compact-piece, finite compact-family, and linear finite-cover readout estimates,
+with matching `LipschitzOnWith` forms. Pairwise norm-ball and sup-bound
+difference estimates now promote directly to `LipschitzOnWith` estimates for
+single compact-piece, finite compact-family, and linear finite-cover readouts,
+with finite compact-family `LipschitzOnWith` estimates unpacking to pointwise
+compact-coordinate distance bounds. Those time-space compact-coordinate bounds
 now also restrict to fixed-time spatial compact readouts whenever the chosen
 time-space compact pieces cover each requested time slice, giving the direct
 bridge from parabolic readouts to spatial Banach-chart coordinate estimates.
