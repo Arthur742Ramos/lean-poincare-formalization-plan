@@ -3824,7 +3824,9 @@ The compact-piece layer now also constructs the canonical product pieces
 containment criterion and the fixed-time spatial slice cover property. It also
 identifies the union of those product pieces with `Kt × ⋃ᵢ Kxᵢ`, including the
 closed-interval and spatial-cover specializations needed for readout
-determination on interval product domains.
+determination on interval product domains. Compact-family readout equality now
+also has a subset form, with direct `Kt × U` and `Icc t₀ T × U` product-domain
+determination lemmas from a spatial compact-family cover of `U`.
 `AnalyticPDE/Parabolic/HigherFunctionSpace.lean` now begins the coordinate
 `C^{2+α,1+α/2}` layer: it defines time and spatial slices, packages a genuine
 parabolic second jet with time, spatial, and second-spatial derivative
