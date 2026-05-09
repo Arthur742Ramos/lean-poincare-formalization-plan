@@ -2789,7 +2789,12 @@ glues `Ioo` data with left/right endpoint `HasTimeDerivativeAt` facts, and the
 selected fixed-IVP and theorem-family wrappers
 `hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpoints` and
 `hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_endpoints`
-turn that into `HasTimeDerivativeOn` on the selected solution `timeSet`.
+turn that into `HasTimeDerivativeOn` on the selected solution `timeSet`. The
+same fixed-IVP and theorem-family endpoint-gluing routes now also project
+directly to `PullbackMetricInnerDerivativeData`, so selected compact `Ioo`
+tensor output plus endpoint tensor derivatives can feed the existing
+scalar-derivative theorem-package projections without an extra manual
+conversion step.
 The theorem-family analogue now performs the same same-witness assembly
 uniformly over all initial-value problems, returning one selected gauge-flow
 family with both per-IVP continuations.
