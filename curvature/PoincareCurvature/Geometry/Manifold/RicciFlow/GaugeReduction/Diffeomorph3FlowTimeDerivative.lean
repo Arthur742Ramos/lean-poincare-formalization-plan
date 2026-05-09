@@ -4960,6 +4960,70 @@ theorem metricBilinearCoordinateField_fixedTime_fderivWithin_tangentVectorOfCoor
       (tangentVectorOfCoordinate (I := I) p uE)
       (tangentVectorOfCoordinate (I := I) p vE)
 
+/-- Model-slot cancellation for the spatial metric-coordinate derivative plus
+the tangent-map variation terms.
+
+This is the coordinate algebra used by the DeTurck Lie-correction route when
+the tangent-map linearization is already stated on arbitrary centered model
+coordinates. -/
+theorem metricBilinearCoordinateField_spatial_tangentMapCorrection_modelSlots_eq
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
+    (X : TangentSpace I p) (Y : ∀ q : M, TangentSpace I q)
+    (D : E →L[ℝ] E)
+    (hD : ∀ wE : E,
+      tangentVectorOfCoordinate (I := I) p (D wE) =
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          Y p (tangentVectorOfCoordinate (I := I) p wE)) -
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (FiberBundle.extend E (tangentVectorOfCoordinate (I := I) p wE)) p X))
+    (uE vE : E) :
+    (fderivWithin ℝ
+      (fun yE : E ↦ metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+      (Set.range I) ((extChartAt I p) p)) X uE vE +
+      (g t).inner p
+        (tangentVectorOfCoordinate (I := I) p (D uE))
+        (tangentVectorOfCoordinate (I := I) p vE) +
+      (g t).inner p
+        (tangentVectorOfCoordinate (I := I) p uE)
+        (tangentVectorOfCoordinate (I := I) p (D vE)) =
+      (g t).inner p
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          Y p (tangentVectorOfCoordinate (I := I) p uE))
+        (tangentVectorOfCoordinate (I := I) p vE) +
+      (g t).inner p
+        (tangentVectorOfCoordinate (I := I) p uE)
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          Y p (tangentVectorOfCoordinate (I := I) p vE)) := by
+  let cov := (chosenLeviCivitaFamily (I := I) (M := M) g) t
+  let B : TangentSpace I p →L[ℝ] TangentSpace I p →L[ℝ] ℝ := (g t).inner p
+  let u : TangentSpace I p := tangentVectorOfCoordinate (I := I) p uE
+  let v : TangentSpace I p := tangentVectorOfCoordinate (I := I) p vE
+  let Au : TangentSpace I p := cov (FiberBundle.extend E u) p X
+  let Av : TangentSpace I p := cov (FiberBundle.extend E v) p X
+  let Bu : TangentSpace I p := cov Y p u
+  let Bv : TangentSpace I p := cov Y p v
+  have hspace :
+      (fderivWithin ℝ
+        (fun yE : E ↦ metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+        (Set.range I) ((extChartAt I p) p)) X uE vE = B Au v + B u Av := by
+    simpa [cov, B, u, v, Au, Av] using
+      metricBilinearCoordinateField_fixedTime_fderivWithin_tangentVectorOfCoordinate_eq_chosenLeviCivita_extend
+        (I := I) (M := M) g t p X uE vE
+  have hDu : tangentVectorOfCoordinate (I := I) p (D uE) = Bu - Au := by
+    simpa [cov, u, Au, Bu] using hD uE
+  have hDv : tangentVectorOfCoordinate (I := I) p (D vE) = Bv - Av := by
+    simpa [cov, v, Av, Bv] using hD vE
+  change
+    (fderivWithin ℝ
+      (fun yE : E ↦ metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+      (Set.range I) ((extChartAt I p) p)) X uE vE +
+      B (tangentVectorOfCoordinate (I := I) p (D uE)) v +
+      B u (tangentVectorOfCoordinate (I := I) p (D vE)) =
+      B Bu v + B u Bv
+  rw [hspace, hDu, hDv]
+  simp [sub_eq_add_neg]
+  abel
+
 /-- The time-direction derivative of the named metric-coordinate field at the
 chart center is exactly the tensor time derivative of the metric.  This isolates
 the part of the `metricBilinearCoordinateField` Fréchet derivative supplied by

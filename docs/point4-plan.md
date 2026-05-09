@@ -575,7 +575,12 @@ The fixed-time spatial derivative of `metricBilinearCoordinateField` now also
 has model-slot forms using `tangentVectorOfCoordinate`, so Banach/readout
 arguments carrying raw model coordinates can use the exterior-derivative and
 Levi-Civita compatibility identities without first restating the slots as
-`sourceTangentCoordinate`s.
+`sourceTangentCoordinate`s.  The same model-slot interface now carries through
+the spatial/tangent-map cancellation algebra via
+`metricBilinearCoordinateField_spatial_tangentMapCorrection_modelSlots_eq`, so
+Picard/readout linearization hypotheses stated directly on arbitrary centered
+model slots can feed the DeTurck correction calculation before specializing to
+geometric tangent vectors.
 The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent
