@@ -2717,6 +2717,12 @@ now goes one step further: it constructs the restricted selected raw gauge-flow
 witness, consumes the finite source cover/readout certificates internally, and
 leaves the remaining state-preserving Picard and lifted local tensor derivative
 obligations in the `IccStatePreservingTensorDerivativeData` package.
+The theorem-family compact wrapper
+`SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_compact_iUnion_openPreimage_localGluingData`
+now performs the same selected compact construction uniformly over all initial
+value problems, returning one selected existence family and per-IVP tensor
+continuations with only the `IccStatePreservingTensorDerivativeData` obligation
+left.
 The theorem-family restricted-symmetric companion mirrors this after fixing one
 selected `ivp`, so family-level compact Picard callers can avoid restating the
 closed-interval certificate too.
@@ -2813,7 +2819,13 @@ it constructs the restricted selected raw gauge-flow witness, consumes the
 finite cover/readout/local-gluing/continuity/derivative/auxiliary certificates
 internally, and leaves callers with the selected-interval
 `IccSpatialCorrectionLocalData` package for the remaining Picard ball,
-lifted-model equality, and target-chart obligations. The selected raw flow
+lifted-model equality, and target-chart obligations.
+The theorem-family analogue
+`SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.exists_restrictSymmetricIcc_spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_compact_iUnion_openPreimage_localGluingData_of_localFlowSolution_lifted_model_eqOn_of_contMDiffCovariantDerivative_background`
+now packages that same smooth-background correction handoff uniformly over all
+initial-value problems, using the family route-data constructor internally and
+leaving only per-IVP `IccSpatialCorrectionLocalData` obligations.
+The selected raw flow
 now also exposes the
 pointwise correction-route `hXeq` certificate as
 `SelectedIntrinsicDeTurckGaugeFlowExistence.flow_vectorField_eq_intrinsicDeTurckGaugeField`,
