@@ -1100,6 +1100,12 @@ smaller initial ball. The autonomous `C¹` route now also exposes
 state-preserving Lipschitz and continuous space-time local-flow witnesses,
 together with localized forms, so after a Picard shrink callers keep the closed
 state-ball estimate used by chart-domain and convex state-tube arguments.
+At the underlying `IsPicardLindelof` layer, the same state-preserving route now
+has direct continuous-flow and localized Lipschitz/continuous witnesses
+`exists_lipschitzLocalFlowSolution_mem_closedBall_restrict` and
+`exists_continuousLocalFlowSolution_mem_closedBall[_restrict]`, so non-autonomous
+chart Picard output can be shrunk while retaining the closed Picard state-ball
+readout without rebuilding the selected solution package.
 The model-flow packages now also have restriction constructors for
 `LocalFlowSolution`, `LipschitzLocalFlowSolution`, `ContinuousLocalFlowSolution`,
 and `VariationalLocalFlowSolution`, preserving ODE, continuity, Lipschitz, and

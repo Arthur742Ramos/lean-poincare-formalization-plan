@@ -12339,6 +12339,123 @@ theorem exists_lipschitzLocalFlowSolution_mem_closedBall
     fun x hx t ht => toStatePreservingLipschitzLocalFlowSolution_flow_mem_closedBall
       hf hx ht⟩
 
+/-- State-preserving Picard-Lindelöf Lipschitz flow data, immediately localized
+to a smaller closed time interval and initial ball while retaining the Picard
+state-ball readout. -/
+def toStatePreservingLipschitzLocalFlowSolution_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    LipschitzLocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+  (toStatePreservingLipschitzLocalFlowSolution hf).restrict htime ht₀' hr
+
+/-- The localized state-preserving Picard-Lindelöf Lipschitz flow stays in the
+same closed Picard state ball. -/
+theorem toStatePreservingLipschitzLocalFlowSolution_restrict_flow_mem_closedBall
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r)
+    {x : V} (hx : x ∈ closedBall x₀ r') {t : ℝ} (ht : t ∈ Icc tmin' tmax') :
+    (toStatePreservingLipschitzLocalFlowSolution_restrict hf htime ht₀' hr).flow x t ∈
+      closedBall x₀ a := by
+  have hx' : x ∈ closedBall x₀ r := by
+    rw [mem_closedBall] at hx ⊢
+    exact le_trans hx (by exact_mod_cast hr)
+  simpa [toStatePreservingLipschitzLocalFlowSolution_restrict] using
+    toStatePreservingLipschitzLocalFlowSolution_flow_mem_closedBall
+      hf hx' (htime ht)
+
+/-- Proof-level localized form of the state-preserving Picard-Lindelöf
+Lipschitz flow. -/
+theorem exists_lipschitzLocalFlowSolution_mem_closedBall_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    ∃ α : LipschitzLocalFlowSolution f
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r',
+      ∀ x ∈ closedBall x₀ r', ∀ t ∈ Icc tmin' tmax',
+        α.flow x t ∈ closedBall x₀ a :=
+  ⟨toStatePreservingLipschitzLocalFlowSolution_restrict hf htime ht₀' hr,
+    fun x hx t ht =>
+      toStatePreservingLipschitzLocalFlowSolution_restrict_flow_mem_closedBall
+        hf htime ht₀' hr hx ht⟩
+
+/-- A selected Picard-Lindelöf continuous local flow that also preserves the
+closed Picard state ball `closedBall x₀ a`. -/
+def toStatePreservingContinuousLocalFlowSolution
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
+    ContinuousLocalFlowSolution f t₀ x₀ r :=
+  (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution
+
+/-- The selected state-preserving Picard-Lindelöf continuous flow stays in the
+closed Picard state ball. -/
+theorem toStatePreservingContinuousLocalFlowSolution_flow_mem_closedBall
+    (hf : IsPicardLindelof f t₀ x₀ a r L K)
+    {x : V} (hx : x ∈ closedBall x₀ r) {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    (toStatePreservingContinuousLocalFlowSolution hf).flow (x, t) ∈
+      closedBall x₀ a := by
+  simpa [toStatePreservingContinuousLocalFlowSolution,
+    LipschitzLocalFlowSolution.toContinuousLocalFlowSolution] using
+      toStatePreservingLipschitzLocalFlowSolution_flow_mem_closedBall hf hx ht
+
+/-- Proof-level form of the state-preserving Picard-Lindelöf continuous
+space-time flow. -/
+theorem exists_continuousLocalFlowSolution_mem_closedBall
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
+    ∃ α : ContinuousLocalFlowSolution f t₀ x₀ r,
+      ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
+        α.flow (x, t) ∈ closedBall x₀ a :=
+  ⟨toStatePreservingContinuousLocalFlowSolution hf,
+    fun x hx t ht =>
+      toStatePreservingContinuousLocalFlowSolution_flow_mem_closedBall hf hx ht⟩
+
+/-- State-preserving Picard-Lindelöf continuous local-flow data, immediately
+localized to a smaller closed time interval and initial ball while retaining
+the Picard state-ball readout. -/
+def toStatePreservingContinuousLocalFlowSolution_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    ContinuousLocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+  (toStatePreservingContinuousLocalFlowSolution hf).restrict htime ht₀' hr
+
+/-- The localized state-preserving Picard-Lindelöf continuous flow stays in the
+same closed Picard state ball. -/
+theorem toStatePreservingContinuousLocalFlowSolution_restrict_flow_mem_closedBall
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r)
+    {x : V} (hx : x ∈ closedBall x₀ r') {t : ℝ} (ht : t ∈ Icc tmin' tmax') :
+    (toStatePreservingContinuousLocalFlowSolution_restrict hf htime ht₀' hr).flow
+        (x, t) ∈ closedBall x₀ a := by
+  have hx' : x ∈ closedBall x₀ r := by
+    rw [mem_closedBall] at hx ⊢
+    exact le_trans hx (by exact_mod_cast hr)
+  simpa [toStatePreservingContinuousLocalFlowSolution_restrict] using
+    toStatePreservingContinuousLocalFlowSolution_flow_mem_closedBall
+      hf hx' (htime ht)
+
+/-- Proof-level localized form of the state-preserving Picard-Lindelöf
+continuous space-time flow. -/
+theorem exists_continuousLocalFlowSolution_mem_closedBall_restrict
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) {tmin' tmax' : ℝ}
+    (htime : Icc tmin' tmax' ⊆ Icc tmin tmax)
+    (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax')
+    {r' : ℝ≥0} (hr : r' ≤ r) :
+    ∃ α : ContinuousLocalFlowSolution f
+      (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r',
+      ∀ x ∈ closedBall x₀ r', ∀ t ∈ Icc tmin' tmax',
+        α.flow (x, t) ∈ closedBall x₀ a :=
+  ⟨toStatePreservingContinuousLocalFlowSolution_restrict hf htime ht₀' hr,
+    fun x hx t ht =>
+      toStatePreservingContinuousLocalFlowSolution_restrict_flow_mem_closedBall
+        hf htime ht₀' hr hx ht⟩
+
 /-- Picard-Lindelöf also yields a continuous partial space-time flow on the
 initial-data ball times the closed time interval. -/
 def toContinuousLocalFlowSolution
