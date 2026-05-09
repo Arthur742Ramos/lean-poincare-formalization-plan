@@ -4006,7 +4006,11 @@ distance, with the same bridge available for the separated all-cover normed
 carrier; pairwise higher difference bounds give `LipschitzOnWith` estimates
 for maps into both structures. These bridges let current higher norm-ball
 estimates feed the best available compact-family jet carrier without asserting
-a full parabolic Banach norm. They do not make the
+a full parabolic Banach norm. The value-level `ParabolicC0AlphaNormLe` and
+higher `ParabolicC2AlphaNormLe` difference APIs now also expose pointwise and
+product-domain closed-ball membership readouts, so later positivity and chart
+neighborhood arguments can consume norm-ball difference estimates in the same
+metric-neighborhood shape used by the geometric chart layer. They do not make the
 derivative choice canonical or upgrade this compact-family jet seminorm into
 the full `C^{2+α,1+α/2}` Banach
 norm, Schauder estimate, or completeness content.

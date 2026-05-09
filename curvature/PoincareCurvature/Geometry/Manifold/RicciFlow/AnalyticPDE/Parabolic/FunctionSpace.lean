@@ -259,6 +259,37 @@ theorem dist_le_of_sub (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s)
     dist (u z) (v z) ≤ N := by
   simpa [dist_eq_norm] using h.norm_le hz
 
+/-- A single-radius bound on a difference puts each value in the closed ball
+around the corresponding comparison value. -/
+theorem mem_closedBall_of_sub (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    u z ∈ Metric.closedBall (v z) N := by
+  simpa [Metric.mem_closedBall] using h.dist_le_of_sub hz
+
+/-- Symmetric closed-ball readout from a single-radius difference bound. -/
+theorem mem_closedBall_symm_of_sub
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s)
+    ⦃z : ℝ × X⦄ (hz : z ∈ s) :
+    v z ∈ Metric.closedBall (u z) N := by
+  simpa [Metric.mem_closedBall, dist_comm] using h.dist_le_of_sub hz
+
+/-- Product-domain pointwise distance readout of a single-radius difference
+bound. -/
+theorem dist_le_of_sub_prod_subset
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t : ℝ} (ht : t ∈ timeSet) {x : X} (hx : x ∈ spaceSet) :
+    dist (u (t, x)) (v (t, x)) ≤ N :=
+  h.dist_le_of_sub (hst ⟨ht, hx⟩)
+
+/-- Product-domain closed-ball readout of a single-radius difference bound. -/
+theorem mem_closedBall_of_sub_prod_subset
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s)
+    {timeSet : Set ℝ} {spaceSet : Set X} (hst : timeSet ×ˢ spaceSet ⊆ s)
+    {t : ℝ} (ht : t ∈ timeSet) {x : X} (hx : x ∈ spaceSet) :
+    u (t, x) ∈ Metric.closedBall (v (t, x)) N :=
+  h.mem_closedBall_of_sub (hst ⟨ht, hx⟩)
+
 /-- Componentwise `C^{0,α}` difference controls with radii linear in a shared scalar give a
 pointwise finite-Pi norm difference bound with the summed component radius. -/
 theorem pi_norm_sub_le_sum_mul_of_entries {ι F : Type*} [Fintype ι]
