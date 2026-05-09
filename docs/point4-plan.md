@@ -1096,7 +1096,10 @@ interval and smaller initial ball, giving direct bridges from mathlib's
 autonomous Picard-Lindelöf theorem to the packaged raw model-flow APIs. These
 autonomous existence witnesses now also have localized forms that immediately
 restrict to any smaller closed time interval containing the base time and any
-smaller initial ball.
+smaller initial ball. The autonomous `C¹` route now also exposes
+state-preserving Lipschitz and continuous space-time local-flow witnesses,
+together with localized forms, so after a Picard shrink callers keep the closed
+state-ball estimate used by chart-domain and convex state-tube arguments.
 The model-flow packages now also have restriction constructors for
 `LocalFlowSolution`, `LipschitzLocalFlowSolution`, `ContinuousLocalFlowSolution`,
 and `VariationalLocalFlowSolution`, preserving ODE, continuity, Lipschitz, and

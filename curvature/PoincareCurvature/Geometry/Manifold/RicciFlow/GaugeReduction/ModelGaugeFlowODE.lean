@@ -24046,6 +24046,97 @@ theorem exists_autonomous_continuousLocalFlowSolution_restrict
   intro tmin' tmax' htime ht₀' r' hr'
   exact ContinuousLocalFlowSolution.nonempty_restrict hα htime ht₀' hr'
 
+/-- A `C¹` autonomous vector field supplies a selected Lipschitz local flow on a
+closed Picard interval that stays in the Picard state ball. -/
+theorem exists_autonomous_lipschitzLocalFlowSolution_mem_closedBall
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ a : ℝ≥0, ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∃ ht₀ : t₀ ∈ Icc (t₀ - ε) (t₀ + ε),
+        ∃ α : LipschitzLocalFlowSolution (fun _ : ℝ => f)
+          (⟨t₀, ht₀⟩ : Icc (t₀ - ε) (t₀ + ε)) x₀ r,
+          ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc (t₀ - ε) (t₀ + ε),
+            α.flow x t ∈ closedBall x₀ a := by
+  obtain ⟨ε, hε, a, r, L, K, hr, hpl⟩ := IsPicardLindelof.of_contDiffAt_one hf
+  have ht₀ : t₀ ∈ Icc (t₀ - ε) (t₀ + ε) := by constructor <;> linarith
+  obtain ⟨α, hα⟩ :=
+    (ModelGaugeFlowODE.IsPicardLindelof.exists_lipschitzLocalFlowSolution_mem_closedBall
+      (V := V) (f := fun _ : ℝ => f)
+      (t₀ := (⟨t₀, ht₀⟩ : Icc (t₀ - ε) (t₀ + ε)))
+      (x₀ := x₀) (a := a) (r := r) (L := L) (K := K) (hpl t₀))
+  exact ⟨a, r, hr, ε, hε, ht₀, α, hα⟩
+
+/-- Localized autonomous state-preserving Lipschitz local-flow existence on any
+smaller closed time interval and smaller initial ball after the Picard radius
+has been chosen. -/
+theorem exists_autonomous_lipschitzLocalFlowSolution_mem_closedBall_restrict
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ a : ℝ≥0, ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∀ {tmin' tmax' : ℝ},
+        (htime : Icc tmin' tmax' ⊆ Icc (t₀ - ε) (t₀ + ε)) →
+        (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax') →
+        ∀ {r' : ℝ≥0}, r' ≤ r →
+          ∃ α : LipschitzLocalFlowSolution (fun _ : ℝ => f)
+            (⟨t₀, ht₀'⟩ : Icc tmin' tmax') x₀ r',
+            ∀ x ∈ closedBall x₀ r', ∀ t ∈ Icc tmin' tmax',
+              α.flow x t ∈ closedBall x₀ a := by
+  obtain ⟨a, r, hr, ε, hε, _ht₀, α, hα⟩ :=
+    exists_autonomous_lipschitzLocalFlowSolution_mem_closedBall (V := V) hf t₀
+  refine ⟨a, r, hr, ε, hε, ?_⟩
+  intro tmin' tmax' htime ht₀' r' hr'
+  let α' : LipschitzLocalFlowSolution (fun _ : ℝ => f)
+      (⟨t₀, ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    α.restrict htime ht₀' hr'
+  refine ⟨α', ?_⟩
+  intro x hx t ht
+  have hx' : x ∈ closedBall x₀ r := by
+    rw [mem_closedBall] at hx ⊢
+    exact le_trans hx (by exact_mod_cast hr')
+  simpa [α'] using hα x hx' t (htime ht)
+
+/-- A `C¹` autonomous vector field supplies a continuous space-time local flow
+on a closed Picard interval that stays in the Picard state ball. -/
+theorem exists_autonomous_continuousLocalFlowSolution_mem_closedBall
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ a : ℝ≥0, ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∃ ht₀ : t₀ ∈ Icc (t₀ - ε) (t₀ + ε),
+        ∃ α : ContinuousLocalFlowSolution (fun _ : ℝ => f)
+          (⟨t₀, ht₀⟩ : Icc (t₀ - ε) (t₀ + ε)) x₀ r,
+          ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc (t₀ - ε) (t₀ + ε),
+            α.flow (x, t) ∈ closedBall x₀ a := by
+  obtain ⟨a, r, hr, ε, hε, ht₀, α, hα⟩ :=
+    exists_autonomous_lipschitzLocalFlowSolution_mem_closedBall (V := V) hf t₀
+  refine ⟨a, r, hr, ε, hε, ht₀, α.toContinuousLocalFlowSolution, ?_⟩
+  intro x hx t ht
+  simpa [LipschitzLocalFlowSolution.toContinuousLocalFlowSolution] using hα x hx t ht
+
+/-- Localized autonomous state-preserving continuous local-flow existence on
+any smaller closed time interval and smaller initial ball after the Picard
+radius has been chosen. -/
+theorem exists_autonomous_continuousLocalFlowSolution_mem_closedBall_restrict
+    (hf : ContDiffAt ℝ 1 f x₀) (t₀ : ℝ) :
+    ∃ a : ℝ≥0, ∃ r : ℝ≥0, 0 < r ∧ ∃ ε > (0 : ℝ),
+      ∀ {tmin' tmax' : ℝ},
+        (htime : Icc tmin' tmax' ⊆ Icc (t₀ - ε) (t₀ + ε)) →
+        (ht₀' : (t₀ : ℝ) ∈ Icc tmin' tmax') →
+        ∀ {r' : ℝ≥0}, r' ≤ r →
+          ∃ α : ContinuousLocalFlowSolution (fun _ : ℝ => f)
+            (⟨t₀, ht₀'⟩ : Icc tmin' tmax') x₀ r',
+            ∀ x ∈ closedBall x₀ r', ∀ t ∈ Icc tmin' tmax',
+              α.flow (x, t) ∈ closedBall x₀ a := by
+  obtain ⟨a, r, hr, ε, hε, _ht₀, α, hα⟩ :=
+    exists_autonomous_continuousLocalFlowSolution_mem_closedBall (V := V) hf t₀
+  refine ⟨a, r, hr, ε, hε, ?_⟩
+  intro tmin' tmax' htime ht₀' r' hr'
+  let α' : ContinuousLocalFlowSolution (fun _ : ℝ => f)
+      (⟨t₀, ht₀'⟩ : Icc tmin' tmax') x₀ r' :=
+    α.restrict htime ht₀' hr'
+  refine ⟨α', ?_⟩
+  intro x hx t ht
+  have hx' : x ∈ closedBall x₀ r := by
+    rw [mem_closedBall] at hx ⊢
+    exact le_trans hx (by exact_mod_cast hr')
+  simpa [α'] using hα x hx' t (htime ht)
+
 /-- Centered version of
 `exists_autonomous_local_integral_curves`, matching the single-trajectory ODE
 statement used when only the gauge curve through one point is needed. -/
