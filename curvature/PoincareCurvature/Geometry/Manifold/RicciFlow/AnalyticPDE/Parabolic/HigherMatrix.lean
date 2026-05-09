@@ -2523,6 +2523,63 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamilyLinearMa
       (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
       (A := A) (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet hAeq
 
+/-- Pointwise compact-coordinate distance estimate for the chosen-jet schematic Ricci-DeTurck
+RHS readout.  This is the memberwise compact-coordinate form of
+`ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_of_metric_entries_directions_of_unique`. -/
+theorem ricciDeTurckSchematicMatrix_compactCoord_dist_le_of_metric_entries_directions_of_unique
+    {ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (ξ : n → X)
+    {δ : ℝ} {C KM : n → n → ℝ} {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : Y → ℝ × X → Matrix n n ℝ}
+    (J : ∀ u : Y, ∀ i j,
+      ParabolicSecondJet (fun z : ℝ × X => M u z i j) s)
+    (hC : ∀ i j, 0 ≤ C i j) (hKM : ∀ i j, 0 ≤ KM i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C i j) α (fun z => M u z i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM i j * dist u v) α
+        (fun z => M u z i j - M v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M u z)
+        (fun a i j => (J u i j).spaceDeriv z (ξ a))
+        (fun a b i j => (J u i j).spaceSecondDeriv z (ξ a) (ξ b))) :
+    ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i (z : Kdom i),
+      dist
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A u) i z)
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A v) i z)
+        ≤ ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ C
+            (firstDerivativeVectorRadius (X := X) ξ C)
+            (secondDerivativeVectorRadius (X := X) ξ C)
+            (∑ i, ∑ j, KM i j)
+            (∑ a, ∑ i, ∑ j, firstDerivativeVectorRadius (X := X) ξ KM a i j)
+            (fun i j => ∑ a, ∑ b,
+              secondDerivativeVectorRadius (X := X) ξ KM a b i j) * dist u v := by
+  have hLip :=
+    ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_of_metric_entries_directions_of_unique
+      (X := X) (α := α) (s := s) Kdom hKdom hα ξ
+      (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
+      (A := A) (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet hAeq
+  simpa using
+    (parabolicC0AlphaSubmodule.forall_compactCoord_dist_le_of_toCompactCoordFamily_lipschitzOnWith
+      (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+      Kdom hKdom hα hLip)
+
 /-- State-space Lipschitz bridge from higher parabolic primitive controls with coarser exported
 constants.  Entrywise higher difference controls may be proved with sharper constants; the
 resulting schematic RHS Lipschitz constant is formed from any larger primitive constants accepted
