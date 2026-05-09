@@ -577,7 +577,9 @@ not yet been connected end-to-end to the raw gauge-flow
 `metricBilinearCoordinateField` construction.
 The same centered formula now applies to any coordinate curve that is eventually
 stationary at the chart center, covering the no-spatial-motion case needed by
-identity/static gauges.
+identity/static gauges, and it now has within-time-set variants for closed
+Picard endpoint filters when the curve also agrees with the chart center at the
+base time.
 For the moving spatial-coordinate side, fixed-time slices of
 `metricBilinearCoordinateField` are now proved `C²` in the preferred extended
 chart, using the existing hom-bundle coordinate smoothness of each smooth

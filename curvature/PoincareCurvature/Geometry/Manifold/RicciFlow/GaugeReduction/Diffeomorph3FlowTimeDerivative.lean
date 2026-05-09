@@ -5041,6 +5041,101 @@ theorem metricBilinearCoordinateField_sourceTangentCoordinate_hasDerivAt_of_even
       (sourceTangentCoordinate (I := I) p u)
       (sourceTangentCoordinate (I := I) p v)
 
+/-- Within-set version of
+`metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt`. This is
+the endpoint shape used when the time variable is restricted to a closed Picard
+interval. -/
+theorem metricBilinearCoordinateField_base_hasDerivWithinAt_of_hasTimeDerivativeAt
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ} {timeSet : Set ℝ}
+    (hg : HasTimeDerivativeAt (I := I) (M := M) g gdot t)
+    (p : M) (uE vE : E) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, (extChartAt I p) p) uE vE)
+      (gdot t p
+        (tangentVectorOfCoordinate (I := I) p uE)
+        (tangentVectorOfCoordinate (I := I) p vE)) timeSet t := by
+  exact (metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt
+    (I := I) (M := M) hg p uE vE).hasDerivWithinAt
+
+/-- Tangent-vector-slot within-set version of
+`metricBilinearCoordinateField_base_hasDerivAt_of_hasTimeDerivativeAt`. -/
+theorem metricBilinearCoordinateField_base_sourceTangentCoordinate_hasDerivWithinAt_of_hasTimeDerivativeAt
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ} {timeSet : Set ℝ}
+    (hg : HasTimeDerivativeAt (I := I) (M := M) g gdot t)
+    (p : M) (u v : TangentSpace I p) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, (extChartAt I p) p)
+          (sourceTangentCoordinate (I := I) p u)
+          (sourceTangentCoordinate (I := I) p v))
+      (gdot t p u v) timeSet t := by
+  exact (metricBilinearCoordinateField_base_sourceTangentCoordinate_hasDerivAt_of_hasTimeDerivativeAt
+    (I := I) (M := M) hg p u v).hasDerivWithinAt
+
+/-- If the spatial coordinate curve is eventually stationary at the chart center
+relative to a time set, the metric-coordinate field has the same within-set
+time derivative as the centered curve. -/
+theorem metricBilinearCoordinateField_hasDerivWithinAt_of_eventuallyEqWithin_center
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ} {timeSet : Set ℝ}
+    (hg : HasTimeDerivativeAt (I := I) (M := M) g gdot t)
+    (p : M) {y : ℝ → E}
+    (hy : y =ᶠ[𝓝[timeSet] t] fun _ : ℝ ↦ (extChartAt I p) p)
+    (hy_t : y t = (extChartAt I p) p)
+    (uE vE : E) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, y τ) uE vE)
+      (gdot t p
+        (tangentVectorOfCoordinate (I := I) p uE)
+        (tangentVectorOfCoordinate (I := I) p vE)) timeSet t := by
+  have hcenter :=
+    metricBilinearCoordinateField_base_hasDerivWithinAt_of_hasTimeDerivativeAt
+      (I := I) (M := M) (timeSet := timeSet) hg p uE vE
+  have hEq :
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, y τ) uE vE) =ᶠ[𝓝[timeSet] t]
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, (extChartAt I p) p) uE vE) := by
+    filter_upwards [hy] with τ hτ
+    rw [hτ]
+  exact hcenter.congr_of_eventuallyEq hEq (by rw [hy_t])
+
+/-- Tangent-vector-slot version of
+`metricBilinearCoordinateField_hasDerivWithinAt_of_eventuallyEqWithin_center`. -/
+theorem metricBilinearCoordinateField_sourceTangentCoordinate_hasDerivWithinAt_of_eventuallyEqWithin_center
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ} {timeSet : Set ℝ}
+    (hg : HasTimeDerivativeAt (I := I) (M := M) g gdot t)
+    (p : M) {y : ℝ → E}
+    (hy : y =ᶠ[𝓝[timeSet] t] fun _ : ℝ ↦ (extChartAt I p) p)
+    (hy_t : y t = (extChartAt I p) p)
+    (u v : TangentSpace I p) :
+    HasDerivWithinAt
+      (fun τ : ℝ ↦
+        metricBilinearCoordinateField (I := I) (M := M) g p
+          (τ, y τ)
+          (sourceTangentCoordinate (I := I) p u)
+          (sourceTangentCoordinate (I := I) p v))
+      (gdot t p u v) timeSet t := by
+  simpa using
+    metricBilinearCoordinateField_hasDerivWithinAt_of_eventuallyEqWithin_center
+      (I := I) (M := M) (timeSet := timeSet) hg p hy hy_t
+      (sourceTangentCoordinate (I := I) p u)
+      (sourceTangentCoordinate (I := I) p v)
+
 /-- At the base time, the two-variable metric-coordinate field agrees with the
 concrete moving bilinear coordinate component. -/
 theorem metricBilinearCoordinateField_base_eq_pullbackMetricBilinearCoordinateMap_self
