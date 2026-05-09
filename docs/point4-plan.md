@@ -3821,7 +3821,10 @@ time-space compact pieces cover each requested time slice, giving the direct
 bridge from parabolic readouts to spatial Banach-chart coordinate estimates.
 The compact-piece layer now also constructs the canonical product pieces
 `Kt × Kxᵢ`, with an `Icc t₀ T` specialization, and proves both their domain
-containment criterion and the fixed-time spatial slice cover property.
+containment criterion and the fixed-time spatial slice cover property. It also
+identifies the union of those product pieces with `Kt × ⋃ᵢ Kxᵢ`, including the
+closed-interval and spatial-cover specializations needed for readout
+determination on interval product domains.
 `AnalyticPDE/Parabolic/HigherFunctionSpace.lean` now begins the coordinate
 `C^{2+α,1+α/2}` layer: it defines time and spatial slices, packages a genuine
 parabolic second jet with time, spatial, and second-spatial derivative

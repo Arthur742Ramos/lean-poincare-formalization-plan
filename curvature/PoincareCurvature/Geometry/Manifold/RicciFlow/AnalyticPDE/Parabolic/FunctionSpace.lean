@@ -58,6 +58,44 @@ theorem timeSpaceProductCompactFamily_covers_timeSlice {X κ : Type*} [Topologic
   intro τ hτ i x
   exact ⟨i, hτ, x.2⟩
 
+/-- The union of product compact pieces is the product of the time compact with the union of the
+spatial compact pieces. -/
+theorem iUnion_timeSpaceProductCompactFamily_eq_prod_iUnion {X κ : Type*}
+    [TopologicalSpace X]
+    (Kt : TopologicalSpace.Compacts ℝ) (Kx : κ → TopologicalSpace.Compacts X) :
+    (⋃ i, (timeSpaceProductCompactFamily Kt Kx i : Set (ℝ × X))) =
+      (Kt : Set ℝ) ×ˢ (⋃ i, (Kx i : Set X)) := by
+  ext z
+  constructor
+  · intro hz
+    rcases mem_iUnion.1 hz with ⟨i, hzi⟩
+    exact ⟨hzi.1, mem_iUnion.2 ⟨i, hzi.2⟩⟩
+  · intro hz
+    rcases mem_iUnion.1 hz.2 with ⟨i, hxi⟩
+    exact mem_iUnion.2 ⟨i, hz.1, hxi⟩
+
+/-- If a spatial set is covered by the spatial compact family, then the corresponding time-space
+product is covered by the product compact family. -/
+theorem timeSpaceProductCompactFamily_product_subset_iUnion_of_subset {X κ : Type*}
+    [TopologicalSpace X]
+    (Kt : TopologicalSpace.Compacts ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    {U : Set X} (hU : U ⊆ ⋃ i, (Kx i : Set X)) :
+    (Kt : Set ℝ) ×ˢ U ⊆
+      ⋃ i, (timeSpaceProductCompactFamily Kt Kx i : Set (ℝ × X)) := by
+  intro z hz
+  rcases mem_iUnion.1 (hU hz.2) with ⟨i, hxi⟩
+  exact mem_iUnion.2 ⟨i, hz.1, hxi⟩
+
+/-- If the spatial compact family covers all space, then the product compact family covers the
+whole product of the time compact with space. -/
+theorem iUnion_timeSpaceProductCompactFamily_eq_prod_univ_of_iUnion_eq_univ {X κ : Type*}
+    [TopologicalSpace X]
+    (Kt : TopologicalSpace.Compacts ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    (hcover : (⋃ i, (Kx i : Set X)) = Set.univ) :
+    (⋃ i, (timeSpaceProductCompactFamily Kt Kx i : Set (ℝ × X))) =
+      (Kt : Set ℝ) ×ˢ Set.univ := by
+  rw [iUnion_timeSpaceProductCompactFamily_eq_prod_iUnion, hcover]
+
 /-- The compact interval `[t₀, T]` as a compact time set. -/
 def timeIccCompact (t₀ T : ℝ) : TopologicalSpace.Compacts ℝ :=
   ⟨Icc t₀ T, isCompact_Icc⟩
@@ -97,6 +135,36 @@ theorem timeSpaceIccCompactFamily_covers_timeSlice {X κ : Type*} [TopologicalSp
     ∀ τ, τ ∈ Icc t₀ T → ∀ i (x : Kx i),
       ∃ j, (τ, x.1) ∈ (timeSpaceIccCompactFamily t₀ T Kx j : Set (ℝ × X)) := by
   exact timeSpaceProductCompactFamily_covers_timeSlice (timeIccCompact t₀ T) Kx
+
+/-- The union of interval product compact pieces is the interval product of the union of the
+spatial compact pieces. -/
+theorem iUnion_timeSpaceIccCompactFamily_eq_Icc_prod_iUnion {X κ : Type*}
+    [TopologicalSpace X]
+    (t₀ T : ℝ) (Kx : κ → TopologicalSpace.Compacts X) :
+    (⋃ i, (timeSpaceIccCompactFamily t₀ T Kx i : Set (ℝ × X))) =
+      Icc t₀ T ×ˢ (⋃ i, (Kx i : Set X)) := by
+  exact iUnion_timeSpaceProductCompactFamily_eq_prod_iUnion (timeIccCompact t₀ T) Kx
+
+/-- If a spatial set is covered by the spatial compact family, then the corresponding closed
+time-interval product is covered by the interval product compact family. -/
+theorem timeSpaceIccCompactFamily_Icc_product_subset_iUnion_of_subset {X κ : Type*}
+    [TopologicalSpace X]
+    (t₀ T : ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    {U : Set X} (hU : U ⊆ ⋃ i, (Kx i : Set X)) :
+    Icc t₀ T ×ˢ U ⊆
+      ⋃ i, (timeSpaceIccCompactFamily t₀ T Kx i : Set (ℝ × X)) := by
+  exact timeSpaceProductCompactFamily_product_subset_iUnion_of_subset
+    (timeIccCompact t₀ T) Kx hU
+
+/-- If the spatial compact family covers all space, then the interval product compact family covers
+the whole closed time-interval product. -/
+theorem iUnion_timeSpaceIccCompactFamily_eq_Icc_prod_univ_of_iUnion_eq_univ {X κ : Type*}
+    [TopologicalSpace X]
+    (t₀ T : ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    (hcover : (⋃ i, (Kx i : Set X)) = Set.univ) :
+    (⋃ i, (timeSpaceIccCompactFamily t₀ T Kx i : Set (ℝ × X))) =
+      Icc t₀ T ×ˢ Set.univ := by
+  rw [iUnion_timeSpaceIccCompactFamily_eq_Icc_prod_iUnion, hcover]
 
 /-- Single-radius parabolic `C^{0,α}` control.  The radius `N` dominates the sum of a sup
 constant and a Holder constant.  This is the closed-ball predicate for the eventual
