@@ -3883,8 +3883,10 @@ normed additive-group structure when the compact pieces cover all time-space;
 the norm and distance are definitionally the compact-family readout norm and
 distance, the induced readout is directly nonexpansive and `1`-Lipschitz in
 both the seminormed and separated all-cover structures, and the finite-cover
-value seminorm now has direct fixed-time spatial readout estimates, including
-the separated all-cover form. The lower readout layer now also factors the
+value seminorm now has direct fixed-time spatial readout estimates and
+direct/symmetric closed-ball readouts from `C^{0,α}` difference balls,
+including finite-coordinate finite-Pi variants with radii `Kᵢ * R` and the
+separated all-cover form. The lower readout layer now also factors the
 global time-space finite-cover to fixed-time spatial-slice cover conversion as
 a reusable bridge, with generic all-cover fixed-time spatial readout handoffs
 for compact-coordinate estimates and `LipschitzOnWith` readouts.
@@ -3958,9 +3960,11 @@ each requested time slice. The higher compact-family readout determination layer
 now also has subset, `Kt × U`, and `Icc t₀ T × U` product-domain forms matching
 the lower `C^{0,α}` readout API. The higher submodule now mirrors the same
 finite-cover value seminormed/normed carrier induced by compact-family value
-readouts, including a separated normed additive-group structure for global
-compact-piece covers. This is only the value-readout carrier, not the full
-`C^{2+α,1+α/2}` Banach norm or a completeness theorem.
+readouts, including definitional norm/distance readback, a separated normed
+additive-group structure for global compact-piece covers, and direct/symmetric
+closed-ball readouts from higher difference balls, including finite-coordinate
+finite-Pi variants with radii `Kᵢ * R`. This is only the value-readout carrier,
+not the full `C^{2+α,1+α/2}` Banach norm or a completeness theorem.
 It also exposes noncanonical chosen-second-jet readouts as lower
 `C^{0,α}` submodule elements for the spatial derivative, second spatial
 derivative, and time derivative. These wrappers only make the existential jet
@@ -4016,11 +4020,12 @@ product-domain distance bounds and direct/symmetric closed-ball membership
 readouts, including finite-coordinate variants from linear-in-a-shared-radius
 component bounds, so later positivity and chart-neighborhood arguments can
 consume norm-ball difference estimates in the same metric-neighborhood shape
-used by the geometric chart layer. The finite-cover value seminorm and combined
-finite-cover chosen-second-jet seminorm now also have direct and symmetric
-closed-ball readouts from those norm-ball difference estimates, including the
-separated all-cover normed variants. They do not make the derivative choice
-canonical or upgrade this compact-family jet seminorm into the full
+used by the geometric chart layer. The lower and higher finite-cover value
+seminorms and the combined finite-cover chosen-second-jet seminorm now also
+have direct and symmetric closed-ball readouts from those norm-ball difference
+estimates, including finite-coordinate value variants and the separated
+all-cover normed variants. They do not make the derivative choice canonical or
+upgrade this compact-family jet seminorm into the full
 `C^{2+α,1+α/2}` Banach
 norm, Schauder estimate, or completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher

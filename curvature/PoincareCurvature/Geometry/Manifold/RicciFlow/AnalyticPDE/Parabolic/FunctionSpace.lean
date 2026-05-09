@@ -1905,6 +1905,77 @@ theorem finiteCoverValue_mem_closedBall_symm_of_normLe_sub {κ : Type*} [Fintype
     finiteCoverValue_dist_le_of_normLe_sub
       (X := X) (E := E) (α := α) (s := s) Kc hKc hα h
 
+/-- Componentwise `C^{0,α}` difference controls with finite-Pi constants control the induced
+finite-cover value distance. -/
+theorem finiteCoverValue_dist_le_pi_of_component_normLe_sub
+    {κ ι F : Type*} [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC0AlphaSubmodule X (ι → F) α s}
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα
+    dist u v ≤ (∑ i, K i) * R := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα
+  rw [finiteCoverValue_dist_eq (X := X) (E := ι → F) (α := α) (s := s)
+    Kc hKc hα u v]
+  simpa [dist_eq_norm] using
+    norm_toCompactCoordFamilyLinearMap_pi_sub_le_sum_mul_of_entries
+      (X := X) (α := α) (s := s) Kc hKc hα hK_nonneg hR h
+
+/-- Componentwise `C^{0,α}` finite-Pi bounds give induced finite-cover value closed-ball
+membership. -/
+theorem finiteCoverValue_mem_closedBall_pi_of_component_normLe_sub
+    {κ ι F : Type*} [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC0AlphaSubmodule X (ι → F) α s}
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα
+    u ∈ Metric.closedBall v ((∑ i, K i) * R) := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα
+  simpa [Metric.mem_closedBall] using
+    finiteCoverValue_dist_le_pi_of_component_normLe_sub
+      (X := X) (α := α) (s := s) Kc hKc hα hK_nonneg hR h
+
+/-- Symmetric induced finite-cover value closed-ball membership from componentwise finite-Pi
+`C^{0,α}` bounds. -/
+theorem finiteCoverValue_mem_closedBall_symm_pi_of_component_normLe_sub
+    {κ ι F : Type*} [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC0AlphaSubmodule X (ι → F) α s}
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα
+    v ∈ Metric.closedBall u ((∑ i, K i) * R) := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα
+  simpa [Metric.mem_closedBall, dist_comm] using
+    finiteCoverValue_dist_le_pi_of_component_normLe_sub
+      (X := X) (α := α) (s := s) Kc hKc hα hK_nonneg hR h
+
 /-- A `C^{0,α}` norm-ball difference controls the separated all-cover finite-cover value
 distance. -/
 theorem finiteCoverValue_dist_le_of_normLe_sub_ofCover {κ : Type*} [Fintype κ]
@@ -1964,6 +2035,80 @@ theorem finiteCoverValue_mem_closedBall_symm_of_normLe_sub_ofCover {κ : Type*}
   simpa [Metric.mem_closedBall, dist_comm] using
     finiteCoverValue_dist_le_of_normLe_sub_ofCover
       (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover h
+
+/-- Componentwise `C^{0,α}` difference controls with finite-Pi constants control the separated
+all-cover finite-cover value distance. -/
+theorem finiteCoverValue_dist_le_pi_of_component_normLe_sub_ofCover
+    {κ ι F : Type*} [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC0AlphaSubmodule X (ι → F) α s}
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα hcover
+    dist u v ≤ (∑ i, K i) * R := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα hcover
+  rw [finiteCoverValue_dist_eq_ofCover (X := X) (E := ι → F) (α := α) (s := s)
+    Kc hKc hα hcover u v]
+  simpa [dist_eq_norm] using
+    norm_toCompactCoordFamilyLinearMap_pi_sub_le_sum_mul_of_entries
+      (X := X) (α := α) (s := s) Kc hKc hα hK_nonneg hR h
+
+/-- Componentwise finite-Pi `C^{0,α}` bounds give separated all-cover finite-cover value
+closed-ball membership. -/
+theorem finiteCoverValue_mem_closedBall_pi_of_component_normLe_sub_ofCover
+    {κ ι F : Type*} [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC0AlphaSubmodule X (ι → F) α s}
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα hcover
+    u ∈ Metric.closedBall v ((∑ i, K i) * R) := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα hcover
+  simpa [Metric.mem_closedBall] using
+    finiteCoverValue_dist_le_pi_of_component_normLe_sub_ofCover
+      (X := X) (α := α) (s := s) Kc hKc hα hcover hK_nonneg hR h
+
+/-- Symmetric separated all-cover finite-cover value closed-ball membership from componentwise
+finite-Pi `C^{0,α}` bounds. -/
+theorem finiteCoverValue_mem_closedBall_symm_pi_of_component_normLe_sub_ofCover
+    {κ ι F : Type*} [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC0AlphaSubmodule X (ι → F) α s}
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC0AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα hcover
+    v ∈ Metric.closedBall u ((∑ i, K i) * R) := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα hcover
+  simpa [Metric.mem_closedBall, dist_comm] using
+    finiteCoverValue_dist_le_pi_of_component_normLe_sub_ofCover
+      (X := X) (α := α) (s := s) Kc hKc hα hcover hK_nonneg hR h
 
 /-- The finite-cover value readout is nonexpansive for its induced seminormed structure. -/
 theorem finiteCoverValue_readout_dist_le {κ : Type*} [Fintype κ]
