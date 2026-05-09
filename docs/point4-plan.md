@@ -3796,10 +3796,11 @@ curried bilinear maps, operator-valued application and their difference forms,
 and Lipschitz nonlinear composition, including closed norm-ball forms. It
 also packages `ParabolicC0AlphaOn` as a real submodule of all time-space
 functions, proves restriction to smaller domains, continuous-linear value
-composition, and product-valued pairing as linear maps, and gives
-positive-exponent linear readouts into `ContinuousMap`s on compact time-space
-pieces and compact piece families, with determination on the covered set and
-injectivity for global compact-piece covers. This is the finite-cover
+composition, product-valued pairing, and finite Pi projection/assembly as
+linear maps, and gives positive-exponent linear readouts into `ContinuousMap`s
+on compact time-space pieces and compact piece families, with determination on
+the covered set and injectivity for global compact-piece covers. This is the
+finite-cover
 `C^{0,α}` analogue of the existing continuous-section compact-readout layer;
 compact readout sup-norm differences, including the finite product readout
 norm, are now bounded by the same single-radius `C^{0,α}` difference control,

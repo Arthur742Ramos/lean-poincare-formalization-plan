@@ -667,6 +667,43 @@ theorem prodLinearMap_apply {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ 
     prodLinearMap (X := X) (E := E) (α := α) (s := s) u z = (u.1 z, u.2 z) :=
   rfl
 
+/-- Coordinate projection from a finite Pi-valued parabolic `C^{0,α}` submodule. -/
+def piApplyLinearMap {ι F : Type*} [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (i : ι) :
+    parabolicC0AlphaSubmodule X (ι → F) α s →ₗ[ℝ]
+      parabolicC0AlphaSubmodule X F α s :=
+  continuousLinearMap (X := X) (E := ι → F) (α := α) (s := s)
+    (ContinuousLinearMap.proj i : (ι → F) →L[ℝ] F)
+
+@[simp]
+theorem piApplyLinearMap_apply {ι F : Type*} [Fintype ι] [NormedAddCommGroup F]
+    [NormedSpace ℝ F] (i : ι) (u : parabolicC0AlphaSubmodule X (ι → F) α s)
+    (z : ℝ × X) :
+    piApplyLinearMap (X := X) (α := α) (s := s) i u z = u z i :=
+  rfl
+
+/-- Assemble a finite Pi-valued parabolic `C^{0,α}` submodule element from its components. -/
+def piOfComponentsLinearMap {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] :
+    (ι → parabolicC0AlphaSubmodule X F α s) →ₗ[ℝ]
+      parabolicC0AlphaSubmodule X (ι → F) α s where
+  toFun u := ⟨fun z i => u i z, ParabolicC0AlphaOn.pi fun i => (u i).2⟩
+  map_add' := by
+    intro u v
+    ext z i
+    rfl
+  map_smul' := by
+    intro c u
+    ext z i
+    rfl
+
+@[simp]
+theorem piOfComponentsLinearMap_apply {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (u : ι → parabolicC0AlphaSubmodule X F α s) (z : ℝ × X) (i : ι) :
+    piOfComponentsLinearMap (X := X) (α := α) (s := s) u z i = u i z :=
+  rfl
+
 /-- Read a parabolic `C^{0,α}` function as a continuous map on a compact time-space piece. -/
 def toContinuousMap {K : TopologicalSpace.Compacts (ℝ × X)}
     (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
