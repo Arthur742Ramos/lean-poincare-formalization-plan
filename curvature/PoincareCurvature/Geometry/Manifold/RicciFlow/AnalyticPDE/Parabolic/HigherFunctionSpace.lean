@@ -3225,6 +3225,65 @@ theorem finiteCoverValue_mem_closedBall_symm_pi_of_component_normLe_sub_ofCover
     finiteCoverValue_dist_le_pi_of_component_normLe_sub_ofCover
       (X := X) (α := α) (s := s) Kc hKc hα hcover hK_nonneg hR h
 
+/-- Pairwise componentwise higher estimates give a Lipschitz estimate in the induced
+finite-cover value seminorm. -/
+theorem lipschitzOnWith_finiteCoverValue_pi_of_component_normLe_sub
+    {Y κ ι F : Type*} [PseudoMetricSpace Y] [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {K : ι → ℝ≥0}
+    {A : Y → parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i,
+      ParabolicC2AlphaNormLe ((K i : ℝ) * dist u v) α
+        (fun z => A u z i - A v z i) s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα
+    LipschitzOnWith (∑ i, K i) A stateSet := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hdist :
+      dist (A u) (A v) ≤ (∑ i, (K i : ℝ)) * dist u v :=
+    finiteCoverValue_dist_le_pi_of_component_normLe_sub
+      (X := X) (α := α) (s := s) Kc hKc hα
+      (R := dist u v) (K := fun i => (K i : ℝ)) (u := A u) (v := A v)
+      (fun i => (K i).2) dist_nonneg (h hu hv)
+  simpa [NNReal.coe_sum] using hdist
+
+/-- Pairwise componentwise higher estimates give a Lipschitz estimate in the separated all-cover
+finite-cover value norm. -/
+theorem lipschitzOnWith_finiteCoverValue_pi_of_component_normLe_sub_ofCover
+    {Y κ ι F : Type*} [PseudoMetricSpace Y] [Fintype κ] [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {stateSet : Set Y} {K : ι → ℝ≥0}
+    {A : Y → parabolicC2AlphaSubmodule X (ι → F) α s}
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i,
+      ParabolicC2AlphaNormLe ((K i : ℝ) * dist u v) α
+        (fun z => A u z i - A v z i) s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα hcover
+    LipschitzOnWith (∑ i, K i) A stateSet := by
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα hcover
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hdist :
+      dist (A u) (A v) ≤ (∑ i, (K i : ℝ)) * dist u v :=
+    finiteCoverValue_dist_le_pi_of_component_normLe_sub_ofCover
+      (X := X) (α := α) (s := s) Kc hKc hα hcover
+      (R := dist u v) (K := fun i => (K i : ℝ)) (u := A u) (v := A v)
+      (fun i => (K i).2) dist_nonneg (h hu hv)
+  simpa [NNReal.coe_sum] using hdist
+
 /-- The finite compact-family chosen spatial-derivative readout induces a seminormed additive
 group structure on the higher parabolic submodule. -/
 @[reducible] noncomputable def finiteCoverChosenSpaceDerivSeminormedAddCommGroup

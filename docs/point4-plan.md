@@ -3888,7 +3888,8 @@ both the seminormed and separated all-cover structures, and the finite-cover
 value seminorm now has direct fixed-time spatial readout estimates and
 direct/symmetric closed-ball readouts from `C^{0,α}` difference balls,
 including finite-coordinate finite-Pi variants with radii `Kᵢ * R` and the
-separated all-cover form. The lower readout layer now also factors the
+matching `LipschitzOnWith` forms with the summed `ℝ≥0` component constant, plus
+the separated all-cover form. The lower readout layer now also factors the
 global time-space finite-cover to fixed-time spatial-slice cover conversion as
 a reusable bridge, with generic all-cover fixed-time spatial readout handoffs
 for compact-coordinate estimates and `LipschitzOnWith` readouts.
@@ -3965,7 +3966,8 @@ finite-cover value seminormed/normed carrier induced by compact-family value
 readouts, including definitional norm/distance readback, a separated normed
 additive-group structure for global compact-piece covers, and direct/symmetric
 closed-ball readouts from higher difference balls, including finite-coordinate
-finite-Pi value variants with radii `Kᵢ * R`. This is only the value-readout
+finite-Pi value variants with radii `Kᵢ * R` and matching `LipschitzOnWith`
+forms with the summed `ℝ≥0` component constant. This is only the value-readout
 carrier, not the full `C^{2+α,1+α/2}` Banach norm or a completeness theorem.
 It also exposes noncanonical chosen-second-jet readouts as lower
 `C^{0,α}` submodule elements for the spatial derivative, second spatial
@@ -4027,9 +4029,10 @@ seminorms and the combined finite-cover chosen-second-jet seminorm now also
 have direct and symmetric closed-ball readouts from those norm-ball difference
 estimates, including finite-coordinate value variants, combined chosen-jet
 variants with coordinate-insertion radii, and the separated all-cover normed
-variants. The finite-coordinate combined chosen-jet estimates also have
-`LipschitzOnWith` forms once an aggregate `ℝ≥0` constant bounds the
-coordinate-insertion radius sum. They do not make the derivative choice
+variants. The finite-coordinate value estimates also have `LipschitzOnWith`
+forms with the summed `ℝ≥0` component constant, while the combined chosen-jet
+estimates have `LipschitzOnWith` forms once an aggregate `ℝ≥0` constant bounds
+the coordinate-insertion radius sum. They do not make the derivative choice
 canonical or upgrade this compact-family jet seminorm into the full
 `C^{2+α,1+α/2}` Banach
 norm, Schauder estimate, or completeness content.
