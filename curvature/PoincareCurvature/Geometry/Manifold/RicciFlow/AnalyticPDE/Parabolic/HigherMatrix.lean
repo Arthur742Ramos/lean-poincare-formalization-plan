@@ -3876,6 +3876,75 @@ theorem matrixApplyLinearMap_apply {m n A : Type*} [Fintype m] [Fintype n]
     matrixApplyLinearMap (X := X) (α := α) (s := s) i j u z = u z i j :=
   rfl
 
+/-- The noncanonical chosen second jet of a matrix entry. -/
+noncomputable def chosenMatrixEntrySecondJet {m n A : Type*} [Fintype m] [Fintype n]
+    [NormedAddCommGroup A] [NormedSpace ℝ A] (i : m) (j : n)
+    (u : parabolicC2AlphaSubmodule X (Matrix m n A) α s) :
+    ParabolicSecondJet (fun z : ℝ × X => u z i j) s :=
+  chosenSecondJet (X := X) (E := A) (α := α) (s := s)
+    (matrixApplyLinearMap (X := X) (α := α) (s := s) i j u)
+
+set_option maxHeartbeats 1000000 in
+/-- A matrix-valued higher parabolic submodule element supplies a deterministic
+chosen-entry-jet schematic Ricci-DeTurck RHS.  This is the noncanonical chosen-jet counterpart
+of the existential qualitative matrix handoff. -/
+theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_directions
+    {n : Type*} [Fintype n] [DecidableEq n] (v : n → X)
+    {δ : ℝ} (M : parabolicC2AlphaSubmodule X (Matrix n n ℝ) α s)
+    (hδpos : 0 < δ) (hdet : ∀ ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M z)
+          (fun a i j =>
+            (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j M).spaceDeriv
+              z (v a))
+          (fun a b i j =>
+            (chosenMatrixEntrySecondJet
+              (X := X) (α := α) (s := s) i j M).spaceSecondDeriv z (v a) (v b))) s := by
+  have hM : ∀ i j, ParabolicC0AlphaOn α (fun z : ℝ × X => M z i j) s := by
+    intro i j
+    exact (matrixApplyLinearMap (X := X) (α := α) (s := s) i j M).2.c0AlphaOn
+  have hD : ∀ a i j, ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j M).spaceDeriv
+          z (v a)) s := by
+    intro a i j
+    have hbase :
+        ParabolicC0AlphaOn α
+          (chosenMatrixEntrySecondJet
+            (X := X) (α := α) (s := s) i j M).spaceDeriv s :=
+      chosenSecondJet_spaceDeriv_c0AlphaOn
+        (X := X) (E := ℝ) (α := α) (s := s)
+        (matrixApplyLinearMap (X := X) (α := α) (s := s) i j M)
+    simpa [chosenMatrixEntrySecondJet, firstDerivativeVectorReadout] using
+      hbase.continuousLinearMap (firstDerivativeVectorReadout (X := X) (E := ℝ) (v a))
+  have hH : ∀ a b i j, ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        (chosenMatrixEntrySecondJet
+          (X := X) (α := α) (s := s) i j M).spaceSecondDeriv z (v a) (v b)) s := by
+    intro a b i j
+    have hbase :
+        ParabolicC0AlphaOn α
+          (chosenMatrixEntrySecondJet
+            (X := X) (α := α) (s := s) i j M).spaceSecondDeriv s :=
+      chosenSecondJet_spaceSecondDeriv_c0AlphaOn
+        (X := X) (E := ℝ) (α := α) (s := s)
+        (matrixApplyLinearMap (X := X) (α := α) (s := s) i j M)
+    simpa [chosenMatrixEntrySecondJet, secondDerivativeVectorReadout] using
+      hbase.continuousLinearMap
+        (secondDerivativeVectorReadout (X := X) (E := ℝ) (v a) (v b))
+  simpa [ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix] using
+    (ParabolicC0AlphaOn.ricciDeTurck_schematic
+      (X := X) (α := α) (s := s) (𝕜 := ℝ)
+      (M := fun z : ℝ × X => M z)
+      (D := fun z a i j =>
+        (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j M).spaceDeriv z (v a))
+      (H := fun z a b i j =>
+        (chosenMatrixEntrySecondJet
+          (X := X) (α := α) (s := s) i j M).spaceSecondDeriv z (v a) (v b))
+      hM hD hH hδpos hdet)
+
 /-- Assemble matrix-valued higher parabolic submodule elements from their entries. -/
 def matrixOfEntriesLinearMap {m n A : Type*} [Fintype m] [Fintype n]
     [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A] :

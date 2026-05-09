@@ -3940,6 +3940,10 @@ readouts, and feeds those derived arrays into the direct schematic
 Ricci-DeTurck `C^{0,α}` estimate, including a Pi-valued finite-family package
 for finite cover products; the same bridge is available from qualitative
 `ParabolicC2AlphaOn` membership when explicit radii are not needed. The
+matrix submodule layer now also has a deterministic noncanonical
+chosen-entry-jet version of this qualitative schematic RHS handoff, so callers
+with a matrix-valued higher submodule element and a determinant lower bound no
+longer have to manage the existential entry-jet family manually. The
 second-jet readout bridge now also accepts an arbitrary finite family of
 spatial directions in any normed model, with quantitative and qualitative
 finite-family packaging, so tangent-frame or chart-basis directions no longer
