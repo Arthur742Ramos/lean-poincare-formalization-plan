@@ -532,6 +532,27 @@ def AnchoredIntrinsicDeTurckGaugeOn.congr_gaugeField
   anchored := gauge.anchored
   follows := gauge.follows.congr_gaugeField hfield
 
+/-- Restrict an anchored intrinsic DeTurck map gauge to a smaller time set. -/
+def AnchoredIntrinsicDeTurckGaugeOn.restrictTimeSet
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (gauge : AnchoredIntrinsicDeTurckGaugeOn (I := I) (M := M) g background t t₀)
+    (hst : s ⊆ t) :
+    AnchoredIntrinsicDeTurckGaugeOn (I := I) (M := M) g background s t₀ where
+  maps := gauge.maps
+  anchored := gauge.anchored
+  follows := gauge.follows.mono hst
+
+@[simp] theorem AnchoredIntrinsicDeTurckGaugeOn.restrictTimeSet_maps
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (gauge : AnchoredIntrinsicDeTurckGaugeOn (I := I) (M := M) g background t t₀)
+    (hst : s ⊆ t) :
+    (gauge.restrictTimeSet hst).maps = gauge.maps :=
+  rfl
+
 /-- A `C²` diffeomorphism-valued anchored DeTurck gauge family. This is the natural strengthening
 of `AnchoredIntrinsicDeTurckGaugeOn` needed for later connection transport. -/
 structure AnchoredIntrinsicDeTurckDiffeomorphGaugeOn
@@ -583,6 +604,29 @@ def AnchoredIntrinsicDeTurckDiffeomorphGaugeOn.congr_gaugeField
   anchored := gauge.anchored
   follows := gauge.follows.congr_gaugeField hfield
 
+/-- Restrict an anchored `C²` intrinsic DeTurck diffeomorphism gauge to a smaller time set. -/
+def AnchoredIntrinsicDeTurckDiffeomorphGaugeOn.restrictTimeSet
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (gauge : AnchoredIntrinsicDeTurckDiffeomorphGaugeOn
+      (I := I) (M := M) g background t t₀)
+    (hst : s ⊆ t) :
+    AnchoredIntrinsicDeTurckDiffeomorphGaugeOn (I := I) (M := M) g background s t₀ where
+  maps := gauge.maps
+  anchored := gauge.anchored
+  follows := gauge.follows.mono hst
+
+@[simp] theorem AnchoredIntrinsicDeTurckDiffeomorphGaugeOn.restrictTimeSet_maps
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (gauge : AnchoredIntrinsicDeTurckDiffeomorphGaugeOn
+      (I := I) (M := M) g background t t₀)
+    (hst : s ⊆ t) :
+    (gauge.restrictTimeSet hst).maps = gauge.maps :=
+  rfl
+
 def AnchoredIntrinsicDeTurckDiffeomorphGaugeOn.toMapGauge
     {g : MetricFamily (I := I) (M := M)}
     {background : ConnectionFamily (I := I) (M := M)}
@@ -593,6 +637,17 @@ def AnchoredIntrinsicDeTurckDiffeomorphGaugeOn.toMapGauge
   maps := gauge.maps.toSmoothSelfMapFamily
   anchored := gauge.anchored.toMapAnchoredAt
   follows := gauge.follows
+
+@[simp] theorem AnchoredIntrinsicDeTurckDiffeomorphGaugeOn.toMapGauge_restrictTimeSet
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (gauge : AnchoredIntrinsicDeTurckDiffeomorphGaugeOn
+      (I := I) (M := M) g background t t₀)
+    (hst : s ⊆ t) :
+    (gauge.restrictTimeSet hst).toMapGauge =
+      gauge.toMapGauge.restrictTimeSet hst :=
+  rfl
 
 /-- A `C³` diffeomorphism-valued anchored DeTurck gauge family. This stronger regularity is
 exactly what lets the gauge pullback of a `C²` metric remain a genuine `MetricFamily`. -/
@@ -690,6 +745,29 @@ def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.congr_gaugeField
   anchored := gauge.anchored
   follows := gauge.follows.congr_gaugeField hfield
 
+/-- Restrict an anchored `C³` intrinsic DeTurck diffeomorphism gauge to a smaller time set. -/
+def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.restrictTimeSet
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (gauge : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn
+      (I := I) (M := M) g background t t₀)
+    (hst : s ⊆ t) :
+    AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M) g background s t₀ where
+  maps := gauge.maps
+  anchored := gauge.anchored
+  follows := gauge.follows.mono hst
+
+@[simp] theorem AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.restrictTimeSet_maps
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (gauge : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn
+      (I := I) (M := M) g background t t₀)
+    (hst : s ⊆ t) :
+    (gauge.restrictTimeSet hst).maps = gauge.maps :=
+  rfl
+
 def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.toDiffeomorph2Gauge
     {g : MetricFamily (I := I) (M := M)}
     {background : ConnectionFamily (I := I) (M := M)}
@@ -701,6 +779,17 @@ def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.toDiffeomorph2Gauge
   anchored := gauge.anchored.toSmoothSelfDiffeomorph2AnchoredAt
   follows := gauge.follows
 
+@[simp] theorem AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.toDiffeomorph2Gauge_restrictTimeSet
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (gauge : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn
+      (I := I) (M := M) g background t t₀)
+    (hst : s ⊆ t) :
+    (gauge.restrictTimeSet hst).toDiffeomorph2Gauge =
+      gauge.toDiffeomorph2Gauge.restrictTimeSet hst :=
+  rfl
+
 def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.toMapGauge
     {g : MetricFamily (I := I) (M := M)}
     {background : ConnectionFamily (I := I) (M := M)}
@@ -709,6 +798,17 @@ def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.toMapGauge
       (I := I) (M := M) g background s t₀) :
     AnchoredIntrinsicDeTurckGaugeOn (I := I) (M := M) g background s t₀ :=
   gauge.toDiffeomorph2Gauge.toMapGauge
+
+@[simp] theorem AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.toMapGauge_restrictTimeSet
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {s t : Set ℝ} {t₀ : ℝ}
+    (gauge : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn
+      (I := I) (M := M) g background t t₀)
+    (hst : s ⊆ t) :
+    (gauge.restrictTimeSet hst).toMapGauge =
+      gauge.toMapGauge.restrictTimeSet hst :=
+  rfl
 
 theorem AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.hasMFDerivAt
     {g : MetricFamily (I := I) (M := M)}
