@@ -605,6 +605,13 @@ as well, via
 `Diffeomorph3GaugeFlowOn.tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderivWithin_modelSlots`
 and
 `Diffeomorph3GaugeFlowOn.tangentVectorOfCoordinate_Df_eq_cov_sub_extend_of_tangentCoordChange_fderivWithin_modelSlots`.
+The signed correction endpoint now has matching fixed-chart and closed-ball
+model-slot wrappers,
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_tangentCoordChange_fderivWithin`
+and
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_nhdsWithin`,
+so fixed-center local `EqOn` Picard data can reach the signed correction while
+keeping arbitrary centered model slots through the correction proof.
 The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent
