@@ -2825,10 +2825,10 @@ The compact same-witness wrappers now have matching `endpointInner` variants,
 so fixed-IVP and theorem-family compact callers can keep endpoint obligations
 in scalar inner-product form all the way to the returned scalar package and
 spatial correction.
-The selected fixed-IVP gluing layer now also accepts boundary-shaped endpoint
-data, both as tensor `HasTimeDerivativeAt` facts and as scalar inner-product
-derivatives, and returns either the full selected tensor time-regularity
-package or `PullbackMetricInnerDerivativeData`.
+The selected fixed-IVP and theorem-family gluing layers now also accept
+boundary-shaped endpoint data, both as tensor `HasTimeDerivativeAt` facts and
+as scalar inner-product derivatives, and return either the full selected tensor
+time-regularity package or `PullbackMetricInnerDerivativeData`.
 The theorem-family analogue now performs the same same-witness assembly
 uniformly over all initial-value problems, returning one selected gauge-flow
 family with both per-IVP continuations.
