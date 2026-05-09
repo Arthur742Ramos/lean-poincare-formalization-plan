@@ -1175,6 +1175,242 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamilyLinearMa
       hM hD hH hMdiff hDdiff hHdiff hδpos hdet hAeq
 
 /-- Pointwise compact-coordinate distance estimate for the schematic Ricci-DeTurck RHS readout
+from higher primitive controls with exact summed primitive constants. -/
+theorem ricciDeTurckSchematicMatrix_compactCoord_dist_le_of_higher_primitive_normLe
+    {ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {δ : ℝ} {KM : n → n → ℝ} {KD : n → n → n → ℝ}
+    {KH : n → n → n → n → ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : Y → ℝ × X → Matrix n n ℝ}
+    {D : Y → ℝ × X → n → n → n → ℝ}
+    {H : Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM : ∀ a b, 0 ≤ KM a b) (hKD : ∀ a b c, 0 ≤ KD a b c)
+    (hKH : ∀ a b i j, 0 ≤ KH a b i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C a b) α (fun z => M u z a b) s)
+    (hD : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB a b c) α (fun z => D u z a b c) s)
+    (hH : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB a b i j) α (fun z => H u z a b i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM a b * dist u v) α
+        (fun z => M u z a b - M v z a b) s)
+    (hDdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD a b c * dist u v) α
+        (fun z => D u z a b c - D v z a b c) s)
+    (hHdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH a b i j * dist u v) α
+        (fun z => H u z a b i j - H v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M u z) (D u z) (H u z)) :
+    ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i (z : Kdom i),
+      dist
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A u) i z)
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A v) i z)
+        ≤ ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ C DB HB
+            (∑ a, ∑ b, KM a b)
+            (∑ a, ∑ b, ∑ c, KD a b c)
+            (fun i j => ∑ a, ∑ b, KH a b i j) * dist u v := by
+  have hLip :
+      LipschitzOnWith
+        ⟨ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ C DB HB
+            (∑ a, ∑ b, KM a b)
+            (∑ a, ∑ b, ∑ c, KD a b c)
+            (fun i j => ∑ a, ∑ b, KH a b i j),
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+            (𝕜 := ℝ) hδpos hDB hHB
+            (Finset.sum_nonneg fun a _ha => Finset.sum_nonneg fun b _hb => hKM a b)
+            (Finset.sum_nonneg fun a _ha =>
+              Finset.sum_nonneg fun b _hb =>
+              Finset.sum_nonneg fun c _hc => hKD a b c)
+            (fun i j =>
+              Finset.sum_nonneg fun a _ha =>
+              Finset.sum_nonneg fun b _hb => hKH a b i j)⟩
+        (fun u : Y =>
+          parabolicC0AlphaSubmodule.toCompactCoordFamily
+            (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+            Kdom hKdom hα (A u))
+        stateSet :=
+    ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_of_higher_primitive_normLe
+      (X := X) (α := α) (s := s) Kdom hKdom hα
+      (KM := KM) (KD := KD) (KH := KH) (C := C) (DB := DB) (HB := HB)
+      (stateSet := stateSet) (A := A) (M := M) (D := D) (H := H)
+      hDB hHB hKM hKD hKH hM hD hH hMdiff hDdiff hHdiff hδpos hdet hAeq
+  simpa using
+    (parabolicC0AlphaSubmodule.forall_compactCoord_dist_le_of_toCompactCoordFamily_lipschitzOnWith
+      (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+      Kdom hKdom hα hLip)
+
+/-- Finite-family pointwise compact-coordinate distance estimates for schematic Ricci-DeTurck RHS
+readouts from higher primitive controls with exact summed primitive constants. -/
+theorem ricciDeTurckSchematicMatrix_compactCoord_dist_le_family_of_higher_primitive_normLe
+    {κ ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {δ : ℝ} {KM : κ → n → n → ℝ} {KD : κ → n → n → n → ℝ}
+    {KH : κ → n → n → n → n → ℝ} {C : κ → n → n → ℝ}
+    {DB : κ → n → n → n → ℝ} {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : κ → Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    {D : κ → Y → ℝ × X → n → n → n → ℝ}
+    {H : κ → Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM : ∀ r a b, 0 ≤ KM r a b)
+    (hKD : ∀ r a b c, 0 ≤ KD r a b c)
+    (hKH : ∀ r a b i j, 0 ≤ KH r a b i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C r a b) α (fun z => M r u z a b) s)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB r a b c) α (fun z => D r u z a b c) s)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB r a b i j) α (fun z => H r u z a b i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM r a b * dist u v) α
+        (fun z => M r u z a b - M r v z a b) s)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD r a b c * dist u v) α
+        (fun z => D r u z a b c - D r v z a b c) s)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH r a b i j * dist u v) α
+        (fun z => H r u z a b i j - H r v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A r u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r u z) (D r u z) (H r u z)) :
+    ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i (z : Kdom i),
+      dist
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A r u) i z)
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A r v) i z)
+        ≤ ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r)
+            (∑ a, ∑ b, KM r a b)
+            (∑ a, ∑ b, ∑ c, KD r a b c)
+            (fun i j => ∑ a, ∑ b, KH r a b i j) * dist u v := by
+  intro r
+  exact ricciDeTurckSchematicMatrix_compactCoord_dist_le_of_higher_primitive_normLe
+    (X := X) (α := α) (s := s) Kdom hKdom hα
+    (KM := KM r) (KD := KD r) (KH := KH r)
+    (C := C r) (DB := DB r) (HB := HB r)
+    (stateSet := stateSet) (A := A r) (M := M r) (D := D r) (H := H r)
+    (hDB r) (hHB r) (hKM r) (hKD r) (hKH r)
+    (hM r) (hD r) (hH r) (hMdiff r) (hDdiff r) (hHdiff r)
+    hδpos (hdet r) (hAeq r)
+
+/-- Finite-family pointwise compact-coordinate distance estimates with one shared exact summed
+schematic RHS constant across all family members. -/
+theorem ricciDeTurckSchematicMatrix_compactCoord_dist_le_pi_family_of_higher_primitive_normLe
+    {κ ι Y n : Type*} [Fintype κ] [Fintype ι] [PseudoMetricSpace Y]
+    [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {δ : ℝ} {KM : κ → n → n → ℝ} {KD : κ → n → n → n → ℝ}
+    {KH : κ → n → n → n → n → ℝ} {C : κ → n → n → ℝ}
+    {DB : κ → n → n → n → ℝ} {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : κ → Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    {D : κ → Y → ℝ × X → n → n → n → ℝ}
+    {H : κ → Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM : ∀ r a b, 0 ≤ KM r a b)
+    (hKD : ∀ r a b c, 0 ≤ KD r a b c)
+    (hKH : ∀ r a b i j, 0 ≤ KH r a b i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C r a b) α (fun z => M r u z a b) s)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB r a b c) α (fun z => D r u z a b c) s)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB r a b i j) α (fun z => H r u z a b i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM r a b * dist u v) α
+        (fun z => M r u z a b - M r v z a b) s)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD r a b c * dist u v) α
+        (fun z => D r u z a b c - D r v z a b c) s)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH r a b i j * dist u v) α
+        (fun z => H r u z a b i j - H r v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A r u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r u z) (D r u z) (H r u z)) :
+    ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ r i (z : Kdom i),
+      dist
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A r u) i z)
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A r v) i z)
+        ≤ (∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r) (DB r) (HB r)
+            (∑ a, ∑ b, KM r a b)
+            (∑ a, ∑ b, ∑ c, KD r a b c)
+            (fun i j => ∑ a, ∑ b, KH r a b i j)) * dist u v := by
+  let Kcoord : κ → ℝ := fun r =>
+    ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+      (𝕜 := ℝ) δ (C r) (DB r) (HB r)
+      (∑ a, ∑ b, KM r a b)
+      (∑ a, ∑ b, ∑ c, KD r a b c)
+      (fun i j => ∑ a, ∑ b, KH r a b i j)
+  have hKcoord_nonneg : ∀ r, 0 ≤ Kcoord r := fun r =>
+    ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+      (𝕜 := ℝ) hδpos (hDB r) (hHB r)
+      (Finset.sum_nonneg fun a _ha => Finset.sum_nonneg fun b _hb => hKM r a b)
+      (Finset.sum_nonneg fun a _ha =>
+        Finset.sum_nonneg fun b _hb =>
+        Finset.sum_nonneg fun c _hc => hKD r a b c)
+      (fun i j =>
+        Finset.sum_nonneg fun a _ha =>
+        Finset.sum_nonneg fun b _hb => hKH r a b i j)
+  intro u hu v hv r i z
+  have hr :
+      dist
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A r u) i z)
+        (parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A r v) i z)
+        ≤ Kcoord r * dist u v := by
+    simpa [Kcoord] using
+      (ricciDeTurckSchematicMatrix_compactCoord_dist_le_family_of_higher_primitive_normLe
+        (X := X) (α := α) (s := s) Kdom hKdom hα
+        (KM := KM) (KD := KD) (KH := KH) (C := C) (DB := DB) (HB := HB)
+        (stateSet := stateSet) (A := A) (M := M) (D := D) (H := H)
+        hDB hHB hKM hKD hKH hM hD hH hMdiff hDdiff hHdiff hδpos hdet hAeq
+        r hu hv i z)
+  have hr_le_sum : Kcoord r ≤ ∑ r, Kcoord r :=
+    Finset.single_le_sum (fun r' _hr' => hKcoord_nonneg r') (Finset.mem_univ r)
+  exact hr.trans (mul_le_mul_of_nonneg_right hr_le_sum dist_nonneg)
+
+/-- Pointwise compact-coordinate distance estimate for the schematic Ricci-DeTurck RHS readout
 from higher primitive controls with coarser exported constants.  This is the shape consumed by
 preferred-cover chart constructors after the compact readout has been unpacked. -/
 theorem ricciDeTurckSchematicMatrix_compactCoord_dist_le_of_higher_primitive_normLe_of_le

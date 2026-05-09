@@ -3905,11 +3905,11 @@ compact-coordinate readout `LipschitzOnWith` bridge for any parabolic
 coarser exported-constant variant for sharper entrywise higher primitive
 controls. The schematic RHS Lipschitz bridge now also has exact and coarser
 linear finite-cover readout variants, so callers that use the finite-product
-linear map do not have to unfold the compact-coordinate family manually. That
-coarser compact readout now also unpacks to pointwise compact-coordinate
-distance bounds with the same schematic RHS constant, including finite-family
-forms with either memberwise constants or one shared finite-sum constant for
-indexed frame/cover data. Radii linear in
+linear map do not have to unfold the compact-coordinate family manually. The
+exact and coarser compact readouts now also unpack to pointwise
+compact-coordinate distance bounds with the same schematic RHS constant,
+including finite-family forms with either memberwise constants or one shared
+finite-sum constant for indexed frame/cover data. Radii linear in
 `dist u v` give the matrix-norm/array primitive bounds needed by the existing
 schematic RHS state-space `LipschitzOnWith` theorem, with a matching
 finite-family wrapper, Pi-valued finite-product `C^{0,α}` and Lipschitz
