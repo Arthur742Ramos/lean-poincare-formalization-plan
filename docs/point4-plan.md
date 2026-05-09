@@ -3998,7 +3998,10 @@ structure with definitional norm and distance readback to the compact-family
 readout. The value and chosen-derivative readouts are also bundled into one
 combined finite-cover chosen-second-jet compact readout linear map, inducing a
 single seminormed additive-group and real normed-space structure with
-definitional norm and distance readback to that product readout. If the compact
+definitional norm and distance readback to that product readout. The combined
+chosen-second-jet product readout target is now also recorded as complete when
+the fiber model is complete; this is target-space completeness only and does
+not assert that the induced readout image is closed. If the compact
 pieces cover all time-space, the value projection makes that combined readout
 injective and upgrades the induced structure to a separated normed additive
 group with a paired real normed-space structure and definitional norm/distance

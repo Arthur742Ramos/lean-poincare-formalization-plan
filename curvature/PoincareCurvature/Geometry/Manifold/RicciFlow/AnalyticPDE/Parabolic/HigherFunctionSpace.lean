@@ -3584,6 +3584,42 @@ noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetNormedSpace
     inferInstance
   exact Prod.normedSpace (𝕜 := ℝ)
 
+/-- The finite-cover target of the combined chosen second-jet readout is complete when the
+fiber model is complete.  This records completeness of the ambient product target only; it
+does not assert closedness of the readout image in that product. -/
+noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetCompleteSpace
+    {κ : Type*} [Fintype κ] [CompleteSpace E]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    CompleteSpace (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc) := by
+  dsimp [chosenSecondJetFiniteCoverReadoutTarget]
+  letI : (i : κ) → NormedAddCommGroup C(Kc i, E) := fun _ => inferInstance
+  letI : (i : κ) → NormedAddCommGroup C(Kc i, X →L[ℝ] E) := fun _ =>
+    inferInstance
+  letI : (i : κ) → NormedAddCommGroup C(Kc i, X →L[ℝ] (X →L[ℝ] E)) :=
+    fun i => @ContinuousMap.instNormedAddCommGroup (Kc i) inferInstance inferInstance
+      (X →L[ℝ] (X →L[ℝ] E)) inferInstance
+  letI : NormedAddCommGroup (∀ i, C(Kc i, E)) := Pi.normedAddCommGroup
+  letI : NormedAddCommGroup (∀ i, C(Kc i, X →L[ℝ] E)) := Pi.normedAddCommGroup
+  letI : NormedAddCommGroup
+      (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := Pi.normedAddCommGroup
+  letI : CompleteSpace (X →L[ℝ] E) := inferInstance
+  letI : CompleteSpace (X →L[ℝ] (X →L[ℝ] E)) := inferInstance
+  letI : (i : κ) → CompleteSpace C(Kc i, E) := fun i =>
+    (completeSpace_congr
+      (ContinuousMap.isUniformEmbedding_equivBoundedOfCompact (Kc i) E)).2 inferInstance
+  letI : (i : κ) → CompleteSpace C(Kc i, X →L[ℝ] E) := fun i =>
+    (completeSpace_congr
+      (ContinuousMap.isUniformEmbedding_equivBoundedOfCompact (Kc i) (X →L[ℝ] E))).2
+        inferInstance
+  letI : (i : κ) → CompleteSpace C(Kc i, X →L[ℝ] (X →L[ℝ] E)) := fun i =>
+    (completeSpace_congr
+      (ContinuousMap.isUniformEmbedding_equivBoundedOfCompact (Kc i)
+        (X →L[ℝ] (X →L[ℝ] E)))).2 inferInstance
+  letI : CompleteSpace (∀ i, C(Kc i, E)) := inferInstance
+  letI : CompleteSpace (∀ i, C(Kc i, X →L[ℝ] E)) := inferInstance
+  letI : CompleteSpace (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := inferInstance
+  infer_instance
+
 /-- Combined finite-cover readout of a higher parabolic function and its chosen second-jet
 components as a linear map, under unique-differentiability of the slices. -/
 noncomputable def chosenSecondJetFiniteCoverReadoutLinearMap {κ : Type*}
