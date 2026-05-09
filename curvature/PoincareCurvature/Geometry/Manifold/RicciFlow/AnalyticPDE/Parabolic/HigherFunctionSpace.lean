@@ -3067,6 +3067,48 @@ noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetSeminormedAd
     inferInstance
   infer_instance
 
+noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetNormedSpace
+    {κ : Type*} [Fintype κ] (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    NormedSpace ℝ (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc) := by
+  dsimp [chosenSecondJetFiniteCoverReadoutTarget]
+  letI : Module ℝ (∀ i, C(Kc i, E)) := inferInstance
+  letI : Module ℝ (∀ i, C(Kc i, X →L[ℝ] E)) := inferInstance
+  letI : Module ℝ (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := inferInstance
+  letI : SeminormedAddCommGroup (∀ i, C(Kc i, E)) := inferInstance
+  letI : SeminormedAddCommGroup (∀ i, C(Kc i, X →L[ℝ] E)) := inferInstance
+  letI : SeminormedAddCommGroup
+      (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := inferInstance
+  letI : NormedSpace ℝ (∀ i, C(Kc i, E)) := inferInstance
+  letI : NormedSpace ℝ (∀ i, C(Kc i, X →L[ℝ] E)) := inferInstance
+  letI : NormedSpace ℝ
+      (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := inferInstance
+  letI : Module ℝ ((∀ i, C(Kc i, E)) × (∀ i, C(Kc i, X →L[ℝ] E))) :=
+    inferInstance
+  letI : Module ℝ
+      ((∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) × (∀ i, C(Kc i, E))) :=
+    inferInstance
+  letI : SeminormedAddCommGroup
+      ((∀ i, C(Kc i, E)) × (∀ i, C(Kc i, X →L[ℝ] E))) :=
+    inferInstance
+  letI : SeminormedAddCommGroup
+      ((∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) × (∀ i, C(Kc i, E))) :=
+    inferInstance
+  letI : NormedSpace ℝ
+      ((∀ i, C(Kc i, E)) × (∀ i, C(Kc i, X →L[ℝ] E))) :=
+    inferInstance
+  letI : NormedSpace ℝ
+      ((∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) × (∀ i, C(Kc i, E))) :=
+    inferInstance
+  letI : Module ℝ
+      (((∀ i, C(Kc i, E)) × (∀ i, C(Kc i, X →L[ℝ] E))) ×
+        ((∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) × (∀ i, C(Kc i, E)))) :=
+    inferInstance
+  letI : SeminormedAddCommGroup
+      (((∀ i, C(Kc i, E)) × (∀ i, C(Kc i, X →L[ℝ] E))) ×
+        ((∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) × (∀ i, C(Kc i, E)))) :=
+    inferInstance
+  exact Prod.normedSpace (𝕜 := ℝ)
+
 /-- Combined finite-cover readout of a higher parabolic function and its chosen second-jet
 components as a linear map, under unique-differentiability of the slices. -/
 noncomputable def chosenSecondJetFiniteCoverReadoutLinearMap {κ : Type*}
@@ -3147,6 +3189,25 @@ structure on the higher parabolic submodule. -/
       UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
     SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
   SeminormedAddCommGroup.induced
+    (parabolicC2AlphaSubmodule X E α s)
+    (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc)
+    (chosenSecondJetFiniteCoverReadoutLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace)
+
+/-- The combined finite-cover chosen second-jet readout induces a seminormed real vector-space
+structure on the higher parabolic submodule. -/
+@[reducible] noncomputable def finiteCoverChosenSecondJetNormedSpace
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    @NormedSpace ℝ (parabolicC2AlphaSubmodule X E α s) _
+      (finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace) :=
+  NormedSpace.induced ℝ
     (parabolicC2AlphaSubmodule X E α s)
     (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc)
     (chosenSecondJetFiniteCoverReadoutLinearMap
