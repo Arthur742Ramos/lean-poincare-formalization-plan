@@ -1187,6 +1187,39 @@ theorem norm_toContinuousMap_sub_le_of_normLe {K : TopologicalSpace.Compacts (�
     parabolicC0AlphaSubmodule.norm_toContinuousMap_sub_le_of_normLe
       (X := X) (E := E) (α := α) (s := s) hK hα h0
 
+/-- Componentwise higher difference controls with radii linear in a shared scalar control the
+compact readout sup norm of a finite Pi-valued higher parabolic function. -/
+theorem norm_toContinuousMap_pi_sub_le_sum_mul_of_entries
+    {Kc : TopologicalSpace.Compacts (ℝ × X)}
+    (hKc : (Kc : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {ι F : Type*} [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC2AlphaSubmodule X (ι → F) α s}
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    ‖toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα u -
+        toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα v‖ ≤
+      (∑ i, K i) * R := by
+  have hsum_nonneg : 0 ≤ ∑ i, K i :=
+    Finset.sum_nonneg fun i _hi => hK_nonneg i
+  have htarget_nonneg : 0 ≤ (∑ i, K i) * R :=
+    mul_nonneg hsum_nonneg hR
+  refine (ContinuousMap.norm_le
+    (f := toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα u -
+      toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα v)
+    htarget_nonneg).mpr ?_
+  intro z
+  have hz : z.1 ∈ s := hKc z.2
+  calc
+    ‖(toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα u -
+        toContinuousMap (X := X) (E := ι → F) (α := α) (s := s) hKc hα v) z‖ =
+        ‖u z.1 - v z.1‖ := by
+          rfl
+    _ ≤ (∑ i, K i) * R :=
+        ParabolicC2AlphaNormLe.pi_norm_sub_le_sum_mul_of_entries
+          (X := X) (α := α) (s := s) hK_nonneg hR h hz
+
 /-- Pairwise single-radius `C^{2+α,1+α/2}` difference estimates give a Lipschitz estimate
 for one compact value readout. -/
 theorem lipschitzOnWith_toContinuousMap_of_normLe_sub {Y : Type*} [PseudoMetricSpace Y]
@@ -1270,6 +1303,30 @@ theorem norm_toCompactCoordFamily_family_sub_le_of_normLe {κ : Type*} [Fintype 
   refine (pi_norm_le_iff_of_nonneg h.nonneg).2 fun i => ?_
   exact norm_toCompactCoordFamily_sub_le_of_normLe
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα h i
+
+/-- Componentwise higher difference controls with radii linear in a shared scalar control the
+finite product of compact-family value readouts for finite Pi-valued higher parabolic functions. -/
+theorem norm_toCompactCoordFamily_pi_family_sub_le_sum_mul_of_entries {κ ι F : Type*}
+    [Fintype κ] [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {R : ℝ} {K : ι → ℝ}
+    {u v : parabolicC2AlphaSubmodule X (ι → F) α s}
+    (hK_nonneg : ∀ i, 0 ≤ K i) (hR : 0 ≤ R)
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    ‖toCompactCoordFamily (X := X) (E := ι → F) (α := α) (s := s)
+        Kc hKc hα u -
+      toCompactCoordFamily (X := X) (E := ι → F) (α := α) (s := s)
+        Kc hKc hα v‖ ≤
+      (∑ i, K i) * R := by
+  have hsum_nonneg : 0 ≤ ∑ i, K i :=
+    Finset.sum_nonneg fun i _hi => hK_nonneg i
+  have htarget_nonneg : 0 ≤ (∑ i, K i) * R :=
+    mul_nonneg hsum_nonneg hR
+  refine (pi_norm_le_iff_of_nonneg htarget_nonneg).2 fun i => ?_
+  exact norm_toContinuousMap_pi_sub_le_sum_mul_of_entries
+    (X := X) (α := α) (s := s) (hKc i) hα hK_nonneg hR h
 
 /-- Pairwise single-radius `C^{2+α,1+α/2}` difference estimates give a Lipschitz estimate
 for the finite product of compact-family value readouts. -/
