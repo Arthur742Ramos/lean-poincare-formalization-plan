@@ -4001,9 +4001,10 @@ shared direction family or member-dependent direction families. The
 state-space Lipschitz bridge can now be invoked directly with those
 deterministic matrix-entry chosen jets, including the finite-coordinate
 specialization with coordinate-radius constants and finite-family/Pi-valued
-forms for family-dependent direction readouts, so chart estimates that use
-higher matrix submodule elements do not need a separate caller-supplied jet
-family. The
+forms for family-dependent direction readouts. The same deterministic bridge
+now also feeds the compact-coordinate and linear finite-cover readout maps, so
+chart estimates that use higher matrix submodule elements do not need a
+separate caller-supplied jet family. The
 second-jet readout bridge now also accepts an arbitrary finite family of
 spatial directions in any normed model, with quantitative and qualitative
 finite-family packaging, so tangent-frame or chart-basis directions no longer

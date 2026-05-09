@@ -4256,6 +4256,138 @@ theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_lipschitzOnWith_p
         chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M r u))
       hC hKM hM hMdiff htime hspace hδpos hdet hz
 
+/-- Compact-coordinate readout Lipschitz bridge for deterministic matrix-entry chosen jets. -/
+theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_of_metric_entries_directions_of_unique
+    {ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (ξ : n → X)
+    {δ : ℝ} {C KM : n → n → ℝ} {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    (M : Y → parabolicC2AlphaSubmodule X (Matrix n n ℝ) α s)
+    (hC : ∀ i j, 0 ≤ C i j) (hKM : ∀ i j, 0 ≤ KM i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C i j) α (fun z : ℝ × X => M u z i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM i j * dist u v) α
+        (fun z : ℝ × X => M u z i j - M v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M u z)
+        (fun a i j =>
+          (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M u)).spaceDeriv
+            z (ξ a))
+        (fun a b i j =>
+          (chosenMatrixEntrySecondJet
+            (X := X) (α := α) (s := s) i j (M u)).spaceSecondDeriv z (ξ a) (ξ b))) :
+    LipschitzOnWith
+      ⟨ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+          (𝕜 := ℝ) δ C
+          (firstDerivativeVectorRadius (X := X) ξ C)
+          (secondDerivativeVectorRadius (X := X) ξ C)
+          (∑ i, ∑ j, KM i j)
+          (∑ a, ∑ i, ∑ j, firstDerivativeVectorRadius (X := X) ξ KM a i j)
+          (fun i j => ∑ a, ∑ b,
+            secondDerivativeVectorRadius (X := X) ξ KM a b i j),
+        ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+          (𝕜 := ℝ) hδpos
+          (firstDerivativeVectorRadius_nonneg (X := X) ξ hC)
+          (secondDerivativeVectorRadius_nonneg (X := X) ξ hC)
+          (Finset.sum_nonneg fun i _hi => Finset.sum_nonneg fun j _hj => hKM i j)
+          (Finset.sum_nonneg fun a _ha =>
+            Finset.sum_nonneg fun i _hi =>
+              Finset.sum_nonneg fun j _hj =>
+                firstDerivativeVectorRadius_nonneg (X := X) ξ hKM a i j)
+          (fun i j =>
+            Finset.sum_nonneg fun a _ha =>
+              Finset.sum_nonneg fun b _hb =>
+                secondDerivativeVectorRadius_nonneg (X := X) ξ hKM a b i j)⟩
+      (fun u : Y =>
+        parabolicC0AlphaSubmodule.toCompactCoordFamily
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A u))
+      stateSet := by
+  simpa using
+    ParabolicC2AlphaNormLe.ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_of_metric_entries_directions_of_unique
+      (X := X) (α := α) (s := s) Kdom hKdom hα ξ
+      (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
+      (A := A) (M := fun u z => M u z)
+      (J := fun u i j =>
+        chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M u))
+      hC hKM hM hMdiff htime hspace hδpos hdet hAeq
+
+/-- Linear finite-cover readout version of
+`chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_of_metric_entries_directions_of_unique`. -/
+theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamilyLinearMap_of_metric_entries_directions_of_unique
+    {ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (ξ : n → X)
+    {δ : ℝ} {C KM : n → n → ℝ} {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    (M : Y → parabolicC2AlphaSubmodule X (Matrix n n ℝ) α s)
+    (hC : ∀ i j, 0 ≤ C i j) (hKM : ∀ i j, 0 ≤ KM i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C i j) α (fun z : ℝ × X => M u z i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM i j * dist u v) α
+        (fun z : ℝ × X => M u z i j - M v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M u z)
+        (fun a i j =>
+          (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M u)).spaceDeriv
+            z (ξ a))
+        (fun a b i j =>
+          (chosenMatrixEntrySecondJet
+            (X := X) (α := α) (s := s) i j (M u)).spaceSecondDeriv z (ξ a) (ξ b))) :
+    LipschitzOnWith
+      ⟨ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+          (𝕜 := ℝ) δ C
+          (firstDerivativeVectorRadius (X := X) ξ C)
+          (secondDerivativeVectorRadius (X := X) ξ C)
+          (∑ i, ∑ j, KM i j)
+          (∑ a, ∑ i, ∑ j, firstDerivativeVectorRadius (X := X) ξ KM a i j)
+          (fun i j => ∑ a, ∑ b,
+            secondDerivativeVectorRadius (X := X) ξ KM a b i j),
+        ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+          (𝕜 := ℝ) hδpos
+          (firstDerivativeVectorRadius_nonneg (X := X) ξ hC)
+          (secondDerivativeVectorRadius_nonneg (X := X) ξ hC)
+          (Finset.sum_nonneg fun i _hi => Finset.sum_nonneg fun j _hj => hKM i j)
+          (Finset.sum_nonneg fun a _ha =>
+            Finset.sum_nonneg fun i _hi =>
+              Finset.sum_nonneg fun j _hj =>
+                firstDerivativeVectorRadius_nonneg (X := X) ξ hKM a i j)
+          (fun i j =>
+            Finset.sum_nonneg fun a _ha =>
+              Finset.sum_nonneg fun b _hb =>
+                secondDerivativeVectorRadius_nonneg (X := X) ξ hKM a b i j)⟩
+      (fun u : Y =>
+        parabolicC0AlphaSubmodule.toCompactCoordFamilyLinearMap
+          (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+          Kdom hKdom hα (A u))
+      stateSet := by
+  simpa using
+    chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_lipschitzOnWith_toCompactCoordFamily_of_metric_entries_directions_of_unique
+      (X := X) (α := α) (s := s) Kdom hKdom hα ξ
+      (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
+      (A := A) M hC hKM hM hMdiff htime hspace hδpos hdet hAeq
+
 set_option maxHeartbeats 1000000 in
 /-- A matrix-valued higher parabolic submodule element supplies a deterministic
 chosen-entry-jet schematic Ricci-DeTurck RHS.  This is the noncanonical chosen-jet counterpart
