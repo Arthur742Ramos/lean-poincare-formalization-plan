@@ -900,6 +900,26 @@ theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F] [NormedSpac
     continuousLinearMap (X := X) (E := E) (α := α) (s := s) L u z = L (u z) :=
   rfl
 
+/-- Product-valued pairing of two coordinate parabolic `C^{2+α,1+α/2}` submodule elements. -/
+def prodLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] :
+    parabolicC2AlphaSubmodule X E α s × parabolicC2AlphaSubmodule X F α s →ₗ[ℝ]
+      parabolicC2AlphaSubmodule X (E × F) α s where
+  toFun u :=
+    ⟨fun z => (u.1 z, u.2 z), ParabolicC2AlphaOn.prod u.1.2 u.2.2⟩
+  map_add' := by
+    intro u v
+    ext z <;> rfl
+  map_smul' := by
+    intro c u
+    ext z <;> rfl
+
+@[simp]
+theorem prodLinearMap_apply {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (u : parabolicC2AlphaSubmodule X E α s × parabolicC2AlphaSubmodule X F α s)
+    (z : ℝ × X) :
+    prodLinearMap (X := X) (E := E) (α := α) (s := s) u z = (u.1 z, u.2 z) :=
+  rfl
+
 /-- Coordinate projection from a finite Pi-valued higher parabolic submodule. -/
 def piApplyLinearMap {ι F : Type*} [Fintype ι] [NormedAddCommGroup F] [NormedSpace ℝ F]
     (i : ι) :

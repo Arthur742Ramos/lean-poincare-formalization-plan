@@ -3825,8 +3825,9 @@ coordinate time-space functions, is closed under product-valued pairing and
 continuous-linear value maps, and reads back to `ParabolicC0AlphaOn` for the
 value component; the full
 `C^{2+α,1+α/2}` radius also bounds the value-level `C^{0,α}` norm, and the
-submodule has linear maps for both continuous-linear value composition and
-forgetful inclusion into the existing `C^{0,α}` submodule. Higher norm balls
+submodule has linear maps for continuous-linear value composition,
+product-valued pairing on product submodules, and forgetful inclusion into the
+existing `C^{0,α}` submodule. Higher norm balls
 now also give value-level pointwise norm and distance readouts,
 chosen-second-jet pointwise bounds for the value, spatial derivative, second
 spatial derivative, and time derivative under one common higher radius,
