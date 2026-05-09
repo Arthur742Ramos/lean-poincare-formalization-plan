@@ -1852,6 +1852,119 @@ theorem finiteCoverValue_dist_eq_ofCover {κ : Type*} [Fintype κ]
           Kc hKc hα v) :=
   rfl
 
+/-- A `C^{0,α}` norm-ball difference controls the induced finite-cover value distance. -/
+theorem finiteCoverValue_dist_le_of_normLe_sub {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    dist u v ≤ N := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  rw [finiteCoverValue_dist_eq (X := X) (E := E) (α := α) (s := s)
+    Kc hKc hα u v]
+  simpa [dist_eq_norm] using
+    norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα h
+
+/-- A `C^{0,α}` norm-ball difference gives finite-cover value closed-ball membership. -/
+theorem finiteCoverValue_mem_closedBall_of_normLe_sub {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    u ∈ Metric.closedBall v N := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  simpa [Metric.mem_closedBall] using
+    finiteCoverValue_dist_le_of_normLe_sub
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα h
+
+/-- Symmetric finite-cover value closed-ball membership from a `C^{0,α}` difference bound. -/
+theorem finiteCoverValue_mem_closedBall_symm_of_normLe_sub {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    v ∈ Metric.closedBall u N := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  simpa [Metric.mem_closedBall, dist_comm] using
+    finiteCoverValue_dist_le_of_normLe_sub
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα h
+
+/-- A `C^{0,α}` norm-ball difference controls the separated all-cover finite-cover value
+distance. -/
+theorem finiteCoverValue_dist_le_of_normLe_sub_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+    dist u v ≤ N := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+  rw [finiteCoverValue_dist_eq_ofCover (X := X) (E := E) (α := α) (s := s)
+    Kc hKc hα hcover u v]
+  simpa [dist_eq_norm] using
+    norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα h
+
+/-- A `C^{0,α}` norm-ball difference gives separated all-cover finite-cover value closed-ball
+membership. -/
+theorem finiteCoverValue_mem_closedBall_of_normLe_sub_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+    u ∈ Metric.closedBall v N := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+  simpa [Metric.mem_closedBall] using
+    finiteCoverValue_dist_le_of_normLe_sub_ofCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover h
+
+/-- Symmetric separated all-cover finite-cover value closed-ball membership from a `C^{0,α}`
+difference bound. -/
+theorem finiteCoverValue_mem_closedBall_symm_of_normLe_sub_ofCover {κ : Type*}
+    [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {N : ℝ} {u v : parabolicC0AlphaSubmodule X E α s}
+    (h : ParabolicC0AlphaNormLe N α (fun z => u z - v z) s) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+    v ∈ Metric.closedBall u N := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+  simpa [Metric.mem_closedBall, dist_comm] using
+    finiteCoverValue_dist_le_of_normLe_sub_ofCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover h
+
 /-- The finite-cover value readout is nonexpansive for its induced seminormed structure. -/
 theorem finiteCoverValue_readout_dist_le {κ : Type*} [Fintype κ]
     (Kc : κ → TopologicalSpace.Compacts (ℝ × X))

@@ -4012,7 +4012,10 @@ product-domain distance bounds and direct/symmetric closed-ball membership
 readouts, including finite-coordinate variants from linear-in-a-shared-radius
 component bounds, so later positivity and chart-neighborhood arguments can
 consume norm-ball difference estimates in the same metric-neighborhood shape
-used by the geometric chart layer. They do not make the derivative choice
+used by the geometric chart layer. The finite-cover value seminorm and combined
+finite-cover chosen-second-jet seminorm now also have direct and symmetric
+closed-ball readouts from those norm-ball difference estimates, including the
+separated all-cover normed variants. They do not make the derivative choice
 canonical or upgrade this compact-family jet seminorm into the full
 `C^{2+α,1+α/2}` Banach
 norm, Schauder estimate, or completeness content.

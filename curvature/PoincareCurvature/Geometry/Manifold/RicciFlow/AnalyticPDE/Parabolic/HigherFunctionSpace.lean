@@ -4149,6 +4149,104 @@ theorem finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique_ofCover
   exact dist_chosenSecondJetFiniteCoverReadoutLinearMap_le_of_normLe_unique
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα h htime hspace
 
+/-- A higher norm-ball difference gives closed-ball membership for the induced combined
+finite-cover chosen second-jet seminorm. -/
+theorem finiteCoverChosenSecondJet_mem_closedBall_of_normLe_sub_unique
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
+    u ∈ Metric.closedBall v N := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
+  simpa [Metric.mem_closedBall] using
+    finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα h htime hspace
+
+/-- Symmetric closed-ball membership for the induced combined finite-cover chosen second-jet
+seminorm from a higher norm-ball difference. -/
+theorem finiteCoverChosenSecondJet_mem_closedBall_symm_of_normLe_sub_unique
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
+    v ∈ Metric.closedBall u N := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
+  simpa [Metric.mem_closedBall, dist_comm] using
+    finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα h htime hspace
+
+/-- A higher norm-ball difference gives closed-ball membership for the separated all-cover
+combined finite-cover chosen second-jet norm. -/
+theorem finiteCoverChosenSecondJet_mem_closedBall_of_normLe_sub_unique_ofCover
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    u ∈ Metric.closedBall v N := by
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace hcover
+  simpa [Metric.mem_closedBall] using
+    finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique_ofCover
+      (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα htime hspace hcover h
+
+/-- Symmetric closed-ball membership for the separated all-cover combined finite-cover chosen
+second-jet norm from a higher norm-ball difference. -/
+theorem finiteCoverChosenSecondJet_mem_closedBall_symm_of_normLe_sub_unique_ofCover
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    v ∈ Metric.closedBall u N := by
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace hcover
+  simpa [Metric.mem_closedBall, dist_comm] using
+    finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique_ofCover
+      (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα htime hspace hcover h
+
 /-- Pairwise higher difference estimates give a Lipschitz estimate in the induced combined
 finite-cover chosen second-jet seminorm. -/
 theorem lipschitzOnWith_finiteCoverChosenSecondJet_of_normLe_sub_unique
