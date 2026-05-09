@@ -3941,7 +3941,10 @@ coarser exported-constant variant for sharper entrywise higher primitive
 controls. The schematic RHS Lipschitz bridge now also has exact and coarser
 linear finite-cover readout variants, so callers that use the finite-product
 linear map do not have to unfold the compact-coordinate family manually. The
-exact and coarser compact readouts now also unpack to pointwise
+chosen metric-entry second-jet/direction-family state-space Lipschitz theorem
+now also has compact-family and linear finite-cover readout wrappers, carrying
+the unique-differentiability transport all the way to the finite chart handoff.
+The exact and coarser compact readouts now also unpack to pointwise
 compact-coordinate distance bounds with the same schematic RHS constant,
 including finite-family forms with either memberwise constants or one shared
 finite-sum constant for indexed frame/cover data. These exact and coarser
