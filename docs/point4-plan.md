@@ -3895,8 +3895,9 @@ submodule now also has a finite-cover value seminormed additive-group and real
 normed-space structure induced by the compact-family readout, plus a separated
 normed additive-group structure when the compact pieces cover all time-space;
 the norm and distance are definitionally the compact-family readout norm and
-distance, the induced readout is directly nonexpansive and `1`-Lipschitz in
-both the seminormed and separated all-cover structures, and the finite-cover
+distance, the induced readout is now named as an isometry (and hence directly
+nonexpansive and `1`-Lipschitz) in both the seminormed and separated all-cover
+structures, and the finite-cover
 value seminorm now has direct fixed-time spatial readout estimates and
 direct/symmetric closed-ball readouts from `C^{0,α}` difference balls,
 including finite-coordinate finite-Pi variants with radii `Kᵢ * R` and the
@@ -4012,8 +4013,10 @@ not assert that the induced readout image is closed. If the compact
 pieces cover all time-space, the value projection makes that combined readout
 injective and upgrades the induced structure to a separated normed additive
 group with a paired real normed-space structure and definitional norm/distance
-readback to the same product readout; for that separated norm, the combined
-readout and each component readout are also packaged as `1`-Lipschitz on
+readback to the same product readout; the combined readout is now named as an
+isometry for both the induced seminormed structure and the separated all-cover
+normed structure, and for that separated norm the combined readout and each
+component readout are also packaged as `1`-Lipschitz on
 arbitrary state sets. Equality of the combined readout identifies the
 underlying functions on any subset covered by the compact pieces. The same
 combined readout has component norm and distance projection bounds for the

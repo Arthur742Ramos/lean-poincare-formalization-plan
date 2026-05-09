@@ -4018,6 +4018,32 @@ theorem finiteCoverChosenSecondJet_timeDeriv_norm_le_ofCover {κ : Type*} [Finty
   change ‖(R u).2.2‖ ≤ ‖R u‖
   exact (norm_snd_le (R u).2).trans (norm_snd_le (R u))
 
+/-- For the separated all-cover norm, the combined finite-cover chosen second-jet readout is an
+isometry. -/
+theorem finiteCoverChosenSecondJet_readout_isometry_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    Isometry
+      (fun u : parabolicC2AlphaSubmodule X E α s =>
+        chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u) := by
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace hcover
+  exact Isometry.of_dist_eq fun u v =>
+    (finiteCoverChosenSecondJet_dist_eq_ofCover
+      (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα htime hspace hcover u v).symm
+
 /-- For the separated all-cover norm, the combined finite-cover chosen second-jet readout is
 nonexpansive. -/
 theorem finiteCoverChosenSecondJet_readout_dist_le_ofCover {κ : Type*} [Fintype κ]
@@ -5228,6 +5254,29 @@ theorem finiteCoverChosenSecondJet_timeDeriv_dist_le {κ : Type*} [Fintype κ]
   change dist (R u).2.2 (R v).2.2 ≤ dist (R u) (R v)
   rw [Prod.dist_eq, Prod.dist_eq]
   exact (le_max_right _ _).trans (le_max_right _ _)
+
+/-- The combined finite-cover chosen second-jet readout is an isometry for its induced seminormed
+structure. -/
+theorem finiteCoverChosenSecondJet_readout_isometry {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
+    Isometry
+      (fun u : parabolicC2AlphaSubmodule X E α s =>
+        chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u) := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
+  exact Isometry.of_dist_eq fun u v =>
+    (finiteCoverChosenSecondJet_dist_eq
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u v).symm
 
 /-- The combined finite-cover chosen second-jet readout is nonexpansive for its induced
 seminormed structure. -/

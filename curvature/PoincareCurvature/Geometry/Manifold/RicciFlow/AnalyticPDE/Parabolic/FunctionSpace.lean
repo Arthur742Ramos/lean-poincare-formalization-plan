@@ -2181,6 +2181,24 @@ theorem lipschitzOnWith_finiteCoverValue_pi_of_component_normLe_sub_ofCover
       (fun i => (K i).2) dist_nonneg (h hu hv)
   simpa [NNReal.coe_sum] using hdist
 
+/-- The finite-cover value readout is an isometry for its induced seminormed structure. -/
+theorem finiteCoverValue_readout_isometry {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    Isometry
+      (fun u : parabolicC0AlphaSubmodule X E α s =>
+        toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα u) := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  exact Isometry.of_dist_eq fun u v =>
+    (finiteCoverValue_dist_eq (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα u v).symm
+
 /-- The finite-cover value readout is nonexpansive for its induced seminormed structure. -/
 theorem finiteCoverValue_readout_dist_le {κ : Type*} [Fintype κ]
     (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
@@ -2226,6 +2244,25 @@ theorem finiteCoverValue_readout_lipschitzOnWith {κ : Type*} [Fintype κ]
   simpa [one_mul] using
     finiteCoverValue_readout_dist_le
       (X := X) (E := E) (α := α) (s := s) Kc hKc hα u v
+
+/-- For the separated all-cover norm, the finite-cover value readout is an isometry. -/
+theorem finiteCoverValue_readout_isometry_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+    Isometry
+      (fun u : parabolicC0AlphaSubmodule X E α s =>
+        toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα u) := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+  exact Isometry.of_dist_eq fun u v =>
+    (finiteCoverValue_dist_eq_ofCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover u v).symm
 
 /-- For the separated all-cover norm, the finite-cover value readout is nonexpansive. -/
 theorem finiteCoverValue_readout_dist_le_ofCover {κ : Type*} [Fintype κ]
