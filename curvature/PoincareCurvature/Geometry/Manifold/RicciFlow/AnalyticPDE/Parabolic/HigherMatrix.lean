@@ -2474,6 +2474,182 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_metric_entries_of_unique
       (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
       (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet
 
+/-- Finite-family state-space Lipschitz bridge for the schematic Ricci-DeTurck RHS when each
+family member reads first- and second-derivative primitives from its own supplied metric-entry
+second jets and finite direction family. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_family_of_metric_entries_family_directions_of_unique
+    {κ Y n : Type*} [Fintype κ] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (ξ : κ → n → X)
+    {δ : ℝ} {C KM : κ → n → n → ℝ} {stateSet : Set Y}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    (J : ∀ r : κ, ∀ u : Y, ∀ i j,
+      ParabolicSecondJet (fun z : ℝ × X => M r u z i j) s)
+    (hC : ∀ r i j, 0 ≤ C r i j) (hKM : ∀ r i j, 0 ≤ KM r i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C r i j) α (fun z => M r u z i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM r i j * dist u v) α
+        (fun z => M r u z i j - M r v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖) :
+    ∀ r ⦃z : ℝ × X⦄, z ∈ s →
+      LipschitzOnWith
+        ⟨ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r)
+            (firstDerivativeVectorRadius (X := X) (ξ r) (C r))
+            (secondDerivativeVectorRadius (X := X) (ξ r) (C r))
+            (∑ i, ∑ j, KM r i j)
+            (∑ a, ∑ i, ∑ j,
+              firstDerivativeVectorRadius (X := X) (ξ r) (KM r) a i j)
+            (fun i j => ∑ a, ∑ b,
+              secondDerivativeVectorRadius (X := X) (ξ r) (KM r) a b i j),
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+            (𝕜 := ℝ) hδpos
+            (firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+            (secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+            (Finset.sum_nonneg fun i _hi => Finset.sum_nonneg fun j _hj => hKM r i j)
+            (Finset.sum_nonneg fun a _ha =>
+              Finset.sum_nonneg fun i _hi =>
+                Finset.sum_nonneg fun j _hj =>
+                  firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r) a i j)
+            (fun i j =>
+              Finset.sum_nonneg fun a _ha =>
+                Finset.sum_nonneg fun b _hb =>
+                  secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r) a b i j)⟩
+        (fun u : Y => ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r u z)
+          (fun a i j => (J r u i j).spaceDeriv z (ξ r a))
+          (fun a b i j => (J r u i j).spaceSecondDeriv z (ξ r a) (ξ r b)))
+        stateSet := by
+  intro r z hz
+  exact ricciDeTurckSchematicMatrix_lipschitzOnWith_of_metric_entries_directions_of_unique
+    (X := X) (α := α) (s := s) (ξ r)
+    (δ := δ) (C := C r) (KM := KM r) (stateSet := stateSet)
+    (M := M r) (J r) (hC r) (hKM r) (hM r) (hMdiff r)
+    htime hspace hδpos (hdet r) hz
+
+/-- Pi-valued finite-family state-space Lipschitz bridge for chosen-jet schematic
+Ricci-DeTurck RHS coordinates.  The exported Lipschitz constant is the finite sum of the
+memberwise chosen-jet schematic constants. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_pi_family_of_metric_entries_family_directions_of_unique
+    {κ Y n : Type*} [Fintype κ] [DecidableEq κ] [PseudoMetricSpace Y]
+    [Fintype n] [DecidableEq n]
+    (ξ : κ → n → X)
+    {δ : ℝ} {C KM : κ → n → n → ℝ} {stateSet : Set Y}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    (J : ∀ r : κ, ∀ u : Y, ∀ i j,
+      ParabolicSecondJet (fun z : ℝ × X => M r u z i j) s)
+    (hC : ∀ r i j, 0 ≤ C r i j) (hKM : ∀ r i j, 0 ≤ KM r i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C r i j) α (fun z => M r u z i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM r i j * dist u v) α
+        (fun z => M r u z i j - M r v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖) :
+    ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      LipschitzOnWith
+        ⟨∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ (C r)
+            (firstDerivativeVectorRadius (X := X) (ξ r) (C r))
+            (secondDerivativeVectorRadius (X := X) (ξ r) (C r))
+            (∑ i, ∑ j, KM r i j)
+            (∑ a, ∑ i, ∑ j,
+              firstDerivativeVectorRadius (X := X) (ξ r) (KM r) a i j)
+            (fun i j => ∑ a, ∑ b,
+              secondDerivativeVectorRadius (X := X) (ξ r) (KM r) a b i j),
+          Finset.sum_nonneg fun r _hr =>
+            ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+              (𝕜 := ℝ) hδpos
+              (firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+              (secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+              (Finset.sum_nonneg fun i _hi =>
+                Finset.sum_nonneg fun j _hj => hKM r i j)
+              (Finset.sum_nonneg fun a _ha =>
+                Finset.sum_nonneg fun i _hi =>
+                  Finset.sum_nonneg fun j _hj =>
+                    firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r) a i j)
+              (fun i j =>
+                Finset.sum_nonneg fun a _ha =>
+                  Finset.sum_nonneg fun b _hb =>
+                    secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r)
+                      a b i j)⟩
+        (fun u : Y => fun r =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (M r u z)
+            (fun a i j => (J r u i j).spaceDeriv z (ξ r a))
+            (fun a b i j => (J r u i j).spaceSecondDeriv z (ξ r a) (ξ r b)))
+        stateSet := by
+  intro z hz
+  let Kcoord : κ → ℝ := fun r =>
+    ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+      (𝕜 := ℝ) δ (C r)
+      (firstDerivativeVectorRadius (X := X) (ξ r) (C r))
+      (secondDerivativeVectorRadius (X := X) (ξ r) (C r))
+      (∑ i, ∑ j, KM r i j)
+      (∑ a, ∑ i, ∑ j,
+        firstDerivativeVectorRadius (X := X) (ξ r) (KM r) a i j)
+      (fun i j => ∑ a, ∑ b,
+        secondDerivativeVectorRadius (X := X) (ξ r) (KM r) a b i j)
+  have hKcoord_nonneg : ∀ r, 0 ≤ Kcoord r := fun r =>
+    ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+      (𝕜 := ℝ) hδpos
+      (firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+      (secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hC r))
+      (Finset.sum_nonneg fun i _hi => Finset.sum_nonneg fun j _hj => hKM r i j)
+      (Finset.sum_nonneg fun a _ha =>
+        Finset.sum_nonneg fun i _hi =>
+          Finset.sum_nonneg fun j _hj =>
+            firstDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r) a i j)
+      (fun i j =>
+        Finset.sum_nonneg fun a _ha =>
+          Finset.sum_nonneg fun b _hb =>
+            secondDerivativeVectorRadius_nonneg (X := X) (ξ r) (hKM r) a b i j)
+  have hcoord : ∀ r,
+      LipschitzOnWith
+        ⟨Kcoord r, hKcoord_nonneg r⟩
+        (fun u : Y => ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r u z)
+          (fun a i j => (J r u i j).spaceDeriv z (ξ r a))
+          (fun a b i j => (J r u i j).spaceSecondDeriv z (ξ r a) (ξ r b)))
+        stateSet := by
+    intro r
+    exact ricciDeTurckSchematicMatrix_lipschitzOnWith_family_of_metric_entries_family_directions_of_unique
+      (X := X) (α := α) (s := s) ξ
+      (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
+      (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet r hz
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hsum_nonneg : 0 ≤ ∑ r, Kcoord r :=
+    Finset.sum_nonneg fun r _hr => hKcoord_nonneg r
+  rw [dist_eq_norm]
+  refine (pi_norm_le_iff_of_nonneg (mul_nonneg hsum_nonneg dist_nonneg)).2 fun r => ?_
+  have hr := (hcoord r).dist_le_mul u hu v hv
+  have hr_le_sum : Kcoord r ≤ ∑ r, Kcoord r :=
+    Finset.single_le_sum (fun r' _hr' => hKcoord_nonneg r') (Finset.mem_univ r)
+  have hentry :
+      ‖ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r u z)
+          (fun a i j => (J r u i j).spaceDeriv z (ξ r a))
+          (fun a b i j => (J r u i j).spaceSecondDeriv z (ξ r a) (ξ r b)) -
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r v z)
+          (fun a i j => (J r v i j).spaceDeriv z (ξ r a))
+          (fun a b i j => (J r v i j).spaceSecondDeriv z (ξ r a) (ξ r b))‖ ≤
+        Kcoord r * dist u v := by
+    simpa [dist_eq_norm] using hr
+  exact hentry.trans (mul_le_mul_of_nonneg_right hr_le_sum dist_nonneg)
+
 /-- Compact-coordinate readout Lipschitz bridge for the schematic Ricci-DeTurck RHS when the
 first- and second-derivative primitives are read from caller-supplied metric-entry second jets.
 This packages the pointwise chosen-jet state-space estimate into the finite compact-family

@@ -3949,7 +3949,9 @@ fixed-time spatial compact readouts when the chosen time-space compact family
 covers those slices. Coordinate-unit direction readouts now reduce by named
 simp lemmas to the coordinate-radius API, including nonnegativity readouts for
 those coordinate radii, and the chosen-jet state-space Lipschitz theorem has a
-coordinate-space specialization stated directly with those radii.
+coordinate-space specialization stated directly with those radii. The same
+chosen-jet state-space bridge now has memberwise finite-family and Pi-valued
+finite-product forms, using the finite sum of the member schematic constants.
 The exact and coarser compact readouts now also unpack to pointwise
 compact-coordinate distance bounds with the same schematic RHS constant,
 including finite-family forms with either memberwise constants or one shared
