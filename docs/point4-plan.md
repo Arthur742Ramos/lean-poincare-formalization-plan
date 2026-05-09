@@ -2809,7 +2809,8 @@ state-preserving Picard witness once the two endpoint tensor derivatives are
 supplied. The selected endpoint-gluing layer also accepts endpoint
 inner-product derivative facts directly, using the single-time pullback
 scalar/tensor conversion to produce the tensor endpoint data internally before
-returning `PullbackMetricInnerDerivativeData`.
+returning either the full selected `HasTimeDerivativeOn` package or
+`PullbackMetricInnerDerivativeData`.
 The compact same-witness wrappers now have matching `endpointInner` variants,
 so fixed-IVP and theorem-family compact callers can keep endpoint obligations
 in scalar inner-product form all the way to the returned scalar package and
