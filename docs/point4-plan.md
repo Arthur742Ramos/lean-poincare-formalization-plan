@@ -3998,6 +3998,11 @@ with a matrix-valued higher submodule element and a determinant lower bound no
 longer have to manage the existential entry-jet family manually; the same shape
 is available for finite families and Pi-valued finite products, with either one
 shared direction family or member-dependent direction families. The
+state-space Lipschitz bridge can now be invoked directly with those
+deterministic matrix-entry chosen jets, including the finite-coordinate
+specialization with coordinate-radius constants, so chart estimates that use
+higher matrix submodule elements do not need a separate caller-supplied jet
+family. The
 second-jet readout bridge now also accepts an arbitrary finite family of
 spatial directions in any normed model, with quantitative and qualitative
 finite-family packaging, so tangent-frame or chart-basis directions no longer
