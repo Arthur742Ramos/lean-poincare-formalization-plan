@@ -3834,7 +3834,12 @@ identifies the union of those product pieces with `Kt × ⋃ᵢ Kxᵢ`, includin
 closed-interval and spatial-cover specializations needed for readout
 determination on interval product domains. Compact-family readout equality now
 also has a subset form, with direct `Kt × U` and `Icc t₀ T × U` product-domain
-determination lemmas from a spatial compact-family cover of `U`.
+determination lemmas from a spatial compact-family cover of `U`. The lower
+submodule now also has a finite-cover value seminormed additive-group and real
+normed-space structure induced by the compact-family readout, plus a separated
+normed additive-group structure when the compact pieces cover all time-space;
+the norm and distance are definitionally the compact-family readout norm and
+distance.
 `AnalyticPDE/Parabolic/HigherFunctionSpace.lean` now begins the coordinate
 `C^{2+α,1+α/2}` layer: it defines time and spatial slices, packages a genuine
 parabolic second jet with time, spatial, and second-spatial derivative
@@ -3903,7 +3908,11 @@ and finite-family `LipschitzOnWith` readouts now also restrict to fixed-time
 spatial compact readouts whenever the chosen time-space compact pieces cover
 each requested time slice. The higher compact-family readout determination layer
 now also has subset, `Kt × U`, and `Icc t₀ T × U` product-domain forms matching
-the lower `C^{0,α}` readout API.
+the lower `C^{0,α}` readout API. The higher submodule now mirrors the same
+finite-cover value seminormed/normed carrier induced by compact-family value
+readouts, including a separated normed additive-group structure for global
+compact-piece covers. This is only the value-readout carrier, not the full
+`C^{2+α,1+α/2}` Banach norm or a completeness theorem.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct

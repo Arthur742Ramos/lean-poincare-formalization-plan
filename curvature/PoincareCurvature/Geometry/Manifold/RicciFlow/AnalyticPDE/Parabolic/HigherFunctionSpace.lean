@@ -1836,6 +1836,88 @@ theorem toCompactCoordFamily_injective_of_iUnion_eq_univ {κ : Type*}
     rw [h]
   simpa using hz_eq
 
+/-- The finite compact-family value readout induces a seminormed additive-group structure on the
+higher parabolic submodule.  This is the finite-cover value norm inherited from the lower
+`C^{0,α}` readout; it does not yet encode derivative Holder seminorms or Schauder completeness. -/
+@[reducible] noncomputable def finiteCoverValueSeminormedAddCommGroup {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α) :
+    SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+  SeminormedAddCommGroup.induced
+    (parabolicC2AlphaSubmodule X E α s) (∀ i, C(Kc i, E))
+    (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα)
+
+/-- The same finite compact-family value readout makes the higher parabolic submodule a seminormed
+real vector space. -/
+@[reducible] noncomputable def finiteCoverValueNormedSpace {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α) :
+    @NormedSpace ℝ (parabolicC2AlphaSubmodule X E α s) _
+      (finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα) :=
+  NormedSpace.induced ℝ
+    (parabolicC2AlphaSubmodule X E α s) (∀ i, C(Kc i, E))
+    (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα)
+
+/-- If the compact pieces cover all time-space, the finite compact-family value readout norm is
+separated on higher parabolic functions. -/
+@[reducible] noncomputable def finiteCoverValueNormedAddCommGroupOfCover {κ : Type*}
+    [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+  NormedAddCommGroup.induced
+    (parabolicC2AlphaSubmodule X E α s) (∀ i, C(Kc i, E))
+    (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα)
+    (toCompactCoordFamily_injective_of_iUnion_eq_univ
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover)
+
+/-- The real vector-space structure paired with
+`finiteCoverValueNormedAddCommGroupOfCover`. -/
+@[reducible] noncomputable def finiteCoverValueNormedSpaceOfCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    @NormedSpace ℝ (parabolicC2AlphaSubmodule X E α s) _
+      (finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover).toSeminormedAddCommGroup :=
+  finiteCoverValueNormedSpace (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+
+/-- With the finite-cover seminormed structure, the higher value norm is definitionally the
+compact-family readout norm. -/
+theorem finiteCoverValue_norm_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    ‖u‖ =
+      ‖toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u‖ :=
+  rfl
+
+/-- With the finite-cover seminormed structure, higher value distance is definitionally the
+compact-family readout distance. -/
+theorem finiteCoverValue_dist_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u v : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    dist u v =
+      dist
+        (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα u)
+        (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα v) :=
+  rfl
+
 /-- Restriction to a smaller set as a linear map between coordinate parabolic
 `C^{2+α,1+α/2}` spaces. -/
 def restrictLinearMap {t : Set (ℝ × X)} (hst : t ⊆ s) :

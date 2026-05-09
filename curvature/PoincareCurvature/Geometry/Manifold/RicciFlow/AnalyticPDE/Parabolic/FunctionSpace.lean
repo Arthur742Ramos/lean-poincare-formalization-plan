@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder
+public import Mathlib.Analysis.Normed.Module.Basic
 public import Mathlib.Topology.ContinuousMap.Compact
 
 set_option linter.unusedSectionVars false
@@ -1570,6 +1571,87 @@ theorem toCompactCoordFamily_injective_of_iUnion_eq_univ {κ : Type*}
         toCompactCoordFamily (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i ⟨z, hzi⟩ := by
     rw [h]
   simpa using hz_eq
+
+/-- The finite compact-family value readout induces a seminormed additive-group structure on the
+lower parabolic submodule.  This is only a finite-cover readout norm; it is separated only when the
+chosen compact pieces determine the underlying functions. -/
+@[reducible] noncomputable def finiteCoverValueSeminormedAddCommGroup {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α) :
+    SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+  SeminormedAddCommGroup.induced
+    (parabolicC0AlphaSubmodule X E α s) (∀ i, C(Kc i, E))
+    (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα)
+
+/-- The same finite compact-family value readout makes the lower parabolic submodule a seminormed
+real vector space. -/
+@[reducible] noncomputable def finiteCoverValueNormedSpace {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α) :
+    @NormedSpace ℝ (parabolicC0AlphaSubmodule X E α s) _
+      (finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα) :=
+  NormedSpace.induced ℝ
+    (parabolicC0AlphaSubmodule X E α s) (∀ i, C(Kc i, E))
+    (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα)
+
+/-- If the compact pieces cover all time-space, the finite compact-family readout norm is separated
+and gives a genuine normed additive-group structure. -/
+@[reducible] noncomputable def finiteCoverValueNormedAddCommGroupOfCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+  NormedAddCommGroup.induced
+    (parabolicC0AlphaSubmodule X E α s) (∀ i, C(Kc i, E))
+    (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+      Kc hKc hα)
+    (toCompactCoordFamily_injective_of_iUnion_eq_univ
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover)
+
+/-- The real vector-space structure paired with
+`finiteCoverValueNormedAddCommGroupOfCover`. -/
+@[reducible] noncomputable def finiteCoverValueNormedSpaceOfCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ) :
+    @NormedSpace ℝ (parabolicC0AlphaSubmodule X E α s) _
+      (finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover).toSeminormedAddCommGroup :=
+  finiteCoverValueNormedSpace (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+
+/-- With the finite-cover seminormed structure, the norm is definitionally the compact-family
+readout norm. -/
+theorem finiteCoverValue_norm_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC0AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    ‖u‖ =
+      ‖toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u‖ :=
+  rfl
+
+/-- With the finite-cover seminormed structure, distance is definitionally the compact-family
+readout distance. -/
+theorem finiteCoverValue_dist_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u v : parabolicC0AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    dist u v =
+      dist
+        (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα u)
+        (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα v) :=
+  rfl
 
 end parabolicC0AlphaSubmodule
 
