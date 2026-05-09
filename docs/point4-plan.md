@@ -3872,7 +3872,10 @@ all have sup-norm bounds from
 compact-family value readouts determines higher-parabolic functions on covered
 domains and gives injectivity when the compact pieces cover all time-space, and
 finite compact-family value `LipschitzOnWith` estimates unpack to pointwise
-compact-coordinate distance bounds.
+compact-coordinate distance bounds. Those higher compact-coordinate distance
+and finite-family `LipschitzOnWith` readouts now also restrict to fixed-time
+spatial compact readouts whenever the chosen time-space compact pieces cover
+each requested time slice.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct

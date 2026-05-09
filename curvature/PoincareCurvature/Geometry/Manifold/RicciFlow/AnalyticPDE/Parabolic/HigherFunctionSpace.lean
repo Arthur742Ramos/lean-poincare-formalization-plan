@@ -1463,6 +1463,64 @@ theorem forall_compactCoord_dist_le_of_toCompactCoordFamily_lipschitzOnWith {Y �
     (dist_pi_le_iff hC).1 hdist i
   exact (ContinuousMap.dist_le hC).1 hi z
 
+/-- Pointwise compact-coordinate estimates on time-space compact pieces give fixed-time spatial
+readout estimates for higher parabolic functions whenever those pieces cover the requested time
+slices. -/
+theorem forall_timeSlice_spatial_dist_le_of_forall_compactCoord_dist_le {Y κ ι : Type*}
+    [PseudoMetricSpace Y]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : κ → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ} {stateSet : Set Y} {K : ℝ}
+    {A : ℝ → Y → parabolicC2AlphaSubmodule X E α s}
+    (hcompact : ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet →
+      ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ j (z : Kdom j),
+        dist
+          (toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+            Kdom hKdom hα (A τ u) j z)
+          (toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+            Kdom hKdom hα (A τ v) j z)
+          ≤ K * dist u v)
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A τ u (τ, x.1)) (A τ v (τ, x.1)) ≤ K * dist u v := by
+  intro τ hτ u hu v hv i x
+  rcases hcover τ hτ i x with ⟨j, hzmem⟩
+  let z : Kdom j := ⟨(τ, x.1), hzmem⟩
+  have hz := hcompact τ hτ hu hv j z
+  simpa [z] using hz
+
+/-- A time-dependent finite compact-family higher-parabolic readout Lipschitz estimate gives
+fixed-time spatial readout estimates whenever the time-space compact pieces cover each requested
+time slice. -/
+theorem forall_timeSlice_spatial_dist_le_of_toCompactCoordFamily_lipschitzOnWith
+    {Y κ ι : Type*} [PseudoMetricSpace Y] [Fintype ι]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : κ → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ} {stateSet : Set Y} {L : ℝ≥0}
+    {A : ℝ → Y → parabolicC2AlphaSubmodule X E α s}
+    (hLip : ∀ τ, τ ∈ timeSet →
+      LipschitzOnWith L
+        (fun u : Y =>
+          toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+            Kdom hKdom hα (A τ u))
+        stateSet)
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A τ u (τ, x.1)) (A τ v (τ, x.1)) ≤ (L : ℝ) * dist u v := by
+  refine forall_timeSlice_spatial_dist_le_of_forall_compactCoord_dist_le
+    (X := X) (E := E) (α := α) (s := s)
+    Kdom hKdom hα Kx
+    (A := A) (K := (L : ℝ)) ?_ hcover
+  intro τ hτ
+  exact forall_compactCoord_dist_le_of_toCompactCoordFamily_lipschitzOnWith
+    (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα (hLip τ hτ)
+
 /-- The linear compact-family value readout inherits the same finite product sup-norm
 estimate from `C^{2+α,1+α/2}` difference control. -/
 theorem norm_toCompactCoordFamilyLinearMap_sub_le_of_normLe {κ : Type*} [Fintype κ]
