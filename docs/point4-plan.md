@@ -4023,10 +4023,12 @@ now also has compact-family, linear finite-cover, and pointwise
 compact-coordinate readout wrappers, carrying the unique-differentiability
 transport all the way to the finite chart handoff; it also restricts to
 fixed-time spatial compact readouts when the chosen time-space compact family
-covers those slices. Coordinate-unit direction readouts now reduce by named
-simp lemmas to the coordinate-radius API, including nonnegativity readouts for
-those coordinate radii, and the chosen-jet state-space Lipschitz theorem has a
-coordinate-space specialization stated directly with those radii. The same
+covers those slices, with all-cover entry points for the single-family and
+Pi-valued fixed-time spatial forms. Coordinate-unit direction readouts now
+reduce by named simp lemmas to the coordinate-radius API, including
+nonnegativity readouts for those coordinate radii, and the chosen-jet
+state-space Lipschitz theorem has a coordinate-space specialization stated
+directly with those radii. The same
 chosen-jet state-space bridge now has memberwise finite-family and Pi-valued
 finite-product forms, using the finite sum of the member schematic constants,
 and those Pi-valued finite products now also feed compact-family and linear

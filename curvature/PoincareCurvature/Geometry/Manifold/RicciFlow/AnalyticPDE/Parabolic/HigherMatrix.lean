@@ -2906,6 +2906,63 @@ theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_metric_entries_
     (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
     (A := A) (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet hAeq
 
+/-- Fixed-time spatial readout estimate for the chosen-jet schematic Ricci-DeTurck RHS when the
+time-space compact pieces cover all time-space. -/
+theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_metric_entries_directions_of_unique_ofCover
+    {η ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    (ξ : n → X)
+    {timeSet : Set ℝ}
+    {δ : ℝ} {C KM : n → n → ℝ} {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : Y → ℝ × X → Matrix n n ℝ}
+    (J : ∀ u : Y, ∀ i j,
+      ParabolicSecondJet (fun z : ℝ × X => M u z i j) s)
+    (hC : ∀ i j, 0 ≤ C i j) (hKM : ∀ i j, 0 ≤ KM i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C i j) α (fun z => M u z i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM i j * dist u v) α
+        (fun z => M u z i j - M v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M u z)
+        (fun a i j => (J u i j).spaceDeriv z (ξ a))
+        (fun a b i j => (J u i j).spaceSecondDeriv z (ξ a) (ξ b)))
+    (hcover : (⋃ j, (Kdom j : Set (ℝ × X))) = Set.univ) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A u (τ, x.1)) (A v (τ, x.1)) ≤
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+              (𝕜 := ℝ) δ C
+              (firstDerivativeVectorRadius (X := X) ξ C)
+              (secondDerivativeVectorRadius (X := X) ξ C)
+              (∑ i, ∑ j, KM i j)
+              (∑ a, ∑ i, ∑ j, firstDerivativeVectorRadius (X := X) ξ KM a i j)
+              (fun i j => ∑ a, ∑ b,
+                secondDerivativeVectorRadius (X := X) ξ KM a b i j) * dist u v := by
+  have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
+    intro τ _hτ i x
+    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
+      simp [hcover]
+    exact Set.mem_iUnion.mp hz
+  exact
+    ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_metric_entries_directions_of_unique
+      (X := X) (α := α) (s := s) Kdom hKdom hα Kx ξ
+      (timeSet := timeSet) (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
+      (A := A) (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet hAeq
+      hcoverSlices
+
 /-- Pi-valued compact-coordinate readout Lipschitz bridge for a finite family of chosen-jet
 schematic Ricci-DeTurck RHS coordinates.  This is the finite-product version consumed by chart
 handoffs whose compact readout values are finite families of matrices. -/
@@ -3176,6 +3233,67 @@ theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_pi_family_of_metri
     (X := X) (α := α) (s := s) Kdom hKdom hα ξ
     (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
     (A := A) (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet hAeq
+
+/-- Fixed-time spatial readout estimate for Pi-valued chosen-jet schematic Ricci-DeTurck RHS
+fields when the time-space compact pieces cover all time-space. -/
+theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_pi_family_of_metric_entries_family_directions_of_unique_ofCover
+    {κ η ι Y n : Type*} [Fintype κ] [DecidableEq κ] [Fintype ι]
+    [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    (ξ : κ → n → X)
+    {timeSet : Set ℝ}
+    {δ : ℝ} {C KM : κ → n → n → ℝ} {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (κ → Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    (J : ∀ r : κ, ∀ u : Y, ∀ i j,
+      ParabolicSecondJet (fun z : ℝ × X => M r u z i j) s)
+    (hC : ∀ r i j, 0 ≤ C r i j) (hKM : ∀ r i j, 0 ≤ KM r i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C r i j) α (fun z => M r u z i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM r i j * dist u v) α
+        (fun z => M r u z i j - M r v z i j) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = fun r =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r u z)
+          (fun a i j => (J r u i j).spaceDeriv z (ξ r a))
+          (fun a b i j => (J r u i j).spaceSecondDeriv z (ξ r a) (ξ r b)))
+    (hcover : (⋃ j, (Kdom j : Set (ℝ × X))) = Set.univ) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A u (τ, x.1)) (A v (τ, x.1)) ≤
+          (∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+              (𝕜 := ℝ) δ (C r)
+              (firstDerivativeVectorRadius (X := X) (ξ r) (C r))
+              (secondDerivativeVectorRadius (X := X) (ξ r) (C r))
+              (∑ i, ∑ j, KM r i j)
+              (∑ a, ∑ i, ∑ j,
+                firstDerivativeVectorRadius (X := X) (ξ r) (KM r) a i j)
+              (fun i j => ∑ a, ∑ b,
+                secondDerivativeVectorRadius (X := X) (ξ r) (KM r) a b i j)) *
+            dist u v := by
+  have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
+    intro τ _hτ i x
+    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
+      simp [hcover]
+    exact Set.mem_iUnion.mp hz
+  exact
+    ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_pi_family_of_metric_entries_family_directions_of_unique
+      (X := X) (α := α) (s := s) Kdom hKdom hα Kx ξ
+      (timeSet := timeSet) (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
+      (A := A) (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet hAeq
+      hcoverSlices
 
 /-- State-space Lipschitz bridge from higher parabolic primitive controls with coarser exported
 constants.  Entrywise higher difference controls may be proved with sharper constants; the
