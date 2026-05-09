@@ -24906,6 +24906,136 @@ theorem tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderiv
   · intro t ht x w xE hxE hAeq
     simpa [V] using hDfCoord ht x w xE hxE hAeq
 
+/-- Model-slot version of
+`tangentVectorOfCoordinate_Df_eq_mlieBracket_of_chartCoordinate_fderivWithin`.
+
+The model linearization is identified with the fixed-chart derivative in an
+arbitrary centered model direction `wE`, and the resulting tangent vector is the
+Lie bracket against the canonical extension of the corresponding tangent vector
+at the chart center. -/
+theorem tangentVectorOfCoordinate_Df_eq_mlieBracket_of_chartCoordinate_fderivWithin_modelSlots
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (V : ℝ → M → E → E)
+    (hGaugeCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ p : M,
+      (VectorField.mpullbackWithin (𝓘(ℝ, E)) I (extChartAt I p).symm
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)
+        (Set.range I)) =ᶠ[𝓝[Set.range I] ((extChartAt I p) p)] V t p)
+    (hDfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         (Df t (α.flow (xE, t))) wE =
+          (fderivWithin ℝ (V t p) (Set.range I) ((extChartAt I p) p)) wE)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p :=
+          SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE
+         SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) wE) =
+            VectorField.mlieBracket I
+              (FiberBundle.extend E pw)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p) := by
+  intro t ht x wE xE hxE hAeq
+  let p : M := (G.maps3 t) x
+  let pw : TangentSpace I p :=
+    SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE
+  have hDf :
+      (Df t (α.flow (xE, t))) wE =
+        (fderivWithin ℝ (V t p) (Set.range I) ((extChartAt I p) p)) wE := by
+    simpa [p, pw] using hDfCoord ht x wE xE hxE hAeq
+  have hBracket :
+      VectorField.mlieBracket I (FiberBundle.extend E pw)
+          (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p =
+        SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+          ((fderivWithin ℝ (V t p) (Set.range I) ((extChartAt I p) p)) wE) := by
+    simpa [pw] using
+      SmoothSelfDiffeomorph3Family.mlieBracket_extend_eq_tangentVectorOfCoordinate_fderivWithin_of_eventuallyEq_mpullbackWithin
+        (I := I) (M := M) p pw
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)
+        (V t p) (hGaugeCoord ht p)
+  change
+    SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+        ((Df t (α.flow (xE, t))) wE) =
+      VectorField.mlieBracket I (FiberBundle.extend E pw)
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p
+  rw [hDf]
+  exact hBracket.symm
+
+/-- Canonical fixed-chart model-slot version of
+`tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderivWithin`. -/
+theorem tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderivWithin_modelSlots
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hDfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         (Df t (α.flow (xE, t))) wE =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) wE)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p :=
+          SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE
+         SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) wE) =
+            VectorField.mlieBracket I
+              (FiberBundle.extend E pw)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p) := by
+  let V : ℝ → M → E → E := fun t p y =>
+    let q : M := (extChartAt I p).symm y
+    tangentCoordChange I q p q
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q)
+  refine
+    G.tangentVectorOfCoordinate_Df_eq_mlieBracket_of_chartCoordinate_fderivWithin_modelSlots
+      g background α V ?_ ?_
+  · intro t ht p
+    simpa [V] using
+      SmoothSelfDiffeomorph3Family.mpullbackWithin_extChartAt_symm_eventuallyEq_tangentCoordChange
+        (I := I) (M := M) p
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)
+  · intro t ht x wE xE hxE hAeq
+    simpa [V] using hDfCoord ht x wE xE hxE hAeq
+
 /-- Relative-filter equality of an auxiliary vector field with the intrinsic
 DeTurck gauge field along the diffeomorphism images gives pointwise equality
 everywhere at the base time, using surjectivity of each diffeomorphism slice. -/
@@ -26833,6 +26963,147 @@ theorem tangentVectorOfCoordinate_Df_eq_cov_sub_extend_of_tangentVectorOfCoordin
       simpa [p, Y] using hXeq ht x
     rw [hpw, ← hXpt]
   simpa [p, pw, cw, cov, Y] using hBracket.trans hBracket_eq
+
+/-- Torsion-free reduction of the tangent-map slot with arbitrary centered
+model-coordinate directions. -/
+theorem tangentVectorOfCoordinate_Df_eq_cov_sub_extend_of_tangentVectorOfCoordinate_Df_eq_mlieBracket_modelSlots
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hXeq : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      X t ((G.maps3 t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((G.maps3 t) x))
+    (hGauge_mdiff : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ p : M,
+      MDiffAt (T%
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) p)
+    (hDfBracket : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p :=
+          SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE
+         SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) wE) =
+            VectorField.mlieBracket I
+              (FiberBundle.extend E pw)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p :=
+          SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE
+         SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) wE) =
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p pw) -
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (FiberBundle.extend E pw) p (X t p))) := by
+  intro t ht x wE xE hxE hAeq
+  let p : M := (G.maps3 t) x
+  let pw : TangentSpace I p :=
+    SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE
+  let cov := (chosenLeviCivitaFamily (I := I) (M := M) g) t
+  let Y : Π q : M, TangentSpace I q :=
+    intrinsicDeTurckGaugeField (I := I) (M := M) g background t
+  have hBracket :
+      SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+          ((Df t (α.flow (xE, t))) wE) =
+        VectorField.mlieBracket I (FiberBundle.extend E pw) Y p := by
+    simpa [p, pw, Y] using hDfBracket ht x wE xE hxE hAeq
+  have hT : cov.torsion = 0 := by
+    exact ((chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M) g) t).1
+  have hext_mdiff :
+      MDiffAt (T% (FiberBundle.extend E pw)) p := by
+    simpa using FiberBundle.mdifferentiableAt_extend (I := I) (F := E) pw
+  have hY_mdiff : MDiffAt (T% Y) p := by
+    simpa [Y] using hGauge_mdiff ht p
+  have htor :
+      cov Y p ((FiberBundle.extend E pw) p) -
+          cov (FiberBundle.extend E pw) p (Y p) =
+        VectorField.mlieBracket I (FiberBundle.extend E pw) Y p := by
+    exact
+      (CovariantDerivative.torsion_eq_zero_iff
+        (I := I) (E := E) (M := M) (cov := cov)).mp hT hext_mdiff hY_mdiff
+  have hBracket_eq :
+      VectorField.mlieBracket I (FiberBundle.extend E pw) Y p =
+        cov Y p pw - cov (FiberBundle.extend E pw) p (X t p) := by
+    rw [← htor]
+    have hpw : (FiberBundle.extend E pw) p = pw := by
+      simp [FiberBundle.extend]
+    have hXpt : X t p = Y p := by
+      simpa [p, Y] using hXeq ht x
+    rw [hpw, ← hXpt]
+  simpa [p, pw, cov, Y] using hBracket.trans hBracket_eq
+
+/-- Model-slot covariant-difference form from the canonical fixed-chart `Df`
+identification. -/
+theorem tangentVectorOfCoordinate_Df_eq_cov_sub_extend_of_tangentCoordChange_fderivWithin_modelSlots
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀)
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    {tmin tmax : ℝ} {τ₀ : Icc tmin tmax}
+    {f : ℝ → E → E} {Df : ℝ → E → E →L[ℝ] E}
+    {x₀ : E} {r : ℝ≥0}
+    (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
+    (hXeq : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      X t ((G.maps3 t) x) =
+        intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((G.maps3 t) x))
+    (hGauge_mdiff : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ p : M,
+      MDiffAt (T%
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)) p)
+    (hDfCoord : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         (Df t (α.flow (xE, t))) wE =
+          (fderivWithin ℝ
+            (fun y : E =>
+              let q : M := (extChartAt I p).symm y
+              tangentCoordChange I q p q
+                (intrinsicDeTurckGaugeField (I := I) (M := M) g background t q))
+            (Set.range I) ((extChartAt I p) p)) wE)) :
+    ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x : M,
+      ∀ wE : E,
+      ∀ xE : E, xE ∈ Metric.closedBall x₀ r →
+        (fun τ : ℝ ↦
+          SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
+            (I := I) (M := M) G.maps3 t τ x) =ᶠ[𝓝 t]
+          (fun τ : ℝ ↦ α.tangent xE τ) →
+        (let p : M := (G.maps3 t) x
+         let pw : TangentSpace I p :=
+          SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p wE
+         SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate (I := I) p
+              ((Df t (α.flow (xE, t))) wE) =
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) p pw) -
+            (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+              (FiberBundle.extend E pw) p (X t p))) := by
+  exact
+    G.tangentVectorOfCoordinate_Df_eq_cov_sub_extend_of_tangentVectorOfCoordinate_Df_eq_mlieBracket_modelSlots
+      g background α hXeq hGauge_mdiff
+      (G.tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderivWithin_modelSlots
+        g background α hDfCoord)
 
 /-- Lie-correction reduction with arbitrary centered model-coordinate slots.
 

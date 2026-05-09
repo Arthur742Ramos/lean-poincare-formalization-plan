@@ -599,7 +599,12 @@ model-slot variants
 `Diffeomorph3GaugeFlowOn.tangentCoordChange_DfCoord_modelSlots_of_model_hasFDerivWithinAt_of_eventuallyEqWithin`,
 and their closed-ball / fixed-center `EqOn` specializations, so closed-Picard
 model derivative data can produce `Df` identities on arbitrary centered model
-directions before entering the correction route.
+directions before entering the correction route.  The tangent-map Lie-bracket
+and torsion-free covariant-difference bridges now mirror that model-slot shape
+as well, via
+`Diffeomorph3GaugeFlowOn.tangentVectorOfCoordinate_Df_eq_mlieBracket_of_tangentCoordChange_fderivWithin_modelSlots`
+and
+`Diffeomorph3GaugeFlowOn.tangentVectorOfCoordinate_Df_eq_cov_sub_extend_of_tangentCoordChange_fderivWithin_modelSlots`.
 The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent
