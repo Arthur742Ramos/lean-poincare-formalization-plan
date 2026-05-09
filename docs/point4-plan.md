@@ -3928,8 +3928,12 @@ components now have compact-piece and compact-family readouts with simp
 projections. Under unique-differentiability hypotheses on the time and spatial
 slices, higher norm-ball controls also transport to these chosen components,
 including pointwise compact-coordinate difference bounds for their readouts.
-They do not make the derivative choice canonical or add a linear finite-cover
-derivative norm, Schauder estimate, or completeness content.
+Those chosen spatial-derivative, second-spatial-derivative, and time-derivative
+compact-family bounds now also lift to `LipschitzOnWith` estimates from
+pairwise higher-norm controls, with pointwise compact-coordinate unpacking from
+the resulting Lipschitz hypotheses. They do not make the derivative choice
+canonical or add a linear finite-cover derivative norm, Schauder estimate, or
+completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct

@@ -1630,6 +1630,253 @@ theorem norm_chosenTimeDerivToCompactCoordFamily_sub_apply_le_of_normLe_unique
     (X := X) (E := E) (α := α) (s := s) h htime hspace).2.2.2
   simpa using hderiv.norm_le (hKc i z.2)
 
+noncomputable local instance chosenSpaceSecondDerivContinuousMapPseudoMetricSpace
+    {K : TopologicalSpace.Compacts (ℝ × X)} :
+    PseudoMetricSpace C(K, X →L[ℝ] (X →L[ℝ] E)) :=
+  @ContinuousMap.instPseudoMetricSpace K (X →L[ℝ] (X →L[ℝ] E))
+    inferInstance inferInstance inferInstance
+
+/-- Pairwise higher difference estimates give a Lipschitz estimate for the finite compact-family
+readout of chosen spatial derivatives, provided the derivative choice is unique on the slices. -/
+theorem lipschitzOnWith_chosenSpaceDerivToCompactCoordFamily_of_normLe_sub_unique
+    {Y κ : Type*} [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0}
+    {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC2AlphaNormLe ((L : ℝ) * dist u v) α
+        (fun z => A u z - A v z) s) :
+    LipschitzOnWith L
+      (fun u : Y =>
+        chosenSpaceDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul
+    (β := ∀ i, C(Kc i, X →L[ℝ] E))
+    (f := fun u : Y =>
+      chosenSpaceDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u)) ?_
+  intro u hu v hv
+  have hC : 0 ≤ (L : ℝ) * dist u v :=
+    mul_nonneg (NNReal.coe_nonneg L) dist_nonneg
+  refine (dist_pi_le_iff hC).2 fun i => ?_
+  refine (ContinuousMap.dist_le hC).2 fun z => ?_
+  have hnorm := norm_chosenSpaceDerivToCompactCoordFamily_sub_apply_le_of_normLe_unique
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv) htime hspace i z
+  simpa [dist_eq_norm] using hnorm
+
+/-- Pairwise higher difference estimates give a Lipschitz estimate for the finite compact-family
+readout of chosen second spatial derivatives, provided the derivative choice is unique on the
+slices. -/
+theorem lipschitzOnWith_chosenSpaceSecondDerivToCompactCoordFamily_of_normLe_sub_unique
+    {Y κ : Type*} [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0}
+    {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC2AlphaNormLe ((L : ℝ) * dist u v) α
+        (fun z => A u z - A v z) s) :
+    LipschitzOnWith L
+      (fun u : Y =>
+        chosenSpaceSecondDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul
+    (β := ∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E)))
+    (f := fun u : Y =>
+      chosenSpaceSecondDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u)) ?_
+  intro u hu v hv
+  have hC : 0 ≤ (L : ℝ) * dist u v :=
+    mul_nonneg (NNReal.coe_nonneg L) dist_nonneg
+  refine (dist_pi_le_iff hC).2 fun i => ?_
+  refine (ContinuousMap.dist_le hC).2 fun z => ?_
+  have hnorm := norm_chosenSpaceSecondDerivToCompactCoordFamily_sub_apply_le_of_normLe_unique
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv) htime hspace i z
+  simpa [dist_eq_norm] using hnorm
+
+/-- Pairwise higher difference estimates give a Lipschitz estimate for the finite compact-family
+readout of chosen time derivatives, provided the derivative choice is unique on the slices. -/
+theorem lipschitzOnWith_chosenTimeDerivToCompactCoordFamily_of_normLe_sub_unique
+    {Y κ : Type*} [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0}
+    {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC2AlphaNormLe ((L : ℝ) * dist u v) α
+        (fun z => A u z - A v z) s) :
+    LipschitzOnWith L
+      (fun u : Y =>
+        chosenTimeDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      stateSet := by
+  refine LipschitzOnWith.of_dist_le_mul
+    (β := ∀ i, C(Kc i, E))
+    (f := fun u : Y =>
+      chosenTimeDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u)) ?_
+  intro u hu v hv
+  have hC : 0 ≤ (L : ℝ) * dist u v :=
+    mul_nonneg (NNReal.coe_nonneg L) dist_nonneg
+  refine (dist_pi_le_iff hC).2 fun i => ?_
+  refine (ContinuousMap.dist_le hC).2 fun z => ?_
+  have hnorm := norm_chosenTimeDerivToCompactCoordFamily_sub_apply_le_of_normLe_unique
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv) htime hspace i z
+  simpa [dist_eq_norm] using hnorm
+
+/-- A finite compact-family chosen-spatial-derivative Lipschitz estimate gives pointwise
+compact-coordinate distance estimates. -/
+theorem forall_compactCoord_dist_le_of_chosenSpaceDerivToCompactCoordFamily_lipschitzOnWith
+    {Y κ : Type*} [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0}
+    {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (h : LipschitzOnWith L
+      (fun u : Y =>
+        chosenSpaceDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      stateSet) :
+    ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i (z : Kc i),
+      dist
+        (chosenSpaceDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u) i z)
+        (chosenSpaceDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A v) i z)
+        ≤ (L : ℝ) * dist u v := by
+  intro u hu v hv i z
+  have hC : 0 ≤ (L : ℝ) * dist u v :=
+    mul_nonneg (NNReal.coe_nonneg L) dist_nonneg
+  have hdist :
+      dist
+        (chosenSpaceDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+        (chosenSpaceDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A v))
+        ≤ (L : ℝ) * dist u v :=
+    LipschitzOnWith.dist_le_mul
+      (β := ∀ i, C(Kc i, X →L[ℝ] E)) (K := L) (s := stateSet)
+      (f := fun u : Y =>
+        chosenSpaceDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      h u hu v hv
+  have hi :
+      dist
+        (chosenSpaceDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u) i)
+        (chosenSpaceDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A v) i)
+        ≤ (L : ℝ) * dist u v :=
+    (dist_pi_le_iff hC).1 hdist i
+  exact (ContinuousMap.dist_le hC).1 hi z
+
+/-- A finite compact-family chosen-second-spatial-derivative Lipschitz estimate gives pointwise
+compact-coordinate distance estimates. -/
+theorem forall_compactCoord_dist_le_of_chosenSpaceSecondDerivToCompactCoordFamily_lipschitzOnWith
+    {Y κ : Type*} [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0}
+    {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (h : LipschitzOnWith L
+      (fun u : Y =>
+        chosenSpaceSecondDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      stateSet) :
+    ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i (z : Kc i),
+      dist
+        (chosenSpaceSecondDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u) i z)
+        (chosenSpaceSecondDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A v) i z)
+        ≤ (L : ℝ) * dist u v := by
+  intro u hu v hv i z
+  have hC : 0 ≤ (L : ℝ) * dist u v :=
+    mul_nonneg (NNReal.coe_nonneg L) dist_nonneg
+  have hdist :
+      dist
+        (chosenSpaceSecondDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+        (chosenSpaceSecondDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A v))
+        ≤ (L : ℝ) * dist u v :=
+    LipschitzOnWith.dist_le_mul
+      (β := ∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) (K := L) (s := stateSet)
+      (f := fun u : Y =>
+        chosenSpaceSecondDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      h u hu v hv
+  have hi :
+      dist
+        (chosenSpaceSecondDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u) i)
+        (chosenSpaceSecondDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A v) i)
+        ≤ (L : ℝ) * dist u v :=
+    (dist_pi_le_iff hC).1 hdist i
+  exact (ContinuousMap.dist_le hC).1 hi z
+
+/-- A finite compact-family chosen-time-derivative Lipschitz estimate gives pointwise
+compact-coordinate distance estimates. -/
+theorem forall_compactCoord_dist_le_of_chosenTimeDerivToCompactCoordFamily_lipschitzOnWith
+    {Y κ : Type*} [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0}
+    {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (h : LipschitzOnWith L
+      (fun u : Y =>
+        chosenTimeDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      stateSet) :
+    ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i (z : Kc i),
+      dist
+        (chosenTimeDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u) i z)
+        (chosenTimeDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A v) i z)
+        ≤ (L : ℝ) * dist u v := by
+  intro u hu v hv i z
+  have hC : 0 ≤ (L : ℝ) * dist u v :=
+    mul_nonneg (NNReal.coe_nonneg L) dist_nonneg
+  have hdist :
+      dist
+        (chosenTimeDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+        (chosenTimeDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A v))
+        ≤ (L : ℝ) * dist u v :=
+    LipschitzOnWith.dist_le_mul
+      (β := ∀ i, C(Kc i, E)) (K := L) (s := stateSet)
+      (f := fun u : Y =>
+        chosenTimeDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u))
+      h u hu v hv
+  have hi :
+      dist
+        (chosenTimeDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A u) i)
+        (chosenTimeDerivToCompactCoordFamily
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα (A v) i)
+        ≤ (L : ℝ) * dist u v :=
+    (dist_pi_le_iff hC).1 hdist i
+  exact (ContinuousMap.dist_le hC).1 hi z
+
 theorem exists_timeDeriv (u : parabolicC2AlphaSubmodule X E α s) :
     ∃ Dt : ℝ × X → E,
       (∀ ⦃z : ℝ × X⦄, z ∈ s →
