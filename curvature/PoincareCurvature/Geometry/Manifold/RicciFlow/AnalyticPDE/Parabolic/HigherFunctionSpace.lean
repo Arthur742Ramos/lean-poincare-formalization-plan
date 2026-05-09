@@ -3029,6 +3029,168 @@ theorem finiteCoverChosenTimeDeriv_dist_eq {κ : Type*} [Fintype κ]
           (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime v) :=
   rfl
 
+/-- Product target for finite-cover readouts of a value and its chosen parabolic second jet.  This
+is still a compact-family sup readout, not a full parabolic Hölder norm. -/
+abbrev chosenSecondJetFiniteCoverReadoutTarget {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :=
+  ((∀ i, C(Kc i, E)) × (∀ i, C(Kc i, X →L[ℝ] E))) ×
+    ((∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) × (∀ i, C(Kc i, E)))
+
+local instance chosenSecondJetFiniteCoverReadoutTargetModule {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    Module ℝ (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc) := by
+  dsimp [chosenSecondJetFiniteCoverReadoutTarget]
+  letI : Module ℝ (∀ i, C(Kc i, E)) := inferInstance
+  letI : Module ℝ (∀ i, C(Kc i, X →L[ℝ] E)) := inferInstance
+  letI : Module ℝ (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := inferInstance
+  letI : Module ℝ ((∀ i, C(Kc i, E)) × (∀ i, C(Kc i, X →L[ℝ] E))) :=
+    inferInstance
+  letI : Module ℝ
+      ((∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) × (∀ i, C(Kc i, E))) :=
+    inferInstance
+  infer_instance
+
+noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetSeminormedAddCommGroup
+    {κ : Type*} [Fintype κ] (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    SeminormedAddCommGroup
+      (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc) := by
+  dsimp [chosenSecondJetFiniteCoverReadoutTarget]
+  letI : SeminormedAddCommGroup (∀ i, C(Kc i, E)) := inferInstance
+  letI : SeminormedAddCommGroup (∀ i, C(Kc i, X →L[ℝ] E)) := inferInstance
+  letI : SeminormedAddCommGroup
+      (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) := inferInstance
+  letI : SeminormedAddCommGroup
+      ((∀ i, C(Kc i, E)) × (∀ i, C(Kc i, X →L[ℝ] E))) :=
+    inferInstance
+  letI : SeminormedAddCommGroup
+      ((∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) × (∀ i, C(Kc i, E))) :=
+    inferInstance
+  infer_instance
+
+/-- Combined finite-cover readout of a higher parabolic function and its chosen second-jet
+components as a linear map, under unique-differentiability of the slices. -/
+noncomputable def chosenSecondJetFiniteCoverReadoutLinearMap {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    parabolicC2AlphaSubmodule X E α s →ₗ[ℝ]
+      chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc where
+  toFun u :=
+    ((toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα u,
+        chosenSpaceDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u),
+      (chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u,
+        chosenTimeDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime u))
+  map_add' := by
+    intro u v
+    apply Prod.ext
+    · apply Prod.ext
+      · exact (toCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα).map_add u v
+      · exact (chosenSpaceDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace).map_add u v
+    · apply Prod.ext
+      · exact (chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace).map_add u v
+      · exact (chosenTimeDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime).map_add u v
+  map_smul' := by
+    intro c u
+    apply Prod.ext
+    · apply Prod.ext
+      · exact (toCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα).map_smul c u
+      · exact (chosenSpaceDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace).map_smul c u
+    · apply Prod.ext
+      · exact (chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace).map_smul c u
+      · exact (chosenTimeDerivToCompactCoordFamilyLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime).map_smul c u
+
+@[simp]
+theorem chosenSecondJetFiniteCoverReadoutLinearMap_apply {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    chosenSecondJetFiniteCoverReadoutLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u =
+      ((toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+            Kc hKc hα u,
+          chosenSpaceDerivToCompactCoordFamilyLinearMap
+            (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u),
+        (chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+            (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u,
+          chosenTimeDerivToCompactCoordFamilyLinearMap
+            (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime u)) :=
+  rfl
+
+/-- The combined finite-cover chosen second-jet readout induces a seminormed additive-group
+structure on the higher parabolic submodule. -/
+@[reducible] noncomputable def finiteCoverChosenSecondJetSeminormedAddCommGroup
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+  SeminormedAddCommGroup.induced
+    (parabolicC2AlphaSubmodule X E α s)
+    (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc)
+    (chosenSecondJetFiniteCoverReadoutLinearMap
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace)
+
+/-- With the combined finite-cover chosen second-jet seminormed structure, the norm is
+definitionally the combined compact-family readout norm. -/
+theorem finiteCoverChosenSecondJet_norm_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
+    ‖u‖ =
+      ‖chosenSecondJetFiniteCoverReadoutLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u‖ :=
+  rfl
+
+/-- With the combined finite-cover chosen second-jet seminormed structure, distance is
+definitionally the combined compact-family readout distance. -/
+theorem finiteCoverChosenSecondJet_dist_eq {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (u v : parabolicC2AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
+    dist u v =
+      dist
+        (chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u)
+        (chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace v) :=
+  rfl
+
 /-- Restriction to a smaller set as a linear map between coordinate parabolic
 `C^{2+α,1+α/2}` spaces. -/
 def restrictLinearMap {t : Set (ℝ × X)} (hst : t ⊆ s) :

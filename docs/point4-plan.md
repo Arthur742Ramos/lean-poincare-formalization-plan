@@ -3937,11 +3937,15 @@ linear maps on compact pieces contained in the domain, and each of the chosen
 spatial-derivative, second-spatial-derivative, and time-derivative readouts now
 induces its own finite-cover seminormed additive-group and real normed-space
 structure with definitional norm and distance readback to the compact-family
-readout. The same chosen derivative Lipschitz readouts now also restrict to
-fixed-time spatial compact readouts whenever the chosen time-space compact
-family covers the requested spatial slices. They do not make the derivative
-choice canonical or combine these seminorms into the full
-`C^{2+α,1+α/2}` Banach norm, Schauder estimate, or completeness content.
+readout. The value and chosen-derivative readouts are also bundled into one
+combined finite-cover chosen-second-jet compact readout linear map, inducing a
+single seminormed additive-group structure with definitional norm and distance
+readback to that product readout. The same chosen derivative Lipschitz readouts
+now also restrict to fixed-time spatial compact readouts whenever the chosen
+time-space compact family covers the requested spatial slices. They do not make
+the derivative choice canonical or upgrade this compact-family jet seminorm into
+the full `C^{2+α,1+α/2}` Banach norm, Schauder estimate, or completeness
+content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct
