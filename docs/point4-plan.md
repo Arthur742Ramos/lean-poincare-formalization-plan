@@ -616,7 +616,11 @@ the signed endpoints are
 and
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_nhdsWithin`,
 so fixed-center local `EqOn` Picard data can reach the signed correction while
-keeping arbitrary centered model slots through the correction proof.
+keeping arbitrary centered model slots through the correction proof.  The
+smooth scalar endpoint also has
+`BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_modelSlotSignedCorrection`,
+which consumes a signed correction already stated in model slots and performs
+the source-coordinate specialization only at the final `hvalue` handoff.
 The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent
