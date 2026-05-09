@@ -242,6 +242,62 @@ theorem chosenMatrixEntrySecondJet_localFrameGramMatrix_ricciDeTurckSchematicMat
       (X := E) (α := α) (s := K) (v := fun a : ι => b a) G hδpos hdet
 
 set_option maxHeartbeats 1000000 in
+/-- Finite-family deterministic chosen-entry-jet compact local-frame Gram bridge.  The compact
+determinant lower bound is shared across the frame family, while each assembled higher matrix
+submodule reads its own chosen entry jets along its own basis. -/
+theorem chosenMatrixEntrySecondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_entries_of_timeSpace_isCompact
+    [IsContMDiffRiemannianBundle I 2 E TE]
+    [ContMDiffVectorBundle 2 E TE I]
+    {ρ : Type*} [Fintype ρ]
+    (e : ρ → Trivialization E (TotalSpace.proj : TotalSpace E TE → E))
+    [∀ r, MemTrivializationAtlas (e r)]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : ρ → Module.Basis ι ℝ E)
+    {K : Set (ℝ × E)} {α : ℝ}
+    (hK : IsCompact K)
+    (hKbase : ∀ r ⦃z : ℝ × E⦄, z ∈ K → z.2 ∈ (e r).baseSet)
+    (hG : ∀ r i j,
+      ParabolicC2AlphaOn α
+        (fun z : ℝ × E =>
+          (show Matrix ι ι ℝ from
+            CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2) i j) K) :
+    ∃ δ > 0,
+      (∀ r ⦃z : ℝ × E⦄, z ∈ K →
+        δ ≤ ‖(show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2).det‖) ∧
+      (let G : ρ → parabolicC2AlphaSubmodule E (Matrix ι ι ℝ) α K :=
+        fun r =>
+          ⟨fun z : ℝ × E =>
+            (show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2),
+            matrix_c2AlphaOn_of_entries (X := E) (α := α) (s := K) (hG r)⟩
+       ParabolicC0AlphaOn α
+        (fun z : ℝ × E => fun r : ρ =>
+          ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+            (show Matrix ι ι ℝ from
+              CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2)
+            (fun a i j =>
+              (parabolicC2AlphaSubmodule.chosenMatrixEntrySecondJet
+                (X := E) (α := α) (s := K) i j (G r)).spaceDeriv z (b r a))
+            (fun a c i j =>
+              (parabolicC2AlphaSubmodule.chosenMatrixEntrySecondJet
+                (X := E) (α := α) (s := K) i j (G r)).spaceSecondDeriv
+                  z (b r a) (b r c))) K) := by
+  rcases
+    ParabolicC0AlphaOn.localFrameGramMatrix_det_family_exists_pos_norm_lower_bound_of_timeSpace_isCompact
+      (I := I) (E := E) e b hK hKbase with
+    ⟨δ, hδpos, hdet⟩
+  let G : ρ → parabolicC2AlphaSubmodule E (Matrix ι ι ℝ) α K :=
+    fun r =>
+      ⟨fun z : ℝ × E =>
+        (show Matrix ι ι ℝ from
+          CovariantDerivative.localFrameGramMatrix (I := I) (e r) (b r) z.2),
+        matrix_c2AlphaOn_of_entries (X := E) (α := α) (s := K) (hG r)⟩
+  refine ⟨δ, hδpos, hdet, ?_⟩
+  simpa [G] using
+    parabolicC2AlphaSubmodule.chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_family_directions
+      (X := E) (α := α) (s := K) (v := fun r a => b r a) G hδpos hdet
+
+set_option maxHeartbeats 1000000 in
 /-- Qualitative finite-family compact local-frame Gram bridge with second-jet primitive arrays.
 This is the membership-only version of
 `ParabolicC2AlphaNormLe.exists_secondJet_localFrameGramMatrix_ricciDeTurckSchematicMatrix_pi_family_of_entries_of_timeSpace_isCompact`. -/

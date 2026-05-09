@@ -3960,9 +3960,10 @@ jets, read first and second primitive arrays along the local-frame basis, and
 extract the compact Gram determinant lower bound before applying the schematic
 Ricci-DeTurck RHS estimate; the same specialization is available for finite
 families of frames with one shared compact determinant lower bound. It also has
-a deterministic chosen-entry-jet qualitative bridge for a single compact local
-frame, assembling the Gram matrix into the higher matrix submodule before
-reading the chosen entry jets along the frame basis. It now also
+a deterministic chosen-entry-jet qualitative bridge for single and finite-family
+compact local frames, assembling each Gram matrix into the higher matrix
+submodule before reading the chosen entry jets along the relevant frame basis.
+It now also
 converts entrywise higher
 primitive difference controls with radii linear in a shared radius into the
 linear-radius `ParabolicBoundedWith` schematic RHS estimate and the
