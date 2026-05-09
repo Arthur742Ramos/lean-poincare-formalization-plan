@@ -2762,6 +2762,9 @@ The fixed-IVP compact endpoint now also has a same-witness combined form,
 which selects one restricted raw gauge-flow witness and returns both the
 state-preserving tensor time-derivative continuation and the smooth-background
 spatial-correction continuation for that same selected interval.
+The theorem-family analogue now performs the same same-witness assembly
+uniformly over all initial-value problems, returning one selected gauge-flow
+family with both per-IVP continuations.
 The theorem-family compact wrapper
 `SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallContinuityEstimates_restrict_readout_mem_ball_iUnion_Icc_cover_lifted_eqOn_of_compact_iUnion_openPreimage_localGluingData`
 now performs the same selected compact construction uniformly over all initial
