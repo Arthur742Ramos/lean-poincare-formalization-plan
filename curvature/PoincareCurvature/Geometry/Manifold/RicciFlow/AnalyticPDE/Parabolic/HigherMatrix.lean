@@ -3945,6 +3945,95 @@ theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_dire
           (X := X) (α := α) (s := s) i j M).spaceSecondDeriv z (v a) (v b))
       hM hD hH hδpos hdet)
 
+/-- Finite-family form of
+`chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_directions`
+with one shared direction family. -/
+theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_family_of_directions
+    {κ n : Type*} [Fintype n] [DecidableEq n] (v : n → X)
+    {δ : ℝ} (M : κ → parabolicC2AlphaSubmodule X (Matrix n n ℝ) α s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∀ r, ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r z)
+          (fun a i j =>
+            (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M r)).spaceDeriv
+              z (v a))
+          (fun a b i j =>
+            (chosenMatrixEntrySecondJet
+              (X := X) (α := α) (s := s) i j (M r)).spaceSecondDeriv
+                z (v a) (v b))) s := by
+  intro r
+  exact chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_directions
+    (X := X) (α := α) (s := s) v (M r) hδpos (hdet r)
+
+/-- Pi-valued finite-family form of the chosen-entry-jet schematic RHS handoff with one shared
+direction family. -/
+theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_directions
+    {κ n : Type*} [Fintype κ] [Fintype n] [DecidableEq n] (v : n → X)
+    {δ : ℝ} (M : κ → parabolicC2AlphaSubmodule X (Matrix n n ℝ) α s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X => fun r : κ =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r z)
+          (fun a i j =>
+            (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M r)).spaceDeriv
+              z (v a))
+          (fun a b i j =>
+            (chosenMatrixEntrySecondJet
+              (X := X) (α := α) (s := s) i j (M r)).spaceSecondDeriv
+                z (v a) (v b))) s :=
+  ParabolicC0AlphaOn.pi fun r =>
+    chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_family_of_directions
+      (X := X) (α := α) (s := s) v M hδpos hdet r
+
+/-- Finite-family form of the chosen-entry-jet schematic RHS handoff with family-dependent
+direction readouts. -/
+theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_family_of_family_directions
+    {κ n : Type*} [Fintype n] [DecidableEq n] (v : κ → n → X)
+    {δ : ℝ} (M : κ → parabolicC2AlphaSubmodule X (Matrix n n ℝ) α s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ∀ r, ParabolicC0AlphaOn α
+      (fun z : ℝ × X =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r z)
+          (fun a i j =>
+            (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M r)).spaceDeriv
+              z (v r a))
+          (fun a b i j =>
+            (chosenMatrixEntrySecondJet
+              (X := X) (α := α) (s := s) i j (M r)).spaceSecondDeriv
+                z (v r a) (v r b))) s := by
+  intro r
+  exact chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_of_directions
+    (X := X) (α := α) (s := s) (v r) (M r) hδpos (hdet r)
+
+/-- Pi-valued finite-family form of the chosen-entry-jet schematic RHS handoff with
+family-dependent direction readouts. -/
+theorem chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_pi_family_of_family_directions
+    {κ n : Type*} [Fintype κ] [Fintype n] [DecidableEq n] (v : κ → n → X)
+    {δ : ℝ} (M : κ → parabolicC2AlphaSubmodule X (Matrix n n ℝ) α s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃z : ℝ × X⦄, z ∈ s → δ ≤ ‖(M r z).det‖) :
+    ParabolicC0AlphaOn α
+      (fun z : ℝ × X => fun r : κ =>
+        ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M r z)
+          (fun a i j =>
+            (chosenMatrixEntrySecondJet (X := X) (α := α) (s := s) i j (M r)).spaceDeriv
+              z (v r a))
+          (fun a b i j =>
+            (chosenMatrixEntrySecondJet
+              (X := X) (α := α) (s := s) i j (M r)).spaceSecondDeriv
+                z (v r a) (v r b))) s :=
+  ParabolicC0AlphaOn.pi fun r =>
+    chosenMatrixEntrySecondJet_ricciDeTurckSchematicMatrix_c0AlphaOn_family_of_family_directions
+      (X := X) (α := α) (s := s) v M hδpos hdet r
+
 /-- Assemble matrix-valued higher parabolic submodule elements from their entries. -/
 def matrixOfEntriesLinearMap {m n A : Type*} [Fintype m] [Fintype n]
     [DecidableEq m] [DecidableEq n] [NormedAddCommGroup A] [NormedSpace ℝ A] :

@@ -3943,7 +3943,9 @@ for finite cover products; the same bridge is available from qualitative
 matrix submodule layer now also has a deterministic noncanonical
 chosen-entry-jet version of this qualitative schematic RHS handoff, so callers
 with a matrix-valued higher submodule element and a determinant lower bound no
-longer have to manage the existential entry-jet family manually. The
+longer have to manage the existential entry-jet family manually; the same shape
+is available for finite families and Pi-valued finite products, with either one
+shared direction family or member-dependent direction families. The
 second-jet readout bridge now also accepts an arbitrary finite family of
 spatial directions in any normed model, with quantitative and qualitative
 finite-family packaging, so tangent-frame or chart-basis directions no longer
