@@ -620,7 +620,9 @@ keeping arbitrary centered model slots through the correction proof.  The
 smooth scalar endpoint also has
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_modelSlotSignedCorrection`,
 which consumes a signed correction already stated in model slots and performs
-the source-coordinate specialization only at the final `hvalue` handoff.
+the source-coordinate specialization only at the final `hvalue` handoff.  The
+closed-ball smooth scalar routes now enter through this adapter, so their
+Picard derivative data also stay in model slots until that final handoff.
 The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent

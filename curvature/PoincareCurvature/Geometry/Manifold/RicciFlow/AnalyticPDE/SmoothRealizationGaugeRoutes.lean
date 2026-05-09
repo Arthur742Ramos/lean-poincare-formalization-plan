@@ -5408,14 +5408,13 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variati
                   ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) =
         realization.toIntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
           gauge3 t x u v) := by
-  have hcorrection :=
-    G.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin
-      (I := I) (M := M)
-      realization.metric realization.background α hDeTurckVector_mdiff
-      hXeq htime hbase hball hder hfCoord
   exact
-    realization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_correction
-      G α gauge3 hgauge_maps hsIcc hchartRHS_eq_intrinsic hcorrection
+    realization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_modelSlotSignedCorrection
+      G α gauge3 hgauge_maps hsIcc hchartRHS_eq_intrinsic
+      (G.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin
+        (I := I) (M := M)
+        realization.metric realization.background α hDeTurckVector_mdiff
+        hXeq htime hbase hball hder hfCoord)
 
 /-- Closed-ball Picard scalar route with the model vector field identified by
 local `EqOn` data near the fixed chart center. -/
@@ -5554,14 +5553,13 @@ theorem BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variati
                   ((G.maps3 t) x) ((G.maps3 t).pushforwardTangent x v)))) =
         realization.toIntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
           gauge3 t x u v) := by
-  have hcorrection :=
-    G.spatial_tangent_correction_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_nhdsWithin
-      (I := I) (M := M)
-      realization.metric realization.background α hDeTurckVector_mdiff
-      hXeq htime hbase hball hder hfEqOn
   exact
-    realization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_correction
-      G α gauge3 hgauge_maps hsIcc hchartRHS_eq_intrinsic hcorrection
+    realization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_modelSlotSignedCorrection
+      G α gauge3 hgauge_maps hsIcc hchartRHS_eq_intrinsic
+      (G.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_eventuallyEqWithin_of_eqOn_nhdsWithin
+        (I := I) (M := M)
+        realization.metric realization.background α hDeTurckVector_mdiff
+        hXeq htime hbase hball hder hfEqOn)
 
 /-- Closed-ball Picard scalar route with the Picard model vector field
 identified locally with an auxiliary vector field, plus relative-filter
