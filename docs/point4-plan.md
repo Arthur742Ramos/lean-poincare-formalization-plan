@@ -2810,6 +2810,10 @@ supplied. The selected endpoint-gluing layer also accepts endpoint
 inner-product derivative facts directly, using the single-time pullback
 scalar/tensor conversion to produce the tensor endpoint data internally before
 returning `PullbackMetricInnerDerivativeData`.
+The compact same-witness wrappers now have matching `endpointInner` variants,
+so fixed-IVP and theorem-family compact callers can keep endpoint obligations
+in scalar inner-product form all the way to the returned scalar package and
+spatial correction.
 The theorem-family analogue now performs the same same-witness assembly
 uniformly over all initial-value problems, returning one selected gauge-flow
 family with both per-IVP continuations.
