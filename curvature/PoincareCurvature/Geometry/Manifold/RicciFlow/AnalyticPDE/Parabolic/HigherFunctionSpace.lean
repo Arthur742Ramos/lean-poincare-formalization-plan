@@ -1466,6 +1466,170 @@ theorem chosenTimeDerivToCompactCoordFamily_apply {κ : Type*}
       (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv z.1 :=
   rfl
 
+/-- Under unique-differentiability of the time and spatial slices, any higher norm ball
+controls the noncanonically chosen second jet as well. -/
+theorem chosenSecondJet_c0AlphaNormLe_self_of_unique
+    (u : parabolicC2AlphaSubmodule X E α s) {N : ℝ}
+    (h : ParabolicC2AlphaNormLe N α (u : (ℝ × X) → E) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    ParabolicC0AlphaNormLe N α (u : (ℝ × X) → E) s ∧
+      ParabolicC0AlphaNormLe N α
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceDeriv s ∧
+        ParabolicC0AlphaNormLe N α
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceSecondDeriv s ∧
+          ParabolicC0AlphaNormLe N α
+            (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv s :=
+  h.secondJet_c0AlphaNormLe_self_of_unique
+    (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u) htime hspace
+
+/-- Under unique-differentiability of slices, a higher norm ball on a difference controls
+the componentwise differences of the two chosen second jets. -/
+theorem chosenSecondJet_sub_c0AlphaNormLe_self_of_unique
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    ParabolicC0AlphaNormLe N α (fun z => u z - v z) s ∧
+      ParabolicC0AlphaNormLe N α
+        (fun z =>
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceDeriv z -
+            (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v).spaceDeriv z) s ∧
+        ParabolicC0AlphaNormLe N α
+          (fun z =>
+            (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceSecondDeriv z -
+              (chosenSecondJet
+                (X := X) (E := E) (α := α) (s := s) v).spaceSecondDeriv z) s ∧
+          ParabolicC0AlphaNormLe N α
+            (fun z =>
+              (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv z -
+                (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v).timeDeriv z) s :=
+  h.secondJet_sub_c0AlphaNormLe_self_of_unique
+    (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u)
+    (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v) htime hspace
+
+/-- A higher norm-ball difference controls compact-coordinate values of chosen spatial
+derivatives, provided the derivative choice is unique on the slices. -/
+theorem norm_chosenSpaceDerivToContinuousMap_sub_apply_le_of_normLe_unique
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (z : K) :
+    ‖chosenSpaceDerivToContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u z -
+        chosenSpaceDerivToContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα v z‖
+      ≤ N := by
+  have hderiv := (chosenSecondJet_sub_c0AlphaNormLe_self_of_unique
+    (X := X) (E := E) (α := α) (s := s) h htime hspace).2.1
+  simpa using hderiv.norm_le (hK z.2)
+
+/-- A higher norm-ball difference controls compact-coordinate values of chosen second spatial
+derivatives, provided the derivative choice is unique on the slices. -/
+theorem norm_chosenSpaceSecondDerivToContinuousMap_sub_apply_le_of_normLe_unique
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (z : K) :
+    ‖chosenSpaceSecondDerivToContinuousMap
+        (X := X) (E := E) (α := α) (s := s) hK hα u z -
+      chosenSpaceSecondDerivToContinuousMap
+        (X := X) (E := E) (α := α) (s := s) hK hα v z‖ ≤ N := by
+  have hderiv := (chosenSecondJet_sub_c0AlphaNormLe_self_of_unique
+    (X := X) (E := E) (α := α) (s := s) h htime hspace).2.2.1
+  simpa using hderiv.norm_le (hK z.2)
+
+/-- A higher norm-ball difference controls compact-coordinate values of chosen time derivatives,
+provided the derivative choice is unique on the slices. -/
+theorem norm_chosenTimeDerivToContinuousMap_sub_apply_le_of_normLe_unique
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (z : K) :
+    ‖chosenTimeDerivToContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u z -
+        chosenTimeDerivToContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα v z‖
+      ≤ N := by
+  have hderiv := (chosenSecondJet_sub_c0AlphaNormLe_self_of_unique
+    (X := X) (E := E) (α := α) (s := s) h htime hspace).2.2.2
+  simpa using hderiv.norm_le (hK z.2)
+
+/-- A higher norm-ball difference controls finite-family compact-coordinate values of chosen
+spatial derivatives, provided the derivative choice is unique on the slices. -/
+theorem norm_chosenSpaceDerivToCompactCoordFamily_sub_apply_le_of_normLe_unique
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (i : κ) (z : Kc i) :
+    ‖chosenSpaceDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i z -
+      chosenSpaceDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i z‖ ≤ N := by
+  have hderiv := (chosenSecondJet_sub_c0AlphaNormLe_self_of_unique
+    (X := X) (E := E) (α := α) (s := s) h htime hspace).2.1
+  simpa using hderiv.norm_le (hKc i z.2)
+
+/-- A higher norm-ball difference controls finite-family compact-coordinate values of chosen
+second spatial derivatives, provided the derivative choice is unique on the slices. -/
+theorem norm_chosenSpaceSecondDerivToCompactCoordFamily_sub_apply_le_of_normLe_unique
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (i : κ) (z : Kc i) :
+    ‖chosenSpaceSecondDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i z -
+      chosenSpaceSecondDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i z‖ ≤ N := by
+  have hderiv := (chosenSecondJet_sub_c0AlphaNormLe_self_of_unique
+    (X := X) (E := E) (α := α) (s := s) h htime hspace).2.2.1
+  simpa using hderiv.norm_le (hKc i z.2)
+
+/-- A higher norm-ball difference controls finite-family compact-coordinate values of chosen
+time derivatives, provided the derivative choice is unique on the slices. -/
+theorem norm_chosenTimeDerivToCompactCoordFamily_sub_apply_le_of_normLe_unique
+    {κ : Type*} (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (i : κ) (z : Kc i) :
+    ‖chosenTimeDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i z -
+      chosenTimeDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα v i z‖ ≤ N := by
+  have hderiv := (chosenSecondJet_sub_c0AlphaNormLe_self_of_unique
+    (X := X) (E := E) (α := α) (s := s) h htime hspace).2.2.2
+  simpa using hderiv.norm_le (hKc i z.2)
+
 theorem exists_timeDeriv (u : parabolicC2AlphaSubmodule X E α s) :
     ∃ Dt : ℝ × X → E,
       (∀ ⦃z : ℝ × X⦄, z ∈ s →

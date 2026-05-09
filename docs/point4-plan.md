@@ -3918,8 +3918,11 @@ It also exposes noncanonical chosen-second-jet readouts as lower
 derivative, and time derivative. These wrappers only make the existential jet
 choice reusable by downstream compact-readout APIs, and the same chosen
 components now have compact-piece and compact-family readouts with simp
-projections. They do not make the derivative choice canonical or add a linear
-finite-cover derivative norm, Schauder estimate, or completeness content.
+projections. Under unique-differentiability hypotheses on the time and spatial
+slices, higher norm-ball controls also transport to these chosen components,
+including pointwise compact-coordinate difference bounds for their readouts.
+They do not make the derivative choice canonical or add a linear finite-cover
+derivative norm, Schauder estimate, or completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct
