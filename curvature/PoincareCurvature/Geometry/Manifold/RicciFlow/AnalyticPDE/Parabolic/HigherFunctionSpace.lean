@@ -1466,6 +1466,197 @@ theorem chosenTimeDerivToCompactCoordFamily_apply {κ : Type*}
       (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv z.1 :=
   rfl
 
+/-- On compact pieces contained in uniquely differentiable spatial slices, the chosen spatial
+derivative compact-family readout is linear. -/
+noncomputable def chosenSpaceDerivToCompactCoordFamilyLinearMap {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    parabolicC2AlphaSubmodule X E α s →ₗ[ℝ] (∀ i, C(Kc i, X →L[ℝ] E)) where
+  toFun := chosenSpaceDerivToCompactCoordFamily
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  map_add' := by
+    intro u v
+    apply funext
+    intro i
+    apply ContinuousMap.ext
+    intro z
+    have hz : z.1 ∈ s := hKc i z.2
+    have hEq :
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s)
+          (u + v)).spaceDeriv z.1 =
+        ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).add
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v)).spaceDeriv z.1 :=
+      ParabolicSecondJet.spaceDeriv_eq_of_unique
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s) (u + v))
+        ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).add
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v))
+        hz (hspace hz)
+    simpa using hEq
+  map_smul' := by
+    intro c u
+    apply funext
+    intro i
+    apply ContinuousMap.ext
+    intro z
+    have hz : z.1 ∈ s := hKc i z.2
+    have hEq :
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s)
+          (c • u)).spaceDeriv z.1 =
+        (ParabolicSecondJet.smul c
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u)).spaceDeriv z.1 :=
+      ParabolicSecondJet.spaceDeriv_eq_of_unique
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s) (c • u))
+        (ParabolicSecondJet.smul c
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u))
+        hz (hspace hz)
+    simpa using hEq
+
+@[simp]
+theorem chosenSpaceDerivToCompactCoordFamilyLinearMap_apply {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    chosenSpaceDerivToCompactCoordFamilyLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u =
+      chosenSpaceDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα u :=
+  rfl
+
+local instance chosenSpaceSecondDerivContinuousAdd :
+    ContinuousAdd (X →L[ℝ] (X →L[ℝ] E)) :=
+  inferInstance
+
+local instance chosenSpaceSecondDerivContinuousSMul :
+    ContinuousSMul ℝ (X →L[ℝ] (X →L[ℝ] E)) :=
+  inferInstance
+
+/-- On compact pieces contained in uniquely differentiable spatial slices, the chosen second
+spatial derivative compact-family readout is linear. -/
+noncomputable def chosenSpaceSecondDerivToCompactCoordFamilyLinearMap {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    parabolicC2AlphaSubmodule X E α s →ₗ[ℝ]
+      (∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E))) where
+  toFun := chosenSpaceSecondDerivToCompactCoordFamily
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  map_add' := by
+    intro u v
+    apply funext
+    intro i
+    apply ContinuousMap.ext
+    intro z
+    have hz : z.1 ∈ s := hKc i z.2
+    have hEq :
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s)
+          (u + v)).spaceSecondDeriv z.1 =
+        ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).add
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v)).spaceSecondDeriv
+          z.1 :=
+      ParabolicSecondJet.spaceSecondDeriv_eq_of_unique
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s) (u + v))
+        ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).add
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v))
+        hz (fun {x} hx => hspace (z := (z.1.1, x)) hx)
+    simpa using hEq
+  map_smul' := by
+    intro c u
+    apply funext
+    intro i
+    apply ContinuousMap.ext
+    intro z
+    have hz : z.1 ∈ s := hKc i z.2
+    have hEq :
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s)
+          (c • u)).spaceSecondDeriv z.1 =
+        (ParabolicSecondJet.smul c
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u)).spaceSecondDeriv
+          z.1 :=
+      ParabolicSecondJet.spaceSecondDeriv_eq_of_unique
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s) (c • u))
+        (ParabolicSecondJet.smul c
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u))
+        hz (fun {x} hx => hspace (z := (z.1.1, x)) hx)
+    simpa using hEq
+
+@[simp]
+theorem chosenSpaceSecondDerivToCompactCoordFamilyLinearMap_apply {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    chosenSpaceSecondDerivToCompactCoordFamilyLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hspace u =
+      chosenSpaceSecondDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα u :=
+  rfl
+
+/-- On compact pieces contained in uniquely differentiable time slices, the chosen time derivative
+compact-family readout is linear. -/
+noncomputable def chosenTimeDerivToCompactCoordFamilyLinearMap {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1) :
+    parabolicC2AlphaSubmodule X E α s →ₗ[ℝ] (∀ i, C(Kc i, E)) where
+  toFun := chosenTimeDerivToCompactCoordFamily
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  map_add' := by
+    intro u v
+    apply funext
+    intro i
+    apply ContinuousMap.ext
+    intro z
+    have hz : z.1 ∈ s := hKc i z.2
+    have hEq :
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s)
+          (u + v)).timeDeriv z.1 =
+        ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).add
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v)).timeDeriv z.1 :=
+      ParabolicSecondJet.timeDeriv_eq_of_unique
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s) (u + v))
+        ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).add
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v))
+        hz (htime hz)
+    simpa using hEq
+  map_smul' := by
+    intro c u
+    apply funext
+    intro i
+    apply ContinuousMap.ext
+    intro z
+    have hz : z.1 ∈ s := hKc i z.2
+    have hEq :
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s)
+          (c • u)).timeDeriv z.1 =
+        (ParabolicSecondJet.smul c
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u)).timeDeriv z.1 :=
+      ParabolicSecondJet.timeDeriv_eq_of_unique
+        (chosenSecondJet (X := X) (E := E) (α := α) (s := s) (c • u))
+        (ParabolicSecondJet.smul c
+          (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u))
+        hz (htime hz)
+    simpa using hEq
+
+@[simp]
+theorem chosenTimeDerivToCompactCoordFamilyLinearMap_apply {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    chosenTimeDerivToCompactCoordFamilyLinearMap
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime u =
+      chosenTimeDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα u :=
+  rfl
+
 /-- Under unique-differentiability of the time and spatial slices, any higher norm ball
 controls the noncanonically chosen second jet as well. -/
 theorem chosenSecondJet_c0AlphaNormLe_self_of_unique
