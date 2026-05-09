@@ -3816,14 +3816,15 @@ derivative, spatial Hessian, and time-derivative `C^{0,α}` norm-ball controls;
 this higher predicate already has constant and zero constructors and is closed
 under addition, finite sums, negation, subtraction, scalar multiplication, and
 product-valued pairing and continuous-linear value maps with explicit radius
-bounds. Chosen parabolic
+bounds, with a matching product-state difference estimate from component
+difference controls. Chosen parabolic
 second jets now also compose with continuous linear value maps, transforming
 the time, spatial, and second-spatial derivative witnesses componentwise; they
 also support componentwise subtraction and product pairing. Its
 existential `ParabolicC2AlphaOn` class now forms a real submodule of all
 coordinate time-space functions, is closed under product-valued pairing and
-continuous-linear value maps, and reads back to `ParabolicC0AlphaOn` for the
-value component; the full
+product-state differences, and continuous-linear value maps, and reads back to
+`ParabolicC0AlphaOn` for the value component; the full
 `C^{2+α,1+α/2}` radius also bounds the value-level `C^{0,α}` norm, and the
 submodule has linear maps for continuous-linear value composition,
 product-valued pairing on product submodules, and forgetful inclusion into the

@@ -475,6 +475,14 @@ theorem prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   · simpa [ParabolicSecondJet.prod] using
       ParabolicC0AlphaNormLe.prod (X := X) (E := E) (F := F) htu htv
 
+theorem prod_sub_prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {u' : ℝ × X → E} {v v' : ℝ × X → F} {Nu Nv : ℝ}
+    (hu : ParabolicC2AlphaNormLe Nu α (fun z : ℝ × X => u z - u' z) s)
+    (hv : ParabolicC2AlphaNormLe Nv α (fun z : ℝ × X => v z - v' z) s) :
+    ParabolicC2AlphaNormLe (prodRadius (X := X) (E := E) (F := F) * (Nu + Nv)) α
+      (fun z : ℝ × X => (u z, v z) - (u' z, v' z)) s := by
+  simpa using hu.prod hv
+
 /-- Radius multiplier for composing a higher parabolic function with a continuous linear
 value map.  The spatial first- and second-derivative components both use postcomposition by
 `L` on `X →L[ℝ] E`. -/
@@ -828,6 +836,13 @@ theorem prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   rcases hu with ⟨N, hN, huN⟩
   rcases hv with ⟨M, hM, hvN⟩
   exact ⟨_, (huN.prod hvN).nonneg, huN.prod hvN⟩
+
+theorem prod_sub_prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {u' : ℝ × X → E} {v v' : ℝ × X → F}
+    (hu : ParabolicC2AlphaOn α (fun z : ℝ × X => u z - u' z) s)
+    (hv : ParabolicC2AlphaOn α (fun z : ℝ × X => v z - v' z) s) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => (u z, v z) - (u' z, v' z)) s := by
+  simpa using hu.prod hv
 
 theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (L : E →L[ℝ] F) (hu : ParabolicC2AlphaOn α u s) :
