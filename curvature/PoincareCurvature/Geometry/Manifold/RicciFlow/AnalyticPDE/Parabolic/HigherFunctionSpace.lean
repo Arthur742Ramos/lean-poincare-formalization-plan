@@ -6,6 +6,7 @@ public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Mul
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Analysis.Calculus.FDeriv.Add
+public import Mathlib.Analysis.Normed.Operator.Prod
 
 set_option linter.unusedSectionVars false
 
@@ -47,6 +48,17 @@ theorem mem_spaceSliceDomain {X : Type*} {s : Set (ℝ × X)} {t : ℝ} {x : X} 
 variable {X E : Type*}
 variable [NormedAddCommGroup X] [NormedSpace ℝ X]
 variable [NormedAddCommGroup E] [NormedSpace ℝ E]
+
+/-- Continuous-linear packaging of two first-spatial derivative maps as the derivative of a
+product-valued function. -/
+def firstDerivativeProdLinearMap (X E F : Type*)
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] :
+    ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F) :=
+  ((ContinuousLinearMap.prodₗᵢ ℝ :
+    ((X →L[ℝ] E) × (X →L[ℝ] F)) ≃ₗᵢ[ℝ] (X →L[ℝ] E × F)) :
+      ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F))
 
 /-- A coordinate parabolic second jet for a time-space function on a domain.
 
@@ -164,25 +176,22 @@ def prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {v : ℝ × X �
     (Ju : ParabolicSecondJet u s) (Jv : ParabolicSecondJet v s) :
     ParabolicSecondJet (fun z : ℝ × X => (u z, v z)) s where
   timeDeriv := fun z => (Ju.timeDeriv z, Jv.timeDeriv z)
-  spaceDeriv := fun z => (Ju.spaceDeriv z).prod (Jv.spaceDeriv z)
+  spaceDeriv := fun z =>
+    firstDerivativeProdLinearMap X E F (Ju.spaceDeriv z, Jv.spaceDeriv z)
   spaceSecondDeriv := fun z =>
-    let Lprod :
-        ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F) :=
-      (ContinuousLinearMap.prodL ℝ :
-        ((X →L[ℝ] E) × (X →L[ℝ] F)) ≃L[ℝ] (X →L[ℝ] E × F))
-    Lprod.comp ((Ju.spaceSecondDeriv z).prod (Jv.spaceSecondDeriv z))
+    (firstDerivativeProdLinearMap X E F).comp
+      ((Ju.spaceSecondDeriv z).prod (Jv.spaceSecondDeriv z))
   hasTimeDeriv := by
     intro z hz
     exact HasDerivWithinAt.prodMk (Ju.hasTimeDeriv hz) (Jv.hasTimeDeriv hz)
   hasSpaceDeriv := by
     intro z hz
-    simpa using (Ju.hasSpaceDeriv hz).prodMk (Jv.hasSpaceDeriv hz)
+    simpa [firstDerivativeProdLinearMap] using
+      (Ju.hasSpaceDeriv hz).prodMk (Jv.hasSpaceDeriv hz)
   hasSpaceSecondDeriv := by
     intro z hz
-    let Lprod :
-        ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F) :=
-      (ContinuousLinearMap.prodL ℝ :
-        ((X →L[ℝ] E) × (X →L[ℝ] F)) ≃L[ℝ] (X →L[ℝ] E × F))
+    let Lprod : ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F) :=
+      firstDerivativeProdLinearMap X E F
     have hpair :
         HasFDerivWithinAt
           (fun x : X => (Ju.spaceDeriv (z.1, x), Jv.spaceDeriv (z.1, x)))
@@ -190,7 +199,7 @@ def prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {v : ℝ × X �
           (spaceSliceDomain s z.1) z.2 := by
       exact (Ju.hasSpaceSecondDeriv hz).prodMk (Jv.hasSpaceSecondDeriv hz)
     have hcomp := Lprod.hasFDerivAt.comp_hasFDerivWithinAt z.2 hpair
-    simpa [Function.comp, Lprod] using hcomp
+    simpa [Function.comp, Lprod, firstDerivativeProdLinearMap] using hcomp
 
 /-- Compose a parabolic second jet with a continuous linear value map. -/
 def continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -364,6 +373,107 @@ theorem smul (c : ℝ) (h : ParabolicC2AlphaNormLe N α u s) :
   · simpa [ParabolicSecondJet.smul] using hx.smul (𝕜 := ℝ) c
   · simpa [ParabolicSecondJet.smul] using hxx.smul (𝕜 := ℝ) c
   · simpa [ParabolicSecondJet.smul] using ht.smul (𝕜 := ℝ) c
+
+/-- Radius multiplier for product-valued higher parabolic functions.  The value and time
+components and the first spatial derivative use the product isometry directly; the second
+spatial derivative only pays for postcomposition by the first-derivative product map. -/
+def prodRadius {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] : ℝ :=
+  1 + 1 + ‖firstDerivativeProdLinearMap X E F‖ + 1
+
+theorem prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {v : ℝ × X → F} {M : ℝ}
+    (hu : ParabolicC2AlphaNormLe N α u s) (hv : ParabolicC2AlphaNormLe M α v s) :
+    ParabolicC2AlphaNormLe (prodRadius (X := X) (E := E) (F := F) * (N + M)) α
+      (fun z : ℝ × X => (u z, v z)) s := by
+  rcases hu with
+    ⟨Ju, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsumu, huu, hxu, hxxu, htu⟩
+  rcases hv with
+    ⟨Jv, Mu, hMu, Mx, hMx, Mxx, hMxx, Mt, hMt, hsumv, huv, hxv, hxxv, htv⟩
+  let LxIso : ((X →L[ℝ] E) × (X →L[ℝ] F)) ≃ₗᵢ[ℝ]
+      (X →L[ℝ] E × F) :=
+    ContinuousLinearMap.prodₗᵢ ℝ
+  let LxxIso :
+      ((X →L[ℝ] (X →L[ℝ] E)) × (X →L[ℝ] (X →L[ℝ] F))) ≃ₗᵢ[ℝ]
+        (X →L[ℝ] (X →L[ℝ] E) × (X →L[ℝ] F)) :=
+    ContinuousLinearMap.prodₗᵢ ℝ
+  let Lx : ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F) :=
+    firstDerivativeProdLinearMap X E F
+  refine ⟨Ju.prod Jv, Nu + Mu, add_nonneg hNu hMu,
+    Nx + Mx, add_nonneg hNx hMx,
+    ‖Lx‖ * (Nxx + Mxx),
+      mul_nonneg (norm_nonneg Lx) (add_nonneg hNxx hMxx),
+    Nt + Mt, add_nonneg hNt hMt, ?_, ?_, ?_, ?_, ?_⟩
+  · have hsum_all : (Nu + Mu) + (Nx + Mx) + (Nxx + Mxx) + (Nt + Mt) ≤ N + M := by
+      linarith
+    have hx₁_le : Nu + Mu ≤ N + M := by linarith
+    have hx₂_le : Nx + Mx ≤ N + M := by linarith
+    have hx₃_le : Nxx + Mxx ≤ N + M := by linarith
+    have hx₄_le : Nt + Mt ≤ N + M := by linarith
+    have h₁ : Nu + Mu ≤ 1 * (N + M) := by simpa using hx₁_le
+    have h₂ : Nx + Mx ≤ 1 * (N + M) := by simpa using hx₂_le
+    have h₃ : ‖Lx‖ * (Nxx + Mxx) ≤ ‖Lx‖ * (N + M) :=
+      mul_le_mul_of_nonneg_left hx₃_le (norm_nonneg Lx)
+    have h₄ : Nt + Mt ≤ 1 * (N + M) := by simpa using hx₄_le
+    calc
+      (Nu + Mu) + (Nx + Mx) + ‖Lx‖ * (Nxx + Mxx) + (Nt + Mt)
+          ≤ 1 * (N + M) + 1 * (N + M) + ‖Lx‖ * (N + M) + 1 * (N + M) := by
+            linarith
+      _ = prodRadius (X := X) (E := E) (F := F) * (N + M) := by
+            simp [prodRadius, Lx]
+            ring
+  · simpa using
+      ParabolicC0AlphaNormLe.prod (X := X) (E := E) (F := F) huu huv
+  · have hx_pair : ParabolicC0AlphaNormLe (Nx + Mx) α
+        (fun z : ℝ × X => (Ju.spaceDeriv z, Jv.spaceDeriv z)) s :=
+      ParabolicC0AlphaNormLe.prod (X := X) (E := X →L[ℝ] E) (F := X →L[ℝ] F)
+        hxu hxv
+    have hx_prod :=
+      ParabolicC0AlphaNormLe.linearIsometryEquiv (X := X)
+        (E := (X →L[ℝ] E) × (X →L[ℝ] F)) (F := X →L[ℝ] E × F)
+        LxIso hx_pair
+    simpa [ParabolicSecondJet.prod, firstDerivativeProdLinearMap, LxIso] using hx_prod
+  · have hxx_pair : ParabolicC0AlphaNormLe (Nxx + Mxx) α
+        (fun z : ℝ × X => (Ju.spaceSecondDeriv z, Jv.spaceSecondDeriv z)) s :=
+      ParabolicC0AlphaNormLe.prod (X := X)
+        (E := X →L[ℝ] (X →L[ℝ] E)) (F := X →L[ℝ] (X →L[ℝ] F)) hxxu hxxv
+    have hxx_prod_pair :=
+      ParabolicC0AlphaNormLe.linearIsometryEquiv (X := X)
+        (E := (X →L[ℝ] (X →L[ℝ] E)) × (X →L[ℝ] (X →L[ℝ] F)))
+        (F := X →L[ℝ] (X →L[ℝ] E) × (X →L[ℝ] F)) LxxIso hxx_pair
+    have hxx_prod : ParabolicC0AlphaNormLe (‖Lx‖ * (Nxx + Mxx)) α
+        (fun z : ℝ × X => Lx.comp (LxxIso (Ju.spaceSecondDeriv z, Jv.spaceSecondDeriv z)))
+        s := by
+      rcases hxx_prod_pair with ⟨Bxx, hBxx, Hxx, hHxx, hxx_sum, hxx_ctrl⟩
+      refine ⟨‖Lx‖ * Bxx, mul_nonneg (norm_nonneg Lx) hBxx,
+        ‖Lx‖ * Hxx, mul_nonneg (norm_nonneg Lx) hHxx, ?_, ?_⟩
+      · calc
+          ‖Lx‖ * Bxx + ‖Lx‖ * Hxx = ‖Lx‖ * (Bxx + Hxx) := by ring
+          _ ≤ ‖Lx‖ * (Nxx + Mxx) :=
+            mul_le_mul_of_nonneg_left hxx_sum (norm_nonneg Lx)
+      · constructor
+        · intro p hp
+          exact (Lx.opNorm_comp_le (LxxIso (Ju.spaceSecondDeriv p, Jv.spaceSecondDeriv p))).trans
+            (mul_le_mul_of_nonneg_left (hxx_ctrl.1 hp) (norm_nonneg Lx))
+        · intro p hp q hq
+          calc
+            ‖Lx.comp (LxxIso (Ju.spaceSecondDeriv p, Jv.spaceSecondDeriv p)) -
+                Lx.comp (LxxIso (Ju.spaceSecondDeriv q, Jv.spaceSecondDeriv q))‖ =
+                ‖Lx.comp
+                  (LxxIso (Ju.spaceSecondDeriv p, Jv.spaceSecondDeriv p) -
+                    LxxIso (Ju.spaceSecondDeriv q, Jv.spaceSecondDeriv q))‖ := by
+              congr 1
+            _ ≤ ‖Lx‖ *
+                ‖LxxIso (Ju.spaceSecondDeriv p, Jv.spaceSecondDeriv p) -
+                  LxxIso (Ju.spaceSecondDeriv q, Jv.spaceSecondDeriv q)‖ :=
+              Lx.opNorm_comp_le
+                (LxxIso (Ju.spaceSecondDeriv p, Jv.spaceSecondDeriv p) -
+                  LxxIso (Ju.spaceSecondDeriv q, Jv.spaceSecondDeriv q))
+            _ ≤ ‖Lx‖ * (Hxx * (parabolicDistance p q) ^ α) :=
+              mul_le_mul_of_nonneg_left (hxx_ctrl.2 hp hq) (norm_nonneg Lx)
+            _ = (‖Lx‖ * Hxx) * (parabolicDistance p q) ^ α := by ring
+    simpa [ParabolicSecondJet.prod, firstDerivativeProdLinearMap, Lx, LxxIso] using hxx_prod
+  · simpa [ParabolicSecondJet.prod] using
+      ParabolicC0AlphaNormLe.prod (X := X) (E := E) (F := F) htu htv
 
 /-- Radius multiplier for composing a higher parabolic function with a continuous linear
 value map.  The spatial first- and second-derivative components both use postcomposition by
@@ -710,6 +820,14 @@ theorem smul (c : ℝ) (hu : ParabolicC2AlphaOn α u s) :
     ParabolicC2AlphaOn α (fun z : ℝ × X => c • u z) s := by
   rcases hu with ⟨N, hN, huN⟩
   exact ⟨‖c‖ * N, mul_nonneg (norm_nonneg c) hN, huN.smul c⟩
+
+theorem prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {v : ℝ × X → F} (hu : ParabolicC2AlphaOn α u s)
+    (hv : ParabolicC2AlphaOn α v s) :
+    ParabolicC2AlphaOn α (fun z : ℝ × X => (u z, v z)) s := by
+  rcases hu with ⟨N, hN, huN⟩
+  rcases hv with ⟨M, hM, hvN⟩
+  exact ⟨_, (huN.prod hvN).nonneg, huN.prod hvN⟩
 
 theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (L : E →L[ℝ] F) (hu : ParabolicC2AlphaOn α u s) :

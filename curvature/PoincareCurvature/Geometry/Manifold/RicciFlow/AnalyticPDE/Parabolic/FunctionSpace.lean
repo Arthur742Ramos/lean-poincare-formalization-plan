@@ -162,6 +162,22 @@ theorem continuousLinearMap {F : Type*} [NormedSpace ℝ E]
     ‖L‖ * B + ‖L‖ * H = ‖L‖ * (B + H) := by ring
     _ ≤ ‖L‖ * N := mul_le_mul_of_nonneg_left hsum (norm_nonneg L)
 
+theorem linearIsometryEquiv {F : Type*} [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E ≃ₗᵢ[ℝ] F) (hu : ParabolicC0AlphaNormLe N α u s) :
+    ParabolicC0AlphaNormLe N α (fun z => L (u z)) s := by
+  rcases hu with ⟨B, hB, H, hH, hsum, hctrl⟩
+  refine ⟨B, hB, H, hH, hsum, ?_⟩
+  constructor
+  · intro p hp
+    simpa [L.norm_map] using hctrl.1 hp
+  · intro p hp q hq
+    calc
+      ‖L (u p) - L (u q)‖ = ‖L (u p - u q)‖ := by
+        rw [map_sub]
+      _ = ‖u p - u q‖ := L.norm_map (u p - u q)
+      _ ≤ H * (parabolicDistance p q) ^ α := hctrl.2 hp hq
+
 theorem pi {ι F : Type*} [Fintype ι] [NormedAddCommGroup F]
     {N : ι → ℝ} {u : ℝ × X → ι → F}
     (h : ∀ i, ParabolicC0AlphaNormLe (N i) α (fun z => u z i) s) :
