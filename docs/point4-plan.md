@@ -3975,10 +3975,11 @@ derivative, and chosen time derivative readouts. The combined chosen-second-jet
 seminorm is now connected back to the higher norm-ball API: a
 `ParabolicC2AlphaNormLe` bound on `u - v` directly bounds the combined
 finite-cover readout norm and hence the induced finite-cover chosen-second-jet
-distance, and pairwise higher difference bounds give `LipschitzOnWith` estimates
-for maps into this induced seminormed structure. These bridges let current
-higher norm-ball estimates feed the best available compact-family jet carrier
-without asserting a full parabolic Banach norm. They do not make the
+distance, with the same bridge available for the separated all-cover normed
+carrier; pairwise higher difference bounds give `LipschitzOnWith` estimates
+for maps into both structures. These bridges let current higher norm-ball
+estimates feed the best available compact-family jet carrier without asserting
+a full parabolic Banach norm. They do not make the
 derivative choice canonical or upgrade this compact-family jet seminorm into
 the full `C^{2+α,1+α/2}` Banach
 norm, Schauder estimate, or completeness content.

@@ -3964,6 +3964,38 @@ theorem norm_chosenSecondJetFiniteCoverReadoutLinearMap_sub_le_of_normLe_unique
     · simpa [R, chosenSecondJetFiniteCoverReadoutLinearMap_apply] using hH
     · simpa [R, chosenSecondJetFiniteCoverReadoutLinearMap_apply] using ht
 
+/-- A higher norm-ball difference controls the combined finite-cover chosen second-jet readout
+distance, after the slice derivatives are unique. -/
+theorem dist_chosenSecondJetFiniteCoverReadoutLinearMap_le_of_normLe_unique
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    dist
+        (chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u)
+        (chosenSecondJetFiniteCoverReadoutLinearMap
+          (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace v) ≤ N := by
+  let R := chosenSecondJetFiniteCoverReadoutLinearMap
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
+  change dist (R u) (R v) ≤ N
+  have hnorm : ‖R u - R v‖ ≤ N := by
+    simpa [R] using
+      norm_chosenSecondJetFiniteCoverReadoutLinearMap_sub_le_of_normLe_unique
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα h htime hspace
+  calc
+    dist (R u) (R v) = ‖-(R u) + R v‖ := SeminormedAddCommGroup.dist_eq (R u) (R v)
+    _ = ‖R u - R v‖ := by
+      rw [← norm_neg (R u - R v)]
+      congr 1
+      abel
+    _ ≤ N := hnorm
+
 /-- A higher norm-ball difference controls the induced combined finite-cover chosen second-jet
 seminorm. -/
 theorem finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique
@@ -3985,20 +4017,34 @@ theorem finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique
       (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
   rw [finiteCoverChosenSecondJet_dist_eq
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace u v]
-  let R := chosenSecondJetFiniteCoverReadoutLinearMap
-    (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace
-  change dist (R u) (R v) ≤ N
-  have hnorm : ‖R u - R v‖ ≤ N := by
-    simpa [R] using
-      norm_chosenSecondJetFiniteCoverReadoutLinearMap_sub_le_of_normLe_unique
-        (X := X) (E := E) (α := α) (s := s) Kc hKc hα h htime hspace
-  calc
-    dist (R u) (R v) = ‖-(R u) + R v‖ := SeminormedAddCommGroup.dist_eq (R u) (R v)
-    _ = ‖R u - R v‖ := by
-      rw [← norm_neg (R u - R v)]
-      congr 1
-      abel
-    _ ≤ N := hnorm
+  exact dist_chosenSecondJetFiniteCoverReadoutLinearMap_le_of_normLe_unique
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα h htime hspace
+
+/-- A higher norm-ball difference controls the separated all-cover combined finite-cover chosen
+second-jet normed distance. -/
+theorem finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique_ofCover
+    {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {N : ℝ} {u v : parabolicC2AlphaSubmodule X E α s}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    dist u v ≤ N := by
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace hcover
+  rw [finiteCoverChosenSecondJet_dist_eq_ofCover
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace hcover u v]
+  exact dist_chosenSecondJetFiniteCoverReadoutLinearMap_le_of_normLe_unique
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα h htime hspace
 
 /-- Pairwise higher difference estimates give a Lipschitz estimate in the induced combined
 finite-cover chosen second-jet seminorm. -/
@@ -4028,6 +4074,37 @@ theorem lipschitzOnWith_finiteCoverChosenSecondJet_of_normLe_sub_unique
   intro u hu v hv
   exact finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique
     (X := X) (E := E) (α := α) (s := s) Kc hKc hα (h hu hv) htime hspace
+
+/-- Pairwise higher difference estimates give a Lipschitz estimate in the separated all-cover
+combined finite-cover chosen second-jet normed structure. -/
+theorem lipschitzOnWith_finiteCoverChosenSecondJet_of_normLe_sub_unique_ofCover
+    {Y κ : Type*} [PseudoMetricSpace Y] [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0}
+    {A : Y → parabolicC2AlphaSubmodule X E α s}
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ParabolicC2AlphaNormLe ((L : ℝ) * dist u v) α
+        (fun z => A u z - A v z) s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    LipschitzOnWith L A stateSet := by
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X E α s) :=
+    finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace hcover
+  refine LipschitzOnWith.of_dist_le_mul
+    (α := Y) (β := parabolicC2AlphaSubmodule X E α s)
+    (K := L) (s := stateSet) (f := A) ?_
+  intro u hu v hv
+  exact finiteCoverChosenSecondJet_dist_le_of_normLe_sub_unique_ofCover
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα htime hspace hcover (h hu hv)
 
 /-- The value compact-family norm is bounded by the combined finite-cover chosen second-jet
 seminorm. -/
