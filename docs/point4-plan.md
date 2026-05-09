@@ -3957,7 +3957,10 @@ hypothesis. The same chosen derivative Lipschitz readouts now also restrict to
 fixed-time spatial compact readouts whenever the chosen time-space compact
 family covers the requested spatial slices, and the combined seminorm now has
 direct fixed-time spatial value and chosen-derivative distance estimates under
-the same cover hypothesis. They do not make the derivative choice canonical or
+the same cover hypothesis; the separated all-cover normed structure has the
+matching fixed-time spatial estimates directly against its distance for the
+value, chosen spatial derivative, chosen second spatial derivative, and chosen
+time derivative readouts. They do not make the derivative choice canonical or
 upgrade this compact-family jet seminorm into the full `C^{2+α,1+α/2}` Banach
 norm, Schauder estimate, or completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
