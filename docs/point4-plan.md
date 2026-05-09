@@ -3916,8 +3916,10 @@ compact-piece covers. This is only the value-readout carrier, not the full
 It also exposes noncanonical chosen-second-jet readouts as lower
 `C^{0,α}` submodule elements for the spatial derivative, second spatial
 derivative, and time derivative. These wrappers only make the existential jet
-choice reusable by downstream compact-readout APIs; they do not make the
-derivative choice canonical or add Schauder/completeness content.
+choice reusable by downstream compact-readout APIs, and the same chosen
+components now have compact-piece and compact-family readouts with simp
+projections. They do not make the derivative choice canonical or add a linear
+finite-cover derivative norm, Schauder estimate, or completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
 `AnalyticPDE/Parabolic/HigherMatrix.lean` now supplies the first direct

@@ -1351,6 +1351,121 @@ theorem chosenTimeDerivC0AlphaSubmodule_apply
       (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv z :=
   rfl
 
+/-- Compact-piece readout of the chosen spatial derivative. -/
+noncomputable def chosenSpaceDerivToContinuousMap
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) : C(K, X →L[ℝ] E) :=
+  parabolicC0AlphaSubmodule.toContinuousMap
+    (X := X) (E := X →L[ℝ] E) (α := α) (s := s) hK hα
+    (chosenSpaceDerivC0AlphaSubmodule (X := X) (E := E) (α := α) (s := s) u)
+
+@[simp]
+theorem chosenSpaceDerivToContinuousMap_apply
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) (z : K) :
+    chosenSpaceDerivToContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u z =
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceDeriv z.1 :=
+  rfl
+
+/-- Compact-piece readout of the chosen second spatial derivative. -/
+noncomputable def chosenSpaceSecondDerivToContinuousMap
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) : C(K, X →L[ℝ] (X →L[ℝ] E)) :=
+  parabolicC0AlphaSubmodule.toContinuousMap
+    (X := X) (E := X →L[ℝ] (X →L[ℝ] E)) (α := α) (s := s) hK hα
+    (chosenSpaceSecondDerivC0AlphaSubmodule
+      (X := X) (E := E) (α := α) (s := s) u)
+
+@[simp]
+theorem chosenSpaceSecondDerivToContinuousMap_apply
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) (z : K) :
+    chosenSpaceSecondDerivToContinuousMap
+        (X := X) (E := E) (α := α) (s := s) hK hα u z =
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceSecondDeriv z.1 :=
+  rfl
+
+/-- Compact-piece readout of the chosen time derivative. -/
+noncomputable def chosenTimeDerivToContinuousMap
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) : C(K, E) :=
+  parabolicC0AlphaSubmodule.toContinuousMap
+    (X := X) (E := E) (α := α) (s := s) hK hα
+    (chosenTimeDerivC0AlphaSubmodule (X := X) (E := E) (α := α) (s := s) u)
+
+@[simp]
+theorem chosenTimeDerivToContinuousMap_apply
+    {K : TopologicalSpace.Compacts (ℝ × X)}
+    (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) (z : K) :
+    chosenTimeDerivToContinuousMap (X := X) (E := E) (α := α) (s := s) hK hα u z =
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv z.1 :=
+  rfl
+
+/-- Compact-family readout of the chosen spatial derivative. -/
+noncomputable def chosenSpaceDerivToCompactCoordFamily {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) : ∀ i, C(Kc i, X →L[ℝ] E) :=
+  parabolicC0AlphaSubmodule.toCompactCoordFamily
+    (X := X) (E := X →L[ℝ] E) (α := α) (s := s) Kc hKc hα
+    (chosenSpaceDerivC0AlphaSubmodule (X := X) (E := E) (α := α) (s := s) u)
+
+@[simp]
+theorem chosenSpaceDerivToCompactCoordFamily_apply {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) (i : κ) (z : Kc i) :
+    chosenSpaceDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i z =
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceDeriv z.1 :=
+  rfl
+
+/-- Compact-family readout of the chosen second spatial derivative. -/
+noncomputable def chosenSpaceSecondDerivToCompactCoordFamily {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) :
+    ∀ i, C(Kc i, X →L[ℝ] (X →L[ℝ] E)) :=
+  parabolicC0AlphaSubmodule.toCompactCoordFamily
+    (X := X) (E := X →L[ℝ] (X →L[ℝ] E)) (α := α) (s := s) Kc hKc hα
+    (chosenSpaceSecondDerivC0AlphaSubmodule
+      (X := X) (E := E) (α := α) (s := s) u)
+
+@[simp]
+theorem chosenSpaceSecondDerivToCompactCoordFamily_apply {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) (i : κ) (z : Kc i) :
+    chosenSpaceSecondDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i z =
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).spaceSecondDeriv z.1 :=
+  rfl
+
+/-- Compact-family readout of the chosen time derivative. -/
+noncomputable def chosenTimeDerivToCompactCoordFamily {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) : ∀ i, C(Kc i, E) :=
+  parabolicC0AlphaSubmodule.toCompactCoordFamily
+    (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    (chosenTimeDerivC0AlphaSubmodule (X := X) (E := E) (α := α) (s := s) u)
+
+@[simp]
+theorem chosenTimeDerivToCompactCoordFamily_apply {κ : Type*}
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u : parabolicC2AlphaSubmodule X E α s) (i : κ) (z : Kc i) :
+    chosenTimeDerivToCompactCoordFamily
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα u i z =
+      (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).timeDeriv z.1 :=
+  rfl
+
 theorem exists_timeDeriv (u : parabolicC2AlphaSubmodule X E α s) :
     ∃ Dt : ℝ × X → E,
       (∀ ⦃z : ℝ × X⦄, z ∈ s →
