@@ -3819,6 +3819,9 @@ compact-coordinate distance bounds. Those time-space compact-coordinate bounds
 now also restrict to fixed-time spatial compact readouts whenever the chosen
 time-space compact pieces cover each requested time slice, giving the direct
 bridge from parabolic readouts to spatial Banach-chart coordinate estimates.
+The compact-piece layer now also constructs the canonical product pieces
+`Kt × Kxᵢ`, with an `Icc t₀ T` specialization, and proves both their domain
+containment criterion and the fixed-time spatial slice cover property.
 `AnalyticPDE/Parabolic/HigherFunctionSpace.lean` now begins the coordinate
 `C^{2+α,1+α/2}` layer: it defines time and spatial slices, packages a genuine
 parabolic second jet with time, spatial, and second-spatial derivative

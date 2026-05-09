@@ -23,6 +23,81 @@ open scoped Topology NNReal
 namespace RicciFlow
 namespace AnalyticPDE
 
+/-- Product compact pieces in time-space, built from one compact time set and a spatial compact
+family.  These are the canonical pieces used to restrict parabolic compact readouts to fixed-time
+spatial readouts. -/
+def timeSpaceProductCompactFamily {X κ : Type*} [TopologicalSpace X]
+    (Kt : TopologicalSpace.Compacts ℝ) (Kx : κ → TopologicalSpace.Compacts X) :
+    κ → TopologicalSpace.Compacts (ℝ × X) :=
+  fun i => ⟨(Kt : Set ℝ) ×ˢ (Kx i : Set X), Kt.isCompact.prod (Kx i).isCompact⟩
+
+@[simp]
+theorem mem_timeSpaceProductCompactFamily {X κ : Type*} [TopologicalSpace X]
+    (Kt : TopologicalSpace.Compacts ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    {i : κ} {z : ℝ × X} :
+    z ∈ (timeSpaceProductCompactFamily Kt Kx i : Set (ℝ × X)) ↔
+      z.1 ∈ (Kt : Set ℝ) ∧ z.2 ∈ (Kx i : Set X) :=
+  Iff.rfl
+
+/-- Product compact pieces are contained in a time-space domain if every requested time and spatial
+compact point is contained in that domain. -/
+theorem timeSpaceProductCompactFamily_subset_of_forall_mem {X κ : Type*} [TopologicalSpace X]
+    (Kt : TopologicalSpace.Compacts ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    {s : Set (ℝ × X)}
+    (h : ∀ τ, τ ∈ (Kt : Set ℝ) → ∀ i (x : Kx i), (τ, x.1) ∈ s) :
+    ∀ i, (timeSpaceProductCompactFamily Kt Kx i : Set (ℝ × X)) ⊆ s := by
+  intro i z hz
+  exact h z.1 hz.1 i ⟨z.2, hz.2⟩
+
+/-- The product compact family covers each spatial compact on every time in the chosen compact time
+set. -/
+theorem timeSpaceProductCompactFamily_covers_timeSlice {X κ : Type*} [TopologicalSpace X]
+    (Kt : TopologicalSpace.Compacts ℝ) (Kx : κ → TopologicalSpace.Compacts X) :
+    ∀ τ, τ ∈ (Kt : Set ℝ) → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (timeSpaceProductCompactFamily Kt Kx j : Set (ℝ × X)) := by
+  intro τ hτ i x
+  exact ⟨i, hτ, x.2⟩
+
+/-- The compact interval `[t₀, T]` as a compact time set. -/
+def timeIccCompact (t₀ T : ℝ) : TopologicalSpace.Compacts ℝ :=
+  ⟨Icc t₀ T, isCompact_Icc⟩
+
+@[simp]
+theorem mem_timeIccCompact {t₀ T τ : ℝ} :
+    τ ∈ (timeIccCompact t₀ T : Set ℝ) ↔ τ ∈ Icc t₀ T :=
+  Iff.rfl
+
+/-- Product compact pieces over a closed time interval and a spatial compact family. -/
+def timeSpaceIccCompactFamily {X κ : Type*} [TopologicalSpace X]
+    (t₀ T : ℝ) (Kx : κ → TopologicalSpace.Compacts X) :
+    κ → TopologicalSpace.Compacts (ℝ × X) :=
+  timeSpaceProductCompactFamily (timeIccCompact t₀ T) Kx
+
+@[simp]
+theorem mem_timeSpaceIccCompactFamily {X κ : Type*} [TopologicalSpace X]
+    (t₀ T : ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    {i : κ} {z : ℝ × X} :
+    z ∈ (timeSpaceIccCompactFamily t₀ T Kx i : Set (ℝ × X)) ↔
+      z.1 ∈ Icc t₀ T ∧ z.2 ∈ (Kx i : Set X) :=
+  Iff.rfl
+
+/-- Interval product compact pieces are contained in a time-space domain if every interval time and
+spatial compact point is contained in that domain. -/
+theorem timeSpaceIccCompactFamily_subset_of_forall_mem {X κ : Type*} [TopologicalSpace X]
+    (t₀ T : ℝ) (Kx : κ → TopologicalSpace.Compacts X)
+    {s : Set (ℝ × X)}
+    (h : ∀ τ, τ ∈ Icc t₀ T → ∀ i (x : Kx i), (τ, x.1) ∈ s) :
+    ∀ i, (timeSpaceIccCompactFamily t₀ T Kx i : Set (ℝ × X)) ⊆ s := by
+  exact timeSpaceProductCompactFamily_subset_of_forall_mem
+    (timeIccCompact t₀ T) Kx h
+
+/-- Interval product compact pieces cover each spatial compact on every time in the interval. -/
+theorem timeSpaceIccCompactFamily_covers_timeSlice {X κ : Type*} [TopologicalSpace X]
+    (t₀ T : ℝ) (Kx : κ → TopologicalSpace.Compacts X) :
+    ∀ τ, τ ∈ Icc t₀ T → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (timeSpaceIccCompactFamily t₀ T Kx j : Set (ℝ × X)) := by
+  exact timeSpaceProductCompactFamily_covers_timeSlice (timeIccCompact t₀ T) Kx
+
 /-- Single-radius parabolic `C^{0,α}` control.  The radius `N` dominates the sum of a sup
 constant and a Holder constant.  This is the closed-ball predicate for the eventual
 `C^{0,α}` norm, kept constructive so later estimates can choose explicit constants. -/
