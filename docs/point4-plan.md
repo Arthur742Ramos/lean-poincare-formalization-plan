@@ -624,7 +624,10 @@ patch-local auxiliary vector-field `EqOn` plus the along-flow intrinsic-field
 certificate directly in model slots.  Its finite-cover/readout companion
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_iUnion_readout_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
 keeps the retained compact-witness readout equality in the same model-slot
-shape.  The
+shape, and
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_iUnion_readout_mpullbackWithin_of_eventuallyEq_along_maps3_nhdsWithin`
+does the same when the patch-local field input is supplied in centered
+`mpullbackWithin` form.  The
 smooth scalar endpoint also has
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_modelSlotSignedCorrection`,
 which consumes a signed correction already stated in model slots and performs
