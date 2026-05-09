@@ -2415,6 +2415,65 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_metric_entries_directions
       exact hentry_le_b.trans hb_le_a
     exact hentry.trans (mul_le_mul_of_nonneg_right hentry_le_sum dist_nonneg)
 
+/-- Coordinate-space version of
+`ricciDeTurckSchematicMatrix_lipschitzOnWith_of_metric_entries_directions_of_unique`.
+The first- and second-derivative primitive radii are stated with the coordinate-radius API. -/
+theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_metric_entries_of_unique
+    {Y n : Type*} [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    {s : Set (ℝ × (n → ℝ))}
+    {δ : ℝ} {C KM : n → n → ℝ} {stateSet : Set Y}
+    {M : Y → ℝ × (n → ℝ) → Matrix n n ℝ}
+    (J : ∀ u : Y, ∀ i j,
+      ParabolicSecondJet (fun z : ℝ × (n → ℝ) => M u z i j) s)
+    (hC : ∀ i j, 0 ≤ C i j) (hKM : ∀ i j, 0 ≤ KM i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (C i j) α (fun z => M u z i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i j,
+      ParabolicC2AlphaNormLe (KM i j * dist u v) α
+        (fun z => M u z i j - M v z i j) s)
+    (htime : ∀ ⦃z : ℝ × (n → ℝ)⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × (n → ℝ)⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × (n → ℝ)⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖) :
+    ∀ ⦃z : ℝ × (n → ℝ)⦄, z ∈ s →
+      LipschitzOnWith
+        ⟨ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+            (𝕜 := ℝ) δ C
+            (firstDerivativeCoordinateRadius (n := n) C)
+            (secondDerivativeCoordinateRadius (n := n) C)
+            (∑ i, ∑ j, KM i j)
+            (∑ a, ∑ i, ∑ j, firstDerivativeCoordinateRadius (n := n) KM a i j)
+            (fun i j => ∑ a, ∑ b,
+              secondDerivativeCoordinateRadius (n := n) KM a b i j),
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst_nonneg
+            (𝕜 := ℝ) hδpos
+            (firstDerivativeCoordinateRadius_nonneg hC)
+            (secondDerivativeCoordinateRadius_nonneg hC)
+            (Finset.sum_nonneg fun i _hi => Finset.sum_nonneg fun j _hj => hKM i j)
+            (Finset.sum_nonneg fun a _ha =>
+              Finset.sum_nonneg fun i _hi =>
+                Finset.sum_nonneg fun j _hj =>
+                  firstDerivativeCoordinateRadius_nonneg hKM a i j)
+            (fun i j =>
+              Finset.sum_nonneg fun a _ha =>
+                Finset.sum_nonneg fun b _hb =>
+                  secondDerivativeCoordinateRadius_nonneg hKM a b i j)⟩
+        (fun u : Y => ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+          (M u z)
+          (fun a i j => (J u i j).spaceDeriv z (parabolicCoordinateUnitVector n a))
+          (fun a b i j => (J u i j).spaceSecondDeriv z
+            (parabolicCoordinateUnitVector n a) (parabolicCoordinateUnitVector n b)))
+        stateSet := by
+  simpa using
+    ricciDeTurckSchematicMatrix_lipschitzOnWith_of_metric_entries_directions_of_unique
+      (X := n → ℝ) (α := α) (s := s)
+      (ξ := parabolicCoordinateUnitVector n)
+      (δ := δ) (C := C) (KM := KM) (stateSet := stateSet)
+      (M := M) J hC hKM hM hMdiff htime hspace hδpos hdet
+
 /-- Compact-coordinate readout Lipschitz bridge for the schematic Ricci-DeTurck RHS when the
 first- and second-derivative primitives are read from caller-supplied metric-entry second jets.
 This packages the pointwise chosen-jet state-space estimate into the finite compact-family
