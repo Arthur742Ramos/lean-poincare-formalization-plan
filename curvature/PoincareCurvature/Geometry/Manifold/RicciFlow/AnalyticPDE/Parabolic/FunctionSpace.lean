@@ -628,6 +628,45 @@ theorem restrictLinearMap_apply (hst : t ⊆ s)
     restrictLinearMap (X := X) (E := E) (α := α) hst u z = u z :=
   rfl
 
+/-- Compose parabolic `C^{0,α}` functions with a continuous linear value map. -/
+def continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) :
+    parabolicC0AlphaSubmodule X E α s →ₗ[ℝ] parabolicC0AlphaSubmodule X F α s where
+  toFun u := ⟨fun z => L (u z), u.2.continuousLinearMap L⟩
+  map_add' := by
+    intro u v
+    ext z
+    simp
+  map_smul' := by
+    intro c u
+    ext z
+    simp
+
+@[simp]
+theorem continuousLinearMap_apply {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) (u : parabolicC0AlphaSubmodule X E α s) (z : ℝ × X) :
+    continuousLinearMap (X := X) (E := E) (α := α) (s := s) L u z = L (u z) :=
+  rfl
+
+/-- Product-valued pairing of two parabolic `C^{0,α}` submodule elements. -/
+def prodLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] :
+    parabolicC0AlphaSubmodule X E α s × parabolicC0AlphaSubmodule X F α s →ₗ[ℝ]
+      parabolicC0AlphaSubmodule X (E × F) α s where
+  toFun u := ⟨fun z => (u.1 z, u.2 z), u.1.2.prod u.2.2⟩
+  map_add' := by
+    intro u v
+    ext z <;> rfl
+  map_smul' := by
+    intro c u
+    ext z <;> rfl
+
+@[simp]
+theorem prodLinearMap_apply {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (u : parabolicC0AlphaSubmodule X E α s × parabolicC0AlphaSubmodule X F α s)
+    (z : ℝ × X) :
+    prodLinearMap (X := X) (E := E) (α := α) (s := s) u z = (u.1 z, u.2 z) :=
+  rfl
+
 /-- Read a parabolic `C^{0,α}` function as a continuous map on a compact time-space piece. -/
 def toContinuousMap {K : TopologicalSpace.Compacts (ℝ × X)}
     (hK : (K : Set (ℝ × X)) ⊆ s) (hα : 0 < α)

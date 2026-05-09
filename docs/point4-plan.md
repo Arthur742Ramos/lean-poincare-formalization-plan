@@ -3795,7 +3795,8 @@ lower bounds, product and reciprocal differences, scalar-function actions,
 curried bilinear maps, operator-valued application and their difference forms,
 and Lipschitz nonlinear composition, including closed norm-ball forms. It
 also packages `ParabolicC0AlphaOn` as a real submodule of all time-space
-functions, proves restriction to smaller domains as a linear map, and gives
+functions, proves restriction to smaller domains, continuous-linear value
+composition, and product-valued pairing as linear maps, and gives
 positive-exponent linear readouts into `ContinuousMap`s on compact time-space
 pieces and compact piece families, with determination on the covered set and
 injectivity for global compact-piece covers. This is the finite-cover
