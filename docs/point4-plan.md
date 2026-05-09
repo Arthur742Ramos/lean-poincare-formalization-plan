@@ -3848,7 +3848,10 @@ scalar, and corresponding compact-piece and finite compact-family readout
 sup-norm bounds for finite Pi-valued higher functions; the same componentwise
 finite-Pi hypotheses now also promote directly to `LipschitzOnWith` estimates
 for single compact-piece, finite compact-family, and linear finite-cover
-readouts with the summed NNReal component constant. Existential
+readouts with the summed NNReal component constant. The product and
+continuous-linear higher radius multipliers now have explicit nonnegativity
+lemmas, and finite-Pi difference controls with component radii `Kᵢ * R`
+assemble into one linear-radius higher difference bound. Existential
 higher membership and the higher
 submodule now also expose actual time, spatial, and second-spatial derivative
 witnesses with value-level `C^{0,α}` controls, without choosing a canonical

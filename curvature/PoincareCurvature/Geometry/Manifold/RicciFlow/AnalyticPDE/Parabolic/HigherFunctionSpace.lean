@@ -380,6 +380,12 @@ spatial derivative only pays for postcomposition by the first-derivative product
 def prodRadius {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] : ℝ :=
   1 + 1 + ‖firstDerivativeProdLinearMap X E F‖ + 1
 
+/-- The product-valued higher parabolic radius multiplier is nonnegative. -/
+theorem prodRadius_nonneg {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] :
+    0 ≤ prodRadius (X := X) (E := E) (F := F) := by
+  unfold prodRadius
+  positivity
+
 theorem prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {v : ℝ × X → F} {M : ℝ}
     (hu : ParabolicC2AlphaNormLe N α u s) (hv : ParabolicC2AlphaNormLe M α v s) :
@@ -491,6 +497,13 @@ def continuousLinearMapRadius {F : Type*} [NormedAddCommGroup F] [NormedSpace �
   ‖L‖ + ‖ContinuousLinearMap.compL ℝ X E F L‖ +
     ‖ContinuousLinearMap.compL ℝ X E F L‖ + ‖L‖
 
+/-- The higher parabolic radius multiplier for a continuous linear value map is nonnegative. -/
+theorem continuousLinearMapRadius_nonneg {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E →L[ℝ] F) :
+    0 ≤ continuousLinearMapRadius (X := X) (E := E) L := by
+  unfold continuousLinearMapRadius
+  positivity
+
 theorem continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (L : E →L[ℝ] F) (h : ParabolicC2AlphaNormLe N α u s) :
     ParabolicC2AlphaNormLe
@@ -598,6 +611,27 @@ theorem pi_sub_pi {ι F : Type*} [Fintype ι] [DecidableEq ι]
   simpa [Pi.sub_apply] using
     pi (X := X) (α := α) (s := s) (N := N)
       (u := fun z : ℝ × X => u z - v z) h
+
+/-- Finite Pi-valued higher difference controls whose component radii are linear in a
+shared scalar assemble into a single linear-radius higher difference bound. -/
+theorem pi_sub_pi_mul_radius {ι F : Type*} [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {K : ι → ℝ} {R : ℝ} {u v : ℝ × X → ι → F}
+    (h : ∀ i, ParabolicC2AlphaNormLe (K i * R) α
+      (fun z => u z i - v z i) s) :
+    ParabolicC2AlphaNormLe
+      ((∑ i,
+        continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * R) α
+      (fun z : ℝ × X => u z - v z) s := by
+  classical
+  have hpi := pi_sub_pi (X := X) (α := α) (s := s)
+    (N := fun i => K i * R) (u := u) (v := v) h
+  convert hpi using 1
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro i _hi
+  ring
 
 /-- A full higher parabolic norm ball for a finite Pi-valued function projects to each
 coordinate as a full higher parabolic norm ball. -/
