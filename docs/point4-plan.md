@@ -97,6 +97,10 @@ restating the pullback metric definition.
 The DeTurck-specific gauge-reduction layer now exposes the same single-time
 scalar/tensor conversion for the concrete gauge-corrected pullback velocity, so
 endpoint arguments can stay at the intrinsic local-solution API when convenient.
+It also has closed-interval gluing wrappers at that same API, accepting
+interior `Ioo` tensor time-regularity plus either tensor endpoint derivatives
+or scalar endpoint inner-product derivatives to produce time-regularity on the
+intrinsic solution's `Icc` time set.
 
 **What still has to be done.** This scalar derivative is a chain-rule
 calculation that splits into three pieces (time derivative of `g`,

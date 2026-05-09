@@ -3185,6 +3185,77 @@ theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackMetric_inner_hasDeri
     SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner_hasDerivAt_of_hasTimeDerivativeAt
       (I := I) (M := M) (Φ := gauge3.maps) hderiv x u v
 
+/-- DeTurck-specific closed-interval gluing from interior tensor time
+regularity and endpoint tensor derivatives. -/
+theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackMetric_hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpoints
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (source : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      source.toIntrinsicDeTurckSolution.metric source.toIntrinsicDeTurckSolution.background
+      source.toIntrinsicDeTurckSolution.timeSet ivp.initialTime)
+    {tmin tmax : ℝ}
+    (htimeSet : source.toIntrinsicDeTurckSolution.timeSet = Set.Icc tmin tmax)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+      (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3)
+      (Set.Ioo tmin tmax))
+    (hleft : HasTimeDerivativeAt (I := I) (M := M)
+      (gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+      (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3)
+      tmin)
+    (hright : HasTimeDerivativeAt (I := I) (M := M)
+      (gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+      (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3)
+      tmax) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+      (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3)
+      source.toIntrinsicDeTurckSolution.timeSet := by
+  intro t ht
+  exact (HasTimeDerivativeOn.of_Ioo_endpoints hIoo hleft hright) (by
+    simpa [htimeSet] using ht)
+
+/-- DeTurck-specific closed-interval gluing from interior tensor time
+regularity and scalar endpoint inner-product derivatives. -/
+theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackMetric_hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpointInner
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (source : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
+    (gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
+      source.toIntrinsicDeTurckSolution.metric source.toIntrinsicDeTurckSolution.background
+      source.toIntrinsicDeTurckSolution.timeSet ivp.initialTime)
+    {tmin tmax : ℝ}
+    (htimeSet : source.toIntrinsicDeTurckSolution.timeSet = Set.Icc tmin tmax)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+      (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3)
+      (Set.Ioo tmin tmax))
+    (hleft : ∀ x : M, ∀ u v : TM x,
+      HasDerivAt
+        (fun τ ↦
+          (source.toIntrinsicDeTurckSolution.metric τ).inner ((gauge3.maps τ) x)
+            ((gauge3.maps τ).pushforwardTangent x u)
+            ((gauge3.maps τ).pushforwardTangent x v))
+        (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3
+          tmin x u v) tmin)
+    (hright : ∀ x : M, ∀ u v : TM x,
+      HasDerivAt
+        (fun τ ↦
+          (source.toIntrinsicDeTurckSolution.metric τ).inner ((gauge3.maps τ) x)
+            ((gauge3.maps τ).pushforwardTangent x u)
+            ((gauge3.maps τ).pushforwardTangent x v))
+        (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3
+          tmax x u v) tmax) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+      (source.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge gauge3)
+      source.toIntrinsicDeTurckSolution.timeSet :=
+  source.gaugeCorrectedPullbackMetric_hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpoints
+    gauge3 htimeSet hIoo
+    (source.gaugeCorrectedPullbackMetric_hasTimeDerivativeAt_of_inner_hasDerivAt
+      gauge3 hleft)
+    (source.gaugeCorrectedPullbackMetric_hasTimeDerivativeAt_of_inner_hasDerivAt
+      gauge3 hright)
+
 theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_satisfiesEquationAt_of_right_slot_curvature
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (source : IntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp)
