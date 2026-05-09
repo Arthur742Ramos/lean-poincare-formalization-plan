@@ -3882,7 +3882,10 @@ canonical `derivWithin`/`fderivWithin` on unique-differentiability slices, and
 any two chosen jets have the same time, spatial, and second-spatial derivative
 fields there. Consequently, the derivative-component `C^{0,α}` controls
 supplied by a higher norm ball can now be transported from the existentially
-selected jet to any caller-supplied second jet on such slices. The higher
+selected jet to any caller-supplied second jet on such slices; the corresponding
+difference theorem controls the value, spatial-derivative, second-spatial
+derivative, and time-derivative differences of any two supplied jets from one
+higher norm-ball bound on the value difference. The higher
 submodule also has finite-Pi coordinate projection and component-assembly maps,
 and inherits compact value readouts from that forgetful map: single
 compact pieces, finite compact families, and the linear finite-cover readout

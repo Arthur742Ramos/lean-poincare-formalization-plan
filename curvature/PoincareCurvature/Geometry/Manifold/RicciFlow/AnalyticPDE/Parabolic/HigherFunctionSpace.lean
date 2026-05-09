@@ -226,8 +226,19 @@ def smul (c : ℝ) (J : ParabolicSecondJet u s) :
 /-- Difference of two parabolic second jets, with derivative witnesses subtracted
 componentwise. -/
 def sub {v : ℝ × X → E} (Ju : ParabolicSecondJet u s) (Jv : ParabolicSecondJet v s) :
-    ParabolicSecondJet (fun z : ℝ × X => u z - v z) s := by
-  simpa [sub_eq_add_neg] using Ju.add Jv.neg
+    ParabolicSecondJet (fun z : ℝ × X => u z - v z) s where
+  timeDeriv := fun z => Ju.timeDeriv z - Jv.timeDeriv z
+  spaceDeriv := fun z => Ju.spaceDeriv z - Jv.spaceDeriv z
+  spaceSecondDeriv := fun z => Ju.spaceSecondDeriv z - Jv.spaceSecondDeriv z
+  hasTimeDeriv := by
+    intro z hz
+    simpa using (Ju.hasTimeDeriv hz).sub (Jv.hasTimeDeriv hz)
+  hasSpaceDeriv := by
+    intro z hz
+    simpa using (Ju.hasSpaceDeriv hz).sub (Jv.hasSpaceDeriv hz)
+  hasSpaceSecondDeriv := by
+    intro z hz
+    simpa [Pi.sub_apply] using (Ju.hasSpaceSecondDeriv hz).sub (Jv.hasSpaceSecondDeriv hz)
 
 /-- Product of two parabolic second jets, with derivative witnesses paired componentwise. -/
 def prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {v : ℝ × X → F}
@@ -749,6 +760,30 @@ theorem secondJet_c0AlphaNormLe_self_of_unique (h : ParabolicC2AlphaNormLe N α 
   · exact hxx.congr fun z hz =>
       J.spaceSecondDeriv_eq_of_unique K hz (fun {x} hx => hspace (z := (z.1, x)) hx)
   · exact ht.congr fun z hz => J.timeDeriv_eq_of_unique K hz (htime hz)
+
+/-- On unique-differentiability slices, a higher norm-ball bound on a difference controls the
+componentwise differences of any caller-supplied second jets for the two functions. -/
+theorem secondJet_sub_c0AlphaNormLe_self_of_unique {v : ℝ × X → E}
+    (h : ParabolicC2AlphaNormLe N α (fun z => u z - v z) s)
+    (Ju : ParabolicSecondJet u s) (Jv : ParabolicSecondJet v s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    ParabolicC0AlphaNormLe N α (fun z => u z - v z) s ∧
+      ParabolicC0AlphaNormLe N α (fun z => Ju.spaceDeriv z - Jv.spaceDeriv z) s ∧
+        ParabolicC0AlphaNormLe N α
+          (fun z => Ju.spaceSecondDeriv z - Jv.spaceSecondDeriv z) s ∧
+          ParabolicC0AlphaNormLe N α (fun z => Ju.timeDeriv z - Jv.timeDeriv z) s := by
+  rcases h.secondJet_c0AlphaNormLe_self_of_unique (Ju.sub Jv) htime hspace with
+    ⟨huv, hx, hxx, ht⟩
+  refine ⟨huv, ?_, ?_, ?_⟩
+  · simpa [ParabolicSecondJet.sub, ParabolicSecondJet.add, ParabolicSecondJet.neg,
+      sub_eq_add_neg] using hx
+  · simpa [ParabolicSecondJet.sub, ParabolicSecondJet.add, ParabolicSecondJet.neg,
+      sub_eq_add_neg] using hxx
+  · simpa [ParabolicSecondJet.sub, ParabolicSecondJet.add, ParabolicSecondJet.neg,
+      sub_eq_add_neg] using ht
 
 /-- A higher single-radius bound supplies one chosen second jet whose value and
 derivative components are pointwise bounded by the same higher radius. -/
