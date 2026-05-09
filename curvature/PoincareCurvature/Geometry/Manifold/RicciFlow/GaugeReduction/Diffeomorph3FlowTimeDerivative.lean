@@ -6416,6 +6416,29 @@ theorem CoordinatePullbackMetricModelDerivativeWithinOn.mono
   refine ⟨B, B', A, D, uE, vE, ?_, hB.mono hst, hA.mono hst, hvalue⟩
   exact hmodel_eq.filter_mono (nhdsWithin_mono τ hst)
 
+/-- Ordinary coordinate-model derivative data can be used as within-set data on the same
+time set. -/
+theorem CoordinatePullbackMetricModelDerivativeOn.toWithinOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hmodel : CoordinatePullbackMetricModelDerivativeOn (I := I) (M := M)
+      Φ g gdot s) :
+    CoordinatePullbackMetricModelDerivativeWithinOn (I := I) (M := M)
+      Φ g gdot s := by
+  letI : NormedAddCommGroup (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  intro τ hτ x u v
+  obtain ⟨B, B', A, D, uE, vE, hmodel_eq, hB, hA, hvalue⟩ :=
+    hmodel hτ x u v
+  refine ⟨B, B', A, D, uE, vE, ?_, hB.hasDerivWithinAt, hA.hasDerivWithinAt,
+    hvalue⟩
+  exact hmodel_eq.filter_mono nhdsWithin_le_nhds
+
 /-- Restrict within-set field-level coordinate-model derivative data to a
 smaller time set. -/
 theorem CoordinatePullbackMetricFieldDerivativeWithinOn.mono
@@ -6432,6 +6455,24 @@ theorem CoordinatePullbackMetricFieldDerivativeWithinOn.mono
   refine ⟨Bfield, Bfield', y, y', A, D, uE, vE, ?_, hB,
     hy.mono hst, hA.mono hst, hvalue⟩
   exact hmodel.filter_mono (nhdsWithin_mono τ hst)
+
+/-- Ordinary field-level coordinate derivative data can be used as within-set data on the same
+time set. -/
+theorem CoordinatePullbackMetricFieldDerivativeOn.toWithinOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hfield : CoordinatePullbackMetricFieldDerivativeOn (I := I) (M := M)
+      Φ g gdot s) :
+    CoordinatePullbackMetricFieldDerivativeWithinOn (I := I) (M := M)
+      Φ g gdot s := by
+  intro τ hτ x u v
+  obtain ⟨Bfield, Bfield', y, y', A, D, uE, vE, hmodel, hB, hy, hA, hvalue⟩ :=
+    hfield hτ x u v
+  refine ⟨Bfield, Bfield', y, y', A, D, uE, vE, ?_, hB,
+    hy.hasDerivWithinAt, hA.hasDerivWithinAt, hvalue⟩
+  exact hmodel.filter_mono nhdsWithin_le_nhds
 
 /-- Concrete component-derivative data for the preferred coordinate pullback
 model. This names the final positive-dimensional moving-coordinate obligations:
@@ -6539,6 +6580,26 @@ theorem CoordinatePullbackMetricComponentDerivativeOn.mono
     CoordinatePullbackMetricComponentDerivativeOn (I := I) (M := M) Φ g gdot s := by
   intro τ hτ x u v
   exact hdata (hst hτ) x u v
+
+/-- Ordinary concrete component derivative data can be used as within-set component data on
+the same time set. -/
+theorem CoordinatePullbackMetricComponentDerivativeOn.toWithinOn
+    {Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M)}
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {s : Set ℝ}
+    (hdata : CoordinatePullbackMetricComponentDerivativeOn
+      (I := I) (M := M) Φ g gdot s) :
+    CoordinatePullbackMetricComponentDerivativeWithinOn (I := I) (M := M)
+      Φ g gdot s := by
+  letI : NormedAddCommGroup (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+  intro τ hτ x u v
+  obtain ⟨B', D, hB, hA, hvalue⟩ := hdata hτ x u v
+  exact ⟨B', D, hB.hasDerivWithinAt, hA.hasDerivWithinAt, hvalue⟩
 
 /-- Concrete component-derivative form of the within-set coordinate-model
 derivative package. -/

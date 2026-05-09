@@ -155,7 +155,11 @@ eventual-equality transfer forms are also named, matching the chart-local
 geometric scalar identities used downstream.
 Within-set field-level coordinate derivative data now also restricts
 monotonically to smaller time sets, so the full-field endpoint route can be
-localized after shrinking a Picard interval.
+localized after shrinking a Picard interval. Ordinary coordinate-model,
+field-level, and concrete component derivative packages now also promote to
+their within-set endpoint versions on the same time set, so stronger interior
+derivative data can enter the closed-Picard scalar route without being
+repackaged by callers.
 Closed-interval scalar derivative data now upgrades back to ordinary
 `PullbackMetricInnerDerivativeOn` on the open interval, so endpoint component
 work can feed the existing interior gauge-pulled metric time-regularity routes;
