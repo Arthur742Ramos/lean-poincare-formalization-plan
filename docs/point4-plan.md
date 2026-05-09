@@ -3815,7 +3815,10 @@ and by sup-bound-only difference estimates; pairwise norm-ball and sup-bound
 difference estimates now promote directly to `LipschitzOnWith` estimates for
 single compact-piece, finite compact-family, and linear finite-cover readouts,
 with finite compact-family `LipschitzOnWith` estimates unpacking to pointwise
-compact-coordinate distance bounds.
+compact-coordinate distance bounds. Those time-space compact-coordinate bounds
+now also restrict to fixed-time spatial compact readouts whenever the chosen
+time-space compact pieces cover each requested time slice, giving the direct
+bridge from parabolic readouts to spatial Banach-chart coordinate estimates.
 `AnalyticPDE/Parabolic/HigherFunctionSpace.lean` now begins the coordinate
 `C^{2+α,1+α/2}` layer: it defines time and spatial slices, packages a genuine
 parabolic second jet with time, spatial, and second-spatial derivative
