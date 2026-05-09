@@ -3786,7 +3786,10 @@ existential local cylinders while preserving their Holder constants, with
 matching local-frame Gram-coordinate bridges. The interval
 Banach-chart constructor now also has a real-constant coordinate-Lipschitz
 entry point, so those matrix constants no longer need to be prepackaged as
-`ℝ≥0` by callers. This is a
+`ℝ≥0` by callers. It now also accepts time-dependent finite coordinate-family
+`LipschitzOnWith` readouts directly, using the continuous-section
+finite-cover theorem to produce the pointwise coordinate-distance hypothesis
+for the preferred-cover chart constructor. This is a
 coordinate Lipschitz bridge toward the fibrewise RHS hypothesis above, not a
 Schauder estimate or the actual Banach-chart construction.
 The first function-space module for this item is now

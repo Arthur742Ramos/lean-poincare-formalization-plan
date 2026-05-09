@@ -599,6 +599,160 @@ def timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallCoordDistLeReal
       simpa [KcoordNN] using hcoord τ hτ hs ht i x)
     geometric
 
+/-- Build an interval-scoped Ricci-DeTurck Banach chart from finite-cover coordinate-family
+Lipschitz estimates.  This packages the standard finite-coordinate readout bridge before invoking
+the pointwise coordinate-distance constructor. -/
+def timeDependentGeometricRicciDeTurckBanachChartOnIccOfCoordFamilyLipschitzOnWith
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F TM I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [_root_.Bundle.RiemannianBundle TM]
+    [IsContinuousRiemannianBundle (B := M) F TM]
+    {κ : Type*} [Fintype κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F TM)
+    {A : ℝ →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {a L Kpic Kcoord : ℝ≥0}
+    {C : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      @norm (TM x.1 →L[ℝ] F) ContinuousLinearMap.hasOpNorm
+        ((trivializationAt F TM (x0 i)).continuousLinearMapAt ℝ x.1) ≤ C)
+    (picard : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩
+      (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover) a 0 L Kpic)
+    (hcoordLip : ∀ τ, τ ∈ Icc t₀ T →
+      LipschitzOnWith Kcoord
+        (fun s =>
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            et Kc hKc Ko hKo hKoEq hcover (A τ s)).1 :
+              CoordFamily (F := BilF) Kc))
+        (positiveDefiniteLocus
+          (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover))
+    (geometric : ∀ τ s, s ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+      ∃ (g : MetricFamily (I := I) (M := M))
+        (background : ConnectionFamily (I := I) (M := M)),
+        ∀ (x : M) (u v : TangentSpace I x),
+          A τ s x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background τ x u v) :
+    Σ Kstate : ℝ≥0,
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate := by
+  have hcoord :
+      ∀ τ, τ ∈ Icc t₀ T → ∀ ⦃s⦄, s ∈ positiveDefiniteLocus
+          (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+        ∀ ⦃t⦄, t ∈ positiveDefiniteLocus
+          (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+        ∀ i (x : Kc i),
+          dist
+              ((equivCompatibleCoordFamilySubmodule
+                (𝕜 := ℝ) (F := BilF) (V := BilW)
+                et Kc hKc Ko hKo hKoEq hcover (A τ s)).1 i x)
+              ((equivCompatibleCoordFamilySubmodule
+                (𝕜 := ℝ) (F := BilF) (V := BilW)
+                et Kc hKc Ko hKo hKoEq hcover (A τ t)).1 i x)
+            ≤ (Kcoord : ℝ) * dist s t :=
+    forall_coord_dist_le_family_of_coordFamily_lipschitzOnWith
+      (𝕜 := ℝ) (F := BilF) (V := BilW) (timeSet := Icc t₀ T)
+      (et := et) (Kc := Kc) (hKc := hKc)
+      (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+      (stateSet := positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover)
+      (A := A) (L := Kcoord) hcoordLip
+  exact timeDependentGeometricRicciDeTurckBanachChartOnIccOfForallCoordDistLe
+    (M := M) (F := F) (I := I)
+    x0 et het Kc hKc Ko hKo hKoEq hcover g₀ hT
+    (A := A) (a := a) (L := L) (Kpic := Kpic) (Kcoord := Kcoord)
+    hC0 hC picard hcoord geometric
+
+/-- Real-constant variant of
+`timeDependentGeometricRicciDeTurckBanachChartOnIccOfCoordFamilyLipschitzOnWith`. -/
+def timeDependentGeometricRicciDeTurckBanachChartOnIccOfCoordFamilyLipschitzOnWithReal
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F TM I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [_root_.Bundle.RiemannianBundle TM]
+    [IsContinuousRiemannianBundle (B := M) F TM]
+    {κ : Type*} [Fintype κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F TM)
+    {A : ℝ →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ} (hT : t₀ < T)
+    {a L Kpic : ℝ≥0} {Kcoord : ℝ} (hKcoord : 0 ≤ Kcoord)
+    {C : ℝ} (hC0 : 0 ≤ C)
+    (hC : ∀ i (x : Kc i),
+      @norm (TM x.1 →L[ℝ] F) ContinuousLinearMap.hasOpNorm
+        ((trivializationAt F TM (x0 i)).continuousLinearMapAt ℝ x.1) ≤ C)
+    (picard : IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩
+      (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          et Kc hKc Ko hKo hKoEq hcover) a 0 L Kpic)
+    (hcoordLip : ∀ τ, τ ∈ Icc t₀ T →
+      LipschitzOnWith ⟨Kcoord, hKcoord⟩
+        (fun s =>
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            et Kc hKc Ko hKo hKoEq hcover (A τ s)).1 :
+              CoordFamily (F := BilF) Kc))
+        (positiveDefiniteLocus
+          (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover))
+    (geometric : ∀ τ s, s ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := TM) et Kc hKc Ko hKo hKoEq hcover →
+      ∃ (g : MetricFamily (I := I) (M := M))
+        (background : ConnectionFamily (I := I) (M := M)),
+        ∀ (x : M) (u v : TangentSpace I x),
+          A τ s x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background τ x u v) :
+    Σ Kstate : ℝ≥0,
+      TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+        (M := M) (F := F) (I := I)
+        x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate := by
+  let KcoordNN : ℝ≥0 := ⟨Kcoord, hKcoord⟩
+  exact timeDependentGeometricRicciDeTurckBanachChartOnIccOfCoordFamilyLipschitzOnWith
+    (M := M) (F := F) (I := I)
+    x0 et het Kc hKc Ko hKo hKoEq hcover g₀ hT
+    (A := A) (a := a) (L := L) (Kpic := Kpic) (Kcoord := KcoordNN)
+    hC0 hC picard
+    (fun τ hτ => by
+      simpa [KcoordNN] using hcoordLip τ hτ)
+    geometric
+
 /-- Interval Ricci-DeTurck charts can use the preferred-cover smooth-density theorem directly in the
 Picard shrink step.  The remaining density inputs are the finite-cover inverse bound used by the
 transported Banach norm and the local tangent-trivialization bound used to smooth bilinear sections. -/
