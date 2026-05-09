@@ -584,7 +584,11 @@ geometric tangent vectors.  The raw variational correction route now consumes
 that algebra through
 `Diffeomorph3GaugeFlowOn.lieCorrection_modelSlots_of_tangentVectorOfCoordinate_Df_eq_cov_sub_extend`,
 allowing the local `Df` identification to be stated on raw model coordinates
-instead of only on `sourceTangentCoordinate` slots.
+instead of only on `sourceTangentCoordinate` slots.  The signed DeTurck
+correction endpoint now has the same entry point as
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_tangentVectorOfCoordinate_Df_eq_cov_sub_extend`,
+so arbitrary model-slot `Df` identities can be carried directly to the
+`-intrinsicDeTurckCorrection` scalar target.
 The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent
