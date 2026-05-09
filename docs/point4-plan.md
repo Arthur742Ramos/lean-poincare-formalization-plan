@@ -571,6 +571,11 @@ centered-coordinate wrappers entirely when the model slots are
 `tangentVectorOfCoordinate` is now named as well, with two-sided simplification
 lemmas against `sourceTangentCoordinate`, so remaining velocity identities can
 switch between model-coordinate and geometric tangent-vector forms directly.
+The fixed-time spatial derivative of `metricBilinearCoordinateField` now also
+has model-slot forms using `tangentVectorOfCoordinate`, so Banach/readout
+arguments carrying raw model coordinates can use the exterior-derivative and
+Levi-Civita compatibility identities without first restating the slots as
+`sourceTangentCoordinate`s.
 The raw-flow metric-coordinate bridge now has a geometric-slot variant,
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField_geometricValue`,
 whose scalar velocity hypothesis is stated using actual pushed-forward tangent

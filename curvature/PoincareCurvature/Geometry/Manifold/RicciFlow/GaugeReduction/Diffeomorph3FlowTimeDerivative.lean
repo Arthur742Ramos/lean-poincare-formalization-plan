@@ -4918,6 +4918,48 @@ theorem metricBilinearCoordinateField_fixedTime_fderivWithin_sourceTangentCoordi
   exact chosenLeviCivitaFamily_extDerivFun_inner_extend_eq
     (I := I) (M := M) g t p X u v
 
+/-- Fixed-time spatial derivative of the metric-coordinate field at the chart
+center, evaluated on arbitrary model tangent coordinates, rewritten as the
+exterior derivative of the metric on the corresponding canonical `extend`
+sections. -/
+theorem metricBilinearCoordinateField_fixedTime_fderivWithin_tangentVectorOfCoordinate_eq_extDerivFun_extend
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
+    (X : TangentSpace I p) (uE vE : E) :
+    (fderivWithin ℝ
+      (fun yE : E ↦ metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+      (Set.range I) ((extChartAt I p) p)) X uE vE =
+      extDerivFun (I := I)
+        (fun y : M ↦ (g t).inner y
+          (FiberBundle.extend E (tangentVectorOfCoordinate (I := I) p uE) y)
+          (FiberBundle.extend E (tangentVectorOfCoordinate (I := I) p vE) y)) p X := by
+  simpa using
+    metricBilinearCoordinateField_fixedTime_fderivWithin_sourceTangentCoordinate_eq_extDerivFun_extend
+      (I := I) (M := M) g t p X
+      (tangentVectorOfCoordinate (I := I) p uE)
+      (tangentVectorOfCoordinate (I := I) p vE)
+
+/-- Fixed-time spatial derivative of the metric-coordinate field at the chart
+center, evaluated on arbitrary model tangent coordinates, rewritten through
+metric compatibility of the chosen Levi-Civita slice. -/
+theorem metricBilinearCoordinateField_fixedTime_fderivWithin_tangentVectorOfCoordinate_eq_chosenLeviCivita_extend
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
+    (X : TangentSpace I p) (uE vE : E) :
+    (fderivWithin ℝ
+      (fun yE : E ↦ metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
+      (Set.range I) ((extChartAt I p) p)) X uE vE =
+      (g t).inner p
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (FiberBundle.extend E (tangentVectorOfCoordinate (I := I) p uE)) p X)
+        (tangentVectorOfCoordinate (I := I) p vE) +
+      (g t).inner p (tangentVectorOfCoordinate (I := I) p uE)
+        (((chosenLeviCivitaFamily (I := I) (M := M) g) t)
+          (FiberBundle.extend E (tangentVectorOfCoordinate (I := I) p vE)) p X) := by
+  simpa using
+    metricBilinearCoordinateField_fixedTime_fderivWithin_sourceTangentCoordinate_eq_chosenLeviCivita_extend
+      (I := I) (M := M) g t p X
+      (tangentVectorOfCoordinate (I := I) p uE)
+      (tangentVectorOfCoordinate (I := I) p vE)
+
 /-- The time-direction derivative of the named metric-coordinate field at the
 chart center is exactly the tensor time derivative of the metric.  This isolates
 the part of the `metricBilinearCoordinateField` Fréchet derivative supplied by
