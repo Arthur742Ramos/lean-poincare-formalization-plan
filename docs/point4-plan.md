@@ -1046,7 +1046,10 @@ The geometric endpoint data records now mirror this: fixed-IVP, global family,
 and interval family data can replace their bundled gauge-flow component by raw
 gauge-flow existence plus named scalar or coordinate-level pullback-metric
 derivative data, not only by a preconverted tensor pullback-time-derivative
-proof.
+proof. The global and interval geometric endpoint family records now also
+project directly to the chosen-background Ricci-DeTurck theorem family before
+gauge reduction, so callers can keep that package when they do not yet need the
+intrinsic or ordinary Ricci-flow projections.
 The theorem-family zero-gauge-field constructor now also carries the required
 pullback metric time-derivative proof, so any family whose intrinsic DeTurck
 gauge field vanishes on each solution time set can enter the gauge-reduction
