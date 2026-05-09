@@ -4739,6 +4739,89 @@ theorem finiteCoverChosenSecondJet_mem_closedBall_symm_pi_of_component_normLe_su
     finiteCoverChosenSecondJet_dist_le_pi_of_component_normLe_sub_unique_ofCover
       (X := X) (α := α) (s := s) Kc hKc hα htime hspace hcover h
 
+/-- Pairwise finite-coordinate higher difference controls give a Lipschitz estimate in the
+combined finite-cover chosen second-jet seminorm, once an aggregate Lipschitz constant bounds
+the coordinate-insertion radius sum. -/
+theorem lipschitzOnWith_finiteCoverChosenSecondJet_pi_of_component_normLe_sub_unique
+    {Y κ ι F : Type*} [PseudoMetricSpace Y] [Fintype κ] [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    {stateSet : Set Y} {L : ℝ≥0} {K : ι → ℝ}
+    {A : Y → parabolicC2AlphaSubmodule X (ι → F) α s}
+    (hL :
+      (∑ i,
+        ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) ≤ (L : ℝ))
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i,
+      ParabolicC2AlphaNormLe (K i * dist u v) α
+        (fun z => A u z i - A v z i) s)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2) :
+    letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverChosenSecondJetSeminormedAddCommGroup
+        (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace
+    LipschitzOnWith L A stateSet := by
+  letI : SeminormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverChosenSecondJetSeminormedAddCommGroup
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hdist :
+      dist (A u) (A v) ≤
+        (∑ i,
+          ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+            (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * dist u v :=
+    finiteCoverChosenSecondJet_dist_le_pi_of_component_normLe_sub_unique
+      (X := X) (α := α) (s := s) Kc hKc hα
+      (R := dist u v) (K := K) (u := A u) (v := A v)
+      (h hu hv) htime hspace
+  exact hdist.trans (mul_le_mul_of_nonneg_right hL dist_nonneg)
+
+/-- Pairwise finite-coordinate higher difference controls give a Lipschitz estimate in the
+separated all-cover combined finite-cover chosen second-jet norm, once an aggregate Lipschitz
+constant bounds the coordinate-insertion radius sum. -/
+theorem lipschitzOnWith_finiteCoverChosenSecondJet_pi_of_component_normLe_sub_unique_ofCover
+    {Y κ ι F : Type*} [PseudoMetricSpace Y] [Fintype κ] [Fintype ι] [DecidableEq ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (htime : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (timeSliceDomain s z.2) z.1)
+    (hspace : ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      UniqueDiffWithinAt ℝ (spaceSliceDomain s z.1) z.2)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    {stateSet : Set Y} {L : ℝ≥0} {K : ι → ℝ}
+    {A : Y → parabolicC2AlphaSubmodule X (ι → F) α s}
+    (hL :
+      (∑ i,
+        ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+          (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) ≤ (L : ℝ))
+    (h : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ i,
+      ParabolicC2AlphaNormLe (K i * dist u v) α
+        (fun z => A u z i - A v z i) s) :
+    letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+      finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+        (X := X) (E := ι → F) (α := α) (s := s)
+        Kc hKc hα htime hspace hcover
+    LipschitzOnWith L A stateSet := by
+  letI : NormedAddCommGroup (parabolicC2AlphaSubmodule X (ι → F) α s) :=
+    finiteCoverChosenSecondJetNormedAddCommGroupOfCover
+      (X := X) (E := ι → F) (α := α) (s := s) Kc hKc hα htime hspace hcover
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro u hu v hv
+  have hdist :
+      dist (A u) (A v) ≤
+        (∑ i,
+          ParabolicC2AlphaNormLe.continuousLinearMapRadius (X := X) (E := F)
+            (ContinuousLinearMap.single ℝ (fun _ : ι => F) i) * K i) * dist u v :=
+    finiteCoverChosenSecondJet_dist_le_pi_of_component_normLe_sub_unique_ofCover
+      (X := X) (α := α) (s := s) Kc hKc hα htime hspace hcover
+      (R := dist u v) (K := K) (u := A u) (v := A v) (h hu hv)
+  exact hdist.trans (mul_le_mul_of_nonneg_right hL dist_nonneg)
+
 /-- Pairwise higher difference estimates give a Lipschitz estimate in the induced combined
 finite-cover chosen second-jet seminorm. -/
 theorem lipschitzOnWith_finiteCoverChosenSecondJet_of_normLe_sub_unique

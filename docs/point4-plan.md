@@ -4027,8 +4027,10 @@ seminorms and the combined finite-cover chosen-second-jet seminorm now also
 have direct and symmetric closed-ball readouts from those norm-ball difference
 estimates, including finite-coordinate value variants, combined chosen-jet
 variants with coordinate-insertion radii, and the separated all-cover normed
-variants. They do not make the derivative choice canonical or upgrade this
-compact-family jet seminorm into the full
+variants. The finite-coordinate combined chosen-jet estimates also have
+`LipschitzOnWith` forms once an aggregate `ℝ≥0` constant bounds the
+coordinate-insertion radius sum. They do not make the derivative choice
+canonical or upgrade this compact-family jet seminorm into the full
 `C^{2+α,1+α/2}` Banach
 norm, Schauder estimate, or completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
