@@ -3946,7 +3946,9 @@ now also has compact-family, linear finite-cover, and pointwise
 compact-coordinate readout wrappers, carrying the unique-differentiability
 transport all the way to the finite chart handoff; it also restricts to
 fixed-time spatial compact readouts when the chosen time-space compact family
-covers those slices.
+covers those slices. Coordinate-unit direction readouts now reduce by named
+simp lemmas to the coordinate-radius API, including nonnegativity readouts for
+those coordinate radii.
 The exact and coarser compact readouts now also unpack to pointwise
 compact-coordinate distance bounds with the same schematic RHS constant,
 including finite-family forms with either memberwise constants or one shared

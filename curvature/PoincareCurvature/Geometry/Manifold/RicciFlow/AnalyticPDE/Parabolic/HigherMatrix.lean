@@ -150,6 +150,34 @@ def secondDerivativeCoordinateRadius {n : Type*} [Fintype n] [DecidableEq n]
     (R : n → n → ℝ) : n → n → n → n → ℝ :=
   fun a b i j => secondDerivativeCoordinateReadoutOpNorm (n := n) a b * R i j
 
+@[simp]
+theorem firstDerivativeVectorRadius_coordinateUnitVector {n : Type*} [Fintype n]
+    [DecidableEq n] (R : n → n → ℝ) :
+    firstDerivativeVectorRadius (X := n → ℝ) (parabolicCoordinateUnitVector n) R =
+      firstDerivativeCoordinateRadius (n := n) R :=
+  rfl
+
+@[simp]
+theorem secondDerivativeVectorRadius_coordinateUnitVector {n : Type*} [Fintype n]
+    [DecidableEq n] (R : n → n → ℝ) :
+    secondDerivativeVectorRadius (X := n → ℝ) (parabolicCoordinateUnitVector n) R =
+      secondDerivativeCoordinateRadius (n := n) R :=
+  rfl
+
+theorem firstDerivativeCoordinateRadius_nonneg {n : Type*} [Fintype n] [DecidableEq n]
+    {R : n → n → ℝ} (hR : ∀ i j, 0 ≤ R i j) :
+    ∀ a i j, 0 ≤ firstDerivativeCoordinateRadius (n := n) R a i j := by
+  simpa using
+    (firstDerivativeVectorRadius_nonneg (X := n → ℝ)
+      (parabolicCoordinateUnitVector n) hR)
+
+theorem secondDerivativeCoordinateRadius_nonneg {n : Type*} [Fintype n] [DecidableEq n]
+    {R : n → n → ℝ} (hR : ∀ i j, 0 ≤ R i j) :
+    ∀ a b i j, 0 ≤ secondDerivativeCoordinateRadius (n := n) R a b i j := by
+  simpa using
+    (secondDerivativeVectorRadius_nonneg (X := n → ℝ)
+      (parabolicCoordinateUnitVector n) hR)
+
 namespace ParabolicC0AlphaNormLe
 
 variable {X E F : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
