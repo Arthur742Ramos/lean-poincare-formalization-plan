@@ -37132,6 +37132,135 @@ theorem hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_endpointI
     (G.flow.maps3.pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt hleft)
     (G.flow.maps3.pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt hright)
 
+/-- Selected closed-interval gluing from interior tensor data and tensor
+derivative data at every non-interior boundary point. -/
+theorem hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_boundary
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo tmin tmax))
+    (hboundary : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → t ∉ Ioo tmin tmax →
+      HasTimeDerivativeAt (I := I) (M := M)
+        (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+        (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+        t) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet := by
+  intro t ht
+  have htIcc : t ∈ Icc tmin tmax := by
+    simpa [htimeSet] using ht
+  by_cases htInterior : t ∈ Ioo tmin tmax
+  · exact hIoo htInterior
+  · exact hboundary htIcc htInterior
+
+/-- Restricted-symmetric selected closed-interval gluing from interior tensor
+data and tensor derivative data at every non-interior boundary point. -/
+theorem hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_boundary
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo (ivp.initialTime - ε) (ivp.initialTime + ε)))
+    (hboundary : ∀ ⦃t : ℝ⦄,
+      t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) →
+      t ∉ Ioo (ivp.initialTime - ε) (ivp.initialTime + ε) →
+      HasTimeDerivativeAt (I := I) (M := M)
+        (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+        (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+        t) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_boundary
+    (G.timeSet_eq_Icc_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol)
+    hIoo hboundary
+
+/-- Selected closed-interval gluing from interior tensor data and scalar
+inner-product derivative data at every non-interior boundary point. -/
+theorem hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_boundaryInner
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo tmin tmax))
+    (hboundary : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → t ∉ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            (G.solution.1.toIntrinsicDeTurckSolution.metric τ).inner
+              ((G.flow.maps3 τ) x)
+              ((G.flow.maps3 τ).pushforwardTangent x u)
+              ((G.flow.maps3 τ).pushforwardTangent x v))
+          (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge
+            t x u v) t) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_boundary htimeSet hIoo
+    (fun {t} ht hnot ↦
+      G.flow.maps3.pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt
+        (hboundary (t := t) ht hnot))
+
+/-- Restricted-symmetric selected closed-interval gluing from interior tensor
+data and scalar inner-product derivative data at every non-interior boundary
+point. -/
+theorem hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_boundaryInner
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo (ivp.initialTime - ε) (ivp.initialTime + ε)))
+    (hboundary : ∀ ⦃t : ℝ⦄,
+      t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) →
+      t ∉ Ioo (ivp.initialTime - ε) (ivp.initialTime + ε) →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            (G.solution.1.toIntrinsicDeTurckSolution.metric τ).inner
+              ((G.flow.maps3 τ) x)
+              ((G.flow.maps3 τ).pushforwardTangent x u)
+              ((G.flow.maps3 τ).pushforwardTangent x v))
+          (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge
+            t x u v) t) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_boundary
+    sol hε hsub hGsol hIoo
+    (fun {t} ht hnot ↦
+      G.flow.maps3.pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt
+        (hboundary (t := t) ht hnot))
+
 /-- Interior plus endpoint tensor time-derivative data on a selected closed
 Picard interval gives the selected scalar inner-derivative package. -/
 theorem pullbackMetricInnerDerivativeData_of_timeSet_eq_Icc_of_Ioo_endpoints
@@ -37261,6 +37390,120 @@ theorem pullbackMetricInnerDerivativeData_of_solution_eq_restrictSymmetricIcc_of
     sol hε hsub hGsol hIoo
     (G.flow.maps3.pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt hleft)
     (G.flow.maps3.pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt hright)
+
+/-- Selected scalar package bridge from interior tensor data and boundary-shaped
+tensor derivative data. -/
+theorem pullbackMetricInnerDerivativeData_of_timeSet_eq_Icc_of_Ioo_boundary
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo tmin tmax))
+    (hboundary : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → t ∉ Ioo tmin tmax →
+      HasTimeDerivativeAt (I := I) (M := M)
+        (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+        (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+        t) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (G.hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_boundary
+      htimeSet hIoo hboundary)
+
+/-- Restricted-symmetric selected scalar package bridge from interior tensor
+data and boundary-shaped tensor derivative data. -/
+theorem pullbackMetricInnerDerivativeData_of_solution_eq_restrictSymmetricIcc_of_Ioo_boundary
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo (ivp.initialTime - ε) (ivp.initialTime + ε)))
+    (hboundary : ∀ ⦃t : ℝ⦄,
+      t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) →
+      t ∉ Ioo (ivp.initialTime - ε) (ivp.initialTime + ε) →
+      HasTimeDerivativeAt (I := I) (M := M)
+        (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+        (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+        t) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+    (G.hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_boundary
+      sol hε hsub hGsol hIoo hboundary)
+
+/-- Selected scalar package bridge from interior tensor data and boundary-shaped
+scalar inner-product derivative data. -/
+theorem pullbackMetricInnerDerivativeData_of_timeSet_eq_Icc_of_Ioo_boundaryInner
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo tmin tmax))
+    (hboundary : ∀ ⦃t : ℝ⦄, t ∈ Icc tmin tmax → t ∉ Ioo tmin tmax →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            (G.solution.1.toIntrinsicDeTurckSolution.metric τ).inner
+              ((G.flow.maps3 τ) x)
+              ((G.flow.maps3 τ).pushforwardTangent x u)
+              ((G.flow.maps3 τ).pushforwardTangent x v))
+          (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge
+            t x u v) t) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.pullbackMetricInnerDerivativeData_of_timeSet_eq_Icc_of_Ioo_boundary
+    htimeSet hIoo
+    (fun {t} ht hnot ↦
+      G.flow.maps3.pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt
+        (hboundary (t := t) ht hnot))
+
+/-- Restricted-symmetric selected scalar package bridge from interior tensor
+data and boundary-shaped scalar inner-product derivative data. -/
+theorem pullbackMetricInnerDerivativeData_of_solution_eq_restrictSymmetricIcc_of_Ioo_boundaryInner
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo (ivp.initialTime - ε) (ivp.initialTime + ε)))
+    (hboundary : ∀ ⦃t : ℝ⦄,
+      t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) →
+      t ∉ Ioo (ivp.initialTime - ε) (ivp.initialTime + ε) →
+      ∀ x : M, ∀ u v : TangentSpace I x,
+        HasDerivAt
+          (fun τ : ℝ ↦
+            (G.solution.1.toIntrinsicDeTurckSolution.metric τ).inner
+              ((G.flow.maps3 τ) x)
+              ((G.flow.maps3 τ).pushforwardTangent x u)
+              ((G.flow.maps3 τ).pushforwardTangent x v))
+          (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge
+            t x u v) t) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.pullbackMetricInnerDerivativeData_of_solution_eq_restrictSymmetricIcc_of_Ioo_boundary
+    sol hε hsub hGsol hIoo
+    (fun {t} ht hnot ↦
+      G.flow.maps3.pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt
+        (hboundary (t := t) ht hnot))
 
 /-- Selected closed-interval state-preserving Picard data plus local tensor
 readout data for the compact constructor handoff.
