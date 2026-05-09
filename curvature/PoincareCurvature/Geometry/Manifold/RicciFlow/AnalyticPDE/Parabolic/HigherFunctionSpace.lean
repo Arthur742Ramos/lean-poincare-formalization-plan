@@ -3622,7 +3622,7 @@ noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetNormedSpace
 /-- The finite-cover target of the combined chosen second-jet readout is complete when the
 fiber model is complete.  This records completeness of the ambient product target only; it
 does not assert closedness of the readout image in that product. -/
-noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetCompleteSpace
+theorem chosenSecondJetFiniteCoverReadoutTarget_completeSpace
     {κ : Type*} [Fintype κ] [CompleteSpace E]
     (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
     CompleteSpace (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc) := by
@@ -3649,6 +3649,12 @@ noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetCompleteSpac
     finiteCoverChosenSpaceSecondDerivReadoutTarget_completeSpace
       (X := X) (E := E) Kc
   infer_instance
+
+noncomputable local instance chosenSecondJetFiniteCoverReadoutTargetCompleteSpace
+    {κ : Type*} [Fintype κ] [CompleteSpace E]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X)) :
+    CompleteSpace (chosenSecondJetFiniteCoverReadoutTarget (X := X) (E := E) Kc) :=
+  chosenSecondJetFiniteCoverReadoutTarget_completeSpace (X := X) (E := E) Kc
 
 /-- Combined finite-cover readout of a higher parabolic function and its chosen second-jet
 components as a linear map, under unique-differentiability of the slices. -/
