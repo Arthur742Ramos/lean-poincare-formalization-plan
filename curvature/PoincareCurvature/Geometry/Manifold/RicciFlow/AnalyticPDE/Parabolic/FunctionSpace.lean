@@ -1653,6 +1653,211 @@ theorem finiteCoverValue_dist_eq {κ : Type*} [Fintype κ]
           Kc hKc hα v) :=
   rfl
 
+/-- With the separated all-cover finite-cover value normed structure, the norm is
+definitionally the compact-family readout norm. -/
+theorem finiteCoverValue_norm_eq_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    (u : parabolicC0AlphaSubmodule X E α s) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+    ‖u‖ =
+      ‖toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u‖ :=
+  rfl
+
+/-- With the separated all-cover finite-cover value normed structure, distance is
+definitionally the compact-family readout distance. -/
+theorem finiteCoverValue_dist_eq_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    (u v : parabolicC0AlphaSubmodule X E α s) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+    dist u v =
+      dist
+        (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα u)
+        (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα v) :=
+  rfl
+
+/-- The finite-cover value readout is nonexpansive for its induced seminormed structure. -/
+theorem finiteCoverValue_readout_dist_le {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (u v : parabolicC0AlphaSubmodule X E α s) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    dist
+      (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u)
+      (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα v) ≤ dist u v := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  rw [finiteCoverValue_dist_eq (X := X) (E := E) (α := α) (s := s)
+    Kc hKc hα u v]
+
+/-- The finite-cover value readout is `1`-Lipschitz for its induced seminormed structure. -/
+theorem finiteCoverValue_readout_lipschitzOnWith {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (stateSet : Set (parabolicC0AlphaSubmodule X E α s)) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+    LipschitzOnWith 1
+      (fun u : parabolicC0AlphaSubmodule X E α s =>
+        toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα u)
+      stateSet := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα
+  refine LipschitzOnWith.of_dist_le_mul
+    (α := parabolicC0AlphaSubmodule X E α s) (β := ∀ i, C(Kc i, E))
+    (K := (1 : ℝ≥0)) (s := stateSet)
+    (f := fun u : parabolicC0AlphaSubmodule X E α s =>
+      toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u) ?_
+  intro u _hu v _hv
+  simpa [one_mul] using
+    finiteCoverValue_readout_dist_le
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα u v
+
+/-- For the separated all-cover norm, the finite-cover value readout is nonexpansive. -/
+theorem finiteCoverValue_readout_dist_le_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    (u v : parabolicC0AlphaSubmodule X E α s) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+    dist
+      (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u)
+      (toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα v) ≤ dist u v := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+  rw [finiteCoverValue_dist_eq_ofCover (X := X) (E := E) (α := α) (s := s)
+    Kc hKc hα hcover u v]
+
+/-- For the separated all-cover norm, the finite-cover value readout is `1`-Lipschitz on any
+state set. -/
+theorem finiteCoverValue_readout_lipschitzOnWith_ofCover {κ : Type*} [Fintype κ]
+    (Kc : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKc : ∀ i, (Kc i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (hcover : (⋃ i, (Kc i : Set (ℝ × X))) = Set.univ)
+    (stateSet : Set (parabolicC0AlphaSubmodule X E α s)) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+    LipschitzOnWith 1
+      (fun u : parabolicC0AlphaSubmodule X E α s =>
+        toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+          Kc hKc hα u)
+      stateSet := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover
+  refine LipschitzOnWith.of_dist_le_mul
+    (α := parabolicC0AlphaSubmodule X E α s) (β := ∀ i, C(Kc i, E))
+    (K := (1 : ℝ≥0)) (s := stateSet)
+    (f := fun u : parabolicC0AlphaSubmodule X E α s =>
+      toCompactCoordFamilyLinearMap (X := X) (E := E) (α := α) (s := s)
+        Kc hKc hα u) ?_
+  intro u _hu v _hv
+  simpa [one_mul] using
+    finiteCoverValue_readout_dist_le_ofCover
+      (X := X) (E := E) (α := α) (s := s) Kc hKc hα hcover u v
+
+/-- Fixed-time spatial value readout estimate for the finite-cover value seminorm, after the
+time-space compact pieces cover the requested spatial slices. -/
+theorem finiteCoverValue_timeSlice_spatial_dist_le
+    {η κ : Type*} [Fintype κ]
+    (Kdom : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    (stateSet : Set (parabolicC0AlphaSubmodule X E α s))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueSeminormedAddCommGroup
+        (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : parabolicC0AlphaSubmodule X E α s⦄,
+      u ∈ stateSet → ∀ ⦃v : parabolicC0AlphaSubmodule X E α s⦄, v ∈ stateSet →
+        ∀ i (x : Kx i), dist (u (τ, x.1)) (v (τ, x.1)) ≤ dist u v := by
+  letI : SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueSeminormedAddCommGroup
+      (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα
+  have hLip : ∀ τ, τ ∈ timeSet →
+      LipschitzOnWith (1 : ℝ≥0)
+        (fun u : parabolicC0AlphaSubmodule X E α s =>
+          toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+            Kdom hKdom hα u)
+        stateSet := by
+    intro _τ _hτ
+    simpa using
+      finiteCoverValue_readout_lipschitzOnWith
+        (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα stateSet
+  have h := forall_timeSlice_spatial_dist_le_of_toCompactCoordFamily_lipschitzOnWith
+    (X := X) (E := E) (α := α) (s := s)
+    Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+    (A := fun _τ u => u) hLip hcover
+  simpa [one_mul] using h
+
+/-- Fixed-time spatial value readout estimate for the separated all-cover finite-cover value
+norm. -/
+theorem finiteCoverValue_timeSlice_spatial_dist_le_ofCover
+    {η κ : Type*} [Fintype κ]
+    (Kdom : κ → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ j, (Kdom j : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    (hcover : (⋃ j, (Kdom j : Set (ℝ × X))) = Set.univ)
+    (stateSet : Set (parabolicC0AlphaSubmodule X E α s)) :
+    letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+      finiteCoverValueNormedAddCommGroupOfCover
+        (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα hcover
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : parabolicC0AlphaSubmodule X E α s⦄,
+      u ∈ stateSet → ∀ ⦃v : parabolicC0AlphaSubmodule X E α s⦄, v ∈ stateSet →
+        ∀ i (x : Kx i), dist (u (τ, x.1)) (v (τ, x.1)) ≤ dist u v := by
+  letI : NormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+    finiteCoverValueNormedAddCommGroupOfCover
+      (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα hcover
+  have hcoverSlices : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X)) := by
+    intro τ _hτ i x
+    have hz : (τ, x.1) ∈ ⋃ j, (Kdom j : Set (ℝ × X)) := by
+      simp [hcover]
+    exact Set.mem_iUnion.mp hz
+  have hLip : ∀ τ, τ ∈ timeSet →
+      LipschitzOnWith (1 : ℝ≥0)
+        (fun u : parabolicC0AlphaSubmodule X E α s =>
+          toCompactCoordFamily (X := X) (E := E) (α := α) (s := s)
+            Kdom hKdom hα u)
+        stateSet := by
+    intro _τ _hτ
+    simpa using
+      finiteCoverValue_readout_lipschitzOnWith_ofCover
+        (X := X) (E := E) (α := α) (s := s) Kdom hKdom hα hcover stateSet
+  have h := forall_timeSlice_spatial_dist_le_of_toCompactCoordFamily_lipschitzOnWith
+    (X := X) (E := E) (α := α) (s := s)
+    Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+    (A := fun _τ u => u) hLip hcoverSlices
+  simpa [one_mul] using h
+
 end parabolicC0AlphaSubmodule
 
 end AnalyticPDE

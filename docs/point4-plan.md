@@ -3846,7 +3846,10 @@ submodule now also has a finite-cover value seminormed additive-group and real
 normed-space structure induced by the compact-family readout, plus a separated
 normed additive-group structure when the compact pieces cover all time-space;
 the norm and distance are definitionally the compact-family readout norm and
-distance.
+distance, the induced readout is directly nonexpansive and `1`-Lipschitz in
+both the seminormed and separated all-cover structures, and the finite-cover
+value seminorm now has direct fixed-time spatial readout estimates, including
+the separated all-cover form.
 `AnalyticPDE/Parabolic/HigherFunctionSpace.lean` now begins the coordinate
 `C^{2+α,1+α/2}` layer: it defines time and spatial slices, packages a genuine
 parabolic second jet with time, spatial, and second-spatial derivative
