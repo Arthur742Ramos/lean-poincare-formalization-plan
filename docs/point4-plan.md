@@ -89,6 +89,12 @@ HasDerivAt
   t
 ```
 
+The same scalar/tensor conversion is now available at a single time via
+`pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt` and
+`pullbackMetricFamily_inner_hasDerivAt_of_hasTimeDerivativeAt`, so endpoint
+scalar derivative data can be moved into the tensor endpoint packages without
+restating the pullback metric definition.
+
 **What still has to be done.** This scalar derivative is a chain-rule
 calculation that splits into three pieces (time derivative of `g`,
 spatial derivative of `g.inner` along `X_t`, derivative of the

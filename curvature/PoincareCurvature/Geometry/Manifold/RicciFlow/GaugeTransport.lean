@@ -3205,6 +3205,24 @@ theorem pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt
   simpa [metricTensor, SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using
     hderiv ht x u v
 
+/-- Single-time version of
+`pullbackMetricFamily_hasTimeDerivativeOn_of_inner_hasDerivAt`. -/
+theorem pullbackMetricFamily_hasTimeDerivativeAt_of_inner_hasDerivAt
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ}
+    (hderiv : ∀ x : M, ∀ u v : TM x,
+      HasDerivAt
+        (fun τ ↦
+          (g τ).inner ((Φ τ) x)
+            ((Φ τ).pushforwardTangent x u)
+            ((Φ τ).pushforwardTangent x v))
+        (gdot t x u v) t) :
+    HasTimeDerivativeAt (I := I) (M := M) (Φ.pullbackMetricFamily g) gdot t := by
+  intro x u v
+  simpa [metricTensor, SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using
+    hderiv x u v
+
 /-- Extract the scalar inner-product derivative from a time-derivative statement for a `C³`
 gauge-pulled metric family. -/
 theorem pullbackMetricFamily_inner_hasDerivAt_of_hasTimeDerivativeOn
@@ -3221,6 +3239,24 @@ theorem pullbackMetricFamily_inner_hasDerivAt_of_hasTimeDerivativeOn
       (gdot t x u v) t := by
   simpa [metricTensor, SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using
     hderiv ht x u v
+
+/-- Single-time version of
+`pullbackMetricFamily_inner_hasDerivAt_of_hasTimeDerivativeOn`. -/
+theorem pullbackMetricFamily_inner_hasDerivAt_of_hasTimeDerivativeAt
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)}
+    {t : ℝ}
+    (hderiv : HasTimeDerivativeAt (I := I) (M := M)
+      (Φ.pullbackMetricFamily g) gdot t)
+    (x : M) (u v : TM x) :
+    HasDerivAt
+      (fun τ ↦
+        (g τ).inner ((Φ τ) x)
+          ((Φ τ).pushforwardTangent x u)
+          ((Φ τ).pushforwardTangent x v))
+      (gdot t x u v) t := by
+  simpa [metricTensor, SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using
+    hderiv x u v
 
 /-- Time derivatives commute with pullback by a time-independent `C³` diffeomorphism.  This is the
 static-gauge part of the non-identity gauge time-regularity problem. -/
