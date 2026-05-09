@@ -3793,7 +3793,7 @@ continuity rules, including finite sums, finite Pi-valued packaging,
 continuous-linear images, products, reciprocal/division closure under pointwise
 lower bounds, product and reciprocal differences, scalar-function actions,
 curried bilinear maps, operator-valued application and their difference forms,
-and Lipschitz nonlinear composition. It
+and Lipschitz nonlinear composition, including closed norm-ball forms. It
 also packages `ParabolicC0AlphaOn` as a real submodule of all time-space
 functions, proves restriction to smaller domains as a linear map, and gives
 positive-exponent linear readouts into `ContinuousMap`s on compact time-space

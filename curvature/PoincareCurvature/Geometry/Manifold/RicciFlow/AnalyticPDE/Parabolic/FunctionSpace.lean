@@ -507,6 +507,44 @@ theorem comp_lipschitzOnWith {F : Type*} [NormedAddCommGroup F]
     mul_le_mul_of_nonneg_left hH_le_N (NNReal.coe_nonneg K)
   linarith
 
+theorem comp_lipschitzOnWith_of_closedBall {F : Type*} [NormedAddCommGroup F]
+    {Bφ : ℝ} {K : ℝ≥0} {φ : E → F}
+    (hu : ParabolicC0AlphaNormLe N α u s) (hBφ : 0 ≤ Bφ)
+    (hφB : ∀ y ∈ Metric.closedBall (0 : E) N, ‖φ y‖ ≤ Bφ)
+    (hφL : LipschitzOnWith K φ (Metric.closedBall (0 : E) N)) :
+    ParabolicC0AlphaNormLe (Bφ + (K : ℝ) * N) α (fun z => φ (u z)) s := by
+  rcases hu with ⟨B, hB, H, hH, hsum, hctrl⟩
+  have hB_le_N : B ≤ N := by linarith
+  refine ⟨Bφ, hBφ, (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH, ?_, ?_⟩
+  · have hH_le_N : H ≤ N := by linarith
+    have hKH_le_KN : (K : ℝ) * H ≤ (K : ℝ) * N :=
+      mul_le_mul_of_nonneg_left hH_le_N (NNReal.coe_nonneg K)
+    linarith
+  · exact hctrl.comp_lipschitzOnWith_of_closedBall
+      (fun y hy => hφB y (Metric.closedBall_subset_closedBall hB_le_N hy))
+      (hφL.mono (Metric.closedBall_subset_closedBall hB_le_N))
+
+theorem comp_lipschitzOnWith_of_closedBall_auto_bound {F : Type*} [NormedAddCommGroup F]
+    {K : ℝ≥0} {φ : E → F}
+    (hu : ParabolicC0AlphaNormLe N α u s)
+    (hφL : LipschitzOnWith K φ (Metric.closedBall (0 : E) N)) :
+    ParabolicC0AlphaNormLe (‖φ (0 : E)‖ + (K : ℝ) * N) α
+      (fun z => φ (u z)) s := by
+  rcases hu with ⟨B, hB, H, hH, hsum, hctrl⟩
+  have hB_le_N : B ≤ N := by linarith
+  refine ⟨‖φ (0 : E)‖ + (K : ℝ) * B,
+    add_nonneg (norm_nonneg _) (mul_nonneg (NNReal.coe_nonneg K) hB),
+    (K : ℝ) * H, mul_nonneg (NNReal.coe_nonneg K) hH, ?_, ?_⟩
+  · calc
+      ‖φ (0 : E)‖ + (K : ℝ) * B + (K : ℝ) * H =
+          ‖φ (0 : E)‖ + (K : ℝ) * (B + H) := by ring
+      _ ≤ ‖φ (0 : E)‖ + (K : ℝ) * N := by
+          have hmul : (K : ℝ) * (B + H) ≤ (K : ℝ) * N :=
+            mul_le_mul_of_nonneg_left hsum (NNReal.coe_nonneg K)
+          linarith
+  · exact hctrl.comp_lipschitzOnWith_of_closedBall_auto_bound hB
+      (hφL.mono (Metric.closedBall_subset_closedBall hB_le_N))
+
 theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F]
     {Bφ : ℝ} {K : ℝ≥0} {φ : E → F}
     (hu : ParabolicC0AlphaNormLe N α u s) (hBφ : 0 ≤ Bφ)
