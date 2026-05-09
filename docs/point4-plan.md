@@ -3953,15 +3953,17 @@ value, chosen spatial derivative, chosen second spatial derivative, and chosen
 time derivative compact-family readouts; the combined readout and each
 component readout are also packaged as `1`-Lipschitz on arbitrary state sets
 for the induced seminormed structure without the all-cover separation
-hypothesis. The same chosen derivative Lipschitz readouts now also restrict to
-fixed-time spatial compact readouts whenever the chosen time-space compact
-family covers the requested spatial slices, and the combined seminorm now has
-direct fixed-time spatial value and chosen-derivative distance estimates under
-the same cover hypothesis; the separated all-cover normed structure has the
-matching fixed-time spatial estimates directly against its distance for the
-value, chosen spatial derivative, chosen second spatial derivative, and chosen
-time derivative readouts. They do not make the derivative choice canonical or
-upgrade this compact-family jet seminorm into the full `C^{2+α,1+α/2}` Banach
+hypothesis, and the separated all-cover normed structure has matching component
+norm and distance projection bounds. The same chosen derivative Lipschitz
+readouts now also restrict to fixed-time spatial compact readouts whenever the
+chosen time-space compact family covers the requested spatial slices, and the
+combined seminorm now has direct fixed-time spatial value and chosen-derivative
+distance estimates under the same cover hypothesis; the separated all-cover
+normed structure has the matching fixed-time spatial estimates directly against
+its distance for the value, chosen spatial derivative, chosen second spatial
+derivative, and chosen time derivative readouts. They do not make the
+derivative choice canonical or upgrade this compact-family jet seminorm into
+the full `C^{2+α,1+α/2}` Banach
 norm, Schauder estimate, or completeness content.
 Second jets, `ParabolicC2AlphaNormLe`, `ParabolicC2AlphaOn`, and the higher
 submodule now also restrict to smaller time-space domains.
