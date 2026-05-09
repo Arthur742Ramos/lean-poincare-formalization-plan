@@ -1410,6 +1410,207 @@ theorem ricciDeTurckSchematicMatrix_compactCoord_dist_le_pi_family_of_higher_pri
     Finset.single_le_sum (fun r' _hr' => hKcoord_nonneg r') (Finset.mem_univ r)
   exact hr.trans (mul_le_mul_of_nonneg_right hr_le_sum dist_nonneg)
 
+/-- Fixed-time spatial readout estimate for the schematic Ricci-DeTurck RHS from higher primitive
+controls with exact summed primitive constants, after the time-space compact pieces cover the
+requested time slices. -/
+theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_higher_primitive_normLe
+    {η ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    {δ : ℝ} {KM : n → n → ℝ} {KD : n → n → n → ℝ}
+    {KH : n → n → n → n → ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : Y → ℝ × X → Matrix n n ℝ}
+    {D : Y → ℝ × X → n → n → n → ℝ}
+    {H : Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM : ∀ a b, 0 ≤ KM a b) (hKD : ∀ a b c, 0 ≤ KD a b c)
+    (hKH : ∀ a b i j, 0 ≤ KH a b i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C a b) α (fun z => M u z a b) s)
+    (hD : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB a b c) α (fun z => D u z a b c) s)
+    (hH : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB a b i j) α (fun z => H u z a b i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM a b * dist u v) α
+        (fun z => M u z a b - M v z a b) s)
+    (hDdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD a b c * dist u v) α
+        (fun z => D u z a b c - D v z a b c) s)
+    (hHdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH a b i j * dist u v) α
+        (fun z => H u z a b i j - H v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M u z) (D u z) (H u z))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A u (τ, x.1)) (A v (τ, x.1)) ≤
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+              (𝕜 := ℝ) δ C DB HB
+              (∑ a, ∑ b, KM a b)
+              (∑ a, ∑ b, ∑ c, KD a b c)
+              (fun i j => ∑ a, ∑ b, KH a b i j) * dist u v := by
+  refine parabolicC0AlphaSubmodule.forall_timeSlice_spatial_dist_le_of_forall_compactCoord_dist_le
+    (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+    Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+    (A := fun _ u => A u)
+    (K := ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+      (𝕜 := ℝ) δ C DB HB
+      (∑ a, ∑ b, KM a b)
+      (∑ a, ∑ b, ∑ c, KD a b c)
+      (fun i j => ∑ a, ∑ b, KH a b i j)) ?_ hcover
+  intro _τ _hτ
+  exact ricciDeTurckSchematicMatrix_compactCoord_dist_le_of_higher_primitive_normLe
+    (X := X) (α := α) (s := s) Kdom hKdom hα
+    (KM := KM) (KD := KD) (KH := KH) (C := C) (DB := DB) (HB := HB)
+    (stateSet := stateSet) (A := A) (M := M) (D := D) (H := H)
+    hDB hHB hKM hKD hKH hM hD hH hMdiff hDdiff hHdiff hδpos hdet hAeq
+
+/-- Finite-family fixed-time spatial readout estimates for the schematic Ricci-DeTurck RHS from
+higher primitive controls with exact summed primitive constants. -/
+theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_family_of_higher_primitive_normLe
+    {κ η ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    {δ : ℝ} {KM : κ → n → n → ℝ} {KD : κ → n → n → n → ℝ}
+    {KH : κ → n → n → n → n → ℝ} {C : κ → n → n → ℝ}
+    {DB : κ → n → n → n → ℝ} {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : κ → Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    {D : κ → Y → ℝ × X → n → n → n → ℝ}
+    {H : κ → Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM : ∀ r a b, 0 ≤ KM r a b)
+    (hKD : ∀ r a b c, 0 ≤ KD r a b c)
+    (hKH : ∀ r a b i j, 0 ≤ KH r a b i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C r a b) α (fun z => M r u z a b) s)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB r a b c) α (fun z => D r u z a b c) s)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB r a b i j) α (fun z => H r u z a b i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM r a b * dist u v) α
+        (fun z => M r u z a b - M r v z a b) s)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD r a b c * dist u v) α
+        (fun z => D r u z a b c - D r v z a b c) s)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH r a b i j * dist u v) α
+        (fun z => H r u z a b i j - H r v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A r u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r u z) (D r u z) (H r u z))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    ∀ r τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A r u (τ, x.1)) (A r v (τ, x.1)) ≤
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+              (𝕜 := ℝ) δ (C r) (DB r) (HB r)
+              (∑ a, ∑ b, KM r a b)
+              (∑ a, ∑ b, ∑ c, KD r a b c)
+              (fun i j => ∑ a, ∑ b, KH r a b i j) * dist u v := by
+  intro r
+  exact ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_higher_primitive_normLe
+    (X := X) (α := α) (s := s) Kdom hKdom hα Kx
+    (timeSet := timeSet)
+    (KM := KM r) (KD := KD r) (KH := KH r)
+    (C := C r) (DB := DB r) (HB := HB r)
+    (stateSet := stateSet) (A := A r) (M := M r) (D := D r) (H := H r)
+    (hDB r) (hHB r) (hKM r) (hKD r) (hKH r)
+    (hM r) (hD r) (hH r) (hMdiff r) (hDdiff r) (hHdiff r)
+    hδpos (hdet r) (hAeq r) hcover
+
+/-- Finite-family fixed-time spatial readout estimates with one shared exact summed schematic RHS
+constant across all family members. -/
+theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_pi_family_of_higher_primitive_normLe
+    {κ η ι Y n : Type*} [Fintype κ] [Fintype ι] [PseudoMetricSpace Y]
+    [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    {δ : ℝ} {KM : κ → n → n → ℝ} {KD : κ → n → n → n → ℝ}
+    {KH : κ → n → n → n → n → ℝ} {C : κ → n → n → ℝ}
+    {DB : κ → n → n → n → ℝ} {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : κ → Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    {D : κ → Y → ℝ × X → n → n → n → ℝ}
+    {H : κ → Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM : ∀ r a b, 0 ≤ KM r a b)
+    (hKD : ∀ r a b c, 0 ≤ KD r a b c)
+    (hKH : ∀ r a b i j, 0 ≤ KH r a b i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C r a b) α (fun z => M r u z a b) s)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB r a b c) α (fun z => D r u z a b c) s)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB r a b i j) α (fun z => H r u z a b i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM r a b * dist u v) α
+        (fun z => M r u z a b - M r v z a b) s)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD r a b c * dist u v) α
+        (fun z => D r u z a b c - D r v z a b c) s)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH r a b i j * dist u v) α
+        (fun z => H r u z a b i j - H r v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A r u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r u z) (D r u z) (H r u z))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ r i (x : Kx i),
+        dist (A r u (τ, x.1)) (A r v (τ, x.1)) ≤
+          (∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+              (𝕜 := ℝ) δ (C r) (DB r) (HB r)
+              (∑ a, ∑ b, KM r a b)
+              (∑ a, ∑ b, ∑ c, KD r a b c)
+              (fun i j => ∑ a, ∑ b, KH r a b i j)) * dist u v := by
+  intro τ hτ u hu v hv r i x
+  refine parabolicC0AlphaSubmodule.forall_timeSlice_spatial_dist_le_of_forall_compactCoord_dist_le
+    (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+    Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+    (A := fun _ u => A r u)
+    (K := (∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+      (𝕜 := ℝ) δ (C r) (DB r) (HB r)
+      (∑ a, ∑ b, KM r a b)
+      (∑ a, ∑ b, ∑ c, KD r a b c)
+      (fun i j => ∑ a, ∑ b, KH r a b i j))) ?_ hcover τ hτ hu hv i x
+  intro _τ _hτ u hu v hv j z
+  exact ricciDeTurckSchematicMatrix_compactCoord_dist_le_pi_family_of_higher_primitive_normLe
+      (X := X) (α := α) (s := s) Kdom hKdom hα
+      (KM := KM) (KD := KD) (KH := KH) (C := C) (DB := DB) (HB := HB)
+      (stateSet := stateSet) (A := A) (M := M) (D := D) (H := H)
+      hDB hHB hKM hKD hKH hM hD hH hMdiff hDdiff hHdiff hδpos hdet hAeq
+      hu hv r j z
+
 /-- Pointwise compact-coordinate distance estimate for the schematic Ricci-DeTurck RHS readout
 from higher primitive controls with coarser exported constants.  This is the shape consumed by
 preferred-cover chart constructors after the compact readout has been unpacked. -/
@@ -1646,6 +1847,221 @@ theorem ricciDeTurckSchematicMatrix_compactCoord_dist_le_pi_family_of_higher_pri
   have hr_le_sum : Kcoord r ≤ ∑ r, Kcoord r :=
     Finset.single_le_sum (fun r' _hr' => hKcoord_nonneg r') (Finset.mem_univ r)
   exact hr.trans (mul_le_mul_of_nonneg_right hr_le_sum dist_nonneg)
+
+/-- Fixed-time spatial readout estimate for the schematic Ricci-DeTurck RHS from higher primitive
+controls with coarser exported constants, after the time-space compact pieces cover the requested
+time slices. -/
+theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_higher_primitive_normLe_of_le
+    {η ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    {δ KM KD : ℝ} {KH : n → n → ℝ}
+    {KM0 : n → n → ℝ} {KD0 : n → n → n → ℝ}
+    {KH0 : n → n → n → n → ℝ} {C : n → n → ℝ}
+    {DB : n → n → n → ℝ} {HB : n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : Y → ℝ × X → Matrix n n ℝ}
+    {D : Y → ℝ × X → n → n → n → ℝ}
+    {H : Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ a b c, 0 ≤ DB a b c) (hHB : ∀ a b i j, 0 ≤ HB a b i j)
+    (hKM0_nonneg : ∀ a b, 0 ≤ KM0 a b)
+    (hKD0_nonneg : ∀ a b c, 0 ≤ KD0 a b c)
+    (hKH0_nonneg : ∀ a b i j, 0 ≤ KH0 a b i j)
+    (hKM_nonneg : 0 ≤ KM) (hKD_nonneg : 0 ≤ KD)
+    (hKH_nonneg : ∀ i j, 0 ≤ KH i j)
+    (hKM_le : (∑ a, ∑ b, KM0 a b) ≤ KM)
+    (hKD_le : (∑ a, ∑ b, ∑ c, KD0 a b c) ≤ KD)
+    (hKH_le : ∀ i j, (∑ a, ∑ b, KH0 a b i j) ≤ KH i j)
+    (hM : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C a b) α (fun z => M u z a b) s)
+    (hD : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB a b c) α (fun z => D u z a b c) s)
+    (hH : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB a b i j) α (fun z => H u z a b i j) s)
+    (hMdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM0 a b * dist u v) α
+        (fun z => M u z a b - M v z a b) s)
+    (hDdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD0 a b c * dist u v) α
+        (fun z => D u z a b c - D v z a b c) s)
+    (hHdiff : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH0 a b i j * dist u v) α
+        (fun z => H u z a b i j - H v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M u z).det‖)
+    (hAeq : ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M u z) (D u z) (H u z))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A u (τ, x.1)) (A v (τ, x.1)) ≤
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+              (𝕜 := ℝ) δ C DB HB KM KD KH * dist u v := by
+  refine parabolicC0AlphaSubmodule.forall_timeSlice_spatial_dist_le_of_forall_compactCoord_dist_le
+    (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+    Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+    (A := fun _ u => A u)
+    (K := ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+      (𝕜 := ℝ) δ C DB HB KM KD KH) ?_ hcover
+  intro _τ _hτ
+  exact ricciDeTurckSchematicMatrix_compactCoord_dist_le_of_higher_primitive_normLe_of_le
+    (X := X) (α := α) (s := s) Kdom hKdom hα
+    (KM0 := KM0) (KD0 := KD0) (KH0 := KH0)
+    (KM := KM) (KD := KD) (KH := KH) (C := C) (DB := DB) (HB := HB)
+    (stateSet := stateSet) (A := A) (M := M) (D := D) (H := H)
+    hDB hHB hKM0_nonneg hKD0_nonneg hKH0_nonneg
+    hKM_nonneg hKD_nonneg hKH_nonneg hKM_le hKD_le hKH_le
+    hM hD hH hMdiff hDdiff hHdiff hδpos hdet hAeq
+
+/-- Finite-family fixed-time spatial readout estimates for the schematic Ricci-DeTurck RHS from
+higher primitive controls with coarser exported constants. -/
+theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_family_of_higher_primitive_normLe_of_le
+    {κ η ι Y n : Type*} [Fintype ι] [PseudoMetricSpace Y] [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    {δ : ℝ} {KM KD : κ → ℝ} {KH : κ → n → n → ℝ}
+    {KM0 : κ → n → n → ℝ} {KD0 : κ → n → n → n → ℝ}
+    {KH0 : κ → n → n → n → n → ℝ} {C : κ → n → n → ℝ}
+    {DB : κ → n → n → n → ℝ} {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : κ → Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    {D : κ → Y → ℝ × X → n → n → n → ℝ}
+    {H : κ → Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM0_nonneg : ∀ r a b, 0 ≤ KM0 r a b)
+    (hKD0_nonneg : ∀ r a b c, 0 ≤ KD0 r a b c)
+    (hKH0_nonneg : ∀ r a b i j, 0 ≤ KH0 r a b i j)
+    (hKM_nonneg : ∀ r, 0 ≤ KM r) (hKD_nonneg : ∀ r, 0 ≤ KD r)
+    (hKH_nonneg : ∀ r i j, 0 ≤ KH r i j)
+    (hKM_le : ∀ r, (∑ a, ∑ b, KM0 r a b) ≤ KM r)
+    (hKD_le : ∀ r, (∑ a, ∑ b, ∑ c, KD0 r a b c) ≤ KD r)
+    (hKH_le : ∀ r i j, (∑ a, ∑ b, KH0 r a b i j) ≤ KH r i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C r a b) α (fun z => M r u z a b) s)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB r a b c) α (fun z => D r u z a b c) s)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB r a b i j) α (fun z => H r u z a b i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM0 r a b * dist u v) α
+        (fun z => M r u z a b - M r v z a b) s)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD0 r a b c * dist u v) α
+        (fun z => D r u z a b c - D r v z a b c) s)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH0 r a b i j * dist u v) α
+        (fun z => H r u z a b i j - H r v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A r u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r u z) (D r u z) (H r u z))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    ∀ r τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ i (x : Kx i),
+        dist (A r u (τ, x.1)) (A r v (τ, x.1)) ≤
+          ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+              (𝕜 := ℝ) δ (C r) (DB r) (HB r) (KM r) (KD r) (KH r) * dist u v := by
+  intro r
+  exact ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_of_higher_primitive_normLe_of_le
+    (X := X) (α := α) (s := s) Kdom hKdom hα Kx
+    (timeSet := timeSet)
+    (KM0 := KM0 r) (KD0 := KD0 r) (KH0 := KH0 r)
+    (KM := KM r) (KD := KD r) (KH := KH r)
+    (C := C r) (DB := DB r) (HB := HB r)
+    (stateSet := stateSet) (A := A r) (M := M r) (D := D r) (H := H r)
+    (hDB r) (hHB r) (hKM0_nonneg r) (hKD0_nonneg r) (hKH0_nonneg r)
+    (hKM_nonneg r) (hKD_nonneg r) (hKH_nonneg r)
+    (hKM_le r) (hKD_le r) (hKH_le r)
+    (hM r) (hD r) (hH r) (hMdiff r) (hDdiff r) (hHdiff r)
+    hδpos (hdet r) (hAeq r) hcover
+
+/-- Finite-family fixed-time spatial readout estimates with one shared coarser schematic RHS
+constant across all family members. -/
+theorem ricciDeTurckSchematicMatrix_timeSlice_spatial_dist_le_pi_family_of_higher_primitive_normLe_of_le
+    {κ η ι Y n : Type*} [Fintype κ] [Fintype ι] [PseudoMetricSpace Y]
+    [Fintype n] [DecidableEq n]
+    (Kdom : ι → TopologicalSpace.Compacts (ℝ × X))
+    (hKdom : ∀ i, (Kdom i : Set (ℝ × X)) ⊆ s) (hα : 0 < α)
+    (Kx : η → TopologicalSpace.Compacts X)
+    {timeSet : Set ℝ}
+    {δ : ℝ} {KM KD : κ → ℝ} {KH : κ → n → n → ℝ}
+    {KM0 : κ → n → n → ℝ} {KD0 : κ → n → n → n → ℝ}
+    {KH0 : κ → n → n → n → n → ℝ} {C : κ → n → n → ℝ}
+    {DB : κ → n → n → n → ℝ} {HB : κ → n → n → n → n → ℝ}
+    {stateSet : Set Y}
+    {A : κ → Y → parabolicC0AlphaSubmodule X (Matrix n n ℝ) α s}
+    {M : κ → Y → ℝ × X → Matrix n n ℝ}
+    {D : κ → Y → ℝ × X → n → n → n → ℝ}
+    {H : κ → Y → ℝ × X → n → n → n → n → ℝ}
+    (hDB : ∀ r a b c, 0 ≤ DB r a b c)
+    (hHB : ∀ r a b i j, 0 ≤ HB r a b i j)
+    (hKM0_nonneg : ∀ r a b, 0 ≤ KM0 r a b)
+    (hKD0_nonneg : ∀ r a b c, 0 ≤ KD0 r a b c)
+    (hKH0_nonneg : ∀ r a b i j, 0 ≤ KH0 r a b i j)
+    (hKM_nonneg : ∀ r, 0 ≤ KM r) (hKD_nonneg : ∀ r, 0 ≤ KD r)
+    (hKH_nonneg : ∀ r i j, 0 ≤ KH r i j)
+    (hKM_le : ∀ r, (∑ a, ∑ b, KM0 r a b) ≤ KM r)
+    (hKD_le : ∀ r, (∑ a, ∑ b, ∑ c, KD0 r a b c) ≤ KD r)
+    (hKH_le : ∀ r i j, (∑ a, ∑ b, KH0 r a b i j) ≤ KH r i j)
+    (hM : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (C r a b) α (fun z => M r u z a b) s)
+    (hD : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (DB r a b c) α (fun z => D r u z a b c) s)
+    (hH : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (HB r a b i j) α (fun z => H r u z a b i j) s)
+    (hMdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b,
+      ParabolicC2AlphaNormLe (KM0 r a b * dist u v) α
+        (fun z => M r u z a b - M r v z a b) s)
+    (hDdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b c,
+      ParabolicC2AlphaNormLe (KD0 r a b c * dist u v) α
+        (fun z => D r u z a b c - D r v z a b c) s)
+    (hHdiff : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet → ∀ a b i j,
+      ParabolicC2AlphaNormLe (KH0 r a b i j * dist u v) α
+        (fun z => H r u z a b i j - H r v z a b i j) s)
+    (hδpos : 0 < δ)
+    (hdet : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃z : ℝ × X⦄, z ∈ s →
+      δ ≤ ‖(M r u z).det‖)
+    (hAeq : ∀ r ⦃u : Y⦄, u ∈ stateSet → ∀ z : ℝ × X,
+      A r u z = ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        (M r u z) (D r u z) (H r u z))
+    (hcover : ∀ τ, τ ∈ timeSet → ∀ i (x : Kx i),
+      ∃ j, (τ, x.1) ∈ (Kdom j : Set (ℝ × X))) :
+    ∀ τ, τ ∈ timeSet → ∀ ⦃u : Y⦄, u ∈ stateSet → ∀ ⦃v : Y⦄, v ∈ stateSet →
+      ∀ r i (x : Kx i),
+        dist (A r u (τ, x.1)) (A r v (τ, x.1)) ≤
+          (∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+              (𝕜 := ℝ) δ (C r) (DB r) (HB r) (KM r) (KD r) (KH r)) *
+            dist u v := by
+  intro τ hτ u hu v hv r i x
+  refine parabolicC0AlphaSubmodule.forall_timeSlice_spatial_dist_le_of_forall_compactCoord_dist_le
+    (X := X) (E := Matrix n n ℝ) (α := α) (s := s)
+    Kdom hKdom hα Kx (timeSet := timeSet) (stateSet := stateSet)
+    (A := fun _ u => A r u)
+    (K := (∑ r, ParabolicC0AlphaOn.ricciDeTurckSchematicDiffBoundConst
+      (𝕜 := ℝ) δ (C r) (DB r) (HB r) (KM r) (KD r) (KH r))) ?_ hcover
+    τ hτ hu hv i x
+  intro _τ _hτ u hu v hv j z
+  exact ricciDeTurckSchematicMatrix_compactCoord_dist_le_pi_family_of_higher_primitive_normLe_of_le
+      (X := X) (α := α) (s := s) Kdom hKdom hα
+      (KM0 := KM0) (KD0 := KD0) (KH0 := KH0)
+      (KM := KM) (KD := KD) (KH := KH) (C := C) (DB := DB) (HB := HB)
+      (stateSet := stateSet) (A := A) (M := M) (D := D) (H := H)
+      hDB hHB hKM0_nonneg hKD0_nonneg hKH0_nonneg
+      hKM_nonneg hKD_nonneg hKH_nonneg hKM_le hKD_le hKH_le
+      hM hD hH hMdiff hDdiff hHdiff hδpos hdet hAeq hu hv r j z
 
 /-- Higher parabolic entry controls supply the primitive entrywise hypotheses for the
 single-radius schematic Ricci-DeTurck RHS difference estimate. -/

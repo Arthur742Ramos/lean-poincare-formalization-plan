@@ -3915,7 +3915,10 @@ linear map do not have to unfold the compact-coordinate family manually. The
 exact and coarser compact readouts now also unpack to pointwise
 compact-coordinate distance bounds with the same schematic RHS constant,
 including finite-family forms with either memberwise constants or one shared
-finite-sum constant for indexed frame/cover data. Radii linear in
+finite-sum constant for indexed frame/cover data. These exact and coarser
+pointwise RHS readouts now also restrict directly to fixed-time spatial compact
+readouts under a time-slice cover hypothesis, again with single-family,
+memberwise finite-family, and shared finite-sum variants. Radii linear in
 `dist u v` give the matrix-norm/array primitive bounds needed by the existing
 schematic RHS state-space `LipschitzOnWith` theorem, with a matching
 finite-family wrapper, Pi-valued finite-product `C^{0,α}` and Lipschitz
