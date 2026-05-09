@@ -36989,6 +36989,67 @@ theorem hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallConti
     hf_lip hDf_lip hf_bound hA_bound hD_bound hf_cont hDf_cont hmul
     htime htbase hr hder α hα Fₗ U hcover hreadout hdata
 
+/-- Interior time-derivative data on a selected closed Picard interval, together
+with endpoint time-derivative data, gives the full selected time-set
+time-derivative package. -/
+theorem hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpoints
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {tmin tmax : ℝ}
+    (htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet = Icc tmin tmax)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo tmin tmax))
+    (hleft : HasTimeDerivativeAt (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      tmin)
+    (hright : HasTimeDerivativeAt (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      tmax) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet := by
+  intro t ht
+  exact (HasTimeDerivativeOn.of_Ioo_endpoints hIoo hleft hright) (by
+    simpa [htimeSet] using ht)
+
+/-- Restricted-symmetric selected closed-interval version of
+`hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpoints`. -/
+theorem hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_endpoints
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution = sol.restrictSymmetricIcc hε hsub)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (Ioo (ivp.initialTime - ε) (ivp.initialTime + ε)))
+    (hleft : HasTimeDerivativeAt (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (ivp.initialTime - ε))
+    (hright : HasTimeDerivativeAt (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      (ivp.initialTime + ε)) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      (G.flow.maps3.pullbackMetricFamily G.solution.1.toIntrinsicDeTurckSolution.metric)
+      (G.solution.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge G.gauge)
+      G.solution.1.toIntrinsicDeTurckSolution.timeSet :=
+  G.hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpoints
+    (G.timeSet_eq_Icc_of_solution_eq_restrictSymmetricIcc sol hε hsub hGsol)
+    hIoo hleft hright
+
 /-- Selected closed-interval state-preserving Picard data plus local tensor
 readout data for the compact constructor handoff.
 
@@ -38105,6 +38166,81 @@ theorem hasTimeDerivativeOn_Ioo_ofProductStatePreservingComponentClosedBallConti
     sol hε hsub hGsol hf_lip hDf_lip hf_bound hA_bound hD_bound
     hf_cont hDf_cont hmul htime htbase hr hder α hα Fₗ U hcover
     hreadout hdata
+
+/-- Theorem-family closed-interval endpoint gluing for selected raw gauge-flow
+time derivatives. -/
+theorem hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpoints
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    {tmin tmax : ℝ}
+    (htimeSet : (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet =
+      Icc tmin tmax)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      (Ioo tmin tmax))
+    (hleft : HasTimeDerivativeAt (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      tmin)
+    (hright : HasTimeDerivativeAt (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      tmax) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpoints
+    htimeSet hIoo hleft hright
+
+/-- Theorem-family restricted-symmetric closed-interval endpoint gluing for
+selected raw gauge-flow time derivatives. -/
+theorem hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_endpoints
+    (G : SelectedIntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M))
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {ε : ℝ} (hε : 0 < ε)
+    (hsub : Icc (ivp.initialTime - ε) (ivp.initialTime + ε) ⊆
+      sol.1.toIntrinsicDeTurckSolution.timeSet)
+    (hGsol : G.solution ivp = sol.restrictSymmetricIcc hε hsub)
+    (hIoo : HasTimeDerivativeOn (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      (Ioo (ivp.initialTime - ε) (ivp.initialTime + ε)))
+    (hleft : HasTimeDerivativeAt (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      (ivp.initialTime - ε))
+    (hright : HasTimeDerivativeAt (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      (ivp.initialTime + ε)) :
+    HasTimeDerivativeOn (I := I) (M := M)
+      ((G.flow ivp).maps3.pullbackMetricFamily
+        (G.solution ivp).1.toIntrinsicDeTurckSolution.metric)
+      ((G.solution ivp).1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.gauge ivp))
+      (G.solution ivp).1.toIntrinsicDeTurckSolution.timeSet :=
+  (G.forInitialValueProblem ivp).hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_endpoints
+    sol hε hsub hGsol hIoo hleft hright
 
 /-- Theorem-family compact selected raw-flow construction packaged with the
 smooth-background spatial correction route.

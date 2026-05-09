@@ -2783,6 +2783,13 @@ The fixed-IVP compact endpoint now also has a same-witness combined form,
 which selects one restricted raw gauge-flow witness and returns both the
 state-preserving tensor time-derivative continuation and the smooth-background
 spatial-correction continuation for that same selected interval.
+The open-interior result can now be promoted to the selected closed time set
+when endpoint derivatives are available: `HasTimeDerivativeOn.of_Ioo_endpoints`
+glues `Ioo` data with left/right endpoint `HasTimeDerivativeAt` facts, and the
+selected fixed-IVP and theorem-family wrappers
+`hasTimeDerivativeOn_of_timeSet_eq_Icc_of_Ioo_endpoints` and
+`hasTimeDerivativeOn_of_solution_eq_restrictSymmetricIcc_of_Ioo_endpoints`
+turn that into `HasTimeDerivativeOn` on the selected solution `timeSet`.
 The theorem-family analogue now performs the same same-witness assembly
 uniformly over all initial-value problems, returning one selected gauge-flow
 family with both per-IVP continuations.
