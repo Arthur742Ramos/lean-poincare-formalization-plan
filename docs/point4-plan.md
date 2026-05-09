@@ -3959,7 +3959,10 @@ on a normed-vector chart model: entrywise higher Gram controls choose second
 jets, read first and second primitive arrays along the local-frame basis, and
 extract the compact Gram determinant lower bound before applying the schematic
 Ricci-DeTurck RHS estimate; the same specialization is available for finite
-families of frames with one shared compact determinant lower bound. It now also
+families of frames with one shared compact determinant lower bound. It also has
+a deterministic chosen-entry-jet qualitative bridge for a single compact local
+frame, assembling the Gram matrix into the higher matrix submodule before
+reading the chosen entry jets along the frame basis. It now also
 converts entrywise higher
 primitive difference controls with radii linear in a shared radius into the
 linear-radius `ParabolicBoundedWith` schematic RHS estimate and the
