@@ -10,7 +10,7 @@ For an Einstein initial metric `g₀` with `Ric(g₀) = λ • g₀`, the homoth
 as a Lean `IntrinsicLocalSolution` requires a positive scalar multiple of a smooth
 Riemannian metric and scale-invariance of the intrinsic Ricci tensor.
 
-This module proves the genuine, `sorry`-free, reusable infrastructure:
+This module proves the genuine, placeholder-free, reusable infrastructure:
 
 * `RicciFlow.smulMetric` — the positive scalar multiple `c • g` of a smooth
   Riemannian metric, with all bundle/metric fields (`symm`, `pos`, `isVonNBounded`,
@@ -25,9 +25,10 @@ needs scale-invariance of metric compatibility, whose proof in this repository's
 `inner ℝ`-based `IsMetricCompatibleTangent` definition currently triggers a Lean
 kernel-defeq blowup (converting `inner ℝ` to the metric field under the `extDerivFun`
 binder in the heavy tangent-bundle instance context).  That step is left as future
-work.  Nothing here uses `sorry`/`axiom`; this strictly enlarges the proven
-metric-rescaling toolkit and does not by itself close point 4 (which requires the
-Hamilton–DeTurck parabolic theorem for arbitrary initial metrics).
+work.  Nothing here uses proof placeholders or unchecked assumptions; this
+strictly enlarges the proven metric-rescaling toolkit and does not by itself
+close point 4 (which requires the Hamilton–DeTurck parabolic theorem for
+arbitrary initial metrics).
 -/
 
 @[expose] public noncomputable section
