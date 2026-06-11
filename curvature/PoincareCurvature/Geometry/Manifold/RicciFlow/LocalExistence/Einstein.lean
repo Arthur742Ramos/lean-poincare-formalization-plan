@@ -3,30 +3,37 @@ module
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence
 
 /-!
-# Einstein homothetic Ricci-flow solutions
+# Metric rescaling infrastructure for Ricci flow (toward Einstein homothetic solutions)
 
-For an Einstein initial metric `g₀` with `Ric(g₀) = λ • g₀`, the homothetic
-family `g(t) = (1 - 2λ (t - t₀)) • g₀` solves Ricci flow `∂ₜ g = -2 Ric(g)` on
-the interval where the scale factor stays positive.  This module proves this is
-a genuine `IntrinsicLocalSolution`, giving the first *curved* (non-degenerate)
-local-existence case for roadmap point 4.
+For an Einstein initial metric `g₀` with `Ric(g₀) = λ • g₀`, the homothetic family
+`g(t) = (1 - 2λ (t - t₀)) • g₀` solves Ricci flow `∂ₜ g = -2 Ric(g)`.  Realizing this
+as a Lean `IntrinsicLocalSolution` requires a positive scalar multiple of a smooth
+Riemannian metric and scale-invariance of the intrinsic Ricci tensor.
 
-Reusable infrastructure proved here:
+This module proves the genuine, `sorry`-free, reusable infrastructure:
 
 * `RicciFlow.smulMetric` — the positive scalar multiple `c • g` of a smooth
-  Riemannian metric, with all bundle/metric fields discharged;
-* scale-invariance of the intrinsic Ricci tensor under positive rescaling.
+  Riemannian metric, with all bundle/metric fields (`symm`, `pos`, `isVonNBounded`,
+  `contMDiff`) discharged;
+* `RicciFlow.smulMetric_inner_apply` — its fibrewise inner product `= c * g.inner`.
 
-This is genuine `sorry`-free mathematical content; it does not by itself close
-point 4 (which requires existence for *arbitrary* initial metrics, i.e. the
-Hamilton–DeTurck parabolic theorem), but it strictly enlarges the proven
-local-existence territory beyond the degenerate empty/subsingleton/rank-one
-cases and supplies metric-rescaling infrastructure useful for normalized flow.
+The companion `EinsteinAux.lean` proves scalar-linearity of the scalar exterior
+derivative (`extDerivFun_const_smul_apply`), the remaining calculus input.
+
+Note: assembling these into the full homothetic local-existence theorem additionally
+needs scale-invariance of metric compatibility, whose proof in this repository's
+`inner ℝ`-based `IsMetricCompatibleTangent` definition currently triggers a Lean
+kernel-defeq blowup (converting `inner ℝ` to the metric field under the `extDerivFun`
+binder in the heavy tangent-bundle instance context).  That step is left as future
+work.  Nothing here uses `sorry`/`axiom`; this strictly enlarges the proven
+metric-rescaling toolkit and does not by itself close point 4 (which requires the
+Hamilton–DeTurck parabolic theorem for arbitrary initial metrics).
 -/
 
 @[expose] public noncomputable section
 
 set_option linter.unusedSectionVars false
+set_option maxHeartbeats 1000000
 
 open Bundle
 open scoped Manifold ContDiff

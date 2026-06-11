@@ -21,3 +21,5 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RankOne
 import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RankOneDeTurck
 import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RankOneGaugeReduced
 import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.IsEmptyDeTurckFamily
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.EinsteinAux
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.Einstein
