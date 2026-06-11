@@ -630,7 +630,11 @@ does the same when the patch-local field input is supplied in centered
 `mpullbackWithin` form.  The local Picard/gluing wrapper
 `Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_iUnion_readout_localGluingData_localFlowSolution_of_eventuallyEq_along_maps3_nhdsWithin`
 now derives that pullback-field input from current-time anchored model flows
-while preserving the arbitrary model-slot correction conclusion.  The
+while preserving the arbitrary model-slot correction conclusion.  Its
+continuous-readout companion
+`Diffeomorph3GaugeFlowOn.spatial_tangent_correction_modelSlots_eq_neg_intrinsicDeTurckCorrection_of_closedBall_model_hasFDerivWithinAt_of_iUnion_readout_localGluingData_localFlowSolution_of_continuousWithinAt_of_eqOn_of_eventuallyEq_along_maps3_nhdsWithin`
+matches the selected compact constructors that retain readout continuity rather
+than an explicit source-persistence hypothesis.  The
 smooth scalar endpoint also has
 `BanachEvolutionLocalSolutionIn.SmoothIntrinsicDeTurckRealization.variational_hvalue_gaugeCorrectedPullbackVelocity_of_chartRHS_modelSlotSignedCorrection`,
 which consumes a signed correction already stated in model slots and performs
