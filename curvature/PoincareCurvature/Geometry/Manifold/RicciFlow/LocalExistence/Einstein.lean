@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.EinsteinAux
 
 /-!
 # Metric rescaling infrastructure for Ricci flow (toward Einstein homothetic solutions)
@@ -96,5 +97,90 @@ def smulMetric (c : ℝ) (hc : 0 < c)
     (smulMetric (I := I) (M := M) c hc g).inner b v w = c * g.inner b v w := by
   change (c • g.inner b) v w = c * g.inner b v w
   simp only [ContinuousLinearMap.smul_apply, smul_eq_mul]
+
+/-- Metric compatibility transfers along any positive constant rescaling of the
+fibrewise inner product.  Stated for an *arbitrary* second metric `g'` whose inner
+product is `c` times that of `g`, so the heavy `inner ℝ ↔ .inner` conversion is
+checked against a free variable rather than against the structure literal
+`smulMetric c hc g` (whose `isVonNBounded` proof field would otherwise blow up the
+kernel defeq check).  This is the genuine analytic content behind scale-invariance
+of the Levi-Civita connection: the Leibniz identity scales by the constant `c`,
+discharged by `extDerivFun_const_smul_apply`. -/
+theorem isMetricCompatibleTangent_of_inner_eq_const_smul (c : ℝ)
+    {g g' : Bundle.ContMDiffRiemannianMetric I 2 E TM}
+    (hinner : ∀ (x : M) (u v : TM x), g'.inner x u v = c * g.inner x u v)
+    (cov : CovariantDerivative I E TM)
+    (hcov : letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩;
+      cov.IsMetricCompatibleTangent) :
+    letI : Bundle.RiemannianBundle TM := ⟨g'.toRiemannianMetric⟩;
+    cov.IsMetricCompatibleTangent := by
+  letI : Bundle.RiemannianBundle TM := ⟨g'.toRiemannianMetric⟩
+  intro x σ τ hσ hτ u
+  -- Differentiability of the `g`-inner product of the two sections.
+  have hf : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun y ↦ g.inner y (σ y) (τ y)) x := by
+    letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩
+    simpa using CovariantDerivative.mdiffAt_inner_sections
+      (I := I) (E := E) (M := M) (x := x) (σ := σ) (τ := τ) hσ hτ
+  -- The `g`-compatibility Leibniz identity.
+  have hcompat :
+      extDerivFun (I := I) (fun y ↦ g.inner y (σ y) (τ y)) x u =
+        g.inner x (cov σ x u) (τ x) + g.inner x (σ x) (cov τ x u) := by
+    letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩
+    simpa using hcov (σ := σ) (τ := τ) hσ hτ u
+  -- Convert the `g'` Leibniz goal to the `g'.inner` form (variable `g'`, cheap defeq).
+  change
+    extDerivFun (I := I) (fun y ↦ g'.inner y (σ y) (τ y)) x u =
+      g'.inner x (cov σ x u) (τ x) + g'.inner x (σ x) (cov τ x u)
+  simp only [hinner]
+  rw [extDerivFun_const_smul_apply c u hf, hcompat, mul_add]
+
+/-- Metric compatibility is invariant under positive rescaling of the metric:
+if `cov` is metric-compatible for `g`, it is metric-compatible for `c • g`. -/
+theorem isMetricCompatibleTangent_smulMetric (c : ℝ) (hc : 0 < c)
+    (g : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    (cov : CovariantDerivative I E TM)
+    (hcov : letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩;
+      cov.IsMetricCompatibleTangent) :
+    letI : Bundle.RiemannianBundle TM := ⟨(smulMetric (I := I) (M := M) c hc g).toRiemannianMetric⟩;
+    cov.IsMetricCompatibleTangent :=
+  isMetricCompatibleTangent_of_inner_eq_const_smul (I := I) (M := M) c
+    (g := g) (g' := smulMetric (I := I) (M := M) c hc g)
+    (fun x u v ↦ smulMetric_inner_apply (I := I) (M := M) c hc g x u v) cov hcov
+
+/-- Levi-Civita transfers along any positive constant rescaling of the inner product,
+stated for an arbitrary second metric `g'`.  Torsion-freeness is metric-independent;
+metric compatibility scales via `isMetricCompatibleTangent_of_inner_eq_const_smul`. -/
+theorem isLeviCivita_of_inner_eq_const_smul (c : ℝ)
+    {g g' : Bundle.ContMDiffRiemannianMetric I 2 E TM}
+    (hinner : ∀ (x : M) (u v : TM x), g'.inner x u v = c * g.inner x u v)
+    (cov : CovariantDerivative I E TM)
+    (hcov : letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩;
+      cov.IsLeviCivita) :
+    letI : Bundle.RiemannianBundle TM := ⟨g'.toRiemannianMetric⟩;
+    cov.IsLeviCivita := by
+  -- Extract metric compatibility under the source `g`-instance.
+  have hmc :
+      letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩;
+      cov.IsMetricCompatibleTangent := hcov.2
+  -- `IsTorsionFree` unfolds to `cov.torsion = 0`, which mentions no Riemannian instance,
+  -- so we bridge through that instance-free equation rather than asking the kernel to
+  -- unify the two `RiemannianBundle` instances.
+  have htf0 : cov.torsion = 0 :=
+    letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩; hcov.1
+  letI : Bundle.RiemannianBundle TM := ⟨g'.toRiemannianMetric⟩
+  refine ⟨htf0, ?_⟩
+  exact isMetricCompatibleTangent_of_inner_eq_const_smul (I := I) (M := M) c hinner cov hmc
+
+/-- A Levi-Civita connection for `g` is a Levi-Civita connection for `c • g` (`c > 0`). -/
+theorem isLeviCivita_smulMetric (c : ℝ) (hc : 0 < c)
+    (g : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    (cov : CovariantDerivative I E TM)
+    (hcov : letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩;
+      cov.IsLeviCivita) :
+    letI : Bundle.RiemannianBundle TM := ⟨(smulMetric (I := I) (M := M) c hc g).toRiemannianMetric⟩;
+    cov.IsLeviCivita :=
+  isLeviCivita_of_inner_eq_const_smul (I := I) (M := M) c
+    (g := g) (g' := smulMetric (I := I) (M := M) c hc g)
+    (fun x u v ↦ smulMetric_inner_apply (I := I) (M := M) c hc g x u v) cov hcov
 
 end RicciFlow
