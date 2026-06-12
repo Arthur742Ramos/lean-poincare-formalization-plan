@@ -310,6 +310,82 @@ theorem isLeviCivita_const_homotheticMetricFamily
     rw [hslice]
     exact hLevi
 
+/-- The Ricci curvature of a connection does not depend on the Riemannian metric used to
+register the bundle instance: it is the trace of the connection-only curvature tensor.
+Stated for *variable* metrics `A`, `B` so the kernel never has to reduce a structure
+literal's proof fields. -/
+theorem ricciCurvature_riemannianBundle_irrelevant
+    (A B : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    (cov₀ : CovariantDerivative I E TM)
+    [hcov₀ : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1]
+    (x : M) (u v : TM x) :
+    (letI : Bundle.RiemannianBundle TM := ⟨A.toRiemannianMetric⟩;
+     CovariantDerivative.ricciCurvature (cov := cov₀) x u v) =
+      (letI : Bundle.RiemannianBundle TM := ⟨B.toRiemannianMetric⟩;
+       CovariantDerivative.ricciCurvature (cov := cov₀) x u v) := by
+  -- The `RiemannianBundle` instance only changes the *norm* on the fibers; it preserves the
+  -- underlying `AddCommGroup`/`Module ℝ` structure (`toNormedAddCommGroupOfTopology` takes those
+  -- as inputs).  `ricciCurvature` is the trace of the connection-only curvature endomorphism, so
+  -- after exposing the trace, the two endomorphisms coincide without reducing the norm structure.
+  simp only [CovariantDerivative.ricciCurvature_apply]
+  congr 1
+
+/-- The intrinsic Ricci tensor of the homothetic family is `λ • g₀` for Einstein
+initial data `Ric(cov₀) = λ • g₀`. -/
+theorem intrinsicRicciTensor_homotheticMetricFamily
+    (lam t₀ : ℝ) (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    (cov₀ : CovariantDerivative I E TM)
+    [hcov₀ : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1]
+    (hLevi : letI : Bundle.RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩; cov₀.IsLeviCivita)
+    (hEinstein : ∀ (x : M) (u v : TM x),
+      (letI : Bundle.RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩;
+       CovariantDerivative.ricciCurvature (cov := cov₀) x u v) = lam * g₀.inner x u v)
+    (t : ℝ) {x : M} (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M)
+      (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀) t x u v =
+      lam * g₀.inner x u v := by
+  rw [intrinsicRicciTensor_eq_ricciCurvature_of_const_isLeviCivita (I := I) (M := M)
+    (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀) cov₀
+    (isLeviCivita_const_homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ cov₀ hLevi) t x u v]
+  -- Move from the `(g t)` instance to the `g₀` instance without touching the metric
+  -- structure literal, then apply the Einstein equation.
+  rw [ricciCurvature_riemannianBundle_irrelevant (I := I) (M := M)
+    (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ t) g₀ cov₀ x u v]
+  exact hEinstein x u v
+
+/-- A positive terminal-time increment on which the homothetic scaling factor stays positive. -/
+def homotheticDelta (lam : ℝ) : ℝ := 1 / (2 * |lam| + 2)
+
+lemma homotheticDelta_pos (lam : ℝ) : 0 < homotheticDelta lam := by
+  have : 0 < 2 * |lam| + 2 := by positivity
+  simpa [homotheticDelta] using one_div_pos.mpr this
+
+/-- On `[t₀, t₀ + δ]` (with `δ = homotheticDelta lam`), the scaling factor is positive. -/
+lemma homotheticFactor_pos_of_mem_Icc (lam t₀ : ℝ) {t : ℝ}
+    (ht : t ∈ Set.Icc t₀ (t₀ + homotheticDelta lam)) :
+    0 < homotheticFactor lam t₀ t := by
+  obtain ⟨ht0, ht1⟩ := ht
+  have hden : 0 < 2 * |lam| + 2 := by positivity
+  have hdnonneg : 0 ≤ t - t₀ := sub_nonneg.mpr ht0
+  have hdle : t - t₀ ≤ homotheticDelta lam := by linarith
+  -- `|2 * lam * (t - t₀)| < 1`, hence `1 - 2 lam (t-t₀) > 0`.
+  have hbound : |2 * lam * (t - t₀)| < 1 := by
+    rw [abs_mul, abs_mul]
+    have h2 : |(2 : ℝ)| = 2 := by norm_num
+    rw [h2, abs_of_nonneg hdnonneg]
+    have hkey : 2 * |lam| * (t - t₀) ≤ 2 * |lam| * homotheticDelta lam := by
+      apply mul_le_mul_of_nonneg_left hdle
+      positivity
+    have hlt : 2 * |lam| * homotheticDelta lam < 1 := by
+      rw [homotheticDelta]
+      rw [mul_one_div]
+      rw [div_lt_one hden]
+      linarith
+    linarith
+  have := (abs_lt.mp hbound).2
+  simp only [homotheticFactor]
+  linarith
+
 end Homothetic
 
 end RicciFlow
