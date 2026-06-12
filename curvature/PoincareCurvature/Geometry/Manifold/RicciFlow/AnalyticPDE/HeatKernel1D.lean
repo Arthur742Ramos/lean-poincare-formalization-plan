@@ -199,5 +199,22 @@ theorem integrable_heatKernel1D {t : ℝ} (ht : 0 < t) :
     rw [neg_div, div_eq_inv_mul]; ring
   rw [hexp]
 
+/-- The heat kernel is even in the space variable: `K(t, -x) = K(t, x)`. -/
+@[simp] lemma heatKernel1D_neg (t x : ℝ) : heatKernel1D t (-x) = heatKernel1D t x := by
+  simp [heatKernel1D]
+
+/-- The heat kernel is nonnegative for `t > 0` (a convenience form of positivity for
+integral/`L¹` arguments). -/
+lemma heatKernel1D_nonneg {t : ℝ} (ht : 0 < t) (x : ℝ) : 0 ≤ heatKernel1D t x :=
+  (heatKernel1D_pos ht x).le
+
+/-- The `L¹` mass of the heat kernel is `1`: `∫ x, |K(t, x)| = 1` for `t > 0`. -/
+theorem integral_norm_heatKernel1D {t : ℝ} (ht : 0 < t) :
+    ∫ x : ℝ, ‖heatKernel1D t x‖ = 1 := by
+  have hnorm : (fun x : ℝ => ‖heatKernel1D t x‖) = fun x : ℝ => heatKernel1D t x := by
+    funext x
+    rw [Real.norm_eq_abs, abs_of_nonneg (heatKernel1D_nonneg ht x)]
+  rw [hnorm, integral_heatKernel1D ht]
+
 end AnalyticPDE
 end RicciFlow
