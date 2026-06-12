@@ -230,6 +230,11 @@ theorem integral_heatKernel1D_sub {t : ℝ} (ht : 0 < t) (x : ℝ) :
   rw [hfun, integral_add_right_eq_self (fun y : ℝ => heatKernel1D t y) (-x)]
   exact integral_heatKernel1D ht
 
+/-- The shifted heat kernel `y ↦ K(t, x - y)` is integrable for `t > 0`. -/
+theorem integrable_heatKernel1D_sub {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    Integrable (fun y : ℝ => heatKernel1D t (x - y)) :=
+  (integrable_heatKernel1D ht).comp_sub_left x
+
 /-- The 1D heat semigroup acting on a function `f`:
 `(heatSemigroup1D t f) x = ∫ y, K(t, x - y) · f y dy`.  For `t > 0` and bounded
 continuous `f` this is the solution of the heat equation with initial data `f`. -/
@@ -241,6 +246,35 @@ theorem heatSemigroup1D_const {t : ℝ} (ht : 0 < t) (c x : ℝ) :
     heatSemigroup1D t (fun _ => c) x = c := by
   rw [heatSemigroup1D]
   rw [integral_mul_const, integral_heatKernel1D_sub ht, one_mul]
+
+/-- **Maximum principle / sup-norm contraction for the heat semigroup.**  If
+`|f y| ≤ C` for all `y`, then `|heatSemigroup1D t f x| ≤ C` for `t > 0`.
+(The domination by the integrable `K(t, x - ·)·C` makes the integrability of the
+convolution integrand unnecessary as a hypothesis.) -/
+theorem abs_heatSemigroup1D_le {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ} (x : ℝ)
+    (hf : ∀ y, |f y| ≤ C) :
+    |heatSemigroup1D t f x| ≤ C := by
+  have hCnonneg : 0 ≤ C := le_trans (abs_nonneg _) (hf 0)
+  -- Pointwise: `|K(t,x-y)·f y| ≤ K(t,x-y)·C`.
+  have hpt : ∀ y, ‖heatKernel1D t (x - y) * f y‖ ≤ heatKernel1D t (x - y) * C := by
+    intro y
+    rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (heatKernel1D_nonneg ht (x - y))]
+    exact mul_le_mul_of_nonneg_left (hf y) (heatKernel1D_nonneg ht (x - y))
+  -- Integral bound.
+  have hbound :
+      ∫ y : ℝ, heatKernel1D t (x - y) * C = C := by
+    rw [integral_mul_const, integral_heatKernel1D_sub ht, one_mul]
+  calc
+    |heatSemigroup1D t f x|
+        = ‖∫ y : ℝ, heatKernel1D t (x - y) * f y‖ := by
+          rw [heatSemigroup1D, Real.norm_eq_abs]
+    _ ≤ ∫ y : ℝ, heatKernel1D t (x - y) * C := by
+          refine le_trans (norm_integral_le_integral_norm _) ?_
+          refine integral_mono_of_nonneg
+            (Filter.Eventually.of_forall (fun y ↦ norm_nonneg _)) ?_
+            (Filter.Eventually.of_forall hpt)
+          exact (integrable_heatKernel1D_sub ht x).mul_const C
+    _ = C := hbound
 
 end AnalyticPDE
 end RicciFlow
