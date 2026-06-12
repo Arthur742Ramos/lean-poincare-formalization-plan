@@ -347,5 +347,17 @@ theorem heatSemigroup1D_mem_Icc {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {c C : 
   rw [abs_le] at hbound
   exact ⟨by linarith [hbound.1], by linarith [hbound.2]⟩
 
+/-- **Comparison principle for the heat semigroup.**  If `f ≤ g` pointwise and both
+convolution integrands are integrable, then `heatSemigroup1D t f x ≤ heatSemigroup1D t g x`. -/
+theorem heatSemigroup1D_mono {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ} (x : ℝ)
+    (hfg : ∀ y, f y ≤ g y)
+    (hfint : Integrable (fun y : ℝ => heatKernel1D t (x - y) * f y))
+    (hgint : Integrable (fun y : ℝ => heatKernel1D t (x - y) * g y)) :
+    heatSemigroup1D t f x ≤ heatSemigroup1D t g x := by
+  rw [heatSemigroup1D, heatSemigroup1D]
+  refine integral_mono hfint hgint ?_
+  intro y
+  exact mul_le_mul_of_nonneg_left (hfg y) (heatKernel1D_nonneg ht (x - y))
+
 end AnalyticPDE
 end RicciFlow
