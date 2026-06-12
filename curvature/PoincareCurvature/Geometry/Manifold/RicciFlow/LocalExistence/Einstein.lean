@@ -211,4 +211,77 @@ theorem intrinsicRicciTensor_eq_ricciCurvature_of_const_isLeviCivita
 
 end Intrinsic
 
+section Homothetic
+
+variable [SigmaCompactSpace M]
+
+/-- The homothetic scaling factor `1 - 2λ(t - t₀)` of the Einstein Ricci flow. -/
+def homotheticFactor (lam t₀ t : ℝ) : ℝ := 1 - 2 * lam * (t - t₀)
+
+@[simp] lemma homotheticFactor_self (lam t₀ : ℝ) : homotheticFactor lam t₀ t₀ = 1 := by
+  simp [homotheticFactor]
+
+lemma hasDerivAt_homotheticFactor (lam t₀ t : ℝ) :
+    HasDerivAt (homotheticFactor lam t₀) (-(2 * lam)) t := by
+  have h : HasDerivAt (fun s : ℝ ↦ 2 * lam * (s - t₀)) (2 * lam) t := by
+    simpa using ((hasDerivAt_id t).sub_const t₀).const_mul (2 * lam)
+  simpa [homotheticFactor] using h.const_sub 1
+
+/-- The homothetic metric family `g(t) = (1 - 2λ(t-t₀)) • g₀`, defined as `g₀`
+wherever the scaling factor is non-positive (outside the local existence interval). -/
+noncomputable def homotheticMetricFamily
+    (lam t₀ : ℝ) (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM) :
+    MetricFamily (I := I) (M := M) :=
+  fun t ↦
+    if h : 0 < homotheticFactor lam t₀ t then
+      smulMetric (I := I) (M := M) (homotheticFactor lam t₀ t) h g₀
+    else g₀
+
+/-- On the region where the scaling factor is positive, the homothetic family's inner
+product is the scaled inner product of `g₀`. -/
+lemma homotheticMetricFamily_inner_of_pos
+    (lam t₀ : ℝ) (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    {t : ℝ} (ht : 0 < homotheticFactor lam t₀ t) (x : M) (u v : TM x) :
+    (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ t).inner x u v =
+      homotheticFactor lam t₀ t * g₀.inner x u v := by
+  simp only [homotheticMetricFamily, dif_pos ht]
+  exact smulMetric_inner_apply (I := I) (M := M) _ ht g₀ x u v
+
+/-- The scaling factor is eventually positive near any time where it is positive. -/
+lemma eventually_homotheticFactor_pos (lam t₀ : ℝ) {t : ℝ}
+    (ht : 0 < homotheticFactor lam t₀ t) :
+    ∀ᶠ s in nhds t, 0 < homotheticFactor lam t₀ s :=
+  (continuousAt_const.eventually_lt
+    (hasDerivAt_homotheticFactor lam t₀ t).continuousAt ht)
+
+/-- The homothetic family agrees with the explicitly-scaled family near any time in the
+positive region. -/
+lemma homotheticMetricFamily_metricTensor_eventuallyEq
+    (lam t₀ : ℝ) (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    {t : ℝ} (ht : 0 < homotheticFactor lam t₀ t) (x : M) (u v : TM x) :
+    (fun s ↦ metricTensor (I := I) (M := M)
+      (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀) s x u v) =ᶠ[nhds t]
+      (fun s ↦ homotheticFactor lam t₀ s * g₀.inner x u v) := by
+  filter_upwards [eventually_homotheticFactor_pos lam t₀ ht] with s hs
+  simp only [metricTensor]
+  exact homotheticMetricFamily_inner_of_pos (I := I) (M := M) lam t₀ g₀ hs x u v
+
+/-- Time derivative of the homothetic metric family at a time in the positive region:
+`∂ₜ g(t) = -2λ • g₀`. -/
+lemma hasTimeDerivativeAt_homotheticMetricFamily
+    (lam t₀ : ℝ) (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    {t : ℝ} (ht : 0 < homotheticFactor lam t₀ t) :
+    HasTimeDerivativeAt (I := I) (M := M)
+      (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀)
+      (fun _ x u v ↦ -(2 * lam) * g₀.inner x u v) t := by
+  intro x u v
+  have hbase : HasDerivAt
+      (fun s ↦ homotheticFactor lam t₀ s * g₀.inner x u v)
+      (-(2 * lam) * g₀.inner x u v) t :=
+    (hasDerivAt_homotheticFactor lam t₀ t).mul_const (g₀.inner x u v)
+  exact hbase.congr_of_eventuallyEq
+    (homotheticMetricFamily_metricTensor_eventuallyEq (I := I) (M := M) lam t₀ g₀ ht x u v)
+
+end Homothetic
+
 end RicciFlow
