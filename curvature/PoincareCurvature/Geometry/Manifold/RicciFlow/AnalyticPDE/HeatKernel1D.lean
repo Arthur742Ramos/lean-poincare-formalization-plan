@@ -103,5 +103,30 @@ theorem hasDerivAt_heatKernel1D_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
   rw [← hval]
   exact hconst
 
+/-- The spatial second derivative of the heat kernel:
+`∂ₓₓ K(t, x) = K(t, x) · (x² / (4 t²) - 1 / (2 t))`. -/
+theorem hasDerivAt_heatKernel1D_space_second {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    HasDerivAt (fun y => heatKernel1D t y * (-y / (2 * t)))
+      (heatKernel1D t x * (x ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) x := by
+  have htne : (2 * t) ≠ 0 := by positivity
+  -- First factor: `∂ₓ K = K · (-x/(2t))`.
+  have hK := hasDerivAt_heatKernel1D_space ht x
+  -- Second factor: `∂ₓ (-y/(2t)) = -1/(2t)`.
+  have hg : HasDerivAt (fun y : ℝ => -y / (2 * t)) (-1 / (2 * t)) x := by
+    have hid : HasDerivAt (fun y : ℝ => -y) (-1 : ℝ) x := by
+      simpa using (hasDerivAt_id x).neg
+    simpa using hid.div_const (2 * t)
+  -- Product rule.
+  have hmul := hK.mul hg
+  -- Rewrite the derivative value into `K · (x²/(4t²) - 1/(2t))`.
+  have hval :
+      heatKernel1D t x * (-x / (2 * t)) * (-x / (2 * t)) +
+        heatKernel1D t x * (-1 / (2 * t)) =
+      heatKernel1D t x * (x ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) := by
+    field_simp
+    ring
+  rw [← hval]
+  exact hmul
+
 end AnalyticPDE
 end RicciFlow
