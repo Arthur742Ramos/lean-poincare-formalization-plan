@@ -186,5 +186,18 @@ theorem heatKernel1D_heatEquation {t : ℝ} (ht : 0 < t) (x : ℝ) :
         (heatKernel1D t x * (x ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) x :=
   ⟨hasDerivAt_heatKernel1D_time ht x, hasDerivAt_heatKernel1D_space_second ht x⟩
 
+/-- The heat kernel is integrable in the space variable for `t > 0`. -/
+theorem integrable_heatKernel1D {t : ℝ} (ht : 0 < t) :
+    Integrable (fun x : ℝ => heatKernel1D t x) := by
+  have hb : 0 < (4 * t)⁻¹ := by positivity
+  have hgauss : Integrable (fun x : ℝ => Real.exp (-(4 * t)⁻¹ * x ^ 2)) :=
+    integrable_exp_neg_mul_sq hb
+  have hconst := hgauss.const_mul ((4 * π * t) ^ (-(1 : ℝ) / 2))
+  refine hconst.congr (Filter.Eventually.of_forall (fun x ↦ ?_))
+  simp only [heatKernel1D_apply]
+  have hexp : -(4 * t)⁻¹ * x ^ 2 = -x ^ 2 / (4 * t) := by
+    rw [neg_div, div_eq_inv_mul]; ring
+  rw [hexp]
+
 end AnalyticPDE
 end RicciFlow
