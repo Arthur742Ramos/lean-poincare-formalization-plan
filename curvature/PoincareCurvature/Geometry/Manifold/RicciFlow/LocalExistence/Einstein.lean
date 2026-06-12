@@ -282,6 +282,34 @@ lemma hasTimeDerivativeAt_homotheticMetricFamily
   exact hbase.congr_of_eventuallyEq
     (homotheticMetricFamily_metricTensor_eventuallyEq (I := I) (M := M) lam t₀ g₀ ht x u v)
 
+/-- A Levi-Civita connection for `g₀` is Levi-Civita for every slice of the homothetic
+family (whether in the positive region `c • g₀` or the fallback `g₀`). -/
+theorem isLeviCivita_const_homotheticMetricFamily
+    (lam t₀ : ℝ) (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    (cov₀ : CovariantDerivative I E TM)
+    (hLevi : letI : Bundle.RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩; cov₀.IsLeviCivita) :
+    CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M)
+      (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀)
+      (CovariantDerivative.TimeDependentCovariantDerivative.const
+        (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) cov₀) := by
+  intro t
+  show letI : Bundle.RiemannianBundle TM :=
+      ⟨(homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ t).toRiemannianMetric⟩;
+    cov₀.IsLeviCivita
+  by_cases h : 0 < homotheticFactor lam t₀ t
+  · -- Positive region: the slice is `(φ t) • g₀`.
+    have hslice : homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ t =
+        smulMetric (I := I) (M := M) (homotheticFactor lam t₀ t) h g₀ := by
+      simp only [homotheticMetricFamily, dif_pos h]
+    rw [hslice]
+    exact isLeviCivita_smulMetric (I := I) (M := M) (homotheticFactor lam t₀ t) h g₀ cov₀ hLevi
+  · -- Fallback region: the slice is `g₀` itself.
+    have hslice : homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ t = g₀ := by
+      simp only [homotheticMetricFamily, dif_neg h]
+    rw [hslice]
+    exact hLevi
+
 end Homothetic
 
 end RicciFlow
