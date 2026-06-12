@@ -286,5 +286,29 @@ theorem heatSemigroup1D_nonneg {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} (x : ℝ
   intro y
   exact mul_nonneg (heatKernel1D_nonneg ht (x - y)) (hf y)
 
+/-- The convolution integrand `y ↦ K(t, x - y) · f y` is integrable for `t > 0`
+whenever `f` is a.e.-strongly-measurable and bounded.  This unblocks linearity and
+the two-sided maximum principle for the heat semigroup. -/
+theorem integrable_heatKernel1D_sub_mul {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
+    (x : ℝ) (hmeas : AEStronglyMeasurable f) (hbound : ∀ y, ‖f y‖ ≤ C) :
+    Integrable (fun y : ℝ => heatKernel1D t (x - y) * f y) :=
+  (integrable_heatKernel1D_sub ht x).mul_bdd hmeas
+    (Filter.Eventually.of_forall hbound)
+
+/-- Linearity of the heat semigroup in the data (for bounded measurable inputs):
+`Hₜ(f + g) = Hₜf + Hₜg`. -/
+theorem heatSemigroup1D_add {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ} {C : ℝ} (x : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ C) :
+    heatSemigroup1D t (fun y => f y + g y) x =
+      heatSemigroup1D t f x + heatSemigroup1D t g x := by
+  rw [heatSemigroup1D, heatSemigroup1D, heatSemigroup1D]
+  have hsplit : ∀ y, heatKernel1D t (x - y) * (f y + g y)
+      = heatKernel1D t (x - y) * f y + heatKernel1D t (x - y) * g y := by
+    intro y; ring
+  simp only [hsplit]
+  exact integral_add (integrable_heatKernel1D_sub_mul ht x hfm hfb)
+    (integrable_heatKernel1D_sub_mul ht x hgm hgb)
+
 end AnalyticPDE
 end RicciFlow
