@@ -353,6 +353,30 @@ theorem intrinsicRicciTensor_homotheticMetricFamily
     (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ t) g₀ cov₀ x u v]
   exact hEinstein x u v
 
+/-- **Einstein is preserved along the homothetic Ricci flow.** On the positive region,
+each slice `g(t)` of the homothetic family is again Einstein, with rescaled constant
+`λ / φ(t)`: `Ric(g(t)) = (λ / (1 - 2λ(t-t₀))) • g(t)`. -/
+theorem intrinsicRicciTensor_homotheticMetricFamily_eq_smul_slice
+    (lam t₀ : ℝ) (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    (cov₀ : CovariantDerivative I E TM)
+    [hcov₀ : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1]
+    (hLevi : letI : Bundle.RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩; cov₀.IsLeviCivita)
+    (hEinstein : ∀ (x : M) (u v : TM x),
+      (letI : Bundle.RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩;
+       CovariantDerivative.ricciCurvature (cov := cov₀) x u v) =
+        lam * g₀.inner x u v)
+    (t : ℝ) {x : M} (hpos : 0 < homotheticFactor lam t₀ t) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M)
+      (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀) t x u v =
+      (lam / homotheticFactor lam t₀ t) *
+        (homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ t).inner x u v := by
+  rw [intrinsicRicciTensor_homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ cov₀
+    hLevi hEinstein t u v]
+  rw [homotheticMetricFamily_inner_of_pos (I := I) (M := M) lam t₀ g₀ hpos x u v]
+  -- `lam * g₀.inner = (lam / φ) * (φ * g₀.inner)` since `φ ≠ 0`.
+  have hne : homotheticFactor lam t₀ t ≠ 0 := ne_of_gt hpos
+  field_simp
+
 /-- A positive terminal-time increment on which the homothetic scaling factor stays positive. -/
 def homotheticDelta (lam : ℝ) : ℝ := 1 / (2 * |lam| + 2)
 
