@@ -276,5 +276,15 @@ theorem abs_heatSemigroup1D_le {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ
           exact (integrable_heatKernel1D_sub ht x).mul_const C
     _ = C := hbound
 
+/-- **Positivity preservation for the heat semigroup.**  If `f ≥ 0`, then
+`heatSemigroup1D t f x ≥ 0` for `t > 0`. -/
+theorem heatSemigroup1D_nonneg {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} (x : ℝ)
+    (hf : ∀ y, 0 ≤ f y) :
+    0 ≤ heatSemigroup1D t f x := by
+  rw [heatSemigroup1D]
+  refine integral_nonneg ?_
+  intro y
+  exact mul_nonneg (heatKernel1D_nonneg ht (x - y)) (hf y)
+
 end AnalyticPDE
 end RicciFlow
