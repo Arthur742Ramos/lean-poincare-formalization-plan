@@ -468,5 +468,52 @@ theorem abs_heatSemigroupND_le {n : ℕ} {t : ℝ} (ht : 0 < t) {f : (Fin n → 
           exact (integrable_heatKernelND_sub ht x).mul_const C
     _ = C := hbound
 
+/-- The `n`-dim convolution integrand `y ↦ Kₙ(t, x - y) · f y` is integrable for
+bounded a.e.-strongly-measurable `f`. -/
+theorem integrable_heatKernelND_sub_mul {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ)
+    (hmeas : AEStronglyMeasurable f) (hbound : ∀ y, ‖f y‖ ≤ C) :
+    Integrable (fun y : Fin n → ℝ => heatKernelND t (x - y) * f y) :=
+  (integrable_heatKernelND_sub ht x).mul_bdd hmeas
+    (Filter.Eventually.of_forall hbound)
+
+/-- Subtracting a constant commutes with the `n`-dimensional heat semigroup. -/
+theorem heatSemigroupND_sub_const {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ) (m : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    heatSemigroupND t (fun y => f y - m) x = heatSemigroupND t f x - m := by
+  rw [heatSemigroupND, heatSemigroupND]
+  have hsplit : ∀ y, heatKernelND t (x - y) * (f y - m)
+      = heatKernelND t (x - y) * f y - heatKernelND t (x - y) * m := by
+    intro y; ring
+  simp only [hsplit]
+  rw [integral_sub (integrable_heatKernelND_sub_mul ht x hfm hfb)
+    ((integrable_heatKernelND_sub ht x).mul_const m)]
+  rw [integral_mul_const, integral_heatKernelND_sub ht, one_mul]
+
+/-- **Two-sided maximum principle for the `n`-dimensional heat semigroup.**  If
+`c ≤ f y ≤ C` for all `y` and `f` is a.e.-strongly-measurable, then
+`c ≤ heatSemigroupND t f x ≤ C`. -/
+theorem heatSemigroupND_mem_Icc {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {c C : ℝ} (x : Fin n → ℝ)
+    (hfm : AEStronglyMeasurable f) (hlo : ∀ y, c ≤ f y) (hhi : ∀ y, f y ≤ C) :
+    heatSemigroupND t f x ∈ Set.Icc c C := by
+  set m := (c + C) / 2 with hm
+  set R := (C - c) / 2 with hR
+  have hfb : ∀ y, ‖f y‖ ≤ |c| + |C| := by
+    intro y
+    have hc1 : -|c| ≤ c := neg_abs_le c
+    have hC1 : C ≤ |C| := le_abs_self C
+    have hcnn : 0 ≤ |c| := abs_nonneg c
+    have hCnn : 0 ≤ |C| := abs_nonneg C
+    rw [Real.norm_eq_abs, abs_le]
+    exact ⟨by linarith [hlo y], by linarith [hhi y]⟩
+  have hshift : ∀ y, |f y - m| ≤ R := by
+    intro y; rw [abs_le]; constructor <;> [linarith [hlo y]; linarith [hhi y]]
+  have hbound := abs_heatSemigroupND_le ht x (f := fun y => f y - m) (C := R) hshift
+  rw [heatSemigroupND_sub_const ht x m hfm hfb] at hbound
+  rw [abs_le] at hbound
+  exact ⟨by linarith [hbound.1], by linarith [hbound.2]⟩
+
 end AnalyticPDE
 end RicciFlow
