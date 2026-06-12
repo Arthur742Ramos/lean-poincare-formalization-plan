@@ -408,5 +408,18 @@ theorem integral_norm_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) :
     funext x; rw [Real.norm_eq_abs, abs_of_nonneg (heatKernelND_nonneg ht x)]
   rw [hnorm, integral_heatKernelND ht]
 
+/-- Shifted total mass of the `n`-dimensional heat kernel: `∫ y, Kₙ(t, x - y) dy = 1`
+for `t > 0`.  This is the constant-preservation property of the `n`-dimensional heat
+semigroup. -/
+theorem integral_heatKernelND_sub {n : ℕ} {t : ℝ} (ht : 0 < t) (x : Fin n → ℝ) :
+    ∫ y : Fin n → ℝ, heatKernelND t (x - y) = 1 := by
+  -- `Kₙ(t, x - y) = ∏ i, K(t, x i - y i)`; Fubini reduces to the 1D shifted mass.
+  have hfun : (fun y : Fin n → ℝ => heatKernelND t (x - y))
+      = fun y : Fin n → ℝ => ∏ i, heatKernel1D t (x i - y i) := by
+    funext y; rw [heatKernelND]; rfl
+  rw [hfun,
+    integral_fin_nat_prod_volume_eq_prod (fun i (z : ℝ) => heatKernel1D t (x i - z))]
+  simp only [integral_heatKernel1D_sub ht, Finset.prod_const_one]
+
 end AnalyticPDE
 end RicciFlow
