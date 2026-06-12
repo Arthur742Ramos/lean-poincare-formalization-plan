@@ -407,6 +407,13 @@ lemma heatKernelND_nonneg {n : ℕ} {t : ℝ} (ht : 0 < t) (x : Fin n → ℝ) :
     0 ≤ heatKernelND t x :=
   (heatKernelND_pos ht x).le
 
+/-- The `n`-dimensional heat kernel is continuous in the space variable. -/
+lemma continuous_heatKernelND {n : ℕ} (t : ℝ) :
+    Continuous (fun x : Fin n → ℝ => heatKernelND t x) := by
+  unfold heatKernelND
+  refine continuous_finset_prod Finset.univ (fun i _ => ?_)
+  exact (continuous_heatKernel1D_space t).comp (continuous_apply i)
+
 /-- Total mass of the `n`-dimensional heat kernel: `∫ x, Kₙ(t, x) = 1` for `t > 0`,
 via Fubini and the 1D mass. -/
 theorem integral_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) :
