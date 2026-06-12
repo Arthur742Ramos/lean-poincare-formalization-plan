@@ -183,4 +183,32 @@ theorem isLeviCivita_smulMetric (c : ℝ) (hc : 0 < c)
     (g := g) (g' := smulMetric (I := I) (M := M) c hc g)
     (fun x u v ↦ smulMetric_inner_apply (I := I) (M := M) c hc g x u v) cov hcov
 
+section Intrinsic
+
+variable [SigmaCompactSpace M]
+
+/-- If a *constant* connection family `const cov₀` is Levi-Civita for the whole
+metric family `g`, then the intrinsic Ricci tensor of `g` is computed by `cov₀`
+at every time, i.e. it equals the Ricci curvature of `cov₀` (which does not depend
+on the metric used to register the Riemannian instance). -/
+theorem intrinsicRicciTensor_eq_ricciCurvature_of_const_isLeviCivita
+    (g : MetricFamily (I := I) (M := M))
+    (cov₀ : CovariantDerivative I E TM)
+    [hcov₀ : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1]
+    (hLevi : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g
+      (CovariantDerivative.TimeDependentCovariantDerivative.const
+        (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) cov₀))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciTensor (I := I) (M := M) g t x u v =
+      (letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩;
+       CovariantDerivative.ricciCurvature (cov := cov₀) x u v) := by
+  rw [intrinsicRicciTensor_eq_ricciTensor_of_isLeviCivita (I := I) (M := M) g
+    (cov := CovariantDerivative.TimeDependentCovariantDerivative.const
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) cov₀)
+    (fun _ ↦ hcov₀) hLevi]
+  rfl
+
+end Intrinsic
+
 end RicciFlow
