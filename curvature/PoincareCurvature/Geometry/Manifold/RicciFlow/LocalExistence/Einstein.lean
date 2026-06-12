@@ -386,6 +386,75 @@ lemma homotheticFactor_pos_of_mem_Icc (lam t₀ : ℝ) {t : ℝ}
   simp only [homotheticFactor]
   linarith
 
+/-- **Einstein homothetic Ricci flow.**  For Einstein initial data
+`Ric(cov₀) = λ • g₀` (with `cov₀` a Levi-Civita connection for `g₀`), the homothetic
+family `g(t) = (1 - 2λ(t-t₀)) • g₀` is a genuine intrinsic local Ricci-flow solution
+on `[t₀, t₀ + δ]`, with metric velocity `-2λ • g₀`. -/
+noncomputable def einsteinHomotheticIntrinsicLocalSolution
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (lam : ℝ) (cov₀ : CovariantDerivative I E TM)
+    [hcov₀ : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1]
+    (hLevi : letI : Bundle.RiemannianBundle TM := ⟨ivp.initialMetric.toRiemannianMetric⟩;
+      cov₀.IsLeviCivita)
+    (hEinstein : ∀ (x : M) (u v : TM x),
+      (letI : Bundle.RiemannianBundle TM := ⟨ivp.initialMetric.toRiemannianMetric⟩;
+       CovariantDerivative.ricciCurvature (cov := cov₀) x u v) =
+        lam * ivp.initialMetric.inner x u v) :
+    IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp where
+  terminalTime := ivp.initialTime + homotheticDelta lam
+  initial_lt_terminal := by
+    have := homotheticDelta_pos lam; linarith
+  toIntrinsicSolution :=
+    { timeSet := Set.Icc ivp.initialTime (ivp.initialTime + homotheticDelta lam)
+      metric := homotheticMetricFamily (I := I) (M := M) lam ivp.initialTime ivp.initialMetric
+      metricVelocity := fun _ x u v ↦ -(2 * lam) * ivp.initialMetric.inner x u v
+      isRicciFlow := by
+        constructor
+        · -- Time derivative `∂ₜ g = -2λ • g₀` on the interval (the scaling factor is positive there).
+          intro t ht
+          exact hasTimeDerivativeAt_homotheticMetricFamily (I := I) (M := M) lam
+            ivp.initialTime ivp.initialMetric
+            (homotheticFactor_pos_of_mem_Icc lam ivp.initialTime ht)
+        · -- Intrinsic Ricci-flow equation: `-2λ • g₀ = -2 Ric(g(t)) = -2 (λ • g₀)`.
+          intro t _ht x u v
+          show -(2 * lam) * ivp.initialMetric.inner x u v =
+            intrinsicRicciFlowRHS (I := I) (M := M)
+              (homotheticMetricFamily (I := I) (M := M) lam ivp.initialTime ivp.initialMetric)
+              t x u v
+          rw [intrinsicRicciFlowRHS_apply]
+          show -(2 * lam) * ivp.initialMetric.inner x u v =
+            (-2 : ℝ) * intrinsicRicciTensor (I := I) (M := M)
+              (homotheticMetricFamily (I := I) (M := M) lam ivp.initialTime ivp.initialMetric)
+              t x u v
+          rw [intrinsicRicciTensor_homotheticMetricFamily (I := I) (M := M) lam
+            ivp.initialTime ivp.initialMetric cov₀ hLevi hEinstein t u v]
+          ring }
+  interval_subset := subset_rfl
+  matchesInitialMetric := by
+    intro x u v
+    show metricTensor (I := I) (M := M)
+      (homotheticMetricFamily (I := I) (M := M) lam ivp.initialTime ivp.initialMetric)
+      ivp.initialTime x u v = ivp.initialMetric.inner x u v
+    have hpos : 0 < homotheticFactor lam ivp.initialTime ivp.initialTime := by
+      simp [homotheticFactor]
+    simp only [metricTensor]
+    rw [homotheticMetricFamily_inner_of_pos (I := I) (M := M) lam ivp.initialTime
+      ivp.initialMetric hpos x u v, homotheticFactor_self, one_mul]
+
+/-- Einstein initial data admits an intrinsic local Ricci-flow solution. -/
+theorem intrinsicLocalSolution_nonempty_of_einstein
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (lam : ℝ) (cov₀ : CovariantDerivative I E TM)
+    [hcov₀ : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1]
+    (hLevi : letI : Bundle.RiemannianBundle TM := ⟨ivp.initialMetric.toRiemannianMetric⟩;
+      cov₀.IsLeviCivita)
+    (hEinstein : ∀ (x : M) (u v : TM x),
+      (letI : Bundle.RiemannianBundle TM := ⟨ivp.initialMetric.toRiemannianMetric⟩;
+       CovariantDerivative.ricciCurvature (cov := cov₀) x u v) =
+        lam * ivp.initialMetric.inner x u v) :
+    Nonempty (IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨einsteinHomotheticIntrinsicLocalSolution (I := I) (M := M) ivp lam cov₀ hLevi hEinstein⟩
+
 end Homothetic
 
 end RicciFlow
