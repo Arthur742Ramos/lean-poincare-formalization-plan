@@ -128,5 +128,63 @@ theorem hasDerivAt_heatKernel1D_space_second {t : ℝ} (ht : 0 < t) (x : ℝ) :
   rw [← hval]
   exact hmul
 
+/-- The time derivative of the heat kernel:
+`∂ₜ K(t, x) = K(t, x) · (x² / (4 t²) - 1 / (2 t))`. -/
+theorem hasDerivAt_heatKernel1D_time {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    HasDerivAt (fun s => heatKernel1D s x)
+      (heatKernel1D t x * (x ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) t := by
+  have htne : t ≠ 0 := ne_of_gt ht
+  have h4πtpos : 0 < 4 * π * t := by positivity
+  have h4πtne : 4 * π * t ≠ 0 := ne_of_gt h4πtpos
+  -- Prefactor `c s = (4 π s)^(-1/2)`; derivative via chain rule with inner `s ↦ 4 π s`.
+  have hinner : HasDerivAt (fun s : ℝ => 4 * π * s) (4 * π) t := by
+    simpa using ((hasDerivAt_id t).const_mul (4 * π))
+  have hrpow : HasDerivAt (fun u : ℝ => u ^ (-(1 : ℝ) / 2))
+      ((-(1 : ℝ) / 2) * (4 * π * t) ^ (-(1 : ℝ) / 2 - 1)) (4 * π * t) :=
+    Real.hasDerivAt_rpow_const (Or.inl h4πtne)
+  have hc : HasDerivAt (fun s : ℝ => (4 * π * s) ^ (-(1 : ℝ) / 2))
+      ((-(1 : ℝ) / 2) * (4 * π * t) ^ (-(1 : ℝ) / 2 - 1) * (4 * π)) t :=
+    hrpow.comp t hinner
+  -- Exponent `e s = -x²/(4 s) = (-x²/4) · s⁻¹`; derivative `x²/(4 t²)`.
+  have he : HasDerivAt (fun s : ℝ => -x ^ 2 / (4 * s)) (x ^ 2 / (4 * t ^ 2)) t := by
+    have hsinv : HasDerivAt (fun s : ℝ => s⁻¹) (-(t ^ 2)⁻¹) t := by
+      simpa using hasDerivAt_inv htne
+    have hmul := hsinv.const_mul (-x ^ 2 / 4)
+    have hfuneq : (fun s : ℝ => -x ^ 2 / 4 * s⁻¹) = (fun s : ℝ => -x ^ 2 / (4 * s)) := by
+      funext s; field_simp
+    have hval : -x ^ 2 / 4 * -(t ^ 2)⁻¹ = x ^ 2 / (4 * t ^ 2) := by
+      field_simp
+    rw [hfuneq] at hmul
+    rwa [hval] at hmul
+  -- Exponential factor `exp (e s)`.
+  have hexp := he.exp
+  -- Product rule: `∂ₜ (c · exp e) = c' · exp e + c · (exp e · e')`.
+  have hmul := hc.mul hexp
+  -- Rewrite to `K · (x²/(4t²) - 1/(2t))`.
+  have hval :
+      (-(1 : ℝ) / 2) * (4 * π * t) ^ (-(1 : ℝ) / 2 - 1) * (4 * π) *
+          Real.exp (-x ^ 2 / (4 * t)) +
+        (4 * π * t) ^ (-(1 : ℝ) / 2) *
+          (Real.exp (-x ^ 2 / (4 * t)) * (x ^ 2 / (4 * t ^ 2))) =
+      heatKernel1D t x * (x ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) := by
+    rw [heatKernel1D]
+    -- Reduce `(4πt)^(-1/2-1)` to `(4πt)^(-1/2) · (4πt)⁻¹`.
+    rw [show (-(1 : ℝ) / 2 - 1) = (-(1 : ℝ) / 2) + (-1) by ring,
+      Real.rpow_add h4πtpos, Real.rpow_neg_one]
+    field_simp
+    ring
+  rw [← hval]
+  exact hmul
+
+/-- **The 1D heat kernel solves the heat equation** `∂ₜ K = ∂ₓₓ K`: the time
+derivative equals the spatial second derivative, both being
+`K(t, x) · (x² / (4 t²) - 1 / (2 t))`. -/
+theorem heatKernel1D_heatEquation {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    HasDerivAt (fun s => heatKernel1D s x)
+        (heatKernel1D t x * (x ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) t ∧
+      HasDerivAt (fun y => heatKernel1D t y * (-y / (2 * t)))
+        (heatKernel1D t x * (x ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) x :=
+  ⟨hasDerivAt_heatKernel1D_time ht x, hasDerivAt_heatKernel1D_space_second ht x⟩
+
 end AnalyticPDE
 end RicciFlow
