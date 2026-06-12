@@ -53,6 +53,23 @@ lemma heatKernel1D_pos {t : ℝ} (ht : 0 < t) (x : ℝ) : 0 < heatKernel1D t x :
   rw [heatKernel1D]
   exact mul_pos (heatKernel1D_prefactor_pos ht) (Real.exp_pos _)
 
+/-- The heat kernel attains its maximum `(4πt)^(-1/2)` at the centre: for `t > 0`,
+`K(t, x) ≤ (4 π t)^(-1/2)`. -/
+lemma heatKernel1D_le_prefactor {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    heatKernel1D t x ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+  rw [heatKernel1D]
+  -- `exp(-x²/(4t)) ≤ 1` since the exponent is ≤ 0.
+  have hexp_le : Real.exp (-x ^ 2 / (4 * t)) ≤ 1 := by
+    rw [Real.exp_le_one_iff]
+    apply div_nonpos_of_nonpos_of_nonneg
+    · exact neg_nonpos_of_nonneg (sq_nonneg x)
+    · positivity
+  calc
+    (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (-x ^ 2 / (4 * t))
+        ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) * 1 :=
+          mul_le_mul_of_nonneg_left hexp_le (heatKernel1D_prefactor_pos ht).le
+    _ = (4 * π * t) ^ (-(1 : ℝ) / 2) := mul_one _
+
 /-- Total mass of the heat kernel: `∫ x, K(t, x) dx = 1` for `t > 0`. -/
 theorem integral_heatKernel1D {t : ℝ} (ht : 0 < t) :
     ∫ x : ℝ, heatKernel1D t x = 1 := by
