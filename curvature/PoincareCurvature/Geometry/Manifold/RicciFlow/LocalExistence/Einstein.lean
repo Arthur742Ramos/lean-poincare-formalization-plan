@@ -455,6 +455,22 @@ theorem intrinsicLocalSolution_nonempty_of_einstein
     Nonempty (IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
   ⟨einsteinHomotheticIntrinsicLocalSolution (I := I) (M := M) ivp lam cov₀ hLevi hEinstein⟩
 
+/-- Einstein initial data admits an ordinary (connection-parametrized) local
+Ricci-flow solution, via the intrinsic homothetic solution. -/
+theorem localSolution_nonempty_of_einstein
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (lam : ℝ) (cov₀ : CovariantDerivative I E TM)
+    [hcov₀ : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1]
+    (hLevi : letI : Bundle.RiemannianBundle TM := ⟨ivp.initialMetric.toRiemannianMetric⟩;
+      cov₀.IsLeviCivita)
+    (hEinstein : ∀ (x : M) (u v : TM x),
+      (letI : Bundle.RiemannianBundle TM := ⟨ivp.initialMetric.toRiemannianMetric⟩;
+       CovariantDerivative.ricciCurvature (cov := cov₀) x u v) =
+        lam * ivp.initialMetric.inner x u v) :
+    Nonempty (LocalSolution (E := E) (H := H) (I := I) (M := M) ivp) :=
+  ⟨(einsteinHomotheticIntrinsicLocalSolution (I := I) (M := M) ivp lam cov₀ hLevi
+    hEinstein).toLocalSolution⟩
+
 end Homothetic
 
 end RicciFlow
