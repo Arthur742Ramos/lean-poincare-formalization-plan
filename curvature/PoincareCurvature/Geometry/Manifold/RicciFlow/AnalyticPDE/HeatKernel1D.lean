@@ -310,5 +310,42 @@ theorem heatSemigroup1D_add {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ} {C : ℝ}
   exact integral_add (integrable_heatKernel1D_sub_mul ht x hfm hfb)
     (integrable_heatKernel1D_sub_mul ht x hgm hgb)
 
+/-- Subtracting a constant commutes with the heat semigroup:
+`Hₜ(f - m) = Hₜf - m` for bounded measurable `f`. -/
+theorem heatSemigroup1D_sub_const {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ} (x m : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    heatSemigroup1D t (fun y => f y - m) x = heatSemigroup1D t f x - m := by
+  rw [heatSemigroup1D, heatSemigroup1D]
+  have hsplit : ∀ y, heatKernel1D t (x - y) * (f y - m)
+      = heatKernel1D t (x - y) * f y - heatKernel1D t (x - y) * m := by
+    intro y; ring
+  simp only [hsplit]
+  rw [integral_sub (integrable_heatKernel1D_sub_mul ht x hfm hfb)
+    ((integrable_heatKernel1D_sub ht x).mul_const m)]
+  rw [integral_mul_const, integral_heatKernel1D_sub ht, one_mul]
+
+/-- **Two-sided maximum principle.**  If `c ≤ f y ≤ C` for all `y` and `f` is
+a.e.-strongly-measurable, then `c ≤ heatSemigroup1D t f x ≤ C` for `t > 0`. -/
+theorem heatSemigroup1D_mem_Icc {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {c C : ℝ} (x : ℝ)
+    (hfm : AEStronglyMeasurable f) (hlo : ∀ y, c ≤ f y) (hhi : ∀ y, f y ≤ C) :
+    heatSemigroup1D t f x ∈ Set.Icc c C := by
+  set m := (c + C) / 2 with hm
+  set R := (C - c) / 2 with hR
+  -- `|f y - m| ≤ R`, and `‖f y‖ ≤ max |c| |C|` gives the boundedness for linearity.
+  have hfb : ∀ y, ‖f y‖ ≤ |c| + |C| := by
+    intro y
+    have hc1 : -|c| ≤ c := neg_abs_le c
+    have hC1 : C ≤ |C| := le_abs_self C
+    have hcnn : 0 ≤ |c| := abs_nonneg c
+    have hCnn : 0 ≤ |C| := abs_nonneg C
+    rw [Real.norm_eq_abs, abs_le]
+    exact ⟨by linarith [hlo y], by linarith [hhi y]⟩
+  have hshift : ∀ y, |f y - m| ≤ R := by
+    intro y; rw [abs_le]; constructor <;> [linarith [hlo y]; linarith [hhi y]]
+  have hbound := abs_heatSemigroup1D_le ht x (f := fun y => f y - m) (C := R) hshift
+  rw [heatSemigroup1D_sub_const ht x m hfm hfb] at hbound
+  rw [abs_le] at hbound
+  exact ⟨by linarith [hbound.1], by linarith [hbound.2]⟩
+
 end AnalyticPDE
 end RicciFlow
