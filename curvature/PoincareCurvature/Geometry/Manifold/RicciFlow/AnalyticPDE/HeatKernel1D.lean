@@ -70,6 +70,13 @@ lemma heatKernel1D_le_prefactor {t : ℝ} (ht : 0 < t) (x : ℝ) :
           mul_le_mul_of_nonneg_left hexp_le (heatKernel1D_prefactor_pos ht).le
     _ = (4 * π * t) ^ (-(1 : ℝ) / 2) := mul_one _
 
+/-- The heat kernel is continuous in the space variable for any fixed `t`. -/
+lemma continuous_heatKernel1D_space (t : ℝ) :
+    Continuous (fun x : ℝ => heatKernel1D t x) := by
+  unfold heatKernel1D
+  exact continuous_const.mul
+    (Real.continuous_exp.comp (by fun_prop))
+
 /-- Total mass of the heat kernel: `∫ x, K(t, x) dx = 1` for `t > 0`. -/
 theorem integral_heatKernel1D {t : ℝ} (ht : 0 < t) :
     ∫ x : ℝ, heatKernel1D t x = 1 := by
