@@ -2,6 +2,7 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.MeasureTheory.Integral.Pi
 
 /-!
 # The one-dimensional Euclidean heat kernel
@@ -358,6 +359,37 @@ theorem heatSemigroup1D_mono {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ} (x : ℝ
   refine integral_mono hfint hgint ?_
   intro y
   exact mul_le_mul_of_nonneg_left (hfg y) (heatKernel1D_nonneg ht (x - y))
+
+/-! ## The `n`-dimensional Euclidean heat kernel
+
+The `n`-dimensional heat kernel is the product of the 1D kernels over the
+coordinates.  We work on `Fin n → ℝ` with the product Lebesgue measure. -/
+
+/-- The `n`-dimensional Euclidean heat kernel on `Fin n → ℝ`:
+`Kₙ(t, x) = ∏ i, K(t, x i)`. -/
+def heatKernelND {n : ℕ} (t : ℝ) (x : Fin n → ℝ) : ℝ :=
+  ∏ i, heatKernel1D t (x i)
+
+lemma heatKernelND_apply {n : ℕ} (t : ℝ) (x : Fin n → ℝ) :
+    heatKernelND t x = ∏ i, heatKernel1D t (x i) := rfl
+
+/-- The `n`-dimensional heat kernel is strictly positive for `t > 0`. -/
+lemma heatKernelND_pos {n : ℕ} {t : ℝ} (ht : 0 < t) (x : Fin n → ℝ) :
+    0 < heatKernelND t x :=
+  Finset.prod_pos (fun i _ => heatKernel1D_pos ht (x i))
+
+/-- The `n`-dimensional heat kernel is nonnegative for `t > 0`. -/
+lemma heatKernelND_nonneg {n : ℕ} {t : ℝ} (ht : 0 < t) (x : Fin n → ℝ) :
+    0 ≤ heatKernelND t x :=
+  (heatKernelND_pos ht x).le
+
+/-- Total mass of the `n`-dimensional heat kernel: `∫ x, Kₙ(t, x) = 1` for `t > 0`,
+via Fubini and the 1D mass. -/
+theorem integral_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) :
+    ∫ x : Fin n → ℝ, heatKernelND t x = 1 := by
+  simp only [heatKernelND]
+  rw [integral_fin_nat_prod_volume_eq_prod (fun _ (z : ℝ) => heatKernel1D t z)]
+  simp only [integral_heatKernel1D ht, Finset.prod_const_one]
 
 end AnalyticPDE
 end RicciFlow
