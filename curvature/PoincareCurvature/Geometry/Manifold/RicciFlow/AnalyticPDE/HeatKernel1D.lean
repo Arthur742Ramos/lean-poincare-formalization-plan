@@ -1,0 +1,81 @@
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
+
+/-!
+# The one-dimensional Euclidean heat kernel
+
+This module begins the parabolic-regularity foundation needed for the
+Ricci–DeTurck Schauder estimates (roadmap point 4, uniqueness side).  Mathlib
+v4.29.1 contains no heat-kernel / parabolic-PDE theory, so this is built from the
+Gaussian-integral API.
+
+The 1D heat kernel is
+`heatKernel1D t x = (4 π t)^(-1/2) * exp (-x^2 / (4 t))` for `t > 0`.
+
+This first increment proves the genuinely-checkable analytic facts:
+
+* `heatKernel1D_pos` — strict positivity for `t > 0`;
+* `integral_heatKernel1D` — total mass `∫ x, heatKernel1D t x = 1` for `t > 0`,
+  obtained from `integral_gaussian`.
+
+Later increments will add the heat equation `∂ₜ K = ∂ₓₓ K`, the semigroup
+property, and the Hölder mapping estimates that feed the parabolic Schauder
+theory.
+-/
+
+@[expose] public noncomputable section
+
+open Real MeasureTheory
+open scoped Real
+
+namespace RicciFlow
+namespace AnalyticPDE
+
+/-- The one-dimensional Euclidean heat kernel
+`K(t, x) = (4 π t)^(-1/2) · exp(-x² / (4 t))`. -/
+def heatKernel1D (t x : ℝ) : ℝ :=
+  (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (-x ^ 2 / (4 * t))
+
+lemma heatKernel1D_apply (t x : ℝ) :
+    heatKernel1D t x = (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (-x ^ 2 / (4 * t)) := rfl
+
+/-- The normalising prefactor `(4 π t)^(-1/2)` is positive for `t > 0`. -/
+lemma heatKernel1D_prefactor_pos {t : ℝ} (ht : 0 < t) :
+    0 < (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+  have h4πt : 0 < 4 * π * t := by positivity
+  exact Real.rpow_pos_of_pos h4πt _
+
+/-- The heat kernel is strictly positive for `t > 0`. -/
+lemma heatKernel1D_pos {t : ℝ} (ht : 0 < t) (x : ℝ) : 0 < heatKernel1D t x := by
+  rw [heatKernel1D]
+  exact mul_pos (heatKernel1D_prefactor_pos ht) (Real.exp_pos _)
+
+/-- Total mass of the heat kernel: `∫ x, K(t, x) dx = 1` for `t > 0`. -/
+theorem integral_heatKernel1D {t : ℝ} (ht : 0 < t) :
+    ∫ x : ℝ, heatKernel1D t x = 1 := by
+  have hb : 0 < (4 * t)⁻¹ := by positivity
+  -- Rewrite the exponent `-x²/(4t)` as `-(4t)⁻¹ * x²` to match `integral_gaussian`.
+  have hexp : ∀ x : ℝ, -x ^ 2 / (4 * t) = -(4 * t)⁻¹ * x ^ 2 := by
+    intro x; rw [neg_div, div_eq_inv_mul]; ring
+  -- Pull the constant prefactor out of the integral.
+  calc
+    ∫ x : ℝ, heatKernel1D t x
+        = ∫ x : ℝ, (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (-(4 * t)⁻¹ * x ^ 2) := by
+          refine integral_congr_ae (Filter.Eventually.of_forall (fun x ↦ ?_))
+          rw [heatKernel1D, hexp x]
+    _ = (4 * π * t) ^ (-(1 : ℝ) / 2) * ∫ x : ℝ, Real.exp (-(4 * t)⁻¹ * x ^ 2) := by
+          rw [integral_const_mul]
+    _ = (4 * π * t) ^ (-(1 : ℝ) / 2) * √(π / (4 * t)⁻¹) := by
+          rw [integral_gaussian]
+    _ = 1 := by
+          have h4πt : 0 < 4 * π * t := by positivity
+          -- `π / (4t)⁻¹ = 4 π t`.
+          have harg : π / (4 * t)⁻¹ = 4 * π * t := by
+            rw [div_inv_eq_mul]; ring
+          rw [harg, Real.sqrt_eq_rpow, ← Real.rpow_add h4πt]
+          norm_num
+
+end AnalyticPDE
+end RicciFlow
