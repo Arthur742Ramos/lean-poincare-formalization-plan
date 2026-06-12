@@ -421,5 +421,52 @@ theorem integral_heatKernelND_sub {n : ℕ} {t : ℝ} (ht : 0 < t) (x : Fin n �
     integral_fin_nat_prod_volume_eq_prod (fun i (z : ℝ) => heatKernel1D t (x i - z))]
   simp only [integral_heatKernel1D_sub ht, Finset.prod_const_one]
 
+/-- The `n`-dimensional heat semigroup acting on `f : (Fin n → ℝ) → ℝ`:
+`(heatSemigroupND t f) x = ∫ y, Kₙ(t, x - y) · f y dy`. -/
+def heatSemigroupND {n : ℕ} (t : ℝ) (f : (Fin n → ℝ) → ℝ) (x : Fin n → ℝ) : ℝ :=
+  ∫ y : Fin n → ℝ, heatKernelND t (x - y) * f y
+
+/-- The `n`-dimensional heat semigroup fixes constants. -/
+theorem heatSemigroupND_const {n : ℕ} {t : ℝ} (ht : 0 < t) (c : ℝ) (x : Fin n → ℝ) :
+    heatSemigroupND t (fun _ => c) x = c := by
+  rw [heatSemigroupND, integral_mul_const, integral_heatKernelND_sub ht, one_mul]
+
+/-- `n`-dimensional heat-kernel nonnegativity gives semigroup positivity preservation. -/
+theorem heatSemigroupND_nonneg {n : ℕ} {t : ℝ} (ht : 0 < t) {f : (Fin n → ℝ) → ℝ}
+    (x : Fin n → ℝ) (hf : ∀ y, 0 ≤ f y) :
+    0 ≤ heatSemigroupND t f x := by
+  rw [heatSemigroupND]
+  refine integral_nonneg ?_
+  intro y
+  exact mul_nonneg (heatKernelND_nonneg ht (x - y)) (hf y)
+
+/-- The shifted `n`-dimensional heat kernel `y ↦ Kₙ(t, x - y)` is integrable for `t > 0`. -/
+theorem integrable_heatKernelND_sub {n : ℕ} {t : ℝ} (ht : 0 < t) (x : Fin n → ℝ) :
+    Integrable (fun y : Fin n → ℝ => heatKernelND t (x - y)) :=
+  (integrable_heatKernelND ht).comp_sub_left x
+
+/-- **Maximum principle for the `n`-dimensional heat semigroup.**  If `|f y| ≤ C`
+for all `y`, then `|heatSemigroupND t f x| ≤ C` for `t > 0`. -/
+theorem abs_heatSemigroupND_le {n : ℕ} {t : ℝ} (ht : 0 < t) {f : (Fin n → ℝ) → ℝ}
+    {C : ℝ} (x : Fin n → ℝ) (hf : ∀ y, |f y| ≤ C) :
+    |heatSemigroupND t f x| ≤ C := by
+  have hpt : ∀ y, ‖heatKernelND t (x - y) * f y‖ ≤ heatKernelND t (x - y) * C := by
+    intro y
+    rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (heatKernelND_nonneg ht (x - y))]
+    exact mul_le_mul_of_nonneg_left (hf y) (heatKernelND_nonneg ht (x - y))
+  have hbound : ∫ y : Fin n → ℝ, heatKernelND t (x - y) * C = C := by
+    rw [integral_mul_const, integral_heatKernelND_sub ht, one_mul]
+  calc
+    |heatSemigroupND t f x|
+        = ‖∫ y : Fin n → ℝ, heatKernelND t (x - y) * f y‖ := by
+          rw [heatSemigroupND, Real.norm_eq_abs]
+    _ ≤ ∫ y : Fin n → ℝ, heatKernelND t (x - y) * C := by
+          refine le_trans (norm_integral_le_integral_norm _) ?_
+          refine integral_mono_of_nonneg
+            (Filter.Eventually.of_forall (fun y ↦ norm_nonneg _)) ?_
+            (Filter.Eventually.of_forall hpt)
+          exact (integrable_heatKernelND_sub ht x).mul_const C
+    _ = C := hbound
+
 end AnalyticPDE
 end RicciFlow
