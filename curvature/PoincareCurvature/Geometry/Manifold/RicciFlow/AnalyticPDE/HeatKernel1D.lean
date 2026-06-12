@@ -391,5 +391,22 @@ theorem integral_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) :
   rw [integral_fin_nat_prod_volume_eq_prod (fun _ (z : ℝ) => heatKernel1D t z)]
   simp only [integral_heatKernel1D ht, Finset.prod_const_one]
 
+/-- The `n`-dimensional heat kernel is integrable for `t > 0`. -/
+theorem integrable_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) :
+    Integrable (fun x : Fin n → ℝ => heatKernelND t x) := by
+  have : (volume : Measure (Fin n → ℝ)) = Measure.pi (fun _ => volume) := by
+    rw [volume_pi]
+  rw [show (fun x : Fin n → ℝ => heatKernelND t x)
+      = (fun x : Fin n → ℝ => ∏ i, heatKernel1D t (x i)) from rfl, this]
+  exact Integrable.fin_nat_prod (fun _ => integrable_heatKernel1D ht)
+
+/-- The `L¹` mass of the `n`-dimensional heat kernel is `1` for `t > 0`. -/
+theorem integral_norm_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) :
+    ∫ x : Fin n → ℝ, ‖heatKernelND t x‖ = 1 := by
+  have hnorm : (fun x : Fin n → ℝ => ‖heatKernelND t x‖)
+      = fun x : Fin n → ℝ => heatKernelND t x := by
+    funext x; rw [Real.norm_eq_abs, abs_of_nonneg (heatKernelND_nonneg ht x)]
+  rw [hnorm, integral_heatKernelND ht]
+
 end AnalyticPDE
 end RicciFlow
