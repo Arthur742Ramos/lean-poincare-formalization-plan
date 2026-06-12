@@ -77,5 +77,31 @@ theorem integral_heatKernel1D {t : ℝ} (ht : 0 < t) :
           rw [harg, Real.sqrt_eq_rpow, ← Real.rpow_add h4πt]
           norm_num
 
+/-- The spatial first derivative of the heat kernel:
+`∂ₓ K(t, x) = K(t, x) · (-x / (2 t))`. -/
+theorem hasDerivAt_heatKernel1D_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    HasDerivAt (fun y => heatKernel1D t y)
+      (heatKernel1D t x * (-x / (2 * t))) x := by
+  have htne : (4 * t) ≠ 0 := by positivity
+  -- Derivative of the exponent `f y = -y²/(4t)`: `f' = -2x/(4t) = -x/(2t)`.
+  have hf : HasDerivAt (fun y : ℝ => -y ^ 2 / (4 * t)) (-x / (2 * t)) x := by
+    have hpow : HasDerivAt (fun y : ℝ => -y ^ 2) (-(2 * x)) x := by
+      simpa using (hasDerivAt_pow 2 x).neg
+    have hdiv := hpow.div_const (4 * t)
+    -- `-(2x)/(4t) = -x/(2t)`.
+    have heq : -(2 * x) / (4 * t) = -x / (2 * t) := by
+      rw [div_eq_div_iff htne (by positivity)]; ring
+    rwa [heq] at hdiv
+  -- Chain rule for `exp ∘ f`, then multiply by the constant prefactor.
+  have hexp := hf.exp
+  have hconst := hexp.const_mul ((4 * π * t) ^ (-(1 : ℝ) / 2))
+  -- Rewrite the resulting derivative value into `K · (-x/(2t))`.
+  have hval : (4 * π * t) ^ (-(1 : ℝ) / 2) *
+      (Real.exp (-x ^ 2 / (4 * t)) * (-x / (2 * t))) =
+      heatKernel1D t x * (-x / (2 * t)) := by
+    rw [heatKernel1D]; ring
+  rw [← hval]
+  exact hconst
+
 end AnalyticPDE
 end RicciFlow
