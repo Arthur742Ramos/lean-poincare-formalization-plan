@@ -230,5 +230,17 @@ theorem integral_heatKernel1D_sub {t : ℝ} (ht : 0 < t) (x : ℝ) :
   rw [hfun, integral_add_right_eq_self (fun y : ℝ => heatKernel1D t y) (-x)]
   exact integral_heatKernel1D ht
 
+/-- The 1D heat semigroup acting on a function `f`:
+`(heatSemigroup1D t f) x = ∫ y, K(t, x - y) · f y dy`.  For `t > 0` and bounded
+continuous `f` this is the solution of the heat equation with initial data `f`. -/
+def heatSemigroup1D (t : ℝ) (f : ℝ → ℝ) (x : ℝ) : ℝ :=
+  ∫ y : ℝ, heatKernel1D t (x - y) * f y
+
+/-- The heat semigroup fixes constants: `heatSemigroup1D t (fun _ => c) x = c` for `t > 0`. -/
+theorem heatSemigroup1D_const {t : ℝ} (ht : 0 < t) (c x : ℝ) :
+    heatSemigroup1D t (fun _ => c) x = c := by
+  rw [heatSemigroup1D]
+  rw [integral_mul_const, integral_heatKernel1D_sub ht, one_mul]
+
 end AnalyticPDE
 end RicciFlow
