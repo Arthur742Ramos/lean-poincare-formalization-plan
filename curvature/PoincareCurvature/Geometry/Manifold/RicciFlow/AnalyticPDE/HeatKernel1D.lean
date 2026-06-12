@@ -528,5 +528,24 @@ theorem heatSemigroupND_mono {n : ℕ} {t : ℝ} (ht : 0 < t) {f g : (Fin n → 
   intro y
   exact mul_le_mul_of_nonneg_left (hfg y) (heatKernelND_nonneg ht (x - y))
 
+/-- The first moment of the heat kernel is integrable: `y ↦ |y| · K(t, y)` is
+integrable for `t > 0`.  Equivalently, the spatial derivative `∂ₓ K(t, ·)` is
+dominated by an integrable function — the envelope needed to differentiate the
+heat-semigroup convolution under the integral sign. -/
+theorem integrable_abs_mul_heatKernel1D {t : ℝ} (ht : 0 < t) :
+    Integrable (fun x : ℝ => |x| * heatKernel1D t x) := by
+  have hb : 0 < (4 * t)⁻¹ := by positivity
+  -- `Integrable (x ↦ x^1 · exp(-(4t)⁻¹ x²))` from the Gaussian-moment lemma.
+  have hmoment : Integrable (fun x : ℝ => x ^ (1 : ℝ) * Real.exp (-(4 * t)⁻¹ * x ^ 2)) :=
+    integrable_rpow_mul_exp_neg_mul_sq hb (by norm_num : (-1 : ℝ) < 1)
+  -- Its absolute value is `|x| · exp(...)`; scale by the prefactor to get `|x| · K`.
+  have habs := hmoment.abs.const_mul ((4 * π * t) ^ (-(1 : ℝ) / 2))
+  refine habs.congr (Filter.Eventually.of_forall (fun x ↦ ?_))
+  simp only [heatKernel1D_apply]
+  have hxexp : -x ^ 2 / (4 * t) = -(4 * t)⁻¹ * x ^ 2 := by
+    rw [neg_div, div_eq_inv_mul]; ring
+  rw [hxexp, Real.rpow_one, abs_mul, abs_of_pos (Real.exp_pos _)]
+  ring
+
 end AnalyticPDE
 end RicciFlow
