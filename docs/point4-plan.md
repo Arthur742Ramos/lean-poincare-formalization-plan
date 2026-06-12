@@ -33,6 +33,34 @@ unconditionally in three families of compact manifolds:
 All three are real Lean theorems with stationary local solutions and
 metric uniqueness, not interface placeholders.
 
+### Einstein homothetic *existence* (new, non-stationary)
+
+A genuinely non-stationary positive-dimensional **existence** result is now
+also proved in `LocalExistence/Einstein.lean`: for Einstein initial data
+`Ric(cov₀) = λ • g₀` (with `cov₀` a Levi-Civita connection for `g₀`), the
+homothetic family `g(t) = (1 - 2λ(t-t₀)) • g₀` is a genuine
+`IntrinsicLocalSolution` on `[t₀, t₀ + δ]` with metric velocity `-2λ • g₀`
+(`einsteinHomotheticIntrinsicLocalSolution` /
+`intrinsicLocalSolution_nonempty_of_einstein`). Supporting reusable lemmas:
+
+* `smulMetric` — positive scalar multiple of a `ContMDiffRiemannianMetric`;
+* `isMetricCompatibleTangent_smulMetric` / `isLeviCivita_smulMetric` —
+  scale-invariance of metric compatibility and the Levi-Civita property;
+* `ricciCurvature_riemannianBundle_irrelevant` — the Ricci curvature value is
+  independent of the Riemannian bundle instance (it is the trace of the
+  connection-only curvature tensor);
+* `intrinsicRicciTensor_homotheticMetricFamily` — intrinsic Ricci of the
+  homothetic family is `λ • g₀`.
+
+This is the first non-stationary positive-dimensional family with a proved
+point-4 *intrinsic local solution*. It does **not** by itself close point 4
+even on Einstein backgrounds, because the full
+`IntrinsicLocalExistenceUniqueness` package additionally requires metric
+*uniqueness over all* intrinsic local solutions; for `λ ≠ 0` the metric
+velocity is nonzero, so the zero-velocity uniqueness machinery used in the
+three families above does not apply, and uniqueness still needs the parabolic
+DeTurck theorem (Item 3 below).
+
 ## Conditional bridge already proved
 
 The chain
