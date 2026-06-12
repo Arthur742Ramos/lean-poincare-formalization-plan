@@ -216,5 +216,19 @@ theorem integral_norm_heatKernel1D {t : ℝ} (ht : 0 < t) :
     rw [Real.norm_eq_abs, abs_of_nonneg (heatKernel1D_nonneg ht x)]
   rw [hnorm, integral_heatKernel1D ht]
 
+/-- Shifted total mass: `∫ y, K(t, x - y) dy = 1` for `t > 0`.  This is the fact
+that the heat semigroup preserves constants (`Hₜ 1 = 1`). -/
+theorem integral_heatKernel1D_sub {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    ∫ y : ℝ, heatKernel1D t (x - y) = 1 := by
+  -- By evenness `K(t, x - y) = K(t, y - x) = K(t, y + (-x))`.
+  have hfun : (fun y : ℝ => heatKernel1D t (x - y))
+      = (fun y : ℝ => heatKernel1D t (y + -x)) := by
+    funext y
+    rw [← heatKernel1D_neg t (x - y)]
+    congr 1
+    ring
+  rw [hfun, integral_add_right_eq_self (fun y : ℝ => heatKernel1D t y) (-x)]
+  exact integral_heatKernel1D ht
+
 end AnalyticPDE
 end RicciFlow
