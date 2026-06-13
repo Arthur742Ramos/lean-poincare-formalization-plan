@@ -1361,5 +1361,97 @@ theorem deriv_heatSemigroup1D_space_eq_zero_of_const {t : ℝ} (ht : 0 < t) (c x
   rw [h]
   exact deriv_const x c
 
+/-- Explicit form of the time derivative of `Hₛf x`. -/
+theorem heatSemigroup1D_time_deriv_eq_space_second_integral {t : ℝ} (ht : 0 < t)
+    {f : ℝ → ℝ} {C : ℝ} (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    deriv (fun s => heatSemigroup1D s f x) t =
+      ∫ y, (heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y :=
+  (hasDerivAt_heatSemigroup1D_time ht x hfm hfb).deriv
+
+/-- `Hₜ` applied to a constant has zero spatial derivative (as a `HasDerivAt`). -/
+theorem hasDerivAt_heatSemigroup1D_space_const_zero {t : ℝ} (ht : 0 < t) (c : ℝ)
+    (x : ℝ) : HasDerivAt (fun z => heatSemigroup1D t (fun _ => c) z) 0 x := by
+  have h : (fun z => heatSemigroup1D t (fun _ => c) z) = fun _ => c :=
+    funext (fun z => heatSemigroup1D_const ht c z)
+  rw [h]
+  exact hasDerivAt_const x c
+
+/-- The heat kernel is continuous in the time variable on `(0, ∞)`. -/
+theorem continuousOn_heatKernel1D_time {x : ℝ} :
+    ContinuousOn (fun s => heatKernel1D s x) (Set.Ioi 0) :=
+  fun s hs => (hasDerivAt_heatKernel1D_time hs x).continuousAt.continuousWithinAt
+
+/-- The `n`-dimensional heat semigroup annihilates the zero function (Pi-zero form). -/
+theorem heatSemigroupND_zero_fun {n : ℕ} {t : ℝ} (ht : 0 < t) (x : Fin n → ℝ) :
+    heatSemigroupND t (0 : (Fin n → ℝ) → ℝ) x = 0 := by
+  simpa [Pi.zero_def] using heatSemigroupND_const ht 0 x
+
+/-- Key Gaussian-moment estimate: `exp(-x²/(4t)) · |x| ≤ √t` for `t > 0`. -/
+lemma heatKernel1D_exp_mul_abs_le {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    Real.exp (-x ^ 2 / (4 * t)) * |x| ≤ Real.sqrt t := by
+  set s := Real.sqrt t with hs
+  have hs0 : 0 ≤ s := Real.sqrt_nonneg t
+  have hs2 : s ^ 2 = t := Real.sq_sqrt ht.le
+  have h4t : (0 : ℝ) < 4 * t := by positivity
+  have he : (1 : ℝ) + x ^ 2 / (4 * t) ≤ Real.exp (x ^ 2 / (4 * t)) := by
+    have := Real.add_one_le_exp (x ^ 2 / (4 * t)); linarith
+  have hpos1 : (0 : ℝ) < 1 + x ^ 2 / (4 * t) := by positivity
+  have hle1 : Real.exp (-x ^ 2 / (4 * t)) ≤ 1 / (1 + x ^ 2 / (4 * t)) := by
+    rw [show -x ^ 2 / (4 * t) = -(x ^ 2 / (4 * t)) by ring, Real.exp_neg, ← one_div]
+    exact one_div_le_one_div_of_le hpos1 he
+  have h2 : Real.exp (-x ^ 2 / (4 * t)) * |x| ≤ (1 / (1 + x ^ 2 / (4 * t))) * |x| :=
+    mul_le_mul_of_nonneg_right hle1 (abs_nonneg x)
+  refine h2.trans ?_
+  rw [div_mul_eq_mul_div, one_mul, div_le_iff₀ hpos1]
+  rw [← hs2]
+  have hxa : (0 : ℝ) ≤ |x| := abs_nonneg x
+  have hssq : (0 : ℝ) < 4 * s ^ 2 := by rw [hs2]; positivity
+  rw [show x ^ 2 = |x| ^ 2 from (sq_abs x).symm]
+  have hexp : s * (1 + |x| ^ 2 / (4 * s ^ 2)) = s + |x| ^ 2 / (4 * s) := by
+    rcases eq_or_lt_of_le hs0 with h | h
+    · rw [← h]; simp
+    · field_simp
+  rw [hexp]
+  have hspos : 0 < s := Real.sqrt_pos.mpr ht
+  rw [show s + |x| ^ 2 / (4 * s) = (4 * s ^ 2 + |x| ^ 2) / (4 * s) by field_simp]
+  rw [le_div_iff₀ (by positivity)]
+  nlinarith [sq_nonneg (2 * s - |x|), hs0, hxa]
+
+/-- **The 1D heat kernel is globally Lipschitz in the space variable** (for fixed
+`t > 0`), with explicit constant `(4πt)^(-1/2)·√t/(2t)`.  This is the first
+Hölder-type bound — the spatial regularity estimate that feeds parabolic Schauder
+theory. -/
+theorem exists_lipschitz_heatKernel1D {t : ℝ} (ht : 0 < t) :
+    ∃ L : ℝ, 0 ≤ L ∧
+      ∀ x x', |heatKernel1D t x - heatKernel1D t x'| ≤ L * |x - x'| := by
+  have h2t : (0 : ℝ) < 2 * t := by positivity
+  have hpre : (0 : ℝ) < (4 * π * t) ^ (-(1 : ℝ) / 2) := heatKernel1D_prefactor_pos ht
+  set L : ℝ := (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t) with hL
+  have hL0 : 0 ≤ L := by rw [hL]; positivity
+  have hbound : ∀ y ∈ (Set.univ : Set ℝ), ‖deriv (fun z => heatKernel1D t z) y‖ ≤ L := by
+    intro y _
+    rw [deriv_heatKernel1D_space ht y, Real.norm_eq_abs, abs_mul]
+    rw [abs_of_nonneg (heatKernel1D_nonneg ht y)]
+    rw [abs_div, abs_neg, abs_of_pos h2t]
+    rw [heatKernel1D_apply]
+    have hkey := heatKernel1D_exp_mul_abs_le ht y
+    have hc : (0 : ℝ) ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) / (2 * t) := by positivity
+    have hrw : (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (-y ^ 2 / (4 * t)) * (|y| / (2 * t))
+        = ((4 * π * t) ^ (-(1 : ℝ) / 2) / (2 * t)) *
+            (Real.exp (-y ^ 2 / (4 * t)) * |y|) := by
+      field_simp
+    rw [hrw, hL, mul_div_assoc]
+    calc ((4 * π * t) ^ (-(1 : ℝ) / 2) / (2 * t)) *
+            (Real.exp (-y ^ 2 / (4 * t)) * |y|)
+        ≤ ((4 * π * t) ^ (-(1 : ℝ) / 2) / (2 * t)) * Real.sqrt t :=
+          mul_le_mul_of_nonneg_left hkey hc
+      _ = (4 * π * t) ^ (-(1 : ℝ) / 2) * (Real.sqrt t / (2 * t)) := by ring
+  have hdiff : ∀ y ∈ (Set.univ : Set ℝ), DifferentiableAt ℝ (fun z => heatKernel1D t z) y :=
+    fun y _ => differentiableAt_heatKernel1D_space ht y
+  refine ⟨L, hL0, fun x x' => ?_⟩
+  have hmvt := Convex.norm_image_sub_le_of_norm_deriv_le hdiff hbound convex_univ
+    (Set.mem_univ x') (Set.mem_univ x)
+  simpa [Real.norm_eq_abs] using hmvt
+
 end AnalyticPDE
 end RicciFlow
