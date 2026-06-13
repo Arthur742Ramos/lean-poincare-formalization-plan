@@ -233,6 +233,45 @@ theorem heatKernel1D_heatEquation {t : ℝ} (ht : 0 < t) (x : ℝ) :
         (heatKernel1D t x * (x ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) x :=
   ⟨hasDerivAt_heatKernel1D_time ht x, hasDerivAt_heatKernel1D_space_second ht x⟩
 
+/-- The heat kernel is differentiable in the space variable at each point. -/
+lemma differentiableAt_heatKernel1D_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    DifferentiableAt ℝ (fun y => heatKernel1D t y) x :=
+  (hasDerivAt_heatKernel1D_space ht x).differentiableAt
+
+/-- The heat kernel is differentiable in the space variable. -/
+lemma differentiable_heatKernel1D_space {t : ℝ} (ht : 0 < t) :
+    Differentiable ℝ (fun y => heatKernel1D t y) :=
+  fun x => (hasDerivAt_heatKernel1D_space ht x).differentiableAt
+
+/-- The spatial derivative of the heat kernel, as a `deriv`. -/
+lemma deriv_heatKernel1D_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    deriv (fun y => heatKernel1D t y) x = heatKernel1D t x * (-x / (2 * t)) :=
+  (hasDerivAt_heatKernel1D_space ht x).deriv
+
+/-- The heat kernel is differentiable in time at each positive time. -/
+lemma differentiableAt_heatKernel1D_time {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    DifferentiableAt ℝ (fun s => heatKernel1D s x) t :=
+  (hasDerivAt_heatKernel1D_time ht x).differentiableAt
+
+/-- The time derivative of the heat kernel, as a `deriv`. -/
+lemma deriv_heatKernel1D_time {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    deriv (fun s => heatKernel1D s x) t
+      = heatKernel1D t x * (x ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) :=
+  (hasDerivAt_heatKernel1D_time ht x).deriv
+
+/-- The heat kernel is continuous in time at each positive time. -/
+lemma continuousAt_heatKernel1D_time {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    ContinuousAt (fun s => heatKernel1D s x) t :=
+  (hasDerivAt_heatKernel1D_time ht x).continuousAt
+
+/-- **The heat equation as an equality of `deriv`s**: the time derivative equals the
+spatial second derivative at every point. -/
+theorem heatKernel1D_deriv_time_eq_deriv_space_second {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    deriv (fun s => heatKernel1D s x) t
+      = deriv (fun y => heatKernel1D t y * (-y / (2 * t))) x := by
+  rw [(hasDerivAt_heatKernel1D_time ht x).deriv,
+      (hasDerivAt_heatKernel1D_space_second ht x).deriv]
+
 /-- The heat kernel is integrable in the space variable for `t > 0`. -/
 theorem integrable_heatKernel1D {t : ℝ} (ht : 0 < t) :
     Integrable (fun x : ℝ => heatKernel1D t x) := by
@@ -254,6 +293,12 @@ theorem integrable_heatKernel1D {t : ℝ} (ht : 0 < t) :
 integral/`L¹` arguments). -/
 lemma heatKernel1D_nonneg {t : ℝ} (ht : 0 < t) (x : ℝ) : 0 ≤ heatKernel1D t x :=
   (heatKernel1D_pos ht x).le
+
+/-- Absolute-value form of the peak bound: `|K(t, x)| ≤ (4πt)^(-1/2)`. -/
+lemma abs_heatKernel1D_le_prefactor {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    |heatKernel1D t x| ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+  rw [abs_of_nonneg (heatKernel1D_nonneg ht x)]
+  exact heatKernel1D_le_prefactor ht x
 
 /-- The `L¹` mass of the heat kernel is `1`: `∫ x, |K(t, x)| = 1` for `t > 0`. -/
 theorem integral_norm_heatKernel1D {t : ℝ} (ht : 0 < t) :
@@ -737,6 +782,19 @@ theorem integrable_abs_mul_heatKernel1D {t : ℝ} (ht : 0 < t) :
     rw [neg_div, div_eq_inv_mul]; ring
   rw [hxexp, Real.rpow_one, abs_mul, abs_of_pos (Real.exp_pos _)]
   ring
+
+/-- The first spatial derivative of the heat kernel is integrable in the space
+variable for `t > 0` — the convolution against `∂ₓK` is well-defined. -/
+theorem integrable_deriv_heatKernel1D_space {t : ℝ} (ht : 0 < t) :
+    Integrable (fun x : ℝ => heatKernel1D t x * (-x / (2 * t))) := by
+  have hdom := (integrable_abs_mul_heatKernel1D ht).const_mul ((2 * t)⁻¹)
+  refine hdom.mono' ?_ (Filter.Eventually.of_forall (fun x ↦ ?_))
+  · exact ((continuous_heatKernel1D_space t).mul (by fun_prop)).aestronglyMeasurable
+  · have htt : 0 < 2 * t := by positivity
+    rw [Real.norm_eq_abs, abs_mul, abs_div, abs_neg, abs_of_pos htt,
+      abs_of_nonneg (heatKernel1D_nonneg ht x)]
+    rw [show (2 * t)⁻¹ * (|x| * heatKernel1D t x)
+        = heatKernel1D t x * (|x| / (2 * t)) by ring]
 
 end AnalyticPDE
 end RicciFlow
