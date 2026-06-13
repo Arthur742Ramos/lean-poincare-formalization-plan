@@ -262,6 +262,20 @@ lemma hasDerivAt_heatKernel1D_space_sub {t : ℝ} (ht : 0 < t) (x y : ℝ) :
   have h := (hasDerivAt_heatKernel1D_space ht (x - y)).comp x hin
   simpa using h
 
+/-- The chain-rule second spatial derivative of the reflected/translated kernel:
+`∂ₓ (z ↦ ∂ₓK(t, z - y)) = K(t, x-y) · ((x-y)²/(4t²) - 1/(2t))`. -/
+lemma hasDerivAt_heatKernel1D_space_second_sub {t : ℝ} (ht : 0 < t) (x y : ℝ) :
+    HasDerivAt (fun z => heatKernel1D t (z - y) * (-(z - y) / (2 * t)))
+      (heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) x := by
+  have hin : HasDerivAt (fun z => z - y) 1 x := (hasDerivAt_id x).sub_const y
+  have h := (hasDerivAt_heatKernel1D_space_second ht (x - y)).comp x hin
+  simpa only [Function.comp, mul_one] using h
+
+/-- The negated kernel's spatial derivative. -/
+theorem hasDerivAt_neg_heatKernel1D_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    HasDerivAt (fun y => - heatKernel1D t y) (- (heatKernel1D t x * (-x / (2 * t)))) x :=
+  (hasDerivAt_heatKernel1D_space ht x).neg
+
 /-- The heat kernel is differentiable in time at each positive time. -/
 lemma differentiableAt_heatKernel1D_time {t : ℝ} (ht : 0 < t) (x : ℝ) :
     DifferentiableAt ℝ (fun s => heatKernel1D s x) t :=
@@ -323,6 +337,11 @@ lemma abs_heatKernel1D_le_prefactor {t : ℝ} (ht : 0 < t) (x : ℝ) :
 lemma sq_heatKernel1D_le {t : ℝ} (ht : 0 < t) (x : ℝ) :
     heatKernel1D t x ^ 2 ≤ ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ 2 :=
   pow_le_pow_left₀ (heatKernel1D_nonneg ht x) (heatKernel1D_le_prefactor ht x) 2
+
+/-- The squared peak bound in absolute-value form. -/
+lemma sq_abs_heatKernel1D_le {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    |heatKernel1D t x| ^ 2 ≤ ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ 2 := by
+  rw [abs_heatKernel1D ht]; exact sq_heatKernel1D_le ht x
 
 /-- The heat kernel is monotone decreasing in `|x|`: if `|x| ≤ |y|` then
 `K(t, y) ≤ K(t, x)`. -/
@@ -687,6 +706,18 @@ theorem continuousAt_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → �
     ContinuousAt (fun z => heatSemigroup1D t f z) x :=
   (hasDerivAt_heatSemigroup1D_space ht x hfm hfb).continuousAt
 
+/-- The heat semigroup is (globally) spatially continuous for bounded data. -/
+theorem continuous_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    Continuous (fun z => heatSemigroup1D t f z) :=
+  continuous_iff_continuousAt.mpr (fun x => continuousAt_heatSemigroup1D_space ht x hfm hfb)
+
+/-- The heat semigroup is (globally) spatially differentiable for bounded data. -/
+theorem differentiable_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ}
+    {C : ℝ} (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    Differentiable ℝ (fun z => heatSemigroup1D t f z) :=
+  fun x => differentiableAt_heatSemigroup1D_space ht x hfm hfb
+
 /-! ## The `n`-dimensional Euclidean heat kernel
 
 The `n`-dimensional heat kernel is the product of the 1D kernels over the
@@ -1014,6 +1045,151 @@ theorem integrable_deriv_heatKernel1D_space_sub_mul {t : ℝ} (ht : 0 < t) {f : 
   have hg : Integrable (fun y : ℝ => heatKernel1D t (x - y) * (-(x - y) / (2 * t))) :=
     (integrable_deriv_heatKernel1D_space ht).comp_sub_left x
   exact hg.mul_bdd hfm (Filter.Eventually.of_forall hfb)
+
+/-- The second-derivative convolution integrand is integrable. -/
+theorem integrable_deriv2_heatKernel1D_space_sub_mul {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ}
+    {C : ℝ} (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    Integrable (fun y => (heatKernel1D t (x - y) *
+      ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y) := by
+  have hsq : Integrable (fun y => (x - y) ^ 2 * heatKernel1D t (x - y)) :=
+    (integrable_sq_mul_heatKernel1D ht).comp_sub_left x
+  have hK : Integrable (fun y => heatKernel1D t (x - y)) := integrable_heatKernel1D_sub ht x
+  have hbase : Integrable (fun y =>
+      heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) := by
+    have hcomb := (hsq.const_mul (1 / (4 * t ^ 2))).sub (hK.const_mul (1 / (2 * t)))
+    refine hcomb.congr ?_
+    filter_upwards with y
+    simp only [Pi.sub_apply]
+    ring
+  exact hbase.mul_bdd hfm (Filter.Eventually.of_forall hfb)
+
+/-- **Second spatial derivative of the heat semigroup.**  Differentiating the
+first-derivative formula again, `z ↦ ∂ₓHₜf z` is itself differentiable, with
+`∂ₓₓHₜf = ∫ y, ∂ₓₓK(t, x - y) · f y`.  This establishes that `Hₜf` is twice
+spatially differentiable for bounded measurable data (the second smoothing
+result), again via Leibniz with a Gaussian envelope using the second moment. -/
+theorem hasDerivAt_deriv_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ}
+    {C : ℝ} (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    HasDerivAt (fun z => ∫ y, (heatKernel1D t (z - y) * (-(z - y) / (2 * t))) * f y)
+      (∫ y, (heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y) x := by
+  have h2t : (0 : ℝ) < 2 * t := by positivity
+  have hCnn : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+  set F : ℝ → ℝ → ℝ := fun z y =>
+    heatKernel1D t (z - y) * (-(z - y) / (2 * t)) * f y with hF
+  set F' : ℝ → ℝ → ℝ := fun z y =>
+    heatKernel1D t (z - y) * ((z - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * f y with hF'
+  set M := (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (1 / (4 * t)) * C with hM
+  set bound : ℝ → ℝ := fun y =>
+    M * (((1 + |y - x|) ^ 2 / (4 * t ^ 2) + 1 / (2 * t))
+      * Real.exp (-(y - x) ^ 2 / (8 * t))) with hbound
+  have hs : Metric.ball x 1 ∈ nhds x := Metric.ball_mem_nhds x (by norm_num)
+  have hFmeas : ∀ᶠ z in nhds x, AEStronglyMeasurable (F z) volume := by
+    filter_upwards with z
+    refine (((continuous_heatKernel1D_space t).comp
+      (continuous_const.sub continuous_id)).mul ?_).aestronglyMeasurable.mul hfm
+    fun_prop
+  have hFint : Integrable (F x) volume := by
+    simpa only [hF] using integrable_deriv_heatKernel1D_space_sub_mul ht x hfm hfb
+  have hF'meas : AEStronglyMeasurable (F' x) volume := by
+    refine (((continuous_heatKernel1D_space t).comp
+      (continuous_const.sub continuous_id)).mul ?_).aestronglyMeasurable.mul hfm
+    fun_prop
+  have hbnd : ∀ᵐ y ∂(volume : Measure ℝ),
+      ∀ z ∈ Metric.ball x 1, ‖F' z y‖ ≤ bound y := by
+    filter_upwards with y z hz
+    rw [Metric.mem_ball, Real.dist_eq] at hz
+    have hzle : |z - x| ≤ 1 := hz.le
+    have hpre : (0 : ℝ) < (4 * π * t) ^ (-(1 : ℝ) / 2) := heatKernel1D_prefactor_pos ht
+    have hnorm : ‖F' z y‖
+        = heatKernel1D t (z - y) * |((z - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))| * |f y| := by
+      simp only [hF']
+      rw [Real.norm_eq_abs, abs_mul, abs_mul,
+        abs_of_nonneg (heatKernel1D_nonneg ht (z - y))]
+    rw [hnorm]
+    have hzx2 : (z - x) ^ 2 ≤ 1 := by
+      rw [← Real.sqrt_le_sqrt_iff (by positivity), Real.sqrt_one, Real.sqrt_sq_eq_abs]
+      exact hzle
+    set Eg := Real.exp (-(y - x) ^ 2 / (8 * t)) with hEg
+    have hEgpos : 0 < Eg := Real.exp_pos _
+    set P := (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (1 / (4 * t)) with hP
+    have hPpos : 0 < P := by positivity
+    set Poly := (1 + |y - x|) ^ 2 / (4 * t ^ 2) + 1 / (2 * t) with hPoly
+    have hPolynn : 0 ≤ Poly := by rw [hPoly]; positivity
+    have hK : heatKernel1D t (z - y) ≤ P * Eg := by
+      rw [hP, hEg, heatKernel1D_apply, mul_assoc ((4 * π * t) ^ (-(1 : ℝ) / 2)),
+        ← Real.exp_add]
+      apply mul_le_mul_of_nonneg_left _ hpre.le
+      apply Real.exp_le_exp.mpr
+      have hq : (z - y) ^ 2 ≥ (y - x) ^ 2 / 2 - (z - x) ^ 2 := by
+        nlinarith [sq_nonneg ((y - x) - 2 * (z - x))]
+      rw [← sub_nonneg]
+      have key : 1 / (4 * t) + -(y - x) ^ 2 / (8 * t) - -(z - y) ^ 2 / (4 * t)
+          = (2 - ((y - x) ^ 2 - 2 * (z - y) ^ 2)) / (8 * t) := by
+        field_simp; ring
+      rw [key]
+      apply div_nonneg _ (by positivity)
+      nlinarith [hq, hzx2]
+    have hzy : |z - y| ≤ 1 + |y - x| := by
+      have hzysplit : z - y = (z - x) + (x - y) := by ring
+      calc |z - y| ≤ |z - x| + |x - y| := by rw [hzysplit]; exact abs_add_le _ _
+        _ ≤ 1 + |y - x| := by rw [abs_sub_comm x y]; linarith
+    have hsqle : (z - y) ^ 2 ≤ (1 + |y - x|) ^ 2 := by
+      nlinarith [hzy, sq_abs (z - y), abs_nonneg (z - y), abs_nonneg (y - x)]
+    have hpolybd : |((z - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))| ≤ Poly := by
+      have hA : (0 : ℝ) ≤ (z - y) ^ 2 / (4 * t ^ 2) := by positivity
+      have hB : (0 : ℝ) ≤ 1 / (2 * t) := by positivity
+      have hstep1 : |((z - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))|
+          ≤ (z - y) ^ 2 / (4 * t ^ 2) + 1 / (2 * t) := by
+        rw [abs_le]; exact ⟨by linarith, by linarith⟩
+      have hstep2 : (z - y) ^ 2 / (4 * t ^ 2)
+          ≤ (1 + |y - x|) ^ 2 / (4 * t ^ 2) :=
+        div_le_div_of_nonneg_right hsqle (by positivity)
+      rw [hPoly]; linarith
+    have hfa : |f y| ≤ C := (Real.norm_eq_abs (f y) ▸ hfb y)
+    have hub : heatKernel1D t (z - y) * |((z - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))| * |f y|
+        ≤ (P * Eg) * Poly * C := by
+      apply mul_le_mul _ hfa (abs_nonneg _)
+        (mul_nonneg (mul_nonneg hPpos.le hEgpos.le) hPolynn)
+      apply mul_le_mul hK hpolybd (abs_nonneg _) (mul_nonneg hPpos.le hEgpos.le)
+    refine hub.trans (le_of_eq ?_)
+    simp only [hbound, hM, hP, hEg, hPoly]; ring
+  have hboundint : Integrable bound volume := by
+    have hb8 : 0 < (8 * t)⁻¹ := by positivity
+    have h0 : Integrable (fun w : ℝ => Real.exp (-(8 * t)⁻¹ * w ^ 2)) :=
+      integrable_exp_neg_mul_sq hb8
+    have h1 : Integrable (fun w : ℝ => w ^ (1 : ℝ) * Real.exp (-(8 * t)⁻¹ * w ^ 2)) :=
+      integrable_rpow_mul_exp_neg_mul_sq hb8 (by norm_num)
+    have h2 : Integrable (fun w : ℝ => w ^ (2 : ℝ) * Real.exp (-(8 * t)⁻¹ * w ^ 2)) :=
+      integrable_rpow_mul_exp_neg_mul_sq hb8 (by norm_num)
+    have hbase : Integrable
+        (fun w : ℝ => ((1 + |w|) ^ 2 / (4 * t ^ 2) + 1 / (2 * t))
+          * Real.exp (-w ^ 2 / (8 * t))) := by
+      have hsum := (((h0.const_mul (1 / (4 * t ^ 2) + 1 / (2 * t))).add
+        ((h1.abs).const_mul (1 / (2 * t ^ 2)))).add (h2.const_mul (1 / (4 * t ^ 2))))
+      refine hsum.congr (Filter.Eventually.of_forall (fun w => ?_))
+      simp only [Pi.add_apply, Real.rpow_one, Real.rpow_two]
+      have hexp : -(8 * t)⁻¹ * w ^ 2 = -w ^ 2 / (8 * t) := by
+        rw [neg_div, div_eq_inv_mul]; ring
+      rw [abs_mul, abs_of_pos (Real.exp_pos _), hexp, ← sq_abs w]; ring
+    have htrans : Integrable
+        (fun y : ℝ => ((1 + |y - x|) ^ 2 / (4 * t ^ 2) + 1 / (2 * t))
+          * Real.exp (-(y - x) ^ 2 / (8 * t))) :=
+      hbase.comp_sub_right x
+    simpa only [hbound] using htrans.const_mul M
+  have hderiv : ∀ᵐ y ∂(volume : Measure ℝ),
+      ∀ z ∈ Metric.ball x 1, HasDerivAt (fun z => F z y) (F' z y) z := by
+    filter_upwards with y z _
+    have hin : HasDerivAt (fun z : ℝ => z - y) 1 z := by
+      simpa using (hasDerivAt_id z).sub_const y
+    have hcomp := (hasDerivAt_heatKernel1D_space_second ht (z - y)).comp z hin
+    rw [mul_one] at hcomp
+    have hmul := hcomp.mul_const (f y)
+    simp only [hF, hF']
+    exact hmul
+  have key := hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (μ := volume) (F := F) (x₀ := x) (bound := bound) (s := Metric.ball x 1)
+    hs hFmeas hFint hF'meas hbnd hboundint hderiv
+  simpa only [hF, hF'] using key.2
 
 end AnalyticPDE
 end RicciFlow
