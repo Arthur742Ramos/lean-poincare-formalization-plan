@@ -254,6 +254,14 @@ lemma deriv_heatKernel1D_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
     deriv (fun y => heatKernel1D t y) x = heatKernel1D t x * (-x / (2 * t)) :=
   (hasDerivAt_heatKernel1D_space ht x).deriv
 
+/-- The chain-rule derivative of the reflected/translated kernel `z ↦ K(t, z - y)`. -/
+lemma hasDerivAt_heatKernel1D_space_sub {t : ℝ} (ht : 0 < t) (x y : ℝ) :
+    HasDerivAt (fun z => heatKernel1D t (z - y))
+      (heatKernel1D t (x - y) * (-(x - y) / (2 * t))) x := by
+  have hin : HasDerivAt (fun z => z - y) 1 x := (hasDerivAt_id x).sub_const y
+  have h := (hasDerivAt_heatKernel1D_space ht (x - y)).comp x hin
+  simpa using h
+
 /-- The heat kernel is differentiable in time at each positive time. -/
 lemma differentiableAt_heatKernel1D_time {t : ℝ} (ht : 0 < t) (x : ℝ) :
     DifferentiableAt ℝ (fun s => heatKernel1D s x) t :=
@@ -299,6 +307,11 @@ theorem integrable_heatKernel1D {t : ℝ} (ht : 0 < t) :
 integral/`L¹` arguments). -/
 lemma heatKernel1D_nonneg {t : ℝ} (ht : 0 < t) (x : ℝ) : 0 ≤ heatKernel1D t x :=
   (heatKernel1D_pos ht x).le
+
+/-- The heat kernel equals its own absolute value. -/
+lemma abs_heatKernel1D {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    |heatKernel1D t x| = heatKernel1D t x :=
+  abs_of_nonneg (heatKernel1D_nonneg ht x)
 
 /-- Absolute-value form of the peak bound: `|K(t, x)| ≤ (4πt)^(-1/2)`. -/
 lemma abs_heatKernel1D_le_prefactor {t : ℝ} (ht : 0 < t) (x : ℝ) :
@@ -533,6 +546,16 @@ theorem heatSemigroup1D_mono {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ} (x : ℝ
   intro y
   exact mul_le_mul_of_nonneg_left (hfg y) (heatKernel1D_nonneg ht (x - y))
 
+/-- Comparison principle from boundedness hypotheses: `f ≤ g` (both bounded
+measurable) implies `Hₜf ≤ Hₜg`. -/
+theorem heatSemigroup1D_le_heatSemigroup1D_of_le {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ}
+    {C : ℝ} (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ C) (hfg : ∀ y, f y ≤ g y) :
+    heatSemigroup1D t f x ≤ heatSemigroup1D t g x :=
+  heatSemigroup1D_mono ht x hfg
+    (integrable_heatKernel1D_sub_mul ht x hfm hfb)
+    (integrable_heatKernel1D_sub_mul ht x hgm hgb)
+
 /-- For nonnegative bounded data, the semigroup output stays in `[0, C]`. -/
 theorem heatSemigroup1D_mem_Icc_of_nonneg {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
     (x : ℝ) (hfm : AEStronglyMeasurable f) (h0 : ∀ y, 0 ≤ f y) (hC : ∀ y, f y ≤ C) :
@@ -644,6 +667,25 @@ theorem hasDerivAt_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ
     (μ := volume) (F := F) (x₀ := x) (bound := bound) (s := Metric.ball x 1)
     hs hFmeas hFint hF'meas hbnd hboundint hderiv
   simpa only [hF, hF', heatSemigroup1D] using key.2
+
+/-- The heat semigroup is spatially differentiable (for bounded measurable data). -/
+theorem differentiableAt_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ}
+    {C : ℝ} (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    DifferentiableAt ℝ (fun z => heatSemigroup1D t f z) x :=
+  (hasDerivAt_heatSemigroup1D_space ht x hfm hfb).differentiableAt
+
+/-- The spatial derivative of the heat semigroup, as a `deriv`. -/
+theorem deriv_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
+    (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    deriv (fun z => heatSemigroup1D t f z) x
+      = ∫ y, (heatKernel1D t (x - y) * (-(x - y) / (2 * t))) * f y :=
+  (hasDerivAt_heatSemigroup1D_space ht x hfm hfb).deriv
+
+/-- The heat semigroup is spatially continuous (for bounded measurable data). -/
+theorem continuousAt_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ}
+    {C : ℝ} (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    ContinuousAt (fun z => heatSemigroup1D t f z) x :=
+  (hasDerivAt_heatSemigroup1D_space ht x hfm hfb).continuousAt
 
 /-! ## The `n`-dimensional Euclidean heat kernel
 
@@ -947,6 +989,31 @@ theorem integrable_deriv_heatKernel1D_space {t : ℝ} (ht : 0 < t) :
       abs_of_nonneg (heatKernel1D_nonneg ht x)]
     rw [show (2 * t)⁻¹ * (|x| * heatKernel1D t x)
         = heatKernel1D t x * (|x| / (2 * t)) by ring]
+
+/-- The second moment of the heat kernel is integrable: `y ↦ y² · K(t, y)` —
+the envelope needed for the second spatial derivative of the convolution. -/
+theorem integrable_sq_mul_heatKernel1D {t : ℝ} (ht : 0 < t) :
+    Integrable (fun x : ℝ => x ^ 2 * heatKernel1D t x) := by
+  have hb : 0 < (4 * t)⁻¹ := by positivity
+  have hmoment : Integrable (fun x : ℝ => x ^ (2 : ℝ) * Real.exp (-(4 * t)⁻¹ * x ^ 2)) :=
+    integrable_rpow_mul_exp_neg_mul_sq hb (by norm_num : (-1 : ℝ) < 2)
+  have hscaled := hmoment.const_mul ((4 * π * t) ^ (-(1 : ℝ) / 2))
+  refine hscaled.congr (Filter.Eventually.of_forall (fun x ↦ ?_))
+  simp only [heatKernel1D_apply]
+  have hxexp : -x ^ 2 / (4 * t) = -(4 * t)⁻¹ * x ^ 2 := by
+    rw [neg_div, div_eq_inv_mul]; ring
+  have hxsq : x ^ (2 : ℝ) = x ^ 2 := by
+    rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+  rw [hxexp, hxsq]
+  ring
+
+/-- The convolution integrand for the spatial-derivative formula is integrable. -/
+theorem integrable_deriv_heatKernel1D_space_sub_mul {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ}
+    {C : ℝ} (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    Integrable (fun y => (heatKernel1D t (x - y) * (-(x - y) / (2 * t))) * f y) := by
+  have hg : Integrable (fun y : ℝ => heatKernel1D t (x - y) * (-(x - y) / (2 * t))) :=
+    (integrable_deriv_heatKernel1D_space ht).comp_sub_left x
+  exact hg.mul_bdd hfm (Filter.Eventually.of_forall hfb)
 
 end AnalyticPDE
 end RicciFlow
