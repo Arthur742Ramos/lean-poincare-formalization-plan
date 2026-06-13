@@ -77,6 +77,28 @@ lemma continuous_heatKernel1D_space (t : ℝ) :
   exact continuous_const.mul
     (Real.continuous_exp.comp (by fun_prop))
 
+/-- Strict peak bound: away from the centre the heat kernel is strictly below its
+maximum, `K(t, x) < (4πt)^(-1/2)` for `x ≠ 0`. -/
+lemma heatKernel1D_lt_prefactor_of_ne {t : ℝ} (ht : 0 < t) {x : ℝ} (hx : x ≠ 0) :
+    heatKernel1D t x < (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+  rw [heatKernel1D_apply]
+  have hpre : 0 < (4 * π * t) ^ (-(1 : ℝ) / 2) := heatKernel1D_prefactor_pos ht
+  have hxsq : 0 < x ^ 2 := by positivity
+  have hneg : -x ^ 2 / (4 * t) < 0 := by
+    apply div_neg_of_neg_of_pos
+    · linarith
+    · linarith
+  have hexp : Real.exp (-x ^ 2 / (4 * t)) < 1 := Real.exp_lt_one_iff.mpr hneg
+  calc (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (-x ^ 2 / (4 * t))
+      < (4 * π * t) ^ (-(1 : ℝ) / 2) * 1 := mul_lt_mul_of_pos_left hexp hpre
+    _ = (4 * π * t) ^ (-(1 : ℝ) / 2) := mul_one _
+
+/-- The shifted heat kernel `y ↦ K(t, x - y)` is a.e.-strongly-measurable. -/
+theorem aestronglyMeasurable_heatKernel1D_sub {t : ℝ} (x : ℝ) :
+    AEStronglyMeasurable (fun y : ℝ => heatKernel1D t (x - y)) volume :=
+  ((continuous_heatKernel1D_space t).comp
+    (continuous_const.sub continuous_id)).aestronglyMeasurable
+
 /-- Total mass of the heat kernel: `∫ x, K(t, x) dx = 1` for `t > 0`. -/
 theorem integral_heatKernel1D {t : ℝ} (ht : 0 < t) :
     ∫ x : ℝ, heatKernel1D t x = 1 := by
@@ -366,6 +388,35 @@ theorem heatSemigroup1D_sub {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ} {C : ℝ}
   exact integral_sub (integrable_heatKernel1D_sub_mul ht x hfm hfb)
     (integrable_heatKernel1D_sub_mul ht x hgm hgb)
 
+/-- The heat semigroup annihilates the zero function: `Hₜ0 = 0`. -/
+theorem heatSemigroup1D_zero {t : ℝ} (x : ℝ) :
+    heatSemigroup1D t (fun _ => 0) x = 0 := by
+  unfold heatSemigroup1D
+  simp
+
+/-- One-sided constant bound: `|f| ≤ C ⟹ Hₜf ≤ C`. -/
+theorem heatSemigroup1D_le_of_le {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
+    (x : ℝ) (hf : ∀ y, |f y| ≤ C) : heatSemigroup1D t f x ≤ C :=
+  le_of_abs_le (abs_heatSemigroup1D_le ht x hf)
+
+/-- One-sided constant bound: `|f| ≤ C ⟹ -C ≤ Hₜf`. -/
+theorem neg_le_heatSemigroup1D {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
+    (x : ℝ) (hf : ∀ y, |f y| ≤ C) : -C ≤ heatSemigroup1D t f x :=
+  (abs_le.mp (abs_heatSemigroup1D_le ht x hf)).1
+
+/-- Adding a constant commutes with the heat semigroup: `Hₜ(f + m) = Hₜf + m`. -/
+theorem heatSemigroup1D_add_const {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
+    (x m : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    heatSemigroup1D t (fun y => f y + m) x = heatSemigroup1D t f x + m := by
+  unfold heatSemigroup1D
+  have hsplit : ∀ y, heatKernel1D t (x - y) * (f y + m)
+      = heatKernel1D t (x - y) * f y + heatKernel1D t (x - y) * m := by
+    intro y; ring
+  simp only [hsplit]
+  rw [integral_add (integrable_heatKernel1D_sub_mul ht x hfm hfb)
+    ((integrable_heatKernel1D_sub ht x).mul_const m)]
+  rw [integral_mul_const, integral_heatKernel1D_sub ht, one_mul]
+
 
 theorem heatSemigroup1D_sub_const {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ} (x m : ℝ)
     (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
@@ -443,6 +494,11 @@ lemma continuous_heatKernelND {n : ℕ} (t : ℝ) :
   unfold heatKernelND
   refine continuous_finset_prod Finset.univ (fun i _ => ?_)
   exact (continuous_heatKernel1D_space t).comp (continuous_apply i)
+
+/-- The shifted `n`-dimensional heat kernel `y ↦ Kₙ(t, x - y)` is continuous. -/
+theorem continuous_heatKernelND_sub {n : ℕ} (t : ℝ) (x : Fin n → ℝ) :
+    Continuous (fun y : Fin n → ℝ => heatKernelND t (x - y)) :=
+  (continuous_heatKernelND t).comp (continuous_const.sub continuous_id)
 
 /-- The `n`-dimensional heat kernel is even in the space variable. -/
 lemma heatKernelND_neg {n : ℕ} (t : ℝ) (x : Fin n → ℝ) :
@@ -561,6 +617,18 @@ theorem abs_heatSemigroupND_le {n : ℕ} {t : ℝ} (ht : 0 < t) {f : (Fin n → 
           exact (integrable_heatKernelND_sub ht x).mul_const C
     _ = C := hbound
 
+/-- The `n`-dimensional heat semigroup annihilates the zero function. -/
+theorem heatSemigroupND_zero {n : ℕ} {t : ℝ} (x : Fin n → ℝ) :
+    heatSemigroupND t (fun _ => 0) x = 0 := by
+  unfold heatSemigroupND
+  simp
+
+/-- One-sided constant bound in `n` dimensions: `|f| ≤ C ⟹ Hₜf ≤ C`. -/
+theorem heatSemigroupND_le_of_le {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ)
+    (hf : ∀ y, |f y| ≤ C) : heatSemigroupND t f x ≤ C :=
+  le_of_abs_le (abs_heatSemigroupND_le ht x hf)
+
 /-- The `n`-dim convolution integrand `y ↦ Kₙ(t, x - y) · f y` is integrable for
 bounded a.e.-strongly-measurable `f`. -/
 theorem integrable_heatKernelND_sub_mul {n : ℕ} {t : ℝ} (ht : 0 < t)
@@ -583,6 +651,21 @@ theorem heatSemigroupND_add {n : ℕ} {t : ℝ} (ht : 0 < t) {f g : (Fin n → �
     intro y; ring
   simp only [hsplit]
   rw [integral_add (integrable_heatKernelND_sub_mul ht x hfm hfb)
+    (integrable_heatKernelND_sub_mul ht x hgm hgb)]
+
+/-- Subtraction linearity of the `n`-dimensional heat semigroup (for bounded
+measurable inputs): `Hₜ(f - g) = Hₜf - Hₜg`. -/
+theorem heatSemigroupND_sub {n : ℕ} {t : ℝ} (ht : 0 < t) {f g : (Fin n → ℝ) → ℝ}
+    {C : ℝ} (x : Fin n → ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ C) :
+    heatSemigroupND t (fun y => f y - g y) x
+      = heatSemigroupND t f x - heatSemigroupND t g x := by
+  unfold heatSemigroupND
+  have hsplit : ∀ y, heatKernelND t (x - y) * (f y - g y)
+      = heatKernelND t (x - y) * f y - heatKernelND t (x - y) * g y := by
+    intro y; ring
+  simp only [hsplit]
+  rw [integral_sub (integrable_heatKernelND_sub_mul ht x hfm hfb)
     (integrable_heatKernelND_sub_mul ht x hgm hgb)]
 
 /-- Subtracting a constant commutes with the `n`-dimensional heat semigroup. -/
