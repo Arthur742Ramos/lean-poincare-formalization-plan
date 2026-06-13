@@ -335,8 +335,38 @@ theorem heatSemigroup1D_add {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ} {C : ℝ}
   exact integral_add (integrable_heatKernel1D_sub_mul ht x hfm hfb)
     (integrable_heatKernel1D_sub_mul ht x hgm hgb)
 
-/-- Subtracting a constant commutes with the heat semigroup:
-`Hₜ(f - m) = Hₜf - m` for bounded measurable `f`. -/
+/-- Scalar homogeneity of the heat semigroup: `Hₜ(c·f) = c·Hₜf`. -/
+theorem heatSemigroup1D_smul {t : ℝ} (c : ℝ) (f : ℝ → ℝ) (x : ℝ) :
+    heatSemigroup1D t (fun y => c * f y) x = c * heatSemigroup1D t f x := by
+  unfold heatSemigroup1D
+  rw [← integral_const_mul]
+  apply integral_congr_ae
+  filter_upwards with y
+  ring
+
+/-- Negation linearity of the heat semigroup: `Hₜ(-f) = -Hₜf`. -/
+theorem heatSemigroup1D_neg {t : ℝ} (f : ℝ → ℝ) (x : ℝ) :
+    heatSemigroup1D t (fun y => - f y) x = - heatSemigroup1D t f x := by
+  unfold heatSemigroup1D
+  simp_rw [mul_neg]
+  rw [integral_neg]
+
+/-- Subtraction linearity of the heat semigroup (for bounded measurable inputs):
+`Hₜ(f - g) = Hₜf - Hₜg`. -/
+theorem heatSemigroup1D_sub {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ} {C : ℝ} (x : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ C) :
+    heatSemigroup1D t (fun y => f y - g y) x
+      = heatSemigroup1D t f x - heatSemigroup1D t g x := by
+  unfold heatSemigroup1D
+  have hsplit : ∀ y, heatKernel1D t (x - y) * (f y - g y)
+      = heatKernel1D t (x - y) * f y - heatKernel1D t (x - y) * g y := by
+    intro y; ring
+  simp only [hsplit]
+  exact integral_sub (integrable_heatKernel1D_sub_mul ht x hfm hfb)
+    (integrable_heatKernel1D_sub_mul ht x hgm hgb)
+
+
 theorem heatSemigroup1D_sub_const {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ} (x m : ℝ)
     (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
     heatSemigroup1D t (fun y => f y - m) x = heatSemigroup1D t f x - m := by
@@ -414,6 +444,23 @@ lemma continuous_heatKernelND {n : ℕ} (t : ℝ) :
   refine continuous_finset_prod Finset.univ (fun i _ => ?_)
   exact (continuous_heatKernel1D_space t).comp (continuous_apply i)
 
+/-- The `n`-dimensional heat kernel is even in the space variable. -/
+lemma heatKernelND_neg {n : ℕ} (t : ℝ) (x : Fin n → ℝ) :
+    heatKernelND t (-x) = heatKernelND t x := by
+  simp [heatKernelND, Pi.neg_apply]
+
+/-- The `n`-dimensional peak bound: `Kₙ(t, x) ≤ ((4πt)^(-1/2))^n`. -/
+lemma heatKernelND_le_pow {n : ℕ} {t : ℝ} (ht : 0 < t) (x : Fin n → ℝ) :
+    heatKernelND t x ≤ ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ n := by
+  rw [heatKernelND_apply]
+  calc ∏ i, heatKernel1D t (x i)
+      ≤ ∏ _i : Fin n, (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+        apply Finset.prod_le_prod
+        · intro i _; exact heatKernel1D_nonneg ht (x i)
+        · intro i _; exact heatKernel1D_le_prefactor ht (x i)
+    _ = ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ n := by
+        rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+
 /-- Total mass of the `n`-dimensional heat kernel: `∫ x, Kₙ(t, x) = 1` for `t > 0`,
 via Fubini and the 1D mass. -/
 theorem integral_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) :
@@ -462,6 +509,21 @@ theorem heatSemigroupND_const {n : ℕ} {t : ℝ} (ht : 0 < t) (c : ℝ) (x : Fi
     heatSemigroupND t (fun _ => c) x = c := by
   rw [heatSemigroupND, integral_mul_const, integral_heatKernelND_sub ht, one_mul]
 
+/-- Scalar homogeneity of the `n`-dimensional heat semigroup: `Hₜ(c·f) = c·Hₜf`. -/
+theorem heatSemigroupND_smul {n : ℕ} {t : ℝ} (c : ℝ) (f : (Fin n → ℝ) → ℝ)
+    (x : Fin n → ℝ) :
+    heatSemigroupND t (fun y => c * f y) x = c * heatSemigroupND t f x := by
+  unfold heatSemigroupND
+  simp_rw [mul_left_comm]
+  rw [integral_const_mul]
+
+/-- Negation linearity of the `n`-dimensional heat semigroup: `Hₜ(-f) = -Hₜf`. -/
+theorem heatSemigroupND_neg {n : ℕ} {t : ℝ} (f : (Fin n → ℝ) → ℝ) (x : Fin n → ℝ) :
+    heatSemigroupND t (fun y => - f y) x = - heatSemigroupND t f x := by
+  unfold heatSemigroupND
+  simp_rw [mul_neg]
+  rw [integral_neg]
+
 /-- `n`-dimensional heat-kernel nonnegativity gives semigroup positivity preservation. -/
 theorem heatSemigroupND_nonneg {n : ℕ} {t : ℝ} (ht : 0 < t) {f : (Fin n → ℝ) → ℝ}
     (x : Fin n → ℝ) (hf : ∀ y, 0 ≤ f y) :
@@ -507,6 +569,21 @@ theorem integrable_heatKernelND_sub_mul {n : ℕ} {t : ℝ} (ht : 0 < t)
     Integrable (fun y : Fin n → ℝ => heatKernelND t (x - y) * f y) :=
   (integrable_heatKernelND_sub ht x).mul_bdd hmeas
     (Filter.Eventually.of_forall hbound)
+
+/-- Additive linearity of the `n`-dimensional heat semigroup (for bounded measurable
+inputs): `Hₜ(f + g) = Hₜf + Hₜg`. -/
+theorem heatSemigroupND_add {n : ℕ} {t : ℝ} (ht : 0 < t) {f g : (Fin n → ℝ) → ℝ}
+    {C : ℝ} (x : Fin n → ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ C) :
+    heatSemigroupND t (fun y => f y + g y) x
+      = heatSemigroupND t f x + heatSemigroupND t g x := by
+  unfold heatSemigroupND
+  have hsplit : ∀ y, heatKernelND t (x - y) * (f y + g y)
+      = heatKernelND t (x - y) * f y + heatKernelND t (x - y) * g y := by
+    intro y; ring
+  simp only [hsplit]
+  rw [integral_add (integrable_heatKernelND_sub_mul ht x hfm hfb)
+    (integrable_heatKernelND_sub_mul ht x hgm hgb)]
 
 /-- Subtracting a constant commutes with the `n`-dimensional heat semigroup. -/
 theorem heatSemigroupND_sub_const {n : ℕ} {t : ℝ} (ht : 0 < t)
