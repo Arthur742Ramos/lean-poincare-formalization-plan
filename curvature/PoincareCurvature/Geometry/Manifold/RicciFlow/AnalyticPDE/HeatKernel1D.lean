@@ -3,6 +3,7 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.MeasureTheory.Integral.Pi
+public import Mathlib.Analysis.Calculus.ParametricIntegral
 
 /-!
 # The one-dimensional Euclidean heat kernel
@@ -243,6 +244,11 @@ lemma differentiable_heatKernel1D_space {t : ℝ} (ht : 0 < t) :
     Differentiable ℝ (fun y => heatKernel1D t y) :=
   fun x => (hasDerivAt_heatKernel1D_space ht x).differentiableAt
 
+/-- The reflected/translated kernel `y ↦ K(t, x - y)` is differentiable. -/
+lemma differentiable_heatKernel1D_space_neg_sub {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    Differentiable ℝ (fun y => heatKernel1D t (x - y)) :=
+  (differentiable_heatKernel1D_space ht).comp (differentiable_id.const_sub x)
+
 /-- The spatial derivative of the heat kernel, as a `deriv`. -/
 lemma deriv_heatKernel1D_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
     deriv (fun y => heatKernel1D t y) x = heatKernel1D t x * (-x / (2 * t)) :=
@@ -299,6 +305,23 @@ lemma abs_heatKernel1D_le_prefactor {t : ℝ} (ht : 0 < t) (x : ℝ) :
     |heatKernel1D t x| ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) := by
   rw [abs_of_nonneg (heatKernel1D_nonneg ht x)]
   exact heatKernel1D_le_prefactor ht x
+
+/-- The squared peak bound. -/
+lemma sq_heatKernel1D_le {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    heatKernel1D t x ^ 2 ≤ ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ 2 :=
+  pow_le_pow_left₀ (heatKernel1D_nonneg ht x) (heatKernel1D_le_prefactor ht x) 2
+
+/-- The heat kernel is monotone decreasing in `|x|`: if `|x| ≤ |y|` then
+`K(t, y) ≤ K(t, x)`. -/
+lemma heatKernel1D_le_of_abs_le {t : ℝ} (ht : 0 < t) {x y : ℝ}
+    (h : |x| ≤ |y|) : heatKernel1D t y ≤ heatKernel1D t x := by
+  rw [heatKernel1D_apply, heatKernel1D_apply]
+  apply mul_le_mul_of_nonneg_left _ (heatKernel1D_prefactor_pos ht).le
+  apply Real.exp_le_exp.mpr
+  have hxy : x ^ 2 ≤ y ^ 2 := by
+    rw [← sq_abs x, ← sq_abs y]; gcongr
+  have h4t : (0 : ℝ) < 4 * t := by positivity
+  gcongr
 
 /-- The `L¹` mass of the heat kernel is `1`: `∫ x, |K(t, x)| = 1` for `t > 0`. -/
 theorem integral_norm_heatKernel1D {t : ℝ} (ht : 0 < t) :
@@ -510,6 +533,118 @@ theorem heatSemigroup1D_mono {t : ℝ} (ht : 0 < t) {f g : ℝ → ℝ} (x : ℝ
   intro y
   exact mul_le_mul_of_nonneg_left (hfg y) (heatKernel1D_nonneg ht (x - y))
 
+/-- For nonnegative bounded data, the semigroup output stays in `[0, C]`. -/
+theorem heatSemigroup1D_mem_Icc_of_nonneg {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
+    (x : ℝ) (hfm : AEStronglyMeasurable f) (h0 : ∀ y, 0 ≤ f y) (hC : ∀ y, f y ≤ C) :
+    heatSemigroup1D t f x ∈ Set.Icc 0 C :=
+  heatSemigroup1D_mem_Icc ht x hfm h0 hC
+
+/-- **Spatial differentiability of the heat semigroup.**  For bounded
+a.e.-strongly-measurable `f` and `t > 0`, the convolution `z ↦ Hₜf z` is
+differentiable, and its derivative is obtained by differentiating the kernel under
+the integral sign:
+`∂ₓ Hₜf = ∫ y, ∂ₓK(t, x - y) · f y`.
+The proof uses Leibniz's rule (`hasDerivAt_integral_of_dominated_loc_of_deriv_le`)
+with an explicit Gaussian dominating envelope. -/
+theorem hasDerivAt_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
+    (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    HasDerivAt (fun z => heatSemigroup1D t f z)
+      (∫ y, (heatKernel1D t (x - y) * (-(x - y) / (2 * t))) * f y) x := by
+  have h2t : (0 : ℝ) < 2 * t := by positivity
+  have hCnn : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+  set F : ℝ → ℝ → ℝ := fun z y => heatKernel1D t (z - y) * f y with hF
+  set F' : ℝ → ℝ → ℝ := fun z y => heatKernel1D t (z - y) * (-(z - y) / (2 * t)) * f y with hF'
+  set M := (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (1 / (4 * t)) * C / (2 * t) with hM
+  set bound : ℝ → ℝ := fun y => M * ((1 + |y - x|) * Real.exp (-(y - x) ^ 2 / (8 * t)))
+    with hbound
+  have hs : Metric.ball x 1 ∈ nhds x := Metric.ball_mem_nhds x (by norm_num)
+  have hFmeas : ∀ᶠ z in nhds x, AEStronglyMeasurable (F z) volume := by
+    filter_upwards with z
+    exact (aestronglyMeasurable_heatKernel1D_sub z).mul hfm
+  have hFint : Integrable (F x) volume :=
+    integrable_heatKernel1D_sub_mul ht x hfm hfb
+  have hF'meas : AEStronglyMeasurable (F' x) volume := by
+    refine (((continuous_heatKernel1D_space t).comp
+      (continuous_const.sub continuous_id)).mul ?_).aestronglyMeasurable.mul hfm
+    fun_prop
+  have hbnd : ∀ᵐ y ∂(volume : Measure ℝ), ∀ z ∈ Metric.ball x 1, ‖F' z y‖ ≤ bound y := by
+    filter_upwards with y z hz
+    rw [Metric.mem_ball, Real.dist_eq] at hz
+    have hzle : |z - x| ≤ 1 := hz.le
+    have hpre : (0 : ℝ) < (4 * π * t) ^ (-(1 : ℝ) / 2) := heatKernel1D_prefactor_pos ht
+    have hnorm : ‖F' z y‖
+        = heatKernel1D t (z - y) * (|z - y| / (2 * t)) * |f y| := by
+      simp only [hF']
+      rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_div, abs_neg,
+        abs_of_pos h2t, abs_of_nonneg (heatKernel1D_nonneg ht (z - y))]
+    rw [hnorm]
+    have hzx2 : (z - x) ^ 2 ≤ 1 := by
+      rw [← Real.sqrt_le_sqrt_iff (by positivity), Real.sqrt_one, Real.sqrt_sq_eq_abs]
+      exact hzle
+    have hK : heatKernel1D t (z - y)
+        ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (1 / (4 * t))
+            * Real.exp (-(y - x) ^ 2 / (8 * t)) := by
+      rw [heatKernel1D_apply, mul_assoc ((4 * π * t) ^ (-(1 : ℝ) / 2)), ← Real.exp_add]
+      apply mul_le_mul_of_nonneg_left _ hpre.le
+      apply Real.exp_le_exp.mpr
+      have hq : (z - y) ^ 2 ≥ (y - x) ^ 2 / 2 - (z - x) ^ 2 := by
+        nlinarith [sq_nonneg ((y - x) - 2 * (z - x))]
+      rw [← sub_nonneg]
+      have key : 1 / (4 * t) + -(y - x) ^ 2 / (8 * t) - -(z - y) ^ 2 / (4 * t)
+          = (2 - ((y - x) ^ 2 - 2 * (z - y) ^ 2)) / (8 * t) := by
+        field_simp; ring
+      rw [key]
+      apply div_nonneg _ (by positivity)
+      nlinarith [hq, hzx2]
+    have hzy : |z - y| ≤ 1 + |y - x| := by
+      have hzysplit : z - y = (z - x) + (x - y) := by ring
+      calc |z - y| ≤ |z - x| + |x - y| := by rw [hzysplit]; exact abs_add_le _ _
+        _ ≤ 1 + |y - x| := by rw [abs_sub_comm x y]; linarith
+    set Eg := Real.exp (-(y - x) ^ 2 / (8 * t)) with hEg
+    have hEgpos : 0 < Eg := Real.exp_pos _
+    set P := (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (1 / (4 * t)) with hP
+    have hPpos : 0 < P := by positivity
+    have hfa : |f y| ≤ C := (Real.norm_eq_abs (f y) ▸ hfb y)
+    have hub : heatKernel1D t (z - y) * (|z - y| / (2 * t)) * |f y|
+        ≤ (P * Eg) * ((1 + |y - x|) / (2 * t)) * C := by
+      apply mul_le_mul _ hfa (abs_nonneg _) (by positivity)
+      apply mul_le_mul hK _ (by positivity) (by positivity)
+      exact div_le_div_of_nonneg_right hzy h2t.le
+    refine hub.trans (le_of_eq ?_)
+    simp only [hbound, hM, hP]; ring
+  have hboundint : Integrable bound volume := by
+    have hb8 : 0 < (8 * t)⁻¹ := by positivity
+    have h0 : Integrable (fun w : ℝ => Real.exp (-(8 * t)⁻¹ * w ^ 2)) :=
+      integrable_exp_neg_mul_sq hb8
+    have h1 : Integrable (fun w : ℝ => w ^ (1 : ℝ) * Real.exp (-(8 * t)⁻¹ * w ^ 2)) :=
+      integrable_rpow_mul_exp_neg_mul_sq hb8 (by norm_num)
+    have hbase : Integrable (fun w : ℝ => (1 + |w|) * Real.exp (-w ^ 2 / (8 * t))) := by
+      have hsum := h0.add h1.abs
+      refine hsum.congr (Filter.Eventually.of_forall (fun w => ?_))
+      simp only [Pi.add_apply, Real.rpow_one]
+      have hexp : -(8 * t)⁻¹ * w ^ 2 = -w ^ 2 / (8 * t) := by
+        rw [neg_div, div_eq_inv_mul]; ring
+      rw [hexp, abs_mul, abs_of_pos (Real.exp_pos _)]; ring
+    have htrans : Integrable
+        (fun y : ℝ => (1 + |y - x|) * Real.exp (-(y - x) ^ 2 / (8 * t))) :=
+      hbase.comp_sub_right x
+    simpa only [hbound] using htrans.const_mul M
+  have hderiv : ∀ᵐ y ∂(volume : Measure ℝ),
+      ∀ z ∈ Metric.ball x 1, HasDerivAt (fun z => F z y) (F' z y) z := by
+    filter_upwards with y z _
+    have hin : HasDerivAt (fun z : ℝ => z - y) 1 z := by
+      simpa using (hasDerivAt_id z).sub_const y
+    have hcomp : HasDerivAt (fun z : ℝ => heatKernel1D t (z - y))
+        (heatKernel1D t (z - y) * (-(z - y) / (2 * t))) z := by
+      have := (hasDerivAt_heatKernel1D_space ht (z - y)).comp z hin
+      simpa using this
+    have := hcomp.mul_const (f y)
+    simpa only [hF, hF'] using this
+  have key := hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (μ := volume) (F := F) (x₀ := x) (bound := bound) (s := Metric.ball x 1)
+    hs hFmeas hFint hF'meas hbnd hboundint hderiv
+  simpa only [hF, hF', heatSemigroup1D] using key.2
+
 /-! ## The `n`-dimensional Euclidean heat kernel
 
 The `n`-dimensional heat kernel is the product of the 1D kernels over the
@@ -544,6 +679,11 @@ lemma continuous_heatKernelND {n : ℕ} (t : ℝ) :
 theorem continuous_heatKernelND_sub {n : ℕ} (t : ℝ) (x : Fin n → ℝ) :
     Continuous (fun y : Fin n → ℝ => heatKernelND t (x - y)) :=
   (continuous_heatKernelND t).comp (continuous_const.sub continuous_id)
+
+/-- The shifted `n`-dimensional heat kernel is a.e.-strongly-measurable. -/
+theorem aestronglyMeasurable_heatKernelND_sub {n : ℕ} {t : ℝ} (x : Fin n → ℝ) :
+    AEStronglyMeasurable (fun y : Fin n → ℝ => heatKernelND t (x - y)) volume :=
+  (continuous_heatKernelND_sub t x).aestronglyMeasurable
 
 /-- The `n`-dimensional heat kernel is even in the space variable. -/
 lemma heatKernelND_neg {n : ℕ} (t : ℝ) (x : Fin n → ℝ) :
@@ -727,9 +867,21 @@ theorem heatSemigroupND_sub_const {n : ℕ} {t : ℝ} (ht : 0 < t)
     ((integrable_heatKernelND_sub ht x).mul_const m)]
   rw [integral_mul_const, integral_heatKernelND_sub ht, one_mul]
 
-/-- **Two-sided maximum principle for the `n`-dimensional heat semigroup.**  If
-`c ≤ f y ≤ C` for all `y` and `f` is a.e.-strongly-measurable, then
-`c ≤ heatSemigroupND t f x ≤ C`. -/
+/-- Adding a constant commutes with the `n`-dimensional heat semigroup. -/
+theorem heatSemigroupND_add_const {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ) (m : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    heatSemigroupND t (fun y => f y + m) x = heatSemigroupND t f x + m := by
+  rw [heatSemigroupND, heatSemigroupND]
+  have hsplit : ∀ y, heatKernelND t (x - y) * (f y + m)
+      = heatKernelND t (x - y) * f y + heatKernelND t (x - y) * m := by
+    intro y; ring
+  simp only [hsplit]
+  rw [integral_add (integrable_heatKernelND_sub_mul ht x hfm hfb)
+    ((integrable_heatKernelND_sub ht x).mul_const m)]
+  rw [integral_mul_const, integral_heatKernelND_sub ht, one_mul]
+
+
 theorem heatSemigroupND_mem_Icc {n : ℕ} {t : ℝ} (ht : 0 < t)
     {f : (Fin n → ℝ) → ℝ} {c C : ℝ} (x : Fin n → ℝ)
     (hfm : AEStronglyMeasurable f) (hlo : ∀ y, c ≤ f y) (hhi : ∀ y, f y ≤ C) :
