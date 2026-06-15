@@ -30,7 +30,7 @@ theory.
 @[expose] public noncomputable section
 
 open Real MeasureTheory
-open scoped Real
+open scoped Real ENNReal
 
 namespace RicciFlow
 namespace AnalyticPDE
@@ -2564,6 +2564,123 @@ lemma duhamelKernel1D_zero (t : ℝ) (x : ℝ) : duhamelKernel1D t (fun _ _ => 0
   unfold duhamelKernel1D
   simp only [heatSemigroup1D_zero]
   simp
+
+/-! ### Quantitative parabolic smoothing constants
+
+The explicit `t^{-1/2}` gradient-smoothing rate `‖∂ₓHₜf‖∞ ≤ C·(πt)^{-1/2}` — the
+canonical parabolic Schauder estimate — obtained by evaluating the heat kernel's
+absolute first moment `∫|w|K(t,w)` in closed form. -/
+
+/-- Half-line first moment of a Gaussian: `∫₀^∞ x·exp(-b x²) dx = 1/(2b)` (FTC with
+antiderivative `-(1/2b)·exp(-b x²)`). -/
+lemma integral_Ioi_id_mul_exp_neg_mul_sq {b : ℝ} (hb : 0 < b) :
+    ∫ x in Set.Ioi (0 : ℝ), x * Real.exp (-b * x ^ 2) = 1 / (2 * b) := by
+  set F : ℝ → ℝ := fun x => -(1 / (2 * b)) * Real.exp (-b * x ^ 2) with hF
+  have hb' : b ≠ 0 := ne_of_gt hb
+  have hderiv : ∀ x ∈ Set.Ioi (0 : ℝ), HasDerivAt F (x * Real.exp (-b * x ^ 2)) x := by
+    intro x _
+    have h1 : HasDerivAt (fun x => -b * x ^ 2) (-b * (2 * x)) x := by
+      have := hasDerivAt_pow 2 x
+      simpa using this.const_mul (-b)
+    have h2 : HasDerivAt (fun x => Real.exp (-b * x ^ 2))
+        (Real.exp (-b * x ^ 2) * (-b * (2 * x))) x :=
+      (Real.hasDerivAt_exp _).comp x h1
+    have h3 : HasDerivAt F (-(1 / (2 * b)) * (Real.exp (-b * x ^ 2) * (-b * (2 * x)))) x :=
+      h2.const_mul (-(1 / (2 * b)))
+    have heqv : -(1 / (2 * b)) * (Real.exp (-b * x ^ 2) * (-b * (2 * x)))
+        = x * Real.exp (-b * x ^ 2) := by field_simp
+    rw [heqv] at h3
+    exact h3
+  have hcont : ContinuousWithinAt F (Set.Ici (0 : ℝ)) 0 :=
+    (Continuous.continuousWithinAt (by fun_prop))
+  have hint : IntegrableOn (fun x => x * Real.exp (-b * x ^ 2)) (Set.Ioi (0 : ℝ)) volume :=
+    (integrable_mul_exp_neg_mul_sq hb).integrableOn
+  have htends : Filter.Tendsto F Filter.atTop (nhds 0) := by
+    have hmain : Filter.Tendsto (fun x : ℝ => -b * x ^ 2) Filter.atTop Filter.atBot := by
+      apply Filter.Tendsto.const_mul_atTop_of_neg (by linarith : -b < 0)
+      exact Filter.tendsto_pow_atTop (by norm_num)
+    have hexp : Filter.Tendsto (fun x : ℝ => Real.exp (-b * x ^ 2)) Filter.atTop (nhds 0) :=
+      Real.tendsto_exp_atBot.comp hmain
+    have := hexp.const_mul (-(1 / (2 * b)))
+    simpa [hF] using this
+  have hres := MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv hint htends
+  rw [hres]
+  simp only [hF]
+  norm_num
+
+/-- Full-line absolute first moment of a Gaussian: `∫ |x|·exp(-b x²) dx = 1/b`. -/
+lemma integral_abs_mul_exp_neg_mul_sq {b : ℝ} (hb : 0 < b) :
+    ∫ x : ℝ, |x| * Real.exp (-b * x ^ 2) = 1 / b := by
+  have h := integral_comp_abs (f := fun t => t * Real.exp (-b * t ^ 2))
+  simp only [sq_abs] at h
+  rw [h, integral_Ioi_id_mul_exp_neg_mul_sq hb]
+  field_simp
+
+/-- The heat kernel's absolute first moment in closed form:
+`∫ |w|·K(t,w) dw = (4πt)^(-1/2)·(4t)`. -/
+lemma integral_abs_mul_heatKernel1D_eq {t : ℝ} (ht : 0 < t) :
+    (∫ w, |w| * heatKernel1D t w) = (4 * π * t) ^ (-(1 : ℝ) / 2) * (4 * t) := by
+  set P : ℝ := (4 * π * t) ^ (-(1 : ℝ) / 2) with hP
+  have hb : (0 : ℝ) < 1 / (4 * t) := by positivity
+  have hcongr : (∫ w, |w| * heatKernel1D t w)
+      = ∫ w, P * (|w| * Real.exp (-(1 / (4 * t)) * w ^ 2)) := by
+    apply integral_congr_ae (Filter.Eventually.of_forall (fun w => ?_))
+    rw [heatKernel1D_apply]
+    have hexp : -w ^ 2 / (4 * t) = -(1 / (4 * t)) * w ^ 2 := by rw [neg_div]; field_simp
+    rw [hexp, hP]; ring
+  rw [hcongr, integral_const_mul, integral_abs_mul_exp_neg_mul_sq hb]
+  rw [hP, one_div_one_div]
+
+/-- Positivity of the heat-kernel first moment. -/
+lemma integral_abs_mul_heatKernel1D_pos {t : ℝ} (ht : 0 < t) :
+    0 < ∫ w, |w| * heatKernel1D t w := by
+  rw [integral_abs_mul_heatKernel1D_eq ht]
+  have := heatKernel1D_prefactor_pos ht
+  positivity
+
+/-- Algebraic helper: `√(4πt) = 2·√(πt)`. -/
+lemma sqrt_four_pi_t_eq (t : ℝ) (ht : 0 < t) :
+    Real.sqrt (4 * π * t) = 2 * Real.sqrt (π * t) := by
+  rw [mul_assoc, Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 4)]
+  congr 1
+  rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]
+
+/-- The prefactor in inverse-sqrt form: `(4πt)^(-1/2) = 1/(2√(πt))`. -/
+lemma prefactor_eq_inv_two_sqrt (t : ℝ) (ht : 0 < t) :
+    (4 * π * t) ^ (-(1 : ℝ) / 2) = 1 / (2 * Real.sqrt (π * t)) := by
+  have e : (4 * π * t) ^ (-(1 : ℝ) / 2) = (Real.sqrt (4 * π * t))⁻¹ := by
+    rw [show (-(1 : ℝ) / 2) = -(1 / 2) by ring, Real.rpow_neg (by positivity),
+      ← Real.sqrt_eq_rpow]
+  rw [e, sqrt_four_pi_t_eq t ht, one_div]
+
+/-- **The canonical `t^{-1/2}` gradient-smoothing (Lipschitz) rate.** For bounded
+measurable `f` with `‖f‖∞ ≤ C`, the heat semigroup output is Lipschitz with the
+explicit parabolic constant `C/√(πt)`:
+`|Hₜf a - Hₜf b| ≤ (C/√(πt))·|a - b|`. -/
+theorem heatSemigroup1D_lipschitz_sqrt_rate (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) (a b : ℝ) :
+    |heatSemigroup1D t f a - heatSemigroup1D t f b| ≤ (C / Real.sqrt (π * t)) * |a - b| := by
+  have hsqrt_pt : (0 : ℝ) < Real.sqrt (π * t) := Real.sqrt_pos.mpr (by positivity)
+  have hcoef : C * (∫ w, |w| * heatKernel1D t w) / (2 * t) = C / Real.sqrt (π * t) := by
+    rw [integral_abs_mul_heatKernel1D_eq ht, prefactor_eq_inv_two_sqrt t ht]
+    have h2t : (2 : ℝ) * t ≠ 0 := by positivity
+    have hst : Real.sqrt (π * t) ≠ 0 := ne_of_gt hsqrt_pt
+    have hsq : Real.sqrt (π * t) * Real.sqrt (π * t) = π * t :=
+      Real.mul_self_sqrt (by positivity)
+    field_simp
+    nlinarith [hsq]
+  have hbase := abs_heatSemigroup1D_sub_self_le t ht f C hfm hfb a b
+  rwa [hcoef] at hbase
+
+/-- The smoothing rate packaged as a mathlib `LipschitzWith` instance. -/
+theorem heatSemigroup1D_lipschitzWith_sqrt_rate (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hCnn : 0 ≤ C) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    LipschitzWith (Real.toNNReal (C / Real.sqrt (π * t)))
+      (fun x => heatSemigroup1D t f x) := by
+  have hsqrt : (0 : ℝ) < Real.sqrt (π * t) := Real.sqrt_pos.mpr (by positivity)
+  refine LipschitzWith.of_dist_le_mul (fun a b => ?_)
+  rw [Real.dist_eq, Real.dist_eq, Real.coe_toNNReal _ (by positivity)]
+  exact heatSemigroup1D_lipschitz_sqrt_rate t ht f C hfm hfb a b
 
 end AnalyticPDE
 end RicciFlow
