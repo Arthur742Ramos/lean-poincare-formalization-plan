@@ -2403,5 +2403,167 @@ lemma heatSemigroup1D_nonneg_of_nonneg {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ}
   rw [heatSemigroup1D]
   exact integral_nonneg (fun y => mul_nonneg (heatKernel1D_nonneg ht (x - y)) (hf y))
 
+/-! ### Semigroup composition law and Duhamel scaffolding
+
+The Chapman–Kolmogorov identity lifts (via Fubini) to the semigroup composition
+law `Hₜ ∘ Hₛ = H_{t+s}` — the Markov/semigroup structure of the heat flow — and
+the inhomogeneous Duhamel convolution that drives variable-coefficient
+perturbation theory. -/
+
+/-- Sup-norm bound on `Hₜf` (restated from `abs_heatSemigroup1D_le`). -/
+lemma heatSemigroup1D_abs_le_sup {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} {C : ℝ}
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) (x : ℝ) :
+    |heatSemigroup1D t f x| ≤ C :=
+  abs_heatSemigroup1D_le ht x (fun y => by simpa [Real.norm_eq_abs] using hfb y)
+
+/-- Joint integrability of the uncurried kernel-product on the plane (Fubini
+hypothesis for the composition law). -/
+lemma integrable_uncurry_heatKernel_pair (t s : ℝ) (ht : 0 < t) (hs : 0 < s) (x : ℝ) :
+    Integrable (Function.uncurry fun (y z : ℝ) => heatKernel1D t (x - z) * heatKernel1D s (z - y))
+      (volume.prod volume) := by
+  have hts : (0 : ℝ) < t + s := by linarith
+  have hmeas : AEStronglyMeasurable
+      (Function.uncurry fun (y z : ℝ) => heatKernel1D t (x - z) * heatKernel1D s (z - y))
+      (volume.prod volume) := by
+    apply Continuous.aestronglyMeasurable
+    unfold Function.uncurry
+    exact ((continuous_heatKernel1D_space t).comp (by fun_prop)).mul
+      ((continuous_heatKernel1D_space s).comp (by fun_prop))
+  rw [MeasureTheory.integrable_prod_iff hmeas]
+  refine ⟨Filter.Eventually.of_forall (fun y => ?_), ?_⟩
+  · exact integrable_heatKernel1D_mul_pair t s ht hs x y
+  · apply (integrable_heatKernel1D_sub hts x).congr
+    refine Filter.Eventually.of_forall (fun y => ?_)
+    show heatKernel1D (t + s) (x - y)
+        = ∫ z, ‖heatKernel1D t (x - z) * heatKernel1D s (z - y)‖
+    rw [← heatKernel1D_chapman_kolmogorov t s ht hs x y]
+    apply integral_congr_ae
+    refine Filter.Eventually.of_forall (fun z => ?_)
+    dsimp only
+    rw [Real.norm_of_nonneg
+      (mul_nonneg (heatKernel1D_nonneg ht _) (heatKernel1D_nonneg hs _))]
+
+/-- Pointwise integrand identity feeding the composition-law Fubini step. -/
+lemma heatSemigroup1D_chapman_pointwise (t s : ℝ) (ht : 0 < t) (hs : 0 < s)
+    (f : ℝ → ℝ) (x y : ℝ) :
+    (∫ z, heatKernel1D t (x - z) * heatKernel1D s (z - y) * f y)
+      = heatKernel1D (t + s) (x - y) * f y := by
+  rw [integral_mul_const, heatKernel1D_chapman_kolmogorov t s ht hs x y]
+
+/-- **Heat-semigroup composition law.** `Hₜ(Hₛf) = H_{t+s}f` for bounded
+measurable `f`, the semigroup/Markov structure of the heat flow, proved by Fubini
+from Chapman–Kolmogorov. -/
+theorem heatSemigroup1D_comp (t s : ℝ) (ht : 0 < t) (hs : 0 < s) {f : ℝ → ℝ} {C : ℝ}
+    (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    heatSemigroup1D t (fun w => heatSemigroup1D s f w) x = heatSemigroup1D (t + s) f x := by
+  have hpair_cont : Continuous
+      (fun p : ℝ × ℝ => heatKernel1D t (x - p.1) * heatKernel1D s (p.1 - p.2)) :=
+    ((continuous_heatKernel1D_space t).comp (continuous_const.sub continuous_fst)).mul
+      ((continuous_heatKernel1D_space s).comp (continuous_fst.sub continuous_snd))
+  have hpair_meas : AEStronglyMeasurable
+      (fun p : ℝ × ℝ => heatKernel1D t (x - p.1) * heatKernel1D s (p.1 - p.2))
+      (volume.prod volume) := hpair_cont.aestronglyMeasurable
+  have hbase : Integrable
+      (fun p : ℝ × ℝ => heatKernel1D t (x - p.1) * heatKernel1D s (p.1 - p.2))
+      (volume.prod volume) := by
+    refine (integrable_prod_iff hpair_meas).mpr ⟨?_, ?_⟩
+    · exact Filter.Eventually.of_forall
+        (fun z => (integrable_heatKernel1D_sub hs z).const_mul (heatKernel1D t (x - z)))
+    · have hfun :
+          (fun z => ∫ y, ‖heatKernel1D t (x - z) * heatKernel1D s (z - y)‖)
+            = fun z => heatKernel1D t (x - z) := by
+        funext z
+        have hnorm :
+            (fun y => ‖heatKernel1D t (x - z) * heatKernel1D s (z - y)‖)
+              = fun y => heatKernel1D t (x - z) * heatKernel1D s (z - y) := by
+          funext y
+          rw [Real.norm_eq_abs,
+            abs_of_nonneg (mul_nonneg (heatKernel1D_nonneg ht _) (heatKernel1D_nonneg hs _))]
+        rw [hnorm, integral_const_mul, integral_heatKernel1D_sub hs z, mul_one]
+      rw [hfun]
+      exact integrable_heatKernel1D_sub ht x
+  have hfull : Integrable
+      (fun p : ℝ × ℝ => (heatKernel1D t (x - p.1) * heatKernel1D s (p.1 - p.2)) * f p.2)
+      (volume.prod volume) :=
+    hbase.mul_bdd hfm.comp_snd (Filter.Eventually.of_forall (fun p => hfb p.2))
+  have hintegr : Integrable
+      (Function.uncurry
+        (fun z y => heatKernel1D t (x - z) * (heatKernel1D s (z - y) * f y)))
+      (volume.prod volume) := by
+    have heq :
+        (Function.uncurry
+          (fun z y => heatKernel1D t (x - z) * (heatKernel1D s (z - y) * f y)))
+          = fun p : ℝ × ℝ =>
+            (heatKernel1D t (x - p.1) * heatKernel1D s (p.1 - p.2)) * f p.2 := by
+      funext p
+      simp only [Function.uncurry]
+      ring
+    rw [heq]
+    exact hfull
+  simp only [heatSemigroup1D]
+  have step1 : ∀ z : ℝ,
+      heatKernel1D t (x - z) * (∫ y, heatKernel1D s (z - y) * f y)
+        = ∫ y, heatKernel1D t (x - z) * (heatKernel1D s (z - y) * f y) := by
+    intro z
+    rw [integral_const_mul]
+  simp_rw [step1]
+  rw [integral_integral_swap hintegr]
+  have step3 : ∀ y : ℝ,
+      (∫ z, heatKernel1D t (x - z) * (heatKernel1D s (z - y) * f y))
+        = heatKernel1D (t + s) (x - y) * f y := by
+    intro y
+    have hassoc :
+        (fun z => heatKernel1D t (x - z) * (heatKernel1D s (z - y) * f y))
+          = fun z => (heatKernel1D t (x - z) * heatKernel1D s (z - y)) * f y := by
+      funext z; ring
+    rw [hassoc, integral_mul_const, heatKernel1D_chapman_kolmogorov t s ht hs x y]
+  simp_rw [step3]
+
+/-- The composition law in the constant case (no Fubini needed; independent check). -/
+lemma heatSemigroup1D_comp_const (t s : ℝ) (ht : 0 < t) (hs : 0 < s) (c x : ℝ) :
+    heatSemigroup1D t (fun w => heatSemigroup1D s (fun _ => c) w) x
+      = heatSemigroup1D (t + s) (fun _ => c) x := by
+  have hinner : (fun w => heatSemigroup1D s (fun _ => c) w) = fun _ => c := by
+    funext w; exact heatSemigroup1D_const hs c w
+  rw [hinner, heatSemigroup1D_const ht, heatSemigroup1D_const (by linarith : 0 < t + s)]
+
+/-- **n-dimensional Chapman–Kolmogorov.** The convolution of the nD heat kernels
+at times `t` and `s` is the nD heat kernel at time `t+s`, proved coordinatewise
+from the 1D identity via the product structure. -/
+theorem heatKernelND_chapman_kolmogorov {n : ℕ} (t s : ℝ) (ht : 0 < t) (hs : 0 < s)
+    (a b : Fin n → ℝ) :
+    ∫ z : Fin n → ℝ, heatKernelND t (a - z) * heatKernelND s (z - b)
+      = heatKernelND (t + s) (a - b) := by
+  have hfun : (fun z : Fin n → ℝ => heatKernelND t (a - z) * heatKernelND s (z - b))
+      = fun z : Fin n → ℝ =>
+        ∏ i, (heatKernel1D t (a i - z i) * heatKernel1D s (z i - b i)) := by
+    funext z
+    rw [heatKernelND, heatKernelND, ← Finset.prod_mul_distrib]
+    rfl
+  rw [hfun,
+    integral_fin_nat_prod_volume_eq_prod
+      (fun i (z : ℝ) => heatKernel1D t (a i - z) * heatKernel1D s (z - b i))]
+  simp only [heatKernel1D_chapman_kolmogorov t s ht hs]
+  rw [heatKernelND]
+  rfl
+
+/-- nD kernel subtraction-symmetry (nD analog of `heatKernel1D_sub_comm`). -/
+lemma heatKernelND_sub_comm {n : ℕ} (t : ℝ) (a z : Fin n → ℝ) :
+    heatKernelND t (a - z) = heatKernelND t (z - a) := by
+  simp only [heatKernelND, Pi.sub_apply, heatKernel1D_sub_comm]
+
+/-- **Duhamel time-convolution.** `duhamelKernel1D t g x = ∫₀ᵗ H_{t−s}(g s) x ds`,
+the particular-solution term for the inhomogeneous heat equation
+`∂ₜu = ∂ₓₓu + g`. This seeds the perturbation engine toward variable-coefficient
+solvability. -/
+noncomputable def duhamelKernel1D (t : ℝ) (g : ℝ → ℝ → ℝ) (x : ℝ) : ℝ :=
+  ∫ s in Set.Ioo 0 t, heatSemigroup1D (t - s) (g s) x
+
+/-- The Duhamel convolution of the zero source is zero. -/
+lemma duhamelKernel1D_zero (t : ℝ) (x : ℝ) : duhamelKernel1D t (fun _ _ => 0) x = 0 := by
+  unfold duhamelKernel1D
+  simp only [heatSemigroup1D_zero]
+  simp
+
 end AnalyticPDE
 end RicciFlow
