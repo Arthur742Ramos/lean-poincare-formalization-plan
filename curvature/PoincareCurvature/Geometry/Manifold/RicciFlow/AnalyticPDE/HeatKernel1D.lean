@@ -1453,5 +1453,109 @@ theorem exists_lipschitz_heatKernel1D {t : ℝ} (ht : 0 < t) :
     (Set.mem_univ x') (Set.mem_univ x)
   simpa [Real.norm_eq_abs] using hmvt
 
+/-- `√t / (2t) = 1 / (2√t)`. -/
+lemma sqrt_t_div_two_t_eq (t : ℝ) (ht : 0 < t) :
+    Real.sqrt t / (2 * t) = 1 / (2 * Real.sqrt t) := by
+  have h : Real.sqrt t * Real.sqrt t = t := Real.mul_self_sqrt ht.le
+  have hne : Real.sqrt t ≠ 0 := (Real.sqrt_pos.mpr ht).ne'
+  rw [div_eq_div_iff (by positivity) (by positivity)]
+  nlinarith [h]
+
+/-- Uniform bound on the kernel's spatial derivative: `|∂ₓK(t,x)| ≤ (4πt)^(-1/2)·√t/(2t)`. -/
+lemma norm_deriv_heatKernel1D_space_le (t : ℝ) (ht : 0 < t) (x : ℝ) :
+    |deriv (fun y => heatKernel1D t y) x| ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t) := by
+  rw [deriv_heatKernel1D_space ht x]
+  have h2t : (0 : ℝ) < 2 * t := by positivity
+  have hK : 0 ≤ heatKernel1D t x := heatKernel1D_nonneg ht x
+  have hpre : (0 : ℝ) ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) := (heatKernel1D_prefactor_pos ht).le
+  have hkey := heatKernel1D_exp_mul_abs_le ht x
+  rw [abs_mul, abs_of_nonneg hK, abs_div, abs_neg, abs_of_pos h2t]
+  rw [heatKernel1D_apply]
+  calc (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (-x ^ 2 / (4 * t)) * (|x| / (2 * t))
+      = (4 * π * t) ^ (-(1 : ℝ) / 2) * (Real.exp (-x ^ 2 / (4 * t)) * |x|) / (2 * t) := by ring
+    _ ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t) := by gcongr
+
+/-- The shifted first-moment integrand `y ↦ |x - y| · K(t, x - y)` is integrable. -/
+lemma integrable_abs_sub_mul_heatKernel1D_sub {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    Integrable (fun y => |x - y| * heatKernel1D t (x - y)) := by
+  have h := (integrable_abs_mul_heatKernel1D ht).comp_sub_left x
+  simpa using h
+
+/-- **Stability of the heat semigroup in the data**: if `|f - g| ≤ C` pointwise
+(with both `f, g` bounded measurable), then `|Hₜf x - Hₜg x| ≤ C`. -/
+theorem abs_heatSemigroup1D_sub_le (t : ℝ) (ht : 0 < t) (f g : ℝ → ℝ)
+    (C D : ℝ) (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ D)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ D)
+    (hbound : ∀ y, |f y - g y| ≤ C) :
+    |heatSemigroup1D t f x - heatSemigroup1D t g x| ≤ C := by
+  rw [← heatSemigroup1D_sub ht x hfm hfb hgm hgb]
+  exact abs_heatSemigroup1D_le ht x hbound
+
+/-- Nonnegativity of the shifted `n`-dimensional kernel. -/
+lemma heatKernelND_sub_nonneg (n : ℕ) (t : ℝ) (ht : 0 < t) (x y : Fin n → ℝ) :
+    0 ≤ heatKernelND t (x - y) :=
+  heatKernelND_nonneg ht (x - y)
+
+/-- One-sided constant bound (from two-sided pointwise bound) for the `n`-dim semigroup. -/
+theorem heatSemigroupND_le_of_forall_le (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (f : (Fin n → ℝ) → ℝ) (C : ℝ) (x : Fin n → ℝ)
+    (hf : ∀ y, f y ≤ C) (hf2 : ∀ y, -C ≤ f y) :
+    heatSemigroupND t f x ≤ C :=
+  heatSemigroupND_le_of_le ht x (fun y => abs_le.mpr (And.intro (hf2 y) (hf y)))
+
+/-- **The heat semigroup is globally Lipschitz in space** (for bounded measurable
+data), with constant `L = C·A/(2t)` where `A = ∫ |w|·K(t,w) dw`.  This spatial
+Hölder estimate is exactly the regularity bound that feeds parabolic Schauder
+theory for the variable-coefficient operators. -/
+theorem exists_lipschitz_heatSemigroup1D (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    ∃ L : ℝ, 0 ≤ L ∧ ∀ a b, |heatSemigroup1D t f a - heatSemigroup1D t f b| ≤ L * |a - b| := by
+  have h2t : (0 : ℝ) < 2 * t := by positivity
+  have hCnn : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+  set A : ℝ := ∫ (w : ℝ), |w| * heatKernel1D t w with hAdef
+  have hAnn : 0 ≤ A := by
+    rw [hAdef]
+    exact integral_nonneg (fun w => mul_nonneg (abs_nonneg w) (heatKernel1D_nonneg ht w))
+  set L : ℝ := C * (2 * t)⁻¹ * A with hLdef
+  have hLnn : 0 ≤ L := by
+    rw [hLdef]; exact mul_nonneg (mul_nonneg hCnn (by positivity)) hAnn
+  refine ⟨L, hLnn, ?_⟩
+  have hbnd : ∀ x ∈ (Set.univ : Set ℝ),
+      ‖deriv (fun z => heatSemigroup1D t f z) x‖ ≤ L := by
+    intro x _
+    rw [Real.norm_eq_abs, deriv_heatSemigroup1D_space ht x hfm hfb]
+    have hint : Integrable
+        (fun y => (heatKernel1D t (x - y) * (-(x - y) / (2 * t))) * f y) :=
+      integrable_deriv_heatKernel1D_space_sub_mul ht x hfm hfb
+    have hbint : Integrable
+        (fun y => heatKernel1D t (x - y) * (|x - y| / (2 * t)) * C) := by
+      have hg : Integrable (fun y : ℝ => |x - y| * heatKernel1D t (x - y)) :=
+        (integrable_abs_mul_heatKernel1D ht).comp_sub_left x
+      refine (hg.const_mul (C * (2 * t)⁻¹)).congr ?_
+      filter_upwards with y; ring
+    calc |∫ y, (heatKernel1D t (x - y) * (-(x - y) / (2 * t))) * f y|
+        ≤ ∫ y, ‖(heatKernel1D t (x - y) * (-(x - y) / (2 * t))) * f y‖ := by
+          rw [← Real.norm_eq_abs]; exact norm_integral_le_integral_norm _
+      _ ≤ ∫ y, heatKernel1D t (x - y) * (|x - y| / (2 * t)) * C := by
+          refine integral_mono hint.norm hbint (fun y => ?_)
+          rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_div, abs_neg, abs_of_pos h2t,
+            abs_of_nonneg (heatKernel1D_nonneg ht (x - y))]
+          refine mul_le_mul_of_nonneg_left ?_
+            (mul_nonneg (heatKernel1D_nonneg ht (x - y)) (by positivity))
+          exact (Real.norm_eq_abs (f y)) ▸ hfb y
+      _ = L := by
+          have heq : (fun y => heatKernel1D t (x - y) * (|x - y| / (2 * t)) * C)
+              = fun y => (C * (2 * t)⁻¹) * (|x - y| * heatKernel1D t (x - y)) := by
+            funext y; ring
+          rw [heq, integral_const_mul,
+            integral_sub_left_eq_self (fun w => |w| * heatKernel1D t w) volume x, ← hAdef, hLdef]
+  have hdiff : ∀ x ∈ (Set.univ : Set ℝ),
+      DifferentiableAt ℝ (fun z => heatSemigroup1D t f z) x :=
+    fun x _ => differentiable_heatSemigroup1D_space ht hfm hfb x
+  intro a b
+  have hmvt := (convex_univ).norm_image_sub_le_of_norm_deriv_le hdiff hbnd
+    (Set.mem_univ b) (Set.mem_univ a)
+  simpa [Real.norm_eq_abs] using hmvt
+
 end AnalyticPDE
 end RicciFlow
