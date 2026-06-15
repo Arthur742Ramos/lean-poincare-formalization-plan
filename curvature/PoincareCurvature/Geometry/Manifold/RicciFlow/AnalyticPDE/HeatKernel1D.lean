@@ -1821,5 +1821,69 @@ theorem heatSemigroup1D_le_iff_bound (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C
     heatSemigroup1D t f x ≤ C ∧ -C ≤ heatSemigroup1D t f x :=
   ⟨le_of_abs_le (abs_heatSemigroup1D_le ht x hf), heatSemigroup1D_neg_le t ht f C x hf⟩
 
+/-- **Factorization of the `n`-dimensional kernel** along one coordinate:
+`Kₙ(t, x) = K(t, xᵢ)·∏_{j≠i} K(t, xⱼ)`.  The structural lemma for coordinate
+partial derivatives of `Kₙ`. -/
+lemma heatKernelND_eq_update_mul (n : ℕ) (t : ℝ) (x : Fin n → ℝ) (i : Fin n) :
+    heatKernelND t x
+      = heatKernel1D t (x i) * ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j) := by
+  rw [heatKernelND_apply,
+    ← Finset.mul_prod_erase Finset.univ (fun j => heatKernel1D t (x j)) (Finset.mem_univ i)]
+
+/-- The `n`-dim kernel is bounded by one 1D factor times the prefactor power `(n-1)`. -/
+lemma heatKernelND_le_factor (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ)
+    (i : Fin n) :
+    heatKernelND t x
+      ≤ heatKernel1D t (x i) * ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ (n - 1) := by
+  rw [heatKernelND_apply]
+  rw [← Finset.mul_prod_erase Finset.univ (fun j => heatKernel1D t (x j))
+      (Finset.mem_univ i)]
+  apply mul_le_mul_of_nonneg_left _ (heatKernel1D_nonneg ht (x i))
+  calc ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j)
+      ≤ ∏ _j ∈ Finset.univ.erase i, (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+        apply Finset.prod_le_prod
+        · intro j _; exact heatKernel1D_nonneg ht (x j)
+        · intro j _; exact heatKernel1D_le_prefactor ht (x j)
+    _ = ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ (n - 1) := by
+        rw [Finset.prod_const, Finset.card_erase_of_mem (Finset.mem_univ i),
+          Finset.card_univ, Fintype.card_fin]
+
+/-- The `n`-dim kernel at the origin equals the prefactor to the `n`-th power. -/
+lemma heatKernelND_zero_eq (n : ℕ) (t : ℝ) :
+    heatKernelND t (0 : Fin n → ℝ) = ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ n := by
+  rw [heatKernelND_apply]
+  simp only [Pi.zero_apply, heatKernel1D_zero_eq_prefactor, Finset.prod_const,
+    Finset.card_univ, Fintype.card_fin]
+
+/-- **Stability of the `n`-dim heat semigroup in the data**: `|f - g| ≤ C` pointwise
+(with both bounded measurable) gives `|Hₜf x - Hₜg x| ≤ C`. -/
+theorem abs_heatSemigroupND_sub_le (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (f g : (Fin n → ℝ) → ℝ) (C D : ℝ) (x : Fin n → ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ D)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ D)
+    (hbound : ∀ y, |f y - g y| ≤ C) :
+    |heatSemigroupND t f x - heatSemigroupND t g x| ≤ C := by
+  rw [← heatSemigroupND_sub ht x hfm hfb hgm hgb]
+  exact abs_heatSemigroupND_le ht x hbound
+
+/-- Lower bound counterpart of the `n`-dim semigroup maximum principle. -/
+theorem heatSemigroupND_neg_le (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (f : (Fin n → ℝ) → ℝ) (C : ℝ) (x : Fin n → ℝ)
+    (hf : ∀ y, |f y| ≤ C) : -C ≤ heatSemigroupND t f x :=
+  (abs_le.mp (abs_heatSemigroupND_le ht x hf)).1
+
+/-- The `n`-dim semigroup output lies in `[-C, C]` for `|f| ≤ C`. -/
+theorem heatSemigroupND_mem_Icc_neg_pos (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (f : (Fin n → ℝ) → ℝ) (C : ℝ) (x : Fin n → ℝ) (hf : ∀ y, |f y| ≤ C) :
+    heatSemigroupND t f x ∈ Set.Icc (-C) C :=
+  Set.mem_Icc.mpr ⟨(abs_le.mp (abs_heatSemigroupND_le ht x hf)).1,
+    le_of_abs_le (abs_heatSemigroupND_le ht x hf)⟩
+
+/-- Alternative form of the kernel Lipschitz constant: `Lip(t) = (1/(2√t))·(4πt)^(-1/2)`. -/
+lemma heatKernel1DLipConst_eq (t : ℝ) (ht : 0 < t) :
+    heatKernel1DLipConst t = 1 / (2 * Real.sqrt t) * (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+  rw [heatKernel1DLipConst, mul_div_assoc, sqrt_t_div_two_t_eq t ht]
+  ring
+
 end AnalyticPDE
 end RicciFlow
