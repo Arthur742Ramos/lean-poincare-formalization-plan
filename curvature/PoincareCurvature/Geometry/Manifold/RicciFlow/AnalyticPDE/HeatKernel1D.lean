@@ -2031,5 +2031,47 @@ theorem heatSemigroupND_zero_const (n : ℕ) (t : ℝ) (ht : 0 < t)
     heatSemigroupND t (fun _ => (0 : ℝ)) x = 0 := by
   simpa using heatSemigroupND_const ht 0 x
 
+/-- The second coordinate partial derivative as a `deriv` value. -/
+lemma heatKernelND_coord_second_value (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ) (i : Fin n) :
+    deriv (fun r => heatKernelND t (Function.update x i r) * (-(r) / (2 * t))) (x i)
+      = heatKernelND t x * ((x i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) :=
+  (hasDerivAt_heatKernelND_coord_second n t ht x i).deriv
+
+/-- Differentiability of the coordinate first-derivative slice. -/
+lemma differentiableAt_heatKernelND_coord_second (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (x : Fin n → ℝ) (i : Fin n) :
+    DifferentiableAt ℝ (fun r => heatKernelND t (Function.update x i r) * (-(r) / (2 * t))) (x i) :=
+  (hasDerivAt_heatKernelND_coord_second n t ht x i).differentiableAt
+
+/-- **The Laplacian of the `n`-dimensional kernel factors out `Kₙ`**: the sum of the
+second coordinate partials equals `Kₙ(t,x)·Σᵢ(xᵢ²/(4t²) − 1/(2t))`. -/
+lemma heatKernelND_laplacian_eq (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ) :
+    (∑ i : Fin n, heatKernelND t x * ((x i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)))
+      = heatKernelND t x * (∑ i : Fin n, ((x i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) := by
+  rw [Finset.mul_sum]
+
+/-- The sum of the per-coordinate heat-equation coefficients:
+`Σᵢ(xᵢ²/(4t²) − 1/(2t)) = (Σᵢxᵢ²)/(4t²) − n/(2t)`.  Hence the `n`-dimensional
+kernel Laplacian is `Kₙ(t,x)·(|x|²/(4t²) − n/(2t))`. -/
+lemma sum_heatKernel_coeff (n : ℕ) (t : ℝ) (x : Fin n → ℝ) :
+    (∑ i : Fin n, ((x i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)))
+      = (∑ i : Fin n, (x i) ^ 2) / (4 * t ^ 2) - n / (2 * t) := by
+  rw [Finset.sum_sub_distrib]
+  congr 1
+  · rw [← Finset.sum_div]
+  · rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+    ring
+
+/-- The coordinate partial at the centre vanishes. -/
+lemma heatKernelND_coord_at_zero (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ)
+    (i : Fin n) :
+    heatKernel1D t 0 * (-(0 : ℝ) / (2 * t)) * (∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j)) = 0 := by
+  simp
+
+/-- Strict positivity of the erased-coordinate product. -/
+lemma heatKernelND_pos_prod_factor (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ)
+    (i : Fin n) : 0 < ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j) :=
+  Finset.prod_pos (fun j _ => heatKernel1D_pos ht (x j))
+
 end AnalyticPDE
 end RicciFlow
