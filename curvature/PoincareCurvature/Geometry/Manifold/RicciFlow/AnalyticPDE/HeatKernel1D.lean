@@ -1613,5 +1613,62 @@ theorem heatSemigroup1D_eq_zero_of_eq_zero (t : ℝ) (f : ℝ → ℝ) (x : ℝ)
   unfold heatSemigroup1D
   simp only [hf, mul_zero, integral_zero]
 
+/-- Uniform bound on the kernel difference: `|K(t,a) - K(t,b)| ≤ 2·(4πt)^(-1/2)`. -/
+theorem heatKernel1D_sub_abs_le_min (t : ℝ) (ht : 0 < t) (a b : ℝ) :
+    |heatKernel1D t a - heatKernel1D t b| ≤ 2 * (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+  calc |heatKernel1D t a - heatKernel1D t b|
+      ≤ |heatKernel1D t a| + |heatKernel1D t b| := abs_sub _ _
+    _ = heatKernel1D t a + heatKernel1D t b := by
+          rw [abs_heatKernel1D ht, abs_heatKernel1D ht]
+    _ ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) + (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+          gcongr <;> exact heatKernel1D_le_prefactor ht _
+    _ = 2 * (4 * π * t) ^ (-(1 : ℝ) / 2) := by ring
+
+/-- **The heat kernel as a `LipschitzWith` map** (mathlib's Lipschitz API), with the
+explicit NNReal constant. -/
+lemma lipschitzWith_heatKernel1D (t : ℝ) (ht : 0 < t) :
+    LipschitzWith ((4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t)).toNNReal
+      (fun x => heatKernel1D t x) := by
+  refine LipschitzWith.of_dist_le_mul (fun a b => ?_)
+  rw [Real.dist_eq, Real.dist_eq, Real.coe_toNNReal _ (by positivity)]
+  exact heatKernel1D_sub_abs_le t ht a b
+
+/-- Alternative form of the kernel-derivative bound: `|∂ₓK| ≤ (1/(2√t))·(4πt)^(-1/2)`. -/
+lemma abs_deriv_heatKernel1D_space_le (t : ℝ) (ht : 0 < t) (x : ℝ) :
+    |deriv (fun y => heatKernel1D t y) x| ≤ 1 / (2 * Real.sqrt t) * (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+  have h := norm_deriv_heatKernel1D_space_le t ht x
+  rw [mul_div_assoc, sqrt_t_div_two_t_eq t ht] at h
+  linarith [h]
+
+/-- The `n`-dimensional heat kernel is continuous along a single coordinate. -/
+theorem continuous_heatKernelND_update (n : ℕ) (t : ℝ) (x : Fin n → ℝ) (i : Fin n) :
+    Continuous (fun r : ℝ => heatKernelND t (Function.update x i r)) := by
+  have hupd : Continuous (fun r : ℝ => Function.update x i r) := by
+    refine continuous_pi (fun j => ?_)
+    by_cases hj : j = i
+    · subst hj; simpa [Function.update_self] using (continuous_id : Continuous (fun r : ℝ => r))
+    · simpa [Function.update_of_ne hj] using (continuous_const : Continuous (fun _ : ℝ => x j))
+  exact (continuous_heatKernelND t).comp hupd
+
+/-- Lower bound counterpart of the semigroup maximum principle. -/
+theorem heatSemigroup1D_neg_le (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ) (x : ℝ)
+    (hf : ∀ y, |f y| ≤ C) : -C ≤ heatSemigroup1D t f x :=
+  (abs_le.mp (abs_heatSemigroup1D_le ht x hf)).1
+
+/-- Two-point spatial difference bound: `|Hₜf x - Hₜf x'| ≤ 2C` when `|f| ≤ C`. -/
+theorem heatSemigroup1D_dist_le_two_C (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (x x' : ℝ) (hf : ∀ y, |f y| ≤ C) :
+    |heatSemigroup1D t f x - heatSemigroup1D t f x'| ≤ 2 * C := by
+  have htri : |heatSemigroup1D t f x - heatSemigroup1D t f x'|
+      ≤ |heatSemigroup1D t f x| + |heatSemigroup1D t f x'| := abs_sub _ _
+  linarith [abs_heatSemigroup1D_le ht x hf, abs_heatSemigroup1D_le ht x' hf]
+
+/-- The `n`-dimensional heat semigroup annihilates a pointwise-zero function. -/
+theorem heatSemigroupND_eq_zero_of_eq_zero (n : ℕ) (t : ℝ)
+    (f : (Fin n → ℝ) → ℝ) (x : Fin n → ℝ) (hf : ∀ y, f y = 0) :
+    heatSemigroupND t f x = 0 := by
+  unfold heatSemigroupND
+  simp only [hf, mul_zero, integral_zero]
+
 end AnalyticPDE
 end RicciFlow
