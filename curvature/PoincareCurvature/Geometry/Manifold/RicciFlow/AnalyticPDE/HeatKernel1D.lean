@@ -1885,5 +1885,70 @@ lemma heatKernel1DLipConst_eq (t : ℝ) (ht : 0 < t) :
   rw [heatKernel1DLipConst, mul_div_assoc, sqrt_t_div_two_t_eq t ht]
   ring
 
+/-- Positivity of the named kernel Lipschitz constant. -/
+lemma heatKernel1DLipConst_pos (t : ℝ) (ht : 0 < t) : 0 < heatKernel1DLipConst t := by
+  unfold heatKernel1DLipConst
+  positivity
+
+/-- Updating coordinate `i` to its own value is the identity. -/
+lemma heatKernelND_update_self (n : ℕ) (t : ℝ) (x : Fin n → ℝ) (i : Fin n) :
+    heatKernelND t (Function.update x i (x i)) = heatKernelND t x := by
+  rw [Function.update_eq_self]
+
+/-- The `n`-dim kernel with coordinate `i` set to `r` factors as `K(t,r)·∏_{j≠i}K(t,xⱼ)`. -/
+lemma heatKernelND_update_factor (n : ℕ) (t : ℝ) (x : Fin n → ℝ) (i : Fin n) (r : ℝ) :
+    heatKernelND t (Function.update x i r)
+      = heatKernel1D t r * ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j) := by
+  rw [heatKernelND_eq_update_mul n t (Function.update x i r) i]
+  rw [Function.update_self]
+  congr 1
+  apply Finset.prod_congr rfl
+  intro j hj
+  rw [Function.update_of_ne (Finset.ne_of_mem_erase hj)]
+
+/-- The erased-coordinate product is nonnegative. -/
+lemma heatKernelND_prod_erase_nonneg (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (x : Fin n → ℝ) (i : Fin n) :
+    0 ≤ ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j) :=
+  Finset.prod_nonneg (fun j _ => heatKernel1D_nonneg ht (x j))
+
+/-- **The coordinate partial derivative of the `n`-dimensional heat kernel**:
+`∂_{xᵢ} Kₙ(t, x) = Kₙ(t, x)·(-xᵢ/(2t))`.  Proved via the factorization
+`Kₙ = K(t,xᵢ)·∏_{j≠i}K(t,xⱼ)` (the non-`i` factors are constant in `xᵢ`).  This is
+the structural input for the `n`-dimensional heat equation of the semigroup. -/
+lemma hasDerivAt_heatKernelND_coord (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (x : Fin n → ℝ) (i : Fin n) :
+    HasDerivAt (fun r => heatKernelND t (Function.update x i r))
+      (heatKernelND t x * (-(x i) / (2 * t))) (x i) := by
+  set P : ℝ := ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j) with hP
+  have hfun : (fun r => heatKernelND t (Function.update x i r))
+      = (fun r => heatKernel1D t r * P) := by
+    funext r
+    rw [heatKernelND_eq_update_mul n t (Function.update x i r) i]
+    rw [Function.update_self]
+    congr 1
+    apply Finset.prod_congr rfl
+    intro j hj
+    rw [Function.update_of_ne (Finset.ne_of_mem_erase hj)]
+  rw [hfun]
+  have hbase := (hasDerivAt_heatKernel1D_space ht (x i)).mul_const P
+  convert hbase using 1
+  rw [heatKernelND_eq_update_mul n t x i, ← hP]
+  ring
+
+/-- Differentiability of the `n`-dim kernel along a coordinate. -/
+lemma differentiableAt_heatKernelND_coord (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (x : Fin n → ℝ) (i : Fin n) :
+    DifferentiableAt ℝ (fun r => heatKernelND t (Function.update x i r)) (x i) :=
+  (hasDerivAt_heatKernelND_coord n t ht x i).differentiableAt
+
+/-- Scalar bound for the `n`-dim semigroup: `|Hₜ(c·f)| ≤ c·C` for `c ≥ 0`, `|f| ≤ C`. -/
+theorem heatSemigroupND_smul_le (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (f : (Fin n → ℝ) → ℝ) (c C : ℝ) (x : Fin n → ℝ) (hc : 0 ≤ c)
+    (hf : ∀ y, |f y| ≤ C) :
+    |heatSemigroupND t (fun y => c * f y) x| ≤ c * C := by
+  rw [heatSemigroupND_smul, abs_mul, abs_of_nonneg hc]
+  exact mul_le_mul_of_nonneg_left (abs_heatSemigroupND_le ht x hf) hc
+
 end AnalyticPDE
 end RicciFlow
