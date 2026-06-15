@@ -1723,5 +1723,103 @@ theorem heatKernel1D_sub_shift_abs_le (t : ℝ) (ht : 0 < t) (x x' y : ℝ) :
   rw [he] at h
   exact h
 
+/-- The named spatial-Lipschitz constant of the heat kernel at time `t`. -/
+noncomputable def heatKernel1DLipConst (t : ℝ) : ℝ :=
+  (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t)
+
+lemma heatKernel1DLipConst_nonneg (t : ℝ) (ht : 0 < t) :
+    0 ≤ heatKernel1DLipConst t := by
+  unfold heatKernel1DLipConst
+  positivity
+
+/-- Kernel spatial-Hölder bound through the named constant. -/
+lemma heatKernel1D_sub_abs_le_const (t : ℝ) (ht : 0 < t) (a b : ℝ) :
+    |heatKernel1D t a - heatKernel1D t b| ≤ heatKernel1DLipConst t * |a - b| := by
+  unfold heatKernel1DLipConst
+  exact heatKernel1D_sub_abs_le t ht a b
+
+/-- **Explicit Lipschitz constant for the heat semigroup**: with `A = ∫ |w|·K(t,w)`,
+`|Hₜf a - Hₜf b| ≤ (C·A/(2t))·|a - b|` whenever `|f| ≤ C`. -/
+theorem abs_heatSemigroup1D_sub_self_le (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) (a b : ℝ) :
+    |heatSemigroup1D t f a - heatSemigroup1D t f b| ≤
+      (C * (∫ w, |w| * heatKernel1D t w) / (2 * t)) * |a - b| := by
+  have h2t : (0 : ℝ) < 2 * t := by positivity
+  have hCnn : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+  set A : ℝ := ∫ (w : ℝ), |w| * heatKernel1D t w with hAdef
+  have hAnn : 0 ≤ A := by
+    rw [hAdef]
+    exact integral_nonneg (fun w => mul_nonneg (abs_nonneg w) (heatKernel1D_nonneg ht w))
+  set L : ℝ := C * A / (2 * t) with hLdef
+  have hbnd : ∀ x ∈ (Set.univ : Set ℝ),
+      ‖deriv (fun z => heatSemigroup1D t f z) x‖ ≤ L := by
+    intro x _
+    rw [Real.norm_eq_abs, deriv_heatSemigroup1D_space ht x hfm hfb]
+    have hint : Integrable
+        (fun y => (heatKernel1D t (x - y) * (-(x - y) / (2 * t))) * f y) :=
+      integrable_deriv_heatKernel1D_space_sub_mul ht x hfm hfb
+    have hbint : Integrable
+        (fun y => heatKernel1D t (x - y) * (|x - y| / (2 * t)) * C) := by
+      have hg : Integrable (fun y : ℝ => |x - y| * heatKernel1D t (x - y)) :=
+        (integrable_abs_mul_heatKernel1D ht).comp_sub_left x
+      refine (hg.const_mul (C * (2 * t)⁻¹)).congr ?_
+      filter_upwards with y; ring
+    calc |∫ y, (heatKernel1D t (x - y) * (-(x - y) / (2 * t))) * f y|
+        ≤ ∫ y, ‖(heatKernel1D t (x - y) * (-(x - y) / (2 * t))) * f y‖ := by
+          rw [← Real.norm_eq_abs]; exact norm_integral_le_integral_norm _
+      _ ≤ ∫ y, heatKernel1D t (x - y) * (|x - y| / (2 * t)) * C := by
+          refine integral_mono hint.norm hbint (fun y => ?_)
+          rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_div, abs_neg, abs_of_pos h2t,
+            abs_of_nonneg (heatKernel1D_nonneg ht (x - y))]
+          refine mul_le_mul_of_nonneg_left ?_
+            (mul_nonneg (heatKernel1D_nonneg ht (x - y)) (by positivity))
+          exact (Real.norm_eq_abs (f y)) ▸ hfb y
+      _ = L := by
+          have heq : (fun y => heatKernel1D t (x - y) * (|x - y| / (2 * t)) * C)
+              = fun y => (C * (2 * t)⁻¹) * (|x - y| * heatKernel1D t (x - y)) := by
+            funext y; ring
+          rw [heq, integral_const_mul,
+            integral_sub_left_eq_self (fun w => |w| * heatKernel1D t w) volume x, ← hAdef, hLdef]
+          ring
+  have hdiff : ∀ x ∈ (Set.univ : Set ℝ),
+      DifferentiableAt ℝ (fun z => heatSemigroup1D t f z) x :=
+    fun x _ => differentiable_heatSemigroup1D_space ht hfm hfb x
+  have hmvt := (convex_univ).norm_image_sub_le_of_norm_deriv_le hdiff hbnd
+    (Set.mem_univ b) (Set.mem_univ a)
+  rw [hLdef] at hmvt
+  simpa [Real.norm_eq_abs] using hmvt
+
+/-- Scalar homogeneity (explicit name) for the `n`-dim semigroup. -/
+theorem heatSemigroupND_smul_const (n : ℕ) (t : ℝ) (ht : 0 < t) (c : ℝ)
+    (f : (Fin n → ℝ) → ℝ) (x : Fin n → ℝ) :
+    heatSemigroupND t (fun y => c * f y) x = c * heatSemigroupND t f x := by
+  simpa using heatSemigroupND_smul (t := t) c f x
+
+/-- Adding a constant on the left commutes with the heat semigroup. -/
+theorem heatSemigroup1D_const_add (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C m : ℝ)
+    (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    heatSemigroup1D t (fun y => m + f y) x = m + heatSemigroup1D t f x := by
+  have hcomm : (fun y => m + f y) = (fun y => f y + m) := by funext y; ring
+  rw [hcomm, heatSemigroup1D_add_const ht x m hfm hfb, add_comm]
+
+/-- The `n`-dim semigroup of a constant is continuous (it is constant). -/
+theorem continuous_heatSemigroupND_const (n : ℕ) (t : ℝ) (ht : 0 < t) (c : ℝ) :
+    Continuous (fun x : Fin n → ℝ => heatSemigroupND t (fun _ => c) x) := by
+  have h : (fun x : Fin n → ℝ => heatSemigroupND t (fun _ => c) x) = fun _ => c :=
+    funext (fun x => heatSemigroupND_const ht c x)
+  rw [h]
+  exact continuous_const
+
+/-- The kernel at a self-difference equals the kernel at the centre. -/
+lemma heatKernel1D_sub_self (t : ℝ) (x : ℝ) :
+    heatKernel1D t (x - x) = heatKernel1D t 0 := by
+  rw [sub_self]
+
+/-- Combined two-sided bound for the semigroup. -/
+theorem heatSemigroup1D_le_iff_bound (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (x : ℝ) (hf : ∀ y, |f y| ≤ C) :
+    heatSemigroup1D t f x ≤ C ∧ -C ≤ heatSemigroup1D t f x :=
+  ⟨le_of_abs_le (abs_heatSemigroup1D_le ht x hf), heatSemigroup1D_neg_le t ht f C x hf⟩
+
 end AnalyticPDE
 end RicciFlow
