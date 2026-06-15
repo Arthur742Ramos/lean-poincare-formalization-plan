@@ -2192,5 +2192,32 @@ lemma heatKernelND_two_eq (t : ℝ) (x : Fin 2 → ℝ) :
     heatKernelND t x = heatKernel1D t (x 0) * heatKernel1D t (x 1) := by
   rw [heatKernelND_apply, Fin.prod_univ_two]
 
+/-- The 3-dimensional kernel as a product of three 1D kernels. -/
+lemma heatKernelND_three_eq (t : ℝ) (x : Fin 3 → ℝ) :
+    heatKernelND t x = heatKernel1D t (x 0) * heatKernel1D t (x 1) * heatKernel1D t (x 2) := by
+  rw [heatKernelND_apply, Fin.prod_univ_three]
+
+/-- Unfolding of `laplacianCoeff`. -/
+lemma laplacianCoeff_eq (t : ℝ) (x : ℝ) :
+    laplacianCoeff t x = x ^ 2 / (4 * t ^ 2) - 1 / (2 * t) := rfl
+
+/-- `laplacianCoeff` is even in the space variable. -/
+lemma laplacianCoeff_neg_eq (t : ℝ) (x : ℝ) :
+    laplacianCoeff t (-x) = laplacianCoeff t x := by
+  simp [laplacianCoeff]
+
+/-- A weighted (variable-coefficient) second-order operator `a·∂ₓₓg`, the first
+scaffolding toward variable-coefficient parabolic operators. -/
+noncomputable def weightedHeatOp (a : ℝ) (g : ℝ → ℝ) (x : ℝ) : ℝ :=
+  a * deriv (deriv g) x
+
+/-- The weighted operator annihilates constants. -/
+lemma weightedHeatOp_const_zero (a : ℝ) (c x : ℝ) :
+    weightedHeatOp a (fun _ => c) x = 0 := by
+  have h : deriv (fun _ : ℝ => c) = fun _ => (0 : ℝ) := by
+    ext y; exact deriv_const y c
+  rw [weightedHeatOp, h]
+  simp
+
 end AnalyticPDE
 end RicciFlow
