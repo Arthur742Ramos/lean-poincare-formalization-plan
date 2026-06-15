@@ -2073,5 +2073,75 @@ lemma heatKernelND_pos_prod_factor (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n �
     (i : Fin n) : 0 < ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j) :=
   Finset.prod_pos (fun j _ => heatKernel1D_pos ht (x j))
 
+/-- The single-factor product identity reconstructs `Kₙ`. -/
+lemma heatKernel1D_factor_eq_kernelND (n : ℕ) (t : ℝ) (x : Fin n → ℝ) (i : Fin n) :
+    heatKernel1D t (x i) * ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j)
+      = heatKernelND t x := by
+  rw [heatKernelND_apply]
+  exact Finset.mul_prod_erase _ (fun j => heatKernel1D t (x j)) (Finset.mem_univ i)
+
+/-- The shifted `n`-dim kernel as a product of shifted 1D kernels. -/
+lemma heatKernelND_sub_apply (n : ℕ) (t : ℝ) (x y : Fin n → ℝ) :
+    heatKernelND t (x - y) = ∏ i, heatKernel1D t (x i - y i) := by
+  rw [heatKernelND_apply]
+  apply Finset.prod_congr rfl
+  intro i _
+  rw [Pi.sub_apply]
+
+/-- The `n`-dim kernel is nonzero. -/
+lemma heatKernelND_ne_zero (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ) :
+    heatKernelND t x ≠ 0 :=
+  ne_of_gt (heatKernelND_pos ht x)
+
+/-- **The time derivative of the `n`-dimensional heat kernel** (via the finite
+product rule over coordinates): `∂ₜKₙ(t,x) = Kₙ(t,x)·Σᵢ(xᵢ²/(4t²) − 1/(2t))`. -/
+lemma hasDerivAt_heatKernelND_time (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ) :
+    HasDerivAt (fun s => heatKernelND s x)
+      (heatKernelND t x * (∑ i : Fin n, ((x i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)))) t := by
+  have h := HasDerivAt.finset_prod (𝕜 := ℝ) (u := (Finset.univ : Finset (Fin n)))
+    (f := fun i => fun s => heatKernel1D s (x i))
+    (f' := fun i => heatKernel1D t (x i) * ((x i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)))
+    (x := t)
+    (fun i _ => hasDerivAt_heatKernel1D_time ht (x i))
+  have hfun : (fun s => heatKernelND s x)
+      = ∏ i : Fin n, (fun s => heatKernel1D s (x i)) := by
+    funext s
+    rw [Finset.prod_apply, heatKernelND_apply]
+  rw [hfun]
+  convert h using 1
+  rw [← heatKernelND_laplacian_eq n t ht x]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [smul_eq_mul, heatKernelND_apply,
+      ← Finset.mul_prod_erase Finset.univ (fun j => heatKernel1D t (x j)) (Finset.mem_univ i)]
+  ring
+
+/-- Differentiability of the `n`-dim kernel in time. -/
+lemma differentiableAt_heatKernelND_time (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (x : Fin n → ℝ) : DifferentiableAt ℝ (fun s => heatKernelND s x) t :=
+  (hasDerivAt_heatKernelND_time n t ht x).differentiableAt
+
+/-- The `n`-dim kernel is continuous in time on `(0, ∞)`. -/
+lemma heatKernelND_continuous_time (n : ℕ) (x : Fin n → ℝ) :
+    ContinuousOn (fun s => heatKernelND s x) (Set.Ioi 0) := by
+  simp only [heatKernelND_apply]
+  apply continuousOn_finset_prod
+  intro i _
+  intro s hs
+  exact (hasDerivAt_heatKernel1D_time hs (x i)).continuousAt.continuousWithinAt
+
+/-- **The `n`-dimensional heat kernel solves the `n`-dimensional heat equation**:
+`∂ₜKₙ = ΔKₙ` at every `(t, x)` with `t > 0`.  The time derivative
+`Kₙ·Σᵢ(xᵢ²/(4t²) − 1/(2t))` is exactly the sum of the second coordinate partials
+(the Laplacian), since each 1D factor solves the 1D heat equation. -/
+theorem heatKernelND_solves_heatEquation (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ) :
+    deriv (fun s => heatKernelND s x) t
+      = ∑ i : Fin n, deriv (fun r => heatKernelND t (Function.update x i r) * (-(r) / (2 * t))) (x i) := by
+  rw [(hasDerivAt_heatKernelND_time n t ht x).deriv]
+  rw [show (∑ i : Fin n, deriv (fun r => heatKernelND t (Function.update x i r) * (-(r) / (2 * t))) (x i))
+      = ∑ i : Fin n, heatKernelND t x * ((x i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) from
+    Finset.sum_congr rfl (fun i _ => (hasDerivAt_heatKernelND_coord_second n t ht x i).deriv)]
+  rw [heatKernelND_laplacian_eq n t ht x]
+
 end AnalyticPDE
 end RicciFlow
