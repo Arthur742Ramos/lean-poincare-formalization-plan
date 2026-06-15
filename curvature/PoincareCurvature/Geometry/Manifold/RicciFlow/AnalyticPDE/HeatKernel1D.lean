@@ -2143,5 +2143,54 @@ theorem heatKernelND_solves_heatEquation (n : ℕ) (t : ℝ) (ht : 0 < t) (x : F
     Finset.sum_congr rfl (fun i _ => (hasDerivAt_heatKernelND_coord_second n t ht x i).deriv)]
   rw [heatKernelND_laplacian_eq n t ht x]
 
+/-- The `n`-dim kernel time derivative, as a `deriv`. -/
+lemma deriv_heatKernelND_time_eq (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ) :
+    deriv (fun s => heatKernelND s x) t
+      = heatKernelND t x * (∑ i : Fin n, ((x i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) :=
+  (hasDerivAt_heatKernelND_time n t ht x).deriv
+
+/-- The `n`-dim kernel time derivative in closed form: `Kₙ·(|x|²/(4t²) − n/(2t))`. -/
+lemma deriv_heatKernelND_time_eq_closed (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ) :
+    deriv (fun s => heatKernelND s x) t
+      = heatKernelND t x * ((∑ i : Fin n, (x i) ^ 2) / (4 * t ^ 2) - n / (2 * t)) := by
+  rw [(hasDerivAt_heatKernelND_time n t ht x).deriv, sum_heatKernel_coeff n t x]
+
+/-- The 1D heat-equation coefficient `xᵢ²/(4t²) − 1/(2t)`, named for variable-coefficient
+operator work. -/
+noncomputable def laplacianCoeff (t : ℝ) (x : ℝ) : ℝ := x ^ 2 / (4 * t ^ 2) - 1 / (2 * t)
+
+/-- The 1D kernel second spatial derivative expressed through `laplacianCoeff`. -/
+lemma heatKernel1D_space_second_eq_coeff (t : ℝ) (ht : 0 < t) (x : ℝ) :
+    HasDerivAt (fun y => heatKernel1D t y * (-y / (2 * t)))
+      (heatKernel1D t x * laplacianCoeff t x) x := by
+  unfold laplacianCoeff
+  exact hasDerivAt_heatKernel1D_space_second ht x
+
+/-- The shifted `n`-dim kernel at a self-difference. -/
+lemma heatKernelND_sub_self_eq (n : ℕ) (t : ℝ) (x : Fin n → ℝ) :
+    heatKernelND t (x - x) = heatKernelND t (0 : Fin n → ℝ) := by
+  rw [sub_self]
+
+/-- The `n`-dim convolution integrand is a.e.-strongly-measurable. -/
+lemma aestronglyMeasurable_heatKernelND_sub_mul (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (f : (Fin n → ℝ) → ℝ) (x : Fin n → ℝ) (hfm : AEStronglyMeasurable f) :
+    AEStronglyMeasurable (fun y => heatKernelND t (x - y) * f y) volume :=
+  (aestronglyMeasurable_heatKernelND_sub (t := t) x).mul hfm
+
+/-- Positivity of a product of two 1D kernels. -/
+lemma heatKernel1D_mul_pos (t : ℝ) (ht : 0 < t) (x y : ℝ) :
+    0 < heatKernel1D t x * heatKernel1D t y :=
+  mul_pos (heatKernel1D_pos ht x) (heatKernel1D_pos ht y)
+
+/-- The 1-dimensional kernel reduces to the 1D kernel. -/
+lemma heatKernelND_one_eq (t : ℝ) (x : Fin 1 → ℝ) :
+    heatKernelND t x = heatKernel1D t (x 0) := by
+  rw [heatKernelND_apply, Fin.prod_univ_one]
+
+/-- The 2-dimensional kernel as a product of two 1D kernels. -/
+lemma heatKernelND_two_eq (t : ℝ) (x : Fin 2 → ℝ) :
+    heatKernelND t x = heatKernel1D t (x 0) * heatKernel1D t (x 1) := by
+  rw [heatKernelND_apply, Fin.prod_univ_two]
+
 end AnalyticPDE
 end RicciFlow
