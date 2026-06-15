@@ -2682,5 +2682,263 @@ theorem heatSemigroup1D_lipschitzWith_sqrt_rate (t : ℝ) (ht : 0 < t) (f : ℝ 
   rw [Real.dist_eq, Real.dist_eq, Real.coe_toNNReal _ (by positivity)]
   exact heatSemigroup1D_lipschitz_sqrt_rate t ht f C hfm hfb a b
 
+/-! ### Second-derivative `t^{-1}` smoothing rate (C² Schauder half)
+
+The heat kernel's second moment `∫ w²K(t,w) = 2t` yields the canonical C²
+parabolic smoothing estimate `‖∂ₓₓHₜf‖∞ ≤ ‖f‖∞/t` — the second half of the
+Schauder regularity scale, completing the C¹ gradient rate above. -/
+
+/-- Gaussian second moment: `∫ x²·exp(-b x²) dx = (1/2b)·√(π/b)` (FTC on
+`-(x/2b)·exp(-b x²)` + even symmetrization). -/
+lemma integral_sq_mul_exp_neg_mul_sq {b : ℝ} (hb : 0 < b) :
+    ∫ x : ℝ, x ^ 2 * Real.exp (-b * x ^ 2) = (1 / (2 * b)) * Real.sqrt (π / b) := by
+  have hb' : b ≠ 0 := ne_of_gt hb
+  set G : ℝ → ℝ := fun x => -(x / (2 * b)) * Real.exp (-b * x ^ 2) with hG
+  have hderiv : ∀ x ∈ Set.Ioi (0 : ℝ),
+      HasDerivAt G
+        (x ^ 2 * Real.exp (-b * x ^ 2) - 1 / (2 * b) * Real.exp (-b * x ^ 2)) x := by
+    intro x _
+    have h1 : HasDerivAt (fun x => -b * x ^ 2) (-b * (2 * x)) x := by
+      have := hasDerivAt_pow 2 x
+      simpa using this.const_mul (-b)
+    have h2 : HasDerivAt (fun x => Real.exp (-b * x ^ 2))
+        (Real.exp (-b * x ^ 2) * (-b * (2 * x))) x :=
+      (Real.hasDerivAt_exp _).comp x h1
+    have h3 : HasDerivAt (fun x : ℝ => -(x / (2 * b))) (-(1 / (2 * b))) x := by
+      have hid : HasDerivAt (fun x : ℝ => x / (2 * b)) (1 / (2 * b)) x := by
+        simpa using (hasDerivAt_id x).div_const (2 * b)
+      simpa using hid.neg
+    have hmul := h3.mul h2
+    have heqv :
+        (-(1 / (2 * b))) * Real.exp (-b * x ^ 2)
+          + (-(x / (2 * b))) * (Real.exp (-b * x ^ 2) * (-b * (2 * x)))
+        = x ^ 2 * Real.exp (-b * x ^ 2) - 1 / (2 * b) * Real.exp (-b * x ^ 2) := by
+      field_simp; ring
+    rw [heqv] at hmul
+    exact hmul
+  have hcont : ContinuousWithinAt G (Set.Ici (0 : ℝ)) 0 :=
+    (Continuous.continuousWithinAt (by rw [hG]; fun_prop))
+  have hintsq : Integrable (fun x : ℝ => x ^ 2 * Real.exp (-b * x ^ 2)) := by
+    simpa using integrable_rpow_mul_exp_neg_mul_sq hb (by norm_num : (-1 : ℝ) < 2)
+  have hintexp : Integrable (fun x : ℝ => Real.exp (-b * x ^ 2)) :=
+    integrable_exp_neg_mul_sq hb
+  have hintexp' : Integrable (fun x : ℝ => 1 / (2 * b) * Real.exp (-b * x ^ 2)) :=
+    hintexp.const_mul _
+  have hint : IntegrableOn
+      (fun x => x ^ 2 * Real.exp (-b * x ^ 2) - 1 / (2 * b) * Real.exp (-b * x ^ 2))
+      (Set.Ioi (0 : ℝ)) volume :=
+    (hintsq.sub hintexp').integrableOn
+  have hxexp : Filter.Tendsto (fun x : ℝ => x * Real.exp (-b * x ^ 2))
+      Filter.atTop (nhds 0) := by
+    have hlit := rpow_mul_exp_neg_mul_sq_isLittleO_exp_neg hb 1
+    have hz : Filter.Tendsto (fun x : ℝ => Real.exp (-(1 / 2) * x)) Filter.atTop (nhds 0) :=
+      Real.tendsto_exp_atBot.comp
+        (Filter.tendsto_id.const_mul_atTop_of_neg (by norm_num : -(1 / 2 : ℝ) < 0))
+    have hzero := hlit.tendsto_zero_of_tendsto hz
+    refine hzero.congr (fun x => ?_)
+    rw [Real.rpow_one]
+  have htends : Filter.Tendsto G Filter.atTop (nhds 0) := by
+    have := hxexp.const_mul (-(1 / (2 * b)))
+    rw [mul_zero] at this
+    refine this.congr (fun x => ?_)
+    rw [hG]; ring
+  have hres := MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv hint htends
+  have hG0 : G 0 = 0 := by rw [hG]; simp
+  rw [hG0, sub_zero] at hres
+  rw [integral_sub hintsq.integrableOn hintexp'.integrableOn, integral_const_mul,
+    integral_gaussian_Ioi] at hres
+  have hIoi : ∫ x in Set.Ioi (0 : ℝ), x ^ 2 * Real.exp (-b * x ^ 2)
+      = 1 / (2 * b) * (Real.sqrt (π / b) / 2) := by
+    linarith [hres]
+  have h := integral_comp_abs (f := fun t => t ^ 2 * Real.exp (-b * t ^ 2))
+  simp only [sq_abs] at h
+  rw [h, hIoi]
+  ring
+
+/-- The heat kernel's second moment (its variance): `∫ w²·K(t,w) dw = 2t`. -/
+theorem integral_sq_mul_heatKernel1D_eq {t : ℝ} (ht : 0 < t) :
+    (∫ w, w ^ 2 * heatKernel1D t w) = 2 * t := by
+  have h2t : (2 * t : ℝ) ≠ 0 := by positivity
+  set f : ℝ → ℝ := fun w => w * heatKernel1D t w with hf
+  set f' : ℝ → ℝ := fun w =>
+    heatKernel1D t w - (1 / (2 * t)) * (w ^ 2 * heatKernel1D t w) with hf'
+  have hderiv : ∀ w, HasDerivAt f (f' w) w := by
+    intro w
+    have hid : HasDerivAt (fun w : ℝ => w) 1 w := hasDerivAt_id w
+    have hK : HasDerivAt (fun w => heatKernel1D t w)
+        (heatKernel1D t w * (-w / (2 * t))) w := hasDerivAt_heatKernel1D_space ht w
+    have hprod := hid.mul hK
+    have hval : (1 : ℝ) * heatKernel1D t w + w * (heatKernel1D t w * (-w / (2 * t)))
+        = f' w := by
+      simp only [hf']
+      field_simp
+      ring
+    rw [hval] at hprod
+    exact hprod
+  have hf'int : Integrable f' := by
+    have hK : Integrable (fun w => heatKernel1D t w) := integrable_heatKernel1D ht
+    have hsq : Integrable (fun w => w ^ 2 * heatKernel1D t w) :=
+      integrable_sq_mul_heatKernel1D ht
+    exact hK.sub (hsq.const_mul (1 / (2 * t)))
+  have hfint : Integrable f := by
+    have habs := integrable_abs_mul_heatKernel1D ht
+    refine habs.mono' ?_ (Filter.Eventually.of_forall (fun w => ?_))
+    · exact (continuous_id.mul (continuous_heatKernel1D_space t)).aestronglyMeasurable
+    · rw [Real.norm_eq_abs, hf, abs_mul, abs_of_nonneg (heatKernel1D_nonneg ht w)]
+  have hzero := integral_eq_zero_of_hasDerivAt_of_integrable hderiv hf'int hfint
+  rw [show (∫ w, f' w)
+        = (∫ w, heatKernel1D t w) - (1 / (2 * t)) * (∫ w, w ^ 2 * heatKernel1D t w) from ?_] at hzero
+  · rw [integral_heatKernel1D ht] at hzero
+    have : (1 / (2 * t)) * (∫ w, w ^ 2 * heatKernel1D t w) = 1 := by linarith
+    field_simp at this
+    linarith [this]
+  · simp only [hf']
+    rw [integral_sub (integrable_heatKernel1D ht)
+      ((integrable_sq_mul_heatKernel1D ht).const_mul (1 / (2 * t)))]
+    rw [integral_const_mul]
+
+/-- Integrability of the shifted second-moment integrand. -/
+lemma integrable_sq_mul_heatKernel1D_sub {t : ℝ} (ht : 0 < t) (x : ℝ) :
+    Integrable (fun y => (x - y) ^ 2 * heatKernel1D t (x - y)) :=
+  (integrable_sq_mul_heatKernel1D ht).comp_sub_left x
+
+/-- Pointwise triangle bound: `|w²/(4t²) - 1/(2t)| ≤ w²/(4t²) + 1/(2t)`. -/
+lemma sq_sub_inv_le_add (t : ℝ) (ht : 0 < t) (w : ℝ) :
+    |w ^ 2 / (4 * t ^ 2) - 1 / (2 * t)| ≤ w ^ 2 / (4 * t ^ 2) + 1 / (2 * t) := by
+  have hA : (0 : ℝ) ≤ w ^ 2 / (4 * t ^ 2) := by positivity
+  have hB : (0 : ℝ) ≤ 1 / (2 * t) := by positivity
+  calc |w ^ 2 / (4 * t ^ 2) - 1 / (2 * t)|
+      ≤ |w ^ 2 / (4 * t ^ 2)| + |1 / (2 * t)| := abs_sub _ _
+    _ = w ^ 2 / (4 * t ^ 2) + 1 / (2 * t) := by rw [abs_of_nonneg hA, abs_of_nonneg hB]
+
+/-- The integral the C² rate collapses to: `∫ K(t,w)·(w²/(4t²)+1/(2t)) dw = 1/t`. -/
+lemma heatKernel1D_mul_sq_sub_inv_integral_eq {t : ℝ} (ht : 0 < t) :
+    (∫ w, heatKernel1D t w * (w ^ 2 / (4 * t ^ 2) + 1 / (2 * t))) = 1 / t := by
+  have htne : t ≠ 0 := ne_of_gt ht
+  have hmain_congr : (∫ w, heatKernel1D t w * (w ^ 2 / (4 * t ^ 2) + 1 / (2 * t)))
+      = (∫ w, ((1 / (4 * t ^ 2)) * (w ^ 2 * heatKernel1D t w)
+          + (1 / (2 * t)) * heatKernel1D t w)) := by
+    apply integral_congr_ae (Filter.Eventually.of_forall (fun w => ?_))
+    ring
+  rw [hmain_congr,
+    integral_add ((integrable_sq_mul_heatKernel1D ht).const_mul (1 / (4 * t ^ 2)))
+      ((integrable_heatKernel1D ht).const_mul (1 / (2 * t))),
+    integral_const_mul, integral_const_mul,
+    integral_sq_mul_heatKernel1D_eq ht, integral_heatKernel1D ht]
+  field_simp
+  ring
+
+/-- **The C² (second-derivative) parabolic smoothing rate** `‖∂ₓₓHₜf‖∞ ≤ ‖f‖∞/t`
+for bounded measurable `f`, completing the Schauder regularity scale. -/
+theorem heatSemigroup1D_deriv2_abs_le_inv_t (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) (x : ℝ) :
+    |deriv (deriv (fun z => heatSemigroup1D t f z)) x| ≤ C / t := by
+  have hCnn : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+  set g : ℝ → ℝ := fun w => heatKernel1D t w * (w ^ 2 / (4 * t ^ 2) + 1 / (2 * t)) with hg
+  have hgeven : ∀ w, g (-w) = g w := by
+    intro w; simp only [hg, heatKernel1D_neg]; ring
+  have hcv : (∫ y, heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) + 1 / (2 * t)))
+      = ∫ w, g w := by
+    have hfun : (fun y => heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) + 1 / (2 * t)))
+        = (fun y => g (y + -x)) := by
+      funext y
+      show heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) + 1 / (2 * t)) = g (y + -x)
+      have e1 : g (x - y) = heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) + 1 / (2 * t)) :=
+        rfl
+      rw [← e1, ← hgeven (x - y)]
+      congr 1; ring
+    rw [hfun, integral_add_right_eq_self g (-x)]
+  have hval : (∫ w, g w) = 1 / t := by
+    have hsplit : (fun w => g w)
+        = (fun w => (1 / (4 * t ^ 2)) * (w ^ 2 * heatKernel1D t w)
+            + (1 / (2 * t)) * heatKernel1D t w) := by
+      funext w; simp only [hg]; ring
+    rw [hsplit,
+      integral_add ((integrable_sq_mul_heatKernel1D ht).const_mul (1 / (4 * t ^ 2)))
+        ((integrable_heatKernel1D ht).const_mul (1 / (2 * t))),
+      integral_const_mul, integral_const_mul,
+      integral_sq_mul_heatKernel1D_eq ht, integral_heatKernel1D ht]
+    field_simp
+    ring
+  rw [deriv2_heatSemigroup1D_eq_integral ht x hfm hfb]
+  have hFint : Integrable
+      (fun y => heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * f y) :=
+    integrable_deriv2_heatKernel1D_space_sub_mul ht x hfm hfb
+  set Gbase : ℝ → ℝ := fun y => heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) + 1 / (2 * t))
+    with hGbase
+  have hGbaseint : Integrable Gbase := by
+    have hsq : Integrable (fun y => (x - y) ^ 2 * heatKernel1D t (x - y)) :=
+      (integrable_sq_mul_heatKernel1D ht).comp_sub_left x
+    have hK : Integrable (fun y => heatKernel1D t (x - y)) := integrable_heatKernel1D_sub ht x
+    have hcomb := (hsq.const_mul (1 / (4 * t ^ 2))).add (hK.const_mul (1 / (2 * t)))
+    refine hcomb.congr ?_
+    filter_upwards with y
+    simp only [Pi.add_apply, hGbase]; ring
+  have hGint : Integrable (fun y => Gbase y * C) := hGbaseint.mul_const C
+  calc |∫ y, heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * f y|
+      ≤ ∫ y, ‖heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * f y‖ := by
+        rw [← Real.norm_eq_abs]
+        exact norm_integral_le_integral_norm _
+    _ ≤ ∫ y, Gbase y * C := by
+        refine integral_mono hFint.norm hGint (fun y => ?_)
+        have hKnn : 0 ≤ heatKernel1D t (x - y) := heatKernel1D_nonneg ht (x - y)
+        have hfa : |f y| ≤ C := (Real.norm_eq_abs (f y) ▸ hfb y)
+        have hcoefabs :
+            |((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))|
+              ≤ (x - y) ^ 2 / (4 * t ^ 2) + 1 / (2 * t) := by
+          rw [abs_le]
+          constructor
+          · have : (0 : ℝ) ≤ (x - y) ^ 2 / (4 * t ^ 2) := by positivity
+            linarith
+          · have : (0 : ℝ) ≤ 1 / (2 * t) := by positivity
+            linarith
+        have hnorm :
+            ‖heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * f y‖
+              = heatKernel1D t (x - y) * |((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))| * |f y| := by
+          rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_of_nonneg hKnn]
+        rw [hnorm, hGbase]
+        have hstep1 :
+            heatKernel1D t (x - y) * |((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))| * |f y|
+              ≤ heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) + 1 / (2 * t)) * C := by
+          apply mul_le_mul _ hfa (abs_nonneg _)
+            (mul_nonneg hKnn (by positivity))
+          exact mul_le_mul_of_nonneg_left hcoefabs hKnn
+        exact hstep1
+    _ = C / t := by
+        rw [integral_mul_const, hcv, hval]
+        field_simp
+
+/-- Additivity of the Duhamel convolution in the source term (with integrability
+of the time-slices). -/
+lemma duhamelKernel1D_add (t : ℝ) (ht : 0 < t) (g h : ℝ → ℝ → ℝ) (Cg Ch : ℝ)
+    (hgm : ∀ s, AEStronglyMeasurable (g s)) (hgb : ∀ s y, ‖g s y‖ ≤ Cg)
+    (hhm : ∀ s, AEStronglyMeasurable (h s)) (hhb : ∀ s y, ‖h s y‖ ≤ Ch)
+    (x : ℝ)
+    (hgI : MeasureTheory.IntegrableOn
+      (fun s => heatSemigroup1D (t - s) (g s) x) (Set.Ioo 0 t))
+    (hhI : MeasureTheory.IntegrableOn
+      (fun s => heatSemigroup1D (t - s) (h s) x) (Set.Ioo 0 t)) :
+    duhamelKernel1D t (fun s y => g s y + h s y) x
+      = duhamelKernel1D t g x + duhamelKernel1D t h x := by
+  unfold duhamelKernel1D
+  have hcong :
+      (∫ s in Set.Ioo 0 t, heatSemigroup1D (t - s) (fun y => g s y + h s y) x)
+        = ∫ s in Set.Ioo 0 t,
+            (heatSemigroup1D (t - s) (g s) x + heatSemigroup1D (t - s) (h s) x) := by
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioo
+    intro s hs
+    have hts : 0 < t - s := by linarith [hs.2]
+    exact heatSemigroup1D_add hts x (hgm s)
+      (fun y => le_trans (hgb s y) (le_max_left Cg Ch)) (hhm s)
+      (fun y => le_trans (hhb s y) (le_max_right Cg Ch))
+  rw [hcong, MeasureTheory.integral_add hgI hhI]
+
+/-- Scalar homogeneity of the Duhamel convolution. -/
+lemma duhamelKernel1D_smul (t : ℝ) (c : ℝ) (g : ℝ → ℝ → ℝ) (x : ℝ) :
+    duhamelKernel1D t (fun s y => c * g s y) x = c * duhamelKernel1D t g x := by
+  unfold duhamelKernel1D
+  simp_rw [heatSemigroup1D_smul]
+  rw [integral_const_mul]
+
 end AnalyticPDE
 end RicciFlow
