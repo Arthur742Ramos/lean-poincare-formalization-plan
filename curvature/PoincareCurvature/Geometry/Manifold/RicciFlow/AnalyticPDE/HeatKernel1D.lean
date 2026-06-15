@@ -2219,5 +2219,66 @@ lemma weightedHeatOp_const_zero (a : ℝ) (c x : ℝ) :
   rw [weightedHeatOp, h]
   simp
 
+/-- Definitional unfolding of `weightedHeatOp`. -/
+lemma weightedHeatOp_eq (a : ℝ) (g : ℝ → ℝ) (x : ℝ) :
+    weightedHeatOp a g x = a * deriv (deriv g) x := rfl
+
+/-- Scalar homogeneity of the weighted operator (for `C¹` data with `C¹` derivative). -/
+lemma weightedHeatOp_smul (a c : ℝ) (g : ℝ → ℝ) (x : ℝ)
+    (hg : Differentiable ℝ g) (hg2 : Differentiable ℝ (deriv g)) :
+    weightedHeatOp a (fun y => c * g y) x = c * weightedHeatOp a g x := by
+  unfold weightedHeatOp
+  have h1 : deriv (fun z => c * g z) = fun y => c * deriv g y := by
+    ext y; exact deriv_const_mul c (hg y)
+  rw [h1]
+  have h2 : deriv (fun y => c * deriv g y) x = c * deriv (deriv g) x :=
+    deriv_const_mul c (hg2 x)
+  rw [h2]
+  ring
+
+/-- The weighted operator annihilates the zero function. -/
+lemma weightedHeatOp_zero_fun (a x : ℝ) :
+    weightedHeatOp a (fun _ => (0 : ℝ)) x = 0 :=
+  weightedHeatOp_const_zero a 0 x
+
+/-- A zero coefficient kills the weighted operator. -/
+lemma weightedHeatOp_zero_coeff (g : ℝ → ℝ) (x : ℝ) : weightedHeatOp 0 g x = 0 := by
+  simp [weightedHeatOp]
+
+/-- The 1D kernel's second spatial derivative, in `laplacianCoeff` form. -/
+lemma heatKernel1D_second_deriv_eq (t : ℝ) (ht : 0 < t) (x : ℝ) :
+    deriv (fun y => heatKernel1D t y * (-y / (2 * t))) x
+      = heatKernel1D t x * laplacianCoeff t x :=
+  (heatKernel1D_space_second_eq_coeff t ht x).deriv
+
+/-- `laplacianCoeff t x > 0` once `x² > 2t` (the coefficient is positive away from
+the origin). -/
+lemma laplacianCoeff_pos_large (t : ℝ) (ht : 0 < t) (x : ℝ)
+    (hx : 2 * t < x ^ 2) : 0 < laplacianCoeff t x := by
+  have h4t2 : (0 : ℝ) < 4 * t ^ 2 := by positivity
+  have hne : (4 * t ^ 2 : ℝ) ≠ 0 := ne_of_gt h4t2
+  have htne : (2 * t : ℝ) ≠ 0 := by positivity
+  have hrw : x ^ 2 / (4 * t ^ 2) - 1 / (2 * t) = (x ^ 2 - 2 * t) / (4 * t ^ 2) := by
+    field_simp
+    ring
+  rw [laplacianCoeff_eq, hrw]
+  apply div_pos _ h4t2
+  linarith [hx]
+
+/-- `laplacianCoeff t 0 = -1/(2t)`. -/
+lemma laplacianCoeff_zero (t : ℝ) (ht : 0 < t) : laplacianCoeff t 0 = -(1 / (2 * t)) := by
+  simp [laplacianCoeff]
+
+/-- **The Laplacian (second spatial derivative) of `Hₜf` as a kernel-weighted
+integral** through `laplacianCoeff`: `∂ₓₓHₜf(x) = ∫ K(t,x-y)·c(t,x-y)·f y`, where
+`c = laplacianCoeff`.  This is the representation that links the constant-coefficient
+heat semigroup to variable-coefficient operator solvability. -/
+lemma heatSemigroup1D_deriv2_integral_form (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ)
+    (C : ℝ) (x : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    deriv (deriv (fun z => heatSemigroup1D t f z)) x
+      = ∫ y, (heatKernel1D t (x - y) * laplacianCoeff t (x - y)) * f y := by
+  rw [deriv2_heatSemigroup1D_eq_integral ht x hfm hfb]
+  simp_rw [laplacianCoeff_eq]
+
 end AnalyticPDE
 end RicciFlow
