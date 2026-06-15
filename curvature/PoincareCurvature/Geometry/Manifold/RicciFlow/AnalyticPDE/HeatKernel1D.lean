@@ -2940,5 +2940,101 @@ lemma duhamelKernel1D_smul (t : ℝ) (c : ℝ) (g : ℝ → ℝ → ℝ) (x : �
   simp_rw [heatSemigroup1D_smul]
   rw [integral_const_mul]
 
+/-! ### Frozen-coefficient parametrix
+
+The fundamental solution of the constant-coefficient diffusion `∂ₜu = a·∂ₓₓu`
+(`a > 0`) is `Gₐ(t,x) = K(a·t, x)`. Its entire theory — mass, the diffusion
+equation `∂ₜGₐ = a·∂ₓₓGₐ`, the semigroup, and the inherited C¹/C² smoothing rates
+— follows from the standard heat kernel by the time-rescaling `t ↦ a·t`. This is
+the parametrix that frozen-coefficient perturbation builds variable-coefficient
+solvability on. -/
+
+/-- The frozen-coefficient heat kernel `Gₐ(t,x) = K(a·t, x)`, fundamental solution
+of `∂ₜu = a·∂ₓₓu`. -/
+noncomputable def frozenHeatKernel1D (a t x : ℝ) : ℝ := heatKernel1D (a * t) x
+
+lemma frozenHeatKernel1D_apply (a t x : ℝ) :
+    frozenHeatKernel1D a t x = heatKernel1D (a * t) x := rfl
+
+lemma frozenHeatKernel1D_pos {a t : ℝ} (ha : 0 < a) (ht : 0 < t) (x : ℝ) :
+    0 < frozenHeatKernel1D a t x := by
+  rw [frozenHeatKernel1D_apply]; exact heatKernel1D_pos (mul_pos ha ht) x
+
+lemma frozenHeatKernel1D_nonneg {a t : ℝ} (ha : 0 < a) (ht : 0 < t) (x : ℝ) :
+    0 ≤ frozenHeatKernel1D a t x := (frozenHeatKernel1D_pos ha ht x).le
+
+/-- The frozen kernel has unit mass. -/
+lemma integral_frozenHeatKernel1D {a t : ℝ} (ha : 0 < a) (ht : 0 < t) :
+    ∫ x, frozenHeatKernel1D a t x = 1 := by
+  simp only [frozenHeatKernel1D_apply]; exact integral_heatKernel1D (mul_pos ha ht)
+
+lemma integrable_frozenHeatKernel1D {a t : ℝ} (ha : 0 < a) (ht : 0 < t) :
+    Integrable (fun x => frozenHeatKernel1D a t x) := by
+  simp only [frozenHeatKernel1D_apply]; exact integrable_heatKernel1D (mul_pos ha ht)
+
+/-- Second spatial derivative of the frozen kernel. -/
+lemma hasDerivAt_frozenHeatKernel1D_space_second {a t : ℝ} (ha : 0 < a) (ht : 0 < t) (x : ℝ) :
+    HasDerivAt (deriv (fun z => frozenHeatKernel1D a t z))
+      (heatKernel1D (a * t) x * (x ^ 2 / (4 * (a * t) ^ 2) - 1 / (2 * (a * t)))) x := by
+  have hfun : (fun z => frozenHeatKernel1D a t z) = (fun z => heatKernel1D (a * t) z) := by
+    funext z; rw [frozenHeatKernel1D_apply]
+  have hderiv : (deriv fun z => heatKernel1D (a * t) z)
+      = fun y => heatKernel1D (a * t) y * (-y / (2 * (a * t))) := by
+    funext y
+    exact (hasDerivAt_heatKernel1D_space (mul_pos ha ht) y).deriv
+  rw [hfun, hderiv]
+  exact hasDerivAt_heatKernel1D_space_second (mul_pos ha ht) x
+
+/-- Time derivative of the frozen kernel: the chain rule picks up the coefficient
+`a`, encoding `∂ₜGₐ = a·∂ₓₓGₐ`. -/
+lemma hasDerivAt_frozenHeatKernel1D_time {a t : ℝ} (ha : 0 < a) (ht : 0 < t) (x : ℝ) :
+    HasDerivAt (fun s => frozenHeatKernel1D a s x)
+      (a * (heatKernel1D (a * t) x * (x ^ 2 / (4 * (a * t) ^ 2) - 1 / (2 * (a * t))))) t := by
+  have hinner : HasDerivAt (fun s : ℝ => a * s) a t := by
+    simpa using (hasDerivAt_id t).const_mul a
+  have houter := hasDerivAt_heatKernel1D_time (mul_pos ha ht) x
+  have hcomp := houter.comp t hinner
+  simpa [frozenHeatKernel1D, Function.comp, mul_comm] using hcomp
+
+/-- **The frozen kernel solves the `a`-diffusion equation** `∂ₜGₐ = a·∂ₓₓGₐ`. -/
+lemma frozenHeatKernel1D_heatEquation {a t : ℝ} (ha : 0 < a) (ht : 0 < t) (x : ℝ) :
+    deriv (fun s => frozenHeatKernel1D a s x) t
+      = a * deriv (deriv (fun z => frozenHeatKernel1D a t z)) x := by
+  rw [(hasDerivAt_frozenHeatKernel1D_time ha ht x).deriv,
+    (hasDerivAt_frozenHeatKernel1D_space_second ha ht x).deriv]
+
+/-- The frozen-coefficient semigroup `Gₐ,ₜf = H_{a·t}f`. -/
+noncomputable def frozenHeatSemigroup1D (a t : ℝ) (f : ℝ → ℝ) (x : ℝ) : ℝ :=
+  heatSemigroup1D (a * t) f x
+
+lemma frozenHeatSemigroup1D_apply (a t : ℝ) (f : ℝ → ℝ) (x : ℝ) :
+    frozenHeatSemigroup1D a t f x = heatSemigroup1D (a * t) f x := rfl
+
+lemma frozenHeatSemigroup1D_const {a t : ℝ} (ha : 0 < a) (ht : 0 < t) (c x : ℝ) :
+    frozenHeatSemigroup1D a t (fun _ => c) x = c := by
+  rw [frozenHeatSemigroup1D_apply]; exact heatSemigroup1D_const (mul_pos ha ht) c x
+
+lemma frozenHeatSemigroup1D_nonneg {a t : ℝ} (ha : 0 < a) (ht : 0 < t) {f : ℝ → ℝ}
+    (hf : ∀ y, 0 ≤ f y) (x : ℝ) : 0 ≤ frozenHeatSemigroup1D a t f x := by
+  rw [frozenHeatSemigroup1D_apply]
+  exact heatSemigroup1D_nonneg_of_nonneg (mul_pos ha ht) hf x
+
+/-- The frozen semigroup inherits the C¹ gradient-smoothing rate (`a`-rescaled). -/
+lemma frozenHeatSemigroup1D_lipschitz_rate {a t : ℝ} (ha : 0 < a) (ht : 0 < t)
+    (f : ℝ → ℝ) (C : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) (p q : ℝ) :
+    |frozenHeatSemigroup1D a t f p - frozenHeatSemigroup1D a t f q|
+      ≤ (C / Real.sqrt (π * (a * t))) * |p - q| := by
+  rw [frozenHeatSemigroup1D_apply, frozenHeatSemigroup1D_apply]
+  exact heatSemigroup1D_lipschitz_sqrt_rate (a * t) (mul_pos ha ht) f C hfm hfb p q
+
+/-- The frozen semigroup inherits the C² (second-derivative) smoothing rate. -/
+lemma frozenHeatSemigroup1D_deriv2_rate {a t : ℝ} (ha : 0 < a) (ht : 0 < t)
+    (f : ℝ → ℝ) (C : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) (x : ℝ) :
+    |deriv (deriv (fun z => frozenHeatSemigroup1D a t f z)) x| ≤ C / (a * t) := by
+  have hfe : (fun z => frozenHeatSemigroup1D a t f z) = (fun z => heatSemigroup1D (a * t) f z) := by
+    funext z; rw [frozenHeatSemigroup1D_apply]
+  rw [hfe]
+  exact heatSemigroup1D_deriv2_abs_le_inv_t (a * t) (mul_pos ha ht) f C hfm hfb x
+
 end AnalyticPDE
 end RicciFlow
