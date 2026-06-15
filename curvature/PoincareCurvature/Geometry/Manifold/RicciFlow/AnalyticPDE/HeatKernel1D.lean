@@ -2280,5 +2280,128 @@ lemma heatSemigroup1D_deriv2_integral_form (t : ℝ) (ht : 0 < t) (f : ℝ → �
   rw [deriv2_heatSemigroup1D_eq_integral ht x hfm hfb]
   simp_rw [laplacianCoeff_eq]
 
+/-! ### Chapman–Kolmogorov (semigroup composition)
+
+The convolution-semigroup identity `∫ K(t,a−z)·K(s,z−b) dz = K(t+s,a−b)` is the
+analytic heart of the heat semigroup's composition law `Hₜ ∘ Hₛ = H_{t+s}`, and
+the gateway to Duhamel's principle for the inhomogeneous equation — the engine of
+variable-coefficient and quasilinear (Ricci–DeTurck) perturbation theory. -/
+
+/-- Product of two shifted heat kernels, with the two Gaussian exponents combined. -/
+lemma heatKernel1D_mul_eq (t s : ℝ) (ht : 0 < t) (hs : 0 < s) (a b z : ℝ) :
+    heatKernel1D t (a - z) * heatKernel1D s (z - b)
+      = ((4 * π * t) ^ (-(1 : ℝ) / 2) * (4 * π * s) ^ (-(1 : ℝ) / 2))
+        * Real.exp (-((a - z) ^ 2 / (4 * t) + (z - b) ^ 2 / (4 * s))) := by
+  rw [heatKernel1D_apply, heatKernel1D_apply, mul_mul_mul_comm, ← Real.exp_add,
+    show -(a - z) ^ 2 / (4 * t) + -(z - b) ^ 2 / (4 * s)
+        = -((a - z) ^ 2 / (4 * t) + (z - b) ^ 2 / (4 * s)) by ring]
+
+/-- Completing the square in the combined exponent: the `z`-dependence is a single
+shifted square, with residual the `(a−b)` Gaussian at time `t+s`. -/
+lemma gaussian_exponent_complete_square (t s : ℝ) (ht : 0 < t) (hs : 0 < s)
+    (a b z : ℝ) :
+    (a - z) ^ 2 / (4 * t) + (z - b) ^ 2 / (4 * s)
+      = (t + s) / (4 * t * s) * (z - (s * a + t * b) / (t + s)) ^ 2
+        + (a - b) ^ 2 / (4 * (t + s)) := by
+  have hts : (0 : ℝ) < t + s := by linarith
+  have ht' : t ≠ 0 := ne_of_gt ht
+  have hs' : s ≠ 0 := ne_of_gt hs
+  have htsne : t + s ≠ 0 := ne_of_gt hts
+  field_simp
+  ring
+
+/-- A shifted/scaled 1D Gaussian integral in closed form (translation invariance
+plus `integral_gaussian`). -/
+lemma integral_gaussian_shift (c μ : ℝ) (hc : 0 < c) :
+    ∫ z : ℝ, Real.exp (-c * (z - μ) ^ 2) = Real.sqrt (π / c) := by
+  have h : (∫ z : ℝ, Real.exp (-c * (z - μ) ^ 2))
+      = ∫ w : ℝ, Real.exp (-c * w ^ 2) :=
+    integral_sub_right_eq_self (fun w => Real.exp (-c * w ^ 2)) μ
+  rw [h, integral_gaussian]
+
+/-- Joint integrability in `z` of the product of two shifted kernels (so the
+convolution integral is well-defined). -/
+lemma integrable_heatKernel1D_mul_pair (t s : ℝ) (ht : 0 < t) (hs : 0 < s)
+    (a b : ℝ) :
+    Integrable (fun z => heatKernel1D t (a - z) * heatKernel1D s (z - b)) := by
+  refine (integrable_heatKernel1D_sub ht a).mul_bdd (c := (4 * π * s) ^ (-(1 : ℝ) / 2)) ?_ ?_
+  · exact ((continuous_heatKernel1D_space s).comp
+      (continuous_id.sub continuous_const)).aestronglyMeasurable
+  · refine Filter.Eventually.of_forall (fun z => ?_)
+    rw [Real.norm_of_nonneg (heatKernel1D_nonneg hs _)]
+    exact heatKernel1D_le_prefactor hs _
+
+/-- Symmetry of the kernel's spatial argument under swapping the subtraction order. -/
+lemma heatKernel1D_sub_comm (t a z : ℝ) :
+    heatKernel1D t (a - z) = heatKernel1D t (z - a) := by
+  rw [← heatKernel1D_neg t (z - a)]
+  ring_nf
+
+/-- The prefactor-collapse identity: the two kernel prefactors times the Gaussian
+normalisation `√(π / c)` (with `c = (t+s)/(4ts)`) collapse to the single `t+s`
+prefactor. This is the normalisation miracle behind Chapman–Kolmogorov. -/
+lemma prefactor_product_eq (t s : ℝ) (ht : 0 < t) (hs : 0 < s) :
+    ((4 * π * t) ^ (-(1 : ℝ) / 2) * (4 * π * s) ^ (-(1 : ℝ) / 2))
+        * Real.sqrt (π / ((t + s) / (4 * t * s)))
+      = (4 * π * (t + s)) ^ (-(1 : ℝ) / 2) := by
+  have hpi : (0 : ℝ) < π := Real.pi_pos
+  have e : ∀ u : ℝ, 0 < u → u ^ (-(1 : ℝ) / 2) = (Real.sqrt u)⁻¹ := by
+    intro u hu
+    rw [show (-(1 : ℝ) / 2) = -(1 / 2) by ring, Real.rpow_neg hu.le, ← Real.sqrt_eq_rpow]
+  rw [e _ (by positivity), e _ (by positivity), e _ (by positivity)]
+  rw [← Real.sqrt_inv, ← Real.sqrt_inv, ← Real.sqrt_inv]
+  rw [← Real.sqrt_mul (by positivity), ← Real.sqrt_mul (by positivity)]
+  congr 1
+  have h1 : (4 : ℝ) * π * t ≠ 0 := by positivity
+  have h2 : (4 : ℝ) * π * s ≠ 0 := by positivity
+  have h3 : (4 : ℝ) * π * (t + s) ≠ 0 := by positivity
+  have h4 : t + s ≠ 0 := by positivity
+  have h5 : (4 : ℝ) * t * s ≠ 0 := by positivity
+  field_simp
+
+/-- Continuity in `z` of the kernel-product integrand. -/
+lemma continuous_heatKernel1D_pair_z (t s a b : ℝ) :
+    Continuous (fun z => heatKernel1D t (a - z) * heatKernel1D s (z - b)) :=
+  ((continuous_heatKernel1D_space t).comp (by fun_prop)).mul
+    ((continuous_heatKernel1D_space s).comp (by fun_prop))
+
+/-- **Chapman–Kolmogorov identity.** The convolution of the heat kernels at times
+`t` and `s` is the heat kernel at time `t+s`:
+`∫ K(t,a−z)·K(s,z−b) dz = K(t+s, a−b)`. -/
+theorem heatKernel1D_chapman_kolmogorov (t s : ℝ) (ht : 0 < t) (hs : 0 < s)
+    (a b : ℝ) :
+    ∫ z : ℝ, heatKernel1D t (a - z) * heatKernel1D s (z - b)
+      = heatKernel1D (t + s) (a - b) := by
+  have hts : (0 : ℝ) < t + s := by linarith
+  have hc : (0 : ℝ) < (t + s) / (4 * t * s) := by positivity
+  -- Rewrite the integrand: product of kernels → prefactor · exp(completed square).
+  have hint : (fun z => heatKernel1D t (a - z) * heatKernel1D s (z - b))
+      = fun z => ((4 * π * t) ^ (-(1 : ℝ) / 2) * (4 * π * s) ^ (-(1 : ℝ) / 2))
+          * (Real.exp (-((a - b) ^ 2 / (4 * (t + s))))
+            * Real.exp (-((t + s) / (4 * t * s))
+                * (z - (s * a + t * b) / (t + s)) ^ 2)) := by
+    funext z
+    rw [heatKernel1D_mul_eq t s ht hs a b z, gaussian_exponent_complete_square t s ht hs a b z]
+    rw [show -((t + s) / (4 * t * s) * (z - (s * a + t * b) / (t + s)) ^ 2
+            + (a - b) ^ 2 / (4 * (t + s)))
+        = -((a - b) ^ 2 / (4 * (t + s)))
+          + -((t + s) / (4 * t * s)) * (z - (s * a + t * b) / (t + s)) ^ 2 by ring,
+      Real.exp_add]
+  rw [hint]
+  -- Pull constants out of the integral; the remaining integral is a shifted Gaussian.
+  rw [integral_const_mul, integral_const_mul]
+  rw [integral_gaussian_shift ((t + s) / (4 * t * s)) ((s * a + t * b) / (t + s)) hc]
+  -- Reassemble into K(t+s, a-b).
+  rw [heatKernel1D_apply]
+  rw [show -(a - b) ^ 2 / (4 * (t + s)) = -((a - b) ^ 2 / (4 * (t + s))) by ring]
+  rw [← prefactor_product_eq t s ht hs]
+  ring
+
+/-- The heat semigroup preserves nonnegativity (clean maximum-principle corollary). -/
+lemma heatSemigroup1D_nonneg_of_nonneg {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ}
+    (hf : ∀ y, 0 ≤ f y) (x : ℝ) : 0 ≤ heatSemigroup1D t f x := by
+  rw [heatSemigroup1D]
+  exact integral_nonneg (fun y => mul_nonneg (heatKernel1D_nonneg ht (x - y)) (hf y))
+
 end AnalyticPDE
 end RicciFlow
