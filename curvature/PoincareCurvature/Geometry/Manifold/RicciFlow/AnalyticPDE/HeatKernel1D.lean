@@ -3036,5 +3036,159 @@ lemma frozenHeatSemigroup1D_deriv2_rate {a t : ℝ} (ha : 0 < a) (ht : 0 < t)
   rw [hfe]
   exact heatSemigroup1D_deriv2_abs_le_inv_t (a * t) (mul_pos ha ht) f C hfm hfb x
 
+/-! ### Hölder-gain estimates (the variable-coefficient iteration's load-bearing layer)
+
+The C² smoothing rate `‖∂ₓₓHₜf‖∞ ≤ C/t` has a non-integrable time singularity, so
+the variable-coefficient Duhamel iteration cannot run in C⁰. It runs instead in
+Hölder C^{0,α}, where the gain rate is `τ^{-1+α/2}` — time-integrable since
+`∫₀ᵗ s^{-1+α/2} ds = t^{α/2}/(α/2) < ∞`. These lemmas build that layer:
+interpolation (sup + Lipschitz ⇒ Hölder), the singular-kernel integrability, and
+the semigroup Hölder-seminorm bounds. -/
+
+/-- Interpolation core: `min p q ≤ p^{1-α}·q^α` for `p,q ≥ 0`, `α ∈ [0,1]`. -/
+lemma min_le_rpow_mul_rpow {p q : ℝ} (hp : 0 ≤ p) (hq : 0 ≤ q) {α : ℝ}
+    (hα0 : 0 ≤ α) (hα1 : α ≤ 1) : min p q ≤ p ^ (1 - α) * q ^ α := by
+  rcases le_total p q with hpq | hqp
+  · rw [min_eq_left hpq]
+    rcases eq_or_lt_of_le hp with hp0 | hp0
+    · subst hp0
+      exact mul_nonneg (Real.rpow_nonneg le_rfl _) (Real.rpow_nonneg hq _)
+    · have key : p ^ (1 - α) * p ^ α = p := by
+        rw [← Real.rpow_add hp0]
+        norm_num
+      calc p = p ^ (1 - α) * p ^ α := key.symm
+        _ ≤ p ^ (1 - α) * q ^ α :=
+            mul_le_mul_of_nonneg_left (Real.rpow_le_rpow hp hpq hα0)
+              (Real.rpow_nonneg hp _)
+  · rw [min_eq_right hqp]
+    rcases eq_or_lt_of_le hq with hq0 | hq0
+    · subst hq0
+      exact mul_nonneg (Real.rpow_nonneg hp _) (Real.rpow_nonneg le_rfl _)
+    · have key : q ^ (1 - α) * q ^ α = q := by
+        rw [← Real.rpow_add hq0]
+        norm_num
+      calc q = q ^ (1 - α) * q ^ α := key.symm
+        _ ≤ p ^ (1 - α) * q ^ α :=
+            mul_le_mul_of_nonneg_right (Real.rpow_le_rpow hq hqp (by linarith))
+              (Real.rpow_nonneg hq _)
+
+/-- Exponent facts for the singular Duhamel weight when `0 < α < 2`. -/
+lemma rpow_neg_one_add_half_facts {α : ℝ} (hα : 0 < α) (hα2 : α < 2) :
+    (-1 : ℝ) < -1 + α / 2 ∧ -1 + α / 2 < 0 ∧ 0 < α / 2 := by
+  refine ⟨?_, ?_, ?_⟩ <;> linarith
+
+/-- **Time-integrability of the singular Duhamel kernel** in closed form:
+`∫₀ᵗ s^{-1+α/2} ds = t^{α/2}/(α/2) < ∞` for `0 < α < 2`. This is what makes the
+Hölder iteration converge. -/
+lemma integral_Ioo_rpow_singular {t α : ℝ} (ht : 0 < t) (hα : 0 < α) (hα2 : α < 2) :
+    ∫ s in Set.Ioo 0 t, s ^ (-1 + α / 2) = t ^ (α / 2) / (α / 2) := by
+  have hr : (-1 : ℝ) < -1 + α / 2 := by linarith
+  have hpos : (0 : ℝ) < α / 2 := by linarith
+  have hconv : ∫ s in Set.Ioo (0 : ℝ) t, s ^ (-1 + α / 2)
+      = ∫ s in Set.Ioc (0 : ℝ) t, s ^ (-1 + α / 2) :=
+    MeasureTheory.setIntegral_congr_set Ioo_ae_eq_Ioc
+  rw [hconv, ← intervalIntegral.integral_of_le ht.le, integral_rpow (Or.inl hr)]
+  have he : (-1 + α / 2) + 1 = α / 2 := by ring
+  rw [he, Real.zero_rpow (ne_of_gt hpos), sub_zero]
+
+/-- The Duhamel time-weight `s ↦ (t-s)^{-1+α/2}` is integrable on `(0,t)`. -/
+lemma duhamel_time_weight_integrable {t α : ℝ} (ht : 0 < t) (hα : 0 < α) (hα2 : α < 2) :
+    MeasureTheory.IntegrableOn (fun s => (t - s) ^ (-1 + α / 2)) (Set.Ioo 0 t) := by
+  have hr : (-1 : ℝ) < -1 + α / 2 := by linarith
+  have hbase : IntervalIntegrable (fun x : ℝ => x ^ (-1 + α / 2)) volume 0 t :=
+    intervalIntegral.intervalIntegrable_rpow' hr
+  have hcomp := hbase.comp_sub_left t
+  simp only [sub_zero, sub_self] at hcomp
+  exact (intervalIntegrable_iff_integrableOn_Ioo_of_le ht.le).mp hcomp.symm
+
+/-- Monotonicity of the accumulated time-weight `t^{α/2}/(α/2)` on `[0,T]`. -/
+lemma rpow_half_le_of_le {t T α : ℝ} (hα : 0 < α) (ht : 0 < t) (htT : t ≤ T) :
+    t ^ (α / 2) / (α / 2) ≤ T ^ (α / 2) / (α / 2) := by
+  gcongr
+
+/-- **The heat-semigroup Hölder-seminorm bound** by interpolating the sup
+contraction and the C¹ Lipschitz rate:
+`|Hₜf a - Hₜf b| ≤ (2C)^{1-α}·(C/√(πt))^α·|a-b|^α`. -/
+lemma heatSemigroup1D_holder_seminorm_bound (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1)
+    (a b : ℝ) :
+    |heatSemigroup1D t f a - heatSemigroup1D t f b|
+      ≤ (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * |a - b| ^ α := by
+  set D := |heatSemigroup1D t f a - heatSemigroup1D t f b| with hD
+  have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+  have hfabs : ∀ y, |f y| ≤ C := fun y => by simpa [Real.norm_eq_abs] using hfb y
+  have hsupa : |heatSemigroup1D t f a| ≤ C := abs_heatSemigroup1D_le ht a hfabs
+  have hsupb : |heatSemigroup1D t f b| ≤ C := abs_heatSemigroup1D_le ht b hfabs
+  have hsup : D ≤ 2 * C := by
+    calc D ≤ |heatSemigroup1D t f a| + |heatSemigroup1D t f b| := abs_sub _ _
+      _ ≤ C + C := add_le_add hsupa hsupb
+      _ = 2 * C := by ring
+  have hlip : D ≤ (C / Real.sqrt (π * t)) * |a - b| :=
+    heatSemigroup1D_lipschitz_sqrt_rate t ht f C hfm hfb a b
+  have hsqrt_pos : (0 : ℝ) < Real.sqrt (π * t) := Real.sqrt_pos.mpr (by positivity)
+  have hp_nn : (0 : ℝ) ≤ 2 * C := by positivity
+  have hcoef_nn : (0 : ℝ) ≤ C / Real.sqrt (π * t) := by positivity
+  have habs_nn : (0 : ℝ) ≤ |a - b| := abs_nonneg _
+  have hq_nn : (0 : ℝ) ≤ (C / Real.sqrt (π * t)) * |a - b| := mul_nonneg hcoef_nn habs_nn
+  have hDmin : D ≤ min (2 * C) ((C / Real.sqrt (π * t)) * |a - b|) := le_min hsup hlip
+  have hstep := min_le_rpow_mul_rpow hp_nn hq_nn hα0 hα1
+  have hsplitq : ((C / Real.sqrt (π * t)) * |a - b|) ^ α
+      = (C / Real.sqrt (π * t)) ^ α * |a - b| ^ α :=
+    Real.mul_rpow hcoef_nn habs_nn
+  calc D ≤ min (2 * C) ((C / Real.sqrt (π * t)) * |a - b|) := hDmin
+    _ ≤ (2 * C) ^ (1 - α) * ((C / Real.sqrt (π * t)) * |a - b|) ^ α := hstep
+    _ = (2 * C) ^ (1 - α) * ((C / Real.sqrt (π * t)) ^ α * |a - b| ^ α) := by rw [hsplitq]
+    _ = (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * |a - b| ^ α := by ring
+
+/-- Data-stability of the semigroup in sup norm: `|Hₜf x - Hₜg x| ≤ ‖f-g‖∞`. -/
+lemma heatSemigroup1D_sub_holder (t : ℝ) (ht : 0 < t) (f g : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hgm : AEStronglyMeasurable g)
+    (hfgb : ∀ y, ‖f y - g y‖ ≤ C) (x : ℝ) :
+    |heatSemigroup1D t f x - heatSemigroup1D t g x| ≤ C := by
+  have hCnonneg : 0 ≤ C := le_trans (norm_nonneg _) (hfgb 0)
+  have hfgb' : ∀ y, |f y - g y| ≤ C := fun y => by
+    simpa [Real.norm_eq_abs] using hfgb y
+  have hd : Integrable (fun y : ℝ => heatKernel1D t (x - y) * (f y - g y)) :=
+    integrable_heatKernel1D_sub_mul ht x (hfm.sub hgm) hfgb
+  by_cases hF : Integrable (fun y : ℝ => heatKernel1D t (x - y) * f y)
+  · have hG : Integrable (fun y : ℝ => heatKernel1D t (x - y) * g y) := by
+      have h2 := hF.sub hd
+      refine h2.congr ?_
+      filter_upwards with y
+      simp only [Pi.sub_apply]
+      ring
+    have key : heatSemigroup1D t f x - heatSemigroup1D t g x
+        = heatSemigroup1D t (fun y => f y - g y) x := by
+      simp only [heatSemigroup1D]
+      rw [← integral_sub hF hG]
+      apply integral_congr_ae
+      filter_upwards with y
+      ring
+    rw [key]
+    exact abs_heatSemigroup1D_le ht x hfgb'
+  · have hGni : ¬ Integrable (fun y : ℝ => heatKernel1D t (x - y) * g y) := by
+      intro hG
+      apply hF
+      have h3 := hG.add hd
+      refine h3.congr ?_
+      filter_upwards with y
+      simp only [Pi.add_apply]
+      ring
+    have e1 : heatSemigroup1D t f x = 0 := by
+      simp only [heatSemigroup1D]; exact integral_undef hF
+    have e2 : heatSemigroup1D t g x = 0 := by
+      simp only [heatSemigroup1D]; exact integral_undef hGni
+    rw [e1, e2]
+    simpa using hCnonneg
+
+/-- The frozen-coefficient semigroup inherits the Hölder-seminorm bound. -/
+lemma frozenHeatSemigroup1D_holder_seminorm_bound {a t : ℝ} (ha : 0 < a) (ht : 0 < t)
+    (f : ℝ → ℝ) (C : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) (p q : ℝ) :
+    |frozenHeatSemigroup1D a t f p - frozenHeatSemigroup1D a t f q|
+      ≤ (2 * C) ^ (1 - α) * (C / Real.sqrt (π * (a * t))) ^ α * |p - q| ^ α := by
+  rw [frozenHeatSemigroup1D_apply, frozenHeatSemigroup1D_apply]
+  exact heatSemigroup1D_holder_seminorm_bound (a * t) (mul_pos ha ht) f C hfm hfb hα0 hα1 p q
+
 end AnalyticPDE
 end RicciFlow
