@@ -1950,5 +1950,86 @@ theorem heatSemigroupND_smul_le (n : ℕ) (t : ℝ) (ht : 0 < t)
   rw [heatSemigroupND_smul, abs_mul, abs_of_nonneg hc]
   exact mul_le_mul_of_nonneg_left (abs_heatSemigroupND_le ht x hf) hc
 
+/-- The factorization identity, reversed (product form to `Kₙ`). -/
+lemma heatKernelND_update_eq_self_factor (n : ℕ) (t : ℝ) (x : Fin n → ℝ) (i : Fin n) :
+    heatKernel1D t (x i) * ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j)
+      = heatKernelND t x :=
+  (heatKernelND_eq_update_mul n t x i).symm
+
+/-- The coordinate partial derivative of `Kₙ` at an arbitrary point `a` (not just `xᵢ`):
+`∂_r Kₙ(t, update x i r)|_a = K(t,a)·(-a/(2t))·∏_{j≠i}K(t,xⱼ)`. -/
+lemma hasDerivAt_heatKernelND_coord_at (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (x : Fin n → ℝ) (i : Fin n) (a : ℝ) :
+    HasDerivAt (fun r => heatKernelND t (Function.update x i r))
+      (heatKernel1D t a * (-(a) / (2 * t)) *
+        (∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j))) a := by
+  set P := (∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j)) with hP
+  have hfun : (fun r => heatKernelND t (Function.update x i r))
+      = (fun r => heatKernel1D t r * P) := by
+    funext r; exact heatKernelND_update_factor n t x i r
+  rw [hfun]
+  exact (hasDerivAt_heatKernel1D_space ht a).mul_const P
+
+/-- The coordinate partial derivative of `Kₙ`, as a `deriv`. -/
+lemma deriv_heatKernelND_coord (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n → ℝ) (i : Fin n) :
+    deriv (fun r => heatKernelND t (Function.update x i r)) (x i)
+      = heatKernelND t x * (-(x i) / (2 * t)) :=
+  (hasDerivAt_heatKernelND_coord n t ht x i).deriv
+
+/-- **The second coordinate partial derivative of the `n`-dimensional heat kernel**:
+differentiating `r ↦ ∂_{xᵢ}Kₙ(t, update x i r)` again at `r = xᵢ` gives
+`Kₙ(t,x)·(xᵢ²/(4t²) - 1/(2t))`.  Together with the first partials, this assembles
+the `n`-dimensional Laplacian of `Kₙ`. -/
+lemma hasDerivAt_heatKernelND_coord_second (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (x : Fin n → ℝ) (i : Fin n) :
+    HasDerivAt (fun r => heatKernelND t (Function.update x i r) * (-(r) / (2 * t)))
+      (heatKernelND t x * ((x i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) (x i) := by
+  set P := ∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j) with hP
+  have hfun : (fun r => heatKernelND t (Function.update x i r) * (-(r) / (2 * t)))
+      = (fun r => (heatKernel1D t r * (-(r) / (2 * t))) * P) := by
+    funext r
+    rw [heatKernelND_update_factor n t x i r, hP]
+    ring
+  rw [hfun]
+  convert (hasDerivAt_heatKernel1D_space_second ht (x i)).mul_const P using 1
+  rw [heatKernelND_eq_update_mul n t x i, hP]
+  ring
+
+/-- The `n`-dim kernel is Lipschitz along a single coordinate, with explicit constant. -/
+theorem heatKernelND_update_sub_abs_le (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (x : Fin n → ℝ) (i : Fin n) (r s : ℝ) :
+    |heatKernelND t (Function.update x i r) - heatKernelND t (Function.update x i s)| ≤
+      (((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ (n - 1) *
+        ((4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t))) * |r - s| := by
+  rw [heatKernelND_update_factor n t x i r, heatKernelND_update_factor n t x i s, ← sub_mul,
+    abs_mul]
+  rw [abs_of_nonneg (heatKernelND_prod_erase_nonneg n t ht x i)]
+  have hP : (∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j))
+      ≤ ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ (n - 1) := by
+    calc (∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j))
+        ≤ ∏ _j ∈ Finset.univ.erase i, (4 * π * t) ^ (-(1 : ℝ) / 2) :=
+          Finset.prod_le_prod (fun j _ => heatKernel1D_nonneg ht (x j))
+            (fun j _ => heatKernel1D_le_prefactor ht (x j))
+      _ = ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ (n - 1) := by
+          rw [Finset.prod_const, Finset.card_erase_of_mem (Finset.mem_univ i), Finset.card_univ,
+            Fintype.card_fin]
+  have hK : |heatKernel1D t r - heatKernel1D t s|
+      ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t) * |r - s| :=
+    heatKernel1D_sub_abs_le t ht r s
+  calc |heatKernel1D t r - heatKernel1D t s|
+        * (∏ j ∈ Finset.univ.erase i, heatKernel1D t (x j))
+      ≤ ((4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t) * |r - s|) *
+          ((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ (n - 1) :=
+        mul_le_mul hK hP (heatKernelND_prod_erase_nonneg n t ht x i)
+          (le_trans (abs_nonneg _) hK)
+    _ = (((4 * π * t) ^ (-(1 : ℝ) / 2)) ^ (n - 1) *
+          ((4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t))) * |r - s| := by ring
+
+/-- The `n`-dim semigroup annihilates the zero constant. -/
+theorem heatSemigroupND_zero_const (n : ℕ) (t : ℝ) (ht : 0 < t)
+    (x : Fin n → ℝ) :
+    heatSemigroupND t (fun _ => (0 : ℝ)) x = 0 := by
+  simpa using heatSemigroupND_const ht 0 x
+
 end AnalyticPDE
 end RicciFlow
