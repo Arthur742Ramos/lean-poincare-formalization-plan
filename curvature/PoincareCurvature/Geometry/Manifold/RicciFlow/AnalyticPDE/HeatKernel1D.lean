@@ -1557,5 +1557,61 @@ theorem exists_lipschitz_heatSemigroup1D (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ
     (Set.mem_univ b) (Set.mem_univ a)
   simpa [Real.norm_eq_abs] using hmvt
 
+/-- The `L¹` norm of the kernel's spatial derivative, as a constant times the first
+moment. -/
+lemma integral_abs_deriv_heatKernel1D {t : ℝ} (ht : 0 < t) :
+    (∫ y, |heatKernel1D t y * (-y / (2 * t))|)
+      = (1 / (2 * t)) * ∫ y, |y| * heatKernel1D t y := by
+  rw [show (1 / (2 * t)) * (∫ y, |y| * heatKernel1D t y)
+        = ∫ y, (1 / (2 * t)) * (|y| * heatKernel1D t y) from
+      (integral_const_mul _ _).symm]
+  apply integral_congr_ae
+  filter_upwards with y
+  rw [abs_mul, abs_of_nonneg (heatKernel1D_nonneg ht y), abs_div, abs_neg,
+    abs_of_pos (show (0 : ℝ) < 2 * t by positivity)]
+  ring
+
+/-- **Explicit-constant Hölder/Lipschitz bound for the kernel in space**:
+`|K(t, a) - K(t, b)| ≤ ((4πt)^(-1/2)·√t/(2t))·|a - b|`.  The constant is exactly
+the sup of `|∂ₓK|`.  This is the `C^{0,1}` (Lipschitz) modulus that the parabolic
+Schauder `C^{0,α}` estimates are built on. -/
+theorem heatKernel1D_sub_abs_le (t : ℝ) (ht : 0 < t) (a b : ℝ) :
+    |heatKernel1D t a - heatKernel1D t b| ≤
+      ((4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t)) * |a - b| := by
+  have hdiff : Differentiable ℝ (fun z => heatKernel1D t z) :=
+    differentiable_heatKernel1D_space ht
+  have hbound : ∀ y ∈ (Set.univ : Set ℝ),
+      ‖deriv (fun z => heatKernel1D t z) y‖ ≤
+        (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t) := by
+    intro y _
+    rw [Real.norm_eq_abs]
+    exact norm_deriv_heatKernel1D_space_le t ht y
+  have h := Convex.norm_image_sub_le_of_norm_deriv_le
+    (fun x _ => hdiff x) hbound convex_univ
+    (Set.mem_univ b) (Set.mem_univ a)
+  simpa [Real.norm_eq_abs] using h
+
+/-- The heat semigroup evaluated at `0`. -/
+lemma heatSemigroup1D_apply_zero (t : ℝ) (f : ℝ → ℝ) :
+    heatSemigroup1D t f 0 = ∫ y, heatKernel1D t (-y) * f y := by
+  simp only [heatSemigroup1D, zero_sub]
+
+/-- Explicit form of the kernel's spatial derivative. -/
+lemma deriv_heatKernel1D_space_eq (t : ℝ) (ht : 0 < t) (x : ℝ) :
+    deriv (fun y => heatKernel1D t y) x
+      = (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (-x ^ 2 / (4 * t)) * (-x / (2 * t)) := by
+  rw [deriv_heatKernel1D_space ht x, heatKernel1D_apply]
+
+/-- The kernel at the centre equals the prefactor. -/
+lemma heatKernel1D_zero_eq_prefactor (t : ℝ) :
+    heatKernel1D t 0 = (4 * π * t) ^ (-(1 : ℝ) / 2) := by
+  rw [heatKernel1D_apply]; simp
+
+/-- The heat semigroup annihilates a pointwise-zero function. -/
+theorem heatSemigroup1D_eq_zero_of_eq_zero (t : ℝ) (f : ℝ → ℝ) (x : ℝ)
+    (hf : ∀ y, f y = 0) : heatSemigroup1D t f x = 0 := by
+  unfold heatSemigroup1D
+  simp only [hf, mul_zero, integral_zero]
+
 end AnalyticPDE
 end RicciFlow
