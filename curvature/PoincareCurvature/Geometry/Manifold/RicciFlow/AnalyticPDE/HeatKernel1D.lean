@@ -1670,5 +1670,58 @@ theorem heatSemigroupND_eq_zero_of_eq_zero (n : ℕ) (t : ℝ)
   unfold heatSemigroupND
   simp only [hf, mul_zero, integral_zero]
 
+/-- **The heat semigroup as a `LipschitzWith` map** (mathlib API) for bounded data. -/
+theorem lipschitzWith_heatSemigroup1D (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    ∃ K : NNReal, LipschitzWith K (fun x => heatSemigroup1D t f x) := by
+  obtain ⟨L, hL0, hLip⟩ := exists_lipschitz_heatSemigroup1D t ht f C hfm hfb
+  refine ⟨L.toNNReal, ?_⟩
+  refine LipschitzWith.of_dist_le_mul (fun a b => ?_)
+  rw [Real.dist_eq, Real.dist_eq, Real.coe_toNNReal _ hL0]
+  exact hLip a b
+
+/-- The heat kernel is uniformly continuous in space. -/
+theorem uniformContinuous_heatKernel1D_space (t : ℝ) (ht : 0 < t) :
+    UniformContinuous (fun x => heatKernel1D t x) :=
+  (lipschitzWith_heatKernel1D t ht).uniformContinuous
+
+/-- The semigroup output lies in `[-C, C]` for `|f| ≤ C`. -/
+theorem heatSemigroup1D_mem_Icc_neg_pos (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ)
+    (C : ℝ) (x : ℝ) (hf : ∀ y, |f y| ≤ C) :
+    heatSemigroup1D t f x ∈ Set.Icc (-C) C :=
+  Set.mem_Icc.mpr ⟨heatSemigroup1D_neg_le t ht f C x hf,
+    le_of_abs_le (abs_heatSemigroup1D_le ht x hf)⟩
+
+/-- **Joint continuity of the heat kernel** on `(0, ∞) × ℝ`. -/
+lemma continuousOn_heatKernel1D_prod :
+    ContinuousOn (fun p : ℝ × ℝ => heatKernel1D p.1 p.2) (Set.Ioi 0 ×ˢ Set.univ) := by
+  simp only [heatKernel1D_apply]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.rpow_const
+    · exact (continuous_const.mul continuous_fst).continuousOn
+    · intro p hp
+      left
+      have : 0 < 4 * π * p.1 := by
+        have : 0 < p.1 := hp.1
+        positivity
+      exact ne_of_gt this
+  · apply Real.continuous_exp.comp_continuousOn
+    apply ContinuousOn.div
+    · exact ((continuous_snd.pow 2).neg).continuousOn
+    · exact (continuous_const.mul continuous_fst).continuousOn
+    · intro p hp
+      have : 0 < p.1 := hp.1
+      positivity
+
+/-- **Shifted-kernel spatial Hölder bound** (core of convolution Hölder estimates):
+`|K(t, x-y) - K(t, x'-y)| ≤ Lip · |x - x'|`, uniformly in `y`. -/
+theorem heatKernel1D_sub_shift_abs_le (t : ℝ) (ht : 0 < t) (x x' y : ℝ) :
+    |heatKernel1D t (x - y) - heatKernel1D t (x' - y)| ≤
+      ((4 * π * t) ^ (-(1 : ℝ) / 2) * Real.sqrt t / (2 * t)) * |x - x'| := by
+  have h := heatKernel1D_sub_abs_le t ht (x - y) (x' - y)
+  have he : (x - y) - (x' - y) = x - x' := by ring
+  rw [he] at h
+  exact h
+
 end AnalyticPDE
 end RicciFlow
