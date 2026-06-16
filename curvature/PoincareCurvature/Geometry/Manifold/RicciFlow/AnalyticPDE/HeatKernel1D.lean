@@ -7,6 +7,8 @@ public import Mathlib.Analysis.Calculus.ParametricIntegral
 public import Mathlib.Topology.MetricSpace.Contracting
 public import Mathlib.Topology.ContinuousMap.Bounded.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+public import Mathlib.Analysis.ODE.PicardLindelof
+public import Mathlib.Analysis.ODE.Gronwall
 
 /-!
 # The one-dimensional Euclidean heat kernel
@@ -32,8 +34,8 @@ theory.
 
 @[expose] public noncomputable section
 
-open Real MeasureTheory
-open scoped Real ENNReal NNReal
+open Real MeasureTheory Metric
+open scoped Real ENNReal NNReal Topology
 
 namespace RicciFlow
 namespace AnalyticPDE
@@ -4374,6 +4376,140 @@ theorem vector_second_order_iterate_tendsto (n : ℕ)
     vector_contractingWith_of_pointwise n h0 h1 _ hpt
   exact ⟨ContractingWith.fixedPoint _ hΦ, hΦ.fixedPoint_isFixedPt,
     hΦ.tendsto_iterate_fixedPoint w0⟩
+
+/-! ### Picard–Lindelöf bridge to mathlib ODE existence
+
+The Ricci–DeTurck chart's `picard` field is a mathlib `IsPicardLindelof` hypothesis.
+These lemmas show that a globally bounded + Lipschitz (time-independent) vector
+field is `IsPicardLindelof` and hence generates a genuine ODE solution
+(`HasDerivWithinAt α (g (α t))`), even on the infinite-dimensional space `ℝ →ᵇ ℝ`.
+This is the existence mechanism the chart encodes — satisfiable precisely when the
+operator is bounded-Lipschitz, i.e. under the `w := ∂ₓₓu` (top-derivative)
+reformulation, NOT for the unbounded C⁰ second-order operator. -/
+
+/-- A constant vector field is `IsPicardLindelof` — the simplest genuine witness. -/
+lemma isPicardLindelof_const {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (c : E) (x0 : E) (T : ℝ) (hT : 0 < T) (L : ℝ≥0) (hL : ‖c‖ ≤ L) :
+    IsPicardLindelof (fun _ _ => c) (tmin := 0) (tmax := T)
+      ⟨0, by constructor <;> [rfl; exact hT.le]⟩ x0 (L * T.toNNReal + 1) 0 L 0 := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro t _
+    exact (LipschitzWith.const c).lipschitzOnWith
+  · intro x _
+    exact continuousOn_const
+  · intro t _ x _
+    exact hL
+  · push_cast [Real.coe_toNNReal']
+    simp only [sub_zero, max_eq_left hT.le]
+    have : (0 : ℝ) ≤ (L : ℝ) * T := by positivity
+    linarith
+
+/-- **The Picard–Lindelöf bridge**: a globally bounded + Lipschitz time-independent
+vector field is `IsPicardLindelof`. -/
+lemma isPicardLindelof_of_bounded_lipschitz {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : E → E) (x0 : E) (T : ℝ) (hT : 0 < T) (L K : ℝ≥0)
+    (hbound : ∀ x, ‖g x‖ ≤ L) (hlip : LipschitzWith K g) :
+    IsPicardLindelof (fun _ x => g x) (tmin := 0) (tmax := T)
+      ⟨0, by constructor <;> [rfl; exact hT.le]⟩ x0 (L * T.toNNReal + 1) 0 L K := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro t _
+    exact hlip.lipschitzOnWith
+  · intro x _
+    exact continuousOn_const
+  · intro t _ x _
+    exact hbound x
+  · have ht0 : ((⟨0, ⟨le_rfl, hT.le⟩⟩ : Set.Icc (0 : ℝ) T) : ℝ) = 0 := rfl
+    rw [ht0]
+    simp only [sub_zero, max_eq_left hT.le]
+    push_cast [Real.coe_toNNReal T hT.le]
+    linarith
+
+/-- **Existence of an ODE solution** for a bounded + Lipschitz field on a complete
+normed space, via the bridge + mathlib's Picard–Lindelöf existence. -/
+lemma bounded_lipschitz_evolution_exists {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [CompleteSpace E]
+    (g : E → E) (x0 : E) {T : ℝ} (hT : 0 < T) {L K : ℝ≥0}
+    (hbound : ∀ x, ‖g x‖ ≤ (L : ℝ)) (hlip : LipschitzWith K g) :
+    ∃ α : ℝ → E, α 0 = x0 ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (g (α t)) (Set.Icc 0 T) t) := by
+  have ht0 : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_refl _, le_of_lt hT⟩
+  set t₀ : Set.Icc (0 : ℝ) T := ⟨0, ht0⟩ with ht₀
+  set a : ℝ≥0 := L * T.toNNReal + 1 with ha
+  have hpl : IsPicardLindelof (fun (_ : ℝ) (x : E) => g x) t₀ x0 a 0 L K := by
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · intro t _
+      exact hlip.lipschitzOnWith
+    · intro x _
+      exact continuousOn_const
+    · intro t _ x _
+      exact hbound x
+    · show (L : ℝ) * max (T - (t₀ : ℝ)) ((t₀ : ℝ) - 0) ≤ (a : ℝ) - 0
+      have ht₀v : (t₀ : ℝ) = 0 := rfl
+      have hTn : (T.toNNReal : ℝ) = T := Real.coe_toNNReal T (le_of_lt hT)
+      rw [ht₀v, ha]
+      push_cast [hTn]
+      have hmax : max (T - 0) ((0 : ℝ) - 0) = T := by simp; linarith
+      rw [hmax]
+      nlinarith
+  obtain ⟨α, hα0, hαderiv⟩ := hpl.exists_eq_forall_mem_Icc_hasDerivWithinAt₀
+  refine ⟨α, ?_, ?_⟩
+  · simpa [ht₀] using hα0
+  · intro t ht
+    exact hαderiv t ht
+
+/-- A BCF operator with a uniform pointwise contraction bound is `LipschitzWith`. -/
+lemma lipschitzWith_heatSemigroup_zeroth_bcf {K : ℝ≥0}
+    (Ψ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (h : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |Ψ f x - Ψ g x| ≤ (K : ℝ) * dist f g) :
+    LipschitzWith K Ψ :=
+  bcf_lipschitz_of_pointwise Ψ h
+
+/-- A BCF operator with a uniform pointwise sup bound has bounded operator norm. -/
+lemma bcf_operator_bounded {L : ℝ} (hL : 0 ≤ L)
+    (Ψ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (h : ∀ f : BoundedContinuousFunction ℝ ℝ, ∀ x, |Ψ f x| ≤ L) :
+    ∀ f, ‖Ψ f‖ ≤ L := by
+  intro f
+  rw [BoundedContinuousFunction.norm_le hL]
+  intro x
+  rw [Real.norm_eq_abs]
+  exact h f x
+
+/-- **Capstone**: a bounded + Lipschitz operator on the infinite-dimensional space
+`ℝ →ᵇ ℝ` generates a genuine time-evolution ODE solution — the exact existence
+mechanism the Ricci–DeTurck chart's `picard` field encodes, realized on a real
+function space via the bounded-Lipschitz reformulation. -/
+lemma exists_bcf_evolution (Ψ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (x0 : BoundedContinuousFunction ℝ ℝ) (T : ℝ) (hT : 0 < T) (L K : ℝ≥0)
+    (hbound : ∀ f, ‖Ψ f‖ ≤ (L : ℝ)) (hlip : LipschitzWith K Ψ) :
+    ∃ α : ℝ → BoundedContinuousFunction ℝ ℝ, α 0 = x0 ∧
+      ∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (Ψ (α t)) (Set.Icc 0 T) t :=
+  bounded_lipschitz_evolution_exists Ψ x0 hT hbound hlip
+
+/-- **Uniqueness** of the ODE solution for a Lipschitz field (Gronwall). -/
+lemma ode_solution_unique {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : E → E) (K : ℝ≥0) (hlip : LipschitzWith K g) (T : ℝ)
+    (α β : ℝ → E) (hα0 : α 0 = β 0)
+    (hα : ∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (g (α t)) (Set.Icc 0 T) t)
+    (hβ : ∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt β (g (β t)) (Set.Icc 0 T) t)
+    (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) T) :
+    α t = β t := by
+  have key : Set.EqOn α β (Set.Icc 0 T) := by
+    refine ODE_solution_unique (v := fun _ : ℝ => g) (K := K) (a := 0) (b := T)
+      (fun _ => hlip) ?_ ?_ ?_ ?_ hα0
+    · exact HasDerivWithinAt.continuousOn (fun s hs => hα s hs)
+    · intro s hs
+      have hsIcc : s ∈ Set.Icc (0 : ℝ) T := Set.Ico_subset_Icc_self hs
+      refine (hα s hsIcc).mono_of_mem_nhdsWithin ?_
+      exact Filter.mem_of_superset (Ico_mem_nhdsGE hs.2)
+        (fun x hx => ⟨le_trans hs.1 hx.1, le_of_lt hx.2⟩)
+    · exact HasDerivWithinAt.continuousOn (fun s hs => hβ s hs)
+    · intro s hs
+      have hsIcc : s ∈ Set.Icc (0 : ℝ) T := Set.Ico_subset_Icc_self hs
+      refine (hβ s hsIcc).mono_of_mem_nhdsWithin ?_
+      exact Filter.mem_of_superset (Ico_mem_nhdsGE hs.2)
+        (fun x hx => ⟨le_trans hs.1 hx.1, le_of_lt hx.2⟩)
+  exact key ht
 
 end AnalyticPDE
 end RicciFlow
