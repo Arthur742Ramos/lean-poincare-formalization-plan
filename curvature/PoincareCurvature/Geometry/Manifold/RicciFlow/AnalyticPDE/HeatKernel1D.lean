@@ -6,6 +6,7 @@ public import Mathlib.MeasureTheory.Integral.Pi
 public import Mathlib.Analysis.Calculus.ParametricIntegral
 public import Mathlib.Topology.MetricSpace.Contracting
 public import Mathlib.Topology.ContinuousMap.Bounded.Basic
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # The one-dimensional Euclidean heat kernel
@@ -4184,6 +4185,91 @@ theorem second_order_existence_with_convergence (β : BoundedContinuousFunction 
       Filter.Tendsto (fun n => (fun w => β + S0 w)^[n] w0) Filter.atTop (nhds z) := by
   obtain ⟨h0, h1⟩ := second_order_contraction_factor M t hM ht hsmall
   exact affine_iterate_tendsto_fixedPoint β h0 h1 S0 hS0 w0
+
+/-! ### Antiderivative recovery (fixed point ⇒ classical solution)
+
+The second-order fixed point lives as `w = ∂ₓₓu` (a continuous function). To recover
+a classical twice-differentiable solution `u` we antidifferentiate `w` twice through
+the fundamental theorem of calculus: `antideriv w` is C¹ with derivative `w`, and
+`doubleAntideriv w` is C² with `∂ₓₓ(doubleAntideriv w) = w`. Adding an affine
+function sets arbitrary initial data without changing the second derivative. -/
+
+/-- The antiderivative `∫₀ˣ w`. -/
+noncomputable def antideriv (w : ℝ → ℝ) (x : ℝ) : ℝ := ∫ s in (0 : ℝ)..x, w s
+
+/-- FTC: `antideriv w` has derivative `w` at every point (for continuous `w`). -/
+lemma hasDerivAt_antideriv (w : ℝ → ℝ) (hw : Continuous w) (x : ℝ) :
+    HasDerivAt (antideriv w) (w x) x := by
+  unfold antideriv
+  exact intervalIntegral.integral_hasDerivAt_right
+    (hw.intervalIntegrable 0 x)
+    hw.stronglyMeasurable.stronglyMeasurableAtFilter
+    hw.continuousAt
+
+lemma deriv_antideriv (w : ℝ → ℝ) (hw : Continuous w) (x : ℝ) :
+    deriv (antideriv w) x = w x := (hasDerivAt_antideriv w hw x).deriv
+
+/-- The antiderivative of a continuous function is continuous. -/
+lemma continuous_antideriv (w : ℝ → ℝ) (hw : Continuous w) : Continuous (antideriv w) := by
+  have hdiff : Differentiable ℝ (antideriv w) :=
+    fun x => (hasDerivAt_antideriv w hw x).differentiableAt
+  exact hdiff.continuous
+
+/-- The double antiderivative `∫₀ˣ ∫₀ˢ w`. -/
+noncomputable def doubleAntideriv (w : ℝ → ℝ) (x : ℝ) : ℝ := antideriv (antideriv w) x
+
+lemma antideriv_zero (w : ℝ → ℝ) : antideriv w 0 = 0 := by
+  unfold antideriv; simp
+
+lemma doubleAntideriv_zero (w : ℝ → ℝ) : doubleAntideriv w 0 = 0 := by
+  unfold doubleAntideriv antideriv; simp
+
+/-- The double antiderivative's first derivative is the single antiderivative. -/
+lemma deriv_doubleAntideriv (w : ℝ → ℝ) (hw : Continuous w) (x : ℝ) :
+    deriv (doubleAntideriv w) x = antideriv w x := by
+  unfold doubleAntideriv
+  exact (hasDerivAt_antideriv (antideriv w) (continuous_antideriv w hw) x).deriv
+
+/-- **The recovery**: `∂ₓₓ(doubleAntideriv w) = w` — the double antiderivative is a
+C² function whose second derivative is the original continuous function. -/
+lemma deriv_deriv_doubleAntideriv (w : ℝ → ℝ) (hw : Continuous w) (x : ℝ) :
+    deriv (deriv (doubleAntideriv w)) x = w x := by
+  have hfun : deriv (doubleAntideriv w) = antideriv w :=
+    funext (fun y => deriv_doubleAntideriv w hw y)
+  rw [hfun]
+  exact deriv_antideriv w hw x
+
+/-- The second derivative of an affine function is zero. -/
+lemma deriv_deriv_affine (p q : ℝ) (x : ℝ) : deriv (deriv (fun z => p * z + q)) x = 0 := by
+  have h1 : deriv (fun z => p * z + q) = fun _ => p := by
+    funext y
+    exact (by simpa using ((hasDerivAt_id y).const_mul p).add_const q :
+      HasDerivAt (fun z => p * z + q) p y).deriv
+  rw [h1]; simp
+
+/-- **Classical-solution recovery (homogeneous data)**: any continuous `w` is the
+second derivative of an explicit C² function vanishing at `0`. -/
+lemma exists_c2_with_second_deriv (w : ℝ → ℝ) (hw : Continuous w) :
+    ∃ u : ℝ → ℝ, (∀ x, deriv (deriv u) x = w x) ∧ u 0 = 0 :=
+  ⟨doubleAntideriv w, fun x => deriv_deriv_doubleAntideriv w hw x, doubleAntideriv_zero w⟩
+
+/-- **Classical-solution recovery with initial data**: for any continuous `w` and
+initial values `(u0, v0)`, there is a C² function `u` with `∂ₓₓu = w` and `u 0 = u0`. -/
+lemma exists_c2_with_initial_data (w : ℝ → ℝ) (hw : Continuous w) (u0 v0 : ℝ) :
+    ∃ u : ℝ → ℝ, (∀ x, deriv (deriv u) x = w x) ∧ u 0 = u0 := by
+  have hderiv_daw : ∀ y, HasDerivAt (doubleAntideriv w) (antideriv w y) y := by
+    intro y
+    unfold doubleAntideriv
+    exact hasDerivAt_antideriv (antideriv w) (continuous_antideriv w hw) y
+  have haffine : ∀ y, HasDerivAt (fun x => v0 * x + u0) v0 y := by
+    intro y; simpa using ((hasDerivAt_id y).const_mul v0).add_const u0
+  refine ⟨fun x => doubleAntideriv w x + (v0 * x + u0), fun x => ?_, ?_⟩
+  · have key : deriv (fun x => doubleAntideriv w x + (v0 * x + u0))
+        = fun y => antideriv w y + v0 :=
+      funext fun y => ((hderiv_daw y).add (haffine y)).deriv
+    rw [key]
+    exact ((hasDerivAt_antideriv w hw x).add_const v0).deriv
+  · simp [doubleAntideriv, antideriv]
 
 end AnalyticPDE
 end RicciFlow
