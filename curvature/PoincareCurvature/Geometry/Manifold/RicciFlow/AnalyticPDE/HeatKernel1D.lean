@@ -3943,5 +3943,118 @@ lemma baseline_plus_heat_in_c1 (t : ℝ) (ht : 0 < t) (baseline : ℝ → ℝ) (
       (fun y => by rw [← Real.norm_eq_abs]; exact hgb y) x
   · exact baseline_plus_heat_lipschitz t ht baseline Lb hbase_l g B hgm hgb a b
 
+/-! ### C²-regularity class and the second-order perturbation (1D Ricci–DeTurck model)
+
+The genuine second-order scalar equation `∂ₜu = a(x)∂ₓₓu + lower` (the 1D model of
+Ricci–DeTurck). The heat semigroup gains TWO derivatives (`Hₜ : C⁰ → C²`,
+`‖∂ₓₓHₜf‖ ≤ C/t`), so it controls the second-order perturbation
+`P[u](x) = (a(x)−a₀)·∂ₓₓu(x)`. When the coefficient oscillation `M = ‖a−a₀‖∞` is
+small relative to the time-step `t`, `P` is a contraction (`M/t < 1`) — the
+frozen-coefficient mechanism by which the second-order equation closes, which the
+C⁰ obstruction blocks for the naive unbounded operator. -/
+
+/-- Bounded-second-derivative predicate. -/
+def SecondDerivBy (u : ℝ → ℝ) (N : ℝ) : Prop := ∀ x, |deriv (deriv u) x| ≤ N
+
+/-- The C²-regularity class: bounded by `M`, Lipschitz by `L`, second derivative
+bounded by `N`. -/
+structure InC2Class (u : ℝ → ℝ) (M L N : ℝ) : Prop where
+  bounded : ∀ x, |u x| ≤ M
+  lipschitz : ∀ a b, |u a - u b| ≤ L * |a - b|
+  second : ∀ x, |deriv (deriv u) x| ≤ N
+
+lemma InC2Class.bounded_nonneg {u : ℝ → ℝ} {M L N : ℝ} (h : InC2Class u M L N) : 0 ≤ M :=
+  le_trans (abs_nonneg _) (h.bounded 0)
+
+lemma InC2Class.second_nonneg {u : ℝ → ℝ} {M L N : ℝ} (h : InC2Class u M L N) : 0 ≤ N :=
+  le_trans (abs_nonneg _) (h.second 0)
+
+lemma InC2Class.toC1 {u : ℝ → ℝ} {M L N : ℝ} (h : InC2Class u M L N) : InC1Class u M L :=
+  ⟨h.bounded, h.lipschitz⟩
+
+/-- The heat semigroup maps the sup-ball of radius `C` into `InC2Class C (C/√(πt))
+(C/t)` — it gains two derivatives. -/
+lemma heatSemigroup1D_c2_bounds (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    (∀ x, |heatSemigroup1D t f x| ≤ C) ∧
+    (∀ a b, |heatSemigroup1D t f a - heatSemigroup1D t f b| ≤ (C / Real.sqrt (π * t)) * |a - b|) ∧
+    (∀ x, |deriv (deriv (fun z => heatSemigroup1D t f z)) x| ≤ C / t) := by
+  refine ⟨fun x => ?_, fun a b => ?_, fun x => ?_⟩
+  · exact abs_heatSemigroup1D_le ht x (fun y => by rw [← Real.norm_eq_abs]; exact hfb y)
+  · exact heatSemigroup1D_lipschitz_sqrt_rate t ht f C hfm hfb a b
+  · exact heatSemigroup1D_deriv2_abs_le_inv_t t ht f C hfm hfb x
+
+/-- The second-order perturbation `(a(x)−a₀)·∂ₓₓu` is sup-bounded by `M·N` when the
+coefficient oscillation is `≤ M` and `‖∂ₓₓu‖ ≤ N`. -/
+lemma second_order_perturbation_sup (acoef : ℝ → ℝ) (a0 : ℝ) (M : ℝ)
+    (haM : ∀ x, |acoef x - a0| ≤ M)
+    (u : ℝ → ℝ) (N : ℝ) (hN : ∀ x, |deriv (deriv u) x| ≤ N) (x : ℝ) :
+    |(acoef x - a0) * deriv (deriv u) x| ≤ M * N := by
+  have hMnn : 0 ≤ M := le_trans (abs_nonneg _) (haM x)
+  rw [abs_mul]
+  exact mul_le_mul (haM x) (hN x) (abs_nonneg _) hMnn
+
+/-- `∀`-version of the second-order perturbation source bound. -/
+lemma duhamel_second_order_source_bound (acoef : ℝ → ℝ) (a0 : ℝ) (M : ℝ)
+    (haM : ∀ x, |acoef x - a0| ≤ M)
+    (u : ℝ → ℝ) (N : ℝ) (hN : ∀ x, |deriv (deriv u) x| ≤ N) :
+    ∀ x, |(acoef x - a0) * deriv (deriv u) x| ≤ M * N :=
+  fun x => second_order_perturbation_sup acoef a0 M haM u N hN x
+
+/-- **The second-order perturbation contraction estimate**:
+`|P[u] − P[v]| ≤ M·‖∂ₓₓ(u−v)‖`. When the coefficient oscillation `M` is small, `P`
+contracts in the C² seminorm — the heart of frozen-coefficient second-order
+existence. -/
+lemma second_order_perturbation_diff (acoef : ℝ → ℝ) (a0 : ℝ) (M : ℝ)
+    (haM : ∀ x, |acoef x - a0| ≤ M)
+    (u v : ℝ → ℝ) (Nd : ℝ) (hNd : ∀ x, |deriv (deriv u) x - deriv (deriv v) x| ≤ Nd) (x : ℝ) :
+    |(acoef x - a0) * deriv (deriv u) x - (acoef x - a0) * deriv (deriv v) x| ≤ M * Nd := by
+  have hMnn : 0 ≤ M := le_trans (abs_nonneg _) (haM x)
+  have hfac : (acoef x - a0) * deriv (deriv u) x - (acoef x - a0) * deriv (deriv v) x
+      = (acoef x - a0) * (deriv (deriv u) x - deriv (deriv v) x) := by ring
+  rw [hfac, abs_mul]
+  exact mul_le_mul (haM x) (hNd x) (abs_nonneg _) hMnn
+
+/-- Monotonicity of the C²-class bounds (to fit an iterate into a fixed ball). -/
+lemma c2_bounds_mono (u : ℝ → ℝ) (M L N M' L' N' : ℝ)
+    (hb : ∀ x, |u x| ≤ M) (hl : ∀ a b, |u a - u b| ≤ L * |a - b|) (hs : ∀ x, |deriv (deriv u) x| ≤ N)
+    (hM : M ≤ M') (hL : L ≤ L') (hN : N ≤ N') (hLnn : 0 ≤ L) :
+    (∀ x, |u x| ≤ M') ∧ (∀ a b, |u a - u b| ≤ L' * |a - b|) ∧ (∀ x, |deriv (deriv u) x| ≤ N') := by
+  refine ⟨fun x => le_trans (hb x) hM, fun a b => ?_, fun x => le_trans (hs x) hN⟩
+  calc |u a - u b| ≤ L * |a - b| := hl a b
+    _ ≤ L' * |a - b| := mul_le_mul_of_nonneg_right hL (abs_nonneg _)
+
+/-- **C²-invariance of the second-order update**: the second derivative of
+`baseline + Hₜ(P[u])` is bounded by `Nb + (M·Nu)/t`, combining the baseline bound
+with the C² rate applied to the bounded perturbation source. -/
+lemma frozen_second_order_iterate_deriv2 (t : ℝ) (ht : 0 < t) (baseline : ℝ → ℝ) (Nb : ℝ)
+    (hbase2 : ∀ x, |deriv (deriv baseline) x| ≤ Nb)
+    (acoef : ℝ → ℝ) (a0 : ℝ) (M : ℝ) (haM : ∀ x, |acoef x - a0| ≤ M)
+    (u : ℝ → ℝ) (Nu : ℝ) (hNu : ∀ x, |deriv (deriv u) x| ≤ Nu)
+    (hsrcm : AEStronglyMeasurable (fun y => (acoef y - a0) * deriv (deriv u) y)) (x : ℝ) :
+    |deriv (deriv baseline) x +
+      deriv (deriv (fun z => heatSemigroup1D t (fun y => (acoef y - a0) * deriv (deriv u) y) z)) x|
+      ≤ Nb + (M * Nu) / t := by
+  have hsrc_bd : ∀ y, ‖(acoef y - a0) * deriv (deriv u) y‖ ≤ M * Nu := fun y => by
+    rw [Real.norm_eq_abs, abs_mul]
+    exact mul_le_mul (haM y) (hNu y) (abs_nonneg _) (le_trans (abs_nonneg _) (haM y))
+  calc |deriv (deriv baseline) x +
+          deriv (deriv (fun z => heatSemigroup1D t (fun y => (acoef y - a0) * deriv (deriv u) y) z)) x|
+      ≤ |deriv (deriv baseline) x| +
+          |deriv (deriv (fun z => heatSemigroup1D t (fun y => (acoef y - a0) * deriv (deriv u) y) z)) x|
+          := abs_add_le _ _
+    _ ≤ Nb + (M * Nu) / t := add_le_add (hbase2 x)
+          (heatSemigroup1D_deriv2_abs_le_inv_t t ht
+            (fun y => (acoef y - a0) * deriv (deriv u) y) (M * Nu) hsrcm hsrc_bd x)
+
+/-- The second-order contraction window: when the coefficient oscillation `M` is
+smaller than the time-step `t`, the factor `M/t ∈ [0,1)` and the frozen-coefficient
+second-order map contracts. -/
+lemma second_order_contraction_factor (M t : ℝ) (hM : 0 ≤ M) (ht : 0 < t) (hsmall : M < t) :
+    0 ≤ M / t ∧ M / t < 1 := by
+  refine ⟨div_nonneg hM ht.le, ?_⟩
+  rw [div_lt_one ht]
+  exact hsmall
+
 end AnalyticPDE
 end RicciFlow
