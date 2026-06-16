@@ -22,6 +22,7 @@ that neighborhood-uniform local existence lemma is the precise next increment.
 import Mathlib.Geometry.Manifold.IntegralCurve.UniformTime
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 import Mathlib.Topology.Compactness.Compact
+import Mathlib.Analysis.ODE.PicardLindelof
 
 open scoped Manifold Topology
 open Set Filter
@@ -73,5 +74,178 @@ theorem exists_global_integralCurve_of_uniform {E H M : Type*} [NormedAddCommGro
     (x : M) :
     ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
   exists_isMIntegralCurve_of_isMIntegralCurveOn hv hε huniform x
+
+/-- **Manifold flow box: neighborhood-uniform local existence.** For a `C¹` vector
+field `v` on a boundaryless complete manifold, around every point `x₀` there is a
+neighborhood `U` and a single `ε > 0` such that *every* start point `y ∈ U` admits
+an integral curve through `y` on the common interval `Ioo (-ε) ε`.
+
+This generalizes mathlib's `exists_isMIntegralCurveAt_of_contMDiffAt` (a single
+curve at one point) to all nearby start points sharing one time interval, by
+lifting the continuous-flow Picard–Lindelöf theorem through a chart and using a
+tube-lemma argument to keep the nearby curves inside the chart target. It is the
+piece mathlib lacks (continuous dependence of integral curves on the initial point,
+lifted to the manifold `IsMIntegralCurveOn` API). -/
+theorem exists_nhds_uniform_integralCurve {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    {v : (x : M) → TangentSpace I x}
+    (hv : ContMDiff I I.tangent 1 (fun x => (⟨x, v x⟩ : TangentBundle I M)))
+    (x₀ : M) :
+    ∃ U ∈ nhds x₀, ∃ ε > 0, ∀ y ∈ U, ∃ γ : ℝ → M, γ 0 = y ∧ IsMIntegralCurveOn γ v (Set.Ioo (-ε) ε) := by
+  have hx : I.IsInteriorPoint x₀ := BoundarylessManifold.isInteriorPoint
+  have hc : extChartAt I x₀ x₀ ∈ interior (extChartAt I x₀).target := (I.isInteriorPoint_iff).mp hx
+  have hvx := (hv x₀)
+  rw [contMDiffAt_iff] at hvx
+  obtain ⟨_, hvx⟩ := hvx
+  have hF := hvx.contDiffAt (range_mem_nhds_isInteriorPoint hx) |>.snd
+  obtain ⟨ε, hε, a, r, L, K, hr, hpl⟩ := IsPicardLindelof.of_contDiffAt_one hF
+  obtain ⟨α, hflow, hcont⟩ :=
+    (hpl 0).exists_forall_mem_closedBall_eq_hasDerivWithinAt_continuousOn
+  have hgc : ContinuousOn (fun t => α (extChartAt I x₀ x₀, t)) (Icc (0 - ε) (0 + ε)) :=
+    hcont.comp (by fun_prop) (fun t ht => ⟨Metric.mem_closedBall_self hr.le, ht⟩)
+  have hg0 : ContinuousAt (fun t => α (extChartAt I x₀ x₀, t)) 0 :=
+    hgc.continuousAt (Icc_mem_nhds (by linarith) (by linarith))
+  have hαc0 : α (extChartAt I x₀ x₀, (0 : ℝ)) ∈ interior (extChartAt I x₀).target := by
+    have h0 := (hflow (extChartAt I x₀ x₀) (Metric.mem_closedBall_self hr.le)).1
+    simp only at h0
+    rw [show α (extChartAt I x₀ x₀, (0 : ℝ)) = extChartAt I x₀ x₀ from h0]
+    exact hc
+  have g0W : (fun t => α (extChartAt I x₀ x₀, t)) ⁻¹' (interior (extChartAt I x₀).target) ∈ 𝓝 (0 : ℝ) :=
+    hg0.preimage_mem_nhds (isOpen_interior.mem_nhds hαc0)
+  obtain ⟨δ, hδ, hsub⟩ := Metric.mem_nhds_iff.mp g0W
+  set ε₁ := min δ ε / 2 with hε₁def
+  have hminpos : 0 < min δ ε := lt_min hδ hε
+  have hε₁pos : 0 < ε₁ := by rw [hε₁def]; linarith
+  have hε₁ltδ : ε₁ < δ := by
+    rw [hε₁def]; have := min_le_left δ ε; linarith
+  have hε₁ltε : ε₁ < ε := by
+    rw [hε₁def]; have := min_le_right δ ε; linarith
+  have htube : ∀ᶠ x in 𝓝 (extChartAt I x₀ x₀),
+      ∀ t ∈ Icc (-ε₁) ε₁, α (x, t) ∈ interior (extChartAt I x₀).target := by
+    apply IsCompact.eventually_forall_of_forall_eventually isCompact_Icc
+    intro t htK
+    have htIoo : t ∈ Ioo (0 - ε) (0 + ε) :=
+      ⟨by have := htK.1; linarith, by have := htK.2; linarith⟩
+    have hSnhds : (Metric.ball (extChartAt I x₀ x₀) (↑r) ×ˢ Ioo (0 - ε) (0 + ε))
+        ∈ 𝓝 (extChartAt I x₀ x₀, t) :=
+      (Metric.isOpen_ball.prod isOpen_Ioo).mem_nhds ⟨Metric.mem_ball_self hr, htIoo⟩
+    have hcontAt : ContinuousAt α (extChartAt I x₀ x₀, t) :=
+      hcont.continuousAt (mem_of_superset hSnhds
+        (Set.prod_mono Metric.ball_subset_closedBall Ioo_subset_Icc_self))
+    have hαW : α (extChartAt I x₀ x₀, t) ∈ interior (extChartAt I x₀).target := by
+      apply hsub
+      rw [Real.ball_eq_Ioo]
+      exact ⟨by have := htK.1; linarith, by have := htK.2; linarith⟩
+    exact hcontAt.preimage_mem_nhds (isOpen_interior.mem_nhds hαW)
+  have hUmem : (extChartAt I x₀) ⁻¹'
+      {x | (∀ t ∈ Icc (-ε₁) ε₁, α (x, t) ∈ interior (extChartAt I x₀).target) ∧
+        x ∈ Metric.ball (extChartAt I x₀ x₀) (↑r)} ∈ 𝓝 x₀ :=
+    (continuousAt_extChartAt x₀).preimage_mem_nhds
+      (htube.and (Metric.ball_mem_nhds _ hr))
+  refine ⟨(extChartAt I x₀).source ∩ (extChartAt I x₀) ⁻¹'
+      {x | (∀ t ∈ Icc (-ε₁) ε₁, α (x, t) ∈ interior (extChartAt I x₀).target) ∧
+        x ∈ Metric.ball (extChartAt I x₀ x₀) (↑r)},
+    Filter.inter_mem (extChartAt_source_mem_nhds x₀) hUmem, ε₁, hε₁pos, ?_⟩
+  intro y hy
+  set x := extChartAt I x₀ y with hxdef
+  have hxball : x ∈ Metric.closedBall (extChartAt I x₀ x₀) (↑r) :=
+    Metric.ball_subset_closedBall hy.2.2
+  have hball2 : ∀ t ∈ Icc (-ε₁) ε₁, α (x, t) ∈ interior (extChartAt I x₀).target := hy.2.1
+  set g : ℝ → E := fun s => α (x, s) with hgdef
+  refine ⟨(extChartAt I x₀).symm ∘ g, ?_, ?_⟩
+  · have h0 := (hflow x hxball).1
+    simp only at h0
+    show (extChartAt I x₀).symm (g 0) = y
+    rw [hgdef]
+    beta_reduce
+    rw [show α (x, (0 : ℝ)) = x from h0, hxdef,
+      PartialEquiv.left_inv _ hy.1]
+  · intro t ht
+    let xₜ : M := (extChartAt I x₀).symm (g t)
+    have htIcc : t ∈ Icc (0 - ε) (0 + ε) :=
+      ⟨by have := ht.1; linarith, by have := ht.2; linarith⟩
+    have h : HasDerivAt g (x := t) <|
+        fderivWithin ℝ (extChartAt I x₀ ∘ (extChartAt I xₜ).symm)
+          (range I) (extChartAt I xₜ xₜ) (v xₜ) :=
+      ((hflow x hxball).2 t htIcc).hasDerivAt (Icc_mem_nhds (by have := ht.1; linarith)
+        (by have := ht.2; linarith))
+    rw [← tangentCoordChange_def] at h
+    have hf3 : g t ∈ interior (extChartAt I x₀).target :=
+      hball2 t (Ioo_subset_Icc_self ht)
+    have hf3' := mem_of_mem_of_subset hf3 interior_subset
+    have hft1 := mem_preimage.mp <|
+      mem_of_mem_of_subset hf3' (extChartAt I x₀).target_subset_preimage_source
+    have hft2 := mem_extChartAt_source (I := I) xₜ
+    apply HasMFDerivAt.hasMFDerivWithinAt
+    refine ⟨(continuousAt_extChartAt_symm'' hf3').comp h.continuousAt,
+      HasDerivWithinAt.hasFDerivWithinAt ?_⟩
+    simp only [mfld_simps, hasDerivWithinAt_univ]
+    change HasDerivAt ((extChartAt I xₜ ∘ (extChartAt I x₀).symm) ∘ g) (v xₜ) t
+    rw [← tangentCoordChange_self (I := I) (x := xₜ) (z := xₜ) (v := v xₜ) hft2,
+      ← tangentCoordChange_comp (x := x₀) ⟨⟨hft2, hft1⟩, hft2⟩]
+    apply HasFDerivAt.comp_hasDerivAt _ _ h
+    apply HasFDerivWithinAt.hasFDerivAt (s := range I) _ <|
+      mem_nhds_iff.mpr ⟨interior (extChartAt I x₀).target,
+        subset_trans interior_subset (extChartAt_target_subset_range ..),
+        isOpen_interior, hf3⟩
+    rw [← (extChartAt I x₀).right_inv hf3']
+    exact hasFDerivWithinAt_tangentCoordChange ⟨hft1, hft2⟩
+
+/-- **Uniform existence time from the flow box and compactness.** On a compact
+manifold, the neighborhood-uniform flow box yields a single `ε > 0` working for
+*every* start point, by extracting a finite subcover and taking the minimum
+lifespan. -/
+theorem exists_uniform_time_of_nhds_uniform {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [CompactSpace M]
+    {v : (x : M) → TangentSpace I x}
+    (hbox : ∀ x₀ : M, ∃ U ∈ nhds x₀, ∃ ε > 0, ∀ y ∈ U, ∃ γ : ℝ → M, γ 0 = y ∧
+      IsMIntegralCurveOn γ v (Set.Ioo (-ε) ε)) :
+    ∃ ε > 0, ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurveOn γ v (Set.Ioo (-ε) ε) := by
+  choose U hUmem ε hεpos hprop using hbox
+  have hopen : ∀ x : M, ∃ t, t ⊆ U x ∧ IsOpen t ∧ x ∈ t := fun x => mem_nhds_iff.mp (hUmem x)
+  choose V hVsub hVopen hVmem using hopen
+  obtain ⟨t, ht⟩ := isCompact_univ.elim_finite_subcover V hVopen
+    (fun x _ => mem_iUnion.mpr ⟨x, hVmem x⟩)
+  rcases t.eq_empty_or_nonempty with hte | htne
+  · subst hte
+    refine ⟨1, one_pos, fun x => ?_⟩
+    have hx : x ∈ (∅ : Set M) := by
+      have h := ht (mem_univ x); simp at h
+    exact absurd hx (notMem_empty x)
+  · refine ⟨t.inf' htne ε, ?_, fun x => ?_⟩
+    · exact (Finset.lt_inf'_iff htne).mpr (fun i _ => hεpos i)
+    · obtain ⟨i, hi, hxi⟩ := mem_iUnion₂.mp (ht (mem_univ x))
+      obtain ⟨γ, hγ0, hγon⟩ := hprop i x (hVsub i hxi)
+      refine ⟨γ, hγ0, hγon.mono ?_⟩
+      have hle : t.inf' htne ε ≤ ε i := Finset.inf'_le ε hi
+      exact Ioo_subset_Ioo (by linarith) hle
+
+/-- **Uniform existence time on a compact boundaryless manifold.** For a `C¹` vector
+field `v` on a compact boundaryless complete manifold, there is a single `ε > 0`
+such that every point admits an integral curve through it on `Ioo (-ε) ε`. Combines
+the flow box with the compactness reduction. -/
+theorem exists_uniform_integralCurve_time {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [CompactSpace M]
+    {v : (x : M) → TangentSpace I x}
+    (hv : ContMDiff I I.tangent 1 (fun x => (⟨x, v x⟩ : TangentBundle I M))) :
+    ∃ ε > 0, ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurveOn γ v (Set.Ioo (-ε) ε) :=
+  exists_uniform_time_of_nhds_uniform (fun x₀ => exists_nhds_uniform_integralCurve hv x₀)
+
+/-- **Global integral curves on a compact boundaryless manifold.** For a `C¹` vector
+field on a compact boundaryless complete manifold, every point lies on a *global*
+integral curve. This is the assembled flow-existence result the gauge-flow
+construction needs: flow box ⇒ uniform time ⇒ globalization. -/
+theorem exists_global_integralCurve_compact {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [CompactSpace M] [T2Space M]
+    {v : (x : M) → TangentSpace I x}
+    (hv : ContMDiff I I.tangent 1 (fun x => (⟨x, v x⟩ : TangentBundle I M)))
+    (x : M) :
+    ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v := by
+  obtain ⟨ε, hε, huniform⟩ := exists_uniform_integralCurve_time hv
+  exact exists_global_integralCurve_of_uniform hv ε hε huniform x
 
 end PoincareCurvature.ManifoldFlow
