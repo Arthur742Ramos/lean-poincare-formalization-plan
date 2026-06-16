@@ -3835,5 +3835,113 @@ lemma affine_iterate_tendsto_fixedPoint (a : BoundedContinuousFunction ℝ ℝ) 
   exact ⟨ContractingWith.fixedPoint Φ hΦ, hΦ.fixedPoint_isFixedPt,
     hΦ.tendsto_iterate_fixedPoint u0⟩
 
+/-! ### C¹-regularity class and its parabolic invariance
+
+Toward short-time existence for the second-order scalar equation, the solution must
+live in a C¹-regularity class (bounded sup-norm AND bounded Lipschitz constant)
+where the parabolic operator keeps derivatives controlled. The affine update
+`baseline + Hₜ(g)` maps `InC1Class M L` into `InC1Class (M+B) (L+B/√(πt))` — the
+structural invariance that confines the second-order iteration to a regularity
+ball. -/
+
+/-- The Lipschitz-bound predicate (companion to `BoundedBy` for the C¹ class). -/
+def LipschitzBy (u : ℝ → ℝ) (L : ℝ) : Prop := ∀ a b, |u a - u b| ≤ L * |a - b|
+
+lemma LipschitzBy.nonneg {u : ℝ → ℝ} {L : ℝ} (h : LipschitzBy u L) (hne : ∃ a b : ℝ, a ≠ b) :
+    0 ≤ L := by
+  obtain ⟨a, b, hab⟩ := hne
+  have h1 := h a b
+  have h2 : 0 < |a - b| := by rw [abs_pos]; exact sub_ne_zero.mpr hab
+  by_contra hL
+  push_neg at hL
+  have : L * |a - b| < 0 := mul_neg_of_neg_of_pos hL h2
+  linarith [abs_nonneg (u a - u b), h1]
+
+lemma LipschitzBy.add {u v : ℝ → ℝ} {L M : ℝ} (hu : LipschitzBy u L) (hv : LipschitzBy v M) :
+    LipschitzBy (fun x => u x + v x) (L + M) := by
+  intro a b
+  calc |(u a + v a) - (u b + v b)|
+      = |(u a - u b) + (v a - v b)| := by rw [show (u a + v a) - (u b + v b)
+        = (u a - u b) + (v a - v b) by ring]
+    _ ≤ |u a - u b| + |v a - v b| := abs_add_le _ _
+    _ ≤ L * |a - b| + M * |a - b| := add_le_add (hu a b) (hv a b)
+    _ = (L + M) * |a - b| := by ring
+
+/-- The explicit continuity modulus of a Lipschitz-class function. -/
+lemma lipschitzBy_uniform (u : ℝ → ℝ) (L : ℝ) (hL : 0 ≤ L)
+    (hlip : ∀ a b, |u a - u b| ≤ L * |a - b|) (a b : ℝ) (δ : ℝ)
+    (hab : |a - b| ≤ δ) : |u a - u b| ≤ L * δ := by
+  calc |u a - u b| ≤ L * |a - b| := hlip a b
+    _ ≤ L * δ := mul_le_mul_of_nonneg_left hab hL
+
+/-- The heat semigroup output satisfies the explicit C¹ Lipschitz bound `C/√(πt)`. -/
+lemma heatSemigroup1D_lipschitzBy_rate (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    ∀ a b, |heatSemigroup1D t f a - heatSemigroup1D t f b| ≤ (C / Real.sqrt (π * t)) * |a - b| :=
+  fun a b => heatSemigroup1D_lipschitz_sqrt_rate t ht f C hfm hfb a b
+
+/-- The C¹-regularity class: bounded by `M` in sup, Lipschitz by `L`. -/
+structure InC1Class (u : ℝ → ℝ) (M L : ℝ) : Prop where
+  bounded : ∀ x, |u x| ≤ M
+  lipschitz : ∀ a b, |u a - u b| ≤ L * |a - b|
+
+lemma InC1Class.bounded_nonneg {u : ℝ → ℝ} {M L : ℝ} (h : InC1Class u M L) : 0 ≤ M :=
+  le_trans (abs_nonneg _) (h.bounded 0)
+
+lemma InC1Class.mono {u : ℝ → ℝ} {M L M' L' : ℝ} (h : InC1Class u M L)
+    (hM : M ≤ M') (hL : L ≤ L') (hLnn : 0 ≤ L) : InC1Class u M' L' := by
+  refine ⟨fun x => le_trans (h.bounded x) hM, fun a b => ?_⟩
+  calc |u a - u b| ≤ L * |a - b| := h.lipschitz a b
+    _ ≤ L' * |a - b| := mul_le_mul_of_nonneg_right hL (abs_nonneg _)
+
+/-- The heat semigroup maps the sup-ball of radius `C` into `InC1Class C (C/√(πt))`
+(bounded by `C`, Lipschitz by the smoothing gradient rate). -/
+lemma heatSemigroup1D_c1_bounds (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    (∀ x, |heatSemigroup1D t f x| ≤ C) ∧
+    (∀ a b, |heatSemigroup1D t f a - heatSemigroup1D t f b| ≤ (C / Real.sqrt (π * t)) * |a - b|) := by
+  refine ⟨fun x => ?_, fun a b => ?_⟩
+  · exact abs_heatSemigroup1D_le ht x (fun y => by rw [← Real.norm_eq_abs]; exact hfb y)
+  · exact heatSemigroup1D_lipschitz_sqrt_rate t ht f C hfm hfb a b
+
+/-- Sup-norm invariance: `baseline + Hₜ(g)` stays bounded by `Mb + B`. -/
+lemma baseline_plus_heat_bounded (t : ℝ) (ht : 0 < t) (baseline : ℝ → ℝ) (Mb : ℝ)
+    (hbase : ∀ x, |baseline x| ≤ Mb) (g : ℝ → ℝ) (B : ℝ)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, |g y| ≤ B) (x : ℝ) :
+    |baseline x + heatSemigroup1D t g x| ≤ Mb + B := by
+  calc |baseline x + heatSemigroup1D t g x|
+      ≤ |baseline x| + |heatSemigroup1D t g x| := abs_add_le _ _
+    _ ≤ Mb + B := add_le_add (hbase x) (abs_heatSemigroup1D_le ht x hgb)
+
+/-- Lipschitz invariance: `baseline + Hₜ(g)` stays Lipschitz with the rate
+`Lb + B/√(πt)`. -/
+lemma baseline_plus_heat_lipschitz (t : ℝ) (ht : 0 < t) (baseline : ℝ → ℝ) (Lb : ℝ)
+    (hbase : ∀ a b, |baseline a - baseline b| ≤ Lb * |a - b|) (g : ℝ → ℝ) (B : ℝ)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ B) (a b : ℝ) :
+    |(baseline a + heatSemigroup1D t g a) - (baseline b + heatSemigroup1D t g b)|
+      ≤ (Lb + B / Real.sqrt (π * t)) * |a - b| := by
+  rw [show (baseline a + heatSemigroup1D t g a) - (baseline b + heatSemigroup1D t g b)
+      = (baseline a - baseline b) + (heatSemigroup1D t g a - heatSemigroup1D t g b) by ring]
+  calc |(baseline a - baseline b) + (heatSemigroup1D t g a - heatSemigroup1D t g b)|
+      ≤ |baseline a - baseline b| + |heatSemigroup1D t g a - heatSemigroup1D t g b| :=
+        abs_add_le _ _
+    _ ≤ Lb * |a - b| + (B / Real.sqrt (π * t)) * |a - b| :=
+        add_le_add (hbase a b)
+          (heatSemigroup1D_lipschitz_sqrt_rate t ht g B hgm hgb a b)
+    _ = (Lb + B / Real.sqrt (π * t)) * |a - b| := by ring
+
+/-- **C¹-class parabolic invariance**: the affine update `baseline + Hₜ(g)` maps
+`InC1Class Mb Lb` (the baseline) with a `B`-bounded source into
+`InC1Class (Mb+B) (Lb+B/√(πt))` — the structural heart of the second-order
+invariant-ball construction. -/
+lemma baseline_plus_heat_in_c1 (t : ℝ) (ht : 0 < t) (baseline : ℝ → ℝ) (Mb Lb : ℝ)
+    (hbase_b : ∀ x, |baseline x| ≤ Mb) (hbase_l : ∀ a b, |baseline a - baseline b| ≤ Lb * |a - b|)
+    (g : ℝ → ℝ) (B : ℝ) (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ B) :
+    InC1Class (fun x => baseline x + heatSemigroup1D t g x) (Mb + B) (Lb + B / Real.sqrt (π * t)) := by
+  refine ⟨fun x => ?_, fun a b => ?_⟩
+  · exact baseline_plus_heat_bounded t ht baseline Mb hbase_b g B hgm
+      (fun y => by rw [← Real.norm_eq_abs]; exact hgb y) x
+  · exact baseline_plus_heat_lipschitz t ht baseline Lb hbase_l g B hgm hgb a b
+
 end AnalyticPDE
 end RicciFlow
