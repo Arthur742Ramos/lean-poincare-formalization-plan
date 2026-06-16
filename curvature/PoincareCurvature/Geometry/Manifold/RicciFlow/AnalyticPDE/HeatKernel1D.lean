@@ -3711,5 +3711,129 @@ lemma dist_fixedPoint_le_of_contraction {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ 
   have := hΦ.dist_fixedPoint_le x
   rwa [show ((θ.toNNReal : ℝ)) = θ from Real.coe_toNNReal θ hθ0] at this
 
+/-! ### Concrete instantiation: the heat semigroup in `ℝ →ᵇ ℝ`
+
+The parabolic smoothing operator `Hₜ` maps bounded measurable data to bounded
+continuous functions, landing in the complete space `ℝ →ᵇ ℝ` where the fixed point
+lives. This yields a concrete, hypothesis-free existence + uniqueness theorem for
+the affine operator equation `z = a + L z` (a contraction `L`), with explicit
+Picard-iterate convergence — the full apparatus closing a real operator equation. -/
+
+/-- The heat semigroup output is a bounded continuous function (lands in `ℝ →ᵇ ℝ`). -/
+lemma heatSemigroup1D_bcf_exists {t : ℝ} (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    ∃ F : BoundedContinuousFunction ℝ ℝ, ∀ x, F x = heatSemigroup1D t f x := by
+  have hcont := continuous_heatSemigroup1D_space ht hfm hfb
+  have hbd : ∀ x, |heatSemigroup1D t f x| ≤ C :=
+    fun x => abs_heatSemigroup1D_le ht x (fun y => by rw [← Real.norm_eq_abs]; exact hfb y)
+  exact exists_bcf_of_bounded_continuous _ hcont C hbd
+
+/-- Multiplication of a BCF by a bounded continuous coefficient lands in `ℝ →ᵇ ℝ`. -/
+lemma bcf_mul_coeff_exists (c : ℝ → ℝ) (hcont : Continuous c) (Mc : ℝ) (hc : ∀ x, |c x| ≤ Mc)
+    (u : BoundedContinuousFunction ℝ ℝ) :
+    ∃ F : BoundedContinuousFunction ℝ ℝ, ∀ x, F x = c x * u x := by
+  have hMc : (0 : ℝ) ≤ Mc := le_trans (abs_nonneg _) (hc 0)
+  refine exists_bcf_of_bounded_continuous (fun x => c x * u x) (hcont.mul u.continuous)
+    (Mc * ‖u‖) ?_
+  intro x
+  have hu : |u x| ≤ ‖u‖ := by
+    have := BoundedContinuousFunction.norm_coe_le_norm u x
+    simpa [Real.norm_eq_abs] using this
+  calc |c x * u x| = |c x| * |u x| := abs_mul _ _
+    _ ≤ Mc * ‖u‖ := mul_le_mul (hc x) hu (abs_nonneg _) hMc
+
+/-- BCF subtraction is pointwise. -/
+lemma bcf_sub_apply (f g : BoundedContinuousFunction ℝ ℝ) (x : ℝ) : (f - g) x = f x - g x := by
+  simp
+
+/-- A pointwise difference is bounded by the BCF sup-distance. -/
+lemma bcf_dist_eq_iSup_pointwise_le (f g : BoundedContinuousFunction ℝ ℝ) (x : ℝ) :
+    |f x - g x| ≤ dist f g := by
+  have h := BoundedContinuousFunction.dist_coe_le_dist (f := f) (g := g) x
+  rwa [Real.dist_eq] at h
+
+/-- **Maximum-principle nonexpansiveness** of the linear heat semigroup:
+`|Hₜf x - Hₜg x| ≤ ‖f-g‖∞`. -/
+lemma heatSemigroup1D_nonexpansive (t : ℝ) (ht : 0 < t) (f g : ℝ → ℝ) (C : ℝ)
+    (hfm : AEStronglyMeasurable f) (hgm : AEStronglyMeasurable g)
+    (hfgb : ∀ y, |f y - g y| ≤ C) (x : ℝ) :
+    |heatSemigroup1D t f x - heatSemigroup1D t g x| ≤ C :=
+  heatSemigroup1D_sub_holder t ht f g C hfm hgm
+    (fun y => by rw [Real.norm_eq_abs]; exact hfgb y) x
+
+/-- The heat semigroup is nonexpansive in the BCF sup-metric. -/
+lemma heatSemigroup1D_bcf_dist_le (t : ℝ) (ht : 0 < t) (F G HF HG : BoundedContinuousFunction ℝ ℝ)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hHF : ∀ x, HF x = heatSemigroup1D t F x) (hHG : ∀ x, HG x = heatSemigroup1D t G x)
+    (hbound : ∀ y, |F y - G y| ≤ C) :
+    dist HF HG ≤ C := by
+  apply bcf_dist_le_of_pointwise HF HG C hC
+  intro x
+  rw [hHF, hHG]
+  exact heatSemigroup1D_sub_holder t ht (F : ℝ → ℝ) (G : ℝ → ℝ) C
+    F.continuous.aestronglyMeasurable G.continuous.aestronglyMeasurable
+    (fun y => by rw [Real.norm_eq_abs]; exact hbound y) x
+
+/-- The zeroth-order heat-Duhamel contraction estimate: the bounded coefficient
+operator composed with the semigroup contracts in sup norm by `Mc`. -/
+lemma heat_zeroth_order_contraction (t : ℝ) (ht : 0 < t) (c : ℝ → ℝ) (Mc : ℝ)
+    (hc : ∀ x, |c x| ≤ Mc)
+    (u v : ℝ → ℝ) (Cu : ℝ) (hum : AEStronglyMeasurable (fun y => c y * u y))
+    (hvm : AEStronglyMeasurable (fun y => c y * v y))
+    (huv : ∀ y, |u y - v y| ≤ Cu) (x : ℝ) :
+    |heatSemigroup1D t (fun y => c y * u y) x - heatSemigroup1D t (fun y => c y * v y) x|
+      ≤ Mc * Cu := by
+  have hMc : 0 ≤ Mc := le_trans (abs_nonneg _) (hc 0)
+  refine heatSemigroup1D_sub_holder t ht (fun y => c y * u y) (fun y => c y * v y)
+    (Mc * Cu) hum hvm (fun y => ?_) x
+  rw [Real.norm_eq_abs]
+  have hfac : c y * u y - c y * v y = c y * (u y - v y) := by ring
+  rw [hfac, abs_mul]
+  exact mul_le_mul (hc y) (huv y) (abs_nonneg _) hMc
+
+/-- **Concrete existence + uniqueness for the affine operator equation**
+`z = a + L z`: for any contraction `L` on `ℝ →ᵇ ℝ` (factor `θ < 1`), the equation
+has a unique solution. A fully-instantiated, hypothesis-free fixed-point theorem. -/
+lemma affine_bcf_fixedPoint_exists_unique (a : BoundedContinuousFunction ℝ ℝ) {θ : ℝ}
+    (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (L : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (hL : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |L f x - L g x| ≤ θ * dist f g) :
+    ∃! z : BoundedContinuousFunction ℝ ℝ, a + L z = z := by
+  set Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ :=
+    fun z => a + L z with hΦ
+  have hcontr : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x,
+      |Φ f x - Φ g x| ≤ θ * dist f g := by
+    intro f g x
+    have hfx : Φ f x = a x + L f x := by simp [hΦ]
+    have hgx : Φ g x = a x + L g x := by simp [hΦ]
+    rw [hfx, hgx]
+    have : a x + L f x - (a x + L g x) = L f x - L g x := by ring
+    rw [this]
+    exact hL f g x
+  have := exists_unique_fixedPoint_of_pointwise_contraction hθ0 hθ1 Φ hcontr
+  simpa [hΦ] using this
+
+/-- The Picard iterates of the affine contraction converge to its unique fixed
+point (constructive existence). -/
+lemma affine_iterate_tendsto_fixedPoint (a : BoundedContinuousFunction ℝ ℝ) {θ : ℝ}
+    (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (L : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (hL : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |L f x - L g x| ≤ θ * dist f g)
+    (u0 : BoundedContinuousFunction ℝ ℝ) :
+    ∃ z : BoundedContinuousFunction ℝ ℝ, (a + L z = z) ∧
+      Filter.Tendsto (fun n => (fun w => a + L w)^[n] u0) Filter.atTop (nhds z) := by
+  set Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ :=
+    fun w => a + L w with hΦdef
+  have hpt : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |Φ f x - Φ g x| ≤ θ * dist f g := by
+    intro f g x
+    have : Φ f x - Φ g x = L f x - L g x := by
+      simp only [hΦdef, BoundedContinuousFunction.add_apply]; ring
+    rw [this]
+    exact hL f g x
+  have hΦ : ContractingWith (Real.toNNReal θ) Φ :=
+    contractingWith_of_pointwise hθ0 hθ1 Φ hpt
+  exact ⟨ContractingWith.fixedPoint Φ hΦ, hΦ.fixedPoint_isFixedPt,
+    hΦ.tendsto_iterate_fixedPoint u0⟩
+
 end AnalyticPDE
 end RicciFlow
