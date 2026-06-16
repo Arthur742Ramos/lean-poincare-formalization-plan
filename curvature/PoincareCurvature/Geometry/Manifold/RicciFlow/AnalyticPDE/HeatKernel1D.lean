@@ -4,6 +4,8 @@ public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.MeasureTheory.Integral.Pi
 public import Mathlib.Analysis.Calculus.ParametricIntegral
+public import Mathlib.Topology.MetricSpace.Contracting
+public import Mathlib.Topology.ContinuousMap.Bounded.Basic
 
 /-!
 # The one-dimensional Euclidean heat kernel
@@ -30,7 +32,7 @@ theory.
 @[expose] public noncomputable section
 
 open Real MeasureTheory
-open scoped Real ENNReal
+open scoped Real ENNReal NNReal
 
 namespace RicciFlow
 namespace AnalyticPDE
@@ -3490,6 +3492,104 @@ lemma picard_sequence_converges {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
     (hcontract : ∀ n, |u (n + 1) - u (n + 2)| ≤ θ * |u n - u (n + 1)|) :
     ∃ ulim : ℝ, Filter.Tendsto u Filter.atTop (nhds ulim) :=
   cauchySeq_tendsto_of_complete (cauchySeq_of_contraction_real hθ0 hθ1 u D hD h0 hcontract)
+
+/-! ### Function-space Banach fixed point (existence + uniqueness)
+
+The Picard iteration lands in the complete metric space `ℝ →ᵇ ℝ` of bounded
+continuous functions, where mathlib's `ContractingWith` gives BOTH existence and
+uniqueness of the fixed point — exactly the shape the local-existence-and-
+uniqueness statement needs. These lemmas package that machinery for the
+bounded zeroth-order (lower-order) parabolic operator, whose Duhamel map is a
+genuine BCF→BCF contraction for small time. -/
+
+/-- **Banach fixed-point existence + uniqueness** on a complete nonempty metric
+space: a contraction has a unique fixed point. -/
+lemma banach_fixedPoint_exists_unique {α : Type*} [MetricSpace α] [Nonempty α] [CompleteSpace α]
+    {K : ℝ≥0} (Φ : α → α) (hΦ : ContractingWith K Φ) :
+    ∃! z : α, Φ z = z := by
+  refine ⟨ContractingWith.fixedPoint Φ hΦ, hΦ.fixedPoint_isFixedPt, ?_⟩
+  intro w hw
+  exact hΦ.fixedPoint_unique (show Function.IsFixedPt Φ w from hw)
+
+/-- Pointwise ⇒ sup-distance bound for bounded continuous functions. -/
+lemma bcf_dist_le_of_pointwise (f g : BoundedContinuousFunction ℝ ℝ) (C : ℝ) (hC : 0 ≤ C)
+    (h : ∀ x, |f x - g x| ≤ C) : dist f g ≤ C := by
+  rw [BoundedContinuousFunction.dist_le hC]
+  intro x
+  rw [Real.dist_eq]
+  exact h x
+
+/-- A pointwise contraction bound gives a `LipschitzWith` self-map of `ℝ →ᵇ ℝ`. -/
+lemma bcf_lipschitz_of_pointwise {K : ℝ≥0}
+    (Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (h : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |Φ f x - Φ g x| ≤ (K : ℝ) * dist f g) :
+    LipschitzWith K Φ := by
+  refine LipschitzWith.of_dist_le_mul (fun f g => ?_)
+  rw [BoundedContinuousFunction.dist_le (by positivity)]
+  intro x
+  rw [Real.dist_eq]
+  exact h f g x
+
+/-- The zeroth-order multiplication operator preserves sup bounds. -/
+lemma mul_bounded_of_bounded (c u : ℝ → ℝ) (Mc Mu : ℝ) (hMc : 0 ≤ Mc) (hMu : 0 ≤ Mu)
+    (hc : ∀ x, |c x| ≤ Mc) (hu : ∀ x, |u x| ≤ Mu) :
+    ∀ x, |c x * u x| ≤ Mc * Mu := by
+  intro x
+  rw [abs_mul]
+  exact mul_le_mul (hc x) (hu x) (abs_nonneg _) hMc
+
+/-- The zeroth-order multiplication operator is Lipschitz in its argument with
+constant `‖c‖∞`. -/
+lemma mul_bounded_sub_le (c : ℝ → ℝ) (Mc : ℝ) (hMc : 0 ≤ Mc) (hc : ∀ x, |c x| ≤ Mc)
+    (u v : ℝ → ℝ) (D : ℝ) (hD : ∀ x, |u x - v x| ≤ D) :
+    ∀ x, |c x * u x - c x * v x| ≤ Mc * D := by
+  intro x
+  have : c x * u x - c x * v x = c x * (u x - v x) := by ring
+  rw [this, abs_mul]
+  exact mul_le_mul (hc x) (hD x) (abs_nonneg _) hMc
+
+/-- A `θ < 1` pointwise BCF contraction packages into `ContractingWith θ.toNNReal`. -/
+lemma contractingWith_of_pointwise {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (h : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |Φ f x - Φ g x| ≤ θ * dist f g) :
+    ContractingWith (Real.toNNReal θ) Φ := by
+  refine ⟨?_, ?_⟩
+  · have hlt : ((Real.toNNReal θ : NNReal) : ℝ) < 1 := by
+      rw [Real.coe_toNNReal θ hθ0]; exact hθ1
+    exact_mod_cast hlt
+  · apply LipschitzWith.of_dist_le_mul
+    intro f g
+    have hcoe : ((Real.toNNReal θ : NNReal) : ℝ) = θ := Real.coe_toNNReal θ hθ0
+    rw [hcoe]
+    rw [BoundedContinuousFunction.dist_le (by positivity)]
+    intro x
+    rw [Real.dist_eq]
+    exact h f g x
+
+/-- `IsFixedPt` unfolds to the operator equation. -/
+lemma isFixedPt_iff {α : Type*} (Φ : α → α) (z : α) : Function.IsFixedPt Φ z ↔ Φ z = z := Iff.rfl
+
+/-- The Banach fixed point solves the operator equation `Φ z = z`. -/
+lemma fixedPoint_solves {α : Type*} [MetricSpace α] [Nonempty α] [CompleteSpace α]
+    {K : ℝ≥0} (Φ : α → α) (hΦ : ContractingWith K Φ) :
+    Φ (ContractingWith.fixedPoint Φ hΦ) = ContractingWith.fixedPoint Φ hΦ :=
+  hΦ.fixedPoint_isFixedPt
+
+/-- A bounded continuous `f : ℝ → ℝ` lifts to an element of `ℝ →ᵇ ℝ` with the same
+values. -/
+lemma exists_bcf_of_bounded_continuous (f : ℝ → ℝ) (hcont : Continuous f) (M : ℝ)
+    (hbound : ∀ x, |f x| ≤ M) :
+    ∃ F : BoundedContinuousFunction ℝ ℝ, ∀ x, F x = f x := by
+  refine ⟨BoundedContinuousFunction.ofNormedAddCommGroup f hcont M (fun x => ?_), fun x => rfl⟩
+  rw [Real.norm_eq_abs]
+  exact hbound x
+
+/-- The bounded zeroth-order Duhamel contraction factor `Mc·t` lies in `[0,1)` for
+`t < 1/Mc` — the short-time existence window for the bounded lower-order equation. -/
+lemma bounded_zeroth_order_contraction_factor (Mc t : ℝ) (hMc : 0 < Mc) (ht : 0 < t)
+    (hsmall : t < 1 / Mc) :
+    0 ≤ Mc * t ∧ Mc * t < 1 :=
+  contraction_factor_props Mc t hMc ht hsmall
 
 end AnalyticPDE
 end RicciFlow
