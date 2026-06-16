@@ -141,4 +141,78 @@ theorem flow_contDiff_succ_of_augmented_flow_contDiff {V : Type*} [NormedAddComm
   flow_contDiff_succ_of_jacobian_contDiff hderiv
     (jacobian_contDiff_of_augmented_flow_contDiff hΨ)
 
+/-! ### Local (`ContDiffOn`) bootstrap on open sets
+
+The project's ODE flow is regular only on a Picard cylinder (a closed ball in space
+times a time interval), so its variational outputs are *local*: `HasFDerivAt` at
+points of a ball with a `ContinuousOn` tangent. These `ContDiffOn`/open-set versions
+of the bootstrap engine match that exactly, so they are the forms that wire the
+abstract recursion into `ModelGaugeFlowODE`'s ball-local results. -/
+
+/-- **Local C¹ packaging on an open set.** A map with `HasFDerivAt` at every point of
+an open set `s` and a `ContinuousOn` derivative is `ContDiffOn 1` on `s`. -/
+theorem contDiffOn_one_of_hasFDerivAt_continuousOn_isOpen {V W : Type*} [NormedAddCommGroup V]
+    [NormedSpace ℝ V] [NormedAddCommGroup W] [NormedSpace ℝ W]
+    {g : V → W} {g' : V → (V →L[ℝ] W)} {s : Set V} (hs : IsOpen s)
+    (hderiv : ∀ x ∈ s, HasFDerivAt g (g' x) x) (hcont : ContinuousOn g' s) :
+    ContDiffOn ℝ 1 g s := by
+  have hfeq : ∀ x ∈ s, fderiv ℝ g x = g' x := fun x hx => (hderiv x hx).fderiv
+  have hone : (1 : WithTop ℕ∞) = (0 : WithTop ℕ∞) + 1 := by norm_num
+  rw [hone, contDiffOn_succ_iff_fderiv_of_isOpen hs]
+  refine ⟨fun x hx => (hderiv x hx).differentiableAt.differentiableWithinAt, ?_, ?_⟩
+  · intro h
+    exact absurd h (by simp)
+  · rw [contDiffOn_zero]
+    exact hcont.congr hfeq
+
+/-- **Local inductive step on an open set.** A map with `HasFDerivAt` at every point of
+an open set `s` and a `ContDiffOn n` Jacobian is `ContDiffOn (n+1)` on `s`. -/
+theorem contDiffOn_succ_of_jacobian_contDiffOn_isOpen {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace ℝ V]
+    {n : ℕ} {g : V → V} {Dg : V → (V →L[ℝ] V)} {s : Set V} (hs : IsOpen s)
+    (hderiv : ∀ x ∈ s, HasFDerivAt g (Dg x) x)
+    (hjac : ContDiffOn ℝ (n : WithTop ℕ∞) Dg s) :
+    ContDiffOn ℝ ((n : WithTop ℕ∞) + 1) g s := by
+  rw [contDiffOn_succ_iff_fderiv_of_isOpen hs]
+  refine ⟨?_, ?_, ?_⟩
+  · intro x hx
+    exact ((hderiv x hx).differentiableAt).differentiableWithinAt
+  · intro htop
+    exact absurd htop (WithTop.natCast_ne_top n)
+  · refine hjac.congr ?_
+    intro x hx
+    exact (hderiv x hx).fderiv
+
+/-- **Local Jacobian projection.** If the augmented flow's time-`t` slice is
+`ContDiffOn n` on `S` and the embedding `x ↦ (x, 1)` maps `s` into `S`, then the
+Jacobian `x ↦ (Ψ (x,1) t).2` is `ContDiffOn n` on `s`. -/
+theorem jacobian_contDiffOn_of_augmented_flow_contDiffOn {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace ℝ V]
+    {n : WithTop ℕ∞} {Ψ : (V × (V →L[ℝ] V)) → ℝ → (V × (V →L[ℝ] V))} {t : ℝ}
+    {S : Set (V × (V →L[ℝ] V))} {s : Set V}
+    (hΨ : ContDiffOn ℝ n (fun z : V × (V →L[ℝ] V) => Ψ z t) S)
+    (hmaps : MapsTo (fun x : V => (x, (1 : V →L[ℝ] V))) s S) :
+    ContDiffOn ℝ n (fun x : V => (Ψ (x, (1 : V →L[ℝ] V)) t).2) s := by
+  have he : ContDiff ℝ n (fun x : V => (x, (1 : V →L[ℝ] V))) :=
+    contDiff_id.prodMk contDiff_const
+  have hcomp : ContDiffOn ℝ n (fun x : V => Ψ (x, (1 : V →L[ℝ] V)) t) s :=
+    hΨ.comp (he.contDiffOn) hmaps
+  exact contDiff_snd.comp_contDiffOn hcomp
+
+/-- **The assembled local bootstrap step.** On an open set `s`, if the base flow `g`
+has `HasFDerivAt` everywhere with Jacobian the second-component projection of a
+`ContDiffOn n` augmented flow `Ψ` (whose embedding maps `s` into `S`), then `g` is
+`ContDiffOn (n+1)` on `s`. This is the wiring-ready form: it reduces local "flow
+`C^{n+1}`" to local "augmented flow `C^n`". -/
+theorem contDiffOn_succ_of_augmented_flow_contDiffOn_isOpen {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace ℝ V]
+    {n : ℕ} {g : V → V} {Ψ : (V × (V →L[ℝ] V)) → ℝ → (V × (V →L[ℝ] V))} {t : ℝ}
+    {S : Set (V × (V →L[ℝ] V))} {s : Set V} (hs : IsOpen s)
+    (hderiv : ∀ x ∈ s, HasFDerivAt g ((Ψ (x, (1 : V →L[ℝ] V)) t).2) x)
+    (hmaps : MapsTo (fun x : V => (x, (1 : V →L[ℝ] V))) s S)
+    (hΨ : ContDiffOn ℝ (n : WithTop ℕ∞) (fun z : V × (V →L[ℝ] V) => Ψ z t) S) :
+    ContDiffOn ℝ ((n : WithTop ℕ∞) + 1) g s :=
+  contDiffOn_succ_of_jacobian_contDiffOn_isOpen hs hderiv
+    (jacobian_contDiffOn_of_augmented_flow_contDiffOn hΨ hmaps)
+
 end PoincareCurvature.VariationalSmoothness
