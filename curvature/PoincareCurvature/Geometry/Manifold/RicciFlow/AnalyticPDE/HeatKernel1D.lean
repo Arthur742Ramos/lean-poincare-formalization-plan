@@ -3190,5 +3190,208 @@ lemma frozenHeatSemigroup1D_holder_seminorm_bound {a t : ℝ} (ha : 0 < a) (ht :
   rw [frozenHeatSemigroup1D_apply, frozenHeatSemigroup1D_apply]
   exact heatSemigroup1D_holder_seminorm_bound (a * t) (mul_pos ha ht) f C hfm hfb hα0 hα1 p q
 
+/-! ### Duhamel contraction estimates
+
+The analytic inequalities that make the variable-coefficient Duhamel map a
+contraction for small time: the perturbation-operator sup bound, the Duhamel-term
+sup/Hölder/data-stability estimates, the short-time smallness factor, and the
+geometric-decay iterate bound (Banach fixed-point engine). These assemble
+short-time existence for the scalar variable-coefficient parabolic equation, the
+1D model of Ricci–DeTurck. -/
+
+/-- A function bounded in sup by `M`. -/
+def BoundedBy (u : ℝ → ℝ) (M : ℝ) : Prop := ∀ x, |u x| ≤ M
+
+lemma BoundedBy.nonneg {u : ℝ → ℝ} {M : ℝ} (h : BoundedBy u M) : 0 ≤ M :=
+  le_trans (abs_nonneg _) (h 0)
+
+lemma BoundedBy.add {u v : ℝ → ℝ} {M N : ℝ} (hu : BoundedBy u M) (hv : BoundedBy v N) :
+    BoundedBy (fun x => u x + v x) (M + N) := by
+  intro x
+  calc |u x + v x| ≤ |u x| + |v x| := abs_add_le _ _
+    _ ≤ M + N := add_le_add (hu x) (hv x)
+
+lemma BoundedBy.smul {u : ℝ → ℝ} {M : ℝ} (c : ℝ) (hu : BoundedBy u M) :
+    BoundedBy (fun x => c * u x) (|c| * M) := by
+  intro x
+  rw [abs_mul]
+  exact mul_le_mul_of_nonneg_left (hu x) (abs_nonneg _)
+
+/-- The perturbation operator `(a(x)-a₀)·v(x)` is bounded in sup by `M·V` where
+`M` bounds the coefficient oscillation and `V` bounds `v`. -/
+lemma perturbation_op_sup_bound (acoef : ℝ → ℝ) (a0 : ℝ) (M : ℝ) (v : ℝ → ℝ) (V : ℝ)
+    (haM : ∀ x, |acoef x - a0| ≤ M) (hvV : ∀ x, |v x| ≤ V) (x : ℝ) :
+    |(acoef x - a0) * v x| ≤ M * V := by
+  have hMnn : 0 ≤ M := le_trans (abs_nonneg _) (haM x)
+  rw [abs_mul]
+  exact mul_le_mul (haM x) (hvV x) (abs_nonneg _) hMnn
+
+/-- The perturbation applied to the frozen second derivative:
+`|(a(x)-a₀)·∂ₓₓ(Gₐ₀f)(x)| ≤ M·C/(a₀·τ)`. -/
+lemma frozen_perturbation_deriv2_bound {a0 : ℝ} (ha0 : 0 < a0) {τ : ℝ} (hτ : 0 < τ)
+    (acoef : ℝ → ℝ) (M : ℝ) (haM : ∀ x, |acoef x - a0| ≤ M)
+    (f : ℝ → ℝ) (C : ℝ) (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) (x : ℝ) :
+    |(acoef x - a0) * deriv (deriv (fun z => frozenHeatSemigroup1D a0 τ f z)) x|
+      ≤ M * (C / (a0 * τ)) := by
+  rw [abs_mul]
+  exact mul_le_mul (haM x) (frozenHeatSemigroup1D_deriv2_rate ha0 hτ f C hfm hfb x)
+    (abs_nonneg _) (le_trans (abs_nonneg _) (haM x))
+
+/-- **Duhamel-term sup bound**: `|∫₀ᵗ H_{t-s}(g s) x ds| ≤ B·t` when `|g s y| ≤ B`. -/
+lemma duhamel_term_sup_bound (t : ℝ) (ht : 0 < t) (g : ℝ → ℝ → ℝ) (B : ℝ) (x : ℝ)
+    (hgm : ∀ s, AEStronglyMeasurable (g s)) (hB : 0 ≤ B)
+    (hgb : ∀ s y, |g s y| ≤ B)
+    (hint : MeasureTheory.IntegrableOn (fun s => heatSemigroup1D (t - s) (g s) x) (Set.Ioo 0 t)) :
+    |duhamelKernel1D t g x| ≤ B * t := by
+  unfold duhamelKernel1D
+  have hmeas : (volume (Set.Ioo (0 : ℝ) t)) < ∞ := by
+    rw [Real.volume_Ioo]; exact ENNReal.ofReal_lt_top
+  have hbound : ∀ s ∈ Set.Ioo (0 : ℝ) t, ‖heatSemigroup1D (t - s) (g s) x‖ ≤ B := by
+    intro s hs
+    have : |heatSemigroup1D (t - s) (g s) x| ≤ B :=
+      abs_heatSemigroup1D_le (sub_pos.mpr hs.2) x (fun y => hgb s y)
+    simpa [Real.norm_eq_abs] using this
+  have key := MeasureTheory.norm_setIntegral_le_of_norm_le_const hmeas hbound
+  rw [Real.norm_eq_abs] at key
+  have hvol : (volume.real (Set.Ioo (0 : ℝ) t)) = t := by
+    rw [Measure.real, Real.volume_Ioo, sub_zero, ENNReal.toReal_ofReal ht.le]
+  rw [hvol] at key
+  exact key
+
+/-- **Duhamel-term data stability** (the contraction core): if the two sources
+differ by at most `B` in sup, their Duhamel terms differ by at most `B·t`. -/
+lemma duhamel_term_data_stability (t : ℝ) (ht : 0 < t) (g h : ℝ → ℝ → ℝ) (B : ℝ) (x : ℝ)
+    (hgm : ∀ s, AEStronglyMeasurable (g s)) (hhm : ∀ s, AEStronglyMeasurable (h s))
+    (hB : 0 ≤ B) (hgh : ∀ s y, |g s y - h s y| ≤ B)
+    (hintg : MeasureTheory.IntegrableOn (fun s => heatSemigroup1D (t - s) (g s) x) (Set.Ioo 0 t))
+    (hinth : MeasureTheory.IntegrableOn (fun s => heatSemigroup1D (t - s) (h s) x) (Set.Ioo 0 t)) :
+    |duhamelKernel1D t g x - duhamelKernel1D t h x| ≤ B * t := by
+  unfold duhamelKernel1D
+  rw [← integral_sub hintg hinth]
+  have hper : ∀ s ∈ Set.Ioo (0 : ℝ) t,
+      ‖heatSemigroup1D (t - s) (g s) x - heatSemigroup1D (t - s) (h s) x‖ ≤ B := by
+    intro s hs
+    rw [Real.norm_eq_abs]
+    exact heatSemigroup1D_sub_holder (t - s) (sub_pos.mpr hs.2) (g s) (h s) B
+      (hgm s) (hhm s) (fun y => by rw [Real.norm_eq_abs]; exact hgh s y) x
+  have hmeas : (volume (Set.Ioo (0 : ℝ) t)).toReal = t := by
+    rw [Real.volume_Ioo]; simp [ENNReal.toReal_ofReal ht.le]
+  have hbound := MeasureTheory.norm_setIntegral_le_of_norm_le_const
+    (by rw [Real.volume_Ioo]; exact ENNReal.ofReal_lt_top)
+    hper
+  rw [Real.norm_eq_abs, Measure.real, hmeas] at hbound
+  exact hbound
+
+/-- Monotonicity of the accumulated contraction factor on `[0,T]`. -/
+lemma duhamel_contraction_factor_small {α : ℝ} (hα : 0 < α) (hα2 : α < 2) {t T : ℝ}
+    (ht : 0 < t) (htT : t ≤ T) (hT : 0 < T) :
+    t ^ (α / 2) / (α / 2) ≤ T ^ (α / 2) / (α / 2) :=
+  rpow_half_le_of_le hα ht htT
+
+/-- The contraction factor drops below `1` for small enough `T`. -/
+lemma duhamel_factor_lt_one_of_small {α : ℝ} (hα : 0 < α) (hα2 : α < 2) {T : ℝ}
+    (hT : 0 < T) (hTbound : T ^ (α / 2) < α / 2) :
+    T ^ (α / 2) / (α / 2) < 1 := by
+  rw [div_lt_one (by linarith)]
+  exact hTbound
+
+/-- **Duhamel-term Hölder bound** via the singular time-weight: the Hölder
+seminorm of the Duhamel term is controlled by the (finite) time-weight integral. -/
+lemma duhamel_term_holder_via_weight (t : ℝ) (ht : 0 < t) (g : ℝ → ℝ → ℝ) (B : ℝ)
+    (hgm : ∀ s, AEStronglyMeasurable (g s)) (hB : 0 ≤ B) (hgb : ∀ s y, |g s y| ≤ B)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1)
+    (hint : ∀ a b : ℝ, MeasureTheory.IntegrableOn
+      (fun s => heatSemigroup1D (t - s) (g s) a - heatSemigroup1D (t - s) (g s) b) (Set.Ioo 0 t))
+    (a b : ℝ) :
+    |duhamelKernel1D t g a - duhamelKernel1D t g b|
+      ≤ (∫ s in Set.Ioo 0 t, (2 * B) ^ (1 - α) * (B / Real.sqrt (π * (t - s))) ^ α) * |a - b| ^ α := by
+  have hweight : MeasureTheory.IntegrableOn (fun s => (t - s) ^ (-(α / 2))) (Set.Ioo 0 t) := by
+    have hr : (-1 : ℝ) < -(α / 2) := by linarith
+    have hbase : IntervalIntegrable (fun x : ℝ => x ^ (-(α / 2))) volume 0 t :=
+      intervalIntegral.intervalIntegrable_rpow' hr
+    have hcomp := hbase.comp_sub_left t
+    simp only [sub_zero, sub_self] at hcomp
+    exact (intervalIntegrable_iff_integrableOn_Ioo_of_le ht.le).mp hcomp.symm
+  have hKeq : Set.EqOn
+      (fun s => (2 * B) ^ (1 - α) * (B / Real.sqrt (π * (t - s))) ^ α)
+      (fun s => ((2 * B) ^ (1 - α) * (B / Real.sqrt π) ^ α) * (t - s) ^ (-(α / 2)))
+      (Set.Ioo 0 t) := by
+    intro s hs
+    have hu : 0 < t - s := sub_pos.mpr hs.2
+    have hupi : Real.sqrt (π * (t - s)) = Real.sqrt π * Real.sqrt (t - s) :=
+      Real.sqrt_mul Real.pi_nonneg _
+    have hsq : (Real.sqrt (t - s)) ^ α = (t - s) ^ (α / 2) := by
+      rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hu.le]
+      congr 1; ring
+    have hkey : (B / Real.sqrt (π * (t - s))) ^ α
+        = (B / Real.sqrt π) ^ α * (t - s) ^ (-(α / 2)) := by
+      rw [hupi, Real.div_rpow hB (by positivity), Real.div_rpow hB (Real.sqrt_nonneg _),
+        Real.mul_rpow (Real.sqrt_nonneg _) (Real.sqrt_nonneg _), hsq, Real.rpow_neg hu.le]
+      field_simp
+    show (2 * B) ^ (1 - α) * (B / Real.sqrt (π * (t - s))) ^ α
+        = ((2 * B) ^ (1 - α) * (B / Real.sqrt π) ^ α) * (t - s) ^ (-(α / 2))
+    rw [hkey]; ring
+  have hKint : MeasureTheory.IntegrableOn
+      (fun s => (2 * B) ^ (1 - α) * (B / Real.sqrt (π * (t - s))) ^ α) (Set.Ioo 0 t) :=
+    MeasureTheory.IntegrableOn.congr_fun
+      (hweight.const_mul ((2 * B) ^ (1 - α) * (B / Real.sqrt π) ^ α)) hKeq.symm measurableSet_Ioo
+  have hRHSint : MeasureTheory.IntegrableOn
+      (fun s => (2 * B) ^ (1 - α) * (B / Real.sqrt (π * (t - s))) ^ α * |a - b| ^ α) (Set.Ioo 0 t) :=
+    hKint.mul_const (|a - b| ^ α)
+  by_cases hAi : MeasureTheory.IntegrableOn
+      (fun s => heatSemigroup1D (t - s) (g s) a) (Set.Ioo 0 t)
+  · have hBi : MeasureTheory.IntegrableOn
+        (fun s => heatSemigroup1D (t - s) (g s) b) (Set.Ioo 0 t) :=
+      (hAi.sub (hint a b)).congr (Filter.Eventually.of_forall (fun s => by
+        simp only [Pi.sub_apply]; ring))
+    have hdiff : duhamelKernel1D t g a - duhamelKernel1D t g b
+        = ∫ s in Set.Ioo 0 t,
+            (heatSemigroup1D (t - s) (g s) a - heatSemigroup1D (t - s) (g s) b) := by
+      rw [duhamelKernel1D, duhamelKernel1D, ← integral_sub hAi hBi]
+    rw [hdiff, ← Real.norm_eq_abs]
+    calc ‖∫ s in Set.Ioo 0 t,
+            (heatSemigroup1D (t - s) (g s) a - heatSemigroup1D (t - s) (g s) b)‖
+        ≤ ∫ s in Set.Ioo 0 t,
+            ‖heatSemigroup1D (t - s) (g s) a - heatSemigroup1D (t - s) (g s) b‖ :=
+          norm_integral_le_integral_norm _
+      _ = ∫ s in Set.Ioo 0 t,
+            |heatSemigroup1D (t - s) (g s) a - heatSemigroup1D (t - s) (g s) b| := by
+          simp_rw [Real.norm_eq_abs]
+      _ ≤ ∫ s in Set.Ioo 0 t,
+            (2 * B) ^ (1 - α) * (B / Real.sqrt (π * (t - s))) ^ α * |a - b| ^ α :=
+          setIntegral_mono_on ((hint a b).abs) hRHSint measurableSet_Ioo
+            (fun s hs => heatSemigroup1D_holder_seminorm_bound (t - s) (sub_pos.mpr hs.2)
+              (g s) B (hgm s) (fun y => by rw [Real.norm_eq_abs]; exact hgb s y) hα0 hα1 a b)
+      _ = (∫ s in Set.Ioo 0 t, (2 * B) ^ (1 - α) * (B / Real.sqrt (π * (t - s))) ^ α) * |a - b| ^ α :=
+          MeasureTheory.integral_mul_const _ _
+  · have hBi : ¬ MeasureTheory.IntegrableOn
+        (fun s => heatSemigroup1D (t - s) (g s) b) (Set.Ioo 0 t) := by
+      intro hBi
+      exact hAi ((hBi.add (hint a b)).congr (Filter.Eventually.of_forall (fun s => by
+        simp only [Pi.add_apply]; ring)))
+    have hA0 : duhamelKernel1D t g a = 0 := by
+      rw [duhamelKernel1D]; exact integral_undef hAi
+    have hB0 : duhamelKernel1D t g b = 0 := by
+      rw [duhamelKernel1D]; exact integral_undef hBi
+    rw [hA0, hB0, sub_zero, abs_zero]
+    have hInt0 : 0 ≤ ∫ s in Set.Ioo 0 t, (2 * B) ^ (1 - α) * (B / Real.sqrt (π * (t - s))) ^ α :=
+      setIntegral_nonneg measurableSet_Ioo (fun s _ =>
+        mul_nonneg (Real.rpow_nonneg (mul_nonneg (by norm_num) hB) _)
+          (Real.rpow_nonneg (div_nonneg hB (Real.sqrt_nonneg _)) _))
+    exact mul_nonneg hInt0 (Real.rpow_nonneg (abs_nonneg _) _)
+
+/-- **Geometric-decay iterate bound** (Banach fixed-point engine): if `d` shrinks
+by a factor `θ < 1` at each step, then `d n ≤ θⁿ·d₀`. -/
+lemma contraction_iterate_bound {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) (d0 : ℝ) (hd0 : 0 ≤ d0)
+    (n : ℕ) (d : ℕ → ℝ) (hd : ∀ k, 0 ≤ d k) (h0 : d 0 ≤ d0)
+    (hstep : ∀ k, d (k + 1) ≤ θ * d k) :
+    d n ≤ θ ^ n * d0 := by
+  induction n with
+  | zero => simpa using h0
+  | succ m ih =>
+    calc d (m + 1) ≤ θ * d m := hstep m
+      _ ≤ θ * (θ ^ m * d0) := mul_le_mul_of_nonneg_left ih hθ0
+      _ = θ ^ (m + 1) * d0 := by rw [pow_succ]; ring
+
 end AnalyticPDE
 end RicciFlow
