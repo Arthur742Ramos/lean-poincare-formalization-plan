@@ -3603,5 +3603,113 @@ theorem exists_unique_fixedPoint_of_pointwise_contraction {θ : ℝ} (hθ0 : 0 �
     ∃! z : BoundedContinuousFunction ℝ ℝ, Φ z = z :=
   banach_fixedPoint_exists_unique Φ (contractingWith_of_pointwise hθ0 hθ1 Φ h)
 
+/-! ### Regularity-preserving fixed point (fixed point on a complete invariant set)
+
+For the genuine second-order perturbation the solution must stay in a regularity
+class (a closed ball of Hölder/Lipschitz-bounded functions) where the Duhamel
+term's second derivative is controlled. Closed subsets of `ℝ →ᵇ ℝ` are complete
+(`IsClosed.isComplete`), so the Banach fixed point runs on a forward-invariant
+closed ball, confining the solution to the regularity class — the function-space
+form of escaping the original C⁰ obstruction. -/
+
+/-- A closed subset of `ℝ →ᵇ ℝ` is complete. -/
+lemma isComplete_closed_bcf {s : Set (BoundedContinuousFunction ℝ ℝ)} (hs : IsClosed s) :
+    IsComplete s :=
+  hs.isComplete
+
+/-- `edist` between bounded continuous functions is never `∞`. -/
+lemma edist_ne_top_bcf (f g : BoundedContinuousFunction ℝ ℝ) : edist f g ≠ ∞ :=
+  edist_ne_top f g
+
+/-- A closed ball in `ℝ →ᵇ ℝ` is complete. -/
+lemma closedBall_isComplete (center : BoundedContinuousFunction ℝ ℝ) (R : ℝ) :
+    IsComplete (Metric.closedBall center R) :=
+  Metric.isClosed_closedBall.isComplete
+
+/-- A closed ball of nonnegative radius is nonempty. -/
+lemma closedBall_nonempty_of_nonneg (center : BoundedContinuousFunction ℝ ℝ) {R : ℝ} (hR : 0 ≤ R) :
+    (Metric.closedBall center R).Nonempty :=
+  ⟨center, by rw [Metric.mem_closedBall, dist_self]; exact hR⟩
+
+/-- `MapsTo` criterion for a closed ball via the distance characterization. -/
+lemma mapsTo_closedBall_of_dist
+    {Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ}
+    (center : BoundedContinuousFunction ℝ ℝ) (R : ℝ)
+    (h : ∀ f, dist f center ≤ R → dist (Φ f) center ≤ R) :
+    Set.MapsTo Φ (Metric.closedBall center R) (Metric.closedBall center R) := by
+  intro f hf
+  rw [Metric.mem_closedBall] at hf ⊢
+  exact h f hf
+
+/-- A contraction mapping a complete invariant set into itself has a fixed point in
+that set. -/
+lemma fixedPoint_on_invariant_set {K : ℝ≥0}
+    (Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (s : Set (BoundedContinuousFunction ℝ ℝ)) (hsc : IsComplete s) (hne : s.Nonempty)
+    (hmaps : Set.MapsTo Φ s s)
+    (hcontract : ContractingWith K (hmaps.restrict Φ s s)) :
+    ∃ z ∈ s, Φ z = z := by
+  have hx₀ : hne.choose ∈ s := hne.choose_spec
+  have hx : edist hne.choose (Φ hne.choose) ≠ ∞ := edist_ne_top _ _
+  rcases ContractingWith.exists_fixedPoint' hsc hmaps hcontract hx₀ hx with
+    ⟨y, hys, hyfix, _⟩
+  exact ⟨y, hys, hyfix⟩
+
+/-- A pointwise `θ < 1` contraction restricts to a `ContractingWith` on any invariant
+subset. -/
+lemma restrict_contracting_of_pointwise {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (s : Set (BoundedContinuousFunction ℝ ℝ)) (hmaps : Set.MapsTo Φ s s)
+    (h : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |Φ f x - Φ g x| ≤ θ * dist f g) :
+    ContractingWith (Real.toNNReal θ) (hmaps.restrict Φ s s) := by
+  refine ⟨?_, ?_⟩
+  · have hlt : ((Real.toNNReal θ : NNReal) : ℝ) < 1 := by
+      rw [Real.coe_toNNReal θ hθ0]; exact hθ1
+    exact_mod_cast hlt
+  · apply LipschitzWith.of_dist_le_mul
+    rintro ⟨f, hf⟩ ⟨g, hg⟩
+    have hcoe : ((Real.toNNReal θ : NNReal) : ℝ) = θ := Real.coe_toNNReal θ hθ0
+    rw [hcoe]
+    have hsub : dist (hmaps.restrict Φ s s ⟨f, hf⟩) (hmaps.restrict Φ s s ⟨g, hg⟩)
+        = dist (Φ f) (Φ g) := Subtype.dist_eq _ _
+    have hsub2 : dist (⟨f, hf⟩ : s) ⟨g, hg⟩ = dist f g := Subtype.dist_eq _ _
+    rw [hsub, hsub2]
+    rw [BoundedContinuousFunction.dist_le (by positivity)]
+    intro x
+    rw [Real.dist_eq]
+    exact h f g x
+
+/-- **Regularity-preserving existence + uniqueness**: a globally-pointwise
+contraction with a complete invariant set `s` has a unique fixed point, and it lies
+in `s`. The solution is confined to the regularity class `s`. -/
+lemma exists_unique_fixedPoint_in_set {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (s : Set (BoundedContinuousFunction ℝ ℝ)) (hsc : IsComplete s) (hne : s.Nonempty)
+    (hmaps : Set.MapsTo Φ s s)
+    (h : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |Φ f x - Φ g x| ≤ θ * dist f g) :
+    ∃! z, z ∈ s ∧ Φ z = z := by
+  have hΦglobal : ContractingWith (Real.toNNReal θ) Φ := contractingWith_of_pointwise hθ0 hθ1 Φ h
+  have hrestrict : ContractingWith (Real.toNNReal θ) (hmaps.restrict Φ s s) :=
+    restrict_contracting_of_pointwise hθ0 hθ1 Φ s hmaps h
+  obtain ⟨x0, hx0⟩ := hne
+  obtain ⟨z, hzs, hzfix, -⟩ :=
+    ContractingWith.exists_fixedPoint' hsc hmaps hrestrict hx0 (edist_ne_top _ _)
+  have hglobal : ∃! w, Φ w = w := banach_fixedPoint_exists_unique Φ hΦglobal
+  refine ⟨z, ⟨hzs, hzfix⟩, ?_⟩
+  rintro w ⟨hws, hwfix⟩
+  exact hglobal.unique hwfix hzfix
+
+/-- A-priori geometric convergence rate of the Picard iterates to the unique fixed
+point: `dist x z* ≤ dist x (Φ x) / (1 - θ)`. -/
+lemma dist_fixedPoint_le_of_contraction {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (h : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |Φ f x - Φ g x| ≤ θ * dist f g)
+    (x : BoundedContinuousFunction ℝ ℝ) :
+    dist x (ContractingWith.fixedPoint Φ (contractingWith_of_pointwise hθ0 hθ1 Φ h))
+      ≤ dist x (Φ x) / (1 - θ) := by
+  have hΦ := contractingWith_of_pointwise hθ0 hθ1 Φ h
+  have := hΦ.dist_fixedPoint_le x
+  rwa [show ((θ.toNNReal : ℝ)) = θ from Real.coe_toNNReal θ hθ0] at this
+
 end AnalyticPDE
 end RicciFlow
