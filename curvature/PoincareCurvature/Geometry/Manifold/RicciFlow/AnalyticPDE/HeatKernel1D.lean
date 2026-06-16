@@ -3393,5 +3393,103 @@ lemma contraction_iterate_bound {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) (d0
       _ ≤ θ * (θ ^ m * d0) := mul_le_mul_of_nonneg_left ih hθ0
       _ = θ ^ (m + 1) * d0 := by rw [pow_succ]; ring
 
+/-! ### Picard fixed-point assembly (abstract short-time existence)
+
+The Duhamel contraction estimates assemble into Banach fixed-point convergence:
+a real sequence whose consecutive distances contract by `θ < 1` is Cauchy, hence
+converges (ℝ complete). Applied to the Picard iteration `uₙ₊₁ = baseline +
+Duhamel(perturbation of uₙ)`, with per-step factor `B·T < 1` for small `T`, this
+gives short-time existence for the scalar variable-coefficient parabolic model. -/
+
+/-- A real sequence with geometric consecutive-distance decay is Cauchy. -/
+lemma cauchySeq_of_geometric_real (f : ℕ → ℝ) (C r : ℝ) (hC : 0 ≤ C) (hr0 : 0 ≤ r) (hr1 : r < 1)
+    (hstep : ∀ n, |f n - f (n + 1)| ≤ C * r ^ n) : CauchySeq f := by
+  apply cauchySeq_of_le_geometric r C hr1
+  intro n
+  rw [Real.dist_eq]
+  exact hstep n
+
+/-- A real Cauchy sequence converges (`ℝ` is complete). -/
+lemma cauchySeq_tendsto_real (f : ℕ → ℝ) (hf : CauchySeq f) :
+    ∃ a : ℝ, Filter.Tendsto f Filter.atTop (nhds a) :=
+  cauchySeq_tendsto_of_complete hf
+
+/-- One-step contraction ⇒ geometric decay of consecutive distances. -/
+lemma iterate_dist_geometric_of_contraction {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (f : ℕ → ℝ) (D : ℝ) (hD : 0 ≤ D)
+    (h0 : |f 0 - f 1| ≤ D)
+    (hcontract : ∀ n, |f (n + 1) - f (n + 2)| ≤ θ * |f n - f (n + 1)|) :
+    ∀ n, |f n - f (n + 1)| ≤ D * θ ^ n := by
+  intro n
+  have key := contraction_iterate_bound hθ0 hθ1 D hD n
+    (fun n => |f n - f (n + 1)|) (fun k => abs_nonneg _) h0 hcontract
+  rw [mul_comm] at key
+  exact key
+
+/-- A real sequence whose consecutive distances contract by `θ < 1` is Cauchy. -/
+lemma cauchySeq_of_contraction_real {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (f : ℕ → ℝ) (D : ℝ) (hD : 0 ≤ D)
+    (h0 : |f 0 - f 1| ≤ D)
+    (hcontract : ∀ n, |f (n + 1) - f (n + 2)| ≤ θ * |f n - f (n + 1)|) :
+    CauchySeq f := by
+  set d : ℕ → ℝ := fun k => |f k - f (k + 1)| with hd_def
+  have hd_nonneg : ∀ k, 0 ≤ d k := fun k => abs_nonneg _
+  have hstep : ∀ k, d (k + 1) ≤ θ * d k := by
+    intro k
+    simpa [hd_def] using hcontract k
+  have hgeo : ∀ n, d n ≤ θ ^ n * D :=
+    fun n => contraction_iterate_bound hθ0 hθ1 D hD n d hd_nonneg h0 hstep
+  refine cauchySeq_of_le_geometric θ D hθ1 ?_
+  intro n
+  rw [Real.dist_eq]
+  calc |f n - f (n + 1)| = d n := by rw [hd_def]
+    _ ≤ θ ^ n * D := hgeo n
+    _ = D * θ ^ n := by rw [mul_comm]
+
+/-- The geometric error tends to `0`. -/
+lemma tendsto_geometric_error {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) (D : ℝ) :
+    Filter.Tendsto (fun n => D * θ ^ n) Filter.atTop (nhds 0) := by
+  have h := tendsto_pow_atTop_nhds_zero_of_lt_one hθ0 hθ1
+  have := h.const_mul D
+  simpa using this
+
+/-- The Picard update value `baseline + Duhamel(g)` at a point. -/
+noncomputable def picardValue (baseline : ℝ) (t : ℝ) (g : ℝ → ℝ → ℝ) (x : ℝ) : ℝ :=
+  baseline + duhamelKernel1D t g x
+
+lemma picardValue_sub (baseline : ℝ) (t : ℝ) (g h : ℝ → ℝ → ℝ) (x : ℝ) :
+    picardValue baseline t g x - picardValue baseline t h x
+      = duhamelKernel1D t g x - duhamelKernel1D t h x := by
+  unfold picardValue; ring
+
+/-- The Picard update is a contraction with factor `B·t` in the source difference. -/
+lemma picardValue_contraction (baseline : ℝ) (t : ℝ) (ht : 0 < t) (g h : ℝ → ℝ → ℝ) (B : ℝ)
+    (x : ℝ)
+    (hgm : ∀ s, AEStronglyMeasurable (g s)) (hhm : ∀ s, AEStronglyMeasurable (h s))
+    (hB : 0 ≤ B) (hgh : ∀ s y, |g s y - h s y| ≤ B)
+    (hintg : MeasureTheory.IntegrableOn (fun s => heatSemigroup1D (t - s) (g s) x) (Set.Ioo 0 t))
+    (hinth : MeasureTheory.IntegrableOn (fun s => heatSemigroup1D (t - s) (h s) x) (Set.Ioo 0 t)) :
+    |picardValue baseline t g x - picardValue baseline t h x| ≤ B * t := by
+  rw [picardValue_sub]
+  exact duhamel_term_data_stability t ht g h B x hgm hhm hB hgh hintg hinth
+
+/-- The per-step factor `B·T` is a genuine contraction factor (`∈ [0,1)`) for
+`T < 1/B`. -/
+lemma contraction_factor_props (B T : ℝ) (hB : 0 < B) (hT : 0 < T) (hsmall : T < 1 / B) :
+    0 ≤ B * T ∧ B * T < 1 := by
+  refine ⟨mul_nonneg hB.le hT.le, ?_⟩
+  have h : T * B < (1 / B) * B := mul_lt_mul_of_pos_right hsmall hB
+  rw [one_div, inv_mul_cancel₀ (ne_of_gt hB)] at h
+  linarith [mul_comm B T]
+
+/-- **The Picard iteration converges** (abstract short-time existence at a point):
+any sequence satisfying the one-step contraction has a limit. -/
+lemma picard_sequence_converges {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (u : ℕ → ℝ) (D : ℝ) (hD : 0 ≤ D)
+    (h0 : |u 0 - u 1| ≤ D)
+    (hcontract : ∀ n, |u (n + 1) - u (n + 2)| ≤ θ * |u n - u (n + 1)|) :
+    ∃ ulim : ℝ, Filter.Tendsto u Filter.atTop (nhds ulim) :=
+  cauchySeq_tendsto_of_complete (cauchySeq_of_contraction_real hθ0 hθ1 u D hD h0 hcontract)
+
 end AnalyticPDE
 end RicciFlow
