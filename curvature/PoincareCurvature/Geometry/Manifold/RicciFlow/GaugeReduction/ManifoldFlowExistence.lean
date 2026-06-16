@@ -24,6 +24,7 @@ import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 import Mathlib.Topology.Compactness.Compact
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
+import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 
 open scoped Manifold Topology
 open Set Filter
@@ -346,5 +347,105 @@ theorem isTimeDependentIntegralCurve_of_autonomous_of_fst {E H M : Type*} [Norme
     ∀ t ∈ s, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => (Γ τ).2) s t
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t ((Γ t).2))) :=
   isTimeDependentIntegralCurve_of_autonomous (autonomous_fst_eq_id hs h0 hconn hΓ0 hΓ) hΓ
+
+/-! ### Time-dependent integral-curve existence and uniqueness
+
+Assembling the flow box on `ℝ × M` with the autonomization bridge gives existence
+and uniqueness of time-dependent integral curves on a (boundaryless, T2) manifold.
+Existence uses the *non-compact* flow box per start point (since `ℝ × M` is never
+compact); uniqueness uses mathlib's autonomous uniqueness on the product. -/
+
+/-- **Per-point time-dependent local existence.** For a jointly-`C¹` time-dependent
+field `X` on a boundaryless complete manifold, every start point `x` (at time `0`)
+admits a time-dependent integral curve of `X` on some `Ioo (-ε) ε`. -/
+theorem exists_timeDependent_integralCurve {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    (x : M) :
+    ∃ ε > 0, ∃ γ : ℝ → M, γ 0 = x ∧
+      ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ (Set.Ioo (-ε) ε) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))) := by
+  obtain ⟨U, hU, ε, hε, hcurve⟩ := exists_nhds_uniform_integralCurve (I := (𝓘(ℝ, ℝ)).prod I) hX (0, x)
+  have hmem : ((0 : ℝ), x) ∈ U := mem_of_mem_nhds hU
+  obtain ⟨Γ, hΓ0, hΓint⟩ := hcurve ((0 : ℝ), x) hmem
+  refine ⟨ε, hε, fun τ => (Γ τ).2, ?_, ?_⟩
+  · show (Γ 0).2 = x
+    rw [hΓ0]
+  · have h0 : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_neg_of_pos hε, hε⟩
+    have hΓ0fst : (Γ 0).1 = 0 := by rw [hΓ0]
+    refine isTimeDependentIntegralCurve_of_autonomous_of_fst
+      isOpen_Ioo h0 isPreconnected_Ioo hΓ0fst ?_
+    intro t ht
+    exact hΓint t ht
+
+/-- The continuous-linear-map identity underlying the lift of an `M`-curve to the
+product manifold: `(id, (1).smulRight v) = (1).smulRight (1, v)`. -/
+private theorem timeDependent_lift_clm {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E']
+    (v : E') :
+    (ContinuousLinearMap.id ℝ ℝ).prod ((1 : ℝ →L[ℝ] ℝ).smulRight v)
+      = (1 : ℝ →L[ℝ] ℝ).smulRight ((1, v) : ℝ × E') := by
+  apply ContinuousLinearMap.ext
+  intro r
+  simp [ContinuousLinearMap.prod_apply, ContinuousLinearMap.smulRight_apply]
+
+/-- **Reverse autonomization lift.** A time-dependent integral curve `γ` of `X` on
+`M` lifts to an autonomous integral curve `τ ↦ (τ, γ τ)` of `(1, X)` on `ℝ × M`. -/
+theorem autonomousLift_hasMFDerivWithinAt {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M]
+    {X : ℝ → (x : M) → TangentSpace I x} {γ : ℝ → M} {s : Set ℝ} {t : ℝ} (ht : t ∈ s)
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t)))) :
+    HasMFDerivWithinAt (𝓘(ℝ, ℝ)) ((𝓘(ℝ, ℝ)).prod I) (fun τ => (τ, γ τ)) s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (((1 : ℝ), X t (γ t)) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (t, γ t))) := by
+  have hid : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) (id : ℝ → ℝ) s t
+      (ContinuousLinearMap.id ℝ ℝ) := hasMFDerivWithinAt_id s t
+  have h := hid.prodMk hγ
+  refine h.congr_mfderiv ?_
+  refine ContinuousLinearMap.ext fun r => ?_
+  refine Prod.ext ?_ rfl
+  rw [ContinuousLinearMap.prod_apply]
+  show (ContinuousLinearMap.id ℝ ℝ) r
+      = ((1 : ℝ →L[ℝ] ℝ) r • ((1 : ℝ), X t (γ t)) : ℝ × TangentSpace I (γ t)).1
+  rw [ContinuousLinearMap.id_apply, Prod.smul_fst, ContinuousLinearMap.one_apply,
+    smul_eq_mul, mul_one]
+
+/-- **Uniqueness of time-dependent integral curves.** Two time-dependent integral
+curves of a jointly-`C¹` field `X` on a boundaryless T2 manifold that agree at
+`t = 0` agree throughout `Ioo a b` (with `0 ∈ Ioo a b`). Proved by lifting to
+autonomous curves on `ℝ × M` and applying mathlib's autonomous uniqueness. -/
+theorem timeDependent_integralCurve_unique {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {γ γ' : ℝ → M} {a b : ℝ} (hab : (0 : ℝ) ∈ Set.Ioo a b)
+    (hγ : ∀ t ∈ Set.Ioo a b, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ (Set.Ioo a b) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    (hγ' : ∀ t ∈ Set.Ioo a b, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ' (Set.Ioo a b) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ' t))))
+    (h0 : γ 0 = γ' 0) :
+    Set.EqOn γ γ' (Set.Ioo a b) := by
+  set w : (x : ℝ × M) → TangentSpace ((𝓘(ℝ, ℝ)).prod I) x :=
+    fun p => ((1 : ℝ), X p.1 p.2) with hw
+  set Γ : ℝ → ℝ × M := fun t => (t, γ t) with hΓdef
+  set Γ' : ℝ → ℝ × M := fun t => (t, γ' t) with hΓ'def
+  have hΓint : IsMIntegralCurveOn Γ w (Set.Ioo a b) := by
+    intro t ht
+    exact autonomousLift_hasMFDerivWithinAt ht (hγ t ht)
+  have hΓ'int : IsMIntegralCurveOn Γ' w (Set.Ioo a b) := by
+    intro t ht
+    exact autonomousLift_hasMFDerivWithinAt ht (hγ' t ht)
+  have hv : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun x => (⟨x, w x⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))) := hX
+  have hstart : Γ 0 = Γ' 0 := by simp [hΓdef, hΓ'def, h0]
+  have heq : Set.EqOn Γ Γ' (Set.Ioo a b) :=
+    isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless hab hv hΓint hΓ'int hstart
+  intro t ht
+  have h2 : (Γ t).2 = (Γ' t).2 := by rw [heq ht]
+  simpa [hΓdef, hΓ'def] using h2
 
 end PoincareCurvature.ManifoldFlow
