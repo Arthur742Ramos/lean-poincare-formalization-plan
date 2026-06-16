@@ -4511,5 +4511,23 @@ lemma ode_solution_unique {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
         (fun x hx => ⟨le_trans hs.1 hx.1, le_of_lt hx.2⟩)
   exact key ht
 
+/-- **Existence + uniqueness of the evolution** for a bounded + Lipschitz field on a
+complete normed space: there is a solution `α` with `α 0 = x0` solving the ODE, and
+any two solutions with the same initial value agree. This is the abstract
+existence-and-uniqueness shape the local Ricci-flow package needs — fully satisfiable
+for a bounded-Lipschitz (top-derivative-state) operator. -/
+theorem bounded_lipschitz_evolution_exists_unique
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    (g : E → E) (x0 : E) {T : ℝ} (hT : 0 < T) {L K : ℝ≥0}
+    (hbound : ∀ x, ‖g x‖ ≤ (L : ℝ)) (hlip : LipschitzWith K g) :
+    (∃ α : ℝ → E, α 0 = x0 ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (g (α t)) (Set.Icc 0 T) t)) ∧
+    (∀ α β : ℝ → E, α 0 = β 0 →
+      (∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (g (α t)) (Set.Icc 0 T) t) →
+      (∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt β (g (β t)) (Set.Icc 0 T) t) →
+      ∀ t ∈ Set.Icc (0 : ℝ) T, α t = β t) :=
+  ⟨bounded_lipschitz_evolution_exists g x0 hT hbound hlip,
+   fun α β hαβ hα hβ t ht => ode_solution_unique g K hlip T α β hαβ hα hβ t ht⟩
+
 end AnalyticPDE
 end RicciFlow
