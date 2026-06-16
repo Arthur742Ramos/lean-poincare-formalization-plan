@@ -4271,5 +4271,109 @@ lemma exists_c2_with_initial_data (w : ℝ → ℝ) (hw : Continuous w) (u0 v0 :
     exact ((hasDerivAt_antideriv w hw x).add_const v0).deriv
   · simp [doubleAntideriv, antideriv]
 
+/-! ### Vector-valued (system) second-order existence
+
+The Ricci–DeTurck equation is a SYSTEM: the metric tensor has many components, each
+a real function. The unknown is vector-valued, `ℝ → (Fin n → ℝ)`, living in the
+complete space `ℝ →ᵇ (Fin n → ℝ)`. Since `Fin n → ℝ` is a complete normed space, the
+abstract Banach fixed point applies directly, and the scalar second-order existence
++ classical recovery lift componentwise to the system. -/
+
+/-- The vector BCF space is nonempty and complete. -/
+lemma vector_bcf_instances (n : ℕ) :
+    Nonempty (BoundedContinuousFunction ℝ (Fin n → ℝ)) ∧
+    CompleteSpace (BoundedContinuousFunction ℝ (Fin n → ℝ)) :=
+  ⟨⟨0⟩, inferInstance⟩
+
+/-- System Banach existence + uniqueness (the generic theorem on the vector BCF). -/
+lemma vector_banach_fixedPoint_exists_unique (n : ℕ) {K : ℝ≥0}
+    (Φ : BoundedContinuousFunction ℝ (Fin n → ℝ) → BoundedContinuousFunction ℝ (Fin n → ℝ))
+    (hΦ : ContractingWith K Φ) :
+    ∃! z : BoundedContinuousFunction ℝ (Fin n → ℝ), Φ z = z :=
+  banach_fixedPoint_exists_unique Φ hΦ
+
+/-- Pointwise ⇒ sup-distance for vector BCF. -/
+lemma vector_bcf_dist_le (n : ℕ) (f g : BoundedContinuousFunction ℝ (Fin n → ℝ)) (C : ℝ)
+    (hC : 0 ≤ C) (h : ∀ x, dist (f x) (g x) ≤ C) : dist f g ≤ C := by
+  rw [BoundedContinuousFunction.dist_le hC]
+  exact h
+
+/-- A pointwise `θ < 1` contraction packages into `ContractingWith` on vector BCF. -/
+lemma vector_contractingWith_of_pointwise (n : ℕ) {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (Φ : BoundedContinuousFunction ℝ (Fin n → ℝ) → BoundedContinuousFunction ℝ (Fin n → ℝ))
+    (h : ∀ f g : BoundedContinuousFunction ℝ (Fin n → ℝ), ∀ x, dist (Φ f x) (Φ g x) ≤ θ * dist f g) :
+    ContractingWith (Real.toNNReal θ) Φ := by
+  refine ⟨?_, ?_⟩
+  · have hlt : ((Real.toNNReal θ : NNReal) : ℝ) < 1 := by rw [Real.coe_toNNReal θ hθ0]; exact hθ1
+    exact_mod_cast hlt
+  · apply LipschitzWith.of_dist_le_mul
+    intro f g
+    have hcoe : ((Real.toNNReal θ : NNReal) : ℝ) = θ := Real.coe_toNNReal θ hθ0
+    rw [hcoe, BoundedContinuousFunction.dist_le (by positivity)]
+    intro x
+    exact h f g x
+
+/-- System affine existence + uniqueness `∃! z, a + L z = z` for a contraction `L`. -/
+lemma vector_affine_fixedPoint_exists_unique (n : ℕ) (a : BoundedContinuousFunction ℝ (Fin n → ℝ))
+    {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (L : BoundedContinuousFunction ℝ (Fin n → ℝ) → BoundedContinuousFunction ℝ (Fin n → ℝ))
+    (hL : ∀ f g : BoundedContinuousFunction ℝ (Fin n → ℝ), ∀ x, dist (L f x) (L g x) ≤ θ * dist f g) :
+    ∃! z : BoundedContinuousFunction ℝ (Fin n → ℝ), a + L z = z := by
+  have hcontr : ∀ f g : BoundedContinuousFunction ℝ (Fin n → ℝ), ∀ x,
+      dist ((fun z => a + L z) f x) ((fun z => a + L z) g x) ≤ θ * dist f g := by
+    intro f g x
+    rw [BoundedContinuousFunction.add_apply, BoundedContinuousFunction.add_apply,
+      dist_add_left (a x) (L f x) (L g x)]
+    exact hL f g x
+  exact banach_fixedPoint_exists_unique (fun z => a + L z)
+    (vector_contractingWith_of_pointwise n hθ0 hθ1 _ hcontr)
+
+/-- Componentwise classical recovery: a continuous vector function `w` is the
+componentwise second derivative of a vector C² function. -/
+lemma vector_exists_c2_with_second_deriv (n : ℕ) (w : ℝ → (Fin n → ℝ)) (hw : Continuous w) :
+    ∃ u : ℝ → (Fin n → ℝ), ∀ i x, deriv (deriv (fun s => u s i)) x = w x i := by
+  have hcomp : ∀ i, ∃ ui : ℝ → ℝ, ∀ x, deriv (deriv ui) x = w x i := by
+    intro i
+    obtain ⟨ui, hui, _⟩ := exists_c2_with_second_deriv (fun x => w x i) ((continuous_apply i).comp hw)
+    exact ⟨ui, hui⟩
+  choose U hU using hcomp
+  exact ⟨fun s i => U i s, fun i x => hU i x⟩
+
+/-- **System second-order existence + uniqueness**: for a contraction perturbation
+`S₀` with factor `M/t < 1`, the system equation `w = β + S₀(w)` has a unique
+solution in `ℝ →ᵇ (Fin n → ℝ)` — the multi-component (metric-tensor) lift. -/
+theorem vector_second_order_fixedPoint_exists_unique (n : ℕ)
+    (β : BoundedContinuousFunction ℝ (Fin n → ℝ)) {M t : ℝ}
+    (hM : 0 ≤ M) (ht : 0 < t) (hsmall : M < t)
+    (S0 : BoundedContinuousFunction ℝ (Fin n → ℝ) → BoundedContinuousFunction ℝ (Fin n → ℝ))
+    (hS0 : ∀ w w' : BoundedContinuousFunction ℝ (Fin n → ℝ), ∀ x,
+      dist (S0 w x) (S0 w' x) ≤ (M / t) * dist w w') :
+    ∃! z : BoundedContinuousFunction ℝ (Fin n → ℝ), β + S0 z = z := by
+  obtain ⟨h0, h1⟩ := second_order_contraction_factor M t hM ht hsmall
+  exact vector_affine_fixedPoint_exists_unique n β h0 h1 S0 hS0
+
+/-- Constructive system existence: the Picard iterates for the system second-order
+equation converge to the unique solution. -/
+theorem vector_second_order_iterate_tendsto (n : ℕ)
+    (β : BoundedContinuousFunction ℝ (Fin n → ℝ)) {M t : ℝ}
+    (hM : 0 ≤ M) (ht : 0 < t) (hsmall : M < t)
+    (S0 : BoundedContinuousFunction ℝ (Fin n → ℝ) → BoundedContinuousFunction ℝ (Fin n → ℝ))
+    (hS0 : ∀ w w' : BoundedContinuousFunction ℝ (Fin n → ℝ), ∀ x,
+      dist (S0 w x) (S0 w' x) ≤ (M / t) * dist w w')
+    (w0 : BoundedContinuousFunction ℝ (Fin n → ℝ)) :
+    ∃ z : BoundedContinuousFunction ℝ (Fin n → ℝ), (β + S0 z = z) ∧
+      Filter.Tendsto (fun k => (fun w => β + S0 w)^[k] w0) Filter.atTop (nhds z) := by
+  obtain ⟨h0, h1⟩ := second_order_contraction_factor M t hM ht hsmall
+  have hpt : ∀ f g : BoundedContinuousFunction ℝ (Fin n → ℝ), ∀ x,
+      dist ((fun w => β + S0 w) f x) ((fun w => β + S0 w) g x) ≤ (M / t) * dist f g := by
+    intro f g x
+    rw [BoundedContinuousFunction.add_apply, BoundedContinuousFunction.add_apply,
+      dist_add_left (β x) (S0 f x) (S0 g x)]
+    exact hS0 f g x
+  have hΦ : ContractingWith (Real.toNNReal (M / t)) (fun w => β + S0 w) :=
+    vector_contractingWith_of_pointwise n h0 h1 _ hpt
+  exact ⟨ContractingWith.fixedPoint _ hΦ, hΦ.fixedPoint_isFixedPt,
+    hΦ.tendsto_iterate_fixedPoint w0⟩
+
 end AnalyticPDE
 end RicciFlow
