@@ -21,6 +21,7 @@ that neighborhood-uniform local existence lemma is the precise next increment.
 -/
 import Mathlib.Geometry.Manifold.IntegralCurve.UniformTime
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
+import Mathlib.Geometry.Manifold.IntegralCurve.Transform
 import Mathlib.Topology.Compactness.Compact
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
@@ -447,5 +448,66 @@ theorem timeDependent_integralCurve_unique {E H M : Type*} [NormedAddCommGroup E
   intro t ht
   have h2 : (Γ t).2 = (Γ' t).2 := by rw [heq ht]
   simpa [hΓdef, hΓ'def] using h2
+
+/-! ### Flow group law and mutual inverse
+
+For an *autonomous* `C¹` field on a boundaryless T2 manifold, the flow `Φ` (with
+`Φ 0 x = x` and each `τ ↦ Φ τ x` an integral curve) satisfies the group law
+`Φ (s+t) = Φ s ∘ Φ t`, hence `Φ t` and `Φ (-t)` are mutual inverses. These follow
+from integral-curve *uniqueness* alone — no smooth dependence on the initial
+condition is needed — and supply the mutual-inverse data that
+`SmoothSelfDiffeomorph3Family.ofInverse` consumes. -/
+
+/-- **Flow group law.** For an autonomous `C¹` field, the flow satisfies
+`Φ (s + t) x = Φ s (Φ t x)`, by uniqueness of the integral curve through `Φ t x`. -/
+theorem flow_group_law {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [BoundarylessManifold I M] [T2Space M]
+    {v : (x : M) → TangentSpace I x}
+    (hv : ContMDiff I I.tangent 1 (fun x => (⟨x, v x⟩ : TangentBundle I M)))
+    {Φ : ℝ → M → M}
+    (hanchor : ∀ x, Φ 0 x = x)
+    (hcurve : ∀ x, IsMIntegralCurve (fun t => Φ t x) v)
+    (s t : ℝ) (x : M) :
+    Φ (s + t) x = Φ s (Φ t x) := by
+  have hγ1 : IsMIntegralCurve (fun τ => Φ (τ + t) x) v := by
+    have h := (hcurve x).comp_add t
+    convert h using 1
+  have hγ2 : IsMIntegralCurve (fun τ => Φ τ (Φ t x)) v := hcurve (Φ t x)
+  have heq : (fun τ => Φ (τ + t) x) = (fun τ => Φ τ (Φ t x)) :=
+    isMIntegralCurve_eq_of_contMDiff (t₀ := 0)
+      (fun τ => BoundarylessManifold.isInteriorPoint) hv hγ1 hγ2
+      (by simp [hanchor])
+  exact congrFun heq s
+
+/-- The flow's left/right inverses from the group law (pure algebra). -/
+theorem flow_leftInverse {M : Type*} {Φ : ℝ → M → M}
+    (hanchor : ∀ x, Φ 0 x = x)
+    (hgroup : ∀ (s t : ℝ) (x : M), Φ (s + t) x = Φ s (Φ t x)) (t : ℝ) :
+    Function.LeftInverse (Φ (-t)) (Φ t) :=
+  fun x => by rw [← hgroup (-t) t x, neg_add_cancel, hanchor]
+
+theorem flow_rightInverse {M : Type*} {Φ : ℝ → M → M}
+    (hanchor : ∀ x, Φ 0 x = x)
+    (hgroup : ∀ (s t : ℝ) (x : M), Φ (s + t) x = Φ s (Φ t x)) (t : ℝ) :
+    Function.RightInverse (Φ (-t)) (Φ t) :=
+  fun x => by rw [← hgroup t (-t) x, add_neg_cancel, hanchor]
+
+/-- **The complete mutual-inverse package** for `SmoothSelfDiffeomorph3Family.ofInverse`:
+from the flow's defining properties, both `Φ t` and `Φ (-t)` are mutual inverses for
+every `t`. Derived from integral-curve uniqueness; no smooth dependence needed. -/
+theorem flow_inverse_package {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [BoundarylessManifold I M] [T2Space M]
+    {v : (x : M) → TangentSpace I x}
+    (hv : ContMDiff I I.tangent 1 (fun x => (⟨x, v x⟩ : TangentBundle I M)))
+    {Φ : ℝ → M → M}
+    (hanchor : ∀ x, Φ 0 x = x)
+    (hcurve : ∀ x, IsMIntegralCurve (fun t => Φ t x) v) :
+    (∀ t, Function.LeftInverse (Φ (-t)) (Φ t)) ∧ (∀ t, Function.RightInverse (Φ (-t)) (Φ t)) := by
+  have hgroup : ∀ (s t : ℝ) (x : M), Φ (s + t) x = Φ s (Φ t x) :=
+    fun s t x => flow_group_law hv hanchor hcurve s t x
+  exact ⟨fun t => flow_leftInverse hanchor hgroup t,
+         fun t => flow_rightInverse hanchor hgroup t⟩
 
 end PoincareCurvature.ManifoldFlow
