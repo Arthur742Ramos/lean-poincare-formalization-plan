@@ -3591,5 +3591,17 @@ lemma bounded_zeroth_order_contraction_factor (Mc t : ℝ) (hMc : 0 < Mc) (ht : 
     0 ≤ Mc * t ∧ Mc * t < 1 :=
   contraction_factor_props Mc t hMc ht hsmall
 
+/-- **Abstract short-time existence + uniqueness for a contraction iteration map.**
+Any self-map `Φ` of `ℝ →ᵇ ℝ` satisfying the pointwise contraction estimate
+`|Φ f x − Φ g x| ≤ θ·dist f g` with `θ < 1` has a unique fixed point. This is the
+packaged Banach engine the variable-coefficient (and ultimately Ricci–DeTurck)
+solution operators instantiate: existence and uniqueness in one statement, on the
+complete function space. -/
+theorem exists_unique_fixedPoint_of_pointwise_contraction {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
+    (Φ : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (h : ∀ f g : BoundedContinuousFunction ℝ ℝ, ∀ x, |Φ f x - Φ g x| ≤ θ * dist f g) :
+    ∃! z : BoundedContinuousFunction ℝ ℝ, Φ z = z :=
+  banach_fixedPoint_exists_unique Φ (contractingWith_of_pointwise hθ0 hθ1 Φ h)
+
 end AnalyticPDE
 end RicciFlow
