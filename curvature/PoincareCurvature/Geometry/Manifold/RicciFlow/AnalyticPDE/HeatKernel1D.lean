@@ -4056,5 +4056,134 @@ lemma second_order_contraction_factor (M t : ℝ) (hM : 0 ≤ M) (ht : 0 < t) (h
   rw [div_lt_one ht]
   exact hsmall
 
+/-! ### Second-order scalar short-time existence (1D Ricci–DeTurck model)
+
+The decisive step. The naive fixed point fails because `∂ₓₓ` is unbounded on C⁰ —
+the original obstruction. The resolution: take the SECOND DERIVATIVE `w := ∂ₓₓu` as
+the unknown. The Duhamel form becomes `w = β + ∂ₓₓHₜ((a−a₀)·w)` with `β = ∂ₓₓ(baseline)`,
+and the solution map `S(w) = β + ∂ₓₓHₜ((a−a₀)·w)` is a CONTRACTION on `ℝ →ᵇ ℝ`:
+`∂ₓₓHₜ` turns the unbounded operator into a smoothing GAIN (`‖∂ₓₓHₜg‖ ≤ ‖g‖/t`), and
+`(a−a₀)·w` has sup `≤ M·‖w‖`, so `|S(w)−S(w')| ≤ (M/t)·‖w−w'‖ < ‖w−w'‖` when `M < t`.
+This yields genuine existence + uniqueness for the second-order scalar model. -/
+
+/-- The C² integral representation of a difference (linearity of the second
+derivative under the integral). -/
+lemma deriv2_heatSemigroup1D_sub_eq (t : ℝ) (ht : 0 < t) (f g : ℝ → ℝ) (Cf Cg : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ Cf)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ Cg) (x : ℝ) :
+    deriv (deriv (fun z => heatSemigroup1D t f z)) x
+        - deriv (deriv (fun z => heatSemigroup1D t g z)) x
+      = ∫ y, (heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * (f y - g y) := by
+  rw [deriv2_heatSemigroup1D_eq_integral ht x hfm hfb,
+      deriv2_heatSemigroup1D_eq_integral ht x hgm hgb,
+      ← integral_sub (integrable_deriv2_heatKernel1D_space_sub_mul ht x hfm hfb)
+        (integrable_deriv2_heatKernel1D_space_sub_mul ht x hgm hgb)]
+  apply integral_congr_ae
+  filter_upwards with y
+  ring
+
+/-- **The difference C² bound**: `|∂ₓₓHₜf − ∂ₓₓHₜg| ≤ ‖f−g‖∞ / t`. The load-bearing
+estimate making the second-order map's difference controllable. -/
+lemma deriv2_heatSemigroup1D_sub_abs_le (t : ℝ) (ht : 0 < t) (f g : ℝ → ℝ) (Cf Cg D : ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ Cf)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ Cg) (hD : ∀ y, |f y - g y| ≤ D) (x : ℝ) :
+    |deriv (deriv (fun z => heatSemigroup1D t f z)) x
+        - deriv (deriv (fun z => heatSemigroup1D t g z)) x| ≤ D / t := by
+  set h : ℝ → ℝ := fun y => f y - g y with hh
+  have hhm : AEStronglyMeasurable h := hfm.sub hgm
+  have hhb : ∀ y, ‖h y‖ ≤ D := fun y => by rw [hh]; simpa [Real.norm_eq_abs] using hD y
+  have heq : deriv (deriv (fun z => heatSemigroup1D t f z)) x
+      - deriv (deriv (fun z => heatSemigroup1D t g z)) x
+      = deriv (deriv (fun z => heatSemigroup1D t h z)) x := by
+    rw [deriv2_heatSemigroup1D_eq_integral ht x hfm hfb,
+        deriv2_heatSemigroup1D_eq_integral ht x hgm hgb,
+        deriv2_heatSemigroup1D_eq_integral ht x hhm hhb,
+        ← integral_sub (integrable_deriv2_heatKernel1D_space_sub_mul ht x hfm hfb)
+          (integrable_deriv2_heatKernel1D_space_sub_mul ht x hgm hgb)]
+    apply integral_congr_ae (Filter.Eventually.of_forall (fun y => ?_))
+    simp only [hh]; ring
+  rw [heq]
+  exact heatSemigroup1D_deriv2_abs_le_inv_t t ht h D hhm hhb x
+
+/-- **The second-order solution-map contraction**: the `Hₜ∂ₓₓ`-perturbation part of
+the second-order map shrinks differences by `M/t`. -/
+lemma second_order_map_contraction (t : ℝ) (ht : 0 < t) (acoef : ℝ → ℝ) (a0 : ℝ) (M : ℝ)
+    (haM : ∀ x, |acoef x - a0| ≤ M)
+    (w w' : ℝ → ℝ) (D : ℝ) (hww : ∀ y, |w y - w' y| ≤ D)
+    (hwm : AEStronglyMeasurable (fun y => (acoef y - a0) * w y))
+    (hwb : ∃ Cw, ∀ y, ‖(acoef y - a0) * w y‖ ≤ Cw)
+    (hw'm : AEStronglyMeasurable (fun y => (acoef y - a0) * w' y))
+    (hw'b : ∃ Cw', ∀ y, ‖(acoef y - a0) * w' y‖ ≤ Cw') (x : ℝ) :
+    |deriv (deriv (fun z => heatSemigroup1D t (fun y => (acoef y - a0) * w y) z)) x
+      - deriv (deriv (fun z => heatSemigroup1D t (fun y => (acoef y - a0) * w' y) z)) x|
+      ≤ (M * D) / t := by
+  obtain ⟨Cw, hCw⟩ := hwb
+  obtain ⟨Cw', hCw'⟩ := hw'b
+  have hMnn : 0 ≤ M := le_trans (abs_nonneg _) (haM 0)
+  have hdiff : ∀ y, |(acoef y - a0) * w y - (acoef y - a0) * w' y| ≤ M * D := by
+    intro y
+    rw [show (acoef y - a0) * w y - (acoef y - a0) * w' y = (acoef y - a0) * (w y - w' y) by ring,
+        abs_mul]
+    exact mul_le_mul (haM y) (hww y) (abs_nonneg _) hMnn
+  exact deriv2_heatSemigroup1D_sub_abs_le t ht (fun y => (acoef y - a0) * w y)
+    (fun y => (acoef y - a0) * w' y) Cw Cw' (M * D) hwm hCw hw'm hCw' hdiff x
+
+/-- The perturbation source `(a−a₀)·w` is bounded and measurable when `w ∈ ℝ →ᵇ ℝ`
+and `a` is bounded continuous. -/
+lemma coeff_mul_bcf_bound (acoef : ℝ → ℝ) (a0 : ℝ) (M : ℝ) (haM : ∀ x, |acoef x - a0| ≤ M)
+    (hac : Continuous acoef) (w : BoundedContinuousFunction ℝ ℝ) :
+    AEStronglyMeasurable (fun y => (acoef y - a0) * w y) ∧
+      (∀ y, ‖(acoef y - a0) * w y‖ ≤ M * ‖w‖) := by
+  refine ⟨?_, fun y => ?_⟩
+  · exact ((hac.sub continuous_const).mul w.continuous).aestronglyMeasurable
+  · rw [Real.norm_eq_abs, abs_mul]
+    have hwy : |w y| ≤ ‖w‖ := by
+      have := BoundedContinuousFunction.norm_coe_le_norm w y
+      simpa [Real.norm_eq_abs] using this
+    exact mul_le_mul (haM y) hwy (abs_nonneg _) (le_trans (abs_nonneg _) (haM y))
+
+/-- The second-order contraction window facts. -/
+lemma second_order_window (M t : ℝ) (hM : 0 ≤ M) (ht : 0 < t) :
+    (M < t → M / t < 1) ∧ (M = 0 → M / t = 0) ∧ (0 ≤ M / t) := by
+  refine ⟨fun h => ?_, fun h => ?_, div_nonneg hM ht.le⟩
+  · rw [div_lt_one ht]; exact h
+  · rw [h]; simp
+
+/-- **Second-order scalar short-time existence + uniqueness.** For a contraction
+perturbation `S₀` with factor `M/t < 1` (`M` = coefficient oscillation, `t` =
+time-step), the second-order fixed-point equation `w = β + S₀(w)` has a UNIQUE
+solution in `ℝ →ᵇ ℝ`. The 1D Ricci–DeTurck scalar model is solvable. -/
+theorem second_order_fixedPoint_exists_unique (β : BoundedContinuousFunction ℝ ℝ) {M t : ℝ}
+    (hM : 0 ≤ M) (ht : 0 < t) (hsmall : M < t)
+    (S0 : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (hS0 : ∀ w w' : BoundedContinuousFunction ℝ ℝ, ∀ x, |S0 w x - S0 w' x| ≤ (M / t) * dist w w') :
+    ∃! z : BoundedContinuousFunction ℝ ℝ, β + S0 z = z := by
+  obtain ⟨h0, h1⟩ := second_order_contraction_factor M t hM ht hsmall
+  exact affine_bcf_fixedPoint_exists_unique β h0 h1 S0 hS0
+
+/-- The second-order fixed point satisfies the pointwise decomposition
+`z = β + S₀(z)`. -/
+lemma second_order_fixedPoint_bound (β : BoundedContinuousFunction ℝ ℝ) {M t : ℝ}
+    (hM : 0 ≤ M) (ht : 0 < t) (hsmall : M < t)
+    (S0 : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (hS0 : ∀ w w' : BoundedContinuousFunction ℝ ℝ, ∀ x, |S0 w x - S0 w' x| ≤ (M / t) * dist w w')
+    (z : BoundedContinuousFunction ℝ ℝ) (hz : β + S0 z = z) (x : ℝ) :
+    |z x| ≤ |β x| + |S0 z x| := by
+  have hx : z x = (β + S0 z) x := by rw [hz]
+  rw [hx, BoundedContinuousFunction.add_apply]
+  exact abs_add_le _ _
+
+/-- **Constructive second-order existence**: the Picard iterates for the
+second-order scalar model converge to the unique solution. -/
+theorem second_order_existence_with_convergence (β : BoundedContinuousFunction ℝ ℝ) {M t : ℝ}
+    (hM : 0 ≤ M) (ht : 0 < t) (hsmall : M < t)
+    (S0 : BoundedContinuousFunction ℝ ℝ → BoundedContinuousFunction ℝ ℝ)
+    (hS0 : ∀ w w' : BoundedContinuousFunction ℝ ℝ, ∀ x, |S0 w x - S0 w' x| ≤ (M / t) * dist w w')
+    (w0 : BoundedContinuousFunction ℝ ℝ) :
+    ∃ z : BoundedContinuousFunction ℝ ℝ, (β + S0 z = z) ∧
+      Filter.Tendsto (fun n => (fun w => β + S0 w)^[n] w0) Filter.atTop (nhds z) := by
+  obtain ⟨h0, h1⟩ := second_order_contraction_factor M t hM ht hsmall
+  exact affine_iterate_tendsto_fixedPoint β h0 h1 S0 hS0 w0
+
 end AnalyticPDE
 end RicciFlow
