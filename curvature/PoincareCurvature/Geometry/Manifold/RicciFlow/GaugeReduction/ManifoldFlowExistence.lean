@@ -23,6 +23,7 @@ import Mathlib.Geometry.Manifold.IntegralCurve.UniformTime
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 import Mathlib.Topology.Compactness.Compact
 import Mathlib.Analysis.ODE.PicardLindelof
+import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
 open scoped Manifold Topology
 open Set Filter
@@ -247,5 +248,103 @@ theorem exists_global_integralCurve_compact {E H M : Type*} [NormedAddCommGroup 
     ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v := by
   obtain ⟨ε, hε, huniform⟩ := exists_uniform_integralCurve_time hv
   exact exists_global_integralCurve_of_uniform hv ε hε huniform x
+
+/-! ### Time-dependent integral curves via autonomization
+
+A *time-dependent* field `X : ℝ → (x : M) → TangentSpace I x` is integrated by
+autonomizing: on the product manifold `ℝ × M`, the *autonomous* field
+`(s, x) ↦ (1, X s x)` has integral curves whose first coordinate tracks the time
+parameter, so projecting to `M` yields a time-dependent integral curve. The product
+tangent space splits definitionally,
+`TangentSpace (𝓘(ℝ,ℝ).prod I) (s, x) = ℝ × TangentSpace I x`, so the two fiber
+components are handled independently. -/
+
+/-- **Autonomization projection.** An integral curve `Γ` of the autonomous field
+`(1, X · ·)` on `ℝ × M` whose first coordinate is the identity (`(Γ t).1 = t`)
+projects, via the second coordinate, to a *time-dependent* integral curve of `X` on
+`M`: `∂ₜ (Γ ·).2 = X t (Γ t).2`. -/
+theorem isTimeDependentIntegralCurve_of_autonomous {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M]
+    {X : ℝ → (x : M) → TangentSpace I x} {Γ : ℝ → ℝ × M} {s : Set ℝ}
+    (hfst : ∀ t ∈ s, (Γ t).1 = t)
+    (hΓ : ∀ t ∈ s, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) ((𝓘(ℝ, ℝ)).prod I) Γ s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))) :
+    ∀ t ∈ s, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => (Γ τ).2) s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t ((Γ t).2))) := by
+  intro t ht
+  have hsnd : HasMFDerivAt ((𝓘(ℝ, ℝ)).prod I) I Prod.snd (Γ t)
+      (ContinuousLinearMap.snd ℝ (TangentSpace 𝓘(ℝ, ℝ) (Γ t).1) (TangentSpace I (Γ t).2)) :=
+    hasMFDerivAt_snd (Γ t)
+  have hcomp := hsnd.comp_hasMFDerivWithinAt t (hΓ t ht)
+  have hfun : (Prod.snd ∘ Γ) = (fun τ => (Γ τ).2) := rfl
+  rw [hfun] at hcomp
+  have hclm : (ContinuousLinearMap.snd ℝ (TangentSpace 𝓘(ℝ, ℝ) (Γ t).1)
+        (TangentSpace I (Γ t).2)).comp
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))
+      = (1 : ℝ →L[ℝ] ℝ).smulRight (X t ((Γ t).2)) := by
+    ext
+    simp [hfst t ht]
+  exact hclm ▸ hcomp
+
+/-- **The time component tracks the parameter.** An integral curve `Γ` of the
+autonomous field `(1, X · ·)` on `ℝ × M` over a preconnected open set `s ∋ 0`, with
+`(Γ 0).1 = 0`, has `(Γ t).1 = t` throughout `s` — because its first coordinate has
+constant derivative `1`. -/
+theorem autonomous_fst_eq_id {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M]
+    {X : ℝ → (x : M) → TangentSpace I x} {Γ : ℝ → ℝ × M} {s : Set ℝ}
+    (hs : IsOpen s) (h0 : (0 : ℝ) ∈ s) (hconn : IsPreconnected s)
+    (hΓ0 : (Γ 0).1 = 0)
+    (hΓ : ∀ t ∈ s, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) ((𝓘(ℝ, ℝ)).prod I) Γ s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))) :
+    ∀ t ∈ s, (Γ t).1 = t := by
+  set φ : ℝ → ℝ := fun τ => (Γ τ).1 with hφ
+  have hd : ∀ τ ∈ s, HasDerivWithinAt φ 1 s τ := by
+    intro τ hτ
+    have hcomp :=
+      ((hasMFDerivAt_fst (Γ τ)).hasMFDerivWithinAt (s := univ)).comp τ (hΓ τ hτ)
+        (by rw [preimage_univ]; exact subset_univ s)
+    rw [hasMFDerivWithinAt_iff_hasFDerivWithinAt] at hcomp
+    have hdw := hcomp.hasDerivWithinAt
+    have hfun : (Prod.fst ∘ Γ) = φ := rfl
+    rw [hfun] at hdw
+    refine hdw.congr_deriv ?_
+    show ((ContinuousLinearMap.fst ℝ (TangentSpace 𝓘(ℝ, ℝ) (Γ τ).1) (TangentSpace I (Γ τ).2)).comp
+        (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ)
+          (((1 : ℝ), X (Γ τ).1 (Γ τ).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ τ))))
+        (1 : ℝ) = (1 : ℝ)
+    simp
+  have hderiv : ∀ τ ∈ s, deriv φ τ = 1 := fun τ hτ =>
+    ((hd τ hτ).hasDerivAt (hs.mem_nhds hτ)).deriv
+  have hdiff : DifferentiableOn ℝ φ s := fun τ hτ => (hd τ hτ).differentiableWithinAt
+  have hg : ∀ τ ∈ s, deriv (fun y : ℝ => y) τ = 1 := fun τ _ => by simp
+  have heq : EqOn φ (fun y : ℝ => y) s := by
+    refine hs.eqOn_of_deriv_eq hconn hdiff differentiable_id.differentiableOn ?_ h0 ?_
+    · intro τ hτ
+      rw [hderiv τ hτ, hg τ hτ]
+    · exact hΓ0
+  intro t ht
+  simpa [hφ] using heq ht
+
+/-- **Time-dependent integral curve from an autonomous one** (combined form): if
+`Γ` is an autonomous integral curve of `(1, X)` on a preconnected open `s ∋ 0` with
+`(Γ 0).1 = 0`, then `(Γ ·).2` is a time-dependent integral curve of `X` on `s`. -/
+theorem isTimeDependentIntegralCurve_of_autonomous_of_fst {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M]
+    {X : ℝ → (x : M) → TangentSpace I x} {Γ : ℝ → ℝ × M} {s : Set ℝ}
+    (hs : IsOpen s) (h0 : (0 : ℝ) ∈ s) (hconn : IsPreconnected s)
+    (hΓ0 : (Γ 0).1 = 0)
+    (hΓ : ∀ t ∈ s, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) ((𝓘(ℝ, ℝ)).prod I) Γ s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))) :
+    ∀ t ∈ s, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => (Γ τ).2) s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t ((Γ t).2))) :=
+  isTimeDependentIntegralCurve_of_autonomous (autonomous_fst_eq_id hs h0 hconn hΓ0 hΓ) hΓ
 
 end PoincareCurvature.ManifoldFlow
