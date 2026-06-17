@@ -782,7 +782,46 @@ The recursion's underlying flow is the raw `toStatePreserving hf0` flow (needed
 state-preserving for the `HasFDerivAt` extraction), but its smoothness is only available on a
 *reconstructible* `ofProduct` flow. The project's flow uniqueness identifies the two — both
 are continuous local flows of the same field, same anchor, same initial point, both staying
-in a Lipschitz state — so `ContDiffOn` transfers from the `ofProduct` flow to the raw flow. -/
+in a Lipschitz state — so `ContDiffOn` transfers from the `ofProduct` flow to the raw flow.
+The Lipschitz-state hypothesis is discharged from the keystone by the next lemma. -/
+
+omit [CompleteSpace W] in
+/-- **The variational field `(g, fderiv g)` is Lipschitz on a closed ball** when `g` is `C³`.
+The keystone gives `g` and `fderiv g` Lipschitz; the project's
+`lipschitzOnWith_variationalVectorField_closedBall_at` assembles the variational field's
+Lipschitz constant (with the tangent-factor bound `BA = 1 + a` and `‖fderiv g‖ ≤ BD` from
+compactness). This discharges the uniqueness bridge's `hf_lip` hypothesis. -/
+theorem variationalField_lipschitzOnWith_of_contDiff_three
+    {g : W → W} (hg : ContDiff ℝ 3 g) (w₀ : W) (a : ℝ≥0) (s : ℝ) :
+    ∃ K : ℝ≥0,
+      LipschitzOnWith K
+        (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g) s)
+        (closedBall (w₀, (1 : W →L[ℝ] W)) a) := by
+  obtain ⟨Kf, hKf⟩ := (contDiff_three_prolongation_lipschitz_package hg w₀ a).1
+  obtain ⟨KD, hKD⟩ := (contDiff_three_prolongation_lipschitz_package hg w₀ a).2.1
+  have hcompact : IsCompact (closedBall w₀ (a : ℝ)) := isCompact_closedBall w₀ a
+  have hDg_cont : Continuous (fun x => fderiv ℝ g x) := hg.continuous_fderiv (by norm_num)
+  obtain ⟨BDr, hBDr⟩ := (hcompact.bddAbove_image (continuous_norm.comp hDg_cont).continuousOn)
+  have hw0 : w₀ ∈ closedBall w₀ (a : ℝ) := mem_closedBall_self (by positivity)
+  have hBD_nonneg : 0 ≤ BDr := le_trans (norm_nonneg _) (hBDr ⟨w₀, hw0, rfl⟩)
+  set BD : ℝ≥0 := BDr.toNNReal with hBDdef
+  set BA : ℝ≥0 := 1 + a with hBAdef
+  have hBD_coe : (BD : ℝ) = BDr := by rw [hBDdef, Real.coe_toNNReal _ hBD_nonneg]
+  refine ⟨max Kf (KD * BA + BD), ?_⟩
+  have hAbound : ∀ A ∈ closedBall (1 : W →L[ℝ] W) (a : ℝ), ‖A‖₊ ≤ BA := by
+    intro A hA
+    rw [← NNReal.coe_le_coe, coe_nnnorm, hBAdef]
+    have hdist : dist A (1 : W →L[ℝ] W) ≤ a := by rw [← mem_closedBall]; exact hA
+    have hsub : ‖A - 1‖ ≤ (a : ℝ) := by rw [← dist_eq_norm]; exact hdist
+    have hone : ‖(1 : W →L[ℝ] W)‖ ≤ 1 := ContinuousLinearMap.norm_id_le
+    have htri : ‖A‖ ≤ ‖(1 : W →L[ℝ] W)‖ + ‖A - 1‖ := by
+      simpa [add_comm] using norm_le_norm_add_norm_sub' A (1 : W →L[ℝ] W)
+    push_cast; linarith
+  have hDbound : ∀ y ∈ closedBall w₀ a, ‖(fun _ : ℝ => fderiv ℝ g) s y‖₊ ≤ BD := by
+    intro y hy
+    rw [← NNReal.coe_le_coe, coe_nnnorm, hBD_coe]; exact hBDr ⟨y, hy, rfl⟩
+  exact lipschitzOnWith_variationalVectorField_closedBall_at (t := s)
+    hKf hKD hAbound hDbound
 
 omit [FiniteDimensional ℝ W] [CompleteSpace W] in
 /-- Two continuous local flows of the same field, same anchor/center/radius, both staying in
