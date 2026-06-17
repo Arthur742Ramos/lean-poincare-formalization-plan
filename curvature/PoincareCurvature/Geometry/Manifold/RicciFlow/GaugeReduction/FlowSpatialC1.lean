@@ -477,6 +477,33 @@ theorem baseFlow_contDiffOn_succ_of_augmented_contDiffOn
     exact hball x (ball_subset_closedBall hx)
   · exact hΨ
 
+/-- **Conditional spatial-`C³` of the real base flow.** If the level-0 augmented flow
+slice is `ContDiffOn 2` on the augmented ball, the real base flow slice is `ContDiffOn 3`
+on the base ball — the spatial-`C³` target for the gauge-flow diffeomorphism. This is the
+recursion step at `n = 2` (cast `2 + 1 = 3`). The hypothesis is the precise honest modular
+boundary, supplied by recursing the same step at the augmented level. -/
+theorem baseFlow_contDiffOn_three_of_augmented_contDiffOn_two
+    {g : W → W} (hg : ContDiff ℝ 2 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a r r' L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a r L K)
+    (hball : ∀ y ∈ closedBall w₀ r',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    (hΨ : ContDiffOn ℝ (2 : ℕ)
+      (fun z : W × (W →L[ℝ] W) =>
+        (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution.flow (z, t))
+      (closedBall (w₀, (1 : W →L[ℝ] W)) r)) :
+    ContDiffOn ℝ 3
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).flow
+            (y, t))
+      (ball w₀ r') := by
+  have h := baseFlow_contDiffOn_succ_of_augmented_contDiffOn (n := 2) hg hf hball ht
+    (by simpa using hΨ)
+  simpa using h
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
