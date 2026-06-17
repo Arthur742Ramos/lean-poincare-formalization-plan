@@ -156,4 +156,93 @@ theorem contDiff_three_prolongation_lipschitz_package
   · exact hDf.contDiffOn.exists_lipschitzOnWith (by norm_num) hconv hcompact
   · exact hD2f.contDiffOn.exists_lipschitzOnWith (by norm_num) hconv hcompact
 
+/-! ### End-to-end: a spatially-`C³` autonomous field has a variational flow
+
+For a time-independent spatially-`C³` field `g`, the keystone Lipschitz package plus the
+project's generic variational Picard-Lindelöf assembler combine into an honest
+`VariationalLocalFlowSolution`: the base flow `x ↦ Φ_t x` together with its tangent map
+solving the variational equation `A' = (fderiv g)(Φ) ∘ A`, `A(t₀) = 1`. This is the
+concrete realization of the `C¹` base case — no longer a structure hypothesis but a flow
+produced from the single assumption `ContDiff ℝ 3 g`. -/
+
+section Autonomous
+
+variable {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W] [FiniteDimensional ℝ W]
+  [CompleteSpace W]
+
+omit [CompleteSpace W] in
+/-- **Autonomous `C³` field ⟹ variational Picard-Lindelöf.** For a time-independent
+spatially-`C³` field `g`, the variational system `(y,A)' = (g y, (fderiv g y)∘A)` is
+Picard-Lindelöf on every closed ball, with constants drawn from the keystone package and
+compact-ball norm bounds. The remaining hypothesis is the standard Picard time-radius
+smallness on the exposed Lipschitz constant `L`. -/
+theorem isPicardLindelof_autonomous_variational_of_contDiff_three
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (w₀ : W) (a r : ℝ≥0) :
+    ∃ L K : ℝ≥0,
+      (L * (max (tmax - (t₀ : ℝ)) ((t₀ : ℝ) - tmin)) ≤ (a : ℝ) - r) →
+        IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+          t₀ (w₀, (1 : W →L[ℝ] W)) a r L K := by
+  obtain ⟨Kf, hKf⟩ := (contDiff_three_prolongation_lipschitz_package hg w₀ a).1
+  obtain ⟨KD, hKD⟩ := (contDiff_three_prolongation_lipschitz_package hg w₀ a).2.1
+  have hg_cont : Continuous g := hg.continuous
+  have hDg_cont : Continuous (fun x => fderiv ℝ g x) := hg.continuous_fderiv (by norm_num)
+  have hcompact : IsCompact (closedBall w₀ (a : ℝ)) := isCompact_closedBall w₀ a
+  obtain ⟨Lfr, hLfr⟩ := (hcompact.bddAbove_image (continuous_norm.comp hg_cont).continuousOn)
+  obtain ⟨BDr, hBDr⟩ := (hcompact.bddAbove_image (continuous_norm.comp hDg_cont).continuousOn)
+  have hw0 : w₀ ∈ closedBall w₀ (a : ℝ) := mem_closedBall_self (by positivity)
+  have hLf_nonneg : 0 ≤ Lfr := le_trans (norm_nonneg _) (hLfr ⟨w₀, hw0, rfl⟩)
+  have hBD_nonneg : 0 ≤ BDr := le_trans (norm_nonneg _) (hBDr ⟨w₀, hw0, rfl⟩)
+  set Lf : ℝ≥0 := Lfr.toNNReal with hLfdef
+  set BD : ℝ≥0 := BDr.toNNReal with hBDdef
+  set BA : ℝ≥0 := 1 + a with hBAdef
+  refine ⟨max Lf (BD * BA), max Kf (KD * BA + BD), fun hmul => ?_⟩
+  have hLf_coe : (Lf : ℝ) = Lfr := by rw [hLfdef, Real.coe_toNNReal _ hLf_nonneg]
+  have hBD_coe : (BD : ℝ) = BDr := by rw [hBDdef, Real.coe_toNNReal _ hBD_nonneg]
+  apply isPicardLindelof_variationalVectorField_of_component_closedBall_continuity
+    (Kf := Kf) (KD := KD) (Lf := Lf) (BA := BA) (BD := BD)
+  · exact fun t _ => hKf
+  · exact fun t _ => hKD
+  · intro t _ y hy
+    rw [hLf_coe]; exact hLfr ⟨y, hy, rfl⟩
+  · intro A hA
+    rw [← NNReal.coe_le_coe, coe_nnnorm, hBAdef]
+    have hdist : dist A (1 : W →L[ℝ] W) ≤ a := by rw [← mem_closedBall]; exact hA
+    have hsub : ‖A - 1‖ ≤ (a : ℝ) := by rw [← dist_eq_norm]; exact hdist
+    have hone : ‖(1 : W →L[ℝ] W)‖ ≤ 1 := ContinuousLinearMap.norm_id_le
+    have htri : ‖A‖ ≤ ‖(1 : W →L[ℝ] W)‖ + ‖A - 1‖ := by
+      simpa [add_comm] using norm_le_norm_add_norm_sub' A (1 : W →L[ℝ] W)
+    push_cast
+    linarith
+  · intro t _ y hy
+    rw [← NNReal.coe_le_coe, coe_nnnorm, hBD_coe]; exact hBDr ⟨y, hy, rfl⟩
+  · exact fun y _ => continuousOn_const
+  · exact fun y _ => continuousOn_const
+  · exact hmul
+
+/-- **Autonomous `C³` field ⟹ variational flow exists.** There is a Lipschitz constant
+`L` such that whenever the Picard time-radius smallness on `L` holds, the project's
+`ofProductPicardLindelof` produces an honest `VariationalLocalFlowSolution` on
+`closedBall w₀ r`: the base flow `x ↦ Φ_t x` paired with its tangent map solving the
+variational equation. The embedding-ball hypothesis is automatic (the tangent coordinate
+is fixed at the identity). -/
+theorem exists_const_variationalFlow_autonomous_of_contDiff_three
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (w₀ : W) (a r : ℝ≥0) :
+    ∃ L : ℝ≥0,
+      (L * (max (tmax - (t₀ : ℝ)) ((t₀ : ℝ) - tmin)) ≤ (a : ℝ) - r) →
+        Nonempty (VariationalLocalFlowSolution (fun _ : ℝ => g)
+          (fun _ : ℝ => fderiv ℝ g) t₀ w₀ r) := by
+  obtain ⟨L, K, hPL⟩ := isPicardLindelof_autonomous_variational_of_contDiff_three hg t₀ w₀ a r
+  have hball : ∀ x ∈ closedBall w₀ r,
+      (x, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r := by
+    intro x hx
+    rw [mem_closedBall] at hx ⊢
+    rw [Prod.dist_eq]
+    simp only [dist_self, max_le_iff]
+    exact ⟨hx, by positivity⟩
+  exact ⟨L, fun hmul => nonempty_ofProductPicardLindelof (hPL hmul) hball⟩
+
+end Autonomous
+
 end PoincareCurvature.FlowSpatialC1
