@@ -419,6 +419,81 @@ theorem stateFlow_hasFDerivAt_two
   · intro τ _ z _
     exact (hgdiff z).hasFDerivWithinAt
 
+/-- C²-minimal concrete spatial-`C¹` flow slice: from `ContDiff ℝ 2 g` plus the Picard
+data, the real state-preserving flow slice is `ContDiffOn ℝ 1` on the ball. -/
+theorem stateFlow_contDiffOn_one_two
+    {g : W → W} (hg : ContDiff ℝ 2 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a r r' L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a r L K)
+    (hball : ∀ y ∈ closedBall w₀ r',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) :
+    ContDiffOn ℝ 1
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).flow
+            (y, t))
+      (ball w₀ r') := by
+  have htbig : t ∈ Icc tmin tmax := ⟨le_trans t₀.2.1 ht.1, ht.2⟩
+  exact ofProduct_flow_timeSlice_contDiffOn_one_ball
+    (toStatePreservingLipschitzLocalFlowSolution hf) hball htbig
+    (fun x hx => stateFlow_hasFDerivAt_two hg hf hball hx ht)
+
 end Autonomous
+
+/-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
+
+The flow-derivative extraction `stateFlow_*_two` is generic in the model space, so it
+applies verbatim at the *augmented* space `V × (V →L[ℝ] V)`. The level-1 augmented field
+`(g, fderiv g)` is `C²` whenever `g` is `C³`, so the augmented (product) flow `Ψ0` that
+the bootstrap tower consumes is itself spatially `C¹` — with no new lemma, only an
+instantiation. This is the concrete confirmation that the tower's higher-level inputs are
+reachable. -/
+
+section Prolongation
+
+variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
+  [CompleteSpace V]
+
+open PoincareCurvature.VariationalSmoothness
+
+omit [FiniteDimensional ℝ V] [CompleteSpace V] in
+/-- The level-1 augmented field `(g, fderiv g)` is `C²` when `g` is `C³`. -/
+theorem augmentedField_contDiff_two
+    {g : V → V} (hg : ContDiff ℝ 3 g) :
+    ContDiff ℝ 2 (fun z : V × (V →L[ℝ] V) => (g z.1, (fderiv ℝ g z.1).comp z.2)) := by
+  have hg2 : ContDiff ℝ 2 g := hg.of_le (by norm_num)
+  have hDg2 : ContDiff ℝ 2 (fun x => fderiv ℝ g x) := (contDiff_succ_iff_fderiv.mp hg).2.2
+  exact contDiff_variationalField hg2 hDg2
+
+/-- **The level-1 augmented flow is spatially `C¹`.** Instantiating the generic
+`stateFlow_contDiffOn_one_two` at the augmented space `V × (V →L[ℝ] V)` with the level-1
+field `G1 = (g, fderiv g)` (which is `C²` from `g : C³`), the flow of `G1` — the product
+flow `Ψ0` of the bootstrap — is `ContDiffOn 1` on its ball. Reachable purely by
+instantiation, no new lemma. -/
+theorem level1_flow_contDiffOn_one
+    {g : V → V} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
+    {w₀ : V × (V →L[ℝ] V)} {a r r' L K : ℝ≥0}
+    (G1 : (V × (V →L[ℝ] V)) → (V × (V →L[ℝ] V)))
+    (hG1 : G1 = fun z : V × (V →L[ℝ] V) => (g z.1, (fderiv ℝ g z.1).comp z.2))
+    (hf : IsPicardLindelof
+      (variationalVectorField (fun _ : ℝ => G1) (fun _ : ℝ => fderiv ℝ G1))
+      t₀ (w₀, (1 : (V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V)))) a r L K)
+    (hball : ∀ y ∈ closedBall w₀ r',
+      (y, (1 : (V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V)))) ∈
+        closedBall (w₀, (1 : (V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V)))) r)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) :
+    ContDiffOn ℝ 1
+      (fun y : V × (V →L[ℝ] V) =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).flow
+            (y, t))
+      (ball w₀ r') := by
+  have hG1_c2 : ContDiff ℝ 2 G1 := by rw [hG1]; exact augmentedField_contDiff_two hg
+  exact stateFlow_contDiffOn_one_two hG1_c2 hf hball ht
+
+end Prolongation
 
 end PoincareCurvature.FlowSpatialC1
