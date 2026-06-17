@@ -215,4 +215,43 @@ theorem contDiffOn_succ_of_augmented_flow_contDiffOn_isOpen {V : Type*} [NormedA
   contDiffOn_succ_of_jacobian_contDiffOn_isOpen hs hderiv
     (jacobian_contDiffOn_of_augmented_flow_contDiffOn hΨ hmaps)
 
+/-- **The spatial-`C³` capstone.** Point 4 needs the gauge flow to be spatially `C³`,
+which is exactly *two* rungs of the augmented-flow bootstrap above the `C¹` base case.
+
+Concretely: the base flow `g0` (on `s0`) has Jacobian the second projection of the
+level-0 augmented flow `Ψ0` (on `S0`); `Ψ0`'s own slice has Jacobian the second
+projection of the level-1 augmented flow `Ψ1` (on `S1`); and `Ψ1`'s slice is `C¹`
+(the variational base case). Applying the local rung lemma twice — first lifting the
+`C¹` base of `Ψ1` to a `C²` slice of `Ψ0`, then lifting that to a `C³` `g0` — yields
+spatial `C³`. The rung lemma is generic in the model space, so it instantiates cleanly
+at both augmented levels. -/
+theorem contDiffOn_three_of_augmented_tower {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace ℝ V]
+    {t : ℝ} {g0 : V → V}
+    {Ψ0 : (V × (V →L[ℝ] V)) → ℝ → (V × (V →L[ℝ] V))}
+    {Ψ1 : ((V × (V →L[ℝ] V)) × ((V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V)))) → ℝ →
+      ((V × (V →L[ℝ] V)) × ((V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V))))}
+    {s0 : Set V} {S0 : Set (V × (V →L[ℝ] V))}
+    {S1 : Set ((V × (V →L[ℝ] V)) × ((V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V))))}
+    (hs0 : IsOpen s0) (hS0 : IsOpen S0)
+    (hderiv0 : ∀ x ∈ s0, HasFDerivAt g0 ((Ψ0 (x, (1 : V →L[ℝ] V)) t).2) x)
+    (hmaps0 : MapsTo (fun x : V => (x, (1 : V →L[ℝ] V))) s0 S0)
+    (hderiv1 : ∀ z ∈ S0,
+      HasFDerivAt (fun w : V × (V →L[ℝ] V) => Ψ0 w t)
+        ((Ψ1 (z, (1 : (V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V)))) t).2) z)
+    (hmaps1 : MapsTo
+      (fun z : V × (V →L[ℝ] V) =>
+        (z, (1 : (V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V))))) S0 S1)
+    (hbase : ContDiffOn ℝ 1 (fun w => Ψ1 w t) S1) :
+    ContDiffOn ℝ 3 g0 s0 := by
+  have h2 : ContDiffOn ℝ ((1 : ℕ) + 1) (fun w : V × (V →L[ℝ] V) => Ψ0 w t) S0 := by
+    have hbase' : ContDiffOn ℝ ((1 : ℕ) : WithTop ℕ∞) (fun w => Ψ1 w t) S1 := by
+      simpa using hbase
+    exact contDiffOn_succ_of_augmented_flow_contDiffOn_isOpen hS0 hderiv1 hmaps1 hbase'
+  have h2' : ContDiffOn ℝ ((2 : ℕ) : WithTop ℕ∞) (fun w : V × (V →L[ℝ] V) => Ψ0 w t) S0 := by
+    simpa using h2
+  have h3 : ContDiffOn ℝ ((2 : ℕ) + 1) g0 s0 :=
+    contDiffOn_succ_of_augmented_flow_contDiffOn_isOpen hs0 hderiv0 hmaps0 h2'
+  simpa using h3
+
 end PoincareCurvature.VariationalSmoothness
