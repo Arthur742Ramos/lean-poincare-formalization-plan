@@ -25,6 +25,7 @@ namespace PoincareCurvature.FlowSpatialC1
 
 open RicciFlow RicciFlow.ModelGaugeFlowODE
   RicciFlow.ModelGaugeFlowODE.VariationalLocalFlowSolution
+  RicciFlow.ModelGaugeFlowODE.IsPicardLindelof
   PoincareCurvature.VariationalSmoothness
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
@@ -242,6 +243,74 @@ theorem exists_const_variationalFlow_autonomous_of_contDiff_three
     simp only [dist_self, max_le_iff]
     exact ⟨hx, by positivity⟩
   exact ⟨L, fun hmul => nonempty_ofProductPicardLindelof (hPL hmul) hball⟩
+
+/-- **Genuine `HasFDerivAt` of the real flow slice from `ContDiff ℝ 3 g`.** For the
+state-preserving variational flow of an autonomous `C³` field, every interior point and
+forward time has the spatial Fréchet derivative equal to the variational tangent map.
+All hypotheses of the project's convex-state criterion are discharged with
+`state := closedBall w₀ a`: the ball is convex; the flow stays in it (state-preserving);
+`‖fderiv g‖` is bounded and `fderiv g` is Lipschitz there (keystone + compactness); and
+`g` is differentiable everywhere. -/
+theorem stateFlow_hasFDerivAt
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a r r' L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a r L K)
+    (hball : ∀ y ∈ closedBall w₀ r',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r)
+    {x : W} (hx : x ∈ ball w₀ r') {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) :
+    HasFDerivAt
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).flow
+            (y, t))
+      ((ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).tangent
+            x t)
+      x := by
+  set β := toStatePreservingLipschitzLocalFlowSolution hf with hβ
+  obtain ⟨KDf, hKDf⟩ := (contDiff_three_prolongation_lipschitz_package hg w₀ a).2.1
+  have hg_cont : Continuous (fun x => fderiv ℝ g x) := hg.continuous_fderiv (by norm_num)
+  have hcompact : IsCompact (closedBall w₀ (a : ℝ)) := isCompact_closedBall w₀ a
+  obtain ⟨KB, hKB⟩ := (hcompact.bddAbove_image (continuous_norm.comp hg_cont).continuousOn)
+  have hgdiff : ∀ z : W, HasFDerivAt g (fderiv ℝ g z) z := fun z =>
+    (hg.differentiable (by norm_num)).differentiableAt.hasFDerivAt
+  apply ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball
+    (β := β) (K := KB) (KD := KDf) (state := fun _ => closedBall w₀ a) hball hx ht
+  · exact fun τ _ => convex_closedBall w₀ a
+  · intro y hy τ hτ
+    exact ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall_forward_Icc
+      hf hball hy hτ
+  · intro τ _ z hz
+    exact hKB ⟨z, hz, rfl⟩
+  · intro τ _
+    exact hKDf
+  · intro τ _ z _
+    exact (hgdiff z).hasFDerivWithinAt
+
+/-- **Concrete spatial-`C¹` flow slice from `ContDiff ℝ 3 g` alone.** Combining the
+genuine per-point `HasFDerivAt` (all hypotheses discharged from `C³`) with the automatic
+tangent-continuity of the product flow, the state-preserving variational flow's time
+slice `y ↦ Φ_t y` is `ContDiffOn ℝ 1` on the open ball — the spatial-`C¹` base case,
+produced from nothing but `C³`-regularity of the field plus the Picard data. -/
+theorem stateFlow_contDiffOn_one
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a r r' L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a r L K)
+    (hball : ∀ y ∈ closedBall w₀ r',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) :
+    ContDiffOn ℝ 1
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).flow
+            (y, t))
+      (ball w₀ r') := by
+  have htbig : t ∈ Icc tmin tmax := ⟨le_trans t₀.2.1 ht.1, ht.2⟩
+  exact ofProduct_flow_timeSlice_contDiffOn_one_ball
+    (toStatePreservingLipschitzLocalFlowSolution hf) hball htbig
+    (fun x hx => stateFlow_hasFDerivAt hg hf hball hx ht)
 
 end Autonomous
 
