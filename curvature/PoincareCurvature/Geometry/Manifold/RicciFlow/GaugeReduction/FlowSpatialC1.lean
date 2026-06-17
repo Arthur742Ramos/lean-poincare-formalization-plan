@@ -897,6 +897,36 @@ theorem raw_eq_ofProduct_flow
       (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution β
       ht₀ hf_lip hα_mem hβ_mem ht z hz
 
+/-- **Raw flow slice `ContDiffOn n` from the `ofProduct` flow `β`'s slice.** Combining
+`raw_eq_ofProduct_flow` (uniqueness) with `contDiffOn_transfer_of_flows_eq`: if the
+reconstructible `ofProduct` flow `β`'s slice `z ↦ β.flow(z,t)` is `ContDiffOn n` on the open
+ball, the raw `toStatePreserving hf0` flow's slice is too. This fully discharges the raw flow's
+embedded/full-slice smoothness from `β` — resolving the raw/ofProduct junction so the recursion
+can use the state-preserving raw flow while obtaining its smoothness from the reconstructible
+`β`. -/
+theorem rawFlow_contDiffOn_of_ofProduct_contDiffOn
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a0 r0 L0 K0 : ℝ≥0}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf0 : IsPicardLindelof
+      (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a0 r0 L0 K0)
+    (β : ContinuousLocalFlowSolution
+      (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) r0)
+    (hβ_mem : ∀ z ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0, ∀ s ∈ Ioo tmin tmax,
+      β.flow (z, s) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) a0)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) {n : WithTop ℕ∞}
+    (hβ : ContDiffOn ℝ n (fun z : W × (W →L[ℝ] W) => β.flow (z, t))
+      (ball (w₀, (1 : W →L[ℝ] W)) r0)) :
+    ContDiffOn ℝ n
+      (fun z : W × (W →L[ℝ] W) =>
+        (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution.flow (z, t))
+      (ball (w₀, (1 : W →L[ℝ] W)) r0) := by
+  have heq := raw_eq_ofProduct_flow hg ht₀ hf0 β hβ_mem ht
+  exact contDiffOn_transfer_of_flows_eq
+    (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution β heq hβ
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
