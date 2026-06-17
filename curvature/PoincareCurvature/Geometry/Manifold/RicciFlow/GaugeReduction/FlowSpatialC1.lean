@@ -73,6 +73,35 @@ theorem ofProduct_flow_timeSlice_contDiffOn_one_ball
     (continuous_snd.comp_continuousOn hpair).mono ball_subset_closedBall
   exact flow_timeSlice_contDiffOn_one_ball β hder hcont
 
+/-- **Tangent spatial `ContDiffOn` from the augmented flow's spatial `ContDiffOn` — no
+uniqueness.** If the level-1 (augmented) flow slice `z ↦ α.flow(z,t)` is `ContDiffOn n` on
+the augmented ball, then the level-0 base flow's tangent map `x ↦ tangent x t` is
+`ContDiffOn n` on the base ball. The tangent is *definitionally* `(α.flow((x,1),t)).2`
+(by the `ofProductContinuousLocalFlowSolution` field defn), so it is the composition of the
+`C^∞` embedding `x ↦ ((x,1),t)` (through `x ↦ (x,1)`), the flow, and `Prod.snd` — giving the
+smoothness directly, with no flow-uniqueness argument. This is the bridge that closes the
+full-flow recursion: the tangent component's smoothness reduces to the augmented flow's
+own smoothness one level up. -/
+theorem tangent_contDiffOn_of_augmentedFlow_contDiffOn
+    {R : ℝ≥0} {n : WithTop ℕ∞}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀ (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ}
+    (hαflow : ContDiffOn ℝ n (fun z : V × (V →L[ℝ] V) => α.flow (z, t))
+      (closedBall (x₀, (1 : V →L[ℝ] V)) R)) :
+    ContDiffOn ℝ n
+      (fun x : V => (ofProductContinuousLocalFlowSolution α hball).tangent x t)
+      (closedBall x₀ r) := by
+  have hemb : ContDiff ℝ n (fun x : V => (x, (1 : V →L[ℝ] V))) :=
+    contDiff_id.prodMk contDiff_const
+  have hmaps : MapsTo (fun x : V => (x, (1 : V →L[ℝ] V)))
+      (closedBall x₀ r) (closedBall (x₀, (1 : V →L[ℝ] V)) R) := hball
+  have hcomp : ContDiffOn ℝ n
+      (fun x : V => α.flow ((x, (1 : V →L[ℝ] V)), t)) (closedBall x₀ r) :=
+    hαflow.comp (hemb.contDiffOn) hmaps
+  exact contDiff_snd.comp_contDiffOn hcomp
+
 /-! ### Prolongation chaining: the project's variational machinery runs one level up
 
 To climb from `C¹` to `C³` the tower must instantiate the project's variational
