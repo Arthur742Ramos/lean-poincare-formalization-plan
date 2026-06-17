@@ -506,6 +506,39 @@ theorem baseFlow_contDiffOn_succ_of_augmented_contDiffOn
     exact hball x (ball_subset_closedBall hx)
   · exact hΨ
 
+/-- **Recursion step keyed on the tangent.** The base flow slice is `ContDiffOn (n+1)`
+whenever its *tangent* map `x ↦ tangent x t` is `ContDiffOn n` on the base ball. This is
+the weakened, directly-controllable form of the recursion: the rung
+`contDiffOn_succ_of_jacobian_contDiffOn_isOpen` only ever needs the Jacobian (= the tangent,
+on the embedded slice), not the full augmented flow. The base flow's per-point `HasFDerivAt`
+(equal to the tangent) comes from `g : C²` via `stateFlow_hasFDerivAt_two`. Combined with
+`tangent_contDiffOn_of_augmentedFlow_contDiffOn` (which gives the tangent's smoothness from
+the augmented flow one level up), this closes the bootstrap recursion. -/
+theorem baseFlow_contDiffOn_succ_of_tangent_contDiffOn
+    {g : W → W} (hg : ContDiff ℝ 2 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a r r' L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a r L K)
+    (hball : ∀ y ∈ closedBall w₀ r',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) {n : ℕ}
+    (htan : ContDiffOn ℝ (n : WithTop ℕ∞)
+      (fun x : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).tangent
+            x t)
+      (ball w₀ r')) :
+    ContDiffOn ℝ ((n : WithTop ℕ∞) + 1)
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).flow
+            (y, t))
+      (ball w₀ r') := by
+  apply contDiffOn_succ_of_jacobian_contDiffOn_isOpen (n := n) isOpen_ball
+  · intro x hx
+    exact stateFlow_hasFDerivAt_two hg hf hball hx ht
+  · exact htan
+
 /-- **Conditional spatial-`C³` of the real base flow.** If the level-0 augmented flow
 slice is `ContDiffOn 2` on the augmented ball, the real base flow slice is `ContDiffOn 3`
 on the base ball — the spatial-`C³` target for the gauge-flow diffeomorphism. This is the
