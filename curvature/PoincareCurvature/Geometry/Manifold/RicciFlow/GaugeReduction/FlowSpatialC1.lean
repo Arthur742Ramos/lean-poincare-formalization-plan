@@ -616,6 +616,49 @@ theorem augmentedFlow_contDiffOn_one_of_components
       (closedBall (w₀, (1 : W →L[ℝ] W)) r) :=
   contDiffOn_prod_of_components hbase htan
 
+/-- **Unconditional base flow `ContDiffOn 2`** (modulo the dischargeable augmented-flow
+input). Given the level-0 augmented flow's `ContDiffOn 1` (`hα0`, supplied at the augmented
+level by `stateFlow_contDiffOn_one_two`), the real base flow slice is `ContDiffOn 2` on the
+ball — with no flow-uniqueness and no over-strong hypothesis. The chain: the tangent's
+`ContDiffOn 1` comes from `hα0` via `tangent_contDiffOn_of_augmentedFlow_contDiffOn` (a pure
+composition, the tangent being definitionally `(α0.flow((x,1),t)).2`), then the
+tangent-keyed recursion step lifts the base flow to `ContDiffOn 2`. -/
+theorem baseFlow_contDiffOn_two
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a0 r0 r0' L0 K0 : ℝ≥0}
+    (hf0 : IsPicardLindelof
+      (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a0 r0 L0 K0)
+    (hball0 : ∀ y ∈ closedBall w₀ r0',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    (hα0 : ContDiffOn ℝ (1 : ℕ)
+      (fun z : W × (W →L[ℝ] W) =>
+        (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution.flow (z, t))
+      (closedBall (w₀, (1 : W →L[ℝ] W)) r0)) :
+    ContDiffOn ℝ 2
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution hball0).flow
+            (y, t))
+      (ball w₀ r0') := by
+  have hg2 : ContDiff ℝ 2 g := hg.of_le (by norm_num)
+  have htan : ContDiffOn ℝ (1 : WithTop ℕ∞)
+      (fun x : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution hball0).tangent
+            x t)
+      (ball w₀ r0') := by
+    have hb := tangent_contDiffOn_of_augmentedFlow_contDiffOn
+      (f := fun _ : ℝ => g) (Df := fun _ : ℝ => fderiv ℝ g)
+      (x₀ := w₀) (r := r0')
+      (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution hball0
+      (by simpa using hα0)
+    exact hb.mono ball_subset_closedBall
+  have h := baseFlow_contDiffOn_succ_of_tangent_contDiffOn (n := 1) hg2 hf0 hball0 ht
+    (by simpa using htan)
+  simpa using h
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
