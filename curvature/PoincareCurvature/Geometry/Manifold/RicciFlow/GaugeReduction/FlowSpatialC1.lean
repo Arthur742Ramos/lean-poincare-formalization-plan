@@ -122,4 +122,38 @@ theorem level1_augmented_norm_le
   norm_variationalVectorField_le_closedBall_at
     (f := F0) (Df := DF0) (t := t) hF0_bound hA_bound hD_bound hz
 
+/-! ### The keystone reduction: spatial `C³` collapses every prolongation estimate
+
+The level-2 Picard construction reduced (above) to one genuinely-new ingredient:
+Lipschitz/operator-norm control of the prolongation derivative, i.e. of `fderiv f` and
+`fderiv (fderiv f)`. The next lemma shows this ingredient is *free* once the gauge field
+is spatially `C³`: on any closed ball — convex and (in finite dimension) compact —
+`ContDiffOn.exists_lipschitzOnWith` turns `C^k` regularity into a Lipschitz constant.
+So a single hypothesis `ContDiff ℝ 3 f` supplies all three Lipschitz estimates the
+two-rung tower needs, with no separate second-derivative analysis. -/
+
+variable {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W] [FiniteDimensional ℝ W]
+
+/-- **`C³` ⟹ prolongation Lipschitz package.** A globally spatially-`C³` field `f`
+provides Lipschitz constants for `f`, `fderiv f`, and `fderiv (fderiv f)` on every
+closed ball — exactly the estimates the augmented Picard-Lindelöf construction needs at
+levels 0, 1, and 2 of the bootstrap. The closed ball is convex and (in finite
+dimension) compact, so `ContDiffOn.exists_lipschitzOnWith` applies at each derivative
+order. -/
+theorem contDiff_three_prolongation_lipschitz_package
+    {g : W → W} (hg : ContDiff ℝ 3 g) (w₀ : W) (a : ℝ≥0) :
+    (∃ Kf, LipschitzOnWith Kf g (closedBall w₀ a)) ∧
+    (∃ KDf, LipschitzOnWith KDf (fun x => fderiv ℝ g x) (closedBall w₀ a)) ∧
+    (∃ KD2f, LipschitzOnWith KD2f
+      (fun x => fderiv ℝ (fun y => fderiv ℝ g y) x) (closedBall w₀ a)) := by
+  have hconv : Convex ℝ (closedBall w₀ (a : ℝ)) := convex_closedBall w₀ a
+  have hcompact : IsCompact (closedBall w₀ (a : ℝ)) := isCompact_closedBall w₀ a
+  have hDf : ContDiff ℝ 2 (fun x => fderiv ℝ g x) := (contDiff_succ_iff_fderiv.mp hg).2.2
+  have hD2f : ContDiff ℝ 1 (fun x => fderiv ℝ (fun y => fderiv ℝ g y) x) :=
+    (contDiff_succ_iff_fderiv.mp hDf).2.2
+  refine ⟨?_, ?_, ?_⟩
+  · exact hg.contDiffOn.exists_lipschitzOnWith (by norm_num) hconv hcompact
+  · exact hDf.contDiffOn.exists_lipschitzOnWith (by norm_num) hconv hcompact
+  · exact hD2f.contDiffOn.exists_lipschitzOnWith (by norm_num) hconv hcompact
+
 end PoincareCurvature.FlowSpatialC1
