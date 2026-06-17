@@ -102,6 +102,50 @@ theorem tangent_contDiffOn_of_augmentedFlow_contDiffOn
     hαflow.comp (hemb.contDiffOn) hmaps
   exact contDiff_snd.comp_contDiffOn hcomp
 
+/-- **Base-projection smoothness — companion to the tangent bridge.** If the underlying
+augmented flow slice `z ↦ α.flow(z,t)` is `ContDiffOn n` on the augmented ball, then the
+`ofProduct` base flow slice `x ↦ (ofProduct α hball).flow(x,t)` is `ContDiffOn n` on the
+base ball. The base flow is *definitionally* `(α.flow((x,1),t)).1`, so it is the composition
+`x ↦ (x,1) → α.flow(·,t) → Prod.fst`. Together with the tangent bridge this controls *both*
+projections of the ofProduct flow from the underlying flow. -/
+theorem baseProj_contDiffOn_of_augmentedFlow_contDiffOn
+    {R : ℝ≥0} {n : WithTop ℕ∞}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀ (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ}
+    (hαflow : ContDiffOn ℝ n (fun z : V × (V →L[ℝ] V) => α.flow (z, t))
+      (closedBall (x₀, (1 : V →L[ℝ] V)) R)) :
+    ContDiffOn ℝ n
+      (fun x : V => (ofProductContinuousLocalFlowSolution α hball).flow (x, t))
+      (closedBall x₀ r) := by
+  have hemb : ContDiff ℝ n (fun x : V => (x, (1 : V →L[ℝ] V))) :=
+    contDiff_id.prodMk contDiff_const
+  have hmaps : MapsTo (fun x : V => (x, (1 : V →L[ℝ] V)))
+      (closedBall x₀ r) (closedBall (x₀, (1 : V →L[ℝ] V)) R) := hball
+  have hcomp : ContDiffOn ℝ n
+      (fun x : V => α.flow ((x, (1 : V →L[ℝ] V)), t)) (closedBall x₀ r) :=
+    hαflow.comp (hemb.contDiffOn) hmaps
+  exact contDiff_fst.comp_contDiffOn hcomp
+
+/-- **Embedded underlying-flow reconstruction.** The embedded underlying-flow slice
+`x ↦ α.flow((x,1),t)` equals the pair `((ofProduct α hball).flow(x,t), tangent x t)` (by the
+`ofProduct` field definitions, `rfl`), so it is `ContDiffOn n` whenever both ofProduct
+projections are. This is the type-uniform recursion link: the embedded flow that the
+bridges consume is exactly the pair of the next-level ofProduct projections. -/
+theorem embeddedFlow_contDiffOn_of_projections
+    {R : ℝ≥0} {n : WithTop ℕ∞}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀ (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} {s : Set V}
+    (hbase : ContDiffOn ℝ n
+      (fun x : V => (ofProductContinuousLocalFlowSolution α hball).flow (x, t)) s)
+    (htan : ContDiffOn ℝ n
+      (fun x : V => (ofProductContinuousLocalFlowSolution α hball).tangent x t) s) :
+    ContDiffOn ℝ n (fun x : V => α.flow ((x, (1 : V →L[ℝ] V)), t)) s :=
+  contDiffOn_prod_of_components hbase htan
+
 /-! ### Prolongation chaining: the project's variational machinery runs one level up
 
 To climb from `C¹` to `C³` the tower must instantiate the project's variational
