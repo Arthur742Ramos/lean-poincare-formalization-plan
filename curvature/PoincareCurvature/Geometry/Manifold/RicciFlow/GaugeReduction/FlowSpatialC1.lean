@@ -312,6 +312,113 @@ theorem stateFlow_contDiffOn_one
     (toStatePreservingLipschitzLocalFlowSolution hf) hball htbig
     (fun x hx => stateFlow_hasFDerivAt hg hf hball hx ht)
 
+/-! #### Minimal-regularity (`C²`) reusable forms
+
+The HasFDerivAt extraction and the Picard construction each consume only `g` and
+`fderiv g` being Lipschitz/bounded — facts available already at `C²`. Stating them at the
+minimal `C²` hypothesis (rather than `C³`) makes them reusable at *each* prolongation
+level of the bootstrap: the level-1 augmented field `(g, fderiv g)` is `C²` when `g` is
+`C³`, so these same lemmas apply to it. -/
+
+omit [CompleteSpace W] in
+/-- `fderiv g` is Lipschitz on every closed ball when `g` is `C²`. This is the only
+keystone ingredient the flow-derivative extraction consumes, isolated at minimal
+regularity for reuse at every prolongation level. -/
+theorem fderiv_lipschitzOnWith_of_contDiff_two
+    {g : W → W} (hg : ContDiff ℝ 2 g) (w₀ : W) (a : ℝ≥0) :
+    ∃ K, LipschitzOnWith K (fun x => fderiv ℝ g x) (closedBall w₀ a) := by
+  have hconv : Convex ℝ (closedBall w₀ (a : ℝ)) := convex_closedBall w₀ a
+  have hcompact : IsCompact (closedBall w₀ (a : ℝ)) := isCompact_closedBall w₀ a
+  have hDf : ContDiff ℝ 1 (fun x => fderiv ℝ g x) := (contDiff_succ_iff_fderiv.mp hg).2.2
+  exact hDf.contDiffOn.exists_lipschitzOnWith (by norm_num) hconv hcompact
+
+omit [CompleteSpace W] in
+/-- C²-minimal variational Picard-Lindelöf: needs only `g` and `fderiv g` Lipschitz +
+bounded, all available at `C²`. -/
+theorem isPicardLindelof_autonomous_variational_of_contDiff_two
+    {g : W → W} (hg : ContDiff ℝ 2 g)
+    {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (w₀ : W) (a r : ℝ≥0) :
+    ∃ L K : ℝ≥0,
+      (L * (max (tmax - (t₀ : ℝ)) ((t₀ : ℝ) - tmin)) ≤ (a : ℝ) - r) →
+        IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+          t₀ (w₀, (1 : W →L[ℝ] W)) a r L K := by
+  have hconv : Convex ℝ (closedBall w₀ (a : ℝ)) := convex_closedBall w₀ a
+  have hcompact : IsCompact (closedBall w₀ (a : ℝ)) := isCompact_closedBall w₀ a
+  obtain ⟨Kf, hKf⟩ := hg.contDiffOn.exists_lipschitzOnWith (by norm_num) hconv hcompact
+  obtain ⟨KD, hKD⟩ := fderiv_lipschitzOnWith_of_contDiff_two hg w₀ a
+  have hg_cont : Continuous g := hg.continuous
+  have hDg_cont : Continuous (fun x => fderiv ℝ g x) := hg.continuous_fderiv (by norm_num)
+  obtain ⟨Lfr, hLfr⟩ := (hcompact.bddAbove_image (continuous_norm.comp hg_cont).continuousOn)
+  obtain ⟨BDr, hBDr⟩ := (hcompact.bddAbove_image (continuous_norm.comp hDg_cont).continuousOn)
+  have hw0 : w₀ ∈ closedBall w₀ (a : ℝ) := mem_closedBall_self (by positivity)
+  have hLf_nonneg : 0 ≤ Lfr := le_trans (norm_nonneg _) (hLfr ⟨w₀, hw0, rfl⟩)
+  have hBD_nonneg : 0 ≤ BDr := le_trans (norm_nonneg _) (hBDr ⟨w₀, hw0, rfl⟩)
+  set Lf : ℝ≥0 := Lfr.toNNReal with hLfdef
+  set BD : ℝ≥0 := BDr.toNNReal with hBDdef
+  set BA : ℝ≥0 := 1 + a with hBAdef
+  refine ⟨max Lf (BD * BA), max Kf (KD * BA + BD), fun hmul => ?_⟩
+  have hLf_coe : (Lf : ℝ) = Lfr := by rw [hLfdef, Real.coe_toNNReal _ hLf_nonneg]
+  have hBD_coe : (BD : ℝ) = BDr := by rw [hBDdef, Real.coe_toNNReal _ hBD_nonneg]
+  apply isPicardLindelof_variationalVectorField_of_component_closedBall_continuity
+    (Kf := Kf) (KD := KD) (Lf := Lf) (BA := BA) (BD := BD)
+  · exact fun t _ => hKf
+  · exact fun t _ => hKD
+  · intro t _ y hy
+    rw [hLf_coe]; exact hLfr ⟨y, hy, rfl⟩
+  · intro A hA
+    rw [← NNReal.coe_le_coe, coe_nnnorm, hBAdef]
+    have hdist : dist A (1 : W →L[ℝ] W) ≤ a := by rw [← mem_closedBall]; exact hA
+    have hsub : ‖A - 1‖ ≤ (a : ℝ) := by rw [← dist_eq_norm]; exact hdist
+    have hone : ‖(1 : W →L[ℝ] W)‖ ≤ 1 := ContinuousLinearMap.norm_id_le
+    have htri : ‖A‖ ≤ ‖(1 : W →L[ℝ] W)‖ + ‖A - 1‖ := by
+      simpa [add_comm] using norm_le_norm_add_norm_sub' A (1 : W →L[ℝ] W)
+    push_cast
+    linarith
+  · intro t _ y hy
+    rw [← NNReal.coe_le_coe, coe_nnnorm, hBD_coe]; exact hBDr ⟨y, hy, rfl⟩
+  · exact fun y _ => continuousOn_const
+  · exact fun y _ => continuousOn_const
+  · exact hmul
+
+/-- C²-minimal flow-derivative extraction: the real state-preserving flow slice has
+spatial Fréchet derivative = the variational tangent map, needing only `g` to be `C²`. -/
+theorem stateFlow_hasFDerivAt_two
+    {g : W → W} (hg : ContDiff ℝ 2 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a r r' L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a r L K)
+    (hball : ∀ y ∈ closedBall w₀ r',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r)
+    {x : W} (hx : x ∈ ball w₀ r') {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) :
+    HasFDerivAt
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).flow
+            (y, t))
+      ((ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).tangent
+            x t)
+      x := by
+  obtain ⟨KDf, hKDf⟩ := fderiv_lipschitzOnWith_of_contDiff_two hg w₀ a
+  have hg_cont : Continuous (fun x => fderiv ℝ g x) := hg.continuous_fderiv (by norm_num)
+  have hcompact : IsCompact (closedBall w₀ (a : ℝ)) := isCompact_closedBall w₀ a
+  obtain ⟨KB, hKB⟩ := (hcompact.bddAbove_image (continuous_norm.comp hg_cont).continuousOn)
+  have hgdiff : ∀ z : W, HasFDerivAt g (fderiv ℝ g z) z := fun z =>
+    (hg.differentiable (by norm_num)).differentiableAt.hasFDerivAt
+  apply ofProduct_flow_timeSlice_hasFDerivAt_of_Df_lipschitzOnWith_on_convex_state_forward_Icc_of_mem_ball
+    (β := toStatePreservingLipschitzLocalFlowSolution hf)
+    (K := KB) (KD := KDf) (state := fun _ => closedBall w₀ a) hball hx ht
+  · exact fun τ _ => convex_closedBall w₀ a
+  · intro y hy τ hτ
+    exact ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall_forward_Icc
+      hf hball hy hτ
+  · intro τ _ z hz
+    exact hKB ⟨z, hz, rfl⟩
+  · intro τ _
+    exact hKDf
+  · intro τ _ z _
+    exact (hgdiff z).hasFDerivWithinAt
+
 end Autonomous
 
 end PoincareCurvature.FlowSpatialC1
