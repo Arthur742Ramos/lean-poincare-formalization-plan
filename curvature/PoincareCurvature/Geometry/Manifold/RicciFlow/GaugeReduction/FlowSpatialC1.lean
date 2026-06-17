@@ -856,6 +856,47 @@ theorem contDiffOn_transfer_of_flows_eq
   intro x hx
   exact heq x (ball_subset_closedBall hx)
 
+/-- **Raw flow equals an `ofProduct` flow** of the same variational field, via project flow
+uniqueness, with every hypothesis discharged from `ContDiff 3 g`. The state is `closedBall
+(w₀,1) a0`; the field `variationalVectorField g (fderiv g)` is Lipschitz there
+(`variationalField_lipschitzOnWith_of_contDiff_three`); the raw flow stays in it
+(`toStatePreservingLipschitzLocalFlowSolution_flow_mem_closedBall`) and `β` is assumed to (its
+`flow_mem`, supplied by `ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall` at the
+call site). This is the keystone that lets the raw flow's embedded-slice smoothness transfer
+from the reconstructible `ofProduct` flow `β`. -/
+theorem raw_eq_ofProduct_flow
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a0 r0 L0 K0 : ℝ≥0}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf0 : IsPicardLindelof
+      (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a0 r0 L0 K0)
+    (β : ContinuousLocalFlowSolution
+      (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) r0)
+    (hβ_mem : ∀ z ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0, ∀ s ∈ Ioo tmin tmax,
+      β.flow (z, s) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) a0)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ∀ z ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0,
+      (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution.flow (z, t)
+        = β.flow (z, t) := by
+  obtain ⟨K, hK⟩ := variationalField_lipschitzOnWith_of_contDiff_three (W := W) hg w₀ a0 0
+  have hf_lip : ∀ s ∈ Ioo tmin tmax,
+      LipschitzOnWith K
+        (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g) s)
+        ((fun _ : ℝ => closedBall (w₀, (1 : W →L[ℝ] W)) a0) s) :=
+    fun s _ => hK
+  have hα_mem : ∀ z ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0, ∀ s ∈ Ioo tmin tmax,
+      (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution.flow (z, s)
+        ∈ closedBall (w₀, (1 : W →L[ℝ] W)) a0 := by
+    intro z hz s hs
+    exact toStatePreservingLipschitzLocalFlowSolution_flow_mem_closedBall hf0 hz
+      (Ioo_subset_Icc_self hs)
+  exact fun z hz =>
+    flows_eqOn_of_lipschitzState
+      (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution β
+      ht₀ hf_lip hα_mem hβ_mem ht z hz
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
