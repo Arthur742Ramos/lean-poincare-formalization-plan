@@ -146,6 +146,39 @@ theorem embeddedFlow_contDiffOn_of_projections
     ContDiffOn ℝ n (fun x : V => α.flow ((x, (1 : V →L[ℝ] V)), t)) s :=
   contDiffOn_prod_of_components hbase htan
 
+/-- **Tangent from the embedded slice — the weakened bridge.** The `ofProduct` tangent map
+`x ↦ tangent x t` is `ContDiffOn n` whenever *only the embedded slice* `x ↦ α.flow((x,1),t)`
+is `ContDiffOn n` — strictly weaker than the full augmented flow on all of the augmented
+ball. The tangent is definitionally `(α.flow((x,1),t)).2 = Prod.snd ∘ (embedded slice)`. This
+is the decisive simplification: combined with `baseProj_from_embedded` and
+`embeddedFlow_contDiffOn_of_projections`, the recursion needs only embedded-slice smoothness
+at each level, which reconstructs from the next level's two projections — making the
+type-changing tower a uniform recursion with no full-augmented-flow hypothesis anywhere. -/
+theorem tangent_contDiffOn_of_embedded
+    {R : ℝ≥0} {n : WithTop ℕ∞}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀ (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} {s : Set V}
+    (hemb : ContDiffOn ℝ n (fun x : V => α.flow ((x, (1 : V →L[ℝ] V)), t)) s) :
+    ContDiffOn ℝ n
+      (fun x : V => (ofProductContinuousLocalFlowSolution α hball).tangent x t) s :=
+  contDiff_snd.comp_contDiffOn hemb
+
+/-- **Base projection from the embedded slice — the weakened companion.** The `ofProduct`
+base flow `x ↦ (ofProduct α hball).flow(x,t)` is `ContDiffOn n` whenever only the embedded
+slice `x ↦ α.flow((x,1),t)` is. Definitionally `Prod.fst ∘ (embedded slice)`. -/
+theorem baseProj_contDiffOn_of_embedded
+    {R : ℝ≥0} {n : WithTop ℕ∞}
+    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀ (x₀, (1 : V →L[ℝ] V)) R)
+    (hball : ∀ x ∈ closedBall x₀ r,
+      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R)
+    {t : ℝ} {s : Set V}
+    (hemb : ContDiffOn ℝ n (fun x : V => α.flow ((x, (1 : V →L[ℝ] V)), t)) s) :
+    ContDiffOn ℝ n
+      (fun x : V => (ofProductContinuousLocalFlowSolution α hball).flow (x, t)) s :=
+  contDiff_fst.comp_contDiffOn hemb
+
 /-! ### Prolongation chaining: the project's variational machinery runs one level up
 
 To climb from `C¹` to `C³` the tower must instantiate the project's variational
