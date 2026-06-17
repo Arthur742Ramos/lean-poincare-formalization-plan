@@ -440,6 +440,43 @@ theorem stateFlow_contDiffOn_one_two
     (toStatePreservingLipschitzLocalFlowSolution hf) hball htbig
     (fun x hx => stateFlow_hasFDerivAt_two hg hf hball hx ht)
 
+/-- **One real-flow recursion step.** If the level-0 augmented flow slice `z ↦ Ψ0 z`
+(the product flow whose 2nd projection at `(x,1)` is — definitionally — the base flow's
+tangent map) is `ContDiffOn n` on the augmented ball, then the real base flow slice
+`x ↦ Φ_t x` is `ContDiffOn (n+1)` on the base ball. The base flow's per-point
+`HasFDerivAt` (equal to the tangent) comes from `g : C²` via `stateFlow_hasFDerivAt_two`;
+the tangent equals `(Ψ0 (x,1)).2` by definitional unfolding of
+`ofProductContinuousLocalFlowSolution`, so the abstract rung lemma
+`contDiffOn_succ_of_augmented_flow_contDiffOn_isOpen` closes it. This is the genuine
+engine step on the real flow objects; applied twice it yields spatial `C³`. -/
+theorem baseFlow_contDiffOn_succ_of_augmented_contDiffOn
+    {g : W → W} (hg : ContDiff ℝ 2 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a r r' L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a r L K)
+    (hball : ∀ y ∈ closedBall w₀ r',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) {n : ℕ}
+    (hΨ : ContDiffOn ℝ (n : WithTop ℕ∞)
+      (fun z : W × (W →L[ℝ] W) =>
+        (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution.flow (z, t))
+      (closedBall (w₀, (1 : W →L[ℝ] W)) r)) :
+    ContDiffOn ℝ ((n : WithTop ℕ∞) + 1)
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).flow
+            (y, t))
+      (ball w₀ r') := by
+  apply contDiffOn_succ_of_augmented_flow_contDiffOn_isOpen
+    (Ψ := fun z _ =>
+      (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution.flow (z, t))
+    (S := closedBall (w₀, (1 : W →L[ℝ] W)) r) (t := t) isOpen_ball
+  · intro x hx
+    exact stateFlow_hasFDerivAt_two hg hf hball hx ht
+  · intro x hx
+    exact hball x (ball_subset_closedBall hx)
+  · exact hΨ
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
