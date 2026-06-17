@@ -17,6 +17,9 @@ These lemmas supply the smoothness facts that drive that recursion:
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.Calculus.FDeriv.Mul
+import Mathlib.Analysis.Calculus.FDeriv.Comp
+import Mathlib.Analysis.Calculus.FDeriv.CompCLM
+import Mathlib.Analysis.Calculus.FDeriv.Prod
 import Mathlib.Analysis.Normed.Operator.Prod
 
 open scoped Topology
@@ -65,6 +68,32 @@ theorem contDiff_variationalField_fderiv {V : Type*} [NormedAddCommGroup V] [Nor
     ContDiff ℝ (n : ℕ) (fun z : V × (V →L[ℝ] V) => (f z.1, (fderiv ℝ f z.1).comp z.2)) :=
   contDiff_variationalField (hf.of_le (by exact_mod_cast Nat.le_succ n))
     (contDiff_fderiv_of_contDiff_succ hf)
+
+/-- **Spatial differentiability of the prolongation field.** The variational
+(prolongation) vector field `w(a, B) = (f a, (Df a) ∘ B)` on the augmented space
+`V × (V →L[ℝ] V)` is Fréchet-differentiable at `(a, B)` whenever `f` is differentiable
+at `a` (with derivative `Df a`) and `Df` is itself differentiable at `a` (with
+derivative `D2f a`). The augmented Picard-Lindelöf construction at the next bootstrap
+rung needs precisely this — that the prolonged field has a spatial derivative — and
+mathlib has no lemma for it. Only existence is exposed; the operator is synthesised by
+`prodMk`/`clm_comp`. -/
+theorem hasFDerivAt_prolongationField {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : V → V} {Df : V → (V →L[ℝ] V)} {D2f : V → (V →L[ℝ] (V →L[ℝ] V))}
+    {a : V} {B : V →L[ℝ] V}
+    (hf : HasFDerivAt f (Df a) a) (hDf : HasFDerivAt Df (D2f a) a) :
+    ∃ D : (V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V)),
+      HasFDerivAt
+        (fun z : V × (V →L[ℝ] V) => (f z.1, (Df z.1).comp z.2)) D (a, B) := by
+  have h1 : HasFDerivAt (fun z : V × (V →L[ℝ] V) => f z.1)
+      ((Df a).comp (ContinuousLinearMap.fst ℝ V (V →L[ℝ] V))) (a, B) :=
+    HasFDerivAt.comp (a, B) hf hasFDerivAt_fst
+  have hg : HasFDerivAt (fun z : V × (V →L[ℝ] V) => Df z.1)
+      ((D2f a).comp (ContinuousLinearMap.fst ℝ V (V →L[ℝ] V))) (a, B) :=
+    HasFDerivAt.comp (a, B) hDf hasFDerivAt_fst
+  have hh : HasFDerivAt (fun z : V × (V →L[ℝ] V) => z.2)
+      (ContinuousLinearMap.snd ℝ V (V →L[ℝ] V)) (a, B) :=
+    hasFDerivAt_snd
+  exact ⟨_, HasFDerivAt.prodMk h1 (HasFDerivAt.clm_comp hg hh)⟩
 
 /-! ### The smooth-dependence bootstrap engine
 
