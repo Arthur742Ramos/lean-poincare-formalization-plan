@@ -776,6 +776,47 @@ theorem baseFlow_contDiffOn_two_from_embedded
     (by simpa using htan)
   simpa using h
 
+/-! #### Uniqueness transfer: raw flow ↔ `ofProduct` flow
+
+The recursion's underlying flow is the raw `toStatePreserving hf0` flow (needed
+state-preserving for the `HasFDerivAt` extraction), but its smoothness is only available on a
+*reconstructible* `ofProduct` flow. The project's flow uniqueness identifies the two — both
+are continuous local flows of the same field, same anchor, same initial point, both staying
+in a Lipschitz state — so `ContDiffOn` transfers from the `ofProduct` flow to the raw flow. -/
+
+omit [FiniteDimensional ℝ W] [CompleteSpace W] in
+/-- Two continuous local flows of the same field, same anchor/center/radius, both staying in
+a common Lipschitz state, agree pointwise on the closed ball at every time (project flow
+uniqueness, pointwise form). -/
+theorem flows_eqOn_of_lipschitzState
+    {f : ℝ → W → W} {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : W} {r : ℝ≥0}
+    (α β : ContinuousLocalFlowSolution f t₀ x₀ r)
+    {K : ℝ≥0} {state : ℝ → Set W}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf_lip : ∀ t ∈ Ioo tmin tmax, LipschitzOnWith K (f t) (state t))
+    (hα_mem : ∀ x ∈ closedBall x₀ r, ∀ t ∈ Ioo tmin tmax, α.flow (x, t) ∈ state t)
+    (hβ_mem : ∀ x ∈ closedBall x₀ r, ∀ t ∈ Ioo tmin tmax, β.flow (x, t) ∈ state t)
+    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
+    ∀ x ∈ closedBall x₀ r, α.flow (x, t) = β.flow (x, t) := by
+  intro x hx
+  exact ContinuousLocalFlowSolution.flow_eq_of_lipschitzOnWith_of_mem_Icc α β hx hx ht₀ hf_lip
+    (hα_mem x hx) (hβ_mem x hx) ht
+
+omit [FiniteDimensional ℝ W] [CompleteSpace W] in
+/-- `ContDiffOn` transfer across two flows that agree on the ball: if `α` and `β` agree
+pointwise on `closedBall x₀ r` and `β`'s slice is `ContDiffOn n`, then `α`'s slice is too on
+the open ball (via `ContDiffOn.congr`). -/
+theorem contDiffOn_transfer_of_flows_eq
+    {f : ℝ → W → W} {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : W} {r : ℝ≥0}
+    (α β : ContinuousLocalFlowSolution f t₀ x₀ r)
+    {n : WithTop ℕ∞} {t : ℝ}
+    (heq : ∀ x ∈ closedBall x₀ r, α.flow (x, t) = β.flow (x, t))
+    (hβ : ContDiffOn ℝ n (fun x : W => β.flow (x, t)) (ball x₀ r)) :
+    ContDiffOn ℝ n (fun x : W => α.flow (x, t)) (ball x₀ r) := by
+  apply hβ.congr
+  intro x hx
+  exact heq x (ball_subset_closedBall hx)
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
