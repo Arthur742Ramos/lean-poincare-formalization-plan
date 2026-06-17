@@ -504,6 +504,56 @@ theorem baseFlow_contDiffOn_three_of_augmented_contDiffOn_two
     (by simpa using hΨ)
   simpa using h
 
+/-- **Base flow is `ContDiffOn 2`** given the full augmented flow's `ContDiffOn 1`. The
+recursion step at `n = 1` (cast `1 + 1 = 2`) — the first genuine gain above the `C¹` base.
+The hypothesis is the *full* augmented (product) flow slice being `ContDiffOn 1`, assembled
+from its base and tangent projections via `augmentedFlow_contDiffOn_one_of_components`. -/
+theorem baseFlow_contDiffOn_two_of_augmented_contDiffOn_one
+    {g : W → W} (hg : ContDiff ℝ 2 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a r r' L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a r L K)
+    (hball : ∀ y ∈ closedBall w₀ r',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    (hΨ : ContDiffOn ℝ (1 : ℕ)
+      (fun z : W × (W →L[ℝ] W) =>
+        (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution.flow (z, t))
+      (closedBall (w₀, (1 : W →L[ℝ] W)) r)) :
+    ContDiffOn ℝ 2
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution hball).flow
+            (y, t))
+      (ball w₀ r') := by
+  have h := baseFlow_contDiffOn_succ_of_augmented_contDiffOn (n := 1) hg hf hball ht
+    (by simpa using hΨ)
+  simpa using h
+
+omit [FiniteDimensional ℝ W] in
+/-- The full augmented flow slice's `ContDiffOn 1` assembled from its base and tangent
+projections (via `contDiffOn_prod_of_components`). The base projection is
+`stateFlow_contDiffOn_one_two` at the augmented level; the tangent projection `htan` is the
+base projection of the doubly-augmented flow — the next tower level. -/
+theorem augmentedFlow_contDiffOn_one_of_components
+    {g : W → W}
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a r L K : ℝ≥0}
+    (hf : IsPicardLindelof (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a r L K) {t : ℝ}
+    (hbase : ContDiffOn ℝ (1 : ℕ)
+      (fun z : W × (W →L[ℝ] W) =>
+        ((toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution.flow (z, t)).1)
+      (closedBall (w₀, (1 : W →L[ℝ] W)) r))
+    (htan : ContDiffOn ℝ (1 : ℕ)
+      (fun z : W × (W →L[ℝ] W) =>
+        ((toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution.flow (z, t)).2)
+      (closedBall (w₀, (1 : W →L[ℝ] W)) r)) :
+    ContDiffOn ℝ (1 : ℕ)
+      (fun z : W × (W →L[ℝ] W) =>
+        (toStatePreservingLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution.flow (z, t))
+      (closedBall (w₀, (1 : W →L[ℝ] W)) r) :=
+  contDiffOn_prod_of_components hbase htan
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
