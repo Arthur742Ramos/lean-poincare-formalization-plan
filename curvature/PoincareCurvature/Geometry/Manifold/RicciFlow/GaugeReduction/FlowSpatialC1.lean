@@ -736,6 +736,46 @@ theorem baseFlow_contDiffOn_two
     (by simpa using htan)
   simpa using h
 
+/-- **Base flow `ContDiffOn 2` from the embedded augmented slice** — the correctly-weakened
+interface. The hypothesis is only the *embedded* slice `x ↦ (underlying flow)((x,1),t)` being
+`ContDiffOn 1` on `ball w₀ r0'` (not the full augmented flow on the whole augmented ball).
+This is the minimal input the recursion actually consumes: the tangent and the base flow's
+own packaging both factor through the embedded slice via `tangent_contDiffOn_of_embedded`.
+This is the right interface for the final tower discharge — the embedded slice reconstructs
+from the next level's two `ofProduct` projections. -/
+theorem baseFlow_contDiffOn_two_from_embedded
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a0 r0 r0' L0 K0 : ℝ≥0}
+    (hf0 : IsPicardLindelof
+      (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a0 r0 L0 K0)
+    (hball0 : ∀ y ∈ closedBall w₀ r0',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax)
+    (hemb0 : ContDiffOn ℝ (1 : WithTop ℕ∞)
+      (fun x : W =>
+        (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution.flow
+          ((x, (1 : W →L[ℝ] W)), t))
+      (ball w₀ r0')) :
+    ContDiffOn ℝ 2
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution hball0).flow
+            (y, t))
+      (ball w₀ r0') := by
+  have hg2 : ContDiff ℝ 2 g := hg.of_le (by norm_num)
+  have htan : ContDiffOn ℝ (1 : WithTop ℕ∞)
+      (fun x : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution hball0).tangent
+            x t)
+      (ball w₀ r0') :=
+    tangent_contDiffOn_of_embedded
+      (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution hball0 hemb0
+  have h := baseFlow_contDiffOn_succ_of_tangent_contDiffOn (n := 1) hg2 hf0 hball0 ht
+    (by simpa using htan)
+  simpa using h
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
