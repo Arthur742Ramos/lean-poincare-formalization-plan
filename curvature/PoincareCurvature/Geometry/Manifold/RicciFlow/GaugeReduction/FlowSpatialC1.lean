@@ -72,4 +72,54 @@ theorem ofProduct_flow_timeSlice_contDiffOn_one_ball
     (continuous_snd.comp_continuousOn hpair).mono ball_subset_closedBall
   exact flow_timeSlice_contDiffOn_one_ball β hder hcont
 
+/-! ### Prolongation chaining: the project's variational machinery runs one level up
+
+To climb from `C¹` to `C³` the tower must instantiate the project's variational
+Picard-Lindelöf construction at successively prolonged vector fields. The next two
+lemmas confirm this chaining typechecks: the *level-1* augmented field is literally
+`variationalVectorField F0 DF0` for the level-0 augmented field `F0` and its spatial
+derivative `DF0`, so the project's generic Lipschitz/norm packaging applies verbatim
+on the augmented model space `W = V × (V →L[ℝ] V)`. This reduces the level-2 Picard
+hypotheses to: `F0` Lipschitz/bounded (already supplied by the project at level 1) plus
+the single genuinely-new estimate — a Lipschitz/operator-norm bound on the prolongation
+derivative `DF0` (which needs `D²f` controlled, i.e. spatial `C^{2,1}` on the field). -/
+
+/-- **Level-1 augmented Lipschitz chaining.** The doubly-prolonged field
+`variationalVectorField F0 DF0` is `(max KF (KDF·BA + BDF))`-Lipschitz on the augmented
+ball whenever `F0` is `KF`-Lipschitz, `DF0` is `KDF`-Lipschitz, the tangent factor is
+`BA`-bounded, and `DF0` is `BDF`-bounded — exactly the project's level-0 packaging,
+reused at the augmented space. -/
+theorem level1_augmented_lipschitzOnWith
+    (F0 : ℝ → (V × (V →L[ℝ] V)) → (V × (V →L[ℝ] V)))
+    (DF0 : ℝ → (V × (V →L[ℝ] V)) → ((V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V))))
+    {t : ℝ} {w₀ : V × (V →L[ℝ] V)}
+    {A₀ : (V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V))}
+    {a KF KDF BA BDF : ℝ≥0}
+    (hF0_lip : LipschitzOnWith KF (F0 t) (closedBall w₀ a))
+    (hDF0_lip : LipschitzOnWith KDF (DF0 t) (closedBall w₀ a))
+    (hA_bound : ∀ A ∈ closedBall A₀ a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ y ∈ closedBall w₀ a, ‖DF0 t y‖₊ ≤ BDF) :
+    LipschitzOnWith (max KF (KDF * BA + BDF))
+      (variationalVectorField F0 DF0 t) (closedBall (w₀, A₀) a) :=
+  lipschitzOnWith_variationalVectorField_closedBall_at
+    (f := F0) (Df := DF0) (t := t) hF0_lip hDF0_lip hA_bound hD_bound
+
+/-- **Level-1 augmented norm chaining.** The doubly-prolonged field is
+`(max LF (BDF·BA))`-bounded on the augmented ball from the same componentwise data —
+the project's level-0 norm estimate reused at the augmented space. -/
+theorem level1_augmented_norm_le
+    (F0 : ℝ → (V × (V →L[ℝ] V)) → (V × (V →L[ℝ] V)))
+    (DF0 : ℝ → (V × (V →L[ℝ] V)) → ((V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V))))
+    {t : ℝ} {w₀ : V × (V →L[ℝ] V)}
+    {A₀ : (V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V))}
+    {a LF BA BDF : ℝ≥0}
+    (hF0_bound : ∀ y ∈ closedBall w₀ a, ‖F0 t y‖ ≤ LF)
+    (hA_bound : ∀ A ∈ closedBall A₀ a, ‖A‖₊ ≤ BA)
+    (hD_bound : ∀ y ∈ closedBall w₀ a, ‖DF0 t y‖₊ ≤ BDF)
+    {z : (V × (V →L[ℝ] V)) × ((V × (V →L[ℝ] V)) →L[ℝ] (V × (V →L[ℝ] V)))}
+    (hz : z ∈ closedBall (w₀, A₀) a) :
+    ‖variationalVectorField F0 DF0 t z‖ ≤ max LF (BDF * BA) :=
+  norm_variationalVectorField_le_closedBall_at
+    (f := F0) (Df := DF0) (t := t) hF0_bound hA_bound hD_bound hz
+
 end PoincareCurvature.FlowSpatialC1
