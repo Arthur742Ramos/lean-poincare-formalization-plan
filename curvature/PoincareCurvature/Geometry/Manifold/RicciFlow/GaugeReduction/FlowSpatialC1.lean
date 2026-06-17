@@ -927,6 +927,110 @@ theorem rawFlow_contDiffOn_of_ofProduct_contDiffOn
   exact contDiffOn_transfer_of_flows_eq
     (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution β heq hβ
 
+/-- **The `ofProduct` flow `β`'s slice is `ContDiffOn 1`, directly.** For a level-1 Picard
+`hf1` (the variational system of `F1 = (g, fderiv g)`, posed on `W2`), the `ofProduct` base
+flow `(ofProduct (toStatePreserving hf1) hball1).flow` — which is `β.flow` for the discharge
+— is `ContDiffOn 1` by `stateFlow_contDiffOn_one_two` applied at the `W1` level, since `F1` is
+`C²` whenever `g` is `C³` (`contDiff_variationalField`). No recursion: this is the base
+projection of the `W2` flow. -/
+theorem ofProductFlow_slice_contDiffOn_one
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {r0 a1 r1 L1 K1 : ℝ≥0}
+    (hf1 : IsPicardLindelof
+      (variationalVectorField
+        (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+        (fun t => fderiv ℝ (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g) t)))
+      t₀ ((w₀, (1 : W →L[ℝ] W)), (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) a1 r1 L1 K1)
+    (hball1 : ∀ z ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0,
+      (z, (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) ∈
+        closedBall ((w₀, (1 : W →L[ℝ] W)), (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) r1)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) :
+    ContDiffOn ℝ 1
+      (fun z : W × (W →L[ℝ] W) =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf1).toContinuousLocalFlowSolution hball1).flow
+            (z, t))
+      (ball (w₀, (1 : W →L[ℝ] W)) r0) := by
+  have hF1 : ContDiff ℝ 2
+      (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g) 0) := by
+    have hg2 : ContDiff ℝ 2 g := hg.of_le (by norm_num)
+    have hDg2 : ContDiff ℝ 2 (fun x => fderiv ℝ g x) := (contDiff_succ_iff_fderiv.mp hg).2.2
+    exact contDiff_variationalField hg2 hDg2
+  exact stateFlow_contDiffOn_one_two hF1 hf1 hball1 ht
+
+/-- **Unconditional base flow `ContDiffOn 2`** from `ContDiff 3 g` plus two-level Picard data.
+The level-0 Picard `hf0` (for `F1 = (g, fderiv g)` on `W1`) and level-1 Picard `hf1` (for
+`F1`'s own variational system on `W2`, with the *same* state radius `a0`) close the discharge:
+`β = ofProduct(toStatePreserving hf1)` is a continuous local flow of `F1` on `W1`, equal to the
+raw `toStatePreserving hf0` flow by uniqueness, with slice `ContDiffOn 1` directly via
+`stateFlow_contDiffOn_one_two`. The discharge transfers that smoothness to the raw flow, the
+embedded slice restricts to `ball w₀ r0'` (using `r0' ≤ r0`), and the recursion step lifts the
+base flow to `ContDiffOn 2`. No conditional hypotheses on the flow — only the field `C³` and
+the (always-satisfiable, by `isPicardLindelof_autonomous_variational_of_contDiff_two`) Picard
+data at the two levels. -/
+theorem baseFlow_contDiffOn_two_unconditional
+    {g : W → W} (hg : ContDiff ℝ 3 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a0 r0 r0' L0 K0 : ℝ≥0}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf0 : IsPicardLindelof
+      (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a0 r0 L0 K0)
+    (hball0 : ∀ y ∈ closedBall w₀ r0',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0)
+    (hr : r0' ≤ r0)
+    {r1 L1 K1 : ℝ≥0}
+    (hf1 : IsPicardLindelof
+      (variationalVectorField
+        (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+        (fun t => fderiv ℝ (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g) t)))
+      t₀ ((w₀, (1 : W →L[ℝ] W)), (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) a0 r1 L1 K1)
+    (hball1 : ∀ z ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0,
+      (z, (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) ∈
+        closedBall ((w₀, (1 : W →L[ℝ] W)), (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) r1)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) :
+    ContDiffOn ℝ 2
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution hball0).flow
+            (y, t))
+      (ball w₀ r0') := by
+  set β := (ofProductContinuousLocalFlowSolution
+    (toStatePreservingLipschitzLocalFlowSolution hf1).toContinuousLocalFlowSolution hball1).toContinuousLocalFlowSolution with hβdef
+  have hβ_slice : ContDiffOn ℝ (1 : WithTop ℕ∞)
+      (fun z : W × (W →L[ℝ] W) => β.flow (z, t)) (ball (w₀, (1 : W →L[ℝ] W)) r0) := by
+    have := ofProductFlow_slice_contDiffOn_one (W := W) hg hf1 hball1 ht
+    simpa [hβdef] using this
+  have hβ_mem : ∀ z ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0, ∀ s ∈ Ioo tmin tmax,
+      β.flow (z, s) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) a0 := by
+    intro z hz s hs
+    have := ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall hf1 hball1 hz
+      (Ioo_subset_Icc_self hs)
+    simpa [hβdef, ofProductStatePreservingPicardLindelof] using this
+  have htbig : t ∈ Icc tmin tmax := ⟨le_trans t₀.2.1 ht.1, ht.2⟩
+  have hraw : ContDiffOn ℝ (1 : WithTop ℕ∞)
+      (fun z : W × (W →L[ℝ] W) =>
+        (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution.flow (z, t))
+      (ball (w₀, (1 : W →L[ℝ] W)) r0) :=
+    rawFlow_contDiffOn_of_ofProduct_contDiffOn (W := W) hg ht₀ hf0 β hβ_mem htbig hβ_slice
+  have hemb0 : ContDiffOn ℝ (1 : WithTop ℕ∞)
+      (fun x : W =>
+        (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution.flow
+          ((x, (1 : W →L[ℝ] W)), t))
+      (ball w₀ r0') := by
+    have hemb : ContDiff ℝ (1 : WithTop ℕ∞) (fun x : W => (x, (1 : W →L[ℝ] W))) :=
+      contDiff_id.prodMk contDiff_const
+    have hmaps : MapsTo (fun x : W => (x, (1 : W →L[ℝ] W)))
+        (ball w₀ r0') (ball (w₀, (1 : W →L[ℝ] W)) r0) := by
+      intro x hx
+      have hr0'pos : (0 : ℝ) < r0' := lt_of_le_of_lt (dist_nonneg) hx
+      rw [mem_ball] at hx ⊢
+      rw [Prod.dist_eq]
+      simp only [dist_self, max_lt_iff]
+      exact ⟨lt_of_lt_of_le hx (by exact_mod_cast hr),
+        lt_of_lt_of_le hr0'pos (by exact_mod_cast hr)⟩
+    exact hraw.comp (hemb.contDiffOn) hmaps
+  exact baseFlow_contDiffOn_two_from_embedded hg hf0 hball0 ht hemb0
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
