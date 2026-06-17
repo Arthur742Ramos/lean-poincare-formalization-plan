@@ -244,6 +244,21 @@ theorem contDiffOn_succ_of_augmented_flow_contDiffOn_isOpen {V : Type*} [NormedA
   contDiffOn_succ_of_jacobian_contDiffOn_isOpen hs hderiv
     (jacobian_contDiffOn_of_augmented_flow_contDiffOn hΨ hmaps)
 
+/-- **Full augmented-flow `ContDiffOn` from its two projections.** A flow valued in a
+product `P × Q` is `ContDiffOn n` exactly when both component projections are. This is the
+bridge that lets a bootstrap recursion track the *full* augmented flow `(base, tangent)`
+through the tower (rather than just the base projection): the smoothness of the whole is
+the `prodMk` of the smoothness of its parts. -/
+theorem contDiffOn_prod_of_components {X P Q : Type*}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup P] [NormedSpace ℝ P] [NormedAddCommGroup Q] [NormedSpace ℝ Q]
+    {n : WithTop ℕ∞} {F : X → P × Q} {s : Set X}
+    (h1 : ContDiffOn ℝ n (fun z => (F z).1) s)
+    (h2 : ContDiffOn ℝ n (fun z => (F z).2) s) :
+    ContDiffOn ℝ n F s := by
+  have := h1.prodMk h2
+  simpa using this
+
 /-- **The spatial-`C³` capstone.** Point 4 needs the gauge flow to be spatially `C³`,
 which is exactly *two* rungs of the augmented-flow bootstrap above the `C¹` base case.
 
