@@ -5471,6 +5471,56 @@ theorem comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
 
 end ParabolicC0AlphaOn
 
+/-! ### Schauder scaling estimates
+
+The parabolic dilation `p ↦ (r ^ 2 * p.1, r • p.2)` is the domain reparametrization used in the
+Schauder scaling argument.  Composing the change-of-variables lemmas with the scaling identity
+`parabolicDistance_dilation` gives ready-to-use estimates: precomposition with the dilation
+preserves the parabolic Hölder / `C^{0,α}` classes, scaling the Hölder constant by `|r| ^ α`. -/
+
+/-- Schauder scaling estimate for the parabolic Hölder seminorm. -/
+theorem ParabolicHolderWith.comp_dilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {C α r : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicHolderWith (C * |r| ^ α) α
+      (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) t :=
+  hu.comp_parabolicDistanceLe hC hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_dilation r p q).le)
+
+/-- Schauder scaling estimate for parabolic Hölder membership. -/
+theorem ParabolicHolderOn.comp_dilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicHolderOn α (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_dilation r p q).le)
+
+/-- Schauder scaling estimate for parabolic `C^{0,α}` control: the sup bound `B` is preserved
+and the Hölder constant scales by `|r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_dilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) t :=
+  hu.comp_parabolicDistanceLe hH hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_dilation r p q).le)
+
+/-- Schauder scaling estimate for parabolic `C^{0,α}` membership. -/
+theorem ParabolicC0AlphaOn.comp_dilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_dilation r p q).le)
+
 end AnalyticPDE
 end RicciFlow
 
