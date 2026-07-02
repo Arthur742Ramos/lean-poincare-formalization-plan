@@ -5580,6 +5580,116 @@ theorem ParabolicC0AlphaOn.comp_dilation_parabolicClosedBall
   hu.comp_dilation hα
     (parabolicClosedBall_zero_mapsTo_dilation.mono_right (fun _q hq => le_trans hq hle))
 
+/-! ### Affine (centered) Schauder change of variables
+
+Composing the origin-centered parabolic dilation with a translation gives the affine parabolic
+change of variables `p ↦ c + (r ^ 2 * p.1, r • p.2)`, which normalizes a parabolic ball about an
+arbitrary center `c` to the origin.  By `parabolicDistance_add_left` the translation is an
+isometry for the parabolic distance, so the centered dilation still expands parabolic distance by
+exactly `|r|`; the Schauder scaling estimates therefore carry over verbatim, with the same
+`|r| ^ α` Hölder-constant factor.  This is the change of variables underlying the interior
+Schauder estimate, where the estimate on a ball about an interior point is reduced to the
+origin-centered unit ball. -/
+
+/-- **Affine parabolic scaling identity.** The centered parabolic dilation
+`p ↦ c + (r ^ 2 * p.1, r • p.2)` scales parabolic distance by exactly `|r|`, for any center `c`.
+This is `parabolicDistance_dilation` composed with the translation isometry
+`parabolicDistance_add_left`. -/
+theorem parabolicDistance_centeredDilation {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c : ℝ × X) (r : ℝ) (p q : ℝ × X) :
+    parabolicDistance (c + (r ^ 2 * p.1, r • p.2)) (c + (r ^ 2 * q.1, r • q.2))
+      = |r| * parabolicDistance p q := by
+  rw [parabolicDistance_add_left, parabolicDistance_dilation]
+
+/-- The centered parabolic dilation `p ↦ c + (r ^ 2 * p.1, r • p.2)` maps the origin-centered
+closed parabolic ball of radius `ρ` into the closed parabolic ball of radius `|r| * ρ` about `c`.
+This discharges the `Set.MapsTo` hypothesis of the affine Schauder scaling estimates. -/
+theorem parabolicClosedBall_mapsTo_centeredDilation
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c : ℝ × X} {r ρ : ℝ} :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2))
+      (parabolicClosedBall (0 : ℝ × X) ρ) (parabolicClosedBall c (|r| * ρ)) := by
+  intro q hq
+  simp only [parabolicClosedBall, Set.mem_setOf_eq] at hq ⊢
+  have hz : ((r ^ 2 * (0 : ℝ × X).1, r • (0 : ℝ × X).2) : ℝ × X) = (0 : ℝ × X) := by simp
+  have hkey : parabolicDistance c (c + (r ^ 2 * q.1, r • q.2))
+      = |r| * parabolicDistance (0 : ℝ × X) q := by
+    have h := parabolicDistance_centeredDilation c r (0 : ℝ × X) q
+    rw [hz, add_zero] at h
+    exact h
+  rw [hkey]
+  exact mul_le_mul_of_nonneg_left hq (abs_nonneg r)
+
+/-- Affine Schauder scaling estimate for the parabolic Hölder seminorm. -/
+theorem ParabolicHolderWith.comp_centeredDilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {C α r : ℝ} {c : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicHolderWith (C * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) t :=
+  hu.comp_parabolicDistanceLe hC hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_centeredDilation c r p q).le)
+
+/-- Affine Schauder scaling estimate for parabolic Hölder membership. -/
+theorem ParabolicHolderOn.comp_centeredDilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {c : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicHolderOn α (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_centeredDilation c r p q).le)
+
+/-- Affine Schauder scaling estimate for parabolic `C^{0,α}` control: the sup bound `B` is
+preserved and the Hölder constant scales by `|r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_centeredDilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r : ℝ} {c : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) t :=
+  hu.comp_parabolicDistanceLe hH hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_centeredDilation c r p q).le)
+
+/-- Affine Schauder scaling estimate for parabolic `C^{0,α}` membership. -/
+theorem ParabolicC0AlphaOn.comp_centeredDilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {c : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_centeredDilation c r p q).le)
+
+/-- **Affine Schauder normalization (`C^{0,α}` control).** If `u` is parabolic `C^{0,α}` with
+constants `B, H` on the closed parabolic ball of radius `R` about an arbitrary center `c`, and
+`|r| * ρ ≤ R`, then `u` precomposed with the centered parabolic dilation
+`p ↦ c + (r ^ 2 * p.1, r • p.2)` is parabolic `C^{0,α}` on the origin-centered closed ball of
+radius `ρ`, with sup bound `B` and Hölder constant `H * |r| ^ α`.  This normalizes a parabolic
+ball about any center to the origin. -/
+theorem ParabolicC0AlphaWith.comp_centeredDilation_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ R : ℝ} {c : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedBall c R))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) (parabolicClosedBall (0 : ℝ × X) ρ) :=
+  hu.comp_centeredDilation hH hα
+    (parabolicClosedBall_mapsTo_centeredDilation.mono_right (fun _q hq => le_trans hq hle))
+
+/-- **Affine Schauder normalization (`C^{0,α}` membership).** Existential-constant form of
+`ParabolicC0AlphaWith.comp_centeredDilation_parabolicClosedBall`. -/
+theorem ParabolicC0AlphaOn.comp_centeredDilation_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ R : ℝ} {c : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedBall c R))
+    (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2)))
+      (parabolicClosedBall (0 : ℝ × X) ρ) :=
+  hu.comp_centeredDilation hα
+    (parabolicClosedBall_mapsTo_centeredDilation.mono_right (fun _q hq => le_trans hq hle))
+
 end AnalyticPDE
 end RicciFlow
 
