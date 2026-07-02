@@ -1045,6 +1045,24 @@ theorem eq_closedCylinder (hR : 0 ≤ R) :
 
 end parabolicClosedBall
 
+/-- **Parabolic scaling identity.** Under the affine parabolic dilation of `ℝ × X` that
+scales time by `r ^ 2` and space by `r`, the parabolic distance scales by exactly `|r|`.
+Combined with `ParabolicC0AlphaWith.comp_parabolicDistanceLe` (with `L = |r|`), this is the
+change of variables underlying the Schauder scaling argument. -/
+theorem parabolicDistance_dilation {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (r : ℝ) (p q : ℝ × X) :
+    parabolicDistance (r ^ 2 * p.1, r • p.2) (r ^ 2 * q.1, r • q.2)
+      = |r| * parabolicDistance p q := by
+  have htime : Real.sqrt |r ^ 2 * p.1 - r ^ 2 * q.1| = |r| * Real.sqrt |p.1 - q.1| := by
+    rw [← mul_sub, abs_mul, abs_of_nonneg (sq_nonneg r), Real.sqrt_mul (sq_nonneg r),
+      Real.sqrt_sq_eq_abs]
+  have hspace : dist (r • p.2) (r • q.2) = |r| * dist p.2 q.2 := by
+    rw [dist_smul₀, Real.norm_eq_abs]
+  show max (Real.sqrt |r ^ 2 * p.1 - r ^ 2 * q.1|) (dist (r • p.2) (r • q.2))
+      = |r| * max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
+  rw [htime, hspace]
+  exact (mul_max_of_nonneg _ _ (abs_nonneg r)).symm
+
 /-- Parabolic Holder control with exponent `α` and constant `C` on a set of time-space points. -/
 def ParabolicHolderWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
     (C α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
