@@ -2349,6 +2349,32 @@ theorem uniformContinuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) :
     _ ≤ C * (parabolicDistance p q) ^ α := h hp hq
     _ < ε := hupper
 
+/-- Pullback of a parabolic Hölder estimate along a map `φ : ℝ × Y → ℝ × X` that expands
+parabolic distance by at most a factor `L`.  This is the abstract change-of-variables /
+reparametrization lemma behind parabolic scaling (the Schauder dilation argument): if `u`
+is `α`-Hölder with constant `C` on `s`, and `φ` maps `t` into `s` with
+`parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q`, then `u ∘ φ` is `α`-Hölder
+with constant `C * L ^ α` on `t`. -/
+theorem comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α) (hL : 0 ≤ L)
+    (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicHolderWith (C * L ^ α) α (fun p => u (φ p)) t := by
+  intro p hp q hq
+  have hbase : ‖u (φ p) - u (φ q)‖ ≤ C * (parabolicDistance (φ p) (φ q)) ^ α :=
+    hu (hmaps hp) (hmaps hq)
+  have hmono : (parabolicDistance (φ p) (φ q)) ^ α ≤ (L * parabolicDistance p q) ^ α :=
+    Real.rpow_le_rpow (parabolicDistance.nonneg _ _) (hφ hp hq) hα
+  have hsplit : (L * parabolicDistance p q) ^ α = L ^ α * (parabolicDistance p q) ^ α :=
+    Real.mul_rpow hL (parabolicDistance.nonneg _ _)
+  calc
+    ‖u (φ p) - u (φ q)‖ ≤ C * (parabolicDistance (φ p) (φ q)) ^ α := hbase
+    _ ≤ C * (L * parabolicDistance p q) ^ α := mul_le_mul_of_nonneg_left hmono hC
+    _ = C * (L ^ α * (parabolicDistance p q) ^ α) := by rw [hsplit]
+    _ = (C * L ^ α) * (parabolicDistance p q) ^ α := by ring
+
 end ParabolicHolderWith
 
 namespace ParabolicHolderOn
@@ -3013,6 +3039,20 @@ theorem c0AlphaOn_of_closedCylinder [ProperSpace X] {c : ℝ × X}
   h.c0AlphaOn_of_isCompact hα
     (parabolicClosedCylinder.isCompact c timeRadius spaceRadius)
 
+/-- Pullback of parabolic Hölder membership along a map `φ : ℝ × Y → ℝ × X` that expands
+parabolic distance by at most a factor `L` and maps `t` into `s`.  Existential-constant form
+of `ParabolicHolderWith.comp_parabolicDistanceLe`. -/
+theorem comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicHolderOn α u s) (hα : 0 ≤ α) (hL : 0 ≤ L)
+    (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicHolderOn α (fun p => u (φ p)) t := by
+  rcases hu with ⟨C, hC, hCu⟩
+  exact ⟨C * L ^ α, mul_nonneg hC (Real.rpow_nonneg hL α),
+    hCu.comp_parabolicDistanceLe hC hα hL hmaps hφ⟩
+
 end ParabolicHolderOn
 
 namespace ParabolicBoundedWith
@@ -3372,6 +3412,16 @@ theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
       exact add_le_add_left
         (mul_le_mul_of_nonneg_left (hu hp) (NNReal.coe_nonneg K)) _
     _ = ‖φ (0 : E)‖ + (K : ℝ) * B := by ring
+
+/-- Pullback of a parabolic sup-norm bound along a map `φ : ℝ × Y → ℝ × X` that maps `t`
+into `s`.  This is the boundedness half of the parabolic change-of-variables lemma; the
+bound constant is unchanged. -/
+theorem comp_mapsTo {Y : Type*} [PseudoMetricSpace Y]
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicBoundedWith B u s) (hmaps : Set.MapsTo φ t s) :
+    ParabolicBoundedWith B (fun p => u (φ p)) t := by
+  intro p hp
+  exact hu (hmaps hp)
 
 end ParabolicBoundedWith
 
@@ -4396,6 +4446,20 @@ theorem of_fst_lipschitzOnWith_of_subset_closedCylinder {K : ℝ≥0} {f : ℝ �
   exact hbase.mono_exponent_of_subset_closedCylinder
     (NNReal.coe_nonneg K) hα_nonneg hα_le_two hs hdiam
 
+/-- Pullback of parabolic `C^{0,α}` control along a map `φ : ℝ × Y → ℝ × X` that maps `t`
+into `s` and expands parabolic distance by at most a factor `L`.  The sup bound `B` is
+preserved and the Hölder constant `H` scales by `L ^ α`.  This packages the abstract
+change-of-variables lemma behind parabolic (Schauder) scaling. -/
+theorem comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H) (hα : 0 ≤ α) (hL : 0 ≤ L)
+    (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicC0AlphaWith B (H * L ^ α) α (fun p => u (φ p)) t :=
+  ⟨hu.bounded.comp_mapsTo hmaps,
+    hu.holder.comp_parabolicDistanceLe hH hα hL hmaps hφ⟩
+
 end ParabolicC0AlphaWith
 
 namespace ParabolicC0AlphaOn
@@ -5372,6 +5436,20 @@ theorem mono_exponent_of_subset_closedCylinder {β timeRadius spaceRadius : ℝ}
   rcases h with ⟨B, hB, H, hH, hBH⟩
   exact ⟨B, hB, H, hH,
     hBH.mono_exponent_of_subset_closedCylinder hH hβ hβα hs hdiam⟩
+
+/-- Pullback of parabolic `C^{0,α}` membership along a map `φ : ℝ × Y → ℝ × X` that maps
+`t` into `s` and expands parabolic distance by at most a factor `L`.  Existential-constant
+form of `ParabolicC0AlphaWith.comp_parabolicDistanceLe`. -/
+theorem comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicC0AlphaOn α u s) (hα : 0 ≤ α) (hL : 0 ≤ L)
+    (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicC0AlphaOn α (fun p => u (φ p)) t := by
+  rcases hu with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B, hB, H * L ^ α, mul_nonneg hH (Real.rpow_nonneg hL α),
+    hBH.comp_parabolicDistanceLe hH hα hL hmaps hφ⟩
 
 end ParabolicC0AlphaOn
 
