@@ -5811,6 +5811,69 @@ theorem ParabolicC0AlphaOn.comp_affineChart_parabolicClosedBall
   hu.comp_affineChart hα
     (parabolicClosedBall_mapsTo_affineChart.mono_right (fun _q hq => le_trans hq hle))
 
+/-! ### Affine parabolic change of variables on cylinders
+
+The general affine map also carries a closed parabolic cylinder about the source center `a` to a
+closed parabolic cylinder about the target center `c`, scaling the time radius by `r ^ 2` and the
+spatial radius by `|r|` (the anisotropic parabolic scaling).  This is the cylinder counterpart of
+`parabolicClosedBall_mapsTo_affineChart`, giving the Schauder normalization on the product cylinder
+shape used when the time and space radii are tracked independently. -/
+
+/-- The general affine map `p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` maps the closed
+parabolic cylinder of time radius `T` and space radius `S` about the source center `a` into the
+closed parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about the target
+center `c`. -/
+theorem parabolicClosedCylinder_mapsTo_affineChart
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r T S : ℝ} :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedCylinder a T S) (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  intro q hq
+  simp only [parabolicClosedCylinder, Set.mem_setOf_eq] at hq ⊢
+  obtain ⟨hqt, hqs⟩ := hq
+  refine ⟨?_, ?_⟩
+  · have htime : |c.1 - (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2))).1| = r ^ 2 * |a.1 - q.1| := by
+      simp only [Prod.fst_add, sub_add_cancel_left, abs_neg, abs_mul, abs_of_nonneg (sq_nonneg r),
+        abs_sub_comm a.1 q.1]
+    rw [htime]
+    exact mul_le_mul_of_nonneg_left hqt (sq_nonneg r)
+  · have hspace : dist c.2 (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2))).2 = |r| * dist a.2 q.2 := by
+      simp only [Prod.snd_add, dist_eq_norm, sub_add_cancel_left, norm_neg, norm_smul,
+        Real.norm_eq_abs]
+      rw [norm_sub_rev q.2 a.2]
+    rw [hspace]
+    exact mul_le_mul_of_nonneg_left hqs (abs_nonneg r)
+
+/-- **Affine Schauder normalization on cylinders (`C^{0,α}` control).** If `u` is parabolic
+`C^{0,α}` with constants `B, H` on the closed parabolic cylinder of time radius `T'` and space
+radius `S'` about a target center `c`, and `r ^ 2 * T ≤ T'`, `|r| * S ≤ S'`, then `u` precomposed
+with the general affine map is parabolic `C^{0,α}` on the closed cylinder of time radius `T` and
+space radius `S` about the source center `a`, with sup bound `B` and Hölder constant
+`H * |r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r T S T' S' : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedCylinder c T' S'))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hT : r ^ 2 * T ≤ T') (hS : |r| * S ≤ S') :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicClosedCylinder a T S) :=
+  hu.comp_affineChart hH hα
+    (parabolicClosedCylinder_mapsTo_affineChart.mono_right
+      (fun _x hx => ⟨le_trans hx.1 hT, le_trans hx.2 hS⟩))
+
+/-- **Affine Schauder normalization on cylinders (`C^{0,α}` membership).** Existential-constant
+form of `ParabolicC0AlphaWith.comp_affineChart_parabolicClosedCylinder`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r T S T' S' : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedCylinder c T' S'))
+    (hα : 0 ≤ α) (hT : r ^ 2 * T ≤ T') (hS : |r| * S ≤ S') :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicClosedCylinder a T S) :=
+  hu.comp_affineChart hα
+    (parabolicClosedCylinder_mapsTo_affineChart.mono_right
+      (fun _x hx => ⟨le_trans hx.1 hT, le_trans hx.2 hS⟩))
+
 end AnalyticPDE
 end RicciFlow
 
