@@ -5540,6 +5540,32 @@ theorem ParabolicC0AlphaOn.comp_dilation
   hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
     (fun p _ q _ => (parabolicDistance_dilation r p q).le)
 
+/-- **Schauder scaling on balls (`C^{0,α}` control).** If `u` is parabolic `C^{0,α}` with
+constants `B, H` on the closed parabolic ball of radius `R` about the origin, and `|r| * ρ ≤ R`,
+then `u` precomposed with the parabolic dilation is parabolic `C^{0,α}` on the closed ball of
+radius `ρ`, with sup bound `B` and Hölder constant `H * |r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_dilation_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ R : ℝ} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedBall (0 : ℝ × X) R))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) (parabolicClosedBall (0 : ℝ × X) ρ) :=
+  hu.comp_dilation hH hα
+    (parabolicClosedBall_zero_mapsTo_dilation.mono_right (fun _q hq => le_trans hq hle))
+
+/-- **Schauder scaling on balls (`C^{0,α}` membership).** Existential-constant form of
+`ParabolicC0AlphaWith.comp_dilation_parabolicClosedBall`. -/
+theorem ParabolicC0AlphaOn.comp_dilation_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ R : ℝ} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedBall (0 : ℝ × X) R))
+    (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2))
+      (parabolicClosedBall (0 : ℝ × X) ρ) :=
+  hu.comp_dilation hα
+    (parabolicClosedBall_zero_mapsTo_dilation.mono_right (fun _q hq => le_trans hq hle))
+
 end AnalyticPDE
 end RicciFlow
 
