@@ -1063,6 +1063,20 @@ theorem parabolicDistance_dilation {X : Type*} [NormedAddCommGroup X] [NormedSpa
   rw [htime, hspace]
   exact (mul_max_of_nonneg _ _ (abs_nonneg r)).symm
 
+/-- **Parabolic distance is translation invariant.** Adding a fixed time-space vector `c` to
+both arguments leaves the parabolic distance unchanged.  Together with `parabolicDistance_dilation`
+this gives the affine parabolic change of variables (rescaling about an arbitrary center) used in
+the Schauder argument. -/
+theorem parabolicDistance_add_left {X : Type*} [NormedAddCommGroup X] (c p q : ℝ × X) :
+    parabolicDistance (c + p) (c + q) = parabolicDistance p q := by
+  have htime : |(c + p).1 - (c + q).1| = |p.1 - q.1| := by
+    simp [add_sub_add_left_eq_sub]
+  have hspace : dist (c + p).2 (c + q).2 = dist p.2 q.2 := by
+    simp [dist_add_left]
+  show max (Real.sqrt |(c + p).1 - (c + q).1|) (dist (c + p).2 (c + q).2)
+      = max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
+  rw [htime, hspace]
+
 /-- The origin-centered parabolic dilation maps the closed parabolic ball of radius `ρ` into
 the closed parabolic ball of radius `|r| * ρ`.  This discharges the `Set.MapsTo` hypothesis of
 the Schauder scaling estimates for balls centered at the origin. -/
