@@ -5905,6 +5905,32 @@ theorem affineChart_one_self {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ
   · simp only [Prod.fst_add, one_pow, one_mul, id]; ring
   · simp only [Prod.snd_add, one_smul, id]; abel
 
+/-- **The affine parabolic chart is invertible (left inverse).**  When `r ≠ 0`, the affine chart
+`Φ_{a,c,r⁻¹} : p ↦ a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))` is a left inverse of the forward
+chart `Φ_{c,a,r} : p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))`, by the composition law and
+`inv_mul_cancel₀`.  This is the de-normalization map used to transport Schauder estimates back to
+the original scale. -/
+theorem affineChart_leftInverse {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0) :
+    Function.LeftInverse (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) := by
+  have h : (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))) ∘
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) = id := by
+    rw [affineChart_comp_affineChart a c a r⁻¹ r, inv_mul_cancel₀ hr, affineChart_one_self]
+  exact fun x => congrFun h x
+
+/-- **The affine parabolic chart is invertible (right inverse).**  When `r ≠ 0`, the affine chart
+`Φ_{a,c,r⁻¹}` is also a right inverse of the forward chart `Φ_{c,a,r}`, so the two charts are
+mutually inverse bijections of `ℝ × X`. -/
+theorem affineChart_rightInverse {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0) :
+    Function.RightInverse (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) := by
+  have h : (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) ∘
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))) = id := by
+    rw [affineChart_comp_affineChart c a c r r⁻¹, mul_inv_cancel₀ hr, affineChart_one_self]
+  exact fun x => congrFun h x
+
 end AnalyticPDE
 end RicciFlow
 
