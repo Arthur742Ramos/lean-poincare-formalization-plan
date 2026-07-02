@@ -1098,6 +1098,89 @@ theorem baseFlow_contDiffOn_three_modular
     (by simpa using htan)
   simpa using h
 
+set_option maxSynthPendingDepth 3 in
+/-- **Unconditional base flow `ContDiffOn 3`** from `ContDiff 4 g` plus three-level Picard data.
+Closes the spatial-`C³` frontier by discharging the `β`-slice-`C²` hypothesis of
+`baseFlow_contDiffOn_three_modular`: the `ofProduct` flow `β` built from the level-1 Picard
+`hf1` is a continuous local flow of `F0 = (g, fderiv g)` on `W1`, and its slice is `ContDiffOn 2`
+by applying `baseFlow_contDiffOn_two_unconditional` **one level up** — at base space
+`W1 = W × (W →L[ℝ] W)`, with the `W1` variational field `G = (g, fderiv g)` (which is `C³`
+since `g` is `C⁴`, via `contDiff_variationalField`) and the level-1/level-2 Picard data
+`hf1`/`hball1` (as the up-level's level-0 data) and `hf2`/`hball2` (as the up-level's level-1
+data). Feeding that `C²` slice into `baseFlow_contDiffOn_three_modular` yields the real base
+flow slice at `ContDiffOn 3`. No conditional hypotheses on any flow — only the field `C⁴` and
+the (always-satisfiable) Picard data at the three levels. -/
+theorem baseFlow_contDiffOn_three_unconditional
+    {g : W → W} (hg : ContDiff ℝ 4 g)
+    {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {w₀ : W} {a0 r0 r0' L0 K0 : ℝ≥0}
+    (ht₀ : (t₀ : ℝ) ∈ Ioo tmin tmax)
+    (hf0 : IsPicardLindelof
+      (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+      t₀ (w₀, (1 : W →L[ℝ] W)) a0 r0 L0 K0)
+    (hball0 : ∀ y ∈ closedBall w₀ r0',
+      (y, (1 : W →L[ℝ] W)) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0)
+    (hr : r0' ≤ r0)
+    {r1 L1 K1 : ℝ≥0}
+    (hf1 : IsPicardLindelof
+      (variationalVectorField
+        (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+        (fun t => fderiv ℝ (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g) t)))
+      t₀ ((w₀, (1 : W →L[ℝ] W)), (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) a0 r1 L1 K1)
+    (hball1 : ∀ z ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0,
+      (z, (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) ∈
+        closedBall ((w₀, (1 : W →L[ℝ] W)), (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) r1)
+    (hr1 : r0 ≤ r1)
+    {r2 L2 K2 : ℝ≥0}
+    (hf2 : IsPicardLindelof
+      (variationalVectorField
+        (variationalVectorField
+          (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+          (fun t => fderiv ℝ (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g) t)))
+        (fun t => fderiv ℝ
+          ((variationalVectorField
+            (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g))
+            (fun t => fderiv ℝ (variationalVectorField (fun _ : ℝ => g) (fun _ : ℝ => fderiv ℝ g) t))) t)))
+      t₀
+      (((w₀, (1 : W →L[ℝ] W)), (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))),
+        (1 : ((W × (W →L[ℝ] W)) × ((W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) →L[ℝ]
+          ((W × (W →L[ℝ] W)) × ((W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W))))))
+      a0 r2 L2 K2)
+    (hball2 : ∀ z ∈ closedBall
+        ((w₀, (1 : W →L[ℝ] W)), (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) r1,
+      (z, (1 : ((W × (W →L[ℝ] W)) × ((W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) →L[ℝ]
+          ((W × (W →L[ℝ] W)) × ((W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))))) ∈
+        closedBall
+          (((w₀, (1 : W →L[ℝ] W)), (1 : (W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))),
+            (1 : ((W × (W →L[ℝ] W)) × ((W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))) →L[ℝ]
+              ((W × (W →L[ℝ] W)) × ((W × (W →L[ℝ] W)) →L[ℝ] (W × (W →L[ℝ] W)))))) r2)
+    {t : ℝ} (ht : t ∈ Icc (t₀ : ℝ) tmax) :
+    ContDiffOn ℝ 3
+      (fun y : W =>
+        (ofProductContinuousLocalFlowSolution
+          (toStatePreservingLipschitzLocalFlowSolution hf0).toContinuousLocalFlowSolution hball0).flow
+            (y, t))
+      (ball w₀ r0') := by
+  set β := (ofProductContinuousLocalFlowSolution
+    (toStatePreservingLipschitzLocalFlowSolution hf1).toContinuousLocalFlowSolution hball1).toContinuousLocalFlowSolution with hβdef
+  have hβ_mem : ∀ z ∈ closedBall (w₀, (1 : W →L[ℝ] W)) r0, ∀ s ∈ Ioo tmin tmax,
+      β.flow (z, s) ∈ closedBall (w₀, (1 : W →L[ℝ] W)) a0 := by
+    intro z hz s hs
+    have := ofProductStatePreservingPicardLindelof_flow_mem_base_closedBall hf1 hball1 hz
+      (Ioo_subset_Icc_self hs)
+    simpa [hβdef, ofProductStatePreservingPicardLindelof] using this
+  have hβ_slice : ContDiffOn ℝ (2 : WithTop ℕ∞)
+      (fun z : W × (W →L[ℝ] W) => β.flow (z, t)) (ball (w₀, (1 : W →L[ℝ] W)) r0) := by
+    have hg' : ContDiff ℝ 3
+        (fun z : W × (W →L[ℝ] W) => (g z.1, (fderiv ℝ g z.1).comp z.2)) := by
+      have hg3 : ContDiff ℝ 3 g := hg.of_le (by norm_num)
+      have hDg3 : ContDiff ℝ 3 (fun x => fderiv ℝ g x) := (contDiff_succ_iff_fderiv.mp hg).2.2
+      exact contDiff_variationalField hg3 hDg3
+    have := baseFlow_contDiffOn_two_unconditional
+      (g := fun z : W × (W →L[ℝ] W) => (g z.1, (fderiv ℝ g z.1).comp z.2))
+      hg' ht₀ hf1 hball1 hr1 hf2 hball2 ht
+    simpa [hβdef] using this
+  exact baseFlow_contDiffOn_three_modular (hg.of_le (by norm_num)) ht₀ hf0 hball0 hr β hβ_mem ht hβ_slice
+
 end Autonomous
 
 /-! ### Prolongation level: the augmented flow is spatially `C¹` by instantiation
