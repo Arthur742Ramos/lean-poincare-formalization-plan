@@ -1063,6 +1063,25 @@ theorem parabolicDistance_dilation {X : Type*} [NormedAddCommGroup X] [NormedSpa
   rw [htime, hspace]
   exact (mul_max_of_nonneg _ _ (abs_nonneg r)).symm
 
+/-- The origin-centered parabolic dilation maps the closed parabolic ball of radius `ρ` into
+the closed parabolic ball of radius `|r| * ρ`.  This discharges the `Set.MapsTo` hypothesis of
+the Schauder scaling estimates for balls centered at the origin. -/
+theorem parabolicClosedBall_zero_mapsTo_dilation
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {r ρ : ℝ} :
+    Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2))
+      (parabolicClosedBall (0 : ℝ × X) ρ) (parabolicClosedBall (0 : ℝ × X) (|r| * ρ)) := by
+  intro q hq
+  simp only [parabolicClosedBall, Set.mem_setOf_eq] at hq ⊢
+  have hz : ((r ^ 2 * (0 : ℝ × X).1, r • (0 : ℝ × X).2) : ℝ × X) = (0 : ℝ × X) := by
+    simp
+  have hkey : parabolicDistance (0 : ℝ × X) (r ^ 2 * q.1, r • q.2)
+      = |r| * parabolicDistance (0 : ℝ × X) q := by
+    have h := parabolicDistance_dilation r (0 : ℝ × X) q
+    rw [hz] at h
+    exact h
+  rw [hkey]
+  exact mul_le_mul_of_nonneg_left hq (abs_nonneg r)
+
 /-- Parabolic Holder control with exponent `α` and constant `C` on a set of time-space points. -/
 def ParabolicHolderWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
     (C α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
