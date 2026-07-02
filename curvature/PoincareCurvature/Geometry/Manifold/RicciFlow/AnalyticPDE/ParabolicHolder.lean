@@ -5690,6 +5690,127 @@ theorem ParabolicC0AlphaOn.comp_centeredDilation_parabolicClosedBall
   hu.comp_centeredDilation hα
     (parabolicClosedBall_mapsTo_centeredDilation.mono_right (fun _q hq => le_trans hq hle))
 
+/-! ### General affine parabolic change of variables
+
+The centered dilation of the previous section fixes the origin as the source center.  Subtracting
+a source center `a` first gives the fully general affine parabolic map
+`p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))`, which carries the parabolic ball about `a` to the
+parabolic ball about `c` and rescales by `|r|`.  This is the change of variables that relates two
+arbitrary parabolic balls, used in the interior Schauder estimate to move between a ball about an
+interior point and a normalized ball. -/
+
+/-- **Parabolic distance is invariant under a fixed translation on the right.**  Subtracting a
+fixed time-space vector `a` from both arguments leaves the parabolic distance unchanged; this is
+the `sub` companion of `parabolicDistance_add_left`. -/
+theorem parabolicDistance_sub_right {X : Type*} [NormedAddCommGroup X] (a p q : ℝ × X) :
+    parabolicDistance (p - a) (q - a) = parabolicDistance p q := by
+  have h := parabolicDistance_add_left (-a) p q
+  simpa [sub_eq_neg_add] using h
+
+/-- **General affine parabolic scaling identity.** The affine map
+`p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` scales parabolic distance by exactly `|r|`, for
+any source center `a` and target center `c`.  It is `parabolicDistance_centeredDilation` applied to
+the translated points `p - a`, `q - a`, followed by `parabolicDistance_sub_right`. -/
+theorem parabolicDistance_affineChart {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c a : ℝ × X) (r : ℝ) (p q : ℝ × X) :
+    parabolicDistance (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+        (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2)))
+      = |r| * parabolicDistance p q := by
+  have h := parabolicDistance_centeredDilation c r (p - a) (q - a)
+  rw [parabolicDistance_sub_right] at h
+  simp only [Prod.fst_sub, Prod.snd_sub] at h
+  exact h
+
+/-- The general affine map `p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` maps the closed
+parabolic ball of radius `ρ` about the source center `a` into the closed parabolic ball of radius
+`|r| * ρ` about the target center `c`.  This discharges the `Set.MapsTo` hypothesis of the general
+affine Schauder scaling estimates. -/
+theorem parabolicClosedBall_mapsTo_affineChart
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r ρ : ℝ} :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedBall a ρ) (parabolicClosedBall c (|r| * ρ)) := by
+  intro q hq
+  simp only [parabolicClosedBall, Set.mem_setOf_eq] at hq ⊢
+  have hz : ((r ^ 2 * (a.1 - a.1), r • (a.2 - a.2)) : ℝ × X) = (0 : ℝ × X) := by simp
+  have hkey : parabolicDistance c (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2)))
+      = |r| * parabolicDistance a q := by
+    have h := parabolicDistance_affineChart c a r a q
+    rw [hz, add_zero] at h
+    exact h
+  rw [hkey]
+  exact mul_le_mul_of_nonneg_left hq (abs_nonneg r)
+
+/-- General affine Schauder scaling estimate for the parabolic Hölder seminorm. -/
+theorem ParabolicHolderWith.comp_affineChart
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {C α r : ℝ} {c a : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) t s) :
+    ParabolicHolderWith (C * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))) t :=
+  hu.comp_parabolicDistanceLe hC hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_affineChart c a r p q).le)
+
+/-- General affine Schauder scaling estimate for parabolic Hölder membership. -/
+theorem ParabolicHolderOn.comp_affineChart
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {c a : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) t s) :
+    ParabolicHolderOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_affineChart c a r p q).le)
+
+/-- General affine Schauder scaling estimate for parabolic `C^{0,α}` control: the sup bound `B` is
+preserved and the Hölder constant scales by `|r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r : ℝ} {c a : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) t s) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))) t :=
+  hu.comp_parabolicDistanceLe hH hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_affineChart c a r p q).le)
+
+/-- General affine Schauder scaling estimate for parabolic `C^{0,α}` membership. -/
+theorem ParabolicC0AlphaOn.comp_affineChart
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {c a : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) t s) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_affineChart c a r p q).le)
+
+/-- **General affine Schauder normalization (`C^{0,α}` control).** If `u` is parabolic `C^{0,α}`
+with constants `B, H` on the closed parabolic ball of radius `R` about a target center `c`, and
+`|r| * ρ ≤ R`, then `u` precomposed with the general affine map
+`p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` is parabolic `C^{0,α}` on the closed ball of radius
+`ρ` about the source center `a`, with sup bound `B` and Hölder constant `H * |r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ R : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedBall c R))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicClosedBall a ρ) :=
+  hu.comp_affineChart hH hα
+    (parabolicClosedBall_mapsTo_affineChart.mono_right (fun _q hq => le_trans hq hle))
+
+/-- **General affine Schauder normalization (`C^{0,α}` membership).** Existential-constant form of
+`ParabolicC0AlphaWith.comp_affineChart_parabolicClosedBall`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ R : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedBall c R))
+    (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicClosedBall a ρ) :=
+  hu.comp_affineChart hα
+    (parabolicClosedBall_mapsTo_affineChart.mono_right (fun _q hq => le_trans hq hle))
+
 end AnalyticPDE
 end RicciFlow
 
