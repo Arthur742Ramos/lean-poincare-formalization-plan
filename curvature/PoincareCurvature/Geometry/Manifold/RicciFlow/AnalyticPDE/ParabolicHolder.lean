@@ -5874,6 +5874,37 @@ theorem ParabolicC0AlphaOn.comp_affineChart_parabolicClosedCylinder
     (parabolicClosedCylinder_mapsTo_affineChart.mono_right
       (fun _x hx => ⟨le_trans hx.1 hT, le_trans hx.2 hS⟩))
 
+/-! ### Algebra of the affine parabolic charts
+
+The affine parabolic maps compose to another affine parabolic map, with the dilation factors
+multiplying and the intermediate center cancelling; the chart with unit factor and equal
+source/target center is the identity.  These give the groupoid structure used to iterate the
+Schauder scaling (for instance in a dyadic decomposition) and to invert the normalization. -/
+
+/-- **Composition law for affine parabolic charts.**  Composing the affine map centered at `a`
+into `c` with factor `r` after the affine map centered at `b` into `a` with factor `s` gives the
+affine map centered at `b` into `c` with factor `r * s`: the intermediate center `a` cancels and
+the dilation factors multiply. -/
+theorem affineChart_comp_affineChart {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c a b : ℝ × X) (r s : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) ∘
+        (fun p : ℝ × X => a + (s ^ 2 * (p.1 - b.1), s • (p.2 - b.2)))
+      = fun p : ℝ × X => c + ((r * s) ^ 2 * (p.1 - b.1), (r * s) • (p.2 - b.2)) := by
+  funext p
+  simp only [Function.comp_apply, Prod.fst_add, Prod.snd_add]
+  refine Prod.ext ?_ ?_
+  · simp only [Prod.fst_add]; ring
+  · simp only [Prod.snd_add]; module
+
+/-- The affine parabolic chart with unit dilation factor and equal source and target center is the
+identity map.  This is the unit of the affine-chart composition law. -/
+theorem affineChart_one_self {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c : ℝ × X) :
+    (fun p : ℝ × X => c + ((1 : ℝ) ^ 2 * (p.1 - c.1), (1 : ℝ) • (p.2 - c.2))) = id := by
+  funext p
+  refine Prod.ext ?_ ?_
+  · simp only [Prod.fst_add, one_pow, one_mul, id]; ring
+  · simp only [Prod.snd_add, one_smul, id]; abel
+
 end AnalyticPDE
 end RicciFlow
 
