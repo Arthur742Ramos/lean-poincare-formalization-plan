@@ -4319,6 +4319,30 @@ theorem norm_derivField_apply_flow_sub_le
     Real.coe_toNNReal _ (Real.exp_pos _).le] at hd
   exact hd
 
+/-- **Uniform-in-time linearisation remainder of the flow.**  The pointwise interval bound
+`norm_flow_sub_fundamentalSolution_le_Icc` made uniform over the whole forward tube `[t₀, T]`: with a
+single defect bound `δ` on `Ico t₀ T`, the linearisation remainder
+`(Φ y t - Φ x t) - D_x Φ_t (y - x)` is bounded by `δ · gronwallBound 0 K 1 (T - t₀)` for *every*
+`t ∈ [t₀, T]` — the `t`-dependent Grönwall factor `gronwallBound 0 K 1 (t - t₀)` is replaced by its
+endpoint value at `T` (monotonicity `gronwallBound_mono`).  The uniform-in-`s` first-order remainder
+consumed by the forcing analysis of the base-point `C²` bootstrap. -/
+theorem norm_flow_sub_fundamentalSolution_le_uniform
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {Φ : E → ℝ → E} (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x y : E) {δ T : ℝ} (hδ : 0 ≤ δ)
+    (hdefect : ∀ s ∈ Ico t₀ T,
+      ‖v s (Φ y s) - v s (Φ x s) - A s (Φ y s - Φ x s)‖ ≤ δ)
+    {t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖(Φ y t - Φ x t) - fundamentalSolution hA hΦ' h0' t (y - x)‖
+      ≤ δ * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+  have hb := norm_flow_sub_fundamentalSolution_le_Icc hA hΦ' h0' hΦ h0 x y hdefect ht
+  rw [gronwallBound_zero_left_mul] at hb
+  refine hb.trans (mul_le_mul_of_nonneg_left ?_ hδ)
+  exact gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg
+    (show t - t₀ ≤ T - t₀ by linarith [ht.2])
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
