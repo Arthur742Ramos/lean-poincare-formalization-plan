@@ -7333,6 +7333,53 @@ theorem ParabolicC0AlphaOn.of_space_time_holder_parabolicClosedBall
   ParabolicC0AlphaOn.of_space_time_holder hα
     (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq) hbound hspace htime
 
+/-- **Characterization of parabolic Hölder continuity.**  On a corner-closed time-space set, `u` is
+parabolic `α`-Hölder if and only if it is separately spatially `α`-Hölder (uniform in time) and
+temporally `α/2`-Hölder (uniform in space).  The forward direction is `space_slice` together with
+`time_slice_half_exponent`; the reverse direction is `of_space_time_holder`. -/
+theorem ParabolicHolderOn.iff_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s) :
+    ParabolicHolderOn α u s ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) := by
+  refine ⟨fun h => ⟨h.space_slice, h.time_slice_half_exponent⟩, ?_⟩
+  rintro ⟨hspace, htime⟩
+  exact ParabolicHolderOn.of_space_time_holder hα hcorner hspace htime
+
+/-- Characterization of parabolic Hölder continuity on a closed product parabolic cylinder. -/
+theorem ParabolicHolderOn.iff_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α) :
+    ParabolicHolderOn α u (parabolicClosedCylinder c timeRadius spaceRadius) ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicHolderOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedCylinder.corner_mem hp hq)
+
+/-- Characterization of parabolic Hölder continuity on a closed parabolic ball. -/
+theorem ParabolicHolderOn.iff_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α) :
+    ParabolicHolderOn α u (parabolicClosedBall c R) ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicHolderOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq)
+
 end AnalyticPDE
 end RicciFlow
 
