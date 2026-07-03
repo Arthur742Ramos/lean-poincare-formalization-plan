@@ -7435,6 +7435,71 @@ theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicClosedBall
   ParabolicC0AlphaOn.iff_space_time_holder hα
     (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq)
 
+/-- Characterization of parabolic Hölder continuity on an open product parabolic cylinder — the
+interior Schauder domain. -/
+theorem ParabolicHolderOn.iff_space_time_holder_parabolicCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α) :
+    ParabolicHolderOn α u (parabolicCylinder c timeRadius spaceRadius) ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        (t, y) ∈ parabolicCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        (τ, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicHolderOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicCylinder.corner_mem hp hq)
+
+/-- Characterization of parabolic Hölder continuity on an open parabolic ball. -/
+theorem ParabolicHolderOn.iff_space_time_holder_parabolicBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α) :
+    ParabolicHolderOn α u (parabolicBall c R) ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicBall c R → (t, y) ∈ parabolicBall c R →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicBall c R → (τ, x) ∈ parabolicBall c R →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicHolderOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicBall.corner_mem hp hq)
+
+/-- Characterization of parabolic `C^{0,α}` membership on an open product parabolic cylinder — the
+interior Schauder domain. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α) :
+    ParabolicC0AlphaOn α u (parabolicCylinder c timeRadius spaceRadius) ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u
+        (parabolicCylinder c timeRadius spaceRadius)) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        (t, y) ∈ parabolicCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        (τ, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicC0AlphaOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicCylinder.corner_mem hp hq)
+
+/-- Characterization of parabolic `C^{0,α}` membership on an open parabolic ball. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α) :
+    ParabolicC0AlphaOn α u (parabolicBall c R) ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u (parabolicBall c R)) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicBall c R → (t, y) ∈ parabolicBall c R →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicBall c R → (τ, x) ∈ parabolicBall c R →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicC0AlphaOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicBall.corner_mem hp hq)
+
 end AnalyticPDE
 end RicciFlow
 
