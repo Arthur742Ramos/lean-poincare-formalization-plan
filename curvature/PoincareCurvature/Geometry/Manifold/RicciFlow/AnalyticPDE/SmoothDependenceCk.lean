@@ -10182,6 +10182,91 @@ theorem thirdVariationOperator_hD₃_slot_of_bilinear [CompleteSpace E]
   rw [hW₂eq s, hV₀eq s, hcurry s] at hh
   exact hh
 
+/-- **Base-point `C³` bootstrap of the flow resolvent (assembly).**  For a `C^{3,1}` field `v`
+(uniformly `K`-Lipschitz, everywhere Fréchet differentiable with `L`-Lipschitz spatial derivative
+`Dv`, `M₂`-Lipschitz second derivative `D2vc`, and third derivative `D3vm`/`D3v` in both its
+`E →L (E[×2] →L E)` and `E[×3] →L E` representations — `M₃`-Lipschitz, with the two-fold curry
+`hcompat` and the curry-left compatibility `hcurry`) and a variational flow family `Ψ`, the packaged
+**second** fundamental solution `z ↦ D₂ z` (the spatial derivative of the resolvent
+`z ↦ D_x Φ_t^{A(z)}`, characterised by `D₂ z h = Vlin^{z,h} t`) is itself Fréchet differentiable at
+the reference base point `x₀`, with derivative the packaged design-corrected **third**-variation
+operator `D₃` of `exists_thirdVariationOperator_of_field`.
+
+Assembly.  `exists_continuousLinearMap_linearisedVariation` (chosen over all `z`) packages the family
+`D₂` of second fundamental solutions with its linearised-first-variation characterisation.
+`exists_thirdVariationOperator_of_field` supplies the candidate derivative `D₃` (with the canonical
+linearised-first-variation family `Vfam` and the `Fin 3`-multilinear bilinear characterisation
+`hD₃bilinear`).  For each `z` near `x₀` (`‖z − x₀‖ ≤ 1`): the base curve `W₂`
+(`exists_hasDerivAt_firstVariation_linearised`) and difference curve `Wdiff`
+(`exists_hasDerivAt_inhomogVariation_of_continuous`) are built;
+`thirdVariationOperator_hD₃_slot_of_bilinear` discharges the `hD₃` slot from `hD₃bilinear`; and
+`norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC` gives the neighbourhood-uniform
+operator-level `C³` Taylor remainder `‖(D₂ z − D₂ x₀) − D₃ (z − x₀)‖ ≤ C · ‖z − x₀‖²` with `C`
+independent of `z`.  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` upgrades the `O(‖z − x₀‖²)` error
+to `HasFDerivAt D₂ D₃ x₀`.  The spatial `C³` layer of the smooth-dependence tower unblocking Items 1
+& 2; everything is proved from field-level data, no PDE or manifold content.  The remaining step to
+the resolvent's spatial `ContDiff ℝ 3` is the continuity of `z ↦ D₃` and the
+`contDiff_succ_iff_fderiv` chain. -/
+theorem exists_hasFDerivAt_secondFundamentalSolution_baseCurve [CompleteSpace E]
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ : ℝ≥0} {C' C'' N : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ) (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ) (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (x₀ : E)
+    (hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K)
+    (hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)))
+    (hD2contfun : ∀ z, Continuous (fun s => D2vc s (Φ z s)))
+    (hD3mcont : Continuous (fun s => D3vm s (Φ x₀ s)))
+    (hD3vcont : Continuous (fun s => D3v s (Φ x₀ s)))
+    (hC'0 : 0 ≤ C') (hC'fun : ∀ z, ∀ s, ‖D2vc s (Φ z s)‖ ≤ C')
+    (hN0 : 0 ≤ N) (hN : ∀ s, ‖D3vm s (Φ x₀ s)‖ ≤ N)
+    (hC''0 : 0 ≤ C'') (hC'' : ∀ s, ‖D3v s (Φ x₀ s)‖ ≤ C'')
+    (hcurry : ∀ s, D3vm s (Φ x₀ s) = (D3v s (Φ x₀ s)).curryLeft)
+    {Ψ : E → E → ℝ → E}
+    (hΨ : ∀ z, ∀ x, IsIntegralCurve (Ψ z x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0Ψ : ∀ z, ∀ x, Ψ z x t₀ = x)
+    {T : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ (D₂ : E → (E →L[ℝ] (E →L[ℝ] E))) (D₃ : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))),
+      (∀ (z h : E) (Vlin : ℝ → (E →L[ℝ] E)), Vlin t₀ = 0 →
+        (∀ s, HasDerivAt Vlin
+          ((Dv s (Φ z s)).comp (Vlin s)
+            + ((D2vc s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+                (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)) s) →
+        D₂ z h = Vlin t) ∧
+      HasFDerivAt D₂ D₃ x₀ := by
+  choose D₂ hD₂char using fun z => exists_continuousLinearMap_linearisedVariation
+    z (hAfun z) (hAcontfun z) (hD2contfun z) (hΨ z) (h0Ψ z) hC'0 (hC'fun z) ht
+  obtain ⟨Vfam, D₃, hVfam0, hVfamd, _, _, _, _, hD₃bilinear⟩ :=
+    exists_thirdVariationOperator_of_field x₀ (hAfun x₀) (hAcontfun x₀) (hD2contfun x₀)
+      hD3vcont (hΨ x₀) (h0Ψ x₀) hC'0 hC''0 (hC'fun x₀) hC'' ht
+  refine ⟨D₂, D₃, hD₂char, ?_⟩
+  apply hasFDerivAt_of_eventually_norm_sub_sub_le_sq (f := D₂) (f' := D₃) (x₀ := x₀)
+  filter_upwards [Metric.ball_mem_nhds x₀ one_pos] with z hz
+  have hk : ‖z - x₀‖ ≤ 1 := by
+    have hmem := Metric.mem_ball.mp hz
+    rw [dist_eq_norm] at hmem
+    exact hmem.le
+  have hW : Continuous (fun s => fundamentalSolution (hAfun x₀) (hΨ x₀) (h0Ψ x₀) s) :=
+    continuous_fundamentalSolution_time (hAfun x₀) (hΨ x₀) (h0Ψ x₀)
+  obtain ⟨W₂, hW₂0, hW₂⟩ := exists_hasDerivAt_firstVariation_linearised
+    x₀ (hAfun x₀) (hAcontfun x₀) (hD2contfun x₀) (hΨ x₀) (h0Ψ x₀) z
+  obtain ⟨Wdiff, hWdiff0, hWdiff⟩ := exists_hasDerivAt_inhomogVariation_of_continuous
+    (hAfun x₀) (hAcontfun x₀) (((hAcontfun z).sub (hAcontfun x₀)).clm_comp hW) t₀
+  have hslot := thirdVariationOperator_hD₃_slot_of_bilinear x₀ z (hAfun x₀) (hΨ x₀) (h0Ψ x₀)
+    hVfam0 hVfamd hcurry hD₃bilinear hW₂ hW₂0
+  exact norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC
+    hv hΦ h0 hDv hDvlip hD2vc hD2vclip hD3vm hD3vmlip hcompat z x₀
+    (hAfun z) (hAfun x₀) (hAcontfun x₀) (hAcontfun z) (hD2contfun z) (hD2contfun x₀) hD3mcont
+    hC'0 (hC'fun z) (hC'fun x₀) hN0 hN (hΨ x₀) (h0Ψ x₀) (hΨ z) (h0Ψ z)
+    hW₂ hW₂0 hWdiff hWdiff0 (hD₂char z) (hD₂char x₀) hslot hk ht
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
