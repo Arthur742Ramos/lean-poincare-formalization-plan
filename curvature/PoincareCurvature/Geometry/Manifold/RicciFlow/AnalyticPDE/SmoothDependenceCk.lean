@@ -6169,6 +6169,26 @@ theorem norm_bilinearCompForcing_sub_le
           (mul_le_mul hcd hB₂ (norm_nonneg _) hpda)
     _ = (dp * a * b + p * da * b + p * a * db) * ‖h‖ := by ring
 
+/-- **A-priori size bound for the composition-forcing operator.**  The magnitude companion of
+`norm_bilinearCompForcing_sub_le`: the composition-forcing `((P ∘ A) h) ∘ B` of the higher variational
+ODEs has operator norm `≤ ‖P‖ · ‖A‖ · ‖B‖ · ‖h‖`.  Proof: two applications of operator-norm
+submultiplicativity (`opNorm_comp_le`) and the evaluation bound (`le_opNorm`).  Fed the flow bounds
+(`‖D²v‖ ≤ C'`, `‖W‖, ‖D₂‖ ≤ …`) this is the size datum `N` of the third-variation forcing that, via the
+a-priori estimate `norm_inhomogVariation_le`, bounds the (second) `D₃`-solution — the analogue of the
+`‖D²v‖ · ‖W‖²`-bound used to bound the linearised first variation in `norm_linearisedFirstVariation_le`. -/
+theorem norm_bilinearCompForcing_le
+    (P : E →L[ℝ] (E →L[ℝ] E)) (A B : E →L[ℝ] E) (h : E) :
+    ‖((P.comp A) h).comp B‖ ≤ ‖P‖ * ‖A‖ * ‖B‖ * ‖h‖ := by
+  calc ‖((P.comp A) h).comp B‖
+      ≤ ‖(P.comp A) h‖ * ‖B‖ := ContinuousLinearMap.opNorm_comp_le _ _
+    _ ≤ (‖P.comp A‖ * ‖h‖) * ‖B‖ :=
+        mul_le_mul_of_nonneg_right (ContinuousLinearMap.le_opNorm _ _) (norm_nonneg _)
+    _ ≤ (‖P‖ * ‖A‖ * ‖h‖) * ‖B‖ :=
+        mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_right (ContinuousLinearMap.opNorm_comp_le _ _) (norm_nonneg _))
+          (norm_nonneg _)
+    _ = ‖P‖ * ‖A‖ * ‖B‖ * ‖h‖ := by ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
