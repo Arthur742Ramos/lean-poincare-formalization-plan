@@ -5818,3 +5818,37 @@ forcing then lets `hD₃bilinear` (with `k = z − x₀`) close the slot.  Then 
 `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` (`C = max (…) 0`, ball `‖z − x₀‖ < 1`) for
 `HasFDerivAt (fun z => D₂ z) D₃ x₀`; finally `z ↦ D₃` continuity + `contDiff_succ_iff_fderiv` close
 `exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
+
+Update — the **characterisation bridge and the everywhere `HasFDerivAt (fun z => D₂ z) D₃ z`
+assembly are now BUILT** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`.  Three new theorems close the bridge + assembly flagged above:
+
+* `thirdVariationOperator_hD₃_slot_of_bilinear` — the **characterisation bridge**.  Given the canonical
+  linearised-first-variation family `Vfam` and the packaged bilinear `D₃` of
+  `exists_thirdVariationOperator_of_field` (its `Fin 3`-multilinear characterisation `hD₃bilinear`),
+  plus the curry-left compatibility `D3vm(Φ x₀ ·) = (D3v(Φ x₀ ·)).curryLeft`, the operator `D₃`
+  satisfies the `hD₃` hypothesis slot of `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC`
+  for the direction `z − x₀`.  Proof: Grönwall uniqueness `inhomogVariation_unique` pins
+  `W₂ = Vfam (z − x₀)` and `V₀ = Vfam h` pointwise (same coefficient `Dv(Φ x₀ ·)`, same anchor `0`);
+  rewriting the design-corrected third-variation forcing by these two identities and `hcurry` turns it
+  term-for-term into the bilinear forcing, and `hD₃bilinear (z − x₀) h V` closes `D₃ (z − x₀) h = V t`.
+  The last purely-algebraic link between the packaged operator and the neighbourhood-uniform
+  operator-level `C³` Taylor remainder.
+* `exists_hasFDerivAt_secondFundamentalSolution_baseCurve` — the **single-base-point `C³` bootstrap**.
+  For a `C^{3,1}` field, the packaged second fundamental solution `z ↦ D₂ z` (spatial derivative of the
+  resolvent, `D₂ z h = Vlin^{z,h} t`) is Fréchet differentiable at `x₀` with derivative the packaged
+  `D₃`.  Assembly: `choose` the `D₂`-family (`exists_continuousLinearMap_linearisedVariation`); take
+  `D₃`/`Vfam`/`hD₃bilinear` from `exists_thirdVariationOperator_of_field`; per `z` on the unit ball
+  build `W₂` and `Wdiff`, discharge `hD₃` via the bridge, apply the numerator and
+  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`.
+* `exists_hasFDerivAt_secondFundamentalSolution` — the **everywhere (family) `C³` bootstrap**.  A single
+  packaged family `D₂` and a third-fundamental-solution family `D₃fam` with `∀ y, HasFDerivAt D₂ (D₃fam y) y`
+  (uniform-in-base-point third-derivative data).  This is the everywhere `fderiv D₂ = D₃fam` half of the
+  resolvent's spatial `ContDiff ℝ 3`.
+
+Remaining for `ContDiff ℝ 3` (next session): the **continuity of the third fundamental solution**
+`y ↦ D₃fam y` — a third-order operator-difference (Lipschitz) bound `‖D₃fam z − D₃fam z₀‖ ≤ C‖z − z₀‖`,
+the analogue of the `C²` `hcont_D₂` one order up (opNorm bound + the third-variation-ODE gap over the
+four forcing terms), which does not yet exist and is the true remaining blocker — then
+`contDiff_one_iff_fderiv`/`contDiff_succ_iff_fderiv` chain close
+`exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
