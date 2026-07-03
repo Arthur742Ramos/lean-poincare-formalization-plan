@@ -759,6 +759,32 @@ theorem fundamentalSolution_injective {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0
   refine injective_flow_apply (fun s => lipschitzWith_variationalFieldVec hA s) hΦ h0 t ?_
   simpa only [fundamentalSolution_apply] using hxy
 
+/-!
+### Identification with the operator-valued fundamental-matrix ODE
+
+The `fundamentalSolution` built from the *vector* flow family coincides with any solution of
+the *operator*-valued variational equation `W'(t) = A(t) ∘ W(t)` normalised by `W t₀ = 1`
+(the fundamental matrix).  This ties the two variational ODEs together at the operator level:
+whenever the operator fundamental matrix exists, it *is* the resolvent `D_x Φ_t`. -/
+
+/-- **The resolvent equals the operator-valued fundamental matrix.**  If `W` solves the
+operator variational ODE `W'(t) = A(t) ∘ W(t)` with `W t₀ = 1`, then for any vector flow
+family `Φ` of `variationalFieldVec A` anchored at `Φ x t₀ = x`,
+`fundamentalSolution hA hΦ h0 t = W t`.  (For each `x`, both `t ↦ Φ x t` and `t ↦ W t x`
+solve the vector variational ODE — the latter by `isIntegralCurve_variational_apply` — and
+agree at `t₀`, so they coincide by vector uniqueness.) -/
+theorem fundamentalSolution_eq_of_operator_isIntegralCurve {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) {W : ℝ → (E →L[ℝ] E)}
+    (hW : IsIntegralCurve W (variationalField A))
+    (hW0 : W t₀ = ContinuousLinearMap.id ℝ E)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) : fundamentalSolution hA hΦ h0 t = W t := by
+  ext x
+  rw [fundamentalSolution_apply]
+  refine variationalVec_eq_of_isIntegralCurve hA (hΦ x)
+    (isIntegralCurve_variational_apply hW x) (t₁ := t₀) ?_ t
+  rw [h0, hW0, ContinuousLinearMap.id_apply]
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
