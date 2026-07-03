@@ -6920,6 +6920,44 @@ theorem affineChartHomeomorph_bijOn_frontier_parabolicClosedCylinder
   rw [← affineChartHomeomorph_image_frontier_parabolicClosedCylinder c a hr T S]
   exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
 
+/-! ### Open parabolic shapes lie in the interior of the closed shapes
+
+The open parabolic ball and cylinder are open sets contained in the corresponding closed shapes, so
+they are contained in the *interior* of the closed shapes.  In particular each closed parabolic shape
+is a neighborhood of its center.  These intrinsic (chart-free) facts are what let an interior
+Schauder estimate on a closed parabolic ball/cylinder place an open parabolic-ball neighborhood of an
+interior point inside the domain. -/
+
+/-- The open parabolic ball of radius `R` about `p` is contained in the interior of the closed
+parabolic ball of radius `R` about `p`. -/
+theorem parabolicBall.subset_interior_closedBall {X : Type*} [PseudoMetricSpace X] (p : ℝ × X)
+    (R : ℝ) :
+    parabolicBall p R ⊆ interior (parabolicClosedBall p R) :=
+  interior_maximal parabolicBall.subset_closedBall (parabolicBall.isOpen p R)
+
+/-- The open parabolic cylinder is contained in the interior of the closed parabolic cylinder with
+the same time and space radii. -/
+theorem parabolicCylinder.subset_interior_closedCylinder {X : Type*} [PseudoMetricSpace X]
+    (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
+    parabolicCylinder p timeRadius spaceRadius
+      ⊆ interior (parabolicClosedCylinder p timeRadius spaceRadius) :=
+  interior_maximal parabolicCylinder.subset_closedCylinder
+    (parabolicCylinder.isOpen p timeRadius spaceRadius)
+
+/-- A closed parabolic ball of positive radius is a neighborhood of its center. -/
+theorem parabolicClosedBall.mem_nhds {X : Type*} [PseudoMetricSpace X] {p : ℝ × X} {R : ℝ}
+    (hR : 0 < R) :
+    parabolicClosedBall p R ∈ 𝓝 p :=
+  Filter.mem_of_superset (parabolicBall.mem_nhds hR) parabolicBall.subset_closedBall
+
+/-- A closed parabolic cylinder with positive time and space radii is a neighborhood of its
+center. -/
+theorem parabolicClosedCylinder.mem_nhds {X : Type*} [PseudoMetricSpace X] {p : ℝ × X}
+    {timeRadius spaceRadius : ℝ} (ht : 0 < timeRadius) (hs : 0 < spaceRadius) :
+    parabolicClosedCylinder p timeRadius spaceRadius ∈ 𝓝 p :=
+  Filter.mem_of_superset (parabolicCylinder.mem_nhds ht hs)
+    parabolicCylinder.subset_closedCylinder
+
 end AnalyticPDE
 end RicciFlow
 
