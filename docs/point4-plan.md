@@ -4532,6 +4532,36 @@ and fully proved (axioms `propext`/`Classical.choice`/`Quot.sound` only):
   `injective_flow_apply` (injectivity — the diffeomorphism-onto-image half needed
   by Item 2), and `continuous_flow` (**joint** continuity of `(t, x) ↦ Φ x t`).
 
+The `C^0` layer has since been rounded out with the quantitative
+**bi-Lipschitz / embedding** and **stability** refinements (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only):
+
+* `dist_ge_of_isIntegralCurve` — the **lower** two-sided exponential bound
+  `dist (f t₀) (g t₀) · exp (-K · |t - t₀|) ≤ dist (f t) (g t)` (the flow run
+  backward from `t` to `t₀` expands separation by at most `exp (K · |t - t₀|)`).
+* `dist_flow_apply_ge`, `antilipschitzWith_flow_apply`,
+  `antilipschitzWith_flow_apply_of_abs_le` — the time-`t` flow map is
+  **antilipschitz** with constant `exp (K · |t - t₀|)` (uniform `exp (K · T)` on a
+  symmetric compact interval): the quantitative injectivity.
+* `isUniformEmbedding_flow_apply`, `isEmbedding_flow_apply` — being both Lipschitz
+  and antilipschitz, `x ↦ Φ x t` is a **bi-Lipschitz uniform (topological)
+  embedding onto its image**: the `C^0` "diffeomorphism onto its image" shadow
+  consumed by the compact-manifold gauge flow of Item 2.
+* `dist_le_of_isIntegralCurve_perturb` — the **two-sided** Grönwall stability under
+  a uniform field perturbation, `dist (f t) (g t) ≤ gronwallBound (dist (f t₀)
+  (g t₀)) K ε |t - t₀|` for all `t` (the backward half via the time-reversed
+  curves), and its flow-family form `dist_flow_perturb_le` (two flows of
+  `ε`-close fields, same anchor, stay `gronwallBound 0 K ε |t - t₀|`-close) — the
+  DeTurck-flow continuous-dependence-on-the-field transfer.
+* `flow_eq_of_isIntegralCurve` — uniqueness of the flow family (`ε = 0` degenerate
+  case of the perturbation bound).
+* `lipschitzWith_of_isIntegralCurve_of_norm_le`, `lipschitzWith_flow_of_norm_le`,
+  `dist_flow_le_of_norm_le` — the **time-direction** modulus missing from
+  `continuous_flow`: under a uniform velocity bound `‖v t (Φ x t)‖ ≤ M` each curve
+  is `M`-Lipschitz in time, giving a joint Lipschitz modulus
+  `dist (Φ x t) (Φ y s) ≤ M · |t - s| + exp (K · T) · dist x y` on a compact time
+  interval.
+
 Remaining in this tower (future sessions): the `C^1` (differentiable) dependence
 layer — the flow derivative `D_x Φ_t` solving the linearised/variational ODE —
 and its bootstrap to `C^k` (`C^3`), which is what the compact-manifold gauge flow
