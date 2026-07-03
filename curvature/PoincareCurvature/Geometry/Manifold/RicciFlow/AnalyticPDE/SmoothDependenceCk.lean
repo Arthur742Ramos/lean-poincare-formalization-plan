@@ -4489,6 +4489,77 @@ theorem norm_flow_sub_sq_le
         pow_le_pow_left₀ (norm_nonneg _) hsep 2
     _ = Real.exp (2 * (K : ℝ) * T) * ‖z - x‖ ^ 2 := by rw [mul_pow, hexp2]
 
+/-- **Quadratic (`C²`) Taylor bound for the trajectory-linearised coefficient.**  For a `C^{2,1}`
+field `v` (uniformly `K`-Lipschitz; spatial derivative `Dv s` everywhere-defined and `L`-Lipschitz;
+second spatial derivative `D²v s` everywhere-defined, `M`-Lipschitz, and bounded by `C'` along the
+reference trajectory `s ↦ Φ x₀ s`), the coefficient `A(x₀) s = Dv s (Φ x₀ s)` has a *quadratically
+small* Taylor remainder in the base point, uniformly on the compact time tube `[t₀, T]`:
+`‖Dv s (Φ z s) - Dv s (Φ x₀ s) - (D²v s (Φ x₀ s) ∘ D_x Φ_s) (z - x₀)‖`
+`  ≤ (M · e + C' · (L · e · g)) · ‖z - x₀‖²`, where `e = exp (2 K (T - t₀))`,
+`g = gronwallBound 0 K 1 (T - t₀)`, and `D_x Φ_s = fundamentalSolution … s` is the resolvent.  The
+linear map `D²v s (Φ x₀ s) ∘ D_x Φ_s` is precisely `∂/∂x₀ [Dv s (Φ x₀ s)]`
+(`hasFDerivAt_derivField_apply_flow`), so this is a *quantitative Fréchet* statement: the coefficient is
+`C^{1,1}` in the base point with an `O(‖z - x₀‖²)` remainder.  Proof: split the remainder into the pure
+`C^{1,1}` Taylor remainder of `Dv s` (`norm_derivField_sub_sub_secondDeriv_le` + `norm_flow_sub_sq_le`)
+plus `D²v s (Φ x₀ s)` applied to the flow's own quadratic remainder
+(`norm_flow_sub_fundamentalSolution_le_sq`, bounded via `‖D²v s (Φ x₀ s)‖ ≤ C'`).  This is the
+coefficient-side second-order estimate feeding the second-order variational estimate
+`norm_fundamentalSolution_sub_sub_variation_le` in the base-point `C²` bootstrap. -/
+theorem norm_derivField_sub_sub_comp_fundamentalSolution_le_sq
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {L M : ℝ≥0} {C' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ) (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hC'0 : 0 ≤ C') (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (z : E) {T s : ℝ} (hs : s ∈ Icc t₀ T) :
+    ‖Dv s (Φ z s) - Dv s (Φ x₀ s)
+        - (D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (z - x₀)‖
+      ≤ ((M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀))) * ‖z - x₀‖ ^ 2 := by
+  have hsT : |s - t₀| ≤ T - t₀ := by
+    rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+  rw [ContinuousLinearMap.comp_apply]
+  have hms : D2v s (Φ x₀ s) ((Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀))
+      = D2v s (Φ x₀ s) (Φ z s - Φ x₀ s)
+        - D2v s (Φ x₀ s) (fundamentalSolution hA hΦ' h0' s (z - x₀)) :=
+    (D2v s (Φ x₀ s)).map_sub _ _
+  have hsplit :
+      Dv s (Φ z s) - Dv s (Φ x₀ s) - D2v s (Φ x₀ s) (fundamentalSolution hA hΦ' h0' s (z - x₀))
+        = (Dv s (Φ z s) - Dv s (Φ x₀ s) - D2v s (Φ x₀ s) (Φ z s - Φ x₀ s))
+          + D2v s (Φ x₀ s) ((Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀)) := by
+    rw [hms]; abel
+  rw [hsplit]
+  refine (norm_add_le _ _).trans ?_
+  have hb1 : ‖Dv s (Φ z s) - Dv s (Φ x₀ s) - D2v s (Φ x₀ s) (Φ z s - Φ x₀ s)‖
+      ≤ (M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖z - x₀‖ ^ 2 := by
+    have htay := norm_derivField_sub_sub_secondDeriv_le (hD2v s) (hD2vlip s) (Φ x₀ s) (Φ z s)
+    have hfs := norm_flow_sub_sq_le hv hΦ h0 hsT x₀ z
+    calc ‖Dv s (Φ z s) - Dv s (Φ x₀ s) - D2v s (Φ x₀ s) (Φ z s - Φ x₀ s)‖
+        ≤ (M : ℝ) * ‖Φ z s - Φ x₀ s‖ ^ 2 := htay
+      _ ≤ (M : ℝ) * (Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖z - x₀‖ ^ 2) :=
+          mul_le_mul_of_nonneg_left hfs M.coe_nonneg
+      _ = (M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖z - x₀‖ ^ 2 := by ring
+  have hb2 : ‖D2v s (Φ x₀ s) ((Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀))‖
+      ≤ C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖z - x₀‖ ^ 2 := by
+    have hflow := norm_flow_sub_fundamentalSolution_le_sq hv hΦ h0 hDv hDvlip x₀ hA hΦ' h0' z hs
+    calc ‖D2v s (Φ x₀ s) ((Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀))‖
+        ≤ ‖D2v s (Φ x₀ s)‖
+            * ‖(Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀)‖ :=
+          (D2v s (Φ x₀ s)).le_opNorm _
+      _ ≤ C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀) * ‖z - x₀‖ ^ 2) :=
+          mul_le_mul (hC' s) hflow (norm_nonneg _) hC'0
+      _ = C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖z - x₀‖ ^ 2 := by ring
+  exact (add_le_add hb1 hb2).trans_eq (by ring)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
