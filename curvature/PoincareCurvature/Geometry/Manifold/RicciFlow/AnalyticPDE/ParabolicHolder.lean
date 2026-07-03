@@ -7500,6 +7500,51 @@ theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicBall
   ParabolicC0AlphaOn.iff_space_time_holder hα
     (fun {_ _} {_ _} hp hq => parabolicBall.corner_mem hp hq)
 
+/-! ### Closedness of the parabolic classes under pointwise limits
+
+A parabolic Hölder bound with a *fixed* constant, a uniform sup bound, and the combined `C^{0,α}`
+control each pass to pointwise limits of a family of functions.  These are the closedness properties
+behind completeness of the parabolic Hölder space: a Cauchy sequence in the parabolic `C^{0,α}` norm
+has (in particular) a pointwise limit, and its uniform sup/Hölder bounds are inherited by that limit.
+The index is an arbitrary `NeBot` filter, so the same statement covers sequential (`atTop`) limits and
+net limits of approximation schemes. -/
+
+/-- A parabolic Hölder bound with a fixed constant `C` is inherited by any pointwise limit. -/
+theorem ParabolicHolderWith.of_tendsto
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {C α : ℝ} {f : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hf : ∀ i, ParabolicHolderWith C α (f i) s)
+    (hg : ∀ ⦃p : ℝ × X⦄, p ∈ s → Filter.Tendsto (fun i => f i p) l (𝓝 (g p))) :
+    ParabolicHolderWith C α g s := by
+  intro p hp q hq
+  have hlim : Filter.Tendsto (fun i => ‖f i p - f i q‖) l (𝓝 ‖g p - g q‖) :=
+    ((hg hp).sub (hg hq)).norm
+  refine le_of_tendsto hlim ?_
+  filter_upwards with i using hf i hp hq
+
+/-- A uniform sup bound `B` is inherited by any pointwise limit. -/
+theorem ParabolicBoundedWith.of_tendsto
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {B : ℝ} {f : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hf : ∀ i, ParabolicBoundedWith B (f i) s)
+    (hg : ∀ ⦃p : ℝ × X⦄, p ∈ s → Filter.Tendsto (fun i => f i p) l (𝓝 (g p))) :
+    ParabolicBoundedWith B g s := by
+  intro p hp
+  have hlim : Filter.Tendsto (fun i => ‖f i p‖) l (𝓝 ‖g p‖) := (hg hp).norm
+  refine le_of_tendsto hlim ?_
+  filter_upwards with i using hf i hp
+
+/-- Combined parabolic `C^{0,α}` control (fixed sup and Hölder constants) is inherited by any
+pointwise limit. -/
+theorem ParabolicC0AlphaWith.of_tendsto
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {B H α : ℝ} {f : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hf : ∀ i, ParabolicC0AlphaWith B H α (f i) s)
+    (hg : ∀ ⦃p : ℝ × X⦄, p ∈ s → Filter.Tendsto (fun i => f i p) l (𝓝 (g p))) :
+    ParabolicC0AlphaWith B H α g s :=
+  ⟨ParabolicBoundedWith.of_tendsto (fun i => (hf i).1) hg,
+   ParabolicHolderWith.of_tendsto (fun i => (hf i).2) hg⟩
+
 end AnalyticPDE
 end RicciFlow
 
