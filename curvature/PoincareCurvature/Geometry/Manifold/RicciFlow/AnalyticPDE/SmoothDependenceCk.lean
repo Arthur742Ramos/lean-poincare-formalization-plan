@@ -2531,6 +2531,36 @@ theorem fundamentalSolution_sub_eq_integral {A₁ A₂ : ℝ → (E →L[ℝ] E)
   simp only [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]
   abel
 
+/-- **The time-derivative of the resolvent path is `A t ∘ D_x Φ_t`.**  The explicit `deriv` form of
+the operator variational ODE `hasDerivAt_fundamentalSolution`: for a norm-continuous coefficient
+`A`, `deriv (t ↦ D_x Φ_t) = A t ∘ D_x Φ_t`.  A convenience readout for regularity consumers that
+work with `deriv` rather than `HasDerivAt`. -/
+theorem deriv_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) :
+    deriv (fun s => fundamentalSolution hA hΦ h0 s) t
+      = (A t).comp (fundamentalSolution hA hΦ h0 t) :=
+  (hasDerivAt_fundamentalSolution hA hAcont hΦ h0 t).deriv
+
+/-- **The resolvent path is `C¹` in time as an operator-valued curve.**  For a norm-continuous
+coefficient `A`, the curve `t ↦ D_x Φ_t ∈ E →L[ℝ] E` is continuously differentiable
+(`ContDiff ℝ 1`): it is differentiable everywhere (`hasDerivAt_fundamentalSolution`) with derivative
+`t ↦ A t ∘ D_x Φ_t`, which is norm-continuous
+(`hAcont.clm_comp continuous_fundamentalSolution_time`).  The packaged regularity — as opposed to the
+raw `HasDerivAt` + continuity pieces — is what higher-order (`C^k`) consumers compose against. -/
+theorem contDiff_one_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    ContDiff ℝ 1 (fun s => fundamentalSolution hA hΦ h0 s) := by
+  rw [contDiff_one_iff_deriv]
+  refine ⟨fun t => (hasDerivAt_fundamentalSolution hA hAcont hΦ h0 t).differentiableAt, ?_⟩
+  have hd : deriv (fun s => fundamentalSolution hA hΦ h0 s)
+      = fun t => (A t).comp (fundamentalSolution hA hΦ h0 t) :=
+    funext fun t => deriv_fundamentalSolution hA hAcont hΦ h0 t
+  rw [hd]
+  exact hAcont.clm_comp (continuous_fundamentalSolution_time hA hΦ h0)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow

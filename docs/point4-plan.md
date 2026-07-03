@@ -4840,6 +4840,16 @@ field); the *differentiable* dependence of the resolvent on its coefficient fiel
 fixed-point / Neumann analysis of the Duhamel difference formula `fundamentalSolution_sub_eq_integral`
 above — toward the base-point `C^2`/`C^k` bootstrap.
 
+Update — the resolvent path's **`C¹`-in-time regularity** is now packaged (axioms
+`propext`/`Classical.choice`/`Quot.sound` only):
+
+* `deriv_fundamentalSolution` — the explicit `deriv` readout of the operator ODE:
+  `deriv (t ↦ D_x Φ_t) = A t ∘ D_x Φ_t` (from `hasDerivAt_fundamentalSolution`).
+* `contDiff_one_fundamentalSolution` — the curve `t ↦ D_x Φ_t ∈ E →L[ℝ] E` is `ContDiff ℝ 1`:
+  differentiable everywhere with the norm-continuous derivative `t ↦ A t ∘ D_x Φ_t`
+  (`contDiff_one_iff_deriv`).  This is the packaged regularity (vs. the raw `HasDerivAt` + continuity
+  pieces) that higher-order `C^k` consumers compose against.
+
 Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
 modulus; the *existence* of the variational flow family (global integral curves of the linear
 field); differentiable dependence of the resolvent on its coefficient field (the second-order
