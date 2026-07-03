@@ -7968,6 +7968,50 @@ theorem parabolicC0AlphaNorm_congr {X E : Type*} [PseudoMetricSpace X] [NormedAd
   unfold parabolicC0AlphaNorm
   rw [parabolicSupNorm_congr h, parabolicHolderSeminorm_congr h]
 
+/-- The parabolic sup norm (the `C^0` part) is dominated by the full parabolic `C^{0,α}` norm.
+This lets uniform (`C^0`) control be extracted from `C^{0,α}` control — the first step toward
+completeness of the parabolic Hölder space. -/
+theorem parabolicSupNorm_le_parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicSupNorm u s ≤ parabolicC0AlphaNorm α u s := by
+  unfold parabolicC0AlphaNorm
+  exact le_add_of_nonneg_right (parabolicHolderSeminorm_nonneg α u s)
+
+/-- The parabolic Hölder seminorm is dominated by the full parabolic `C^{0,α}` norm. -/
+theorem parabolicHolderSeminorm_le_parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicHolderSeminorm α u s ≤ parabolicC0AlphaNorm α u s := by
+  unfold parabolicC0AlphaNorm
+  exact le_add_of_nonneg_left (parabolicSupNorm_nonneg u s)
+
+/-- **Pointwise domination by the full parabolic `C^{0,α}` norm.**  A function with a nonnegative
+uniform bound on `s` is pointwise dominated on `s` by its parabolic `C^{0,α}` norm. -/
+theorem norm_le_parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} {p : ℝ × X}
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) (hp : p ∈ s) :
+    ‖u p‖ ≤ parabolicC0AlphaNorm α u s :=
+  (norm_le_parabolicSupNorm hu hp).trans (parabolicSupNorm_le_parabolicC0AlphaNorm α u s)
+
+/-- **Pointwise Hölder readout against the full norm.**  For a parabolic `α`-Hölder function the
+Hölder difference estimate holds with the full parabolic `C^{0,α}` norm as its constant. -/
+theorem norm_sub_le_parabolicC0AlphaNorm_mul {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} {p q : ℝ × X}
+    (hu : ParabolicHolderOn α u s) (hp : p ∈ s) (hq : q ∈ s) :
+    ‖u p - u q‖ ≤ parabolicC0AlphaNorm α u s * parabolicDistance p q ^ α :=
+  (norm_sub_le_parabolicHolderSeminorm hu hp hq).trans
+    (mul_le_mul_of_nonneg_right (parabolicHolderSeminorm_le_parabolicC0AlphaNorm α u s)
+      (Real.rpow_nonneg (parabolicDistance.nonneg p q) α))
+
+/-- **Uniform-metric domination by the norm of a difference.**  If `u - v` is bounded on `s`, the
+pointwise distance `‖u p - v p‖` on `s` is controlled by the parabolic `C^{0,α}` norm of the
+difference.  This is the estimate that turns a `C^{0,α}`-Cauchy sequence into a uniformly Cauchy
+one, the key step toward completeness of the parabolic Hölder space. -/
+theorem norm_sub_le_parabolicC0AlphaNorm_sub {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)} {p : ℝ × X}
+    (huv : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B (fun z => u z - v z) s) (hp : p ∈ s) :
+    ‖u p - v p‖ ≤ parabolicC0AlphaNorm α (fun z => u z - v z) s :=
+  norm_le_parabolicC0AlphaNorm (α := α) huv hp
+
 end AnalyticPDE
 end RicciFlow
 
