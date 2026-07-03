@@ -5858,6 +5858,208 @@ theorem norm_chainRuleForcing_sub_le
           (mul_le_mul habd hW₂ (norm_nonneg _) hpdw)
     _ = (dp * w ^ 2 + 2 * p * w * dw) * ‖h‖ := by ring
 
+/-- **The flow map is `ContDiff ℝ 2` in the initial data (`C^{2,1}` field).**  The honest "flow is `C²`
+in initial data" milestone in Mathlib's `ContDiff` vocabulary: from a uniformly `K`-Lipschitz,
+time-continuous field `v` with everywhere-defined, jointly continuous, spatially `L`-Lipschitz first
+derivative `Dv` and everywhere-defined, jointly continuous, `M`-Lipschitz second derivative `D²v`,
+there is one flow family `Φ` of `v` (anchored `Φ z t₀ = z`) whose forward time-`t` slice
+`z ↦ Φ z t` is `ContDiff ℝ 2` — twice continuously (Fréchet) differentiable in the initial value.
+
+Proof: build `Φ` and the per-`z` variational families `Ψ z`.  The `C¹` bootstrap identifies the
+resolvent map with `fderiv ℝ (fun w => Φ w t)`, and the base-point `C²` bootstrap
+(`exists_hasFDerivAt_fundamentalSolution_baseCurve`, replicated with the packaged operator `D₂ z` of
+`exists_continuousLinearMap_linearisedVariation`) identifies its derivative with `D₂ z`, so
+`fderiv ℝ (fderiv ℝ (fun w => Φ w t)) = D₂`.  Continuity of the second fundamental solution
+`z ↦ D₂ z` — the new ingredient — is the Lipschitz bound `‖D₂ z − D₂ z₀‖ ≤ C · ‖z − z₀‖`: for a unit
+direction `h`, `D₂ z h − D₂ z₀ h = Vlin^{z,h} t − Vlin^{z₀,h} t` (operator characterisation), and the
+two linearised variations solve inhomogeneous ODEs whose coefficient gap
+(`norm_derivField_apply_flow_sub_le`) and chain-rule forcing gap
+(`norm_chainRuleForcing_sub_le`, fed the `D²v`-gap `norm_secondDerivField_apply_flow_sub_le` and the
+resolvent gap `norm_fundamentalSolution_baseCurve_sub_le`) are `O(‖z − z₀‖)`, so
+`norm_inhomogVariation_sub_le_of_gap` gives `‖Vlin^{z,h} t − Vlin^{z₀,h} t‖ ≤ C · ‖z − z₀‖ · ‖h‖`.
+Packaged as `ContDiff ℝ 2` via `contDiff_one_iff_fderiv` and `contDiff_succ_iff_fderiv`.  The
+self-contained `C²`-in-initial-data layer consumed by the compact-manifold gauge flow (Item 2) and the
+tensor time-derivative chain rule (Item 1). -/
+theorem exists_flow_contDiff_two_of_lipschitz_secondDeriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ)
+    (hD2vc : Continuous fun p : ℝ × E => D2v p.1 p.2)
+    {M : ℝ≥0} (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    {t : ℝ} (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContDiff ℝ 2 (fun z => Φ z t) := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  have hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K := fun z s => by
+    have h : ‖Dv s (Φ z s)‖ ≤ (K : ℝ) := (hDv s (Φ z s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)) := fun z =>
+    hDvc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hD2contfun : ∀ z, Continuous (fun s => D2v s (Φ z s)) := fun z =>
+    hD2vc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hCz : ∀ z, ∀ s, ‖D2v s (Φ z s)‖ ≤ (L : ℝ) := fun z s =>
+    (hD2v s (Φ z s)).le_of_lipschitz (hDvlip s)
+  choose Ψ h0Ψ hΨ using fun z => exists_variationalFlowFamily (hAfun z) (hAcontfun z)
+  have htmem : t ∈ Set.Icc t₀ t := ⟨ht0, le_refl t⟩
+  have hg0 : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (t - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr ht0)
+  -- the packaged second fundamental solution operators, with their linearised-variation characterisation
+  choose D₂ hD₂char using fun z => exists_continuousLinearMap_linearisedVariation
+    z (hAfun z) (hAcontfun z) (hD2contfun z) (hΨ z) (h0Ψ z) L.coe_nonneg (hCz z) htmem
+  -- `C¹` bootstrap: the resolvent map is the flow's spatial derivative
+  have hres : ∀ z, HasFDerivAt (fun w => Φ w t)
+      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) z := fun z =>
+    hasFDerivAt_flow_of_lipschitz_deriv hv (hAfun z) (hΨ z) (h0Ψ z) hΦ h0 z ht0
+      (Dv := Dv) (fun _ s _ ξ _ => (hDv s ξ).hasFDerivWithinAt) L.coe_nonneg
+      (fun _ s _ ξ _ => by
+        have hlip := (hDvlip s).dist_le_mul ξ (Φ z s)
+        rw [dist_eq_norm, dist_eq_norm] at hlip
+        exact hlip)
+  have hfeq : fderiv ℝ (fun w => Φ w t)
+      = fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t :=
+    funext fun z => (hres z).fderiv
+  -- base-point `C²` bootstrap with the *packaged* operator `D₂ z` (replicating
+  -- `exists_hasFDerivAt_fundamentalSolution_baseCurve` so that `fderiv` is identified with `D₂ z`)
+  have hD2has : ∀ z, HasFDerivAt
+      (fun z' => fundamentalSolution (hAfun z') (hΨ z') (h0Ψ z') t) (D₂ z) z := by
+    intro z
+    refine hasFDerivAt_of_eventually_norm_sub_sub_le_sq (C :=
+        (L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (t - t₀)) ^ 3
+            * gronwallBound 0 (K : ℝ) 1 (t - t₀) ^ 2
+          + ((M : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀))
+              + (L : ℝ) * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (t - t₀)))
+            * Real.exp ((K : ℝ) * (t - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀))
+      (Filter.Eventually.of_forall (fun z' => ?_))
+    obtain ⟨Vz, hVz0, hVz⟩ := exists_hasDerivAt_firstVariation_true
+      z (hAfun z) (hAcontfun z) (hΨ z) (h0Ψ z) z' (hAcontfun z')
+    obtain ⟨Vlin, hVlin0, hVlin⟩ := exists_hasDerivAt_firstVariation_linearised
+      z (hAfun z) (hAcontfun z) (hD2contfun z) (hΨ z) (h0Ψ z) z'
+    have hrem := norm_fundamentalSolution_sub_sub_linearVariation_le_sq
+      hv hΦ h0 hDv hDvlip hD2v hD2vlip z (hAfun z) (hAcontfun z) L.coe_nonneg (hCz z)
+      (hΨ z) (h0Ψ z) z' (hAfun z') (hAcontfun z') (hΨ z') (h0Ψ z') hVz hVz0 hVlin hVlin0 htmem
+    have hval : D₂ z (z' - z) = Vlin t := hD₂char z (z' - z) Vlin hVlin0 hVlin
+    rw [hval]; exact hrem
+  have hfeq2 : fderiv ℝ (fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) = D₂ :=
+    funext fun z => (hD2has z).fderiv
+  -- **continuity of the second fundamental solution** `z ↦ D₂ z` (the new ingredient)
+  have hcont_D₂ : Continuous D₂ := by
+    have hClip0 : (0 : ℝ) ≤ (((L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)))
+          * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (t - t₀))
+        + ((M : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 3
+            + 2 * (L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (t - t₀)) ^ 3
+                * gronwallBound 0 (K : ℝ) 1 (t - t₀)))
+        * gronwallBound 0 (K : ℝ) 1 (t - t₀) :=
+      mul_nonneg (add_nonneg
+        (mul_nonneg (by positivity) (mul_nonneg (by positivity) hg0))
+        (add_nonneg (by positivity) (mul_nonneg (by positivity) hg0))) hg0
+    have hkey : ∀ z z₀ : E, ‖D₂ z - D₂ z₀‖
+        ≤ (((L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)))
+              * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (t - t₀))
+            + ((M : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 3
+                + 2 * (L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (t - t₀)) ^ 3
+                    * gronwallBound 0 (K : ℝ) 1 (t - t₀)))
+            * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - z₀‖ := by
+      intro z z₀
+      refine ContinuousLinearMap.opNorm_le_bound _
+        (mul_nonneg hClip0 (norm_nonneg _)) (fun h => ?_)
+      rw [ContinuousLinearMap.sub_apply]
+      obtain ⟨V1, hV10, hV1⟩ := exists_hasDerivAt_firstVariation_linearised_dir
+        z (hAfun z) (hAcontfun z) (hD2contfun z) (hΨ z) (h0Ψ z) h
+      obtain ⟨V2, hV20, hV2⟩ := exists_hasDerivAt_firstVariation_linearised_dir
+        z₀ (hAfun z₀) (hAcontfun z₀) (hD2contfun z₀) (hΨ z₀) (h0Ψ z₀) h
+      rw [hD₂char z h V1 hV10 hV1, hD₂char z₀ h V2 hV20 hV2]
+      -- coefficient gap `α`
+      have hAgap : ∀ s ∈ Set.Icc t₀ t, ‖Dv s (Φ z s) - Dv s (Φ z₀ s)‖
+          ≤ (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖ := by
+        intro s hs
+        have hsT : |s - t₀| ≤ t - t₀ := by
+          rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+        exact norm_derivField_apply_flow_sub_le hv hΦ h0 (hDvlip s) hsT z z₀
+      -- second-solution bound `N`
+      have hV₂bound : ∀ s ∈ Set.Icc t₀ t, ‖V2 s‖
+          ≤ (L : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀)) * ‖h‖
+              * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+        intro s hs
+        refine (norm_linearisedFirstVariation_le z₀ (hAfun z₀) (hΨ z₀) (h0Ψ z₀)
+          L.coe_nonneg (hCz z₀) h hV2 hV20 hs).trans ?_
+        apply mul_le_mul_of_nonneg_left
+          (gronwallBound_mono le_rfl zero_le_one K.coe_nonneg (by linarith [hs.2]))
+        positivity
+      -- forcing gap `β`
+      have hFgap : ∀ s ∈ Set.Icc t₀ t,
+          ‖((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+                (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)
+            - ((D2v s (Φ z₀ s)).comp (fundamentalSolution (hAfun z₀) (hΨ z₀) (h0Ψ z₀) s) h).comp
+                (fundamentalSolution (hAfun z₀) (hΨ z₀) (h0Ψ z₀) s)‖
+          ≤ ((M : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖
+                  * Real.exp ((K : ℝ) * (t - t₀)) ^ 2
+                + 2 * (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀))
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 2
+                        * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - z₀‖))
+              * ‖h‖ := by
+        intro s hs
+        have hsT : |s - t₀| ≤ t - t₀ := by
+          rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+        have hW1 : ‖fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s‖
+            ≤ Real.exp ((K : ℝ) * (t - t₀)) :=
+          (norm_fundamentalSolution_le (hAfun z) (hΨ z) (h0Ψ z) s).trans
+            (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsT K.coe_nonneg))
+        have hW2 : ‖fundamentalSolution (hAfun z₀) (hΨ z₀) (h0Ψ z₀) s‖
+            ≤ Real.exp ((K : ℝ) * (t - t₀)) :=
+          (norm_fundamentalSolution_le (hAfun z₀) (hΨ z₀) (h0Ψ z₀) s).trans
+            (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsT K.coe_nonneg))
+        have hWd : ‖fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s
+              - fundamentalSolution (hAfun z₀) (hΨ z₀) (h0Ψ z₀) s‖
+            ≤ (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 2
+                * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - z₀‖ := by
+          refine (norm_fundamentalSolution_baseCurve_sub_le hv hΦ h0 hDvlip z z₀
+            (hAfun z) (hAfun z₀) (hΨ z) (h0Ψ z) (hΨ z₀) (h0Ψ z₀) (T := t) hs).trans ?_
+          calc (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖
+                  * Real.exp ((K : ℝ) * (t - t₀)) * gronwallBound 0 (K : ℝ) 1 (s - t₀)
+              = (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 2 * ‖z - z₀‖
+                  * gronwallBound 0 (K : ℝ) 1 (s - t₀) := by ring
+            _ ≤ (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 2 * ‖z - z₀‖
+                  * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+                apply mul_le_mul_of_nonneg_left
+                  (gronwallBound_mono le_rfl zero_le_one K.coe_nonneg (by linarith [hs.2]))
+                positivity
+            _ = (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 2
+                  * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - z₀‖ := by ring
+        exact norm_chainRuleForcing_sub_le h (hCz z s) hW1 hW2
+          (norm_secondDerivField_apply_flow_sub_le hv hΦ h0 (hD2vlip s) hsT z z₀) hWd
+          L.coe_nonneg (Real.exp_pos _).le (by positivity) (by positivity)
+      -- assemble via the inhomogeneous-variation dependence bound
+      refine (norm_inhomogVariation_sub_le_of_gap (hAfun z) hV1 hV10 hV2 hV20
+        hAgap hV₂bound hFgap (by positivity) htmem).trans_eq ?_
+      ring
+    have hlip : LipschitzWith ((((L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)))
+          * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (t - t₀))
+        + ((M : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 3
+            + 2 * (L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (t - t₀)) ^ 3
+                * gronwallBound 0 (K : ℝ) 1 (t - t₀)))
+        * gronwallBound 0 (K : ℝ) 1 (t - t₀)).toNNReal D₂ := by
+      refine LipschitzWith.of_dist_le_mul (fun z z₀ => ?_)
+      rw [Real.coe_toNNReal _ hClip0, dist_eq_norm, dist_eq_norm]
+      exact hkey z z₀
+    exact hlip.continuous
+  -- assemble `ContDiff ℝ 2`
+  refine ⟨Φ, h0, hΦ, ?_⟩
+  have hdiff_df : Differentiable ℝ (fderiv ℝ (fun w => Φ w t)) := by
+    rw [hfeq]; exact fun z => (hD2has z).differentiableAt
+  have hcont_ddf : Continuous (fderiv ℝ (fderiv ℝ (fun w => Φ w t))) := by
+    rw [hfeq, hfeq2]; exact hcont_D₂
+  have hone : ContDiff ℝ 1 (fderiv ℝ (fun w => Φ w t)) :=
+    contDiff_one_iff_fderiv.mpr ⟨hdiff_df, hcont_ddf⟩
+  rw [show (2 : WithTop ℕ∞) = 1 + 1 from rfl, contDiff_succ_iff_fderiv]
+  exact ⟨fun z => (hres z).differentiableAt, by rintro ⟨⟩, hone⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
