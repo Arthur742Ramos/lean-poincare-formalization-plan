@@ -263,6 +263,99 @@ theorem continuous_flow
     (f := fun p : ℝ × E => Φ p.2 p.1) (x := nhds (t₁, x₁))
   exact hiff.mpr key
 
+/-!
+## The flow map is a bi-Lipschitz uniform embedding in the initial value
+
+The two-sided distance bound also yields a *lower* exponential control: the flow
+cannot contract distances faster than `exp (-K · |t - t₀|)`.  Combined with the
+Lipschitz upper bound this exhibits the time-`t` flow map as a **bi-Lipschitz**
+(indeed a uniform) embedding onto its image — the `C^0` shadow of the
+"diffeomorphism onto its image" property consumed by the compact-manifold gauge
+flow of Item 2.  Antilipschitz packaging is the quantitative statement that the
+inverse of the flow map (on its image) is itself Lipschitz with the reciprocal
+exponential constant.
+-/
+
+/-- **Lower** two-sided exponential dependence for integral curves:
+`dist (f t₀) (g t₀) · exp (-K · |t - t₀|) ≤ dist (f t) (g t)`.  Obtained from the
+two-sided upper bound `dist_le_of_isIntegralCurve` with the anchor and evaluation
+times swapped: the flow run *backward* from time `t` to `t₀` can expand
+`dist (f t) (g t)` by at most `exp (K · |t - t₀|)`. -/
+theorem dist_ge_of_isIntegralCurve
+    (hv : ∀ t, LipschitzWith K (v t)) (hf : IsIntegralCurve f v) (hg : IsIntegralCurve g v)
+    (t₀ t : ℝ) :
+    dist (f t₀) (g t₀) * Real.exp (-(K : ℝ) * |t - t₀|) ≤ dist (f t) (g t) := by
+  have hb := dist_le_of_isIntegralCurve hv hf hg t t₀
+  rw [abs_sub_comm] at hb
+  calc dist (f t₀) (g t₀) * Real.exp (-(K : ℝ) * |t - t₀|)
+      ≤ dist (f t) (g t) * Real.exp ((K : ℝ) * |t - t₀|) * Real.exp (-(K : ℝ) * |t - t₀|) :=
+        mul_le_mul_of_nonneg_right hb (Real.exp_pos _).le
+    _ = dist (f t) (g t) := by
+        rw [mul_assoc, ← Real.exp_add,
+          show (K : ℝ) * |t - t₀| + -(K : ℝ) * |t - t₀| = 0 by ring, Real.exp_zero, mul_one]
+
+/-- Lower exponential dependence on initial data for a flow family:
+`dist x y · exp (-K · |t - t₀|) ≤ dist (Φ x t) (Φ y t)`. -/
+theorem dist_flow_apply_ge
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (x y : E) (t : ℝ) :
+    dist x y * Real.exp (-(K : ℝ) * |t - t₀|) ≤ dist (Φ x t) (Φ y t) := by
+  have hb := dist_ge_of_isIntegralCurve hv (hΦ x) (hΦ y) t₀ t
+  rwa [h0 x, h0 y] at hb
+
+/-- The time-`t` flow map `x ↦ Φ x t` is **antilipschitz** with constant
+`exp (K · |t - t₀|)`: distinct initial values are separated at least
+`exp (-K · |t - t₀|)` as far after flowing.  This is the quantitative injectivity
+that upgrades `injective_flow_apply` to a bi-Lipschitz embedding. -/
+theorem antilipschitzWith_flow_apply
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (t : ℝ) :
+    AntilipschitzWith (Real.exp ((K : ℝ) * |t - t₀|)).toNNReal (fun x => Φ x t) := by
+  refine AntilipschitzWith.of_le_mul_dist fun x y => ?_
+  rw [Real.coe_toNNReal _ (Real.exp_pos _).le]
+  have hb := dist_flow_apply_ge hv hΦ h0 x y t
+  have key := mul_le_mul_of_nonneg_right hb (Real.exp_pos ((K : ℝ) * |t - t₀|)).le
+  rw [mul_assoc, ← Real.exp_add,
+    show -(K : ℝ) * |t - t₀| + (K : ℝ) * |t - t₀| = 0 by ring, Real.exp_zero, mul_one] at key
+  exact key.trans_eq (mul_comm _ _)
+
+/-- Uniform antilipschitz dependence of the flow map on a symmetric compact time
+interval: whenever `|t - t₀| ≤ T`, the time-`t` flow map is antilipschitz with the
+single constant `exp (K · T)`. -/
+theorem antilipschitzWith_flow_apply_of_abs_le
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) {T : ℝ} (hT : |t - t₀| ≤ T) :
+    AntilipschitzWith (Real.exp ((K : ℝ) * T)).toNNReal (fun x => Φ x t) := by
+  refine AntilipschitzWith.of_le_mul_dist fun x y => ?_
+  rw [Real.coe_toNNReal _ (Real.exp_pos _).le]
+  have hb := dist_flow_apply_ge hv hΦ h0 x y t
+  have key := mul_le_mul_of_nonneg_right hb (Real.exp_pos ((K : ℝ) * |t - t₀|)).le
+  rw [mul_assoc, ← Real.exp_add,
+    show -(K : ℝ) * |t - t₀| + (K : ℝ) * |t - t₀| = 0 by ring, Real.exp_zero, mul_one] at key
+  refine key.trans ?_
+  rw [mul_comm]
+  refine mul_le_mul_of_nonneg_right ?_ dist_nonneg
+  exact Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hT K.coe_nonneg)
+
+/-- **The time-`t` flow map is a uniform embedding onto its image.**  Being both
+Lipschitz (`lipschitzWith_flow_apply`) and antilipschitz (`antilipschitzWith_flow_apply`)
+in the initial value, `x ↦ Φ x t` is a bi-Lipschitz — hence uniform — embedding.
+This is the `C^0` incarnation of "the gauge flow is a diffeomorphism onto its
+image" that Item 2 consumes. -/
+theorem isUniformEmbedding_flow_apply
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (t : ℝ) :
+    IsUniformEmbedding (fun x => Φ x t) :=
+  (antilipschitzWith_flow_apply hv hΦ h0 t).isUniformEmbedding
+    (lipschitzWith_flow_apply hv hΦ h0 t).uniformContinuous
+
+/-- The time-`t` flow map is a topological embedding onto its image. -/
+theorem isEmbedding_flow_apply
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (t : ℝ) :
+    Topology.IsEmbedding (fun x => Φ x t) :=
+  (isUniformEmbedding_flow_apply hv hΦ h0 t).isEmbedding
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
