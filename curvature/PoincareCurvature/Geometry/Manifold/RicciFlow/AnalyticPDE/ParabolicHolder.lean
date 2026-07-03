@@ -6491,6 +6491,167 @@ theorem affineChart_preimage_parabolicClosedCylinder
   · intro q hq
     exact parabolicClosedCylinder_mapsTo_affineChart hq
 
+/-! ### Topological transport of closures, interiors, and frontiers under the affine chart
+
+The affine parabolic chart `affineChartHomeomorph c a hr` is a homeomorphism, so it commutes with
+`closure`, `interior`, and `frontier`.  Combined with the exact image identities for the parabolic
+ball and cylinder shapes, this transports the *topological* boundary data of those shapes between
+the source and target scales, as needed when a Schauder rescaling argument must move the closure of
+an open cylinder, the interior of a closed cylinder, or their frontiers, rather than only the shapes
+themselves.  This is the topological counterpart, at the level of `closure`/`interior`/`frontier`,
+of the `affineChart_image_*` set-equality lemmas above. -/
+
+/-- Homeomorphism-coe form of `affineChart_image_parabolicBall`: the forward affine chart, viewed as
+the homeomorphism `affineChartHomeomorph c a hr`, carries the open parabolic ball of radius `ρ`
+about `a` onto the open parabolic ball of radius `|r| * ρ` about `c`. -/
+theorem affineChartHomeomorph_image_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' parabolicBall a ρ = parabolicBall c (|r| * ρ) :=
+  affineChart_image_parabolicBall c a hr ρ
+
+/-- **Transport of the closure of an open parabolic ball under the affine chart.**  For `r ≠ 0`, the
+affine chart homeomorphism carries the closure of the open parabolic ball of radius `ρ` about `a`
+onto the closure of the open parabolic ball of radius `|r| * ρ` about `c`. -/
+theorem affineChartHomeomorph_image_closure_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' closure (parabolicBall a ρ)
+      = closure (parabolicBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_closure (parabolicBall a ρ),
+    affineChartHomeomorph_image_parabolicBall c a hr ρ]
+
+/-- **Transport of the interior of an open parabolic ball under the affine chart.**  For `r ≠ 0`,
+the affine chart homeomorphism carries the interior of the parabolic ball of radius `ρ` about `a`
+onto the interior of the parabolic ball of radius `|r| * ρ` about `c`. -/
+theorem affineChartHomeomorph_image_interior_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' interior (parabolicBall a ρ)
+      = interior (parabolicBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_interior (parabolicBall a ρ),
+    affineChartHomeomorph_image_parabolicBall c a hr ρ]
+
+/-- **Transport of the frontier of an open parabolic ball under the affine chart.**  For `r ≠ 0`,
+the affine chart homeomorphism carries the frontier of the parabolic ball of radius `ρ` about `a`
+onto the frontier of the parabolic ball of radius `|r| * ρ` about `c`. -/
+theorem affineChartHomeomorph_image_frontier_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' frontier (parabolicBall a ρ)
+      = frontier (parabolicBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_frontier (parabolicBall a ρ),
+    affineChartHomeomorph_image_parabolicBall c a hr ρ]
+
+/-- Homeomorphism-coe form of `affineChart_image_parabolicClosedBall`. -/
+theorem affineChartHomeomorph_image_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' parabolicClosedBall a ρ = parabolicClosedBall c (|r| * ρ) :=
+  affineChart_image_parabolicClosedBall c a hr ρ
+
+/-- **Transport of the closure of a closed parabolic ball under the affine chart.** -/
+theorem affineChartHomeomorph_image_closure_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' closure (parabolicClosedBall a ρ)
+      = closure (parabolicClosedBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_closure (parabolicClosedBall a ρ),
+    affineChartHomeomorph_image_parabolicClosedBall c a hr ρ]
+
+/-- **Transport of the interior of a closed parabolic ball under the affine chart.**  This is the
+interior-regularity domain shape for an interior Schauder estimate on a closed parabolic ball. -/
+theorem affineChartHomeomorph_image_interior_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' interior (parabolicClosedBall a ρ)
+      = interior (parabolicClosedBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_interior (parabolicClosedBall a ρ),
+    affineChartHomeomorph_image_parabolicClosedBall c a hr ρ]
+
+/-- **Transport of the frontier of a closed parabolic ball under the affine chart.** -/
+theorem affineChartHomeomorph_image_frontier_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' frontier (parabolicClosedBall a ρ)
+      = frontier (parabolicClosedBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_frontier (parabolicClosedBall a ρ),
+    affineChartHomeomorph_image_parabolicClosedBall c a hr ρ]
+
+/-- Homeomorphism-coe form of `affineChart_image_parabolicCylinder`. -/
+theorem affineChartHomeomorph_image_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' parabolicCylinder a T S
+      = parabolicCylinder c (r ^ 2 * T) (|r| * S) :=
+  affineChart_image_parabolicCylinder c a hr T S
+
+/-- **Transport of the closure of an open parabolic cylinder under the affine chart.**  This moves
+the closure of the interior-regularity cylinder `Q = (t₀, t₁) × Ω` between scales. -/
+theorem affineChartHomeomorph_image_closure_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' closure (parabolicCylinder a T S)
+      = closure (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_closure (parabolicCylinder a T S),
+    affineChartHomeomorph_image_parabolicCylinder c a hr T S]
+
+/-- **Transport of the interior of an open parabolic cylinder under the affine chart.** -/
+theorem affineChartHomeomorph_image_interior_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' interior (parabolicCylinder a T S)
+      = interior (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_interior (parabolicCylinder a T S),
+    affineChartHomeomorph_image_parabolicCylinder c a hr T S]
+
+/-- **Transport of the frontier of an open parabolic cylinder under the affine chart.**  The
+frontier of the open cylinder is its parabolic boundary; this transports it between scales. -/
+theorem affineChartHomeomorph_image_frontier_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' frontier (parabolicCylinder a T S)
+      = frontier (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_frontier (parabolicCylinder a T S),
+    affineChartHomeomorph_image_parabolicCylinder c a hr T S]
+
+/-- Homeomorphism-coe form of `affineChart_image_parabolicClosedCylinder`. -/
+theorem affineChartHomeomorph_image_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' parabolicClosedCylinder a T S
+      = parabolicClosedCylinder c (r ^ 2 * T) (|r| * S) :=
+  affineChart_image_parabolicClosedCylinder c a hr T S
+
+/-- **Transport of the closure of a closed parabolic cylinder under the affine chart.** -/
+theorem affineChartHomeomorph_image_closure_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' closure (parabolicClosedCylinder a T S)
+      = closure (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_closure (parabolicClosedCylinder a T S),
+    affineChartHomeomorph_image_parabolicClosedCylinder c a hr T S]
+
+/-- **Transport of the interior of a closed parabolic cylinder under the affine chart.**  This is
+the interior-regularity domain shape for an interior Schauder estimate on a closed parabolic
+cylinder. -/
+theorem affineChartHomeomorph_image_interior_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' interior (parabolicClosedCylinder a T S)
+      = interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_interior (parabolicClosedCylinder a T S),
+    affineChartHomeomorph_image_parabolicClosedCylinder c a hr T S]
+
+/-- **Transport of the frontier of a closed parabolic cylinder under the affine chart.** -/
+theorem affineChartHomeomorph_image_frontier_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' frontier (parabolicClosedCylinder a T S)
+      = frontier (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_frontier (parabolicClosedCylinder a T S),
+    affineChartHomeomorph_image_parabolicClosedCylinder c a hr T S]
+
 end AnalyticPDE
 end RicciFlow
 
