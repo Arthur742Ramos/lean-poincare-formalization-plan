@@ -5220,3 +5220,39 @@ map `z ↦ D_x Φ_t^{A(z)}` (via the canonical `fundamentalSolution`, independen
 `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, and feed it to
 `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` — giving `HasFDerivAt (fun z => D_x Φ_t^{A(z)}) D₂ x₀`,
 the spatial `C²` regularity — then iterate for `C³`.
+
+Update — **the base-point `C²` bootstrap is now CLOSED** (piece (iii) assembled; all axioms
+`propext`/`Classical.choice`/`Quot.sound` only).  The spatial `C²` regularity of the flow's resolvent —
+the derivative of the resolvent `z ↦ D_x Φ_t` in the initial value, i.e. the *second* spatial
+derivative of the flow — is proved from field-level data (`C^{2,1}` field), and both at a base point
+and everywhere.  This completes the `C²` layer of the smooth-dependence tower that Items 1 & 2 consume.
+
+* `exists_hasFDerivAt_fundamentalSolution_baseCurve` — **piece (iii), the assembly**:
+  `∃ D₂, HasFDerivAt (fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) D₂ x₀`.  The packaged
+  operator `D₂` (`exists_continuousLinearMap_linearisedVariation`) is identified as the Fréchet
+  derivative of the resolvent map `z ↦ D_x Φ_t^{A(z)}` at the base point.  The uniform second-order
+  Taylor remainder `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` bounds
+  `‖(W_z t − W₀ t) − Vlin t‖ ≤ C‖z − x₀‖²`; the operator characterisation gives `D₂(z − x₀) = Vlin t`;
+  and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` upgrades the `O(‖z − x₀‖²)` error to `HasFDerivAt`.
+* `differentiableAt_fundamentalSolution_baseCurve` — the **`DifferentiableAt` corollary**: the resolvent
+  map is Fréchet differentiable at `x₀`.
+* `exists_hasFDerivAt_fderiv_flow_of_lipschitz_secondDeriv` — the **field-level, self-contained**
+  second-derivative statement (mirroring the `C¹` `exists_hasFDerivAt_flow_of_lipschitz_deriv`): from a
+  `C^{2,1}` field (uniformly `K`-Lipschitz, time-continuous `v` with everywhere-defined, jointly
+  continuous, spatially `L`-Lipschitz `Dv` and everywhere-defined, jointly continuous, `M`-Lipschitz
+  `D2v`) there is a flow family `Φ` of `v` whose resolvent map — identified via the `C¹` bootstrap
+  `hasFDerivAt_flow_of_lipschitz_deriv` with `fderiv ℝ (fun w => Φ w t)` — is Fréchet differentiable at
+  `x₀`.  I.e. `z ↦ Φ z t` is twice Fréchet differentiable at `x₀`.  Builds the flow family, the per-`z`
+  variational families, and the `D2v ≤ L` bound (`C' = L`) internally.
+* `exists_flow_fderiv_differentiable_of_lipschitz_secondDeriv` — the **everywhere** version: one flow
+  family `Φ` whose resolvent map `z ↦ fderiv ℝ (fun w => Φ w t) z` is `Differentiable ℝ` (Fréchet
+  differentiable at every initial value).  Mirrors the `C¹` `exists_flow_differentiable_of_lipschitz_deriv`.
+
+Remaining for the smooth-dependence tower (future sessions): **the `C³` layer** — differentiate the
+resolvent's derivative `x₀ ↦ D₂(x₀)` (the second fundamental solution) once more.  This needs the
+*third-order* variational analysis: the `x₀`-dependence of `D₂` via a second variational equation for
+the resolvent's resolvent, in the same style as the `C²` numerator
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq` — a new numerator
+`‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²` with `D₃` the packaged third variation — then the same
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge.  Alternatively, connect the now-complete `C²`
+dependence to the manifold gauge-flow consumers of Items 1 & 2 directly.
