@@ -5419,6 +5419,89 @@ theorem exists_hasFDerivAt_fundamentalSolution_baseCurve [CompleteSpace E]
   rw [hval]
   exact hrem
 
+/-- **Spatial `C²` regularity of the resolvent — the `DifferentiableAt` corollary.**  The resolvent
+map `z ↦ D_x Φ_t^{A(z)} = fundamentalSolution … t` is Fréchet differentiable at the base point `x₀`.
+Immediate from `exists_hasFDerivAt_fundamentalSolution_baseCurve` via `HasFDerivAt.differentiableAt`. -/
+theorem differentiableAt_fundamentalSolution_baseCurve [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {L M : ℝ≥0} {C' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ) (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (x₀ : E)
+    (hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K)
+    (hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    (hC'0 : 0 ≤ C') (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    {Ψ : E → E → ℝ → E}
+    (hΨ : ∀ z, ∀ x, IsIntegralCurve (Ψ z x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0Ψ : ∀ z, ∀ x, Ψ z x t₀ = x)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    DifferentiableAt ℝ (fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) x₀ := by
+  obtain ⟨D₂, hD₂⟩ := exists_hasFDerivAt_fundamentalSolution_baseCurve
+    hv hΦ h0 hDv hDvlip hD2v hD2vlip x₀ hAfun hAcontfun hD2cont hC'0 hC' hΨ h0Ψ ht
+  exact hD₂.differentiableAt
+
+/-- **The flow map has a second spatial derivative at the base point (`C²` in initial data,
+`C^{2,1}` field).**  Field-level, self-contained assembly of the base-point `C²` bootstrap: from a
+uniformly `K`-Lipschitz, time-continuous field `v` whose spatial derivative `Dv` exists everywhere, is
+jointly continuous and `L`-Lipschitz in space, and whose *second* spatial derivative `D2v` exists
+everywhere, is jointly continuous and `M`-Lipschitz, there is a flow family `Φ` of `v` (anchored) such
+that the **resolvent map** `z ↦ D_x Φ_t = fderiv ℝ (fun w => Φ w t) z` — the first spatial derivative
+of the flow — is *itself* Fréchet differentiable at every base point `x₀`, i.e. the flow map
+`z ↦ Φ z t` is twice Fréchet differentiable at `x₀`.
+
+Proof: `exists_flow_family` builds `Φ`; the coefficient `A(z) s = Dv s (Φ z s)` is norm-`≤ K`
+(`HasFDerivAt.le_of_lipschitz`) and continuous along each (continuous) trajectory, so
+`exists_variationalFlowFamily` supplies the per-`z` variational families `Ψ z`.  The `C¹` bootstrap
+`hasFDerivAt_flow_of_lipschitz_deriv` identifies the resolvent with the flow's spatial derivative,
+`fderiv ℝ (fun w => Φ w t) z = fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t`; and the base-point
+`C²` result `exists_hasFDerivAt_fundamentalSolution_baseCurve` (with `C' = L`, the `D2v` bound from the
+`L`-Lipschitz `Dv`) differentiates that resolvent map in the base point.  The self-contained spatial
+`C²` layer unblocking Items 1 & 2. -/
+theorem exists_hasFDerivAt_fderiv_flow_of_lipschitz_secondDeriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ)
+    (hD2vc : Continuous fun p : ℝ × E => D2v p.1 p.2)
+    {M : ℝ≥0} (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (x₀ : E) {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ (Φ : E → ℝ → E) (D₂ : E →L[ℝ] (E →L[ℝ] E)),
+      (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        HasFDerivAt (fun z => fderiv ℝ (fun w => Φ w t) z) D₂ x₀ := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  -- coefficient data at every base point: norm bound and continuity along the trajectory
+  have hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K := fun z s => by
+    have h : ‖Dv s (Φ z s)‖ ≤ (K : ℝ) := (hDv s (Φ z s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)) := fun z =>
+    hDvc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hD2cont : Continuous (fun s => D2v s (Φ x₀ s)) :=
+    hD2vc.comp (continuous_id.prodMk (hΦ x₀).continuous)
+  -- the second derivative is bounded by `L` (it is the derivative of the `L`-Lipschitz `Dv`)
+  have hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ (L : ℝ) := fun s =>
+    (hD2v s (Φ x₀ s)).le_of_lipschitz (hDvlip s)
+  -- per-base-point variational flow families
+  choose Ψ h0Ψ hΨ using fun z => exists_variationalFlowFamily (hAfun z) (hAcontfun z)
+  -- the resolvent equals the flow's spatial derivative at every base point (`C¹` bootstrap)
+  have hres : ∀ z, HasFDerivAt (fun w => Φ w t)
+      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) z := fun z =>
+    hasFDerivAt_flow_of_lipschitz_deriv hv (hAfun z) (hΨ z) (h0Ψ z) hΦ h0 z ht.1
+      (Dv := Dv) (fun _ s _ ξ _ => (hDv s ξ).hasFDerivWithinAt) L.coe_nonneg
+      (fun _ s _ ξ _ => by
+        have hlip := (hDvlip s).dist_le_mul ξ (Φ z s)
+        rw [dist_eq_norm, dist_eq_norm] at hlip
+        exact hlip)
+  have hfeq : (fun z => fderiv ℝ (fun w => Φ w t) z)
+      = (fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) :=
+    funext fun z => (hres z).fderiv
+  obtain ⟨D₂, hD₂⟩ := exists_hasFDerivAt_fundamentalSolution_baseCurve
+    hv hΦ h0 hDv hDvlip hD2v hD2vlip x₀ hAfun hAcontfun hD2cont L.coe_nonneg hC' hΨ h0Ψ ht
+  exact ⟨Φ, D₂, h0, hΦ, hfeq ▸ hD₂⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
