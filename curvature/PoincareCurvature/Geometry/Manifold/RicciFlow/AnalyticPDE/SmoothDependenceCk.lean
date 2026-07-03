@@ -1575,6 +1575,84 @@ theorem hasFDerivAt_flow_of_lipschitz_deriv_of_hasFDerivAt
   hasFDerivAt_flow_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ ht0
     (fun _ s _ ξ _ => (hderiv s ξ).hasFDerivWithinAt) hL hlip
 
+/-!
+### Local (`∀ᶠ z in 𝓝 x₀`) refinements of the `C¹` dependence tower
+
+Fréchet differentiability of `x ↦ Φ x t` at the base point `x₀` is a **local** property, so the
+defect / oscillation / derivative-existence hypotheses of the theorems above need only hold for
+initial conditions `z` in a *neighbourhood* of `x₀`, not for every `z : E`.  The following variants
+weaken the global `∀ z` hypotheses to `∀ᶠ z in 𝓝 x₀` (the nonnegativity of the modulus and the
+structural flow-family hypotheses stay global, being harmless / non-analytic).
+
+This is the honest form consumed by a genuine smooth field: its spatial derivative `D_x v` is only
+*locally* Lipschitz, so the global Lipschitz-derivative bound of `hasFDerivAt_flow_of_lipschitz_deriv`
+generally fails, whereas its local counterpart `hasFDerivAt_flow_of_lipschitz_deriv_eventually`
+holds on the neighbourhood of `x₀` where the local Lipschitz estimate is available. -/
+
+open Asymptotics Filter in
+/-- **Local form of `hasFDerivAt_flow_of_defect_isLittleO`.**  The `C¹` dependence of the flow on
+the initial condition, needing the defect bound `‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+≤ D z` only for `z` in a neighbourhood of `x₀` (`∀ᶠ z in 𝓝 x₀`) rather than for every `z`.  Since
+`HasFDerivAt` is determined by the behaviour of `z ↦ Φ z t` near `x₀`, the big-O numerator estimate
+`numerator = O(D)` is an eventual (in `𝓝 x₀`) statement, so the eventual defect bound suffices. -/
+theorem hasFDerivAt_flow_of_defect_isLittleO_eventually
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {D : E → ℝ} (hDnn : ∀ z, 0 ≤ D z)
+    (hdefect : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z)
+    (hDo : (fun z => D z) =o[𝓝 x₀] fun z => z - x₀) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  have hbig : (fun z => Φ z t - Φ x₀ t - fundamentalSolution hA hΦ' h0' t (z - x₀))
+      =O[𝓝 x₀] fun z => D z := by
+    rw [isBigO_iff]
+    refine ⟨gronwallBound 0 (K : ℝ) 1 (t - t₀), ?_⟩
+    filter_upwards [hdefect] with z hdefectz
+    show ‖Φ z t - Φ x₀ t - fundamentalSolution hA hΦ' h0' t (z - x₀)‖
+        ≤ gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖D z‖
+    rw [Real.norm_eq_abs, abs_of_nonneg (hDnn z)]
+    have hb := norm_flow_sub_fundamentalSolution_le_Icc hA hΦ' h0' hΦ h0 x₀ z
+      hdefectz (Set.mem_Icc.mpr ⟨ht0, le_refl t⟩)
+    rwa [gronwallBound_zero_left_mul, mul_comm (D z)] at hb
+  exact HasFDerivAt.of_isLittleO (hbig.trans_isLittleO hDo)
+
+open Asymptotics Filter in
+/-- **The flow map is differentiable at the base point** (local defect-modulus form):
+`DifferentiableAt ℝ (fun z => Φ z t) x₀`. -/
+theorem differentiableAt_flow_of_defect_isLittleO_eventually
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {D : E → ℝ} (hDnn : ∀ z, 0 ≤ D z)
+    (hdefect : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z)
+    (hDo : (fun z => D z) =o[𝓝 x₀] fun z => z - x₀) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_defect_isLittleO_eventually hA hΦ' h0' hΦ h0 x₀ ht0 hDnn hdefect
+    hDo).differentiableAt
+
+open Asymptotics Filter in
+/-- **The Fréchet derivative of the flow map is the resolvent** (local defect-modulus form):
+`fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t = D_x Φ_t`. -/
+theorem fderiv_flow_of_defect_isLittleO_eventually
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {D : E → ℝ} (hDnn : ∀ z, 0 ≤ D z)
+    (hdefect : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z)
+    (hDo : (fun z => D z) =o[𝓝 x₀] fun z => z - x₀) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_defect_isLittleO_eventually hA hΦ' h0' hΦ h0 x₀ ht0 hDnn hdefect
+    hDo).fderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
