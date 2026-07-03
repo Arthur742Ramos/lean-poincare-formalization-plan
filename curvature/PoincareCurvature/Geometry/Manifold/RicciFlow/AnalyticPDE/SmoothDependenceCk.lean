@@ -2421,6 +2421,34 @@ theorem fundamentalSolution_eq_one_add_integral {A : ℝ → (E →L[ℝ] E)} {K
   rw [hint, ← ContinuousLinearMap.one_def]
   abel
 
+open MeasureTheory intervalIntegral in
+/-- **The resolvent is close to the identity near the anchor.**  Quantitative "resolvent `≈ 1`"
+bound: `‖D_x Φ_t - 1‖ ≤ K · exp (K · |t - t₀|) · |t - t₀|`, so the resolvent departs from the
+identity operator at most linearly (times the exponential) in the elapsed time, vanishing as
+`t → t₀`.  Immediate from the Volterra identity `fundamentalSolution_eq_one_add_integral`
+(`D_x Φ_t - 1 = ∫_{t₀}^{t} A σ ∘ D_x Φ_σ dσ`) and the a-priori velocity bound
+`norm_comp_fundamentalSolution_le` (`‖A σ ∘ D_x Φ_σ‖ ≤ K · exp (K · |σ - t₀|)`), whose integrand is
+`≤ K · exp (K · |t - t₀|)` on the time window `Ι t₀ t` (`|σ - t₀| ≤ |t - t₀|`), integrated by
+`intervalIntegral.norm_integral_le_of_norm_le_const`.  This is the operator-Duhamel short-time
+estimate underlying the contraction/invertibility of the resolvent for small `|t - t₀|`. -/
+theorem norm_fundamentalSolution_sub_one_le {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    [CompleteSpace E]
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) :
+    ‖fundamentalSolution hA hΦ h0 t - 1‖
+      ≤ (K : ℝ) * Real.exp ((K : ℝ) * |t - t₀|) * |t - t₀| := by
+  rw [fundamentalSolution_eq_one_add_integral hA hAcont hΦ h0 t, add_sub_cancel_left]
+  refine intervalIntegral.norm_integral_le_of_norm_le_const
+    (C := (K : ℝ) * Real.exp ((K : ℝ) * |t - t₀|)) ?_
+  intro σ hσ
+  refine (norm_comp_fundamentalSolution_le hA hΦ h0 σ).trans ?_
+  have hσle : |σ - t₀| ≤ |t - t₀| := by
+    have hmem : σ ∈ Set.uIcc t₀ t := Set.uIoc_subset_uIcc hσ
+    have := Real.dist_le_of_mem_uIcc hmem Set.left_mem_uIcc
+    simpa [Real.dist_eq, abs_sub_comm] using this
+  gcongr
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow

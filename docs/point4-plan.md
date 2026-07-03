@@ -4808,6 +4808,13 @@ that differentiable dependence on the coefficient field will be built on:
   `fundamentalSolution_anchor` (`D_x Φ_{t₀} = 1`) yields the Volterra equation.  (This is the first
   use of Bochner interval integration in the module, adding the single core-Mathlib import
   `Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus`.)
+* `norm_fundamentalSolution_sub_one_le` — the **short-time closeness of the resolvent to the
+  identity**: `‖D_x Φ_t - 1‖ ≤ K · exp (K · |t - t₀|) · |t - t₀|` (`→ 0` as `t → t₀`).  Immediate
+  from the Volterra identity (`D_x Φ_t - 1 = ∫_{t₀}^{t} A σ ∘ D_x Φ_σ dσ`) and the a-priori velocity
+  bound `norm_comp_fundamentalSolution_le` (`‖A σ ∘ D_x Φ_σ‖ ≤ K · exp (K · |σ - t₀|)`), whose
+  integrand is `≤ K · exp (K · |t - t₀|)` on the window `Ι t₀ t`, integrated by
+  `intervalIntegral.norm_integral_le_of_norm_le_const`.  This is the operator-Duhamel short-time
+  estimate underlying the contraction / invertibility of the resolvent for small `|t - t₀|`.
 
 Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
 modulus; the *existence* of the variational flow family (global integral curves of the linear
