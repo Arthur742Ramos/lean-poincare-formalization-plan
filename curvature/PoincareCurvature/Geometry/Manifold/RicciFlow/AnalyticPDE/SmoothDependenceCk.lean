@@ -2272,6 +2272,30 @@ theorem norm_fundamentalSolution_sub_le_time {A : ℝ → (E →L[ℝ] E)} {K : 
   simp only [ContinuousLinearMap.sub_apply, fundamentalSolution_apply]
   exact key u
 
+/-- **The resolvent path is norm-continuous in time.**  `t ↦ D_x Φ_t` is a continuous curve in
+the operator Banach space `E →L[ℝ] E`, not merely strongly (fixed-direction) continuous:
+immediate from the operator-norm local-Lipschitz bound `norm_fundamentalSolution_sub_le_time` by
+squeezing the distance `‖D_x Φ_a - D_x Φ_t‖` between `0` and the vanishing bound
+`K · exp (K · max |t - t₀| |a - t₀|) · |a - t| → 0`.  This norm-continuity of the resolvent as a
+curve of operators is the input consumed when Bochner-integrating the resolvent along time (the
+Duhamel/variation-of-constants representation) in the parabolic theory. -/
+theorem continuous_fundamentalSolution_time {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    Continuous (fun t => fundamentalSolution hA hΦ h0 t) := by
+  rw [continuous_iff_continuousAt]
+  intro t
+  show Filter.Tendsto (fun a => fundamentalSolution hA hΦ h0 a) (𝓝 t)
+    (𝓝 (fundamentalSolution hA hΦ h0 t))
+  rw [tendsto_iff_dist_tendsto_zero]
+  have hgcont : Continuous
+      (fun a => (K : ℝ) * Real.exp ((K : ℝ) * max |t - t₀| |a - t₀|) * |a - t|) := by
+    fun_prop
+  have hgt : (K : ℝ) * Real.exp ((K : ℝ) * max |t - t₀| |t - t₀|) * |t - t| = 0 := by simp
+  refine squeeze_zero (fun a => dist_nonneg) (fun a => ?_) (hgcont.tendsto' t 0 hgt)
+  rw [dist_eq_norm]
+  exact norm_fundamentalSolution_sub_le_time hA hΦ h0 t a
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
