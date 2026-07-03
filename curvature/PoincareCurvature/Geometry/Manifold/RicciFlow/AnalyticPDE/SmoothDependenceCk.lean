@@ -10850,6 +10850,207 @@ theorem norm_thirdVariationForcing_baseCurve_sub_le
   refine (add_le_add (add_le_add (add_le_add hT1 hT2) hT3) hT4).trans_eq ?_
   ring
 
+/-- **Base-point Lipschitz gap of the third-variation curve.**  The `C³`-continuity curve gap and the
+direct one-order-up analogue of `norm_linearisedFirstVariation_baseCurve_sub_le`: for two base points
+`z`, `x₀` with resolvents `W_z`, `W_x`, linearised first-variation curves `Uzk = Vfam^z k`,
+`Uxk = Vfam^x k` (direction `k`) and `Uzh = Vfam^z h`, `Uxh = Vfam^x h` (direction `h`), and the
+third-variation curves `Vz`, `Vx` solving the design-corrected third-variation ODE (coefficient
+`Dv(Φ · s)`, four-term forcing) at `z`, `x₀`, the whole curve difference is `O(‖z − x₀‖·‖k‖·‖h‖)`
+uniformly on `[t₀, T]`:
+`‖Vz t − Vx t‖ ≤ Cλ · ‖z − x₀‖ · ‖k‖ · ‖h‖ · gronwallBound 0 K 1 (t − t₀)`
+with `Cλ = L·exp⁴·g·(3C'²g + C'') + 3·exp⁴·g·(2M₂C' + 4LC'²g) + exp⁴·(3C''Lg + M₃)`,
+`exp = exp(K(T−t₀))`, `g = gronwallBound 0 K 1 (T−t₀)`.
+
+Proof: `norm_inhomogVariation_sub_le_of_gap` fed the coefficient gap `α = L·exp·‖z − x₀‖`
+(`norm_derivField_apply_flow_sub_le`), the second-curve size `N = ‖Vx s‖`-bound
+(`norm_thirdVariation_coeff_le` with the `Vfam^x` sizes `‖Uxk‖ ≤ C'exp²‖k‖g`, `‖Uxh‖ ≤ C'exp²‖h‖g` from
+`norm_linearisedFirstVariation_le`), and the four-term forcing gap `β`
+(`norm_thirdVariationForcing_baseCurve_sub_le`); the `(α·N + β)·gronwall` constant collapses to `Cλ` by
+`ring`.  This is the size datum that `ContinuousLinearMap.opNorm_le_bound` (twice, over `k` then `h`)
+turns into the Lipschitz continuity `‖D₃fam z − D₃fam x₀‖ ≤ Cλ·gronwall·‖z − x₀‖` of the third
+fundamental solution — the sole remaining ingredient of the resolvent's spatial `ContDiff ℝ 3`. -/
+theorem norm_thirdVariation_baseCurve_sub_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ : ℝ≥0} {C' C'' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD2vlip : ∀ s, LipschitzWith M₂ (D2v s))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hC'0 : 0 ≤ C') (hC'z : ∀ s, ‖D2v s (Φ z s)‖ ≤ C') (hC'x : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    (hC''0 : 0 ≤ C'') (hC''z : ∀ s, ‖D3v s (Φ z s)‖ ≤ C'') (hC''x : ∀ s, ‖D3v s (Φ x₀ s)‖ ≤ C'')
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h2 : ∀ x, Φ₂ x t₀ = x)
+    (k h : E) {T : ℝ}
+    {Uzk Uxk Uzh Uxh : ℝ → (E →L[ℝ] E)}
+    (hUzk : ∀ s, HasDerivAt Uzk
+      ((Dv s (Φ z s)).comp (Uzk s)
+        + ((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) k).comp
+            (fundamentalSolution hAz hΦ₁ h1 s)) s)
+    (hUzk0 : Uzk t₀ = 0)
+    (hUxk : ∀ s, HasDerivAt Uxk
+      ((Dv s (Φ x₀ s)).comp (Uxk s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) k).comp
+            (fundamentalSolution hAx hΦ₂ h2 s)) s)
+    (hUxk0 : Uxk t₀ = 0)
+    (hUzh : ∀ s, HasDerivAt Uzh
+      ((Dv s (Φ z s)).comp (Uzh s)
+        + ((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) h).comp
+            (fundamentalSolution hAz hΦ₁ h1 s)) s)
+    (hUzh0 : Uzh t₀ = 0)
+    (hUxh : ∀ s, HasDerivAt Uxh
+      ((Dv s (Φ x₀ s)).comp (Uxh s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) h).comp
+            (fundamentalSolution hAx hΦ₂ h2 s)) s)
+    (hUxh0 : Uxh t₀ = 0)
+    {Vz Vx : ℝ → (E →L[ℝ] E)}
+    (hVz : ∀ s, HasDerivAt Vz
+      ((Dv s (Φ z s)).comp (Vz s)
+        + (((D2v s (Φ z s)).comp (Uzk s) h).comp (fundamentalSolution hAz hΦ₁ h1 s)
+           + (((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) h).comp (Uzk s)
+              + (((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) k).comp (Uzh s)
+                 + (continuousMultilinearCurryFin1 ℝ E E
+                     (((D3v s (Φ z s)).curryLeft (fundamentalSolution hAz hΦ₁ h1 s k)).curryLeft
+                       (fundamentalSolution hAz hΦ₁ h1 s h))).comp
+                     (fundamentalSolution hAz hΦ₁ h1 s))))) s)
+    (hVz0 : Vz t₀ = 0)
+    (hVx : ∀ s, HasDerivAt Vx
+      ((Dv s (Φ x₀ s)).comp (Vx s)
+        + (((D2v s (Φ x₀ s)).comp (Uxk s) h).comp (fundamentalSolution hAx hΦ₂ h2 s)
+           + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) h).comp (Uxk s)
+              + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) k).comp (Uxh s)
+                 + (continuousMultilinearCurryFin1 ℝ E E
+                     (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hAx hΦ₂ h2 s k)).curryLeft
+                       (fundamentalSolution hAx hΦ₂ h2 s h))).comp
+                     (fundamentalSolution hAx hΦ₂ h2 s))))) s)
+    (hVx0 : Vx t₀ = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ‖Vz t - Vx t‖
+      ≤ ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+            * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'')
+          + 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+              * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)))
+        * ‖z - x₀‖ * ‖k‖ * ‖h‖ * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  have he0 : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (T - t₀)) := (Real.exp_pos _).le
+  have hg0 : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans ht.1 ht.2))
+  have he2 : Real.exp (2 * (K : ℝ) * (T - t₀)) = Real.exp ((K : ℝ) * (T - t₀)) ^ 2 := by
+    rw [sq, ← Real.exp_add]; congr 1; ring
+  have he3 : Real.exp (3 * (K : ℝ) * (T - t₀)) = Real.exp ((K : ℝ) * (T - t₀)) ^ 3 := by
+    have hpow : Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+        = Real.exp ((K : ℝ) * (T - t₀))
+          * (Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))) := by ring
+    rw [hpow, ← Real.exp_add, ← Real.exp_add]; congr 1; ring
+  -- coefficient gap `α`
+  have hAgap : ∀ s ∈ Set.Icc t₀ T, ‖Dv s (Φ z s) - Dv s (Φ x₀ s)‖
+      ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ := by
+    intro s hs
+    have hsabs : |s - t₀| ≤ T - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+    exact norm_derivField_apply_flow_sub_le hv hΦ h0 (hDvlip s) hsabs z x₀
+  have hα : (0 : ℝ) ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ := by positivity
+  -- `Vfam^x` sizes
+  have hN₂ : ∀ s ∈ Set.Icc t₀ T, ‖Uxk s‖
+      ≤ C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖k‖ * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    intro s hs
+    have hle := norm_linearisedFirstVariation_le x₀ hAx hΦ₂ h2 hC'0 hC'x k hUxk hUxk0 hs
+    rw [he2] at hle
+    refine hle.trans ?_
+    have hmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+      gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg (by linarith [hs.2])
+    exact mul_le_mul_of_nonneg_left hmono
+      (mul_nonneg (mul_nonneg hC'0 (by positivity)) (norm_nonneg _))
+  have hN₀ : ∀ s ∈ Set.Icc t₀ T, ‖Uxh s‖
+      ≤ C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖h‖ * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    intro s hs
+    have hle := norm_linearisedFirstVariation_le x₀ hAx hΦ₂ h2 hC'0 hC'x h hUxh hUxh0 hs
+    rw [he2] at hle
+    refine hle.trans ?_
+    have hmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+      gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg (by linarith [hs.2])
+    exact mul_le_mul_of_nonneg_left hmono
+      (mul_nonneg (mul_nonneg hC'0 (by positivity)) (norm_nonneg _))
+  -- second-curve size `N`
+  have hN₂0 : (0 : ℝ) ≤ C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖k‖
+      * gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    mul_nonneg (mul_nonneg (mul_nonneg hC'0 (by positivity)) (norm_nonneg _)) hg0
+  have hBIG0 : (0 : ℝ) ≤ 2 * C' * (C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖k‖
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖
+        + C' * (C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖h‖
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖
+        + C'' * Real.exp ((K : ℝ) * (T - t₀)) ^ 3 * ‖k‖ * ‖h‖ := by
+    have h1' : (0 : ℝ) ≤ 2 * C' * (C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖k‖
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖ :=
+      mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (by positivity) hC'0) hN₂0) he0) (norm_nonneg _)
+    have h2' : (0 : ℝ) ≤ C' * (C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖h‖
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖ :=
+      mul_nonneg (mul_nonneg (mul_nonneg hC'0
+        (mul_nonneg (mul_nonneg (mul_nonneg hC'0 (by positivity)) (norm_nonneg _)) hg0)) he0)
+        (norm_nonneg _)
+    have h3' : (0 : ℝ) ≤ C'' * Real.exp ((K : ℝ) * (T - t₀)) ^ 3 * ‖k‖ * ‖h‖ :=
+      mul_nonneg (mul_nonneg (mul_nonneg hC''0 (by positivity)) (norm_nonneg _)) (norm_nonneg _)
+    exact add_nonneg (add_nonneg h1' h2') h3'
+  have hV₂bound : ∀ s ∈ Set.Icc t₀ T, ‖Vx s‖
+      ≤ (2 * C' * (C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖k‖
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖
+            + C' * (C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖h‖
+                * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖
+            + C'' * Real.exp ((K : ℝ) * (T - t₀)) ^ 3 * ‖k‖ * ‖h‖)
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    intro s hs
+    have hVx_C : ∀ s', HasDerivAt Vx
+        ((Dv s' (Φ x₀ s')).comp (Vx s')
+          + (((D2v s' (Φ x₀ s')).comp (Uxk s') h).comp (fundamentalSolution hAx hΦ₂ h2 s')
+             + ((D2v s' (Φ x₀ s')).comp (fundamentalSolution hAx hΦ₂ h2 s') h).comp (Uxk s')
+             + (((D2v s' (Φ x₀ s')).comp (fundamentalSolution hAx hΦ₂ h2 s') k).comp (Uxh s')
+                + (continuousMultilinearCurryFin1 ℝ E E
+                    (((D3v s' (Φ x₀ s')).curryLeft (fundamentalSolution hAx hΦ₂ h2 s' k)).curryLeft
+                      (fundamentalSolution hAx hΦ₂ h2 s' h))).comp
+                    (fundamentalSolution hAx hΦ₂ h2 s')))) s' := by
+      intro s'
+      convert hVx s' using 2
+      abel
+    have hb := norm_thirdVariation_coeff_le x₀ hAx hΦ₂ h2 hC'0 hC''0 hN₂0 hC'x hC''x hN₂ hN₀
+      k h hVx_C hVx0 hs
+    rw [he3] at hb
+    refine hb.trans ?_
+    have hmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+      gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg (by linarith [hs.2])
+    exact mul_le_mul_of_nonneg_left hmono hBIG0
+  -- forcing gap `β`
+  have hFgap : ∀ s ∈ Set.Icc t₀ T,
+      ‖(((D2v s (Φ z s)).comp (Uzk s) h).comp (fundamentalSolution hAz hΦ₁ h1 s)
+          + (((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) h).comp (Uzk s)
+             + (((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) k).comp (Uzh s)
+                + (continuousMultilinearCurryFin1 ℝ E E
+                    (((D3v s (Φ z s)).curryLeft (fundamentalSolution hAz hΦ₁ h1 s k)).curryLeft
+                      (fundamentalSolution hAz hΦ₁ h1 s h))).comp
+                    (fundamentalSolution hAz hΦ₁ h1 s))))
+        - (((D2v s (Φ x₀ s)).comp (Uxk s) h).comp (fundamentalSolution hAx hΦ₂ h2 s)
+          + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) h).comp (Uxk s)
+             + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) k).comp (Uxh s)
+                + (continuousMultilinearCurryFin1 ℝ E E
+                    (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hAx hΦ₂ h2 s k)).curryLeft
+                      (fundamentalSolution hAx hΦ₂ h2 s h))).comp
+                    (fundamentalSolution hAx hΦ₂ h2 s))))‖
+      ≤ (3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+                * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+            + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+                * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)))
+          * ‖z - x₀‖ * ‖k‖ * ‖h‖ := by
+    intro s hs
+    exact norm_thirdVariationForcing_baseCurve_sub_le hv hΦ h0 hDvlip hD2vlip hD3vlip z x₀
+      hAz hAx hC'0 hC'z hC'x hC''z hΦ₁ h1 hΦ₂ h2 k h hUzk hUzk0 hUxk hUxk0 hUzh hUzh0 hUxh hUxh0 hs
+  refine (norm_inhomogVariation_sub_le_of_gap hAz hVz hVz0 hVx hVx0 hAgap hV₂bound hFgap hα
+    ht).trans_eq ?_
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
