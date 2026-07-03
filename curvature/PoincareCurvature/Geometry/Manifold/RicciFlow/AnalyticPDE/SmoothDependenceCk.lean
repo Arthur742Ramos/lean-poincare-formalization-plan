@@ -5730,6 +5730,26 @@ theorem norm_inhomogVariation_sub_le_of_gap
       _ ≤ α * N := mul_le_mul (hAgap s hs) (hV₂bound s hs) (norm_nonneg _) hα
   exact norm_inhomogVariation_le hA₁ hRderiv hR0 hGbound ht
 
+/-- **Uniform Lipschitz-in-base-point bound for the second derivative field along the flow.**  The
+second-derivative analogue of `norm_derivField_apply_flow_sub_le`: for a uniformly `K`-Lipschitz field
+`v` with `M`-Lipschitz *second* spatial derivative `D²v s`, and a flow family `Φ` of `v` anchored at
+`Φ x t₀ = x`, the second-derivative field along the flow `z ↦ D²v s (Φ z s)` moves by at most
+`M · exp (K T) · ‖z − w‖` for every time `s` with `|s − t₀| ≤ T`.  Composes the `M`-Lipschitz `D²v s`
+with the uniform flow-Lipschitz bound `lipschitzWith_flow_apply_of_abs_le` (`exp (K T)`), exactly as
+`norm_derivField_apply_flow_sub_le` does for the first derivative.  This is the size datum for the
+`D²v`-gap term in the chain-rule forcing perturbation of the base-point `C³`/`ContDiff ℝ 2` bootstrap
+(continuity of the second fundamental solution). -/
+theorem norm_secondDerivField_apply_flow_sub_le
+    {Φ : E → ℝ → E} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))} {M : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (hD2v : LipschitzWith M (D2v s)) (hsT : |s - t₀| ≤ T) (z w : E) :
+    ‖D2v s (Φ z s) - D2v s (Φ w s)‖ ≤ (M : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ := by
+  have hlip : LipschitzWith (M * (Real.exp ((K : ℝ) * T)).toNNReal) (fun z => D2v s (Φ z s)) :=
+    hD2v.comp (lipschitzWith_flow_apply_of_abs_le hv hΦ h0 hsT)
+  have hd := hlip.dist_le_mul z w
+  rw [dist_eq_norm, dist_eq_norm, NNReal.coe_mul, Real.coe_toNNReal _ (Real.exp_pos _).le] at hd
+  exact hd
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
