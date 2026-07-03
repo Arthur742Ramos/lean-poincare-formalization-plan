@@ -4278,6 +4278,47 @@ theorem differentiableAt_derivField_apply_flow
     DifferentiableAt ℝ (fun z => Dv s (Φ z s)) x₀ :=
   (hasFDerivAt_derivField_apply_flow hΦ hDv).differentiableAt
 
+/-- **The linearised coefficient is Lipschitz in the base point.**  If the field's spatial derivative
+`Dv s` is `L`-Lipschitz and the time-`s` flow map `z ↦ Φ z s` is `C`-Lipschitz, then the linearised
+coefficient `z ↦ Dv s (Φ z s) = A(z) s` is `L · C`-Lipschitz.  Composition of Lipschitz maps
+(`LipschitzWith.comp`). -/
+theorem lipschitzWith_derivField_apply_flow
+    {Dv : ℝ → E → (E →L[ℝ] E)} {Φ : E → ℝ → E} {s : ℝ} {L C : ℝ≥0}
+    (hDv : LipschitzWith L (Dv s))
+    (hΦ : LipschitzWith C (fun z => Φ z s)) :
+    LipschitzWith (L * C) (fun z => Dv s (Φ z s)) :=
+  hDv.comp hΦ
+
+/-- **Uniform Lipschitz-in-base-point bound for the linearised coefficient on a compact time tube.**
+For a uniformly `K`-Lipschitz field `v` with `L`-Lipschitz spatial derivative `Dv s`, and a flow
+family `Φ` of `v` anchored at `Φ x t₀ = x`, the linearised coefficient `z ↦ Dv s (Φ z s)` is
+Lipschitz with the single constant `L · exp (K T)` for every time `s` with `|s - t₀| ≤ T`.  Combines
+`lipschitzWith_derivField_apply_flow` with the uniform flow-Lipschitz bound
+`lipschitzWith_flow_apply_of_abs_le` (`exp (K T)`, uniform in `s` on `[t₀ - T, t₀ + T]`). -/
+theorem lipschitzWith_derivField_apply_flow_of_abs_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {L : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (hDv : LipschitzWith L (Dv s)) (hsT : |s - t₀| ≤ T) :
+    LipschitzWith (L * (Real.exp ((K : ℝ) * T)).toNNReal) (fun z => Dv s (Φ z s)) :=
+  lipschitzWith_derivField_apply_flow hDv (lipschitzWith_flow_apply_of_abs_le hv hΦ h0 hsT)
+
+/-- **Coefficient-perturbation size datum for the second-order variational estimates.**  Under the
+hypotheses of `lipschitzWith_derivField_apply_flow_of_abs_le`, the coefficient perturbation is
+`O(‖z - w‖)` uniformly in `s` on the compact time tube:
+`‖Dv s (Φ z s) - Dv s (Φ w s)‖ ≤ L · exp (K T) · ‖z - w‖` for `|s - t₀| ≤ T`.  This is exactly the
+`hAA'`/`ε` input of `norm_fundamentalSolution_sub_sub_variation_le` and
+`norm_fundamentalSolution_variation_le` (with `ε = L · exp (K T) · ‖z - w‖`), the leading-order size
+of the coefficient response to a base-point increment `z - w`. -/
+theorem norm_derivField_apply_flow_sub_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {L : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (hDv : LipschitzWith L (Dv s)) (hsT : |s - t₀| ≤ T) (z w : E) :
+    ‖Dv s (Φ z s) - Dv s (Φ w s)‖ ≤ (L : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ := by
+  have hd := (lipschitzWith_derivField_apply_flow_of_abs_le hv hΦ h0 hDv hsT).dist_le_mul z w
+  rw [dist_eq_norm, dist_eq_norm, NNReal.coe_mul,
+    Real.coe_toNNReal _ (Real.exp_pos _).le] at hd
+  exact hd
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
