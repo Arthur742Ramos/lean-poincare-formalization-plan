@@ -4942,3 +4942,49 @@ perturbation, upgrading the estimate to honest Fréchet differentiability of `A 
 *general* merely-continuous spatial modulus; the *existence* of the variational flow family; and the
 resulting *spatial* `C^k`/`C^2` bootstrap (`x₀ ↦ D_x Φ_t` differentiable in the base point, its
 coefficient `A(x₀) s = D_x v(s, Φ x₀ s)` feeding the above).
+
+Update — the **linearity-in-perturbation of the first variation** is now proved (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only), closing the *algebraic* half of the
+existence/linearity target above.  The first variation `V` (solution of the inhomogeneous operator
+ODE `V' = A ∘ V + F` anchored at `V t₀ = 0`, with the coefficient-perturbation forcing
+`F = (A₁ - A₂) ∘ W₂` *linear* in the perturbation `A₁ - A₂`) is exhibited as a genuinely **bounded
+linear** and **single-valued** function of the perturbation:
+
+* `hasDerivAt_inhomogVariation_add` / `hasDerivAt_inhomogVariation_smul` /
+  `hasDerivAt_inhomogVariation_sub` — **superposition** for the inhomogeneous variational ODE: the
+  solution set is closed under addition, scalar multiplication and subtraction of the forcing
+  (`(V₁ ± V₂)' = A ∘ (V₁ ± V₂) + (F₁ ± F₂)`, `(c • V)' = A ∘ (c • V) + c • F`), from `HasDerivAt.add`
+  /`.const_smul`/`.sub` and bilinearity of composition (`comp_add`/`comp_smul`/`comp_sub`).
+* `inhomogVariation_unique` — **uniqueness**: two anchored solutions of the *same* forcing agree
+  everywhere (the difference solves the homogeneous variational ODE with zero anchor, killed by
+  Grönwall uniqueness `variational_eq_of_isIntegralCurve`).  Makes the first variation single-valued.
+* `hasDerivAt_firstVariation_perturbation_add` / `_smul` / `_sub` — the **coefficient-perturbation**
+  specialisations (generic background resolvent `W`): the first variation for `B₁ ± B₂` / `c • B` is
+  `V₁ ± V₂` / `c • V`, via linearity of `B ↦ B ∘ W` (`add_comp`/`smul_comp`/`sub_comp`).
+* `norm_inhomogVariation_le` — the **general (forcing-agnostic) a-priori size bound**:
+  `‖V t‖ ≤ M · gronwallBound 0 K 1 (t - t₀)` on `[t₀, T]` for any `V' = A ∘ V + F` (`‖A‖ ≤ K`,
+  `‖F‖ ≤ M`), of which `norm_fundamentalSolution_variation_le` (forcing `(A₁ - A₂) ∘ W₂`,
+  `M = ε · exp (K (T - t₀))`) is the leading instance.  Grönwall
+  (`norm_le_gronwallBound_of_norm_deriv_right_le`).
+* `norm_firstVariation_perturbation_sub_le` — **Lipschitz dependence on the perturbation**:
+  `‖V₁ t - V₂ t‖ ≤ (ε · C) · gronwallBound 0 K 1 (t - t₀)` when `‖B₁ - B₂‖ ≤ ε`, `‖W‖ ≤ C` on
+  `[t₀, T]` (`V₁ - V₂` is the first variation for `B₁ - B₂`, size-bounded by `norm_inhomogVariation_le`).
+  Continuity/boundedness of the Gateaux-derivative map `perturbation ↦ V`.
+* `inhomogVariation_eq_zero_of_forcing_zero` — the **origin value**: zero perturbation gives the zero
+  first variation (uniqueness against the zero solution) — a linear map sends `0` to `0`.
+* `firstVariation_perturbation_add_eq` / `firstVariation_perturbation_smul_eq` — the **map-level**
+  linearity: the unique anchored first variation for `B₁ + B₂` (resp. `c • B`) *equals* `V₁ + V₂`
+  (resp. `c • V`) as a pointwise identity (superposition + uniqueness).  With the origin value this
+  makes `perturbation ↦ V` a genuine **linear map**.
+* `inhomogVariation_eq_integral` — the **Volterra/Picard fixed-point equation**:
+  `V t = ∫_{t₀}^{t} (A σ ∘ V σ + F σ) dσ` (FTC + anchor), companion to
+  `fundamentalSolution_eq_one_add_integral`; the integral-equation entry point for the *existence*
+  half.
+
+Remaining after this (future sessions): the **existence** of the first variation `V` (the
+continuation-flavoured half — Mathlib supplies only local Picard–Lindelöf; construct the global
+anchored solution of the linear inhomogeneous ODE, e.g. by continuation/Bielecki iteration of the
+Volterra equation `inhomogVariation_eq_integral`, or by reduction to a homogeneous flow on the
+augmented state `L(E) × ℝ`); the *general* merely-continuous spatial modulus; the *existence* of the
+variational flow family; and the resulting *spatial* `C^k`/`C^2` bootstrap (`x₀ ↦ D_x Φ_t`
+differentiable in the base point).
