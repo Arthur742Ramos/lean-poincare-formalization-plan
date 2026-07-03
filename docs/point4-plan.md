@@ -4400,6 +4400,20 @@ restriction to `s`), and the completeness-facing bound `parabolicC0AlphaNorm_le_
 for decomposition step 1 is to assemble the Banach-space (completeness) instance — a bundled
 parabolic `C^{0,α}` function type with a `NormedAddCommGroup`/`CompleteSpace` structure whose
 Cauchy sequences converge via the closedness lemmas above — then lift to `C^{2+α,1+α/2}`.
+The completeness *property* itself is now proved at the function level: the norm functional
+dominates its parts (`parabolic{SupNorm,HolderSeminorm}_le_parabolicC0AlphaNorm`) with pointwise
+readouts (`norm_le_parabolicC0AlphaNorm`, `norm_sub_le_parabolicC0AlphaNorm_mul`) and the
+uniform-metric difference bound `norm_sub_le_parabolicC0AlphaNorm_sub`; a norm bound converts to an
+explicit ball via `parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm`; and
+`exists_parabolicC0AlphaOn_tendsto_of_cauchy` proves that, for complete `E`, a sequence of parabolic
+`C^{0,α}` functions on `s` that is Cauchy in the parabolic `C^{0,α}` norm converges in that norm to
+a parabolic `C^{0,α}` limit (pointwise limit via completeness of `E`, limit-in-class via
+`ParabolicC0AlphaWith.of_tendsto`, norm convergence via `parabolicC0AlphaNorm_le_of_tendsto`).
+The norm functional is also `1`-Lipschitz
+(`abs_parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub`), so the norms of a Cauchy sequence
+converge to the norm of the limit. The remaining gap is now only the bundling: a quotient/subtype
+carrier for functions modulo agreement on `s` (so `‖·‖ = 0 ↔ · = 0`) with the packaged
+`NormedAddCommGroup`/`CompleteSpace` instances, then the lift to `C^{2+α,1+α/2}`.
 
 **Suggested decomposition** (multi-session):
 
