@@ -10347,6 +10347,200 @@ theorem exists_hasFDerivAt_secondFundamentalSolution [CompleteSpace E]
     hC'0 (hC'fun z) (hC'fun y) hN0 (hN y) (hΨ y) (h0Ψ y) (hΨ z) (h0Ψ z)
     hW₂ hW₂0 hWdiff hWdiff0 (hD₂char z) (hD₂char y) hslot hk ht
 
+/-- **Abstract base-point telescoping gap for the fully-contracted third-derivative forcing term.**
+The pure operator-norm skeleton of the base-point Lipschitz gap of the fourth (third-derivative)
+forcing term of the third-variation ODE.  For two third derivatives `T₁, T₂ : E [×3]→L[ℝ] E`, two
+pairs of contraction directions `a₁, a₂` and `b₁, b₂`, and two outer resolvents `C₁, C₂ : E →L[ℝ] E`,
+the fully-contracted forcing operators
+`(continuousMultilinearCurryFin1 ((Tᵢ.curryLeft aᵢ).curryLeft bᵢ)).comp Cᵢ` differ by at most
+`(p·na·nb)·dc + (p·na·db + (p·da + dp·na)·nb)·nc`, given the size bounds `‖T₁‖ ≤ p`, `‖aᵢ‖ ≤ na`,
+`‖bᵢ‖ ≤ nb`, `‖C₂‖ ≤ nc` and the gaps `‖T₁ − T₂‖ ≤ dp`, `‖a₁ − a₂‖ ≤ da`, `‖b₁ − b₂‖ ≤ db`,
+`‖C₁ − C₂‖ ≤ dc`.
+
+Proof: telescope the outer composition
+`(CF Mz).comp C₁ − (CF Mx).comp C₂ = (CF Mz).comp (C₁ − C₂) + (CF Mz − CF Mx).comp C₂`
+(`comp_sub`/`sub_comp`), bound each summand by `opNorm_comp_le`, and fold the
+`continuousMultilinearCurryFin1` isometry (`norm_map`, `map_sub`) to replace `‖CF Mz‖` by `‖Mz‖` and
+`‖CF Mz − CF Mx‖` by `‖Mz − Mx‖`.  The size `‖Mz‖ ≤ p·na·nb` and the double-contraction gap
+`‖Mz − Mx‖ ≤ (p·na)·db + (p·da + dp·na)·nb` both come from the bilinear evaluation gap
+`norm_clm_apply_sub_le` and the `curryLeft` isometry `ContinuousMultilinearMap.curryLeft_norm`.  This
+is the `curryFin1`-composed analogue of `norm_bilinearCompForcing_sub_le` — the perturbation primitive
+for the one third-variation forcing term not of the `((P ∘ A) h) ∘ B` shape. -/
+theorem norm_curryFin1_biContract_comp_sub_le
+    {T₁ T₂ : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {a₁ a₂ b₁ b₂ : E} {C₁ C₂ : E →L[ℝ] E}
+    {p na nb nc dp da db dc : ℝ}
+    (hT₁ : ‖T₁‖ ≤ p)
+    (ha₁ : ‖a₁‖ ≤ na) (ha₂ : ‖a₂‖ ≤ na)
+    (hb₁ : ‖b₁‖ ≤ nb) (hb₂ : ‖b₂‖ ≤ nb)
+    (hC₂ : ‖C₂‖ ≤ nc)
+    (hTd : ‖T₁ - T₂‖ ≤ dp) (had : ‖a₁ - a₂‖ ≤ da)
+    (hbd : ‖b₁ - b₂‖ ≤ db) (hCd : ‖C₁ - C₂‖ ≤ dc) :
+    ‖(continuousMultilinearCurryFin1 ℝ E E ((T₁.curryLeft a₁).curryLeft b₁)).comp C₁
+        - (continuousMultilinearCurryFin1 ℝ E E ((T₂.curryLeft a₂).curryLeft b₂)).comp C₂‖
+      ≤ (p * na * nb) * dc + (p * na * db + (p * da + dp * na) * nb) * nc := by
+  have hp0 : 0 ≤ p := le_trans (norm_nonneg _) hT₁
+  have hna0 : 0 ≤ na := le_trans (norm_nonneg _) ha₁
+  have hnb0 : 0 ≤ nb := le_trans (norm_nonneg _) hb₁
+  have hdp0 : 0 ≤ dp := le_trans (norm_nonneg _) hTd
+  have hda0 : 0 ≤ da := le_trans (norm_nonneg _) had
+  have hdb0 : 0 ≤ db := le_trans (norm_nonneg _) hbd
+  -- `‖T₁.curryLeft a₁‖ ≤ p · na`
+  have hPz : ‖T₁.curryLeft a₁‖ ≤ p * na := by
+    calc ‖T₁.curryLeft a₁‖ ≤ ‖T₁.curryLeft‖ * ‖a₁‖ := ContinuousLinearMap.le_opNorm _ _
+      _ = ‖T₁‖ * ‖a₁‖ := by rw [ContinuousMultilinearMap.curryLeft_norm]
+      _ ≤ p * na := mul_le_mul hT₁ ha₁ (norm_nonneg _) hp0
+  -- `‖Mz‖ ≤ p · na · nb`
+  have hMz : ‖(T₁.curryLeft a₁).curryLeft b₁‖ ≤ p * na * nb := by
+    calc ‖(T₁.curryLeft a₁).curryLeft b₁‖
+        ≤ ‖(T₁.curryLeft a₁).curryLeft‖ * ‖b₁‖ := ContinuousLinearMap.le_opNorm _ _
+      _ = ‖T₁.curryLeft a₁‖ * ‖b₁‖ := by rw [ContinuousMultilinearMap.curryLeft_norm]
+      _ ≤ (p * na) * nb := mul_le_mul hPz hb₁ (norm_nonneg _) (mul_nonneg hp0 hna0)
+  -- first-contraction gap `‖T₁.curryLeft a₁ − T₂.curryLeft a₂‖ ≤ p · da + dp · na`
+  have hPgap : ‖T₁.curryLeft a₁ - T₂.curryLeft a₂‖ ≤ p * da + dp * na := by
+    have hbb := norm_clm_apply_sub_le T₁.curryLeft T₂.curryLeft a₁ a₂
+    have e1 : ‖T₁.curryLeft‖ = ‖T₁‖ := ContinuousMultilinearMap.curryLeft_norm _
+    have e2 : ‖T₁.curryLeft - T₂.curryLeft‖ = ‖T₁ - T₂‖ := by
+      rw [show T₁.curryLeft - T₂.curryLeft = (T₁ - T₂).curryLeft from
+            (ContinuousLinearMap.ext (congrFun rfl)).symm,
+          ContinuousMultilinearMap.curryLeft_norm]
+    rw [e1, e2] at hbb
+    refine hbb.trans (add_le_add ?_ ?_)
+    · exact mul_le_mul hT₁ had (norm_nonneg _) hp0
+    · exact mul_le_mul hTd ha₂ (norm_nonneg _) hdp0
+  -- double-contraction gap `‖Mz − Mx‖ ≤ (p·na)·db + (p·da + dp·na)·nb`
+  have hMgap : ‖(T₁.curryLeft a₁).curryLeft b₁ - (T₂.curryLeft a₂).curryLeft b₂‖
+      ≤ p * na * db + (p * da + dp * na) * nb := by
+    have hbb := norm_clm_apply_sub_le (T₁.curryLeft a₁).curryLeft (T₂.curryLeft a₂).curryLeft b₁ b₂
+    have e1 : ‖(T₁.curryLeft a₁).curryLeft‖ = ‖T₁.curryLeft a₁‖ :=
+      ContinuousMultilinearMap.curryLeft_norm _
+    have e2 : ‖(T₁.curryLeft a₁).curryLeft - (T₂.curryLeft a₂).curryLeft‖
+        = ‖T₁.curryLeft a₁ - T₂.curryLeft a₂‖ := by
+      rw [show (T₁.curryLeft a₁).curryLeft - (T₂.curryLeft a₂).curryLeft
+            = ((T₁.curryLeft a₁) - (T₂.curryLeft a₂)).curryLeft from
+            (ContinuousLinearMap.ext (congrFun rfl)).symm,
+          ContinuousMultilinearMap.curryLeft_norm]
+    rw [e1, e2] at hbb
+    refine hbb.trans (add_le_add ?_ ?_)
+    · exact mul_le_mul hPz hbd (norm_nonneg _) (mul_nonneg hp0 hna0)
+    · exact mul_le_mul hPgap hb₂ (norm_nonneg _)
+        (add_nonneg (mul_nonneg hp0 hda0) (mul_nonneg hdp0 hna0))
+  -- fold the outer isometry
+  have hcf1 : ‖continuousMultilinearCurryFin1 ℝ E E ((T₁.curryLeft a₁).curryLeft b₁)‖
+      = ‖(T₁.curryLeft a₁).curryLeft b₁‖ :=
+    (continuousMultilinearCurryFin1 ℝ E E).norm_map _
+  have hcf2 : ‖continuousMultilinearCurryFin1 ℝ E E ((T₁.curryLeft a₁).curryLeft b₁)
+        - continuousMultilinearCurryFin1 ℝ E E ((T₂.curryLeft a₂).curryLeft b₂)‖
+      = ‖(T₁.curryLeft a₁).curryLeft b₁ - (T₂.curryLeft a₂).curryLeft b₂‖ := by
+    rw [← map_sub (continuousMultilinearCurryFin1 ℝ E E)]
+    exact (continuousMultilinearCurryFin1 ℝ E E).norm_map _
+  have hsplit :
+      (continuousMultilinearCurryFin1 ℝ E E ((T₁.curryLeft a₁).curryLeft b₁)).comp C₁
+        - (continuousMultilinearCurryFin1 ℝ E E ((T₂.curryLeft a₂).curryLeft b₂)).comp C₂
+      = (continuousMultilinearCurryFin1 ℝ E E ((T₁.curryLeft a₁).curryLeft b₁)).comp (C₁ - C₂)
+        + (continuousMultilinearCurryFin1 ℝ E E ((T₁.curryLeft a₁).curryLeft b₁)
+            - continuousMultilinearCurryFin1 ℝ E E ((T₂.curryLeft a₂).curryLeft b₂)).comp C₂ := by
+    rw [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]; abel
+  rw [hsplit]
+  refine (norm_add_le _ _).trans ?_
+  refine (add_le_add (ContinuousLinearMap.opNorm_comp_le _ _)
+    (ContinuousLinearMap.opNorm_comp_le _ _)).trans ?_
+  rw [hcf1, hcf2]
+  refine add_le_add
+    (mul_le_mul hMz hCd (norm_nonneg _) (mul_nonneg (mul_nonneg hp0 hna0) hnb0)) ?_
+  refine mul_le_mul hMgap hC₂ (norm_nonneg _) ?_
+  exact add_nonneg (mul_nonneg (mul_nonneg hp0 hna0) hdb0)
+    (mul_nonneg (add_nonneg (mul_nonneg hp0 hda0) (mul_nonneg hdp0 hna0)) hnb0)
+
+/-- **Base-point Lipschitz gap of the fully-contracted third-derivative forcing term.**  The linear
+(continuity-grade) base-point gap of the fourth forcing term of the third-variation ODE, and the
+`C³`-layer analogue one order up of the chain-rule forcing gap inside
+`norm_linearisedFirstVariation_baseCurve_sub_le`.  For two base points `z`, `x₀` with their variational
+resolvents `W_z = fundamentalSolution hAz hΦ₁ h1`, `W_x = fundamentalSolution hAx hΦ₂ h2`, the
+fully-contracted third-derivative forcing operator
+`s ↦ (continuousMultilinearCurryFin1 ((D³v(Φ · s)).curryLeft (W k)).curryLeft (W h)).comp W`
+moves, for `s ∈ [t₀, T]`, by at most
+`exp(K(T−t₀))⁴ · (M₃ + 3·C''·L·gronwallBound 0 K 1 (T−t₀)) · ‖z − x₀‖ · ‖k‖ · ‖h‖`.
+
+Proof: instantiate the abstract telescoping gap `norm_curryFin1_biContract_comp_sub_le` with
+`T₁ = D³v(Φ z s)`, `a₁ = W_z k`, `b₁ = W_z h`, `C₁ = W_z` (and the `x₀`-versions), feeding the flow
+size data `‖D³v(Φ z s)‖ ≤ C''`, `‖W_· u‖ ≤ exp(K(T−t₀))·‖u‖` (`norm_fundamentalSolution_le`), the
+resolvent base-gap `‖W_z − W_x‖ ≤ L·exp(K(T−t₀))²·gronwallBound 0 K 1 (T−t₀)·‖z − x₀‖`
+(`norm_fundamentalSolution_baseCurve_sub_le` + `gronwallBound_mono`), and the third-derivative field
+base-gap `‖D³v(Φ z s) − D³v(Φ x₀ s)‖ ≤ M₃·exp(K(T−t₀))·‖z − x₀‖`
+(`norm_thirdDerivField_apply_flow_sub_le`); the abstract polynomial constant collapses to the clean
+`exp⁴·(M₃ + 3C''Lg)` form by `ring`.  This is the last of the four forcing-term base-gaps needed for
+the third-variation curve continuity — the `D₃`-analogue of the `chainRuleForcing` gap. -/
+theorem norm_thirdDerivForcing_baseCurve_sub_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₃ : ℝ≥0} {C'' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hC''z : ∀ s, ‖D3v s (Φ z s)‖ ≤ C'')
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h2 : ∀ x, Φ₂ x t₀ = x)
+    (k h : E) {T s : ℝ} (hs : s ∈ Set.Icc t₀ T) :
+    ‖(continuousMultilinearCurryFin1 ℝ E E
+          (((D3v s (Φ z s)).curryLeft (fundamentalSolution hAz hΦ₁ h1 s k)).curryLeft
+            (fundamentalSolution hAz hΦ₁ h1 s h))).comp (fundamentalSolution hAz hΦ₁ h1 s)
+        - (continuousMultilinearCurryFin1 ℝ E E
+          (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hAx hΦ₂ h2 s k)).curryLeft
+            (fundamentalSolution hAx hΦ₂ h2 s h))).comp (fundamentalSolution hAx hΦ₂ h2 s)‖
+      ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+          * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ))
+          * ‖z - x₀‖ * ‖k‖ * ‖h‖ := by
+  have hsT : |s - t₀| ≤ T - t₀ := by
+    rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+  have hexpmono : Real.exp ((K : ℝ) * |s - t₀|) ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsT K.coe_nonneg)
+  have hWzn : ‖fundamentalSolution hAz hΦ₁ h1 s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    (norm_fundamentalSolution_le hAz hΦ₁ h1 s).trans hexpmono
+  have hWxn : ‖fundamentalSolution hAx hΦ₂ h2 s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    (norm_fundamentalSolution_le hAx hΦ₂ h2 s).trans hexpmono
+  have hdw : ‖fundamentalSolution hAz hΦ₁ h1 s - fundamentalSolution hAx hΦ₂ h2 s‖
+      ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖
+          * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    refine (norm_fundamentalSolution_baseCurve_sub_le hv hΦ h0 hDvlip z x₀ hAz hAx
+      hΦ₁ h1 hΦ₂ h2 hs).trans ?_
+    have hmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+      gronwallBound_mono (le_refl (0:ℝ)) zero_le_one K.coe_nonneg (by linarith [hs.2])
+    exact mul_le_mul_of_nonneg_left hmono (by positivity)
+  -- contracted resolvent-direction sizes
+  have haz : ‖fundamentalSolution hAz hΦ₁ h1 s k‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖ :=
+    (ContinuousLinearMap.le_opNorm _ _).trans (mul_le_mul_of_nonneg_right hWzn (norm_nonneg _))
+  have hax : ‖fundamentalSolution hAx hΦ₂ h2 s k‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖ :=
+    (ContinuousLinearMap.le_opNorm _ _).trans (mul_le_mul_of_nonneg_right hWxn (norm_nonneg _))
+  have hbz : ‖fundamentalSolution hAz hΦ₁ h1 s h‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖ :=
+    (ContinuousLinearMap.le_opNorm _ _).trans (mul_le_mul_of_nonneg_right hWzn (norm_nonneg _))
+  have hbx : ‖fundamentalSolution hAx hΦ₂ h2 s h‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖ :=
+    (ContinuousLinearMap.le_opNorm _ _).trans (mul_le_mul_of_nonneg_right hWxn (norm_nonneg _))
+  -- third-derivative field base-gap
+  have hTd : ‖D3v s (Φ z s) - D3v s (Φ x₀ s)‖
+      ≤ (M₃ : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ :=
+    norm_thirdDerivField_apply_flow_sub_le hv hΦ h0 (hD3vlip s) hsT z x₀
+  -- contracted resolvent-direction gaps
+  have had : ‖fundamentalSolution hAz hΦ₁ h1 s k - fundamentalSolution hAx hΦ₂ h2 s k‖
+      ≤ ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖
+          * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖k‖ := by
+    rw [← ContinuousLinearMap.sub_apply]
+    exact (ContinuousLinearMap.le_opNorm _ _).trans
+      (mul_le_mul_of_nonneg_right hdw (norm_nonneg _))
+  have hbd : ‖fundamentalSolution hAz hΦ₁ h1 s h - fundamentalSolution hAx hΦ₂ h2 s h‖
+      ≤ ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖
+          * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖h‖ := by
+    rw [← ContinuousLinearMap.sub_apply]
+    exact (ContinuousLinearMap.le_opNorm _ _).trans
+      (mul_le_mul_of_nonneg_right hdw (norm_nonneg _))
+  refine (norm_curryFin1_biContract_comp_sub_le (hC''z s) haz hax hbz hbx hWxn hTd had hbd
+    hdw).trans_eq ?_
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
