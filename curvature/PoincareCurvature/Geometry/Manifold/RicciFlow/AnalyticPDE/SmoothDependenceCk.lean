@@ -2214,6 +2214,64 @@ theorem norm_fundamentalSolution_sub_le_of_forall_le
       (le_of_eq ?_)
     ring
 
+/-- **Operator-norm local Lipschitz continuity of the resolvent in time.**  Beyond the
+strong (fixed-direction) continuity `continuous_fundamentalSolution_apply`, the fundamental
+solution is Lipschitz in time in the *operator* norm on every bounded time window: for any
+two times `t₁`, `t₂`,
+`‖D_x Φ_{t₂} - D_x Φ_{t₁}‖ ≤ K · exp (K · max |t₁ - t₀| |t₂ - t₀|) · |t₂ - t₁|`.  Each
+resolvent column `s ↦ Φ u s` solves the variational ODE `u' = A s (u s)`, so the
+one-dimensional mean-value inequality bounds its increment by the supremum over the time
+window of `‖A s (Φ u s)‖ ≤ K · exp (K |s - t₀|) · ‖u‖`; the exponential is maximised at an
+endpoint (`abs_le_max_abs_abs`), and taking the operator-norm supremum over unit directions
+gives the stated bound.  This upgrades the resolvent path `t ↦ D_x Φ_t` from strongly
+continuous to norm-continuous — an input to the `C^k` bootstrap (continuity of the resolvent
+in time) and to Bochner integration of the resolvent in the parabolic theory. -/
+theorem norm_fundamentalSolution_sub_le_time {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t₁ t₂ : ℝ) :
+    ‖fundamentalSolution hA hΦ h0 t₂ - fundamentalSolution hA hΦ h0 t₁‖
+      ≤ (K : ℝ) * Real.exp ((K : ℝ) * max |t₁ - t₀| |t₂ - t₀|) * |t₂ - t₁| := by
+  set C : ℝ := (K : ℝ) * Real.exp ((K : ℝ) * max |t₁ - t₀| |t₂ - t₀|) with hCdef
+  have hC0 : 0 ≤ C := mul_nonneg K.coe_nonneg (Real.exp_pos _).le
+  have habs : ∀ σ ∈ Set.uIcc t₁ t₂, |σ - t₀| ≤ max |t₁ - t₀| |t₂ - t₀| := by
+    intro σ hσ
+    rcases le_total t₁ t₂ with h | h
+    · rw [Set.uIcc_of_le h, Set.mem_Icc] at hσ
+      obtain ⟨hσ1, hσ2⟩ := hσ
+      exact abs_le_max_abs_abs (by linarith) (by linarith)
+    · rw [Set.uIcc_of_ge h, Set.mem_Icc] at hσ
+      obtain ⟨hσ1, hσ2⟩ := hσ
+      rw [max_comm]
+      exact abs_le_max_abs_abs (by linarith) (by linarith)
+  have key : ∀ u : E, ‖Φ u t₂ - Φ u t₁‖ ≤ C * |t₂ - t₁| * ‖u‖ := by
+    intro u
+    have hderiv : ∀ σ ∈ Set.uIcc t₁ t₂,
+        HasDerivWithinAt (Φ u) (A σ (Φ u σ)) (Set.uIcc t₁ t₂) σ :=
+      fun σ _ => (hΦ u σ).hasDerivWithinAt
+    have hbound : ∀ σ ∈ Set.uIcc t₁ t₂, ‖A σ (Φ u σ)‖ ≤ C * ‖u‖ := by
+      intro σ hσ
+      have hAσ : ‖A σ‖ ≤ (K : ℝ) := by exact_mod_cast hA σ
+      have hexp : Real.exp ((K : ℝ) * |σ - t₀|)
+          ≤ Real.exp ((K : ℝ) * max |t₁ - t₀| |t₂ - t₀|) :=
+        Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left (habs σ hσ) K.coe_nonneg)
+      have hΦσ : ‖Φ u σ‖ ≤ Real.exp ((K : ℝ) * max |t₁ - t₀| |t₂ - t₀|) * ‖u‖ :=
+        (norm_flow_variationalFieldVec_le hA hΦ h0 u σ).trans
+          (mul_le_mul_of_nonneg_right hexp (norm_nonneg u))
+      calc ‖A σ (Φ u σ)‖ ≤ ‖A σ‖ * ‖Φ u σ‖ := (A σ).le_opNorm _
+        _ ≤ (K : ℝ) * (Real.exp ((K : ℝ) * max |t₁ - t₀| |t₂ - t₀|) * ‖u‖) :=
+            mul_le_mul hAσ hΦσ (norm_nonneg _) K.coe_nonneg
+        _ = C * ‖u‖ := by rw [hCdef]; ring
+    have hmv : ‖Φ u t₂ - Φ u t₁‖ ≤ C * ‖u‖ * |t₂ - t₁| := by
+      have h := Convex.norm_image_sub_le_of_norm_hasDerivWithin_le hderiv hbound
+        (convex_uIcc t₁ t₂) left_mem_uIcc right_mem_uIcc
+      rwa [Real.norm_eq_abs] at h
+    calc ‖Φ u t₂ - Φ u t₁‖ ≤ C * ‖u‖ * |t₂ - t₁| := hmv
+      _ = C * |t₂ - t₁| * ‖u‖ := by ring
+  refine ContinuousLinearMap.opNorm_le_bound _ (mul_nonneg hC0 (abs_nonneg _)) (fun u => ?_)
+  simp only [ContinuousLinearMap.sub_apply, fundamentalSolution_apply]
+  exact key u
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
