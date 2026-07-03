@@ -714,6 +714,51 @@ theorem fundamentalSolution_anchor {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
   ext x
   rw [fundamentalSolution_apply, h0, ContinuousLinearMap.id_apply]
 
+/-!
+### The fundamental solution is bounded below and injective (a non-degenerate resolvent)
+
+Dual to the operator bound: the *lower* exponential control `dist_flow_apply_ge` of the
+`C^0` layer forces the linear flow map to be bounded below by `exp (-K · |t - t₀|)`.  Hence
+the fundamental solution `D_x Φ_t` has a controlled left inverse on its image — it is
+injective, the linear/operator shadow of the bi-Lipschitz embedding
+`isUniformEmbedding_flow_apply`, and the resolvent is non-degenerate. -/
+
+/-- **Lower operator bound for the linear flow map.**  `exp (-K · |t - t₀|) · ‖x‖ ≤ ‖Φ x t‖`,
+from the `C^0` lower dependence bound `dist_flow_apply_ge` applied between `x` and `0` with
+`Φ 0 t = 0`.  The resolvent cannot contract a direction faster than `exp (-K · |t - t₀|)`. -/
+theorem norm_flow_variationalFieldVec_ge {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (x : E) (t : ℝ) : Real.exp (-(K : ℝ) * |t - t₀|) * ‖x‖ ≤ ‖Φ x t‖ := by
+  have hb := dist_flow_apply_ge (fun s => lipschitzWith_variationalFieldVec hA s) hΦ h0 x 0 t
+  rw [flow_variationalFieldVec_zero hA hΦ h0 t, dist_zero_right, dist_zero_right] at hb
+  calc Real.exp (-(K : ℝ) * |t - t₀|) * ‖x‖
+      = ‖x‖ * Real.exp (-(K : ℝ) * |t - t₀|) := mul_comm _ _
+    _ ≤ ‖Φ x t‖ := hb
+
+/-- **The fundamental solution operator is bounded below.**
+`exp (-K · |t - t₀|) · ‖x‖ ≤ ‖D_x Φ_t x‖`: the resolvent applied to a nonzero direction is
+nonzero, with the reciprocal exponential lower bound. -/
+theorem norm_fundamentalSolution_apply_ge {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (x : E) (t : ℝ) :
+    Real.exp (-(K : ℝ) * |t - t₀|) * ‖x‖ ≤ ‖fundamentalSolution hA hΦ h0 t x‖ := by
+  rw [fundamentalSolution_apply]
+  exact norm_flow_variationalFieldVec_ge hA hΦ h0 x t
+
+/-- **The fundamental solution operator is injective.**  Being bounded below, the resolvent
+`D_x Φ_t ∈ E →L[ℝ] E` has trivial kernel — the operator shadow of the flow map being a
+bi-Lipschitz embedding (`injective_flow_apply`).  This is the linear non-degeneracy that
+makes the directional derivative assignment `u₀ ↦ D_x Φ_t u₀` faithful. -/
+theorem fundamentalSolution_injective {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) : Function.Injective (fundamentalSolution hA hΦ h0 t) := by
+  intro x y hxy
+  refine injective_flow_apply (fun s => lipschitzWith_variationalFieldVec hA s) hΦ h0 t ?_
+  simpa only [fundamentalSolution_apply] using hxy
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
