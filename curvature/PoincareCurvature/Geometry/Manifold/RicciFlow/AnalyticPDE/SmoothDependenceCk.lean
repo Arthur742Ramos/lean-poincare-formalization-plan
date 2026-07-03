@@ -977,6 +977,48 @@ theorem norm_flow_sub_variational_le_Icc
   simp only [dist_eq_norm, zero_sub, norm_neg] at hb
   exact hb
 
+/-- **Homogeneity of the (zero-initial) Grönwall bound in the defect.**  For the vanishing
+initial value, the Grönwall bound is *linear* in the perturbation size `ε`:
+`gronwallBound 0 K ε x = ε * gronwallBound 0 K 1 x`.  (Immediate from the closed form
+`ε/K · (exp (K x) - 1)`, resp. `ε · x` when `K = 0`.)  This is the algebraic step that turns
+the linearisation-remainder bound `‖(g t - f t) - w t‖ ≤ gronwallBound 0 K δ (t - t₀)` into an
+estimate *proportional* to the defect `δ`, so that a defect of order `o(‖g t₀ - f t₀‖)` yields
+a remainder of the same order — the passage from the remainder bound to Fréchet
+differentiability of the flow. -/
+theorem gronwallBound_zero_left_mul (K ε x : ℝ) :
+    gronwallBound 0 K ε x = ε * gronwallBound 0 K 1 x := by
+  by_cases hK : K = 0
+  · subst hK; simp only [gronwallBound_K0]; ring
+  · simp only [gronwallBound_of_K_ne_0 hK]; ring
+
+/-- **Operator form of the interval remainder bound.**  The interval linearisation-remainder
+bound `norm_flow_sub_variational_le_Icc` recast with the honest resolvent operator
+`fundamentalSolution` (`D_x Φ_t`) as the linear prediction.  For the nonlinear flow family `Φ`
+of `v` and the variational flow family `Φ'` of `variationalFieldVec A` (`‖A s‖ ≤ K`), the
+difference between the actual flow separation `Φ y t - Φ x t` and its resolvent prediction
+`D_x Φ_t · (y - x) = fundamentalSolution … t (y - x)` is controlled by the defect on the
+forward interval:
+`‖(Φ y t - Φ x t) - fundamentalSolution hA hΦ' h0' t (y - x)‖ ≤ gronwallBound 0 K δ (t - t₀)`
+for `t ∈ Icc t₀ b`, whenever `‖v s (Φ y s) - v s (Φ x s) - A s (Φ y s - Φ x s)‖ ≤ δ` on
+`Ico t₀ b`.  This is precisely the numerator of the Fréchet difference quotient for
+`x ↦ Φ x t`, in the form its differentiability proof consumes. -/
+theorem norm_flow_sub_fundamentalSolution_le_Icc
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x y : E) {δ b : ℝ}
+    (hdefect : ∀ s ∈ Ico t₀ b,
+      ‖v s (Φ y s) - v s (Φ x s) - A s (Φ y s - Φ x s)‖ ≤ δ)
+    {t : ℝ} (ht : t ∈ Icc t₀ b) :
+    ‖(Φ y t - Φ x t) - fundamentalSolution hA hΦ' h0' t (y - x)‖
+      ≤ gronwallBound 0 (K : ℝ) δ (t - t₀) := by
+  have hw : IsIntegralCurve (fun s => fundamentalSolution hA hΦ' h0' s (y - x))
+      (variationalFieldVec A) := isIntegralCurve_fundamentalSolution_apply hA hΦ' h0' (y - x)
+  have hinit : (fun s => fundamentalSolution hA hΦ' h0' s (y - x)) t₀ = Φ y t₀ - Φ x t₀ := by
+    simp only [fundamentalSolution_apply_anchor, h0]
+  exact norm_flow_sub_variational_le_Icc (hΦ x) (hΦ y) hA hw hdefect hinit ht
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
