@@ -1173,6 +1173,89 @@ theorem isLittleO_of_norm_le_mul_of_tendsto_nhds_zero
   filter_upwards [hle, hgc] with x hx hgx
   exact hx.trans (mul_le_mul_of_nonneg_right hgx.le (norm_nonneg _))
 
+open Asymptotics Filter in
+/-- **`C¹` dependence of the flow from a vanishing uniform oscillation modulus.**  Let `Φ` be a
+nonlinear flow family of `v`, `Φ'` the variational flow family of the linearisation
+`variationalFieldVec A` (`‖A s‖ ≤ K`), and `t ≥ t₀`.  Suppose a *single, time-uniform* oscillation
+modulus `C : E → ℝ` with `0 ≤ C z`, `C z → 0` as `z → x₀`, bounds the linearisation defect on
+`Ico t₀ t` by `‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ C z · (exp (K |s - t₀|) ·
+‖z - x₀‖)`.  Then `x ↦ Φ x t` is Fréchet differentiable at `x₀` with derivative the resolvent
+`fundamentalSolution … t = D_x Φ_t`.  This discharges the defect-modulus hypothesis of
+`hasFDerivAt_flow_of_defect_isLittleO` down to the *vanishing* of the uniform oscillation modulus
+(the residual `C¹`-regularity input, supplied by Heine–Cantor on the compact trajectory tube). -/
+theorem hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hdefect : ∀ z, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+        ≤ C z * (Real.exp ((K : ℝ) * |s - t₀|) * ‖z - x₀‖)) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  set D : E → ℝ := fun z => C z * (Real.exp ((K : ℝ) * (t - t₀)) * ‖z - x₀‖) with hD
+  have hDnn : ∀ z, 0 ≤ D z := fun z =>
+    mul_nonneg (hCnn z) (mul_nonneg (Real.exp_pos _).le (norm_nonneg _))
+  have hdefect' : ∀ z, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z := by
+    intro z s hs
+    have hsle : |s - t₀| ≤ t - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]
+      exact sub_le_sub_right hs.2.le t₀
+    have hexple : Real.exp ((K : ℝ) * |s - t₀|) ≤ Real.exp ((K : ℝ) * (t - t₀)) :=
+      Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsle K.coe_nonneg)
+    refine (hdefect z s hs).trans ?_
+    simp only [hD]
+    exact mul_le_mul_of_nonneg_left
+      (mul_le_mul_of_nonneg_right hexple (norm_nonneg _)) (hCnn z)
+  have hDo : (fun z => D z) =o[𝓝 x₀] fun z => z - x₀ := by
+    refine isLittleO_of_norm_le_mul_of_tendsto_nhds_zero
+      (g := fun z => C z * Real.exp ((K : ℝ) * (t - t₀))) ?_ ?_
+    · refine Filter.Eventually.of_forall (fun z => ?_)
+      rw [Real.norm_eq_abs, abs_of_nonneg (hDnn z)]
+      refine le_of_eq ?_
+      simp only [hD]
+      ring
+    · simpa using hCto.mul_const (Real.exp ((K : ℝ) * (t - t₀)))
+  exact hasFDerivAt_flow_of_defect_isLittleO hA hΦ' h0' hΦ h0 x₀ ht0 hDnn hdefect' hDo
+
+open Asymptotics Filter in
+/-- **The flow map is differentiable at the base point** from a vanishing uniform oscillation
+modulus (the consumer-facing corollary of `hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero`):
+`DifferentiableAt ℝ (fun z => Φ z t) x₀`. -/
+theorem differentiableAt_flow_of_uniform_oscillation_tendsto_zero
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hdefect : ∀ z, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+        ≤ C z * (Real.exp ((K : ℝ) * |s - t₀|) * ‖z - x₀‖)) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero hA hΦ' h0' hΦ h0 x₀ ht0 hCnn hCto
+    hdefect).differentiableAt
+
+open Asymptotics Filter in
+/-- **The Fréchet derivative of the flow map is the resolvent** from a vanishing uniform
+oscillation modulus:
+`fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution … t = D_x Φ_t`. -/
+theorem fderiv_flow_of_uniform_oscillation_tendsto_zero
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hdefect : ∀ z, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+        ≤ C z * (Real.exp ((K : ℝ) * |s - t₀|) * ‖z - x₀‖)) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero hA hΦ' h0' hΦ h0 x₀ ht0 hCnn hCto
+    hdefect).fderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
