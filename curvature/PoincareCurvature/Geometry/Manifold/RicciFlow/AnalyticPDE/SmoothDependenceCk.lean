@@ -1553,6 +1553,28 @@ theorem fderiv_flow_of_lipschitz_deriv
     fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
   (hasFDerivAt_flow_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hL hlip).fderiv
 
+open Asymptotics Filter in
+/-- **Global-derivative convenience form** of `hasFDerivAt_flow_of_lipschitz_deriv`.  Takes the
+*global* Fréchet derivative `Dv s` of `v s` at every point (as a genuine `C¹` field provides,
+`HasFDerivAt (v s) (Dv s ξ) ξ`) instead of the chord-restricted `HasFDerivWithinAt`; the chord
+hypothesis follows by `HasFDerivAt.hasFDerivWithinAt`.  The single cleanest entry point to the
+`C^1` flow-dependence tower for a smooth field with a spatially-Lipschitz derivative. -/
+theorem hasFDerivAt_flow_of_lipschitz_deriv_of_hasFDerivAt
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ :=
+  hasFDerivAt_flow_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ ht0
+    (fun _ s _ ξ _ => (hderiv s ξ).hasFDerivWithinAt) hL hlip
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
