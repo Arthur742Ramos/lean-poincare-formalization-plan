@@ -122,6 +122,15 @@ theorem eq_of_isIntegralCurve_of_eq
   rw [h0, dist_self, zero_mul] at hb
   exact dist_le_zero.mp hb
 
+/-- Uniqueness from agreement at *any* single time: two global integral curves of a
+uniformly Lipschitz field that coincide at one time `t₁` coincide everywhere. -/
+theorem eq_of_isIntegralCurve_of_eq_at
+    (hv : ∀ t, LipschitzWith K (v t)) (hf : IsIntegralCurve f v) (hg : IsIntegralCurve g v)
+    {t₁ : ℝ} (h1 : f t₁ = g t₁) (t : ℝ) : f t = g t := by
+  have hb := dist_le_of_isIntegralCurve hv hf hg t₁ t
+  rw [h1, dist_self, zero_mul] at hb
+  exact dist_le_zero.mp hb
+
 /-!
 ## Stability under perturbation of the vector field
 
@@ -188,6 +197,17 @@ theorem continuous_flow_apply
     (h0 : ∀ x, Φ x t₀ = x) (t : ℝ) :
     Continuous (fun x => Φ x t) :=
   (lipschitzWith_flow_apply hv hΦ h0 t).continuous
+
+/-- The time-`t` flow map `x ↦ Φ x t` is injective: distinct initial values stay distinct
+under the flow.  (This is the injectivity half of the flow being a diffeomorphism onto its
+image, consumed by the gauge-flow diffeomorphism family of Item 2.) -/
+theorem injective_flow_apply
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (t : ℝ) :
+    Function.Injective (fun x => Φ x t) := by
+  intro x y hxy
+  have hb := eq_of_isIntegralCurve_of_eq_at hv (hΦ x) (hΦ y) hxy t₀
+  rwa [h0 x, h0 y] at hb
 
 /-- Uniform Lipschitz dependence of the flow map on a symmetric compact time interval:
 whenever `|t - t₀| ≤ T`, the time-`t` flow map is Lipschitz with the single constant
