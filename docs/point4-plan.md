@@ -5435,3 +5435,55 @@ with cancellation between `(A₁ − A₀) ∘ V₁` and the `D₃` forcing term
 toolkit and a concrete second fundamental solution curve `W₂ = ∂_{x₀} W`); feeding it to
 `norm_inhomogVariation_sub_sub_le_of_forcingGap` gives the Taylor remainder, and the already-available
 `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge then yields `ContDiff ℝ 3`.
+
+Update — **the design-independent forcing-gap size/remainder bricks and the base-point `C^{0,1}`
+operator continuity of `D₂` are now proved** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`),
+chipping the remaining `C³` forcing-gap `hβ` from below with pieces that do **not** depend on the still-open
+`F₃` design question flagged at the end of this update:
+
+* `norm_linearisedFirstVariation_baseCurve_sub_le` — the **curve-level `V₁ − V₀ = O(‖z − x₀‖·‖h‖)`
+  size datum**: for the two linearised first-variation curves in a common direction `h` at base points
+  `z` and `x₀` (`Vz`, `Vx`, chain-rule forcings `((D²v(Φ·)∘W_·)h)∘W_·`), `‖Vz t − Vx t‖ ≤
+  exp(K(T−t₀))³·(M + 3·L·C'·gronwallBound 0 K 1 (T−t₀))·‖z − x₀‖·‖h‖·gronwallBound 0 K 1 (t − t₀)`,
+  uniformly on the tube.  Exposes as a standalone lemma the second-fundamental-solution-**curve**
+  continuity previously only buried (at the time-`t` value) inside
+  `exists_flow_contDiff_two_of_lipschitz_secondDeriv`; assembled from `norm_inhomogVariation_sub_le_of_gap`
+  fed the coefficient gap (`norm_derivField_apply_flow_sub_le`), the `N`-bound
+  (`norm_linearisedFirstVariation_le` + `gronwallBound_mono`), and the chain-rule forcing gap
+  (`norm_chainRuleForcing_sub_le` + flow bounds); the messy `(α·N + β)·gronwall` constant collapses to the
+  clean `exp³·(M + 3LC'g)` form by `Real.exp_add` + `ring`.
+* `norm_coeffVariation_sub_secondDerivComp_le_sq` — the **second-order remainder of the
+  coefficient-times-variation forcing term `(A₁ − A₀) ∘ V₁`**: isolates its linear-in-`(z − x₀)` part
+  `(D²v(Φ x₀ s)[W_x (z − x₀)]) ∘ V₀` with a quadratic `O(‖z − x₀‖²·‖h‖)` remainder, via the telescope
+  `P ∘ Vz − Q ∘ Vx = P ∘ (Vz − Vx) + (P − Q) ∘ Vx` fed `norm_derivField_apply_flow_sub_le ×
+  norm_linearisedFirstVariation_baseCurve_sub_le` (cross term) and `norm_derivField_sub_sub_comp_
+  fundamentalSolution_le_sq × norm_linearisedFirstVariation_le` (field-Taylor defect `P − Q`).
+* `norm_chainRuleForcing_flow_sub_le` — the **standalone clean-constant `β` forcing-gap datum**:
+  `‖F(z) s − F(x₀) s‖ ≤ exp(K(T−t₀))³·(M + 2·L·C'·gronwallBound 0 K 1 (T−t₀))·‖z − x₀‖·‖h‖` for the
+  chain-rule forcing `F(z) s = ((D²v(Φ z s) ∘ W_z) h) ∘ W_z`, i.e. the base-point Lipschitz continuity of
+  the second-variation forcing along the flow (`norm_chainRuleForcing_sub_le` + flow bounds, constant
+  collapsed by `ring`).
+* `norm_secondFundamentalSolution_op_sub_le` — the **honest operator-norm `C^{0,1}` statement for `D₂`**:
+  `‖D₂z − D₂x‖ ≤ exp(K(T−t₀))³·(M + 3·L·C'·gronwallBound 0 K 1 (T−t₀))·gronwallBound 0 K 1 (t−t₀)·
+  ‖z − x₀‖` for the packaged base-point second derivatives `D₂z, D₂x` (each characterised, à la
+  `exists_continuousLinearMap_linearisedVariation`, by `D₂· h = Vlin t`).  Via `opNorm_le_bound`: per
+  direction `h`, build the canonical variations (`exists_hasDerivAt_firstVariation_linearised_dir`),
+  identify `D₂z h = Vz t`, `D₂x h = Vx t`, and bound by `norm_linearisedFirstVariation_baseCurve_sub_le`.
+  This is the operator-norm `z ↦ D₂(z)` regularity datum the `C³` layer differentiates.
+
+**Forcing-gap design note (open, for the next session).**  Writing `Ψ = (A₁ − A₀) ∘ V₁ + (F₁ − F₀)` for
+the extra forcing that `V₁ − V₀` experiences (so `hβ` bounds `‖Ψ − F₃‖`), the first-order-in-`k` part of
+`(A₁ − A₀) ∘ V₁` is `(D²v(Φ x₀)[W_x k]) ∘ V₀` (isolated by `norm_coeffVariation_sub_secondDerivComp_le_sq`,
+`k = z − x₀`, `V₀ = Vlin^{x₀,h}`), while the current packaged `F₃ = F_A + F_B + F_C` accounts only for the
+linear part of `(F₁ − F₀)`.  The two asymmetric terms are `F_A(s) = (e ↦ D²v(Φ x₀ s)[W₂ s h, W_x s e])`,
+`F_B(s) = (e ↦ D²v(Φ x₀ s)[W_x s h, W₂ s e])` with `W₂ = Vlin^{x₀,k}` (the second fundamental solution
+curve in direction `k`); the isolated leading term is `e ↦ D²v(Φ x₀ s)[W_x s k, V₀ s e]` with
+`V₀ = Vlin^{x₀,h}`.  Because `W₂ = Vlin^{x₀,·}(k)` and `V₀ = Vlin^{x₀,·}(h)` are the **same** operator
+curve evaluated at the two directions, matching the isolated leading term against `F_A`/`F_B` requires the
+**symmetry of `D²v`** (`D²v[a,b] = D²v[b,a]`), which is currently **not** a hypothesis of the smooth-
+dependence tower.  So the next `C³` step is either (i) add a `D²v`-symmetry hypothesis (available from
+`ContDiff`/`secondDeriv` symmetry) and prove the leading-term cancellation, or (ii) verify whether `F₃`
+needs an extra `(D²v[W_x k]) ∘ V₀` summand; then the remaining `hβ` pieces are the `(F₁ − F₀)` second-order
+remainder (needs the multilinear `D³v` Taylor — note the curried triple `E →L E →L E →L E` has **no** norm
+instance in Mathlib v4.29.1, verified, so use `ContinuousMultilinearMap ℝ (Fin 3) E`) plus the pure
+quadratic remainders now available above.
