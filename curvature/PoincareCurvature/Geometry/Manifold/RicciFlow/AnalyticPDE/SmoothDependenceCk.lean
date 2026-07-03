@@ -4050,6 +4050,38 @@ theorem exists_hasDerivAt_inhomogVariation [CompleteSpace E]
     rw [hz0]
   · exact hasDerivAt_inhomogVariation_of_augmented hzcurve hz0 s
 
+/-- **Existence of the resolvent / fundamental solution (homogeneous operator ODE).**  For a
+norm-bounded (`‖A s‖₊ ≤ K`), continuous operator path `A : ℝ → (E →L[ℝ] E)` on a complete real Banach
+space and any anchor `t₀`, the *homogeneous* operator ODE `W' = A ∘ W` with identity initial condition
+`W t₀ = 1` has a global solution `W : ℝ → (E →L[ℝ] E)`.  The right-composition field
+`W ↦ (A s) ∘ W` is `K`-Lipschitz (submultiplicativity `‖(A s) ∘ (W₁ - W₂)‖ ≤ ‖A s‖ · ‖W₁ - W₂‖`) and
+continuous in time (`Continuous.clm_comp`), so `exists_isIntegralCurve_of_lipschitzWith` on the
+complete space `E →L[ℝ] E` supplies the curve.
+
+This is the unconditional existence of the object the file's `fundamentalSolution` theory
+(`hasDerivAt_fundamentalSolution`, `fundamentalSolution_eq_one_add_integral`, …) axiomatises as "given
+a flow family": it discharges that flow-family hypothesis directly from the coefficient bound and
+continuity, so the resolvent `D_x Φ_t` — the spatial derivative of the base flow — is now a
+constructed object.  (Take `F = 0` in `exists_hasDerivAt_inhomogVariation` for the anchored-at-`0`
+inhomogeneous sibling; here the anchor is the identity `1`, giving the genuine resolvent.) -/
+theorem exists_hasDerivAt_resolvent [CompleteSpace E]
+    {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) (hAc : Continuous A) (t₀ : ℝ) :
+    ∃ W : ℝ → (E →L[ℝ] E), W t₀ = 1 ∧ ∀ s, HasDerivAt W ((A s).comp (W s)) s := by
+  have hlip : ∀ s, LipschitzWith K (fun W : E →L[ℝ] E => (A s).comp W) := by
+    intro s
+    refine LipschitzWith.of_dist_le_mul fun W₁ W₂ => ?_
+    have hAs : ‖A s‖ ≤ (K : ℝ) := by exact_mod_cast hA s
+    rw [dist_eq_norm, dist_eq_norm, ← ContinuousLinearMap.comp_sub]
+    calc ‖(A s).comp (W₁ - W₂)‖
+        ≤ ‖A s‖ * ‖W₁ - W₂‖ := ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (K : ℝ) * ‖W₁ - W₂‖ := by gcongr
+  have hcont : ∀ W : E →L[ℝ] E, Continuous fun s => (A s).comp W :=
+    fun W => hAc.clm_comp continuous_const
+  obtain ⟨W, hW0, hWcurve⟩ :=
+    exists_isIntegralCurve_of_lipschitzWith hlip hcont t₀ (1 : E →L[ℝ] E)
+  exact ⟨W, hW0, fun s => hWcurve s⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
