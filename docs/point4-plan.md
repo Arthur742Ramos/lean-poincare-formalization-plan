@@ -4350,6 +4350,21 @@ ball/cylinder and on the interior of a closed parabolic ball/cylinder
 (`ParabolicC0Alpha{With,On}.comp_affineChart_{closure_parabolicBall,closure_parabolicCylinder,interior_parabolicClosedBall,interior_parabolicClosedCylinder}`),
 i.e. the affine change of variables is now available on the exact boundary-domain
 shapes on which an interior parabolic regularity estimate is taken.
+The parabolic Hölder vocabulary now also has the *reverse assembly* direction,
+converse to the `space_slice` / `time_slice_half_exponent` readouts: on a
+corner-closed time-space set (one containing the mixed corner `(τ, x)` of any two
+of its points `(t, x)` and `(τ, y)` — proved automatic for open/closed parabolic
+balls and cylinders via `parabolic{Ball,ClosedBall,Cylinder,ClosedCylinder}.corner_mem`,
+each being a product of a time interval and a spatial ball), spatial `α`-Hölder
+control uniform in time together with temporal `α/2`-Hölder control uniform in
+space reassemble into parabolic `α`-Hölder control with the summed constant.
+This is packaged as `ParabolicHolderWith.of_space_time_holder` and its
+`ParabolicHolderOn` / `ParabolicC0AlphaWith` / `ParabolicC0AlphaOn` companions,
+with closed cylinder/ball Schauder-domain specializations, plus the textbook
+characterization `ParabolicHolderOn.iff_space_time_holder` (parabolic Hölder ⟺
+separate spatial and temporal Hölder on a corner-closed set). This is the standard
+route to parabolic Schauder estimates — control the space and time regularity of a
+solution separately and then combine them into the parabolic norm.
 
 **Suggested decomposition** (multi-session):
 
