@@ -837,6 +837,20 @@ theorem fundamentalSolution_apply_anchor {A : ℝ → (E →L[ℝ] E)} {K : ℝ�
     (u₀ : E) : fundamentalSolution hA hΦ h0 t₀ u₀ = u₀ := by
   rw [fundamentalSolution_apply, h0]
 
+/-- **The resolvent is canonical.**  Any two flow families `Φ`, `Ψ` of `variationalFieldVec A`
+anchored at `t₀` give the same fundamental solution operator: the resolvent `D_x Φ_t` depends
+only on the field `A` (and `t₀`, `t`), not on the choice of flow family used to build it.
+(Immediate from vector uniqueness `variationalVec_eq_of_isIntegralCurve`.) -/
+theorem fundamentalSolution_congr {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    {Ψ : E → ℝ → E} (hΨ : ∀ x, IsIntegralCurve (Ψ x) (variationalFieldVec A))
+    (h0Ψ : ∀ x, Ψ x t₀ = x) (t : ℝ) :
+    fundamentalSolution hA hΦ h0 t = fundamentalSolution hA hΨ h0Ψ t := by
+  ext x
+  simp only [fundamentalSolution_apply]
+  exact variationalVec_eq_of_isIntegralCurve hA (hΦ x) (hΨ x) (t₁ := t₀) (by rw [h0, h0Ψ]) t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
