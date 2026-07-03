@@ -5352,6 +5352,73 @@ theorem fderiv_of_eventually_norm_sub_sub_le_sq
     fderiv ℝ f x₀ = f' :=
   (hasFDerivAt_of_eventually_norm_sub_sub_le_sq h).fderiv
 
+/-- **Spatial `C²` regularity of the flow's resolvent** (base-point `C²` bootstrap, piece (iii) —
+assembly).  For a `C^{2,1}` field `v` (uniformly `K`-Lipschitz, everywhere Fréchet differentiable with
+`L`-Lipschitz spatial derivative `Dv` and `M`-Lipschitz second derivative `D2v`) with a flow family
+`Φ` (`Φ z t₀ = z`), the resolvent map `z ↦ D_x Φ_t^{A(z)} = fundamentalSolution … t` — the time-`t`
+fundamental solution of the *linearised* ODE with coefficient `A(z) s = Dv s (Φ z s)`, packaged over a
+uniform variational flow family `Ψ` — is Fréchet differentiable at the base point `x₀`, with derivative
+the packaged linearised-first-variation operator `D₂ = ∂/∂x₀(D_x Φ_t)`.
+
+This is the assembly of the base-point `C²` bootstrap:
+* `exists_continuousLinearMap_linearisedVariation` packages the candidate derivative `D₂` and pins
+  `D₂ (z − x₀) = Vlin^{z−x₀} t` (the time-`t` value of the linearised first variation);
+* `exists_hasDerivAt_firstVariation_true` / `..._linearised` supply the variations `Vz`, `Vlin` for
+  each `z` (their forcings are time-unbounded, so continuity — not a global bound — is what closes
+  existence);
+* `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` bounds the linearisation error
+  `‖(W_z t − W₀ t) − Vlin t‖ ≤ C · ‖z − x₀‖²` with `C` *uniform in `z`* (the second-order Taylor
+  remainder of the resolvent in the base point);
+* substituting `Vlin t = D₂ (z − x₀)` turns this into the quadratic error `∀ z`, and
+  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` upgrades the `O(‖z − x₀‖²)` error to `HasFDerivAt`.
+
+The spatial `C²` layer of the smooth-dependence tower unblocking Items 1 & 2; everything is proved
+from field-level data, no PDE or manifold content. -/
+theorem exists_hasFDerivAt_fundamentalSolution_baseCurve [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {L M : ℝ≥0} {C' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ) (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (x₀ : E)
+    (hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K)
+    (hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    (hC'0 : 0 ≤ C') (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    {Ψ : E → E → ℝ → E}
+    (hΨ : ∀ z, ∀ x, IsIntegralCurve (Ψ z x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0Ψ : ∀ z, ∀ x, Ψ z x t₀ = x)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ D₂ : E →L[ℝ] (E →L[ℝ] E),
+      HasFDerivAt (fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) D₂ x₀ := by
+  -- The packaged candidate spatial `C²` derivative `D₂ = ∂/∂x₀(D_x Φ_t)`, with the
+  -- characterisation `D₂ h = Vlin^h t` for any linearised first variation of direction `h`.
+  obtain ⟨D₂, hD₂⟩ := exists_continuousLinearMap_linearisedVariation
+    x₀ (hAfun x₀) (hAcontfun x₀) hD2cont (hΨ x₀) (h0Ψ x₀) hC'0 hC' ht
+  refine ⟨D₂, ?_⟩
+  refine hasFDerivAt_of_eventually_norm_sub_sub_le_sq (C :=
+    (L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+        * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2
+      + ((M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+        * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀)) ?_
+  refine Filter.Eventually.of_forall (fun z => ?_)
+  -- Existence of the true / linearised first variations for the increment `z − x₀`.
+  obtain ⟨Vz, hVz0, hVz⟩ := exists_hasDerivAt_firstVariation_true
+    x₀ (hAfun x₀) (hAcontfun x₀) (hΨ x₀) (h0Ψ x₀) z (hAcontfun z)
+  obtain ⟨Vlin, hVlin0, hVlin⟩ := exists_hasDerivAt_firstVariation_linearised
+    x₀ (hAfun x₀) (hAcontfun x₀) hD2cont (hΨ x₀) (h0Ψ x₀) z
+  -- The second-order Taylor remainder of the resolvent, with a constant uniform in `z`.
+  have hrem := norm_fundamentalSolution_sub_sub_linearVariation_le_sq
+    hv hΦ h0 hDv hDvlip hD2v hD2vlip x₀ (hAfun x₀) (hAcontfun x₀) hC'0 hC'
+    (hΨ x₀) (h0Ψ x₀) z (hAfun z) (hAcontfun z) (hΨ z) (h0Ψ z) hVz hVz0 hVlin hVlin0 ht
+  -- The packaged operator agrees with the linearised first variation: `D₂ (z − x₀) = Vlin t`.
+  have hval : D₂ (z - x₀) = Vlin t := hD₂ (z - x₀) Vlin hVlin0 hVlin
+  -- Rewrite the linearisation error into the Taylor-remainder shape and conclude.
+  rw [hval]
+  exact hrem
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
