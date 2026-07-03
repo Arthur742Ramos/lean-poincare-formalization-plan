@@ -6278,6 +6278,142 @@ theorem affineChart_image_parabolicCylinder
       = parabolicCylinder c (r ^ 2 * T) (|r| * S) :=
   (affineChart_bijOn_parabolicCylinder c a hr T S).image_eq
 
+/-! ### Schauder estimates on open parabolic balls and cylinders
+
+With the open-domain change of variables in place, the affine Schauder normalization and
+de-normalization `C^{0,α}`/Hölder estimates are available on the open parabolic ball and cylinder
+shapes, exactly paralleling the closed-domain estimates.  Normalization uses the forward chart to
+transport `C^{0,α}` control on an open ball (cylinder) about the target center `c` to the rescaled
+open ball (cylinder) about the source center `a`; de-normalization uses the inverse chart to run in
+the reverse direction.  All the open-domain estimates require `r ≠ 0`, inherited from the
+open-domain `Set.MapsTo` lemmas. -/
+
+/-- **Affine Schauder normalization on open balls (`C^{0,α}` control).**  For `r ≠ 0`, if `u` is
+parabolic `C^{0,α}` with constants `B, H` on the open parabolic ball of radius `R` about a target
+center `c`, and `|r| * ρ ≤ R`, then `u` precomposed with the forward affine chart is parabolic
+`C^{0,α}` on the open ball of radius `ρ` about the source center `a`, with sup bound `B` and Hölder
+constant `H * |r| ^ α`.  Open-domain companion of
+`ParabolicC0AlphaWith.comp_affineChart_parabolicClosedBall`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ R : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicBall c R))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicBall a ρ) :=
+  hu.comp_affineChart hH hα
+    ((parabolicBall_mapsTo_affineChart hr).mono_right (parabolicBall.mono hle))
+
+/-- **Affine Schauder normalization on open balls (`C^{0,α}` membership).**  Existential-constant
+form of `ParabolicC0AlphaWith.comp_affineChart_parabolicBall`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ R : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicBall c R))
+    (hα : 0 ≤ α) (hr : r ≠ 0) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicBall a ρ) :=
+  hu.comp_affineChart hα
+    ((parabolicBall_mapsTo_affineChart hr).mono_right (parabolicBall.mono hle))
+
+/-- **Affine Schauder normalization on open cylinders (`C^{0,α}` control).**  For `r ≠ 0`, if `u` is
+parabolic `C^{0,α}` with constants `B, H` on the open parabolic cylinder of time radius `T'` and
+space radius `S'` about a target center `c`, and `r ^ 2 * T ≤ T'`, `|r| * S ≤ S'`, then `u`
+precomposed with the forward affine chart is parabolic `C^{0,α}` on the open cylinder of time radius
+`T` and space radius `S` about the source center `a`, with sup bound `B` and Hölder constant
+`H * |r| ^ α`.  Open-domain companion of
+`ParabolicC0AlphaWith.comp_affineChart_parabolicClosedCylinder`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r T S T' S' : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicCylinder c T' S'))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) (hT : r ^ 2 * T ≤ T') (hS : |r| * S ≤ S') :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicCylinder a T S) :=
+  hu.comp_affineChart hH hα
+    ((parabolicCylinder_mapsTo_affineChart hr).mono_right
+      (fun _x hx => ⟨lt_of_lt_of_le hx.1 hT, lt_of_lt_of_le hx.2 hS⟩))
+
+/-- **Affine Schauder normalization on open cylinders (`C^{0,α}` membership).**  Existential-constant
+form of `ParabolicC0AlphaWith.comp_affineChart_parabolicCylinder`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r T S T' S' : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicCylinder c T' S'))
+    (hα : 0 ≤ α) (hr : r ≠ 0) (hT : r ^ 2 * T ≤ T') (hS : |r| * S ≤ S') :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicCylinder a T S) :=
+  hu.comp_affineChart hα
+    ((parabolicCylinder_mapsTo_affineChart hr).mono_right
+      (fun _x hx => ⟨lt_of_lt_of_le hx.1 hT, lt_of_lt_of_le hx.2 hS⟩))
+
+/-- **De-normalization Hölder estimate on open balls.**  For `r ≠ 0`, parabolic Hölder control of
+`u` with constant `C` on the open parabolic ball of radius `ρ` about the source center `a` gives
+parabolic Hölder constant `C * |r⁻¹| ^ α` for `u ∘ Φ_{a,c,r⁻¹}` on the open parabolic ball of radius
+`|r| * ρ` about the target center `c`.  Open-domain companion of
+`ParabolicHolderWith.comp_affineChart_inv_parabolicClosedBall`. -/
+theorem ParabolicHolderWith.comp_affineChart_inv_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {C α r ρ : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicHolderWith C α u (parabolicBall a ρ)) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hr : r ≠ 0) :
+    ParabolicHolderWith (C * |r⁻¹| ^ α) α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicBall c (|r| * ρ)) :=
+  hu.comp_affineChart hC hα (parabolicBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` estimate on open balls.**  For `r ≠ 0`, `C^{0,α}` control of `u` on
+the open parabolic ball of radius `ρ` about `a` gives `C^{0,α}` control of `u ∘ Φ_{a,c,r⁻¹}` on the
+open parabolic ball of radius `|r| * ρ` about `c`, with the sup bound preserved and the Hölder
+constant scaled by `|r⁻¹| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_inv_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicBall a ρ)) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r⁻¹| ^ α) α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicBall c (|r| * ρ)) :=
+  hu.comp_affineChart hH hα (parabolicBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` membership on open balls.**  Existential-constant form of
+`ParabolicC0AlphaWith.comp_affineChart_inv_parabolicBall`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_inv_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicBall a ρ)) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicBall c (|r| * ρ)) :=
+  hu.comp_affineChart hα (parabolicBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` estimate on open cylinders.**  For `r ≠ 0`, `C^{0,α}` control of
+`u` on the open parabolic cylinder of time radius `T` and space radius `S` about `a` gives `C^{0,α}`
+control of `u ∘ Φ_{a,c,r⁻¹}` on the open parabolic cylinder of time radius `r ^ 2 * T` and space
+radius `|r| * S` about `c`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_inv_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r T S : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicCylinder a T S)) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r⁻¹| ^ α) α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicCylinder c (r ^ 2 * T) (|r| * S)) :=
+  hu.comp_affineChart hH hα (parabolicCylinder_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` membership on open cylinders.**  Existential-constant form of
+`ParabolicC0AlphaWith.comp_affineChart_inv_parabolicCylinder`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_inv_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r T S : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicCylinder a T S)) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicCylinder c (r ^ 2 * T) (|r| * S)) :=
+  hu.comp_affineChart hα (parabolicCylinder_mapsTo_affineChart_inv hr)
+
 end AnalyticPDE
 end RicciFlow
 
