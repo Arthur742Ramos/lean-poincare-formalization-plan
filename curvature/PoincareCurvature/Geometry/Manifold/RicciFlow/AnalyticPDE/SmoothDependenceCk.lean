@@ -6417,6 +6417,104 @@ theorem exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv [Complete
     continuous_thirdDerivForcing hD3cont hW k h
   exact exists_hasDerivAt_secondVariation_linearised_dir x₀ hA hAcont hD2cont hΦ' h0' hW2 hF3 h
 
+/-- **A-priori size bound for the third variation** — the `D₃`-analogue of
+`norm_linearisedFirstVariation_le`.  For a solution `V` of the third-variation ODE
+`V' = A₀ ∘ V + (F_A + F_B + F_C)`, `V t₀ = 0` (`A₀ s = Dv s (Φ x₀ s)`, the exact forcing produced by
+`exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv`), with the second/third derivatives
+bounded along the reference trajectory (`‖D²v‖ ≤ C'`, `‖D³v‖ ≤ C''`) and the second fundamental
+solution curve bounded on the time interval (`‖W₂ s‖ ≤ N₂`), the time-`t` value obeys
+`‖V t‖ ≤ (2·C'·N₂·exp(K(T−t₀))·‖h‖ + C''·exp(3K(T−t₀))·‖k‖·‖h‖) · gronwallBound 0 K 1 (t − t₀)`.
+
+Proof: bound the three forcing terms uniformly on `[t₀, T]` — `F_A`, `F_B` by
+`norm_bilinearCompForcing_le` (fed `‖D²v‖ ≤ C'`, `‖W₂‖ ≤ N₂`, and the resolvent bound
+`‖W‖ ≤ exp(K(T−t₀))` from `norm_fundamentalSolution_le`), and `F_C` by `norm_thirdDerivForcing_le`
+(fed `‖D³v‖ ≤ C''`, `‖W k‖ ≤ exp·‖k‖`, `‖W h‖ ≤ exp·‖h‖`, `‖W‖ ≤ exp`) — sum them by the triangle
+inequality (`exp·exp·exp = exp(3·)`), then feed the constant forcing bound to the generic Grönwall
+estimate `norm_inhomogVariation_le`.  This is the `N`-datum that, together with the (future) linearity
+of `V` in the directions, bounds the packaged `D₃` operator toward `ContDiff ℝ 3`. -/
+theorem norm_thirdVariation_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {C' C'' N₂ : ℝ} (hC'0 : 0 ≤ C') (hC''0 : 0 ≤ C'') (hN₂0 : 0 ≤ N₂)
+    (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C') (hC'' : ∀ s, ‖D3v s (Φ x₀ s)‖ ≤ C'')
+    {W2 : ℝ → (E →L[ℝ] E)} {T : ℝ} (hW2 : ∀ s ∈ Set.Icc t₀ T, ‖W2 s‖ ≤ N₂)
+    (k h : E) {V : ℝ → (E →L[ℝ] E)}
+    (hV : ∀ s, HasDerivAt V
+      ((Dv s (Φ x₀ s)).comp (V s)
+        + (((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s)
+           + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s)
+           + (continuousMultilinearCurryFin1 ℝ E E
+               (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                 (fundamentalSolution hA hΦ' h0' s h))).comp
+               (fundamentalSolution hA hΦ' h0' s))) s)
+    (hV0 : V t₀ = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ‖V t‖
+      ≤ (2 * C' * N₂ * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖
+          + C'' * Real.exp (3 * (K : ℝ) * (T - t₀)) * ‖k‖ * ‖h‖)
+        * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  refine norm_inhomogVariation_le hA hV hV0 ?_ ht
+  intro s hs
+  have hsabs : |s - t₀| ≤ T - t₀ := by
+    rw [abs_of_nonneg (by linarith [hs.1] : (0 : ℝ) ≤ s - t₀)]; linarith [hs.2]
+  have hWle : ‖fundamentalSolution hA hΦ' h0' s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    (norm_fundamentalSolution_le hA hΦ' h0' s).trans
+      (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsabs K.coe_nonneg))
+  have hex0 : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (T - t₀)) := (Real.exp_pos _).le
+  have hPle : ‖D2v s (Φ x₀ s)‖ ≤ C' := hC' s
+  have hDle : ‖D3v s (Φ x₀ s)‖ ≤ C'' := hC'' s
+  have hW2le : ‖W2 s‖ ≤ N₂ := hW2 s hs
+  have hWk : ‖fundamentalSolution hA hΦ' h0' s k‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖ :=
+    ((fundamentalSolution hA hΦ' h0' s).le_opNorm k).trans (by gcongr)
+  have hWh : ‖fundamentalSolution hA hΦ' h0' s h‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖ :=
+    ((fundamentalSolution hA hΦ' h0' s).le_opNorm h).trans (by gcongr)
+  have hexp3 : Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+        * Real.exp ((K : ℝ) * (T - t₀)) = Real.exp (3 * (K : ℝ) * (T - t₀)) := by
+    rw [← Real.exp_add, ← Real.exp_add]; congr 1; ring
+  have htA : ‖((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s)‖
+      ≤ C' * N₂ * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖ := by
+    refine (norm_bilinearCompForcing_le (D2v s (Φ x₀ s)) (W2 s)
+      (fundamentalSolution hA hΦ' h0' s) h).trans ?_
+    gcongr
+  have htB : ‖((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s)‖
+      ≤ C' * Real.exp ((K : ℝ) * (T - t₀)) * N₂ * ‖h‖ := by
+    refine (norm_bilinearCompForcing_le (D2v s (Φ x₀ s))
+      (fundamentalSolution hA hΦ' h0' s) (W2 s) h).trans ?_
+    gcongr
+  have htC : ‖(continuousMultilinearCurryFin1 ℝ E E
+        (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+          (fundamentalSolution hA hΦ' h0' s h))).comp (fundamentalSolution hA hΦ' h0' s)‖
+      ≤ C'' * (Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖) * (Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖)
+          * Real.exp ((K : ℝ) * (T - t₀)) := by
+    refine (norm_thirdDerivForcing_le (D3v s (Φ x₀ s)) (fundamentalSolution hA hΦ' h0' s k)
+      (fundamentalSolution hA hΦ' h0' s h) (fundamentalSolution hA hΦ' h0' s)).trans ?_
+    gcongr
+  calc ‖((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s)
+          + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s)
+          + (continuousMultilinearCurryFin1 ℝ E E
+              (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                (fundamentalSolution hA hΦ' h0' s h))).comp (fundamentalSolution hA hΦ' h0' s)‖
+      ≤ ‖((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s)‖
+          + ‖((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s)‖
+          + ‖(continuousMultilinearCurryFin1 ℝ E E
+              (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                (fundamentalSolution hA hΦ' h0' s h))).comp (fundamentalSolution hA hΦ' h0' s)‖ :=
+        norm_add₃_le
+    _ ≤ C' * N₂ * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖
+          + C' * Real.exp ((K : ℝ) * (T - t₀)) * N₂ * ‖h‖
+          + C'' * (Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖) * (Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖)
+              * Real.exp ((K : ℝ) * (T - t₀)) :=
+        add_le_add (add_le_add htA htB) htC
+    _ = 2 * C' * N₂ * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖
+          + C'' * (Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+              * Real.exp ((K : ℝ) * (T - t₀))) * ‖k‖ * ‖h‖ := by ring
+    _ = 2 * C' * N₂ * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖
+          + C'' * Real.exp (3 * (K : ℝ) * (T - t₀)) * ‖k‖ * ‖h‖ := by rw [hexp3]
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
