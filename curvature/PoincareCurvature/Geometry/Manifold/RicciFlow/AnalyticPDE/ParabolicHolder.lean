@@ -1045,6 +1045,57 @@ theorem eq_closedCylinder (hR : 0 ≤ R) :
 
 end parabolicClosedBall
 
+/-- **Parabolic scaling identity.** Under the affine parabolic dilation of `ℝ × X` that
+scales time by `r ^ 2` and space by `r`, the parabolic distance scales by exactly `|r|`.
+Combined with `ParabolicC0AlphaWith.comp_parabolicDistanceLe` (with `L = |r|`), this is the
+change of variables underlying the Schauder scaling argument. -/
+theorem parabolicDistance_dilation {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (r : ℝ) (p q : ℝ × X) :
+    parabolicDistance (r ^ 2 * p.1, r • p.2) (r ^ 2 * q.1, r • q.2)
+      = |r| * parabolicDistance p q := by
+  have htime : Real.sqrt |r ^ 2 * p.1 - r ^ 2 * q.1| = |r| * Real.sqrt |p.1 - q.1| := by
+    rw [← mul_sub, abs_mul, abs_of_nonneg (sq_nonneg r), Real.sqrt_mul (sq_nonneg r),
+      Real.sqrt_sq_eq_abs]
+  have hspace : dist (r • p.2) (r • q.2) = |r| * dist p.2 q.2 := by
+    rw [dist_smul₀, Real.norm_eq_abs]
+  show max (Real.sqrt |r ^ 2 * p.1 - r ^ 2 * q.1|) (dist (r • p.2) (r • q.2))
+      = |r| * max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
+  rw [htime, hspace]
+  exact (mul_max_of_nonneg _ _ (abs_nonneg r)).symm
+
+/-- **Parabolic distance is translation invariant.** Adding a fixed time-space vector `c` to
+both arguments leaves the parabolic distance unchanged.  Together with `parabolicDistance_dilation`
+this gives the affine parabolic change of variables (rescaling about an arbitrary center) used in
+the Schauder argument. -/
+theorem parabolicDistance_add_left {X : Type*} [NormedAddCommGroup X] (c p q : ℝ × X) :
+    parabolicDistance (c + p) (c + q) = parabolicDistance p q := by
+  have htime : |(c + p).1 - (c + q).1| = |p.1 - q.1| := by
+    simp [add_sub_add_left_eq_sub]
+  have hspace : dist (c + p).2 (c + q).2 = dist p.2 q.2 := by
+    simp [dist_add_left]
+  show max (Real.sqrt |(c + p).1 - (c + q).1|) (dist (c + p).2 (c + q).2)
+      = max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
+  rw [htime, hspace]
+
+/-- The origin-centered parabolic dilation maps the closed parabolic ball of radius `ρ` into
+the closed parabolic ball of radius `|r| * ρ`.  This discharges the `Set.MapsTo` hypothesis of
+the Schauder scaling estimates for balls centered at the origin. -/
+theorem parabolicClosedBall_zero_mapsTo_dilation
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {r ρ : ℝ} :
+    Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2))
+      (parabolicClosedBall (0 : ℝ × X) ρ) (parabolicClosedBall (0 : ℝ × X) (|r| * ρ)) := by
+  intro q hq
+  simp only [parabolicClosedBall, Set.mem_setOf_eq] at hq ⊢
+  have hz : ((r ^ 2 * (0 : ℝ × X).1, r • (0 : ℝ × X).2) : ℝ × X) = (0 : ℝ × X) := by
+    simp
+  have hkey : parabolicDistance (0 : ℝ × X) (r ^ 2 * q.1, r • q.2)
+      = |r| * parabolicDistance (0 : ℝ × X) q := by
+    have h := parabolicDistance_dilation r (0 : ℝ × X) q
+    rw [hz] at h
+    exact h
+  rw [hkey]
+  exact mul_le_mul_of_nonneg_left hq (abs_nonneg r)
+
 /-- Parabolic Holder control with exponent `α` and constant `C` on a set of time-space points. -/
 def ParabolicHolderWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
     (C α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
@@ -2349,6 +2400,32 @@ theorem uniformContinuousOn (h : ParabolicHolderWith C α u s) (hα : 0 < α) :
     _ ≤ C * (parabolicDistance p q) ^ α := h hp hq
     _ < ε := hupper
 
+/-- Pullback of a parabolic Hölder estimate along a map `φ : ℝ × Y → ℝ × X` that expands
+parabolic distance by at most a factor `L`.  This is the abstract change-of-variables /
+reparametrization lemma behind parabolic scaling (the Schauder dilation argument): if `u`
+is `α`-Hölder with constant `C` on `s`, and `φ` maps `t` into `s` with
+`parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q`, then `u ∘ φ` is `α`-Hölder
+with constant `C * L ^ α` on `t`. -/
+theorem comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α) (hL : 0 ≤ L)
+    (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicHolderWith (C * L ^ α) α (fun p => u (φ p)) t := by
+  intro p hp q hq
+  have hbase : ‖u (φ p) - u (φ q)‖ ≤ C * (parabolicDistance (φ p) (φ q)) ^ α :=
+    hu (hmaps hp) (hmaps hq)
+  have hmono : (parabolicDistance (φ p) (φ q)) ^ α ≤ (L * parabolicDistance p q) ^ α :=
+    Real.rpow_le_rpow (parabolicDistance.nonneg _ _) (hφ hp hq) hα
+  have hsplit : (L * parabolicDistance p q) ^ α = L ^ α * (parabolicDistance p q) ^ α :=
+    Real.mul_rpow hL (parabolicDistance.nonneg _ _)
+  calc
+    ‖u (φ p) - u (φ q)‖ ≤ C * (parabolicDistance (φ p) (φ q)) ^ α := hbase
+    _ ≤ C * (L * parabolicDistance p q) ^ α := mul_le_mul_of_nonneg_left hmono hC
+    _ = C * (L ^ α * (parabolicDistance p q) ^ α) := by rw [hsplit]
+    _ = (C * L ^ α) * (parabolicDistance p q) ^ α := by ring
+
 end ParabolicHolderWith
 
 namespace ParabolicHolderOn
@@ -3013,6 +3090,20 @@ theorem c0AlphaOn_of_closedCylinder [ProperSpace X] {c : ℝ × X}
   h.c0AlphaOn_of_isCompact hα
     (parabolicClosedCylinder.isCompact c timeRadius spaceRadius)
 
+/-- Pullback of parabolic Hölder membership along a map `φ : ℝ × Y → ℝ × X` that expands
+parabolic distance by at most a factor `L` and maps `t` into `s`.  Existential-constant form
+of `ParabolicHolderWith.comp_parabolicDistanceLe`. -/
+theorem comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicHolderOn α u s) (hα : 0 ≤ α) (hL : 0 ≤ L)
+    (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicHolderOn α (fun p => u (φ p)) t := by
+  rcases hu with ⟨C, hC, hCu⟩
+  exact ⟨C * L ^ α, mul_nonneg hC (Real.rpow_nonneg hL α),
+    hCu.comp_parabolicDistanceLe hC hα hL hmaps hφ⟩
+
 end ParabolicHolderOn
 
 namespace ParabolicBoundedWith
@@ -3372,6 +3463,16 @@ theorem comp_lipschitzWith {F : Type*} [NormedAddCommGroup F] {K : ℝ≥0}
       exact add_le_add_left
         (mul_le_mul_of_nonneg_left (hu hp) (NNReal.coe_nonneg K)) _
     _ = ‖φ (0 : E)‖ + (K : ℝ) * B := by ring
+
+/-- Pullback of a parabolic sup-norm bound along a map `φ : ℝ × Y → ℝ × X` that maps `t`
+into `s`.  This is the boundedness half of the parabolic change-of-variables lemma; the
+bound constant is unchanged. -/
+theorem comp_mapsTo {Y : Type*} [PseudoMetricSpace Y]
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicBoundedWith B u s) (hmaps : Set.MapsTo φ t s) :
+    ParabolicBoundedWith B (fun p => u (φ p)) t := by
+  intro p hp
+  exact hu (hmaps hp)
 
 end ParabolicBoundedWith
 
@@ -4396,6 +4497,20 @@ theorem of_fst_lipschitzOnWith_of_subset_closedCylinder {K : ℝ≥0} {f : ℝ �
   exact hbase.mono_exponent_of_subset_closedCylinder
     (NNReal.coe_nonneg K) hα_nonneg hα_le_two hs hdiam
 
+/-- Pullback of parabolic `C^{0,α}` control along a map `φ : ℝ × Y → ℝ × X` that maps `t`
+into `s` and expands parabolic distance by at most a factor `L`.  The sup bound `B` is
+preserved and the Hölder constant `H` scales by `L ^ α`.  This packages the abstract
+change-of-variables lemma behind parabolic (Schauder) scaling. -/
+theorem comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H) (hα : 0 ≤ α) (hL : 0 ≤ L)
+    (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicC0AlphaWith B (H * L ^ α) α (fun p => u (φ p)) t :=
+  ⟨hu.bounded.comp_mapsTo hmaps,
+    hu.holder.comp_parabolicDistanceLe hH hα hL hmaps hφ⟩
+
 end ParabolicC0AlphaWith
 
 namespace ParabolicC0AlphaOn
@@ -5373,7 +5488,2830 @@ theorem mono_exponent_of_subset_closedCylinder {β timeRadius spaceRadius : ℝ}
   exact ⟨B, hB, H, hH,
     hBH.mono_exponent_of_subset_closedCylinder hH hβ hβα hs hdiam⟩
 
+/-- Pullback of parabolic `C^{0,α}` membership along a map `φ : ℝ × Y → ℝ × X` that maps
+`t` into `s` and expands parabolic distance by at most a factor `L`.  Existential-constant
+form of `ParabolicC0AlphaWith.comp_parabolicDistanceLe`. -/
+theorem comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicC0AlphaOn α u s) (hα : 0 ≤ α) (hL : 0 ≤ L)
+    (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicC0AlphaOn α (fun p => u (φ p)) t := by
+  rcases hu with ⟨B, hB, H, hH, hBH⟩
+  exact ⟨B, hB, H * L ^ α, mul_nonneg hH (Real.rpow_nonneg hL α),
+    hBH.comp_parabolicDistanceLe hH hα hL hmaps hφ⟩
+
 end ParabolicC0AlphaOn
+
+/-! ### Schauder scaling estimates
+
+The parabolic dilation `p ↦ (r ^ 2 * p.1, r • p.2)` is the domain reparametrization used in the
+Schauder scaling argument.  Composing the change-of-variables lemmas with the scaling identity
+`parabolicDistance_dilation` gives ready-to-use estimates: precomposition with the dilation
+preserves the parabolic Hölder / `C^{0,α}` classes, scaling the Hölder constant by `|r| ^ α`. -/
+
+/-- Schauder scaling estimate for the parabolic Hölder seminorm. -/
+theorem ParabolicHolderWith.comp_dilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {C α r : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicHolderWith (C * |r| ^ α) α
+      (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) t :=
+  hu.comp_parabolicDistanceLe hC hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_dilation r p q).le)
+
+/-- Schauder scaling estimate for parabolic Hölder membership. -/
+theorem ParabolicHolderOn.comp_dilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicHolderOn α (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_dilation r p q).le)
+
+/-- Schauder scaling estimate for parabolic `C^{0,α}` control: the sup bound `B` is preserved
+and the Hölder constant scales by `|r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_dilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) t :=
+  hu.comp_parabolicDistanceLe hH hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_dilation r p q).le)
+
+/-- Schauder scaling estimate for parabolic `C^{0,α}` membership. -/
+theorem ParabolicC0AlphaOn.comp_dilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_dilation r p q).le)
+
+/-- **Schauder scaling on balls (`C^{0,α}` control).** If `u` is parabolic `C^{0,α}` with
+constants `B, H` on the closed parabolic ball of radius `R` about the origin, and `|r| * ρ ≤ R`,
+then `u` precomposed with the parabolic dilation is parabolic `C^{0,α}` on the closed ball of
+radius `ρ`, with sup bound `B` and Hölder constant `H * |r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_dilation_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ R : ℝ} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedBall (0 : ℝ × X) R))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2)) (parabolicClosedBall (0 : ℝ × X) ρ) :=
+  hu.comp_dilation hH hα
+    (parabolicClosedBall_zero_mapsTo_dilation.mono_right (fun _q hq => le_trans hq hle))
+
+/-- **Schauder scaling on balls (`C^{0,α}` membership).** Existential-constant form of
+`ParabolicC0AlphaWith.comp_dilation_parabolicClosedBall`. -/
+theorem ParabolicC0AlphaOn.comp_dilation_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ R : ℝ} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedBall (0 : ℝ × X) R))
+    (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (r ^ 2 * p.1, r • p.2))
+      (parabolicClosedBall (0 : ℝ × X) ρ) :=
+  hu.comp_dilation hα
+    (parabolicClosedBall_zero_mapsTo_dilation.mono_right (fun _q hq => le_trans hq hle))
+
+/-! ### Affine (centered) Schauder change of variables
+
+Composing the origin-centered parabolic dilation with a translation gives the affine parabolic
+change of variables `p ↦ c + (r ^ 2 * p.1, r • p.2)`, which normalizes a parabolic ball about an
+arbitrary center `c` to the origin.  By `parabolicDistance_add_left` the translation is an
+isometry for the parabolic distance, so the centered dilation still expands parabolic distance by
+exactly `|r|`; the Schauder scaling estimates therefore carry over verbatim, with the same
+`|r| ^ α` Hölder-constant factor.  This is the change of variables underlying the interior
+Schauder estimate, where the estimate on a ball about an interior point is reduced to the
+origin-centered unit ball. -/
+
+/-- **Affine parabolic scaling identity.** The centered parabolic dilation
+`p ↦ c + (r ^ 2 * p.1, r • p.2)` scales parabolic distance by exactly `|r|`, for any center `c`.
+This is `parabolicDistance_dilation` composed with the translation isometry
+`parabolicDistance_add_left`. -/
+theorem parabolicDistance_centeredDilation {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c : ℝ × X) (r : ℝ) (p q : ℝ × X) :
+    parabolicDistance (c + (r ^ 2 * p.1, r • p.2)) (c + (r ^ 2 * q.1, r • q.2))
+      = |r| * parabolicDistance p q := by
+  rw [parabolicDistance_add_left, parabolicDistance_dilation]
+
+/-- The centered parabolic dilation `p ↦ c + (r ^ 2 * p.1, r • p.2)` maps the origin-centered
+closed parabolic ball of radius `ρ` into the closed parabolic ball of radius `|r| * ρ` about `c`.
+This discharges the `Set.MapsTo` hypothesis of the affine Schauder scaling estimates. -/
+theorem parabolicClosedBall_mapsTo_centeredDilation
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c : ℝ × X} {r ρ : ℝ} :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2))
+      (parabolicClosedBall (0 : ℝ × X) ρ) (parabolicClosedBall c (|r| * ρ)) := by
+  intro q hq
+  simp only [parabolicClosedBall, Set.mem_setOf_eq] at hq ⊢
+  have hz : ((r ^ 2 * (0 : ℝ × X).1, r • (0 : ℝ × X).2) : ℝ × X) = (0 : ℝ × X) := by simp
+  have hkey : parabolicDistance c (c + (r ^ 2 * q.1, r • q.2))
+      = |r| * parabolicDistance (0 : ℝ × X) q := by
+    have h := parabolicDistance_centeredDilation c r (0 : ℝ × X) q
+    rw [hz, add_zero] at h
+    exact h
+  rw [hkey]
+  exact mul_le_mul_of_nonneg_left hq (abs_nonneg r)
+
+/-- Affine Schauder scaling estimate for the parabolic Hölder seminorm. -/
+theorem ParabolicHolderWith.comp_centeredDilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {C α r : ℝ} {c : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicHolderWith (C * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) t :=
+  hu.comp_parabolicDistanceLe hC hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_centeredDilation c r p q).le)
+
+/-- Affine Schauder scaling estimate for parabolic Hölder membership. -/
+theorem ParabolicHolderOn.comp_centeredDilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {c : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicHolderOn α (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_centeredDilation c r p q).le)
+
+/-- Affine Schauder scaling estimate for parabolic `C^{0,α}` control: the sup bound `B` is
+preserved and the Hölder constant scales by `|r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_centeredDilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r : ℝ} {c : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) t :=
+  hu.comp_parabolicDistanceLe hH hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_centeredDilation c r p q).le)
+
+/-- Affine Schauder scaling estimate for parabolic `C^{0,α}` membership. -/
+theorem ParabolicC0AlphaOn.comp_centeredDilation
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {c : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * p.1, r • p.2)) t s) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_centeredDilation c r p q).le)
+
+/-- **Affine Schauder normalization (`C^{0,α}` control).** If `u` is parabolic `C^{0,α}` with
+constants `B, H` on the closed parabolic ball of radius `R` about an arbitrary center `c`, and
+`|r| * ρ ≤ R`, then `u` precomposed with the centered parabolic dilation
+`p ↦ c + (r ^ 2 * p.1, r • p.2)` is parabolic `C^{0,α}` on the origin-centered closed ball of
+radius `ρ`, with sup bound `B` and Hölder constant `H * |r| ^ α`.  This normalizes a parabolic
+ball about any center to the origin. -/
+theorem ParabolicC0AlphaWith.comp_centeredDilation_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ R : ℝ} {c : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedBall c R))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2))) (parabolicClosedBall (0 : ℝ × X) ρ) :=
+  hu.comp_centeredDilation hH hα
+    (parabolicClosedBall_mapsTo_centeredDilation.mono_right (fun _q hq => le_trans hq hle))
+
+/-- **Affine Schauder normalization (`C^{0,α}` membership).** Existential-constant form of
+`ParabolicC0AlphaWith.comp_centeredDilation_parabolicClosedBall`. -/
+theorem ParabolicC0AlphaOn.comp_centeredDilation_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ R : ℝ} {c : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedBall c R))
+    (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * p.1, r • p.2)))
+      (parabolicClosedBall (0 : ℝ × X) ρ) :=
+  hu.comp_centeredDilation hα
+    (parabolicClosedBall_mapsTo_centeredDilation.mono_right (fun _q hq => le_trans hq hle))
+
+/-! ### General affine parabolic change of variables
+
+The centered dilation of the previous section fixes the origin as the source center.  Subtracting
+a source center `a` first gives the fully general affine parabolic map
+`p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))`, which carries the parabolic ball about `a` to the
+parabolic ball about `c` and rescales by `|r|`.  This is the change of variables that relates two
+arbitrary parabolic balls, used in the interior Schauder estimate to move between a ball about an
+interior point and a normalized ball. -/
+
+/-- **Parabolic distance is invariant under a fixed translation on the right.**  Subtracting a
+fixed time-space vector `a` from both arguments leaves the parabolic distance unchanged; this is
+the `sub` companion of `parabolicDistance_add_left`. -/
+theorem parabolicDistance_sub_right {X : Type*} [NormedAddCommGroup X] (a p q : ℝ × X) :
+    parabolicDistance (p - a) (q - a) = parabolicDistance p q := by
+  have h := parabolicDistance_add_left (-a) p q
+  simpa [sub_eq_neg_add] using h
+
+/-- **General affine parabolic scaling identity.** The affine map
+`p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` scales parabolic distance by exactly `|r|`, for
+any source center `a` and target center `c`.  It is `parabolicDistance_centeredDilation` applied to
+the translated points `p - a`, `q - a`, followed by `parabolicDistance_sub_right`. -/
+theorem parabolicDistance_affineChart {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c a : ℝ × X) (r : ℝ) (p q : ℝ × X) :
+    parabolicDistance (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+        (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2)))
+      = |r| * parabolicDistance p q := by
+  have h := parabolicDistance_centeredDilation c r (p - a) (q - a)
+  rw [parabolicDistance_sub_right] at h
+  simp only [Prod.fst_sub, Prod.snd_sub] at h
+  exact h
+
+/-- The general affine map `p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` maps the closed
+parabolic ball of radius `ρ` about the source center `a` into the closed parabolic ball of radius
+`|r| * ρ` about the target center `c`.  This discharges the `Set.MapsTo` hypothesis of the general
+affine Schauder scaling estimates. -/
+theorem parabolicClosedBall_mapsTo_affineChart
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r ρ : ℝ} :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedBall a ρ) (parabolicClosedBall c (|r| * ρ)) := by
+  intro q hq
+  simp only [parabolicClosedBall, Set.mem_setOf_eq] at hq ⊢
+  have hz : ((r ^ 2 * (a.1 - a.1), r • (a.2 - a.2)) : ℝ × X) = (0 : ℝ × X) := by simp
+  have hkey : parabolicDistance c (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2)))
+      = |r| * parabolicDistance a q := by
+    have h := parabolicDistance_affineChart c a r a q
+    rw [hz, add_zero] at h
+    exact h
+  rw [hkey]
+  exact mul_le_mul_of_nonneg_left hq (abs_nonneg r)
+
+/-- General affine Schauder scaling estimate for the parabolic Hölder seminorm. -/
+theorem ParabolicHolderWith.comp_affineChart
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {C α r : ℝ} {c a : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderWith C α u s) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) t s) :
+    ParabolicHolderWith (C * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))) t :=
+  hu.comp_parabolicDistanceLe hC hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_affineChart c a r p q).le)
+
+/-- General affine Schauder scaling estimate for parabolic Hölder membership. -/
+theorem ParabolicHolderOn.comp_affineChart
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {c a : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) t s) :
+    ParabolicHolderOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_affineChart c a r p q).le)
+
+/-- General affine Schauder scaling estimate for parabolic `C^{0,α}` control: the sup bound `B` is
+preserved and the Hölder constant scales by `|r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r : ℝ} {c a : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaWith B H α u s) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) t s) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))) t :=
+  hu.comp_parabolicDistanceLe hH hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_affineChart c a r p q).le)
+
+/-- General affine Schauder scaling estimate for parabolic `C^{0,α}` membership. -/
+theorem ParabolicC0AlphaOn.comp_affineChart
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r : ℝ} {c a : ℝ × X} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hα : 0 ≤ α)
+    (hmaps : Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) t s) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))) t :=
+  hu.comp_parabolicDistanceLe hα (abs_nonneg r) hmaps
+    (fun p _ q _ => (parabolicDistance_affineChart c a r p q).le)
+
+/-- **General affine Schauder normalization (`C^{0,α}` control).** If `u` is parabolic `C^{0,α}`
+with constants `B, H` on the closed parabolic ball of radius `R` about a target center `c`, and
+`|r| * ρ ≤ R`, then `u` precomposed with the general affine map
+`p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` is parabolic `C^{0,α}` on the closed ball of radius
+`ρ` about the source center `a`, with sup bound `B` and Hölder constant `H * |r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ R : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedBall c R))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicClosedBall a ρ) :=
+  hu.comp_affineChart hH hα
+    (parabolicClosedBall_mapsTo_affineChart.mono_right (fun _q hq => le_trans hq hle))
+
+/-- **General affine Schauder normalization (`C^{0,α}` membership).** Existential-constant form of
+`ParabolicC0AlphaWith.comp_affineChart_parabolicClosedBall`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ R : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedBall c R))
+    (hα : 0 ≤ α) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicClosedBall a ρ) :=
+  hu.comp_affineChart hα
+    (parabolicClosedBall_mapsTo_affineChart.mono_right (fun _q hq => le_trans hq hle))
+
+/-! ### Affine parabolic change of variables on cylinders
+
+The general affine map also carries a closed parabolic cylinder about the source center `a` to a
+closed parabolic cylinder about the target center `c`, scaling the time radius by `r ^ 2` and the
+spatial radius by `|r|` (the anisotropic parabolic scaling).  This is the cylinder counterpart of
+`parabolicClosedBall_mapsTo_affineChart`, giving the Schauder normalization on the product cylinder
+shape used when the time and space radii are tracked independently. -/
+
+/-- The general affine map `p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` maps the closed
+parabolic cylinder of time radius `T` and space radius `S` about the source center `a` into the
+closed parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about the target
+center `c`. -/
+theorem parabolicClosedCylinder_mapsTo_affineChart
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r T S : ℝ} :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedCylinder a T S) (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  intro q hq
+  simp only [parabolicClosedCylinder, Set.mem_setOf_eq] at hq ⊢
+  obtain ⟨hqt, hqs⟩ := hq
+  refine ⟨?_, ?_⟩
+  · have htime : |c.1 - (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2))).1| = r ^ 2 * |a.1 - q.1| := by
+      simp only [Prod.fst_add, sub_add_cancel_left, abs_neg, abs_mul, abs_of_nonneg (sq_nonneg r),
+        abs_sub_comm a.1 q.1]
+    rw [htime]
+    exact mul_le_mul_of_nonneg_left hqt (sq_nonneg r)
+  · have hspace : dist c.2 (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2))).2 = |r| * dist a.2 q.2 := by
+      simp only [Prod.snd_add, dist_eq_norm, sub_add_cancel_left, norm_neg, norm_smul,
+        Real.norm_eq_abs]
+      rw [norm_sub_rev q.2 a.2]
+    rw [hspace]
+    exact mul_le_mul_of_nonneg_left hqs (abs_nonneg r)
+
+/-- **Affine Schauder normalization on cylinders (`C^{0,α}` control).** If `u` is parabolic
+`C^{0,α}` with constants `B, H` on the closed parabolic cylinder of time radius `T'` and space
+radius `S'` about a target center `c`, and `r ^ 2 * T ≤ T'`, `|r| * S ≤ S'`, then `u` precomposed
+with the general affine map is parabolic `C^{0,α}` on the closed cylinder of time radius `T` and
+space radius `S` about the source center `a`, with sup bound `B` and Hölder constant
+`H * |r| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r T S T' S' : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedCylinder c T' S'))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hT : r ^ 2 * T ≤ T') (hS : |r| * S ≤ S') :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicClosedCylinder a T S) :=
+  hu.comp_affineChart hH hα
+    (parabolicClosedCylinder_mapsTo_affineChart.mono_right
+      (fun _x hx => ⟨le_trans hx.1 hT, le_trans hx.2 hS⟩))
+
+/-- **Affine Schauder normalization on cylinders (`C^{0,α}` membership).** Existential-constant
+form of `ParabolicC0AlphaWith.comp_affineChart_parabolicClosedCylinder`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r T S T' S' : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedCylinder c T' S'))
+    (hα : 0 ≤ α) (hT : r ^ 2 * T ≤ T') (hS : |r| * S ≤ S') :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicClosedCylinder a T S) :=
+  hu.comp_affineChart hα
+    (parabolicClosedCylinder_mapsTo_affineChart.mono_right
+      (fun _x hx => ⟨le_trans hx.1 hT, le_trans hx.2 hS⟩))
+
+/-! ### Algebra of the affine parabolic charts
+
+The affine parabolic maps compose to another affine parabolic map, with the dilation factors
+multiplying and the intermediate center cancelling; the chart with unit factor and equal
+source/target center is the identity.  These give the groupoid structure used to iterate the
+Schauder scaling (for instance in a dyadic decomposition) and to invert the normalization. -/
+
+/-- **Composition law for affine parabolic charts.**  Composing the affine map centered at `a`
+into `c` with factor `r` after the affine map centered at `b` into `a` with factor `s` gives the
+affine map centered at `b` into `c` with factor `r * s`: the intermediate center `a` cancels and
+the dilation factors multiply. -/
+theorem affineChart_comp_affineChart {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c a b : ℝ × X) (r s : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) ∘
+        (fun p : ℝ × X => a + (s ^ 2 * (p.1 - b.1), s • (p.2 - b.2)))
+      = fun p : ℝ × X => c + ((r * s) ^ 2 * (p.1 - b.1), (r * s) • (p.2 - b.2)) := by
+  funext p
+  simp only [Function.comp_apply, Prod.fst_add, Prod.snd_add]
+  refine Prod.ext ?_ ?_
+  · simp only [Prod.fst_add]; ring
+  · simp only [Prod.snd_add]; module
+
+/-- The affine parabolic chart with unit dilation factor and equal source and target center is the
+identity map.  This is the unit of the affine-chart composition law. -/
+theorem affineChart_one_self {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c : ℝ × X) :
+    (fun p : ℝ × X => c + ((1 : ℝ) ^ 2 * (p.1 - c.1), (1 : ℝ) • (p.2 - c.2))) = id := by
+  funext p
+  refine Prod.ext ?_ ?_
+  · simp only [Prod.fst_add, one_pow, one_mul, id]; ring
+  · simp only [Prod.snd_add, one_smul, id]; abel
+
+/-- **The affine parabolic chart is invertible (left inverse).**  When `r ≠ 0`, the affine chart
+`Φ_{a,c,r⁻¹} : p ↦ a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))` is a left inverse of the forward
+chart `Φ_{c,a,r} : p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))`, by the composition law and
+`inv_mul_cancel₀`.  This is the de-normalization map used to transport Schauder estimates back to
+the original scale. -/
+theorem affineChart_leftInverse {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0) :
+    Function.LeftInverse (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) := by
+  have h : (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))) ∘
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) = id := by
+    rw [affineChart_comp_affineChart a c a r⁻¹ r, inv_mul_cancel₀ hr, affineChart_one_self]
+  exact fun x => congrFun h x
+
+/-- **The affine parabolic chart is invertible (right inverse).**  When `r ≠ 0`, the affine chart
+`Φ_{a,c,r⁻¹}` is also a right inverse of the forward chart `Φ_{c,a,r}`, so the two charts are
+mutually inverse bijections of `ℝ × X`. -/
+theorem affineChart_rightInverse {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0) :
+    Function.RightInverse (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) := by
+  have h : (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) ∘
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))) = id := by
+    rw [affineChart_comp_affineChart c a c r r⁻¹, mul_inv_cancel₀ hr, affineChart_one_self]
+  exact fun x => congrFun h x
+
+/-! ### The affine parabolic chart is a bijection of parabolic balls and cylinders
+
+Combining the forward `Set.MapsTo` estimates with the two-sided inverse chart shows that, for
+`r ≠ 0`, the affine parabolic chart is a `Set.BijOn` between a parabolic ball (or cylinder) about
+the source center and the rescaled ball (cylinder) about the target center.  The inverse chart
+`Φ_{a,c,r⁻¹}` supplies the de-normalization `Set.MapsTo` that carries the rescaled ball back to the
+original ball.  These bijections are what legitimize transporting a Schauder `C^{0,α}` estimate in
+*both* directions: normalize to a unit-scale ball, apply the estimate, and de-normalize back. -/
+
+/-- **De-normalization map on balls.**  For `r ≠ 0`, the inverse affine chart
+`Φ_{a,c,r⁻¹} : p ↦ a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))` maps the closed parabolic ball of
+radius `|r| * ρ` about the target center `c` back into the closed parabolic ball of radius `ρ` about
+the source center `a`, since `|r⁻¹| * (|r| * ρ) = ρ`.  This is the reverse `Set.MapsTo` companion of
+`parabolicClosedBall_mapsTo_affineChart`. -/
+theorem parabolicClosedBall_mapsTo_affineChart_inv
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r ρ : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (parabolicClosedBall c (|r| * ρ)) (parabolicClosedBall a ρ) := by
+  have h := parabolicClosedBall_mapsTo_affineChart (c := a) (a := c) (r := r⁻¹) (ρ := |r| * ρ)
+  have hrad : |r⁻¹| * (|r| * ρ) = ρ := by
+    rw [abs_inv, inv_mul_cancel_left₀ (abs_pos.mpr hr).ne']
+  rwa [hrad] at h
+
+/-- **The affine parabolic chart is a bijection of parabolic balls.**  For `r ≠ 0`, the forward
+affine chart `Φ_{c,a,r} : p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` restricts to a `Set.BijOn`
+from the closed parabolic ball of radius `ρ` about the source center `a` onto the closed parabolic
+ball of radius `|r| * ρ` about the target center `c`.  The inverse chart `Φ_{a,c,r⁻¹}` is the
+two-sided inverse, and both forward and reverse maps are `Set.MapsTo` on these balls. -/
+theorem affineChart_bijOn_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedBall a ρ) (parabolicClosedBall c (|r| * ρ)) := by
+  have hinv : Set.InvOn
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedBall a ρ) (parabolicClosedBall c (|r| * ρ)) :=
+    ⟨(affineChart_leftInverse c a hr).leftInvOn (parabolicClosedBall a ρ),
+      (affineChart_rightInverse c a hr).rightInvOn (parabolicClosedBall c (|r| * ρ))⟩
+  exact hinv.bijOn parabolicClosedBall_mapsTo_affineChart
+    (parabolicClosedBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization map on cylinders.**  For `r ≠ 0`, the inverse affine chart `Φ_{a,c,r⁻¹}` maps
+the closed parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about the target
+center `c` back into the closed parabolic cylinder of time radius `T` and space radius `S` about the
+source center `a`, since `r⁻¹ ^ 2 * (r ^ 2 * T) = T` and `|r⁻¹| * (|r| * S) = S`.  This is the reverse
+`Set.MapsTo` companion of `parabolicClosedCylinder_mapsTo_affineChart`. -/
+theorem parabolicClosedCylinder_mapsTo_affineChart_inv
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r T S : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) (parabolicClosedCylinder a T S) := by
+  have h := parabolicClosedCylinder_mapsTo_affineChart
+    (c := a) (a := c) (r := r⁻¹) (T := r ^ 2 * T) (S := |r| * S)
+  have hT : r⁻¹ ^ 2 * (r ^ 2 * T) = T := by
+    rw [inv_pow, inv_mul_cancel_left₀ (pow_ne_zero 2 hr)]
+  have hS : |r⁻¹| * (|r| * S) = S := by
+    rw [abs_inv, inv_mul_cancel_left₀ (abs_pos.mpr hr).ne']
+  rwa [hT, hS] at h
+
+/-- **The affine parabolic chart is a bijection of parabolic cylinders.**  For `r ≠ 0`, the forward
+affine chart `Φ_{c,a,r}` restricts to a `Set.BijOn` from the closed parabolic cylinder of time
+radius `T` and space radius `S` about the source center `a` onto the closed parabolic cylinder of
+time radius `r ^ 2 * T` and space radius `|r| * S` about the target center `c`, with the inverse
+chart `Φ_{a,c,r⁻¹}` as two-sided inverse. -/
+theorem affineChart_bijOn_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedCylinder a T S) (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  have hinv : Set.InvOn
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedCylinder a T S) (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) :=
+    ⟨(affineChart_leftInverse c a hr).leftInvOn (parabolicClosedCylinder a T S),
+      (affineChart_rightInverse c a hr).rightInvOn
+        (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))⟩
+  exact hinv.bijOn parabolicClosedCylinder_mapsTo_affineChart
+    (parabolicClosedCylinder_mapsTo_affineChart_inv hr)
+
+/-- **Exact image of a parabolic ball under the affine chart.**  For `r ≠ 0`, the forward affine
+chart carries the closed parabolic ball of radius `ρ` about `a` *onto* (not merely into) the closed
+parabolic ball of radius `|r| * ρ` about `c`.  This is the image-equality strengthening of
+`parabolicClosedBall_mapsTo_affineChart`, obtained from the bijection. -/
+theorem affineChart_image_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) '' parabolicClosedBall a ρ
+      = parabolicClosedBall c (|r| * ρ) :=
+  (affineChart_bijOn_parabolicClosedBall c a hr ρ).image_eq
+
+/-- **Exact image of a parabolic cylinder under the affine chart.**  For `r ≠ 0`, the forward affine
+chart carries the closed parabolic cylinder of time radius `T` and space radius `S` about `a` onto
+the closed parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about `c`. -/
+theorem affineChart_image_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) '' parabolicClosedCylinder a T S
+      = parabolicClosedCylinder c (r ^ 2 * T) (|r| * S) :=
+  (affineChart_bijOn_parabolicClosedCylinder c a hr T S).image_eq
+
+/-! ### De-normalization Schauder estimates (inverse affine chart)
+
+The forward `comp_affineChart_parabolicClosed{Ball,Cylinder}` estimates *normalize*: they transport
+`C^{0,α}` / Hölder control from a target ball (cylinder) about `c` to the rescaled source ball
+(cylinder) about `a`.  The following *de-normalization* estimates run in the reverse direction, using
+the inverse chart `Φ_{a,c,r⁻¹}` and the reverse `Set.MapsTo` lemmas: control on the source ball
+(cylinder) about `a` yields control of the reparametrized function on the rescaled ball (cylinder)
+about `c`, with the Hölder constant scaled by `|r⁻¹| ^ α`.  These are exactly the estimates that
+carry a unit-scale Schauder bound back to the original geometric scale. -/
+
+/-- **De-normalization Hölder estimate on balls.**  For `r ≠ 0`, if `u` has parabolic Hölder
+constant `C` on the closed parabolic ball of radius `ρ` about the source center `a`, then `u`
+precomposed with the inverse affine chart `Φ_{a,c,r⁻¹}` has parabolic Hölder constant `C * |r⁻¹| ^ α`
+on the closed parabolic ball of radius `|r| * ρ` about the target center `c`. -/
+theorem ParabolicHolderWith.comp_affineChart_inv_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {C α r ρ : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicHolderWith C α u (parabolicClosedBall a ρ)) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hr : r ≠ 0) :
+    ParabolicHolderWith (C * |r⁻¹| ^ α) α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicClosedBall c (|r| * ρ)) :=
+  hu.comp_affineChart hC hα (parabolicClosedBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` estimate on balls.**  For `r ≠ 0`, `C^{0,α}` control of `u` on the
+closed parabolic ball of radius `ρ` about `a` gives `C^{0,α}` control of `u ∘ Φ_{a,c,r⁻¹}` on the
+closed parabolic ball of radius `|r| * ρ` about `c`, with the sup bound preserved and the Hölder
+constant scaled by `|r⁻¹| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_inv_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedBall a ρ)) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r⁻¹| ^ α) α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicClosedBall c (|r| * ρ)) :=
+  hu.comp_affineChart hH hα (parabolicClosedBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` membership on balls.**  Existential-constant form of
+`ParabolicC0AlphaWith.comp_affineChart_inv_parabolicClosedBall`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_inv_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedBall a ρ)) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicClosedBall c (|r| * ρ)) :=
+  hu.comp_affineChart hα (parabolicClosedBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` estimate on cylinders.**  For `r ≠ 0`, `C^{0,α}` control of `u` on
+the closed parabolic cylinder of time radius `T` and space radius `S` about `a` gives `C^{0,α}`
+control of `u ∘ Φ_{a,c,r⁻¹}` on the closed parabolic cylinder of time radius `r ^ 2 * T` and space
+radius `|r| * S` about `c`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_inv_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r T S : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicClosedCylinder a T S)) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r⁻¹| ^ α) α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) :=
+  hu.comp_affineChart hH hα (parabolicClosedCylinder_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` membership on cylinders.**  Existential-constant form of
+`ParabolicC0AlphaWith.comp_affineChart_inv_parabolicClosedCylinder`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_inv_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r T S : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicClosedCylinder a T S)) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) :=
+  hu.comp_affineChart hα (parabolicClosedCylinder_mapsTo_affineChart_inv hr)
+
+/-- **The affine parabolic chart as a homeomorphism.**  For `r ≠ 0`, the forward affine parabolic
+chart `Φ_{c,a,r} : p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` is a self-homeomorphism of the
+time-space `ℝ × X`, with inverse the chart `Φ_{a,c,r⁻¹}`.  Being a homeomorphism, it transports open
+sets, closed sets, closures, and interiors between the source and target scales — the topological
+counterpart of the `Set.BijOn` statements above, used when a Schauder rescaling argument needs to
+move open neighborhoods rather than just closed balls and cylinders. -/
+def affineChartHomeomorph
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0) :
+    Homeomorph (ℝ × X) (ℝ × X) where
+  toFun := fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))
+  invFun := fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))
+  left_inv := affineChart_leftInverse c a hr
+  right_inv := affineChart_rightInverse c a hr
+  continuous_toFun := by fun_prop
+  continuous_invFun := by fun_prop
+
+/-- The forward direction of `affineChartHomeomorph` is the explicit affine parabolic chart. -/
+@[simp] theorem affineChartHomeomorph_apply
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (p : ℝ × X) :
+    affineChartHomeomorph c a hr p = c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)) := rfl
+
+/-- The inverse direction of `affineChartHomeomorph` is the explicit inverse affine parabolic
+chart. -/
+@[simp] theorem affineChartHomeomorph_symm_apply
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (p : ℝ × X) :
+    (affineChartHomeomorph c a hr).symm p = a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)) := rfl
+
+/-! ### Open parabolic balls and cylinders under the affine chart
+
+The `Set.MapsTo`/`Set.BijOn`/image lemmas above are stated for the *closed* parabolic ball and
+cylinder shapes.  Parabolic PDE (Schauder) estimates, however, are naturally taken on the *open*
+parabolic cylinder `Q = (t₀, t₁) × Ω` where the interior regularity lives, so the change of
+variables must also be available for the open shapes.  Because the strict inequality
+`parabolicDistance a q < ρ` is only preserved by the affine chart when the dilation factor is
+*strictly* positive, the open-domain lemmas require `r ≠ 0` (the closed-domain ones held for all
+`r`, since a nonnegative factor preserves `≤`).  With `r ≠ 0` the affine chart is a bijection of
+open parabolic balls and cylinders, exactly as in the closed case, and transports open-domain
+`C^{0,α}`/Hölder control in both directions. -/
+
+/-- The general affine map `p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` maps the *open*
+parabolic ball of radius `ρ` about the source center `a` into the *open* parabolic ball of radius
+`|r| * ρ` about the target center `c`, provided `r ≠ 0` (so that the dilation factor `|r|` is
+strictly positive and the strict inequality is preserved).  Open-domain companion of
+`parabolicClosedBall_mapsTo_affineChart`. -/
+theorem parabolicBall_mapsTo_affineChart
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r ρ : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicBall a ρ) (parabolicBall c (|r| * ρ)) := by
+  intro q hq
+  simp only [parabolicBall, Set.mem_setOf_eq] at hq ⊢
+  have hz : ((r ^ 2 * (a.1 - a.1), r • (a.2 - a.2)) : ℝ × X) = (0 : ℝ × X) := by simp
+  have hkey : parabolicDistance c (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2)))
+      = |r| * parabolicDistance a q := by
+    have h := parabolicDistance_affineChart c a r a q
+    rw [hz, add_zero] at h
+    exact h
+  rw [hkey]
+  exact mul_lt_mul_of_pos_left hq (abs_pos.mpr hr)
+
+/-- The general affine map maps the *open* parabolic cylinder of time radius `T` and space radius
+`S` about the source center `a` into the *open* parabolic cylinder of time radius `r ^ 2 * T` and
+space radius `|r| * S` about the target center `c`, provided `r ≠ 0`.  Open-domain companion of
+`parabolicClosedCylinder_mapsTo_affineChart`. -/
+theorem parabolicCylinder_mapsTo_affineChart
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r T S : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicCylinder a T S) (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  intro q hq
+  simp only [parabolicCylinder, Set.mem_setOf_eq] at hq ⊢
+  obtain ⟨hqt, hqs⟩ := hq
+  refine ⟨?_, ?_⟩
+  · have htime : |c.1 - (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2))).1| = r ^ 2 * |a.1 - q.1| := by
+      simp only [Prod.fst_add, sub_add_cancel_left, abs_neg, abs_mul, abs_of_nonneg (sq_nonneg r),
+        abs_sub_comm a.1 q.1]
+    rw [htime]
+    exact mul_lt_mul_of_pos_left hqt (by positivity)
+  · have hspace : dist c.2 (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2))).2 = |r| * dist a.2 q.2 := by
+      simp only [Prod.snd_add, dist_eq_norm, sub_add_cancel_left, norm_neg, norm_smul,
+        Real.norm_eq_abs]
+      rw [norm_sub_rev q.2 a.2]
+    rw [hspace]
+    exact mul_lt_mul_of_pos_left hqs (abs_pos.mpr hr)
+
+/-- **De-normalization map on open balls.**  For `r ≠ 0`, the inverse affine chart `Φ_{a,c,r⁻¹}`
+maps the open parabolic ball of radius `|r| * ρ` about the target center `c` back into the open
+parabolic ball of radius `ρ` about the source center `a`.  Open-domain companion of
+`parabolicClosedBall_mapsTo_affineChart_inv`. -/
+theorem parabolicBall_mapsTo_affineChart_inv
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r ρ : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (parabolicBall c (|r| * ρ)) (parabolicBall a ρ) := by
+  have h := parabolicBall_mapsTo_affineChart (c := a) (a := c) (r := r⁻¹) (ρ := |r| * ρ)
+    (inv_ne_zero hr)
+  have hrad : |r⁻¹| * (|r| * ρ) = ρ := by
+    rw [abs_inv, inv_mul_cancel_left₀ (abs_pos.mpr hr).ne']
+  rwa [hrad] at h
+
+/-- **The affine parabolic chart is a bijection of open parabolic balls.**  For `r ≠ 0`, the forward
+affine chart `Φ_{c,a,r}` restricts to a `Set.BijOn` from the open parabolic ball of radius `ρ` about
+the source center `a` onto the open parabolic ball of radius `|r| * ρ` about the target center `c`,
+with the inverse chart `Φ_{a,c,r⁻¹}` as two-sided inverse. -/
+theorem affineChart_bijOn_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicBall a ρ) (parabolicBall c (|r| * ρ)) := by
+  have hinv : Set.InvOn
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicBall a ρ) (parabolicBall c (|r| * ρ)) :=
+    ⟨(affineChart_leftInverse c a hr).leftInvOn (parabolicBall a ρ),
+      (affineChart_rightInverse c a hr).rightInvOn (parabolicBall c (|r| * ρ))⟩
+  exact hinv.bijOn (parabolicBall_mapsTo_affineChart hr)
+    (parabolicBall_mapsTo_affineChart_inv hr)
+
+/-- **Exact image of an open parabolic ball under the affine chart.**  For `r ≠ 0`, the forward
+affine chart carries the open parabolic ball of radius `ρ` about `a` onto the open parabolic ball of
+radius `|r| * ρ` about `c`. -/
+theorem affineChart_image_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) '' parabolicBall a ρ
+      = parabolicBall c (|r| * ρ) :=
+  (affineChart_bijOn_parabolicBall c a hr ρ).image_eq
+
+/-- **De-normalization map on open cylinders.**  For `r ≠ 0`, the inverse affine chart `Φ_{a,c,r⁻¹}`
+maps the open parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about the
+target center `c` back into the open parabolic cylinder of time radius `T` and space radius `S`
+about the source center `a`.  Open-domain companion of
+`parabolicClosedCylinder_mapsTo_affineChart_inv`. -/
+theorem parabolicCylinder_mapsTo_affineChart_inv
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r T S : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (parabolicCylinder c (r ^ 2 * T) (|r| * S)) (parabolicCylinder a T S) := by
+  have h := parabolicCylinder_mapsTo_affineChart
+    (c := a) (a := c) (r := r⁻¹) (T := r ^ 2 * T) (S := |r| * S) (inv_ne_zero hr)
+  have hT : r⁻¹ ^ 2 * (r ^ 2 * T) = T := by
+    rw [inv_pow, inv_mul_cancel_left₀ (pow_ne_zero 2 hr)]
+  have hS : |r⁻¹| * (|r| * S) = S := by
+    rw [abs_inv, inv_mul_cancel_left₀ (abs_pos.mpr hr).ne']
+  rwa [hT, hS] at h
+
+/-- **The affine parabolic chart is a bijection of open parabolic cylinders.**  For `r ≠ 0`, the
+forward affine chart `Φ_{c,a,r}` restricts to a `Set.BijOn` from the open parabolic cylinder of time
+radius `T` and space radius `S` about the source center `a` onto the open parabolic cylinder of time
+radius `r ^ 2 * T` and space radius `|r| * S` about the target center `c`. -/
+theorem affineChart_bijOn_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicCylinder a T S) (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  have hinv : Set.InvOn
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicCylinder a T S) (parabolicCylinder c (r ^ 2 * T) (|r| * S)) :=
+    ⟨(affineChart_leftInverse c a hr).leftInvOn (parabolicCylinder a T S),
+      (affineChart_rightInverse c a hr).rightInvOn
+        (parabolicCylinder c (r ^ 2 * T) (|r| * S))⟩
+  exact hinv.bijOn (parabolicCylinder_mapsTo_affineChart hr)
+    (parabolicCylinder_mapsTo_affineChart_inv hr)
+
+/-- **Exact image of an open parabolic cylinder under the affine chart.**  For `r ≠ 0`, the forward
+affine chart carries the open parabolic cylinder of time radius `T` and space radius `S` about `a`
+onto the open parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about `c`. -/
+theorem affineChart_image_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) '' parabolicCylinder a T S
+      = parabolicCylinder c (r ^ 2 * T) (|r| * S) :=
+  (affineChart_bijOn_parabolicCylinder c a hr T S).image_eq
+
+/-! ### Schauder estimates on open parabolic balls and cylinders
+
+With the open-domain change of variables in place, the affine Schauder normalization and
+de-normalization `C^{0,α}`/Hölder estimates are available on the open parabolic ball and cylinder
+shapes, exactly paralleling the closed-domain estimates.  Normalization uses the forward chart to
+transport `C^{0,α}` control on an open ball (cylinder) about the target center `c` to the rescaled
+open ball (cylinder) about the source center `a`; de-normalization uses the inverse chart to run in
+the reverse direction.  All the open-domain estimates require `r ≠ 0`, inherited from the
+open-domain `Set.MapsTo` lemmas. -/
+
+/-- **Affine Schauder normalization on open balls (`C^{0,α}` control).**  For `r ≠ 0`, if `u` is
+parabolic `C^{0,α}` with constants `B, H` on the open parabolic ball of radius `R` about a target
+center `c`, and `|r| * ρ ≤ R`, then `u` precomposed with the forward affine chart is parabolic
+`C^{0,α}` on the open ball of radius `ρ` about the source center `a`, with sup bound `B` and Hölder
+constant `H * |r| ^ α`.  Open-domain companion of
+`ParabolicC0AlphaWith.comp_affineChart_parabolicClosedBall`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ R : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicBall c R))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicBall a ρ) :=
+  hu.comp_affineChart hH hα
+    ((parabolicBall_mapsTo_affineChart hr).mono_right (parabolicBall.mono hle))
+
+/-- **Affine Schauder normalization on open balls (`C^{0,α}` membership).**  Existential-constant
+form of `ParabolicC0AlphaWith.comp_affineChart_parabolicBall`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ R : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicBall c R))
+    (hα : 0 ≤ α) (hr : r ≠ 0) (hle : |r| * ρ ≤ R) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicBall a ρ) :=
+  hu.comp_affineChart hα
+    ((parabolicBall_mapsTo_affineChart hr).mono_right (parabolicBall.mono hle))
+
+/-- **Affine Schauder normalization on open cylinders (`C^{0,α}` control).**  For `r ≠ 0`, if `u` is
+parabolic `C^{0,α}` with constants `B, H` on the open parabolic cylinder of time radius `T'` and
+space radius `S'` about a target center `c`, and `r ^ 2 * T ≤ T'`, `|r| * S ≤ S'`, then `u`
+precomposed with the forward affine chart is parabolic `C^{0,α}` on the open cylinder of time radius
+`T` and space radius `S` about the source center `a`, with sup bound `B` and Hölder constant
+`H * |r| ^ α`.  Open-domain companion of
+`ParabolicC0AlphaWith.comp_affineChart_parabolicClosedCylinder`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r T S T' S' : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicCylinder c T' S'))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) (hT : r ^ 2 * T ≤ T') (hS : |r| * S ≤ S') :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicCylinder a T S) :=
+  hu.comp_affineChart hH hα
+    ((parabolicCylinder_mapsTo_affineChart hr).mono_right
+      (fun _x hx => ⟨lt_of_lt_of_le hx.1 hT, lt_of_lt_of_le hx.2 hS⟩))
+
+/-- **Affine Schauder normalization on open cylinders (`C^{0,α}` membership).**  Existential-constant
+form of `ParabolicC0AlphaWith.comp_affineChart_parabolicCylinder`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r T S T' S' : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicCylinder c T' S'))
+    (hα : 0 ≤ α) (hr : r ≠ 0) (hT : r ^ 2 * T ≤ T') (hS : |r| * S ≤ S') :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (parabolicCylinder a T S) :=
+  hu.comp_affineChart hα
+    ((parabolicCylinder_mapsTo_affineChart hr).mono_right
+      (fun _x hx => ⟨lt_of_lt_of_le hx.1 hT, lt_of_lt_of_le hx.2 hS⟩))
+
+/-- **De-normalization Hölder estimate on open balls.**  For `r ≠ 0`, parabolic Hölder control of
+`u` with constant `C` on the open parabolic ball of radius `ρ` about the source center `a` gives
+parabolic Hölder constant `C * |r⁻¹| ^ α` for `u ∘ Φ_{a,c,r⁻¹}` on the open parabolic ball of radius
+`|r| * ρ` about the target center `c`.  Open-domain companion of
+`ParabolicHolderWith.comp_affineChart_inv_parabolicClosedBall`. -/
+theorem ParabolicHolderWith.comp_affineChart_inv_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {C α r ρ : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicHolderWith C α u (parabolicBall a ρ)) (hC : 0 ≤ C) (hα : 0 ≤ α)
+    (hr : r ≠ 0) :
+    ParabolicHolderWith (C * |r⁻¹| ^ α) α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicBall c (|r| * ρ)) :=
+  hu.comp_affineChart hC hα (parabolicBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` estimate on open balls.**  For `r ≠ 0`, `C^{0,α}` control of `u` on
+the open parabolic ball of radius `ρ` about `a` gives `C^{0,α}` control of `u ∘ Φ_{a,c,r⁻¹}` on the
+open parabolic ball of radius `|r| * ρ` about `c`, with the sup bound preserved and the Hölder
+constant scaled by `|r⁻¹| ^ α`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_inv_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r ρ : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicBall a ρ)) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r⁻¹| ^ α) α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicBall c (|r| * ρ)) :=
+  hu.comp_affineChart hH hα (parabolicBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` membership on open balls.**  Existential-constant form of
+`ParabolicC0AlphaWith.comp_affineChart_inv_parabolicBall`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_inv_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r ρ : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicBall a ρ)) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicBall c (|r| * ρ)) :=
+  hu.comp_affineChart hα (parabolicBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` estimate on open cylinders.**  For `r ≠ 0`, `C^{0,α}` control of
+`u` on the open parabolic cylinder of time radius `T` and space radius `S` about `a` gives `C^{0,α}`
+control of `u ∘ Φ_{a,c,r⁻¹}` on the open parabolic cylinder of time radius `r ^ 2 * T` and space
+radius `|r| * S` about `c`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_inv_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α r T S : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (parabolicCylinder a T S)) (hH : 0 ≤ H) (hα : 0 ≤ α)
+    (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r⁻¹| ^ α) α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicCylinder c (r ^ 2 * T) (|r| * S)) :=
+  hu.comp_affineChart hH hα (parabolicCylinder_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization `C^{0,α}` membership on open cylinders.**  Existential-constant form of
+`ParabolicC0AlphaWith.comp_affineChart_inv_parabolicCylinder`. -/
+theorem ParabolicC0AlphaOn.comp_affineChart_inv_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α r T S : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (parabolicCylinder a T S)) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α
+      (fun p : ℝ × X => u (a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))))
+      (parabolicCylinder c (r ^ 2 * T) (|r| * S)) :=
+  hu.comp_affineChart hα (parabolicCylinder_mapsTo_affineChart_inv hr)
+
+/-! ### Preimages of parabolic balls and cylinders under the affine chart
+
+The `Set.image` lemmas above have `Set.preimage` companions: because the affine chart is a global
+bijection with the inverse chart `Φ_{a,c,r⁻¹}` as two-sided inverse, the preimage of the rescaled
+ball (cylinder) about the target center `c` under the forward chart is exactly the original ball
+(cylinder) about the source center `a`.  These are the pullback statements used to restrict a
+function defined near `c` to the chart-normalized domain about `a`.  Each inclusion is discharged by
+the corresponding forward/inverse `Set.MapsTo` lemma together with the left-inverse identity. -/
+
+/-- **Preimage of an open parabolic ball under the affine chart.**  For `r ≠ 0`, the preimage of the
+open parabolic ball of radius `|r| * ρ` about `c` under the forward affine chart is the open
+parabolic ball of radius `ρ` about `a`. -/
+theorem affineChart_preimage_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) ⁻¹' parabolicBall c (|r| * ρ)
+      = parabolicBall a ρ := by
+  apply Set.eq_of_subset_of_subset
+  · intro q hq
+    rw [Set.mem_preimage] at hq
+    have h := parabolicBall_mapsTo_affineChart_inv (a := a) hr hq
+    rwa [affineChart_leftInverse c a hr q] at h
+  · intro q hq
+    exact parabolicBall_mapsTo_affineChart hr hq
+
+/-- **Preimage of a closed parabolic ball under the affine chart.**  For `r ≠ 0`, the preimage of
+the closed parabolic ball of radius `|r| * ρ` about `c` under the forward affine chart is the closed
+parabolic ball of radius `ρ` about `a`. -/
+theorem affineChart_preimage_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) ⁻¹' parabolicClosedBall c (|r| * ρ)
+      = parabolicClosedBall a ρ := by
+  apply Set.eq_of_subset_of_subset
+  · intro q hq
+    rw [Set.mem_preimage] at hq
+    have h := parabolicClosedBall_mapsTo_affineChart_inv (a := a) hr hq
+    rwa [affineChart_leftInverse c a hr q] at h
+  · intro q hq
+    exact parabolicClosedBall_mapsTo_affineChart hq
+
+/-- **Preimage of an open parabolic cylinder under the affine chart.**  For `r ≠ 0`, the preimage of
+the open parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about `c` under
+the forward affine chart is the open parabolic cylinder of time radius `T` and space radius `S`
+about `a`. -/
+theorem affineChart_preimage_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+        ⁻¹' parabolicCylinder c (r ^ 2 * T) (|r| * S)
+      = parabolicCylinder a T S := by
+  apply Set.eq_of_subset_of_subset
+  · intro q hq
+    rw [Set.mem_preimage] at hq
+    have h := parabolicCylinder_mapsTo_affineChart_inv (a := a) hr hq
+    rwa [affineChart_leftInverse c a hr q] at h
+  · intro q hq
+    exact parabolicCylinder_mapsTo_affineChart hr hq
+
+/-- **Preimage of a closed parabolic cylinder under the affine chart.**  For `r ≠ 0`, the preimage
+of the closed parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about `c`
+under the forward affine chart is the closed parabolic cylinder of time radius `T` and space radius
+`S` about `a`. -/
+theorem affineChart_preimage_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+        ⁻¹' parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)
+      = parabolicClosedCylinder a T S := by
+  apply Set.eq_of_subset_of_subset
+  · intro q hq
+    rw [Set.mem_preimage] at hq
+    have h := parabolicClosedCylinder_mapsTo_affineChart_inv (a := a) hr hq
+    rwa [affineChart_leftInverse c a hr q] at h
+  · intro q hq
+    exact parabolicClosedCylinder_mapsTo_affineChart hq
+
+/-! ### Topological transport of closures, interiors, and frontiers under the affine chart
+
+The affine parabolic chart `affineChartHomeomorph c a hr` is a homeomorphism, so it commutes with
+`closure`, `interior`, and `frontier`.  Combined with the exact image identities for the parabolic
+ball and cylinder shapes, this transports the *topological* boundary data of those shapes between
+the source and target scales, as needed when a Schauder rescaling argument must move the closure of
+an open cylinder, the interior of a closed cylinder, or their frontiers, rather than only the shapes
+themselves.  This is the topological counterpart, at the level of `closure`/`interior`/`frontier`,
+of the `affineChart_image_*` set-equality lemmas above. -/
+
+/-- Homeomorphism-coe form of `affineChart_image_parabolicBall`: the forward affine chart, viewed as
+the homeomorphism `affineChartHomeomorph c a hr`, carries the open parabolic ball of radius `ρ`
+about `a` onto the open parabolic ball of radius `|r| * ρ` about `c`. -/
+theorem affineChartHomeomorph_image_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' parabolicBall a ρ = parabolicBall c (|r| * ρ) :=
+  affineChart_image_parabolicBall c a hr ρ
+
+/-- **Transport of the closure of an open parabolic ball under the affine chart.**  For `r ≠ 0`, the
+affine chart homeomorphism carries the closure of the open parabolic ball of radius `ρ` about `a`
+onto the closure of the open parabolic ball of radius `|r| * ρ` about `c`. -/
+theorem affineChartHomeomorph_image_closure_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' closure (parabolicBall a ρ)
+      = closure (parabolicBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_closure (parabolicBall a ρ),
+    affineChartHomeomorph_image_parabolicBall c a hr ρ]
+
+/-- **Transport of the interior of an open parabolic ball under the affine chart.**  For `r ≠ 0`,
+the affine chart homeomorphism carries the interior of the parabolic ball of radius `ρ` about `a`
+onto the interior of the parabolic ball of radius `|r| * ρ` about `c`. -/
+theorem affineChartHomeomorph_image_interior_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' interior (parabolicBall a ρ)
+      = interior (parabolicBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_interior (parabolicBall a ρ),
+    affineChartHomeomorph_image_parabolicBall c a hr ρ]
+
+/-- **Transport of the frontier of an open parabolic ball under the affine chart.**  For `r ≠ 0`,
+the affine chart homeomorphism carries the frontier of the parabolic ball of radius `ρ` about `a`
+onto the frontier of the parabolic ball of radius `|r| * ρ` about `c`. -/
+theorem affineChartHomeomorph_image_frontier_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' frontier (parabolicBall a ρ)
+      = frontier (parabolicBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_frontier (parabolicBall a ρ),
+    affineChartHomeomorph_image_parabolicBall c a hr ρ]
+
+/-- Homeomorphism-coe form of `affineChart_image_parabolicClosedBall`. -/
+theorem affineChartHomeomorph_image_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' parabolicClosedBall a ρ = parabolicClosedBall c (|r| * ρ) :=
+  affineChart_image_parabolicClosedBall c a hr ρ
+
+/-- **Transport of the closure of a closed parabolic ball under the affine chart.** -/
+theorem affineChartHomeomorph_image_closure_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' closure (parabolicClosedBall a ρ)
+      = closure (parabolicClosedBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_closure (parabolicClosedBall a ρ),
+    affineChartHomeomorph_image_parabolicClosedBall c a hr ρ]
+
+/-- **Transport of the interior of a closed parabolic ball under the affine chart.**  This is the
+interior-regularity domain shape for an interior Schauder estimate on a closed parabolic ball. -/
+theorem affineChartHomeomorph_image_interior_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' interior (parabolicClosedBall a ρ)
+      = interior (parabolicClosedBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_interior (parabolicClosedBall a ρ),
+    affineChartHomeomorph_image_parabolicClosedBall c a hr ρ]
+
+/-- **Transport of the frontier of a closed parabolic ball under the affine chart.** -/
+theorem affineChartHomeomorph_image_frontier_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr '' frontier (parabolicClosedBall a ρ)
+      = frontier (parabolicClosedBall c (|r| * ρ)) := by
+  rw [(affineChartHomeomorph c a hr).image_frontier (parabolicClosedBall a ρ),
+    affineChartHomeomorph_image_parabolicClosedBall c a hr ρ]
+
+/-- Homeomorphism-coe form of `affineChart_image_parabolicCylinder`. -/
+theorem affineChartHomeomorph_image_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' parabolicCylinder a T S
+      = parabolicCylinder c (r ^ 2 * T) (|r| * S) :=
+  affineChart_image_parabolicCylinder c a hr T S
+
+/-- **Transport of the closure of an open parabolic cylinder under the affine chart.**  This moves
+the closure of the interior-regularity cylinder `Q = (t₀, t₁) × Ω` between scales. -/
+theorem affineChartHomeomorph_image_closure_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' closure (parabolicCylinder a T S)
+      = closure (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_closure (parabolicCylinder a T S),
+    affineChartHomeomorph_image_parabolicCylinder c a hr T S]
+
+/-- **Transport of the interior of an open parabolic cylinder under the affine chart.** -/
+theorem affineChartHomeomorph_image_interior_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' interior (parabolicCylinder a T S)
+      = interior (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_interior (parabolicCylinder a T S),
+    affineChartHomeomorph_image_parabolicCylinder c a hr T S]
+
+/-- **Transport of the frontier of an open parabolic cylinder under the affine chart.**  The
+frontier of the open cylinder is its parabolic boundary; this transports it between scales. -/
+theorem affineChartHomeomorph_image_frontier_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' frontier (parabolicCylinder a T S)
+      = frontier (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_frontier (parabolicCylinder a T S),
+    affineChartHomeomorph_image_parabolicCylinder c a hr T S]
+
+/-- Homeomorphism-coe form of `affineChart_image_parabolicClosedCylinder`. -/
+theorem affineChartHomeomorph_image_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' parabolicClosedCylinder a T S
+      = parabolicClosedCylinder c (r ^ 2 * T) (|r| * S) :=
+  affineChart_image_parabolicClosedCylinder c a hr T S
+
+/-- **Transport of the closure of a closed parabolic cylinder under the affine chart.** -/
+theorem affineChartHomeomorph_image_closure_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' closure (parabolicClosedCylinder a T S)
+      = closure (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_closure (parabolicClosedCylinder a T S),
+    affineChartHomeomorph_image_parabolicClosedCylinder c a hr T S]
+
+/-- **Transport of the interior of a closed parabolic cylinder under the affine chart.**  This is
+the interior-regularity domain shape for an interior Schauder estimate on a closed parabolic
+cylinder. -/
+theorem affineChartHomeomorph_image_interior_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' interior (parabolicClosedCylinder a T S)
+      = interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_interior (parabolicClosedCylinder a T S),
+    affineChartHomeomorph_image_parabolicClosedCylinder c a hr T S]
+
+/-- **Transport of the frontier of a closed parabolic cylinder under the affine chart.** -/
+theorem affineChartHomeomorph_image_frontier_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr '' frontier (parabolicClosedCylinder a T S)
+      = frontier (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  rw [(affineChartHomeomorph c a hr).image_frontier (parabolicClosedCylinder a T S),
+    affineChartHomeomorph_image_parabolicClosedCylinder c a hr T S]
+
+/-! #### De-normalization: preimage transport of closures, interiors, and frontiers
+
+The image-direction lemmas above transport topological boundary data from the source scale (about
+`a`) forward to the target scale (about `c`).  The following preimage-direction lemmas run the
+reverse (de-normalization) direction: they pull the `closure`/`interior`/`frontier` of a rescaled
+shape about `c` back to the corresponding topological operation of the original shape about `a`,
+using `Homeomorph.preimage_{closure,interior,frontier}` and the `affineChart_preimage_*` identities.
+Together with the image lemmas these give two-way topological transport for Schauder rescaling. -/
+
+/-- Homeomorphism-coe form of `affineChart_preimage_parabolicBall`: the preimage under the forward
+affine chart of the rescaled open parabolic ball about `c` is the original open parabolic ball about
+`a`. -/
+theorem affineChartHomeomorph_preimage_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' parabolicBall c (|r| * ρ) = parabolicBall a ρ :=
+  affineChart_preimage_parabolicBall c a hr ρ
+
+/-- **De-normalization transport of the closure of an open parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_closure_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' closure (parabolicBall c (|r| * ρ))
+      = closure (parabolicBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_closure (parabolicBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicBall c a hr ρ]
+
+/-- **De-normalization transport of the interior of an open parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_interior_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' interior (parabolicBall c (|r| * ρ))
+      = interior (parabolicBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_interior (parabolicBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicBall c a hr ρ]
+
+/-- **De-normalization transport of the frontier of an open parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_frontier_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' frontier (parabolicBall c (|r| * ρ))
+      = frontier (parabolicBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_frontier (parabolicBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicBall c a hr ρ]
+
+/-- Homeomorphism-coe form of `affineChart_preimage_parabolicClosedBall`. -/
+theorem affineChartHomeomorph_preimage_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' parabolicClosedBall c (|r| * ρ) = parabolicClosedBall a ρ :=
+  affineChart_preimage_parabolicClosedBall c a hr ρ
+
+/-- **De-normalization transport of the closure of a closed parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_closure_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' closure (parabolicClosedBall c (|r| * ρ))
+      = closure (parabolicClosedBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_closure (parabolicClosedBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicClosedBall c a hr ρ]
+
+/-- **De-normalization transport of the interior of a closed parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_interior_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' interior (parabolicClosedBall c (|r| * ρ))
+      = interior (parabolicClosedBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_interior (parabolicClosedBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicClosedBall c a hr ρ]
+
+/-- **De-normalization transport of the frontier of a closed parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_frontier_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' frontier (parabolicClosedBall c (|r| * ρ))
+      = frontier (parabolicClosedBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_frontier (parabolicClosedBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicClosedBall c a hr ρ]
+
+/-- Homeomorphism-coe form of `affineChart_preimage_parabolicCylinder`. -/
+theorem affineChartHomeomorph_preimage_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' parabolicCylinder c (r ^ 2 * T) (|r| * S)
+      = parabolicCylinder a T S :=
+  affineChart_preimage_parabolicCylinder c a hr T S
+
+/-- **De-normalization transport of the closure of an open parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_closure_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' closure (parabolicCylinder c (r ^ 2 * T) (|r| * S))
+      = closure (parabolicCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_closure (parabolicCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicCylinder c a hr T S]
+
+/-- **De-normalization transport of the interior of an open parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_interior_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' interior (parabolicCylinder c (r ^ 2 * T) (|r| * S))
+      = interior (parabolicCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_interior (parabolicCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicCylinder c a hr T S]
+
+/-- **De-normalization transport of the frontier of an open parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_frontier_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' frontier (parabolicCylinder c (r ^ 2 * T) (|r| * S))
+      = frontier (parabolicCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_frontier (parabolicCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicCylinder c a hr T S]
+
+/-- Homeomorphism-coe form of `affineChart_preimage_parabolicClosedCylinder`. -/
+theorem affineChartHomeomorph_preimage_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)
+      = parabolicClosedCylinder a T S :=
+  affineChart_preimage_parabolicClosedCylinder c a hr T S
+
+/-- **De-normalization transport of the closure of a closed parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_closure_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' closure (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))
+      = closure (parabolicClosedCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_closure
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicClosedCylinder c a hr T S]
+
+/-- **De-normalization transport of the interior of a closed parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_interior_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))
+      = interior (parabolicClosedCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_interior
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicClosedCylinder c a hr T S]
+
+/-- **De-normalization transport of the frontier of a closed parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_frontier_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' frontier (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))
+      = frontier (parabolicClosedCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_frontier
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicClosedCylinder c a hr T S]
+
+/-! #### The affine chart is a bijection on closures, interiors, and frontiers
+
+Being a homeomorphism, the affine parabolic chart restricts to a `Set.BijOn` between the
+`closure`/`interior`/`frontier` of a source shape about `a` and that of the rescaled target shape
+about `c` (its global injectivity gives the `Set.InjOn`, and the image-transport equalities above
+identify the image).  These bijections are exactly what a *pairwise* Hölder / `C^{0,α}` estimate on
+a topological-boundary domain consumes when transported across the chart. -/
+
+/-- **The affine chart is a bijection between the closures of open parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_closure_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (closure (parabolicBall a ρ))
+      (closure (parabolicBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_closure_parabolicBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the interiors of open parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_interior_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (interior (parabolicBall a ρ))
+      (interior (parabolicBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_interior_parabolicBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the frontiers of open parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_frontier_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (frontier (parabolicBall a ρ))
+      (frontier (parabolicBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_frontier_parabolicBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the closures of closed parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_closure_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (closure (parabolicClosedBall a ρ))
+      (closure (parabolicClosedBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_closure_parabolicClosedBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the interiors of closed parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_interior_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (interior (parabolicClosedBall a ρ))
+      (interior (parabolicClosedBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_interior_parabolicClosedBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the frontiers of closed parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_frontier_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (frontier (parabolicClosedBall a ρ))
+      (frontier (parabolicClosedBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_frontier_parabolicClosedBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the closures of open parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_closure_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (closure (parabolicCylinder a T S))
+      (closure (parabolicCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_closure_parabolicCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the interiors of open parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_interior_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (interior (parabolicCylinder a T S))
+      (interior (parabolicCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_interior_parabolicCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the frontiers of open parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_frontier_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (frontier (parabolicCylinder a T S))
+      (frontier (parabolicCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_frontier_parabolicCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the closures of closed parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_closure_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (closure (parabolicClosedCylinder a T S))
+      (closure (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_closure_parabolicClosedCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the interiors of closed parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_interior_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (interior (parabolicClosedCylinder a T S))
+      (interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_interior_parabolicClosedCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the frontiers of closed parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_frontier_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (frontier (parabolicClosedCylinder a T S))
+      (frontier (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_frontier_parabolicClosedCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-! ### Open parabolic shapes lie in the interior of the closed shapes
+
+The open parabolic ball and cylinder are open sets contained in the corresponding closed shapes, so
+they are contained in the *interior* of the closed shapes.  In particular each closed parabolic shape
+is a neighborhood of its center.  These intrinsic (chart-free) facts are what let an interior
+Schauder estimate on a closed parabolic ball/cylinder place an open parabolic-ball neighborhood of an
+interior point inside the domain. -/
+
+/-- The open parabolic ball of radius `R` about `p` is contained in the interior of the closed
+parabolic ball of radius `R` about `p`. -/
+theorem parabolicBall.subset_interior_closedBall {X : Type*} [PseudoMetricSpace X] (p : ℝ × X)
+    (R : ℝ) :
+    parabolicBall p R ⊆ interior (parabolicClosedBall p R) :=
+  interior_maximal parabolicBall.subset_closedBall (parabolicBall.isOpen p R)
+
+/-- The open parabolic cylinder is contained in the interior of the closed parabolic cylinder with
+the same time and space radii. -/
+theorem parabolicCylinder.subset_interior_closedCylinder {X : Type*} [PseudoMetricSpace X]
+    (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
+    parabolicCylinder p timeRadius spaceRadius
+      ⊆ interior (parabolicClosedCylinder p timeRadius spaceRadius) :=
+  interior_maximal parabolicCylinder.subset_closedCylinder
+    (parabolicCylinder.isOpen p timeRadius spaceRadius)
+
+/-- A closed parabolic ball of positive radius is a neighborhood of its center. -/
+theorem parabolicClosedBall.mem_nhds {X : Type*} [PseudoMetricSpace X] {p : ℝ × X} {R : ℝ}
+    (hR : 0 < R) :
+    parabolicClosedBall p R ∈ 𝓝 p :=
+  Filter.mem_of_superset (parabolicBall.mem_nhds hR) parabolicBall.subset_closedBall
+
+/-- A closed parabolic cylinder with positive time and space radii is a neighborhood of its
+center. -/
+theorem parabolicClosedCylinder.mem_nhds {X : Type*} [PseudoMetricSpace X] {p : ℝ × X}
+    {timeRadius spaceRadius : ℝ} (ht : 0 < timeRadius) (hs : 0 < spaceRadius) :
+    parabolicClosedCylinder p timeRadius spaceRadius ∈ 𝓝 p :=
+  Filter.mem_of_superset (parabolicCylinder.mem_nhds ht hs)
+    parabolicCylinder.subset_closedCylinder
+
+/-! ### Schauder change of variables on the topological-boundary domains
+
+Combining the generic affine `C^{0,α}` change of variables `ParabolicC0Alpha{With,On}.comp_affineChart`
+(which consumes an arbitrary `Set.MapsTo` of the affine chart) with the `Set.BijOn` of the chart on
+closures and interiors, the affine Schauder normalization is available directly on the
+*closure of an open* parabolic ball/cylinder and on the *interior of a closed* parabolic
+ball/cylinder — the two boundary-domain shapes on which an interior parabolic regularity estimate is
+naturally taken.  The sup bound is preserved and the Hölder constant scales by `|r| ^ α`, exactly as
+for the shape estimates. -/
+
+/-- **Schauder normalization on the closure of an open parabolic ball (`C^{0,α}` control).** -/
+theorem ParabolicC0AlphaWith.comp_affineChart_closure_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α ρ r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (closure (parabolicBall c (|r| * ρ))))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (closure (parabolicBall a ρ)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hH hα
+    (affineChartHomeomorph_bijOn_closure_parabolicBall c a hr ρ).mapsTo
+
+/-- **Schauder normalization on the closure of an open parabolic ball (`C^{0,α}` membership).** -/
+theorem ParabolicC0AlphaOn.comp_affineChart_closure_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α ρ r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (closure (parabolicBall c (|r| * ρ))))
+    (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (closure (parabolicBall a ρ)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hα
+    (affineChartHomeomorph_bijOn_closure_parabolicBall c a hr ρ).mapsTo
+
+/-- **Schauder normalization on the closure of an open parabolic cylinder (`C^{0,α}` control).** -/
+theorem ParabolicC0AlphaWith.comp_affineChart_closure_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α T S r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (closure (parabolicCylinder c (r ^ 2 * T) (|r| * S))))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (closure (parabolicCylinder a T S)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hH hα
+    (affineChartHomeomorph_bijOn_closure_parabolicCylinder c a hr T S).mapsTo
+
+/-- **Schauder normalization on the closure of an open parabolic cylinder (`C^{0,α}` membership).** -/
+theorem ParabolicC0AlphaOn.comp_affineChart_closure_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α T S r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (closure (parabolicCylinder c (r ^ 2 * T) (|r| * S))))
+    (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (closure (parabolicCylinder a T S)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hα
+    (affineChartHomeomorph_bijOn_closure_parabolicCylinder c a hr T S).mapsTo
+
+/-- **Schauder normalization on the interior of a closed parabolic ball (`C^{0,α}` control).**  This
+is the interior-regularity domain for an interior Schauder estimate on a closed parabolic ball. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_interior_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α ρ r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (interior (parabolicClosedBall c (|r| * ρ))))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (interior (parabolicClosedBall a ρ)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hH hα
+    (affineChartHomeomorph_bijOn_interior_parabolicClosedBall c a hr ρ).mapsTo
+
+/-- **Schauder normalization on the interior of a closed parabolic ball (`C^{0,α}` membership).** -/
+theorem ParabolicC0AlphaOn.comp_affineChart_interior_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α ρ r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (interior (parabolicClosedBall c (|r| * ρ))))
+    (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (interior (parabolicClosedBall a ρ)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hα
+    (affineChartHomeomorph_bijOn_interior_parabolicClosedBall c a hr ρ).mapsTo
+
+/-- **Schauder normalization on the interior of a closed parabolic cylinder (`C^{0,α}` control).**
+This is the interior-regularity domain for an interior Schauder estimate on a closed parabolic
+cylinder `Q = (t₀, t₁) × Ω`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_interior_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α T S r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u
+      (interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (interior (parabolicClosedCylinder a T S)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hH hα
+    (affineChartHomeomorph_bijOn_interior_parabolicClosedCylinder c a hr T S).mapsTo
+
+/-- **Schauder normalization on the interior of a closed parabolic cylinder (`C^{0,α}` membership).** -/
+theorem ParabolicC0AlphaOn.comp_affineChart_interior_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α T S r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))))
+    (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (interior (parabolicClosedCylinder a T S)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hα
+    (affineChartHomeomorph_bijOn_interior_parabolicClosedCylinder c a hr T S).mapsTo
+
+/-!
+## Reverse assembly of parabolic Hölder control from separate space and time control
+
+The `space_slice` and `time_slice_half_exponent` readouts extract, from a parabolic `α`-Hölder
+estimate, spatial `α`-Hölder control (uniform in time) and temporal `α/2`-Hölder control (uniform
+in space).  The following primitives run the *converse* direction: on a set that contains the mixed
+corner `(τ, x)` of any two of its points `(t, x)` and `(τ, y)` (a "corner-closed" set, e.g. a
+parabolic ball or cylinder, which is a product of a time interval and a spatial ball), separate
+spatial and temporal Hölder control reassemble into full parabolic Hölder control with the summed
+constant.  This is the standard way parabolic Schauder estimates are obtained: control the space and
+time regularity separately and then combine.
+-/
+
+/-- A parabolic ball is corner-closed: if `(t, x)` and `(τ, y)` lie in it, so does `(τ, x)`.  This
+is because the parabolic ball is the product of a time interval and a spatial ball. -/
+theorem parabolicBall.corner_mem {X : Type*} [PseudoMetricSpace X]
+    {c : ℝ × X} {R : ℝ} {t τ : ℝ} {x y : X}
+    (hp : (t, x) ∈ parabolicBall c R) (hq : (τ, y) ∈ parabolicBall c R) :
+    (τ, x) ∈ parabolicBall c R := by
+  simp only [parabolicBall.mem, parabolicDistance, max_lt_iff] at hp hq ⊢
+  exact ⟨hq.1, hp.2⟩
+
+/-- A closed parabolic ball is corner-closed. -/
+theorem parabolicClosedBall.corner_mem {X : Type*} [PseudoMetricSpace X]
+    {c : ℝ × X} {R : ℝ} {t τ : ℝ} {x y : X}
+    (hp : (t, x) ∈ parabolicClosedBall c R) (hq : (τ, y) ∈ parabolicClosedBall c R) :
+    (τ, x) ∈ parabolicClosedBall c R := by
+  simp only [parabolicClosedBall.mem, parabolicDistance, max_le_iff] at hp hq ⊢
+  exact ⟨hq.1, hp.2⟩
+
+/-- A product parabolic cylinder is corner-closed. -/
+theorem parabolicCylinder.corner_mem {X : Type*} [PseudoMetricSpace X]
+    {c : ℝ × X} {timeRadius spaceRadius : ℝ} {t τ : ℝ} {x y : X}
+    (hp : (t, x) ∈ parabolicCylinder c timeRadius spaceRadius)
+    (hq : (τ, y) ∈ parabolicCylinder c timeRadius spaceRadius) :
+    (τ, x) ∈ parabolicCylinder c timeRadius spaceRadius := by
+  simp only [parabolicCylinder.mem] at hp hq ⊢
+  exact ⟨hq.1, hp.2⟩
+
+/-- A closed product parabolic cylinder is corner-closed. -/
+theorem parabolicClosedCylinder.corner_mem {X : Type*} [PseudoMetricSpace X]
+    {c : ℝ × X} {timeRadius spaceRadius : ℝ} {t τ : ℝ} {x y : X}
+    (hp : (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hq : (τ, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius) :
+    (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius := by
+  simp only [parabolicClosedCylinder.mem] at hp hq ⊢
+  exact ⟨hq.1, hp.2⟩
+
+/-- **Reverse assembly of parabolic Hölder control.**  On a corner-closed time-space set, spatial
+`α`-Hölder control (with constant `Hs`, uniform in time) together with temporal `α/2`-Hölder control
+(with constant `Ht`, uniform in space) give parabolic `α`-Hölder control with constant `Hs + Ht`.
+This is the converse of `ParabolicHolderWith.space_slice` and
+`ParabolicHolderWith.time_slice_half_exponent`. -/
+theorem ParabolicHolderWith.of_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s)
+    (hspace : ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u s := by
+  rintro ⟨t, x⟩ hp ⟨τ, y⟩ hq
+  have hcornerMem : (τ, x) ∈ s := hcorner hp hq
+  have htime' : ‖u (t, x) - u (τ, x)‖ ≤ Ht * parabolicDistance (t, x) (τ, y) ^ α := by
+    refine (htime hp hcornerMem).trans ?_
+    rw [Real.rpow_div_two_eq_sqrt α (abs_nonneg (t - τ))]
+    refine mul_le_mul_of_nonneg_left ?_ hHt
+    exact Real.rpow_le_rpow (Real.sqrt_nonneg _)
+      (parabolicDistance.sqrt_time_le (t, x) (τ, y)) hα
+  have hspace' : ‖u (τ, x) - u (τ, y)‖ ≤ Hs * parabolicDistance (t, x) (τ, y) ^ α := by
+    refine (hspace hcornerMem hq).trans ?_
+    refine mul_le_mul_of_nonneg_left ?_ hHs
+    exact Real.rpow_le_rpow dist_nonneg
+      (parabolicDistance.space_dist_le (t, x) (τ, y)) hα
+  have hdecomp : u (t, x) - u (τ, y)
+      = (u (t, x) - u (τ, x)) + (u (τ, x) - u (τ, y)) :=
+    (sub_add_sub_cancel _ _ _).symm
+  rw [hdecomp]
+  calc ‖(u (t, x) - u (τ, x)) + (u (τ, x) - u (τ, y))‖
+      ≤ ‖u (t, x) - u (τ, x)‖ + ‖u (τ, x) - u (τ, y)‖ := norm_add_le _ _
+    _ ≤ Ht * parabolicDistance (t, x) (τ, y) ^ α
+        + Hs * parabolicDistance (t, x) (τ, y) ^ α := add_le_add htime' hspace'
+    _ = (Hs + Ht) * parabolicDistance (t, x) (τ, y) ^ α := by ring
+
+/-- **Reverse assembly of parabolic Hölder membership.**  The `ParabolicHolderOn` (existential
+constant) form of `ParabolicHolderWith.of_space_time_holder`. -/
+theorem ParabolicHolderOn.of_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s)
+    (hspace : ∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderOn α u s := by
+  obtain ⟨Hs, hHs, hspace'⟩ := hspace
+  obtain ⟨Ht, hHt, htime'⟩ := htime
+  exact ⟨Hs + Ht, add_nonneg hHs hHt,
+    ParabolicHolderWith.of_space_time_holder hHs hHt hα hcorner hspace' htime'⟩
+
+/-- **Reverse assembly of parabolic `C^{0,α}` control.**  Sup control together with separate spatial
+and temporal Hölder control reassemble into parabolic `C^{0,α}` control on a corner-closed set. -/
+theorem ParabolicC0AlphaWith.of_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {B Hs Ht α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hbound : ParabolicBoundedWith B u s) (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s)
+    (hspace : ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaWith B (Hs + Ht) α u s :=
+  ⟨hbound, ParabolicHolderWith.of_space_time_holder hHs hHt hα hcorner hspace htime⟩
+
+/-- Reverse assembly of parabolic Hölder control on an open product parabolic cylinder, where
+corner-closedness is automatic. -/
+theorem ParabolicHolderWith.of_space_time_holder_parabolicCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+      (t, y) ∈ parabolicCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+      (τ, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u (parabolicCylinder c timeRadius spaceRadius) :=
+  ParabolicHolderWith.of_space_time_holder hHs hHt hα
+    (fun {_ _} {_ _} hp hq => parabolicCylinder.corner_mem hp hq) hspace htime
+
+/-- Reverse assembly of parabolic Hölder control on a closed product parabolic cylinder — the
+interior/boundary Schauder domain `Q = I × Ω`. -/
+theorem ParabolicHolderWith.of_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u (parabolicClosedCylinder c timeRadius spaceRadius) :=
+  ParabolicHolderWith.of_space_time_holder hHs hHt hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedCylinder.corner_mem hp hq) hspace htime
+
+/-- Reverse assembly of parabolic Hölder control on an open parabolic ball. -/
+theorem ParabolicHolderWith.of_space_time_holder_parabolicBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α R : ℝ} {u : ℝ × X → E} {c : ℝ × X}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X}, (t, x) ∈ parabolicBall c R → (t, y) ∈ parabolicBall c R →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X}, (t, x) ∈ parabolicBall c R → (τ, x) ∈ parabolicBall c R →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u (parabolicBall c R) :=
+  ParabolicHolderWith.of_space_time_holder hHs hHt hα
+    (fun {_ _} {_ _} hp hq => parabolicBall.corner_mem hp hq) hspace htime
+
+/-- Reverse assembly of parabolic Hölder control on a closed parabolic ball. -/
+theorem ParabolicHolderWith.of_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α R : ℝ} {u : ℝ × X → E} {c : ℝ × X}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u (parabolicClosedBall c R) :=
+  ParabolicHolderWith.of_space_time_holder hHs hHt hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq) hspace htime
+
+/-- Reverse assembly of parabolic `C^{0,α}` control on a closed product parabolic cylinder — the
+Schauder domain — from sup control and separate spatial/temporal Hölder control. -/
+theorem ParabolicC0AlphaWith.of_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {B Hs Ht α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ}
+    (hbound : ParabolicBoundedWith B u (parabolicClosedCylinder c timeRadius spaceRadius))
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaWith B (Hs + Ht) α u (parabolicClosedCylinder c timeRadius spaceRadius) :=
+  ⟨hbound, ParabolicHolderWith.of_space_time_holder_parabolicClosedCylinder hHs hHt hα hspace htime⟩
+
+/-- Reverse assembly of parabolic `C^{0,α}` control on a closed parabolic ball from sup control and
+separate spatial/temporal Hölder control. -/
+theorem ParabolicC0AlphaWith.of_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {B Hs Ht α R : ℝ} {u : ℝ × X → E} {c : ℝ × X}
+    (hbound : ParabolicBoundedWith B u (parabolicClosedBall c R))
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaWith B (Hs + Ht) α u (parabolicClosedBall c R) :=
+  ⟨hbound, ParabolicHolderWith.of_space_time_holder_parabolicClosedBall hHs hHt hα hspace htime⟩
+
+/-- **Reverse assembly of parabolic `C^{0,α}` membership.**  The constant-free `ParabolicC0AlphaOn`
+form: sup control plus separate spatial and temporal Hölder membership reassemble into parabolic
+`C^{0,α}` membership on a corner-closed set.  The three inputs match the shapes produced by
+`ParabolicC0AlphaOn.boundedOn`, `ParabolicHolderOn.space_slice`, and
+`ParabolicHolderOn.time_slice_half_exponent`. -/
+theorem ParabolicC0AlphaOn.of_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s)
+    (hbound : ∃ B ≥ 0, ParabolicBoundedWith B u s)
+    (hspace : ∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaOn α u s := by
+  obtain ⟨B, hB, hbound'⟩ := hbound
+  obtain ⟨Hs, hHs, hspace'⟩ := hspace
+  obtain ⟨Ht, hHt, htime'⟩ := htime
+  exact ⟨B, hB, Hs + Ht, add_nonneg hHs hHt,
+    ParabolicC0AlphaWith.of_space_time_holder hbound' hHs hHt hα hcorner hspace' htime'⟩
+
+/-- Constant-free reverse assembly of parabolic `C^{0,α}` membership on a closed product parabolic
+cylinder — the Schauder domain. -/
+theorem ParabolicC0AlphaOn.of_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α)
+    (hbound : ∃ B ≥ 0, ParabolicBoundedWith B u
+      (parabolicClosedCylinder c timeRadius spaceRadius))
+    (hspace : ∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaOn α u (parabolicClosedCylinder c timeRadius spaceRadius) :=
+  ParabolicC0AlphaOn.of_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedCylinder.corner_mem hp hq) hbound hspace htime
+
+/-- Constant-free reverse assembly of parabolic `C^{0,α}` membership on a closed parabolic ball. -/
+theorem ParabolicC0AlphaOn.of_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α)
+    (hbound : ∃ B ≥ 0, ParabolicBoundedWith B u (parabolicClosedBall c R))
+    (hspace : ∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaOn α u (parabolicClosedBall c R) :=
+  ParabolicC0AlphaOn.of_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq) hbound hspace htime
+
+/-- **Characterization of parabolic Hölder continuity.**  On a corner-closed time-space set, `u` is
+parabolic `α`-Hölder if and only if it is separately spatially `α`-Hölder (uniform in time) and
+temporally `α/2`-Hölder (uniform in space).  The forward direction is `space_slice` together with
+`time_slice_half_exponent`; the reverse direction is `of_space_time_holder`. -/
+theorem ParabolicHolderOn.iff_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s) :
+    ParabolicHolderOn α u s ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) := by
+  refine ⟨fun h => ⟨h.space_slice, h.time_slice_half_exponent⟩, ?_⟩
+  rintro ⟨hspace, htime⟩
+  exact ParabolicHolderOn.of_space_time_holder hα hcorner hspace htime
+
+/-- Characterization of parabolic Hölder continuity on a closed product parabolic cylinder. -/
+theorem ParabolicHolderOn.iff_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α) :
+    ParabolicHolderOn α u (parabolicClosedCylinder c timeRadius spaceRadius) ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicHolderOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedCylinder.corner_mem hp hq)
+
+/-- Characterization of parabolic Hölder continuity on a closed parabolic ball. -/
+theorem ParabolicHolderOn.iff_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α) :
+    ParabolicHolderOn α u (parabolicClosedBall c R) ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicHolderOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq)
+
+/-- **Characterization of parabolic `C^{0,α}` membership.**  On a corner-closed time-space set,
+`u` lies in the parabolic `C^{0,α}` class if and only if it is uniformly bounded, separately
+spatially `α`-Hölder (uniform in time), and temporally `α/2`-Hölder (uniform in space).  This is the
+full norm-level companion of `ParabolicHolderOn.iff_space_time_holder`: it additionally records the
+sup bound, so it packages the exact data (`C^0` control plus separate space/time Hölder control)
+that assembles a parabolic Schauder norm.  The forward direction is `boundedOn` together with
+`space_slice` and `time_slice_half_exponent`; the reverse direction is `of_space_time_holder`. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s) :
+    ParabolicC0AlphaOn α u s ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u s) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) := by
+  refine ⟨fun h => ⟨h.boundedOn, h.space_slice, h.time_slice_half_exponent⟩, ?_⟩
+  rintro ⟨hbound, hspace, htime⟩
+  exact ParabolicC0AlphaOn.of_space_time_holder hα hcorner hbound hspace htime
+
+/-- Characterization of parabolic `C^{0,α}` membership on a closed product parabolic cylinder — the
+Schauder domain. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α) :
+    ParabolicC0AlphaOn α u (parabolicClosedCylinder c timeRadius spaceRadius) ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u
+        (parabolicClosedCylinder c timeRadius spaceRadius)) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicC0AlphaOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedCylinder.corner_mem hp hq)
+
+/-- Characterization of parabolic `C^{0,α}` membership on a closed parabolic ball. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α) :
+    ParabolicC0AlphaOn α u (parabolicClosedBall c R) ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u (parabolicClosedBall c R)) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicC0AlphaOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq)
+
+/-- Characterization of parabolic Hölder continuity on an open product parabolic cylinder — the
+interior Schauder domain. -/
+theorem ParabolicHolderOn.iff_space_time_holder_parabolicCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α) :
+    ParabolicHolderOn α u (parabolicCylinder c timeRadius spaceRadius) ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        (t, y) ∈ parabolicCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        (τ, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicHolderOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicCylinder.corner_mem hp hq)
+
+/-- Characterization of parabolic Hölder continuity on an open parabolic ball. -/
+theorem ParabolicHolderOn.iff_space_time_holder_parabolicBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α) :
+    ParabolicHolderOn α u (parabolicBall c R) ↔
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicBall c R → (t, y) ∈ parabolicBall c R →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicBall c R → (τ, x) ∈ parabolicBall c R →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicHolderOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicBall.corner_mem hp hq)
+
+/-- Characterization of parabolic `C^{0,α}` membership on an open product parabolic cylinder — the
+interior Schauder domain. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α) :
+    ParabolicC0AlphaOn α u (parabolicCylinder c timeRadius spaceRadius) ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u
+        (parabolicCylinder c timeRadius spaceRadius)) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        (t, y) ∈ parabolicCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        (τ, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicC0AlphaOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicCylinder.corner_mem hp hq)
+
+/-- Characterization of parabolic `C^{0,α}` membership on an open parabolic ball. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α) :
+    ParabolicC0AlphaOn α u (parabolicBall c R) ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u (parabolicBall c R)) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicBall c R → (t, y) ∈ parabolicBall c R →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicBall c R → (τ, x) ∈ parabolicBall c R →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicC0AlphaOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicBall.corner_mem hp hq)
+
+/-! ### Closedness of the parabolic classes under pointwise limits
+
+A parabolic Hölder bound with a *fixed* constant, a uniform sup bound, and the combined `C^{0,α}`
+control each pass to pointwise limits of a family of functions.  These are the closedness properties
+behind completeness of the parabolic Hölder space: a Cauchy sequence in the parabolic `C^{0,α}` norm
+has (in particular) a pointwise limit, and its uniform sup/Hölder bounds are inherited by that limit.
+The index is an arbitrary `NeBot` filter, so the same statement covers sequential (`atTop`) limits and
+net limits of approximation schemes. -/
+
+/-- A parabolic Hölder bound with a fixed constant `C` is inherited by any pointwise limit. -/
+theorem ParabolicHolderWith.of_tendsto
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {C α : ℝ} {f : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hf : ∀ i, ParabolicHolderWith C α (f i) s)
+    (hg : ∀ ⦃p : ℝ × X⦄, p ∈ s → Filter.Tendsto (fun i => f i p) l (𝓝 (g p))) :
+    ParabolicHolderWith C α g s := by
+  intro p hp q hq
+  have hlim : Filter.Tendsto (fun i => ‖f i p - f i q‖) l (𝓝 ‖g p - g q‖) :=
+    ((hg hp).sub (hg hq)).norm
+  refine le_of_tendsto hlim ?_
+  filter_upwards with i using hf i hp hq
+
+/-- A uniform sup bound `B` is inherited by any pointwise limit. -/
+theorem ParabolicBoundedWith.of_tendsto
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {B : ℝ} {f : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hf : ∀ i, ParabolicBoundedWith B (f i) s)
+    (hg : ∀ ⦃p : ℝ × X⦄, p ∈ s → Filter.Tendsto (fun i => f i p) l (𝓝 (g p))) :
+    ParabolicBoundedWith B g s := by
+  intro p hp
+  have hlim : Filter.Tendsto (fun i => ‖f i p‖) l (𝓝 ‖g p‖) := (hg hp).norm
+  refine le_of_tendsto hlim ?_
+  filter_upwards with i using hf i hp
+
+/-- Combined parabolic `C^{0,α}` control (fixed sup and Hölder constants) is inherited by any
+pointwise limit. -/
+theorem ParabolicC0AlphaWith.of_tendsto
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {B H α : ℝ} {f : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hf : ∀ i, ParabolicC0AlphaWith B H α (f i) s)
+    (hg : ∀ ⦃p : ℝ × X⦄, p ∈ s → Filter.Tendsto (fun i => f i p) l (𝓝 (g p))) :
+    ParabolicC0AlphaWith B H α g s :=
+  ⟨ParabolicBoundedWith.of_tendsto (fun i => (hf i).1) hg,
+   ParabolicHolderWith.of_tendsto (fun i => (hf i).2) hg⟩
+
+/-- A parabolic Hölder bound with a fixed constant `C` is inherited by any uniform limit on `s`:
+the parabolic `α`-Hölder ball is closed in the topology of uniform convergence. -/
+theorem ParabolicHolderWith.of_tendstoUniformlyOn
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {C α : ℝ} {F : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hF : ∀ i, ParabolicHolderWith C α (F i) s)
+    (hg : TendstoUniformlyOn F g l s) :
+    ParabolicHolderWith C α g s :=
+  ParabolicHolderWith.of_tendsto hF (fun _ hp => hg.tendsto_at hp)
+
+/-- A uniform sup bound `B` is inherited by any uniform limit on `s`. -/
+theorem ParabolicBoundedWith.of_tendstoUniformlyOn
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {B : ℝ} {F : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hF : ∀ i, ParabolicBoundedWith B (F i) s)
+    (hg : TendstoUniformlyOn F g l s) :
+    ParabolicBoundedWith B g s :=
+  ParabolicBoundedWith.of_tendsto hF (fun _ hp => hg.tendsto_at hp)
+
+/-- Combined parabolic `C^{0,α}` control (fixed sup and Hölder constants) is inherited by any uniform
+limit on `s`: the parabolic `C^{0,α}` ball is closed in the topology of uniform convergence, the
+closedness underlying completeness of the parabolic Hölder space. -/
+theorem ParabolicC0AlphaWith.of_tendstoUniformlyOn
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {B H α : ℝ} {F : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hF : ∀ i, ParabolicC0AlphaWith B H α (F i) s)
+    (hg : TendstoUniformlyOn F g l s) :
+    ParabolicC0AlphaWith B H α g s :=
+  ParabolicC0AlphaWith.of_tendsto hF (fun _ hp => hg.tendsto_at hp)
+
+/-!
+### The parabolic Hölder seminorm as an `ℝ`-valued functional
+
+Realizing the parabolic `C^{0,α}` control predicates as genuine `ℝ`-valued functionals is the
+first packaging step toward the parabolic Hölder *Banach space* (completeness of which is the
+inheritance step recorded above).  We take the seminorm/`sup`-norm to be the least admissible
+constant, `sInf` of the (closed, upward) set of valid constants.  The defining set is bounded below
+by `0` and, when the function lies in the class, nonempty; the infimum is then *achieved* (it is
+itself a valid constant), so these functionals are honest least Hölder/sup constants rather than
+mere lower bounds.
+-/
+
+/-- The parabolic Hölder seminorm of `u` on `s`: the least nonnegative constant for which the
+parabolic `α`-Hölder estimate holds.  When `u` is not parabolic `α`-Hölder on `s` the defining
+constant set is empty and the seminorm is `0` by the `sInf` convention. -/
+def parabolicHolderSeminorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : ℝ :=
+  sInf {C : ℝ | 0 ≤ C ∧ ParabolicHolderWith C α u s}
+
+/-- The parabolic Hölder seminorm is nonnegative. -/
+theorem parabolicHolderSeminorm_nonneg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    0 ≤ parabolicHolderSeminorm α u s :=
+  Real.sInf_nonneg fun _ hx => hx.1
+
+/-- The parabolic Hölder seminorm is a lower bound for every admissible Hölder constant: it is the
+*least* nonnegative constant that works. -/
+theorem parabolicHolderSeminorm_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α C : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC0 : 0 ≤ C) (hC : ParabolicHolderWith C α u s) :
+    parabolicHolderSeminorm α u s ≤ C :=
+  csInf_le ⟨0, fun _ hx => hx.1⟩ ⟨hC0, hC⟩
+
+/-- **Achievement of the parabolic Hölder seminorm.**  If `u` is parabolic `α`-Hölder on `s`, then
+the estimate holds with the seminorm itself as the constant: the infimum of admissible constants is
+attained.  This is what makes `parabolicHolderSeminorm` a genuine least Hölder constant. -/
+theorem parabolicHolderWith_parabolicHolderSeminorm
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) :
+    ParabolicHolderWith (parabolicHolderSeminorm α u s) α u s := by
+  obtain ⟨C, hC0, hC⟩ := hu
+  unfold parabolicHolderSeminorm
+  intro p hp q hq
+  have hSne : ({C : ℝ | 0 ≤ C ∧ ParabolicHolderWith C α u s}).Nonempty := ⟨C, hC0, hC⟩
+  have ht : (0 : ℝ) ≤ parabolicDistance p q ^ α :=
+    Real.rpow_nonneg (parabolicDistance.nonneg p q) α
+  rcases lt_or_eq_of_le ht with ht' | ht'
+  · rw [← div_le_iff₀ ht']
+    refine le_csInf hSne ?_
+    rintro C' ⟨-, hC'⟩
+    rw [div_le_iff₀ ht']
+    exact hC' hp hq
+  · rw [← ht', mul_zero]
+    have h := hC hp hq
+    rwa [← ht', mul_zero] at h
+
+/-- A function is parabolic `α`-Hölder on `s` iff the estimate holds with the seminorm as the
+constant.  This packages `ParabolicHolderOn` as attainment of the `ℝ`-valued seminorm functional. -/
+theorem parabolicHolderOn_iff_parabolicHolderWith_seminorm
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} :
+    ParabolicHolderOn α u s ↔ ParabolicHolderWith (parabolicHolderSeminorm α u s) α u s :=
+  ⟨parabolicHolderWith_parabolicHolderSeminorm,
+    fun h => ⟨parabolicHolderSeminorm α u s, parabolicHolderSeminorm_nonneg α u s, h⟩⟩
+
+/-- The parabolic sup norm of `u` on `s`: the least nonnegative uniform bound for `‖u ·‖` on `s`.
+When `u` is unbounded on `s` the defining set is empty and the value is `0` by the `sInf`
+convention. -/
+def parabolicSupNorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (u : ℝ × X → E) (s : Set (ℝ × X)) : ℝ :=
+    sInf {B : ℝ | 0 ≤ B ∧ ParabolicBoundedWith B u s}
+
+/-- The parabolic sup norm is nonnegative. -/
+theorem parabolicSupNorm_nonneg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (u : ℝ × X → E) (s : Set (ℝ × X)) :
+      0 ≤ parabolicSupNorm u s :=
+    Real.sInf_nonneg fun _ hx => hx.1
+
+/-- The parabolic sup norm is a lower bound for every admissible uniform bound. -/
+theorem parabolicSupNorm_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {B : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+      (hB0 : 0 ≤ B) (hB : ParabolicBoundedWith B u s) :
+      parabolicSupNorm u s ≤ B :=
+    csInf_le ⟨0, fun _ hx => hx.1⟩ ⟨hB0, hB⟩
+
+/-- **Achievement of the parabolic sup norm.**  If `u` has some nonnegative uniform bound on `s`,
+then it is bounded by the sup norm itself. -/
+theorem parabolicBoundedWith_parabolicSupNorm
+      {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+      ParabolicBoundedWith (parabolicSupNorm u s) u s := by
+    obtain ⟨B, hB0, hB⟩ := hu
+    unfold parabolicSupNorm
+    intro p hp
+    refine le_csInf ⟨B, hB0, hB⟩ ?_
+    rintro B' ⟨-, hB'⟩
+    exact hB' hp
+
+/-- A function has a nonnegative uniform bound on `s` iff it is bounded by the sup-norm functional. -/
+theorem exists_parabolicBoundedWith_iff_parabolicBoundedWith_supNorm
+      {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s : Set (ℝ × X)} :
+      (∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) ↔
+        ParabolicBoundedWith (parabolicSupNorm u s) u s :=
+    ⟨parabolicBoundedWith_parabolicSupNorm,
+      fun h => ⟨parabolicSupNorm u s, parabolicSupNorm_nonneg u s, h⟩⟩
+
+/-- The parabolic `C^{0,α}` norm of `u` on `s`: the sum of the parabolic sup norm (`C^0` part) and
+the parabolic Hölder seminorm.  This is the honest `ℝ`-valued `C^{0,α}` norm functional. -/
+def parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : ℝ :=
+    parabolicSupNorm u s + parabolicHolderSeminorm α u s
+
+/-- The parabolic `C^{0,α}` norm is nonnegative. -/
+theorem parabolicC0AlphaNorm_nonneg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+      0 ≤ parabolicC0AlphaNorm α u s :=
+    add_nonneg (parabolicSupNorm_nonneg u s) (parabolicHolderSeminorm_nonneg α u s)
+
+/-- The parabolic `C^{0,α}` norm is dominated by the sum of any admissible sup and Hölder
+constants. -/
+theorem parabolicC0AlphaNorm_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α B H : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+      (hB0 : 0 ≤ B) (hH0 : 0 ≤ H) (h : ParabolicC0AlphaWith B H α u s) :
+      parabolicC0AlphaNorm α u s ≤ B + H :=
+    add_le_add (parabolicSupNorm_le hB0 h.1) (parabolicHolderSeminorm_le hH0 h.2)
+
+/-- **Achievement of the parabolic `C^{0,α}` norm constants.**  A function in the parabolic
+`C^{0,α}` class satisfies the combined control with its own sup norm and Hölder seminorm as the
+constants: both extremal constants are attained simultaneously. -/
+theorem parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm
+      {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ParabolicC0AlphaOn α u s) :
+      ParabolicC0AlphaWith (parabolicSupNorm u s) (parabolicHolderSeminorm α u s) α u s := by
+    obtain ⟨B, hB0, H, hH0, hbdd, hhol⟩ := hu
+    exact ⟨parabolicBoundedWith_parabolicSupNorm ⟨B, hB0, hbdd⟩,
+      parabolicHolderWith_parabolicHolderSeminorm ⟨H, hH0, hhol⟩⟩
+
+/-- A function is in the parabolic `C^{0,α}` class iff the combined control holds with the sup-norm
+and Hölder-seminorm functionals as constants. -/
+theorem parabolicC0AlphaOn_iff_parabolicC0AlphaWith_norms
+      {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} :
+      ParabolicC0AlphaOn α u s ↔
+        ParabolicC0AlphaWith (parabolicSupNorm u s) (parabolicHolderSeminorm α u s) α u s :=
+    ⟨parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm,
+      fun h => ⟨parabolicSupNorm u s, parabolicSupNorm_nonneg u s,
+        parabolicHolderSeminorm α u s, parabolicHolderSeminorm_nonneg α u s, h⟩⟩
+
+/-- **Subadditivity of the parabolic Hölder seminorm** (the triangle inequality for the seminorm):
+one of the two seminorm axioms making `parabolicHolderSeminorm` a genuine seminorm. -/
+theorem parabolicHolderSeminorm_add_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
+      parabolicHolderSeminorm α (fun z => u z + v z) s
+        ≤ parabolicHolderSeminorm α u s + parabolicHolderSeminorm α v s :=
+    parabolicHolderSeminorm_le
+      (add_nonneg (parabolicHolderSeminorm_nonneg α u s) (parabolicHolderSeminorm_nonneg α v s))
+      ((parabolicHolderWith_parabolicHolderSeminorm hu).add
+        (parabolicHolderWith_parabolicHolderSeminorm hv))
+
+/-- **Subadditivity of the parabolic sup norm** (the triangle inequality for the `C^0` part). -/
+theorem parabolicSupNorm_add_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u v : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s)
+      (hv : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B v s) :
+      parabolicSupNorm (fun z => u z + v z) s ≤ parabolicSupNorm u s + parabolicSupNorm v s :=
+    parabolicSupNorm_le
+      (add_nonneg (parabolicSupNorm_nonneg u s) (parabolicSupNorm_nonneg v s))
+      ((parabolicBoundedWith_parabolicSupNorm hu).add
+        (parabolicBoundedWith_parabolicSupNorm hv))
+
+/-- **Triangle inequality for the parabolic `C^{0,α}` norm** on the class of parabolic `C^{0,α}`
+functions: `‖u + v‖ ≤ ‖u‖ + ‖v‖`.  This is the subadditivity needed for the parabolic Hölder
+seminormed/Banach structure. -/
+theorem parabolicC0AlphaNorm_add_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+      parabolicC0AlphaNorm α (fun z => u z + v z) s
+        ≤ parabolicC0AlphaNorm α u s + parabolicC0AlphaNorm α v s := by
+    obtain ⟨Bu, hBu0, Hu, hHu0, hbu, hhu⟩ := hu
+    obtain ⟨Bv, hBv0, Hv, hHv0, hbv, hhv⟩ := hv
+    have hsup : parabolicSupNorm (fun z => u z + v z) s
+        ≤ parabolicSupNorm u s + parabolicSupNorm v s :=
+      parabolicSupNorm_add_le ⟨Bu, hBu0, hbu⟩ ⟨Bv, hBv0, hbv⟩
+    have hhol : parabolicHolderSeminorm α (fun z => u z + v z) s
+        ≤ parabolicHolderSeminorm α u s + parabolicHolderSeminorm α v s :=
+      parabolicHolderSeminorm_add_le ⟨Hu, hHu0, hhu⟩ ⟨Hv, hHv0, hhv⟩
+    simp only [parabolicC0AlphaNorm]
+    linarith
+
+/-- **Integer homogeneity bound for the parabolic Hölder seminorm.**  Scaling by an integer scales
+the seminorm by at most `‖n‖`. -/
+theorem parabolicHolderSeminorm_zsmul_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (n : ℤ)
+      (hu : ParabolicHolderOn α u s) :
+      parabolicHolderSeminorm α (fun z => n • u z) s ≤ ‖n‖ * parabolicHolderSeminorm α u s :=
+    parabolicHolderSeminorm_le
+      (mul_nonneg (norm_nonneg n) (parabolicHolderSeminorm_nonneg α u s))
+      ((parabolicHolderWith_parabolicHolderSeminorm hu).zsmul n)
+
+/-- **Integer homogeneity bound for the parabolic sup norm.** -/
+theorem parabolicSupNorm_zsmul_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s : Set (ℝ × X)} (n : ℤ)
+      (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+      parabolicSupNorm (fun z => n • u z) s ≤ ‖n‖ * parabolicSupNorm u s :=
+    parabolicSupNorm_le
+      (mul_nonneg (norm_nonneg n) (parabolicSupNorm_nonneg u s))
+      ((parabolicBoundedWith_parabolicSupNorm hu).zsmul n)
+
+/-- The parabolic Hölder seminorm of the zero function is `0` (the second seminorm axiom). -/
+theorem parabolicHolderSeminorm_zero {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (α : ℝ) (s : Set (ℝ × X)) :
+      parabolicHolderSeminorm α (fun _ : ℝ × X => (0 : E)) s = 0 := by
+    refine le_antisymm ?_ (parabolicHolderSeminorm_nonneg α _ s)
+    exact parabolicHolderSeminorm_le le_rfl (ParabolicHolderWith.const (C := 0) (0 : E) le_rfl)
+
+/-- The parabolic sup norm of the zero function is `0`. -/
+theorem parabolicSupNorm_zero {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (s : Set (ℝ × X)) :
+      parabolicSupNorm (fun _ : ℝ × X => (0 : E)) s = 0 := by
+    refine le_antisymm ?_ (parabolicSupNorm_nonneg _ s)
+    exact parabolicSupNorm_le le_rfl (ParabolicBoundedWith.const (B := 0) (0 : E) (le_of_eq norm_zero))
+
+/-- **Domain monotonicity of the parabolic Hölder seminorm.**  Restricting the domain does not
+increase the seminorm (a smaller domain has fewer pairs to control). -/
+theorem parabolicHolderSeminorm_mono_domain {X E : Type*} [PseudoMetricSpace X]
+      [NormedAddCommGroup E] {α : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+      (hst : s ⊆ t) (ht : ParabolicHolderOn α u t) :
+      parabolicHolderSeminorm α u s ≤ parabolicHolderSeminorm α u t := by
+    refine parabolicHolderSeminorm_le (parabolicHolderSeminorm_nonneg α u t) ?_
+    intro p hp q hq
+    exact (parabolicHolderWith_parabolicHolderSeminorm ht) (hst hp) (hst hq)
+
+/-- **Domain monotonicity of the parabolic sup norm.** -/
+theorem parabolicSupNorm_mono_domain {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s t : Set (ℝ × X)}
+      (hst : s ⊆ t) (ht : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u t) :
+      parabolicSupNorm u s ≤ parabolicSupNorm u t := by
+    refine parabolicSupNorm_le (parabolicSupNorm_nonneg u t) ?_
+    intro p hp
+    exact (parabolicBoundedWith_parabolicSupNorm ht) (hst hp)
+
+/-- Pointwise readout of the parabolic Hölder seminorm: for a parabolic `α`-Hölder function the
+Hölder estimate holds with the seminorm as its constant. -/
+theorem norm_sub_le_parabolicHolderSeminorm {X E : Type*} [PseudoMetricSpace X]
+      [NormedAddCommGroup E] {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} {p q : ℝ × X}
+      (hu : ParabolicHolderOn α u s) (hp : p ∈ s) (hq : q ∈ s) :
+      ‖u p - u q‖ ≤ parabolicHolderSeminorm α u s * parabolicDistance p q ^ α :=
+    (parabolicHolderWith_parabolicHolderSeminorm hu) hp hq
+
+/-- Pointwise readout of the parabolic sup norm: a bounded function is pointwise dominated by its
+sup norm. -/
+theorem norm_le_parabolicSupNorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s : Set (ℝ × X)} {p : ℝ × X}
+      (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) (hp : p ∈ s) :
+      ‖u p‖ ≤ parabolicSupNorm u s :=
+    (parabolicBoundedWith_parabolicSupNorm hu) hp
+
+/-- **Lower semicontinuity readout toward completeness.**  A pointwise limit of functions in a fixed
+parabolic `C^{0,α}` ball has `C^{0,α}` norm at most the sum of the fixed sup and Hölder constants:
+the norm functional does not blow up under pointwise limits.  Combined with the closedness lemmas
+`ParabolicC0AlphaWith.of_tendsto`, this is the norm-level inheritance behind completeness. -/
+theorem parabolicC0AlphaNorm_le_of_tendsto {X E ι : Type*} [PseudoMetricSpace X]
+      [NormedAddCommGroup E] {l : Filter ι} [l.NeBot] {B H α : ℝ}
+      {f : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+      (hB0 : 0 ≤ B) (hH0 : 0 ≤ H)
+      (hf : ∀ i, ParabolicC0AlphaWith B H α (f i) s)
+      (hg : ∀ ⦃p : ℝ × X⦄, p ∈ s → Filter.Tendsto (fun i => f i p) l (𝓝 (g p))) :
+      parabolicC0AlphaNorm α g s ≤ B + H :=
+    parabolicC0AlphaNorm_le hB0 hH0 (ParabolicC0AlphaWith.of_tendsto hf hg)
+
+/-- The parabolic Hölder seminorm is invariant under negation (unconditionally: the admissible
+constant sets coincide). -/
+theorem parabolicHolderSeminorm_neg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicHolderSeminorm α (fun z => -u z) s = parabolicHolderSeminorm α u s := by
+  unfold parabolicHolderSeminorm
+  congr 1
+  ext C
+  simp only [Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hC0, h⟩; exact ⟨hC0, by simpa using h.neg⟩
+  · rintro ⟨hC0, h⟩; exact ⟨hC0, h.neg⟩
+
+/-- The parabolic sup norm is invariant under negation. -/
+theorem parabolicSupNorm_neg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicSupNorm (fun z => -u z) s = parabolicSupNorm u s := by
+  unfold parabolicSupNorm
+  congr 1
+  ext B
+  simp only [Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hB0, h⟩; exact ⟨hB0, by simpa using h.neg⟩
+  · rintro ⟨hB0, h⟩; exact ⟨hB0, h.neg⟩
+
+/-- The parabolic `C^{0,α}` norm is invariant under negation. -/
+theorem parabolicC0AlphaNorm_neg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicC0AlphaNorm α (fun z => -u z) s = parabolicC0AlphaNorm α u s := by
+  unfold parabolicC0AlphaNorm
+  rw [parabolicSupNorm_neg, parabolicHolderSeminorm_neg]
+
+/-- The parabolic `C^{0,α}` norm of the zero function is `0`. -/
+theorem parabolicC0AlphaNorm_zero {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (s : Set (ℝ × X)) :
+    parabolicC0AlphaNorm α (fun _ : ℝ × X => (0 : E)) s = 0 := by
+  unfold parabolicC0AlphaNorm
+  rw [parabolicSupNorm_zero, parabolicHolderSeminorm_zero, add_zero]
+
+/-- Triangle inequality for the parabolic Hölder seminorm of a difference. -/
+theorem parabolicHolderSeminorm_sub_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
+    parabolicHolderSeminorm α (fun z => u z - v z) s
+      ≤ parabolicHolderSeminorm α u s + parabolicHolderSeminorm α v s :=
+  parabolicHolderSeminorm_le
+    (add_nonneg (parabolicHolderSeminorm_nonneg α u s) (parabolicHolderSeminorm_nonneg α v s))
+    ((parabolicHolderWith_parabolicHolderSeminorm hu).sub
+      (parabolicHolderWith_parabolicHolderSeminorm hv))
+
+/-- Triangle inequality for the parabolic sup norm of a difference. -/
+theorem parabolicSupNorm_sub_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s)
+    (hv : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B v s) :
+    parabolicSupNorm (fun z => u z - v z) s ≤ parabolicSupNorm u s + parabolicSupNorm v s :=
+  parabolicSupNorm_le
+    (add_nonneg (parabolicSupNorm_nonneg u s) (parabolicSupNorm_nonneg v s))
+    ((parabolicBoundedWith_parabolicSupNorm hu).sub
+      (parabolicBoundedWith_parabolicSupNorm hv))
+
+/-- Triangle inequality for the parabolic `C^{0,α}` norm of a difference: the distance form of the
+norm subadditivity, used to compare two parabolic `C^{0,α}` functions. -/
+theorem parabolicC0AlphaNorm_sub_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicC0AlphaNorm α (fun z => u z - v z) s
+      ≤ parabolicC0AlphaNorm α u s + parabolicC0AlphaNorm α v s := by
+  obtain ⟨Bu, hBu0, Hu, hHu0, hbu, hhu⟩ := hu
+  obtain ⟨Bv, hBv0, Hv, hHv0, hbv, hhv⟩ := hv
+  have hsup : parabolicSupNorm (fun z => u z - v z) s
+      ≤ parabolicSupNorm u s + parabolicSupNorm v s :=
+    parabolicSupNorm_sub_le ⟨Bu, hBu0, hbu⟩ ⟨Bv, hBv0, hbv⟩
+  have hhol : parabolicHolderSeminorm α (fun z => u z - v z) s
+      ≤ parabolicHolderSeminorm α u s + parabolicHolderSeminorm α v s :=
+    parabolicHolderSeminorm_sub_le ⟨Hu, hHu0, hhu⟩ ⟨Hv, hHv0, hhv⟩
+  simp only [parabolicC0AlphaNorm]
+  linarith
+
+/-- The parabolic Hölder seminorm depends only on the values of `u` on `s`. -/
+theorem parabolicHolderSeminorm_congr {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)} (h : Set.EqOn u v s) :
+    parabolicHolderSeminorm α u s = parabolicHolderSeminorm α v s := by
+  unfold parabolicHolderSeminorm
+  congr 1
+  ext C
+  simp only [Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hC0, hu⟩
+    refine ⟨hC0, fun p hp q hq => ?_⟩
+    rw [← h hp, ← h hq]; exact hu hp hq
+  · rintro ⟨hC0, hv⟩
+    refine ⟨hC0, fun p hp q hq => ?_⟩
+    rw [h hp, h hq]; exact hv hp hq
+
+/-- The parabolic sup norm depends only on the values of `u` on `s`. -/
+theorem parabolicSupNorm_congr {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {u v : ℝ × X → E} {s : Set (ℝ × X)} (h : Set.EqOn u v s) :
+    parabolicSupNorm u s = parabolicSupNorm v s := by
+  unfold parabolicSupNorm
+  congr 1
+  ext B
+  simp only [Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hB0, hu⟩
+    refine ⟨hB0, fun p hp => ?_⟩
+    rw [← h hp]; exact hu hp
+  · rintro ⟨hB0, hv⟩
+    refine ⟨hB0, fun p hp => ?_⟩
+    rw [h hp]; exact hv hp
+
+/-- The parabolic `C^{0,α}` norm depends only on the values of `u` on `s`. -/
+theorem parabolicC0AlphaNorm_congr {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)} (h : Set.EqOn u v s) :
+    parabolicC0AlphaNorm α u s = parabolicC0AlphaNorm α v s := by
+  unfold parabolicC0AlphaNorm
+  rw [parabolicSupNorm_congr h, parabolicHolderSeminorm_congr h]
+
+/-- The parabolic sup norm (the `C^0` part) is dominated by the full parabolic `C^{0,α}` norm.
+This lets uniform (`C^0`) control be extracted from `C^{0,α}` control — the first step toward
+completeness of the parabolic Hölder space. -/
+theorem parabolicSupNorm_le_parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicSupNorm u s ≤ parabolicC0AlphaNorm α u s := by
+  unfold parabolicC0AlphaNorm
+  exact le_add_of_nonneg_right (parabolicHolderSeminorm_nonneg α u s)
+
+/-- The parabolic Hölder seminorm is dominated by the full parabolic `C^{0,α}` norm. -/
+theorem parabolicHolderSeminorm_le_parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicHolderSeminorm α u s ≤ parabolicC0AlphaNorm α u s := by
+  unfold parabolicC0AlphaNorm
+  exact le_add_of_nonneg_left (parabolicSupNorm_nonneg u s)
+
+/-- **Pointwise domination by the full parabolic `C^{0,α}` norm.**  A function with a nonnegative
+uniform bound on `s` is pointwise dominated on `s` by its parabolic `C^{0,α}` norm. -/
+theorem norm_le_parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} {p : ℝ × X}
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) (hp : p ∈ s) :
+    ‖u p‖ ≤ parabolicC0AlphaNorm α u s :=
+  (norm_le_parabolicSupNorm hu hp).trans (parabolicSupNorm_le_parabolicC0AlphaNorm α u s)
+
+/-- **Pointwise Hölder readout against the full norm.**  For a parabolic `α`-Hölder function the
+Hölder difference estimate holds with the full parabolic `C^{0,α}` norm as its constant. -/
+theorem norm_sub_le_parabolicC0AlphaNorm_mul {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} {p q : ℝ × X}
+    (hu : ParabolicHolderOn α u s) (hp : p ∈ s) (hq : q ∈ s) :
+    ‖u p - u q‖ ≤ parabolicC0AlphaNorm α u s * parabolicDistance p q ^ α :=
+  (norm_sub_le_parabolicHolderSeminorm hu hp hq).trans
+    (mul_le_mul_of_nonneg_right (parabolicHolderSeminorm_le_parabolicC0AlphaNorm α u s)
+      (Real.rpow_nonneg (parabolicDistance.nonneg p q) α))
+
+/-- **Uniform-metric domination by the norm of a difference.**  If `u - v` is bounded on `s`, the
+pointwise distance `‖u p - v p‖` on `s` is controlled by the parabolic `C^{0,α}` norm of the
+difference.  This is the estimate that turns a `C^{0,α}`-Cauchy sequence into a uniformly Cauchy
+one, the key step toward completeness of the parabolic Hölder space. -/
+theorem norm_sub_le_parabolicC0AlphaNorm_sub {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)} {p : ℝ × X}
+    (huv : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B (fun z => u z - v z) s) (hp : p ∈ s) :
+    ‖u p - v p‖ ≤ parabolicC0AlphaNorm α (fun z => u z - v z) s :=
+  norm_le_parabolicC0AlphaNorm (α := α) huv hp
+
+/-- **Norm bound to explicit ball membership.**  If `u` is parabolic `C^{0,α}` on `s` with norm
+`≤ c`, then it satisfies the combined `C^{0,α}` control with both constants equal to `c`.  This is
+the converse packaging to `parabolicC0AlphaNorm_le`: it turns a bound on the norm functional into a
+uniform sup and Hölder estimate, the shape consumed by the closedness/limit lemmas. -/
+theorem parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α c : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hle : parabolicC0AlphaNorm α u s ≤ c) :
+    ParabolicC0AlphaWith c c α u s :=
+  (parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm hu).mono_const
+    ((parabolicSupNorm_le_parabolicC0AlphaNorm α u s).trans hle)
+    ((parabolicHolderSeminorm_le_parabolicC0AlphaNorm α u s).trans hle)
+
+/-- **Sequential completeness of the parabolic `C^{0,α}` space.**  Let `E` be complete.  A sequence
+`f` of parabolic `C^{0,α}` functions on `s` that is Cauchy in the parabolic `C^{0,α}` norm converges
+in that norm to a parabolic `C^{0,α}` limit `g`.
+
+This is the completeness (Banach) property behind the parabolic Hölder space.  The proof combines the
+three completeness-facing primitives already in place:
+
+* the uniform-metric domination `norm_sub_le_parabolicC0AlphaNorm_sub` makes each pointwise sequence
+  `n ↦ f n p` Cauchy in `E`, so (completeness of `E`) it has a pointwise limit `g`;
+* the closedness lemma `ParabolicC0AlphaWith.of_tendsto` shows `g` is again `C^{0,α}` (using a fixed
+  ball for the tail indices, via `parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm`);
+* the lower-semicontinuity bound `parabolicC0AlphaNorm_le_of_tendsto` upgrades pointwise convergence
+  of the differences to convergence of the parabolic `C^{0,α}` norm. -/
+theorem exists_parabolicC0AlphaOn_tendsto_of_cauchy {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [CompleteSpace E] {α : ℝ} {f : ℕ → ℝ × X → E} {s : Set (ℝ × X)}
+    (hf : ∀ n, ParabolicC0AlphaOn α (f n) s)
+    (hcauchy : ∀ ε > 0, ∃ N, ∀ m ≥ N, ∀ n ≥ N,
+      parabolicC0AlphaNorm α (fun z => f m z - f n z) s ≤ ε) :
+    ∃ g, ParabolicC0AlphaOn α g s ∧
+      ∀ ε > 0, ∃ N, ∀ n ≥ N, parabolicC0AlphaNorm α (fun z => f n z - g z) s ≤ ε := by
+  classical
+  have hsub : ∀ m n, ParabolicC0AlphaOn α (fun z => f m z - f n z) s :=
+    fun m n => (hf m).sub (hf n)
+  have hsub_bdd : ∀ m n,
+      ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B (fun z => f m z - f n z) s := by
+    intro m n
+    obtain ⟨B, hB, H, hH, hbdd, hhol⟩ := hsub m n
+    exact ⟨B, hB, hbdd⟩
+  -- pointwise Cauchy: each `n ↦ f n p` (`p ∈ s`) is Cauchy in `E`.
+  have hpt_cauchy : ∀ p ∈ s, CauchySeq (fun n => f n p) := by
+    intro p hp
+    rw [Metric.cauchySeq_iff]
+    intro ε hε
+    obtain ⟨N, hN⟩ := hcauchy (ε / 2) (by positivity)
+    refine ⟨N, fun m hm n hn => ?_⟩
+    have hle2 : dist (f m p) (f n p) ≤ ε / 2 := by
+      rw [dist_eq_norm]
+      exact (norm_sub_le_parabolicC0AlphaNorm_sub (hsub_bdd m n) hp).trans (hN m hm n hn)
+    linarith
+  -- the pointwise limit `g`.
+  have hlim : ∀ p ∈ s, ∃ L, Filter.Tendsto (fun n => f n p) Filter.atTop (nhds L) :=
+    fun p hp => cauchySeq_tendsto_of_complete (hpt_cauchy p hp)
+  let g : ℝ × X → E := fun p => if hp : p ∈ s then Classical.choose (hlim p hp) else 0
+  have hg : ∀ p ∈ s, Filter.Tendsto (fun n => f n p) Filter.atTop (nhds (g p)) := by
+    intro p hp
+    have : g p = Classical.choose (hlim p hp) := dif_pos hp
+    rw [this]
+    exact Classical.choose_spec (hlim p hp)
+  -- `g` is again parabolic `C^{0,α}`, via a fixed unit ball at the tail past `N₁`.
+  obtain ⟨N₁, hN₁⟩ := hcauchy 1 one_pos
+  have hball : ∀ k, ParabolicC0AlphaWith 1 1 α (fun z => f (k + N₁) z - f N₁ z) s := fun k =>
+    parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm (hsub (k + N₁) N₁)
+      (hN₁ (k + N₁) (Nat.le_add_left N₁ k) N₁ le_rfl)
+  have hgN₁_tendsto : ∀ p ∈ s,
+      Filter.Tendsto (fun k => f (k + N₁) p - f N₁ p) Filter.atTop (nhds (g p - f N₁ p)) :=
+    fun p hp => ((hg p hp).comp (Filter.tendsto_add_atTop_nat N₁)).sub tendsto_const_nhds
+  have hgN₁ : ParabolicC0AlphaWith 1 1 α (fun z => g z - f N₁ z) s :=
+    ParabolicC0AlphaWith.of_tendsto hball hgN₁_tendsto
+  have hg_class : ParabolicC0AlphaOn α g s := by
+    have hadd : ParabolicC0AlphaOn α (fun z => f N₁ z + (g z - f N₁ z)) s :=
+      (hf N₁).add ⟨1, zero_le_one, 1, zero_le_one, hgN₁⟩
+    have heq : (fun z => f N₁ z + (g z - f N₁ z)) = g := by funext z; abel
+    rwa [heq] at hadd
+  -- norm convergence `‖f n - g‖ → 0`.
+  refine ⟨g, hg_class, ?_⟩
+  intro ε hε
+  obtain ⟨N, hN⟩ := hcauchy (ε / 2) (by positivity)
+  refine ⟨N, fun n hn => ?_⟩
+  have hballC : ∀ k, ParabolicC0AlphaWith (ε / 2) (ε / 2) α (fun z => f n z - f (k + N) z) s :=
+    fun k => parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm (hsub n (k + N))
+      (hN n hn (k + N) (Nat.le_add_left N k))
+  have htendC : ∀ p ∈ s,
+      Filter.Tendsto (fun k => f n p - f (k + N) p) Filter.atTop (nhds (f n p - g p)) :=
+    fun p hp => tendsto_const_nhds.sub ((hg p hp).comp (Filter.tendsto_add_atTop_nat N))
+  have hbound : parabolicC0AlphaNorm α (fun z => f n z - g z) s ≤ ε / 2 + ε / 2 :=
+    parabolicC0AlphaNorm_le_of_tendsto (by positivity) (by positivity) hballC htendC
+  linarith
+
+/-- **Reverse triangle inequality for the parabolic `C^{0,α}` norm.**  The norm difference of two
+parabolic `C^{0,α}` functions is dominated by the norm of their difference — the `1`-Lipschitz
+continuity of the norm functional.  Combined with `exists_parabolicC0AlphaOn_tendsto_of_cauchy`,
+this shows the parabolic `C^{0,α}` norms of a Cauchy sequence converge to the norm of the limit. -/
+theorem parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicC0AlphaNorm α u s - parabolicC0AlphaNorm α v s
+      ≤ parabolicC0AlphaNorm α (fun z => u z - v z) s := by
+  have key : parabolicC0AlphaNorm α u s
+      ≤ parabolicC0AlphaNorm α v s + parabolicC0AlphaNorm α (fun z => u z - v z) s := by
+    have hle := parabolicC0AlphaNorm_add_le hv (hu.sub hv)
+    have heq : (fun z => v z + (u z - v z)) = u := by funext z; abel
+    rwa [heq] at hle
+  linarith
+
+/-- The absolute norm difference of two parabolic `C^{0,α}` functions is dominated by the norm of
+their difference (the two-sided reverse triangle inequality / norm continuity). -/
+theorem abs_parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    |parabolicC0AlphaNorm α u s - parabolicC0AlphaNorm α v s|
+      ≤ parabolicC0AlphaNorm α (fun z => u z - v z) s := by
+  rw [abs_sub_le_iff]
+  refine ⟨parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub hu hv, ?_⟩
+  have heq : parabolicC0AlphaNorm α (fun z => v z - u z) s
+      = parabolicC0AlphaNorm α (fun z => u z - v z) s := by
+    have hfun : (fun z => v z - u z) = (fun z => -(u z - v z)) := by funext z; abel
+    rw [hfun, parabolicC0AlphaNorm_neg]
+  rw [← heq]
+  exact parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub hv hu
+
+/-- **Scalar homogeneity bound for the parabolic sup norm.**  Scaling by a normed-field scalar
+`c` scales the parabolic sup norm by at most `‖c‖`.  This is the `norm_smul_le`-shaped
+homogeneity primitive for the `C^0` part of the parabolic `C^{0,α}` norm. -/
+theorem parabolicSupNorm_const_smul_le {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+    parabolicSupNorm (fun z => c • u z) s ≤ ‖c‖ * parabolicSupNorm u s :=
+  parabolicSupNorm_le
+    (mul_nonneg (norm_nonneg c) (parabolicSupNorm_nonneg u s))
+    ((parabolicBoundedWith_parabolicSupNorm hu).smul c)
+
+/-- **Scalar homogeneity of the parabolic sup norm** (equality form): `‖c • u‖₀ = ‖c‖ ‖u‖₀`. -/
+theorem parabolicSupNorm_const_smul {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+    parabolicSupNorm (fun z => c • u z) s = ‖c‖ * parabolicSupNorm u s := by
+  refine le_antisymm (parabolicSupNorm_const_smul_le c hu) ?_
+  rcases eq_or_ne c 0 with hc | hc
+  · subst hc
+    rw [norm_zero, zero_mul]
+    exact parabolicSupNorm_nonneg _ s
+  · have hcu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B (fun z => c • u z) s := by
+      obtain ⟨B, hB, hbu⟩ := hu
+      exact ⟨‖c‖ * B, mul_nonneg (norm_nonneg c) hB, hbu.smul c⟩
+    have hkey : parabolicSupNorm u s
+        ≤ ‖c⁻¹‖ * parabolicSupNorm (fun z => c • u z) s := by
+      have h := parabolicSupNorm_const_smul_le (u := fun z => c • u z) c⁻¹ hcu
+      simpa only [inv_smul_smul₀ hc] using h
+    have hcc : ‖c‖ * ‖c⁻¹‖ = 1 := by
+      rw [← norm_mul, mul_inv_cancel₀ hc, norm_one]
+    calc ‖c‖ * parabolicSupNorm u s
+        ≤ ‖c‖ * (‖c⁻¹‖ * parabolicSupNorm (fun z => c • u z) s) :=
+          mul_le_mul_of_nonneg_left hkey (norm_nonneg c)
+      _ = (‖c‖ * ‖c⁻¹‖) * parabolicSupNorm (fun z => c • u z) s := by ring
+      _ = parabolicSupNorm (fun z => c • u z) s := by rw [hcc, one_mul]
+
+/-- **Scalar homogeneity bound for the parabolic Hölder seminorm.**  Scaling by a normed-field
+scalar `c` scales the parabolic Hölder seminorm by at most `‖c‖`. -/
+theorem parabolicHolderSeminorm_const_smul_le {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ParabolicHolderOn α u s) :
+    parabolicHolderSeminorm α (fun z => c • u z) s ≤ ‖c‖ * parabolicHolderSeminorm α u s :=
+  parabolicHolderSeminorm_le
+    (mul_nonneg (norm_nonneg c) (parabolicHolderSeminorm_nonneg α u s))
+    ((parabolicHolderWith_parabolicHolderSeminorm hu).smul c)
+
+/-- **Scalar homogeneity of the parabolic Hölder seminorm** (equality form):
+`[c • u]_α = ‖c‖ [u]_α`. -/
+theorem parabolicHolderSeminorm_const_smul {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ParabolicHolderOn α u s) :
+    parabolicHolderSeminorm α (fun z => c • u z) s = ‖c‖ * parabolicHolderSeminorm α u s := by
+  refine le_antisymm (parabolicHolderSeminorm_const_smul_le c hu) ?_
+  rcases eq_or_ne c 0 with hc | hc
+  · subst hc
+    rw [norm_zero, zero_mul]
+    exact parabolicHolderSeminorm_nonneg α _ s
+  · have hcu : ParabolicHolderOn α (fun z => c • u z) s := hu.smul c
+    have hkey : parabolicHolderSeminorm α u s
+        ≤ ‖c⁻¹‖ * parabolicHolderSeminorm α (fun z => c • u z) s := by
+      have h := parabolicHolderSeminorm_const_smul_le (u := fun z => c • u z) c⁻¹ hcu
+      simpa only [inv_smul_smul₀ hc] using h
+    have hcc : ‖c‖ * ‖c⁻¹‖ = 1 := by
+      rw [← norm_mul, mul_inv_cancel₀ hc, norm_one]
+    calc ‖c‖ * parabolicHolderSeminorm α u s
+        ≤ ‖c‖ * (‖c⁻¹‖ * parabolicHolderSeminorm α (fun z => c • u z) s) :=
+          mul_le_mul_of_nonneg_left hkey (norm_nonneg c)
+      _ = (‖c‖ * ‖c⁻¹‖) * parabolicHolderSeminorm α (fun z => c • u z) s := by ring
+      _ = parabolicHolderSeminorm α (fun z => c • u z) s := by rw [hcc, one_mul]
+
+/-- **Scalar homogeneity of the parabolic `C^{0,α}` norm** (equality form):
+`‖c • u‖_{C^{0,α}} = ‖c‖ ‖u‖_{C^{0,α}}`.  Together with subadditivity, negation invariance, and
+vanishing on zero this supplies the seminorm axioms of the parabolic `C^{0,α}` norm as a genuine
+`ℝ`-scalar seminorm — the homogeneity needed for the `NormedSpace ℝ`/Banach structure. -/
+theorem parabolicC0AlphaNorm_const_smul {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm α (fun z => c • u z) s = ‖c‖ * parabolicC0AlphaNorm α u s := by
+  obtain ⟨B, hB, H, hH, hbdd, hhol⟩ := hu
+  unfold parabolicC0AlphaNorm
+  rw [parabolicSupNorm_const_smul c ⟨B, hB, hbdd⟩,
+    parabolicHolderSeminorm_const_smul c ⟨H, hH, hhol⟩, mul_add]
+
+/-- **Scalar homogeneity bound for the parabolic `C^{0,α}` norm**: `‖c • u‖ ≤ ‖c‖ ‖u‖`. -/
+theorem parabolicC0AlphaNorm_const_smul_le {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm α (fun z => c • u z) s ≤ ‖c‖ * parabolicC0AlphaNorm α u s :=
+  le_of_eq (parabolicC0AlphaNorm_const_smul c hu)
+
+/-- **Submultiplicativity of the parabolic sup norm.**  In a normed ring the parabolic sup norm of a
+pointwise product is at most the product of the parabolic sup norms. -/
+theorem parabolicSupNorm_mul_le {X A : Type*} [PseudoMetricSpace X] [NormedRing A]
+    {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s)
+    (hv : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B v s) :
+    parabolicSupNorm (fun z => u z * v z) s
+      ≤ parabolicSupNorm u s * parabolicSupNorm v s := by
+  have hbu := parabolicBoundedWith_parabolicSupNorm hu
+  have hbv := parabolicBoundedWith_parabolicSupNorm hv
+  exact parabolicSupNorm_le
+    (mul_nonneg (parabolicSupNorm_nonneg u s) (parabolicSupNorm_nonneg v s))
+    (hbu.mul hbv (parabolicSupNorm_nonneg u s))
+
+/-- **Product estimate for the parabolic Hölder seminorm.**  The parabolic Hölder seminorm of a
+pointwise product is controlled by the Leibniz combination of sup norms and Hölder seminorms of the
+two factors. -/
+theorem parabolicHolderSeminorm_mul_le {X A : Type*} [PseudoMetricSpace X] [NormedRing A]
+    {α : ℝ} {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicHolderSeminorm α (fun z => u z * v z) s
+      ≤ parabolicSupNorm u s * parabolicHolderSeminorm α v s
+        + parabolicSupNorm v s * parabolicHolderSeminorm α u s := by
+  obtain ⟨Bu, hBu, Hu, hHu, hbu, hhu⟩ := hu
+  obtain ⟨Bv, hBv, Hv, hHv, hbv, hhv⟩ := hv
+  have hmul :=
+    (parabolicHolderWith_parabolicHolderSeminorm (u := u) ⟨Hu, hHu, hhu⟩).mul
+      (parabolicHolderWith_parabolicHolderSeminorm (u := v) ⟨Hv, hHv, hhv⟩)
+      (parabolicBoundedWith_parabolicSupNorm (u := u) ⟨Bu, hBu, hbu⟩)
+      (parabolicBoundedWith_parabolicSupNorm (u := v) ⟨Bv, hBv, hbv⟩)
+      (parabolicSupNorm_nonneg u s)
+  exact parabolicHolderSeminorm_le
+    (add_nonneg
+      (mul_nonneg (parabolicSupNorm_nonneg u s) (parabolicHolderSeminorm_nonneg α v s))
+      (mul_nonneg (parabolicSupNorm_nonneg v s) (parabolicHolderSeminorm_nonneg α u s)))
+    hmul
+
+/-- **Banach-algebra (submultiplicative) estimate for the parabolic `C^{0,α}` norm.**  In a normed
+ring the parabolic `C^{0,α}` norm of a pointwise product is at most the product of the parabolic
+`C^{0,α}` norms: `‖u v‖_{C^{0,α}} ≤ ‖u‖_{C^{0,α}} ‖v‖_{C^{0,α}}`.  This is the normed-algebra
+inequality of the parabolic Hölder space, a key ingredient for the nonlinear (Ricci–DeTurck)
+Schauder estimates. -/
+theorem parabolicC0AlphaNorm_mul_le {X A : Type*} [PseudoMetricSpace X] [NormedRing A]
+    {α : ℝ} {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicC0AlphaNorm α (fun z => u z * v z) s
+      ≤ parabolicC0AlphaNorm α u s * parabolicC0AlphaNorm α v s := by
+  have hsup : parabolicSupNorm (fun z => u z * v z) s
+      ≤ parabolicSupNorm u s * parabolicSupNorm v s := by
+    obtain ⟨Bu, hBu, _, _, hbu, _⟩ := hu
+    obtain ⟨Bv, hBv, _, _, hbv, _⟩ := hv
+    exact parabolicSupNorm_mul_le ⟨Bu, hBu, hbu⟩ ⟨Bv, hBv, hbv⟩
+  have hhol := parabolicHolderSeminorm_mul_le hu hv
+  have hSU := parabolicSupNorm_nonneg u s
+  have hSV := parabolicSupNorm_nonneg v s
+  have hHU := parabolicHolderSeminorm_nonneg α u s
+  have hHV := parabolicHolderSeminorm_nonneg α v s
+  unfold parabolicC0AlphaNorm
+  nlinarith [hsup, hhol, hSU, hSV, hHU, hHV, mul_nonneg hHU hHV]
+
+/-- **Bilinear Lipschitz (product-difference) estimate for the parabolic `C^{0,α}` norm.**  In a
+normed ring, `‖u v - u' v'‖_{C^{0,α}} ≤ ‖u‖_{C^{0,α}} ‖v - v'‖_{C^{0,α}} + ‖u - u'‖_{C^{0,α}}
+‖v'‖_{C^{0,α}}`.  This is the local Lipschitz bound for multiplication on the parabolic Hölder space,
+the estimate behind contraction/uniqueness arguments for the nonlinear (Ricci–DeTurck) fixed point. -/
+theorem parabolicC0AlphaNorm_mul_sub_mul_le {X A : Type*} [PseudoMetricSpace X] [NormedRing A]
+    {α : ℝ} {u u' v v' : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hu' : ParabolicC0AlphaOn α u' s)
+    (hv : ParabolicC0AlphaOn α v s) (hv' : ParabolicC0AlphaOn α v' s) :
+    parabolicC0AlphaNorm α (fun z => u z * v z - u' z * v' z) s
+      ≤ parabolicC0AlphaNorm α u s * parabolicC0AlphaNorm α (fun z => v z - v' z) s
+        + parabolicC0AlphaNorm α (fun z => u z - u' z) s * parabolicC0AlphaNorm α v' s := by
+  have hdv : ParabolicC0AlphaOn α (fun z => v z - v' z) s := hv.sub hv'
+  have hdu : ParabolicC0AlphaOn α (fun z => u z - u' z) s := hu.sub hu'
+  have ha : ParabolicC0AlphaOn α (fun z => u z * (v z - v' z)) s := hu.mul hdv
+  have hb : ParabolicC0AlphaOn α (fun z => (u z - u' z) * v' z) s := hdu.mul hv'
+  have hrw : (fun z => u z * v z - u' z * v' z)
+      = fun z => u z * (v z - v' z) + (u z - u' z) * v' z := by
+    funext z; noncomm_ring
+  rw [hrw]
+  refine (parabolicC0AlphaNorm_add_le ha hb).trans (add_le_add ?_ ?_)
+  · exact parabolicC0AlphaNorm_mul_le hu hdv
+  · exact parabolicC0AlphaNorm_mul_le hdu hv'
 
 end AnalyticPDE
 end RicciFlow

@@ -4331,6 +4331,108 @@ comparison primitive inputs, extracting one shared determinant lower bound for
 the Gram and comparison matrices from compactness first. It is still below the
 actual `C^{2+α,1+α/2}` norm and Schauder estimate.
 
+The affine parabolic chart layer now also has a complete topological-boundary
+transport layer built on `affineChartHomeomorph`: for `r ≠ 0` the chart commutes
+with `closure`, `interior`, and `frontier` of all four parabolic shapes
+(open/closed balls and cylinders) in both the image (`affineChartHomeomorph_image_{closure,interior,frontier}_*`)
+and preimage (`affineChartHomeomorph_preimage_{closure,interior,frontier}_*`)
+directions, and restricts to a `Set.BijOn` between those boundary sets
+(`affineChartHomeomorph_bijOn_{closure,interior,frontier}_*`).  Intrinsic
+(chart-free) shape topology was filled in: each open parabolic shape lies in the
+interior of the corresponding closed shape
+(`parabolic{Ball,Cylinder}.subset_interior_closed*`), so each closed parabolic
+shape of positive radius is a neighborhood of its center
+(`parabolicClosed{Ball,Cylinder}.mem_nhds`).  Feeding the boundary `Set.BijOn`
+into the generic `MapsTo`-parametrized change of variables
+`ParabolicC0Alpha{With,On}.comp_affineChart` now gives the affine Schauder
+`C^{0,α}` normalization directly on the closure of an open parabolic
+ball/cylinder and on the interior of a closed parabolic ball/cylinder
+(`ParabolicC0Alpha{With,On}.comp_affineChart_{closure_parabolicBall,closure_parabolicCylinder,interior_parabolicClosedBall,interior_parabolicClosedCylinder}`),
+i.e. the affine change of variables is now available on the exact boundary-domain
+shapes on which an interior parabolic regularity estimate is taken.
+The parabolic Hölder vocabulary now also has the *reverse assembly* direction,
+converse to the `space_slice` / `time_slice_half_exponent` readouts: on a
+corner-closed time-space set (one containing the mixed corner `(τ, x)` of any two
+of its points `(t, x)` and `(τ, y)` — proved automatic for open/closed parabolic
+balls and cylinders via `parabolic{Ball,ClosedBall,Cylinder,ClosedCylinder}.corner_mem`,
+each being a product of a time interval and a spatial ball), spatial `α`-Hölder
+control uniform in time together with temporal `α/2`-Hölder control uniform in
+space reassemble into parabolic `α`-Hölder control with the summed constant.
+This is packaged as `ParabolicHolderWith.of_space_time_holder` and its
+`ParabolicHolderOn` / `ParabolicC0AlphaWith` / `ParabolicC0AlphaOn` companions,
+with closed cylinder/ball Schauder-domain specializations, plus the textbook
+characterization `ParabolicHolderOn.iff_space_time_holder` (parabolic Hölder ⟺
+separate spatial and temporal Hölder on a corner-closed set). This is the standard
+route to parabolic Schauder estimates — control the space and time regularity of a
+solution separately and then combine them into the parabolic norm.
+The space/time characterization is now also available at the *full norm level* and on
+the *open* Schauder domains: `ParabolicC0AlphaOn.iff_space_time_holder` records the sup
+bound alongside the separate spatial/temporal Hölder control (the exact `C^0` +
+space/time data of the parabolic `C^{0,α}` norm), with closed and open
+cylinder/ball specializations, and `ParabolicHolderOn.iff_space_time_holder_parabolic{Cylinder,Ball}`
+give the open-interior-domain analogues of the closed-shape characterization (both
+proved from the general corner-closed `iff` via the open `corner_mem` lemmas).
+The parabolic classes are now also proved *closed under limits*, the inheritance step
+behind completeness of the parabolic Hölder space:
+`ParabolicHolderWith`/`ParabolicBoundedWith`/`ParabolicC0AlphaWith.of_tendsto` pass a
+fixed Hölder constant, uniform sup bound, and combined `C^{0,α}` control to pointwise
+limits over any `NeBot` filter, and the `...of_tendstoUniformlyOn` companions state the
+same closedness in the topology of uniform convergence (the fixed-constant `C^{0,α}`
+ball is closed in `C^0`). The `C^{0,α}` seminorm is now packaged as an honest `ℝ`-valued
+functional: `parabolicHolderSeminorm α u s = sInf {C ≥ 0 | ParabolicHolderWith C α u s}`
+(the least admissible Hölder constant), its `C^0` companion `parabolicSupNorm u s`, and the
+full norm `parabolicC0AlphaNorm α u s = parabolicSupNorm u s + parabolicHolderSeminorm α u s`.
+Each is proved nonnegative, a lower bound for every admissible constant, and *attained* on the
+corresponding class (`parabolicHolderWith_parabolicHolderSeminorm`,
+`parabolicBoundedWith_parabolicSupNorm`,
+`parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm`), with the class-membership
+iff-characterizations (`parabolicHolderOn_iff_parabolicHolderWith_seminorm`,
+`parabolicC0AlphaOn_iff_parabolicC0AlphaWith_norms`). The seminorm axioms are in place —
+subadditivity (`parabolic{HolderSeminorm,SupNorm,C0AlphaNorm}_add_le` and the difference
+forms `..._sub_le`), vanishing on zero (`parabolic{HolderSeminorm,SupNorm,C0AlphaNorm}_zero`),
+integer homogeneity (`parabolic{HolderSeminorm,SupNorm}_zsmul_le`), and unconditional
+negation invariance (`parabolic{HolderSeminorm,SupNorm,C0AlphaNorm}_neg`) — together with
+domain monotonicity (`parabolic{HolderSeminorm,SupNorm}_mono_domain`), pointwise readouts
+(`norm_sub_le_parabolicHolderSeminorm`, `norm_le_parabolicSupNorm`), `Set.EqOn`-congruence
+(`parabolic{HolderSeminorm,SupNorm,C0AlphaNorm}_congr`, so the functional descends to the
+restriction to `s`), and the completeness-facing bound `parabolicC0AlphaNorm_le_of_tendsto`
+(the norm stays `≤ B + H` under any pointwise limit of a fixed `C^{0,α}` ball). What remains
+for decomposition step 1 is to assemble the Banach-space (completeness) instance — a bundled
+parabolic `C^{0,α}` function type with a `NormedAddCommGroup`/`CompleteSpace` structure whose
+Cauchy sequences converge via the closedness lemmas above — then lift to `C^{2+α,1+α/2}`.
+The completeness *property* itself is now proved at the function level: the norm functional
+dominates its parts (`parabolic{SupNorm,HolderSeminorm}_le_parabolicC0AlphaNorm`) with pointwise
+readouts (`norm_le_parabolicC0AlphaNorm`, `norm_sub_le_parabolicC0AlphaNorm_mul`) and the
+uniform-metric difference bound `norm_sub_le_parabolicC0AlphaNorm_sub`; a norm bound converts to an
+explicit ball via `parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm`; and
+`exists_parabolicC0AlphaOn_tendsto_of_cauchy` proves that, for complete `E`, a sequence of parabolic
+`C^{0,α}` functions on `s` that is Cauchy in the parabolic `C^{0,α}` norm converges in that norm to
+a parabolic `C^{0,α}` limit (pointwise limit via completeness of `E`, limit-in-class via
+`ParabolicC0AlphaWith.of_tendsto`, norm convergence via `parabolicC0AlphaNorm_le_of_tendsto`).
+The norm functional is also `1`-Lipschitz
+(`abs_parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub`), so the norms of a Cauchy sequence
+converge to the norm of the limit. The remaining gap is now only the bundling: a quotient/subtype
+carrier for functions modulo agreement on `s` (so `‖·‖ = 0 ↔ · = 0`) with the packaged
+`NormedAddCommGroup`/`CompleteSpace` instances, then the lift to `C^{2+α,1+α/2}`.
+The seminormed-level bundling is now in place: `parabolicC0AlphaSubmodule.seminormedAddCommGroup`
+(from the bundled `AddGroupSeminorm`/`Seminorm ℝ`) has readouts `seminormedAddCommGroup_norm`,
+`seminormedAddCommGroup_dist` (`dist u v = parabolicC0AlphaNorm α (u−v) s`), and — the completeness
+half of the parabolic Hölder Banach space — `parabolicC0AlphaSubmodule.completeSpace`, a
+`@CompleteSpace` fact for the parabolic `C^{0,α}` submodule under the *pinned* `C^{0,α}` uniformity
+(assembled from `Metric.complete_of_cauchySeq_tendsto` + `exists_parabolicC0AlphaOn_tendsto_of_cauchy`;
+the uniformity is pinned because the ambient function subtype already carries the pointwise product
+`instUniformSpaceSubtype`, which the honest separated Banach carrier on a type synonym/quotient will
+displace). Scalar compatibility is packaged as `parabolicC0AlphaSubmodule.normedSpace`
+(`NormedSpace ℝ` over the seminormed structure), so the parabolic Hölder space is exhibited as a
+*complete seminormed `ℝ`-vector space* (semi-Banach); only point separation remains for the genuine
+Banach instance. Toward decomposition step 2 (the Schauder/Lipschitz estimate), the parabolic
+`C^{0,α}` norm functional is now shown to be a *normed algebra* norm: submultiplicativity
+`parabolicC0AlphaNorm_mul_le` (`‖u·v‖ ≤ ‖u‖·‖v‖` in a normed ring, from `parabolicSupNorm_mul_le`
+and the Leibniz `parabolicHolderSeminorm_mul_le`) and the bilinear Lipschitz product-difference bound
+`parabolicC0AlphaNorm_mul_sub_mul_le` (`‖u·v − u'·v'‖ ≤ ‖u‖·‖v−v'‖ + ‖u−u'‖·‖v'‖`), the local
+Lipschitz control of multiplication behind the nonlinear Ricci–DeTurck contraction/uniqueness
+arguments.
+
 **Suggested decomposition** (multi-session):
 
 1. Choose a function-space realization of the metric locus. The

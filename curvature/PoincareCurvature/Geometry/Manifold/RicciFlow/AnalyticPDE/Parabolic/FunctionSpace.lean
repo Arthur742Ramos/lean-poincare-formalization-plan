@@ -2384,6 +2384,133 @@ theorem finiteCoverValue_timeSlice_spatial_dist_le_ofCover
     (A := fun _τ u => u) hLip hcover
   simpa [one_mul] using h
 
+/-- The parabolic `C^{0,α}` norm packaged as a bundled `AddGroupSeminorm` on the submodule of
+parabolic `C^{0,α}` functions: it satisfies `toFun 0 = 0`, the triangle inequality, and negation
+invariance.  This is the bundled seminorm underlying the parabolic `C^{0,α}` (semi)normed space. -/
+noncomputable def addGroupSeminorm (α : ℝ) (s : Set (ℝ × X)) :
+    AddGroupSeminorm (parabolicC0AlphaSubmodule X E α s) where
+  toFun u := parabolicC0AlphaNorm α u.1 s
+  map_zero' := by
+    simp only [Submodule.coe_zero]
+    exact parabolicC0AlphaNorm_zero α s
+  add_le' u v := by
+    simpa only [Submodule.coe_add] using parabolicC0AlphaNorm_add_le u.2 v.2
+  neg' u := by
+    simpa only [Submodule.coe_neg] using parabolicC0AlphaNorm_neg α u.1 s
+
+/-- The bundled parabolic `C^{0,α}` `AddGroupSeminorm` evaluates to the parabolic `C^{0,α}` norm
+of the underlying function. -/
+@[simp]
+theorem addGroupSeminorm_apply (α : ℝ) (s : Set (ℝ × X))
+    (u : parabolicC0AlphaSubmodule X E α s) :
+    addGroupSeminorm α s u = parabolicC0AlphaNorm α u.1 s :=
+  rfl
+
+/-- The parabolic `C^{0,α}` norm packaged as a genuine real-scalar `Seminorm` on the submodule of
+parabolic `C^{0,α}` functions: it adds scalar homogeneity `‖c • u‖ = ‖c‖ ‖u‖` to the additive
+seminorm axioms.  This is the bundled `Seminorm ℝ` underlying the `NormedSpace ℝ` structure of the
+parabolic Hölder space. -/
+noncomputable def seminorm (α : ℝ) (s : Set (ℝ × X)) :
+    Seminorm ℝ (parabolicC0AlphaSubmodule X E α s) :=
+  { addGroupSeminorm α s with
+    smul' := fun c u => by
+      simpa only [Submodule.coe_smul] using parabolicC0AlphaNorm_const_smul c u.2 }
+
+/-- The bundled parabolic `C^{0,α}` `Seminorm` evaluates to the parabolic `C^{0,α}` norm of the
+underlying function. -/
+@[simp]
+theorem seminorm_apply (α : ℝ) (s : Set (ℝ × X))
+    (u : parabolicC0AlphaSubmodule X E α s) :
+    seminorm α s u = parabolicC0AlphaNorm α u.1 s :=
+  rfl
+
+/-- The parabolic `C^{0,α}` seminormed additive-group structure on the submodule of parabolic
+`C^{0,α}` functions, built from the bundled `AddGroupSeminorm`.  Under this structure the norm is
+`‖u‖ = parabolicC0AlphaNorm α u.1 s`.  It is supplied as a `def` (not a global instance) because
+the underlying function-space subtype already carries the pointwise product topology; the honest
+separated `NormedAddCommGroup`/`CompleteSpace` Banach instances belong on a dedicated type synonym
+that isolates the parabolic Hölder topology. -/
+@[reducible] noncomputable def seminormedAddCommGroup (α : ℝ) (s : Set (ℝ × X)) :
+    SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+  AddGroupSeminorm.toSeminormedAddCommGroup (addGroupSeminorm α s)
+
+/-- Under the parabolic `C^{0,α}` seminormed structure, the norm of a bundled function is its
+parabolic `C^{0,α}` norm. -/
+theorem seminormedAddCommGroup_norm (α : ℝ) (s : Set (ℝ × X))
+    (u : parabolicC0AlphaSubmodule X E α s) :
+    (seminormedAddCommGroup α s).toNorm.norm u = parabolicC0AlphaNorm α u.1 s :=
+  rfl
+
+/-- Under the parabolic `C^{0,α}` seminormed structure, distance between two bundled functions is
+the parabolic `C^{0,α}` norm of their pointwise difference. -/
+theorem seminormedAddCommGroup_dist (α : ℝ) (s : Set (ℝ × X))
+    (u v : parabolicC0AlphaSubmodule X E α s) :
+    letI := seminormedAddCommGroup (X := X) (E := E) α s
+    dist u v = parabolicC0AlphaNorm α (fun z => u.1 z - v.1 z) s := by
+  letI := seminormedAddCommGroup (X := X) (E := E) α s
+  rw [dist_eq_norm]
+  have hfun : ((u - v : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E)
+      = fun z => u.1 z - v.1 z := by
+    ext z; simp
+  show parabolicC0AlphaNorm α ((u - v : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E) s = _
+  rw [hfun]
+
+/-- **Completeness of the parabolic `C^{0,α}` seminormed space.**  Under the bundled parabolic
+`C^{0,α}` seminormed structure, every `C^{0,α}`-norm-Cauchy sequence of parabolic `C^{0,α}` functions
+converges in the `C^{0,α}` norm to a parabolic `C^{0,α}` function.  This is the completeness half of
+the parabolic Hölder Banach space, packaged as a `CompleteSpace` fact for the seminormed submodule;
+it is assembled from `Metric.complete_of_cauchySeq_tendsto` and the sequential completeness
+`exists_parabolicC0AlphaOn_tendsto_of_cauchy`.  (The structure is a genuine `NormedAddCommGroup`
+once the underlying functions are determined by their restriction to `s`, e.g. on a type synonym or
+after a quotient; completeness holds already at the seminormed level.) -/
+theorem completeSpace [CompleteSpace E] (α : ℝ) (s : Set (ℝ × X)) :
+    @CompleteSpace (parabolicC0AlphaSubmodule X E α s)
+      (seminormedAddCommGroup (X := X) (E := E) α s).toPseudoMetricSpace.toUniformSpace := by
+  letI := seminormedAddCommGroup (X := X) (E := E) α s
+  refine @Metric.complete_of_cauchySeq_tendsto (parabolicC0AlphaSubmodule X E α s) _ ?_
+  intro u hu
+  rw [Metric.cauchySeq_iff] at hu
+  have hf : ∀ n, ParabolicC0AlphaOn α ((u n : ℝ × X → E)) s := fun n => (u n).2
+  have hcauchy : ∀ ε > 0, ∃ N, ∀ m ≥ N, ∀ n ≥ N,
+      parabolicC0AlphaNorm α (fun z => (u m : ℝ × X → E) z - (u n : ℝ × X → E) z) s ≤ ε := by
+    intro ε hε
+    obtain ⟨N, hN⟩ := hu ε hε
+    refine ⟨N, fun m hm n hn => ?_⟩
+    have h := hN m hm n hn
+    rw [seminormedAddCommGroup_dist] at h
+    exact h.le
+  obtain ⟨g, hg_class, hg_conv⟩ :=
+    exists_parabolicC0AlphaOn_tendsto_of_cauchy hf hcauchy
+  refine ⟨⟨g, hg_class⟩, ?_⟩
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  obtain ⟨N, hN⟩ := hg_conv (ε / 2) (by positivity)
+  refine ⟨N, fun n hn => ?_⟩
+  rw [seminormedAddCommGroup_dist]
+  exact lt_of_le_of_lt (hN n hn) (by linarith)
+
+/-- **The parabolic `C^{0,α}` seminormed structure is a seminormed real vector space.**  Scalar
+multiplication is norm-compatible (`‖c • u‖ ≤ ‖c‖ ‖u‖`, in fact with equality), so the parabolic
+`C^{0,α}` seminorm structure carries a `NormedSpace ℝ`.  Combined with `completeSpace` this exhibits
+the parabolic Hölder space as a complete seminormed `ℝ`-vector space (a semi-Banach space); it
+becomes a genuine Banach space once the underlying functions are separated by their restriction to
+`s`. -/
+noncomputable def normedSpace (α : ℝ) (s : Set (ℝ × X)) :
+    @NormedSpace ℝ (parabolicC0AlphaSubmodule X E α s) _
+      (seminormedAddCommGroup (X := X) (E := E) α s) :=
+  letI := seminormedAddCommGroup (X := X) (E := E) α s
+  { (inferInstance : Module ℝ (parabolicC0AlphaSubmodule X E α s)) with
+    norm_smul_le := fun c u => by
+      have hbound := parabolicC0AlphaNorm_const_smul_le
+        (X := X) (E := E) (𝕜 := ℝ) (α := α) (s := s) c u.2
+      have hsmul : ((c • u : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E)
+          = fun z => c • u.1 z := by ext z; simp
+      show parabolicC0AlphaNorm α
+          ((c • u : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E) s
+          ≤ ‖c‖ * parabolicC0AlphaNorm α u.1 s
+      rw [hsmul]
+      exact hbound }
+
 end parabolicC0AlphaSubmodule
 
 end AnalyticPDE
