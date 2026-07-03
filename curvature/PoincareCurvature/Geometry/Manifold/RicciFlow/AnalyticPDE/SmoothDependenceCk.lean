@@ -3080,6 +3080,54 @@ theorem hasDerivAt_firstVariation_perturbation_smul
   have h := hasDerivAt_inhomogVariation_smul c hV s
   rwa [← ContinuousLinearMap.smul_comp] at h
 
+/-- **General a-priori size bound for the inhomogeneous variational ODE.**  Forcing-agnostic
+Grönwall estimate: if `V` solves `V' = A ∘ V + F` (with `‖A s‖ ≤ K`) anchored at `V t₀ = 0`, and the
+forcing is bounded by `M ≥ 0` on `[t₀, T]` (`‖F s‖ ≤ M`), then
+`‖V t‖ ≤ M · gronwallBound 0 K 1 (t - t₀)` on `[t₀, T]`.  Proof: `‖V' s‖ ≤ K · ‖V s‖ + M` (operator
+submultiplicativity of `A ∘ V` and the forcing bound), and Grönwall
+(`norm_le_gronwallBound_of_norm_deriv_right_le`) closes it, with `gronwallBound_zero_left_mul`
+factoring the linear response `M`.  This is the general first-variation size estimate of which
+`norm_fundamentalSolution_variation_le` (specialised to the coefficient-perturbation forcing
+`F = (A₁ - A₂) ∘ W₂`, `M = ε · exp (K (T - t₀))`) is the leading instance. -/
+theorem norm_inhomogVariation_le {A F V : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ s, ‖A s‖₊ ≤ K)
+    (hVderiv : ∀ s, HasDerivAt V ((A s).comp (V s) + F s) s)
+    (hV0 : V t₀ = 0) {M : ℝ} {T : ℝ} (hFbound : ∀ s ∈ Set.Icc t₀ T, ‖F s‖ ≤ M)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ‖V t‖ ≤ M * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  have hcV : Continuous V := continuous_iff_continuousAt.mpr (fun s => (hVderiv s).continuousAt)
+  have ha : ‖V t₀‖ ≤ 0 := by simp [hV0]
+  have hbound : ∀ s ∈ Set.Ico t₀ t,
+      ‖(A s).comp (V s) + F s‖ ≤ (K : ℝ) * ‖V s‖ + M := by
+    intro s hs
+    have hsIcc : s ∈ Set.Icc t₀ T := ⟨hs.1, le_trans hs.2.le ht.2⟩
+    have hAs : ‖A s‖ ≤ (K : ℝ) := by exact_mod_cast hA s
+    refine (norm_add_le _ _).trans (add_le_add ?_ (hFbound s hsIcc))
+    calc ‖(A s).comp (V s)‖ ≤ ‖A s‖ * ‖V s‖ := ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (K : ℝ) * ‖V s‖ := mul_le_mul_of_nonneg_right hAs (norm_nonneg _)
+  have hgron := norm_le_gronwallBound_of_norm_deriv_right_le (a := t₀) (b := t)
+    hcV.continuousOn (fun x _ => (hVderiv x).hasDerivWithinAt) ha hbound t ⟨ht.1, le_rfl⟩
+  calc ‖V t‖ ≤ gronwallBound 0 (K : ℝ) M (t - t₀) := hgron
+    _ = M * gronwallBound 0 (K : ℝ) 1 (t - t₀) := gronwallBound_zero_left_mul _ _ _
+
+/-- **Zero forcing gives the zero first variation.**  The first variation for a vanishing
+perturbation is identically zero: if `V' = A ∘ V + F` with `F ≡ 0` and `V t₀ = 0`, then `V ≡ 0`.
+(Uniqueness `inhomogVariation_unique` against the zero solution.)  This is the value at the origin of
+the *linear* first-variation map `perturbation ↦ V` — a linear map sends `0` to `0` — consistent with
+`hasDerivAt_firstVariation_perturbation_add/smul`. -/
+theorem inhomogVariation_eq_zero_of_forcing_zero {A F V : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ s, ‖A s‖₊ ≤ K)
+    (hVderiv : ∀ s, HasDerivAt V ((A s).comp (V s) + F s) s)
+    (hF : ∀ s, F s = 0) (hV0 : V t₀ = 0) (t : ℝ) : V t = 0 := by
+  have hZderiv : ∀ s, HasDerivAt (fun _ : ℝ => (0 : E →L[ℝ] E))
+      ((A s).comp ((fun _ : ℝ => (0 : E →L[ℝ] E)) s) + F s) s := by
+    intro s
+    have hz : (A s).comp ((fun _ : ℝ => (0 : E →L[ℝ] E)) s) + F s = 0 := by simp [hF s]
+    rw [hz]
+    exact hasDerivAt_const s 0
+  have hfin := inhomogVariation_unique hA hVderiv hZderiv hV0 t
+  exact hfin
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
