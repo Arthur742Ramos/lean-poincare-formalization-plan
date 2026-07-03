@@ -3191,6 +3191,40 @@ theorem norm_firstVariation_perturbation_sub_le
       _ ≤ ε * C := mul_le_mul (hB s hs) (hW s hs) (norm_nonneg _) hε
   exact norm_inhomogVariation_le hA₂ hDderiv hD0 hFbound ht
 
+/-- **The first-variation map is additive.**  Combining superposition
+(`hasDerivAt_firstVariation_perturbation_add`) with Grönwall uniqueness (`inhomogVariation_unique`):
+the *unique* anchored first variation `V₁₂` for the summed perturbation `B₁ + B₂` equals the sum of
+the individual first variations, `V₁₂ t = V₁ t + V₂ t`.  This is the honest *map-level* additivity of
+the coefficient-derivative assignment `perturbation ↦ V` (not merely closure of the solution set
+under addition). -/
+theorem firstVariation_perturbation_add_eq
+    {A₂ W B₁ B₂ V₁ V₂ V₁₂ : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA₂ : ∀ s, ‖A₂ s‖₊ ≤ K)
+    (hV₁ : ∀ s, HasDerivAt V₁ ((A₂ s).comp (V₁ s) + (B₁ s).comp (W s)) s)
+    (hV₂ : ∀ s, HasDerivAt V₂ ((A₂ s).comp (V₂ s) + (B₂ s).comp (W s)) s)
+    (hV₁₂ : ∀ s, HasDerivAt V₁₂ ((A₂ s).comp (V₁₂ s) + (B₁ s + B₂ s).comp (W s)) s)
+    (hV₁0 : V₁ t₀ = 0) (hV₂0 : V₂ t₀ = 0) (hV₁₂0 : V₁₂ t₀ = 0)
+    (t : ℝ) : V₁₂ t = V₁ t + V₂ t := by
+  have hsum := hasDerivAt_firstVariation_perturbation_add hV₁ hV₂
+  have h0 : V₁₂ t₀ = (fun r => V₁ r + V₂ r) t₀ := by simp [hV₁₂0, hV₁0, hV₂0]
+  exact inhomogVariation_unique hA₂ hV₁₂ hsum h0 t
+
+/-- **The first-variation map is homogeneous.**  Combining homogeneity
+(`hasDerivAt_firstVariation_perturbation_smul`) with Grönwall uniqueness: the unique anchored first
+variation `Vc` for the scaled perturbation `c • B` equals the scaled first variation,
+`Vc t = c • V t`.  Together with `firstVariation_perturbation_add_eq` and
+`inhomogVariation_eq_zero_of_forcing_zero` this makes `perturbation ↦ V` a genuine *linear map*. -/
+theorem firstVariation_perturbation_smul_eq
+    {A₂ W B V Vc : ℝ → (E →L[ℝ] E)} {K : ℝ≥0} (c : ℝ)
+    (hA₂ : ∀ s, ‖A₂ s‖₊ ≤ K)
+    (hV : ∀ s, HasDerivAt V ((A₂ s).comp (V s) + (B s).comp (W s)) s)
+    (hVc : ∀ s, HasDerivAt Vc ((A₂ s).comp (Vc s) + (c • B s).comp (W s)) s)
+    (hV0 : V t₀ = 0) (hVc0 : Vc t₀ = 0)
+    (t : ℝ) : Vc t = c • V t := by
+  have hsmul := hasDerivAt_firstVariation_perturbation_smul c hV
+  have h0 : Vc t₀ = (fun r => c • V r) t₀ := by simp [hVc0, hV0]
+  exact inhomogVariation_unique hA₂ hVc hsmul h0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
