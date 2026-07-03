@@ -4988,3 +4988,48 @@ Volterra equation `inhomogVariation_eq_integral`, or by reduction to a homogeneo
 augmented state `L(E) × ℝ`); the *general* merely-continuous spatial modulus; the *existence* of the
 variational flow family; and the resulting *spatial* `C^k`/`C^2` bootstrap (`x₀ ↦ D_x Φ_t`
 differentiable in the base point).
+
+Update — the **existence half is now CLOSED** (all axioms `propext`/`Classical.choice`/`Quot.sound`
+only): the complete ODE existence tower from Mathlib's local Picard–Lindelöf up to a *global* integral
+curve of a globally (in state, uniformly in time) Lipschitz field is proved in `SmoothDependenceCk`,
+and applied to construct the first variation `V` and the resolvent `W = D_x Φ`.  This discharges the
+flow-existence hypothesis (`∀ s, HasDerivAt z …` / `IsIntegralCurve`) that every downstream
+first-variation and `fundamentalSolution` lemma in the file previously assumed.  New
+`public import Mathlib.Analysis.ODE.PicardLindelof`.
+
+* `lipschitzFlowStep K = min 1 (1/(2(K+1)))` (`_pos`, `_le_one`, `_mul_le`: `K·step ≤ 1/2`) — the
+  **uniform, anchor-independent** local-existence half-step.
+* `exists_isIntegralCurveOn_Icc_of_lipschitzWith` — **uniform-step local existence**: for a uniformly
+  `K`-Lipschitz (`∀ t, LipschitzWith K (v t)`), time-continuous (`∀ x, Continuous (v · x)`) field on a
+  complete Banach space, an integral curve through any `(t₀, x₀)` on `Icc (t₀-step) (t₀+step)`.  Built
+  by assembling `IsPicardLindelof` (ball radius `a = 2·step·(C₀+1)+1`, bound `L = K·a+C₀+1`,
+  `C₀ = sup_{Icc} ‖v · x₀‖`, giving `L·step ≤ a-½ ≤ a`) and
+  `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀`.  The *uniform* step (from choosing a
+  large ball) is what allows chaining across arbitrarily long intervals.
+* `exists_isIntegralCurveAt_of_lipschitzWith` — the `IsIntegralCurveAt` (local-at-a-point) form.
+* `exists_isIntegralCurveOn_Icc_forward_of_lipschitzWith` — **forward** existence on *every* `Icc t₀ T`
+  by induction on the number of uniform steps (base = local existence; step = extend by one local
+  solution at the right endpoint, `isIntegralCurveOn_glue_Icc`); Archimedean choice of step count.
+* `exists_isIntegralCurveOn_Icc_backward_of_lipschitzWith` — **backward** existence on `Icc T t₀` via
+  the time-reversed field `w t x = -(v(-t)x)` (uniformly `K`-Lipschitz by `LipschitzWith.neg`) and
+  `isIntegralCurveOn_comp_neg`.
+* `exists_isIntegralCurveOn_Icc_of_lipschitzWith_containing` — **two-sided**: a *single* integral curve
+  on any `Icc a b` with `a ≤ t₀ ≤ b` (glue backward on `Icc a t₀` and forward on `Icc t₀ b` at `t₀`).
+* `eqOn_of_isIntegralCurveOn_Icc` — **interval uniqueness** (Mathlib `ODE_solution_unique_of_mem_Icc`,
+  trivial state constraint; interior `HasDerivAt` + `IsIntegralCurveOn.continuousOn`).
+* `exists_isIntegralCurve_of_lipschitzWith` — **GLOBAL existence**: choose a solution `Γ n` on each
+  window `Icc (t₀-(n+1)) (t₀+(n+1))`, reconcile overlaps by interval uniqueness so the selection
+  `γ t = Γ ⌊|t-t₀|⌋₊ t` is unambiguous and equals `Γ m` on `Icc (t₀-m) (t₀+m)`, then exhaust via
+  `isIntegralCurve_of_forall_mem_Icc`.
+* `exists_hasDerivAt_inhomogVariation` — **existence of the first variation**: for norm-bounded
+  continuous `A, F`, a global `V` with `V t₀ = 0`, `V' = A∘V + F` (feed `augmentedVariationalField A F`
+  — uniformly `(K+M)`-Lipschitz, time-continuous — into global existence; operator coordinate via
+  `hasDerivAt_inhomogVariation_of_augmented`).  Closes the existence half of the first-variation target.
+* `exists_hasDerivAt_resolvent` — **existence of the resolvent** `W' = A∘W`, `W t₀ = 1` (homogeneous
+  field `W ↦ (A s)∘W`, `K`-Lipschitz + time-continuous, on the complete space `E →L[ℝ] E`).
+
+Remaining after this (future sessions): the *general* merely-continuous spatial modulus (Heine–Cantor
+on the compact trajectory tube); the **spatial `C^k`/`C^2` bootstrap** (`x₀ ↦ D_x Φ_t` differentiable
+in the base point — now feedable, since the resolvent whose coefficient is `A(x₀) s = D_x v(s, Φ x₀ s)`
+is a constructed object); and packaging the first variation as a bounded *linear map* of the
+perturbation (Fréchet, via the existing linearity/uniqueness/bound lemmas + this existence).
