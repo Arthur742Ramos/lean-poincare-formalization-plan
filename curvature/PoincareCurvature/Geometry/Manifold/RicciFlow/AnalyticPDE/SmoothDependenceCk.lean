@@ -2695,6 +2695,66 @@ theorem deriv_deriv_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ�
   rw [hd]
   exact (hasDerivAt_deriv_fundamentalSolution hA hAcont hΦ h0 hA' t).deriv
 
+/-- **Time-regularity of an integral curve.**  An integral curve `γ` of a field `v : ℝ → E → E`
+that is jointly `C^n` in `(time, space)` (`ContDiff ℝ n (Function.uncurry v)`) is `C^{n+1}` in time.
+Proof by induction on `n`: `γ` solves `γ'(t) = v t (γ t) = (↿v) (t, γ t)`, the composition of the
+(inductively) `C^{n+1}` map `t ↦ (t, γ t)` with the `C^{n+1}` field `↿v`, hence itself `C^{n+1}`; so
+`γ` is differentiable with a `C^{n+1}` derivative, i.e. `C^{n+2}` (`contDiff_succ_iff_deriv`).  The
+base case is joint continuity of `↿v`, giving a `C¹` curve (`contDiff_one_iff_deriv`).  Unlike the
+resolvent bootstrap this holds for a general (nonlinear) field, so it also delivers the
+time-regularity of the *base* gauge flow `t ↦ Φ x t` that Item 2's compact-manifold flow uses. -/
+theorem contDiff_of_isIntegralCurve {γ : ℝ → E} (hγ : IsIntegralCurve γ v) :
+    ∀ n : ℕ, ContDiff ℝ (n : WithTop ℕ∞) (Function.uncurry v) →
+      ContDiff ℝ ((n : WithTop ℕ∞) + 1) γ := by
+  have hderiv : deriv γ = fun t => v t (γ t) := funext fun t => (hγ t).deriv
+  have hdiff : Differentiable ℝ γ := fun t => (hγ t).differentiableAt
+  intro n
+  induction n with
+  | zero =>
+    intro hv0
+    have hcont : ContDiff ℝ (1 : WithTop ℕ∞) γ := by
+      rw [contDiff_one_iff_deriv]
+      refine ⟨hdiff, ?_⟩
+      rw [hderiv]
+      exact hv0.continuous.comp (continuous_id.prodMk hγ.continuous)
+    simpa using hcont
+  | succ n ih =>
+    intro hvn1
+    have hvn : ContDiff ℝ (n : WithTop ℕ∞) (Function.uncurry v) :=
+      hvn1.of_le (by exact_mod_cast Nat.le_succ n)
+    have hγcn1 : ContDiff ℝ ((n + 1 : ℕ) : WithTop ℕ∞) γ := by
+      rw [Nat.cast_add_one]; exact ih hvn
+    rw [contDiff_succ_iff_deriv]
+    refine ⟨hdiff, ?_, ?_⟩
+    · simp
+    · rw [hderiv]
+      exact hvn1.comp (contDiff_id.prodMk hγcn1)
+
+open scoped ContDiff in
+/-- **Smoothness of an integral curve.**  An integral curve of a jointly-`C^∞` field is `C^∞` in
+time (order-by-order via `contDiff_infty` and the finite bootstrap). -/
+theorem contDiff_infty_of_isIntegralCurve {γ : ℝ → E} (hγ : IsIntegralCurve γ v)
+    (huv : ContDiff ℝ ∞ (Function.uncurry v)) : ContDiff ℝ ∞ γ := by
+  rw [contDiff_infty]
+  intro n
+  exact (contDiff_of_isIntegralCurve hγ n (contDiff_infty.mp huv n)).of_le le_self_add
+
+/-- **Time-regularity of the base flow.**  Each trajectory `t ↦ Ψ x t` of a flow family of a
+jointly-`C^n` field is `C^{n+1}` in time — the specialisation of `contDiff_of_isIntegralCurve` to a
+flow family, the form Item 2's compact-manifold gauge flow consumes for the time direction. -/
+theorem contDiff_flow_time {Ψ : E → ℝ → E} (hΨ : ∀ x, IsIntegralCurve (Ψ x) v)
+    (n : ℕ) (huv : ContDiff ℝ (n : WithTop ℕ∞) (Function.uncurry v)) (x : E) :
+    ContDiff ℝ ((n : WithTop ℕ∞) + 1) (fun t => Ψ x t) :=
+  contDiff_of_isIntegralCurve (hΨ x) n huv
+
+open scoped ContDiff in
+/-- **Smoothness of the base flow.**  Each trajectory `t ↦ Ψ x t` of a flow family of a
+jointly-`C^∞` field is `C^∞` in time. -/
+theorem contDiff_infty_flow_time {Ψ : E → ℝ → E} (hΨ : ∀ x, IsIntegralCurve (Ψ x) v)
+    (huv : ContDiff ℝ ∞ (Function.uncurry v)) (x : E) :
+    ContDiff ℝ ∞ (fun t => Ψ x t) :=
+  contDiff_infty_of_isIntegralCurve (hΨ x) huv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
