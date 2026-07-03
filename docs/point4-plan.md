@@ -4675,3 +4675,34 @@ uniformised over `s ∈ [t₀, t]` by Heine–Cantor on the compact trajectory t
 exponential flow-separation bound `dist_flow_apply_le` — which upgrades
 `hasFDerivAt_flow_of_defect_isLittleO` to an *unconditional* `C^1` dependence theorem; then the
 *existence* of the variational flow family, and the bootstrap to `C^k` (`C^3`).
+
+Update — the defect-modulus discharge is now built as a full reduction chain in
+`SmoothDependenceCk`, bottoming out at a directly-usable hypothesis for smooth fields:
+
+* `isLittleO_of_norm_le_mul_of_tendsto_nhds_zero` — the asymptotic glue: if `‖f x‖ ≤ g x · ‖u x‖`
+  eventually and `g → 0`, then `f =o[l] u`.  Turns "`defect ≤ (modulus→0)·separation`" into the
+  `o(‖z - x₀‖)` hypothesis of `hasFDerivAt_flow_of_defect_isLittleO`.
+* `hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero` (+ `differentiableAt`/`fderiv`) — from a
+  single time-uniform oscillation modulus `C : E → ℝ` with `C z → 0` bounding the defect on
+  `Ico t₀ t` by `C z · (exp (K |s - t₀|) · ‖z - x₀‖)`, delivers `HasFDerivAt (fun z => Φ z t) =
+  D_x Φ_t`.  (Sets `D z = C z · exp (K (t - t₀)) · ‖z - x₀‖`, `= o(‖z - x₀‖)` via the glue.)
+* `hasFDerivAt_flow_of_segment_oscillation_tendsto_zero` (+ corollaries) — composes the mean-value
+  bound `norm_flow_defect_le_of_segment_oscillation` with the previous, reducing the `C^1`
+  dependence to a *pure `C^1`-regularity* hypothesis: the derivative chord-oscillation
+  `‖Dv s ξ - A s‖` (over `ξ ∈ [Φ x₀ s, Φ z s]`, `s ∈ Ico t₀ t`) is `≤ C z → 0`.
+* `tendsto_modulus_comp_norm_sub` — the "`C(z) → 0`" engine: for `0 ≤ c` and `ω → 0` along
+  `𝓝[≥] 0`, `z ↦ ω (c · ‖z - x₀‖) → 0` as `z → x₀`.
+* `hasFDerivAt_flow_of_uniform_deriv_modulus` (+ corollaries) — from a nonnegative monotone modulus
+  `ω` vanishing at `0⁺` with `‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)`.  The chord points lie within
+  `exp (K |s - t₀|) · ‖z - x₀‖` of the anchor (`dist_flow_apply_le` + the segment decomposition), so
+  the monotone `ω` caps the oscillation by `C z = ω (exp (K (t - t₀)) · ‖z - x₀‖) → 0`.
+* `hasFDerivAt_flow_of_lipschitz_deriv` (+ corollaries) — the `C^{1,1}` specialisation and the
+  practical entry point: `‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖` (`0 ≤ L`, uniform in `s`) gives the
+  `C^1` dependence via the linear modulus `ω r = L · max r 0`.  This covers every smooth field —
+  in particular the intended Ricci-flow right-hand sides — so the smooth-case `C^1` dependence of
+  the flow on initial data is now unconditional.
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus, i.e. extracting a monotone `ω → 0` for `hasFDerivAt_flow_of_uniform_deriv_modulus` from
+joint continuity of `Dv` via Heine–Cantor uniform continuity on the compact trajectory tube; then
+the *existence* of the variational flow family, and the bootstrap to `C^k` (`C^3`).
