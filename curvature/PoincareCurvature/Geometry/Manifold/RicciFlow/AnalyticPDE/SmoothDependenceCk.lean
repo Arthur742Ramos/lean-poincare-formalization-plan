@@ -1795,6 +1795,209 @@ theorem fderiv_flow_of_segment_oscillation_tendsto_zero_eventually
   (hasFDerivAt_flow_of_segment_oscillation_tendsto_zero_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0
     hderiv hCnn hCto hosc).fderiv
 
+open Asymptotics Filter in
+/-- **Local form of `hasFDerivAt_flow_of_uniform_deriv_modulus`.**  With a nonnegative, monotone
+modulus `ω` vanishing at `0⁺`, the derivative existence on trajectory chords and the modulus bound
+`‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)` are required only for `z` in a neighbourhood of `x₀`.  Same
+proof as the global form (the chord points lie within `exp (K (t - t₀)) · ‖z - x₀‖` of the anchor,
+so `C z := ω (exp (K (t - t₀)) · ‖z - x₀‖) → 0` caps the oscillation), feeding
+`hasFDerivAt_flow_of_segment_oscillation_tendsto_zero_eventually`. -/
+theorem hasFDerivAt_flow_of_uniform_deriv_modulus_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {ω : ℝ → ℝ} (hωnn : ∀ r, 0 ≤ ω r) (hωmono : Monotone ω)
+    (hω0 : Tendsto ω (𝓝[≥] (0 : ℝ)) (𝓝 0))
+    (hmod : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  set c : ℝ := Real.exp ((K : ℝ) * (t - t₀)) with hc
+  have hc0 : 0 ≤ c := (Real.exp_pos _).le
+  set C : E → ℝ := fun z => ω (c * ‖z - x₀‖) with hC
+  have hCnn : ∀ z, 0 ≤ C z := fun z => hωnn _
+  have hCto : Tendsto C (𝓝 x₀) (𝓝 0) := tendsto_modulus_comp_norm_sub x₀ hc0 hω0
+  have hosc : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ C z := by
+    filter_upwards [hmod] with z hmodz
+    intro s hs ξ hξ
+    have hle : ‖ξ - Φ x₀ s‖ ≤ c * ‖z - x₀‖ := by
+      obtain ⟨p, q, hp, hq, hpq, rfl⟩ := hξ
+      have hq1 : q ≤ 1 := by linarith
+      have heq : (p • Φ x₀ s + q • Φ z s) - Φ x₀ s = q • (Φ z s - Φ x₀ s) := by
+        have hp1 : p = 1 - q := by linarith
+        rw [hp1, sub_smul, one_smul, smul_sub]
+        abel
+      have hsep : ‖Φ z s - Φ x₀ s‖ ≤ ‖z - x₀‖ * Real.exp ((K : ℝ) * |s - t₀|) := by
+        have h := dist_flow_apply_le hv hΦ h0 z x₀ s
+        rwa [dist_eq_norm, dist_eq_norm] at h
+      have hexp : Real.exp ((K : ℝ) * |s - t₀|) ≤ c := by
+        rw [hc]
+        refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left ?_ K.coe_nonneg)
+        rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]
+        exact sub_le_sub_right hs.2.le t₀
+      rw [heq, norm_smul, Real.norm_eq_abs, abs_of_nonneg hq]
+      calc q * ‖Φ z s - Φ x₀ s‖ ≤ 1 * ‖Φ z s - Φ x₀ s‖ :=
+            mul_le_mul_of_nonneg_right hq1 (norm_nonneg _)
+        _ = ‖Φ z s - Φ x₀ s‖ := one_mul _
+        _ ≤ ‖z - x₀‖ * Real.exp ((K : ℝ) * |s - t₀|) := hsep
+        _ ≤ ‖z - x₀‖ * c := mul_le_mul_of_nonneg_left hexp (norm_nonneg _)
+        _ = c * ‖z - x₀‖ := mul_comm _ _
+    calc ‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖) := hmodz s hs ξ hξ
+      _ ≤ ω (c * ‖z - x₀‖) := hωmono hle
+      _ = C z := by simp only [hC]
+  exact hasFDerivAt_flow_of_segment_oscillation_tendsto_zero_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0
+    hderiv hCnn hCto hosc
+
+open Asymptotics Filter in
+/-- Local form of `differentiableAt_flow_of_uniform_deriv_modulus`. -/
+theorem differentiableAt_flow_of_uniform_deriv_modulus_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {ω : ℝ → ℝ} (hωnn : ∀ r, 0 ≤ ω r) (hωmono : Monotone ω)
+    (hω0 : Tendsto ω (𝓝[≥] (0 : ℝ)) (𝓝 0))
+    (hmod : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_uniform_deriv_modulus_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hωnn
+    hωmono hω0 hmod).differentiableAt
+
+open Asymptotics Filter in
+/-- Local form of `fderiv_flow_of_uniform_deriv_modulus`. -/
+theorem fderiv_flow_of_uniform_deriv_modulus_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {ω : ℝ → ℝ} (hωnn : ∀ r, 0 ≤ ω r) (hωmono : Monotone ω)
+    (hω0 : Tendsto ω (𝓝[≥] (0 : ℝ)) (𝓝 0))
+    (hmod : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_uniform_deriv_modulus_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hωnn
+    hωmono hω0 hmod).fderiv
+
+/-!
+### The local `C^{1,1}` entry point: a *locally* Lipschitz spatial derivative
+
+The practical payoff of the localisation.  A genuine smooth field has a spatial derivative that is
+only **locally** Lipschitz, so the global bound `‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖` of
+`hasFDerivAt_flow_of_lipschitz_deriv` need not hold for *all* `z`.  It does hold, however, for `z`
+ranging over a neighbourhood of `x₀` (where the chord `[Φ x₀ s, Φ z s]` stays inside the region on
+which the local Lipschitz estimate is valid).  These `_eventually` forms are exactly what such a
+field supplies, giving unconditional `C¹` dependence of the flow on initial data for every smooth
+field. -/
+
+open Asymptotics Filter in
+/-- **Local `C^{1,1}` `C¹`-dependence.**  If the derivative oscillation is Lipschitz in the distance
+to the anchor trajectory, `‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖`, for `z` in a neighbourhood of `x₀`,
+then `x ↦ Φ x t` is Fréchet differentiable at `x₀` with derivative the resolvent.  The linear
+modulus `ω r = L · max r 0` discharges `hasFDerivAt_flow_of_uniform_deriv_modulus_eventually`. -/
+theorem hasFDerivAt_flow_of_lipschitz_deriv_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  refine hasFDerivAt_flow_of_uniform_deriv_modulus_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv
+    (ω := fun r => L * max r 0) (fun r => mul_nonneg hL (le_max_right r 0)) ?_ ?_ ?_
+  · intro a b hab
+    exact mul_le_mul_of_nonneg_left (max_le_max hab le_rfl) hL
+  · have hbase : Tendsto (fun r : ℝ => L * r) (𝓝[≥] (0 : ℝ)) (𝓝 0) := by
+      have h2 : Tendsto (fun r : ℝ => L * r) (𝓝 (0 : ℝ)) (𝓝 0) := by
+        simpa using (continuous_const.mul continuous_id).tendsto (0 : ℝ)
+      exact h2.mono_left nhdsWithin_le_nhds
+    refine hbase.congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    rw [max_eq_left (Set.mem_Ici.mp hr)]
+  · filter_upwards [hlip] with z hlipz
+    intro s hs ξ hξ
+    simpa [max_eq_left (norm_nonneg (ξ - Φ x₀ s))] using hlipz s hs ξ hξ
+
+open Asymptotics Filter in
+/-- Local form of `differentiableAt_flow_of_lipschitz_deriv`. -/
+theorem differentiableAt_flow_of_lipschitz_deriv_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_lipschitz_deriv_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hL
+    hlip).differentiableAt
+
+open Asymptotics Filter in
+/-- Local form of `fderiv_flow_of_lipschitz_deriv`. -/
+theorem fderiv_flow_of_lipschitz_deriv_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_lipschitz_deriv_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hL hlip).fderiv
+
+open Asymptotics Filter in
+/-- **Global-derivative convenience form** of `hasFDerivAt_flow_of_lipschitz_deriv_eventually`.
+Takes the *global* Fréchet derivative `HasFDerivAt (v s) (Dv s ξ) ξ` at every point (as a genuine
+`C¹` field provides) instead of the chord-restricted `HasFDerivWithinAt`, so only the *local*
+Lipschitz-derivative bound (`∀ᶠ z in 𝓝 x₀`) need be supplied.  The single cleanest entry point to
+the `C¹` flow-dependence tower for a smooth field whose derivative is *locally* Lipschitz. -/
+theorem hasFDerivAt_flow_of_lipschitz_deriv_of_hasFDerivAt_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ :=
+  hasFDerivAt_flow_of_lipschitz_deriv_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0
+    (Filter.Eventually.of_forall (fun _ s _ ξ _ => (hderiv s ξ).hasFDerivWithinAt)) hL hlip
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
