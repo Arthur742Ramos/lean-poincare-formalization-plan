@@ -7871,6 +7871,104 @@ theorem thirdVariation_coeff_perturbation_smul_eq
   have h0 : Vc t₀ = (fun r => c • V r) t₀ := by simp [hVc0, hV0]
   exact inhomogVariation_unique hA hVc' hsmul h0 t
 
+/-- **The packaged design-corrected third-variation operator `D₃(k)`** — the corrected analogue of
+`exists_continuousLinearMap_thirdVariation`, packaging `h ↦ D₃(k, h)` as a *bounded linear map* for the
+*corrected* four-term forcing (including the coefficient-variation leading term `(D²v[W k]) ∘ V₀`).
+
+Since that leading term carries the reference `h`-direction second fundamental solution curve, the caller
+supplies `V₀` as a *linear* function `V0fun : E → (ℝ → (E →L[ℝ] E))` of the direction `h` — additive
+(`hV0add`), homogeneous (`hV0smul`), continuous (`hV0cont`), and bounded `‖V0fun h s‖ ≤ N₀ · ‖h‖`
+(`hV0bound`, so the bound factors `‖h‖`).  There is then a bounded operator
+`D₃k : E →L[ℝ] (E →L[ℝ] E)` whose value on any direction `h` is the time-`t` value of *any* solution `V`
+of the corrected third-variation ODE
+`V' = A₀ ∘ V + (((D²v ∘ W₂) h) ∘ W + ((D²v ∘ W) h) ∘ W₂ + ((D²v[W k]) ∘ (V0fun h) +
+(curryFin1 ((D³v.curryLeft (W k)).curryLeft (W h))) ∘ W))`, `V t₀ = 0`.
+
+Assembly: the direction-parameterised solution `h ↦ V^h`
+(`exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff`) is additive and homogeneous in
+`h` (`thirdVariation_coeff_perturbation_add_eq`/`_smul_eq`, feeding the rewritten
+`V0fun (h₁+h₂) = V0fun h₁ + V0fun h₂` / `V0fun (c•h) = c • V0fun h`) and bounded with
+`‖V^h t‖ ≤ ((2·C'·N₂·exp(K(T−t₀)) + C'·N₀·exp(K(T−t₀))·‖k‖ + C''·exp(3K(T−t₀))·‖k‖) ·
+gronwallBound 0 K 1 (t−t₀)) · ‖h‖` (`norm_thirdVariation_coeff_le` with `N₀ ↦ N₀·‖h‖`, factoring `‖h‖`),
+so `LinearMap.mkContinuous` yields the operator; the value is solution-independent by
+`inhomogVariation_unique`.  This is the design-corrected operator `D₃(k)` whose second-order Taylor
+remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²` (now closable, since the corrected `F₃` cancels
+the coefficient-variation leading term) gives the spatial `C³` regularity of the flow's resolvent. -/
+theorem exists_continuousLinearMap_thirdVariation_coeff [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    (hD3cont : Continuous (fun s => D3v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {C' C'' N₂ N₀ : ℝ} (hC'0 : 0 ≤ C') (hC''0 : 0 ≤ C'') (hN₂0 : 0 ≤ N₂)
+    (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C') (hC'' : ∀ s, ‖D3v s (Φ x₀ s)‖ ≤ C'')
+    {W2 : ℝ → (E →L[ℝ] E)} (hW2cont : Continuous W2)
+    {T : ℝ} (hW2 : ∀ s ∈ Set.Icc t₀ T, ‖W2 s‖ ≤ N₂)
+    {V0fun : E → (ℝ → (E →L[ℝ] E))} (hV0cont : ∀ h, Continuous (V0fun h))
+    (hV0add : ∀ (h₁ h₂ : E) (s : ℝ), V0fun (h₁ + h₂) s = V0fun h₁ s + V0fun h₂ s)
+    (hV0smul : ∀ (c : ℝ) (h : E) (s : ℝ), V0fun (c • h) s = c • V0fun h s)
+    (hV0bound : ∀ (h : E), ∀ s ∈ Set.Icc t₀ T, ‖V0fun h s‖ ≤ N₀ * ‖h‖)
+    (k : E) {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ D₃k : E →L[ℝ] (E →L[ℝ] E),
+      ∀ (h : E) (V : ℝ → (E →L[ℝ] E)), V t₀ = 0 →
+        (∀ s, HasDerivAt V
+          ((Dv s (Φ x₀ s)).comp (V s)
+            + (((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s)
+               + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s)
+               + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) k).comp (V0fun h s)
+                  + (continuousMultilinearCurryFin1 ℝ E E
+                      (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                        (fundamentalSolution hA hΦ' h0' s h))).comp
+                      (fundamentalSolution hA hΦ' h0' s)))) s) →
+        D₃k h = V t := by
+  choose Vsol hVsol0 hVsolderiv using fun h =>
+    exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff x₀ hA hAcont hD2cont hD3cont
+      hΦ' h0' hW2cont (hV0cont h) k h
+  have hadd : ∀ h₁ h₂ : E, Vsol (h₁ + h₂) t = Vsol h₁ t + Vsol h₂ t := fun h₁ h₂ =>
+    thirdVariation_coeff_perturbation_add_eq x₀ hA hΦ' h0' k h₁ h₂
+      (hVsolderiv h₁) (hVsolderiv h₂)
+      (fun s => by have hh := hVsolderiv (h₁ + h₂) s; rwa [hV0add h₁ h₂ s] at hh)
+      (hVsol0 h₁) (hVsol0 h₂) (hVsol0 (h₁ + h₂)) t
+  have hsmul : ∀ (c : ℝ) (h : E), Vsol (c • h) t = c • Vsol h t := fun c h =>
+    thirdVariation_coeff_perturbation_smul_eq x₀ hA hΦ' h0' k c h
+      (hVsolderiv h)
+      (fun s => by have hh := hVsolderiv (c • h) s; rwa [hV0smul c h s] at hh)
+      (hVsol0 h) (hVsol0 (c • h)) t
+  have hbound : ∀ h : E,
+      ‖Vsol h t‖
+        ≤ ((2 * C' * N₂ * Real.exp ((K : ℝ) * (T - t₀))
+              + C' * N₀ * Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖
+              + C'' * Real.exp (3 * (K : ℝ) * (T - t₀)) * ‖k‖)
+            * gronwallBound 0 (K : ℝ) 1 (t - t₀)) * ‖h‖ :=
+    fun h => by
+      have hle := norm_thirdVariation_coeff_le x₀ hA hΦ' h0' hC'0 hC''0 hN₂0 hC' hC''
+        hW2 (hV0bound h) k h (hVsolderiv h) (hVsol0 h) ht
+      calc ‖Vsol h t‖
+          ≤ (2 * C' * N₂ * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖
+              + C' * (N₀ * ‖h‖) * Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖
+              + C'' * Real.exp (3 * (K : ℝ) * (T - t₀)) * ‖k‖ * ‖h‖)
+            * gronwallBound 0 (K : ℝ) 1 (t - t₀) := hle
+        _ = ((2 * C' * N₂ * Real.exp ((K : ℝ) * (T - t₀))
+              + C' * N₀ * Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖
+              + C'' * Real.exp (3 * (K : ℝ) * (T - t₀)) * ‖k‖)
+            * gronwallBound 0 (K : ℝ) 1 (t - t₀)) * ‖h‖ := by ring
+  refine ⟨LinearMap.mkContinuous
+    { toFun := fun h => Vsol h t
+      map_add' := hadd
+      map_smul' := fun c h => by simpa using hsmul c h }
+    ((2 * C' * N₂ * Real.exp ((K : ℝ) * (T - t₀))
+        + C' * N₀ * Real.exp ((K : ℝ) * (T - t₀)) * ‖k‖
+        + C'' * Real.exp (3 * (K : ℝ) * (T - t₀)) * ‖k‖)
+      * gronwallBound 0 (K : ℝ) 1 (t - t₀)) hbound, ?_⟩
+  intro h V hV0 hVderiv
+  have huniq : Vsol h t = V t :=
+    inhomogVariation_unique hA (hVsolderiv h) hVderiv (by rw [hVsol0 h, hV0]) t
+  simpa using huniq
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
