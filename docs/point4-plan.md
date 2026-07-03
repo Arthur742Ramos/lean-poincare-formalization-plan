@@ -4863,3 +4863,43 @@ modulus; the *existence* of the variational flow family (global integral curves 
 field); differentiable dependence of the resolvent on its coefficient field (the second-order
 variational equation), built on the Volterra identity above, toward the base-point `C^2`/`C^k`
 bootstrap.
+
+Update — the resolvent's **`C^k` regularity in time** is now proved (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only), promoting the `C¹`-in-time result to arbitrary
+order and adding a general integral-curve regularity lemma that also covers the base (nonlinear)
+flow.  These are the time-direction half of the `C^k` regularity the DeTurck / Ricci-flow bootstrap
+consumes:
+
+* `contDiff_fundamentalSolution_time` — the **operator bootstrap**: if the coefficient path `A` is
+  `C^n` in time (`ContDiff ℝ n A`) then the resolvent `t ↦ D_x Φ_t ∈ E →L[ℝ] E` is `C^{n+1}`.
+  Induction on `n`: base `n = 0` is `contDiff_one_fundamentalSolution` (continuous `A` ⟹ `C¹`
+  resolvent); the step reads `deriv (t ↦ D_x Φ_t) = A t ∘ D_x Φ_t` off the operator ODE
+  (`deriv_fundamentalSolution`), a `ContDiff.clm_comp` of the `C^{n+1}` field with the
+  inductively-`C^{n+1}` resolvent, so `deriv W ∈ C^{n+1}` and `W ∈ C^{n+2}`
+  (`contDiff_succ_iff_deriv`).  `contDiff_infty_fundamentalSolution_time` is the `C^∞` corollary
+  (order-by-order via `contDiff_infty`).
+* `contDiff_fundamentalSolution_apply_time` / `contDiff_infty_…` — the resolvent **action**
+  `t ↦ D_x Φ_t · u₀` (pushforward of a fixed vector) is `C^{n+1}` / `C^∞`, via evaluation-at-`u₀`
+  (`ContDiff.clm_apply`); `contDiff_fundamentalSolution_apply_joint` / `contDiff_infty_…` upgrade
+  this to the **joint** `(t, u₀) ↦ D_x Φ_t · u₀` on `ℝ × E` (pull back along `Prod.fst`, evaluate
+  against `Prod.snd`).  These are the pushforward-leg forms Item 1's tensor time-derivative chain
+  rule consumes.
+* `hasDerivAt_deriv_fundamentalSolution` / `deriv_deriv_fundamentalSolution` — the **explicit
+  second-order time equation** of the resolvent (the `k = 2` instance made concrete): for a `C¹`
+  coefficient (`A' = deriv A`), `d/dt (A t ∘ D_x Φ_t) = A' t ∘ D_x Φ_t + A t ∘ (A t ∘ D_x Φ_t)`,
+  the operator product rule `HasDerivAt.clm_comp` applied to the resolvent velocity field with the
+  first-order operator ODE as the second factor.
+* `contDiff_of_isIntegralCurve` — the **general** integral-curve regularity (not tied to the linear
+  variational field): an integral curve `γ` of a jointly-`C^n` field
+  (`ContDiff ℝ n (Function.uncurry v)`) is `C^{n+1}` in time — `γ'(t) = v t (γ t) = (↿v)(t, γ t)` is
+  a `ContDiff.comp` of `↿v` with `t ↦ (t, γ t)`.  `contDiff_infty_of_isIntegralCurve` is the `C^∞`
+  form, and `contDiff_flow_time` / `contDiff_infty_flow_time` specialise to a flow family (each
+  trajectory `t ↦ Ψ x t` is `C^{n+1}` / `C^∞`) — the time-regularity of the **base** gauge flow that
+  Item 2's compact-manifold flow consumes.
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+spatial modulus (Heine–Cantor uniform continuity on the compact trajectory tube); the *existence* of
+the variational flow family (global integral curves of the linear field — Mathlib supplies only
+local Picard–Lindelöf, so this needs a continuation / Bielecki-norm argument); and the *spatial*
+`C^k`/`C^2` bootstrap (differentiable dependence of `x₀ ↦ D_x Φ_t` on the base point, via
+differentiable dependence of the resolvent on its coefficient).
