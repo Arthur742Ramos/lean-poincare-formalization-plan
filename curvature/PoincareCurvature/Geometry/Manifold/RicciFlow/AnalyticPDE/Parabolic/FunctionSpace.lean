@@ -2489,6 +2489,28 @@ theorem completeSpace [CompleteSpace E] (α : ℝ) (s : Set (ℝ × X)) :
   rw [seminormedAddCommGroup_dist]
   exact lt_of_le_of_lt (hN n hn) (by linarith)
 
+/-- **The parabolic `C^{0,α}` seminormed structure is a seminormed real vector space.**  Scalar
+multiplication is norm-compatible (`‖c • u‖ ≤ ‖c‖ ‖u‖`, in fact with equality), so the parabolic
+`C^{0,α}` seminorm structure carries a `NormedSpace ℝ`.  Combined with `completeSpace` this exhibits
+the parabolic Hölder space as a complete seminormed `ℝ`-vector space (a semi-Banach space); it
+becomes a genuine Banach space once the underlying functions are separated by their restriction to
+`s`. -/
+noncomputable def normedSpace (α : ℝ) (s : Set (ℝ × X)) :
+    @NormedSpace ℝ (parabolicC0AlphaSubmodule X E α s) _
+      (seminormedAddCommGroup (X := X) (E := E) α s) :=
+  letI := seminormedAddCommGroup (X := X) (E := E) α s
+  { (inferInstance : Module ℝ (parabolicC0AlphaSubmodule X E α s)) with
+    norm_smul_le := fun c u => by
+      have hbound := parabolicC0AlphaNorm_const_smul_le
+        (X := X) (E := E) (𝕜 := ℝ) (α := α) (s := s) c u.2
+      have hsmul : ((c • u : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E)
+          = fun z => c • u.1 z := by ext z; simp
+      show parabolicC0AlphaNorm α
+          ((c • u : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E) s
+          ≤ ‖c‖ * parabolicC0AlphaNorm α u.1 s
+      rw [hsmul]
+      exact hbound }
+
 end parabolicC0AlphaSubmodule
 
 end AnalyticPDE
