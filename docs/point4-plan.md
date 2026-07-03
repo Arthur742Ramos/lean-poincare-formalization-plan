@@ -5525,3 +5525,68 @@ coefficient remainder `norm_coeffVariation_sub_secondDerivComp_le_sq`, this give
 for the **corrected** `F₃`; then `norm_inhomogVariation_sub_sub_le_of_forcingGap` yields the Taylor
 remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²`, and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
 yields `ContDiff ℝ 3`.
+
+Update — **the second-order (quadratic-remainder) Taylor engine for the composition forcing is now
+proved**, isolating the analytic core of the `(F₁ − F₀)` remainder into a design-independent,
+clean-typed algebraic engine (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`:
+
+* `norm_bilinearCompForcing_sub_sub_le` — the **`C³`-layer quadratic-remainder analogue** of the
+  first-order (Lipschitz) perturbation bound `norm_bilinearCompForcing_sub_le`.  For the trilinear
+  composition forcing `G(P, A, B) := ((P ∘ A) h) ∘ B` (linear in each of `P : E →L (E →L E)`,
+  `A, B : E →L E`), it identifies the **three linear-variation terms**
+  `G(dP,A₀,B₀) + G(P₀,dA,B₀) + G(P₀,A₀,dB)` with the remainder controlled *quadratically* by the
+  factor Taylor remainders (`‖P₁ − P₀ − dP‖ ≤ εp`, etc.) and the first-order gaps
+  (`‖P₁ − P₀‖ ≤ δp`, etc.):
+  `‖(G(P₁,A₁,B₁) − G(P₀,A₀,B₀)) − (G(dP,A₀,B₀)+G(P₀,dA,B₀)+G(P₀,A₀,dB))‖ ≤ (εp·a·b + p·εa·b + p·a·εb +
+  δp·δa·b + δp·a·δb + p·δa·δb + δp·δa·δb)·‖h‖`.  Proof: the exact trilinear (multilinear) expansion
+  identity (`simp only [comp_sub, sub_comp, sub_apply]; abel`) + seven-term triangle inequality + the
+  a-priori size bound `norm_bilinearCompForcing_le` on each summand.  This is the engine that matches the
+  two asymmetric forcing terms `F_A = ((D²v ∘ W₂) h) ∘ W`, `F_B = ((D²v ∘ W) h) ∘ W₂` (with
+  `dA = dB = W₂`) against the second-variation forcing gap `F(z) − F(x₀)` with the required `O(‖z − x₀‖²)`
+  remainder.
+* `norm_bilinearCompForcing_sub_sub_le_sq` — the **`O(‖k‖²)` collapse** of the engine in the **diagonal**
+  operand shape `((P ∘ W) h) ∘ W` (inner and outer factors equal — exactly the second-variation
+  forcing).  Fed first-order gaps linear in `k` (`dp·‖k‖`, `dw·‖k‖`) and quadratic Taylor remainders
+  (`cp·‖k‖²`, `cw·‖k‖²`) and `‖k‖ ≤ 1`, the seven-term bound collapses to the single clean `C³`-target
+  rate `(cp·w² + 2·p·cw·w + 2·dp·dw·w + p·dw² + dp·dw²)·‖k‖²·‖h‖` (the lone cubic cross term
+  `dp·dw²·‖k‖³ ≤ dp·dw²·‖k‖²` via `‖k‖ ≤ 1`, `nlinarith`).  This is the `(F₁ − F₀)` remainder in the
+  diagonal shape, its final `O(‖z − x₀‖²·‖h‖)` rate exposed — exactly the numerator shape the
+  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge to `ContDiff ℝ 3` consumes.
+
+These two reduce the remaining `(F₁ − F₀)` work to a **single** ingredient: identifying the `dP`-linear
+term `G(D²v(Φz) − D²v(Φx₀), W, W)` (the exact `D²v`-difference contracted) with the module's `F_C`
+(the `continuousMultilinearCurryFin1`/`D³v.curryLeft` form) up to `O(‖z − x₀‖²)` — i.e. the pure
+`D²v`-along-flow Taylor `‖(D²v(Φz s) − D²v(Φx₀ s)) − D³v(Φx₀ s)[W_x k]‖ ≤ M·‖k‖²`.  **Representation
+note (verified this session):** the curried triple `E →L E →L E →L E` (`= E →L (E →L (E →L E))`) carries
+**no** `NormedAddCommGroup`/`NormedSpace` instance in Mathlib v4.29.1, so the natural
+`norm_sub_fderiv_le_mul_sq_of_lipschitz` route (with `g = D²v(·)`, `g' = ∂D²v : E →L (E →L (E →L E))`)
+does **not** type-check — the `D²v` Taylor must be done in the multilinear representation
+`D²v : E → (E[×2]→L E)`, `D³v : E → (E →L (E[×2]→L E))` (both norm-carrying), then bridged to the
+composition form via the `continuousMultilinearCurryFin1` isometries.
+
+The **multilinear `D²v`-along-flow Taylor is now proved** (this session; all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`):
+
+* `norm_secondDerivField_sub_sub_thirdDeriv_ml_le` — the pure quadratic Taylor bound
+  `‖D²v s b − D²v s a − D³v s a (b − a)‖ ≤ M·‖b − a‖²` in the multilinear representation
+  `D²v s : E → (E[×2]→L E)`, `D³v s : E → (E →L (E[×2]→L E))` (both norm-carrying — the point of the
+  representation), a one-line specialisation of the codomain-generic
+  `norm_sub_fderiv_le_mul_sq_of_lipschitz`; the `D²v`-analogue of `norm_derivField_sub_sub_secondDeriv_le`.
+* `norm_secondDerivField_sub_sub_thirdDeriv_ml_flow_le` — its flow-tube form
+  `‖D²v s (Φ z s) − D²v s (Φ x s) − D³v s (Φ x s) (Φ z s − Φ x s)‖ ≤ M·exp (2 K T)·‖z − x‖²` (uniform on
+  `|s − t₀| ≤ T`), combining the pure bound with the flow-separation square bound `norm_flow_sub_sq_le`;
+  the `D²v`-analogue of `norm_field_linearizationDefect_flow_le`.
+
+Remaining for `ContDiff ℝ 3` (next session), now a **pure representation-bridge + assembly** step (no new
+analytic estimate): (a) the `continuousMultilinearCurryFin1`/`curryLeft` isometry bridge relating the
+multilinear-`D²v` Taylor residual `D³v(Φx₀ s)[Φz s − Φx₀ s]` (in `E[×2]→L E`) to the composition-form
+`F_C` operator `((P_C ∘ W) h) ∘ W` (`P_C = ` curried `D³v(Φx₀ s).curryLeft(W_x k)`), turning the
+`dP`-linear term of `norm_bilinearCompForcing_sub_sub_le` into `F_C` with `‖k‖²` residual; (b) threading
+the concrete flow/resolvent bounds (`norm_fundamentalSolution_sub_sub_linearVariation_le_sq` for `cw`,
+`norm_fundamentalSolution_baseCurve_sub_le` for `dw`, `norm_secondDerivField_apply_flow_sub_le` for `dp`,
+`norm_fundamentalSolution_le`/`hC'` for `w`/`p`) into `norm_bilinearCompForcing_sub_sub_le_sq` to obtain
+the `(F₁ − F₀)` remainder `‖(F₁ − F₀) − (F_A + F_B + F_C)‖ ≤ Cquad·‖z − x₀‖²·‖h‖`; then (with the
+already-proved coefficient remainder `norm_coeffVariation_sub_secondDerivComp_le_sq`) the forcing gap
+`hβ`, `norm_inhomogVariation_sub_sub_le_of_forcingGap`, and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+close `ContDiff ℝ 3`.
