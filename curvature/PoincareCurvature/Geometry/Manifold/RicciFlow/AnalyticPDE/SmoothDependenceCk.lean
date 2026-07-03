@@ -2374,6 +2374,20 @@ theorem isIntegralCurve_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : �
     IsIntegralCurve (fun t => fundamentalSolution hA hΦ h0 t) (variationalField A) :=
   fun t => hasDerivAt_fundamentalSolution hA hAcont hΦ h0 t
 
+/-- **A priori velocity bound for the resolvent path.**  The time-derivative of the resolvent —
+the right-hand side `A t ∘ D_x Φ_t` of the operator ODE `hasDerivAt_fundamentalSolution` — has
+operator norm at most `K · exp (K · |t - t₀|)`: the resolvent curve moves through operator space
+with speed controlled by the same exponential that bounds the resolvent itself.  Immediate from
+submultiplicativity of the operator norm and `norm_fundamentalSolution_le`. -/
+theorem norm_comp_fundamentalSolution_le {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) :
+    ‖(A t).comp (fundamentalSolution hA hΦ h0 t)‖ ≤ (K : ℝ) * Real.exp ((K : ℝ) * |t - t₀|) := by
+  refine (ContinuousLinearMap.opNorm_comp_le (A t) (fundamentalSolution hA hΦ h0 t)).trans ?_
+  refine mul_le_mul ?_ (norm_fundamentalSolution_le hA hΦ h0 t) (norm_nonneg _) K.coe_nonneg
+  exact_mod_cast hA t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
