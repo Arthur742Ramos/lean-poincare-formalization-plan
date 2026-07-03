@@ -4566,3 +4566,24 @@ Remaining in this tower (future sessions): the `C^1` (differentiable) dependence
 layer — the flow derivative `D_x Φ_t` solving the linearised/variational ODE —
 and its bootstrap to `C^k` (`C^3`), which is what the compact-manifold gauge flow
 of Item 2 and the tensor time-derivative chain rule of Item 1 ultimately consume.
+
+The **first brick of the `C^1` layer** is now in place (axioms
+`propext`/`Classical.choice`/`Quot.sound` only): the linearised/variational ODE is
+formalised as an object and shown well-posed.
+
+* `variationalField A t W = (A t).comp W` — the operator-valued variational field on
+  the operator Banach space `E →L[ℝ] E`, whose integral curves solve the
+  fundamental-solution equation `W'(t) = A(t) ∘ W(t)` satisfied by `D_x Φ_t`;
+  `lipschitzWith_variationalField` proves it is `K`-Lipschitz under `‖A t‖ ≤ K`
+  (operator-norm submultiplicativity), and the `C^0` lemmas instantiated on
+  `E →L[ℝ] E` give `variational_eq_of_isIntegralCurve` (uniqueness) and
+  `dist_variational_le` (exponential a-priori bound).
+* `variationalFieldVec A t u = A t u` — the **vector** variational field on `E`,
+  whose integral curves solve `u'(t) = A(t) (u(t))`, the equation obeyed by the
+  directional derivative `∂_{u₀} Φ_t = D_x Φ_t · u₀`; `lipschitzWith_variationalFieldVec`,
+  `variationalVec_eq_of_isIntegralCurve`, `dist_variationalVec_le` are its Lipschitz /
+  uniqueness / a-priori-bound analogues.
+* `isIntegralCurve_variational_apply` — the connective lemma: evaluating a solution `W`
+  of the operator equation on a fixed direction `u₀` yields a solution `t ↦ W t u₀` of
+  the vector equation (via the derivative chain rule `HasDerivAt.clm_apply`), tying the
+  fundamental solution to the directional derivatives it generates.

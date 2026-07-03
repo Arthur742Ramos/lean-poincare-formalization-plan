@@ -529,6 +529,60 @@ theorem dist_variational_le {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
     dist (W₁ t) (W₂ t) ≤ dist (W₁ t₀) (W₂ t₀) * Real.exp ((K : ℝ) * |t - t₀|) :=
   dist_le_of_isIntegralCurve (fun s => lipschitzWith_variationalField hA s) h1 h2 t₀ t
 
+/-- The **vector** variational field `u ↦ A t u` on `E`, associated to an operator path `A`.
+Its integral curves solve the vector variational equation `u'(t) = A(t) (u(t))` satisfied
+by the directional derivative `∂_h Φ_t` (evaluation of the fundamental solution on a fixed
+direction) — the form of the linearised equation consumed by the tensor time-derivative
+chain rule of Item 1. -/
+def variationalFieldVec (A : ℝ → (E →L[ℝ] E)) : ℝ → E → E :=
+  fun t u => A t u
+
+/-- **The vector variational field is Lipschitz.**  Under a uniform bound `‖A t‖ ≤ K`, the
+linear field `u ↦ A t u` is `K`-Lipschitz in `u`. -/
+theorem lipschitzWith_variationalFieldVec {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (t : ℝ) :
+    LipschitzWith K (variationalFieldVec A t) := by
+  refine LipschitzWith.of_dist_le_mul fun u₁ u₂ => ?_
+  simp only [variationalFieldVec, dist_eq_norm, ← map_sub]
+  calc ‖(A t) (u₁ - u₂)‖
+      ≤ ‖A t‖ * ‖u₁ - u₂‖ := (A t).le_opNorm _
+    _ ≤ (K : ℝ) * ‖u₁ - u₂‖ := by
+        gcongr
+        exact_mod_cast hA t
+
+/-- **Uniqueness for the vector variational ODE.**  Two solutions of `u'(t) = A(t) (u(t))`
+with `‖A t‖ ≤ K` that agree at one time agree everywhere. -/
+theorem variationalVec_eq_of_isIntegralCurve {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) {u₁ u₂ : ℝ → E}
+    (h1 : IsIntegralCurve u₁ (variationalFieldVec A))
+    (h2 : IsIntegralCurve u₂ (variationalFieldVec A))
+    {t₁ : ℝ} (h : u₁ t₁ = u₂ t₁) (t : ℝ) : u₁ t = u₂ t :=
+  eq_of_isIntegralCurve_of_eq_at (fun s => lipschitzWith_variationalFieldVec hA s) h1 h2 h t
+
+/-- **A priori exponential bound for the vector variational ODE.**
+`dist (u₁ t) (u₂ t) ≤ dist (u₁ t₀) (u₂ t₀) · exp (K · |t - t₀|)`. -/
+theorem dist_variationalVec_le {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) {u₁ u₂ : ℝ → E}
+    (h1 : IsIntegralCurve u₁ (variationalFieldVec A))
+    (h2 : IsIntegralCurve u₂ (variationalFieldVec A))
+    (t₀ t : ℝ) :
+    dist (u₁ t) (u₂ t) ≤ dist (u₁ t₀) (u₂ t₀) * Real.exp ((K : ℝ) * |t - t₀|) :=
+  dist_le_of_isIntegralCurve (fun s => lipschitzWith_variationalFieldVec hA s) h1 h2 t₀ t
+
+/-- **The operator variational solution, evaluated on a fixed direction, solves the vector
+variational ODE.**  If `W` solves `W'(t) = A(t) ∘ W(t)` (the fundamental-solution equation),
+then for any `u₀` the curve `t ↦ W t u₀` solves `u'(t) = A(t) (u(t))`.  This links the
+operator- and vector-valued variational equations: the directional derivative
+`∂_{u₀} Φ_t = D_x Φ_t · u₀ = W t u₀` obeys the vector variational equation, via the chain
+rule for the (continuous linear) evaluation map `L ↦ L u₀`. -/
+theorem isIntegralCurve_variational_apply {A : ℝ → (E →L[ℝ] E)}
+    {W : ℝ → (E →L[ℝ] E)} (hW : IsIntegralCurve W (variationalField A)) (u₀ : E) :
+    IsIntegralCurve (fun t => W t u₀) (variationalFieldVec A) := by
+  intro t
+  have hcomp := (hW t).clm_apply (hasDerivAt_const t u₀)
+  simpa only [variationalField, variationalFieldVec, ContinuousLinearMap.comp_apply,
+    map_zero, add_zero] using hcomp
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
