@@ -811,6 +811,32 @@ theorem continuous_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥
   simp only [fundamentalSolution_apply]
   exact continuous_flow (fun s => lipschitzWith_variationalFieldVec hA s) hΦ h0
 
+/-!
+### The resolvent's columns are the variational-ODE solutions
+
+The action `t ↦ D_x Φ_t · u₀` is exactly the solution of the vector variational ODE through
+`u₀` at `t₀`.  This is the characterisation a subsequent `C^1`-differentiability proof
+consumes: it is precisely the fact that the candidate derivative `D_x Φ_t` applied to a
+direction obeys the linearised equation with the correct initial value. -/
+
+/-- **The resolvent columns solve the variational ODE.**  For each direction `u₀`, the path
+`t ↦ D_x Φ_t · u₀` is an integral curve of the vector variational field `variationalFieldVec A`. -/
+theorem isIntegralCurve_fundamentalSolution_apply {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (u₀ : E) :
+    IsIntegralCurve (fun t => fundamentalSolution hA hΦ h0 t u₀) (variationalFieldVec A) := by
+  simp only [fundamentalSolution_apply]
+  exact hΦ u₀
+
+/-- **The resolvent recovers the initial direction at the anchor.**  `D_x Φ_{t₀} · u₀ = u₀`. -/
+@[simp]
+theorem fundamentalSolution_apply_anchor {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (u₀ : E) : fundamentalSolution hA hΦ h0 t₀ u₀ = u₀ := by
+  rw [fundamentalSolution_apply, h0]
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
