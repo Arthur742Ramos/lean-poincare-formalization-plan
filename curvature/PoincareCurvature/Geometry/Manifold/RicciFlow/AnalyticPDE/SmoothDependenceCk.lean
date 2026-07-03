@@ -3275,6 +3275,48 @@ def augmentedVariationalField (A F : ℝ → (E →L[ℝ] E)) :
     ℝ → ((E →L[ℝ] E) × ℝ) → ((E →L[ℝ] E) × ℝ) :=
   fun s p => ((A s).comp p.1 + p.2 • F s, 0)
 
+/-- **The augmented variational field is uniformly Lipschitz.**  Under uniform bounds `‖A s‖ ≤ K` and
+`‖F s‖ ≤ M`, the linear augmented field `(V, c) ↦ (A s ∘ V + c • F s, 0)` on `(E →L[ℝ] E) × ℝ` is
+`(K + M)`-Lipschitz in `(V, c)`, with the constant independent of `s`.  (Sup-norm on the product,
+submultiplicativity of `A s ∘ ·`, and `‖c • F s‖ ≤ ‖c‖ · M`; the two component gaps are each bounded
+by the product-norm gap.)  This places the augmented homogeneous flow squarely in the uniformly
+Lipschitz regime handled by the `C⁰`/`C¹` dependence theory above — so the flow-existence input
+required by `hasDerivAt_inhomogVariation_of_augmented` is of exactly the same well-posed kind consumed
+throughout this file for `variationalFieldVec`. -/
+theorem lipschitzWith_augmentedVariationalField {A F : ℝ → (E →L[ℝ] E)} {K M : ℝ≥0}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) (hF : ∀ s, ‖F s‖₊ ≤ M) (s : ℝ) :
+    LipschitzWith (K + M) (augmentedVariationalField A F s) := by
+  refine LipschitzWith.of_dist_le_mul fun p q => ?_
+  have hAs : ‖A s‖ ≤ (K : ℝ) := by exact_mod_cast hA s
+  have hFs : ‖F s‖ ≤ (M : ℝ) := by exact_mod_cast hF s
+  have hfst : ‖p.1 - q.1‖ ≤ ‖p - q‖ := norm_fst_le (p - q)
+  have hsnd : ‖p.2 - q.2‖ ≤ ‖p - q‖ := norm_snd_le (p - q)
+  rw [dist_eq_norm, dist_eq_norm]
+  have hnorm : ‖augmentedVariationalField A F s p - augmentedVariationalField A F s q‖
+      = ‖(A s).comp (p.1 - q.1) + (p.2 - q.2) • F s‖ := by
+    rw [Prod.norm_def]
+    have e1 : (augmentedVariationalField A F s p - augmentedVariationalField A F s q).1
+        = (A s).comp (p.1 - q.1) + (p.2 - q.2) • F s := by
+      show ((A s).comp p.1 + p.2 • F s) - ((A s).comp q.1 + q.2 • F s)
+          = (A s).comp (p.1 - q.1) + (p.2 - q.2) • F s
+      rw [ContinuousLinearMap.comp_sub, sub_smul]; abel
+    have e2 : (augmentedVariationalField A F s p - augmentedVariationalField A F s q).2 = 0 := by
+      show (0 : ℝ) - 0 = 0
+      simp
+    rw [e1, e2, norm_zero, max_eq_left (norm_nonneg _)]
+  rw [hnorm]
+  have h1 : ‖(A s).comp (p.1 - q.1)‖ ≤ (K : ℝ) * ‖p - q‖ :=
+    calc ‖(A s).comp (p.1 - q.1)‖
+        ≤ ‖A s‖ * ‖p.1 - q.1‖ := ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (K : ℝ) * ‖p - q‖ := mul_le_mul hAs hfst (norm_nonneg _) (by positivity)
+  have h2 : ‖(p.2 - q.2) • F s‖ ≤ ‖p - q‖ * (M : ℝ) := by
+    rw [norm_smul]
+    exact mul_le_mul hsnd hFs (norm_nonneg _) (norm_nonneg _)
+  calc ‖(A s).comp (p.1 - q.1) + (p.2 - q.2) • F s‖
+      ≤ ‖(A s).comp (p.1 - q.1)‖ + ‖(p.2 - q.2) • F s‖ := norm_add_le _ _
+    _ ≤ (K : ℝ) * ‖p - q‖ + ‖p - q‖ * (M : ℝ) := add_le_add h1 h2
+    _ = ((K + M : ℝ≥0) : ℝ) * ‖p - q‖ := by push_cast; ring
+
 /-- **The scalar coordinate of the augmented flow has zero derivative.**  For any integral curve `z`
 of `augmentedVariationalField A F`, the scalar component `s ↦ (z s).2` has derivative `0` everywhere
 (the second slot of the augmented field is identically `0`); obtained by post-composing with the
