@@ -2441,6 +2441,54 @@ theorem seminormedAddCommGroup_norm (α : ℝ) (s : Set (ℝ × X))
     (seminormedAddCommGroup α s).toNorm.norm u = parabolicC0AlphaNorm α u.1 s :=
   rfl
 
+/-- Under the parabolic `C^{0,α}` seminormed structure, distance between two bundled functions is
+the parabolic `C^{0,α}` norm of their pointwise difference. -/
+theorem seminormedAddCommGroup_dist (α : ℝ) (s : Set (ℝ × X))
+    (u v : parabolicC0AlphaSubmodule X E α s) :
+    letI := seminormedAddCommGroup (X := X) (E := E) α s
+    dist u v = parabolicC0AlphaNorm α (fun z => u.1 z - v.1 z) s := by
+  letI := seminormedAddCommGroup (X := X) (E := E) α s
+  rw [dist_eq_norm]
+  have hfun : ((u - v : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E)
+      = fun z => u.1 z - v.1 z := by
+    ext z; simp
+  show parabolicC0AlphaNorm α ((u - v : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E) s = _
+  rw [hfun]
+
+/-- **Completeness of the parabolic `C^{0,α}` seminormed space.**  Under the bundled parabolic
+`C^{0,α}` seminormed structure, every `C^{0,α}`-norm-Cauchy sequence of parabolic `C^{0,α}` functions
+converges in the `C^{0,α}` norm to a parabolic `C^{0,α}` function.  This is the completeness half of
+the parabolic Hölder Banach space, packaged as a `CompleteSpace` fact for the seminormed submodule;
+it is assembled from `Metric.complete_of_cauchySeq_tendsto` and the sequential completeness
+`exists_parabolicC0AlphaOn_tendsto_of_cauchy`.  (The structure is a genuine `NormedAddCommGroup`
+once the underlying functions are determined by their restriction to `s`, e.g. on a type synonym or
+after a quotient; completeness holds already at the seminormed level.) -/
+theorem completeSpace [CompleteSpace E] (α : ℝ) (s : Set (ℝ × X)) :
+    @CompleteSpace (parabolicC0AlphaSubmodule X E α s)
+      (seminormedAddCommGroup (X := X) (E := E) α s).toPseudoMetricSpace.toUniformSpace := by
+  letI := seminormedAddCommGroup (X := X) (E := E) α s
+  refine @Metric.complete_of_cauchySeq_tendsto (parabolicC0AlphaSubmodule X E α s) _ ?_
+  intro u hu
+  rw [Metric.cauchySeq_iff] at hu
+  have hf : ∀ n, ParabolicC0AlphaOn α ((u n : ℝ × X → E)) s := fun n => (u n).2
+  have hcauchy : ∀ ε > 0, ∃ N, ∀ m ≥ N, ∀ n ≥ N,
+      parabolicC0AlphaNorm α (fun z => (u m : ℝ × X → E) z - (u n : ℝ × X → E) z) s ≤ ε := by
+    intro ε hε
+    obtain ⟨N, hN⟩ := hu ε hε
+    refine ⟨N, fun m hm n hn => ?_⟩
+    have h := hN m hm n hn
+    rw [seminormedAddCommGroup_dist] at h
+    exact h.le
+  obtain ⟨g, hg_class, hg_conv⟩ :=
+    exists_parabolicC0AlphaOn_tendsto_of_cauchy hf hcauchy
+  refine ⟨⟨g, hg_class⟩, ?_⟩
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  obtain ⟨N, hN⟩ := hg_conv (ε / 2) (by positivity)
+  refine ⟨N, fun n hn => ?_⟩
+  rw [seminormedAddCommGroup_dist]
+  exact lt_of_le_of_lt (hN n hn) (by linarith)
+
 end parabolicC0AlphaSubmodule
 
 end AnalyticPDE
