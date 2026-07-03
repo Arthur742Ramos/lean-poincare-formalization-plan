@@ -5750,6 +5750,41 @@ theorem norm_secondDerivField_apply_flow_sub_le
   rw [dist_eq_norm, dist_eq_norm, NNReal.coe_mul, Real.coe_toNNReal _ (Real.exp_pos _).le] at hd
   exact hd
 
+/-- **The resolvent is Lipschitz in the base point along the flow.**  Packaging the base-point
+continuous dependence of the first fundamental solution used inside
+`exists_flow_fderiv_continuous_of_lipschitz_deriv` as a standalone quantitative estimate.  For two
+base points `z`, `w`, the trajectory-linearised coefficients `A(z) s = Dv s (Φ z s)`,
+`A(w) s = Dv s (Φ w s)` (both `≤ K`) with their variational flow families `Φ₁`, `Φ₂`, the resolvents
+at time `t` satisfy
+`‖D_x Φ_t^{A(z)} − D_x Φ_t^{A(w)}‖ ≤ L · exp (K (T − t₀)) · ‖z − w‖ · exp (K (T − t₀)) · gronwallBound 0 K 1 (t − t₀)`
+for `t ∈ [t₀, T]`.  Proof: the coefficient gap is `≤ L · exp (K (T − t₀)) · ‖z − w‖` on `[t₀, T]`
+(`norm_derivField_apply_flow_sub_le`), fed to the resolvent-in-coefficient bound
+`norm_fundamentalSolution_sub_le_of_forall_le_Icc`.  This is the `dw` datum (the size of the resolvent
+response to a base-point increment, uniformly over the tube) consumed by the chain-rule forcing
+perturbation of the base-point `ContDiff ℝ 2` bootstrap (continuity of the second fundamental
+solution). -/
+theorem norm_fundamentalSolution_baseCurve_sub_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {L : ℝ≥0}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (z w : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAw : ∀ s, ‖Dv s (Φ w s)‖₊ ≤ K)
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec (fun s => Dv s (Φ w s))))
+    (h2 : ∀ x, Φ₂ x t₀ = x)
+    {T t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖fundamentalSolution hAz hΦ₁ h1 t - fundamentalSolution hAw hΦ₂ h2 t‖
+      ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - w‖
+          * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  have hgap : ∀ s ∈ Icc t₀ T, ‖Dv s (Φ z s) - Dv s (Φ w s)‖
+      ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - w‖ := fun s hs => by
+    have hsT : |s - t₀| ≤ T - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+    exact norm_derivField_apply_flow_sub_le hv hΦ h0 (hDvlip s) hsT z w
+  exact norm_fundamentalSolution_sub_le_of_forall_le_Icc hAz hAw hΦ₁ h1 hΦ₂ h2
+    (by positivity) hgap ht
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
