@@ -9173,6 +9173,33 @@ theorem norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq [CompleteSpa
   refine hmain.trans (le_of_eq ?_)
   ring
 
+/-- **Continuity of the `D3vm`-representation third-derivative forcing term.**  The companion of
+`continuous_thirdDerivForcing` for the *already-once-curried* representation of the third derivative
+`DF : ℝ → (E →L[ℝ] (E[×2]→L E))` (i.e. `DF s = D³v(·)` in the `E →L ContinuousMultilinearMap (Fin 2)`
+form carrying the norm/continuity instances that the curried triple `E →L E →L E →L E` lacks): the
+once-and-twice contracted map
+`s ↦ (continuousMultilinearCurryFin1 ℝ E E ((DF s (W s k)).curryLeft (W s h))).comp (W s)`
+(`e ↦ DF s [W s k][W s h, W s e]`) is continuous.  Proof mirrors `continuous_thirdDerivForcing` from the
+first inner application onward (`DF s (W s k)` via `Continuous.clm_apply`, the `curryLeft` isometry
+`continuousMultilinearCurryLeftEquiv`, `continuousMultilinearCurryFin1`, and `Continuous.clm_comp`).
+This is the continuity of the `F_C` forcing in the `D3vm` representation used by the flow-forcing chain
+rule and the design-corrected third variation. -/
+theorem continuous_thirdDerivCurryForcing
+    {DF : ℝ → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {W : ℝ → (E →L[ℝ] E)} (hDF : Continuous DF) (hW : Continuous W) (k h : E) :
+    Continuous fun s =>
+      (continuousMultilinearCurryFin1 ℝ E E ((DF s (W s k)).curryLeft (W s h))).comp (W s) := by
+  have hWk : Continuous fun s => W s k := hW.clm_apply continuous_const
+  have hWh : Continuous fun s => W s h := hW.clm_apply continuous_const
+  have hc1 : Continuous fun s => DF s (W s k) := hDF.clm_apply hWk
+  have hcL2 : Continuous fun s => (DF s (W s k)).curryLeft :=
+    (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => E) E).continuous.comp hc1
+  have hc2 : Continuous fun s => (DF s (W s k)).curryLeft (W s h) := hcL2.clm_apply hWh
+  have hc3 : Continuous fun s =>
+      continuousMultilinearCurryFin1 ℝ E E ((DF s (W s k)).curryLeft (W s h)) :=
+    (continuousMultilinearCurryFin1 ℝ E E).continuous.comp hc2
+  exact hc3.clm_comp hW
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
