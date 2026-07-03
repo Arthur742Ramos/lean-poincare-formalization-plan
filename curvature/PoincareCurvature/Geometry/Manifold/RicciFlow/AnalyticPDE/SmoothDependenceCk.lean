@@ -158,6 +158,38 @@ theorem dist_le_of_isIntegralCurve_perturb_of_le {w : ℝ → E → E} {ε : ℝ
   have hb := key t ⟨h, le_rfl⟩
   rwa [zero_add] at hb
 
+/-- **Two-sided stability under perturbation of the vector field.**  If `f` is an integral
+curve of the uniformly `K`-Lipschitz field `v` and `g` is an integral curve of a field `w`
+that stays within `ε` of `v` uniformly, then for *all* `t`,
+`dist (f t) (g t) ≤ gronwallBound (dist (f t₀) (g t₀)) K ε |t - t₀|`.  Mathlib's Grönwall
+approximation lemma only supplies the forward (`t ≥ t₀`) half; the backward half comes
+from applying the forward bound to the time-reversed curves, whose fields are still
+`K`-Lipschitz and `ε`-close.  This is the two-sided *continuous dependence on the field*
+that transfers regularity of the DeTurck vector field to the DeTurck flow. -/
+theorem dist_le_of_isIntegralCurve_perturb {w : ℝ → E → E} {ε : ℝ}
+    (hv : ∀ t, LipschitzWith K (v t)) (hf : IsIntegralCurve f v) (hg : IsIntegralCurve g w)
+    (hvw : ∀ t x, dist (v t x) (w t x) ≤ ε) (t₀ t : ℝ) :
+    dist (f t) (g t) ≤ gronwallBound (dist (f t₀) (g t₀)) (K : ℝ) ε |t - t₀| := by
+  rcases le_total t₀ t with h | h
+  · rw [abs_of_nonneg (sub_nonneg.mpr h)]
+    exact dist_le_of_isIntegralCurve_perturb_of_le hv hf hg hvw h
+  · have hw : ∀ s, LipschitzWith K (fun x => -(v (-s) x)) := by
+      intro s
+      refine LipschitzWith.of_dist_le_mul fun a b => ?_
+      rw [dist_neg_neg]
+      exact (hv (-s)).dist_le_mul a b
+    have hfn := isIntegralCurve_comp_neg hf
+    have hgn := isIntegralCurve_comp_neg hg
+    have hvw' : ∀ s x, dist (-(v (-s) x)) (-(w (-s) x)) ≤ ε := by
+      intro s x
+      rw [dist_neg_neg]
+      exact hvw (-s) x
+    have key := dist_le_of_isIntegralCurve_perturb_of_le hw hfn hgn hvw' (neg_le_neg h)
+    simp only [neg_neg] at key
+    rw [abs_of_nonpos (sub_nonpos.mpr h)]
+    have harg : -t - -t₀ = -(t - t₀) := by ring
+    rwa [harg] at key
+
 /-!
 ## The flow map is exponentially Lipschitz in the initial value
 
