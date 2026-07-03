@@ -8158,6 +8158,79 @@ theorem thirdVariation_coeff_baseDir_add_eq
   have h0 : V₁₂ t₀ = (fun r => V₁ r + V₂ r) t₀ := by simp [hV₁₂0, hV₁0, hV₂0]
   exact inhomogVariation_unique hA hV₁₂' hsum h0 t
 
+/-- **Homogeneity in the base direction `k` of the design-corrected third variation.**  The
+scalar-homogeneous companion of `thirdVariation_coeff_baseDir_add_eq` and the corrected analogue of
+`thirdVariation_baseDir_smul_eq`.  With `W₂` homogeneous in the base direction (`hW2smul`) and the fixed
+`h`-direction curve `V₀`, scaling `k` by `c` scales the corrected third variation by `c`:
+`V^{c • k} t = c • V^k t`.  The corrected four-term forcing is homogeneous in `k`: `F_A`, `F_B` via
+`comp_smul`/`smul_comp`/`smul_apply` on `W₂ k`, the leading term `(D²v[W (c•k)]) ∘ V₀` via `map_smul` on
+`W (c•k)` then `smul_comp` (with `V₀` fixed), and `F_C` via `map_smul`/`curryLeft_smul` on `W k`; then
+`hasDerivAt_inhomogVariation_smul` and `inhomogVariation_unique` finish.  The homogeneous-in-`k` half of
+packaging the full bilinear corrected operator `(k, h) ↦ D₃(k, h)`. -/
+theorem thirdVariation_coeff_baseDir_smul_eq
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {W2 : E → ℝ → (E →L[ℝ] E)} {V0 : ℝ → (E →L[ℝ] E)}
+    (hW2smul : ∀ (c : ℝ) (k : E) (s : ℝ), W2 (c • k) s = c • W2 k s)
+    (c : ℝ) (k h : E) {V Vc : ℝ → (E →L[ℝ] E)}
+    (hV : ∀ s, HasDerivAt V
+      ((Dv s (Φ x₀ s)).comp (V s)
+        + (((D2v s (Φ x₀ s)).comp (W2 k s) h).comp (fundamentalSolution hA hΦ' h0' s)
+           + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 k s)
+           + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) k).comp (V0 s)
+              + (continuousMultilinearCurryFin1 ℝ E E
+                  (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                    (fundamentalSolution hA hΦ' h0' s h))).comp
+                  (fundamentalSolution hA hΦ' h0' s)))) s)
+    (hVc : ∀ s, HasDerivAt Vc
+      ((Dv s (Φ x₀ s)).comp (Vc s)
+        + (((D2v s (Φ x₀ s)).comp (W2 (c • k) s) h).comp (fundamentalSolution hA hΦ' h0' s)
+           + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 (c • k) s)
+           + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (c • k)).comp (V0 s)
+              + (continuousMultilinearCurryFin1 ℝ E E
+                  (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s (c • k))).curryLeft
+                    (fundamentalSolution hA hΦ' h0' s h))).comp
+                  (fundamentalSolution hA hΦ' h0' s)))) s)
+    (hV0 : V t₀ = 0) (hVc0 : Vc t₀ = 0)
+    (t : ℝ) : Vc t = c • V t := by
+  have hVc' : ∀ s, HasDerivAt Vc
+      ((Dv s (Φ x₀ s)).comp (Vc s)
+        + c • (((D2v s (Φ x₀ s)).comp (W2 k s) h).comp (fundamentalSolution hA hΦ' h0' s)
+            + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 k s)
+            + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) k).comp (V0 s)
+               + (continuousMultilinearCurryFin1 ℝ E E
+                   (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                     (fundamentalSolution hA hΦ' h0' s h))).comp
+                   (fundamentalSolution hA hΦ' h0' s)))) s := by
+    intro s
+    have hmap :
+        (((D2v s (Φ x₀ s)).comp (W2 (c • k) s) h).comp (fundamentalSolution hA hΦ' h0' s)
+          + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 (c • k) s)
+          + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (c • k)).comp (V0 s)
+             + (continuousMultilinearCurryFin1 ℝ E E
+                 (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s (c • k))).curryLeft
+                   (fundamentalSolution hA hΦ' h0' s h))).comp
+                 (fundamentalSolution hA hΦ' h0' s)))
+        = c • (((D2v s (Φ x₀ s)).comp (W2 k s) h).comp (fundamentalSolution hA hΦ' h0' s)
+            + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 k s)
+            + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) k).comp (V0 s)
+               + (continuousMultilinearCurryFin1 ℝ E E
+                   (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                     (fundamentalSolution hA hΦ' h0' s h))).comp
+                   (fundamentalSolution hA hΦ' h0' s))) := by
+      rw [hW2smul c k s]
+      simp only [map_smul, curryLeft_smul, ContinuousLinearMap.comp_smul,
+        ContinuousLinearMap.smul_comp, ContinuousLinearMap.smul_apply, smul_add]
+    have := hVc s
+    rwa [hmap] at this
+  have hsmul := hasDerivAt_inhomogVariation_smul c hV
+  have h0 : Vc t₀ = (fun r => c • V r) t₀ := by simp [hVc0, hV0]
+  exact inhomogVariation_unique hA hVc' hsmul h0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
