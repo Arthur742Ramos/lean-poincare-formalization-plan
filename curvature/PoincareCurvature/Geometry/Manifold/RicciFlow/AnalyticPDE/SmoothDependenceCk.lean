@@ -915,6 +915,68 @@ theorem norm_flow_sub_variational_le
   rw [show g t₀ - f t₀ - w t₀ = (0 : E) from by rw [hinit]; abel, norm_zero] at hkey
   exact hkey
 
+/-- **Interval-restricted linearisation-remainder bound.**  The refinement of
+`norm_flow_sub_variational_le` in which the linearisation defect need only be controlled on the
+*forward interval* `Ico t₀ b`, not for all times.  For integral curves `f`, `g` of a field `v`,
+a solution `w` of the variational ODE `w' = A(s) w` (`‖A s‖ ≤ K`) matching the initial
+separation `w t₀ = g t₀ - f t₀`, and a bound `δ` on the defect
+`‖v s (g s) - v s (f s) - A s (g s - f s)‖` *for `s ∈ Ico t₀ b`*, the linear prediction tracks
+the flow separation on `Icc t₀ b`:
+`‖(g t - f t) - w t‖ ≤ gronwallBound 0 K δ (t - t₀)`  for `t ∈ Icc t₀ b`.
+
+This is the version differentiable dependence actually consumes: as the flow separation
+`‖g s - f s‖` grows exponentially in `s`, the defect can only be made uniformly small on a
+*compact* time interval (the tube around the reference trajectory), so a globally-uniform `δ`
+is unavailable — but on `[t₀, b]` the `C¹` modulus of `v` does supply one.  Proved by comparing
+the remainder `r := g - f - w` (an approximate solution of the variational field, defect `≤ δ`
+on `Ico t₀ b`) against the exact zero solution via Mathlib's interval Grönwall estimate
+`dist_le_of_approx_trajectories_ODE`. -/
+theorem norm_flow_sub_variational_le_Icc
+    (hf : IsIntegralCurve f v) (hg : IsIntegralCurve g v)
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {w : ℝ → E} (hw : IsIntegralCurve w (variationalFieldVec A))
+    {δ b : ℝ}
+    (hdefect : ∀ s ∈ Ico t₀ b, ‖v s (g s) - v s (f s) - A s (g s - f s)‖ ≤ δ)
+    (hinit : w t₀ = g t₀ - f t₀) {t : ℝ} (ht : t ∈ Icc t₀ b) :
+    ‖(g t - f t) - w t‖ ≤ gronwallBound 0 (K : ℝ) δ (t - t₀) := by
+  -- the zero curve is the exact solution of the (linear) variational ODE
+  have hzero : IsIntegralCurve (fun _ : ℝ => (0 : E)) (variationalFieldVec A) := by
+    intro s
+    simpa only [variationalFieldVec, map_zero] using hasDerivAt_const (c := (0 : E)) (x := s)
+  -- the remainder `r := g - f - w`: its derivative and continuity
+  have hrderiv : ∀ s, HasDerivAt (fun s => g s - f s - w s)
+      (v s (g s) - v s (f s) - variationalFieldVec A s (w s)) s :=
+    fun s => ((hg s).sub (hf s)).sub (hw s)
+  have hrcont : Continuous (fun s => g s - f s - w s) :=
+    (hg.continuous.sub hf.continuous).sub hw.continuous
+  -- the remainder's derivative is `A`-linear up to the defect, uniformly `≤ δ` on `Ico t₀ b`
+  have g_bound : ∀ s ∈ Ico t₀ b,
+      dist (v s (g s) - v s (f s) - variationalFieldVec A s (w s))
+        (variationalFieldVec A s (g s - f s - w s)) ≤ δ := by
+    intro s hs
+    have hdef : (v s (g s) - v s (f s) - variationalFieldVec A s (w s))
+        - variationalFieldVec A s (g s - f s - w s)
+        = v s (g s) - v s (f s) - A s (g s - f s) := by
+      simp only [variationalFieldVec, map_sub]; abel
+    rw [dist_eq_norm, hdef]
+    exact hdefect s hs
+  -- initial separation is predicted exactly, so the remainder starts at `0`
+  have ha : dist ((fun _ : ℝ => (0 : E)) t₀) ((fun s => g s - f s - w s) t₀) ≤ (0 : ℝ) := by
+    have h0 : g t₀ - f t₀ - w t₀ = (0 : E) := by rw [hinit]; abel
+    simp only [h0, dist_self, le_refl]
+  -- interval Grönwall: compare the remainder to the exact zero solution
+  have key := dist_le_of_approx_trajectories_ODE (a := t₀) (b := b)
+    (εf := 0) (εg := δ) (δ := 0)
+    (fun s => lipschitzWith_variationalFieldVec hA s)
+    hzero.continuous.continuousOn (fun s _ => (hzero s).hasDerivWithinAt)
+    (fun s _ => le_of_eq (dist_self _))
+    hrcont.continuousOn (fun s _ => (hrderiv s).hasDerivWithinAt)
+    g_bound ha
+  have hb := key t ht
+  rw [zero_add] at hb
+  simp only [dist_eq_norm, zero_sub, norm_neg] at hb
+  exact hb
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
