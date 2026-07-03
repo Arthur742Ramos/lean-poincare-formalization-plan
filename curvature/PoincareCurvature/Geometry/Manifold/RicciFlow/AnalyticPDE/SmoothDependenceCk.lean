@@ -3814,6 +3814,64 @@ theorem exists_isIntegralCurveAt_of_lipschitzWith [CompleteSpace E]
   have hpos := lipschitzFlowStep_pos K
   exact ⟨γ, hγ0, hγon.isIntegralCurveAt (Icc_mem_nhds (by linarith) (by linarith))⟩
 
+/-- **Forward existence on an arbitrary compact interval (continuation).**  A uniformly (in time)
+`K`-Lipschitz, time-continuous vector field on a complete real Banach space admits, through any anchor
+`(t₀, x₀)`, an integral curve on *every* forward compact interval `Icc t₀ T` (`t₀ ≤ T`).  Local
+existence (`exists_isIntegralCurveOn_Icc_of_lipschitzWith`) supplies a solution over one uniform step
+`lipschitzFlowStep K`; the constructive gluing `isIntegralCurveOn_glue_Icc` concatenates successive
+steps.  The *uniform* step (independent of the anchor) is what guarantees finitely many steps reach
+any `T` — the property that fails for a merely-local existence statement (a globally Lipschitz field
+cannot blow up in finite time, so its trajectories extend to all times).
+
+Proof: an induction shows `∃ γ, γ t₀ = x₀ ∧ IsIntegralCurveOn γ v (Icc t₀ (t₀ + n · step))` for every
+`n : ℕ` (base = local existence restricted to `{t₀}`; step = extend the length-`n` solution by one
+more local solution anchored at its right endpoint `(t₀ + n·step, γ (t₀ + n·step))`, glued at the
+junction where the two curves agree by construction).  Choosing `n` with `t₀ + n·step ≥ T`
+(Archimedean, `step > 0`) and restricting gives the claim.  (No hypothesis `t₀ ≤ T` is needed: for
+`T < t₀` the interval `Icc t₀ T` is empty and the claim is vacuous.) -/
+theorem exists_isIntegralCurveOn_Icc_forward_of_lipschitzWith [CompleteSpace E]
+    {v : ℝ → E → E} {K : ℝ≥0}
+    (hlip : ∀ t, LipschitzWith K (v t)) (hcont : ∀ x, Continuous fun t => v t x)
+    (t₀ : ℝ) (x₀ : E) (T : ℝ) :
+    ∃ γ : ℝ → E, γ t₀ = x₀ ∧ IsIntegralCurveOn γ v (Set.Icc t₀ T) := by
+  set h : ℝ := lipschitzFlowStep K with hh_def
+  have hh0 : 0 < h := by rw [hh_def]; exact lipschitzFlowStep_pos K
+  -- `n`-step forward existence by induction on the number of uniform steps
+  have hstep : ∀ n : ℕ, ∃ γ : ℝ → E, γ t₀ = x₀ ∧
+      IsIntegralCurveOn γ v (Set.Icc t₀ (t₀ + (n : ℝ) * h)) := by
+    intro n
+    induction n with
+    | zero =>
+        obtain ⟨γ, hγ0, hγon⟩ := exists_isIntegralCurveOn_Icc_of_lipschitzWith hlip hcont t₀ x₀
+        rw [← hh_def] at hγon
+        refine ⟨γ, hγ0, ?_⟩
+        simp only [Nat.cast_zero, zero_mul, add_zero]
+        exact hγon.mono (Set.Icc_subset_Icc (by linarith) (by linarith))
+    | succ n ih =>
+        obtain ⟨γ, hγ0, hγon⟩ := ih
+        have hb : t₀ + (↑(n + 1) : ℝ) * h = (t₀ + (n : ℝ) * h) + h := by push_cast; ring
+        set b : ℝ := t₀ + (n : ℝ) * h with hb_def
+        have hbb : t₀ ≤ b := by
+          rw [hb_def]; have := mul_nonneg (Nat.cast_nonneg n) hh0.le; linarith
+        obtain ⟨δ, hδ0, hδon⟩ := exists_isIntegralCurveOn_Icc_of_lipschitzWith hlip hcont b (γ b)
+        rw [← hh_def] at hδon
+        have hδon2 : IsIntegralCurveOn δ v (Set.Icc b (b + h)) :=
+          hδon.mono (Set.Icc_subset_Icc (by linarith) (le_refl _))
+        have hmatch : γ b = δ b := hδ0.symm
+        have hconv : b + h = t₀ + (↑(n + 1) : ℝ) * h := by rw [hb]
+        refine ⟨fun t => if t ≤ b then γ t else δ t, ?_, ?_⟩
+        · show (if t₀ ≤ b then γ t₀ else δ t₀) = x₀
+          rw [if_pos hbb]; exact hγ0
+        · have hglue := isIntegralCurveOn_glue_Icc hbb (by linarith) hγon hδon2 hmatch
+          rwa [hconv] at hglue
+  -- pick enough steps to reach `T`, then restrict
+  obtain ⟨n, hn⟩ := exists_nat_gt ((T - t₀) / h)
+  have hTn : T ≤ t₀ + (n : ℝ) * h := by
+    rw [div_lt_iff₀ hh0] at hn
+    linarith
+  obtain ⟨γ, hγ0, hγon⟩ := hstep n
+  exact ⟨γ, hγ0, hγon.mono (Set.Icc_subset_Icc (le_refl _) hTn)⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
