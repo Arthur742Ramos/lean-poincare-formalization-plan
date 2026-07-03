@@ -4632,3 +4632,46 @@ Remaining in this tower (future sessions): *existence* of the variational flow f
 integral curves of the uniformly-Lipschitz linear field, making the above non-vacuous), then
 the actual `C^1` differentiability of the base flow `x ↦ Φ x t` with derivative `D_x Φ_t`
 (the remainder Grönwall estimate), and its bootstrap to `C^k` (`C^3`).
+
+The **`C^1` differentiability layer has now been opened** (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only): the *linearisation-remainder Grönwall bound* —
+the analytic core of differentiable dependence — is proved, and assembled into the actual
+Fréchet-differentiability of the flow (conditional on a defect modulus).  For integral curves
+`f`, `g` of a field `v`, a solution `w` of the vector variational ODE `w' = A(s) w`
+(`‖A s‖ ≤ K`) predicting the initial separation `w t₀ = g t₀ - f t₀`, and a bound `δ` on the
+linearisation defect `‖v s (g s) - v s (f s) - A s (g s - f s)‖`:
+
+* `norm_flow_sub_variational_le` — the **global** remainder bound
+  `‖(g t - f t) - w t‖ ≤ gronwallBound 0 K δ |t - t₀|` (defect uniform in all time), proved by
+  recognising `r := g - f - w` as an integral curve of `variationalFieldVec A` perturbed by the
+  `δ`-bounded defect and comparing it to the zero solution via the two-sided perturbation
+  Grönwall bound `dist_le_of_isIntegralCurve_perturb`.
+* `norm_flow_sub_variational_le_Icc` — the **interval-restricted** refinement, needing the defect
+  only on the forward interval `Ico t₀ b` (as the flow separation grows exponentially, a
+  globally-uniform `δ` is unavailable; on a compact time tube the `C^1` modulus supplies one),
+  via Mathlib's interval Grönwall estimate `dist_le_of_approx_trajectories_ODE`.
+* `gronwallBound_zero_left_mul` — the **homogeneity** `gronwallBound 0 K ε x = ε · gronwallBound
+  0 K 1 x`, turning the remainder bound into an estimate proportional to the defect `δ`.
+* `norm_flow_sub_fundamentalSolution_le_Icc` — the **operator form** of the interval bound, with
+  the honest resolvent `fundamentalSolution … t = D_x Φ_t` as the linear prediction:
+  `‖(Φ y t - Φ x t) - D_x Φ_t · (y - x)‖ ≤ gronwallBound 0 K δ (t - t₀)` — the numerator of the
+  Fréchet difference quotient for `x ↦ Φ x t`.
+* `hasFDerivAt_flow_of_defect_isLittleO` — the **`C^1` differentiability** itself: if the defect
+  is `o(‖z - x₀‖)` as `z → x₀` (a `D : E → ℝ`, `0 ≤ D`, bounding the defect on `Ico t₀ t` with
+  `D =o[𝓝 x₀] (· - x₀)`), then `HasFDerivAt (fun z => Φ z t) (fundamentalSolution … t) x₀` — the
+  flow map is Fréchet differentiable at `x₀` with derivative the resolvent.  Proof: the operator
+  interval bound gives `numerator = O(D)` (via `gronwallBound_zero_left_mul`), which composed
+  with `D = o(z - x₀)` gives `numerator = o(z - x₀)`.
+* `differentiableAt_flow_of_defect_isLittleO`, `fderiv_flow_of_defect_isLittleO` — the
+  consumer-facing corollaries: `DifferentiableAt ℝ (fun z => Φ z t) x₀`, and
+  `fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution … t` (the flow's spatial derivative **is**
+  the fundamental solution operator).
+
+Remaining in this tower (future sessions): **discharging the defect modulus** — proving that a
+`C^1` field `v` (with `A s = D_x v(s, Φ x₀ s)`) *supplies* the hypothesis `D =o(‖z - x₀‖)`, via
+the mean-value remainder `‖v s b - v s a - D_x v(s,a)(b-a)‖ ≤ (sup over the segment of
+‖D_x v(s,·) - D_x v(s,a)‖)·‖b - a‖` (Mathlib `Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le`)
+uniformised over `s ∈ [t₀, t]` by Heine–Cantor on the compact trajectory tube together with the
+exponential flow-separation bound `dist_flow_apply_le` — which upgrades
+`hasFDerivAt_flow_of_defect_isLittleO` to an *unconditional* `C^1` dependence theorem; then the
+*existence* of the variational flow family, and the bootstrap to `C^k` (`C^3`).
