@@ -6060,6 +6060,47 @@ theorem exists_flow_contDiff_two_of_lipschitz_secondDeriv [CompleteSpace E]
   rw [show (2 : WithTop ℕ∞) = 1 + 1 from rfl, contDiff_succ_iff_fderiv]
   exact ⟨fun z => (hres z).differentiableAt, by rintro ⟨⟩, hone⟩
 
+/-- **Uniform Lipschitz-in-base-point bound for a derivative field along the flow (any order).**  The
+codomain-generic form of `norm_secondDerivField_apply_flow_sub_le`: for a uniformly `K`-Lipschitz field
+`v`, a flow family `Φ` of `v` anchored at `Φ x t₀ = x`, and *any* seminormed target `F` carrying an
+`N`-Lipschitz field `DF s : E → F` (typically an iterated spatial derivative of `v`), the field along
+the flow `z ↦ DF s (Φ z s)` moves by at most `N · exp (K T) · ‖z − w‖` for every time `s` with
+`|s − t₀| ≤ T`.  Composes the `N`-Lipschitz `DF s` with the uniform flow-Lipschitz bound
+`lipschitzWith_flow_apply_of_abs_le` (`exp (K T)`), exactly as `norm_secondDerivField_apply_flow_sub_le`
+does for the second derivative.  Specialising `F := E →L[ℝ] (E →L[ℝ] E)` recovers
+`norm_secondDerivField_apply_flow_sub_le`; specialising `F` to the third-derivative target
+`ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E` gives `norm_thirdDerivField_apply_flow_sub_le`, the
+`D³v`-gap size datum of the base-point `ContDiff ℝ 3` bootstrap. -/
+theorem norm_field_apply_flow_sub_le
+    {F : Type*} [SeminormedAddCommGroup F]
+    {Φ : E → ℝ → E} {DF : ℝ → E → F} {N : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (hDF : LipschitzWith N (DF s)) (hsT : |s - t₀| ≤ T) (z w : E) :
+    ‖DF s (Φ z s) - DF s (Φ w s)‖ ≤ (N : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ := by
+  have hlip : LipschitzWith (N * (Real.exp ((K : ℝ) * T)).toNNReal) (fun z => DF s (Φ z s)) :=
+    hDF.comp (lipschitzWith_flow_apply_of_abs_le hv hΦ h0 hsT)
+  have hd := hlip.dist_le_mul z w
+  rw [dist_eq_norm, dist_eq_norm, NNReal.coe_mul, Real.coe_toNNReal _ (Real.exp_pos _).le] at hd
+  exact hd
+
+/-- **Uniform Lipschitz-in-base-point bound for the third derivative field along the flow.**  The
+third-derivative specialisation of `norm_field_apply_flow_sub_le` (and the third-order analogue of
+`norm_secondDerivField_apply_flow_sub_le`): for a uniformly `K`-Lipschitz field `v` with `N`-Lipschitz
+*third* spatial derivative `D³v s`, and a flow family `Φ` of `v` anchored at `Φ x t₀ = x`, the
+third-derivative field along the flow `z ↦ D³v s (Φ z s)` moves by at most `N · exp (K T) · ‖z − w‖`
+for every time `s` with `|s − t₀| ≤ T`.  The third spatial derivative is represented by the canonical
+`iteratedFDeriv`-target `ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E`; the curried triple
+`E →L[ℝ] E →L[ℝ] E →L[ℝ] E` carries no operator-norm instance in Mathlib v4.29.1.  This is the size
+datum for the `D³v`-gap term in the chain-rule forcing perturbation of the base-point
+`C⁴`/`ContDiff ℝ 3` bootstrap (continuity of the third fundamental solution). -/
+theorem norm_thirdDerivField_apply_flow_sub_le
+    {Φ : E → ℝ → E} {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {N : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (hD3v : LipschitzWith N (D3v s)) (hsT : |s - t₀| ≤ T) (z w : E) :
+    ‖D3v s (Φ z s) - D3v s (Φ w s)‖ ≤ (N : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ :=
+  norm_field_apply_flow_sub_le hv hΦ h0 hD3v hsT z w
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
