@@ -5350,3 +5350,43 @@ Remaining for the `C³` layer (future sessions): the **existence of the second-o
 bridge to `ContDiff ℝ 3`.  The forcing-gap/size toolkit above is exactly the analogue of the
 `C²`-continuity data (`norm_secondDerivField_apply_flow_sub_le`, `norm_fundamentalSolution_baseCurve_sub_le`,
 `norm_chainRuleForcing_sub_le`) that drove `exists_flow_contDiff_two_of_lipschitz_secondDeriv`.
+
+Update — **the `C³` third-variation existence-and-packaging chain is now complete** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`).  The whole `D₃`-analogue of the `C²` existence→packaging
+mechanism is proved:
+
+* `exists_hasDerivAt_secondVariation_linearised_dir` — the **existence of the second-order (third)
+  variation** (the `D₃`-analogue of `exists_hasDerivAt_firstVariation_linearised_dir`): the
+  three-term third-variation ODE `V' = A₀ ∘ V + (F_A + F_B + F_C)`, `V t₀ = 0`, with the two asymmetric
+  composition terms `F_A = ((D²v ∘ W₂) h) ∘ W`, `F_B = ((D²v ∘ W) h) ∘ W₂` and *any* continuous
+  third-derivative term `F₃`, has a global solution (via `exists_hasDerivAt_inhomogVariation_of_continuous`,
+  the asymmetric-term continuity by `clm_comp`/`clm_apply`).
+* `continuous_thirdDerivForcing` + `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv` —
+  the **concrete** third-derivative forcing `F_C = (curryFin1 ((D³v.curryLeft (W k)).curryLeft (W h))) ∘ W`
+  (`e ↦ D³v[W k, W h, W e]`, representing the third derivative via `curryLeft`/`continuousMultilinearCurryFin1`,
+  which *do* carry norm/continuity instances, unlike the curried triple `E →L E →L E →L E`) and its
+  continuity, giving the **fully-instantiated** third-variation existence.
+* `norm_thirdDerivForcing_le` — the **`F_C` size datum** `‖(curryFin1 ((T.curryLeft a).curryLeft b)) ∘ W‖ ≤
+  ‖T‖·‖a‖·‖b‖·‖W‖` (the `curryLeft`/`Fin 1` analogue of `norm_bilinearCompForcing_le`, via the `curryLeft`
+  and `continuousMultilinearCurryFin1` isometries), completing the forcing-size toolkit for all three terms.
+* `norm_thirdVariation_le` — the **a-priori size bound on the third variation** (the `D₃`-analogue of
+  `norm_linearisedFirstVariation_le`): `‖V t‖ ≤ (2·C'·N₂·exp(K(T−t₀)) + C''·exp(3K(T−t₀))·‖k‖) ·
+  gronwallBound 0 K 1 (t−t₀) · ‖h‖`, from the three forcing-term bounds + `norm_inhomogVariation_le`.
+* `thirdVariation_perturbation_add_eq` / `thirdVariation_perturbation_smul_eq` — the **`h`-linearity**
+  (additive + homogeneous) of the third variation (the whole three-term forcing is linear in `h` —
+  `map_add`/`map_smul` through the operator applications and `curryLeft`/`curryFin1`, `add_comp`/`smul_comp` —
+  so uniqueness `inhomogVariation_unique` identifies `V^{h₁+h₂} = V^{h₁} + V^{h₂}`, `V^{c•h} = c • V^h`).
+* `exists_continuousLinearMap_thirdVariation` + `exists_continuousLinearMap_thirdVariation_norm_le` — the
+  **packaged `D₃(k)` operator** `h ↦ D₃(k, h)` as a bounded linear map (for fixed base direction `k` and
+  second fundamental solution curve `W₂`), the `D₃`-analogue of `exists_continuousLinearMap_linearisedVariation`
+  (`LinearMap.mkContinuous` fed the `h`-linearity and the a-priori bound; value independent of the chosen
+  solution by uniqueness), together with its operator-norm bound `‖D₃k‖ ≤ (…)·gronwallBound…`
+  (`opNorm_le_bound` + `0 ≤ gronwallBound 0 K 1 (t−t₀)`).
+
+Remaining for the `C³` layer (future sessions): the **second-order Taylor remainder**
+`‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²` (the `D₃`-analogue of the `C²` numerator
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, comparing the base-point difference of the
+*second* fundamental solution to the packaged `D₃` via a `norm_inhomogVariation_sub_le_of_gap` Grönwall
+estimate — needs the base-point machinery for `z ↦ D₂(z)` and a concrete second fundamental solution
+curve `W₂ = ∂_{x₀} W`), then the already-available `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge
+to `ContDiff ℝ 3`; and/or the `k`-linearity/full bilinear `(k, h)` packaging of `D₃`.
