@@ -612,6 +612,108 @@ theorem isIntegralCurve_variationalFieldVec_smul {A : ℝ → (E →L[ℝ] E)} {
   have h := (hu t).const_smul c
   simpa only [variationalFieldVec, map_smul] using h
 
+/-!
+### The fundamental solution operator `D_x Φ_t` as a bounded operator
+
+Combining the superposition principle with the `C^0` uniqueness
+(`variationalVec_eq_of_isIntegralCurve`) and the exponential a priori bound
+(`dist_flow_apply_le`), the time-`t` flow map of the *linear* vector variational field is
+additive, homogeneous, and operator-norm bounded, so it assembles into an honest bounded
+operator `E →L[ℝ] E` — the fundamental solution / resolvent `D_x Φ_t` predicted by the
+variational equation `u'(t) = A(t) (u(t))`.  Here `Φ : E → ℝ → E` is any flow family of
+`variationalFieldVec A` anchored at `Φ x t₀ = x`.  This is the concrete `E →L[ℝ] E` object
+— linear in the initial direction and with an explicit exponential operator bound — that
+the compact-manifold gauge flow (Item 2) and the tensor time-derivative chain rule
+(Item 1) ultimately consume.
+-/
+
+/-- **Additivity of the linear flow map.**  For a flow family `Φ` of the vector variational
+field `variationalFieldVec A` (with `‖A t‖ ≤ K`) anchored at `Φ x t₀ = x`, the time-`t` map
+`x ↦ Φ x t` is additive.  (Both `Φ (x + y)` and `t ↦ Φ x t + Φ y t` solve the same linear
+ODE — the latter by superposition — and agree at the anchor `t₀`, so they agree everywhere
+by uniqueness.) -/
+theorem flow_variationalFieldVec_add {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (x y : E) (t : ℝ) : Φ (x + y) t = Φ x t + Φ y t :=
+  variationalVec_eq_of_isIntegralCurve hA (hΦ (x + y))
+    (isIntegralCurve_variationalFieldVec_add (hΦ x) (hΦ y)) (t₁ := t₀) (by simp only [h0]) t
+
+/-- **Homogeneity of the linear flow map.**  The time-`t` map `x ↦ Φ x t` commutes with
+scalar multiplication: `Φ (c • x) t = c • Φ x t`. -/
+theorem flow_variationalFieldVec_smul {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (c : ℝ) (x : E) (t : ℝ) : Φ (c • x) t = c • Φ x t :=
+  variationalVec_eq_of_isIntegralCurve hA (hΦ (c • x))
+    (isIntegralCurve_variationalFieldVec_smul c (hΦ x)) (t₁ := t₀) (by simp only [h0]) t
+
+/-- **The linear flow map fixes the origin.**  `Φ 0 t = 0`: the zero direction has zero
+directional derivative (the special case `c = 0` of homogeneity). -/
+theorem flow_variationalFieldVec_zero {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) : Φ 0 t = 0 := by
+  have h := flow_variationalFieldVec_smul hA hΦ h0 (0 : ℝ) (0 : E) t
+  simpa using h
+
+/-- **Operator bound for the linear flow map.**  `‖Φ x t‖ ≤ exp (K · |t - t₀|) · ‖x‖`,
+obtained from the `C^0` two-sided Lipschitz bound `dist_flow_apply_le` applied between the
+initial values `x` and `0` together with `Φ 0 t = 0`.  This is the operator-norm bound that
+makes the fundamental solution a *bounded* linear map. -/
+theorem norm_flow_variationalFieldVec_le {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (x : E) (t : ℝ) : ‖Φ x t‖ ≤ Real.exp ((K : ℝ) * |t - t₀|) * ‖x‖ := by
+  have hb := dist_flow_apply_le (fun s => lipschitzWith_variationalFieldVec hA s) hΦ h0 x 0 t
+  rw [flow_variationalFieldVec_zero hA hΦ h0 t, dist_zero_right, dist_zero_right] at hb
+  calc ‖Φ x t‖ ≤ ‖x‖ * Real.exp ((K : ℝ) * |t - t₀|) := hb
+    _ = Real.exp ((K : ℝ) * |t - t₀|) * ‖x‖ := mul_comm _ _
+
+/-- **The fundamental solution operator `D_x Φ_t ∈ E →L[ℝ] E`.**  For a flow family `Φ` of
+the linear vector variational field `variationalFieldVec A` (`‖A t‖ ≤ K`) anchored at
+`Φ x t₀ = x`, the time-`t` flow map `x ↦ Φ x t` — additive, homogeneous, and bounded by
+`exp (K · |t - t₀|)` — packaged as an honest bounded linear operator.  This is the concrete
+resolvent / fundamental solution that the directional derivatives `∂_{u₀} Φ_t = W t u₀`
+assemble into. -/
+def fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) : E →L[ℝ] E :=
+  LinearMap.mkContinuous
+    { toFun := fun x => Φ x t
+      map_add' := fun x y => flow_variationalFieldVec_add hA hΦ h0 x y t
+      map_smul' := fun c x => by
+        simp only [RingHom.id_apply]
+        exact flow_variationalFieldVec_smul hA hΦ h0 c x t }
+    (Real.exp ((K : ℝ) * |t - t₀|))
+    (fun x => norm_flow_variationalFieldVec_le hA hΦ h0 x t)
+
+@[simp]
+theorem fundamentalSolution_apply {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) (x : E) : fundamentalSolution hA hΦ h0 t x = Φ x t := rfl
+
+/-- **The fundamental solution has operator norm at most `exp (K · |t - t₀|)`.**  The
+quantitative bound `‖D_x Φ_t‖ ≤ exp (K · |t - t₀|)` on the resolvent, inherited from the
+pointwise operator bound. -/
+theorem norm_fundamentalSolution_le {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) : ‖fundamentalSolution hA hΦ h0 t‖ ≤ Real.exp ((K : ℝ) * |t - t₀|) := by
+  exact LinearMap.mkContinuous_norm_le _ (Real.exp_pos _).le _
+
+/-- **The fundamental solution is the identity at the anchor time.**  `D_x Φ_{t₀} = 1`: the
+resolvent from `t₀` to `t₀` is the identity operator, matching the initial condition
+`W t₀ = 1` of the fundamental-solution equation. -/
+theorem fundamentalSolution_anchor {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    fundamentalSolution hA hΦ h0 t₀ = ContinuousLinearMap.id ℝ E := by
+  ext x
+  rw [fundamentalSolution_apply, h0, ContinuousLinearMap.id_apply]
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
