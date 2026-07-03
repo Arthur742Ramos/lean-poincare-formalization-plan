@@ -1998,6 +1998,111 @@ theorem hasFDerivAt_flow_of_lipschitz_deriv_of_hasFDerivAt_eventually
   hasFDerivAt_flow_of_lipschitz_deriv_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0
     (Filter.Eventually.of_forall (fun _ s _ ξ _ => (hderiv s ξ).hasFDerivWithinAt)) hL hlip
 
+open Filter in
+/-- **`C¹` dependence from a spatial derivative Lipschitz on a ball around the anchor trajectory.**
+The most directly consumable entry point for a smooth field on a chart: `v s` has a global spatial
+derivative `Dv s` (`HasFDerivAt (v s) (Dv s ξ) ξ`), and on the fixed radius-`r` ball around each
+anchor point `Φ x₀ s` (`s ∈ Ico t₀ t`) the derivative oscillation is `L`-Lipschitz in the distance
+to the anchor, `‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖`.  Then `x ↦ Φ x t` is Fréchet differentiable at
+`x₀` with derivative the resolvent.  A genuine `C^∞` field supplies exactly this — its derivative is
+*locally* Lipschitz on balls — even when it is not *globally* Lipschitz-derivative.  The proof shows
+that for `‖z - x₀‖ < r / exp (K (t - t₀))` every trajectory chord `[Φ x₀ s, Φ z s]` stays inside the
+`r`-ball (flow separation `‖Φ z s - Φ x₀ s‖ ≤ exp (K (t - t₀)) ‖z - x₀‖`), so the ball estimate
+supplies the *eventual* Lipschitz-derivative hypothesis of
+`hasFDerivAt_flow_of_lipschitz_deriv_eventually`. -/
+theorem hasFDerivAt_flow_of_lipschitz_deriv_on_ball
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {r : ℝ} (hr : 0 < r) {L : ℝ} (hL : 0 ≤ L)
+    (hlipball : ∀ s ∈ Ico t₀ t, ∀ ξ ∈ Metric.closedBall (Φ x₀ s) r,
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  set c : ℝ := Real.exp ((K : ℝ) * (t - t₀)) with hc
+  have hc0 : 0 < c := Real.exp_pos _
+  -- for `z` in the ball of radius `r / c`, every chord point stays in the `r`-ball around the anchor
+  have hev : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ξ ∈ Metric.closedBall (Φ x₀ s) r := by
+    filter_upwards [Metric.ball_mem_nhds x₀ (by positivity : 0 < r / c)] with z hz
+    intro s hs ξ hξ
+    have hzlt : ‖z - x₀‖ < r / c := by rw [← dist_eq_norm]; exact Metric.mem_ball.mp hz
+    have hle : ‖ξ - Φ x₀ s‖ ≤ c * ‖z - x₀‖ := by
+      obtain ⟨p, q, hp, hq, hpq, rfl⟩ := hξ
+      have hq1 : q ≤ 1 := by linarith
+      have heq : (p • Φ x₀ s + q • Φ z s) - Φ x₀ s = q • (Φ z s - Φ x₀ s) := by
+        have hp1 : p = 1 - q := by linarith
+        rw [hp1, sub_smul, one_smul, smul_sub]
+        abel
+      have hsep : ‖Φ z s - Φ x₀ s‖ ≤ ‖z - x₀‖ * Real.exp ((K : ℝ) * |s - t₀|) := by
+        have h := dist_flow_apply_le hv hΦ h0 z x₀ s
+        rwa [dist_eq_norm, dist_eq_norm] at h
+      have hexp : Real.exp ((K : ℝ) * |s - t₀|) ≤ c := by
+        rw [hc]
+        refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left ?_ K.coe_nonneg)
+        rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]
+        exact sub_le_sub_right hs.2.le t₀
+      rw [heq, norm_smul, Real.norm_eq_abs, abs_of_nonneg hq]
+      calc q * ‖Φ z s - Φ x₀ s‖ ≤ 1 * ‖Φ z s - Φ x₀ s‖ :=
+            mul_le_mul_of_nonneg_right hq1 (norm_nonneg _)
+        _ = ‖Φ z s - Φ x₀ s‖ := one_mul _
+        _ ≤ ‖z - x₀‖ * Real.exp ((K : ℝ) * |s - t₀|) := hsep
+        _ ≤ ‖z - x₀‖ * c := mul_le_mul_of_nonneg_left hexp (norm_nonneg _)
+        _ = c * ‖z - x₀‖ := mul_comm _ _
+    have hcrc : c * (r / c) = r := by field_simp
+    have hlt : c * ‖z - x₀‖ < r := by
+      have h := mul_lt_mul_of_pos_left hzlt hc0
+      rwa [hcrc] at h
+    rw [Metric.mem_closedBall, dist_eq_norm]
+    exact le_of_lt (lt_of_le_of_lt hle hlt)
+  refine hasFDerivAt_flow_of_lipschitz_deriv_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0
+    (Eventually.of_forall (fun _ s _ ξ _ => (hderiv s ξ).hasFDerivWithinAt)) hL ?_
+  filter_upwards [hev] with z hzev
+  intro s hs ξ hξ
+  exact hlipball s hs ξ (hzev s hs ξ hξ)
+
+open Filter in
+/-- The flow map is differentiable at `x₀` from a ball-Lipschitz spatial derivative
+(`hasFDerivAt_flow_of_lipschitz_deriv_on_ball`). -/
+theorem differentiableAt_flow_of_lipschitz_deriv_on_ball
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {r : ℝ} (hr : 0 < r) {L : ℝ} (hL : 0 ≤ L)
+    (hlipball : ∀ s ∈ Ico t₀ t, ∀ ξ ∈ Metric.closedBall (Φ x₀ s) r,
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_lipschitz_deriv_on_ball hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hr hL
+    hlipball).differentiableAt
+
+open Filter in
+/-- The Fréchet derivative of the flow map is the resolvent, from a ball-Lipschitz spatial
+derivative (`hasFDerivAt_flow_of_lipschitz_deriv_on_ball`). -/
+theorem fderiv_flow_of_lipschitz_deriv_on_ball
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {r : ℝ} (hr : 0 < r) {L : ℝ} (hL : 0 ≤ L)
+    (hlipball : ∀ s ∈ Ico t₀ t, ∀ ξ ∈ Metric.closedBall (Φ x₀ s) r,
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_lipschitz_deriv_on_ball hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hr hL
+    hlipball).fderiv
+
 /-!
 ### Continuous dependence of the resolvent on the coefficient field
 
