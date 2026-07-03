@@ -7396,6 +7396,66 @@ theorem norm_coeffVariation_sub_secondDerivComp_le_sq
             (mul_nonneg (add_nonneg (by positivity)
               (mul_nonneg hC'0 (mul_nonneg (by positivity) hg))) (sq_nonneg _))
 
+/-- **Base-point Lipschitz continuity of the chain-rule (second-variation) forcing along the flow.**
+The linearised first-variation ODE at base point `z` carries the chain-rule forcing
+`F(z) s = ((D²v(Φ z s) ∘ W_z) h) ∘ W_z` (`W_z = D_x Φ_s^{A(z)} = fundamentalSolution hAz hΦ₁ h1`).
+This lemma is the standalone, clean-constant form of the forcing-gap datum computed inline inside
+`norm_linearisedFirstVariation_baseCurve_sub_le`: the whole forcing moves by `O(‖z − x₀‖ · ‖h‖)` when
+the base point moves from `x₀` to `z`, uniformly on `[t₀, T]`,
+`‖F(z) s − F(x₀) s‖ ≤ exp(K(T−t₀))³ · (M + 2·L·C'·gronwallBound 0 K 1 (T−t₀)) · ‖z − x₀‖ · ‖h‖`.
+
+Proof: `norm_chainRuleForcing_sub_le` (the joint `P, W` perturbation of `((P ∘ W) h) ∘ W`) fed the flow
+bounds `‖D²v(Φ z s)‖ ≤ C'`, the resolvent bound `‖W‖ ≤ exp(K(T−t₀))` (`norm_fundamentalSolution_le`),
+the `D²v`-gap `dp` (`norm_secondDerivField_apply_flow_sub_le`) and resolvent base-gap `dw`
+(`norm_fundamentalSolution_baseCurve_sub_le`), whose raw output `(dp·w² + 2·C'·w·dw)·‖h‖` collapses to
+the stated `exp³·(M + 2LC'g)` constant by `ring` (all factors are `exp(K(T−t₀))`).  This is the `β`
+forcing-gap size datum of the base-point `C²` continuity / `C³` Taylor analysis, exposed for reuse. -/
+theorem norm_chainRuleForcing_flow_sub_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {L M : ℝ≥0} {C' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hC'0 : 0 ≤ C') (hC'z : ∀ s, ‖D2v s (Φ z s)‖ ≤ C')
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h2 : ∀ x, Φ₂ x t₀ = x)
+    (h : E) {T s : ℝ} (hs : s ∈ Set.Icc t₀ T) :
+    ‖((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) h).comp
+          (fundamentalSolution hAz hΦ₁ h1 s)
+        - ((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) h).comp
+            (fundamentalSolution hAx hΦ₂ h2 s)‖
+      ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+          * ((M : ℝ) + 2 * (L : ℝ) * C' * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+          * ‖z - x₀‖ * ‖h‖ := by
+  have hsT : |s - t₀| ≤ T - t₀ := by
+    rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+  have hexpmono : Real.exp ((K : ℝ) * |s - t₀|) ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsT K.coe_nonneg)
+  have hwz : ‖fundamentalSolution hAz hΦ₁ h1 s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    (norm_fundamentalSolution_le hAz hΦ₁ h1 s).trans hexpmono
+  have hwx : ‖fundamentalSolution hAx hΦ₂ h2 s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    (norm_fundamentalSolution_le hAx hΦ₂ h2 s).trans hexpmono
+  have hdp : ‖D2v s (Φ z s) - D2v s (Φ x₀ s)‖
+      ≤ (M : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ :=
+    norm_secondDerivField_apply_flow_sub_le hv hΦ h0 (hD2vlip s) hsT z x₀
+  have hgnn : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans hs.1 hs.2))
+  have hdw : ‖fundamentalSolution hAz hΦ₁ h1 s - fundamentalSolution hAx hΦ₂ h2 s‖
+      ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖
+          * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    refine (norm_fundamentalSolution_baseCurve_sub_le hv hΦ h0 hDvlip z x₀ hAz hAx
+      hΦ₁ h1 hΦ₂ h2 hs).trans ?_
+    have hmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+      gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg (by linarith [hs.2])
+    exact mul_le_mul_of_nonneg_left hmono (by positivity)
+  refine (norm_chainRuleForcing_sub_le h (hC'z s) hwz hwx hdp hdw hC'0 (Real.exp_pos _).le
+    (by positivity) (mul_nonneg (by positivity) hgnn)).trans (le_of_eq ?_)
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
