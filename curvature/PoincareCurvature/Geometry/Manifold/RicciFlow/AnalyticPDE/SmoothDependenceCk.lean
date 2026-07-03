@@ -2296,6 +2296,84 @@ theorem continuous_fundamentalSolution_time {A : ℝ → (E →L[ℝ] E)} {K : �
   rw [dist_eq_norm]
   exact norm_fundamentalSolution_sub_le_time hA hΦ h0 t a
 
+open Asymptotics Filter in
+/-- **The fundamental solution solves the operator-valued variational ODE (`W' = A W`).**  For a
+*norm-continuous* coefficient path `A` (`‖A t‖ ≤ K`), the resolvent `t ↦ D_x Φ_t` is
+differentiable in the operator norm with
+`d/dt (D_x Φ_t) = A t ∘ (D_x Φ_t)`.  This is genuine *operator-norm* (not merely strong)
+differentiability: the linearisation-remainder is controlled uniformly over unit directions.
+Proof: each column `s ↦ Φ u s` solves the vector ODE `u' = A s (u s)`, so the operator
+Taylor remainder applied to `u` is, by the one-dimensional mean-value inequality, bounded by
+`‖s - t‖ · (sup over the chord of ‖A σ ∘ D_x Φ_σ - A t ∘ D_x Φ_t‖) · ‖u‖`; the operator-norm
+supremum over `u` and the norm-continuity of `σ ↦ A σ ∘ D_x Φ_σ`
+(`continuous_fundamentalSolution_time` composed with `Continuous A`) drive the remainder to
+`o(‖s - t‖)`. -/
+theorem hasDerivAt_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) :
+    HasDerivAt (fun s => fundamentalSolution hA hΦ h0 s)
+      ((A t).comp (fundamentalSolution hA hΦ h0 t)) t := by
+  set W : ℝ → (E →L[ℝ] E) := fun s => fundamentalSolution hA hΦ h0 s with hWdef
+  set H : ℝ → (E →L[ℝ] E) := fun σ => (A σ).comp (W σ) with hHdef
+  have hHcont : Continuous H :=
+    hAcont.clm_comp (continuous_fundamentalSolution_time hA hΦ h0)
+  rw [hasDerivAt_iff_isLittleO, isLittleO_iff]
+  intro ε hε
+  have hUnhds : {σ : ℝ | ‖H σ - H t‖ < ε} ∈ 𝓝 t := by
+    refine (isOpen_lt ((hHcont.sub continuous_const).norm) continuous_const).mem_nhds ?_
+    simpa using hε
+  obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp hUnhds
+  filter_upwards [Metric.ball_mem_nhds t hδ] with s hs
+  refine ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg hε.le (norm_nonneg _)) (fun u => ?_)
+  simp only [ContinuousLinearMap.sub_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.comp_apply]
+  have hderiv : ∀ σ ∈ Set.uIcc t s,
+      HasDerivWithinAt (fun σ => W σ u - (σ - t) • (A t (W t u)))
+        (A σ (W σ u) - A t (W t u)) (Set.uIcc t s) σ := by
+    intro σ _
+    have hcol : HasDerivAt (fun σ => W σ u) (A σ (W σ u)) σ :=
+      isIntegralCurve_fundamentalSolution_apply hA hΦ h0 u σ
+    have hlin : HasDerivAt (fun σ => (σ - t) • (A t (W t u))) (A t (W t u)) σ := by
+      simpa using (((hasDerivAt_id σ).sub (hasDerivAt_const σ t)).smul_const (A t (W t u)))
+    exact (hcol.sub hlin).hasDerivWithinAt
+  have hbound : ∀ σ ∈ Set.uIcc t s, ‖A σ (W σ u) - A t (W t u)‖ ≤ ε * ‖u‖ := by
+    intro σ hσ
+    have hσδ : dist σ t < δ := by
+      have h1 : dist σ t ≤ dist t s := Real.dist_le_of_mem_uIcc hσ left_mem_uIcc
+      rw [dist_comm t s] at h1
+      exact lt_of_le_of_lt h1 hs
+    have hHσ : ‖H σ - H t‖ < ε := hball (Metric.mem_ball.mpr hσδ)
+    have heq : A σ (W σ u) - A t (W t u) = (H σ - H t) u := by
+      simp only [hHdef, ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply]
+    rw [heq]
+    calc ‖(H σ - H t) u‖ ≤ ‖H σ - H t‖ * ‖u‖ := (H σ - H t).le_opNorm u
+      _ ≤ ε * ‖u‖ := mul_le_mul_of_nonneg_right hHσ.le (norm_nonneg u)
+  have hmv := Convex.norm_image_sub_le_of_norm_hasDerivWithin_le hderiv hbound
+    (convex_uIcc t s) left_mem_uIcc right_mem_uIcc
+  have hφeq : (fun σ => W σ u - (σ - t) • (A t (W t u))) s
+      - (fun σ => W σ u - (σ - t) • (A t (W t u))) t
+      = W s u - W t u - (s - t) • (A t (W t u)) := by
+    simp only [sub_self, zero_smul, sub_zero]
+    abel
+  rw [hφeq] at hmv
+  exact hmv.trans (le_of_eq (by ring))
+
+open Filter in
+/-- **The resolvent path is the operator integral curve of the variational field.**  Packaged
+form of `hasDerivAt_fundamentalSolution`: for a norm-continuous `A`, the curve `t ↦ D_x Φ_t` is a
+global integral curve of the operator variational field `variationalField A` (`W ↦ A t ∘ W`).
+Together with `fundamentalSolution_anchor` (`D_x Φ_{t₀} = 1`) this is the full characterisation of
+the fundamental solution as *the* solution of the operator ODE `W' = A W`, `W t₀ = 1` — the
+statement `fundamentalSolution_eq_of_operator_isIntegralCurve` consumes hypothetically, now
+discharged.  It also makes the operator resolvent's own dynamics available to the `C^k` bootstrap. -/
+theorem isIntegralCurve_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    IsIntegralCurve (fun t => fundamentalSolution hA hΦ h0 t) (variationalField A) :=
+  fun t => hasDerivAt_fundamentalSolution hA hAcont hΦ h0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
