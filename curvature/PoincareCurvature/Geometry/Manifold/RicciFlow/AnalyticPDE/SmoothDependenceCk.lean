@@ -5118,6 +5118,42 @@ theorem exists_hasDerivAt_firstVariation_true [CompleteSpace E]
     (hAzcont.sub hAcont).clm_comp (continuous_fundamentalSolution_time hA hΦ' h0')
   exact exists_hasDerivAt_inhomogVariation_of_continuous hA hAcont hFc t₀
 
+/-- **Existence of the linearised first variation `Vlin`.**  The companion of
+`exists_hasDerivAt_firstVariation_true` for the *linearised* (chain-rule) forcing: given the base
+point `x₀`, its coefficient `A₀ s = Dv s (Φ x₀ s)` (`K`-bounded, continuous) with second derivative
+`D2v` whose along-trajectory value `s ↦ D²v s (Φ x₀ s)` is continuous, the resolvent
+`W₀ = fundamentalSolution hA hΦ' h0'`, and a direction increment `z − x₀`, the anchored *linearised
+first variation* ODE `Vlin' = A₀ ∘ Vlin + (D²v(Φ x₀ s) ∘ W₀ · (z − x₀)) ∘ W₀`, `Vlin t₀ = 0` has a
+global solution.
+
+The chain-rule forcing `(D²v(Φ x₀ s) ∘ W₀ · (z − x₀)) ∘ W₀` again grows like `exp (2K |s − t₀|)` and
+is never globally bounded, so `exists_hasDerivAt_inhomogVariation_of_continuous` is what closes it
+(continuity by `Continuous.clm_comp`/`Continuous.clm_apply` of `D²v(Φ x₀ ·)` with the continuous
+resolvent).  Produces exactly the `hVlin`/`hVlin0` datum consumed by
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq` — completing the existence half of piece (i).
+-/
+theorem exists_hasDerivAt_firstVariation_linearised [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (z : E) :
+    ∃ Vlin : ℝ → (E →L[ℝ] E), Vlin t₀ = 0 ∧
+      ∀ s, HasDerivAt Vlin
+        ((Dv s (Φ x₀ s)).comp (Vlin s)
+          + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (z - x₀)).comp
+              (fundamentalSolution hA hΦ' h0' s)) s := by
+  have hW : Continuous (fun s => fundamentalSolution hA hΦ' h0' s) :=
+    continuous_fundamentalSolution_time hA hΦ' h0'
+  have hFc : Continuous fun s =>
+      ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (z - x₀)).comp
+        (fundamentalSolution hA hΦ' h0' s) :=
+    ((hD2cont.clm_comp hW).clm_apply continuous_const).clm_comp hW
+  exact exists_hasDerivAt_inhomogVariation_of_continuous hA hAcont hFc t₀
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
