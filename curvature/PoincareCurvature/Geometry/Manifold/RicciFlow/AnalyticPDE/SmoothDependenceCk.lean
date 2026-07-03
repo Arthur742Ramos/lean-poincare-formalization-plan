@@ -2589,6 +2589,56 @@ theorem norm_integral_comp_fundamentalSolution_le {A : ℝ → (E →L[ℝ] E)} 
   refine (mul_le_mul (hB σ) (norm_fundamentalSolution_le hA hΦ h0 σ) (norm_nonneg _) hε).trans ?_
   exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by gcongr)) hε
 
+/-- **Time-regularity bootstrap of the resolvent (finite order).**  If the coefficient path `A`
+is `C^n` in time (`ContDiff ℝ n A`), then the resolvent curve `t ↦ D_x Φ_t ∈ E →L[ℝ] E` is
+`C^{n+1}` in time.  Proof by induction on `n`: the base case (`n = 0`, i.e. norm-continuous `A`
+⟹ `C¹` resolvent) is `contDiff_one_fundamentalSolution`; the inductive step reads the resolvent's
+derivative off the operator ODE `deriv (t ↦ D_x Φ_t) = A t ∘ D_x Φ_t`
+(`deriv_fundamentalSolution`) — a composition of the `C^{n+1}` field `A` with the (inductively)
+`C^{n+1}` resolvent, hence itself `C^{n+1}` via `ContDiff.clm_comp`, so `deriv W ∈ C^{n+1}` and
+therefore `W ∈ C^{n+2}` by `contDiff_succ_iff_deriv`.  This is the time-direction half of the
+`C^k` resolvent regularity that the Ricci-flow / DeTurck `C^k` bootstrap consumes. -/
+theorem contDiff_fundamentalSolution_time {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    ∀ n : ℕ, ContDiff ℝ (n : WithTop ℕ∞) A →
+      ContDiff ℝ ((n : WithTop ℕ∞) + 1) (fun s => fundamentalSolution hA hΦ h0 s) := by
+  intro n
+  induction n with
+  | zero =>
+    intro hA0
+    have hc : Continuous A := hA0.continuous
+    simpa using contDiff_one_fundamentalSolution hA hc hΦ h0
+  | succ n ih =>
+    intro hAn1
+    have hc : Continuous A := hAn1.continuous
+    have hAn : ContDiff ℝ (n : WithTop ℕ∞) A :=
+      hAn1.of_le (by exact_mod_cast Nat.le_succ n)
+    have hWn : ContDiff ℝ ((n + 1 : ℕ) : WithTop ℕ∞) (fun s => fundamentalSolution hA hΦ h0 s) := by
+      rw [Nat.cast_add_one]; exact ih hAn
+    rw [contDiff_succ_iff_deriv]
+    refine ⟨fun t => (hasDerivAt_fundamentalSolution hA hc hΦ h0 t).differentiableAt, ?_, ?_⟩
+    · simp
+    · have hd : deriv (fun s => fundamentalSolution hA hΦ h0 s)
+          = fun t => (A t).comp (fundamentalSolution hA hΦ h0 t) :=
+        funext fun t => deriv_fundamentalSolution hA hc hΦ h0 t
+      rw [hd]
+      exact hAn1.clm_comp hWn
+
+open scoped ContDiff in
+/-- **Time-regularity of the resolvent: a smooth coefficient gives a smooth resolvent.**  If the
+coefficient path `A` is `C^∞` in time, then so is the resolvent curve `t ↦ D_x Φ_t ∈ E →L[ℝ] E`.
+`C^∞`-ness is tested order by order (`contDiff_infty`): for every `n`, `A ∈ C^n` (indeed `C^∞`),
+so the finite bootstrap `contDiff_fundamentalSolution_time` gives `W ∈ C^{n+1} ⊆ C^n`. -/
+theorem contDiff_infty_fundamentalSolution_time {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAsmooth : ContDiff ℝ ∞ A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    ContDiff ℝ ∞ (fun s => fundamentalSolution hA hΦ h0 s) := by
+  rw [contDiff_infty]
+  intro n
+  exact (contDiff_fundamentalSolution_time hA hΦ h0 n (contDiff_infty.mp hAsmooth n)).of_le
+    le_self_add
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
