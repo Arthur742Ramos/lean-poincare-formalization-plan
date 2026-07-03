@@ -3251,6 +3251,79 @@ theorem inhomogVariation_eq_integral [CompleteSpace E]
   rw [hV0, sub_zero] at hint
   exact hint.symm
 
+/-!
+### Existence of the first variation via the augmented homogeneous flow
+
+The linearity/uniqueness/bound lemmas above take the first variation `V` — a solution of the
+*inhomogeneous* operator ODE `V' = A ∘ V + F` anchored at `V t₀ = 0` — as a hypothesis.  Here we
+reduce the *existence* of such a `V` to the existence of a genuine **homogeneous** linear flow, by
+the classical homogenisation of an affine ODE.
+
+On the augmented Banach space `(E →L[ℝ] E) × ℝ` consider the *linear* (homogeneous) field
+`ℳ(s)(V, c) = (A s ∘ V + c • F s, 0)`.  An integral curve `z = (V, c)` of `ℳ` through `(0, 1)` has a
+constant scalar coordinate `c ≡ 1` (its derivative is `0`), so the operator coordinate `V` satisfies
+`V' = A ∘ V + 1 • F = A ∘ V + F` with `V t₀ = 0`: it *is* the first variation.  Thus the inhomogeneous
+first variation is a component of a homogeneous resolvent — the operator-ODE shadow of Duhamel's
+principle — and its existence follows from the very same flow-existence input this file consumes for
+`variationalFieldVec`.  No new analysis is required beyond homogeneous flow existence. -/
+
+/-- The **augmented (homogenised) variational field** on `(E →L[ℝ] E) × ℝ` associated to an operator
+path `A` and a forcing path `F`: `(V, c) ↦ (A s ∘ V + c • F s, 0)`.  It is linear (homogeneous) in
+`(V, c)`; an integral curve through `(0, 1)` carries the first variation of the inhomogeneous
+variational ODE `V' = A ∘ V + F` in its operator coordinate. -/
+def augmentedVariationalField (A F : ℝ → (E →L[ℝ] E)) :
+    ℝ → ((E →L[ℝ] E) × ℝ) → ((E →L[ℝ] E) × ℝ) :=
+  fun s p => ((A s).comp p.1 + p.2 • F s, 0)
+
+/-- **The scalar coordinate of the augmented flow has zero derivative.**  For any integral curve `z`
+of `augmentedVariationalField A F`, the scalar component `s ↦ (z s).2` has derivative `0` everywhere
+(the second slot of the augmented field is identically `0`); obtained by post-composing with the
+continuous linear projection `snd`. -/
+theorem hasDerivAt_augmentedVariationalField_snd {A F : ℝ → (E →L[ℝ] E)}
+    {z : ℝ → ((E →L[ℝ] E) × ℝ)}
+    (hz : ∀ s, HasDerivAt z (augmentedVariationalField A F s (z s)) s) (s : ℝ) :
+    HasDerivAt (fun r => (z r).2) 0 s := by
+  have h := (ContinuousLinearMap.snd ℝ (E →L[ℝ] E) ℝ).hasFDerivAt.comp_hasDerivAt s (hz s)
+  simpa [augmentedVariationalField, ContinuousLinearMap.coe_snd', Function.comp_def] using h
+
+/-- **The scalar coordinate of the augmented flow through `(0, 1)` is constantly `1`.**  Its
+derivative vanishes everywhere (`hasDerivAt_augmentedVariationalField_snd`) and it starts at `1`, so
+it is constant equal to `1` by `is_const_of_deriv_eq_zero`. -/
+theorem augmentedVariationalField_snd_eq_one {A F : ℝ → (E →L[ℝ] E)}
+    {z : ℝ → ((E →L[ℝ] E) × ℝ)}
+    (hz : ∀ s, HasDerivAt z (augmentedVariationalField A F s (z s)) s)
+    (hz0 : z t₀ = (0, 1)) (s : ℝ) : (z s).2 = 1 := by
+  have hderiv := hasDerivAt_augmentedVariationalField_snd hz
+  have hdiff : Differentiable ℝ (fun r => (z r).2) := fun r => (hderiv r).differentiableAt
+  have hzero : ∀ r, deriv (fun r => (z r).2) r = 0 := fun r => (hderiv r).deriv
+  have hconst : (z s).2 = (z t₀).2 := is_const_of_deriv_eq_zero hdiff hzero s t₀
+  rw [hconst, hz0]
+
+/-- **Existence of the first variation via the augmented homogeneous flow.**  If `z` is an integral
+curve of the homogeneous augmented field `augmentedVariationalField A F` through `(0, 1)`, then its
+operator coordinate `V = (z ·).1` solves the *inhomogeneous* variational ODE `V' = A ∘ V + F`.  (The
+scalar coordinate is constantly `1`, so the forcing `c • F` reduces to `F`.)  This reduces existence
+of the first variation to homogeneous flow existence — the operator-ODE Duhamel principle — supplying
+the `HasDerivAt V (A ∘ V + F)` hypothesis consumed by the linearity/uniqueness/bound lemmas above. -/
+theorem hasDerivAt_inhomogVariation_of_augmented {A F : ℝ → (E →L[ℝ] E)}
+    {z : ℝ → ((E →L[ℝ] E) × ℝ)}
+    (hz : ∀ s, HasDerivAt z (augmentedVariationalField A F s (z s)) s)
+    (hz0 : z t₀ = (0, 1)) (s : ℝ) :
+    HasDerivAt (fun r => (z r).1) ((A s).comp ((z s).1) + F s) s := by
+  have hone : (z s).2 = 1 := augmentedVariationalField_snd_eq_one hz hz0 s
+  have h := (ContinuousLinearMap.fst ℝ (E →L[ℝ] E) ℝ).hasFDerivAt.comp_hasDerivAt s (hz s)
+  simpa [augmentedVariationalField, ContinuousLinearMap.coe_fst', Function.comp_def, hone] using h
+
+/-- **The augmented first variation is anchored at `0`.**  The operator coordinate of the augmented
+flow through `(0, 1)` vanishes at the anchor time: `V t₀ = 0`.  Together with
+`hasDerivAt_inhomogVariation_of_augmented` this delivers the full anchored first variation `V`, whose
+existence is thereby reduced to that of the augmented homogeneous flow. -/
+theorem inhomogVariation_of_augmented_anchor
+    {z : ℝ → ((E →L[ℝ] E) × ℝ)} (hz0 : z t₀ = (0, 1)) :
+    (fun r => (z r).1) t₀ = (0 : E →L[ℝ] E) := by
+  show (z t₀).1 = 0
+  rw [hz0]
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
