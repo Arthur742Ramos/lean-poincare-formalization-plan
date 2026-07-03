@@ -6306,6 +6306,87 @@ theorem exists_hasDerivAt_secondVariation_linearised_dir [CompleteSpace E]
     (hFa.add hFb).add hF3
   exact exists_hasDerivAt_inhomogVariation_of_continuous hA hAcont hFc t₀
 
+/-- **Continuity of the third-derivative forcing term.**  The concrete continuous realisation of the
+abstract `F₃` slot in `exists_hasDerivAt_secondVariation_linearised_dir`.  For continuous curves
+`D₃ : ℝ → (E [×3]→L[ℝ] E)` (the third spatial derivative along the reference trajectory, in the
+canonical `iteratedFDeriv`-target `ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E`) and
+`W : ℝ → (E →L[ℝ] E)` (the resolvent), and two directions `k`, `h`, the once-and-twice contracted map
+`s ↦ (e ↦ D₃(s)[W s k, W s h, W s e])` — represented, avoiding the instance-less curried triple
+`E →L E →L E →L E`, as
+`(continuousMultilinearCurryFin1 ℝ E E ((D₃(s).curryLeft (W s k)).curryLeft (W s h))).comp (W s)` — is
+continuous.
+
+Proof: `curryLeft` is the underlying map of the isometric equivalence
+`continuousMultilinearCurryLeftEquiv` (hence continuous), so each contraction `s ↦ (…).curryLeft (W s ·)`
+is `Continuous.clm_apply` of the curried operator against the continuous direction `s ↦ W s ·`; the
+final `Fin 1 → linear` isometry `continuousMultilinearCurryFin1` and the outer composition `.comp (W s)`
+(`Continuous.clm_comp`) preserve continuity.  This is the `β`/size-carrying forcing term whose gap is
+controlled by `norm_thirdDerivCurryLeft_apply_flow_sub_le`. -/
+theorem continuous_thirdDerivForcing
+    {D3 : ℝ → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {W : ℝ → (E →L[ℝ] E)} (hD3 : Continuous D3) (hW : Continuous W) (k h : E) :
+    Continuous fun s =>
+      (continuousMultilinearCurryFin1 ℝ E E
+        (((D3 s).curryLeft (W s k)).curryLeft (W s h))).comp (W s) := by
+  have hcL1 : Continuous fun s => (D3 s).curryLeft :=
+    (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).continuous.comp hD3
+  have hWk : Continuous fun s => W s k := hW.clm_apply continuous_const
+  have hWh : Continuous fun s => W s h := hW.clm_apply continuous_const
+  have hc1 : Continuous fun s => (D3 s).curryLeft (W s k) := hcL1.clm_apply hWk
+  have hcL2 : Continuous fun s => ((D3 s).curryLeft (W s k)).curryLeft :=
+    (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => E) E).continuous.comp hc1
+  have hc2 : Continuous fun s => ((D3 s).curryLeft (W s k)).curryLeft (W s h) := hcL2.clm_apply hWh
+  have hc3 : Continuous fun s =>
+      continuousMultilinearCurryFin1 ℝ E E (((D3 s).curryLeft (W s k)).curryLeft (W s h)) :=
+    (continuousMultilinearCurryFin1 ℝ E E).continuous.comp hc2
+  exact hc3.clm_comp hW
+
+/-- **Existence of the second-order (third) variation with the concrete third-derivative forcing** —
+the fully-instantiated `D₃`-analogue of `exists_hasDerivAt_firstVariation_linearised_dir`.  Specialises
+`exists_hasDerivAt_secondVariation_linearised_dir` by supplying the abstract third term `F₃` as the
+*concrete* once-and-twice contracted third derivative
+`s ↦ (continuousMultilinearCurryFin1 ℝ E E ((D³v(Φ x₀ s).curryLeft (W s k)).curryLeft (W s h))).comp (W s)`
+(`W = fundamentalSolution`, `e ↦ D³v(Φ x₀ s)[W k, W h, W e]`), whose continuity is
+`continuous_thirdDerivForcing`.
+
+Thus, for the reference base point `x₀` with `K`-bounded continuous coefficient `A₀ s = Dv s (Φ x₀ s)`,
+continuous second/third derivatives along the trajectory (`hD2cont`, `hD3cont`), resolvent
+`W = fundamentalSolution hA hΦ' h0'`, and any continuous second fundamental solution curve `W₂` in the
+base direction `k`, the third-variation ODE `V' = A₀ ∘ V + (F_A + F_B + F_C)`, `V t₀ = 0` — with the two
+asymmetric composition terms `F_A = ((D²v ∘ W₂) h) ∘ W`, `F_B = ((D²v ∘ W) h) ∘ W₂` and the
+third-derivative term `F_C` above — has a global solution `V`.  This is the complete `D₃`-solution
+existence datum that the packaged `D₃` operator and the second-order Taylor remainder
+`‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²` will consume toward `ContDiff ℝ 3`. -/
+theorem exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    (hD3cont : Continuous (fun s => D3v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {W2 : ℝ → (E →L[ℝ] E)} (hW2 : Continuous W2)
+    (k h : E) :
+    ∃ V : ℝ → (E →L[ℝ] E), V t₀ = 0 ∧
+      ∀ s, HasDerivAt V
+        ((Dv s (Φ x₀ s)).comp (V s)
+          + (((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s)
+             + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s)
+             + (continuousMultilinearCurryFin1 ℝ E E
+                 (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                   (fundamentalSolution hA hΦ' h0' s h))).comp
+                 (fundamentalSolution hA hΦ' h0' s))) s := by
+  have hW : Continuous (fun s => fundamentalSolution hA hΦ' h0' s) :=
+    continuous_fundamentalSolution_time hA hΦ' h0'
+  have hF3 : Continuous fun s =>
+      (continuousMultilinearCurryFin1 ℝ E E
+        (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+          (fundamentalSolution hA hΦ' h0' s h))).comp (fundamentalSolution hA hΦ' h0' s) :=
+    continuous_thirdDerivForcing hD3cont hW k h
+  exact exists_hasDerivAt_secondVariation_linearised_dir x₀ hA hAcont hD2cont hΦ' h0' hW2 hF3 h
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
