@@ -4903,3 +4903,42 @@ the variational flow family (global integral curves of the linear field — Math
 local Picard–Lindelöf, so this needs a continuation / Bielecki-norm argument); and the *spatial*
 `C^k`/`C^2` bootstrap (differentiable dependence of `x₀ ↦ D_x Φ_t` on the base point, via
 differentiable dependence of the resolvent on its coefficient).
+
+Update — the **second-order variational equation** (differentiable dependence of the resolvent on its
+coefficient field) is now proved (all axioms `propext`/`Classical.choice`/`Quot.sound` only),
+promoting the Duhamel *difference* formula `fundamentalSolution_sub_eq_integral` and the coefficient
+*Lipschitz* bound `norm_fundamentalSolution_sub_le_of_forall_le` to a genuine second-order (Gateaux)
+derivative.  For coefficients `A₁`, `A₂` (`‖·‖ ≤ K`, norm-continuous) with `ε`-small gap
+(`‖A₁ s - A₂ s‖ ≤ ε`) and resolvents `W₁ = D_x Φ₁`, `W₂ = D_x Φ₂`:
+
+* `hasDerivAt_fundamentalSolution_sub` — the **differential form of the Duhamel gap equation**: the
+  resolvent gap `t ↦ W₁ t - W₂ t` solves the inhomogeneous operator ODE
+  `d/dt (W₁ - W₂) = A₁ ∘ (W₁ - W₂) + (A₁ - A₂) ∘ W₂` (subtract the two operator ODEs `W₁' = A₁ ∘ W₁`,
+  `W₂' = A₂ ∘ W₂` of `hasDerivAt_fundamentalSolution` and regroup via bilinearity of composition
+  `comp_sub`/`sub_comp`).  Homogeneous part propagates the gap; source `(A₁ - A₂) ∘ W₂` is the leading
+  coefficient-perturbation forcing.  This is the differential ancestor of the integral identity
+  `fundamentalSolution_sub_eq_integral`.
+* `norm_fundamentalSolution_sub_sub_variation_le` — the **second-order remainder bound**: given the
+  *first variation* `V` (a solution of the inhomogeneous operator ODE `V' = A₂ ∘ V + (A₁ - A₂) ∘ W₂`,
+  `V t₀ = 0`, the leading linear response of the resolvent to the coefficient perturbation), the gap
+  agrees with its linear prediction `V` to second order,
+  `‖(W₁ t - W₂ t) - V t‖ ≤ ε² · exp (K (T - t₀)) · (gronwallBound 0 K 1 (T - t₀))²` on `[t₀, T]`.
+  Proof: the remainder `R := (W₁ - W₂) - V` solves the *homogeneous* variational ODE
+  `R' = A₂ ∘ R + (A₁ - A₂) ∘ (W₁ - W₂)` (subtract the first-variation ODE from the gap ODE — the two
+  `(A₁ - A₂) ∘ W₂` sources cancel), `R t₀ = 0`, with an `O(ε²)` forcing (since the gap is `O(ε)` by
+  `norm_fundamentalSolution_sub_le_of_forall_le`); operator Grönwall
+  (`norm_le_gronwallBound_of_norm_deriv_right_le`) closes it.  This is the exact second-order
+  variational equation the base-point `C²` bootstrap consumes.
+* `norm_fundamentalSolution_variation_le` — the **`O(ε)` a-priori bound on the first variation**:
+  `‖V t‖ ≤ ε · exp (K (T - t₀)) · gronwallBound 0 K 1 (t - t₀)` on `[t₀, T]` (Grönwall on the
+  inhomogeneous ODE for `V`, its forcing `(A₁ - A₂) ∘ W₂` bounded by `ε · exp (K (T - t₀))`).
+  Together with the second-order remainder this exhibits `W₁ - W₂ = V + O(ε²)` with linear leading
+  term `V = O(ε)` — so `V` is genuinely the (Gateaux) derivative of the resolvent in the coefficient
+  direction `A₁ - A₂`.
+
+Remaining after this (future sessions): the *existence* / linearity-in-perturbation of the first
+variation `V` (so the Gateaux derivative assembles into a bounded linear map of the coefficient
+perturbation, upgrading the estimate to honest Fréchet differentiability of `A ↦ D_x Φ_t`); the
+*general* merely-continuous spatial modulus; the *existence* of the variational flow family; and the
+resulting *spatial* `C^k`/`C^2` bootstrap (`x₀ ↦ D_x Φ_t` differentiable in the base point, its
+coefficient `A(x₀) s = D_x v(s, Φ x₀ s)` feeding the above).
