@@ -5931,6 +5931,85 @@ theorem affineChart_rightInverse {X : Type*} [NormedAddCommGroup X] [NormedSpace
     rw [affineChart_comp_affineChart c a c r r⁻¹, mul_inv_cancel₀ hr, affineChart_one_self]
   exact fun x => congrFun h x
 
+/-! ### The affine parabolic chart is a bijection of parabolic balls and cylinders
+
+Combining the forward `Set.MapsTo` estimates with the two-sided inverse chart shows that, for
+`r ≠ 0`, the affine parabolic chart is a `Set.BijOn` between a parabolic ball (or cylinder) about
+the source center and the rescaled ball (cylinder) about the target center.  The inverse chart
+`Φ_{a,c,r⁻¹}` supplies the de-normalization `Set.MapsTo` that carries the rescaled ball back to the
+original ball.  These bijections are what legitimize transporting a Schauder `C^{0,α}` estimate in
+*both* directions: normalize to a unit-scale ball, apply the estimate, and de-normalize back. -/
+
+/-- **De-normalization map on balls.**  For `r ≠ 0`, the inverse affine chart
+`Φ_{a,c,r⁻¹} : p ↦ a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))` maps the closed parabolic ball of
+radius `|r| * ρ` about the target center `c` back into the closed parabolic ball of radius `ρ` about
+the source center `a`, since `|r⁻¹| * (|r| * ρ) = ρ`.  This is the reverse `Set.MapsTo` companion of
+`parabolicClosedBall_mapsTo_affineChart`. -/
+theorem parabolicClosedBall_mapsTo_affineChart_inv
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r ρ : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (parabolicClosedBall c (|r| * ρ)) (parabolicClosedBall a ρ) := by
+  have h := parabolicClosedBall_mapsTo_affineChart (c := a) (a := c) (r := r⁻¹) (ρ := |r| * ρ)
+  have hrad : |r⁻¹| * (|r| * ρ) = ρ := by
+    rw [abs_inv, inv_mul_cancel_left₀ (abs_pos.mpr hr).ne']
+  rwa [hrad] at h
+
+/-- **The affine parabolic chart is a bijection of parabolic balls.**  For `r ≠ 0`, the forward
+affine chart `Φ_{c,a,r} : p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` restricts to a `Set.BijOn`
+from the closed parabolic ball of radius `ρ` about the source center `a` onto the closed parabolic
+ball of radius `|r| * ρ` about the target center `c`.  The inverse chart `Φ_{a,c,r⁻¹}` is the
+two-sided inverse, and both forward and reverse maps are `Set.MapsTo` on these balls. -/
+theorem affineChart_bijOn_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedBall a ρ) (parabolicClosedBall c (|r| * ρ)) := by
+  have hinv : Set.InvOn
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedBall a ρ) (parabolicClosedBall c (|r| * ρ)) :=
+    ⟨(affineChart_leftInverse c a hr).leftInvOn (parabolicClosedBall a ρ),
+      (affineChart_rightInverse c a hr).rightInvOn (parabolicClosedBall c (|r| * ρ))⟩
+  exact hinv.bijOn parabolicClosedBall_mapsTo_affineChart
+    (parabolicClosedBall_mapsTo_affineChart_inv hr)
+
+/-- **De-normalization map on cylinders.**  For `r ≠ 0`, the inverse affine chart `Φ_{a,c,r⁻¹}` maps
+the closed parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about the target
+center `c` back into the closed parabolic cylinder of time radius `T` and space radius `S` about the
+source center `a`, since `r⁻¹ ^ 2 * (r ^ 2 * T) = T` and `|r⁻¹| * (|r| * S) = S`.  This is the reverse
+`Set.MapsTo` companion of `parabolicClosedCylinder_mapsTo_affineChart`. -/
+theorem parabolicClosedCylinder_mapsTo_affineChart_inv
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r T S : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) (parabolicClosedCylinder a T S) := by
+  have h := parabolicClosedCylinder_mapsTo_affineChart
+    (c := a) (a := c) (r := r⁻¹) (T := r ^ 2 * T) (S := |r| * S)
+  have hT : r⁻¹ ^ 2 * (r ^ 2 * T) = T := by
+    rw [inv_pow, inv_mul_cancel_left₀ (pow_ne_zero 2 hr)]
+  have hS : |r⁻¹| * (|r| * S) = S := by
+    rw [abs_inv, inv_mul_cancel_left₀ (abs_pos.mpr hr).ne']
+  rwa [hT, hS] at h
+
+/-- **The affine parabolic chart is a bijection of parabolic cylinders.**  For `r ≠ 0`, the forward
+affine chart `Φ_{c,a,r}` restricts to a `Set.BijOn` from the closed parabolic cylinder of time
+radius `T` and space radius `S` about the source center `a` onto the closed parabolic cylinder of
+time radius `r ^ 2 * T` and space radius `|r| * S` about the target center `c`, with the inverse
+chart `Φ_{a,c,r⁻¹}` as two-sided inverse. -/
+theorem affineChart_bijOn_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedCylinder a T S) (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) := by
+  have hinv : Set.InvOn
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicClosedCylinder a T S) (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)) :=
+    ⟨(affineChart_leftInverse c a hr).leftInvOn (parabolicClosedCylinder a T S),
+      (affineChart_rightInverse c a hr).rightInvOn
+        (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))⟩
+  exact hinv.bijOn parabolicClosedCylinder_mapsTo_affineChart
+    (parabolicClosedCylinder_mapsTo_affineChart_inv hr)
+
 end AnalyticPDE
 end RicciFlow
 
