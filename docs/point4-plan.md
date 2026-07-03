@@ -5643,3 +5643,62 @@ module's composition-form second-variation forcing (of
 already-proved coefficient remainder `norm_coeffVariation_sub_secondDerivComp_le_sq`, the forcing gap `hβ`,
 `norm_inhomogVariation_sub_sub_le_of_forcingGap`, and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` close
 `ContDiff ℝ 3`.
+
+Update — **the representation-bridge toolkit is now COMPLETE, the concrete `(F₁ − F₀)` assembly is
+PROVED, and the forcing-gap combinator is assembled** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`.  This closes the
+representation half in full and reduces the remaining `ContDiff ℝ 3` work to a single (large) threading
+capstone:
+
+* `curry2_iteratedFDeriv_two` — the **pure `iteratedFDeriv`/`fderiv` representation bridge for `D²v`**:
+  `curry2 (iteratedFDeriv ℝ 2 f z) = fderiv ℝ (fderiv ℝ f) z`, identifying the multilinear form
+  `E[×2]→L E` (carrying the `C³` Taylor bounds) with the composition form `E →L (E →L E)` (of the
+  second-variation ODE forcing).  Unconditional, via `curry2_apply` + Mathlib's `iteratedFDeriv_two_apply`.
+  Its `HasFDerivAt`-consumable form `curry2_iteratedFDeriv_two_eq_of_hasFDerivAt`
+  (`curry2 (iteratedFDeriv ℝ 2 f x) = D2comp` given `HasFDerivAt f (Df ·)` and `HasFDerivAt Df D2comp x`)
+  identifies the module's abstract composition-form second derivative with `curry2` of the multilinear one
+  — the compatibility `hcompat` the assembly threads.
+* `curryLeft_iteratedFDeriv_three` — the **third-order companion**:
+  `(iteratedFDeriv ℝ 3 f x).curryLeft = fderiv ℝ (iteratedFDeriv ℝ 2 f) x`, identifying the module's `F_C`
+  contraction `(iteratedFDeriv 3 f ξ).curryLeft (W k)` with the `C³`-Taylor form
+  `fderiv (iteratedFDeriv 2 f) ξ (W k)`.  Via `ContinuousMultilinearMap.curryLeft_apply` + Mathlib's
+  `iteratedFDeriv_succ_apply_left` at `Fin.cons`.  Consumable form
+  `curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt` (`D3ml = (iteratedFDeriv 3 f x).curryLeft` given
+  `HasFDerivAt (iteratedFDeriv 2 f) D3ml x`).
+* `norm_chainRuleForcing_flow_sub_sub_le_sq` — the **concrete `(F₁ − F₀)` second-order forcing remainder
+  along the flow**, the `C³`-layer field-derived analogue of `norm_chainRuleForcing_flow_sub_le`:
+  `∃ C, ∀ s ∈ [t₀, T], ‖(F₁ − F₀) − (F_C + F_A + F_B)‖ ≤ C · ‖z − x₀‖² · ‖h‖`
+  with `F₁ = ((D²v(Φz) ∘ W_z) h) ∘ W_z`, `F₀ = ((D²v(Φx₀) ∘ W_x) h) ∘ W_x`.  **Key simplification**: the
+  engine `norm_bilinearCompForcing_curry2_sub_sub_le_sq` already accepts arbitrary composition-form
+  `P₀, P₁`, so they are set to `D²v_comp` *directly*; the representation compatibility `hcompat` is needed
+  *only* for the `cp` quadratic remainder `hεP` (a `←hcompat` rewrite turning the `curry2`-form bound of
+  `norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq` into composition form).  The six field bounds:
+  `p` via `hC'`, `w` via `norm_fundamentalSolution_le`, `dp` via `norm_secondDerivField_apply_flow_sub_le`,
+  `dw` via `norm_fundamentalSolution_baseCurve_sub_le`, `cp` via
+  `norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq` (+`←hcompat`), `cw` via
+  `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` (`W₂ = Vlin`).  The `F_C` term matches the
+  module's `(iteratedFDeriv 3).curryLeft`-shape via `D3vm` (bridged by `curryLeft_iteratedFDeriv_three`).
+  The existential `∃ C` over the field constant keeps the statement clean (`rotate_left` lets the engine
+  determine the witness).
+* `norm_forcingGap_le_of_remainders` — the **forcing-gap combinator**: assembles the coefficient-variation
+  remainder `‖(A₁ − A₀) ∘ V₁ − newLeading‖ ≤ β₁` (`norm_coeffVariation_sub_secondDerivComp_le_sq`) and the
+  chain-rule forcing remainder `‖(F₁ − F₀) − (F_C + F_A + F_B)‖ ≤ β₂`
+  (`norm_chainRuleForcing_flow_sub_sub_le_sq`) into the single forcing gap
+  `‖((A₁ − A₀) ∘ V₁ + (F₁ − F₀)) − F₃‖ ≤ β₁ + β₂` with `F₃ = F_A + F_B + (newLeading + F_C)` — **exactly**
+  the design-corrected third-variation forcing of
+  `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff` and the `hβ` hypothesis of
+  `norm_inhomogVariation_sub_sub_le_of_forcingGap` (verified by inspection: the coefficient remainder's
+  `newLeading = ((D²v(Φx₀) ∘ W_x) k) ∘ V_x` and the corrected `F₃`'s leading term
+  `((D²v(Φx₀) ∘ W_x) k) ∘ V0` coincide with `V_x = V0`).  Pure algebra (`abel` regroup + `norm_add_le`).
+
+Remaining for `ContDiff ℝ 3` (next session): the **single `hβ`-application capstone** — a (large,
+~40-hypothesis) field-derived theorem instantiating `norm_inhomogVariation_sub_sub_le_of_forcingGap` with
+the three ODE solutions (`V₁, V₀` = first variations at `z, x₀`; `V₃` = the corrected second variation of
+`exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff`), feeding its `hβ` via
+`norm_forcingGap_le_of_remainders` applied to the two now-proved field remainders (the coefficient
+remainder still stated in un-factored `‖z − x₀‖/‖z − x₀‖²`-mixed form, so a `ring`-reshape to
+`C₁ · ‖z − x₀‖² · ‖h‖` is needed; supply `D3vm = (D3v_fin3).curryLeft` compat via
+`curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt`).  This yields the base-point second-derivative Taylor
+remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C · ‖z − x₀‖²`; then
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` closes `ContDiff ℝ 3`.  All analytic ingredients now exist;
+the capstone is pure threading + one `ring`-reshape.
