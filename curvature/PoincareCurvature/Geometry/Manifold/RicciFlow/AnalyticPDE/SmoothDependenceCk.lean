@@ -8752,6 +8752,42 @@ theorem norm_secondDerivField_curry2_apply_flow_sub_le
   exact (norm_curry2_le _).trans
     (norm_secondDerivField_ml_apply_flow_sub_le hv hΦ h0 hD2v hsT z w)
 
+/-- **`F_C`-form second-order composition-forcing Taylor engine.**  The trilinear quadratic-remainder
+engine `norm_bilinearCompForcing_sub_sub_le_sq` fused with the representation bridge
+`bilinearCompForcing_curry2_eq`, so its `dP`-linear output is delivered *directly* in the module's
+third-derivative forcing shape `F_C = (continuousMultilinearCurryFin1 ℝ E E (S.curryLeft (W₀ h))).comp W₀`
+instead of the raw composition-form `((curry2 S ∘ W₀) h) ∘ W₀`.
+
+Choosing the candidate operator `dP := curry2 S` (`S : E[×2]→L E`, the contracted third derivative) and
+supplying the six factor bounds (`p, w` sizes; `dp, dw` first-order gaps; `cp, cw` quadratic Taylor
+remainders; `‖k‖ ≤ 1`),
+`‖(((P₁ ∘ W₁) h) ∘ W₁ − ((P₀ ∘ W₀) h) ∘ W₀) − (F_C + ((P₀ ∘ dW) h) ∘ W₀ + ((P₀ ∘ W₀) h) ∘ dW)‖`
+`  ≤ (cp·w² + 2·p·cw·w + 2·dp·dw·w + p·dw² + dp·dw²)·‖k‖²·‖h‖`.
+Proof: apply `norm_bilinearCompForcing_sub_sub_le_sq` with `dP = curry2 S`, then rewrite its
+`dP`-linear term `((curry2 S ∘ W₀) h) ∘ W₀` into `F_C` via `bilinearCompForcing_curry2_eq`.  This is the
+assembled `(F₁ − F₀)` forcing-remainder engine: fed `P₀ = curry2 (D²v(Φ x₀ s))`,
+`P₁ = curry2 (D²v(Φ z s))`, `S = D³v(Φ x₀ s)(W_x k)`, `W₀ = W_x`, `W₁ = W_z`, `dW = W₂`, with the six
+bounds supplied by `norm_curry2_le`/`hC'` (`p`), `norm_fundamentalSolution_le` (`w`),
+`norm_secondDerivField_curry2_apply_flow_sub_le` (`dp`), `norm_fundamentalSolution_baseCurve_sub_le`
+(`dw`), `norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq` (`cp`) and
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq` (`cw`), it yields the `(F₁ − F₀)` forcing gap
+`‖(F₁ − F₀) − (F_C + F_A + F_B)‖ ≤ Cquad·‖z − x₀‖²·‖h‖` toward `ContDiff ℝ 3`. -/
+theorem norm_bilinearCompForcing_curry2_sub_sub_le_sq
+    {P₀ P₁ : E →L[ℝ] (E →L[ℝ] E)} {W₀ W₁ dW : E →L[ℝ] E}
+    (S : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) (h k : E)
+    {p w cp cw dp dw : ℝ}
+    (hP₀ : ‖P₀‖ ≤ p) (hW₀ : ‖W₀‖ ≤ w)
+    (hrP : ‖P₁ - P₀‖ ≤ dp * ‖k‖) (hrW : ‖W₁ - W₀‖ ≤ dw * ‖k‖)
+    (hεP : ‖P₁ - P₀ - curry2 S‖ ≤ cp * ‖k‖ ^ 2) (hεW : ‖W₁ - W₀ - dW‖ ≤ cw * ‖k‖ ^ 2)
+    (hp : 0 ≤ p) (hw : 0 ≤ w) (hdp : 0 ≤ dp) (hdw : 0 ≤ dw) (hk : ‖k‖ ≤ 1) :
+    ‖(((P₁.comp W₁) h).comp W₁ - ((P₀.comp W₀) h).comp W₀)
+        - (((continuousMultilinearCurryFin1 ℝ E E (S.curryLeft (W₀ h))).comp W₀)
+            + (((P₀.comp dW) h).comp W₀) + (((P₀.comp W₀) h).comp dW))‖
+      ≤ (cp * w * w + 2 * p * cw * w + 2 * dp * dw * w + p * dw * dw + dp * dw * dw)
+          * ‖k‖ ^ 2 * ‖h‖ := by
+  have hbase := norm_bilinearCompForcing_sub_sub_le_sq h k hP₀ hW₀ hrP hrW hεP hεW hp hw hdp hdw hk
+  rwa [bilinearCompForcing_curry2_eq S W₀ h] at hbase
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
