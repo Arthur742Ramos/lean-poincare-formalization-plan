@@ -4378,9 +4378,28 @@ behind completeness of the parabolic Hölder space:
 fixed Hölder constant, uniform sup bound, and combined `C^{0,α}` control to pointwise
 limits over any `NeBot` filter, and the `...of_tendstoUniformlyOn` companions state the
 same closedness in the topology of uniform convergence (the fixed-constant `C^{0,α}`
-ball is closed in `C^0`). What remains for decomposition step 1 is to package the
-`C^{0,α}` seminorm as an `ℝ`-valued functional and assemble the Banach-space
-(completeness) instance, then lift to `C^{2+α,1+α/2}`.
+ball is closed in `C^0`). The `C^{0,α}` seminorm is now packaged as an honest `ℝ`-valued
+functional: `parabolicHolderSeminorm α u s = sInf {C ≥ 0 | ParabolicHolderWith C α u s}`
+(the least admissible Hölder constant), its `C^0` companion `parabolicSupNorm u s`, and the
+full norm `parabolicC0AlphaNorm α u s = parabolicSupNorm u s + parabolicHolderSeminorm α u s`.
+Each is proved nonnegative, a lower bound for every admissible constant, and *attained* on the
+corresponding class (`parabolicHolderWith_parabolicHolderSeminorm`,
+`parabolicBoundedWith_parabolicSupNorm`,
+`parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm`), with the class-membership
+iff-characterizations (`parabolicHolderOn_iff_parabolicHolderWith_seminorm`,
+`parabolicC0AlphaOn_iff_parabolicC0AlphaWith_norms`). The seminorm axioms are in place —
+subadditivity (`parabolic{HolderSeminorm,SupNorm,C0AlphaNorm}_add_le` and the difference
+forms `..._sub_le`), vanishing on zero (`parabolic{HolderSeminorm,SupNorm,C0AlphaNorm}_zero`),
+integer homogeneity (`parabolic{HolderSeminorm,SupNorm}_zsmul_le`), and unconditional
+negation invariance (`parabolic{HolderSeminorm,SupNorm,C0AlphaNorm}_neg`) — together with
+domain monotonicity (`parabolic{HolderSeminorm,SupNorm}_mono_domain`), pointwise readouts
+(`norm_sub_le_parabolicHolderSeminorm`, `norm_le_parabolicSupNorm`), `Set.EqOn`-congruence
+(`parabolic{HolderSeminorm,SupNorm,C0AlphaNorm}_congr`, so the functional descends to the
+restriction to `s`), and the completeness-facing bound `parabolicC0AlphaNorm_le_of_tendsto`
+(the norm stays `≤ B + H` under any pointwise limit of a fixed `C^{0,α}` ball). What remains
+for decomposition step 1 is to assemble the Banach-space (completeness) instance — a bundled
+parabolic `C^{0,α}` function type with a `NormedAddCommGroup`/`CompleteSpace` structure whose
+Cauchy sequences converge via the closedness lemmas above — then lift to `C^{2+α,1+α/2}`.
 
 **Suggested decomposition** (multi-session):
 
