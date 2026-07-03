@@ -7380,6 +7380,61 @@ theorem ParabolicHolderOn.iff_space_time_holder_parabolicClosedBall
   ParabolicHolderOn.iff_space_time_holder hα
     (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq)
 
+/-- **Characterization of parabolic `C^{0,α}` membership.**  On a corner-closed time-space set,
+`u` lies in the parabolic `C^{0,α}` class if and only if it is uniformly bounded, separately
+spatially `α`-Hölder (uniform in time), and temporally `α/2`-Hölder (uniform in space).  This is the
+full norm-level companion of `ParabolicHolderOn.iff_space_time_holder`: it additionally records the
+sup bound, so it packages the exact data (`C^0` control plus separate space/time Hölder control)
+that assembles a parabolic Schauder norm.  The forward direction is `boundedOn` together with
+`space_slice` and `time_slice_half_exponent`; the reverse direction is `of_space_time_holder`. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s) :
+    ParabolicC0AlphaOn α u s ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u s) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) := by
+  refine ⟨fun h => ⟨h.boundedOn, h.space_slice, h.time_slice_half_exponent⟩, ?_⟩
+  rintro ⟨hbound, hspace, htime⟩
+  exact ParabolicC0AlphaOn.of_space_time_holder hα hcorner hbound hspace htime
+
+/-- Characterization of parabolic `C^{0,α}` membership on a closed product parabolic cylinder — the
+Schauder domain. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α) :
+    ParabolicC0AlphaOn α u (parabolicClosedCylinder c timeRadius spaceRadius) ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u
+        (parabolicClosedCylinder c timeRadius spaceRadius)) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicC0AlphaOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedCylinder.corner_mem hp hq)
+
+/-- Characterization of parabolic `C^{0,α}` membership on a closed parabolic ball. -/
+theorem ParabolicC0AlphaOn.iff_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α) :
+    ParabolicC0AlphaOn α u (parabolicClosedBall c R) ↔
+      (∃ B ≥ 0, ParabolicBoundedWith B u (parabolicClosedBall c R)) ∧
+      (∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+        (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+        ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α) ∧
+      (∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+        (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+        ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :=
+  ParabolicC0AlphaOn.iff_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq)
+
 end AnalyticPDE
 end RicciFlow
 
