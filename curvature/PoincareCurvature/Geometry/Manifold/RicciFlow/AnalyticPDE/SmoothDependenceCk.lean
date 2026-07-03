@@ -8325,6 +8325,106 @@ theorem exists_continuousLinearMap_thirdVariation_coeff_bilinear [CompleteSpace 
   intro k h V hV0 hVderiv
   simpa using hD₃char k h V hV0 hVderiv
 
+/-- **Second-order (quadratic-remainder) Taylor engine for the bilinear composition forcing.**
+The `C³`-layer analogue of the first-order (Lipschitz) perturbation bound
+`norm_bilinearCompForcing_sub_le`: it identifies the **three linear-variation terms** of the
+composition forcing `G(P, A, B) := ((P ∘ A) h) ∘ B` (trilinear in `(P, A, B)`) with a remainder
+controlled *quadratically* by the factor Taylor remainders and first-order gaps.
+
+For base operands `P₀ : E →L (E →L E)`, `A₀, B₀ : E →L E` (sizes `p, a, b`), perturbed operands
+`P₁, A₁, B₁` (first-order gaps `‖P₁ − P₀‖ ≤ δp`, `‖A₁ − A₀‖ ≤ δa`, `‖B₁ − B₀‖ ≤ δb`) and *candidate
+linearisations* `dP, dA, dB` with factor Taylor remainders `‖P₁ − P₀ − dP‖ ≤ εp`,
+`‖A₁ − A₀ − dA‖ ≤ εa`, `‖B₁ − B₀ − dB‖ ≤ εb`,
+`‖(G(P₁,A₁,B₁) − G(P₀,A₀,B₀)) − (G(dP,A₀,B₀) + G(P₀,dA,B₀) + G(P₀,A₀,dB))‖`
+`  ≤ (εp·a·b + p·εa·b + p·a·εb + δp·δa·b + δp·a·δb + p·δa·δb + δp·δa·δb) · ‖h‖`.
+
+Proof: the exact trilinear (multilinear) expansion identity
+`(G(P₁,A₁,B₁) − G(P₀,A₀,B₀)) − (G(dP,A₀,B₀)+G(P₀,dA,B₀)+G(P₀,A₀,dB))`
+`= G(P₁−P₀−dP, A₀, B₀) + G(P₀, A₁−A₀−dA, B₀) + G(P₀, A₀, B₁−B₀−dB)`
+`  + G(P₁−P₀, A₁−A₀, B₀) + G(P₁−P₀, A₀, B₁−B₀) + G(P₀, A₁−A₀, B₁−B₀) + G(P₁−P₀, A₁−A₀, B₁−B₀)`
+(pure `comp`/apply bilinearity, closed by `simp only [comp_sub, sub_comp, sub_apply]; abel`), followed
+by the triangle inequality and the a-priori size bound `norm_bilinearCompForcing_le`
+(`‖G(P,A,B)‖ ≤ ‖P‖·‖A‖·‖B‖·‖h‖`) on each of the seven summands: the three "linear-remainder" terms are
+`O(ε)` and the four cross terms are quadratic/cubic in the first-order gaps `δ`.
+
+In the `C³` bootstrap this is the engine that identifies the two asymmetric composition forcing terms
+`F_A = ((D²v ∘ W₂) h) ∘ W`, `F_B = ((D²v ∘ W) h) ∘ W₂` (with `P₀ = D²v(Φ x₀)`, `A₀ = B₀ = W = D_x Φ`,
+`dA = dB = W₂` the second fundamental solution curve) as the linear-in-`(z − x₀)` part of the
+second-variation forcing gap `F(z) − F(x₀)` (`F(z) = ((D²v(Φ z) ∘ W_z) h) ∘ W_z`), with the required
+`O(‖z − x₀‖²·‖h‖)` remainder — the analytic content of the plan's remaining `(F₁ − F₀)` second-order
+forcing remainder toward `ContDiff ℝ 3`. -/
+theorem norm_bilinearCompForcing_sub_sub_le
+    {P₀ P₁ dP : E →L[ℝ] (E →L[ℝ] E)} {A₀ A₁ dA B₀ B₁ dB : E →L[ℝ] E} (h : E)
+    {p a b δp δa δb εp εa εb : ℝ}
+    (hP₀ : ‖P₀‖ ≤ p) (hA₀ : ‖A₀‖ ≤ a) (hB₀ : ‖B₀‖ ≤ b)
+    (hrP : ‖P₁ - P₀‖ ≤ δp) (hrA : ‖A₁ - A₀‖ ≤ δa) (hrB : ‖B₁ - B₀‖ ≤ δb)
+    (hεP : ‖P₁ - P₀ - dP‖ ≤ εp) (hεA : ‖A₁ - A₀ - dA‖ ≤ εa) (hεB : ‖B₁ - B₀ - dB‖ ≤ εb)
+    (hp : 0 ≤ p) (ha : 0 ≤ a) (hδp : 0 ≤ δp) (hδa : 0 ≤ δa) :
+    ‖(((P₁.comp A₁) h).comp B₁ - ((P₀.comp A₀) h).comp B₀)
+        - ((((dP.comp A₀) h).comp B₀) + (((P₀.comp dA) h).comp B₀)
+            + (((P₀.comp A₀) h).comp dB))‖
+      ≤ (εp * a * b + p * εa * b + p * a * εb
+          + δp * δa * b + δp * a * δb + p * δa * δb + δp * δa * δb) * ‖h‖ := by
+  have hid :
+      (((P₁.comp A₁) h).comp B₁ - ((P₀.comp A₀) h).comp B₀)
+        - ((((dP.comp A₀) h).comp B₀) + (((P₀.comp dA) h).comp B₀)
+            + (((P₀.comp A₀) h).comp dB))
+      = ((((P₁ - P₀ - dP).comp A₀) h).comp B₀)
+        + (((P₀.comp (A₁ - A₀ - dA)) h).comp B₀)
+        + (((P₀.comp A₀) h).comp (B₁ - B₀ - dB))
+        + ((((P₁ - P₀).comp (A₁ - A₀)) h).comp B₀)
+        + ((((P₁ - P₀).comp A₀) h).comp (B₁ - B₀))
+        + (((P₀.comp (A₁ - A₀)) h).comp (B₁ - B₀))
+        + ((((P₁ - P₀).comp (A₁ - A₀)) h).comp (B₁ - B₀)) := by
+    simp only [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp,
+      ContinuousLinearMap.sub_apply]
+    abel
+  rw [hid]
+  have hεp0 : 0 ≤ εp := (norm_nonneg (P₁ - P₀ - dP)).trans hεP
+  have hεa0 : 0 ≤ εa := (norm_nonneg (A₁ - A₀ - dA)).trans hεA
+  have hεb0 : 0 ≤ εb := (norm_nonneg (B₁ - B₀ - dB)).trans hεB
+  have hδb0 : 0 ≤ δb := (norm_nonneg (B₁ - B₀)).trans hrB
+  have h1 : ‖(((P₁ - P₀ - dP).comp A₀) h).comp B₀‖ ≤ εp * a * b * ‖h‖ :=
+    (norm_bilinearCompForcing_le (P₁ - P₀ - dP) A₀ B₀ h).trans (by gcongr)
+  have h2 : ‖((P₀.comp (A₁ - A₀ - dA)) h).comp B₀‖ ≤ p * εa * b * ‖h‖ :=
+    (norm_bilinearCompForcing_le P₀ (A₁ - A₀ - dA) B₀ h).trans (by gcongr)
+  have h3 : ‖((P₀.comp A₀) h).comp (B₁ - B₀ - dB)‖ ≤ p * a * εb * ‖h‖ :=
+    (norm_bilinearCompForcing_le P₀ A₀ (B₁ - B₀ - dB) h).trans (by gcongr)
+  have h4 : ‖(((P₁ - P₀).comp (A₁ - A₀)) h).comp B₀‖ ≤ δp * δa * b * ‖h‖ :=
+    (norm_bilinearCompForcing_le (P₁ - P₀) (A₁ - A₀) B₀ h).trans (by gcongr)
+  have h5 : ‖(((P₁ - P₀).comp A₀) h).comp (B₁ - B₀)‖ ≤ δp * a * δb * ‖h‖ :=
+    (norm_bilinearCompForcing_le (P₁ - P₀) A₀ (B₁ - B₀) h).trans (by gcongr)
+  have h6 : ‖((P₀.comp (A₁ - A₀)) h).comp (B₁ - B₀)‖ ≤ p * δa * δb * ‖h‖ :=
+    (norm_bilinearCompForcing_le P₀ (A₁ - A₀) (B₁ - B₀) h).trans (by gcongr)
+  have h7 : ‖(((P₁ - P₀).comp (A₁ - A₀)) h).comp (B₁ - B₀)‖ ≤ δp * δa * δb * ‖h‖ :=
+    (norm_bilinearCompForcing_le (P₁ - P₀) (A₁ - A₀) (B₁ - B₀) h).trans (by gcongr)
+  calc ‖((((P₁ - P₀ - dP).comp A₀) h).comp B₀)
+          + (((P₀.comp (A₁ - A₀ - dA)) h).comp B₀)
+          + (((P₀.comp A₀) h).comp (B₁ - B₀ - dB))
+          + ((((P₁ - P₀).comp (A₁ - A₀)) h).comp B₀)
+          + ((((P₁ - P₀).comp A₀) h).comp (B₁ - B₀))
+          + (((P₀.comp (A₁ - A₀)) h).comp (B₁ - B₀))
+          + ((((P₁ - P₀).comp (A₁ - A₀)) h).comp (B₁ - B₀))‖
+      ≤ ‖(((P₁ - P₀ - dP).comp A₀) h).comp B₀‖
+          + ‖((P₀.comp (A₁ - A₀ - dA)) h).comp B₀‖
+          + ‖((P₀.comp A₀) h).comp (B₁ - B₀ - dB)‖
+          + ‖(((P₁ - P₀).comp (A₁ - A₀)) h).comp B₀‖
+          + ‖(((P₁ - P₀).comp A₀) h).comp (B₁ - B₀)‖
+          + ‖((P₀.comp (A₁ - A₀)) h).comp (B₁ - B₀)‖
+          + ‖(((P₁ - P₀).comp (A₁ - A₀)) h).comp (B₁ - B₀)‖ := by
+        refine (norm_add_le _ _).trans (add_le_add ?_ le_rfl)
+        refine (norm_add_le _ _).trans (add_le_add ?_ le_rfl)
+        refine (norm_add_le _ _).trans (add_le_add ?_ le_rfl)
+        refine (norm_add_le _ _).trans (add_le_add ?_ le_rfl)
+        refine (norm_add_le _ _).trans (add_le_add ?_ le_rfl)
+        exact norm_add_le _ _
+    _ ≤ εp * a * b * ‖h‖ + p * εa * b * ‖h‖ + p * a * εb * ‖h‖
+          + δp * δa * b * ‖h‖ + δp * a * δb * ‖h‖ + p * δa * δb * ‖h‖ + δp * δa * δb * ‖h‖ :=
+        add_le_add (add_le_add (add_le_add (add_le_add (add_le_add (add_le_add h1 h2) h3) h4) h5)
+          h6) h7
+    _ = (εp * a * b + p * εa * b + p * a * εb
+          + δp * δa * b + δp * a * δb + p * δa * δb + δp * δa * δb) * ‖h‖ := by ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
