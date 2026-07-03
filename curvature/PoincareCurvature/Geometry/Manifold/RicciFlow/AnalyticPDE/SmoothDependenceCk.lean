@@ -10097,6 +10097,91 @@ theorem exists_thirdVariationOperator_of_field [CompleteSpace E]
     hVfamcont hVfamadd hVfamsmul hVfambound hVfamcont hVfamadd hVfamsmul hVfambound ht
   exact ⟨Vfam, D₃, hVfam0, hVfamd, hVfamcont, hVfamadd, hVfamsmul, hVfambound, hD₃⟩
 
+/-- **The characterisation bridge: the packaged third-variation operator discharges the `hD₃` slot of
+the operator numerator.**  Given the canonical linearised-first-variation family `Vfam` and the packaged
+bilinear third-variation operator `D₃` produced by `exists_thirdVariationOperator_of_field` (its
+`Fin 3`-multilinear characterisation `hD₃bilinear`), together with the curry-left compatibility
+`D3vm s (Φ x₀ s) = (D3v s (Φ x₀ s)).curryLeft` between the field's third derivative in its
+`E →L (E[×2] →L E)` (`D3vm`) and `E[×3] →L E` (`D3v`) representations, the operator `D₃` satisfies the
+`hD₃` hypothesis slot required by `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC`
+for the increment direction `z − x₀`.
+
+Proof.  The numerator's slot fixes an inner direction `h`, a base curve `V₀` (an arbitrary linearised
+first variation of direction `h`) and a curve `V` solving the design-corrected third-variation ODE with
+the numerator's base curve `W₂` (a linearised first variation of direction `z − x₀`).  Grönwall
+uniqueness (`inhomogVariation_unique`, coefficient `Dv (Φ x₀ ·)`, same anchor `0` at `t₀`) pins the
+two auxiliary curves to the canonical family: `W₂ = Vfam (z − x₀)` and `V₀ = Vfam h` pointwise.
+Rewriting the third-variation forcing by these two identities and the curry-left compatibility turns it
+term-for-term into the `Fin 3`-multilinear bilinear forcing of `hD₃bilinear` (base direction `k = z − x₀`,
+inner `h`), whose four summands are exactly `((D²v ∘ Vfam k) h) ∘ W₀`, `((D²v ∘ W₀) h) ∘ Vfam k`,
+`((D²v ∘ W₀) k) ∘ Vfam h` and `(curryFin1 (D³v.curryLeft (W₀ k)).curryLeft (W₀ h)) ∘ W₀`.  Then
+`hD₃bilinear (z − x₀) h V` closes the slot with `D₃ (z − x₀) h = V t`.
+
+This is the missing link between the constructive packaged operator and the neighbourhood-uniform
+operator-level `C³` Taylor remainder — the last purely-algebraic step before the everywhere
+`HasFDerivAt (fun z => D₂ z) D₃ x₀` assembly of the resolvent's spatial `ContDiff ℝ 3`. -/
+theorem thirdVariationOperator_hD₃_slot_of_bilinear [CompleteSpace E]
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    (x₀ z : E) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ x, IsIntegralCurve (Φ' x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ x, Φ' x t₀ = x)
+    {Vfam : E → (ℝ → (E →L[ℝ] E))}
+    (hVfam0 : ∀ h, Vfam h t₀ = 0)
+    (hVfamd : ∀ (h : E) (s : ℝ), HasDerivAt (Vfam h)
+      ((Dv s (Φ x₀ s)).comp (Vfam h s)
+        + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp
+            (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hcurry : ∀ s, D3vm s (Φ x₀ s) = (D3v s (Φ x₀ s)).curryLeft)
+    {D₃ : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))}
+    (hD₃bilinear : ∀ (k h : E) (V : ℝ → (E →L[ℝ] E)), V t₀ = 0 →
+      (∀ s, HasDerivAt V
+        ((Dv s (Φ x₀ s)).comp (V s)
+          + (((D2vc s (Φ x₀ s)).comp (Vfam k s) h).comp (fundamentalSolution hAx hΦ' h0' s)
+             + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp (Vfam k s)
+             + (((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) k).comp (Vfam h s)
+                + (continuousMultilinearCurryFin1 ℝ E E
+                    (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hAx hΦ' h0' s k)).curryLeft
+                      (fundamentalSolution hAx hΦ' h0' s h))).comp
+                    (fundamentalSolution hAx hΦ' h0' s)))) s) →
+      D₃ k h = V t)
+    {W₂ : ℝ → (E →L[ℝ] E)}
+    (hW₂ : ∀ s, HasDerivAt W₂
+      ((Dv s (Φ x₀ s)).comp (W₂ s)
+        + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp
+            (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hW₂0 : W₂ t₀ = 0) :
+    ∀ (h : E) (V₀ V : ℝ → (E →L[ℝ] E)),
+      V₀ t₀ = 0 →
+      (∀ s, HasDerivAt V₀
+        ((Dv s (Φ x₀ s)).comp (V₀ s)
+          + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp
+              (fundamentalSolution hAx hΦ' h0' s)) s) →
+      V t₀ = 0 →
+      (∀ s, HasDerivAt V
+        ((Dv s (Φ x₀ s)).comp (V s)
+          + (((D2vc s (Φ x₀ s)).comp (W₂ s) h).comp (fundamentalSolution hAx hΦ' h0' s)
+              + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp (W₂ s)
+              + (((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp (V₀ s)
+                  + (continuousMultilinearCurryFin1 ℝ E E
+                        ((D3vm s (Φ x₀ s)
+                            (fundamentalSolution hAx hΦ' h0' s (z - x₀))).curryLeft
+                          (fundamentalSolution hAx hΦ' h0' s h))).comp
+                      (fundamentalSolution hAx hΦ' h0' s)))) s) →
+      D₃ (z - x₀) h = V t := by
+  intro h V₀ V hV₀0 hV₀d hV0 hVd
+  have hW₂eq : ∀ s, W₂ s = Vfam (z - x₀) s := fun s =>
+    inhomogVariation_unique hAx hW₂ (hVfamd (z - x₀)) (by rw [hW₂0, hVfam0]) s
+  have hV₀eq : ∀ s, V₀ s = Vfam h s := fun s =>
+    inhomogVariation_unique hAx hV₀d (hVfamd h) (by rw [hV₀0, hVfam0]) s
+  refine hD₃bilinear (z - x₀) h V hV0 (fun s => ?_)
+  have hh := hVd s
+  rw [hW₂eq s, hV₀eq s, hcurry s] at hh
+  exact hh
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
