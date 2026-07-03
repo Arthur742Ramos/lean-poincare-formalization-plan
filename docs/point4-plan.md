@@ -5170,3 +5170,53 @@ above + the a-priori bound `norm_inhomogVariation_le` for boundedness), and (iii
 Taylor remainder `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` (uniform in `z` near `x₀`)
 into `HasFDerivAt (fun z => D_x Φ_t^{A(z)}) D₂ x₀` — the spatial `C²` regularity — then iterate for
 `C³`.
+
+Update — **pieces (i) and (ii) of the base-point `C²` bootstrap are now CLOSED**, and the analytic
+bridge for piece (iii) is in place (all axioms `propext`/`Classical.choice`/`Quot.sound` only).  The
+recurring blocker — existence of the first variations `Vz`, `Vlin` for their *time-unbounded* forcings
+— is dissolved by the observation that the **direct** inhomogeneous variation field
+`inhomogVariationalField A F s W = (A s) ∘ W + F s` is *uniformly* `K`-Lipschitz in the state (the
+forcing `F s` is a state-constant translation and cancels in the state-difference), so a globally
+*continuous but unbounded* forcing still feeds the uniform-Lipschitz global existence — no augmented
+scalar coordinate (which forced `‖F s‖ ≤ M`) and no time-truncation.
+
+* `inhomogVariationalField`, `lipschitzWith_inhomogVariationalField`,
+  `exists_hasDerivAt_inhomogVariation_of_continuous` — **existence of the first variation for a
+  merely-continuous (time-unbounded) forcing**: for norm-bounded continuous `A` (`‖A s‖₊ ≤ K`) and
+  *any* continuous `F`, the anchored `V' = A ∘ V + F`, `V t₀ = 0` has a global solution, directly from
+  `exists_isIntegralCurve_of_lipschitzWith` on the uniformly-`K`-Lipschitz direct field.  The piece the
+  globally-bounded `exists_hasDerivAt_inhomogVariation` could not supply.
+* `exists_hasDerivAt_firstVariation_true` — **existence of the true first variation `Vz`** (forcing
+  `(A_z − A₀) ∘ W₀`, `A₀ s = Dv s (Φ x₀ s)`, `A_z s = Dv s (Φ z s)`), forcing continuity via
+  `Continuous.clm_comp` of `A_z − A₀` with `continuous_fundamentalSolution_time`.  Exactly the
+  `hVz`/`hVz0` datum of `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`.
+* `exists_hasDerivAt_firstVariation_linearised` / `..._dir` — **existence of the linearised first
+  variation `Vlin`** (chain-rule forcing `(D²v(Φ x₀ s) ∘ W₀ · h) ∘ W₀`), keyed on the increment
+  `z − x₀` and (the `_dir` form) on a free direction `h`; forcing continuity via
+  `Continuous.clm_comp`/`Continuous.clm_apply`.  Exactly the `hVlin`/`hVlin0` datum.  This closes
+  **piece (i)** (existence of `Vz`, `Vlin`).
+* `norm_linearisedFirstVariation_le` — **operator-norm bound for `Vlin`, linear in the direction**:
+  `‖Vlin t‖ ≤ C' · exp(2K(T − t₀)) · ‖h‖ · gronwallBound 0 K 1 (t − t₀)` on `[t₀, T]`, with the constant
+  independent of `h` (forcing bound `‖D²v‖ · ‖W₀‖ · ‖h‖ · ‖W₀‖ ≤ C' exp(2K(T−t₀)) ‖h‖` via
+  submultiplicativity + `norm_fundamentalSolution_le`, closed by `norm_inhomogVariation_le`).  The
+  boundedness datum for `mkContinuous`.
+* `exists_continuousLinearMap_linearisedVariation` — **the candidate spatial `C²` derivative
+  `D₂ = ∂/∂x₀(D_x Φ_t)` as a bounded operator** `E →L[ℝ] (E →L[ℝ] E)`: `D₂ h` equals the time-`t` value
+  of *any* solution of the linearised ODE for direction `h`.  Built by `LinearMap.mkContinuous` from the
+  canonical `h ↦ Vlin^h t` (chosen via `..._linearised_dir`), additive/homogeneous by
+  `linearVariation_perturbation_add_eq`/`_smul_eq`, bounded by `norm_linearisedFirstVariation_le`;
+  independence of the chosen solution by `inhomogVariation_unique`.  This closes **piece (ii)**.
+* `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` (+ `differentiableAt_`/`fderiv_` corollaries) — **the
+  analytic bridge for piece (iii)**: an `O(‖z − x₀‖²)` linearisation error near `x₀` gives
+  `HasFDerivAt f f' x₀` (the quadratic error is `o(‖z − x₀‖)` since `C · ‖z − x₀‖ → 0`, via
+  `isLittleO_of_norm_le_mul_of_tendsto_nhds_zero` and `HasFDerivAt.of_isLittleO`).  Exactly the shape
+  produced by `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` with `f' = D₂`.
+
+Remaining for the base-point `C²` bootstrap (future sessions): **piece (iii)** — assemble the resolvent
+map `z ↦ D_x Φ_t^{A(z)}` (via the canonical `fundamentalSolution`, independent of the flow family by
+`fundamentalSolution_congr`), establish the eventual quadratic bound
+`∀ᶠ z, ‖(W_z t − W₀ t) − D₂ (z − x₀)‖ ≤ C ‖z − x₀‖²` by substituting `D₂ (z − x₀) = Vlin^{z−x₀} t`
+(`exists_continuousLinearMap_linearisedVariation`) into
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, and feed it to
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` — giving `HasFDerivAt (fun z => D_x Φ_t^{A(z)}) D₂ x₀`,
+the spatial `C²` regularity — then iterate for `C³`.
