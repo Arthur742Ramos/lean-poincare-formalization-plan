@@ -4393,6 +4393,78 @@ theorem norm_derivField_sub_sub_secondDeriv_le
     ‖Dv s b - Dv s a - D2v s a (b - a)‖ ≤ (M : ℝ) * ‖b - a‖ ^ 2 :=
   norm_sub_fderiv_le_mul_sq_of_lipschitz hDv hD2vlip a b
 
+/-- **Flow-tube quadratic bound for the field's linearisation defect.**  For a `C^{1,1}` field `v`
+(spatial derivative `Dv s`, `L`-Lipschitz), the defect of the trajectory linearisation is quadratic in
+the initial separation, uniformly on the compact time tube:
+`‖v s (Φ z s) - v s (Φ x s) - Dv s (Φ x s) (Φ z s - Φ x s)‖ ≤ L · exp (2 K T) · ‖z - x‖²` whenever
+`|s - t₀| ≤ T`.  Combines the pure Taylor bound `norm_sub_fderiv_le_mul_sq_of_lipschitz` (applied to
+`g = v s`, `g' = Dv s`, `a = Φ x s`, `b = Φ z s`) with the exponential flow-separation bound
+`dist_flow_apply_le` (`‖Φ z s - Φ x s‖ ≤ exp (K T) ‖z - x‖`, whence the square is
+`≤ exp (2 K T) ‖z - x‖²`).  This is the `δ = O(‖z - x‖²)` datum that, fed to
+`norm_flow_sub_fundamentalSolution_le_uniform`, upgrades the qualitative `C¹` dependence of the flow to
+a quantitative `C^{1,1}` (quadratic-remainder) rate. -/
+theorem norm_field_linearizationDefect_flow_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {L : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x)
+    (hDv : ∀ ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : LipschitzWith L (Dv s))
+    (hsT : |s - t₀| ≤ T) (x z : E) :
+    ‖v s (Φ z s) - v s (Φ x s) - Dv s (Φ x s) (Φ z s - Φ x s)‖
+      ≤ (L : ℝ) * Real.exp (2 * (K : ℝ) * T) * ‖z - x‖ ^ 2 := by
+  have htaylor := norm_sub_fderiv_le_mul_sq_of_lipschitz hDv hDvlip (Φ x s) (Φ z s)
+  refine htaylor.trans ?_
+  have hexp : Real.exp ((K : ℝ) * |s - t₀|) ≤ Real.exp ((K : ℝ) * T) :=
+    Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsT K.coe_nonneg)
+  have hsep : ‖Φ z s - Φ x s‖ ≤ Real.exp ((K : ℝ) * T) * ‖z - x‖ := by
+    have hd := dist_flow_apply_le hv hΦ h0 z x s
+    rw [dist_eq_norm, dist_eq_norm] at hd
+    calc ‖Φ z s - Φ x s‖ ≤ ‖z - x‖ * Real.exp ((K : ℝ) * |s - t₀|) := hd
+      _ ≤ ‖z - x‖ * Real.exp ((K : ℝ) * T) := mul_le_mul_of_nonneg_left hexp (norm_nonneg _)
+      _ = Real.exp ((K : ℝ) * T) * ‖z - x‖ := mul_comm _ _
+  have hsq : ‖Φ z s - Φ x s‖ ^ 2 ≤ (Real.exp ((K : ℝ) * T) * ‖z - x‖) ^ 2 :=
+    pow_le_pow_left₀ (norm_nonneg _) hsep 2
+  have hexp2 : Real.exp ((K : ℝ) * T) ^ 2 = Real.exp (2 * (K : ℝ) * T) := by
+    rw [sq, ← Real.exp_add]; congr 1; ring
+  calc (L : ℝ) * ‖Φ z s - Φ x s‖ ^ 2
+      ≤ (L : ℝ) * (Real.exp ((K : ℝ) * T) * ‖z - x‖) ^ 2 :=
+        mul_le_mul_of_nonneg_left hsq L.coe_nonneg
+    _ = (L : ℝ) * Real.exp (2 * (K : ℝ) * T) * ‖z - x‖ ^ 2 := by rw [mul_pow, hexp2]; ring
+
+/-- **Quantitative `C^{1,1}` dependence of the flow on the initial condition.**  For a `C^{1,1}` field
+`v` (uniformly `K`-Lipschitz, spatial derivative `Dv s` everywhere-defined and `L`-Lipschitz), the
+flow's first-order Taylor remainder in the initial value is *quadratically* small, uniformly on the
+forward compact time tube `[t₀, T]`:
+`‖Φ z t - Φ x₀ t - D_x Φ_t (z - x₀)‖ ≤ L · exp (2 K (T - t₀)) · gronwallBound 0 K 1 (T - t₀) · ‖z - x₀‖²`
+for every `t ∈ [t₀, T]`, where `D_x Φ_t = fundamentalSolution … t` is the resolvent (linearised
+coefficient `A s = Dv s (Φ x₀ s)`).  This strengthens the qualitative `C¹` statement
+`hasFDerivAt_flow_of_lipschitz_deriv` (remainder `o(‖z - x₀‖)`) to an explicit second-order
+(`O(‖z - x₀‖²)`) rate.  Proof: the field's trajectory-linearisation defect is `O(‖z - x₀‖²)` uniformly
+in `s` (`norm_field_linearizationDefect_flow_le`), which is exactly the defect datum `δ` fed to the
+uniform-in-time flow remainder `norm_flow_sub_fundamentalSolution_le_uniform`. -/
+theorem norm_flow_sub_fundamentalSolution_le_sq
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {L : ℝ≥0}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (z : E) {T t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖Φ z t - Φ x₀ t - fundamentalSolution hA hΦ' h0' t (z - x₀)‖
+      ≤ (L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀) * ‖z - x₀‖ ^ 2 := by
+  have hdefect : ∀ s ∈ Ico t₀ T,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - Dv s (Φ x₀ s) (Φ z s - Φ x₀ s)‖
+        ≤ (L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖z - x₀‖ ^ 2 := by
+    intro s hs
+    have hsT : |s - t₀| ≤ T - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+    exact norm_field_linearizationDefect_flow_le hv hΦ h0 (hDv s) (hDvlip s) hsT x₀ z
+  have hδ0 : (0 : ℝ) ≤ (L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖z - x₀‖ ^ 2 := by positivity
+  have hmain := norm_flow_sub_fundamentalSolution_le_uniform hA hΦ' h0' hΦ h0 x₀ z hδ0 hdefect ht
+  refine hmain.trans_eq ?_
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
