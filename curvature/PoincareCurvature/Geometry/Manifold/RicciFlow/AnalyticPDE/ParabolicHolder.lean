@@ -8290,6 +8290,29 @@ theorem parabolicC0AlphaNorm_mul_le {X A : Type*} [PseudoMetricSpace X] [NormedR
   unfold parabolicC0AlphaNorm
   nlinarith [hsup, hhol, hSU, hSV, hHU, hHV, mul_nonneg hHU hHV]
 
+/-- **Bilinear Lipschitz (product-difference) estimate for the parabolic `C^{0,α}` norm.**  In a
+normed ring, `‖u v - u' v'‖_{C^{0,α}} ≤ ‖u‖_{C^{0,α}} ‖v - v'‖_{C^{0,α}} + ‖u - u'‖_{C^{0,α}}
+‖v'‖_{C^{0,α}}`.  This is the local Lipschitz bound for multiplication on the parabolic Hölder space,
+the estimate behind contraction/uniqueness arguments for the nonlinear (Ricci–DeTurck) fixed point. -/
+theorem parabolicC0AlphaNorm_mul_sub_mul_le {X A : Type*} [PseudoMetricSpace X] [NormedRing A]
+    {α : ℝ} {u u' v v' : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hu' : ParabolicC0AlphaOn α u' s)
+    (hv : ParabolicC0AlphaOn α v s) (hv' : ParabolicC0AlphaOn α v' s) :
+    parabolicC0AlphaNorm α (fun z => u z * v z - u' z * v' z) s
+      ≤ parabolicC0AlphaNorm α u s * parabolicC0AlphaNorm α (fun z => v z - v' z) s
+        + parabolicC0AlphaNorm α (fun z => u z - u' z) s * parabolicC0AlphaNorm α v' s := by
+  have hdv : ParabolicC0AlphaOn α (fun z => v z - v' z) s := hv.sub hv'
+  have hdu : ParabolicC0AlphaOn α (fun z => u z - u' z) s := hu.sub hu'
+  have ha : ParabolicC0AlphaOn α (fun z => u z * (v z - v' z)) s := hu.mul hdv
+  have hb : ParabolicC0AlphaOn α (fun z => (u z - u' z) * v' z) s := hdu.mul hv'
+  have hrw : (fun z => u z * v z - u' z * v' z)
+      = fun z => u z * (v z - v' z) + (u z - u' z) * v' z := by
+    funext z; noncomm_ring
+  rw [hrw]
+  refine (parabolicC0AlphaNorm_add_le ha hb).trans (add_le_add ?_ ?_)
+  · exact parabolicC0AlphaNorm_mul_le hu hdv
+  · exact parabolicC0AlphaNorm_mul_le hdu hv'
+
 end AnalyticPDE
 end RicciFlow
 
