@@ -9094,6 +9094,85 @@ theorem norm_forcingGap_flow_le_sq [CompleteSpace E]
   rw [hexp]
   linarith [hmax]
 
+/-- **The curve-level `C³` second-order Taylor remainder for the second fundamental solution.**  The
+`D₃`-analogue of the `C²` numerator `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, at the
+level of the per-direction second fundamental solution curves: the base-point difference of the second
+fundamental solution `Uz − Ux` (the linearised first-variation curves in the common direction `h` at
+base points `z`, `x₀`) minus the third variation `V₃` (the design-corrected third-variation curve
+solving `V₃' = Dv(Φx₀) ∘ V₃ + (F_A + F_B + (newLeading + F_C))`, `V₃ t₀ = 0`) is second order in the
+base-point displacement:
+`‖(Uz t − Ux t) − V₃ t‖ ≤ C · ‖z − x₀‖² · ‖h‖` on the forward tube `[t₀, T]`.  Proof: the forcing-gap
+estimate `norm_forcingGap_flow_le_sq` supplies the `hβ` of `norm_inhomogVariation_sub_sub_le_of_forcingGap`
+(with the three ODE solutions `Uz`, `Ux`, `V₃`), whose Grönwall bound is then reshaped by `ring`.  This
+is exactly the numerator the packaged operators `D₂`, `D₃` feed to
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` (with `k = z − x₀`) to obtain
+`HasFDerivAt (fun z => D₂ z) D₃ x₀`, i.e. the flow's second fundamental solution is Fréchet
+differentiable in the initial data — the last analytic step before `ContDiff ℝ 3`. -/
+theorem norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {L M₂ M₃ : ℝ≥0} {C' N : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ) (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ) (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAxcont : Continuous (fun s => Dv s (Φ x₀ s))) (hAzcont : Continuous (fun s => Dv s (Φ z s)))
+    (hC'0 : 0 ≤ C') (hC'z : ∀ s, ‖D2vc s (Φ z s)‖ ≤ C') (hC'x : ∀ s, ‖D2vc s (Φ x₀ s)‖ ≤ C')
+    (hN0 : 0 ≤ N) (hN : ∀ s, ‖D3vm s (Φ x₀ s)‖ ≤ N)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ x, IsIntegralCurve (Φ' x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ x, Φ' x t₀ = x)
+    {Φ₁ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0₁ : ∀ x, Φ₁ x t₀ = x)
+    (h : E)
+    {Uz Ux W₂ Wdiff V₃ : ℝ → (E →L[ℝ] E)}
+    (hUz : ∀ s, HasDerivAt Uz
+      ((Dv s (Φ z s)).comp (Uz s)
+        + ((D2vc s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h0₁ s) h).comp
+            (fundamentalSolution hAz hΦ₁ h0₁ s)) s)
+    (hUz0 : Uz t₀ = 0)
+    (hUx : ∀ s, HasDerivAt Ux
+      ((Dv s (Φ x₀ s)).comp (Ux s)
+        + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp
+            (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hUx0 : Ux t₀ = 0)
+    (hW₂ : ∀ s, HasDerivAt W₂
+      ((Dv s (Φ x₀ s)).comp (W₂ s)
+        + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp
+            (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hW₂0 : W₂ t₀ = 0)
+    (hWdiff : ∀ s, HasDerivAt Wdiff
+      ((Dv s (Φ x₀ s)).comp (Wdiff s)
+        + (Dv s (Φ z s) - Dv s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hWdiff0 : Wdiff t₀ = 0)
+    (hV₃ : ∀ s, HasDerivAt V₃
+      ((Dv s (Φ x₀ s)).comp (V₃ s)
+        + (((D2vc s (Φ x₀ s)).comp (W₂ s) h).comp (fundamentalSolution hAx hΦ' h0' s)
+            + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp (W₂ s)
+            + (((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp (Ux s)
+                + (continuousMultilinearCurryFin1 ℝ E E
+                      ((D3vm s (Φ x₀ s)
+                          (fundamentalSolution hAx hΦ' h0' s (z - x₀))).curryLeft
+                        (fundamentalSolution hAx hΦ' h0' s h))).comp
+                    (fundamentalSolution hAx hΦ' h0' s)))) s)
+    (hV₃0 : V₃ t₀ = 0)
+    {T : ℝ} (hk : ‖z - x₀‖ ≤ 1) {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ C : ℝ, ‖(Uz t - Ux t) - V₃ t‖ ≤ C * ‖z - x₀‖ ^ 2 * ‖h‖ := by
+  obtain ⟨C, hβ⟩ := norm_forcingGap_flow_le_sq (T := T) hv hΦ h0 hDv hDvlip hD2vc hD2vclip
+    hD3vm hD3vmlip hcompat z x₀ hAz hAx hAxcont hAzcont hC'0 hC'z hC'x hN0 hN hΦ' h0' hΦ₁ h0₁
+    h hUz hUz0 hUx hUx0 hW₂ hW₂0 hWdiff hWdiff0 hk
+  refine ⟨C * gronwallBound 0 (K : ℝ) 1 (t - t₀), ?_⟩
+  have hmain := norm_inhomogVariation_sub_sub_le_of_forcingGap
+    (β := C * ‖z - x₀‖ ^ 2 * ‖h‖) hAx hUz hUz0 hUx hUx0 hV₃ hV₃0 hβ ht
+  refine hmain.trans (le_of_eq ?_)
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
