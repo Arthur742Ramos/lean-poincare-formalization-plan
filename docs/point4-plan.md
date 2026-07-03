@@ -4706,3 +4706,48 @@ Remaining in this tower (future sessions): the *general* (merely-continuous, non
 modulus, i.e. extracting a monotone `ω → 0` for `hasFDerivAt_flow_of_uniform_deriv_modulus` from
 joint continuity of `Dv` via Heine–Cantor uniform continuity on the compact trajectory tube; then
 the *existence* of the variational flow family, and the bootstrap to `C^k` (`C^3`).
+
+Update — the whole `C¹` dependence tower has been **localised**: since Fréchet differentiability of
+`x ↦ Φ x t` at the base point `x₀` is a *local* property, every defect / oscillation /
+derivative-existence hypothesis was weakened from the global `∀ z` to `∀ᶠ z in 𝓝 x₀` (the modulus
+nonnegativity and the structural flow-family hypotheses stay global).  This matters because a
+genuine smooth field has a spatial derivative that is only *locally* Lipschitz, so the global
+Lipschitz-derivative bound of `hasFDerivAt_flow_of_lipschitz_deriv` generally fails for it — whereas
+its local counterpart holds on the neighbourhood of `x₀` where the local estimate is available.  All
+`_eventually` variants are fully proved (axioms `propext`/`Classical.choice`/`Quot.sound` only):
+
+* `hasFDerivAt_flow_of_defect_isLittleO_eventually` (+ `differentiableAt`/`fderiv`) — the localised
+  core: the linearisation-defect bound `‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z`
+  is needed only `∀ᶠ z in 𝓝 x₀` (the big-O numerator estimate is itself an eventual statement).
+* `hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero_eventually`,
+  `hasFDerivAt_flow_of_segment_oscillation_tendsto_zero_eventually` (+ corollaries) — the localised
+  oscillation layer.
+* `hasFDerivAt_flow_of_uniform_deriv_modulus_eventually` (+ corollaries) — the localised modulus
+  form.
+* `hasFDerivAt_flow_of_lipschitz_deriv_eventually` (+ `_of_hasFDerivAt`, `differentiableAt`,
+  `fderiv`) — **the local `C^{1,1}` payoff entry point**: `C¹` dependence from a *locally* Lipschitz
+  spatial derivative `‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖` holding only for `z` near `x₀` — the honest
+  form the Ricci-DeTurck right-hand side supplies.
+
+Update — **continuous dependence of the resolvent on the coefficient field** is now proved (axioms
+`propext`/`Classical.choice`/`Quot.sound` only), the operator-level input to the `C²` regularity of
+the flow in initial data (where the coefficient `A(x₀) s = D_x v(s, Φ x₀ s)` varies with the base
+point) and to the continuous dependence of the DeTurck flow on the metric:
+
+* `norm_fundamentalSolution_sub_apply_le_of_forall_le` — the directional form: for coefficients `A`,
+  `A'` (both `‖·‖ ≤ K`) with variational flow families `Φ₁`, `Φ₂` and `‖A s - A' s‖ ≤ ε`, on the
+  forward compact interval `[t₀, T]`,
+  `‖D_x Φ_t^A u₀ - D_x Φ_t^{A'} u₀‖ ≤ ε · exp (K (T - t₀)) · ‖u₀‖ · gronwallBound 0 K 1 (t - t₀)`.
+  The `A'`-column `s ↦ Φ₂ u₀ s` is an *approximate solution* of the `A`-field; the linearised
+  perturbation `‖(A' s - A s)(Φ₂ u₀ s)‖ ≤ ε ‖Φ₂ u₀ s‖` is not uniform in the direction, so the
+  a-priori trajectory bound `‖Φ₂ u₀ s‖ ≤ exp (K (T - t₀)) ‖u₀‖` (`norm_flow_variationalFieldVec_le`)
+  is used to make it uniform on `[t₀, T]`, then Mathlib's `dist_le_of_approx_trajectories_ODE`.
+* `norm_fundamentalSolution_sub_le_of_forall_le` — the operator-norm assembly over unit directions:
+  `‖D_x Φ_t^A - D_x Φ_t^{A'}‖ ≤ ε · exp (K (T - t₀)) · gronwallBound 0 K 1 (t - t₀)`.  The resolvent
+  is thus a locally Lipschitz function of its coefficient field.
+* `gronwallBound_zero_one_nonneg` — the supporting `0 ≤ gronwallBound 0 K 1 x` (`0 ≤ K`, `0 ≤ x`).
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus; the *existence* of the variational flow family (global integral curves of the linear
+field); and the bootstrap to `C^k` (`C^3`) — the resolvent-continuity brick is a first ingredient of
+the latter (continuity of `x₀ ↦ D_x Φ_t` in the base point, once `x₀ ↦ A(x₀)` is set up).
