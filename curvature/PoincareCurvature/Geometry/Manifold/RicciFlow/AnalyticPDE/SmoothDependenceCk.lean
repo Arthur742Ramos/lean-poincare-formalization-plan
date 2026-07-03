@@ -5304,6 +5304,33 @@ theorem exists_continuousLinearMap_linearisedVariation [CompleteSpace E]
     inhomogVariation_unique hA (hVsolderiv h) hVlinderiv (by rw [hVsol0 h, hVlin0]) t
   simpa using huniq
 
+open Asymptotics Filter in
+/-- **`HasFDerivAt` from a quadratic (`O(‖z − x₀‖²)`) linearisation error.**  If the linearisation
+error `f z − f x₀ − f'(z − x₀)` is bounded by `C · ‖z − x₀‖²` for `z` near `x₀`, then `f` is Fréchet
+differentiable at `x₀` with derivative `f'`.  (The quadratic error is `o(‖z − x₀‖)` since the scalar
+modulus `C · ‖z − x₀‖ → 0`.)  The reusable analytic bridge from a *second-order Taylor remainder* to
+differentiability: the exact shape produced by
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq` (with `f' = D₂` the packaged operator of
+`exists_continuousLinearMap_linearisedVariation`), feeding the spatial `C²` regularity assembly
+(remaining piece (iii)). -/
+theorem hasFDerivAt_of_eventually_norm_sub_sub_le_sq
+    {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G]
+    {f : F → G} {f' : F →L[ℝ] G} {x₀ : F} {C : ℝ}
+    (h : ∀ᶠ z in 𝓝 x₀, ‖f z - f x₀ - f' (z - x₀)‖ ≤ C * ‖z - x₀‖ ^ 2) :
+    HasFDerivAt f f' x₀ := by
+  refine HasFDerivAt.of_isLittleO ?_
+  refine isLittleO_of_norm_le_mul_of_tendsto_nhds_zero (g := fun z => C * ‖z - x₀‖) ?_ ?_
+  · filter_upwards [h] with z hz
+    refine hz.trans_eq ?_
+    show C * ‖z - x₀‖ ^ 2 = C * ‖z - x₀‖ * ‖z - x₀‖
+    ring
+  · have hcont : Continuous (fun z : F => ‖z - x₀‖) :=
+      (continuous_id.sub continuous_const).norm
+    have hnorm : Tendsto (fun z : F => ‖z - x₀‖) (𝓝 x₀) (𝓝 0) := by
+      simpa using hcont.tendsto x₀
+    simpa using hnorm.const_mul C
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
