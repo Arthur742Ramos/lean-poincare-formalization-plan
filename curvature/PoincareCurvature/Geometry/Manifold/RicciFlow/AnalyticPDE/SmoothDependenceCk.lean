@@ -1145,6 +1145,34 @@ theorem norm_flow_defect_le_of_segment_oscillation
   rw [mul_comm (Real.exp ((K : ℝ) * |s - t₀|)) (‖z - x₀‖)]
   exact mul_le_mul_of_nonneg_left hsep hC
 
+/-!
+### Asymptotic glue and the oscillation-driven `C¹` dependence theorem
+
+The mean-value bound `norm_flow_defect_le_of_segment_oscillation` controls the linearisation
+defect at each time `s` by `C · exp (K |s - t₀|) · ‖z - x₀‖`, where `C` is the oscillation of the
+field's spatial derivative on the trajectory chord.  What `hasFDerivAt_flow_of_defect_isLittleO`
+consumes is a *little-o* defect modulus.  The bridge is purely asymptotic: once a single
+uniform-in-time oscillation modulus `C(z)` is available with `C(z) → 0` as `z → x₀`, the defect
+bound is `(vanishing modulus) · ‖z - x₀‖`, which is `o(‖z - x₀‖)`.  This upgrades the conditional
+`C¹` dependence to one whose only hypothesis is the *vanishing* of the uniform oscillation
+modulus. -/
+
+open Asymptotics Filter in
+/-- **Little-o from a vanishing pointwise modulus.**  If `‖f x‖ ≤ g x · ‖u x‖` holds eventually
+along `l` and the scalar modulus `g` tends to `0` along `l`, then `f =o[l] u`.  The asymptotic
+glue turning a bound "`defect ≤ (modulus → 0) · separation`" into the little-o hypothesis
+consumed by `hasFDerivAt_flow_of_defect_isLittleO`. -/
+theorem isLittleO_of_norm_le_mul_of_tendsto_nhds_zero
+    {α : Type*} {F₁ F₂ : Type*} [NormedAddCommGroup F₁] [NormedAddCommGroup F₂]
+    {l : Filter α} {f : α → F₁} {u : α → F₂} {g : α → ℝ}
+    (hle : ∀ᶠ x in l, ‖f x‖ ≤ g x * ‖u x‖) (hg : Tendsto g l (𝓝 0)) :
+    f =o[l] u := by
+  rw [isLittleO_iff]
+  intro c hc
+  have hgc : ∀ᶠ x in l, g x < c := hg.eventually (Iio_mem_nhds hc)
+  filter_upwards [hle, hgc] with x hx hgx
+  exact hx.trans (mul_le_mul_of_nonneg_right hgx.le (norm_nonneg _))
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
