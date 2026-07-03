@@ -3489,6 +3489,80 @@ theorem isIntegralCurve_glue_Iic_Ici {b : ℝ} {γ₁ γ₂ : ℝ → E}
     exact (h₂ x hx).congr (fun y hy => hEq2 hy) hgx
   exact isIntegralCurve_of_isIntegralCurveOn_Iic_Ici step1 step2
 
+/-- **Closed-interval gluing.**  If `γ` is an integral curve of `v` on `Icc a b` and on `Icc b c`
+(with `a ≤ b ≤ c`), then it is an integral curve on the whole interval `Icc a c`.  Away from the
+junction `b` the relevant closed subinterval is a within-`Icc a c` neighbourhood of the point, so the
+subinterval derivative transports to `Icc a c` by `HasDerivWithinAt.mono_of_mem_nhdsWithin`; at the
+junction the two one-sided within-derivatives combine via `HasDerivWithinAt.union` over
+`Icc a b ∪ Icc b c = Icc a c`.  This is the finite-interval companion of
+`isIntegralCurve_of_isIntegralCurveOn_Iic_Ici`, used to concatenate successive local solutions. -/
+theorem isIntegralCurveOn_Icc_union {a b c : ℝ} (hab : a ≤ b) (hbc : b ≤ c)
+    (h₁ : IsIntegralCurveOn γ v (Set.Icc a b)) (h₂ : IsIntegralCurveOn γ v (Set.Icc b c)) :
+    IsIntegralCurveOn γ v (Set.Icc a c) := by
+  rw [← Set.Icc_union_Icc_eq_Icc hab hbc]
+  intro t ht
+  rcases lt_trichotomy t b with hlt | heq | hgt
+  · have htab : t ∈ Set.Icc a b := by
+      rcases ht with h | h
+      · exact h
+      · exact absurd h.1 (not_le.mpr hlt)
+    have hd := h₁ t htab
+    apply hd.mono_of_mem_nhdsWithin
+    rw [Set.Icc_union_Icc_eq_Icc hab hbc, mem_nhdsWithin]
+    exact ⟨Set.Iio b, isOpen_Iio, Set.mem_Iio.mpr hlt,
+      fun x hx => ⟨hx.2.1, le_of_lt (Set.mem_Iio.mp hx.1)⟩⟩
+  · rw [heq]
+    have hd1 := h₁ b (Set.mem_Icc.mpr ⟨hab, le_rfl⟩)
+    have hd2 := h₂ b (Set.mem_Icc.mpr ⟨le_rfl, hbc⟩)
+    exact hd1.union hd2
+  · have htbc : t ∈ Set.Icc b c := by
+      rcases ht with h | h
+      · exact absurd h.2 (not_le.mpr hgt)
+      · exact h
+    have hd := h₂ t htbc
+    apply hd.mono_of_mem_nhdsWithin
+    rw [Set.Icc_union_Icc_eq_Icc hab hbc, mem_nhdsWithin]
+    exact ⟨Set.Ioi b, isOpen_Ioi, Set.mem_Ioi.mpr hgt,
+      fun x hx => ⟨le_of_lt (Set.mem_Ioi.mp hx.1), hx.2.2⟩⟩
+
+/-- **Constructive closed-interval continuation.**  Given a left integral curve `γ₁` on `Icc a b` and
+a right integral curve `γ₂` on `Icc b c` (with `a ≤ b ≤ c`) that agree at the junction `γ₁ b = γ₂ b`,
+the piecewise curve `fun t => if t ≤ b then γ₁ t else γ₂ t` is an integral curve of `v` on `Icc a c`.
+The glued curve agrees with `γ₁` on `Icc a b` and with `γ₂` on `Icc b c`, so each subinterval
+integral-curve property transfers by `HasDerivWithinAt.congr` and `isIntegralCurveOn_Icc_union` fuses
+them.  Iterating this over a chain `a = t₀ ≤ t₁ ≤ ⋯ ≤ tₙ = c` concatenates finitely many local
+Picard–Lindelöf solutions into one solution on the whole span — the finite-continuation building
+block toward global existence. -/
+theorem isIntegralCurveOn_glue_Icc {a b c : ℝ} (hab : a ≤ b) (hbc : b ≤ c) {γ₁ γ₂ : ℝ → E}
+    (h₁ : IsIntegralCurveOn γ₁ v (Set.Icc a b)) (h₂ : IsIntegralCurveOn γ₂ v (Set.Icc b c))
+    (hmatch : γ₁ b = γ₂ b) :
+    IsIntegralCurveOn (fun t => if t ≤ b then γ₁ t else γ₂ t) v (Set.Icc a c) := by
+  set γ := fun t => if t ≤ b then γ₁ t else γ₂ t with hγdef
+  have hEq1 : Set.EqOn γ γ₁ (Set.Icc a b) := by
+    intro x hx
+    simp only [hγdef]
+    rw [if_pos hx.2]
+  have hEq2 : Set.EqOn γ γ₂ (Set.Icc b c) := by
+    intro x hx
+    rcases hx.1.lt_or_eq with h | h
+    · simp only [hγdef]
+      rw [if_neg (not_le.mpr h)]
+    · subst h
+      simp only [hγdef]
+      rw [if_pos le_rfl]
+      exact hmatch
+  have step1 : IsIntegralCurveOn γ v (Set.Icc a b) := by
+    intro x hx
+    have hgx : γ x = γ₁ x := hEq1 hx
+    rw [hgx]
+    exact (h₁ x hx).congr (fun y hy => hEq1 hy) hgx
+  have step2 : IsIntegralCurveOn γ v (Set.Icc b c) := by
+    intro x hx
+    have hgx : γ x = γ₂ x := hEq2 hx
+    rw [hgx]
+    exact (h₂ x hx).congr (fun y hy => hEq2 hy) hgx
+  exact isIntegralCurveOn_Icc_union hab hbc step1 step2
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
