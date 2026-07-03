@@ -5215,6 +5215,95 @@ theorem norm_linearisedFirstVariation_le
       _ = C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖ := by rw [← hexp2]; ring
   exact norm_inhomogVariation_le hA hVlin hVlin0 hFbound ht
 
+/-- **Existence of the linearised first variation, keyed on the direction `h`.**  The
+direction-parameterised form of `exists_hasDerivAt_firstVariation_linearised` (with the increment a
+free vector `h` rather than `z − x₀`), so the solution family `h ↦ Vlin^h` can be assembled into a
+map of `h`.  Same proof: `exists_hasDerivAt_inhomogVariation_of_continuous` on the (continuous,
+time-unbounded) chain-rule forcing `((D²v(Φ x₀ s) ∘ W₀) h) ∘ W₀`. -/
+theorem exists_hasDerivAt_firstVariation_linearised_dir [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (h : E) :
+    ∃ Vlin : ℝ → (E →L[ℝ] E), Vlin t₀ = 0 ∧
+      ∀ s, HasDerivAt Vlin
+        ((Dv s (Φ x₀ s)).comp (Vlin s)
+          + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp
+              (fundamentalSolution hA hΦ' h0' s)) s := by
+  have hW : Continuous (fun s => fundamentalSolution hA hΦ' h0' s) :=
+    continuous_fundamentalSolution_time hA hΦ' h0'
+  have hFc : Continuous fun s =>
+      ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp
+        (fundamentalSolution hA hΦ' h0' s) :=
+    ((hD2cont.clm_comp hW).clm_apply continuous_const).clm_comp hW
+  exact exists_hasDerivAt_inhomogVariation_of_continuous hA hAcont hFc t₀
+
+/-- **The candidate spatial `C²` derivative as a bounded operator** `D₂ = ∂/∂x₀ (D_x Φ_t)`.  Packaging
+piece (ii) of the base-point `C²` bootstrap: there is a *bounded linear map*
+`D₂ : E →L[ℝ] (E →L[ℝ] E)` whose value on a direction `h` equals the time-`t` value of **any**
+solution `Vlin` of the linearised first-variation ODE for direction `h`
+(`Vlin' = A₀ ∘ Vlin + (D²v(Φ x₀ s) ∘ W₀ · h) ∘ W₀`, `Vlin t₀ = 0`, `A₀ s = Dv s (Φ x₀ s)`,
+`W₀ = fundamentalSolution hA hΦ' h0'`).
+
+The map is `h ↦ Vlin^h t` for the canonical solution `Vlin^h` (chosen from
+`exists_hasDerivAt_firstVariation_linearised_dir`); it is additive and homogeneous
+(`linearVariation_perturbation_add_eq`/`_smul_eq`) and bounded with operator norm
+`≤ C' · exp (2K(T − t₀)) · gronwallBound 0 K 1 (t − t₀)` (`norm_linearisedFirstVariation_le`), so
+`LinearMap.mkContinuous` yields the bounded operator; the value is independent of the chosen solution
+by the linear-ODE uniqueness `inhomogVariation_unique`.  This is the operator `D₂` that, fed with the
+second-order Taylor remainder `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, will give
+`HasFDerivAt (fun z => D_x Φ_t^{A(z)}) D₂ x₀` — the spatial `C²` regularity (piece (iii)). -/
+theorem exists_continuousLinearMap_linearisedVariation [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {C' : ℝ} (hC'0 : 0 ≤ C') (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ D₂ : E →L[ℝ] (E →L[ℝ] E),
+      ∀ (h : E) (Vlin : ℝ → (E →L[ℝ] E)), Vlin t₀ = 0 →
+        (∀ s, HasDerivAt Vlin
+          ((Dv s (Φ x₀ s)).comp (Vlin s)
+            + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp
+                (fundamentalSolution hA hΦ' h0' s)) s) →
+        D₂ h = Vlin t := by
+  choose Vsol hVsol0 hVsolderiv using fun h =>
+    exists_hasDerivAt_firstVariation_linearised_dir x₀ hA hAcont hD2cont hΦ' h0' h
+  have hadd : ∀ h₁ h₂ : E, Vsol (h₁ + h₂) t = Vsol h₁ t + Vsol h₂ t := fun h₁ h₂ =>
+    linearVariation_perturbation_add_eq x₀ hA hΦ' h0' h₁ h₂
+      (hVsolderiv h₁) (hVsolderiv h₂) (hVsolderiv (h₁ + h₂))
+      (hVsol0 h₁) (hVsol0 h₂) (hVsol0 (h₁ + h₂)) t
+  have hsmul : ∀ (c : ℝ) (h : E), Vsol (c • h) t = c • Vsol h t := fun c h =>
+    linearVariation_perturbation_smul_eq x₀ hA hΦ' h0' c h
+      (hVsolderiv h) (hVsolderiv (c • h)) (hVsol0 h) (hVsol0 (c • h)) t
+  have hbound : ∀ h : E,
+      ‖Vsol h t‖
+        ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖h‖ :=
+    fun h => by
+      have hle := norm_linearisedFirstVariation_le x₀ hA hΦ' h0' hC'0 hC' h
+        (hVsolderiv h) (hVsol0 h) ht
+      calc ‖Vsol h t‖
+          ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖
+              * gronwallBound 0 (K : ℝ) 1 (t - t₀) := hle
+        _ = C' * Real.exp (2 * (K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖h‖ := by ring
+  refine ⟨LinearMap.mkContinuous
+    { toFun := fun h => Vsol h t
+      map_add' := hadd
+      map_smul' := fun c h => by simpa using hsmul c h }
+    (C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀)) hbound, ?_⟩
+  intro h Vlin hVlin0 hVlinderiv
+  have huniq : Vsol h t = Vlin t :=
+    inhomogVariation_unique hA (hVsolderiv h) hVlinderiv (by rw [hVsol0 h, hVlin0]) t
+  simpa using huniq
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
