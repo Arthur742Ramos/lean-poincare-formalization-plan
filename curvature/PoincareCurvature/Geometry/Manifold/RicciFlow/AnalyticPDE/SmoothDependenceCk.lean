@@ -3600,6 +3600,58 @@ theorem isIntegralCurveOn_Icc_chain {a : ℕ → ℝ} (hmono : Monotone a)
       exact isIntegralCurveOn_Icc_union
         (hmono (Nat.zero_le (n + 1))) (hmono (Nat.le_succ (n + 1))) ih (h (n + 1))
 
+/-- **Right half-line from a growing family of forward compact-interval solutions.**  If `γ` is an
+integral curve of `v` on every forward interval `Icc t₀ (t₀ + N)`, `N : ℕ`, then it is an integral
+curve on the whole right half-line `Ici t₀`.  Any `t ≥ t₀` lies in `Icc t₀ (t₀ + N)` for large `N`
+(Archimedean), and that interval is a within-`Ici t₀` neighbourhood of `t`, so the within-interval
+derivative transports to `Ici t₀` by `HasDerivWithinAt.mono_of_mem_nhdsWithin`. -/
+theorem isIntegralCurveOn_Ici_of_forall_Icc {t₀ : ℝ}
+    (h : ∀ N : ℕ, IsIntegralCurveOn γ v (Set.Icc t₀ (t₀ + N))) :
+    IsIntegralCurveOn γ v (Set.Ici t₀) := by
+  intro t ht
+  obtain ⟨N, hN⟩ := exists_nat_gt (t - t₀)
+  have htmem : t ∈ Set.Icc t₀ (t₀ + (N : ℝ)) :=
+    Set.mem_Icc.mpr ⟨Set.mem_Ici.mp ht, by linarith⟩
+  have hd := h N t htmem
+  apply hd.mono_of_mem_nhdsWithin
+  rw [mem_nhdsWithin]
+  exact ⟨Set.Iio (t₀ + (N : ℝ)), isOpen_Iio, Set.mem_Iio.mpr (by linarith),
+    fun x hx => Set.mem_Icc.mpr ⟨Set.mem_Ici.mp hx.2, le_of_lt (Set.mem_Iio.mp hx.1)⟩⟩
+
+/-- **Left half-line from a growing family of backward compact-interval solutions.**  The mirror of
+`isIntegralCurveOn_Ici_of_forall_Icc`: integral-curve data on every backward interval
+`Icc (t₀ - N) t₀`, `N : ℕ`, yields an integral curve on the whole left half-line `Iic t₀`. -/
+theorem isIntegralCurveOn_Iic_of_forall_Icc {t₀ : ℝ}
+    (h : ∀ N : ℕ, IsIntegralCurveOn γ v (Set.Icc (t₀ - N) t₀)) :
+    IsIntegralCurveOn γ v (Set.Iic t₀) := by
+  intro t ht
+  obtain ⟨N, hN⟩ := exists_nat_gt (t₀ - t)
+  have htmem : t ∈ Set.Icc (t₀ - (N : ℝ)) t₀ :=
+    Set.mem_Icc.mpr ⟨by linarith, Set.mem_Iic.mp ht⟩
+  have hd := h N t htmem
+  apply hd.mono_of_mem_nhdsWithin
+  rw [mem_nhdsWithin]
+  exact ⟨Set.Ioi (t₀ - (N : ℝ)), isOpen_Ioi, Set.mem_Ioi.mpr (by linarith),
+    fun x hx => Set.mem_Icc.mpr ⟨le_of_lt (Set.mem_Ioi.mp hx.1), Set.mem_Iic.mp hx.2⟩⟩
+
+/-- **Global integral curve from forward and backward families of compact-interval solutions.**  If
+`γ` is an integral curve of `v` on every forward interval `Icc t₀ (t₀ + N)` *and* on every backward
+interval `Icc (t₀ - N) t₀`, then it is a *global* integral curve of `v`.  The two families give
+integral-curve data on the right half-line `Ici t₀` and the left half-line `Iic t₀`
+(`isIntegralCurveOn_Ici_of_forall_Icc`, `isIntegralCurveOn_Iic_of_forall_Icc`), and these glue at the
+anchor `t₀` via `isIntegralCurve_of_isIntegralCurveOn_Iic_Ici`.  This is the end of the continuation
+chain assembled in this section: it reduces *global* existence of an integral curve to solving the ODE
+on the two growing families of compact intervals around the anchor — precisely the output produced by
+iterating `isIntegralCurveOn_Icc_chain` over local Picard–Lindelöf solutions.  It discharges the
+global-flow hypothesis shape `IsIntegralCurve` consumed throughout this file to the compact-interval
+local theory that Mathlib v4.29.1 does supply. -/
+theorem isIntegralCurve_of_forall_Icc_Ici_Iic {t₀ : ℝ}
+    (hf : ∀ N : ℕ, IsIntegralCurveOn γ v (Set.Icc t₀ (t₀ + N)))
+    (hb : ∀ N : ℕ, IsIntegralCurveOn γ v (Set.Icc (t₀ - N) t₀)) :
+    IsIntegralCurve γ v :=
+  isIntegralCurve_of_isIntegralCurveOn_Iic_Ici
+    (isIntegralCurveOn_Iic_of_forall_Icc hb) (isIntegralCurveOn_Ici_of_forall_Icc hf)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
