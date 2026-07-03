@@ -4226,6 +4226,58 @@ theorem exists_flow_differentiable_of_lipschitz_deriv [CompleteSpace E]
     rw [dist_eq_norm, dist_eq_norm] at hlip
     exact hlip
 
+/-!
+### Coefficient regularity for the base-point `C²` bootstrap
+
+The `C¹` bootstrap (`hasFDerivAt_flow_of_lipschitz_deriv`, …) produces the resolvent
+`R s = D_x Φ_s` as the Fréchet derivative of the flow in its initial value.  The next layer — the
+base-point `C²`/`C^k` bootstrap — differentiates `x₀ ↦ R(x₀) s = fundamentalSolution … s` once more,
+via the second-order variational estimates `norm_fundamentalSolution_sub_sub_variation_le` /
+`norm_fundamentalSolution_variation_le`.  Its coefficient is the linearisation of the field along the
+reference trajectory, `A(x₀) s = Dv s (Φ x₀ s)`, so the `C²` step consumes two facts about how this
+coefficient depends on the base point `x₀`:
+
+* its **Fréchet derivative** — the chain rule `∂/∂x₀ [Dv s (Φ x₀ s)] = D²v s (Φ x₀ s) ∘ D_x Φ_s`,
+  requiring the field's *second* spatial derivative `D²v` and the already-established flow derivative
+  `D_x Φ` (`hasFDerivAt_derivField_apply_flow`);
+* its **size** — a Lipschitz-in-`x₀` bound making the coefficient perturbation
+  `‖A(x₀+h) s - A(x₀) s‖ = O(‖h‖)`, *uniformly* on the compact time tube, the `ε`-datum
+  (`hAA'`/`hε`) of the second-order variational estimates
+  (`lipschitzWith_derivField_apply_flow`, `..._of_abs_le`, `norm_derivField_apply_flow_sub_le`).
+
+Together with the **uniform-in-time first-order flow remainder**
+`norm_flow_sub_fundamentalSolution_le_uniform` (the interval bound
+`norm_flow_sub_fundamentalSolution_le_Icc` upgraded to a single Grönwall factor over `[t₀, T]`), these
+are the coefficient-side inputs of the base-point `C²` bootstrap.  Everything below is proved from
+field-level data (second spatial derivative of `v`, Lipschitz derivative, flow-family data); no PDE
+or manifold content is used. -/
+
+/-- **Chain rule for the linearised coefficient (`∂A/∂x₀`).**  If the time-`s` flow map `z ↦ Φ z s`
+is Fréchet differentiable at `x₀` with derivative `R` (the resolvent `D_x Φ_s` supplied by the `C¹`
+bootstrap) and the field's spatial derivative `Dv s` is itself Fréchet differentiable at the
+trajectory point `Φ x₀ s` with derivative `D2` (the second spatial derivative `D²v s (Φ x₀ s)`), then
+the linearised coefficient `z ↦ Dv s (Φ z s) = A(z) s` is Fréchet differentiable at `x₀` with
+derivative `D2.comp R = D²v s (Φ x₀ s) ∘ D_x Φ_s`.  Pure chain rule (`HasFDerivAt.comp`); the `∂A/∂x₀`
+ingredient with which the base-point `C²` bootstrap linearises the coefficient perturbation. -/
+theorem hasFDerivAt_derivField_apply_flow
+    {Dv : ℝ → E → (E →L[ℝ] E)} {Φ : E → ℝ → E} {x₀ : E} {s : ℝ}
+    {R : E →L[ℝ] E} {D2 : E →L[ℝ] (E →L[ℝ] E)}
+    (hΦ : HasFDerivAt (fun z => Φ z s) R x₀)
+    (hDv : HasFDerivAt (Dv s) D2 (Φ x₀ s)) :
+    HasFDerivAt (fun z => Dv s (Φ z s)) (D2.comp R) x₀ :=
+  hDv.comp x₀ hΦ
+
+/-- **Differentiability form of the coefficient chain rule.**  Under the hypotheses of
+`hasFDerivAt_derivField_apply_flow`, the linearised coefficient `z ↦ Dv s (Φ z s)` is
+`DifferentiableAt ℝ` at `x₀`. -/
+theorem differentiableAt_derivField_apply_flow
+    {Dv : ℝ → E → (E →L[ℝ] E)} {Φ : E → ℝ → E} {x₀ : E} {s : ℝ}
+    {R : E →L[ℝ] E} {D2 : E →L[ℝ] (E →L[ℝ] E)}
+    (hΦ : HasFDerivAt (fun z => Φ z s) R x₀)
+    (hDv : HasFDerivAt (Dv s) D2 (Φ x₀ s)) :
+    DifferentiableAt ℝ (fun z => Dv s (Φ z s)) x₀ :=
+  (hasFDerivAt_derivField_apply_flow hΦ hDv).differentiableAt
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
