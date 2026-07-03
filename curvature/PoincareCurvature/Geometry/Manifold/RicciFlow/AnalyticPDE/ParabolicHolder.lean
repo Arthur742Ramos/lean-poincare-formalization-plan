@@ -7278,6 +7278,61 @@ theorem ParabolicC0AlphaWith.of_space_time_holder_parabolicClosedBall
     ParabolicC0AlphaWith B (Hs + Ht) α u (parabolicClosedBall c R) :=
   ⟨hbound, ParabolicHolderWith.of_space_time_holder_parabolicClosedBall hHs hHt hα hspace htime⟩
 
+/-- **Reverse assembly of parabolic `C^{0,α}` membership.**  The constant-free `ParabolicC0AlphaOn`
+form: sup control plus separate spatial and temporal Hölder membership reassemble into parabolic
+`C^{0,α}` membership on a corner-closed set.  The three inputs match the shapes produced by
+`ParabolicC0AlphaOn.boundedOn`, `ParabolicHolderOn.space_slice`, and
+`ParabolicHolderOn.time_slice_half_exponent`. -/
+theorem ParabolicC0AlphaOn.of_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s)
+    (hbound : ∃ B ≥ 0, ParabolicBoundedWith B u s)
+    (hspace : ∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaOn α u s := by
+  obtain ⟨B, hB, hbound'⟩ := hbound
+  obtain ⟨Hs, hHs, hspace'⟩ := hspace
+  obtain ⟨Ht, hHt, htime'⟩ := htime
+  exact ⟨B, hB, Hs + Ht, add_nonneg hHs hHt,
+    ParabolicC0AlphaWith.of_space_time_holder hbound' hHs hHt hα hcorner hspace' htime'⟩
+
+/-- Constant-free reverse assembly of parabolic `C^{0,α}` membership on a closed product parabolic
+cylinder — the Schauder domain. -/
+theorem ParabolicC0AlphaOn.of_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ} (hα : 0 ≤ α)
+    (hbound : ∃ B ≥ 0, ParabolicBoundedWith B u
+      (parabolicClosedCylinder c timeRadius spaceRadius))
+    (hspace : ∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaOn α u (parabolicClosedCylinder c timeRadius spaceRadius) :=
+  ParabolicC0AlphaOn.of_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedCylinder.corner_mem hp hq) hbound hspace htime
+
+/-- Constant-free reverse assembly of parabolic `C^{0,α}` membership on a closed parabolic ball. -/
+theorem ParabolicC0AlphaOn.of_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α R : ℝ} {u : ℝ × X → E} {c : ℝ × X} (hα : 0 ≤ α)
+    (hbound : ∃ B ≥ 0, ParabolicBoundedWith B u (parabolicClosedBall c R))
+    (hspace : ∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaOn α u (parabolicClosedBall c R) :=
+  ParabolicC0AlphaOn.of_space_time_holder hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq) hbound hspace htime
+
 end AnalyticPDE
 end RicciFlow
 
