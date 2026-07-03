@@ -8012,6 +8012,96 @@ theorem norm_sub_le_parabolicC0AlphaNorm_sub {X E : Type*} [PseudoMetricSpace X]
     ‖u p - v p‖ ≤ parabolicC0AlphaNorm α (fun z => u z - v z) s :=
   norm_le_parabolicC0AlphaNorm (α := α) huv hp
 
+/-- **Norm bound to explicit ball membership.**  If `u` is parabolic `C^{0,α}` on `s` with norm
+`≤ c`, then it satisfies the combined `C^{0,α}` control with both constants equal to `c`.  This is
+the converse packaging to `parabolicC0AlphaNorm_le`: it turns a bound on the norm functional into a
+uniform sup and Hölder estimate, the shape consumed by the closedness/limit lemmas. -/
+theorem parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α c : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hle : parabolicC0AlphaNorm α u s ≤ c) :
+    ParabolicC0AlphaWith c c α u s :=
+  (parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm hu).mono_const
+    ((parabolicSupNorm_le_parabolicC0AlphaNorm α u s).trans hle)
+    ((parabolicHolderSeminorm_le_parabolicC0AlphaNorm α u s).trans hle)
+
+/-- **Sequential completeness of the parabolic `C^{0,α}` space.**  Let `E` be complete.  A sequence
+`f` of parabolic `C^{0,α}` functions on `s` that is Cauchy in the parabolic `C^{0,α}` norm converges
+in that norm to a parabolic `C^{0,α}` limit `g`.
+
+This is the completeness (Banach) property behind the parabolic Hölder space.  The proof combines the
+three completeness-facing primitives already in place:
+
+* the uniform-metric domination `norm_sub_le_parabolicC0AlphaNorm_sub` makes each pointwise sequence
+  `n ↦ f n p` Cauchy in `E`, so (completeness of `E`) it has a pointwise limit `g`;
+* the closedness lemma `ParabolicC0AlphaWith.of_tendsto` shows `g` is again `C^{0,α}` (using a fixed
+  ball for the tail indices, via `parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm`);
+* the lower-semicontinuity bound `parabolicC0AlphaNorm_le_of_tendsto` upgrades pointwise convergence
+  of the differences to convergence of the parabolic `C^{0,α}` norm. -/
+theorem exists_parabolicC0AlphaOn_tendsto_of_cauchy {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [CompleteSpace E] {α : ℝ} {f : ℕ → ℝ × X → E} {s : Set (ℝ × X)}
+    (hf : ∀ n, ParabolicC0AlphaOn α (f n) s)
+    (hcauchy : ∀ ε > 0, ∃ N, ∀ m ≥ N, ∀ n ≥ N,
+      parabolicC0AlphaNorm α (fun z => f m z - f n z) s ≤ ε) :
+    ∃ g, ParabolicC0AlphaOn α g s ∧
+      ∀ ε > 0, ∃ N, ∀ n ≥ N, parabolicC0AlphaNorm α (fun z => f n z - g z) s ≤ ε := by
+  classical
+  have hsub : ∀ m n, ParabolicC0AlphaOn α (fun z => f m z - f n z) s :=
+    fun m n => (hf m).sub (hf n)
+  have hsub_bdd : ∀ m n,
+      ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B (fun z => f m z - f n z) s := by
+    intro m n
+    obtain ⟨B, hB, H, hH, hbdd, hhol⟩ := hsub m n
+    exact ⟨B, hB, hbdd⟩
+  -- pointwise Cauchy: each `n ↦ f n p` (`p ∈ s`) is Cauchy in `E`.
+  have hpt_cauchy : ∀ p ∈ s, CauchySeq (fun n => f n p) := by
+    intro p hp
+    rw [Metric.cauchySeq_iff]
+    intro ε hε
+    obtain ⟨N, hN⟩ := hcauchy (ε / 2) (by positivity)
+    refine ⟨N, fun m hm n hn => ?_⟩
+    have hle2 : dist (f m p) (f n p) ≤ ε / 2 := by
+      rw [dist_eq_norm]
+      exact (norm_sub_le_parabolicC0AlphaNorm_sub (hsub_bdd m n) hp).trans (hN m hm n hn)
+    linarith
+  -- the pointwise limit `g`.
+  have hlim : ∀ p ∈ s, ∃ L, Filter.Tendsto (fun n => f n p) Filter.atTop (nhds L) :=
+    fun p hp => cauchySeq_tendsto_of_complete (hpt_cauchy p hp)
+  let g : ℝ × X → E := fun p => if hp : p ∈ s then Classical.choose (hlim p hp) else 0
+  have hg : ∀ p ∈ s, Filter.Tendsto (fun n => f n p) Filter.atTop (nhds (g p)) := by
+    intro p hp
+    have : g p = Classical.choose (hlim p hp) := dif_pos hp
+    rw [this]
+    exact Classical.choose_spec (hlim p hp)
+  -- `g` is again parabolic `C^{0,α}`, via a fixed unit ball at the tail past `N₁`.
+  obtain ⟨N₁, hN₁⟩ := hcauchy 1 one_pos
+  have hball : ∀ k, ParabolicC0AlphaWith 1 1 α (fun z => f (k + N₁) z - f N₁ z) s := fun k =>
+    parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm (hsub (k + N₁) N₁)
+      (hN₁ (k + N₁) (Nat.le_add_left N₁ k) N₁ le_rfl)
+  have hgN₁_tendsto : ∀ p ∈ s,
+      Filter.Tendsto (fun k => f (k + N₁) p - f N₁ p) Filter.atTop (nhds (g p - f N₁ p)) :=
+    fun p hp => ((hg p hp).comp (Filter.tendsto_add_atTop_nat N₁)).sub tendsto_const_nhds
+  have hgN₁ : ParabolicC0AlphaWith 1 1 α (fun z => g z - f N₁ z) s :=
+    ParabolicC0AlphaWith.of_tendsto hball hgN₁_tendsto
+  have hg_class : ParabolicC0AlphaOn α g s := by
+    have hadd : ParabolicC0AlphaOn α (fun z => f N₁ z + (g z - f N₁ z)) s :=
+      (hf N₁).add ⟨1, zero_le_one, 1, zero_le_one, hgN₁⟩
+    have heq : (fun z => f N₁ z + (g z - f N₁ z)) = g := by funext z; abel
+    rwa [heq] at hadd
+  -- norm convergence `‖f n - g‖ → 0`.
+  refine ⟨g, hg_class, ?_⟩
+  intro ε hε
+  obtain ⟨N, hN⟩ := hcauchy (ε / 2) (by positivity)
+  refine ⟨N, fun n hn => ?_⟩
+  have hballC : ∀ k, ParabolicC0AlphaWith (ε / 2) (ε / 2) α (fun z => f n z - f (k + N) z) s :=
+    fun k => parabolicC0AlphaWith_of_le_parabolicC0AlphaNorm (hsub n (k + N))
+      (hN n hn (k + N) (Nat.le_add_left N k))
+  have htendC : ∀ p ∈ s,
+      Filter.Tendsto (fun k => f n p - f (k + N) p) Filter.atTop (nhds (f n p - g p)) :=
+    fun p hp => tendsto_const_nhds.sub ((hg p hp).comp (Filter.tendsto_add_atTop_nat N))
+  have hbound : parabolicC0AlphaNorm α (fun z => f n z - g z) s ≤ ε / 2 + ε / 2 :=
+    parabolicC0AlphaNorm_le_of_tendsto (by positivity) (by positivity) hballC htendC
+  linarith
+
 end AnalyticPDE
 end RicciFlow
 
