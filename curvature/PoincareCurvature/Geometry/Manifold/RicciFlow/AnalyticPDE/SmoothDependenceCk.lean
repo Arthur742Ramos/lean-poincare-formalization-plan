@@ -1019,6 +1019,59 @@ theorem norm_flow_sub_fundamentalSolution_le_Icc
     simp only [fundamentalSolution_apply_anchor, h0]
   exact norm_flow_sub_variational_le_Icc (hΦ x) (hΦ y) hA hw hdefect hinit ht
 
+/-!
+### `C¹` dependence on initial data (conditional on a linearisation modulus)
+
+Assembling the pieces, the flow map `x ↦ Φ x t` is **Fréchet differentiable** at a base point
+`x₀`, with derivative the fundamental solution / resolvent `D_x Φ_t = fundamentalSolution … t`,
+*provided* the linearisation defect along the reference trajectory is of order `o(‖z - x₀‖)` as
+`z → x₀`, uniformly on the forward time interval.  This isolates the remaining analytic input
+(the `C¹` modulus of the field `v`, which — via the mean-value form `‖v(b) - v(a) - D_x v(a)
+(b - a)‖ ≤ o(‖b - a‖)` and the exponential flow-separation bound — supplies such a defect
+modulus on a compact time tube) as a single clean hypothesis, and derives the differentiable
+dependence from it.  The proof: the interval remainder bound
+`norm_flow_sub_fundamentalSolution_le_Icc` gives `‖numerator z‖ ≤ gronwallBound 0 K (D z)
+(t - t₀)`, the Grönwall homogeneity `gronwallBound_zero_left_mul` turns the right side into
+`gronwallBound 0 K 1 (t - t₀) · D z`, so `numerator = O(D)`; composing with the hypothesis
+`D = o(z - x₀)` yields `numerator = o(z - x₀)`, i.e. `HasFDerivAt`. -/
+
+open Asymptotics in
+/-- **`C¹` dependence of the flow on the initial condition (conditional on a defect modulus).**
+For a nonlinear flow family `Φ` of `v`, the variational flow family `Φ'` of the linearisation
+`variationalFieldVec A` (`‖A s‖ ≤ K`), a forward time `t ≥ t₀`, and a defect bound `D : E → ℝ`
+with `0 ≤ D z` and `‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z` on `Ico t₀ t`,
+if the defect is little-o of the initial separation, `D =o[𝓝 x₀] (· - x₀)`, then
+`x ↦ Φ x t` is Fréchet differentiable at `x₀` with derivative the resolvent
+`fundamentalSolution hA hΦ' h0' t = D_x Φ_t`.  The `C¹` layer of the dependence tower. -/
+theorem hasFDerivAt_flow_of_defect_isLittleO
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {D : E → ℝ} (hDnn : ∀ z, 0 ≤ D z)
+    (hdefect : ∀ z, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z)
+    (hDo : (fun z => D z) =o[𝓝 x₀] fun z => z - x₀) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  -- interval remainder bound + Grönwall homogeneity: the numerator is `O(D)`
+  have hnum : ∀ z, ‖Φ z t - Φ x₀ t - fundamentalSolution hA hΦ' h0' t (z - x₀)‖
+      ≤ gronwallBound 0 (K : ℝ) 1 (t - t₀) * D z := by
+    intro z
+    have hb := norm_flow_sub_fundamentalSolution_le_Icc hA hΦ' h0' hΦ h0 x₀ z
+      (hdefect z) (Set.mem_Icc.mpr ⟨ht0, le_refl t⟩)
+    rwa [gronwallBound_zero_left_mul, mul_comm (D z)] at hb
+  have hbig : (fun z => Φ z t - Φ x₀ t - fundamentalSolution hA hΦ' h0' t (z - x₀))
+      =O[𝓝 x₀] fun z => D z := by
+    rw [isBigO_iff]
+    refine ⟨gronwallBound 0 (K : ℝ) 1 (t - t₀), Filter.Eventually.of_forall (fun z => ?_)⟩
+    show ‖Φ z t - Φ x₀ t - fundamentalSolution hA hΦ' h0' t (z - x₀)‖
+        ≤ gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖D z‖
+    rw [Real.norm_eq_abs, abs_of_nonneg (hDnn z)]
+    exact hnum z
+  -- compose with `D =o (z - x₀)` to get the little-o numerator, i.e. `HasFDerivAt`
+  exact HasFDerivAt.of_isLittleO (hbig.trans_isLittleO hDo)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
