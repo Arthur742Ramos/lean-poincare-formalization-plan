@@ -10034,6 +10034,69 @@ theorem exists_linearisedFirstVariationFamily [CompleteSpace E]
       _ = C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) * ‖h‖ := by
           ring
 
+/-- **The design-corrected third-variation operator, constructed from field data.**  Self-contained
+existence of the packaged bilinear third variation `D₃ : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))` directly from a
+`C^{3}`-regular field: rather than assuming the linear auxiliary families `W2`, `V0fun`, this feeds the
+*canonical* linearised-first-variation family `Vfam` (`exists_linearisedFirstVariationFamily`) as **both**
+the base-direction curve and the inner-direction curve into
+`exists_continuousLinearMap_thirdVariation_coeff_bilinear`, so `W2 = V0fun = Vfam` and the shared
+`‖Vfam · s‖ ≤ C' · exp(2K(T − t₀)) · gronwallBound 0 K 1 (T − t₀) · ‖·‖` bound supplies both `N₂` and `N₀`.
+
+Returns the family `Vfam` alongside `D₃`, exposing `Vfam`'s initial value, its linearised first-variation
+ODE, continuity, additivity, homogeneity, and uniform bound, together with the characterisation
+`D₃ k h = V t` for any `V` solving the design-corrected third-variation ODE (with `W2 = V0fun = Vfam` and
+the `Fin 3` multilinear third derivative `D3v`).  This is the packaged `D₃` (with the constructive family)
+the `HasFDerivAt (fun z => D₂ z) D₃ x₀` everywhere assembly consumes: `W₂ = Vfam (z − x₀)` and `V₀ = Vfam h`
+match its per-`z` curves, bridging to the `hD₃` slot of
+`norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC` (up to the representation identity
+`D3vm s ξ = (D3v s ξ).curryLeft` and first-variation uniqueness). -/
+theorem exists_thirdVariationOperator_of_field [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    (hD3cont : Continuous (fun s => D3v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {C' C'' : ℝ} (hC'0 : 0 ≤ C') (hC''0 : 0 ≤ C'')
+    (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C') (hC'' : ∀ s, ‖D3v s (Φ x₀ s)‖ ≤ C'')
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ (Vfam : E → (ℝ → (E →L[ℝ] E))) (D₃ : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))),
+      (∀ h, Vfam h t₀ = 0) ∧
+      (∀ (h : E) (s : ℝ), HasDerivAt (Vfam h)
+        ((Dv s (Φ x₀ s)).comp (Vfam h s)
+          + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp
+              (fundamentalSolution hA hΦ' h0' s)) s) ∧
+      (∀ h, Continuous (Vfam h)) ∧
+      (∀ (h₁ h₂ : E) (s : ℝ), Vfam (h₁ + h₂) s = Vfam h₁ s + Vfam h₂ s) ∧
+      (∀ (c : ℝ) (h : E) (s : ℝ), Vfam (c • h) s = c • Vfam h s) ∧
+      (∀ (h : E), ∀ s ∈ Set.Icc t₀ T,
+        ‖Vfam h s‖ ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀))
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀) * ‖h‖) ∧
+      (∀ (k h : E) (V : ℝ → (E →L[ℝ] E)), V t₀ = 0 →
+        (∀ s, HasDerivAt V
+          ((Dv s (Φ x₀ s)).comp (V s)
+            + (((D2v s (Φ x₀ s)).comp (Vfam k s) h).comp (fundamentalSolution hA hΦ' h0' s)
+               + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (Vfam k s)
+               + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) k).comp (Vfam h s)
+                  + (continuousMultilinearCurryFin1 ℝ E E
+                      (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                        (fundamentalSolution hA hΦ' h0' s h))).comp
+                      (fundamentalSolution hA hΦ' h0' s)))) s) →
+        D₃ k h = V t) := by
+  obtain ⟨Vfam, hVfam0, hVfamd, hVfamcont, hVfamadd, hVfamsmul, hVfambound⟩ :=
+    exists_linearisedFirstVariationFamily x₀ hA hAcont hD2cont hΦ' h0' hC'0 hC' T
+  have hNnn : (0 : ℝ) ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀))
+      * gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    mul_nonneg (mul_nonneg hC'0 (Real.exp_pos _).le)
+      (gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans ht.1 ht.2)))
+  obtain ⟨D₃, hD₃⟩ := exists_continuousLinearMap_thirdVariation_coeff_bilinear
+    x₀ hA hAcont hD2cont hD3cont hΦ' h0' hC'0 hC''0 hNnn hNnn hC' hC''
+    hVfamcont hVfamadd hVfamsmul hVfambound hVfamcont hVfamadd hVfamsmul hVfambound ht
+  exact ⟨Vfam, D₃, hVfam0, hVfamd, hVfamcont, hVfamadd, hVfamsmul, hVfambound, hD₃⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
