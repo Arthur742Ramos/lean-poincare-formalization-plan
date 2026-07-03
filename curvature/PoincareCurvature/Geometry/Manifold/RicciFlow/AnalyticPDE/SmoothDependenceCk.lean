@@ -851,6 +851,70 @@ theorem fundamentalSolution_congr {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
   simp only [fundamentalSolution_apply]
   exact variationalVec_eq_of_isIntegralCurve hA (hΦ x) (hΨ x) (t₁ := t₀) (by rw [h0, h0Ψ]) t
 
+/-!
+### The linearisation-remainder Grönwall bound (the analytic core of `C¹` dependence)
+
+The decisive estimate underlying *differentiable* dependence on initial data.  Let `f`, `g`
+be two integral curves of a (possibly nonlinear) field `v`, and let `w` solve the vector
+variational ODE `w'(s) = A(s) (w(s))` — the linearisation of `v` along the pair, with
+`‖A s‖ ≤ K` — matching the *initial* separation exactly, `w t₀ = g t₀ - f t₀`.  If the
+pointwise **linearisation defect** `‖v s (g s) - v s (f s) - A s (g s - f s)‖` is uniformly
+`≤ δ`, then the linear prediction `w` tracks the true flow separation `g - f` to within
+`gronwallBound 0 K δ |t - t₀|`.
+
+The proof recognises the remainder `r := g - f - w` as an integral curve of the variational
+field `variationalFieldVec A` **perturbed** by the (`δ`-bounded, `u`-independent) defect, and
+compares it — via the two-sided perturbation Grönwall bound
+`dist_le_of_isIntegralCurve_perturb` — to the zero solution, with which it shares its initial
+value `r t₀ = 0`.  When `v` is `C¹` with `A s = D_x v (s, f s)` the defect is
+`o(‖g s - f s‖) = o(‖g t₀ - f t₀‖)`, so `δ → 0` faster than the initial separation and this
+bound upgrades to Fréchet differentiability of the flow with derivative the fundamental
+solution `D_x Φ_t` — the `C¹` layer of the dependence tower.  Nothing about `v` beyond the two
+integral curves and the defect bound is used (in particular `v` need not be Lipschitz). -/
+
+/-- **Linearisation-remainder Grönwall bound.**  For two integral curves `f`, `g` of a field
+`v`, a solution `w` of the vector variational ODE `w' = A(s) w` (`‖A s‖ ≤ K`) matching the
+initial separation `w t₀ = g t₀ - f t₀`, and a uniform bound `δ` on the linearisation defect
+`‖v s (g s) - v s (f s) - A s (g s - f s)‖`, the linear prediction `w` tracks the true flow
+separation `g - f` to within `gronwallBound 0 K δ |t - t₀|`:
+`‖(g t - f t) - w t‖ ≤ gronwallBound 0 K δ |t - t₀|`.  The analytic core of differentiable
+dependence on initial data. -/
+theorem norm_flow_sub_variational_le
+    (hf : IsIntegralCurve f v) (hg : IsIntegralCurve g v)
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {w : ℝ → E} (hw : IsIntegralCurve w (variationalFieldVec A))
+    {δ : ℝ} (hdefect : ∀ s, ‖v s (g s) - v s (f s) - A s (g s - f s)‖ ≤ δ)
+    (hinit : w t₀ = g t₀ - f t₀) (t : ℝ) :
+    ‖(g t - f t) - w t‖ ≤ gronwallBound 0 (K : ℝ) δ |t - t₀| := by
+  -- the zero curve solves the (linear) vector variational ODE
+  have hzero : IsIntegralCurve (fun _ : ℝ => (0 : E)) (variationalFieldVec A) := by
+    intro s
+    simpa only [variationalFieldVec, map_zero] using hasDerivAt_const (c := (0 : E)) (x := s)
+  -- `r := g - f - w` solves the variational ODE perturbed by the (u-independent) defect
+  have hr : IsIntegralCurve (fun s => g s - f s - w s)
+      (fun s u => A s u + (v s (g s) - v s (f s) - A s (g s - f s))) := by
+    intro s
+    show HasDerivAt (fun s => g s - f s - w s)
+        (A s (g s - f s - w s) + (v s (g s) - v s (f s) - A s (g s - f s))) s
+    have hd := ((hg s).sub (hf s)).sub (hw s)
+    convert hd using 1
+    simp only [variationalFieldVec, map_sub]
+    abel
+  -- the base and perturbed fields differ by at most `δ`, uniformly in `(s, u)`
+  have hpert : ∀ s u, dist (variationalFieldVec A s u)
+      (A s u + (v s (g s) - v s (f s) - A s (g s - f s))) ≤ δ := by
+    intro s u
+    simp only [variationalFieldVec, dist_eq_norm]
+    rw [show A s u - (A s u + (v s (g s) - v s (f s) - A s (g s - f s)))
+          = -(v s (g s) - v s (f s) - A s (g s - f s)) from by abel, norm_neg]
+    exact hdefect s
+  -- compare `r` to the zero solution by the perturbation Grönwall bound
+  have hkey := dist_le_of_isIntegralCurve_perturb
+      (fun s => lipschitzWith_variationalFieldVec hA s) hzero hr hpert t₀ t
+  simp only [dist_eq_norm, zero_sub, norm_neg] at hkey
+  rw [show g t₀ - f t₀ - w t₀ = (0 : E) from by rw [hinit]; abel, norm_zero] at hkey
+  exact hkey
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
