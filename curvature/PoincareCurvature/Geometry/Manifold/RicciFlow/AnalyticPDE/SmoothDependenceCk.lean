@@ -5669,6 +5669,67 @@ theorem exists_flow_contDiff_one_of_lipschitz_deriv [CompleteSpace E]
     exists_flow_fderiv_continuous_of_lipschitz_deriv hv hvc hderiv hDvc hDvlip ht0
   exact ⟨Φ, h0, hΦ, contDiff_one_iff_fderiv.mpr ⟨hdiff, hcont⟩⟩
 
+/-!
+### Continuous dependence of the inhomogeneous variation on its coefficient and forcing
+
+The base-point `C²` bootstrap packages the second fundamental solution `D₂(x₀)` as the time-`t` value
+of the *linearised first variation* `Vlin` — the anchored solution of an inhomogeneous linear ODE
+`V' = A(x₀) ∘ V + F(x₀)` whose coefficient `A(x₀) s = Dv s (Φ x₀ s)` and chain-rule forcing
+`F(x₀) s = (D²v(Φ x₀ s) ∘ W(x₀,s) · h) ∘ W(x₀,s)` both depend on the base point `x₀`.  Establishing
+that `x₀ ↦ D₂(x₀)` is *continuous* — the missing ingredient for the honest `ContDiff ℝ 2` regularity of
+the flow in the initial data — therefore reduces to the continuous (in fact Lipschitz) dependence of
+the inhomogeneous variation's time-`t` value on the pair `(A, F)`.  The following primitive isolates
+that dependence, allowing the two coefficient fields to differ (unlike the same-coefficient
+subtraction `hasDerivAt_inhomogVariation_sub`): the difference `V₁ - V₂` solves the inhomogeneous ODE
+with coefficient `A₁` and the *residual* forcing `(A₁ - A₂) ∘ V₂ + (F₁ - F₂)`, whose size is
+controlled by the coefficient gap `α`, the second-solution bound `N`, and the forcing gap `β`. -/
+
+/-- **Lipschitz dependence of the inhomogeneous variation on the coefficient and forcing.**  Let `V₁`,
+`V₂` be the anchored solutions (`V t₀ = 0`) of the inhomogeneous variational ODEs
+`V₁' = A₁ ∘ V₁ + F₁` and `V₂' = A₂ ∘ V₂ + F₂`, with `A₁` norm-bounded by `K`.  If, on the compact tube
+`[t₀, T]`, the coefficients differ by at most `α` (`‖A₁ s − A₂ s‖ ≤ α`), the second solution is bounded
+by `N` (`‖V₂ s‖ ≤ N`), and the forcings differ by at most `β` (`‖F₁ s − F₂ s‖ ≤ β`), then
+`‖V₁ t − V₂ t‖ ≤ (α · N + β) · gronwallBound 0 K 1 (t − t₀)` for every `t ∈ [t₀, T]`.
+
+Proof: the difference `R = V₁ − V₂` solves the inhomogeneous ODE with coefficient `A₁` and residual
+forcing `G = (A₁ − A₂) ∘ V₂ + (F₁ − F₂)` (rearranging `A₁ ∘ V₁ + F₁ − (A₂ ∘ V₂ + F₂)` via
+`comp_sub`/`sub_comp`), anchored `R t₀ = 0`.  On `[t₀, T]` the forcing satisfies
+`‖G s‖ ≤ ‖A₁ s − A₂ s‖ · ‖V₂ s‖ + ‖F₁ s − F₂ s‖ ≤ α · N + β` (submultiplicativity of the operator
+norm), and the general a-priori bound `norm_inhomogVariation_le` closes it.  Taking `α, β → 0` this is
+the continuity of `(A, F) ↦ V(t)`; specialised to the trajectory-linearised coefficient and chain-rule
+forcing it drives the continuity of the second fundamental solution `x₀ ↦ D₂(x₀)`. -/
+theorem norm_inhomogVariation_sub_le_of_gap
+    {A₁ A₂ F₁ F₂ V₁ V₂ : ℝ → (E →L[ℝ] E)}
+    (hA₁ : ∀ s, ‖A₁ s‖₊ ≤ K)
+    (hV₁ : ∀ s, HasDerivAt V₁ ((A₁ s).comp (V₁ s) + F₁ s) s) (hV₁0 : V₁ t₀ = 0)
+    (hV₂ : ∀ s, HasDerivAt V₂ ((A₂ s).comp (V₂ s) + F₂ s) s) (hV₂0 : V₂ t₀ = 0)
+    {α β N T : ℝ}
+    (hAgap : ∀ s ∈ Icc t₀ T, ‖A₁ s - A₂ s‖ ≤ α)
+    (hV₂bound : ∀ s ∈ Icc t₀ T, ‖V₂ s‖ ≤ N)
+    (hFgap : ∀ s ∈ Icc t₀ T, ‖F₁ s - F₂ s‖ ≤ β)
+    (hα : 0 ≤ α) {t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖V₁ t - V₂ t‖ ≤ (α * N + β) * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  -- `R = V₁ - V₂` solves `R' = A₁ ∘ R + G`, `G = (A₁ - A₂) ∘ V₂ + (F₁ - F₂)`
+  have hRderiv : ∀ s, HasDerivAt (fun r => V₁ r - V₂ r)
+      ((A₁ s).comp (V₁ s - V₂ s)
+        + ((A₁ s - A₂ s).comp (V₂ s) + (F₁ s - F₂ s))) s := by
+    intro s
+    have h := (hV₁ s).sub (hV₂ s)
+    have heq : (A₁ s).comp (V₁ s) + F₁ s - ((A₂ s).comp (V₂ s) + F₂ s)
+        = (A₁ s).comp (V₁ s - V₂ s)
+          + ((A₁ s - A₂ s).comp (V₂ s) + (F₁ s - F₂ s)) := by
+      rw [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]; abel
+    rwa [heq] at h
+  have hR0 : (fun r => V₁ r - V₂ r) t₀ = 0 := by simp [hV₁0, hV₂0]
+  have hGbound : ∀ s ∈ Icc t₀ T,
+      ‖(A₁ s - A₂ s).comp (V₂ s) + (F₁ s - F₂ s)‖ ≤ α * N + β := by
+    intro s hs
+    refine (norm_add_le _ _).trans (add_le_add ?_ (hFgap s hs))
+    calc ‖(A₁ s - A₂ s).comp (V₂ s)‖
+        ≤ ‖A₁ s - A₂ s‖ * ‖V₂ s‖ := ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ α * N := mul_le_mul (hAgap s hs) (hV₂bound s hs) (norm_nonneg _) hα
+  exact norm_inhomogVariation_le hA₁ hRderiv hR0 hGbound ht
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
