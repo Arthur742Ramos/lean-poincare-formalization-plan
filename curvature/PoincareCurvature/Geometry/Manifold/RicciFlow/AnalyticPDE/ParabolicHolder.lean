@@ -7641,6 +7641,49 @@ theorem parabolicHolderOn_iff_parabolicHolderWith_seminorm
   ⟨parabolicHolderWith_parabolicHolderSeminorm,
     fun h => ⟨parabolicHolderSeminorm α u s, parabolicHolderSeminorm_nonneg α u s, h⟩⟩
 
+/-- The parabolic sup norm of `u` on `s`: the least nonnegative uniform bound for `‖u ·‖` on `s`.
+When `u` is unbounded on `s` the defining set is empty and the value is `0` by the `sInf`
+convention. -/
+def parabolicSupNorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (u : ℝ × X → E) (s : Set (ℝ × X)) : ℝ :=
+    sInf {B : ℝ | 0 ≤ B ∧ ParabolicBoundedWith B u s}
+
+/-- The parabolic sup norm is nonnegative. -/
+theorem parabolicSupNorm_nonneg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (u : ℝ × X → E) (s : Set (ℝ × X)) :
+      0 ≤ parabolicSupNorm u s :=
+    Real.sInf_nonneg fun _ hx => hx.1
+
+/-- The parabolic sup norm is a lower bound for every admissible uniform bound. -/
+theorem parabolicSupNorm_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {B : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+      (hB0 : 0 ≤ B) (hB : ParabolicBoundedWith B u s) :
+      parabolicSupNorm u s ≤ B :=
+    csInf_le ⟨0, fun _ hx => hx.1⟩ ⟨hB0, hB⟩
+
+/-- **Achievement of the parabolic sup norm.**  If `u` has some nonnegative uniform bound on `s`,
+then it is bounded by the sup norm itself. -/
+theorem parabolicBoundedWith_parabolicSupNorm
+      {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+      ParabolicBoundedWith (parabolicSupNorm u s) u s := by
+    obtain ⟨B, hB0, hB⟩ := hu
+    unfold parabolicSupNorm
+    intro p hp
+    refine le_csInf ⟨B, hB0, hB⟩ ?_
+    rintro B' ⟨-, hB'⟩
+    exact hB' hp
+
+/-- A function has a nonnegative uniform bound on `s` iff it is bounded by the sup-norm functional. -/
+theorem exists_parabolicBoundedWith_iff_parabolicBoundedWith_supNorm
+      {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s : Set (ℝ × X)} :
+      (∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) ↔
+        ParabolicBoundedWith (parabolicSupNorm u s) u s :=
+    ⟨parabolicBoundedWith_parabolicSupNorm,
+      fun h => ⟨parabolicSupNorm u s, parabolicSupNorm_nonneg u s, h⟩⟩
+
 end AnalyticPDE
 end RicciFlow
 
