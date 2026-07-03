@@ -8853,6 +8853,116 @@ theorem curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt
   rw [curryLeft_iteratedFDeriv_three]
   exact hD3.fderiv.symm
 
+
+/-- **Concrete `(F₁ − F₀)` second-order forcing remainder along the flow.**  The `C³`-layer analogue of
+`norm_chainRuleForcing_flow_sub_le`: the second-variation chain-rule forcing
+`((D²v(Φ y) ∘ W_y) h) ∘ W_y` at base points `z` and `x₀`, minus its design-corrected first-order
+variation `F_C + F_A + F_B`, is `O(‖z − x₀‖² · ‖h‖)` on the forward tube `[t₀, T]`. -/
+theorem norm_chainRuleForcing_flow_sub_sub_le_sq [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {L M₂ M₃ : ℝ≥0} {C' N : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ) (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ) (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (z x₀ : E)
+    (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K) (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K)
+    (hAxcont : Continuous (fun s => Dv s (Φ x₀ s))) (hAzcont : Continuous (fun s => Dv s (Φ z s)))
+    (hC'0 : 0 ≤ C') (hC' : ∀ s, ‖D2vc s (Φ x₀ s)‖ ≤ C')
+    (hN0 : 0 ≤ N) (hN : ∀ s, ‖D3vm s (Φ x₀ s)‖ ≤ N)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ x, IsIntegralCurve (Φ' x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ x, Φ' x t₀ = x)
+    {Φ₁ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0₁ : ∀ x, Φ₁ x t₀ = x)
+    {Vz Vlin : ℝ → (E →L[ℝ] E)}
+    (hVz : ∀ s, HasDerivAt Vz
+      ((Dv s (Φ x₀ s)).comp (Vz s)
+        + (Dv s (Φ z s) - Dv s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hVz0 : Vz t₀ = 0)
+    (hVlin : ∀ s, HasDerivAt Vlin
+      ((Dv s (Φ x₀ s)).comp (Vlin s)
+        + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp
+            (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hVlin0 : Vlin t₀ = 0)
+    (h : E) {T : ℝ} (hk : ‖z - x₀‖ ≤ 1) :
+    ∃ C : ℝ, ∀ s ∈ Set.Icc t₀ T,
+      ‖(((D2vc s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h0₁ s) h).comp
+              (fundamentalSolution hAz hΦ₁ h0₁ s)
+            - ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp
+                (fundamentalSolution hAx hΦ' h0' s))
+          - ((continuousMultilinearCurryFin1 ℝ E E
+                  ((D3vm s (Φ x₀ s)
+                      (fundamentalSolution hAx hΦ' h0' s (z - x₀))).curryLeft
+                    (fundamentalSolution hAx hΦ' h0' s h))).comp
+                (fundamentalSolution hAx hΦ' h0' s)
+              + ((D2vc s (Φ x₀ s)).comp (Vlin s) h).comp (fundamentalSolution hAx hΦ' h0' s)
+              + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp (Vlin s))‖
+        ≤ C * ‖z - x₀‖ ^ 2 * ‖h‖ := by
+  refine ⟨?_, fun s hs => ?_⟩
+  rotate_left
+  have hsT : |s - t₀| ≤ T - t₀ := by
+    rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+  have hexpmono : Real.exp ((K : ℝ) * |s - t₀|) ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsT K.coe_nonneg)
+  have hg : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans hs.1 hs.2))
+  -- p : ‖P₀‖ ≤ C'
+  have hP₀ : ‖D2vc s (Φ x₀ s)‖ ≤ C' := hC' s
+  -- w : ‖W₀‖ ≤ exp
+  have hW₀ : ‖fundamentalSolution hAx hΦ' h0' s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    (norm_fundamentalSolution_le hAx hΦ' h0' s).trans hexpmono
+  -- dp : first-order D²v gap
+  have hrP : ‖D2vc s (Φ z s) - D2vc s (Φ x₀ s)‖
+      ≤ (M₂ : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ :=
+    norm_secondDerivField_apply_flow_sub_le hv hΦ h0 (hD2vclip s) hsT z x₀
+  -- dw : first-order resolvent gap
+  have hrW : ‖fundamentalSolution hAz hΦ₁ h0₁ s - fundamentalSolution hAx hΦ' h0' s‖
+      ≤ ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖z - x₀‖ := by
+    have hbase := norm_fundamentalSolution_baseCurve_sub_le hv hΦ h0 hDvlip z x₀ hAz hAx
+      hΦ₁ h0₁ hΦ' h0' hs
+    have hmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+      gronwallBound_mono le_rfl zero_le_one K.coe_nonneg (by linarith [hs.2])
+    refine hbase.trans ?_
+    calc (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ * Real.exp ((K : ℝ) * (T - t₀))
+            * gronwallBound 0 (K : ℝ) 1 (s - t₀)
+        ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ * Real.exp ((K : ℝ) * (T - t₀))
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+          mul_le_mul_of_nonneg_left hmono (by positivity)
+      _ = ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖z - x₀‖ := by ring
+  -- cp : quadratic D²v Taylor remainder (in composition form via hcompat)
+  have hεP : ‖D2vc s (Φ z s) - D2vc s (Φ x₀ s)
+        - curry2 (D3vm s (Φ x₀ s) (fundamentalSolution hAx hΦ' h0' s (z - x₀)))‖
+      ≤ ((M₃ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          + N * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀))) * ‖z - x₀‖ ^ 2 := by
+    have hcp := norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq
+      hv hΦ h0 hDv hDvlip hD3vm hD3vmlip x₀ hAx hN0 hN hΦ' h0' z hs
+    rw [← hcompat s (Φ z s), ← hcompat s (Φ x₀ s)] at hcp
+    exact hcp
+  -- cw : quadratic resolvent Taylor remainder
+  have hεW : ‖(fundamentalSolution hAz hΦ₁ h0₁ s - fundamentalSolution hAx hΦ' h0' s) - Vlin s‖
+      ≤ ((L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2
+          + ((M₂ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+            * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+        * ‖z - x₀‖ ^ 2 :=
+    norm_fundamentalSolution_sub_sub_linearVariation_le_sq hv hΦ h0 hDv hDvlip hD2vc hD2vclip
+      x₀ hAx hAxcont hC'0 hC' hΦ' h0' z hAz hAzcont hΦ₁ h0₁ hVz hVz0 hVlin hVlin0 hs
+  exact norm_bilinearCompForcing_curry2_sub_sub_le_sq
+    (D3vm s (Φ x₀ s) (fundamentalSolution hAx hΦ' h0' s (z - x₀))) h (z - x₀)
+    hP₀ hW₀ hrP hrW hεP hεW hC'0 (Real.exp_pos _).le
+    (by positivity) (mul_nonneg (by positivity) hg) hk
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
