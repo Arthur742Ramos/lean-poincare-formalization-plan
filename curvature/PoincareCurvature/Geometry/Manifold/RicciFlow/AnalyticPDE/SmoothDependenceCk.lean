@@ -9565,6 +9565,157 @@ theorem norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniform [Com
     (β := (C₁ + max C₂ 0) * ‖z - x₀‖ ^ 2 * ‖h‖) hAx hUz hUz0 hUx hUx0 hV₃ hV₃0 hβ ht
   refine hmain.trans (le_of_eq ?_)
   ring
+
+/-- **Explicit-constant form of the `h`-uniform curve-level `C³` Taylor remainder.**  Identical to
+`norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniform` except the constant is written out
+*explicitly* — `(C₁ + C₂) · gronwallBound 0 K 1 (t − t₀)`, where `C₁` is the coefficient-variation
+constant of `norm_coeffVariation_sub_secondDerivComp_le_sq` and `C₂` is the explicit engine constant of
+`norm_chainRuleForcing_flow_sub_sub_le_sq_uniformC` — rather than existentially quantified.  The constant
+depends only on the field data `K, L, M₂, M₃, C', N, T, t₀`, never on `z` or `h`, so a *single* `C` is
+valid for every base point `z` in a neighbourhood of `x₀`: the neighbourhood-uniformity that the operator
+packaging and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` require.  Proof: the `∃`-form's proof with
+`norm_chainRuleForcing_flow_sub_sub_le_sq_uniformC` supplying the explicit forcing constant and the
+Grönwall remainder `norm_inhomogVariation_sub_sub_le_of_forcingGap` reshaped by `ring`. -/
+theorem norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniformC [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {L M₂ M₃ : ℝ≥0} {C' N : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ) (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ) (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAxcont : Continuous (fun s => Dv s (Φ x₀ s))) (hAzcont : Continuous (fun s => Dv s (Φ z s)))
+    (hC'0 : 0 ≤ C') (hC'z : ∀ s, ‖D2vc s (Φ z s)‖ ≤ C') (hC'x : ∀ s, ‖D2vc s (Φ x₀ s)‖ ≤ C')
+    (hN0 : 0 ≤ N) (hN : ∀ s, ‖D3vm s (Φ x₀ s)‖ ≤ N)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ x, IsIntegralCurve (Φ' x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ x, Φ' x t₀ = x)
+    {Φ₁ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0₁ : ∀ x, Φ₁ x t₀ = x)
+    {W₂ Wdiff : ℝ → (E →L[ℝ] E)}
+    (hW₂ : ∀ s, HasDerivAt W₂
+      ((Dv s (Φ x₀ s)).comp (W₂ s)
+        + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp
+            (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hW₂0 : W₂ t₀ = 0)
+    (hWdiff : ∀ s, HasDerivAt Wdiff
+      ((Dv s (Φ x₀ s)).comp (Wdiff s)
+        + (Dv s (Φ z s) - Dv s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hWdiff0 : Wdiff t₀ = 0)
+    {T : ℝ} (hk : ‖z - x₀‖ ≤ 1) {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∀ (h : E) (Uz Ux V₃ : ℝ → (E →L[ℝ] E)),
+      (∀ s, HasDerivAt Uz
+        ((Dv s (Φ z s)).comp (Uz s)
+          + ((D2vc s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h0₁ s) h).comp
+              (fundamentalSolution hAz hΦ₁ h0₁ s)) s) → Uz t₀ = 0 →
+      (∀ s, HasDerivAt Ux
+        ((Dv s (Φ x₀ s)).comp (Ux s)
+          + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp
+              (fundamentalSolution hAx hΦ' h0' s)) s) → Ux t₀ = 0 →
+      (∀ s, HasDerivAt V₃
+        ((Dv s (Φ x₀ s)).comp (V₃ s)
+          + (((D2vc s (Φ x₀ s)).comp (W₂ s) h).comp (fundamentalSolution hAx hΦ' h0' s)
+              + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp (W₂ s)
+              + (((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp (Ux s)
+                  + (continuousMultilinearCurryFin1 ℝ E E
+                        ((D3vm s (Φ x₀ s)
+                            (fundamentalSolution hAx hΦ' h0' s (z - x₀))).curryLeft
+                          (fundamentalSolution hAx hΦ' h0' s h))).comp
+                      (fundamentalSolution hAx hΦ' h0' s)))) s) → V₃ t₀ = 0 →
+      ‖(Uz t - Ux t) - V₃ t‖
+        ≤ (((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+                * ((M₂ : ℝ) + 3 * (L : ℝ) * C' * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              + ((M₂ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                    + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+                  * (C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+            + (((M₃ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                    + N * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+                  * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                + 2 * C'
+                    * ((L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+                          * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2
+                        + ((M₂ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                            + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                                * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+                          * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                    * Real.exp ((K : ℝ) * (T - t₀))
+                + 2 * ((M₂ : ℝ) * Real.exp ((K : ℝ) * (T - t₀)))
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                    * Real.exp ((K : ℝ) * (T - t₀))
+                + C'
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                + (M₂ : ℝ) * Real.exp ((K : ℝ) * (T - t₀))
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))))
+            * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - x₀‖ ^ 2 * ‖h‖ := by
+  intro h Uz Ux V₃ hUz hUz0 hUx hUx0 hV₃ hV₃0
+  set C₁ : ℝ := (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+        * ((M₂ : ℝ) + 3 * (L : ℝ) * C' * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+        * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+      + ((M₂ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+            + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          * (C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+    with hC₁def
+  have hf_all := norm_chainRuleForcing_flow_sub_sub_le_sq_uniformC (T := T) hv hΦ h0 hDv hDvlip
+    hD2vc hD2vclip hD3vm hD3vmlip hcompat z x₀ hAx hAz hAxcont hAzcont hC'0 hC'x hN0 hN
+    hΦ' h0' hΦ₁ h0₁ hWdiff hWdiff0 hW₂ hW₂0 hk
+  refine (norm_inhomogVariation_sub_sub_le_of_forcingGap
+    (β := (C₁
+        + (((M₃ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              + N * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+            * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+          + 2 * C'
+              * ((L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+                    * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2
+                  + ((M₂ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                      + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                          * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+                    * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+              * Real.exp ((K : ℝ) * (T - t₀))
+          + 2 * ((M₂ : ℝ) * Real.exp ((K : ℝ) * (T - t₀)))
+              * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+              * Real.exp ((K : ℝ) * (T - t₀))
+          + C'
+              * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+              * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+          + (M₂ : ℝ) * Real.exp ((K : ℝ) * (T - t₀))
+              * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+              * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (T - t₀)))) * ‖z - x₀‖ ^ 2 * ‖h‖)
+    hAx hUz hUz0 hUx hUx0 hV₃ hV₃0 ?_ ht).trans (le_of_eq (by ring))
+  intro s hs
+  have hc := norm_coeffVariation_sub_secondDerivComp_le_sq hv hΦ h0 hDv hDvlip hD2vc hD2vclip
+    z x₀ hAz hAx hC'0 hC'z hC'x (hΦ₁ := hΦ₁) (h1 := h0₁) (hΦ₂ := hΦ') (h2 := h0') (h := h)
+    (hVz := hUz) (hVz0 := hUz0) (hVx := hUx) (hVx0 := hUx0) (hs := hs)
+  have hcoeff' : ‖(Dv s (Φ z s) - Dv s (Φ x₀ s)).comp (Uz s)
+        - ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp (Ux s)‖
+      ≤ C₁ * ‖z - x₀‖ ^ 2 * ‖h‖ := by
+    refine hc.trans (le_of_eq ?_)
+    rw [hC₁def]; ring
+  have hf := hf_all h s hs
+  exact (norm_forcingGap_le_of_remainders hcoeff' hf).trans_eq (by ring)
+
 /-- **Operator-level `C³` second-order Taylor remainder for the second fundamental solution.**  The
 `D₃`-analogue of the `C²` operator estimate `norm_secondFundamentalSolution_op_sub_le`, and the
 operator-norm packaging of the curve-level Taylor remainder: for the packaged base-point second
