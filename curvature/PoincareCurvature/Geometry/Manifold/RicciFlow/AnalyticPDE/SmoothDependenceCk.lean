@@ -3583,6 +3583,23 @@ theorem isIntegralCurve_of_forall_mem_Icc {t₀ : ℝ}
     Icc_mem_nhds (by linarith) (by linarith)
   exact (h n t hmem).hasDerivAt hnhd
 
+/-- **Finite-chain concatenation of consecutive-interval solutions.**  If `a : ℕ → ℝ` is monotone and
+`γ` is an integral curve of `v` on every consecutive interval `Icc (a i) (a (i+1))`, then `γ` is an
+integral curve on the whole span `Icc (a 0) (a (N+1))` for every `N`.  Proved by induction on `N`,
+fusing one more interval at each step with `isIntegralCurveOn_Icc_union`.  This lifts the two-interval
+gluing to arbitrarily many pieces — the induction that turns a sequence of local Picard–Lindelöf
+solutions (arranged to share endpoints) into a single solution on an arbitrarily long interval, the
+main input to the exhaustion lemma `isIntegralCurve_of_forall_mem_Icc`. -/
+theorem isIntegralCurveOn_Icc_chain {a : ℕ → ℝ} (hmono : Monotone a)
+    (h : ∀ i, IsIntegralCurveOn γ v (Set.Icc (a i) (a (i + 1)))) :
+    ∀ N : ℕ, IsIntegralCurveOn γ v (Set.Icc (a 0) (a (N + 1))) := by
+  intro N
+  induction N with
+  | zero => exact h 0
+  | succ n ih =>
+      exact isIntegralCurveOn_Icc_union
+        (hmono (Nat.zero_le (n + 1))) (hmono (Nat.le_succ (n + 1))) ih (h (n + 1))
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
