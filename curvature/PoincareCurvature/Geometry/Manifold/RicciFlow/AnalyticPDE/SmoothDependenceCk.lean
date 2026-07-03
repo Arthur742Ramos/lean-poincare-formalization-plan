@@ -3872,6 +3872,57 @@ theorem exists_isIntegralCurveOn_Icc_forward_of_lipschitzWith [CompleteSpace E]
   obtain ⟨γ, hγ0, hγon⟩ := hstep n
   exact ⟨γ, hγ0, hγon.mono (Set.Icc_subset_Icc (le_refl _) hTn)⟩
 
+/-- **Backward existence on an arbitrary compact interval (time reversal).**  A uniformly (in time)
+`K`-Lipschitz, time-continuous vector field on a complete real Banach space admits, through any anchor
+`(t₀, x₀)`, an integral curve on *every* backward compact interval `Icc T t₀`.  Obtained from the
+forward result (`exists_isIntegralCurveOn_Icc_forward_of_lipschitzWith`) applied to the time-reversed
+field `w t x = -(v (-t) x)` — itself uniformly `K`-Lipschitz (negation is `1`-Lipschitz) and
+time-continuous — at the reflected anchor `(-t₀, x₀)`, then reflected back with
+`isIntegralCurveOn_comp_neg`.  Since `-(w (-t) x) = v t x` and `Neg.neg ⁻¹' Icc (-t₀) (-T) = Icc T t₀`,
+the reflected curve `t ↦ η (-t)` is an integral curve of `v` on `Icc T t₀`. -/
+theorem exists_isIntegralCurveOn_Icc_backward_of_lipschitzWith [CompleteSpace E]
+    {v : ℝ → E → E} {K : ℝ≥0}
+    (hlip : ∀ t, LipschitzWith K (v t)) (hcont : ∀ x, Continuous fun t => v t x)
+    (t₀ : ℝ) (x₀ : E) (T : ℝ) :
+    ∃ γ : ℝ → E, γ t₀ = x₀ ∧ IsIntegralCurveOn γ v (Set.Icc T t₀) := by
+  set w : ℝ → E → E := fun t x => -(v (-t) x) with hw_def
+  have hlipW : ∀ t, LipschitzWith K (w t) := fun t => (hlip (-t)).neg
+  have hcontW : ∀ x, Continuous fun t => w t x := fun x => ((hcont x).comp continuous_neg).neg
+  obtain ⟨η, hη0, hηon⟩ :=
+    exists_isIntegralCurveOn_Icc_forward_of_lipschitzWith hlipW hcontW (-t₀) x₀ (-T)
+  have hcomp := isIntegralCurveOn_comp_neg hηon
+  have e1 : (fun t x => -(w (-t) x)) = v := by
+    funext t x; simp only [hw_def, neg_neg]
+  have e2 : (Neg.neg ⁻¹' Set.Icc (-t₀) (-T)) = Set.Icc T t₀ := by
+    ext s
+    simp only [Set.mem_preimage, Set.mem_Icc, neg_le_neg_iff]
+    tauto
+  rw [e1, e2] at hcomp
+  exact ⟨fun t => η (-t), hη0, hcomp⟩
+
+/-- **Existence on an arbitrary compact interval containing the anchor.**  Combining the forward and
+backward continuations: for a uniformly (in time) `K`-Lipschitz, time-continuous vector field on a
+complete real Banach space and any anchor `(t₀, x₀)`, and any compact interval `Icc a b` with
+`a ≤ t₀ ≤ b`, there is a *single* integral curve `γ` of `v` through `x₀` on all of `Icc a b`.  The
+backward solution on `Icc a t₀` and the forward solution on `Icc t₀ b` (both through `x₀` at `t₀`)
+agree at the junction `t₀` and are fused by `isIntegralCurveOn_glue_Icc`.  This is the compact-interval
+existence the exhaustion lemmas (`isIntegralCurve_of_forall_mem_Icc`,
+`isIntegralCurve_of_forall_Icc_Ici_Iic`) consume toward a global integral curve. -/
+theorem exists_isIntegralCurveOn_Icc_of_lipschitzWith_containing [CompleteSpace E]
+    {v : ℝ → E → E} {K : ℝ≥0}
+    (hlip : ∀ t, LipschitzWith K (v t)) (hcont : ∀ x, Continuous fun t => v t x)
+    (t₀ : ℝ) (x₀ : E) {a b : ℝ} (ha : a ≤ t₀) (hb : t₀ ≤ b) :
+    ∃ γ : ℝ → E, γ t₀ = x₀ ∧ IsIntegralCurveOn γ v (Set.Icc a b) := by
+  obtain ⟨γf, hγf0, hγfon⟩ :=
+    exists_isIntegralCurveOn_Icc_forward_of_lipschitzWith hlip hcont t₀ x₀ b
+  obtain ⟨γb, hγb0, hγbon⟩ :=
+    exists_isIntegralCurveOn_Icc_backward_of_lipschitzWith hlip hcont t₀ x₀ a
+  have hmatch : γb t₀ = γf t₀ := by rw [hγb0, hγf0]
+  refine ⟨fun t => if t ≤ t₀ then γb t else γf t, ?_, ?_⟩
+  · show (if t₀ ≤ t₀ then γb t₀ else γf t₀) = x₀
+    rw [if_pos le_rfl]; exact hγb0
+  · exact isIntegralCurveOn_glue_Icc ha hb hγbon hγfon hmatch
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
