@@ -2779,6 +2779,44 @@ theorem contDiff_infty_fundamentalSolution_apply_joint {A : ℝ → (E →L[ℝ]
   ((contDiff_infty_fundamentalSolution_time hA hAsmooth hΦ h0).comp contDiff_fst).clm_apply
     contDiff_snd
 
+/-!
+### Differentiable dependence of the resolvent on its coefficient field
+
+The Duhamel difference formula `fundamentalSolution_sub_eq_integral` is the *integral* form of the
+equation governing the resolvent gap `W₁ - W₂` of two coefficient fields.  Its *differential* form —
+the inhomogeneous operator ODE for the gap — starts the second-order variational analysis:
+*differentiable* dependence of the resolvent on its coefficient field. -/
+
+/-- **Differential form of the Duhamel gap equation.**  For norm-continuous coefficient fields `A₁`,
+`A₂` (`‖·‖ ≤ K`) with variational flow families and resolvents `W₁ = D_x Φ₁`, `W₂ = D_x Φ₂`, the gap
+`t ↦ W₁ t - W₂ t` solves the inhomogeneous operator ODE
+`d/dt (W₁ - W₂) = A₁ ∘ (W₁ - W₂) + (A₁ - A₂) ∘ W₂`.  This is the differential (`HasDerivAt`) form of
+the integral identity `fundamentalSolution_sub_eq_integral`: subtract the two operator ODEs
+`W₁' = A₁ ∘ W₁`, `W₂' = A₂ ∘ W₂` (`hasDerivAt_fundamentalSolution`) and regroup via bilinearity of
+composition, `A₁ ∘ W₁ - A₂ ∘ W₂ = A₁ ∘ (W₁ - W₂) + (A₁ - A₂) ∘ W₂`.  The homogeneous part
+`A₁ ∘ (W₁ - W₂)` propagates the gap; the source `(A₁ - A₂) ∘ W₂` is the leading
+coefficient-perturbation forcing — the second-order variational equation is built on this. -/
+theorem hasDerivAt_fundamentalSolution_sub {A₁ A₂ : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hA₁ : ∀ t, ‖A₁ t‖₊ ≤ K) (hA₁cont : Continuous A₁)
+    (hA₂ : ∀ t, ‖A₂ t‖₊ ≤ K) (hA₂cont : Continuous A₂)
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec A₁)) (h0₁ : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec A₂)) (h0₂ : ∀ x, Φ₂ x t₀ = x)
+    (t : ℝ) :
+    HasDerivAt (fun s => fundamentalSolution hA₁ hΦ₁ h0₁ s - fundamentalSolution hA₂ hΦ₂ h0₂ s)
+      ((A₁ t).comp (fundamentalSolution hA₁ hΦ₁ h0₁ t - fundamentalSolution hA₂ hΦ₂ h0₂ t)
+        + (A₁ t - A₂ t).comp (fundamentalSolution hA₂ hΦ₂ h0₂ t)) t := by
+  have h1 := hasDerivAt_fundamentalSolution hA₁ hA₁cont hΦ₁ h0₁ t
+  have h2 := hasDerivAt_fundamentalSolution hA₂ hA₂cont hΦ₂ h0₂ t
+  have heq : (A₁ t).comp (fundamentalSolution hA₁ hΦ₁ h0₁ t - fundamentalSolution hA₂ hΦ₂ h0₂ t)
+        + (A₁ t - A₂ t).comp (fundamentalSolution hA₂ hΦ₂ h0₂ t)
+      = (A₁ t).comp (fundamentalSolution hA₁ hΦ₁ h0₁ t)
+        - (A₂ t).comp (fundamentalSolution hA₂ hΦ₂ h0₂ t) := by
+    simp only [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]
+    abel
+  rw [heq]
+  exact h1.sub h2
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
