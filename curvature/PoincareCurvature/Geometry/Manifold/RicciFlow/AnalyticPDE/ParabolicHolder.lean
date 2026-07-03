@@ -6414,6 +6414,83 @@ theorem ParabolicC0AlphaOn.comp_affineChart_inv_parabolicCylinder
       (parabolicCylinder c (r ^ 2 * T) (|r| * S)) :=
   hu.comp_affineChart hα (parabolicCylinder_mapsTo_affineChart_inv hr)
 
+/-! ### Preimages of parabolic balls and cylinders under the affine chart
+
+The `Set.image` lemmas above have `Set.preimage` companions: because the affine chart is a global
+bijection with the inverse chart `Φ_{a,c,r⁻¹}` as two-sided inverse, the preimage of the rescaled
+ball (cylinder) about the target center `c` under the forward chart is exactly the original ball
+(cylinder) about the source center `a`.  These are the pullback statements used to restrict a
+function defined near `c` to the chart-normalized domain about `a`.  Each inclusion is discharged by
+the corresponding forward/inverse `Set.MapsTo` lemma together with the left-inverse identity. -/
+
+/-- **Preimage of an open parabolic ball under the affine chart.**  For `r ≠ 0`, the preimage of the
+open parabolic ball of radius `|r| * ρ` about `c` under the forward affine chart is the open
+parabolic ball of radius `ρ` about `a`. -/
+theorem affineChart_preimage_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) ⁻¹' parabolicBall c (|r| * ρ)
+      = parabolicBall a ρ := by
+  apply Set.eq_of_subset_of_subset
+  · intro q hq
+    rw [Set.mem_preimage] at hq
+    have h := parabolicBall_mapsTo_affineChart_inv (a := a) hr hq
+    rwa [affineChart_leftInverse c a hr q] at h
+  · intro q hq
+    exact parabolicBall_mapsTo_affineChart hr hq
+
+/-- **Preimage of a closed parabolic ball under the affine chart.**  For `r ≠ 0`, the preimage of
+the closed parabolic ball of radius `|r| * ρ` about `c` under the forward affine chart is the closed
+parabolic ball of radius `ρ` about `a`. -/
+theorem affineChart_preimage_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) ⁻¹' parabolicClosedBall c (|r| * ρ)
+      = parabolicClosedBall a ρ := by
+  apply Set.eq_of_subset_of_subset
+  · intro q hq
+    rw [Set.mem_preimage] at hq
+    have h := parabolicClosedBall_mapsTo_affineChart_inv (a := a) hr hq
+    rwa [affineChart_leftInverse c a hr q] at h
+  · intro q hq
+    exact parabolicClosedBall_mapsTo_affineChart hq
+
+/-- **Preimage of an open parabolic cylinder under the affine chart.**  For `r ≠ 0`, the preimage of
+the open parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about `c` under
+the forward affine chart is the open parabolic cylinder of time radius `T` and space radius `S`
+about `a`. -/
+theorem affineChart_preimage_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+        ⁻¹' parabolicCylinder c (r ^ 2 * T) (|r| * S)
+      = parabolicCylinder a T S := by
+  apply Set.eq_of_subset_of_subset
+  · intro q hq
+    rw [Set.mem_preimage] at hq
+    have h := parabolicCylinder_mapsTo_affineChart_inv (a := a) hr hq
+    rwa [affineChart_leftInverse c a hr q] at h
+  · intro q hq
+    exact parabolicCylinder_mapsTo_affineChart hr hq
+
+/-- **Preimage of a closed parabolic cylinder under the affine chart.**  For `r ≠ 0`, the preimage
+of the closed parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about `c`
+under the forward affine chart is the closed parabolic cylinder of time radius `T` and space radius
+`S` about `a`. -/
+theorem affineChart_preimage_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+        ⁻¹' parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)
+      = parabolicClosedCylinder a T S := by
+  apply Set.eq_of_subset_of_subset
+  · intro q hq
+    rw [Set.mem_preimage] at hq
+    have h := parabolicClosedCylinder_mapsTo_affineChart_inv (a := a) hr hq
+    rwa [affineChart_leftInverse c a hr q] at h
+  · intro q hq
+    exact parabolicClosedCylinder_mapsTo_affineChart hq
+
 end AnalyticPDE
 end RicciFlow
 
