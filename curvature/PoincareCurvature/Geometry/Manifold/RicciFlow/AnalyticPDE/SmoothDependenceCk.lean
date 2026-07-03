@@ -4012,6 +4012,44 @@ theorem exists_isIntegralCurve_of_lipschitzWith [CompleteSpace E]
       rw [Set.mem_Icc] at hy; rw [abs_lt]; constructor <;> linarith
     exact hglobal_eq m y hymem
 
+/-- **Existence of the first variation (the operator-ODE Duhamel existence, capstone).**  For
+norm-bounded, continuous operator paths `A, F : ℝ → (E →L[ℝ] E)` on a complete real Banach space
+(`‖A s‖₊ ≤ K`, `‖F s‖₊ ≤ M`, `Continuous A`, `Continuous F`) and any anchor time `t₀`, the anchored
+*inhomogeneous variational ODE* `V' = A ∘ V + F`, `V t₀ = 0` has a (global) solution `V`.
+
+This closes the **existence half** of the first-variation target that the whole
+`augmentedVariationalField` / continuation apparatus was built for.  The homogenised augmented field
+`augmentedVariationalField A F` on `(E →L[ℝ] E) × ℝ` is uniformly `(K + M)`-Lipschitz
+(`lipschitzWith_augmentedVariationalField`) and continuous in time (composition/scalar-multiplication
+continuity of `A`, `F`), so — the augmented state space `(E →L[ℝ] E) × ℝ` being complete — the global
+existence theorem `exists_isIntegralCurve_of_lipschitzWith` produces an integral curve `z` through
+`(0, 1)`.  Its operator coordinate `V = (z ·).1` solves the inhomogeneous variational ODE by
+`hasDerivAt_inhomogVariation_of_augmented`.  Combined with the uniqueness
+(`inhomogVariation_unique`), linearity (`firstVariation_perturbation_add_eq`, …) and a-priori bounds
+(`norm_inhomogVariation_le`) already established, the first variation of the resolvent is now a fully
+constructed object — the Gateaux/Fréchet derivative datum for the spatial `C^k` bootstrap of the flow
+that Items 1 and 2 consume. -/
+theorem exists_hasDerivAt_inhomogVariation [CompleteSpace E]
+    {A F : ℝ → (E →L[ℝ] E)} {K M : ℝ≥0}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) (hF : ∀ s, ‖F s‖₊ ≤ M)
+    (hAc : Continuous A) (hFc : Continuous F) (t₀ : ℝ) :
+    ∃ V : ℝ → (E →L[ℝ] E), V t₀ = 0 ∧
+      ∀ s, HasDerivAt V ((A s).comp (V s) + F s) s := by
+  have hlipW : ∀ s, LipschitzWith (K + M) (augmentedVariationalField A F s) :=
+    fun s => lipschitzWith_augmentedVariationalField hA hF s
+  have hcontW : ∀ p : (E →L[ℝ] E) × ℝ,
+      Continuous fun s => augmentedVariationalField A F s p := by
+    intro p
+    show Continuous fun s => ((A s).comp p.1 + p.2 • F s, (0 : ℝ))
+    exact (Continuous.add (hAc.clm_comp continuous_const) (hFc.const_smul p.2)).prodMk
+      continuous_const
+  obtain ⟨z, hz0, hzcurve⟩ :=
+    exists_isIntegralCurve_of_lipschitzWith hlipW hcontW t₀ ((0 : E →L[ℝ] E), (1 : ℝ))
+  refine ⟨fun s => (z s).1, ?_, fun s => ?_⟩
+  · show (z t₀).1 = 0
+    rw [hz0]
+  · exact hasDerivAt_inhomogVariation_of_augmented hzcurve hz0 s
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
