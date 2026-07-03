@@ -5852,3 +5852,38 @@ the analogue of the `C²` `hcont_D₂` one order up (opNorm bound + the third-va
 four forcing terms), which does not yet exist and is the true remaining blocker — then
 `contDiff_one_iff_fderiv`/`contDiff_succ_iff_fderiv` chain close
 `exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
+
+Update — the **third-variation-ODE base-point gap tower is now BUILT** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`.  Six new theorems
+supply the entire third-order operator-difference gap over the four forcing terms that the `D₃fam`
+continuity (`hcont_D₂` one order up) needs:
+
+* `norm_curryFin1_biContract_comp_sub_le` — the abstract operator-norm telescoping skeleton for the
+  fully-contracted third-derivative forcing term (`(curryFin1 ((T.curryLeft a).curryLeft b)).comp C`),
+  under joint perturbation of `T, a, b, C`; via `norm_clm_apply_sub_le` + the `curryLeft`/`curryFin1`
+  isometries.
+* `norm_thirdDerivForcing_baseCurve_sub_le` — its flow instance (term 4 of the forcing): the linear
+  base-point gap of `curryFin1(D³v[Wk,Wh,W·])`, `≤ exp⁴·(M₃ + 3C''Lg)·‖z−x₀‖·‖k‖·‖h‖`.
+* `norm_bilinearComp_VfamInner_baseCurve_sub_le` — the base-point gap of the `Vfam`-inner term
+  (`((D²v ∘ Vfam_k) h) ∘ W`, term 1), `≤ exp⁴·g·(2M₂C' + 4LC'²g)·‖z−x₀‖·‖k‖·‖h‖`, via the abstract
+  `norm_bilinearCompForcing_sub_le` + `norm_linearisedFirstVariation_baseCurve_sub_le`.
+* `norm_bilinearComp_VfamOuter_baseCurve_sub_le` — the base-point gap of the `Vfam`-outer terms
+  (`((D²v ∘ W) d) ∘ Vfam_e`, terms 2 & 3), the same clean constant with `‖e‖·‖d‖`.
+* `norm_add4_sub_add4_le` — the four-fold triangle inequality for the right-nested four-term forcing.
+* `norm_thirdVariationForcing_baseCurve_sub_le` — the **full four-term forcing gap `β`**:
+  `‖F^z − F^x‖ ≤ (3·exp⁴·g·(2M₂C' + 4LC'²g) + exp⁴·(3C''Lg + M₃))·‖z−x₀‖·‖k‖·‖h‖`, summing the four
+  term gaps via `norm_add4_sub_add4_le`.
+* `norm_thirdVariation_baseCurve_sub_le` — the **third-variation curve base gap** (the `C³` analogue of
+  `norm_linearisedFirstVariation_baseCurve_sub_le`): for the third-variation curves `Vz`, `Vx`,
+  `‖Vz t − Vx t‖ ≤ Cλ·‖z−x₀‖·‖k‖·‖h‖·gronwall(t−t₀)` with
+  `Cλ = L·exp⁴·g·(3C'²g + C'') + 3·exp⁴·g·(2M₂C' + 4LC'²g) + exp⁴·(3C''Lg + M₃)`, assembled from the
+  coefficient gap `α`, the second-curve size `N` (`norm_thirdVariation_coeff_le`) and the forcing gap
+  `β` via `norm_inhomogVariation_sub_le_of_gap`.
+
+Remaining for `ContDiff ℝ 3` (next session): the **`D₃fam` continuity assembly** — for the packaged
+`D₃fam`, construct per base-point the third-variation curves `Vz`, `Vx` and the four `Vfam` curves,
+identify `D₃fam z k h = Vz t` (the operator characterisation `hD₃bilinear`) and apply
+`norm_thirdVariation_baseCurve_sub_le`, then `ContinuousLinearMap.opNorm_le_bound` (twice, over `k`
+then `h`) gives `‖D₃fam z − D₃fam x₀‖ ≤ Cλ·gronwall·‖z − x₀‖` — i.e. `LipschitzWith`/`Continuous D₃fam`;
+the `contDiff_one_iff_fderiv`/`contDiff_succ_iff_fderiv` chain then closes
+`exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
