@@ -5390,3 +5390,48 @@ Remaining for the `C³` layer (future sessions): the **second-order Taylor remai
 estimate — needs the base-point machinery for `z ↦ D₂(z)` and a concrete second fundamental solution
 curve `W₂ = ∂_{x₀} W`), then the already-available `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge
 to `ContDiff ℝ 3`; and/or the `k`-linearity/full bilinear `(k, h)` packaging of `D₃`.
+
+Update — **the `C³` `D₃` packaging is now bilinear in `(k, h)`, and the second-order Taylor-remainder
+scaffold is in place** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`).  This closes the
+`k`-linearity/bilinear-packaging item flagged above and lays the reusable Grönwall scaffold that the
+remaining Taylor remainder plugs into:
+
+* `curryLeft_add` / `curryLeft_smul` — the additivity/homogeneity of `ContinuousMultilinearMap.curryLeft`
+  in the multilinear argument (via the linearity of `continuousMultilinearCurryLeftEquiv`), exposed as
+  `simp`-usable rewrites (the plain `def` form is not matched by `map_add`/`map_smul` directly).  Needed
+  to push the base direction `k` through the *outer* `curryLeft` of the third-derivative forcing `F_C`.
+* `thirdVariation_baseDir_add_eq` / `thirdVariation_baseDir_smul_eq` — the **`k`-linearity of the third
+  variation** (the base-direction analogue of the `h`-linearity `thirdVariation_perturbation_add_eq`/
+  `_smul_eq`): with `W₂` itself linear in `k` (as it is when `W₂ k = ∂_{x₀} W · k`), the whole three-term
+  forcing `F_A + F_B + F_C` is linear in `k` — `F_A`/`F_B` split via the linearity of `W₂ k`
+  (`comp_add`/`add_comp`/`add_apply`, resp. `comp_smul`/`smul_comp`/`smul_apply`), `F_C` via the
+  linearity of `W k` (`map_add`/`map_smul`) pushed through the two `curryLeft` layers (`map_add`/`map_smul`
+  on the inner `D³v.curryLeft`, `curryLeft_add`/`curryLeft_smul` on the outer) — so
+  `inhomogVariation_unique` identifies `V^{k₁+k₂} = V^{k₁} + V^{k₂}`, `V^{c•k} = c • V^k`.
+* `exists_continuousLinearMap_thirdVariation_bilinear` — the **full bilinear operator**
+  `D₃ : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))`, `D₃ k h =` the time-`t` third variation.  Upgrades
+  `exists_continuousLinearMap_thirdVariation` (inner `h` only, fixed `k`) to both directions: for each `k`
+  the inner operator `D₃(k)` comes from `exists_continuousLinearMap_thirdVariation_norm_le` fed the
+  `‖k‖`-scaled curve bound `‖W₂ k s‖ ≤ N₂·‖k‖` (so `‖D₃(k)‖ ≤ (…)·‖k‖`, genuinely `O(‖k‖)`); the outer
+  `k`-additivity/homogeneity is the new `thirdVariation_baseDir_add_eq`/`_smul_eq` (through the value
+  characterisation `D₃(k) h = V^{k,h} t` and ODE uniqueness), packaged by `LinearMap.mkContinuous`.  This
+  is the object the base-point Taylor remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖` (with `k = z − x₀`)
+  compares against.
+* `norm_inhomogVariation_sub_sub_le_of_forcingGap` — the **second-order Taylor-remainder scaffold**
+  (generic, phrased at the inhomogeneous-variation level): for `V₁` (coefficient `A₁`, forcing `F₁`), `V₀`
+  and `V₃` (both reference coefficient `A₀`, forcings `F₀`, `F₃`), all anchored at `t₀`, the triple
+  difference obeys `‖(V₁ t − V₀ t) − V₃ t‖ ≤ β · gronwallBound 0 K 1 (t − t₀)` where `β` bounds the
+  **forcing gap** `((A₁ − A₀) ∘ V₁ + (F₁ − F₀)) − F₃`.  Proof: `W = (V₁ − V₀) − V₃` solves the
+  `A₀`-coefficient inhomogeneous ODE `W' = A₀ ∘ W + (forcing gap)` (from `(hV₁.sub hV₀).sub hV₃` and the
+  rearrangement `A₁ ∘ V₁ = A₀ ∘ V₁ + (A₁ − A₀) ∘ V₁`), so `norm_inhomogVariation_le` fed `β` closes it.
+  The `D₃`-analogue of the *shape* of `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, isolating
+  the whole remaining second-order content into the single forcing-gap hypothesis `hβ`.
+
+Remaining for the `C³` layer (future sessions): the **forcing-gap estimate** `hβ` — that for the concrete
+`D₂`/`D₃` instantiation (`A₁ = Dv(Φ z)`, `A₀ = Dv(Φ x₀)`, `V₁ = Vlin^{z,h}`, `V₀ = Vlin^{x₀,h}`,
+`F₃ = F_A + F_B + F_C` with `W₂ = ∂_{x₀} W · (z − x₀)`) the forcing gap
+`((A₁ − A₀) ∘ V₁ + (F₁ − F₀)) − F₃` is `O(‖z − x₀‖² · ‖h‖)` (a multi-term second-order Taylor analysis
+with cancellation between `(A₁ − A₀) ∘ V₁` and the `D₃` forcing terms, using the built forcing-gap/size
+toolkit and a concrete second fundamental solution curve `W₂ = ∂_{x₀} W`); feeding it to
+`norm_inhomogVariation_sub_sub_le_of_forcingGap` gives the Taylor remainder, and the already-available
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge then yields `ContDiff ℝ 3`.
