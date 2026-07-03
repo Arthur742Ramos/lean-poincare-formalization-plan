@@ -122,6 +122,58 @@ theorem eq_of_isIntegralCurve_of_eq
   rw [h0, dist_self, zero_mul] at hb
   exact dist_le_zero.mp hb
 
+/-!
+## The flow map is exponentially Lipschitz in the initial value
+
+Packaging the two-sided Grönwall bound for a *flow family* `Φ : E → ℝ → E`, where for
+each initial value `x` the curve `Φ x` is the integral curve of `v` anchored at
+`Φ x t₀ = x`.  This is exactly the `C^0` dependence-on-initial-data statement that the
+compact-manifold gauge flow (Item 2) consumes: the time-`t` flow map `x ↦ Φ x t` is
+Lipschitz, with an explicit exponential constant, uniformly on compact time intervals.
+-/
+
+variable {Φ : E → ℝ → E}
+
+/-- Two-sided dependence bound for a flow family: if for each initial value `x` the
+curve `Φ x` is an integral curve of the uniformly `K`-Lipschitz field `v` anchored at
+`Φ x t₀ = x`, then `dist (Φ x t) (Φ y t) ≤ dist x y · exp (K · |t - t₀|)`. -/
+theorem dist_flow_apply_le
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (x y : E) (t : ℝ) :
+    dist (Φ x t) (Φ y t) ≤ dist x y * Real.exp ((K : ℝ) * |t - t₀|) := by
+  have hb := dist_le_of_isIntegralCurve hv (hΦ x) (hΦ y) t₀ t
+  rwa [h0 x, h0 y] at hb
+
+/-- The time-`t` flow map `x ↦ Φ x t` is Lipschitz with constant `exp (K · |t - t₀|)`. -/
+theorem lipschitzWith_flow_apply
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (t : ℝ) :
+    LipschitzWith (Real.exp ((K : ℝ) * |t - t₀|)).toNNReal (fun x => Φ x t) := by
+  refine LipschitzWith.of_dist_le_mul fun x y => ?_
+  rw [Real.coe_toNNReal _ (Real.exp_pos _).le]
+  calc dist (Φ x t) (Φ y t) ≤ dist x y * Real.exp ((K : ℝ) * |t - t₀|) :=
+        dist_flow_apply_le hv hΦ h0 x y t
+    _ = Real.exp ((K : ℝ) * |t - t₀|) * dist x y := mul_comm _ _
+
+/-- The time-`t` flow map `x ↦ Φ x t` is continuous in the initial value. -/
+theorem continuous_flow_apply
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (t : ℝ) :
+    Continuous (fun x => Φ x t) :=
+  (lipschitzWith_flow_apply hv hΦ h0 t).continuous
+
+/-- Uniform Lipschitz dependence of the flow map on a symmetric compact time interval:
+whenever `|t - t₀| ≤ T`, the time-`t` flow map is Lipschitz with the single constant
+`exp (K · T)`. -/
+theorem lipschitzWith_flow_apply_of_abs_le
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) {T : ℝ} (hT : |t - t₀| ≤ T) :
+    LipschitzWith (Real.exp ((K : ℝ) * T)).toNNReal (fun x => Φ x t) := by
+  refine LipschitzWith.of_dist_le_mul fun x y => ?_
+  rw [Real.coe_toNNReal _ (Real.exp_pos _).le, mul_comm (Real.exp ((K : ℝ) * T)) (dist x y)]
+  have hxy := dist_le_of_isIntegralCurve_of_abs_le hv (hΦ x) (hΦ y) hT
+  rwa [h0 x, h0 y] at hxy
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
