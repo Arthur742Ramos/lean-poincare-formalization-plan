@@ -4560,6 +4560,103 @@ theorem norm_derivField_sub_sub_comp_fundamentalSolution_le_sq
             * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖z - x₀‖ ^ 2 := by ring
   exact (add_le_add hb1 hb2).trans_eq (by ring)
 
+/-- **Second-order agreement of the resolvent's first variation with its linearised (chain-rule)
+form.**  Fix the base point `x₀` with reference coefficient `A₀ s = Dv s (Φ x₀ s)` and resolvent
+`W₀ s = D_x Φ_s = fundamentalSolution hA hΦ' h0' s`.  For a nearby base point `z`, let
+
+* `Vz` be the *true* first variation — the anchored solution of
+  `Vz' = A₀ ∘ Vz + (A_z - A₀) ∘ W₀` (`A_z s = Dv s (Φ z s)`), the leading response of the resolvent
+  to the actual coefficient perturbation `A_z - A₀`; and
+* `Vlin` be the *linearised* first variation — the anchored solution of
+  `Vlin' = A₀ ∘ Vlin + (∂A₀/∂x₀ · (z - x₀)) ∘ W₀`, whose forcing uses the *chain-rule* coefficient
+  derivative `∂A₀/∂x₀ = D²v(Φ x₀ s) ∘ W₀` (`hasFDerivAt_derivField_apply_flow`) evaluated on the
+  base-point increment `z - x₀`.
+
+Then the two first variations agree to *second order* in the increment, uniformly on `[t₀, T]`:
+`‖Vz t - Vlin t‖ ≤ Cquad · exp (K (T - t₀)) · gronwallBound 0 K 1 (t - t₀) · ‖z - x₀‖²`, where
+`Cquad = M · e + C' · (L · e · g)` (`e = exp (2 K (T - t₀))`, `g = gronwallBound 0 K 1 (T - t₀)`) is
+the coefficient Taylor constant of `norm_derivField_sub_sub_comp_fundamentalSolution_le_sq`.  Proof:
+the difference `Vz - Vlin` is (`hasDerivAt_firstVariation_perturbation_sub`) the first variation for
+the perturbation `(A_z - A₀) - ∂A₀/∂x₀ · (z - x₀)`, whose forcing is bounded by
+`(Cquad ‖z - x₀‖²) · ‖W₀ s‖ ≤ Cquad ‖z - x₀‖² · exp (K (T - t₀))` (the coefficient Taylor bound
+`norm_derivField_sub_sub_comp_fundamentalSolution_le_sq` times the resolvent bound
+`norm_fundamentalSolution_le`); the general a-priori first-variation bound `norm_inhomogVariation_le`
+closes it.  This is the second-order term of the base-point `C²` bootstrap: since `Vlin` is *linear*
+in `z - x₀`, it identifies the Fréchet derivative of the resolvent in the base point, with an
+`O(‖z - x₀‖²)` remainder. -/
+theorem norm_firstVariation_sub_linearVariation_le_sq
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {L M : ℝ≥0} {C' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ) (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hC'0 : 0 ≤ C') (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (z : E) {T : ℝ}
+    {Vz Vlin : ℝ → (E →L[ℝ] E)}
+    (hVz : ∀ s, HasDerivAt Vz
+      ((Dv s (Φ x₀ s)).comp (Vz s)
+        + (Dv s (Φ z s) - Dv s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s)) s)
+    (hVz0 : Vz t₀ = 0)
+    (hVlin : ∀ s, HasDerivAt Vlin
+      ((Dv s (Φ x₀ s)).comp (Vlin s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (z - x₀)).comp
+            (fundamentalSolution hA hΦ' h0' s)) s)
+    (hVlin0 : Vlin t₀ = 0)
+    {t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖Vz t - Vlin t‖
+      ≤ ((M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+        * Real.exp ((K : ℝ) * (T - t₀))
+        * gronwallBound 0 (K : ℝ) 1 (t - t₀)
+        * ‖z - x₀‖ ^ 2 := by
+  set Cquad : ℝ := (M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+      + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀)) with hCquad
+  set expT : ℝ := Real.exp ((K : ℝ) * (T - t₀)) with hexpT
+  have hCquad0 : 0 ≤ Cquad := by
+    rw [hCquad]
+    refine add_nonneg (mul_nonneg M.coe_nonneg (Real.exp_pos _).le) ?_
+    refine mul_nonneg hC'0 (mul_nonneg (mul_nonneg L.coe_nonneg (Real.exp_pos _).le) ?_)
+    exact gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans ht.1 ht.2))
+  -- The difference `Vz - Vlin` is the first variation for the residual coefficient perturbation.
+  have hVd := hasDerivAt_firstVariation_perturbation_sub hVz hVlin
+  -- Bound the residual forcing by `Cquad · ‖z - x₀‖² · expT` on the tube `[t₀, T]`.
+  have hFbound : ∀ s ∈ Icc t₀ T,
+      ‖((Dv s (Φ z s) - Dv s (Φ x₀ s))
+          - (D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (z - x₀)).comp
+            (fundamentalSolution hA hΦ' h0' s)‖
+        ≤ Cquad * ‖z - x₀‖ ^ 2 * expT := by
+    intro s hs
+    have htaylor := norm_derivField_sub_sub_comp_fundamentalSolution_le_sq
+      hv hΦ h0 hDv hDvlip hD2v hD2vlip x₀ hA hC'0 hC' hΦ' h0' z hs
+    have hWbound : ‖fundamentalSolution hA hΦ' h0' s‖ ≤ expT := by
+      refine (norm_fundamentalSolution_le hA hΦ' h0' s).trans ?_
+      rw [hexpT]
+      refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left ?_ K.coe_nonneg)
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+    calc ‖((Dv s (Φ z s) - Dv s (Φ x₀ s))
+              - (D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (z - x₀)).comp
+                (fundamentalSolution hA hΦ' h0' s)‖
+        ≤ ‖(Dv s (Φ z s) - Dv s (Φ x₀ s))
+              - (D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (z - x₀)‖
+            * ‖fundamentalSolution hA hΦ' h0' s‖ :=
+          ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (Cquad * ‖z - x₀‖ ^ 2) * expT :=
+          mul_le_mul htaylor hWbound (norm_nonneg _)
+            (mul_nonneg hCquad0 (sq_nonneg _))
+      _ = Cquad * ‖z - x₀‖ ^ 2 * expT := by ring
+  have hV0 : (fun r => Vz r - Vlin r) t₀ = 0 := by simp [hVz0, hVlin0]
+  have hbound := norm_inhomogVariation_le hA hVd hV0 hFbound ht
+  calc ‖Vz t - Vlin t‖
+      = ‖(fun r => Vz r - Vlin r) t‖ := by rfl
+    _ ≤ Cquad * ‖z - x₀‖ ^ 2 * expT * gronwallBound 0 (K : ℝ) 1 (t - t₀) := hbound
+    _ = Cquad * expT * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - x₀‖ ^ 2 := by ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
