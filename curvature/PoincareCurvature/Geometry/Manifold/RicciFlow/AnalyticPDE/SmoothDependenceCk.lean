@@ -472,6 +472,63 @@ theorem dist_flow_le_of_norm_le {M : ℝ}
           have hd := hLip.dist_le_mul x y
           rwa [Real.coe_toNNReal _ (Real.exp_pos _).le] at hd
 
+/-!
+## First brick of the `C^1` layer: the linear (variational) field is Lipschitz
+
+Toward *differentiable* dependence on initial data one linearises: the flow
+derivative `D_x Φ_t` is expected to solve the operator-valued **variational** ODE
+`W'(t) = A(t) ∘ W(t)`, where `A(t) = D_x v (t, Φ_t x)` is the spatial derivative of
+the field along the flow.  The algebraic core underpinning well-posedness of that
+linear ODE is that, for a uniformly bounded operator path `A : ℝ → (E →L[ℝ] E)`
+with `‖A t‖ ≤ K`, the associated linear vector field on the operator Banach space
+`E →L[ℝ] E`, namely `W ↦ (A t).comp W`, is `K`-Lipschitz in `W`.  Uniqueness and
+the exponential a priori bound for the variational ODE then follow from the `C^0`
+dependence lemmas above, now instantiated on the Banach space of operators.  This
+opens the `C^1` layer: the object on which differentiable dependence is built is
+in place and well-posed. -/
+
+/-- The linear (variational) vector field `W ↦ (A t).comp W` on the operator Banach space
+`E →L[ℝ] E`, associated to an operator path `A`.  Its integral curves are the solutions of
+the variational equation `W'(t) = A(t) ∘ W(t)`. -/
+def variationalField (A : ℝ → (E →L[ℝ] E)) :
+    ℝ → (E →L[ℝ] E) → (E →L[ℝ] E) :=
+  fun t W => (A t).comp W
+
+/-- **The variational field is Lipschitz.**  Under a uniform operator-norm bound
+`‖A t‖ ≤ K`, the linear field `W ↦ (A t).comp W` is `K`-Lipschitz in `W` — the core
+estimate behind well-posedness of the variational ODE.  (Submultiplicativity of the
+operator norm: `‖A t ∘ (W₁ - W₂)‖ ≤ ‖A t‖ · ‖W₁ - W₂‖ ≤ K · ‖W₁ - W₂‖`.) -/
+theorem lipschitzWith_variationalField {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (t : ℝ) :
+    LipschitzWith K (variationalField A t) := by
+  refine LipschitzWith.of_dist_le_mul fun W₁ W₂ => ?_
+  simp only [variationalField, dist_eq_norm, ← ContinuousLinearMap.comp_sub]
+  calc ‖(A t).comp (W₁ - W₂)‖
+      ≤ ‖A t‖ * ‖W₁ - W₂‖ := ContinuousLinearMap.opNorm_comp_le _ _
+    _ ≤ (K : ℝ) * ‖W₁ - W₂‖ := by
+        gcongr
+        exact_mod_cast hA t
+
+/-- **Uniqueness for the variational ODE.**  Two solutions of the linear variational ODE
+`W'(t) = (A t).comp (W t)` with `‖A t‖ ≤ K` that agree at one time agree everywhere. -/
+theorem variational_eq_of_isIntegralCurve {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) {W₁ W₂ : ℝ → (E →L[ℝ] E)}
+    (h1 : IsIntegralCurve W₁ (variationalField A))
+    (h2 : IsIntegralCurve W₂ (variationalField A))
+    {t₁ : ℝ} (h : W₁ t₁ = W₂ t₁) (t : ℝ) : W₁ t = W₂ t :=
+  eq_of_isIntegralCurve_of_eq_at (fun s => lipschitzWith_variationalField hA s) h1 h2 h t
+
+/-- **A priori exponential bound for the variational ODE.**  Two solutions of
+`W'(t) = (A t).comp (W t)` with `‖A t‖ ≤ K` satisfy
+`dist (W₁ t) (W₂ t) ≤ dist (W₁ t₀) (W₂ t₀) · exp (K · |t - t₀|)`. -/
+theorem dist_variational_le {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) {W₁ W₂ : ℝ → (E →L[ℝ] E)}
+    (h1 : IsIntegralCurve W₁ (variationalField A))
+    (h2 : IsIntegralCurve W₂ (variationalField A))
+    (t₀ t : ℝ) :
+    dist (W₁ t) (W₂ t) ≤ dist (W₁ t₀) (W₂ t₀) * Real.exp ((K : ℝ) * |t - t₀|) :=
+  dist_le_of_isIntegralCurve (fun s => lipschitzWith_variationalField hA s) h1 h2 t₀ t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
