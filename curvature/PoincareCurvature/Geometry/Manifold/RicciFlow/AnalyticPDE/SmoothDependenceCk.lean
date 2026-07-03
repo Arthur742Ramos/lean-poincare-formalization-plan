@@ -8715,6 +8715,43 @@ theorem bilinearCompForcing_curry2_eq
   ext i
   fin_cases i <;> rfl
 
+/-- **Flow-Lipschitz first-order gap for the field's second derivative (multilinear representation)** —
+the `D²v`-multilinear analogue of `norm_secondDerivField_apply_flow_sub_le`.  For the field's second
+derivative in the multilinear representation `D²v s : E → (E[×2]→L E)`, `M`-Lipschitz, the values along
+two trajectories differ by `‖D²v s (Φ z s) − D²v s (Φ w s)‖ ≤ M · exp (K T) · ‖z − w‖` on the tube
+`|s − t₀| ≤ T` (`M`-Lipschitz composed with the exponential flow-Lipschitz bound
+`lipschitzWith_flow_apply_of_abs_le`).  This is the first-order (`dp`) datum of the `(F₁ − F₀)` forcing
+remainder in the multilinear representation. -/
+theorem norm_secondDerivField_ml_apply_flow_sub_le
+    {Φ : E → ℝ → E} {D2v : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {M : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (hD2v : LipschitzWith M (D2v s)) (hsT : |s - t₀| ≤ T) (z w : E) :
+    ‖D2v s (Φ z s) - D2v s (Φ w s)‖ ≤ (M : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ := by
+  have hlip : LipschitzWith (M * (Real.exp ((K : ℝ) * T)).toNNReal) (fun z => D2v s (Φ z s)) :=
+    hD2v.comp (lipschitzWith_flow_apply_of_abs_le hv hΦ h0 hsT)
+  have hd := hlip.dist_le_mul z w
+  rw [dist_eq_norm, dist_eq_norm, NNReal.coe_mul, Real.coe_toNNReal _ (Real.exp_pos _).le] at hd
+  exact hd
+
+/-- **Flow-Lipschitz first-order gap for the composition-form second derivative `curry2 (D²v)`** — the
+`dp` datum of the `(F₁ − F₀)` forcing remainder in the composition form the trilinear engine consumes:
+`‖curry2 (D²v s (Φ z s)) − curry2 (D²v s (Φ w s))‖ ≤ M · exp (K T) · ‖z − w‖`.  The composition-form
+operators `P₁ = curry2 (D²v(Φ z s))`, `P₀ = curry2 (D²v(Φ x₀ s))` are the `hrP`/`dp` inputs of
+`norm_bilinearCompForcing_sub_sub_le_sq`; since `curry2` is linear (`curry2_sub`) and norm-nonexpansive
+(`norm_curry2_le`), the composition-form gap is `≤` the multilinear gap
+`norm_secondDerivField_ml_apply_flow_sub_le`. -/
+theorem norm_secondDerivField_curry2_apply_flow_sub_le
+    {Φ : E → ℝ → E} {D2v : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {M : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (hD2v : LipschitzWith M (D2v s)) (hsT : |s - t₀| ≤ T) (z w : E) :
+    ‖curry2 (D2v s (Φ z s)) - curry2 (D2v s (Φ w s))‖
+      ≤ (M : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ := by
+  rw [← curry2_sub]
+  exact (norm_curry2_le _).trans
+    (norm_secondDerivField_ml_apply_flow_sub_le hv hΦ h0 hD2v hsT z w)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
