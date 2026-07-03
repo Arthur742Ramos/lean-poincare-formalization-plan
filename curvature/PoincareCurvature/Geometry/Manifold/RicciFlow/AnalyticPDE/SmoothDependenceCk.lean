@@ -7100,6 +7100,59 @@ theorem exists_continuousLinearMap_thirdVariation_bilinear [CompleteSpace E]
   intro k h V hV0 hVderiv
   simpa using hD₃char k h V hV0 hVderiv
 
+/-- **Second-order (Taylor) remainder scaffold: reduction to a forcing gap.**  The generic Grönwall
+scaffold for the base-point `C³` Taylor remainder — the `D₃`-analogue of the shape of
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, phrased at the level of *inhomogeneous
+variations* so that the concrete `D₂`/`D₃` instantiation is deferred.
+
+Given three anchored inhomogeneous variations sharing the reference coefficient `A₀` for the *second*
+and *third*, and a possibly-different coefficient `A₁` for the *first*:
+* `V₁` solves `V' = A₁ ∘ V + F₁`, `V t₀ = 0` (the linearised first variation at the *perturbed* base
+  point — coefficient `A₁ = Dv(Φ z)`, forcing `F₁`);
+* `V₀` solves `V' = A₀ ∘ V + F₀`, `V t₀ = 0` (the linearised first variation at the *reference* base
+  point — coefficient `A₀ = Dv(Φ x₀)`, forcing `F₀`);
+* `V₃` solves `V' = A₀ ∘ V + F₃`, `V t₀ = 0` (the *third* variation — same reference coefficient `A₀`,
+  the packaged `D₃` forcing `F₃`),
+
+the difference `(V₁ − V₀) − V₃` obeys `‖(V₁ t − V₀ t) − V₃ t‖ ≤ β · gronwallBound 0 K 1 (t − t₀)`, where
+`β` bounds the **forcing gap** `((A₁ − A₀) ∘ V₁ + (F₁ − F₀)) − F₃` on the tube `[t₀, T]`.
+
+Proof: the exact difference `W = (V₁ − V₀) − V₃` solves the `A₀`-coefficient inhomogeneous ODE
+`W' = A₀ ∘ W + (((A₁ − A₀) ∘ V₁ + (F₁ − F₀)) − F₃)`, `W t₀ = 0` — obtained from `(hV₁.sub hV₀).sub hV₃`
+by the algebraic rearrangement `A₁ ∘ V₁ = A₀ ∘ V₁ + (A₁ − A₀) ∘ V₁` (`comp_sub`/`sub_comp`, `abel`) — so
+the a-priori bound `norm_inhomogVariation_le` (coefficient `A₀` is `K`-bounded) fed the forcing gap `β`
+gives the estimate.  The remaining second-order content — that the forcing gap is genuinely
+`O(‖z − x₀‖² · ‖h‖)`, i.e. that the packaged `D₃` forcing `F₃` is the correct linearisation of
+`(A₁ − A₀) ∘ V₁ + (F₁ − F₀)` in `z − x₀` — is isolated into the single hypothesis `hβ`, exactly the
+`β`-gap that the built forcing-gap toolkit (`norm_bilinearCompForcing_sub_le`,
+`norm_thirdDerivCurryLeft_apply_flow_sub_le`, …) is designed to supply. -/
+theorem norm_inhomogVariation_sub_sub_le_of_forcingGap
+    {A₁ A₀ F₁ F₀ F₃ V₁ V₀ V₃ : ℝ → (E →L[ℝ] E)}
+    (hA₀ : ∀ s, ‖A₀ s‖₊ ≤ K)
+    (hV₁ : ∀ s, HasDerivAt V₁ ((A₁ s).comp (V₁ s) + F₁ s) s) (hV₁0 : V₁ t₀ = 0)
+    (hV₀ : ∀ s, HasDerivAt V₀ ((A₀ s).comp (V₀ s) + F₀ s) s) (hV₀0 : V₀ t₀ = 0)
+    (hV₃ : ∀ s, HasDerivAt V₃ ((A₀ s).comp (V₃ s) + F₃ s) s) (hV₃0 : V₃ t₀ = 0)
+    {β T : ℝ}
+    (hβ : ∀ s ∈ Set.Icc t₀ T,
+      ‖((A₁ s - A₀ s).comp (V₁ s) + (F₁ s - F₀ s)) - F₃ s‖ ≤ β)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ‖(V₁ t - V₀ t) - V₃ t‖ ≤ β * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  have hWderiv : ∀ s, HasDerivAt (fun r => (V₁ r - V₀ r) - V₃ r)
+      ((A₀ s).comp ((V₁ s - V₀ s) - V₃ s)
+        + (((A₁ s - A₀ s).comp (V₁ s) + (F₁ s - F₀ s)) - F₃ s)) s := by
+    intro s
+    have h := ((hV₁ s).sub (hV₀ s)).sub (hV₃ s)
+    have heq :
+        (A₁ s).comp (V₁ s) + F₁ s - ((A₀ s).comp (V₀ s) + F₀ s)
+            - ((A₀ s).comp (V₃ s) + F₃ s)
+        = (A₀ s).comp ((V₁ s - V₀ s) - V₃ s)
+          + (((A₁ s - A₀ s).comp (V₁ s) + (F₁ s - F₀ s)) - F₃ s) := by
+      simp only [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]
+      abel
+    rwa [heq] at h
+  have hW0 : (fun r => (V₁ r - V₀ r) - V₃ r) t₀ = 0 := by simp [hV₁0, hV₀0, hV₃0]
+  exact norm_inhomogVariation_le hA₀ hWderiv hW0 hβ ht
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
