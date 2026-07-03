@@ -3366,6 +3366,24 @@ theorem inhomogVariation_of_augmented_anchor
   show (z t₀).1 = 0
   rw [hz0]
 
+/-- **Existence and a-priori bound of the first variation from the augmented flow.**  The operator
+coordinate `V = (z ·).1` of an integral curve `z` of `augmentedVariationalField A F` through `(0, 1)`
+is the anchored first variation of `V' = A ∘ V + F` (`hasDerivAt_inhomogVariation_of_augmented`,
+`inhomogVariation_of_augmented_anchor`), so it inherits the general Grönwall a-priori bound: with
+`‖A s‖ ≤ K` and `‖F s‖ ≤ M` on `[t₀, T]`, `‖V t‖ ≤ M · gronwallBound 0 K 1 (t - t₀)` there.  This is
+the capstone of the augmented-flow reduction: existence *and* the exponential size control of the
+first variation follow from homogeneous flow existence alone, delivering the complete first-variation
+data (existence, anchoring, size bound) consumed by the second-variation estimates. -/
+theorem norm_inhomogVariation_of_augmented_le {A F : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) {z : ℝ → ((E →L[ℝ] E) × ℝ)}
+    (hz : ∀ s, HasDerivAt z (augmentedVariationalField A F s (z s)) s)
+    (hz0 : z t₀ = (0, 1)) {M T : ℝ} (hFbound : ∀ s ∈ Set.Icc t₀ T, ‖F s‖ ≤ M)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ‖(z t).1‖ ≤ M * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  have hV := hasDerivAt_inhomogVariation_of_augmented hz hz0
+  have hV0 : (fun r => (z r).1) t₀ = 0 := inhomogVariation_of_augmented_anchor hz0
+  exact norm_inhomogVariation_le hA hV hV0 hFbound ht
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
