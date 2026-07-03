@@ -8230,6 +8230,66 @@ theorem parabolicC0AlphaNorm_const_smul_le {X E 𝕜 : Type*} [PseudoMetricSpace
     parabolicC0AlphaNorm α (fun z => c • u z) s ≤ ‖c‖ * parabolicC0AlphaNorm α u s :=
   le_of_eq (parabolicC0AlphaNorm_const_smul c hu)
 
+/-- **Submultiplicativity of the parabolic sup norm.**  In a normed ring the parabolic sup norm of a
+pointwise product is at most the product of the parabolic sup norms. -/
+theorem parabolicSupNorm_mul_le {X A : Type*} [PseudoMetricSpace X] [NormedRing A]
+    {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s)
+    (hv : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B v s) :
+    parabolicSupNorm (fun z => u z * v z) s
+      ≤ parabolicSupNorm u s * parabolicSupNorm v s := by
+  have hbu := parabolicBoundedWith_parabolicSupNorm hu
+  have hbv := parabolicBoundedWith_parabolicSupNorm hv
+  exact parabolicSupNorm_le
+    (mul_nonneg (parabolicSupNorm_nonneg u s) (parabolicSupNorm_nonneg v s))
+    (hbu.mul hbv (parabolicSupNorm_nonneg u s))
+
+/-- **Product estimate for the parabolic Hölder seminorm.**  The parabolic Hölder seminorm of a
+pointwise product is controlled by the Leibniz combination of sup norms and Hölder seminorms of the
+two factors. -/
+theorem parabolicHolderSeminorm_mul_le {X A : Type*} [PseudoMetricSpace X] [NormedRing A]
+    {α : ℝ} {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicHolderSeminorm α (fun z => u z * v z) s
+      ≤ parabolicSupNorm u s * parabolicHolderSeminorm α v s
+        + parabolicSupNorm v s * parabolicHolderSeminorm α u s := by
+  obtain ⟨Bu, hBu, Hu, hHu, hbu, hhu⟩ := hu
+  obtain ⟨Bv, hBv, Hv, hHv, hbv, hhv⟩ := hv
+  have hmul :=
+    (parabolicHolderWith_parabolicHolderSeminorm (u := u) ⟨Hu, hHu, hhu⟩).mul
+      (parabolicHolderWith_parabolicHolderSeminorm (u := v) ⟨Hv, hHv, hhv⟩)
+      (parabolicBoundedWith_parabolicSupNorm (u := u) ⟨Bu, hBu, hbu⟩)
+      (parabolicBoundedWith_parabolicSupNorm (u := v) ⟨Bv, hBv, hbv⟩)
+      (parabolicSupNorm_nonneg u s)
+  exact parabolicHolderSeminorm_le
+    (add_nonneg
+      (mul_nonneg (parabolicSupNorm_nonneg u s) (parabolicHolderSeminorm_nonneg α v s))
+      (mul_nonneg (parabolicSupNorm_nonneg v s) (parabolicHolderSeminorm_nonneg α u s)))
+    hmul
+
+/-- **Banach-algebra (submultiplicative) estimate for the parabolic `C^{0,α}` norm.**  In a normed
+ring the parabolic `C^{0,α}` norm of a pointwise product is at most the product of the parabolic
+`C^{0,α}` norms: `‖u v‖_{C^{0,α}} ≤ ‖u‖_{C^{0,α}} ‖v‖_{C^{0,α}}`.  This is the normed-algebra
+inequality of the parabolic Hölder space, a key ingredient for the nonlinear (Ricci–DeTurck)
+Schauder estimates. -/
+theorem parabolicC0AlphaNorm_mul_le {X A : Type*} [PseudoMetricSpace X] [NormedRing A]
+    {α : ℝ} {u v : ℝ × X → A} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicC0AlphaNorm α (fun z => u z * v z) s
+      ≤ parabolicC0AlphaNorm α u s * parabolicC0AlphaNorm α v s := by
+  have hsup : parabolicSupNorm (fun z => u z * v z) s
+      ≤ parabolicSupNorm u s * parabolicSupNorm v s := by
+    obtain ⟨Bu, hBu, _, _, hbu, _⟩ := hu
+    obtain ⟨Bv, hBv, _, _, hbv, _⟩ := hv
+    exact parabolicSupNorm_mul_le ⟨Bu, hBu, hbu⟩ ⟨Bv, hBv, hbv⟩
+  have hhol := parabolicHolderSeminorm_mul_le hu hv
+  have hSU := parabolicSupNorm_nonneg u s
+  have hSV := parabolicSupNorm_nonneg v s
+  have hHU := parabolicHolderSeminorm_nonneg α u s
+  have hHV := parabolicHolderSeminorm_nonneg α v s
+  unfold parabolicC0AlphaNorm
+  nlinarith [hsup, hhol, hSU, hSV, hHU, hHV, mul_nonneg hHU hHV]
+
 end AnalyticPDE
 end RicciFlow
 
