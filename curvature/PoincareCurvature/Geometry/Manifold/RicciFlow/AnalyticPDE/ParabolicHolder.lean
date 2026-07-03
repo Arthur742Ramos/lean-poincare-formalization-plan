@@ -6958,6 +6958,112 @@ theorem parabolicClosedCylinder.mem_nhds {X : Type*} [PseudoMetricSpace X] {p : 
   Filter.mem_of_superset (parabolicCylinder.mem_nhds ht hs)
     parabolicCylinder.subset_closedCylinder
 
+/-! ### Schauder change of variables on the topological-boundary domains
+
+Combining the generic affine `C^{0,α}` change of variables `ParabolicC0Alpha{With,On}.comp_affineChart`
+(which consumes an arbitrary `Set.MapsTo` of the affine chart) with the `Set.BijOn` of the chart on
+closures and interiors, the affine Schauder normalization is available directly on the
+*closure of an open* parabolic ball/cylinder and on the *interior of a closed* parabolic
+ball/cylinder — the two boundary-domain shapes on which an interior parabolic regularity estimate is
+naturally taken.  The sup bound is preserved and the Hölder constant scales by `|r| ^ α`, exactly as
+for the shape estimates. -/
+
+/-- **Schauder normalization on the closure of an open parabolic ball (`C^{0,α}` control).** -/
+theorem ParabolicC0AlphaWith.comp_affineChart_closure_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α ρ r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (closure (parabolicBall c (|r| * ρ))))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (closure (parabolicBall a ρ)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hH hα
+    (affineChartHomeomorph_bijOn_closure_parabolicBall c a hr ρ).mapsTo
+
+/-- **Schauder normalization on the closure of an open parabolic ball (`C^{0,α}` membership).** -/
+theorem ParabolicC0AlphaOn.comp_affineChart_closure_parabolicBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α ρ r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (closure (parabolicBall c (|r| * ρ))))
+    (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (closure (parabolicBall a ρ)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hα
+    (affineChartHomeomorph_bijOn_closure_parabolicBall c a hr ρ).mapsTo
+
+/-- **Schauder normalization on the closure of an open parabolic cylinder (`C^{0,α}` control).** -/
+theorem ParabolicC0AlphaWith.comp_affineChart_closure_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α T S r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (closure (parabolicCylinder c (r ^ 2 * T) (|r| * S))))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (closure (parabolicCylinder a T S)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hH hα
+    (affineChartHomeomorph_bijOn_closure_parabolicCylinder c a hr T S).mapsTo
+
+/-- **Schauder normalization on the closure of an open parabolic cylinder (`C^{0,α}` membership).** -/
+theorem ParabolicC0AlphaOn.comp_affineChart_closure_parabolicCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α T S r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (closure (parabolicCylinder c (r ^ 2 * T) (|r| * S))))
+    (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (closure (parabolicCylinder a T S)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hα
+    (affineChartHomeomorph_bijOn_closure_parabolicCylinder c a hr T S).mapsTo
+
+/-- **Schauder normalization on the interior of a closed parabolic ball (`C^{0,α}` control).**  This
+is the interior-regularity domain for an interior Schauder estimate on a closed parabolic ball. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_interior_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α ρ r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u (interior (parabolicClosedBall c (|r| * ρ))))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (interior (parabolicClosedBall a ρ)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hH hα
+    (affineChartHomeomorph_bijOn_interior_parabolicClosedBall c a hr ρ).mapsTo
+
+/-- **Schauder normalization on the interior of a closed parabolic ball (`C^{0,α}` membership).** -/
+theorem ParabolicC0AlphaOn.comp_affineChart_interior_parabolicClosedBall
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α ρ r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (interior (parabolicClosedBall c (|r| * ρ))))
+    (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (interior (parabolicClosedBall a ρ)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hα
+    (affineChartHomeomorph_bijOn_interior_parabolicClosedBall c a hr ρ).mapsTo
+
+/-- **Schauder normalization on the interior of a closed parabolic cylinder (`C^{0,α}` control).**
+This is the interior-regularity domain for an interior Schauder estimate on a closed parabolic
+cylinder `Q = (t₀, t₁) × Ω`. -/
+theorem ParabolicC0AlphaWith.comp_affineChart_interior_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {B H α T S r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaWith B H α u
+      (interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))))
+    (hH : 0 ≤ H) (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaWith B (H * |r| ^ α) α
+      (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (interior (parabolicClosedCylinder a T S)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hH hα
+    (affineChartHomeomorph_bijOn_interior_parabolicClosedCylinder c a hr T S).mapsTo
+
+/-- **Schauder normalization on the interior of a closed parabolic cylinder (`C^{0,α}` membership).** -/
+theorem ParabolicC0AlphaOn.comp_affineChart_interior_parabolicClosedCylinder
+    {X E : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedAddCommGroup E]
+    {α T S r : ℝ} {c a : ℝ × X} {u : ℝ × X → E}
+    (hu : ParabolicC0AlphaOn α u (interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))))
+    (hα : 0 ≤ α) (hr : r ≠ 0) :
+    ParabolicC0AlphaOn α (fun p : ℝ × X => u (c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))))
+      (interior (parabolicClosedCylinder a T S)) :=
+  hu.comp_affineChart (c := c) (a := a) (r := r) hα
+    (affineChartHomeomorph_bijOn_interior_parabolicClosedCylinder c a hr T S).mapsTo
+
 end AnalyticPDE
 end RicciFlow
 
