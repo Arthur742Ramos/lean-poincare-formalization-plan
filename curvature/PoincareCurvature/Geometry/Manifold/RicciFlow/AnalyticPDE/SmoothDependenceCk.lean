@@ -3403,6 +3403,92 @@ theorem augmentedVariationalField_fst_unique {A F : ℝ → (E →L[ℝ] E)} {K 
     rw [inhomogVariation_of_augmented_anchor hz₁0, inhomogVariation_of_augmented_anchor hz₂0]
   exact inhomogVariation_unique hA hV₁ hV₂ h0 t
 
+/-!
+### Gluing integral curves across a junction (the continuation primitive)
+
+Mathlib v4.29.1 supplies *local* existence of integral curves (Picard–Lindelöf on a compact
+interval) but no way to **glue** integral curves that meet at a common time into a single curve valid
+on the union.  The two lemmas here provide that missing continuation primitive.
+
+The payoff is `isIntegralCurve_of_isIntegralCurveOn_Iic_Ici`: a curve which is an integral curve on
+the left half-line `Iic b` and on the right half-line `Ici b` is a **global** integral curve.  This
+is exactly the shape (`IsIntegralCurve` — a genuine two-sided derivative at *every* time) consumed by
+every flow-existence hypothesis in this file (`hΦ : ∀ x, IsIntegralCurve (Φ x) …`, and the augmented
+homogeneous flow `∀ s, HasDerivAt z …` of `hasDerivAt_inhomogVariation_of_augmented`).  Thus a global
+integral curve can be assembled from a forward local solution on `[b, ∞)` and a backward local
+solution on `(-∞, b]` glued at the anchor `b` — reducing global existence to one-sided existence.
+
+`isIntegralCurve_glue_Iic_Ici` is the constructive companion: it *builds* the glued curve
+`fun t => if t ≤ b then γ₁ t else γ₂ t` from two one-sided integral curves that agree at the junction
+`γ₁ b = γ₂ b`, and shows it is a global integral curve.  Only Mathlib's Banach-level within-set
+derivative calculus is used — no PDE or manifold content. -/
+
+/-- **Half-line gluing to a global integral curve.**  If `γ` is an integral curve of `v` on the left
+half-line `Iic b` *and* on the right half-line `Ici b`, then it is a *global* integral curve of `v`.
+At a time `t < b` the set `Iic b` is a neighbourhood of `t`, so the within-`Iic b` derivative upgrades
+to a two-sided `HasDerivAt`; symmetrically for `t > b` using `Ici b`; and at the junction `t = b` the
+two one-sided within-set derivatives combine via `HasDerivWithinAt.union` over `Iic b ∪ Ici b = univ`
+into the two-sided derivative.  This is the continuation primitive that turns one-sided existence into
+the global `IsIntegralCurve` consumed throughout this file. -/
+theorem isIntegralCurve_of_isIntegralCurveOn_Iic_Ici {b : ℝ}
+    (h₁ : IsIntegralCurveOn γ v (Set.Iic b)) (h₂ : IsIntegralCurveOn γ v (Set.Ici b)) :
+    IsIntegralCurve γ v := by
+  intro t
+  rcases lt_trichotomy t b with hlt | heq | hgt
+  · have hd := h₁ t (le_of_lt hlt)
+    have hnhd : Set.Iic b ∈ 𝓝 t :=
+      Filter.mem_of_superset (isOpen_Iio.mem_nhds (Set.mem_Iio.mpr hlt)) Set.Iio_subset_Iic_self
+    exact hd.hasDerivAt hnhd
+  · rw [heq]
+    have hd1 := h₁ b (Set.mem_Iic.mpr le_rfl)
+    have hd2 := h₂ b (Set.mem_Ici.mpr le_rfl)
+    have hu := hd1.union hd2
+    rw [Set.Iic_union_Ici] at hu
+    exact hasDerivWithinAt_univ.mp hu
+  · have hd := h₂ t (le_of_lt hgt)
+    have hnhd : Set.Ici b ∈ 𝓝 t :=
+      Filter.mem_of_superset (isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr hgt)) Set.Ioi_subset_Ici_self
+    exact hd.hasDerivAt hnhd
+
+/-- **Constructive continuation: gluing two one-sided integral curves into a global one.**  Given a
+left integral curve `γ₁` on `Iic b` and a right integral curve `γ₂` on `Ici b` that agree at the
+junction (`γ₁ b = γ₂ b`), the piecewise curve `fun t => if t ≤ b then γ₁ t else γ₂ t` is a *global*
+integral curve of `v`.  The glued curve agrees with `γ₁` on `Iic b` and with `γ₂` on `Ici b` (the
+junction value being pinned by `γ₁ b = γ₂ b`), so each one-sided integral-curve property transfers by
+`HasDerivWithinAt.congr`, and `isIntegralCurve_of_isIntegralCurveOn_Iic_Ici` assembles them into the
+global curve.  This is the concrete tool for continuing a solution past a time `b` — the operational
+heart of extending local ODE solutions to global ones. -/
+theorem isIntegralCurve_glue_Iic_Ici {b : ℝ} {γ₁ γ₂ : ℝ → E}
+    (h₁ : IsIntegralCurveOn γ₁ v (Set.Iic b)) (h₂ : IsIntegralCurveOn γ₂ v (Set.Ici b))
+    (hmatch : γ₁ b = γ₂ b) :
+    IsIntegralCurve (fun t => if t ≤ b then γ₁ t else γ₂ t) v := by
+  set γ := fun t => if t ≤ b then γ₁ t else γ₂ t with hγdef
+  have hEq1 : Set.EqOn γ γ₁ (Set.Iic b) := by
+    intro x hx
+    simp only [hγdef]
+    rw [if_pos (Set.mem_Iic.mp hx)]
+  have hEq2 : Set.EqOn γ γ₂ (Set.Ici b) := by
+    intro x hx
+    have hbx : b ≤ x := Set.mem_Ici.mp hx
+    rcases hbx.lt_or_eq with h | h
+    · simp only [hγdef]
+      rw [if_neg (not_le.mpr h)]
+    · subst h
+      simp only [hγdef]
+      rw [if_pos le_rfl]
+      exact hmatch
+  have step1 : IsIntegralCurveOn γ v (Set.Iic b) := by
+    intro x hx
+    have hgx : γ x = γ₁ x := hEq1 hx
+    rw [hgx]
+    exact (h₁ x hx).congr (fun y hy => hEq1 hy) hgx
+  have step2 : IsIntegralCurveOn γ v (Set.Ici b) := by
+    intro x hx
+    have hgx : γ x = γ₂ x := hEq2 hx
+    rw [hgx]
+    exact (h₂ x hx).congr (fun y hy => hEq2 hy) hgx
+  exact isIntegralCurve_of_isIntegralCurveOn_Iic_Ici step1 step2
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
