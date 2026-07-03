@@ -4186,6 +4186,46 @@ theorem exists_hasFDerivAt_flow_of_lipschitz_deriv [CompleteSpace E]
     rw [dist_eq_norm, dist_eq_norm] at hlip
     exact hlip
 
+/-- **The time-`t` flow map is differentiable in the initial condition everywhere (`C^{1,1}`
+field).**  Strengthening `exists_hasFDerivAt_flow_of_lipschitz_deriv` to a *single* flow family that
+is differentiable at *every* base point: under the same field-level hypotheses (uniformly
+`K`-Lipschitz, time-continuous `v` with everywhere-defined, jointly continuous, spatially
+`L`-Lipschitz derivative `Dv`), there is one flow family `Φ` of `v` (anchored `Φ z t₀ = z`) whose
+forward time-`t` slice `z ↦ Φ z t` is `Differentiable ℝ` — i.e. Fréchet differentiable at every
+initial value.  Proof: build `Φ` once with `exists_flow_family`, then at each base point `x₀` supply
+the derivative via `exists_hasFDerivAt_flow_of_lipschitz_deriv`'s internal construction (coefficient
+`Dv s (Φ x₀ s)`, variational flow family, resolvent) and read off `.differentiableAt`.  This is the
+"`C¹` in initial data" regularity statement consumed by the spatial bootstrap of Items 1 and 2. -/
+theorem exists_flow_differentiable_of_lipschitz_deriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    {t : ℝ} (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        Differentiable ℝ (fun z => Φ z t) := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  refine ⟨Φ, h0, hΦ, ?_⟩
+  intro x₀
+  have hAnorm : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K := by
+    intro s
+    have h : ‖Dv s (Φ x₀ s)‖ ≤ (K : ℝ) := (hderiv s (Φ x₀ s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcont : Continuous fun s => Dv s (Φ x₀ s) := by
+    have hpair : Continuous fun s : ℝ => (s, Φ x₀ s) :=
+      continuous_id.prodMk (hΦ x₀).continuous
+    exact hDvc.comp hpair
+  obtain ⟨Φ', h0', hΦ'⟩ := exists_variationalFlowFamily hAnorm hAcont
+  refine (hasFDerivAt_flow_of_lipschitz_deriv hv hAnorm hΦ' h0' hΦ h0 x₀ ht0
+    (Dv := Dv) (L := (L : ℝ)) ?_ L.coe_nonneg ?_).differentiableAt
+  · intro z s _ ξ _
+    exact (hderiv s ξ).hasFDerivWithinAt
+  · intro z s _ ξ _
+    have hlip := (hDvlip s).dist_le_mul ξ (Φ x₀ s)
+    rw [dist_eq_norm, dist_eq_norm] at hlip
+    exact hlip
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
