@@ -6010,6 +6010,27 @@ theorem affineChart_bijOn_parabolicClosedCylinder
   exact hinv.bijOn parabolicClosedCylinder_mapsTo_affineChart
     (parabolicClosedCylinder_mapsTo_affineChart_inv hr)
 
+/-- **Exact image of a parabolic ball under the affine chart.**  For `r ≠ 0`, the forward affine
+chart carries the closed parabolic ball of radius `ρ` about `a` *onto* (not merely into) the closed
+parabolic ball of radius `|r| * ρ` about `c`.  This is the image-equality strengthening of
+`parabolicClosedBall_mapsTo_affineChart`, obtained from the bijection. -/
+theorem affineChart_image_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) '' parabolicClosedBall a ρ
+      = parabolicClosedBall c (|r| * ρ) :=
+  (affineChart_bijOn_parabolicClosedBall c a hr ρ).image_eq
+
+/-- **Exact image of a parabolic cylinder under the affine chart.**  For `r ≠ 0`, the forward affine
+chart carries the closed parabolic cylinder of time radius `T` and space radius `S` about `a` onto
+the closed parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about `c`. -/
+theorem affineChart_image_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) '' parabolicClosedCylinder a T S
+      = parabolicClosedCylinder c (r ^ 2 * T) (|r| * S) :=
+  (affineChart_bijOn_parabolicClosedCylinder c a hr T S).image_eq
+
 /-! ### De-normalization Schauder estimates (inverse affine chart)
 
 The forward `comp_affineChart_parabolicClosed{Ball,Cylinder}` estimates *normalize*: they transport
