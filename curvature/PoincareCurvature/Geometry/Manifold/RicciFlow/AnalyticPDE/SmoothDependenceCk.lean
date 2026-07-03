@@ -8467,6 +8467,57 @@ theorem norm_bilinearCompForcing_sub_sub_le_sq
     mul_nonneg (by positivity) (by linarith)
   nlinarith [hextra, hknn, hk, sq_nonneg ‖k‖]
 
+/-- **Pure quadratic (`C^{2,1}`) Taylor bound for the field's second spatial derivative** — the
+`D²v`-analogue of `norm_derivField_sub_sub_secondDeriv_le`, one order up.  For the field's second
+spatial derivative in the **multilinear representation** `D²v s : E → (E[×2]→L E)` — with third spatial
+derivative `D³v s : E → (E →L (E[×2]→L E))`, `M`-Lipschitz — the Taylor remainder is quadratic:
+`‖D²v s b − D²v s a − D³v s a (b − a)‖ ≤ M · ‖b − a‖²`.
+
+Crucially the derivative's codomain `E[×2]→L E = ContinuousMultilinearMap ℝ (Fin 2) E` **does** carry
+`NormedAddCommGroup`/`NormedSpace` instances (so `E →L (E[×2]→L E)` does too, and `LipschitzWith M`
+type-checks), whereas the naive operator-curried triple `E →L (E →L (E →L E))` carries **no** norm
+instance in Mathlib v4.29.1 (verified) — hence the second derivative must be Taylor-expanded in this
+multilinear representation, and later bridged to the composition form of the second-variation forcing
+via the `continuousMultilinearCurryFin1` isometries.  A one-line specialisation of the codomain-generic
+`norm_sub_fderiv_le_mul_sq_of_lipschitz` (`g = D²v s`, `g' = D³v s`).  This is the `D³v`-Taylor
+ingredient of the remaining `(F₁ − F₀)` second-order forcing remainder toward `ContDiff ℝ 3`. -/
+theorem norm_secondDerivField_sub_sub_thirdDeriv_ml_le
+    {D2v : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3v : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {M : ℝ≥0} {s : ℝ}
+    (hD2v : ∀ ξ, HasFDerivAt (D2v s) (D3v s ξ) ξ) (hD3vlip : LipschitzWith M (D3v s)) (a b : E) :
+    ‖D2v s b - D2v s a - D3v s a (b - a)‖ ≤ (M : ℝ) * ‖b - a‖ ^ 2 :=
+  norm_sub_fderiv_le_mul_sq_of_lipschitz hD2v hD3vlip a b
+
+/-- **Flow-tube quadratic bound for the field's second-derivative linearisation defect** — the
+`D²v`-analogue of `norm_field_linearizationDefect_flow_le`.  For a uniformly `K`-Lipschitz field `v`
+whose second spatial derivative `D²v s : E → (E[×2]→L E)` has an everywhere-defined, `M`-Lipschitz
+Fréchet derivative `D³v s : E → (E →L (E[×2]→L E))`, the trajectory linearisation of `D²v` has a
+quadratically small defect, uniformly on the compact time tube `|s − t₀| ≤ T`:
+`‖D²v s (Φ z s) − D²v s (Φ x s) − D³v s (Φ x s) (Φ z s − Φ x s)‖ ≤ M · exp (2 K T) · ‖z − x‖²`.
+Combines the pure multilinear Taylor bound `norm_secondDerivField_sub_sub_thirdDeriv_ml_le`
+(`a = Φ x s`, `b = Φ z s`) with the flow-separation square bound `norm_flow_sub_sq_le`
+(`‖Φ z s − Φ x s‖² ≤ exp (2 K T) ‖z − x‖²`).  With `Φ z s − Φ x s ≈ D_x Φ_s (z − x)` this is the
+`O(‖z − x‖²)` residual isolating the leading `D³v(Φ x s)[D_x Φ_s (z − x)]` term of the base-point
+second-derivative coefficient expansion — the flow-tube `D³v`-Taylor datum the `(F₁ − F₀)` forcing
+remainder consumes for its `dP`-linear (`F_C`) term. -/
+theorem norm_secondDerivField_sub_sub_thirdDeriv_ml_flow_le
+    {Φ : E → ℝ → E}
+    {D2v : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3v : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {M : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hD2v : ∀ ξ, HasFDerivAt (D2v s) (D3v s ξ) ξ) (hD3vlip : LipschitzWith M (D3v s))
+    (hsT : |s - t₀| ≤ T) (x z : E) :
+    ‖D2v s (Φ z s) - D2v s (Φ x s) - D3v s (Φ x s) (Φ z s - Φ x s)‖
+      ≤ (M : ℝ) * Real.exp (2 * (K : ℝ) * T) * ‖z - x‖ ^ 2 := by
+  refine (norm_secondDerivField_sub_sub_thirdDeriv_ml_le hD2v hD3vlip (Φ x s) (Φ z s)).trans ?_
+  have hfs := norm_flow_sub_sq_le hv hΦ h0 hsT x z
+  calc (M : ℝ) * ‖Φ z s - Φ x s‖ ^ 2
+      ≤ (M : ℝ) * (Real.exp (2 * (K : ℝ) * T) * ‖z - x‖ ^ 2) :=
+        mul_le_mul_of_nonneg_left hfs M.coe_nonneg
+    _ = (M : ℝ) * Real.exp (2 * (K : ℝ) * T) * ‖z - x‖ ^ 2 := by ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
