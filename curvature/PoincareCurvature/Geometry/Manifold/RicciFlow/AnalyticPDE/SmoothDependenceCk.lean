@@ -2,6 +2,7 @@ module
 
 public import Mathlib.Analysis.ODE.Basic
 public import Mathlib.Analysis.ODE.Gronwall
+public import Mathlib.Analysis.ODE.PicardLindelof
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 set_option linter.unusedSectionVars false
@@ -3670,6 +3671,132 @@ theorem isIntegralCurveOn_comp_neg {f : ℝ → E} {v : ℝ → E → E} {s : Se
   have hcomp := (hf (-t) hmem).scomp t (hasDerivWithinAt_neg t (Neg.neg ⁻¹' s))
     (Set.mapsTo_preimage Neg.neg s)
   simpa only [Function.comp_def, neg_one_smul] using hcomp
+
+/-!
+### Local existence of integral curves (Picard–Lindelöf, uniform step)
+
+The continuation stack above (`isIntegralCurveOn_Icc_union`, `isIntegralCurveOn_Icc_chain`,
+`isIntegralCurve_of_forall_Icc_Ici_Iic`) reduces *global* existence of an integral curve to
+*compact-interval* `IsIntegralCurveOn` data, and the augmented-flow reduction
+(`hasDerivAt_inhomogVariation_of_augmented`) reduces existence of the first variation to existence of
+a global integral curve of the Lipschitz field `augmentedVariationalField A F`.  The one remaining
+input is *local* existence — which is exactly what Mathlib v4.29.1 supplies, via Picard–Lindelöf
+(`IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀`) on a complete Banach space.
+
+For a field that is **uniformly (in time) `K`-Lipschitz in state**, the local solution can be produced
+on a time interval of a *uniform* half-length `lipschitzFlowStep K`, independent of the anchor
+`(t₀, x₀)`.  The mechanism: on a closed ball of radius `a` the field is bounded by `K·a + C₀` (with
+`C₀` a time-sup of `‖v · x₀‖`), so Picard–Lindelöf yields a solution of length `a/(K·a + C₀) → 1/K`
+as `a → ∞`; choosing `a` large (depending on `C₀`) makes the length reach the fixed target
+`lipschitzFlowStep K`.  This uniform lower bound on the step is what allows the local solutions to be
+*chained* (via `isIntegralCurveOn_Icc_chain`) across an arbitrarily long compact interval — the
+crucial property a merely-local existence statement would lack. -/
+
+/-- The **uniform local-existence half-step** for a uniformly `K`-Lipschitz vector field: the
+anchor-independent time radius `min 1 (1 / (2 (K + 1)))` on which a local integral curve is guaranteed
+to exist (`exists_isIntegralCurveOn_Icc_of_lipschitzWith`).  It lies in `(0, 1]` and satisfies
+`K · lipschitzFlowStep K ≤ 1/2`, the inequality that makes the Picard–Lindelöf interval-length
+constraint solvable with a fixed step. -/
+def lipschitzFlowStep (K : ℝ≥0) : ℝ := min 1 (1 / (2 * ((K : ℝ) + 1)))
+
+/-- The uniform local-existence half-step is positive. -/
+theorem lipschitzFlowStep_pos (K : ℝ≥0) : 0 < lipschitzFlowStep K := by
+  refine lt_min one_pos ?_
+  positivity
+
+/-- The uniform local-existence half-step is at most `1`. -/
+theorem lipschitzFlowStep_le_one (K : ℝ≥0) : lipschitzFlowStep K ≤ 1 := min_le_left _ _
+
+/-- The defining inequality of the half-step: `K · lipschitzFlowStep K ≤ 1/2`.  (Since
+`lipschitzFlowStep K ≤ 1 / (2 (K + 1))` and `K ≤ K + 1`.)  This is the bound that makes the
+Picard–Lindelöf time-length constraint `L · h ≤ a` solvable with a *fixed* step `h`. -/
+theorem lipschitzFlowStep_mul_le (K : ℝ≥0) : (K : ℝ) * lipschitzFlowStep K ≤ 1 / 2 := by
+  have hK : (0 : ℝ) ≤ (K : ℝ) := K.coe_nonneg
+  have hstep : lipschitzFlowStep K ≤ 1 / (2 * ((K : ℝ) + 1)) := min_le_right _ _
+  have hpos : (0 : ℝ) < (K : ℝ) + 1 := by positivity
+  calc (K : ℝ) * lipschitzFlowStep K
+      ≤ (K : ℝ) * (1 / (2 * ((K : ℝ) + 1))) := by gcongr
+    _ = (K : ℝ) / (2 * ((K : ℝ) + 1)) := by rw [mul_one_div]
+    _ ≤ 1 / 2 := by
+        rw [div_le_iff₀ (by positivity : (0:ℝ) < 2 * ((K : ℝ) + 1))]
+        nlinarith [hK]
+
+/-- **Local existence of an integral curve, uniform step (Picard–Lindelöf).**  For a vector field
+`v : ℝ → E → E` on a complete real Banach space that is uniformly (in time) `K`-Lipschitz in the state
+(`∀ t, LipschitzWith K (v t)`) and continuous in time at every fixed state (`∀ x, Continuous (v · x)`),
+and for any anchor `(t₀, x₀)`, there is an integral curve `γ` of `v` through `x₀` on the symmetric
+closed interval of the *uniform* half-length `lipschitzFlowStep K` — a radius depending only on `K`,
+**not** on the anchor `(t₀, x₀)`.
+
+This is the local-existence input the continuation stack (`isIntegralCurveOn_Icc_chain`,
+`isIntegralCurve_of_forall_Icc_Ici_Iic`) and the augmented-flow reduction
+(`hasDerivAt_inhomogVariation_of_augmented`) consume — the one piece Mathlib supplies directly, here
+packaged from `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀`.  The uniform lower bound
+on the step is essential: it lets the finitely many local solutions be chained across an arbitrarily
+long compact interval.
+
+Construction: on the closed ball `closedBall x₀ a` the field is bounded by `L = K·a + C₀` where
+`C₀ = sup_{[t₀-h, t₀+h]} ‖v · x₀‖` (finite by compactness), so `IsPicardLindelof` holds on the
+interval as soon as `L·h ≤ a`.  Taking `a = 2·h·(C₀+1) + 1` with `h = lipschitzFlowStep K` (whence
+`K·h ≤ 1/2`) makes `L·h ≤ a/2 + (a-1)/2 = a - 1/2 ≤ a`. -/
+theorem exists_isIntegralCurveOn_Icc_of_lipschitzWith [CompleteSpace E]
+    {v : ℝ → E → E} {K : ℝ≥0}
+    (hlip : ∀ t, LipschitzWith K (v t)) (hcont : ∀ x, Continuous fun t => v t x)
+    (t₀ : ℝ) (x₀ : E) :
+    ∃ γ : ℝ → E, γ t₀ = x₀ ∧
+      IsIntegralCurveOn γ v (Set.Icc (t₀ - lipschitzFlowStep K) (t₀ + lipschitzFlowStep K)) := by
+  set h : ℝ := lipschitzFlowStep K with hh_def
+  have hh0 : 0 < h := by rw [hh_def]; exact lipschitzFlowStep_pos K
+  have hKh : (K : ℝ) * h ≤ 1 / 2 := by rw [hh_def]; exact lipschitzFlowStep_mul_le K
+  have hmem : t₀ ∈ Set.Icc (t₀ - h) (t₀ + h) := Set.mem_Icc.mpr ⟨by linarith, by linarith⟩
+  -- time-sup of ‖v · x₀‖ on the compact interval
+  have hcontOn : ContinuousOn (fun t => v t x₀) (Set.Icc (t₀ - h) (t₀ + h)) := (hcont x₀).continuousOn
+  obtain ⟨C₀, hC₀⟩ := isCompact_Icc.exists_bound_of_continuousOn hcontOn
+  have hC₀0 : 0 ≤ C₀ := le_trans (norm_nonneg _) (hC₀ t₀ hmem)
+  -- ball radius and field bound
+  set a : ℝ := 2 * h * (C₀ + 1) + 1 with ha_def
+  have ha0 : 0 < a := by rw [ha_def]; positivity
+  set L : ℝ := (K : ℝ) * a + C₀ + 1 with hL_def
+  have hL0 : 0 < L := by rw [hL_def]; positivity
+  -- the Picard–Lindelöf interval-length inequality  L·h ≤ a
+  have hLh : L * h ≤ a := by
+    have e1 : (K : ℝ) * a * h ≤ a / 2 := by
+      have h' : (K : ℝ) * a * h = a * ((K : ℝ) * h) := by ring
+      rw [h']
+      calc a * ((K : ℝ) * h) ≤ a * (1 / 2) := by gcongr
+        _ = a / 2 := by ring
+    have e2 : (C₀ + 1) * h = (a - 1) / 2 := by rw [ha_def]; ring
+    have expand : L * h = (K : ℝ) * a * h + (C₀ + 1) * h := by rw [hL_def]; ring
+    rw [expand, e2]; linarith [e1]
+  -- build the Picard–Lindelöf datum on [t₀-h, t₀+h]
+  have hpl : IsPicardLindelof v (⟨t₀, hmem⟩ : Set.Icc (t₀ - h) (t₀ + h)) x₀
+      ⟨a, le_of_lt ha0⟩ 0 ⟨L, le_of_lt hL0⟩ K := by
+    refine ⟨fun t _ => (hlip t).lipschitzOnWith, fun x _ => (hcont x).continuousOn,
+      fun t ht x hx => ?_, ?_⟩
+    · -- norm bound on the ball
+      have hxa : dist x x₀ ≤ a := by
+        have := Metric.mem_closedBall.mp hx
+        simpa using this
+      have h_first : ‖v t x - v t x₀‖ ≤ (K : ℝ) * a := by
+        rw [← dist_eq_norm]
+        refine le_trans ((hlip t).dist_le_mul x x₀) ?_
+        gcongr
+      have h_second : ‖v t x₀‖ ≤ C₀ := hC₀ t ht
+      have hle : ‖v t x‖ ≤ (K : ℝ) * a + C₀ := by
+        have htri : ‖v t x‖ ≤ ‖v t x - v t x₀‖ + ‖v t x₀‖ := by
+          simpa using norm_add_le (v t x - v t x₀) (v t x₀)
+        calc ‖v t x‖ ≤ ‖v t x - v t x₀‖ + ‖v t x₀‖ := htri
+          _ ≤ (K : ℝ) * a + C₀ := add_le_add h_first h_second
+      calc ‖v t x‖ ≤ (K : ℝ) * a + C₀ := hle
+        _ ≤ L := by rw [hL_def]; linarith
+    · -- interval-length inequality
+      show (L : ℝ) * max ((t₀ + h) - t₀) (t₀ - (t₀ - h)) ≤ a - ((0 : ℝ≥0) : ℝ)
+      have hmax : max ((t₀ + h) - t₀) (t₀ - (t₀ - h)) = h := by
+        rw [show (t₀ + h) - t₀ = h by ring, show t₀ - (t₀ - h) = h by ring, max_self]
+      rw [hmax, NNReal.coe_zero, sub_zero]
+      exact hLh
+  obtain ⟨γ, hγ0, hγd⟩ := hpl.exists_eq_forall_mem_Icc_hasDerivWithinAt₀
+  exact ⟨γ, hγ0, fun t ht => hγd t ht⟩
 
 end SmoothDependenceCk
 end AnalyticPDE
