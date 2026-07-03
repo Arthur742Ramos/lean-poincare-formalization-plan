@@ -3225,6 +3225,32 @@ theorem firstVariation_perturbation_smul_eq
   have h0 : Vc t₀ = (fun r => c • V r) t₀ := by simp [hVc0, hV0]
   exact inhomogVariation_unique hA₂ hVc hsmul h0 t
 
+/-- **Volterra (integral) form of the first variation.**  The anchored solution of the inhomogeneous
+variational ODE `V' = A ∘ V + F` (`V t₀ = 0`) satisfies the fixed-point integral equation
+`V t = ∫_{t₀}^{t} (A σ ∘ V σ + F σ) dσ`.  Immediate from the fundamental theorem of calculus
+(`intervalIntegral.integral_eq_sub_of_hasDerivAt`) with the anchor `V t₀ = 0`, the integrand being
+continuous (`A`, `F` continuous, `V` continuous from `HasDerivAt`) hence interval-integrable.  This is
+the Volterra/Picard equation whose iteration constructs the first variation — the integral-equation
+starting point for the *existence* of the first variation (the remaining, continuation-flavoured half
+of the linearity-and-existence target), companion to `fundamentalSolution_eq_one_add_integral` for
+the homogeneous resolvent. -/
+theorem inhomogVariation_eq_integral [CompleteSpace E]
+    {A F V : ℝ → (E →L[ℝ] E)}
+    (hAcont : Continuous A) (hFcont : Continuous F)
+    (hVderiv : ∀ s, HasDerivAt V ((A s).comp (V s) + F s) s)
+    (hV0 : V t₀ = 0) (t : ℝ) :
+    V t = ∫ σ in t₀..t, ((A σ).comp (V σ) + F σ) := by
+  have hVcont : Continuous V :=
+    continuous_iff_continuousAt.mpr (fun s => (hVderiv s).continuousAt)
+  have hHcont : Continuous (fun σ => (A σ).comp (V σ) + F σ) :=
+    (hAcont.clm_comp hVcont).add hFcont
+  have hderiv : ∀ σ ∈ Set.uIcc t₀ t, HasDerivAt V ((A σ).comp (V σ) + F σ) σ :=
+    fun σ _ => hVderiv σ
+  have hint := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
+    (hHcont.intervalIntegrable t₀ t)
+  rw [hV0, sub_zero] at hint
+  exact hint.symm
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
