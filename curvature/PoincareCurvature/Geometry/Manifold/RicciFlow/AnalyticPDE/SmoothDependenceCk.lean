@@ -7153,6 +7153,124 @@ theorem norm_inhomogVariation_sub_sub_le_of_forcingGap
   have hW0 : (fun r => (V₁ r - V₀ r) - V₃ r) t₀ = 0 := by simp [hV₁0, hV₀0, hV₃0]
   exact norm_inhomogVariation_le hA₀ hWderiv hW0 hβ ht
 
+/-- **Base-point Lipschitz continuity of the linearised first-variation curve (the second fundamental
+solution as a curve).**  The `C³`-layer curve-level analogue of the `C²` time-`t`-value continuity of
+the second fundamental solution: for the two linearised first-variation curves in a common direction
+`h`, one at base point `z` (`Vz`: coefficient `A(z) s = Dv s (Φ z s)`, chain-rule forcing
+`((D²v(Φ z s) ∘ W_z) h) ∘ W_z`, resolvent `W_z = D_x Φ_s^{A(z)} = fundamentalSolution hAz hΦ₁ h1`) and
+one at base point `x₀` (`Vx`, the analogue at `x₀`), the whole curve difference is `O(‖z − x₀‖ · ‖h‖)`
+uniformly on the forward tube `[t₀, T]`:
+`‖Vz t − Vx t‖ ≤ exp(K(T−t₀))³ · (M + 3·L·C'·gronwallBound 0 K 1 (T−t₀)) · ‖z − x₀‖ · ‖h‖ ·
+gronwallBound 0 K 1 (t − t₀)`.
+
+Unlike the inline continuity buried in `exists_flow_contDiff_two_of_lipschitz_secondDeriv` (which only
+extracts the time-`t` value `‖D₂ z h − D₂ x₀ h‖`), this exposes the full curve estimate as a standalone
+reusable lemma — the `‖V₁ − V₀‖` size datum that the base-point second-order Taylor analysis of the
+`C³` layer (the `hβ` forcing gap of `norm_inhomogVariation_sub_sub_le_of_forcingGap`) consumes for the
+cross term `(A₁ − A₀) ∘ (V₁ − V₀)`.
+
+Proof: `norm_inhomogVariation_sub_le_of_gap` (the coefficient-and-forcing-gap Grönwall estimate) fed
+the coefficient gap `α = L·exp(K(T−t₀))·‖z−x₀‖` (`norm_derivField_apply_flow_sub_le`), the second-
+solution size `N = C'·exp(2K(T−t₀))·‖h‖·gronwallBound 0 K 1 (T−t₀)` on `Vx`
+(`norm_linearisedFirstVariation_le` + `gronwallBound_mono`), and the forcing gap `β`
+(`norm_chainRuleForcing_sub_le` fed `‖D²v‖ ≤ C'`, the resolvent bound `‖W‖ ≤ exp` from
+`norm_fundamentalSolution_le`, the `D²v`-gap `norm_secondDerivField_apply_flow_sub_le`, and the
+resolvent base-gap `norm_fundamentalSolution_baseCurve_sub_le`); the messy `(α·N + β)·gronwall`
+constant collapses to the clean `exp³·(M + 3LC'g)` form by `Real.exp_add` (`exp(2·) = exp(·)²`) and
+`ring`. -/
+theorem norm_linearisedFirstVariation_baseCurve_sub_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {L M : ℝ≥0} {C' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hC'0 : 0 ≤ C') (hC'z : ∀ s, ‖D2v s (Φ z s)‖ ≤ C') (hC'x : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h2 : ∀ x, Φ₂ x t₀ = x)
+    (h : E) {T : ℝ}
+    {Vz Vx : ℝ → (E →L[ℝ] E)}
+    (hVz : ∀ s, HasDerivAt Vz
+      ((Dv s (Φ z s)).comp (Vz s)
+        + ((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) h).comp
+            (fundamentalSolution hAz hΦ₁ h1 s)) s)
+    (hVz0 : Vz t₀ = 0)
+    (hVx : ∀ s, HasDerivAt Vx
+      ((Dv s (Φ x₀ s)).comp (Vx s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) h).comp
+            (fundamentalSolution hAx hΦ₂ h2 s)) s)
+    (hVx0 : Vx t₀ = 0)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ‖Vz t - Vx t‖
+      ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+          * ((M : ℝ) + 3 * (L : ℝ) * C' * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+          * ‖z - x₀‖ * ‖h‖ * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  -- Coefficient gap `α = L · exp(K(T−t₀)) · ‖z − x₀‖`.
+  have hAgap : ∀ s ∈ Set.Icc t₀ T,
+      ‖Dv s (Φ z s) - Dv s (Φ x₀ s)‖
+        ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ := by
+    intro s hs
+    have hsT : |s - t₀| ≤ T - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+    exact norm_derivField_apply_flow_sub_le hv hΦ h0 (hDvlip s) hsT z x₀
+  -- Second-solution size `N = C' · exp(2K(T−t₀)) · ‖h‖ · gronwallBound 0 K 1 (T−t₀)`.
+  have hVxbound : ∀ s ∈ Set.Icc t₀ T,
+      ‖Vx s‖
+        ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖ * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    intro s hs
+    refine (norm_linearisedFirstVariation_le x₀ hAx hΦ₂ h2 hC'0 hC'x h hVx hVx0 hs).trans ?_
+    have hmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+      gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg (by linarith [hs.2])
+    have hpre : (0 : ℝ) ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖ :=
+      mul_nonneg (mul_nonneg hC'0 (Real.exp_pos _).le) (norm_nonneg _)
+    exact mul_le_mul_of_nonneg_left hmono hpre
+  -- Forcing gap `β = (dp·w² + 2·C'·w·dw) · ‖h‖`.
+  have hFgap : ∀ s ∈ Set.Icc t₀ T,
+      ‖((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) h).comp
+              (fundamentalSolution hAz hΦ₁ h1 s)
+            - ((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) h).comp
+                (fundamentalSolution hAx hΦ₂ h2 s)‖
+        ≤ ((M : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖
+              * Real.exp ((K : ℝ) * (T - t₀)) ^ 2
+            + 2 * C' * Real.exp ((K : ℝ) * (T - t₀))
+                * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖
+                    * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          * ‖h‖ := by
+    intro s hs
+    have hsT : |s - t₀| ≤ T - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+    have hexpmono : Real.exp ((K : ℝ) * |s - t₀|) ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+      Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsT K.coe_nonneg)
+    have hwz : ‖fundamentalSolution hAz hΦ₁ h1 s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+      (norm_fundamentalSolution_le hAz hΦ₁ h1 s).trans hexpmono
+    have hwx : ‖fundamentalSolution hAx hΦ₂ h2 s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+      (norm_fundamentalSolution_le hAx hΦ₂ h2 s).trans hexpmono
+    have hdp : ‖D2v s (Φ z s) - D2v s (Φ x₀ s)‖
+        ≤ (M : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ :=
+      norm_secondDerivField_apply_flow_sub_le hv hΦ h0 (hD2vlip s) hsT z x₀
+    have hgnn : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+      gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans hs.1 hs.2))
+    have hdw : ‖fundamentalSolution hAz hΦ₁ h1 s - fundamentalSolution hAx hΦ₂ h2 s‖
+        ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖
+            * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+      refine (norm_fundamentalSolution_baseCurve_sub_le hv hΦ h0 hDvlip z x₀ hAz hAx
+        hΦ₁ h1 hΦ₂ h2 hs).trans ?_
+      have hmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+        gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg (by linarith [hs.2])
+      exact mul_le_mul_of_nonneg_left hmono (by positivity)
+    exact norm_chainRuleForcing_sub_le h (hC'z s) hwz hwx hdp hdw hC'0 (Real.exp_pos _).le
+      (by positivity) (mul_nonneg (by positivity) hgnn)
+  -- Assemble via the coefficient-and-forcing-gap Grönwall estimate, then collapse the constant.
+  have hα : (0 : ℝ) ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ := by positivity
+  refine (norm_inhomogVariation_sub_le_of_gap hAz hVz hVz0 hVx hVx0 hAgap hVxbound hFgap hα ht).trans
+    (le_of_eq ?_)
+  have he2 : Real.exp (2 * (K : ℝ) * (T - t₀)) = Real.exp ((K : ℝ) * (T - t₀)) ^ 2 := by
+    rw [sq, ← Real.exp_add]; congr 1; ring
+  rw [he2]; ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
