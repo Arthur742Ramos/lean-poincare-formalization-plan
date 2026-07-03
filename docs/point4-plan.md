@@ -4728,6 +4728,12 @@ its local counterpart holds on the neighbourhood of `x₀` where the local estim
   `fderiv`) — **the local `C^{1,1}` payoff entry point**: `C¹` dependence from a *locally* Lipschitz
   spatial derivative `‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖` holding only for `z` near `x₀` — the honest
   form the Ricci-DeTurck right-hand side supplies.
+* `hasFDerivAt_flow_of_lipschitz_deriv_on_ball` (+ `differentiableAt`/`fderiv`) — **the chart-level
+  entry point**: takes a *global* spatial derivative `HasFDerivAt (v s) (Dv s ξ) ξ` plus the
+  Lipschitz-derivative bound holding only on a fixed radius-`r` ball around each anchor point
+  `Φ x₀ s`; for `‖z - x₀‖ < r / exp (K (t - t₀))` the trajectory chord `[Φ x₀ s, Φ z s]` stays inside
+  that ball (flow separation), discharging the eventual hypothesis.  This is exactly what a smooth
+  (`C^∞`) field on a chart supplies — its derivative is locally Lipschitz on balls.
 
 Update — **continuous dependence of the resolvent on the coefficient field** is now proved (axioms
 `propext`/`Classical.choice`/`Quot.sound` only), the operator-level input to the `C²` regularity of
