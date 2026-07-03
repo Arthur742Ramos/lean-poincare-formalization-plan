@@ -4465,6 +4465,30 @@ theorem norm_flow_sub_fundamentalSolution_le_sq
   refine hmain.trans_eq ?_
   ring
 
+/-- **Flow-separation square bound on the compact time tube.**  `‖Φ z s - Φ x s‖² ≤ exp (2 K T) ‖z - x‖²`
+whenever `|s - t₀| ≤ T`; the square of the exponential flow-Lipschitz bound `dist_flow_apply_le`.  A
+reusable factor for the quadratic (`C^{1,1}`/`C²`) remainder estimates, where a `‖b - a‖²` Taylor term
+with `a = Φ x s`, `b = Φ z s` must be re-expressed in the initial separation `‖z - x‖`. -/
+theorem norm_flow_sub_sq_le
+    {Φ : E → ℝ → E} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hsT : |s - t₀| ≤ T) (x z : E) :
+    ‖Φ z s - Φ x s‖ ^ 2 ≤ Real.exp (2 * (K : ℝ) * T) * ‖z - x‖ ^ 2 := by
+  have hexp : Real.exp ((K : ℝ) * |s - t₀|) ≤ Real.exp ((K : ℝ) * T) :=
+    Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsT K.coe_nonneg)
+  have hsep : ‖Φ z s - Φ x s‖ ≤ Real.exp ((K : ℝ) * T) * ‖z - x‖ := by
+    have hd := dist_flow_apply_le hv hΦ h0 z x s
+    rw [dist_eq_norm, dist_eq_norm] at hd
+    calc ‖Φ z s - Φ x s‖ ≤ ‖z - x‖ * Real.exp ((K : ℝ) * |s - t₀|) := hd
+      _ ≤ ‖z - x‖ * Real.exp ((K : ℝ) * T) := mul_le_mul_of_nonneg_left hexp (norm_nonneg _)
+      _ = Real.exp ((K : ℝ) * T) * ‖z - x‖ := mul_comm _ _
+  have hexp2 : Real.exp ((K : ℝ) * T) ^ 2 = Real.exp (2 * (K : ℝ) * T) := by
+    rw [sq, ← Real.exp_add]; congr 1; ring
+  calc ‖Φ z s - Φ x s‖ ^ 2
+      ≤ (Real.exp ((K : ℝ) * T) * ‖z - x‖) ^ 2 :=
+        pow_le_pow_left₀ (norm_nonneg _) hsep 2
+    _ = Real.exp (2 * (K : ℝ) * T) * ‖z - x‖ ^ 2 := by rw [mul_pow, hexp2]
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
