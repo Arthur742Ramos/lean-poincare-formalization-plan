@@ -5301,3 +5301,52 @@ Remaining for the smooth-dependence tower (future sessions): the **`C³` layer**
 analysis of `x₀ ↦ D₂(x₀)`, giving `ContDiff ℝ 3`), and/or the **`ContDiff ℝ 1`/`2` everywhere→jointly
 in `(x, t)`** refinements and connecting the now-`ContDiff` initial-data dependence to the
 manifold gauge-flow consumers of Items 1 & 2.
+
+Update — **the `C³`-layer forcing toolkit is now under construction** (the third-order variational
+analysis giving `ContDiff ℝ 3`).  The `C³` bootstrap replicates the `C²` continuity mechanism one order
+up: the *third* fundamental solution `x₀ ↦ D₃(x₀)` (`= ∂/∂x₀ D₂(x₀)`) is characterised, per direction,
+by an inhomogeneous linear variational ODE whose forcing is `∂/∂x₀` of the second-variation
+chain-rule forcing `((D²v(Φz)∘W)h)∘W`.  Differentiating in the base point produces **three** forcing
+terms: two *asymmetric composition* terms `((D²v(Φz)∘D₂(z))h)∘W(z)` and `((D²v(Φz)∘W(z))h)∘D₂(z)`
+(where `D₂` is the second fundamental solution and `W` the resolvent), plus a *third-derivative* term
+built from `D³v(Φz)` contracted once with a resolvent direction.  The generic driver
+`norm_inhomogVariation_sub_le_of_gap` (which only needs a forcing gap `β`) is directly reusable at the
+`D₃` level, so the new work is exactly the `β` (forcing-gap) and `N` (forcing-size) data for these three
+terms.  This session adds the fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`)
+primitives that supply them:
+
+* `norm_field_apply_flow_sub_le` — the **codomain-generic field-along-flow Lipschitz size datum**: for
+  *any* seminormed target `F` and an `N`-Lipschitz field `DF s : E → F`, `z ↦ DF s (Φ z s)` moves by at
+  most `N · exp (K T) · ‖z − w‖` on the tube `|s − t₀| ≤ T`.  Subsumes
+  `norm_secondDerivField_apply_flow_sub_le` (`F := E →L[ℝ] (E →L[ℝ] E)`) and, crucially, sidesteps the
+  fact that the *curried* triple `E →L[ℝ] E →L[ℝ] E →L[ℝ] E` carries **no** operator-norm instance in
+  Mathlib v4.29.1 (verified).
+* `norm_thirdDerivField_apply_flow_sub_le` — the **`D³v`-along-flow Lipschitz bound**, the third-order
+  analogue of `norm_secondDerivField_apply_flow_sub_le`, with the third spatial derivative represented
+  by the canonical `iteratedFDeriv`-target `ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E` (which
+  *does* carry clean `NormedAddCommGroup`/`NormedSpace` instances, unlike the curried triple).
+* `norm_bilinearCompForcing_sub_le` — the **asymmetric composition-forcing perturbation**
+  `‖((P₁∘A₁)h)∘B₁ − ((P₂∘A₂)h)∘B₂‖ ≤ (dp·a·b + p·da·b + p·a·db)·‖h‖` for *possibly-different* inner/outer
+  operands `A ≠ B` (e.g. `A = D₂`, `B = W`).  Specialising `A = B = W` recovers exactly
+  `norm_chainRuleForcing_sub_le` (`(dp·w² + 2p·w·dw)·‖h‖`) — verified.  Supplies the `β`-gap of the two
+  asymmetric forcing terms.
+* `norm_bilinearCompForcing_le` — the **a-priori size** `‖((P∘A)h)∘B‖ ≤ ‖P‖·‖A‖·‖B‖·‖h‖`, the `N`-datum
+  bounding the (second) `D₃`-solution through `norm_inhomogVariation_le`.
+* `norm_clm_apply_sub_le` — the **bilinear-evaluation gap**
+  `‖T₁ u₁ − T₂ u₂‖ ≤ ‖T₁‖·‖u₁ − u₂‖ + ‖T₁ − T₂‖·‖u₂‖`, the telescoping split of a product gap into an
+  operand-gap and an operator-gap part.
+* `norm_thirdDerivCurryLeft_apply_flow_sub_le` — the **once-contracted `D³v`-field gap** (the `β`-gap of
+  the third-derivative forcing term): `‖(D³v(Φz s)).curryLeft u₁ − (D³v(Φw s)).curryLeft u₂‖ ≤
+  ‖D³v(Φz s)‖·‖u₁ − u₂‖ + N·exp(K T)·‖z − w‖·‖u₂‖`, assembled from `norm_clm_apply_sub_le`, the
+  `curryLeft` isometry `ContinuousMultilinearMap.curryLeft_norm`, and
+  `norm_thirdDerivField_apply_flow_sub_le`.
+
+Remaining for the `C³` layer (future sessions): the **existence of the second-order (third) variation**
+(`exists_hasDerivAt_secondVariation…`, the `D₃`-analogue of
+`exists_hasDerivAt_firstVariation_linearised_dir`), the **packaged `D₃` operator** — which, because
+`D₂ : E →L[ℝ] (E →L[ℝ] E)`, must be represented in a form avoiding the instance-less curried triple
+(e.g. via `ContinuousMultilinearMap`/`curryLeft`) — the **second-order Taylor remainder**
+`‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²`, and finally the `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+bridge to `ContDiff ℝ 3`.  The forcing-gap/size toolkit above is exactly the analogue of the
+`C²`-continuity data (`norm_secondDerivField_apply_flow_sub_le`, `norm_fundamentalSolution_baseCurve_sub_le`,
+`norm_chainRuleForcing_sub_le`) that drove `exists_flow_contDiff_two_of_lipschitz_secondDeriv`.
