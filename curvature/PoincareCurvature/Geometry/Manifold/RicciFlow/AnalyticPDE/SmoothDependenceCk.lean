@@ -1363,6 +1363,112 @@ theorem tendsto_modulus_comp_norm_sub {ω : ℝ → ℝ} {c : ℝ} (x₀ : E)
     simpa using hnorm.const_mul c
   exact hω.comp hsep
 
+open Asymptotics Filter in
+/-- **`C¹` dependence of the flow from a uniform modulus of continuity of the spatial derivative.**
+With `Φ`, `Φ'` the nonlinear/variational flow families and `t ≥ t₀`, suppose the field `v s` has
+spatial derivative `Dv s` on each trajectory chord `[Φ x₀ s, Φ z s]` (`s ∈ Ico t₀ t`), and a single
+nonnegative, monotone modulus `ω : ℝ → ℝ` vanishing at `0⁺` bounds the derivative oscillation there
+by the distance to the anchor trajectory, `‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)`.  Then `x ↦ Φ x t`
+is Fréchet differentiable at `x₀` with derivative the resolvent `fundamentalSolution … t = D_x Φ_t`.
+The chord points lie within `exp (K |s - t₀|) · ‖z - x₀‖` of `Φ x₀ s` (`dist_flow_apply_le`), so the
+monotone modulus caps the oscillation by `C z := ω (exp (K (t - t₀)) · ‖z - x₀‖) → 0`
+(`tendsto_modulus_comp_norm_sub`), discharging the hypothesis of
+`hasFDerivAt_flow_of_segment_oscillation_tendsto_zero`.  This is the `C¹`-regularity input in its
+most usable form: a modulus of continuity for the field's spatial derivative. -/
+theorem hasFDerivAt_flow_of_uniform_deriv_modulus
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {ω : ℝ → ℝ} (hωnn : ∀ r, 0 ≤ ω r) (hωmono : Monotone ω)
+    (hω0 : Tendsto ω (𝓝[≥] (0 : ℝ)) (𝓝 0))
+    (hmod : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  set c : ℝ := Real.exp ((K : ℝ) * (t - t₀)) with hc
+  have hc0 : 0 ≤ c := (Real.exp_pos _).le
+  set C : E → ℝ := fun z => ω (c * ‖z - x₀‖) with hC
+  have hCnn : ∀ z, 0 ≤ C z := fun z => hωnn _
+  have hCto : Tendsto C (𝓝 x₀) (𝓝 0) := tendsto_modulus_comp_norm_sub x₀ hc0 hω0
+  have hosc : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ C z := by
+    intro z s hs ξ hξ
+    have hle : ‖ξ - Φ x₀ s‖ ≤ c * ‖z - x₀‖ := by
+      obtain ⟨p, q, hp, hq, hpq, rfl⟩ := hξ
+      have hq1 : q ≤ 1 := by linarith
+      have heq : (p • Φ x₀ s + q • Φ z s) - Φ x₀ s = q • (Φ z s - Φ x₀ s) := by
+        have hp1 : p = 1 - q := by linarith
+        rw [hp1, sub_smul, one_smul, smul_sub]
+        abel
+      have hsep : ‖Φ z s - Φ x₀ s‖ ≤ ‖z - x₀‖ * Real.exp ((K : ℝ) * |s - t₀|) := by
+        have h := dist_flow_apply_le hv hΦ h0 z x₀ s
+        rwa [dist_eq_norm, dist_eq_norm] at h
+      have hexp : Real.exp ((K : ℝ) * |s - t₀|) ≤ c := by
+        rw [hc]
+        refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left ?_ K.coe_nonneg)
+        rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]
+        exact sub_le_sub_right hs.2.le t₀
+      rw [heq, norm_smul, Real.norm_eq_abs, abs_of_nonneg hq]
+      calc q * ‖Φ z s - Φ x₀ s‖ ≤ 1 * ‖Φ z s - Φ x₀ s‖ :=
+            mul_le_mul_of_nonneg_right hq1 (norm_nonneg _)
+        _ = ‖Φ z s - Φ x₀ s‖ := one_mul _
+        _ ≤ ‖z - x₀‖ * Real.exp ((K : ℝ) * |s - t₀|) := hsep
+        _ ≤ ‖z - x₀‖ * c := mul_le_mul_of_nonneg_left hexp (norm_nonneg _)
+        _ = c * ‖z - x₀‖ := mul_comm _ _
+    calc ‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖) := hmod z s hs ξ hξ
+      _ ≤ ω (c * ‖z - x₀‖) := hωmono hle
+      _ = C z := by simp only [hC]
+  exact hasFDerivAt_flow_of_segment_oscillation_tendsto_zero hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv
+    hCnn hCto hosc
+
+open Asymptotics Filter in
+/-- **The flow map is differentiable at the base point** from a uniform modulus of continuity of
+the spatial derivative: `DifferentiableAt ℝ (fun z => Φ z t) x₀`. -/
+theorem differentiableAt_flow_of_uniform_deriv_modulus
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {ω : ℝ → ℝ} (hωnn : ∀ r, 0 ≤ ω r) (hωmono : Monotone ω)
+    (hω0 : Tendsto ω (𝓝[≥] (0 : ℝ)) (𝓝 0))
+    (hmod : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_uniform_deriv_modulus hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hωnn hωmono hω0
+    hmod).differentiableAt
+
+open Asymptotics Filter in
+/-- **The Fréchet derivative of the flow map is the resolvent** from a uniform modulus of
+continuity of the spatial derivative:
+`fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution … t = D_x Φ_t`. -/
+theorem fderiv_flow_of_uniform_deriv_modulus
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {ω : ℝ → ℝ} (hωnn : ∀ r, 0 ≤ ω r) (hωmono : Monotone ω)
+    (hω0 : Tendsto ω (𝓝[≥] (0 : ℝ)) (𝓝 0))
+    (hmod : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_uniform_deriv_modulus hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hωnn hωmono hω0
+    hmod).fderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
