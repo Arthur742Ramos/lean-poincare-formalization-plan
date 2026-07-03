@@ -1653,6 +1653,148 @@ theorem fderiv_flow_of_defect_isLittleO_eventually
   (hasFDerivAt_flow_of_defect_isLittleO_eventually hA hΦ' h0' hΦ h0 x₀ ht0 hDnn hdefect
     hDo).fderiv
 
+open Asymptotics Filter in
+/-- **Local form of `hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero`.**  The per-time defect
+bound `‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ C z · (exp (K |s - t₀|) · ‖z - x₀‖)`,
+with `C z → 0`, is required only for `z` in a neighbourhood of `x₀`.  Reduces to
+`hasFDerivAt_flow_of_defect_isLittleO_eventually` with `D z = C z · exp (K (t - t₀)) · ‖z - x₀‖`. -/
+theorem hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero_eventually
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hdefect : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+        ≤ C z * (Real.exp ((K : ℝ) * |s - t₀|) * ‖z - x₀‖)) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  set D : E → ℝ := fun z => C z * (Real.exp ((K : ℝ) * (t - t₀)) * ‖z - x₀‖) with hD
+  have hDnn : ∀ z, 0 ≤ D z := fun z =>
+    mul_nonneg (hCnn z) (mul_nonneg (Real.exp_pos _).le (norm_nonneg _))
+  have hdefect' : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z := by
+    filter_upwards [hdefect] with z hdefectz
+    intro s hs
+    have hsle : |s - t₀| ≤ t - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]
+      exact sub_le_sub_right hs.2.le t₀
+    have hexple : Real.exp ((K : ℝ) * |s - t₀|) ≤ Real.exp ((K : ℝ) * (t - t₀)) :=
+      Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsle K.coe_nonneg)
+    refine (hdefectz s hs).trans ?_
+    simp only [hD]
+    exact mul_le_mul_of_nonneg_left
+      (mul_le_mul_of_nonneg_right hexple (norm_nonneg _)) (hCnn z)
+  have hDo : (fun z => D z) =o[𝓝 x₀] fun z => z - x₀ := by
+    refine isLittleO_of_norm_le_mul_of_tendsto_nhds_zero
+      (g := fun z => C z * Real.exp ((K : ℝ) * (t - t₀))) ?_ ?_
+    · refine Filter.Eventually.of_forall (fun z => ?_)
+      rw [Real.norm_eq_abs, abs_of_nonneg (hDnn z)]
+      refine le_of_eq ?_
+      simp only [hD]
+      ring
+    · simpa using hCto.mul_const (Real.exp ((K : ℝ) * (t - t₀)))
+  exact hasFDerivAt_flow_of_defect_isLittleO_eventually hA hΦ' h0' hΦ h0 x₀ ht0 hDnn hdefect' hDo
+
+open Asymptotics Filter in
+/-- Local form of `differentiableAt_flow_of_uniform_oscillation_tendsto_zero`. -/
+theorem differentiableAt_flow_of_uniform_oscillation_tendsto_zero_eventually
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hdefect : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+        ≤ C z * (Real.exp ((K : ℝ) * |s - t₀|) * ‖z - x₀‖)) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero_eventually hA hΦ' h0' hΦ h0 x₀ ht0 hCnn
+    hCto hdefect).differentiableAt
+
+open Asymptotics Filter in
+/-- Local form of `fderiv_flow_of_uniform_oscillation_tendsto_zero`. -/
+theorem fderiv_flow_of_uniform_oscillation_tendsto_zero_eventually
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hdefect : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+        ≤ C z * (Real.exp ((K : ℝ) * |s - t₀|) * ‖z - x₀‖)) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero_eventually hA hΦ' h0' hΦ h0 x₀ ht0 hCnn
+    hCto hdefect).fderiv
+
+open Asymptotics Filter in
+/-- **Local form of `hasFDerivAt_flow_of_segment_oscillation_tendsto_zero`.**  The derivative
+existence on trajectory chords and the chord-oscillation bound `‖Dv s ξ - A s‖ ≤ C z` (with
+`C z → 0`) are required only for `z` in a neighbourhood of `x₀`.  The mean-value bound
+`norm_flow_defect_le_of_segment_oscillation` converts them (eventually) into the defect modulus of
+`hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero_eventually`. -/
+theorem hasFDerivAt_flow_of_segment_oscillation_tendsto_zero_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hosc : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ C z) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  have hdefect : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+        ≤ C z * (Real.exp ((K : ℝ) * |s - t₀|) * ‖z - x₀‖) := by
+    filter_upwards [hderiv, hosc] with z hderivz hoscz
+    intro s hs
+    exact norm_flow_defect_le_of_segment_oscillation hv hΦ h0 x₀ z s (hderivz s hs) (hoscz s hs)
+  exact hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero_eventually hA hΦ' h0' hΦ h0 x₀ ht0
+    hCnn hCto hdefect
+
+open Asymptotics Filter in
+/-- Local form of `differentiableAt_flow_of_segment_oscillation_tendsto_zero`. -/
+theorem differentiableAt_flow_of_segment_oscillation_tendsto_zero_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hosc : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ C z) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_segment_oscillation_tendsto_zero_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0
+    hderiv hCnn hCto hosc).differentiableAt
+
+open Asymptotics Filter in
+/-- Local form of `fderiv_flow_of_segment_oscillation_tendsto_zero`. -/
+theorem fderiv_flow_of_segment_oscillation_tendsto_zero_eventually
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hosc : ∀ᶠ z in 𝓝 x₀, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ C z) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_segment_oscillation_tendsto_zero_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0
+    hderiv hCnn hCto hosc).fderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
