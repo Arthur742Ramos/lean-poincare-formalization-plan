@@ -4835,6 +4835,118 @@ theorem norm_fundamentalSolution_sub_sub_variation_le_Icc
     _ = ε ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2 := by
         rw [hΓdef]; ring
 
+/-- **Second-order Taylor remainder of the resolvent in the base point.**  Fix `x₀` with reference
+coefficient `A₀ s = Dv s (Φ x₀ s)`, variational flow family `Φ'` and resolvent
+`W₀ s = fundamentalSolution hA hΦ' h0' s = D_x Φ_s`.  For a nearby base point `z` with coefficient
+`A_z s = Dv s (Φ z s)`, variational flow family `Φ₁` and resolvent `W_z s = fundamentalSolution hAz
+hΦ₁ h0₁ s`, the resolvent gap `W_z t - W₀ t` agrees to *second order* in the increment `z - x₀` with
+the *linearised* first variation `Vlin` — the anchored solution of
+`Vlin' = A₀ ∘ Vlin + (∂A₀/∂x₀ · (z - x₀)) ∘ W₀` whose forcing is the chain-rule coefficient
+derivative `∂A₀/∂x₀ = D²v(Φ x₀ s) ∘ W₀` (`hasFDerivAt_derivField_apply_flow`) applied to `z - x₀`:
+`‖(W_z t - W₀ t) - Vlin t‖ ≤ (L² e₁³ g² + Cquad e₁ g) · ‖z - x₀‖²` uniformly on `[t₀, T]`, where
+`e₁ = exp (K (T - t₀))`, `g = gronwallBound 0 K 1 (T - t₀)`, `Cquad = M e₂ + C' L e₂ g`
+(`e₂ = exp (2 K (T - t₀))`).  Proof: triangle inequality across the *true* first variation `Vz`,
+* `‖(W_z t - W₀ t) - Vz t‖ ≤ ε² e₁ g²` (the interval second-order variational estimate
+  `norm_fundamentalSolution_sub_sub_variation_le_Icc`, with `ε = L e₁ ‖z - x₀‖` the coefficient gap
+  from `norm_derivField_apply_flow_sub_le`), and
+* `‖Vz t - Vlin t‖ ≤ Cquad e₁ g ‖z - x₀‖²` (`norm_firstVariation_sub_linearVariation_le_sq`).
+
+Since `Vlin` is *linear* in `z - x₀`, this identifies the Fréchet derivative of `x₀ ↦ D_x Φ_t` in the
+base point with an `O(‖z - x₀‖²)` remainder — the spatial `C²` numerator of the base-point bootstrap
+(the exact resolvent analogue of the `C¹` numerator `norm_flow_sub_fundamentalSolution_le_sq`). -/
+theorem norm_fundamentalSolution_sub_sub_linearVariation_le_sq
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {L M : ℝ≥0} {C' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ) (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K) (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hC'0 : 0 ≤ C') (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (z : E) (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAzcont : Continuous (fun s => Dv s (Φ z s)))
+    {Φ₁ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0₁ : ∀ x, Φ₁ x t₀ = x)
+    {T : ℝ}
+    {Vz Vlin : ℝ → (E →L[ℝ] E)}
+    (hVz : ∀ s, HasDerivAt Vz
+      ((Dv s (Φ x₀ s)).comp (Vz s)
+        + (Dv s (Φ z s) - Dv s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s)) s)
+    (hVz0 : Vz t₀ = 0)
+    (hVlin : ∀ s, HasDerivAt Vlin
+      ((Dv s (Φ x₀ s)).comp (Vlin s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (z - x₀)).comp
+            (fundamentalSolution hA hΦ' h0' s)) s)
+    (hVlin0 : Vlin t₀ = 0)
+    {t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖(fundamentalSolution hAz hΦ₁ h0₁ t - fundamentalSolution hA hΦ' h0' t) - Vlin t‖
+      ≤ ((L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2
+          + ((M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+            * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+        * ‖z - x₀‖ ^ 2 := by
+  -- The coefficient gap `ε = L · exp (K (T - t₀)) · ‖z - x₀‖`, valid on the tube `[t₀, T]`.
+  have hε : (0 : ℝ) ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ :=
+    mul_nonneg (mul_nonneg L.coe_nonneg (Real.exp_pos _).le) (norm_nonneg _)
+  have hAA' : ∀ s ∈ Icc t₀ T,
+      ‖Dv s (Φ z s) - Dv s (Φ x₀ s)‖
+        ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ := by
+    intro s hs
+    have hsabs : |s - t₀| ≤ T - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+    exact norm_derivField_apply_flow_sub_le hv hΦ h0 (hDvlip s) hsabs z x₀
+  -- Piece 1: the true first variation `Vz` predicts the resolvent gap to `O(ε²)`.
+  have hp1 := norm_fundamentalSolution_sub_sub_variation_le_Icc
+    hAz hAzcont hA hAcont hΦ₁ h0₁ hΦ' h0' hε hAA' hVz hVz0 ht
+  -- Piece 2: the linearised first variation `Vlin` agrees with `Vz` to `O(‖z - x₀‖²)`.
+  have hp2 := norm_firstVariation_sub_linearVariation_le_sq
+    hv hΦ h0 hDv hDvlip hD2v hD2vlip x₀ hA hC'0 hC' hΦ' h0' z hVz hVz0 hVlin hVlin0 ht
+  -- Grönwall monotonicity, to replace the `t`-window factor by its endpoint value at `T`.
+  have hgt : gronwallBound 0 (K : ℝ) 1 (t - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg (by linarith [ht.2])
+  have hCq0 : (0 : ℝ) ≤ (M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+      + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀)) := by
+    refine add_nonneg (mul_nonneg M.coe_nonneg (Real.exp_pos _).le) ?_
+    refine mul_nonneg hC'0 (mul_nonneg (mul_nonneg L.coe_nonneg (Real.exp_pos _).le) ?_)
+    exact gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans ht.1 ht.2))
+  -- Bound Piece 2's `t`-window factor by the endpoint value.
+  have hp2' :
+      ((M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+        * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - x₀‖ ^ 2
+      ≤ ((M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+        * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) * ‖z - x₀‖ ^ 2 :=
+    mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_left hgt (mul_nonneg hCq0 (Real.exp_pos _).le)) (sq_nonneg _)
+  -- Reshape both pieces to their clean `· * ‖z - x₀‖²` forms.
+  have hp1' :
+      ‖(fundamentalSolution hAz hΦ₁ h0₁ t - fundamentalSolution hA hΦ' h0' t) - Vz t‖
+        ≤ (L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2 * ‖z - x₀‖ ^ 2 := by
+    refine hp1.trans (le_of_eq ?_); ring
+  have hp2'' :
+      ‖Vz t - Vlin t‖
+        ≤ ((M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+            + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) * ‖z - x₀‖ ^ 2 :=
+    hp2.trans hp2'
+  -- Triangle inequality across `Vz`, then combine the two second-order bounds.
+  have htri : (fundamentalSolution hAz hΦ₁ h0₁ t - fundamentalSolution hA hΦ' h0' t) - Vlin t
+      = ((fundamentalSolution hAz hΦ₁ h0₁ t - fundamentalSolution hA hΦ' h0' t) - Vz t)
+        + (Vz t - Vlin t) := by abel
+  rw [htri]
+  refine (norm_add_le _ _).trans ((add_le_add hp1' hp2'').trans_eq ?_)
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
