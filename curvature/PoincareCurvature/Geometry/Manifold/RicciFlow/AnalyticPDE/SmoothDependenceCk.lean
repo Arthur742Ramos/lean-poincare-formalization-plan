@@ -123,6 +123,33 @@ theorem eq_of_isIntegralCurve_of_eq
   exact dist_le_zero.mp hb
 
 /-!
+## Stability under perturbation of the vector field
+
+Continuous dependence of an integral curve on the *field* it solves: if two curves solve
+uniformly `ε`-close fields (one of them uniformly `K`-Lipschitz), their separation is
+controlled by the Grönwall bound.  This is the driver behind "the flow depends
+continuously on the vector field", used to transfer regularity of the DeTurck field to
+the DeTurck flow.
+-/
+
+/-- **Forward stability under perturbation of the vector field.**  If `f` is an integral
+curve of the uniformly `K`-Lipschitz field `v`, `g` is an integral curve of a field `w`
+that stays within `ε` of `v` uniformly, then for `t₀ ≤ t`,
+`dist (f t) (g t) ≤ gronwallBound (dist (f t₀) (g t₀)) K ε (t - t₀)`. -/
+theorem dist_le_of_isIntegralCurve_perturb_of_le {w : ℝ → E → E} {ε : ℝ}
+    (hv : ∀ t, LipschitzWith K (v t)) (hf : IsIntegralCurve f v) (hg : IsIntegralCurve g w)
+    (hvw : ∀ t x, dist (v t x) (w t x) ≤ ε) (h : t₀ ≤ t) :
+    dist (f t) (g t) ≤ gronwallBound (dist (f t₀) (g t₀)) (K : ℝ) ε (t - t₀) := by
+  have key := dist_le_of_approx_trajectories_ODE (a := t₀) (b := t)
+    (εf := 0) (εg := ε) (δ := dist (f t₀) (g t₀)) hv
+    hf.continuous.continuousOn (fun s _ => (hf s).hasDerivWithinAt)
+    (fun s _ => le_of_eq (dist_self _))
+    hg.continuous.continuousOn (fun s _ => (hg s).hasDerivWithinAt)
+    (fun s _ => by rw [dist_comm]; exact hvw s (g s)) le_rfl
+  have hb := key t ⟨h, le_rfl⟩
+  rwa [zero_add] at hb
+
+/-!
 ## The flow map is exponentially Lipschitz in the initial value
 
 Packaging the two-sided Grönwall bound for a *flow family* `Φ : E → ℝ → E`, where for
