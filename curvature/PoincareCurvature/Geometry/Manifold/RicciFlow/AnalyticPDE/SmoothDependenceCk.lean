@@ -388,6 +388,39 @@ theorem isEmbedding_flow_apply
     Topology.IsEmbedding (fun x => Φ x t) :=
   (isUniformEmbedding_flow_apply hv hΦ h0 t).isEmbedding
 
+/-!
+## Flow-family packaging of uniqueness and field-perturbation stability
+
+The two-sided perturbation bound and the uniqueness lemma, packaged for two flow
+*families* `Φ, Ψ` anchored at the same initial value.  With `ε = 0` the
+perturbation bound degenerates to uniqueness of the flow family; with `ε > 0` it is
+the quantitative "two flows of `ε`-close fields stay close" that transfers
+regularity of the DeTurck vector field to the DeTurck flow (Item 3 / Item 2).
+-/
+
+/-- **Two flow families of uniformly `ε`-close fields, anchored at the same initial
+value, stay close.**  If `Φ x` solves the uniformly `K`-Lipschitz field `v` and `Ψ x`
+solves an `ε`-close field `w`, both with `Φ x t₀ = Ψ x t₀ = x`, then
+`dist (Φ x t) (Ψ x t) ≤ gronwallBound 0 K ε |t - t₀|` for all `t`. -/
+theorem dist_flow_perturb_le {w : ℝ → E → E} {Ψ : E → ℝ → E} {ε : ℝ}
+    (hv : ∀ t, LipschitzWith K (v t))
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (hΨ : ∀ x, IsIntegralCurve (Ψ x) w)
+    (hvw : ∀ t x, dist (v t x) (w t x) ≤ ε)
+    (h0Φ : ∀ x, Φ x t₀ = x) (h0Ψ : ∀ x, Ψ x t₀ = x) (x : E) (t : ℝ) :
+    dist (Φ x t) (Ψ x t) ≤ gronwallBound 0 (K : ℝ) ε |t - t₀| := by
+  have hb := dist_le_of_isIntegralCurve_perturb hv (hΦ x) (hΨ x) hvw t₀ t
+  rwa [h0Φ x, h0Ψ x, dist_self] at hb
+
+/-- **Uniqueness of the flow family.**  Any two flow families of the *same* uniformly
+`K`-Lipschitz field anchored at `Φ x t₀ = Ψ x t₀ = x` agree everywhere. -/
+theorem flow_eq_of_isIntegralCurve {Ψ : E → ℝ → E}
+    (hv : ∀ t, LipschitzWith K (v t))
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (hΨ : ∀ x, IsIntegralCurve (Ψ x) v)
+    (h0Φ : ∀ x, Φ x t₀ = x) (h0Ψ : ∀ x, Ψ x t₀ = x) (x : E) (t : ℝ) :
+    Φ x t = Ψ x t := by
+  have h0 : Φ x t₀ = Ψ x t₀ := by rw [h0Φ x, h0Ψ x]
+  exact eq_of_isIntegralCurve_of_eq hv (hΦ x) (hΨ x) h0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
