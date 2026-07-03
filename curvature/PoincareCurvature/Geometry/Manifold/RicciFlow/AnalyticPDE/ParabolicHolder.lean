@@ -7929,6 +7929,45 @@ theorem parabolicC0AlphaNorm_sub_le {X E : Type*} [PseudoMetricSpace X] [NormedA
   simp only [parabolicC0AlphaNorm]
   linarith
 
+/-- The parabolic Hölder seminorm depends only on the values of `u` on `s`. -/
+theorem parabolicHolderSeminorm_congr {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)} (h : Set.EqOn u v s) :
+    parabolicHolderSeminorm α u s = parabolicHolderSeminorm α v s := by
+  unfold parabolicHolderSeminorm
+  congr 1
+  ext C
+  simp only [Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hC0, hu⟩
+    refine ⟨hC0, fun p hp q hq => ?_⟩
+    rw [← h hp, ← h hq]; exact hu hp hq
+  · rintro ⟨hC0, hv⟩
+    refine ⟨hC0, fun p hp q hq => ?_⟩
+    rw [h hp, h hq]; exact hv hp hq
+
+/-- The parabolic sup norm depends only on the values of `u` on `s`. -/
+theorem parabolicSupNorm_congr {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {u v : ℝ × X → E} {s : Set (ℝ × X)} (h : Set.EqOn u v s) :
+    parabolicSupNorm u s = parabolicSupNorm v s := by
+  unfold parabolicSupNorm
+  congr 1
+  ext B
+  simp only [Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hB0, hu⟩
+    refine ⟨hB0, fun p hp => ?_⟩
+    rw [← h hp]; exact hu hp
+  · rintro ⟨hB0, hv⟩
+    refine ⟨hB0, fun p hp => ?_⟩
+    rw [h hp]; exact hv hp
+
+/-- The parabolic `C^{0,α}` norm depends only on the values of `u` on `s`. -/
+theorem parabolicC0AlphaNorm_congr {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)} (h : Set.EqOn u v s) :
+    parabolicC0AlphaNorm α u s = parabolicC0AlphaNorm α v s := by
+  unfold parabolicC0AlphaNorm
+  rw [parabolicSupNorm_congr h, parabolicHolderSeminorm_congr h]
+
 end AnalyticPDE
 end RicciFlow
 
