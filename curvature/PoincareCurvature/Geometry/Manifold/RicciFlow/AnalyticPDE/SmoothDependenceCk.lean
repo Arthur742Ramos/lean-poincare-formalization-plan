@@ -3798,6 +3798,22 @@ theorem exists_isIntegralCurveOn_Icc_of_lipschitzWith [CompleteSpace E]
   obtain ⟨γ, hγ0, hγd⟩ := hpl.exists_eq_forall_mem_Icc_hasDerivWithinAt₀
   exact ⟨γ, hγ0, fun t ht => hγd t ht⟩
 
+/-- **Local existence of an integral curve at a point (Picard–Lindelöf).**  The
+`IsIntegralCurveAt` form of `exists_isIntegralCurveOn_Icc_of_lipschitzWith`: a uniformly (in time)
+`K`-Lipschitz, time-continuous vector field on a complete real Banach space admits, through any anchor
+`(t₀, x₀)`, a local integral curve valid in a neighbourhood of `t₀`.  Obtained by upgrading the
+solution on `Icc (t₀ - lipschitzFlowStep K) (t₀ + lipschitzFlowStep K)` to `IsIntegralCurveAt` at the
+interior point `t₀` (the interval is a neighbourhood of `t₀` since `lipschitzFlowStep K > 0`), via
+`IsIntegralCurveOn.isIntegralCurveAt`. -/
+theorem exists_isIntegralCurveAt_of_lipschitzWith [CompleteSpace E]
+    {v : ℝ → E → E} {K : ℝ≥0}
+    (hlip : ∀ t, LipschitzWith K (v t)) (hcont : ∀ x, Continuous fun t => v t x)
+    (t₀ : ℝ) (x₀ : E) :
+    ∃ γ : ℝ → E, γ t₀ = x₀ ∧ IsIntegralCurveAt γ v t₀ := by
+  obtain ⟨γ, hγ0, hγon⟩ := exists_isIntegralCurveOn_Icc_of_lipschitzWith hlip hcont t₀ x₀
+  have hpos := lipschitzFlowStep_pos K
+  exact ⟨γ, hγ0, hγon.isIntegralCurveAt (Icc_mem_nhds (by linarith) (by linarith))⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
