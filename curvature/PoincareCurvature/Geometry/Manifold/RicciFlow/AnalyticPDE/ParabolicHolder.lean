@@ -6652,6 +6652,158 @@ theorem affineChartHomeomorph_image_frontier_parabolicClosedCylinder
   rw [(affineChartHomeomorph c a hr).image_frontier (parabolicClosedCylinder a T S),
     affineChartHomeomorph_image_parabolicClosedCylinder c a hr T S]
 
+/-! #### De-normalization: preimage transport of closures, interiors, and frontiers
+
+The image-direction lemmas above transport topological boundary data from the source scale (about
+`a`) forward to the target scale (about `c`).  The following preimage-direction lemmas run the
+reverse (de-normalization) direction: they pull the `closure`/`interior`/`frontier` of a rescaled
+shape about `c` back to the corresponding topological operation of the original shape about `a`,
+using `Homeomorph.preimage_{closure,interior,frontier}` and the `affineChart_preimage_*` identities.
+Together with the image lemmas these give two-way topological transport for Schauder rescaling. -/
+
+/-- Homeomorphism-coe form of `affineChart_preimage_parabolicBall`: the preimage under the forward
+affine chart of the rescaled open parabolic ball about `c` is the original open parabolic ball about
+`a`. -/
+theorem affineChartHomeomorph_preimage_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' parabolicBall c (|r| * ρ) = parabolicBall a ρ :=
+  affineChart_preimage_parabolicBall c a hr ρ
+
+/-- **De-normalization transport of the closure of an open parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_closure_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' closure (parabolicBall c (|r| * ρ))
+      = closure (parabolicBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_closure (parabolicBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicBall c a hr ρ]
+
+/-- **De-normalization transport of the interior of an open parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_interior_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' interior (parabolicBall c (|r| * ρ))
+      = interior (parabolicBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_interior (parabolicBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicBall c a hr ρ]
+
+/-- **De-normalization transport of the frontier of an open parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_frontier_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' frontier (parabolicBall c (|r| * ρ))
+      = frontier (parabolicBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_frontier (parabolicBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicBall c a hr ρ]
+
+/-- Homeomorphism-coe form of `affineChart_preimage_parabolicClosedBall`. -/
+theorem affineChartHomeomorph_preimage_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' parabolicClosedBall c (|r| * ρ) = parabolicClosedBall a ρ :=
+  affineChart_preimage_parabolicClosedBall c a hr ρ
+
+/-- **De-normalization transport of the closure of a closed parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_closure_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' closure (parabolicClosedBall c (|r| * ρ))
+      = closure (parabolicClosedBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_closure (parabolicClosedBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicClosedBall c a hr ρ]
+
+/-- **De-normalization transport of the interior of a closed parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_interior_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' interior (parabolicClosedBall c (|r| * ρ))
+      = interior (parabolicClosedBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_interior (parabolicClosedBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicClosedBall c a hr ρ]
+
+/-- **De-normalization transport of the frontier of a closed parabolic ball.** -/
+theorem affineChartHomeomorph_preimage_frontier_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' frontier (parabolicClosedBall c (|r| * ρ))
+      = frontier (parabolicClosedBall a ρ) := by
+  rw [(affineChartHomeomorph c a hr).preimage_frontier (parabolicClosedBall c (|r| * ρ)),
+    affineChartHomeomorph_preimage_parabolicClosedBall c a hr ρ]
+
+/-- Homeomorphism-coe form of `affineChart_preimage_parabolicCylinder`. -/
+theorem affineChartHomeomorph_preimage_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' parabolicCylinder c (r ^ 2 * T) (|r| * S)
+      = parabolicCylinder a T S :=
+  affineChart_preimage_parabolicCylinder c a hr T S
+
+/-- **De-normalization transport of the closure of an open parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_closure_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' closure (parabolicCylinder c (r ^ 2 * T) (|r| * S))
+      = closure (parabolicCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_closure (parabolicCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicCylinder c a hr T S]
+
+/-- **De-normalization transport of the interior of an open parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_interior_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' interior (parabolicCylinder c (r ^ 2 * T) (|r| * S))
+      = interior (parabolicCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_interior (parabolicCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicCylinder c a hr T S]
+
+/-- **De-normalization transport of the frontier of an open parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_frontier_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' frontier (parabolicCylinder c (r ^ 2 * T) (|r| * S))
+      = frontier (parabolicCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_frontier (parabolicCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicCylinder c a hr T S]
+
+/-- Homeomorphism-coe form of `affineChart_preimage_parabolicClosedCylinder`. -/
+theorem affineChartHomeomorph_preimage_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)
+      = parabolicClosedCylinder a T S :=
+  affineChart_preimage_parabolicClosedCylinder c a hr T S
+
+/-- **De-normalization transport of the closure of a closed parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_closure_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' closure (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))
+      = closure (parabolicClosedCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_closure
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicClosedCylinder c a hr T S]
+
+/-- **De-normalization transport of the interior of a closed parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_interior_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))
+      = interior (parabolicClosedCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_interior
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicClosedCylinder c a hr T S]
+
+/-- **De-normalization transport of the frontier of a closed parabolic cylinder.** -/
+theorem affineChartHomeomorph_preimage_frontier_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    affineChartHomeomorph c a hr ⁻¹' frontier (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))
+      = frontier (parabolicClosedCylinder a T S) := by
+  rw [(affineChartHomeomorph c a hr).preimage_frontier
+      (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)),
+    affineChartHomeomorph_preimage_parabolicClosedCylinder c a hr T S]
+
 end AnalyticPDE
 end RicciFlow
 
