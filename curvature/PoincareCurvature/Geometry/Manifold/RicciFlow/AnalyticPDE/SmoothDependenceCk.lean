@@ -4126,6 +4126,66 @@ theorem exists_variationalFlowFamily [CompleteSpace E]
     simpa only [variationalFieldVec] using hAc.clm_apply continuous_const
   exact exists_flow_family hlip hcont
 
+/-!
+### Unconditional differentiable dependence on initial data for a `C^{1,1}` field
+
+Assembling the flow-family existence with the `C^{1,1}` conditional theorem
+`hasFDerivAt_flow_of_lipschitz_deriv` gives a fully **unconditional** differentiable-dependence
+statement from *field-level* data only: a uniformly `K`-Lipschitz, time-continuous field whose spatial
+Fréchet derivative `Dv` exists everywhere, is jointly continuous, and is (uniformly in time)
+`L`-Lipschitz in space.  No flow family, no coefficient path, no resolvent need be supplied — they are
+all constructed internally.  This is the Banach-level smooth-dependence-on-initial-data result that
+Items 1 and 2 consume: the spatial derivative `x₀ ↦ D_x Φ_t` of the base flow exists and is the
+resolvent. -/
+
+/-- **Unconditional `C¹` dependence of the flow on initial data (`C^{1,1}` field).**  Let `v` be a
+uniformly `K`-Lipschitz (`∀ τ, LipschitzWith K (v τ)`), time-continuous (`∀ x, Continuous (v · x)`)
+field on a complete Banach space, whose spatial Fréchet derivative `Dv s x` exists at every `(s, x)`
+(`hderiv`), is jointly continuous (`hDvc`), and is `L`-Lipschitz in the spatial variable uniformly in
+time (`hDvlip`).  Then for every base point `x₀` and forward time `t ≥ t₀` there exist a flow family
+`Φ` of `v` (anchored `Φ z t₀ = z`) and a bounded operator `D` (the resolvent
+`fundamentalSolution … t = D_x Φ_t`) such that the flow map `z ↦ Φ z t` is **Fréchet differentiable**
+at `x₀` with derivative `D`.
+
+Proof: `exists_flow_family` builds `Φ`; the coefficient `A s := Dv s (Φ x₀ s)` (linearisation along the
+reference trajectory) is norm-`≤ K` (`HasFDerivAt.le_of_lipschitz`, the derivative of a `K`-Lipschitz
+map has norm `≤ K`) and continuous (`Dv` jointly continuous ∘ the continuous reference trajectory), so
+`exists_variationalFlowFamily` builds the variational flow family `Φ'` and hence the resolvent `D`;
+finally `hasFDerivAt_flow_of_lipschitz_deriv` closes the differentiability, its segment-wise derivative
+hypothesis discharged by `HasFDerivAt.hasFDerivWithinAt` and its Lipschitz-defect hypothesis
+`‖Dv s ξ - A s‖ = ‖Dv s ξ - Dv s (Φ x₀ s)‖ ≤ L‖ξ - Φ x₀ s‖` by `hDvlip`. -/
+theorem exists_hasFDerivAt_flow_of_lipschitz_deriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t) :
+    ∃ (Φ : E → ℝ → E) (D : E →L[ℝ] E),
+      (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        HasFDerivAt (fun z => Φ z t) D x₀ := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  -- coefficient `A s = Dv s (Φ x₀ s)`: norm-bounded (derivative of a `K`-Lipschitz map) …
+  have hAnorm : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K := by
+    intro s
+    have h : ‖Dv s (Φ x₀ s)‖ ≤ (K : ℝ) := (hderiv s (Φ x₀ s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  -- … and continuous (jointly continuous `Dv` along the continuous reference trajectory)
+  have hAcont : Continuous fun s => Dv s (Φ x₀ s) := by
+    have hpair : Continuous fun s : ℝ => (s, Φ x₀ s) :=
+      continuous_id.prodMk (hΦ x₀).continuous
+    exact hDvc.comp hpair
+  obtain ⟨Φ', h0', hΦ'⟩ := exists_variationalFlowFamily hAnorm hAcont
+  refine ⟨Φ, fundamentalSolution hAnorm hΦ' h0' t, h0, hΦ, ?_⟩
+  refine hasFDerivAt_flow_of_lipschitz_deriv hv hAnorm hΦ' h0' hΦ h0 x₀ ht0
+    (Dv := Dv) (L := (L : ℝ)) ?_ L.coe_nonneg ?_
+  · intro z s _ ξ _
+    exact (hderiv s ξ).hasFDerivWithinAt
+  · intro z s _ ξ _
+    have hlip := (hDvlip s).dist_le_mul ξ (Φ x₀ s)
+    rw [dist_eq_norm, dist_eq_norm] at hlip
+    exact hlip
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
