@@ -5089,6 +5089,35 @@ theorem exists_hasDerivAt_inhomogVariation_of_continuous [CompleteSpace E]
   refine ⟨V, hV0, fun s => ?_⟩
   simpa only [inhomogVariationalField] using hVcurve s
 
+/-- **Existence of the true first variation `Vz`.**  For the base-point `C²` bootstrap: given the
+reference base point `x₀`, its trajectory-linearised coefficient `A₀ s = Dv s (Φ x₀ s)`
+(`K`-bounded, continuous), the associated resolvent `W₀ = fundamentalSolution hA hΦ' h0'`, and a
+second point `z` whose coefficient `A_z s = Dv s (Φ z s)` is continuous, the anchored *true first
+variation* ODE `Vz' = A₀ ∘ Vz + (A_z − A₀) ∘ W₀`, `Vz t₀ = 0` has a global solution.
+
+The forcing `(A_z − A₀) ∘ W₀` grows like `exp (K |s − t₀|)` and is *never* globally bounded, so the
+globally-bounded `exists_hasDerivAt_inhomogVariation` does not apply; the merely-continuous existence
+`exists_hasDerivAt_inhomogVariation_of_continuous` closes it (`A₀` is `K`-bounded and continuous, the
+forcing is continuous by `Continuous.clm_comp` of `A_z − A₀` with `continuous_fundamentalSolution_time`).
+Produces exactly the `hVz`/`hVz0` datum consumed by
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq`. -/
+theorem exists_hasDerivAt_firstVariation_true [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (z : E) (hAzcont : Continuous (fun s => Dv s (Φ z s))) :
+    ∃ Vz : ℝ → (E →L[ℝ] E), Vz t₀ = 0 ∧
+      ∀ s, HasDerivAt Vz
+        ((Dv s (Φ x₀ s)).comp (Vz s)
+          + (Dv s (Φ z s) - Dv s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s)) s := by
+  have hFc : Continuous fun s =>
+      (Dv s (Φ z s) - Dv s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) :=
+    (hAzcont.sub hAcont).clm_comp (continuous_fundamentalSolution_time hA hΦ' h0')
+  exact exists_hasDerivAt_inhomogVariation_of_continuous hA hAcont hFc t₀
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
