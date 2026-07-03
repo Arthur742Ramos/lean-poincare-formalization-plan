@@ -5033,3 +5033,36 @@ on the compact trajectory tube); the **spatial `C^k`/`C^2` bootstrap** (`x₀ �
 in the base point — now feedable, since the resolvent whose coefficient is `A(x₀) s = D_x v(s, Φ x₀ s)`
 is a constructed object); and packaging the first variation as a bounded *linear map* of the
 perturbation (Fréchet, via the existing linearity/uniqueness/bound lemmas + this existence).
+
+Update — the **spatial `C¹` bootstrap is now CLOSED at the Banach level** for a `C^{1,1}` field (all
+axioms `propext`/`Classical.choice`/`Quot.sound` only): the flow families are constructed from the
+existence tower, and the base-point differentiable dependence — `x₀ ↦ Φ x₀ t` Fréchet differentiable
+with derivative the resolvent — is assembled unconditionally from *field-level* data (no flow family,
+coefficient path, or resolvent supplied by the caller).  This turns the whole conditional
+`C¹`-dependence tower (`hasFDerivAt_flow_of_lipschitz_deriv`, …) into a self-contained theorem.
+
+* `exists_flow_family` — **existence of the flow family**: for a uniformly `K`-Lipschitz,
+  time-continuous field `v` on a complete Banach space, a family `Φ : E → ℝ → E` with `Φ z t₀ = z` and
+  `IsIntegralCurve (Φ z) v` for every `z` (`choose` an integral curve through each `(t₀, z)` out of the
+  global existence theorem `exists_isIntegralCurve_of_lipschitzWith`).  The `(hΦ, h0)` datum.
+* `exists_variationalFlowFamily` — **existence of the variational flow family**: for a norm-bounded
+  (`‖A s‖₊ ≤ K`), continuous coefficient `A`, the `variationalFieldVec A` specialisation of
+  `exists_flow_family` (field `K`-Lipschitz via `lipschitzWith_variationalFieldVec`, time-continuous
+  via `Continuous.clm_apply`).  The `(hΦ', h0')` datum, hence the resolvent `fundamentalSolution`.
+* `exists_hasFDerivAt_flow_of_lipschitz_deriv` — **unconditional base-point differentiable
+  dependence**: given `v` uniformly `K`-Lipschitz + time-continuous with an everywhere-defined,
+  jointly continuous (`hDvc`), spatially `L`-Lipschitz (`hDvlip`) Fréchet derivative `Dv`, there exist a
+  flow family `Φ` of `v` and a bounded operator `D` (the resolvent `D_x Φ_t`) with `HasFDerivAt
+  (fun z => Φ z t) D x₀` at any `x₀`, `t ≥ t₀`.  Proof: `exists_flow_family` builds `Φ`; the coefficient
+  `A s = Dv s (Φ x₀ s)` is norm-`≤ K` (`HasFDerivAt.le_of_lipschitz`) and continuous, so
+  `exists_variationalFlowFamily` builds `Φ'`/`D`; `hasFDerivAt_flow_of_lipschitz_deriv` closes it
+  (segment derivative via `HasFDerivAt.hasFDerivWithinAt`, Lipschitz defect via `hDvlip`).
+* `exists_flow_differentiable_of_lipschitz_deriv` — **`C¹` in initial data everywhere**: a *single*
+  flow family `Φ` of `v` whose time-`t` slice `z ↦ Φ z t` is `Differentiable ℝ` (Fréchet differentiable
+  at every initial value) — the clean regularity statement (build `Φ` once, differentiate at each `x₀`).
+
+Remaining after this (future sessions): the *general* merely-continuous spatial modulus (Heine–Cantor
+on the compact trajectory tube — upgrades `C^{1,1}` to a general `C¹` field); the **spatial `C^2`/`C^k`
+bootstrap** (differentiate `x₀ ↦ D_x Φ_t` once more, via the now-constructed resolvent and the
+second-order variational equation `norm_fundamentalSolution_sub_sub_variation_le`); and packaging the
+first variation as a bounded *linear map* of the perturbation (Fréchet).
