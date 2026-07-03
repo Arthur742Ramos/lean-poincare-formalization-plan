@@ -4823,6 +4823,22 @@ that differentiable dependence on the coefficient field will be built on:
   `fundamentalSolution_injective` (injectivity) it gives a genuine two-sided operator inverse, so the
   flow map `x ↦ Φ x t` is a linear isomorphism for `t` near `t₀` (the local-diffeomorphism input for
   Item 2's compact-manifold gauge flow).
+* `fundamentalSolution_sub_eq_integral` — the **Duhamel difference formula** (variation of
+  parameters) for two coefficient fields `A₁`, `A₂` with resolvents `W₁`, `W₂`:
+  `W₁ t - W₂ t = ∫_{t₀}^{t} A₁ σ ∘ (W₁ σ - W₂ σ) dσ + ∫_{t₀}^{t} (A₁ σ - A₂ σ) ∘ W₂ σ dσ`.  Subtract
+  the two Volterra equations (the identities cancel), then split the single integrand via bilinearity
+  of composition `A₁ ∘ W₁ - A₂ ∘ W₂ = A₁ ∘ (W₁ - W₂) + (A₁ - A₂) ∘ W₂` (`comp_sub`/`sub_comp`) using
+  `integral_sub`/`integral_add`/`integral_congr` (all four integrands norm-continuous hence
+  interval-integrable).  This is the "homogeneous propagation of the resolvent gap" plus the "source
+  term from the coefficient gap"; as `A₂ → A₁` the first term is `O(‖W₁ - W₂‖)` and the second is the
+  leading `(A₁ - A₂)` contribution, so this is the exact ancestor of the *differentiable* dependence
+  of the resolvent on its coefficient (the second-order variational equation).
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus; the *existence* of the variational flow family (global integral curves of the linear
+field); the *differentiable* dependence of the resolvent on its coefficient field — now reduced to a
+fixed-point / Neumann analysis of the Duhamel difference formula `fundamentalSolution_sub_eq_integral`
+above — toward the base-point `C^2`/`C^k` bootstrap.
 
 Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
 modulus; the *existence* of the variational flow family (global integral curves of the linear

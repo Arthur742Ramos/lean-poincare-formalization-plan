@@ -2481,6 +2481,56 @@ theorem isUnit_fundamentalSolution_of_time_lt {A : ℝ → (E →L[ℝ] E)} {K :
   isUnit_fundamentalSolution_of_norm_sub_one_lt hA hΦ h0 t
     (lt_of_le_of_lt (norm_fundamentalSolution_sub_one_le hA hAcont hΦ h0 t) ht)
 
+open MeasureTheory intervalIntegral in
+/-- **Duhamel difference formula for the resolvent.**  For two norm-continuous coefficient fields
+`A₁`, `A₂` (both `‖·‖ ≤ K`) with variational flow families `Φ₁`, `Φ₂`, the difference of the two
+resolvents obeys the variation-of-parameters identity
+`D_x Φ₁_t - D_x Φ₂_t = ∫_{t₀}^{t} A₁ σ ∘ (D_x Φ₁_σ - D_x Φ₂_σ) dσ + ∫_{t₀}^{t} (A₁ σ - A₂ σ) ∘ D_x Φ₂_σ dσ`.
+Subtracting the two Volterra equations `fundamentalSolution_eq_one_add_integral` cancels the
+identities, and the integrand difference `A₁ ∘ W₁ - A₂ ∘ W₂ = A₁ ∘ (W₁ - W₂) + (A₁ - A₂) ∘ W₂`
+(bilinearity of composition, `comp_sub`/`sub_comp`) splits the single integral into the two Duhamel
+terms — the "homogeneous propagation of the resolvent gap" plus the "source term from the coefficient
+gap".  As `A₂ → A₁` the first term is `O(‖W₁ - W₂‖)` and the second is the leading `(A₁ - A₂)`
+contribution, so this identity is the exact ancestor of the *differentiable* dependence of the
+resolvent on its coefficient field (the second-order variational equation) toward the `C^k`
+bootstrap. -/
+theorem fundamentalSolution_sub_eq_integral {A₁ A₂ : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    [CompleteSpace E] {Φ₁ Φ₂ : E → ℝ → E}
+    (hA₁ : ∀ t, ‖A₁ t‖₊ ≤ K) (hA₁cont : Continuous A₁)
+    (hA₂ : ∀ t, ‖A₂ t‖₊ ≤ K) (hA₂cont : Continuous A₂)
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec A₁)) (h0₁ : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec A₂)) (h0₂ : ∀ x, Φ₂ x t₀ = x)
+    (t : ℝ) :
+    fundamentalSolution hA₁ hΦ₁ h0₁ t - fundamentalSolution hA₂ hΦ₂ h0₂ t
+      = (∫ σ in t₀..t, (A₁ σ).comp
+            (fundamentalSolution hA₁ hΦ₁ h0₁ σ - fundamentalSolution hA₂ hΦ₂ h0₂ σ))
+        + ∫ σ in t₀..t, (A₁ σ - A₂ σ).comp (fundamentalSolution hA₂ hΦ₂ h0₂ σ) := by
+  set W₁ := fundamentalSolution hA₁ hΦ₁ h0₁ with hW₁
+  set W₂ := fundamentalSolution hA₂ hΦ₂ h0₂ with hW₂
+  have hcW₁ : Continuous W₁ := continuous_fundamentalSolution_time hA₁ hΦ₁ h0₁
+  have hcW₂ : Continuous W₂ := continuous_fundamentalSolution_time hA₂ hΦ₂ h0₂
+  have hi1 : IntervalIntegrable (fun σ => (A₁ σ).comp (W₁ σ)) volume t₀ t :=
+    (hA₁cont.clm_comp hcW₁).intervalIntegrable t₀ t
+  have hi2 : IntervalIntegrable (fun σ => (A₂ σ).comp (W₂ σ)) volume t₀ t :=
+    (hA₂cont.clm_comp hcW₂).intervalIntegrable t₀ t
+  have hi3 : IntervalIntegrable (fun σ => (A₁ σ).comp (W₁ σ - W₂ σ)) volume t₀ t :=
+    (hA₁cont.clm_comp (hcW₁.sub hcW₂)).intervalIntegrable t₀ t
+  have hi4 : IntervalIntegrable (fun σ => (A₁ σ - A₂ σ).comp (W₂ σ)) volume t₀ t :=
+    ((hA₁cont.sub hA₂cont).clm_comp hcW₂).intervalIntegrable t₀ t
+  have hV₁ : W₁ t = 1 + ∫ σ in t₀..t, (A₁ σ).comp (W₁ σ) :=
+    fundamentalSolution_eq_one_add_integral hA₁ hA₁cont hΦ₁ h0₁ t
+  have hV₂ : W₂ t = 1 + ∫ σ in t₀..t, (A₂ σ).comp (W₂ σ) :=
+    fundamentalSolution_eq_one_add_integral hA₂ hA₂cont hΦ₂ h0₂ t
+  rw [hV₁, hV₂]
+  have hlhs : (1 + ∫ σ in t₀..t, (A₁ σ).comp (W₁ σ))
+      - (1 + ∫ σ in t₀..t, (A₂ σ).comp (W₂ σ))
+      = (∫ σ in t₀..t, (A₁ σ).comp (W₁ σ)) - ∫ σ in t₀..t, (A₂ σ).comp (W₂ σ) := by abel
+  rw [hlhs, ← intervalIntegral.integral_sub hi1 hi2,
+    ← intervalIntegral.integral_add hi3 hi4]
+  refine intervalIntegral.integral_congr (fun σ _ => ?_)
+  simp only [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]
+  abel
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
