@@ -6189,6 +6189,36 @@ theorem norm_bilinearCompForcing_le
           (norm_nonneg _)
     _ = ‖P‖ * ‖A‖ * ‖B‖ * ‖h‖ := by ring
 
+/-- **A-priori size bound for the third-derivative forcing term.**  The magnitude datum for the
+third (third-derivative) forcing term `F_C`, the curryLeft/`Fin 1`-represented analogue of
+`norm_bilinearCompForcing_le`: for a third derivative `T : E [×3]→L[ℝ] E`, directions `a`, `b`, and a
+resolvent `W : E →L[ℝ] E`, the once-and-twice contracted map `e ↦ T[a, b, W e]` — realised as
+`(continuousMultilinearCurryFin1 ℝ E E ((T.curryLeft a).curryLeft b)).comp W` (avoiding the
+instance-less curried triple) — has operator norm `≤ ‖T‖ · ‖a‖ · ‖b‖ · ‖W‖`.
+
+Proof: `opNorm_comp_le` for the outer `.comp W`, the isometry `continuousMultilinearCurryFin1`
+(`LinearIsometryEquiv.norm_map`) turning it into `‖(T.curryLeft a).curryLeft b‖`, then two evaluation
+bounds `le_opNorm` each folded through the `curryLeft` isometry
+`ContinuousMultilinearMap.curryLeft_norm` (`‖T.curryLeft‖ = ‖T‖`).  Fed the flow bounds
+(`‖D³v‖ ≤ C''`, `‖W‖ ≤ exp (K(T−t₀))`, `a = W k`, `b = W h`) this is the size datum `N` of the
+third-derivative term that `norm_inhomogVariation_le` turns into an a-priori bound on the third
+variation — completing, alongside `norm_bilinearCompForcing_le`, the forcing-size toolkit for all three
+`D₃`-forcing terms. -/
+theorem norm_thirdDerivForcing_le
+    (T : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E) (a b : E) (W : E →L[ℝ] E) :
+    ‖(continuousMultilinearCurryFin1 ℝ E E ((T.curryLeft a).curryLeft b)).comp W‖
+      ≤ ‖T‖ * ‖a‖ * ‖b‖ * ‖W‖ := by
+  calc ‖(continuousMultilinearCurryFin1 ℝ E E ((T.curryLeft a).curryLeft b)).comp W‖
+      ≤ ‖continuousMultilinearCurryFin1 ℝ E E ((T.curryLeft a).curryLeft b)‖ * ‖W‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+    _ = ‖(T.curryLeft a).curryLeft b‖ * ‖W‖ := by rw [LinearIsometryEquiv.norm_map]
+    _ ≤ ‖(T.curryLeft a).curryLeft‖ * ‖b‖ * ‖W‖ := by
+        gcongr; exact ContinuousLinearMap.le_opNorm _ _
+    _ = ‖T.curryLeft a‖ * ‖b‖ * ‖W‖ := by rw [ContinuousMultilinearMap.curryLeft_norm]
+    _ ≤ ‖T.curryLeft‖ * ‖a‖ * ‖b‖ * ‖W‖ := by
+        gcongr; exact ContinuousLinearMap.le_opNorm _ _
+    _ = ‖T‖ * ‖a‖ * ‖b‖ * ‖W‖ := by rw [ContinuousMultilinearMap.curryLeft_norm]
+
 /-- **Bilinear-evaluation gap for a bounded operator field.**  The telescoping estimate underlying
 every base-point gap computation: for two bounded linear maps `T₁, T₂ : E →L[ℝ] F` (any seminormed
 target `F`) evaluated at two points `u₁, u₂`,
