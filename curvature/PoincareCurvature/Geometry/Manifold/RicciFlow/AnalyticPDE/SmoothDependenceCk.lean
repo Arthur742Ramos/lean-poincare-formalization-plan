@@ -5154,6 +5154,67 @@ theorem exists_hasDerivAt_firstVariation_linearised [CompleteSpace E]
     ((hD2cont.clm_comp hW).clm_apply continuous_const).clm_comp hW
   exact exists_hasDerivAt_inhomogVariation_of_continuous hA hAcont hFc t₀
 
+/-- **Operator-norm bound for the linearised first variation, linear in the direction.**  The
+boundedness datum for packaging `h ↦ Vlin^h t` as a bounded linear map.  If `Vlin` solves the
+linearised (chain-rule) first-variation ODE for direction `h`,
+`Vlin' = A₀ ∘ Vlin + (D²v(Φ x₀ s) ∘ W₀ · h) ∘ W₀`, `Vlin t₀ = 0` (`A₀ s = Dv s (Φ x₀ s)`,
+`W₀ = fundamentalSolution hA hΦ' h0'`), then on `[t₀, T]`
+`‖Vlin t‖ ≤ C' · exp (2K(T − t₀)) · ‖h‖ · gronwallBound 0 K 1 (t − t₀)`, with the constant
+*independent of `h`* — so the map `h ↦ Vlin^h t` is bounded with operator norm
+`≤ C' · exp (2K(T − t₀)) · gronwallBound 0 K 1 (t − t₀)`.
+
+Proof: the forcing `((D²v(Φ x₀ s) ∘ W₀) h) ∘ W₀` is bounded by
+`‖D²v(Φ x₀ s)‖ · ‖W₀ s‖ · ‖h‖ · ‖W₀ s‖ ≤ C' · exp(2K(T − t₀)) · ‖h‖` on `[t₀, T]` (operator
+submultiplicativity `opNorm_comp_le`/`le_opNorm`, the resolvent bound `norm_fundamentalSolution_le`,
+and the `D²v` bound), and the general a-priori estimate `norm_inhomogVariation_le` closes it. -/
+theorem norm_linearisedFirstVariation_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {C' : ℝ} (hC'0 : 0 ≤ C') (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    (h : E) {Vlin : ℝ → (E →L[ℝ] E)}
+    (hVlin : ∀ s, HasDerivAt Vlin
+      ((Dv s (Φ x₀ s)).comp (Vlin s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp
+            (fundamentalSolution hA hΦ' h0' s)) s)
+    (hVlin0 : Vlin t₀ = 0)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ‖Vlin t‖
+      ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖
+          * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  have hexp2 : Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+      = Real.exp (2 * (K : ℝ) * (T - t₀)) := by
+    rw [← Real.exp_add]; congr 1; ring
+  have hFbound : ∀ s ∈ Set.Icc t₀ T,
+      ‖((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp
+          (fundamentalSolution hA hΦ' h0' s)‖
+        ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖ := by
+    intro s hs
+    have hsabs : |s - t₀| ≤ T - t₀ := by
+      rw [abs_of_nonneg (by linarith [hs.1] : (0 : ℝ) ≤ s - t₀)]; linarith [hs.2]
+    have hWle : ‖fundamentalSolution hA hΦ' h0' s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+      (norm_fundamentalSolution_le hA hΦ' h0' s).trans
+        (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsabs K.coe_nonneg))
+    calc ‖((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp
+            (fundamentalSolution hA hΦ' h0' s)‖
+        ≤ ‖(D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h‖
+            * ‖fundamentalSolution hA hΦ' h0' s‖ := ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ ‖(D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s)‖ * ‖h‖
+            * ‖fundamentalSolution hA hΦ' h0' s‖ :=
+          mul_le_mul_of_nonneg_right (ContinuousLinearMap.le_opNorm _ _) (norm_nonneg _)
+      _ ≤ ‖D2v s (Φ x₀ s)‖ * ‖fundamentalSolution hA hΦ' h0' s‖ * ‖h‖
+            * ‖fundamentalSolution hA hΦ' h0' s‖ :=
+          mul_le_mul_of_nonneg_right
+            (mul_le_mul_of_nonneg_right (ContinuousLinearMap.opNorm_comp_le _ _) (norm_nonneg _))
+            (norm_nonneg _)
+      _ ≤ C' * Real.exp ((K : ℝ) * (T - t₀)) * ‖h‖ * Real.exp ((K : ℝ) * (T - t₀)) := by
+          gcongr
+          exact hC' s
+      _ = C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖ := by rw [← hexp2]; ring
+  exact norm_inhomogVariation_le hA hVlin hVlin0 hFbound ht
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
