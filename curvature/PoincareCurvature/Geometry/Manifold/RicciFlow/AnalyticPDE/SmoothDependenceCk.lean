@@ -6189,6 +6189,65 @@ theorem norm_bilinearCompForcing_le
           (norm_nonneg _)
     _ = ‖P‖ * ‖A‖ * ‖B‖ * ‖h‖ := by ring
 
+/-- **Bilinear-evaluation gap for a bounded operator field.**  The telescoping estimate underlying
+every base-point gap computation: for two bounded linear maps `T₁, T₂ : E →L[ℝ] F` (any seminormed
+target `F`) evaluated at two points `u₁, u₂`,
+`‖T₁ u₁ − T₂ u₂‖ ≤ ‖T₁‖ · ‖u₁ − u₂‖ + ‖T₁ − T₂‖ · ‖u₂‖`.
+Proof: `T₁ u₁ − T₂ u₂ = T₁ (u₁ − u₂) + (T₁ − T₂) u₂`, then the triangle inequality and the evaluation
+bound `le_opNorm`.  Used to split a product gap into an "operand gap" part and an "operator gap" part;
+in the third-variation forcing it turns the once-contracted third derivative
+`z ↦ (D³v(Φ z s)).curryLeft (u z)` into `norm_thirdDerivCurryLeft_apply_flow_sub_le`. -/
+theorem norm_clm_apply_sub_le {F : Type*} [SeminormedAddCommGroup F] [NormedSpace ℝ F]
+    (T₁ T₂ : E →L[ℝ] F) (u₁ u₂ : E) :
+    ‖T₁ u₁ - T₂ u₂‖ ≤ ‖T₁‖ * ‖u₁ - u₂‖ + ‖T₁ - T₂‖ * ‖u₂‖ := by
+  have hsplit : T₁ u₁ - T₂ u₂ = T₁ (u₁ - u₂) + (T₁ - T₂) u₂ := by
+    rw [map_sub, ContinuousLinearMap.sub_apply]; abel
+  calc ‖T₁ u₁ - T₂ u₂‖ = ‖T₁ (u₁ - u₂) + (T₁ - T₂) u₂‖ := by rw [hsplit]
+    _ ≤ ‖T₁ (u₁ - u₂)‖ + ‖(T₁ - T₂) u₂‖ := norm_add_le _ _
+    _ ≤ ‖T₁‖ * ‖u₁ - u₂‖ + ‖T₁ - T₂‖ * ‖u₂‖ :=
+        add_le_add (ContinuousLinearMap.le_opNorm _ _) (ContinuousLinearMap.le_opNorm _ _)
+
+/-- **Gap of the once-contracted third derivative field along the flow.**  The size datum for the
+`D³v`-term (term 1) of the third-variation forcing.  Differentiating the second-variation forcing in
+the base point contracts one slot of the third spatial derivative `D³v(Φ z s)` with a resolvent-type
+direction `u`; the resulting field `z ↦ (D³v(Φ z s)).curryLeft u ∈ (E [×2]→L[ℝ] E)` moves, between
+base points `z`, `w` and directions `u₁`, `u₂`, by at most
+`‖D³v(Φ z s)‖ · ‖u₁ − u₂‖ + N · exp (K T) · ‖z − w‖ · ‖u₂‖`.  Proof: the bilinear-evaluation gap
+`norm_clm_apply_sub_le` applied to `T = (D³v(Φ · s)).curryLeft`, with the `curryLeft` isometry
+`ContinuousMultilinearMap.curryLeft_norm` turning `‖T‖` into `‖D³v(Φ z s)‖` and `‖T₁ − T₂‖` into
+`‖D³v(Φ z s) − D³v(Φ w s)‖`, the latter bounded by `norm_thirdDerivField_apply_flow_sub_le`.  Fed to
+the composition-forcing perturbation `norm_bilinearCompForcing_sub_le` (as the operator gap `dp`) this
+completes the third-variation forcing gap that `norm_inhomogVariation_sub_le_of_gap` turns into the
+continuity of the third fundamental solution. -/
+theorem norm_thirdDerivCurryLeft_apply_flow_sub_le
+    {Φ : E → ℝ → E} {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {N : ℝ≥0} {s T : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (hD3v : LipschitzWith N (D3v s)) (hsT : |s - t₀| ≤ T)
+    (z w u₁ u₂ : E) :
+    ‖(D3v s (Φ z s)).curryLeft u₁ - (D3v s (Φ w s)).curryLeft u₂‖
+      ≤ ‖D3v s (Φ z s)‖ * ‖u₁ - u₂‖
+        + (N : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ * ‖u₂‖ := by
+  have hbase := norm_clm_apply_sub_le
+    (D3v s (Φ z s)).curryLeft (D3v s (Φ w s)).curryLeft u₁ u₂
+  have h1 : ‖(D3v s (Φ z s)).curryLeft‖ = ‖D3v s (Φ z s)‖ :=
+    ContinuousMultilinearMap.curryLeft_norm _
+  have hcs : (D3v s (Φ z s) - D3v s (Φ w s)).curryLeft
+      = (D3v s (Φ z s)).curryLeft - (D3v s (Φ w s)).curryLeft :=
+    ContinuousLinearMap.ext (congrFun rfl)
+  have h2 : ‖(D3v s (Φ z s)).curryLeft - (D3v s (Φ w s)).curryLeft‖
+      = ‖D3v s (Φ z s) - D3v s (Φ w s)‖ := by
+    rw [← hcs, ContinuousMultilinearMap.curryLeft_norm]
+  have h3 : ‖D3v s (Φ z s) - D3v s (Φ w s)‖ ≤ (N : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ :=
+    norm_thirdDerivField_apply_flow_sub_le hv hΦ h0 hD3v hsT z w
+  calc ‖(D3v s (Φ z s)).curryLeft u₁ - (D3v s (Φ w s)).curryLeft u₂‖
+      ≤ ‖(D3v s (Φ z s)).curryLeft‖ * ‖u₁ - u₂‖
+          + ‖(D3v s (Φ z s)).curryLeft - (D3v s (Φ w s)).curryLeft‖ * ‖u₂‖ := hbase
+    _ = ‖D3v s (Φ z s)‖ * ‖u₁ - u₂‖
+          + ‖D3v s (Φ z s) - D3v s (Φ w s)‖ * ‖u₂‖ := by rw [h1, h2]
+    _ ≤ ‖D3v s (Φ z s)‖ * ‖u₁ - u₂‖
+          + (N : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ * ‖u₂‖ := by gcongr
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
