@@ -2384,6 +2384,63 @@ theorem finiteCoverValue_timeSlice_spatial_dist_le_ofCover
     (A := fun _τ u => u) hLip hcover
   simpa [one_mul] using h
 
+/-- The parabolic `C^{0,α}` norm packaged as a bundled `AddGroupSeminorm` on the submodule of
+parabolic `C^{0,α}` functions: it satisfies `toFun 0 = 0`, the triangle inequality, and negation
+invariance.  This is the bundled seminorm underlying the parabolic `C^{0,α}` (semi)normed space. -/
+noncomputable def addGroupSeminorm (α : ℝ) (s : Set (ℝ × X)) :
+    AddGroupSeminorm (parabolicC0AlphaSubmodule X E α s) where
+  toFun u := parabolicC0AlphaNorm α u.1 s
+  map_zero' := by
+    simp only [Submodule.coe_zero]
+    exact parabolicC0AlphaNorm_zero α s
+  add_le' u v := by
+    simpa only [Submodule.coe_add] using parabolicC0AlphaNorm_add_le u.2 v.2
+  neg' u := by
+    simpa only [Submodule.coe_neg] using parabolicC0AlphaNorm_neg α u.1 s
+
+/-- The bundled parabolic `C^{0,α}` `AddGroupSeminorm` evaluates to the parabolic `C^{0,α}` norm
+of the underlying function. -/
+@[simp]
+theorem addGroupSeminorm_apply (α : ℝ) (s : Set (ℝ × X))
+    (u : parabolicC0AlphaSubmodule X E α s) :
+    addGroupSeminorm α s u = parabolicC0AlphaNorm α u.1 s :=
+  rfl
+
+/-- The parabolic `C^{0,α}` norm packaged as a genuine real-scalar `Seminorm` on the submodule of
+parabolic `C^{0,α}` functions: it adds scalar homogeneity `‖c • u‖ = ‖c‖ ‖u‖` to the additive
+seminorm axioms.  This is the bundled `Seminorm ℝ` underlying the `NormedSpace ℝ` structure of the
+parabolic Hölder space. -/
+noncomputable def seminorm (α : ℝ) (s : Set (ℝ × X)) :
+    Seminorm ℝ (parabolicC0AlphaSubmodule X E α s) :=
+  { addGroupSeminorm α s with
+    smul' := fun c u => by
+      simpa only [Submodule.coe_smul] using parabolicC0AlphaNorm_const_smul c u.2 }
+
+/-- The bundled parabolic `C^{0,α}` `Seminorm` evaluates to the parabolic `C^{0,α}` norm of the
+underlying function. -/
+@[simp]
+theorem seminorm_apply (α : ℝ) (s : Set (ℝ × X))
+    (u : parabolicC0AlphaSubmodule X E α s) :
+    seminorm α s u = parabolicC0AlphaNorm α u.1 s :=
+  rfl
+
+/-- The parabolic `C^{0,α}` seminormed additive-group structure on the submodule of parabolic
+`C^{0,α}` functions, built from the bundled `AddGroupSeminorm`.  Under this structure the norm is
+`‖u‖ = parabolicC0AlphaNorm α u.1 s`.  It is supplied as a `def` (not a global instance) because
+the underlying function-space subtype already carries the pointwise product topology; the honest
+separated `NormedAddCommGroup`/`CompleteSpace` Banach instances belong on a dedicated type synonym
+that isolates the parabolic Hölder topology. -/
+@[reducible] noncomputable def seminormedAddCommGroup (α : ℝ) (s : Set (ℝ × X)) :
+    SeminormedAddCommGroup (parabolicC0AlphaSubmodule X E α s) :=
+  AddGroupSeminorm.toSeminormedAddCommGroup (addGroupSeminorm α s)
+
+/-- Under the parabolic `C^{0,α}` seminormed structure, the norm of a bundled function is its
+parabolic `C^{0,α}` norm. -/
+theorem seminormedAddCommGroup_norm (α : ℝ) (s : Set (ℝ × X))
+    (u : parabolicC0AlphaSubmodule X E α s) :
+    (seminormedAddCommGroup α s).toNorm.norm u = parabolicC0AlphaNorm α u.1 s :=
+  rfl
+
 end parabolicC0AlphaSubmodule
 
 end AnalyticPDE
