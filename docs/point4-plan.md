@@ -4496,3 +4496,43 @@ appear in `RicciFlowLocalExistence.lean` as additional imports.
 the heavy PDE realization file unchanged and adds raw-gauge endpoint projections
 plus Banach-to-centered-metric-coordinate readout bridges on top of the
 already-proved global and interval chart-closure data.
+
+## ODE dependence-on-initial-data infrastructure (new upstream module, Items 1/2)
+
+The recurring blocker for Items 1 and 2 is that Mathlib v4.29.1 supplies smooth
+ODE-flow dependence only at the Banach level (Grönwall trajectory estimates,
+integral-curve existence), not the `C^k`/manifold flow-on-initial-data needed
+here.  A dedicated new module builds that missing theory from the Banach-level
+Mathlib results up, isolated so it never touches the heavy files:
+
+`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/SmoothDependenceCk.lean`
+(imports only `Mathlib.Analysis.ODE.Basic` and `Mathlib.Analysis.ODE.Gronwall`).
+
+The `C^0` / Lipschitz (`C^{0,1}`) base layer of the dependence tower is complete
+and fully proved (axioms `propext`/`Classical.choice`/`Quot.sound` only):
+
+* `isIntegralCurve_comp_neg` — the time-reversed curve `s ↦ f (-s)` is an integral
+  curve of the time-reversed field `(s, x) ↦ -(v (-s) x)`.
+* `dist_le_of_isIntegralCurve_of_le` — forward exponential dependence bound
+  (`IsIntegralCurve` packaging of Mathlib's `dist_le_of_trajectories_ODE`).
+* `dist_le_of_isIntegralCurve` — the **two-sided** bound
+  `dist (f t) (g t) ≤ dist (f t₀) (g t₀) · exp (K · |t - t₀|)` for all `t`
+  (Mathlib only gives the forward half; the backward half comes from applying the
+  forward bound to the time-reversed curves).
+* `dist_le_of_isIntegralCurve_of_abs_le` — uniform bound on a symmetric compact
+  time interval.
+* `eq_of_isIntegralCurve_of_eq`, `eq_of_isIntegralCurve_of_eq_at` — global
+  uniqueness of an integral curve from agreement at the anchor / at any one time.
+* `dist_le_of_isIntegralCurve_perturb_of_le` — forward Grönwall stability under a
+  uniform perturbation of the vector field (continuous dependence on the field).
+* Flow-family packaging for `Φ : E → ℝ → E` with `Φ x t₀ = x`:
+  `dist_flow_apply_le`, `lipschitzWith_flow_apply`,
+  `lipschitzWith_flow_apply_of_abs_le` (the time-`t` flow map is exponentially
+  Lipschitz in the initial value), `continuous_flow_apply`,
+  `injective_flow_apply` (injectivity — the diffeomorphism-onto-image half needed
+  by Item 2), and `continuous_flow` (**joint** continuity of `(t, x) ↦ Φ x t`).
+
+Remaining in this tower (future sessions): the `C^1` (differentiable) dependence
+layer — the flow derivative `D_x Φ_t` solving the linearised/variational ODE —
+and its bootstrap to `C^k` (`C^3`), which is what the compact-manifold gauge flow
+of Item 2 and the tensor time-derivative chain rule of Item 1 ultimately consume.
