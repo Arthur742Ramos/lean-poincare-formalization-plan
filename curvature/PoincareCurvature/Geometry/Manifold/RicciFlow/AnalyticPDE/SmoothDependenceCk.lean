@@ -2639,6 +2639,62 @@ theorem contDiff_infty_fundamentalSolution_time {A : ℝ → (E →L[ℝ] E)} {K
   exact (contDiff_fundamentalSolution_time hA hΦ h0 n (contDiff_infty.mp hAsmooth n)).of_le
     le_self_add
 
+/-- **Time-regularity of the resolvent action (a pushforward of a fixed vector).**  For a `C^n`
+coefficient path `A`, the resolvent *action* `t ↦ D_x Φ_t · u₀ = Φ u₀ t ∈ E` — the pushforward of a
+fixed initial vector `u₀` along the flow — is `C^{n+1}` in time.  Immediate from the operator-level
+bootstrap `contDiff_fundamentalSolution_time` composed with evaluation at `u₀` (a continuous linear
+map, `ContDiff.clm_apply` against `contDiff_const`).  This is the form the tensor time-derivative
+chain rule of Item 1 consumes for the pushforward legs `Φ_t · u`, `Φ_t · v`. -/
+theorem contDiff_fundamentalSolution_apply_time {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (n : ℕ) (hAdiff : ContDiff ℝ (n : WithTop ℕ∞) A) (u₀ : E) :
+    ContDiff ℝ ((n : WithTop ℕ∞) + 1) (fun s => fundamentalSolution hA hΦ h0 s u₀) :=
+  (contDiff_fundamentalSolution_time hA hΦ h0 n hAdiff).clm_apply contDiff_const
+
+open scoped ContDiff in
+/-- **Smoothness of the resolvent action.**  If the coefficient path `A` is `C^∞` in time then so
+is the resolvent action `t ↦ D_x Φ_t · u₀`. -/
+theorem contDiff_infty_fundamentalSolution_apply_time {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAsmooth : ContDiff ℝ ∞ A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) (u₀ : E) :
+    ContDiff ℝ ∞ (fun s => fundamentalSolution hA hΦ h0 s u₀) :=
+  (contDiff_infty_fundamentalSolution_time hA hAsmooth hΦ h0).clm_apply contDiff_const
+
+/-- **The second-order time equation of the resolvent (its "acceleration").**  For a `C¹`
+coefficient path `A` — supplied as `A' = deriv A`, `HasDerivAt A (A' t) t` — the velocity field of
+the resolvent, `t ↦ A t ∘ D_x Φ_t` (`= deriv (t ↦ D_x Φ_t)` by `deriv_fundamentalSolution`), is
+itself differentiable with
+`d/dt (A t ∘ D_x Φ_t) = A' t ∘ D_x Φ_t + A t ∘ (A t ∘ D_x Φ_t)`.  This is the operator product
+rule `HasDerivAt.clm_comp` applied to `A t ∘ D_x Φ_t`, using the first-order operator ODE
+`hasDerivAt_fundamentalSolution` for the second factor; equivalently, the resolvent is `C²` in time
+with this explicit second derivative — the `k = 2` instance of the `C^k` bootstrap made concrete. -/
+theorem hasDerivAt_deriv_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    {A' : ℝ → (E →L[ℝ] E)} (hA' : ∀ t, HasDerivAt A (A' t) t) (t : ℝ) :
+    HasDerivAt (fun s => (A s).comp (fundamentalSolution hA hΦ h0 s))
+      ((A' t).comp (fundamentalSolution hA hΦ h0 t)
+        + (A t).comp ((A t).comp (fundamentalSolution hA hΦ h0 t))) t :=
+  (hA' t).clm_comp (hasDerivAt_fundamentalSolution hA hAcont hΦ h0 t)
+
+/-- **Explicit second time-derivative of the resolvent.**  The `deriv`-readout of
+`hasDerivAt_deriv_fundamentalSolution`: for a `C¹` coefficient `A`,
+`deriv (deriv (t ↦ D_x Φ_t)) t = A' t ∘ D_x Φ_t + A t ∘ (A t ∘ D_x Φ_t)`, the closed form of the
+resolvent's second time derivative (the operator ODE differentiated once more). -/
+theorem deriv_deriv_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    {A' : ℝ → (E →L[ℝ] E)} (hA' : ∀ t, HasDerivAt A (A' t) t) (t : ℝ) :
+    deriv (deriv (fun s => fundamentalSolution hA hΦ h0 s)) t
+      = (A' t).comp (fundamentalSolution hA hΦ h0 t)
+        + (A t).comp ((A t).comp (fundamentalSolution hA hΦ h0 t)) := by
+  have hd : deriv (fun s => fundamentalSolution hA hΦ h0 s)
+      = fun s => (A s).comp (fundamentalSolution hA hΦ h0 s) :=
+    funext fun s => deriv_fundamentalSolution hA hAcont hΦ h0 s
+  rw [hd]
+  exact (hasDerivAt_deriv_fundamentalSolution hA hAcont hΦ h0 hA' t).deriv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
