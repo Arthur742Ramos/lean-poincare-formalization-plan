@@ -4736,6 +4736,105 @@ theorem norm_fundamentalSolution_sub_le_of_forall_le_Icc
       hA hA' hΦ₁ h1 hΦ₂ h2 hAA' u₀ ht).trans (le_of_eq ?_)
     ring
 
+/-- **Interval-restricted second-order variational estimate.**  The variant of
+`norm_fundamentalSolution_sub_sub_variation_le` whose coefficient-gap hypothesis
+`‖A₁ s - A₂ s‖ ≤ ε` is required only on the compact tube `[t₀, T]` (the proof evaluates the gap only
+there — through `norm_fundamentalSolution_sub_le_of_forall_le_Icc` and directly on `Ico t₀ t`).  This
+is the form the base-point `C²` bootstrap consumes: the trajectory-linearised coefficients
+`A₁ s = Dv s (Φ z s)`, `A₂ s = Dv s (Φ x₀ s)` are `ε`-close only on `[t₀, T]`.  Given the first
+variation `V` (`V' = A₂ ∘ V + (A₁ - A₂) ∘ W₂`, `V t₀ = 0`), the resolvent gap agrees with `V` to
+second order there:
+`‖(W₁ t - W₂ t) - V t‖ ≤ ε² · exp (K (T - t₀)) · gronwallBound 0 K 1 (T - t₀)²`. -/
+theorem norm_fundamentalSolution_sub_sub_variation_le_Icc
+    {A₁ A₂ : ℝ → (E →L[ℝ] E)} {K : ℝ≥0} {Φ₁ Φ₂ : E → ℝ → E}
+    (hA₁ : ∀ t, ‖A₁ t‖₊ ≤ K) (hA₁cont : Continuous A₁)
+    (hA₂ : ∀ t, ‖A₂ t‖₊ ≤ K) (hA₂cont : Continuous A₂)
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec A₁)) (h0₁ : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec A₂)) (h0₂ : ∀ x, Φ₂ x t₀ = x)
+    {ε : ℝ} {T : ℝ} (hε : 0 ≤ ε) (hAA' : ∀ s ∈ Icc t₀ T, ‖A₁ s - A₂ s‖ ≤ ε)
+    {V : ℝ → (E →L[ℝ] E)}
+    (hVderiv : ∀ s, HasDerivAt V
+      ((A₂ s).comp (V s) + (A₁ s - A₂ s).comp (fundamentalSolution hA₂ hΦ₂ h0₂ s)) s)
+    (hV0 : V t₀ = 0)
+    {t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖(fundamentalSolution hA₁ hΦ₁ h0₁ t - fundamentalSolution hA₂ hΦ₂ h0₂ t) - V t‖
+      ≤ ε ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2 := by
+  have hKr : (0 : ℝ) ≤ (K : ℝ) := K.coe_nonneg
+  have ht0T : t₀ ≤ T := le_trans ht.1 ht.2
+  have hg0 : 0 ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_zero_one_nonneg hKr (sub_nonneg.mpr ht0T)
+  set R : ℝ → (E →L[ℝ] E) :=
+    fun s => (fundamentalSolution hA₁ hΦ₁ h0₁ s - fundamentalSolution hA₂ hΦ₂ h0₂ s) - V s
+    with hRdef
+  have hcR : Continuous R := by
+    rw [hRdef]
+    exact ((continuous_fundamentalSolution_time hA₁ hΦ₁ h0₁).sub
+      (continuous_fundamentalSolution_time hA₂ hΦ₂ h0₂)).sub
+      (continuous_iff_continuousAt.mpr (fun s => (hVderiv s).continuousAt))
+  have hR0 : R t₀ = 0 := by
+    rw [hRdef]
+    simp [fundamentalSolution_anchor hA₁ hΦ₁ h0₁, fundamentalSolution_anchor hA₂ hΦ₂ h0₂, hV0]
+  set Γ : ℝ := ε ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+    with hΓdef
+  have hΓ0 : 0 ≤ Γ := by
+    rw [hΓdef]; exact mul_nonneg (mul_nonneg (sq_nonneg ε) (Real.exp_pos _).le) hg0
+  have hgap : ∀ s ∈ Icc t₀ T,
+      ‖fundamentalSolution hA₁ hΦ₁ h0₁ s - fundamentalSolution hA₂ hΦ₂ h0₂ s‖
+        ≤ ε * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    intro s hs
+    refine (norm_fundamentalSolution_sub_le_of_forall_le_Icc
+      hA₁ hA₂ hΦ₁ h0₁ hΦ₂ h0₂ hε hAA' hs).trans ?_
+    exact mul_le_mul_of_nonneg_left
+      (gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one hKr (by linarith [hs.2]))
+      (mul_nonneg hε (Real.exp_pos _).le)
+  have hRderiv : ∀ s, HasDerivAt R
+      ((A₂ s).comp (R s) + (A₁ s - A₂ s).comp
+        (fundamentalSolution hA₁ hΦ₁ h0₁ s - fundamentalSolution hA₂ hΦ₂ h0₂ s)) s := by
+    intro s
+    have hgs := (hasDerivAt_fundamentalSolution_sub hA₁ hA₁cont hA₂ hA₂cont hΦ₁ h0₁ hΦ₂ h0₂ s).sub
+      (hVderiv s)
+    have hval :
+        (A₁ s).comp (fundamentalSolution hA₁ hΦ₁ h0₁ s - fundamentalSolution hA₂ hΦ₂ h0₂ s)
+          + (A₁ s - A₂ s).comp (fundamentalSolution hA₂ hΦ₂ h0₂ s)
+        - ((A₂ s).comp (V s)
+          + (A₁ s - A₂ s).comp (fundamentalSolution hA₂ hΦ₂ h0₂ s))
+        = (A₂ s).comp (R s) + (A₁ s - A₂ s).comp
+          (fundamentalSolution hA₁ hΦ₁ h0₁ s - fundamentalSolution hA₂ hΦ₂ h0₂ s) := by
+      rw [hRdef]
+      simp only [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]
+      abel
+    rwa [hval] at hgs
+  have ha : ‖R t₀‖ ≤ 0 := by simp [hR0]
+  have hbound : ∀ s ∈ Ico t₀ t,
+      ‖(A₂ s).comp (R s) + (A₁ s - A₂ s).comp
+        (fundamentalSolution hA₁ hΦ₁ h0₁ s - fundamentalSolution hA₂ hΦ₂ h0₂ s)‖
+        ≤ (K : ℝ) * ‖R s‖ + Γ := by
+    intro s hs
+    have hsIcc : s ∈ Icc t₀ T := ⟨hs.1, le_trans hs.2.le ht.2⟩
+    have hA₂s : ‖A₂ s‖ ≤ (K : ℝ) := by exact_mod_cast hA₂ s
+    refine (norm_add_le _ _).trans (add_le_add ?_ ?_)
+    · calc ‖(A₂ s).comp (R s)‖ ≤ ‖A₂ s‖ * ‖R s‖ := ContinuousLinearMap.opNorm_comp_le _ _
+        _ ≤ (K : ℝ) * ‖R s‖ := mul_le_mul_of_nonneg_right hA₂s (norm_nonneg _)
+    · calc ‖(A₁ s - A₂ s).comp
+              (fundamentalSolution hA₁ hΦ₁ h0₁ s - fundamentalSolution hA₂ hΦ₂ h0₂ s)‖
+            ≤ ‖A₁ s - A₂ s‖
+              * ‖fundamentalSolution hA₁ hΦ₁ h0₁ s - fundamentalSolution hA₂ hΦ₂ h0₂ s‖ :=
+            ContinuousLinearMap.opNorm_comp_le _ _
+        _ ≤ ε * (ε * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀)) :=
+            mul_le_mul (hAA' s hsIcc) (hgap s hsIcc) (norm_nonneg _) hε
+        _ = Γ := by rw [hΓdef]; ring
+  have hgron := norm_le_gronwallBound_of_norm_deriv_right_le (a := t₀) (b := t)
+    hcR.continuousOn (fun x _ => (hRderiv x).hasDerivWithinAt) ha hbound t ⟨ht.1, le_rfl⟩
+  calc ‖(fundamentalSolution hA₁ hΦ₁ h0₁ t - fundamentalSolution hA₂ hΦ₂ h0₂ t) - V t‖
+      = ‖R t‖ := by rw [hRdef]
+    _ ≤ gronwallBound 0 (K : ℝ) Γ (t - t₀) := hgron
+    _ = Γ * gronwallBound 0 (K : ℝ) 1 (t - t₀) := gronwallBound_zero_left_mul _ _ _
+    _ ≤ Γ * gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+        mul_le_mul_of_nonneg_left
+          (gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one hKr (by linarith [ht.2])) hΓ0
+    _ = ε ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2 := by
+        rw [hΓdef]; ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
