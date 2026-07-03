@@ -5114,3 +5114,59 @@ a-priori first-variation bound `norm_fundamentalSolution_variation_le` to conclu
 `x₀ ↦ fundamentalSolution(A(x₀)) t = D_x Φ_t` is Fréchet differentiable (the first variation as a
 bounded *linear* map of the base-point increment), giving the spatial `C²` regularity of the flow —
 then iterate for `C³`.
+
+Update — the **base-point `C²` numerator (second-order Taylor remainder of the resolvent in the base
+point) is now CLOSED at the estimate level** (all axioms `propext`/`Classical.choice`/`Quot.sound`
+only), assembling the coefficient Taylor bound with the second-order variational estimate to identify
+the spatial `C²` derivative of the flow's resolvent up to an `O(‖z − x₀‖²)` remainder.  The
+second-order variational machinery, previously stated with a *globally*-uniform coefficient gap, is
+first re-cut in the interval-restricted form the base-point coefficients actually satisfy (their gap
+`Dv s (Φ z s) − Dv s (Φ x₀ s)` is `≤ L exp(K(T−t₀)) ‖z−x₀‖` only on compact tubes, never globally):
+
+* `norm_fundamentalSolution_sub_apply_le_of_forall_le_Icc`,
+  `norm_fundamentalSolution_sub_le_of_forall_le_Icc` — the **interval-restricted resolvent-coefficient
+  bounds**: the variants of `norm_fundamentalSolution_sub_apply/sub_le_of_forall_le` whose
+  coefficient-gap hypothesis `‖A s − A′ s‖ ≤ ε` is required only on `[t₀, T]` (the proof evaluates the
+  gap only there, through `dist_le_of_approx_trajectories_ODE`).
+  `‖D_x Φ_t^A − D_x Φ_t^{A′}‖ ≤ ε · exp(K(T−t₀)) · gronwallBound 0 K 1 (t−t₀)`.
+* `norm_fundamentalSolution_sub_sub_variation_le_Icc` — the **interval-restricted second-order
+  variational estimate**: the variant of `norm_fundamentalSolution_sub_sub_variation_le` with the
+  coefficient gap required only on `[t₀, T]` (via the interval sub-bound in `hgap` and directly on
+  `Ico t₀ t` in `hbound`).  Given the first variation `V` (`V′ = A₂ ∘ V + (A₁ − A₂) ∘ W₂`, `V t₀ = 0`),
+  `‖(W₁ t − W₂ t) − V t‖ ≤ ε² · exp(K(T−t₀)) · gronwallBound 0 K 1 (T−t₀)²` on `[t₀, T]`.
+* `norm_firstVariation_sub_linearVariation_le_sq` — **second-order agreement of the true and the
+  linearised first variation**: for the *true* first variation `Vz` (forcing `(A_z − A₀) ∘ W₀`) and the
+  *linearised* first variation `Vlin` (chain-rule forcing `(D²v(Φ x₀ s) ∘ W₀ · (z − x₀)) ∘ W₀`),
+  `‖Vz t − Vlin t‖ ≤ Cquad · exp(K(T−t₀)) · gronwallBound 0 K 1 (t−t₀) · ‖z − x₀‖²` (`Cquad` the
+  coefficient Taylor constant `M e + C′ L e g`).  `Vz − Vlin` is the first variation for the *residual*
+  coefficient perturbation (`hasDerivAt_firstVariation_perturbation_sub`), whose forcing is
+  `≤ Cquad ‖z − x₀‖² · ‖W₀ s‖` (the coefficient Taylor bound
+  `norm_derivField_sub_sub_comp_fundamentalSolution_le_sq` × `norm_fundamentalSolution_le`), closed by
+  the general a-priori bound `norm_inhomogVariation_le`.
+* `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` — **the second-order Taylor remainder of the
+  resolvent in the base point** (the spatial `C²` numerator): for a `C^{2,1}` field, the resolvent gap
+  `W_z t − W₀ t` (`W₀ =` resolvent of `A₀ s = Dv s (Φ x₀ s)`, `W_z` of `A_z s = Dv s (Φ z s)`) agrees to
+  second order with the *linearised* first variation `Vlin`,
+  `‖(W_z t − W₀ t) − Vlin t‖ ≤ (L² e₁³ g² + Cquad e₁ g) · ‖z − x₀‖²` on `[t₀, T]`
+  (`e₁ = exp(K(T−t₀))`, `g = gronwallBound 0 K 1 (T−t₀)`).  Triangle inequality across `Vz`:
+  `‖(W_z t − W₀ t) − Vz t‖ ≤ ε² e₁ g²` (`norm_fundamentalSolution_sub_sub_variation_le_Icc`,
+  `ε = L e₁ ‖z − x₀‖` from `norm_derivField_apply_flow_sub_le`) plus `‖Vz t − Vlin t‖`
+  (`norm_firstVariation_sub_linearVariation_le_sq`).  Since `Vlin` is *linear* in `z − x₀` this is the
+  resolvent analogue of the `C¹` numerator `norm_flow_sub_fundamentalSolution_le_sq`.
+* `linearVariation_perturbation_add_eq`, `linearVariation_perturbation_smul_eq` — the **linearity of the
+  candidate `C²` derivative**: the map `h ↦ Vlin^h t` is additive and homogeneous
+  (`Vlin^{h₁+h₂} t = Vlin^{h₁} t + Vlin^{h₂} t`, `Vlin^{c•h} t = c • Vlin^h t`), since the chain-rule
+  forcing `(D²v(Φ x₀ s) ∘ W₀)` is a bounded linear map of `h` (`map_add`/`map_smul`) and the
+  first-variation map is linear (`firstVariation_perturbation_add_eq`/`_smul_eq`).  The algebraic half of
+  packaging `h ↦ Vlin^h t` as a bounded linear map `D₂ ∈ E →L[ℝ] (E →L[ℝ] E)`.
+
+Remaining for the base-point `C²` bootstrap (future sessions): (i) the **existence** of the true /
+linearised first variations `Vz`, `Vlin` for these *time-unbounded* (locally bounded) forcings — the
+forcing `(A_z − A₀) ∘ W₀` grows like `exp(K|s−t₀|)`, so the globally-bounded
+`exists_hasDerivAt_inhomogVariation` does not apply; a compact-interval linear-ODE existence (Mathlib
+local Picard–Lindelöf + continuation, without a global forcing bound) is needed.  (ii) **package**
+`h ↦ Vlin^h t` as the bounded operator `D₂ = ∂/∂x₀ (D_x Φ_t)` via `LinearMap.mkContinuous` (linearity
+above + the a-priori bound `norm_inhomogVariation_le` for boundedness), and (iii) feed `D₂` and the
+Taylor remainder `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` (uniform in `z` near `x₀`)
+into `HasFDerivAt (fun z => D_x Φ_t^{A(z)}) D₂ x₀` — the spatial `C²` regularity — then iterate for
+`C³`.
