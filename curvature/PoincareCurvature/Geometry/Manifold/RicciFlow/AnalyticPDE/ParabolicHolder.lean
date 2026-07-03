@@ -7064,6 +7064,122 @@ theorem ParabolicC0AlphaOn.comp_affineChart_interior_parabolicClosedCylinder
   hu.comp_affineChart (c := c) (a := a) (r := r) hα
     (affineChartHomeomorph_bijOn_interior_parabolicClosedCylinder c a hr T S).mapsTo
 
+/-!
+## Reverse assembly of parabolic Hölder control from separate space and time control
+
+The `space_slice` and `time_slice_half_exponent` readouts extract, from a parabolic `α`-Hölder
+estimate, spatial `α`-Hölder control (uniform in time) and temporal `α/2`-Hölder control (uniform
+in space).  The following primitives run the *converse* direction: on a set that contains the mixed
+corner `(τ, x)` of any two of its points `(t, x)` and `(τ, y)` (a "corner-closed" set, e.g. a
+parabolic ball or cylinder, which is a product of a time interval and a spatial ball), separate
+spatial and temporal Hölder control reassemble into full parabolic Hölder control with the summed
+constant.  This is the standard way parabolic Schauder estimates are obtained: control the space and
+time regularity separately and then combine.
+-/
+
+/-- A parabolic ball is corner-closed: if `(t, x)` and `(τ, y)` lie in it, so does `(τ, x)`.  This
+is because the parabolic ball is the product of a time interval and a spatial ball. -/
+theorem parabolicBall.corner_mem {X : Type*} [PseudoMetricSpace X]
+    {c : ℝ × X} {R : ℝ} {t τ : ℝ} {x y : X}
+    (hp : (t, x) ∈ parabolicBall c R) (hq : (τ, y) ∈ parabolicBall c R) :
+    (τ, x) ∈ parabolicBall c R := by
+  simp only [parabolicBall.mem, parabolicDistance, max_lt_iff] at hp hq ⊢
+  exact ⟨hq.1, hp.2⟩
+
+/-- A closed parabolic ball is corner-closed. -/
+theorem parabolicClosedBall.corner_mem {X : Type*} [PseudoMetricSpace X]
+    {c : ℝ × X} {R : ℝ} {t τ : ℝ} {x y : X}
+    (hp : (t, x) ∈ parabolicClosedBall c R) (hq : (τ, y) ∈ parabolicClosedBall c R) :
+    (τ, x) ∈ parabolicClosedBall c R := by
+  simp only [parabolicClosedBall.mem, parabolicDistance, max_le_iff] at hp hq ⊢
+  exact ⟨hq.1, hp.2⟩
+
+/-- A product parabolic cylinder is corner-closed. -/
+theorem parabolicCylinder.corner_mem {X : Type*} [PseudoMetricSpace X]
+    {c : ℝ × X} {timeRadius spaceRadius : ℝ} {t τ : ℝ} {x y : X}
+    (hp : (t, x) ∈ parabolicCylinder c timeRadius spaceRadius)
+    (hq : (τ, y) ∈ parabolicCylinder c timeRadius spaceRadius) :
+    (τ, x) ∈ parabolicCylinder c timeRadius spaceRadius := by
+  simp only [parabolicCylinder.mem] at hp hq ⊢
+  exact ⟨hq.1, hp.2⟩
+
+/-- A closed product parabolic cylinder is corner-closed. -/
+theorem parabolicClosedCylinder.corner_mem {X : Type*} [PseudoMetricSpace X]
+    {c : ℝ × X} {timeRadius spaceRadius : ℝ} {t τ : ℝ} {x y : X}
+    (hp : (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius)
+    (hq : (τ, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius) :
+    (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius := by
+  simp only [parabolicClosedCylinder.mem] at hp hq ⊢
+  exact ⟨hq.1, hp.2⟩
+
+/-- **Reverse assembly of parabolic Hölder control.**  On a corner-closed time-space set, spatial
+`α`-Hölder control (with constant `Hs`, uniform in time) together with temporal `α/2`-Hölder control
+(with constant `Ht`, uniform in space) give parabolic `α`-Hölder control with constant `Hs + Ht`.
+This is the converse of `ParabolicHolderWith.space_slice` and
+`ParabolicHolderWith.time_slice_half_exponent`. -/
+theorem ParabolicHolderWith.of_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s)
+    (hspace : ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u s := by
+  rintro ⟨t, x⟩ hp ⟨τ, y⟩ hq
+  have hcornerMem : (τ, x) ∈ s := hcorner hp hq
+  have htime' : ‖u (t, x) - u (τ, x)‖ ≤ Ht * parabolicDistance (t, x) (τ, y) ^ α := by
+    refine (htime hp hcornerMem).trans ?_
+    rw [Real.rpow_div_two_eq_sqrt α (abs_nonneg (t - τ))]
+    refine mul_le_mul_of_nonneg_left ?_ hHt
+    exact Real.rpow_le_rpow (Real.sqrt_nonneg _)
+      (parabolicDistance.sqrt_time_le (t, x) (τ, y)) hα
+  have hspace' : ‖u (τ, x) - u (τ, y)‖ ≤ Hs * parabolicDistance (t, x) (τ, y) ^ α := by
+    refine (hspace hcornerMem hq).trans ?_
+    refine mul_le_mul_of_nonneg_left ?_ hHs
+    exact Real.rpow_le_rpow dist_nonneg
+      (parabolicDistance.space_dist_le (t, x) (τ, y)) hα
+  have hdecomp : u (t, x) - u (τ, y)
+      = (u (t, x) - u (τ, x)) + (u (τ, x) - u (τ, y)) :=
+    (sub_add_sub_cancel _ _ _).symm
+  rw [hdecomp]
+  calc ‖(u (t, x) - u (τ, x)) + (u (τ, x) - u (τ, y))‖
+      ≤ ‖u (t, x) - u (τ, x)‖ + ‖u (τ, x) - u (τ, y)‖ := norm_add_le _ _
+    _ ≤ Ht * parabolicDistance (t, x) (τ, y) ^ α
+        + Hs * parabolicDistance (t, x) (τ, y) ^ α := add_le_add htime' hspace'
+    _ = (Hs + Ht) * parabolicDistance (t, x) (τ, y) ^ α := by ring
+
+/-- **Reverse assembly of parabolic Hölder membership.**  The `ParabolicHolderOn` (existential
+constant) form of `ParabolicHolderWith.of_space_time_holder`. -/
+theorem ParabolicHolderOn.of_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s)
+    (hspace : ∃ Hs ≥ 0, ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∃ Ht ≥ 0, ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderOn α u s := by
+  obtain ⟨Hs, hHs, hspace'⟩ := hspace
+  obtain ⟨Ht, hHt, htime'⟩ := htime
+  exact ⟨Hs + Ht, add_nonneg hHs hHt,
+    ParabolicHolderWith.of_space_time_holder hHs hHt hα hcorner hspace' htime'⟩
+
+/-- **Reverse assembly of parabolic `C^{0,α}` control.**  Sup control together with separate spatial
+and temporal Hölder control reassemble into parabolic `C^{0,α}` control on a corner-closed set. -/
+theorem ParabolicC0AlphaWith.of_space_time_holder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {B Hs Ht α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hbound : ParabolicBoundedWith B u s) (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hcorner : ∀ {t τ : ℝ} {x y : X}, (t, x) ∈ s → (τ, y) ∈ s → (τ, x) ∈ s)
+    (hspace : ∀ {t : ℝ} {x y : X}, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X}, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaWith B (Hs + Ht) α u s :=
+  ⟨hbound, ParabolicHolderWith.of_space_time_holder hHs hHt hα hcorner hspace htime⟩
+
 end AnalyticPDE
 end RicciFlow
 
