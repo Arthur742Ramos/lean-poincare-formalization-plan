@@ -5556,6 +5556,119 @@ theorem exists_flow_fderiv_differentiable_of_lipschitz_secondDeriv [CompleteSpac
   exact differentiableAt_fundamentalSolution_baseCurve
     hv hΦ h0 hDv hDvlip hD2v hD2vlip x₀ hAfun hAcontfun hD2cont L.coe_nonneg hC' hΨ h0Ψ ht
 
+/-!
+### Continuous differentiability of the flow in the initial data (`C¹` in the strong Mathlib sense)
+
+The unconditional differentiable-dependence result `exists_flow_differentiable_of_lipschitz_deriv`
+only produces a *differentiable* flow map; the honest `C¹` regularity consumed by the compact-manifold
+gauge flow of Item 2 (a *diffeomorphism* family, whose derivatives must vary continuously) is
+`ContDiff ℝ 1` — differentiability **plus norm-continuity of the derivative**.  The missing piece is
+that the resolvent map `z ↦ D_x Φ_t = fderiv ℝ (fun w => Φ w t) z` depends continuously on the base
+point `z`.  This is supplied by the operator-norm continuous dependence of the resolvent on its
+coefficient (`norm_fundamentalSolution_sub_le_of_forall_le_Icc`) composed with the Lipschitz-in-base
+control of the linearised coefficient along the reference trajectory
+(`norm_derivField_apply_flow_sub_le`): the coefficient `A(z) s = Dv s (Φ z s)` moves by at most
+`L · exp (K (t − t₀)) · ‖z − z₀‖` on the tube `[t₀, t]`, hence the resolvent moves by at most
+`L · exp (K (t − t₀))² · gronwallBound 0 K 1 (t − t₀) · ‖z − z₀‖`.  The resolvent map is therefore
+(globally) Lipschitz in the base point, in particular continuous.  This upgrades the `C¹`-in-initial
+-data dependence from *differentiable* to *continuously differentiable* — the `ContDiff ℝ 1` interface
+that Items 1 and 2 actually consume. -/
+
+/-- **The flow map is `C¹`-with-continuous-derivative in the initial data (`C^{1,1}` field): the
+resolvent varies continuously with the base point.**  Strengthening
+`exists_flow_differentiable_of_lipschitz_deriv`: under the same field-level hypotheses (uniformly
+`K`-Lipschitz, time-continuous `v` with everywhere-defined, jointly continuous, spatially
+`L`-Lipschitz derivative `Dv`) there is one flow family `Φ` of `v` (anchored `Φ z t₀ = z`) whose
+forward time-`t` slice `z ↦ Φ z t` is `Differentiable ℝ` **and** whose derivative map
+`z ↦ fderiv ℝ (fun w => Φ w t) z` — the resolvent `D_x Φ_t` — is `Continuous`.
+
+Proof: build `Φ` once; the `C¹` bootstrap `hasFDerivAt_flow_of_lipschitz_deriv` identifies the resolvent
+map with `fderiv ℝ (fun w => Φ w t)`, so it remains to show `z ↦ fundamentalSolution (A(z)) t` is
+continuous.  Two base points `z`, `z₀` have coefficients `A(z) s = Dv s (Φ z s)` differing by at most
+`ε = L · exp (K (t − t₀)) · ‖z − z₀‖` on `[t₀, t]` (`norm_derivField_apply_flow_sub_le`), so the
+resolvent gap is `≤ ε · exp (K (t − t₀)) · gronwallBound 0 K 1 (t − t₀)`
+(`norm_fundamentalSolution_sub_le_of_forall_le_Icc`); this is a fixed multiple of `‖z − z₀‖`, i.e. the
+resolvent map is Lipschitz, hence continuous. -/
+theorem exists_flow_fderiv_continuous_of_lipschitz_deriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    {t : ℝ} (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        Differentiable ℝ (fun z => Φ z t) ∧
+        Continuous (fun z => fderiv ℝ (fun w => Φ w t) z) := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  have hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K := fun z s => by
+    have h : ‖Dv s (Φ z s)‖ ≤ (K : ℝ) := (hderiv s (Φ z s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)) := fun z =>
+    hDvc.comp (continuous_id.prodMk (hΦ z).continuous)
+  choose Ψ h0Ψ hΨ using fun z => exists_variationalFlowFamily (hAfun z) (hAcontfun z)
+  -- the `C¹` bootstrap identifies the resolvent map with `fderiv` at every base point
+  have hres : ∀ z, HasFDerivAt (fun w => Φ w t)
+      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) z := fun z =>
+    hasFDerivAt_flow_of_lipschitz_deriv hv (hAfun z) (hΨ z) (h0Ψ z) hΦ h0 z ht0
+      (Dv := Dv) (fun _ s _ ξ _ => (hderiv s ξ).hasFDerivWithinAt) L.coe_nonneg
+      (fun _ s _ ξ _ => by
+        have hlip := (hDvlip s).dist_le_mul ξ (Φ z s)
+        rw [dist_eq_norm, dist_eq_norm] at hlip
+        exact hlip)
+  have hfeq : (fun z => fderiv ℝ (fun w => Φ w t) z)
+      = (fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) :=
+    funext fun z => (hres z).fderiv
+  refine ⟨Φ, h0, hΦ, fun z => (hres z).differentiableAt, ?_⟩
+  rw [hfeq]
+  -- the resolvent map is Lipschitz in the base point, hence continuous
+  have hg0 : 0 ≤ gronwallBound 0 (K : ℝ) 1 (t - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr ht0)
+  have hC0 : (0 : ℝ) ≤ (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 2
+      * gronwallBound 0 (K : ℝ) 1 (t - t₀) :=
+    mul_nonneg (by positivity) hg0
+  apply LipschitzWith.continuous
+    (K := ((L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 2
+      * gronwallBound 0 (K : ℝ) 1 (t - t₀)).toNNReal)
+  apply LipschitzWith.of_dist_le_mul
+  intro z z₀
+  rw [Real.coe_toNNReal _ hC0, dist_eq_norm, dist_eq_norm]
+  have hgap : ∀ s ∈ Icc t₀ t, ‖Dv s (Φ z s) - Dv s (Φ z₀ s)‖
+      ≤ (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖ := fun s hs => by
+    have hsT : |s - t₀| ≤ t - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+    exact norm_derivField_apply_flow_sub_le hv hΦ h0 (hDvlip s) hsT z z₀
+  have key := norm_fundamentalSolution_sub_le_of_forall_le_Icc
+    (hAfun z) (hAfun z₀) (hΨ z) (h0Ψ z) (hΨ z₀) (h0Ψ z₀)
+    (by positivity : (0 : ℝ) ≤ (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖)
+    hgap ⟨ht0, le_refl t⟩
+  calc ‖fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t
+          - fundamentalSolution (hAfun z₀) (hΨ z₀) (h0Ψ z₀) t‖
+      ≤ (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖
+          * Real.exp ((K : ℝ) * (t - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀) := key
+    _ = (L : ℝ) * Real.exp ((K : ℝ) * (t - t₀)) ^ 2
+          * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - z₀‖ := by ring
+
+/-- **The flow map is `ContDiff ℝ 1` in the initial data (`C^{1,1}` field).**  The Mathlib-`ContDiff`
+packaging of `exists_flow_fderiv_continuous_of_lipschitz_deriv`: under the same field-level hypotheses
+there is one flow family `Φ` of `v` (anchored `Φ z t₀ = z`) whose forward time-`t` slice
+`z ↦ Φ z t` is `ContDiff ℝ 1` — continuously (Fréchet) differentiable in the initial value.  This is
+the honest "`C¹` in initial data" statement (differentiable with continuous derivative), in the
+`ContDiff` vocabulary that the compact-manifold gauge flow (Item 2) and the tensor time-derivative
+chain rule (Item 1) consume, obtained from the differentiability and resolvent-continuity halves via
+`contDiff_one_iff_fderiv`. -/
+theorem exists_flow_contDiff_one_of_lipschitz_deriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    {t : ℝ} (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContDiff ℝ 1 (fun z => Φ z t) := by
+  obtain ⟨Φ, h0, hΦ, hdiff, hcont⟩ :=
+    exists_flow_fderiv_continuous_of_lipschitz_deriv hv hvc hderiv hDvc hDvlip ht0
+  exact ⟨Φ, h0, hΦ, contDiff_one_iff_fderiv.mpr ⟨hdiff, hcont⟩⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
