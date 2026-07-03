@@ -5066,3 +5066,51 @@ on the compact trajectory tube — upgrades `C^{1,1}` to a general `C¹` field);
 bootstrap** (differentiate `x₀ ↦ D_x Φ_t` once more, via the now-constructed resolvent and the
 second-order variational equation `norm_fundamentalSolution_sub_sub_variation_le`); and packaging the
 first variation as a bounded *linear map* of the perturbation (Fréchet).
+
+Update — the **coefficient-side second-order (`C²`) estimate layer is now built** in
+`SmoothDependenceCk` (all axioms `propext`/`Classical.choice`/`Quot.sound` only), supplying every
+coefficient-side input the base-point `C²` bootstrap feeds to the second-order variational estimate
+`norm_fundamentalSolution_sub_sub_variation_le`.  The coefficient is `A(x₀) s = Dv s (Φ x₀ s)`, the
+linearisation of the field along the reference trajectory, with resolvent `R s = D_x Φ_s =
+fundamentalSolution … s`.
+
+* `hasFDerivAt_derivField_apply_flow` / `differentiableAt_derivField_apply_flow` — **the coefficient
+  chain rule `∂A/∂x₀`**: from the flow derivative `HasFDerivAt (fun z => Φ z s) R x₀` (the `C¹`
+  resolvent) and the field's *second* spatial derivative `HasFDerivAt (Dv s) D2 (Φ x₀ s)`, the
+  coefficient `z ↦ Dv s (Φ z s)` is Fréchet differentiable at `x₀` with derivative
+  `D2.comp R = D²v s (Φ x₀ s) ∘ D_x Φ_s` (pure `HasFDerivAt.comp`).
+* `lipschitzWith_derivField_apply_flow`, `..._of_abs_le`, `norm_derivField_apply_flow_sub_le` — **the
+  `ε = O(‖z − w‖)` size datum** (`hAA'`/`hε` of the second-order variational estimates): `Dv s`
+  `L`-Lipschitz composed with the flow's exponential Lipschitz bound gives
+  `‖Dv s (Φ z s) − Dv s (Φ w s)‖ ≤ L · exp (K T) · ‖z − w‖` uniformly on `|s − t₀| ≤ T`.
+* `norm_flow_sub_fundamentalSolution_le_uniform` — **the uniform-in-time first-order flow remainder**:
+  `norm_flow_sub_fundamentalSolution_le_Icc` with the `t`-dependent Grönwall factor replaced by its
+  endpoint value (`gronwallBound_mono`), so `‖(Φ y t − Φ x t) − D_x Φ_t (y − x)‖ ≤
+  δ · gronwallBound 0 K 1 (T − t₀)` for *all* `t ∈ [t₀, T]`.
+* `norm_sub_fderiv_le_mul_sq_of_lipschitz` — **the pure quadratic `C^{1,1}` Taylor bound**:
+  `‖g b − g a − g' a (b − a)‖ ≤ M ‖b − a‖²` for a map `g` with `M`-Lipschitz derivative `g'` (linearised
+  MVT `Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le'` + the segment bound `‖ξ − a‖ ≤ ‖b − a‖`);
+  `norm_derivField_sub_sub_secondDeriv_le` is its `g = Dv s`, `g' = D²v s` specialisation.
+* `norm_flow_sub_sq_le` — **flow-separation square bound** `‖Φ z s − Φ x s‖² ≤ exp (2 K T) ‖z − x‖²`
+  (the square of `dist_flow_apply_le`).
+* `norm_field_linearizationDefect_flow_le` + `norm_flow_sub_fundamentalSolution_le_sq` — **quantitative
+  `C^{1,1}` dependence of the flow on initial data**: the field's trajectory-linearisation defect is
+  `O(‖z − x₀‖²)` uniformly in `s`, which fed as `δ` to `norm_flow_sub_fundamentalSolution_le_uniform`
+  upgrades the *qualitative* `C¹` (`HasFDerivAt`, remainder `o(‖z − x₀‖)`) to an *explicit* second-order
+  rate `‖Φ z t − Φ x₀ t − D_x Φ_t (z − x₀)‖ ≤ L · exp (2K(T−t₀)) · gronwallBound 0 K 1 (T−t₀) · ‖z − x₀‖²`
+  on `[t₀, T]`.
+* `norm_derivField_sub_sub_comp_fundamentalSolution_le_sq` — **the central `C²` coefficient Taylor
+  bound**: for a `C^{2,1}` field, `‖Dv s (Φ z s) − Dv s (Φ x₀ s) − (D²v s (Φ x₀ s) ∘ D_x Φ_s)(z − x₀)‖ ≤
+  (M · e + C' · L · e · g) · ‖z − x₀‖²` (`e = exp (2K(T−t₀))`, `g = gronwallBound 0 K 1 (T−t₀)`)
+  uniformly for `s ∈ [t₀, T]` — i.e. the coefficient is `C^{1,1}` in the base point with `O(‖z − x₀‖²)`
+  remainder and derivative `∂A/∂x₀` above.  Split into the pure `Dv`-Taylor remainder
+  (`norm_derivField_sub_sub_secondDeriv_le` + `norm_flow_sub_sq_le`) plus `D²v` applied to the flow's own
+  quadratic remainder (`norm_flow_sub_fundamentalSolution_le_sq`).
+
+Remaining for the base-point `C²` bootstrap (future sessions): assemble the above coefficient Taylor
+bound (`= O(‖z − x₀‖²)` coefficient perturbation with linear leading term the chain-rule derivative)
+with the second-order variational estimate `norm_fundamentalSolution_sub_sub_variation_le` and the
+a-priori first-variation bound `norm_fundamentalSolution_variation_le` to conclude
+`x₀ ↦ fundamentalSolution(A(x₀)) t = D_x Φ_t` is Fréchet differentiable (the first variation as a
+bounded *linear* map of the base-point increment), giving the spatial `C²` regularity of the flow —
+then iterate for `C³`.
