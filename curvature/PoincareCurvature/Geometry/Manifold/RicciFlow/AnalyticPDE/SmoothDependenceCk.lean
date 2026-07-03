@@ -8591,6 +8591,103 @@ theorem norm_secondDerivField_sub_sub_thirdDeriv_ml_fundamentalSolution_le_sq
             * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖z - x₀‖ ^ 2 := by ring
   exact (add_le_add hb1 hb2).trans_eq (by ring)
 
+/-- **Two-fold left-curry to composition form.**  The isometric realisation of a `Fin 2` multilinear
+map `X : E[×2]→L E` as an honest iterated operator `E →L (E →L E)`, with `curry2 X a b = X ![a, b]`
+(`curry2_apply`).  This is the representation bridge between the *multilinear* form — in which the
+field's second derivative `D²v : E → (E[×2]→L E)` and its `C³` Taylor expansion live (the only form in
+which the third derivative carries a norm, `E →L (E[×2]→L E)`) — and the *composition* form
+`E →L (E →L E)` in which the second-variation forcing `((D²v ∘ W) h) ∘ W` and the trilinear engine
+`norm_bilinearCompForcing_*` operate.  Built by post-composing the left-curry
+`X.curryLeft : E →L (E[×1]→L E)` with the `Fin 1` evaluation isometry
+`continuousMultilinearCurryFin1 ℝ E E : (E[×1]→L E) ≃ₗᵢ (E →L E)`. -/
+noncomputable def curry2 (X : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) :
+    E →L[ℝ] (E →L[ℝ] E) :=
+  (continuousMultilinearCurryFin1 ℝ E E).toContinuousLinearEquiv.toContinuousLinearMap.comp
+    X.curryLeft
+
+/-- **Pointwise evaluation of the two-fold curry**: `curry2 X a b = X ![a, b]`.  Gives the composition
+form its meaning — the operator `a ↦ (b ↦ X[a, b])` — so that a composition-form forcing
+`((curry2 X ∘ W) h) ∘ W` evaluated at `e` is `X[W h, W e]`, identifying it (with `X` a contracted third
+derivative) as the module's third-derivative forcing term `F_C`. -/
+theorem curry2_apply (X : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) (a b : E) :
+    curry2 X a b = X ![a, b] := by
+  rw [curry2, ContinuousLinearMap.comp_apply]
+  simp only [ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv,
+    continuousMultilinearCurryFin1_apply, ContinuousMultilinearMap.curryLeft_apply]
+  congr 1
+  ext i
+  fin_cases i <;> rfl
+
+/-- The two-fold curry distributes over subtraction (it is linear). -/
+theorem curry2_sub (X Y : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) :
+    curry2 (X - Y) = curry2 X - curry2 Y := by
+  rw [curry2, curry2, curry2,
+    show (X - Y).curryLeft = X.curryLeft - Y.curryLeft from
+      ContinuousLinearMap.ext (congrFun rfl),
+    ContinuousLinearMap.comp_sub]
+
+/-- The two-fold curry is norm-nonexpansive: `‖curry2 X‖ ≤ ‖X‖` (in fact an isometry, `curryLeft`
+being one and `continuousMultilinearCurryFin1` a linear isometric equivalence).  This is what lets the
+multilinear central `C³` Taylor bound transport verbatim to the composition form without constant
+inflation. -/
+theorem norm_curry2_le (X : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) :
+    ‖curry2 X‖ ≤ ‖X‖ := by
+  refine ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg _) (fun a => ?_)
+  rw [curry2, ContinuousLinearMap.comp_apply]
+  have hC : ‖(continuousMultilinearCurryFin1 ℝ E E).toContinuousLinearEquiv.toContinuousLinearMap
+      (X.curryLeft a)‖ = ‖X.curryLeft a‖ := by
+    simp [LinearIsometryEquiv.norm_map]
+  rw [hC]
+  calc ‖X.curryLeft a‖ ≤ ‖X.curryLeft‖ * ‖a‖ := (X.curryLeft).le_opNorm a
+    _ = ‖X‖ * ‖a‖ := by rw [ContinuousMultilinearMap.curryLeft_norm]
+
+/-- **Composition-form central `C³` coefficient Taylor bound** — the `curry2`-bridged form of
+`norm_secondDerivField_sub_sub_thirdDeriv_ml_fundamentalSolution_le_sq`.  Transported through the
+representation isometry `curry2`, the multilinear central `C³` Taylor bound becomes a bound on the
+*composition-form* second-derivative gap `curry2 (D²v(Φ z s)) − curry2 (D²v(Φ x₀ s))` and its
+linearisation `curry2 (D³v(Φ x₀ s)(W_x (z − x₀)))` — exactly the shape the trilinear forcing engine
+`norm_bilinearCompForcing_sub_sub_le_sq` consumes as its candidate operator `dP` and quadratic
+remainder `εp = cp · ‖k‖²`:
+`‖(curry2 (D²v(Φ z s)) − curry2 (D²v(Φ x₀ s))) − curry2 (D³v(Φ x₀ s)(W_x (z − x₀)))‖ ≤ Cquad · ‖z − x₀‖²`,
+`Cquad = M · e + N · (L · e · g)`, `e = exp (2 K (T − t₀))`, `g = gronwallBound 0 K 1 (T − t₀)`.
+
+By `curry2_apply`, `curry2 (D²v(·)) : E →L (E →L E)` is the composition form `a b ↦ D²v(·)[a, b]` of the
+field's second derivative, and the candidate `dP = curry2 (D³v(Φ x₀ s)(W_x k))` evaluates to
+`a b ↦ D³v(Φ x₀ s)[W_x k, a, b]` — so `((dP ∘ W) h) ∘ W` is the once-and-twice contracted third
+derivative, i.e. the third-derivative forcing term `F_C`.  Proof: `curry2` is linear (`curry2_sub`), so
+the three-term combination collapses to `curry2 (D²v(Φ z s) − D²v(Φ x₀ s) − D³v(Φ x₀ s)(W_x k))`, whose
+norm is `≤` the multilinear residual norm (`norm_curry2_le`), bounded by the multilinear central `C³`
+Taylor bound `norm_secondDerivField_sub_sub_thirdDeriv_ml_fundamentalSolution_le_sq`.  This is the
+representation half of the remaining `(F₁ − F₀)` forcing-remainder step toward `ContDiff ℝ 3`. -/
+theorem norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2v : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3v : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {L M : ℝ≥0} {N : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD3v : ∀ s ξ, HasFDerivAt (D2v s) (D3v s ξ) ξ) (hD3vlip : ∀ s, LipschitzWith M (D3v s))
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hN0 : 0 ≤ N) (hN : ∀ s, ‖D3v s (Φ x₀ s)‖ ≤ N)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (z : E) {T s : ℝ} (hs : s ∈ Icc t₀ T) :
+    ‖curry2 (D2v s (Φ z s)) - curry2 (D2v s (Φ x₀ s))
+        - curry2 (D3v s (Φ x₀ s) (fundamentalSolution hA hΦ' h0' s (z - x₀)))‖
+      ≤ ((M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          + N * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀))) * ‖z - x₀‖ ^ 2 := by
+  have hcollapse : curry2 (D2v s (Φ z s)) - curry2 (D2v s (Φ x₀ s))
+        - curry2 (D3v s (Φ x₀ s) (fundamentalSolution hA hΦ' h0' s (z - x₀)))
+      = curry2 (D2v s (Φ z s) - D2v s (Φ x₀ s)
+          - D3v s (Φ x₀ s) (fundamentalSolution hA hΦ' h0' s (z - x₀))) := by
+    rw [curry2_sub, curry2_sub]
+  rw [hcollapse]
+  refine (norm_curry2_le _).trans ?_
+  exact norm_secondDerivField_sub_sub_thirdDeriv_ml_fundamentalSolution_le_sq
+    hv hΦ h0 hDv hDvlip hD3v hD3vlip x₀ hA hN0 hN hΦ' h0' z hs
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
