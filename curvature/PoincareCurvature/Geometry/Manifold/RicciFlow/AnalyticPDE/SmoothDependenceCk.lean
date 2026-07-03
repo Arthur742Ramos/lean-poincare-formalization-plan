@@ -1998,6 +1998,117 @@ theorem hasFDerivAt_flow_of_lipschitz_deriv_of_hasFDerivAt_eventually
   hasFDerivAt_flow_of_lipschitz_deriv_eventually hv hA hΦ' h0' hΦ h0 x₀ ht0
     (Filter.Eventually.of_forall (fun _ s _ ξ _ => (hderiv s ξ).hasFDerivWithinAt)) hL hlip
 
+/-!
+### Continuous dependence of the resolvent on the coefficient field
+
+The fundamental solution `D_x Φ_t` depends continuously — indeed Lipschitz-ly — on the coefficient
+field `A`.  If two uniformly-`K`-bounded coefficients `A`, `A'` are uniformly `ε`-close,
+`‖A s - A' s‖ ≤ ε`, then on a forward compact time interval `[t₀, T]` their resolvents differ in
+operator norm by at most `ε · exp (K (T - t₀)) · gronwallBound 0 K 1 (t - t₀)`.  The linearised
+perturbation `‖(A s - A' s) u‖ ≤ ε ‖u‖` is *not uniform* in `u`, so this is not a corollary of the
+uniform-field-perturbation bound `dist_flow_perturb_le`; instead it uses the a-priori trajectory
+growth `‖Φ₂ u₀ s‖ ≤ exp (K (T - t₀)) ‖u₀‖` (`norm_flow_variationalFieldVec_le`) to turn the
+per-point linearisation defect into a *uniform* one on the compact interval, then feeds Mathlib's
+approximate-trajectory Grönwall estimate `dist_le_of_approx_trajectories_ODE`.  This is the
+operator-level continuous dependence of the linearised flow / resolvent on its coefficient — an
+input to the `C²` regularity of the flow in initial data (where `A` itself varies with the base
+point) and to the continuous dependence of the DeTurck flow on the metric. -/
+
+/-- **Nonnegativity of the unit Grönwall bound.**  `0 ≤ gronwallBound 0 K 1 x` for `0 ≤ K` and
+`0 ≤ x`: on the diagonal `δ = 0`, `ε = 1`, the bound is `x` (if `K = 0`) or `(exp (K x) - 1)/K ≥ 0`
+(if `K > 0`). -/
+theorem gronwallBound_zero_one_nonneg {K x : ℝ} (hK : 0 ≤ K) (hx : 0 ≤ x) :
+    0 ≤ gronwallBound 0 K 1 x := by
+  rcases eq_or_lt_of_le hK with hK0 | hK0
+  · rw [← hK0]
+    simp only [gronwallBound_K0]
+    simpa using hx
+  · rw [gronwallBound_of_K_ne_0 (ne_of_gt hK0)]
+    have hexp : (1 : ℝ) ≤ Real.exp (K * x) := by
+      rw [← Real.exp_zero]
+      exact Real.exp_le_exp.mpr (mul_nonneg hK0.le hx)
+    have h1 : (0 : ℝ) ≤ Real.exp (K * x) - 1 := by linarith
+    have h2 : (0 : ℝ) ≤ 1 / K := by positivity
+    simp only [zero_mul, zero_add]
+    exact mul_nonneg h2 h1
+
+/-- **Continuous dependence of the resolvent on the coefficient (directional form).**  For two
+uniformly-`K`-bounded coefficient fields `A`, `A'` with variational flow families `Φ₁`, `Φ₂`, and
+`‖A s - A' s‖ ≤ ε` for all `s`, the resolvents applied to a fixed direction `u₀` satisfy, on the
+forward compact interval `[t₀, T]`,
+`‖D_x Φ_t^A u₀ - D_x Φ_t^{A'} u₀‖ ≤ ε · exp (K (T - t₀)) · ‖u₀‖ · gronwallBound 0 K 1 (t - t₀)`.
+The `A'`-column `s ↦ Φ₂ u₀ s` is treated as an approximate solution of the `A`-field, its
+linearisation defect `‖(A' s - A s)(Φ₂ u₀ s)‖ ≤ ε · exp (K (T - t₀)) · ‖u₀‖` uniform on `[t₀, T]`. -/
+theorem norm_fundamentalSolution_sub_apply_le_of_forall_le
+    {A A' : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K) (hA' : ∀ s, ‖A' s‖₊ ≤ K)
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec A)) (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec A')) (h2 : ∀ x, Φ₂ x t₀ = x)
+    {ε : ℝ} (hAA' : ∀ s, ‖A s - A' s‖ ≤ ε)
+    (u₀ : E) {T t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖fundamentalSolution hA hΦ₁ h1 t u₀ - fundamentalSolution hA' hΦ₂ h2 t u₀‖
+      ≤ ε * Real.exp ((K : ℝ) * (T - t₀)) * ‖u₀‖ * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  set εg : ℝ := ε * Real.exp ((K : ℝ) * (T - t₀)) * ‖u₀‖ with hεg
+  have hgbound : ∀ s ∈ Ico t₀ T,
+      dist (variationalFieldVec A' s (Φ₂ u₀ s)) (variationalFieldVec A s (Φ₂ u₀ s)) ≤ εg := by
+    intro s hs
+    have hsle : |s - t₀| ≤ T - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]
+      exact sub_le_sub_right hs.2.le t₀
+    have hgnorm : ‖Φ₂ u₀ s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) * ‖u₀‖ := by
+      refine (norm_flow_variationalFieldVec_le hA' hΦ₂ h2 u₀ s).trans ?_
+      exact mul_le_mul_of_nonneg_right
+        (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsle K.coe_nonneg)) (norm_nonneg _)
+    have hcoeff : ‖A' s - A s‖ ≤ ε := by
+      rw [show A' s - A s = -(A s - A' s) by abel, norm_neg]; exact hAA' s
+    calc dist (variationalFieldVec A' s (Φ₂ u₀ s)) (variationalFieldVec A s (Φ₂ u₀ s))
+        = ‖(A' s - A s) (Φ₂ u₀ s)‖ := by
+          simp only [variationalFieldVec, dist_eq_norm, ContinuousLinearMap.sub_apply]
+      _ ≤ ‖A' s - A s‖ * ‖Φ₂ u₀ s‖ := (A' s - A s).le_opNorm _
+      _ ≤ ε * (Real.exp ((K : ℝ) * (T - t₀)) * ‖u₀‖) :=
+          mul_le_mul hcoeff hgnorm (norm_nonneg _) (le_trans (norm_nonneg _) hcoeff)
+      _ = εg := by rw [hεg]; ring
+  have key := dist_le_of_approx_trajectories_ODE
+    (v := variationalFieldVec A) (a := t₀) (b := T)
+    (f := fun s => Φ₁ u₀ s) (g := fun s => Φ₂ u₀ s)
+    (f' := fun s => variationalFieldVec A s (Φ₁ u₀ s))
+    (g' := fun s => variationalFieldVec A' s (Φ₂ u₀ s))
+    (εf := 0) (εg := εg) (δ := 0) (K := K)
+    (fun s => lipschitzWith_variationalFieldVec hA s)
+    (hΦ₁ u₀).continuous.continuousOn
+    (fun s _ => (hΦ₁ u₀ s).hasDerivWithinAt)
+    (fun s _ => le_of_eq (dist_self _))
+    (hΦ₂ u₀).continuous.continuousOn
+    (fun s _ => (hΦ₂ u₀ s).hasDerivWithinAt)
+    hgbound
+    (by simp [h1, h2])
+  have hb := key t ht
+  rw [zero_add, gronwallBound_zero_left_mul] at hb
+  rw [fundamentalSolution_apply, fundamentalSolution_apply, ← dist_eq_norm]
+  exact hb
+
+/-- **Operator-norm continuous dependence of the resolvent on the coefficient.**  Assembling the
+directional bound `norm_fundamentalSolution_sub_apply_le_of_forall_le` over all unit directions:
+for coefficient fields `A`, `A'` (both `≤ K`) with `‖A s - A' s‖ ≤ ε`, the resolvents satisfy
+`‖D_x Φ_t^A - D_x Φ_t^{A'}‖ ≤ ε · exp (K (T - t₀)) · gronwallBound 0 K 1 (t - t₀)` on `[t₀, T]`.
+The resolvent is thus a (locally) Lipschitz function of its coefficient field. -/
+theorem norm_fundamentalSolution_sub_le_of_forall_le
+    {A A' : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K) (hA' : ∀ s, ‖A' s‖₊ ≤ K)
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec A)) (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec A')) (h2 : ∀ x, Φ₂ x t₀ = x)
+    {ε : ℝ} (hε : 0 ≤ ε) (hAA' : ∀ s, ‖A s - A' s‖ ≤ ε)
+    {T t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖fundamentalSolution hA hΦ₁ h1 t - fundamentalSolution hA' hΦ₂ h2 t‖
+      ≤ ε * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  refine ContinuousLinearMap.opNorm_le_bound _ ?_ (fun u₀ => ?_)
+  · exact mul_nonneg (mul_nonneg hε (Real.exp_pos _).le)
+      (gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr ht.1))
+  · rw [ContinuousLinearMap.sub_apply]
+    refine (norm_fundamentalSolution_sub_apply_le_of_forall_le hA hA' hΦ₁ h1 hΦ₂ h2 hAA' u₀ ht).trans
+      (le_of_eq ?_)
+    ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
