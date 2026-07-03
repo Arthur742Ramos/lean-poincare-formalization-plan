@@ -4757,3 +4757,38 @@ Remaining in this tower (future sessions): the *general* (merely-continuous, non
 modulus; the *existence* of the variational flow family (global integral curves of the linear
 field); and the bootstrap to `C^k` (`C^3`) — the resolvent-continuity brick is a first ingredient of
 the latter (continuity of `x₀ ↦ D_x Φ_t` in the base point, once `x₀ ↦ A(x₀)` is set up).
+
+Update — the resolvent's **regularity in time** is now proved at the *operator-norm* level (all
+axioms `propext`/`Classical.choice`/`Quot.sound` only), culminating in the operator-valued
+fundamental-solution equation itself — a central ingredient of the `C^k` bootstrap:
+
+* `norm_fundamentalSolution_sub_le_time` — **operator-norm local Lipschitz continuity in time**:
+  `‖D_x Φ_{t₂} - D_x Φ_{t₁}‖ ≤ K · exp (K · max |t₁ - t₀| |t₂ - t₀|) · |t₂ - t₁|`.  This is a genuine
+  *operator*-norm (not merely strong / fixed-direction) bound: each resolvent column `s ↦ Φ u s`
+  solves the vector variational ODE, so the one-dimensional mean-value inequality bounds its
+  increment by the supremum over the time window of `‖A s (Φ u s)‖ ≤ K · exp (K |s - t₀|) · ‖u‖`; the
+  exponential is maximised at an endpoint (`abs_le_max_abs_abs`), and the operator-norm supremum
+  over unit directions (`opNorm_le_bound`) gives the bound.
+* `continuous_fundamentalSolution_time` — the topological packaging: `t ↦ D_x Φ_t` is a **continuous
+  curve in the operator Banach space** `E →L[ℝ] E`, obtained by squeezing the distance between `0`
+  and the vanishing local-Lipschitz bound.  This upgrades the resolvent path from strongly
+  continuous (`continuous_fundamentalSolution_apply`) to norm-continuous.
+* `hasDerivAt_fundamentalSolution` / `isIntegralCurve_fundamentalSolution` — **the operator-valued
+  variational ODE** `W' = A W`: for a *norm-continuous* coefficient `A` (`‖A t‖ ≤ K`), the resolvent
+  is differentiable in the operator norm with `d/dt (D_x Φ_t) = A t ∘ (D_x Φ_t)`.  This is *operator*
+  differentiability (uniform over unit directions), not just the strong/columnwise statement: the
+  linearisation remainder applied to `u` is bounded, via the mean-value Taylor inequality, by
+  `‖s - t‖ · (‖A σ ∘ D_x Φ_σ - A t ∘ D_x Φ_t‖ near t) · ‖u‖`, and the norm-continuity of
+  `σ ↦ A σ ∘ D_x Φ_σ` (`continuous_fundamentalSolution_time` composed with `Continuous A` via
+  `Continuous.clm_comp`) drives it to `o(‖s - t‖)`.  Combined with `fundamentalSolution_anchor`
+  (`D_x Φ_{t₀} = 1`) this fully characterises the resolvent as *the* solution of `W' = A W`,
+  `W t₀ = 1`, discharging the operator integral-curve hypothesis previously assumed by
+  `fundamentalSolution_eq_of_operator_isIntegralCurve`.
+* `norm_comp_fundamentalSolution_le` — the a priori **velocity bound** on the resolvent path:
+  `‖A t ∘ D_x Φ_t‖ ≤ K · exp (K · |t - t₀|)` (the operator ODE's right-hand side), so the resolvent
+  curve moves through operator space at speed controlled by the same exponential.
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus; the *existence* of the variational flow family (global integral curves of the linear
+field); differentiable dependence of the resolvent on its coefficient field (the second-order
+variational equation), toward the base-point `C^2`/`C^k` bootstrap.
