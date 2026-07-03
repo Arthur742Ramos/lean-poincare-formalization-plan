@@ -5502,6 +5502,60 @@ theorem exists_hasFDerivAt_fderiv_flow_of_lipschitz_secondDeriv [CompleteSpace E
     hv hΦ h0 hDv hDvlip hD2v hD2vlip x₀ hAfun hAcontfun hD2cont L.coe_nonneg hC' hΨ h0Ψ ht
   exact ⟨Φ, D₂, h0, hΦ, hfeq ▸ hD₂⟩
 
+/-- **The flow's spatial derivative is everywhere differentiable (`C²` in initial data at every base
+point, `C^{2,1}` field).**  Strengthening `exists_hasFDerivAt_fderiv_flow_of_lipschitz_secondDeriv` to
+a *single* flow family whose resolvent map is differentiable at *every* base point: under the same
+field-level hypotheses there is one flow family `Φ` of `v` (anchored `Φ z t₀ = z`) whose resolvent map
+`z ↦ fderiv ℝ (fun w => Φ w t) z` — the first spatial derivative of the time-`t` flow — is
+`Differentiable ℝ`, i.e. Fréchet differentiable at every initial value.  Thus `z ↦ Φ z t` is twice
+Fréchet differentiable everywhere.
+
+Proof: build `Φ` and the per-`z` variational families `Ψ` once; the `C¹` bootstrap identifies the
+resolvent map with `fderiv ℝ (fun w => Φ w t)` uniformly, and at each base point
+`differentiableAt_fundamentalSolution_baseCurve` supplies the derivative (coefficient bound `C' = L`).
+The "`C²` in initial data" regularity statement — everywhere — for the spatial bootstrap of Items 1
+and 2. -/
+theorem exists_flow_fderiv_differentiable_of_lipschitz_secondDeriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ)
+    (hD2vc : Continuous fun p : ℝ × E => D2v p.1 p.2)
+    {M : ℝ≥0} (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        Differentiable ℝ (fun z => fderiv ℝ (fun w => Φ w t) z) := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  have hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K := fun z s => by
+    have h : ‖Dv s (Φ z s)‖ ≤ (K : ℝ) := (hDv s (Φ z s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)) := fun z =>
+    hDvc.comp (continuous_id.prodMk (hΦ z).continuous)
+  choose Ψ h0Ψ hΨ using fun z => exists_variationalFlowFamily (hAfun z) (hAcontfun z)
+  -- the resolvent map equals `fderiv` of the flow, uniformly in the base point (`C¹` bootstrap)
+  have hres : ∀ z, HasFDerivAt (fun w => Φ w t)
+      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) z := fun z =>
+    hasFDerivAt_flow_of_lipschitz_deriv hv (hAfun z) (hΨ z) (h0Ψ z) hΦ h0 z ht.1
+      (Dv := Dv) (fun _ s _ ξ _ => (hDv s ξ).hasFDerivWithinAt) L.coe_nonneg
+      (fun _ s _ ξ _ => by
+        have hlip := (hDvlip s).dist_le_mul ξ (Φ z s)
+        rw [dist_eq_norm, dist_eq_norm] at hlip
+        exact hlip)
+  have hfeq : (fun z => fderiv ℝ (fun w => Φ w t) z)
+      = (fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) :=
+    funext fun z => (hres z).fderiv
+  refine ⟨Φ, h0, hΦ, ?_⟩
+  rw [hfeq]
+  intro x₀
+  have hD2cont : Continuous (fun s => D2v s (Φ x₀ s)) :=
+    hD2vc.comp (continuous_id.prodMk (hΦ x₀).continuous)
+  have hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ (L : ℝ) := fun s =>
+    (hD2v s (Φ x₀ s)).le_of_lipschitz (hDvlip s)
+  exact differentiableAt_fundamentalSolution_baseCurve
+    hv hΦ h0 hDv hDvlip hD2v hD2vlip x₀ hAfun hAcontfun hD2cont L.coe_nonneg hC' hΨ h0Ψ ht
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
