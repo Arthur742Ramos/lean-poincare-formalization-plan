@@ -4849,6 +4849,14 @@ Update — the resolvent path's **`C¹`-in-time regularity** is now packaged (ax
   differentiable everywhere with the norm-continuous derivative `t ↦ A t ∘ D_x Φ_t`
   (`contDiff_one_iff_deriv`).  This is the packaged regularity (vs. the raw `HasDerivAt` + continuity
   pieces) that higher-order `C^k` consumers compose against.
+* `norm_integral_comp_fundamentalSolution_le` — the **a priori bound on the Duhamel source term**:
+  for any operator path `B` with `‖B σ‖ ≤ ε` (`0 ≤ ε`),
+  `‖∫_{t₀}^{t} B σ ∘ D_x Φ_σ dσ‖ ≤ ε · exp (K · |t - t₀|) · |t - t₀|` (pointwise
+  `‖B σ ∘ D_x Φ_σ‖ ≤ ε · exp (K · |σ - t₀|) ≤ ε · exp (K · |t - t₀|)` via submultiplicativity +
+  `norm_fundamentalSolution_le` + the endpoint-maximised exponential, integrated by
+  `intervalIntegral.norm_integral_le_of_norm_le_const`).  Applied with `B = A₁ - A₂` this is the size
+  of the inhomogeneous forcing in `fundamentalSolution_sub_eq_integral` — the leading-order resolvent
+  response to a coefficient perturbation of size `ε`.
 
 Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
 modulus; the *existence* of the variational flow family (global integral curves of the linear

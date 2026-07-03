@@ -2561,6 +2561,34 @@ theorem contDiff_one_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ�
   rw [hd]
   exact hAcont.clm_comp (continuous_fundamentalSolution_time hA hΦ h0)
 
+open MeasureTheory intervalIntegral in
+/-- **A priori bound on a resolvent-forcing integral (the Duhamel source term).**  For any
+operator-valued path `B` with `‖B σ‖ ≤ ε` (`0 ≤ ε`),
+`‖∫_{t₀}^{t} B σ ∘ D_x Φ_σ dσ‖ ≤ ε · exp (K · |t - t₀|) · |t - t₀|`.  Applied with `B = A₁ - A₂` this
+bounds the inhomogeneous "source term" of the Duhamel difference formula
+`fundamentalSolution_sub_eq_integral` — the leading-order response of the resolvent to a coefficient
+perturbation of size `ε`.  Proof: pointwise `‖B σ ∘ D_x Φ_σ‖ ≤ ‖B σ‖ · ‖D_x Φ_σ‖ ≤ ε · exp (K · |σ -
+t₀|) ≤ ε · exp (K · |t - t₀|)` (operator-norm submultiplicativity, `norm_fundamentalSolution_le`, and
+`|σ - t₀| ≤ |t - t₀|` on the window `Ι t₀ t`), integrated by
+`intervalIntegral.norm_integral_le_of_norm_le_const`. -/
+theorem norm_integral_comp_fundamentalSolution_le {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0} {ε : ℝ}
+    [CompleteSpace E]
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (hε : 0 ≤ ε) (B : ℝ → (E →L[ℝ] E)) (hB : ∀ σ, ‖B σ‖ ≤ ε) (t : ℝ) :
+    ‖∫ σ in t₀..t, (B σ).comp (fundamentalSolution hA hΦ h0 σ)‖
+      ≤ ε * Real.exp ((K : ℝ) * |t - t₀|) * |t - t₀| := by
+  refine intervalIntegral.norm_integral_le_of_norm_le_const
+    (C := ε * Real.exp ((K : ℝ) * |t - t₀|)) ?_
+  intro σ hσ
+  have hσle : |σ - t₀| ≤ |t - t₀| := by
+    have hmem : σ ∈ Set.uIcc t₀ t := Set.uIoc_subset_uIcc hσ
+    have := Real.dist_le_of_mem_uIcc hmem Set.left_mem_uIcc
+    simpa [Real.dist_eq, abs_sub_comm] using this
+  refine (ContinuousLinearMap.opNorm_comp_le (B σ) (fundamentalSolution hA hΦ h0 σ)).trans ?_
+  refine (mul_le_mul (hB σ) (norm_fundamentalSolution_le hA hΦ h0 σ) (norm_nonneg _) hε).trans ?_
+  exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by gcongr)) hε
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
