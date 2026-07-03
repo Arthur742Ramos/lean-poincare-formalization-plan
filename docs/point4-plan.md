@@ -4365,6 +4365,22 @@ characterization `ParabolicHolderOn.iff_space_time_holder` (parabolic Hölder �
 separate spatial and temporal Hölder on a corner-closed set). This is the standard
 route to parabolic Schauder estimates — control the space and time regularity of a
 solution separately and then combine them into the parabolic norm.
+The space/time characterization is now also available at the *full norm level* and on
+the *open* Schauder domains: `ParabolicC0AlphaOn.iff_space_time_holder` records the sup
+bound alongside the separate spatial/temporal Hölder control (the exact `C^0` +
+space/time data of the parabolic `C^{0,α}` norm), with closed and open
+cylinder/ball specializations, and `ParabolicHolderOn.iff_space_time_holder_parabolic{Cylinder,Ball}`
+give the open-interior-domain analogues of the closed-shape characterization (both
+proved from the general corner-closed `iff` via the open `corner_mem` lemmas).
+The parabolic classes are now also proved *closed under limits*, the inheritance step
+behind completeness of the parabolic Hölder space:
+`ParabolicHolderWith`/`ParabolicBoundedWith`/`ParabolicC0AlphaWith.of_tendsto` pass a
+fixed Hölder constant, uniform sup bound, and combined `C^{0,α}` control to pointwise
+limits over any `NeBot` filter, and the `...of_tendstoUniformlyOn` companions state the
+same closedness in the topology of uniform convergence (the fixed-constant `C^{0,α}`
+ball is closed in `C^0`). What remains for decomposition step 1 is to package the
+`C^{0,α}` seminorm as an `ℝ`-valued functional and assemble the Banach-space
+(completeness) instance, then lift to `C^{2+α,1+α/2}`.
 
 **Suggested decomposition** (multi-session):
 
