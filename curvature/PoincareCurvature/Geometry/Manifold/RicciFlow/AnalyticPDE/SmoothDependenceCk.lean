@@ -8688,6 +8688,33 @@ theorem norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq
   exact norm_secondDerivField_sub_sub_thirdDeriv_ml_fundamentalSolution_le_sq
     hv hΦ h0 hDv hDvlip hD3v hD3vlip x₀ hA hN0 hN hΦ' h0' z hs
 
+/-- **Composition-form `dP`-term equals the third-derivative forcing `F_C`.**  The algebraic identity
+completing the representation bridge: the trilinear forcing engine's `dP`-linear term
+`((curry2 S ∘ W) h) ∘ W` — the composition-form once-and-twice contracted operator — coincides with
+the module's `continuousMultilinearCurryFin1`/`curryLeft`-shaped forcing term
+`(continuousMultilinearCurryFin1 ℝ E E (S.curryLeft (W h))).comp W`.  Both send `e ↦ S[W h, W e]`
+(`curry2_apply` on the left, `continuousMultilinearCurryFin1_apply` + `curryLeft_apply` on the right).
+
+Applied with `S = (D³v(Φ x₀ s)).curryLeft (W k)` (`W = fundamentalSolution`) the right-hand side is
+exactly the third-derivative forcing term `F_C` of
+`exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv`
+(`(continuousMultilinearCurryFin1 ℝ E E (((D³v(Φ x₀ s)).curryLeft (W k)).curryLeft (W h))).comp W`),
+so the composition-form candidate `dP = curry2 ((D³v(Φ x₀ s)).curryLeft (W k))` produced by the trilinear
+engine `norm_bilinearCompForcing_sub_sub_le_sq` is identified with `F_C`.  Together with
+`norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq` (the quadratic remainder `εp = cp · ‖k‖²` for
+this `dP`) this closes the representation half of the remaining `(F₁ − F₀)` forcing-remainder step
+toward `ContDiff ℝ 3`. -/
+theorem bilinearCompForcing_curry2_eq
+    (S : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) (W : E →L[ℝ] E) (h : E) :
+    (((curry2 S).comp W) h).comp W
+      = (continuousMultilinearCurryFin1 ℝ E E (S.curryLeft (W h))).comp W := by
+  ext e
+  simp only [ContinuousLinearMap.comp_apply, curry2_apply, continuousMultilinearCurryFin1_apply,
+    ContinuousMultilinearMap.curryLeft_apply]
+  congr 1
+  ext i
+  fin_cases i <;> rfl
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
