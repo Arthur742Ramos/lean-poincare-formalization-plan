@@ -8134,6 +8134,102 @@ theorem abs_parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub {X E : Type*} [
   rw [← heq]
   exact parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub hv hu
 
+/-- **Scalar homogeneity bound for the parabolic sup norm.**  Scaling by a normed-field scalar
+`c` scales the parabolic sup norm by at most `‖c‖`.  This is the `norm_smul_le`-shaped
+homogeneity primitive for the `C^0` part of the parabolic `C^{0,α}` norm. -/
+theorem parabolicSupNorm_const_smul_le {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+    parabolicSupNorm (fun z => c • u z) s ≤ ‖c‖ * parabolicSupNorm u s :=
+  parabolicSupNorm_le
+    (mul_nonneg (norm_nonneg c) (parabolicSupNorm_nonneg u s))
+    ((parabolicBoundedWith_parabolicSupNorm hu).smul c)
+
+/-- **Scalar homogeneity of the parabolic sup norm** (equality form): `‖c • u‖₀ = ‖c‖ ‖u‖₀`. -/
+theorem parabolicSupNorm_const_smul {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+    parabolicSupNorm (fun z => c • u z) s = ‖c‖ * parabolicSupNorm u s := by
+  refine le_antisymm (parabolicSupNorm_const_smul_le c hu) ?_
+  rcases eq_or_ne c 0 with hc | hc
+  · subst hc
+    rw [norm_zero, zero_mul]
+    exact parabolicSupNorm_nonneg _ s
+  · have hcu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B (fun z => c • u z) s := by
+      obtain ⟨B, hB, hbu⟩ := hu
+      exact ⟨‖c‖ * B, mul_nonneg (norm_nonneg c) hB, hbu.smul c⟩
+    have hkey : parabolicSupNorm u s
+        ≤ ‖c⁻¹‖ * parabolicSupNorm (fun z => c • u z) s := by
+      have h := parabolicSupNorm_const_smul_le (u := fun z => c • u z) c⁻¹ hcu
+      simpa only [inv_smul_smul₀ hc] using h
+    have hcc : ‖c‖ * ‖c⁻¹‖ = 1 := by
+      rw [← norm_mul, mul_inv_cancel₀ hc, norm_one]
+    calc ‖c‖ * parabolicSupNorm u s
+        ≤ ‖c‖ * (‖c⁻¹‖ * parabolicSupNorm (fun z => c • u z) s) :=
+          mul_le_mul_of_nonneg_left hkey (norm_nonneg c)
+      _ = (‖c‖ * ‖c⁻¹‖) * parabolicSupNorm (fun z => c • u z) s := by ring
+      _ = parabolicSupNorm (fun z => c • u z) s := by rw [hcc, one_mul]
+
+/-- **Scalar homogeneity bound for the parabolic Hölder seminorm.**  Scaling by a normed-field
+scalar `c` scales the parabolic Hölder seminorm by at most `‖c‖`. -/
+theorem parabolicHolderSeminorm_const_smul_le {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ParabolicHolderOn α u s) :
+    parabolicHolderSeminorm α (fun z => c • u z) s ≤ ‖c‖ * parabolicHolderSeminorm α u s :=
+  parabolicHolderSeminorm_le
+    (mul_nonneg (norm_nonneg c) (parabolicHolderSeminorm_nonneg α u s))
+    ((parabolicHolderWith_parabolicHolderSeminorm hu).smul c)
+
+/-- **Scalar homogeneity of the parabolic Hölder seminorm** (equality form):
+`[c • u]_α = ‖c‖ [u]_α`. -/
+theorem parabolicHolderSeminorm_const_smul {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ParabolicHolderOn α u s) :
+    parabolicHolderSeminorm α (fun z => c • u z) s = ‖c‖ * parabolicHolderSeminorm α u s := by
+  refine le_antisymm (parabolicHolderSeminorm_const_smul_le c hu) ?_
+  rcases eq_or_ne c 0 with hc | hc
+  · subst hc
+    rw [norm_zero, zero_mul]
+    exact parabolicHolderSeminorm_nonneg α _ s
+  · have hcu : ParabolicHolderOn α (fun z => c • u z) s := hu.smul c
+    have hkey : parabolicHolderSeminorm α u s
+        ≤ ‖c⁻¹‖ * parabolicHolderSeminorm α (fun z => c • u z) s := by
+      have h := parabolicHolderSeminorm_const_smul_le (u := fun z => c • u z) c⁻¹ hcu
+      simpa only [inv_smul_smul₀ hc] using h
+    have hcc : ‖c‖ * ‖c⁻¹‖ = 1 := by
+      rw [← norm_mul, mul_inv_cancel₀ hc, norm_one]
+    calc ‖c‖ * parabolicHolderSeminorm α u s
+        ≤ ‖c‖ * (‖c⁻¹‖ * parabolicHolderSeminorm α (fun z => c • u z) s) :=
+          mul_le_mul_of_nonneg_left hkey (norm_nonneg c)
+      _ = (‖c‖ * ‖c⁻¹‖) * parabolicHolderSeminorm α (fun z => c • u z) s := by ring
+      _ = parabolicHolderSeminorm α (fun z => c • u z) s := by rw [hcc, one_mul]
+
+/-- **Scalar homogeneity of the parabolic `C^{0,α}` norm** (equality form):
+`‖c • u‖_{C^{0,α}} = ‖c‖ ‖u‖_{C^{0,α}}`.  Together with subadditivity, negation invariance, and
+vanishing on zero this supplies the seminorm axioms of the parabolic `C^{0,α}` norm as a genuine
+`ℝ`-scalar seminorm — the homogeneity needed for the `NormedSpace ℝ`/Banach structure. -/
+theorem parabolicC0AlphaNorm_const_smul {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm α (fun z => c • u z) s = ‖c‖ * parabolicC0AlphaNorm α u s := by
+  obtain ⟨B, hB, H, hH, hbdd, hhol⟩ := hu
+  unfold parabolicC0AlphaNorm
+  rw [parabolicSupNorm_const_smul c ⟨B, hB, hbdd⟩,
+    parabolicHolderSeminorm_const_smul c ⟨H, hH, hhol⟩, mul_add]
+
+/-- **Scalar homogeneity bound for the parabolic `C^{0,α}` norm**: `‖c • u‖ ≤ ‖c‖ ‖u‖`. -/
+theorem parabolicC0AlphaNorm_const_smul_le {X E 𝕜 : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedField 𝕜] [NormedSpace 𝕜 E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (c : 𝕜)
+    (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm α (fun z => c • u z) s ≤ ‖c‖ * parabolicC0AlphaNorm α u s :=
+  le_of_eq (parabolicC0AlphaNorm_const_smul c hu)
+
 end AnalyticPDE
 end RicciFlow
 
