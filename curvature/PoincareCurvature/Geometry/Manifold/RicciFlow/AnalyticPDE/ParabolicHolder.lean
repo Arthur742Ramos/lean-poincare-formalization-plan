@@ -8102,6 +8102,38 @@ theorem exists_parabolicC0AlphaOn_tendsto_of_cauchy {X E : Type*} [PseudoMetricS
     parabolicC0AlphaNorm_le_of_tendsto (by positivity) (by positivity) hballC htendC
   linarith
 
+/-- **Reverse triangle inequality for the parabolic `C^{0,α}` norm.**  The norm difference of two
+parabolic `C^{0,α}` functions is dominated by the norm of their difference — the `1`-Lipschitz
+continuity of the norm functional.  Combined with `exists_parabolicC0AlphaOn_tendsto_of_cauchy`,
+this shows the parabolic `C^{0,α}` norms of a Cauchy sequence converge to the norm of the limit. -/
+theorem parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicC0AlphaNorm α u s - parabolicC0AlphaNorm α v s
+      ≤ parabolicC0AlphaNorm α (fun z => u z - v z) s := by
+  have key : parabolicC0AlphaNorm α u s
+      ≤ parabolicC0AlphaNorm α v s + parabolicC0AlphaNorm α (fun z => u z - v z) s := by
+    have hle := parabolicC0AlphaNorm_add_le hv (hu.sub hv)
+    have heq : (fun z => v z + (u z - v z)) = u := by funext z; abel
+    rwa [heq] at hle
+  linarith
+
+/-- The absolute norm difference of two parabolic `C^{0,α}` functions is dominated by the norm of
+their difference (the two-sided reverse triangle inequality / norm continuity). -/
+theorem abs_parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    |parabolicC0AlphaNorm α u s - parabolicC0AlphaNorm α v s|
+      ≤ parabolicC0AlphaNorm α (fun z => u z - v z) s := by
+  rw [abs_sub_le_iff]
+  refine ⟨parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub hu hv, ?_⟩
+  have heq : parabolicC0AlphaNorm α (fun z => v z - u z) s
+      = parabolicC0AlphaNorm α (fun z => u z - v z) s := by
+    have hfun : (fun z => v z - u z) = (fun z => -(u z - v z)) := by funext z; abel
+    rw [hfun, parabolicC0AlphaNorm_neg]
+  rw [← heq]
+  exact parabolicC0AlphaNorm_sub_le_parabolicC0AlphaNorm_sub hv hu
+
 end AnalyticPDE
 end RicciFlow
 
