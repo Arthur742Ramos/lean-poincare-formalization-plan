@@ -2,6 +2,7 @@ module
 
 public import Mathlib.Analysis.ODE.Basic
 public import Mathlib.Analysis.ODE.Gronwall
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 set_option linter.unusedSectionVars false
 
@@ -2387,6 +2388,38 @@ theorem norm_comp_fundamentalSolution_le {A : ℝ → (E →L[ℝ] E)} {K : ℝ�
   refine (ContinuousLinearMap.opNorm_comp_le (A t) (fundamentalSolution hA hΦ h0 t)).trans ?_
   refine mul_le_mul ?_ (norm_fundamentalSolution_le hA hΦ h0 t) (norm_nonneg _) K.coe_nonneg
   exact_mod_cast hA t
+
+open MeasureTheory intervalIntegral in
+/-- **The fundamental solution satisfies the Volterra / Duhamel integral equation.**  For a
+*norm-continuous* coefficient path `A` (`‖A t‖ ≤ K`), the resolvent `t ↦ D_x Φ_t` obeys the
+integral form of the operator variational ODE `W' = A W`, `W t₀ = 1`:
+`D_x Φ_t = 1 + ∫_{t₀}^{t} A σ ∘ D_x Φ_σ dσ`.  This is the fixed-point / Picard characterisation of
+the fundamental solution: applying the fundamental theorem of calculus
+(`intervalIntegral.integral_eq_sub_of_hasDerivAt`) to the operator ODE
+`hasDerivAt_fundamentalSolution` — whose right-hand side `σ ↦ A σ ∘ D_x Φ_σ` is norm-continuous
+(`hAcont.clm_comp continuous_fundamentalSolution_time`), hence interval-integrable — and folding in
+the anchor `fundamentalSolution_anchor` (`D_x Φ_{t₀} = 1`) turns the differential equation into its
+Volterra integral equation.  This is the operator-Duhamel identity underlying differentiable
+dependence of the resolvent on its coefficient field (the second-order variational equation) toward
+the `C^k` bootstrap. -/
+theorem fundamentalSolution_eq_one_add_integral {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    [CompleteSpace E]
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) :
+    fundamentalSolution hA hΦ h0 t
+      = 1 + ∫ σ in t₀..t, (A σ).comp (fundamentalSolution hA hΦ h0 σ) := by
+  have hHcont : Continuous (fun σ => (A σ).comp (fundamentalSolution hA hΦ h0 σ)) :=
+    hAcont.clm_comp (continuous_fundamentalSolution_time hA hΦ h0)
+  have hderiv : ∀ σ ∈ Set.uIcc t₀ t,
+      HasDerivAt (fun s => fundamentalSolution hA hΦ h0 s)
+        ((A σ).comp (fundamentalSolution hA hΦ h0 σ)) σ :=
+    fun σ _ => hasDerivAt_fundamentalSolution hA hAcont hΦ h0 σ
+  have hint := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
+    (hHcont.intervalIntegrable t₀ t)
+  rw [fundamentalSolution_anchor hA hΦ h0] at hint
+  rw [hint, ← ContinuousLinearMap.one_def]
+  abel
 
 end SmoothDependenceCk
 end AnalyticPDE

@@ -4792,3 +4792,25 @@ Remaining in this tower (future sessions): the *general* (merely-continuous, non
 modulus; the *existence* of the variational flow family (global integral curves of the linear
 field); differentiable dependence of the resolvent on its coefficient field (the second-order
 variational equation), toward the base-point `C^2`/`C^k` bootstrap.
+
+Update — the resolvent's **Volterra / Duhamel integral equation** is now proved (axioms
+`propext`/`Classical.choice`/`Quot.sound` only), converting the operator differential equation
+`hasDerivAt_fundamentalSolution` into its Picard fixed-point form — the operator-Duhamel identity
+that differentiable dependence on the coefficient field will be built on:
+
+* `fundamentalSolution_eq_one_add_integral` — for a *norm-continuous* coefficient `A` (`‖A t‖ ≤ K`,
+  `CompleteSpace E`), the resolvent satisfies `D_x Φ_t = 1 + ∫_{t₀}^{t} A σ ∘ D_x Φ_σ dσ`.  Proof:
+  the operator ODE `W' = A W` (`hasDerivAt_fundamentalSolution`) holds at every time, its
+  right-hand side `σ ↦ A σ ∘ D_x Φ_σ` is norm-continuous
+  (`hAcont.clm_comp continuous_fundamentalSolution_time`) hence interval-integrable, so the
+  fundamental theorem of calculus (`intervalIntegral.integral_eq_sub_of_hasDerivAt`) gives
+  `∫_{t₀}^{t} A σ ∘ D_x Φ_σ dσ = D_x Φ_t - D_x Φ_{t₀}`, and folding in
+  `fundamentalSolution_anchor` (`D_x Φ_{t₀} = 1`) yields the Volterra equation.  (This is the first
+  use of Bochner interval integration in the module, adding the single core-Mathlib import
+  `Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus`.)
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus; the *existence* of the variational flow family (global integral curves of the linear
+field); differentiable dependence of the resolvent on its coefficient field (the second-order
+variational equation), built on the Volterra identity above, toward the base-point `C^2`/`C^k`
+bootstrap.
