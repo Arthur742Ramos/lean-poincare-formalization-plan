@@ -4331,6 +4331,26 @@ comparison primitive inputs, extracting one shared determinant lower bound for
 the Gram and comparison matrices from compactness first. It is still below the
 actual `C^{2+α,1+α/2}` norm and Schauder estimate.
 
+The affine parabolic chart layer now also has a complete topological-boundary
+transport layer built on `affineChartHomeomorph`: for `r ≠ 0` the chart commutes
+with `closure`, `interior`, and `frontier` of all four parabolic shapes
+(open/closed balls and cylinders) in both the image (`affineChartHomeomorph_image_{closure,interior,frontier}_*`)
+and preimage (`affineChartHomeomorph_preimage_{closure,interior,frontier}_*`)
+directions, and restricts to a `Set.BijOn` between those boundary sets
+(`affineChartHomeomorph_bijOn_{closure,interior,frontier}_*`).  Intrinsic
+(chart-free) shape topology was filled in: each open parabolic shape lies in the
+interior of the corresponding closed shape
+(`parabolic{Ball,Cylinder}.subset_interior_closed*`), so each closed parabolic
+shape of positive radius is a neighborhood of its center
+(`parabolicClosed{Ball,Cylinder}.mem_nhds`).  Feeding the boundary `Set.BijOn`
+into the generic `MapsTo`-parametrized change of variables
+`ParabolicC0Alpha{With,On}.comp_affineChart` now gives the affine Schauder
+`C^{0,α}` normalization directly on the closure of an open parabolic
+ball/cylinder and on the interior of a closed parabolic ball/cylinder
+(`ParabolicC0Alpha{With,On}.comp_affineChart_{closure_parabolicBall,closure_parabolicCylinder,interior_parabolicClosedBall,interior_parabolicClosedCylinder}`),
+i.e. the affine change of variables is now available on the exact boundary-domain
+shapes on which an interior parabolic regularity estimate is taken.
+
 **Suggested decomposition** (multi-session):
 
 1. Choose a function-space realization of the metric locus. The
