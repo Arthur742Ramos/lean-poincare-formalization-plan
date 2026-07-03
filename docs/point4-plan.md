@@ -5702,3 +5702,48 @@ remainder still stated in un-factored `‖z − x₀‖/‖z − x₀‖²`-mixe
 remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C · ‖z − x₀‖²`; then
 `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` closes `ContDiff ℝ 3`.  All analytic ingredients now exist;
 the capstone is pure threading + one `ring`-reshape.
+
+Update — **the `hβ`-application capstone is now DONE, and the base-point Taylor remainder has been
+lifted all the way to the *operator level* — the exact numerator `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+consumes** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`.  Six new theorems close the capstone flagged above and package it
+into the operator-norm form:
+
+* `norm_forcingGap_flow_le_sq` — the **`C³` forcing-gap `hβ` along the flow**: assembles the
+  coefficient-variation remainder `norm_coeffVariation_sub_secondDerivComp_le_sq` (ring-reshaped to the
+  clean `C₁·‖z − x₀‖²·‖h‖` rate) and `norm_chainRuleForcing_flow_sub_sub_le_sq` via
+  `norm_forcingGap_le_of_remainders` into `‖((Dv(Φz) − Dv(Φx₀))∘Uz + (F₁ − F₀)) − (F_A + F_B +
+  (newLeading + F_C))‖ ≤ C·‖z − x₀‖²·‖h‖`, uniformly on `[t₀, T]` — exactly the `hβ` of
+  `norm_inhomogVariation_sub_sub_le_of_forcingGap`.
+* `norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq` — the **curve-level `C³` Taylor
+  remainder** (the `D₃`-analogue of the `C²` numerator `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`):
+  feeds the forcing gap into `norm_inhomogVariation_sub_sub_le_of_forcingGap` with the three ODE solutions
+  `Uz, Ux, V₃`, giving `‖(Uz t − Ux t) − V₃ t‖ ≤ C·‖z − x₀‖²·‖h‖`.
+* `continuous_thirdDerivCurryForcing` — continuity of the `F_C` forcing in the `D3vm` (`E →L (E[×2]→L E)`)
+  representation, the companion of `continuous_thirdDerivForcing`.
+* `norm_chainRuleForcing_flow_sub_sub_le_sq_uniform` — the **`h`-uniform** (direction-independent
+  constant) chain-rule forcing remainder: `∃C, ∀ h, ∀ s ∈ [t₀,T], …≤ C·‖z − x₀‖²·‖h‖` with `C` chosen
+  **before** `h` (the engine constant of `norm_bilinearCompForcing_curry2_sub_sub_le_sq` never mentions
+  `h`; the `?C` metavariable unifies to it on the single `exact`).  This is what the operator-norm
+  packaging needs (`opNorm_le_bound` requires one bound valid for every direction).
+* `norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniform` — the `h`-uniform curve-level
+  Taylor remainder (`C` before `h` and the `h`-dependent curves `Uz, Ux, V₃`).
+* `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq` — the **operator-level `C³` Taylor
+  remainder** (the `D₃`-analogue of the `C²` operator estimate `norm_secondFundamentalSolution_op_sub_le`):
+  for packaged `D₂z, D₂x : E →L (E →L E)` and `D₃ : E →L (E →L (E →L E))` with their curve
+  characterisations, `‖(D₂z − D₂x) − D₃ (z − x₀)‖ ≤ C·‖z − x₀‖²`.  Via `ContinuousLinearMap.opNorm_le_bound`
+  reduced to a per-direction bound; per `h` the three canonical curves are built
+  (`exists_hasDerivAt_firstVariation_linearised_dir` ×2, `exists_hasDerivAt_secondVariation_linearised_dir`
+  with concrete `newLeading + F_C` forcing), operator values rewritten to curve values via the
+  characterisations, and closed by the direction-uniform curve bound.  **This is exactly the numerator
+  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` consumes** (with `k = z − x₀`) to prove
+  `HasFDerivAt (fun z => D₂ z) D₃ x₀`.
+
+Remaining for `ContDiff ℝ 3` (next session): the **everywhere assembly** — a `z`-varying second
+fundamental solution operator field `z ↦ D₂ z` with a neighbourhood-uniform constant `C`, feeding
+`norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq` to
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` for `HasFDerivAt (fun z => D₂ z) D₃ x₀`, then the
+`contDiff_succ_iff_fderiv` chain (with the `C²` `exists_flow_contDiff_two_of_lipschitz_secondDeriv` and
+continuity of `z ↦ D₃`) to `exists_flow_contDiff_three_of_lipschitz_thirdDeriv` — the honest `ContDiff ℝ 3`,
+mirroring the `C²` `exists_flow_contDiff_two_of_lipschitz_secondDeriv` assembly one order up.  All the
+per-base-point analytic content is now proved; the remainder is the neighbourhood/uniformity packaging.
