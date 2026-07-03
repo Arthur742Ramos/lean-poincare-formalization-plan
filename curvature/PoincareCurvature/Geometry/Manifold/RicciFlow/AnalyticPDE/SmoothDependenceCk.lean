@@ -3652,6 +3652,25 @@ theorem isIntegralCurve_of_forall_Icc_Ici_Iic {t₀ : ℝ}
   isIntegralCurve_of_isIntegralCurveOn_Iic_Ici
     (isIntegralCurveOn_Iic_of_forall_Icc hb) (isIntegralCurveOn_Ici_of_forall_Icc hf)
 
+/-- **Time reversal of an interval integral curve (the `IsIntegralCurveOn` companion of
+`isIntegralCurve_comp_neg`).**  If `f` is an integral curve of `v` on a set `s`, then the reflected
+curve `t ↦ f (-t)` is an integral curve of the time-reversed field `(t, x) ↦ -(v (-t) x)` on the
+reflected set `Neg.neg ⁻¹' s`.  Proved by the within-set scalar chain rule (`HasDerivWithinAt.scomp`)
+composing with the reparametrisation `Neg.neg` (whose within-derivative is `-1`), the `MapsTo` datum
+being `Set.mapsTo_preimage`.  Since `Neg.neg ⁻¹' (Ici a) = Iic (-a)` and `Neg.neg ⁻¹' (Iic a) =
+Ici (-a)`, this converts a *forward* half-line solution of the reflected field into a *backward*
+half-line solution of `v`: it lets the backward family required by
+`isIntegralCurve_of_forall_Icc_Ici_Iic` be supplied by a forward solver applied to the reflected
+field, reducing global existence to *forward* local existence alone. -/
+theorem isIntegralCurveOn_comp_neg {f : ℝ → E} {v : ℝ → E → E} {s : Set ℝ}
+    (hf : IsIntegralCurveOn f v s) :
+    IsIntegralCurveOn (fun t => f (-t)) (fun t x => -(v (-t) x)) (Neg.neg ⁻¹' s) := by
+  intro t ht
+  have hmem : -t ∈ s := ht
+  have hcomp := (hf (-t) hmem).scomp t (hasDerivWithinAt_neg t (Neg.neg ⁻¹' s))
+    (Set.mapsTo_preimage Neg.neg s)
+  simpa only [Function.comp_def, neg_one_smul] using hcomp
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
