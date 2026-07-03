@@ -2976,6 +2976,110 @@ theorem norm_fundamentalSolution_variation_le
     _ = ε * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀) :=
         gronwallBound_zero_left_mul _ _ _
 
+/-!
+### Linearity and uniqueness of the first variation
+
+The second-order variational estimates above (`norm_fundamentalSolution_sub_sub_variation_le`,
+`norm_fundamentalSolution_variation_le`) take the *first variation* `V` — a solution of the
+inhomogeneous operator ODE `V' = A ∘ V + F` anchored at `V t₀ = 0` — as a hypothesis.  Here `F` is
+the coefficient-perturbation forcing `(A₁ - A₂) ∘ W₂`, *linear* in the perturbation `A₁ - A₂`.  The
+lemmas below establish that the map `F ↦ V` (equivalently `perturbation ↦ V`) is a genuine
+**linear** and **single-valued** assignment: the inhomogeneous variational ODE is linear, so its
+solution set is closed under addition and scalar multiplication (superposition), and Grönwall
+uniqueness pins the anchored solution down.  This is exactly the linearity-in-perturbation that
+upgrades the Gateaux estimate `W₁ - W₂ = V + O(ε²)` toward an honest *bounded linear* Gateaux/Fréchet
+derivative of the resolvent `A ↦ D_x Φ_t` in its coefficient field — the algebraic backbone of the
+base-point `C^k` bootstrap. -/
+
+/-- **Superposition (additivity) for the inhomogeneous variational ODE.**  If `V₁` solves
+`V₁' = A ∘ V₁ + F₁` and `V₂` solves `V₂' = A ∘ V₂ + F₂` (the first-variation ODEs with forcings
+`F₁`, `F₂`), then their sum solves the ODE with the summed forcing,
+`(V₁ + V₂)' = A ∘ (V₁ + V₂) + (F₁ + F₂)`.  Linearity of the operator ODE: add the two `HasDerivAt`
+statements and regroup via bilinearity of composition (`comp_add`). -/
+theorem hasDerivAt_inhomogVariation_add {A F₁ F₂ V₁ V₂ : ℝ → (E →L[ℝ] E)}
+    (hV₁ : ∀ s, HasDerivAt V₁ ((A s).comp (V₁ s) + F₁ s) s)
+    (hV₂ : ∀ s, HasDerivAt V₂ ((A s).comp (V₂ s) + F₂ s) s)
+    (s : ℝ) :
+    HasDerivAt (fun r => V₁ r + V₂ r)
+      ((A s).comp (V₁ s + V₂ s) + (F₁ s + F₂ s)) s := by
+  have h := (hV₁ s).add (hV₂ s)
+  have heq : (A s).comp (V₁ s) + F₁ s + ((A s).comp (V₂ s) + F₂ s)
+      = (A s).comp (V₁ s + V₂ s) + (F₁ s + F₂ s) := by
+    rw [ContinuousLinearMap.comp_add]; abel
+  rwa [heq] at h
+
+/-- **Homogeneity (scalar multiplication) for the inhomogeneous variational ODE.**  If `V` solves
+`V' = A ∘ V + F`, then `c • V` solves the ODE with the scaled forcing,
+`(c • V)' = A ∘ (c • V) + c • F`.  Linearity of the operator ODE: scale the `HasDerivAt` statement
+and use `A ∘ (c • V) = c • (A ∘ V)` (`comp_smul`). -/
+theorem hasDerivAt_inhomogVariation_smul {A F V : ℝ → (E →L[ℝ] E)} (c : ℝ)
+    (hV : ∀ s, HasDerivAt V ((A s).comp (V s) + F s) s)
+    (s : ℝ) :
+    HasDerivAt (fun r => c • V r) ((A s).comp (c • V s) + c • F s) s := by
+  have h := (hV s).const_smul c
+  have heq : c • ((A s).comp (V s) + F s) = (A s).comp (c • V s) + c • F s := by
+    rw [smul_add, ContinuousLinearMap.comp_smul]
+  rwa [heq] at h
+
+/-- **Uniqueness of the first variation.**  Two solutions `V₁`, `V₂` of the *same* inhomogeneous
+variational ODE `V' = A ∘ V + F` (with `‖A s‖ ≤ K`) that agree at one time `t₀` agree everywhere.
+Proof: the difference `D = V₁ - V₂` solves the *homogeneous* variational ODE `D' = A ∘ D` (the
+forcings cancel) with `D t₀ = 0`, hence equals the zero solution by Grönwall uniqueness
+(`variational_eq_of_isIntegralCurve`).  Together with existence this makes the first variation a
+*single-valued* (well-defined) function of the forcing. -/
+theorem inhomogVariation_unique {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) {F V₁ V₂ : ℝ → (E →L[ℝ] E)}
+    (hV₁ : ∀ s, HasDerivAt V₁ ((A s).comp (V₁ s) + F s) s)
+    (hV₂ : ∀ s, HasDerivAt V₂ ((A s).comp (V₂ s) + F s) s)
+    (h0 : V₁ t₀ = V₂ t₀) (t : ℝ) : V₁ t = V₂ t := by
+  have hDcurve : IsIntegralCurve (fun s => V₁ s - V₂ s) (variationalField A) := by
+    intro s
+    have h := (hV₁ s).sub (hV₂ s)
+    have heq : (A s).comp (V₁ s) + F s - ((A s).comp (V₂ s) + F s)
+        = variationalField A s (V₁ s - V₂ s) := by
+      simp only [variationalField, ContinuousLinearMap.comp_sub]; abel
+    rwa [heq] at h
+  have hZcurve : IsIntegralCurve (fun _ : ℝ => (0 : E →L[ℝ] E)) (variationalField A) := by
+    intro s
+    simpa [variationalField] using hasDerivAt_const s (0 : E →L[ℝ] E)
+  have hD0 : (fun s => V₁ s - V₂ s) t₀ = (fun _ : ℝ => (0 : E →L[ℝ] E)) t₀ :=
+    sub_eq_zero.mpr h0
+  have hfin := variational_eq_of_isIntegralCurve hA hDcurve hZcurve hD0 t
+  have hzero : V₁ t - V₂ t = 0 := hfin
+  exact sub_eq_zero.mp hzero
+
+/-- **The first variation is additive in the coefficient perturbation.**  With a fixed background
+resolvent `W` (e.g. `W = D_x Φ₂ = fundamentalSolution hA₂ hΦ₂ h0₂`), the forcing of the
+first-variation ODE is `B ∘ W`, *linear* in the perturbation `B = A₁ - A₂`.  Hence if `V₁` is the
+first variation for perturbation `B₁` and `V₂` for `B₂`, their sum `V₁ + V₂` is the first variation
+for `B₁ + B₂`:
+`(V₁ + V₂)' = A₂ ∘ (V₁ + V₂) + (B₁ + B₂) ∘ W`.  (Superposition
+`hasDerivAt_inhomogVariation_add` composed with linearity of `B ↦ B ∘ W`, `add_comp`.) -/
+theorem hasDerivAt_firstVariation_perturbation_add
+    {A₂ W B₁ B₂ V₁ V₂ : ℝ → (E →L[ℝ] E)}
+    (hV₁ : ∀ s, HasDerivAt V₁ ((A₂ s).comp (V₁ s) + (B₁ s).comp (W s)) s)
+    (hV₂ : ∀ s, HasDerivAt V₂ ((A₂ s).comp (V₂ s) + (B₂ s).comp (W s)) s)
+    (s : ℝ) :
+    HasDerivAt (fun r => V₁ r + V₂ r)
+      ((A₂ s).comp (V₁ s + V₂ s) + (B₁ s + B₂ s).comp (W s)) s := by
+  have h := hasDerivAt_inhomogVariation_add hV₁ hV₂ s
+  rwa [← ContinuousLinearMap.add_comp] at h
+
+/-- **The first variation is homogeneous in the coefficient perturbation.**  With a fixed background
+resolvent `W`, if `V` is the first variation for perturbation `B`, then `c • V` is the first
+variation for `c • B`:
+`(c • V)' = A₂ ∘ (c • V) + (c • B) ∘ W`.  (Homogeneity `hasDerivAt_inhomogVariation_smul` composed
+with linearity of `B ↦ B ∘ W`, `smul_comp`.)  Together with additivity this exhibits the first
+variation as a *linear* function of the coefficient perturbation. -/
+theorem hasDerivAt_firstVariation_perturbation_smul
+    {A₂ W B V : ℝ → (E →L[ℝ] E)} (c : ℝ)
+    (hV : ∀ s, HasDerivAt V ((A₂ s).comp (V s) + (B s).comp (W s)) s)
+    (s : ℝ) :
+    HasDerivAt (fun r => c • V r)
+      ((A₂ s).comp (c • V s) + (c • B s).comp (W s)) s := by
+  have h := hasDerivAt_inhomogVariation_smul c hV s
+  rwa [← ContinuousLinearMap.smul_comp] at h
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
