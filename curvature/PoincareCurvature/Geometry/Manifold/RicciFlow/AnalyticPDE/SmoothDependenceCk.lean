@@ -4082,6 +4082,50 @@ theorem exists_hasDerivAt_resolvent [CompleteSpace E]
     exists_isIntegralCurve_of_lipschitzWith hlip hcont t₀ (1 : E →L[ℝ] E)
   exact ⟨W, hW0, fun s => hWcurve s⟩
 
+/-!
+### Existence of the flow family (and the variational flow family)
+
+The global existence theorem `exists_isIntegralCurve_of_lipschitzWith` produces, for *one* initial
+value, a global integral curve.  Choosing such a curve for *every* initial value assembles a **flow
+family** `Φ : E → ℝ → E` with `Φ z t₀ = z` and `IsIntegralCurve (Φ z) v` for all `z` — exactly the
+`(hΦ, h0)` datum that the entire conditional dependence tower
+(`hasFDerivAt_flow_of_defect_isLittleO`, `hasFDerivAt_flow_of_lipschitz_deriv`, …) takes as a
+hypothesis.  Specialising to the vector variational field `variationalFieldVec A` (`K`-Lipschitz and,
+for a continuous coefficient `A`, time-continuous) yields the **variational flow family** `Φ'` — the
+`(hΦ', h0')` datum, from which the resolvent `fundamentalSolution hA hΦ' h0'` is built.  These two
+existence lemmas discharge the flow-family hypotheses of the tower from field-level data alone. -/
+
+/-- **Existence of the flow family.**  For a uniformly `K`-Lipschitz (`∀ t, LipschitzWith K (v t)`),
+time-continuous (`∀ x, Continuous (v · x)`) field on a complete Banach space, there is a *family* of
+global integral curves `Φ : E → ℝ → E` anchored at the identity, `Φ z t₀ = z`, with `Φ z` a global
+integral curve of `v` for every initial value `z`.  Assembled by `choose`-ing an integral curve
+through each `(t₀, z)` out of the global existence theorem `exists_isIntegralCurve_of_lipschitzWith`.
+This is the `(hΦ, h0)` flow-family datum consumed by the whole `C¹`-dependence tower. -/
+theorem exists_flow_family [CompleteSpace E]
+    (hlip : ∀ t, LipschitzWith K (v t)) (hcont : ∀ x, Continuous fun t => v t x) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) := by
+  choose Φ hΦ0 hΦcurve using
+    fun z => exists_isIntegralCurve_of_lipschitzWith hlip hcont t₀ z
+  exact ⟨Φ, hΦ0, hΦcurve⟩
+
+/-- **Existence of the variational flow family.**  For a norm-bounded (`‖A s‖₊ ≤ K`), continuous
+operator path `A : ℝ → (E →L[ℝ] E)` on a complete Banach space, there is a family of global integral
+curves `Φ' : E → ℝ → E` of the vector variational field `variationalFieldVec A` (`u ↦ A · u`), anchored
+`Φ' z t₀ = z`.  The field is `K`-Lipschitz (`lipschitzWith_variationalFieldVec`) and time-continuous
+(evaluation of the continuous path `A` on a fixed direction, `Continuous.clm_apply`), so this is the
+`variationalFieldVec` specialisation of `exists_flow_family`.  It is the `(hΦ', h0')` datum from which
+the resolvent `fundamentalSolution hA hΦ' h0'` is constructed. -/
+theorem exists_variationalFlowFamily [CompleteSpace E]
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K) (hAc : Continuous A) :
+    ∃ Φ' : E → ℝ → E, (∀ z, Φ' z t₀ = z) ∧
+      (∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A)) := by
+  have hlip : ∀ s, LipschitzWith K (variationalFieldVec A s) :=
+    fun s => lipschitzWith_variationalFieldVec hA s
+  have hcont : ∀ x, Continuous fun s => variationalFieldVec A s x := by
+    intro x
+    simpa only [variationalFieldVec] using hAc.clm_apply continuous_const
+  exact exists_flow_family hlip hcont
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
