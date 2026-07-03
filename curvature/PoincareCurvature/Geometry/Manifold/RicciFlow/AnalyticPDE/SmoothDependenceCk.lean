@@ -7007,6 +7007,99 @@ theorem thirdVariation_baseDir_smul_eq
   have h0 : Vc t₀ = (fun r => c • V r) t₀ := by simp [hVc0, hV0]
   exact inhomogVariation_unique hA hVc' hsmul h0 t
 
+/-- **The packaged bilinear third-variation operator `D₃`** — the full `(k, h)`-bilinear operator
+`D₃ : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))`, whose value `D₃ k h` is the time-`t` third variation for base
+direction `k` and inner direction `h`.
+
+This upgrades `exists_continuousLinearMap_thirdVariation` (which packages only the inner
+`h ↦ D₃(k, h)` for a *fixed* base direction `k`) to a bounded operator in *both* directions.  The inner
+`h`-linearity gives, for each `k`, the operator `D₃(k) : E →L[ℝ] (E →L[ℝ] E)`
+(`exists_continuousLinearMap_thirdVariation_norm_le`, fed the `‖k‖`-scaled curve bound `‖W₂ k s‖ ≤ N₂·‖k‖`
+so its operator norm is `≤ (2·C'·N₂·exp(K(T−t₀)) + C''·exp(3K(T−t₀)))·gronwallBound 0 K 1 (t−t₀)·‖k‖`,
+i.e. genuinely `O(‖k‖)`).  The outer `k`-linearity is the new content: `k ↦ D₃(k)` is additive and
+homogeneous by `thirdVariation_baseDir_add_eq`/`_smul_eq` (through the value characterisation
+`D₃(k) h = V^{k,h} t` and ODE uniqueness), and bounded by the `‖k‖`-scaled norm estimate, so
+`LinearMap.mkContinuous` yields the bilinear operator.  The value is independent of the chosen solution
+by `inhomogVariation_unique`.
+
+This is the fully-packaged `D₃` — bilinear in `(k, h)` — that the base-point `C³` Taylor remainder
+`‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²` (with `k = z − x₀`) will compare against, en route to the
+spatial `C³` regularity of the flow's resolvent (`ContDiff ℝ 3`). -/
+theorem exists_continuousLinearMap_thirdVariation_bilinear [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    (hD3cont : Continuous (fun s => D3v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {C' C'' N₂ : ℝ} (hC'0 : 0 ≤ C') (hC''0 : 0 ≤ C'') (hN₂0 : 0 ≤ N₂)
+    (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C') (hC'' : ∀ s, ‖D3v s (Φ x₀ s)‖ ≤ C'')
+    {W2 : E → ℝ → (E →L[ℝ] E)} (hW2cont : ∀ k, Continuous (W2 k))
+    (hW2add : ∀ k₁ k₂ s, W2 (k₁ + k₂) s = W2 k₁ s + W2 k₂ s)
+    (hW2smul : ∀ (c : ℝ) (k : E) (s : ℝ), W2 (c • k) s = c • W2 k s)
+    {T : ℝ} (hW2 : ∀ (k : E), ∀ s ∈ Set.Icc t₀ T, ‖W2 k s‖ ≤ N₂ * ‖k‖)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ D₃ : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E)),
+      ∀ (k h : E) (V : ℝ → (E →L[ℝ] E)), V t₀ = 0 →
+        (∀ s, HasDerivAt V
+          ((Dv s (Φ x₀ s)).comp (V s)
+            + (((D2v s (Φ x₀ s)).comp (W2 k s) h).comp (fundamentalSolution hA hΦ' h0' s)
+               + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 k s)
+               + (continuousMultilinearCurryFin1 ℝ E E
+                   (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                     (fundamentalSolution hA hΦ' h0' s h))).comp
+                   (fundamentalSolution hA hΦ' h0' s))) s) →
+        D₃ k h = V t := by
+  -- per base direction `k`: the inner operator `D₃(k)` with its `‖k‖`-scaled operator-norm bound
+  choose D₃ hD₃nb hD₃char using fun k =>
+    exists_continuousLinearMap_thirdVariation_norm_le x₀ hA hAcont hD2cont hD3cont hΦ' h0'
+      hC'0 hC''0 (mul_nonneg hN₂0 (norm_nonneg k)) hC' hC'' (hW2cont k) (hW2 k) k ht
+  -- outer additivity `D₃(k₁+k₂) = D₃ k₁ + D₃ k₂`
+  have hadd : ∀ k₁ k₂ : E, D₃ (k₁ + k₂) = D₃ k₁ + D₃ k₂ := by
+    intro k₁ k₂
+    refine ContinuousLinearMap.ext (fun h => ?_)
+    obtain ⟨V₁, hV₁0, hV₁d⟩ := exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv
+      x₀ hA hAcont hD2cont hD3cont hΦ' h0' (hW2cont k₁) k₁ h
+    obtain ⟨V₂, hV₂0, hV₂d⟩ := exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv
+      x₀ hA hAcont hD2cont hD3cont hΦ' h0' (hW2cont k₂) k₂ h
+    obtain ⟨V₁₂, hV₁₂0, hV₁₂d⟩ := exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv
+      x₀ hA hAcont hD2cont hD3cont hΦ' h0' (hW2cont (k₁ + k₂)) (k₁ + k₂) h
+    rw [ContinuousLinearMap.add_apply, hD₃char (k₁ + k₂) h V₁₂ hV₁₂0 hV₁₂d,
+      hD₃char k₁ h V₁ hV₁0 hV₁d, hD₃char k₂ h V₂ hV₂0 hV₂d]
+    exact thirdVariation_baseDir_add_eq x₀ hA hΦ' h0' hW2add k₁ k₂ h
+      hV₁d hV₂d hV₁₂d hV₁0 hV₂0 hV₁₂0 t
+  -- outer homogeneity `D₃(c • k) = c • D₃ k`
+  have hsmul : ∀ (c : ℝ) (k : E), D₃ (c • k) = c • D₃ k := by
+    intro c k
+    refine ContinuousLinearMap.ext (fun h => ?_)
+    obtain ⟨V, hV0, hVd⟩ := exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv
+      x₀ hA hAcont hD2cont hD3cont hΦ' h0' (hW2cont k) k h
+    obtain ⟨Vc, hVc0, hVcd⟩ := exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv
+      x₀ hA hAcont hD2cont hD3cont hΦ' h0' (hW2cont (c • k)) (c • k) h
+    rw [ContinuousLinearMap.smul_apply, hD₃char (c • k) h Vc hVc0 hVcd,
+      hD₃char k h V hV0 hVd]
+    exact thirdVariation_baseDir_smul_eq x₀ hA hΦ' h0' hW2smul k c h hVd hVcd hV0 hVc0 t
+  -- outer operator-norm bound, linear in `‖k‖`
+  have hbound : ∀ k : E, ‖D₃ k‖
+      ≤ ((2 * C' * N₂ * Real.exp ((K : ℝ) * (T - t₀))
+            + C'' * Real.exp (3 * (K : ℝ) * (T - t₀)))
+          * gronwallBound 0 (K : ℝ) 1 (t - t₀)) * ‖k‖ := by
+    intro k
+    refine (hD₃nb k).trans_eq ?_
+    ring
+  refine ⟨LinearMap.mkContinuous
+    { toFun := D₃
+      map_add' := hadd
+      map_smul' := fun c k => by simpa using hsmul c k }
+    ((2 * C' * N₂ * Real.exp ((K : ℝ) * (T - t₀))
+        + C'' * Real.exp (3 * (K : ℝ) * (T - t₀)))
+      * gronwallBound 0 (K : ℝ) 1 (t - t₀)) hbound, ?_⟩
+  intro k h V hV0 hVderiv
+  simpa using hD₃char k h V hV0 hVderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
