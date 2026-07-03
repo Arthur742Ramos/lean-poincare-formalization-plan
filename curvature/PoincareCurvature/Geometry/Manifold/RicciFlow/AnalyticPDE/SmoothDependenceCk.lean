@@ -2449,6 +2449,38 @@ theorem norm_fundamentalSolution_sub_one_le {A : ℝ → (E →L[ℝ] E)} {K : �
     simpa [Real.dist_eq, abs_sub_comm] using this
   gcongr
 
+/-- **The resolvent is invertible whenever it is within distance `1` of the identity.**  If
+`‖D_x Φ_t - 1‖ < 1` then the resolvent `D_x Φ_t` is a unit of the operator ring `E →L[ℝ] E` (an
+invertible bounded operator), by the Neumann-series openness of the units around `1`
+(`Units.oneSub`).  This is the operator/inverse-function-theorem shadow of the bi-Lipschitz
+embedding: on top of `fundamentalSolution_injective` (injectivity) it provides a genuine two-sided
+operator inverse. -/
+theorem isUnit_fundamentalSolution_of_norm_sub_one_lt {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    [CompleteSpace E]
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) (ht : ‖fundamentalSolution hA hΦ h0 t - 1‖ < 1) :
+    IsUnit (fundamentalSolution hA hΦ h0 t) := by
+  have h1 : ‖1 - fundamentalSolution hA hΦ h0 t‖ < 1 := by rwa [norm_sub_rev]
+  exact sub_sub_self 1 (fundamentalSolution hA hΦ h0 t) ▸
+    (Units.oneSub (1 - fundamentalSolution hA hΦ h0 t) h1).isUnit
+
+/-- **Short-time invertibility of the resolvent.**  For a norm-continuous coefficient `A`, whenever
+the elapsed-time bound `K · exp (K · |t - t₀|) · |t - t₀| < 1` holds the resolvent `D_x Φ_t` is a
+unit of `E →L[ℝ] E`.  Combines the short-time closeness `norm_fundamentalSolution_sub_one_le`
+(`‖D_x Φ_t - 1‖ ≤ K · exp (K · |t - t₀|) · |t - t₀|`) with the Neumann-series invertibility
+`isUnit_fundamentalSolution_of_norm_sub_one_lt`; in particular the flow map `x ↦ Φ x t` is a linear
+isomorphism for all `t` close enough to `t₀` — the local-diffeomorphism input for the compact
+manifold gauge flow of Item 2. -/
+theorem isUnit_fundamentalSolution_of_time_lt {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    [CompleteSpace E]
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) (ht : (K : ℝ) * Real.exp ((K : ℝ) * |t - t₀|) * |t - t₀| < 1) :
+    IsUnit (fundamentalSolution hA hΦ h0 t) :=
+  isUnit_fundamentalSolution_of_norm_sub_one_lt hA hΦ h0 t
+    (lt_of_le_of_lt (norm_fundamentalSolution_sub_one_le hA hAcont hΦ h0 t) ht)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow

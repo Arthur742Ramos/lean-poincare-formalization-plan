@@ -4815,6 +4815,14 @@ that differentiable dependence on the coefficient field will be built on:
   integrand is `≤ K · exp (K · |t - t₀|)` on the window `Ι t₀ t`, integrated by
   `intervalIntegral.norm_integral_le_of_norm_le_const`.  This is the operator-Duhamel short-time
   estimate underlying the contraction / invertibility of the resolvent for small `|t - t₀|`.
+* `isUnit_fundamentalSolution_of_norm_sub_one_lt` / `isUnit_fundamentalSolution_of_time_lt` — the
+  **invertibility of the resolvent** as an operator: if `‖D_x Φ_t - 1‖ < 1` then `D_x Φ_t` is a unit
+  of `E →L[ℝ] E` (Neumann-series openness of the units around `1`, `Units.oneSub`); combined with the
+  short-time bound above, `K · exp (K · |t - t₀|) · |t - t₀| < 1` suffices.  This is the
+  operator/inverse-function-theorem shadow of the bi-Lipschitz embedding — on top of
+  `fundamentalSolution_injective` (injectivity) it gives a genuine two-sided operator inverse, so the
+  flow map `x ↦ Φ x t` is a linear isomorphism for `t` near `t₀` (the local-diffeomorphism input for
+  Item 2's compact-manifold gauge flow).
 
 Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
 modulus; the *existence* of the variational flow family (global integral curves of the linear
