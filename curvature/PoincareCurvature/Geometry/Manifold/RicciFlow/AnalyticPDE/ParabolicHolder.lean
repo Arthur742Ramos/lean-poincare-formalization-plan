@@ -7684,6 +7684,110 @@ theorem exists_parabolicBoundedWith_iff_parabolicBoundedWith_supNorm
     ⟨parabolicBoundedWith_parabolicSupNorm,
       fun h => ⟨parabolicSupNorm u s, parabolicSupNorm_nonneg u s, h⟩⟩
 
+/-- The parabolic `C^{0,α}` norm of `u` on `s`: the sum of the parabolic sup norm (`C^0` part) and
+the parabolic Hölder seminorm.  This is the honest `ℝ`-valued `C^{0,α}` norm functional. -/
+def parabolicC0AlphaNorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : ℝ :=
+    parabolicSupNorm u s + parabolicHolderSeminorm α u s
+
+/-- The parabolic `C^{0,α}` norm is nonnegative. -/
+theorem parabolicC0AlphaNorm_nonneg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+      0 ≤ parabolicC0AlphaNorm α u s :=
+    add_nonneg (parabolicSupNorm_nonneg u s) (parabolicHolderSeminorm_nonneg α u s)
+
+/-- The parabolic `C^{0,α}` norm is dominated by the sum of any admissible sup and Hölder
+constants. -/
+theorem parabolicC0AlphaNorm_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α B H : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+      (hB0 : 0 ≤ B) (hH0 : 0 ≤ H) (h : ParabolicC0AlphaWith B H α u s) :
+      parabolicC0AlphaNorm α u s ≤ B + H :=
+    add_le_add (parabolicSupNorm_le hB0 h.1) (parabolicHolderSeminorm_le hH0 h.2)
+
+/-- **Achievement of the parabolic `C^{0,α}` norm constants.**  A function in the parabolic
+`C^{0,α}` class satisfies the combined control with its own sup norm and Hölder seminorm as the
+constants: both extremal constants are attained simultaneously. -/
+theorem parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm
+      {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ParabolicC0AlphaOn α u s) :
+      ParabolicC0AlphaWith (parabolicSupNorm u s) (parabolicHolderSeminorm α u s) α u s := by
+    obtain ⟨B, hB0, H, hH0, hbdd, hhol⟩ := hu
+    exact ⟨parabolicBoundedWith_parabolicSupNorm ⟨B, hB0, hbdd⟩,
+      parabolicHolderWith_parabolicHolderSeminorm ⟨H, hH0, hhol⟩⟩
+
+/-- A function is in the parabolic `C^{0,α}` class iff the combined control holds with the sup-norm
+and Hölder-seminorm functionals as constants. -/
+theorem parabolicC0AlphaOn_iff_parabolicC0AlphaWith_norms
+      {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} :
+      ParabolicC0AlphaOn α u s ↔
+        ParabolicC0AlphaWith (parabolicSupNorm u s) (parabolicHolderSeminorm α u s) α u s :=
+    ⟨parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm,
+      fun h => ⟨parabolicSupNorm u s, parabolicSupNorm_nonneg u s,
+        parabolicHolderSeminorm α u s, parabolicHolderSeminorm_nonneg α u s, h⟩⟩
+
+/-- **Subadditivity of the parabolic Hölder seminorm** (the triangle inequality for the seminorm):
+one of the two seminorm axioms making `parabolicHolderSeminorm` a genuine seminorm. -/
+theorem parabolicHolderSeminorm_add_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
+      parabolicHolderSeminorm α (fun z => u z + v z) s
+        ≤ parabolicHolderSeminorm α u s + parabolicHolderSeminorm α v s :=
+    parabolicHolderSeminorm_le
+      (add_nonneg (parabolicHolderSeminorm_nonneg α u s) (parabolicHolderSeminorm_nonneg α v s))
+      ((parabolicHolderWith_parabolicHolderSeminorm hu).add
+        (parabolicHolderWith_parabolicHolderSeminorm hv))
+
+/-- **Subadditivity of the parabolic sup norm** (the triangle inequality for the `C^0` part). -/
+theorem parabolicSupNorm_add_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u v : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s)
+      (hv : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B v s) :
+      parabolicSupNorm (fun z => u z + v z) s ≤ parabolicSupNorm u s + parabolicSupNorm v s :=
+    parabolicSupNorm_le
+      (add_nonneg (parabolicSupNorm_nonneg u s) (parabolicSupNorm_nonneg v s))
+      ((parabolicBoundedWith_parabolicSupNorm hu).add
+        (parabolicBoundedWith_parabolicSupNorm hv))
+
+/-- **Triangle inequality for the parabolic `C^{0,α}` norm** on the class of parabolic `C^{0,α}`
+functions: `‖u + v‖ ≤ ‖u‖ + ‖v‖`.  This is the subadditivity needed for the parabolic Hölder
+seminormed/Banach structure. -/
+theorem parabolicC0AlphaNorm_add_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+      (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+      parabolicC0AlphaNorm α (fun z => u z + v z) s
+        ≤ parabolicC0AlphaNorm α u s + parabolicC0AlphaNorm α v s := by
+    obtain ⟨Bu, hBu0, Hu, hHu0, hbu, hhu⟩ := hu
+    obtain ⟨Bv, hBv0, Hv, hHv0, hbv, hhv⟩ := hv
+    have hsup : parabolicSupNorm (fun z => u z + v z) s
+        ≤ parabolicSupNorm u s + parabolicSupNorm v s :=
+      parabolicSupNorm_add_le ⟨Bu, hBu0, hbu⟩ ⟨Bv, hBv0, hbv⟩
+    have hhol : parabolicHolderSeminorm α (fun z => u z + v z) s
+        ≤ parabolicHolderSeminorm α u s + parabolicHolderSeminorm α v s :=
+      parabolicHolderSeminorm_add_le ⟨Hu, hHu0, hhu⟩ ⟨Hv, hHv0, hhv⟩
+    simp only [parabolicC0AlphaNorm]
+    linarith
+
+/-- **Integer homogeneity bound for the parabolic Hölder seminorm.**  Scaling by an integer scales
+the seminorm by at most `‖n‖`. -/
+theorem parabolicHolderSeminorm_zsmul_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (n : ℤ)
+      (hu : ParabolicHolderOn α u s) :
+      parabolicHolderSeminorm α (fun z => n • u z) s ≤ ‖n‖ * parabolicHolderSeminorm α u s :=
+    parabolicHolderSeminorm_le
+      (mul_nonneg (norm_nonneg n) (parabolicHolderSeminorm_nonneg α u s))
+      ((parabolicHolderWith_parabolicHolderSeminorm hu).zsmul n)
+
+/-- **Integer homogeneity bound for the parabolic sup norm.** -/
+theorem parabolicSupNorm_zsmul_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s : Set (ℝ × X)} (n : ℤ)
+      (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+      parabolicSupNorm (fun z => n • u z) s ≤ ‖n‖ * parabolicSupNorm u s :=
+    parabolicSupNorm_le
+      (mul_nonneg (norm_nonneg n) (parabolicSupNorm_nonneg u s))
+      ((parabolicBoundedWith_parabolicSupNorm hu).zsmul n)
+
 end AnalyticPDE
 end RicciFlow
 
