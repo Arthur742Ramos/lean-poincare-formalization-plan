@@ -7545,6 +7545,36 @@ theorem ParabolicC0AlphaWith.of_tendsto
   ⟨ParabolicBoundedWith.of_tendsto (fun i => (hf i).1) hg,
    ParabolicHolderWith.of_tendsto (fun i => (hf i).2) hg⟩
 
+/-- A parabolic Hölder bound with a fixed constant `C` is inherited by any uniform limit on `s`:
+the parabolic `α`-Hölder ball is closed in the topology of uniform convergence. -/
+theorem ParabolicHolderWith.of_tendstoUniformlyOn
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {C α : ℝ} {F : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hF : ∀ i, ParabolicHolderWith C α (F i) s)
+    (hg : TendstoUniformlyOn F g l s) :
+    ParabolicHolderWith C α g s :=
+  ParabolicHolderWith.of_tendsto hF (fun _ hp => hg.tendsto_at hp)
+
+/-- A uniform sup bound `B` is inherited by any uniform limit on `s`. -/
+theorem ParabolicBoundedWith.of_tendstoUniformlyOn
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {B : ℝ} {F : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hF : ∀ i, ParabolicBoundedWith B (F i) s)
+    (hg : TendstoUniformlyOn F g l s) :
+    ParabolicBoundedWith B g s :=
+  ParabolicBoundedWith.of_tendsto hF (fun _ hp => hg.tendsto_at hp)
+
+/-- Combined parabolic `C^{0,α}` control (fixed sup and Hölder constants) is inherited by any uniform
+limit on `s`: the parabolic `C^{0,α}` ball is closed in the topology of uniform convergence, the
+closedness underlying completeness of the parabolic Hölder space. -/
+theorem ParabolicC0AlphaWith.of_tendstoUniformlyOn
+    {X E ι : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {l : Filter ι} [l.NeBot] {B H α : ℝ} {F : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+    (hF : ∀ i, ParabolicC0AlphaWith B H α (F i) s)
+    (hg : TendstoUniformlyOn F g l s) :
+    ParabolicC0AlphaWith B H α g s :=
+  ParabolicC0AlphaWith.of_tendsto hF (fun _ hp => hg.tendsto_at hp)
+
 end AnalyticPDE
 end RicciFlow
 
