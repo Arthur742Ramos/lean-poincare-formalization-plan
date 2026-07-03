@@ -421,6 +421,57 @@ theorem flow_eq_of_isIntegralCurve {Ψ : E → ℝ → E}
   have h0 : Φ x t₀ = Ψ x t₀ := by rw [h0Φ x, h0Ψ x]
   exact eq_of_isIntegralCurve_of_eq hv (hΦ x) (hΨ x) h0 t
 
+/-!
+## Time regularity of the flow under a uniform velocity bound
+
+The `continuous_flow` result gives *joint* continuity of `(t, x) ↦ Φ x t` but no
+quantitative modulus in the time direction.  When the field is uniformly bounded
+along the curve, `‖v t (f t)‖ ≤ M`, the integral curve is `M`-Lipschitz in time
+(its derivative is the velocity, of norm `≤ M`).  This is the time-direction
+companion of the exponential Lipschitz-in-initial-data bound, and together they
+give a joint Lipschitz modulus of the flow on compact time intervals.
+-/
+
+/-- An integral curve of a field whose velocity along the curve is uniformly bounded by
+`M` is `M`-Lipschitz in time: `dist (f s) (f t) ≤ M · dist s t`.  The curve's derivative
+is `v t (f t)`, of norm `≤ M`, so the mean value inequality applies. -/
+theorem lipschitzWith_of_isIntegralCurve_of_norm_le {M : ℝ}
+    (hf : IsIntegralCurve f v) (hM : 0 ≤ M) (hvb : ∀ t, ‖v t (f t)‖ ≤ M) :
+    LipschitzWith M.toNNReal f := by
+  have hdiff : Differentiable ℝ f := fun t => (hf t).differentiableAt
+  refine lipschitzWith_of_nnnorm_deriv_le hdiff fun t => ?_
+  rw [(hf t).deriv, ← NNReal.coe_le_coe, coe_nnnorm, Real.coe_toNNReal M hM]
+  exact hvb t
+
+/-- Each curve of a flow family whose velocity is uniformly bounded by `M` along the flow
+is `M`-Lipschitz in time. -/
+theorem lipschitzWith_flow_of_norm_le {M : ℝ}
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (hM : 0 ≤ M)
+    (hvb : ∀ x t, ‖v t (Φ x t)‖ ≤ M) (x : E) :
+    LipschitzWith M.toNNReal (Φ x) :=
+  lipschitzWith_of_isIntegralCurve_of_norm_le (hΦ x) hM (hvb x)
+
+/-- **Joint Lipschitz modulus of the flow on a symmetric compact time interval.**  Under a
+uniform velocity bound `M` and with `|t - t₀|, |s - t₀| ≤ T`, the flow separation is
+controlled by the time gap (rate `M`) plus the initial-value gap (rate `exp (K · T)`):
+`dist (Φ x t) (Φ y s) ≤ M · |t - s| + exp (K · T) · dist x y`.  This is the quantitative
+strengthening of `continuous_flow` combining time- and initial-value-regularity. -/
+theorem dist_flow_le_of_norm_le {M : ℝ}
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) (hM : 0 ≤ M) (hvb : ∀ x t, ‖v t (Φ x t)‖ ≤ M)
+    {T : ℝ} (x y : E) {s t : ℝ} (hs : |s - t₀| ≤ T) :
+    dist (Φ x t) (Φ y s) ≤ M * |t - s| + Real.exp ((K : ℝ) * T) * dist x y := by
+  calc dist (Φ x t) (Φ y s)
+      ≤ dist (Φ x t) (Φ x s) + dist (Φ x s) (Φ y s) := dist_triangle _ _ _
+    _ ≤ M * |t - s| + Real.exp ((K : ℝ) * T) * dist x y := by
+        gcongr
+        · have hL := lipschitzWith_flow_of_norm_le hΦ hM hvb x
+          have hd := hL.dist_le_mul t s
+          rwa [Real.coe_toNNReal M hM, Real.dist_eq] at hd
+        · have hLip := lipschitzWith_flow_apply_of_abs_le hv hΦ h0 hs
+          have hd := hLip.dist_le_mul x y
+          rwa [Real.coe_toNNReal _ (Real.exp_pos _).le] at hd
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
