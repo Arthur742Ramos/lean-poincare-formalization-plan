@@ -7575,6 +7575,72 @@ theorem ParabolicC0AlphaWith.of_tendstoUniformlyOn
     ParabolicC0AlphaWith B H α g s :=
   ParabolicC0AlphaWith.of_tendsto hF (fun _ hp => hg.tendsto_at hp)
 
+/-!
+### The parabolic Hölder seminorm as an `ℝ`-valued functional
+
+Realizing the parabolic `C^{0,α}` control predicates as genuine `ℝ`-valued functionals is the
+first packaging step toward the parabolic Hölder *Banach space* (completeness of which is the
+inheritance step recorded above).  We take the seminorm/`sup`-norm to be the least admissible
+constant, `sInf` of the (closed, upward) set of valid constants.  The defining set is bounded below
+by `0` and, when the function lies in the class, nonempty; the infimum is then *achieved* (it is
+itself a valid constant), so these functionals are honest least Hölder/sup constants rather than
+mere lower bounds.
+-/
+
+/-- The parabolic Hölder seminorm of `u` on `s`: the least nonnegative constant for which the
+parabolic `α`-Hölder estimate holds.  When `u` is not parabolic `α`-Hölder on `s` the defining
+constant set is empty and the seminorm is `0` by the `sInf` convention. -/
+def parabolicHolderSeminorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : ℝ :=
+  sInf {C : ℝ | 0 ≤ C ∧ ParabolicHolderWith C α u s}
+
+/-- The parabolic Hölder seminorm is nonnegative. -/
+theorem parabolicHolderSeminorm_nonneg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    0 ≤ parabolicHolderSeminorm α u s :=
+  Real.sInf_nonneg fun _ hx => hx.1
+
+/-- The parabolic Hölder seminorm is a lower bound for every admissible Hölder constant: it is the
+*least* nonnegative constant that works. -/
+theorem parabolicHolderSeminorm_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α C : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC0 : 0 ≤ C) (hC : ParabolicHolderWith C α u s) :
+    parabolicHolderSeminorm α u s ≤ C :=
+  csInf_le ⟨0, fun _ hx => hx.1⟩ ⟨hC0, hC⟩
+
+/-- **Achievement of the parabolic Hölder seminorm.**  If `u` is parabolic `α`-Hölder on `s`, then
+the estimate holds with the seminorm itself as the constant: the infimum of admissible constants is
+attained.  This is what makes `parabolicHolderSeminorm` a genuine least Hölder constant. -/
+theorem parabolicHolderWith_parabolicHolderSeminorm
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) :
+    ParabolicHolderWith (parabolicHolderSeminorm α u s) α u s := by
+  obtain ⟨C, hC0, hC⟩ := hu
+  unfold parabolicHolderSeminorm
+  intro p hp q hq
+  have hSne : ({C : ℝ | 0 ≤ C ∧ ParabolicHolderWith C α u s}).Nonempty := ⟨C, hC0, hC⟩
+  have ht : (0 : ℝ) ≤ parabolicDistance p q ^ α :=
+    Real.rpow_nonneg (parabolicDistance.nonneg p q) α
+  rcases lt_or_eq_of_le ht with ht' | ht'
+  · rw [← div_le_iff₀ ht']
+    refine le_csInf hSne ?_
+    rintro C' ⟨-, hC'⟩
+    rw [div_le_iff₀ ht']
+    exact hC' hp hq
+  · rw [← ht', mul_zero]
+    have h := hC hp hq
+    rwa [← ht', mul_zero] at h
+
+/-- A function is parabolic `α`-Hölder on `s` iff the estimate holds with the seminorm as the
+constant.  This packages `ParabolicHolderOn` as attainment of the `ℝ`-valued seminorm functional. -/
+theorem parabolicHolderOn_iff_parabolicHolderWith_seminorm
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} :
+    ParabolicHolderOn α u s ↔ ParabolicHolderWith (parabolicHolderSeminorm α u s) α u s :=
+  ⟨parabolicHolderWith_parabolicHolderSeminorm,
+    fun h => ⟨parabolicHolderSeminorm α u s, parabolicHolderSeminorm_nonneg α u s, h⟩⟩
+
 end AnalyticPDE
 end RicciFlow
 
