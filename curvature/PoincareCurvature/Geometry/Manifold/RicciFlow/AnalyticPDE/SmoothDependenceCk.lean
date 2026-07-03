@@ -9830,6 +9830,146 @@ theorem norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq [CompleteSpac
   gcongr
   exact le_max_left C 0
 
+/-- **Explicit-constant (neighbourhood-uniform) operator-level `C³` Taylor remainder for the second
+fundamental solution.**  Identical to `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq` except
+the constant is written out *explicitly* — `max ((C₁ + C₂) · gronwallBound 0 K 1 (t − t₀)) 0`, the
+constant of `norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniformC` clamped nonnegative —
+rather than existentially quantified.  This is the operator numerator in the exact form
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` consumes: a **single** constant `C`, depending only on the
+field data `K, L, M₂, M₃, C', N, T, t₀` (never on `z`), valid for every base point `z` in a neighbourhood
+of `x₀`.  Feeding this (with `k = z − x₀`, `D₂z = D₂ z`, `D₂x = D₂ x₀`, `D₃` the bilinear third variation)
+gives `HasFDerivAt (fun z => D₂ z) D₃ x₀` — the second fundamental solution's Fréchet differentiability in
+the initial data, hence the flow resolvent's spatial `ContDiff ℝ 3`.  Proof: the `∃`-form's proof with the
+explicit-constant curve bound `norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniformC`
+closing each per-direction estimate after `ContinuousLinearMap.opNorm_le_bound`. -/
+theorem norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {L M₂ M₃ : ℝ≥0} {C' N : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ) (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ) (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAxcont : Continuous (fun s => Dv s (Φ x₀ s))) (hAzcont : Continuous (fun s => Dv s (Φ z s)))
+    (hD2zcont : Continuous (fun s => D2vc s (Φ z s)))
+    (hD2xcont : Continuous (fun s => D2vc s (Φ x₀ s)))
+    (hD3xcont : Continuous (fun s => D3vm s (Φ x₀ s)))
+    (hC'0 : 0 ≤ C') (hC'z : ∀ s, ‖D2vc s (Φ z s)‖ ≤ C') (hC'x : ∀ s, ‖D2vc s (Φ x₀ s)‖ ≤ C')
+    (hN0 : 0 ≤ N) (hN : ∀ s, ‖D3vm s (Φ x₀ s)‖ ≤ N)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ x, IsIntegralCurve (Φ' x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ x, Φ' x t₀ = x)
+    {Φ₁ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0₁ : ∀ x, Φ₁ x t₀ = x)
+    {W₂ Wdiff : ℝ → (E →L[ℝ] E)}
+    (hW₂ : ∀ s, HasDerivAt W₂
+      ((Dv s (Φ x₀ s)).comp (W₂ s)
+        + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp
+            (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hW₂0 : W₂ t₀ = 0)
+    (hWdiff : ∀ s, HasDerivAt Wdiff
+      ((Dv s (Φ x₀ s)).comp (Wdiff s)
+        + (Dv s (Φ z s) - Dv s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s)) s)
+    (hWdiff0 : Wdiff t₀ = 0)
+    {D₂z D₂x : E →L[ℝ] (E →L[ℝ] E)} {D₃ : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))}
+    (hD₂z : ∀ (h : E) (V : ℝ → (E →L[ℝ] E)), V t₀ = 0 →
+      (∀ s, HasDerivAt V
+        ((Dv s (Φ z s)).comp (V s)
+          + ((D2vc s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h0₁ s) h).comp
+              (fundamentalSolution hAz hΦ₁ h0₁ s)) s) →
+      D₂z h = V t)
+    (hD₂x : ∀ (h : E) (V : ℝ → (E →L[ℝ] E)), V t₀ = 0 →
+      (∀ s, HasDerivAt V
+        ((Dv s (Φ x₀ s)).comp (V s)
+          + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp
+              (fundamentalSolution hAx hΦ' h0' s)) s) →
+      D₂x h = V t)
+    (hD₃ : ∀ (h : E) (V₀ V : ℝ → (E →L[ℝ] E)),
+      V₀ t₀ = 0 →
+      (∀ s, HasDerivAt V₀
+        ((Dv s (Φ x₀ s)).comp (V₀ s)
+          + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp
+              (fundamentalSolution hAx hΦ' h0' s)) s) →
+      V t₀ = 0 →
+      (∀ s, HasDerivAt V
+        ((Dv s (Φ x₀ s)).comp (V s)
+          + (((D2vc s (Φ x₀ s)).comp (W₂ s) h).comp (fundamentalSolution hAx hΦ' h0' s)
+              + ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) h).comp (W₂ s)
+              + (((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp (V₀ s)
+                  + (continuousMultilinearCurryFin1 ℝ E E
+                        ((D3vm s (Φ x₀ s)
+                            (fundamentalSolution hAx hΦ' h0' s (z - x₀))).curryLeft
+                          (fundamentalSolution hAx hΦ' h0' s h))).comp
+                      (fundamentalSolution hAx hΦ' h0' s)))) s) →
+      D₃ (z - x₀) h = V t)
+    {T : ℝ} (hk : ‖z - x₀‖ ≤ 1) (ht : t ∈ Set.Icc t₀ T) :
+    ‖(D₂z - D₂x) - D₃ (z - x₀)‖
+      ≤ max ((((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+                * ((M₂ : ℝ) + 3 * (L : ℝ) * C' * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              + ((M₂ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                    + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+                  * (C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+            + (((M₃ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                    + N * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+                  * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                + 2 * C'
+                    * ((L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+                          * gronwallBound 0 (K : ℝ) 1 (T - t₀) ^ 2
+                        + ((M₂ : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                            + C' * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+                                * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+                          * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                    * Real.exp ((K : ℝ) * (T - t₀))
+                + 2 * ((M₂ : ℝ) * Real.exp ((K : ℝ) * (T - t₀)))
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                    * Real.exp ((K : ℝ) * (T - t₀))
+                + C'
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                + (M₂ : ℝ) * Real.exp ((K : ℝ) * (T - t₀))
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+                    * ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * Real.exp ((K : ℝ) * (T - t₀))
+                        * gronwallBound 0 (K : ℝ) 1 (T - t₀))))
+            * gronwallBound 0 (K : ℝ) 1 (t - t₀)) 0 * ‖z - x₀‖ ^ 2 := by
+  refine ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg (le_max_right _ 0) (sq_nonneg _)) (fun h => ?_)
+  have hC := norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniformC (T := T)
+    hv hΦ h0 hDv hDvlip hD2vc hD2vclip hD3vm hD3vmlip hcompat z x₀ hAz hAx hAxcont hAzcont
+    hC'0 hC'z hC'x hN0 hN hΦ' h0' hΦ₁ h0₁ hW₂ hW₂0 hWdiff hWdiff0 hk ht
+  obtain ⟨Uz, hUz0, hUzd⟩ :=
+    exists_hasDerivAt_firstVariation_linearised_dir z hAz hAzcont hD2zcont hΦ₁ h0₁ h
+  obtain ⟨Ux, hUx0, hUxd⟩ :=
+    exists_hasDerivAt_firstVariation_linearised_dir x₀ hAx hAxcont hD2xcont hΦ' h0' h
+  have hW : Continuous (fun s => fundamentalSolution hAx hΦ' h0' s) :=
+    continuous_fundamentalSolution_time hAx hΦ' h0'
+  have hUxc : Continuous Ux := Differentiable.continuous (fun s => (hUxd s).differentiableAt)
+  have hW₂c : Continuous W₂ := Differentiable.continuous (fun s => (hW₂ s).differentiableAt)
+  have hLead : Continuous fun s =>
+      ((D2vc s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ' h0' s) (z - x₀)).comp (Ux s) :=
+    ((hD2xcont.clm_comp hW).clm_apply continuous_const).clm_comp hUxc
+  have hFC := continuous_thirdDerivCurryForcing hD3xcont hW (z - x₀) h
+  obtain ⟨V₃, hV₃0, hV₃d⟩ :=
+    exists_hasDerivAt_secondVariation_linearised_dir x₀ hAx hAxcont hD2xcont hΦ' h0' hW₂c
+      (hLead.add hFC) h
+  rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply,
+      hD₂z h Uz hUz0 hUzd, hD₂x h Ux hUx0 hUxd, hD₃ h Ux V₃ hUx0 hUxd hV₃0 hV₃d]
+  refine (hC h Uz Ux V₃ hUzd hUz0 hUxd hUx0 hV₃d hV₃0).trans ?_
+  gcongr
+  exact le_max_left _ _
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
