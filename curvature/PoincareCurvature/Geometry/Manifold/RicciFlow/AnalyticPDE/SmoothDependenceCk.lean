@@ -3563,6 +3563,26 @@ theorem isIntegralCurveOn_glue_Icc {a b c : ℝ} (hab : a ≤ b) (hbc : b ≤ c)
     exact (h₂ x hx).congr (fun y hy => hEq2 hy) hgx
   exact isIntegralCurveOn_Icc_union hab hbc step1 step2
 
+/-- **Exhaustion: global integral curve from a countable family of bounded-interval solutions.**  If
+`γ` is an integral curve of `v` on every symmetric closed interval `Icc (t₀ - n) (t₀ + n)`, `n : ℕ`,
+then it is a *global* integral curve of `v`.  Any time `t` lies in the open interior of some
+`Icc (t₀ - n) (t₀ + n)` (Archimedean: choose `n > |t - t₀|`), where that interval is a genuine
+neighbourhood of `t`, so the within-interval derivative upgrades to a two-sided `HasDerivAt`.  This is
+the countable-exhaustion counterpart of `isIntegralCurve_of_isIntegralCurveOn_Iic_Ici`: it reduces
+global existence to solving on a growing sequence of compact intervals — the natural target of
+iterating `isIntegralCurveOn_glue_Icc` over local Picard–Lindelöf solutions. -/
+theorem isIntegralCurve_of_forall_mem_Icc {t₀ : ℝ}
+    (h : ∀ n : ℕ, IsIntegralCurveOn γ v (Set.Icc (t₀ - n) (t₀ + n))) :
+    IsIntegralCurve γ v := by
+  intro t
+  obtain ⟨n, hn⟩ := exists_nat_gt (|t - t₀|)
+  obtain ⟨hl, hr⟩ := abs_lt.mp hn
+  have hmem : t ∈ Set.Icc (t₀ - (n : ℝ)) (t₀ + (n : ℝ)) :=
+    Set.mem_Icc.mpr ⟨by linarith, by linarith⟩
+  have hnhd : Set.Icc (t₀ - (n : ℝ)) (t₀ + (n : ℝ)) ∈ 𝓝 t :=
+    Icc_mem_nhds (by linarith) (by linarith)
+  exact (h n t hmem).hasDerivAt hnhd
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
