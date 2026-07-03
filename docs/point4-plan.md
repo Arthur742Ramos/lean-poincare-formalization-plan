@@ -5786,3 +5786,35 @@ and `Φ₁ z = Ψ z`; then `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` with `
 `‖z − x₀‖ < 1` gives `HasFDerivAt (fun z => D₂ z) D₃ x₀`.  Finally the continuity of `z ↦ D₃` (a third-order
 analogue of the `C²` `hcont_D₂` Lipschitz bound) and the `contDiff_succ_iff_fderiv` chain close
 `exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
+
+Update — the two **constructive inputs (i)–(ii)** above are now BUILT (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`:
+
+* `exists_linearisedFirstVariationFamily` — the **canonical linearised-first-variation family** `Vfam :
+  E → (ℝ → (E →L E))`, linear in the direction: pointwise-additive (`linearVariation_perturbation_add_eq`),
+  homogeneous (`linearVariation_perturbation_smul_eq`), continuous (`Differentiable.continuous` of the
+  ODE), solving `(Vfam h)' = A₀ ∘ Vfam h + (D²v(Φ x₀ s) ∘ W₀ · h) ∘ W₀` with `Vfam h t₀ = 0`, bounded
+  `‖Vfam h s‖ ≤ C' · exp(2K(T − t₀)) · gronwallBound 0 K 1 (T − t₀) · ‖h‖` on `[t₀, T]`
+  (`norm_linearisedFirstVariation_le` + `gronwallBound_mono`).  This single family supplies **both** the
+  base-direction curve `W2` (at `k`) and the inner curve `V0fun` (at `h`) the bilinear `D₃` packaging needs,
+  and — via its ODE — matches the per-`z` `W₂ = Vfam (z − x₀)`, `V₀ = Vfam h` of the operator numerator.
+* `exists_thirdVariationOperator_of_field` — the **self-contained packaged `D₃`** `E →L (E →L (E →L E))`
+  built directly from `C^{3}`-field data by feeding `Vfam` as both `W2` and `V0fun` into
+  `exists_continuousLinearMap_thirdVariation_coeff_bilinear` (shared `Vfam`-bound giving both `N₂, N₀`).
+  Returns `Vfam` alongside `D₃` with its init/ODE/continuity/additivity/homogeneity/bound and the bilinear
+  characterisation `D₃ k h = V t` (design-corrected third-variation ODE, `W2 = V0fun = Vfam`, `Fin 3`
+  multilinear `D3v`).
+
+Remaining for `ContDiff ℝ 3` (next session): the **characterisation bridge** discharging the `hD₃` slot of
+`norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC` from the bilinear characterisation of
+`exists_thirdVariationOperator_of_field` — for `V₀` an arbitrary linearised first variation in direction
+`h`, `V₀ = Vfam h` pointwise by `inhomogVariation_unique` (same ODE, same anchor), so the numerator's
+third-variation forcing (using `V₀` and the `E →L (E[×2]→L E)` representation `D3vm`) equals the bilinear
+forcing (using `Vfam h` and the `Fin 3` representation `D3v`) once `D3vm s ξ = (D3v s ξ).curryLeft` is
+supplied (`curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt`); a `funext`/`rw` on the `HasDerivAt`
+forcing then lets `hD₃bilinear` (with `k = z − x₀`) close the slot.  Then the **everywhere assembly**: the
+`D₂` field via `choose exists_continuousLinearMap_linearisedVariation`, per-`z` `W₂ z = Vfam (z − x₀)`,
+`Wdiff z` (`exists_hasDerivAt_inhomogVariation_of_continuous`), `Φ₁ z = Ψ z`, and
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` (`C = max (…) 0`, ball `‖z − x₀‖ < 1`) for
+`HasFDerivAt (fun z => D₂ z) D₃ x₀`; finally `z ↦ D₃` continuity + `contDiff_succ_iff_fderiv` close
+`exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
