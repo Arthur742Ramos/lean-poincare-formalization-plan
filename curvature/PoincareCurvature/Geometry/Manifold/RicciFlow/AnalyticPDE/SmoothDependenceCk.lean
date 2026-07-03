@@ -1335,6 +1335,34 @@ theorem fderiv_flow_of_segment_oscillation_tendsto_zero
   (hasFDerivAt_flow_of_segment_oscillation_tendsto_zero hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hCnn
     hCto hosc).fderiv
 
+/-!
+### Manufacturing the vanishing oscillation from a modulus of continuity
+
+The final input to the `C¹` dependence tower is the *vanishing* of the derivative chord-oscillation.
+For a `C¹` field this is furnished by a modulus of continuity `ω` of the spatial derivative
+(uniform in `s ∈ [t₀, t]` on the compact trajectory tube, via Heine–Cantor): `ω` is nonnegative,
+monotone, and vanishes at `0⁺`.  The two ingredients below turn such a modulus into the
+hypotheses of `hasFDerivAt_flow_of_segment_oscillation_tendsto_zero`: the modulus composed with the
+(exponentially controlled) flow separation still tends to `0`, and the chord-oscillation is bounded
+by that composition. -/
+
+open Filter in
+/-- **A vanishing modulus composed with the vanishing scaled separation still vanishes.**  If
+`ω → 0` along `𝓝[≥] 0` and `0 ≤ c`, then `z ↦ ω (c · ‖z - x₀‖)` tends to `0` as `z → x₀`.  The
+"`C(z) → 0`" engine of the modulus-of-continuity route to `C¹` flow-dependence. -/
+theorem tendsto_modulus_comp_norm_sub {ω : ℝ → ℝ} {c : ℝ} (x₀ : E)
+    (hc : 0 ≤ c) (hω : Tendsto ω (𝓝[≥] (0 : ℝ)) (𝓝 0)) :
+    Tendsto (fun z => ω (c * ‖z - x₀‖)) (𝓝 x₀) (𝓝 0) := by
+  have hsep : Tendsto (fun z : E => c * ‖z - x₀‖) (𝓝 x₀) (𝓝[≥] (0 : ℝ)) := by
+    rw [tendsto_nhdsWithin_iff]
+    refine ⟨?_, Filter.Eventually.of_forall fun z => Set.mem_Ici.mpr (mul_nonneg hc (norm_nonneg _))⟩
+    have hnorm : Tendsto (fun z : E => ‖z - x₀‖) (𝓝 x₀) (𝓝 0) := by
+      have hcont : Continuous fun z : E => ‖z - x₀‖ :=
+        (continuous_id.sub continuous_const).norm
+      simpa using hcont.tendsto x₀
+    simpa using hnorm.const_mul c
+  exact hω.comp hsep
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
