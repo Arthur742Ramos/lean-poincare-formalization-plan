@@ -7456,6 +7456,76 @@ theorem norm_chainRuleForcing_flow_sub_le
     (by positivity) (mul_nonneg (by positivity) hgnn)).trans (le_of_eq ?_)
   ring
 
+/-- **Operator-norm Lipschitz continuity of the packaged second fundamental solution in the base
+point.**  The genuine `C^{0,1}` (operator-norm-continuous dependence) statement for the base-point
+second derivative `D₂ = ∂/∂x₀ (D_x Φ_t)`: given the two packaged operators
+`D₂z, D₂x : E →L[ℝ] (E →L[ℝ] E)` (each characterised, as produced by
+`exists_continuousLinearMap_linearisedVariation`, by `D₂· h = Vlin t` for any solution `Vlin` of the
+linearised first-variation ODE at the respective base point, direction `h`), their operator-norm
+difference is linear in the base-point increment:
+`‖D₂z − D₂x‖ ≤ exp(K(T−t₀))³ · (M + 3·L·C'·gronwallBound 0 K 1 (T−t₀)) · gronwallBound 0 K 1 (t−t₀) ·
+‖z − x₀‖`.
+
+Unlike the *pointwise-in-`h`* curve estimate `norm_linearisedFirstVariation_baseCurve_sub_le`, this is
+the uniform operator bound, obtained via `ContinuousLinearMap.opNorm_le_bound`: for each direction `h`,
+build the canonical linearised first variations `Vz`, `Vx`
+(`exists_hasDerivAt_firstVariation_linearised_dir` at `z`, `x₀`), identify `D₂z h = Vz t`,
+`D₂x h = Vx t` (the value characterisations `hD₂z`, `hD₂x`), and bound `‖Vz t − Vx t‖ ≤ … · ‖h‖` by
+`norm_linearisedFirstVariation_baseCurve_sub_le` (constant rearranged by `ring`).  This packages the
+`C²` continuity of the second fundamental solution as an honest operator-norm Lipschitz bound — the
+`z ↦ D₂(z)` regularity datum that the `C³` layer differentiates. -/
+theorem norm_secondFundamentalSolution_op_sub_le [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {L M : ℝ≥0} {C' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAzcont : Continuous (fun s => Dv s (Φ z s))) (hAxcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2zcont : Continuous (fun s => D2v s (Φ z s)))
+    (hD2xcont : Continuous (fun s => D2v s (Φ x₀ s)))
+    (hC'0 : 0 ≤ C') (hC'z : ∀ s, ‖D2v s (Φ z s)‖ ≤ C') (hC'x : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h2 : ∀ x, Φ₂ x t₀ = x)
+    {D₂z D₂x : E →L[ℝ] (E →L[ℝ] E)}
+    (hD₂z : ∀ (h : E) (Vlin : ℝ → (E →L[ℝ] E)), Vlin t₀ = 0 →
+      (∀ s, HasDerivAt Vlin
+        ((Dv s (Φ z s)).comp (Vlin s)
+          + ((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) h).comp
+              (fundamentalSolution hAz hΦ₁ h1 s)) s) →
+      D₂z h = Vlin t)
+    (hD₂x : ∀ (h : E) (Vlin : ℝ → (E →L[ℝ] E)), Vlin t₀ = 0 →
+      (∀ s, HasDerivAt Vlin
+        ((Dv s (Φ x₀ s)).comp (Vlin s)
+          + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) h).comp
+              (fundamentalSolution hAx hΦ₂ h2 s)) s) →
+      D₂x h = Vlin t)
+    {T : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ‖D₂z - D₂x‖
+      ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+          * ((M : ℝ) + 3 * (L : ℝ) * C' * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+          * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - x₀‖ := by
+  have hg : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans ht.1 ht.2))
+  have hgt : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (t - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr ht.1)
+  have hMLC : (0 : ℝ) ≤ (M : ℝ) + 3 * (L : ℝ) * C' * gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    add_nonneg (by positivity) (mul_nonneg (mul_nonneg (by positivity) hC'0) hg)
+  refine ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg (mul_nonneg (mul_nonneg (by positivity) hMLC) hgt) (norm_nonneg _)) (fun h => ?_)
+  rw [ContinuousLinearMap.sub_apply]
+  obtain ⟨Vz, hVz0, hVzd⟩ :=
+    exists_hasDerivAt_firstVariation_linearised_dir z hAz hAzcont hD2zcont hΦ₁ h1 h
+  obtain ⟨Vx, hVx0, hVxd⟩ :=
+    exists_hasDerivAt_firstVariation_linearised_dir x₀ hAx hAxcont hD2xcont hΦ₂ h2 h
+  rw [hD₂z h Vz hVz0 hVzd, hD₂x h Vx hVx0 hVxd]
+  refine (norm_linearisedFirstVariation_baseCurve_sub_le hv hΦ h0 hDvlip hD2vlip z x₀ hAz hAx
+    hC'0 hC'z hC'x hΦ₁ h1 hΦ₂ h2 h hVzd hVz0 hVxd hVx0 ht).trans (le_of_eq ?_)
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
