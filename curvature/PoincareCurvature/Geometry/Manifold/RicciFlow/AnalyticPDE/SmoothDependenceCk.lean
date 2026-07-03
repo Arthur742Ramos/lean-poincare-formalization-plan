@@ -1072,6 +1072,40 @@ theorem hasFDerivAt_flow_of_defect_isLittleO
   -- compose with `D =o (z - x₀)` to get the little-o numerator, i.e. `HasFDerivAt`
   exact HasFDerivAt.of_isLittleO (hbig.trans_isLittleO hDo)
 
+open Asymptotics in
+/-- **The flow map is differentiable at the base point** (under the defect-modulus hypothesis of
+`hasFDerivAt_flow_of_defect_isLittleO`): `x ↦ Φ x t` is `DifferentiableAt ℝ` at `x₀`. -/
+theorem differentiableAt_flow_of_defect_isLittleO
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {D : E → ℝ} (hDnn : ∀ z, 0 ≤ D z)
+    (hdefect : ∀ z, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z)
+    (hDo : (fun z => D z) =o[𝓝 x₀] fun z => z - x₀) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_defect_isLittleO hA hΦ' h0' hΦ h0 x₀ ht0 hDnn hdefect hDo).differentiableAt
+
+open Asymptotics in
+/-- **The Fréchet derivative of the flow map is the resolvent** (under the defect-modulus
+hypothesis of `hasFDerivAt_flow_of_defect_isLittleO`):
+`fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t = D_x Φ_t`.  The identification
+consumed downstream: the spatial derivative of the flow *is* the fundamental solution operator. -/
+theorem fderiv_flow_of_defect_isLittleO
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {D : E → ℝ} (hDnn : ∀ z, 0 ≤ D z)
+    (hdefect : ∀ z, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z)
+    (hDo : (fun z => D z) =o[𝓝 x₀] fun z => z - x₀) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_defect_isLittleO hA hΦ' h0' hΦ h0 x₀ ht0 hDnn hdefect hDo).fderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
