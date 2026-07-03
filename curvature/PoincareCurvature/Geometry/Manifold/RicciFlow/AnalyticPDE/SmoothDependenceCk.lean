@@ -5785,6 +5785,79 @@ theorem norm_fundamentalSolution_baseCurve_sub_le
   exact norm_fundamentalSolution_sub_le_of_forall_le_Icc hAz hAw hΦ₁ h1 hΦ₂ h2
     (by positivity) hgap ht
 
+/-- **Perturbation estimate for the chain-rule forcing operator.**  The chain-rule forcing of the
+linearised first-variation ODE has, at each time, the shape `((P ∘ W) h) ∘ W` where `P = D²v(Φ z s)`
+and `W = D_x Φ_s^{A(z)}` is the resolvent (so `(P ∘ W) h ∘ W = (D²v(Φ z s) ∘ W · h) ∘ W`).  This
+lemma bounds its response to a joint perturbation of `P` and `W`: for `‖P₁‖ ≤ p`, `‖W₁‖, ‖W₂‖ ≤ w`,
+`‖P₁ − P₂‖ ≤ dp`, `‖W₁ − W₂‖ ≤ dw`,
+`‖((P₁ ∘ W₁) h) ∘ W₁ − ((P₂ ∘ W₂) h) ∘ W₂‖ ≤ (dp · w² + 2 · p · w · dw) · ‖h‖`.
+
+Proof: telescoping the composition (`comp_sub`/`sub_comp`), `((P₁∘W₁)h)∘W₁ − ((P₂∘W₂)h)∘W₂ =
+a ∘ (W₁ − W₂) + (a − b) ∘ W₂` with `a = (P₁∘W₁)h`, `b = (P₂∘W₂)h`; then `‖a‖ ≤ p·w·‖h‖`,
+`‖a − b‖ ≤ (p·dw + dp·w)·‖h‖` (a second telescoping of `P₁∘W₁ − P₂∘W₂`), and submultiplicativity of
+the operator norm.  This is the algebraic core of the forcing-gap `β` in the chain-rule forcing
+perturbation of the base-point `ContDiff ℝ 2` bootstrap: fed the flow bounds (`‖D²v‖ ≤ L = p`,
+`‖W‖ ≤ exp (K(T−t₀)) = w`, `dp` from `norm_secondDerivField_apply_flow_sub_le`, `dw` from
+`norm_fundamentalSolution_baseCurve_sub_le`) it bounds the forcing response to a base-point increment,
+which `norm_inhomogVariation_sub_le_of_gap` turns into the continuity of the second fundamental
+solution. -/
+theorem norm_chainRuleForcing_sub_le
+    {P₁ P₂ : E →L[ℝ] (E →L[ℝ] E)} {W₁ W₂ : E →L[ℝ] E} (h : E)
+    {p w dp dw : ℝ}
+    (hP₁ : ‖P₁‖ ≤ p) (hW₁ : ‖W₁‖ ≤ w) (hW₂ : ‖W₂‖ ≤ w)
+    (hPd : ‖P₁ - P₂‖ ≤ dp) (hWd : ‖W₁ - W₂‖ ≤ dw)
+    (hp : 0 ≤ p) (hw : 0 ≤ w) (hdp : 0 ≤ dp) (hdw : 0 ≤ dw) :
+    ‖((P₁.comp W₁) h).comp W₁ - ((P₂.comp W₂) h).comp W₂‖
+      ≤ (dp * w ^ 2 + 2 * p * w * dw) * ‖h‖ := by
+  -- `‖(P₁ ∘ W₁) h‖ ≤ p · w · ‖h‖`
+  have hanorm : ‖(P₁.comp W₁) h‖ ≤ p * w * ‖h‖ := by
+    calc ‖(P₁.comp W₁) h‖ ≤ ‖P₁.comp W₁‖ * ‖h‖ := ContinuousLinearMap.le_opNorm _ _
+      _ ≤ ‖P₁‖ * ‖W₁‖ * ‖h‖ :=
+          mul_le_mul_of_nonneg_right (ContinuousLinearMap.opNorm_comp_le _ _) (norm_nonneg _)
+      _ ≤ p * w * ‖h‖ := by gcongr
+  -- `‖P₁ ∘ W₁ − P₂ ∘ W₂‖ ≤ p · dw + dp · w`
+  have hPWd : ‖P₁.comp W₁ - P₂.comp W₂‖ ≤ p * dw + dp * w := by
+    have hsplit : P₁.comp W₁ - P₂.comp W₂
+        = P₁.comp (W₁ - W₂) + (P₁ - P₂).comp W₂ := by
+      rw [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]; abel
+    calc ‖P₁.comp W₁ - P₂.comp W₂‖
+        = ‖P₁.comp (W₁ - W₂) + (P₁ - P₂).comp W₂‖ := by rw [hsplit]
+      _ ≤ ‖P₁.comp (W₁ - W₂)‖ + ‖(P₁ - P₂).comp W₂‖ :=
+          norm_add_le (P₁.comp (W₁ - W₂)) ((P₁ - P₂).comp W₂)
+      _ ≤ ‖P₁‖ * ‖W₁ - W₂‖ + ‖P₁ - P₂‖ * ‖W₂‖ :=
+          add_le_add (ContinuousLinearMap.opNorm_comp_le _ _)
+            (ContinuousLinearMap.opNorm_comp_le _ _)
+      _ ≤ p * dw + dp * w := by gcongr
+  -- `‖(P₁ ∘ W₁) h − (P₂ ∘ W₂) h‖ ≤ (p · dw + dp · w) · ‖h‖`
+  have habd : ‖(P₁.comp W₁) h - (P₂.comp W₂) h‖ ≤ (p * dw + dp * w) * ‖h‖ := by
+    have hab : (P₁.comp W₁) h - (P₂.comp W₂) h = (P₁.comp W₁ - P₂.comp W₂) h := by
+      rw [ContinuousLinearMap.sub_apply]
+    calc ‖(P₁.comp W₁) h - (P₂.comp W₂) h‖ = ‖(P₁.comp W₁ - P₂.comp W₂) h‖ := by rw [hab]
+      _ ≤ ‖P₁.comp W₁ - P₂.comp W₂‖ * ‖h‖ := ContinuousLinearMap.le_opNorm _ _
+      _ ≤ (p * dw + dp * w) * ‖h‖ := by gcongr
+  -- telescope: `G₁ − G₂ = (P₁∘W₁)h ∘ (W₁ − W₂) + ((P₁∘W₁)h − (P₂∘W₂)h) ∘ W₂`
+  have hGsplit : ((P₁.comp W₁) h).comp W₁ - ((P₂.comp W₂) h).comp W₂
+      = ((P₁.comp W₁) h).comp (W₁ - W₂)
+        + ((P₁.comp W₁) h - (P₂.comp W₂) h).comp W₂ := by
+    rw [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]; abel
+  have hpw : (0 : ℝ) ≤ p * w * ‖h‖ := by positivity
+  have hpdw : (0 : ℝ) ≤ (p * dw + dp * w) * ‖h‖ := by positivity
+  calc ‖((P₁.comp W₁) h).comp W₁ - ((P₂.comp W₂) h).comp W₂‖
+      = ‖((P₁.comp W₁) h).comp (W₁ - W₂)
+          + ((P₁.comp W₁) h - (P₂.comp W₂) h).comp W₂‖ := by rw [hGsplit]
+    _ ≤ ‖((P₁.comp W₁) h).comp (W₁ - W₂)‖
+          + ‖((P₁.comp W₁) h - (P₂.comp W₂) h).comp W₂‖ :=
+        norm_add_le (((P₁.comp W₁) h).comp (W₁ - W₂))
+          (((P₁.comp W₁) h - (P₂.comp W₂) h).comp W₂)
+    _ ≤ ‖(P₁.comp W₁) h‖ * ‖W₁ - W₂‖
+          + ‖(P₁.comp W₁) h - (P₂.comp W₂) h‖ * ‖W₂‖ :=
+        add_le_add (ContinuousLinearMap.opNorm_comp_le _ _)
+          (ContinuousLinearMap.opNorm_comp_le _ _)
+    _ ≤ (p * w * ‖h‖) * dw + ((p * dw + dp * w) * ‖h‖) * w :=
+        add_le_add (mul_le_mul hanorm hWd (norm_nonneg _) hpw)
+          (mul_le_mul habd hW₂ (norm_nonneg _) hpdw)
+    _ = (dp * w ^ 2 + 2 * p * w * dw) * ‖h‖ := by ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
