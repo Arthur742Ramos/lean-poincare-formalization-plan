@@ -1469,6 +1469,90 @@ theorem fderiv_flow_of_uniform_deriv_modulus
   (hasFDerivAt_flow_of_uniform_deriv_modulus hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hωnn hωmono hω0
     hmod).fderiv
 
+/-!
+### The `C^{1,1}` specialisation: a Lipschitz spatial derivative
+
+The most directly usable entry point: when the field's spatial derivative is *Lipschitz* on the
+trajectory chords (uniformly in `s`), i.e. `‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖`, the linear modulus
+`ω r = L · r⁺` (nonnegative, monotone, vanishing at `0⁺`) feeds
+`hasFDerivAt_flow_of_uniform_deriv_modulus` directly.  This covers every smooth (`C^∞`) field — in
+particular the intended Ricci-flow application, whose right-hand sides are smooth — so it is the
+practical `C¹`-dependence theorem: no abstract modulus of continuity to supply, only a Lipschitz
+constant for the derivative. -/
+
+open Asymptotics Filter in
+/-- **`C¹` dependence of the flow from a Lipschitz spatial derivative (`C^{1,1}`).**  If the field
+`v s` has spatial derivative `Dv s` on each trajectory chord `[Φ x₀ s, Φ z s]` (`s ∈ Ico t₀ t`) and
+the derivative oscillation there is Lipschitz in the distance to the anchor trajectory,
+`‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖` with `0 ≤ L` uniform in `s`, then `x ↦ Φ x t` is Fréchet
+differentiable at `x₀` with derivative the resolvent `fundamentalSolution … t = D_x Φ_t`.  The linear
+modulus `ω r = L · max r 0` discharges `hasFDerivAt_flow_of_uniform_deriv_modulus`. -/
+theorem hasFDerivAt_flow_of_lipschitz_deriv
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  refine hasFDerivAt_flow_of_uniform_deriv_modulus hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv
+    (ω := fun r => L * max r 0) (fun r => mul_nonneg hL (le_max_right r 0)) ?_ ?_ ?_
+  · intro a b hab
+    exact mul_le_mul_of_nonneg_left (max_le_max hab le_rfl) hL
+  · have hbase : Tendsto (fun r : ℝ => L * r) (𝓝[≥] (0 : ℝ)) (𝓝 0) := by
+      have h2 : Tendsto (fun r : ℝ => L * r) (𝓝 (0 : ℝ)) (𝓝 0) := by
+        simpa using (continuous_const.mul continuous_id).tendsto (0 : ℝ)
+      exact h2.mono_left nhdsWithin_le_nhds
+    refine hbase.congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    rw [max_eq_left (Set.mem_Ici.mp hr)]
+  · intro z s hs ξ hξ
+    simpa [max_eq_left (norm_nonneg (ξ - Φ x₀ s))] using hlip z s hs ξ hξ
+
+open Asymptotics Filter in
+/-- **The flow map is differentiable at the base point** from a Lipschitz spatial derivative:
+`DifferentiableAt ℝ (fun z => Φ z t) x₀`. -/
+theorem differentiableAt_flow_of_lipschitz_deriv
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hL hlip).differentiableAt
+
+open Asymptotics Filter in
+/-- **The Fréchet derivative of the flow map is the resolvent** from a Lipschitz spatial
+derivative: `fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution … t = D_x Φ_t`. -/
+theorem fderiv_flow_of_lipschitz_deriv
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hL hlip).fderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
