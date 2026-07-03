@@ -4343,6 +4343,56 @@ theorem norm_flow_sub_fundamentalSolution_le_uniform
   exact gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg
     (show t - t₀ ≤ T - t₀ by linarith [ht.2])
 
+/-- **Quadratic (`C^{1,1}`) Taylor remainder bound.**  If `g : E → F` is everywhere Fréchet
+differentiable with derivative `g'` and `g'` is `M`-Lipschitz, then the first-order Taylor remainder
+is *quadratically* small: `‖g b - g a - g' a (b - a)‖ ≤ M · ‖b - a‖²`.  Proof: on the segment `[a, b]`
+the derivative deviation is `‖g' ξ - g' a‖ ≤ M ‖ξ - a‖ ≤ M ‖b - a‖` (Lipschitz `g'`, and
+`‖ξ - a‖ ≤ ‖b - a‖` on the segment via `segment_eq_image'`), so the linearised mean-value inequality
+`Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le'` bounds the remainder by `(M ‖b - a‖) · ‖b - a‖`.
+The pure-calculus second-order estimate the base-point `C²` bootstrap applies to the field's spatial
+derivative to control the quadratic part of the coefficient perturbation. -/
+theorem norm_sub_fderiv_le_mul_sq_of_lipschitz
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {g : E → F} {g' : E → (E →L[ℝ] F)} {M : ℝ≥0}
+    (hg : ∀ ξ, HasFDerivAt g (g' ξ) ξ) (hg'lip : LipschitzWith M g') (a b : E) :
+    ‖g b - g a - g' a (b - a)‖ ≤ (M : ℝ) * ‖b - a‖ ^ 2 := by
+  have hseg : ∀ ξ ∈ segment ℝ a b, ‖ξ - a‖ ≤ ‖b - a‖ := by
+    intro ξ hξ
+    rw [segment_eq_image' ℝ a b] at hξ
+    obtain ⟨θ, hθ, rfl⟩ := hξ
+    have hsub : a + θ • (b - a) - a = θ • (b - a) := by abel
+    rw [hsub, norm_smul, Real.norm_eq_abs, abs_of_nonneg hθ.1]
+    have hm := mul_le_mul_of_nonneg_right hθ.2 (norm_nonneg (b - a))
+    rwa [one_mul] at hm
+  have hbound : ∀ ξ ∈ segment ℝ a b, ‖g' ξ - g' a‖ ≤ (M : ℝ) * ‖b - a‖ := by
+    intro ξ hξ
+    have h1 : ‖g' ξ - g' a‖ ≤ (M : ℝ) * ‖ξ - a‖ := by
+      have hd := hg'lip.dist_le_mul ξ a
+      rwa [dist_eq_norm, dist_eq_norm] at hd
+    exact h1.trans (mul_le_mul_of_nonneg_left (hseg ξ hξ) M.coe_nonneg)
+  have hmvt := (convex_segment a b).norm_image_sub_le_of_norm_hasFDerivWithin_le'
+    (f := g) (f' := g') (φ := g' a)
+    (fun ξ _ => (hg ξ).hasFDerivWithinAt) hbound
+    (left_mem_segment ℝ a b) (right_mem_segment ℝ a b)
+  calc ‖g b - g a - g' a (b - a)‖
+      ≤ (M : ℝ) * ‖b - a‖ * ‖b - a‖ := hmvt
+    _ = (M : ℝ) * ‖b - a‖ ^ 2 := by ring
+
+/-- **Second-order (quadratic) part of the coefficient perturbation.**  Specialising
+`norm_sub_fderiv_le_mul_sq_of_lipschitz` to the field's spatial derivative `g = Dv s`, `g' = D²v s`
+(the second spatial derivative, `M`-Lipschitz): the trajectory-linearised coefficient's Taylor
+remainder is quadratic in the trajectory separation,
+`‖Dv s b - Dv s a - D²v s a (b - a)‖ ≤ M · ‖b - a‖²`.  With `a = Φ x₀ s`, `b = Φ (x₀+h) s`
+(separation `≤ exp (K T) · ‖h‖` by `dist_flow_apply_le`), this is the `O(‖h‖²)` bracket of the
+base-point `C²` coefficient expansion `A(x₀+h) s - A(x₀) s - (D²v s (Φ x₀ s) ∘ D_x Φ_s) h`; the
+complementary bracket is `D²v s (Φ x₀ s)` applied to the uniform-in-time flow remainder
+`norm_flow_sub_fundamentalSolution_le_uniform`. -/
+theorem norm_derivField_sub_sub_secondDeriv_le
+    {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))} {M : ℝ≥0} {s : ℝ}
+    (hDv : ∀ ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ) (hD2vlip : LipschitzWith M (D2v s)) (a b : E) :
+    ‖Dv s b - Dv s a - D2v s a (b - a)‖ ≤ (M : ℝ) * ‖b - a‖ ^ 2 :=
+  norm_sub_fderiv_le_mul_sq_of_lipschitz hDv hD2vlip a b
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
