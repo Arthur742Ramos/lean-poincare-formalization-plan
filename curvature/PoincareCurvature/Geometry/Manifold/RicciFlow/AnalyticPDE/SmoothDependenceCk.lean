@@ -3384,6 +3384,25 @@ theorem norm_inhomogVariation_of_augmented_le {A F : ℝ → (E →L[ℝ] E)} {K
   have hV0 : (fun r => (z r).1) t₀ = 0 := inhomogVariation_of_augmented_anchor hz0
   exact norm_inhomogVariation_le hA hV hV0 hFbound ht
 
+/-- **Well-definedness of the augmented first variation.**  Any two integral curves `z₁, z₂` of the
+augmented field `augmentedVariationalField A F` through `(0, 1)` carry the *same* operator coordinate:
+`(z₁ t).1 = (z₂ t).1`.  Both operator coordinates solve the anchored inhomogeneous ODE
+`V' = A ∘ V + F`, `V t₀ = 0` (`hasDerivAt_inhomogVariation_of_augmented`,
+`inhomogVariation_of_augmented_anchor`), so Grönwall uniqueness (`inhomogVariation_unique`) pins them
+together.  Thus the first variation extracted by the augmented-flow reduction is a canonical,
+flow-independent object — it depends only on `A` and `F`, not on the particular augmented flow. -/
+theorem augmentedVariationalField_fst_unique {A F : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) {z₁ z₂ : ℝ → ((E →L[ℝ] E) × ℝ)}
+    (hz₁ : ∀ s, HasDerivAt z₁ (augmentedVariationalField A F s (z₁ s)) s)
+    (hz₂ : ∀ s, HasDerivAt z₂ (augmentedVariationalField A F s (z₂ s)) s)
+    (hz₁0 : z₁ t₀ = (0, 1)) (hz₂0 : z₂ t₀ = (0, 1)) (t : ℝ) :
+    (z₁ t).1 = (z₂ t).1 := by
+  have hV₁ := hasDerivAt_inhomogVariation_of_augmented hz₁ hz₁0
+  have hV₂ := hasDerivAt_inhomogVariation_of_augmented hz₂ hz₂0
+  have h0 : (fun r => (z₁ r).1) t₀ = (fun r => (z₂ r).1) t₀ := by
+    rw [inhomogVariation_of_augmented_anchor hz₁0, inhomogVariation_of_augmented_anchor hz₂0]
+  exact inhomogVariation_unique hA hV₁ hV₂ h0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
