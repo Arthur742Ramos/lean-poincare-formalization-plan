@@ -6248,6 +6248,64 @@ theorem norm_thirdDerivCurryLeft_apply_flow_sub_le
     _ ≤ ‖D3v s (Φ z s)‖ * ‖u₁ - u₂‖
           + (N : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ * ‖u₂‖ := by gcongr
 
+/-- **Existence of the second-order (third) variation** — the `D₃`-analogue of
+`exists_hasDerivAt_firstVariation_linearised_dir`, packaging the *existence half* of the base-point
+`C³` bootstrap.
+
+Differentiating the linearised first-variation ODE (whose forcing is the chain-rule term
+`((D²v(Φ x₀ s) ∘ W) h) ∘ W`, `W = fundamentalSolution`) once more in the base point `x₀` produces a new
+inhomogeneous linear variational ODE `V' = A₀ ∘ V + F`, `V t₀ = 0`, with `A₀ s = Dv s (Φ x₀ s)` and a
+*three-term* forcing:
+
+* the two **asymmetric composition** terms `((D²v(Φ x₀ s) ∘ W₂) h) ∘ W` and `((D²v(Φ x₀ s) ∘ W) h) ∘ W₂`
+  — the outer/inner resolvent `W` differentiated into the *second fundamental solution* curve
+  `W₂ s = ∂/∂x₀ (fundamentalSolution) s` in the base direction (supplied here as any continuous curve;
+  its concrete construction as a second fundamental solution is a separate piece); and
+* an abstract **third-derivative** forcing `F₃` (built from `D³v(Φ x₀ s)` contracted once with a
+  resolvent direction — supplied here as any continuous curve, e.g.
+  `s ↦ continuousMultilinearCurryFin1 ℝ E E (((D³v(Φ x₀ s)).curryLeft (W s k)).curryLeft (W s h))`).
+
+Existence follows exactly as in the first-variation case: the two asymmetric terms are continuous by
+`Continuous.clm_comp`/`Continuous.clm_apply` (from `hD2cont`, the resolvent continuity
+`continuous_fundamentalSolution_time`, and `hW2`), so their sum with the continuous `F₃` is a
+continuous forcing, and the merely-continuous global existence
+`exists_hasDerivAt_inhomogVariation_of_continuous` (the forcing need not be globally bounded) supplies
+the solution `V` through `(t₀, 0)`.  This is the `D₃`-solution existence datum that the packaged `D₃`
+operator and the second-order Taylor remainder will consume, in the same way
+`exists_hasDerivAt_firstVariation_linearised_dir` fed `exists_continuousLinearMap_linearisedVariation`
+and `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`. -/
+theorem exists_hasDerivAt_secondVariation_linearised_dir [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {W2 : ℝ → (E →L[ℝ] E)} (hW2 : Continuous W2)
+    {F3 : ℝ → (E →L[ℝ] E)} (hF3 : Continuous F3)
+    (h : E) :
+    ∃ V : ℝ → (E →L[ℝ] E), V t₀ = 0 ∧
+      ∀ s, HasDerivAt V
+        ((Dv s (Φ x₀ s)).comp (V s)
+          + (((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s)
+             + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s)
+             + F3 s)) s := by
+  have hW : Continuous (fun s => fundamentalSolution hA hΦ' h0' s) :=
+    continuous_fundamentalSolution_time hA hΦ' h0'
+  have hFa : Continuous fun s =>
+      ((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s) :=
+    ((hD2cont.clm_comp hW2).clm_apply continuous_const).clm_comp hW
+  have hFb : Continuous fun s =>
+      ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s) :=
+    ((hD2cont.clm_comp hW).clm_apply continuous_const).clm_comp hW2
+  have hFc : Continuous fun s =>
+      (((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s)
+        + F3 s) :=
+    (hFa.add hFb).add hF3
+  exact exists_hasDerivAt_inhomogVariation_of_continuous hA hAcont hFc t₀
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
