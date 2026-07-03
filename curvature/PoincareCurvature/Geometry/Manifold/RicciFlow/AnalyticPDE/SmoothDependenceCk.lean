@@ -8518,6 +8518,79 @@ theorem norm_secondDerivField_sub_sub_thirdDeriv_ml_flow_le
         mul_le_mul_of_nonneg_left hfs M.coe_nonneg
     _ = (M : ℝ) * Real.exp (2 * (K : ℝ) * T) * ‖z - x‖ ^ 2 := by ring
 
+/-- **Central `C³` coefficient Taylor bound (multilinear representation)** — the `D²v`-analogue of
+`norm_derivField_sub_sub_comp_fundamentalSolution_le_sq`, one order up.  This is the *single remaining
+analytic ingredient* of the `(F₁ − F₀)` second-order forcing remainder toward `ContDiff ℝ 3`: it
+identifies the base-point second-derivative gap `D²v(Φ z s) − D²v(Φ x₀ s)` with its **linearised**
+form `D³v(Φ x₀ s)[D_x Φ_s (z − x₀)]` — the third derivative contracted with the resolvent-linearised
+increment `W_x k = fundamentalSolution … s (z − x₀)` — up to a quadratic `O(‖z − x₀‖²)` remainder,
+uniformly on the compact time tube `[t₀, T]`:
+`‖(D²v(Φ z s) − D²v(Φ x₀ s)) − D³v(Φ x₀ s)(W_x (z − x₀))‖ ≤ (M · e + N · (L · e · g)) · ‖z − x₀‖²`,
+with `e = exp (2 K (T − t₀))`, `g = gronwallBound 0 K 1 (T − t₀)`.
+
+Everything is in the *multilinear* representation `D²v s : E → (E[×2]→L E)`,
+`D³v s : E → (E →L (E[×2]→L E))` (both norm-carrying, unlike the instance-less operator-curried
+triple `E →L (E →L (E →L E))`), so `LipschitzWith M (D³v s)` and the operator-evaluation bounds
+type-check.  Proof mirrors the `C²` template: split the linearised gap as the flow-Taylor defect
+`D²v(Φ z s) − D²v(Φ x₀ s) − D³v(Φ x₀ s)(Φ z s − Φ x₀ s)` (bounded `≤ M · e · ‖k‖²` by the flow-tube
+multilinear Taylor `norm_secondDerivField_sub_sub_thirdDeriv_ml_flow_le`) plus the linearisation
+residual `D³v(Φ x₀ s)((Φ z s − Φ x₀ s) − W_x k)` (bounded `≤ N · (L · e · g) · ‖k‖²` by the operator
+bound `‖D³v(Φ x₀ s)‖ ≤ N` times the first-order flow remainder
+`norm_flow_sub_fundamentalSolution_le_sq`).  With this the `dP`-linear term of
+`norm_bilinearCompForcing_sub_sub_le` — after the `continuousMultilinearCurryFin1`/`curryLeft`
+representation bridge — is identified with the module's `F_C` with an `O(‖z − x₀‖²)` residual,
+completing (alongside `norm_coeffVariation_sub_secondDerivComp_le_sq`) the `(F₁ − F₀)` forcing gap. -/
+theorem norm_secondDerivField_sub_sub_thirdDeriv_ml_fundamentalSolution_le_sq
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2v : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3v : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {L M : ℝ≥0} {N : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD3v : ∀ s ξ, HasFDerivAt (D2v s) (D3v s ξ) ξ) (hD3vlip : ∀ s, LipschitzWith M (D3v s))
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hN0 : 0 ≤ N) (hN : ∀ s, ‖D3v s (Φ x₀ s)‖ ≤ N)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (z : E) {T s : ℝ} (hs : s ∈ Icc t₀ T) :
+    ‖D2v s (Φ z s) - D2v s (Φ x₀ s)
+        - D3v s (Φ x₀ s) (fundamentalSolution hA hΦ' h0' s (z - x₀))‖
+      ≤ ((M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          + N * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+              * gronwallBound 0 (K : ℝ) 1 (T - t₀))) * ‖z - x₀‖ ^ 2 := by
+  have hsT : |s - t₀| ≤ T - t₀ := by
+    rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+  have hms : D3v s (Φ x₀ s) ((Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀))
+      = D3v s (Φ x₀ s) (Φ z s - Φ x₀ s)
+        - D3v s (Φ x₀ s) (fundamentalSolution hA hΦ' h0' s (z - x₀)) :=
+    (D3v s (Φ x₀ s)).map_sub _ _
+  have hsplit :
+      D2v s (Φ z s) - D2v s (Φ x₀ s)
+          - D3v s (Φ x₀ s) (fundamentalSolution hA hΦ' h0' s (z - x₀))
+        = (D2v s (Φ z s) - D2v s (Φ x₀ s) - D3v s (Φ x₀ s) (Φ z s - Φ x₀ s))
+          + D3v s (Φ x₀ s) ((Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀)) := by
+    rw [hms]; abel
+  rw [hsplit]
+  refine (norm_add_le _ _).trans ?_
+  have hb1 : ‖D2v s (Φ z s) - D2v s (Φ x₀ s) - D3v s (Φ x₀ s) (Φ z s - Φ x₀ s)‖
+      ≤ (M : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖z - x₀‖ ^ 2 :=
+    norm_secondDerivField_sub_sub_thirdDeriv_ml_flow_le hv hΦ h0 (hD3v s) (hD3vlip s) hsT x₀ z
+  have hb2 : ‖D3v s (Φ x₀ s) ((Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀))‖
+      ≤ N * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖z - x₀‖ ^ 2 := by
+    have hflow := norm_flow_sub_fundamentalSolution_le_sq hv hΦ h0 hDv hDvlip x₀ hA hΦ' h0' z hs
+    calc ‖D3v s (Φ x₀ s) ((Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀))‖
+        ≤ ‖D3v s (Φ x₀ s)‖
+            * ‖(Φ z s - Φ x₀ s) - fundamentalSolution hA hΦ' h0' s (z - x₀)‖ :=
+          (D3v s (Φ x₀ s)).le_opNorm _
+      _ ≤ N * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀) * ‖z - x₀‖ ^ 2) :=
+          mul_le_mul (hN s) hflow (norm_nonneg _) hN0
+      _ = N * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (T - t₀))
+            * gronwallBound 0 (K : ℝ) 1 (T - t₀)) * ‖z - x₀‖ ^ 2 := by ring
+  exact (add_le_add hb1 hb2).trans_eq (by ring)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
