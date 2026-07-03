@@ -7788,6 +7788,68 @@ theorem parabolicSupNorm_zsmul_le {X E : Type*} [PseudoMetricSpace X] [NormedAdd
       (mul_nonneg (norm_nonneg n) (parabolicSupNorm_nonneg u s))
       ((parabolicBoundedWith_parabolicSupNorm hu).zsmul n)
 
+/-- The parabolic Hölder seminorm of the zero function is `0` (the second seminorm axiom). -/
+theorem parabolicHolderSeminorm_zero {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (α : ℝ) (s : Set (ℝ × X)) :
+      parabolicHolderSeminorm α (fun _ : ℝ × X => (0 : E)) s = 0 := by
+    refine le_antisymm ?_ (parabolicHolderSeminorm_nonneg α _ s)
+    exact parabolicHolderSeminorm_le le_rfl (ParabolicHolderWith.const (C := 0) (0 : E) le_rfl)
+
+/-- The parabolic sup norm of the zero function is `0`. -/
+theorem parabolicSupNorm_zero {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      (s : Set (ℝ × X)) :
+      parabolicSupNorm (fun _ : ℝ × X => (0 : E)) s = 0 := by
+    refine le_antisymm ?_ (parabolicSupNorm_nonneg _ s)
+    exact parabolicSupNorm_le le_rfl (ParabolicBoundedWith.const (B := 0) (0 : E) (le_of_eq norm_zero))
+
+/-- **Domain monotonicity of the parabolic Hölder seminorm.**  Restricting the domain does not
+increase the seminorm (a smaller domain has fewer pairs to control). -/
+theorem parabolicHolderSeminorm_mono_domain {X E : Type*} [PseudoMetricSpace X]
+      [NormedAddCommGroup E] {α : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+      (hst : s ⊆ t) (ht : ParabolicHolderOn α u t) :
+      parabolicHolderSeminorm α u s ≤ parabolicHolderSeminorm α u t := by
+    refine parabolicHolderSeminorm_le (parabolicHolderSeminorm_nonneg α u t) ?_
+    intro p hp q hq
+    exact (parabolicHolderWith_parabolicHolderSeminorm ht) (hst hp) (hst hq)
+
+/-- **Domain monotonicity of the parabolic sup norm.** -/
+theorem parabolicSupNorm_mono_domain {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s t : Set (ℝ × X)}
+      (hst : s ⊆ t) (ht : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u t) :
+      parabolicSupNorm u s ≤ parabolicSupNorm u t := by
+    refine parabolicSupNorm_le (parabolicSupNorm_nonneg u t) ?_
+    intro p hp
+    exact (parabolicBoundedWith_parabolicSupNorm ht) (hst hp)
+
+/-- Pointwise readout of the parabolic Hölder seminorm: for a parabolic `α`-Hölder function the
+Hölder estimate holds with the seminorm as its constant. -/
+theorem norm_sub_le_parabolicHolderSeminorm {X E : Type*} [PseudoMetricSpace X]
+      [NormedAddCommGroup E] {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} {p q : ℝ × X}
+      (hu : ParabolicHolderOn α u s) (hp : p ∈ s) (hq : q ∈ s) :
+      ‖u p - u q‖ ≤ parabolicHolderSeminorm α u s * parabolicDistance p q ^ α :=
+    (parabolicHolderWith_parabolicHolderSeminorm hu) hp hq
+
+/-- Pointwise readout of the parabolic sup norm: a bounded function is pointwise dominated by its
+sup norm. -/
+theorem norm_le_parabolicSupNorm {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+      {u : ℝ × X → E} {s : Set (ℝ × X)} {p : ℝ × X}
+      (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) (hp : p ∈ s) :
+      ‖u p‖ ≤ parabolicSupNorm u s :=
+    (parabolicBoundedWith_parabolicSupNorm hu) hp
+
+/-- **Lower semicontinuity readout toward completeness.**  A pointwise limit of functions in a fixed
+parabolic `C^{0,α}` ball has `C^{0,α}` norm at most the sum of the fixed sup and Hölder constants:
+the norm functional does not blow up under pointwise limits.  Combined with the closedness lemmas
+`ParabolicC0AlphaWith.of_tendsto`, this is the norm-level inheritance behind completeness. -/
+theorem parabolicC0AlphaNorm_le_of_tendsto {X E ι : Type*} [PseudoMetricSpace X]
+      [NormedAddCommGroup E] {l : Filter ι} [l.NeBot] {B H α : ℝ}
+      {f : ι → ℝ × X → E} {g : ℝ × X → E} {s : Set (ℝ × X)}
+      (hB0 : 0 ≤ B) (hH0 : 0 ≤ H)
+      (hf : ∀ i, ParabolicC0AlphaWith B H α (f i) s)
+      (hg : ∀ ⦃p : ℝ × X⦄, p ∈ s → Filter.Tendsto (fun i => f i p) l (𝓝 (g p))) :
+      parabolicC0AlphaNorm α g s ≤ B + H :=
+    parabolicC0AlphaNorm_le hB0 hH0 (ParabolicC0AlphaWith.of_tendsto hf hg)
+
 end AnalyticPDE
 end RicciFlow
 
