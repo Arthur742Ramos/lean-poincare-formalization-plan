@@ -8425,6 +8425,48 @@ theorem norm_bilinearCompForcing_sub_sub_le
     _ = (εp * a * b + p * εa * b + p * a * εb
           + δp * δa * b + δp * a * δb + p * δa * δb + δp * δa * δb) * ‖h‖ := by ring
 
+/-- **`O(‖k‖²)` collapse of the second-order composition-forcing Taylor engine (diagonal case).**
+Specialises `norm_bilinearCompForcing_sub_sub_le` to the **diagonal** operand shape
+`F(·) = ((P ∘ W) h) ∘ W` (inner and outer factors equal — exactly the second-variation forcing
+`((D²v ∘ W) h) ∘ W`) and collapses the seven-term bound into the single clean target rate
+`Cquad · ‖k‖² · ‖h‖` that the `ContDiff ℝ 3` `HasFDerivAt`-bridge
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` consumes.
+
+Given a base point's operator `P₀` (`‖P₀‖ ≤ p`) and resolvent `W₀` (`‖W₀‖ ≤ w`), a perturbed
+`P₁, W₁` with **first-order gaps** linear in `k` (`‖P₁ − P₀‖ ≤ dp·‖k‖`, `‖W₁ − W₀‖ ≤ dw·‖k‖`) and
+**candidate linearisations** `dP, dW` with **quadratic Taylor remainders** (`‖P₁ − P₀ − dP‖ ≤ cp·‖k‖²`,
+`‖W₁ − W₀ − dW‖ ≤ cw·‖k‖²`), and `‖k‖ ≤ 1`,
+`‖(((P₁ ∘ W₁) h) ∘ W₁ − ((P₀ ∘ W₀) h) ∘ W₀) − (((dP ∘ W₀) h) ∘ W₀ + ((P₀ ∘ dW) h) ∘ W₀ + ((P₀ ∘ W₀) h) ∘ dW)‖`
+`  ≤ (cp·w² + 2·p·cw·w + 2·dp·dw·w + p·dw² + dp·dw²) · ‖k‖² · ‖h‖`.
+
+Proof: `norm_bilinearCompForcing_sub_sub_le` (with `A₀ = B₀ = W₀`, `dA = dB = dW`) gives the seven-term
+bound; each summand is `O(‖k‖²)` except the cubic cross term `dp·dw²·‖k‖³`, which the constraint
+`‖k‖ ≤ 1` bounds by `dp·dw²·‖k‖²` (`‖k‖³ ≤ ‖k‖²`); `nlinarith` then absorbs everything into the single
+`Cquad·‖k‖²` factor.  In the `C³` bootstrap `k = z − x₀`, `P₀ = D²v(Φ x₀)`, `P₁ = D²v(Φ z)`,
+`W₀ = D_x Φ`, `W₁ = D_x Φ^{A(z)}`, `dW = W₂` (second fundamental solution curve); the two `dW`-linear
+terms are `F_A`, `F_B` and the `dP`-linear term becomes `F_C` after the (remaining) `D³v`-contraction
+identification.  So this is the `(F₁ − F₀)` second-order forcing remainder in the diagonal shape, its
+final `O(‖z − x₀‖²·‖h‖)` rate exposed. -/
+theorem norm_bilinearCompForcing_sub_sub_le_sq
+    {P₀ P₁ dP : E →L[ℝ] (E →L[ℝ] E)} {W₀ W₁ dW : E →L[ℝ] E} (h k : E)
+    {p w cp cw dp dw : ℝ}
+    (hP₀ : ‖P₀‖ ≤ p) (hW₀ : ‖W₀‖ ≤ w)
+    (hrP : ‖P₁ - P₀‖ ≤ dp * ‖k‖) (hrW : ‖W₁ - W₀‖ ≤ dw * ‖k‖)
+    (hεP : ‖P₁ - P₀ - dP‖ ≤ cp * ‖k‖ ^ 2) (hεW : ‖W₁ - W₀ - dW‖ ≤ cw * ‖k‖ ^ 2)
+    (hp : 0 ≤ p) (hw : 0 ≤ w) (hdp : 0 ≤ dp) (hdw : 0 ≤ dw) (hk : ‖k‖ ≤ 1) :
+    ‖(((P₁.comp W₁) h).comp W₁ - ((P₀.comp W₀) h).comp W₀)
+        - ((((dP.comp W₀) h).comp W₀) + (((P₀.comp dW) h).comp W₀)
+            + (((P₀.comp W₀) h).comp dW))‖
+      ≤ (cp * w * w + 2 * p * cw * w + 2 * dp * dw * w + p * dw * dw + dp * dw * dw)
+          * ‖k‖ ^ 2 * ‖h‖ := by
+  refine (norm_bilinearCompForcing_sub_sub_le h hP₀ hW₀ hW₀ hrP hrW hrW hεP hεW hεW hp hw
+      (mul_nonneg hdp (norm_nonneg k)) (mul_nonneg hdw (norm_nonneg k))).trans ?_
+  refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg h)
+  have hknn : (0 : ℝ) ≤ ‖k‖ := norm_nonneg k
+  have hextra : dp * dw * dw * ‖k‖ ^ 2 * (1 - ‖k‖) ≥ 0 :=
+    mul_nonneg (by positivity) (by linarith)
+  nlinarith [hextra, hknn, hk, sq_nonneg ‖k‖]
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
