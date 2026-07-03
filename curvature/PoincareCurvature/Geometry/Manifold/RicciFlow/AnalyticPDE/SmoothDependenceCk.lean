@@ -1256,6 +1256,85 @@ theorem fderiv_flow_of_uniform_oscillation_tendsto_zero
   (hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero hA hΦ' h0' hΦ h0 x₀ ht0 hCnn hCto
     hdefect).fderiv
 
+/-!
+### From defect modulus to derivative oscillation: the `C¹`-regularity hypothesis
+
+The final composable reduction: `norm_flow_defect_le_of_segment_oscillation` turns a bound on the
+*oscillation of the field's spatial derivative on the trajectory chord* into the per-time defect
+bound consumed by `hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero`.  Composing the two, the
+`C¹` dependence of the flow reduces to a single hypothesis phrased purely in terms of the field:
+the chord-oscillation `‖Dv s ξ - A s‖` (uniform in `s ∈ [t₀, t]`, over `ξ` on the chord
+`[Φ x₀ s, Φ z s]`) vanishes as `z → x₀`.  This is exactly the modulus-of-continuity input a genuine
+`C¹` field supplies via Heine–Cantor on the compact trajectory tube. -/
+
+open Asymptotics Filter in
+/-- **`C¹` dependence of the flow from a vanishing derivative chord-oscillation.**  With `Φ`, `Φ'`
+the nonlinear/variational flow families and `t ≥ t₀`, suppose the field `v s` has spatial
+derivative `Dv s` on each trajectory chord `[Φ x₀ s, Φ z s]` (`s ∈ Ico t₀ t`), and a single
+uniform modulus `C : E → ℝ` with `0 ≤ C z`, `C z → 0` as `z → x₀`, bounds the derivative
+oscillation `‖Dv s ξ - A s‖ ≤ C z` there.  Then `x ↦ Φ x t` is Fréchet differentiable at `x₀` with
+derivative the resolvent `fundamentalSolution … t = D_x Φ_t`.  The mean-value bound
+`norm_flow_defect_le_of_segment_oscillation` converts the oscillation into the defect modulus of
+`hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero`; the only residual input is the vanishing of
+the derivative oscillation — a pure `C¹`-regularity statement about `v`. -/
+theorem hasFDerivAt_flow_of_segment_oscillation_tendsto_zero
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hosc : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s), ‖Dv s ξ - A s‖ ≤ C z) :
+    HasFDerivAt (fun z => Φ z t) (fundamentalSolution hA hΦ' h0' t) x₀ := by
+  have hdefect : ∀ z, ∀ s ∈ Ico t₀ t,
+      ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+        ≤ C z * (Real.exp ((K : ℝ) * |s - t₀|) * ‖z - x₀‖) := fun z s hs =>
+    norm_flow_defect_le_of_segment_oscillation hv hΦ h0 x₀ z s (hderiv z s hs) (hosc z s hs)
+  exact hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero hA hΦ' h0' hΦ h0 x₀ ht0 hCnn hCto
+    hdefect
+
+open Asymptotics Filter in
+/-- **The flow map is differentiable at the base point** from a vanishing derivative
+chord-oscillation: `DifferentiableAt ℝ (fun z => Φ z t) x₀`. -/
+theorem differentiableAt_flow_of_segment_oscillation_tendsto_zero
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hosc : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s), ‖Dv s ξ - A s‖ ≤ C z) :
+    DifferentiableAt ℝ (fun z => Φ z t) x₀ :=
+  (hasFDerivAt_flow_of_segment_oscillation_tendsto_zero hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hCnn
+    hCto hosc).differentiableAt
+
+open Asymptotics Filter in
+/-- **The Fréchet derivative of the flow map is the resolvent** from a vanishing derivative
+chord-oscillation: `fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution … t = D_x Φ_t`. -/
+theorem fderiv_flow_of_segment_oscillation_tendsto_zero
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    {C : E → ℝ} (hCnn : ∀ z, 0 ≤ C z) (hCto : Tendsto C (𝓝 x₀) (𝓝 0))
+    (hosc : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s), ‖Dv s ξ - A s‖ ≤ C z) :
+    fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
+  (hasFDerivAt_flow_of_segment_oscillation_tendsto_zero hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hCnn
+    hCto hosc).fderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
