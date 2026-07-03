@@ -2755,6 +2755,30 @@ theorem contDiff_infty_flow_time {Ψ : E → ℝ → E} (hΨ : ∀ x, IsIntegral
     ContDiff ℝ ∞ (fun t => Ψ x t) :=
   contDiff_infty_of_isIntegralCurve (hΨ x) huv
 
+/-- **Joint regularity of the resolvent action in (time, vector).**  For a `C^n` coefficient path
+`A`, the pushforward map `(t, u₀) ↦ D_x Φ_t · u₀` is jointly `C^{n+1}` on `ℝ × E`.  The resolvent
+operator curve `t ↦ D_x Φ_t` is `C^{n+1}` (`contDiff_fundamentalSolution_time`), pulled back along the
+projection `Prod.fst`, then evaluated against the smooth `Prod.snd` through the bounded-bilinear
+(hence smooth) evaluation map (`ContDiff.clm_apply`).  So the flow pushforward is regular jointly in
+the flow time and the pushed vector. -/
+theorem contDiff_fundamentalSolution_apply_joint {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (n : ℕ) (hAdiff : ContDiff ℝ (n : WithTop ℕ∞) A) :
+    ContDiff ℝ ((n : WithTop ℕ∞) + 1)
+      (fun p : ℝ × E => fundamentalSolution hA hΦ h0 p.1 p.2) :=
+  ((contDiff_fundamentalSolution_time hA hΦ h0 n hAdiff).comp contDiff_fst).clm_apply contDiff_snd
+
+open scoped ContDiff in
+/-- **Joint smoothness of the resolvent action.**  For a `C^∞` coefficient `A`, the pushforward
+`(t, u₀) ↦ D_x Φ_t · u₀` is jointly `C^∞` on `ℝ × E`. -/
+theorem contDiff_infty_fundamentalSolution_apply_joint {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAsmooth : ContDiff ℝ ∞ A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    ContDiff ℝ ∞ (fun p : ℝ × E => fundamentalSolution hA hΦ h0 p.1 p.2) :=
+  ((contDiff_infty_fundamentalSolution_time hA hAsmooth hΦ h0).comp contDiff_fst).clm_apply
+    contDiff_snd
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
