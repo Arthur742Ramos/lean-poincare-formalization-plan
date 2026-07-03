@@ -4414,6 +4414,24 @@ The norm functional is also `1`-Lipschitz
 converge to the norm of the limit. The remaining gap is now only the bundling: a quotient/subtype
 carrier for functions modulo agreement on `s` (so `‖·‖ = 0 ↔ · = 0`) with the packaged
 `NormedAddCommGroup`/`CompleteSpace` instances, then the lift to `C^{2+α,1+α/2}`.
+The seminormed-level bundling is now in place: `parabolicC0AlphaSubmodule.seminormedAddCommGroup`
+(from the bundled `AddGroupSeminorm`/`Seminorm ℝ`) has readouts `seminormedAddCommGroup_norm`,
+`seminormedAddCommGroup_dist` (`dist u v = parabolicC0AlphaNorm α (u−v) s`), and — the completeness
+half of the parabolic Hölder Banach space — `parabolicC0AlphaSubmodule.completeSpace`, a
+`@CompleteSpace` fact for the parabolic `C^{0,α}` submodule under the *pinned* `C^{0,α}` uniformity
+(assembled from `Metric.complete_of_cauchySeq_tendsto` + `exists_parabolicC0AlphaOn_tendsto_of_cauchy`;
+the uniformity is pinned because the ambient function subtype already carries the pointwise product
+`instUniformSpaceSubtype`, which the honest separated Banach carrier on a type synonym/quotient will
+displace). Scalar compatibility is packaged as `parabolicC0AlphaSubmodule.normedSpace`
+(`NormedSpace ℝ` over the seminormed structure), so the parabolic Hölder space is exhibited as a
+*complete seminormed `ℝ`-vector space* (semi-Banach); only point separation remains for the genuine
+Banach instance. Toward decomposition step 2 (the Schauder/Lipschitz estimate), the parabolic
+`C^{0,α}` norm functional is now shown to be a *normed algebra* norm: submultiplicativity
+`parabolicC0AlphaNorm_mul_le` (`‖u·v‖ ≤ ‖u‖·‖v‖` in a normed ring, from `parabolicSupNorm_mul_le`
+and the Leibniz `parabolicHolderSeminorm_mul_le`) and the bilinear Lipschitz product-difference bound
+`parabolicC0AlphaNorm_mul_sub_mul_le` (`‖u·v − u'·v'‖ ≤ ‖u‖·‖v−v'‖ + ‖u−u'‖·‖v'‖`), the local
+Lipschitz control of multiplication behind the nonlinear Ricci–DeTurck contraction/uniqueness
+arguments.
 
 **Suggested decomposition** (multi-session):
 
