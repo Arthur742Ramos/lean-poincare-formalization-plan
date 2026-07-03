@@ -5487,3 +5487,41 @@ needs an extra `(D²v[W_x k]) ∘ V₀` summand; then the remaining `hβ` pieces
 remainder (needs the multilinear `D³v` Taylor — note the curried triple `E →L E →L E →L E` has **no** norm
 instance in Mathlib v4.29.1, verified, so use `ContinuousMultilinearMap ℝ (Fin 3) E`) plus the pure
 quadratic remainders now available above.
+
+Update — **the open forcing-gap design question is RESOLVED (option (ii)), and the entire
+design-corrected `D₃` packaging chain is now built** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`.  The ODE
+derivation settles it: differentiating the second-variation ODE `V' = A₀ ∘ V₀ + ((D²v ∘ W) h) ∘ W` in
+the base point (direction `k`) gives `∂_k(A₀ ∘ V₀) = (∂_k A₀) ∘ V₀ + A₀ ∘ (∂_k V₀)`; the coefficient
+part `∂_k A₀ = D²v[W_x k]` contributes the **coefficient-variation leading term `(D²v[W_x k]) ∘ V₀`**,
+which is *not* among `F_A`/`F_B`/`F_C` (those come only from differentiating the forcing) and which is
+exactly the operator isolated by `norm_coeffVariation_sub_secondDerivComp_le_sq` as the
+first-order-in-`k` part of `(A₁ − A₀) ∘ V₁`.  So the correct third-variation forcing is
+`F₃ = (D²v[W_x k]) ∘ V₀ + F_A + F_B + F_C`; **no `D²v`-symmetry hypothesis is required**.  The whole
+`C²`-packaging mechanism is replayed for this corrected forcing:
+
+* `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff` — corrected third-variation
+  ODE existence (`F₃` slot fed `newLeading + F_C`).
+* `norm_thirdVariation_coeff_le` — corrected a-priori size bound (four-term forcing; the leading term
+  bounded via `norm_bilinearCompForcing_le` fed `‖V₀‖ ≤ N₀`).
+* `thirdVariation_coeff_perturbation_add_eq` / `_smul_eq` — additivity/homogeneity **in `h`** (the
+  leading term forces `V₀` to be linear in `h` as well: `(h, V₀)`-jointly linear, via
+  `add_comp`/`comp_add`/`smul_comp`/`comp_smul`).
+* `exists_continuousLinearMap_thirdVariation_coeff` / `_norm_le` — the packaged corrected operator
+  `D₃(k) : E →L (E →L E)` (`V₀ = V0fun h` supplied linearly, `‖V0fun h s‖ ≤ N₀·‖h‖` so the bound
+  factors `‖h‖`) with operator norm `‖D₃k‖ ≤ (2C'N₂exp + C'N₀exp‖k‖ + C''exp³‖k‖)·gronwall`.
+* `thirdVariation_coeff_baseDir_add_eq` / `_smul_eq` — additivity/homogeneity **in `k`** (the leading
+  term carries `k` explicitly with `V₀` fixed; `W₂` linear in `k`).
+* `exists_continuousLinearMap_thirdVariation_coeff_bilinear` — the **full bilinear corrected operator**
+  `D₃ : E →L (E →L (E →L E))` (`W₂` linear in `k` with `‖W₂ k s‖ ≤ N₂·‖k‖`, `V0fun` linear in `h`;
+  `‖k‖`-linear operator norm).  This is the design-corrected `D₃` that the base-point second-order
+  Taylor remainder consumes.
+
+Remaining for `ContDiff ℝ 3` (next session): the **`(F₁ − F₀)` second-order remainder**
+`‖(F₁ − F₀) − (F_A + F_B + F_C)‖ ≤ Cquad·‖z − x₀‖²·‖h‖` (the flow-forcing Taylor defect: `D²v(Φz) −
+D²v(Φx₀) ≈ D³v[W_x k]` and `W_z − W_x ≈ W₂ k` expansions, using `norm_bilinearCompForcing_sub_le`,
+`norm_thirdDerivCurryLeft_apply_flow_sub_le`, and the `D³v` Taylor).  Combined with the already-proved
+coefficient remainder `norm_coeffVariation_sub_secondDerivComp_le_sq`, this gives the forcing gap `hβ`
+for the **corrected** `F₃`; then `norm_inhomogVariation_sub_sub_le_of_forcingGap` yields the Taylor
+remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²`, and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+yields `ContDiff ℝ 3`.
