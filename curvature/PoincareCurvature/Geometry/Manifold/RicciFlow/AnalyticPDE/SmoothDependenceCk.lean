@@ -6101,6 +6101,74 @@ theorem norm_thirdDerivField_apply_flow_sub_le
     ‖D3v s (Φ z s) - D3v s (Φ w s)‖ ≤ (N : ℝ) * Real.exp ((K : ℝ) * T) * ‖z - w‖ :=
   norm_field_apply_flow_sub_le hv hΦ h0 hD3v hsT z w
 
+/-- **Perturbation estimate for the asymmetric composition-forcing operator.**  The higher variational
+ODEs produce forcing terms of the shape `((P ∘ A) h) ∘ B` where `P : E →L[ℝ] (E →L[ℝ] E)` is a spatial
+derivative of the field and `A`, `B` are resolvent-type operators, *possibly different* — e.g.
+`A = D₂` the second fundamental solution and `B = W` the resolvent in the third-variation forcing.
+This lemma bounds its response to a joint perturbation of `P`, `A`, `B`: for `‖P₁‖ ≤ p`,
+`‖A₁‖, ‖A₂‖ ≤ a`, `‖B₂‖ ≤ b`, `‖P₁ − P₂‖ ≤ dp`, `‖A₁ − A₂‖ ≤ da`, `‖B₁ − B₂‖ ≤ db`,
+`‖((P₁ ∘ A₁) h) ∘ B₁ − ((P₂ ∘ A₂) h) ∘ B₂‖ ≤ (dp · a · b + p · da · b + p · a · db) · ‖h‖`.
+Specialising `A₁ = B₁ = W₁`, `A₂ = B₂ = W₂` (so `a = b = w`, `da = db = dw`) recovers exactly
+`norm_chainRuleForcing_sub_le` (`(dp · w² + 2 · p · w · dw) · ‖h‖`).  Proof: telescope the outer
+composition (`comp_sub`/`sub_comp`) into `((P₁∘A₁)h) ∘ (B₁ − B₂) + ((P₁∘A₁)h − (P₂∘A₂)h) ∘ B₂`, then
+telescope the inner one `P₁∘A₁ − P₂∘A₂ = P₁∘(A₁−A₂) + (P₁−P₂)∘A₂`, everywhere using
+submultiplicativity of the operator norm. -/
+theorem norm_bilinearCompForcing_sub_le
+    {P₁ P₂ : E →L[ℝ] (E →L[ℝ] E)} {A₁ A₂ B₁ B₂ : E →L[ℝ] E} (h : E)
+    {p a b dp da db : ℝ}
+    (hP₁ : ‖P₁‖ ≤ p) (hA₁ : ‖A₁‖ ≤ a) (hA₂ : ‖A₂‖ ≤ a) (hB₂ : ‖B₂‖ ≤ b)
+    (hPd : ‖P₁ - P₂‖ ≤ dp) (hAd : ‖A₁ - A₂‖ ≤ da) (hBd : ‖B₁ - B₂‖ ≤ db)
+    (hp : 0 ≤ p) (ha : 0 ≤ a) (hdp : 0 ≤ dp) (hda : 0 ≤ da) :
+    ‖((P₁.comp A₁) h).comp B₁ - ((P₂.comp A₂) h).comp B₂‖
+      ≤ (dp * a * b + p * da * b + p * a * db) * ‖h‖ := by
+  -- `‖(P₁ ∘ A₁) h‖ ≤ p · a · ‖h‖`
+  have hcnorm : ‖(P₁.comp A₁) h‖ ≤ p * a * ‖h‖ := by
+    calc ‖(P₁.comp A₁) h‖ ≤ ‖P₁.comp A₁‖ * ‖h‖ := ContinuousLinearMap.le_opNorm _ _
+      _ ≤ ‖P₁‖ * ‖A₁‖ * ‖h‖ :=
+          mul_le_mul_of_nonneg_right (ContinuousLinearMap.opNorm_comp_le _ _) (norm_nonneg _)
+      _ ≤ p * a * ‖h‖ := by gcongr
+  -- `‖P₁ ∘ A₁ − P₂ ∘ A₂‖ ≤ p · da + dp · a`
+  have hPAd : ‖P₁.comp A₁ - P₂.comp A₂‖ ≤ p * da + dp * a := by
+    have hsplit : P₁.comp A₁ - P₂.comp A₂ = P₁.comp (A₁ - A₂) + (P₁ - P₂).comp A₂ := by
+      rw [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]; abel
+    calc ‖P₁.comp A₁ - P₂.comp A₂‖
+        = ‖P₁.comp (A₁ - A₂) + (P₁ - P₂).comp A₂‖ := by rw [hsplit]
+      _ ≤ ‖P₁.comp (A₁ - A₂)‖ + ‖(P₁ - P₂).comp A₂‖ :=
+          norm_add_le (P₁.comp (A₁ - A₂)) ((P₁ - P₂).comp A₂)
+      _ ≤ ‖P₁‖ * ‖A₁ - A₂‖ + ‖P₁ - P₂‖ * ‖A₂‖ :=
+          add_le_add (ContinuousLinearMap.opNorm_comp_le _ _)
+            (ContinuousLinearMap.opNorm_comp_le _ _)
+      _ ≤ p * da + dp * a := by gcongr
+  -- `‖(P₁ ∘ A₁) h − (P₂ ∘ A₂) h‖ ≤ (p · da + dp · a) · ‖h‖`
+  have hcd : ‖(P₁.comp A₁) h - (P₂.comp A₂) h‖ ≤ (p * da + dp * a) * ‖h‖ := by
+    have hc : (P₁.comp A₁) h - (P₂.comp A₂) h = (P₁.comp A₁ - P₂.comp A₂) h := by
+      rw [ContinuousLinearMap.sub_apply]
+    calc ‖(P₁.comp A₁) h - (P₂.comp A₂) h‖ = ‖(P₁.comp A₁ - P₂.comp A₂) h‖ := by rw [hc]
+      _ ≤ ‖P₁.comp A₁ - P₂.comp A₂‖ * ‖h‖ := ContinuousLinearMap.le_opNorm _ _
+      _ ≤ (p * da + dp * a) * ‖h‖ := by gcongr
+  -- telescope the outer composition
+  have hGsplit : ((P₁.comp A₁) h).comp B₁ - ((P₂.comp A₂) h).comp B₂
+      = ((P₁.comp A₁) h).comp (B₁ - B₂)
+        + ((P₁.comp A₁) h - (P₂.comp A₂) h).comp B₂ := by
+    rw [ContinuousLinearMap.comp_sub, ContinuousLinearMap.sub_comp]; abel
+  have hpa : (0 : ℝ) ≤ p * a * ‖h‖ := by positivity
+  have hpda : (0 : ℝ) ≤ (p * da + dp * a) * ‖h‖ := by positivity
+  calc ‖((P₁.comp A₁) h).comp B₁ - ((P₂.comp A₂) h).comp B₂‖
+      = ‖((P₁.comp A₁) h).comp (B₁ - B₂)
+          + ((P₁.comp A₁) h - (P₂.comp A₂) h).comp B₂‖ := by rw [hGsplit]
+    _ ≤ ‖((P₁.comp A₁) h).comp (B₁ - B₂)‖
+          + ‖((P₁.comp A₁) h - (P₂.comp A₂) h).comp B₂‖ :=
+        norm_add_le (((P₁.comp A₁) h).comp (B₁ - B₂))
+          (((P₁.comp A₁) h - (P₂.comp A₂) h).comp B₂)
+    _ ≤ ‖(P₁.comp A₁) h‖ * ‖B₁ - B₂‖
+          + ‖(P₁.comp A₁) h - (P₂.comp A₂) h‖ * ‖B₂‖ :=
+        add_le_add (ContinuousLinearMap.opNorm_comp_le _ _)
+          (ContinuousLinearMap.opNorm_comp_le _ _)
+    _ ≤ (p * a * ‖h‖) * db + ((p * da + dp * a) * ‖h‖) * b :=
+        add_le_add (mul_le_mul hcnorm hBd (norm_nonneg _) hpa)
+          (mul_le_mul hcd hB₂ (norm_nonneg _) hpda)
+    _ = (dp * a * b + p * da * b + p * a * db) * ‖h‖ := by ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
