@@ -6804,6 +6804,122 @@ theorem affineChartHomeomorph_preimage_frontier_parabolicClosedCylinder
       (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S)),
     affineChartHomeomorph_preimage_parabolicClosedCylinder c a hr T S]
 
+/-! #### The affine chart is a bijection on closures, interiors, and frontiers
+
+Being a homeomorphism, the affine parabolic chart restricts to a `Set.BijOn` between the
+`closure`/`interior`/`frontier` of a source shape about `a` and that of the rescaled target shape
+about `c` (its global injectivity gives the `Set.InjOn`, and the image-transport equalities above
+identify the image).  These bijections are exactly what a *pairwise* Hölder / `C^{0,α}` estimate on
+a topological-boundary domain consumes when transported across the chart. -/
+
+/-- **The affine chart is a bijection between the closures of open parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_closure_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (closure (parabolicBall a ρ))
+      (closure (parabolicBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_closure_parabolicBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the interiors of open parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_interior_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (interior (parabolicBall a ρ))
+      (interior (parabolicBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_interior_parabolicBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the frontiers of open parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_frontier_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (frontier (parabolicBall a ρ))
+      (frontier (parabolicBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_frontier_parabolicBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the closures of closed parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_closure_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (closure (parabolicClosedBall a ρ))
+      (closure (parabolicClosedBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_closure_parabolicClosedBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the interiors of closed parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_interior_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (interior (parabolicClosedBall a ρ))
+      (interior (parabolicClosedBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_interior_parabolicClosedBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the frontiers of closed parabolic balls.** -/
+theorem affineChartHomeomorph_bijOn_frontier_parabolicClosedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (frontier (parabolicClosedBall a ρ))
+      (frontier (parabolicClosedBall c (|r| * ρ))) := by
+  rw [← affineChartHomeomorph_image_frontier_parabolicClosedBall c a hr ρ]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the closures of open parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_closure_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (closure (parabolicCylinder a T S))
+      (closure (parabolicCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_closure_parabolicCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the interiors of open parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_interior_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (interior (parabolicCylinder a T S))
+      (interior (parabolicCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_interior_parabolicCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the frontiers of open parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_frontier_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (frontier (parabolicCylinder a T S))
+      (frontier (parabolicCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_frontier_parabolicCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the closures of closed parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_closure_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (closure (parabolicClosedCylinder a T S))
+      (closure (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_closure_parabolicClosedCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the interiors of closed parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_interior_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (interior (parabolicClosedCylinder a T S))
+      (interior (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_interior_parabolicClosedCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
+/-- **The affine chart is a bijection between the frontiers of closed parabolic cylinders.** -/
+theorem affineChartHomeomorph_bijOn_frontier_parabolicClosedCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (affineChartHomeomorph c a hr) (frontier (parabolicClosedCylinder a T S))
+      (frontier (parabolicClosedCylinder c (r ^ 2 * T) (|r| * S))) := by
+  rw [← affineChartHomeomorph_image_frontier_parabolicClosedCylinder c a hr T S]
+  exact (affineChartHomeomorph c a hr).injective.injOn.bijOn_image
+
 end AnalyticPDE
 end RicciFlow
 
