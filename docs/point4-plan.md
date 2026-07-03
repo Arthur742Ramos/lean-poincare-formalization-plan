@@ -5256,3 +5256,48 @@ the resolvent's resolvent, in the same style as the `C²` numerator
 `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²` with `D₃` the packaged third variation — then the same
 `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge.  Alternatively, connect the now-complete `C²`
 dependence to the manifold gauge-flow consumers of Items 1 & 2 directly.
+
+Update — **the flow map is now `ContDiff ℝ 2` in the initial data** (honest continuous second
+differentiability), together with the honest `C¹` (`ContDiff ℝ 1`) statement and the reusable
+continuity primitives that bridge the earlier *differentiable*-only dependence results to Mathlib's
+`ContDiff` vocabulary (all axioms `propext`/`Classical.choice`/`Quot.sound` only).  The earlier
+`exists_flow_differentiable_of_lipschitz_deriv` / `exists_flow_fderiv_differentiable_of_lipschitz_secondDeriv`
+only produced *differentiable* flow maps; the compact-manifold gauge flow (Item 2) consumes genuine
+`C^k` (a *diffeomorphism* family, whose derivatives must vary continuously), i.e. `ContDiff`.
+
+* `exists_flow_fderiv_continuous_of_lipschitz_deriv`, `exists_flow_contDiff_one_of_lipschitz_deriv` —
+  the **`C¹`-in-initial-data upgrade** (`C^{1,1}` field): one flow family `Φ` whose forward slice
+  `z ↦ Φ z t` is `Differentiable` **and** whose resolvent map `z ↦ fderiv ℝ (fun w => Φ w t) z = D_x Φ_t`
+  is `Continuous` (in fact Lipschitz), hence `ContDiff ℝ 1`.  The resolvent-continuity half is the
+  operator-norm continuous dependence of the resolvent on its coefficient
+  (`norm_fundamentalSolution_sub_le_of_forall_le_Icc`) composed with the Lipschitz-in-base control of
+  the trajectory-linearised coefficient (`norm_derivField_apply_flow_sub_le`).
+* `norm_inhomogVariation_sub_le_of_gap` — **Lipschitz dependence of the inhomogeneous variation on its
+  coefficient and forcing** (allowing the two coefficient fields to differ, unlike
+  `hasDerivAt_inhomogVariation_sub`): `‖V₁ t − V₂ t‖ ≤ (α·N + β)·gronwallBound 0 K 1 (t − t₀)` from a
+  coefficient gap `α`, second-solution bound `N`, forcing gap `β`.  The continuous-dependence primitive
+  behind the second fundamental solution's base-point regularity.
+* `norm_secondDerivField_apply_flow_sub_le` — the **`D²v`-along-flow Lipschitz bound** (second-derivative
+  analogue of `norm_derivField_apply_flow_sub_le`): `‖D²v s (Φ z s) − D²v s (Φ w s)‖ ≤ M·exp(K T)·‖z − w‖`.
+* `norm_fundamentalSolution_baseCurve_sub_le` — the **resolvent Lipschitz-in-base-point** estimate
+  (`‖D_x Φ_t^{A(z)} − D_x Φ_t^{A(w)}‖ ≤ L·exp(K(T−t₀))·‖z−w‖·exp(K(T−t₀))·gronwallBound 0 K 1 (t−t₀)`).
+* `norm_chainRuleForcing_sub_le` — the **perturbation estimate for the chain-rule forcing operator**
+  `((P∘W)h)∘W`: `≤ (dp·w² + 2·p·w·dw)·‖h‖` under `‖P₁‖ ≤ p`, `‖W₁‖,‖W₂‖ ≤ w`, `‖P₁−P₂‖ ≤ dp`,
+  `‖W₁−W₂‖ ≤ dw` (telescoping the composition).  The algebraic core of the forcing gap `β`.
+* `exists_flow_contDiff_two_of_lipschitz_secondDeriv` — **the `ContDiff ℝ 2` assembly** (`C^{2,1}` field):
+  `z ↦ Φ z t` is twice continuously Fréchet differentiable.  The `C¹` bootstrap gives
+  `fderiv ℝ (fun w => Φ w t)` = resolvent; the base-point `C²` bootstrap (replicated with the *packaged*
+  operator `D₂ z` of `exists_continuousLinearMap_linearisedVariation`) gives
+  `fderiv ℝ (fderiv ℝ (fun w => Φ w t)) = D₂`; and the new **continuity of the second fundamental
+  solution** `z ↦ D₂ z` is the Lipschitz bound `‖D₂ z − D₂ z₀‖ ≤ C·‖z − z₀‖`, obtained (for a unit
+  direction `h`, via `D₂ z h − D₂ z₀ h = Vlin^{z,h} t − Vlin^{z₀,h} t`) from
+  `norm_inhomogVariation_sub_le_of_gap` fed the coefficient gap
+  (`norm_derivField_apply_flow_sub_le`), the second-solution bound (`norm_linearisedFirstVariation_le`),
+  and the forcing gap (`norm_chainRuleForcing_sub_le` fed `norm_secondDerivField_apply_flow_sub_le` and
+  `norm_fundamentalSolution_baseCurve_sub_le`).  Packaged via `contDiff_one_iff_fderiv` /
+  `contDiff_succ_iff_fderiv`.
+
+Remaining for the smooth-dependence tower (future sessions): the **`C³` layer** (third-order variational
+analysis of `x₀ ↦ D₂(x₀)`, giving `ContDiff ℝ 3`), and/or the **`ContDiff ℝ 1`/`2` everywhere→jointly
+in `(x, t)`** refinements and connecting the now-`ContDiff` initial-data dependence to the
+manifold gauge-flow consumers of Items 1 & 2.
