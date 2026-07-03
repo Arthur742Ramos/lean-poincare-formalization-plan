@@ -1106,6 +1106,45 @@ theorem fderiv_flow_of_defect_isLittleO
     fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
   (hasFDerivAt_flow_of_defect_isLittleO hA hΦ' h0' hΦ h0 x₀ ht0 hDnn hdefect hDo).fderiv
 
+/-!
+### Toward discharging the defect modulus: the mean-value defect bound
+
+A step toward making `hasFDerivAt_flow_of_defect_isLittleO` *unconditional*: the linearisation
+defect along the flow is bounded by the *oscillation* of the field's spatial derivative on the
+segment joining the two trajectories, times the flow separation — which the exponential
+dependence bound turns into `exp (K |s - t₀|) · ‖z - x₀‖`.  A subsequent Heine–Cantor argument on
+the compact trajectory tube (uniform continuity of `D_x v`) makes the oscillation `C(z) → 0` as
+`z → x₀`, delivering the `o(‖z - x₀‖)` hypothesis. -/
+
+/-- **Defect ≤ (derivative oscillation) × (flow separation).**  If `v s` has spatial derivative
+`Dv s` on the segment `[Φ x₀ s, Φ z s]` with `‖Dv s ξ - A s‖ ≤ C` there, then the mean-value
+inequality bounds the linearisation defect by `C · ‖Φ z s - Φ x₀ s‖`, and the exponential
+initial-data dependence `dist_flow_apply_le` bounds the separation by `exp (K |s - t₀|) · ‖z -
+x₀‖`:
+`‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ C · (exp (K |s - t₀|) · ‖z - x₀‖)`.
+The bridge from `C¹`-regularity of the field to the defect modulus consumed by
+`hasFDerivAt_flow_of_defect_isLittleO`. -/
+theorem norm_flow_defect_le_of_segment_oscillation
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    {A : ℝ → (E →L[ℝ] E)} {Dv : ℝ → E → (E →L[ℝ] E)} {C : ℝ}
+    (x₀ z : E) (s : ℝ)
+    (hderiv : ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      HasFDerivWithinAt (v s) (Dv s ξ) (segment ℝ (Φ x₀ s) (Φ z s)) ξ)
+    (hbound : ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s), ‖Dv s ξ - A s‖ ≤ C) :
+    ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖
+      ≤ C * (Real.exp ((K : ℝ) * |s - t₀|) * ‖z - x₀‖) := by
+  have hC : (0 : ℝ) ≤ C := le_trans (norm_nonneg _) (hbound (Φ x₀ s) (left_mem_segment ℝ _ _))
+  have hmv : ‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ C * ‖Φ z s - Φ x₀ s‖ :=
+    (convex_segment (Φ x₀ s) (Φ z s)).norm_image_sub_le_of_norm_hasFDerivWithin_le'
+      hderiv hbound (left_mem_segment ℝ _ _) (right_mem_segment ℝ _ _)
+  have hsep : ‖Φ z s - Φ x₀ s‖ ≤ ‖z - x₀‖ * Real.exp ((K : ℝ) * |s - t₀|) := by
+    have h := dist_flow_apply_le hv hΦ h0 z x₀ s
+    rwa [dist_eq_norm, dist_eq_norm] at h
+  refine hmv.trans ?_
+  rw [mul_comm (Real.exp ((K : ℝ) * |s - t₀|)) (‖z - x₀‖)]
+  exact mul_le_mul_of_nonneg_left hsep hC
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
