@@ -7850,6 +7850,85 @@ theorem parabolicC0AlphaNorm_le_of_tendsto {X E ι : Type*} [PseudoMetricSpace X
       parabolicC0AlphaNorm α g s ≤ B + H :=
     parabolicC0AlphaNorm_le hB0 hH0 (ParabolicC0AlphaWith.of_tendsto hf hg)
 
+/-- The parabolic Hölder seminorm is invariant under negation (unconditionally: the admissible
+constant sets coincide). -/
+theorem parabolicHolderSeminorm_neg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicHolderSeminorm α (fun z => -u z) s = parabolicHolderSeminorm α u s := by
+  unfold parabolicHolderSeminorm
+  congr 1
+  ext C
+  simp only [Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hC0, h⟩; exact ⟨hC0, by simpa using h.neg⟩
+  · rintro ⟨hC0, h⟩; exact ⟨hC0, h.neg⟩
+
+/-- The parabolic sup norm is invariant under negation. -/
+theorem parabolicSupNorm_neg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicSupNorm (fun z => -u z) s = parabolicSupNorm u s := by
+  unfold parabolicSupNorm
+  congr 1
+  ext B
+  simp only [Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hB0, h⟩; exact ⟨hB0, by simpa using h.neg⟩
+  · rintro ⟨hB0, h⟩; exact ⟨hB0, h.neg⟩
+
+/-- The parabolic `C^{0,α}` norm is invariant under negation. -/
+theorem parabolicC0AlphaNorm_neg {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) :
+    parabolicC0AlphaNorm α (fun z => -u z) s = parabolicC0AlphaNorm α u s := by
+  unfold parabolicC0AlphaNorm
+  rw [parabolicSupNorm_neg, parabolicHolderSeminorm_neg]
+
+/-- The parabolic `C^{0,α}` norm of the zero function is `0`. -/
+theorem parabolicC0AlphaNorm_zero {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (s : Set (ℝ × X)) :
+    parabolicC0AlphaNorm α (fun _ : ℝ × X => (0 : E)) s = 0 := by
+  unfold parabolicC0AlphaNorm
+  rw [parabolicSupNorm_zero, parabolicHolderSeminorm_zero, add_zero]
+
+/-- Triangle inequality for the parabolic Hölder seminorm of a difference. -/
+theorem parabolicHolderSeminorm_sub_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicHolderOn α u s) (hv : ParabolicHolderOn α v s) :
+    parabolicHolderSeminorm α (fun z => u z - v z) s
+      ≤ parabolicHolderSeminorm α u s + parabolicHolderSeminorm α v s :=
+  parabolicHolderSeminorm_le
+    (add_nonneg (parabolicHolderSeminorm_nonneg α u s) (parabolicHolderSeminorm_nonneg α v s))
+    ((parabolicHolderWith_parabolicHolderSeminorm hu).sub
+      (parabolicHolderWith_parabolicHolderSeminorm hv))
+
+/-- Triangle inequality for the parabolic sup norm of a difference. -/
+theorem parabolicSupNorm_sub_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s)
+    (hv : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B v s) :
+    parabolicSupNorm (fun z => u z - v z) s ≤ parabolicSupNorm u s + parabolicSupNorm v s :=
+  parabolicSupNorm_le
+    (add_nonneg (parabolicSupNorm_nonneg u s) (parabolicSupNorm_nonneg v s))
+    ((parabolicBoundedWith_parabolicSupNorm hu).sub
+      (parabolicBoundedWith_parabolicSupNorm hv))
+
+/-- Triangle inequality for the parabolic `C^{0,α}` norm of a difference: the distance form of the
+norm subadditivity, used to compare two parabolic `C^{0,α}` functions. -/
+theorem parabolicC0AlphaNorm_sub_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicC0AlphaNorm α (fun z => u z - v z) s
+      ≤ parabolicC0AlphaNorm α u s + parabolicC0AlphaNorm α v s := by
+  obtain ⟨Bu, hBu0, Hu, hHu0, hbu, hhu⟩ := hu
+  obtain ⟨Bv, hBv0, Hv, hHv0, hbv, hhv⟩ := hv
+  have hsup : parabolicSupNorm (fun z => u z - v z) s
+      ≤ parabolicSupNorm u s + parabolicSupNorm v s :=
+    parabolicSupNorm_sub_le ⟨Bu, hBu0, hbu⟩ ⟨Bv, hBv0, hbv⟩
+  have hhol : parabolicHolderSeminorm α (fun z => u z - v z) s
+      ≤ parabolicHolderSeminorm α u s + parabolicHolderSeminorm α v s :=
+    parabolicHolderSeminorm_sub_le ⟨Hu, hHu0, hhu⟩ ⟨Hv, hHv0, hhv⟩
+  simp only [parabolicC0AlphaNorm]
+  linarith
+
 end AnalyticPDE
 end RicciFlow
 
