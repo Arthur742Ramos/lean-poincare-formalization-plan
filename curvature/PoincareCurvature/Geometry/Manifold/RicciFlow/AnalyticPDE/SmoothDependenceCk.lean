@@ -4947,6 +4947,76 @@ theorem norm_fundamentalSolution_sub_sub_linearVariation_le_sq
   refine (norm_add_le _ _).trans ((add_le_add hp1' hp2'').trans_eq ?_)
   ring
 
+/-- **Additivity of the linearised first variation in the direction.**  The linearised first
+variation `Vlin^h` (the anchored solution of `V' = A₀ ∘ V + (∂A₀/∂x₀ · h) ∘ W₀`, `V t₀ = 0`, with the
+chain-rule forcing `∂A₀/∂x₀ · h = (D²v(Φ x₀ s) ∘ W₀) h` for the base direction `h`) is *additive* in
+`h`: `Vlin^{h₁ + h₂} t = Vlin^{h₁} t + Vlin^{h₂} t`.  This is the additive half of packaging the
+candidate spatial `C²` derivative `h ↦ Vlin^h t` as a bounded linear map.  Proof: the forcing
+`(D²v(Φ x₀ s) ∘ W₀)` is a *bounded linear map* of `h`, so its value at `h₁ + h₂` splits (`map_add`);
+the first-variation additivity `firstVariation_perturbation_add_eq` then pins `Vlin^{h₁+h₂}` to the
+sum. -/
+theorem linearVariation_perturbation_add_eq
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (h₁ h₂ : E) {V₁ V₂ V₁₂ : ℝ → (E →L[ℝ] E)}
+    (hV₁ : ∀ s, HasDerivAt V₁ ((Dv s (Φ x₀ s)).comp (V₁ s)
+      + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h₁).comp
+          (fundamentalSolution hA hΦ' h0' s)) s)
+    (hV₂ : ∀ s, HasDerivAt V₂ ((Dv s (Φ x₀ s)).comp (V₂ s)
+      + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h₂).comp
+          (fundamentalSolution hA hΦ' h0' s)) s)
+    (hV₁₂ : ∀ s, HasDerivAt V₁₂ ((Dv s (Φ x₀ s)).comp (V₁₂ s)
+      + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (h₁ + h₂)).comp
+          (fundamentalSolution hA hΦ' h0' s)) s)
+    (hV₁0 : V₁ t₀ = 0) (hV₂0 : V₂ t₀ = 0) (hV₁₂0 : V₁₂ t₀ = 0)
+    (t : ℝ) : V₁₂ t = V₁ t + V₂ t := by
+  have hV₁₂' : ∀ s, HasDerivAt V₁₂ ((Dv s (Φ x₀ s)).comp (V₁₂ s)
+      + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h₁)
+          + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h₂)).comp
+          (fundamentalSolution hA hΦ' h0' s)) s := by
+    intro s
+    have hmap : (D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (h₁ + h₂)
+        = (D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h₁
+          + (D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h₂ :=
+      map_add _ h₁ h₂
+    have := hV₁₂ s
+    rwa [hmap] at this
+  exact firstVariation_perturbation_add_eq hA hV₁ hV₂ hV₁₂' hV₁0 hV₂0 hV₁₂0 t
+
+/-- **Homogeneity of the linearised first variation in the direction.**  The linearised first
+variation `Vlin^h` is *homogeneous* in `h`: `Vlin^{c • h} t = c • Vlin^h t`.  This is the homogeneous
+half of packaging the candidate spatial `C²` derivative `h ↦ Vlin^h t` as a bounded linear map.
+Proof: the chain-rule forcing `(D²v(Φ x₀ s) ∘ W₀)` is linear, so its value at `c • h` scales
+(`map_smul`); the first-variation homogeneity `firstVariation_perturbation_smul_eq` closes it. -/
+theorem linearVariation_perturbation_smul_eq
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (c : ℝ) (h : E) {V Vc : ℝ → (E →L[ℝ] E)}
+    (hV : ∀ s, HasDerivAt V ((Dv s (Φ x₀ s)).comp (V s)
+      + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp
+          (fundamentalSolution hA hΦ' h0' s)) s)
+    (hVc : ∀ s, HasDerivAt Vc ((Dv s (Φ x₀ s)).comp (Vc s)
+      + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (c • h)).comp
+          (fundamentalSolution hA hΦ' h0' s)) s)
+    (hV0 : V t₀ = 0) (hVc0 : Vc t₀ = 0)
+    (t : ℝ) : Vc t = c • V t := by
+  have hVc' : ∀ s, HasDerivAt Vc ((Dv s (Φ x₀ s)).comp (Vc s)
+      + (c • ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h)).comp
+          (fundamentalSolution hA hΦ' h0' s)) s := by
+    intro s
+    have hmap : (D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) (c • h)
+        = c • ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h) :=
+      map_smul _ c h
+    have := hVc s
+    rwa [hmap] at this
+  exact firstVariation_perturbation_smul_eq c hA hV hVc' hV0 hVc0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
