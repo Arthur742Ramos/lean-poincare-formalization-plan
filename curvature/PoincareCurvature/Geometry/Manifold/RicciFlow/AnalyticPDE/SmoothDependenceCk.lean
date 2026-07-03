@@ -174,6 +174,48 @@ theorem lipschitzWith_flow_apply_of_abs_le
   have hxy := dist_le_of_isIntegralCurve_of_abs_le hv (hΦ x) (hΦ y) hT
   rwa [h0 x, h0 y] at hxy
 
+/-- **Joint continuity of the flow.**  For a flow family `Φ` of the uniformly
+`K`-Lipschitz field `v` anchored at `Φ x t₀ = x`, the map `(t, x) ↦ Φ x t` is jointly
+continuous on `ℝ × E`.  Continuity in the initial value is uniform (Lipschitz with the
+exponential constant) and continuity in time comes from each curve being an integral
+curve; the two combine by a triangle-inequality squeeze. -/
+theorem continuous_flow
+    (hv : ∀ t, LipschitzWith K (v t)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v)
+    (h0 : ∀ x, Φ x t₀ = x) :
+    Continuous (fun p : ℝ × E => Φ p.2 p.1) := by
+  rw [continuous_iff_continuousAt]
+  rintro ⟨t₁, x₁⟩
+  have key : Filter.Tendsto (fun p : ℝ × E => dist (Φ p.2 p.1) (Φ x₁ t₁))
+      (nhds (t₁, x₁)) (nhds 0) := by
+    refine squeeze_zero (fun p => dist_nonneg) (g := fun p : ℝ × E =>
+        dist p.2 x₁ * Real.exp ((K : ℝ) * |p.1 - t₀|) + dist (Φ x₁ p.1) (Φ x₁ t₁))
+        (fun p => ?_) ?_
+    · calc dist (Φ p.2 p.1) (Φ x₁ t₁)
+          ≤ dist (Φ p.2 p.1) (Φ x₁ p.1) + dist (Φ x₁ p.1) (Φ x₁ t₁) := dist_triangle _ _ _
+        _ ≤ dist p.2 x₁ * Real.exp ((K : ℝ) * |p.1 - t₀|) + dist (Φ x₁ p.1) (Φ x₁ t₁) := by
+            gcongr
+            exact dist_flow_apply_le hv hΦ h0 p.2 x₁ p.1
+    · have hd : Filter.Tendsto (fun p : ℝ × E => dist p.2 x₁) (nhds (t₁, x₁)) (nhds 0) := by
+        have hcont : Continuous (fun p : ℝ × E => dist p.2 x₁) :=
+          continuous_snd.dist continuous_const
+        simpa using hcont.tendsto (t₁, x₁)
+      have he : Filter.Tendsto (fun p : ℝ × E => Real.exp ((K : ℝ) * |p.1 - t₀|))
+          (nhds (t₁, x₁)) (nhds (Real.exp ((K : ℝ) * |t₁ - t₀|))) := by
+        have hcont : Continuous (fun p : ℝ × E => Real.exp ((K : ℝ) * |p.1 - t₀|)) :=
+          Real.continuous_exp.comp
+            (continuous_const.mul (continuous_fst.sub continuous_const).abs)
+        simpa using hcont.tendsto (t₁, x₁)
+      have hB2 : Filter.Tendsto (fun p : ℝ × E => dist (Φ x₁ p.1) (Φ x₁ t₁))
+          (nhds (t₁, x₁)) (nhds 0) := by
+        have hcont : Continuous (fun p : ℝ × E => dist (Φ x₁ p.1) (Φ x₁ t₁)) :=
+          ((hΦ x₁).continuous.comp continuous_fst).dist continuous_const
+        simpa using hcont.tendsto (t₁, x₁)
+      have hB1 := hd.mul he
+      simpa using (hB1.add hB2)
+  have hiff := tendsto_iff_dist_tendsto_zero (a := Φ x₁ t₁)
+    (f := fun p : ℝ × E => Φ p.2 p.1) (x := nhds (t₁, x₁))
+  exact hiff.mpr key
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
