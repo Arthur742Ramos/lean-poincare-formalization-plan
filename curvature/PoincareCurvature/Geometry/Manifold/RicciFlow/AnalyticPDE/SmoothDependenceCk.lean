@@ -5017,6 +5017,78 @@ theorem linearVariation_perturbation_smul_eq
     rwa [hmap] at this
   exact firstVariation_perturbation_smul_eq c hA hV hVc' hV0 hVc0 t
 
+/-!
+### Existence of the first variation for a *time-unbounded* (locally bounded) forcing
+
+The base-point `C²` bootstrap needs the true / linearised first variations `Vz`, `Vlin` whose
+forcings — `(A_z − A₀) ∘ W₀`, `(D²v(Φ x₀ s) ∘ W₀ · h) ∘ W₀` — are only *continuous*, growing like
+`exp (K |s − t₀|)` in `s` and hence never globally norm-bounded.  The globally-bounded existence
+`exists_hasDerivAt_inhomogVariation` (whose homogenised `augmentedVariationalField` folds `F` into the
+state via a scalar coordinate, forcing `‖F s‖ ≤ M`) therefore does not apply.
+
+The key observation is that the **direct** inhomogeneous variation field
+`inhomogVariationalField A F s W = (A s) ∘ W + F s` is *uniformly* `K`-Lipschitz *in the state* `W`
+whenever `A` is globally `K`-bounded — the forcing `F s` cancels in the state-difference
+`g s W₁ − g s W₂ = (A s) ∘ (W₁ − W₂)`, so its (possibly unbounded) size never enters the Lipschitz
+constant.  Global existence of `V` with `V t₀ = 0`, `V' = A ∘ V + F` therefore follows *directly*
+from the uniform-Lipschitz global existence `exists_isIntegralCurve_of_lipschitzWith` — no augmented
+scalar coordinate, no truncation, no global bound on `F`. -/
+
+/-- The **direct inhomogeneous variation field** `W ↦ (A t) ∘ W + F t` on `E →L[ℝ] E`, whose integral
+curves solve the inhomogeneous variational ODE `V' = A ∘ V + F`.  (Compare `variationalField`, the
+homogeneous `F = 0` case.) -/
+def inhomogVariationalField (A F : ℝ → (E →L[ℝ] E)) :
+    ℝ → (E →L[ℝ] E) → (E →L[ℝ] E) :=
+  fun t W => (A t).comp W + F t
+
+/-- **The direct inhomogeneous variation field is `K`-Lipschitz in the state**, with `K` the operator
+bound of `A` alone — *independently of the size of the forcing* `F`.  The forcing is a state-constant
+translation, so it cancels in the state-difference `(A t) ∘ W₁ + F t − ((A t) ∘ W₂ + F t) =
+(A t) ∘ (W₁ − W₂)`; submultiplicativity then gives `≤ ‖A t‖ ‖W₁ − W₂‖ ≤ K ‖W₁ − W₂‖`.  This is what
+lets a *time-unbounded* (but continuous) forcing still feed the uniform-Lipschitz global existence. -/
+theorem lipschitzWith_inhomogVariationalField {A F : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (t : ℝ) :
+    LipschitzWith K (inhomogVariationalField A F t) := by
+  refine LipschitzWith.of_dist_le_mul fun W₁ W₂ => ?_
+  simp only [inhomogVariationalField, dist_eq_norm]
+  have hsub : (A t).comp W₁ + F t - ((A t).comp W₂ + F t) = (A t).comp (W₁ - W₂) := by
+    rw [ContinuousLinearMap.comp_sub]; abel
+  rw [hsub]
+  calc ‖(A t).comp (W₁ - W₂)‖
+      ≤ ‖A t‖ * ‖W₁ - W₂‖ := ContinuousLinearMap.opNorm_comp_le _ _
+    _ ≤ (K : ℝ) * ‖W₁ - W₂‖ := by
+        gcongr
+        exact_mod_cast hA t
+
+/-- **Existence of the first variation for a merely-continuous (time-unbounded) forcing.**  For a
+norm-bounded (`‖A s‖₊ ≤ K`), continuous operator path `A` and *any* continuous forcing
+`F : ℝ → (E →L[ℝ] E)` — **no global bound on `F` required** — the anchored inhomogeneous variational
+ODE `V' = A ∘ V + F`, `V t₀ = 0` has a global solution `V`.
+
+Proof: the direct field `inhomogVariationalField A F` is uniformly `K`-Lipschitz in the state
+(`lipschitzWith_inhomogVariationalField`, the forcing cancels) and continuous in time
+(`s ↦ (A s) ∘ W + F s` via `Continuous.clm_comp` + `Continuous.add`), so — the operator space
+`E →L[ℝ] E` being complete (`E` complete) — the uniform-Lipschitz global existence
+`exists_isIntegralCurve_of_lipschitzWith` supplies an integral curve `V` through `(t₀, 0)`, i.e.
+`∀ s, HasDerivAt V ((A s) ∘ V s + F s) s`.  This is the piece the globally-bounded
+`exists_hasDerivAt_inhomogVariation` could not supply — the existence half of the *time-unbounded*
+first variations `Vz`, `Vlin` that the base-point `C²` bootstrap consumes. -/
+theorem exists_hasDerivAt_inhomogVariation_of_continuous [CompleteSpace E]
+    {A F : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) (hAc : Continuous A) (hFc : Continuous F) (t₀ : ℝ) :
+    ∃ V : ℝ → (E →L[ℝ] E), V t₀ = 0 ∧
+      ∀ s, HasDerivAt V ((A s).comp (V s) + F s) s := by
+  have hlip : ∀ s, LipschitzWith K (inhomogVariationalField A F s) :=
+    fun s => lipschitzWith_inhomogVariationalField hA s
+  have hcont : ∀ W : E →L[ℝ] E, Continuous fun s => inhomogVariationalField A F s W := by
+    intro W
+    show Continuous fun s => (A s).comp W + F s
+    exact (hAc.clm_comp continuous_const).add hFc
+  obtain ⟨V, hV0, hVcurve⟩ :=
+    exists_isIntegralCurve_of_lipschitzWith hlip hcont t₀ (0 : E →L[ℝ] E)
+  refine ⟨V, hV0, fun s => ?_⟩
+  simpa only [inhomogVariationalField] using hVcurve s
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
