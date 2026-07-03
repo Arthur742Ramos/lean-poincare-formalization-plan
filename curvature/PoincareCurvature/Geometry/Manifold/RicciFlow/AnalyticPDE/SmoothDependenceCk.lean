@@ -7526,6 +7526,65 @@ theorem norm_secondFundamentalSolution_op_sub_le [CompleteSpace E]
     hC'0 hC'z hC'x hΦ₁ h1 hΦ₂ h2 h hVzd hVz0 hVxd hVx0 ht).trans (le_of_eq ?_)
   ring
 
+/-- **Existence of the second-order (third) variation with the coefficient-variation leading term** —
+the *design-corrected* `D₃`-solution existence, resolving the plan's open forcing-gap design question.
+
+The packaged forcing of `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv` is
+`F_A + F_B + F_C`.  Differentiating the second-variation ODE `V' = A₀ ∘ V + ((D²v ∘ W) h) ∘ W` in the
+base point (direction `k`) produces, *in addition*, the **coefficient-variation leading term**
+`(D²v[W k]) ∘ V₀`.  Indeed `∂_k(A₀ ∘ V₀) = (∂_k A₀) ∘ V₀ + A₀ ∘ (∂_k V₀)`: the second summand is the
+homogeneous `A₀ ∘ V` of the new unknown, while the first is `∂_k A₀ = D²v[W k]` (the chain rule
+`∂_k[Dv(·, Φ(x₀, ·))] = D²v[∂_k Φ] = D²v[W k]`) composed with the reference `h`-direction second
+fundamental solution curve `V₀`.  This term is *not* among `F_A`, `F_B`, `F_C` (which arise only from
+differentiating the *forcing* `((D²v ∘ W) h) ∘ W`), and it is exactly the operator isolated by
+`norm_coeffVariation_sub_secondDerivComp_le_sq` as the first-order-in-`k` part of `(A₁ − A₀) ∘ V₁`
+(with `k = z − x₀`, `V₀ = Vx`).  Including it in `F₃` is precisely what makes the second-order Taylor
+remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖` genuinely `O(‖z − x₀‖²)`; no `D²v`-symmetry hypothesis is
+required — the plan's open forcing-gap design question resolves in favour of the extra summand.
+
+Given the reference base point `x₀`, resolvent `W = fundamentalSolution hA hΦ' h0'`, continuous second
+fundamental solution curve `W₂` in direction `k`, and continuous `h`-direction second fundamental
+solution curve `V₀`, the corrected third-variation ODE
+`V' = A₀ ∘ V + (F_A + F_B + ((D²v[W k]) ∘ V₀ + F_C))`, `V t₀ = 0` has a global solution `V`.  Proof:
+specialise `exists_hasDerivAt_secondVariation_linearised_dir` with the abstract `F₃` slot instantiated
+to the sum of the coefficient-variation term (continuity by `clm_comp`/`clm_apply`, mirroring the `F_B`
+continuity) and the third-derivative term `F_C` (`continuous_thirdDerivForcing`). -/
+theorem exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E} {K : ℝ≥0}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    (hD3cont : Continuous (fun s => D3v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {W2 : ℝ → (E →L[ℝ] E)} (hW2 : Continuous W2)
+    {V0 : ℝ → (E →L[ℝ] E)} (hV0 : Continuous V0)
+    (k h : E) :
+    ∃ V : ℝ → (E →L[ℝ] E), V t₀ = 0 ∧
+      ∀ s, HasDerivAt V
+        ((Dv s (Φ x₀ s)).comp (V s)
+          + (((D2v s (Φ x₀ s)).comp (W2 s) h).comp (fundamentalSolution hA hΦ' h0' s)
+             + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp (W2 s)
+             + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) k).comp (V0 s)
+                + (continuousMultilinearCurryFin1 ℝ E E
+                    (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+                      (fundamentalSolution hA hΦ' h0' s h))).comp
+                    (fundamentalSolution hA hΦ' h0' s)))) s := by
+  have hW : Continuous (fun s => fundamentalSolution hA hΦ' h0' s) :=
+    continuous_fundamentalSolution_time hA hΦ' h0'
+  have hLead : Continuous fun s =>
+      ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) k).comp (V0 s) :=
+    ((hD2cont.clm_comp hW).clm_apply continuous_const).clm_comp hV0
+  have hF3 : Continuous fun s =>
+      ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) k).comp (V0 s)
+      + (continuousMultilinearCurryFin1 ℝ E E
+          (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hA hΦ' h0' s k)).curryLeft
+            (fundamentalSolution hA hΦ' h0' s h))).comp (fundamentalSolution hA hΦ' h0' s) :=
+    hLead.add (continuous_thirdDerivForcing hD3cont hW k h)
+  exact exists_hasDerivAt_secondVariation_linearised_dir x₀ hA hAcont hD2cont hΦ' h0' hW2 hF3 h
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
