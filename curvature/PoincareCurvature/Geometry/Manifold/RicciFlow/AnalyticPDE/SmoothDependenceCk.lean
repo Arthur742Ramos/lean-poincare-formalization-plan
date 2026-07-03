@@ -3128,6 +3128,69 @@ theorem inhomogVariation_eq_zero_of_forcing_zero {A F V : ℝ → (E →L[ℝ] E
   have hfin := inhomogVariation_unique hA hVderiv hZderiv hV0 t
   exact hfin
 
+/-- **Superposition (subtraction) for the inhomogeneous variational ODE.**  If `V₁` solves
+`V₁' = A ∘ V₁ + F₁` and `V₂` solves `V₂' = A ∘ V₂ + F₂`, then their difference solves the ODE with
+the subtracted forcing, `(V₁ - V₂)' = A ∘ (V₁ - V₂) + (F₁ - F₂)`.  (Linearity of the operator ODE;
+`comp_sub`.) -/
+theorem hasDerivAt_inhomogVariation_sub {A F₁ F₂ V₁ V₂ : ℝ → (E →L[ℝ] E)}
+    (hV₁ : ∀ s, HasDerivAt V₁ ((A s).comp (V₁ s) + F₁ s) s)
+    (hV₂ : ∀ s, HasDerivAt V₂ ((A s).comp (V₂ s) + F₂ s) s)
+    (s : ℝ) :
+    HasDerivAt (fun r => V₁ r - V₂ r)
+      ((A s).comp (V₁ s - V₂ s) + (F₁ s - F₂ s)) s := by
+  have h := (hV₁ s).sub (hV₂ s)
+  have heq : (A s).comp (V₁ s) + F₁ s - ((A s).comp (V₂ s) + F₂ s)
+      = (A s).comp (V₁ s - V₂ s) + (F₁ s - F₂ s) := by
+    rw [ContinuousLinearMap.comp_sub]; abel
+  rwa [heq] at h
+
+/-- **The first variation is subtractive in the coefficient perturbation.**  With a fixed background
+resolvent `W`, if `V₁` is the first variation for perturbation `B₁` and `V₂` for `B₂`, their
+difference `V₁ - V₂` is the first variation for `B₁ - B₂`:
+`(V₁ - V₂)' = A₂ ∘ (V₁ - V₂) + (B₁ - B₂) ∘ W`.  (Superposition `hasDerivAt_inhomogVariation_sub`
+composed with linearity of `B ↦ B ∘ W`, `sub_comp`.)  This is the differential input to the Lipschitz
+dependence of the first variation on the perturbation. -/
+theorem hasDerivAt_firstVariation_perturbation_sub
+    {A₂ W B₁ B₂ V₁ V₂ : ℝ → (E →L[ℝ] E)}
+    (hV₁ : ∀ s, HasDerivAt V₁ ((A₂ s).comp (V₁ s) + (B₁ s).comp (W s)) s)
+    (hV₂ : ∀ s, HasDerivAt V₂ ((A₂ s).comp (V₂ s) + (B₂ s).comp (W s)) s)
+    (s : ℝ) :
+    HasDerivAt (fun r => V₁ r - V₂ r)
+      ((A₂ s).comp (V₁ s - V₂ s) + (B₁ s - B₂ s).comp (W s)) s := by
+  have h := hasDerivAt_inhomogVariation_sub hV₁ hV₂ s
+  rwa [← ContinuousLinearMap.sub_comp] at h
+
+/-- **Lipschitz dependence of the first variation on the coefficient perturbation.**  With a fixed
+background resolvent `W` bounded by `C` on `[t₀, T]` (`‖W s‖ ≤ C`), the first variation depends
+Lipschitz-continuously on the perturbation: if `V₁`, `V₂` are the (anchored) first variations for
+perturbations `B₁`, `B₂` with `‖B₁ s - B₂ s‖ ≤ ε`, then
+`‖V₁ t - V₂ t‖ ≤ (ε · C) · gronwallBound 0 K 1 (t - t₀)` on `[t₀, T]`.  Proof: `V₁ - V₂` is the first
+variation for `B₁ - B₂` (`hasDerivAt_firstVariation_perturbation_sub`) with forcing bounded by
+`‖(B₁ - B₂) ∘ W‖ ≤ ε · C`, and the general a-priori bound `norm_inhomogVariation_le` closes it.
+Taking `ε → 0` this is the *continuity* of the Gateaux-derivative map `perturbation ↦ V`; together
+with additivity/homogeneity (`hasDerivAt_firstVariation_perturbation_add/smul`) it exhibits the first
+variation as a genuinely *bounded linear* map of the coefficient perturbation — the honest
+Gateaux/Fréchet derivative of the resolvent `A ↦ D_x Φ_t`. -/
+theorem norm_firstVariation_perturbation_sub_le
+    {A₂ W B₁ B₂ V₁ V₂ : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA₂ : ∀ s, ‖A₂ s‖₊ ≤ K)
+    (hV₁ : ∀ s, HasDerivAt V₁ ((A₂ s).comp (V₁ s) + (B₁ s).comp (W s)) s)
+    (hV₂ : ∀ s, HasDerivAt V₂ ((A₂ s).comp (V₂ s) + (B₂ s).comp (W s)) s)
+    (hV₁0 : V₁ t₀ = 0) (hV₂0 : V₂ t₀ = 0)
+    {ε C T : ℝ} (hε : 0 ≤ ε)
+    (hB : ∀ s ∈ Set.Icc t₀ T, ‖B₁ s - B₂ s‖ ≤ ε)
+    (hW : ∀ s ∈ Set.Icc t₀ T, ‖W s‖ ≤ C)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ‖V₁ t - V₂ t‖ ≤ (ε * C) * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  have hDderiv := hasDerivAt_firstVariation_perturbation_sub hV₁ hV₂
+  have hD0 : (fun r => V₁ r - V₂ r) t₀ = 0 := by simp [hV₁0, hV₂0]
+  have hFbound : ∀ s ∈ Set.Icc t₀ T, ‖(B₁ s - B₂ s).comp (W s)‖ ≤ ε * C := by
+    intro s hs
+    calc ‖(B₁ s - B₂ s).comp (W s)‖
+        ≤ ‖B₁ s - B₂ s‖ * ‖W s‖ := ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ ε * C := mul_le_mul (hB s hs) (hW s hs) (norm_nonneg _) hε
+  exact norm_inhomogVariation_le hA₂ hDderiv hD0 hFbound ht
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
