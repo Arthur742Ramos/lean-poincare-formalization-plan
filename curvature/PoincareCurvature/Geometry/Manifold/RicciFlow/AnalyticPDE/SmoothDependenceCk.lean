@@ -3923,6 +3923,95 @@ theorem exists_isIntegralCurveOn_Icc_of_lipschitzWith_containing [CompleteSpace 
     rw [if_pos le_rfl]; exact hγb0
   · exact isIntegralCurveOn_glue_Icc ha hb hγbon hγfon hmatch
 
+/-- **Interval uniqueness of integral curves.**  Two integral curves of a uniformly (in time)
+`K`-Lipschitz vector field on a compact interval `Icc a b` that agree at a single *interior* point
+`t₁ ∈ Ioo a b` agree on all of `Icc a b`.  This is Mathlib's Grönwall ODE uniqueness
+(`ODE_solution_unique_of_mem_Icc`, with the trivial state constraint `s ≡ univ`): the `IsIntegralCurveOn`
+within-interval derivatives upgrade to genuine `HasDerivAt` on the open interior (where `Icc a b` is a
+neighbourhood), and `IsIntegralCurveOn.continuousOn` supplies the endpoint continuity.  It is the tool
+that reconciles the per-window compact-interval solutions into a single global integral curve. -/
+theorem eqOn_of_isIntegralCurveOn_Icc
+    {v : ℝ → E → E} {K : ℝ≥0} (hlip : ∀ t, LipschitzWith K (v t))
+    {a b t₁ : ℝ} (ht₁ : t₁ ∈ Set.Ioo a b) {γ₁ γ₂ : ℝ → E}
+    (h₁ : IsIntegralCurveOn γ₁ v (Set.Icc a b)) (h₂ : IsIntegralCurveOn γ₂ v (Set.Icc a b))
+    (heq : γ₁ t₁ = γ₂ t₁) : Set.EqOn γ₁ γ₂ (Set.Icc a b) :=
+  ODE_solution_unique_of_mem_Icc (s := fun _ => Set.univ)
+    (fun t _ => (hlip t).lipschitzOnWith) ht₁
+    h₁.continuousOn
+    (fun t ht => (h₁ t (Set.Ioo_subset_Icc_self ht)).hasDerivAt (Icc_mem_nhds ht.1 ht.2))
+    (fun _ _ => Set.mem_univ _)
+    h₂.continuousOn
+    (fun t ht => (h₂ t (Set.Ioo_subset_Icc_self ht)).hasDerivAt (Icc_mem_nhds ht.1 ht.2))
+    (fun _ _ => Set.mem_univ _) heq
+
+/-- **Global existence of an integral curve (globally Lipschitz field).**  A vector field on a
+complete real Banach space that is uniformly (in time) `K`-Lipschitz in state and continuous in time
+admits, through any anchor `(t₀, x₀)`, a *global* integral curve `γ` (a genuine two-sided
+`HasDerivAt` at every time).  This is the capstone of the existence tower for a globally Lipschitz
+field: such fields never blow up in finite time, so their trajectories extend to all of `ℝ`.
+
+Assembly: `exists_isIntegralCurveOn_Icc_of_lipschitzWith_containing` supplies, for each `n`, a solution
+`Γ n` on the window `Icc (t₀ - (n+1)) (t₀ + (n+1))` through `x₀`.  By interval uniqueness
+(`eqOn_of_isIntegralCurveOn_Icc`) these windows agree on overlaps, so the pointwise-selected curve
+`γ t = Γ ⌊|t - t₀|⌋₊ t` (choosing the smallest window whose interior contains `t`) is unambiguous, and
+on every symmetric compact interval `Icc (t₀ - m) (t₀ + m)` it coincides with the single solution
+`Γ m`.  The countable-exhaustion lemma `isIntegralCurve_of_forall_mem_Icc` then upgrades this to a
+global integral curve.  Feeding the augmented field `augmentedVariationalField A F` (uniformly
+Lipschitz by `lipschitzWith_augmentedVariationalField`) into this result discharges the flow-existence
+hypothesis of `hasDerivAt_inhomogVariation_of_augmented`, delivering the first variation. -/
+theorem exists_isIntegralCurve_of_lipschitzWith [CompleteSpace E]
+    {v : ℝ → E → E} {K : ℝ≥0}
+    (hlip : ∀ t, LipschitzWith K (v t)) (hcont : ∀ x, Continuous fun t => v t x)
+    (t₀ : ℝ) (x₀ : E) :
+    ∃ γ : ℝ → E, γ t₀ = x₀ ∧ IsIntegralCurve γ v := by
+  -- a solution on every symmetric window strictly containing the anchor
+  have hex : ∀ n : ℕ, ∃ γ : ℝ → E, γ t₀ = x₀ ∧
+      IsIntegralCurveOn γ v (Set.Icc (t₀ - ((n : ℝ) + 1)) (t₀ + ((n : ℝ) + 1))) := by
+    intro n
+    have hn0 : (0 : ℝ) ≤ (n : ℝ) + 1 := by positivity
+    exact exists_isIntegralCurveOn_Icc_of_lipschitzWith_containing hlip hcont t₀ x₀
+      (by linarith) (by linarith)
+  choose Γ hΓ0 hΓon using hex
+  set γ : ℝ → E := fun t => Γ ⌊|t - t₀|⌋₊ t with hγ_def
+  -- windows agree: on the interior of window `k`, the selection equals `Γ m` whenever `k ≤ m`
+  have hglobal_eq : ∀ (m : ℕ) (t : ℝ), |t - t₀| < (m : ℝ) + 1 → Γ ⌊|t - t₀|⌋₊ t = Γ m t := by
+    intro m t htm
+    set k := ⌊|t - t₀|⌋₊ with hk_def
+    have hkm : k ≤ m := by
+      have h1 : k < m + 1 := by
+        rw [hk_def, Nat.floor_lt (abs_nonneg _)]; exact_mod_cast htm
+      omega
+    have hkmR : (k : ℝ) ≤ (m : ℝ) := by exact_mod_cast hkm
+    have hltk : |t - t₀| < (k : ℝ) + 1 := by rw [hk_def]; exact Nat.lt_floor_add_one _
+    have htk : t ∈ Set.Ioo (t₀ - ((k : ℝ) + 1)) (t₀ + ((k : ℝ) + 1)) := by
+      rw [Set.mem_Ioo]; rw [abs_lt] at hltk; constructor <;> linarith
+    have ht₀int : t₀ ∈ Set.Ioo (t₀ - ((k : ℝ) + 1)) (t₀ + ((k : ℝ) + 1)) := by
+      rw [Set.mem_Ioo]; have := Nat.cast_nonneg (α := ℝ) k; constructor <;> linarith
+    have hmsub : Set.Icc (t₀ - ((k : ℝ) + 1)) (t₀ + ((k : ℝ) + 1)) ⊆
+        Set.Icc (t₀ - ((m : ℝ) + 1)) (t₀ + ((m : ℝ) + 1)) :=
+      Set.Icc_subset_Icc (by linarith) (by linarith)
+    have huniq : Set.EqOn (Γ k) (Γ m) (Set.Icc (t₀ - ((k : ℝ) + 1)) (t₀ + ((k : ℝ) + 1))) :=
+      eqOn_of_isIntegralCurveOn_Icc hlip ht₀int (hΓon k) ((hΓon m).mono hmsub)
+        (by rw [hΓ0 k, hΓ0 m])
+    exact huniq (Set.Ioo_subset_Icc_self htk)
+  refine ⟨γ, ?_, ?_⟩
+  · show Γ ⌊|t₀ - t₀|⌋₊ t₀ = x₀
+    simp only [sub_self, abs_zero, Nat.floor_zero]
+    exact hΓ0 0
+  · apply isIntegralCurve_of_forall_mem_Icc
+    intro m t ht
+    have htmem : |t - t₀| < (m : ℝ) + 1 := by
+      rw [Set.mem_Icc] at ht; rw [abs_lt]; constructor <;> linarith
+    have hgt : γ t = Γ m t := hglobal_eq m t htmem
+    rw [hgt]
+    have hmsub2 : Set.Icc (t₀ - (m : ℝ)) (t₀ + (m : ℝ)) ⊆
+        Set.Icc (t₀ - ((m : ℝ) + 1)) (t₀ + ((m : ℝ) + 1)) :=
+      Set.Icc_subset_Icc (by linarith) (by linarith)
+    refine (((hΓon m).mono hmsub2) t ht).congr (fun y hy => ?_) hgt
+    have hymem : |y - t₀| < (m : ℝ) + 1 := by
+      rw [Set.mem_Icc] at hy; rw [abs_lt]; constructor <;> linarith
+    exact hglobal_eq m y hymem
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
