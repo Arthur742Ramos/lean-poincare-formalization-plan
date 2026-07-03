@@ -8963,6 +8963,27 @@ theorem norm_chainRuleForcing_flow_sub_sub_le_sq [CompleteSpace E]
     hP₀ hW₀ hrP hrW hεP hεW hC'0 (Real.exp_pos _).le
     (by positivity) (mul_nonneg (by positivity) hg) hk
 
+/-- **Forcing-gap combinator for the design-corrected third variation.**  Assembles the two
+independently-proved second-order remainders — the coefficient-variation remainder
+`‖(A₁ − A₀) ∘ V₁ − newLeading‖ ≤ β₁` (`norm_coeffVariation_sub_secondDerivComp_le_sq`) and the
+chain-rule forcing remainder `‖(F₁ − F₀) − (F_C + F_A + F_B)‖ ≤ β₂`
+(`norm_chainRuleForcing_flow_sub_sub_le_sq`) — into the single forcing gap
+`‖((A₁ − A₀) ∘ V₁ + (F₁ − F₀)) − F₃‖ ≤ β₁ + β₂` with `F₃ = F_A + F_B + (newLeading + F_C)`, exactly the
+design-corrected third-variation forcing of
+`exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff` and the `hβ` hypothesis of
+`norm_inhomogVariation_sub_sub_le_of_forcingGap`.  Pure algebra: regroup by `abel` (the composition
+`(A₁ − A₀) ∘ V₁` and the forcing operators are treated as additive atoms), then `norm_add_le` +
+`add_le_add`. -/
+theorem norm_forcingGap_le_of_remainders
+    {A₁ A₀ V₁ Fone Fzero FA FB FC newLeading : E →L[ℝ] E} {β₁ β₂ : ℝ}
+    (hcoeff : ‖(A₁ - A₀).comp V₁ - newLeading‖ ≤ β₁)
+    (hforcing : ‖(Fone - Fzero) - (FC + FA + FB)‖ ≤ β₂) :
+    ‖((A₁ - A₀).comp V₁ + (Fone - Fzero)) - (FA + FB + (newLeading + FC))‖ ≤ β₁ + β₂ := by
+  have hre : ((A₁ - A₀).comp V₁ + (Fone - Fzero)) - (FA + FB + (newLeading + FC))
+      = ((A₁ - A₀).comp V₁ - newLeading) + ((Fone - Fzero) - (FC + FA + FB)) := by abel
+  rw [hre]
+  exact (norm_add_le _ _).trans (add_le_add hcoeff hforcing)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
