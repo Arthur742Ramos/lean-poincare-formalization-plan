@@ -6010,6 +6010,35 @@ theorem affineChart_bijOn_parabolicClosedCylinder
   exact hinv.bijOn parabolicClosedCylinder_mapsTo_affineChart
     (parabolicClosedCylinder_mapsTo_affineChart_inv hr)
 
+/-- **The affine parabolic chart as a homeomorphism.**  For `r ≠ 0`, the forward affine parabolic
+chart `Φ_{c,a,r} : p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` is a self-homeomorphism of the
+time-space `ℝ × X`, with inverse the chart `Φ_{a,c,r⁻¹}`.  Being a homeomorphism, it transports open
+sets, closed sets, closures, and interiors between the source and target scales — the topological
+counterpart of the `Set.BijOn` statements above, used when a Schauder rescaling argument needs to
+move open neighborhoods rather than just closed balls and cylinders. -/
+def affineChartHomeomorph
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0) :
+    Homeomorph (ℝ × X) (ℝ × X) where
+  toFun := fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))
+  invFun := fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2))
+  left_inv := affineChart_leftInverse c a hr
+  right_inv := affineChart_rightInverse c a hr
+  continuous_toFun := by fun_prop
+  continuous_invFun := by fun_prop
+
+/-- The forward direction of `affineChartHomeomorph` is the explicit affine parabolic chart. -/
+@[simp] theorem affineChartHomeomorph_apply
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (p : ℝ × X) :
+    affineChartHomeomorph c a hr p = c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)) := rfl
+
+/-- The inverse direction of `affineChartHomeomorph` is the explicit inverse affine parabolic
+chart. -/
+@[simp] theorem affineChartHomeomorph_symm_apply
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (p : ℝ × X) :
+    (affineChartHomeomorph c a hr).symm p = a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)) := rfl
+
 end AnalyticPDE
 end RicciFlow
 
