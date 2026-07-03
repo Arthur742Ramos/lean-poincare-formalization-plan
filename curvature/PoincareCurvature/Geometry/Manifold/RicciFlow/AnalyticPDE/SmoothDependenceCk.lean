@@ -8788,6 +8788,42 @@ theorem norm_bilinearCompForcing_curry2_sub_sub_le_sq
   have hbase := norm_bilinearCompForcing_sub_sub_le_sq h k hP₀ hW₀ hrP hrW hεP hεW hp hw hdp hdw hk
   rwa [bilinearCompForcing_curry2_eq S W₀ h] at hbase
 
+/-- **Representation compatibility of the two second-derivative forms.**  The two-fold curry
+`curry2 (iteratedFDeriv ℝ 2 f z)` of the *multilinear* second derivative
+`iteratedFDeriv ℝ 2 f z : E[×2]→L E` (the norm-carrying form in which the `C³` Taylor bounds live)
+equals the *composition-form* second derivative `fderiv ℝ (fderiv ℝ f) z : E →L (E →L E)` (the form in
+which the second-variation ODE forcing and the trilinear engine `norm_bilinearCompForcing_*` operate).
+
+This is the pure `iteratedFDeriv`/`fderiv` representation bridge the `(F₁ − F₀)` assembly needs to
+identify the module's composition-form forcing operators `P = curry2 (D²v_ml)` with the field's honest
+composition second derivative.  Unconditional (`iteratedFDeriv`/`fderiv` are total): by `curry2_apply`
+and Mathlib's `iteratedFDeriv_two_apply` (`iteratedFDeriv ℝ 2 f z m = fderiv (fderiv f) z (m 0) (m 1)`)
+evaluated at `m = ![a, b]`. -/
+theorem curry2_iteratedFDeriv_two (f : E → E) (z : E) :
+    curry2 (iteratedFDeriv ℝ 2 f z) = fderiv ℝ (fderiv ℝ f) z := by
+  ext a b
+  rw [curry2_apply, iteratedFDeriv_two_apply]
+  simp
+
+/-- **Consumable form of the second-derivative representation compatibility.**  If `Df` is the
+(composition-form) first derivative of `f` at every point and `D2comp` is the derivative of `Df` at
+`x`, then the two-fold curry of the multilinear second derivative equals `D2comp`:
+`curry2 (iteratedFDeriv ℝ 2 f x) = D2comp`.  This is the form the `(F₁ − F₀)` assembly threads: the
+second-variation ODE forcing of `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv` carries
+its second derivative as an abstract composition-form operator `D2comp` satisfying
+`HasFDerivAt Df D2comp x` (with `Df` the field's first derivative), and the `curry2` Taylor bounds carry
+it as the multilinear `iteratedFDeriv ℝ 2 f`; this lemma identifies them.  Proof: rewrite by
+`curry2_iteratedFDeriv_two`, replace `fderiv ℝ f = Df` (uniqueness of `HasFDerivAt` derivatives), then
+`hD2.fderiv`. -/
+theorem curry2_iteratedFDeriv_two_eq_of_hasFDerivAt
+    {f : E → E} {Df : E → (E →L[ℝ] E)} {D2comp : E →L[ℝ] (E →L[ℝ] E)} {x : E}
+    (hDf : ∀ y, HasFDerivAt f (Df y) y) (hD2 : HasFDerivAt Df D2comp x) :
+    curry2 (iteratedFDeriv ℝ 2 f x) = D2comp := by
+  rw [curry2_iteratedFDeriv_two]
+  have hf' : fderiv ℝ f = Df := funext (fun y => (hDf y).fderiv)
+  rw [hf']
+  exact hD2.fderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
