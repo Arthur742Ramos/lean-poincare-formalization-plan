@@ -583,6 +583,35 @@ theorem isIntegralCurve_variational_apply {A : ℝ → (E →L[ℝ] E)}
   simpa only [variationalField, variationalFieldVec, ContinuousLinearMap.comp_apply,
     map_zero, add_zero] using hcomp
 
+/-!
+### Superposition principle for the vector variational ODE
+
+Being *linear*, the vector variational equation `u'(t) = A(t) (u(t))` has a solution set
+closed under addition and scalar multiplication.  This is exactly what makes the map
+`u₀ ↦ (solution through u₀) t` — i.e. the directional derivative `u₀ ↦ D_x Φ_t · u₀` —
+**linear in the direction `u₀`**, so that it assembles into the bounded operator
+`D_x Φ_t ∈ E →L[ℝ] E`.
+-/
+
+/-- **Superposition (additivity).**  The sum of two solutions of the vector variational
+ODE is again a solution. -/
+theorem isIntegralCurve_variationalFieldVec_add {A : ℝ → (E →L[ℝ] E)} {u w : ℝ → E}
+    (hu : IsIntegralCurve u (variationalFieldVec A))
+    (hw : IsIntegralCurve w (variationalFieldVec A)) :
+    IsIntegralCurve (fun t => u t + w t) (variationalFieldVec A) := by
+  intro t
+  have h := (hu t).add (hw t)
+  simpa only [variationalFieldVec, map_add] using h
+
+/-- **Superposition (homogeneity).**  A scalar multiple of a solution of the vector
+variational ODE is again a solution. -/
+theorem isIntegralCurve_variationalFieldVec_smul {A : ℝ → (E →L[ℝ] E)} {u : ℝ → E} (c : ℝ)
+    (hu : IsIntegralCurve u (variationalFieldVec A)) :
+    IsIntegralCurve (fun t => c • u t) (variationalFieldVec A) := by
+  intro t
+  have h := (hu t).const_smul c
+  simpa only [variationalFieldVec, map_smul] using h
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow

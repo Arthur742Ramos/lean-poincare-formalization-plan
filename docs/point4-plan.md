@@ -4587,3 +4587,8 @@ formalised as an object and shown well-posed.
   of the operator equation on a fixed direction `u₀` yields a solution `t ↦ W t u₀` of
   the vector equation (via the derivative chain rule `HasDerivAt.clm_apply`), tying the
   fundamental solution to the directional derivatives it generates.
+* `isIntegralCurve_variationalFieldVec_add`, `isIntegralCurve_variationalFieldVec_smul` —
+  the **superposition principle**: solutions of the (linear) vector variational equation
+  are closed under addition and scalar multiplication, so the directional derivative
+  `u₀ ↦ D_x Φ_t · u₀` is linear in `u₀` and assembles into the bounded operator
+  `D_x Φ_t ∈ E →L[ℝ] E`.
