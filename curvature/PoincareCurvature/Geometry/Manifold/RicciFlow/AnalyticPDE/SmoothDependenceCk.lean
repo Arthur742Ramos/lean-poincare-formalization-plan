@@ -785,6 +785,32 @@ theorem fundamentalSolution_eq_of_operator_isIntegralCurve {A : ℝ → (E →L[
     (isIntegralCurve_variational_apply hW x) (t₁ := t₀) ?_ t
   rw [h0, hW0, ContinuousLinearMap.id_apply]
 
+/-!
+### Continuity of the resolvent action in time
+
+Since the resolvent acts by `D_x Φ_t · u₀ = Φ u₀ t`, the `C^0` time/joint continuity of the
+flow (`IsIntegralCurve.continuous`, `continuous_flow`) transfers verbatim to the fundamental
+solution: `t ↦ D_x Φ_t u₀` is continuous, and the full action `(t, u₀) ↦ D_x Φ_t u₀` is jointly
+continuous. -/
+
+/-- **Strong continuity of the resolvent in time.**  For a fixed direction `u₀`, the path
+`t ↦ D_x Φ_t · u₀` is continuous. -/
+theorem continuous_fundamentalSolution_apply {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (u₀ : E) : Continuous (fun t => fundamentalSolution hA hΦ h0 t u₀) := by
+  simp only [fundamentalSolution_apply]
+  exact (hΦ u₀).continuous
+
+/-- **Joint continuity of the resolvent action.**  The map `(t, u₀) ↦ D_x Φ_t · u₀` is jointly
+continuous on `ℝ × E`. -/
+theorem continuous_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥0}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    Continuous (fun p : ℝ × E => fundamentalSolution hA hΦ h0 p.1 p.2) := by
+  simp only [fundamentalSolution_apply]
+  exact continuous_flow (fun s => lipschitzWith_variationalFieldVec hA s) hΦ h0
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
