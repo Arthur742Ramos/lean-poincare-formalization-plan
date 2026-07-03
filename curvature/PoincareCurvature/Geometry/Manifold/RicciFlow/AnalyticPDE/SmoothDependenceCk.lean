@@ -10745,6 +10745,111 @@ theorem norm_bilinearComp_VfamOuter_baseCurve_sub_le
       hg0)).trans_eq ?_
   ring
 
+/-- **Four-fold triangle inequality for a difference of right-nested sums.**  For `a, b, c, d` and
+`a', b', c', d'` in any seminormed additive group,
+`‖(a + (b + (c + d))) − (a' + (b' + (c' + d')))‖ ≤ ‖a − a'‖ + ‖b − b'‖ + ‖c − c'‖ + ‖d − d'‖`.  The
+grouping `a + (b + (c + d))` matches the right-nested shape of the four-term third-variation forcing, so
+this reduces the base-point gap of the whole forcing to the four individual term gaps in one step. -/
+theorem norm_add4_sub_add4_le {F : Type*} [SeminormedAddCommGroup F]
+    (a b c d a' b' c' d' : F) :
+    ‖a + (b + (c + d)) - (a' + (b' + (c' + d')))‖
+      ≤ ‖a - a'‖ + ‖b - b'‖ + ‖c - c'‖ + ‖d - d'‖ := by
+  have heq : a + (b + (c + d)) - (a' + (b' + (c' + d')))
+      = (a - a') + ((b - b') + ((c - c') + (d - d'))) := by abel
+  rw [heq]
+  calc ‖(a - a') + ((b - b') + ((c - c') + (d - d')))‖
+      ≤ ‖a - a'‖ + ‖(b - b') + ((c - c') + (d - d'))‖ := norm_add_le _ _
+    _ ≤ ‖a - a'‖ + (‖b - b'‖ + ‖(c - c') + (d - d')‖) := add_le_add le_rfl (norm_add_le _ _)
+    _ ≤ ‖a - a'‖ + (‖b - b'‖ + (‖c - c'‖ + ‖d - d'‖)) :=
+        add_le_add le_rfl (add_le_add le_rfl (norm_add_le _ _))
+    _ = ‖a - a'‖ + ‖b - b'‖ + ‖c - c'‖ + ‖d - d'‖ := by ring
+
+/-- **Base-point Lipschitz gap of the full four-term third-variation forcing (`β`).**  The
+`C³`-continuity forcing gap: for a `C^{3,1}` field and two base points `z`, `x₀` with resolvents
+`W_z`, `W_x` and linearised first-variation curves `Uzk = Vfam^z k`, `Uxk = Vfam^x k` (direction `k`)
+and `Uzh = Vfam^z h`, `Uxh = Vfam^x h` (direction `h`), the whole design-corrected third-variation
+forcing
+`F = ((D²v ∘ Vfam_k) h) ∘ W + (((D²v ∘ W) h) ∘ Vfam_k + (((D²v ∘ W) k) ∘ Vfam_h + curryFin1(D³v[Wk,Wh,W·])))`
+moves, for `s ∈ [t₀, T]`, by at most
+`(3·exp⁴·g·(2M₂C' + 4LC'²g) + exp⁴·(3C''Lg + M₃)) · ‖z − x₀‖ · ‖k‖ · ‖h‖`
+with `exp = exp(K(T−t₀))`, `g = gronwallBound 0 K 1 (T−t₀)`.
+
+Proof: the four-fold triangle inequality `norm_add4_sub_add4_le` reduces the forcing gap to the four
+individual term gaps `norm_bilinearComp_VfamInner_baseCurve_sub_le` (term 1),
+`norm_bilinearComp_VfamOuter_baseCurve_sub_le` (terms 2, 3) and `norm_thirdDerivForcing_baseCurve_sub_le`
+(term 4); the sum of the four explicit constants collapses by `ring`.  This is the `β` ingredient of the
+third-variation curve base gap, exactly analogous to the single chain-rule forcing gap `β` of
+`norm_linearisedFirstVariation_baseCurve_sub_le` one order up. -/
+theorem norm_thirdVariationForcing_baseCurve_sub_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ : ℝ≥0} {C' C'' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD2vlip : ∀ s, LipschitzWith M₂ (D2v s))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hC'0 : 0 ≤ C') (hC'z : ∀ s, ‖D2v s (Φ z s)‖ ≤ C') (hC'x : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    (hC''z : ∀ s, ‖D3v s (Φ z s)‖ ≤ C'')
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h2 : ∀ x, Φ₂ x t₀ = x)
+    (k h : E) {T : ℝ}
+    {Uzk Uxk Uzh Uxh : ℝ → (E →L[ℝ] E)}
+    (hUzk : ∀ s, HasDerivAt Uzk
+      ((Dv s (Φ z s)).comp (Uzk s)
+        + ((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) k).comp
+            (fundamentalSolution hAz hΦ₁ h1 s)) s)
+    (hUzk0 : Uzk t₀ = 0)
+    (hUxk : ∀ s, HasDerivAt Uxk
+      ((Dv s (Φ x₀ s)).comp (Uxk s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) k).comp
+            (fundamentalSolution hAx hΦ₂ h2 s)) s)
+    (hUxk0 : Uxk t₀ = 0)
+    (hUzh : ∀ s, HasDerivAt Uzh
+      ((Dv s (Φ z s)).comp (Uzh s)
+        + ((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) h).comp
+            (fundamentalSolution hAz hΦ₁ h1 s)) s)
+    (hUzh0 : Uzh t₀ = 0)
+    (hUxh : ∀ s, HasDerivAt Uxh
+      ((Dv s (Φ x₀ s)).comp (Uxh s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) h).comp
+            (fundamentalSolution hAx hΦ₂ h2 s)) s)
+    (hUxh0 : Uxh t₀ = 0)
+    {s : ℝ} (hs : s ∈ Set.Icc t₀ T) :
+    ‖(((D2v s (Φ z s)).comp (Uzk s) h).comp (fundamentalSolution hAz hΦ₁ h1 s)
+        + (((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) h).comp (Uzk s)
+           + (((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) k).comp (Uzh s)
+              + (continuousMultilinearCurryFin1 ℝ E E
+                  (((D3v s (Φ z s)).curryLeft (fundamentalSolution hAz hΦ₁ h1 s k)).curryLeft
+                    (fundamentalSolution hAz hΦ₁ h1 s h))).comp
+                  (fundamentalSolution hAz hΦ₁ h1 s))))
+      - (((D2v s (Φ x₀ s)).comp (Uxk s) h).comp (fundamentalSolution hAx hΦ₂ h2 s)
+        + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) h).comp (Uxk s)
+           + (((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) k).comp (Uxh s)
+              + (continuousMultilinearCurryFin1 ℝ E E
+                  (((D3v s (Φ x₀ s)).curryLeft (fundamentalSolution hAx hΦ₂ h2 s k)).curryLeft
+                    (fundamentalSolution hAx hΦ₂ h2 s h))).comp
+                  (fundamentalSolution hAx hΦ₂ h2 s))))‖
+      ≤ (3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+                * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+            + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+                * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)))
+          * ‖z - x₀‖ * ‖k‖ * ‖h‖ := by
+  refine (norm_add4_sub_add4_le _ _ _ _ _ _ _ _).trans ?_
+  have hT1 := norm_bilinearComp_VfamInner_baseCurve_sub_le hv hΦ h0 hDvlip hD2vlip z x₀ hAz hAx
+    hC'0 hC'z hC'x hΦ₁ h1 hΦ₂ h2 k h hUzk hUzk0 hUxk hUxk0 hs
+  have hT2 := norm_bilinearComp_VfamOuter_baseCurve_sub_le hv hΦ h0 hDvlip hD2vlip z x₀ hAz hAx
+    hC'0 hC'z hC'x hΦ₁ h1 hΦ₂ h2 h k hUzk hUzk0 hUxk hUxk0 hs
+  have hT3 := norm_bilinearComp_VfamOuter_baseCurve_sub_le hv hΦ h0 hDvlip hD2vlip z x₀ hAz hAx
+    hC'0 hC'z hC'x hΦ₁ h1 hΦ₂ h2 k h hUzh hUzh0 hUxh hUxh0 hs
+  have hT4 := norm_thirdDerivForcing_baseCurve_sub_le hv hΦ h0 hDvlip hD3vlip z x₀ hAz hAx
+    hC''z hΦ₁ h1 hΦ₂ h2 k h hs
+  refine (add_le_add (add_le_add (add_le_add hT1 hT2) hT3) hT4).trans_eq ?_
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
