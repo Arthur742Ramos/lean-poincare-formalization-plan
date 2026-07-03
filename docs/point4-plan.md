@@ -5590,3 +5590,56 @@ the `(F₁ − F₀)` remainder `‖(F₁ − F₀) − (F_A + F_B + F_C)‖ ≤
 already-proved coefficient remainder `norm_coeffVariation_sub_secondDerivComp_le_sq`) the forcing gap
 `hβ`, `norm_inhomogVariation_sub_sub_le_of_forcingGap`, and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
 close `ContDiff ℝ 3`.
+
+Update — **the representation half of the remaining `(F₁ − F₀)` step is now CLOSED, and the `F_C`-form
+forcing engine is assembled** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`.  This discharges step (a) above in full and pre-threads step (b)
+into a single ready-to-feed engine:
+
+* `norm_secondDerivField_sub_sub_thirdDeriv_ml_fundamentalSolution_le_sq` — the *single remaining
+  analytic ingredient* named above: the multilinear central `C³` coefficient Taylor bound with the
+  **resolvent-linearised** residual,
+  `‖(D²v(Φ z s) − D²v(Φ x₀ s)) − D³v(Φ x₀ s)(W_x (z − x₀))‖ ≤ (M·e + N·(L·e·g))·‖z − x₀‖²`
+  (`e = exp (2K(T−t₀))`, `g = gronwallBound 0 K 1 (T−t₀)`, `N` a bound on `‖D³v(Φ x₀ s)‖`), uniformly on
+  the tube — the `D²v`-analogue of the `C²` `norm_derivField_sub_sub_comp_fundamentalSolution_le_sq`.
+  Split into the flow-Taylor defect (`norm_secondDerivField_sub_sub_thirdDeriv_ml_flow_le`) plus the
+  linearisation residual `D³v(Φ x₀ s)[(Φ z s − Φ x₀ s) − W_x k]` (operator bound × the first-order flow
+  remainder `norm_flow_sub_fundamentalSolution_le_sq`).
+* `curry2` (+ `curry2_apply`, `curry2_sub`, `norm_curry2_le`) — the **multilinear→composition
+  representation bridge**: `curry2 : (E[×2]→L E) → (E →L (E →L E))`, `curry2 X a b = X ![a, b]`, built
+  from `X.curryLeft` post-composed with the `Fin 1` isometry `continuousMultilinearCurryFin1`.  Linear
+  (`curry2_sub`) and norm-nonexpansive (`norm_curry2_le`, in fact isometric) — the only form in which
+  the third derivative carries a norm (`E →L (E[×2]→L E)`) transported into the composition form the
+  trilinear engine operates in.
+* `norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq` — the **composition-form central `C³` Taylor
+  bound**: the multilinear bound transported through `curry2` (linearity collapses the three-term
+  combination, `norm_curry2_le` transports the estimate verbatim), giving the `εp = cp·‖k‖²` quadratic
+  remainder for the candidate `dP = curry2 (D³v(Φ x₀ s)(W_x k))`.
+* `bilinearCompForcing_curry2_eq` — the **`dP`-term = `F_C` identity**:
+  `((curry2 S ∘ W) h) ∘ W = (continuousMultilinearCurryFin1 ℝ E E (S.curryLeft (W h))).comp W` (both
+  `e ↦ S[W h, W e]`).  With `S = (D³v(Φ x₀ s)).curryLeft (W k)` the right side is *exactly* the module's
+  third-derivative forcing `F_C`, so the trilinear engine's composition-form candidate is identified with
+  `F_C`.  This closes step (a).
+* `norm_secondDerivField_ml_apply_flow_sub_le` / `norm_secondDerivField_curry2_apply_flow_sub_le` — the
+  `dp` first-order flow-Lipschitz gap `‖D²v(Φ z s) − D²v(Φ w s)‖ ≤ M·exp(K T)·‖z − w‖` (multilinear and
+  its `curry2` image), the `hrP` threading input.
+* `norm_bilinearCompForcing_curry2_sub_sub_le_sq` — the **assembled `F_C`-form forcing engine**: the
+  trilinear quadratic-remainder engine `norm_bilinearCompForcing_sub_sub_le_sq` fused with
+  `bilinearCompForcing_curry2_eq`, so choosing `dP = curry2 S` delivers the `dP`-linear output *directly*
+  in the `F_C` shape.  Fed `P₀ = curry2 (D²v(Φ x₀ s))`, `P₁ = curry2 (D²v(Φ z s))`,
+  `S = D³v(Φ x₀ s)(W_x k)`, `W₀ = W_x`, `W₁ = W_z`, `dW = W₂` and the six factor bounds — `p` via
+  `norm_curry2_le`/`hC'`, `w` via `norm_fundamentalSolution_le`, `dp` via
+  `norm_secondDerivField_curry2_apply_flow_sub_le`, `dw` via `norm_fundamentalSolution_baseCurve_sub_le`,
+  `cp` via `norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq`, `cw` via
+  `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` — it yields the `(F₁ − F₀)` forcing gap
+  `‖(F₁ − F₀) − (F_C + F_A + F_B)‖ ≤ Cquad·‖z − x₀‖²·‖h‖`.
+
+Remaining for `ContDiff ℝ 3` (next session): the **concrete `(F₁ − F₀)` assembly theorem** — instantiate
+`norm_bilinearCompForcing_curry2_sub_sub_le_sq` with the flow/resolvent objects (`W_x`, `W_z`, `W₂`) and
+the six bounds above, using the compatibility `D²v_comp s ξ = curry2 (D²v_ml s ξ)` between the two
+second-derivative representations (from `iteratedFDeriv`/`fderiv` for a smooth field) to bridge the
+module's composition-form second-variation forcing (of
+`exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv`) to the `curry2` bounds.  Then, with the
+already-proved coefficient remainder `norm_coeffVariation_sub_secondDerivComp_le_sq`, the forcing gap `hβ`,
+`norm_inhomogVariation_sub_sub_le_of_forcingGap`, and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` close
+`ContDiff ℝ 3`.
