@@ -5331,6 +5331,27 @@ theorem hasFDerivAt_of_eventually_norm_sub_sub_le_sq
       simpa using hcont.tendsto x₀
     simpa using hnorm.const_mul C
 
+/-- **Differentiability from a quadratic linearisation error** (the `DifferentiableAt` corollary of
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq`). -/
+theorem differentiableAt_of_eventually_norm_sub_sub_le_sq
+    {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G]
+    {f : F → G} {f' : F →L[ℝ] G} {x₀ : F} {C : ℝ}
+    (h : ∀ᶠ z in 𝓝 x₀, ‖f z - f x₀ - f' (z - x₀)‖ ≤ C * ‖z - x₀‖ ^ 2) :
+    DifferentiableAt ℝ f x₀ :=
+  (hasFDerivAt_of_eventually_norm_sub_sub_le_sq h).differentiableAt
+
+/-- **The Fréchet derivative is `f'`** (the `fderiv` corollary of
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq`): a quadratic linearisation error identifies the
+derivative. -/
+theorem fderiv_of_eventually_norm_sub_sub_le_sq
+    {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G]
+    {f : F → G} {f' : F →L[ℝ] G} {x₀ : F} {C : ℝ}
+    (h : ∀ᶠ z in 𝓝 x₀, ‖f z - f x₀ - f' (z - x₀)‖ ≤ C * ‖z - x₀‖ ^ 2) :
+    fderiv ℝ f x₀ = f' :=
+  (hasFDerivAt_of_eventually_norm_sub_sub_le_sq h).fderiv
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
