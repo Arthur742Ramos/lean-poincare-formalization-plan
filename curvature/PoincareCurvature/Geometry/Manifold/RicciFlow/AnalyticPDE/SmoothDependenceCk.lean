@@ -9970,6 +9970,70 @@ theorem norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC [Com
   gcongr
   exact le_max_left _ _
 
+/-- **The canonical linearised-first-variation family, linear in the direction.**  Packages the
+per-direction linearised first variation at `x₀` (`exists_hasDerivAt_firstVariation_linearised_dir`,
+chosen over all directions `h`) into a single family `Vfam : E → (ℝ → (E →L[ℝ] E))` that is *linear* in
+`h` — pointwise additive `Vfam (h₁ + h₂) s = Vfam h₁ s + Vfam h₂ s` (`linearVariation_perturbation_add_eq`)
+and homogeneous `Vfam (c • h) s = c • Vfam h s` (`linearVariation_perturbation_smul_eq`) — continuous in
+time (`Differentiable.continuous` of the ODE), solving the linearised first-variation ODE
+`(Vfam h)' = A₀ ∘ Vfam h + (D²v(Φ x₀ s) ∘ W₀ · h) ∘ W₀` with `Vfam h t₀ = 0`, and bounded
+`‖Vfam h s‖ ≤ C' · exp(2K(T − t₀)) · gronwallBound 0 K 1 (T − t₀) · ‖h‖` uniformly on `[t₀, T]`
+(`norm_linearisedFirstVariation_le`, the `s`-dependent Grönwall factor pushed to the endpoint by
+`gronwallBound_mono`).
+
+This single family supplies **both** the base-direction curve `W2` (evaluated at `k`) and the
+inner-direction curve `V0fun` (at `h`) required by the design-corrected bilinear third-variation packaging
+`exists_continuousLinearMap_thirdVariation_coeff_bilinear` (linearity/continuity/bound are exactly its
+`hW2*`/`hV0*` hypotheses), and — through its exposed ODE — matches the per-`z` base-direction curve
+`W₂ = Vfam (z − x₀)` and inner curve `V₀ = Vfam h` of the operator numerator
+`norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC`.  A constructive input for the
+`HasFDerivAt (fun z => D₂ z) D₃ x₀` everywhere assembly toward the flow resolvent's spatial
+`ContDiff ℝ 3`. -/
+theorem exists_linearisedFirstVariationFamily [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    (x₀ : E) (hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hAcont : Continuous (fun s => Dv s (Φ x₀ s)))
+    (hD2cont : Continuous (fun s => D2v s (Φ x₀ s)))
+    {Φ' : E → ℝ → E}
+    (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    {C' : ℝ} (hC'0 : 0 ≤ C') (hC' : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C') (T : ℝ) :
+    ∃ Vfam : E → (ℝ → (E →L[ℝ] E)),
+      (∀ h, Vfam h t₀ = 0) ∧
+      (∀ (h : E) (s : ℝ), HasDerivAt (Vfam h)
+        ((Dv s (Φ x₀ s)).comp (Vfam h s)
+          + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hA hΦ' h0' s) h).comp
+              (fundamentalSolution hA hΦ' h0' s)) s) ∧
+      (∀ h, Continuous (Vfam h)) ∧
+      (∀ (h₁ h₂ : E) (s : ℝ), Vfam (h₁ + h₂) s = Vfam h₁ s + Vfam h₂ s) ∧
+      (∀ (c : ℝ) (h : E) (s : ℝ), Vfam (c • h) s = c • Vfam h s) ∧
+      (∀ (h : E), ∀ s ∈ Set.Icc t₀ T,
+        ‖Vfam h s‖ ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀))
+          * gronwallBound 0 (K : ℝ) 1 (T - t₀) * ‖h‖) := by
+  choose Vfam hVfam0 hVfamd using fun h =>
+    exists_hasDerivAt_firstVariation_linearised_dir x₀ hA hAcont hD2cont hΦ' h0' h
+  refine ⟨Vfam, hVfam0, hVfamd, ?_, ?_, ?_, ?_⟩
+  · intro h
+    exact Differentiable.continuous (fun s => (hVfamd h s).differentiableAt)
+  · intro h₁ h₂ s
+    exact linearVariation_perturbation_add_eq x₀ hA hΦ' h0' h₁ h₂
+      (hVfamd h₁) (hVfamd h₂) (hVfamd (h₁ + h₂)) (hVfam0 h₁) (hVfam0 h₂) (hVfam0 (h₁ + h₂)) s
+  · intro c h s
+    exact linearVariation_perturbation_smul_eq x₀ hA hΦ' h0' c h
+      (hVfamd h) (hVfamd (c • h)) (hVfam0 h) (hVfam0 (c • h)) s
+  · intro h s hs
+    refine (norm_linearisedFirstVariation_le x₀ hA hΦ' h0' hC'0 hC' h
+      (hVfamd h) (hVfam0 h) hs).trans ?_
+    have hmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+      gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg (by linarith [hs.2])
+    have hnn : (0 : ℝ) ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖ :=
+      mul_nonneg (mul_nonneg hC'0 (Real.exp_pos _).le) (norm_nonneg _)
+    calc C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖ * gronwallBound 0 (K : ℝ) 1 (s - t₀)
+        ≤ C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * ‖h‖ * gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+          mul_le_mul_of_nonneg_left hmono hnn
+      _ = C' * Real.exp (2 * (K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) * ‖h‖ := by
+          ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
