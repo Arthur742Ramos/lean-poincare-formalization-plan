@@ -7180,6 +7180,104 @@ theorem ParabolicC0AlphaWith.of_space_time_holder
     ParabolicC0AlphaWith B (Hs + Ht) α u s :=
   ⟨hbound, ParabolicHolderWith.of_space_time_holder hHs hHt hα hcorner hspace htime⟩
 
+/-- Reverse assembly of parabolic Hölder control on an open product parabolic cylinder, where
+corner-closedness is automatic. -/
+theorem ParabolicHolderWith.of_space_time_holder_parabolicCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+      (t, y) ∈ parabolicCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+      (τ, x) ∈ parabolicCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u (parabolicCylinder c timeRadius spaceRadius) :=
+  ParabolicHolderWith.of_space_time_holder hHs hHt hα
+    (fun {_ _} {_ _} hp hq => parabolicCylinder.corner_mem hp hq) hspace htime
+
+/-- Reverse assembly of parabolic Hölder control on a closed product parabolic cylinder — the
+interior/boundary Schauder domain `Q = I × Ω`. -/
+theorem ParabolicHolderWith.of_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u (parabolicClosedCylinder c timeRadius spaceRadius) :=
+  ParabolicHolderWith.of_space_time_holder hHs hHt hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedCylinder.corner_mem hp hq) hspace htime
+
+/-- Reverse assembly of parabolic Hölder control on an open parabolic ball. -/
+theorem ParabolicHolderWith.of_space_time_holder_parabolicBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α R : ℝ} {u : ℝ × X → E} {c : ℝ × X}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X}, (t, x) ∈ parabolicBall c R → (t, y) ∈ parabolicBall c R →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X}, (t, x) ∈ parabolicBall c R → (τ, x) ∈ parabolicBall c R →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u (parabolicBall c R) :=
+  ParabolicHolderWith.of_space_time_holder hHs hHt hα
+    (fun {_ _} {_ _} hp hq => parabolicBall.corner_mem hp hq) hspace htime
+
+/-- Reverse assembly of parabolic Hölder control on a closed parabolic ball. -/
+theorem ParabolicHolderWith.of_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α R : ℝ} {u : ℝ × X → E} {c : ℝ × X}
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u (parabolicClosedBall c R) :=
+  ParabolicHolderWith.of_space_time_holder hHs hHt hα
+    (fun {_ _} {_ _} hp hq => parabolicClosedBall.corner_mem hp hq) hspace htime
+
+/-- Reverse assembly of parabolic `C^{0,α}` control on a closed product parabolic cylinder — the
+Schauder domain — from sup control and separate spatial/temporal Hölder control. -/
+theorem ParabolicC0AlphaWith.of_space_time_holder_parabolicClosedCylinder
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {B Hs Ht α : ℝ} {u : ℝ × X → E} {c : ℝ × X} {timeRadius spaceRadius : ℝ}
+    (hbound : ParabolicBoundedWith B u (parabolicClosedCylinder c timeRadius spaceRadius))
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (t, y) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      (τ, x) ∈ parabolicClosedCylinder c timeRadius spaceRadius →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaWith B (Hs + Ht) α u (parabolicClosedCylinder c timeRadius spaceRadius) :=
+  ⟨hbound, ParabolicHolderWith.of_space_time_holder_parabolicClosedCylinder hHs hHt hα hspace htime⟩
+
+/-- Reverse assembly of parabolic `C^{0,α}` control on a closed parabolic ball from sup control and
+separate spatial/temporal Hölder control. -/
+theorem ParabolicC0AlphaWith.of_space_time_holder_parabolicClosedBall
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {B Hs Ht α R : ℝ} {u : ℝ × X → E} {c : ℝ × X}
+    (hbound : ParabolicBoundedWith B u (parabolicClosedBall c R))
+    (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht) (hα : 0 ≤ α)
+    (hspace : ∀ {t : ℝ} {x y : X},
+      (t, x) ∈ parabolicClosedBall c R → (t, y) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * (dist x y) ^ α)
+    (htime : ∀ {t τ : ℝ} {x : X},
+      (t, x) ∈ parabolicClosedBall c R → (τ, x) ∈ parabolicClosedBall c R →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicC0AlphaWith B (Hs + Ht) α u (parabolicClosedBall c R) :=
+  ⟨hbound, ParabolicHolderWith.of_space_time_holder_parabolicClosedBall hHs hHt hα hspace htime⟩
+
 end AnalyticPDE
 end RicciFlow
 
