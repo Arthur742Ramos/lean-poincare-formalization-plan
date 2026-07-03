@@ -5747,3 +5747,42 @@ fundamental solution operator field `z ↦ D₂ z` with a neighbourhood-uniform 
 continuity of `z ↦ D₃`) to `exists_flow_contDiff_three_of_lipschitz_thirdDeriv` — the honest `ContDiff ℝ 3`,
 mirroring the `C²` `exists_flow_contDiff_two_of_lipschitz_secondDeriv` assembly one order up.  All the
 per-base-point analytic content is now proved; the remainder is the neighbourhood/uniformity packaging.
+
+Update — the **neighbourhood-uniform-constant tower is now CLOSED** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`.  The obstruction to
+the `HasFDerivAt` step above was that `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq` states
+its constant as a *per-`z` existential* `∃ C`, whereas `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+requires a **single** `C` valid for every `z` in a neighbourhood of `x₀`.  Since the constant is genuinely
+`z`-independent (a closed field expression in `K, L, M₂, M₃, C', N, T, t₀`, with `‖z − x₀‖²` factored out),
+the fix is to *expose* it explicitly.  Three explicit-constant twins were added, mirroring the `∃`-form
+proofs but writing the constant out (the `∃` was introduced only at the `norm_bilinearCompForcing_*`
+engine level, whose output constant is already explicit):
+
+* `norm_chainRuleForcing_flow_sub_sub_le_sq_uniformC` — the chain-rule forcing remainder with the engine
+  constant `cp·w² + 2p·cw·w + 2dp·dw·w + p·dw² + dp·dw²` (the six field bounds substituted) written out.
+  Verbatim `∃`-form proof, closed by the engine `.trans_eq (by ring)`.
+* `norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniformC` — the curve-level `C³` Taylor
+  remainder with constant `(C₁ + C₂)·gronwallBound 0 K 1 (t − t₀)` (`C₁` = the coefficient-variation
+  constant, `C₂` = the chain-rule engine constant) written out.  Proof: the `∃`-form's proof with the
+  forcing-gap `β` a metavariable determined by `norm_forcingGap_le_of_remainders`, the Grönwall bound
+  `norm_inhomogVariation_sub_sub_le_of_forcingGap` reshaped by `ring`.
+* `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC` — the **operator-level** `C³`
+  Taylor remainder `‖(D₂z − D₂x) − D₃ (z − x₀)‖ ≤ max ((C₁ + C₂)·gronwallBound 0 K 1 (t − t₀)) 0 · ‖z − x₀‖²`,
+  the operator numerator in the exact **single-constant** form
+  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` consumes.  Proof: the `∃`-op proof with the explicit-
+  constant curve bound closing each per-direction estimate after `ContinuousLinearMap.opNorm_le_bound`
+  (constant `max … 0`, nonnegative by `le_max_right`).
+
+Remaining for `ContDiff ℝ 3` (next session): with the neighbourhood-uniform numerator now available, the
+`HasFDerivAt (fun z => D₂ z) D₃ x₀` assembly needs (i) the **canonical linear families** the bilinear `D₃`
+packaging `exists_continuousLinearMap_thirdVariation_coeff_bilinear` consumes — a `W2 : E → ℝ → (E →L E)`
+linear in the base direction `k` (`= ` the linearised first variation at `x₀` in direction `k`,
+pointwise-additive/homogeneous via `linearVariation_perturbation_add_eq`/`_smul_eq`, continuous, `‖·‖ ≤ N₂‖k‖`)
+and the analogous `V0fun` linear in `h`; (ii) the `D₃` bounded operator from that packaging, whose
+characterisation is bridged to the `hD₃` slot of `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC`
+by building the per-`z` `W₂ z = W2 (z − x₀)` and a first-variation-uniqueness argument for the `V₀`/`V0fun h`
+match (`inhomogVariation_unique`); (iii) the per-`z` `Wdiff z` via `exists_hasDerivAt_inhomogVariation_of_continuous`
+and `Φ₁ z = Ψ z`; then `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` with `C = max (…) 0` on the ball
+`‖z − x₀‖ < 1` gives `HasFDerivAt (fun z => D₂ z) D₃ x₀`.  Finally the continuity of `z ↦ D₃` (a third-order
+analogue of the `C²` `hcont_D₂` Lipschitz bound) and the `contDiff_succ_iff_fderiv` chain close
+`exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
