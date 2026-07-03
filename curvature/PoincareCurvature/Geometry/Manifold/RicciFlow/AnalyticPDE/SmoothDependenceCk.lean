@@ -8824,6 +8824,35 @@ theorem curry2_iteratedFDeriv_two_eq_of_hasFDerivAt
   rw [hf']
   exact hD2.fderiv
 
+/-- **Representation bridge for the third derivative.**  The left-curry of the Fin-3 multilinear third
+derivative `iteratedFDeriv ℝ 3 f x : E[×3]→L E` equals the composition-form derivative of the Fin-2
+multilinear second derivative, `fderiv ℝ (iteratedFDeriv ℝ 2 f) x : E →L (E[×2]→L E)`.  This is the
+third-order companion of `curry2_iteratedFDeriv_two`: the module's `F_C` forcing contracts the third
+derivative as `(iteratedFDeriv ℝ 3 f ξ).curryLeft (W k)`, whereas the `C³` Taylor bound
+`norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq` produces it as
+`(fderiv ℝ (iteratedFDeriv ℝ 2 f) ξ) (W k)`; this lemma identifies the two.  Unconditional: by
+`ContinuousMultilinearMap.curryLeft_apply` and Mathlib's `iteratedFDeriv_succ_apply_left`
+(`iteratedFDeriv ℝ 3 f x m = fderiv (iteratedFDeriv ℝ 2 f) x (m 0) (tail m)`) at `m = Fin.cons a b`. -/
+theorem curryLeft_iteratedFDeriv_three (f : E → E) (x : E) :
+    (iteratedFDeriv ℝ 3 f x).curryLeft = fderiv ℝ (iteratedFDeriv ℝ 2 f) x := by
+  ext a b
+  rw [ContinuousMultilinearMap.curryLeft_apply, iteratedFDeriv_succ_apply_left]
+  simp
+
+/-- **Consumable form of the third-derivative bridge.**  If `D3ml` is the (composition-form) derivative
+of the multilinear second derivative `iteratedFDeriv ℝ 2 f` at `x`, then
+`D3ml = (iteratedFDeriv ℝ 3 f x).curryLeft`.  This is the form the `(F₁ − F₀)` assembly threads: the
+`C³` Taylor bound carries the third derivative as an abstract `D3ml` satisfying
+`HasFDerivAt (iteratedFDeriv ℝ 2 f) D3ml x`, and the module's `F_C` forcing carries it as
+`(iteratedFDeriv ℝ 3 f x).curryLeft`; this lemma identifies them.  Proof: rewrite the right side by
+`curryLeft_iteratedFDeriv_three`, then `hD3.fderiv` (uniqueness of `HasFDerivAt` derivatives). -/
+theorem curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt
+    {f : E → E} {D3ml : E →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E} {x : E}
+    (hD3 : HasFDerivAt (iteratedFDeriv ℝ 2 f) D3ml x) :
+    D3ml = (iteratedFDeriv ℝ 3 f x).curryLeft := by
+  rw [curryLeft_iteratedFDeriv_three]
+  exact hD3.fderiv.symm
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
