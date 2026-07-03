@@ -6134,6 +6134,150 @@ chart. -/
     (p : ℝ × X) :
     (affineChartHomeomorph c a hr).symm p = a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)) := rfl
 
+/-! ### Open parabolic balls and cylinders under the affine chart
+
+The `Set.MapsTo`/`Set.BijOn`/image lemmas above are stated for the *closed* parabolic ball and
+cylinder shapes.  Parabolic PDE (Schauder) estimates, however, are naturally taken on the *open*
+parabolic cylinder `Q = (t₀, t₁) × Ω` where the interior regularity lives, so the change of
+variables must also be available for the open shapes.  Because the strict inequality
+`parabolicDistance a q < ρ` is only preserved by the affine chart when the dilation factor is
+*strictly* positive, the open-domain lemmas require `r ≠ 0` (the closed-domain ones held for all
+`r`, since a nonnegative factor preserves `≤`).  With `r ≠ 0` the affine chart is a bijection of
+open parabolic balls and cylinders, exactly as in the closed case, and transports open-domain
+`C^{0,α}`/Hölder control in both directions. -/
+
+/-- The general affine map `p ↦ c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))` maps the *open*
+parabolic ball of radius `ρ` about the source center `a` into the *open* parabolic ball of radius
+`|r| * ρ` about the target center `c`, provided `r ≠ 0` (so that the dilation factor `|r|` is
+strictly positive and the strict inequality is preserved).  Open-domain companion of
+`parabolicClosedBall_mapsTo_affineChart`. -/
+theorem parabolicBall_mapsTo_affineChart
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r ρ : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicBall a ρ) (parabolicBall c (|r| * ρ)) := by
+  intro q hq
+  simp only [parabolicBall, Set.mem_setOf_eq] at hq ⊢
+  have hz : ((r ^ 2 * (a.1 - a.1), r • (a.2 - a.2)) : ℝ × X) = (0 : ℝ × X) := by simp
+  have hkey : parabolicDistance c (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2)))
+      = |r| * parabolicDistance a q := by
+    have h := parabolicDistance_affineChart c a r a q
+    rw [hz, add_zero] at h
+    exact h
+  rw [hkey]
+  exact mul_lt_mul_of_pos_left hq (abs_pos.mpr hr)
+
+/-- The general affine map maps the *open* parabolic cylinder of time radius `T` and space radius
+`S` about the source center `a` into the *open* parabolic cylinder of time radius `r ^ 2 * T` and
+space radius `|r| * S` about the target center `c`, provided `r ≠ 0`.  Open-domain companion of
+`parabolicClosedCylinder_mapsTo_affineChart`. -/
+theorem parabolicCylinder_mapsTo_affineChart
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r T S : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicCylinder a T S) (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  intro q hq
+  simp only [parabolicCylinder, Set.mem_setOf_eq] at hq ⊢
+  obtain ⟨hqt, hqs⟩ := hq
+  refine ⟨?_, ?_⟩
+  · have htime : |c.1 - (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2))).1| = r ^ 2 * |a.1 - q.1| := by
+      simp only [Prod.fst_add, sub_add_cancel_left, abs_neg, abs_mul, abs_of_nonneg (sq_nonneg r),
+        abs_sub_comm a.1 q.1]
+    rw [htime]
+    exact mul_lt_mul_of_pos_left hqt (by positivity)
+  · have hspace : dist c.2 (c + (r ^ 2 * (q.1 - a.1), r • (q.2 - a.2))).2 = |r| * dist a.2 q.2 := by
+      simp only [Prod.snd_add, dist_eq_norm, sub_add_cancel_left, norm_neg, norm_smul,
+        Real.norm_eq_abs]
+      rw [norm_sub_rev q.2 a.2]
+    rw [hspace]
+    exact mul_lt_mul_of_pos_left hqs (abs_pos.mpr hr)
+
+/-- **De-normalization map on open balls.**  For `r ≠ 0`, the inverse affine chart `Φ_{a,c,r⁻¹}`
+maps the open parabolic ball of radius `|r| * ρ` about the target center `c` back into the open
+parabolic ball of radius `ρ` about the source center `a`.  Open-domain companion of
+`parabolicClosedBall_mapsTo_affineChart_inv`. -/
+theorem parabolicBall_mapsTo_affineChart_inv
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r ρ : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (parabolicBall c (|r| * ρ)) (parabolicBall a ρ) := by
+  have h := parabolicBall_mapsTo_affineChart (c := a) (a := c) (r := r⁻¹) (ρ := |r| * ρ)
+    (inv_ne_zero hr)
+  have hrad : |r⁻¹| * (|r| * ρ) = ρ := by
+    rw [abs_inv, inv_mul_cancel_left₀ (abs_pos.mpr hr).ne']
+  rwa [hrad] at h
+
+/-- **The affine parabolic chart is a bijection of open parabolic balls.**  For `r ≠ 0`, the forward
+affine chart `Φ_{c,a,r}` restricts to a `Set.BijOn` from the open parabolic ball of radius `ρ` about
+the source center `a` onto the open parabolic ball of radius `|r| * ρ` about the target center `c`,
+with the inverse chart `Φ_{a,c,r⁻¹}` as two-sided inverse. -/
+theorem affineChart_bijOn_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    Set.BijOn (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicBall a ρ) (parabolicBall c (|r| * ρ)) := by
+  have hinv : Set.InvOn
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicBall a ρ) (parabolicBall c (|r| * ρ)) :=
+    ⟨(affineChart_leftInverse c a hr).leftInvOn (parabolicBall a ρ),
+      (affineChart_rightInverse c a hr).rightInvOn (parabolicBall c (|r| * ρ))⟩
+  exact hinv.bijOn (parabolicBall_mapsTo_affineChart hr)
+    (parabolicBall_mapsTo_affineChart_inv hr)
+
+/-- **Exact image of an open parabolic ball under the affine chart.**  For `r ≠ 0`, the forward
+affine chart carries the open parabolic ball of radius `ρ` about `a` onto the open parabolic ball of
+radius `|r| * ρ` about `c`. -/
+theorem affineChart_image_parabolicBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (ρ : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) '' parabolicBall a ρ
+      = parabolicBall c (|r| * ρ) :=
+  (affineChart_bijOn_parabolicBall c a hr ρ).image_eq
+
+/-- **De-normalization map on open cylinders.**  For `r ≠ 0`, the inverse affine chart `Φ_{a,c,r⁻¹}`
+maps the open parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about the
+target center `c` back into the open parabolic cylinder of time radius `T` and space radius `S`
+about the source center `a`.  Open-domain companion of
+`parabolicClosedCylinder_mapsTo_affineChart_inv`. -/
+theorem parabolicCylinder_mapsTo_affineChart_inv
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {c a : ℝ × X} {r T S : ℝ} (hr : r ≠ 0) :
+    Set.MapsTo (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (parabolicCylinder c (r ^ 2 * T) (|r| * S)) (parabolicCylinder a T S) := by
+  have h := parabolicCylinder_mapsTo_affineChart
+    (c := a) (a := c) (r := r⁻¹) (T := r ^ 2 * T) (S := |r| * S) (inv_ne_zero hr)
+  have hT : r⁻¹ ^ 2 * (r ^ 2 * T) = T := by
+    rw [inv_pow, inv_mul_cancel_left₀ (pow_ne_zero 2 hr)]
+  have hS : |r⁻¹| * (|r| * S) = S := by
+    rw [abs_inv, inv_mul_cancel_left₀ (abs_pos.mpr hr).ne']
+  rwa [hT, hS] at h
+
+/-- **The affine parabolic chart is a bijection of open parabolic cylinders.**  For `r ≠ 0`, the
+forward affine chart `Φ_{c,a,r}` restricts to a `Set.BijOn` from the open parabolic cylinder of time
+radius `T` and space radius `S` about the source center `a` onto the open parabolic cylinder of time
+radius `r ^ 2 * T` and space radius `|r| * S` about the target center `c`. -/
+theorem affineChart_bijOn_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    Set.BijOn (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicCylinder a T S) (parabolicCylinder c (r ^ 2 * T) (|r| * S)) := by
+  have hinv : Set.InvOn
+      (fun p : ℝ × X => a + (r⁻¹ ^ 2 * (p.1 - c.1), r⁻¹ • (p.2 - c.2)))
+      (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2)))
+      (parabolicCylinder a T S) (parabolicCylinder c (r ^ 2 * T) (|r| * S)) :=
+    ⟨(affineChart_leftInverse c a hr).leftInvOn (parabolicCylinder a T S),
+      (affineChart_rightInverse c a hr).rightInvOn
+        (parabolicCylinder c (r ^ 2 * T) (|r| * S))⟩
+  exact hinv.bijOn (parabolicCylinder_mapsTo_affineChart hr)
+    (parabolicCylinder_mapsTo_affineChart_inv hr)
+
+/-- **Exact image of an open parabolic cylinder under the affine chart.**  For `r ≠ 0`, the forward
+affine chart carries the open parabolic cylinder of time radius `T` and space radius `S` about `a`
+onto the open parabolic cylinder of time radius `r ^ 2 * T` and space radius `|r| * S` about `c`. -/
+theorem affineChart_image_parabolicCylinder
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (c a : ℝ × X) {r : ℝ} (hr : r ≠ 0)
+    (T S : ℝ) :
+    (fun p : ℝ × X => c + (r ^ 2 * (p.1 - a.1), r • (p.2 - a.2))) '' parabolicCylinder a T S
+      = parabolicCylinder c (r ^ 2 * T) (|r| * S) :=
+  (affineChart_bijOn_parabolicCylinder c a hr T S).image_eq
+
 end AnalyticPDE
 end RicciFlow
 
