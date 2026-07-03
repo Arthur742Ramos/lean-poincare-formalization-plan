@@ -4592,3 +4592,43 @@ formalised as an object and shown well-posed.
   are closed under addition and scalar multiplication, so the directional derivative
   `u₀ ↦ D_x Φ_t · u₀` is linear in `u₀` and assembles into the bounded operator
   `D_x Φ_t ∈ E →L[ℝ] E`.
+
+The superposition principle has now been **cashed out**: the directional-derivative map is
+assembled into the honest bounded operator `D_x Φ_t ∈ E →L[ℝ] E` (the fundamental solution /
+resolvent), with a full operator-level API (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only).  For a flow family `Φ` of
+`variationalFieldVec A` (`‖A t‖ ≤ K`) anchored at `Φ x t₀ = x`:
+
+* `flow_variationalFieldVec_add`, `flow_variationalFieldVec_smul`,
+  `flow_variationalFieldVec_zero` — the time-`t` flow map `x ↦ Φ x t` of the *linear* field
+  is additive, homogeneous, and fixes the origin (superposition + vector uniqueness).
+* `norm_flow_variationalFieldVec_le` — the operator upper bound
+  `‖Φ x t‖ ≤ exp (K · |t - t₀|) · ‖x‖` (from `dist_flow_apply_le` and `Φ 0 t = 0`).
+* `fundamentalSolution` — the resulting **bounded operator** `D_x Φ_t ∈ E →L[ℝ] E`, packaged
+  via `LinearMap.mkContinuous`, with `fundamentalSolution_apply` (`D_x Φ_t · x = Φ x t`),
+  `norm_fundamentalSolution_le` (`‖D_x Φ_t‖ ≤ exp (K · |t - t₀|)`), and
+  `fundamentalSolution_anchor` (`D_x Φ_{t₀} = 1`).
+* `norm_flow_variationalFieldVec_ge`, `norm_fundamentalSolution_apply_ge`,
+  `fundamentalSolution_injective` — the **lower** operator bound
+  `exp (-K · |t - t₀|) · ‖x‖ ≤ ‖D_x Φ_t · x‖` (from the `C^0` lower bound
+  `dist_flow_apply_ge`), whence the resolvent is bounded below and **injective** (the
+  operator shadow of the bi-Lipschitz embedding `injective_flow_apply`): a non-degenerate
+  resolvent.
+* `fundamentalSolution_eq_of_operator_isIntegralCurve` — the **operator-ODE bridge**: any
+  solution `W` of the operator variational equation `W'(t) = A(t) ∘ W(t)` with `W t₀ = 1`
+  (the fundamental matrix) satisfies `fundamentalSolution … t = W t`, tying the operator- and
+  vector-valued variational equations together.
+* `continuous_fundamentalSolution_apply`, `continuous_fundamentalSolution` — strong (in time)
+  and joint continuity of the resolvent action `(t, u₀) ↦ D_x Φ_t · u₀` (from
+  `IsIntegralCurve.continuous` / `continuous_flow`).
+* `isIntegralCurve_fundamentalSolution_apply`, `fundamentalSolution_apply_anchor` — the
+  resolvent **columns are the variational-ODE solutions**: `t ↦ D_x Φ_t · u₀` is the integral
+  curve of `variationalFieldVec A` through `u₀` at `t₀` (the characterisation a subsequent
+  `C^1`-differentiability proof consumes).
+* `fundamentalSolution_congr` — the resolvent is **canonical**: independent of the flow-family
+  representative, depending only on the field `A` (and `t₀`, `t`).
+
+Remaining in this tower (future sessions): *existence* of the variational flow family (global
+integral curves of the uniformly-Lipschitz linear field, making the above non-vacuous), then
+the actual `C^1` differentiability of the base flow `x ↦ Φ x t` with derivative `D_x Φ_t`
+(the remainder Grönwall estimate), and its bootstrap to `C^k` (`C^3`).
