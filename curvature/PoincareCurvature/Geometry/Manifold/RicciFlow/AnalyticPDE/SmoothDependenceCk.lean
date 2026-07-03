@@ -4657,6 +4657,85 @@ theorem norm_firstVariation_sub_linearVariation_le_sq
     _ ≤ Cquad * ‖z - x₀‖ ^ 2 * expT * gronwallBound 0 (K : ℝ) 1 (t - t₀) := hbound
     _ = Cquad * expT * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖z - x₀‖ ^ 2 := by ring
 
+/-- **Interval-restricted directional resolvent-coefficient bound.**  The variant of
+`norm_fundamentalSolution_sub_apply_le_of_forall_le` whose coefficient-gap hypothesis
+`‖A s - A' s‖ ≤ ε` is required only on the compact tube `[t₀, T]` (the proof only ever evaluates the
+gap there).  This is the form the base-point `C²` bootstrap needs: the trajectory-linearised
+coefficients `A₀ s = Dv s (Φ x₀ s)` and `A_z s = Dv s (Φ z s)` are close *only on compact time
+intervals* (their difference `≤ L · exp (K (T - t₀)) · ‖z - x₀‖` grows with the tube), never
+globally. -/
+theorem norm_fundamentalSolution_sub_apply_le_of_forall_le_Icc
+    {A A' : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K) (hA' : ∀ s, ‖A' s‖₊ ≤ K)
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec A)) (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec A')) (h2 : ∀ x, Φ₂ x t₀ = x)
+    {ε : ℝ} {T : ℝ} (hAA' : ∀ s ∈ Icc t₀ T, ‖A s - A' s‖ ≤ ε)
+    (u₀ : E) {t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖fundamentalSolution hA hΦ₁ h1 t u₀ - fundamentalSolution hA' hΦ₂ h2 t u₀‖
+      ≤ ε * Real.exp ((K : ℝ) * (T - t₀)) * ‖u₀‖ * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  set εg : ℝ := ε * Real.exp ((K : ℝ) * (T - t₀)) * ‖u₀‖ with hεg
+  have hgbound : ∀ s ∈ Ico t₀ T,
+      dist (variationalFieldVec A' s (Φ₂ u₀ s)) (variationalFieldVec A s (Φ₂ u₀ s)) ≤ εg := by
+    intro s hs
+    have hsle : |s - t₀| ≤ T - t₀ := by
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]
+      exact sub_le_sub_right hs.2.le t₀
+    have hgnorm : ‖Φ₂ u₀ s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) * ‖u₀‖ := by
+      refine (norm_flow_variationalFieldVec_le hA' hΦ₂ h2 u₀ s).trans ?_
+      exact mul_le_mul_of_nonneg_right
+        (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsle K.coe_nonneg)) (norm_nonneg _)
+    have hcoeff : ‖A' s - A s‖ ≤ ε := by
+      rw [show A' s - A s = -(A s - A' s) by abel, norm_neg]
+      exact hAA' s ⟨hs.1, hs.2.le⟩
+    calc dist (variationalFieldVec A' s (Φ₂ u₀ s)) (variationalFieldVec A s (Φ₂ u₀ s))
+        = ‖(A' s - A s) (Φ₂ u₀ s)‖ := by
+          simp only [variationalFieldVec, dist_eq_norm, ContinuousLinearMap.sub_apply]
+      _ ≤ ‖A' s - A s‖ * ‖Φ₂ u₀ s‖ := (A' s - A s).le_opNorm _
+      _ ≤ ε * (Real.exp ((K : ℝ) * (T - t₀)) * ‖u₀‖) :=
+          mul_le_mul hcoeff hgnorm (norm_nonneg _) (le_trans (norm_nonneg _) hcoeff)
+      _ = εg := by rw [hεg]; ring
+  have key := dist_le_of_approx_trajectories_ODE
+    (v := variationalFieldVec A) (a := t₀) (b := T)
+    (f := fun s => Φ₁ u₀ s) (g := fun s => Φ₂ u₀ s)
+    (f' := fun s => variationalFieldVec A s (Φ₁ u₀ s))
+    (g' := fun s => variationalFieldVec A' s (Φ₂ u₀ s))
+    (εf := 0) (εg := εg) (δ := 0) (K := K)
+    (fun s => lipschitzWith_variationalFieldVec hA s)
+    (hΦ₁ u₀).continuous.continuousOn
+    (fun s _ => (hΦ₁ u₀ s).hasDerivWithinAt)
+    (fun s _ => le_of_eq (dist_self _))
+    (hΦ₂ u₀).continuous.continuousOn
+    (fun s _ => (hΦ₂ u₀ s).hasDerivWithinAt)
+    hgbound
+    (by simp [h1, h2])
+  have hb := key t ht
+  rw [zero_add, gronwallBound_zero_left_mul] at hb
+  rw [fundamentalSolution_apply, fundamentalSolution_apply, ← dist_eq_norm]
+  exact hb
+
+/-- **Interval-restricted operator-norm resolvent-coefficient bound.**  The variant of
+`norm_fundamentalSolution_sub_le_of_forall_le` with the coefficient-gap hypothesis required only on
+the tube `[t₀, T]` (assembled over unit directions from
+`norm_fundamentalSolution_sub_apply_le_of_forall_le_Icc`).  For coefficients `A`, `A'` (both `≤ K`)
+with `‖A s - A' s‖ ≤ ε` on `[t₀, T]`,
+`‖D_x Φ_t^A - D_x Φ_t^{A'}‖ ≤ ε · exp (K (T - t₀)) · gronwallBound 0 K 1 (t - t₀)` there. -/
+theorem norm_fundamentalSolution_sub_le_of_forall_le_Icc
+    {A A' : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K) (hA' : ∀ s, ‖A' s‖₊ ≤ K)
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec A)) (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec A')) (h2 : ∀ x, Φ₂ x t₀ = x)
+    {ε : ℝ} {T : ℝ} (hε : 0 ≤ ε) (hAA' : ∀ s ∈ Icc t₀ T, ‖A s - A' s‖ ≤ ε)
+    {t : ℝ} (ht : t ∈ Icc t₀ T) :
+    ‖fundamentalSolution hA hΦ₁ h1 t - fundamentalSolution hA' hΦ₂ h2 t‖
+      ≤ ε * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀) := by
+  refine ContinuousLinearMap.opNorm_le_bound _ ?_ (fun u₀ => ?_)
+  · exact mul_nonneg (mul_nonneg hε (Real.exp_pos _).le)
+      (gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr ht.1))
+  · rw [ContinuousLinearMap.sub_apply]
+    refine (norm_fundamentalSolution_sub_apply_le_of_forall_le_Icc
+      hA hA' hΦ₁ h1 hΦ₂ h2 hAA' u₀ ht).trans (le_of_eq ?_)
+    ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
