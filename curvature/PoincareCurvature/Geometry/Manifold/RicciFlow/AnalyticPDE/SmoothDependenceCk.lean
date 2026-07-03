@@ -10541,6 +10541,111 @@ theorem norm_thirdDerivForcing_baseCurve_sub_le
     hdw).trans_eq ?_
   ring
 
+/-- **Base-point Lipschitz gap of the `Vfam`-inner bilinear composition forcing term
+`((D²v ∘ Vfam_k) h) ∘ W`.**  The first of the three `((P ∘ A) d) ∘ B`-shaped forcing terms of the
+third-variation ODE, in which the *inner* operand `A` is a linearised first-variation curve `Vfam_k`
+(direction `k`) and the *outer* operand `B` is the resolvent `W`.  For two base points `z`, `x₀` with
+resolvents `W_z`, `W_x` and linearised first-variation curves `U_z`, `U_x` in direction `k` (solving the
+linearised ODE at `z`, `x₀` respectively), the forcing operator
+`s ↦ ((D²v(Φ · s) ∘ U_·) h) ∘ W_·` moves, for `s ∈ [t₀, T]`, by at most
+`exp(K(T−t₀))⁴ · g · (2·M₂·C' + 4·L·C'²·g) · ‖z − x₀‖ · ‖k‖ · ‖h‖` with `g = gronwallBound 0 K 1 (T−t₀)`.
+
+Proof: instantiate the abstract composition-forcing perturbation `norm_bilinearCompForcing_sub_le` with
+`P = D²v(Φ · s)`, `A = U_·` (the `Vfam_k` curve), `B = W_·`, feeding the sizes `‖D²v‖ ≤ C'`,
+`‖U_·‖ ≤ C'·exp(K(T−t₀))²·‖k‖·g` (`norm_linearisedFirstVariation_le`), `‖W_x‖ ≤ exp(K(T−t₀))`, and the
+base-gaps `‖D²v(Φ z) − D²v(Φ x₀)‖ ≤ M₂·exp·‖z−x₀‖` (`norm_secondDerivField_apply_flow_sub_le`),
+`‖U_z − U_x‖ ≤ exp³·(M₂ + 3LC'g)·‖z−x₀‖·‖k‖·g` (`norm_linearisedFirstVariation_baseCurve_sub_le`),
+`‖W_z − W_x‖ ≤ L·exp²·g·‖z−x₀‖` (`norm_fundamentalSolution_baseCurve_sub_le`); the abstract
+`(dp·a·b + p·da·b + p·a·db)·‖h‖` bound collapses to the clean `exp⁴·g·(2M₂C' + 4LC'²g)` form by
+`ring`. -/
+theorem norm_bilinearComp_VfamInner_baseCurve_sub_le
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {L M₂ : ℝ≥0} {C' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD2vlip : ∀ s, LipschitzWith M₂ (D2v s))
+    (z x₀ : E)
+    (hAz : ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K) (hAx : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K)
+    (hC'0 : 0 ≤ C') (hC'z : ∀ s, ‖D2v s (Φ z s)‖ ≤ C') (hC'x : ∀ s, ‖D2v s (Φ x₀ s)‖ ≤ C')
+    {Φ₁ Φ₂ : E → ℝ → E}
+    (hΦ₁ : ∀ x, IsIntegralCurve (Φ₁ x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h1 : ∀ x, Φ₁ x t₀ = x)
+    (hΦ₂ : ∀ x, IsIntegralCurve (Φ₂ x) (variationalFieldVec (fun s => Dv s (Φ x₀ s))))
+    (h2 : ∀ x, Φ₂ x t₀ = x)
+    (k h : E) {T : ℝ}
+    {Uz Ux : ℝ → (E →L[ℝ] E)}
+    (hUz : ∀ s, HasDerivAt Uz
+      ((Dv s (Φ z s)).comp (Uz s)
+        + ((D2v s (Φ z s)).comp (fundamentalSolution hAz hΦ₁ h1 s) k).comp
+            (fundamentalSolution hAz hΦ₁ h1 s)) s)
+    (hUz0 : Uz t₀ = 0)
+    (hUx : ∀ s, HasDerivAt Ux
+      ((Dv s (Φ x₀ s)).comp (Ux s)
+        + ((D2v s (Φ x₀ s)).comp (fundamentalSolution hAx hΦ₂ h2 s) k).comp
+            (fundamentalSolution hAx hΦ₂ h2 s)) s)
+    (hUx0 : Ux t₀ = 0)
+    {s : ℝ} (hs : s ∈ Set.Icc t₀ T) :
+    ‖((D2v s (Φ z s)).comp (Uz s) h).comp (fundamentalSolution hAz hΦ₁ h1 s)
+        - ((D2v s (Φ x₀ s)).comp (Ux s) h).comp (fundamentalSolution hAx hΦ₂ h2 s)‖
+      ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+          * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+          * ‖z - x₀‖ * ‖k‖ * ‖h‖ := by
+  have hsabs : |s - t₀| ≤ T - t₀ := by
+    rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; linarith [hs.2]
+  have he0 : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (T - t₀)) := (Real.exp_pos _).le
+  have hg0 : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans hs.1 hs.2))
+  have hgmono : gronwallBound 0 (K : ℝ) 1 (s - t₀) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_mono (le_refl (0 : ℝ)) zero_le_one K.coe_nonneg (by linarith [hs.2])
+  have he2 : Real.exp (2 * (K : ℝ) * (T - t₀)) = Real.exp ((K : ℝ) * (T - t₀)) ^ 2 := by
+    rw [sq, ← Real.exp_add]; congr 1; ring
+  -- resolvent sizes and base-gap
+  have hWxn : ‖fundamentalSolution hAx hΦ₂ h2 s‖ ≤ Real.exp ((K : ℝ) * (T - t₀)) :=
+    (norm_fundamentalSolution_le hAx hΦ₂ h2 s).trans
+      (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hsabs K.coe_nonneg))
+  have hBd : ‖fundamentalSolution hAz hΦ₁ h1 s - fundamentalSolution hAx hΦ₂ h2 s‖
+      ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖
+          * Real.exp ((K : ℝ) * (T - t₀)) * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    refine (norm_fundamentalSolution_baseCurve_sub_le hv hΦ h0 hDvlip z x₀ hAz hAx
+      hΦ₁ h1 hΦ₂ h2 hs).trans ?_
+    exact mul_le_mul_of_nonneg_left hgmono (by positivity)
+  -- `Vfam_k`-curve sizes
+  have hA₁ : ‖Uz s‖ ≤ C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖k‖
+      * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    have hle := norm_linearisedFirstVariation_le z hAz hΦ₁ h1 hC'0 hC'z k hUz hUz0 hs
+    rw [he2] at hle
+    refine hle.trans ?_
+    exact mul_le_mul_of_nonneg_left hgmono
+      (mul_nonneg (mul_nonneg hC'0 (by positivity)) (norm_nonneg _))
+  have hA₂ : ‖Ux s‖ ≤ C' * Real.exp ((K : ℝ) * (T - t₀)) ^ 2 * ‖k‖
+      * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    have hle := norm_linearisedFirstVariation_le x₀ hAx hΦ₂ h2 hC'0 hC'x k hUx hUx0 hs
+    rw [he2] at hle
+    refine hle.trans ?_
+    exact mul_le_mul_of_nonneg_left hgmono
+      (mul_nonneg (mul_nonneg hC'0 (by positivity)) (norm_nonneg _))
+  -- `Vfam_k`-curve base-gap
+  have hMco : (0 : ℝ) ≤ (M₂ : ℝ) + 3 * (L : ℝ) * C' * gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    add_nonneg M₂.coe_nonneg
+      (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) L.coe_nonneg) hC'0) hg0)
+  have hAd : ‖Uz s - Ux s‖
+      ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 3
+          * ((M₂ : ℝ) + 3 * (L : ℝ) * C' * gronwallBound 0 (K : ℝ) 1 (T - t₀))
+          * ‖z - x₀‖ * ‖k‖ * gronwallBound 0 (K : ℝ) 1 (T - t₀) := by
+    refine (norm_linearisedFirstVariation_baseCurve_sub_le hv hΦ h0 hDvlip hD2vlip z x₀ hAz hAx
+      hC'0 hC'z hC'x hΦ₁ h1 hΦ₂ h2 k hUz hUz0 hUx hUx0 hs).trans ?_
+    exact mul_le_mul_of_nonneg_left hgmono
+      (mul_nonneg (mul_nonneg (mul_nonneg (by positivity) hMco) (norm_nonneg _)) (norm_nonneg _))
+  -- second-derivative field base-gap
+  have hPd : ‖D2v s (Φ z s) - D2v s (Φ x₀ s)‖
+      ≤ (M₂ : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) * ‖z - x₀‖ :=
+    norm_secondDerivField_apply_flow_sub_le hv hΦ h0 (hD2vlip s) hsabs z x₀
+  refine (norm_bilinearCompForcing_sub_le h (hC'z s) hA₁ hA₂ hWxn hPd hAd hBd hC'0
+    (mul_nonneg (mul_nonneg (mul_nonneg hC'0 (by positivity)) (norm_nonneg _)) hg0)
+    (mul_nonneg (mul_nonneg M₂.coe_nonneg he0) (norm_nonneg _))
+    (mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (by positivity) hMco) (norm_nonneg _))
+      (norm_nonneg _)) hg0)).trans_eq ?_
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
