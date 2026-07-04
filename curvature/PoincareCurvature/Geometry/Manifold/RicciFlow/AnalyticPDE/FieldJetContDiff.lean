@@ -311,6 +311,48 @@ theorem contMDiff_two_flow_apply_of_contDiff_of_bddDerivs [CompleteSpace E]
     (fun x => continuous_apply_of_contDiff_uncurry h x)
     hL hD2vlip hΦ h0 t
 
+/-! ## Layer-3 multilinear compatibility identities (`hcompat`/`hcurry`)
+
+The tower's `C³` flow theorem `contMDiff_three_flow_apply_of_lipschitz_thirdDeriv` consumes the third
+jet in the **multilinear** (`iteratedFDeriv`) representation — the only form in which the third
+derivative carries a synthesizable norm — together with two compatibility identities linking that
+representation to the nested-`fderiv` second derivative used by the layer-2 forcing engine:
+
+* `hcompat : D2vc s ξ = curry2 (D2vm s ξ)` with `D2vc s = fderiv ℝ (fderiv ℝ (v s))` and
+  `D2vm s = iteratedFDeriv ℝ 2 (v s)`;
+* `hcurry  : D3vm s ξ = (D3v s ξ).curryLeft` with `D3vm s = fderiv ℝ (iteratedFDeriv ℝ 2 (v s))` and
+  `D3v s = iteratedFDeriv ℝ 3 (v s)`.
+
+Both identities hold **unconditionally** (no smoothness hypothesis): the first is the pointwise
+`iteratedFDeriv_two_apply` bridged through `curry2_apply`; the second is the definitional
+`fderiv_iteratedFDeriv` (`fderiv ℝ (iteratedFDeriv ℝ 2 f) = continuousMultilinearCurryLeftEquiv … ∘
+iteratedFDeriv ℝ 3 f`), whose currying equiv is exactly `ContinuousMultilinearMap.curryLeft`. -/
+
+/-- **`hcompat` identity.**  The nested-`fderiv` second derivative `fderiv ℝ (fderiv ℝ f) ξ`, as an
+`E →L[ℝ] E →L[ℝ] E`, is the two-fold curry `curry2` of the multilinear second derivative
+`iteratedFDeriv ℝ 2 f ξ`.  Holds for every `f : E → E` and `ξ` with no smoothness hypothesis:
+`curry2 X a b = X ![a, b]` (`curry2_apply`) and `iteratedFDeriv ℝ 2 f ξ ![a, b] =
+fderiv ℝ (fderiv ℝ f) ξ a b` (`iteratedFDeriv_two_apply`).  This is exactly the `hcompat` input of the
+tower's `C³` flow theorem (with `f := v s`). -/
+theorem fderiv_fderiv_eq_curry2_iteratedFDeriv_two (f : E → E) (ξ : E) :
+    fderiv ℝ (fderiv ℝ f) ξ = curry2 (iteratedFDeriv ℝ 2 f ξ) := by
+  ext a b
+  rw [curry2_apply, iteratedFDeriv_two_apply]
+  simp
+
+/-- **`hcurry` identity.**  The Fréchet derivative of the multilinear second derivative
+`fderiv ℝ (iteratedFDeriv ℝ 2 f) ξ` — an `E →L[ℝ] (E[×2]→L E)` — is the left-curry
+`(iteratedFDeriv ℝ 3 f ξ).curryLeft` of the multilinear third derivative.  Definitional: by
+`fderiv_iteratedFDeriv` (`n = 2`) `fderiv ℝ (iteratedFDeriv ℝ 2 f)` is
+`continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E ∘ iteratedFDeriv ℝ 3 f`, and that
+currying equiv's forward map is `ContinuousMultilinearMap.curryLeft`.  Exactly the `hcurry` input of
+the tower's `C³` flow theorem (with `f := v s`). -/
+theorem fderiv_iteratedFDeriv_two_eq_curryLeft (f : E → E) (ξ : E) :
+    fderiv ℝ (iteratedFDeriv ℝ 2 f) ξ = (iteratedFDeriv ℝ 3 f ξ).curryLeft := by
+  ext x m
+  rw [fderiv_iteratedFDeriv]
+  rfl
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
