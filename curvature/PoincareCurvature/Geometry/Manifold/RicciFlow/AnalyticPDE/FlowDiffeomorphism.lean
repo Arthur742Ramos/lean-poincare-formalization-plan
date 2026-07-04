@@ -704,6 +704,43 @@ theorem exists_contDiff_three_diffeomorph_flow_apply [CompleteSpace E]
     show Φ (Ψ w t₀) t = w
     rw [heq]; exact hΨ0 w
 
+/-- **Field-data-only `C³` flow-diffeomorphism existence.**  From the `C^{3,1}` jet of the field `v`
+alone (no pre-supplied flow family), there is a flow family `Φ` anchored at `t₀`, an integral curve
+of `v`, whose time-`t` map is a `C³` diffeomorphism of the state space for *every* `t`: bijective
+with reverse-time inverse `ψ`, both `ContDiff ℝ 3`.  This is the fully unconditional entry point —
+the Banach/chart-level statement a compact-manifold gauge-flow constructor (Item 2) consumes. -/
+theorem exists_flow_contDiff_three_diffeomorph [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ N : ℝ≥0}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ)
+    (hD2vcc : Continuous fun p : ℝ × E => D2vc p.1 p.2)
+    (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD2vmlip : ∀ s, LipschitzWith N (D2vm s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ)
+    (hD3vmc : Continuous fun p : ℝ × E => D3vm p.1 p.2)
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vc : Continuous fun p : ℝ × E => D3v p.1 p.2)
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hcurry : ∀ s ξ, D3vm s ξ = (D3v s ξ).curryLeft) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+      ∀ t, ∃ ψ : E → E, Function.LeftInverse ψ (fun z => Φ z t) ∧
+        Function.RightInverse ψ (fun z => Φ z t) ∧
+        ContDiff ℝ 3 (fun z => Φ z t) ∧ ContDiff ℝ 3 ψ := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  refine ⟨Φ, h0, hΦ, fun t => ?_⟩
+  exact exists_contDiff_three_diffeomorph_flow_apply
+    hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip hD2vmlip hD3vm hD3vmc hD3vmlip
+    hD3vc hD3vlip hcompat hcurry hΦ h0 t
+
 end
 
 end SmoothDependenceCk
