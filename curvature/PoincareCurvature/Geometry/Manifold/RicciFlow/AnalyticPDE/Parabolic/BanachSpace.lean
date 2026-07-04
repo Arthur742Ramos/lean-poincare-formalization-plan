@@ -2057,6 +2057,59 @@ theorem exists_fixedPoint_quadraticRHS_closedBall_zero [CompleteSpace E]
     (mapsTo_quadraticRHS_closedBall_zero A L f hself)
   simpa using hcontract
 
+/-- **The quadratic Ricci–DeTurck right-hand side is Lipschitz on every closed ball.**  On
+`closedBall c r` (`0 ≤ r`), `u ↦ A u + L(u, u) + f` is `LipschitzOnWith (‖A‖ + 2‖L‖(‖c‖+r))` — the
+linear part contributes `‖A‖` and the quadratic diagonal `2‖L‖(‖c‖+r)`
+(`norm_mulBilinL_diag_sub_le`).  The named contraction property of the DeTurck right-hand side,
+supplying both the short-time contraction (when `‖A‖ + 2‖L‖(‖c‖+r) < 1`) and the in-ball uniqueness. -/
+theorem lipschitzOnWith_quadraticRHS_closedBall
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (L : E →L[ℝ] E →L[ℝ] E) (f : ParabolicC0AlphaBanach X E α s)
+    (c : ParabolicC0AlphaBanach X E α s) {r : ℝ} (hr : 0 ≤ r) :
+    LipschitzOnWith (‖A‖ + 2 * ‖L‖ * (‖c‖ + r)).toNNReal
+      (fun u => A u + mulBilinL L u u + f) (Metric.closedBall c r) := by
+  rw [lipschitzOnWith_iff_dist_le_mul]
+  intro u hu v hv
+  have hu' : ‖u‖ ≤ ‖c‖ + r := by
+    have hdc : dist u c ≤ r := Metric.mem_closedBall.mp hu
+    have hsub : ‖u‖ - ‖c‖ ≤ ‖u - c‖ := norm_sub_norm_le u c
+    rw [dist_eq_norm] at hdc; linarith
+  have hv' : ‖v‖ ≤ ‖c‖ + r := by
+    have hdc : dist v c ≤ r := Metric.mem_closedBall.mp hv
+    have hsub : ‖v‖ - ‖c‖ ≤ ‖v - c‖ := norm_sub_norm_le v c
+    rw [dist_eq_norm] at hdc; linarith
+  have huv : ‖u‖ + ‖v‖ ≤ 2 * (‖c‖ + r) := by linarith
+  rw [dist_eq_norm, dist_eq_norm, Real.coe_toNNReal _ (by positivity)]
+  have hsplit : (A u + mulBilinL L u u + f) - (A v + mulBilinL L v v + f)
+      = A (u - v) + (mulBilinL L u u - mulBilinL L v v) := by rw [map_sub]; abel
+  rw [hsplit]
+  calc ‖A (u - v) + (mulBilinL L u u - mulBilinL L v v)‖
+      ≤ ‖A (u - v)‖ + ‖mulBilinL L u u - mulBilinL L v v‖ := norm_add_le _ _
+    _ ≤ ‖A‖ * ‖u - v‖ + ‖L‖ * (‖u‖ + ‖v‖) * ‖u - v‖ :=
+        add_le_add (A.le_opNorm _) (norm_mulBilinL_diag_sub_le L u v)
+    _ ≤ ‖A‖ * ‖u - v‖ + ‖L‖ * (2 * (‖c‖ + r)) * ‖u - v‖ := by gcongr
+    _ = (‖A‖ + 2 * ‖L‖ * (‖c‖ + r)) * ‖u - v‖ := by ring
+
+/-- **Uniqueness of the quadratic Ricci–DeTurck solution in a ball.**  Under the contraction condition
+`‖A‖ + 2‖L‖(‖c‖+r) < 1`, two solutions of `A u + L(u, u) + f = u` lying in `closedBall c r` coincide.
+With the existence `exists_fixedPoint_quadraticRHS_closedBall` this is the full well-posedness of the
+quadratic Ricci–DeTurck short-time chart solution. -/
+theorem eq_of_fixedPoint_quadraticRHS_closedBall
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (L : E →L[ℝ] E →L[ℝ] E) (f : ParabolicC0AlphaBanach X E α s)
+    (c : ParabolicC0AlphaBanach X E α s) {r : ℝ}
+    (hcontract : ‖A‖ + 2 * ‖L‖ * (‖c‖ + r) < 1)
+    {u u' : ParabolicC0AlphaBanach X E α s}
+    (hu : u ∈ Metric.closedBall c r) (hu' : u' ∈ Metric.closedBall c r)
+    (hfu : A u + mulBilinL L u u + f = u) (hfu' : A u' + mulBilinL L u' u' + f = u') :
+    u = u' := by
+  have hr0 : (0 : ℝ) ≤ r := le_trans dist_nonneg (Metric.mem_closedBall.mp hu)
+  have hK : (‖A‖ + 2 * ‖L‖ * (‖c‖ + r)).toNNReal < 1 := by
+    rw [← NNReal.coe_lt_coe, Real.coe_toNNReal _ (by positivity), NNReal.coe_one]
+    exact hcontract
+  exact eq_of_fixedPoint_of_lipschitzOnWith_closedBall hK
+    (lipschitzOnWith_quadraticRHS_closedBall A L f c hr0) hu hu' hfu hfu'
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
