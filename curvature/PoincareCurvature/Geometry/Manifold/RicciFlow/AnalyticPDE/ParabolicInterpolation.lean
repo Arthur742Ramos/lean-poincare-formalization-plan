@@ -277,5 +277,70 @@ theorem parabolicC0AlphaNorm_sub_interpolation_short_time_le
   intro x hx
   exact sub_eq_zero.mpr (hagree x hx)
 
+/-- **Quantitative short-time smallness of the interpolation factor.**  For `0 < α`, `θ < 1`, and any
+target ratio `q > 0`, there is a slab thickness `T₀ > 0` such that for every `0 ≤ T ≤ T₀` the
+short-time interpolation contraction factor is at most `q`:
+
+  `(√T)^α + 2^{1−θ} · (√T)^{α (1−θ)} ≤ q`.
+
+Both exponents `α` and `α (1 − θ)` are strictly positive (as `α > 0`, `1 − θ > 0`), so the factor is
+continuous in `T` at `0` with value `0 < q`; hence it stays below `q` on a whole neighbourhood of `0`,
+and in particular on `[0, T₀]` for `T₀` half the neighbourhood radius.  This is the honest
+*quantitative* form of "the factor `→ 0` as `T → 0`" that the Ricci–DeTurck fixed point consumes:
+choosing the slab thin enough drives the intermediate-norm contraction ratio below any prescribed
+`q < 1`. -/
+theorem exists_thickness_shortTimeInterpFactor_le
+    {α θ q : ℝ} (hα : 0 < α) (hθ1 : θ < 1) (hq : 0 < q) :
+    ∃ T₀ > 0, ∀ T : ℝ, 0 ≤ T → T ≤ T₀ →
+      Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)) ≤ q := by
+  have hαθ : 0 < α * (1 - θ) := mul_pos hα (by linarith)
+  have hgc : ContinuousAt
+      (fun T : ℝ => Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ))) 0 :=
+    (Real.continuous_sqrt.continuousAt.rpow_const (Or.inr hα.le)).add
+      (continuousAt_const.mul (Real.continuous_sqrt.continuousAt.rpow_const (Or.inr hαθ.le)))
+  have hlt : Real.sqrt (0 : ℝ) ^ α + 2 ^ (1 - θ) * Real.sqrt 0 ^ (α * (1 - θ)) < q := by
+    rw [Real.sqrt_zero, Real.zero_rpow (ne_of_gt hα), Real.zero_rpow (ne_of_gt hαθ),
+      mul_zero, add_zero]
+    exact hq
+  have hev := Filter.Tendsto.eventually_lt_const hlt hgc
+  rw [Metric.eventually_nhds_iff] at hev
+  obtain ⟨ε, hε, hball⟩ := hev
+  refine ⟨ε / 2, by positivity, fun T hT0 hTle => ?_⟩
+  have hdist : dist T 0 < ε := by
+    rw [Real.dist_eq, sub_zero, abs_of_nonneg hT0]; linarith
+  exact le_of_lt (hball hdist)
+
+/-- **Short-time intermediate `C^{0,α θ}` contraction (quantitative form).**  For `0 < α`,
+`0 ≤ θ < 1`, and any prescribed contraction ratio `q > 0`, there is a slab thickness `T₀ > 0` such
+that on *every* time-slab of thickness `T ≤ T₀` (closed under dropping to the initial slice), any two
+functions `u`, `v` agreeing on the initial slice with `α`-Hölder difference satisfy the genuine
+`q`-contraction estimate in the intermediate parabolic norm:
+
+  `‖u − v‖_{C^{0,α θ}} ≤ q · [u − v]_α`.
+
+This is the load-bearing capstone the Ricci–DeTurck short-time fixed point consumes: it upgrades the
+qualitative short-time smallness `parabolicC0AlphaNorm_sub_interpolation_short_time_le` (whose factor
+merely `→ 0`) to the quantitative "thin enough slab ⇒ contraction ratio `< 1`" statement, by choosing
+`T₀` so small (`exists_thickness_shortTimeInterpFactor_le`) that the interpolation factor is below the
+target ratio `q`.  Taking `q < 1` exhibits the solution map as a strict contraction in the
+intermediate `C^{0,α θ}` norm on a sufficiently thin time-slab. -/
+theorem exists_thickness_parabolicC0AlphaNorm_sub_interpolation_contraction
+    {α θ q : ℝ} (hα : 0 < α) (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) (hq : 0 < q) :
+    ∃ T₀ > 0, ∀ {T t₀ : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)},
+      0 ≤ T → T ≤ T₀ →
+      ParabolicHolderOn α (fun z => u z - v z) s →
+      (∀ p ∈ s, |p.1 - t₀| ≤ T) →
+      (∀ p ∈ s, (t₀, p.2) ∈ s) →
+      (∀ x : X, (t₀, x) ∈ s → u (t₀, x) = v (t₀, x)) →
+      parabolicC0AlphaNorm (α * θ) (fun z => u z - v z) s
+        ≤ q * parabolicHolderSeminorm α (fun z => u z - v z) s := by
+  obtain ⟨T₀, hT₀, hfac⟩ := exists_thickness_shortTimeInterpFactor_le hα hθ1 hq
+  refine ⟨T₀, hT₀, ?_⟩
+  intro T t₀ u v s hT0 hTle huv hslab hcyl hagree
+  refine (parabolicC0AlphaNorm_sub_interpolation_short_time_le hα.le hθ0 hθ1.le
+    huv hslab hcyl hagree).trans ?_
+  exact mul_le_mul_of_nonneg_right (hfac T hT0 hTle)
+    (parabolicHolderSeminorm_nonneg α (fun z => u z - v z) s)
+
 end AnalyticPDE
 end RicciFlow
