@@ -348,6 +348,111 @@ theorem exists_flow_diffeomorph_two [CompleteSpace E]
   exact ⟨⟨⟨fun z => Φ z t, ψ, hL, hR⟩,
     contMDiff_iff_contDiff.mpr hcdΦ, contMDiff_iff_contDiff.mpr hcdψ⟩, fun z => rfl⟩
 
+/-!
+## The spatial pushforward (differential) of the flow map, and the resolvent action
+
+The layers above supply the *spatial* smoothness (`ContMDiff`) of the flow map `x ↦ Φ x t` and the
+*time* derivative of a single trajectory (`hasMFDerivAt_of_isIntegralCurve`).  The remaining
+manifold-vocabulary datum the gauge-flow consumers of Items 1 & 2 need is the **pushforward** — the
+differential (`mfderiv`) of the flow map `x ↦ Φ x t` itself — together with its identification with
+the resolvent / fundamental solution `D_x Φ_t`, and the manifold form of the vector variational ODE
+obeyed by a pushed-forward direction `τ ↦ D_x Φ_τ · u₀`.
+
+All three are transports of the already-proved Banach `SmoothDependenceCk` tower through the standard
+Mathlib identifications `HasFDerivAt.hasMFDerivAt` / `HasMFDerivAt.mfderiv` (for the model manifold
+`𝓘(ℝ, E)`, whose `mfderiv` *is* the Fréchet `fderiv`) and the module's own
+`hasMFDerivAt_of_isIntegralCurve`; no new PDE or analytic content is introduced, and nothing here
+touches the heavy gauge files.  Everything is sorry-free (axioms
+`propext`/`Classical.choice`/`Quot.sound` only).
+-/
+
+/-- **Manifold pushforward of the flow map from its Fréchet derivative.**  If the time-`t` flow map
+`x ↦ Φ x t` has Fréchet derivative `D` at `x₀`, then in the `𝓘(ℝ, E)` model-manifold vocabulary it
+has manifold differential `D`:
+`HasMFDerivAt 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z ↦ Φ z t) x₀ D`.  The spatial companion of the trajectory
+time-derivative `hasMFDerivAt_of_isIntegralCurve` — the manifold form of the flow's *pushforward*
+(`Φ_t ·`) the tensor time-derivative chain rule (Item 1) and the compact-manifold gauge-flow
+constructor (Item 2) consume.  A pure transport through `HasFDerivAt.hasMFDerivAt`. -/
+theorem hasMFDerivAt_flow_apply_of_hasFDerivAt {t : ℝ} {x₀ : E} {D : E →L[ℝ] E}
+    (h : HasFDerivAt (fun z => Φ z t) D x₀) :
+    HasMFDerivAt 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀ D :=
+  h.hasMFDerivAt
+
+/-- **Within-set manifold pushforward of the flow map** from its Fréchet derivative:
+`HasMFDerivWithinAt 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z ↦ Φ z t) s x₀ D` for every set `s`.  The `HasMFDerivAt[s]`
+refinement of `hasMFDerivAt_flow_apply_of_hasFDerivAt`. -/
+theorem hasMFDerivWithinAt_flow_apply_of_hasFDerivAt {t : ℝ} {x₀ : E} {D : E →L[ℝ] E} {s : Set E}
+    (h : HasFDerivAt (fun z => Φ z t) D x₀) :
+    HasMFDerivWithinAt 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) s x₀ D :=
+  h.hasMFDerivAt.hasMFDerivWithinAt
+
+/-- **The manifold differential (`mfderiv`) of the flow map equals its Fréchet derivative.**
+`mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z ↦ Φ z t) x₀ = D` whenever `HasFDerivAt (fun z ↦ Φ z t) D x₀`. -/
+theorem mfderiv_flow_apply_of_hasFDerivAt {t : ℝ} {x₀ : E} {D : E →L[ℝ] E}
+    (h : HasFDerivAt (fun z => Φ z t) D x₀) :
+    mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀ = D :=
+  h.hasMFDerivAt.mfderiv
+
+/-- **The manifold pushforward of the flow map is the resolvent** (`C^{1,1}` field, self-contained).
+For a `K`-Lipschitz field `v` with a spatial derivative `Dv` whose deviation from the reference
+coefficient `A` along the trajectory chords is `L`-linear, the time-`t` flow map `x ↦ Φ x t` has
+manifold differential the fundamental solution (resolvent) `D_x Φ_t`:
+`HasMFDerivAt 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z ↦ Φ z t) x₀ (fundamentalSolution hA hΦ' h0' t)`.  The manifold
+form of `hasFDerivAt_flow_of_lipschitz_deriv_of_hasFDerivAt` (the `E →L[ℝ] E` type ascription forces
+the resolvent to elaborate at its Fréchet type before the tangent-space identification). -/
+theorem hasMFDerivAt_flow_apply_of_lipschitz_deriv
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    HasMFDerivAt 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀
+      (fundamentalSolution hA hΦ' h0' t : E →L[ℝ] E) :=
+  (hasFDerivAt_flow_of_lipschitz_deriv_of_hasFDerivAt hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hL
+    hlip).hasMFDerivAt
+
+/-- **The manifold differential of the flow map is the resolvent** (`C^{1,1}` field, `mfderiv`
+readout): `mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z ↦ Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t = D_x Φ_t`.
+-/
+theorem mfderiv_flow_apply_of_lipschitz_deriv
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ z, ∀ s ∈ Ico t₀ t, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀
+      = (fundamentalSolution hA hΦ' h0' t : E →L[ℝ] E) :=
+  (hasMFDerivAt_flow_apply_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ ht0 hderiv hL hlip).mfderiv
+
+/-- **Manifold vector variational ODE of a pushed-forward direction (resolvent column).**  For each
+direction `u₀`, the path `τ ↦ D_x Φ_τ · u₀` (the resolvent applied to `u₀`, i.e. the pushforward of
+the fixed tangent vector `u₀`) obeys, in the `𝓘(ℝ, E)` model-manifold vocabulary, the vector
+variational ODE derivative equation
+`HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ ↦ D_x Φ_τ · u₀) t ((1).smulRight (A t (D_x Φ_t · u₀)))` for every
+`t`.  The manifold form of `isIntegralCurve_fundamentalSolution_apply` via
+`hasMFDerivAt_of_isIntegralCurve` — exactly the "time-derivative of the pushforward `Φ_t · u`" datum
+the tensor time-derivative chain rule (Item 1) consumes. -/
+theorem hasMFDerivAt_fundamentalSolution_apply {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ s, ‖A s‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (u₀ : E) (t : ℝ) :
+    HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ => fundamentalSolution hA hΦ h0 τ u₀) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (variationalFieldVec A t (fundamentalSolution hA hΦ h0 t u₀) : E)) :=
+  hasMFDerivAt_of_isIntegralCurve (isIntegralCurve_fundamentalSolution_apply hA hΦ h0 u₀) t
+
 end
 
 end SmoothDependenceCk
