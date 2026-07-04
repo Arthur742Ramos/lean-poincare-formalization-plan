@@ -5988,3 +5988,62 @@ noncomputable endomorphism-ring instance is prohibitively expensive.  So the nes
 fundamental solution stated with a multilinear-valued derivative from the outset — then feed
 `contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous` to obtain `ContDiff ℝ 3` dependence on
 initial conditions, unblocking Items 1/2.
+
+Update — **THE REMAINING GAP IS CLOSED, and `C³` dependence of the flow on initial data is now
+proved** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`.  The nested→multilinear `HasFDerivAt` wall — whose naive
+resolution (`uncurry2CLM.hasFDerivAt.comp x hD2`) whnf-diverges on the `E →L E →L E` instance diamond
+— is broken *without* the nested-CLM chain rule, and the whole `ContDiff ℝ 3` chain is assembled up to
+the honest flow-level theorem.
+
+**Root-cause diagnosis (this session).**  Every `HasFDerivAt`-lemma application whose codomain is the
+*double* space `E →L E →L E` (`.isLittleO`, `.comp`, `isBigO_comp`) fails: (a) `HasFDerivAt.isLittleO`
+leaves its metavariables unassigned unless the implicits are supplied *explicitly*
+(`HasFDerivAt.isLittleO (𝕜 := ℝ) (f := D2) (f' := D3) (x := x) hD3`); (b) two clashing `Norm`
+instances on `E →L E →L E` (`ContinuousLinearMap.hasOpNorm` vs `SeminormedAddCommGroup.toNorm`) that
+the unifier will not reduce (nested-space whnf blowup) break `trans_isLittleO`/`isBigO_comp`; (c)
+`‖uncurry2CLM‖` itself fails to synthesize (`Norm ((E →L E →L E) →L ML(Fin 2))` unavailable).
+
+**The break (all sorry-free).**
+* `norm_uncurry2CLM_le` — `‖uncurry2CLM T‖ ≤ ‖T‖`, via `ContinuousMultilinearMap.opNorm_le_bound` +
+  two `le_opNorm` on the double space; never forms the unsynthesizable `‖uncurry2CLM‖`.
+* `isLittleO_uncurry2CLM_comp` — post-composes a little-o with `uncurry2CLM`, through
+  `Asymptotics.isLittleO_iff` + `filter_upwards` + `.trans` (defeq-robust; sidesteps the double-space
+  `Norm` diamond that `isBigO_comp`/`trans_isLittleO` trip on).
+* `hasFDerivAt_iteratedFDeriv_two_uncurry2CLM` — **THE BRIDGE**:
+  `HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp D3) x` from the nested
+  `HasFDerivAt D2 D3 x` (`D2 = fderiv (fderiv f)` composition-form, `D3 : E →L E →L E →L E`), via the
+  explicit-implicit `.isLittleO` extraction + the two bricks above + the pointwise
+  `iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt`.
+* `contDiff_three_of_hasFDerivAt_nested_of_continuous` — the **obstruction-free assembler**:
+  `ContDiff ℝ 3 f` from `ContDiff ℝ 2 f`, the nested chain
+  `HasFDerivAt f Df`/`HasFDerivAt Df D2`/`HasFDerivAt D2 D3fam`, and
+  `Continuous (z ↦ uncurry3 (D3fam z))`.  Sets `D3ml x = (uncurry3 (D3fam x)).curryLeft`, discharges
+  the `HasFDerivAt` slot via the bridge (+ `uncurry3_curryLeft`) and the continuity via the isometry
+  `continuousMultilinearCurryLeftEquiv` (whose forward map *is* `curryLeft`), then feeds the existing
+  capstone `contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous`.
+
+**The `C³`-side bundle and the flow capstone.**
+* `exists_hasFDerivAt_secondFundamentalSolution_multilinearContinuous` — fuses
+  `exists_hasFDerivAt_secondFundamentalSolution` (the nested `D₂`/`D₃fam` chain) with
+  `lipschitzWith_thirdFundamentalSolution_multilinear` (multilinear continuity) for the **same**
+  existentially-bound `D₃fam`/`Vfamfam` (one `exists_thirdVariationOperator_of_field` drives both, so
+  the third-variation-ODE characterisation is shared).  Returns
+  `∃ D₂ D₃fam, (D₂-char) ∧ (∀ y, HasFDerivAt D₂ (D₃fam y) y) ∧ Continuous (z ↦ uncurry3 (D₃fam z))` —
+  exactly the third-derivative-side triple the assembler consumes; lone extra hypothesis `hD3vlip`.
+* `exists_flow_contDiff_three_of_lipschitz_thirdDeriv` — **THE ITEM 1/2 UNBLOCK**: for a `C^{3,1}`
+  field, `∃ Φ, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧ ContDiff ℝ 3 (z ↦ Φ z t)`.
+  Assembles, for one shared `Φ`: `exists_flow_contDiff_two_of_lipschitz_secondDeriv` (`Φ` +
+  `ContDiff ℝ 2`), the bundle above (nested chain + continuity), and the `C¹`/`C²` bootstraps
+  (`hasFDerivAt_flow_of_lipschitz_deriv` + `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`,
+  identifying `fderiv (z ↦ Φ z t) =` resolvent and `fderiv (resolvent) = D₂`), fed to the assembler.
+  Along-flow bounds are read off the derivative Lipschitz constants (`C' = L`,
+  `‖D3v‖ = ‖D3v.curryLeft‖ = ‖D3vm‖ ≤ N` by the `curryLeft` isometry `ContinuousMultilinearMap.curryLeft_norm`).
+
+Remaining for Point 4 (future sessions): **connect the now-`ContDiff ℝ 3` initial-data dependence to
+the manifold gauge-flow consumers of Items 1 & 2** — the compact-manifold gauge-flow constructor
+(Item 2, extending `GaugeReduction/Diffeomorph3FlowExistence.lean` through the Banach model bridge
+`ModelGaugeFlowODE.lean`), and the tensor time-derivative chain rule (Item 1,
+`Diffeomorph3FlowTimeDerivative.lean`) which now has its `C³` initial-data-dependence input available;
+plus the general (merely-continuous, non-Lipschitz `Dv`) modulus, and the Item 3 parabolic
+Hölder/Schauder frontier (`AnalyticPDE/ParabolicHolder.lean`).
