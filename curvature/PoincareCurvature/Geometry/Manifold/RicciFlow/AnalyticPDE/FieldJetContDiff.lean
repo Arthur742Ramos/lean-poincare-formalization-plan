@@ -288,6 +288,29 @@ theorem contMDiff_two_flow_apply_of_contDiff [CompleteSpace E]
     hD2vlip
     hΦ h0 t
 
+/-- **Manifold spatial `C²` regularity of the flow from joint `ContDiff` and a first-derivative bound.**
+The convenience form of `contMDiff_two_flow_apply_of_contDiff` that discharges the spatial Lipschitz
+(`hv`) and time-continuity (`hvc`) inputs from the `ContDiff` hypothesis together with a global
+first-derivative bound (`hK`), matching the layer-1 `contMDiff_one_flow_apply_of_contDiff_of_bddDerivs`
+API: from `v` jointly `ContDiff ℝ n` (`2 ≤ n`) with a globally bounded first and second spatial
+derivative (bounds `K`, `L`) and an `M`-Lipschitz second spatial-derivative field, each time-`t` flow
+map `z ↦ Φ z t` is `ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 2`.  The top-order Lipschitz control `hD2vlip` is
+supplied directly, since expressing it as a third-derivative bound would require the multilinear
+(rather than iterated-`fderiv`) representation of the third jet. -/
+theorem contMDiff_two_flow_apply_of_contDiff_of_bddDerivs [CompleteSpace E]
+    {K L M : ℝ≥0} {t₀ : ℝ} {Φ : E → ℝ → E}
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 2 ≤ n)
+    (hK : ∀ s ξ, ‖fderiv ℝ (v s) ξ‖₊ ≤ K)
+    (hL : ∀ s ξ, ‖fderiv ℝ (fderiv ℝ (v s)) ξ‖₊ ≤ L)
+    (hD2vlip : ∀ s, LipschitzWith M (fderiv ℝ (fderiv ℝ (v s))))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 2 (fun z => Φ z t) := by
+  have hn1 : (1 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  exact contMDiff_two_flow_apply_of_contDiff h hn
+    (fun τ => lipschitzWith_apply_of_contDiff_of_nnnorm_fderiv_le h hn1 hK τ)
+    (fun x => continuous_apply_of_contDiff_uncurry h x)
+    hL hD2vlip hΦ h0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
