@@ -8961,6 +8961,37 @@ theorem parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction {X E : Type*}
   rw [inv_mul_eq_div, le_div_iff₀ h1q]
   nlinarith [hkey]
 
+/-- **Uniqueness of the parabolic `C^{0,α}` fixed point (completeness-free).**  The direct
+uniqueness corollary of the two-map stability bound
+`parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction` specialised to `T₁ = T₂ = T`: any two
+fixed points `g₁`, `g₂` of a class-preserving parabolic `C^{0,α}` `q`-contraction `T` (`q < 1`)
+coincide on `s`.  Unlike the uniqueness bundled inside
+`exists_parabolicC0AlphaOn_fixedPt_of_contraction`, this requires no completeness of `E` and no
+reference to a Picard-constructed solution — it compares two *given* fixed points directly (their
+difference is bounded by `(1 − q)⁻¹·‖T g₂ − T g₂‖ = 0`), the exact form the Ricci–DeTurck short-time
+uniqueness (chart `encode`) consumes. -/
+theorem parabolicC0AlphaOn_fixedPt_unique_of_contraction {X E : Type*}
+    [PseudoMetricSpace X] [NormedAddCommGroup E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T : (ℝ × X → E) → (ℝ × X → E)} {g₁ g₂ : ℝ × X → E}
+    (hq1 : q < 1)
+    (hg₁ : ParabolicC0AlphaOn α g₁ s) (hg₂ : ParabolicC0AlphaOn α g₂ s)
+    (hg₁fix : Set.EqOn (T g₁) g₁ s) (hg₂fix : Set.EqOn (T g₂) g₂ s)
+    (hTmaps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T u) s)
+    (hTcontr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T u z - T v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    Set.EqOn g₁ g₂ s := by
+  have hbound := parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction
+    hq1 hg₁ hg₂ hg₁fix hg₂fix hTmaps hTmaps hTcontr
+  have hzero : parabolicC0AlphaNorm α (fun z => T g₂ z - T g₂ z) s = 0 := by
+    have hfun : (fun z => T g₂ z - T g₂ z) = (fun _ : ℝ × X => (0 : E)) := by
+      funext z; rw [sub_self]
+    rw [hfun, parabolicC0AlphaNorm_zero]
+  rw [hzero, mul_zero] at hbound
+  have heq0 : parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s = 0 :=
+    le_antisymm hbound (parabolicC0AlphaNorm_nonneg α _ s)
+  exact eqOn_of_parabolicC0AlphaNorm_sub_eq_zero hg₁ hg₂ heq0
+
 /-!
 ### Parabolic Hölder interpolation
 
