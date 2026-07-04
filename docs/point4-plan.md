@@ -6133,3 +6133,44 @@ through the Banach model bridge `ModelGaugeFlowODE.lean` and Mathlib's chart/`Is
 layer — the remaining work is the local-chart↔global-flow bridging, the diffeomorphism data itself
 is now available), the tensor time-derivative chain rule (Item 1), and the Item 3 parabolic
 Hölder/Schauder frontier (`AnalyticPDE/ParabolicHolder.lean`).
+
+Update — **the Fréchet → manifold bridge is now built: `ContMDiff`/`HasMFDerivAt` smooth dependence
+of the ODE flow on initial data for the model manifold `𝓘(ℝ, E)`**, in the new self-contained leaf
+module `AnalyticPDE/SmoothDependenceManifold.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; imports the cached `FlowDiffeomorphism` tower plus the
+Mathlib manifold `ContMDiff`/`MFDeriv`/`Diffeomorph` layer, so it builds without recompiling the
+Banach tower).  The Banach smooth-dependence towers (`SmoothDependenceCk`, `FlowDiffeomorphism`) state
+everything in the *Fréchet* (`ContDiff`/`HasFDerivAt`/`IsIntegralCurve`) vocabulary of
+`Mathlib.Analysis`, but Item 2's compact-manifold gauge-flow constructor
+(`GaugeReduction/GaugeFlowAssembly.gaugeFlow_of_inverse_flow`) consumes the *manifold*
+(`ContMDiff`/`HasMFDerivAt`) vocabulary of `Mathlib.Geometry.Manifold`.  This module transports the
+whole diffeomorphism tower across that gap for the model manifold `E`, which — because the
+general-manifold smooth-dependence theorem is proved chart-by-chart with each chart *the model space
+`E`* — is the load-bearing chart-level core.  No new PDE/analytic content; nothing touches the heavy
+gauge files.
+
+* `hasMFDerivAt_of_isIntegralCurve` — the manifold ODE derivative form of an integral curve: from
+  `IsIntegralCurve γ v`, `HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) γ t ((1 : ℝ →L[ℝ] ℝ).smulRight (v t (γ t)))`
+  for every `t` — exactly the `hderiv` shape `gaugeFlow_of_inverse_flow` consumes (via
+  `hasDerivAt_iff_hasFDerivAt`/`smulRight_one_eq_toSpanSingleton` + `hasMFDerivAt_iff_hasFDerivAt`).
+* `contMDiff_{one,two,three}_flow_apply_of_lipschitz_{deriv,secondDeriv,thirdDeriv}` — the manifold
+  spatial `C^k` regularity of the flow map `x ↦ Φ x t` (`ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) k`), via
+  `contMDiff_iff_contDiff`.
+* `exists_flow_contMDiff_three` — field-data-only manifold smooth-dependence existence.
+* `exists_flow_contMDiff_three_diffeomorph` — the manifold `C³` **self-diffeomorphism family**
+  (per-time two-sided inverse `ψ`, both `x ↦ Φ x t` and `ψ` `ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3`): the
+  model-manifold instance of the diffeomorphism data Item 2's gauge flow consumes.
+* `exists_flow_contMDiff_three_gaugeData` — the **full model-manifold gauge-flow data bundle**:
+  anchoring, the manifold ODE derivative equation at every time, and the per-time `C³`
+  self-diffeomorphism data, packaged in the exact shapes `gaugeFlow_of_inverse_flow` needs (for
+  `M = E`, `𝓘(ℝ, E)`).
+* `exists_flow_diffeomorph_{one,two,three}` — the time-`t` flow map bundled as a first-class Mathlib
+  `Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E k` (`k = 1, 2, 3`), from the `C^{k,1}` field jet alone: the
+  reverse-time inverse flow supplies the smooth inverse, and both directions are `ContMDiff k`.
+
+Remaining for Point 4 (future sessions): the last mile is the **general-manifold** lift — replacing
+`M = E` (`𝓘(ℝ, E)`) with an arbitrary compact `M` — which is the chart-by-chart patching that lives
+in the heavy `GaugeReduction/ModelGaugeFlowODE.lean` / `Diffeomorph3FlowExistence.lean` (the model
+`E`-chart smooth-dependence core those consume is now available); the tensor time-derivative chain
+rule (Item 1, `Diffeomorph3FlowTimeDerivative.lean`); and the Item 3 parabolic Hölder/Schauder
+frontier (`AnalyticPDE/ParabolicHolder.lean`).
