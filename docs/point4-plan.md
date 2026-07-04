@@ -6752,3 +6752,52 @@ interior/global a-priori estimate** exhibiting the concrete Ricci–DeTurck RHS 
 (Item 3); the **general-manifold** gauge-flow lift (Item 2, heavy gauge files — the spatial-`C³`
 regularity + global-`ℝ` extension of the compact-manifold flow slices); and the Item 1 tensor
 time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file).
+
+Update — **the abstract Ricci–DeTurck short-time existence & uniqueness is now proved, reduced to the
+single parabolic Schauder gain estimate**, extending the leaf module
+`AnalyticPDE/ParabolicInterpolation.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; pure norm/rpow analysis + the parabolic Banach fixed point,
+no heat-kernel content, nothing touching the heavy files).  The previous milestone supplied the
+*qualitative* short-time smallness `parabolicC0AlphaNorm_sub_interpolation_short_time_le` — for an
+initial-vanishing `α`-Hölder difference on a slab of thickness `T`,
+`‖u − v‖_{C^{0,α θ}} ≤ factor(T)·[u − v]_α` with
+`factor(T) = (√T)^α + 2^{1−θ}(√T)^{α(1−θ)} → 0` as `T → 0`.  That "`→ 0`" is not directly usable by a
+fixed point, which needs a *quantitative* contraction ratio `< 1`.  This session closes exactly that
+gap and threads it through to short-time well-posedness:
+
+* `exists_thickness_shortTimeInterpFactor_le` — the **quantitative factor smallness**: for `0 < α`,
+  `θ < 1` and any target ratio `q > 0` there is a slab thickness `T₀ > 0` with `factor(T) ≤ q` for all
+  `0 ≤ T ≤ T₀`.  The factor is continuous in `T` at `0` (both exponents `α`, `α(1−θ)` strictly
+  positive) with value `0 < q`, so it stays below `q` on a neighbourhood of `0`
+  (`Filter.Tendsto.eventually_lt_const` + `Metric.eventually_nhds_iff`).  The honest quantitative form
+  of "`factor → 0`".
+* `exists_thickness_parabolicC0AlphaNorm_sub_interpolation_contraction` — the **quantitative
+  intermediate-norm contraction of a difference**: for any `q > 0`, a thin enough slab gives
+  `‖u − v‖_{C^{0,α θ}} ≤ q·[u − v]_α` for initial-agreeing `α`-Hölder differences.
+* `exists_thickness_solutionMap_contraction_of_schauder_gain` — the **reduction to the Schauder gain**:
+  composing the interpolation smallness with a hypothesised parabolic Schauder gain
+  `[S w₁ − S w₂]_α ≤ C·‖w₁ − w₂‖_{C^{0,α θ}}` (gain from the intermediate input norm to the top output
+  seminorm — the heat-kernel content, taken as a hypothesis) turns the solution map into a *genuine
+  same-exponent `q`-contraction* `‖S w₁ − S w₂‖_{C^{0,α θ}} ≤ q·‖w₁ − w₂‖_{C^{0,α θ}}` on a thin enough
+  slab (choosing `T₀` so `factor(T)·C ≤ q`, via target `q/(C+1)`).  The exact input shape the parabolic
+  Banach fixed point `exists_parabolicC0AlphaOn_fixedPt_of_contraction` consumes.
+* `exists_shortTime_fixedPoint_of_schauder_gain` — the **short-time existence & uniqueness capstone**:
+  a solution map `S` on the parabolic `C^{0,α θ}` class that self-maps, preserves the initial datum,
+  has `α`-Hölder output differences, and satisfies the Schauder gain has, on a sufficiently thin
+  time-slab, a *unique* fixed point `g = S g` in the class (`½`-contraction fed into the parabolic
+  Banach fixed point).  Every hypothesis except the Schauder gain is a structural property of the
+  DeTurck solution operator.
+* `exists_shortTime_fixedPoint_ball_of_schauder_gain` — the **quantitative form with a-priori bound**:
+  the same unique fixed point additionally obeys `‖g − u₀‖_{C^{0,α θ}} ≤ 2·‖S u₀ − u₀‖_{C^{0,α θ}}`
+  (the `(1 − ½)⁻¹` ball-form Banach bound), controlling the solution by twice the initial residual of
+  any starting guess — the estimate that keeps the DeTurck solution inside the ball on which the
+  coefficient data / Schauder gain remain valid.
+
+With this the **entire abstract side of Item 3 is now in place**: given the one parabolic Schauder gain
+estimate, short-time DeTurck existence, uniqueness, and the solution bound all follow.  Remaining for
+Point 4 (future sessions): the genuine parabolic **Schauder interior/global a-priori estimate**
+exhibiting the concrete Ricci–DeTurck RHS as such a `C^{0,α}`-gaining operator (the heat-kernel content,
+`HeatKernel1D.lean` + assembly from `mulCoeffL`/`compL`/`precompL`/`constL`) — now the *sole* missing
+mathematical input on the Item 3 fixed-point route; the **general-manifold** gauge-flow lift (Item 2,
+heavy gauge files — spatial-`C³` regularity + global-`ℝ` extension of the compact-manifold flow
+slices); and the Item 1 tensor time-derivative chain rule (metric leg + scalar assembly).
