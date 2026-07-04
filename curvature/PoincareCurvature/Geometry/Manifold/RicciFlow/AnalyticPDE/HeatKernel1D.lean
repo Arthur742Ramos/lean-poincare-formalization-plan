@@ -4529,5 +4529,89 @@ theorem bounded_lipschitz_evolution_exists_unique
   ⟨bounded_lipschitz_evolution_exists g x0 hT hbound hlip,
    fun α β hαβ hα hβ t ht => ode_solution_unique g K hlip T α β hαβ hα hβ t ht⟩
 
+/-- **Time-dependent Picard–Lindelöf bridge**: a globally bounded + uniformly Lipschitz
+time-dependent vector field `g : ℝ → E → E`, continuous in time on `[0, T]`, is
+`IsPicardLindelof`.  The time-independent bridge `isPicardLindelof_of_bounded_lipschitz`
+is the special case `g t = g 0`; the chart's `A : ℝ → …` is genuinely time-dependent, so
+its `picard` field consumes exactly this time-dependent form. -/
+lemma isPicardLindelof_of_bounded_lipschitz_timeDependent
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : ℝ → E → E) (x0 : E) (T : ℝ) (hT : 0 < T) (L K : ℝ≥0)
+    (hbound : ∀ t x, ‖g t x‖ ≤ (L : ℝ)) (hlip : ∀ t, LipschitzWith K (g t))
+    (hcont : ∀ x, ContinuousOn (fun t => g t x) (Set.Icc (0 : ℝ) T)) :
+    IsPicardLindelof g (tmin := 0) (tmax := T)
+      ⟨0, by constructor <;> [rfl; exact hT.le]⟩ x0 (L * T.toNNReal + 1) 0 L K := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro t _
+    exact (hlip t).lipschitzOnWith
+  · intro x _
+    exact hcont x
+  · intro t _ x _
+    exact hbound t x
+  · have ht0 : ((⟨0, ⟨le_rfl, hT.le⟩⟩ : Set.Icc (0 : ℝ) T) : ℝ) = 0 := rfl
+    rw [ht0]
+    simp only [sub_zero, max_eq_left hT.le]
+    push_cast [Real.coe_toNNReal T hT.le]
+    linarith
+
+/-- **Existence of an ODE solution** for a bounded + uniformly Lipschitz, time-continuous
+time-dependent field on a complete normed space, via the time-dependent bridge + mathlib's
+Picard–Lindelöf existence. -/
+lemma bounded_lipschitz_evolution_exists_timeDependent
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    (g : ℝ → E → E) (x0 : E) {T : ℝ} (hT : 0 < T) {L K : ℝ≥0}
+    (hbound : ∀ t x, ‖g t x‖ ≤ (L : ℝ)) (hlip : ∀ t, LipschitzWith K (g t))
+    (hcont : ∀ x, ContinuousOn (fun t => g t x) (Set.Icc (0 : ℝ) T)) :
+    ∃ α : ℝ → E, α 0 = x0 ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (g t (α t)) (Set.Icc 0 T) t) := by
+  have hpl := isPicardLindelof_of_bounded_lipschitz_timeDependent g x0 T hT L K hbound hlip hcont
+  obtain ⟨α, hα0, hαderiv⟩ := hpl.exists_eq_forall_mem_Icc_hasDerivWithinAt₀
+  exact ⟨α, hα0, hαderiv⟩
+
+/-- **Uniqueness** of the ODE solution for a uniformly Lipschitz time-dependent field
+(Gronwall).  The time-dependent companion of `ode_solution_unique`. -/
+lemma ode_solution_unique_timeDependent {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : ℝ → E → E) (K : ℝ≥0) (hlip : ∀ t, LipschitzWith K (g t)) (T : ℝ)
+    (α β : ℝ → E) (hα0 : α 0 = β 0)
+    (hα : ∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (g t (α t)) (Set.Icc 0 T) t)
+    (hβ : ∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt β (g t (β t)) (Set.Icc 0 T) t)
+    (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) T) :
+    α t = β t := by
+  have key : Set.EqOn α β (Set.Icc 0 T) := by
+    refine ODE_solution_unique (v := g) (K := K) (a := 0) (b := T)
+      hlip ?_ ?_ ?_ ?_ hα0
+    · exact HasDerivWithinAt.continuousOn (fun s hs => hα s hs)
+    · intro s hs
+      have hsIcc : s ∈ Set.Icc (0 : ℝ) T := Set.Ico_subset_Icc_self hs
+      refine (hα s hsIcc).mono_of_mem_nhdsWithin ?_
+      exact Filter.mem_of_superset (Ico_mem_nhdsGE hs.2)
+        (fun x hx => ⟨le_trans hs.1 hx.1, le_of_lt hx.2⟩)
+    · exact HasDerivWithinAt.continuousOn (fun s hs => hβ s hs)
+    · intro s hs
+      have hsIcc : s ∈ Set.Icc (0 : ℝ) T := Set.Ico_subset_Icc_self hs
+      refine (hβ s hsIcc).mono_of_mem_nhdsWithin ?_
+      exact Filter.mem_of_superset (Ico_mem_nhdsGE hs.2)
+        (fun x hx => ⟨le_trans hs.1 hx.1, le_of_lt hx.2⟩)
+  exact key ht
+
+/-- **Existence + uniqueness of the evolution** for a bounded + uniformly Lipschitz,
+time-continuous time-dependent field on a complete normed space.  This is the abstract
+existence-and-uniqueness shape the time-dependent Ricci–DeTurck chart `A`/`picard` needs —
+fully satisfiable for a bounded-Lipschitz (mild / regularised) time-dependent operator. -/
+theorem bounded_lipschitz_evolution_exists_unique_timeDependent
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    (g : ℝ → E → E) (x0 : E) {T : ℝ} (hT : 0 < T) {L K : ℝ≥0}
+    (hbound : ∀ t x, ‖g t x‖ ≤ (L : ℝ)) (hlip : ∀ t, LipschitzWith K (g t))
+    (hcont : ∀ x, ContinuousOn (fun t => g t x) (Set.Icc (0 : ℝ) T)) :
+    (∃ α : ℝ → E, α 0 = x0 ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (g t (α t)) (Set.Icc 0 T) t)) ∧
+    (∀ α β : ℝ → E, α 0 = β 0 →
+      (∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (g t (α t)) (Set.Icc 0 T) t) →
+      (∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt β (g t (β t)) (Set.Icc 0 T) t) →
+      ∀ t ∈ Set.Icc (0 : ℝ) T, α t = β t) :=
+  ⟨bounded_lipschitz_evolution_exists_timeDependent g x0 hT hbound hlip hcont,
+   fun α β hαβ hα hβ t ht =>
+     ode_solution_unique_timeDependent g K hlip T α β hαβ hα hβ t ht⟩
+
 end AnalyticPDE
 end RicciFlow
