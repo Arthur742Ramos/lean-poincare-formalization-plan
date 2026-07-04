@@ -5,6 +5,7 @@ public import Mathlib.Analysis.Normed.Group.SeparationQuotient
 public import Mathlib.Topology.UniformSpace.UniformEmbedding
 public import Mathlib.Topology.Algebra.SeparationQuotient.Section
 public import Mathlib.Topology.MetricSpace.Contracting
+public import Mathlib.Analysis.SpecificLimits.Normed
 
 set_option linter.unusedSectionVars false
 
@@ -1235,6 +1236,49 @@ theorem exists_unique_affineFixedPoint [CompleteSpace E]
   refine ⟨ContractingWith.fixedPoint (fun u => A u + f) hg, hg.fixedPoint_isFixedPt, ?_⟩
   intro y hy
   exact hg.fixedPoint_unique hy
+
+/-- **The solution operator of the affine Ricci–DeTurck fixed-point equation.**  When the linear
+part `A` is a contraction (`‖A‖ < 1`), `1 - A` is invertible on the (complete) parabolic `C^{0,α}`
+Banach space via the Neumann series, so the solution of `A u + f = u` depends *boundedly and
+linearly* on the inhomogeneous data `f` through `u = (1 - A)⁻¹ f`.  This bounded linear solution
+operator is the quantitative a-priori structure of the Ricci–DeTurck Schauder iteration. -/
+noncomputable def affineSolveL [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s) (hA : ‖A‖ < 1) :
+    ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s :=
+  ↑(Units.oneSub A hA)⁻¹
+
+/-- **The solution operator is a right inverse of `1 - A`.**  `(1 - A) * affineSolveL A hA = 1` in
+the endomorphism ring of the parabolic `C^{0,α}` Banach space. -/
+theorem oneSub_mul_affineSolveL [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s) (hA : ‖A‖ < 1) :
+    (1 - A) * affineSolveL A hA = 1 := by
+  show (1 - A) * (↑(Units.oneSub A hA)⁻¹) = 1
+  rw [← Units.val_oneSub A hA]
+  exact (Units.oneSub A hA).mul_inv
+
+/-- **`affineSolveL A hA f` solves the affine fixed-point equation.**  The value `u = (1 - A)⁻¹ f`
+satisfies `A u + f = u`; combined with `exists_unique_affineFixedPoint` it is *the* solution. -/
+theorem affineSolveL_isSolution [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s) (hA : ‖A‖ < 1)
+    (f : ParabolicC0AlphaBanach X E α s) :
+    A (affineSolveL A hA f) + f = affineSolveL A hA f := by
+  have h1 := congrArg (fun L : ParabolicC0AlphaBanach X E α s →L[ℝ] _ => L f)
+    (oneSub_mul_affineSolveL A hA)
+  simp only [ContinuousLinearMap.mul_apply, ContinuousLinearMap.sub_apply,
+    ContinuousLinearMap.one_apply] at h1
+  calc A (affineSolveL A hA f) + f
+      = A (affineSolveL A hA f) + (affineSolveL A hA f - A (affineSolveL A hA f)) := by rw [h1]
+    _ = affineSolveL A hA f := by abel
+
+/-- **The solution operator yields the unique solution.**  Every solution `u` of the affine
+Ricci–DeTurck fixed-point equation `A u + f = u` equals `affineSolveL A hA f`, so the bounded linear
+map `f ↦ affineSolveL A hA f` is *the* solution map of the linearised Ricci–DeTurck flow. -/
+theorem eq_affineSolveL_of_isSolution [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s) (hA : ‖A‖ < 1)
+    {f u : ParabolicC0AlphaBanach X E α s} (hu : A u + f = u) :
+    u = affineSolveL A hA f := by
+  obtain ⟨w, _, hw⟩ := exists_unique_affineFixedPoint A f hA
+  rw [hw u hu, hw (affineSolveL A hA f) (affineSolveL_isSolution A hA f)]
 
 end ParabolicC0AlphaBanach
 
