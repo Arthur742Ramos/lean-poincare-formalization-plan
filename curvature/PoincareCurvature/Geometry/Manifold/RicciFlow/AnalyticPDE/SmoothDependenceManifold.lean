@@ -76,6 +76,16 @@ theorem hasMFDerivAt_of_isIntegralCurve {γ : ℝ → E} (h : IsIntegralCurve γ
   rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton]
   exact ((h t).hasFDerivAt).hasMFDerivAt
 
+/-- **Within-set manifold ODE derivative form of an integral curve.**  The `HasMFDerivWithinAt`
+(`HasMFDerivAt[s]`) refinement of `hasMFDerivAt_of_isIntegralCurve`, holding for every time set `s`
+and every time `t` — this is the exact `hderiv` shape (`HasMFDerivAt[s] (fun τ ↦ F τ x) t …`) that
+the compact-manifold gauge-flow reduction `GaugeReduction/GaugeFlowAssembly.gaugeFlow_of_inverse_flow`
+consumes. -/
+theorem hasMFDerivWithinAt_of_isIntegralCurve {γ : ℝ → E} (h : IsIntegralCurve γ v)
+    (s : Set ℝ) (t : ℝ) :
+    HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight (v t (γ t))) :=
+  (hasMFDerivAt_of_isIntegralCurve h t).hasMFDerivWithinAt
+
 /-- **Manifold spatial `C³` regularity of the flow map.**  Under the `C^{3,1}` jet hypotheses on the
 field `v`, together with a flow family `Φ` anchored at `t₀` and integrating `v`, the time-`t` flow map
 `x ↦ Φ x t` is `ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3` for every `t`.  The manifold form of
