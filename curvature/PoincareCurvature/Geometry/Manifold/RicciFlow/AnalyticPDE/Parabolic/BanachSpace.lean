@@ -2110,6 +2110,26 @@ theorem eq_of_fixedPoint_quadraticRHS_closedBall
   exact eq_of_fixedPoint_of_lipschitzOnWith_closedBall hK
     (lipschitzOnWith_quadraticRHS_closedBall A L f c hr0) hu hu' hfu hfu'
 
+/-- **Well-posedness of the quadratic Ricci–DeTurck short-time chart solution.**  From the two scalar
+smallness conditions `‖A‖ + 2‖L‖r < 1` (contraction) and `‖A‖·r + ‖L‖·r² + ‖f‖ ≤ r` (invariant ball),
+the quadratic equation `A u + L(u, u) + f = u` has a **unique** solution in `closedBall 0 r`.  Bundles
+`exists_fixedPoint_quadraticRHS_closedBall_zero` (existence) with
+`eq_of_fixedPoint_quadraticRHS_closedBall` (in-ball uniqueness): the well-posed short-time chart datum
+the Ricci–DeTurck chart closure consumes, stated purely from the operator/data norms. -/
+theorem existsUnique_fixedPoint_quadraticRHS_closedBall_zero [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (L : E →L[ℝ] E →L[ℝ] E) (f : ParabolicC0AlphaBanach X E α s) {r : ℝ} (hr : 0 ≤ r)
+    (hcontract : ‖A‖ + 2 * ‖L‖ * r < 1)
+    (hself : ‖A‖ * r + ‖L‖ * r * r + ‖f‖ ≤ r) :
+    ∃! u, u ∈ Metric.closedBall (0 : ParabolicC0AlphaBanach X E α s) r ∧
+      A u + mulBilinL L u u + f = u := by
+  obtain ⟨u, hu_mem, hu_eq⟩ :=
+    exists_fixedPoint_quadraticRHS_closedBall_zero A L f hr hcontract hself
+  refine ⟨u, ⟨hu_mem, hu_eq⟩, ?_⟩
+  rintro u' ⟨hu'_mem, hu'_eq⟩
+  exact eq_of_fixedPoint_quadraticRHS_closedBall A L f 0 (by simpa using hcontract)
+    hu'_mem hu_mem hu'_eq hu_eq
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
