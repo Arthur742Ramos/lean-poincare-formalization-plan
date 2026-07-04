@@ -11571,6 +11571,82 @@ theorem lipschitzWith_thirdFundamentalSolution_multilinear [CompleteSpace E]
     (hVfamfam0 z) (hVfamfamd z) (hVfamfamc z) (hD₃famchar z)
     (hVfamfam0 x₀) (hVfamfamd x₀) (hVfamfamc x₀) (hD₃famchar x₀) ht k
 
+/-- **Continuity of the third iterated derivative from multilinear derivative data.**  If the second
+iterated derivative `iteratedFDeriv ℝ 2 f` is everywhere Fréchet differentiable with derivative
+`D3ml x : E →L ContinuousMultilinearMap ℝ (Fin 2) E` (the *multilinear* representation of the third
+derivative — a value in a **properly normed** space, sidestepping the un-normed triple
+continuous-linear-map tower), and `D3ml` is continuous, then the third iterated derivative
+`iteratedFDeriv ℝ 3 f` is continuous.
+
+This is the obstruction-free continuity of the third derivative in the exact form the
+`contDiff`/`iteratedFDeriv` chain consumes.  Proof: `curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt`
+identifies `D3ml x` with `(iteratedFDeriv ℝ 3 f x).curryLeft`, so
+`iteratedFDeriv ℝ 3 f x = (continuousMultilinearCurryLeftEquiv …).symm (D3ml x)`; the curry isometry's
+inverse is continuous, so the composite is continuous.  Crucially, the hypothesis carries the third
+derivative as `D3ml : E → (E →L ContinuousMultilinearMap ℝ (Fin 2) E)` — a normed codomain — rather
+than as an `E → (E →L E →L E →L E)` whose triple operator norm does not synthesize in Mathlib
+v4.29.1. -/
+theorem continuous_iteratedFDeriv_three_of_hasFDerivAt_continuous
+    {f : E → E}
+    {D3ml : E → (E →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    (hD3 : ∀ x, HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x)
+    (hcont : Continuous D3ml) :
+    Continuous (iteratedFDeriv ℝ 3 f) := by
+  have key : iteratedFDeriv ℝ 3 f
+      = fun x => (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).symm (D3ml x) := by
+    funext x
+    have h := curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt (hD3 x)
+    apply (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).injective
+    rw [LinearIsometryEquiv.apply_symm_apply]
+    exact h.symm
+  rw [key]
+  exact (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).symm.continuous.comp hcont
+
+/-- **Differentiability of the second iterated derivative from multilinear derivative data.**  If the
+second iterated derivative `iteratedFDeriv ℝ 2 f` is everywhere Fréchet differentiable with derivative
+`D3ml x` (multilinear-valued), then it is differentiable.  The trivial `HasFDerivAt.differentiableAt`
+half of the `ContDiff ℝ 3` upgrade, kept multilinear so it never touches the un-normed triple
+continuous-linear-map tower. -/
+theorem differentiable_iteratedFDeriv_two_of_hasFDerivAt
+    {f : E → E}
+    {D3ml : E → (E →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    (hD3 : ∀ x, HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x) :
+    Differentiable ℝ (iteratedFDeriv ℝ 2 f) :=
+  fun x => (hD3 x).differentiableAt
+
+/-- **`ContDiff ℝ 3` from `ContDiff ℝ 2` plus multilinear third-derivative data.**  The obstruction-free
+capstone bridge to `C³` smoothness.  Given that `f` is already `C²`, that its second iterated
+derivative `iteratedFDeriv ℝ 2 f` is everywhere Fréchet differentiable with a *continuous*,
+*multilinear-valued* derivative `D3ml`, then `f` is `C³`.
+
+This packages the `contDiff_nat_iff_continuous_differentiable` criterion at `n = 3`: the missing
+ingredients beyond `C²` are continuity of the third iterated derivative
+(`continuous_iteratedFDeriv_three_of_hasFDerivAt_continuous`) and differentiability of the second
+(`differentiable_iteratedFDeriv_two_of_hasFDerivAt`), both supplied here from the multilinear
+derivative datum `D3ml` — which lives in the well-normed
+`E →L ContinuousMultilinearMap ℝ (Fin 2) E`, never in the un-normed `E →L E →L E →L E`.  This is the
+abstract interface a flow-specific caller feeds with the fundamental-solution third-derivative data to
+reach `ContDiff ℝ 3` dependence on initial conditions. -/
+theorem contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous
+    {f : E → E}
+    {D3ml : E → (E →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    (hf2 : ContDiff ℝ 2 f)
+    (hD3 : ∀ x, HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x)
+    (hcont : Continuous D3ml) :
+    ContDiff ℝ 3 f := by
+  rw [show (3 : WithTop ℕ∞) = ((3 : ℕ) : WithTop ℕ∞) from by norm_cast,
+    contDiff_nat_iff_continuous_differentiable]
+  refine ⟨fun m hm => ?_, fun m hm => ?_⟩
+  · interval_cases m
+    · exact hf2.continuous_iteratedFDeriv (by norm_num)
+    · exact hf2.continuous_iteratedFDeriv (by norm_num)
+    · exact hf2.continuous_iteratedFDeriv (by norm_num)
+    · exact continuous_iteratedFDeriv_three_of_hasFDerivAt_continuous hD3 hcont
+  · interval_cases m
+    · exact hf2.differentiable_iteratedFDeriv (by norm_num)
+    · exact hf2.differentiable_iteratedFDeriv (by norm_num)
+    · exact differentiable_iteratedFDeriv_two_of_hasFDerivAt hD3
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
