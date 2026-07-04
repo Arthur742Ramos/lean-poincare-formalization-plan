@@ -120,6 +120,102 @@ theorem exists_homeomorph_flow_apply [CompleteSpace E]
             continuous_toFun := continuous_flow_apply hv hΦ h0 t
             continuous_invFun := hψlip.continuous }, rfl⟩
 
+/-!
+## Two-sided (all-time) differentiable dependence
+
+The regularity layers of `SmoothDependenceCk` are all stated in *forward* time (`t₀ ≤ t`).  For the
+flow at a time `t ≥ t₀` to be a **diffeomorphism**, its inverse is a *backward* flow (target time
+`t₀` earlier than the anchor `t`), so backward-time differentiability is needed.  It follows from
+the forward result by the time-reversal trick already used for the Grönwall bounds
+(`isIntegralCurve_comp_neg`): the field `w s x = -(v (-s) x)` is `K`-Lipschitz with `L`-Lipschitz,
+jointly continuous spatial derivative `Dw s x = -(Dv (-s) x)`, and the forward flow of `w` anchored
+at `-t₀`, reflected by `s ↦ -s`, is the backward flow of `v` anchored at `t₀`.
+-/
+
+/-- **Backward-in-time differentiable dependence on initial data** for a `C^{1,1}` field.  Same
+hypotheses as `exists_flow_differentiable_of_lipschitz_deriv` but for `t ≤ t₀`.  Proved by applying
+the forward theorem to the time-reversed field `w s x = -(v (-s) x)` (with reversed derivative
+`Dw s x = -(Dv (-s) x)`) anchored at `-t₀` and target `-t ≥ -t₀`, then reflecting the resulting flow
+family by `s ↦ -s`. -/
+theorem exists_flow_differentiable_of_lipschitz_deriv_backward [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    {t : ℝ} (ht0 : t ≤ t₀) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        Differentiable ℝ (fun z => Φ z t) := by
+  set w : ℝ → E → E := fun s x => -(v (-s) x) with hw_def
+  set Dw : ℝ → E → (E →L[ℝ] E) := fun s x => -(Dv (-s) x) with hDw_def
+  have hw : ∀ τ, LipschitzWith K (w τ) := by
+    intro τ
+    refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hw_def, dist_neg_neg]
+    exact (hv (-τ)).dist_le_mul a b
+  have hwc : ∀ x, Continuous fun s => w s x := by
+    intro x
+    simp only [hw_def]
+    exact ((hvc x).comp continuous_neg).neg
+  have hderivw : ∀ s x, HasFDerivAt (w s) (Dw s x) x := by
+    intro s x
+    simpa only [hw_def, hDw_def] using (hderiv (-s) x).neg
+  have hDwc : Continuous fun p : ℝ × E => Dw p.1 p.2 := by
+    simp only [hDw_def]
+    exact (hDvc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
+  have hDwlip : ∀ s, LipschitzWith L (Dw s) := by
+    intro s
+    refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hDw_def, dist_neg_neg]
+    exact (hDvlip (-s)).dist_le_mul a b
+  obtain ⟨Φ', hΦ'0, hΦ'curve, hΦ'diff⟩ :=
+    exists_flow_differentiable_of_lipschitz_deriv (v := w) (Dv := Dw) (t₀ := -t₀)
+      hw hwc hderivw hDwc hDwlip (t := -t) (neg_le_neg ht0)
+  have hVeq : (fun s (x : E) => -(w (-s) x)) = v := by
+    funext s x; simp only [hw_def, neg_neg]
+  refine ⟨fun z s => Φ' z (-s), fun z => hΦ'0 z, fun z => ?_, hΦ'diff⟩
+  have hcurve := isIntegralCurve_comp_neg (hΦ'curve z)
+  rw [hVeq] at hcurve
+  exact hcurve
+
+/-- **Two-sided (all-time) differentiable dependence on initial data** for a `C^{1,1}` field: for
+*every* `t`, some flow family anchored at `t₀` has differentiable time-`t` map.  Combines the
+forward (`exists_flow_differentiable_of_lipschitz_deriv`) and backward
+(`exists_flow_differentiable_of_lipschitz_deriv_backward`) halves by `le_total`. -/
+theorem exists_flow_differentiable_of_lipschitz_deriv_two_sided [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (t : ℝ) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        Differentiable ℝ (fun z => Φ z t) := by
+  rcases le_total t₀ t with h | h
+  · exact exists_flow_differentiable_of_lipschitz_deriv hv hvc hderiv hDvc hDvlip h
+  · exact exists_flow_differentiable_of_lipschitz_deriv_backward hv hvc hderiv hDvc hDvlip h
+
+/-- **Differentiable dependence for a *given* flow family, at every time.**  Any flow family `Φ` of
+the `C^{1,1}` field `v` anchored at `Φ z t₀ = z` has differentiable time-`t` map `z ↦ Φ z t` for
+*all* `t` (both forward and backward of `t₀`).  Since the anchored integral curve through each point
+is unique (`eq_of_isIntegralCurve_of_eq`), the given `Φ` agrees pointwise with the flow family
+supplied by `exists_flow_differentiable_of_lipschitz_deriv_two_sided`, so differentiability
+transfers.  This is the "one family, every time" form the diffeomorphism family consumes. -/
+theorem differentiable_flow_apply_of_lipschitz_deriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    Differentiable ℝ (fun z => Φ z t) := by
+  obtain ⟨Φ', h0', hΦ'curve, hΦ'diff⟩ :=
+    exists_flow_differentiable_of_lipschitz_deriv_two_sided hv hvc hderiv hDvc hDvlip t
+  have hEq : (fun z => Φ z t) = (fun z => Φ' z t) := by
+    funext z
+    exact eq_of_isIntegralCurve_of_eq hv (hΦ z) (hΦ'curve z) (by rw [h0 z, h0' z]) t
+  rw [hEq]; exact hΦ'diff
+
 end
 
 end SmoothDependenceCk
