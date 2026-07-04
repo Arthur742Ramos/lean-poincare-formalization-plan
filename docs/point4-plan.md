@@ -13,6 +13,65 @@ geometric content is precisely captured by a small number of named
 structures. The remaining work is to construct inhabitants of those
 structures for arbitrary compact Riemannian manifolds.
 
+## Definition of Done — Point 4 completion gate (authoritative)
+
+**Do not declare point 4 closed, in a commit message, a status pulse, a
+rollover note, or anywhere else, unless `curvature/scripts/point4_audit.sh`
+prints `VERDICT: POINT 4 CLOSED` and exits `0` when run WITHOUT `--no-build`.**
+That script is the single source of truth. Prose, `grep`, and "looks done"
+do not count. (A naive `grep sorry` is specifically banned as evidence: the
+word appears inside docstrings such as "proved sorry-free", which repeatedly
+produced false "6 sorries" / "0 sorries" flip-flops. Use the audit's
+comment-stripping scanner, `scripts/point4_scan.py cheats`, for the real
+count.)
+
+The audit enforces five hard gates, all of which must pass:
+
+1. **G1 — sorry-free.** No `sorry`, `admit`, `sorryAx`, `native_decide`,
+   `decide!`, `axiom`, or `opaque` in the `PoincareCurvature/` library source
+   (measured after comments and string literals are stripped, so docstring
+   prose cannot create false positives *or* hide a real cheat).
+2. **G2 — build green.** `lake build` succeeds.
+3. **G3 — unconditional construction.** A target theorem exists whose
+   conclusion is `IntrinsicLocalExistenceUniquenessFamily` for a **general
+   compact manifold**, carrying **no** restricting instance
+   (`IsEmpty`, `Subsingleton`, `Fact (Module.finrank ℝ E ≤ 1)`, …) and **no**
+   assumed `TimeDependentGeometricRicciDeTurckBanachChart` /
+   `RicciDeTurckChartClosureData` hypothesis. In other words: the `chart` and
+   `D` of the conditional bridge must be *constructed*, and Items 1, 2, and 3
+   (below) discharged, not assumed.
+4. **G4 — axiom-clean.** `#print axioms <target>` is a subset of
+   `{propext, Classical.choice, Quot.sound}` and never mentions `sorryAx`.
+5. **G5 — faithful type.** The *elaborated* type of the target (from
+   `#check @<target>`) really is the point-4 package and carries none of the
+   forbidden binders above — so vacuous or over-hypothesised instantiations are
+   rejected even when the assumption is injected through a `variable`.
+
+**Canonical target.** The audit looks for a declaration whose base name is in
+`curvature/scripts/point4_target.txt` (default
+`intrinsicLocalExistenceUniquenessFamily_pointFour`). When you assemble Items
+1–3 into the unconditional closure, name it exactly that (or update the file),
+and state it for a general compact manifold with only the ambient instances —
+no `IsEmpty`/`Subsingleton`/`finrank` gate, no `chart`/`D` argument. The
+existing bridge
+`intrinsicLocalExistenceUniquenessFamily_of_ricciDeTurckChartClosureData`
+passes G1/G4 but **fails G3/G5** precisely because it still takes `chart` and
+`D` as hypotheses; that is the gap to close.
+
+Partial closure is honest and welcome as *interim* progress (the empty /
+subsingleton / rank-one / Einstein families already inhabit the package on
+their sub-classes), but the audit only reports `CLOSED` for the fully general,
+hypothesis-free, axiom-clean theorem. Report remaining work as fractions of
+`{Item 1, Item 2, Item 3}` (equivalently `{chart, D}` construction), never as a
+premature "done".
+
+Run it yourself before any completion claim:
+
+```bash
+cd curvature && ./scripts/point4_audit.sh            # full check (runs lake build)
+cd curvature && ./scripts/point4_audit.sh --no-build # fast gate check, no build
+```
+
 ## Already proved (in this repository)
 
 `IntrinsicLocalExistenceUniquenessFamily` is currently constructible
