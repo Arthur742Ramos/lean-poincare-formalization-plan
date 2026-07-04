@@ -6930,3 +6930,41 @@ regularity of the compact flow slices (the chart-by-chart `C¹ → C³` transpor
 `SmoothDependenceManifold` core).  Remaining for Point 4 (unchanged otherwise): that spatial-`C³`
 regularity (Item 2); the Item 1 tensor time-derivative chain rule; and the Item 3 parabolic Schauder
 gain (heat-kernel content).
+
+Update — **time-dependent Banach Cauchy–Lipschitz well-posedness for the chart `A`/`picard` route
+is now proved** (in `AnalyticPDE/HeatKernel1D.lean`; all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; full library green).  The pre-existing Banach-ODE bridge
+`isPicardLindelof_of_bounded_lipschitz` / `bounded_lipschitz_evolution_exists_unique` covered only
+**time-independent** fields, but the Ricci–DeTurck chart's `A : ℝ → …` (hence its `picard` field and
+the solution operator it generates) is genuinely **time-dependent**; this session supplies the missing
+time-dependent generalization on both the `0`-anchored and the general interval `[t₀, T]` (the exact
+`IsPicardLindelof A (tmin := t₀) (tmax := T) ⟨t₀,…⟩ x₀ a 0 L Kpic` interval/anchor shape of the chart
+`picard` field):
+
+* `isPicardLindelof_of_bounded_lipschitz_timeDependent` / `…_timeDependent_Icc` — a globally bounded
+  (`‖g t x‖ ≤ L`) + uniformly Lipschitz (`∀ t, LipschitzWith K (g t)`), time-continuous
+  (`ContinuousOn (g · x) [t₀,T]`) time-dependent field `g : ℝ → E → E` is `IsPicardLindelof` with
+  `a = L·(T−t₀) + 1`, `r = 0`, anchored at the left endpoint `t₀`; the last (`mul_max_le`) field is the
+  one-sided interval-length computation `L·(T−t₀) ≤ a`.
+* `bounded_lipschitz_evolution_exists_timeDependent` / `…_Icc` — existence of a solution `α` with
+  `α t₀ = x₀` on `[t₀,T]` (via `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀`, `E`
+  complete).
+* `ode_solution_unique_timeDependent` / `…_Icc` — Gronwall uniqueness (`ODE_solution_unique` with
+  `v := g` time-dependent), and `bounded_lipschitz_evolution_exists_unique_timeDependent` / `…_Icc`
+  package existence + uniqueness in the shape the mild/regularised chart operator consumes.
+* `ode_solution_dist_le_timeDependent_Icc` — continuous dependence (`dist (α t) (β t) ≤
+  dist (α t₀) (β t₀)·exp(K·(t−t₀))`, via `dist_le_of_trajectories_ODE`): the third Hadamard leg, so the
+  time-dependent Banach ODE route now has the full existence / uniqueness / stability triple (uniqueness
+  is its `dist₀ = 0` case).
+
+**Formulation note (re-confirmed with committed lemmas).** These discharge the honest **mild / bounded /
+regularised** route to `picard`: the chart builder `TimeDependentGeometricRicciDeTurckBanachChart.ofLipschitzBoundedContinuous`
+already discharges `picard` inline from ball-restricted bounded/Lipschitz/time-continuous data, and the
+above give the standalone time-dependent PL + evolution existence/uniqueness/stability for such a
+representative on any `[NormedAddCommGroup E] [NormedSpace ℝ E]` (`+ CompleteSpace` for existence),
+instantiated at `E = ContinuousSectionSpace`.  Unchanged: for a **general** initial metric the true
+second-order Ricci–DeTurck RHS is unbounded on `C⁰`, so `hgeom` (`A = intrinsicRicciDeTurckRHS` on the
+positive-definite locus) cannot simultaneously hold for a `C⁰`-bounded `A`; the general operator's
+`picard` still requires the parabolic Schauder a-priori bound.  Remaining for Point 4 (unchanged): the
+Item 3 parabolic Schauder gain (heat-kernel content); the Item 2 spatial-`C³` flow-slice regularity;
+and the Item 1 tensor time-derivative chain rule.
