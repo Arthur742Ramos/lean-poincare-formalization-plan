@@ -1715,6 +1715,42 @@ theorem affinePlusLipschitzFixedPoint_mem_closedBall [CompleteSpace E] {k : ℝ�
   exact fixedPoint_mem_of_mapsTo_isClosed hlt hg1 Metric.isClosed_closedBall
     (Metric.mem_closedBall_self hr) hmaps hu
 
+/-- **Combined continuous dependence on the frozen data and the nonlinearity.**  For the *same*
+linear part `A`, two quasilinear right-hand sides differing in *both* the nonlinearity and the frozen
+data — `A u₁ + N₁ u₁ + f₁ = u₁` and `A u₂ + N₂ u₂ + f₂ = u₂` (`N₁` `k`-Lipschitz, `‖A‖ + k < 1`,
+`N₁`, `N₂` uniformly `C`-close) — have solutions obeying
+`‖u₁ - u₂‖ ≤ (C + ‖f₁ - f₂‖) / (1 - (‖A‖ + k))`.  The full continuous-dependence estimate on the
+frozen chart data `(N, f)`, of which the pure-data `norm_affinePlusLipschitzFixedPoint_sub_le`
+(`N₁ = N₂`, `C = 0`) and the pure-nonlinearity `norm_affinePlusLipschitzFixedPoint_sub_le_nonlinearity`
+(`f₁ = f₂`) are the two faces: a `C`-sized perturbation of the nonlinearity together with a
+`‖f₁ - f₂‖`-sized change of the data moves the Ricci–DeTurck solution by at most
+`(C + ‖f₁ - f₂‖) / (1 - (‖A‖ + k))`. -/
+theorem norm_affinePlusLipschitzFixedPoint_sub_le_of_data_nonlinearity [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N₁ N₂ : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (f₁ f₂ : ParabolicC0AlphaBanach X E α s)
+    (hN₁ : LipschitzWith k N₁) (hAk : ‖A‖ + (k : ℝ) < 1)
+    {u₁ u₂ : ParabolicC0AlphaBanach X E α s}
+    (hu₁ : A u₁ + N₁ u₁ + f₁ = u₁) (hu₂ : A u₂ + N₂ u₂ + f₂ = u₂)
+    {C : ℝ} (hC : ∀ z, ‖N₁ z - N₂ z‖ ≤ C) :
+    ‖u₁ - u₂‖ ≤ (C + ‖f₁ - f₂‖) / (1 - (‖A‖ + (k : ℝ))) := by
+  have hlin : LipschitzWith ‖A‖₊ (fun u => A u) := A.lipschitz
+  have hg0 : LipschitzWith (‖A‖₊ + k) (fun u => A u + N₁ u) := hlin.add hN₁
+  have hg1 : LipschitzWith (‖A‖₊ + k) (fun u => A u + N₁ u + f₁) := by
+    simpa only [add_zero] using hg0.add (LipschitzWith.const f₁)
+  have hlt : ‖A‖₊ + k < 1 := by exact_mod_cast hAk
+  have hCg : ∀ z, ‖(fun u => A u + N₁ u + f₁) z - (fun u => A u + N₂ u + f₂) z‖
+      ≤ C + ‖f₁ - f₂‖ := by
+    intro z
+    have he : (A z + N₁ z + f₁) - (A z + N₂ z + f₂) = (N₁ z - N₂ z) + (f₁ - f₂) := by abel
+    calc ‖(fun u => A u + N₁ u + f₁) z - (fun u => A u + N₂ u + f₂) z‖
+        = ‖(N₁ z - N₂ z) + (f₁ - f₂)‖ := by rw [he]
+      _ ≤ ‖N₁ z - N₂ z‖ + ‖f₁ - f₂‖ := norm_add_le _ _
+      _ ≤ C + ‖f₁ - f₂‖ := add_le_add (hC z) le_rfl
+  have h := norm_fixedPoint_sub_fixedPoint_le (k := ‖A‖₊ + k)
+    (g₁ := fun u => A u + N₁ u + f₁) (g₂ := fun u => A u + N₂ u + f₂) hlt hg1 hu₁ hu₂ hCg
+  simpa only [NNReal.coe_add, coe_nnnorm] using h
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
