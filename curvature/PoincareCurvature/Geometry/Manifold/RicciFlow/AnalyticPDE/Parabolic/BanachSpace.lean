@@ -4,6 +4,7 @@ public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Paraboli
 public import Mathlib.Analysis.Normed.Group.SeparationQuotient
 public import Mathlib.Topology.UniformSpace.UniformEmbedding
 public import Mathlib.Topology.Algebra.SeparationQuotient.Section
+public import Mathlib.Topology.MetricSpace.Contracting
 
 set_option linter.unusedSectionVars false
 
@@ -1185,6 +1186,55 @@ theorem compL_constL {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L :
   rw [eq_iff_forall_evalCLM]
   intro z hz
   rw [evalCLM_compL_apply, evalCLM_constL_apply, evalCLM_constL_apply]
+
+/-! ### The affine Ricci–DeTurck fixed-point equation `A u + f = u`
+
+The parabolic `C^{0,α}` operator API assembled above — fiberwise post-composition `compL`,
+frozen-coefficient multiplication `mulL`, and the constant embedding `constL` — combines into the
+**affine right-hand side** `u ↦ A u + f` of the linearised Ricci–DeTurck flow on a Banach chart
+(`A` the bounded linear principal-plus-lower-order operator, `f` the inhomogeneous / frozen data).
+When the linear part is a contraction (`‖A‖ < 1`), the completeness of the parabolic `C^{0,α}`
+Banach space closes the linear-solvability step: the affine equation has a unique solution.  This is
+the abstract Banach fixed-point core of the Ricci–DeTurck Schauder iteration. -/
+
+/-- **The affine self-map `u ↦ A u + f` is `‖A‖`-Lipschitz.**  Translation by the fixed
+inhomogeneity `f` is an isometry, so the affine right-hand side of the linearised Ricci–DeTurck flow
+has the same Lipschitz constant as its linear part `A`. -/
+theorem lipschitzWith_affineMap
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (f : ParabolicC0AlphaBanach X E α s) :
+    LipschitzWith ‖A‖₊ (fun u => A u + f) := by
+  refine LipschitzWith.of_dist_le_mul (fun x y => ?_)
+  have hdist : dist (A x + f) (A y + f) = dist (A x) (A y) := by
+    rw [dist_eq_norm, dist_eq_norm, add_sub_add_right_eq_sub]
+  show dist (A x + f) (A y + f) ≤ ↑‖A‖₊ * dist x y
+  rw [hdist]
+  exact A.lipschitz.dist_le_mul x y
+
+/-- **The affine self-map is a contraction when its linear part is.**  If `‖A‖ < 1` then the affine
+right-hand side `u ↦ A u + f` is a `ContractingWith ‖A‖₊` self-map of the (complete) parabolic
+`C^{0,α}` Banach space. -/
+theorem contractingWith_affineMap
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (f : ParabolicC0AlphaBanach X E α s) (hA : ‖A‖ < 1) :
+    ContractingWith ‖A‖₊ (fun u => A u + f) :=
+  ⟨by exact_mod_cast hA, lipschitzWith_affineMap A f⟩
+
+/-- **Unique solvability of the affine Ricci–DeTurck fixed-point equation.**  On the complete
+parabolic `C^{0,α}` Banach chart, if the linear part `A` of the affine right-hand side `u ↦ A u + f`
+is a contraction (`‖A‖ < 1`), then the equation `A u + f = u` has a *unique* solution `u`.  This is
+the Banach fixed-point / linear-solvability step underlying the Ricci–DeTurck Schauder iteration:
+the frozen-coefficient linear part `A` (built from `compL`/`mulL`) plus the inhomogeneous data `f`
+(built from `constL`) determine a single Banach-chart solution. -/
+theorem exists_unique_affineFixedPoint [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (f : ParabolicC0AlphaBanach X E α s) (hA : ‖A‖ < 1) :
+    ∃! u, A u + f = u := by
+  haveI : Nonempty (ParabolicC0AlphaBanach X E α s) := ⟨0⟩
+  have hg : ContractingWith ‖A‖₊ (fun u => A u + f) := contractingWith_affineMap A f hA
+  refine ⟨ContractingWith.fixedPoint (fun u => A u + f) hg, hg.fixedPoint_isFixedPt, ?_⟩
+  intro y hy
+  exact hg.fixedPoint_unique hy
 
 end ParabolicC0AlphaBanach
 
