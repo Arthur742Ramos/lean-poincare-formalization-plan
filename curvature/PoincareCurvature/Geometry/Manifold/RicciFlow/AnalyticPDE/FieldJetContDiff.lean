@@ -543,6 +543,51 @@ theorem exists_flow_contMDiff_three_of_contDiff [CompleteSpace E]
   exact ⟨Φ, h0, hΦ, fun t => contMDiff_three_flow_apply_of_contDiff h hn hv hvc
     hDvlip hD2vclip hD2vmlip hD3vmlip hD3vlip hΦ h0 t⟩
 
+/-- **Field-data-only manifold `C³` self-diffeomorphism family from a single `ContDiff` hypothesis.**
+From `v` jointly `ContDiff ℝ n (uncurry v)` (`3 ≤ n`) with the stated Lipschitz controls, there is a
+flow family `Φ` anchored at `t₀` and integrating `v` whose time-`t` map is a `C³` diffeomorphism of the
+state space for every `t`: it has a two-sided inverse `ψ`, with both `x ↦ Φ x t` and `ψ` in
+`ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3`.  The `ContDiff`-hypothesis form of
+`exists_flow_contMDiff_three_diffeomorph`, supplying its `C^{3,1}` field jet from the single smoothness
+hypothesis — exactly the mutually-inverse `C³` time-slice diffeomorphism data the compact-manifold gauge
+flow of Item 2 consumes. -/
+theorem exists_flow_contMDiff_three_diffeomorph_of_contDiff [CompleteSpace E]
+    {K L M₂ M₃ N : ℝ≥0} {t₀ : ℝ}
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 3 ≤ n)
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    (hDvlip : ∀ s, LipschitzWith L (fderiv ℝ (v s)))
+    (hD2vclip : ∀ s, LipschitzWith M₂ (fderiv ℝ (fderiv ℝ (v s))))
+    (hD2vmlip : ∀ s, LipschitzWith N (iteratedFDeriv ℝ 2 (v s)))
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (fderiv ℝ (iteratedFDeriv ℝ 2 (v s))))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (iteratedFDeriv ℝ 3 (v s))) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+      ∀ t, ∃ ψ : E → E, Function.LeftInverse ψ (fun z => Φ z t) ∧
+        Function.RightInverse ψ (fun z => Φ z t) ∧
+        ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3 (fun z => Φ z t) ∧ ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3 ψ := by
+  have hn1 : (1 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  have hn2 : (2 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  exact exists_flow_contMDiff_three_diffeomorph (t₀ := t₀)
+    (Dv := fun s => fderiv ℝ (v s))
+    (D2vc := fun s => fderiv ℝ (fderiv ℝ (v s)))
+    (D2vm := fun s => iteratedFDeriv ℝ 2 (v s))
+    (D3vm := fun s => fderiv ℝ (iteratedFDeriv ℝ 2 (v s)))
+    (D3v := fun s => iteratedFDeriv ℝ 3 (v s))
+    hv hvc
+    (fun s ξ => hasFDerivAt_fderiv_of_contDiff_uncurry h hn1 s ξ)
+    (continuous_fderiv_of_contDiff_uncurry h hn1)
+    hDvlip
+    (fun s ξ => hasFDerivAt_fderiv_fderiv_of_contDiff_uncurry h hn2 s ξ)
+    (continuous_fderiv_fderiv_of_contDiff_uncurry h hn2)
+    hD2vclip
+    hD2vmlip
+    (fun s ξ => hasFDerivAt_fderiv_iteratedFDeriv_two_of_contDiff_uncurry h hn s ξ)
+    (continuous_fderiv_iteratedFDeriv_two_of_contDiff_uncurry h hn)
+    hD3vmlip
+    (continuous_iteratedFDeriv_three_of_contDiff_uncurry h hn)
+    hD3vlip
+    (fun s ξ => fderiv_fderiv_eq_curry2_iteratedFDeriv_two (v s) ξ)
+    (fun s ξ => fderiv_iteratedFDeriv_two_eq_curryLeft (v s) ξ)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
