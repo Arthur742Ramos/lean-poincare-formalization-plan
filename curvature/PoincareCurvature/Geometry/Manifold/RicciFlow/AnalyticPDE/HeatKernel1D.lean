@@ -2708,6 +2708,30 @@ lemma integral_abs_deriv_heatKernel1D_eq {t : ℝ} (ht : 0 < t) :
   field_simp
   ring
 
+/-- **The `n`-dimensional heat kernel's coordinate spatial gradient `L¹` (total-variation) norm in
+closed form:** `∫ x, |∂_{x_k}Kₙ(t,x)| dx = 1/√(π t)`, independent of the dimension `n`.  The product
+structure `Kₙ(t,x) = ∏ᵢ K(t,xᵢ)` gives the log-derivative identity
+`∂_{x_k}Kₙ(t,x) = Kₙ(t,x)·(−x_k/2t)` (only the `k`-th factor depends on `x_k`), so the coordinate
+gradient `L¹` norm is `(1/2t)·∫|x_k|·Kₙ = (1/2t)·(4πt)^{-1/2}·4t = 1/√(π t)` via the coordinate first
+moment `integral_abs_coord_mul_heatKernelND_eq`.  The exact `n`-dimensional
+*gain-of-one-spatial-derivative costs `t^{-1/2}`* Schauder constant (dimension-free, since the `n − 1`
+transverse Gaussians integrate to `1`). -/
+lemma integral_abs_deriv_coord_heatKernelND_eq {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    (∫ x : Fin n → ℝ, |heatKernelND t x * (-(x k) / (2 * t))|) = 1 / Real.sqrt (π * t) := by
+  have h2t : (0 : ℝ) < 2 * t := by positivity
+  have hcongr : (∫ x : Fin n → ℝ, |heatKernelND t x * (-(x k) / (2 * t))|)
+      = ∫ x : Fin n → ℝ, (1 / (2 * t)) * (|x k| * heatKernelND t x) := by
+    refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    have hK : (0 : ℝ) ≤ heatKernelND t x := heatKernelND_nonneg ht x
+    simp only [abs_mul, abs_of_nonneg hK, abs_div, abs_neg, abs_of_pos h2t]
+    ring
+  rw [hcongr, integral_const_mul, integral_abs_coord_mul_heatKernelND_eq ht,
+    prefactor_eq_inv_two_sqrt t ht]
+  have hst : Real.sqrt (π * t) ≠ 0 := ne_of_gt (Real.sqrt_pos.mpr (by positivity))
+  have ht0 : t ≠ 0 := ne_of_gt ht
+  field_simp
+  ring
+
 /-- **The canonical `t^{-1/2}` gradient-smoothing (Lipschitz) rate.** For bounded
 measurable `f` with `‖f‖∞ ≤ C`, the heat semigroup output is Lipschitz with the
 explicit parabolic constant `C/√(πt)`:
