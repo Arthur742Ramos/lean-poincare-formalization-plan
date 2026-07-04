@@ -221,5 +221,61 @@ theorem parabolicHolderSeminorm_interpolation_short_time_le
         rw [e1]; ring
     _ = 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)) * parabolicHolderSeminorm α u s := by rw [e2]
 
+/-- **Short-time smallness of the full intermediate `C^{0,α θ}` norm.**  For an initial-vanishing,
+`α`-Hölder function on a thin time-slab, the *full* intermediate parabolic `C^{0,α θ}` norm is
+controlled by a short-time-small multiple of the leading `α`-seminorm:
+
+  `‖u‖_{C^{0,α θ}} ≤ ((√T)^α + 2^{1−θ} (√T)^{α (1−θ)}) · [u]_α`.
+
+Both terms of the factor carry a positive power of the slab thickness `T`, so the whole intermediate
+norm `→ 0` as `T → 0`.  Sum of the initial-vanishing sup bound and the intermediate-seminorm bound
+`parabolicHolderSeminorm_interpolation_short_time_le`. -/
+theorem parabolicC0AlphaNorm_interpolation_short_time_le
+    {α θ T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicC0AlphaNorm (α * θ) u s
+      ≤ (Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)))
+        * parabolicHolderSeminorm α u s := by
+  have hsup : parabolicSupNorm u s ≤ parabolicHolderSeminorm α u s * Real.sqrt T ^ α :=
+    parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero hα hu hslab hcyl hu0
+  have hsemi : parabolicHolderSeminorm (α * θ) u s
+      ≤ 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)) * parabolicHolderSeminorm α u s :=
+    parabolicHolderSeminorm_interpolation_short_time_le hα hθ0 hθ1 hu hslab hcyl hu0
+  unfold parabolicC0AlphaNorm
+  calc parabolicSupNorm u s + parabolicHolderSeminorm (α * θ) u s
+      ≤ parabolicHolderSeminorm α u s * Real.sqrt T ^ α
+        + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)) * parabolicHolderSeminorm α u s :=
+        add_le_add hsup hsemi
+    _ = (Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)))
+        * parabolicHolderSeminorm α u s := by ring
+
+/-- **Short-time intermediate `C^{0,α θ}` contraction for a difference (initial-agreement form).**
+The form the Ricci–DeTurck fixed point consumes: if `u` and `v` agree on the initial-time slice and
+their difference is `α`-Hölder on a thin slab, then the intermediate `C^{0,α θ}` norm of the
+difference is short-time small relative to its own leading `α`-seminorm:
+
+  `‖u − v‖_{C^{0,α θ}} ≤ ((√T)^α + 2^{1−θ} (√T)^{α (1−θ)}) · [u − v]_α`.
+
+Immediate from `parabolicC0AlphaNorm_interpolation_short_time_le` applied to `u − v`, which vanishes
+on the initial slice by agreement.  As `T → 0` the factor `→ 0`, so on a sufficiently thin time-slab
+the map `u ↦ (solution)` is a contraction in the intermediate norm. -/
+theorem parabolicC0AlphaNorm_sub_interpolation_short_time_le
+    {α θ T t₀ : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (huv : ParabolicHolderOn α (fun z => u z - v z) s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hagree : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = v (t₀, x)) :
+    parabolicC0AlphaNorm (α * θ) (fun z => u z - v z) s
+      ≤ (Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)))
+        * parabolicHolderSeminorm α (fun z => u z - v z) s := by
+  refine parabolicC0AlphaNorm_interpolation_short_time_le hα hθ0 hθ1 huv hslab hcyl ?_
+  intro x hx
+  exact sub_eq_zero.mpr (hagree x hx)
+
 end AnalyticPDE
 end RicciFlow
