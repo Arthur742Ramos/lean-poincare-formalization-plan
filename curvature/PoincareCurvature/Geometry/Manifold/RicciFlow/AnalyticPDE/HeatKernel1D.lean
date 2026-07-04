@@ -4962,5 +4962,61 @@ lemma integrable_deriv_coord_heatKernelND_sub_mul {n : ℕ} {t : ℝ} (ht : 0 < 
     (integrable_deriv_coord_heatKernelND ht k).comp_sub_left x
   exact hg.mul_bdd hfm (Filter.Eventually.of_forall hfb)
 
+/-- **An `n`-dimensional Gaussian-envelope dominating function is integrable.**  The dominating
+function for differentiating `heatSemigroupND` along coordinate `k` under the integral sign has the
+product form: a one-dimensional Gaussian envelope `(1 + |y_k − x_k|)·exp(−(y_k − x_k)²/8t)` in
+slot `k` (the classical Leibniz envelope from `hasDerivAt_heatSemigroup1D_space`) times the
+`n − 1` transverse translated heat kernels `∏_{j ≠ k} K(t, x_j − y_j)`.  Each factor is integrable
+(the envelope by `integrable_rpow_mul_exp_neg_mul_sq`, the kernels by `integrable_heatKernel1D`),
+so the product is integrable by `Integrable.fin_nat_prod`.  This is the `n`-dimensional analogue of
+the `hboundint` step in `hasDerivAt_heatSemigroup1D_space`. -/
+lemma integrable_gaussianEnvelope_erase_prod {n : ℕ} {t : ℝ} (ht : 0 < t)
+    (x : Fin n → ℝ) (k : Fin n) :
+    Integrable (fun y : Fin n → ℝ =>
+      (1 + |y k - x k|) * Real.exp (-(y k - x k) ^ 2 / (8 * t))
+        * ∏ j ∈ Finset.univ.erase k, heatKernel1D t (x j - y j)) := by
+  classical
+  have hb8 : 0 < (8 * t)⁻¹ := by positivity
+  have h0 : Integrable (fun w : ℝ => Real.exp (-(8 * t)⁻¹ * w ^ 2)) :=
+    integrable_exp_neg_mul_sq hb8
+  have h1 : Integrable (fun w : ℝ => w ^ (1 : ℝ) * Real.exp (-(8 * t)⁻¹ * w ^ 2)) :=
+    integrable_rpow_mul_exp_neg_mul_sq hb8 (by norm_num)
+  have hbase : Integrable (fun w : ℝ => (1 + |w|) * Real.exp (-w ^ 2 / (8 * t))) := by
+    have hsum := h0.add h1.abs
+    refine hsum.congr (Filter.Eventually.of_forall (fun w => ?_))
+    simp only [Pi.add_apply, Real.rpow_one]
+    have hexp : -(8 * t)⁻¹ * w ^ 2 = -w ^ 2 / (8 * t) := by
+      rw [neg_div, div_eq_inv_mul]; ring
+    rw [hexp, abs_mul, abs_of_pos (Real.exp_pos _)]; ring
+  have henv : Integrable
+      (fun z : ℝ => (1 + |z - x k|) * Real.exp (-(z - x k) ^ 2 / (8 * t))) :=
+    hbase.comp_sub_right (x k)
+  set F : Fin n → ℝ → ℝ :=
+    fun i z => if i = k then (1 + |z - x k|) * Real.exp (-(z - x k) ^ 2 / (8 * t))
+               else heatKernel1D t (x i - z) with hF
+  have hprod : (fun y : Fin n → ℝ =>
+      (1 + |y k - x k|) * Real.exp (-(y k - x k) ^ 2 / (8 * t))
+        * ∏ j ∈ Finset.univ.erase k, heatKernel1D t (x j - y j))
+      = fun y => ∏ i, F i (y i) := by
+    funext y
+    rw [(Finset.mul_prod_erase Finset.univ (fun i => F i (y i)) (Finset.mem_univ k)).symm]
+    have hFk : F k (y k) = (1 + |y k - x k|) * Real.exp (-(y k - x k) ^ 2 / (8 * t)) := by
+      simp only [hF, if_pos rfl]
+    rw [hFk]
+    congr 1
+    apply Finset.prod_congr rfl
+    intro j hj
+    simp only [hF, if_neg (Finset.ne_of_mem_erase hj)]
+  have hvol : (volume : Measure (Fin n → ℝ)) = Measure.pi (fun _ => volume) := by
+    rw [volume_pi]
+  rw [hprod, hvol]
+  refine Integrable.fin_nat_prod (f := F) (fun i => ?_)
+  rcases eq_or_ne i k with hik | hik
+  · subst hik
+    simp only [hF, if_pos rfl]
+    exact henv
+  · simp only [hF, if_neg hik]
+    exact (integrable_heatKernel1D ht).comp_sub_left (x i)
+
 end AnalyticPDE
 end RicciFlow
