@@ -2010,6 +2010,53 @@ theorem exists_fixedPoint_quadraticRHS_closedBall [CompleteSpace E]
       _ = (‖A‖ + 2 * ‖L‖ * (‖c‖ + r)) * ‖u - v‖ := by ring
   exact exists_fixedPoint_of_lipschitzOnWith_closedBall hr hK hlip hmaps
 
+/-- **The quadratic Ricci–DeTurck right-hand side preserves a small ball around the origin.**  If
+`‖A‖·r + ‖L‖·r² + ‖f‖ ≤ r` then `u ↦ A u + L(u, u) + f` maps `closedBall 0 r` into itself — the
+invariant-ball (self-mapping) datum, derived from explicit scalar smallness of the data.  On a short
+time interval `‖f‖` is small (the initial data enters through `f`), so this holds for a suitable `r`. -/
+theorem mapsTo_quadraticRHS_closedBall_zero
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (L : E →L[ℝ] E →L[ℝ] E) (f : ParabolicC0AlphaBanach X E α s) {r : ℝ}
+    (hself : ‖A‖ * r + ‖L‖ * r * r + ‖f‖ ≤ r) :
+    Set.MapsTo (fun u => A u + mulBilinL L u u + f)
+      (Metric.closedBall 0 r) (Metric.closedBall 0 r) := by
+  intro u hu
+  rw [Metric.mem_closedBall, dist_zero_right] at hu
+  have hr0 : (0 : ℝ) ≤ r := le_trans (norm_nonneg u) hu
+  show A u + mulBilinL L u u + f ∈ Metric.closedBall 0 r
+  rw [Metric.mem_closedBall, dist_zero_right]
+  calc ‖A u + mulBilinL L u u + f‖
+      ≤ ‖A u + mulBilinL L u u‖ + ‖f‖ := norm_add_le _ _
+    _ ≤ (‖A u‖ + ‖mulBilinL L u u‖) + ‖f‖ := by gcongr; exact norm_add_le _ _
+    _ ≤ (‖A‖ * ‖u‖ + ‖L‖ * ‖u‖ * ‖u‖) + ‖f‖ :=
+        add_le_add (add_le_add (A.le_opNorm u) (norm_mulBilinL_diag_le L u)) le_rfl
+    _ ≤ (‖A‖ * r + ‖L‖ * r * r) + ‖f‖ := by
+        have h1 : ‖A‖ * ‖u‖ ≤ ‖A‖ * r := mul_le_mul_of_nonneg_left hu (norm_nonneg A)
+        have hLu : ‖L‖ * ‖u‖ ≤ ‖L‖ * r := mul_le_mul_of_nonneg_left hu (norm_nonneg L)
+        have h2 : ‖L‖ * ‖u‖ * ‖u‖ ≤ ‖L‖ * r * r :=
+          calc ‖L‖ * ‖u‖ * ‖u‖ ≤ ‖L‖ * r * ‖u‖ := mul_le_mul_of_nonneg_right hLu (norm_nonneg u)
+            _ ≤ ‖L‖ * r * r := mul_le_mul_of_nonneg_left hu (mul_nonneg (norm_nonneg L) hr0)
+        linarith
+    _ ≤ r := by linarith
+
+/-- **Fully scalar-data-driven short-time existence for the quadratic Ricci–DeTurck right-hand side.**
+From the contraction condition `‖A‖ + 2‖L‖r < 1` and the invariant-ball condition
+`‖A‖·r + ‖L‖·r² + ‖f‖ ≤ r` alone — both explicit scalar smallness bounds on the data — the quadratic
+equation `A u + L(u, u) + f = u` has a solution in `closedBall 0 r`.  Combines the self-mapping datum
+`mapsTo_quadraticRHS_closedBall_zero` with the ball existence
+`exists_fixedPoint_quadraticRHS_closedBall`, so no set-theoretic `MapsTo` hypothesis needs to be
+supplied: the honest short-time chart existence stated purely from the operator/data norms. -/
+theorem exists_fixedPoint_quadraticRHS_closedBall_zero [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (L : E →L[ℝ] E →L[ℝ] E) (f : ParabolicC0AlphaBanach X E α s) {r : ℝ} (hr : 0 ≤ r)
+    (hcontract : ‖A‖ + 2 * ‖L‖ * r < 1)
+    (hself : ‖A‖ * r + ‖L‖ * r * r + ‖f‖ ≤ r) :
+    ∃ u ∈ Metric.closedBall (0 : ParabolicC0AlphaBanach X E α s) r,
+      A u + mulBilinL L u u + f = u := by
+  refine exists_fixedPoint_quadraticRHS_closedBall A L f 0 hr ?_
+    (mapsTo_quadraticRHS_closedBall_zero A L f hself)
+  simpa using hcontract
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
