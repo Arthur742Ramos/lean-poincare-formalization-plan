@@ -1491,6 +1491,30 @@ theorem tendsto_iterate_fixedPoint [CompleteSpace E] {k : ℝ≥0}
   rw [hueq]
   exact hc.tendsto_iterate_fixedPoint x
 
+/-- **Unique solvability of the quasilinear Ricci–DeTurck fixed-point equation.**  The genuine
+Ricci–DeTurck right-hand side splits as a bounded *linear* principal-plus-lower-order part `A`, a
+*nonlinear* remainder `N` (`LipschitzWith k`), and the inhomogeneous / frozen data `f`.  If the
+combined contraction constant is subunital, `‖A‖ + k < 1`, then the quasilinear equation
+`A u + N u + f = u` has a unique solution `u` on the (complete) parabolic `C^{0,α}` Banach chart.
+This exhibits the actual algebraic shape of the Ricci–DeTurck Schauder fixed point (linear principal
+part + nonlinear perturbation + data): the right-hand side is shown to contract with constant
+`‖A‖ + k` (the operator norm of the linear part plus the Lipschitz constant of the nonlinearity), and
+`exists_unique_lipschitzFixedPoint` then supplies the unique solution.  It simultaneously generalises
+the affine `exists_unique_affineFixedPoint` (the `N = 0` case) and the concrete-operator corollaries
+`exists_unique_compL_affineFixedPoint` / `exists_unique_mulCoeffL_affineFixedPoint`. -/
+theorem exists_unique_affinePlusLipschitzFixedPoint [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (f : ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1) :
+    ∃! u, A u + N u + f = u := by
+  have hlin : LipschitzWith ‖A‖₊ (fun u => A u) := A.lipschitz
+  have hg0 : LipschitzWith (‖A‖₊ + k) (fun u => A u + N u) := hlin.add hN
+  have hgf : LipschitzWith (‖A‖₊ + k) (fun u => A u + N u + f) := by
+    simpa only [add_zero] using hg0.add (LipschitzWith.const f)
+  have hlt : ‖A‖₊ + k < 1 := by exact_mod_cast hAk
+  exact exists_unique_lipschitzFixedPoint (fun u => A u + N u + f) hlt hgf
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
