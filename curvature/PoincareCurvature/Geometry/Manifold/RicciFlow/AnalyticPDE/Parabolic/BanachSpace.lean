@@ -271,5 +271,80 @@ theorem norm_restrictL_le {t : Set (ℝ × X)} (hts : t ⊆ s) :
 
 end ParabolicC0AlphaBanach
 
+namespace ParabolicC0AlphaSpace
+
+/-- **Restriction to the full domain is the identity (pointwise).**  Restricting a carrier element
+along `s ⊆ s` returns the same element (the underlying function is unchanged and the parabolic
+`C^{0,α}` witness is proof-irrelevant). -/
+@[simp]
+theorem restrictL_self_apply (u : ParabolicC0AlphaSpace X E α s) :
+    restrictL (X := X) (E := E) (α := α) (s := s) (Set.Subset.refl s) u = u :=
+  Subtype.ext rfl
+
+/-- **Restriction is functorial (projective system), pointwise.**  Restricting a carrier element
+from `s` to `t` and then to `r ⊆ t` gives the same element as restricting directly from `s` to
+`r`. -/
+@[simp]
+theorem restrictL_comp_apply {t r : Set (ℝ × X)} (hts : t ⊆ s) (hrt : r ⊆ t)
+    (u : ParabolicC0AlphaSpace X E α s) :
+    restrictL hrt (restrictL hts u) = restrictL (hrt.trans hts) u :=
+  Subtype.ext rfl
+
+/-- **Restriction to the full domain is the identity operator.** -/
+theorem restrictL_self :
+    restrictL (X := X) (E := E) (α := α) (s := s) (Set.Subset.refl s)
+      = ContinuousLinearMap.id ℝ (ParabolicC0AlphaSpace X E α s) := by
+  ext u
+  simp
+
+/-- **Restriction is functorial (projective system) at the operator level.**  The parabolic
+`C^{0,α}` restriction operators form a projective system: `restrictL (r ⊆ t)` composed with
+`restrictL (t ⊆ s)` is `restrictL (r ⊆ s)`. -/
+theorem restrictL_comp {t r : Set (ℝ × X)} (hts : t ⊆ s) (hrt : r ⊆ t) :
+    (restrictL hrt).comp (restrictL hts)
+      = restrictL (X := X) (E := E) (α := α) (s := s) (hrt.trans hts) := by
+  ext u
+  simp
+
+end ParabolicC0AlphaSpace
+
+namespace ParabolicC0AlphaBanach
+
+/-- **Restriction to the full domain is the identity (pointwise) on the Banach space.** -/
+@[simp]
+theorem restrictL_self_apply (x : ParabolicC0AlphaBanach X E α s) :
+    restrictL (X := X) (E := E) (α := α) (s := s) (Set.Subset.refl s) x = x := by
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  rw [restrictL_mk, ParabolicC0AlphaSpace.restrictL_self_apply]
+
+/-- **Restriction is functorial (projective system), pointwise, on the Banach space.** -/
+@[simp]
+theorem restrictL_comp_apply {t r : Set (ℝ × X)} (hts : t ⊆ s) (hrt : r ⊆ t)
+    (x : ParabolicC0AlphaBanach X E α s) :
+    restrictL hrt (restrictL hts x) = restrictL (hrt.trans hts) x := by
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  rw [restrictL_mk, restrictL_mk, restrictL_mk,
+    ParabolicC0AlphaSpace.restrictL_comp_apply]
+
+/-- **Restriction to the full domain is the identity operator on the Banach space.** -/
+theorem restrictL_self :
+    restrictL (X := X) (E := E) (α := α) (s := s) (Set.Subset.refl s)
+      = ContinuousLinearMap.id ℝ (ParabolicC0AlphaBanach X E α s) := by
+  ext x
+  simp
+
+/-- **Restriction is functorial (projective system) at the operator level on the Banach space.**
+The parabolic `C^{0,α}` Banach restriction operators form a projective system: `restrictL (r ⊆ t)`
+composed with `restrictL (t ⊆ s)` is `restrictL (r ⊆ s)`.  This is the categorical data that gluing
+of local Ricci–DeTurck Banach-chart solutions across overlapping charts (the chart-closure data)
+consumes. -/
+theorem restrictL_comp {t r : Set (ℝ × X)} (hts : t ⊆ s) (hrt : r ⊆ t) :
+    (restrictL hrt).comp (restrictL hts)
+      = restrictL (X := X) (E := E) (α := α) (s := s) (hrt.trans hts) := by
+  ext x
+  simp
+
+end ParabolicC0AlphaBanach
+
 end AnalyticPDE
 end RicciFlow
