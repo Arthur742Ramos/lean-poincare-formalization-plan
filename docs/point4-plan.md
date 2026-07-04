@@ -6989,3 +6989,42 @@ positive-definite locus) cannot simultaneously hold for a `C⁰`-bounded `A`; th
 `picard` still requires the parabolic Schauder a-priori bound.  Remaining for Point 4 (unchanged): the
 Item 3 parabolic Schauder gain (heat-kernel content); the Item 2 spatial-`C³` flow-slice regularity;
 and the Item 1 tensor time-derivative chain rule.
+
+Update — **layer-2 `ContDiff → field-jet` bridge is now proved (`C²` manifold flow regularity from a
+single joint-`ContDiff` hypothesis)** in `AnalyticPDE/FieldJetContDiff.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; full library green).  Extending the layer-1 `C¹` bridge
+(`contMDiff_one_flow_apply_of_contDiff`), this session adds:
+
+* `continuous_fderiv_of_contDiff_uncurry'` and `contDiff_uncurry_fderiv_of_contDiff_uncurry'` — the
+  **codomain-general** (`w : ℝ → E → F`) forms of the layer-1 continuity lemma and of the "derivative
+  field is itself jointly `ContDiff` one order lower" step (`uncurry (fderiv ℝ (w ·)) = fderiv ℝ
+  (uncurry w) ∘L inr`, a bounded-linear post-composition).  These are exactly what lets the field-jet
+  extraction **recurse**: the layer-1 derivative field `fun s ↦ fderiv ℝ (v s)` is `(E →L[ℝ] E)`-valued,
+  not `E`-valued, so the original (codomain-`E`) layer-1 lemmas do not re-apply to it.
+* `hasFDerivAt_fderiv_fderiv_of_contDiff_uncurry` (`hD2v`) and
+  `continuous_fderiv_fderiv_of_contDiff_uncurry` (`hD2vc`) — the second-jet inputs of the tower's `C²`
+  flow theorem `contMDiff_two_flow_apply_of_lipschitz_secondDeriv`, obtained by applying the primed
+  layer-1 lemmas to the derivative field.
+* `contMDiff_two_flow_apply_of_contDiff` and `contMDiff_two_flow_apply_of_contDiff_of_bddDerivs` — the
+  `C²` bridges (the second discharges `hv`/`hvc` from a first-derivative bound, matching the layer-1
+  `_of_bddDerivs` API).
+
+**Key finding (blocks the naive layer-3/fully-bounded route).** The nested-`fderiv` representation of
+the jet **caps out at `C²`**: the triple-nested continuous-linear space `E →L[ℝ] E →L[ℝ] E →L[ℝ] E` has
+**no directly-synthesizable `SeminormedAddCommGroup`/`Norm`/`NNNorm` instance** in this context (verified
+by probe — `fderiv ℝ (fderiv ℝ (fderiv ℝ f))` type-checks, but `‖·‖₊` on its value does not synthesize),
+so a third-derivative bound `‖fderiv ℝ (fderiv ℝ (fderiv ℝ (v s))) ξ‖₊ ≤ M` cannot even be *stated*.
+Consequently `hD2vlip` (Lipschitz of the second-derivative field) is taken as a hypothesis in the `C²`
+bridges rather than derived from a bound.  **Layer-3 / `C³` therefore MUST use the multilinear /
+`iteratedFDeriv` representation** — which is precisely why the tower's `C³` theorem
+`contMDiff_three_flow_apply_of_lipschitz_thirdDeriv` consumes `D2vm : E → (E[×2]→L E)`,
+`D3vm : E → (E →L (E[×2]→L E))`, `D3v : E → (E[×3]→L E)` with the `curry2`/`curryLeft` compatibility
+fields `hcompat`/`hcurry` (`curry2` in `SmoothDependenceCk.lean`).
+
+**Next target (layer-3 `C³` `ContDiff` bridge).** Produce, from a single `ContDiff ℝ n (uncurry v)`
+(`n ≥ 4`), the multilinear jet objects `D2vm := iteratedFDeriv ℝ 2 (v ·)`, `D3v := iteratedFDeriv ℝ 3
+(v ·)`, `D3vm := fderiv ℝ (iteratedFDeriv ℝ 2 (v ·))`, with their `HasFDerivAt`/joint-continuity/
+`LipschitzWith` inputs (the multilinear norms are clean at every arity, so the third-order bound is now
+statable) and the compatibility identities `hcompat : fderiv ℝ (fderiv ℝ (v s)) ξ = curry2
+(iteratedFDeriv ℝ 2 (v s) ξ)` and `hcurry`, to assemble `contMDiff_three_flow_apply_of_contDiff` — the
+`C^{3,1}` jet the model-manifold `C³` gauge flow consumes.
