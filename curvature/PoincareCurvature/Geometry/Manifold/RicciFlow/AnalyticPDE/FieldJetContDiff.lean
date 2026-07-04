@@ -408,6 +408,95 @@ theorem contDiff_uncurry_iteratedFDeriv_of_contDiff_uncurry (k : ℕ) :
     rw [heq]
     fun_prop
 
+/-! ## Layer-3 multilinear jet inputs and the `C³` `ContDiff` flow bridge
+
+Combining the multilinear-jet recursion with the layer-1/2 jet lemmas and the compatibility identities
+supplies every non-Lipschitz input of the tower's `C³` flow theorem
+`contMDiff_three_flow_apply_of_lipschitz_thirdDeriv` from a single `ContDiff ℝ n (uncurry v)`
+hypothesis (`3 ≤ n`).  The top-order Lipschitz controls are supplied directly (matching the layer-2
+bridge, since expressing them as fourth-derivative bounds would require yet another multilinear jet). -/
+
+/-- **`hD3vm` input.**  The multilinear second-derivative field `iteratedFDeriv ℝ 2 (v s)` is a genuine
+Fréchet-differentiable field: `fderiv ℝ (iteratedFDeriv ℝ 2 (v s)) ξ` is its derivative at every `ξ`,
+for a jointly-`ContDiff ℝ n` field with `3 ≤ n` (so each slice `v s` is spatially `ContDiff ℝ n` and
+its `iteratedFDeriv ℝ 2` is `ContDiff ℝ 1`). -/
+theorem hasFDerivAt_fderiv_iteratedFDeriv_two_of_contDiff_uncurry
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 3 ≤ n) (s : ℝ) (ξ : E) :
+    HasFDerivAt (iteratedFDeriv ℝ 2 (v s)) (fderiv ℝ (iteratedFDeriv ℝ 2 (v s)) ξ) ξ := by
+  have hvs : ContDiff ℝ n (v s) := contDiff_apply_of_contDiff_uncurry h s
+  have hmn : (1 : WithTop ℕ∞) + (2 : ℕ) ≤ n := by exact_mod_cast hn
+  have h2 : ContDiff ℝ 1 (iteratedFDeriv ℝ 2 (v s)) := hvs.iteratedFDeriv_right hmn
+  exact ((h2.differentiable one_ne_zero).differentiableAt).hasFDerivAt
+
+/-- **`hD3vmc` input.**  Joint `(t, x)`-continuity of the derivative of the multilinear second
+derivative, `(t, x) ↦ fderiv ℝ (iteratedFDeriv ℝ 2 (v t)) x`, from the codomain-general layer-1
+continuity lemma applied to the jointly-`ContDiff` multilinear second-derivative field
+`iteratedFDeriv ℝ 2 (v ·)` (itself `ContDiff` by the multilinear-jet recursion, `3 ≤ n`). -/
+theorem continuous_fderiv_iteratedFDeriv_two_of_contDiff_uncurry
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 3 ≤ n) :
+    Continuous (fun p : ℝ × E => fderiv ℝ (iteratedFDeriv ℝ 2 (v p.1)) p.2) := by
+  have hmn : (1 : WithTop ℕ∞) + (2 : ℕ) ≤ n := by exact_mod_cast hn
+  have hcd : ContDiff ℝ 1 (Function.uncurry (fun s => iteratedFDeriv ℝ 2 (v s))) :=
+    contDiff_uncurry_iteratedFDeriv_of_contDiff_uncurry 2 h hmn
+  exact continuous_fderiv_of_contDiff_uncurry' hcd le_rfl
+
+/-- **`hD3vc` input.**  Joint `(t, x)`-continuity of the multilinear third derivative,
+`(t, x) ↦ iteratedFDeriv ℝ 3 (v t) x`, as the continuity of the jointly-`ContDiff ℝ 0`
+multilinear third-derivative field `iteratedFDeriv ℝ 3 (v ·)` (`3 ≤ n`). -/
+theorem continuous_iteratedFDeriv_three_of_contDiff_uncurry
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 3 ≤ n) :
+    Continuous (fun p : ℝ × E => iteratedFDeriv ℝ 3 (v p.1) p.2) := by
+  have hmn : (0 : WithTop ℕ∞) + (3 : ℕ) ≤ n := by exact_mod_cast hn
+  have hcd : ContDiff ℝ 0 (Function.uncurry (fun s => iteratedFDeriv ℝ 3 (v s))) :=
+    contDiff_uncurry_iteratedFDeriv_of_contDiff_uncurry 3 h hmn
+  exact hcd.continuous
+
+/-- **Manifold spatial `C³` regularity of the flow from a genuine `ContDiff` field.**  Packaging the
+layer-1/2/3 field-jet extraction with the tower's `C^{3,1}` manifold regularity theorem
+`contMDiff_three_flow_apply_of_lipschitz_thirdDeriv`: for a jointly-`ContDiff ℝ n` field `v` (`3 ≤ n`)
+that is spatially `K`-Lipschitz and time-continuous, whose second and third spatial derivatives
+(nested and multilinear) obey the stated Lipschitz bounds, any integral-curve flow family `Φ` anchored
+at `t₀` has each time-`t` map `z ↦ Φ z t` in `ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3`.  The pointwise
+`HasFDerivAt`, joint continuity, and multilinear compatibility (`hcompat`/`hcurry`) inputs of the tower
+are all supplied here from the single `ContDiff` hypothesis; the top-order Lipschitz controls are
+supplied directly.  This is the `C^{3,1}` jet the model-manifold `C³` gauge flow consumes, stated in
+terms of joint `ContDiff` of the field. -/
+theorem contMDiff_three_flow_apply_of_contDiff [CompleteSpace E]
+    {K L M₂ M₃ N : ℝ≥0} {t₀ : ℝ} {Φ : E → ℝ → E}
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 3 ≤ n)
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    (hDvlip : ∀ s, LipschitzWith L (fderiv ℝ (v s)))
+    (hD2vclip : ∀ s, LipschitzWith M₂ (fderiv ℝ (fderiv ℝ (v s))))
+    (hD2vmlip : ∀ s, LipschitzWith N (iteratedFDeriv ℝ 2 (v s)))
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (fderiv ℝ (iteratedFDeriv ℝ 2 (v s))))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (iteratedFDeriv ℝ 3 (v s)))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3 (fun z => Φ z t) := by
+  have hn1 : (1 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  have hn2 : (2 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  exact contMDiff_three_flow_apply_of_lipschitz_thirdDeriv
+    (Dv := fun s => fderiv ℝ (v s))
+    (D2vc := fun s => fderiv ℝ (fderiv ℝ (v s)))
+    (D2vm := fun s => iteratedFDeriv ℝ 2 (v s))
+    (D3vm := fun s => fderiv ℝ (iteratedFDeriv ℝ 2 (v s)))
+    (D3v := fun s => iteratedFDeriv ℝ 3 (v s))
+    hv hvc
+    (fun s ξ => hasFDerivAt_fderiv_of_contDiff_uncurry h hn1 s ξ)
+    (continuous_fderiv_of_contDiff_uncurry h hn1)
+    hDvlip
+    (fun s ξ => hasFDerivAt_fderiv_fderiv_of_contDiff_uncurry h hn2 s ξ)
+    (continuous_fderiv_fderiv_of_contDiff_uncurry h hn2)
+    hD2vclip
+    hD2vmlip
+    (fun s ξ => hasFDerivAt_fderiv_iteratedFDeriv_two_of_contDiff_uncurry h hn s ξ)
+    (continuous_fderiv_iteratedFDeriv_two_of_contDiff_uncurry h hn)
+    hD3vmlip
+    (continuous_iteratedFDeriv_three_of_contDiff_uncurry h hn)
+    hD3vlip
+    (fun s ξ => fderiv_fderiv_eq_curry2_iteratedFDeriv_two (v s) ξ)
+    (fun s ξ => fderiv_iteratedFDeriv_two_eq_curryLeft (v s) ξ)
+    hΦ h0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
