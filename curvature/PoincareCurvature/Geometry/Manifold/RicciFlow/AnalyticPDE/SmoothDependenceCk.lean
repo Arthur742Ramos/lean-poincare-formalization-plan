@@ -11341,6 +11341,43 @@ theorem uncurry2CLM_apply (T : E →L[ℝ] E →L[ℝ] E) (w : Fin 2 → E) :
     continuousMultilinearCurryLeftEquiv_symm_apply, continuousMultilinearCurryFin1_symm_apply]
   rfl
 
+/-- **`uncurry2CLM` is a left inverse of `curry2`.**  `uncurry2CLM (curry2 M) = M`.  Together with
+`curry2_uncurry2CLM` this exhibits the multilinear packaging `uncurry2CLM` and the composition-form
+representation `curry2` as mutually inverse isometries between the `Fin 2` multilinear space and the
+double continuous-linear-map space `E →L E →L E`.  This is what converts the existing
+`curry2 (iteratedFDeriv ℝ 2 f) = D₂` identifications into the multilinear form
+`iteratedFDeriv ℝ 2 f = uncurry2CLM (D₂)` needed to feed the `iteratedFDeriv ℝ 3` chain. -/
+theorem uncurry2CLM_curry2 (M : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) :
+    uncurry2CLM (curry2 M) = M := by
+  ext w
+  rw [uncurry2CLM_apply, curry2_apply]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+/-- **`uncurry2CLM` is a right inverse of `curry2`.**  `curry2 (uncurry2CLM T) = T`. -/
+theorem curry2_uncurry2CLM (T : E →L[ℝ] E →L[ℝ] E) :
+    curry2 (uncurry2CLM T) = T := by
+  ext a b
+  rw [curry2_apply, uncurry2CLM_apply]
+  simp
+
+/-- **Second iterated derivative as a multilinear packaging.**  If `f` is everywhere differentiable
+with derivative `Df`, and the first derivative `Df` is Fréchet differentiable at `x` with derivative
+`D2 : E →L E →L E`, then the (multilinear) second iterated derivative equals the multilinear
+packaging of `D2`: `iteratedFDeriv ℝ 2 f x = uncurry2CLM D2`.  The `C²`-side companion of
+`iteratedFDeriv_three_eq_uncurry3_of_hasFDerivAt`, obtained from the composition-form identification
+`curry2_iteratedFDeriv_two_eq_of_hasFDerivAt` by the inverse relation `uncurry2CLM_curry2`.  This is
+the pointwise datum that (differentiated once more, through the continuous linear `uncurry2CLM`)
+supplies the `HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp (D₃fam x)) x` hypothesis of
+`iteratedFDeriv_three_eq_uncurry3_of_hasFDerivAt`. -/
+theorem iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt
+    {f : E → E} {Df : E → (E →L[ℝ] E)} {D2 : E →L[ℝ] (E →L[ℝ] E)} {x : E}
+    (hDf : ∀ y, HasFDerivAt f (Df y) y) (hD2 : HasFDerivAt Df D2 x) :
+    iteratedFDeriv ℝ 2 f x = uncurry2CLM D2 := by
+  rw [← uncurry2CLM_curry2 (iteratedFDeriv ℝ 2 f x),
+    curry2_iteratedFDeriv_two_eq_of_hasFDerivAt hDf hD2]
+
 /-- **Multilinear packaging of a triple continuous-linear map.**  Sends the nested triple operator
 `T : E →L E →L E →L E` to the *properly normed* `Fin 3` continuous multilinear map
 `v ↦ T (v 0) (v 1) (v 2)` in `ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E`.
