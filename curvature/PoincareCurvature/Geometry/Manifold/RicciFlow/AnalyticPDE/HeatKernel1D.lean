@@ -4938,5 +4938,29 @@ lemma integrable_coord_mul_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fi
     (Filter.Eventually.of_forall (fun x => ?_))
   rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (heatKernelND_nonneg ht x)]
 
+/-- **The `n`-dimensional kernel coordinate-derivative is integrable.**  Since
+`∂_{x_k}Kₙ(t,x) = Kₙ(t,x)·(−x_k/2t)`, this is the signed coordinate first moment
+`integrable_coord_mul_heatKernelND` scaled by `−1/2t`. -/
+lemma integrable_deriv_coord_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    Integrable (fun x : Fin n → ℝ => heatKernelND t x * (-(x k) / (2 * t))) := by
+  refine ((integrable_coord_mul_heatKernelND ht k).const_mul (-(1 / (2 * t)))).congr ?_
+  filter_upwards with x
+  ring
+
+/-- **The `n`-dimensional coordinate-derivative convolution integrand is integrable.**  The
+`n`-dimensional analogue of `integrable_deriv_heatKernel1D_space_sub_mul`: the shifted kernel
+coordinate-derivative `y ↦ ∂_{x_k}Kₙ(t, x − y)` is integrable (translate of
+`integrable_deriv_coord_heatKernelND`), and multiplying by the bounded measurable datum `f`
+preserves integrability. -/
+lemma integrable_deriv_coord_heatKernelND_sub_mul {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    Integrable
+      (fun y : Fin n → ℝ => heatKernelND t (x - y) * (-((x - y) k) / (2 * t)) * f y) := by
+  have hg : Integrable
+      (fun y : Fin n → ℝ => heatKernelND t (x - y) * (-((x - y) k) / (2 * t))) :=
+    (integrable_deriv_coord_heatKernelND ht k).comp_sub_left x
+  exact hg.mul_bdd hfm (Filter.Eventually.of_forall hfb)
+
 end AnalyticPDE
 end RicciFlow
