@@ -6260,3 +6260,36 @@ arbitrary compact `M`) — the local-chart↔global-flow patching in the heavy
 existence + diffeomorphism + ODE data is now available (`ModelManifoldGaugeFlow`); the Item 1 tensor
 time-derivative chain rule (`Diffeomorph3FlowTimeDerivative.lean`); and the Item 3 parabolic
 Hölder/Schauder frontier (`AnalyticPDE/ParabolicHolder.lean`).
+
+Update — **parabolic `C^{0,α}` Banach space operator API extended** in
+`AnalyticPDE/Parabolic/BanachSpace.lean` (all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`), building the functional-analytic structure the
+Ricci–DeTurck Banach chart and chart-closure data (Item 3) consume, layered on the genuine separated
+Banach space (`ParabolicC0AlphaBanach`) and the norm-nonincreasing restriction operator `restrictL`:
+
+* `restrictL_self` / `restrictL_comp` (carrier `ParabolicC0AlphaSpace` **and** Banach
+  `ParabolicC0AlphaBanach`, with the `_apply` pointwise forms) — the **restriction operators form a
+  projective system**: restricting along `s ⊆ s` is the identity, and `restrictL (r ⊆ t)` composed
+  with `restrictL (t ⊆ s)` is `restrictL (r ⊆ s)`.  This is the categorical data that gluing of
+  local Ricci–DeTurck Banach-chart solutions across overlapping charts consumes.
+* `evalCLM z hz` (carrier and Banach, with `evalCLM_apply` / `evalCLM_mk` / `evalCLM_mk_apply`,
+  `norm_evalCLM_apply_le`, `norm_evalCLM_le`) — **point evaluation at a space-time point `z ∈ s` as a
+  bounded linear functional `… →L[ℝ] E` of operator norm `≤ 1`**.  On the carrier it is the
+  composite `LinearMap.proj z ∘ subtype` bounded by `norm_le_parabolicC0AlphaNorm` (the sup part of
+  the `C^{0,α}` norm controls the pointwise value on `s`); it **descends to the Banach quotient** via
+  `SeparationQuotient.liftCLM` because functions identified on `s` share the value at `z ∈ s`.  This
+  is the functional that reads off a Banach-chart solution's value at a space-time point.
+* `evalCLM_restrictL_apply` (carrier and Banach) — **the evaluation functionals form a compatible
+  cone over the restriction projective system**: `evalCLM z hz ∘ restrictL (t ⊆ s) = evalCLM z (…)`
+  for `z ∈ t`.  This is the coherence that keeps the point-values of glued chart-solutions consistent
+  across overlaps.
+* `eq_iff_forall_evalCLM` — **the point-evaluation functionals separate points**: a parabolic
+  `C^{0,α}` Banach class is completely determined by its values at the space-time points of `s`
+  (`x = y ↔ ∀ z ∈ s, evalCLM z hz x = evalCLM z hz y`), via `mk_eq_mk_iff` and the `B = H = 0`
+  `C^{0,α}` bound (a function vanishing on `s` has zero parabolic `C^{0,α}` norm).  The faithful
+  representation showing a Ricci–DeTurck Banach-chart solution is determined by its space-time values.
+
+Remaining for Point 4 (future sessions): the genuine **Schauder a-priori estimates** and the
+Ricci–DeTurck RHS operator on the parabolic Banach space (Item 3, the analytic main theorem); the
+**general-manifold** gauge-flow lift (Item 2, heavy gauge files); and the Item 1 tensor
+time-derivative chain rule.
