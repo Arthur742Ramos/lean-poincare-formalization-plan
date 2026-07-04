@@ -11832,6 +11832,116 @@ theorem exists_hasFDerivAt_secondFundamentalSolution_multilinearContinuous [Comp
       (fun z => (hprops z).1) (fun z => (hprops z).2.1) (fun z => (hprops z).2.2.1)
       (fun z => (hprops z).2.2.2.2.2.2) ht).continuous
 
+/-- **`C³` dependence of the flow on initial data — the Item 1/2 unblock.**  For a `C^{3,1}` vector
+field `v` on a real Banach space (uniformly `K`-Lipschitz, time-continuous, with first/second/third
+spatial derivatives `Dv`, `D2vc`/`D2vm`, `D3vm`/`D3v` — jointly continuous and spatially Lipschitz,
+in the compatible composition/multilinear representations), the time-`t` flow map `z ↦ Φ z t` is
+`ContDiff ℝ 3` (three times continuously Fréchet differentiable in the initial value).
+
+This is the theorem the compact-manifold gauge flow of Item 2 and the tensor time-derivative chain
+rule of Item 1 ultimately consume: Mathlib v4.29.1 supplies smooth ODE-flow dependence only at the
+Banach/first-order level, and this closes the `C³` initial-data regularity built up through the whole
+`SmoothDependenceCk` tower.
+
+The proof assembles three now-available pieces for a **single shared** flow family `Φ`:
+(1) `exists_flow_contDiff_two_of_lipschitz_secondDeriv` supplies `Φ` together with the honest
+`ContDiff ℝ 2 (z ↦ Φ z t)`; (2) `exists_hasFDerivAt_secondFundamentalSolution_multilinearContinuous`
+supplies the nested third-fundamental chain `∀ y, HasFDerivAt D₂ (D₃fam y) y` *and* the multilinear
+continuity `Continuous (z ↦ uncurry3 (D₃fam z))`; (3) the `C¹`/`C²` bootstraps
+(`hasFDerivAt_flow_of_lipschitz_deriv`, the base-point `C²` remainder
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq`) identify the flow's first derivative with
+the resolvent and the resolvent's derivative with the packaged `D₂`.  Feeding all of these to the
+obstruction-free `contDiff_three_of_hasFDerivAt_nested_of_continuous` — which routes the third
+derivative through the well-normed `ML(Fin 3)` / `E →L ML(Fin 2)` spaces, never the un-normed
+`E →L E →L E →L E` — yields `ContDiff ℝ 3`.  The along-flow bounds are read off the derivative
+Lipschitz constants (`C' = L`, `‖D3vm‖ ≤ N = ‖D2vm‖`-Lipschitz, `‖D3v‖ = ‖D3v.curryLeft‖ = ‖D3vm‖`
+by the `curryLeft` isometry). -/
+theorem exists_flow_contDiff_three_of_lipschitz_thirdDeriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ N : ℝ≥0}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ)
+    (hD2vcc : Continuous fun p : ℝ × E => D2vc p.1 p.2)
+    (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD2vmlip : ∀ s, LipschitzWith N (D2vm s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ)
+    (hD3vmc : Continuous fun p : ℝ × E => D3vm p.1 p.2)
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vc : Continuous fun p : ℝ × E => D3v p.1 p.2)
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hcurry : ∀ s ξ, D3vm s ξ = (D3v s ξ).curryLeft)
+    (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContDiff ℝ 3 (fun z => Φ z t) := by
+  obtain ⟨Φ, h0, hΦ, hf2⟩ := exists_flow_contDiff_two_of_lipschitz_secondDeriv
+    hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip ht0
+  have hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K := fun z s => by
+    have h : ‖Dv s (Φ z s)‖ ≤ (K : ℝ) := (hDv s (Φ z s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)) := fun z =>
+    hDvc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hD2contfun : ∀ z, Continuous (fun s => D2vc s (Φ z s)) := fun z =>
+    hD2vcc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hD3mcont : ∀ z, Continuous (fun s => D3vm s (Φ z s)) := fun z =>
+    hD3vmc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hD3vcont : ∀ z, Continuous (fun s => D3v s (Φ z s)) := fun z =>
+    hD3vc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hCz : ∀ z, ∀ s, ‖D2vc s (Φ z s)‖ ≤ (L : ℝ) := fun z s =>
+    (hD2vc s (Φ z s)).le_of_lipschitz (hDvlip s)
+  have hNfun : ∀ z, ∀ s, ‖D3vm s (Φ z s)‖ ≤ (N : ℝ) := fun z s =>
+    (hD3vm s (Φ z s)).le_of_lipschitz (hD2vmlip s)
+  have hC''fun : ∀ z, ∀ s, ‖D3v s (Φ z s)‖ ≤ (N : ℝ) := fun z s => by
+    have hcn : ‖(D3v s (Φ z s)).curryLeft‖ = ‖D3v s (Φ z s)‖ :=
+      ContinuousMultilinearMap.curryLeft_norm _
+    have hbnd := hNfun z s
+    rw [hcurry s (Φ z s), hcn] at hbnd
+    exact hbnd
+  have htmem : t ∈ Set.Icc t₀ t := ⟨ht0, le_refl t⟩
+  choose Ψ h0Ψ hΨ using fun z => exists_variationalFlowFamily (hAfun z) (hAcontfun z)
+  obtain ⟨D₂, D₃fam, hD₂char, hD3chain, hcont⟩ :=
+    exists_hasFDerivAt_secondFundamentalSolution_multilinearContinuous
+      hv hΦ h0 hDv hDvlip hD2vc hD2vclip hD3vm hD3vmlip hD3vlip hcompat hAfun hAcontfun
+      hD2contfun hD3mcont hD3vcont L.coe_nonneg hCz N.coe_nonneg hNfun N.coe_nonneg hC''fun
+      (fun z s => hcurry s (Φ z s)) hΨ h0Ψ htmem
+  have hDf : ∀ z, HasFDerivAt (fun w => Φ w t)
+      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) z := fun z =>
+    hasFDerivAt_flow_of_lipschitz_deriv hv (hAfun z) (hΨ z) (h0Ψ z) hΦ h0 z ht0
+      (Dv := Dv) (fun _ s _ ξ _ => (hDv s ξ).hasFDerivWithinAt) L.coe_nonneg
+      (fun _ s _ ξ _ => by
+        have hlip := (hDvlip s).dist_le_mul ξ (Φ z s)
+        rw [dist_eq_norm, dist_eq_norm] at hlip
+        exact hlip)
+  have hD2 : ∀ z, HasFDerivAt
+      (fun z' => fundamentalSolution (hAfun z') (hΨ z') (h0Ψ z') t) (D₂ z) z := by
+    intro z
+    refine hasFDerivAt_of_eventually_norm_sub_sub_le_sq (C :=
+        (L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (t - t₀)) ^ 3
+            * gronwallBound 0 (K : ℝ) 1 (t - t₀) ^ 2
+          + ((M₂ : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀))
+              + (L : ℝ) * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (t - t₀)))
+            * Real.exp ((K : ℝ) * (t - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀))
+      (Filter.Eventually.of_forall (fun z' => ?_))
+    obtain ⟨Vz, hVz0, hVz⟩ := exists_hasDerivAt_firstVariation_true
+      z (hAfun z) (hAcontfun z) (hΨ z) (h0Ψ z) z' (hAcontfun z')
+    obtain ⟨Vlin, hVlin0, hVlin⟩ := exists_hasDerivAt_firstVariation_linearised
+      z (hAfun z) (hAcontfun z) (hD2contfun z) (hΨ z) (h0Ψ z) z'
+    have hrem := norm_fundamentalSolution_sub_sub_linearVariation_le_sq
+      hv hΦ h0 hDv hDvlip hD2vc hD2vclip z (hAfun z) (hAcontfun z) L.coe_nonneg (hCz z)
+      (hΨ z) (h0Ψ z) z' (hAfun z') (hAcontfun z') (hΨ z') (h0Ψ z') hVz hVz0 hVlin hVlin0 htmem
+    have hval : D₂ z (z' - z) = Vlin t := hD₂char z (z' - z) Vlin hVlin0 hVlin
+    rw [hval]; exact hrem
+  exact ⟨Φ, h0, hΦ,
+    contDiff_three_of_hasFDerivAt_nested_of_continuous hf2 hDf hD2 hD3chain hcont⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
