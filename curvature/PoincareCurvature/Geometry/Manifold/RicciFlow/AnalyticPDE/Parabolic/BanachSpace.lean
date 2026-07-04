@@ -471,5 +471,138 @@ theorem eq_iff_forall_evalCLM (x y : ParabolicC0AlphaBanach X E α s) :
 
 end ParabolicC0AlphaBanach
 
+/-- **Operator bound for fiberwise post-composition.**  Post-composing a parabolic `C^{0,α}`
+function `u` with a continuous linear value map `L : E →L[ℝ] F` scales the parabolic `C^{0,α}` norm by
+at most `‖L‖`: `‖L ∘ u‖_{C^{0,α}} ≤ ‖L‖ · ‖u‖_{C^{0,α}}`.  Both the sup part and the Hölder-seminorm
+part scale by `‖L‖` (the operator-application closure `ParabolicC0AlphaWith.continuousLinearMap`), and
+the parabolic `C^{0,α}` norm is their sum. -/
+theorem parabolicC0AlphaNorm_continuousLinearMap_le {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ F] (L : E →L[ℝ] F) {u : ℝ × X → E} (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm α (fun z => L (u z)) s ≤ ‖L‖ * parabolicC0AlphaNorm α u s := by
+  have hself : ParabolicC0AlphaWith (parabolicSupNorm u s) (parabolicHolderSeminorm α u s) α u s :=
+    parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm hu
+  have hL : ParabolicC0AlphaWith (‖L‖ * parabolicSupNorm u s)
+      (‖L‖ * parabolicHolderSeminorm α u s) α (fun z => L (u z)) s :=
+    hself.continuousLinearMap L
+  have hbound := parabolicC0AlphaNorm_le
+    (mul_nonneg (norm_nonneg L) (parabolicSupNorm_nonneg u s))
+    (mul_nonneg (norm_nonneg L) (parabolicHolderSeminorm_nonneg α u s)) hL
+  refine hbound.trans (le_of_eq ?_)
+  rw [parabolicC0AlphaNorm]; ring
+
+namespace ParabolicC0AlphaSpace
+
+/-- **Fiberwise post-composition with a continuous linear value map, on the seminormed carrier.**
+Sends a parabolic `C^{0,α}` function `u` to `z ↦ L (u z)`, as an `ℝ`-linear map of the carriers
+(reuses `parabolicC0AlphaSubmodule.continuousLinearMap`). -/
+def compLM {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F) :
+    ParabolicC0AlphaSpace X E α s →ₗ[ℝ] ParabolicC0AlphaSpace X F α s :=
+  parabolicC0AlphaSubmodule.continuousLinearMap L
+
+@[simp]
+theorem toFun_compLM {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F)
+    (u : ParabolicC0AlphaSpace X E α s) :
+    toFun (compLM L u) = fun z => L (toFun u z) :=
+  rfl
+
+/-- **Fiberwise post-composition is a bounded operator of norm `≤ ‖L‖` on the carriers.**  Applying a
+continuous linear value map `L : E →L[ℝ] F` pointwise to a parabolic `C^{0,α}` function is a bounded
+`ℝ`-linear map `ParabolicC0AlphaSpace … E … →L[ℝ] ParabolicC0AlphaSpace … F …` of operator norm
+`≤ ‖L‖` (`parabolicC0AlphaNorm_continuousLinearMap_le`). -/
+noncomputable def compL {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F) :
+    ParabolicC0AlphaSpace X E α s →L[ℝ] ParabolicC0AlphaSpace X F α s :=
+  LinearMap.mkContinuous (compLM L) ‖L‖ (fun u => by
+    show parabolicC0AlphaNorm α (fun z => L (toFun u z)) s ≤ ‖L‖ * parabolicC0AlphaNorm α (toFun u) s
+    exact parabolicC0AlphaNorm_continuousLinearMap_le L (toSubmodule u).2)
+
+@[simp]
+theorem toFun_compL {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F)
+    (u : ParabolicC0AlphaSpace X E α s) :
+    toFun (compL L u) = fun z => L (toFun u z) :=
+  rfl
+
+/-- The carrier post-composition operator has operator norm `≤ ‖L‖`. -/
+theorem norm_compL_le {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F) :
+    ‖compL (X := X) (E := E) (α := α) (s := s) (F := F) L‖ ≤ ‖L‖ :=
+  LinearMap.mkContinuous_norm_le _ (norm_nonneg L) _
+
+end ParabolicC0AlphaSpace
+
+namespace ParabolicC0AlphaBanach
+
+/-- **Fiberwise post-composition descends to the Banach spaces.**  Applying a continuous linear value
+map `L : E →L[ℝ] F` pointwise is well defined on Banach classes — it is `‖L‖`-Lipschitz, so it sends
+functions that agree on `s` to functions that agree on `s` — giving a bounded operator
+`ParabolicC0AlphaBanach … E … →L[ℝ] ParabolicC0AlphaBanach … F …`
+(`SeparationQuotient.liftCLM` of `mk ∘ (carrier post-composition)`).  This is the functional-analytic
+operation of applying a fiberwise bundle morphism / coordinate change to a Ricci–DeTurck Banach-chart
+solution. -/
+noncomputable def compL {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F) :
+    ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X F α s :=
+  SeparationQuotient.liftCLM (mkL.comp (ParabolicC0AlphaSpace.compL L))
+    (fun u u' hins => by
+      change SeparationQuotient.mk _ = SeparationQuotient.mk _
+      refine SeparationQuotient.mk_eq_mk.2 ?_
+      rw [Metric.inseparable_iff]
+      have h0 : dist u u' = 0 := Metric.inseparable_iff.mp hins
+      have hle : dist (ParabolicC0AlphaSpace.compL L u) (ParabolicC0AlphaSpace.compL L u')
+          ≤ ‖L‖ * dist u u' := by
+        rw [dist_eq_norm, dist_eq_norm, ← map_sub]
+        calc ‖ParabolicC0AlphaSpace.compL L (u - u')‖
+            ≤ ‖ParabolicC0AlphaSpace.compL L‖ * ‖u - u'‖ :=
+              (ParabolicC0AlphaSpace.compL L).le_opNorm _
+          _ ≤ ‖L‖ * ‖u - u'‖ := by
+              gcongr; exact ParabolicC0AlphaSpace.norm_compL_le L
+      exact le_antisymm (hle.trans (le_of_eq (by rw [h0, mul_zero]))) dist_nonneg)
+
+/-- **Post-composition commutes with the projection.**  On the class of a representative `u`,
+post-composition is the class of the post-composed representative. -/
+@[simp]
+theorem compL_mk {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F)
+    (u : ParabolicC0AlphaSpace X E α s) :
+    compL L (mk u) = mk (ParabolicC0AlphaSpace.compL L u) :=
+  SeparationQuotient.liftCLM_mk _ _ u
+
+/-- The Banach post-composition operator has operator norm `≤ ‖L‖`. -/
+theorem norm_compL_le {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F) :
+    ‖compL (X := X) (E := E) (α := α) (s := s) (F := F) L‖ ≤ ‖L‖ := by
+  refine ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg L) (fun x => ?_)
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  rw [compL_mk, norm_mk, norm_mk, ParabolicC0AlphaSpace.toFun_compL]
+  exact parabolicC0AlphaNorm_continuousLinearMap_le L (ParabolicC0AlphaSpace.toSubmodule u).2
+
+/-- **Point evaluation of a post-composed class is the value map applied to the point value (cone
+coherence with the fiber map).**  Reading off the space-time value of a Ricci–DeTurck chart solution
+after applying a fiberwise bundle morphism `L` is `L` applied to the value of the original solution. -/
+@[simp]
+theorem evalCLM_compL_apply {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F)
+    (z : ℝ × X) (hz : z ∈ s) (x : ParabolicC0AlphaBanach X E α s) :
+    evalCLM z hz (compL L x) = L (evalCLM z hz x) := by
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  simp only [compL_mk, evalCLM_mk_apply, ParabolicC0AlphaSpace.toFun_compL]
+
+/-- **Post-composition by the identity is the identity operator.** -/
+theorem compL_id :
+    compL (X := X) (E := E) (α := α) (s := s) (ContinuousLinearMap.id ℝ E)
+      = ContinuousLinearMap.id ℝ (ParabolicC0AlphaBanach X E α s) := by
+  ext x
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  rw [ContinuousLinearMap.id_apply, compL_mk]
+  rfl
+
+/-- **Post-composition is functorial in the value map (composition).**  Applying `L₂ ∘ L₁` fiberwise
+is applying `L₁` and then `L₂` — the parabolic `C^{0,α}` Banach post-composition operators form a
+covariant functor of the value space. -/
+theorem compL_comp {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L₂ : F →L[ℝ] G) (L₁ : E →L[ℝ] F) :
+    compL (X := X) (α := α) (s := s) (L₂.comp L₁)
+      = (compL L₂).comp (compL L₁) := by
+  ext x
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  rw [ContinuousLinearMap.comp_apply, compL_mk, compL_mk, compL_mk]
+  rfl
+
+end ParabolicC0AlphaBanach
+
 end AnalyticPDE
 end RicciFlow
