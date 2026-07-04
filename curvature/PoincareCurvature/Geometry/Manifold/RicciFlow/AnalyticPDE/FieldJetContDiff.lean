@@ -353,6 +353,61 @@ theorem fderiv_iteratedFDeriv_two_eq_curryLeft (f : E → E) (ξ : E) :
   rw [fderiv_iteratedFDeriv]
   rfl
 
+/-! ## Layer-3 multilinear field-jet extraction (`iteratedFDeriv` joint `ContDiff` from a single
+`ContDiff` hypothesis)
+
+The tower's `C³` flow theorem consumes the second and third derivatives in the multilinear
+`iteratedFDeriv` representation, with joint `(t, x)`-continuity.  We supply their joint smoothness by a
+single recursion: `uncurry (fun s ↦ iteratedFDeriv ℝ (k+1) (w s))` is the currying isometry applied to
+`uncurry (fun s ↦ fderiv ℝ (iteratedFDeriv ℝ k (w s)))` (`iteratedFDeriv_succ_eq_comp_left`), whose
+joint `ContDiff` (one order lower) comes from the codomain-general layer-1 recursion
+`contDiff_uncurry_fderiv_of_contDiff_uncurry'` applied to the `k`-th jet field.  The base case
+`k = 0` is `uncurry w` post-composed with the `Fin 0` currying isometry. -/
+
+/-- **Multilinear field-jet joint `ContDiff` recursion.**  From a single joint-`ContDiff ℝ n` field
+`w : ℝ → E → F`, the spatial multilinear jet field `(t, x) ↦ iteratedFDeriv ℝ k (w t) x` is jointly
+`ContDiff ℝ m` whenever `m + k ≤ n`.  Proved by induction on `k`: the `succ` step rewrites
+`iteratedFDeriv ℝ (k+1) (w s)` as the left-currying isometry of `fderiv ℝ (iteratedFDeriv ℝ k (w s))`
+(`iteratedFDeriv_succ_eq_comp_left`) and applies the codomain-general layer-1 derivative-field
+recursion `contDiff_uncurry_fderiv_of_contDiff_uncurry'` to the `k`-th jet field. -/
+theorem contDiff_uncurry_iteratedFDeriv_of_contDiff_uncurry (k : ℕ) :
+    ∀ {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {w : ℝ → E → F} {m : WithTop ℕ∞},
+      ContDiff ℝ n (Function.uncurry w) → m + (k : WithTop ℕ∞) ≤ n →
+      ContDiff ℝ m (Function.uncurry (fun s => iteratedFDeriv ℝ k (w s))) := by
+  induction k with
+  | zero =>
+    intro F _ _ w m hw hmn
+    have hcast : m ≤ n := by simpa using hmn
+    have heq : (Function.uncurry (fun s => iteratedFDeriv ℝ 0 (w s)))
+        = (continuousMultilinearCurryFin0 ℝ E F).symm ∘ Function.uncurry w := by
+      funext p
+      obtain ⟨s, x⟩ := p
+      simp only [Function.comp_apply, Function.uncurry_apply_pair, iteratedFDeriv_zero_eq_comp]
+    rw [heq]
+    exact (LinearIsometryEquiv.contDiff _).comp (hw.of_le hcast)
+  | succ k ih =>
+    intro F _ _ w m hw hmn
+    have hstep : m + 1 + (k : WithTop ℕ∞) ≤ n := by
+      have hk1 : ((k + 1 : ℕ) : WithTop ℕ∞) = (k : WithTop ℕ∞) + 1 := by push_cast; ring
+      rw [hk1] at hmn
+      calc m + 1 + (k : WithTop ℕ∞) = m + ((k : WithTop ℕ∞) + 1) := by
+            rw [add_assoc, add_comm (1 : WithTop ℕ∞) (k : WithTop ℕ∞)]
+        _ ≤ n := hmn
+    have ihk : ContDiff ℝ (m + 1) (Function.uncurry (fun s => iteratedFDeriv ℝ k (w s))) :=
+      ih hw hstep
+    have hfd : ContDiff ℝ m
+        (Function.uncurry (fun s => fderiv ℝ (iteratedFDeriv ℝ k (w s)))) :=
+      contDiff_uncurry_fderiv_of_contDiff_uncurry' ihk (le_refl _)
+    have heq : (Function.uncurry (fun s => iteratedFDeriv ℝ (k + 1) (w s)))
+        = (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (k + 1) => E) F).symm
+          ∘ Function.uncurry (fun s => fderiv ℝ (iteratedFDeriv ℝ k (w s))) := by
+      funext p
+      obtain ⟨s, x⟩ := p
+      simp only [Function.comp_apply, Function.uncurry_apply_pair]
+      rw [iteratedFDeriv_succ_eq_comp_left, Function.comp_apply]
+    rw [heq]
+    fun_prop
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
