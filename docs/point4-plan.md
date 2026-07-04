@@ -6174,3 +6174,53 @@ in the heavy `GaugeReduction/ModelGaugeFlowODE.lean` / `Diffeomorph3FlowExistenc
 `E`-chart smooth-dependence core those consume is now available); the tensor time-derivative chain
 rule (Item 1, `Diffeomorph3FlowTimeDerivative.lean`); and the Item 3 parabolic Hölder/Schauder
 frontier (`AnalyticPDE/ParabolicHolder.lean`).
+
+Update — **the model-manifold (`M = E`) raw `C³` gauge-flow existence is now inhabited from
+field-jet data: the ODE smooth-dependence tower is connected all the way to the project's actual
+gauge-flow structure `RicciFlow.Diffeomorph3GaugeFlowOn`**, in the new self-contained leaf module
+`AnalyticPDE/ModelManifoldGaugeFlow.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; a legacy-mode file importing the cached
+`GaugeReduction/GaugeFlowAssembly` and the `AnalyticPDE/SmoothDependenceManifold` tower, so it builds
+without recompiling either).  Item 2's reduction target
+`GaugeFlowAssembly.gaugeFlow_of_inverse_flow` consumes mutually inverse `ContMDiff I I 3` time-slice
+maps `F`, `G : ℝ → M → M`, anchoring, and the within-set manifold ODE derivative equation
+`HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun τ ↦ F τ x) s t ((1).smulRight (X t (F t x)))`.  For the model
+manifold `E` (`𝓘(ℝ, E)`), a `TimeDependentVectorField` is *definitionally* an ordinary field
+`ℝ → E → E` (`TangentSpace 𝓘(ℝ, E) x = E`), and the whole smooth-dependence tower supplies exactly
+this data — so the previously separate Fréchet tower and manifold gauge API now meet.
+
+* `exists_diffeomorph3GaugeFlowOn_of_field_jet` — from the `C^{3,1}` field jet of `v` alone (globally
+  `K`-Lipschitz, time-continuous `v` with the standard globally-Lipschitz/jointly-continuous Fréchet
+  jet `Dv`, `D²v` (`D2vc`/`D2vm`), `D³v` (`D3vm`/`D3v`) and the `curry2`/`curryLeft` compatibilities),
+  `Nonempty (RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) (X := v) s t₀)` on an *arbitrary*
+  time set `s`.  A pure assembly: the gauge-data bundle `exists_flow_contMDiff_three_gaugeData`
+  supplies `Φ`, anchoring, the per-time smooth inverse (`choose`), and the manifold ODE derivative
+  (weakened to within-set by `HasMFDerivAt.hasMFDerivWithinAt`), fed to `gaugeFlow_of_inverse_flow`.
+  The instance side (`IsManifold 𝓘(ℝ, E) ∞ E`, `ContMDiffVectorBundle 2 E (TangentSpace 𝓘(ℝ, E)) …`,
+  `SigmaCompactSpace E`) resolves automatically for `M = E` from `[FiniteDimensional ℝ E]`,
+  `[CompleteSpace E]`.  This is the **load-bearing chart-level core** of Item 2's general
+  compact-manifold constructor: because the general-manifold smooth-dependence theorem is proved
+  chart-by-chart with each chart the model space `E`, per-chart gauge-flow existence is now available;
+  the remaining work is the local-chart↔global-flow patching in the heavy gauge files.
+* `exists_flow_diffeomorph_three_hasMFDerivAt` — the per-chart *export*: a *single* flow family `Φ`
+  that simultaneously anchors, satisfies the manifold ODE derivative equation at every time
+  (`HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ ↦ Φ z τ) t ((1).smulRight (v t (Φ z t)))`), and is, for every
+  `t`, the coercion of a bundled `Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3`.  This threads one `Φ` through
+  both `exists_flow_diffeomorph_three` (which exposed the `Diffeomorph` family but dropped the flow
+  equation) and the gauge-data bundle (which exposed the ODE but only an unbundled inverse), giving
+  the exact per-chart datum — a first-class `C³` self-diffeomorphism family that *is* the flow of the
+  chart-local field — the general lift transports.
+
+Update — **parabolic Hölder normed-algebra constant-function primitives** added to
+`AnalyticPDE/ParabolicHolder.lean` (axiom-clean), the constant-term / multiplicative-unit bounds
+complementing the existing additive / scalar / product (`_add_le`, `_smul`, `_mul_le`,
+`_mul_sub_mul_le`) estimates on the way to the Schauder fixed point: `parabolicHolderSeminorm_const`
+(a constant has zero Hölder oscillation, `= 0`, via `ParabolicHolderWith 0`), `parabolicSupNorm_const_le`
+(`≤ ‖c‖`, via `ParabolicBoundedWith ‖c‖`), and `parabolicC0AlphaNorm_const_le` (`≤ ‖c‖`).
+
+Remaining for Point 4 (future sessions): the **general-manifold** lift (replace `M = E` with an
+arbitrary compact `M`) — the local-chart↔global-flow patching in the heavy
+`GaugeReduction/ModelGaugeFlowODE.lean` / `Diffeomorph3FlowExistence.lean`, whose per-chart flow
+existence + diffeomorphism + ODE data is now available (`ModelManifoldGaugeFlow`); the Item 1 tensor
+time-derivative chain rule (`Diffeomorph3FlowTimeDerivative.lean`); and the Item 3 parabolic
+Hölder/Schauder frontier (`AnalyticPDE/ParabolicHolder.lean`).
