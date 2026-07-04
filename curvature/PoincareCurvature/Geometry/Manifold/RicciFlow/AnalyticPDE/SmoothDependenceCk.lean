@@ -11203,6 +11203,124 @@ theorem norm_thirdFundamentalSolution_apply_baseCurve_sub_le [CompleteSpace E]
   case hx => intro s; convert hVx s using 2; abel
   case heq => ring
 
+/-- **Per-direction Lipschitz continuity of the packaged third fundamental solution family.**  For
+the packaged design-corrected third-variation operator family `D₃fam : E → (E →L E →L E →L E)` (with
+its canonical linearised-first-variation family `Vfamfam` and bilinear characterisation `hD₃famchar`,
+as produced base-point-by-base-point by `exists_thirdVariationOperator_of_field`), the map
+`z ↦ D₃fam z k` — for each fixed outer direction `k`, valued in the *double* continuous-linear-map
+space `E →L E →L E` — is Lipschitz with constant `Cλ · gronwallBound 0 K 1 (t − t₀) · ‖k‖`.
+
+This is the genuine continuity content of the third fundamental solution that survives the Mathlib
+v4.29.1 obstruction on the triple operator norm (`Norm`/`NormedSpace ℝ (E →L E →L E)` do not
+synthesize — the endomorphism-ring/module diamond): although `Continuous D₃fam` cannot be phrased
+through the triple operator norm, its per-direction slices `z ↦ D₃fam z k` land in the well-normed
+double space and are honestly Lipschitz — i.e. `D₃fam` is continuous in the strong operator topology,
+direction by direction.
+
+Proof: `LipschitzWith.of_dist_le_mul`; the base-point gap
+`norm_thirdFundamentalSolution_apply_baseCurve_sub_le` (fed `Vfamfam z`, `Vfamfam x₀` and the two
+bilinear characterisations) supplies exactly `‖D₃fam z k − D₃fam x₀ k‖ ≤ Cλ·g·‖z − x₀‖·‖k‖`, and a
+`ring` reassociation matches the Lipschitz constant `Cλ·g·‖k‖`. -/
+theorem lipschitzWith_thirdFundamentalSolution_apply [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ : ℝ≥0} {C' C'' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD2vlip : ∀ s, LipschitzWith M₂ (D2v s))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K)
+    (hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)))
+    (hD2contfun : ∀ z, Continuous (fun s => D2v s (Φ z s)))
+    (hD3contfun : ∀ z, Continuous (fun s => D3v s (Φ z s)))
+    (hC'0 : 0 ≤ C') (hC'fun : ∀ z, ∀ s, ‖D2v s (Φ z s)‖ ≤ C')
+    (hC''0 : 0 ≤ C'') (hC''fun : ∀ z, ∀ s, ‖D3v s (Φ z s)‖ ≤ C'')
+    {Ψ : E → E → ℝ → E}
+    (hΨ : ∀ z, ∀ x, IsIntegralCurve (Ψ z x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0Ψ : ∀ z, ∀ x, Ψ z x t₀ = x)
+    {T : ℝ} {t : ℝ}
+    {Vfamfam : E → E → (ℝ → (E →L[ℝ] E))}
+    {D₃fam : E → (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E)))}
+    (hVfamfam0 : ∀ z, ∀ h, Vfamfam z h t₀ = 0)
+    (hVfamfamd : ∀ z, ∀ (h : E) (s : ℝ), HasDerivAt (Vfamfam z h)
+      ((Dv s (Φ z s)).comp (Vfamfam z h s)
+        + ((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+            (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)) s)
+    (hVfamfamc : ∀ z, ∀ h, Continuous (Vfamfam z h))
+    (hD₃famchar : ∀ z, ∀ (k h : E) (V : ℝ → (E →L[ℝ] E)), V t₀ = 0 →
+      (∀ s, HasDerivAt V
+        ((Dv s (Φ z s)).comp (V s)
+          + (((D2v s (Φ z s)).comp (Vfamfam z k s) h).comp
+                (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)
+             + ((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+                 (Vfamfam z k s)
+             + (((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) k).comp
+                   (Vfamfam z h s)
+                + (continuousMultilinearCurryFin1 ℝ E E
+                    (((D3v s (Φ z s)).curryLeft
+                          (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s k)).curryLeft
+                      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s h))).comp
+                    (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)))) s) →
+      D₃fam z k h = V t)
+    (ht : t ∈ Set.Icc t₀ T) (k : E) :
+    LipschitzWith
+      (((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+            * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'')
+          + 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+              * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)))
+        * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖k‖).toNNReal
+      (fun z => D₃fam z k) := by
+  have he4 : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 4 := by positivity
+  have hg0 : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans ht.1 ht.2))
+  have hgt0 : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (t - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr ht.1)
+  have hL := L.coe_nonneg
+  have hM₂ := M₂.coe_nonneg
+  have hM₃ := M₃.coe_nonneg
+  have hCbig0 : (0 : ℝ) ≤
+      ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+            * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'')
+          + 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+              * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ))) := by
+    have hA : (0 : ℝ) ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+        * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+        * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'') :=
+      mul_nonneg (mul_nonneg (mul_nonneg hL he4) hg0)
+        (add_nonneg (mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg C')) hg0) hC''0)
+    have hB : (0 : ℝ) ≤ 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+        * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+        * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀))) :=
+      mul_nonneg (by norm_num) (mul_nonneg (mul_nonneg he4 hg0)
+        (add_nonneg (mul_nonneg (mul_nonneg (by norm_num) hM₂) hC'0)
+          (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hL) (sq_nonneg C')) hg0)))
+    have hC : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+        * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)) :=
+      mul_nonneg he4 (add_nonneg
+        (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hC''0) hL) hg0) hM₃)
+    linarith
+  have hCg0 : (0 : ℝ) ≤
+      ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+            * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'')
+          + 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+              * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)))
+        * gronwallBound 0 (K : ℝ) 1 (t - t₀) * ‖k‖ :=
+    mul_nonneg (mul_nonneg hCbig0 hgt0) (norm_nonneg _)
+  refine LipschitzWith.of_dist_le_mul (fun z x₀ => ?_)
+  rw [Real.coe_toNNReal _ hCg0, dist_eq_norm, dist_eq_norm]
+  refine (norm_thirdFundamentalSolution_apply_baseCurve_sub_le hv hΦ h0 hDvlip hD2vlip hD3vlip
+    z x₀ (hAfun z) (hAfun x₀) (hAcontfun z) (hAcontfun x₀) (hD2contfun z) (hD2contfun x₀)
+    (hD3contfun z) (hD3contfun x₀) hC'0 (hC'fun z) (hC'fun x₀) hC''0 (hC''fun z) (hC''fun x₀)
+    (hΨ z) (h0Ψ z) (hΨ x₀) (h0Ψ x₀)
+    (hVfamfam0 z) (hVfamfamd z) (hVfamfamc z) (hD₃famchar z)
+    (hVfamfam0 x₀) (hVfamfamd x₀) (hVfamfamc x₀) (hD₃famchar x₀) ht k).trans_eq ?_
+  ring
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
