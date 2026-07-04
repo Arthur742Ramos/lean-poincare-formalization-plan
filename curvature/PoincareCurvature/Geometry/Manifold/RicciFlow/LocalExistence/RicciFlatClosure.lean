@@ -156,6 +156,48 @@ noncomputable def localExistenceUniquenessFamily_of_forall_intrinsicRicciTensor_
   (intrinsicLocalExistenceUniquenessFamily_of_forall_intrinsicRicciTensor_eq_zero
     (I := I) (M := M) hexist hRic).toOrdinary
 
+/-- **Theorem-family positive-dimensional Ricci-flat closure.**  A uniform supply of Ricci-flatness
+(so existence is unconditional for every initial value problem) together with the uniform
+Ricci-vanishing hypothesis yields the whole intrinsic existence–uniqueness theorem family; the only
+remaining content is `hRic`, i.e. Ricci-flatness preservation along the flow. -/
+noncomputable def intrinsicLocalExistenceUniquenessFamily_of_forall_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+    (hRicciFlat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (hRic : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+          intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicSolution.metric t x u v = 0) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    intrinsicLocalExistenceUniqueness_of_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+      (I := I) (M := M) ivp (hRicciFlat ivp) (hRic ivp)
+
+/-- Ordinary (connection-parametrized) positive-dimensional Ricci-flat closure: for Ricci-flat
+initial data (existence unconditional) with the Ricci-vanishing hypothesis, the ordinary point-4
+package holds, obtained from the intrinsic Ricci-flat closure through
+`IntrinsicLocalExistenceUniqueness.toOrdinary`. -/
+noncomputable def localExistenceUniqueness_of_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (hRic : ∀ sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+        intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicSolution.metric t x u v = 0) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (intrinsicLocalExistenceUniqueness_of_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M) ivp hRicciFlat hRic).toOrdinary
+
+/-- Theorem-family ordinary positive-dimensional Ricci-flat closure. -/
+noncomputable def localExistenceUniquenessFamily_of_forall_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+    (hRicciFlat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (hRic : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+          intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicSolution.metric t x u v = 0) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (intrinsicLocalExistenceUniquenessFamily_of_forall_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M) hRicciFlat hRic).toOrdinary
+
 end Intrinsic
 
 end Compact
