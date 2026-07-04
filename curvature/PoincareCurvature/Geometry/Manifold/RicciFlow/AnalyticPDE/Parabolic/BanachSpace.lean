@@ -442,6 +442,33 @@ theorem evalCLM_restrictL_apply {t : Set (ℝ × X)} (hts : t ⊆ s) (z : ℝ ×
   rw [restrictL_mk, evalCLM_mk, evalCLM_mk,
     ParabolicC0AlphaSpace.evalCLM_restrictL_apply]
 
+/-- **The point-evaluation functionals separate points of the Banach space.**  A parabolic `C^{0,α}`
+Banach element is completely determined by its values at the space-time points of `s`: two classes
+are equal iff they agree under every point-evaluation `evalCLM z hz` (`z ∈ s`).  Equivalently, the
+Banach space is faithfully represented by the family of its values on `s` — the fact that a
+Ricci–DeTurck Banach-chart solution is determined by its space-time values. -/
+theorem eq_iff_forall_evalCLM (x y : ParabolicC0AlphaBanach X E α s) :
+    x = y ↔ ∀ (z : ℝ × X) (hz : z ∈ s), evalCLM z hz x = evalCLM z hz y := by
+  constructor
+  · rintro rfl z hz; rfl
+  · intro h
+    obtain ⟨u, rfl⟩ := mk_surjective x
+    obtain ⟨v, rfl⟩ := mk_surjective y
+    have hpt : ∀ z ∈ s, ParabolicC0AlphaSpace.toFun u z = ParabolicC0AlphaSpace.toFun v z := by
+      intro z hz
+      have hz' := h z hz
+      rwa [evalCLM_mk_apply, evalCLM_mk_apply] at hz'
+    rw [mk_eq_mk_iff]
+    set w : ℝ × X → E :=
+      fun z => ParabolicC0AlphaSpace.toFun u z - ParabolicC0AlphaSpace.toFun v z with hw
+    have hw0 : ∀ z ∈ s, w z = 0 := fun z hz => by
+      simp only [hw, sub_eq_zero]; exact hpt z hz
+    have hbound : ParabolicC0AlphaWith 0 0 α w s :=
+      ⟨fun p hp => by simp [hw0 p hp], fun p hp q hq => by simp [hw0 p hp, hw0 q hq]⟩
+    have hle : parabolicC0AlphaNorm α w s ≤ 0 := by
+      simpa using parabolicC0AlphaNorm_le (le_refl 0) (le_refl 0) hbound
+    exact le_antisymm hle (parabolicC0AlphaNorm_nonneg α w s)
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
