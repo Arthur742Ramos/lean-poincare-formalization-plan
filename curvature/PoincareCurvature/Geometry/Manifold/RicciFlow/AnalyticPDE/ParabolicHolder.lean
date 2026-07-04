@@ -8508,6 +8508,73 @@ theorem parabolicC0AlphaNorm_le_add_holderSeminorm_mul_of_initial_le
           + parabolicHolderSeminorm α u s := by gcongr
     _ = M₀ + (Real.sqrt T ^ α + 1) * parabolicHolderSeminorm α u s := by ring
 
+/-! ### Space/time decomposition of parabolic Hölder regularity
+
+The parabolic distance is `max (√|Δt|) (dist_x)`, so a parabolic `α`-Hölder estimate restricts, at a
+fixed time, to a spatial `α`-Hölder estimate and, at a fixed space point, to a temporal `α/2`-Hölder
+estimate.  Conversely, separate spatial-`α` and temporal-`α/2` control reassemble into parabolic
+`α`-Hölder control on a set closed under mixing time/space coordinates (a parabolic cylinder).  These
+projections and the reconstruction are the structural characterisation of parabolic Hölder spaces
+that the Schauder theory rests on. -/
+
+/-- **Spatial projection of parabolic Hölder control.**  At a fixed time `t`, a parabolic `α`-Hölder
+function is spatially `α`-Hölder with the same constant: `‖u (t, x) - u (t, y)‖ ≤ C · dist x y ^ α`. -/
+theorem norm_sub_le_of_parabolicHolderWith_same_time
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {C α t : ℝ} {x y : X} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC : ParabolicHolderWith C α u s) (hx : (t, x) ∈ s) (hy : (t, y) ∈ s) :
+    ‖u (t, x) - u (t, y)‖ ≤ C * dist x y ^ α := by
+  have h := hC hx hy
+  rwa [parabolicDistance.same_time] at h
+
+/-- **Temporal projection of parabolic Hölder control.**  At a fixed space point `x`, a parabolic
+`α`-Hölder function is temporally `α/2`-Hölder with the same constant:
+`‖u (t, x) - u (τ, x)‖ ≤ C · |t - τ| ^ (α / 2)`.  The `α/2` exponent is the parabolic scaling of time. -/
+theorem norm_sub_le_of_parabolicHolderWith_same_space
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {C α t τ : ℝ} {x : X} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC : ParabolicHolderWith C α u s) (hp : (t, x) ∈ s) (hq : (τ, x) ∈ s) :
+    ‖u (t, x) - u (τ, x)‖ ≤ C * |t - τ| ^ (α / 2) := by
+  have h := hC hp hq
+  rwa [parabolicDistance.same_space_rpow] at h
+
+/-- **Reconstruction of parabolic Hölder control from separate spatial and temporal control.**  If
+`u` is spatially `α`-Hölder with constant `Hs` (at each fixed time) and temporally `α/2`-Hölder with
+constant `Ht` (at each fixed space point), and `s` is closed under mixing the time coordinate of one
+point with the space coordinate of another (`(p.1, q.2) ∈ s`, as for a parabolic cylinder), then `u`
+is parabolic `α`-Hölder with constant `Hs + Ht`.  The estimate splits `u p - u q` through the
+intermediate point `(p.1, q.2)`, bounding the spatial jump by `Hs · dist^α ≤ Hs · d_par^α` and the
+temporal jump by `Ht · |Δt|^{α/2} ≤ Ht · d_par^α`. -/
+theorem parabolicHolderWith_of_forall_same_time_same_space
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht)
+    (hmid : ∀ p ∈ s, ∀ q ∈ s, (p.1, q.2) ∈ s)
+    (hspace : ∀ ⦃t : ℝ⦄ ⦃x y : X⦄, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * dist x y ^ α)
+    (htime : ∀ ⦃x : X⦄ ⦃t τ : ℝ⦄, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u s := by
+  rintro ⟨tp, xp⟩ hp ⟨tq, xq⟩ hq
+  have hmidpt : (tp, xq) ∈ s := hmid (tp, xp) hp (tq, xq) hq
+  have hspace' := hspace hp hmidpt
+  have htime' := htime hmidpt hq
+  have hd : dist xp xq ^ α ≤ parabolicDistance ((tp, xp) : ℝ × X) (tq, xq) ^ α :=
+    Real.rpow_le_rpow dist_nonneg (parabolicDistance.space_dist_le (tp, xp) (tq, xq)) hα
+  have ht : |tp - tq| ^ (α / 2) ≤ parabolicDistance ((tp, xp) : ℝ × X) (tq, xq) ^ α := by
+    rw [Real.rpow_div_two_eq_sqrt α (abs_nonneg _)]
+    exact Real.rpow_le_rpow (Real.sqrt_nonneg _)
+      (parabolicDistance.sqrt_time_le (tp, xp) (tq, xq)) hα
+  calc ‖u (tp, xp) - u (tq, xq)‖
+      ≤ ‖u (tp, xp) - u (tp, xq)‖ + ‖u (tp, xq) - u (tq, xq)‖ := by
+        have h := norm_add_le (u (tp, xp) - u (tp, xq)) (u (tp, xq) - u (tq, xq))
+        rwa [sub_add_sub_cancel] at h
+    _ ≤ Hs * dist xp xq ^ α + Ht * |tp - tq| ^ (α / 2) := add_le_add hspace' htime'
+    _ ≤ Hs * parabolicDistance (tp, xp) (tq, xq) ^ α
+          + Ht * parabolicDistance (tp, xp) (tq, xq) ^ α :=
+        add_le_add (mul_le_mul_of_nonneg_left hd hHs) (mul_le_mul_of_nonneg_left ht hHt)
+    _ = (Hs + Ht) * parabolicDistance (tp, xp) (tq, xq) ^ α := by ring
+
 end AnalyticPDE
 end RicciFlow
 
