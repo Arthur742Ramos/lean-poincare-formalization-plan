@@ -8910,6 +8910,98 @@ theorem exists_parabolicC0AlphaOn_fixedPt_ball_of_contraction {X E : Type*} [Pse
   exact ⟨g, hg, hfix, huniq,
     parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction hq1 hg hu₀ hfix hTmaps hTcontr⟩
 
+/-!
+### Parabolic Hölder interpolation
+
+The classical interpolation inequality between the sup norm (`C^0`) and the `α`-Hölder seminorm:
+a bounded, `α`-Hölder function is, for every weight `0 ≤ θ ≤ 1`, Hölder with the intermediate
+exponent `α·θ` and constant `(2·sup)^{1−θ}·(seminorm)^θ`.  This is the mechanism parabolic Schauder
+estimates use to *absorb lower-order terms*: an intermediate Hölder seminorm is controlled by a small
+multiple of the top seminorm plus a large multiple of the sup norm.  Pure norm/rpow algebra — no
+Schauder or heat-kernel content.
+-/
+
+/-- **Parabolic Hölder interpolation (explicit-constant form).**  A parabolically bounded (by `B`)
+and `α`-Hölder (with constant `H`) function is, for every interpolation weight `0 ≤ θ ≤ 1`, parabolic
+Hölder with the *intermediate* exponent `α · θ` and constant `(2 · B) ^ (1 − θ) · H ^ θ`:
+`‖u p − u q‖ ≤ (2B)^{1−θ} · H^θ · d(p, q)^{α θ}`.
+
+The classical interpolation between the `C^0` (sup) norm and the `α`-Hölder seminorm.  Proved
+pointwise with *no* case split on `d(p, q) = 0`, by writing
+`‖u p − u q‖ = ‖u p − u q‖^{1−θ} · ‖u p − u q‖^θ` (valid since `(1 − θ) + θ = 1`) and bounding the two
+factors by the sup bound (`≤ 2B`) and the Hölder bound (`≤ H · d^α`) respectively. -/
+theorem parabolicHolderWith_interpolation
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {B H α θ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hB0 : 0 ≤ B) (hH0 : 0 ≤ H) (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hbdd : ParabolicBoundedWith B u s)
+    (hhol : ParabolicHolderWith H α u s) :
+    ParabolicHolderWith ((2 * B) ^ (1 - θ) * H ^ θ) (α * θ) u s := by
+  intro p hp q hq
+  have hd0 : 0 ≤ parabolicDistance p q := parabolicDistance.nonneg p q
+  have hx0 : 0 ≤ ‖u p - u q‖ := norm_nonneg _
+  have hx2B : ‖u p - u q‖ ≤ 2 * B := by
+    calc ‖u p - u q‖ ≤ ‖u p‖ + ‖u q‖ := norm_sub_le _ _
+      _ ≤ B + B := add_le_add (hbdd hp) (hbdd hq)
+      _ = 2 * B := by ring
+  have hxH : ‖u p - u q‖ ≤ H * parabolicDistance p q ^ α := hhol hp hq
+  have hne : (1 - θ) + θ ≠ 0 := by
+    have h1 : (1 - θ) + θ = 1 := by ring
+    rw [h1]; norm_num
+  have hsplit : ‖u p - u q‖ ^ (1 - θ) * ‖u p - u q‖ ^ θ = ‖u p - u q‖ := by
+    rw [← Real.rpow_add' hx0 hne]
+    have h1 : (1 - θ) + θ = 1 := by ring
+    rw [h1, Real.rpow_one]
+  have hb1 : ‖u p - u q‖ ^ (1 - θ) ≤ (2 * B) ^ (1 - θ) :=
+    Real.rpow_le_rpow hx0 hx2B (by linarith)
+  have hb2 : ‖u p - u q‖ ^ θ ≤ (H * parabolicDistance p q ^ α) ^ θ :=
+    Real.rpow_le_rpow hx0 hxH hθ0
+  have hmul : ‖u p - u q‖ ^ (1 - θ) * ‖u p - u q‖ ^ θ
+      ≤ (2 * B) ^ (1 - θ) * (H * parabolicDistance p q ^ α) ^ θ :=
+    mul_le_mul hb1 hb2 (Real.rpow_nonneg hx0 θ) (Real.rpow_nonneg (by linarith) _)
+  have hrw : (H * parabolicDistance p q ^ α) ^ θ
+      = H ^ θ * parabolicDistance p q ^ (α * θ) := by
+    rw [Real.mul_rpow hH0 (Real.rpow_nonneg hd0 α), ← Real.rpow_mul hd0]
+  calc ‖u p - u q‖ = ‖u p - u q‖ ^ (1 - θ) * ‖u p - u q‖ ^ θ := hsplit.symm
+    _ ≤ (2 * B) ^ (1 - θ) * (H * parabolicDistance p q ^ α) ^ θ := hmul
+    _ = (2 * B) ^ (1 - θ) * (H ^ θ * parabolicDistance p q ^ (α * θ)) := by rw [hrw]
+    _ = (2 * B) ^ (1 - θ) * H ^ θ * parabolicDistance p q ^ (α * θ) := by ring
+
+/-- **Parabolic Hölder interpolation (seminorm form).**  For a function in the parabolic `C^{0,α}`
+class and every weight `0 ≤ θ ≤ 1`, the intermediate `α · θ`-Hölder seminorm obeys
+`[u]_{α θ} ≤ (2 · ‖u‖_{C^0})^{1 − θ} · [u]_α^θ`.  The functional form of
+`parabolicHolderWith_interpolation`, evaluated at the attained extremal constants `parabolicSupNorm`
+and `parabolicHolderSeminorm`. -/
+theorem parabolicHolderSeminorm_interpolation_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α θ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hu : ParabolicC0AlphaOn α u s) :
+    parabolicHolderSeminorm (α * θ) u s
+      ≤ (2 * parabolicSupNorm u s) ^ (1 - θ) * parabolicHolderSeminorm α u s ^ θ := by
+  obtain ⟨hbdd, hhol⟩ :=
+    parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm hu
+  refine parabolicHolderSeminorm_le ?_ ?_
+  · exact mul_nonneg
+      (Real.rpow_nonneg (by have := parabolicSupNorm_nonneg u s; linarith) _)
+      (Real.rpow_nonneg (parabolicHolderSeminorm_nonneg α u s) _)
+  · exact parabolicHolderWith_interpolation (parabolicSupNorm_nonneg u s)
+      (parabolicHolderSeminorm_nonneg α u s) hθ0 hθ1 hbdd hhol
+
+/-- **Parabolic `C^{0,α}` interpolation (norm form).**  Adding the sup norm to the seminorm
+interpolation bounds the full intermediate `C^{0,α·θ}` norm:
+`‖u‖_{C^{0,α θ}} ≤ ‖u‖_{C^0} + (2 · ‖u‖_{C^0})^{1 − θ} · [u]_α^θ`. -/
+theorem parabolicC0AlphaNorm_interpolation_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α θ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm (α * θ) u s
+      ≤ parabolicSupNorm u s
+        + (2 * parabolicSupNorm u s) ^ (1 - θ) * parabolicHolderSeminorm α u s ^ θ := by
+  unfold parabolicC0AlphaNorm
+  exact add_le_add (le_refl _) (parabolicHolderSeminorm_interpolation_le hθ0 hθ1 hu)
+
 end AnalyticPDE
 end RicciFlow
 
