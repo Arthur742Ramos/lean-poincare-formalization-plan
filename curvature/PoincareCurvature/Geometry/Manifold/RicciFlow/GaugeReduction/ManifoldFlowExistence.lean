@@ -931,4 +931,34 @@ theorem exists_timeDependent_flow_compact_bijective {E H M : Type*} [NormedAddCo
     refine ⟨timeDependent_flow_injective hX hε hanchor hflow' ht,
       timeDependent_flow_surjective hX hε₁ hδ hanchor hflow hanch ht⟩
 
+/-- **Concrete mutually-inverse time-slice maps for the compact-manifold flow.** On a
+compact boundaryless (nonempty) T2 manifold, the forward flow `Φ` and the explicit
+inverse family `G t := Function.invFun (Φ t)` are mutually inverse on every window time,
+with both anchored at the identity: `G t` is a genuine two-sided inverse of the bijection
+`Φ t` (`Function.leftInverse_invFun` / `rightInverse_invFun` on the bijectivity of every
+slice). This is the concrete `F := Φ`, `G` mutually-inverse time-slice datum
+`GaugeFlowAssembly.gaugeFlow_of_inverse_flow` consumes (on the window; the sole remaining
+analytic obligation being the spatial `C³` regularity of `F t`/`G t`). -/
+theorem exists_timeDependent_flow_compact_inverse {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M] [T2Space M] [Nonempty M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∃ Φ G : ℝ → M → M, (∀ x, Φ 0 x = x) ∧ (∀ x, G 0 x = x) ∧
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+        (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) ∧
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.LeftInverse (G t) (Φ t)) ∧
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.RightInverse (G t) (Φ t)) := by
+  obtain ⟨ε, hε, Φ, hanchor, hflow, hbij⟩ := exists_timeDependent_flow_compact_bijective hX
+  refine ⟨ε, hε, Φ, fun t => Function.invFun (Φ t), hanchor, ?_, hflow, ?_, ?_⟩
+  · intro x
+    show Function.invFun (Φ 0) x = x
+    have h0mem : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_neg_of_pos hε, hε⟩
+    have h := Function.leftInverse_invFun (hbij 0 h0mem).injective x
+    rwa [hanchor x] at h
+  · intro t ht; exact Function.leftInverse_invFun (hbij t ht).injective
+  · intro t ht; exact Function.rightInverse_invFun (hbij t ht).surjective
+
 end PoincareCurvature.ManifoldFlow
