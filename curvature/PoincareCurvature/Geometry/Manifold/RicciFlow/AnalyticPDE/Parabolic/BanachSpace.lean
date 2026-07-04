@@ -1068,5 +1068,86 @@ theorem evalCLM_precompL_apply {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
 
 end ParabolicC0AlphaBanach
 
+/-! ### The constant-function embedding operator
+
+Embedding a value `c : E` as the constant function `z ↦ c` is a bounded operator
+`E →L ParabolicC0AlphaBanach X E α s` of norm `≤ 1`.  This is the inhomogeneous / frozen-data part
+of the Ricci–DeTurck right-hand side (a constant reaction term, or frozen initial data, entering the
+affine `u ↦ A u + f` structure of the Schauder fixed-point). -/
+
+namespace ParabolicC0AlphaSpace
+
+/-- The constant function `z ↦ c`, linear in `c`, as a linear map into the parabolic `C^{0,α}`
+submodule. -/
+def constSubmoduleLinearMap : E →ₗ[ℝ] parabolicC0AlphaSubmodule X E α s where
+  toFun c := ⟨fun _ => c, ParabolicC0AlphaOn.const c⟩
+  map_add' c c' := by ext z; simp
+  map_smul' a c := by ext z; simp
+
+/-- The constant-function embedding as a linear map into the parabolic `C^{0,α}` carrier. -/
+def constLinearMap : E →ₗ[ℝ] ParabolicC0AlphaSpace X E α s :=
+  constSubmoduleLinearMap
+
+@[simp]
+theorem toFun_constLinearMap (c : E) :
+    toFun (constLinearMap (X := X) (α := α) (s := s) c) = fun _ => c :=
+  rfl
+
+/-- **The constant-function embedding is bounded of operator norm `≤ 1`** on the carrier, via
+`parabolicC0AlphaNorm_const_le`. -/
+noncomputable def constL : E →L[ℝ] ParabolicC0AlphaSpace X E α s :=
+  LinearMap.mkContinuous constLinearMap 1 (fun c => by
+    show parabolicC0AlphaNorm α (toFun (constLinearMap c)) s ≤ 1 * ‖c‖
+    rw [one_mul, toFun_constLinearMap]
+    exact parabolicC0AlphaNorm_const_le α c s)
+
+@[simp]
+theorem toFun_constL (c : E) :
+    toFun (constL (X := X) (α := α) (s := s) c) = fun _ => c :=
+  rfl
+
+/-- The constant-function embedding on the carrier has operator norm `≤ 1`. -/
+theorem norm_constL_le :
+    ‖constL (X := X) (E := E) (α := α) (s := s)‖ ≤ 1 :=
+  LinearMap.mkContinuous_norm_le _ zero_le_one _
+
+end ParabolicC0AlphaSpace
+
+namespace ParabolicC0AlphaBanach
+
+/-- **The constant-function embedding on the parabolic `C^{0,α}` Banach space.**  A value `c : E`
+is embedded as the class of the constant function `z ↦ c`; a bounded operator of norm `≤ 1`. -/
+noncomputable def constL : E →L[ℝ] ParabolicC0AlphaBanach X E α s :=
+  mkL.comp (ParabolicC0AlphaSpace.constL)
+
+@[simp]
+theorem constL_apply (c : E) :
+    constL (X := X) (E := E) (α := α) (s := s) c = mk (ParabolicC0AlphaSpace.constL c) :=
+  rfl
+
+/-- The constant-function embedding on the Banach space has operator norm `≤ 1`. -/
+theorem norm_constL_le :
+    ‖constL (X := X) (E := E) (α := α) (s := s)‖ ≤ 1 := by
+  refine ContinuousLinearMap.opNorm_le_bound _ zero_le_one (fun c => ?_)
+  rw [one_mul, constL_apply, norm_mk, ParabolicC0AlphaSpace.toFun_constL]
+  exact parabolicC0AlphaNorm_const_le α c s
+
+/-- **Point evaluation of a constant class returns the constant.**  The value of the embedded
+constant `c` at any space-time point `z ∈ s` is `c`. -/
+theorem evalCLM_constL_apply (z : ℝ × X) (hz : z ∈ s) (c : E) :
+    evalCLM z hz (constL (X := X) (E := E) (α := α) (s := s) c) = c := by
+  rw [constL_apply, evalCLM_mk_apply, ParabolicC0AlphaSpace.toFun_constL]
+
+/-- **Post-composition of a constant is the constant of the post-composed value.**  Applying a
+fiberwise bundle morphism `L` to the embedded constant `c` gives the embedded constant `L c` — the
+compatibility of the frozen-data embedding with a coordinate change / bundle morphism. -/
+theorem compL_constL {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (L : E →L[ℝ] F) (c : E) :
+    compL L (constL (X := X) (E := E) (α := α) (s := s) c) = constL (L c) := by
+  rw [eq_iff_forall_evalCLM]
+  intro z hz
+  rw [evalCLM_compL_apply, evalCLM_constL_apply, evalCLM_constL_apply]
+
+end ParabolicC0AlphaBanach
+
 end AnalyticPDE
 end RicciFlow
