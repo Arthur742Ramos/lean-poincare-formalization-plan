@@ -6293,3 +6293,37 @@ Remaining for Point 4 (future sessions): the genuine **Schauder a-priori estimat
 Ricci–DeTurck RHS operator on the parabolic Banach space (Item 3, the analytic main theorem); the
 **general-manifold** gauge-flow lift (Item 2, heavy gauge files); and the Item 1 tensor
 time-derivative chain rule.
+
+Update — **parabolic `C^{0,α}` Banach change-of-variables + inhomogeneous operator API extended** in
+`AnalyticPDE/Parabolic/BanachSpace.lean` (all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`), continuing the Ricci–DeTurck Banach-chart operator
+algebra (`restrictL`/`evalCLM`/`compL`/`mulCoeffL`/`mulL`) toward the Schauder fixed point:
+
+* **Precomposition norm bounds** (`parabolicSupNorm_comp_mapsTo`,
+  `parabolicHolderSeminorm_comp_parabolicDistanceLe`, `parabolicC0AlphaNorm_comp_parabolicDistanceLe_le`)
+  — the norm-level core: for a space-time map `φ : ℝ × Y → ℝ × X` mapping `t` into `s` and expanding
+  parabolic distance by at most `L`, the sup norm of `u ∘ φ` on `t` is `≤` that of `u` on `s`, the
+  Hölder seminorm scales by `L ^ α`, and `‖u ∘ φ‖_{C^{0,α}(t)} ≤ max 1 (L ^ α) · ‖u‖_{C^{0,α}(s)}`
+  (built on the existing `comp_parabolicDistanceLe` change-of-variables family).
+* **The precomposition (change-of-variables) bounded operator** `ParabolicC0AlphaBanach.precompL`
+  — `u ↦ u ∘ φ` as a bounded operator `ParabolicC0AlphaBanach X E α s →L ParabolicC0AlphaBanach Y E α t`
+  of operator norm `≤ max 1 (L ^ α)` (carrier `ParabolicC0AlphaSpace.precompSubmoduleLinearMap`
+  /`precompLinearMap`/`precompL`, descended to the separation quotients because bounded), with
+  `precompL_mk`, `norm_precompL_le`, and the pullback∘evaluation cone coherence
+  `evalCLM_precompL_apply` (`evalCLM w (precompL φ x) = evalCLM (φ w) x`).  This is the operator behind
+  chart-transition gluing, the DeTurck gauge-diffeomorphism action, and parabolic Schauder scaling;
+  it **generalises `restrictL`** (the `φ = ` inclusion, `L = 1` case).
+* **Precomposition functoriality** `precompL_comp_apply` — the contravariant cocycle law
+  `precompL_ψ ∘ precompL_φ = precompL_{φ∘ψ}` (composite `r → s`, `(L·M)`-expanding), the
+  chart-transition cocycle condition that gluing across overlapping charts consumes (precomposition
+  analogue of `restrictL_comp` / `compL_comp`), proved through the point-separation representation.
+* **The constant-function embedding operator** `ParabolicC0AlphaBanach.constL` — `c : E ↦` the class
+  of the constant field `z ↦ c`, a bounded operator `E →L ParabolicC0AlphaBanach X E α s` of norm
+  `≤ 1` (the inhomogeneous / frozen-data part of the affine `u ↦ A u + f` Ricci–DeTurck RHS), with
+  `norm_constL_le`, the point-evaluation coherence `evalCLM_constL_apply` (`evalCLM z (constL c) = c`),
+  and the bundle-morphism compatibility `compL_constL` (`compL L (constL c) = constL (L c)`).
+
+Remaining for Point 4 (future sessions): unchanged in scope — the genuine **Schauder a-priori
+estimates** and the Ricci–DeTurck RHS operator (assembled from `mulCoeffL`/`compL`/`precompL`/`constL`)
+on the parabolic Banach space (Item 3, the analytic main theorem); the **general-manifold**
+gauge-flow lift (Item 2, heavy gauge files); and the Item 1 tensor time-derivative chain rule.
