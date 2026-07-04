@@ -1457,6 +1457,40 @@ theorem norm_fixedPoint_sub_fixedPoint_le [CompleteSpace E] {k : ℝ≥0}
   have h := hc.dist_fixedPoint_fixedPoint_of_dist_le' g₂ (x := u₁) (y := u₂) hu₁ hu₂ hfg
   rwa [dist_eq_norm] at h
 
+/-- **Geometric convergence of the Picard/Schauder iteration.**  For a `k`-contraction `g` (`k < 1`)
+with fixed point `u` (`g u = u`), the Picard iterates `g^[n] x` from any starting point `x` obey the
+a-priori geometric error bound `‖g^[n] x - u‖ ≤ ‖x - g x‖ · kⁿ / (1 - k)`.  This is the quantitative
+constructive form of the nonlinear Ricci–DeTurck existence: the iteration reaches the solution at an
+explicit geometric rate controlled by the first residual `‖x - g x‖`. -/
+theorem norm_iterate_sub_fixedPoint_le [CompleteSpace E] {k : ℝ≥0}
+    {g : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s}
+    (hk : k < 1) (hg : LipschitzWith k g) (x : ParabolicC0AlphaBanach X E α s)
+    {u : ParabolicC0AlphaBanach X E α s} (hu : g u = u) (n : ℕ) :
+    ‖g^[n] x - u‖ ≤ ‖x - g x‖ * (k : ℝ) ^ n / (1 - (k : ℝ)) := by
+  haveI : Nonempty (ParabolicC0AlphaBanach X E α s) := ⟨0⟩
+  have hc : ContractingWith k g := ⟨hk, hg⟩
+  have hueq : u = ContractingWith.fixedPoint g hc := hc.fixedPoint_unique hu
+  have h := hc.apriori_dist_iterate_fixedPoint_le x n
+  rw [dist_eq_norm, dist_eq_norm] at h
+  rw [hueq]
+  exact h
+
+/-- **The Picard/Schauder iteration converges to the Ricci–DeTurck solution.**  For a `k`-contraction
+`g` (`k < 1`) with fixed point `u`, the iterates `g^[n] x` from any starting point `x` converge to
+`u`.  The topological (qualitative) companion of the geometric rate
+`norm_iterate_sub_fixedPoint_le`: the nonlinear iteration is a convergent constructive scheme for the
+Ricci–DeTurck solution. -/
+theorem tendsto_iterate_fixedPoint [CompleteSpace E] {k : ℝ≥0}
+    {g : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s}
+    (hk : k < 1) (hg : LipschitzWith k g) (x : ParabolicC0AlphaBanach X E α s)
+    {u : ParabolicC0AlphaBanach X E α s} (hu : g u = u) :
+    Filter.Tendsto (fun n => g^[n] x) Filter.atTop (𝓝 u) := by
+  haveI : Nonempty (ParabolicC0AlphaBanach X E α s) := ⟨0⟩
+  have hc : ContractingWith k g := ⟨hk, hg⟩
+  have hueq : u = ContractingWith.fixedPoint g hc := hc.fixedPoint_unique hu
+  rw [hueq]
+  exact hc.tendsto_iterate_fixedPoint x
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
