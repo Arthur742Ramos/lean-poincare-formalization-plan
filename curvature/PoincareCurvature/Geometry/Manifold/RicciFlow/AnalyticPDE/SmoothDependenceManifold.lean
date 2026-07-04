@@ -789,6 +789,97 @@ theorem mfderiv_flow_pushforward_of_lipschitz_deriv
   (hasMFDerivAt_flow_pushforward_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ u₀ ht0 hderiv hL
     hlip).mfderiv
 
+/-- **Field-data-only manifold time-derivative of the actual flow's pushforward** (`C^{1,1}` field).
+The genuinely usable form of `hasMFDerivWithinAt_flow_pushforward_of_lipschitz_deriv`: instead of
+requiring the caller to supply an abstract reference coefficient `A`, a variational flow family, and a
+segment deviation bound, it takes only the **`C^{1,1}` field jet** of `v` — globally `K`-Lipschitz,
+with an everywhere Fréchet derivative `Dv` that is jointly continuous and (uniformly in time)
+`L`-Lipschitz in space — together with the actual flow `Φ` of `v`.  The reference coefficient is the
+canonical `A t := D_x v_t|_{Φ_t x₀}` (the field's spatial derivative along the *anchor* trajectory),
+built here from the jet: `‖Dv‖ ≤ K` from `HasFDerivAt.le_of_lipschitz`, the variational family from
+`exists_variationalFlowFamily`, and the deviation bound from the spatial Lipschitz constant.  The
+conclusion is the explicit classical variational law
+
+`HasMFDerivWithinAt 𝓘(ℝ,ℝ) 𝓘(ℝ,E) (fun τ ↦ (mfderiv (fun z ↦ Φ z τ) x₀) u₀) (Ici t₀) t`
+`  ((1).smulRight (D_x v_t|_{Φ_t x₀} · ((mfderiv (fun z ↦ Φ z t) x₀) u₀)))`,
+
+i.e. `d/dt (D_x Φ_t · u₀) = D_x v_t|_{Φ_t x₀} · (D_x Φ_t · u₀)` — exactly the pushforward-leg
+time-derivative Item 1's scalar tensor chain rule consumes, from field-jet data alone. -/
+theorem hasMFDerivWithinAt_flow_pushforward_of_field_jet [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ u₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s)) :
+    HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+      (fun τ => (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z τ) x₀) u₀) (Ici t₀) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (Dv t (Φ x₀ t) ((mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀) u₀))) := by
+  have hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K := fun s => by
+    have h := (hderiv s (Φ x₀ s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcont : Continuous (fun s => Dv s (Φ x₀ s)) :=
+    hDvc.comp (continuous_id.prodMk (hΦ x₀).continuous)
+  obtain ⟨Φ', h0', hΦ'⟩ := exists_variationalFlowFamily hA hAcont
+  have hlip : ∀ z, ∀ s ∈ Ici t₀, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - Dv s (Φ x₀ s)‖ ≤ (L : ℝ) * ‖ξ - Φ x₀ s‖ := by
+    intro z s _ ξ _
+    have h := (hDvlip s).dist_le_mul ξ (Φ x₀ s)
+    rwa [dist_eq_norm, dist_eq_norm] at h
+  exact hasMFDerivWithinAt_flow_pushforward_of_lipschitz_deriv
+    hv hA hΦ' h0' hΦ h0 x₀ u₀ ht0 hderiv L.coe_nonneg hlip
+
+/-- **Interior field-data-only manifold time-derivative of the actual flow's pushforward**
+(`C^{1,1}` field).  The plain (`HasMFDerivAt`) form of
+`hasMFDerivWithinAt_flow_pushforward_of_field_jet` at strictly-forward times `t₀ < t`, from field-jet
+data alone: `d/dt (D_x Φ_t · u₀) = D_x v_t|_{Φ_t x₀} · (D_x Φ_t · u₀)` as an ordinary manifold
+derivative. -/
+theorem hasMFDerivAt_flow_pushforward_of_field_jet [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ u₀ : E) {t : ℝ} (ht0 : t₀ < t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s)) :
+    HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+      (fun τ => (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z τ) x₀) u₀) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (Dv t (Φ x₀ t) ((mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀) u₀))) := by
+  have hA : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K := fun s => by
+    have h := (hderiv s (Φ x₀ s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcont : Continuous (fun s => Dv s (Φ x₀ s)) :=
+    hDvc.comp (continuous_id.prodMk (hΦ x₀).continuous)
+  obtain ⟨Φ', h0', hΦ'⟩ := exists_variationalFlowFamily hA hAcont
+  have hlip : ∀ z, ∀ s ∈ Ici t₀, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - Dv s (Φ x₀ s)‖ ≤ (L : ℝ) * ‖ξ - Φ x₀ s‖ := by
+    intro z s _ ξ _
+    have h := (hDvlip s).dist_le_mul ξ (Φ x₀ s)
+    rwa [dist_eq_norm, dist_eq_norm] at h
+  exact hasMFDerivAt_flow_pushforward_of_lipschitz_deriv
+    hv hA hΦ' h0' hΦ h0 x₀ u₀ ht0 hderiv L.coe_nonneg hlip
+
+/-- **`mfderiv` readout of the actual flow's pushforward time-derivative, field-data-only**
+(interior, `C^{1,1}` field).  `mfderiv 𝓘(ℝ,ℝ) 𝓘(ℝ,E) (fun τ ↦ (mfderiv (fun z ↦ Φ z τ) x₀) u₀) t =
+(1).smulRight (D_x v_t|_{Φ_t x₀} · (D_x Φ_t · u₀))` for `t₀ < t` — the exact pushforward-leg `mfderiv`
+value Item 1's scalar chain-rule plugs in, from field-jet data alone. -/
+theorem mfderiv_flow_pushforward_of_field_jet [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ u₀ : E) {t : ℝ} (ht0 : t₀ < t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s)) :
+    mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+      (fun τ => (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z τ) x₀) u₀) t
+      = (1 : ℝ →L[ℝ] ℝ).smulRight
+        (Dv t (Φ x₀ t) ((mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀) u₀)) :=
+  (hasMFDerivAt_flow_pushforward_of_field_jet hv hΦ h0 x₀ u₀ ht0 hderiv hDvc hDvlip).mfderiv
+
 end
 
 end SmoothDependenceCk
