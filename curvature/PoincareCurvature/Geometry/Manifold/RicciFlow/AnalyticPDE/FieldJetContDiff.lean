@@ -521,6 +521,28 @@ theorem contMDiff_three_flow_apply_of_contDiff_of_bddDerivs [CompleteSpace E]
     (fun x => continuous_apply_of_contDiff_uncurry h x)
     hDvlip hD2vclip hD2vmlip hD3vmlip hD3vlip hΦ h0 t
 
+/-- **Field-data-only manifold `C³` smooth-dependence existence from a single `ContDiff` hypothesis.**
+From `v` jointly `ContDiff ℝ n (uncurry v)` (`3 ≤ n`), spatially `K`-Lipschitz and time-continuous, with
+the stated second/third spatial-derivative Lipschitz controls, there is a flow family `Φ` anchored at
+`t₀` and integrating `v` whose time-`t` map is `ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3` for every `t`.  The
+`ContDiff`-hypothesis form of `exists_flow_contMDiff_three` (obtained by combining `exists_flow_family`
+with `contMDiff_three_flow_apply_of_contDiff`), packaging the entire `C^{3,1}` field jet the
+model-manifold `C³` gauge flow consumes behind a single smoothness hypothesis. -/
+theorem exists_flow_contMDiff_three_of_contDiff [CompleteSpace E]
+    {K L M₂ M₃ N : ℝ≥0} {t₀ : ℝ}
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 3 ≤ n)
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    (hDvlip : ∀ s, LipschitzWith L (fderiv ℝ (v s)))
+    (hD2vclip : ∀ s, LipschitzWith M₂ (fderiv ℝ (fderiv ℝ (v s))))
+    (hD2vmlip : ∀ s, LipschitzWith N (iteratedFDeriv ℝ 2 (v s)))
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (fderiv ℝ (iteratedFDeriv ℝ 2 (v s))))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (iteratedFDeriv ℝ 3 (v s))) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ∀ t, ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3 (fun z => Φ z t) := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family (t₀ := t₀) hv hvc
+  exact ⟨Φ, h0, hΦ, fun t => contMDiff_three_flow_apply_of_contDiff h hn hv hvc
+    hDvlip hD2vclip hD2vmlip hD3vmlip hD3vlip hΦ h0 t⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
