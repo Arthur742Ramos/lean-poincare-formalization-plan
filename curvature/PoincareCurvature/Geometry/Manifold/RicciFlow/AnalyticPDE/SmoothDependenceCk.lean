@@ -11647,6 +11647,104 @@ theorem contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous
     · exact hf2.differentiable_iteratedFDeriv (by norm_num)
     · exact differentiable_iteratedFDeriv_two_of_hasFDerivAt hD3
 
+/-- **`uncurry2CLM` is norm-nonexpansive** — `‖uncurry2CLM T‖ ≤ ‖T‖` — proved *without ever forming*
+`‖uncurry2CLM‖`.  Taking the operator norm of `uncurry2CLM` itself requires
+`Norm ((E →L E →L E) →L ML(Fin 2))`, which fails to synthesize in Mathlib v4.29.1 (the domain
+`E →L E →L E` sits behind an expensive instance diamond).  Instead the bound is read off slot-by-slot
+via `ContinuousMultilinearMap.opNorm_le_bound` and two `ContinuousLinearMap.le_opNorm` steps on the
+*double* CLM space (the module's established pattern, cf. `lipschitzWith_uncurry3_of_apply_sub_le`),
+so only norms that *do* synthesize are used.  This is the size datum that lets `uncurry2CLM`
+post-compose a little-o (`isLittleO_uncurry2CLM_comp`). -/
+theorem norm_uncurry2CLM_le (T : E →L[ℝ] (E →L[ℝ] E)) : ‖uncurry2CLM T‖ ≤ ‖T‖ := by
+  refine ContinuousMultilinearMap.opNorm_le_bound (ContinuousLinearMap.opNorm_nonneg T) (fun m => ?_)
+  rw [uncurry2CLM_apply]
+  calc ‖T (m 0) (m 1)‖
+      ≤ ‖T (m 0)‖ * ‖m 1‖ := ContinuousLinearMap.le_opNorm _ _
+    _ ≤ (‖T‖ * ‖m 0‖) * ‖m 1‖ := by gcongr; exact ContinuousLinearMap.le_opNorm _ _
+    _ = ‖T‖ * (‖m 0‖ * ‖m 1‖) := by ring
+    _ = ‖T‖ * ∏ i, ‖m i‖ := by rw [Fin.prod_univ_two]
+
+/-- **Post-composition of a little-o with the nonexpansive `uncurry2CLM`.**  If `u =o[l] w` (with `u`
+valued in the double space `E →L E →L E`) then `y ↦ uncurry2CLM (u y) =o[l] w`.  Proof: unfold both
+little-o's to the `∀ c > 0, eventually ‖·‖ ≤ c ‖w‖` form (`Asymptotics.isLittleO_iff`) and transport
+the bound pointwise through `norm_uncurry2CLM_le`.  Routing through `isLittleO_iff` +
+`filter_upwards` + `Trans.trans` (rather than `ContinuousLinearMap.isBigO_comp` /
+`IsBigO.trans_isLittleO`) is deliberate: the latter drag in `uncurry2CLM`'s domain as a *seminormed*
+space, forcing a whnf reconciliation of the double-space `Norm` diamond
+(`ContinuousLinearMap.hasOpNorm` vs `SeminormedAddCommGroup.toNorm`) that blows up; the
+`isLittleO_iff` route only ever manipulates the already-formed norms and is defeq-robust. -/
+theorem isLittleO_uncurry2CLM_comp {α : Type*} {l : Filter α}
+    {u : α → (E →L[ℝ] (E →L[ℝ] E))} {G : Type*} [SeminormedAddGroup G] {w : α → G}
+    (h : u =o[l] w) : (fun y => uncurry2CLM (u y)) =o[l] w := by
+  rw [Asymptotics.isLittleO_iff] at h ⊢
+  intro c hc
+  filter_upwards [h hc] with y hy
+  exact (norm_uncurry2CLM_le (u y)).trans hy
+
+/-- **The nested→multilinear `HasFDerivAt` bridge for the second iterated derivative.**  This is the
+single wall that blocked applying the `ContDiff ℝ 3` capstone to the flow.  Given that `f` is `C²`
+with first derivative `Df` and second (composition-form) derivative `D2`, and that `D2` is Fréchet
+differentiable at `x` with derivative the *nested triple* operator `D3 : E →L E →L E →L E`, the
+(multilinear) second iterated derivative `iteratedFDeriv ℝ 2 f` is Fréchet differentiable at `x` with
+derivative the *multilinear-valued* operator `uncurry2CLM.comp D3 : E →L ML(Fin 2)`.
+
+The naive route — rewrite `iteratedFDeriv ℝ 2 f = uncurry2CLM ∘ D2` and apply the chain rule
+`uncurry2CLM.hasFDerivAt.comp x hD3` — **whnf-diverges / fails to unify**: it forces Lean to
+reconcile the plain topological-module structure carried by `uncurry2CLM`'s domain `E →L E →L E`
+with the seminormed structure the chain rule demands, an expensive defeq on the nested space.
+
+The proof here sidesteps that entirely.  It extracts the defining little-o of `hD3` (with the
+implicit arguments supplied *explicitly* — `HasFDerivAt.isLittleO` on a double-space codomain
+otherwise fails to assign its metavariables), post-composes it through the nonexpansive `uncurry2CLM`
+(`isLittleO_uncurry2CLM_comp`), and rewrites the resulting little-o into the Fréchet-difference shape
+of the goal using the pointwise identity `iteratedFDeriv ℝ 2 f y = uncurry2CLM (D2 y)`
+(`iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt`) and the linearity of `uncurry2CLM`.  Only norms
+that synthesize are ever touched. -/
+theorem hasFDerivAt_iteratedFDeriv_two_uncurry2CLM
+    {f : E → E} {Df : E → (E →L[ℝ] E)} {D2 : E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3 : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))} {x : E}
+    (hDf : ∀ y, HasFDerivAt f (Df y) y) (hD2 : ∀ y, HasFDerivAt Df (D2 y) y)
+    (hD3 : HasFDerivAt D2 D3 x) :
+    HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp D3) x := by
+  have hlo := HasFDerivAt.isLittleO (𝕜 := ℝ) (f := D2) (f' := D3) (x := x) hD3
+  refine HasFDerivAt.of_isLittleO ((isLittleO_uncurry2CLM_comp hlo).congr_left (fun y => ?_))
+  rw [iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt hDf (hD2 y),
+      iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt hDf (hD2 x),
+      ContinuousLinearMap.comp_apply, map_sub, map_sub]
+
+/-- **Obstruction-free `ContDiff ℝ 3` from nested second-fundamental-solution data.**  The clean
+interface that a flow-specific caller feeds to reach `C³` dependence on initial conditions.  Given
+that `f` is already `C²` with first/second (composition-form) derivatives `Df`, `D2`, that `D2` is
+everywhere Fréchet differentiable with the *nested triple* third-fundamental operator `D3fam y`
+(`HasFDerivAt D2 (D3fam y) y` — exactly the datum `exists_hasFDerivAt_secondFundamentalSolution`
+delivers), and that the *multilinear packaging* `z ↦ uncurry3 (D3fam z)` is continuous (the
+obstruction-free continuity `lipschitzWith_thirdFundamentalSolution_multilinear` supplies), then `f`
+is `C³`.
+
+This packages the existing capstone `contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous` with
+the multilinear third-derivative datum `D3ml x = (uncurry3 (D3fam x)).curryLeft`:
+`hasFDerivAt_iteratedFDeriv_two_uncurry2CLM` (+ `uncurry3_curryLeft`) supplies the pointwise
+`HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x`, and the continuity of `D3ml` is the continuity of
+`z ↦ uncurry3 (D3fam z)` transported through the isometry `continuousMultilinearCurryLeftEquiv`
+(whose forward map *is* `curryLeft`).  Crucially the third derivative is carried throughout as a
+value in the well-normed `ML(Fin 3)` / `E →L ML(Fin 2)` spaces — never in the un-normed
+`E →L E →L E →L E`. -/
+theorem contDiff_three_of_hasFDerivAt_nested_of_continuous
+    {f : E → E} {Df : E → (E →L[ℝ] E)} {D2 : E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3fam : E → (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E)))}
+    (hf2 : ContDiff ℝ 2 f)
+    (hDf : ∀ y, HasFDerivAt f (Df y) y)
+    (hD2 : ∀ y, HasFDerivAt Df (D2 y) y)
+    (hD3 : ∀ y, HasFDerivAt D2 (D3fam y) y)
+    (hcont : Continuous (fun z => uncurry3 (D3fam z))) :
+    ContDiff ℝ 3 f := by
+  refine contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous
+    (D3ml := fun x => (uncurry3 (D3fam x)).curryLeft) hf2 (fun x => ?_) ?_
+  · show HasFDerivAt (iteratedFDeriv ℝ 2 f) ((uncurry3 (D3fam x)).curryLeft) x
+    rw [uncurry3_curryLeft]
+    exact hasFDerivAt_iteratedFDeriv_two_uncurry2CLM hDf hD2 (hD3 x)
+  · exact (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).continuous.comp hcont
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
