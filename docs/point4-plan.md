@@ -5887,3 +5887,55 @@ identify `D₃fam z k h = Vz t` (the operator characterisation `hD₃bilinear`) 
 then `h`) gives `‖D₃fam z − D₃fam x₀‖ ≤ Cλ·gronwall·‖z − x₀‖` — i.e. `LipschitzWith`/`Continuous D₃fam`;
 the `contDiff_one_iff_fderiv`/`contDiff_succ_iff_fderiv` chain then closes
 `exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
+
+Update — the **`D₃fam` continuity assembly is now PARTLY BUILT, and a hard Mathlib obstruction on the
+triple continuous-linear-map norm was discovered** (all new theorems axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`:
+
+* `norm_thirdFundamentalSolution_apply_baseCurve_sub_le` — the **per-direction operator base-point
+  gap** of the packaged third-variation operator `D₃`.  For two base points `z, x₀` with their
+  packaged operators `D₃z, D₃x` (bilinear characterisations `hD₃z`, `hD₃x` through the canonical
+  families `Vfamz`, `Vfamx`), `‖D₃z k − D₃x k‖ ≤ Cλ·gronwall(t−t₀)·‖z−x₀‖·‖k‖` with the *same* `Cλ`
+  constant as `norm_thirdVariation_baseCurve_sub_le`.  Proof: `opNorm_le_bound` over the inner
+  direction `h`; per `h`, `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff`
+  (fed `Vfamz k`, `Vfamz h`) builds the third-variation curves `Vz`, `Vx`; `hD₃z`/`hD₃x` identify
+  `D₃z k h = Vz t`, `D₃x k h = Vx t`; `norm_thirdVariation_baseCurve_sub_le` bounds `‖Vz t − Vx t‖`
+  (the existence-lemma forcing associates `(T1+T2)+(T3+T4)` vs the base-gap lemma's `T1+(T2+(T3+T4))`
+  — reconciled by `convert … using 2; abel`).  This is the `C³` analogue of the `hkey` operator gap
+  inside `exists_flow_contDiff_two_of_lipschitz_secondDeriv`, one order up.
+* `lipschitzWith_thirdFundamentalSolution_apply` — **per-direction Lipschitz continuity** of the
+  packaged family `D₃fam : E → (E →L E →L E →L E)`: for each fixed outer direction `k`, the slice
+  `z ↦ D₃fam z k` (valued in the well-normed *double* space `E →L E →L E`) is
+  `LipschitzWith (Cλ·gronwall(t−t₀)·‖k‖).toNNReal`.  Proof: `LipschitzWith.of_dist_le_mul` + the
+  base-point gap above.  I.e. `D₃fam` is genuinely continuous in the strong operator topology,
+  direction by direction.
+
+**THE OBSTRUCTION (blocks the naive `Continuous D₃fam` and hence `exists_flow_contDiff_three`).**  In
+Mathlib v4.29.1 the **triple continuous-linear-map operator norm does not synthesize**: for `E` a
+plain `NormedAddCommGroup`/`NormedSpace ℝ`, `Norm (E →L E →L E →L E)`,
+`SeminormedAddCommGroup (E →L E →L E →L E)`, `NormedSpace ℝ (E →L E →L E)` and
+`UniformSpace (E →L E →L E →L E)` **all fail** (verified even for `EuclideanSpace ℝ (Fin 2)`); the
+root is the endomorphism-ring/module diamond — `NormedSpace ℝ (E →L E →L E)` cannot be built.  Only
+`TopologicalSpace (E →L E →L E →L E)` synthesizes, via `ContinuousLinearMap.topologicalSpace` (a
+non-norm, pointwise/strong topology), **not** through `TopologicalSpace.induced`, so
+`continuous_induced_rng` does not apply and there is no off-the-shelf lemma (`apply?`/`exact?` find
+nothing) to get `Continuous D₃fam` from the per-direction continuity `∀ k, Continuous (z ↦ D₃fam z k)`.
+Consequently the `C²`-style closing (`hkey : ‖D₂ z − D₂ x₀‖ ≤ C·‖z−x₀‖` → `LipschitzWith`/`Continuous`
+via the *double* norm) does **not** lift verbatim to `C³`: `‖D₃fam z − D₃fam x₀‖` (the triple norm)
+is unstatable.  Note `contDiff_one_iff_fderiv` *does* still typecheck at the double level (its
+`Continuous (fderiv g)` uses the triple's pointwise topology), so a `Continuous D₃fam` in that
+pointwise topology *might* still feed the chain — but proving it requires unfolding
+`ContinuousLinearMap.topologicalSpace` by hand (a genuine detour), and it is unverified whether that
+topology is the one the `contDiff_succ_iff_fderiv` chain ultimately consumes.
+
+Remaining for `ContDiff ℝ 3` (next session) — two viable routes:
+  1. **Pointwise-topology route (smaller, uncertain):** prove `Continuous D₃fam` in
+     `ContinuousLinearMap.topologicalSpace` from the per-direction continuity
+     `lipschitzWith_thirdFundamentalSolution_apply` (via the definition of
+     `ContinuousLinearMap.topologicalSpace` / a bespoke `continuous_of_apply` bridge), then check the
+     `contDiff_one_iff_fderiv`/`contDiff_succ_iff_fderiv` chain actually closes
+     `exists_flow_contDiff_three_of_lipschitz_thirdDeriv` with that topology.
+  2. **Multilinear route (larger, robust):** reformulate the `C³` closing through `iteratedFDeriv`
+     (`ContinuousMultilinearMap ℝ (fun _ : Fin n => E) E`, which carries a proper norm at every order
+     and avoids the nested-CLM diamond entirely) instead of the nested `fderiv` tower.
+The two per-direction theorems above are the robust analytic content and feed either route.
