@@ -6707,3 +6707,48 @@ windowed `F`/`G` the adapter's `∀ t` hypotheses want.  Remaining for Point 4 (
 unchanged in scope — that spatial-`C³` regularity + global extension for Item 2, the Item 1 tensor
 time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file), and the Item 3
 parabolic Schauder a-priori estimates.
+
+Update — **the parabolic Hölder interpolation → short-time-contraction toolkit is now proved**,
+in `AnalyticPDE/ParabolicHolder.lean` and the new leaf module
+`AnalyticPDE/ParabolicInterpolation.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`).  The classical interpolation between the `C^0` (sup)
+norm and the `α`-Hölder seminorm — the mechanism parabolic Schauder estimates use to *absorb
+lower-order terms* and, combined with the initial-vanishing short-time smallness, to make the
+Ricci–DeTurck solution map a contraction in the *intermediate* Hölder norms (not merely the sup
+norm).  Pure norm/rpow/AM–GM algebra, no heat-kernel content:
+
+* `parabolicHolderWith_interpolation` / `parabolicHolderSeminorm_interpolation_le` /
+  `parabolicC0AlphaNorm_interpolation_le` (in `ParabolicHolder.lean`) — the **multiplicative
+  interpolation** `[u]_{α θ} ≤ (2·sup)^{1−θ}·[u]_α^θ` (a bounded, `α`-Hölder function is Hölder with
+  the intermediate exponent `α θ` and constant `(2B)^{1−θ} H^θ`), proved pointwise with no
+  `d = 0` case split by writing `‖u p − u q‖ = ‖u p − u q‖^{1−θ}·‖u p − u q‖^θ` and bounding the two
+  factors by the sup bound and the Hölder bound; plus its seminorm-functional and full-`C^{0,α θ}`-norm
+  forms.
+* `rpow_mul_rpow_le_absorb`, `parabolicHolderWith_interpolation_add` / `_le` / `_absorb`,
+  `parabolicHolderSeminorm_interpolation_add_le` / `_absorb_le` (in the new leaf
+  `ParabolicInterpolation.lean`, which localises the sole heavy dependency
+  `Mathlib.Analysis.MeanInequalities` off the widely-imported `ParabolicHolder`) — the **additive /
+  Young / absorbing** refinements: the weighted-AM–GM scalar inequality
+  `a^{1−θ} b^θ ≤ (1−θ)κ^{−θ/(1−θ)} a + θκ b`, the additive convex-combination constant
+  `(1−θ)(2B)+θH` (and the uniform `2B+H`), and the `κ`-scaled absorbing constant whose `θκ`
+  coefficient on the leading seminorm is tunable to any target — the honest lower-order-term
+  absorption form.
+* `parabolicHolderSeminorm_interpolation_short_time_le`,
+  `parabolicC0AlphaNorm_interpolation_short_time_le`,
+  `parabolicC0AlphaNorm_sub_interpolation_short_time_le` (in `ParabolicInterpolation.lean`) — the
+  **short-time contraction** capstone: feeding the initial-vanishing sup bound
+  `parabolicSupNorm ≤ [u]_α·(√T)^α` into the multiplicative interpolation gives
+  `[u]_{α θ} ≤ 2^{1−θ}·(√T)^{α (1−θ)}·[u]_α` and
+  `‖u‖_{C^{0,α θ}} ≤ ((√T)^α + 2^{1−θ}(√T)^{α (1−θ)})·[u]_α` for an initial-vanishing `u` on a thin
+  slab (every factor a positive power of the slab thickness `T`, so `→ 0` as `T → 0`), and — the
+  form the fixed point consumes — `‖u − v‖_{C^{0,α θ}} ≤ (…)·[u − v]_α` for `u`, `v` agreeing on the
+  initial slice: the Ricci–DeTurck solution map contracts in the intermediate parabolic norm on a
+  sufficiently thin time-slab.
+
+Remaining for Point 4 (future sessions): unchanged in scope — the genuine parabolic **Schauder
+interior/global a-priori estimate** exhibiting the concrete Ricci–DeTurck RHS as such a
+`C^{0,α}` contraction (the heat-kernel content) and its assembly from
+`mulCoeffL`/`compL`/`precompL`/`constL` with these interpolation / short-time-smallness factors
+(Item 3); the **general-manifold** gauge-flow lift (Item 2, heavy gauge files — the spatial-`C³`
+regularity + global-`ℝ` extension of the compact-manifold flow slices); and the Item 1 tensor
+time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file).
