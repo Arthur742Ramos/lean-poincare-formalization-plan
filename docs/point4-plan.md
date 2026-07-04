@@ -4433,6 +4433,42 @@ and the Leibniz `parabolicHolderSeminorm_mul_le`) and the bilinear Lipschitz pro
 Lipschitz control of multiplication behind the nonlinear Ricci–DeTurck contraction/uniqueness
 arguments.
 
+Update — **the genuine (separated) parabolic `C^{0,α}` Banach space is now built**, closing the
+"only point separation remains for the genuine Banach instance" gap flagged above (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`).  New module
+`AnalyticPDE/Parabolic/BanachSpace.lean` (imports only `Parabolic/FunctionSpace` + Mathlib's
+`SeparationQuotient` normed machinery; does not touch the heavy files):
+
+* `ParabolicC0AlphaSpace X E α s` — a **type-synonym carrier** for `parabolicC0AlphaSubmodule` whose
+  *canonical* `SeminormedAddCommGroup`/`NormedSpace ℝ`/`CompleteSpace` instances are the parabolic
+  Hölder ones (displacing the ambient pointwise-product topology the bare submodule subtype carries).
+  This is the complete seminormed space (`parabolicC0AlphaSubmodule.seminormedAddCommGroup` /
+  `completeSpace` / `normedSpace`) exhibited as a first-class type, with `norm_def` / `dist_def`.
+* `ParabolicC0AlphaBanach X E α s := SeparationQuotient (ParabolicC0AlphaSpace X E α s)` — the honest
+  **Banach space**: Mathlib's `SeparationQuotient` upgrades the complete *seminormed* structure to a
+  genuine `NormedAddCommGroup` (point separation) + `CompleteSpace` + `NormedSpace ℝ`.  With the
+  projection `mk`, `mk_surjective`, `norm_mk` (`‖mk u‖ = parabolicC0AlphaNorm α u s` — the projection
+  is norm-preserving on representatives), `norm_mk_ofSubmodule`, and `mk_eq_mk_iff` (`mk u = mk v ↔`
+  the parabolic `C^{0,α}` norm of the difference is `0` — the point-separation characterisation).
+* **Projection/section bounded-operator API**: `mkL` (the projection as `→L[ℝ]`, `‖mkL‖ ≤ 1`), a
+  continuous linear **section** `outL` (`SeparationQuotient.outCLM`) with `mk_outL`
+  (`mk (outL x) = x`), `mkL_comp_outL`, `outL_injective`, and `norm_outL` (`‖outL x‖ = ‖x‖` — the
+  section is an **isometric** linear embedding of the Banach space into the semi-Banach carrier).
+* **Domain-restriction operator** (a core chart-closure operation — restricting to sub-cylinders):
+  the reusable norm estimate `parabolicC0AlphaNorm_mono_domain` (`t ⊆ s ⟹ parabolicC0AlphaNorm α u t
+  ≤ parabolicC0AlphaNorm α u s`, from the sup- and Hölder-seminorm domain monotonicities — a genuine
+  gap that was missing); the carrier restriction `ParabolicC0AlphaSpace.restrictL` (op-norm `≤ 1`,
+  `LinearMap.mkContinuous` fed the monotonicity); and its **descent to the Banach spaces**
+  `ParabolicC0AlphaBanach.restrictL` (well-defined on classes because norm-nonincreasing, via
+  `SeparationQuotient.liftCLM`), with `restrictL_mk` (`restrictL (mk u) = mk (restrict u)`) and
+  `norm_restrictL_le` (op-norm `≤ 1`).
+
+This realises decomposition step 1 (the parabolic Hölder function-space carrier) at the `C^{0,α}`
+level as a genuine Banach space with its basic operator API — the `C^0`-level function-space
+realisation the Ricci–DeTurck Banach chart consumes.  Remaining (future sessions): the lift to the
+higher-regularity parabolic Hölder space `C^{2+α,1+α/2}`, then decomposition steps 2 (the
+Schauder/Lipschitz estimate for the Ricci–DeTurck RHS) and 3 (the chart / chart-closure fields).
+
 **Suggested decomposition** (multi-session):
 
 1. Choose a function-space realization of the metric locus. The
