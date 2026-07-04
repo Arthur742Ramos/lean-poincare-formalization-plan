@@ -1751,6 +1751,28 @@ theorem norm_affinePlusLipschitzFixedPoint_sub_le_of_data_nonlinearity [Complete
     (g₁ := fun u => A u + N₁ u + f₁) (g₂ := fun u => A u + N₂ u + f₂) hlt hg1 hu₁ hu₂ hCg
   simpa only [NNReal.coe_add, coe_nnnorm] using h
 
+/-- **A-priori bound for the quasilinear solution operator.**  `affinePlusLipschitzSolve A N hN hAk f`
+obeys `‖·‖ ≤ (‖N 0‖ + ‖f‖) / (1 - (‖A‖ + k))` — the a-priori Schauder estimate
+(`norm_affinePlusLipschitzFixedPoint_le`) read off the bundled solution operator. -/
+theorem norm_affinePlusLipschitzSolve_le [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1)
+    (f : ParabolicC0AlphaBanach X E α s) :
+    ‖affinePlusLipschitzSolve A N hN hAk f‖ ≤ (‖N 0‖ + ‖f‖) / (1 - (‖A‖ + (k : ℝ))) :=
+  norm_affinePlusLipschitzFixedPoint_le A N f hN hAk
+    (affinePlusLipschitzSolve_isSolution A N hN hAk f)
+
+/-- **The quasilinear Ricci–DeTurck solution operator is continuous in the data.**  The continuity
+companion of `lipschitzWith_affinePlusLipschitzSolve`: the nonlinear solution realisation
+`f ↦ affinePlusLipschitzSolve A N hN hAk f` is a continuous map of the frozen data. -/
+theorem continuous_affinePlusLipschitzSolve [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1) :
+    Continuous (affinePlusLipschitzSolve A N hN hAk) :=
+  (lipschitzWith_affinePlusLipschitzSolve A N hN hAk).continuous
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
