@@ -490,6 +490,62 @@ theorem contMDiff_infty_fundamentalSolution_apply_time {A : ℝ → (E →L[ℝ]
   contMDiff_iff_contDiff.mpr
     (contDiff_infty_fundamentalSolution_apply_time hA hAsmooth hΦ h0 u₀)
 
+/-- **Manifold operator variational ODE of the resolvent path.**  For a norm-continuous coefficient
+`A`, the *operator-valued* resolvent curve `τ ↦ D_x Φ_τ ∈ E →L[ℝ] E` (the fundamental solution as a
+whole operator, not merely its action on one direction) obeys, in the model-manifold vocabulary of
+`𝓘(ℝ, E →L[ℝ] E)`, the operator variational ODE derivative equation
+`HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E →L[ℝ] E) (fun τ ↦ D_x Φ_τ) t ((1).smulRight (A t ∘ D_x Φ_t))` for every
+`t`.  The operator-valued companion of `hasMFDerivAt_fundamentalSolution_apply`: it is the manifold
+form of `isIntegralCurve_fundamentalSolution` (the resolvent is the integral curve of the operator
+variational field `variationalField A : W ↦ A t ∘ W`), obtained through the module's own
+`hasMFDerivAt_of_isIntegralCurve` instantiated at the *operator* model space `E →L[ℝ] E`.  This is the
+time-regularity datum a consumer pushing forward a whole frame — rather than a single tangent
+direction — along the flow consumes. -/
+theorem hasMFDerivAt_fundamentalSolution {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) :
+    HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E →L[ℝ] E) (fun τ => fundamentalSolution hA hΦ h0 τ) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (variationalField A t (fundamentalSolution hA hΦ h0 t) : E →L[ℝ] E)) :=
+  hasMFDerivAt_of_isIntegralCurve (isIntegralCurve_fundamentalSolution hA hAcont hΦ h0) t
+
+/-- **Within-set manifold operator variational ODE of the resolvent path.**  The
+`HasMFDerivWithinAt` (`HasMFDerivAt[s]`) refinement of `hasMFDerivAt_fundamentalSolution`, holding for
+every time set `s` — the within-set derivative shape the gauge-flow assembly consumes for the
+operator-valued resolvent frame `τ ↦ D_x Φ_τ`. -/
+theorem hasMFDerivWithinAt_fundamentalSolution {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (s : Set ℝ) (t : ℝ) :
+    HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E →L[ℝ] E) (fun τ => fundamentalSolution hA hΦ h0 τ) s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (variationalField A t (fundamentalSolution hA hΦ h0 t) : E →L[ℝ] E)) :=
+  (hasMFDerivAt_fundamentalSolution hA hAcont hΦ h0 t).hasMFDerivWithinAt
+
+/-- **Manifold `C^{n+1}` time-regularity of the operator-valued resolvent path.**  For a `C^n`-in-time
+coefficient `A`, the resolvent curve `τ ↦ D_x Φ_τ ∈ E →L[ℝ] E` (the whole fundamental-solution
+operator) is `ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E →L[ℝ] E) (n + 1)` in time.  The operator-valued companion of
+`contMDiff_fundamentalSolution_apply_time` — the manifold form of `contDiff_fundamentalSolution_time`,
+via `contMDiff_iff_contDiff` for the operator model space `E →L[ℝ] E`. -/
+theorem contMDiff_fundamentalSolution_time {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (n : ℕ) (hAdiff : ContDiff ℝ (n : WithTop ℕ∞) A) :
+    ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E →L[ℝ] E) ((n : WithTop ℕ∞) + 1)
+      (fun s => fundamentalSolution hA hΦ h0 s) :=
+  contMDiff_iff_contDiff.mpr (contDiff_fundamentalSolution_time hA hΦ h0 n hAdiff)
+
+/-- **Manifold `C^∞` time-regularity of the operator-valued resolvent path.**  For a `C^∞`-in-time
+coefficient `A`, the resolvent curve `τ ↦ D_x Φ_τ ∈ E →L[ℝ] E` is `ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E →L[ℝ] E) ∞`
+in time.  The `C^∞` companion of `contMDiff_fundamentalSolution_time`. -/
+theorem contMDiff_infty_fundamentalSolution_time {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAsmooth : ContDiff ℝ ∞ A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E →L[ℝ] E) ∞ (fun s => fundamentalSolution hA hΦ h0 s) :=
+  contMDiff_iff_contDiff.mpr
+    (contDiff_infty_fundamentalSolution_time hA hAsmooth hΦ h0)
+
 end
 
 end SmoothDependenceCk
