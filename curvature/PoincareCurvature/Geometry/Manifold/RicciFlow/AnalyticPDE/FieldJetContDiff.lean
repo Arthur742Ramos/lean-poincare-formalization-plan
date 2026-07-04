@@ -169,6 +169,125 @@ theorem contMDiff_one_flow_apply_of_contDiff_of_bddDerivs [CompleteSpace E]
     (fun x => continuous_apply_of_contDiff_uncurry h x)
     hL hΦ h0 t
 
+/-! ## Layer-2 field-jet extraction (`C²` flow regularity from a single `ContDiff` hypothesis)
+
+The layer-1 lemmas above fix the field codomain as `E`.  To iterate the jet extraction one derivative
+order higher we re-apply them to the derivative field `fun s ↦ fderiv ℝ (v s) : ℝ → E → (E →L[ℝ] E)`,
+whose codomain is `E →L[ℝ] E`, not `E`.  So we first record codomain-general (`'`) forms of the two
+layer-1 building blocks, then assemble the second-jet inputs `hD2v`/`hD2vc`/`hD2vlip` of the tower's
+`C²` flow theorem `contMDiff_two_flow_apply_of_lipschitz_secondDeriv` from a single joint-`ContDiff`
+hypothesis plus global spatial second/third-derivative bounds. -/
+
+/-- **Codomain-general joint `(t, x)`-continuity of the spatial derivative.**  The codomain-general
+form of `continuous_fderiv_of_contDiff_uncurry`: for a jointly-`ContDiff ℝ n` field `w : ℝ → E → F`
+(`1 ≤ n`) the spatial derivative `fderiv ℝ (w t) x` is jointly continuous, via the partial-derivative
+identity `fderiv ℝ (w t) x = fderiv ℝ (uncurry w) (t, x) ∘L inr`.  This enables iterating the field-jet
+extraction to the next derivative order (the derivative field takes values in `E →L[ℝ] E`, not `E`). -/
+theorem continuous_fderiv_of_contDiff_uncurry' {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {w : ℝ → E → F} (h : ContDiff ℝ n (Function.uncurry w)) (hn : 1 ≤ n) :
+    Continuous (fun p : ℝ × E => fderiv ℝ (w p.1) p.2) := by
+  have hne : n ≠ 0 := (lt_of_lt_of_le zero_lt_one hn).ne'
+  have key : (fun p : ℝ × E => fderiv ℝ (w p.1) p.2)
+      = fun p : ℝ × E =>
+        (fderiv ℝ (Function.uncurry w) p).comp (ContinuousLinearMap.inr ℝ ℝ E) := by
+    funext p
+    have h1 : HasFDerivAt (Function.uncurry w) (fderiv ℝ (Function.uncurry w) p) p :=
+      ((h.differentiable hne).differentiableAt).hasFDerivAt
+    have h2 : HasFDerivAt (fun x : E => (p.1, x)) (ContinuousLinearMap.inr ℝ ℝ E) p.2 :=
+      hasFDerivAt_prodMk_right p.1 p.2
+    have hc : HasFDerivAt (w p.1)
+        ((fderiv ℝ (Function.uncurry w) p).comp (ContinuousLinearMap.inr ℝ ℝ E)) p.2 := by
+      have hcomp := h1.comp p.2 h2
+      have heq : (Function.uncurry w ∘ fun x : E => (p.1, x)) = w p.1 := by funext x; rfl
+      rwa [heq] at hcomp
+    exact hc.fderiv
+  rw [key]
+  exact (h.continuous_fderiv hne).clm_comp continuous_const
+
+/-- **The layer-1 spatial-derivative field of a jointly-`ContDiff` field is itself jointly `ContDiff`
+one order lower.**  If `w : ℝ → E → F` has `ContDiff ℝ n (uncurry w)` and `m + 1 ≤ n`, then
+`uncurry (fun s ↦ fderiv ℝ (w s))` is `ContDiff ℝ m`, because it equals `fderiv ℝ (uncurry w)`
+post-composed with the fixed inclusion `inr` (a bounded linear, hence `ContDiff`, map).  This is the
+inductive step that lets the field-jet extraction recurse: apply the layer-1 lemmas to the derivative
+field `fderiv ℝ (w ·)` to obtain the layer-2 jet. -/
+theorem contDiff_uncurry_fderiv_of_contDiff_uncurry' {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ F] {w : ℝ → E → F} {m : WithTop ℕ∞}
+    (h : ContDiff ℝ n (Function.uncurry w)) (hmn : m + 1 ≤ n) :
+    ContDiff ℝ m (Function.uncurry (fun s => fderiv ℝ (w s))) := by
+  have hn1 : (1 : WithTop ℕ∞) ≤ n := le_trans (self_le_add_left 1 m) hmn
+  have hne : n ≠ 0 := (lt_of_lt_of_le zero_lt_one hn1).ne'
+  have key : Function.uncurry (fun s => fderiv ℝ (w s))
+      = fun p : ℝ × E =>
+        (fderiv ℝ (Function.uncurry w) p).comp (ContinuousLinearMap.inr ℝ ℝ E) := by
+    funext p
+    have h1 : HasFDerivAt (Function.uncurry w) (fderiv ℝ (Function.uncurry w) p) p :=
+      ((h.differentiable hne).differentiableAt).hasFDerivAt
+    have h2 : HasFDerivAt (fun x : E => (p.1, x)) (ContinuousLinearMap.inr ℝ ℝ E) p.2 :=
+      hasFDerivAt_prodMk_right p.1 p.2
+    have hc : HasFDerivAt (w p.1)
+        ((fderiv ℝ (Function.uncurry w) p).comp (ContinuousLinearMap.inr ℝ ℝ E)) p.2 := by
+      have hcomp := h1.comp p.2 h2
+      have heq : (Function.uncurry w ∘ fun x : E => (p.1, x)) = w p.1 := by funext x; rfl
+      rwa [heq] at hcomp
+    exact hc.fderiv
+  rw [key]
+  exact ContDiff.clm_comp (h.fderiv_right hmn) contDiff_const
+
+/-- **Second spatial derivative exists as a genuine Fréchet derivative** (`2 ≤ n`).  The first spatial
+derivative `fderiv ℝ (v s)` is itself `ContDiff ℝ 1`, hence differentiable, so `fderiv ℝ (fderiv ℝ
+(v s)) ξ` is a genuine Fréchet derivative of `fderiv ℝ (v s)` at every point.  This is the `hD2v` input
+of the tower's `C²` flow theorem `contMDiff_two_flow_apply_of_lipschitz_secondDeriv`. -/
+theorem hasFDerivAt_fderiv_fderiv_of_contDiff_uncurry
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 2 ≤ n) (s : ℝ) (ξ : E) :
+    HasFDerivAt (fderiv ℝ (v s)) (fderiv ℝ (fderiv ℝ (v s)) ξ) ξ := by
+  have hvs : ContDiff ℝ n (v s) := contDiff_apply_of_contDiff_uncurry h s
+  have hmn : (1 : WithTop ℕ∞) + 1 ≤ n := le_trans (by norm_num) hn
+  have hdiff : Differentiable ℝ (fderiv ℝ (v s)) :=
+    (hvs.fderiv_right (m := 1) hmn).differentiable one_ne_zero
+  exact (hdiff ξ).hasFDerivAt
+
+/-- **Joint `(t, x)`-continuity of the second spatial derivative** (`2 ≤ n`), obtained by applying the
+codomain-general layer-1 continuity lemma `continuous_fderiv_of_contDiff_uncurry'` to the layer-1
+derivative field `fderiv ℝ (v ·)`, which is itself jointly `ContDiff ℝ 1` by
+`contDiff_uncurry_fderiv_of_contDiff_uncurry'`.  This is the `hD2vc` input of the tower's `C²` flow
+theorem. -/
+theorem continuous_fderiv_fderiv_of_contDiff_uncurry
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 2 ≤ n) :
+    Continuous (fun p : ℝ × E => fderiv ℝ (fderiv ℝ (v p.1)) p.2) := by
+  have hV : ContDiff ℝ (1 : WithTop ℕ∞) (Function.uncurry (fun s => fderiv ℝ (v s))) :=
+    contDiff_uncurry_fderiv_of_contDiff_uncurry' h (le_trans (by norm_num) hn)
+  exact continuous_fderiv_of_contDiff_uncurry' hV le_rfl
+
+/-- **Manifold spatial `C²` regularity of the flow from a genuine `ContDiff` field.**  Packaging the
+layer-1 + layer-2 field-jet extraction with the tower's `C^{2,1}` manifold regularity theorem
+`contMDiff_two_flow_apply_of_lipschitz_secondDeriv`: for a jointly-`ContDiff ℝ n` field `v` (`2 ≤ n`)
+that is spatially `K`-Lipschitz and time-continuous, with a globally bounded second spatial derivative
+(bound `L`) and an `M`-Lipschitz second spatial-derivative field, any integral-curve flow family `Φ`
+anchored at `t₀` has each time-`t` map `z ↦ Φ z t` in `ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 2`.  The layer-1 jet
+inputs `hDv`/`hDvc`/`hDvlip` and the second-jet inputs `hD2v`/`hD2vc` are supplied here from the single
+`ContDiff` hypothesis; the top-order Lipschitz control `hD2vlip` is supplied directly (matching the
+tower's own `C²` theorem), so no third-order derivative object is required.  This is the second
+flow-regularity statement in the tower stated in terms of joint `ContDiff` of the field. -/
+theorem contMDiff_two_flow_apply_of_contDiff [CompleteSpace E]
+    {K L M : ℝ≥0} {t₀ : ℝ} {Φ : E → ℝ → E}
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 2 ≤ n)
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    (hL : ∀ s ξ, ‖fderiv ℝ (fderiv ℝ (v s)) ξ‖₊ ≤ L)
+    (hD2vlip : ∀ s, LipschitzWith M (fderiv ℝ (fderiv ℝ (v s))))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 2 (fun z => Φ z t) := by
+  have hn1 : (1 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  exact contMDiff_two_flow_apply_of_lipschitz_secondDeriv
+    (Dv := fun s => fderiv ℝ (v s)) (D2v := fun s => fderiv ℝ (fderiv ℝ (v s)))
+    hv hvc
+    (fun s ξ => hasFDerivAt_fderiv_of_contDiff_uncurry h hn1 s ξ)
+    (continuous_fderiv_of_contDiff_uncurry h hn1)
+    (fun s => lipschitzWith_fderiv_of_contDiff_of_nnnorm_secondFDeriv_le h hn hL s)
+    (fun s ξ => hasFDerivAt_fderiv_fderiv_of_contDiff_uncurry h hn s ξ)
+    (continuous_fderiv_fderiv_of_contDiff_uncurry h hn)
+    hD2vlip
+    hΦ h0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
