@@ -6047,3 +6047,43 @@ the manifold gauge-flow consumers of Items 1 & 2** — the compact-manifold gaug
 `Diffeomorph3FlowTimeDerivative.lean`) which now has its `C³` initial-data-dependence input available;
 plus the general (merely-continuous, non-Lipschitz `Dv`) modulus, and the Item 3 parabolic
 Hölder/Schauder frontier (`AnalyticPDE/ParabolicHolder.lean`).
+
+Update — **the general (merely-continuous, non-Lipschitz `Dv`) modulus is now CLOSED for a
+finite-dimensional state space**, in the new self-contained module
+`AnalyticPDE/SmoothDependenceContinuousDeriv.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; it imports the cached `SmoothDependenceCk`, so it builds
+without recompiling that tower).  The Lipschitz-derivative restriction that
+`hasFDerivAt_flow_of_lipschitz_deriv` / `exists_flow_contDiff_one_of_lipschitz_deriv` impose is
+removed: a genuine `C^1` field supplies only a *jointly continuous* spatial derivative, which on a
+finite-dimensional space suffices by Heine–Cantor.
+
+* `exists_monotone_modulus_of_continuousOn_tube` — **the reusable analytic core**: for a proper
+  (e.g. finite-dimensional) space, a continuous `f : ℝ → E → ℝ` that is nonnegative and vanishes at
+  the origin over a compact `T ⊆ ℝ` (`f s 0 = 0`) admits a nonnegative, monotone, `0⁺`-vanishing
+  modulus `ω` with `f s w ≤ ω ‖w‖` on the radius-`R` tube.  Witness `ω r = sSup` of `f` over the
+  radius-`min r R` sub-tube; boundedness from compactness (`IsCompact.bddAbove_image`), monotonicity
+  from nested tubes (`csSup_le_csSup`), and the `0⁺` limit from Heine–Cantor uniform continuity
+  (`IsCompact.uniformContinuousOn_of_continuous`).  This is the "monotone `ω → 0` from joint
+  continuity of `Dv` on the compact trajectory tube" the plan flagged as the missing step.
+* `hasFDerivAt_flow_of_continuous_deriv` (+ `differentiableAt`/`fderiv` corollaries) — the pointwise
+  `C¹` dependence: from `hDv` (everywhere Fréchet derivative), `hDvc` (joint continuity of `Dv`), and
+  `A s = Dv s (Φ x₀ s)`, `z ↦ Φ z t` is Fréchet differentiable at `x₀` with derivative the resolvent.
+  Feeds the derivative-oscillation modulus `‖Dv s (Φ x₀ s + w) − Dv s (Φ x₀ s)‖` on the compact
+  trajectory tube to `hasFDerivAt_flow_of_uniform_deriv_modulus_eventually`.
+* `exists_flow_differentiable_of_continuous_deriv` — the unconditional **everywhere-`Differentiable`**
+  version (continuous-derivative analogue of `exists_flow_differentiable_of_lipschitz_deriv`): from
+  field-level data only, one flow family `Φ` with `Differentiable ℝ (z ↦ Φ z t)`.
+* `exists_flow_fderiv_continuous_of_continuous_deriv` / `exists_flow_contDiff_one_of_continuous_deriv`
+  — the **`ContDiff ℝ 1`** version (continuous-derivative analogue of
+  `exists_flow_contDiff_one_of_lipschitz_deriv`).  Resolvent continuity is the continuous
+  (non-Lipschitz) coefficient dependence of the fundamental solution
+  (`norm_fundamentalSolution_sub_le_of_forall_le_Icc`) fed the base-point derivative-oscillation
+  modulus at the flow-separation `exp(K(t−t₀))·‖z−z₀‖` (via `tendsto_modulus_comp_norm_sub`), squeezed
+  to `0`; packaged through `contDiff_one_iff_fderiv`.  This is the honest "`C¹` in initial data" in
+  the `ContDiff` vocabulary Item 2 consumes, now for an arbitrary `C^1` right-hand side.
+
+Remaining for Point 4 (future sessions): unchanged — the manifold gauge-flow consumers of Items 1 & 2
+(the compact-manifold gauge-flow constructor, the tensor time-derivative chain rule), the higher
+(`ContDiff ℝ 2`/`3`) continuous-derivative layers (needing modulus arguments on `D²v`/`D³v`, lower
+leverage since smooth Ricci-flow RHSs already have locally-Lipschitz derivatives and use the
+`_lipschitz_` C³ capstone), and the Item 3 parabolic Hölder/Schauder frontier.
