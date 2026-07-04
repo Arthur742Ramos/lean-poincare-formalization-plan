@@ -119,6 +119,96 @@ noncomputable def isEmptyRicciDeTurckBanachChart
   geometric := fun _ _ _ =>
     ⟨gF, chosenLeviCivitaFamily (I := I) (M := M) gF, fun x => isEmptyElim x⟩
 
+/-- On an empty manifold the bundled continuous-section space is a subsingleton: two sections agree
+because there are no points at which to compare them. -/
+theorem continuousSectionSpace_subsingleton_of_isEmpty
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ) :
+    Subsingleton (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover) :=
+  ⟨fun a b => ContinuousSectionSpace.ext fun x => isEmptyElim x⟩
+
+/-- The first genuine inhabitant of `RicciDeTurckChartClosureData`: on an empty manifold every
+Banach solution has a smooth chosen-background realization (all pointwise obligations are vacuous),
+and every chosen DeTurck candidate encodes back into the chart via the constant Banach solution at
+the initial section (whose ODE holds because the state space is a subsingleton, so the chart velocity
+vanishes).  This completes the `{realization, encode}` fraction of the closure-data critical path. -/
+noncomputable def isEmptyRicciDeTurckChartClosureData
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := TM)) (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {ivp : InitialValueProblem (E := F) (H := H) (I := I) (M := M)}
+    {T : ℝ} {a L Kpic Kstate : ℝ≥0}
+    (chart : TimeDependentGeometricRicciDeTurckBanachChart
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover
+      ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T a L Kpic Kstate)
+    (gF : MetricFamily (I := I) (M := M)) :
+    RicciDeTurckChartClosureData x0 et het Kc hKc Ko hKo hKoEq hcover chart := by
+  haveI hSub :
+      Subsingleton (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover) :=
+    continuousSectionSpace_subsingleton_of_isEmpty (I := I)
+      et Kc hKc Ko hKo hKoEq hcover
+  exact
+    { realization := fun _ =>
+        { metric := gF
+          background := chosenLeviCivitaFamily (I := I) (M := M) gF
+          metric_eq_curve := fun _ _ x => isEmptyElim x
+          boundary_hasTimeDerivative := fun _ _ _ x => isEmptyElim x
+          chartRHS_eq_intrinsic := fun _ _ x => isEmptyElim x
+          hbackground := rfl }
+      encode := fun candidate =>
+        { sol :=
+            { terminalTime := candidate.1.terminalTime
+              initial_lt_terminal := candidate.1.initial_lt_terminal
+              curve := fun _ => InitialValueProblem.toContinuousSectionSpace
+                (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp
+              initial_eq := rfl
+              equation := by
+                intro t _
+                have h0 : chart.A t ((fun _ : ℝ => InitialValueProblem.toContinuousSectionSpace
+                    (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp) t)
+                    = (0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+                      (V := _root_.Bundle.BilinearFormBundle (V := TM))
+                      et Kc hKc Ko hKo hKoEq hcover) := Subsingleton.elim _ _
+                simp only [h0]
+                exact hasDerivWithinAt_const t
+                  (Set.Icc ivp.initialTime candidate.1.terminalTime)
+                  (InitialValueProblem.toContinuousSectionSpace
+                    (M := M) (F := F) (I := I) et Kc hKc Ko hKo hKoEq hcover ivp)
+              mem_state := fun _ _ x => isEmptyElim x }
+          realization :=
+            { metric := gF
+              metricVelocity := intrinsicRicciDeTurckRHS (I := I) (M := M) gF
+                (chosenLeviCivitaFamily (I := I) (M := M) gF)
+              background := chosenLeviCivitaFamily (I := I) (M := M) gF
+              metric_eq_curve := fun _ _ x => isEmptyElim x
+              hasTimeDerivative := fun _ _ x => isEmptyElim x
+              equation := fun _ _ x => isEmptyElim x }
+          terminal_eq := rfl
+          metric_eq := fun _ _ x => isEmptyElim x } }
+
 end IsEmptyChart
 
 end MetricLocusEvolution
