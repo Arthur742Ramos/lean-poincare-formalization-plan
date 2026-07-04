@@ -993,6 +993,75 @@ theorem evalCLM_mulBilinL_apply {F G : Type*} [NormedAddCommGroup F] [NormedSpac
   obtain ⟨a, rfl⟩ := mk_surjective u
   rw [mulBilinL_mk, mulL_apply, evalCLM_mulCoeffL_apply, evalCLM_mk_apply]
 
+/-- **A priori bound on the quadratic term.**  The diagonal `u ↦ L(u, u)` of the bilinear
+multiplication satisfies `‖L(u, u)‖ ≤ ‖L‖ · ‖u‖ · ‖u‖` — the size of the quadratic Ricci–DeTurck
+nonlinearity on a chart solution `u`. -/
+theorem norm_mulBilinL_diag_le {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    (L : E →L[ℝ] E →L[ℝ] G) (u : ParabolicC0AlphaBanach X E α s) :
+    ‖mulBilinL L u u‖ ≤ ‖L‖ * ‖u‖ * ‖u‖ := by
+  calc ‖mulBilinL L u u‖ ≤ ‖mulBilinL L u‖ * ‖u‖ := (mulBilinL L u).le_opNorm _
+    _ ≤ (‖L‖ * ‖u‖) * ‖u‖ := by
+        gcongr
+        calc ‖mulBilinL L u‖ ≤ ‖mulBilinL L‖ * ‖u‖ := (mulBilinL L).le_opNorm _
+          _ ≤ ‖L‖ * ‖u‖ := by gcongr; exact norm_mulBilinL_le L
+
+/-- **Bilinear polarisation of the quadratic-term difference.**  `L(u, u) − L(v, v) = L(u, u − v)
++ L(u − v, v)`, the exact algebraic identity behind the local Lipschitz control of the quadratic
+Ricci–DeTurck nonlinearity (from the bilinearity of `mulBilinL`). -/
+theorem mulBilinL_diag_sub {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    (L : E →L[ℝ] E →L[ℝ] G) (u v : ParabolicC0AlphaBanach X E α s) :
+    mulBilinL L u u - mulBilinL L v v
+      = mulBilinL L u (u - v) + mulBilinL L (u - v) v := by
+  have h1 : mulBilinL L u (u - v) = mulBilinL L u u - mulBilinL L u v := map_sub _ _ _
+  have h2 : mulBilinL L (u - v) v = mulBilinL L u v - mulBilinL L v v := by
+    rw [map_sub, ContinuousLinearMap.sub_apply]
+  rw [h1, h2]; abel
+
+/-- **Local Lipschitz control of the quadratic term.**  `‖L(u, u) − L(v, v)‖ ≤ ‖L‖ · (‖u‖ + ‖v‖) ·
+‖u − v‖`, the quadratic nonlinearity's difference bound: on any ball of radius `R` it is
+`(2‖L‖R)`-Lipschitz.  This is exactly the `k`-Lipschitz-nonlinearity datum the Ricci–DeTurck
+short-time fixed-point solver (`exists_unique_affinePlusLipschitzFixedPoint` / `affinePlusLipschitzSolve`)
+consumes. -/
+theorem norm_mulBilinL_diag_sub_le {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    (L : E →L[ℝ] E →L[ℝ] G) (u v : ParabolicC0AlphaBanach X E α s) :
+    ‖mulBilinL L u u - mulBilinL L v v‖ ≤ ‖L‖ * (‖u‖ + ‖v‖) * ‖u - v‖ := by
+  rw [mulBilinL_diag_sub]
+  refine (norm_add_le _ _).trans ?_
+  have e1 : ‖mulBilinL L u (u - v)‖ ≤ ‖L‖ * ‖u‖ * ‖u - v‖ := by
+    calc ‖mulBilinL L u (u - v)‖ ≤ ‖mulBilinL L u‖ * ‖u - v‖ := (mulBilinL L u).le_opNorm _
+      _ ≤ (‖L‖ * ‖u‖) * ‖u - v‖ := by
+          gcongr
+          calc ‖mulBilinL L u‖ ≤ ‖mulBilinL L‖ * ‖u‖ := (mulBilinL L).le_opNorm _
+            _ ≤ ‖L‖ * ‖u‖ := by gcongr; exact norm_mulBilinL_le L
+  have e2 : ‖mulBilinL L (u - v) v‖ ≤ ‖L‖ * ‖u - v‖ * ‖v‖ := by
+    calc ‖mulBilinL L (u - v) v‖ ≤ ‖mulBilinL L (u - v)‖ * ‖v‖ := (mulBilinL L (u - v)).le_opNorm _
+      _ ≤ (‖L‖ * ‖u - v‖) * ‖v‖ := by
+          gcongr
+          calc ‖mulBilinL L (u - v)‖ ≤ ‖mulBilinL L‖ * ‖u - v‖ := (mulBilinL L).le_opNorm _
+            _ ≤ ‖L‖ * ‖u - v‖ := by gcongr; exact norm_mulBilinL_le L
+  calc ‖mulBilinL L u (u - v)‖ + ‖mulBilinL L (u - v) v‖
+      ≤ ‖L‖ * ‖u‖ * ‖u - v‖ + ‖L‖ * ‖u - v‖ * ‖v‖ := add_le_add e1 e2
+    _ = ‖L‖ * (‖u‖ + ‖v‖) * ‖u - v‖ := by ring
+
+/-- **The quadratic nonlinearity is Lipschitz on every closed ball.**  On `closedBall 0 R` the diagonal
+`u ↦ L(u, u)` is `(2‖L‖R)`-Lipschitz — the invariant-ball nonlinearity control the Ricci–DeTurck
+short-time contraction consumes (a small ball / short time makes `2‖L‖R < 1`). -/
+theorem lipschitzOnWith_mulBilinL_diag {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    (L : E →L[ℝ] E →L[ℝ] G) {R : ℝ} (hR : 0 ≤ R) :
+    LipschitzOnWith (2 * ‖L‖ * R).toNNReal (fun u => mulBilinL L u u)
+      (Metric.closedBall (0 : ParabolicC0AlphaBanach X E α s) R) := by
+  rw [lipschitzOnWith_iff_dist_le_mul]
+  intro u hu v hv
+  have hu' : ‖u‖ ≤ R := by simpa [dist_eq_norm] using hu
+  have hv' : ‖v‖ ≤ R := by simpa [dist_eq_norm] using hv
+  have hconst : ((2 * ‖L‖ * R).toNNReal : ℝ) = 2 * ‖L‖ * R :=
+    Real.coe_toNNReal _ (by positivity)
+  rw [dist_eq_norm, dist_eq_norm, hconst]
+  calc ‖mulBilinL L u u - mulBilinL L v v‖
+      ≤ ‖L‖ * (‖u‖ + ‖v‖) * ‖u - v‖ := norm_mulBilinL_diag_sub_le L u v
+    _ ≤ ‖L‖ * (R + R) * ‖u - v‖ := by gcongr
+    _ = 2 * ‖L‖ * R * ‖u - v‖ := by ring
+
 end ParabolicC0AlphaBanach
 
 /-! ### The precomposition (change-of-variables) operator
