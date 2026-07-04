@@ -2694,6 +2694,20 @@ lemma prefactor_eq_inv_two_sqrt (t : ℝ) (ht : 0 < t) :
       ← Real.sqrt_eq_rpow]
   rw [e, sqrt_four_pi_t_eq t ht, one_div]
 
+/-- **The heat kernel's spatial gradient `L¹` (total-variation) norm in closed form:**
+`∫ y, |∂ₓK(t,y)| dy = 1/√(π t)`.  Since `∂ₓK(t,y) = K(t,y)·(−y/2t)`, this is the absolute first
+moment `∫|y|·K(t,y) = (4πt)^{-1/2}·4t` scaled by `1/2t`, collapsing to `2·(4πt)^{-1/2} = 1/√(π t)`.
+This is the exact quantitative *gain-of-one-spatial-derivative costs `t^{-1/2}`* constant underlying
+the `C¹` parabolic Schauder smoothing rate (`heatSemigroup1D_lipschitz_sqrt_rate`). -/
+lemma integral_abs_deriv_heatKernel1D_eq {t : ℝ} (ht : 0 < t) :
+    (∫ y, |heatKernel1D t y * (-y / (2 * t))|) = 1 / Real.sqrt (π * t) := by
+  rw [integral_abs_deriv_heatKernel1D ht, integral_abs_mul_heatKernel1D_eq ht,
+    prefactor_eq_inv_two_sqrt t ht]
+  have hst : Real.sqrt (π * t) ≠ 0 := ne_of_gt (Real.sqrt_pos.mpr (by positivity))
+  have ht0 : t ≠ 0 := ne_of_gt ht
+  field_simp
+  ring
+
 /-- **The canonical `t^{-1/2}` gradient-smoothing (Lipschitz) rate.** For bounded
 measurable `f` with `‖f‖∞ ≤ C`, the heat semigroup output is Lipschitz with the
 explicit parabolic constant `C/√(πt)`:
