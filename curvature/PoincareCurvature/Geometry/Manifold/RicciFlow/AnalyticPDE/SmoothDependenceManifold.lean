@@ -3,6 +3,7 @@ module
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FlowDiffeomorphism
 public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 public import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
+public import Mathlib.Geometry.Manifold.Diffeomorph
 
 set_option linter.unusedSectionVars false
 
@@ -224,6 +225,42 @@ theorem exists_flow_contMDiff_three_gaugeData [CompleteSpace E]
     hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip hD2vmlip hD3vm hD3vmc hD3vmlip
     hD3vc hD3vlip hcompat hcurry
   exact ⟨Φ, h0, fun z t => hasMFDerivAt_of_isIntegralCurve (hΦ z) t, hdiff⟩
+
+/-- **The time-`t` flow map bundled as a first-class Mathlib `C³` `Diffeomorph`.**  From the `C^{3,1}`
+jet of the field `v` alone there is a flow family `Φ`, anchored at `t₀` and integrating `v`, such that
+for *every* `t` the time-`t` map `x ↦ Φ x t` is (the coercion of) a genuine
+`Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3` — a `C³` diffeomorphism of the model manifold `E` in Mathlib's
+own bundled sense.  The reverse-time inverse flow supplies the smooth inverse. -/
+theorem exists_flow_diffeomorph_three [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ N : ℝ≥0}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ)
+    (hD2vcc : Continuous fun p : ℝ × E => D2vc p.1 p.2)
+    (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD2vmlip : ∀ s, LipschitzWith N (D2vm s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ)
+    (hD3vmc : Continuous fun p : ℝ × E => D3vm p.1 p.2)
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vc : Continuous fun p : ℝ × E => D3v p.1 p.2)
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hcurry : ∀ s ξ, D3vm s ξ = (D3v s ξ).curryLeft) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+      ∀ t, ∃ F : Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3, ∀ z, F z = Φ z t := by
+  obtain ⟨Φ, h0, hΦ, hdiff⟩ := exists_flow_contMDiff_three_diffeomorph
+    hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip hD2vmlip hD3vm hD3vmc hD3vmlip
+    hD3vc hD3vlip hcompat hcurry
+  refine ⟨Φ, h0, hΦ, fun t => ?_⟩
+  obtain ⟨ψ, hL, hR, hcdΦ, hcdψ⟩ := hdiff t
+  exact ⟨⟨⟨fun z => Φ z t, ψ, hL, hR⟩, hcdΦ, hcdψ⟩, fun z => rfl⟩
 
 end
 
