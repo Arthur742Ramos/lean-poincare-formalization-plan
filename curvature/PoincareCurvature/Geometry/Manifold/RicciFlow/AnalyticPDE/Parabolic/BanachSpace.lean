@@ -3,6 +3,7 @@ module
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace
 public import Mathlib.Analysis.Normed.Group.SeparationQuotient
 public import Mathlib.Topology.UniformSpace.UniformEmbedding
+public import Mathlib.Topology.Algebra.SeparationQuotient.Section
 
 set_option linter.unusedSectionVars false
 
@@ -146,6 +147,49 @@ theorem mk_eq_mk_iff (u v : ParabolicC0AlphaSpace X E α s) :
         - ParabolicC0AlphaSpace.toFun v z) s = 0 := by
   change SeparationQuotient.mk u = SeparationQuotient.mk v ↔ _
   rw [SeparationQuotient.mk_eq_mk, Metric.inseparable_iff, ParabolicC0AlphaSpace.dist_def]
+
+/-- **The projection as a continuous `ℝ`-linear map.**  `mk` packaged as a bounded operator
+`ParabolicC0AlphaSpace →L[ℝ] ParabolicC0AlphaBanach` (`SeparationQuotient.mkCLM`). -/
+def mkL : ParabolicC0AlphaSpace X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s :=
+  SeparationQuotient.mkCLM ℝ (ParabolicC0AlphaSpace X E α s)
+
+@[simp]
+theorem mkL_apply (u : ParabolicC0AlphaSpace X E α s) : mkL u = mk u := rfl
+
+/-- The projection operator has operator norm `≤ 1` (it is `1`-Lipschitz; in fact norm-preserving on
+representatives, `norm_mk`). -/
+theorem norm_mkL_le : ‖(mkL : ParabolicC0AlphaSpace X E α s →L[ℝ] _)‖ ≤ 1 := by
+  refine ContinuousLinearMap.opNorm_le_bound _ zero_le_one (fun u => ?_)
+  rw [one_mul, mkL_apply]
+  exact le_of_eq (SeparationQuotient.norm_mk u)
+
+/-- **A continuous `ℝ`-linear section of the projection.**  `SeparationQuotient.outCLM` chooses, for
+each Banach class, a representative parabolic `C^{0,α}` function, continuously and linearly, with
+`mk (outL x) = x`. -/
+noncomputable def outL : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaSpace X E α s :=
+  SeparationQuotient.outCLM ℝ (ParabolicC0AlphaSpace X E α s)
+
+/-- The section is a right inverse of the projection: `mk (outL x) = x`. -/
+@[simp]
+theorem mk_outL (x : ParabolicC0AlphaBanach X E α s) : mk (outL x) = x :=
+  SeparationQuotient.mk_outCLM ℝ x
+
+/-- The projection composed with the section is the identity. -/
+theorem mkL_comp_outL :
+    (mkL : ParabolicC0AlphaSpace X E α s →L[ℝ] _).comp outL = ContinuousLinearMap.id ℝ _ :=
+  SeparationQuotient.mkCLM_comp_outCLM ℝ (ParabolicC0AlphaSpace X E α s)
+
+/-- **The section is an isometry.**  `‖outL x‖ = ‖x‖`: the parabolic `C^{0,α}` norm of the chosen
+representative equals the Banach norm of the class (the projection is norm-preserving, so its section
+is an isometric linear embedding of the Banach space into the semi-Banach carrier). -/
+theorem norm_outL (x : ParabolicC0AlphaBanach X E α s) : ‖outL x‖ = ‖x‖ := by
+  conv_rhs => rw [← mk_outL x]
+  exact (SeparationQuotient.norm_mk (outL x)).symm
+
+/-- The section is injective. -/
+theorem outL_injective :
+    Function.Injective (outL : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaSpace X E α s) :=
+  Function.LeftInverse.injective mk_outL
 
 end ParabolicC0AlphaBanach
 
