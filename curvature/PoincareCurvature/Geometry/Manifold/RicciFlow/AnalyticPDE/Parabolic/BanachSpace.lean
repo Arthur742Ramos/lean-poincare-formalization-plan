@@ -1911,6 +1911,105 @@ theorem continuous_affinePlusLipschitzSolve [CompleteSpace E] {k : ℝ≥0}
     Continuous (affinePlusLipschitzSolve A N hN hAk) :=
   (lipschitzWith_affinePlusLipschitzSolve A N hN hAk).continuous
 
+/-! ### Banach fixed point on a closed ball, and the quadratic Ricci–DeTurck short-time existence
+
+The `affinePlusLipschitz` solver above needs a *globally* Lipschitz nonlinearity.  The genuine
+Ricci–DeTurck nonlinearity is *quadratic* (`u ↦ mulBilinL L u u`), only **locally** Lipschitz.  The
+following localise the Banach fixed-point theorem to a closed ball (a complete metric subspace of the
+parabolic Banach space) and apply it to the quadratic right-hand side, giving the honest short-time /
+small-ball existence for the quadratic nonlinearity. -/
+
+/-- **Banach fixed point on a closed ball.**  A self-map `g` of a closed ball `closedBall c r`
+(`0 ≤ r`) that is `LipschitzOnWith K` on the ball with `K < 1` has a fixed point in the ball.  The
+closed ball is complete (closed in the complete parabolic Banach space), so the
+contraction-on-a-complete-subset Banach fixed-point theorem (`ContractingWith.exists_fixedPoint'`)
+applies.  This is the abstract short-time small-ball existence: whenever a nonlinear parabolic
+Ricci–DeTurck right-hand side preserves and contracts a small ball around the initial data, it has a
+(chart) solution in that ball. -/
+theorem exists_fixedPoint_of_lipschitzOnWith_closedBall [CompleteSpace E]
+    {g : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s}
+    {c : ParabolicC0AlphaBanach X E α s} {r : ℝ} (hr : 0 ≤ r) {K : ℝ≥0} (hK : K < 1)
+    (hg : LipschitzOnWith K g (Metric.closedBall c r))
+    (hmaps : Set.MapsTo g (Metric.closedBall c r) (Metric.closedBall c r)) :
+    ∃ u ∈ Metric.closedBall c r, g u = u := by
+  have hcomplete : IsComplete (Metric.closedBall c r :
+      Set (ParabolicC0AlphaBanach X E α s)) := Metric.isClosed_closedBall.isComplete
+  have hrestrict : LipschitzWith K
+      (hmaps.restrict g (Metric.closedBall c r) (Metric.closedBall c r)) := by
+    intro a b
+    exact hg a.2 b.2
+  have hcball : c ∈ Metric.closedBall c r := Metric.mem_closedBall_self hr
+  obtain ⟨u, hu_mem, hu_fix, _, _⟩ :=
+    ContractingWith.exists_fixedPoint' hcomplete hmaps ⟨hK, hrestrict⟩ hcball
+      (edist_ne_top _ _)
+  exact ⟨u, hu_mem, hu_fix⟩
+
+/-- **Uniqueness of the fixed point in a closed ball.**  Two fixed points of a `LipschitzOnWith K`
+(`K < 1`) map that both lie in the ball coincide (`dist u u' ≤ K · dist u u'` with `K < 1` forces
+`dist u u' = 0`).  With existence this makes the ball-localised Ricci–DeTurck solution unique. -/
+theorem eq_of_fixedPoint_of_lipschitzOnWith_closedBall
+    {g : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s}
+    {c : ParabolicC0AlphaBanach X E α s} {r : ℝ} {K : ℝ≥0} (hK : K < 1)
+    (hg : LipschitzOnWith K g (Metric.closedBall c r))
+    {u u' : ParabolicC0AlphaBanach X E α s}
+    (hu : u ∈ Metric.closedBall c r) (hu' : u' ∈ Metric.closedBall c r)
+    (hfu : g u = u) (hfu' : g u' = u') : u = u' := by
+  have hd : dist u u' ≤ (K : ℝ) * dist u u' := by
+    have h := (lipschitzOnWith_iff_dist_le_mul.mp hg) u hu u' hu'
+    rwa [hfu, hfu'] at h
+  have hKr : (K : ℝ) < 1 := by exact_mod_cast hK
+  have hnn : (0 : ℝ) ≤ dist u u' := dist_nonneg
+  have hdist : dist u u' ≤ 0 := by nlinarith
+  exact dist_le_zero.mp hdist
+
+/-- **Short-time / small-ball existence for the quadratic Ricci–DeTurck right-hand side.**  For a
+linear part `A`, the quadratic nonlinearity `u ↦ L(u, u)` (`mulBilinL L`), and frozen data `f`, if the
+ball radius / time is small enough that the right-hand side is a *contraction* on `closedBall c r`
+(`‖A‖ + 2‖L‖(‖c‖ + r) < 1`, the diagonal Lipschitz constant on the ball, `lipschitzOnWith_mulBilinL_diag`)
+**and** preserves that ball (`hmaps`, the invariant-ball hypothesis), then the quadratic Ricci–DeTurck
+fixed-point equation `A u + L(u, u) + f = u` has a solution in the ball.  This is the honest quadratic
+short-time chart existence — the quadratic analogue of the globally-Lipschitz
+`affinePlusLipschitzFixedPoint_mem_closedBall`, valid for the genuinely *only locally* Lipschitz
+Ricci–DeTurck nonlinearity. -/
+theorem exists_fixedPoint_quadraticRHS_closedBall [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (L : E →L[ℝ] E →L[ℝ] E) (f : ParabolicC0AlphaBanach X E α s)
+    (c : ParabolicC0AlphaBanach X E α s) {r : ℝ} (hr : 0 ≤ r)
+    (hcontract : ‖A‖ + 2 * ‖L‖ * (‖c‖ + r) < 1)
+    (hmaps : Set.MapsTo (fun u => A u + mulBilinL L u u + f)
+      (Metric.closedBall c r) (Metric.closedBall c r)) :
+    ∃ u ∈ Metric.closedBall c r, A u + mulBilinL L u u + f = u := by
+  set K : ℝ≥0 := (‖A‖ + 2 * ‖L‖ * (‖c‖ + r)).toNNReal with hKdef
+  have hKcoe : (K : ℝ) = ‖A‖ + 2 * ‖L‖ * (‖c‖ + r) := by
+    rw [hKdef]; exact Real.coe_toNNReal _ (by positivity)
+  have hK : K < 1 := by
+    rw [← NNReal.coe_lt_coe, hKcoe, NNReal.coe_one]; exact hcontract
+  have hlip : LipschitzOnWith K (fun u => A u + mulBilinL L u u + f)
+      (Metric.closedBall c r) := by
+    rw [lipschitzOnWith_iff_dist_le_mul]
+    intro u hu v hv
+    have hu' : ‖u‖ ≤ ‖c‖ + r := by
+      have hdc : dist u c ≤ r := Metric.mem_closedBall.mp hu
+      have hsub : ‖u‖ - ‖c‖ ≤ ‖u - c‖ := norm_sub_norm_le u c
+      rw [dist_eq_norm] at hdc; linarith
+    have hv' : ‖v‖ ≤ ‖c‖ + r := by
+      have hdc : dist v c ≤ r := Metric.mem_closedBall.mp hv
+      have hsub : ‖v‖ - ‖c‖ ≤ ‖v - c‖ := norm_sub_norm_le v c
+      rw [dist_eq_norm] at hdc; linarith
+    have huv : ‖u‖ + ‖v‖ ≤ 2 * (‖c‖ + r) := by linarith
+    rw [dist_eq_norm, dist_eq_norm, hKcoe]
+    have hsplit : (A u + mulBilinL L u u + f) - (A v + mulBilinL L v v + f)
+        = A (u - v) + (mulBilinL L u u - mulBilinL L v v) := by
+      rw [map_sub]; abel
+    rw [hsplit]
+    calc ‖A (u - v) + (mulBilinL L u u - mulBilinL L v v)‖
+        ≤ ‖A (u - v)‖ + ‖mulBilinL L u u - mulBilinL L v v‖ := norm_add_le _ _
+      _ ≤ ‖A‖ * ‖u - v‖ + ‖L‖ * (‖u‖ + ‖v‖) * ‖u - v‖ :=
+          add_le_add (A.le_opNorm _) (norm_mulBilinL_diag_sub_le L u v)
+      _ ≤ ‖A‖ * ‖u - v‖ + ‖L‖ * (2 * (‖c‖ + r)) * ‖u - v‖ := by gcongr
+      _ = (‖A‖ + 2 * ‖L‖ * (‖c‖ + r)) * ‖u - v‖ := by ring
+  exact exists_fixedPoint_of_lipschitzOnWith_closedBall hr hK hlip hmaps
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
