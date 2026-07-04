@@ -665,4 +665,27 @@ theorem timeDependent_flow_injective {E H M : Type*} [NormedAddCommGroup E]
   have h0 := heq h0mem
   simpa [hanchor] using h0
 
+/-- **Bundled injective time-dependent flow on a compact manifold.** Combines
+`exists_timeDependent_flow_compact` with `timeDependent_flow_injective`: for a
+jointly-`C¹` time-dependent field `X` on a compact boundaryless T2 manifold there is a
+uniform `ε > 0` and an anchored flow `Φ` (`Φ 0 = id`) whose orbits `τ ↦ Φ τ x` solve
+the field's ODE on `Ioo (-ε) ε` and whose every time-`t` slice `x ↦ Φ t x` is
+injective. This is the compact-manifold time-dependent local flow with injective
+time-slices — the existence-plus-injectivity (diffeomorphism-onto-image) datum the
+compact-manifold gauge flow of Item 2 consumes for its forward family `F`. -/
+theorem exists_timeDependent_flow_compact_injective {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∃ Φ : ℝ → M → M, (∀ x, Φ 0 x = x) ∧
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+        (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) ∧
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.Injective (Φ t)) := by
+  obtain ⟨ε, hε, Φ, hanchor, hflow⟩ := exists_timeDependent_flow_compact hX
+  exact ⟨ε, hε, Φ, hanchor, hflow,
+    fun t ht => timeDependent_flow_injective hX hε hanchor hflow ht⟩
+
 end PoincareCurvature.ManifoldFlow
