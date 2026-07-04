@@ -8885,6 +8885,31 @@ theorem parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction {X E : Type*} [Pseudo
   rw [inv_mul_eq_div, le_div_iff₀ h1q]
   nlinarith [hkey]
 
+/-- **Short-time parabolic solution operator (invariant-ball form).**  Packaging
+`exists_parabolicC0AlphaOn_fixedPt_of_contraction` with the a-priori residual bound
+`parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction`: a class-preserving `q`-contraction `T`
+(`0 ≤ q < 1`) on the parabolic `C^{0,α}` space has a fixed point `g` on `s` that is unique on `s`
+*and* lies in the explicit ball `‖g − u₀‖ ≤ (1−q)⁻¹·‖T u₀ − u₀‖` around any chosen starting function
+`u₀`.  This is the bundled chart-closure datum the Ricci–DeTurck short-time existence consumes once
+its right-hand side is exhibited as such a contraction. -/
+theorem exists_parabolicC0AlphaOn_fixedPt_ball_of_contraction {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [CompleteSpace E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T : (ℝ × X → E) → (ℝ × X → E)} {u₀ : ℝ × X → E}
+    (hq0 : 0 ≤ q) (hq1 : q < 1)
+    (hu₀ : ParabolicC0AlphaOn α u₀ s)
+    (hTmaps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T u) s)
+    (hTcontr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T u z - T v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    ∃ g, ParabolicC0AlphaOn α g s ∧ Set.EqOn (T g) g s ∧
+      (∀ w, ParabolicC0AlphaOn α w s → Set.EqOn (T w) w s → Set.EqOn w g s) ∧
+      parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+        ≤ (1 - q)⁻¹ * parabolicC0AlphaNorm α (fun z => T u₀ z - u₀ z) s := by
+  obtain ⟨g, hg, hfix, huniq⟩ :=
+    exists_parabolicC0AlphaOn_fixedPt_of_contraction hq0 hq1 hu₀ hTmaps hTcontr
+  exact ⟨g, hg, hfix, huniq,
+    parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction hq1 hg hu₀ hfix hTmaps hTcontr⟩
+
 end AnalyticPDE
 end RicciFlow
 
