@@ -160,5 +160,66 @@ theorem parabolicHolderSeminorm_interpolation_absorb_le
   · exact parabolicHolderWith_interpolation_absorb (parabolicSupNorm_nonneg u s)
       (parabolicHolderSeminorm_nonneg α u s) hθ0 hθ1 hκ hbdd hhol
 
+/-- **Short-time smallness of the intermediate Hölder seminorm.**  If `u` is parabolic `α`-Hölder on
+`s`, every time-coordinate of `s` lies within `T` of the initial time `t₀`, `s` is closed under
+dropping to the initial-time slice, and `u` vanishes on that slice, then for every weight
+`0 ≤ θ ≤ 1` the intermediate `α · θ`-Hölder seminorm is a *small* multiple of the leading
+`α`-seminorm:
+
+  `[u]_{α θ} ≤ 2^{1−θ} · (√T)^{α (1−θ)} · [u]_α`.
+
+Since `(√T)^{α (1−θ)} = T^{α (1−θ)/2} → 0` as the slab thickness `T → 0`, the intermediate seminorm
+is dominated by an arbitrarily small fraction of the top seminorm on a thin time-slab — the
+mechanism by which the Ricci–DeTurck solution map contracts in the *intermediate* seminorms too, not
+merely the sup norm.  Obtained by feeding the initial-vanishing sup bound
+`parabolicSupNorm ≤ [u]_α · (√T)^α` into the multiplicative interpolation
+`parabolicHolderSeminorm_interpolation_le`. -/
+theorem parabolicHolderSeminorm_interpolation_short_time_le
+    {α θ T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicHolderSeminorm (α * θ) u s
+      ≤ 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)) * parabolicHolderSeminorm α u s := by
+  have hH0 : 0 ≤ parabolicHolderSeminorm α u s := parabolicHolderSeminorm_nonneg α u s
+  have hsqrt0 : 0 ≤ Real.sqrt T := Real.sqrt_nonneg T
+  have hrpow0 : 0 ≤ Real.sqrt T ^ α := Real.rpow_nonneg hsqrt0 α
+  have hne : (1 - θ) + θ ≠ 0 := by rw [show (1 - θ) + θ = 1 by ring]; norm_num
+  have hhol : ParabolicHolderWith (parabolicHolderSeminorm α u s) α u s :=
+    parabolicHolderWith_parabolicHolderSeminorm hu
+  have hbdd : ParabolicBoundedWith (parabolicHolderSeminorm α u s * Real.sqrt T ^ α) u s := by
+    rintro ⟨t, x⟩ hp
+    have hp0 : (t₀, x) ∈ s := hcyl (t, x) hp
+    exact norm_le_of_parabolicHolderWith_of_initial_zero hH0 hα hhol hp hp0
+      (hu0 x hp0) (hslab (t, x) hp)
+  have hCOA : ParabolicC0AlphaOn α u s :=
+    ⟨parabolicHolderSeminorm α u s * Real.sqrt T ^ α, mul_nonneg hH0 hrpow0,
+      parabolicHolderSeminorm α u s, hH0, hbdd, hhol⟩
+  have hst : parabolicSupNorm u s ≤ parabolicHolderSeminorm α u s * Real.sqrt T ^ α :=
+    parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero hα hu hslab hcyl hu0
+  have hinterp := parabolicHolderSeminorm_interpolation_le hθ0 hθ1 hCOA
+  refine hinterp.trans ?_
+  have e1 : (2 * (parabolicHolderSeminorm α u s * Real.sqrt T ^ α)) ^ (1 - θ)
+      = 2 ^ (1 - θ) * parabolicHolderSeminorm α u s ^ (1 - θ)
+        * Real.sqrt T ^ (α * (1 - θ)) := by
+    rw [Real.mul_rpow (by norm_num) (mul_nonneg hH0 hrpow0), Real.mul_rpow hH0 hrpow0,
+        ← Real.rpow_mul hsqrt0]
+    ring
+  have e2 : parabolicHolderSeminorm α u s ^ (1 - θ) * parabolicHolderSeminorm α u s ^ θ
+      = parabolicHolderSeminorm α u s := by
+    rw [← Real.rpow_add' hH0 hne, show (1 - θ) + θ = 1 by ring, Real.rpow_one]
+  calc (2 * parabolicSupNorm u s) ^ (1 - θ) * parabolicHolderSeminorm α u s ^ θ
+      ≤ (2 * (parabolicHolderSeminorm α u s * Real.sqrt T ^ α)) ^ (1 - θ)
+          * parabolicHolderSeminorm α u s ^ θ := by
+        apply mul_le_mul_of_nonneg_right
+          (Real.rpow_le_rpow (by have := parabolicSupNorm_nonneg u s; linarith)
+            (by linarith [hst]) (by linarith)) (Real.rpow_nonneg hH0 θ)
+    _ = 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ))
+          * (parabolicHolderSeminorm α u s ^ (1 - θ) * parabolicHolderSeminorm α u s ^ θ) := by
+        rw [e1]; ring
+    _ = 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)) * parabolicHolderSeminorm α u s := by rw [e2]
+
 end AnalyticPDE
 end RicciFlow
