@@ -6649,3 +6649,61 @@ into this compact-manifold flow) and the **mutual spatial inverse** `G t` (the t
 time-dependent flow giving surjectivity, whose forward existence pieces — uniform time-dependent
 existence and anchored uniqueness — are now in place), then `gaugeFlow_of_inverse_flow` closes Item 2;
 plus the Item 1 tensor time-derivative chain rule and the Item 3 parabolic Schauder a-priori estimates.
+
+Update — **the compact-manifold time-dependent flow's slices are now proved bijective, with
+a concrete mutually-inverse family — the diffeomorphism-onto-image / `G t`-inverse content
+`gaugeFlow_of_inverse_flow` consumes on the window is closed**, extending
+`GaugeReduction/ManifoldFlowExistence.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; a pure manifold-topology + integral-curve
+development, no PDE content, nothing touching the heavy gauge files).  The previous milestone
+supplied forward existence, **injectivity** (`timeDependent_flow_injective`), and canonicity
+(`timeDependent_flow_unique`) of the time-slice maps `x ↦ Φ t x`, but **surjectivity** — the
+other half of "diffeomorphism onto image" — is *not* automatic on a compact manifold from
+injectivity + continuity (that would need invariance of domain); it requires a genuine backward
+flow (an integral curve of `X` run from time `t` *back* to time `0`), whose lifespan must be
+reconciled with the forward lifespan.  This session closes exactly that gap:
+
+* `autonomous_fst_eq_add` — the **affine first-coordinate law** generalising `autonomous_fst_eq_id`
+  to any anchor time: an autonomous integral curve `Γ` of `(1, X)` on a preconnected open `s ∋ 0`
+  with `(Γ 0).1 = t₀` has `(Γ t).1 = t₀ + t` throughout (the first coordinate has constant
+  derivative `1`, so it is `t ↦ t₀ + t`).  This lets a curve *anchored at time `t₀`* be recognised,
+  after the shift `σ ↦ σ - t₀`, as a genuine time-dependent integral curve.
+* `exists_uniform_timeDependent_integralCurve_anchored` — **anchored-anywhere existence over a
+  compact time-slab**: for any `r > 0`, a single uniform lifespan `δ > 0` such that *every* start
+  time `t₀ ∈ [-r, r]` and *every* point `y` admit a time-dependent integral curve of `X` on
+  `Ioo (t₀ - δ) (t₀ + δ)` with `γ t₀ = y`.  Proved by taking the uniform lifespan of the
+  autonomization `(1, X)` over the compact **slab** `Icc (-r) r ×ˢ univ ⊆ ℝ × M`
+  (`exists_uniform_time_of_nhds_uniform_on_compact`, previously used only over the `{0} × M` slice)
+  and time-shifting the autonomous curve anchored at `(t₀, y)` by `σ ↦ σ - t₀`
+  (`IsMIntegralCurveOn.comp_add`), whose first coordinate then tracks the parameter by
+  `autonomous_fst_eq_add`, so it descends via `isTimeDependentIntegralCurve_of_autonomous`.  The
+  slab (not a single slice) is what supplies a lifespan `δ` uniform over the *start times*, the
+  crux of the backward-lifespan reconciliation.
+* `timeDependent_flow_surjective` — **surjectivity of every time-slice** `x ↦ Φ t x` (`|t| < min ε₁ δ`):
+  run the backward curve from `(t, y)` to time `0`, landing at `x`; then `Φ · x` and that backward
+  curve are two time-dependent integral curves agreeing at time `0`, so by uniqueness
+  (`timeDependent_integralCurve_eqOn_of_eq`, restricted to a common sub-interval `Ioo a b ∋ 0, t`
+  via `HasMFDerivWithinAt.mono`) they agree at `t`, giving `Φ t x = y`.
+* `exists_timeDependent_flow_compact_bijective` — the bundled **uniform `ε > 0` anchored flow with
+  every slice bijective**: reconciles the forward lifespan `ε₁` (`exists_timeDependent_flow_compact`)
+  and the slab lifespan `δ` (the anchored existence, with `r := ε₁`) by `ε := min ε₁ δ`; combines the
+  existing injectivity with the new surjectivity.  With `timeDependent_flow_unique` this exhibits the
+  compact-manifold local flow as a *canonically determined family of bijections*.
+* `exists_timeDependent_flow_compact_inverse` — the **concrete mutually-inverse `F := Φ`, `G` datum**:
+  the explicit inverse family `G t := Function.invFun (Φ t)`, both anchored at the identity
+  (`Φ 0 = G 0 = id`), the forward orbits solving the gauge ODE on `Ioo (-ε) ε`, and `G t` a genuine
+  two-sided inverse of the bijection `Φ t` on every window time (`Function.leftInverse_invFun` /
+  `rightInverse_invFun`).  This is exactly the `hleft`/`hright` mutually-inverse time-slice datum
+  `GaugeFlowAssembly.gaugeFlow_of_inverse_flow` consumes (on the window; needs `[Nonempty M]`).
+
+Reading the adapter `GaugeFlowAssembly.gaugeFlow_of_inverse_flow` confirms its `F`, `G` are the
+*spatial* inverse per slice (**not** a backward time-flow), consumed as `LeftInverse`/`RightInverse`
++ `ContMDiff I I 3` + anchoring + the within-set manifold ODE.  With this milestone the
+mutual-inverse, anchoring, and ODE-derivative data are all in hand on the window; the **single
+remaining Item-2 analytic obligation is the spatial `C³` regularity** `hF`/`hG` of the slice maps
+(the `C¹ → C³` bootstrap transported chart-by-chart from `SmoothDependenceCk`/`SmoothDependenceManifold`,
+whose model-`E`-chart `C³` smooth dependence is already proved), plus the global-`ℝ` extension of the
+windowed `F`/`G` the adapter's `∀ t` hypotheses want.  Remaining for Point 4 (future sessions):
+unchanged in scope — that spatial-`C³` regularity + global extension for Item 2, the Item 1 tensor
+time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file), and the Item 3
+parabolic Schauder a-priori estimates.
