@@ -7028,3 +7028,47 @@ fields `hcompat`/`hcurry` (`curry2` in `SmoothDependenceCk.lean`).
 statable) and the compatibility identities `hcompat : fderiv ℝ (fderiv ℝ (v s)) ξ = curry2
 (iteratedFDeriv ℝ 2 (v s) ξ)` and `hcurry`, to assemble `contMDiff_three_flow_apply_of_contDiff` — the
 `C^{3,1}` jet the model-manifold `C³` gauge flow consumes.
+
+Update — **layer-3 `C³` `ContDiff → field-jet` bridge is now proved (`contMDiff_three_flow_apply_of_contDiff`)**
+in `AnalyticPDE/FieldJetContDiff.lean` (all axiom-clean `propext`/`Classical.choice`/`Quot.sound`; full
+library green, `scripts/point4_scan.py cheats` = `TOTAL 0`).  This completes the previously-stated "next
+target": the `C^{3,1}` field jet the model-manifold `C³` gauge flow consumes is now extracted from a
+*single* joint-`ContDiff ℝ n (uncurry v)` hypothesis (`3 ≤ n`).  This session adds, on the unconditional
+Item-2 critical path:
+
+* `fderiv_fderiv_eq_curry2_iteratedFDeriv_two` (`hcompat`) and `fderiv_iteratedFDeriv_two_eq_curryLeft`
+  (`hcurry`) — the two multilinear compatibility identities, both **unconditional** (no smoothness
+  hypothesis): the first bridges the nested-`fderiv` second derivative to `curry2 (iteratedFDeriv ℝ 2 …)`
+  via `curry2_apply` + `iteratedFDeriv_two_apply`; the second is the definitional `fderiv_iteratedFDeriv`
+  (the currying equiv is `ContinuousMultilinearMap.curryLeft`).
+* `contDiff_uncurry_iteratedFDeriv_of_contDiff_uncurry` — the **multilinear field-jet joint-`ContDiff`
+  recursion**: `(t, x) ↦ iteratedFDeriv ℝ k (v t) x` is jointly `ContDiff ℝ m` for `m + k ≤ n`, by
+  induction on `k` rewriting `iteratedFDeriv ℝ (k+1)` as the left-currying isometry of
+  `fderiv ℝ (iteratedFDeriv ℝ k)` (`iteratedFDeriv_succ_eq_comp_left`) and applying the codomain-general
+  layer-1 derivative-field recursion `contDiff_uncurry_fderiv_of_contDiff_uncurry'` to the `k`-th jet.
+  (Plumbing note: `ContDiff.comp` with `LinearIsometryEquiv.contDiff`/`ContinuousLinearEquiv.contDiff`
+  of the multilinear curry equiv `whnf`-times-out or hits a Seminormed/Normed instance diamond; `fun_prop`
+  discharges the post-composition robustly — the reliable incantation for composing `ContDiff` with a
+  curry isometry.)
+* `hasFDerivAt_fderiv_iteratedFDeriv_two_of_contDiff_uncurry` (`hD3vm`),
+  `continuous_fderiv_iteratedFDeriv_two_of_contDiff_uncurry` (`hD3vmc`), and
+  `continuous_iteratedFDeriv_three_of_contDiff_uncurry` (`hD3vc`) — the multilinear second/third jet
+  `HasFDerivAt`/joint-continuity inputs, from `ContDiff.iteratedFDeriv_right` (single slice) and the
+  recursion + the codomain-general layer-1 continuity lemma.
+* `contMDiff_three_flow_apply_of_contDiff` and `contMDiff_three_flow_apply_of_contDiff_of_bddDerivs` — the
+  `C³` bridges themselves, feeding all the above plus the assumed top-order Lipschitz controls
+  (`hDvlip`/`hD2vclip`/`hD2vmlip`/`hD3vmlip`/`hD3vlip`, supplied directly, as expressing them as
+  fourth-derivative bounds would need a further multilinear jet) into the tower's
+  `contMDiff_three_flow_apply_of_lipschitz_thirdDeriv`.  The `_of_bddDerivs` form additionally discharges
+  `hv`/`hvc` from a first-derivative bound.
+
+**Formulation note (unchanged, re-confirmed).** The Item-3 chart route stays parabolic-Schauder-blocked
+for a general initial metric: `hgeom` (`A = intrinsicRicciDeTurckRHS` on the positive-definite locus)
+cannot hold for a `C⁰`-bounded `A`, and the empty / rank-`≤1` closures already exist directly
+(`intrinsicLocalExistenceUniquenessFamily_of_isEmpty`,
+`intrinsicLocalExistenceUniquenessFamily_of_finrank_model_le_one`).  So this session advanced the
+**unconditional Item-2** leg instead.  **Next target.** Wire `contMDiff_three_flow_apply_of_contDiff`
+(equivalently `exists_flow_contMDiff_three_gaugeData`) into the compact-manifold gauge-flow existence
+(`GaugeReduction/Diffeomorph3FlowExistence.lean` via the model bridge in `ModelGaugeFlowODE.lean` and
+`GaugeFlowAssembly.gaugeFlow_of_inverse_flow`), discharging Item-2's spatial-`C³` flow-slice regularity
+input from a `ContDiff` field of the DeTurck gauge vector field.
