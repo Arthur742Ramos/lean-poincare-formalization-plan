@@ -6480,3 +6480,53 @@ chain rule `B(τ)(y(τ))(a(τ))(b(τ))` — the base point `y(τ)`, and the two 
 leg (`∂_t g`, spatial `∂` of `g.inner`) and the scalar assembly in the heavy tensor file.  Remaining
 for Point 4 (future sessions): unchanged in scope — the general-manifold gauge-flow lift (Item 2), the
 Item 1 metric-leg + scalar-assembly, and the Item 3 parabolic Schauder a-priori estimates.
+
+Update — **the parabolic short-time-smallness a-priori layer is now proved** in
+`AnalyticPDE/ParabolicHolder.lean` (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), the
+"operator norm bounded by the time-interval length" content the Ricci–DeTurck / parabolic Schauder
+fixed point contracts on.  The parabolic distance from `(t, x)` to the initial-time point `(t₀, x)` is
+`√|t − t₀|`, so a function that vanishes at the initial time is uniformly small on a thin time-slab —
+this is the mechanism that makes the DeTurck solution map a short-time contraction.  Thirteen new
+theorems, in four coherent groups:
+
+* **Short-time smallness from initial vanishing.**  `norm_le_of_parabolicHolderWith_of_initial_zero`
+  (pointwise `‖u (t, x)‖ ≤ C · (√T)^α` from a Hölder constant `C`, initial vanishing `u (t₀, x) = 0`,
+  and `|t − t₀| ≤ T`); `parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero`
+  (`‖u‖_{C⁰} ≤ [u]_α · (√T)^α` on a slab-`+`-initial-cylinder set, `→ 0` as `T → 0`);
+  `parabolicC0AlphaNorm_le_holderSeminorm_mul_of_initial_zero`
+  (`‖u‖_{C^{0,α}} ≤ ((√T)^α + 1) · [u]_α`, full-norm control by the seminorm alone);
+  `sqrt_rpow_eq_rpow_half` (`(√T)^α = T^{α/2}`) and
+  `parabolicSupNorm_le_holderSeminorm_mul_rpow_of_initial_zero` (the explicit `T^{α/2}` power-of-slab
+  form).
+* **Affine (non-vanishing) initial data.**  `norm_le_of_parabolicHolderWith_of_initial_le`,
+  `parabolicSupNorm_le_add_holderSeminorm_mul_of_initial_le`
+  (`‖u‖_{C⁰} ≤ M₀ + [u]_α · (√T)^α`) and
+  `parabolicC0AlphaNorm_le_add_holderSeminorm_mul_of_initial_le`
+  (`‖u‖_{C^{0,α}} ≤ M₀ + ((√T)^α + 1) · [u]_α`): the estimates in the honest form the iteration with a
+  *prescribed* (bounded-by-`M₀`, not zero) initial condition consumes; splitting
+  `u (t, x) = (u (t, x) − u (t₀, x)) + u (t₀, x)`.  `M₀ = 0` recovers the vanishing case.
+* **Space/time decomposition of parabolic Hölder regularity.**
+  `norm_sub_le_of_parabolicHolderWith_same_time` (spatial `α`-Hölder projection at fixed time,
+  `‖u (t, x) − u (t, y)‖ ≤ C · dist x y ^ α`), `norm_sub_le_of_parabolicHolderWith_same_space`
+  (temporal `α/2`-Hölder projection at fixed space, `‖u (t, x) − u (τ, x)‖ ≤ C · |t − τ|^{α/2}`), and
+  `parabolicHolderWith_of_forall_same_time_same_space` (the reconstruction: separate spatial-`α` +
+  temporal-`α/2` control on a set closed under mixing coordinates — a parabolic cylinder — reassemble
+  into parabolic `α`-Hölder control with constant `Hs + Ht`, via the intermediate point `(p.1, q.2)`).
+  The structural characterisation of parabolic Hölder spaces the Schauder theory rests on.
+* **Short-time smallness in the full `C^{0,α}` (Banach) norm.**
+  `parabolicSupNorm_le_parabolicC0AlphaNorm_mul_of_initial_zero`
+  (`‖u‖_{C⁰} ≤ ‖u‖_{C^{0,α}} · (√T)^α` for initial-vanishing `u` — honest operator smallness on the
+  parabolic Banach space) and its contraction form
+  `parabolicSupNorm_sub_le_parabolicC0AlphaNorm_mul_of_initial_agree`
+  (`‖u − v‖_{C⁰} ≤ ‖u − v‖_{C^{0,α}} · (√T)^α` when `u`, `v` agree at the initial time): the solution
+  map has `C⁰`-operator norm `≤ (√T)^α → 0` on the fibre over a fixed initial condition — the
+  short-time contraction giving uniqueness / short-time existence of the DeTurck fixed point.
+
+Remaining for Point 4 (future sessions): the remaining genuine parabolic **Schauder interior/global
+a-priori estimate** (bounding the full `C^{0,α}` norm of the solution by the data — the heat-kernel
+Schauder content) and the assembly of the concrete Ricci–DeTurck RHS operator on the parabolic Banach
+chart from `mulCoeffL`/`compL`/`precompL`/`constL` with these short-time-smallness factors (Item 3);
+the **general-manifold** gauge-flow lift (Item 2, heavy gauge files — the `C³` initial-data-dependence
+input `exists_flow_contDiff_three_diffeomorph` and the model-manifold gauge-flow core
+`exists_diffeomorph3GaugeFlowOn_of_field_jet` are now available); and the Item 1 tensor
+time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file).
