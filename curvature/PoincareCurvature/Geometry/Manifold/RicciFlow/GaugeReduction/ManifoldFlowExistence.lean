@@ -688,4 +688,30 @@ theorem exists_timeDependent_flow_compact_injective {E H M : Type*} [NormedAddCo
   exact ⟨ε, hε, Φ, hanchor, hflow,
     fun t ht => timeDependent_flow_injective hX hε hanchor hflow ht⟩
 
+/-- **Uniqueness (canonicity) of the anchored time-dependent flow.** For a jointly-`C¹`
+time-dependent field `X` on a boundaryless T2 manifold, any two flows `Φ`, `Φ'` that are
+anchored (`Φ 0 = Φ' 0 = id`) with orbits solving the field's ODE on `Ioo (-ε) ε` agree
+on `Ioo (-ε) ε`: for every `x` the two orbits agree at `0`, hence everywhere by
+`timeDependent_integralCurve_eqOn_of_eq`. Together with existence and injectivity this
+makes the compact-manifold local flow a *canonically determined* family of injections. -/
+theorem timeDependent_flow_unique {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ε : ℝ} (hε : 0 < ε) {Φ Φ' : ℝ → M → M}
+    (hanchor : ∀ x, Φ 0 x = x) (hanchor' : ∀ x, Φ' 0 x = x)
+    (hflow : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+      (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    (hflow' : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ' τ x)
+      (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ' t x))))
+    {t : ℝ} (ht : t ∈ Set.Ioo (-ε) ε) (x : M) :
+    Φ t x = Φ' t x := by
+  have h0mem : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_neg_of_pos hε, hε⟩
+  have h0 : (fun τ => Φ τ x) 0 = (fun τ => Φ' τ x) 0 := by simp [hanchor, hanchor']
+  have heq : Set.EqOn (fun τ => Φ τ x) (fun τ => Φ' τ x) (Set.Ioo (-ε) ε) :=
+    timeDependent_integralCurve_eqOn_of_eq hX h0mem (hflow x) (hflow' x) h0
+  exact heq ht
+
 end PoincareCurvature.ManifoldFlow
