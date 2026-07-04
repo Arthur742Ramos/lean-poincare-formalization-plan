@@ -4699,5 +4699,33 @@ theorem bounded_lipschitz_evolution_exists_unique_timeDependent_Icc
    fun α β hαβ hα hβ t ht =>
      ode_solution_unique_timeDependent_Icc g K hlip t₀ T α β hαβ hα hβ t ht⟩
 
+/-- **Continuous dependence on initial data (Gronwall) on `[t₀, T]`** for a uniformly
+Lipschitz time-dependent field.  For two solutions `α`, `β` of `ẋ = g t x` on `[t₀, T]`,
+`dist (α t) (β t) ≤ dist (α t₀) (β t₀) · exp(K·(t − t₀))`.  This is the third Hadamard
+well-posedness leg (stability), completing the existence / uniqueness / continuous-dependence
+triple for the time-dependent Banach Cauchy–Lipschitz route; `ode_solution_unique_timeDependent_Icc`
+is its `dist (α t₀) (β t₀) = 0` special case. -/
+lemma ode_solution_dist_le_timeDependent_Icc {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : ℝ → E → E) (K : ℝ≥0) (hlip : ∀ t, LipschitzWith K (g t)) (t₀ T : ℝ)
+    (α β : ℝ → E)
+    (hα : ∀ t ∈ Set.Icc t₀ T, HasDerivWithinAt α (g t (α t)) (Set.Icc t₀ T) t)
+    (hβ : ∀ t ∈ Set.Icc t₀ T, HasDerivWithinAt β (g t (β t)) (Set.Icc t₀ T) t)
+    (t : ℝ) (ht : t ∈ Set.Icc t₀ T) :
+    dist (α t) (β t) ≤ dist (α t₀) (β t₀) * Real.exp ((K : ℝ) * (t - t₀)) := by
+  refine dist_le_of_trajectories_ODE (v := g) (K := K) (a := t₀) (b := T)
+    hlip ?_ ?_ ?_ ?_ le_rfl t ht
+  · exact HasDerivWithinAt.continuousOn (fun s hs => hα s hs)
+  · intro s hs
+    have hsIcc : s ∈ Set.Icc t₀ T := Set.Ico_subset_Icc_self hs
+    refine (hα s hsIcc).mono_of_mem_nhdsWithin ?_
+    exact Filter.mem_of_superset (Ico_mem_nhdsGE hs.2)
+      (fun x hx => ⟨le_trans hs.1 hx.1, le_of_lt hx.2⟩)
+  · exact HasDerivWithinAt.continuousOn (fun s hs => hβ s hs)
+  · intro s hs
+    have hsIcc : s ∈ Set.Icc t₀ T := Set.Ico_subset_Icc_self hs
+    refine (hβ s hsIcc).mono_of_mem_nhdsWithin ?_
+    exact Filter.mem_of_superset (Ico_mem_nhdsGE hs.2)
+      (fun x hx => ⟨le_trans hs.1 hx.1, le_of_lt hx.2⟩)
+
 end AnalyticPDE
 end RicciFlow
