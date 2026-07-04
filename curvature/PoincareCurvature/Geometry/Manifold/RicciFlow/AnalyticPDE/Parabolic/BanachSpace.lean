@@ -56,6 +56,83 @@ theorem parabolicC0AlphaNorm_mono_domain {u : ℝ × X → E} {s t : Set (ℝ ×
   add_le_add (parabolicSupNorm_mono_domain hts hu.boundedOn)
     (parabolicHolderSeminorm_mono_domain hts hu.holderOn)
 
+/-! ### Precomposition (change-of-variables) norm bounds
+
+The operator underlying gluing across overlapping charts, the DeTurck gauge-diffeomorphism action,
+and parabolic Schauder scaling is precomposition `u ↦ u ∘ φ` by a map `φ : ℝ × Y → ℝ × X` of the
+space-time base.  The three lemmas below control the parabolic `C^{0,α}` norm of `u ∘ φ` when `φ`
+maps `t` into `s` and expands parabolic distance by at most a factor `L`.  They are the norm-level
+core the bounded precomposition operator `precompL` is built on (generalising `restrictL`, which is
+the special case `φ = ` inclusion, `L = 1`). -/
+
+/-- **Precomposition does not increase the parabolic sup norm.**  If `φ` maps `t` into `s`, then the
+sup norm of `u ∘ φ` on `t` is at most the sup norm of `u` on `s`. -/
+theorem parabolicSupNorm_comp_mapsTo {Y : Type*} [PseudoMetricSpace Y] {u : ℝ × X → E}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) (hmaps : Set.MapsTo φ t s) :
+    parabolicSupNorm (fun p => u (φ p)) t ≤ parabolicSupNorm u s := by
+  refine parabolicSupNorm_le (parabolicSupNorm_nonneg u s) ?_
+  intro p hp
+  exact (parabolicBoundedWith_parabolicSupNorm hu) (hmaps hp)
+
+/-- **Precomposition scales the parabolic Hölder seminorm by `L ^ α`.**  If `φ` maps `t` into `s`
+and `parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q`, then the Hölder seminorm of
+`u ∘ φ` on `t` is at most `L ^ α` times the Hölder seminorm of `u` on `s`. -/
+theorem parabolicHolderSeminorm_comp_parabolicDistanceLe {Y : Type*} [PseudoMetricSpace Y]
+    {L : ℝ} {u : ℝ × X → E} {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicHolderOn α u s) (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    parabolicHolderSeminorm α (fun p => u (φ p)) t
+      ≤ L ^ α * parabolicHolderSeminorm α u s := by
+  have hbase : ParabolicHolderWith (parabolicHolderSeminorm α u s) α u s :=
+    parabolicHolderWith_parabolicHolderSeminorm hu
+  have hcomp : ParabolicHolderWith (parabolicHolderSeminorm α u s * L ^ α) α
+      (fun p => u (φ p)) t :=
+    hbase.comp_parabolicDistanceLe (parabolicHolderSeminorm_nonneg α u s) hα hL hmaps hφ
+  have hle : parabolicHolderSeminorm α (fun p => u (φ p)) t
+      ≤ parabolicHolderSeminorm α u s * L ^ α :=
+    parabolicHolderSeminorm_le
+      (mul_nonneg (parabolicHolderSeminorm_nonneg α u s) (Real.rpow_nonneg hL α)) hcomp
+  exact hle.trans_eq (mul_comm _ _)
+
+/-- **The parabolic `C^{0,α}` norm of a precomposition.**  Combining the sup and Hölder bounds:
+`‖u ∘ φ‖_{C^{0,α}(t)} ≤ max 1 (L ^ α) · ‖u‖_{C^{0,α}(s)}` when `φ` maps `t` into `s` and expands
+parabolic distance by at most `L`.  For a parabolic-nonexpanding change of variables (`L ≤ 1`,
+`0 ≤ α`) the factor is `1`, so precomposition is norm-nonincreasing. -/
+theorem parabolicC0AlphaNorm_comp_parabolicDistanceLe_le {Y : Type*} [PseudoMetricSpace Y]
+    {L : ℝ} {u : ℝ × X → E} {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hu : ParabolicC0AlphaOn α u s) (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    parabolicC0AlphaNorm α (fun p => u (φ p)) t
+      ≤ max 1 (L ^ α) * parabolicC0AlphaNorm α u s := by
+  have hsup : parabolicSupNorm (fun p => u (φ p)) t ≤ parabolicSupNorm u s :=
+    parabolicSupNorm_comp_mapsTo hu.boundedOn hmaps
+  have hhol : parabolicHolderSeminorm α (fun p => u (φ p)) t
+      ≤ L ^ α * parabolicHolderSeminorm α u s :=
+    parabolicHolderSeminorm_comp_parabolicDistanceLe hu.holderOn hα hL hmaps hφ
+  have hBs : 0 ≤ parabolicSupNorm u s := parabolicSupNorm_nonneg u s
+  have hHs : 0 ≤ parabolicHolderSeminorm α u s := parabolicHolderSeminorm_nonneg α u s
+  have hmax1 : (1 : ℝ) ≤ max 1 (L ^ α) := le_max_left _ _
+  have hmaxL : L ^ α ≤ max 1 (L ^ α) := le_max_right _ _
+  have hsup' : parabolicSupNorm u s ≤ max 1 (L ^ α) * parabolicSupNorm u s := by
+    have h := mul_le_mul_of_nonneg_right hmax1 hBs
+    rwa [one_mul] at h
+  have hhol' : L ^ α * parabolicHolderSeminorm α u s
+      ≤ max 1 (L ^ α) * parabolicHolderSeminorm α u s :=
+    mul_le_mul_of_nonneg_right hmaxL hHs
+  have key : parabolicC0AlphaNorm α (fun p => u (φ p)) t
+      ≤ parabolicSupNorm u s + L ^ α * parabolicHolderSeminorm α u s :=
+    add_le_add hsup hhol
+  refine key.trans ?_
+  have hstep : parabolicSupNorm u s + L ^ α * parabolicHolderSeminorm α u s
+      ≤ max 1 (L ^ α) * parabolicSupNorm u s
+        + max 1 (L ^ α) * parabolicHolderSeminorm α u s := add_le_add hsup' hhol'
+  refine hstep.trans_eq ?_
+  unfold parabolicC0AlphaNorm
+  ring
+
 /-- **The semi-Banach carrier of the parabolic `C^{0,α}` space.**  A type synonym for
 `parabolicC0AlphaSubmodule X E α s` whose canonical topology/uniformity is the parabolic `C^{0,α}`
 seminorm one, isolating it from the ambient pointwise product topology on the underlying function
