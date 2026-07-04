@@ -1066,6 +1066,32 @@ theorem evalCLM_precompL_apply {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
   obtain ⟨u, rfl⟩ := mk_surjective x
   simp only [precompL_mk, evalCLM_mk_apply, ParabolicC0AlphaSpace.toFun_precompL]
 
+/-- **Precomposition is functorial (contravariant / cocycle law).**  Precomposing first by
+`φ : ℝ × Y → ℝ × X` (a `t → s`, `L`-expanding change of variables) and then by `ψ : ℝ × Z → ℝ × Y`
+(an `r → t`, `M`-expanding one) equals precomposition by the composite `φ ∘ ψ` (an `r → s`,
+`(L·M)`-expanding change of variables).  This is the chart-transition cocycle condition the gluing of
+local Ricci–DeTurck Banach-chart solutions across overlapping charts consumes (the precomposition
+analogue of `restrictL_comp` and `compL_comp`).  Proved through the point-separation representation. -/
+theorem precompL_comp_apply {Y Z : Type*} [PseudoMetricSpace Y] [PseudoMetricSpace Z]
+    {L M : ℝ} {φ : ℝ × Y → ℝ × X} {ψ : ℝ × Z → ℝ × Y} {t : Set (ℝ × Y)} {r : Set (ℝ × Z)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hM : 0 ≤ M)
+    (hφmaps : Set.MapsTo φ t s) (hψmaps : Set.MapsTo ψ r t)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q)
+    (hψ : ∀ ⦃p : ℝ × Z⦄, p ∈ r → ∀ ⦃q : ℝ × Z⦄, q ∈ r →
+      parabolicDistance (ψ p) (ψ q) ≤ M * parabolicDistance p q)
+    (x : ParabolicC0AlphaBanach X E α s) :
+    precompL hα hM hψmaps hψ (precompL hα hL hφmaps hφ x)
+      = precompL (X := X) (E := E) (α := α) (s := s) hα (mul_nonneg hL hM)
+          (hφmaps.comp hψmaps)
+          (fun p hp q hq =>
+            (hφ (hψmaps hp) (hψmaps hq)).trans
+              ((mul_le_mul_of_nonneg_left (hψ hp hq) hL).trans_eq (mul_assoc L M _).symm)) x := by
+  rw [eq_iff_forall_evalCLM]
+  intro w hw
+  rw [evalCLM_precompL_apply, evalCLM_precompL_apply, evalCLM_precompL_apply]
+  rfl
+
 end ParabolicC0AlphaBanach
 
 /-! ### The constant-function embedding operator
