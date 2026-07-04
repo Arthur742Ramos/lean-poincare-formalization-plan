@@ -500,5 +500,57 @@ theorem exists_shortTime_fixedPoint_ball_of_schauder_gain [CompleteSpace E]
           (fun x hx => hSinit w₁ w₂ x hx) (hSgain w₁ w₂ hw₁ hw₂))
   exact ⟨g, hg, hfix, huniq, hbound.trans_eq (by norm_num)⟩
 
+/-- **Ricci–DeTurck short-time continuous dependence, reduced to the parabolic Schauder gain.**
+The stability companion of `exists_shortTime_fixedPoint_of_schauder_gain` and
+`exists_shortTime_fixedPoint_ball_of_schauder_gain`, completing the abstract well-posedness family
+(existence, uniqueness, a-priori bound, *stability*) on the reduced-to-Schauder-gain route.
+
+Given two solution maps `S₁`, `S₂` on the parabolic `C^{0,α θ}` class over a slab `s` anchored at the
+initial time `t₀` (closed under dropping to the initial slice), where `S₁` self-maps (`hS₁maps`),
+preserves initial data (`hS₁init`), has `α`-Hölder output differences (`hS₁holder`) and satisfies the
+parabolic Schauder gain (`hS₁gain`) — so that on a thin enough slab it is a `½`-contraction — and `S₂`
+self-maps (`hS₂maps`), the respective fixed points `g₁ = S₁ g₁`, `g₂ = S₂ g₂` obey the
+continuous-dependence bound
+
+  `‖g₁ − g₂‖_{C^{0,α θ}} ≤ 2 · ‖S₁ g₂ − S₂ g₂‖_{C^{0,α θ}}`
+
+on every slab of thickness `T ≤ T₀`.  Two solution operators agreeing at their common fixed locus
+have identical short-time solutions (recovering uniqueness), and nearby operators have nearby
+solutions — the Hadamard continuous-dependence leg for the Ricci–DeTurck short-time flow, obtained by
+feeding the thin-slab `½`-contraction of `S₁`
+(`exists_thickness_solutionMap_contraction_of_schauder_gain`, `q = ½`) into the two-map fixed-point
+stability bound `parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction`
+(constant `(1 − ½)⁻¹ = 2`). -/
+theorem exists_shortTime_fixedPoint_stability_of_schauder_gain [CompleteSpace E]
+    {α θ C : ℝ} (hα : 0 < α) (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) (hC : 0 ≤ C) :
+    ∃ T₀ > 0, ∀ {T t₀ : ℝ} {s : Set (ℝ × X)}
+        {S₁ S₂ : (ℝ × X → E) → (ℝ × X → E)} {g₁ g₂ : ℝ × X → E},
+      0 ≤ T → T ≤ T₀ →
+      (∀ p ∈ s, |p.1 - t₀| ≤ T) →
+      (∀ p ∈ s, (t₀, p.2) ∈ s) →
+      (∀ u, ParabolicC0AlphaOn (α * θ) u s → ParabolicC0AlphaOn (α * θ) (S₁ u) s) →
+      (∀ u, ParabolicC0AlphaOn (α * θ) u s → ParabolicC0AlphaOn (α * θ) (S₂ u) s) →
+      (∀ w₁ w₂, ParabolicC0AlphaOn (α * θ) w₁ s → ParabolicC0AlphaOn (α * θ) w₂ s →
+        ParabolicHolderOn α (fun z => S₁ w₁ z - S₁ w₂ z) s) →
+      (∀ w₁ w₂, ∀ x : X, (t₀, x) ∈ s → S₁ w₁ (t₀, x) = S₁ w₂ (t₀, x)) →
+      (∀ w₁ w₂, ParabolicC0AlphaOn (α * θ) w₁ s → ParabolicC0AlphaOn (α * θ) w₂ s →
+        parabolicHolderSeminorm α (fun z => S₁ w₁ z - S₁ w₂ z) s
+          ≤ C * parabolicC0AlphaNorm (α * θ) (fun z => w₁ z - w₂ z) s) →
+      ParabolicC0AlphaOn (α * θ) g₁ s → ParabolicC0AlphaOn (α * θ) g₂ s →
+      Set.EqOn (S₁ g₁) g₁ s → Set.EqOn (S₂ g₂) g₂ s →
+      parabolicC0AlphaNorm (α * θ) (fun z => g₁ z - g₂ z) s
+        ≤ 2 * parabolicC0AlphaNorm (α * θ) (fun z => S₁ g₂ z - S₂ g₂ z) s := by
+  obtain ⟨T₀, hT₀, hcontr⟩ :=
+    exists_thickness_solutionMap_contraction_of_schauder_gain (X := X) (E := E)
+      (q := (1 : ℝ) / 2) hα hθ0 hθ1 hC (by norm_num)
+  refine ⟨T₀, hT₀, ?_⟩
+  intro T t₀ s S₁ S₂ g₁ g₂ hT0 hTle hslab hcyl hS₁maps hS₂maps hS₁holder hS₁init hS₁gain
+    hg₁ hg₂ hg₁fix hg₂fix
+  have hbound := parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction
+    (q := (1 : ℝ) / 2) (by norm_num) hg₁ hg₂ hg₁fix hg₂fix hS₁maps hS₂maps
+    (fun u v hu hv => hcontr hT0 hTle (hS₁holder u v hu hv) hslab hcyl
+      (fun x hx => hS₁init u v x hx) (hS₁gain u v hu hv))
+  exact hbound.trans_eq (by norm_num)
+
 end AnalyticPDE
 end RicciFlow
