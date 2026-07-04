@@ -603,4 +603,66 @@ theorem exists_timeDependent_flow_compact {E H M : Type*} [NormedAddCommGroup E]
   choose γ hγ0 hγon using huniform
   exact ⟨ε, hε, fun t x => γ x t, hγ0, fun x t ht => hγon x t ht⟩
 
+/-- **Uniqueness of time-dependent integral curves anchored at any interior time.**
+For a jointly-`C¹` time-dependent field `X` on a boundaryless T2 manifold, two
+time-dependent integral curves on `Ioo a b` that agree at a *single interior time*
+`t₀ ∈ Ioo a b` agree on all of `Ioo a b`. Generalises
+`timeDependent_integralCurve_unique` (anchor `t₀ = 0`) by anchoring at an arbitrary
+interior time; proved by lifting to autonomous curves on `ℝ × M` and applying
+mathlib's autonomous uniqueness at `t₀`. Anchoring at an arbitrary time is what
+yields injectivity of each time-`t` flow map. -/
+theorem timeDependent_integralCurve_eqOn_of_eq {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {γ γ' : ℝ → M} {a b t₀ : ℝ} (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hγ : ∀ t ∈ Set.Ioo a b, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ (Set.Ioo a b) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    (hγ' : ∀ t ∈ Set.Ioo a b, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ' (Set.Ioo a b) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ' t))))
+    (h0 : γ t₀ = γ' t₀) :
+    Set.EqOn γ γ' (Set.Ioo a b) := by
+  set w : (x : ℝ × M) → TangentSpace ((𝓘(ℝ, ℝ)).prod I) x :=
+    fun p => ((1 : ℝ), X p.1 p.2) with hw
+  set Γ : ℝ → ℝ × M := fun t => (t, γ t) with hΓdef
+  set Γ' : ℝ → ℝ × M := fun t => (t, γ' t) with hΓ'def
+  have hΓint : IsMIntegralCurveOn Γ w (Set.Ioo a b) := fun t ht =>
+    autonomousLift_hasMFDerivWithinAt ht (hγ t ht)
+  have hΓ'int : IsMIntegralCurveOn Γ' w (Set.Ioo a b) := fun t ht =>
+    autonomousLift_hasMFDerivWithinAt ht (hγ' t ht)
+  have hstart : Γ t₀ = Γ' t₀ := by simp [hΓdef, hΓ'def, h0]
+  have heq : Set.EqOn Γ Γ' (Set.Ioo a b) :=
+    isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless ht₀ hX hΓint hΓ'int hstart
+  intro t ht
+  have h2 : (Γ t).2 = (Γ' t).2 := by rw [heq ht]
+  simpa [hΓdef, hΓ'def] using h2
+
+/-- **Injectivity of each time-`t` flow map.** For a jointly-`C¹` time-dependent
+field `X` on a compact boundaryless T2 manifold, if a flow `Φ` is anchored
+(`Φ 0 = id`) with every orbit `τ ↦ Φ τ x` a time-dependent integral curve of `X` on
+`Ioo (-ε) ε`, then for each `t ∈ Ioo (-ε) ε` the time-`t` map `x ↦ Φ t x` is
+injective: two orbits agreeing at time `t` agree everywhere on `Ioo (-ε) ε`, in
+particular at time `0`, where the anchor reads off the two start points. This is the
+diffeomorphism-onto-image (injectivity) half the compact-manifold gauge flow of
+Item 2 consumes. -/
+theorem timeDependent_flow_injective {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ε : ℝ} (hε : 0 < ε) {Φ : ℝ → M → M} (hanchor : ∀ x, Φ 0 x = x)
+    (hflow : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+      (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    {t : ℝ} (ht : t ∈ Set.Ioo (-ε) ε) :
+    Function.Injective (Φ t) := by
+  intro x y hxy
+  have h0mem : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_neg_of_pos hε, hε⟩
+  have heq : Set.EqOn (fun τ => Φ τ x) (fun τ => Φ τ y) (Set.Ioo (-ε) ε) :=
+    timeDependent_integralCurve_eqOn_of_eq hX ht (hflow x) (hflow y) hxy
+  have h0 := heq h0mem
+  simpa [hanchor] using h0
+
 end PoincareCurvature.ManifoldFlow
