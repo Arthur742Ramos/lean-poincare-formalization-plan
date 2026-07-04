@@ -6365,3 +6365,45 @@ the time-interval length — the hard analytic content in `AnalyticPDE/Parabolic
 assembly of the concrete RHS from `mulCoeffL`/`compL`/`precompL`/`constL` with the geometric
 coefficients (Item 3, the analytic main theorem); the **general-manifold** gauge-flow lift (Item 2,
 heavy gauge files); and the Item 1 tensor time-derivative chain rule.
+
+Update — **the manifold-level spatial pushforward (differential) of the ODE flow map is now proved on
+the model manifold `𝓘(ℝ, E)`**, extending `AnalyticPDE/SmoothDependenceManifold.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; a pure Fréchet→manifold transport, nothing touches the heavy
+gauge files).  The Banach `SmoothDependenceCk` tower proved spatial `C^k` smoothness (`ContMDiff`) of
+the time-`t` flow map `x ↦ Φ x t` and the *time* derivative of a single trajectory
+(`hasMFDerivAt_of_isIntegralCurve`), but the **pushforward** — the manifold differential (`mfderiv`) of
+the flow map itself, and its explicit value the resolvent `D_x Φ_t` — was stated only in the *Fréchet*
+(`HasFDerivAt`/`fderiv`) vocabulary.  Item 1's tensor time-derivative chain rule and Item 2's
+compact-manifold gauge-flow constructor both consume the *manifold* (`HasMFDerivAt`/`mfderiv`) form.
+
+* `hasMFDerivAt_flow_apply_of_hasFDerivAt` / `hasMFDerivWithinAt_flow_apply_of_hasFDerivAt` /
+  `mfderiv_flow_apply_of_hasFDerivAt` — the **generic pushforward bridges**: from the Fréchet spatial
+  derivative `HasFDerivAt (fun z => Φ z t) D x₀` (which the tower supplies via
+  `hasFDerivAt_flow_of_lipschitz_deriv` etc.), the time-`t` flow map has manifold differential `D`
+  (`HasMFDerivAt`/`HasMFDerivAt[s]`/`mfderiv = D`).  The spatial companion of
+  `hasMFDerivAt_of_isIntegralCurve` (`HasFDerivAt.hasMFDerivAt` / `.mfderiv`).
+* `hasMFDerivAt_flow_apply_of_lipschitz_deriv` / `mfderiv_flow_apply_of_lipschitz_deriv` — the
+  **self-contained `C^{1,1}`-jet identification**: `mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀ =
+  fundamentalSolution … = D_x Φ_t` — *the manifold pushforward is the resolvent* — transporting
+  `hasFDerivAt_flow_of_lipschitz_deriv_of_hasFDerivAt`.  (An `E →L[ℝ] E` type ascription on the
+  resolvent is essential: without it, elaborating the concrete `fundamentalSolution …` term *against*
+  the expected tangent-space CLM type eagerly triggers `NormedAddCommGroup (TangentSpace 𝓘(ℝ, E) x₀)`
+  synthesis, which fails because `TangentSpace I x := E` derives only the `AddCommGroup`/`Module`/
+  `TopologicalSpace` structure, not the normed one; the ascription forces elaboration at the Fréchet
+  type first, then the tangent-space identification is a defeq unification.)
+* `hasMFDerivAt_fundamentalSolution_apply` / `hasMFDerivWithinAt_fundamentalSolution_apply` — the
+  **manifold vector variational ODE of a pushed-forward direction** (resolvent column): the path
+  `τ ↦ D_x Φ_τ · u₀` (the pushforward of a fixed tangent vector `u₀` along the flow) has manifold
+  derivative `(1).smulRight (A t (D_x Φ_t · u₀))` for every `t` (and its `HasMFDerivAt[s]` refinement),
+  via `hasMFDerivAt_of_isIntegralCurve` ∘ `isIntegralCurve_fundamentalSolution_apply` — exactly the
+  "time-derivative of the pushforward `Φ_t · u`" datum Item 1's scalar chain rule differentiates.
+* `contMDiff_fundamentalSolution_apply_time` / `contMDiff_infty_fundamentalSolution_apply_time` — the
+  **`C^{n+1}`/`C^∞` time-regularity of the pushed-forward direction** `τ ↦ D_x Φ_τ · u₀` (manifold form
+  of `contDiff_fundamentalSolution_apply_time`, via `contMDiff_iff_contDiff`), the pushforward-leg time
+  regularity the tensor time-derivative chain rule consumes.
+
+Remaining for Point 4 (future sessions): unchanged in scope — the **general-manifold** gauge-flow lift
+(Item 2, the chart↔global patching in the heavy gauge files; the model-`E`-chart pushforward/resolvent
+data those consume is now available in the manifold vocabulary), the Item 1 tensor time-derivative
+chain rule (which now has both the pushforward `mfderiv` and its time derivative available as manifold
+data), and the Item 3 parabolic Schauder a-priori estimates.
