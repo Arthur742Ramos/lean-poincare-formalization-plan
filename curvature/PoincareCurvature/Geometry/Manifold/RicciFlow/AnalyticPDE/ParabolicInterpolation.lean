@@ -342,5 +342,71 @@ theorem exists_thickness_parabolicC0AlphaNorm_sub_interpolation_contraction
   exact mul_le_mul_of_nonneg_right (hfac T hT0 hTle)
     (parabolicHolderSeminorm_nonneg α (fun z => u z - v z) s)
 
+/-- **Short-time existence reduces to the parabolic Schauder gain (contraction form).**  Suppose a
+solution map produces, from candidate perturbations `w₁`, `w₂`, outputs `Sw₁`, `Sw₂` that
+* agree on the initial-time slice (the solution map preserves the prescribed initial data), and
+* whose difference is `α`-Hölder on the slab and satisfies the **parabolic Schauder gain**
+  `[Sw₁ − Sw₂]_α ≤ C · ‖w₁ − w₂‖_{C^{0,α θ}}`
+  (gain of regularity from the intermediate `C^{0,α θ}` input norm to the top `α`-Hölder seminorm of
+  the output — the heat-kernel content, taken here as a hypothesis).
+
+Then for `0 < α`, `0 ≤ θ < 1`, gain constant `C ≥ 0` and any target ratio `q > 0`, there is a slab
+thickness `T₀ > 0` such that on every slab of thickness `T ≤ T₀` the solution map is a genuine
+`q`-contraction **in the intermediate `C^{0,α θ}` norm** (the same exponent on both sides):
+
+  `‖Sw₁ − Sw₂‖_{C^{0,α θ}} ≤ q · ‖w₁ − w₂‖_{C^{0,α θ}}`.
+
+Composing the short-time interpolation smallness `‖Sw₁ − Sw₂‖_{α θ} ≤ factor(T) · [Sw₁ − Sw₂]_α`
+(`parabolicC0AlphaNorm_sub_interpolation_short_time_le`, whose factor `→ 0`) with the gain and choosing
+`T₀` so that `factor(T) · C ≤ q` (`exists_thickness_shortTimeInterpFactor_le` with target
+`q / (C + 1)`).  Taking `q < 1` exhibits the solution map as a strict contraction on the complete
+parabolic `C^{0,α θ}` space — the exact input to `exists_parabolicC0AlphaOn_fixedPt_of_contraction` —
+reducing Ricci–DeTurck short-time existence to the single Schauder gain estimate. -/
+theorem exists_thickness_solutionMap_contraction_of_schauder_gain
+    {α θ C q : ℝ} (hα : 0 < α) (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) (hC : 0 ≤ C) (hq : 0 < q) :
+    ∃ T₀ > 0, ∀ {T t₀ : ℝ} {w₁ w₂ Sw₁ Sw₂ : ℝ × X → E} {s : Set (ℝ × X)},
+      0 ≤ T → T ≤ T₀ →
+      ParabolicHolderOn α (fun z => Sw₁ z - Sw₂ z) s →
+      (∀ p ∈ s, |p.1 - t₀| ≤ T) →
+      (∀ p ∈ s, (t₀, p.2) ∈ s) →
+      (∀ x : X, (t₀, x) ∈ s → Sw₁ (t₀, x) = Sw₂ (t₀, x)) →
+      parabolicHolderSeminorm α (fun z => Sw₁ z - Sw₂ z) s
+        ≤ C * parabolicC0AlphaNorm (α * θ) (fun z => w₁ z - w₂ z) s →
+      parabolicC0AlphaNorm (α * θ) (fun z => Sw₁ z - Sw₂ z) s
+        ≤ q * parabolicC0AlphaNorm (α * θ) (fun z => w₁ z - w₂ z) s := by
+  have hCp : (0 : ℝ) < C + 1 := by linarith
+  have hCne : (C : ℝ) + 1 ≠ 0 := ne_of_gt hCp
+  obtain ⟨T₀, hT₀, hfac⟩ :=
+    exists_thickness_shortTimeInterpFactor_le hα hθ1 (div_pos hq hCp)
+  refine ⟨T₀, hT₀, ?_⟩
+  intro T t₀ w₁ w₂ Sw₁ Sw₂ s hT0 hTle hdiff hslab hcyl hagree hgain
+  have hfac_nonneg :
+      (0 : ℝ) ≤ Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)) :=
+    add_nonneg (Real.rpow_nonneg (Real.sqrt_nonneg T) α)
+      (mul_nonneg (Real.rpow_nonneg (by norm_num) _)
+        (Real.rpow_nonneg (Real.sqrt_nonneg T) _))
+  have hfacC :
+      (Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ))) * C ≤ q := by
+    have h1 := mul_le_mul_of_nonneg_right (hfac T hT0 hTle) hC
+    have h2 : q / (C + 1) * C ≤ q := by
+      have hq1 : (0 : ℝ) ≤ q / (C + 1) := by positivity
+      calc q / (C + 1) * C ≤ q / (C + 1) * (C + 1) :=
+            mul_le_mul_of_nonneg_left (by linarith) hq1
+        _ = q := by field_simp
+    exact h1.trans h2
+  calc parabolicC0AlphaNorm (α * θ) (fun z => Sw₁ z - Sw₂ z) s
+      ≤ (Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)))
+          * parabolicHolderSeminorm α (fun z => Sw₁ z - Sw₂ z) s :=
+        parabolicC0AlphaNorm_sub_interpolation_short_time_le hα.le hθ0 hθ1.le
+          hdiff hslab hcyl hagree
+    _ ≤ (Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ)))
+          * (C * parabolicC0AlphaNorm (α * θ) (fun z => w₁ z - w₂ z) s) :=
+        mul_le_mul_of_nonneg_left hgain hfac_nonneg
+    _ = ((Real.sqrt T ^ α + 2 ^ (1 - θ) * Real.sqrt T ^ (α * (1 - θ))) * C)
+          * parabolicC0AlphaNorm (α * θ) (fun z => w₁ z - w₂ z) s := by ring
+    _ ≤ q * parabolicC0AlphaNorm (α * θ) (fun z => w₁ z - w₂ z) s :=
+        mul_le_mul_of_nonneg_right hfacC
+          (parabolicC0AlphaNorm_nonneg (α * θ) (fun z => w₁ z - w₂ z) s)
+
 end AnalyticPDE
 end RicciFlow
