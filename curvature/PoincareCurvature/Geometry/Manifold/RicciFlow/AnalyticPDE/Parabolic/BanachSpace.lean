@@ -604,5 +604,164 @@ theorem compL_comp {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 end ParabolicC0AlphaBanach
 
+/-- **Self-bound: the parabolic `C^{0,α}` norm is an admissible `ParabolicC0AlphaNormLe` bound.**  Its
+own sup norm and Hölder seminorm are simultaneously achieved (`parabolicC0AlphaWith_parabolicSupNorm_…`)
+and sum to the parabolic `C^{0,α}` norm. -/
+theorem parabolicC0AlphaNormLe_norm {u : ℝ × X → E} (hu : ParabolicC0AlphaOn α u s) :
+    ParabolicC0AlphaNormLe (parabolicC0AlphaNorm α u s) α u s :=
+  ⟨parabolicSupNorm u s, parabolicSupNorm_nonneg u s,
+    parabolicHolderSeminorm α u s, parabolicHolderSeminorm_nonneg α u s, le_of_eq rfl,
+    parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm hu⟩
+
+/-- **`ParabolicC0AlphaNormLe` dominates the parabolic `C^{0,α}` norm.**  Any admissible combined bound
+`N` is at least the parabolic `C^{0,α}` norm. -/
+theorem parabolicC0AlphaNorm_le_of_normLe {N : ℝ} {u : ℝ × X → E}
+    (h : ParabolicC0AlphaNormLe N α u s) : parabolicC0AlphaNorm α u s ≤ N := by
+  obtain ⟨B, hB, H, hH, hsum, hctrl⟩ := h
+  exact (parabolicC0AlphaNorm_le hB hH hctrl).trans hsum
+
+/-- **Bilinear multiplication bound.**  For a continuous bilinear map `L : E →L[ℝ] F →L[ℝ] G`, the
+pointwise product `z ↦ L (a z) (v z)` obeys the parabolic `C^{0,α}` algebra estimate
+`‖L(a,v)‖_{C^{0,α}} ≤ ‖L‖ · ‖a‖_{C^{0,α}} · ‖v‖_{C^{0,α}}` (the operator form of the parabolic
+`C^{0,α}` product inequality that a Ricci–DeTurck coefficient multiplication consumes). -/
+theorem parabolicC0AlphaNorm_continuousLinearMap₂_le {F G : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ F] [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    {a : ℝ × X → E} {v : ℝ × X → F} (ha : ParabolicC0AlphaOn α a s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicC0AlphaNorm α (fun z => L (a z) (v z)) s
+      ≤ ‖L‖ * parabolicC0AlphaNorm α a s * parabolicC0AlphaNorm α v s :=
+  parabolicC0AlphaNorm_le_of_normLe
+    ((parabolicC0AlphaNormLe_norm ha).continuousLinearMap₂ L (parabolicC0AlphaNormLe_norm hv))
+
+namespace parabolicC0AlphaSubmodule
+
+/-- **Frozen-coefficient bilinear multiplication as a linear map on the submodules.**  For a fixed
+parabolic `C^{0,α}` coefficient field `a` and a continuous bilinear map `L`, the assignment
+`v ↦ (z ↦ L (a z) (v z))` is an `ℝ`-linear map of parabolic `C^{0,α}` submodules (linear in the second
+argument, the closure coming from `ParabolicC0AlphaOn.continuousLinearMap₂`). -/
+def continuousLinearMap₂Coeff {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : parabolicC0AlphaSubmodule X E α s) :
+    parabolicC0AlphaSubmodule X F α s →ₗ[ℝ] parabolicC0AlphaSubmodule X G α s where
+  toFun v := ⟨fun z => L (a z) (v z), a.2.continuousLinearMap₂ L v.2⟩
+  map_add' v w := by
+    ext z
+    simp
+  map_smul' c v := by
+    ext z
+    simp
+
+@[simp]
+theorem continuousLinearMap₂Coeff_apply {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : parabolicC0AlphaSubmodule X E α s) (v : parabolicC0AlphaSubmodule X F α s) (z : ℝ × X) :
+    continuousLinearMap₂Coeff (X := X) (E := E) (α := α) (s := s) L a v z = L (a z) (v z) :=
+  rfl
+
+end parabolicC0AlphaSubmodule
+
+namespace ParabolicC0AlphaSpace
+
+/-- Frozen-coefficient multiplication `v ↦ (z ↦ L (a z) (v z))` on the seminormed carriers. -/
+def mulCoeffLM {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) :
+    ParabolicC0AlphaSpace X F α s →ₗ[ℝ] ParabolicC0AlphaSpace X G α s :=
+  parabolicC0AlphaSubmodule.continuousLinearMap₂Coeff L (toSubmodule a)
+
+@[simp]
+theorem toFun_mulCoeffLM {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) (v : ParabolicC0AlphaSpace X F α s) :
+    toFun (mulCoeffLM L a v) = fun z => L (toFun a z) (toFun v z) :=
+  rfl
+
+/-- **Frozen-coefficient multiplication is a bounded operator of norm `≤ ‖L‖ · ‖a‖` on the carriers.**
+For a fixed parabolic `C^{0,α}` coefficient field `a`, multiplication `v ↦ (z ↦ L (a z) (v z))` by a
+continuous bilinear map `L` is a bounded `ℝ`-linear map with operator norm `≤ ‖L‖ · ‖a‖` — the
+frozen-coefficient linear operator at the heart of parabolic Schauder theory. -/
+noncomputable def mulCoeffL {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) :
+    ParabolicC0AlphaSpace X F α s →L[ℝ] ParabolicC0AlphaSpace X G α s :=
+  LinearMap.mkContinuous (mulCoeffLM L a) (‖L‖ * ‖a‖) (fun v => by
+    show parabolicC0AlphaNorm α (fun z => L (toFun a z) (toFun v z)) s
+        ≤ ‖L‖ * parabolicC0AlphaNorm α (toFun a) s * parabolicC0AlphaNorm α (toFun v) s
+    exact parabolicC0AlphaNorm_continuousLinearMap₂_le L (toSubmodule a).2 (toSubmodule v).2)
+
+@[simp]
+theorem toFun_mulCoeffL {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) (v : ParabolicC0AlphaSpace X F α s) :
+    toFun (mulCoeffL L a v) = fun z => L (toFun a z) (toFun v z) :=
+  rfl
+
+/-- The carrier frozen-coefficient operator has operator norm `≤ ‖L‖ · ‖a‖`. -/
+theorem norm_mulCoeffL_le {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) :
+    ‖mulCoeffL (X := X) (E := E) (α := α) (s := s) (F := F) (G := G) L a‖ ≤ ‖L‖ * ‖a‖ :=
+  LinearMap.mkContinuous_norm_le _ (mul_nonneg (norm_nonneg L) (norm_nonneg a)) _
+
+end ParabolicC0AlphaSpace
+
+namespace ParabolicC0AlphaBanach
+
+/-- **Frozen-coefficient multiplication descends to the Banach spaces.**  For a fixed parabolic
+`C^{0,α}` coefficient field `a`, multiplication `v ↦ (z ↦ L (a z) (v z))` by a continuous bilinear map
+`L` is well defined on Banach classes (it is `(‖L‖·‖a‖)`-Lipschitz), giving a bounded operator
+`ParabolicC0AlphaBanach … F … →L[ℝ] ParabolicC0AlphaBanach … G …` of norm `≤ ‖L‖ · ‖a‖`.  This is the
+frozen-coefficient linear operator whose invertibility the Ricci–DeTurck Schauder estimates
+control. -/
+noncomputable def mulCoeffL {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) :
+    ParabolicC0AlphaBanach X F α s →L[ℝ] ParabolicC0AlphaBanach X G α s :=
+  SeparationQuotient.liftCLM (mkL.comp (ParabolicC0AlphaSpace.mulCoeffL L a))
+    (fun v v' hins => by
+      change SeparationQuotient.mk _ = SeparationQuotient.mk _
+      refine SeparationQuotient.mk_eq_mk.2 ?_
+      rw [Metric.inseparable_iff]
+      have h0 : dist v v' = 0 := Metric.inseparable_iff.mp hins
+      have hle : dist (ParabolicC0AlphaSpace.mulCoeffL L a v) (ParabolicC0AlphaSpace.mulCoeffL L a v')
+          ≤ ‖ParabolicC0AlphaSpace.mulCoeffL L a‖ * dist v v' := by
+        rw [dist_eq_norm, dist_eq_norm, ← map_sub]
+        exact (ParabolicC0AlphaSpace.mulCoeffL L a).le_opNorm _
+      exact le_antisymm (hle.trans (le_of_eq (by rw [h0, mul_zero]))) dist_nonneg)
+
+/-- **Frozen-coefficient multiplication commutes with the projection.** -/
+@[simp]
+theorem mulCoeffL_mk {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) (v : ParabolicC0AlphaSpace X F α s) :
+    mulCoeffL L a (mk v) = mk (ParabolicC0AlphaSpace.mulCoeffL L a v) :=
+  SeparationQuotient.liftCLM_mk _ _ v
+
+/-- The Banach frozen-coefficient operator has operator norm `≤ ‖L‖ · ‖a‖`. -/
+theorem norm_mulCoeffL_le {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) :
+    ‖mulCoeffL (X := X) (E := E) (α := α) (s := s) (F := F) (G := G) L a‖ ≤ ‖L‖ * ‖a‖ := by
+  refine ContinuousLinearMap.opNorm_le_bound _ (mul_nonneg (norm_nonneg L) (norm_nonneg a))
+    (fun x => ?_)
+  obtain ⟨v, rfl⟩ := mk_surjective x
+  rw [mulCoeffL_mk, norm_mk, norm_mk, ParabolicC0AlphaSpace.toFun_mulCoeffL]
+  have := parabolicC0AlphaNorm_continuousLinearMap₂_le L
+    (ParabolicC0AlphaSpace.toSubmodule a).2 (ParabolicC0AlphaSpace.toSubmodule v).2
+  simpa only [ParabolicC0AlphaSpace.norm_def, mul_assoc] using this
+
+/-- **Point evaluation of a frozen-coefficient product is the bilinear map applied to the point
+values.**  Reading off the space-time value of `L(a, ·)` applied to a chart solution `x` at `z` is
+`L (a z) (evalCLM z x)` — the pointwise algebra coherence of the frozen-coefficient operator. -/
+@[simp]
+theorem evalCLM_mulCoeffL_apply {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) (z : ℝ × X) (hz : z ∈ s)
+    (x : ParabolicC0AlphaBanach X F α s) :
+    evalCLM z hz (mulCoeffL L a x) = L (ParabolicC0AlphaSpace.toFun a z) (evalCLM z hz x) := by
+  obtain ⟨v, rfl⟩ := mk_surjective x
+  simp only [mulCoeffL_mk, evalCLM_mk_apply, ParabolicC0AlphaSpace.toFun_mulCoeffL]
+
+end ParabolicC0AlphaBanach
+
 end AnalyticPDE
 end RicciFlow
