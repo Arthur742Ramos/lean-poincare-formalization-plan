@@ -8910,6 +8910,57 @@ theorem exists_parabolicC0AlphaOn_fixedPt_ball_of_contraction {X E : Type*} [Pse
   exact ⟨g, hg, hfix, huniq,
     parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction hq1 hg hu₀ hfix hTmaps hTcontr⟩
 
+/-- **Continuous dependence / stability of the short-time parabolic fixed point.**  The two-map
+Banach perturbation bound completing the well-posedness triad (existence, uniqueness, *stability*):
+if `T₁` and `T₂` are class-preserving parabolic `C^{0,α}` maps, `T₁` is a `q`-contraction (`q < 1`),
+and `g₁`, `g₂` are their respective fixed points on `s`, then
+
+  `‖g₁ − g₂‖_{C^{0,α}} ≤ (1 − q)⁻¹ · ‖T₁ g₂ − T₂ g₂‖_{C^{0,α}}`,
+
+so the parabolic fixed point depends Lipschitz-continuously on the solution operator: two operators
+that are close at their common fixed locus have close fixed points, and they coincide when
+`T₁ g₂ = T₂ g₂` on `s` (in particular when `T₁ = T₂`, recovering uniqueness).  This is the
+quantitative continuous-dependence estimate that upgrades the qualitative uniqueness of the
+Ricci–DeTurck short-time solution to Hadamard well-posedness.  The argument is the same
+triangle-inequality/contraction computation as `parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction`,
+now run between two genuine fixed points (`g₁ − g₂ = (T₁ g₁ − T₁ g₂) + (T₁ g₂ − T₂ g₂)`) instead of a
+fixed point and an arbitrary starting function, and it uses only the contraction property of `T₁`. -/
+theorem parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction {X E : Type*}
+    [PseudoMetricSpace X] [NormedAddCommGroup E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T₁ T₂ : (ℝ × X → E) → (ℝ × X → E)} {g₁ g₂ : ℝ × X → E}
+    (hq1 : q < 1)
+    (hg₁ : ParabolicC0AlphaOn α g₁ s) (hg₂ : ParabolicC0AlphaOn α g₂ s)
+    (hg₁fix : Set.EqOn (T₁ g₁) g₁ s) (hg₂fix : Set.EqOn (T₂ g₂) g₂ s)
+    (hT₁maps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T₁ u) s)
+    (hT₂maps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T₂ u) s)
+    (hT₁contr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T₁ u z - T₁ v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s
+      ≤ (1 - q)⁻¹ * parabolicC0AlphaNorm α (fun z => T₁ g₂ z - T₂ g₂ z) s := by
+  have h1q : (0 : ℝ) < 1 - q := by linarith
+  have hdecomp : Set.EqOn (fun z => g₁ z - g₂ z)
+      (fun z => (T₁ g₁ z - T₁ g₂ z) + (T₁ g₂ z - T₂ g₂ z)) s := by
+    intro p hp
+    show g₁ p - g₂ p = (T₁ g₁ p - T₁ g₂ p) + (T₁ g₂ p - T₂ g₂ p)
+    rw [hg₁fix hp, hg₂fix hp]; abel
+  have hcls1 : ParabolicC0AlphaOn α (fun z => T₁ g₁ z - T₁ g₂ z) s :=
+    (hT₁maps g₁ hg₁).sub (hT₁maps g₂ hg₂)
+  have hcls2 : ParabolicC0AlphaOn α (fun z => T₁ g₂ z - T₂ g₂ z) s :=
+    (hT₁maps g₂ hg₂).sub (hT₂maps g₂ hg₂)
+  have htri : parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s
+      ≤ parabolicC0AlphaNorm α (fun z => T₁ g₁ z - T₁ g₂ z) s
+        + parabolicC0AlphaNorm α (fun z => T₁ g₂ z - T₂ g₂ z) s := by
+    rw [parabolicC0AlphaNorm_congr hdecomp]
+    exact parabolicC0AlphaNorm_add_le hcls1 hcls2
+  have hcontr : parabolicC0AlphaNorm α (fun z => T₁ g₁ z - T₁ g₂ z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s := hT₁contr g₁ g₂ hg₁ hg₂
+  have hkey : parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s
+        + parabolicC0AlphaNorm α (fun z => T₁ g₂ z - T₂ g₂ z) s := by linarith
+  rw [inv_mul_eq_div, le_div_iff₀ h1q]
+  nlinarith [hkey]
+
 /-!
 ### Parabolic Hölder interpolation
 
