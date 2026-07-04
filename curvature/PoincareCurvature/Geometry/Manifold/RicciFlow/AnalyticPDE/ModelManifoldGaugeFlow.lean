@@ -1,5 +1,6 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.GaugeFlowAssembly
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceManifold
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FieldJetContDiff
 
 /-!
 # Model-manifold raw `C³` gauge-flow existence from field-jet data (roadmap point 4, Item 2)
@@ -142,6 +143,52 @@ theorem exists_flow_diffeomorph_three_hasMFDerivAt [FiniteDimensional ℝ E] [Co
   refine ⟨Φ, h0, hderiv, fun t => ?_⟩
   obtain ⟨ψ, hL, hR, hcdΦ, hcdψ⟩ := hdiff t
   exact ⟨⟨⟨fun z => Φ z t, ψ, hL, hR⟩, hcdΦ, hcdψ⟩, fun z => rfl⟩
+
+/-- **Model-manifold raw `C³` gauge-flow existence from a single joint-`ContDiff` field.**
+Same conclusion as `exists_diffeomorph3GaugeFlowOn_of_field_jet` — the raw `C³` DeTurck gauge-flow
+structure `Diffeomorph3GaugeFlowOn (X := v) s t₀` on the model manifold `M = E` (`𝓘(ℝ, E)`) — but with
+the entire `C^{3,1}` Fréchet jet (`Dv`, `D²v` in both `curry`/multilinear guises, `D³v`) and its
+pointwise-`HasFDerivAt`/joint-continuity/compatibility obligations *discharged from a single
+`ContDiff ℝ n (Function.uncurry v)` hypothesis* (`3 ≤ n`).  Only the honest top-order controls remain
+as hypotheses: `v` globally `K`-Lipschitz and time-continuous, plus the four Lipschitz bounds on the
+first/second/third spatial-derivative fields (`hDvlip`/`hD2vclip`/`hD2vmlip`/`hD3vmlip`/`hD3vlip`),
+matching the tower's own `C³` interface (expressing the top-order bounds as fourth-derivative bounds
+would need a further multilinear jet).
+
+This is the `ContDiff`-packaged form of the model-manifold gauge-flow existence — the chart-level core
+of Item 2 stated behind the single smoothness hypothesis the compact-manifold gauge-flow lift will
+supply from a `ContDiff` DeTurck gauge vector field, mirroring the `_of_contDiff` field-jet extraction
+API (`exists_flow_contMDiff_three_diffeomorph_of_contDiff`). A pure assembly: the jet extraction of
+`FieldJetContDiff` fed into `exists_diffeomorph3GaugeFlowOn_of_field_jet`. -/
+theorem exists_diffeomorph3GaugeFlowOn_of_contDiff
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {v : ℝ → E → E} {K L M₂ M₃ N : ℝ≥0} {t₀ : ℝ} {n : WithTop ℕ∞} (s : Set ℝ)
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 3 ≤ n)
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    (hDvlip : ∀ s, LipschitzWith L (fderiv ℝ (v s)))
+    (hD2vclip : ∀ s, LipschitzWith M₂ (fderiv ℝ (fderiv ℝ (v s))))
+    (hD2vmlip : ∀ s, LipschitzWith N (iteratedFDeriv ℝ 2 (v s)))
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (fderiv ℝ (iteratedFDeriv ℝ 2 (v s))))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (iteratedFDeriv ℝ 3 (v s))) :
+    Nonempty (RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) (X := v) s t₀) := by
+  have hn1 : (1 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  have hn2 : (2 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  exact exists_diffeomorph3GaugeFlowOn_of_field_jet (t₀ := t₀) s
+    hv hvc
+    (fun s ξ => hasFDerivAt_fderiv_of_contDiff_uncurry h hn1 s ξ)
+    (continuous_fderiv_of_contDiff_uncurry h hn1)
+    hDvlip
+    (fun s ξ => hasFDerivAt_fderiv_fderiv_of_contDiff_uncurry h hn2 s ξ)
+    (continuous_fderiv_fderiv_of_contDiff_uncurry h hn2)
+    hD2vclip
+    hD2vmlip
+    (fun s ξ => hasFDerivAt_fderiv_iteratedFDeriv_two_of_contDiff_uncurry h hn s ξ)
+    (continuous_fderiv_iteratedFDeriv_two_of_contDiff_uncurry h hn)
+    hD3vmlip
+    (continuous_iteratedFDeriv_three_of_contDiff_uncurry h hn)
+    hD3vlip
+    (fun s ξ => fderiv_fderiv_eq_curry2_iteratedFDeriv_two (v s) ξ)
+    (fun s ξ => fderiv_iteratedFDeriv_two_eq_curryLeft (v s) ξ)
 
 end
 
