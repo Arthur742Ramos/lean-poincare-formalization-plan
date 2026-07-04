@@ -343,6 +343,16 @@ theorem norm_evalCLM_le (z : ℝ × X) (hz : z ∈ s) :
     ‖evalCLM (X := X) (E := E) (α := α) (s := s) z hz‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
+/-- **Point evaluation is compatible with restriction (cone coherence, pointwise).**  The parabolic
+`C^{0,α}` point-evaluation functionals are a compatible cone over the restriction projective system:
+evaluating at `z ∈ t` after restricting to `t ⊆ s` equals evaluating at `z` on `s` (stated
+pointwise; both sides read off the underlying value `u z`). -/
+@[simp]
+theorem evalCLM_restrictL_apply {t : Set (ℝ × X)} (hts : t ⊆ s) (z : ℝ × X) (hz : z ∈ t)
+    (u : ParabolicC0AlphaSpace X E α s) :
+    evalCLM z hz (restrictL hts u) = evalCLM z (hts hz) u :=
+  rfl
+
 end ParabolicC0AlphaSpace
 
 namespace ParabolicC0AlphaBanach
@@ -419,6 +429,18 @@ theorem norm_evalCLM_le (z : ℝ × X) (hz : z ∈ s) :
   obtain ⟨u, rfl⟩ := mk_surjective x
   rw [one_mul, evalCLM_mk, norm_mk]
   exact ParabolicC0AlphaSpace.norm_evalCLM_apply_le z hz u
+
+/-- **Point evaluation is compatible with restriction (cone coherence, pointwise) on the Banach
+space.**  The parabolic `C^{0,α}` Banach point-evaluation functionals are a compatible cone over the
+restriction projective system — the coherence that keeps the point-values of glued Ricci–DeTurck
+Banach-chart solutions consistent across overlapping charts. -/
+@[simp]
+theorem evalCLM_restrictL_apply {t : Set (ℝ × X)} (hts : t ⊆ s) (z : ℝ × X) (hz : z ∈ t)
+    (x : ParabolicC0AlphaBanach X E α s) :
+    evalCLM z hz (restrictL hts x) = evalCLM z (hts hz) x := by
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  rw [restrictL_mk, evalCLM_mk, evalCLM_mk,
+    ParabolicC0AlphaSpace.evalCLM_restrictL_apply]
 
 end ParabolicC0AlphaBanach
 
