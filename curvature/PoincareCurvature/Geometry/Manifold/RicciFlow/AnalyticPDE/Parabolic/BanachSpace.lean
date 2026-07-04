@@ -1092,6 +1092,19 @@ theorem precompL_comp_apply {Y Z : Type*} [PseudoMetricSpace Y] [PseudoMetricSpa
   rw [evalCLM_precompL_apply, evalCLM_precompL_apply, evalCLM_precompL_apply]
   rfl
 
+/-- **Precomposition by the identity is the identity operator.**  The `φ = id`, `L = 1`, `t = s`
+case of `precompL` is `ContinuousLinearMap.id`.  Together with `precompL_comp_apply` this exhibits
+the two functor laws of the precomposition (change-of-variables) action. -/
+theorem precompL_id (hα : 0 ≤ α) :
+    precompL (X := X) (E := E) (α := α) (s := s) (Y := X) (L := 1) (φ := id) (t := s)
+        hα zero_le_one (Set.mapsTo_id s) (fun p _ q _ => le_of_eq (by simp))
+      = ContinuousLinearMap.id ℝ (ParabolicC0AlphaBanach X E α s) := by
+  ext x
+  rw [ContinuousLinearMap.id_apply, eq_iff_forall_evalCLM]
+  intro w hw
+  rw [evalCLM_precompL_apply]
+  rfl
+
 end ParabolicC0AlphaBanach
 
 /-! ### The constant-function embedding operator
