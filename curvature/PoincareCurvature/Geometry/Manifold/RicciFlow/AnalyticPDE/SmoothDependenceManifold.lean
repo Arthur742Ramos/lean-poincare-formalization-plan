@@ -546,6 +546,50 @@ theorem contMDiff_infty_fundamentalSolution_time {A : ℝ → (E →L[ℝ] E)}
   contMDiff_iff_contDiff.mpr
     (contDiff_infty_fundamentalSolution_time hA hAsmooth hΦ h0)
 
+/-- **Manifold `C^{n+1}` time-regularity of the base flow trajectory.**  For a jointly-`C^n` field
+`v` (`ContDiff ℝ n (Function.uncurry v)`), each trajectory `τ ↦ Ψ x τ` of a flow family `Ψ` of `v`
+(`IsIntegralCurve (Ψ x) v`) is `ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (n + 1)` in time — the manifold form of
+`contDiff_flow_time`, via `contMDiff_iff_contDiff`.  This is the higher-order time-regularity of the
+flow itself (the trajectory is one order smoother than the field), the time-direction companion of the
+spatial `C³` regularity `contMDiff_three_flow_apply_of_lipschitz_thirdDeriv`; exactly the form Item
+2's compact-manifold gauge flow consumes along the time direction. -/
+theorem contMDiff_flow_time {Ψ : E → ℝ → E} (hΨ : ∀ x, IsIntegralCurve (Ψ x) v)
+    (n : ℕ) (huv : ContDiff ℝ (n : WithTop ℕ∞) (Function.uncurry v)) (x : E) :
+    ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((n : WithTop ℕ∞) + 1) (fun t => Ψ x t) :=
+  contMDiff_iff_contDiff.mpr (contDiff_flow_time hΨ n huv x)
+
+/-- **Manifold `C^∞` time-regularity of the base flow trajectory.**  For a jointly-`C^∞` field `v`,
+each trajectory `τ ↦ Ψ x τ` of a flow family of `v` is `ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞` in time.  The
+`C^∞` companion of `contMDiff_flow_time`. -/
+theorem contMDiff_infty_flow_time {Ψ : E → ℝ → E} (hΨ : ∀ x, IsIntegralCurve (Ψ x) v)
+    (huv : ContDiff ℝ ∞ (Function.uncurry v)) (x : E) :
+    ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ (fun t => Ψ x t) :=
+  contMDiff_iff_contDiff.mpr (contDiff_infty_flow_time hΨ huv x)
+
+/-- **Manifold joint `C^{n+1}` regularity of the resolvent action in (time, vector).**  For a `C^n`
+coefficient path `A`, the pushforward map `(t, u₀) ↦ D_x Φ_t · u₀` is jointly
+`ContMDiff 𝓘(ℝ, ℝ × E) 𝓘(ℝ, E) (n + 1)` on the product model manifold `ℝ × E`.  The manifold form of
+`contDiff_fundamentalSolution_apply_joint`, via `contMDiff_iff_contDiff` for the product model space
+`ℝ × E`: the flow pushforward is regular jointly in the flow time and the pushed vector, not merely
+separately. -/
+theorem contMDiff_fundamentalSolution_apply_joint {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (n : ℕ) (hAdiff : ContDiff ℝ (n : WithTop ℕ∞) A) :
+    ContMDiff 𝓘(ℝ, ℝ × E) 𝓘(ℝ, E) ((n : WithTop ℕ∞) + 1)
+      (fun p : ℝ × E => fundamentalSolution hA hΦ h0 p.1 p.2) :=
+  contMDiff_iff_contDiff.mpr (contDiff_fundamentalSolution_apply_joint hA hΦ h0 n hAdiff)
+
+/-- **Manifold joint `C^∞` smoothness of the resolvent action.**  For a `C^∞` coefficient `A`, the
+pushforward `(t, u₀) ↦ D_x Φ_t · u₀` is jointly `ContMDiff 𝓘(ℝ, ℝ × E) 𝓘(ℝ, E) ∞` on `ℝ × E`.  The
+`C^∞` companion of `contMDiff_fundamentalSolution_apply_joint`. -/
+theorem contMDiff_infty_fundamentalSolution_apply_joint {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAsmooth : ContDiff ℝ ∞ A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x) :
+    ContMDiff 𝓘(ℝ, ℝ × E) 𝓘(ℝ, E) ∞
+      (fun p : ℝ × E => fundamentalSolution hA hΦ h0 p.1 p.2) :=
+  contMDiff_iff_contDiff.mpr (contDiff_infty_fundamentalSolution_apply_joint hA hAsmooth hΦ h0)
+
 end
 
 end SmoothDependenceCk
