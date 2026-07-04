@@ -467,6 +467,243 @@ theorem exists_contDiff_two_diffeomorph_flow_apply [CompleteSpace E]
     show Φ (Ψ w t₀) t = w
     rw [heq]; exact hΨ0 w
 
+/-!
+## `map_neg` for the currying maps (support for the `C³` time reversal)
+
+The `C³` field hypotheses include the compatibility conditions `D2vc = curry2 D2vm` and
+`D3vm = (D3v).curryLeft`.  Reversing them under negation needs that `curry2` and
+`ContinuousMultilinearMap.curryLeft` commute with negation.
+-/
+
+/-- `curryLeft` of a `Fin 3` continuous multilinear map commutes with negation. -/
+theorem curryLeft_neg_fin3 (X : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E) :
+    (-X).curryLeft = -X.curryLeft := by
+  ext x m
+  simp only [ContinuousMultilinearMap.curryLeft_apply, ContinuousMultilinearMap.neg_apply,
+    ContinuousLinearMap.neg_apply]
+
+/-- The two-fold curry `curry2` commutes with negation. -/
+theorem curry2_neg (X : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) :
+    curry2 (-X) = -curry2 X := by
+  have hcl : (-X).curryLeft = -X.curryLeft := by
+    ext x m
+    simp only [ContinuousMultilinearMap.curryLeft_apply, ContinuousMultilinearMap.neg_apply,
+      ContinuousLinearMap.neg_apply]
+  simp only [curry2, hcl, ContinuousLinearMap.comp_neg]
+
+/-!
+## Two-sided (all-time) `C³` dependence and the `C³` diffeomorphism
+
+The full `C³` layer reverses six spatial fields (`Dw, D2wc, D2wm, D3wm, D3wv`, each the negation of
+the corresponding `v`-field at reflected time), including the multilinear second/third derivatives.
+All the norm/continuity/Lipschitz hypotheses transfer through negation + time reflection, and the two
+compatibility conditions transfer via `curry2_neg` / `curryLeft_neg_fin3`.
+-/
+
+/-- **Backward-in-time `C³` dependence on initial data** for a `C^{3,1}` field (`t ≤ t₀`), by the
+time-reversal argument applied to the full third-order jet of `v`. -/
+theorem exists_flow_contDiff_three_of_lipschitz_thirdDeriv_backward [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ N : ℝ≥0}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ)
+    (hD2vcc : Continuous fun p : ℝ × E => D2vc p.1 p.2)
+    (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD2vmlip : ∀ s, LipschitzWith N (D2vm s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ)
+    (hD3vmc : Continuous fun p : ℝ × E => D3vm p.1 p.2)
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vc : Continuous fun p : ℝ × E => D3v p.1 p.2)
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hcurry : ∀ s ξ, D3vm s ξ = (D3v s ξ).curryLeft)
+    {t : ℝ} (ht0 : t ≤ t₀) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContDiff ℝ 3 (fun z => Φ z t) := by
+  set w : ℝ → E → E := fun s x => -(v (-s) x) with hw_def
+  set Dw : ℝ → E → (E →L[ℝ] E) := fun s x => -(Dv (-s) x) with hDw_def
+  set D2wc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E)) := fun s x => -(D2vc (-s) x) with hD2wc_def
+  set D2wm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) :=
+    fun s x => -(D2vm (-s) x) with hD2wm_def
+  set D3wm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)) :=
+    fun s x => -(D3vm (-s) x) with hD3wm_def
+  set D3wv : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E :=
+    fun s x => -(D3v (-s) x) with hD3wv_def
+  have hw : ∀ τ, LipschitzWith K (w τ) := by
+    intro τ; refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hw_def, dist_neg_neg]; exact (hv (-τ)).dist_le_mul a b
+  have hwc : ∀ x, Continuous fun s => w s x := by
+    intro x; simp only [hw_def]; exact ((hvc x).comp continuous_neg).neg
+  have hDw : ∀ s ξ, HasFDerivAt (w s) (Dw s ξ) ξ := by
+    intro s ξ; simpa only [hw_def, hDw_def] using (hDv (-s) ξ).neg
+  have hDwc : Continuous fun p : ℝ × E => Dw p.1 p.2 := by
+    simp only [hDw_def]; exact (hDvc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
+  have hDwlip : ∀ s, LipschitzWith L (Dw s) := by
+    intro s; refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hDw_def, dist_neg_neg]; exact (hDvlip (-s)).dist_le_mul a b
+  have hD2wc : ∀ s ξ, HasFDerivAt (Dw s) (D2wc s ξ) ξ := by
+    intro s ξ; simpa only [hDw_def, hD2wc_def] using (hD2vc (-s) ξ).neg
+  have hD2wcc : Continuous fun p : ℝ × E => D2wc p.1 p.2 := by
+    simp only [hD2wc_def]; exact (hD2vcc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
+  have hD2wclip : ∀ s, LipschitzWith M₂ (D2wc s) := by
+    intro s; refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hD2wc_def, dist_neg_neg]; exact (hD2vclip (-s)).dist_le_mul a b
+  have hD2wmlip : ∀ s, LipschitzWith N (D2wm s) := by
+    intro s; refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hD2wm_def, dist_neg_neg]; exact (hD2vmlip (-s)).dist_le_mul a b
+  have hD3wm : ∀ s ξ, HasFDerivAt (D2wm s) (D3wm s ξ) ξ := by
+    intro s ξ; simpa only [hD2wm_def, hD3wm_def] using (hD3vm (-s) ξ).neg
+  have hD3wmc : Continuous fun p : ℝ × E => D3wm p.1 p.2 := by
+    simp only [hD3wm_def]; exact (hD3vmc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
+  have hD3wmlip : ∀ s, LipschitzWith M₃ (D3wm s) := by
+    intro s; refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hD3wm_def, dist_neg_neg]; exact (hD3vmlip (-s)).dist_le_mul a b
+  have hD3wvc : Continuous fun p : ℝ × E => D3wv p.1 p.2 := by
+    simp only [hD3wv_def]; exact (hD3vc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
+  have hD3wvlip : ∀ s, LipschitzWith M₃ (D3wv s) := by
+    intro s; refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hD3wv_def, dist_neg_neg]; exact (hD3vlip (-s)).dist_le_mul a b
+  have hwcompat : ∀ s ξ, D2wc s ξ = curry2 (D2wm s ξ) := by
+    intro s ξ; simp only [hD2wc_def, hD2wm_def]
+    rw [curry2_neg, ← hcompat (-s) ξ]
+  have hwcurry : ∀ s ξ, D3wm s ξ = (D3wv s ξ).curryLeft := by
+    intro s ξ; simp only [hD3wm_def, hD3wv_def]
+    rw [curryLeft_neg_fin3, ← hcurry (-s) ξ]
+  obtain ⟨Φ', hΦ'0, hΦ'curve, hΦ'cd⟩ :=
+    exists_flow_contDiff_three_of_lipschitz_thirdDeriv
+      (v := w) (Dv := Dw) (D2vc := D2wc) (D2vm := D2wm) (D3vm := D3wm) (D3v := D3wv) (t₀ := -t₀)
+      hw hwc hDw hDwc hDwlip hD2wc hD2wcc hD2wclip hD2wmlip hD3wm hD3wmc hD3wmlip
+      hD3wvc hD3wvlip hwcompat hwcurry (t := -t) (neg_le_neg ht0)
+  have hVeq : (fun s (x : E) => -(w (-s) x)) = v := by
+    funext s x; simp only [hw_def, neg_neg]
+  refine ⟨fun z s => Φ' z (-s), fun z => hΦ'0 z, fun z => ?_, hΦ'cd⟩
+  have hcurve := isIntegralCurve_comp_neg (hΦ'curve z)
+  rw [hVeq] at hcurve
+  exact hcurve
+
+/-- **Two-sided (all-time) `C³` dependence on initial data** for a `C^{3,1}` field. -/
+theorem exists_flow_contDiff_three_of_lipschitz_thirdDeriv_two_sided [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ N : ℝ≥0}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ)
+    (hD2vcc : Continuous fun p : ℝ × E => D2vc p.1 p.2)
+    (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD2vmlip : ∀ s, LipschitzWith N (D2vm s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ)
+    (hD3vmc : Continuous fun p : ℝ × E => D3vm p.1 p.2)
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vc : Continuous fun p : ℝ × E => D3v p.1 p.2)
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hcurry : ∀ s ξ, D3vm s ξ = (D3v s ξ).curryLeft)
+    (t : ℝ) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContDiff ℝ 3 (fun z => Φ z t) := by
+  rcases le_total t₀ t with h | h
+  · exact exists_flow_contDiff_three_of_lipschitz_thirdDeriv
+      hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip hD2vmlip hD3vm hD3vmc hD3vmlip
+      hD3vc hD3vlip hcompat hcurry h
+  · exact exists_flow_contDiff_three_of_lipschitz_thirdDeriv_backward
+      hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip hD2vmlip hD3vm hD3vmc hD3vmlip
+      hD3vc hD3vlip hcompat hcurry h
+
+/-- **`C³` dependence for a *given* flow family, at every time.** -/
+theorem contDiff_three_flow_apply_of_lipschitz_thirdDeriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ N : ℝ≥0}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ)
+    (hD2vcc : Continuous fun p : ℝ × E => D2vc p.1 p.2)
+    (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD2vmlip : ∀ s, LipschitzWith N (D2vm s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ)
+    (hD3vmc : Continuous fun p : ℝ × E => D3vm p.1 p.2)
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vc : Continuous fun p : ℝ × E => D3v p.1 p.2)
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hcurry : ∀ s ξ, D3vm s ξ = (D3v s ξ).curryLeft)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ContDiff ℝ 3 (fun z => Φ z t) := by
+  obtain ⟨Φ', h0', hΦ'curve, hΦ'cd⟩ :=
+    exists_flow_contDiff_three_of_lipschitz_thirdDeriv_two_sided
+      hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip hD2vmlip hD3vm hD3vmc hD3vmlip
+      hD3vc hD3vlip hcompat hcurry t
+  have hEq : (fun z => Φ z t) = (fun z => Φ' z t) := by
+    funext z
+    exact eq_of_isIntegralCurve_of_eq hv (hΦ z) (hΦ'curve z) (by rw [h0 z, h0' z]) t
+  rw [hEq]; exact hΦ'cd
+
+/-- **The time-`t` flow map is a `C³` diffeomorphism of the state space**, for *every* `t`.  Both the
+flow map and its reverse-time inverse `ψ` are `ContDiff ℝ 3`.  This is the top-order (`C³`) skeleton
+of the self-diffeomorphism family consumed by the compact-manifold gauge flow of Item 2, now with
+genuine `C³` regularity in *both* directions and *without* the forward-time restriction of the
+`SmoothDependenceCk` `C³` layer. -/
+theorem exists_contDiff_three_diffeomorph_flow_apply [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ N : ℝ≥0}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ)
+    (hD2vcc : Continuous fun p : ℝ × E => D2vc p.1 p.2)
+    (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD2vmlip : ∀ s, LipschitzWith N (D2vm s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ)
+    (hD3vmc : Continuous fun p : ℝ × E => D3vm p.1 p.2)
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vc : Continuous fun p : ℝ × E => D3v p.1 p.2)
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hcurry : ∀ s ξ, D3vm s ξ = (D3v s ξ).curryLeft)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ∃ ψ : E → E, Function.LeftInverse ψ (fun z => Φ z t) ∧
+      Function.RightInverse ψ (fun z => Φ z t) ∧
+      ContDiff ℝ 3 (fun z => Φ z t) ∧ ContDiff ℝ 3 ψ := by
+  obtain ⟨Ψ, hΨ0, hΨcurve⟩ := exists_flow_family (t₀ := t) hv hvc
+  refine ⟨fun w => Ψ w t₀, ?_, ?_,
+    contDiff_three_flow_apply_of_lipschitz_thirdDeriv
+      hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip hD2vmlip hD3vm hD3vmc hD3vmlip
+      hD3vc hD3vlip hcompat hcurry hΦ h0 t,
+    contDiff_three_flow_apply_of_lipschitz_thirdDeriv (Φ := Ψ) (t₀ := t)
+      hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip hD2vmlip hD3vm hD3vmc hD3vmlip
+      hD3vc hD3vlip hcompat hcurry hΨcurve hΨ0 t₀⟩
+  · intro z
+    have heq := eq_of_isIntegralCurve_of_eq_at hv (hΨcurve (Φ z t)) (hΦ z) (hΨ0 (Φ z t)) t₀
+    show Ψ (Φ z t) t₀ = z
+    rw [heq]; exact h0 z
+  · intro w
+    have heq := eq_of_isIntegralCurve_of_eq_at hv (hΦ (Ψ w t₀)) (hΨcurve w) (h0 (Ψ w t₀)) t
+    show Φ (Ψ w t₀) t = w
+    rw [heq]; exact hΨ0 w
+
 end
 
 end SmoothDependenceCk
