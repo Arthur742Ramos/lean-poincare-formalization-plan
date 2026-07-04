@@ -8575,6 +8575,50 @@ theorem parabolicHolderWith_of_forall_same_time_same_space
         add_le_add (mul_le_mul_of_nonneg_left hd hHs) (mul_le_mul_of_nonneg_left ht hHt)
     _ = (Hs + Ht) * parabolicDistance (tp, xp) (tq, xq) ^ α := by ring
 
+/-! ### Short-time smallness in the full parabolic `C^{0,α}` (Banach) norm
+
+Bounding the Hölder seminorm by the full `C^{0,α}` norm (`parabolicHolderSeminorm_le_parabolicC0AlphaNorm`)
+turns the seminorm short-time estimates into honest *operator* smallness on the parabolic Banach
+space: for a function vanishing at the initial time, the `C⁰` part is at most its full `C^{0,α}` norm
+times the short-time factor `(√T)^α`.  Applied to a difference `u - v` of two functions agreeing at
+the initial time, this is exactly the short-time contraction the Ricci–DeTurck / parabolic Schauder
+fixed point runs on: the solution map has `C⁰`-operator norm `≤ (√T)^α → 0` on the fibre of data
+sharing an initial condition. -/
+
+/-- **Parabolic `C⁰`-norm short-time bound by the full `C^{0,α}` norm.**  For an initial-vanishing
+function, `‖u‖_{C⁰} ≤ ‖u‖_{C^{0,α}} · (√T)^α`.  The honest operator-smallness statement on the
+parabolic `C^{0,α}` Banach space: on the subspace of initial-vanishing functions the `C⁰` seminorm is
+`(√T)^α`-small relative to the full norm. -/
+theorem parabolicSupNorm_le_parabolicC0AlphaNorm_mul_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicSupNorm u s ≤ parabolicC0AlphaNorm α u s * Real.sqrt T ^ α := by
+  refine (parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero hα hu hslab hcyl hu0).trans ?_
+  exact mul_le_mul_of_nonneg_right
+    (parabolicHolderSeminorm_le_parabolicC0AlphaNorm α u s)
+    (Real.rpow_nonneg (Real.sqrt_nonneg T) α)
+
+/-- **Short-time contraction in the parabolic `C⁰` norm.**  If two functions agree at the initial
+time slice, the `C⁰` norm of their difference is `(√T)^α`-small relative to the `C^{0,α}` norm of
+their difference: `‖u - v‖_{C⁰} ≤ ‖u - v‖_{C^{0,α}} · (√T)^α`.  As the slab thickness `T → 0` the
+factor tends to `0`, so the solution map is a contraction on the fibre over a fixed initial
+condition — the mechanism giving uniqueness/short-time existence of the Ricci–DeTurck fixed point. -/
+theorem parabolicSupNorm_sub_le_parabolicC0AlphaNorm_mul_of_initial_agree
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (huv : ParabolicHolderOn α (fun p => u p - v p) s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hagree : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = v (t₀, x)) :
+    parabolicSupNorm (fun p => u p - v p) s
+      ≤ parabolicC0AlphaNorm α (fun p => u p - v p) s * Real.sqrt T ^ α :=
+  parabolicSupNorm_le_parabolicC0AlphaNorm_mul_of_initial_zero hα huv hslab hcyl
+    (fun x hx => show u (t₀, x) - v (t₀, x) = 0 from sub_eq_zero.mpr (hagree x hx))
+
 end AnalyticPDE
 end RicciFlow
 
