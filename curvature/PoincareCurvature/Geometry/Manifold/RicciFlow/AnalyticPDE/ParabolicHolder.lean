@@ -8619,6 +8619,41 @@ theorem parabolicSupNorm_sub_le_parabolicC0AlphaNorm_mul_of_initial_agree
   parabolicSupNorm_le_parabolicC0AlphaNorm_mul_of_initial_zero hα huv hslab hcyl
     (fun x hx => show u (t₀, x) - v (t₀, x) = 0 from sub_eq_zero.mpr (hagree x hx))
 
+/-- **Separation for the parabolic `C^{0,α}` norm.**  On the class of parabolic `C^{0,α}` functions
+the norm of a difference vanishes *only* when the two functions already agree on `s`.  Together with
+`parabolicC0AlphaNorm_nonneg` this makes `parabolicC0AlphaNorm` a genuine norm on functions modulo
+equality on `s` — the definiteness the parabolic Banach structure and the uniqueness half of the
+fixed-point theorem rest on. -/
+theorem eqOn_of_parabolicC0AlphaNorm_sub_eq_zero {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s)
+    (h : parabolicC0AlphaNorm α (fun z => u z - v z) s = 0) :
+    Set.EqOn u v s := by
+  intro p hp
+  obtain ⟨B, hB0, H, _, hb, _⟩ := hu.sub hv
+  have hbd : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B (fun z => u z - v z) s := ⟨B, hB0, hb⟩
+  have hle : ‖u p - v p‖ ≤ parabolicC0AlphaNorm α (fun z => u z - v z) s :=
+    norm_le_parabolicC0AlphaNorm (α := α) hbd hp
+  rw [h] at hle
+  have hz : ‖u p - v p‖ = 0 := le_antisymm hle (norm_nonneg _)
+  rw [norm_eq_zero, sub_eq_zero] at hz
+  exact hz
+
+/-- **Definiteness of the parabolic `C^{0,α}` norm on the class.**  The parabolic `C^{0,α}` norm of
+`u - v` is zero iff `u` and `v` agree on `s`. -/
+theorem parabolicC0AlphaNorm_sub_eq_zero_iff_eqOn {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicC0AlphaNorm α (fun z => u z - v z) s = 0 ↔ Set.EqOn u v s := by
+  refine ⟨eqOn_of_parabolicC0AlphaNorm_sub_eq_zero hu hv, fun h => ?_⟩
+  have hcongr : parabolicC0AlphaNorm α (fun z => u z - v z) s
+      = parabolicC0AlphaNorm α (fun _ : ℝ × X => (0 : E)) s := by
+    refine parabolicC0AlphaNorm_congr ?_
+    intro p hp
+    show u p - v p = 0
+    rw [h hp, sub_self]
+  rw [hcongr, parabolicC0AlphaNorm_zero]
+
 end AnalyticPDE
 end RicciFlow
 
