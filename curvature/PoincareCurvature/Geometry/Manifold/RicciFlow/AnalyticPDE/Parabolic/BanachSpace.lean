@@ -306,6 +306,43 @@ theorem restrictL_comp {t r : Set (ℝ × X)} (hts : t ⊆ s) (hrt : r ⊆ t) :
   ext u
   simp
 
+/-- **Point evaluation at a space-time point, as a linear map on the carrier.**  Reads off the value
+`u z` of a parabolic `C^{0,α}` function; it is linear because the carrier's additive/scalar
+operations are the pointwise ones on the underlying function (composition of the submodule inclusion
+with `Pi` evaluation). -/
+def evalLM (z : ℝ × X) : ParabolicC0AlphaSpace X E α s →ₗ[ℝ] E :=
+  (LinearMap.proj z).comp (parabolicC0AlphaSubmodule X E α s).subtype
+
+@[simp]
+theorem evalLM_apply (z : ℝ × X) (u : ParabolicC0AlphaSpace X E α s) :
+    evalLM z u = toFun u z :=
+  rfl
+
+/-- **Point evaluation at `z ∈ s` is a bounded linear functional** on the parabolic `C^{0,α}`
+carrier, of operator norm `≤ 1`: the value `u z` is dominated by the parabolic `C^{0,α}` norm.  (The
+sup part of the norm already controls the pointwise value on `s`.) -/
+noncomputable def evalCLM (z : ℝ × X) (hz : z ∈ s) :
+    ParabolicC0AlphaSpace X E α s →L[ℝ] E :=
+  LinearMap.mkContinuous (evalLM z) 1 (fun u => by
+    rw [one_mul, norm_def]
+    exact norm_le_parabolicC0AlphaNorm ((toSubmodule u).2).boundedOn hz)
+
+@[simp]
+theorem evalCLM_apply (z : ℝ × X) (hz : z ∈ s) (u : ParabolicC0AlphaSpace X E α s) :
+    evalCLM z hz u = toFun u z :=
+  rfl
+
+/-- **Pointwise domination for the carrier evaluation:** `‖u z‖ ≤ ‖u‖` for `z ∈ s`. -/
+theorem norm_evalCLM_apply_le (z : ℝ × X) (hz : z ∈ s) (u : ParabolicC0AlphaSpace X E α s) :
+    ‖evalCLM z hz u‖ ≤ ‖u‖ := by
+  rw [norm_def]
+  exact norm_le_parabolicC0AlphaNorm ((toSubmodule u).2).boundedOn hz
+
+/-- Point evaluation on the carrier has operator norm `≤ 1`. -/
+theorem norm_evalCLM_le (z : ℝ × X) (hz : z ∈ s) :
+    ‖evalCLM (X := X) (E := E) (α := α) (s := s) z hz‖ ≤ 1 :=
+  LinearMap.mkContinuous_norm_le _ zero_le_one _
+
 end ParabolicC0AlphaSpace
 
 namespace ParabolicC0AlphaBanach
@@ -343,6 +380,45 @@ theorem restrictL_comp {t r : Set (ℝ × X)} (hts : t ⊆ s) (hrt : r ⊆ t) :
       = restrictL (X := X) (E := E) (α := α) (s := s) (hrt.trans hts) := by
   ext x
   simp
+
+/-- **Point evaluation at `z ∈ s` descends to the Banach space.**  Two parabolic `C^{0,α}` functions
+identified in the separation quotient (they agree on `s`, having zero-norm difference) have the same
+value at any `z ∈ s`, so point evaluation is well defined on classes — a bounded linear functional
+`ParabolicC0AlphaBanach X E α s →L[ℝ] E` of operator norm `≤ 1`.  This is the functional that reads
+off the value of a Ricci–DeTurck Banach-chart solution at a space-time point. -/
+noncomputable def evalCLM (z : ℝ × X) (hz : z ∈ s) :
+    ParabolicC0AlphaBanach X E α s →L[ℝ] E :=
+  SeparationQuotient.liftCLM
+    (M := ParabolicC0AlphaSpace X E α s) (N := E) (R := ℝ) (S := ℝ) (σ := RingHom.id ℝ)
+    (ParabolicC0AlphaSpace.evalCLM z hz)
+    (fun (u u' : ParabolicC0AlphaSpace X E α s) (hins : Inseparable u u') => by
+      have h0 : dist u u' = 0 := Metric.inseparable_iff.mp hins
+      have hz0 : ‖u - u'‖ = 0 := by rw [← dist_eq_norm]; exact h0
+      have hb : ‖ParabolicC0AlphaSpace.evalCLM z hz (u - u')‖ ≤ ‖u - u'‖ :=
+        ParabolicC0AlphaSpace.norm_evalCLM_apply_le z hz (u - u')
+      rw [hz0] at hb
+      have hb0 : ParabolicC0AlphaSpace.evalCLM z hz (u - u') = 0 := norm_le_zero_iff.mp hb
+      rw [map_sub, sub_eq_zero] at hb0
+      exact hb0)
+
+/-- On the class of a representative `u`, point evaluation is the value of that representative. -/
+@[simp]
+theorem evalCLM_mk (z : ℝ × X) (hz : z ∈ s) (u : ParabolicC0AlphaSpace X E α s) :
+    evalCLM z hz (mk u) = ParabolicC0AlphaSpace.evalCLM z hz u :=
+  SeparationQuotient.liftCLM_mk _ _ u
+
+/-- The value of point evaluation on a class is the value of any representative at `z`. -/
+theorem evalCLM_mk_apply (z : ℝ × X) (hz : z ∈ s) (u : ParabolicC0AlphaSpace X E α s) :
+    evalCLM z hz (mk u) = ParabolicC0AlphaSpace.toFun u z :=
+  rfl
+
+/-- Point evaluation on the Banach space has operator norm `≤ 1`. -/
+theorem norm_evalCLM_le (z : ℝ × X) (hz : z ∈ s) :
+    ‖evalCLM (X := X) (E := E) (α := α) (s := s) z hz‖ ≤ 1 := by
+  refine ContinuousLinearMap.opNorm_le_bound _ zero_le_one (fun x => ?_)
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  rw [one_mul, evalCLM_mk, norm_mk]
+  exact ParabolicC0AlphaSpace.norm_evalCLM_apply_le z hz u
 
 end ParabolicC0AlphaBanach
 
