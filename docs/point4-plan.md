@@ -6530,3 +6530,31 @@ the **general-manifold** gauge-flow lift (Item 2, heavy gauge files — the `C³
 input `exists_flow_contDiff_three_diffeomorph` and the model-manifold gauge-flow core
 `exists_diffeomorph3GaugeFlowOn_of_field_jet` are now available); and the Item 1 tensor
 time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file).
+
+Update — **the parabolic Banach fixed-point mechanism is now proved** in
+`AnalyticPDE/ParabolicHolder.lean` (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), the
+Picard/contraction engine that turns the completeness of the parabolic `C^{0,α}` space into the
+short-time Ricci–DeTurck solution operator.  Four new theorems:
+
+* **Definiteness/separation.**  `eqOn_of_parabolicC0AlphaNorm_sub_eq_zero` and its `iff` form
+  `parabolicC0AlphaNorm_sub_eq_zero_iff_eqOn`: on the class, `‖u − v‖_{C^{0,α}} = 0 ↔ u =ₛ v`, so
+  `parabolicC0AlphaNorm` is a genuine norm modulo equality on `s` (the definiteness underlying the
+  fixed point's uniqueness).
+* **Fixed-point existence + uniqueness.**  `exists_parabolicC0AlphaOn_fixedPt_of_contraction`: a
+  class-preserving `q`-contraction `T` (`0 ≤ q < 1`) for the parabolic `C^{0,α}` norm has a class
+  fixed point `g` (`T g =ₛ g`), unique on `s`.  Proof: the Picard iterates `Tⁿ u₀` have geometrically
+  decaying consecutive differences (`‖T^{n+1}u₀ − Tⁿu₀‖ ≤ qⁿ‖T u₀ − u₀‖`), telescope to a
+  `C^{0,α}`-Cauchy sequence (tail `≤ qᴺ‖T u₀ − u₀‖/(1−q)`), and converge by
+  `exists_parabolicC0AlphaOn_tendsto_of_cauchy`; the contraction forces the limit fixed and unique.
+* **A-priori residual bound.**  `parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction`: any fixed point
+  obeys `‖g − u₀‖ ≤ (1−q)⁻¹·‖T u₀ − u₀‖` (no iteration — just `g − u₀ = (T g − T u₀) + (T u₀ − u₀)` on
+  `s`, triangle, contraction), the invariant-ball datum.
+* **Bundled solution operator.**  `exists_parabolicC0AlphaOn_fixedPt_ball_of_contraction`:
+  existence + uniqueness-on-`s` + the explicit `C^{0,α}`-ball bound in one package — the chart-closure
+  datum the Ricci–DeTurck short-time existence consumes once its RHS is exhibited as a contraction.
+
+Remaining for Point 4 (future sessions): the genuine parabolic **Schauder interior/global a-priori
+estimate** exhibiting the DeTurck RHS as such a `C^{0,α}` contraction (the heat-kernel content), and
+its assembly from `mulCoeffL`/`compL`/`precompL`/`constL` with the short-time-smallness factors
+(Item 3); the **general-manifold** gauge-flow lift (Item 2, heavy gauge files); and the Item 1 tensor
+time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file).
