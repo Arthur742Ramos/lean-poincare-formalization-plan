@@ -11367,6 +11367,37 @@ theorem uncurry3_apply (T : E →L[ℝ] E →L[ℝ] E →L[ℝ] E) (v : Fin 3 �
     ContinuousLinearMap.comp_apply, uncurry2CLM_apply]
   rfl
 
+/-- **Left-curry of the multilinear packaging.**  `(uncurry3 T).curryLeft = uncurry2CLM.comp T`.  The
+multilinear-side companion of `curryLeft_iteratedFDeriv_three`: it exhibits the composition-form
+operator `uncurry2CLM ∘ T` as the left-curry of the multilinear packaging `uncurry3 T`, which is the
+shape the `iteratedFDeriv ℝ 3` chain consumes.  Immediate from `uncurry3` being the equiv-inverse
+image of `uncurry2CLM.comp T` under `continuousMultilinearCurryLeftEquiv`. -/
+theorem uncurry3_curryLeft (T : E →L[ℝ] E →L[ℝ] E →L[ℝ] E) :
+    (uncurry3 T).curryLeft = uncurry2CLM.comp T := by
+  rw [uncurry3]
+  exact (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).apply_symm_apply _
+
+/-- **Third iterated derivative as a multilinear packaging.**  If the (multilinear) second iterated
+derivative `iteratedFDeriv ℝ 2 f` is Fréchet differentiable at `x` with derivative the composition-form
+operator `uncurry2CLM ∘ T` (for some triple operator `T : E →L E →L E →L E`), then the third iterated
+derivative equals the multilinear packaging of `T`: `iteratedFDeriv ℝ 3 f x = uncurry3 T`.
+
+This is the bridge that transports abstract third-fundamental-solution data `T` (e.g. `D₃fam x`) onto
+the canonical `iteratedFDeriv ℝ 3` object *in the properly normed multilinear space*, where the
+multilinear Lipschitz continuity `lipschitzWith_thirdFundamentalSolution_multilinear` lives.  Proof:
+`curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt` identifies `uncurry2CLM ∘ T` with
+`(iteratedFDeriv ℝ 3 f x).curryLeft`, `uncurry3_curryLeft` identifies it with `(uncurry3 T).curryLeft`,
+and `curryLeft` (the coercion of `continuousMultilinearCurryLeftEquiv`) is injective. -/
+theorem iteratedFDeriv_three_eq_uncurry3_of_hasFDerivAt
+    {f : E → E} {T : E →L[ℝ] E →L[ℝ] E →L[ℝ] E} {x : E}
+    (hD3 : HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp T) x) :
+    iteratedFDeriv ℝ 3 f x = uncurry3 T := by
+  have h1 : uncurry2CLM.comp T = (iteratedFDeriv ℝ 3 f x).curryLeft :=
+    curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt hD3
+  have h2 : (uncurry3 T).curryLeft = (iteratedFDeriv ℝ 3 f x).curryLeft := by
+    rw [uncurry3_curryLeft, h1]
+  exact ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).injective h2).symm
+
 /-- **Abstract multilinear Lipschitz criterion.**  A per-outer-direction operator-gap bound
 `‖F x k − F y k‖ ≤ C · dist x y · ‖k‖` (valued in the well-normed *double* space `E →L E →L E`)
 promotes to genuine `LipschitzWith C.toNNReal` continuity of the `Fin 3` multilinear packaging
