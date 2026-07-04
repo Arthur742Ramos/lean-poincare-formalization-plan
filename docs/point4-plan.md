@@ -4496,3 +4496,1446 @@ appear in `RicciFlowLocalExistence.lean` as additional imports.
 the heavy PDE realization file unchanged and adds raw-gauge endpoint projections
 plus Banach-to-centered-metric-coordinate readout bridges on top of the
 already-proved global and interval chart-closure data.
+
+## ODE dependence-on-initial-data infrastructure (new upstream module, Items 1/2)
+
+The recurring blocker for Items 1 and 2 is that Mathlib v4.29.1 supplies smooth
+ODE-flow dependence only at the Banach level (Grönwall trajectory estimates,
+integral-curve existence), not the `C^k`/manifold flow-on-initial-data needed
+here.  A dedicated new module builds that missing theory from the Banach-level
+Mathlib results up, isolated so it never touches the heavy files:
+
+`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/SmoothDependenceCk.lean`
+(imports only `Mathlib.Analysis.ODE.Basic` and `Mathlib.Analysis.ODE.Gronwall`).
+
+The `C^0` / Lipschitz (`C^{0,1}`) base layer of the dependence tower is complete
+and fully proved (axioms `propext`/`Classical.choice`/`Quot.sound` only):
+
+* `isIntegralCurve_comp_neg` — the time-reversed curve `s ↦ f (-s)` is an integral
+  curve of the time-reversed field `(s, x) ↦ -(v (-s) x)`.
+* `dist_le_of_isIntegralCurve_of_le` — forward exponential dependence bound
+  (`IsIntegralCurve` packaging of Mathlib's `dist_le_of_trajectories_ODE`).
+* `dist_le_of_isIntegralCurve` — the **two-sided** bound
+  `dist (f t) (g t) ≤ dist (f t₀) (g t₀) · exp (K · |t - t₀|)` for all `t`
+  (Mathlib only gives the forward half; the backward half comes from applying the
+  forward bound to the time-reversed curves).
+* `dist_le_of_isIntegralCurve_of_abs_le` — uniform bound on a symmetric compact
+  time interval.
+* `eq_of_isIntegralCurve_of_eq`, `eq_of_isIntegralCurve_of_eq_at` — global
+  uniqueness of an integral curve from agreement at the anchor / at any one time.
+* `dist_le_of_isIntegralCurve_perturb_of_le` — forward Grönwall stability under a
+  uniform perturbation of the vector field (continuous dependence on the field).
+* Flow-family packaging for `Φ : E → ℝ → E` with `Φ x t₀ = x`:
+  `dist_flow_apply_le`, `lipschitzWith_flow_apply`,
+  `lipschitzWith_flow_apply_of_abs_le` (the time-`t` flow map is exponentially
+  Lipschitz in the initial value), `continuous_flow_apply`,
+  `injective_flow_apply` (injectivity — the diffeomorphism-onto-image half needed
+  by Item 2), and `continuous_flow` (**joint** continuity of `(t, x) ↦ Φ x t`).
+
+The `C^0` layer has since been rounded out with the quantitative
+**bi-Lipschitz / embedding** and **stability** refinements (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only):
+
+* `dist_ge_of_isIntegralCurve` — the **lower** two-sided exponential bound
+  `dist (f t₀) (g t₀) · exp (-K · |t - t₀|) ≤ dist (f t) (g t)` (the flow run
+  backward from `t` to `t₀` expands separation by at most `exp (K · |t - t₀|)`).
+* `dist_flow_apply_ge`, `antilipschitzWith_flow_apply`,
+  `antilipschitzWith_flow_apply_of_abs_le` — the time-`t` flow map is
+  **antilipschitz** with constant `exp (K · |t - t₀|)` (uniform `exp (K · T)` on a
+  symmetric compact interval): the quantitative injectivity.
+* `isUniformEmbedding_flow_apply`, `isEmbedding_flow_apply` — being both Lipschitz
+  and antilipschitz, `x ↦ Φ x t` is a **bi-Lipschitz uniform (topological)
+  embedding onto its image**: the `C^0` "diffeomorphism onto its image" shadow
+  consumed by the compact-manifold gauge flow of Item 2.
+* `dist_le_of_isIntegralCurve_perturb` — the **two-sided** Grönwall stability under
+  a uniform field perturbation, `dist (f t) (g t) ≤ gronwallBound (dist (f t₀)
+  (g t₀)) K ε |t - t₀|` for all `t` (the backward half via the time-reversed
+  curves), and its flow-family form `dist_flow_perturb_le` (two flows of
+  `ε`-close fields, same anchor, stay `gronwallBound 0 K ε |t - t₀|`-close) — the
+  DeTurck-flow continuous-dependence-on-the-field transfer.
+* `flow_eq_of_isIntegralCurve` — uniqueness of the flow family (`ε = 0` degenerate
+  case of the perturbation bound).
+* `lipschitzWith_of_isIntegralCurve_of_norm_le`, `lipschitzWith_flow_of_norm_le`,
+  `dist_flow_le_of_norm_le` — the **time-direction** modulus missing from
+  `continuous_flow`: under a uniform velocity bound `‖v t (Φ x t)‖ ≤ M` each curve
+  is `M`-Lipschitz in time, giving a joint Lipschitz modulus
+  `dist (Φ x t) (Φ y s) ≤ M · |t - s| + exp (K · T) · dist x y` on a compact time
+  interval.
+
+Remaining in this tower (future sessions): the `C^1` (differentiable) dependence
+layer — the flow derivative `D_x Φ_t` solving the linearised/variational ODE —
+and its bootstrap to `C^k` (`C^3`), which is what the compact-manifold gauge flow
+of Item 2 and the tensor time-derivative chain rule of Item 1 ultimately consume.
+
+The **first brick of the `C^1` layer** is now in place (axioms
+`propext`/`Classical.choice`/`Quot.sound` only): the linearised/variational ODE is
+formalised as an object and shown well-posed.
+
+* `variationalField A t W = (A t).comp W` — the operator-valued variational field on
+  the operator Banach space `E →L[ℝ] E`, whose integral curves solve the
+  fundamental-solution equation `W'(t) = A(t) ∘ W(t)` satisfied by `D_x Φ_t`;
+  `lipschitzWith_variationalField` proves it is `K`-Lipschitz under `‖A t‖ ≤ K`
+  (operator-norm submultiplicativity), and the `C^0` lemmas instantiated on
+  `E →L[ℝ] E` give `variational_eq_of_isIntegralCurve` (uniqueness) and
+  `dist_variational_le` (exponential a-priori bound).
+* `variationalFieldVec A t u = A t u` — the **vector** variational field on `E`,
+  whose integral curves solve `u'(t) = A(t) (u(t))`, the equation obeyed by the
+  directional derivative `∂_{u₀} Φ_t = D_x Φ_t · u₀`; `lipschitzWith_variationalFieldVec`,
+  `variationalVec_eq_of_isIntegralCurve`, `dist_variationalVec_le` are its Lipschitz /
+  uniqueness / a-priori-bound analogues.
+* `isIntegralCurve_variational_apply` — the connective lemma: evaluating a solution `W`
+  of the operator equation on a fixed direction `u₀` yields a solution `t ↦ W t u₀` of
+  the vector equation (via the derivative chain rule `HasDerivAt.clm_apply`), tying the
+  fundamental solution to the directional derivatives it generates.
+* `isIntegralCurve_variationalFieldVec_add`, `isIntegralCurve_variationalFieldVec_smul` —
+  the **superposition principle**: solutions of the (linear) vector variational equation
+  are closed under addition and scalar multiplication, so the directional derivative
+  `u₀ ↦ D_x Φ_t · u₀` is linear in `u₀` and assembles into the bounded operator
+  `D_x Φ_t ∈ E →L[ℝ] E`.
+
+The superposition principle has now been **cashed out**: the directional-derivative map is
+assembled into the honest bounded operator `D_x Φ_t ∈ E →L[ℝ] E` (the fundamental solution /
+resolvent), with a full operator-level API (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only).  For a flow family `Φ` of
+`variationalFieldVec A` (`‖A t‖ ≤ K`) anchored at `Φ x t₀ = x`:
+
+* `flow_variationalFieldVec_add`, `flow_variationalFieldVec_smul`,
+  `flow_variationalFieldVec_zero` — the time-`t` flow map `x ↦ Φ x t` of the *linear* field
+  is additive, homogeneous, and fixes the origin (superposition + vector uniqueness).
+* `norm_flow_variationalFieldVec_le` — the operator upper bound
+  `‖Φ x t‖ ≤ exp (K · |t - t₀|) · ‖x‖` (from `dist_flow_apply_le` and `Φ 0 t = 0`).
+* `fundamentalSolution` — the resulting **bounded operator** `D_x Φ_t ∈ E →L[ℝ] E`, packaged
+  via `LinearMap.mkContinuous`, with `fundamentalSolution_apply` (`D_x Φ_t · x = Φ x t`),
+  `norm_fundamentalSolution_le` (`‖D_x Φ_t‖ ≤ exp (K · |t - t₀|)`), and
+  `fundamentalSolution_anchor` (`D_x Φ_{t₀} = 1`).
+* `norm_flow_variationalFieldVec_ge`, `norm_fundamentalSolution_apply_ge`,
+  `fundamentalSolution_injective` — the **lower** operator bound
+  `exp (-K · |t - t₀|) · ‖x‖ ≤ ‖D_x Φ_t · x‖` (from the `C^0` lower bound
+  `dist_flow_apply_ge`), whence the resolvent is bounded below and **injective** (the
+  operator shadow of the bi-Lipschitz embedding `injective_flow_apply`): a non-degenerate
+  resolvent.
+* `fundamentalSolution_eq_of_operator_isIntegralCurve` — the **operator-ODE bridge**: any
+  solution `W` of the operator variational equation `W'(t) = A(t) ∘ W(t)` with `W t₀ = 1`
+  (the fundamental matrix) satisfies `fundamentalSolution … t = W t`, tying the operator- and
+  vector-valued variational equations together.
+* `continuous_fundamentalSolution_apply`, `continuous_fundamentalSolution` — strong (in time)
+  and joint continuity of the resolvent action `(t, u₀) ↦ D_x Φ_t · u₀` (from
+  `IsIntegralCurve.continuous` / `continuous_flow`).
+* `isIntegralCurve_fundamentalSolution_apply`, `fundamentalSolution_apply_anchor` — the
+  resolvent **columns are the variational-ODE solutions**: `t ↦ D_x Φ_t · u₀` is the integral
+  curve of `variationalFieldVec A` through `u₀` at `t₀` (the characterisation a subsequent
+  `C^1`-differentiability proof consumes).
+* `fundamentalSolution_congr` — the resolvent is **canonical**: independent of the flow-family
+  representative, depending only on the field `A` (and `t₀`, `t`).
+
+Remaining in this tower (future sessions): *existence* of the variational flow family (global
+integral curves of the uniformly-Lipschitz linear field, making the above non-vacuous), then
+the actual `C^1` differentiability of the base flow `x ↦ Φ x t` with derivative `D_x Φ_t`
+(the remainder Grönwall estimate), and its bootstrap to `C^k` (`C^3`).
+
+The **`C^1` differentiability layer has now been opened** (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only): the *linearisation-remainder Grönwall bound* —
+the analytic core of differentiable dependence — is proved, and assembled into the actual
+Fréchet-differentiability of the flow (conditional on a defect modulus).  For integral curves
+`f`, `g` of a field `v`, a solution `w` of the vector variational ODE `w' = A(s) w`
+(`‖A s‖ ≤ K`) predicting the initial separation `w t₀ = g t₀ - f t₀`, and a bound `δ` on the
+linearisation defect `‖v s (g s) - v s (f s) - A s (g s - f s)‖`:
+
+* `norm_flow_sub_variational_le` — the **global** remainder bound
+  `‖(g t - f t) - w t‖ ≤ gronwallBound 0 K δ |t - t₀|` (defect uniform in all time), proved by
+  recognising `r := g - f - w` as an integral curve of `variationalFieldVec A` perturbed by the
+  `δ`-bounded defect and comparing it to the zero solution via the two-sided perturbation
+  Grönwall bound `dist_le_of_isIntegralCurve_perturb`.
+* `norm_flow_sub_variational_le_Icc` — the **interval-restricted** refinement, needing the defect
+  only on the forward interval `Ico t₀ b` (as the flow separation grows exponentially, a
+  globally-uniform `δ` is unavailable; on a compact time tube the `C^1` modulus supplies one),
+  via Mathlib's interval Grönwall estimate `dist_le_of_approx_trajectories_ODE`.
+* `gronwallBound_zero_left_mul` — the **homogeneity** `gronwallBound 0 K ε x = ε · gronwallBound
+  0 K 1 x`, turning the remainder bound into an estimate proportional to the defect `δ`.
+* `norm_flow_sub_fundamentalSolution_le_Icc` — the **operator form** of the interval bound, with
+  the honest resolvent `fundamentalSolution … t = D_x Φ_t` as the linear prediction:
+  `‖(Φ y t - Φ x t) - D_x Φ_t · (y - x)‖ ≤ gronwallBound 0 K δ (t - t₀)` — the numerator of the
+  Fréchet difference quotient for `x ↦ Φ x t`.
+* `hasFDerivAt_flow_of_defect_isLittleO` — the **`C^1` differentiability** itself: if the defect
+  is `o(‖z - x₀‖)` as `z → x₀` (a `D : E → ℝ`, `0 ≤ D`, bounding the defect on `Ico t₀ t` with
+  `D =o[𝓝 x₀] (· - x₀)`), then `HasFDerivAt (fun z => Φ z t) (fundamentalSolution … t) x₀` — the
+  flow map is Fréchet differentiable at `x₀` with derivative the resolvent.  Proof: the operator
+  interval bound gives `numerator = O(D)` (via `gronwallBound_zero_left_mul`), which composed
+  with `D = o(z - x₀)` gives `numerator = o(z - x₀)`.
+* `differentiableAt_flow_of_defect_isLittleO`, `fderiv_flow_of_defect_isLittleO` — the
+  consumer-facing corollaries: `DifferentiableAt ℝ (fun z => Φ z t) x₀`, and
+  `fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution … t` (the flow's spatial derivative **is**
+  the fundamental solution operator).
+
+Remaining in this tower (future sessions): **discharging the defect modulus** — proving that a
+`C^1` field `v` (with `A s = D_x v(s, Φ x₀ s)`) *supplies* the hypothesis `D =o(‖z - x₀‖)`, via
+the mean-value remainder `‖v s b - v s a - D_x v(s,a)(b-a)‖ ≤ (sup over the segment of
+‖D_x v(s,·) - D_x v(s,a)‖)·‖b - a‖` (Mathlib `Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le`)
+uniformised over `s ∈ [t₀, t]` by Heine–Cantor on the compact trajectory tube together with the
+exponential flow-separation bound `dist_flow_apply_le` — which upgrades
+`hasFDerivAt_flow_of_defect_isLittleO` to an *unconditional* `C^1` dependence theorem; then the
+*existence* of the variational flow family, and the bootstrap to `C^k` (`C^3`).
+
+Update — the defect-modulus discharge is now built as a full reduction chain in
+`SmoothDependenceCk`, bottoming out at a directly-usable hypothesis for smooth fields:
+
+* `isLittleO_of_norm_le_mul_of_tendsto_nhds_zero` — the asymptotic glue: if `‖f x‖ ≤ g x · ‖u x‖`
+  eventually and `g → 0`, then `f =o[l] u`.  Turns "`defect ≤ (modulus→0)·separation`" into the
+  `o(‖z - x₀‖)` hypothesis of `hasFDerivAt_flow_of_defect_isLittleO`.
+* `hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero` (+ `differentiableAt`/`fderiv`) — from a
+  single time-uniform oscillation modulus `C : E → ℝ` with `C z → 0` bounding the defect on
+  `Ico t₀ t` by `C z · (exp (K |s - t₀|) · ‖z - x₀‖)`, delivers `HasFDerivAt (fun z => Φ z t) =
+  D_x Φ_t`.  (Sets `D z = C z · exp (K (t - t₀)) · ‖z - x₀‖`, `= o(‖z - x₀‖)` via the glue.)
+* `hasFDerivAt_flow_of_segment_oscillation_tendsto_zero` (+ corollaries) — composes the mean-value
+  bound `norm_flow_defect_le_of_segment_oscillation` with the previous, reducing the `C^1`
+  dependence to a *pure `C^1`-regularity* hypothesis: the derivative chord-oscillation
+  `‖Dv s ξ - A s‖` (over `ξ ∈ [Φ x₀ s, Φ z s]`, `s ∈ Ico t₀ t`) is `≤ C z → 0`.
+* `tendsto_modulus_comp_norm_sub` — the "`C(z) → 0`" engine: for `0 ≤ c` and `ω → 0` along
+  `𝓝[≥] 0`, `z ↦ ω (c · ‖z - x₀‖) → 0` as `z → x₀`.
+* `hasFDerivAt_flow_of_uniform_deriv_modulus` (+ corollaries) — from a nonnegative monotone modulus
+  `ω` vanishing at `0⁺` with `‖Dv s ξ - A s‖ ≤ ω (‖ξ - Φ x₀ s‖)`.  The chord points lie within
+  `exp (K |s - t₀|) · ‖z - x₀‖` of the anchor (`dist_flow_apply_le` + the segment decomposition), so
+  the monotone `ω` caps the oscillation by `C z = ω (exp (K (t - t₀)) · ‖z - x₀‖) → 0`.
+* `hasFDerivAt_flow_of_lipschitz_deriv` (+ corollaries) — the `C^{1,1}` specialisation and the
+  practical entry point: `‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖` (`0 ≤ L`, uniform in `s`) gives the
+  `C^1` dependence via the linear modulus `ω r = L · max r 0`.  This covers every smooth field —
+  in particular the intended Ricci-flow right-hand sides — so the smooth-case `C^1` dependence of
+  the flow on initial data is now unconditional.
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus, i.e. extracting a monotone `ω → 0` for `hasFDerivAt_flow_of_uniform_deriv_modulus` from
+joint continuity of `Dv` via Heine–Cantor uniform continuity on the compact trajectory tube; then
+the *existence* of the variational flow family, and the bootstrap to `C^k` (`C^3`).
+
+Update — the whole `C¹` dependence tower has been **localised**: since Fréchet differentiability of
+`x ↦ Φ x t` at the base point `x₀` is a *local* property, every defect / oscillation /
+derivative-existence hypothesis was weakened from the global `∀ z` to `∀ᶠ z in 𝓝 x₀` (the modulus
+nonnegativity and the structural flow-family hypotheses stay global).  This matters because a
+genuine smooth field has a spatial derivative that is only *locally* Lipschitz, so the global
+Lipschitz-derivative bound of `hasFDerivAt_flow_of_lipschitz_deriv` generally fails for it — whereas
+its local counterpart holds on the neighbourhood of `x₀` where the local estimate is available.  All
+`_eventually` variants are fully proved (axioms `propext`/`Classical.choice`/`Quot.sound` only):
+
+* `hasFDerivAt_flow_of_defect_isLittleO_eventually` (+ `differentiableAt`/`fderiv`) — the localised
+  core: the linearisation-defect bound `‖v s (Φ z s) - v s (Φ x₀ s) - A s (Φ z s - Φ x₀ s)‖ ≤ D z`
+  is needed only `∀ᶠ z in 𝓝 x₀` (the big-O numerator estimate is itself an eventual statement).
+* `hasFDerivAt_flow_of_uniform_oscillation_tendsto_zero_eventually`,
+  `hasFDerivAt_flow_of_segment_oscillation_tendsto_zero_eventually` (+ corollaries) — the localised
+  oscillation layer.
+* `hasFDerivAt_flow_of_uniform_deriv_modulus_eventually` (+ corollaries) — the localised modulus
+  form.
+* `hasFDerivAt_flow_of_lipschitz_deriv_eventually` (+ `_of_hasFDerivAt`, `differentiableAt`,
+  `fderiv`) — **the local `C^{1,1}` payoff entry point**: `C¹` dependence from a *locally* Lipschitz
+  spatial derivative `‖Dv s ξ - A s‖ ≤ L · ‖ξ - Φ x₀ s‖` holding only for `z` near `x₀` — the honest
+  form the Ricci-DeTurck right-hand side supplies.
+* `hasFDerivAt_flow_of_lipschitz_deriv_on_ball` (+ `differentiableAt`/`fderiv`) — **the chart-level
+  entry point**: takes a *global* spatial derivative `HasFDerivAt (v s) (Dv s ξ) ξ` plus the
+  Lipschitz-derivative bound holding only on a fixed radius-`r` ball around each anchor point
+  `Φ x₀ s`; for `‖z - x₀‖ < r / exp (K (t - t₀))` the trajectory chord `[Φ x₀ s, Φ z s]` stays inside
+  that ball (flow separation), discharging the eventual hypothesis.  This is exactly what a smooth
+  (`C^∞`) field on a chart supplies — its derivative is locally Lipschitz on balls.
+
+Update — **continuous dependence of the resolvent on the coefficient field** is now proved (axioms
+`propext`/`Classical.choice`/`Quot.sound` only), the operator-level input to the `C²` regularity of
+the flow in initial data (where the coefficient `A(x₀) s = D_x v(s, Φ x₀ s)` varies with the base
+point) and to the continuous dependence of the DeTurck flow on the metric:
+
+* `norm_fundamentalSolution_sub_apply_le_of_forall_le` — the directional form: for coefficients `A`,
+  `A'` (both `‖·‖ ≤ K`) with variational flow families `Φ₁`, `Φ₂` and `‖A s - A' s‖ ≤ ε`, on the
+  forward compact interval `[t₀, T]`,
+  `‖D_x Φ_t^A u₀ - D_x Φ_t^{A'} u₀‖ ≤ ε · exp (K (T - t₀)) · ‖u₀‖ · gronwallBound 0 K 1 (t - t₀)`.
+  The `A'`-column `s ↦ Φ₂ u₀ s` is an *approximate solution* of the `A`-field; the linearised
+  perturbation `‖(A' s - A s)(Φ₂ u₀ s)‖ ≤ ε ‖Φ₂ u₀ s‖` is not uniform in the direction, so the
+  a-priori trajectory bound `‖Φ₂ u₀ s‖ ≤ exp (K (T - t₀)) ‖u₀‖` (`norm_flow_variationalFieldVec_le`)
+  is used to make it uniform on `[t₀, T]`, then Mathlib's `dist_le_of_approx_trajectories_ODE`.
+* `norm_fundamentalSolution_sub_le_of_forall_le` — the operator-norm assembly over unit directions:
+  `‖D_x Φ_t^A - D_x Φ_t^{A'}‖ ≤ ε · exp (K (T - t₀)) · gronwallBound 0 K 1 (t - t₀)`.  The resolvent
+  is thus a locally Lipschitz function of its coefficient field.
+* `gronwallBound_zero_one_nonneg` — the supporting `0 ≤ gronwallBound 0 K 1 x` (`0 ≤ K`, `0 ≤ x`).
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus; the *existence* of the variational flow family (global integral curves of the linear
+field); and the bootstrap to `C^k` (`C^3`) — the resolvent-continuity brick is a first ingredient of
+the latter (continuity of `x₀ ↦ D_x Φ_t` in the base point, once `x₀ ↦ A(x₀)` is set up).
+
+Update — the resolvent's **regularity in time** is now proved at the *operator-norm* level (all
+axioms `propext`/`Classical.choice`/`Quot.sound` only), culminating in the operator-valued
+fundamental-solution equation itself — a central ingredient of the `C^k` bootstrap:
+
+* `norm_fundamentalSolution_sub_le_time` — **operator-norm local Lipschitz continuity in time**:
+  `‖D_x Φ_{t₂} - D_x Φ_{t₁}‖ ≤ K · exp (K · max |t₁ - t₀| |t₂ - t₀|) · |t₂ - t₁|`.  This is a genuine
+  *operator*-norm (not merely strong / fixed-direction) bound: each resolvent column `s ↦ Φ u s`
+  solves the vector variational ODE, so the one-dimensional mean-value inequality bounds its
+  increment by the supremum over the time window of `‖A s (Φ u s)‖ ≤ K · exp (K |s - t₀|) · ‖u‖`; the
+  exponential is maximised at an endpoint (`abs_le_max_abs_abs`), and the operator-norm supremum
+  over unit directions (`opNorm_le_bound`) gives the bound.
+* `continuous_fundamentalSolution_time` — the topological packaging: `t ↦ D_x Φ_t` is a **continuous
+  curve in the operator Banach space** `E →L[ℝ] E`, obtained by squeezing the distance between `0`
+  and the vanishing local-Lipschitz bound.  This upgrades the resolvent path from strongly
+  continuous (`continuous_fundamentalSolution_apply`) to norm-continuous.
+* `hasDerivAt_fundamentalSolution` / `isIntegralCurve_fundamentalSolution` — **the operator-valued
+  variational ODE** `W' = A W`: for a *norm-continuous* coefficient `A` (`‖A t‖ ≤ K`), the resolvent
+  is differentiable in the operator norm with `d/dt (D_x Φ_t) = A t ∘ (D_x Φ_t)`.  This is *operator*
+  differentiability (uniform over unit directions), not just the strong/columnwise statement: the
+  linearisation remainder applied to `u` is bounded, via the mean-value Taylor inequality, by
+  `‖s - t‖ · (‖A σ ∘ D_x Φ_σ - A t ∘ D_x Φ_t‖ near t) · ‖u‖`, and the norm-continuity of
+  `σ ↦ A σ ∘ D_x Φ_σ` (`continuous_fundamentalSolution_time` composed with `Continuous A` via
+  `Continuous.clm_comp`) drives it to `o(‖s - t‖)`.  Combined with `fundamentalSolution_anchor`
+  (`D_x Φ_{t₀} = 1`) this fully characterises the resolvent as *the* solution of `W' = A W`,
+  `W t₀ = 1`, discharging the operator integral-curve hypothesis previously assumed by
+  `fundamentalSolution_eq_of_operator_isIntegralCurve`.
+* `norm_comp_fundamentalSolution_le` — the a priori **velocity bound** on the resolvent path:
+  `‖A t ∘ D_x Φ_t‖ ≤ K · exp (K · |t - t₀|)` (the operator ODE's right-hand side), so the resolvent
+  curve moves through operator space at speed controlled by the same exponential.
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus; the *existence* of the variational flow family (global integral curves of the linear
+field); differentiable dependence of the resolvent on its coefficient field (the second-order
+variational equation), toward the base-point `C^2`/`C^k` bootstrap.
+
+Update — the resolvent's **Volterra / Duhamel integral equation** is now proved (axioms
+`propext`/`Classical.choice`/`Quot.sound` only), converting the operator differential equation
+`hasDerivAt_fundamentalSolution` into its Picard fixed-point form — the operator-Duhamel identity
+that differentiable dependence on the coefficient field will be built on:
+
+* `fundamentalSolution_eq_one_add_integral` — for a *norm-continuous* coefficient `A` (`‖A t‖ ≤ K`,
+  `CompleteSpace E`), the resolvent satisfies `D_x Φ_t = 1 + ∫_{t₀}^{t} A σ ∘ D_x Φ_σ dσ`.  Proof:
+  the operator ODE `W' = A W` (`hasDerivAt_fundamentalSolution`) holds at every time, its
+  right-hand side `σ ↦ A σ ∘ D_x Φ_σ` is norm-continuous
+  (`hAcont.clm_comp continuous_fundamentalSolution_time`) hence interval-integrable, so the
+  fundamental theorem of calculus (`intervalIntegral.integral_eq_sub_of_hasDerivAt`) gives
+  `∫_{t₀}^{t} A σ ∘ D_x Φ_σ dσ = D_x Φ_t - D_x Φ_{t₀}`, and folding in
+  `fundamentalSolution_anchor` (`D_x Φ_{t₀} = 1`) yields the Volterra equation.  (This is the first
+  use of Bochner interval integration in the module, adding the single core-Mathlib import
+  `Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus`.)
+* `norm_fundamentalSolution_sub_one_le` — the **short-time closeness of the resolvent to the
+  identity**: `‖D_x Φ_t - 1‖ ≤ K · exp (K · |t - t₀|) · |t - t₀|` (`→ 0` as `t → t₀`).  Immediate
+  from the Volterra identity (`D_x Φ_t - 1 = ∫_{t₀}^{t} A σ ∘ D_x Φ_σ dσ`) and the a-priori velocity
+  bound `norm_comp_fundamentalSolution_le` (`‖A σ ∘ D_x Φ_σ‖ ≤ K · exp (K · |σ - t₀|)`), whose
+  integrand is `≤ K · exp (K · |t - t₀|)` on the window `Ι t₀ t`, integrated by
+  `intervalIntegral.norm_integral_le_of_norm_le_const`.  This is the operator-Duhamel short-time
+  estimate underlying the contraction / invertibility of the resolvent for small `|t - t₀|`.
+* `isUnit_fundamentalSolution_of_norm_sub_one_lt` / `isUnit_fundamentalSolution_of_time_lt` — the
+  **invertibility of the resolvent** as an operator: if `‖D_x Φ_t - 1‖ < 1` then `D_x Φ_t` is a unit
+  of `E →L[ℝ] E` (Neumann-series openness of the units around `1`, `Units.oneSub`); combined with the
+  short-time bound above, `K · exp (K · |t - t₀|) · |t - t₀| < 1` suffices.  This is the
+  operator/inverse-function-theorem shadow of the bi-Lipschitz embedding — on top of
+  `fundamentalSolution_injective` (injectivity) it gives a genuine two-sided operator inverse, so the
+  flow map `x ↦ Φ x t` is a linear isomorphism for `t` near `t₀` (the local-diffeomorphism input for
+  Item 2's compact-manifold gauge flow).
+* `fundamentalSolution_sub_eq_integral` — the **Duhamel difference formula** (variation of
+  parameters) for two coefficient fields `A₁`, `A₂` with resolvents `W₁`, `W₂`:
+  `W₁ t - W₂ t = ∫_{t₀}^{t} A₁ σ ∘ (W₁ σ - W₂ σ) dσ + ∫_{t₀}^{t} (A₁ σ - A₂ σ) ∘ W₂ σ dσ`.  Subtract
+  the two Volterra equations (the identities cancel), then split the single integrand via bilinearity
+  of composition `A₁ ∘ W₁ - A₂ ∘ W₂ = A₁ ∘ (W₁ - W₂) + (A₁ - A₂) ∘ W₂` (`comp_sub`/`sub_comp`) using
+  `integral_sub`/`integral_add`/`integral_congr` (all four integrands norm-continuous hence
+  interval-integrable).  This is the "homogeneous propagation of the resolvent gap" plus the "source
+  term from the coefficient gap"; as `A₂ → A₁` the first term is `O(‖W₁ - W₂‖)` and the second is the
+  leading `(A₁ - A₂)` contribution, so this is the exact ancestor of the *differentiable* dependence
+  of the resolvent on its coefficient (the second-order variational equation).
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus; the *existence* of the variational flow family (global integral curves of the linear
+field); the *differentiable* dependence of the resolvent on its coefficient field — now reduced to a
+fixed-point / Neumann analysis of the Duhamel difference formula `fundamentalSolution_sub_eq_integral`
+above — toward the base-point `C^2`/`C^k` bootstrap.
+
+Update — the resolvent path's **`C¹`-in-time regularity** is now packaged (axioms
+`propext`/`Classical.choice`/`Quot.sound` only):
+
+* `deriv_fundamentalSolution` — the explicit `deriv` readout of the operator ODE:
+  `deriv (t ↦ D_x Φ_t) = A t ∘ D_x Φ_t` (from `hasDerivAt_fundamentalSolution`).
+* `contDiff_one_fundamentalSolution` — the curve `t ↦ D_x Φ_t ∈ E →L[ℝ] E` is `ContDiff ℝ 1`:
+  differentiable everywhere with the norm-continuous derivative `t ↦ A t ∘ D_x Φ_t`
+  (`contDiff_one_iff_deriv`).  This is the packaged regularity (vs. the raw `HasDerivAt` + continuity
+  pieces) that higher-order `C^k` consumers compose against.
+* `norm_integral_comp_fundamentalSolution_le` — the **a priori bound on the Duhamel source term**:
+  for any operator path `B` with `‖B σ‖ ≤ ε` (`0 ≤ ε`),
+  `‖∫_{t₀}^{t} B σ ∘ D_x Φ_σ dσ‖ ≤ ε · exp (K · |t - t₀|) · |t - t₀|` (pointwise
+  `‖B σ ∘ D_x Φ_σ‖ ≤ ε · exp (K · |σ - t₀|) ≤ ε · exp (K · |t - t₀|)` via submultiplicativity +
+  `norm_fundamentalSolution_le` + the endpoint-maximised exponential, integrated by
+  `intervalIntegral.norm_integral_le_of_norm_le_const`).  Applied with `B = A₁ - A₂` this is the size
+  of the inhomogeneous forcing in `fundamentalSolution_sub_eq_integral` — the leading-order resolvent
+  response to a coefficient perturbation of size `ε`.
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+modulus; the *existence* of the variational flow family (global integral curves of the linear
+field); differentiable dependence of the resolvent on its coefficient field (the second-order
+variational equation), built on the Volterra identity above, toward the base-point `C^2`/`C^k`
+bootstrap.
+
+Update — the resolvent's **`C^k` regularity in time** is now proved (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only), promoting the `C¹`-in-time result to arbitrary
+order and adding a general integral-curve regularity lemma that also covers the base (nonlinear)
+flow.  These are the time-direction half of the `C^k` regularity the DeTurck / Ricci-flow bootstrap
+consumes:
+
+* `contDiff_fundamentalSolution_time` — the **operator bootstrap**: if the coefficient path `A` is
+  `C^n` in time (`ContDiff ℝ n A`) then the resolvent `t ↦ D_x Φ_t ∈ E →L[ℝ] E` is `C^{n+1}`.
+  Induction on `n`: base `n = 0` is `contDiff_one_fundamentalSolution` (continuous `A` ⟹ `C¹`
+  resolvent); the step reads `deriv (t ↦ D_x Φ_t) = A t ∘ D_x Φ_t` off the operator ODE
+  (`deriv_fundamentalSolution`), a `ContDiff.clm_comp` of the `C^{n+1}` field with the
+  inductively-`C^{n+1}` resolvent, so `deriv W ∈ C^{n+1}` and `W ∈ C^{n+2}`
+  (`contDiff_succ_iff_deriv`).  `contDiff_infty_fundamentalSolution_time` is the `C^∞` corollary
+  (order-by-order via `contDiff_infty`).
+* `contDiff_fundamentalSolution_apply_time` / `contDiff_infty_…` — the resolvent **action**
+  `t ↦ D_x Φ_t · u₀` (pushforward of a fixed vector) is `C^{n+1}` / `C^∞`, via evaluation-at-`u₀`
+  (`ContDiff.clm_apply`); `contDiff_fundamentalSolution_apply_joint` / `contDiff_infty_…` upgrade
+  this to the **joint** `(t, u₀) ↦ D_x Φ_t · u₀` on `ℝ × E` (pull back along `Prod.fst`, evaluate
+  against `Prod.snd`).  These are the pushforward-leg forms Item 1's tensor time-derivative chain
+  rule consumes.
+* `hasDerivAt_deriv_fundamentalSolution` / `deriv_deriv_fundamentalSolution` — the **explicit
+  second-order time equation** of the resolvent (the `k = 2` instance made concrete): for a `C¹`
+  coefficient (`A' = deriv A`), `d/dt (A t ∘ D_x Φ_t) = A' t ∘ D_x Φ_t + A t ∘ (A t ∘ D_x Φ_t)`,
+  the operator product rule `HasDerivAt.clm_comp` applied to the resolvent velocity field with the
+  first-order operator ODE as the second factor.
+* `contDiff_of_isIntegralCurve` — the **general** integral-curve regularity (not tied to the linear
+  variational field): an integral curve `γ` of a jointly-`C^n` field
+  (`ContDiff ℝ n (Function.uncurry v)`) is `C^{n+1}` in time — `γ'(t) = v t (γ t) = (↿v)(t, γ t)` is
+  a `ContDiff.comp` of `↿v` with `t ↦ (t, γ t)`.  `contDiff_infty_of_isIntegralCurve` is the `C^∞`
+  form, and `contDiff_flow_time` / `contDiff_infty_flow_time` specialise to a flow family (each
+  trajectory `t ↦ Ψ x t` is `C^{n+1}` / `C^∞`) — the time-regularity of the **base** gauge flow that
+  Item 2's compact-manifold flow consumes.
+
+Remaining in this tower (future sessions): the *general* (merely-continuous, non-Lipschitz `Dv`)
+spatial modulus (Heine–Cantor uniform continuity on the compact trajectory tube); the *existence* of
+the variational flow family (global integral curves of the linear field — Mathlib supplies only
+local Picard–Lindelöf, so this needs a continuation / Bielecki-norm argument); and the *spatial*
+`C^k`/`C^2` bootstrap (differentiable dependence of `x₀ ↦ D_x Φ_t` on the base point, via
+differentiable dependence of the resolvent on its coefficient).
+
+Update — the **second-order variational equation** (differentiable dependence of the resolvent on its
+coefficient field) is now proved (all axioms `propext`/`Classical.choice`/`Quot.sound` only),
+promoting the Duhamel *difference* formula `fundamentalSolution_sub_eq_integral` and the coefficient
+*Lipschitz* bound `norm_fundamentalSolution_sub_le_of_forall_le` to a genuine second-order (Gateaux)
+derivative.  For coefficients `A₁`, `A₂` (`‖·‖ ≤ K`, norm-continuous) with `ε`-small gap
+(`‖A₁ s - A₂ s‖ ≤ ε`) and resolvents `W₁ = D_x Φ₁`, `W₂ = D_x Φ₂`:
+
+* `hasDerivAt_fundamentalSolution_sub` — the **differential form of the Duhamel gap equation**: the
+  resolvent gap `t ↦ W₁ t - W₂ t` solves the inhomogeneous operator ODE
+  `d/dt (W₁ - W₂) = A₁ ∘ (W₁ - W₂) + (A₁ - A₂) ∘ W₂` (subtract the two operator ODEs `W₁' = A₁ ∘ W₁`,
+  `W₂' = A₂ ∘ W₂` of `hasDerivAt_fundamentalSolution` and regroup via bilinearity of composition
+  `comp_sub`/`sub_comp`).  Homogeneous part propagates the gap; source `(A₁ - A₂) ∘ W₂` is the leading
+  coefficient-perturbation forcing.  This is the differential ancestor of the integral identity
+  `fundamentalSolution_sub_eq_integral`.
+* `norm_fundamentalSolution_sub_sub_variation_le` — the **second-order remainder bound**: given the
+  *first variation* `V` (a solution of the inhomogeneous operator ODE `V' = A₂ ∘ V + (A₁ - A₂) ∘ W₂`,
+  `V t₀ = 0`, the leading linear response of the resolvent to the coefficient perturbation), the gap
+  agrees with its linear prediction `V` to second order,
+  `‖(W₁ t - W₂ t) - V t‖ ≤ ε² · exp (K (T - t₀)) · (gronwallBound 0 K 1 (T - t₀))²` on `[t₀, T]`.
+  Proof: the remainder `R := (W₁ - W₂) - V` solves the *homogeneous* variational ODE
+  `R' = A₂ ∘ R + (A₁ - A₂) ∘ (W₁ - W₂)` (subtract the first-variation ODE from the gap ODE — the two
+  `(A₁ - A₂) ∘ W₂` sources cancel), `R t₀ = 0`, with an `O(ε²)` forcing (since the gap is `O(ε)` by
+  `norm_fundamentalSolution_sub_le_of_forall_le`); operator Grönwall
+  (`norm_le_gronwallBound_of_norm_deriv_right_le`) closes it.  This is the exact second-order
+  variational equation the base-point `C²` bootstrap consumes.
+* `norm_fundamentalSolution_variation_le` — the **`O(ε)` a-priori bound on the first variation**:
+  `‖V t‖ ≤ ε · exp (K (T - t₀)) · gronwallBound 0 K 1 (t - t₀)` on `[t₀, T]` (Grönwall on the
+  inhomogeneous ODE for `V`, its forcing `(A₁ - A₂) ∘ W₂` bounded by `ε · exp (K (T - t₀))`).
+  Together with the second-order remainder this exhibits `W₁ - W₂ = V + O(ε²)` with linear leading
+  term `V = O(ε)` — so `V` is genuinely the (Gateaux) derivative of the resolvent in the coefficient
+  direction `A₁ - A₂`.
+
+Remaining after this (future sessions): the *existence* / linearity-in-perturbation of the first
+variation `V` (so the Gateaux derivative assembles into a bounded linear map of the coefficient
+perturbation, upgrading the estimate to honest Fréchet differentiability of `A ↦ D_x Φ_t`); the
+*general* merely-continuous spatial modulus; the *existence* of the variational flow family; and the
+resulting *spatial* `C^k`/`C^2` bootstrap (`x₀ ↦ D_x Φ_t` differentiable in the base point, its
+coefficient `A(x₀) s = D_x v(s, Φ x₀ s)` feeding the above).
+
+Update — the **linearity-in-perturbation of the first variation** is now proved (all axioms
+`propext`/`Classical.choice`/`Quot.sound` only), closing the *algebraic* half of the
+existence/linearity target above.  The first variation `V` (solution of the inhomogeneous operator
+ODE `V' = A ∘ V + F` anchored at `V t₀ = 0`, with the coefficient-perturbation forcing
+`F = (A₁ - A₂) ∘ W₂` *linear* in the perturbation `A₁ - A₂`) is exhibited as a genuinely **bounded
+linear** and **single-valued** function of the perturbation:
+
+* `hasDerivAt_inhomogVariation_add` / `hasDerivAt_inhomogVariation_smul` /
+  `hasDerivAt_inhomogVariation_sub` — **superposition** for the inhomogeneous variational ODE: the
+  solution set is closed under addition, scalar multiplication and subtraction of the forcing
+  (`(V₁ ± V₂)' = A ∘ (V₁ ± V₂) + (F₁ ± F₂)`, `(c • V)' = A ∘ (c • V) + c • F`), from `HasDerivAt.add`
+  /`.const_smul`/`.sub` and bilinearity of composition (`comp_add`/`comp_smul`/`comp_sub`).
+* `inhomogVariation_unique` — **uniqueness**: two anchored solutions of the *same* forcing agree
+  everywhere (the difference solves the homogeneous variational ODE with zero anchor, killed by
+  Grönwall uniqueness `variational_eq_of_isIntegralCurve`).  Makes the first variation single-valued.
+* `hasDerivAt_firstVariation_perturbation_add` / `_smul` / `_sub` — the **coefficient-perturbation**
+  specialisations (generic background resolvent `W`): the first variation for `B₁ ± B₂` / `c • B` is
+  `V₁ ± V₂` / `c • V`, via linearity of `B ↦ B ∘ W` (`add_comp`/`smul_comp`/`sub_comp`).
+* `norm_inhomogVariation_le` — the **general (forcing-agnostic) a-priori size bound**:
+  `‖V t‖ ≤ M · gronwallBound 0 K 1 (t - t₀)` on `[t₀, T]` for any `V' = A ∘ V + F` (`‖A‖ ≤ K`,
+  `‖F‖ ≤ M`), of which `norm_fundamentalSolution_variation_le` (forcing `(A₁ - A₂) ∘ W₂`,
+  `M = ε · exp (K (T - t₀))`) is the leading instance.  Grönwall
+  (`norm_le_gronwallBound_of_norm_deriv_right_le`).
+* `norm_firstVariation_perturbation_sub_le` — **Lipschitz dependence on the perturbation**:
+  `‖V₁ t - V₂ t‖ ≤ (ε · C) · gronwallBound 0 K 1 (t - t₀)` when `‖B₁ - B₂‖ ≤ ε`, `‖W‖ ≤ C` on
+  `[t₀, T]` (`V₁ - V₂` is the first variation for `B₁ - B₂`, size-bounded by `norm_inhomogVariation_le`).
+  Continuity/boundedness of the Gateaux-derivative map `perturbation ↦ V`.
+* `inhomogVariation_eq_zero_of_forcing_zero` — the **origin value**: zero perturbation gives the zero
+  first variation (uniqueness against the zero solution) — a linear map sends `0` to `0`.
+* `firstVariation_perturbation_add_eq` / `firstVariation_perturbation_smul_eq` — the **map-level**
+  linearity: the unique anchored first variation for `B₁ + B₂` (resp. `c • B`) *equals* `V₁ + V₂`
+  (resp. `c • V`) as a pointwise identity (superposition + uniqueness).  With the origin value this
+  makes `perturbation ↦ V` a genuine **linear map**.
+* `inhomogVariation_eq_integral` — the **Volterra/Picard fixed-point equation**:
+  `V t = ∫_{t₀}^{t} (A σ ∘ V σ + F σ) dσ` (FTC + anchor), companion to
+  `fundamentalSolution_eq_one_add_integral`; the integral-equation entry point for the *existence*
+  half.
+
+Remaining after this (future sessions): the **existence** of the first variation `V` (the
+continuation-flavoured half — Mathlib supplies only local Picard–Lindelöf; construct the global
+anchored solution of the linear inhomogeneous ODE, e.g. by continuation/Bielecki iteration of the
+Volterra equation `inhomogVariation_eq_integral`, or by reduction to a homogeneous flow on the
+augmented state `L(E) × ℝ`); the *general* merely-continuous spatial modulus; the *existence* of the
+variational flow family; and the resulting *spatial* `C^k`/`C^2` bootstrap (`x₀ ↦ D_x Φ_t`
+differentiable in the base point).
+
+Update — the **existence half is now CLOSED** (all axioms `propext`/`Classical.choice`/`Quot.sound`
+only): the complete ODE existence tower from Mathlib's local Picard–Lindelöf up to a *global* integral
+curve of a globally (in state, uniformly in time) Lipschitz field is proved in `SmoothDependenceCk`,
+and applied to construct the first variation `V` and the resolvent `W = D_x Φ`.  This discharges the
+flow-existence hypothesis (`∀ s, HasDerivAt z …` / `IsIntegralCurve`) that every downstream
+first-variation and `fundamentalSolution` lemma in the file previously assumed.  New
+`public import Mathlib.Analysis.ODE.PicardLindelof`.
+
+* `lipschitzFlowStep K = min 1 (1/(2(K+1)))` (`_pos`, `_le_one`, `_mul_le`: `K·step ≤ 1/2`) — the
+  **uniform, anchor-independent** local-existence half-step.
+* `exists_isIntegralCurveOn_Icc_of_lipschitzWith` — **uniform-step local existence**: for a uniformly
+  `K`-Lipschitz (`∀ t, LipschitzWith K (v t)`), time-continuous (`∀ x, Continuous (v · x)`) field on a
+  complete Banach space, an integral curve through any `(t₀, x₀)` on `Icc (t₀-step) (t₀+step)`.  Built
+  by assembling `IsPicardLindelof` (ball radius `a = 2·step·(C₀+1)+1`, bound `L = K·a+C₀+1`,
+  `C₀ = sup_{Icc} ‖v · x₀‖`, giving `L·step ≤ a-½ ≤ a`) and
+  `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀`.  The *uniform* step (from choosing a
+  large ball) is what allows chaining across arbitrarily long intervals.
+* `exists_isIntegralCurveAt_of_lipschitzWith` — the `IsIntegralCurveAt` (local-at-a-point) form.
+* `exists_isIntegralCurveOn_Icc_forward_of_lipschitzWith` — **forward** existence on *every* `Icc t₀ T`
+  by induction on the number of uniform steps (base = local existence; step = extend by one local
+  solution at the right endpoint, `isIntegralCurveOn_glue_Icc`); Archimedean choice of step count.
+* `exists_isIntegralCurveOn_Icc_backward_of_lipschitzWith` — **backward** existence on `Icc T t₀` via
+  the time-reversed field `w t x = -(v(-t)x)` (uniformly `K`-Lipschitz by `LipschitzWith.neg`) and
+  `isIntegralCurveOn_comp_neg`.
+* `exists_isIntegralCurveOn_Icc_of_lipschitzWith_containing` — **two-sided**: a *single* integral curve
+  on any `Icc a b` with `a ≤ t₀ ≤ b` (glue backward on `Icc a t₀` and forward on `Icc t₀ b` at `t₀`).
+* `eqOn_of_isIntegralCurveOn_Icc` — **interval uniqueness** (Mathlib `ODE_solution_unique_of_mem_Icc`,
+  trivial state constraint; interior `HasDerivAt` + `IsIntegralCurveOn.continuousOn`).
+* `exists_isIntegralCurve_of_lipschitzWith` — **GLOBAL existence**: choose a solution `Γ n` on each
+  window `Icc (t₀-(n+1)) (t₀+(n+1))`, reconcile overlaps by interval uniqueness so the selection
+  `γ t = Γ ⌊|t-t₀|⌋₊ t` is unambiguous and equals `Γ m` on `Icc (t₀-m) (t₀+m)`, then exhaust via
+  `isIntegralCurve_of_forall_mem_Icc`.
+* `exists_hasDerivAt_inhomogVariation` — **existence of the first variation**: for norm-bounded
+  continuous `A, F`, a global `V` with `V t₀ = 0`, `V' = A∘V + F` (feed `augmentedVariationalField A F`
+  — uniformly `(K+M)`-Lipschitz, time-continuous — into global existence; operator coordinate via
+  `hasDerivAt_inhomogVariation_of_augmented`).  Closes the existence half of the first-variation target.
+* `exists_hasDerivAt_resolvent` — **existence of the resolvent** `W' = A∘W`, `W t₀ = 1` (homogeneous
+  field `W ↦ (A s)∘W`, `K`-Lipschitz + time-continuous, on the complete space `E →L[ℝ] E`).
+
+Remaining after this (future sessions): the *general* merely-continuous spatial modulus (Heine–Cantor
+on the compact trajectory tube); the **spatial `C^k`/`C^2` bootstrap** (`x₀ ↦ D_x Φ_t` differentiable
+in the base point — now feedable, since the resolvent whose coefficient is `A(x₀) s = D_x v(s, Φ x₀ s)`
+is a constructed object); and packaging the first variation as a bounded *linear map* of the
+perturbation (Fréchet, via the existing linearity/uniqueness/bound lemmas + this existence).
+
+Update — the **spatial `C¹` bootstrap is now CLOSED at the Banach level** for a `C^{1,1}` field (all
+axioms `propext`/`Classical.choice`/`Quot.sound` only): the flow families are constructed from the
+existence tower, and the base-point differentiable dependence — `x₀ ↦ Φ x₀ t` Fréchet differentiable
+with derivative the resolvent — is assembled unconditionally from *field-level* data (no flow family,
+coefficient path, or resolvent supplied by the caller).  This turns the whole conditional
+`C¹`-dependence tower (`hasFDerivAt_flow_of_lipschitz_deriv`, …) into a self-contained theorem.
+
+* `exists_flow_family` — **existence of the flow family**: for a uniformly `K`-Lipschitz,
+  time-continuous field `v` on a complete Banach space, a family `Φ : E → ℝ → E` with `Φ z t₀ = z` and
+  `IsIntegralCurve (Φ z) v` for every `z` (`choose` an integral curve through each `(t₀, z)` out of the
+  global existence theorem `exists_isIntegralCurve_of_lipschitzWith`).  The `(hΦ, h0)` datum.
+* `exists_variationalFlowFamily` — **existence of the variational flow family**: for a norm-bounded
+  (`‖A s‖₊ ≤ K`), continuous coefficient `A`, the `variationalFieldVec A` specialisation of
+  `exists_flow_family` (field `K`-Lipschitz via `lipschitzWith_variationalFieldVec`, time-continuous
+  via `Continuous.clm_apply`).  The `(hΦ', h0')` datum, hence the resolvent `fundamentalSolution`.
+* `exists_hasFDerivAt_flow_of_lipschitz_deriv` — **unconditional base-point differentiable
+  dependence**: given `v` uniformly `K`-Lipschitz + time-continuous with an everywhere-defined,
+  jointly continuous (`hDvc`), spatially `L`-Lipschitz (`hDvlip`) Fréchet derivative `Dv`, there exist a
+  flow family `Φ` of `v` and a bounded operator `D` (the resolvent `D_x Φ_t`) with `HasFDerivAt
+  (fun z => Φ z t) D x₀` at any `x₀`, `t ≥ t₀`.  Proof: `exists_flow_family` builds `Φ`; the coefficient
+  `A s = Dv s (Φ x₀ s)` is norm-`≤ K` (`HasFDerivAt.le_of_lipschitz`) and continuous, so
+  `exists_variationalFlowFamily` builds `Φ'`/`D`; `hasFDerivAt_flow_of_lipschitz_deriv` closes it
+  (segment derivative via `HasFDerivAt.hasFDerivWithinAt`, Lipschitz defect via `hDvlip`).
+* `exists_flow_differentiable_of_lipschitz_deriv` — **`C¹` in initial data everywhere**: a *single*
+  flow family `Φ` of `v` whose time-`t` slice `z ↦ Φ z t` is `Differentiable ℝ` (Fréchet differentiable
+  at every initial value) — the clean regularity statement (build `Φ` once, differentiate at each `x₀`).
+
+Remaining after this (future sessions): the *general* merely-continuous spatial modulus (Heine–Cantor
+on the compact trajectory tube — upgrades `C^{1,1}` to a general `C¹` field); the **spatial `C^2`/`C^k`
+bootstrap** (differentiate `x₀ ↦ D_x Φ_t` once more, via the now-constructed resolvent and the
+second-order variational equation `norm_fundamentalSolution_sub_sub_variation_le`); and packaging the
+first variation as a bounded *linear map* of the perturbation (Fréchet).
+
+Update — the **coefficient-side second-order (`C²`) estimate layer is now built** in
+`SmoothDependenceCk` (all axioms `propext`/`Classical.choice`/`Quot.sound` only), supplying every
+coefficient-side input the base-point `C²` bootstrap feeds to the second-order variational estimate
+`norm_fundamentalSolution_sub_sub_variation_le`.  The coefficient is `A(x₀) s = Dv s (Φ x₀ s)`, the
+linearisation of the field along the reference trajectory, with resolvent `R s = D_x Φ_s =
+fundamentalSolution … s`.
+
+* `hasFDerivAt_derivField_apply_flow` / `differentiableAt_derivField_apply_flow` — **the coefficient
+  chain rule `∂A/∂x₀`**: from the flow derivative `HasFDerivAt (fun z => Φ z s) R x₀` (the `C¹`
+  resolvent) and the field's *second* spatial derivative `HasFDerivAt (Dv s) D2 (Φ x₀ s)`, the
+  coefficient `z ↦ Dv s (Φ z s)` is Fréchet differentiable at `x₀` with derivative
+  `D2.comp R = D²v s (Φ x₀ s) ∘ D_x Φ_s` (pure `HasFDerivAt.comp`).
+* `lipschitzWith_derivField_apply_flow`, `..._of_abs_le`, `norm_derivField_apply_flow_sub_le` — **the
+  `ε = O(‖z − w‖)` size datum** (`hAA'`/`hε` of the second-order variational estimates): `Dv s`
+  `L`-Lipschitz composed with the flow's exponential Lipschitz bound gives
+  `‖Dv s (Φ z s) − Dv s (Φ w s)‖ ≤ L · exp (K T) · ‖z − w‖` uniformly on `|s − t₀| ≤ T`.
+* `norm_flow_sub_fundamentalSolution_le_uniform` — **the uniform-in-time first-order flow remainder**:
+  `norm_flow_sub_fundamentalSolution_le_Icc` with the `t`-dependent Grönwall factor replaced by its
+  endpoint value (`gronwallBound_mono`), so `‖(Φ y t − Φ x t) − D_x Φ_t (y − x)‖ ≤
+  δ · gronwallBound 0 K 1 (T − t₀)` for *all* `t ∈ [t₀, T]`.
+* `norm_sub_fderiv_le_mul_sq_of_lipschitz` — **the pure quadratic `C^{1,1}` Taylor bound**:
+  `‖g b − g a − g' a (b − a)‖ ≤ M ‖b − a‖²` for a map `g` with `M`-Lipschitz derivative `g'` (linearised
+  MVT `Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le'` + the segment bound `‖ξ − a‖ ≤ ‖b − a‖`);
+  `norm_derivField_sub_sub_secondDeriv_le` is its `g = Dv s`, `g' = D²v s` specialisation.
+* `norm_flow_sub_sq_le` — **flow-separation square bound** `‖Φ z s − Φ x s‖² ≤ exp (2 K T) ‖z − x‖²`
+  (the square of `dist_flow_apply_le`).
+* `norm_field_linearizationDefect_flow_le` + `norm_flow_sub_fundamentalSolution_le_sq` — **quantitative
+  `C^{1,1}` dependence of the flow on initial data**: the field's trajectory-linearisation defect is
+  `O(‖z − x₀‖²)` uniformly in `s`, which fed as `δ` to `norm_flow_sub_fundamentalSolution_le_uniform`
+  upgrades the *qualitative* `C¹` (`HasFDerivAt`, remainder `o(‖z − x₀‖)`) to an *explicit* second-order
+  rate `‖Φ z t − Φ x₀ t − D_x Φ_t (z − x₀)‖ ≤ L · exp (2K(T−t₀)) · gronwallBound 0 K 1 (T−t₀) · ‖z − x₀‖²`
+  on `[t₀, T]`.
+* `norm_derivField_sub_sub_comp_fundamentalSolution_le_sq` — **the central `C²` coefficient Taylor
+  bound**: for a `C^{2,1}` field, `‖Dv s (Φ z s) − Dv s (Φ x₀ s) − (D²v s (Φ x₀ s) ∘ D_x Φ_s)(z − x₀)‖ ≤
+  (M · e + C' · L · e · g) · ‖z − x₀‖²` (`e = exp (2K(T−t₀))`, `g = gronwallBound 0 K 1 (T−t₀)`)
+  uniformly for `s ∈ [t₀, T]` — i.e. the coefficient is `C^{1,1}` in the base point with `O(‖z − x₀‖²)`
+  remainder and derivative `∂A/∂x₀` above.  Split into the pure `Dv`-Taylor remainder
+  (`norm_derivField_sub_sub_secondDeriv_le` + `norm_flow_sub_sq_le`) plus `D²v` applied to the flow's own
+  quadratic remainder (`norm_flow_sub_fundamentalSolution_le_sq`).
+
+Remaining for the base-point `C²` bootstrap (future sessions): assemble the above coefficient Taylor
+bound (`= O(‖z − x₀‖²)` coefficient perturbation with linear leading term the chain-rule derivative)
+with the second-order variational estimate `norm_fundamentalSolution_sub_sub_variation_le` and the
+a-priori first-variation bound `norm_fundamentalSolution_variation_le` to conclude
+`x₀ ↦ fundamentalSolution(A(x₀)) t = D_x Φ_t` is Fréchet differentiable (the first variation as a
+bounded *linear* map of the base-point increment), giving the spatial `C²` regularity of the flow —
+then iterate for `C³`.
+
+Update — the **base-point `C²` numerator (second-order Taylor remainder of the resolvent in the base
+point) is now CLOSED at the estimate level** (all axioms `propext`/`Classical.choice`/`Quot.sound`
+only), assembling the coefficient Taylor bound with the second-order variational estimate to identify
+the spatial `C²` derivative of the flow's resolvent up to an `O(‖z − x₀‖²)` remainder.  The
+second-order variational machinery, previously stated with a *globally*-uniform coefficient gap, is
+first re-cut in the interval-restricted form the base-point coefficients actually satisfy (their gap
+`Dv s (Φ z s) − Dv s (Φ x₀ s)` is `≤ L exp(K(T−t₀)) ‖z−x₀‖` only on compact tubes, never globally):
+
+* `norm_fundamentalSolution_sub_apply_le_of_forall_le_Icc`,
+  `norm_fundamentalSolution_sub_le_of_forall_le_Icc` — the **interval-restricted resolvent-coefficient
+  bounds**: the variants of `norm_fundamentalSolution_sub_apply/sub_le_of_forall_le` whose
+  coefficient-gap hypothesis `‖A s − A′ s‖ ≤ ε` is required only on `[t₀, T]` (the proof evaluates the
+  gap only there, through `dist_le_of_approx_trajectories_ODE`).
+  `‖D_x Φ_t^A − D_x Φ_t^{A′}‖ ≤ ε · exp(K(T−t₀)) · gronwallBound 0 K 1 (t−t₀)`.
+* `norm_fundamentalSolution_sub_sub_variation_le_Icc` — the **interval-restricted second-order
+  variational estimate**: the variant of `norm_fundamentalSolution_sub_sub_variation_le` with the
+  coefficient gap required only on `[t₀, T]` (via the interval sub-bound in `hgap` and directly on
+  `Ico t₀ t` in `hbound`).  Given the first variation `V` (`V′ = A₂ ∘ V + (A₁ − A₂) ∘ W₂`, `V t₀ = 0`),
+  `‖(W₁ t − W₂ t) − V t‖ ≤ ε² · exp(K(T−t₀)) · gronwallBound 0 K 1 (T−t₀)²` on `[t₀, T]`.
+* `norm_firstVariation_sub_linearVariation_le_sq` — **second-order agreement of the true and the
+  linearised first variation**: for the *true* first variation `Vz` (forcing `(A_z − A₀) ∘ W₀`) and the
+  *linearised* first variation `Vlin` (chain-rule forcing `(D²v(Φ x₀ s) ∘ W₀ · (z − x₀)) ∘ W₀`),
+  `‖Vz t − Vlin t‖ ≤ Cquad · exp(K(T−t₀)) · gronwallBound 0 K 1 (t−t₀) · ‖z − x₀‖²` (`Cquad` the
+  coefficient Taylor constant `M e + C′ L e g`).  `Vz − Vlin` is the first variation for the *residual*
+  coefficient perturbation (`hasDerivAt_firstVariation_perturbation_sub`), whose forcing is
+  `≤ Cquad ‖z − x₀‖² · ‖W₀ s‖` (the coefficient Taylor bound
+  `norm_derivField_sub_sub_comp_fundamentalSolution_le_sq` × `norm_fundamentalSolution_le`), closed by
+  the general a-priori bound `norm_inhomogVariation_le`.
+* `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` — **the second-order Taylor remainder of the
+  resolvent in the base point** (the spatial `C²` numerator): for a `C^{2,1}` field, the resolvent gap
+  `W_z t − W₀ t` (`W₀ =` resolvent of `A₀ s = Dv s (Φ x₀ s)`, `W_z` of `A_z s = Dv s (Φ z s)`) agrees to
+  second order with the *linearised* first variation `Vlin`,
+  `‖(W_z t − W₀ t) − Vlin t‖ ≤ (L² e₁³ g² + Cquad e₁ g) · ‖z − x₀‖²` on `[t₀, T]`
+  (`e₁ = exp(K(T−t₀))`, `g = gronwallBound 0 K 1 (T−t₀)`).  Triangle inequality across `Vz`:
+  `‖(W_z t − W₀ t) − Vz t‖ ≤ ε² e₁ g²` (`norm_fundamentalSolution_sub_sub_variation_le_Icc`,
+  `ε = L e₁ ‖z − x₀‖` from `norm_derivField_apply_flow_sub_le`) plus `‖Vz t − Vlin t‖`
+  (`norm_firstVariation_sub_linearVariation_le_sq`).  Since `Vlin` is *linear* in `z − x₀` this is the
+  resolvent analogue of the `C¹` numerator `norm_flow_sub_fundamentalSolution_le_sq`.
+* `linearVariation_perturbation_add_eq`, `linearVariation_perturbation_smul_eq` — the **linearity of the
+  candidate `C²` derivative**: the map `h ↦ Vlin^h t` is additive and homogeneous
+  (`Vlin^{h₁+h₂} t = Vlin^{h₁} t + Vlin^{h₂} t`, `Vlin^{c•h} t = c • Vlin^h t`), since the chain-rule
+  forcing `(D²v(Φ x₀ s) ∘ W₀)` is a bounded linear map of `h` (`map_add`/`map_smul`) and the
+  first-variation map is linear (`firstVariation_perturbation_add_eq`/`_smul_eq`).  The algebraic half of
+  packaging `h ↦ Vlin^h t` as a bounded linear map `D₂ ∈ E →L[ℝ] (E →L[ℝ] E)`.
+
+Remaining for the base-point `C²` bootstrap (future sessions): (i) the **existence** of the true /
+linearised first variations `Vz`, `Vlin` for these *time-unbounded* (locally bounded) forcings — the
+forcing `(A_z − A₀) ∘ W₀` grows like `exp(K|s−t₀|)`, so the globally-bounded
+`exists_hasDerivAt_inhomogVariation` does not apply; a compact-interval linear-ODE existence (Mathlib
+local Picard–Lindelöf + continuation, without a global forcing bound) is needed.  (ii) **package**
+`h ↦ Vlin^h t` as the bounded operator `D₂ = ∂/∂x₀ (D_x Φ_t)` via `LinearMap.mkContinuous` (linearity
+above + the a-priori bound `norm_inhomogVariation_le` for boundedness), and (iii) feed `D₂` and the
+Taylor remainder `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` (uniform in `z` near `x₀`)
+into `HasFDerivAt (fun z => D_x Φ_t^{A(z)}) D₂ x₀` — the spatial `C²` regularity — then iterate for
+`C³`.
+
+Update — **pieces (i) and (ii) of the base-point `C²` bootstrap are now CLOSED**, and the analytic
+bridge for piece (iii) is in place (all axioms `propext`/`Classical.choice`/`Quot.sound` only).  The
+recurring blocker — existence of the first variations `Vz`, `Vlin` for their *time-unbounded* forcings
+— is dissolved by the observation that the **direct** inhomogeneous variation field
+`inhomogVariationalField A F s W = (A s) ∘ W + F s` is *uniformly* `K`-Lipschitz in the state (the
+forcing `F s` is a state-constant translation and cancels in the state-difference), so a globally
+*continuous but unbounded* forcing still feeds the uniform-Lipschitz global existence — no augmented
+scalar coordinate (which forced `‖F s‖ ≤ M`) and no time-truncation.
+
+* `inhomogVariationalField`, `lipschitzWith_inhomogVariationalField`,
+  `exists_hasDerivAt_inhomogVariation_of_continuous` — **existence of the first variation for a
+  merely-continuous (time-unbounded) forcing**: for norm-bounded continuous `A` (`‖A s‖₊ ≤ K`) and
+  *any* continuous `F`, the anchored `V' = A ∘ V + F`, `V t₀ = 0` has a global solution, directly from
+  `exists_isIntegralCurve_of_lipschitzWith` on the uniformly-`K`-Lipschitz direct field.  The piece the
+  globally-bounded `exists_hasDerivAt_inhomogVariation` could not supply.
+* `exists_hasDerivAt_firstVariation_true` — **existence of the true first variation `Vz`** (forcing
+  `(A_z − A₀) ∘ W₀`, `A₀ s = Dv s (Φ x₀ s)`, `A_z s = Dv s (Φ z s)`), forcing continuity via
+  `Continuous.clm_comp` of `A_z − A₀` with `continuous_fundamentalSolution_time`.  Exactly the
+  `hVz`/`hVz0` datum of `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`.
+* `exists_hasDerivAt_firstVariation_linearised` / `..._dir` — **existence of the linearised first
+  variation `Vlin`** (chain-rule forcing `(D²v(Φ x₀ s) ∘ W₀ · h) ∘ W₀`), keyed on the increment
+  `z − x₀` and (the `_dir` form) on a free direction `h`; forcing continuity via
+  `Continuous.clm_comp`/`Continuous.clm_apply`.  Exactly the `hVlin`/`hVlin0` datum.  This closes
+  **piece (i)** (existence of `Vz`, `Vlin`).
+* `norm_linearisedFirstVariation_le` — **operator-norm bound for `Vlin`, linear in the direction**:
+  `‖Vlin t‖ ≤ C' · exp(2K(T − t₀)) · ‖h‖ · gronwallBound 0 K 1 (t − t₀)` on `[t₀, T]`, with the constant
+  independent of `h` (forcing bound `‖D²v‖ · ‖W₀‖ · ‖h‖ · ‖W₀‖ ≤ C' exp(2K(T−t₀)) ‖h‖` via
+  submultiplicativity + `norm_fundamentalSolution_le`, closed by `norm_inhomogVariation_le`).  The
+  boundedness datum for `mkContinuous`.
+* `exists_continuousLinearMap_linearisedVariation` — **the candidate spatial `C²` derivative
+  `D₂ = ∂/∂x₀(D_x Φ_t)` as a bounded operator** `E →L[ℝ] (E →L[ℝ] E)`: `D₂ h` equals the time-`t` value
+  of *any* solution of the linearised ODE for direction `h`.  Built by `LinearMap.mkContinuous` from the
+  canonical `h ↦ Vlin^h t` (chosen via `..._linearised_dir`), additive/homogeneous by
+  `linearVariation_perturbation_add_eq`/`_smul_eq`, bounded by `norm_linearisedFirstVariation_le`;
+  independence of the chosen solution by `inhomogVariation_unique`.  This closes **piece (ii)**.
+* `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` (+ `differentiableAt_`/`fderiv_` corollaries) — **the
+  analytic bridge for piece (iii)**: an `O(‖z − x₀‖²)` linearisation error near `x₀` gives
+  `HasFDerivAt f f' x₀` (the quadratic error is `o(‖z − x₀‖)` since `C · ‖z − x₀‖ → 0`, via
+  `isLittleO_of_norm_le_mul_of_tendsto_nhds_zero` and `HasFDerivAt.of_isLittleO`).  Exactly the shape
+  produced by `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` with `f' = D₂`.
+
+Remaining for the base-point `C²` bootstrap (future sessions): **piece (iii)** — assemble the resolvent
+map `z ↦ D_x Φ_t^{A(z)}` (via the canonical `fundamentalSolution`, independent of the flow family by
+`fundamentalSolution_congr`), establish the eventual quadratic bound
+`∀ᶠ z, ‖(W_z t − W₀ t) − D₂ (z − x₀)‖ ≤ C ‖z − x₀‖²` by substituting `D₂ (z − x₀) = Vlin^{z−x₀} t`
+(`exists_continuousLinearMap_linearisedVariation`) into
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, and feed it to
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` — giving `HasFDerivAt (fun z => D_x Φ_t^{A(z)}) D₂ x₀`,
+the spatial `C²` regularity — then iterate for `C³`.
+
+Update — **the base-point `C²` bootstrap is now CLOSED** (piece (iii) assembled; all axioms
+`propext`/`Classical.choice`/`Quot.sound` only).  The spatial `C²` regularity of the flow's resolvent —
+the derivative of the resolvent `z ↦ D_x Φ_t` in the initial value, i.e. the *second* spatial
+derivative of the flow — is proved from field-level data (`C^{2,1}` field), and both at a base point
+and everywhere.  This completes the `C²` layer of the smooth-dependence tower that Items 1 & 2 consume.
+
+* `exists_hasFDerivAt_fundamentalSolution_baseCurve` — **piece (iii), the assembly**:
+  `∃ D₂, HasFDerivAt (fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) D₂ x₀`.  The packaged
+  operator `D₂` (`exists_continuousLinearMap_linearisedVariation`) is identified as the Fréchet
+  derivative of the resolvent map `z ↦ D_x Φ_t^{A(z)}` at the base point.  The uniform second-order
+  Taylor remainder `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` bounds
+  `‖(W_z t − W₀ t) − Vlin t‖ ≤ C‖z − x₀‖²`; the operator characterisation gives `D₂(z − x₀) = Vlin t`;
+  and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` upgrades the `O(‖z − x₀‖²)` error to `HasFDerivAt`.
+* `differentiableAt_fundamentalSolution_baseCurve` — the **`DifferentiableAt` corollary**: the resolvent
+  map is Fréchet differentiable at `x₀`.
+* `exists_hasFDerivAt_fderiv_flow_of_lipschitz_secondDeriv` — the **field-level, self-contained**
+  second-derivative statement (mirroring the `C¹` `exists_hasFDerivAt_flow_of_lipschitz_deriv`): from a
+  `C^{2,1}` field (uniformly `K`-Lipschitz, time-continuous `v` with everywhere-defined, jointly
+  continuous, spatially `L`-Lipschitz `Dv` and everywhere-defined, jointly continuous, `M`-Lipschitz
+  `D2v`) there is a flow family `Φ` of `v` whose resolvent map — identified via the `C¹` bootstrap
+  `hasFDerivAt_flow_of_lipschitz_deriv` with `fderiv ℝ (fun w => Φ w t)` — is Fréchet differentiable at
+  `x₀`.  I.e. `z ↦ Φ z t` is twice Fréchet differentiable at `x₀`.  Builds the flow family, the per-`z`
+  variational families, and the `D2v ≤ L` bound (`C' = L`) internally.
+* `exists_flow_fderiv_differentiable_of_lipschitz_secondDeriv` — the **everywhere** version: one flow
+  family `Φ` whose resolvent map `z ↦ fderiv ℝ (fun w => Φ w t) z` is `Differentiable ℝ` (Fréchet
+  differentiable at every initial value).  Mirrors the `C¹` `exists_flow_differentiable_of_lipschitz_deriv`.
+
+Remaining for the smooth-dependence tower (future sessions): **the `C³` layer** — differentiate the
+resolvent's derivative `x₀ ↦ D₂(x₀)` (the second fundamental solution) once more.  This needs the
+*third-order* variational analysis: the `x₀`-dependence of `D₂` via a second variational equation for
+the resolvent's resolvent, in the same style as the `C²` numerator
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq` — a new numerator
+`‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²` with `D₃` the packaged third variation — then the same
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge.  Alternatively, connect the now-complete `C²`
+dependence to the manifold gauge-flow consumers of Items 1 & 2 directly.
+
+Update — **the flow map is now `ContDiff ℝ 2` in the initial data** (honest continuous second
+differentiability), together with the honest `C¹` (`ContDiff ℝ 1`) statement and the reusable
+continuity primitives that bridge the earlier *differentiable*-only dependence results to Mathlib's
+`ContDiff` vocabulary (all axioms `propext`/`Classical.choice`/`Quot.sound` only).  The earlier
+`exists_flow_differentiable_of_lipschitz_deriv` / `exists_flow_fderiv_differentiable_of_lipschitz_secondDeriv`
+only produced *differentiable* flow maps; the compact-manifold gauge flow (Item 2) consumes genuine
+`C^k` (a *diffeomorphism* family, whose derivatives must vary continuously), i.e. `ContDiff`.
+
+* `exists_flow_fderiv_continuous_of_lipschitz_deriv`, `exists_flow_contDiff_one_of_lipschitz_deriv` —
+  the **`C¹`-in-initial-data upgrade** (`C^{1,1}` field): one flow family `Φ` whose forward slice
+  `z ↦ Φ z t` is `Differentiable` **and** whose resolvent map `z ↦ fderiv ℝ (fun w => Φ w t) z = D_x Φ_t`
+  is `Continuous` (in fact Lipschitz), hence `ContDiff ℝ 1`.  The resolvent-continuity half is the
+  operator-norm continuous dependence of the resolvent on its coefficient
+  (`norm_fundamentalSolution_sub_le_of_forall_le_Icc`) composed with the Lipschitz-in-base control of
+  the trajectory-linearised coefficient (`norm_derivField_apply_flow_sub_le`).
+* `norm_inhomogVariation_sub_le_of_gap` — **Lipschitz dependence of the inhomogeneous variation on its
+  coefficient and forcing** (allowing the two coefficient fields to differ, unlike
+  `hasDerivAt_inhomogVariation_sub`): `‖V₁ t − V₂ t‖ ≤ (α·N + β)·gronwallBound 0 K 1 (t − t₀)` from a
+  coefficient gap `α`, second-solution bound `N`, forcing gap `β`.  The continuous-dependence primitive
+  behind the second fundamental solution's base-point regularity.
+* `norm_secondDerivField_apply_flow_sub_le` — the **`D²v`-along-flow Lipschitz bound** (second-derivative
+  analogue of `norm_derivField_apply_flow_sub_le`): `‖D²v s (Φ z s) − D²v s (Φ w s)‖ ≤ M·exp(K T)·‖z − w‖`.
+* `norm_fundamentalSolution_baseCurve_sub_le` — the **resolvent Lipschitz-in-base-point** estimate
+  (`‖D_x Φ_t^{A(z)} − D_x Φ_t^{A(w)}‖ ≤ L·exp(K(T−t₀))·‖z−w‖·exp(K(T−t₀))·gronwallBound 0 K 1 (t−t₀)`).
+* `norm_chainRuleForcing_sub_le` — the **perturbation estimate for the chain-rule forcing operator**
+  `((P∘W)h)∘W`: `≤ (dp·w² + 2·p·w·dw)·‖h‖` under `‖P₁‖ ≤ p`, `‖W₁‖,‖W₂‖ ≤ w`, `‖P₁−P₂‖ ≤ dp`,
+  `‖W₁−W₂‖ ≤ dw` (telescoping the composition).  The algebraic core of the forcing gap `β`.
+* `exists_flow_contDiff_two_of_lipschitz_secondDeriv` — **the `ContDiff ℝ 2` assembly** (`C^{2,1}` field):
+  `z ↦ Φ z t` is twice continuously Fréchet differentiable.  The `C¹` bootstrap gives
+  `fderiv ℝ (fun w => Φ w t)` = resolvent; the base-point `C²` bootstrap (replicated with the *packaged*
+  operator `D₂ z` of `exists_continuousLinearMap_linearisedVariation`) gives
+  `fderiv ℝ (fderiv ℝ (fun w => Φ w t)) = D₂`; and the new **continuity of the second fundamental
+  solution** `z ↦ D₂ z` is the Lipschitz bound `‖D₂ z − D₂ z₀‖ ≤ C·‖z − z₀‖`, obtained (for a unit
+  direction `h`, via `D₂ z h − D₂ z₀ h = Vlin^{z,h} t − Vlin^{z₀,h} t`) from
+  `norm_inhomogVariation_sub_le_of_gap` fed the coefficient gap
+  (`norm_derivField_apply_flow_sub_le`), the second-solution bound (`norm_linearisedFirstVariation_le`),
+  and the forcing gap (`norm_chainRuleForcing_sub_le` fed `norm_secondDerivField_apply_flow_sub_le` and
+  `norm_fundamentalSolution_baseCurve_sub_le`).  Packaged via `contDiff_one_iff_fderiv` /
+  `contDiff_succ_iff_fderiv`.
+
+Remaining for the smooth-dependence tower (future sessions): the **`C³` layer** (third-order variational
+analysis of `x₀ ↦ D₂(x₀)`, giving `ContDiff ℝ 3`), and/or the **`ContDiff ℝ 1`/`2` everywhere→jointly
+in `(x, t)`** refinements and connecting the now-`ContDiff` initial-data dependence to the
+manifold gauge-flow consumers of Items 1 & 2.
+
+Update — **the `C³`-layer forcing toolkit is now under construction** (the third-order variational
+analysis giving `ContDiff ℝ 3`).  The `C³` bootstrap replicates the `C²` continuity mechanism one order
+up: the *third* fundamental solution `x₀ ↦ D₃(x₀)` (`= ∂/∂x₀ D₂(x₀)`) is characterised, per direction,
+by an inhomogeneous linear variational ODE whose forcing is `∂/∂x₀` of the second-variation
+chain-rule forcing `((D²v(Φz)∘W)h)∘W`.  Differentiating in the base point produces **three** forcing
+terms: two *asymmetric composition* terms `((D²v(Φz)∘D₂(z))h)∘W(z)` and `((D²v(Φz)∘W(z))h)∘D₂(z)`
+(where `D₂` is the second fundamental solution and `W` the resolvent), plus a *third-derivative* term
+built from `D³v(Φz)` contracted once with a resolvent direction.  The generic driver
+`norm_inhomogVariation_sub_le_of_gap` (which only needs a forcing gap `β`) is directly reusable at the
+`D₃` level, so the new work is exactly the `β` (forcing-gap) and `N` (forcing-size) data for these three
+terms.  This session adds the fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`)
+primitives that supply them:
+
+* `norm_field_apply_flow_sub_le` — the **codomain-generic field-along-flow Lipschitz size datum**: for
+  *any* seminormed target `F` and an `N`-Lipschitz field `DF s : E → F`, `z ↦ DF s (Φ z s)` moves by at
+  most `N · exp (K T) · ‖z − w‖` on the tube `|s − t₀| ≤ T`.  Subsumes
+  `norm_secondDerivField_apply_flow_sub_le` (`F := E →L[ℝ] (E →L[ℝ] E)`) and, crucially, sidesteps the
+  fact that the *curried* triple `E →L[ℝ] E →L[ℝ] E →L[ℝ] E` carries **no** operator-norm instance in
+  Mathlib v4.29.1 (verified).
+* `norm_thirdDerivField_apply_flow_sub_le` — the **`D³v`-along-flow Lipschitz bound**, the third-order
+  analogue of `norm_secondDerivField_apply_flow_sub_le`, with the third spatial derivative represented
+  by the canonical `iteratedFDeriv`-target `ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E` (which
+  *does* carry clean `NormedAddCommGroup`/`NormedSpace` instances, unlike the curried triple).
+* `norm_bilinearCompForcing_sub_le` — the **asymmetric composition-forcing perturbation**
+  `‖((P₁∘A₁)h)∘B₁ − ((P₂∘A₂)h)∘B₂‖ ≤ (dp·a·b + p·da·b + p·a·db)·‖h‖` for *possibly-different* inner/outer
+  operands `A ≠ B` (e.g. `A = D₂`, `B = W`).  Specialising `A = B = W` recovers exactly
+  `norm_chainRuleForcing_sub_le` (`(dp·w² + 2p·w·dw)·‖h‖`) — verified.  Supplies the `β`-gap of the two
+  asymmetric forcing terms.
+* `norm_bilinearCompForcing_le` — the **a-priori size** `‖((P∘A)h)∘B‖ ≤ ‖P‖·‖A‖·‖B‖·‖h‖`, the `N`-datum
+  bounding the (second) `D₃`-solution through `norm_inhomogVariation_le`.
+* `norm_clm_apply_sub_le` — the **bilinear-evaluation gap**
+  `‖T₁ u₁ − T₂ u₂‖ ≤ ‖T₁‖·‖u₁ − u₂‖ + ‖T₁ − T₂‖·‖u₂‖`, the telescoping split of a product gap into an
+  operand-gap and an operator-gap part.
+* `norm_thirdDerivCurryLeft_apply_flow_sub_le` — the **once-contracted `D³v`-field gap** (the `β`-gap of
+  the third-derivative forcing term): `‖(D³v(Φz s)).curryLeft u₁ − (D³v(Φw s)).curryLeft u₂‖ ≤
+  ‖D³v(Φz s)‖·‖u₁ − u₂‖ + N·exp(K T)·‖z − w‖·‖u₂‖`, assembled from `norm_clm_apply_sub_le`, the
+  `curryLeft` isometry `ContinuousMultilinearMap.curryLeft_norm`, and
+  `norm_thirdDerivField_apply_flow_sub_le`.
+
+Remaining for the `C³` layer (future sessions): the **existence of the second-order (third) variation**
+(`exists_hasDerivAt_secondVariation…`, the `D₃`-analogue of
+`exists_hasDerivAt_firstVariation_linearised_dir`), the **packaged `D₃` operator** — which, because
+`D₂ : E →L[ℝ] (E →L[ℝ] E)`, must be represented in a form avoiding the instance-less curried triple
+(e.g. via `ContinuousMultilinearMap`/`curryLeft`) — the **second-order Taylor remainder**
+`‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²`, and finally the `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+bridge to `ContDiff ℝ 3`.  The forcing-gap/size toolkit above is exactly the analogue of the
+`C²`-continuity data (`norm_secondDerivField_apply_flow_sub_le`, `norm_fundamentalSolution_baseCurve_sub_le`,
+`norm_chainRuleForcing_sub_le`) that drove `exists_flow_contDiff_two_of_lipschitz_secondDeriv`.
+
+Update — **the `C³` third-variation existence-and-packaging chain is now complete** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`).  The whole `D₃`-analogue of the `C²` existence→packaging
+mechanism is proved:
+
+* `exists_hasDerivAt_secondVariation_linearised_dir` — the **existence of the second-order (third)
+  variation** (the `D₃`-analogue of `exists_hasDerivAt_firstVariation_linearised_dir`): the
+  three-term third-variation ODE `V' = A₀ ∘ V + (F_A + F_B + F_C)`, `V t₀ = 0`, with the two asymmetric
+  composition terms `F_A = ((D²v ∘ W₂) h) ∘ W`, `F_B = ((D²v ∘ W) h) ∘ W₂` and *any* continuous
+  third-derivative term `F₃`, has a global solution (via `exists_hasDerivAt_inhomogVariation_of_continuous`,
+  the asymmetric-term continuity by `clm_comp`/`clm_apply`).
+* `continuous_thirdDerivForcing` + `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv` —
+  the **concrete** third-derivative forcing `F_C = (curryFin1 ((D³v.curryLeft (W k)).curryLeft (W h))) ∘ W`
+  (`e ↦ D³v[W k, W h, W e]`, representing the third derivative via `curryLeft`/`continuousMultilinearCurryFin1`,
+  which *do* carry norm/continuity instances, unlike the curried triple `E →L E →L E →L E`) and its
+  continuity, giving the **fully-instantiated** third-variation existence.
+* `norm_thirdDerivForcing_le` — the **`F_C` size datum** `‖(curryFin1 ((T.curryLeft a).curryLeft b)) ∘ W‖ ≤
+  ‖T‖·‖a‖·‖b‖·‖W‖` (the `curryLeft`/`Fin 1` analogue of `norm_bilinearCompForcing_le`, via the `curryLeft`
+  and `continuousMultilinearCurryFin1` isometries), completing the forcing-size toolkit for all three terms.
+* `norm_thirdVariation_le` — the **a-priori size bound on the third variation** (the `D₃`-analogue of
+  `norm_linearisedFirstVariation_le`): `‖V t‖ ≤ (2·C'·N₂·exp(K(T−t₀)) + C''·exp(3K(T−t₀))·‖k‖) ·
+  gronwallBound 0 K 1 (t−t₀) · ‖h‖`, from the three forcing-term bounds + `norm_inhomogVariation_le`.
+* `thirdVariation_perturbation_add_eq` / `thirdVariation_perturbation_smul_eq` — the **`h`-linearity**
+  (additive + homogeneous) of the third variation (the whole three-term forcing is linear in `h` —
+  `map_add`/`map_smul` through the operator applications and `curryLeft`/`curryFin1`, `add_comp`/`smul_comp` —
+  so uniqueness `inhomogVariation_unique` identifies `V^{h₁+h₂} = V^{h₁} + V^{h₂}`, `V^{c•h} = c • V^h`).
+* `exists_continuousLinearMap_thirdVariation` + `exists_continuousLinearMap_thirdVariation_norm_le` — the
+  **packaged `D₃(k)` operator** `h ↦ D₃(k, h)` as a bounded linear map (for fixed base direction `k` and
+  second fundamental solution curve `W₂`), the `D₃`-analogue of `exists_continuousLinearMap_linearisedVariation`
+  (`LinearMap.mkContinuous` fed the `h`-linearity and the a-priori bound; value independent of the chosen
+  solution by uniqueness), together with its operator-norm bound `‖D₃k‖ ≤ (…)·gronwallBound…`
+  (`opNorm_le_bound` + `0 ≤ gronwallBound 0 K 1 (t−t₀)`).
+
+Remaining for the `C³` layer (future sessions): the **second-order Taylor remainder**
+`‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²` (the `D₃`-analogue of the `C²` numerator
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, comparing the base-point difference of the
+*second* fundamental solution to the packaged `D₃` via a `norm_inhomogVariation_sub_le_of_gap` Grönwall
+estimate — needs the base-point machinery for `z ↦ D₂(z)` and a concrete second fundamental solution
+curve `W₂ = ∂_{x₀} W`), then the already-available `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge
+to `ContDiff ℝ 3`; and/or the `k`-linearity/full bilinear `(k, h)` packaging of `D₃`.
+
+Update — **the `C³` `D₃` packaging is now bilinear in `(k, h)`, and the second-order Taylor-remainder
+scaffold is in place** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`).  This closes the
+`k`-linearity/bilinear-packaging item flagged above and lays the reusable Grönwall scaffold that the
+remaining Taylor remainder plugs into:
+
+* `curryLeft_add` / `curryLeft_smul` — the additivity/homogeneity of `ContinuousMultilinearMap.curryLeft`
+  in the multilinear argument (via the linearity of `continuousMultilinearCurryLeftEquiv`), exposed as
+  `simp`-usable rewrites (the plain `def` form is not matched by `map_add`/`map_smul` directly).  Needed
+  to push the base direction `k` through the *outer* `curryLeft` of the third-derivative forcing `F_C`.
+* `thirdVariation_baseDir_add_eq` / `thirdVariation_baseDir_smul_eq` — the **`k`-linearity of the third
+  variation** (the base-direction analogue of the `h`-linearity `thirdVariation_perturbation_add_eq`/
+  `_smul_eq`): with `W₂` itself linear in `k` (as it is when `W₂ k = ∂_{x₀} W · k`), the whole three-term
+  forcing `F_A + F_B + F_C` is linear in `k` — `F_A`/`F_B` split via the linearity of `W₂ k`
+  (`comp_add`/`add_comp`/`add_apply`, resp. `comp_smul`/`smul_comp`/`smul_apply`), `F_C` via the
+  linearity of `W k` (`map_add`/`map_smul`) pushed through the two `curryLeft` layers (`map_add`/`map_smul`
+  on the inner `D³v.curryLeft`, `curryLeft_add`/`curryLeft_smul` on the outer) — so
+  `inhomogVariation_unique` identifies `V^{k₁+k₂} = V^{k₁} + V^{k₂}`, `V^{c•k} = c • V^k`.
+* `exists_continuousLinearMap_thirdVariation_bilinear` — the **full bilinear operator**
+  `D₃ : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))`, `D₃ k h =` the time-`t` third variation.  Upgrades
+  `exists_continuousLinearMap_thirdVariation` (inner `h` only, fixed `k`) to both directions: for each `k`
+  the inner operator `D₃(k)` comes from `exists_continuousLinearMap_thirdVariation_norm_le` fed the
+  `‖k‖`-scaled curve bound `‖W₂ k s‖ ≤ N₂·‖k‖` (so `‖D₃(k)‖ ≤ (…)·‖k‖`, genuinely `O(‖k‖)`); the outer
+  `k`-additivity/homogeneity is the new `thirdVariation_baseDir_add_eq`/`_smul_eq` (through the value
+  characterisation `D₃(k) h = V^{k,h} t` and ODE uniqueness), packaged by `LinearMap.mkContinuous`.  This
+  is the object the base-point Taylor remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖` (with `k = z − x₀`)
+  compares against.
+* `norm_inhomogVariation_sub_sub_le_of_forcingGap` — the **second-order Taylor-remainder scaffold**
+  (generic, phrased at the inhomogeneous-variation level): for `V₁` (coefficient `A₁`, forcing `F₁`), `V₀`
+  and `V₃` (both reference coefficient `A₀`, forcings `F₀`, `F₃`), all anchored at `t₀`, the triple
+  difference obeys `‖(V₁ t − V₀ t) − V₃ t‖ ≤ β · gronwallBound 0 K 1 (t − t₀)` where `β` bounds the
+  **forcing gap** `((A₁ − A₀) ∘ V₁ + (F₁ − F₀)) − F₃`.  Proof: `W = (V₁ − V₀) − V₃` solves the
+  `A₀`-coefficient inhomogeneous ODE `W' = A₀ ∘ W + (forcing gap)` (from `(hV₁.sub hV₀).sub hV₃` and the
+  rearrangement `A₁ ∘ V₁ = A₀ ∘ V₁ + (A₁ − A₀) ∘ V₁`), so `norm_inhomogVariation_le` fed `β` closes it.
+  The `D₃`-analogue of the *shape* of `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`, isolating
+  the whole remaining second-order content into the single forcing-gap hypothesis `hβ`.
+
+Remaining for the `C³` layer (future sessions): the **forcing-gap estimate** `hβ` — that for the concrete
+`D₂`/`D₃` instantiation (`A₁ = Dv(Φ z)`, `A₀ = Dv(Φ x₀)`, `V₁ = Vlin^{z,h}`, `V₀ = Vlin^{x₀,h}`,
+`F₃ = F_A + F_B + F_C` with `W₂ = ∂_{x₀} W · (z − x₀)`) the forcing gap
+`((A₁ − A₀) ∘ V₁ + (F₁ − F₀)) − F₃` is `O(‖z − x₀‖² · ‖h‖)` (a multi-term second-order Taylor analysis
+with cancellation between `(A₁ − A₀) ∘ V₁` and the `D₃` forcing terms, using the built forcing-gap/size
+toolkit and a concrete second fundamental solution curve `W₂ = ∂_{x₀} W`); feeding it to
+`norm_inhomogVariation_sub_sub_le_of_forcingGap` gives the Taylor remainder, and the already-available
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge then yields `ContDiff ℝ 3`.
+
+Update — **the design-independent forcing-gap size/remainder bricks and the base-point `C^{0,1}`
+operator continuity of `D₂` are now proved** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`),
+chipping the remaining `C³` forcing-gap `hβ` from below with pieces that do **not** depend on the still-open
+`F₃` design question flagged at the end of this update:
+
+* `norm_linearisedFirstVariation_baseCurve_sub_le` — the **curve-level `V₁ − V₀ = O(‖z − x₀‖·‖h‖)`
+  size datum**: for the two linearised first-variation curves in a common direction `h` at base points
+  `z` and `x₀` (`Vz`, `Vx`, chain-rule forcings `((D²v(Φ·)∘W_·)h)∘W_·`), `‖Vz t − Vx t‖ ≤
+  exp(K(T−t₀))³·(M + 3·L·C'·gronwallBound 0 K 1 (T−t₀))·‖z − x₀‖·‖h‖·gronwallBound 0 K 1 (t − t₀)`,
+  uniformly on the tube.  Exposes as a standalone lemma the second-fundamental-solution-**curve**
+  continuity previously only buried (at the time-`t` value) inside
+  `exists_flow_contDiff_two_of_lipschitz_secondDeriv`; assembled from `norm_inhomogVariation_sub_le_of_gap`
+  fed the coefficient gap (`norm_derivField_apply_flow_sub_le`), the `N`-bound
+  (`norm_linearisedFirstVariation_le` + `gronwallBound_mono`), and the chain-rule forcing gap
+  (`norm_chainRuleForcing_sub_le` + flow bounds); the messy `(α·N + β)·gronwall` constant collapses to the
+  clean `exp³·(M + 3LC'g)` form by `Real.exp_add` + `ring`.
+* `norm_coeffVariation_sub_secondDerivComp_le_sq` — the **second-order remainder of the
+  coefficient-times-variation forcing term `(A₁ − A₀) ∘ V₁`**: isolates its linear-in-`(z − x₀)` part
+  `(D²v(Φ x₀ s)[W_x (z − x₀)]) ∘ V₀` with a quadratic `O(‖z − x₀‖²·‖h‖)` remainder, via the telescope
+  `P ∘ Vz − Q ∘ Vx = P ∘ (Vz − Vx) + (P − Q) ∘ Vx` fed `norm_derivField_apply_flow_sub_le ×
+  norm_linearisedFirstVariation_baseCurve_sub_le` (cross term) and `norm_derivField_sub_sub_comp_
+  fundamentalSolution_le_sq × norm_linearisedFirstVariation_le` (field-Taylor defect `P − Q`).
+* `norm_chainRuleForcing_flow_sub_le` — the **standalone clean-constant `β` forcing-gap datum**:
+  `‖F(z) s − F(x₀) s‖ ≤ exp(K(T−t₀))³·(M + 2·L·C'·gronwallBound 0 K 1 (T−t₀))·‖z − x₀‖·‖h‖` for the
+  chain-rule forcing `F(z) s = ((D²v(Φ z s) ∘ W_z) h) ∘ W_z`, i.e. the base-point Lipschitz continuity of
+  the second-variation forcing along the flow (`norm_chainRuleForcing_sub_le` + flow bounds, constant
+  collapsed by `ring`).
+* `norm_secondFundamentalSolution_op_sub_le` — the **honest operator-norm `C^{0,1}` statement for `D₂`**:
+  `‖D₂z − D₂x‖ ≤ exp(K(T−t₀))³·(M + 3·L·C'·gronwallBound 0 K 1 (T−t₀))·gronwallBound 0 K 1 (t−t₀)·
+  ‖z − x₀‖` for the packaged base-point second derivatives `D₂z, D₂x` (each characterised, à la
+  `exists_continuousLinearMap_linearisedVariation`, by `D₂· h = Vlin t`).  Via `opNorm_le_bound`: per
+  direction `h`, build the canonical variations (`exists_hasDerivAt_firstVariation_linearised_dir`),
+  identify `D₂z h = Vz t`, `D₂x h = Vx t`, and bound by `norm_linearisedFirstVariation_baseCurve_sub_le`.
+  This is the operator-norm `z ↦ D₂(z)` regularity datum the `C³` layer differentiates.
+
+**Forcing-gap design note (open, for the next session).**  Writing `Ψ = (A₁ − A₀) ∘ V₁ + (F₁ − F₀)` for
+the extra forcing that `V₁ − V₀` experiences (so `hβ` bounds `‖Ψ − F₃‖`), the first-order-in-`k` part of
+`(A₁ − A₀) ∘ V₁` is `(D²v(Φ x₀)[W_x k]) ∘ V₀` (isolated by `norm_coeffVariation_sub_secondDerivComp_le_sq`,
+`k = z − x₀`, `V₀ = Vlin^{x₀,h}`), while the current packaged `F₃ = F_A + F_B + F_C` accounts only for the
+linear part of `(F₁ − F₀)`.  The two asymmetric terms are `F_A(s) = (e ↦ D²v(Φ x₀ s)[W₂ s h, W_x s e])`,
+`F_B(s) = (e ↦ D²v(Φ x₀ s)[W_x s h, W₂ s e])` with `W₂ = Vlin^{x₀,k}` (the second fundamental solution
+curve in direction `k`); the isolated leading term is `e ↦ D²v(Φ x₀ s)[W_x s k, V₀ s e]` with
+`V₀ = Vlin^{x₀,h}`.  Because `W₂ = Vlin^{x₀,·}(k)` and `V₀ = Vlin^{x₀,·}(h)` are the **same** operator
+curve evaluated at the two directions, matching the isolated leading term against `F_A`/`F_B` requires the
+**symmetry of `D²v`** (`D²v[a,b] = D²v[b,a]`), which is currently **not** a hypothesis of the smooth-
+dependence tower.  So the next `C³` step is either (i) add a `D²v`-symmetry hypothesis (available from
+`ContDiff`/`secondDeriv` symmetry) and prove the leading-term cancellation, or (ii) verify whether `F₃`
+needs an extra `(D²v[W_x k]) ∘ V₀` summand; then the remaining `hβ` pieces are the `(F₁ − F₀)` second-order
+remainder (needs the multilinear `D³v` Taylor — note the curried triple `E →L E →L E →L E` has **no** norm
+instance in Mathlib v4.29.1, verified, so use `ContinuousMultilinearMap ℝ (Fin 3) E`) plus the pure
+quadratic remainders now available above.
+
+Update — **the open forcing-gap design question is RESOLVED (option (ii)), and the entire
+design-corrected `D₃` packaging chain is now built** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`.  The ODE
+derivation settles it: differentiating the second-variation ODE `V' = A₀ ∘ V₀ + ((D²v ∘ W) h) ∘ W` in
+the base point (direction `k`) gives `∂_k(A₀ ∘ V₀) = (∂_k A₀) ∘ V₀ + A₀ ∘ (∂_k V₀)`; the coefficient
+part `∂_k A₀ = D²v[W_x k]` contributes the **coefficient-variation leading term `(D²v[W_x k]) ∘ V₀`**,
+which is *not* among `F_A`/`F_B`/`F_C` (those come only from differentiating the forcing) and which is
+exactly the operator isolated by `norm_coeffVariation_sub_secondDerivComp_le_sq` as the
+first-order-in-`k` part of `(A₁ − A₀) ∘ V₁`.  So the correct third-variation forcing is
+`F₃ = (D²v[W_x k]) ∘ V₀ + F_A + F_B + F_C`; **no `D²v`-symmetry hypothesis is required**.  The whole
+`C²`-packaging mechanism is replayed for this corrected forcing:
+
+* `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff` — corrected third-variation
+  ODE existence (`F₃` slot fed `newLeading + F_C`).
+* `norm_thirdVariation_coeff_le` — corrected a-priori size bound (four-term forcing; the leading term
+  bounded via `norm_bilinearCompForcing_le` fed `‖V₀‖ ≤ N₀`).
+* `thirdVariation_coeff_perturbation_add_eq` / `_smul_eq` — additivity/homogeneity **in `h`** (the
+  leading term forces `V₀` to be linear in `h` as well: `(h, V₀)`-jointly linear, via
+  `add_comp`/`comp_add`/`smul_comp`/`comp_smul`).
+* `exists_continuousLinearMap_thirdVariation_coeff` / `_norm_le` — the packaged corrected operator
+  `D₃(k) : E →L (E →L E)` (`V₀ = V0fun h` supplied linearly, `‖V0fun h s‖ ≤ N₀·‖h‖` so the bound
+  factors `‖h‖`) with operator norm `‖D₃k‖ ≤ (2C'N₂exp + C'N₀exp‖k‖ + C''exp³‖k‖)·gronwall`.
+* `thirdVariation_coeff_baseDir_add_eq` / `_smul_eq` — additivity/homogeneity **in `k`** (the leading
+  term carries `k` explicitly with `V₀` fixed; `W₂` linear in `k`).
+* `exists_continuousLinearMap_thirdVariation_coeff_bilinear` — the **full bilinear corrected operator**
+  `D₃ : E →L (E →L (E →L E))` (`W₂` linear in `k` with `‖W₂ k s‖ ≤ N₂·‖k‖`, `V0fun` linear in `h`;
+  `‖k‖`-linear operator norm).  This is the design-corrected `D₃` that the base-point second-order
+  Taylor remainder consumes.
+
+Remaining for `ContDiff ℝ 3` (next session): the **`(F₁ − F₀)` second-order remainder**
+`‖(F₁ − F₀) − (F_A + F_B + F_C)‖ ≤ Cquad·‖z − x₀‖²·‖h‖` (the flow-forcing Taylor defect: `D²v(Φz) −
+D²v(Φx₀) ≈ D³v[W_x k]` and `W_z − W_x ≈ W₂ k` expansions, using `norm_bilinearCompForcing_sub_le`,
+`norm_thirdDerivCurryLeft_apply_flow_sub_le`, and the `D³v` Taylor).  Combined with the already-proved
+coefficient remainder `norm_coeffVariation_sub_secondDerivComp_le_sq`, this gives the forcing gap `hβ`
+for the **corrected** `F₃`; then `norm_inhomogVariation_sub_sub_le_of_forcingGap` yields the Taylor
+remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C‖z − x₀‖²`, and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+yields `ContDiff ℝ 3`.
+
+Update — **the second-order (quadratic-remainder) Taylor engine for the composition forcing is now
+proved**, isolating the analytic core of the `(F₁ − F₀)` remainder into a design-independent,
+clean-typed algebraic engine (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`:
+
+* `norm_bilinearCompForcing_sub_sub_le` — the **`C³`-layer quadratic-remainder analogue** of the
+  first-order (Lipschitz) perturbation bound `norm_bilinearCompForcing_sub_le`.  For the trilinear
+  composition forcing `G(P, A, B) := ((P ∘ A) h) ∘ B` (linear in each of `P : E →L (E →L E)`,
+  `A, B : E →L E`), it identifies the **three linear-variation terms**
+  `G(dP,A₀,B₀) + G(P₀,dA,B₀) + G(P₀,A₀,dB)` with the remainder controlled *quadratically* by the
+  factor Taylor remainders (`‖P₁ − P₀ − dP‖ ≤ εp`, etc.) and the first-order gaps
+  (`‖P₁ − P₀‖ ≤ δp`, etc.):
+  `‖(G(P₁,A₁,B₁) − G(P₀,A₀,B₀)) − (G(dP,A₀,B₀)+G(P₀,dA,B₀)+G(P₀,A₀,dB))‖ ≤ (εp·a·b + p·εa·b + p·a·εb +
+  δp·δa·b + δp·a·δb + p·δa·δb + δp·δa·δb)·‖h‖`.  Proof: the exact trilinear (multilinear) expansion
+  identity (`simp only [comp_sub, sub_comp, sub_apply]; abel`) + seven-term triangle inequality + the
+  a-priori size bound `norm_bilinearCompForcing_le` on each summand.  This is the engine that matches the
+  two asymmetric forcing terms `F_A = ((D²v ∘ W₂) h) ∘ W`, `F_B = ((D²v ∘ W) h) ∘ W₂` (with
+  `dA = dB = W₂`) against the second-variation forcing gap `F(z) − F(x₀)` with the required `O(‖z − x₀‖²)`
+  remainder.
+* `norm_bilinearCompForcing_sub_sub_le_sq` — the **`O(‖k‖²)` collapse** of the engine in the **diagonal**
+  operand shape `((P ∘ W) h) ∘ W` (inner and outer factors equal — exactly the second-variation
+  forcing).  Fed first-order gaps linear in `k` (`dp·‖k‖`, `dw·‖k‖`) and quadratic Taylor remainders
+  (`cp·‖k‖²`, `cw·‖k‖²`) and `‖k‖ ≤ 1`, the seven-term bound collapses to the single clean `C³`-target
+  rate `(cp·w² + 2·p·cw·w + 2·dp·dw·w + p·dw² + dp·dw²)·‖k‖²·‖h‖` (the lone cubic cross term
+  `dp·dw²·‖k‖³ ≤ dp·dw²·‖k‖²` via `‖k‖ ≤ 1`, `nlinarith`).  This is the `(F₁ − F₀)` remainder in the
+  diagonal shape, its final `O(‖z − x₀‖²·‖h‖)` rate exposed — exactly the numerator shape the
+  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` bridge to `ContDiff ℝ 3` consumes.
+
+These two reduce the remaining `(F₁ − F₀)` work to a **single** ingredient: identifying the `dP`-linear
+term `G(D²v(Φz) − D²v(Φx₀), W, W)` (the exact `D²v`-difference contracted) with the module's `F_C`
+(the `continuousMultilinearCurryFin1`/`D³v.curryLeft` form) up to `O(‖z − x₀‖²)` — i.e. the pure
+`D²v`-along-flow Taylor `‖(D²v(Φz s) − D²v(Φx₀ s)) − D³v(Φx₀ s)[W_x k]‖ ≤ M·‖k‖²`.  **Representation
+note (verified this session):** the curried triple `E →L E →L E →L E` (`= E →L (E →L (E →L E))`) carries
+**no** `NormedAddCommGroup`/`NormedSpace` instance in Mathlib v4.29.1, so the natural
+`norm_sub_fderiv_le_mul_sq_of_lipschitz` route (with `g = D²v(·)`, `g' = ∂D²v : E →L (E →L (E →L E))`)
+does **not** type-check — the `D²v` Taylor must be done in the multilinear representation
+`D²v : E → (E[×2]→L E)`, `D³v : E → (E →L (E[×2]→L E))` (both norm-carrying), then bridged to the
+composition form via the `continuousMultilinearCurryFin1` isometries.
+
+The **multilinear `D²v`-along-flow Taylor is now proved** (this session; all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`):
+
+* `norm_secondDerivField_sub_sub_thirdDeriv_ml_le` — the pure quadratic Taylor bound
+  `‖D²v s b − D²v s a − D³v s a (b − a)‖ ≤ M·‖b − a‖²` in the multilinear representation
+  `D²v s : E → (E[×2]→L E)`, `D³v s : E → (E →L (E[×2]→L E))` (both norm-carrying — the point of the
+  representation), a one-line specialisation of the codomain-generic
+  `norm_sub_fderiv_le_mul_sq_of_lipschitz`; the `D²v`-analogue of `norm_derivField_sub_sub_secondDeriv_le`.
+* `norm_secondDerivField_sub_sub_thirdDeriv_ml_flow_le` — its flow-tube form
+  `‖D²v s (Φ z s) − D²v s (Φ x s) − D³v s (Φ x s) (Φ z s − Φ x s)‖ ≤ M·exp (2 K T)·‖z − x‖²` (uniform on
+  `|s − t₀| ≤ T`), combining the pure bound with the flow-separation square bound `norm_flow_sub_sq_le`;
+  the `D²v`-analogue of `norm_field_linearizationDefect_flow_le`.
+
+Remaining for `ContDiff ℝ 3` (next session), now a **pure representation-bridge + assembly** step (no new
+analytic estimate): (a) the `continuousMultilinearCurryFin1`/`curryLeft` isometry bridge relating the
+multilinear-`D²v` Taylor residual `D³v(Φx₀ s)[Φz s − Φx₀ s]` (in `E[×2]→L E`) to the composition-form
+`F_C` operator `((P_C ∘ W) h) ∘ W` (`P_C = ` curried `D³v(Φx₀ s).curryLeft(W_x k)`), turning the
+`dP`-linear term of `norm_bilinearCompForcing_sub_sub_le` into `F_C` with `‖k‖²` residual; (b) threading
+the concrete flow/resolvent bounds (`norm_fundamentalSolution_sub_sub_linearVariation_le_sq` for `cw`,
+`norm_fundamentalSolution_baseCurve_sub_le` for `dw`, `norm_secondDerivField_apply_flow_sub_le` for `dp`,
+`norm_fundamentalSolution_le`/`hC'` for `w`/`p`) into `norm_bilinearCompForcing_sub_sub_le_sq` to obtain
+the `(F₁ − F₀)` remainder `‖(F₁ − F₀) − (F_A + F_B + F_C)‖ ≤ Cquad·‖z − x₀‖²·‖h‖`; then (with the
+already-proved coefficient remainder `norm_coeffVariation_sub_secondDerivComp_le_sq`) the forcing gap
+`hβ`, `norm_inhomogVariation_sub_sub_le_of_forcingGap`, and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+close `ContDiff ℝ 3`.
+
+Update — **the representation half of the remaining `(F₁ − F₀)` step is now CLOSED, and the `F_C`-form
+forcing engine is assembled** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`.  This discharges step (a) above in full and pre-threads step (b)
+into a single ready-to-feed engine:
+
+* `norm_secondDerivField_sub_sub_thirdDeriv_ml_fundamentalSolution_le_sq` — the *single remaining
+  analytic ingredient* named above: the multilinear central `C³` coefficient Taylor bound with the
+  **resolvent-linearised** residual,
+  `‖(D²v(Φ z s) − D²v(Φ x₀ s)) − D³v(Φ x₀ s)(W_x (z − x₀))‖ ≤ (M·e + N·(L·e·g))·‖z − x₀‖²`
+  (`e = exp (2K(T−t₀))`, `g = gronwallBound 0 K 1 (T−t₀)`, `N` a bound on `‖D³v(Φ x₀ s)‖`), uniformly on
+  the tube — the `D²v`-analogue of the `C²` `norm_derivField_sub_sub_comp_fundamentalSolution_le_sq`.
+  Split into the flow-Taylor defect (`norm_secondDerivField_sub_sub_thirdDeriv_ml_flow_le`) plus the
+  linearisation residual `D³v(Φ x₀ s)[(Φ z s − Φ x₀ s) − W_x k]` (operator bound × the first-order flow
+  remainder `norm_flow_sub_fundamentalSolution_le_sq`).
+* `curry2` (+ `curry2_apply`, `curry2_sub`, `norm_curry2_le`) — the **multilinear→composition
+  representation bridge**: `curry2 : (E[×2]→L E) → (E →L (E →L E))`, `curry2 X a b = X ![a, b]`, built
+  from `X.curryLeft` post-composed with the `Fin 1` isometry `continuousMultilinearCurryFin1`.  Linear
+  (`curry2_sub`) and norm-nonexpansive (`norm_curry2_le`, in fact isometric) — the only form in which
+  the third derivative carries a norm (`E →L (E[×2]→L E)`) transported into the composition form the
+  trilinear engine operates in.
+* `norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq` — the **composition-form central `C³` Taylor
+  bound**: the multilinear bound transported through `curry2` (linearity collapses the three-term
+  combination, `norm_curry2_le` transports the estimate verbatim), giving the `εp = cp·‖k‖²` quadratic
+  remainder for the candidate `dP = curry2 (D³v(Φ x₀ s)(W_x k))`.
+* `bilinearCompForcing_curry2_eq` — the **`dP`-term = `F_C` identity**:
+  `((curry2 S ∘ W) h) ∘ W = (continuousMultilinearCurryFin1 ℝ E E (S.curryLeft (W h))).comp W` (both
+  `e ↦ S[W h, W e]`).  With `S = (D³v(Φ x₀ s)).curryLeft (W k)` the right side is *exactly* the module's
+  third-derivative forcing `F_C`, so the trilinear engine's composition-form candidate is identified with
+  `F_C`.  This closes step (a).
+* `norm_secondDerivField_ml_apply_flow_sub_le` / `norm_secondDerivField_curry2_apply_flow_sub_le` — the
+  `dp` first-order flow-Lipschitz gap `‖D²v(Φ z s) − D²v(Φ w s)‖ ≤ M·exp(K T)·‖z − w‖` (multilinear and
+  its `curry2` image), the `hrP` threading input.
+* `norm_bilinearCompForcing_curry2_sub_sub_le_sq` — the **assembled `F_C`-form forcing engine**: the
+  trilinear quadratic-remainder engine `norm_bilinearCompForcing_sub_sub_le_sq` fused with
+  `bilinearCompForcing_curry2_eq`, so choosing `dP = curry2 S` delivers the `dP`-linear output *directly*
+  in the `F_C` shape.  Fed `P₀ = curry2 (D²v(Φ x₀ s))`, `P₁ = curry2 (D²v(Φ z s))`,
+  `S = D³v(Φ x₀ s)(W_x k)`, `W₀ = W_x`, `W₁ = W_z`, `dW = W₂` and the six factor bounds — `p` via
+  `norm_curry2_le`/`hC'`, `w` via `norm_fundamentalSolution_le`, `dp` via
+  `norm_secondDerivField_curry2_apply_flow_sub_le`, `dw` via `norm_fundamentalSolution_baseCurve_sub_le`,
+  `cp` via `norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq`, `cw` via
+  `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` — it yields the `(F₁ − F₀)` forcing gap
+  `‖(F₁ − F₀) − (F_C + F_A + F_B)‖ ≤ Cquad·‖z − x₀‖²·‖h‖`.
+
+Remaining for `ContDiff ℝ 3` (next session): the **concrete `(F₁ − F₀)` assembly theorem** — instantiate
+`norm_bilinearCompForcing_curry2_sub_sub_le_sq` with the flow/resolvent objects (`W_x`, `W_z`, `W₂`) and
+the six bounds above, using the compatibility `D²v_comp s ξ = curry2 (D²v_ml s ξ)` between the two
+second-derivative representations (from `iteratedFDeriv`/`fderiv` for a smooth field) to bridge the
+module's composition-form second-variation forcing (of
+`exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv`) to the `curry2` bounds.  Then, with the
+already-proved coefficient remainder `norm_coeffVariation_sub_secondDerivComp_le_sq`, the forcing gap `hβ`,
+`norm_inhomogVariation_sub_sub_le_of_forcingGap`, and `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` close
+`ContDiff ℝ 3`.
+
+Update — **the representation-bridge toolkit is now COMPLETE, the concrete `(F₁ − F₀)` assembly is
+PROVED, and the forcing-gap combinator is assembled** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`.  This closes the
+representation half in full and reduces the remaining `ContDiff ℝ 3` work to a single (large) threading
+capstone:
+
+* `curry2_iteratedFDeriv_two` — the **pure `iteratedFDeriv`/`fderiv` representation bridge for `D²v`**:
+  `curry2 (iteratedFDeriv ℝ 2 f z) = fderiv ℝ (fderiv ℝ f) z`, identifying the multilinear form
+  `E[×2]→L E` (carrying the `C³` Taylor bounds) with the composition form `E →L (E →L E)` (of the
+  second-variation ODE forcing).  Unconditional, via `curry2_apply` + Mathlib's `iteratedFDeriv_two_apply`.
+  Its `HasFDerivAt`-consumable form `curry2_iteratedFDeriv_two_eq_of_hasFDerivAt`
+  (`curry2 (iteratedFDeriv ℝ 2 f x) = D2comp` given `HasFDerivAt f (Df ·)` and `HasFDerivAt Df D2comp x`)
+  identifies the module's abstract composition-form second derivative with `curry2` of the multilinear one
+  — the compatibility `hcompat` the assembly threads.
+* `curryLeft_iteratedFDeriv_three` — the **third-order companion**:
+  `(iteratedFDeriv ℝ 3 f x).curryLeft = fderiv ℝ (iteratedFDeriv ℝ 2 f) x`, identifying the module's `F_C`
+  contraction `(iteratedFDeriv 3 f ξ).curryLeft (W k)` with the `C³`-Taylor form
+  `fderiv (iteratedFDeriv 2 f) ξ (W k)`.  Via `ContinuousMultilinearMap.curryLeft_apply` + Mathlib's
+  `iteratedFDeriv_succ_apply_left` at `Fin.cons`.  Consumable form
+  `curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt` (`D3ml = (iteratedFDeriv 3 f x).curryLeft` given
+  `HasFDerivAt (iteratedFDeriv 2 f) D3ml x`).
+* `norm_chainRuleForcing_flow_sub_sub_le_sq` — the **concrete `(F₁ − F₀)` second-order forcing remainder
+  along the flow**, the `C³`-layer field-derived analogue of `norm_chainRuleForcing_flow_sub_le`:
+  `∃ C, ∀ s ∈ [t₀, T], ‖(F₁ − F₀) − (F_C + F_A + F_B)‖ ≤ C · ‖z − x₀‖² · ‖h‖`
+  with `F₁ = ((D²v(Φz) ∘ W_z) h) ∘ W_z`, `F₀ = ((D²v(Φx₀) ∘ W_x) h) ∘ W_x`.  **Key simplification**: the
+  engine `norm_bilinearCompForcing_curry2_sub_sub_le_sq` already accepts arbitrary composition-form
+  `P₀, P₁`, so they are set to `D²v_comp` *directly*; the representation compatibility `hcompat` is needed
+  *only* for the `cp` quadratic remainder `hεP` (a `←hcompat` rewrite turning the `curry2`-form bound of
+  `norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq` into composition form).  The six field bounds:
+  `p` via `hC'`, `w` via `norm_fundamentalSolution_le`, `dp` via `norm_secondDerivField_apply_flow_sub_le`,
+  `dw` via `norm_fundamentalSolution_baseCurve_sub_le`, `cp` via
+  `norm_secondDerivField_curry2_sub_sub_thirdDeriv_le_sq` (+`←hcompat`), `cw` via
+  `norm_fundamentalSolution_sub_sub_linearVariation_le_sq` (`W₂ = Vlin`).  The `F_C` term matches the
+  module's `(iteratedFDeriv 3).curryLeft`-shape via `D3vm` (bridged by `curryLeft_iteratedFDeriv_three`).
+  The existential `∃ C` over the field constant keeps the statement clean (`rotate_left` lets the engine
+  determine the witness).
+* `norm_forcingGap_le_of_remainders` — the **forcing-gap combinator**: assembles the coefficient-variation
+  remainder `‖(A₁ − A₀) ∘ V₁ − newLeading‖ ≤ β₁` (`norm_coeffVariation_sub_secondDerivComp_le_sq`) and the
+  chain-rule forcing remainder `‖(F₁ − F₀) − (F_C + F_A + F_B)‖ ≤ β₂`
+  (`norm_chainRuleForcing_flow_sub_sub_le_sq`) into the single forcing gap
+  `‖((A₁ − A₀) ∘ V₁ + (F₁ − F₀)) − F₃‖ ≤ β₁ + β₂` with `F₃ = F_A + F_B + (newLeading + F_C)` — **exactly**
+  the design-corrected third-variation forcing of
+  `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff` and the `hβ` hypothesis of
+  `norm_inhomogVariation_sub_sub_le_of_forcingGap` (verified by inspection: the coefficient remainder's
+  `newLeading = ((D²v(Φx₀) ∘ W_x) k) ∘ V_x` and the corrected `F₃`'s leading term
+  `((D²v(Φx₀) ∘ W_x) k) ∘ V0` coincide with `V_x = V0`).  Pure algebra (`abel` regroup + `norm_add_le`).
+
+Remaining for `ContDiff ℝ 3` (next session): the **single `hβ`-application capstone** — a (large,
+~40-hypothesis) field-derived theorem instantiating `norm_inhomogVariation_sub_sub_le_of_forcingGap` with
+the three ODE solutions (`V₁, V₀` = first variations at `z, x₀`; `V₃` = the corrected second variation of
+`exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff`), feeding its `hβ` via
+`norm_forcingGap_le_of_remainders` applied to the two now-proved field remainders (the coefficient
+remainder still stated in un-factored `‖z − x₀‖/‖z − x₀‖²`-mixed form, so a `ring`-reshape to
+`C₁ · ‖z − x₀‖² · ‖h‖` is needed; supply `D3vm = (D3v_fin3).curryLeft` compat via
+`curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt`).  This yields the base-point second-derivative Taylor
+remainder `‖(D₂(z) − D₂(x₀)) − D₃(z − x₀)‖ ≤ C · ‖z − x₀‖²`; then
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` closes `ContDiff ℝ 3`.  All analytic ingredients now exist;
+the capstone is pure threading + one `ring`-reshape.
+
+Update — **the `hβ`-application capstone is now DONE, and the base-point Taylor remainder has been
+lifted all the way to the *operator level* — the exact numerator `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+consumes** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`.  Six new theorems close the capstone flagged above and package it
+into the operator-norm form:
+
+* `norm_forcingGap_flow_le_sq` — the **`C³` forcing-gap `hβ` along the flow**: assembles the
+  coefficient-variation remainder `norm_coeffVariation_sub_secondDerivComp_le_sq` (ring-reshaped to the
+  clean `C₁·‖z − x₀‖²·‖h‖` rate) and `norm_chainRuleForcing_flow_sub_sub_le_sq` via
+  `norm_forcingGap_le_of_remainders` into `‖((Dv(Φz) − Dv(Φx₀))∘Uz + (F₁ − F₀)) − (F_A + F_B +
+  (newLeading + F_C))‖ ≤ C·‖z − x₀‖²·‖h‖`, uniformly on `[t₀, T]` — exactly the `hβ` of
+  `norm_inhomogVariation_sub_sub_le_of_forcingGap`.
+* `norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq` — the **curve-level `C³` Taylor
+  remainder** (the `D₃`-analogue of the `C²` numerator `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`):
+  feeds the forcing gap into `norm_inhomogVariation_sub_sub_le_of_forcingGap` with the three ODE solutions
+  `Uz, Ux, V₃`, giving `‖(Uz t − Ux t) − V₃ t‖ ≤ C·‖z − x₀‖²·‖h‖`.
+* `continuous_thirdDerivCurryForcing` — continuity of the `F_C` forcing in the `D3vm` (`E →L (E[×2]→L E)`)
+  representation, the companion of `continuous_thirdDerivForcing`.
+* `norm_chainRuleForcing_flow_sub_sub_le_sq_uniform` — the **`h`-uniform** (direction-independent
+  constant) chain-rule forcing remainder: `∃C, ∀ h, ∀ s ∈ [t₀,T], …≤ C·‖z − x₀‖²·‖h‖` with `C` chosen
+  **before** `h` (the engine constant of `norm_bilinearCompForcing_curry2_sub_sub_le_sq` never mentions
+  `h`; the `?C` metavariable unifies to it on the single `exact`).  This is what the operator-norm
+  packaging needs (`opNorm_le_bound` requires one bound valid for every direction).
+* `norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniform` — the `h`-uniform curve-level
+  Taylor remainder (`C` before `h` and the `h`-dependent curves `Uz, Ux, V₃`).
+* `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq` — the **operator-level `C³` Taylor
+  remainder** (the `D₃`-analogue of the `C²` operator estimate `norm_secondFundamentalSolution_op_sub_le`):
+  for packaged `D₂z, D₂x : E →L (E →L E)` and `D₃ : E →L (E →L (E →L E))` with their curve
+  characterisations, `‖(D₂z − D₂x) − D₃ (z − x₀)‖ ≤ C·‖z − x₀‖²`.  Via `ContinuousLinearMap.opNorm_le_bound`
+  reduced to a per-direction bound; per `h` the three canonical curves are built
+  (`exists_hasDerivAt_firstVariation_linearised_dir` ×2, `exists_hasDerivAt_secondVariation_linearised_dir`
+  with concrete `newLeading + F_C` forcing), operator values rewritten to curve values via the
+  characterisations, and closed by the direction-uniform curve bound.  **This is exactly the numerator
+  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` consumes** (with `k = z − x₀`) to prove
+  `HasFDerivAt (fun z => D₂ z) D₃ x₀`.
+
+Remaining for `ContDiff ℝ 3` (next session): the **everywhere assembly** — a `z`-varying second
+fundamental solution operator field `z ↦ D₂ z` with a neighbourhood-uniform constant `C`, feeding
+`norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq` to
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` for `HasFDerivAt (fun z => D₂ z) D₃ x₀`, then the
+`contDiff_succ_iff_fderiv` chain (with the `C²` `exists_flow_contDiff_two_of_lipschitz_secondDeriv` and
+continuity of `z ↦ D₃`) to `exists_flow_contDiff_three_of_lipschitz_thirdDeriv` — the honest `ContDiff ℝ 3`,
+mirroring the `C²` `exists_flow_contDiff_two_of_lipschitz_secondDeriv` assembly one order up.  All the
+per-base-point analytic content is now proved; the remainder is the neighbourhood/uniformity packaging.
+
+Update — the **neighbourhood-uniform-constant tower is now CLOSED** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`.  The obstruction to
+the `HasFDerivAt` step above was that `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq` states
+its constant as a *per-`z` existential* `∃ C`, whereas `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`
+requires a **single** `C` valid for every `z` in a neighbourhood of `x₀`.  Since the constant is genuinely
+`z`-independent (a closed field expression in `K, L, M₂, M₃, C', N, T, t₀`, with `‖z − x₀‖²` factored out),
+the fix is to *expose* it explicitly.  Three explicit-constant twins were added, mirroring the `∃`-form
+proofs but writing the constant out (the `∃` was introduced only at the `norm_bilinearCompForcing_*`
+engine level, whose output constant is already explicit):
+
+* `norm_chainRuleForcing_flow_sub_sub_le_sq_uniformC` — the chain-rule forcing remainder with the engine
+  constant `cp·w² + 2p·cw·w + 2dp·dw·w + p·dw² + dp·dw²` (the six field bounds substituted) written out.
+  Verbatim `∃`-form proof, closed by the engine `.trans_eq (by ring)`.
+* `norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniformC` — the curve-level `C³` Taylor
+  remainder with constant `(C₁ + C₂)·gronwallBound 0 K 1 (t − t₀)` (`C₁` = the coefficient-variation
+  constant, `C₂` = the chain-rule engine constant) written out.  Proof: the `∃`-form's proof with the
+  forcing-gap `β` a metavariable determined by `norm_forcingGap_le_of_remainders`, the Grönwall bound
+  `norm_inhomogVariation_sub_sub_le_of_forcingGap` reshaped by `ring`.
+* `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC` — the **operator-level** `C³`
+  Taylor remainder `‖(D₂z − D₂x) − D₃ (z − x₀)‖ ≤ max ((C₁ + C₂)·gronwallBound 0 K 1 (t − t₀)) 0 · ‖z − x₀‖²`,
+  the operator numerator in the exact **single-constant** form
+  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` consumes.  Proof: the `∃`-op proof with the explicit-
+  constant curve bound closing each per-direction estimate after `ContinuousLinearMap.opNorm_le_bound`
+  (constant `max … 0`, nonnegative by `le_max_right`).
+
+Remaining for `ContDiff ℝ 3` (next session): with the neighbourhood-uniform numerator now available, the
+`HasFDerivAt (fun z => D₂ z) D₃ x₀` assembly needs (i) the **canonical linear families** the bilinear `D₃`
+packaging `exists_continuousLinearMap_thirdVariation_coeff_bilinear` consumes — a `W2 : E → ℝ → (E →L E)`
+linear in the base direction `k` (`= ` the linearised first variation at `x₀` in direction `k`,
+pointwise-additive/homogeneous via `linearVariation_perturbation_add_eq`/`_smul_eq`, continuous, `‖·‖ ≤ N₂‖k‖`)
+and the analogous `V0fun` linear in `h`; (ii) the `D₃` bounded operator from that packaging, whose
+characterisation is bridged to the `hD₃` slot of `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC`
+by building the per-`z` `W₂ z = W2 (z − x₀)` and a first-variation-uniqueness argument for the `V₀`/`V0fun h`
+match (`inhomogVariation_unique`); (iii) the per-`z` `Wdiff z` via `exists_hasDerivAt_inhomogVariation_of_continuous`
+and `Φ₁ z = Ψ z`; then `hasFDerivAt_of_eventually_norm_sub_sub_le_sq` with `C = max (…) 0` on the ball
+`‖z − x₀‖ < 1` gives `HasFDerivAt (fun z => D₂ z) D₃ x₀`.  Finally the continuity of `z ↦ D₃` (a third-order
+analogue of the `C²` `hcont_D₂` Lipschitz bound) and the `contDiff_succ_iff_fderiv` chain close
+`exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
+
+Update — the two **constructive inputs (i)–(ii)** above are now BUILT (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`:
+
+* `exists_linearisedFirstVariationFamily` — the **canonical linearised-first-variation family** `Vfam :
+  E → (ℝ → (E →L E))`, linear in the direction: pointwise-additive (`linearVariation_perturbation_add_eq`),
+  homogeneous (`linearVariation_perturbation_smul_eq`), continuous (`Differentiable.continuous` of the
+  ODE), solving `(Vfam h)' = A₀ ∘ Vfam h + (D²v(Φ x₀ s) ∘ W₀ · h) ∘ W₀` with `Vfam h t₀ = 0`, bounded
+  `‖Vfam h s‖ ≤ C' · exp(2K(T − t₀)) · gronwallBound 0 K 1 (T − t₀) · ‖h‖` on `[t₀, T]`
+  (`norm_linearisedFirstVariation_le` + `gronwallBound_mono`).  This single family supplies **both** the
+  base-direction curve `W2` (at `k`) and the inner curve `V0fun` (at `h`) the bilinear `D₃` packaging needs,
+  and — via its ODE — matches the per-`z` `W₂ = Vfam (z − x₀)`, `V₀ = Vfam h` of the operator numerator.
+* `exists_thirdVariationOperator_of_field` — the **self-contained packaged `D₃`** `E →L (E →L (E →L E))`
+  built directly from `C^{3}`-field data by feeding `Vfam` as both `W2` and `V0fun` into
+  `exists_continuousLinearMap_thirdVariation_coeff_bilinear` (shared `Vfam`-bound giving both `N₂, N₀`).
+  Returns `Vfam` alongside `D₃` with its init/ODE/continuity/additivity/homogeneity/bound and the bilinear
+  characterisation `D₃ k h = V t` (design-corrected third-variation ODE, `W2 = V0fun = Vfam`, `Fin 3`
+  multilinear `D3v`).
+
+Remaining for `ContDiff ℝ 3` (next session): the **characterisation bridge** discharging the `hD₃` slot of
+`norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC` from the bilinear characterisation of
+`exists_thirdVariationOperator_of_field` — for `V₀` an arbitrary linearised first variation in direction
+`h`, `V₀ = Vfam h` pointwise by `inhomogVariation_unique` (same ODE, same anchor), so the numerator's
+third-variation forcing (using `V₀` and the `E →L (E[×2]→L E)` representation `D3vm`) equals the bilinear
+forcing (using `Vfam h` and the `Fin 3` representation `D3v`) once `D3vm s ξ = (D3v s ξ).curryLeft` is
+supplied (`curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt`); a `funext`/`rw` on the `HasDerivAt`
+forcing then lets `hD₃bilinear` (with `k = z − x₀`) close the slot.  Then the **everywhere assembly**: the
+`D₂` field via `choose exists_continuousLinearMap_linearisedVariation`, per-`z` `W₂ z = Vfam (z − x₀)`,
+`Wdiff z` (`exists_hasDerivAt_inhomogVariation_of_continuous`), `Φ₁ z = Ψ z`, and
+`hasFDerivAt_of_eventually_norm_sub_sub_le_sq` (`C = max (…) 0`, ball `‖z − x₀‖ < 1`) for
+`HasFDerivAt (fun z => D₂ z) D₃ x₀`; finally `z ↦ D₃` continuity + `contDiff_succ_iff_fderiv` close
+`exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
+
+Update — the **characterisation bridge and the everywhere `HasFDerivAt (fun z => D₂ z) D₃ z`
+assembly are now BUILT** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`.  Three new theorems close the bridge + assembly flagged above:
+
+* `thirdVariationOperator_hD₃_slot_of_bilinear` — the **characterisation bridge**.  Given the canonical
+  linearised-first-variation family `Vfam` and the packaged bilinear `D₃` of
+  `exists_thirdVariationOperator_of_field` (its `Fin 3`-multilinear characterisation `hD₃bilinear`),
+  plus the curry-left compatibility `D3vm(Φ x₀ ·) = (D3v(Φ x₀ ·)).curryLeft`, the operator `D₃`
+  satisfies the `hD₃` hypothesis slot of `norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC`
+  for the direction `z − x₀`.  Proof: Grönwall uniqueness `inhomogVariation_unique` pins
+  `W₂ = Vfam (z − x₀)` and `V₀ = Vfam h` pointwise (same coefficient `Dv(Φ x₀ ·)`, same anchor `0`);
+  rewriting the design-corrected third-variation forcing by these two identities and `hcurry` turns it
+  term-for-term into the bilinear forcing, and `hD₃bilinear (z − x₀) h V` closes `D₃ (z − x₀) h = V t`.
+  The last purely-algebraic link between the packaged operator and the neighbourhood-uniform
+  operator-level `C³` Taylor remainder.
+* `exists_hasFDerivAt_secondFundamentalSolution_baseCurve` — the **single-base-point `C³` bootstrap**.
+  For a `C^{3,1}` field, the packaged second fundamental solution `z ↦ D₂ z` (spatial derivative of the
+  resolvent, `D₂ z h = Vlin^{z,h} t`) is Fréchet differentiable at `x₀` with derivative the packaged
+  `D₃`.  Assembly: `choose` the `D₂`-family (`exists_continuousLinearMap_linearisedVariation`); take
+  `D₃`/`Vfam`/`hD₃bilinear` from `exists_thirdVariationOperator_of_field`; per `z` on the unit ball
+  build `W₂` and `Wdiff`, discharge `hD₃` via the bridge, apply the numerator and
+  `hasFDerivAt_of_eventually_norm_sub_sub_le_sq`.
+* `exists_hasFDerivAt_secondFundamentalSolution` — the **everywhere (family) `C³` bootstrap**.  A single
+  packaged family `D₂` and a third-fundamental-solution family `D₃fam` with `∀ y, HasFDerivAt D₂ (D₃fam y) y`
+  (uniform-in-base-point third-derivative data).  This is the everywhere `fderiv D₂ = D₃fam` half of the
+  resolvent's spatial `ContDiff ℝ 3`.
+
+Remaining for `ContDiff ℝ 3` (next session): the **continuity of the third fundamental solution**
+`y ↦ D₃fam y` — a third-order operator-difference (Lipschitz) bound `‖D₃fam z − D₃fam z₀‖ ≤ C‖z − z₀‖`,
+the analogue of the `C²` `hcont_D₂` one order up (opNorm bound + the third-variation-ODE gap over the
+four forcing terms), which does not yet exist and is the true remaining blocker — then
+`contDiff_one_iff_fderiv`/`contDiff_succ_iff_fderiv` chain close
+`exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
+
+Update — the **third-variation-ODE base-point gap tower is now BUILT** (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`.  Six new theorems
+supply the entire third-order operator-difference gap over the four forcing terms that the `D₃fam`
+continuity (`hcont_D₂` one order up) needs:
+
+* `norm_curryFin1_biContract_comp_sub_le` — the abstract operator-norm telescoping skeleton for the
+  fully-contracted third-derivative forcing term (`(curryFin1 ((T.curryLeft a).curryLeft b)).comp C`),
+  under joint perturbation of `T, a, b, C`; via `norm_clm_apply_sub_le` + the `curryLeft`/`curryFin1`
+  isometries.
+* `norm_thirdDerivForcing_baseCurve_sub_le` — its flow instance (term 4 of the forcing): the linear
+  base-point gap of `curryFin1(D³v[Wk,Wh,W·])`, `≤ exp⁴·(M₃ + 3C''Lg)·‖z−x₀‖·‖k‖·‖h‖`.
+* `norm_bilinearComp_VfamInner_baseCurve_sub_le` — the base-point gap of the `Vfam`-inner term
+  (`((D²v ∘ Vfam_k) h) ∘ W`, term 1), `≤ exp⁴·g·(2M₂C' + 4LC'²g)·‖z−x₀‖·‖k‖·‖h‖`, via the abstract
+  `norm_bilinearCompForcing_sub_le` + `norm_linearisedFirstVariation_baseCurve_sub_le`.
+* `norm_bilinearComp_VfamOuter_baseCurve_sub_le` — the base-point gap of the `Vfam`-outer terms
+  (`((D²v ∘ W) d) ∘ Vfam_e`, terms 2 & 3), the same clean constant with `‖e‖·‖d‖`.
+* `norm_add4_sub_add4_le` — the four-fold triangle inequality for the right-nested four-term forcing.
+* `norm_thirdVariationForcing_baseCurve_sub_le` — the **full four-term forcing gap `β`**:
+  `‖F^z − F^x‖ ≤ (3·exp⁴·g·(2M₂C' + 4LC'²g) + exp⁴·(3C''Lg + M₃))·‖z−x₀‖·‖k‖·‖h‖`, summing the four
+  term gaps via `norm_add4_sub_add4_le`.
+* `norm_thirdVariation_baseCurve_sub_le` — the **third-variation curve base gap** (the `C³` analogue of
+  `norm_linearisedFirstVariation_baseCurve_sub_le`): for the third-variation curves `Vz`, `Vx`,
+  `‖Vz t − Vx t‖ ≤ Cλ·‖z−x₀‖·‖k‖·‖h‖·gronwall(t−t₀)` with
+  `Cλ = L·exp⁴·g·(3C'²g + C'') + 3·exp⁴·g·(2M₂C' + 4LC'²g) + exp⁴·(3C''Lg + M₃)`, assembled from the
+  coefficient gap `α`, the second-curve size `N` (`norm_thirdVariation_coeff_le`) and the forcing gap
+  `β` via `norm_inhomogVariation_sub_le_of_gap`.
+
+Remaining for `ContDiff ℝ 3` (next session): the **`D₃fam` continuity assembly** — for the packaged
+`D₃fam`, construct per base-point the third-variation curves `Vz`, `Vx` and the four `Vfam` curves,
+identify `D₃fam z k h = Vz t` (the operator characterisation `hD₃bilinear`) and apply
+`norm_thirdVariation_baseCurve_sub_le`, then `ContinuousLinearMap.opNorm_le_bound` (twice, over `k`
+then `h`) gives `‖D₃fam z − D₃fam x₀‖ ≤ Cλ·gronwall·‖z − x₀‖` — i.e. `LipschitzWith`/`Continuous D₃fam`;
+the `contDiff_one_iff_fderiv`/`contDiff_succ_iff_fderiv` chain then closes
+`exists_flow_contDiff_three_of_lipschitz_thirdDeriv`.
+
+Update — the **`D₃fam` continuity assembly is now PARTLY BUILT, and a hard Mathlib obstruction on the
+triple continuous-linear-map norm was discovered** (all new theorems axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), in `AnalyticPDE/SmoothDependenceCk.lean`:
+
+* `norm_thirdFundamentalSolution_apply_baseCurve_sub_le` — the **per-direction operator base-point
+  gap** of the packaged third-variation operator `D₃`.  For two base points `z, x₀` with their
+  packaged operators `D₃z, D₃x` (bilinear characterisations `hD₃z`, `hD₃x` through the canonical
+  families `Vfamz`, `Vfamx`), `‖D₃z k − D₃x k‖ ≤ Cλ·gronwall(t−t₀)·‖z−x₀‖·‖k‖` with the *same* `Cλ`
+  constant as `norm_thirdVariation_baseCurve_sub_le`.  Proof: `opNorm_le_bound` over the inner
+  direction `h`; per `h`, `exists_hasDerivAt_secondVariation_linearised_dir_of_thirdDeriv_coeff`
+  (fed `Vfamz k`, `Vfamz h`) builds the third-variation curves `Vz`, `Vx`; `hD₃z`/`hD₃x` identify
+  `D₃z k h = Vz t`, `D₃x k h = Vx t`; `norm_thirdVariation_baseCurve_sub_le` bounds `‖Vz t − Vx t‖`
+  (the existence-lemma forcing associates `(T1+T2)+(T3+T4)` vs the base-gap lemma's `T1+(T2+(T3+T4))`
+  — reconciled by `convert … using 2; abel`).  This is the `C³` analogue of the `hkey` operator gap
+  inside `exists_flow_contDiff_two_of_lipschitz_secondDeriv`, one order up.
+* `lipschitzWith_thirdFundamentalSolution_apply` — **per-direction Lipschitz continuity** of the
+  packaged family `D₃fam : E → (E →L E →L E →L E)`: for each fixed outer direction `k`, the slice
+  `z ↦ D₃fam z k` (valued in the well-normed *double* space `E →L E →L E`) is
+  `LipschitzWith (Cλ·gronwall(t−t₀)·‖k‖).toNNReal`.  Proof: `LipschitzWith.of_dist_le_mul` + the
+  base-point gap above.  I.e. `D₃fam` is genuinely continuous in the strong operator topology,
+  direction by direction.
+
+**THE OBSTRUCTION (blocks the naive `Continuous D₃fam` and hence `exists_flow_contDiff_three`).**  In
+Mathlib v4.29.1 the **triple continuous-linear-map operator norm does not synthesize**: for `E` a
+plain `NormedAddCommGroup`/`NormedSpace ℝ`, `Norm (E →L E →L E →L E)`,
+`SeminormedAddCommGroup (E →L E →L E →L E)`, `NormedSpace ℝ (E →L E →L E)` and
+`UniformSpace (E →L E →L E →L E)` **all fail** (verified even for `EuclideanSpace ℝ (Fin 2)`); the
+root is the endomorphism-ring/module diamond — `NormedSpace ℝ (E →L E →L E)` cannot be built.  Only
+`TopologicalSpace (E →L E →L E →L E)` synthesizes, via `ContinuousLinearMap.topologicalSpace` (a
+non-norm, pointwise/strong topology), **not** through `TopologicalSpace.induced`, so
+`continuous_induced_rng` does not apply and there is no off-the-shelf lemma (`apply?`/`exact?` find
+nothing) to get `Continuous D₃fam` from the per-direction continuity `∀ k, Continuous (z ↦ D₃fam z k)`.
+Consequently the `C²`-style closing (`hkey : ‖D₂ z − D₂ x₀‖ ≤ C·‖z−x₀‖` → `LipschitzWith`/`Continuous`
+via the *double* norm) does **not** lift verbatim to `C³`: `‖D₃fam z − D₃fam x₀‖` (the triple norm)
+is unstatable.  Note `contDiff_one_iff_fderiv` *does* still typecheck at the double level (its
+`Continuous (fderiv g)` uses the triple's pointwise topology), so a `Continuous D₃fam` in that
+pointwise topology *might* still feed the chain — but proving it requires unfolding
+`ContinuousLinearMap.topologicalSpace` by hand (a genuine detour), and it is unverified whether that
+topology is the one the `contDiff_succ_iff_fderiv` chain ultimately consumes.
+
+Remaining for `ContDiff ℝ 3` (next session) — two viable routes:
+  1. **Pointwise-topology route (smaller, uncertain):** prove `Continuous D₃fam` in
+     `ContinuousLinearMap.topologicalSpace` from the per-direction continuity
+     `lipschitzWith_thirdFundamentalSolution_apply` (via the definition of
+     `ContinuousLinearMap.topologicalSpace` / a bespoke `continuous_of_apply` bridge), then check the
+     `contDiff_one_iff_fderiv`/`contDiff_succ_iff_fderiv` chain actually closes
+     `exists_flow_contDiff_three_of_lipschitz_thirdDeriv` with that topology.
+  2. **Multilinear route (larger, robust):** reformulate the `C³` closing through `iteratedFDeriv`
+     (`ContinuousMultilinearMap ℝ (fun _ : Fin n => E) E`, which carries a proper norm at every order
+     and avoids the nested-CLM diamond entirely) instead of the nested `fderiv` tower.
+The two per-direction theorems above are the robust analytic content and feed either route.
