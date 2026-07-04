@@ -1398,6 +1398,65 @@ theorem norm_affineSolveL_apply_sub_le [CompleteSpace E]
     _ ≤ (1 - ‖A‖)⁻¹ * ‖A - B‖ * (1 - ‖B‖)⁻¹ * ‖f‖ :=
         mul_le_mul_of_nonneg_right (norm_affineSolveL_sub_le A B hA hB) (norm_nonneg f)
 
+/-! ### Nonlinear Schauder fixed point
+
+The affine solvability above (`exists_unique_affineFixedPoint`, `affineSolveL`) closes the
+*linearised* Ricci–DeTurck step.  The genuine Ricci–DeTurck right-hand side is *quasilinear*, i.e. a
+**nonlinear** self-map `g` of the parabolic `C^{0,α}` Banach chart which — on a short time interval /
+a small ball around the initial data — is a contraction (`LipschitzWith k g`, `k < 1`).  The
+following lemmas are the nonlinear fixed-point core the quasilinear iteration consumes: unique
+solvability, the a-posteriori residual bound (which controls the iteration error from a single
+residual `‖x - g x‖`), and the stability of the solution under a uniform perturbation of the
+nonlinearity (which makes the coefficient- and data-dependent iteration well-posed). -/
+
+/-- **Nonlinear Banach fixed-point solvability on the parabolic `C^{0,α}` chart.**  A self-map `g` of
+the (complete) parabolic `C^{0,α}` Banach space that is a contraction (`LipschitzWith k g` with
+`k < 1`) has a *unique* fixed point `g u = u`.  This is the nonlinear generalisation of
+`exists_unique_affineFixedPoint` (the affine `g = A · + f` case): the Banach fixed-point solvability
+of the genuine quasilinear Ricci–DeTurck right-hand side on a short-time / small-ball chart where it
+contracts. -/
+theorem exists_unique_lipschitzFixedPoint [CompleteSpace E] {k : ℝ≥0}
+    (g : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (hk : k < 1) (hg : LipschitzWith k g) :
+    ∃! u, g u = u := by
+  haveI : Nonempty (ParabolicC0AlphaBanach X E α s) := ⟨0⟩
+  have hc : ContractingWith k g := ⟨hk, hg⟩
+  refine ⟨ContractingWith.fixedPoint g hc, hc.fixedPoint_isFixedPt, ?_⟩
+  intro y hy
+  exact hc.fixedPoint_unique hy
+
+/-- **A-posteriori residual bound for the nonlinear fixed point.**  If `g` is a `k`-contraction
+(`k < 1`) and `u` is *any* fixed point (`g u = u`), then every point `x` obeys
+`‖x - u‖ ≤ ‖x - g x‖ / (1 - k)`: the distance from a trial point `x` to the true Ricci–DeTurck
+solution is controlled by the single residual `‖x - g x‖`.  This is the a-posteriori error estimate
+of the quasilinear Schauder iteration. -/
+theorem norm_sub_fixedPoint_le_of_lipschitz [CompleteSpace E] {k : ℝ≥0}
+    {g : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s}
+    (hk : k < 1) (hg : LipschitzWith k g) (x : ParabolicC0AlphaBanach X E α s)
+    {u : ParabolicC0AlphaBanach X E α s} (hu : g u = u) :
+    ‖x - u‖ ≤ ‖x - g x‖ / (1 - (k : ℝ)) := by
+  have hc : ContractingWith k g := ⟨hk, hg⟩
+  have h := hc.dist_le_of_fixedPoint x (y := u) hu
+  rwa [dist_eq_norm, dist_eq_norm] at h
+
+/-- **Stability of the nonlinear fixed point under a uniform perturbation of the nonlinearity.**  Let
+`g₁` be a `k`-contraction (`k < 1`) with fixed point `u₁`, and let `g₂` be *any* map with a fixed
+point `u₂` that is uniformly `C`-close to `g₁` (`∀ z, ‖g₁ z - g₂ z‖ ≤ C`).  Then the fixed points
+satisfy `‖u₁ - u₂‖ ≤ C / (1 - k)`.  This is the well-posedness estimate of the quasilinear
+Ricci–DeTurck iteration: a `C`-sized change in the nonlinear right-hand side moves the solution by at
+most `C / (1 - k)`, so the solution depends continuously on the (coefficient- and data-dependent)
+nonlinearity. -/
+theorem norm_fixedPoint_sub_fixedPoint_le [CompleteSpace E] {k : ℝ≥0}
+    {g₁ g₂ : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s}
+    (hk : k < 1) (hg₁ : LipschitzWith k g₁)
+    {u₁ u₂ : ParabolicC0AlphaBanach X E α s} (hu₁ : g₁ u₁ = u₁) (hu₂ : g₂ u₂ = u₂)
+    {C : ℝ} (hC : ∀ z, ‖g₁ z - g₂ z‖ ≤ C) :
+    ‖u₁ - u₂‖ ≤ C / (1 - (k : ℝ)) := by
+  have hc : ContractingWith k g₁ := ⟨hk, hg₁⟩
+  have hfg : ∀ z, dist (g₁ z) (g₂ z) ≤ C := fun z => by rw [dist_eq_norm]; exact hC z
+  have h := hc.dist_fixedPoint_fixedPoint_of_dist_le' g₂ (x := u₁) (y := u₂) hu₁ hu₂ hfg
+  rwa [dist_eq_norm] at h
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
