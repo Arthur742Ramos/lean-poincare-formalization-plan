@@ -5939,3 +5939,52 @@ Remaining for `ContDiff ℝ 3` (next session) — two viable routes:
      (`ContinuousMultilinearMap ℝ (fun _ : Fin n => E) E`, which carries a proper norm at every order
      and avoids the nested-CLM diamond entirely) instead of the nested `fderiv` tower.
 The two per-direction theorems above are the robust analytic content and feed either route.
+
+Update — the **multilinear route (Route 2) is now substantially built and the `ContDiff ℝ 3`
+capstone interface is CLOSED** (all sorry-free, axioms `propext`/`Classical.choice`/`Quot.sound` only),
+in `AnalyticPDE/SmoothDependenceCk.lean`.  Ten new theorems reformulate the `C³` closing through the
+properly-normed multilinear spaces, sidestepping the un-normed nested continuous-linear-map tower:
+
+* `uncurry2CLM` / `uncurry2CLM_apply` — the multilinear packaging
+  `(E →L E →L E) →L ContinuousMultilinearMap ℝ (Fin 2) E`, a genuine bounded operation (the inner
+  double space is normed).  `uncurry3` / `uncurry3_apply` — the packaging
+  `(E →L E →L E →L E) → ContinuousMultilinearMap ℝ (Fin 3) E`, built through normed intermediaries
+  (`(curryLeftEquiv_3).symm (uncurry2CLM.comp T)`), so `‖uncurry3 (D₃fam z) − uncurry3 (D₃fam x₀)‖`
+  (the *multilinear* norm) IS well-formed even though the triple operator norm is not.
+* `lipschitzWith_uncurry3_of_apply_sub_le` — abstract engine: a per-outer-direction operator gap
+  `‖F x k − F y k‖ ≤ C·dist x y·‖k‖` promotes to `LipschitzWith C.toNNReal (x ↦ uncurry3 (F x))` via
+  `ContinuousMultilinearMap.opNorm_le_bound`.  `lipschitzWith_thirdFundamentalSolution_multilinear` —
+  the flow instance: `z ↦ uncurry3 (D₃fam z)` is `LipschitzWith` (hence `Continuous`) in the
+  properly-normed `Fin 3` multilinear space, fed by `norm_thirdFundamentalSolution_apply_baseCurve_sub_le`.
+  **This is the obstruction-free upgrade of the per-direction `lipschitzWith_thirdFundamentalSolution_apply`.**
+* `uncurry3_curryLeft` (`(uncurry3 T).curryLeft = uncurry2CLM.comp T`), `uncurry2CLM_curry2` /
+  `curry2_uncurry2CLM` (packaging isomorphism: `uncurry2CLM` and `curry2` are mutually inverse),
+  `iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt`
+  (`iteratedFDeriv ℝ 2 f x = uncurry2CLM D2` from the flow 1st/2nd derivative data) and
+  `iteratedFDeriv_three_eq_uncurry3_of_hasFDerivAt`
+  (`HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp T) x → iteratedFDeriv ℝ 3 f x = uncurry3 T`) —
+  the currying bridges between the fundamental-solution data and the canonical `iteratedFDeriv` objects.
+* **Capstone (closed):** `continuous_iteratedFDeriv_three_of_hasFDerivAt_continuous` —
+  `Continuous (iteratedFDeriv ℝ 3 f)` from a **continuous, multilinear-valued** derivative
+  `D3ml : E → (E →L ContinuousMultilinearMap ℝ (Fin 2) E)` of the second iterated derivative (via the
+  curry isometry's inverse being continuous);  `differentiable_iteratedFDeriv_two_of_hasFDerivAt`; and
+  `contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous` — **`ContDiff ℝ 2 f` + continuous
+  multilinear `D3ml` ⟹ `ContDiff ℝ 3 f`** via `contDiff_nat_iff_continuous_differentiable` at `n = 3`.
+  The derivative datum is carried as `E → (E →L ContinuousMultilinearMap ℝ (Fin 2) E)` — a **normed**
+  codomain — throughout, so the capstone never touches the un-normed `E →L E →L E →L E`.
+
+**THE REMAINING GAP (single, well-isolated).**  To *apply* the `ContDiff ℝ 3` capstone to the flow one
+must supply its hypothesis `hD3 : ∀ x, HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x` with `D3ml`
+**multilinear-valued** (`E → (E →L ContinuousMultilinearMap ℝ (Fin 2) E)`).  The existing flow
+machinery (`exists_hasFDerivAt_secondFundamentalSolution`) delivers the *nested* datum
+`HasFDerivAt D₂ (D₃fam x) x` with `D₂ : E → (E →L E →L E)`, and the naive conversion
+`iteratedFDeriv ℝ 2 f = uncurry2CLM ∘ D₂` differentiated by the chain rule
+(`uncurry2CLM.hasFDerivAt.comp x (hD2 x)`) **whnf-diverges / times out** (deterministic `whnf`
+heartbeat blowup): the chain rule forces synthesis/reduction of `NormedSpace ℝ (E →L E →L E)`, whose
+noncomputable endomorphism-ring instance is prohibitively expensive.  So the nested→multilinear
+`HasFDerivAt` conversion is the wall.  **NEXT SESSION:** produce the multilinear `hD3` datum
+*without* the nested-CLM chain rule — e.g. differentiate `iteratedFDeriv ℝ 2 f` (a well-behaved
+`ML(Fin 2)`-valued map) natively via `iteratedFDeriv_succ_eq_comp_left` / a curry-transported second
+fundamental solution stated with a multilinear-valued derivative from the outset — then feed
+`contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous` to obtain `ContDiff ℝ 3` dependence on
+initial conditions, unblocking Items 1/2.
