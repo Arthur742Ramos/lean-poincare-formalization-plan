@@ -6904,3 +6904,29 @@ concrete parabolic **Schauder gain / a-priori estimate** exhibiting the Ricci–
 `C^{0,α}`-gaining operator (heat-kernel content, `HeatKernel1D.lean`) — the sole missing mathematical
 input on the fixed-point route; the general-manifold gauge-flow lift (Item 2); and the Item 1 tensor
 time-derivative chain rule.
+
+Update — **Item 2 windowed → global assembly and compact-flow wiring done** (in
+`GaugeReduction/GaugeFlowAssembly.lean`; both axiom-clean: `propext`/`Classical.choice`/`Quot.sound`).
+The two remaining Item-2 obligations recorded above were the spatial-`C³` regularity of the flow
+slices **and** the global-`ℝ` extension of the windowed `F`/`G` the adapter `gaugeFlow_of_inverse_flow`
+wants (`∀ t`, whereas the compact flow lives on a window `Ioo (-ε) ε`).  The latter — plus the first
+wiring of the compact-flow existence machinery into the adapter — is now proved:
+
+* `exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` — the **global-`ℝ` extension**: given
+  mutually-inverse, anchored slice maps `Φ`, `G` that are spatially `C³` on the window and solve the
+  gauge ODE there, extend both by the identity outside `Ioo (-ε) ε` (identity is its own inverse /
+  smooth / anchored) and thread the windowed ODE through `HasMFDerivWithinAt.congr_mono` to hit the
+  adapter, giving `Nonempty (Diffeomorph3GaugeFlowOn X (Ioo (-ε) ε) 0)`.  Pure assembly, no analysis.
+* `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` — the **compact-flow wiring**:
+  feeds `ManifoldFlow.exists_timeDependent_flow_compact_inverse` (which needs only the `C¹` field datum
+  `hX`) into the extension lemma, so that from the `C¹` gauge field alone the raw `C³` DeTurck
+  gauge-flow `Diffeomorph3GaugeFlowOn X (Ioo (-ε) ε) 0` is inhabited for some `ε > 0`, **conditional
+  only** on the flow slices' spatial-`C³` regularity `hslicesC3` (the `C¹ → C³` bootstrap,
+  characterising the unique compact flow of `X`).  `ManifoldFlowExistence.lean` was previously imported
+  by nothing; this is its first consumer.
+
+Net effect: Item 2 is now **unconditional up to a single named analytic input** — the spatial-`C³`
+regularity of the compact flow slices (the chart-by-chart `C¹ → C³` transport from the model-`E`
+`SmoothDependenceManifold` core).  Remaining for Point 4 (unchanged otherwise): that spatial-`C³`
+regularity (Item 2); the Item 1 tensor time-derivative chain rule; and the Item 3 parabolic Schauder
+gain (heat-kernel content).
