@@ -116,6 +116,46 @@ noncomputable def intrinsicLocalExistenceUniquenessFamily_viaRicciZero_of_finran
   package := fun ivp ↦
     intrinsicLocalExistenceUniqueness_viaRicciZero_of_finrank_le_one (I := I) (M := M) hfin ivp
 
+/-- **Theorem-family Ricci-vanishing closure skeleton.**  A uniform supply of existence witnesses
+together with the uniform Ricci-vanishing hypothesis (every intrinsic local solution of every
+initial value problem stays Ricci-flat on its interval) yields the whole intrinsic
+existence–uniqueness theorem family. -/
+noncomputable def intrinsicLocalExistenceUniquenessFamily_of_forall_intrinsicRicciTensor_eq_zero
+    (hexist : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp))
+    (hRic : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+          intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicSolution.metric t x u v = 0) :
+    IntrinsicLocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    intrinsicLocalExistenceUniqueness_of_forall_intrinsicRicciTensor_eq_zero
+      (I := I) (M := M) ivp (hexist ivp) (hRic ivp)
+
+/-- Ordinary (connection-parametrized) form of the Ricci-vanishing closure skeleton, obtained by
+projecting the intrinsic package through `IntrinsicLocalExistenceUniqueness.toOrdinary`. -/
+noncomputable def localExistenceUniqueness_of_forall_intrinsicRicciTensor_eq_zero
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hexist : Nonempty (IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp))
+    (hRic : ∀ sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+        intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicSolution.metric t x u v = 0) :
+    LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
+  (intrinsicLocalExistenceUniqueness_of_forall_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M) ivp hexist hRic).toOrdinary
+
+/-- Theorem-family ordinary form of the Ricci-vanishing closure skeleton. -/
+noncomputable def localExistenceUniquenessFamily_of_forall_intrinsicRicciTensor_eq_zero
+    (hexist : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      Nonempty (IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp))
+    (hRic : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+          intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicSolution.metric t x u v = 0) :
+    LocalExistenceUniquenessFamily (E := E) (H := H) (I := I) (M := M) :=
+  (intrinsicLocalExistenceUniquenessFamily_of_forall_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M) hexist hRic).toOrdinary
+
 end Intrinsic
 
 end Compact
