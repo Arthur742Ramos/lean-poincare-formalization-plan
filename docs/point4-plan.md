@@ -4525,6 +4525,51 @@ Remaining (future sessions): the lift to the higher-regularity parabolic Hölder
 `C^{2+α,1+α/2}`, then the Schauder/Lipschitz estimate for the Ricci–DeTurck RHS (which supplies the
 concrete `A`, `N`, `f` and the invariant ball these consume) and the chart / chart-closure fields.
 
+Update — **the quadratic Ricci–DeTurck nonlinearity and its short-time small-ball well-posedness are
+now built** on the parabolic `C^{0,α}` Banach chart (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), extending `AnalyticPDE/Parabolic/BanachSpace.lean`.  The
+frozen-coefficient operators (`mulL`/`mulCoeffL`) take their coefficient in the *seminormed carrier*
+(the *linearised* operator); the genuine Ricci–DeTurck nonlinearity is *quadratic*, with the
+coefficient itself a chart solution (a Banach class).  This session supplies exactly that quadratic
+algebra and the honest local existence for it (the globally-Lipschitz `affinePlusLipschitz` solver
+cannot reach a merely-locally-Lipschitz nonlinearity):
+
+* `mulBilinL` — the **fully-Banach bilinear multiplication** `ParabolicC0AlphaBanach … E … →L[ℝ]
+  (ParabolicC0AlphaBanach … F … →L[ℝ] ParabolicC0AlphaBanach … G …)` of norm `≤ ‖L‖`, descending
+  `mulL L` through the separation quotient in the coefficient slot too (well defined because `mulL L` is
+  `‖L‖`-Lipschitz); `mulBilinL_mk`/`mulBilinL_mk_mk`/`norm_mulBilinL_le`/`evalCLM_mulBilinL_apply` give
+  its representative/pointwise-product/norm/point-evaluation coherence.  Both factors are Banach classes
+  — the algebra of the *quadratic* nonlinear term, whose diagonal `u ↦ mulBilinL L u u` is the quadratic
+  map.
+* `norm_mulBilinL_diag_le` (`‖L(u,u)‖ ≤ ‖L‖‖u‖²`), `mulBilinL_diag_sub` (the bilinear polarisation
+  `L(u,u) − L(v,v) = L(u, u−v) + L(u−v, v)`), `norm_mulBilinL_diag_sub_le`
+  (`‖L(u,u) − L(v,v)‖ ≤ ‖L‖(‖u‖+‖v‖)‖u−v‖`), and `lipschitzOnWith_mulBilinL_diag` (the diagonal is
+  `LipschitzWith (2‖L‖R)` on `closedBall 0 R`) — the **local Lipschitz control** of the quadratic
+  nonlinearity, the `k`-Lipschitz-nonlinearity datum a fixed-point solver consumes.
+* `exists_fixedPoint_of_lipschitzOnWith_closedBall` (+ `eq_of_fixedPoint_of_lipschitzOnWith_closedBall`)
+  — the **Banach fixed point on a closed ball**: a self-map of `closedBall c r` that is
+  `LipschitzOnWith K` (`K < 1`) has a (unique-in-ball) fixed point there, via
+  `ContractingWith.exists_fixedPoint'` on the complete closed-ball subspace
+  (`Metric.isClosed_closedBall.isComplete`).  The abstract short-time small-ball existence.
+* `lipschitzOnWith_quadraticRHS_closedBall` — the **named contraction property** of the Ricci–DeTurck
+  right-hand side `u ↦ A u + L(u,u) + f`: `LipschitzOnWith (‖A‖ + 2‖L‖(‖c‖+r))` on `closedBall c r`
+  (linear part `‖A‖` + quadratic diagonal `2‖L‖(‖c‖+r)`).
+* `mapsTo_quadraticRHS_closedBall_zero` — the **invariant-ball (self-mapping) datum** from the explicit
+  scalar smallness `‖A‖·r + ‖L‖·r² + ‖f‖ ≤ r`.
+* `exists_fixedPoint_quadraticRHS_closedBall` (general center, `MapsTo` hypothesis),
+  `exists_fixedPoint_quadraticRHS_closedBall_zero` (center `0`, from the two scalar conditions
+  `‖A‖+2‖L‖r < 1` and `‖A‖·r+‖L‖·r²+‖f‖ ≤ r` alone), `eq_of_fixedPoint_quadraticRHS_closedBall`
+  (in-ball uniqueness), and the bundled `existsUnique_fixedPoint_quadraticRHS_closedBall_zero`
+  (**`∃!`**) — the honest **short-time chart existence + uniqueness** for the quadratic Ricci–DeTurck
+  equation `A u + L(u,u) + f = u`, stated purely from the operator/data norms.  The well-posed
+  short-time chart datum the Ricci–DeTurck chart closure consumes for the genuinely quadratic (only
+  locally Lipschitz) nonlinearity.
+
+Remaining (future sessions): unchanged in scope — the lift to the higher-regularity parabolic Hölder
+space `C^{2+α,1+α/2}`, then the Schauder/Lipschitz estimate for the Ricci–DeTurck RHS (which supplies
+the concrete `A`, the bilinear `L` and data `f`, and the short-time invariant ball these consume via
+the now-available quadratic well-posedness) and the chart / chart-closure fields.
+
 ## Dependencies between items
 
 ```
