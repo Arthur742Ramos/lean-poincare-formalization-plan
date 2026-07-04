@@ -6558,3 +6558,49 @@ estimate** exhibiting the DeTurck RHS as such a `C^{0,α}` contraction (the heat
 its assembly from `mulCoeffL`/`compL`/`precompL`/`constL` with the short-time-smallness factors
 (Item 3); the **general-manifold** gauge-flow lift (Item 2, heavy gauge files); and the Item 1 tensor
 time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file).
+
+Update — **the compact-manifold time-dependent local flow existence + injectivity + uniqueness is now
+proved** in `GaugeReduction/ManifoldFlowExistence.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; a pure manifold-topology + integral-curve development, no PDE
+content, nothing touching the heavy gauge files).  The module previously supplied compact-manifold
+*uniform-time* existence only for **autonomous** fields (`exists_uniform_integralCurve_time`, needing the
+whole manifold compact) and only **per-point** local existence for time-dependent fields
+(`exists_timeDependent_integralCurve`).  The DeTurck gauge field is *time-dependent*, and its
+autonomization space `ℝ × M` is never compact — but the **initial-time slice** `{0} × M` is.  This
+session closes exactly that gap, delivering the time-dependent existence core the gauge flow consumes
+(Item 2), plus the injectivity (diffeomorphism-onto-image) and uniqueness (canonicity) halves:
+
+* `exists_uniform_time_of_nhds_uniform_on_compact` — the **compact-slice** flow-box reduction: the
+  neighborhood-uniform flow box (`exists_nhds_uniform_integralCurve`) yields a *single* uniform lifespan
+  `ε > 0` over any **compact subset** `S` of a (possibly noncompact) manifold, by a finite subcover of `S`
+  and the minimum lifespan.  The refinement of `exists_uniform_time_of_nhds_uniform` (whole space compact)
+  needed to integrate over the compact slice `{0} × M ⊆ ℝ × M`.
+* `exists_uniform_timeDependent_integralCurve_time` — the **compact-manifold time-dependent uniform-time
+  local existence**: for a jointly-`C¹` time-dependent field `X` on a compact boundaryless complete
+  manifold there is one `ε > 0` such that *every* start point `x` admits a time-dependent integral curve
+  of `X` on the common `Ioo (-ε) ε`.  Autonomize to `ℝ × M`, take the uniform lifespan over the compact
+  slice `{0} × M` via the compact-slice reduction, and project through
+  `isTimeDependentIntegralCurve_of_autonomous_of_fst`.
+* `exists_timeDependent_flow_compact` — the bundled flow `Φ : ℝ → M → M` with `Φ 0 = id` and every orbit
+  `τ ↦ Φ τ x` a time-dependent integral curve on `Ioo (-ε) ε` (via `choose`): the anchored
+  integral-curve family the gauge construction is built on.
+* `timeDependent_integralCurve_eqOn_of_eq` — **uniqueness anchored at any interior time** (generalising
+  `timeDependent_integralCurve_unique`, anchor `0`): two time-dependent integral curves on `Ioo a b`
+  agreeing at a single interior `t₀` agree throughout, via the autonomous lift + mathlib's
+  `isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless` at `t₀`.
+* `timeDependent_flow_injective` — **injectivity of every time-`t` slice** `x ↦ Φ t x`: two orbits
+  agreeing at time `t` agree at time `0`, where the anchor reads off the two start points.  The
+  diffeomorphism-onto-image (injectivity) half Item 2 consumes.
+* `timeDependent_flow_unique` — **canonicity of the flow**: two anchored flows with orbits solving the
+  same field ODE on `Ioo (-ε) ε` coincide there (orbit uniqueness anchored at `0`).
+* `exists_timeDependent_flow_compact_injective` — the bundled **existence + orbit-ODE + injective
+  time-slices** datum in one package; with `timeDependent_flow_unique` this exhibits the compact-manifold
+  local flow as a *canonically determined family of injections* — the forward-family `F` datum
+  `GaugeReduction/GaugeFlowAssembly.lean`'s `gaugeFlow_of_inverse_flow` consumes (`hanchored` + `hderiv`).
+
+Remaining for Point 4 (future sessions): unchanged in scope — for Item 2 the **spatial `C³` regularity**
+of the flow map `x ↦ F t x` (the `C¹→C³` bootstrap from `SmoothDependenceCk`/`SmoothDependenceManifold`
+into this compact-manifold flow) and the **mutual spatial inverse** `G t` (the two-parameter / reverse
+time-dependent flow giving surjectivity, whose forward existence pieces — uniform time-dependent
+existence and anchored uniqueness — are now in place), then `gaugeFlow_of_inverse_flow` closes Item 2;
+plus the Item 1 tensor time-derivative chain rule and the Item 3 parabolic Schauder a-priori estimates.
