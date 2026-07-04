@@ -6087,3 +6087,49 @@ Remaining for Point 4 (future sessions): unchanged — the manifold gauge-flow c
 (`ContDiff ℝ 2`/`3`) continuous-derivative layers (needing modulus arguments on `D²v`/`D³v`, lower
 leverage since smooth Ricci-flow RHSs already have locally-Lipschitz derivatives and use the
 `_lipschitz_` C³ capstone), and the Item 3 parabolic Hölder/Schauder frontier.
+
+Update — **the time-`t` flow map is now a `C^k` diffeomorphism (`k = 1, 2, 3`) of the state
+space, for *every* `t`**, in the new self-contained module
+`AnalyticPDE/FlowDiffeomorphism.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; imports the cached `SmoothDependenceCk`, so it builds
+without recompiling that tower).  This closes the **inverse/bijectivity half** of "the flow is a
+diffeomorphism family" that Item 2's compact-manifold gauge-flow constructor consumes: the
+`SmoothDependenceCk` tower already proved the flow map injective (`injective_flow_apply`),
+Lipschitz/continuous (`lipschitzWith_flow_apply`, `continuous_flow_apply`, `continuous_flow`) and
+`ContDiff ℝ k` in the *forward* direction (`t₀ ≤ t`), but bijectivity, the inverse flow map, and
+*backward* regularity did not exist.
+
+* `surjective_flow_apply` / `bijective_flow_apply` — the flow map is a bijection: every `w` is
+  `Φ z t` for `z = γ t₀`, `γ` the integral curve through `w` at `t`
+  (`exists_isIntegralCurve_of_lipschitzWith`), identified with `Φ (γ t₀)` by uniqueness
+  (`eq_of_isIntegralCurve_of_eq_at`).
+* `exists_inverse_flow_apply` — the **reverse-time inverse flow** `ψ = (fun w ↦ Ψ w t₀)` from a
+  companion family `Ψ` anchored at `t` (`exists_flow_family`); `LeftInverse`/`RightInverse` of
+  `x ↦ Φ x t` by uniqueness, `LipschitzWith exp(K|t₀−t|)` as the time-`t₀` map of a flow family.
+* `exists_homeomorph_flow_apply` — bundled `Homeomorph E E` whose coercion is `x ↦ Φ x t` (the
+  ambient-topological skeleton of the self-diffeomorphism family).
+* **Two-sided (all-time) regularity via time reversal.**  The `SmoothDependenceCk` regularity
+  layers are all forward-only (`t₀ ≤ t`); the flow *inverse* is a backward flow, so backward
+  regularity was the true blocker.  It follows from the forward theorems applied to the
+  time-reversed field `w s x = -(v (-s) x)` (reversed derivatives `-(D^k v (-s) x)`; all
+  norm/continuity/Lipschitz hypotheses transfer through negation + time reflection, the `C³`
+  compatibility conditions via the new `curry2_neg` / `curryLeft_neg_fin3` `map_neg` lemmas),
+  anchored at `-t₀`, target `-t ≥ -t₀`, then reflected by `s ↦ -s` (`isIntegralCurve_comp_neg`):
+  `exists_flow_{differentiable,contDiff_one,contDiff_two,contDiff_three}_..._backward` and their
+  `_two_sided` (all-`t`, by `le_total`) and given-family (`{differentiable,contDiff_one,
+  contDiff_two,contDiff_three}_flow_apply_of_..`, one anchored family, every time, by uniqueness
+  transport `eq_of_isIntegralCurve_of_eq`) forms.
+* **The diffeomorphism capstones** `exists_contDiff_{one,two,three}_diffeomorph_flow_apply` — for a
+  given flow family and *every* `t`, the reverse-time inverse `ψ` is a two-sided inverse of
+  `x ↦ Φ x t` and **both** `x ↦ Φ x t` and `ψ` are `ContDiff ℝ k` (no forward/backward restriction).
+* `exists_flow_contDiff_three_diffeomorph` — the **field-data-only** entry point: from the `C^{3,1}`
+  jet of `v` alone, a flow family `Φ` (anchored at `t₀`, integral curve of `v`) whose time-`t` map
+  is a `C³` diffeomorphism for every `t`.
+
+Remaining for Point 4 (future sessions): unchanged in scope — connect this `C^k` flow-diffeomorphism
+data (now bijective + two-sided-regular, i.e. genuine diffeomorphisms, at the Banach/chart level) to
+the compact-manifold gauge-flow constructor (Item 2, `GaugeReduction/Diffeomorph3FlowExistence.lean`
+through the Banach model bridge `ModelGaugeFlowODE.lean` and Mathlib's chart/`IsMIntegralCurve`
+layer — the remaining work is the local-chart↔global-flow bridging, the diffeomorphism data itself
+is now available), the tensor time-derivative chain rule (Item 1), and the Item 3 parabolic
+Hölder/Schauder frontier (`AnalyticPDE/ParabolicHolder.lean`).
