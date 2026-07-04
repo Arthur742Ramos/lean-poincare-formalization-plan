@@ -2014,7 +2014,6 @@ theorem apply_eq_symmL_coord
   exact ((et i).symmL_continuousLinearMapAt hx (s x)).symm
 
 /-- The algebraic zero section evaluates pointwise to zero. -/
-@[simp]
 theorem zero_apply
     {κ : Type*} [Finite κ] [T2Space M]
     (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
@@ -2045,7 +2044,6 @@ theorem zero_apply
   simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply, map_zero]
 
 /-- The pointwise value of a sum of sections is the sum of the pointwise values. -/
-@[simp]
 theorem add_apply
     {κ : Type*} [Finite κ] [T2Space M]
     (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
@@ -2082,7 +2080,6 @@ theorem add_apply
   rfl
 
 /-- The pointwise value of a difference of sections is the difference of the pointwise values. -/
-@[simp]
 theorem sub_apply
     {κ : Type*} [Finite κ] [T2Space M]
     (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
@@ -2119,7 +2116,6 @@ theorem sub_apply
   rfl
 
 /-- The pointwise value of a negated section is the negation of the pointwise value. -/
-@[simp]
 theorem neg_apply
     {κ : Type*} [Finite κ] [T2Space M]
     (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
@@ -2152,7 +2148,6 @@ theorem neg_apply
 
 /-- The pointwise value of a scalar multiple of a section is the scalar multiple of the pointwise
 value. -/
-@[simp]
 theorem smul_apply
     {κ : Type*} [Finite κ] [T2Space M]
     (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
