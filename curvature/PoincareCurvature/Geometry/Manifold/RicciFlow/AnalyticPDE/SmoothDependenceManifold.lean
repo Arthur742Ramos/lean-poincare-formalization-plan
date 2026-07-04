@@ -685,6 +685,50 @@ theorem mfderiv_fundamentalSolution {A : ℝ → (E →L[ℝ] E)}
         (variationalField A t (fundamentalSolution hA hΦ h0 t) : E →L[ℝ] E) :=
   (hasMFDerivAt_fundamentalSolution hA hAcont hΦ h0 t).mfderiv
 
+/-- **Manifold time-derivative of the *actual flow's* pushforward** (`C^{1,1}` field).  Fusing the
+spatial-pushforward identity `mfderiv Φ_τ = D_x Φ_τ = fundamentalSolution` (`mfderiv_flow_apply_of_
+lipschitz_deriv`) with the resolvent's vector variational ODE (`hasMFDerivAt_fundamentalSolution_
+apply`), the pushforward of a *fixed* tangent vector `u₀` along the **actual flow** `Φ` of `v` —
+`τ ↦ (mfderiv 𝓘(ℝ,E) 𝓘(ℝ,E) (fun z ↦ Φ z τ) x₀) u₀ = D_x Φ_τ · u₀` — obeys the classical variational
+law `d/dt (D_x Φ_t · u₀) = D_x v_t|_{Φ_t x₀} · (D_x Φ_t · u₀)` in the `𝓘(ℝ, E)` model-manifold
+vocabulary, as a within-`Ici t₀` (forward-time) manifold derivative:
+
+`HasMFDerivWithinAt 𝓘(ℝ,ℝ) 𝓘(ℝ,E) (fun τ ↦ (mfderiv (fun z ↦ Φ z τ) x₀) u₀) (Ici t₀) t`
+`  ((1).smulRight (A t ((mfderiv (fun z ↦ Φ z t) x₀) u₀)))`.
+
+This is exactly the "time-derivative of the pushforward `Φ_t · u`" datum that Item 1's scalar tensor
+chain rule consumes, now stated through the actual flow map's own differential rather than an
+abstract resolvent path — the pointwise resolvent identity `mfderiv Φ_τ = fundamentalSolution` holds
+only for `τ ≥ t₀` (`ht0`), hence the within-`Ici t₀` derivative.  A pure fusion transferred along the
+pointwise equality on `Ici t₀` via `HasMFDerivWithinAt.congr_mono`; no new analytic content. -/
+theorem hasMFDerivWithinAt_flow_pushforward_of_lipschitz_deriv
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ u₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ z, ∀ s ∈ Ici t₀, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+      (fun τ => (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z τ) x₀) u₀) (Ici t₀) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (variationalFieldVec A t ((mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀) u₀) : E)) := by
+  have hEq : ∀ τ ∈ Ici t₀,
+      (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z τ) x₀) u₀
+        = fundamentalSolution hA hΦ' h0' τ u₀ := by
+    intro τ hτ
+    exact DFunLike.congr_fun
+      (mfderiv_flow_apply_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ hτ hderiv hL
+        (fun z s hs ξ hξ => hlip z s (Set.Ico_subset_Ici_self hs) ξ hξ)) u₀
+  have htmem : t ∈ Ici t₀ := ht0
+  rw [hEq t htmem]
+  exact (hasMFDerivAt_fundamentalSolution_apply hA hΦ' h0' u₀ t).hasMFDerivWithinAt.congr_mono
+    (fun τ hτ => hEq τ hτ) (hEq t htmem) (Set.Subset.refl _)
+
 end
 
 end SmoothDependenceCk
