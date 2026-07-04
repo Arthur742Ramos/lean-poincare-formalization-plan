@@ -262,6 +262,82 @@ theorem exists_flow_diffeomorph_three [CompleteSpace E]
   obtain ⟨ψ, hL, hR, hcdΦ, hcdψ⟩ := hdiff t
   exact ⟨⟨⟨fun z => Φ z t, ψ, hL, hR⟩, hcdΦ, hcdψ⟩, fun z => rfl⟩
 
+/-!
+## `C¹` and `C²` manifold layers
+
+The same Fréchet → manifold transport applies verbatim to the `C¹` (`C^{1,1}` field) and `C²`
+(`C^{2,1}` field) Banach diffeomorphism capstones, giving the lower-order manifold spatial regularity
+and the `C¹`/`C²` `Diffeomorph` bundles.  This rounds the module out into a full `C¹`/`C²`/`C³`
+manifold smooth-dependence tower.
+-/
+
+/-- **Manifold spatial `C¹` regularity of the flow map** (`C^{1,1}` field): the manifold form of
+`contDiff_one_flow_apply_of_lipschitz_deriv`, via `contMDiff_iff_contDiff`. -/
+theorem contMDiff_one_flow_apply_of_lipschitz_deriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 1 (fun z => Φ z t) :=
+  contMDiff_iff_contDiff.mpr <|
+    contDiff_one_flow_apply_of_lipschitz_deriv hv hvc hderiv hDvc hDvlip hΦ h0 t
+
+/-- **Manifold spatial `C²` regularity of the flow map** (`C^{2,1}` field): the manifold form of
+`contDiff_two_flow_apply_of_lipschitz_secondDeriv`, via `contMDiff_iff_contDiff`. -/
+theorem contMDiff_two_flow_apply_of_lipschitz_secondDeriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ)
+    (hD2vc : Continuous fun p : ℝ × E => D2v p.1 p.2)
+    {M : ℝ≥0} (hD2vlip : ∀ s, LipschitzWith M (D2v s))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 2 (fun z => Φ z t) :=
+  contMDiff_iff_contDiff.mpr <|
+    contDiff_two_flow_apply_of_lipschitz_secondDeriv
+      hv hvc hDv hDvc hDvlip hD2v hD2vc hD2vlip hΦ h0 t
+
+/-- **The time-`t` flow map bundled as a Mathlib `C¹` `Diffeomorph`** of the model manifold `E`, from
+the `C^{1,1}` field jet alone. -/
+theorem exists_flow_diffeomorph_one [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s)) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+      ∀ t, ∃ F : Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 1, ∀ z, F z = Φ z t := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  refine ⟨Φ, h0, hΦ, fun t => ?_⟩
+  obtain ⟨ψ, hL, hR, hcdΦ, hcdψ⟩ :=
+    exists_contDiff_one_diffeomorph_flow_apply hv hvc hderiv hDvc hDvlip hΦ h0 t
+  exact ⟨⟨⟨fun z => Φ z t, ψ, hL, hR⟩,
+    contMDiff_iff_contDiff.mpr hcdΦ, contMDiff_iff_contDiff.mpr hcdψ⟩, fun z => rfl⟩
+
+/-- **The time-`t` flow map bundled as a Mathlib `C²` `Diffeomorph`** of the model manifold `E`, from
+the `C^{2,1}` field jet alone. -/
+theorem exists_flow_diffeomorph_two [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2v : ∀ s ξ, HasFDerivAt (Dv s) (D2v s ξ) ξ)
+    (hD2vc : Continuous fun p : ℝ × E => D2v p.1 p.2)
+    {M : ℝ≥0} (hD2vlip : ∀ s, LipschitzWith M (D2v s)) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+      ∀ t, ∃ F : Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 2, ∀ z, F z = Φ z t := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  refine ⟨Φ, h0, hΦ, fun t => ?_⟩
+  obtain ⟨ψ, hL, hR, hcdΦ, hcdψ⟩ :=
+    exists_contDiff_two_diffeomorph_flow_apply hv hvc hDv hDvc hDvlip hD2v hD2vc hD2vlip hΦ h0 t
+  exact ⟨⟨⟨fun z => Φ z t, ψ, hL, hR⟩,
+    contMDiff_iff_contDiff.mpr hcdΦ, contMDiff_iff_contDiff.mpr hcdψ⟩, fun z => rfl⟩
+
 end
 
 end SmoothDependenceCk
