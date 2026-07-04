@@ -453,6 +453,43 @@ theorem hasMFDerivAt_fundamentalSolution_apply {A : ℝ → (E →L[ℝ] E)}
         (variationalFieldVec A t (fundamentalSolution hA hΦ h0 t u₀) : E)) :=
   hasMFDerivAt_of_isIntegralCurve (isIntegralCurve_fundamentalSolution_apply hA hΦ h0 u₀) t
 
+/-- **Within-set manifold vector variational ODE of a pushed-forward direction.**  The
+`HasMFDerivWithinAt` (`HasMFDerivAt[s]`) refinement of `hasMFDerivAt_fundamentalSolution_apply`,
+holding for every time set `s` — the within-set derivative shape the gauge-flow assembly consumes for
+the pushed-forward frame `τ ↦ D_x Φ_τ · u₀`. -/
+theorem hasMFDerivWithinAt_fundamentalSolution_apply {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ s, ‖A s‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (u₀ : E) (s : Set ℝ) (t : ℝ) :
+    HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ => fundamentalSolution hA hΦ h0 τ u₀) s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (variationalFieldVec A t (fundamentalSolution hA hΦ h0 t u₀) : E)) :=
+  (hasMFDerivAt_fundamentalSolution_apply hA hΦ h0 u₀ t).hasMFDerivWithinAt
+
+/-- **Manifold `C^{n+1}` time-regularity of a pushed-forward direction.**  For a `C^n`-in-time
+coefficient `A`, the resolvent action `τ ↦ D_x Φ_τ · u₀` (the pushforward of the fixed tangent vector
+`u₀` along the flow) is `ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (n + 1)` in time.  The manifold form of
+`contDiff_fundamentalSolution_apply_time`, via `contMDiff_iff_contDiff` — the pushforward-leg
+time-regularity Item 1's tensor time-derivative chain rule consumes. -/
+theorem contMDiff_fundamentalSolution_apply_time {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ t, ‖A t‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (n : ℕ) (hAdiff : ContDiff ℝ (n : WithTop ℕ∞) A) (u₀ : E) :
+    ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((n : WithTop ℕ∞) + 1)
+      (fun s => fundamentalSolution hA hΦ h0 s u₀) :=
+  contMDiff_iff_contDiff.mpr (contDiff_fundamentalSolution_apply_time hA hΦ h0 n hAdiff u₀)
+
+/-- **Manifold `C^∞` time-regularity of a pushed-forward direction.**  For a `C^∞`-in-time
+coefficient `A`, the resolvent action `τ ↦ D_x Φ_τ · u₀` is `ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞` in time.
+The `C^∞` companion of `contMDiff_fundamentalSolution_apply_time`. -/
+theorem contMDiff_infty_fundamentalSolution_apply_time {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ t, ‖A t‖₊ ≤ K) (hAsmooth : ContDiff ℝ ∞ A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (u₀ : E) :
+    ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ (fun s => fundamentalSolution hA hΦ h0 s u₀) :=
+  contMDiff_iff_contDiff.mpr
+    (contDiff_infty_fundamentalSolution_apply_time hA hAsmooth hΦ h0 u₀)
+
 end
 
 end SmoothDependenceCk
