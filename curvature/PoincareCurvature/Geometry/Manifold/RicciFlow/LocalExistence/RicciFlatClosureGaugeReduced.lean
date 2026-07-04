@@ -70,6 +70,21 @@ noncomputable def gaugeReducedIntrinsicDeTurckLocalExistenceUniqueness_of_isRicc
   (intrinsicLocalExistenceUniqueness_of_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
     (I := I) (M := M) ivp hRicciFlat hRic).toGaugeReduced_viaIdentityGauge
 
+/-- **Chosen-background Ricci-flat closure.**  The chosen-background (identity `C³` gauge)
+Ricci-DeTurck point-4 package for Ricci-flat initial data with the Ricci-vanishing hypothesis,
+obtained from the intrinsic Ricci-flat closure through
+`IntrinsicLocalExistenceUniqueness.toChosenIntrinsicDeTurck`. -/
+noncomputable def chosenIntrinsicDeTurckLocalExistenceUniqueness_of_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+    (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (hRicciFlat : ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (hRic : ∀ sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+        intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicSolution.metric t x u v = 0) :
+    ChosenIntrinsicDeTurckLocalExistenceUniqueness
+      (E := E) (H := H) (I := I) (M := M) ivp :=
+  (intrinsicLocalExistenceUniqueness_of_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+    (I := I) (M := M) ivp hRicciFlat hRic).toChosenIntrinsicDeTurck
+
 /-- Theorem-family Levi-Civita-background Ricci-flat closure: a uniform supply of Ricci-flatness and
 the uniform Ricci-vanishing hypothesis yields the whole Levi-Civita-background theorem family. -/
 noncomputable def leviCivitaBackgroundIntrinsicDeTurckLocalExistenceUniquenessFamily_of_forall_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
@@ -97,6 +112,22 @@ noncomputable def gaugeReducedIntrinsicDeTurckLocalExistenceUniquenessFamily_of_
       (E := E) (H := H) (I := I) (M := M) where
   package := fun ivp ↦
     gaugeReducedIntrinsicDeTurckLocalExistenceUniqueness_of_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+      (I := I) (M := M) ivp (hRicciFlat ivp) (hRic ivp)
+
+/-- Theorem-family chosen-background Ricci-flat closure: a uniform supply of Ricci-flatness and the
+uniform Ricci-vanishing hypothesis yields the whole chosen-background (identity `C³` gauge)
+Ricci-DeTurck theorem family. -/
+noncomputable def chosenIntrinsicDeTurckLocalExistenceUniquenessFamily_of_forall_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
+    (hRicciFlat : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ivp.IsRicciFlat (E := E) (H := H) (I := I) (M := M))
+    (hRic : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : IntrinsicLocalSolution (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+          intrinsicRicciTensor (I := I) (M := M) sol.toIntrinsicSolution.metric t x u v = 0) :
+    ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily
+      (E := E) (H := H) (I := I) (M := M) where
+  package := fun ivp ↦
+    chosenIntrinsicDeTurckLocalExistenceUniqueness_of_isRicciFlat_of_forall_intrinsicRicciTensor_eq_zero
       (I := I) (M := M) ivp (hRicciFlat ivp) (hRic ivp)
 
 end Compact
