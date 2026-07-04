@@ -652,6 +652,39 @@ theorem exists_flow_contMDiff_one_of_continuous_deriv [FiniteDimensional ℝ E]
     exists_flow_contDiff_one_of_continuous_deriv hv hvc hderiv hDvc ht0
   exact ⟨Φ, h0, hΦ, contMDiff_iff_contDiff.mpr hdiff⟩
 
+/-- **`mfderiv` readout of the trajectory ODE.**  `mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) γ t = (1).smulRight (v t
+(γ t))` for an integral curve `γ` of `v` — the `mfderiv` companion of `hasMFDerivAt_of_isIntegralCurve`
+(the exact `mfderiv` value the tensor time-derivative chain rule plugs into a scalar computation). -/
+theorem mfderiv_of_isIntegralCurve {γ : ℝ → E} (h : IsIntegralCurve γ v) (t : ℝ) :
+    mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) γ t = (1 : ℝ →L[ℝ] ℝ).smulRight (v t (γ t)) :=
+  (hasMFDerivAt_of_isIntegralCurve h t).mfderiv
+
+/-- **`mfderiv` readout of the pushed-forward-direction variational ODE.**
+`mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ ↦ D_x Φ_τ · u₀) t = (1).smulRight (A t (D_x Φ_t · u₀))` — the exact
+time-derivative `mfderiv` value of the pushforward leg `Φ_t · u`, the `mfderiv` companion of
+`hasMFDerivAt_fundamentalSolution_apply` that Item 1's scalar chain-rule assembly consumes. -/
+theorem mfderiv_fundamentalSolution_apply {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ s, ‖A s‖₊ ≤ K)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (u₀ : E) (t : ℝ) :
+    mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ => fundamentalSolution hA hΦ h0 τ u₀) t
+      = (1 : ℝ →L[ℝ] ℝ).smulRight
+        (variationalFieldVec A t (fundamentalSolution hA hΦ h0 t u₀) : E) :=
+  (hasMFDerivAt_fundamentalSolution_apply hA hΦ h0 u₀ t).mfderiv
+
+/-- **`mfderiv` readout of the operator variational ODE of the resolvent path.**
+`mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E →L[ℝ] E) (fun τ ↦ D_x Φ_τ) t = (1).smulRight (A t ∘ D_x Φ_t)` — the exact
+time-derivative `mfderiv` value of the whole resolvent operator, the `mfderiv` companion of
+`hasMFDerivAt_fundamentalSolution`. -/
+theorem mfderiv_fundamentalSolution {A : ℝ → (E →L[ℝ] E)}
+    (hA : ∀ s, ‖A s‖₊ ≤ K) (hAcont : Continuous A)
+    (hΦ : ∀ x, IsIntegralCurve (Φ x) (variationalFieldVec A)) (h0 : ∀ x, Φ x t₀ = x)
+    (t : ℝ) :
+    mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E →L[ℝ] E) (fun τ => fundamentalSolution hA hΦ h0 τ) t
+      = (1 : ℝ →L[ℝ] ℝ).smulRight
+        (variationalField A t (fundamentalSolution hA hΦ h0 t) : E →L[ℝ] E) :=
+  (hasMFDerivAt_fundamentalSolution hA hAcont hΦ h0 t).mfderiv
+
 end
 
 end SmoothDependenceCk
