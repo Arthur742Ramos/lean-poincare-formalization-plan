@@ -1328,6 +1328,76 @@ theorem exists_unique_mulCoeffL_affineFixedPoint {F : Type*} [NormedAddCommGroup
     ∃! u, mulCoeffL L a u + f = u :=
   exists_unique_affineFixedPoint (mulCoeffL L a) f (lt_of_le_of_lt (norm_mulCoeffL_le L a) ha)
 
+/-- **The solution operator is a left inverse of `1 - A`.**  `affineSolveL A hA * (1 - A) = 1` in the
+endomorphism ring of the parabolic `C^{0,α}` Banach space (the two-sided companion of
+`oneSub_mul_affineSolveL`).  Together they exhibit `affineSolveL A hA = (1 - A)⁻¹`. -/
+theorem affineSolveL_mul_oneSub [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s) (hA : ‖A‖ < 1) :
+    affineSolveL A hA * (1 - A) = 1 := by
+  show (↑(Units.oneSub A hA)⁻¹) * (1 - A) = 1
+  rw [← Units.val_oneSub A hA]
+  exact (Units.oneSub A hA).inv_mul
+
+/-- **The resolvent identity for the affine Ricci–DeTurck solution operators.**  For two contracting
+linear parts `A`, `B` (`‖A‖, ‖B‖ < 1`), the Neumann solution operators differ by
+`(1 - A)⁻¹ - (1 - B)⁻¹ = (1 - A)⁻¹ (A - B) (1 - B)⁻¹`.  This is the algebraic core of the *continuous
+dependence of the linearised Schauder solution on its frozen coefficients*: it converts a change
+`A - B` in the coefficient operator into a change in the solution operator, mediated on both sides by
+the individual solution operators. -/
+theorem affineSolveL_sub_eq [CompleteSpace E]
+    (A B : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (hA : ‖A‖ < 1) (hB : ‖B‖ < 1) :
+    affineSolveL A hA - affineSolveL B hB
+      = affineSolveL A hA * (A - B) * affineSolveL B hB := by
+  have hA1 : affineSolveL A hA * (1 - A) = 1 := affineSolveL_mul_oneSub A hA
+  have hB1 : (1 - B) * affineSolveL B hB = 1 := oneSub_mul_affineSolveL B hB
+  have e1 : A - B = (1 - B) - (1 - A) := by abel
+  have key : affineSolveL A hA * (A - B) * affineSolveL B hB
+      = affineSolveL A hA - affineSolveL B hB := by
+    rw [e1, mul_sub, sub_mul,
+      mul_assoc (affineSolveL A hA) (1 - B) (affineSolveL B hB), hB1, mul_one, hA1, one_mul]
+  exact key.symm
+
+/-- **Lipschitz dependence of the Schauder solution operator on the frozen coefficients.**  The
+Neumann solution operator `affineSolveL A hA = (1 - A)⁻¹` obeys the perturbation bound
+`‖affineSolveL A hA - affineSolveL B hB‖ ≤ (1 - ‖A‖)⁻¹ · ‖A - B‖ · (1 - ‖B‖)⁻¹`, so the linearised
+Ricci–DeTurck solution operator depends Lipschitz-continuously (in operator norm) on the frozen
+coefficient operator.  This is the quantitative continuous-dependence estimate that turns the
+coefficient-dependent Ricci–DeTurck Schauder iteration into a contraction. -/
+theorem norm_affineSolveL_sub_le [CompleteSpace E]
+    (A B : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (hA : ‖A‖ < 1) (hB : ‖B‖ < 1) :
+    ‖affineSolveL A hA - affineSolveL B hB‖ ≤ (1 - ‖A‖)⁻¹ * ‖A - B‖ * (1 - ‖B‖)⁻¹ := by
+  have hApos : (0 : ℝ) ≤ (1 - ‖A‖)⁻¹ := inv_nonneg.mpr (by linarith)
+  have hmid : (0 : ℝ) ≤ (1 - ‖A‖)⁻¹ * ‖A - B‖ := mul_nonneg hApos (norm_nonneg _)
+  rw [affineSolveL_sub_eq A B hA hB]
+  calc ‖affineSolveL A hA * (A - B) * affineSolveL B hB‖
+      ≤ ‖affineSolveL A hA * (A - B)‖ * ‖affineSolveL B hB‖ := norm_mul_le _ _
+    _ ≤ ‖affineSolveL A hA‖ * ‖A - B‖ * ‖affineSolveL B hB‖ :=
+        mul_le_mul_of_nonneg_right (norm_mul_le _ _) (norm_nonneg _)
+    _ ≤ (1 - ‖A‖)⁻¹ * ‖A - B‖ * (1 - ‖B‖)⁻¹ :=
+        mul_le_mul
+          (mul_le_mul_of_nonneg_right (norm_affineSolveL_le A hA) (norm_nonneg _))
+          (norm_affineSolveL_le B hB) (norm_nonneg _) hmid
+
+/-- **A-priori solution-difference estimate under a coefficient change.**  For a fixed inhomogeneity
+`f`, the solutions of the two linearised Ricci–DeTurck equations `A u + f = u` and `B u + f = u`
+satisfy `‖affineSolveL A hA f - affineSolveL B hB f‖ ≤ (1 - ‖A‖)⁻¹ · ‖A - B‖ · (1 - ‖B‖)⁻¹ · ‖f‖`.
+This is the quantitative statement that a small change in the frozen coefficients produces a
+correspondingly small change in the Schauder solution — the estimate consumed by the nonlinear
+(coefficient-dependent) Ricci–DeTurck contraction mapping. -/
+theorem norm_affineSolveL_apply_sub_le [CompleteSpace E]
+    (A B : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (hA : ‖A‖ < 1) (hB : ‖B‖ < 1) (f : ParabolicC0AlphaBanach X E α s) :
+    ‖affineSolveL A hA f - affineSolveL B hB f‖ ≤ (1 - ‖A‖)⁻¹ * ‖A - B‖ * (1 - ‖B‖)⁻¹ * ‖f‖ := by
+  have hfe : affineSolveL A hA f - affineSolveL B hB f = (affineSolveL A hA - affineSolveL B hB) f := by
+    rw [ContinuousLinearMap.sub_apply]
+  rw [hfe]
+  calc ‖(affineSolveL A hA - affineSolveL B hB) f‖
+      ≤ ‖affineSolveL A hA - affineSolveL B hB‖ * ‖f‖ := ContinuousLinearMap.le_opNorm _ _
+    _ ≤ (1 - ‖A‖)⁻¹ * ‖A - B‖ * (1 - ‖B‖)⁻¹ * ‖f‖ :=
+        mul_le_mul_of_nonneg_right (norm_affineSolveL_sub_le A B hA hB) (norm_nonneg f)
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
