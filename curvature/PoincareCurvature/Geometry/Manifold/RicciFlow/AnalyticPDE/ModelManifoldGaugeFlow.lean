@@ -190,6 +190,53 @@ theorem exists_diffeomorph3GaugeFlowOn_of_contDiff
     (fun s ξ => fderiv_fderiv_eq_curry2_iteratedFDeriv_two (v s) ξ)
     (fun s ξ => fderiv_iteratedFDeriv_two_eq_curryLeft (v s) ξ)
 
+/-- **Model-manifold `C³` flow family + ODE equation from a single joint-`ContDiff` field.**
+The `ContDiff`-packaged form of `exists_flow_diffeomorph_three_hasMFDerivAt`: from a single
+`ContDiff ℝ n (Function.uncurry v)` hypothesis (`3 ≤ n`) plus the honest top-order Lipschitz controls,
+there is a *single* flow family `Φ` on the model manifold `𝓘(ℝ, E)` that simultaneously anchors
+(`Φ z t₀ = z`), solves the manifold integral-curve ODE derivative equation at every time, and is —
+for every `t` — the coercion of a genuine bundled `Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3`.  The entire
+`C^{3,1}` Fréchet jet and its `HasFDerivAt`/joint-continuity/compatibility obligations are discharged
+from the one smoothness hypothesis.
+
+This is the second documented per-chart export the general compact-manifold lift transports (a
+first-class `C³` self-diffeomorphism family that *is* the flow of the chart-local field), now stated
+behind the single `ContDiff` hypothesis, completing the `_of_contDiff` entry points to both
+model-manifold gauge-flow exports.  A pure assembly of the `FieldJetContDiff` jet extraction fed into
+`exists_flow_diffeomorph_three_hasMFDerivAt`. -/
+theorem exists_flow_diffeomorph_three_hasMFDerivAt_of_contDiff
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {v : ℝ → E → E} {K L M₂ M₃ N : ℝ≥0} {t₀ : ℝ} {n : WithTop ℕ∞}
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 3 ≤ n)
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    (hDvlip : ∀ s, LipschitzWith L (fderiv ℝ (v s)))
+    (hD2vclip : ∀ s, LipschitzWith M₂ (fderiv ℝ (fderiv ℝ (v s))))
+    (hD2vmlip : ∀ s, LipschitzWith N (iteratedFDeriv ℝ 2 (v s)))
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (fderiv ℝ (iteratedFDeriv ℝ 2 (v s))))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (iteratedFDeriv ℝ 3 (v s))) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧
+      (∀ z t, HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ => Φ z τ) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (v t (Φ z t)))) ∧
+      ∀ t, ∃ F : Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3, ∀ z, F z = Φ z t := by
+  have hn1 : (1 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  have hn2 : (2 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  exact exists_flow_diffeomorph_three_hasMFDerivAt (t₀ := t₀)
+    hv hvc
+    (fun s ξ => hasFDerivAt_fderiv_of_contDiff_uncurry h hn1 s ξ)
+    (continuous_fderiv_of_contDiff_uncurry h hn1)
+    hDvlip
+    (fun s ξ => hasFDerivAt_fderiv_fderiv_of_contDiff_uncurry h hn2 s ξ)
+    (continuous_fderiv_fderiv_of_contDiff_uncurry h hn2)
+    hD2vclip
+    hD2vmlip
+    (fun s ξ => hasFDerivAt_fderiv_iteratedFDeriv_two_of_contDiff_uncurry h hn s ξ)
+    (continuous_fderiv_iteratedFDeriv_two_of_contDiff_uncurry h hn)
+    hD3vmlip
+    (continuous_iteratedFDeriv_three_of_contDiff_uncurry h hn)
+    hD3vlip
+    (fun s ξ => fderiv_fderiv_eq_curry2_iteratedFDeriv_two (v s) ξ)
+    (fun s ξ => fderiv_iteratedFDeriv_two_eq_curryLeft (v s) ξ)
+
 end
 
 end SmoothDependenceCk
