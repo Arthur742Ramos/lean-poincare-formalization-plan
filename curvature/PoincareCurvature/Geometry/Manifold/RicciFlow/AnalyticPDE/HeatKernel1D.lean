@@ -4887,5 +4887,56 @@ lemma ode_solution_dist_le_timeDependent_Icc {E : Type*} [NormedAddCommGroup E] 
     exact Filter.mem_of_superset (Ico_mem_nhdsGE hs.2)
       (fun x hx => ⟨le_trans hs.1 hx.1, le_of_lt hx.2⟩)
 
+/-! ### `n`-dimensional heat-semigroup coordinate gradient (C¹ Schauder half)
+
+The one-dimensional gradient-smoothing rate `heatSemigroup1D_lipschitz_sqrt_rate` rests on
+differentiating the heat semigroup under the integral sign (`hasDerivAt_heatSemigroup1D_space`).
+The `n`-dimensional parabolic chart needs the coordinate analogue: differentiating
+`heatSemigroupND` along a single coordinate.  The lemmas below assemble that coordinate
+derivative from the already-committed `n`-dimensional kernel coordinate-derivative
+(`hasDerivAt_heatKernelND_coord_at`) and the product-structure moment integrabilities. -/
+
+/-- **The `n`-dimensional coordinate absolute first moment is integrable.**  Writing
+`|x_k|·Kₙ(t,x) = ∏ᵢ fᵢ(xᵢ)` with the `|·|` absorbed into slot `k`
+(`fₖ(z) = |z|·K(t,z)`, `fⱼ(z) = K(t,z)` for `j ≠ k`), `Integrable.fin_nat_prod` reduces
+integrability to the `k`-th absolute first moment `integrable_abs_mul_heatKernel1D` and the unit
+mass of the transverse Gaussians.  The `n`-dimensional companion of
+`integral_abs_coord_mul_heatKernelND_eq`. -/
+lemma integrable_abs_coord_mul_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    Integrable (fun x : Fin n → ℝ => |x k| * heatKernelND t x) := by
+  classical
+  have hprod : (fun x : Fin n → ℝ => |x k| * heatKernelND t x)
+      = fun x : Fin n → ℝ =>
+          ∏ i, (if i = k then |x i| * heatKernel1D t (x i) else heatKernel1D t (x i)) := by
+    funext x
+    rw [heatKernelND_apply]
+    have hstep :
+        (∏ i, (if i = k then |x i| * heatKernel1D t (x i) else heatKernel1D t (x i)))
+          = (∏ i, (if i = k then |x i| else (1 : ℝ))) * ∏ i, heatKernel1D t (x i) := by
+      rw [← Finset.prod_mul_distrib]
+      exact Finset.prod_congr rfl (fun i _ => by split_ifs <;> ring)
+    rw [hstep, Finset.prod_ite_eq']
+    simp
+  have hvol : (volume : Measure (Fin n → ℝ)) = Measure.pi (fun _ => volume) := by
+    rw [volume_pi]
+  rw [hprod, hvol]
+  refine Integrable.fin_nat_prod
+    (f := fun i z => if i = k then |z| * heatKernel1D t z else heatKernel1D t z) (fun i => ?_)
+  rcases eq_or_ne i k with hik | hik
+  · simp only [if_pos hik]
+    exact integrable_abs_mul_heatKernel1D ht
+  · simp only [if_neg hik]
+    exact integrable_heatKernel1D ht
+
+/-- **The `n`-dimensional coordinate (signed) first moment is integrable.**  Its norm equals the
+absolute first moment `|x_k|·Kₙ(t,x)` (`Kₙ ≥ 0`), so integrability follows from
+`integrable_abs_coord_mul_heatKernelND` by domination. -/
+lemma integrable_coord_mul_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    Integrable (fun x : Fin n → ℝ => (x k) * heatKernelND t x) := by
+  refine (integrable_abs_coord_mul_heatKernelND ht k).mono'
+    (((continuous_apply k).mul (continuous_heatKernelND t)).aestronglyMeasurable)
+    (Filter.Eventually.of_forall (fun x => ?_))
+  rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (heatKernelND_nonneg ht x)]
+
 end AnalyticPDE
 end RicciFlow
