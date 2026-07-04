@@ -1280,6 +1280,28 @@ theorem eq_affineSolveL_of_isSolution [CompleteSpace E]
   obtain ⟨w, _, hw⟩ := exists_unique_affineFixedPoint A f hA
   rw [hw u hu, hw (affineSolveL A hA f) (affineSolveL_isSolution A hA f)]
 
+/-- **Concrete solvability under a fiberwise contraction.**  If the fiber morphism `L : E →L[ℝ] E`
+is a contraction (`‖L‖ < 1`), the affine equation `compL L u + f = u` — fiberwise post-composition by
+`L` (a coordinate change / bundle morphism) plus the inhomogeneity `f` — has a unique solution on the
+parabolic `C^{0,α}` Banach space.  This instantiates the abstract affine solvability at the concrete
+fiberwise-post-composition operator built earlier. -/
+theorem exists_unique_compL_affineFixedPoint [CompleteSpace E] (L : E →L[ℝ] E) (hL : ‖L‖ < 1)
+    (f : ParabolicC0AlphaBanach X E α s) :
+    ∃! u, compL L u + f = u :=
+  exists_unique_affineFixedPoint (compL L) f (lt_of_le_of_lt (norm_compL_le L) hL)
+
+/-- **Concrete solvability under a frozen-coefficient contraction.**  If the frozen-coefficient
+operator `mulCoeffL L a` — multiplication by the `C^{0,α}` coefficient field `a` through the bounded
+bilinear map `L` — is small, `‖L‖ * ‖a‖ < 1`, then the affine equation `mulCoeffL L a u + f = u` has a
+unique solution on the parabolic `C^{0,α}` Banach space.  This instantiates the abstract affine
+solvability at the concrete frozen-coefficient operator at the heart of parabolic Schauder theory. -/
+theorem exists_unique_mulCoeffL_affineFixedPoint {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ F] [CompleteSpace F] (L : E →L[ℝ] F →L[ℝ] F)
+    (a : ParabolicC0AlphaSpace X E α s) (ha : ‖L‖ * ‖a‖ < 1)
+    (f : ParabolicC0AlphaBanach X F α s) :
+    ∃! u, mulCoeffL L a u + f = u :=
+  exists_unique_affineFixedPoint (mulCoeffL L a) f (lt_of_le_of_lt (norm_mulCoeffL_le L a) ha)
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
