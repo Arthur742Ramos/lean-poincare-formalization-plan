@@ -1964,6 +1964,86 @@ theorem coord_dist_le_of_trivialization_opNorm_le
     _ ≤ L * dist (s x.1) (t x.1) := by
       exact mul_le_mul_of_nonneg_right (hL i x) dist_nonneg
 
+/-- The compact coordinate readout of a section at a point of its trivializing piece is the
+trivialization's fiberwise linear map applied to the pointwise value.  This is the named form of the
+`hscoord`/`htcoord` computation used throughout the finite-cover norm bridge. -/
+theorem coord_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x =
+      (et i).continuousLinearMapAt 𝕜 x.1 (s x.1) := by
+  have hx : x.1 ∈ (et i).baseSet := hKc i x.2
+  simp [equivCompatibleCoordFamilySubmodule, toSubtype,
+    continuousSectionEquivCompatibleCoordFamilySubmodule,
+    continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
+    compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
+    Bundle.Trivialization.linearMapAt_apply, hx]
+
+/-- Inversion of `coord_apply`: on a trivializing piece the pointwise value of a section is
+recovered from its compact coordinate readout by the trivialization's backwards fiber map. -/
+theorem apply_eq_symmL_coord
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)
+    {i : κ} {x : M} (hi : x ∈ (Kc i : Set M)) :
+    s x =
+      (et i).symmL 𝕜 x
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i ⟨x, hi⟩) := by
+  have hx : x ∈ (et i).baseSet := hKc i hi
+  rw [coord_apply s i ⟨x, hi⟩]
+  exact ((et i).symmL_continuousLinearMapAt hx (s x)).symm
+
+/-- The algebraic zero section evaluates pointwise to zero. -/
+@[simp]
+theorem zero_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (x : M) :
+    (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) x = 0 := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  rw [apply_eq_symmL_coord
+    (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) hi]
+  have he0 :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+        (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover)) = 0 := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_zero _
+  rw [he0]
+  simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply, map_zero]
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
