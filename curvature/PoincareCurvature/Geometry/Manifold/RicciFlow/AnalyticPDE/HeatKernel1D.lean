@@ -5018,5 +5018,158 @@ lemma integrable_gaussianEnvelope_erase_prod {n : ℕ} {t : ℝ} (ht : 0 < t)
   · simp only [hF, if_neg hik]
     exact (integrable_heatKernel1D ht).comp_sub_left (x i)
 
+/-- **Coordinate spatial derivative of the `n`-dimensional heat semigroup.**  For bounded
+measurable data `f`, the map `s ↦ Hₜf(update x k s)` (varying only the `k`-th coordinate) is
+differentiable at `s = x_k`, with derivative `∫ y, ∂_{x_k}Kₙ(t, x − y)·f(y) dy`.  This is the
+`n`-dimensional coordinate analogue of `hasDerivAt_heatSemigroup1D_space`, obtained by Leibniz's
+rule (`hasDerivAt_integral_of_dominated_loc_of_deriv_le`): the pointwise coordinate derivative
+comes from `hasDerivAt_heatKernelND_coord_at`, and the Gaussian-envelope domination from
+`integrable_gaussianEnvelope_erase_prod`.  Combined with `integral_abs_deriv_coord_heatKernelND_eq`
+(`∫|∂_{x_k}Kₙ| = 1/√(πt)`), this yields the `n`-dimensional `C¹` parabolic Schauder smoothing rate. -/
+theorem hasDerivAt_heatSemigroupND_coord {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ) (k : Fin n)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    HasDerivAt (fun s => heatSemigroupND t f (Function.update x k s))
+      (∫ y, (heatKernelND t (x - y) * (-((x - y) k) / (2 * t))) * f y) (x k) := by
+  classical
+  have h2t : (0 : ℝ) < 2 * t := by positivity
+  have hCnn : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+  set F : ℝ → (Fin n → ℝ) → ℝ :=
+    fun s y => heatKernelND t (Function.update x k s - y) * f y with hF
+  set F' : ℝ → (Fin n → ℝ) → ℝ :=
+    fun s y => heatKernel1D t (s - y k) * (-(s - y k) / (2 * t))
+      * (∏ j ∈ Finset.univ.erase k, heatKernel1D t ((x - y) j)) * f y with hF'
+  set M : ℝ := (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (1 / (4 * t)) * C / (2 * t) with hM
+  set bound : (Fin n → ℝ) → ℝ :=
+    fun y => M * ((1 + |y k - x k|) * Real.exp (-(y k - x k) ^ 2 / (8 * t))
+      * ∏ j ∈ Finset.univ.erase k, heatKernel1D t ((x - y) j)) with hbound
+  -- The coordinate shift identity: `update x k s - y = update (x - y) k (s - y k)`.
+  have hsub : ∀ (s : ℝ) (y : Fin n → ℝ),
+      Function.update x k s - y = Function.update (x - y) k (s - y k) := by
+    intro s y
+    funext i
+    rcases eq_or_ne i k with hik | hik
+    · subst hik; simp [Function.update_self]
+    · simp [Function.update_of_ne hik]
+  -- `F' (x k)` decodes to the intrinsic kernel coordinate-derivative convolution integrand.
+  have hF'eq : F' (x k)
+      = fun y => (heatKernelND t (x - y) * (-((x - y) k) / (2 * t))) * f y := by
+    funext y
+    simp only [hF']
+    rw [heatKernelND_eq_update_mul n t (x - y) k]
+    simp only [Pi.sub_apply]
+    ring
+  -- Measurability of the base and derivative integrands.
+  have hFmeas : ∀ᶠ s in nhds (x k),
+      AEStronglyMeasurable (F s) (volume : Measure (Fin n → ℝ)) := by
+    filter_upwards with s
+    simp only [hF]
+    exact aestronglyMeasurable_heatKernelND_sub_mul n t ht f (Function.update x k s) hfm
+  have hFint : Integrable (F (x k)) (volume : Measure (Fin n → ℝ)) := by
+    simp only [hF]
+    exact integrable_heatKernelND_sub_mul ht (Function.update x k (x k)) hfm hfb
+  have hF'meas : AEStronglyMeasurable (F' (x k)) (volume : Measure (Fin n → ℝ)) := by
+    have hcont : Continuous
+        (fun y : Fin n → ℝ => heatKernelND t (x - y) * (-((x - y) k) / (2 * t))) := by
+      refine (continuous_heatKernelND_sub t x).mul ?_
+      refine Continuous.div_const ?_ _
+      exact ((continuous_apply k).comp (continuous_const.sub continuous_id)).neg
+    rw [hF'eq]
+    exact hcont.aestronglyMeasurable.mul hfm
+  -- Gaussian-envelope domination.
+  have hboundint : Integrable bound (volume : Measure (Fin n → ℝ)) := by
+    simpa only [hbound] using (integrable_gaussianEnvelope_erase_prod ht x k).const_mul M
+  have hbnd : ∀ᵐ y ∂(volume : Measure (Fin n → ℝ)),
+      ∀ s ∈ Metric.ball (x k) 1, ‖F' s y‖ ≤ bound y := by
+    filter_upwards with y s hs
+    rw [Metric.mem_ball, Real.dist_eq] at hs
+    have hzle : |s - x k| ≤ 1 := hs.le
+    have hpre : (0 : ℝ) < (4 * π * t) ^ (-(1 : ℝ) / 2) := heatKernel1D_prefactor_pos ht
+    have hzx2 : (s - x k) ^ 2 ≤ 1 := by
+      rw [← Real.sqrt_le_sqrt_iff (by positivity), Real.sqrt_one, Real.sqrt_sq_eq_abs]
+      exact hzle
+    have hK : heatKernel1D t (s - y k)
+        ≤ (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (1 / (4 * t))
+            * Real.exp (-(y k - x k) ^ 2 / (8 * t)) := by
+      rw [heatKernel1D_apply, mul_assoc ((4 * π * t) ^ (-(1 : ℝ) / 2)), ← Real.exp_add]
+      apply mul_le_mul_of_nonneg_left _ hpre.le
+      apply Real.exp_le_exp.mpr
+      have hq : (s - y k) ^ 2 ≥ (y k - x k) ^ 2 / 2 - (s - x k) ^ 2 := by
+        nlinarith [sq_nonneg ((y k - x k) - 2 * (s - x k))]
+      rw [← sub_nonneg]
+      have key : 1 / (4 * t) + -(y k - x k) ^ 2 / (8 * t) - -(s - y k) ^ 2 / (4 * t)
+          = (2 - ((y k - x k) ^ 2 - 2 * (s - y k) ^ 2)) / (8 * t) := by
+        field_simp; ring
+      rw [key]
+      apply div_nonneg _ (by positivity)
+      nlinarith [hq, hzx2]
+    have hzy : |s - y k| ≤ 1 + |y k - x k| := by
+      have hsplit : s - y k = (s - x k) + (x k - y k) := by ring
+      calc |s - y k| ≤ |s - x k| + |x k - y k| := by rw [hsplit]; exact abs_add_le _ _
+        _ ≤ 1 + |y k - x k| := by rw [abs_sub_comm (x k) (y k)]; linarith
+    have hfa : |f y| ≤ C := (Real.norm_eq_abs (f y) ▸ hfb y)
+    have hQnn : 0 ≤ ∏ j ∈ Finset.univ.erase k, heatKernel1D t ((x - y) j) :=
+      Finset.prod_nonneg (fun j _ => heatKernel1D_nonneg ht _)
+    have hub : heatKernel1D t (s - y k) * (|s - y k| / (2 * t)) * |f y|
+        ≤ ((4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (1 / (4 * t))
+              * Real.exp (-(y k - x k) ^ 2 / (8 * t)))
+            * ((1 + |y k - x k|) / (2 * t)) * C := by
+      apply mul_le_mul _ hfa (abs_nonneg _) (by positivity)
+      apply mul_le_mul hK _ (by positivity) (by positivity)
+      exact div_le_div_of_nonneg_right hzy h2t.le
+    have hnorm : ‖F' s y‖
+        = heatKernel1D t (s - y k) * (|s - y k| / (2 * t))
+            * (∏ j ∈ Finset.univ.erase k, heatKernel1D t ((x - y) j)) * |f y| := by
+      simp only [hF']
+      rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_mul, abs_div, abs_neg, abs_of_pos h2t,
+        abs_of_nonneg (heatKernel1D_nonneg ht (s - y k)), abs_of_nonneg hQnn]
+    rw [hnorm]
+    calc heatKernel1D t (s - y k) * (|s - y k| / (2 * t))
+            * (∏ j ∈ Finset.univ.erase k, heatKernel1D t ((x - y) j)) * |f y|
+        = (heatKernel1D t (s - y k) * (|s - y k| / (2 * t)) * |f y|)
+            * (∏ j ∈ Finset.univ.erase k, heatKernel1D t ((x - y) j)) := by ring
+      _ ≤ (((4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (1 / (4 * t))
+              * Real.exp (-(y k - x k) ^ 2 / (8 * t)))
+              * ((1 + |y k - x k|) / (2 * t)) * C)
+            * (∏ j ∈ Finset.univ.erase k, heatKernel1D t ((x - y) j)) :=
+          mul_le_mul_of_nonneg_right hub hQnn
+      _ = bound y := by simp only [hbound, hM]; ring
+  -- The pointwise coordinate derivative under the integral.
+  have hderiv : ∀ᵐ y ∂(volume : Measure (Fin n → ℝ)),
+      ∀ s ∈ Metric.ball (x k) 1, HasDerivAt (fun s' => F s' y) (F' s y) s := by
+    filter_upwards with y s _
+    have hin : HasDerivAt (fun s' : ℝ => s' - y k) 1 s := by
+      simpa using (hasDerivAt_id s).sub_const (y k)
+    have hcomp : HasDerivAt
+        (fun s' => heatKernelND t (Function.update (x - y) k (s' - y k)))
+        (heatKernel1D t (s - y k) * (-(s - y k) / (2 * t))
+          * (∏ j ∈ Finset.univ.erase k, heatKernel1D t ((x - y) j))) s := by
+      have h := (hasDerivAt_heatKernelND_coord_at n t ht (x - y) k (s - y k)).comp s hin
+      rw [mul_one] at h
+      exact h
+    have hfeq : (fun s' => F s' y)
+        = (fun s' => heatKernelND t (Function.update (x - y) k (s' - y k)) * f y) := by
+      funext s'
+      simp only [hF]
+      rw [hsub s' y]
+    rw [hfeq]
+    exact hcomp.mul_const (f y)
+  -- Assemble via Leibniz's rule.
+  have key := hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (μ := (volume : Measure (Fin n → ℝ))) (F := F) (x₀ := x k) (bound := bound)
+    (s := Metric.ball (x k) 1)
+    (Metric.ball_mem_nhds (x k) one_pos) hFmeas hFint hF'meas hbnd hboundint hderiv
+  have hmain := key.2
+  have hvalint : (∫ y, F' (x k) y ∂(volume : Measure (Fin n → ℝ)))
+      = ∫ y, (heatKernelND t (x - y) * (-((x - y) k) / (2 * t))) * f y
+          ∂(volume : Measure (Fin n → ℝ)) := by
+    rw [hF'eq]
+  have hfun : (fun s => heatSemigroupND t f (Function.update x k s))
+      = (fun s => ∫ y, F s y ∂(volume : Measure (Fin n → ℝ))) := by
+    funext s
+    simp only [hF, heatSemigroupND]
+  rw [hfun, hvalint.symm]
+  exact hmain
+
 end AnalyticPDE
 end RicciFlow
