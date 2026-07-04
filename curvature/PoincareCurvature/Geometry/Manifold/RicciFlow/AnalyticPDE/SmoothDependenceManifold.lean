@@ -729,6 +729,66 @@ theorem hasMFDerivWithinAt_flow_pushforward_of_lipschitz_deriv
   exact (hasMFDerivAt_fundamentalSolution_apply hA hΦ' h0' u₀ t).hasMFDerivWithinAt.congr_mono
     (fun τ hτ => hEq τ hτ) (hEq t htmem) (Set.Subset.refl _)
 
+/-- **Interior manifold time-derivative of the actual flow's pushforward** (`C^{1,1}` field).  The
+plain (`HasMFDerivAt`, unrestricted) form of `hasMFDerivWithinAt_flow_pushforward_of_lipschitz_deriv`
+valid at strictly-forward times `t₀ < t`: since the pushforward-`=`-resolvent identity holds on all
+of `Ici t₀ ⊇ Ioi t₀ ∈ 𝓝 t`, the two curves agree on a full neighbourhood of `t`, so
+`τ ↦ (mfderiv 𝓘(ℝ,E) 𝓘(ℝ,E) (fun z ↦ Φ z τ) x₀) u₀ = D_x Φ_τ · u₀` has the ordinary manifold
+derivative `(1).smulRight (A t (D_x Φ_t · u₀))` at `t`.  Transferred from
+`hasMFDerivAt_fundamentalSolution_apply` via `HasMFDerivAt.congr_of_eventuallyEq`. -/
+theorem hasMFDerivAt_flow_pushforward_of_lipschitz_deriv
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ u₀ : E) {t : ℝ} (ht0 : t₀ < t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ z, ∀ s ∈ Ici t₀, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+      (fun τ => (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z τ) x₀) u₀) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (variationalFieldVec A t ((mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀) u₀) : E)) := by
+  have hEq : ∀ τ ∈ Ici t₀,
+      (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z τ) x₀) u₀
+        = fundamentalSolution hA hΦ' h0' τ u₀ := by
+    intro τ hτ
+    exact DFunLike.congr_fun
+      (mfderiv_flow_apply_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ hτ hderiv hL
+        (fun z s hs ξ hξ => hlip z s (Set.Ico_subset_Ici_self hs) ξ hξ)) u₀
+  rw [hEq t (Set.mem_Ici.mpr (le_of_lt ht0))]
+  refine (hasMFDerivAt_fundamentalSolution_apply hA hΦ' h0' u₀ t).congr_of_eventuallyEq ?_
+  filter_upwards [Ioi_mem_nhds ht0] with τ hτ
+  exact hEq τ (Set.mem_Ici.mpr (Set.mem_Ioi.mp hτ).le)
+
+/-- **`mfderiv` readout of the actual flow's pushforward time-derivative** (interior, `C^{1,1}`
+field).  `mfderiv 𝓘(ℝ,ℝ) 𝓘(ℝ,E) (fun τ ↦ (mfderiv (fun z ↦ Φ z τ) x₀) u₀) t = (1).smulRight
+(A t (D_x Φ_t · u₀))` for `t₀ < t` — the exact `mfderiv` value of the pushforward leg `D_x Φ_t · u`
+that Item 1's scalar chain-rule assembly plugs into its tensor computation, read off from the actual
+flow map's differential.  The `mfderiv` companion of `hasMFDerivAt_flow_pushforward_of_lipschitz_
+deriv`. -/
+theorem mfderiv_flow_pushforward_of_lipschitz_deriv
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ u₀ : E) {t : ℝ} (ht0 : t₀ < t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    {L : ℝ} (hL : 0 ≤ L)
+    (hlip : ∀ z, ∀ s ∈ Ici t₀, ∀ ξ ∈ segment ℝ (Φ x₀ s) (Φ z s),
+      ‖Dv s ξ - A s‖ ≤ L * ‖ξ - Φ x₀ s‖) :
+    mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+      (fun τ => (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z τ) x₀) u₀) t
+      = (1 : ℝ →L[ℝ] ℝ).smulRight
+        (variationalFieldVec A t ((mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀) u₀) : E) :=
+  (hasMFDerivAt_flow_pushforward_of_lipschitz_deriv hv hA hΦ' h0' hΦ h0 x₀ u₀ ht0 hderiv hL
+    hlip).mfderiv
+
 end
 
 end SmoothDependenceCk
