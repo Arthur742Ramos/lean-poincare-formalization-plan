@@ -5215,5 +5215,49 @@ lemma heatSemigroupND_coord_deriv_integral_bound {n : ℕ} {t : ℝ} (ht : 0 < t
         rw [integral_abs_deriv_coord_heatKernelND_sub_eq ht k x]
     _ = C / Real.sqrt (π * t) := by ring
 
+/-- **Coordinate derivative of the `n`-dimensional heat semigroup at an arbitrary point.**
+Re-anchoring `hasDerivAt_heatSemigroupND_coord` at the shifted centre `update x k s₀` shows the
+coordinate slice `s ↦ Hₜf(update x k s)` is differentiable at every `s₀`, not only at `x_k`. -/
+theorem hasDerivAt_heatSemigroupND_coord_update {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ) (k : Fin n)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) (s₀ : ℝ) :
+    HasDerivAt (fun s => heatSemigroupND t f (Function.update x k s))
+      (∫ y, (heatKernelND t (Function.update x k s₀ - y)
+        * (-((Function.update x k s₀ - y) k) / (2 * t))) * f y) s₀ := by
+  have h := hasDerivAt_heatSemigroupND_coord ht (Function.update x k s₀) k hfm hfb
+  have hupd : ∀ s : ℝ,
+      Function.update (Function.update x k s₀) k s = Function.update x k s := by
+    intro s; funext j
+    rcases eq_or_ne j k with hjk | hjk
+    · subst hjk; simp [Function.update_self]
+    · simp [Function.update_of_ne hjk]
+  simp only [hupd, Function.update_self] at h
+  exact h
+
+/-- **`n`-dimensional `C¹` parabolic Schauder smoothing rate (coordinate Lipschitz form).**
+Along any coordinate `k`, the `n`-dimensional heat semigroup of bounded measurable data is Lipschitz
+with the sharp gain rate `C/√(πt)`:
+`|Hₜf(update x k a) − Hₜf(update x k b)| ≤ (‖f‖∞/√(πt))·|a − b|`.  This is the `n`-dimensional
+coordinate analogue of `heatSemigroup1D_lipschitz_sqrt_rate`, obtained from the mean value
+inequality using the uniform coordinate-derivative bound
+`heatSemigroupND_coord_deriv_integral_bound`. -/
+theorem heatSemigroupND_coord_lipschitz_sqrt_rate {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ) (k : Fin n)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) (a b : ℝ) :
+    |heatSemigroupND t f (Function.update x k a) - heatSemigroupND t f (Function.update x k b)|
+      ≤ (C / Real.sqrt (π * t)) * |a - b| := by
+  have hdiff : ∀ s₀ ∈ (Set.univ : Set ℝ),
+      DifferentiableAt ℝ (fun s => heatSemigroupND t f (Function.update x k s)) s₀ :=
+    fun s₀ _ => (hasDerivAt_heatSemigroupND_coord_update ht x k hfm hfb s₀).differentiableAt
+  have hbnd2 : ∀ s₀ ∈ (Set.univ : Set ℝ),
+      ‖deriv (fun s => heatSemigroupND t f (Function.update x k s)) s₀‖
+        ≤ C / Real.sqrt (π * t) := by
+    intro s₀ _
+    rw [(hasDerivAt_heatSemigroupND_coord_update ht x k hfm hfb s₀).deriv, Real.norm_eq_abs]
+    exact heatSemigroupND_coord_deriv_integral_bound ht (Function.update x k s₀) k hfm hfb
+  have hmvt := (convex_univ).norm_image_sub_le_of_norm_deriv_le hdiff hbnd2
+    (Set.mem_univ b) (Set.mem_univ a)
+  simpa only [Real.norm_eq_abs] using hmvt
+
 end AnalyticPDE
 end RicciFlow
