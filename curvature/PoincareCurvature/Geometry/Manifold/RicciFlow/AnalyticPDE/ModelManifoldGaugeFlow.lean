@@ -95,6 +95,54 @@ theorem exists_diffeomorph3GaugeFlowOn_of_field_jet
     (fun t x => Φ x t) G hL hR hcdF hcdψ h0
     (fun t _ x => (hderiv x t).hasMFDerivWithinAt)
 
+/-- **Model-manifold `C³` flow: first-class `Diffeomorph` family together with the ODE equation.**
+From the `C^{3,1}` field jet of `v` alone there is a *single* flow family `Φ` on the model manifold
+`𝓘(ℝ, E)` that simultaneously
+
+* anchors, `Φ z t₀ = z`;
+* satisfies the manifold integral-curve ODE derivative equation at every time,
+  `HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ ↦ Φ z τ) t ((1).smulRight (v t (Φ z t)))`;
+* is, for every `t`, the coercion of a genuine bundled `Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3`.
+
+This threads a single `Φ` through both `exists_flow_diffeomorph_three` (which exposes the `Diffeomorph`
+family but discards the flow equation) and the gauge-data bundle (which exposes the ODE but only an
+unbundled inverse), giving the exact per-chart export the general compact-manifold lift transports:
+in each chart, a first-class `C³` self-diffeomorphism family that *is* the flow of the (chart-local)
+field.  A pure assembly of `exists_flow_contMDiff_three_gaugeData`. -/
+theorem exists_flow_diffeomorph_three_hasMFDerivAt [FiniteDimensional ℝ E] [CompleteSpace E]
+    {v : ℝ → E → E} {K : ℝ≥0} {t₀ : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ N : ℝ≥0}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ)
+    (hD2vcc : Continuous fun p : ℝ × E => D2vc p.1 p.2)
+    (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD2vmlip : ∀ s, LipschitzWith N (D2vm s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ)
+    (hD3vmc : Continuous fun p : ℝ × E => D3vm p.1 p.2)
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vc : Continuous fun p : ℝ × E => D3v p.1 p.2)
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hcurry : ∀ s ξ, D3vm s ξ = (D3v s ξ).curryLeft) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧
+      (∀ z t, HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ => Φ z τ) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (v t (Φ z t)))) ∧
+      ∀ t, ∃ F : Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3, ∀ z, F z = Φ z t := by
+  obtain ⟨Φ, h0, hderiv, hdiff⟩ := exists_flow_contMDiff_three_gaugeData
+    hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip hD2vmlip hD3vm hD3vmc hD3vmlip
+    hD3vc hD3vlip hcompat hcurry
+  refine ⟨Φ, h0, hderiv, fun t => ?_⟩
+  obtain ⟨ψ, hL, hR, hcdΦ, hcdψ⟩ := hdiff t
+  exact ⟨⟨⟨fun z => Φ z t, ψ, hL, hR⟩, hcdΦ, hcdψ⟩, fun z => rfl⟩
+
 end
 
 end SmoothDependenceCk
