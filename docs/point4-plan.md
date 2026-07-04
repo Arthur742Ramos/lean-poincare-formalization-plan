@@ -6388,6 +6388,27 @@ this data — so the previously separate Fréchet tower and manifold gauge API n
   the exact per-chart datum — a first-class `C³` self-diffeomorphism family that *is* the flow of the
   chart-local field — the general lift transports.
 
+Update — **`ContDiff` → field-jet bridge** added in `AnalyticPDE/FieldJetContDiff.lean` (axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`), beginning to close the usability gap that the whole
+smooth-dependence tower is stated behind *artificial field-jet objects*. From a **single** clean
+hypothesis — `v` jointly `ContDiff ℝ n (Function.uncurry v)` — the first jet layer is extracted:
+`contDiff_apply_of_contDiff_uncurry` (each slice `v s` is spatially `ContDiff n`),
+`hasFDerivAt_fderiv_of_contDiff_uncurry` (the spatial derivative object `fderiv ℝ (v s)` is a genuine
+Fréchet derivative — the tower's `hDv` input), and `continuous_fderiv_of_contDiff_uncurry` (joint
+`(t, x)`-continuity via the partial-derivative identity
+`fderiv ℝ (v t) x = fderiv ℝ (Function.uncurry v) (t, x) ∘L inr` — the `hDvc` input).  The `hDvlip`
+input follows from a second-derivative bound via
+`lipschitzWith_fderiv_of_contDiff_of_nnnorm_secondFDeriv_le`, and the spatial-Lipschitz / time-continuity
+inputs from `lipschitzWith_apply_of_contDiff_of_nnnorm_fderiv_le` /
+`continuous_apply_of_contDiff_uncurry`.  These package into `contMDiff_one_flow_apply_of_contDiff` and
+its fully self-contained form `contMDiff_one_flow_apply_of_contDiff_of_bddDerivs`: **manifold spatial
+`C¹` regularity of the flow map stated purely from joint `ContDiff` of the field plus derivative
+bounds** — the first tower flow-regularity result carrying no separately-assumed jet objects.  Next:
+the layer-2/-3 extraction (second/third partial-derivative joint continuity + the `curry2`/`curryLeft`
+compatibilities, reusing `curry2_iteratedFDeriv_two_eq_of_hasFDerivAt` /
+`curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt`) to raise this to the full `C^{3,1}` jet that the
+model-manifold `C³` gauge flow `exists_diffeomorph3GaugeFlowOn_of_field_jet` consumes.
+
 Update — **parabolic Hölder normed-algebra constant-function primitives** added to
 `AnalyticPDE/ParabolicHolder.lean` (axiom-clean), the constant-term / multiplicative-unit bounds
 complementing the existing additive / scalar / product (`_add_le`, `_smul`, `_mul_le`,
