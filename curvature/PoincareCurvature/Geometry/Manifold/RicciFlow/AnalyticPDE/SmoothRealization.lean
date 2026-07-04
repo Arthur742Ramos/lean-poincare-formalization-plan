@@ -8417,6 +8417,94 @@ noncomputable def TimeDependentGeometricRicciDeTurckBanachChart.ofLipschitzBound
   lipschitz := hlipState
   geometric := hgeom
 
+/-- **Interval-scoped Banach-chart assembly from bounded/Lipschitz field data.**
+The `…OnIcc` analogue of `TimeDependentGeometricRicciDeTurckBanachChart.ofLipschitzBoundedContinuous`:
+it assembles a `TimeDependentGeometricRicciDeTurckBanachChartOnIcc` from the same bounded/Lipschitz/
+time-continuous field data on the ball about `g₀`, discharging the Picard-Lindelöf datum by the one-
+sided interval-length computation, and — matching the interval-scoped chart — requiring the
+`Kstate`-Lipschitz control on the positive-definite locus only on the Picard interval `Icc t₀ T`
+(field `lipschitzOn_Icc`) rather than for all times.  This is the interval-route `chart`-side
+constructor consumed by
+`intrinsicLocalExistenceUniquenessFamily_of_ricciDeTurckChartClosureDataOnIcc`. -/
+noncomputable def TimeDependentGeometricRicciDeTurckBanachChartOnIcc.ofLipschitzBoundedContinuous
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ F H}
+    [ChartedSpace H M] [SigmaCompactSpace M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 F (TangentSpace I : M → Type _) I]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj :
+        _root_.Bundle.TotalSpace BilF
+          (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF
+      (_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))) (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric F (TangentSpace I : M → Type _))
+    (t₀ T : ℝ) (a L Kpic Kstate : ℝ≥0)
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+        (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+        et Kc hKc Ko hKo hKoEq hcover)
+    (hT : t₀ < T)
+    (hlipBall : ∀ t ∈ Set.Icc t₀ T, LipschitzOnWith Kpic (A t)
+      (Metric.closedBall
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) (a : ℝ)))
+    (hcontTime : ∀ x ∈ Metric.closedBall
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) (a : ℝ),
+      ContinuousOn (fun t : ℝ => A t x) (Set.Icc t₀ T))
+    (hbound : ∀ t ∈ Set.Icc t₀ T, ∀ x ∈ Metric.closedBall
+        (⟨g₀.toSection, g₀.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF)
+            (V := _root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _)))
+            et Kc hKc Ko hKo hKoEq hcover) (a : ℝ),
+      ‖A t x‖ ≤ (L : ℝ))
+    (hLT : (L : ℝ) * (T - t₀) ≤ (a : ℝ))
+    (hlipStateOn : ∀ t ∈ Set.Icc t₀ T, LipschitzOnWith Kstate (A t)
+      (positiveDefiniteLocus (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+        et Kc hKc Ko hKo hKoEq hcover))
+    (hgeom : ∀ τ s, s ∈ positiveDefiniteLocus
+        (M := M) (F := F) (W := (TangentSpace I : M → Type _))
+        et Kc hKc Ko hKo hKoEq hcover →
+      ∃ (g : MetricFamily (I := I) (M := M))
+        (background : ConnectionFamily (I := I) (M := M)),
+        ∀ (x : M) (u v : TangentSpace I x),
+          A τ s x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background τ x u v) :
+    TimeDependentGeometricRicciDeTurckBanachChartOnIcc
+      (M := M) (F := F) (I := I)
+      x0 et het Kc hKc Ko hKo hKoEq hcover g₀ t₀ T a L Kpic Kstate where
+  A := A
+  hT := hT
+  picard :=
+    { lipschitzOnWith := fun t ht => hlipBall t ht
+      continuousOn := fun x hx => hcontTime x hx
+      norm_le := fun t ht x hx => hbound t ht x hx
+      mul_max_le := by
+        have hmax : max (T - t₀) (t₀ - t₀) = T - t₀ := by
+          rw [sub_self]; exact max_eq_left (by linarith)
+        show (L : ℝ) * max (T - t₀) (t₀ - t₀) ≤ (a : ℝ) - ((0 : ℝ≥0) : ℝ)
+        rw [hmax, NNReal.coe_zero, sub_zero]
+        exact hLT }
+  lipschitzOn_Icc := hlipStateOn
+  geometric := hgeom
+
 end MetricLocusEvolution
 end AnalyticPDE
 end RicciFlow
