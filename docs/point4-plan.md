@@ -6406,4 +6406,40 @@ Remaining for Point 4 (future sessions): unchanged in scope — the **general-ma
 (Item 2, the chart↔global patching in the heavy gauge files; the model-`E`-chart pushforward/resolvent
 data those consume is now available in the manifold vocabulary), the Item 1 tensor time-derivative
 chain rule (which now has both the pushforward `mfderiv` and its time derivative available as manifold
+data), and the Item 1 tensor time-derivative
+chain rule (which now has both the pushforward `mfderiv` and its time derivative available as manifold
 data), and the Item 3 parabolic Schauder a-priori estimates.
+
+Update — **the time-derivative of the *actual flow's* pushforward is now proved on the model manifold
+`𝓘(ℝ, E)`**, extending `AnalyticPDE/SmoothDependenceManifold.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`).  The previous milestone gave, separately, the spatial
+pushforward `mfderiv Φ_τ = D_x Φ_τ = fundamentalSolution` (`mfderiv_flow_apply_of_lipschitz_deriv`)
+and the resolvent's *own* vector variational ODE (`hasMFDerivAt_fundamentalSolution_apply`, about an
+abstract coefficient path).  This session **fuses** them into the classical variational law stated
+through the actual flow's differential, `d/dt (D_x Φ_t · u₀) = D_x v_t|_{Φ_t x₀} · (D_x Φ_t · u₀)` —
+exactly Item 1's "derivative of the pushforward `Φ_t · u`" leg, now for the honest gauge flow rather
+than an abstract resolvent:
+
+* `hasMFDerivWithinAt_flow_pushforward_of_lipschitz_deriv` / `hasMFDerivAt_flow_pushforward_of_lipschitz_deriv`
+  / `mfderiv_flow_pushforward_of_lipschitz_deriv` — the **abstract** (`C^{1,1}`-jet with a supplied
+  reference coefficient/variational family) within-`Ici t₀`, interior (`t₀ < t`), and `mfderiv`-readout
+  forms of `HasMFDerivWithinAt/HasMFDerivAt/mfderiv 𝓘(ℝ,ℝ) 𝓘(ℝ,E) (fun τ ↦ (mfderiv (fun z ↦ Φ z τ) x₀) u₀)`,
+  transferred from `hasMFDerivAt_fundamentalSolution_apply` along the pointwise pushforward=resolvent
+  equality on `Ici t₀` via `HasMFDerivWithinAt.congr_mono` / `HasMFDerivAt.congr_of_eventuallyEq`
+  (the resolvent identity holds only for `τ ≥ t₀`, hence the within-`Ici t₀` / interior split).
+* `hasMFDerivWithinAt_flow_pushforward_of_field_jet` / `hasMFDerivAt_flow_pushforward_of_field_jet`
+  / `mfderiv_flow_pushforward_of_field_jet` — the **genuinely usable field-data-only** forms: the caller
+  supplies only the `C^{1,1}` field jet of `v` (globally `K`-Lipschitz, everywhere Fréchet derivative
+  `Dv` jointly continuous and `L`-Lipschitz in space) plus the actual flow `Φ`; the canonical reference
+  coefficient `A t := D_x v_t|_{Φ_t x₀}`, the `‖Dv‖ ≤ K` bound (`HasFDerivAt.le_of_lipschitz`), the
+  variational family (`exists_variationalFlowFamily`), and the segment deviation bound (spatial Lipschitz
+  constant) are all built internally, so the conclusion is the explicit
+  `(1).smulRight (D_x v_t|_{Φ_t x₀} · (D_x Φ_t · u₀))`.
+
+With the base-point leg (`hasMFDerivAt_of_isIntegralCurve`, giving `d/dt (Φ_τ x) = v_τ(Φ_τ x)`) and
+these pushforward legs, **all three model-`E`-chart ODE-derivative inputs to Item 1's scalar tensor
+chain rule `B(τ)(y(τ))(a(τ))(b(τ))` — the base point `y(τ)`, and the two pushed-forward directions
+`a(τ), b(τ)` — are now available in the manifold vocabulary**; the remaining Item 1 work is the metric
+leg (`∂_t g`, spatial `∂` of `g.inner`) and the scalar assembly in the heavy tensor file.  Remaining
+for Point 4 (future sessions): unchanged in scope — the general-manifold gauge-flow lift (Item 2), the
+Item 1 metric-leg + scalar-assembly, and the Item 3 parabolic Schauder a-priori estimates.
