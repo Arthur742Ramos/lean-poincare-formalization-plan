@@ -5259,5 +5259,49 @@ theorem heatSemigroupND_coord_lipschitz_sqrt_rate {n : ℕ} {t : ℝ} (ht : 0 < 
     (Set.mem_univ b) (Set.mem_univ a)
   simpa only [Real.norm_eq_abs] using hmvt
 
+/-- **`n`-dimensional coordinate `C^{0,α}` parabolic Schauder seminorm bound.**  Interpolating the
+sup bound `|Hₜf(update x k a) − Hₜf(update x k b)| ≤ 2‖f‖∞` against the `C¹` Lipschitz rate
+`heatSemigroupND_coord_lipschitz_sqrt_rate` gives, for every Hölder exponent `0 ≤ α ≤ 1`,
+`|Hₜf(update x k a) − Hₜf(update x k b)| ≤ (2‖f‖∞)^{1−α}·(‖f‖∞/√(πt))^α·|a − b|^α`.  The
+`n`-dimensional coordinate analogue of `heatSemigroup1D_holder_seminorm_bound`, quantifying the
+gain of `α` Hölder derivatives at cost `t^{−α/2}`. -/
+theorem heatSemigroupND_coord_holder_seminorm_bound {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ) (k : Fin n)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1)
+    (a b : ℝ) :
+    |heatSemigroupND t f (Function.update x k a) - heatSemigroupND t f (Function.update x k b)|
+      ≤ (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * |a - b| ^ α := by
+  set D := |heatSemigroupND t f (Function.update x k a)
+    - heatSemigroupND t f (Function.update x k b)| with hD
+  have hfabs : ∀ y, |f y| ≤ C := fun y => by simpa [Real.norm_eq_abs] using hfb y
+  have hsupa : |heatSemigroupND t f (Function.update x k a)| ≤ C :=
+    abs_heatSemigroupND_le ht (Function.update x k a) hfabs
+  have hsupb : |heatSemigroupND t f (Function.update x k b)| ≤ C :=
+    abs_heatSemigroupND_le ht (Function.update x k b) hfabs
+  have hsup : D ≤ 2 * C := by
+    calc D ≤ |heatSemigroupND t f (Function.update x k a)|
+              + |heatSemigroupND t f (Function.update x k b)| := abs_sub _ _
+      _ ≤ C + C := add_le_add hsupa hsupb
+      _ = 2 * C := by ring
+  have hlip : D ≤ (C / Real.sqrt (π * t)) * |a - b| :=
+    heatSemigroupND_coord_lipschitz_sqrt_rate ht x k hfm hfb a b
+  have hcoef_nn : (0 : ℝ) ≤ C / Real.sqrt (π * t) := by
+    have : (0 : ℝ) < Real.sqrt (π * t) := Real.sqrt_pos.mpr (by positivity)
+    have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+    positivity
+  have habs_nn : (0 : ℝ) ≤ |a - b| := abs_nonneg _
+  have hp_nn : (0 : ℝ) ≤ 2 * C := by
+    have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0); positivity
+  have hq_nn : (0 : ℝ) ≤ (C / Real.sqrt (π * t)) * |a - b| := mul_nonneg hcoef_nn habs_nn
+  have hDmin : D ≤ min (2 * C) ((C / Real.sqrt (π * t)) * |a - b|) := le_min hsup hlip
+  have hstep := min_le_rpow_mul_rpow hp_nn hq_nn hα0 hα1
+  have hsplitq : ((C / Real.sqrt (π * t)) * |a - b|) ^ α
+      = (C / Real.sqrt (π * t)) ^ α * |a - b| ^ α :=
+    Real.mul_rpow hcoef_nn habs_nn
+  calc D ≤ min (2 * C) ((C / Real.sqrt (π * t)) * |a - b|) := hDmin
+    _ ≤ (2 * C) ^ (1 - α) * ((C / Real.sqrt (π * t)) * |a - b|) ^ α := hstep
+    _ = (2 * C) ^ (1 - α) * ((C / Real.sqrt (π * t)) ^ α * |a - b| ^ α) := by rw [hsplitq]
+    _ = (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * |a - b| ^ α := by ring
+
 end AnalyticPDE
 end RicciFlow
