@@ -1270,6 +1270,32 @@ theorem affineSolveL_isSolution [CompleteSpace E]
       = A (affineSolveL A hA f) + (affineSolveL A hA f - A (affineSolveL A hA f)) := by rw [h1]
     _ = affineSolveL A hA f := by abel
 
+/-- **A-priori Schauder bound for the solution operator.**  `‖affineSolveL A hA‖ ≤ (1 - ‖A‖)⁻¹`:
+the Neumann solution operator `(1 - A)⁻¹` of the affine Ricci–DeTurck equation is bounded by
+`(1 - ‖A‖)⁻¹`, so the solution obeys the a-priori estimate `‖u‖ ≤ (1 - ‖A‖)⁻¹ ‖f‖`.  This is the
+quantitative linear Schauder estimate: the fixed-point operator is `∑ₙ Aⁿ` and its norm is controlled
+by the geometric bound (`‖(1 : _ →L _)‖ ≤ 1` removes the `‖1‖ - 1` correction term). -/
+theorem norm_affineSolveL_le [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s) (hA : ‖A‖ < 1) :
+    ‖affineSolveL A hA‖ ≤ (1 - ‖A‖)⁻¹ := by
+  have hsum : affineSolveL A hA = ∑' n : ℕ, A ^ n := rfl
+  rw [hsum]
+  have hb := tsum_geometric_le_of_norm_lt_one A hA
+  have h1 : ‖(1 : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)‖ ≤ 1 := by
+    rw [ContinuousLinearMap.one_def]
+    exact ContinuousLinearMap.norm_id_le
+  linarith
+
+/-- **A-priori estimate for the affine Ricci–DeTurck solution.**  The solution `u = affineSolveL A hA
+f` of `A u + f = u` obeys the quantitative linear Schauder bound `‖u‖ ≤ (1 - ‖A‖)⁻¹ ‖f‖` in the
+inhomogeneous data. -/
+theorem norm_affineSolveL_apply_le [CompleteSpace E]
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s) (hA : ‖A‖ < 1)
+    (f : ParabolicC0AlphaBanach X E α s) :
+    ‖affineSolveL A hA f‖ ≤ (1 - ‖A‖)⁻¹ * ‖f‖ :=
+  le_trans ((affineSolveL A hA).le_opNorm f)
+    (mul_le_mul_of_nonneg_right (norm_affineSolveL_le A hA) (norm_nonneg f))
+
 /-- **The solution operator yields the unique solution.**  Every solution `u` of the affine
 Ricci–DeTurck fixed-point equation `A u + f = u` equals `affineSolveL A hA f`, so the bounded linear
 map `f ↦ affineSolveL A hA f` is *the* solution map of the linearised Ricci–DeTurck flow. -/
