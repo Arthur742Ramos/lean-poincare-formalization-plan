@@ -216,6 +216,122 @@ theorem differentiable_flow_apply_of_lipschitz_deriv [CompleteSpace E]
     exact eq_of_isIntegralCurve_of_eq hv (hΦ z) (hΦ'curve z) (by rw [h0 z, h0' z]) t
   rw [hEq]; exact hΦ'diff
 
+/-!
+## Two-sided (all-time) `C¹` dependence and the `C¹` diffeomorphism
+
+The `C¹` (`ContDiff ℝ 1`) layer has the *same* field hypotheses as the differentiable one, so its
+backward/two-sided/given-family forms are obtained by the identical time-reversal argument.  With
+the "one family, every time" `C¹` form in hand, the time-`t` flow map is a genuine **`C¹`
+diffeomorphism** of the state space for *every* `t`: it is a bijection (`bijective_flow_apply`), it
+is `ContDiff ℝ 1`, and its inverse — the time-`t₀` map of a companion family anchored at `t` — is
+also `ContDiff ℝ 1` (no forward/backward restriction, since the given-family `C¹` form is two-sided).
+-/
+
+/-- **Backward-in-time `C¹` dependence on initial data** for a `C^{1,1}` field (`t ≤ t₀`), by the
+same time-reversal argument as the differentiable backward theorem. -/
+theorem exists_flow_contDiff_one_of_lipschitz_deriv_backward [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    {t : ℝ} (ht0 : t ≤ t₀) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContDiff ℝ 1 (fun z => Φ z t) := by
+  set w : ℝ → E → E := fun s x => -(v (-s) x) with hw_def
+  set Dw : ℝ → E → (E →L[ℝ] E) := fun s x => -(Dv (-s) x) with hDw_def
+  have hw : ∀ τ, LipschitzWith K (w τ) := by
+    intro τ
+    refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hw_def, dist_neg_neg]
+    exact (hv (-τ)).dist_le_mul a b
+  have hwc : ∀ x, Continuous fun s => w s x := by
+    intro x
+    simp only [hw_def]
+    exact ((hvc x).comp continuous_neg).neg
+  have hderivw : ∀ s x, HasFDerivAt (w s) (Dw s x) x := by
+    intro s x
+    simpa only [hw_def, hDw_def] using (hderiv (-s) x).neg
+  have hDwc : Continuous fun p : ℝ × E => Dw p.1 p.2 := by
+    simp only [hDw_def]
+    exact (hDvc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
+  have hDwlip : ∀ s, LipschitzWith L (Dw s) := by
+    intro s
+    refine LipschitzWith.of_dist_le_mul fun a b => ?_
+    simp only [hDw_def, dist_neg_neg]
+    exact (hDvlip (-s)).dist_le_mul a b
+  obtain ⟨Φ', hΦ'0, hΦ'curve, hΦ'cd⟩ :=
+    exists_flow_contDiff_one_of_lipschitz_deriv (v := w) (Dv := Dw) (t₀ := -t₀)
+      hw hwc hderivw hDwc hDwlip (t := -t) (neg_le_neg ht0)
+  have hVeq : (fun s (x : E) => -(w (-s) x)) = v := by
+    funext s x; simp only [hw_def, neg_neg]
+  refine ⟨fun z s => Φ' z (-s), fun z => hΦ'0 z, fun z => ?_, hΦ'cd⟩
+  have hcurve := isIntegralCurve_comp_neg (hΦ'curve z)
+  rw [hVeq] at hcurve
+  exact hcurve
+
+/-- **Two-sided (all-time) `C¹` dependence on initial data** for a `C^{1,1}` field. -/
+theorem exists_flow_contDiff_one_of_lipschitz_deriv_two_sided [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (t : ℝ) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContDiff ℝ 1 (fun z => Φ z t) := by
+  rcases le_total t₀ t with h | h
+  · exact exists_flow_contDiff_one_of_lipschitz_deriv hv hvc hderiv hDvc hDvlip h
+  · exact exists_flow_contDiff_one_of_lipschitz_deriv_backward hv hvc hderiv hDvc hDvlip h
+
+/-- **`C¹` dependence for a *given* flow family, at every time.**  Any flow family `Φ` of the
+`C^{1,1}` field `v` anchored at `Φ z t₀ = z` has `ContDiff ℝ 1` time-`t` map for *all* `t`,
+transported from `exists_flow_contDiff_one_of_lipschitz_deriv_two_sided` by integral-curve
+uniqueness. -/
+theorem contDiff_one_flow_apply_of_lipschitz_deriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ContDiff ℝ 1 (fun z => Φ z t) := by
+  obtain ⟨Φ', h0', hΦ'curve, hΦ'cd⟩ :=
+    exists_flow_contDiff_one_of_lipschitz_deriv_two_sided hv hvc hderiv hDvc hDvlip t
+  have hEq : (fun z => Φ z t) = (fun z => Φ' z t) := by
+    funext z
+    exact eq_of_isIntegralCurve_of_eq hv (hΦ z) (hΦ'curve z) (by rw [h0 z, h0' z]) t
+  rw [hEq]; exact hΦ'cd
+
+/-- **The time-`t` flow map is a `C¹` diffeomorphism of the state space**, for *every* `t`.  Bundles
+the reverse-time inverse `ψ` (the time-`t₀` map of a companion flow family anchored at `t`) with the
+two-sided `ContDiff ℝ 1` regularity of both the flow map and its inverse.  This is the `C¹` skeleton
+of the self-diffeomorphism family consumed by the compact-manifold gauge flow of Item 2, now with
+genuine `C¹` regularity in *both* directions (no forward/backward restriction). -/
+theorem exists_contDiff_one_diffeomorph_flow_apply [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {L : ℝ≥0} (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ∃ ψ : E → E, Function.LeftInverse ψ (fun z => Φ z t) ∧
+      Function.RightInverse ψ (fun z => Φ z t) ∧
+      ContDiff ℝ 1 (fun z => Φ z t) ∧ ContDiff ℝ 1 ψ := by
+  obtain ⟨Ψ, hΨ0, hΨcurve⟩ := exists_flow_family (t₀ := t) hv hvc
+  refine ⟨fun w => Ψ w t₀, ?_, ?_,
+    contDiff_one_flow_apply_of_lipschitz_deriv hv hvc hderiv hDvc hDvlip hΦ h0 t,
+    contDiff_one_flow_apply_of_lipschitz_deriv (Φ := Ψ) (t₀ := t)
+      hv hvc hderiv hDvc hDvlip hΨcurve hΨ0 t₀⟩
+  · intro z
+    have heq := eq_of_isIntegralCurve_of_eq_at hv (hΨcurve (Φ z t)) (hΦ z) (hΨ0 (Φ z t)) t₀
+    show Ψ (Φ z t) t₀ = z
+    rw [heq]; exact h0 z
+  · intro w
+    have heq := eq_of_isIntegralCurve_of_eq_at hv (hΦ (Ψ w t₀)) (hΨcurve w) (h0 (Ψ w t₀)) t
+    show Φ (Ψ w t₀) t = w
+    rw [heq]; exact hΨ0 w
+
 end
 
 end SmoothDependenceCk
