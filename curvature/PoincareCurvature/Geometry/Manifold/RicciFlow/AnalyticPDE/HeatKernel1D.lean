@@ -5171,5 +5171,49 @@ theorem hasDerivAt_heatSemigroupND_coord {n : ℕ} {t : ℝ} (ht : 0 < t)
   rw [hfun, hvalint.symm]
   exact hmain
 
+/-- **Translation invariance of the `n`-dimensional coordinate gradient `L¹` norm:**
+`∫ y, |∂_{x_k}Kₙ(t, x − y)| dy = 1/√(πt)`, for every centre `x`.  The shifted coordinate gradient
+has the same total-variation norm as the centred one (`integral_abs_deriv_coord_heatKernelND_eq`),
+since Lebesgue measure on `Fin n → ℝ` is translation invariant. -/
+lemma integral_abs_deriv_coord_heatKernelND_sub_eq {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n)
+    (x : Fin n → ℝ) :
+    (∫ y : Fin n → ℝ, |heatKernelND t (x - y) * (-((x - y) k) / (2 * t))|)
+      = 1 / Real.sqrt (π * t) := by
+  rw [integral_sub_left_eq_self
+    (fun w : Fin n → ℝ => |heatKernelND t w * (-(w k) / (2 * t))|) volume x]
+  exact integral_abs_deriv_coord_heatKernelND_eq ht k
+
+/-- **`n`-dimensional `C¹` parabolic smoothing bound (integral form).**  The coordinate spatial
+derivative of the `n`-dimensional heat semigroup obeys the gain-of-one-derivative estimate
+`|∫ ∂_{x_k}Kₙ(t, x − y)·f(y) dy| ≤ ‖f‖∞ / √(πt)`.  This is the `n`-dimensional analogue of the
+`C/√(πt)` factor in `heatSemigroup1D_lipschitz_sqrt_rate`: bound the integrand by
+`|∂_{x_k}Kₙ(t, x − y)|·C` and integrate using the coordinate gradient `L¹` norm
+`integral_abs_deriv_coord_heatKernelND_sub_eq`. -/
+lemma heatSemigroupND_coord_deriv_integral_bound {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ) (k : Fin n)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    |∫ y, (heatKernelND t (x - y) * (-((x - y) k) / (2 * t))) * f y|
+      ≤ C / Real.sqrt (π * t) := by
+  have hCnn : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+  have hnormint : Integrable
+      (fun y : Fin n → ℝ => ‖(heatKernelND t (x - y) * (-((x - y) k) / (2 * t))) * f y‖)
+      volume := (integrable_deriv_coord_heatKernelND_sub_mul ht k x hfm hfb).norm
+  have habsint : Integrable
+      (fun y : Fin n → ℝ => |heatKernelND t (x - y) * (-((x - y) k) / (2 * t))| * C) volume :=
+    (((integrable_deriv_coord_heatKernelND ht k).comp_sub_left x).abs).mul_const C
+  calc |∫ y, (heatKernelND t (x - y) * (-((x - y) k) / (2 * t))) * f y|
+      ≤ ∫ y, ‖(heatKernelND t (x - y) * (-((x - y) k) / (2 * t))) * f y‖ := by
+        rw [← Real.norm_eq_abs]; exact norm_integral_le_integral_norm _
+    _ ≤ ∫ y, |heatKernelND t (x - y) * (-((x - y) k) / (2 * t))| * C := by
+        refine integral_mono hnormint habsint (fun y => ?_)
+        rw [Real.norm_eq_abs, abs_mul]
+        exact mul_le_mul_of_nonneg_left
+          ((Real.norm_eq_abs (f y)) ▸ hfb y) (abs_nonneg _)
+    _ = (∫ y, |heatKernelND t (x - y) * (-((x - y) k) / (2 * t))|) * C := by
+        rw [integral_mul_const]
+    _ = (1 / Real.sqrt (π * t)) * C := by
+        rw [integral_abs_deriv_coord_heatKernelND_sub_eq ht k x]
+    _ = C / Real.sqrt (π * t) := by ring
+
 end AnalyticPDE
 end RicciFlow
