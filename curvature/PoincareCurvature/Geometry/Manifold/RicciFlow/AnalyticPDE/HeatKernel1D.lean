@@ -2941,6 +2941,58 @@ lemma heatKernel1D_mul_sq_sub_inv_integral_eq {t : ℝ} (ht : 0 < t) :
   field_simp
   ring
 
+/-- Integrability of the `n`-dimensional coordinate second-moment integrand
+`x ↦ (x k)²·Kₙ(t,x)` for `t > 0`.  Via the product factorisation `Kₙ(t,x) = ∏ᵢ K(t,xᵢ)` (with the
+`|·|²` absorbed into slot `k`) and `Integrable.fin_nat_prod`: the `k`-th factor `w ↦ w²·K(t,w)` and
+each transverse `w ↦ K(t,w)` are integrable. -/
+lemma integrable_sq_coord_mul_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    Integrable (fun x : Fin n → ℝ => (x k) ^ 2 * heatKernelND t x) := by
+  classical
+  have hprod : (fun x : Fin n → ℝ => (x k) ^ 2 * heatKernelND t x)
+      = fun x : Fin n → ℝ =>
+          ∏ i, (if i = k then (x i) ^ 2 * heatKernel1D t (x i) else heatKernel1D t (x i)) := by
+    funext x
+    rw [heatKernelND_apply]
+    have hstep :
+        (∏ i, (if i = k then (x i) ^ 2 * heatKernel1D t (x i) else heatKernel1D t (x i)))
+          = (∏ i, (if i = k then (x i) ^ 2 else (1 : ℝ))) * ∏ i, heatKernel1D t (x i) := by
+      rw [← Finset.prod_mul_distrib]
+      exact Finset.prod_congr rfl (fun i _ => by split_ifs <;> ring)
+    rw [hstep, Finset.prod_ite_eq']
+    simp
+  have hvol : (volume : Measure (Fin n → ℝ)) = Measure.pi (fun _ => volume) := by
+    rw [volume_pi]
+  rw [hprod, hvol]
+  refine Integrable.fin_nat_prod
+    (f := fun i z => if i = k then z ^ 2 * heatKernel1D t z else heatKernel1D t z) (fun i => ?_)
+  rcases eq_or_ne i k with hik | hik
+  · simp only [if_pos hik]
+    exact integrable_sq_mul_heatKernel1D ht
+  · simp only [if_neg hik]
+    exact integrable_heatKernel1D ht
+
+/-- The integral the `n`-dimensional `C²` rate collapses to:
+`∫ x, Kₙ(t,x)·((x k)²/(4t²) + 1/(2t)) dx = 1/t`, independent of the dimension `n`.  The `n`-dimensional
+analogue of `heatKernel1D_mul_sq_sub_inv_integral_eq`: linearity splits it into
+`(1/4t²)·∫(x k)²·Kₙ + (1/2t)·∫Kₙ = (1/4t²)·2t + (1/2t)·1 = 1/t` via the coordinate second moment
+`integral_sq_coord_mul_heatKernelND_eq` and the unit mass `integral_heatKernelND`.  The exact
+`n`-dimensional second-derivative (`C²`) parabolic smoothing coefficient. -/
+lemma heatKernelND_mul_sq_coord_add_inv_integral_eq {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    (∫ x : Fin n → ℝ, heatKernelND t x * ((x k) ^ 2 / (4 * t ^ 2) + 1 / (2 * t))) = 1 / t := by
+  have htne : t ≠ 0 := ne_of_gt ht
+  have hcongr : (∫ x : Fin n → ℝ, heatKernelND t x * ((x k) ^ 2 / (4 * t ^ 2) + 1 / (2 * t)))
+      = (∫ x : Fin n → ℝ, ((1 / (4 * t ^ 2)) * ((x k) ^ 2 * heatKernelND t x)
+          + (1 / (2 * t)) * heatKernelND t x)) := by
+    refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    ring
+  rw [hcongr,
+    integral_add ((integrable_sq_coord_mul_heatKernelND ht k).const_mul (1 / (4 * t ^ 2)))
+      ((integrable_heatKernelND ht).const_mul (1 / (2 * t))),
+    integral_const_mul, integral_const_mul,
+    integral_sq_coord_mul_heatKernelND_eq ht k, integral_heatKernelND ht]
+  field_simp
+  ring
+
 /-- **The C² (second-derivative) parabolic smoothing rate** `‖∂ₓₓHₜf‖∞ ≤ ‖f‖∞/t`
 for bounded measurable `f`, completing the Schauder regularity scale. -/
 theorem heatSemigroup1D_deriv2_abs_le_inv_t (t : ℝ) (ht : 0 < t) (f : ℝ → ℝ) (C : ℝ)
