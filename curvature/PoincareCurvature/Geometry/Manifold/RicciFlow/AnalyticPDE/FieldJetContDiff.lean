@@ -125,6 +125,50 @@ theorem contMDiff_one_flow_apply_of_contDiff [CompleteSpace E]
     (fun s => lipschitzWith_fderiv_of_contDiff_of_nnnorm_secondFDeriv_le h hn hL s)
     hΦ h0 t
 
+/-- **Spatial Lipschitz bound of the field from a first-derivative bound.**  If `v` is jointly
+`ContDiff ℝ n` with `1 ≤ n` and the spatial derivative `fderiv ℝ (v s)` is globally bounded in
+operator norm by `K`, then each time slice `v s` is `K`-Lipschitz.  Supplies the `hv` input from a
+derivative bound (via `lipschitzWith_of_nnnorm_fderiv_le`). -/
+theorem lipschitzWith_apply_of_contDiff_of_nnnorm_fderiv_le
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 1 ≤ n)
+    {K : ℝ≥0} (hK : ∀ s ξ, ‖fderiv ℝ (v s) ξ‖₊ ≤ K) (s : ℝ) :
+    LipschitzWith K (v s) := by
+  have hdiff : Differentiable ℝ (v s) :=
+    (contDiff_apply_of_contDiff_uncurry h s).differentiable ((lt_of_lt_of_le zero_lt_one hn).ne')
+  exact lipschitzWith_of_nnnorm_fderiv_le hdiff (hK s)
+
+/-- **Time-continuity of the field slice** from joint `ContDiff`: for each `x`, `s ↦ v s x` is
+continuous, since it is `Function.uncurry v` (continuous) precomposed with `s ↦ (s, x)`.  Supplies the
+`hvc` input. -/
+theorem continuous_apply_of_contDiff_uncurry
+    (h : ContDiff ℝ n (Function.uncurry v)) (x : E) :
+    Continuous (fun s : ℝ => v s x) := by
+  have heq : (fun s : ℝ => v s x) = Function.uncurry v ∘ fun s : ℝ => (s, x) := by
+    funext s; rfl
+  rw [heq]
+  exact h.continuous.comp (continuous_id.prodMk continuous_const)
+
+/-- **Manifold spatial `C¹` regularity of the flow from joint `ContDiff` and derivative bounds
+alone.**  The fully self-contained form of `contMDiff_one_flow_apply_of_contDiff`: from `v` jointly
+`ContDiff ℝ n` (`2 ≤ n`) with globally bounded first and second spatial derivatives (bounds `K`, `L`),
+plus an integral-curve flow family `Φ` anchored at `t₀`, each time-`t` map `z ↦ Φ z t` is
+`ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 1`.  The spatial Lipschitz and time-continuity inputs are here also
+discharged from the `ContDiff` hypothesis (`lipschitzWith_apply_of_contDiff_of_nnnorm_fderiv_le`,
+`continuous_apply_of_contDiff_uncurry`), so the field is described by a single smoothness hypothesis
+and two derivative bounds. -/
+theorem contMDiff_one_flow_apply_of_contDiff_of_bddDerivs [CompleteSpace E]
+    {K L : ℝ≥0} {t₀ : ℝ} {Φ : E → ℝ → E}
+    (h : ContDiff ℝ n (Function.uncurry v)) (hn : 2 ≤ n)
+    (hK : ∀ s ξ, ‖fderiv ℝ (v s) ξ‖₊ ≤ K)
+    (hL : ∀ s ξ, ‖fderiv ℝ (fderiv ℝ (v s)) ξ‖₊ ≤ L)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z) (t : ℝ) :
+    ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 1 (fun z => Φ z t) := by
+  have hn1 : (1 : WithTop ℕ∞) ≤ n := le_trans (by norm_num) hn
+  exact contMDiff_one_flow_apply_of_contDiff h hn
+    (fun τ => lipschitzWith_apply_of_contDiff_of_nnnorm_fderiv_le h hn1 hK τ)
+    (fun x => continuous_apply_of_contDiff_uncurry h x)
+    hL hΦ h0 t
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
