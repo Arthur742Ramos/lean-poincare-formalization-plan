@@ -2852,6 +2852,40 @@ theorem integral_sq_mul_heatKernel1D_eq {t : ℝ} (ht : 0 < t) :
       ((integrable_sq_mul_heatKernel1D ht).const_mul (1 / (2 * t)))]
     rw [integral_const_mul]
 
+/-- The `n`-dimensional heat kernel's **coordinate second moment** in closed form:
+`∫ x, (x k)²·Kₙ(t,x) dx = 2t`, the `n`-dimensional analogue of `integral_sq_mul_heatKernel1D_eq`.
+As with the first moment, `Kₙ(t,x) = ∏ᵢ K(t,xᵢ)` factors, so Fubini
+(`integral_fin_nat_prod_volume_eq_prod`) reduces the integral to the `k`-th one-dimensional second
+moment `∫ w²·K(t,w) dw = 2t` times the `n − 1` transverse unit masses `∫ K(t,w) dw = 1`.  The
+transverse-mass reduction the `n`-dimensional heat-semigroup second-derivative (`C²` Schauder
+smoothing) rate rests on. -/
+lemma integral_sq_coord_mul_heatKernelND_eq {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    (∫ x : Fin n → ℝ, (x k) ^ 2 * heatKernelND t x) = 2 * t := by
+  classical
+  set f : Fin n → ℝ → ℝ :=
+    fun i z => if i = k then z ^ 2 * heatKernel1D t z else heatKernel1D t z with hf
+  have hprod : ∀ x : Fin n → ℝ, (x k) ^ 2 * heatKernelND t x = ∏ i, f i (x i) := by
+    intro x
+    rw [heatKernelND_apply, hf]
+    have hstep :
+        (∏ i, (if i = k then (x i) ^ 2 * heatKernel1D t (x i) else heatKernel1D t (x i)))
+          = (∏ i, (if i = k then (x i) ^ 2 else (1 : ℝ))) * ∏ i, heatKernel1D t (x i) := by
+      rw [← Finset.prod_mul_distrib]
+      exact Finset.prod_congr rfl (fun i _ => by split_ifs <;> ring)
+    rw [hstep, Finset.prod_ite_eq']
+    simp
+  rw [integral_congr_ae (Filter.Eventually.of_forall hprod),
+    integral_fin_nat_prod_volume_eq_prod f]
+  have hint : ∀ i, (∫ z : ℝ, f i z)
+      = if i = k then (∫ w, w ^ 2 * heatKernel1D t w) else (1 : ℝ) := by
+    intro i
+    rw [hf]
+    split_ifs with hik
+    · simp [hik]
+    · simp [hik, integral_heatKernel1D ht]
+  rw [Finset.prod_congr rfl (fun i _ => hint i), Finset.prod_ite_eq']
+  simp [integral_sq_mul_heatKernel1D_eq ht]
+
 /-- Integrability of the shifted second-moment integrand. -/
 lemma integrable_sq_mul_heatKernel1D_sub {t : ℝ} (ht : 0 < t) (x : ℝ) :
     Integrable (fun y => (x - y) ^ 2 * heatKernel1D t (x - y)) :=
