@@ -11745,6 +11745,93 @@ theorem contDiff_three_of_hasFDerivAt_nested_of_continuous
     exact hasFDerivAt_iteratedFDeriv_two_uncurry2CLM hDf hD2 (hD3 x)
   · exact (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).continuous.comp hcont
 
+/-- **The nested second-fundamental-solution `HasFDerivAt` chain *bundled with* its multilinear
+continuity** — the exact triple of data `contDiff_three_of_hasFDerivAt_nested_of_continuous` consumes
+on the third-derivative side.  This packages `exists_hasFDerivAt_secondFundamentalSolution` (the
+everywhere `fderiv D₂ = D₃fam` half of the resolvent's spatial `C³`) together with the multilinear
+continuity `z ↦ uncurry3 (D₃fam z)` of the third fundamental solution
+(`lipschitzWith_thirdFundamentalSolution_multilinear`), for the **same** packaged operators — the
+identification the two halves could not share when quoted as separate theorems (the third fundamental
+solution `D₃fam` and its linearised-first-variation family `Vfamfam` are the existentially bound
+witnesses, so their characterisation is only in scope inside a single proof).
+
+Building both from *one* `exists_thirdVariationOperator_of_field` invocation (whose seventh conjunct
+is the third-variation-ODE characterisation `hD₃bilinear` fed to *both* the `HasFDerivAt` slot
+`thirdVariationOperator_hD₃_slot_of_bilinear` and the multilinear Lipschitz base gap
+`norm_thirdFundamentalSolution_apply_baseCurve_sub_le`) is exactly what lets the continuity be stated
+for the `D₃fam` that the chain differentiates to.  The lone extra hypothesis beyond
+`exists_hasFDerivAt_secondFundamentalSolution` is `hD3vlip` (spatial Lipschitzness of the `Fin 3`
+third derivative `D3v`), which drives the continuity but is inert for the pointwise chain.  This is
+the "sole remaining ingredient" the resolvent-`C³` docstring flagged: with it,
+`contDiff_three_of_hasFDerivAt_nested_of_continuous` closes `ContDiff ℝ 3` dependence on initial
+data. -/
+theorem exists_hasFDerivAt_secondFundamentalSolution_multilinearContinuous [CompleteSpace E]
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ : ℝ≥0} {C' C'' N : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ) (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ) (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K)
+    (hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)))
+    (hD2contfun : ∀ z, Continuous (fun s => D2vc s (Φ z s)))
+    (hD3mcont : ∀ z, Continuous (fun s => D3vm s (Φ z s)))
+    (hD3vcont : ∀ z, Continuous (fun s => D3v s (Φ z s)))
+    (hC'0 : 0 ≤ C') (hC'fun : ∀ z, ∀ s, ‖D2vc s (Φ z s)‖ ≤ C')
+    (hN0 : 0 ≤ N) (hN : ∀ z, ∀ s, ‖D3vm s (Φ z s)‖ ≤ N)
+    (hC''0 : 0 ≤ C'') (hC'' : ∀ z, ∀ s, ‖D3v s (Φ z s)‖ ≤ C'')
+    (hcurry : ∀ z, ∀ s, D3vm s (Φ z s) = (D3v s (Φ z s)).curryLeft)
+    {Ψ : E → E → ℝ → E}
+    (hΨ : ∀ z, ∀ x, IsIntegralCurve (Ψ z x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0Ψ : ∀ z, ∀ x, Ψ z x t₀ = x)
+    {T : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ (D₂ : E → (E →L[ℝ] (E →L[ℝ] E)))
+        (D₃fam : E → (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E)))),
+      (∀ (z h : E) (Vlin : ℝ → (E →L[ℝ] E)), Vlin t₀ = 0 →
+        (∀ s, HasDerivAt Vlin
+          ((Dv s (Φ z s)).comp (Vlin s)
+            + ((D2vc s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+                (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)) s) →
+        D₂ z h = Vlin t) ∧
+      (∀ y, HasFDerivAt D₂ (D₃fam y) y) ∧
+      Continuous (fun z => uncurry3 (D₃fam z)) := by
+  choose D₂ hD₂char using fun z => exists_continuousLinearMap_linearisedVariation
+    z (hAfun z) (hAcontfun z) (hD2contfun z) (hΨ z) (h0Ψ z) hC'0 (hC'fun z) ht
+  choose Vfamfam D₃fam hprops using fun z => exists_thirdVariationOperator_of_field
+    z (hAfun z) (hAcontfun z) (hD2contfun z) (hD3vcont z) (hΨ z) (h0Ψ z) hC'0 hC''0
+      (hC'fun z) (hC'' z) ht
+  refine ⟨D₂, D₃fam, hD₂char, fun y => ?_, ?_⟩
+  · obtain ⟨hVfam0, hVfamd, _, _, _, _, hD₃bilinear⟩ := hprops y
+    apply hasFDerivAt_of_eventually_norm_sub_sub_le_sq (f := D₂) (f' := D₃fam y) (x₀ := y)
+    filter_upwards [Metric.ball_mem_nhds y one_pos] with z hz
+    have hk : ‖z - y‖ ≤ 1 := by
+      have hmem := Metric.mem_ball.mp hz
+      rw [dist_eq_norm] at hmem
+      exact hmem.le
+    have hW : Continuous (fun s => fundamentalSolution (hAfun y) (hΨ y) (h0Ψ y) s) :=
+      continuous_fundamentalSolution_time (hAfun y) (hΨ y) (h0Ψ y)
+    obtain ⟨W₂, hW₂0, hW₂⟩ := exists_hasDerivAt_firstVariation_linearised
+      y (hAfun y) (hAcontfun y) (hD2contfun y) (hΨ y) (h0Ψ y) z
+    obtain ⟨Wdiff, hWdiff0, hWdiff⟩ := exists_hasDerivAt_inhomogVariation_of_continuous
+      (hAfun y) (hAcontfun y) (((hAcontfun z).sub (hAcontfun y)).clm_comp hW) t₀
+    have hslot := thirdVariationOperator_hD₃_slot_of_bilinear y z (hAfun y) (hΨ y) (h0Ψ y)
+      hVfam0 hVfamd (hcurry y) hD₃bilinear hW₂ hW₂0
+    exact norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC
+      hv hΦ h0 hDv hDvlip hD2vc hD2vclip hD3vm hD3vmlip hcompat z y
+      (hAfun z) (hAfun y) (hAcontfun y) (hAcontfun z) (hD2contfun z) (hD2contfun y) (hD3mcont y)
+      hC'0 (hC'fun z) (hC'fun y) hN0 (hN y) (hΨ y) (h0Ψ y) (hΨ z) (h0Ψ z)
+      hW₂ hW₂0 hWdiff hWdiff0 (hD₂char z) (hD₂char y) hslot hk ht
+  · exact (lipschitzWith_thirdFundamentalSolution_multilinear hv hΦ h0 hDvlip hD2vclip hD3vlip
+      hAfun hAcontfun hD2contfun hD3vcont hC'0 hC'fun hC''0 hC'' hΨ h0Ψ
+      (fun z => (hprops z).1) (fun z => (hprops z).2.1) (fun z => (hprops z).2.2.1)
+      (fun z => (hprops z).2.2.2.2.2.2) ht).continuous
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
