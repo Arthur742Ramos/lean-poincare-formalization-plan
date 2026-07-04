@@ -6327,3 +6327,41 @@ Remaining for Point 4 (future sessions): unchanged in scope — the genuine **Sc
 estimates** and the Ricci–DeTurck RHS operator (assembled from `mulCoeffL`/`compL`/`precompL`/`constL`)
 on the parabolic Banach space (Item 3, the analytic main theorem); the **general-manifold**
 gauge-flow lift (Item 2, heavy gauge files); and the Item 1 tensor time-derivative chain rule.
+
+Update — **the parabolic `C^{0,α}` Banach nonlinear Schauder fixed-point toolkit** added to
+`AnalyticPDE/Parabolic/BanachSpace.lean` (all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`), taking the Ricci–DeTurck Banach chart from *linear/affine*
+solvability to the genuine *nonlinear/quasilinear* fixed point that the actual RHS consumes, layered
+on the completed affine Neumann solvability (`affineSolveL`, `exists_unique_affineFixedPoint`):
+
+* **Continuous dependence of the linear solution operator on its coefficients** — `affineSolveL_mul_oneSub`
+  (the left-inverse companion `affineSolveL A hA * (1 - A) = 1` of the existing right inverse, so
+  `affineSolveL A hA = (1 - A)⁻¹` two-sidedly), the **resolvent identity** `affineSolveL_sub_eq`
+  (`(1 - A)⁻¹ - (1 - B)⁻¹ = (1 - A)⁻¹ (A - B) (1 - B)⁻¹`), its operator-norm bound
+  `norm_affineSolveL_sub_le` (`≤ (1 - ‖A‖)⁻¹ ‖A - B‖ (1 - ‖B‖)⁻¹`: the *Lipschitz dependence of the
+  linearised Schauder solution operator on the frozen coefficient operator* that turns the
+  coefficient-dependent iteration into a contraction), and the a-priori solution-difference estimate
+  `norm_affineSolveL_apply_sub_le` at fixed data `f`.
+* **Nonlinear Banach fixed point** — `exists_unique_lipschitzFixedPoint` (a `LipschitzWith k`, `k < 1`
+  self-map has a unique fixed point `g u = u`: the nonlinear generalisation of the affine case, i.e.
+  solvability of the genuine quasilinear Ricci–DeTurck RHS on a short-time / small-ball chart where it
+  contracts), the a-posteriori residual bound `norm_sub_fixedPoint_le_of_lipschitz`
+  (`‖x - u‖ ≤ ‖x - g x‖ / (1 - k)`), and the stability estimate `norm_fixedPoint_sub_fixedPoint_le`
+  (`‖u₁ - u₂‖ ≤ C / (1 - k)` when `‖g₁ z - g₂ z‖ ≤ C` uniformly — well-posedness under a perturbation
+  of the nonlinearity; only `g₁` need contract).
+* **Quantitative Picard/Schauder iteration convergence** — `norm_iterate_sub_fixedPoint_le` (the
+  a-priori geometric rate `‖g^[n] x - u‖ ≤ ‖x - g x‖ · kⁿ / (1 - k)`, the constructive form of the
+  nonlinear existence) and `tendsto_iterate_fixedPoint` (the iterates converge to the solution).
+* **The quasilinear RHS shape** — `exists_unique_affinePlusLipschitzFixedPoint`: the actual
+  Ricci–DeTurck right-hand side split `A u + N u + f` (bounded linear principal-plus-lower-order part
+  `A`, nonlinear `LipschitzWith k` remainder `N`, frozen data `f`) is uniquely solvable when
+  `‖A‖ + k < 1`, via `LipschitzWith.add` (contraction constant `‖A‖₊ + k`) + the nonlinear fixed point.
+  Generalises the affine `exists_unique_affineFixedPoint` (`N = 0`) and the `compL`/`mulCoeffL`
+  corollaries.
+
+Remaining for Point 4 (future sessions): the genuine **parabolic Schauder a-priori estimates** that
+make the concrete Ricci–DeTurck RHS operator a short-time contraction (bounding the operator norm by
+the time-interval length — the hard analytic content in `AnalyticPDE/ParabolicHolder.lean`), and the
+assembly of the concrete RHS from `mulCoeffL`/`compL`/`precompL`/`constL` with the geometric
+coefficients (Item 3, the analytic main theorem); the **general-manifold** gauge-flow lift (Item 2,
+heavy gauge files); and the Item 1 tensor time-derivative chain rule.
