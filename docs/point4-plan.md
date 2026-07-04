@@ -4488,6 +4488,43 @@ parabolic norm setup, the Lipschitz/Schauder estimate, and the actual
 chart construction. Will be the largest single addition of this whole
 program.
 
+Update — **the well-posedness / local-existence layer of the quasilinear Ricci–DeTurck fixed point
+is now built** on the parabolic `C^{0,α}` Banach chart (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), extending `AnalyticPDE/Parabolic/BanachSpace.lean`.  The
+previous milestone gave the *unique solvability* of the quasilinear equation `A u + N u + f = u`
+(bounded-linear principal part `A`, `k`-Lipschitz nonlinearity `N`, frozen data `f`, contraction
+constant `‖A‖ + k < 1`, `exists_unique_affinePlusLipschitzFixedPoint`); this session supplies the
+**continuous-dependence / a-priori / localisation data** the Ricci–DeTurck chart-closure consumes,
+turning the bare solvability into a genuine well-posed solution operator:
+
+* `norm_affinePlusLipschitzFixedPoint_sub_le` — **continuous (Lipschitz) dependence on the data**:
+  two solutions for data `f₁`, `f₂` obey `‖u₁ − u₂‖ ≤ ‖f₁ − f₂‖ / (1 − (‖A‖ + k))` (via
+  `norm_fixedPoint_sub_fixedPoint_le` with `gᵢ = A · + N · + fᵢ`, gap `g₁ − g₂ = f₁ − f₂`); generalises
+  the affine `norm_affineSolveL_apply_sub_le` (`N = 0`).
+* `norm_affinePlusLipschitzFixedPoint_le` — the **a-priori Schauder bound**
+  `‖u‖ ≤ (‖N 0‖ + ‖f‖) / (1 − (‖A‖ + k))` (from `‖u‖ ≤ (‖A‖ + k)‖u‖ + (‖N 0‖ + ‖f‖)`, the nonlinearity
+  contributing `‖N u‖ ≤ k‖u‖ + ‖N 0‖`, solved by `le_div_iff₀`).
+* `norm_affinePlusLipschitzFixedPoint_sub_le_nonlinearity` — **stability under a uniform perturbation
+  of the nonlinearity** (`‖N₁ z − N₂ z‖ ≤ C`): `‖u₁ − u₂‖ ≤ C / (1 − (‖A‖ + k))`; and
+  `norm_affinePlusLipschitzFixedPoint_sub_le_of_data_nonlinearity` — the **combined** continuous
+  dependence on `(N, f)`, `‖u₁ − u₂‖ ≤ (C + ‖f₁ − f₂‖) / (1 − (‖A‖ + k))` (gap
+  `(N₁ − N₂) + (f₁ − f₂)`), of which the two above are the `N₁ = N₂` / `f₁ = f₂` faces.
+* `affinePlusLipschitzSolve` (+ `_isSolution`, `_eq`, `norm_affinePlusLipschitzSolve_le`,
+  `lipschitzWith_affinePlusLipschitzSolve`, `continuous_affinePlusLipschitzSolve`) — the **bundled
+  quasilinear solution operator** `f ↦ u(f)` as a genuinely bounded (`≤ (‖N 0‖ + ‖f‖)/(1−(‖A‖+k))`),
+  `((1 − (‖A‖ + k))⁻¹).toNNReal`-Lipschitz, continuous nonlinear solution realisation (the nonlinear
+  analogue of the bounded *linear* `affineSolveL`).
+* `fixedPoint_mem_of_mapsTo_isClosed` — **closed-set localisation** of a nonlinear fixed point: a
+  `k`-contraction `g` (`k < 1`) with `Set.MapsTo g K K`, `c ∈ K`, `K` closed has its fixed point in `K`
+  (the Picard iterates `g^[n] c` stay in `K` and converge to `u`, `IsClosed.mem_of_tendsto`); and
+  `affinePlusLipschitzFixedPoint_mem_closedBall` — its **invariant-ball** specialisation, the honest
+  short-time / small-ball chart existence (if the RHS maps `closedBall c r` into itself, the solution
+  exists *and stays in the ball*, `dist u c ≤ r`).
+
+Remaining (future sessions): the lift to the higher-regularity parabolic Hölder space
+`C^{2+α,1+α/2}`, then the Schauder/Lipschitz estimate for the Ricci–DeTurck RHS (which supplies the
+concrete `A`, `N`, `f` and the invariant ball these consume) and the chart / chart-closure fields.
+
 ## Dependencies between items
 
 ```
