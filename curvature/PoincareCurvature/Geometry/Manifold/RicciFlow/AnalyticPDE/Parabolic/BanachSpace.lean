@@ -763,5 +763,89 @@ theorem evalCLM_mulCoeffL_apply {F G : Type*} [NormedAddCommGroup F] [NormedSpac
 
 end ParabolicC0AlphaBanach
 
+namespace ParabolicC0AlphaSpace
+
+/-- **Frozen-coefficient multiplication is additive in the coefficient (carrier).**  `L(a + a', v) =
+L(a, v) + L(a', v)` pointwise, from the linearity of `L` in its first argument. -/
+theorem mulCoeffL_add_coeff {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a a' : ParabolicC0AlphaSpace X E α s) (v : ParabolicC0AlphaSpace X F α s) :
+    mulCoeffL L (a + a') v = mulCoeffL L a v + mulCoeffL L a' v := by
+  apply Subtype.ext
+  funext z
+  show L (toFun a z + toFun a' z) (toFun v z)
+      = L (toFun a z) (toFun v z) + L (toFun a' z) (toFun v z)
+  rw [map_add, ContinuousLinearMap.add_apply]
+
+/-- **Frozen-coefficient multiplication is homogeneous in the coefficient (carrier).**  `L(c • a, v) =
+c • L(a, v)` pointwise. -/
+theorem mulCoeffL_smul_coeff {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G) (c : ℝ)
+    (a : ParabolicC0AlphaSpace X E α s) (v : ParabolicC0AlphaSpace X F α s) :
+    mulCoeffL L (c • a) v = c • mulCoeffL L a v := by
+  apply Subtype.ext
+  funext z
+  show L (c • toFun a z) (toFun v z) = c • L (toFun a z) (toFun v z)
+  rw [map_smul, ContinuousLinearMap.smul_apply]
+
+end ParabolicC0AlphaSpace
+
+namespace ParabolicC0AlphaBanach
+
+/-- **Banach frozen-coefficient multiplication is additive in the coefficient.**  As operators
+`ParabolicC0AlphaBanach … F … →L[ℝ] ParabolicC0AlphaBanach … G …`, `mulCoeffL L (a + a')
+= mulCoeffL L a + mulCoeffL L a'`. -/
+theorem mulCoeffL_add_coeff {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a a' : ParabolicC0AlphaSpace X E α s) :
+    mulCoeffL (X := X) (s := s) (G := G) L (a + a') = mulCoeffL L a + mulCoeffL L a' := by
+  ext x
+  obtain ⟨v, rfl⟩ := mk_surjective x
+  rw [ContinuousLinearMap.add_apply, mulCoeffL_mk, mulCoeffL_mk, mulCoeffL_mk,
+    ParabolicC0AlphaSpace.mulCoeffL_add_coeff, ← mkL_apply, ← mkL_apply, ← mkL_apply, map_add]
+
+/-- **Banach frozen-coefficient multiplication is homogeneous in the coefficient.**  As operators,
+`mulCoeffL L (c • a) = c • mulCoeffL L a`. -/
+theorem mulCoeffL_smul_coeff {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G) (c : ℝ)
+    (a : ParabolicC0AlphaSpace X E α s) :
+    mulCoeffL (X := X) (s := s) (G := G) L (c • a) = c • mulCoeffL L a := by
+  ext x
+  obtain ⟨v, rfl⟩ := mk_surjective x
+  rw [ContinuousLinearMap.smul_apply, mulCoeffL_mk, mulCoeffL_mk,
+    ParabolicC0AlphaSpace.mulCoeffL_smul_coeff, ← mkL_apply, ← mkL_apply, map_smul]
+
+/-- **The parabolic `C^{0,α}` bounded bilinear multiplication operator.**  Packaging the
+frozen-coefficient family `a ↦ mulCoeffL L a` as a single bounded `ℝ`-linear map
+`ParabolicC0AlphaSpace … E … →L[ℝ] (ParabolicC0AlphaBanach … F … →L[ℝ] ParabolicC0AlphaBanach … G …)`
+of operator norm `≤ ‖L‖`.  Together with the boundedness of each `mulCoeffL L a` this exhibits the
+genuine bounded bilinear parabolic `C^{0,α}` multiplication `‖L(a, v)‖ ≤ ‖L‖ · ‖a‖ · ‖v‖` — the
+algebra structure a nonlinear Ricci–DeTurck Banach-chart RHS is built from. -/
+noncomputable def mulL {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G) :
+    ParabolicC0AlphaSpace X E α s →L[ℝ]
+      (ParabolicC0AlphaBanach X F α s →L[ℝ] ParabolicC0AlphaBanach X G α s) :=
+  LinearMap.mkContinuous
+    { toFun := fun a => mulCoeffL L a
+      map_add' := mulCoeffL_add_coeff L
+      map_smul' := fun c a => mulCoeffL_smul_coeff L c a }
+    ‖L‖ (fun a => norm_mulCoeffL_le L a)
+
+/-- On a coefficient `a`, the bounded bilinear multiplication is the frozen-coefficient operator. -/
+@[simp]
+theorem mulL_apply {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) :
+    mulL L a = mulCoeffL L a :=
+  rfl
+
+/-- The bounded bilinear multiplication operator has operator norm `≤ ‖L‖`. -/
+theorem norm_mulL_le {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G) :
+    ‖mulL (X := X) (E := E) (α := α) (s := s) (F := F) (G := G) L‖ ≤ ‖L‖ :=
+  LinearMap.mkContinuous_norm_le _ (norm_nonneg L) _
+
+end ParabolicC0AlphaBanach
+
 end AnalyticPDE
 end RicciFlow
