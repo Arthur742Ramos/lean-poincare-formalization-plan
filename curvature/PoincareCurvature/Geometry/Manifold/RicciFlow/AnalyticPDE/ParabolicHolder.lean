@@ -8436,6 +8436,78 @@ theorem parabolicSupNorm_le_holderSeminorm_mul_rpow_of_initial_zero
   rw [← sqrt_rpow_eq_rpow_half hT α]
   exact parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero hα hu hslab hcyl hu0
 
+/-! ### Affine (non-vanishing) initial data
+
+The actual Ricci–DeTurck iteration prescribes a nonzero initial condition, so the estimates above are
+needed in the form where `u` need not vanish at the initial time but merely stays bounded there
+(`‖u (t₀, x)‖ ≤ M₀`).  Splitting `u (t, x) = (u (t, x) - u (t₀, x)) + u (t₀, x)` bounds the sup norm
+by the initial-slice bound `M₀` plus the short-time-small Hölder contribution `[u]_α · (√T)^α`.  With
+`M₀ = 0` these recover the initial-vanishing estimates. -/
+
+/-- **Pointwise short-time bound from bounded initial data.**  If `u` is parabolic `α`-Hölder with
+nonnegative constant `C` on `s`, has `‖u (t₀, x)‖ ≤ M₀` at the initial-time point, and `(t, x)` sits
+within `|t - t₀| ≤ T` of it, then `‖u (t, x)‖ ≤ M₀ + C · (√T)^α`. -/
+theorem norm_le_of_parabolicHolderWith_of_initial_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {C α T t₀ t M₀ : ℝ} {x : X} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC0 : 0 ≤ C) (hα : 0 ≤ α) (hC : ParabolicHolderWith C α u s)
+    (hp : (t, x) ∈ s) (hp0 : (t₀, x) ∈ s)
+    (hu0 : ‖u (t₀, x)‖ ≤ M₀) (hT : |t - t₀| ≤ T) :
+    ‖u (t, x)‖ ≤ M₀ + C * Real.sqrt T ^ α := by
+  have h1 : ‖u (t, x) - u (t₀, x)‖ ≤ C * parabolicDistance (t, x) (t₀, x) ^ α := hC hp hp0
+  rw [parabolicDistance.same_space] at h1
+  have h2 : Real.sqrt |t - t₀| ^ α ≤ Real.sqrt T ^ α :=
+    Real.rpow_le_rpow (Real.sqrt_nonneg _) (Real.sqrt_le_sqrt hT) hα
+  have hstep : ‖u (t, x) - u (t₀, x)‖ ≤ C * Real.sqrt T ^ α :=
+    h1.trans (mul_le_mul_of_nonneg_left h2 hC0)
+  calc ‖u (t, x)‖
+      ≤ ‖u (t, x) - u (t₀, x)‖ + ‖u (t₀, x)‖ := by
+        have h := norm_add_le (u (t, x) - u (t₀, x)) (u (t₀, x))
+        rwa [sub_add_cancel] at h
+    _ ≤ C * Real.sqrt T ^ α + M₀ := add_le_add hstep hu0
+    _ = M₀ + C * Real.sqrt T ^ α := by ring
+
+/-- **Parabolic sup-norm short-time bound from bounded initial data.**  Generalises
+`parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero` to initial data bounded by `M₀` (rather than
+zero): `‖u‖_{C⁰} ≤ M₀ + [u]_α · (√T)^α`.  On a thin slab the Hölder contribution is small, so the
+sup norm is controlled by the initial-slice bound plus a short-time-small remainder — the affine
+a-priori estimate the Ricci–DeTurck iteration with a prescribed initial condition consumes. -/
+theorem parabolicSupNorm_le_add_holderSeminorm_mul_of_initial_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ M₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hM0 : 0 ≤ M₀) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → ‖u (t₀, x)‖ ≤ M₀) :
+    parabolicSupNorm u s ≤ M₀ + parabolicHolderSeminorm α u s * Real.sqrt T ^ α := by
+  have hsemi0 := parabolicHolderSeminorm_nonneg α u s
+  have hsemi := parabolicHolderWith_parabolicHolderSeminorm hu
+  refine parabolicSupNorm_le
+    (add_nonneg hM0 (mul_nonneg hsemi0 (Real.rpow_nonneg (Real.sqrt_nonneg T) α))) ?_
+  rintro ⟨t, x⟩ hp
+  have hp0 : (t₀, x) ∈ s := hcyl (t, x) hp
+  exact norm_le_of_parabolicHolderWith_of_initial_le hsemi0 hα hsemi hp hp0
+    (hu0 x hp0) (hslab (t, x) hp)
+
+/-- **Parabolic `C^{0,α}` short-time bound from bounded initial data.**  The full-norm affine
+estimate: `‖u‖_{C^{0,α}} ≤ M₀ + ((√T)^α + 1) · [u]_α`.  With `M₀ = 0` this recovers
+`parabolicC0AlphaNorm_le_holderSeminorm_mul_of_initial_zero`. -/
+theorem parabolicC0AlphaNorm_le_add_holderSeminorm_mul_of_initial_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ M₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hM0 : 0 ≤ M₀) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → ‖u (t₀, x)‖ ≤ M₀) :
+    parabolicC0AlphaNorm α u s
+      ≤ M₀ + (Real.sqrt T ^ α + 1) * parabolicHolderSeminorm α u s := by
+  have h1 := parabolicSupNorm_le_add_holderSeminorm_mul_of_initial_le hα hM0 hu hslab hcyl hu0
+  unfold parabolicC0AlphaNorm
+  calc parabolicSupNorm u s + parabolicHolderSeminorm α u s
+      ≤ (M₀ + parabolicHolderSeminorm α u s * Real.sqrt T ^ α)
+          + parabolicHolderSeminorm α u s := by gcongr
+    _ = M₀ + (Real.sqrt T ^ α + 1) * parabolicHolderSeminorm α u s := by ring
+
 end AnalyticPDE
 end RicciFlow
 
