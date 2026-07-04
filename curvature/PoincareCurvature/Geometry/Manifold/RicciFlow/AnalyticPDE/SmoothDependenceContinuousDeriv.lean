@@ -275,6 +275,119 @@ theorem exists_flow_differentiable_of_continuous_deriv [FiniteDimensional ℝ E]
   exact (hasFDerivAt_flow_of_continuous_deriv hv hAnorm hΦ' h0' hΦ h0 x₀ ht0
     hderiv hDvc (fun _ => rfl)).differentiableAt
 
+/-- **Continuity of the resolvent map for a `C^1` field** (continuous-derivative analogue of
+`exists_flow_fderiv_continuous_of_lipschitz_deriv`).  For a finite-dimensional state space, from a
+uniformly `K`-Lipschitz, time-continuous field with everywhere-defined, jointly continuous spatial
+derivative `Dv` (no Lipschitz constant), there is a flow family `Φ` of `v` (anchored at `t₀`) whose
+forward time-`t` slice `z ↦ Φ z t` is Fréchet differentiable at every initial value **and** whose
+resolvent map `z ↦ fderiv ℝ (fun w => Φ w t) z = D_x Φ_t` is continuous.
+
+The resolvent-continuity half is the continuous (non-Lipschitz) dependence of the linear
+fundamental solution on its coefficient (`norm_fundamentalSolution_sub_le_of_forall_le_Icc`)
+composed with the base-point modulus of the trajectory-linearised coefficient: at each base point
+`z₀`, the coefficient gap `sup_s ‖Dv s (Φ z s) − Dv s (Φ z₀ s)‖` is dominated by the derivative
+oscillation modulus `ω` (from `exists_monotone_modulus_of_continuousOn_tube`) evaluated at the
+flow-separation `exp(K(t−t₀))·‖z−z₀‖`, which tends to `0`; a squeeze then gives continuity. -/
+theorem exists_flow_fderiv_continuous_of_continuous_deriv [FiniteDimensional ℝ E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {t : ℝ} (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        Differentiable ℝ (fun z => Φ z t) ∧
+        Continuous (fun z => fderiv ℝ (fun w => Φ w t) z) := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  have hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K := fun z s => by
+    have h : ‖Dv s (Φ z s)‖ ≤ (K : ℝ) := (hderiv s (Φ z s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)) := fun z =>
+    hDvc.comp (continuous_id.prodMk (hΦ z).continuous)
+  choose Ψ h0Ψ hΨ using fun z => exists_variationalFlowFamily (hAfun z) (hAcontfun z)
+  have hres : ∀ z, HasFDerivAt (fun w => Φ w t)
+      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) z := fun z =>
+    hasFDerivAt_flow_of_continuous_deriv hv (hAfun z) (hΨ z) (h0Ψ z) hΦ h0 z ht0
+      hderiv hDvc (fun _ => rfl)
+  have hfeq : (fun z => fderiv ℝ (fun w => Φ w t) z)
+      = (fun z => fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) :=
+    funext fun z => (hres z).fderiv
+  refine ⟨Φ, h0, hΦ, fun z => (hres z).differentiableAt, ?_⟩
+  rw [hfeq, continuous_iff_continuousAt]
+  intro z₀
+  have hγc : Continuous (fun s => Φ z₀ s) := (hΦ z₀).continuous
+  have hoscc : Continuous fun p : ℝ × E =>
+      ‖Dv p.1 (Φ z₀ p.1 + p.2) - Dv p.1 (Φ z₀ p.1)‖ := by
+    have hg1 : Continuous fun p : ℝ × E => Dv p.1 (Φ z₀ p.1 + p.2) :=
+      hDvc.comp (continuous_fst.prodMk ((hγc.comp continuous_fst).add continuous_snd))
+    have hg2 : Continuous fun p : ℝ × E => Dv p.1 (Φ z₀ p.1) :=
+      hDvc.comp (continuous_fst.prodMk (hγc.comp continuous_fst))
+    exact (hg1.sub hg2).norm
+  obtain ⟨ω, hωnn, hωmono, hω0, hωbd⟩ :=
+    exists_monotone_modulus_of_continuousOn_tube (T := Set.Icc t₀ t) isCompact_Icc 1
+      (f := fun s w => ‖Dv s (Φ z₀ s + w) - Dv s (Φ z₀ s)‖) hoscc
+      (fun s _ => by simp) (fun s w => norm_nonneg _)
+  have hc0 : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (t - t₀)) := (Real.exp_pos _).le
+  have hnbhd : ∀ᶠ z in 𝓝 z₀, Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖ < 1 := by
+    have hcont : Continuous fun z : E => Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖ :=
+      continuous_const.mul (continuous_norm.comp (continuous_id.sub continuous_const))
+    have h0lt : Real.exp ((K : ℝ) * (t - t₀)) * ‖z₀ - z₀‖ < 1 := by simp
+    exact (hcont.tendsto z₀).eventually (Iio_mem_nhds h0lt)
+  refine tendsto_iff_norm_sub_tendsto_zero.mpr ?_
+  refine squeeze_zero' (g := fun z => ω (Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖)
+      * (Real.exp ((K : ℝ) * (t - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀)))
+    (Filter.Eventually.of_forall (fun z => norm_nonneg _)) ?_ ?_
+  · filter_upwards [hnbhd] with z hz
+    have hgap : ∀ s ∈ Set.Icc t₀ t,
+        ‖Dv s (Φ z s) - Dv s (Φ z₀ s)‖ ≤ ω (Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖) := by
+      intro s hs
+      have hsep : ‖Φ z s - Φ z₀ s‖ ≤ Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖ := by
+        have hd := dist_flow_apply_le hv hΦ h0 z z₀ s
+        rw [dist_eq_norm, dist_eq_norm] at hd
+        have hexp : Real.exp ((K : ℝ) * |s - t₀|) ≤ Real.exp ((K : ℝ) * (t - t₀)) := by
+          refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left ?_ K.coe_nonneg)
+          rw [abs_of_nonneg (sub_nonneg.mpr hs.1)]; exact sub_le_sub_right hs.2 t₀
+        calc ‖Φ z s - Φ z₀ s‖ ≤ ‖z - z₀‖ * Real.exp ((K : ℝ) * |s - t₀|) := hd
+          _ ≤ ‖z - z₀‖ * Real.exp ((K : ℝ) * (t - t₀)) :=
+              mul_le_mul_of_nonneg_left hexp (norm_nonneg _)
+          _ = Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖ := mul_comm _ _
+      have hsep1 : ‖Φ z s - Φ z₀ s‖ ≤ (1 : ℝ) := le_trans hsep (le_of_lt hz)
+      have hbd := hωbd s hs (Φ z s - Φ z₀ s) hsep1
+      simp only [add_sub_cancel] at hbd
+      exact le_trans hbd (hωmono hsep)
+    have key := norm_fundamentalSolution_sub_le_of_forall_le_Icc
+      (hAfun z) (hAfun z₀) (hΨ z) (h0Ψ z) (hΨ z₀) (h0Ψ z₀)
+      (hωnn (Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖)) hgap ⟨ht0, le_refl t⟩
+    calc ‖fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t
+            - fundamentalSolution (hAfun z₀) (hΨ z₀) (h0Ψ z₀) t‖
+        ≤ ω (Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖)
+            * Real.exp ((K : ℝ) * (t - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀) := key
+      _ = ω (Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖)
+            * (Real.exp ((K : ℝ) * (t - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀)) := by ring
+  · have htend : Tendsto (fun z => ω (Real.exp ((K : ℝ) * (t - t₀)) * ‖z - z₀‖))
+        (𝓝 z₀) (𝓝 0) := tendsto_modulus_comp_norm_sub z₀ hc0 hω0
+    simpa using htend.mul_const
+      (Real.exp ((K : ℝ) * (t - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀))
+
+/-- **The flow map is `ContDiff ℝ 1` in the initial data for a `C^1` field** (continuous-derivative
+analogue of `exists_flow_contDiff_one_of_lipschitz_deriv`).  The `ContDiff` packaging of
+`exists_flow_fderiv_continuous_of_continuous_deriv`: under merely a jointly continuous spatial
+derivative (finite-dimensional state space, no Lipschitz constant), there is a flow family `Φ` of
+`v` whose forward time-`t` slice `z ↦ Φ z t` is `ContDiff ℝ 1` — continuously Fréchet differentiable
+in the initial value.  This is the honest "`C¹` in initial data" statement in the `ContDiff`
+vocabulary that the compact-manifold gauge flow (Item 2) consumes, now for an arbitrary `C^1`
+right-hand side, via `contDiff_one_iff_fderiv`. -/
+theorem exists_flow_contDiff_one_of_continuous_deriv [FiniteDimensional ℝ E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {t : ℝ} (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContDiff ℝ 1 (fun z => Φ z t) := by
+  obtain ⟨Φ, h0, hΦ, hdiff, hcont⟩ :=
+    exists_flow_fderiv_continuous_of_continuous_deriv hv hvc hderiv hDvc ht0
+  exact ⟨Φ, h0, hΦ, contDiff_one_iff_fderiv.mpr ⟨hdiff, hcont⟩⟩
+
 end
 
 end SmoothDependenceCk
