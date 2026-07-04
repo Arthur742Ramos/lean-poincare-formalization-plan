@@ -8313,6 +8313,35 @@ theorem parabolicC0AlphaNorm_mul_sub_mul_le {X A : Type*} [PseudoMetricSpace X] 
   · exact parabolicC0AlphaNorm_mul_le hu hdv
   · exact parabolicC0AlphaNorm_mul_le hdu hv'
 
+/-- The parabolic Hölder **seminorm of a constant function vanishes**: a constant has no Hölder
+oscillation, witnessed by `ParabolicHolderWith 0`. -/
+theorem parabolicHolderSeminorm_const {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (c : E) (s : Set (ℝ × X)) :
+    parabolicHolderSeminorm α (fun _ => c) s = 0 := by
+  refine le_antisymm ?_ (parabolicHolderSeminorm_nonneg α (fun _ => c) s)
+  refine parabolicHolderSeminorm_le le_rfl ?_
+  intro p _ q _
+  simp
+
+/-- The parabolic **sup norm of a constant function is at most the norm of the constant**, witnessed
+by `ParabolicBoundedWith ‖c‖`.  (Equality can fail only on the empty domain, where the value is `0`.) -/
+theorem parabolicSupNorm_const_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (c : E) (s : Set (ℝ × X)) :
+    parabolicSupNorm (fun _ => c) s ≤ ‖c‖ := by
+  refine parabolicSupNorm_le (norm_nonneg c) ?_
+  intro p _
+  exact le_rfl
+
+/-- The parabolic **`C^{0,α}` norm of a constant function is at most the norm of the constant**: its
+sup part is `≤ ‖c‖` and its Hölder part vanishes.  This is the constant-term / multiplicative-unit
+bound in the parabolic Hölder normed algebra, complementing the additive/scalar/product estimates. -/
+theorem parabolicC0AlphaNorm_const_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (c : E) (s : Set (ℝ × X)) :
+    parabolicC0AlphaNorm α (fun _ => c) s ≤ ‖c‖ := by
+  unfold parabolicC0AlphaNorm
+  rw [parabolicHolderSeminorm_const, add_zero]
+  exact parabolicSupNorm_const_le c s
+
 end AnalyticPDE
 end RicciFlow
 
