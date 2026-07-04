@@ -1666,6 +1666,55 @@ theorem lipschitzWith_affinePlusLipschitzSolve [CompleteSpace E] {k : ℝ≥0}
     (affinePlusLipschitzSolve_isSolution A N hN hAk f₂)
   rwa [div_eq_inv_mul] at h
 
+/-! ### Local existence on an invariant ball
+
+The fixed-point solvability above is *global* (the right-hand side contracts on the whole Banach
+space).  The genuine Ricci–DeTurck right-hand side, however, is only known to contract and to preserve
+a small ball around the initial data on a short time interval.  The following lemmas localise the
+solution to any closed set / ball the right-hand side preserves — the honest short-time / small-ball
+chart existence. -/
+
+/-- **Localisation of the nonlinear fixed point to a closed invariant set.**  If a `k`-contraction
+`g` (`k < 1`) maps a closed set `K` into itself and `K` contains a point `c`, then *the* fixed point
+`u` (`g u = u`) lies in `K`.  Proof: the Picard iterates `g^[n] c` stay in `K` (invariance +
+`c ∈ K`, `Set.MapsTo.iterate`) and converge to `u` (`tendsto_iterate_fixedPoint`), so the closed `K`
+contains the limit (`IsClosed.mem_of_tendsto`).  The abstract "short-time / small-ball chart"
+localisation: the Ricci–DeTurck solution stays inside any region the right-hand side preserves. -/
+theorem fixedPoint_mem_of_mapsTo_isClosed [CompleteSpace E] {k : ℝ≥0}
+    {g : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s}
+    (hk : k < 1) (hg : LipschitzWith k g)
+    {K : Set (ParabolicC0AlphaBanach X E α s)} (hK : IsClosed K)
+    {c : ParabolicC0AlphaBanach X E α s} (hc : c ∈ K) (hmaps : Set.MapsTo g K K)
+    {u : ParabolicC0AlphaBanach X E α s} (hu : g u = u) :
+    u ∈ K := by
+  refine hK.mem_of_tendsto (tendsto_iterate_fixedPoint hk hg c hu) ?_
+  filter_upwards with n
+  exact hmaps.iterate n hc
+
+/-- **Local existence of the quasilinear Ricci–DeTurck solution on an invariant ball.**  If the
+quasilinear right-hand side `z ↦ A z + N z + f` (`k`-Lipschitz `N`, `‖A‖ + k < 1`) maps a closed ball
+`closedBall c r` (`0 ≤ r`) into itself, then the solution `u` of `A u + N u + f = u` lies in that
+ball (`dist u c ≤ r`).  This is the genuine short-time / small-ball chart form: on the ball around the
+initial data that the Ricci–DeTurck right-hand side preserves, the (unique) solution exists *and stays
+in the ball*.  Specialises `fixedPoint_mem_of_mapsTo_isClosed` to `Metric.closedBall`. -/
+theorem affinePlusLipschitzFixedPoint_mem_closedBall [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (f : ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1)
+    (c : ParabolicC0AlphaBanach X E α s) {r : ℝ} (hr : 0 ≤ r)
+    (hmaps : Set.MapsTo (fun z => A z + N z + f)
+      (Metric.closedBall c r) (Metric.closedBall c r))
+    {u : ParabolicC0AlphaBanach X E α s} (hu : A u + N u + f = u) :
+    u ∈ Metric.closedBall c r := by
+  have hlin : LipschitzWith ‖A‖₊ (fun u => A u) := A.lipschitz
+  have hg0 : LipschitzWith (‖A‖₊ + k) (fun u => A u + N u) := hlin.add hN
+  have hg1 : LipschitzWith (‖A‖₊ + k) (fun u => A u + N u + f) := by
+    simpa only [add_zero] using hg0.add (LipschitzWith.const f)
+  have hlt : ‖A‖₊ + k < 1 := by exact_mod_cast hAk
+  exact fixedPoint_mem_of_mapsTo_isClosed hlt hg1 Metric.isClosed_closedBall
+    (Metric.mem_closedBall_self hr) hmaps hu
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
