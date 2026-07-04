@@ -333,6 +333,53 @@ theorem autonomous_fst_eq_id {E H M : Type*} [NormedAddCommGroup E] [NormedSpace
   intro t ht
   simpa [hφ] using heq ht
 
+/-- **The time component tracks the parameter, anchored at an arbitrary start time.**
+Generalises `autonomous_fst_eq_id` (anchor `t₀ = 0`): an integral curve `Γ` of the
+autonomous field `(1, X · ·)` on a preconnected open set `s ∋ 0`, with
+`(Γ 0).1 = t₀`, has `(Γ t).1 = t₀ + t` throughout `s` — the first coordinate has
+constant derivative `1`, so it is the affine map `t ↦ t₀ + t`. This lets an
+autonomous curve *anchored at time `t₀`* (not `0`) be recognised, after the time
+shift `σ ↦ σ - t₀`, as a genuine time-dependent integral curve. -/
+theorem autonomous_fst_eq_add {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M]
+    {X : ℝ → (x : M) → TangentSpace I x} {Γ : ℝ → ℝ × M} {s : Set ℝ} {t₀ : ℝ}
+    (hs : IsOpen s) (h0 : (0 : ℝ) ∈ s) (hconn : IsPreconnected s)
+    (hΓ0 : (Γ 0).1 = t₀)
+    (hΓ : ∀ t ∈ s, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) ((𝓘(ℝ, ℝ)).prod I) Γ s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))) :
+    ∀ t ∈ s, (Γ t).1 = t₀ + t := by
+  set φ : ℝ → ℝ := fun τ => (Γ τ).1 with hφ
+  have hd : ∀ τ ∈ s, HasDerivWithinAt φ 1 s τ := by
+    intro τ hτ
+    have hcomp :=
+      ((hasMFDerivAt_fst (Γ τ)).hasMFDerivWithinAt (s := univ)).comp τ (hΓ τ hτ)
+        (by rw [preimage_univ]; exact subset_univ s)
+    rw [hasMFDerivWithinAt_iff_hasFDerivWithinAt] at hcomp
+    have hdw := hcomp.hasDerivWithinAt
+    have hfun : (Prod.fst ∘ Γ) = φ := rfl
+    rw [hfun] at hdw
+    refine hdw.congr_deriv ?_
+    show ((ContinuousLinearMap.fst ℝ (TangentSpace 𝓘(ℝ, ℝ) (Γ τ).1) (TangentSpace I (Γ τ).2)).comp
+        (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ)
+          (((1 : ℝ), X (Γ τ).1 (Γ τ).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ τ))))
+        (1 : ℝ) = (1 : ℝ)
+    simp
+  have hderiv : ∀ τ ∈ s, deriv φ τ = 1 := fun τ hτ =>
+    ((hd τ hτ).hasDerivAt (hs.mem_nhds hτ)).deriv
+  have hdiff : DifferentiableOn ℝ φ s := fun τ hτ => (hd τ hτ).differentiableWithinAt
+  have hg : ∀ τ ∈ s, deriv (fun y : ℝ => t₀ + y) τ = 1 := fun τ _ =>
+    ((hasDerivAt_id τ).const_add t₀).deriv
+  have heq : EqOn φ (fun y : ℝ => t₀ + y) s := by
+    refine hs.eqOn_of_deriv_eq hconn hdiff (by fun_prop) ?_ h0 ?_
+    · intro τ hτ
+      rw [hderiv τ hτ, hg τ hτ]
+    · show φ 0 = t₀ + 0
+      rw [add_zero]; exact hΓ0
+  intro t ht
+  simpa [hφ] using heq ht
+
 /-- **Time-dependent integral curve from an autonomous one** (combined form): if
 `Γ` is an autonomous integral curve of `(1, X)` on a preconnected open `s ∋ 0` with
 `(Γ 0).1 = 0`, then `(Γ ·).2` is a time-dependent integral curve of `X` on `s`. -/
@@ -713,5 +760,77 @@ theorem timeDependent_flow_unique {E H M : Type*} [NormedAddCommGroup E]
   have heq : Set.EqOn (fun τ => Φ τ x) (fun τ => Φ' τ x) (Set.Ioo (-ε) ε) :=
     timeDependent_integralCurve_eqOn_of_eq hX h0mem (hflow x) (hflow' x) h0
   exact heq ht
+
+/-! ### Backward reachability and bijectivity of the compact-manifold flow
+
+The forward flow `Φ` has injective time-slices (`timeDependent_flow_injective`), but
+surjectivity of `x ↦ Φ t x` on a compact manifold is *not* automatic from injectivity
+and continuity (invariance of domain would be needed); it requires a genuine backward
+flow — an integral curve of `X` run from time `t` *back* to time `0`. Such curves need
+the time-dependent existence *anchored at an arbitrary time* `t₀`, which the uniform
+lifespan over the compact **time-slab** `Icc (-r) r ×ˢ univ` supplies (a single `δ`
+covering every start time in `[-r, r]`). Reconciling that slab lifespan with the forward
+lifespan closes surjectivity, hence bijectivity, of every time-slice — the
+diffeomorphism-onto-image datum (its `G t` inverse half) Item 2's gauge flow consumes. -/
+
+/-- **Uniform time-dependent integral-curve existence anchored at any time in a slab.**
+For a jointly-`C¹` time-dependent field `X` on a compact boundaryless complete manifold
+and any `r > 0`, there is a single `δ > 0` such that *every* start time `t₀ ∈ [-r, r]`
+and *every* point `y` admit a time-dependent integral curve `γ` of `X` on the common
+window `Ioo (t₀ - δ) (t₀ + δ)` with `γ t₀ = y`. Proved by taking the uniform lifespan of
+the autonomization `(1, X)` over the compact time-slab `Icc (-r) r ×ˢ univ ⊆ ℝ × M`
+(via `exists_uniform_time_of_nhds_uniform_on_compact`) and time-shifting the autonomous
+curve anchored at `(t₀, y)` by `σ ↦ σ - t₀` (its first coordinate then tracks the
+parameter by `autonomous_fst_eq_add`, so it descends to a time-dependent curve). This is
+the anchored-anywhere existence the backward flow — and hence surjectivity — consumes. -/
+theorem exists_uniform_timeDependent_integralCurve_anchored {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {r : ℝ} (hr : 0 < r) :
+    ∃ δ > 0, ∀ t₀ ∈ Set.Icc (-r) r, ∀ y : M, ∃ γ : ℝ → M, γ t₀ = y ∧
+      ∀ t ∈ Set.Ioo (t₀ - δ) (t₀ + δ), HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ
+        (Set.Ioo (t₀ - δ) (t₀ + δ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))) := by
+  have hScompact : IsCompact ((Set.Icc (-r) r ×ˢ (Set.univ : Set M)) : Set (ℝ × M)) :=
+    isCompact_Icc.prod isCompact_univ
+  obtain ⟨δ, hδ, huniform⟩ := exists_uniform_time_of_nhds_uniform_on_compact
+    (fun p => exists_nhds_uniform_integralCurve (I := (𝓘(ℝ, ℝ)).prod I) hX p) hScompact
+  refine ⟨δ, hδ, fun t₀ ht₀ y => ?_⟩
+  obtain ⟨Γ, hΓ0, hΓon⟩ := huniform (t₀, y) ⟨ht₀, Set.mem_univ _⟩
+  have h0mem : (0 : ℝ) ∈ Set.Ioo (-δ) δ := ⟨neg_neg_of_pos hδ, hδ⟩
+  have hΓ0fst : (Γ 0).1 = t₀ := by rw [hΓ0]
+  -- the first coordinate of Γ is the affine map `ρ ↦ t₀ + ρ`
+  have hfst_orig : ∀ ρ ∈ Set.Ioo (-δ) δ, (Γ ρ).1 = t₀ + ρ :=
+    autonomous_fst_eq_add isOpen_Ioo h0mem isPreconnected_Ioo hΓ0fst (fun ρ hρ => hΓon ρ hρ)
+  -- the shifted curve is an autonomous integral curve on `Ioo (t₀-δ) (t₀+δ)`
+  have hΓs_curve : ∀ t ∈ Set.Ioo (t₀ - δ) (t₀ + δ),
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) ((𝓘(ℝ, ℝ)).prod I) (fun σ => Γ (σ - t₀))
+        (Set.Ioo (t₀ - δ) (t₀ + δ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (((1 : ℝ), X (Γ (t - t₀)).1 (Γ (t - t₀)).2) :
+            TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ (t - t₀)))) := by
+    have h := hΓon.comp_add (-t₀)
+    have he1 : (Γ ∘ (· + (-t₀))) = (fun σ => Γ (σ - t₀)) := by
+      funext σ; simp only [Function.comp_apply, sub_eq_add_neg]
+    have he2 : {σ : ℝ | σ + (-t₀) ∈ Set.Ioo (-δ) δ} = Set.Ioo (t₀ - δ) (t₀ + δ) := by
+      ext σ; simp only [Set.mem_setOf_eq, Set.mem_Ioo]
+      constructor
+      · rintro ⟨h1, h2⟩; exact ⟨by linarith, by linarith⟩
+      · rintro ⟨h1, h2⟩; exact ⟨by linarith, by linarith⟩
+    rw [he1, he2] at h
+    exact fun t ht => h t ht
+  -- the shifted first coordinate tracks the parameter
+  have hfst : ∀ t ∈ Set.Ioo (t₀ - δ) (t₀ + δ), (Γ (t - t₀)).1 = t := by
+    intro t ht
+    rcases ht with ⟨h1, h2⟩
+    have hρ : t - t₀ ∈ Set.Ioo (-δ) δ := ⟨by linarith, by linarith⟩
+    rw [hfst_orig (t - t₀) hρ]; ring
+  refine ⟨fun σ => (Γ (σ - t₀)).2, ?_, ?_⟩
+  · show (Γ (t₀ - t₀)).2 = y
+    rw [sub_self, hΓ0]
+  · exact isTimeDependentIntegralCurve_of_autonomous (Γ := fun σ => Γ (σ - t₀)) hfst hΓs_curve
 
 end PoincareCurvature.ManifoldFlow
