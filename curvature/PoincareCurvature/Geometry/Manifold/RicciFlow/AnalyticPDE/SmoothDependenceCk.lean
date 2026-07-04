@@ -11321,6 +11321,188 @@ theorem lipschitzWith_thirdFundamentalSolution_apply [CompleteSpace E]
     (hVfamfam0 x₀) (hVfamfamd x₀) (hVfamfamc x₀) (hD₃famchar x₀) ht k).trans_eq ?_
   ring
 
+/-- **Multilinear packaging of a double continuous-linear map.**  Sends `T : E →L (E →L E)` to the
+`Fin 2` continuous multilinear map `w ↦ T (w 0) (w 1)`.  This is a genuine *bounded* operation
+(a continuous linear map) because the inner space `E →L E` carries an operator norm; it is the
+inverse of `curry2` at the operator level.  The point of routing through this map is that it lets us
+climb one currying level without ever asking for a norm on a nested continuous-linear-map space that
+Mathlib v4.29.1 cannot provide. -/
+noncomputable def uncurry2CLM :
+    (E →L[ℝ] E →L[ℝ] E) →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E :=
+  ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => E) E).symm.toContinuousLinearEquiv.toContinuousLinearMap).comp
+    (ContinuousLinearMap.compL ℝ E (E →L[ℝ] E) (ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) E)
+      (continuousMultilinearCurryFin1 ℝ E E).symm.toContinuousLinearEquiv.toContinuousLinearMap)
+
+/-- Pointwise evaluation of `uncurry2CLM`: `uncurry2CLM T w = T (w 0) (w 1)`. -/
+theorem uncurry2CLM_apply (T : E →L[ℝ] E →L[ℝ] E) (w : Fin 2 → E) :
+    uncurry2CLM T w = T (w 0) (w 1) := by
+  simp only [uncurry2CLM, ContinuousLinearMap.comp_apply, ContinuousLinearMap.compL_apply,
+    ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv,
+    continuousMultilinearCurryLeftEquiv_symm_apply, continuousMultilinearCurryFin1_symm_apply]
+  rfl
+
+/-- **Multilinear packaging of a triple continuous-linear map.**  Sends the nested triple operator
+`T : E →L E →L E →L E` to the *properly normed* `Fin 3` continuous multilinear map
+`v ↦ T (v 0) (v 1) (v 2)` in `ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E`.
+
+This is the key object that sidesteps the Mathlib v4.29.1 obstruction on the third fundamental
+solution.  The triple continuous-linear-map space `E →L E →L E →L E` carries **no** operator norm
+(`Norm`/`SeminormedAddCommGroup (E →L E →L E →L E)` fail to synthesize — the endomorphism-ring/module
+diamond), so a difference `‖D₃fam z − D₃fam x₀‖` cannot even be *stated* through the nested tower.
+The multilinear target `ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E` **does** carry a genuine
+operator norm at every order, and `uncurry3` is built entirely through normed intermediaries (the
+inner double space `E →L E →L E` is normed, so `uncurry2CLM` is a bounded operation, and one further
+left-uncurrying lands in the normed multilinear space) — never touching the un-normed triple space as
+a normed space.  So `‖uncurry3 (D₃fam z) − uncurry3 (D₃fam x₀)‖` *is* well-formed, and continuity of
+the third fundamental solution can be phrased and proved there. -/
+noncomputable def uncurry3 (T : E →L[ℝ] E →L[ℝ] E →L[ℝ] E) :
+    ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E :=
+  (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).symm (uncurry2CLM.comp T)
+
+/-- Pointwise evaluation of `uncurry3`: `uncurry3 T v = T (v 0) (v 1) (v 2)`.  This is the defining
+property that lets the trilinear operator gaps of `D₃fam` be read off slot by slot. -/
+theorem uncurry3_apply (T : E →L[ℝ] E →L[ℝ] E →L[ℝ] E) (v : Fin 3 → E) :
+    uncurry3 T v = T (v 0) (v 1) (v 2) := by
+  rw [uncurry3, continuousMultilinearCurryLeftEquiv_symm_apply,
+    ContinuousLinearMap.comp_apply, uncurry2CLM_apply]
+  rfl
+
+/-- **Abstract multilinear Lipschitz criterion.**  A per-outer-direction operator-gap bound
+`‖F x k − F y k‖ ≤ C · dist x y · ‖k‖` (valued in the well-normed *double* space `E →L E →L E`)
+promotes to genuine `LipschitzWith C.toNNReal` continuity of the `Fin 3` multilinear packaging
+`x ↦ uncurry3 (F x)`, valued in the *properly normed* multilinear space.  Proof:
+`ContinuousMultilinearMap.opNorm_le_bound` reduces the multilinear operator norm of the difference to
+the per-slot bound, which follows by two `le_opNorm` steps (in the normed double space) and the
+hypothesis at the outer slot.  This is the abstract engine that converts the per-direction third
+fundamental solution gap into `Continuous`/`LipschitzWith` continuity of the third derivative, in a
+space that the `contDiff_succ`/`iteratedFDeriv` chain can consume. -/
+theorem lipschitzWith_uncurry3_of_apply_sub_le {X : Type*} [PseudoMetricSpace X]
+    {F : X → (E →L[ℝ] E →L[ℝ] E →L[ℝ] E)} {C : ℝ} (hC : 0 ≤ C)
+    (h : ∀ x y : X, ∀ k : E, ‖F x k - F y k‖ ≤ C * dist x y * ‖k‖) :
+    LipschitzWith C.toNNReal (fun x => uncurry3 (F x)) := by
+  refine LipschitzWith.of_dist_le_mul (fun x y => ?_)
+  rw [Real.coe_toNNReal C hC, dist_eq_norm]
+  refine ContinuousMultilinearMap.opNorm_le_bound (mul_nonneg hC dist_nonneg) (fun m => ?_)
+  rw [ContinuousMultilinearMap.sub_apply, uncurry3_apply, uncurry3_apply,
+    show F x (m 0) (m 1) (m 2) - F y (m 0) (m 1) (m 2)
+        = (F x (m 0) - F y (m 0)) (m 1) (m 2) from by
+      rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply]]
+  calc ‖(F x (m 0) - F y (m 0)) (m 1) (m 2)‖
+      ≤ ‖(F x (m 0) - F y (m 0)) (m 1)‖ * ‖m 2‖ := ContinuousLinearMap.le_opNorm _ _
+    _ ≤ ‖F x (m 0) - F y (m 0)‖ * ‖m 1‖ * ‖m 2‖ :=
+        mul_le_mul_of_nonneg_right (ContinuousLinearMap.le_opNorm _ _) (norm_nonneg _)
+    _ ≤ C * dist x y * ‖m 0‖ * ‖m 1‖ * ‖m 2‖ := by
+        gcongr; exact h x y (m 0)
+    _ = C * dist x y * ∏ i, ‖m i‖ := by rw [Fin.prod_univ_three]; ring
+
+/-- **Multilinear Lipschitz continuity of the packaged third fundamental solution.**  This is the
+obstruction-free form of the continuity of `D₃fam` needed to feed the resolvent's spatial
+`ContDiff ℝ 3`.  For the packaged design-corrected third-variation operator family
+`D₃fam : E → (E →L E →L E →L E)` (with its canonical linearised-first-variation family `Vfamfam` and
+bilinear characterisation `hD₃famchar`, as produced base-point-by-base-point by
+`exists_thirdVariationOperator_of_field`), its `Fin 3` multilinear packaging
+`z ↦ uncurry3 (D₃fam z)` — valued in the *properly normed* space
+`ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E` — is genuinely `LipschitzWith`, with the same
+constant `Cλ · gronwallBound 0 K 1 (t − t₀)` (now with **no** trailing `‖k‖`, absorbed into the
+multilinear norm) as the per-direction slice bound.
+
+Whereas `lipschitzWith_thirdFundamentalSolution_apply` established continuity of `D₃fam`
+direction-by-direction in the strong operator topology (the best available through the un-normed
+triple continuous-linear-map tower), this theorem upgrades it to `LipschitzWith`/`Continuous` in a
+single honest operator norm, by transporting the family through `uncurry3` into the multilinear space
+that carries a proper norm at every order.  Proof: `lipschitzWith_uncurry3_of_apply_sub_le` fed the
+per-direction base-point gap `norm_thirdFundamentalSolution_apply_baseCurve_sub_le` (which supplies
+`‖D₃fam z k − D₃fam x₀ k‖ ≤ Cλ·g·‖z − x₀‖·‖k‖`). -/
+theorem lipschitzWith_thirdFundamentalSolution_multilinear [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ : ℝ≥0} {C' C'' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD2vlip : ∀ s, LipschitzWith M₂ (D2v s))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K)
+    (hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)))
+    (hD2contfun : ∀ z, Continuous (fun s => D2v s (Φ z s)))
+    (hD3contfun : ∀ z, Continuous (fun s => D3v s (Φ z s)))
+    (hC'0 : 0 ≤ C') (hC'fun : ∀ z, ∀ s, ‖D2v s (Φ z s)‖ ≤ C')
+    (hC''0 : 0 ≤ C'') (hC''fun : ∀ z, ∀ s, ‖D3v s (Φ z s)‖ ≤ C'')
+    {Ψ : E → E → ℝ → E}
+    (hΨ : ∀ z, ∀ x, IsIntegralCurve (Ψ z x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0Ψ : ∀ z, ∀ x, Ψ z x t₀ = x)
+    {T : ℝ} {t : ℝ}
+    {Vfamfam : E → E → (ℝ → (E →L[ℝ] E))}
+    {D₃fam : E → (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E)))}
+    (hVfamfam0 : ∀ z, ∀ h, Vfamfam z h t₀ = 0)
+    (hVfamfamd : ∀ z, ∀ (h : E) (s : ℝ), HasDerivAt (Vfamfam z h)
+      ((Dv s (Φ z s)).comp (Vfamfam z h s)
+        + ((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+            (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)) s)
+    (hVfamfamc : ∀ z, ∀ h, Continuous (Vfamfam z h))
+    (hD₃famchar : ∀ z, ∀ (k h : E) (V : ℝ → (E →L[ℝ] E)), V t₀ = 0 →
+      (∀ s, HasDerivAt V
+        ((Dv s (Φ z s)).comp (V s)
+          + (((D2v s (Φ z s)).comp (Vfamfam z k s) h).comp
+                (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)
+             + ((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+                 (Vfamfam z k s)
+             + (((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) k).comp
+                   (Vfamfam z h s)
+                + (continuousMultilinearCurryFin1 ℝ E E
+                    (((D3v s (Φ z s)).curryLeft
+                          (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s k)).curryLeft
+                      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s h))).comp
+                    (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)))) s) →
+      D₃fam z k h = V t)
+    (ht : t ∈ Set.Icc t₀ T) :
+    LipschitzWith
+      (((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+            * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'')
+          + 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+              * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)))
+        * gronwallBound 0 (K : ℝ) 1 (t - t₀)).toNNReal
+      (fun z => uncurry3 (D₃fam z)) := by
+  have he4 : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 4 := by positivity
+  have hg0 : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans ht.1 ht.2))
+  have hgt0 : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (t - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr ht.1)
+  have hL := L.coe_nonneg
+  have hM₂ := M₂.coe_nonneg
+  have hM₃ := M₃.coe_nonneg
+  have hCbig0 : (0 : ℝ) ≤
+      ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+            * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'')
+          + 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+              * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ))) := by
+    have hA : (0 : ℝ) ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+        * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+        * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'') :=
+      mul_nonneg (mul_nonneg (mul_nonneg hL he4) hg0)
+        (add_nonneg (mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg C')) hg0) hC''0)
+    have hB : (0 : ℝ) ≤ 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+        * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+        * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀))) :=
+      mul_nonneg (by norm_num) (mul_nonneg (mul_nonneg he4 hg0)
+        (add_nonneg (mul_nonneg (mul_nonneg (by norm_num) hM₂) hC'0)
+          (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hL) (sq_nonneg C')) hg0)))
+    have hC : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+        * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)) :=
+      mul_nonneg he4 (add_nonneg
+        (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hC''0) hL) hg0) hM₃)
+    linarith
+  refine lipschitzWith_uncurry3_of_apply_sub_le (mul_nonneg hCbig0 hgt0) (fun z x₀ k => ?_)
+  rw [dist_eq_norm]
+  exact norm_thirdFundamentalSolution_apply_baseCurve_sub_le hv hΦ h0 hDvlip hD2vlip hD3vlip
+    z x₀ (hAfun z) (hAfun x₀) (hAcontfun z) (hAcontfun x₀) (hD2contfun z) (hD2contfun x₀)
+    (hD3contfun z) (hD3contfun x₀) hC'0 (hC'fun z) (hC'fun x₀) hC''0 (hC''fun z) (hC''fun x₀)
+    (hΨ z) (h0Ψ z) (hΨ x₀) (h0Ψ x₀)
+    (hVfamfam0 z) (hVfamfamd z) (hVfamfamc z) (hD₃famchar z)
+    (hVfamfam0 x₀) (hVfamfamd x₀) (hVfamfamc x₀) (hD₃famchar x₀) ht k
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
