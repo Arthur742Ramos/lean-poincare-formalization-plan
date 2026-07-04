@@ -209,6 +209,52 @@ noncomputable def isEmptyRicciDeTurckChartClosureData
           terminal_eq := rfl
           metric_eq := fun _ _ x => isEmptyElim x } }
 
+/-- **First chart/closure-data assembly of a genuine point-4 witness.**  On an empty manifold, the
+constant-field Banach chart `isEmptyRicciDeTurckBanachChart` and its closure data
+`isEmptyRicciDeTurckChartClosureData` compose through the already-proved bridge
+`intrinsicLocalExistenceUniquenessFamily_of_ricciDeTurckChartClosureData` to a genuine
+`IntrinsicLocalExistenceUniquenessFamily`.  This is the first end-to-end instantiation of the
+chart → closure-data → bridge critical path (the empty cover `κ := Empty` is used, so the finite
+cover condition `⋃ = univ` reduces to `∅ = ∅`). -/
+noncomputable def intrinsicLocalExistenceUniquenessFamily_isEmpty :
+    IntrinsicLocalExistenceUniquenessFamily (E := F) (H := H) (I := I) (M := M) := by
+  haveI hMem : ∀ i : Empty, MemTrivializationAtlas
+      ((fun i : Empty => i.elim :
+        Empty → _root_.Bundle.Trivialization BilF
+          (_root_.Bundle.TotalSpace.proj :
+            _root_.Bundle.TotalSpace BilF
+              (_root_.Bundle.BilinearFormBundle (V := TM)) → M)) i) :=
+    fun i => i.elim
+  exact intrinsicLocalExistenceUniquenessFamily_of_ricciDeTurckChartClosureData
+    (κ := Empty)
+    (x0 := fun i => i.elim) (et := fun i => i.elim) (het := fun i => i.elim)
+    (Kc := fun i => i.elim) (hKc := fun i => i.elim) (Ko := fun i => i.elim)
+    (hKo := fun i => i.elim) (hKoEq := fun i => i.elim)
+    (hcover := Set.eq_univ_of_forall fun x => isEmptyElim x)
+    (T := _) (a := _) (L := _) (Kpic := _) (Kstate := _)
+    (chart := fun ivp => isEmptyRicciDeTurckBanachChart (κ := Empty)
+      (fun i => i.elim) (fun i => i.elim) (fun i => i.elim) (fun i => i.elim)
+      (fun i => i.elim) (fun i => i.elim) (fun i => i.elim) (fun i => i.elim)
+      (Set.eq_univ_of_forall fun x => isEmptyElim x)
+      ivp.initialMetric.toContinuousRiemannianMetric
+      (CovariantDerivative.TimeDependentRiemannianMetric.const (I := I) (M := M)
+        ivp.initialMetric)
+      ivp.initialTime (ivp.initialTime + 1) (by linarith))
+    (D := fun ivp => isEmptyRicciDeTurckChartClosureData (κ := Empty)
+      (fun i => i.elim) (fun i => i.elim) (fun i => i.elim) (fun i => i.elim)
+      (fun i => i.elim) (fun i => i.elim) (fun i => i.elim) (fun i => i.elim)
+      (Set.eq_univ_of_forall fun x => isEmptyElim x)
+      (isEmptyRicciDeTurckBanachChart (κ := Empty)
+        (fun i => i.elim) (fun i => i.elim) (fun i => i.elim) (fun i => i.elim)
+        (fun i => i.elim) (fun i => i.elim) (fun i => i.elim) (fun i => i.elim)
+        (Set.eq_univ_of_forall fun x => isEmptyElim x)
+        ivp.initialMetric.toContinuousRiemannianMetric
+        (CovariantDerivative.TimeDependentRiemannianMetric.const (I := I) (M := M)
+          ivp.initialMetric)
+        ivp.initialTime (ivp.initialTime + 1) (by linarith))
+      (CovariantDerivative.TimeDependentRiemannianMetric.const (I := I) (M := M)
+        ivp.initialMetric))
+
 end IsEmptyChart
 
 end MetricLocusEvolution
