@@ -6860,3 +6860,47 @@ exhibiting the concrete Ricci–DeTurck RHS as such a `C^{0,α}`-gaining operato
 mathematical input on the Item 3 fixed-point route; the **general-manifold** gauge-flow lift (Item 2,
 heavy gauge files — spatial-`C³` regularity + global-`ℝ` extension of the compact-manifold flow
 slices); and the Item 1 tensor time-derivative chain rule (metric leg + scalar assembly).
+
+Update — **the abstract Item-3 well-posedness family is now complete with the stability /
+continuous-dependence leg** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`; pure
+parabolic-`C^{0,α}`-norm algebra + the already-proved fixed-point machinery, no heat-kernel content,
+nothing touching the heavy files).  The previous milestone had existence, uniqueness and the a-priori
+ball bound (reduced to the single parabolic Schauder gain).  Stability — the third Hadamard leg (the
+solution depends Lipschitz-continuously on the operator) — was the remaining abstract gap, and closes
+it:
+
+* `parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction` (in
+  `AnalyticPDE/ParabolicHolder.lean`) — the **two-map Banach perturbation bound**: for two
+  class-preserving parabolic `C^{0,α}` maps `T₁`, `T₂` with `T₁` a `q`-contraction (`q < 1`) and
+  respective fixed points `g₁ = T₁ g₁`, `g₂ = T₂ g₂`,
+  `‖g₁ − g₂‖_{C^{0,α}} ≤ (1 − q)⁻¹·‖T₁ g₂ − T₂ g₂‖_{C^{0,α}}`.  Same triangle-inequality/contraction
+  computation as the one-map a-priori bound `parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction`
+  (`g₁ − g₂ = (T₁ g₁ − T₁ g₂) + (T₁ g₂ − T₂ g₂)`), now between two genuine fixed points, using only
+  `T₁`'s contraction.
+* `parabolicC0AlphaOn_fixedPt_unique_of_contraction` (same module) — **completeness-free uniqueness**:
+  the `T₁ = T₂ = T` corollary (`‖g₁ − g₂‖ ≤ (1 − q)⁻¹·‖T g₂ − T g₂‖ = 0`), so any two *given* fixed
+  points of a parabolic `C^{0,α}` `q`-contraction coincide on `s` — no `CompleteSpace E`, no
+  Picard-constructed reference solution (the form the Ricci–DeTurck short-time uniqueness / chart
+  `encode` consumes directly).
+* `exists_shortTime_fixedPoint_stability_of_schauder_gain` (in
+  `AnalyticPDE/ParabolicInterpolation.lean`) — the **short-time continuous dependence reduced to the
+  Schauder gain**: two solution maps `S₁`, `S₂` on the parabolic `C^{0,α θ}` class with `S₁`
+  self-mapping / initial-preserving / `α`-Hölder-output / Schauder-gain (⇒ `½`-contraction on a thin
+  slab, via `exists_thickness_solutionMap_contraction_of_schauder_gain`) and `S₂` self-mapping have
+  fixed points obeying `‖g₁ − g₂‖_{C^{0,α θ}} ≤ 2·‖S₁ g₂ − S₂ g₂‖_{C^{0,α θ}}` on every slab
+  `T ≤ T₀` — the stability companion of the existence / a-priori-bound capstones, completing the
+  reduced-to-Schauder-gain quartet (existence, uniqueness, a-priori bound, stability).
+
+With this the **entire abstract side of Item 3** — existence, uniqueness, a-priori control *and*
+Hadamard continuous dependence — is in place, all conditional only on the one parabolic Schauder gain
+estimate.  Formulation note resolved this session: `chart.picard : IsPicardLindelof A` is a Banach
+Cauchy-Lipschitz requirement (bounded / Lipschitz / time-continuous on a `C⁰` ball); the genuine
+second-order Ricci–DeTurck RHS (real Levi-Civita curvature + DeTurck correction) is *unbounded* on the
+`C⁰` section space, so it cannot inhabit `IsPicardLindelof` directly — `ofLipschitzBoundedContinuous`
+is honestly usable only by a mild / regularised representative (or on a sub-class where the RHS is
+uniformly `C⁰`-bounded/Lipschitz), and the general operator's `picard` is supplied by the parabolic
+Schauder a-priori bound (Hölder-space contraction), not a `C⁰` ball.  Remaining for Point 4: the
+concrete parabolic **Schauder gain / a-priori estimate** exhibiting the Ricci–DeTurck RHS as a
+`C^{0,α}`-gaining operator (heat-kernel content, `HeatKernel1D.lean`) — the sole missing mathematical
+input on the fixed-point route; the general-manifold gauge-flow lift (Item 2); and the Item 1 tensor
+time-derivative chain rule.
