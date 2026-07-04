@@ -1515,7 +1515,159 @@ theorem exists_unique_affinePlusLipschitzFixedPoint [CompleteSpace E] {k : ℝ�
   have hlt : ‖A‖₊ + k < 1 := by exact_mod_cast hAk
   exact exists_unique_lipschitzFixedPoint (fun u => A u + N u + f) hlt hgf
 
+/-! ### Well-posedness of the quasilinear Ricci–DeTurck solution
+
+`exists_unique_affinePlusLipschitzFixedPoint` gives the *unique solvability* of the quasilinear
+Ricci–DeTurck fixed-point equation `A u + N u + f = u` (bounded-linear principal-plus-lower-order
+part `A`, nonlinear `k`-Lipschitz remainder `N`, frozen data `f`) whenever the combined contraction
+constant is subunital, `‖A‖ + k < 1`.  The following lemmas are the **well-posedness data** the
+Ricci–DeTurck chart-closure consumes: the continuous (Lipschitz) dependence of the solution on the
+frozen data `f`, its a-priori norm bound, its stability under a uniform perturbation of the
+nonlinearity, and the bundled solution operator `f ↦ u(f)` as a genuine Lipschitz map. -/
+
+/-- **Continuous dependence of the quasilinear solution on the data.**  For the quasilinear
+Ricci–DeTurck equation `A u + N u + f = u` (linear part `A`, `k`-Lipschitz nonlinearity `N`,
+contraction constant `‖A‖ + k < 1`), two solutions `u₁`, `u₂` corresponding to frozen data `f₁`,
+`f₂` obey `‖u₁ - u₂‖ ≤ ‖f₁ - f₂‖ / (1 - (‖A‖ + k))`.  So the Ricci–DeTurck solution depends
+Lipschitz-continuously on the inhomogeneous data — the well-posedness estimate underlying the
+chart's continuous dependence on the (frozen) initial data.  Generalises the affine
+`norm_affineSolveL_apply_sub_le` (`N = 0`) to the genuine quasilinear right-hand side. -/
+theorem norm_affinePlusLipschitzFixedPoint_sub_le [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (f₁ f₂ : ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1)
+    {u₁ u₂ : ParabolicC0AlphaBanach X E α s}
+    (hu₁ : A u₁ + N u₁ + f₁ = u₁) (hu₂ : A u₂ + N u₂ + f₂ = u₂) :
+    ‖u₁ - u₂‖ ≤ ‖f₁ - f₂‖ / (1 - (‖A‖ + (k : ℝ))) := by
+  have hlin : LipschitzWith ‖A‖₊ (fun u => A u) := A.lipschitz
+  have hg0 : LipschitzWith (‖A‖₊ + k) (fun u => A u + N u) := hlin.add hN
+  have hg1 : LipschitzWith (‖A‖₊ + k) (fun u => A u + N u + f₁) := by
+    simpa only [add_zero] using hg0.add (LipschitzWith.const f₁)
+  have hlt : ‖A‖₊ + k < 1 := by exact_mod_cast hAk
+  have hC : ∀ z, ‖(fun u => A u + N u + f₁) z - (fun u => A u + N u + f₂) z‖ ≤ ‖f₁ - f₂‖ := by
+    intro z
+    have he : (A z + N z + f₁) - (A z + N z + f₂) = f₁ - f₂ := by abel
+    calc ‖(fun u => A u + N u + f₁) z - (fun u => A u + N u + f₂) z‖
+        = ‖f₁ - f₂‖ := by rw [he]
+      _ ≤ ‖f₁ - f₂‖ := le_refl _
+  have h := norm_fixedPoint_sub_fixedPoint_le (k := ‖A‖₊ + k)
+    (g₁ := fun u => A u + N u + f₁) (g₂ := fun u => A u + N u + f₂) hlt hg1 hu₁ hu₂ hC
+  simpa only [NNReal.coe_add, coe_nnnorm] using h
+
+/-- **A-priori norm bound for the quasilinear solution.**  Any solution `u` of the quasilinear
+Ricci–DeTurck equation `A u + N u + f = u` (`k`-Lipschitz `N`, `‖A‖ + k < 1`) obeys
+`‖u‖ ≤ (‖N 0‖ + ‖f‖) / (1 - (‖A‖ + k))`.  From the fixed-point identity,
+`‖u‖ ≤ ‖A‖‖u‖ + ‖N u‖ + ‖f‖ ≤ (‖A‖ + k)‖u‖ + (‖N 0‖ + ‖f‖)` (the nonlinearity contributing
+`‖N u‖ ≤ k‖u‖ + ‖N 0‖`), and solving for `‖u‖`.  The quantitative Schauder a-priori estimate for
+the quasilinear right-hand side (the `N = 0` case recovers `‖u‖ ≤ ‖f‖ / (1 - ‖A‖)`). -/
+theorem norm_affinePlusLipschitzFixedPoint_le [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (f : ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1)
+    {u : ParabolicC0AlphaBanach X E α s} (hu : A u + N u + f = u) :
+    ‖u‖ ≤ (‖N 0‖ + ‖f‖) / (1 - (‖A‖ + (k : ℝ))) := by
+  have hNu : ‖N u‖ ≤ (k : ℝ) * ‖u‖ + ‖N 0‖ := by
+    have hd : dist (N u) (N 0) ≤ (k : ℝ) * dist u 0 := hN.dist_le_mul u 0
+    rw [dist_eq_norm, dist_eq_norm, sub_zero] at hd
+    have h2 : ‖N u‖ - ‖N 0‖ ≤ ‖N u - N 0‖ := norm_sub_norm_le _ _
+    linarith [h2, hd]
+  have key : ‖u‖ ≤ (‖A‖ + (k : ℝ)) * ‖u‖ + (‖N 0‖ + ‖f‖) := by
+    calc ‖u‖ = ‖A u + N u + f‖ := by rw [hu]
+      _ ≤ ‖A u + N u‖ + ‖f‖ := norm_add_le _ _
+      _ ≤ (‖A u‖ + ‖N u‖) + ‖f‖ := add_le_add (norm_add_le _ _) le_rfl
+      _ ≤ (‖A‖ * ‖u‖ + ((k : ℝ) * ‖u‖ + ‖N 0‖)) + ‖f‖ :=
+          add_le_add (add_le_add (A.le_opNorm u) hNu) le_rfl
+      _ = (‖A‖ + (k : ℝ)) * ‖u‖ + (‖N 0‖ + ‖f‖) := by ring
+  have hpos : (0 : ℝ) < 1 - (‖A‖ + (k : ℝ)) := by linarith
+  rw [le_div_iff₀ hpos, mul_sub, mul_one]
+  nlinarith [key, mul_comm ‖u‖ (‖A‖ + (k : ℝ))]
+
+/-- **Stability of the quasilinear solution under a uniform perturbation of the nonlinearity.**  For
+the *same* linear part `A` and frozen data `f`, two nonlinearities `N₁`, `N₂` (with `N₁`
+`k`-Lipschitz, `‖A‖ + k < 1`) that are uniformly `C`-close (`∀ z, ‖N₁ z - N₂ z‖ ≤ C`) have solutions
+`u₁`, `u₂` of `A u + Nᵢ u + f = u` satisfying `‖u₁ - u₂‖ ≤ C / (1 - (‖A‖ + k))`.  A `C`-sized change
+in the nonlinear (coefficient-dependent) part of the Ricci–DeTurck right-hand side moves the solution
+by at most `C / (1 - (‖A‖ + k))`, so the solution depends continuously on the nonlinearity. -/
+theorem norm_affinePlusLipschitzFixedPoint_sub_le_nonlinearity [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N₁ N₂ : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (f : ParabolicC0AlphaBanach X E α s)
+    (hN₁ : LipschitzWith k N₁) (hAk : ‖A‖ + (k : ℝ) < 1)
+    {u₁ u₂ : ParabolicC0AlphaBanach X E α s}
+    (hu₁ : A u₁ + N₁ u₁ + f = u₁) (hu₂ : A u₂ + N₂ u₂ + f = u₂)
+    {C : ℝ} (hC : ∀ z, ‖N₁ z - N₂ z‖ ≤ C) :
+    ‖u₁ - u₂‖ ≤ C / (1 - (‖A‖ + (k : ℝ))) := by
+  have hlin : LipschitzWith ‖A‖₊ (fun u => A u) := A.lipschitz
+  have hg0 : LipschitzWith (‖A‖₊ + k) (fun u => A u + N₁ u) := hlin.add hN₁
+  have hg1 : LipschitzWith (‖A‖₊ + k) (fun u => A u + N₁ u + f) := by
+    simpa only [add_zero] using hg0.add (LipschitzWith.const f)
+  have hlt : ‖A‖₊ + k < 1 := by exact_mod_cast hAk
+  have hCg : ∀ z, ‖(fun u => A u + N₁ u + f) z - (fun u => A u + N₂ u + f) z‖ ≤ C := by
+    intro z
+    have he : (A z + N₁ z + f) - (A z + N₂ z + f) = N₁ z - N₂ z := by abel
+    calc ‖(fun u => A u + N₁ u + f) z - (fun u => A u + N₂ u + f) z‖
+        = ‖N₁ z - N₂ z‖ := by rw [he]
+      _ ≤ C := hC z
+  have h := norm_fixedPoint_sub_fixedPoint_le (k := ‖A‖₊ + k)
+    (g₁ := fun u => A u + N₁ u + f) (g₂ := fun u => A u + N₂ u + f) hlt hg1 hu₁ hu₂ hCg
+  simpa only [NNReal.coe_add, coe_nnnorm] using h
+
+/-- **The quasilinear Ricci–DeTurck solution operator.**  For a bounded-linear principal part `A`, a
+`k`-Lipschitz nonlinearity `N` with `‖A‖ + k < 1`, and any frozen data `f`, the value
+`affinePlusLipschitzSolve A N hN hAk f` is *the* (unique) solution of `A u + N u + f = u`.  This is
+the nonlinear solution map `f ↦ u(f)` of the quasilinear Ricci–DeTurck chart. -/
+noncomputable def affinePlusLipschitzSolve [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1)
+    (f : ParabolicC0AlphaBanach X E α s) : ParabolicC0AlphaBanach X E α s :=
+  (exists_unique_affinePlusLipschitzFixedPoint A N f hN hAk).choose
+
+/-- `affinePlusLipschitzSolve A N hN hAk f` solves the quasilinear fixed-point equation. -/
+theorem affinePlusLipschitzSolve_isSolution [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1)
+    (f : ParabolicC0AlphaBanach X E α s) :
+    A (affinePlusLipschitzSolve A N hN hAk f) + N (affinePlusLipschitzSolve A N hN hAk f) + f
+      = affinePlusLipschitzSolve A N hN hAk f :=
+  (exists_unique_affinePlusLipschitzFixedPoint A N f hN hAk).choose_spec.1
+
+/-- **Uniqueness readout of the quasilinear solution operator.**  Every solution `u` of
+`A u + N u + f = u` equals `affinePlusLipschitzSolve A N hN hAk f`. -/
+theorem affinePlusLipschitzSolve_eq [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1)
+    (f : ParabolicC0AlphaBanach X E α s)
+    {u : ParabolicC0AlphaBanach X E α s} (hu : A u + N u + f = u) :
+    u = affinePlusLipschitzSolve A N hN hAk f :=
+  (exists_unique_affinePlusLipschitzFixedPoint A N f hN hAk).choose_spec.2 u hu
+
+/-- **The quasilinear Ricci–DeTurck solution operator is Lipschitz in the data.**  The solution map
+`f ↦ affinePlusLipschitzSolve A N hN hAk f` is `LipschitzWith ((1 - (‖A‖ + k))⁻¹).toNNReal` — the
+bundled continuous-dependence-on-data statement (`norm_affinePlusLipschitzFixedPoint_sub_le` packaged
+as a `LipschitzWith`), the well-posed nonlinear solution realisation the chart-closure data consumes.
+The nonlinear analogue of the bounded *linear* affine solution operator `affineSolveL`. -/
+theorem lipschitzWith_affinePlusLipschitzSolve [CompleteSpace E] {k : ℝ≥0}
+    (A : ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α s)
+    (N : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaBanach X E α s)
+    (hN : LipschitzWith k N) (hAk : ‖A‖ + (k : ℝ) < 1) :
+    LipschitzWith ((1 - (‖A‖ + (k : ℝ)))⁻¹).toNNReal (affinePlusLipschitzSolve A N hN hAk) := by
+  have hpos : (0 : ℝ) < 1 - (‖A‖ + (k : ℝ)) := by linarith
+  have hinv : (0 : ℝ) ≤ (1 - (‖A‖ + (k : ℝ)))⁻¹ := le_of_lt (inv_pos.mpr hpos)
+  apply LipschitzWith.of_dist_le_mul
+  intro f₁ f₂
+  rw [dist_eq_norm, dist_eq_norm, Real.coe_toNNReal _ hinv]
+  have h := norm_affinePlusLipschitzFixedPoint_sub_le A N f₁ f₂ hN hAk
+    (affinePlusLipschitzSolve_isSolution A N hN hAk f₁)
+    (affinePlusLipschitzSolve_isSolution A N hN hAk f₂)
+  rwa [div_eq_inv_mul] at h
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE
 end RicciFlow
+
