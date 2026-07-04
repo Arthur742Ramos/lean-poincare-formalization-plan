@@ -8342,6 +8342,100 @@ theorem parabolicC0AlphaNorm_const_le {X E : Type*} [PseudoMetricSpace X] [Norme
   rw [parabolicHolderSeminorm_const, add_zero]
   exact parabolicSupNorm_const_le c s
 
+/-! ### Short-time smallness from initial vanishing
+
+The parabolic `C^{0,α}` norm of a function that vanishes at the initial time is small on a thin
+time-slab.  Because the parabolic distance from `(t, x)` to `(t₀, x)` is `√|t - t₀|`, a Hölder
+estimate against the (zero) initial value bounds `‖u (t, x)‖` by `[u]_α · (√T)^α = [u]_α · T^{α/2}`
+on the slab `|t - t₀| ≤ T`.  This is the analytic mechanism turning a seminorm (Schauder) a-priori
+bound into a genuine short-time contraction of the Ricci–DeTurck fixed point: the difference of two
+solutions vanishes at the initial time, so its full norm is controlled by its Hölder seminorm times
+a factor `→ 0` (sup part) / `→ 1` (full norm) as the slab thickness `T → 0`. -/
+
+/-- **Pointwise short-time smallness from initial vanishing.**  If `u` satisfies a parabolic
+`α`-Hölder estimate with nonnegative constant `C` on `s`, vanishes at the initial-time point
+`(t₀, x)`, and `(t, x)` sits within parabolic time-distance `√T` of it (`|t - t₀| ≤ T`), then
+`‖u (t, x)‖ ≤ C · (√T)^α`.  The mechanism by which a function that is zero at the initial time is
+uniformly small on a thin time-slab. -/
+theorem norm_le_of_parabolicHolderWith_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {C α T t₀ t : ℝ} {x : X} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC0 : 0 ≤ C) (hα : 0 ≤ α) (hC : ParabolicHolderWith C α u s)
+    (hp : (t, x) ∈ s) (hp0 : (t₀, x) ∈ s)
+    (hu0 : u (t₀, x) = 0) (hT : |t - t₀| ≤ T) :
+    ‖u (t, x)‖ ≤ C * Real.sqrt T ^ α := by
+  have h1 : ‖u (t, x) - u (t₀, x)‖ ≤ C * parabolicDistance (t, x) (t₀, x) ^ α := hC hp hp0
+  rw [hu0, sub_zero, parabolicDistance.same_space] at h1
+  refine h1.trans (mul_le_mul_of_nonneg_left ?_ hC0)
+  exact Real.rpow_le_rpow (Real.sqrt_nonneg _) (Real.sqrt_le_sqrt hT) hα
+
+/-- **Parabolic sup-norm short-time bound from initial vanishing.**  If `u` is parabolic `α`-Hölder
+on `s`, the time-coordinate of every point of `s` lies within `T` of the initial time `t₀`, `s` is
+closed under dropping to the initial-time slice (`(t₀, p.2) ∈ s` whenever `p ∈ s`), and `u` vanishes
+on that initial slice, then the parabolic sup norm is controlled by the Hölder seminorm:
+`‖u‖_{C⁰} ≤ [u]_α · (√T)^α`.  As `T → 0` this tends to `0`: an initial-vanishing function has
+arbitrarily small `C⁰` norm on a sufficiently thin slab. -/
+theorem parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicSupNorm u s ≤ parabolicHolderSeminorm α u s * Real.sqrt T ^ α := by
+  have hsemi0 := parabolicHolderSeminorm_nonneg α u s
+  have hsemi := parabolicHolderWith_parabolicHolderSeminorm hu
+  refine parabolicSupNorm_le
+    (mul_nonneg hsemi0 (Real.rpow_nonneg (Real.sqrt_nonneg T) α)) ?_
+  rintro ⟨t, x⟩ hp
+  have hp0 : (t₀, x) ∈ s := hcyl (t, x) hp
+  exact norm_le_of_parabolicHolderWith_of_initial_zero hsemi0 hα hsemi hp hp0
+    (hu0 x hp0) (hslab (t, x) hp)
+
+/-- **Parabolic `C^{0,α}` short-time bound from initial vanishing.**  Under the initial-vanishing
+hypotheses of `parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero`, the *full* parabolic
+`C^{0,α}` norm is controlled by the Hölder seminorm alone, with a factor that tends to `1` as the
+slab thickness `T → 0`: `‖u‖_{C^{0,α}} ≤ ((√T)^α + 1) · [u]_α`.  This is the estimate that turns a
+seminorm (Schauder) a-priori bound into a full-norm contraction on the initial-vanishing subspace. -/
+theorem parabolicC0AlphaNorm_le_holderSeminorm_mul_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicC0AlphaNorm α u s ≤ (Real.sqrt T ^ α + 1) * parabolicHolderSeminorm α u s := by
+  have h1 := parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero hα hu hslab hcyl hu0
+  unfold parabolicC0AlphaNorm
+  calc parabolicSupNorm u s + parabolicHolderSeminorm α u s
+      ≤ parabolicHolderSeminorm α u s * Real.sqrt T ^ α + parabolicHolderSeminorm α u s := by
+        gcongr
+    _ = (Real.sqrt T ^ α + 1) * parabolicHolderSeminorm α u s := by ring
+
+/-- The short-time factor `(√T)^α` written as a genuine power of the slab thickness:
+`(√T)^α = T^(α/2)` (for `0 ≤ T`).  Makes explicit that the short-time smallness is `O(T^{α/2})` — a
+positive power of the time-interval length. -/
+theorem sqrt_rpow_eq_rpow_half {T : ℝ} (hT : 0 ≤ T) (α : ℝ) :
+    Real.sqrt T ^ α = T ^ (α / 2) := by
+  rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hT]
+  congr 1
+  ring
+
+/-- **Parabolic sup-norm short-time bound, `T^{α/2}` form.**  The initial-vanishing sup-norm estimate
+`parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero` written with the explicit power of the slab
+thickness: `‖u‖_{C⁰} ≤ [u]_α · T^{α/2}` (`0 ≤ T`) — the operator norm bounded by a positive power of
+the time-interval length that the Ricci–DeTurck short-time contraction consumes. -/
+theorem parabolicSupNorm_le_holderSeminorm_mul_rpow_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hT : 0 ≤ T) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicSupNorm u s ≤ parabolicHolderSeminorm α u s * T ^ (α / 2) := by
+  rw [← sqrt_rpow_eq_rpow_half hT α]
+  exact parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero hα hu hslab hcyl hu0
+
 end AnalyticPDE
 end RicciFlow
 
