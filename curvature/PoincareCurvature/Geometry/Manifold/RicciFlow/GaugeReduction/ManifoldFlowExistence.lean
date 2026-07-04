@@ -510,4 +510,97 @@ theorem flow_inverse_package {E H M : Type*} [NormedAddCommGroup E] [NormedSpace
   exact ⟨fun t => flow_leftInverse hanchor hgroup t,
          fun t => flow_rightInverse hanchor hgroup t⟩
 
+/-! ### Uniform time-dependent local flow on a compact manifold
+
+The DeTurck gauge field is *time-dependent*. Integrating it uniformly over all
+start points requires autonomizing to the product `ℝ × M`, which is *never*
+compact, so `exists_uniform_integralCurve_time` (whole space compact) does not
+apply. What *is* compact is the **initial-time slice** `{0} × M`; a uniform lifespan
+over that slice suffices, because every start point `x` enters the autonomization
+as `(0, x)`. This subsection supplies the compact-*slice* uniform-time reduction and
+assembles the compact-manifold time-dependent local flow existence the gauge-flow
+construction consumes. -/
+
+/-- **Uniform existence time over a compact subset from the flow box.** The
+neighborhood-uniform flow box yields, over any *compact subset* `S` of a (possibly
+noncompact) manifold, a single `ε > 0` working for every start point in `S`, by
+extracting a finite subcover of `S` and taking the minimum lifespan. This is the
+compact-*slice* refinement of `exists_uniform_time_of_nhds_uniform` (which needs the
+whole space compact); applied to the compact initial-time slice `{0} × M` of the
+noncompact autonomization space `ℝ × M`, it integrates a *time-dependent* field with
+a single uniform lifespan. -/
+theorem exists_uniform_time_of_nhds_uniform_on_compact {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] {v : (x : M) → TangentSpace I x}
+    (hbox : ∀ x₀ : M, ∃ U ∈ nhds x₀, ∃ ε > 0, ∀ y ∈ U, ∃ γ : ℝ → M, γ 0 = y ∧
+      IsMIntegralCurveOn γ v (Set.Ioo (-ε) ε))
+    {S : Set M} (hS : IsCompact S) :
+    ∃ ε > 0, ∀ x ∈ S, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurveOn γ v (Set.Ioo (-ε) ε) := by
+  choose U hUmem ε hεpos hprop using hbox
+  have hopen : ∀ x : M, ∃ t, t ⊆ U x ∧ IsOpen t ∧ x ∈ t := fun x => mem_nhds_iff.mp (hUmem x)
+  choose V hVsub hVopen hVmem using hopen
+  obtain ⟨t, ht⟩ := hS.elim_finite_subcover V hVopen
+    (fun x _ => mem_iUnion.mpr ⟨x, hVmem x⟩)
+  rcases t.eq_empty_or_nonempty with hte | htne
+  · subst hte
+    refine ⟨1, one_pos, fun x hx => ?_⟩
+    have h := ht hx; simp at h
+  · refine ⟨t.inf' htne ε, (Finset.lt_inf'_iff htne).mpr (fun i _ => hεpos i), fun x hx => ?_⟩
+    obtain ⟨i, hi, hxi⟩ := mem_iUnion₂.mp (ht hx)
+    obtain ⟨γ, hγ0, hγon⟩ := hprop i x (hVsub i hxi)
+    refine ⟨γ, hγ0, hγon.mono ?_⟩
+    have hle : t.inf' htne ε ≤ ε i := Finset.inf'_le ε hi
+    exact Ioo_subset_Ioo (by linarith) hle
+
+/-- **Uniform time-dependent local flow existence on a compact manifold.** For a
+jointly-`C¹` time-dependent field `X` on a compact boundaryless complete manifold,
+there is a *single* `ε > 0` such that every start point `x` (at time `0`) admits a
+time-dependent integral curve of `X` on the common interval `Ioo (-ε) ε`. Because the
+DeTurck gauge field is time-dependent, this — not the autonomous
+`exists_uniform_integralCurve_time` — is the existence core the gauge flow consumes.
+Proved by autonomizing to the noncompact `ℝ × M` and taking the uniform lifespan over
+the *compact initial-time slice* `{0} × M` via
+`exists_uniform_time_of_nhds_uniform_on_compact`, then projecting through
+`isTimeDependentIntegralCurve_of_autonomous_of_fst`. -/
+theorem exists_uniform_timeDependent_integralCurve_time {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧
+      ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ (Set.Ioo (-ε) ε) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))) := by
+  have hScompact : IsCompact (({(0 : ℝ)} ×ˢ (Set.univ : Set M)) : Set (ℝ × M)) :=
+    isCompact_singleton.prod isCompact_univ
+  obtain ⟨ε, hε, huniform⟩ := exists_uniform_time_of_nhds_uniform_on_compact
+    (fun p => exists_nhds_uniform_integralCurve (I := (𝓘(ℝ, ℝ)).prod I) hX p) hScompact
+  refine ⟨ε, hε, fun x => ?_⟩
+  obtain ⟨Γ, hΓ0, hΓon⟩ := huniform (0, x) (by simp)
+  refine ⟨fun τ => (Γ τ).2, by simp [hΓ0], ?_⟩
+  have h0 : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_neg_of_pos hε, hε⟩
+  have hΓ0fst : (Γ 0).1 = 0 := by rw [hΓ0]
+  exact isTimeDependentIntegralCurve_of_autonomous_of_fst
+    isOpen_Ioo h0 isPreconnected_Ioo hΓ0fst (fun t ht => hΓon t ht)
+
+/-- **Bundled uniform time-dependent flow on a compact manifold.** Packages
+`exists_uniform_timeDependent_integralCurve_time` into a flow map `Φ : ℝ → M → M`
+with `Φ 0 = id` such that, for every `x`, the orbit `τ ↦ Φ τ x` is a time-dependent
+integral curve of `X` on the common interval `Ioo (-ε) ε`. This is the anchored
+integral-curve family the compact-manifold gauge-flow construction is built on. -/
+theorem exists_timeDependent_flow_compact {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∃ Φ : ℝ → M → M, (∀ x, Φ 0 x = x) ∧
+      ∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+        (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))) := by
+  obtain ⟨ε, hε, huniform⟩ := exists_uniform_timeDependent_integralCurve_time hX
+  choose γ hγ0 hγon using huniform
+  exact ⟨ε, hε, fun t x => γ x t, hγ0, fun x t ht => hγon x t ht⟩
+
 end PoincareCurvature.ManifoldFlow
