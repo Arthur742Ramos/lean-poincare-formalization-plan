@@ -7072,3 +7072,47 @@ cannot hold for a `C⁰`-bounded `A`, and the empty / rank-`≤1` closures alrea
 (`GaugeReduction/Diffeomorph3FlowExistence.lean` via the model bridge in `ModelGaugeFlowODE.lean` and
 `GaugeFlowAssembly.gaugeFlow_of_inverse_flow`), discharging Item-2's spatial-`C³` flow-slice regularity
 input from a `ContDiff` field of the DeTurck gauge vector field.
+
+Update — **model-manifold `C³` gauge-flow existence is now available behind a single `ContDiff`
+hypothesis** (`AnalyticPDE/ModelManifoldGaugeFlow.lean`; both new theorems axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, cheat-scan `TOTAL 0`).  This session completed the model
+(chart-level) leg of the previously-stated "next target" — driving the raw `C³` DeTurck gauge flow
+from a `ContDiff` field — by adding the two `_of_contDiff` entry points to the model-manifold gauge-flow
+exports, mirroring the `FieldJetContDiff` jet-extraction API:
+
+* `exists_diffeomorph3GaugeFlowOn_of_contDiff` — the model-manifold (`M = E`, `𝓘(ℝ, E)`) raw `C³`
+  gauge-flow existence target `Diffeomorph3GaugeFlowOn (X := v) s t₀`, with the *entire* `C^{3,1}`
+  Fréchet jet (`Dv`, `D²v` in curry/multilinear guises, `D³v`) and all its `HasFDerivAt`/joint-continuity/
+  compatibility obligations discharged from a single `ContDiff ℝ n (Function.uncurry v)` hypothesis
+  (`3 ≤ n`) — only the honest top-order Lipschitz controls remain, matching the tower's `C³` interface.
+  A pure assembly: the `FieldJetContDiff` extraction fed into `exists_diffeomorph3GaugeFlowOn_of_field_jet`.
+* `exists_flow_diffeomorph_three_hasMFDerivAt_of_contDiff` — the `ContDiff`-packaged form of the second
+  documented per-chart export `exists_flow_diffeomorph_three_hasMFDerivAt` (a single flow family `Φ`
+  that anchors, solves the manifold integral-curve ODE at every time, and is for every `t` a first-class
+  bundled `Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3`).
+
+(Plumbing note: `ModelManifoldGaugeFlow.lean` is a *classic* (non-`module`) file; it already imports the
+`module` file `SmoothDependenceManifold`, so adding `import …AnalyticPDE.FieldJetContDiff` — also a
+`module` file — is legal (classic files may import module files) and cycle-free (nothing imports
+`ModelManifoldGaugeFlow`).)
+
+**Honest remaining Item-2 gap (compact manifold).**  The compact-manifold gauge-flow existence
+`GaugeReduction/GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` is
+unconditional *up to* its `hslicesC3` hypothesis — the spatial-`C³` regularity (the `C¹ → C³` bootstrap)
+of the *compact-manifold* flow slices produced by
+`ManifoldFlowExistence.exists_timeDependent_flow_compact_inverse` (which itself needs only the `C¹`
+field datum).  The model-manifold `C³` dependence is now fully available (incl. the `_of_contDiff`
+entry points above), but transporting it to a general compact manifold `M` — expressing `Φ t` in
+charts, applying the model-space `C³` dependence to the chart-local field, and patching back to
+`ContMDiff I I 3 (Φ t)` — is the substantial chart-transfer work that lives in the heavy
+`GaugeReduction/ModelGaugeFlowODE.lean` (~24k lines) / `GaugeReduction/Diffeomorph3FlowExistence.lean`.
+**Next target.** Discharge `hslicesC3` from a `ContDiff` datum on the chart-local DeTurck gauge field
+by the chart-transfer of model-manifold `C³` smooth dependence, yielding an *unconditional* compact
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact` (no `hslicesC3` hypothesis).
+
+**Formulation note (unchanged, re-confirmed).** Item-3's chart route stays parabolic-Schauder-blocked
+for a general initial metric: the chart field `A`'s `geometric` obligation (`A τ s =
+intrinsicRicciDeTurckRHS …` on the positive-definite locus) forces `A` to be the genuine 2nd-order
+Ricci-DeTurck operator, which cannot simultaneously satisfy `picard`'s `IsPicardLindelof` (a `C⁰`-Banach
+Lipschitz/bounded requirement); the empty / rank-`≤1` closures already exist directly.  So this session
+advanced the **unconditional Item-2** leg.
