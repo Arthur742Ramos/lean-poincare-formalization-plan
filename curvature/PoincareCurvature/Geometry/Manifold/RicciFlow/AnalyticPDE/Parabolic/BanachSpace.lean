@@ -924,5 +924,149 @@ theorem norm_mulL_le {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 end ParabolicC0AlphaBanach
 
+/-! ### The precomposition (change-of-variables) operator
+
+Precomposition by a space-time map `φ : ℝ × Y → ℝ × X` mapping `t` into `s` and expanding parabolic
+distance by at most `L` is a bounded operator `ParabolicC0AlphaBanach X E α s →L ParabolicC0AlphaBanach
+Y E α t` of norm `≤ max 1 (L ^ α)`.  This is the operator behind chart-transition gluing, the
+DeTurck gauge-diffeomorphism action, and parabolic Schauder scaling; it generalises `restrictL`
+(the special case `φ = ` inclusion, `L = 1`). -/
+
+namespace ParabolicC0AlphaSpace
+
+/-- Precomposition by `φ` as a linear map of the underlying parabolic `C^{0,α}` submodules. -/
+def precompSubmoduleLinearMap {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    parabolicC0AlphaSubmodule X E α s →ₗ[ℝ] parabolicC0AlphaSubmodule Y E α t where
+  toFun u := ⟨fun p => u.1 (φ p), u.2.comp_parabolicDistanceLe hα hL hmaps hφ⟩
+  map_add' u v := by ext z; simp
+  map_smul' c u := by ext z; simp
+
+/-- Precomposition by `φ` as a linear map of the parabolic `C^{0,α}` carriers. -/
+def precompLinearMap {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicC0AlphaSpace X E α s →ₗ[ℝ] ParabolicC0AlphaSpace Y E α t :=
+  precompSubmoduleLinearMap hα hL hmaps hφ
+
+@[simp]
+theorem toFun_precompLinearMap {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q)
+    (u : ParabolicC0AlphaSpace X E α s) :
+    toFun (precompLinearMap hα hL hmaps hφ u) = fun p => toFun u (φ p) :=
+  rfl
+
+/-- **Precomposition is bounded of operator norm `≤ max 1 (L ^ α)`** on the parabolic `C^{0,α}`
+carrier, via `parabolicC0AlphaNorm_comp_parabolicDistanceLe_le`. -/
+noncomputable def precompL {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicC0AlphaSpace X E α s →L[ℝ] ParabolicC0AlphaSpace Y E α t :=
+  LinearMap.mkContinuous (precompLinearMap hα hL hmaps hφ) (max 1 (L ^ α)) (fun u => by
+    show parabolicC0AlphaNorm α (toFun (precompLinearMap hα hL hmaps hφ u)) t
+      ≤ max 1 (L ^ α) * parabolicC0AlphaNorm α (toFun u) s
+    rw [toFun_precompLinearMap]
+    exact parabolicC0AlphaNorm_comp_parabolicDistanceLe_le (toSubmodule u).2 hα hL hmaps hφ)
+
+@[simp]
+theorem toFun_precompL {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q)
+    (u : ParabolicC0AlphaSpace X E α s) :
+    toFun (precompL hα hL hmaps hφ u) = fun p => toFun u (φ p) :=
+  rfl
+
+/-- The precomposition operator on the carrier has operator norm `≤ max 1 (L ^ α)`. -/
+theorem norm_precompL_le {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ‖precompL (X := X) (E := E) (α := α) (s := s) hα hL hmaps hφ‖ ≤ max 1 (L ^ α) :=
+  LinearMap.mkContinuous_norm_le _ (le_trans zero_le_one (le_max_left _ _)) _
+
+end ParabolicC0AlphaSpace
+
+namespace ParabolicC0AlphaBanach
+
+/-- **The precomposition operator on the parabolic `C^{0,α}` Banach spaces.**  Descends the carrier
+operator to the separation quotients (well-defined because bounded), giving a bounded operator
+`ParabolicC0AlphaBanach X E α s →L ParabolicC0AlphaBanach Y E α t` of norm `≤ max 1 (L ^ α)`. -/
+noncomputable def precompL {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach Y E α t :=
+  SeparationQuotient.liftCLM
+    ((mkL (X := Y) (E := E) (α := α) (s := t)).comp
+      (ParabolicC0AlphaSpace.precompL hα hL hmaps hφ))
+    (fun (u u' : ParabolicC0AlphaSpace X E α s) (hins : Inseparable u u') => by
+      let F : ParabolicC0AlphaSpace X E α s →L[ℝ] ParabolicC0AlphaSpace Y E α t :=
+        ParabolicC0AlphaSpace.precompL hα hL hmaps hφ
+      change SeparationQuotient.mk (F u) = SeparationQuotient.mk (F u')
+      refine SeparationQuotient.mk_eq_mk.2 ?_
+      rw [Metric.inseparable_iff]
+      have h0 : dist u u' = 0 := Metric.inseparable_iff.mp hins
+      have hle : dist (F u) (F u') ≤ ‖F‖ * ‖u - u'‖ := by
+        rw [dist_eq_norm, ← map_sub]
+        exact F.le_opNorm _
+      have h0' : ‖u - u'‖ = 0 := by rw [← dist_eq_norm]; exact h0
+      rw [h0', mul_zero] at hle
+      exact le_antisymm hle dist_nonneg)
+
+/-- **Precomposition commutes with the projection.**  On the class of a representative `u`,
+precomposition is the class of the precomposed representative. -/
+@[simp]
+theorem precompL_mk {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q)
+    (u : ParabolicC0AlphaSpace X E α s) :
+    precompL hα hL hmaps hφ (mk u) = mk (ParabolicC0AlphaSpace.precompL hα hL hmaps hφ u) :=
+  SeparationQuotient.liftCLM_mk _ _ u
+
+/-- The precomposition operator on the Banach spaces has operator norm `≤ max 1 (L ^ α)`. -/
+theorem norm_precompL_le {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q) :
+    ‖precompL (X := X) (E := E) (α := α) (s := s) hα hL hmaps hφ‖ ≤ max 1 (L ^ α) := by
+  refine ContinuousLinearMap.opNorm_le_bound _ (le_trans zero_le_one (le_max_left _ _)) (fun x => ?_)
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  rw [precompL_mk, norm_mk, norm_mk, ParabolicC0AlphaSpace.toFun_precompL]
+  exact parabolicC0AlphaNorm_comp_parabolicDistanceLe_le
+    (ParabolicC0AlphaSpace.toSubmodule u).2 hα hL hmaps hφ
+
+/-- **Precomposition is compatible with point evaluation (cone coherence, pointwise).**  Evaluating
+the precomposed class at a space-time point `w ∈ t` gives the value of the original class at
+`φ w ∈ s`: `evalCLM w (precompL φ x) = evalCLM (φ w) x`.  This is the pullback-of-evaluation
+coherence that keeps the point-values of chart-transition–glued solutions consistent. -/
+theorem evalCLM_precompL_apply {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
+    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
+    (hα : 0 ≤ α) (hL : 0 ≤ L) (hmaps : Set.MapsTo φ t s)
+    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
+      parabolicDistance (φ p) (φ q) ≤ L * parabolicDistance p q)
+    (w : ℝ × Y) (hw : w ∈ t) (x : ParabolicC0AlphaBanach X E α s) :
+    evalCLM w hw (precompL hα hL hmaps hφ x) = evalCLM (φ w) (hmaps hw) x := by
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  simp only [precompL_mk, evalCLM_mk_apply, ParabolicC0AlphaSpace.toFun_precompL]
+
+end ParabolicC0AlphaBanach
+
 end AnalyticPDE
 end RicciFlow
