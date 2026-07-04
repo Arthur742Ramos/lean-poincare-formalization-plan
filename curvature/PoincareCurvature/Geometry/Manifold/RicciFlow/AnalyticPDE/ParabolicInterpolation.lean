@@ -457,5 +457,48 @@ theorem exists_shortTime_fixedPoint_of_schauder_gain [CompleteSpace E]
   exact hcontr hT0 hTle (hSholder w₁ w₂ hw₁ hw₂) hslab hcyl
     (fun x hx => hSinit w₁ w₂ x hx) (hSgain w₁ w₂ hw₁ hw₂)
 
+/-- **Ricci–DeTurck short-time existence with an a-priori solution bound, reduced to the Schauder
+gain.**  The quantitative refinement of `exists_shortTime_fixedPoint_of_schauder_gain`: under the same
+hypotheses (self-mapping, initial-data preservation, `α`-Hölder output differences, and the parabolic
+Schauder gain `[S w₁ − S w₂]_α ≤ C · ‖w₁ − w₂‖_{C^{0,α θ}}`), on a thin enough slab the unique
+`C^{0,α θ}` fixed point `g = S g` additionally satisfies the a-priori bound
+
+  `‖g − u₀‖_{C^{0,α θ}} ≤ 2 · ‖S u₀ − u₀‖_{C^{0,α θ}}`
+
+controlling the solution by (twice) the initial residual `‖S u₀ − u₀‖_{C^{0,α θ}}` of any starting
+guess `u₀` — the estimate that keeps the DeTurck solution inside the ball on which the coefficient
+data / Schauder gain remain valid.  The `½`-contraction (constant `(1 − ½)⁻¹ = 2`) fed into the
+ball-form parabolic Banach fixed point `exists_parabolicC0AlphaOn_fixedPt_ball_of_contraction`. -/
+theorem exists_shortTime_fixedPoint_ball_of_schauder_gain [CompleteSpace E]
+    {α θ C : ℝ} (hα : 0 < α) (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) (hC : 0 ≤ C) :
+    ∃ T₀ > 0, ∀ {T t₀ : ℝ} {s : Set (ℝ × X)}
+        {S : (ℝ × X → E) → (ℝ × X → E)} {u₀ : ℝ × X → E},
+      0 ≤ T → T ≤ T₀ →
+      (∀ p ∈ s, |p.1 - t₀| ≤ T) →
+      (∀ p ∈ s, (t₀, p.2) ∈ s) →
+      ParabolicC0AlphaOn (α * θ) u₀ s →
+      (∀ u, ParabolicC0AlphaOn (α * θ) u s → ParabolicC0AlphaOn (α * θ) (S u) s) →
+      (∀ w₁ w₂, ParabolicC0AlphaOn (α * θ) w₁ s → ParabolicC0AlphaOn (α * θ) w₂ s →
+        ParabolicHolderOn α (fun z => S w₁ z - S w₂ z) s) →
+      (∀ w₁ w₂, ∀ x : X, (t₀, x) ∈ s → S w₁ (t₀, x) = S w₂ (t₀, x)) →
+      (∀ w₁ w₂, ParabolicC0AlphaOn (α * θ) w₁ s → ParabolicC0AlphaOn (α * θ) w₂ s →
+        parabolicHolderSeminorm α (fun z => S w₁ z - S w₂ z) s
+          ≤ C * parabolicC0AlphaNorm (α * θ) (fun z => w₁ z - w₂ z) s) →
+      ∃ g, ParabolicC0AlphaOn (α * θ) g s ∧ Set.EqOn (S g) g s ∧
+        (∀ w, ParabolicC0AlphaOn (α * θ) w s → Set.EqOn (S w) w s → Set.EqOn w g s) ∧
+        parabolicC0AlphaNorm (α * θ) (fun z => g z - u₀ z) s
+          ≤ 2 * parabolicC0AlphaNorm (α * θ) (fun z => S u₀ z - u₀ z) s := by
+  obtain ⟨T₀, hT₀, hcontr⟩ :=
+    exists_thickness_solutionMap_contraction_of_schauder_gain (X := X) (E := E)
+      (q := (1 : ℝ) / 2) hα hθ0 hθ1 hC (by norm_num)
+  refine ⟨T₀, hT₀, ?_⟩
+  intro T t₀ s S u₀ hT0 hTle hslab hcyl hu₀ hSmaps hSholder hSinit hSgain
+  obtain ⟨g, hg, hfix, huniq, hbound⟩ :=
+    exists_parabolicC0AlphaOn_fixedPt_ball_of_contraction (α := α * θ) (q := (1 : ℝ) / 2)
+      (by norm_num) (by norm_num) hu₀ hSmaps (fun w₁ w₂ hw₁ hw₂ =>
+        hcontr hT0 hTle (hSholder w₁ w₂ hw₁ hw₂) hslab hcyl
+          (fun x hx => hSinit w₁ w₂ x hx) (hSgain w₁ w₂ hw₁ hw₂))
+  exact ⟨g, hg, hfix, huniq, hbound.trans_eq (by norm_num)⟩
+
 end AnalyticPDE
 end RicciFlow
