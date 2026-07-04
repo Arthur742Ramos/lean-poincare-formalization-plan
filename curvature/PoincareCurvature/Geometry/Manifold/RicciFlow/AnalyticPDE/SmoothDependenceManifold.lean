@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FlowDiffeomorphism
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceContinuousDeriv
 public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 public import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 public import Mathlib.Geometry.Manifold.Diffeomorph
@@ -589,6 +590,67 @@ theorem contMDiff_infty_fundamentalSolution_apply_joint {A : ℝ → (E →L[ℝ
     ContMDiff 𝓘(ℝ, ℝ × E) 𝓘(ℝ, E) ∞
       (fun p : ℝ × E => fundamentalSolution hA hΦ h0 p.1 p.2) :=
   contMDiff_iff_contDiff.mpr (contDiff_infty_fundamentalSolution_apply_joint hA hAsmooth hΦ h0)
+
+/-- **Manifold pushforward of the flow map is the resolvent — from a *merely continuous* spatial
+derivative.**  Under the weakest-hypothesis `C¹` regime (`v` globally `K`-Lipschitz, spatial Fréchet
+derivative `Dv` jointly *continuous* — not necessarily Lipschitz — and matching the reference
+coefficient along the anchor trajectory, `A s = Dv s (Φ x₀ s)`), the time-`t` flow map `x ↦ Φ x t` has
+manifold differential the resolvent `D_x Φ_t`:
+`HasMFDerivAt 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z ↦ Φ z t) x₀ (fundamentalSolution hA hΦ' h0' t)`.  The manifold
+form of `hasFDerivAt_flow_of_continuous_deriv` — the continuous-derivative companion of
+`hasMFDerivAt_flow_apply_of_lipschitz_deriv`, applicable when only joint continuity of the field jet
+(not a global Lipschitz bound) is available. -/
+theorem hasMFDerivAt_flow_apply_of_continuous_deriv [FiniteDimensional ℝ E]
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hAeq : ∀ s, A s = Dv s (Φ x₀ s)) :
+    HasMFDerivAt 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀
+      (fundamentalSolution hA hΦ' h0' t : E →L[ℝ] E) :=
+  (hasFDerivAt_flow_of_continuous_deriv hv hA hΦ' h0' hΦ h0 x₀ ht0 hDv hDvc hAeq).hasMFDerivAt
+
+/-- **The manifold differential of the flow map is the resolvent — continuous-derivative regime,
+`mfderiv` readout.**  `mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z ↦ Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t`
+under the continuous-derivative hypotheses of `hasMFDerivAt_flow_apply_of_continuous_deriv`. -/
+theorem mfderiv_flow_apply_of_continuous_deriv [FiniteDimensional ℝ E]
+    (hv : ∀ τ, LipschitzWith K (v τ))
+    {A : ℝ → (E →L[ℝ] E)} (hA : ∀ s, ‖A s‖₊ ≤ K)
+    {Φ' : E → ℝ → E} (hΦ' : ∀ z, IsIntegralCurve (Φ' z) (variationalFieldVec A))
+    (h0' : ∀ z, Φ' z t₀ = z)
+    (hΦ : ∀ z, IsIntegralCurve (Φ z) v) (h0 : ∀ z, Φ z t₀ = z)
+    (x₀ : E) {t : ℝ} (ht0 : t₀ ≤ t)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hAeq : ∀ s, A s = Dv s (Φ x₀ s)) :
+    mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀
+      = (fundamentalSolution hA hΦ' h0' t : E →L[ℝ] E) :=
+  (hasMFDerivAt_flow_apply_of_continuous_deriv hv hA hΦ' h0' hΦ h0 x₀ ht0 hDv hDvc hAeq).mfderiv
+
+/-- **Manifold `C¹` flow existence from a *merely continuous* spatial derivative.**  For a globally
+`K`-Lipschitz, time-continuous field `v` whose spatial Fréchet derivative `Dv` is jointly continuous
+(no Lipschitz bound on `Dv` required), there is a flow family `Φ` anchored at `t₀`, integral curve of
+`v`, whose time-`t` map is `ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 1`.  The manifold form of
+`exists_flow_contDiff_one_of_continuous_deriv` (via `contMDiff_iff_contDiff`) — the weakest-hypothesis
+`C¹` companion of `exists_flow_contMDiff_three`, the smooth-dependence existence usable when only joint
+continuity of the field's spatial derivative is available. -/
+theorem exists_flow_contMDiff_one_of_continuous_deriv [FiniteDimensional ℝ E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {t : ℝ} (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 1 (fun z => Φ z t) := by
+  obtain ⟨Φ, h0, hΦ, hdiff⟩ :=
+    exists_flow_contDiff_one_of_continuous_deriv hv hvc hderiv hDvc ht0
+  exact ⟨Φ, h0, hΦ, contMDiff_iff_contDiff.mpr hdiff⟩
 
 end
 
