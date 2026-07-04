@@ -8654,6 +8654,193 @@ theorem parabolicC0AlphaNorm_sub_eq_zero_iff_eqOn {X E : Type*} [PseudoMetricSpa
     rw [h hp, sub_self]
   rw [hcongr, parabolicC0AlphaNorm_zero]
 
+/-- **Parabolic Banach fixed-point theorem.**  Let `E` be complete.  Suppose an operator
+`T` on time-space functions
+
+* preserves the parabolic `C^{0,α}` class on `s` (`hTmaps`), and
+* is a `q`-contraction on that class for the parabolic `C^{0,α}` norm, `0 ≤ q < 1` (`hTcontr`),
+
+and let `u₀` be any starting function in the class.  Then `T` has a fixed point `g` in the class:
+`g` is parabolic `C^{0,α}` on `s`, `T g` and `g` agree on `s`, and `g` is the *unique* such fixed
+point up to equality on `s`.
+
+This is the Picard/Banach contraction mechanism specialised to the parabolic Hölder space: the
+iterates `u₀, T u₀, T² u₀, …` form a `C^{0,α}`-Cauchy sequence (their consecutive differences decay
+geometrically, `‖T^{n+1}u₀ − T^n u₀‖ ≤ qⁿ‖T u₀ − u₀‖`, so the tail telescopes below `qᴺ·‖T u₀ −
+u₀‖/(1−q)`), which converges by the completeness of the parabolic `C^{0,α}` space
+(`exists_parabolicC0AlphaOn_tendsto_of_cauchy`) to a limit that the contraction forces to be fixed;
+uniqueness on `s` is `eqOn_of_parabolicC0AlphaNorm_sub_eq_zero`.  This is the abstract solution
+operator the Ricci–DeTurck short-time chart existence runs once the (future) parabolic Schauder
+estimate exhibits the DeTurck right-hand side as such a contraction. -/
+theorem exists_parabolicC0AlphaOn_fixedPt_of_contraction {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [CompleteSpace E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T : (ℝ × X → E) → (ℝ × X → E)} {u₀ : ℝ × X → E}
+    (hq0 : 0 ≤ q) (hq1 : q < 1)
+    (hu₀ : ParabolicC0AlphaOn α u₀ s)
+    (hTmaps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T u) s)
+    (hTcontr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T u z - T v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    ∃ g, ParabolicC0AlphaOn α g s ∧ Set.EqOn (T g) g s ∧
+      ∀ w, ParabolicC0AlphaOn α w s → Set.EqOn (T w) w s → Set.EqOn w g s := by
+  have h1q : (0 : ℝ) < 1 - q := by linarith
+  -- The Picard iteration sequence `u n = Tⁿ u₀`.
+  obtain ⟨u, hu0, husucc⟩ :
+      ∃ u : ℕ → (ℝ × X → E), u 0 = u₀ ∧ ∀ n, u (n + 1) = T (u n) :=
+    ⟨fun n => Nat.rec u₀ (fun _ p => T p) n, rfl, fun _ => rfl⟩
+  -- Every iterate stays in the class.
+  have hclass : ∀ n, ParabolicC0AlphaOn α (u n) s := by
+    intro n
+    induction n with
+    | zero => rw [hu0]; exact hu₀
+    | succ n ih => rw [husucc]; exact hTmaps (u n) ih
+  -- Abbreviation for the size of the first Picard step.
+  let D : ℝ := parabolicC0AlphaNorm α (fun z => u 1 z - u 0 z) s
+  have hD0 : 0 ≤ D := parabolicC0AlphaNorm_nonneg _ _ _
+  have hDq0 : 0 ≤ D * (1 - q)⁻¹ := mul_nonneg hD0 (inv_nonneg.mpr h1q.le)
+  -- One-step contraction of consecutive differences.
+  have hδ : ∀ n, parabolicC0AlphaNorm α (fun z => u (n + 1 + 1) z - u (n + 1) z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => u (n + 1) z - u n z) s := by
+    intro n
+    have hfun : (fun z => u (n + 1 + 1) z - u (n + 1) z)
+        = (fun z => T (u (n + 1)) z - T (u n) z) := by rw [husucc (n + 1), husucc n]
+    rw [hfun]
+    exact hTcontr (u (n + 1)) (u n) (hclass (n + 1)) (hclass n)
+  -- Geometric decay of consecutive Picard differences.
+  have hstep : ∀ m, parabolicC0AlphaNorm α (fun z => u (m + 1) z - u m z) s ≤ q ^ m * D := by
+    intro m
+    induction m with
+    | zero =>
+        show parabolicC0AlphaNorm α (fun z => u (0 + 1) z - u 0 z) s ≤ q ^ 0 * D
+        rw [pow_zero, one_mul]
+    | succ m ih =>
+        calc parabolicC0AlphaNorm α (fun z => u (m + 1 + 1) z - u (m + 1) z) s
+            ≤ q * parabolicC0AlphaNorm α (fun z => u (m + 1) z - u m z) s := hδ m
+          _ ≤ q * (q ^ m * D) := mul_le_mul_of_nonneg_left ih hq0
+          _ = q ^ (m + 1) * D := by rw [pow_succ]; ring
+  -- Telescoped bound on any forward difference by a geometric partial sum.
+  have hdiff : ∀ (n d : ℕ),
+      parabolicC0AlphaNorm α (fun z => u (n + d) z - u n z) s
+        ≤ q ^ n * D * (∑ k ∈ Finset.range d, q ^ k) := by
+    intro n d
+    induction d with
+    | zero =>
+        have hz : (fun z => u (n + 0) z - u n z) = (fun _ : ℝ × X => (0 : E)) := by
+          funext z; simp
+        rw [hz, parabolicC0AlphaNorm_zero]; simp
+    | succ d ih =>
+        have hsplit : (fun z => u (n + (d + 1)) z - u n z)
+            = (fun z => (u (n + (d + 1)) z - u (n + d) z) + (u (n + d) z - u n z)) := by
+          funext z; abel
+        rw [hsplit]
+        have hcls1 : ParabolicC0AlphaOn α (fun z => u (n + (d + 1)) z - u (n + d) z) s :=
+          (hclass (n + (d + 1))).sub (hclass (n + d))
+        have hcls2 : ParabolicC0AlphaOn α (fun z => u (n + d) z - u n z) s :=
+          (hclass (n + d)).sub (hclass n)
+        refine (parabolicC0AlphaNorm_add_le hcls1 hcls2).trans ?_
+        have hfirst : parabolicC0AlphaNorm α (fun z => u (n + (d + 1)) z - u (n + d) z) s
+            ≤ q ^ (n + d) * D := hstep (n + d)
+        refine (add_le_add hfirst ih).trans (le_of_eq ?_)
+        rw [Finset.sum_range_succ, pow_add]; ring
+  -- The geometric partial sums are bounded by `(1-q)⁻¹`.
+  have hgeom : ∀ d : ℕ, (∑ k ∈ Finset.range d, q ^ k) ≤ (1 - q)⁻¹ := by
+    intro d
+    have hid : (∑ k ∈ Finset.range d, q ^ k) * (1 - q) = 1 - q ^ d := by
+      have hgm := geom_sum_mul q d
+      linear_combination (-1 : ℝ) * hgm
+    rw [inv_eq_one_div, le_div_iff₀ h1q, hid]
+    nlinarith [pow_nonneg hq0 d]
+  -- Uniform forward-difference bound.
+  have hboundpair : ∀ a b : ℕ, a ≤ b →
+      parabolicC0AlphaNorm α (fun z => u b z - u a z) s ≤ q ^ a * (D * (1 - q)⁻¹) := by
+    intro a b hab
+    have hd := hdiff a (b - a)
+    rw [Nat.add_sub_cancel' hab] at hd
+    refine hd.trans ?_
+    calc q ^ a * D * (∑ k ∈ Finset.range (b - a), q ^ k)
+        ≤ q ^ a * D * (1 - q)⁻¹ :=
+          mul_le_mul_of_nonneg_left (hgeom (b - a)) (mul_nonneg (pow_nonneg hq0 a) hD0)
+      _ = q ^ a * (D * (1 - q)⁻¹) := by ring
+  -- The Picard sequence is Cauchy in the parabolic `C^{0,α}` norm.
+  have hcauchy : ∀ ε > 0, ∃ N, ∀ m ≥ N, ∀ n ≥ N,
+      parabolicC0AlphaNorm α (fun z => u m z - u n z) s ≤ ε := by
+    intro ε hε
+    have hc1 : (0 : ℝ) < D * (1 - q)⁻¹ + 1 := by linarith [hDq0]
+    obtain ⟨N, hNlt⟩ := exists_pow_lt_of_lt_one (div_pos hε hc1) hq1
+    refine ⟨N, fun m hm n hn => ?_⟩
+    have hqmin : q ^ (min m n) ≤ q ^ N := pow_le_pow_of_le_one hq0 hq1.le (le_min hm hn)
+    have pairbound : parabolicC0AlphaNorm α (fun z => u m z - u n z) s
+        ≤ q ^ (min m n) * (D * (1 - q)⁻¹) := by
+      rcases le_total n m with hnm | hmn
+      · rw [min_eq_right hnm]; exact hboundpair n m hnm
+      · rw [min_eq_left hmn]
+        have hswap : (fun z => u m z - u n z) = (fun z => -(u n z - u m z)) := by
+          funext z; exact (neg_sub _ _).symm
+        rw [hswap, parabolicC0AlphaNorm_neg]
+        exact hboundpair m n hmn
+    refine le_of_lt ?_
+    calc parabolicC0AlphaNorm α (fun z => u m z - u n z) s
+        ≤ q ^ (min m n) * (D * (1 - q)⁻¹) := pairbound
+      _ ≤ q ^ N * (D * (1 - q)⁻¹) := mul_le_mul_of_nonneg_right hqmin hDq0
+      _ ≤ q ^ N * (D * (1 - q)⁻¹ + 1) :=
+          mul_le_mul_of_nonneg_left (by linarith) (pow_nonneg hq0 N)
+      _ < ε := (lt_div_iff₀ hc1).mp hNlt
+  -- Completeness produces the limit `g`, converged to in the parabolic norm.
+  obtain ⟨g, hg_class, hg_conv⟩ := exists_parabolicC0AlphaOn_tendsto_of_cauchy hclass hcauchy
+  -- `g` is a fixed point on `s`.
+  have hfix : Set.EqOn (T g) g s := by
+    apply eqOn_of_parabolicC0AlphaNorm_sub_eq_zero (hTmaps g hg_class) hg_class
+    refine le_antisymm (le_of_forall_pos_le_add fun ε hε => ?_) (parabolicC0AlphaNorm_nonneg _ _ _)
+    obtain ⟨N, hN⟩ := hg_conv (ε / 2) (by positivity)
+    have hgN : parabolicC0AlphaNorm α (fun z => u N z - g z) s ≤ ε / 2 := hN N le_rfl
+    have hgN1 : parabolicC0AlphaNorm α (fun z => u (N + 1) z - g z) s ≤ ε / 2 :=
+      hN (N + 1) (Nat.le_succ N)
+    have hdecomp : (fun z => T g z - g z)
+        = (fun z => (T g z - T (u N) z) + (u (N + 1) z - g z)) := by
+      funext z
+      have huz : u (N + 1) z = T (u N) z := by rw [husucc]
+      rw [huz]; abel
+    rw [hdecomp]
+    have hc1 : ParabolicC0AlphaOn α (fun z => T g z - T (u N) z) s :=
+      (hTmaps g hg_class).sub (hTmaps (u N) (hclass N))
+    have hc2 : ParabolicC0AlphaOn α (fun z => u (N + 1) z - g z) s :=
+      (hclass (N + 1)).sub hg_class
+    refine (parabolicC0AlphaNorm_add_le hc1 hc2).trans ?_
+    have hswap : parabolicC0AlphaNorm α (fun z => g z - u N z) s
+        = parabolicC0AlphaNorm α (fun z => u N z - g z) s := by
+      have hfe : (fun z => g z - u N z) = (fun z => -(u N z - g z)) := by
+        funext z; exact (neg_sub _ _).symm
+      rw [hfe, parabolicC0AlphaNorm_neg]
+    have hle1 : parabolicC0AlphaNorm α (fun z => T g z - T (u N) z) s ≤ ε / 2 := by
+      refine (hTcontr g (u N) hg_class (hclass N)).trans ?_
+      rw [hswap]
+      calc q * parabolicC0AlphaNorm α (fun z => u N z - g z) s
+          ≤ 1 * parabolicC0AlphaNorm α (fun z => u N z - g z) s :=
+            mul_le_mul_of_nonneg_right hq1.le (parabolicC0AlphaNorm_nonneg _ _ _)
+        _ = parabolicC0AlphaNorm α (fun z => u N z - g z) s := one_mul _
+        _ ≤ ε / 2 := hgN
+    have hsum := add_le_add hle1 hgN1
+    linarith
+  -- Uniqueness on `s`.
+  have huniq : ∀ w, ParabolicC0AlphaOn α w s → Set.EqOn (T w) w s → Set.EqOn w g s := by
+    intro w hw hwfix
+    apply eqOn_of_parabolicC0AlphaNorm_sub_eq_zero hw hg_class
+    have heqON : Set.EqOn (fun z => w z - g z) (fun z => T w z - T g z) s := by
+      intro p hp
+      show w p - g p = T w p - T g p
+      rw [hwfix hp, hfix hp]
+    have hYeq : parabolicC0AlphaNorm α (fun z => w z - g z) s
+        = parabolicC0AlphaNorm α (fun z => T w z - T g z) s := parabolicC0AlphaNorm_congr heqON
+    have hYle : parabolicC0AlphaNorm α (fun z => w z - g z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => w z - g z) s :=
+      hYeq.trans_le (hTcontr w g hw hg_class)
+    have hYnonneg : 0 ≤ parabolicC0AlphaNorm α (fun z => w z - g z) s :=
+      parabolicC0AlphaNorm_nonneg _ _ _
+    have hYle0 : parabolicC0AlphaNorm α (fun z => w z - g z) s ≤ 0 := by
+      nlinarith [hYnonneg, hYle, hq1]
+    exact le_antisymm hYle0 hYnonneg
+  exact ⟨g, hg_class, hfix, huniq⟩
+
 end AnalyticPDE
 end RicciFlow
 
