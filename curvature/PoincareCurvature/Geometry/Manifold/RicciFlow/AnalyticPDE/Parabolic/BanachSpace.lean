@@ -924,6 +924,75 @@ theorem norm_mulL_le {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     ‖mulL (X := X) (E := E) (α := α) (s := s) (F := F) (G := G) L‖ ≤ ‖L‖ :=
   LinearMap.mkContinuous_norm_le _ (norm_nonneg L) _
 
+/-- **The fully-Banach bilinear parabolic `C^{0,α}` multiplication operator.**  The frozen-coefficient
+family `mulL L` takes its coefficient in the *seminormed carrier* `ParabolicC0AlphaSpace`; because it
+is `‖L‖`-Lipschitz it sends coefficients agreeing on `s` (inseparable in the carrier) to the *same*
+operator, so it descends through the separation quotient in the coefficient slot as well.  The result
+is a genuine bounded **bilinear** map
+`ParabolicC0AlphaBanach … E … →L[ℝ] (ParabolicC0AlphaBanach … F … →L[ℝ] ParabolicC0AlphaBanach … G …)`
+of operator norm `≤ ‖L‖` — i.e. `‖L(u, v)‖ ≤ ‖L‖ · ‖u‖ · ‖v‖` for Banach classes `u`, `v`.
+
+Unlike `mulL` (whose coefficient is a fixed carrier representative — the *linearised* frozen-coefficient
+operator whose invertibility the Schauder estimate controls), here **both** factors are Banach classes:
+this is the algebra of the *quadratic* nonlinear Ricci–DeTurck term, whose coefficient is itself a chart
+solution.  Its diagonal `u ↦ mulBilinL L u u` is the quadratic map. -/
+noncomputable def mulBilinL {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G) :
+    ParabolicC0AlphaBanach X E α s →L[ℝ]
+      (ParabolicC0AlphaBanach X F α s →L[ℝ] ParabolicC0AlphaBanach X G α s) :=
+  SeparationQuotient.liftCLM (mulL L)
+    (fun a a' hins => by
+      have hnorm : ‖a - a'‖ = 0 := by
+        rw [← dist_eq_norm]; exact Metric.inseparable_iff.mp hins
+      have hzero : ‖mulL L a - mulL L a'‖ = 0 := by
+        rw [← map_sub]
+        refine le_antisymm ?_ (norm_nonneg _)
+        calc ‖mulL L (a - a')‖ ≤ ‖mulL L‖ * ‖a - a'‖ := (mulL L).le_opNorm _
+          _ = 0 := by rw [hnorm, mul_zero]
+      exact sub_eq_zero.mp (norm_eq_zero.mp hzero))
+
+/-- **On a coefficient class the bilinear multiplication is the frozen-coefficient operator.**  For a
+carrier coefficient `a`, `mulBilinL L (mk a) = mulL L a` (`= mulCoeffL L a`). -/
+@[simp]
+theorem mulBilinL_mk {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) :
+    mulBilinL (X := X) (s := s) (G := G) L (mk a) = mulL L a :=
+  SeparationQuotient.liftCLM_mk _ _ a
+
+/-- **On classes of carrier representatives, the bilinear multiplication is the class of the pointwise
+product.** -/
+theorem mulBilinL_mk_mk {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (a : ParabolicC0AlphaSpace X E α s) (v : ParabolicC0AlphaSpace X F α s) :
+    mulBilinL L (mk a) (mk v) = mk (ParabolicC0AlphaSpace.mulCoeffL L a v) := by
+  rw [mulBilinL_mk, mulL_apply, mulCoeffL_mk]
+
+/-- The bilinear multiplication operator has operator norm `≤ ‖L‖`
+(the honest bounded bilinear estimate `‖L(u, v)‖ ≤ ‖L‖ · ‖u‖ · ‖v‖`). -/
+theorem norm_mulBilinL_le {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G) :
+    ‖mulBilinL (X := X) (E := E) (α := α) (s := s) (F := F) (G := G) L‖ ≤ ‖L‖ := by
+  refine ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg L) (fun x => ?_)
+  obtain ⟨a, rfl⟩ := mk_surjective x
+  rw [mulBilinL_mk, norm_mk]
+  calc ‖mulL L a‖ ≤ ‖mulL L‖ * ‖a‖ := (mulL L).le_opNorm a
+    _ ≤ ‖L‖ * ‖a‖ := by gcongr; exact norm_mulL_le L
+    _ = ‖L‖ * parabolicC0AlphaNorm α (ParabolicC0AlphaSpace.toFun a) s := by
+        rw [ParabolicC0AlphaSpace.norm_def]
+
+/-- **Point evaluation of a bilinear product is the bilinear map on the two point values.**  Reading off
+the space-time value of `L(u, v)` at `z ∈ s` is `L` applied to the value of `u` and the value of `v` —
+the pointwise algebra coherence of the fully-Banach bilinear operator. -/
+@[simp]
+theorem evalCLM_mulBilinL_apply {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] (L : E →L[ℝ] F →L[ℝ] G)
+    (u : ParabolicC0AlphaBanach X E α s) (z : ℝ × X) (hz : z ∈ s)
+    (x : ParabolicC0AlphaBanach X F α s) :
+    evalCLM z hz (mulBilinL L u x) = L (evalCLM z hz u) (evalCLM z hz x) := by
+  obtain ⟨a, rfl⟩ := mk_surjective u
+  rw [mulBilinL_mk, mulL_apply, evalCLM_mulCoeffL_apply, evalCLM_mk_apply]
+
 end ParabolicC0AlphaBanach
 
 /-! ### The precomposition (change-of-variables) operator
