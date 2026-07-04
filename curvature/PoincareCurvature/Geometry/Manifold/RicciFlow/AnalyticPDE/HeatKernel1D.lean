@@ -2643,6 +2643,42 @@ lemma integral_abs_mul_heatKernel1D_pos {t : ℝ} (ht : 0 < t) :
   have := heatKernel1D_prefactor_pos ht
   positivity
 
+/-- The `n`-dimensional heat kernel's **coordinate absolute first moment** in closed form:
+`∫ x, |x k|·Kₙ(t,x) dx = (4πt)^(-1/2)·(4t)`, the `n`-dimensional analogue of
+`integral_abs_mul_heatKernel1D_eq`.  Because `Kₙ(t,x) = ∏ᵢ K(t,xᵢ)` factors as a product of
+one-dimensional Gaussians, Fubini (`integral_fin_nat_prod_volume_eq_prod`) splits the integral: the
+`k`-th factor contributes the one-dimensional absolute first moment `∫|w|·K(t,w) dw` and each of the
+`n − 1` transverse factors contributes the unit mass `∫ K(t,w) dw = 1`.  This is the transverse-mass
+reduction the `n`-dimensional heat-semigroup gradient (`C¹` Schauder smoothing) rate rests on. -/
+lemma integral_abs_coord_mul_heatKernelND_eq {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    (∫ x : Fin n → ℝ, |x k| * heatKernelND t x)
+      = (4 * π * t) ^ (-(1 : ℝ) / 2) * (4 * t) := by
+  classical
+  -- Rewrite the integrand as a genuine product `∏ᵢ fᵢ (xᵢ)` with the `|·|` absorbed into slot `k`.
+  set f : Fin n → ℝ → ℝ :=
+    fun i z => if i = k then |z| * heatKernel1D t z else heatKernel1D t z with hf
+  have hprod : ∀ x : Fin n → ℝ, |x k| * heatKernelND t x = ∏ i, f i (x i) := by
+    intro x
+    rw [heatKernelND_apply, hf]
+    have hstep : (∏ i, (if i = k then |x i| * heatKernel1D t (x i) else heatKernel1D t (x i)))
+        = (∏ i, (if i = k then |x i| else (1 : ℝ))) * ∏ i, heatKernel1D t (x i) := by
+      rw [← Finset.prod_mul_distrib]
+      exact Finset.prod_congr rfl (fun i _ => by split_ifs <;> ring)
+    rw [hstep, Finset.prod_ite_eq']
+    simp
+  rw [integral_congr_ae (Filter.Eventually.of_forall hprod),
+    integral_fin_nat_prod_volume_eq_prod f]
+  -- Evaluate the product of one-dimensional integrals: slot `k` is the moment, the rest are `1`.
+  have hint : ∀ i, (∫ z : ℝ, f i z)
+      = if i = k then (∫ w, |w| * heatKernel1D t w) else (1 : ℝ) := by
+    intro i
+    rw [hf]
+    split_ifs with hik
+    · simp [hik]
+    · simp [hik, integral_heatKernel1D ht]
+  rw [Finset.prod_congr rfl (fun i _ => hint i), Finset.prod_ite_eq']
+  simp [integral_abs_mul_heatKernel1D_eq ht]
+
 /-- Algebraic helper: `√(4πt) = 2·√(πt)`. -/
 lemma sqrt_four_pi_t_eq (t : ℝ) (ht : 0 < t) :
     Real.sqrt (4 * π * t) = 2 * Real.sqrt (π * t) := by
