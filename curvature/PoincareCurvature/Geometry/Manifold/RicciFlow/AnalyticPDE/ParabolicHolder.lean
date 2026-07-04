@@ -8841,6 +8841,50 @@ theorem exists_parabolicC0AlphaOn_fixedPt_of_contraction {X E : Type*} [PseudoMe
     exact le_antisymm hYle0 hYnonneg
   exact ⟨g, hg_class, hfix, huniq⟩
 
+/-- **A-priori residual bound for a fixed point of a parabolic contraction.**  If `g` is any fixed
+point on `s` of a class-preserving `q`-contraction `T` (`0 ≤ q < 1`) and `u₀` is any starting
+function in the class, then `g` lies within `(1-q)⁻¹` times the first residual `‖T u₀ − u₀‖` of `u₀`:
+`‖g − u₀‖ ≤ (1−q)⁻¹ · ‖T u₀ − u₀‖`.
+
+This is the standard Banach a-priori estimate: it needs no iteration, only `g − u₀ = (T g − T u₀) +
+(T u₀ − u₀)` on `s` (using `T g =ₛ g`), the triangle inequality, and the contraction.  Combined with
+`exists_parabolicC0AlphaOn_fixedPt_of_contraction` it keeps the DeTurck solution inside a controlled
+`C^{0,α}` ball around the initial guess — the invariant-ball datum for the short-time chart. -/
+theorem parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T : (ℝ × X → E) → (ℝ × X → E)} {g u₀ : ℝ × X → E}
+    (hq1 : q < 1)
+    (hg : ParabolicC0AlphaOn α g s) (hu₀ : ParabolicC0AlphaOn α u₀ s)
+    (hgfix : Set.EqOn (T g) g s)
+    (hTmaps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T u) s)
+    (hTcontr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T u z - T v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+      ≤ (1 - q)⁻¹ * parabolicC0AlphaNorm α (fun z => T u₀ z - u₀ z) s := by
+  have h1q : (0 : ℝ) < 1 - q := by linarith
+  have hdecomp : Set.EqOn (fun z => g z - u₀ z)
+      (fun z => (T g z - T u₀ z) + (T u₀ z - u₀ z)) s := by
+    intro p hp
+    show g p - u₀ p = (T g p - T u₀ p) + (T u₀ p - u₀ p)
+    rw [hgfix hp]; abel
+  have hcls1 : ParabolicC0AlphaOn α (fun z => T g z - T u₀ z) s :=
+    (hTmaps g hg).sub (hTmaps u₀ hu₀)
+  have hcls2 : ParabolicC0AlphaOn α (fun z => T u₀ z - u₀ z) s :=
+    (hTmaps u₀ hu₀).sub hu₀
+  have htri : parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+      ≤ parabolicC0AlphaNorm α (fun z => T g z - T u₀ z) s
+        + parabolicC0AlphaNorm α (fun z => T u₀ z - u₀ z) s := by
+    rw [parabolicC0AlphaNorm_congr hdecomp]
+    exact parabolicC0AlphaNorm_add_le hcls1 hcls2
+  have hcontr : parabolicC0AlphaNorm α (fun z => T g z - T u₀ z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => g z - u₀ z) s := hTcontr g u₀ hg hu₀
+  have hkey : parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+        + parabolicC0AlphaNorm α (fun z => T u₀ z - u₀ z) s := by linarith
+  rw [inv_mul_eq_div, le_div_iff₀ h1q]
+  nlinarith [hkey]
+
 end AnalyticPDE
 end RicciFlow
 
