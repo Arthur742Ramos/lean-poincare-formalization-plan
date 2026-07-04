@@ -241,6 +241,40 @@ theorem fderiv_flow_of_continuous_deriv [FiniteDimensional ℝ E]
     fderiv ℝ (fun z => Φ z t) x₀ = fundamentalSolution hA hΦ' h0' t :=
   (hasFDerivAt_flow_of_continuous_deriv hv hA hΦ' h0' hΦ h0 x₀ ht0 hDv hDvc hAeq).fderiv
 
+/-- **Unconditional everywhere-differentiable dependence on initial data for a `C^1` field**
+(the continuous-derivative analogue of `exists_flow_differentiable_of_lipschitz_deriv`).  From
+field-level data only — a uniformly `K`-Lipschitz, time-continuous field on a finite-dimensional
+space whose spatial Fréchet derivative `Dv` exists everywhere and is *jointly continuous* (no
+Lipschitz constant required) — there is a flow family `Φ` of `v`, anchored at `t₀`, whose time-`t`
+slice `z ↦ Φ z t` is Fréchet differentiable at **every** initial value.
+
+The flow family and, at each base point, its variational flow are constructed internally
+(`exists_flow_family`, `exists_variationalFlowFamily`); the pointwise differentiability is
+`hasFDerivAt_flow_of_continuous_deriv`.  This is the Banach/finite-dimensional smooth-dependence
+result Items 1 and 2 consume for a merely-`C^1` right-hand side. -/
+theorem exists_flow_differentiable_of_continuous_deriv [FiniteDimensional ℝ E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    (hderiv : ∀ s x, HasFDerivAt (v s) (Dv s x) x)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    {t : ℝ} (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        Differentiable ℝ (fun z => Φ z t) := by
+  obtain ⟨Φ, h0, hΦ⟩ := exists_flow_family hv hvc
+  refine ⟨Φ, h0, hΦ, ?_⟩
+  intro x₀
+  have hAnorm : ∀ s, ‖Dv s (Φ x₀ s)‖₊ ≤ K := by
+    intro s
+    have h : ‖Dv s (Φ x₀ s)‖ ≤ (K : ℝ) := (hderiv s (Φ x₀ s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcont : Continuous fun s => Dv s (Φ x₀ s) := by
+    have hpair : Continuous fun s : ℝ => (s, Φ x₀ s) :=
+      continuous_id.prodMk (hΦ x₀).continuous
+    exact hDvc.comp hpair
+  obtain ⟨Φ', h0', hΦ'⟩ := exists_variationalFlowFamily hAnorm hAcont
+  exact (hasFDerivAt_flow_of_continuous_deriv hv hAnorm hΦ' h0' hΦ h0 x₀ ht0
+    hderiv hDvc (fun _ => rfl)).differentiableAt
+
 end
 
 end SmoothDependenceCk
