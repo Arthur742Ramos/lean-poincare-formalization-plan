@@ -47,6 +47,15 @@ namespace AnalyticPDE
 variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {α : ℝ} {s : Set (ℝ × X)}
 
+/-- **Domain monotonicity of the parabolic `C^{0,α}` norm.**  Restricting a parabolic `C^{0,α}`
+function to a subset can only decrease its `C^{0,α}` norm (both the sup part and the Hölder-seminorm
+part are monotone in the domain). -/
+theorem parabolicC0AlphaNorm_mono_domain {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hts : t ⊆ s) (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm α u t ≤ parabolicC0AlphaNorm α u s :=
+  add_le_add (parabolicSupNorm_mono_domain hts hu.boundedOn)
+    (parabolicHolderSeminorm_mono_domain hts hu.holderOn)
+
 /-- **The semi-Banach carrier of the parabolic `C^{0,α}` space.**  A type synonym for
 `parabolicC0AlphaSubmodule X E α s` whose canonical topology/uniformity is the parabolic `C^{0,α}`
 seminorm one, isolating it from the ambient pointwise product topology on the underlying function
@@ -91,6 +100,37 @@ theorem norm_def (u : ParabolicC0AlphaSpace X E α s) :
 theorem dist_def (u v : ParabolicC0AlphaSpace X E α s) :
     dist u v = parabolicC0AlphaNorm α (fun z => toFun u z - toFun v z) s :=
   parabolicC0AlphaSubmodule.seminormedAddCommGroup_dist (X := X) (E := E) α s u v
+
+/-- Restriction to a subset `t ⊆ s`, as a linear map on the seminormed carriers (it does not change
+the underlying function, only the domain of the parabolic estimates). -/
+def restrictLM {t : Set (ℝ × X)} (hts : t ⊆ s) :
+    ParabolicC0AlphaSpace X E α s →ₗ[ℝ] ParabolicC0AlphaSpace X E α t :=
+  parabolicC0AlphaSubmodule.restrictLinearMap hts
+
+@[simp]
+theorem toFun_restrictLM {t : Set (ℝ × X)} (hts : t ⊆ s) (u : ParabolicC0AlphaSpace X E α s) :
+    toFun (restrictLM hts u) = toFun u :=
+  rfl
+
+/-- **Restriction is norm-nonincreasing.**  Restriction to a subset `t ⊆ s` is a bounded linear map
+of operator norm `≤ 1` on the seminormed carriers (`parabolicC0AlphaNorm_mono_domain`). -/
+noncomputable def restrictL {t : Set (ℝ × X)} (hts : t ⊆ s) :
+    ParabolicC0AlphaSpace X E α s →L[ℝ] ParabolicC0AlphaSpace X E α t :=
+  LinearMap.mkContinuous (restrictLM hts) 1 (fun u => by
+    rw [one_mul]
+    show parabolicC0AlphaNorm α (toFun (restrictLM hts u)) t ≤ parabolicC0AlphaNorm α (toFun u) s
+    rw [toFun_restrictLM]
+    exact parabolicC0AlphaNorm_mono_domain hts (toSubmodule u).2)
+
+@[simp]
+theorem toFun_restrictL {t : Set (ℝ × X)} (hts : t ⊆ s) (u : ParabolicC0AlphaSpace X E α s) :
+    toFun (restrictL hts u) = toFun u :=
+  rfl
+
+/-- The restriction operator on the carrier has operator norm `≤ 1`. -/
+theorem norm_restrictL_le {t : Set (ℝ × X)} (hts : t ⊆ s) :
+    ‖restrictL (X := X) (E := E) (α := α) (s := s) (t := t) hts‖ ≤ 1 :=
+  LinearMap.mkContinuous_norm_le _ zero_le_one _
 
 end ParabolicC0AlphaSpace
 
@@ -190,6 +230,44 @@ theorem norm_outL (x : ParabolicC0AlphaBanach X E α s) : ‖outL x‖ = ‖x‖
 theorem outL_injective :
     Function.Injective (outL : ParabolicC0AlphaBanach X E α s → ParabolicC0AlphaSpace X E α s) :=
   Function.LeftInverse.injective mk_outL
+
+/-- **Restriction descends to the Banach spaces.**  Restriction to a subset `t ⊆ s` — well-defined on
+classes because it is norm-nonincreasing, so it sends functions that agree on `s` to functions that
+agree on `t` — is a bounded operator `ParabolicC0AlphaBanach … s →L[ℝ] ParabolicC0AlphaBanach … t`
+(`SeparationQuotient.liftCLM` of the composite `mk ∘ (carrier restriction)`). -/
+noncomputable def restrictL {t : Set (ℝ × X)} (hts : t ⊆ s) :
+    ParabolicC0AlphaBanach X E α s →L[ℝ] ParabolicC0AlphaBanach X E α t :=
+  SeparationQuotient.liftCLM ((mkL (s := t)).comp (ParabolicC0AlphaSpace.restrictL hts))
+    (fun u u' hins => by
+      change SeparationQuotient.mk _ = SeparationQuotient.mk _
+      refine SeparationQuotient.mk_eq_mk.2 ?_
+      rw [Metric.inseparable_iff]
+      have h0 : dist u u' = 0 := Metric.inseparable_iff.mp hins
+      have hle : dist (ParabolicC0AlphaSpace.restrictL hts u)
+          (ParabolicC0AlphaSpace.restrictL hts u') ≤ dist u u' := by
+        rw [dist_eq_norm, dist_eq_norm, ← map_sub]
+        calc ‖ParabolicC0AlphaSpace.restrictL hts (u - u')‖
+            ≤ ‖ParabolicC0AlphaSpace.restrictL hts‖ * ‖u - u'‖ :=
+              (ParabolicC0AlphaSpace.restrictL hts).le_opNorm _
+          _ ≤ 1 * ‖u - u'‖ := by
+              gcongr; exact ParabolicC0AlphaSpace.norm_restrictL_le hts
+          _ = ‖u - u'‖ := one_mul _
+      exact le_antisymm (hle.trans h0.le) dist_nonneg)
+
+/-- **Restriction commutes with the projection.**  On the class of a representative `u`, restriction
+is the class of the restricted representative. -/
+@[simp]
+theorem restrictL_mk {t : Set (ℝ × X)} (hts : t ⊆ s) (u : ParabolicC0AlphaSpace X E α s) :
+    restrictL hts (mk u) = mk (ParabolicC0AlphaSpace.restrictL hts u) :=
+  SeparationQuotient.liftCLM_mk _ _ u
+
+/-- The restriction operator on the Banach spaces has operator norm `≤ 1`. -/
+theorem norm_restrictL_le {t : Set (ℝ × X)} (hts : t ⊆ s) :
+    ‖restrictL (X := X) (E := E) (α := α) (s := s) (t := t) hts‖ ≤ 1 := by
+  refine ContinuousLinearMap.opNorm_le_bound _ zero_le_one (fun x => ?_)
+  obtain ⟨u, rfl⟩ := mk_surjective x
+  rw [one_mul, restrictL_mk, norm_mk, norm_mk, ParabolicC0AlphaSpace.toFun_restrictL]
+  exact parabolicC0AlphaNorm_mono_domain hts (ParabolicC0AlphaSpace.toSubmodule u).2
 
 end ParabolicC0AlphaBanach
 
