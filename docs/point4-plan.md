@@ -7373,3 +7373,39 @@ H_{t−s}(Q(u s)) ds`, and use the committed per-time contraction `norm_heatMild
 (`‖Φ(u₁)(t) − Φ(u₂)(t)‖ ≤ Kstate·(t − t₀)·‖u₁ − u₂‖`, uniform over `t ∈ (t₀, T]`) to get a
 `ContractingWith` on a short time window, whose fixed point is the model mild solution — the analytic
 template for the mild Ricci–DeTurck representative feeding the chart `A`/`picard`.
+
+Update — **the path-space Banach fixed point is now CLOSED for the model (`ℝⁿ`) mild solution**
+(extending `AnalyticPDE/HeatKernel1D.lean`, all axiom-clean, `scan cheats` `TOTAL 0`, module green).
+This session closes the recorded next target — the model semilinear mild-solution existence+uniqueness
+via `ContractingWith` — by assembling the complete state-space datum and the self-map fixed point:
+
+* `heatMildValuePathBcfIoc` / `heatMildValuePathBcfIcc` (+ `_apply`, `_apply_eq`, self-map norm bounds
+  `norm_heatMildValuePathBcfIoc_le` / `norm_heatMildValuePathBcfIcc_le`) — the mild-value path realized
+  as a genuine element of the complete Banach state spaces `↥(Set.Ioc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`
+  (half-open, no endpoint hypotheses) and `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)` (closed, Lipschitz
+  data), via `ofNormedAddCommGroup` from the `Ioi`/`Icc` continuity and the `‖u₀‖+C·(T−t₀)` bound.
+* `dist_heatMildValuePathBcfIoc_le` / `dist_heatMildValuePathBcfIcc_le` — the short-time contraction
+  datum `dist(Φ(q₁))(Φ(q₂)) ≤ D·(T−t₀)` in each state-space norm (fixed-time `norm_heatMildValueNDbcf_sub_le`,
+  homogeneous term cancels; at the closed endpoint both values are `u₀`).
+* `norm_heatSemigroupNDbcf_sub_self_le_of_lipschitz` (`‖H_s u₀−u₀‖ ≤ L·n·(2/√π)·√s`) +
+  `continuousWithinAt_heatFlowPathBcf_zero` — **strong continuity of the `C_b` heat semigroup at the
+  initial time on Lipschitz data**, the endpoint datum closing the `Icc` route.
+* `continuousWithinAt_heatDuhamelPathBcf_initial`, `continuousWithinAt_heatMildValuePathBcf_initial`,
+  `continuousOn_heatMildValuePathBcf_Icc`, `heatMildValuePathBcf_initial` (`Φ(t₀)=u₀`) — the mild-value
+  path is `ContinuousOn` the **closed** interval on Lipschitz data.
+* `heatMildSelfMap` (source via `Set.IccExtend`), `dist_heatMildSelfMap_le`
+  (`dist(Φu)(Φv) ≤ Kstate·(T−t₀)·dist(u,v)`), and **`exists_unique_heatMildFixedPoint`**: for
+  `L`-Lipschitz `u₀`, bounded `Kstate`-Lipschitz reaction `Q`, and `Kstate·(T−t₀) < 1`, the mild
+  self-map has a **unique fixed point** in `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)` — the genuine model
+  mild solution of `u_t = Δu + Q(u)`, `u(t₀)=u₀`, via `banach_fixedPoint_exists_unique`.
+
+**Next target.**  Transport the model mild fixed point to the chart. Two honest sub-steps:
+  (a) generalise the model state space `(Fin n → ℝ) →ᵇ ℝ` to the manifold bundle state space
+      `ContinuousSectionSpace … et Kc …` (the chart's `A` domain), lifting `heatMildSelfMap` /
+      `exists_unique_heatMildFixedPoint` to sections; and
+  (b) identify the mild representative with the geometric Ricci–DeTurck RHS (`chart.geometric`), where
+      the reaction `Q` is the lower-order (non-Laplacian) part — the point at which the *bounded
+      Lipschitz `Q`* hypothesis meets the real operator (the remaining Schauder/higher-regularity gap:
+      the genuine Ricci–DeTurck reaction is bounded-Lipschitz only relative to a higher-regularity
+      norm, not `C⁰`). The model template now makes precise exactly what must be supplied to inhabit
+      `A`/`picard` through the mild route.
