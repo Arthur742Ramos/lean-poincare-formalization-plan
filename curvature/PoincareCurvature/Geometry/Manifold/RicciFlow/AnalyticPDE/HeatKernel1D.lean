@@ -5641,5 +5641,52 @@ lemma isPicardLindelof_of_boundedOn_lipschitzOn_superset_timeDependent_Icc
     (fun t ht x hx => hbound t ht x (hball hx))
     hLa
 
+/-- **Lipschitz + center bound ⟹ ball bound.**  A `K`-Lipschitz map on `closedBall x₀ a` whose
+value at the centre is bounded by `M` is bounded by `M + K·a` on the whole ball (triangle
+inequality along the Lipschitz estimate).  The reduction that turns the ball norm-bound obligation
+into a single evaluation of the operator at the base point. -/
+lemma norm_le_add_mul_of_lipschitzOn_closedBall {E : Type*} [NormedAddCommGroup E]
+    {f : E → E} {x0 : E} {a K M : ℝ≥0}
+    (hlip : LipschitzOnWith K f (Metric.closedBall x0 (a : ℝ)))
+    (hcenter : ‖f x0‖ ≤ (M : ℝ)) :
+    ∀ x ∈ Metric.closedBall x0 (a : ℝ), ‖f x‖ ≤ (M : ℝ) + (K : ℝ) * (a : ℝ) := by
+  intro x hx
+  have hx0 : x0 ∈ Metric.closedBall x0 (a : ℝ) :=
+    Metric.mem_closedBall_self (NNReal.coe_nonneg a)
+  have hdx : dist x x0 ≤ (a : ℝ) := Metric.mem_closedBall.mp hx
+  have htri : ‖f x‖ ≤ dist (f x) (f x0) + ‖f x0‖ := by
+    rw [← dist_zero_right (f x), ← dist_zero_right (f x0)]
+    exact dist_triangle (f x) (f x0) 0
+  have hlm : dist (f x) (f x0) ≤ (K : ℝ) * dist x x0 := hlip.dist_le_mul x hx x0 hx0
+  have hKa : (K : ℝ) * dist x x0 ≤ (K : ℝ) * (a : ℝ) :=
+    mul_le_mul_of_nonneg_left hdx (NNReal.coe_nonneg K)
+  linarith [htri, hlm, hKa, hcenter]
+
+/-- **Center-bound form of the local time-dependent Picard–Lindelöf bridge on `[t₀, T]`.**
+The ball norm-bound of `isPicardLindelof_of_boundedOn_lipschitzOn_closedBall_timeDependent_Icc`
+is replaced by a bound `‖g t x₀‖ ≤ M` at the *centre* `x₀` only; combined with the `K`-Lipschitz
+control on `closedBall x₀ a` it produces the uniform ball bound `M + K·a` (via
+`norm_le_add_mul_of_lipschitzOn_closedBall`).  This is the shape the honest Ricci–DeTurck chart
+consumes for its `picard` field: the only genuinely analytic norm datum needed is the size of the
+Ricci–DeTurck operator applied to the *fixed initial metric* `g₀`, not a bound over a whole ball. -/
+lemma isPicardLindelof_of_lipschitzOn_centerBound_closedBall_timeDependent_Icc
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : ℝ → E → E) (x0 : E) (t₀ T : ℝ) (hT : t₀ < T) (a K M : ℝ≥0)
+    (hlip : ∀ t ∈ Set.Icc t₀ T, LipschitzOnWith K (g t) (Metric.closedBall x0 (a : ℝ)))
+    (hcont : ∀ x ∈ Metric.closedBall x0 (a : ℝ),
+      ContinuousOn (fun t => g t x) (Set.Icc t₀ T))
+    (hcenter : ∀ t ∈ Set.Icc t₀ T, ‖g t x0‖ ≤ (M : ℝ))
+    (hLa : ((M : ℝ) + (K : ℝ) * (a : ℝ)) * (T - t₀) ≤ (a : ℝ)) :
+    IsPicardLindelof g (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (M + K * a) K := by
+  refine isPicardLindelof_of_boundedOn_lipschitzOn_closedBall_timeDependent_Icc
+    g x0 t₀ T hT a (M + K * a) K hlip hcont ?_ ?_
+  · intro t ht x hx
+    have hb := norm_le_add_mul_of_lipschitzOn_closedBall (hlip t ht) (hcenter t ht) x hx
+    push_cast
+    linarith [hb]
+  · push_cast
+    linarith [hLa]
+
 end AnalyticPDE
 end RicciFlow
