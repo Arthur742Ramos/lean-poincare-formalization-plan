@@ -798,4 +798,40 @@ theorem ricciBilinearFormSection_contMDiff_zero
     (k := (0 : WithTop ℕ∞)) hbase (subset_refl _) hcurv k
   exact hcoeff.continuousOn
 
+/-- **The intrinsic Ricci–DeTurck right-hand side is a continuous `BilinearFormBundle` section,
+unconditionally** (for a `C¹` background connection slice).  This removes the last hypothesis of
+`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection` by *supplying* its Ricci
+section input `rs := ricciBilinearFormSection (someContMDiffLeviCivitaConnection g t)` together with
+its just-proved continuity `ricciBilinearFormSection_contMDiff_zero` — so the geometric operator `A`'s
+value section is now known to be a genuine continuous `BilinearFormBundle` section with **no** assumed
+Ricci-section hypothesis.  This closes the geometric-`A` **value-section** regularity (GAP 2); the
+remaining `A`-side obstruction is the `picard` Lipschitz/centre bounds for the mild/regularised
+representative. -/
+theorem exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    ∃ rhs : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x,
+      ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+        (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := _root_.Bundle.BilinearFormBundle (V := TM)) x (rhs x)) ∧
+      ∀ (x : M) (u v : TM x),
+        rhs x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v := by
+  letI : _root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x) :=
+    ⟨(g t).toRiemannianMetric⟩
+  haveI hcov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g t
+  refine exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection
+    g background t hbackground
+    (ricciBilinearFormSection (I := I) (M := M)
+      (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+        (I := I) (M := M) g t))
+    ?_ ?_
+  · exact ricciBilinearFormSection_contMDiff_zero (I := I) (M := M)
+      (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+        (I := I) (M := M) g t) (Module.finBasis ℝ E)
+  · intro x u v
+    rw [ricciBilinearFormSection_apply]
+    rfl
+
 end RicciFlow
