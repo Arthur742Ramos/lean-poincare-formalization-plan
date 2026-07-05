@@ -7833,3 +7833,52 @@ the section-space representative feeding `chart.lipschitz`/`picard` (routing poi
 through the diamond-free `ContinuousSection` eval API); (ii) the `realization` decode consuming the
 ball-localised `C^{0,α}` regularity via a parabolic Schauder interior estimate; or (iii) the `geometric`
 identification `A τ s x u v = intrinsicRicciDeTurckRHS …` on the positive-definite locus.
+
+---
+
+## Milestone (2026-07-05) — explicit-constant quantitative parabolic `C^{0,α}` norm bounds of the model mild solution (GAP 2 analytic core; Schauder-consumable norm form)
+
+Six additive, fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`) declarations
+appended to `AnalyticPDE/HeatKernelParabolicC0Alpha.lean` (a leaf module, so the additions are fully
+isolated); full `lake build` green (2704 jobs); `scan cheats` `TOTAL 0`.
+
+**Motivation.** The previous milestone established `ParabolicC0AlphaOn` *class membership*
+(`heatMildFixedPoint_parabolicC0AlphaOn` and companions) — but `ParabolicC0AlphaOn` is
+`∃ B ≥ 0, ∃ H ≥ 0, ParabolicC0AlphaWith B H α`, so the concrete sup/Hölder constants are **erased
+behind the existential**.  The parabolic Schauder fixed-point iteration and its contraction estimates
+operate on the **honest `ℝ`-valued norm functional** `parabolicC0AlphaNorm` and need *explicit* a-priori
+norm bounds, not mere membership.  This milestone exposes those constants.
+
+* `heatMildFixedPoint_parabolicBoundedWith` / `heatMildFixedPoint_parabolicSupNorm_le` — the `C^0`
+  part with the **explicit** sup constant `‖u₀‖ + CQ·(T−t₀)`, on *every* time-space set (the a-priori
+  bound `norm_heatMildFixedPoint_le` holds globally and `Set.IccExtend` only clamps the time argument).
+* `heatMildFixedPoint_parabolicHolderWith` — the parabolic Hölder-`1` (parabolic-Lipschitz) modulus on
+  the interior slab `Icc t_lo T ×ˢ univ` with the **explicit** interior constant `Ksp_max + Ktm_coef`
+  (the same coefficients the existential membership lemma computes internally, now surfaced), assembled
+  from the uniform spatial-Lipschitz and time-`Hölder-1/2` moduli.
+* `heatMildFixedPoint_parabolicC0AlphaWith` — the explicit-constant `ParabolicC0AlphaWith` class
+  membership (the direct explicit companion of the existential `heatMildFixedPoint_parabolicC0AlphaOn`).
+* `heatMildFixedPoint_parabolicC0AlphaNorm_le` — the explicit **`parabolicC0AlphaNorm 1` bound**
+  `B + (Ksp_max + Ktm_coef)` on the interior slab (sup part + Hölder-seminorm part via
+  `parabolicSupNorm_le` / `parabolicHolderSeminorm_le`).
+* `heatMildFixedPoint_parabolicC0AlphaNorm_closedBall_le` — the **Schauder-local, general-exponent**
+  form: on an interior `parabolicClosedBall c R` (time-extent `[c.1−R², c.1+R²] ⊆ [t_lo, T]`), the
+  `parabolicC0AlphaNorm α` (`0 ≤ α ≤ 1`) is bounded by `B + (Ksp_max + Ktm_coef)·(2R)^{1−α}` — the
+  interior slab Hölder-`1` modulus restricted to the ball (inside the slab) and exponent-downgraded on
+  the ball of parabolic diameter `≤ 2R` via `ParabolicHolderWith.exponent_le_of_bounded`.  This is the
+  ball-localised explicit Hölder-space norm control the parabolic Schauder local fixed-point iteration
+  and local-to-global gluing consume.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still on the `realization`/Schauder
+side of GAP 2: the model mild representative's regularity is now available as *explicit quantitative
+norm bounds* in the parabolic `C^{0,α}` Banach norm (interior slab and interior closed balls), not just
+existential class membership.  This is the exact interface the parabolic Schauder interior fixed-point
+iteration reads its a-priori constants from — the connective step from "the mild solution is regular"
+to "the mild solution's Hölder-space norm is explicitly controlled by the data".
+
+**Next target.** The frontier remains the transfer/assembly side: (i) the contraction/difference norm
+bound (two mild solutions differ in `parabolicC0AlphaNorm` by the data difference — the Schauder
+fixed-point contraction ingredient); (ii) lift the explicit norm bounds through the coordinate readout
+to the section-space representative feeding `chart.lipschitz`/`picard`; or (iii) the `realization`
+decode consuming the ball-localised explicit `C^{0,α}` norm control via a parabolic Schauder interior
+estimate.
