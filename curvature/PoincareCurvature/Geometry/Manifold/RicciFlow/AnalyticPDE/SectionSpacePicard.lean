@@ -2,6 +2,7 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernel1D
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE
 
 /-!
 # Section-space Picard–Lindelöf constructor (route (ii))
@@ -398,5 +399,56 @@ theorem sectionSpace_evolution_exists_of_forall_coord_centerBound
       (∀ t ∈ Set.Icc t₀ T, HasDerivWithinAt α (A t (α t)) (Set.Icc t₀ T) t) :=
   (isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
     A x0 t₀ T hT a K Mc hlip hcont hcenter hLa).exists_eq_forall_mem_Icc_hasDerivWithinAt₀
+
+/-- **Single-solution Picard–Lindelöf with closed-ball state membership.**  Mathlib's differential
+Picard–Lindelöf theorem `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt` produces the
+local integral curve `α` but discards the a-priori bound that `α` stays inside the closed ball
+`closedBall x₀ a`, on which the vector-field hypotheses hold — a bound its own proof establishes
+(`ODE.FunSpace.compProj_mem_closedBall`).  This variant *retains* that state-membership readout on
+the whole interval, which is exactly what upgrades a raw evolution curve to a state-constrained
+`BanachEvolutionLocalSolutionIn` without shrinking the interval or assuming the state set is open. -/
+theorem _root_.IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt_mem_closedBall
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    {f : ℝ → E → E} {tmin tmax : ℝ} {t₀ : Set.Icc tmin tmax} {x₀ x : E} {a r L K : ℝ≥0}
+    (hf : IsPicardLindelof f t₀ x₀ a r L K) (hx : x ∈ Metric.closedBall x₀ (r : ℝ)) :
+    ∃ α : ℝ → E, α t₀ = x ∧
+      (∀ t ∈ Set.Icc tmin tmax, α t ∈ Metric.closedBall x₀ (a : ℝ)) ∧
+      ∀ t ∈ Set.Icc tmin tmax, HasDerivWithinAt α (f t (α t)) (Set.Icc tmin tmax) t := by
+  obtain ⟨α, hα⟩ := ODE.FunSpace.exists_isFixedPt_next hf hx
+  refine ⟨α.compProj,
+    by rw [ODE.FunSpace.compProj_val, ← hα, ODE.FunSpace.next_apply₀],
+    fun t _ => α.compProj_mem_closedBall hf.mul_max_le, fun t ht => ?_⟩
+  apply ODE.hasDerivWithinAt_picard_Icc t₀.2 hf.continuousOn_uncurry
+    α.continuous_compProj.continuousOn
+    (fun _ _ => α.compProj_mem_closedBall hf.mul_max_le) x ht |>.congr_of_mem _ ht
+  intro t' ht'
+  nth_rw 1 [← hα]
+  rw [ODE.FunSpace.compProj_of_mem ht', ODE.FunSpace.next_apply]
+
+/-- **Closed-ball Picard–Lindelöf gives a state-constrained forward local solution.**  When the
+Picard state ball `closedBall u₀ a` is contained in the prescribed state set `stateSet`, the forward
+Picard–Lindelöf solution — which provably stays in that ball on the *whole* interval `[t₀, T]` — is a
+genuine `BanachEvolutionLocalSolutionIn` on the full window, with **no** interval shrinking and **no**
+openness hypothesis on `stateSet` (contrast `IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_mem_isOpen`,
+which shrinks the terminal time to keep the curve inside an open set).  This is the a-posteriori
+ball-membership route that the honest ball-local section-space Picard data feeds directly into a
+`realization` decode. -/
+theorem _root_.IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
+    {F : ℝ → X → X} {stateSet : Set X} {t₀ T : ℝ} (hT : t₀ < T) {u₀ : X}
+    {a L K : ℝ≥0}
+    (hF : IsPicardLindelof F (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, le_of_lt hT⟩⟩ u₀ a 0 L K)
+    (hsub : Metric.closedBall u₀ (a : ℝ) ⊆ stateSet) :
+    Nonempty (BanachEvolutionLocalSolutionIn F stateSet t₀ u₀) := by
+  obtain ⟨α, hα0, hmem, hderiv⟩ :=
+    hF.exists_eq_forall_mem_Icc_hasDerivWithinAt_mem_closedBall (x := u₀) (by simp)
+  exact ⟨{
+    terminalTime := T
+    initial_lt_terminal := hT
+    curve := α
+    initial_eq := hα0
+    equation := by intro t ht; exact hderiv t ht
+    mem_state := by intro t ht; exact hsub (hmem t ht) }⟩
 
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
