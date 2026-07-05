@@ -768,4 +768,53 @@ theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLin
   · intro s _
     exact (hLc s).add hb
 
+/-- **State-constrained section-space local solution from the mild bounded-linear generator + source
+interface.**  Runs the mild-operator `picard` field
+(`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source`) all
+the way through the a-posteriori closed-ball bridge
+(`IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset`) to a genuine
+`BanachEvolutionLocalSolutionIn (fun t s => L t s + b t) locus t₀ x0` — precisely the state-constrained
+Banach evolution object a downstream `realization` decode into an intrinsic De Turck local solution
+consumes.
+
+The analytic inputs are exactly the mild (regularised) generator data: `L t : CSS →L[ℝ] CSS` a
+bounded linear operator with uniform operator-norm bound `‖L t‖ ≤ K` on `[t₀, T₀]`, strong time
+continuity of `L`, a continuous source `b`, and the a-priori containment `closedBall x0 a ⊆ locus` of
+the Picard ball in the prescribed state locus (e.g. the Riemannian metric cone).  With `F` complete
+the section space is a Banach space, so the Picard–Lindelöf solution — which stays in `closedBall x0 a`
+on the whole window — is a `locus`-valued local solution with no interval shrinking.  This is the
+picard→solution half of the chart, reduced to *exhibiting the regularised generator family*. -/
+theorem exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_boundedLinear_generator_source
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (L : ℝ →
+      (ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →L[ℝ]
+        ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover))
+    (b : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (locus : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover))
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a K : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hK : ∀ t ∈ Set.Icc t₀ T₀, ‖L t‖ ≤ (K : ℝ))
+    (hLc : ∀ s, ContinuousOn (fun t => (L t) s) (Set.Icc t₀ T₀))
+    (hb : ContinuousOn b (Set.Icc t₀ T₀))
+    (hsub : Metric.closedBall x0 (a : ℝ) ⊆ locus) :
+    Nonempty (BanachEvolutionLocalSolutionIn (fun t s => (L t) s + b t) locus t₀ x0) := by
+  obtain ⟨T, hT, Mc, hPL⟩ :=
+    exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source
+      L b x0 t₀ T₀ hT₀ a K ha hK hLc hb
+  exact IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset hT hPL hsub
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
