@@ -198,6 +198,77 @@ theorem ContMDiffOn.smulRightSection [IsManifold I 1 M] [ContMDiffVectorBundle 1
     ((hφ x hx).contMDiffAt (hs.mem_nhds hx))
     ((hv x hx).contMDiffAt (hs.mem_nhds hx))).contMDiffWithinAt
 
+/-- **Level-generic version of `ContMDiffAt.smulRightSection`.** For any smoothness level `n`, the
+scalar-right multiplication `φ ↦ φ.smulRight v` of a `C^n` cotangent-valued section `φ` with a `C^n`
+bundle section `v` is a `C^n` hom-bundle section. This is the `smulRight`-product regularity input
+that lowers the regularity of a covariant derivative by exactly one order (used to run the frame
+covariant-derivative regularity at levels below the hard-coded `2 → 1`). -/
+theorem ContMDiffAt.smulRightSection_of_level {n : WithTop ℕ∞}
+    [IsManifold I 1 M] [ContMDiffVectorBundle 1 F V I] [ContMDiffVectorBundle n F V I]
+    {φ : ∀ x, TangentSpace I x →L[ℝ] ℝ} {v : ∀ x, V x} {x₀ : M}
+    (hφ : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) n
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ) (E := TStar) x (φ x)) x₀)
+    (hv : ContMDiffAt I (I.prod 𝓘(ℝ, F)) n
+      (fun x ↦ TotalSpace.mk' F x (v x)) x₀) :
+    ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] F)) n
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] F) (E := THom) x ((φ x).smulRight (v x))) x₀ := by
+  rw [contMDiffAt_hom_bundle (IB := I) (IM := I) (F₁ := E) (E₁ := (TangentSpace I : M → Type _))
+    (F₂ := F) (E₂ := V)
+    (f := fun x ↦ TotalSpace.mk' (E →L[ℝ] F) (E := THom) x ((φ x).smulRight (v x)))]
+  refine ⟨contMDiffAt_id, ?_⟩
+  change ContMDiffAt I 𝓘(ℝ, E →L[ℝ] F) n
+    (fun x ↦ ContinuousLinearMap.inCoordinates E (TangentSpace I : M → Type _) F V x₀ x x₀ x
+      ((φ x).smulRight (v x))) x₀
+  let Φ : M → E →L[ℝ] ℝ := fun x ↦
+    ContinuousLinearMap.inCoordinates E (TangentSpace I : M → Type _) ℝ (fun _ : M ↦ ℝ)
+      x₀ x x₀ x (φ x)
+  let Vc : M → F := fun x ↦ ((trivializationAt F V x₀) (TotalSpace.mk' F x (v x))).2
+  have hΦ : ContMDiffAt I 𝓘(ℝ, E →L[ℝ] ℝ) n Φ x₀ := by
+    simpa [Φ] using
+      (((contMDiffAt_hom_bundle
+        (IB := I) (IM := I)
+        (F₁ := E) (E₁ := (TangentSpace I : M → Type _))
+        (F₂ := ℝ) (E₂ := fun _ : M ↦ ℝ)
+        (f := fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ) (E := TStar) x (φ x))).mp hφ).2)
+  have hxV : x₀ ∈ (trivializationAt F V x₀).baseSet := mem_baseSet_trivializationAt F V x₀
+  have hVc : ContMDiffAt I 𝓘(ℝ, F) n Vc x₀ := by
+    simpa [Vc] using ((trivializationAt F V x₀).contMDiffAt_section_iff (n := n) hxV).mp hv
+  have hcoord :
+      (fun x ↦
+        (ContinuousLinearMap.smulRightL ℝ E F) (Φ x) (Vc x)) =ᶠ[𝓝 x₀]
+      (fun x ↦
+        ContinuousLinearMap.inCoordinates E (TangentSpace I : M → Type _) F V x₀ x x₀ x
+          ((φ x).smulRight (v x))) := by
+    have hT :
+        ∀ᶠ x in 𝓝 x₀, x ∈ (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet := by
+      exact (trivializationAt E (TangentSpace I : M → Type _) x₀).open_baseSet.mem_nhds
+        (mem_baseSet_trivializationAt E (TangentSpace I : M → Type _) x₀)
+    have hV : ∀ᶠ x in 𝓝 x₀, x ∈ (trivializationAt F V x₀).baseSet := by
+      exact (trivializationAt F V x₀).open_baseSet.mem_nhds
+        (mem_baseSet_trivializationAt F V x₀)
+    filter_upwards [hT, hV] with x hxT hxV
+    rw [ContinuousLinearMap.inCoordinates_smulRight_eq (I := I) (V := V) hxT hxV]
+    rfl
+  refine ContMDiffAt.congr_of_eventuallyEq ?_ hcoord.symm
+  exact (contMDiffAt_const.clm_apply hΦ).clm_apply hVc
+
+/-- **Level-generic version of `ContMDiffOn.smulRightSection`.** The `ContMDiffOn` form of
+`ContMDiffAt.smulRightSection_of_level`. -/
+theorem ContMDiffOn.smulRightSection_of_level {n : WithTop ℕ∞}
+    [IsManifold I 1 M] [ContMDiffVectorBundle 1 F V I] [ContMDiffVectorBundle n F V I]
+    {φ : ∀ x, TangentSpace I x →L[ℝ] ℝ} {v : ∀ x, V x} {s : Set M}
+    (hs : IsOpen s)
+    (hφ : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) n
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ) (E := TStar) x (φ x)) s)
+    (hv : ContMDiffOn I (I.prod 𝓘(ℝ, F)) n
+      (fun x ↦ TotalSpace.mk' F x (v x)) s) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] F)) n
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] F) (E := THom) x ((φ x).smulRight (v x))) s := by
+  intro x hx
+  exact (ContMDiffAt.smulRightSection_of_level
+    ((hφ x hx).contMDiffAt (hs.mem_nhds hx))
+    ((hv x hx).contMDiffAt (hs.mem_nhds hx))).contMDiffWithinAt
+
 namespace Bundle.Trivialization
 
 section Local
@@ -568,6 +639,74 @@ theorem contMDiffCovariantDerivativeOn_frameCovariantDerivative :
   contMDiff hσ := e.contMDiffOn_frameCovariantDerivative_baseSet (I := I) b hσ
 
 end Regularity
+
+section RegularityLevel
+
+variable [FiniteDimensional ℝ F] [CompleteSpace F] [IsManifold I 1 M]
+  {ι : Type*} [Fintype ι]
+  (e : Trivialization F (TotalSpace.proj : TotalSpace F V → M)) [MemTrivializationAtlas e]
+  (b : Module.Basis ι ℝ F)
+
+/-- **Level-generic frame covariant-derivative regularity.** Generalizes
+`contMDiffOn_frameCovariantDerivative` (hard-coded `2 → 1`) to an arbitrary smoothness level `n`: a
+`C^{n+1}` section has a `C^n` frame covariant derivative, since `frameCovariantDerivative` differs
+`σ` by exactly one order (the `extDerivFun` step) and multiplies against the frame. The `n = 0`
+instance (a `C¹` section has a `C⁰`, i.e. continuous, frame covariant derivative) is the regularity
+drop needed to see the covariant derivative of a merely-`C¹` vector field as a continuous section. -/
+theorem contMDiffOn_frameCovariantDerivative_of_level {n : WithTop ℕ∞}
+    [ContMDiffVectorBundle 1 F V I] [ContMDiffVectorBundle n F V I]
+    [ContMDiffVectorBundle (n + 1) F V I]
+    {σ : Π x : M, V x}
+    {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
+    (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, F)) (n + 1) (fun x ↦ TotalSpace.mk' F x (σ x)) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] F)) n
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] F) (E := THom) x
+        (frameCovariantDerivative (I := I) e b σ x)) u := by
+  classical
+  simpa [frameCovariantDerivative] using
+    (ContMDiffOn.sum_section (s := (Finset.univ : Finset ι)) fun i hi ↦ by
+      have hcoeff : ContMDiffOn I 𝓘(ℝ) (n + 1)
+          ((LinearMap.piApply (e.localFrame_coeff I b i)) σ) u :=
+        contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b) hu hu' hσ i
+      have hext : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) n
+          (fun x ↦
+            TotalSpace.mk' (E →L[ℝ] ℝ) (E := TStar) x
+              (extDerivFun ((LinearMap.piApply (e.localFrame_coeff I b i)) σ) x)) u := by
+        intro x hx
+        exact (((hcoeff x hx).contMDiffAt (hu.mem_nhds hx)).extDerivSection
+          (I := I) (E := E) (m := n) (n := n + 1)
+          (le_refl _)).contMDiffWithinAt
+      have hframe : ContMDiffOn I (I.prod 𝓘(ℝ, F)) n
+          (fun x ↦ TotalSpace.mk' F x (e.localFrame b i x)) u := by
+        exact
+          (Bundle.Trivialization.contMDiffOn_localFrame_baseSet (I := I) (e := e)
+            (n := n) (b := b) i).mono hu'
+      exact ContMDiffOn.smulRightSection_of_level (I := I) (V := V) hu hext hframe)
+
+/-- `e.baseSet` version of `contMDiffOn_frameCovariantDerivative_of_level`. -/
+theorem contMDiffOn_frameCovariantDerivative_baseSet_of_level {n : WithTop ℕ∞}
+    [ContMDiffVectorBundle 1 F V I] [ContMDiffVectorBundle n F V I]
+    [ContMDiffVectorBundle (n + 1) F V I]
+    {σ : Π x : M, V x}
+    (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, F)) (n + 1)
+      (fun x ↦ TotalSpace.mk' F x (σ x)) e.baseSet) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] F)) n
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] F) (E := THom) x
+        (frameCovariantDerivative (I := I) e b σ x)) e.baseSet := by
+  exact e.contMDiffOn_frameCovariantDerivative_of_level (I := I) b e.open_baseSet
+    (subset_refl _) hσ
+
+/-- **Level-generic frame covariant-derivative class instance.** The frame covariant derivative is a
+`C^n` covariant derivative on `e.baseSet` for every smoothness level `n` (given a `C^{n+1}`-regular
+bundle). Specializing to `n = 0` gives the frame connection as a `C⁰` (continuous) covariant
+derivative, which is the level-downgrade template for `ContMDiffCovariantDerivativeOn`. -/
+theorem contMDiffCovariantDerivativeOn_frameCovariantDerivative_of_level {n : WithTop ℕ∞}
+    [ContMDiffVectorBundle 1 F V I] [ContMDiffVectorBundle n F V I]
+    [ContMDiffVectorBundle (n + 1) F V I] :
+    ContMDiffCovariantDerivativeOn F n (frameCovariantDerivative (I := I) e b) e.baseSet where
+  contMDiff hσ := e.contMDiffOn_frameCovariantDerivative_baseSet_of_level (I := I) b hσ
+
+end RegularityLevel
 
 end Bundle.Trivialization
 
