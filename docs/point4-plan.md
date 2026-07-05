@@ -8341,3 +8341,51 @@ single named brick.
    `intrinsicRicciTensor` as a continuous `BilinearFormBundle` section — the exact `rs` input to the lemma above,
    completing the geometric `A`-value regularity.  (Then the `picard` Lipschitz/centre bounds for the
    mild/regularised representative remain — the other half of GAP 2.)
+
+## Milestone (2026-07-05, later still) — raw curvature commutator continuity: `curvatureAux` is a continuous `TM`-section for a `C¹` connection (global + local), Step 1 of the Ricci-tensor-section route DONE (Item 3 / GAP 2 geometric-A regularity)
+
+Two additive commits, sorry-free, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0`, `lake build …DeTurckCorrectionRegularity` green (2910 jobs).  Appended to the
+isolated `RicciFlow/DeTurckCorrectionRegularity.lean` (nothing imports it downstream, so no rebuild churn).
+
+**`curvatureAux_contMDiff_zero`** (global).  For a `C¹` covariant derivative `cov` on `TM`
+(`[ContMDiffCovariantDerivative cov 1]`) and *global* `C²` vector fields `X`, `Y`, `Z`, the raw curvature section
+`curvatureAux X Y Z = ∇_X∇_Y Z − ∇_Y∇_X Z − ∇_{[X,Y]}Z` is a **continuous** `TM`-section.  Proof: `contMDiff_along`
+(Along.lean) applied twice — inner `∇_Y Z` at `n=1` (cov `C¹`, `Y` `C¹`, `Z` `C²`), outer `∇_X(∇_Y Z)` at `n=0`
+(cov `C⁰`, `X` `C⁰`, `∇_Y Z` `C¹`); the `C⁰` connection instance is derived from `[cov 1]` via the fiber-norm-free
+tangent-bundle downgrade `CovariantDerivative.TangentFrame.contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one`
+(u := univ) + `⟨·⟩`; the bracket `∇_{[X,Y]}Z` is `C⁰` from the *global* `ContDiff.mlieBracket_vectorField` (`C²` fields → `C⁰`
+bracket) fed to `contMDiff_along`; combined with `ContMDiff.sub_section` and unfolded via `simpa only [curvatureAux]`.
+
+**`curvatureAux_contMDiffOn_zero`** (local / `On`).  Same conclusion on an open set `u` for fields that are `C²`
+*only on `u`* — the local frame fields of a trivialization (`Bundle.Trivialization.contMDiffOn_localFrame_baseSet` gives
+only `ContMDiffOn` on the base set).  The connection is restricted to `u` via
+`TangentFrame.contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one` (level 1) and the `C¹→C⁰`
+downgrade (level 0); the bracket is `ContMDiffOn.mlieBracketWithin_vectorField` (`mlieBracketWithin` on `u`) identified
+with `mlieBracket` on the open set via `VectorField.mlieBracketWithin_eq_mlieBracket` (torsion-proof pattern); the two
+nested `∇`'s use `.contMDiff … |>.clm_bundle_apply` at levels 1 then 0.  This is the **local-to-global gluing brick**
+for Step 2.
+
+**Plumbing lessons (do not re-lose).**  (i) Use the `CovariantDerivative.TangentFrame.*` downgrade lemmas
+(DowngradeNormFree.lean), **not** the bundle-generic `CovariantDerivative.*` ones (Existence.lean) — the latter hit the
+`FiberBundle E (TangentSpace I)` / `VectorBundle ℝ E (TangentSpace I)` fiber-norm diamond in the frontier context and
+fail to synthesize; the `TangentFrame` copies are diamond-free.  (ii) `ContDiff.mlieBracket_vectorField` /
+`ContMDiffOn.mlieBracketWithin_vectorField` live in `section Invariance` with `variable [IsManifold I (minSmoothness ℝ 2) M]`
+— since `minSmoothness` is `irreducible_def`, provide it explicitly `haveI : IsManifold I (minSmoothness ℝ 2) M := by
+rw [minSmoothness_of_isRCLikeNormedField]; infer_instance`; and `[IsManifold I (n+1) M]` with `n=2` needs
+`haveI : IsManifold I ((2:ℕ∞)+1) M := IsManifold.of_le (n := (∞ : WithTop ℕ∞)) (by exact_mod_cast le_top)` (the `LEInfty`
+instances cover only `↑n`/literals, not the `↑2+1` sum shape, and `le_top` targets `ω` not `∞`).  (iii) Do **not** add an
+explicit `haveI : FiberBundle E (TangentSpace I) := inferInstance` — it introduces a second instance diamonding with the
+canonical `TangentSpace.fiberBundle`.
+
+**NEXT — Step 2 hurdle (curvatureTensor section continuity).**  The plan's tensoriality lemma
+`curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right` (Tensor.lean) rewrites
+`curvatureTensor x u v w` (defined via `smoothExtend`) as `curvatureAux X Y σ x` for frame-valued `X,Y,σ`, but its
+`hσcoeff` hypothesis demands **global** `ContMDiff` of `y ↦ localFrame_coeff i y (σ y)` — sections have only **`On`**
+coeff-continuity (`contMDiffOn_localFrame_coeff`, base set).  So lifting `curvatureAux_contMDiffOn_zero` to
+`fun x ↦ curvatureTensor x (e_a x)(e_b x)(e_c x)` continuous needs EITHER (a) a **local/On tensoriality variant**
+requiring only near-`x` coeff-continuity, OR (b) extend the local frames to global smooth fields agreeing near each `x₀`
+(bump), then apply the existing global tensoriality + `curvatureAux_contMDiff_zero`, glued by
+`contMDiffOn_of_locally_contMDiffOn`.  Route (a) is a Tensor.lean addition; route (b) reuses the two committed bricks.
+Then Step 3 (Ricci trace via `ricciEndomorphism`/`ricciCurvature` in Contractions.lean) yields `intrinsicRicciTensor` as
+the continuous `rs` section consumed by `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`.
