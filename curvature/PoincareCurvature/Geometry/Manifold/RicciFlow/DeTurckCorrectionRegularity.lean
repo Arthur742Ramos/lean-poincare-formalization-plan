@@ -689,4 +689,44 @@ theorem contMDiff_zero_bilinearFormBundleSection_of_forall_localFrame
     rw [contMDiffOn_zero_iff]; exact hcontOn
   exact hCM.contMDiffAt (e.open_baseSet.mem_nhds hx0)
 
+/-- The local-frame coefficient linear functional coincides with the basis representation coefficient
+for the induced basis on a trivialization fiber.  This is the section-free form of the (`@[simp]`)
+`localFrame_coeff_apply_of_mem_baseSet`, obtained by evaluating the latter at a section pinned to the
+value `V` at `x`. -/
+lemma repr_basisAt_eq_localFrame_coeff
+    {ι : Type*} (b : Module.Basis ι ℝ E) (x0 : M)
+    {x : M} (hx : x ∈ (trivializationAt E TM x0).baseSet) (V : TM x) (k : ι) :
+    ((trivializationAt E TM x0).basisAt b hx).repr V k
+      = (trivializationAt E TM x0).localFrame_coeff I b k x V := by
+  classical
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
+    ContMDiffVectorBundle.of_le (n := 2) (by norm_num)
+  have h := (trivializationAt E TM x0).localFrame_coeff_apply_of_mem_baseSet (I := I) b hx
+    (Function.update (0 : Π y : M, TM y) x V) k
+  simpa using h.symm
+
+/-- **Trace expansion of Ricci curvature in a local trivialization frame.**
+For `x` in the trivialization base set at `x0`, the Ricci curvature is the frame trace of the
+curvature endomorphism: `ricci x u w = ∑ₖ εᵏ(x) (R(eₖ x, u) w)`, where `eₖ = localFrame b k` is the
+induced frame and `εᵏ = localFrame_coeff b k` the dual coframe.  The trace is metric-independent
+(`LinearMap.trace_eq_matrix_trace` over the frame basis), so any `RiemannianBundle` instance works. -/
+lemma ricciCurvature_eq_sum_localFrame_coeff
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    [cov.ContMDiffCovariantDerivative 1]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E) (x0 : M)
+    {x : M} (hx : x ∈ (trivializationAt E TM x0).baseSet) (u w : TM x) :
+    CovariantDerivative.ricciCurvature (cov := cov) x u w =
+      ∑ k, (trivializationAt E TM x0).localFrame_coeff I b k x
+        (CovariantDerivative.curvatureTensor (cov := cov) x
+          ((trivializationAt E TM x0).localFrame b k x) u w) := by
+  classical
+  rw [CovariantDerivative.ricciCurvature_apply,
+    LinearMap.trace_eq_matrix_trace ℝ ((trivializationAt E TM x0).basisAt b hx), Matrix.trace]
+  refine Finset.sum_congr rfl (fun k _ ↦ ?_)
+  rw [Matrix.diag_apply, LinearMap.toMatrix_apply,
+    CovariantDerivative.ricciEndomorphism_apply,
+    (trivializationAt E TM x0).localFrame_apply_of_mem_baseSet b hx]
+  exact repr_basisAt_eq_localFrame_coeff b x0 hx _ k
+
 end RicciFlow
