@@ -8481,3 +8481,48 @@ continuous, the remaining obstruction is exhibiting the mild/regularised Ricci�
 `sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` (bounded + Lipschitz-in-state).  A genuine
 piece: a boundedness or Lipschitz estimate for the geometric mild representative reusing the already-committed model K/Mc
 bound *shapes* but on the real operator.
+
+## Milestone (2026-07-05, later still) — the `picard` field reduced to *fiber-pointwise* operator estimates: fiber→section `hlip`/`hcont` bridges + fiber-pointwise Picard capstone (Item 3 / GAP 2 `picard` half)
+
+Three additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0` commits; full `lake build PoincareCurvature` green (2916 jobs).  This attacks the
+**still-open half of GAP 2** — the `picard` field — by collapsing its two section-space hypotheses (`hlip`/`hcont`) down to
+the *fiber-pointwise* estimates a regularised geometric Ricci–DeTurck operator naturally produces (its value's fiber at each
+base point is Lipschitz in the state / jointly continuous in `(t,x)`), so that the eventual operator only has to be checked
+one base point at a time rather than in the finite-cover Banach norm.
+
+**`lipschitzOnWith_of_forall_fiber_dist_le`** (ContinuousSection.lean, `TrivializationOpNorm` section).  From a uniform
+operator-norm bound `Lop` on the finite family of fiber trivialization maps (`hL : ∀ i x, ‖(et i).continuousLinearMapAt ℝ
+x‖ ≤ Lop`) and a **fiber-pointwise** Lipschitz-in-state estimate `dist ((A s) x) ((A t) x) ≤ C · dist s t` at every base
+point `x`, uniformly over the state set, concludes `LipschitzOnWith (Lop · C) A stateSet` in the transported finite-cover
+Banach norm.  Chains the committed `coord_dist_le_of_trivialization_opNorm_le` (coordinate readout ≤ `Lop` · fiber dist)
+with `lipschitzOnWith_of_forall_coord_dist_le`.  This is the `hlip` interface of the section-space Picard capstone.
+
+**`continuousOn_of_forall_coord_uncurry_continuousOn`** (ContinuousSection.lean).  From *coordinatewise joint (time–base)
+continuity* of each trivialization readout `(t,x) ↦ (et i).continuousLinearMapAt ℝ x ((f t) x)` on `timeSet ×ˢ Kc i`,
+concludes `ContinuousOn (fun t => f t) timeSet` in the finite-cover Banach norm.  The compact base pieces `Kc i` supply the
+uniform-in-`x` control: `ContinuousMap.continuousOn_of_continuousOn_uncurry` (no local-compactness needed) upgrades the
+pointwise joint continuity to `C(Kc i, F)`-valued continuity, then `continuousOn_of_forall_coord_continuousOn` assembles the
+finitely many readouts; the coordinate identification is the committed `coord_apply`.  This is the `hcont` interface.
+
+**`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_fiber_dist_le_continuousOn`**
+(SectionSpacePicard.lean).  The fiber-pointwise Picard capstone: from `hL` (trivialization op-norm bound), `hfiber`
+(fiber-pointwise `C`-Lipschitz-in-state over the ball, uniformly in `t ∈ [t₀,T₀]`), and `hcont` (coordinatewise joint
+`(t,x)`-continuity of `A·s` on `[t₀,T₀] ×ˢ Kc i`), chooses a forward endpoint and produces `IsPicardLindelof A ⟨t₀,_⟩ x0
+a 0 (Mc + Lop·C·a) (Lop·C)` — the chart's exact `picard` shape with Lipschitz constant `Lop·C`.  Feeds the two ContinuousSection
+bridges above into the section-level capstone
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn`.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: the section-space Picard–Lindelöf field is now
+reducible to *purely fiber-pointwise* facts about the operator — an operator-norm bound on the (compactly supported) finite
+trivialization family (dischargeable for the real `BilinearFormBundle` via the committed
+`preferredBilinear_trivialization_opNorm_le_of_symmL_opNorm_le`, which reduces it to a `symmL` bound on the tangent
+trivialization), a fiber-pointwise Lipschitz-in-state estimate, and fiber-pointwise joint time–base continuity.  Combined with
+the already-CLOSED value-section regularity half of GAP 2, the only remaining `picard` obligation is the fiber-pointwise
+`hfiber`/`hcont` estimates for the actual mild/regularised operator — i.e. these must now be proved for one concrete operator,
+no longer packaged as abstract section-space hypotheses.
+
+**NEXT.**  Exhibit the mild/regularised Ricci–DeTurck section-space operator about `g₀` and prove its fiber-pointwise
+`hfiber` (Lipschitz-in-state at each base point) and `hcont` (joint `(t,x)`-continuity of each coordinate readout), feeding
+the new fiber-pointwise capstone directly to obtain the chart's `picard` field.  The trivialization op-norm `hL` is already a
+solved compactness/`symmL` quantity.
