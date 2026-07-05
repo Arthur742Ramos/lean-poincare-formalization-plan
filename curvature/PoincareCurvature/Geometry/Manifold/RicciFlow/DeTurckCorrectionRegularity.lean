@@ -616,4 +616,77 @@ theorem curvatureTensor_contMDiffOn_frame_zero
   exact congrArg (TotalSpace.mk' E z)
     (curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame hu hz hea heb hec).symm
 
+/-- **Finite-dimensional reconstruction continuity for `E →L G`-valued maps.**
+If `E` and `G` are finite-dimensional and `b` is a basis of `E`, then a map `f : M → (E →L[ℝ] G)`
+is continuous on `t` as soon as each basis evaluation `x ↦ f x (b i)` is.  The continuous linear map
+is reconstructed from its finitely-many basis values via `Basis.constrL`, which is continuous because
+`ι → G` is finite-dimensional. -/
+theorem continuousOn_clm_of_forall_apply_basis
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G] [FiniteDimensional ℝ G]
+    {t : Set M} {f : M → (E →L[ℝ] G)}
+    (h : ∀ i, ContinuousOn (fun x ↦ f x (b i)) t) :
+    ContinuousOn f t := by
+  classical
+  have hrec : ∀ x : M, f x = b.constrL (fun i ↦ f x (b i)) := by
+    intro x
+    apply ContinuousLinearMap.coe_injective
+    refine b.ext (fun i ↦ ?_)
+    simp only [ContinuousLinearMap.coe_coe, Module.Basis.constrL_basis]
+  set recon : (ι → G) →ₗ[ℝ] (E →L[ℝ] G) :=
+    (LinearMap.toContinuousLinearMap : (E →ₗ[ℝ] G) ≃ₗ[ℝ] (E →L[ℝ] G)).toLinearMap.comp
+      (b.constr ℝ : (ι → G) ≃ₗ[ℝ] (E →ₗ[ℝ] G)).toLinearMap with hreconDef
+  have hrecon_apply : ∀ g : ι → G, recon g = b.constrL g := by
+    intro g; rfl
+  have hcont : Continuous recon := recon.continuous_of_finiteDimensional
+  have hg : ContinuousOn (fun x : M ↦ (fun i ↦ f x (b i) : ι → G)) t :=
+    continuousOn_pi.mpr h
+  have hcomp : ContinuousOn (fun x : M ↦ recon (fun i ↦ f x (b i))) t :=
+    hcont.comp_continuousOn hg
+  refine hcomp.congr (fun x _ ↦ ?_)
+  rw [hrecon_apply, ← hrec x]
+
+/-- **Frame-component continuity criterion for `BilinearFormBundle` sections.**
+A section `s` of the tangent bilinear-form bundle is a *continuous* section as soon as, for every
+base point `x0` and every pair of model-basis indices `i, j`, the scalar function
+`x ↦ s x (localFrame b i x) (localFrame b j x)` is continuous on the trivialization base set at `x0`
+(here `localFrame b i` is the `C²` frame field induced by the trivialization at `x0`).  Continuity is
+local, so at each `x0` we read the section in the preferred coordinates
+(`trivializationAt_bilinearFormBundle_apply_eq`), reconstruct the coordinate bilinear form from its
+finitely-many frame evaluations via `continuousOn_clm_of_forall_apply_basis` applied twice, and
+transfer through `Bundle.contMDiffAt_section`. -/
+theorem contMDiff_zero_bilinearFormBundleSection_of_forall_localFrame
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {s : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x}
+    (hcomp : ∀ (x0 : M) (i j : ι),
+      ContinuousOn (fun x ↦ s x ((trivializationAt E TM x0).localFrame b i x)
+        ((trivializationAt E TM x0).localFrame b j x)) (trivializationAt E TM x0).baseSet) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x (s x)) := by
+  classical
+  intro x0
+  rw [Bundle.contMDiffAt_section (IB := I) (F := (E →L[ℝ] E →L[ℝ] ℝ))
+    (E := _root_.Bundle.BilinearFormBundle (V := TM)) (s := s) x0]
+  set e := trivializationAt E TM x0 with he
+  have hx0 : x0 ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt E TM x0
+  have hcontOn : ContinuousOn
+      (fun x ↦ (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+        (_root_.Bundle.BilinearFormBundle (V := TM)) x0 ⟨x, s x⟩).2) e.baseSet := by
+    refine continuousOn_clm_of_forall_apply_basis (E := E) b (fun i ↦ ?_)
+    refine continuousOn_clm_of_forall_apply_basis (E := E) b (fun j ↦ ?_)
+    refine (hcomp x0 i j).congr (fun x hx ↦ ?_)
+    have hxe : x ∈ e.baseSet := hx
+    rw [trivializationAt_bilinearFormBundle_apply_eq (F := E) (W := TM) x0 x hxe (s x) (b i) (b j)]
+    have hli : ∀ k, ((e.continuousLinearEquivAt ℝ x hxe).symm (b k)) = e.localFrame b k x := by
+      intro k
+      rw [e.localFrame_apply_of_mem_baseSet b hxe]
+      rfl
+    rw [hli i, hli j]
+  have hCM : ContMDiffOn I 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) 0
+      (fun x ↦ (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+        (_root_.Bundle.BilinearFormBundle (V := TM)) x0 ⟨x, s x⟩).2) e.baseSet := by
+    rw [contMDiffOn_zero_iff]; exact hcontOn
+  exact hCM.contMDiffAt (e.open_baseSet.mem_nhds hx0)
+
 end RicciFlow
