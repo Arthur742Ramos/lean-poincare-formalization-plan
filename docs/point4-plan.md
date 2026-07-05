@@ -7248,3 +7248,41 @@ dominated on a `t₁`-neighbourhood by `C·1_{[0, t₁+δ−t₀]}` — a domina
 substituted (non-singular-in-`u`) form.  With propagator + Duhamel time-continuity in hand, the
 per-time `norm_heatMildValueNDbcf_sub_le` gives the path-space short-time contraction and the Banach
 fixed point yields a genuine mild solution of the ND reaction–diffusion model.
+
+Update — **the Duhamel + mild-value path time-continuities are now proved** (extending
+`AnalyticPDE/HeatKernel1D.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`, cheat-scan
+`TOTAL 0`, module green).  This session closes the recorded next target — the singular Duhamel-path
+time-continuity and the mild-value path as the sum — via the substitution route:
+
+* `heatSemigroupND_duhamel_eq_comp_sub` — the `u = t − s` change of variables
+  `∫_{t₀}^{t} H_{t−s}(q s)(x) ds = ∫_{0}^{t−t₀} H_u(q(t−u))(x) du`
+  (`intervalIntegral.integral_comp_sub_left`), moving the diagonal singularity `s = t` to the *fixed*
+  heat time `u = 0`.
+* `continuous_heatSemigroupND_comp_sub_time` — for fixed `u > 0`, `t ↦ H_u(q(t−u))(x)` is continuous
+  (composition of the continuous shifted source `t ↦ q(t−u)`, the bounded linear propagator
+  `heatSemigroupNDclm`, and evaluation at `x`).  The a.e.-`u` time-continuity ingredient.
+* `aestronglyMeasurable_heatSemigroupND_comp_sub` — `u ↦ H_u(q(t−u))(x)` is a.e.-measurable (joint
+  kernel×eval measurability + `AEStronglyMeasurable.integral_prod_right'`), adapting the measurability
+  pattern of `intervalIntegrable_heatSemigroupND_duhamel`.
+* `continuousAt_heatSemigroupND_duhamel_time` — the **Duhamel path** `t ↦ ∫_{t₀}^{t} H_{t−s}(q s)(x) ds`
+  is continuous at every `t₁ > t₀`.  After the substitution, the integral over the `t`-dependent domain
+  `(0, t−t₀]` is written as a full-space integral of the indicator
+  `u ↦ 1_{(0, t−t₀]}(u)·H_u(q(t−u))(x)`, and `continuousAt_of_dominated` applies: a.e.-measurable in
+  `u`, dominated on a `t₁`-neighbourhood by the `t`-independent envelope `1_{(0, t₁−t₀+1]}·C`
+  (`abs_heatSemigroupND_le`), continuous in `t` for a.e. `u` (indicator boundary set `{0, t₁−t₀}` null).
+* `continuousAt_heatMildValue_time` (+ `continuousOn_…` on `Ioi t₀`) — the **pointwise mild-solution
+  path** `t ↦ Φ(t)(x) = H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` continuous at every `t₁ > t₀`,
+  the sum of the propagator-shift and Duhamel time-continuities (`heatMildValueNDbcf_apply`).
+* `continuousOn_heatSemigroupND_duhamel_time` — the `ContinuousOn (Ioi t₀)` form of the Duhamel path.
+
+**Next target.**  Upgrade the *pointwise*-in-`x` mild-value path time-continuity to **`BCF`-norm**
+(sup-over-`x`) continuity, so `t ↦ Φ(t)` is a genuine element of the path space
+`C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`.  Blocker identified: sup-norm continuity of the homogeneous part
+`t ↦ H_{t−t₀}u₀` needs the heat-semigroup **composition (Chapman–Kolmogorov) property**
+`H_s(H_t f) = H_{s+t} f` (not yet in `HeatKernel1D.lean`; requires a Gaussian-convolution identity
+`Kₙ(s,·) ⋆ Kₙ(t,·) = Kₙ(s+t,·)`) to run the `ε`-regularisation `H_t = H_{t−ε}(H_ε ·)` reducing to
+strong continuity on the *bounded-uniformly-continuous* range `H_ε u₀`.  The tractable next PIECE is
+therefore that convolution/semigroup identity (or, if the eventual mild fixed point can be set up with
+pointwise continuity + uniform bounds instead of `BCF`-norm continuity, the abstract path-space
+`ContractingWith` self-map on the sup-bounded continuous trajectories directly from the committed
+per-time `norm_heatMildValueNDbcf_sub_le`).
