@@ -9,3 +9,4 @@ import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curv
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree
+import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckCorrectionRegularity
