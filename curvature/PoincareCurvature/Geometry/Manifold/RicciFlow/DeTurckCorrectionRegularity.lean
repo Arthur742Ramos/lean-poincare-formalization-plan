@@ -594,4 +594,26 @@ theorem curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame
       hXy hYy hσcoeff hcoeff_eq
   rw [hgerm, htens]
 
+/-- **Continuity of the bundled curvature tensor contracted along `ContMDiffOn` frame fields.**
+For a `C¹` tangent connection and vector fields `ea`, `eb`, `ec` that are `C²` on an open set `u`, the
+`TM`-section `z ↦ curvatureTensor z (ea z) (eb z) (ec z)` is *continuous* on `u`.  Immediate from the
+raw commutator continuity `curvatureAux_contMDiffOn_zero` and the pointwise identification
+`curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame`.  This closes Step 2 of the
+Ricci-tensor-section route: `curvatureTensor` in local smooth frames is a continuous bundle section. -/
+theorem curvatureTensor_contMDiffOn_frame_zero
+    {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    [CovariantDerivative.ContMDiffCovariantDerivative cov 1]
+    {ea eb ec : Π x : M, TangentSpace I x} {u : Set M} (hu : IsOpen u)
+    (hea : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (ea z)) u)
+    (heb : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (eb z)) u)
+    (hec : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (ec z)) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E)) 0
+      (fun z ↦ TotalSpace.mk' E z
+        (CovariantDerivative.curvatureTensor (cov := cov) z (ea z) (eb z) (ec z))) u := by
+  have hcurv := curvatureAux_contMDiffOn_zero (cov := cov) hu hea heb hec
+  refine hcurv.congr ?_
+  intro z hz
+  exact congrArg (TotalSpace.mk' E z)
+    (curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame hu hz hea heb hec).symm
+
 end RicciFlow
