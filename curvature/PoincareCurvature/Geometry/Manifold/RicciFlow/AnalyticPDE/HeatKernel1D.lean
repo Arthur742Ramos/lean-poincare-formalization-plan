@@ -7632,5 +7632,32 @@ theorem norm_heatMildValuePathBcfIoc_le {n : ℕ} (t₀ T : ℝ)
         have hle : (t : ℝ) ≤ T := t.2.2
         gcongr
 
+/-- **Short-time contraction bound in the Banach state space.**  For a *fixed* initial datum `u₀` and
+two continuous sources `q₁, q₂` sharing a sup bound `C` and with pointwise difference `≤ D`, the two
+mild-value path elements are within `D·(T − t₀)` in the `C_b`-norm:
+`dist (Φ(q₁)) (Φ(q₂)) ≤ D·(T − t₀)`.  At each `t ∈ (t₀, T]` the homogeneous propagator `H_{t−t₀}u₀`
+cancels and the fixed-time Duhamel contraction `norm_heatMildValueNDbcf_sub_le` bounds the difference
+by `D·(t − t₀) ≤ D·(T − t₀)`, uniformly in `t`.  Composed with a `D = Kstate·‖q₁ − q₂‖` reaction
+Lipschitz bound this is the short-time contraction datum for the path-space Banach fixed point of the
+mild-solution self-map. -/
+theorem dist_heatMildValuePathBcfIoc_le {n : ℕ} (t₀ T : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q₁ q₂ : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq₁ : Continuous q₁) (hq₂ : Continuous q₂) {C D : ℝ}
+    (hqb₁ : ∀ s y, ‖q₁ s y‖ ≤ C) (hqb₂ : ∀ s y, ‖q₂ s y‖ ≤ C)
+    (hD : ∀ s y, ‖q₁ s y - q₂ s y‖ ≤ D) (hT : t₀ ≤ T) :
+    dist (heatMildValuePathBcfIoc t₀ T u₀ hq₁ hqb₁)
+        (heatMildValuePathBcfIoc t₀ T u₀ hq₂ hqb₂) ≤ D * (T - t₀) := by
+  have hD0 : (0 : ℝ) ≤ D := le_trans (norm_nonneg _) (hD 0 0)
+  refine (BoundedContinuousFunction.dist_le (mul_nonneg hD0 (by linarith))).2 (fun t => ?_)
+  rw [heatMildValuePathBcfIoc_apply_eq t₀ T u₀ hq₁ hqb₁ t,
+    heatMildValuePathBcfIoc_apply_eq t₀ T u₀ hq₂ hqb₂ t, dist_eq_norm]
+  calc ‖heatMildValueNDbcf t.2.1 u₀ hq₁ hqb₁ - heatMildValueNDbcf t.2.1 u₀ hq₂ hqb₂‖
+      ≤ D * ((t : ℝ) - t₀) :=
+        norm_heatMildValueNDbcf_sub_le t.2.1 u₀ hq₁ hq₂ hqb₁ hqb₂ hD
+    _ ≤ D * (T - t₀) := by
+        have hle : (t : ℝ) ≤ T := t.2.2
+        gcongr
+
 end AnalyticPDE
 end RicciFlow
