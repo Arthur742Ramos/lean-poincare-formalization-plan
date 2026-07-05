@@ -7920,3 +7920,56 @@ headline) is the **time**-difference modulus of two mild solutions (`‖(z−w)(
 `Hölder-1/2` in `√|Δt|`), which combines with the spatial difference modulus into a full parabolic
 `ParabolicHolderWith` bound on `z − w`.  Then (ii)/(iii): lift through the coordinate readout to the
 section-space representative feeding `chart.lipschitz`/`picard`, or the `realization` decode.
+
+## Milestone (2026-07-05) — section-space coordinate-readout size lemmas + Picard field from continuity alone (GAP 2 route (ii): lift through the coordinate readout to the picard field)
+
+Pivot away from model-side heat-kernel estimates (now saturated) to **route (ii)** — lifting bounds
+through the section-space coordinate readout to feed the chart's `picard` field.  Ground-truth audit
+found the *geometric* operator `A` itself is blocked on **missing curvature-continuity
+infrastructure**: there is *zero* existing `Continuous`/`ContMDiff` API for `curvatureTensor` /
+`ricciTensor` / `intrinsicRicciDeTurckRHS` (grep-confirmed), so a direct (non-regularised) geometric
+`A` cannot yet be shown to land in `ContinuousSectionSpace`.  This session instead completed the
+*section-space transport* half of route (ii), reducing the `picard`-field inputs from a hand-supplied
+centre size constant to just Lipschitz + continuity.  All additive, `#print axioms`-clean
+(`propext`/`Classical.choice`/`Quot.sound`), comment-stripped `scan cheats` `TOTAL 0`.
+
+* `exists_forall_coord_norm_le` (ContinuousSection.lean) — **a continuous section has a uniformly
+  bounded compact coordinate readout**: `∃ C ≥ 0, ∀ i (x : Kc i), ‖(coord s).1 i x‖ ≤ C`.  Each
+  coordinate map `(coord s).1 i : C(Kc i, F)` is bounded by its sup-norm (finite since `Kc i` is
+  compact) and the finite index family of sup-norms is bounded above.  The existence form supplying
+  the constant that `norm_le_of_forall_coord_norm_le` consumes.
+* `exists_forall_mem_Icc_coord_norm_le_of_continuousOn` (ContinuousSection.lean) — **uniform centre
+  bound from time-continuity of the coordinate readout**: if `t ↦ (coord (f t)).1 i` is
+  `ContinuousOn (Icc t₀ T)`, then `∃ C ≥ 0, ∀ t ∈ Icc t₀ T, ∀ i x, ‖(coord (f t)).1 i x‖ ≤ C` (via
+  `IsCompact.exists_bound_of_continuousOn` on the compact time window + finite index max).  Produces
+  precisely the `hcenter` datum of `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound`.
+* `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn`
+  (SectionSpacePicard.lean) — **section-space Picard endpoint chooser from Lipschitz + time-continuity
+  alone**: on a reference window `Icc t₀ T₀`, from ball-local `K`-Lipschitz-in-section control and
+  mere time-continuity of the coordinate readouts (no hand-supplied `Mc`), derives the centre bound
+  (previous lemma), chooses a forward endpoint `T ∈ (t₀, T₀]` (`exists_forwardTime_mul_sub_le`
+  intersected with the window via `min T' T₀`), and produces `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0
+  (Mc + K·a) K` — the chart's exact `picard` shape.  **Consumes** the previous centre-bound lemma,
+  demonstrating its purpose.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: the honest section-space
+Picard field can now be produced from just the operator's ball-local Lipschitz constant and the
+time-continuity of its coordinate readout — the size constant `Mc` is no longer a separately
+quantified input.  The residual analytic obligations for a *geometric* chart are therefore exactly
+(a) ball-local coordinate `K`-Lipschitz-in-state of the real Ricci–DeTurck operator, and
+(b) time-continuity of its coordinate readout — both of which still require the missing
+curvature-continuity / mild-regularisation infrastructure.
+
+**BLOCKER (for the geometric `A`).**  `intrinsicRicciDeTurckRHS g background τ` is a genuine
+2nd-order operator (`= intrinsicRicciFlowRHS + intrinsicDeTurckCorrection`, Ricci tensor via the
+chosen Levi-Civita family).  Showing `x ↦ intrinsicRicciDeTurckRHS g background τ x` is a *continuous
+section* (needed for `A` to land in `ContinuousSectionSpace`, and for `hcont`/`hcenter`) has **no
+existing infrastructure**: `curvatureTensor`/`ricciTensor` carry no `Continuous`/`ContMDiff` lemmas.
+The direct route needs a curvature-continuity sub-project (connection-coefficient → curvature → Ricci
+contraction continuity); the regularised route needs the mild-operator construction.
+
+**Next target.**  (i) Begin the curvature-continuity infrastructure with the smallest provable step —
+e.g. continuity in `x` of `intrinsicDeTurckCorrection` (first-order in the metric, most tractable) or
+of a single curvature contraction, from the `ContMDiff` structure of `someContMDiffLeviCivitaConnection`;
+or (ii) the ball-local coordinate `K`-Lipschitz-in-state estimate for a mild/regularised
+representative feeding the `hlip` input of the new endpoint chooser.
