@@ -7292,5 +7292,23 @@ theorem continuousAt_heatFlowPathBcf {n : ℕ} (f : BoundedContinuousFunction (F
         mul_lt_mul_of_pos_left ((Real.sqrt_lt' (by positivity)).mpr hltε) hM1
     _ = ε := by rw [mul_comm]; exact div_mul_cancel₀ ε (ne_of_gt hM1)
 
+/-- `ContinuousOn (Ioi 0)` form of `continuousAt_heatFlowPathBcf`: the propagator path `t ↦ H_t f` is
+`BCF`-norm-continuous on the open forward time ray. -/
+theorem continuousOn_heatFlowPathBcf {n : ℕ} (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    ContinuousOn (heatFlowPathBcf f) (Set.Ioi 0) :=
+  fun _τ hτ => (continuousAt_heatFlowPathBcf f (Set.mem_Ioi.1 hτ)).continuousWithinAt
+
+/-- **`BCF`-norm time-continuity of the shifted propagator path** `t ↦ H_{t−t₀}f`.  The composition of
+`continuousAt_heatFlowPathBcf` (at `t₁ − t₀ > 0`) with the continuous time-shift `t ↦ t − t₀`; this is
+the exact form taken by the homogeneous term `H_{t−t₀}u₀` of the mild-solution path value
+`heatMildValueNDbcf`, now `BCF`-norm-continuous at every `t₁ > t₀`. -/
+theorem continuousAt_heatFlowPathBcf_shift {n : ℕ} (f : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {t₀ t₁ : ℝ} (ht : t₀ < t₁) :
+    ContinuousAt (fun t => heatFlowPathBcf f (t - t₀)) t₁ := by
+  have h1 : ContinuousAt (heatFlowPathBcf f) (t₁ - t₀) :=
+    continuousAt_heatFlowPathBcf f (by linarith)
+  have h2 : ContinuousAt (fun t : ℝ => t - t₀) t₁ := by fun_prop
+  exact ContinuousAt.comp (x := t₁) h1 h2
+
 end AnalyticPDE
 end RicciFlow
