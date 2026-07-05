@@ -5965,5 +5965,89 @@ theorem heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound {n : ℕ} {t₀ t :
   rw [hgval] at hmain
   exact hmain
 
+/-- **The general parabolic-Duhamel singular integral** `∫_{t₀}^{t} (t − s)^r ds =
+(t − t₀)^{r+1}/(r+1)` for every exponent `r > −1`.  The reflection substitution `s ↦ t − s`
+(`intervalIntegral.integral_comp_sub_left`) reduces to `∫_{0}^{t−t₀} u^r du`, evaluated by
+`integral_rpow` (`−1 < r`, so the singularity at `0` is integrable and `0^{r+1} = 0`).  This is the
+time-weight of every parabolic Schauder gain of order `2(r+1)` (the case `r = −α/2` gives the
+`C^{0,α}` gain, `r = −1/2` the first-order gain `integral_rpow_neg_half_sub`). -/
+theorem integral_rpow_sub (t₀ t : ℝ) {r : ℝ} (hr : -1 < r) :
+    (∫ s in t₀..t, (t - s) ^ r) = (t - t₀) ^ (r + 1) / (r + 1) := by
+  rw [intervalIntegral.integral_comp_sub_left (fun z => z ^ r) t]
+  simp only [sub_self]
+  rw [integral_rpow (Or.inl hr)]
+  rw [Real.zero_rpow (by linarith : r + 1 ≠ 0)]
+  ring
+
+/-- **Spatial `C^{0,α}` (Hölder) parabolic Schauder gain of the Duhamel term.**  The Hölder-scale
+refinement of `heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound`: for every `0 ≤ α ≤ 1`, the
+Duhamel integral `U(t)(x) = ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` of a sup-norm-bounded reaction term `q`
+(`‖q s y‖ ≤ C`) gains a fractional spatial `C^{0,α}` modulus at the finite `(t − t₀)^{1−α/2}` cost:
+`|∫_{t₀}^{t} (H_{t−s}(q s)(x) − H_{t−s}(q s)(x')) ds|
+    ≤ (2C)^{1−α}·(C/√π)^α·n^α·‖x − x'‖^α · (t − t₀)^{1−α/2}/(1 − α/2)`.
+The heat semigroup's spatial Hölder rate `heatSemigroupND_spatial_holder_seminorm_bound_norm` bounds
+the integrand by a constant times `(t − s)^{−α/2}` (the singular factor being
+`(C/√(π(t−s)))^α = (C/√π)^α·(t − s)^{−α/2}`); this time-weight is integrable for `α < 2` and its
+integral is `(t − t₀)^{1−α/2}/(1 − α/2)` by `integral_rpow_sub`, applied through
+`intervalIntegral.norm_integral_le_of_norm_le` (the diagonal `s = t` being null).  This is exactly
+the fractional gain-of-regularity a *Hölder-norm* parabolic Schauder fixed point consumes: it makes
+the Duhamel reaction map a contraction in `C^{0,α}` over a short time window, the analytic heart of a
+mild Ricci–DeTurck existence proof. -/
+theorem heatSemigroupND_duhamel_spatial_holder_bound {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    {q : ℝ → (Fin n → ℝ) → ℝ} {C : ℝ}
+    (hqm : ∀ s, AEStronglyMeasurable (q s)) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) (x x' : Fin n → ℝ) :
+    |∫ s in t₀..t, (heatSemigroupND (t - s) (q s) x - heatSemigroupND (t - s) (q s) x')|
+      ≤ (2 * C) ^ (1 - α) * (C / Real.sqrt π) ^ α * (n : ℝ) ^ α * ‖x - x'‖ ^ α
+          * ((t - t₀) ^ (1 - α / 2) / (1 - α / 2)) := by
+  have hC : 0 ≤ C := le_trans (norm_nonneg _) (hqb 0 0)
+  have hr : (-1 : ℝ) < -(α / 2) := by linarith
+  set K : ℝ := (2 * C) ^ (1 - α) * (C / Real.sqrt π) ^ α * (n : ℝ) ^ α * ‖x - x'‖ ^ α with hK
+  set g : ℝ → ℝ := fun s => K * (t - s) ^ (-(α / 2) : ℝ) with hg
+  have hpid : ∀ s, 0 < t - s →
+      (C / Real.sqrt (π * (t - s))) ^ α = (C / Real.sqrt π) ^ α * (t - s) ^ (-(α / 2) : ℝ) := by
+    intro s hpos
+    have hsp : (0 : ℝ) < Real.sqrt π := Real.sqrt_pos.mpr Real.pi_pos
+    have hCsp : 0 ≤ C / Real.sqrt π := div_nonneg hC hsp.le
+    have hts : (0 : ℝ) ≤ (t - s) ^ (-(1 / 2) : ℝ) := Real.rpow_nonneg hpos.le _
+    have hbase_eq : C / Real.sqrt (π * (t - s))
+        = (C / Real.sqrt π) * (t - s) ^ (-(1 / 2) : ℝ) := by
+      rw [Real.sqrt_mul Real.pi_pos.le, Real.rpow_neg hpos.le, ← Real.sqrt_eq_rpow]
+      field_simp
+    have hexp : (-(1 / 2 : ℝ)) * α = -(α / 2) := by ring
+    rw [hbase_eq, Real.mul_rpow hCsp hts, ← Real.rpow_mul hpos.le, hexp]
+  have hae : ∀ᵐ s ∂(volume : MeasureTheory.Measure ℝ), s ∈ Set.Ioc t₀ t →
+      ‖heatSemigroupND (t - s) (q s) x - heatSemigroupND (t - s) (q s) x'‖ ≤ g s := by
+    have hset : {a : ℝ | ¬ a ≠ t} = {t} := by
+      ext s; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+    have htne : ∀ᵐ (s : ℝ), s ≠ t := by
+      rw [MeasureTheory.ae_iff, hset]; exact MeasureTheory.measure_singleton t
+    filter_upwards [htne] with s hs hmem
+    have hlt : s < t := lt_of_le_of_ne hmem.2 hs
+    have hpos : 0 < t - s := by linarith
+    rw [Real.norm_eq_abs]
+    refine (heatSemigroupND_spatial_holder_seminorm_bound_norm hpos (hqm s) (hqb s)
+      hα0 hα1 x x').trans ?_
+    simp only [hg, hK]
+    rw [hpid s hpos]
+    refine le_of_eq ?_
+    ring
+  have hgint : IntervalIntegrable g volume t₀ t := by
+    have h4 : IntervalIntegrable (fun s : ℝ => (t - s) ^ (-(α / 2) : ℝ)) volume t₀ t := by
+      have hbase : IntervalIntegrable (fun z : ℝ => z ^ (-(α / 2) : ℝ)) volume 0 (t - t₀) :=
+        intervalIntegral.intervalIntegrable_rpow' hr
+      have h3 := hbase.comp_sub_left t
+      simpa using h3.symm
+    simp only [hg]
+    exact h4.const_mul _
+  have hmain := intervalIntegral.norm_integral_le_of_norm_le hT hae hgint
+  have hgval : (∫ s in t₀..t, g s) = K * ((t - t₀) ^ (1 - α / 2) / (1 - α / 2)) := by
+    simp only [hg]
+    rw [intervalIntegral.integral_const_mul, integral_rpow_sub t₀ t hr,
+      show (-(α / 2) + 1 : ℝ) = 1 - α / 2 by ring]
+  rw [Real.norm_eq_abs] at hmain
+  rw [hgval] at hmain
+  simpa [hK] using hmain
+
 end AnalyticPDE
 end RicciFlow
