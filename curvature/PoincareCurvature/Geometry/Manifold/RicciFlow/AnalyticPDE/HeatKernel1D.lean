@@ -6899,5 +6899,27 @@ theorem continuousAt_heatMildValue_time {n : ℕ} {t₀ t₁ : ℝ} (ht : t₀ <
       (fun y => by rw [← Real.norm_eq_abs]; exact u₀.norm_coe_le_norm y) x).add
     (continuousAt_heatSemigroupND_duhamel_time ht hq hqb x)
 
+/-- **Time-continuity of the Duhamel path on `(t₀, ∞)`.**  The `ContinuousOn` form of
+`continuousAt_heatSemigroupND_duhamel_time`: the Duhamel time integral path is continuous on the
+open forward time ray, the domain on which a mild-solution trajectory `t ↦ Φ(t)` lives. -/
+theorem continuousOn_heatSemigroupND_duhamel_time {n : ℕ} {t₀ : ℝ}
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+    ContinuousOn (fun t => ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x) (Set.Ioi t₀) :=
+  fun _t ht =>
+    (continuousAt_heatSemigroupND_duhamel_time (Set.mem_Ioi.1 ht) hq hqb x).continuousWithinAt
+
+/-- **Time-continuity of the pointwise mild-solution path on `(t₀, ∞)`.**  The `ContinuousOn` form of
+`continuousAt_heatMildValue_time`: the pointwise mild-solution path
+`t ↦ H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` is continuous on the open forward time ray. -/
+theorem continuousOn_heatMildValue_time {n : ℕ} {t₀ : ℝ}
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+    ContinuousOn (fun t => heatSemigroupND (t - t₀) (⇑u₀) x
+      + ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x) (Set.Ioi t₀) :=
+  fun _t ht =>
+    (continuousAt_heatMildValue_time (Set.mem_Ioi.1 ht) u₀ hq hqb x).continuousWithinAt
+
 end AnalyticPDE
 end RicciFlow
