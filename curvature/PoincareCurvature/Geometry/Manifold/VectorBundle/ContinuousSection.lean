@@ -2392,6 +2392,118 @@ theorem exists_forall_mem_Icc_coord_norm_le_of_continuousOn
     _ ≤ D := hD (Set.mem_range_self i)
     _ ≤ max D 0 := le_max_left _ _
 
+/-- **The compact coordinate readout is `1`-Lipschitz in the section distance (`C(Kc i, F)`
+level).**  The transport `equivCompatibleCoordFamilySubmodule` is a definitional isometry from
+`ContinuousSectionSpace` onto the compatible-coordinate-family submodule of `∀ i, C(Kc i, F)`,
+carrying the finite-cover Banach norm to the `sup`-over-`i` (Pi) norm of the compact coordinate
+maps.  Hence each single coordinate map `s ↦ (coord s).1 i : C(Kc i, F)` contracts distances:
+`dist ((coord s).1 i) ((coord t).1 i) ≤ dist s t`.  This is the elementary contraction that turns
+section-space (Banach-norm) control of an operator into control of each of its compact coordinate
+readouts — the converse direction to `continuousOn_of_forall_coord_continuousOn`. -/
+theorem coordContinuousMap_dist_le_dist
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i)
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i)
+      ≤ dist s t := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedAddCommGroup
+      (𝕜 := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+  have he : Isometry e := fun _ _ => rfl
+  have hval : Isometry
+      (fun a : compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo =>
+        (a : CoordFamily (F := F) Kc)) :=
+    Isometry.of_nndist_eq fun _ _ => rfl
+  have hcomp : Isometry
+      (fun z : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover =>
+        ((e z).1 : CoordFamily (F := F) Kc)) :=
+    hval.comp he
+  calc
+    dist ((e s).1 i) ((e t).1 i)
+        ≤ dist ((e s).1 : CoordFamily (F := F) Kc) ((e t).1 : CoordFamily (F := F) Kc) :=
+          dist_le_pi_dist _ _ i
+    _ = dist s t := hcomp.dist_eq s t
+
+/-- **The pointwise coordinate readout is `1`-Lipschitz in the section distance (fibre `F` level).**
+Evaluating the `1`-Lipschitz `C(Kc i, F)`-level readout at a base point `x ∈ Kc i` (evaluation of a
+continuous map on a compact space is itself `1`-Lipschitz for the sup metric) gives
+`dist ((coord s).1 i x) ((coord t).1 i x) ≤ dist s t`.  This is the pointwise contraction consumed
+by the coordinatewise `hlip` hypothesis of the section-space Picard–Lindelöf constructor. -/
+theorem coord_dist_le_dist
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x)
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x)
+      ≤ dist s t :=
+  le_trans (ContinuousMap.dist_apply_le_dist x)
+    (coordContinuousMap_dist_le_dist s t i)
+
+/-- **Section-space continuity transfers to each compact coordinate readout.**  From continuity of a
+section-valued map `f : X → ContinuousSectionSpace` (in the finite-cover Banach norm) on a set `s`,
+each compact coordinate readout `x ↦ (coord (f x)).1 i` is continuous on `s`.  Immediate from the
+`1`-Lipschitz (hence continuous) single readout `z ↦ (coord z).1 i` composed with `f`.  This is the
+converse of `continuousOn_of_forall_coord_continuousOn`, reducing the coordinatewise time-continuity
+hypothesis `hcont` of the section-space Picard–Lindelöf constructor to *section-space* continuity of
+the operator. -/
+theorem continuousOn_coord_of_continuousOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {X : Type*} [TopologicalSpace X]
+    {f : X → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {s : Set X}
+    (hf : ContinuousOn f s) (i : κ) :
+    ContinuousOn
+      (fun x => (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f x)).1 i) s := by
+  have hLip : LipschitzWith 1
+      (fun z : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover =>
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover z).1 i) :=
+    LipschitzWith.of_dist_le_mul fun z w => by
+      simpa only [NNReal.coe_one, one_mul] using
+        coordContinuousMap_dist_le_dist z w i
+  exact hLip.continuous.comp_continuousOn hf
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace

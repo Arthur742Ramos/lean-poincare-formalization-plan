@@ -585,4 +585,62 @@ theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coo
   · intro t ht i x
     exact le_trans (hCbound t ⟨ht.1, le_trans ht.2 hTle⟩ i x) hCMc
 
+/-- **Section-space Picard endpoint chooser from Banach-norm Lipschitz + time-continuity alone.**
+The cleanest honest form of the chart's `picard` field: its only analytic inputs are stated purely
+at the *section-space (finite-cover Banach norm)* level, with no reference to the compact coordinate
+readouts.  On a reference window `Icc t₀ T₀`, from
+* `hlip` — for each `t ∈ Icc t₀ T₀` the time-slice operator `A t` is `K`-`LipschitzOnWith` on the
+  section-space ball `closedBall x0 a`, and
+* `hcont` — for each section `s ∈ closedBall x0 a` the time-curve `t ↦ A t s` is `ContinuousOn`
+  `(Icc t₀ T₀)` in the section-space norm,
+
+a forward Picard endpoint `T ∈ (t₀, T₀]` and centre size `Mc` are produced for which `A` is
+`IsPicardLindelof` with radius `a`, Lipschitz `K`, and bound `Mc + K·a`.  The coordinatewise
+hypotheses of `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn`
+are discharged from these section-space ones by the `1`-Lipschitz coordinate readout:
+`coord_dist_le_dist` turns the ball-local `LipschitzOnWith` estimate into the pointwise coordinate
+`hlip`, and `continuousOn_coord_of_continuousOn` turns section-space time-continuity into the
+coordinate `hcont`.  This is the interface a genuine (mild/regularised) Ricci–DeTurck section-space
+operator is meant to verify — a Banach-norm Lipschitz-in-state bound and a Banach-norm time-continuity
+of the operator — with all trivialization/coordinate bookkeeping absorbed here. -/
+theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a K : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hlip : ∀ t ∈ Set.Icc t₀ T₀, LipschitzOnWith K (A t) (Metric.closedBall x0 (a : ℝ)))
+    (hcont : ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+        ContinuousOn (fun t => A t s) (Set.Icc t₀ T₀)) :
+    ∃ (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof A (tmin := t₀) (tmax := T)
+        ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + K * a) K := by
+  refine exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn
+    A x0 t₀ T₀ hT₀ a K ha ?_ ?_
+  · intro t ht s hs s' hs' i x
+    calc
+      dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s')).1 i x)
+          ≤ dist (A t s) (A t s') := coord_dist_le_dist (A t s) (A t s') i x
+      _ ≤ (K : ℝ) * dist s s' := (hlip t ht).dist_le_mul s hs s' hs'
+  · intro s hs i
+    exact continuousOn_coord_of_continuousOn (hcont hs) i
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
