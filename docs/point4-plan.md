@@ -7489,3 +7489,46 @@ form) and prove the three coordinatewise estimates (`hbound`/`hlip`/`hcont`) it 
 `isPicardLindelof_continuousSectionSpace_of_forall_coord`; alternatively begin the `realization`
 decode (`BanachEvolutionLocalSolutionIn A → ChosenIntrinsicDeTurckLocalSolution`) that the
 section-space evolution now makes available.
+
+Update — **the honest *ball-local* `picard` route for the section space is now complete** (extending
+`AnalyticPDE/SectionSpacePicard.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`,
+`scan cheats` `TOTAL 0`, bare `lake build` green — 2911 jobs). The prior section-space picard
+constructor `isPicardLindelof_continuousSectionSpace_of_forall_coord` demanded the *global*
+boundedness the `C⁰`-unbounded second-order Ricci–DeTurck operator cannot supply; this session builds
+the honest ball-local route producing the chart's **exact** `a` radius (matching its `lipschitz`-on-
+locus field), via the already-committed ball-local Banach ODE foundations
+(`isPicardLindelof_of_boundedOn_lipschitzOn_superset_timeDependent_Icc`,
+`isPicardLindelof_of_lipschitzOn_centerBound_closedBall_timeDependent_Icc`,
+`exists_forwardTime_mul_sub_le`):
+
+* `isPicardLindelof_continuousSectionSpace_of_forall_coord_superset` — coordinatewise readout
+  boundedness ≤ `L` + `K`-Lipschitz-in-section on a set `S ⊇ closedBall x0 a` (e.g. the positive-
+  definite locus) + time-continuity + `L·(T−t₀) ≤ a` ⟹ `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0 L K` — the
+  chart `picard` shape with radius `a` (not the global `L·(T−t₀)₊+1`).
+* `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` — sharpest honest form: the
+  only norm datum is the coordinatewise readout size of `A t` at the **fixed centre** `x0` (= `g₀`);
+  the ball bound `Mc + K·a` is *derived* from ball-Lipschitz. Output `… x0 a 0 (Mc + K·a) K`.
+* `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` — capstone:
+  from *forward*-time-uniform (on `Ici t₀`) centre-bound data there **exists** a forward endpoint
+  `T > t₀` carrying the full `picard` (endpoint from `exists_forwardTime_mul_sub_le`, auto-satisfying
+  `(Mc + K·a)·(T−t₀) ≤ a`) — supplying *both* `T`-dependent chart fields (`hT`, `picard`) at once,
+  the chart's `lipschitz`/`geometric` fields being `T`-independent.
+* `sectionSpace_evolution_exists_of_forall_coord_centerBound` — honest ball-local companion of
+  `sectionSpace_evolution_exists_unique_of_forall_coord`: the centre-bound data yields the actual
+  `[t₀,T]`-evolution curve `α` (`α t₀ = x0`, `α'(t) = A t (α t)`) via
+  `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀` — the raw material a `realization`
+  decode consumes, now from honest (not globally bounded) input.
+
+**Fractional progress on `{A, picard, realization, encode}`.** `picard` is now constructible from the
+*honest* ball-local / centre-bound coordinatewise analytic control — radius `a`, ball-Lipschitz `K`,
+centre size `Mc = ‖(A t g₀)ᵢ x‖` — the exact shape the real `C⁰`-unbounded operator can supply once a
+parabolic Schauder estimate provides `K` and `Mc`. The remaining `A`/`picard` gap is purely the
+*analytic* production of those two coordinatewise estimates for a concrete mild/regularised
+representative; the picard plumbing above then closes `picard` and hands over the evolution curve.
+
+**Next target.** Either (i) the parabolic Schauder ball-Lipschitz `K` + centre-size `Mc` estimates
+(`hlip`/`hcenter`) for a concrete mild/regularised section-space representative `A` — the sole
+remaining analytic input the picard route now needs; or (ii) the a-posteriori ball-membership
+`curve t ∈ closedBall x0 a` on `[t₀,T]`, upgrading `sectionSpace_evolution_exists_of_forall_coord_centerBound`
+to a full `BanachEvolutionLocalSolutionIn A locus t₀ x0` (the direct `realization` input) given
+`closedBall x0 a ⊆ locus`.
