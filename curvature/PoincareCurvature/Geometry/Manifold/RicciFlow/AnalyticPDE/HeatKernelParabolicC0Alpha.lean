@@ -738,5 +738,64 @@ theorem heatMildFixedPoint_parabolicC0AlphaNorm_closedBall_le {n : ℕ} {t₀ T 
     (parabolicHolderSeminorm_le (mul_nonneg hHslab_nonneg (Real.rpow_nonneg h2R_nonneg _))
       hHball_alpha)
 
+/-- **Explicit parabolic sup-norm data-difference contraction of the model mild solution.**  The
+`C^0` (sup) half of the parabolic Schauder *contraction* on differences of genuine mild solutions:
+for two model mild solutions `z, w` (fixed points of `heatMildSelfMap` for the *same* reaction `Q`,
+initial data `u₀, v₀`), the parabolic sup-norm of the (time-clamped) *difference* is bounded by the
+*initial-data* difference on every time-space set:
+`parabolicSupNorm (z − w) s ≤ ‖u₀ − v₀‖/(1 − Kstate(T − t₀))`.
+Pointwise, the clamped difference `z(projIcc t)(x) − w(projIcc t)(x)` is bounded in absolute value by
+the state-space distance `‖z − w‖ = dist z w`, which the reaction-Lipschitz Banach fixed-point
+stability `dist_heatMildFixedPoint_le` controls by the data difference.  This packages the abstract
+data-stability contraction into the parabolic Hölder framework: the explicit `parabolicSupNorm`
+a-priori constant a parabolic Schauder interior fixed-point iteration reads for the `C^0` part of its
+contraction estimate (the parabolic-Hölder-seminorm part of the contraction being carried by
+`heatMildFixedPoint_sub_spatial_holder_bound` in the spatial directions). -/
+theorem heatMildFixedPoint_parabolicSupNorm_sub_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ v₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {Lu : ℝ} (hLunn : 0 ≤ Lu) (hulip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ Lu * ‖a - b‖)
+    {Lv : ℝ} (hLvnn : 0 ≤ Lv) (hvlip : ∀ a b : Fin n → ℝ, |v₀ a - v₀ b| ≤ Lv * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    {Kstate : ℝ} (hKnn : 0 ≤ Kstate)
+    (hQlip : ∀ v w, ‖Q v - Q w‖ ≤ Kstate * ‖v - w‖)
+    (hsmall : Kstate * (T - t₀) < 1)
+    (z w : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb z = z)
+    (hw : heatMildSelfMap hT v₀ hLvnn hvlip Q hQcont hQb w = w)
+    (s : Set (ℝ × (Fin n → ℝ))) :
+    parabolicSupNorm
+        (fun p : ℝ × (Fin n → ℝ) =>
+          Set.IccExtend hT (⇑z) p.1 p.2 - Set.IccExtend hT (⇑w) p.1 p.2) s
+      ≤ ‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)) := by
+  have hpos : 0 < 1 - Kstate * (T - t₀) := by linarith
+  have hBnn : 0 ≤ ‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)) := div_nonneg (norm_nonneg _) hpos.le
+  have hdistzw : dist z w ≤ ‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)) :=
+    dist_heatMildFixedPoint_le hT u₀ v₀ hLunn hulip hLvnn hvlip Q hQcont hQb hKnn hQlip hsmall
+      z w hz hw
+  have hb : ParabolicBoundedWith (‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)))
+      (fun p : ℝ × (Fin n → ℝ) =>
+        Set.IccExtend hT (⇑z) p.1 p.2 - Set.IccExtend hT (⇑w) p.1 p.2) s := by
+    intro p _hp
+    have hbcf : ‖Set.IccExtend hT (⇑z) p.1 - Set.IccExtend hT (⇑w) p.1‖ ≤ ‖z - w‖ := by
+      have hEq : Set.IccExtend hT (⇑z) p.1 - Set.IccExtend hT (⇑w) p.1
+          = (z - w) (Set.projIcc t₀ T hT p.1) := by
+        show (⇑z) (Set.projIcc t₀ T hT p.1) - (⇑w) (Set.projIcc t₀ T hT p.1)
+            = (z - w) (Set.projIcc t₀ T hT p.1)
+        rw [BoundedContinuousFunction.sub_apply]
+      rw [hEq]
+      exact (z - w).norm_coe_le_norm _
+    have hscal : Set.IccExtend hT (⇑z) p.1 p.2 - Set.IccExtend hT (⇑w) p.1 p.2
+        = (Set.IccExtend hT (⇑z) p.1 - Set.IccExtend hT (⇑w) p.1) p.2 := by
+      rw [BoundedContinuousFunction.sub_apply]
+    calc ‖Set.IccExtend hT (⇑z) p.1 p.2 - Set.IccExtend hT (⇑w) p.1 p.2‖
+        = ‖(Set.IccExtend hT (⇑z) p.1 - Set.IccExtend hT (⇑w) p.1) p.2‖ := by rw [hscal]
+      _ ≤ ‖Set.IccExtend hT (⇑z) p.1 - Set.IccExtend hT (⇑w) p.1‖ :=
+            (Set.IccExtend hT (⇑z) p.1 - Set.IccExtend hT (⇑w) p.1).norm_coe_le_norm p.2
+      _ ≤ ‖z - w‖ := hbcf
+      _ = dist z w := (dist_eq_norm z w).symm
+      _ ≤ ‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)) := hdistzw
+  exact parabolicSupNorm_le hBnn hb
+
 end AnalyticPDE
 end RicciFlow
