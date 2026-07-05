@@ -6434,5 +6434,95 @@ theorem norm_heatDuhamelNDbcf_sub_le {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
     (fun s => (q₂ s).continuous.aestronglyMeasurable) hqb₂
     (fun s y => by rw [← Real.norm_eq_abs]; exact hD s y)
 
+/-- The `1`-dimensional heat kernel is **jointly measurable** in `(t, x)`.  Its explicit Gaussian
+formula `(4πt)^{−1/2}·exp(−x²/(4t))` is a composition of measurable operations (`rpow`, `exp`,
+arithmetic), discharged by `fun_prop`. -/
+lemma measurable_uncurry_heatKernel1D : Measurable (Function.uncurry heatKernel1D) := by
+  have h : Function.uncurry heatKernel1D
+      = fun p : ℝ × ℝ => (4 * π * p.1) ^ (-(1 : ℝ) / 2) * Real.exp (-p.2 ^ 2 / (4 * p.1)) := by
+    funext p; rfl
+  rw [h]; fun_prop
+
+/-- The `n`-dimensional heat kernel is **jointly measurable** in `(t, x)`: a finite product of the
+jointly-measurable `1`-D kernels `measurable_uncurry_heatKernel1D`. -/
+lemma measurable_uncurry_heatKernelND {n : ℕ} :
+    Measurable (fun p : ℝ × (Fin n → ℝ) => heatKernelND p.1 p.2) := by
+  simp only [heatKernelND]
+  refine Finset.measurable_prod _ (fun i _ => ?_)
+  exact measurable_uncurry_heatKernel1D.comp
+    (measurable_fst.prodMk ((measurable_pi_apply i).comp measurable_snd))
+
+/-- **Interval-integrability of the Duhamel integrand.**  For a *continuous*, uniformly
+sup-norm-bounded time-dependent source `q : ℝ → (Fin n → ℝ) →ᵇ ℝ` (`‖q s y‖ ≤ C`), the Duhamel
+integrand `s ↦ H_{t−s}(q s)(x)` is interval-integrable on `[t₀, t]`.  Measurability of the parametric
+integral is `MeasureTheory.AEStronglyMeasurable.integral_prod_right'` applied to the jointly-measurable
+`y`-integrand `(s, y) ↦ Kₙ(t−s, x−y)·(q s)(y)` (kernel factor from `measurable_uncurry_heatKernelND`
+precomposed with the continuous `(s,y) ↦ (t−s, x−y)`; source factor from joint continuity of evaluation
+`(s,y) ↦ (q s)(y)`).  The integrand is bounded by `C` a.e. on `(t₀, t]` (the singular diagonal `s = t`
+being a null set, `abs_heatSemigroupND_le` giving the bound for `t − s > 0`), and a bounded
+a.e.-measurable function on the finite-measure interval is integrable (`(integrable_const C).mono'`).
+This **discharges the integrability hypothesis** of `heatDuhamelNDbcf` from mere continuity of the
+reaction source — the honest measurability content of the mild-solution Duhamel term. -/
+lemma intervalIntegrable_heatSemigroupND_duhamel {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+    IntervalIntegrable (fun s => heatSemigroupND (t - s) (⇑(q s)) x) volume t₀ t := by
+  have hK : Measurable (fun p : ℝ × (Fin n → ℝ) => heatKernelND (t - p.1) (x - p.2)) := by
+    have hcomp : (fun p : ℝ × (Fin n → ℝ) => heatKernelND (t - p.1) (x - p.2))
+        = (fun p : ℝ × (Fin n → ℝ) => heatKernelND p.1 p.2)
+          ∘ (fun p : ℝ × (Fin n → ℝ) => ((t - p.1, x - p.2) : ℝ × (Fin n → ℝ))) := rfl
+    rw [hcomp]
+    exact measurable_uncurry_heatKernelND.comp
+      ((measurable_const.sub measurable_fst).prodMk (measurable_const.sub measurable_snd))
+  have hQ : Measurable (fun p : ℝ × (Fin n → ℝ) => (q p.1) p.2) := by
+    have hcomp : (fun p : ℝ × (Fin n → ℝ) => (q p.1) p.2)
+        = (fun z : (BoundedContinuousFunction (Fin n → ℝ) ℝ) × (Fin n → ℝ) => z.1 z.2)
+          ∘ (fun p : ℝ × (Fin n → ℝ) => (q p.1, p.2)) := rfl
+    rw [hcomp]
+    exact (ContinuousEval.continuous_eval.comp
+      ((hq.comp continuous_fst).prodMk continuous_snd)).measurable
+  have hGmeas : Measurable (fun p : ℝ × (Fin n → ℝ) =>
+      heatKernelND (t - p.1) (x - p.2) * (q p.1) p.2) := hK.mul hQ
+  have hSmeas : AEStronglyMeasurable
+      (fun s => heatSemigroupND (t - s) (⇑(q s)) x) volume := by
+    have heq : (fun s => heatSemigroupND (t - s) (⇑(q s)) x)
+        = fun s => ∫ y, heatKernelND (t - s) (x - y) * (q s) y := rfl
+    rw [heq]
+    exact (hGmeas.aestronglyMeasurable
+      (μ := (volume : Measure ℝ).prod (volume : Measure (Fin n → ℝ)))).integral_prod_right'
+  refine (intervalIntegrable_iff_integrableOn_Ioc_of_le hT).mpr ?_
+  refine (integrable_const C).mono' hSmeas.restrict ?_
+  have hset : {a : ℝ | ¬ a ≠ t} = {t} := by
+    ext s; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+  have htne : ∀ᵐ (s : ℝ), s ≠ t := by
+    rw [MeasureTheory.ae_iff, hset]; exact MeasureTheory.measure_singleton t
+  rw [ae_restrict_iff' measurableSet_Ioc]
+  filter_upwards [htne] with s hs hmem
+  have hlt : s < t := lt_of_le_of_ne hmem.2 hs
+  rw [Real.norm_eq_abs]
+  exact abs_heatSemigroupND_le (by linarith : (0 : ℝ) < t - s) x
+    (fun y => by rw [← Real.norm_eq_abs]; exact hqb s y)
+
+/-- **The Duhamel term as a bounded continuous function, from a *continuous* source.**  The
+self-contained form of `heatDuhamelNDbcf`: for a continuous, uniformly sup-norm-bounded source
+`q : ℝ → (Fin n → ℝ) →ᵇ ℝ`, the Duhamel integral `x ↦ ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` is a bounded
+continuous function, the integrability hypothesis discharged by
+`intervalIntegrable_heatSemigroupND_duhamel`.  This is the inhomogeneous half of the mild-solution
+map bundled on the Banach state space `(Fin n → ℝ) →ᵇ ℝ` with **no** free integrability side-condition
+— the form the mild Ricci–DeTurck fixed point consumes, where `q s = Q(u s)` is a continuous
+reaction of a continuous `BCF`-valued trajectory. -/
+noncomputable def heatDuhamelNDbcf_of_continuous {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    BoundedContinuousFunction (Fin n → ℝ) ℝ :=
+  heatDuhamelNDbcf hT q hqb
+    (fun x => intervalIntegrable_heatSemigroupND_duhamel hT hq hqb x)
+
+@[simp] theorem heatDuhamelNDbcf_of_continuous_apply {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+    heatDuhamelNDbcf_of_continuous hT hq hqb x
+      = ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x := rfl
+
 end AnalyticPDE
 end RicciFlow
