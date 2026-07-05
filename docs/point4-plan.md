@@ -8439,3 +8439,45 @@ sum explicitly).  Then feed `rs` to the committed
 `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`, completing the geometric-`A` **value-section**
 regularity; the remaining `A`-side obstruction is then the `picard` Lipschitz/centre bounds for the mild/regularised
 representative.
+
+## Milestone (2026-07-05, later still) — Step 3 of the Ricci-tensor-section route DONE: the intrinsic Ricci–DeTurck RHS is a continuous `BilinearFormBundle` section **unconditionally** (Item 3 / GAP 2 geometric-`A` value-section regularity CLOSED)
+
+Five additive commits, all sorry-free, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0`, full `lake build PoincareCurvature` green (2916 jobs).  Appended to
+`RicciFlow/DeTurckCorrectionRegularity.lean` (imported by the root, so on the build/audit path).  This closes the
+**value-section** half of GAP 2: the geometric operator `A`'s right-hand side `−2·Ricci + DeTurck` is now a genuine
+continuous `BilinearFormBundle` section with **no** assumed Ricci-section hypothesis.
+
+**`contMDiff_zero_bilinearFormBundleSection_of_forall_localFrame`** (the frame-component criterion).  A tangent
+`BilinearFormBundle` section `s` is a continuous section iff, for every base point `x0` and every model-basis pair
+`(i,j)`, `x ↦ s x (localFrame b i x)(localFrame b j x)` is continuous on `(trivializationAt E TM x0).baseSet`.  Continuity
+is local: at each `x0` the section is read in preferred coordinates (`trivializationAt_bilinearFormBundle_apply_eq`), and
+the coordinate bilinear form `E →L E →L ℝ` is reconstructed from its finitely-many frame evaluations by the finite-dim
+helper **`continuousOn_clm_of_forall_apply_basis`** (`Module.Basis.constrL`, continuous because `ι → G` is
+finite-dimensional) applied twice, then transferred through `Bundle.contMDiffAt_section`.  This is the bridge from Step 2's
+frame continuity of `curvatureTensor` to Step 3's section continuity, avoiding the transported-instance fiber diamond.
+
+**`ricciCurvature_eq_sum_localFrame_coeff`** (the frame trace formula).  For `x ∈ baseSet`,
+`ricci x u w = ∑ₖ localFrame_coeff b k x (curvatureTensor x (localFrame b k x) u w)` — the frame trace of the curvature
+endomorphism against the induced dual coframe, via `LinearMap.trace_eq_matrix_trace` over `basisAt b hx` (trace is
+metric-independent, so any `RiemannianBundle` works) + `toMatrix` diagonal + `ricciEndomorphism_apply` and the section-free
+coframe identity `repr_basisAt_eq_localFrame_coeff` (from `localFrame_coeff_apply_of_mem_baseSet` at a pinned section).
+
+**`ricciBilinearFormSection` / `_apply` / `ricciBilinearFormSection_contMDiff_zero`.**  The linear-map-valued
+`ricciCurvature cov x : TM x →ₗ TM x →ₗ ℝ` is promoted fiberwise to `TM x →L TM x →L ℝ` by the finite-dim
+`LinearMap.toContinuousLinearMap` (no fiber-norm diamond — only `T2Space`/`FiniteDimensional` on the vector-bundle fiber),
+and proved a **continuous** section: the criterion reduces to `x ↦ ricci x (eᵢ x)(eⱼ x)`, the trace formula expands it into
+a finite sum, each summand is `curvatureTensor_contMDiffOn_frame_zero` (Step 2) fed through `contMDiffOn_localFrame_coeff`
+at `k = 0` (continuous coframe pairing).
+
+**`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero`** (the unconditional closure of the value-section half).  Feeds
+`rs := ricciBilinearFormSection (someContMDiffLeviCivitaConnection g t)` + its continuity to the previously-committed
+`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`, with `rs x u v = ricciCurvature = intrinsicRicciTensor`
+by `rfl` under the metric's `RiemannianBundle` instance.  No assumed Ricci-section hypothesis remains.
+
+**NEXT — the `A`-side `picard` bounds (the still-open half of GAP 2).**  With the geometric `A`'s value section now
+continuous, the remaining obstruction is exhibiting the mild/regularised Ricci–DeTurck representative as a
+`ContinuousSectionSpace`-valued operator satisfying the coordinate `hlip`/`hcont`/centre bounds of
+`sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` (bounded + Lipschitz-in-state).  A genuine
+piece: a boundedness or Lipschitz estimate for the geometric mild representative reusing the already-committed model K/Mc
+bound *shapes* but on the real operator.
