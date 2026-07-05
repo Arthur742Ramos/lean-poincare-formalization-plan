@@ -5747,5 +5747,27 @@ theorem heatSemigroupND_laplacian_integral_bound {n : ℕ} {t : ℝ} (ht : 0 < t
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring
 
+/-- **`n`-dimensional heat-semigroup time-derivative integral bound.**  The `n`-dimensional heat
+kernel's *time* derivative `∂ₜ Kₙ(t, x − y)` (which by `deriv_heatKernelND_time_eq` equals the
+Laplacian factor `Kₙ·Σᵢ((x−y)ᵢ²/4t² − 1/2t)`) convolved against bounded data `f` obeys the same
+parabolic gain bound `|∫ ∂ₜKₙ(t, x − y)·f(y) dy| ≤ n·‖f‖∞/t`.  This is the a-priori control on the
+*time* evolution of the heat-smoothed data — the form directly consumed by the time-Lipschitz /
+Picard–Lindelöf side of the parabolic ODE — obtained from `heatSemigroupND_laplacian_integral_bound`
+by identifying the kernel's time derivative with its Laplacian factor. -/
+theorem heatSemigroupND_time_deriv_integral_bound {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    |∫ y, deriv (fun s => heatKernelND s (x - y)) t * f y| ≤ (n : ℝ) * C / t := by
+  have hrw : ∀ y : Fin n → ℝ,
+      deriv (fun s => heatKernelND s (x - y)) t * f y
+        = (heatKernelND t (x - y)
+            * (∑ i : Fin n, (((x - y) i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)))) * f y :=
+    fun y => by rw [deriv_heatKernelND_time_eq n t ht (x - y)]
+  calc |∫ y, deriv (fun s => heatKernelND s (x - y)) t * f y|
+      = |∫ y, (heatKernelND t (x - y)
+            * (∑ i : Fin n, (((x - y) i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)))) * f y| := by
+        rw [integral_congr_ae (Filter.Eventually.of_forall hrw)]
+    _ ≤ (n : ℝ) * C / t := heatSemigroupND_laplacian_integral_bound ht x hfm hfb
+
 end AnalyticPDE
 end RicciFlow
