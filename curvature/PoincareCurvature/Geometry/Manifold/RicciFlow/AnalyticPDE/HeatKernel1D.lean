@@ -5707,5 +5707,45 @@ lemma exists_forwardTime_mul_sub_le (t₀ : ℝ) (a K M : ℝ≥0) (ha : 0 < (a 
   rw [heq]
   exact mul_le_of_le_one_right ha.le (by rw [div_le_one hcp]; linarith)
 
+/-- **`n`-dimensional heat-semigroup Laplacian (time-derivative) integral bound.**  Summing the
+per-coordinate second-derivative Schauder bounds `heatSemigroupND_coord_second_deriv_integral_bound`
+over all `n` coordinates controls the full Laplacian convolution — equivalently, by
+`deriv_heatKernelND_time_eq`, the *time* derivative `∂ₜ Hₜf = Δ Hₜf` — of the `n`-dimensional heat
+semigroup: `|∫ ΔₓKₙ(t, x − y)·f(y) dy| ≤ n·‖f‖∞/t`.  This is the parabolic a-priori estimate
+controlling how fast heat-smoothed data evolves in time: merely bounded data becomes, after time
+`t`, a function whose Laplacian (hence time derivative) is `O(t⁻¹)`. -/
+theorem heatSemigroupND_laplacian_integral_bound {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    |∫ y, (heatKernelND t (x - y)
+        * (∑ i : Fin n, (((x - y) i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)))) * f y|
+      ≤ (n : ℝ) * C / t := by
+  have hpt : ∀ y : Fin n → ℝ,
+      (heatKernelND t (x - y)
+          * (∑ i : Fin n, (((x - y) i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)))) * f y
+        = ∑ i : Fin n,
+            (heatKernelND t (x - y) * (((x - y) i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y := by
+    intro y
+    simp only [Finset.mul_sum, Finset.sum_mul]
+  have hint : (∫ y, (heatKernelND t (x - y)
+          * (∑ i : Fin n, (((x - y) i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)))) * f y)
+        = ∑ i : Fin n, ∫ y,
+            (heatKernelND t (x - y) * (((x - y) i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y := by
+    rw [← integral_finset_sum Finset.univ
+      (fun i _ => integrable_secondDeriv_coord_heatKernelND_sub_mul ht i x hfm hfb)]
+    exact integral_congr_ae (Filter.Eventually.of_forall hpt)
+  rw [hint]
+  calc |∑ i : Fin n, ∫ y,
+            (heatKernelND t (x - y) * (((x - y) i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y|
+      ≤ ∑ i : Fin n, |∫ y,
+            (heatKernelND t (x - y) * (((x - y) i) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y| :=
+        Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ _i : Fin n, C / t :=
+        Finset.sum_le_sum (fun i _ =>
+          heatSemigroupND_coord_second_deriv_integral_bound ht x i hfm hfb)
+    _ = (n : ℝ) * C / t := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+        ring
+
 end AnalyticPDE
 end RicciFlow
