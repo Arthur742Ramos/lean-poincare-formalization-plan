@@ -8740,5 +8740,42 @@ theorem heatMildFixedPoint_apply_time_holder_bound {n : ℕ} {t₀ T : ℝ} (hT 
   rw [hx₂, hx₁]
   exact norm_heatMildValueNDbcf_time_holder_bound ht₁ h12 u₀ hqc hqb x
 
+/-- **`BCF`-norm (Banach-space) `Hölder-1/2` time-modulus of the model mild-solution value.**  The
+sup-over-`x` packaging of `norm_heatMildValueNDbcf_time_holder_bound` (whose pointwise bound is
+uniform in `x`): for `t₀ < t₁ < t₂`, in the Banach state space `(Fin n → ℝ) →ᵇ ℝ`,
+`‖Φ(t₂) − Φ(t₁)‖ ≤ (n·‖u₀‖/√(π(t₁−t₀)))·n·(2/√π·√(t₂−t₁))
+    + (C·(t₂ − t₁) + (4n²C/π)·√(t₁ − t₀)·√(t₂ − t₁))`.
+This is the quantitative Banach-space modulus of continuity of the mild-value path
+`t ↦ heatMildValueNDbcf …` at interior times, upgrading the qualitative time-continuity
+`continuousAt_heatMildValue_time` to a sharp `Hölder-1/2` rate — the time-regularity datum for the
+path-space `C^{0,1/2}([t₁, T], (Fin n → ℝ) →ᵇ ℝ)` membership of the mild Ricci–DeTurck
+representative. -/
+theorem norm_heatMildValueNDbcf_sub_time_holder {n : ℕ} {t₀ t₁ t₂ : ℝ}
+    (ht₁ : t₀ < t₁) (h12 : t₁ < t₂)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ‖heatMildValueNDbcf (lt_trans ht₁ h12) u₀ hq hqb - heatMildValueNDbcf ht₁ u₀ hq hqb‖
+      ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t₁ - t₀))) * (n : ℝ)
+            * (2 / Real.sqrt π * Real.sqrt (t₂ - t₁))
+          + (C * (t₂ - t₁)
+              + 4 * (n : ℝ) ^ 2 * C / π * Real.sqrt (t₁ - t₀) * Real.sqrt (t₂ - t₁)) := by
+  have hC : 0 ≤ C := le_trans (norm_nonneg _) (hqb 0 0)
+  have hRHSnn : (0 : ℝ) ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t₁ - t₀))) * (n : ℝ)
+        * (2 / Real.sqrt π * Real.sqrt (t₂ - t₁))
+      + (C * (t₂ - t₁)
+          + 4 * (n : ℝ) ^ 2 * C / π * Real.sqrt (t₁ - t₀) * Real.sqrt (t₂ - t₁)) := by
+    have hhom : (0 : ℝ) ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t₁ - t₀))) * (n : ℝ)
+        * (2 / Real.sqrt π * Real.sqrt (t₂ - t₁)) := by positivity
+    have hlin : (0 : ℝ) ≤ C * (t₂ - t₁) := mul_nonneg hC (by linarith)
+    have hduh : (0 : ℝ) ≤ 4 * (n : ℝ) ^ 2 * C / π * Real.sqrt (t₁ - t₀) * Real.sqrt (t₂ - t₁) := by
+      have heq : 4 * (n : ℝ) ^ 2 * C / π * Real.sqrt (t₁ - t₀) * Real.sqrt (t₂ - t₁)
+          = (4 * (n : ℝ) ^ 2 / π * Real.sqrt (t₁ - t₀) * Real.sqrt (t₂ - t₁)) * C := by ring
+      rw [heq]; exact mul_nonneg (by positivity) hC
+    linarith
+  refine (BoundedContinuousFunction.norm_le hRHSnn).mpr (fun x => ?_)
+  rw [BoundedContinuousFunction.sub_apply, Real.norm_eq_abs]
+  exact norm_heatMildValueNDbcf_time_holder_bound ht₁ h12 u₀ hq hqb x
+
 end AnalyticPDE
 end RicciFlow
