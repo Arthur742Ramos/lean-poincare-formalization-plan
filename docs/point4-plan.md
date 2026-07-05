@@ -7116,3 +7116,50 @@ intrinsicRicciDeTurckRHS …` on the positive-definite locus) forces `A` to be t
 Ricci-DeTurck operator, which cannot simultaneously satisfy `picard`'s `IsPicardLindelof` (a `C⁰`-Banach
 Lipschitz/bounded requirement); the empty / rank-`≤1` closures already exist directly.  So this session
 advanced the **unconditional Item-2** leg.
+
+Update — **the ND heat semigroup is now a first-class bounded LINEAR operator (norm ≤ 1) on the
+Banach space of bounded continuous functions `(Fin n → ℝ) →ᵇ ℝ`**, extending
+`AnalyticPDE/HeatKernel1D.lean` (all axiom-clean `propext`/`Classical.choice`/`Quot.sound`,
+cheat-scan `TOTAL 0`).  The committed Duhamel Schauder estimates were all stated pointwise on the
+bare curried type `ℝ → (Fin n → ℝ) → ℝ`, which carries no complete-metric-space structure, so the
+Banach fixed point that yields a mild Ricci–DeTurck representative had no state space to live on.
+This session builds that state space's homogeneous propagator:
+
+* `continuous_heatSemigroupND` — spatial continuity of `x ↦ (Hₜf)(x) = ∫ Kₙ(t, x−y)·f y dy` for
+  `t > 0` and bounded continuous `f`.  The reflection change of variables `y ↦ x − y`
+  (`integral_sub_left_eq_self`; `volume` on `Fin n → ℝ` is negation- and translation-invariant)
+  rewrites `Hₜf x = ∫ z, Kₙ(t, z)·f(x − z) dz`, whose integrand is continuous in `x` per fixed `z`
+  and dominated by the `x`-independent integrable envelope `z ↦ Kₙ(t, z)·C`, so
+  `continuous_of_dominated` closes it.  (A constant envelope on the direct `∫ Kₙ(t, x−y)·f y` form is
+  *not* integrable on `ℝⁿ` — the change of variables is what makes the domination work.)
+* `heatSemigroupNDbcf` / `heatSemigroupNDbcf_apply` — `Hₜf` bundled as a `BoundedContinuousFunction`
+  via `ofNormedAddCommGroup` (continuity above + the maximum-principle uniform bound `‖f‖`).
+* `norm_heatSemigroupNDbcf_le` (`‖Hₜf‖ ≤ ‖f‖`), `norm_heatSemigroupNDbcf_sub_le`
+  (`‖Hₜf − Hₜg‖ ≤ ‖f − g‖`, via `heatSemigroupND_sub` linearity + maximum principle), and
+  `lipschitzWith_heatSemigroupNDbcf` (`LipschitzWith 1`) — the `L^∞` non-expansiveness in norm,
+  difference, and Lipschitz vocabularies, the last directly consumable by the `ContractingWith` /
+  Banach-fixed-point API this module already imports.
+* `heatSemigroupNDbcf_add` / `heatSemigroupNDbcf_smul` / `heatSemigroupNDclm` /
+  `norm_heatSemigroupNDclm_le` — additivity + real homogeneity upgrade the map to a bounded
+  `ℝ`-linear operator `((Fin n → ℝ) →ᵇ ℝ) →L[ℝ] ((Fin n → ℝ) →ᵇ ℝ)` of operator norm `≤ 1`
+  (`LinearMap.mkContinuous`), the operator-theoretic object the abstract parabolic Banach fixed-point
+  machinery (`AnalyticPDE/Parabolic/BanachSpace.lean`) consumes.
+
+(Plumbing note: the `→ᵇ` superscript notation does not elaborate in this `module` file
+[`superscriptTerm` elaborator unavailable]; the explicit `BoundedContinuousFunction (Fin n → ℝ) ℝ`
+must be written instead.)
+
+**Formulation finding (re-confirmed, stated per directive).** The general-`M` Item-3 chart route
+stays blocked: `TimeDependentGeometricRicciDeTurckBanachChart` requires `A` to be `IsPicardLindelof`
+(bounded + Lipschitz on the `C⁰` section space, via `isPicardLindelof_of_bounded_lipschitz…`) *and*
+(via `geometric`) to equal the genuine 2nd-order `intrinsicRicciDeTurckRHS` of some smooth metric
+family.  `geometric`'s existential `∃ g` gives freedom (a "realise `s` to a smooth `g[s]`, then apply
+RHS" operator can be bounded-Lipschitz for a *fixed* regularisation, so the **chart** is inhabitable),
+but the genuine obstruction moves into `D`'s `realization`/`encode`: a *regularised* Banach solution
+does not decode to a genuine `ChosenIntrinsicDeTurckLocalSolution`.  Closing it needs the parabolic
+Schauder a-priori estimate controlling the *true* operator — i.e. the mild fixed point on the Banach
+space this session's operator now lives on — not a direct Mathlib Banach ODE.  Next target: the
+**Duhamel term as a `BoundedContinuousFunction`** (`x ↦ ∫_{t₀}^{t} H_{t−s}(q s) x ds` continuous +
+bounded; needs the Duhamel integrand's `s`-continuity/measurability), then the short-time-contraction
+Banach fixed point `Hₜu₀ + Duhamel(Q u)` giving a genuine mild solution of the ND reaction–diffusion
+model.
