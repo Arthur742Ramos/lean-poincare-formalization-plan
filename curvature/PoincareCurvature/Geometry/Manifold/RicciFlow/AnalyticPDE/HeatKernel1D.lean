@@ -6386,5 +6386,53 @@ noncomputable def heatDuhamelNDbcf {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
     (x : Fin n → ℝ) :
     heatDuhamelNDbcf hT q hqb hint x = ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x := rfl
 
+/-- **Self-map (sup-norm) bound for the Duhamel term as a bounded continuous function.**  The
+Banach-space (`(Fin n → ℝ) →ᵇ ℝ`) form of `heatSemigroupND_duhamel_sup_bound`: the Duhamel operator
+sends a sup-norm-`C`-bounded reaction source `q` (`‖q s y‖ ≤ C`) to a bounded continuous function of
+sup-norm `≤ C·(t − t₀)`.  Via `BoundedContinuousFunction.norm_le`, reduced to the pointwise sup
+bound.  This is the *self-map* half of the mild-solution Banach fixed-point data: the Duhamel
+integral of a bounded source stays in a sup-ball whose radius grows linearly in the time window. -/
+theorem norm_heatDuhamelNDbcf_le {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    (q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ) {C : ℝ}
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hint : ∀ x : Fin n → ℝ,
+      IntervalIntegrable (fun s => heatSemigroupND (t - s) (⇑(q s)) x) volume t₀ t) :
+    ‖heatDuhamelNDbcf hT q hqb hint‖ ≤ C * (t - t₀) := by
+  have hC : 0 ≤ C := le_trans (norm_nonneg _) (hqb 0 0)
+  refine (BoundedContinuousFunction.norm_le (mul_nonneg hC (by linarith))).mpr (fun x => ?_)
+  rw [heatDuhamelNDbcf_apply, Real.norm_eq_abs]
+  exact heatSemigroupND_duhamel_sup_bound hT x
+    (fun s y => by rw [← Real.norm_eq_abs]; exact hqb s y)
+
+/-- **Short-time contraction (sup-norm) bound for the Duhamel term as a bounded continuous
+function.**  The Banach-space form of `heatSemigroupND_duhamel_sub_sup_bound`: for two sup-norm-`C`
+bounded reaction sources `q₁, q₂` whose pointwise difference is bounded by `D` (`‖q₁ s y − q₂ s y‖ ≤
+D`), the Duhamel terms differ by at most `D·(t − t₀)` in sup-norm:
+`‖heatDuhamelNDbcf q₁ − heatDuhamelNDbcf q₂‖ ≤ D·(t − t₀)`.  Via `BoundedContinuousFunction.norm_le`
+reduced to the pointwise difference bound (`intervalIntegral.integral_sub` splitting the Duhamel
+integral of the difference).  Composed with a `D = Kstate·‖u₁ − u₂‖` Lipschitz bound on the reaction
+term, this is exactly the estimate `‖ΦDuhamel(u₁) − ΦDuhamel(u₂)‖ ≤ Kstate·(t − t₀)·‖u₁ − u₂‖` that
+makes the mild-solution map a *short-time contraction* on `C([t₀, t], (Fin n → ℝ) →ᵇ ℝ)` (the
+homogeneous propagator `H_{t−t₀}u₀` cancels in the difference, so the full mild map's contraction
+constant is exactly this Duhamel one) — the Banach fixed-point input for a mild Ricci–DeTurck
+representative. -/
+theorem norm_heatDuhamelNDbcf_sub_le {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    (q₁ q₂ : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ) {C D : ℝ}
+    (hqb₁ : ∀ s y, ‖q₁ s y‖ ≤ C) (hqb₂ : ∀ s y, ‖q₂ s y‖ ≤ C)
+    (hD : ∀ s y, ‖q₁ s y - q₂ s y‖ ≤ D)
+    (hint₁ : ∀ x : Fin n → ℝ,
+      IntervalIntegrable (fun s => heatSemigroupND (t - s) (⇑(q₁ s)) x) volume t₀ t)
+    (hint₂ : ∀ x : Fin n → ℝ,
+      IntervalIntegrable (fun s => heatSemigroupND (t - s) (⇑(q₂ s)) x) volume t₀ t) :
+    ‖heatDuhamelNDbcf hT q₁ hqb₁ hint₁ - heatDuhamelNDbcf hT q₂ hqb₂ hint₂‖ ≤ D * (t - t₀) := by
+  have hD0 : 0 ≤ D := le_trans (norm_nonneg _) (hD 0 0)
+  refine (BoundedContinuousFunction.norm_le (mul_nonneg hD0 (by linarith))).mpr (fun x => ?_)
+  rw [BoundedContinuousFunction.sub_apply, heatDuhamelNDbcf_apply, heatDuhamelNDbcf_apply,
+    Real.norm_eq_abs, ← intervalIntegral.integral_sub (hint₁ x) (hint₂ x)]
+  exact heatSemigroupND_duhamel_sub_sup_bound hT x
+    (fun s => (q₁ s).continuous.aestronglyMeasurable) hqb₁
+    (fun s => (q₂ s).continuous.aestronglyMeasurable) hqb₂
+    (fun s y => by rw [← Real.norm_eq_abs]; exact hD s y)
+
 end AnalyticPDE
 end RicciFlow
