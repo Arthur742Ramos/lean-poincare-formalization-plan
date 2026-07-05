@@ -8777,5 +8777,87 @@ theorem norm_heatMildValueNDbcf_sub_time_holder {n : ℕ} {t₀ t₁ t₂ : ℝ}
   rw [BoundedContinuousFunction.sub_apply, Real.norm_eq_abs]
   exact norm_heatMildValueNDbcf_time_holder_bound ht₁ h12 u₀ hq hqb x
 
+/-- **Spatial `C¹` (Lipschitz) data-difference modulus of the mild-solution value.**  The
+two-datum / two-source companion of `lipschitzWith_heatMildValueNDbcf`: for initial data `u₀, v₀`
+with sup difference `≤ D₀` (`|u₀ y − v₀ y| ≤ D₀`) and reaction sources `q₁, q₂` with pointwise sup
+difference `≤ D` (`|q₁ s y − q₂ s y| ≤ D`), the spatial modulus of the *difference* of the two
+mild-solution values obeys
+`|(Φ₁(t)(x) − Φ₂(t)(x)) − (Φ₁(t)(x') − Φ₂(t)(x'))|
+    ≤ (n·D₀/√(π(t−t₀)) + 2nD·√(t−t₀)/√π)·‖x − x'‖`.
+The homogeneous propagator turns the merely-bounded data difference into a spatially Lipschitz
+difference at the `t^{-1/2}` smoothing rate (`heatSemigroupND_sub_spatial_lipschitz_sqrt_rate_norm`)
+and the Duhamel term contributes the `√(t−t₀)` rate on the source difference
+(`heatSemigroupND_duhamel_sub_spatial_lipschitz_sqrt_bound`), combined by the triangle inequality
+after fusing the four Duhamel integrals into one (`intervalIntegral.integral_sub`).  This is the
+spatial-`C¹` half of the parabolic Schauder *contraction* estimate on differences of mild
+solutions — the difference modulus a Hölder-norm fixed-point argument for a mild Ricci–DeTurck
+representative contracts. -/
+theorem heatMildValueNDbcf_sub_spatial_lipschitz_bound {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ v₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q₁ q₂ : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq₁ : Continuous q₁) (hq₂ : Continuous q₂) {C₁ C₂ : ℝ}
+    (hqb₁ : ∀ s y, ‖q₁ s y‖ ≤ C₁) (hqb₂ : ∀ s y, ‖q₂ s y‖ ≤ C₂)
+    {D₀ D : ℝ} (hD₀ : ∀ y, ‖u₀ y - v₀ y‖ ≤ D₀) (hD : ∀ s y, ‖q₁ s y - q₂ s y‖ ≤ D)
+    (x x' : Fin n → ℝ) :
+    |(heatMildValueNDbcf ht u₀ hq₁ hqb₁ x - heatMildValueNDbcf ht v₀ hq₂ hqb₂ x)
+        - (heatMildValueNDbcf ht u₀ hq₁ hqb₁ x' - heatMildValueNDbcf ht v₀ hq₂ hqb₂ x')|
+      ≤ ((n : ℝ) * (D₀ / Real.sqrt (π * (t - t₀)))
+          + 2 * (n : ℝ) * D * Real.sqrt (t - t₀) / Real.sqrt π) * ‖x - x'‖ := by
+  have hpos : (0 : ℝ) < t - t₀ := by linarith
+  have hsg : |(heatSemigroupND (t - t₀) (⇑u₀) x - heatSemigroupND (t - t₀) (⇑v₀) x)
+        - (heatSemigroupND (t - t₀) (⇑u₀) x' - heatSemigroupND (t - t₀) (⇑v₀) x')|
+      ≤ (n : ℝ) * (D₀ / Real.sqrt (π * (t - t₀))) * ‖x - x'‖ :=
+    heatSemigroupND_sub_spatial_lipschitz_sqrt_rate_norm hpos
+      u₀.continuous.aestronglyMeasurable
+      (fun y => (u₀.norm_coe_le_norm y).trans (le_max_left ‖u₀‖ ‖v₀‖))
+      v₀.continuous.aestronglyMeasurable
+      (fun y => (v₀.norm_coe_le_norm y).trans (le_max_right ‖u₀‖ ‖v₀‖))
+      hD₀ x x'
+  have hdu : |∫ s in t₀..t,
+        ((heatSemigroupND (t - s) (⇑(q₁ s)) x - heatSemigroupND (t - s) (⇑(q₂ s)) x)
+          - (heatSemigroupND (t - s) (⇑(q₁ s)) x' - heatSemigroupND (t - s) (⇑(q₂ s)) x'))|
+      ≤ 2 * (n : ℝ) * D * ‖x - x'‖ * Real.sqrt (t - t₀) / Real.sqrt π :=
+    heatSemigroupND_duhamel_sub_spatial_lipschitz_sqrt_bound ht.le
+      (fun s => (q₁ s).continuous.aestronglyMeasurable)
+      (fun s y => (hqb₁ s y).trans (le_max_left C₁ C₂))
+      (fun s => (q₂ s).continuous.aestronglyMeasurable)
+      (fun s y => (hqb₂ s y).trans (le_max_right C₁ C₂))
+      hD x x'
+  have hI1x := intervalIntegrable_heatSemigroupND_duhamel ht.le hq₁ hqb₁ x
+  have hI1x' := intervalIntegrable_heatSemigroupND_duhamel ht.le hq₁ hqb₁ x'
+  have hI2x := intervalIntegrable_heatSemigroupND_duhamel ht.le hq₂ hqb₂ x
+  have hI2x' := intervalIntegrable_heatSemigroupND_duhamel ht.le hq₂ hqb₂ x'
+  have hBcomb :
+      ((∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₁ s)) x)
+          - ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₂ s)) x)
+        - ((∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₁ s)) x')
+          - ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₂ s)) x')
+      = ∫ s in t₀..t,
+          ((heatSemigroupND (t - s) (⇑(q₁ s)) x - heatSemigroupND (t - s) (⇑(q₂ s)) x)
+            - (heatSemigroupND (t - s) (⇑(q₁ s)) x' - heatSemigroupND (t - s) (⇑(q₂ s)) x')) := by
+    rw [intervalIntegral.integral_sub (hI1x.sub hI2x) (hI1x'.sub hI2x'),
+        intervalIntegral.integral_sub hI1x hI2x, intervalIntegral.integral_sub hI1x' hI2x']
+  rw [heatMildValueNDbcf_apply ht u₀ hq₁ hqb₁ x, heatMildValueNDbcf_apply ht v₀ hq₂ hqb₂ x,
+      heatMildValueNDbcf_apply ht u₀ hq₁ hqb₁ x', heatMildValueNDbcf_apply ht v₀ hq₂ hqb₂ x']
+  set a : ℝ := heatSemigroupND (t - t₀) (⇑u₀) x with ha
+  set b : ℝ := heatSemigroupND (t - t₀) (⇑v₀) x with hb
+  set a' : ℝ := heatSemigroupND (t - t₀) (⇑u₀) x' with ha'
+  set b' : ℝ := heatSemigroupND (t - t₀) (⇑v₀) x' with hb'
+  set p : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₁ s)) x with hp
+  set qI : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₂ s)) x with hqI
+  set p' : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₁ s)) x' with hp'
+  set qI' : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₂ s)) x' with hqI'
+  calc |a + p - (b + qI) - (a' + p' - (b' + qI'))|
+      = |(a - b - (a' - b')) + (p - qI - (p' - qI'))| := by
+        rw [show a + p - (b + qI) - (a' + p' - (b' + qI'))
+          = (a - b - (a' - b')) + (p - qI - (p' - qI')) by ring]
+    _ ≤ |a - b - (a' - b')| + |p - qI - (p' - qI')| := abs_add_le _ _
+    _ ≤ (n : ℝ) * (D₀ / Real.sqrt (π * (t - t₀))) * ‖x - x'‖
+          + 2 * (n : ℝ) * D * ‖x - x'‖ * Real.sqrt (t - t₀) / Real.sqrt π := by
+        refine add_le_add hsg ?_
+        rw [hBcomb]; exact hdu
+    _ = ((n : ℝ) * (D₀ / Real.sqrt (π * (t - t₀)))
+          + 2 * (n : ℝ) * D * Real.sqrt (t - t₀) / Real.sqrt π) * ‖x - x'‖ := by ring
+
 end AnalyticPDE
 end RicciFlow
