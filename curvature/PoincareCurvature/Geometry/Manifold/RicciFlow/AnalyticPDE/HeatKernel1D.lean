@@ -7001,5 +7001,100 @@ theorem continuousOn_heatMildValue_time {n : ℕ} {t₀ : ℝ}
   fun _t ht =>
     (continuousAt_heatMildValue_time (Set.mem_Ioi.1 ht) u₀ hq hqb x).continuousWithinAt
 
+/-- **Strong continuity at time `0` of the `n`-dimensional heat semigroup on Lipschitz data.**
+For a bounded (`‖w y‖ ≤ C`), globally `L`-Lipschitz (w.r.t. the sup-norm on `Fin n → ℝ`) datum `w`,
+the deviation of `Hₛw` from `w` is controlled by the heat kernel's absolute first moment:
+`|Hₛw x − w x| ≤ L·n·((4πs)^{−1/2}·(4s))`, which `→ 0` as `s → 0⁺`.  Writing
+`Hₛw x − w x = ∫ Kₙ(s, x−y)·(w y − w x) dy` (mean-zero, using `∫ Kₙ(s, x−y) dy = 1`), bounding
+`|w y − w x| ≤ L‖x − y‖ ≤ L·∑ₖ|xₖ − yₖ|`, and collapsing each coordinate integral by the closed-form
+first moment `integral_abs_coord_mul_heatKernelND_eq`.  This is the approximate-identity estimate
+underlying `BCF`-norm time-continuity of the mild-solution path: combined with the semigroup law
+`heatSemigroupND_comp` (`Hₜ = H_{t−ε}(H_ε ·)`) it reduces sup-norm time-continuity of `t ↦ Hₜf` to
+this quantitative convergence on the Lipschitz range `H_ε f`. -/
+theorem abs_heatSemigroupND_sub_self_le_of_lipschitz {n : ℕ} {s : ℝ} (hs : 0 < s)
+    {w : (Fin n → ℝ) → ℝ} {C L : ℝ} (hLnn : 0 ≤ L)
+    (hwm : AEStronglyMeasurable w) (hwb : ∀ y, ‖w y‖ ≤ C)
+    (hlip : ∀ a b : Fin n → ℝ, |w a - w b| ≤ L * ‖a - b‖) (x : Fin n → ℝ) :
+    |heatSemigroupND s w x - w x|
+      ≤ L * (n : ℝ) * ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) := by
+  -- Integrability facts for the convolution integrands.
+  have hker_w : Integrable (fun y => heatKernelND s (x - y) * w y) :=
+    integrable_heatKernelND_sub_mul hs x hwm hwb
+  have hker_c : Integrable (fun y => heatKernelND s (x - y) * w x) :=
+    (integrable_heatKernelND_sub hs x).mul_const (w x)
+  have hcoord_int : ∀ k : Fin n,
+      Integrable (fun y => heatKernelND s (x - y) * |(x - y) k|) := by
+    intro k
+    have h : Integrable (fun y => |(x - y) k| * heatKernelND s (x - y)) :=
+      (integrable_abs_coord_mul_heatKernelND hs k).comp_sub_left x
+    exact h.congr (Filter.Eventually.of_forall (fun y => mul_comm _ _))
+  -- The mean-zero rewrite: Hₛw x − w x = ∫ Kₙ(s, x−y)·(w y − w x).
+  have hmass : (∫ y : Fin n → ℝ, heatKernelND s (x - y)) = 1 :=
+    integral_heatKernelND_sub hs x
+  have key : heatSemigroupND s w x - w x
+      = ∫ y, heatKernelND s (x - y) * (w y - w x) := by
+    have hsub : (∫ y, heatKernelND s (x - y) * (w y - w x))
+        = (∫ y, heatKernelND s (x - y) * w y)
+          - ∫ y, heatKernelND s (x - y) * w x := by
+      rw [← integral_sub hker_w hker_c]
+      exact integral_congr_ae (Filter.Eventually.of_forall (fun y => by ring))
+    rw [hsub, integral_mul_const, hmass, one_mul, heatSemigroupND]
+  -- Distribution of the coordinate-sum envelope past the kernel factor.
+  have hdistrib : ∀ y : Fin n → ℝ,
+      heatKernelND s (x - y) * (L * ∑ k : Fin n, |(x - y) k|)
+        = L * ∑ k : Fin n, heatKernelND s (x - y) * |(x - y) k| := by
+    intro y
+    simp only [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun k _ => by ring)
+  -- Pointwise domination of the integrand by the coordinate-moment envelope.
+  have hbound_pt : ∀ y, ‖heatKernelND s (x - y) * (w y - w x)‖
+      ≤ L * ∑ k : Fin n, heatKernelND s (x - y) * |(x - y) k| := by
+    intro y
+    have hKnn : 0 ≤ heatKernelND s (x - y) := heatKernelND_nonneg hs _
+    have hnorm_le_sum : ‖x - y‖ ≤ ∑ k : Fin n, |(x - y) k| := by
+      have hr : (0 : ℝ) ≤ ∑ k : Fin n, |(x - y) k| :=
+        Finset.sum_nonneg (fun k _ => abs_nonneg ((x - y) k))
+      refine (pi_norm_le_iff_of_nonneg hr).mpr (fun i => ?_)
+      rw [Real.norm_eq_abs]
+      exact Finset.single_le_sum (fun k _ => abs_nonneg ((x - y) k)) (Finset.mem_univ i)
+    rw [← hdistrib y]
+    calc ‖heatKernelND s (x - y) * (w y - w x)‖
+        = heatKernelND s (x - y) * |w y - w x| := by
+          rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg hKnn]
+      _ ≤ heatKernelND s (x - y) * (L * ‖x - y‖) := by
+          refine mul_le_mul_of_nonneg_left ?_ hKnn
+          calc |w y - w x| ≤ L * ‖y - x‖ := hlip y x
+            _ = L * ‖x - y‖ := by rw [norm_sub_rev]
+      _ ≤ heatKernelND s (x - y) * (L * ∑ k : Fin n, |(x - y) k|) := by
+          refine mul_le_mul_of_nonneg_left ?_ hKnn
+          exact mul_le_mul_of_nonneg_left hnorm_le_sum hLnn
+  -- Integrate the pointwise bound and evaluate each coordinate moment in closed form.
+  have hRHS_int : Integrable
+      (fun y => L * ∑ k : Fin n, heatKernelND s (x - y) * |(x - y) k|) :=
+    (integrable_finset_sum _ (fun k _ => hcoord_int k)).const_mul L
+  rw [key, ← Real.norm_eq_abs]
+  calc ‖∫ y, heatKernelND s (x - y) * (w y - w x)‖
+      ≤ ∫ y, ‖heatKernelND s (x - y) * (w y - w x)‖ :=
+        norm_integral_le_integral_norm _
+    _ ≤ ∫ y, L * ∑ k : Fin n, heatKernelND s (x - y) * |(x - y) k| :=
+        integral_mono_of_nonneg (Filter.Eventually.of_forall (fun y => norm_nonneg _))
+          hRHS_int (Filter.Eventually.of_forall hbound_pt)
+    _ = L * ∑ k : Fin n, ∫ y, heatKernelND s (x - y) * |(x - y) k| := by
+        rw [integral_const_mul, integral_finset_sum _ (fun k _ => hcoord_int k)]
+    _ = L * ∑ _k : Fin n, ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) := by
+        congr 1
+        refine Finset.sum_congr rfl (fun k _ => ?_)
+        have hshift : (∫ y, heatKernelND s (x - y) * |(x - y) k|)
+            = ∫ z, heatKernelND s z * |z k| := by
+          simpa using
+            integral_sub_left_eq_self
+              (fun z : Fin n → ℝ => heatKernelND s z * |z k|) volume x
+        rw [hshift,
+          show (fun z : Fin n → ℝ => heatKernelND s z * |z k|)
+              = fun z => |z k| * heatKernelND s z from by funext z; rw [mul_comm],
+          integral_abs_coord_mul_heatKernelND_eq hs k]
+    _ = L * (n : ℝ) * ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]; ring
+
 end AnalyticPDE
 end RicciFlow
