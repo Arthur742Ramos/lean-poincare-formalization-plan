@@ -7805,5 +7805,89 @@ theorem continuousOn_heatMildValuePathBcf_Icc {n : ℕ} (t₀ T : ℝ)
       Set.Icc_subset_Ici_self
   · exact (continuousAt_heatMildValuePathBcf t₀ u₀ hq hqb hlt).continuousWithinAt
 
+/-- The mild-value path takes the initial datum `u₀` as its value at the initial time `t₀`: the
+homogeneous propagator contributes `H_0 u₀ = u₀` and the Duhamel integral over `[t₀, t₀]` vanishes. -/
+theorem heatMildValuePathBcf_initial {n : ℕ} (t₀ : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    heatMildValuePathBcf t₀ u₀ hq hqb t₀ = u₀ := by
+  have h0 : heatFlowPathBcf u₀ 0 = u₀ := dif_neg (lt_irrefl 0)
+  have hduh : heatDuhamelPathBcf t₀ hq hqb t₀ = 0 := by
+    rw [heatDuhamelPathBcf_of_le le_rfl hq hqb]
+    have hb := norm_heatDuhamelNDbcf_of_continuous_le (le_refl t₀) hq hqb
+    rw [sub_self, mul_zero] at hb
+    exact norm_le_zero_iff.mp hb
+  show heatFlowPathBcf u₀ (t₀ - t₀) + heatDuhamelPathBcf t₀ hq hqb t₀ = u₀
+  rw [sub_self, h0, hduh, add_zero]
+
+/-- **The mild-value path as an element of the *closed*-interval Banach state space
+`C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)` on Lipschitz data.**  The closed-domain analog of
+`heatMildValuePathBcfIoc`: for an `L`-Lipschitz initial datum `u₀` the mild-value path is continuous
+on the closed interval (`continuousOn_heatMildValuePathBcf_Icc`, using the left-endpoint strong
+continuity) and uniformly bounded by `‖u₀‖ + C·(T − t₀)` (its value is `u₀` at `t₀` and
+`heatMildValueNDbcf` for `t > t₀`).  This is the genuine element of `↥(Set.Icc t₀ T) →ᵇ
+((Fin n → ℝ) →ᵇ ℝ)` — the complete state space on which the closed-interval path-space Banach fixed
+point of the mild-solution self-map runs, with the trajectory matching `u₀` at `t₀` in `C_b`-norm. -/
+noncomputable def heatMildValuePathBcfIcc {n : ℕ} (t₀ T : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ) :=
+  BoundedContinuousFunction.ofNormedAddCommGroup
+    (fun t => heatMildValuePathBcf t₀ u₀ hq hqb (t : ℝ))
+    ((continuousOn_heatMildValuePathBcf_Icc t₀ T u₀ hLnn hlip hq hqb).comp_continuous
+      continuous_subtype_val (fun t => t.2))
+    (‖u₀‖ + C * (T - t₀))
+    (fun t => by
+      have hC : (0 : ℝ) ≤ C := le_trans (norm_nonneg _) (hqb 0 0)
+      have hle : (t : ℝ) ≤ T := t.2.2
+      have hge : t₀ ≤ (t : ℝ) := t.2.1
+      show ‖heatMildValuePathBcf t₀ u₀ hq hqb (t : ℝ)‖ ≤ ‖u₀‖ + C * (T - t₀)
+      rcases eq_or_lt_of_le hge with h | hlt
+      · rw [← h, heatMildValuePathBcf_initial]
+        have hnn : (0 : ℝ) ≤ C * (T - t₀) := mul_nonneg hC (by linarith)
+        linarith [norm_nonneg u₀]
+      · rw [heatMildValuePathBcf_of_lt hlt u₀ hq hqb]
+        calc ‖heatMildValueNDbcf hlt u₀ hq hqb‖
+            ≤ ‖u₀‖ + C * ((t : ℝ) - t₀) := norm_heatMildValueNDbcf_le hlt u₀ hq hqb
+          _ ≤ ‖u₀‖ + C * (T - t₀) := by gcongr)
+
+/-- The underlying value of `heatMildValuePathBcfIcc` at `t ∈ [t₀, T]` is the total mild-value path
+value `heatMildValuePathBcf t₀ u₀ hq hqb ↑t`. -/
+@[simp] theorem heatMildValuePathBcfIcc_apply {n : ℕ} (t₀ T : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (t : ↥(Set.Icc t₀ T)) :
+    heatMildValuePathBcfIcc t₀ T u₀ hLnn hlip hq hqb t
+      = heatMildValuePathBcf t₀ u₀ hq hqb (t : ℝ) := rfl
+
+/-- **Self-map (sup-over-time) bound in the closed-interval Banach state space.**  The mild-value
+path element `heatMildValuePathBcfIcc` has `C_b`-norm `≤ ‖u₀‖ + C·(T − t₀)`, the closed-domain analog
+of `norm_heatMildValuePathBcfIoc_le`. -/
+theorem norm_heatMildValuePathBcfIcc_le {n : ℕ} (t₀ T : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (hT : t₀ ≤ T) :
+    ‖heatMildValuePathBcfIcc t₀ T u₀ hLnn hlip hq hqb‖ ≤ ‖u₀‖ + C * (T - t₀) := by
+  have hC : (0 : ℝ) ≤ C := le_trans (norm_nonneg _) (hqb 0 0)
+  refine (BoundedContinuousFunction.norm_le
+    (add_nonneg (norm_nonneg _) (mul_nonneg hC (by linarith)))).2 (fun t => ?_)
+  rw [heatMildValuePathBcfIcc_apply]
+  have hge : t₀ ≤ (t : ℝ) := t.2.1
+  rcases eq_or_lt_of_le hge with h | hlt
+  · rw [← h, heatMildValuePathBcf_initial]
+    have hnn : (0 : ℝ) ≤ C * (T - t₀) := mul_nonneg hC (by linarith)
+    linarith [norm_nonneg u₀]
+  · rw [heatMildValuePathBcf_of_lt hlt u₀ hq hqb]
+    calc ‖heatMildValueNDbcf hlt u₀ hq hqb‖
+        ≤ ‖u₀‖ + C * ((t : ℝ) - t₀) := norm_heatMildValueNDbcf_le hlt u₀ hq hqb
+      _ ≤ ‖u₀‖ + C * (T - t₀) := by
+          have hle : (t : ℝ) ≤ T := t.2.2
+          gcongr
+
 end AnalyticPDE
 end RicciFlow
