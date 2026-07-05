@@ -8654,5 +8654,49 @@ theorem heatSemigroupND_duhamel_time_holder_bound {n : ℕ} {t₀ t₁ t₂ : �
   rw [add_comm (C * (t₂ - t₁))]
   exact add_le_add hA hB
 
+/-- **`Hölder-1/2` time-modulus of the model mild-solution value (parabolic space-time modulus,
+time half).**  Combining the homogeneous heat-semigroup time modulus (`abs_heatSemigroupND_add_sub_le`,
+in `√s` form) with the Duhamel time modulus (`heatSemigroupND_duhamel_time_holder_bound`): for
+`t₀ < t₁ < t₂`, bounded continuous initial datum `u₀`, and a continuous sup-norm-`C`-bounded reaction
+source `q`, the pointwise mild-solution value
+`Φ(t)(x) = H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` obeys
+`|Φ(t₂)(x) − Φ(t₁)(x)| ≤ (n·‖u₀‖/√(π(t₁−t₀)))·n·(2/√π·√(t₂−t₁))
+    + (C·(t₂ − t₁) + (4n²C/π)·√(t₁ − t₀)·√(t₂ − t₁))`,
+uniformly in `x`.  The homogeneous propagator contributes the `t^{-1/2}`-prefactored `√(t₂−t₁)` modulus
+and the Duhamel term the `√(t₁−t₀)·√(t₂−t₁)` and linear `(t₂−t₁)` moduli, split by `abs_add_le` after
+`heatMildValueNDbcf_apply`.  Paired with the earlier spatial `C^{0,α}` gains
+(`heatMildValueNDbcf_spatial_holder_bound`, `lipschitzWith_heatMildValueNDbcf`) this is the *time*
+component of the full parabolic space-time modulus of the mild Ricci–DeTurck representative: away from
+the initial slice `t = t₀` the solution is jointly `Hölder-1/2`-in-time, the regularity the parabolic
+`ParabolicC0AlphaOn` chart membership and the `geometric` identification ultimately consume. -/
+theorem norm_heatMildValueNDbcf_time_holder_bound {n : ℕ} {t₀ t₁ t₂ : ℝ}
+    (ht₁ : t₀ < t₁) (h12 : t₁ < t₂)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+    |heatMildValueNDbcf (lt_trans ht₁ h12) u₀ hq hqb x - heatMildValueNDbcf ht₁ u₀ hq hqb x|
+      ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t₁ - t₀))) * (n : ℝ)
+            * (2 / Real.sqrt π * Real.sqrt (t₂ - t₁))
+          + (C * (t₂ - t₁)
+              + 4 * (n : ℝ) ^ 2 * C / π * Real.sqrt (t₁ - t₀) * Real.sqrt (t₂ - t₁)) := by
+  have hDuh := heatSemigroupND_duhamel_time_holder_bound ht₁.le h12 hq hqb x
+  have hHom : |heatSemigroupND (t₂ - t₀) (⇑u₀) x - heatSemigroupND (t₁ - t₀) (⇑u₀) x|
+      ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t₁ - t₀))) * (n : ℝ)
+          * (2 / Real.sqrt π * Real.sqrt (t₂ - t₁)) := by
+    have hrw : t₂ - t₀ = (t₁ - t₀) + (t₂ - t₁) := by ring
+    rw [hrw, ← heatSemigroupND_timeModulus_eq_sqrt (show (0 : ℝ) ≤ t₂ - t₁ by linarith)]
+    exact abs_heatSemigroupND_add_sub_le (by linarith) (by linarith) u₀.continuous
+      (fun y => u₀.norm_coe_le_norm y) x
+  simp only [heatMildValueNDbcf_apply]
+  have hregroup : (heatSemigroupND (t₂ - t₀) (⇑u₀) x
+          + ∫ s in t₀..t₂, heatSemigroupND (t₂ - s) (⇑(q s)) x)
+        - (heatSemigroupND (t₁ - t₀) (⇑u₀) x
+          + ∫ s in t₀..t₁, heatSemigroupND (t₁ - s) (⇑(q s)) x)
+      = (heatSemigroupND (t₂ - t₀) (⇑u₀) x - heatSemigroupND (t₁ - t₀) (⇑u₀) x)
+        + ((∫ s in t₀..t₂, heatSemigroupND (t₂ - s) (⇑(q s)) x)
+          - (∫ s in t₀..t₁, heatSemigroupND (t₁ - s) (⇑(q s)) x)) := by ring
+  rw [hregroup]
+  exact (abs_add_le _ _).trans (add_le_add hHom hDuh)
+
 end AnalyticPDE
 end RicciFlow
