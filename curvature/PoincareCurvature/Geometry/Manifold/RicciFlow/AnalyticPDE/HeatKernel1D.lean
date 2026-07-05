@@ -7369,5 +7369,140 @@ lemma continuousAt_intervalIntegral_normSub_shift {n : ℕ} {b t₁ : ℝ}
     intro _
     exact (((hq.comp (continuous_id.sub continuous_const)).sub continuous_const).norm).continuousAt
 
+/-- The inhomogeneous Duhamel term as a *total* `BCF`-valued path `ℝ → (Fin n → ℝ) →ᵇ ℝ`:
+`∫_{t₀}^{t} H_{t−s}(q s) ds` for `t₀ ≤ t`, and `0` for `t < t₀`.  Bundling the proof-dependent
+`heatDuhamelNDbcf_of_continuous` into a `dite` makes `t ↦ Duhamel(t)` a genuine map between metric
+spaces, so its `BCF`-norm continuity can be stated as `ContinuousAt`. -/
+noncomputable def heatDuhamelPathBcf {n : ℕ} (t₀ : ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ :=
+  fun t => if h : t₀ ≤ t then heatDuhamelNDbcf_of_continuous h hq hqb else 0
+
+lemma heatDuhamelPathBcf_of_le {n : ℕ} {t₀ t : ℝ} (h : t₀ ≤ t)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    heatDuhamelPathBcf t₀ hq hqb t = heatDuhamelNDbcf_of_continuous h hq hqb := dif_pos h
+
+/-- **`BCF`-norm time-continuity of the inhomogeneous Duhamel path.**  For a continuous, uniformly
+sup-norm-bounded `BCF`-valued reaction source `q`, the Duhamel path
+`t ↦ Duhamel(t) = ∫_{t₀}^{t} H_{t−s}(q s) ds` is continuous at every `t₁ > t₀` in the Banach space
+`(Fin n → ℝ) →ᵇ ℝ`.  This is the *singular*-endpoint half of the mild-value path lift, the companion
+of the homogeneous propagator continuity `continuousAt_heatFlowPathBcf`.
+
+The proof substitutes `u = t − s` (`heatSemigroupND_duhamel_eq_comp_sub`), turning `Duhamel(t)(x)`
+into `∫_0^{t−t₀} H_u(q(t−u))(x) du`, where the heat time `u` is **decoupled** from `t`.  Splitting at
+`b = t₁ − t₀` gives, with `a = t − t₀`,
+`Duhamel(t)(x) − Duhamel(t₁)(x) = ∫_b^a H_u(q(t−u))(x) du + ∫_0^b [H_u(q(t−u))(x) − H_u(q(t₁−u))(x)] du`.
+The **tail** `∫_b^a` is bounded by `C·|t − t₁|` (the propagator is `L^∞`-nonexpansive,
+`abs_heatSemigroupND_le`), uniformly in `x`.  The **main** term uses that `H_u` is *linear and
+nonexpansive*, so `|H_u(q(t−u) − q(t₁−u))(x)| ≤ ‖q(t−u) − q(t₁−u)‖`, hence the term is bounded by the
+non-singular source modulus `G(t) = ∫_0^b ‖q(t−u) − q(t₁−u)‖ du`, again uniformly in `x` — the
+substitution has removed the `(t−s)^{−1/2}` singularity that would otherwise appear.  Taking the
+sup over `x` (`BoundedContinuousFunction.norm_le`) gives `‖Duhamel(t) − Duhamel(t₁)‖ ≤ C·|t − t₁| +
+G(t)`, and the right-hand side tends to `0` (`continuousAt_intervalIntegral_normSub_shift`,
+`G(t₁) = 0`), so the distance is squeezed to `0`. -/
+theorem continuousAt_heatDuhamelPathBcf {n : ℕ} (t₀ : ℝ) {t₁ : ℝ}
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (ht : t₀ < t₁) :
+    ContinuousAt (heatDuhamelPathBcf t₀ hq hqb) t₁ := by
+  have hC : (0 : ℝ) ≤ C := le_trans (norm_nonneg _) (hqb 0 0)
+  have hqm : ∀ s, AEStronglyMeasurable (⇑(q s)) :=
+    fun s => (q s).continuous.aestronglyMeasurable
+  -- continuity of the source-modulus integrand in `u`, for the `IntervalIntegrable` bound.
+  have hcont_g : ∀ t : ℝ, Continuous (fun u : ℝ => ‖q (t - u) - q (t₁ - u)‖) := by
+    intro t
+    exact ((hq.comp (continuous_const.sub continuous_id)).sub
+      (hq.comp (continuous_const.sub continuous_id))).norm
+  -- the majorant path `C·|t − t₁| + G(t)`, continuous at `t₁` with value `0`.
+  have hg_tendsto : Filter.Tendsto
+      (fun t => C * |t - t₁| + ∫ u in (0 : ℝ)..(t₁ - t₀), ‖q (t - u) - q (t₁ - u)‖)
+      (nhds t₁) (nhds 0) := by
+    have h1 : ContinuousAt (fun t : ℝ => C * |t - t₁|) t₁ := by fun_prop
+    have hsum : ContinuousAt
+        (fun t => C * |t - t₁| + ∫ u in (0 : ℝ)..(t₁ - t₀), ‖q (t - u) - q (t₁ - u)‖) t₁ :=
+      h1.add (continuousAt_intervalIntegral_normSub_shift hq hqb)
+    have h := hsum.tendsto
+    simp only [sub_self, abs_zero, mul_zero, norm_zero, intervalIntegral.integral_zero,
+      add_zero] at h
+    exact h
+  -- reduce continuity to `dist → 0` and squeeze by the majorant.
+  show Filter.Tendsto (heatDuhamelPathBcf t₀ hq hqb) (nhds t₁)
+    (nhds (heatDuhamelPathBcf t₀ hq hqb t₁))
+  rw [tendsto_iff_dist_tendsto_zero]
+  refine squeeze_zero' (Filter.Eventually.of_forall (fun t => dist_nonneg)) ?_ hg_tendsto
+  filter_upwards [Ioi_mem_nhds ht] with t htmem
+  have htgt : t₀ < t := Set.mem_Ioi.1 htmem
+  have ht_le : t₀ ≤ t := htgt.le
+  have ha : (0 : ℝ) ≤ t - t₀ := by linarith
+  have hb : (0 : ℝ) ≤ t₁ - t₀ := by linarith
+  show dist (heatDuhamelPathBcf t₀ hq hqb t) (heatDuhamelPathBcf t₀ hq hqb t₁)
+    ≤ C * |t - t₁| + ∫ u in (0 : ℝ)..(t₁ - t₀), ‖q (t - u) - q (t₁ - u)‖
+  rw [heatDuhamelPathBcf_of_le ht_le hq hqb, heatDuhamelPathBcf_of_le ht.le hq hqb, dist_eq_norm]
+  refine (BoundedContinuousFunction.norm_le
+    (add_nonneg (mul_nonneg hC (abs_nonneg _))
+      (intervalIntegral.integral_nonneg hb (fun u _ => norm_nonneg _)))).mpr (fun x => ?_)
+  -- pointwise-in-`x` estimate, after substituting `u = t − s` in both Duhamel integrals.
+  rw [BoundedContinuousFunction.sub_apply, heatDuhamelNDbcf_of_continuous_apply,
+    heatDuhamelNDbcf_of_continuous_apply, Real.norm_eq_abs,
+    heatSemigroupND_duhamel_eq_comp_sub t₀ t (fun s => ⇑(q s)) x,
+    heatSemigroupND_duhamel_eq_comp_sub t₀ t₁ (fun s => ⇑(q s)) x]
+  -- integrability facts for the interval splits.
+  have hint_0b_t : IntervalIntegrable (fun u => heatSemigroupND u (⇑(q (t - u))) x)
+      volume 0 (t₁ - t₀) :=
+    intervalIntegrable_heatSemigroupND_comp_sub t hb hq hqb x
+  have hint_0b_t₁ : IntervalIntegrable (fun u => heatSemigroupND u (⇑(q (t₁ - u))) x)
+      volume 0 (t₁ - t₀) :=
+    intervalIntegrable_heatSemigroupND_comp_sub t₁ hb hq hqb x
+  have hsub_uIcc : Set.uIcc (t₁ - t₀) (t - t₀) ⊆ Set.uIcc (0 : ℝ) (max (t - t₀) (t₁ - t₀)) := by
+    apply Set.uIcc_subset_uIcc
+    · rw [Set.mem_uIcc]; exact Or.inl ⟨hb, le_max_right _ _⟩
+    · rw [Set.mem_uIcc]; exact Or.inl ⟨ha, le_max_left _ _⟩
+  have hint_ba_t : IntervalIntegrable (fun u => heatSemigroupND u (⇑(q (t - u))) x)
+      volume (t₁ - t₀) (t - t₀) :=
+    (intervalIntegrable_heatSemigroupND_comp_sub t (le_trans ha (le_max_left _ _)) hq hqb
+      x).mono_set hsub_uIcc
+  -- algebraic identity `∫_0^a Ft − ∫_0^b Ft₁ = ∫_b^a Ft + ∫_0^b (Ft − Ft₁)`.
+  have hsplit : (∫ u in (0 : ℝ)..(t - t₀), heatSemigroupND u (⇑(q (t - u))) x)
+      = (∫ u in (0 : ℝ)..(t₁ - t₀), heatSemigroupND u (⇑(q (t - u))) x)
+        + ∫ u in (t₁ - t₀)..(t - t₀), heatSemigroupND u (⇑(q (t - u))) x :=
+    (intervalIntegral.integral_add_adjacent_intervals hint_0b_t hint_ba_t).symm
+  rw [hsplit,
+    show (∫ u in (0 : ℝ)..(t₁ - t₀), heatSemigroupND u (⇑(q (t - u))) x)
+          + (∫ u in (t₁ - t₀)..(t - t₀), heatSemigroupND u (⇑(q (t - u))) x)
+          - ∫ u in (0 : ℝ)..(t₁ - t₀), heatSemigroupND u (⇑(q (t₁ - u))) x
+        = (∫ u in (t₁ - t₀)..(t - t₀), heatSemigroupND u (⇑(q (t - u))) x)
+          + ((∫ u in (0 : ℝ)..(t₁ - t₀), heatSemigroupND u (⇑(q (t - u))) x)
+            - ∫ u in (0 : ℝ)..(t₁ - t₀), heatSemigroupND u (⇑(q (t₁ - u))) x) from by ring,
+    ← intervalIntegral.integral_sub hint_0b_t hint_0b_t₁]
+  refine le_trans (abs_add_le _ _) (add_le_add ?_ ?_)
+  · -- tail bound `≤ C·|t − t₁|`.
+    have htail : |∫ u in (t₁ - t₀)..(t - t₀), heatSemigroupND u (⇑(q (t - u))) x|
+        ≤ C * |(t - t₀) - (t₁ - t₀)| := by
+      rw [← Real.norm_eq_abs]
+      refine intervalIntegral.norm_integral_le_of_norm_le_const (fun u hu => ?_)
+      have hmem : u ∈ Set.Ioc (min (t₁ - t₀) (t - t₀)) (max (t₁ - t₀) (t - t₀)) := hu
+      have hupos : (0 : ℝ) < u := lt_of_le_of_lt (le_min hb ha) hmem.1
+      rw [Real.norm_eq_abs]
+      exact abs_heatSemigroupND_le hupos x
+        (fun y => by rw [← Real.norm_eq_abs]; exact hqb (t - u) y)
+    calc |∫ u in (t₁ - t₀)..(t - t₀), heatSemigroupND u (⇑(q (t - u))) x|
+        ≤ C * |(t - t₀) - (t₁ - t₀)| := htail
+      _ = C * |t - t₁| := by rw [show (t - t₀) - (t₁ - t₀) = t - t₁ from by ring]
+  · -- main bound `≤ G(t)`.
+    rw [← Real.norm_eq_abs]
+    refine intervalIntegral.norm_integral_le_of_norm_le hb ?_
+      ((hcont_g t).intervalIntegrable 0 (t₁ - t₀))
+    filter_upwards with u
+    intro hu
+    have hupos : (0 : ℝ) < u := (Set.mem_Ioc.1 hu).1
+    rw [Real.norm_eq_abs, ← heatSemigroupND_sub hupos x (hqm _) (fun y => hqb (t - u) y)
+      (hqm _) (fun y => hqb (t₁ - u) y)]
+    refine abs_heatSemigroupND_le hupos x (fun y => ?_)
+    have hsa : (q (t - u) - q (t₁ - u)) y = q (t - u) y - q (t₁ - u) y := by
+      rw [BoundedContinuousFunction.sub_apply]
+    rw [← hsa, ← Real.norm_eq_abs]
+    exact (q (t - u) - q (t₁ - u)).norm_coe_le_norm y
+
 end AnalyticPDE
 end RicciFlow
