@@ -1103,4 +1103,138 @@ theorem contMDiff_nonempty :
 
 end GlobalRegularity
 
+section LevelDowngrade
+
+variable [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [CompleteSpace F]
+  [T2Space M] [IsManifold I ∞ M] [ContMDiffVectorBundle 2 F V I]
+
+/-- **General-bundle class-to-set restriction of a `C¹` covariant derivative.**  A globally `C¹`
+covariant derivative (`ContMDiffCovariantDerivative cov 1`) restricts to a `C¹` covariant derivative
+on every open set.  Proved by a smooth-bump localization: multiplying a `C²` section by a bump equal
+to `1` near a point produces a globally `C²` section, whose covariant derivative is `C¹` by the class,
+and which agrees with the original covariant derivative where the bump is `1`.  Bundle-generic version
+of the tangent-bundle lemma in `LeviCivita.lean`; kept in the `RiemannianBundle`-free `Existence`
+context so the frame decomposition can be applied without an instance diamond. -/
+theorem contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one
+    {cov : CovariantDerivative I F V} [ContMDiffCovariantDerivative cov 1]
+    {u : Set M} (hu : IsOpen u) :
+    ContMDiffCovariantDerivativeOn F 1 cov.toFun u := by
+  refine { contMDiff := ?_ }
+  intro σ hσ
+  apply contMDiffOn_of_locally_contMDiffOn
+  intro x hx
+  have hux : u ∈ nhds x := hu.mem_nhds hx
+  obtain ⟨ψ, hψtsupp, hψsupp⟩ :=
+    (SmoothBumpFunction.nhds_basis_support (I := I) (c := x) hux).mem_iff.mp hux
+  have hψ : ContMDiff I 𝓘(ℝ) 2 ψ := ψ.contMDiff.of_le (show (2 : WithTop ℕ∞) ≤ ∞ by decide)
+  let τ : Π y : M, V y := fun y ↦ ψ y • σ y
+  have hτ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2 (T% τ) := by
+    simpa [τ] using
+      (ContMDiffOn.smul_section_of_tsupport (I := I) (F := F) (V := V) (u := u)
+        (n := (2 : WithTop ℕ∞)) (ψ := ψ) hψ.contMDiffOn hu hψtsupp hσ)
+  have hcovτ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] F)) 1
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] F) (E := THom) y (cov τ y)) := by
+    have hτOn : ContMDiffOn I (I.prod 𝓘(ℝ, F)) 2 (T% τ) Set.univ := by
+      simpa [contMDiffOn_univ] using hτ
+    simpa [contMDiffOn_univ] using
+      ((inferInstance : ContMDiffCovariantDerivative cov 1).contMDiff.contMDiff hτOn)
+  have hψeq1 : {y : M | ψ y = 1} ∈ nhds x := by
+    filter_upwards [ψ.eventuallyEq_one] with y hy
+    simpa using hy
+  rcases mem_nhds_iff.mp hψeq1 with ⟨w, hwsub, hwopen, hxw⟩
+  have hwu : w ⊆ u := by
+    intro y hy
+    have hy1 : ψ y = 1 := hwsub hy
+    have hysupp : y ∈ Function.support ψ := by
+      simpa [Function.support] using show ψ y ≠ 0 by rw [hy1]; norm_num
+    exact hψsupp hysupp
+  have hEq : ∀ y ∈ w, cov σ y = cov τ y := by
+    intro y hy
+    have hyu : y ∈ u := hwu hy
+    have hσy : MDiffAt (T% σ) y :=
+      (((hσ y hyu).contMDiffAt (hu.mem_nhds hyu)).of_le
+        (by simp : (1 : WithTop ℕ∞) ≤ 2)).mdifferentiableAt one_ne_zero
+    have hτy : MDiffAt (T% τ) y :=
+      (hτ.contMDiffAt.of_le (by simp : (1 : WithTop ℕ∞) ≤ 2)).mdifferentiableAt one_ne_zero
+    exact (cov.isCovariantDerivativeOn (s := w)).congr_of_eqOn hσy hτy (hwopen.mem_nhds hy)
+      (fun z hz ↦ by
+        have hz1 : ψ z = 1 := hwsub hz
+        calc
+          σ z = 1 • σ z := by simpa using (one_smul ℝ (σ z)).symm
+          _ = ψ z • σ z := by simpa [hz1])
+  have hcovσw : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] F)) 1
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] F) (E := THom) y (cov σ y)) w := by
+    refine ContMDiffOn.congr hcovτ.contMDiffOn ?_
+    intro y hy
+    exact congrArg (fun A ↦ TotalSpace.mk' (E := THom) (E →L[ℝ] F) y A) (hEq y hy)
+  refine ⟨w, hwopen, hxw, ?_⟩
+  simpa [Set.inter_eq_right.mpr hwu] using hcovσw
+
+/-- **General-bundle covariant-derivative level downgrade `1 → 0`.**  A globally `C¹` covariant
+derivative (`ContMDiffCovariantDerivative cov 1`) is a `C⁰` covariant derivative on every open set:
+the covariant derivative of a merely-`C¹` section is a *continuous* `T*M ⊗ V`-section.  This is the
+"any `C^{k+1}` covariant derivative is `C^k`" monotonicity for `k = 0` (an explicit Mathlib "later
+file" TODO), proved from the local frame decomposition
+`∇σ = ∇^{frame}σ + ∑ᵢ (coeffᵢ σ) · ∇(frameᵢ)`: the frame term is `C⁰` by
+`contMDiffOn_frameCovariantDerivative_of_level`, and each `∇(frameᵢ)` is `C¹` because a `C²`-regular
+bundle has `C²` local frames that probe the `C¹` class (via the class-to-set restriction).  Applying
+to the tangent bundle: the covariant derivative of a `C¹` vector field is a continuous section — the
+DeTurck-correction regularity input. -/
+theorem contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one
+    {cov : CovariantDerivative I F V} [ContMDiffCovariantDerivative cov 1]
+    {u : Set M} (hu : IsOpen u) :
+    ContMDiffCovariantDerivativeOn F 0 cov.toFun u := by
+  classical
+  refine { contMDiff := ?_ }
+  intro σ hσ
+  apply contMDiffOn_of_locally_contMDiffOn
+  intro x hx
+  let e := trivializationAt F V x
+  let b := Module.finBasis ℝ F
+  have hxbase : x ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt F V x
+  refine ⟨e.baseSet, e.open_baseSet, hxbase, ?_⟩
+  haveI : ContMDiffVectorBundle 0 F V I :=
+    ContMDiffVectorBundle.of_le (n := 2) (show (0 : WithTop ℕ∞) ≤ 2 by norm_num)
+  haveI : ContMDiffVectorBundle (0 + 1) F V I := by
+    simpa using (inferInstance : ContMDiffVectorBundle 1 F V I)
+  have hopen : IsOpen (u ∩ e.baseSet) := hu.inter e.open_baseSet
+  have hsub : u ∩ e.baseSet ⊆ e.baseSet := Set.inter_subset_right
+  have hσ1 : ContMDiffOn I (I.prod 𝓘(ℝ, F)) 1 (T% σ) (u ∩ e.baseSet) := by
+    simpa using (show ContMDiffOn I (I.prod 𝓘(ℝ, F)) (0 + 1) (T% σ) u from hσ).mono
+      Set.inter_subset_left
+  have hcov1 : ContMDiffCovariantDerivativeOn F 1 cov.toFun e.baseSet :=
+    contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one
+      (u := e.baseSet) e.open_baseSet
+  have hσ01 : ContMDiffOn I (I.prod 𝓘(ℝ, F)) (0 + 1) (T% σ) (u ∩ e.baseSet) := by
+    simpa using hσ1
+  have hframe0 := Bundle.Trivialization.contMDiffOn_frameCovariantDerivative_of_level
+    (I := I) (V := V) (n := 0) e b hopen hsub hσ01
+  have hcoeff : ∀ i, ContMDiffOn I 𝓘(ℝ) 1
+      ((LinearMap.piApply (e.localFrame_coeff I b i)) σ) (u ∩ e.baseSet) := fun i =>
+    contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b) hopen hsub hσ1 i
+  have hframe2 : ∀ i, ContMDiffOn I (I.prod 𝓘(ℝ, F)) (1 + 1)
+      (T% (e.localFrame b i)) e.baseSet := fun i => by
+    simpa using
+      (Bundle.Trivialization.contMDiffOn_localFrame_baseSet (I := I) (e := e)
+        (n := (2 : WithTop ℕ∞)) (b := b) i)
+  have hcovframe := fun i => hcov1.contMDiff (hframe2 i)
+  have hdiff0 := ContMDiffOn.sum_section (s := (Finset.univ : Finset _))
+    (fun i (_ : i ∈ Finset.univ) =>
+      ContMDiffOn.smul_section (n := (0 : WithTop ℕ∞))
+        ((hcoeff i).of_le (show (0 : WithTop ℕ∞) ≤ 1 by norm_num))
+        (((hcovframe i).mono hsub).of_le (show (0 : WithTop ℕ∞) ≤ 1 by norm_num)))
+  have htotal := ContMDiffOn.add_section hframe0 hdiff0
+  refine htotal.congr fun y hy => ?_
+  have hMDiff : MDiffAt (T% σ) y :=
+    ((hσ1 y hy).contMDiffAt (hopen.mem_nhds hy)).mdifferentiableAt one_ne_zero
+  congr 1
+  refine ContinuousLinearMap.ext fun v => ?_
+  have hdec := e.covariantDerivative_apply_eq_sum_localFrame_add_sum_covariantDerivative_localFrame
+    (I := I) b cov hy.2 hMDiff v
+  simpa [Bundle.Trivialization.frameCovariantDerivative, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.sum_apply, ContinuousLinearMap.smulRight_apply,
+    ContinuousLinearMap.smul_apply] using hdec
+
+end LevelDowngrade
+
 end CovariantDerivative
