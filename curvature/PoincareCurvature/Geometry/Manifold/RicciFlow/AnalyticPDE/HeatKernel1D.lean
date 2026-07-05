@@ -7542,5 +7542,24 @@ theorem continuousAt_heatMildValuePathBcf {n : ℕ} (t₀ : ℝ) {t₁ : ℝ}
   (continuousAt_heatFlowPathBcf_shift u₀ ht).add
     (continuousAt_heatDuhamelPathBcf t₀ hq hqb ht)
 
+/-- `ContinuousOn (Ioi t₀)` form of `continuousAt_heatDuhamelPathBcf`: the Duhamel path is
+`BCF`-norm-continuous on the open forward time ray. -/
+theorem continuousOn_heatDuhamelPathBcf {n : ℕ} (t₀ : ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ContinuousOn (heatDuhamelPathBcf t₀ hq hqb) (Set.Ioi t₀) :=
+  fun _t ht => (continuousAt_heatDuhamelPathBcf t₀ hq hqb (Set.mem_Ioi.1 ht)).continuousWithinAt
+
+/-- `ContinuousOn (Ioi t₀)` form of `continuousAt_heatMildValuePathBcf`: the mild-solution path is
+`BCF`-norm-continuous on the open forward time ray — the domain on which a mild-solution trajectory
+`t ↦ Φ(t)` lives as an element of `C((t₀, T], (Fin n → ℝ) →ᵇ ℝ)`. -/
+theorem continuousOn_heatMildValuePathBcf {n : ℕ} (t₀ : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ContinuousOn (heatMildValuePathBcf t₀ u₀ hq hqb) (Set.Ioi t₀) :=
+  fun _t ht =>
+    (continuousAt_heatMildValuePathBcf t₀ u₀ hq hqb (Set.mem_Ioi.1 ht)).continuousWithinAt
+
 end AnalyticPDE
 end RicciFlow
