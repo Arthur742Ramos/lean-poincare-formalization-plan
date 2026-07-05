@@ -2653,6 +2653,82 @@ theorem continuousOn_of_forall_coord_uncurry_continuousOn
   intro p _
   exact coord_apply (f p.1) i p.2
 
+/-- **Bounded linear section-space operator from a coordinatewise operator-norm bound.**  Given a
+`𝕜`-linear map `T` on the transported finite-cover section space together with a uniform bound
+`‖(coord (T s)).1 i x‖ ≤ C · ‖s‖` on every compact coordinate readout of the image, `T` is bounded and
+packages into a `ContinuousSectionSpace →L[𝕜] ContinuousSectionSpace`.  The coordinate bound is pushed
+to the section-norm bound `‖T s‖ ≤ C · ‖s‖` by `norm_le_of_forall_coord_norm_le`, then
+`LinearMap.mkContinuous` supplies the packaged operator (whose operator-norm control is
+`mkContinuousOfForallCoordNormLe_norm_le`).  This is the missing constructor that turns a generator's
+fiber/coordinate operator estimate into the `CSS →L[𝕜] CSS` object consumed as the bounded linear
+generator `L t` of the section-space Picard–Lindelöf `picard` field. -/
+noncomputable def mkContinuousOfForallCoordNormLe
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (T : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →ₗ[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (T s)).1 i x‖ ≤ C * ‖s‖) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →L[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover :=
+  T.mkContinuous C fun s =>
+    norm_le_of_forall_coord_norm_le (mul_nonneg hC (norm_nonneg s)) (hbound s)
+
+@[simp]
+theorem mkContinuousOfForallCoordNormLe_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (T : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →ₗ[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (T s)).1 i x‖ ≤ C * ‖s‖)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) :
+    mkContinuousOfForallCoordNormLe T C hC hbound s = T s :=
+  rfl
+
+/-- Operator-norm control for `mkContinuousOfForallCoordNormLe`: the packaged section-space operator
+has operator norm at most the coordinatewise bound `C`. -/
+theorem mkContinuousOfForallCoordNormLe_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (T : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →ₗ[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (T s)).1 i x‖ ≤ C * ‖s‖) :
+    ‖mkContinuousOfForallCoordNormLe T C hC hbound‖ ≤ C := by
+  refine LinearMap.mkContinuous_norm_le T hC fun s => ?_
+  exact norm_le_of_forall_coord_norm_le (mul_nonneg hC (norm_nonneg s)) (hbound s)
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
