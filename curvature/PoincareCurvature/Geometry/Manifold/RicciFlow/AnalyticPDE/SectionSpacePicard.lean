@@ -509,4 +509,80 @@ theorem sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_cente
     (isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
       A x0 t₀ T hT a K Mc hlip hcont hcenter hLa) hsub
 
+/-- **Section-space Picard endpoint chooser from Lipschitz + time-continuity alone (no hand-supplied
+centre bound).**  A convenience strengthening of
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound`: the centre
+readout size `Mc` need not be supplied by hand.  On a reference window `Icc t₀ T₀`, from
+coordinatewise `K`-Lipschitz-in-section control on `closedBall x0 a` and mere *time-continuity* of the
+compact coordinate readouts there, the uniform centre bound is *derived*
+(`exists_forall_mem_Icc_coord_norm_le_of_continuousOn`, using compactness of `Icc t₀ T₀` and of the
+base pieces), and a forward Picard endpoint `T ∈ (t₀, T₀]` is chosen (`exists_forwardTime_mul_sub_le`
+intersected with the window `min T' T₀`) for which `A` is `IsPicardLindelof` with radius `a`,
+Lipschitz `K`, and the internally produced bound `Mc + K·a`.  This is the honest section-space
+`picard`-field shape whose only analytic inputs are the operator's ball-local Lipschitz constant and
+the continuity of its coordinate readout — no separately quantified size constant, the centre bound
+`Mc` coming for free from continuity of the readout at the initial metric on a compact window. -/
+theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a K : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hlip : ∀ t ∈ Set.Icc t₀ T₀, ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+        ∀ ⦃s'⦄, s' ∈ Metric.closedBall x0 (a : ℝ) → ∀ (i : κ) (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s')).1 i x)
+          ≤ (K : ℝ) * dist s s')
+    (hcont : ∀ s ∈ Metric.closedBall x0 (a : ℝ), ∀ (i : κ),
+        ContinuousOn
+          (fun t => (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i)
+          (Set.Icc t₀ T₀)) :
+    ∃ (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof A (tmin := t₀) (tmax := T)
+        ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + K * a) K := by
+  obtain ⟨C, hC0, hCbound⟩ :=
+    exists_forall_mem_Icc_coord_norm_le_of_continuousOn
+      (f := fun t => A t x0) (t₀ := t₀) (T := T₀)
+      (hcont x0 (Metric.mem_closedBall_self ha.le))
+  set Mc : ℝ≥0 := C.toNNReal with hMc
+  have hCMc : C ≤ (Mc : ℝ) := by
+    rw [hMc]; exact (Real.coe_toNNReal C hC0).ge
+  obtain ⟨T', hT', hLa'⟩ :=
+    RicciFlow.AnalyticPDE.exists_forwardTime_mul_sub_le t₀ a K Mc ha
+  have hTle : min T' T₀ ≤ T₀ := min_le_right T' T₀
+  have hstep : (min T' T₀ - t₀) ≤ (T' - t₀) := by
+    have := min_le_left T' T₀; linarith
+  refine ⟨min T' T₀, lt_min hT' hT₀, Mc, ?_⟩
+  have hLa : ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (min T' T₀ - t₀) ≤ (a : ℝ) := by
+    calc ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (min T' T₀ - t₀)
+        ≤ ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (T' - t₀) :=
+          mul_le_mul_of_nonneg_left hstep (by positivity)
+      _ ≤ (a : ℝ) := hLa'
+  refine isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
+    A x0 t₀ (min T' T₀) (lt_min hT' hT₀) a K Mc ?_ ?_ ?_ hLa
+  · intro t ht
+    exact hlip t ⟨ht.1, le_trans ht.2 hTle⟩
+  · intro s hs i
+    exact (hcont s hs i).mono (Set.Icc_subset_Icc le_rfl hTle)
+  · intro t ht i x
+    exact le_trans (hCbound t ⟨ht.1, le_trans ht.2 hTle⟩ i x) hCMc
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
