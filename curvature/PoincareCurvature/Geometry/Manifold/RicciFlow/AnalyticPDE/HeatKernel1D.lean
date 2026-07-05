@@ -7723,5 +7723,87 @@ theorem continuousWithinAt_heatFlowPathBcf_zero {n : ℕ}
     filter_upwards [self_mem_nhdsWithin] with s hs using hbd s hs
   exact squeeze_zero' (Filter.Eventually.of_forall (fun _ => dist_nonneg)) hev hmaj
 
+/-- **Right-continuity of the inhomogeneous Duhamel path at the initial time.**  The Duhamel path
+`heatDuhamelPathBcf t₀ hq hqb` is `ContinuousWithinAt` at `t₀` along `Ici t₀`, with value `0`:
+`∫_{t₀}^{t} H_{t−s}(q s) ds → 0` in `C_b`-norm as `t → t₀⁺`.  The value at `t₀` is `0` (its norm is
+`≤ C·(t₀ − t₀) = 0`, `norm_heatDuhamelNDbcf_of_continuous_le`), and on `Ici t₀` the distance to `0` is
+`≤ C·(t − t₀) → 0`, giving the squeeze.  Unlike `continuousOn_heatDuhamelPathBcf` (which only handles
+the open ray `Ioi t₀`), this closes the *left endpoint*. -/
+theorem continuousWithinAt_heatDuhamelPathBcf_initial {n : ℕ} (t₀ : ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ContinuousWithinAt (heatDuhamelPathBcf t₀ hq hqb) (Set.Ici t₀) t₀ := by
+  have hval : heatDuhamelPathBcf t₀ hq hqb t₀ = 0 := by
+    rw [heatDuhamelPathBcf_of_le le_rfl hq hqb]
+    have hb := norm_heatDuhamelNDbcf_of_continuous_le (le_refl t₀) hq hqb
+    rw [sub_self, mul_zero] at hb
+    exact norm_le_zero_iff.mp hb
+  have hbd : ∀ t : ℝ, t₀ ≤ t → dist (heatDuhamelPathBcf t₀ hq hqb t) 0 ≤ C * (t - t₀) := by
+    intro t ht
+    rw [heatDuhamelPathBcf_of_le ht hq hqb, dist_zero_right]
+    exact norm_heatDuhamelNDbcf_of_continuous_le ht hq hqb
+  show Filter.Tendsto (heatDuhamelPathBcf t₀ hq hqb) (nhdsWithin t₀ (Set.Ici t₀))
+    (nhds (heatDuhamelPathBcf t₀ hq hqb t₀))
+  rw [hval, tendsto_iff_dist_tendsto_zero]
+  have hmaj : Filter.Tendsto (fun t : ℝ => C * (t - t₀))
+      (nhdsWithin t₀ (Set.Ici t₀)) (nhds 0) := by
+    have hcont : Filter.Tendsto (fun t : ℝ => C * (t - t₀)) (nhds t₀)
+        (nhds (C * (t₀ - t₀))) :=
+      (continuous_const.mul (continuous_id.sub continuous_const)).tendsto t₀
+    rw [sub_self, mul_zero] at hcont
+    exact hcont.mono_left nhdsWithin_le_nhds
+  have hev : ∀ᶠ t in nhdsWithin t₀ (Set.Ici t₀),
+      dist (heatDuhamelPathBcf t₀ hq hqb t) 0 ≤ C * (t - t₀) := by
+    filter_upwards [self_mem_nhdsWithin] with t ht using hbd t ht
+  exact squeeze_zero' (Filter.Eventually.of_forall (fun _ => dist_nonneg)) hev hmaj
+
+/-- **Right-continuity of the mild-value path at the initial time on Lipschitz data.**  For an
+`L`-Lipschitz bounded continuous initial datum `u₀` and a continuous, uniformly sup-norm-bounded
+source `q`, the mild-value path `t ↦ Φ(t) = H_{t−t₀}u₀ + ∫_{t₀}^{t} H_{t−s}(q s) ds` is
+`ContinuousWithinAt` at `t₀` along `Ici t₀`, with value `u₀`.  It is the sum of the shifted
+homogeneous propagator path (`continuousWithinAt_heatFlowPathBcf_zero`, precomposed with the
+continuous shift `t ↦ t − t₀`) — which tends to `u₀` — and the Duhamel path
+(`continuousWithinAt_heatDuhamelPathBcf_initial`) — which tends to `0`.  This is the endpoint match
+`Φ(t₀) = u₀` in the *strong* `C_b` sense that the closed-interval path space demands. -/
+theorem continuousWithinAt_heatMildValuePathBcf_initial {n : ℕ} (t₀ : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ContinuousWithinAt (heatMildValuePathBcf t₀ u₀ hq hqb) (Set.Ici t₀) t₀ := by
+  have hshift : ContinuousWithinAt (fun t : ℝ => t - t₀) (Set.Ici t₀) t₀ :=
+    (continuous_id.sub continuous_const).continuousWithinAt
+  have hmaps : Set.MapsTo (fun t : ℝ => t - t₀) (Set.Ici t₀) (Set.Ici 0) :=
+    fun t ht => by simp only [Set.mem_Ici, sub_nonneg]; exact ht
+  have hg : ContinuousWithinAt (heatFlowPathBcf u₀) (Set.Ici 0) ((fun t : ℝ => t - t₀) t₀) := by
+    show ContinuousWithinAt (heatFlowPathBcf u₀) (Set.Ici 0) (t₀ - t₀)
+    rw [sub_self]; exact continuousWithinAt_heatFlowPathBcf_zero u₀ hLnn hlip
+  have hhom : ContinuousWithinAt (fun t : ℝ => heatFlowPathBcf u₀ (t - t₀)) (Set.Ici t₀) t₀ :=
+    ContinuousWithinAt.comp (g := heatFlowPathBcf u₀) (f := fun t : ℝ => t - t₀)
+      hg hshift hmaps
+  have hduh : ContinuousWithinAt (heatDuhamelPathBcf t₀ hq hqb) (Set.Ici t₀) t₀ :=
+    continuousWithinAt_heatDuhamelPathBcf_initial t₀ hq hqb
+  exact hhom.add hduh
+
+/-- **Closed-interval `BCF`-norm continuity of the mild-value path on Lipschitz data.**  Combining
+the open-ray continuity `continuousOn_heatMildValuePathBcf` (on `Ioi t₀`) with the left-endpoint
+right-continuity `continuousWithinAt_heatMildValuePathBcf_initial`, for `L`-Lipschitz initial data the
+mild-value path `t ↦ Φ(t)` is `ContinuousOn` the *closed* interval `Icc t₀ T`.  This is precisely the
+input that upgrades the half-open state space `↥(Ioc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)` to the closed-domain
+path space `C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)` on Lipschitz initial data, on which the mild-solution
+trajectory matches `u₀` at `t₀` in the genuine `C_b` sense. -/
+theorem continuousOn_heatMildValuePathBcf_Icc {n : ℕ} (t₀ T : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ContinuousOn (heatMildValuePathBcf t₀ u₀ hq hqb) (Set.Icc t₀ T) := by
+  intro t ht
+  rcases eq_or_lt_of_le ht.1 with h | hlt
+  · rw [← h]
+    exact (continuousWithinAt_heatMildValuePathBcf_initial t₀ u₀ hLnn hlip hq hqb).mono
+      Set.Icc_subset_Ici_self
+  · exact (continuousAt_heatMildValuePathBcf t₀ u₀ hq hqb hlt).continuousWithinAt
+
 end AnalyticPDE
 end RicciFlow
