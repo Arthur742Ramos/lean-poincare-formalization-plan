@@ -6879,5 +6879,25 @@ theorem continuousAt_heatSemigroupND_duhamel_time {n : ℕ} {t₀ t₁ : ℝ} (h
         have htlt : t < u + t₀ := Set.mem_Iio.1 htmem
         rw [Set.indicator_of_notMem (fun hmem => absurd (Set.mem_Ioc.1 hmem).2 (not_le.2 (by linarith)))]
 
+/-- **Time-continuity of the mild-solution map value (pointwise in space).**  For bounded continuous
+initial datum `u₀` and a continuous, uniformly sup-norm-bounded `BCF`-valued reaction source `q`, the
+pointwise mild-solution path
+`t ↦ Φ(t)(x) = H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t} H_{t−s}(q s)(x) ds`
+is continuous at every `t₁ > t₀`: the sum of the time-continuous homogeneous propagator
+(`continuousAt_heatSemigroupND_shift_time`) and the time-continuous Duhamel term
+(`continuousAt_heatSemigroupND_duhamel_time`).  This is the pointwise-in-`x` value of the
+mild-solution path `t ↦ heatMildValueNDbcf …` (cf. `heatMildValueNDbcf_apply`); combined with the
+per-time short-time contraction `norm_heatMildValueNDbcf_sub_le` it is the time-continuity datum for
+lifting the model mild-solution map to the path space `C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`. -/
+theorem continuousAt_heatMildValue_time {n : ℕ} {t₀ t₁ : ℝ} (ht : t₀ < t₁)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+    ContinuousAt (fun t => heatSemigroupND (t - t₀) (⇑u₀) x
+      + ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x) t₁ :=
+  (continuousAt_heatSemigroupND_shift_time ht u₀.continuous
+      (fun y => by rw [← Real.norm_eq_abs]; exact u₀.norm_coe_le_norm y) x).add
+    (continuousAt_heatSemigroupND_duhamel_time ht hq hqb x)
+
 end AnalyticPDE
 end RicciFlow
