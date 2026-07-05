@@ -8698,5 +8698,47 @@ theorem norm_heatMildValueNDbcf_time_holder_bound {n : ℕ} {t₀ t₁ t₂ : �
   rw [hregroup]
   exact (abs_add_le _ _).trans (add_le_add hHom hDuh)
 
+/-- **`Hölder-1/2` time-modulus of the model mild solution (solution-level parabolic space-time
+modulus, time half).**  The solution-level companion of `lipschitzWith_heatMildFixedPoint_apply`
+and `heatMildFixedPoint_apply_spatial_holder_bound`: for two interior times `t₀ < t₁ < t₂ ≤ T`, the
+genuine model mild solution `z` (any fixed point of `heatMildSelfMap`) obeys the pointwise time
+modulus
+`|z(t₂)(x) − z(t₁)(x)| ≤ (n·‖u₀‖/√(π(t₁−t₀)))·n·(2/√π·√(t₂−t₁))
+    + (CQ·(t₂ − t₁) + (4n²CQ/π)·√(t₁ − t₀)·√(t₂ − t₁))`,
+uniformly in `x`.  Both slices equal `heatMildValueNDbcf` for the common trajectory-reaction source
+`s ↦ Q(z(projIcc s))` (`heatMildFixedPoint_apply`), so the map-level time modulus
+`norm_heatMildValueNDbcf_time_holder_bound` transfers to the solution itself.  Together with the
+spatial `C¹`/`C^{0,α}` solution-level gains this completes the model mild-solution parabolic
+space-time regularity picture: away from `t = t₀`, the actual solution is jointly `Hölder-1/2`-in-time
+and `C^{0,α}`-in-space — the full parabolic Schauder modulus the geometric Ricci–DeTurck chart
+identification consumes. -/
+theorem heatMildFixedPoint_apply_time_holder_bound {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t₁ t₂ : ↥(Set.Icc t₀ T)} (ht₁ : t₀ < (t₁ : ℝ)) (h12 : (t₁ : ℝ) < (t₂ : ℝ)) (x : Fin n → ℝ) :
+    |z t₂ x - z t₁ x|
+      ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * ((t₁ : ℝ) - t₀))) * (n : ℝ)
+            * (2 / Real.sqrt π * Real.sqrt ((t₂ : ℝ) - (t₁ : ℝ)))
+          + (CQ * ((t₂ : ℝ) - (t₁ : ℝ))
+              + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt ((t₁ : ℝ) - t₀)
+                  * Real.sqrt ((t₂ : ℝ) - (t₁ : ℝ))) := by
+  have hqc : Continuous (fun s => Q (Set.IccExtend hT (⇑z) s)) :=
+    hQcont.comp (continuous_IccExtend_iff.mpr z.continuous)
+  have hqb : ∀ s y, ‖Q (Set.IccExtend hT (⇑z) s) y‖ ≤ CQ := fun s y =>
+    le_trans ((Q (Set.IccExtend hT (⇑z) s)).norm_coe_le_norm y) (hQb _)
+  have ht₂ : t₀ < (t₂ : ℝ) := lt_trans ht₁ h12
+  have hx₂ : z t₂ x = heatMildValueNDbcf ht₂ u₀ hqc hqb x := by
+    rw [heatMildValueNDbcf_apply ht₂ u₀ hqc hqb x]
+    exact heatMildFixedPoint_apply hT u₀ hLnn hlip Q hQcont hQb z hz ht₂ x
+  have hx₁ : z t₁ x = heatMildValueNDbcf ht₁ u₀ hqc hqb x := by
+    rw [heatMildValueNDbcf_apply ht₁ u₀ hqc hqb x]
+    exact heatMildFixedPoint_apply hT u₀ hLnn hlip Q hQcont hQb z hz ht₁ x
+  rw [hx₂, hx₁]
+  exact norm_heatMildValueNDbcf_time_holder_bound ht₁ h12 u₀ hqc hqb x
+
 end AnalyticPDE
 end RicciFlow
