@@ -5769,5 +5769,26 @@ theorem heatSemigroupND_time_deriv_integral_bound {n : ℕ} {t : ℝ} (ht : 0 < 
         rw [integral_congr_ae (Filter.Eventually.of_forall hrw)]
     _ ≤ (n : ℝ) * C / t := heatSemigroupND_laplacian_integral_bound ht x hfm hfb
 
+/-- **Spatial `t^{-1/2}` Lipschitz smoothing of a difference of heat-smoothed data.**  Combining the
+sup-norm linearity `heatSemigroupND_sub` with the parabolic spatial Lipschitz rate
+`heatSemigroupND_spatial_lipschitz_sqrt_rate_norm`, the difference `Hₜf − Hₜg` of two heat-smoothed
+functions is spatially Lipschitz with a rate governed by the *sup distance* `D ≥ ‖f − g‖∞` of the
+data:
+`|(Hₜf(x) − Hₜg(x)) − (Hₜf(x') − Hₜg(x'))| ≤ n·(D/√(πt))·‖x − x'‖`.
+The smoothing turns a merely-bounded data difference into a spatially Lipschitz difference at cost
+`t^{-1/2}` — the equicontinuity/modulus control on differences that a parabolic (Schauder /
+Arzelà–Ascoli) fixed-point argument for a mild Ricci–DeTurck representative rests on. -/
+theorem heatSemigroupND_sub_spatial_lipschitz_sqrt_rate_norm {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f g : (Fin n → ℝ) → ℝ} {C D : ℝ}
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ C)
+    (hD : ∀ y, ‖f y - g y‖ ≤ D) (x x' : Fin n → ℝ) :
+    |(heatSemigroupND t f x - heatSemigroupND t g x)
+        - (heatSemigroupND t f x' - heatSemigroupND t g x')|
+      ≤ (n : ℝ) * (D / Real.sqrt (π * t)) * ‖x - x'‖ := by
+  rw [← heatSemigroupND_sub ht x hfm hfb hgm hgb,
+      ← heatSemigroupND_sub ht x' hfm hfb hgm hgb]
+  exact heatSemigroupND_spatial_lipschitz_sqrt_rate_norm ht (hfm.sub hgm) hD x x'
+
 end AnalyticPDE
 end RicciFlow
