@@ -7286,3 +7286,45 @@ therefore that convolution/semigroup identity (or, if the eventual mild fixed po
 pointwise continuity + uniform bounds instead of `BCF`-norm continuity, the abstract path-space
 `ContractingWith` self-map on the sup-bounded continuous trajectories directly from the committed
 per-time `norm_heatMildValueNDbcf_sub_le`).
+
+Update — **the `BCF`-norm propagator-path time-continuity blocker is now fully resolved** (extending
+`AnalyticPDE/HeatKernel1D.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`, cheat-scan
+`TOTAL 0`, module green).  This session closes the recorded next target — the sup-over-`x` (`BCF`-norm)
+time-continuity of the homogeneous propagator path `t ↦ H_t f` — via the semigroup route flagged above,
+building the missing Chapman–Kolmogorov ⇒ approximate-identity ⇒ Hölder-1/2 modulus ⇒ continuity tower:
+
+* `heatSemigroupND_comp` — the **`n`-dimensional heat-semigroup composition law** `Hₜ(Hₛf) = H_{t+s}f`
+  for bounded a.e.-measurable `f`, by Fubini (`integral_integral_swap`) from the already-committed nD
+  Chapman–Kolmogorov identity `heatKernelND_chapman_kolmogorov` (the `ND` analog of the committed
+  `heatSemigroup1D_comp`).  This is the previously-missing semigroup identity the `ε`-regularisation
+  `Hₜ = H_{t−ε}(H_ε ·)` needs.
+* `abs_heatSemigroupND_sub_self_le_of_lipschitz` — **strong continuity at time `0` on Lipschitz data**:
+  for bounded `L`-Lipschitz `w`, `|Hₛw x − w x| ≤ L·n·((4πs)^{−1/2}·4s) → 0`.  Mean-zero rewrite
+  `Hₛw x − w x = ∫ Kₙ(s,x−y)(w y − w x)` (using `∫Kₙ = 1`), pointwise `|w y − w x| ≤ L‖x−y‖ ≤
+  L·∑ₖ|xₖ−yₖ|` (`pi_norm_le_iff_of_nonneg` + `Finset.single_le_sum`), each coordinate integral
+  collapsed by the closed-form first moment `integral_abs_coord_mul_heatKernelND_eq` (via
+  `integral_sub_left_eq_self`).
+* `abs_heatSemigroupND_add_sub_le` / `norm_heatSemigroupNDbcf_add_sub_le` — the **pointwise and
+  `BCF`-norm consecutive-time modulus** `|H_{t'+s}w x − H_{t'}w x| ≤ (n·C/√(πt'))·n·((4πs)^{−1/2}·4s)`.
+  Via `heatSemigroupND_comp` (`H_{t'+s} = H_s(H_{t'} ·)`) this is the strong-continuity estimate applied
+  to `v := H_{t'}w`, which is *already* Lipschitz with the committed `√t'`-parabolic-smoothing constant
+  `n·C/√(πt')` (`heatSemigroupND_spatial_lipschitz_sqrt_rate_norm`) — so no Lipschitz hypothesis on `w`.
+* `heatSemigroupND_timeModulus_sq` / `_eq_sqrt` / `norm_heatSemigroupNDbcf_add_sub_le_sqrt` — the
+  **sharp `Hölder-1/2` `√s` form**: `(4πs)^{−1/2}·4s` squares to `4s/π` (rpow arithmetic), hence equals
+  `(2/√π)·√s`, giving `‖H_{t'+s}f − H_{t'}f‖ ≤ (n·‖f‖/√(πt'))·n·(2/√π)·√s`.
+* `continuousAt_heatFlowPathBcf` (+ total path `heatFlowPathBcf`, `heatFlowPathBcf_of_pos`,
+  `heatSemigroupNDbcf_congr`) — the **capstone `BCF`-norm time-continuity**: for bounded continuous `f`
+  and every `τ₁ > 0`, `t ↦ H_t f` is `ContinuousAt τ₁` in `(Fin n → ℝ) →ᵇ ℝ`.  Within `|t − τ₁| < τ₁/2`
+  the `BCF`-distance is squeezed by `M·√|t − τ₁|` (the `√s` modulus in both `t ≷ τ₁` directions, the
+  smaller-time prefactor bounded uniformly by `M = (n·‖f‖/√(π·τ₁/2))·n·(2/√π)`), and `√|t − τ₁| → 0`
+  (`Real.sqrt_lt'`).  This upgrades the earlier *pointwise-in-`x`* `continuousAt_heatMildValue_time` to
+  genuine sup-norm continuity.
+
+**Next target.**  The remaining half of the mild-value path lift: **`BCF`-norm time-continuity of the
+inhomogeneous Duhamel path** `t ↦ heatDuhamelNDbcf(t)` (the singular-endpoint term), after which the
+mild-value path `t ↦ heatMildValueNDbcf(t) = H_{t−t₀}u₀ + Duhamel(q)` is `BCF`-norm continuous as the
+sum of `continuousAt_heatFlowPathBcf` (homogeneous) and the Duhamel continuity — a genuine element of
+the path space `C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`.  Then the committed per-time `norm_heatMildValueNDbcf_sub_le`
+gives the path-space short-time contraction and the Banach fixed point (`ContractingWith`) yields a
+genuine mild solution of the ND reaction–diffusion model — the model template for the mild Ricci–DeTurck
+representative feeding the chart `A`/`picard`.
