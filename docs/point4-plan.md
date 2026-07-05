@@ -7641,3 +7641,48 @@ remaining analytic input; or (ii) the instance-pinned BilinearFormBundle-concret
 realization-input capstone (folding in `exists_pos_closedBall_toSection_subset_positiveDefiniteLocus`)
 once the `whnf` blow-up above is tamed; or (iii) the `realization` decode
 `RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`.
+
+---
+
+## Milestone (2026-07-05) — model mild-solution a-priori estimate suite + local-existence-with-containment capstone (GAP 2 analytic core)
+
+Six additive, fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`) theorems appended
+to `AnalyticPDE/HeatKernel1D.lean`, completing the model semilinear reaction–diffusion
+(`u_t = Δu + Q(u)`) well-posedness theory with the a-priori control the chart `picard`/closed-ball
+route consumes. Bare `lake build` green (2911 jobs); `scan cheats` `TOTAL 0`.
+
+* `norm_heatMildFixedPoint_le` — **a-priori sup bound** (fourth well-posedness pillar): any fixed point
+  `z` of the mild-solution self-map obeys `‖z‖ ≤ ‖u₀‖ + CQ·(T − t₀)`. The `C⁰` centre-size estimate.
+* `norm_heatMildValueNDbcf_sub_initial_le_of_lipschitz` — **fixed-time deviation from the initial
+  datum** (parabolic modulus of continuity): `‖Φ(t) − u₀‖ ≤ L·n·(2/√π·√(t − t₀)) + C·(t − t₀)`, via
+  the decomposition `Φ(t) − u₀ = (H_{t−t₀}u₀ − u₀) + Duhamel` (heat-semigroup Lipschitz modulus +
+  Duhamel bound).
+* `dist_heatMildFixedPoint_const_le` — **path-space containment near the initial datum**: the whole
+  fixed-point trajectory satisfies `dist z (const u₀) ≤ L·n·(2/√π·√(T − t₀)) + CQ·(T − t₀)`. Pointwise
+  from the previous lemma + the `t₀`-endpoint value `u₀`; `→ 0` as `T → t₀⁺`.
+* `exists_forwardTime_sqrt_add_mul_sub_le` — **√-shape window chooser** (analog of
+  `exists_forwardTime_mul_sub_le`): for `M₁,M₂ ≥ 0`, `a > 0` there is `T > t₀` with
+  `M₁·√(T − t₀) + M₂·(T − t₀) ≤ a`.
+* `exists_forwardTime_sqrt_add_mul_sub_le_and_lt_one` — **combined containment + contraction window**:
+  a `T > t₀` meeting both `M₁·√(T − t₀) + M₂·(T − t₀) ≤ a` and `K·(T − t₀) < 1`, by shrinking to
+  `min (T₁ − t₀) (1/(K + 1))` (containment monotone in window length).
+* `exists_heatMildFixedPoint_dist_const_le` — **CAPSTONE: model local existence with a-priori ball
+  containment.** For any target radius `a > 0` there is a forward window `T > t₀` carrying a mild
+  solution `z` (fixed point) with `dist z (const u₀) ≤ a` — a solution that never leaves the prescribed
+  ball. Assembles the combined chooser (with `M₁ = L·n·(2/√π)`, `M₂ = CQ`),
+  `exists_unique_heatMildFixedPoint`, and `dist_heatMildFixedPoint_const_le`.
+
+**Fractional progress on `{A, picard, realization, encode}`.** This is the genuine model template for
+the mild Ricci–DeTurck representative feeding `A`/`picard`: the honest analytic well-posedness data
+(existence, uniqueness, continuous dependence, a-priori sup/deviation/containment) is now complete on
+the model space `↥(Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`, with the per-datum window chosen so the solution
+stays in the target ball. The remaining `A`/`picard` gap is the transfer of this model template to the
+section space of `BilinearFormBundle` (the genuine chart state space) and the identification of the
+mild representative with `intrinsicRicciDeTurckRHS` on the positive-definite locus (the `geometric`
+field).
+
+**Next target.** Either (i) lift the model containment capstone to the section-space representative
+(matching `dist_heatMildFixedPoint_const_le`'s output to the closed-ball `hsub` already discharged by
+`exists_pos_closedBall_toSection_subset_positiveDefiniteLocus`); or (ii) the `realization` decode
+`RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`; or (iii) further parabolic
+Schauder gain (spatial second-derivative Hölder control) toward the `geometric` identification.
