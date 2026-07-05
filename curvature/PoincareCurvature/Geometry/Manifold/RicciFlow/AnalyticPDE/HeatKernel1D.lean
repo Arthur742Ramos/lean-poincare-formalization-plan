@@ -7659,5 +7659,69 @@ theorem dist_heatMildValuePathBcfIoc_le {n : ℕ} (t₀ T : ℝ)
         have hle : (t : ℝ) ≤ T := t.2.2
         gcongr
 
+/-- **`BCF`-norm strong continuity of the heat propagator at time `0` on Lipschitz data.**  For a
+bounded continuous initial datum `u₀` that is `L`-Lipschitz, the sup-norm approximation-identity
+estimate `‖H_s u₀ − u₀‖ ≤ L·n·(2/√π)·√s` holds for every `s > 0`.  This is the sup-over-`x`
+(`BoundedContinuousFunction.norm_le`) packaging of the pointwise Lipschitz strong-continuity bound
+`abs_heatSemigroupND_sub_self_le_of_lipschitz`, rewritten into its sharp `√s` closed form via
+`heatSemigroupND_timeModulus_eq_sqrt`.  As `s → 0⁺` the right-hand side tends to `0`, so the `C_b`
+heat semigroup is *strongly continuous at the left endpoint* on Lipschitz data — the missing endpoint
+datum for lifting the mild-solution path to a genuine element of the *closed*-interval path space
+`C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`. -/
+theorem norm_heatSemigroupNDbcf_sub_self_le_of_lipschitz {n : ℕ} {s : ℝ} (hs : 0 < s)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖) :
+    ‖heatSemigroupNDbcf hs u₀ - u₀‖ ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt s) := by
+  rw [← heatSemigroupND_timeModulus_eq_sqrt hs.le]
+  have hbnd : ∀ x, |heatSemigroupND s (⇑u₀) x - u₀ x|
+      ≤ L * (n : ℝ) * ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) :=
+    fun x => abs_heatSemigroupND_sub_self_le_of_lipschitz hs hLnn
+      u₀.continuous.aestronglyMeasurable
+      (fun y => u₀.norm_coe_le_norm y) hlip x
+  have hCnn : (0 : ℝ) ≤ L * (n : ℝ) * ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) :=
+    le_trans (abs_nonneg _) (hbnd 0)
+  refine (BoundedContinuousFunction.norm_le hCnn).2 (fun x => ?_)
+  rw [BoundedContinuousFunction.sub_apply, heatSemigroupNDbcf_apply, Real.norm_eq_abs]
+  exact hbnd x
+
+/-- **Right-continuity of the heat-semigroup propagator path at the initial time on Lipschitz
+data.**  For an `L`-Lipschitz bounded continuous initial datum `u₀`, the total propagator path
+`heatFlowPathBcf u₀` (which takes the value `u₀` at `0` and `H_τ u₀` for `τ > 0`) is
+`ContinuousWithinAt` at `0` along `Ici 0`: `H_s u₀ → u₀` in `C_b`-norm as `s → 0⁺`.  Proof by the
+squeeze `dist (heatFlowPathBcf u₀ s) u₀ ≤ (L·n·(2/√π))·√s` (`0` at `s = 0`;
+`norm_heatSemigroupNDbcf_sub_self_le_of_lipschitz` for `s > 0`) against the continuous majorant
+`s ↦ M·√s → 0`.  Combined with the `Ioi t₀` continuity (`continuousOn_heatMildValuePathBcf`), for
+Lipschitz initial data the mild-value path is continuous on the *closed* interval, hence a genuine
+element of `C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`. -/
+theorem continuousWithinAt_heatFlowPathBcf_zero {n : ℕ}
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖) :
+    ContinuousWithinAt (heatFlowPathBcf u₀) (Set.Ici 0) 0 := by
+  have h0 : heatFlowPathBcf u₀ 0 = u₀ := dif_neg (lt_irrefl 0)
+  set M : ℝ := L * (n : ℝ) * (2 / Real.sqrt π) with hM
+  have hbd : ∀ s : ℝ, 0 ≤ s → dist (heatFlowPathBcf u₀ s) u₀ ≤ M * Real.sqrt s := by
+    intro s hs
+    rcases eq_or_lt_of_le hs with h | hspos
+    · rw [← h, h0]; simp
+    · rw [heatFlowPathBcf_of_pos u₀ hspos, dist_eq_norm]
+      calc ‖heatSemigroupNDbcf hspos u₀ - u₀‖
+          ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt s) :=
+            norm_heatSemigroupNDbcf_sub_self_le_of_lipschitz hspos u₀ hLnn hlip
+        _ = M * Real.sqrt s := by rw [hM]; ring
+  show Filter.Tendsto (heatFlowPathBcf u₀) (nhdsWithin 0 (Set.Ici 0))
+    (nhds (heatFlowPathBcf u₀ 0))
+  rw [h0, tendsto_iff_dist_tendsto_zero]
+  have hmaj : Filter.Tendsto (fun s : ℝ => M * Real.sqrt s)
+      (nhdsWithin 0 (Set.Ici 0)) (nhds 0) := by
+    have hcont : Filter.Tendsto (fun s : ℝ => M * Real.sqrt s) (nhds 0)
+        (nhds (M * Real.sqrt 0)) :=
+      (continuous_const.mul Real.continuous_sqrt).tendsto 0
+    rw [Real.sqrt_zero, mul_zero] at hcont
+    exact hcont.mono_left nhdsWithin_le_nhds
+  have hev : ∀ᶠ s in nhdsWithin (0 : ℝ) (Set.Ici 0),
+      dist (heatFlowPathBcf u₀ s) u₀ ≤ M * Real.sqrt s := by
+    filter_upwards [self_mem_nhdsWithin] with s hs using hbd s hs
+  exact squeeze_zero' (Filter.Eventually.of_forall (fun _ => dist_nonneg)) hev hmaj
+
 end AnalyticPDE
 end RicciFlow
