@@ -8389,3 +8389,53 @@ requiring only near-`x` coeff-continuity, OR (b) extend the local frames to glob
 `contMDiffOn_of_locally_contMDiffOn`.  Route (a) is a Tensor.lean addition; route (b) reuses the two committed bricks.
 Then Step 3 (Ricci trace via `ricciEndomorphism`/`ricciCurvature` in Contractions.lean) yields `intrinsicRicciTensor` as
 the continuous `rs` section consumed by `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`.
+
+## Milestone (2026-07-05, later still) — Step 2 of the Ricci-tensor-section route DONE: `curvatureTensor` in local `ContMDiffOn` frames is a continuous `TM`-section (Item 3 / GAP 2 geometric-A regularity)
+
+Three additive commits, sorry-free, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0`, `lake build …DeTurckCorrectionRegularity` green (2910 jobs).  Appended to the
+isolated `RicciFlow/DeTurckCorrectionRegularity.lean` (nothing imports it downstream, so no rebuild churn).  This closes
+the Step 2 hurdle recorded in the previous milestone (the tensoriality lemma's **global** `hσcoeff` demand vs. sections'
+only-**`On`** coeff-continuity) **without** touching the heavy `Tensor.lean` — the localisation is done additively in the
+extension module using only *public* tensoriality/locality API.
+
+**`curvatureAux_apply_eq_of_eventuallyEq_fields`** (the germ-move brick).  If globally-`C¹`/`C²` fields `X`, `Y`, `σ`
+agree *near* `y` with arbitrary fields `ea`, `eb`, `ec` (which carry **no** global regularity of their own), then
+`curvatureAux ea eb ec y = curvatureAux X Y σ y`.  This is the `ContMDiffOn`-friendly companion of the (public but
+global-only) `curvatureAux_eq_of_eventuallyEq_apply`: the local fields inherit differentiability at points near `y` from
+the global comparison fields via the eventual equality.  Proof mirrors `curvatureAux_eq_of_eventuallyEq_right_apply`
+inline, using the *public* `IsCovariantDerivativeOn.congr_of_eventuallyEq` (+ `cov.isCovariantDerivativeOnUniv`),
+`MDifferentiableAt.congr_of_eventuallyEq` (to transfer differentiability of the local fields and of `cov.along · ·`), and
+`Filter.EventuallyEq.mlieBracket_vectorField` for the bracket slot — the private `along_eventuallyEq_right_apply` /
+`mdifferentiableAt_along_of_contMDiff` of `Tensor.lean` are **not** needed.
+
+**`curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame`** (the `On`-tensoriality).  For `C²`-on-`u` fields
+`ea`, `eb`, `ec` and `y ∈ u`, `curvatureAux ea eb ec y = curvatureTensor y (ea y)(eb y)(ec y)`.  Route (resolving Step 2):
+bump-globalise the local fields in `u ∩ (trivializationAt E TM y).baseSet` via `ContMDiffOn.smul_section_of_tsupport`
+(so the right-slot **global** field `σ = ψ • ec` has trivialization coefficients that are `C²` on that patch —
+`contMDiffOn_localFrame_coeff` on the global field, **not** on `ec` — and vanish off the bump by `map_zero` of the linear
+`localFrame_coeff`, glued to a global `C²` coeff via `contMDiff_of_contMDiffOn_union_of_isOpen`); apply the **existing
+global** value tensoriality `curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right` at `y`; then
+transfer back to the local fields by the germ-move (the bump is `=ᶠ 1` near `y`, so `ψ • ea =ᶠ ea` etc.).  Basis:
+`Module.finBasis ℝ E`.
+
+**`curvatureTensor_contMDiffOn_frame_zero`** (Step 2 conclusion).  `z ↦ curvatureTensor z (ea z)(eb z)(ec z)` is a
+**continuous** `TM`-section on `u` for `C²`-on-`u` frame fields — `curvatureAux_contMDiffOn_zero` (`ContMDiffOn 0`) `.congr`
+the pointwise `On`-tensoriality.  So the bundled curvature tensor in local smooth frames is a continuous bundle section.
+
+**NEXT — Step 3 (Ricci trace → `intrinsicRicciTensor` as the continuous `rs` section).**  `intrinsicRicciTensor g =
+ricciTensor g (someLeviCivita) = ricciCurvature = trace(ricciEndomorphism)`, and (Contractions.lean) the trace is expanded
+`LinearMap.trace_eq_sum_inner _ b` over an **orthonormal** fiber basis, giving
+`ricciCurvature x u w = ∑ᵢ ⟪curvatureTensor x (eᵢ x) u w, eᵢ x⟫`.  To realise `x ↦ ricciCurvature x` as a continuous
+`BilinearFormBundle`-section (the `rs` input to `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`)
+still needs: (i) a **local `ContMDiffOn` orthonormal frame** `eᵢ` (none in the repo yet — Gram–Schmidt on a trivialization
+coordinate frame against the `C²` metric section, OR a non-orthonormal frame + dual coframe using `LinearMap.trace_eq_sum`
+to avoid orthonormalisation), (ii) continuity of each scalar summand `x ↦ ⟪curvatureTensor x (eᵢ x) u w, eᵢ x⟫` from the
+just-committed `curvatureTensor_contMDiffOn_frame_zero` + the `C²` metric-inner continuity, and (iii) assembling the finite
+sum of continuous bilinear-form sections into one `BilinearFormBundle`-section (reuse the `ContMDiff.{add,const_smul}_section`
+pattern of `intrinsicDeTurckCorrectionSection`, being careful with the fiber `NormedAddCommGroup (TM x →L ℝ)` instance
+diamond — build the continuity `have` from the section lemmas and let the `∃`/section be inferred, never write the Pi-level
+sum explicitly).  Then feed `rs` to the committed
+`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`, completing the geometric-`A` **value-section**
+regularity; the remaining `A`-side obstruction is then the `picard` Lipschitz/centre bounds for the mild/regularised
+representative.
