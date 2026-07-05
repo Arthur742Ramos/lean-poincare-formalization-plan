@@ -7777,3 +7777,59 @@ the section-space representative feeding `chart.lipschitz`/`picard` (the coordin
 `ContinuousSection` eval API; or (ii) the `realization` decode
 `RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`; or (iii) the `geometric`
 identification `A τ s x u v = intrinsicRicciDeTurckRHS …` on the positive-definite locus.
+
+---
+
+## Milestone (2026-07-05) — parabolic `C^{0,α}`-class membership of the model mild solution (GAP 2 analytic core; assembled space-time modulus in Schauder-consumable class form)
+
+New additive module `AnalyticPDE/HeatKernelParabolicC0Alpha.lean` (imports `HeatKernel1D` and
+`ParabolicHolder`, which were previously siblings importing neither the other), bridging the model
+heat-kernel regularity suite into the parabolic Hölder framework.  Four fully-proved, axiom-clean
+(`propext`/`Classical.choice`/`Quot.sound`) declarations; full `lake build` green (2911 jobs);
+`scan cheats` `TOTAL 0`.
+
+This converts the raw space-time moduli of the previous three milestones (spatial `C¹`/`C^{0,α}`,
+time `Hölder-1/2`) into `ParabolicC0AlphaOn` **class membership** — the exact interface the parabolic
+Schauder / smooth-realization side consumes — rather than leaving them as free-floating pointwise
+estimates.  The parabolic distance `parabolicDistance p q = max (√|Δt|) (dist x x')` makes a
+spatial-Lipschitz bound plus a time-`Hölder-1/2` bound combine precisely into the exponent-`1`
+parabolic Hölder estimate.
+
+* `heatMildFixedPoint_parabolicC0AlphaOn` — **parabolic `C^{0,1}` (parabolic-Lipschitz) membership of
+  the genuine mild solution on the interior slab `Icc t_lo T ×ˢ univ`** (`t₀ < t_lo ≤ T`).  Assembles,
+  via the triangle inequality (spatial step at fixed time + time step at fixed space), the spatial
+  Lipschitz modulus `lipschitzWith_heatMildFixedPoint_apply` (coefficient uniformly bounded over
+  `[t_lo, T]` by `Ksp_max`) and the `Hölder-1/2` time modulus `heatMildFixedPoint_apply_time_holder_bound`
+  (coefficient uniformly bounded by `Ktm_coef`, absorbing the linear `|Δt|` Duhamel term into `√|Δt|`
+  via `|Δt| ≤ √(T−t_lo)·√|Δt|`).  Sup part from `norm_heatMildFixedPoint_le`.
+* `ParabolicHolderWith.exponent_le_of_bounded` / `ParabolicC0AlphaOn.exponent_le_of_bounded` — **generic
+  parabolic Hölder exponent lowering on a parabolic-bounded set.**  Reusable ParabolicHolder
+  infrastructure: on a set of parabolic diameter `≤ D`, `ParabolicHolderWith C 1 ⟹ ParabolicHolderWith
+  (C·D^{1−α}) α` (split `pd = pd^α · pd^{1−α}`, bound the second factor by `D^{1−α}`), and likewise for
+  the full `ParabolicC0AlphaOn` class.  This is the standard Lipschitz⟹Hölder downgrade in the
+  parabolic metric.
+* `heatMildFixedPoint_parabolicC0AlphaOn_of_bounded` — **`C^{0,α}` (any `0 ≤ α ≤ 1`) mild-solution
+  membership on a parabolic-bounded interior subset**, combining the slab `C^{0,1}` membership
+  (`mono_set` to the subset) with the exponent-lowering.  The Schauder-relevant Hölder-exponent form.
+* `heatMildFixedPoint_parabolicC0AlphaOn_closedBall` — **`C^{0,α}` mild-solution membership on an
+  interior parabolic closed ball** whose time-extent `[c.1 − R², c.1 + R²]` lies in `[t_lo, T]`.  The
+  ball is inside the slab (time coordinate pinned by `time_abs_le_sq_of_mem`) and has parabolic
+  diameter `≤ 2R` (triangle through the centre).  This is the ball-localised regularity datum the
+  parabolic Schauder local-to-global gluing (`ParabolicC0AlphaOn.of_parabolicBall_cover_closedBall`
+  and companions) directly consumes.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The model mild representative's
+regularity is now available not merely as raw moduli but as `ParabolicC0AlphaOn α` membership on
+interior parabolic balls/cylinders — the class-level interface bridging the (previously isolated)
+508-declaration heat-kernel theory to the parabolic Schauder framework.  This is the connective tissue
+the `realization` decode (`RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`)
+needs to certify that a Banach mild solution is regular enough to be a genuine geometric solution: the
+Schauder bootstrap operates on `ParabolicC0AlphaOn`-class data on local cylinders, which is exactly
+what `heatMildFixedPoint_parabolicC0AlphaOn_closedBall` now supplies.
+
+**Next target.** With the model regularity in Schauder-consumable class form, the frontier remains the
+transfer/assembly side: (i) lift the `ParabolicC0AlphaOn` membership through the coordinate readout to
+the section-space representative feeding `chart.lipschitz`/`picard` (routing pointwise identifications
+through the diamond-free `ContinuousSection` eval API); (ii) the `realization` decode consuming the
+ball-localised `C^{0,α}` regularity via a parabolic Schauder interior estimate; or (iii) the `geometric`
+identification `A τ s x u v = intrinsicRicciDeTurckRHS …` on the positive-definite locus.
