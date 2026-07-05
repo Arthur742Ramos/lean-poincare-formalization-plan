@@ -5871,5 +5871,24 @@ theorem heatSemigroupND_duhamel_sub_sup_bound {n : ℕ} {t₀ T : ℝ} (hT : t�
       (h₁ s) (h₂ s) D C x (h1m s) (h1b s) (h2m s) (h2b s) (hD s)
   rwa [Real.norm_eq_abs, abs_of_nonneg (by linarith : (0 : ℝ) ≤ T - t₀)] at key
 
+/-- **Short-time sup-norm bound for the full mild-solution map of the `n`-dimensional heat flow.**
+The mild-solution map `Φ(u)(t)(x) = H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` (heat
+semigroup on the initial datum `u₀` plus the Duhamel integral of the reaction term `q`) obeys
+`|Φ(u)(t)(x)| ≤ C₀ + C·(t − t₀)` whenever `|u₀ y| ≤ C₀` and `|q s y| ≤ C`.  Triangle inequality
+(`abs_add_le`) splits the value into its homogeneous and Duhamel parts, controlled respectively by
+the `L^∞` contraction `abs_heatSemigroupND_le` (`|H_{t−t₀}u₀(x)| ≤ C₀`) and the Duhamel sup-norm
+bound `heatSemigroupND_duhamel_sup_bound` (`|∫ …| ≤ C·(t − t₀)`).  This is the *self-map*
+(boundedness) half of the Banach fixed-point data for a mild Ricci–DeTurck representative — paired
+with the contraction half `heatSemigroupND_duhamel_sub_sup_bound`, it makes `Φ` a self-map of a
+sup-norm ball of radius `≥ C₀ + C·(t − t₀)` over a short time window. -/
+theorem heatSemigroupND_mild_sup_bound {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    {u₀ : (Fin n → ℝ) → ℝ} {q : ℝ → (Fin n → ℝ) → ℝ} {C₀ C : ℝ} (x : Fin n → ℝ)
+    (hu0 : ∀ y, |u₀ y| ≤ C₀) (hq : ∀ s, ∀ y, |q s y| ≤ C) :
+    |heatSemigroupND (t - t₀) u₀ x + ∫ s in t₀..t, heatSemigroupND (t - s) (q s) x|
+      ≤ C₀ + C * (t - t₀) :=
+  (abs_add_le _ _).trans
+    (add_le_add (abs_heatSemigroupND_le (by linarith : (0 : ℝ) < t - t₀) x hu0)
+      (heatSemigroupND_duhamel_sup_bound ht.le x hq))
+
 end AnalyticPDE
 end RicciFlow
