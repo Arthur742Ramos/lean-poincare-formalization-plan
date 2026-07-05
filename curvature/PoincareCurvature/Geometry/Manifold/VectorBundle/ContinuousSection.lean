@@ -2345,6 +2345,53 @@ theorem exists_forall_coord_norm_le
     _ ≤ C := hC (Set.mem_range_self i)
     _ ≤ max C 0 := le_max_left _ _
 
+/-- **Uniform centre-readout bound from time-continuity of the coordinate readout.**  If a
+time-parametrised section `f : ℝ → ContinuousSectionSpace` has, on each trivializing piece `i`, a
+compact coordinate readout `t ↦ (equivCompatibleCoordFamilySubmodule … (f t)).1 i` that is
+`ContinuousOn (Icc t₀ T)` (the `hcont` datum of the section-space Picard–Lindelöf constructor,
+specialised at the centre section `f t = A t x0`), then the pointwise coordinate values are
+uniformly bounded over the whole compact time window and finite trivializing cover: there is a
+constant `C ≥ 0` with `‖(coord (f t)).1 i x‖ ≤ C` for all `t ∈ Icc t₀ T`, indices `i`, and base
+points `x ∈ Kc i`.  Each `t ↦ ‖(coord (f t)).1 i‖` (sup-norm of the coordinate map) is continuous on
+the compact `Icc t₀ T`, hence bounded, and the finite family of these interval bounds is bounded
+above.  This produces precisely the `hcenter` hypothesis
+`∀ t ∈ Icc t₀ T, ∀ i x, ‖(coord (A t x0)).1 i x‖ ≤ Mc` (take `Mc := C.toNNReal`) of
+`isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` from the (provable)
+time-continuity of the operator's coordinate readout at the initial metric. -/
+theorem exists_forall_mem_Icc_coord_norm_le_of_continuousOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {f : ℝ → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ}
+    (hcont : ∀ i, ContinuousOn
+      (fun t => (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i)
+      (Set.Icc t₀ T)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc t₀ T, ∀ i (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i x‖ ≤ C := by
+  classical
+  choose C hC using fun i => isCompact_Icc.exists_bound_of_continuousOn (hcont i)
+  obtain ⟨D, hD⟩ := (Set.finite_range C).bddAbove
+  refine ⟨max D 0, le_max_right _ _, fun t ht i x => ?_⟩
+  calc
+    ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i x‖
+        ≤ ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i‖ :=
+      ContinuousMap.norm_coe_le_norm _ x
+    _ ≤ C i := hC i t ht
+    _ ≤ D := hD (Set.mem_range_self i)
+    _ ≤ max D 0 := le_max_left _ _
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
