@@ -7889,5 +7889,40 @@ theorem norm_heatMildValuePathBcfIcc_le {n : ℕ} (t₀ T : ℝ)
           have hle : (t : ℝ) ≤ T := t.2.2
           gcongr
 
+/-- **Short-time contraction bound in the closed-interval Banach state space.**  The closed-domain
+analog of `dist_heatMildValuePathBcfIoc_le`: for a fixed `L`-Lipschitz initial datum `u₀` and two
+sources `q₁, q₂` (common sup bound `C`, pointwise difference `≤ D`), the closed-interval mild-value
+path elements satisfy `dist (Φ(q₁)) (Φ(q₂)) ≤ D·(T − t₀)` in `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.
+At the left endpoint `t₀` both values equal `u₀` (`heatMildValuePathBcf_initial`), so the difference
+vanishes; for `t > t₀` the homogeneous propagator cancels and the fixed-time Duhamel contraction
+`norm_heatMildValueNDbcf_sub_le` gives `D·(t − t₀) ≤ D·(T − t₀)`.  Together with
+`heatMildValuePathBcfIcc` and `norm_heatMildValuePathBcfIcc_le` this is the complete closed-interval
+path-space Banach-fixed-point datum (state-space element, self-map bound, contraction) for the
+mild-solution self-map on Lipschitz initial data. -/
+theorem dist_heatMildValuePathBcfIcc_le {n : ℕ} (t₀ T : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    {q₁ q₂ : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq₁ : Continuous q₁) (hq₂ : Continuous q₂) {C D : ℝ}
+    (hqb₁ : ∀ s y, ‖q₁ s y‖ ≤ C) (hqb₂ : ∀ s y, ‖q₂ s y‖ ≤ C)
+    (hD : ∀ s y, ‖q₁ s y - q₂ s y‖ ≤ D) (hT : t₀ ≤ T) :
+    dist (heatMildValuePathBcfIcc t₀ T u₀ hLnn hlip hq₁ hqb₁)
+        (heatMildValuePathBcfIcc t₀ T u₀ hLnn hlip hq₂ hqb₂) ≤ D * (T - t₀) := by
+  have hD0 : (0 : ℝ) ≤ D := le_trans (norm_nonneg _) (hD 0 0)
+  refine (BoundedContinuousFunction.dist_le (mul_nonneg hD0 (by linarith))).2 (fun t => ?_)
+  rw [heatMildValuePathBcfIcc_apply, heatMildValuePathBcfIcc_apply, dist_eq_norm]
+  have hge : t₀ ≤ (t : ℝ) := t.2.1
+  rcases eq_or_lt_of_le hge with h | hlt
+  · rw [← h, heatMildValuePathBcf_initial t₀ u₀ hq₁ hqb₁,
+      heatMildValuePathBcf_initial t₀ u₀ hq₂ hqb₂, sub_self, norm_zero]
+    exact mul_nonneg hD0 (by linarith)
+  · rw [heatMildValuePathBcf_of_lt hlt u₀ hq₁ hqb₁, heatMildValuePathBcf_of_lt hlt u₀ hq₂ hqb₂]
+    calc ‖heatMildValueNDbcf hlt u₀ hq₁ hqb₁ - heatMildValueNDbcf hlt u₀ hq₂ hqb₂‖
+        ≤ D * ((t : ℝ) - t₀) :=
+          norm_heatMildValueNDbcf_sub_le hlt u₀ hq₁ hq₂ hqb₁ hqb₂ hD
+      _ ≤ D * (T - t₀) := by
+          have hle : (t : ℝ) ≤ T := t.2.2
+          gcongr
+
 end AnalyticPDE
 end RicciFlow
