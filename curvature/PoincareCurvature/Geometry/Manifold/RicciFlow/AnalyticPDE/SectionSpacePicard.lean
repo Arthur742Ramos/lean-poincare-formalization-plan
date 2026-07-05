@@ -643,4 +643,62 @@ theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzO
   · intro s hs i
     exact continuousOn_coord_of_continuousOn (hcont hs) i
 
+/-- **Section-space Picard–Lindelöf endpoint chooser from purely fiber-pointwise operator
+estimates.**  This is the interface a (regularised) geometric section-space operator naturally
+verifies.  From
+* a uniform operator-norm bound `Lop` on the finite family of fiber trivialization maps,
+* a *fiber-pointwise* Lipschitz-in-state estimate
+  `dist ((A t s) x) ((A t s') x) ≤ C · dist s s'` at every base point `x`, uniformly over the ball
+  and over `t ∈ [t₀, T₀]`, and
+* *coordinatewise joint (time–base) continuity* of each trivialization readout of `A · s` on
+  `[t₀, T₀] ×ˢ Kc i`,
+
+this chooses a forward endpoint `T` and produces `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0 (Mc + Lop·C·a)
+(Lop·C)` — the chart's exact `picard` shape with Lipschitz constant `Lop · C`.  The fiber-pointwise
+Lipschitz bound is lifted to the section-space `LipschitzOnWith` via
+`lipschitzOnWith_of_forall_fiber_dist_le`, and the joint-continuity data to section-space
+time-continuity via `continuousOn_of_forall_coord_uncurry_continuousOn`, before invoking the
+section-level capstone
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn`. -/
+theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_fiber_dist_le_continuousOn
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a Lop C : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hL : ∀ i (x : Kc i), ‖(et i).continuousLinearMapAt ℝ x.1‖ ≤ (Lop : ℝ))
+    (hfiber : ∀ t ∈ Set.Icc t₀ T₀,
+      ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+      ∀ ⦃s'⦄, s' ∈ Metric.closedBall x0 (a : ℝ) →
+        ∀ x : M, dist ((A t s) x) ((A t s') x) ≤ (C : ℝ) * dist s s')
+    (hcont : ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) → ∀ i,
+      ContinuousOn
+        (fun p : ℝ × M => (et i).continuousLinearMapAt ℝ p.2 ((A p.1 s) p.2))
+        (Set.Icc t₀ T₀ ×ˢ (Kc i : Set M))) :
+    ∃ (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof A (tmin := t₀) (tmax := T)
+        ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + (Lop * C) * a) (Lop * C) := by
+  refine exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn
+    A x0 t₀ T₀ hT₀ a (Lop * C) ha ?_ ?_
+  · intro t ht
+    exact lipschitzOnWith_of_forall_fiber_dist_le (A := A t) (L := Lop) (C := C) hL
+      (fun s hs s' hs' x => hfiber t ht hs hs' x)
+  · intro s hs
+    exact continuousOn_of_forall_coord_uncurry_continuousOn
+      (f := fun t => A t s) (hcont hs)
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
