@@ -7728,3 +7728,52 @@ mild value) completing the full parabolic space-time `C^{0,α}` modulus toward `
 membership; or (ii) transfer of the spatial-regularity suite to the section-space representative (the
 coordinatewise readout `K`-Lipschitz-in-section datum feeding `chart.lipschitz`); or (iii) the
 `realization` decode `RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`.
+
+---
+
+## Milestone (2026-07-05) — `Hölder-1/2` *time*-modulus of the model mild solution (GAP 2 analytic core; time half of the parabolic space-time modulus)
+
+Four additive, fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`) theorems appended
+to `AnalyticPDE/HeatKernel1D.lean`, supplying the **time-regularity companion** the previous milestone
+flagged as "Next target (i)".  Together with the earlier spatial `C¹`/`C^{0,α}` suite this completes
+the model mild-solution **parabolic space-time modulus** (`Hölder-1/2`-in-time × `C^{0,α}`-in-space).
+Full `lake build` green (2911 jobs); `scan cheats` `TOTAL 0`.
+
+* `heatSemigroupND_duhamel_time_holder_bound` — **`Hölder-1/2` time modulus of the Duhamel term.**
+  For `t₀ ≤ t₁ < t₂` and a sup-norm-`C`-bounded source `q`,
+  `|U(t₂)(x) − U(t₁)(x)| ≤ C·(t₂−t₁) + (4n²C/π)·√(t₁−t₀)·√(t₂−t₁)` (uniform in `x`).  The difference
+  splits (`integral_add_adjacent_intervals` + `integral_sub`) into a *new-interval* term controlled by
+  the Duhamel sup bound `heatSemigroupND_duhamel_sup_bound` (`≤ C·(t₂−t₁)`) and a *propagator-
+  difference* term whose integrand is bounded by the pointwise semigroup time modulus
+  `abs_heatSemigroupND_add_sub_le` (in `√s` form via `heatSemigroupND_timeModulus_eq_sqrt`) times the
+  integrable weight `(t₁−s)^{−1/2}`, integrated by `integral_rpow_neg_half_sub`.  This is the genuinely
+  new content — the existing Duhamel time-*continuity* (`continuousAt_heatSemigroupND_duhamel_time`)
+  was proved *softly* by dominated convergence, with no quantitative rate.
+* `norm_heatMildValueNDbcf_time_holder_bound` — **`Hölder-1/2` time modulus of the mild-value map**
+  (pointwise in `x`): combines the homogeneous heat-semigroup time modulus with the Duhamel one via
+  `abs_add_le` after `heatMildValueNDbcf_apply`.
+* `heatMildFixedPoint_apply_time_holder_bound` — **`Hölder-1/2` time modulus of the genuine mild
+  solution** `z` (any fixed point): both slices equal `heatMildValueNDbcf` for the common
+  trajectory-reaction source `s ↦ Q(z(projIcc s))` (`heatMildFixedPoint_apply`), transferring the
+  map-level modulus to the solution.  Solution-level companion of
+  `lipschitzWith_heatMildFixedPoint_apply` / `heatMildFixedPoint_apply_spatial_holder_bound`.
+* `norm_heatMildValueNDbcf_sub_time_holder` — **`BCF`-norm (Banach-space) time modulus**: the
+  sup-over-`x` packaging, giving the quantitative `Hölder-1/2` modulus of continuity of the mild-value
+  path `t ↦ heatMildValueNDbcf …` in the state space `(Fin n → ℝ) →ᵇ ℝ` (upgrading the qualitative
+  `continuousAt_heatMildValue_time`).
+
+**Fractional progress on `{A, picard, realization, encode}`.** GAP 2's heat-kernel Schauder estimate
+now carries the FULL parabolic space-time modulus of the model mild representative: away from the
+initial slice `t = t₀`, the solution is jointly `Hölder-1/2`-in-time and `C^{0,α}`-in-space, with
+sharp explicit constants.  This is the complete analytic regularity the eventual `geometric`
+identification of the chart operator `A` with `intrinsicRicciDeTurckRHS` (and the `realization` decode)
+consumes; the model template is now regularity-complete (existence, uniqueness, continuous dependence,
+a-priori sup/deviation/containment, spatial `C¹`/`C^{0,α}`, and time `C^{0,1/2}`).
+
+**Next target.** With the model Schauder toolkit regularity-complete, the frontier is now the
+*transfer/assembly* side (not more model estimates): either (i) lift the space-time modulus suite to
+the section-space representative feeding `chart.lipschitz`/`picard` (the coordinatewise
+`K`-Lipschitz-in-section datum), routing pointwise identifications through the diamond-free
+`ContinuousSection` eval API; or (ii) the `realization` decode
+`RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`; or (iii) the `geometric`
+identification `A τ s x u v = intrinsicRicciDeTurckRHS …` on the positive-definite locus.
