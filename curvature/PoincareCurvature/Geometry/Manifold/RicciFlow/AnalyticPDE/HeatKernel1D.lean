@@ -6799,5 +6799,85 @@ theorem aestronglyMeasurable_heatSemigroupND_comp_sub {n : ℕ} (t : ℝ)
   exact (hGmeas.aestronglyMeasurable
     (μ := (volume : Measure ℝ).prod (volume : Measure (Fin n → ℝ)))).integral_prod_right'
 
+/-- **Time-continuity of the Duhamel path.**  For a *continuous*, uniformly sup-norm-bounded
+`BCF`-valued source `q` (`‖q s y‖ ≤ C`), the Duhamel time integral
+`t ↦ ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` is continuous at every `t₁ > t₀`.  This is the *singular*-endpoint
+companion of the propagator time-continuity `continuousAt_heatSemigroupND_shift_time`: the integrand
+`H_{t−s}(q s)(x)` is singular at the diagonal `s = t`, so plain dominated convergence in `s` fails.
+The proof substitutes `u = t − s` (`heatSemigroupND_duhamel_eq_comp_sub`), moving the singularity to
+the fixed heat time `u = 0`, and rewrites the substituted integral over the `t`-dependent domain
+`(0, t − t₀]` as a full-space integral of the indicator `u ↦ 1_{(0, t−t₀]}(u)·H_u(q(t−u))(x)`.  A
+dominated-convergence argument (`continuousAt_of_dominated`) then applies: the integrand is
+a.e.-measurable in `u` (`aestronglyMeasurable_heatSemigroupND_comp_sub`), dominated on a
+`t₁`-neighbourhood by the `t`-independent integrable envelope `1_{(0, t₁−t₀+1]}·C`
+(`abs_heatSemigroupND_le`), and continuous in `t` for a.e. `u`
+(`continuous_heatSemigroupND_comp_sub_time`, the indicator boundary set `{0, t₁−t₀}` being null).
+With the propagator (`continuousAt_heatSemigroupND_shift_time`) and Duhamel time-continuities in hand,
+the per-time contraction `norm_heatMildValueNDbcf_sub_le` upgrades to the path-space contraction that
+makes the mild-solution map a Banach fixed point on `C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`. -/
+theorem continuousAt_heatSemigroupND_duhamel_time {n : ℕ} {t₀ t₁ : ℝ} (ht : t₀ < t₁)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+    ContinuousAt (fun t => ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x) t₁ := by
+  have hC : (0 : ℝ) ≤ C := le_trans (norm_nonneg (q t₁ x)) (hqb t₁ x)
+  have hfun : (fun t => ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x)
+      = fun t => ∫ u in (0 : ℝ)..(t - t₀), heatSemigroupND u (⇑(q (t - u))) x := by
+    funext t
+    exact heatSemigroupND_duhamel_eq_comp_sub t₀ t (fun s => ⇑(q s)) x
+  rw [hfun]
+  have hEq : (fun t => ∫ u in (0 : ℝ)..(t - t₀), heatSemigroupND u (⇑(q (t - u))) x)
+      =ᶠ[nhds t₁]
+      fun t => ∫ u, Set.indicator (Set.Ioc (0 : ℝ) (t - t₀))
+        (fun u => heatSemigroupND u (⇑(q (t - u))) x) u := by
+    filter_upwards [Ioi_mem_nhds ht] with t htmem
+    have hle : (0 : ℝ) ≤ t - t₀ := by have := Set.mem_Ioi.1 htmem; linarith
+    rw [intervalIntegral.integral_of_le hle,
+      ← MeasureTheory.integral_indicator measurableSet_Ioc]
+  refine ContinuousAt.congr ?_ hEq.symm
+  refine continuousAt_of_dominated
+    (bound := fun u => Set.indicator (Set.Ioc (0 : ℝ) (t₁ - t₀ + 1)) (fun _ => C) u) ?_ ?_ ?_ ?_
+  · filter_upwards with t
+    exact (aestronglyMeasurable_heatSemigroupND_comp_sub t hq x).indicator measurableSet_Ioc
+  · filter_upwards [Iio_mem_nhds (show t₁ < t₁ + 1 by linarith)] with t htmem
+    filter_upwards with u
+    by_cases hmem : u ∈ Set.Ioc (0 : ℝ) (t - t₀)
+    · rw [Set.indicator_of_mem hmem]
+      have hupos : (0 : ℝ) < u := (Set.mem_Ioc.1 hmem).1
+      have hule : u ≤ t - t₀ := (Set.mem_Ioc.1 hmem).2
+      have htlt : t < t₁ + 1 := Set.mem_Iio.1 htmem
+      rw [Set.indicator_of_mem (Set.mem_Ioc.2 ⟨hupos, by linarith⟩), Real.norm_eq_abs]
+      exact abs_heatSemigroupND_le hupos x
+        (fun y => by rw [← Real.norm_eq_abs]; exact hqb (t - u) y)
+    · rw [Set.indicator_of_notMem hmem, norm_zero]
+      exact Set.indicator_nonneg (fun _ _ => hC) u
+  · exact (integrable_indicator_iff measurableSet_Ioc).mpr (integrableOn_const (hs := measure_Ioc_lt_top.ne))
+  · have h0 : ∀ᵐ (u : ℝ), u ≠ 0 := by
+      rw [MeasureTheory.ae_iff]
+      have hset : {a : ℝ | ¬ a ≠ 0} = {0} := by
+        ext a; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+      rw [hset]; exact MeasureTheory.measure_singleton 0
+    have hd : ∀ᵐ (u : ℝ), u ≠ t₁ - t₀ := by
+      rw [MeasureTheory.ae_iff]
+      have hset : {a : ℝ | ¬ a ≠ t₁ - t₀} = {t₁ - t₀} := by
+        ext a; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+      rw [hset]; exact MeasureTheory.measure_singleton _
+    filter_upwards [h0, hd] with u hu0 hud
+    rcases lt_or_gt_of_ne hu0 with hult | hupos
+    · have hzero : (fun t => Set.indicator (Set.Ioc (0 : ℝ) (t - t₀))
+          (fun u => heatSemigroupND u (⇑(q (t - u))) x) u) = fun _ => (0 : ℝ) := by
+        funext t
+        rw [Set.indicator_of_notMem (fun hmem => absurd (Set.mem_Ioc.1 hmem).1 (not_lt.2 hult.le))]
+      rw [hzero]; exact continuousAt_const
+    · rcases lt_or_gt_of_ne hud with hlt | hgt
+      · refine (continuous_heatSemigroupND_comp_sub_time hupos hq x).continuousAt.congr ?_
+        filter_upwards [Ioi_mem_nhds (show u + t₀ < t₁ by linarith)] with t htmem
+        have htgt : u + t₀ < t := Set.mem_Ioi.1 htmem
+        rw [Set.indicator_of_mem (Set.mem_Ioc.2 ⟨hupos, by linarith⟩)]
+      · have hcont0 : ContinuousAt (fun _ : ℝ => (0 : ℝ)) t₁ := continuousAt_const
+        refine hcont0.congr ?_
+        filter_upwards [Iio_mem_nhds (show t₁ < u + t₀ by linarith)] with t htmem
+        have htlt : t < u + t₀ := Set.mem_Iio.1 htmem
+        rw [Set.indicator_of_notMem (fun hmem => absurd (Set.mem_Ioc.1 hmem).2 (not_le.2 (by linarith)))]
+
 end AnalyticPDE
 end RicciFlow
