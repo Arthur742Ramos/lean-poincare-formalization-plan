@@ -7162,5 +7162,43 @@ theorem norm_heatSemigroupNDbcf_add_sub_le {n : ℕ} {t' s : ℝ} (ht' : 0 < t')
   exact abs_heatSemigroupND_add_sub_le ht' hs f.continuous
     (fun y => f.norm_coe_le_norm y) x
 
+/-- The heat-kernel time-modulus factor `(4πs)^{−1/2}·(4s)` squares to `4s/π` (for `s ≥ 0`) — the
+algebraic core of its `Hölder-1/2` `√s` decay. -/
+lemma heatSemigroupND_timeModulus_sq {s : ℝ} (hs : 0 ≤ s) :
+    ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) ^ 2 = 4 * s / π := by
+  rw [mul_pow, ← Real.rpow_natCast ((4 * π * s) ^ (-(1 : ℝ) / 2)) 2,
+    ← Real.rpow_mul (by positivity : (0 : ℝ) ≤ 4 * π * s),
+    show (-(1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = -1 by push_cast; ring, Real.rpow_neg_one]
+  rcases eq_or_lt_of_le hs with h | hs'
+  · rw [← h]; simp
+  · have hπ : (π : ℝ) ≠ 0 := Real.pi_ne_zero
+    have h4πs : (4 : ℝ) * π * s ≠ 0 := by positivity
+    field_simp
+
+/-- **`Hölder-1/2` closed form of the heat-kernel time-modulus factor.**
+`(4πs)^{−1/2}·(4s) = (2/√π)·√s` for `s ≥ 0`: the exact `√s` decay rate, obtained from the squared
+identity `heatSemigroupND_timeModulus_sq` by nonnegativity. -/
+lemma heatSemigroupND_timeModulus_eq_sqrt {s : ℝ} (hs : 0 ≤ s) :
+    (4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s) = 2 / Real.sqrt π * Real.sqrt s := by
+  have hμnn : (0 : ℝ) ≤ (4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s) :=
+    mul_nonneg (Real.rpow_nonneg (by positivity) _) (by positivity)
+  have hrnn : (0 : ℝ) ≤ 2 / Real.sqrt π * Real.sqrt s := by positivity
+  rw [← Real.sqrt_sq hμnn, ← Real.sqrt_sq hrnn, heatSemigroupND_timeModulus_sq hs]
+  congr 1
+  rw [mul_pow, div_pow, Real.sq_sqrt Real.pi_pos.le, Real.sq_sqrt hs]
+  ring
+
+/-- **`Hölder-1/2` sup-norm time-modulus of the `n`-dimensional heat semigroup.**  The sharp `√s`
+form of `norm_heatSemigroupNDbcf_add_sub_le`:
+`‖H_{t'+s}f − H_{t'}f‖ ≤ (n·‖f‖/√(πt'))·n·(2/√π)·√s`.
+The explicit `√s` decay makes `BCF`-norm right-time-continuity at every `t' > 0` a squeeze against a
+`√`-modulus: the prefactor is `t'`-fixed and `x`-uniform, and `√s → 0` as `s → 0⁺`. -/
+theorem norm_heatSemigroupNDbcf_add_sub_le_sqrt {n : ℕ} {t' s : ℝ} (ht' : 0 < t') (hs : 0 < s)
+    (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    ‖heatSemigroupNDbcf (add_pos ht' hs) f - heatSemigroupNDbcf ht' f‖
+      ≤ ((n : ℝ) * (‖f‖ / Real.sqrt (π * t'))) * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt s) := by
+  rw [← heatSemigroupND_timeModulus_eq_sqrt hs.le]
+  exact norm_heatSemigroupNDbcf_add_sub_le ht' hs f
+
 end AnalyticPDE
 end RicciFlow
