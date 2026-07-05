@@ -5616,5 +5616,30 @@ lemma isPicardLindelof_of_boundedOn_lipschitzOn_closedBall_timeDependent_Icc
   push_cast
   linarith [hLa]
 
+/-- **Superset form of the local time-dependent Picard–Lindelöf bridge on `[t₀, T]`.**
+Derives the ball-local `IsPicardLindelof` from bound and Lipschitz control on *any* set `S`
+containing the closed ball `closedBall x₀ a`.  This is the reduction the honest Ricci–DeTurck chart
+consumes: the chart already proves `A t` is `K`-Lipschitz on the positive-definite locus for its
+`lipschitz` field, and — once the closed ball about the initial metric sits inside that locus —
+the very same Lipschitz (and a norm bound on the locus) yields the `picard` field for free via
+`LipschitzOnWith.mono`, with no duplicated ball-local estimate.  Specializes to
+`isPicardLindelof_of_boundedOn_lipschitzOn_closedBall_timeDependent_Icc` at `S = closedBall x₀ a`. -/
+lemma isPicardLindelof_of_boundedOn_lipschitzOn_superset_timeDependent_Icc
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : ℝ → E → E) (x0 : E) (t₀ T : ℝ) (hT : t₀ < T) (a L K : ℝ≥0)
+    {S : Set E} (hball : Metric.closedBall x0 (a : ℝ) ⊆ S)
+    (hlip : ∀ t ∈ Set.Icc t₀ T, LipschitzOnWith K (g t) S)
+    (hcont : ∀ x ∈ Metric.closedBall x0 (a : ℝ),
+      ContinuousOn (fun t => g t x) (Set.Icc t₀ T))
+    (hbound : ∀ t ∈ Set.Icc t₀ T, ∀ x ∈ S, ‖g t x‖ ≤ (L : ℝ))
+    (hLa : (L : ℝ) * (T - t₀) ≤ (a : ℝ)) :
+    IsPicardLindelof g (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 L K :=
+  isPicardLindelof_of_boundedOn_lipschitzOn_closedBall_timeDependent_Icc g x0 t₀ T hT a L K
+    (fun t ht => (hlip t ht).mono hball)
+    hcont
+    (fun t ht x hx => hbound t ht x (hball hx))
+    hLa
+
 end AnalyticPDE
 end RicciFlow
