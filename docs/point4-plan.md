@@ -8243,3 +8243,55 @@ continuous `BilinearFormBundle` section, then package the intrinsic Ricci–DeTu
 (continuity of `x ↦ (g t).inner x` as a `BilinearFormBundle` section, from the `C²` metric family) plus a
 diamond-safe composition `(BilinearForm) ∘ (Hom(TM,TM))`; build that metric-section continuity brick
 first (watch the `letI : RiemannianBundle` in `intrinsicDeTurckCorrection`).
+
+## Milestone (2026-07-05, later) — intrinsic DeTurck correction PROVED a continuous `BilinearFormBundle` section (Item 3 / GAP 2 geometric-A regularity)
+
+The previous milestone's stated NEXT (metric-section composition to `intrinsicDeTurckCorrection`
+continuity) is now **done, sorry-free, `#print axioms`-clean** (`propext`/`Classical.choice`/`Quot.sound`),
+comment-stripped `scan cheats PoincareCurvature` `TOTAL 0`, full `lake build PoincareCurvature` green
+(2916 jobs).  Four additive commits; no heavy file rewritten.
+
+**(1) Bundle-level `clm_comp` (new module `VectorBundle/HomBundleComp.lean`, added to root).**
+Mathlib's `VectorBundle/Hom.lean` has `clm_bundle_apply`/`clm_bundle_apply₂` (applying a hom-section to
+vector-sections) but **no** composition of two hom-sections.  `ContMDiff{WithinAt,At,On,}.clm_bundle_comp`
+supplies it: for smooth sections `ϕ : Hom(E₂,E₃)`, `ψ : Hom(E₁,E₂)`, `x ↦ (ϕ x).comp (ψ x)` is a smooth
+`Hom(E₁,E₃)`-section.  Proof reduces `contMDiff*_hom_bundle` to `inCoordinates` and uses
+`inCoordinates_comp_eq` — the coordinate readout of a composition factors through the readouts on the
+middle base set, via the `symmL ∘ continuousLinearMapAt = id` cancellation — reducing to the ordinary
+normed `ContMDiff*.clm_comp`.  Fully general, fiber-norm-free.
+
+**(2) Covariant part `C1 = (g t).inner ∘L ∇W` continuous** — `metricComp_intrinsicDeTurckVectorField_
+covariantDerivative_contMDiff_zero`: apply `clm_bundle_comp` to the `C²` metric section
+(`ContMDiffRiemannianMetric.contMDiff_toSection`, downgraded to `C⁰`) and the continuous `∇W`
+`Hom(TM,TM)`-section (the earlier `intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`).
+
+**(3) Fiber-norm-free slot-flip continuity** — `contMDiff_flipBilinearFormSection_tangent_zero`: for a
+continuous `BilinearFormBundle` section `s`, `x ↦ (s x).flip` is continuous.  Mirrors the existing
+`Bundle.contMDiff_symmetrizeBilinearSection` (model operator `ContinuousLinearMap.flipBilinear` in
+preferred coordinates) but with the **flip** operator and — crucially — **no** `Π` fiber-norm: it uses
+only the fiber-norm-free readout `trivializationAt_bilinearFormBundle_apply_eq` (the fiber-norm version
+lives later in `RiemannianSection.lean`).  Needed two plumbing fixes flagged in the steer:
+(a) the CLM-`AddCommMonoid` diamond on `E →L E →L ℝ` (`flipBilinear`'s type vs the `𝓘(ℝ,·)` model) —
+resolved by re-declaring the canonical `NormedAddCommGroup`/`NormedSpace (E →L E →L ℝ)` as *local
+instances* (as `RiemannianSection.lean` does); (b) `rw [flip_apply]` HO-pattern failure — use
+`exact ContinuousLinearMap.flip_apply (s x) _ _`.
+
+**(4) The correction section itself** — `intrinsicDeTurckCorrectionSection` (`= C1 + flip C1`, a genuine
+`Π x, BilinearFormBundle (V := TM) x`) with `_apply` (`= intrinsicDeTurckCorrection` by metric
+`symm`) and `_contMDiff_zero` (continuity via `ContMDiff.add_section` of (2)+(3)).  **Plumbing note for
+next time:** the section-level `+` on the tangent synonym only resolves when the summands are typed as the
+bundle fiber `BilinearFormBundle (V:=TM) x` *un-unfolded* — an ascription `(… : Π x, BilW x)` unfolds the
+abbrev to the raw synonym and `Add (Π x, TM x →L TM x →L ℝ)` then fails; the fix is to force the resolving
+instance with `@HAdd.hAdd (Π x, BilW x) … instHAdd …`.  `infer_instance` confirms `Add (Π x, BilW x)`
+*does* resolve; only the raw-synonym form fails.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The `A`-regularity side of GAP 2 is now
+essentially complete: the intrinsic Ricci–DeTurck reaction (DeTurck-correction) term is a continuous
+`BilinearFormBundle`/`ContinuousSectionSpace` value.
+
+**NEXT.**  Assemble the full geometric operator `A` value: add the Ricci part `−2 Ric(g t)` (continuity of
+`ricciTensor` as a `BilinearFormBundle` section — same bundle-section algebra) to
+`intrinsicDeTurckCorrectionSection` to realize `intrinsicRicciDeTurckRHS` as a `ContinuousSectionSpace`
+value, then feed it as `chart.A` and discharge the `IsPicardLindelof` (`picard`) coordinate
+bounds (`hlip`/`hcont`/centre) for the **mild/regularised** representative via the committed
+`isPicardLindelof_of_bounded_lipschitz_timeDependent` foundation.
