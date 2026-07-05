@@ -90,4 +90,72 @@ theorem isPicardLindelof_continuousSectionSpace_of_forall_coord
   · intro s
     exact continuousOn_of_forall_coord_continuousOn (fun i => hcont s i)
 
+/-- **Section-space bounded–Lipschitz evolution existence & uniqueness (transport step (a)).**
+From coordinatewise (local trivialization readout) boundedness ≤ `L`, `K`-Lipschitz-in-section and
+time-continuity on `[t₀, T]`, the time-dependent operator `A` on the (complete) section space admits
+a unique `[t₀, T]`-evolution `α` with `α t₀ = x0` solving `α'(t) = A t (α t)`.  This lifts the model
+`ℝⁿ` mild-solution existence–uniqueness to the manifold-bundle section space (`CompleteSpace` from
+`CompleteSpace F`), the state space of the chart's `A`, by assembling the coordinate→section handoffs
+with the Banach evolution foundation `bounded_lipschitz_evolution_exists_unique_timeDependent_Icc`. -/
+theorem sectionSpace_evolution_exists_unique_of_forall_coord
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T : ℝ) (hT : t₀ < T) (L K : ℝ≥0)
+    (hbound : ∀ (t : ℝ)
+        (s : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+        (i : κ) (x : Kc i),
+        ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x‖ ≤ (L : ℝ))
+    (hlip : ∀ (t : ℝ)
+        (s s' : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover)
+        (i : κ) (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s')).1 i x)
+          ≤ (K : ℝ) * dist s s')
+    (hcont : ∀
+        (s : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+        (i : κ),
+        ContinuousOn
+          (fun t => (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i)
+          (Set.Icc t₀ T)) :
+    (∃ α : ℝ →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+      α t₀ = x0 ∧
+      (∀ t ∈ Set.Icc t₀ T, HasDerivWithinAt α (A t (α t)) (Set.Icc t₀ T) t)) ∧
+    (∀ α β : ℝ →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+      α t₀ = β t₀ →
+      (∀ t ∈ Set.Icc t₀ T, HasDerivWithinAt α (A t (α t)) (Set.Icc t₀ T) t) →
+      (∀ t ∈ Set.Icc t₀ T, HasDerivWithinAt β (A t (β t)) (Set.Icc t₀ T) t) →
+      ∀ t ∈ Set.Icc t₀ T, α t = β t) := by
+  refine bounded_lipschitz_evolution_exists_unique_timeDependent_Icc
+    A x0 hT (L := L) (K := K) ?_ ?_ ?_
+  · intro t s
+    exact norm_le_of_forall_coord_norm_le (NNReal.coe_nonneg L) (fun i x => hbound t s i x)
+  · intro t
+    exact lipschitzWith_of_forall_coord_dist_le (fun s s' i x => hlip t s s' i x)
+  · intro s
+    exact continuousOn_of_forall_coord_continuousOn (fun i => hcont s i)
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
