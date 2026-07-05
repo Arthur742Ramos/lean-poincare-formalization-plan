@@ -8292,6 +8292,40 @@ theorem lipschitzWith_heatMildFixedPoint_apply {n : ℕ} {t₀ T : ℝ} (hT : t�
   rw [hfun]
   exact lipschitzWith_heatMildValueNDbcf ht u₀ hqc hqb
 
+/-- **Spatial `C^{0,α}` (Hölder) parabolic Schauder regularity of the model mild solution.**  The
+fractional companion of `lipschitzWith_heatMildFixedPoint_apply`: at every interior time
+`t₀ < t ≤ T` and Hölder exponent `0 ≤ α ≤ 1`, the value `z(t)` of the genuine model mild solution
+(any fixed point of `heatMildSelfMap`) satisfies the spatial Hölder modulus
+`|z(t)(x) − z(t)(x')| ≤ (Psg + Pdu)·‖x − x'‖^α` with the same homogeneous/Duhamel constants as
+`heatMildValueNDbcf_spatial_holder_bound`.  Since `z(t)` equals `heatMildValueNDbcf` for the
+trajectory-reaction source `s ↦ Q(z(projIcc s))` (`heatMildFixedPoint_apply`), the fractional
+Schauder gain transfers to the solution itself. -/
+theorem heatMildFixedPoint_apply_spatial_holder_bound {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t : ↥(Set.Icc t₀ T)} (ht : t₀ < (t : ℝ))
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) (x x' : Fin n → ℝ) :
+    |z t x - z t x'|
+      ≤ ((2 * ‖u₀‖) ^ (1 - α) * (‖u₀‖ / Real.sqrt (π * ((t : ℝ) - t₀))) ^ α * (n : ℝ) ^ α
+          + (2 * CQ) ^ (1 - α) * (CQ / Real.sqrt π) ^ α * (n : ℝ) ^ α
+              * (((t : ℝ) - t₀) ^ (1 - α / 2) / (1 - α / 2))) * ‖x - x'‖ ^ α := by
+  have hqc : Continuous (fun s => Q (Set.IccExtend hT (⇑z) s)) :=
+    hQcont.comp (continuous_IccExtend_iff.mpr z.continuous)
+  have hqb : ∀ s y, ‖Q (Set.IccExtend hT (⇑z) s) y‖ ≤ CQ := fun s y =>
+    le_trans ((Q (Set.IccExtend hT (⇑z) s)).norm_coe_le_norm y) (hQb _)
+  have hx : z t x = heatMildValueNDbcf ht u₀ hqc hqb x := by
+    rw [heatMildValueNDbcf_apply ht u₀ hqc hqb x]
+    exact heatMildFixedPoint_apply hT u₀ hLnn hlip Q hQcont hQb z hz ht x
+  have hx' : z t x' = heatMildValueNDbcf ht u₀ hqc hqb x' := by
+    rw [heatMildValueNDbcf_apply ht u₀ hqc hqb x']
+    exact heatMildFixedPoint_apply hT u₀ hLnn hlip Q hQcont hQb z hz ht x'
+  rw [hx, hx']
+  exact heatMildValueNDbcf_spatial_holder_bound ht u₀ hqc hqb hα0 hα1 x x'
+
 /-- **A-priori sup bound for the model mild solution.**  Any fixed point `z` of the mild-solution
 self-map (for initial datum `u₀` and reaction nonlinearity `Q` bounded by `CQ`) obeys the uniform
 `L^∞` estimate `‖z‖ ≤ ‖u₀‖ + CQ·(T − t₀)` in the state space `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.
