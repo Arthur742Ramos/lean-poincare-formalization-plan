@@ -175,4 +175,52 @@ lemma intrinsicDeTurckCorrection_eq_metricComp_add_flip
   congr 1
   exact (g t).symm x u _
 
+/-- The intrinsic DeTurck correction packaged as a genuine `BilinearFormBundle` section:
+`C1 + flip C1`, where `C1 = (g t).inner ∘L ∇W`.  Each summand is ascribed to the bundle-fiber type
+`BilinearFormBundle (V := TM) x` (rather than the raw tangent synonym) so the section-level `+`
+resolves through the vector-bundle `Add`. -/
+noncomputable def intrinsicDeTurckCorrectionSection
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x :=
+  @HAdd.hAdd
+    (Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x) instHAdd
+    (fun x ↦ ((g t).inner x).comp
+      ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+        (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x))
+    (fun x ↦ (((g t).inner x).comp
+      ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+        (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x)).flip)
+
+@[simp] lemma intrinsicDeTurckCorrectionSection_apply
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicDeTurckCorrectionSection (I := I) (M := M) g background t x u v =
+      intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v := by
+  simp only [intrinsicDeTurckCorrectionSection, Pi.add_apply, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.comp_apply, ContinuousLinearMap.flip_apply,
+    intrinsicDeTurckCorrection_apply]
+  congr 1
+  exact (g t).symm x _ u
+
+/-- The intrinsic DeTurck correction is a continuous `BilinearFormBundle` section for a `C¹`
+background connection slice.  This is the symmetrized covariant part of the intrinsic Ricci–DeTurck
+reaction term (`C1 + flip C1`), assembled fiber-norm-free from
+`metricComp_intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`,
+`contMDiff_flipBilinearFormSection_tangent_zero`, and `ContMDiff.add_section`.  Reading the intrinsic
+Ricci–DeTurck right-hand side as a `ContinuousSectionSpace` value (the geometric operator `A`) consumes
+exactly this regularity. -/
+theorem intrinsicDeTurckCorrectionSection_contMDiff_zero
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x
+        (intrinsicDeTurckCorrectionSection (I := I) (M := M) g background t x)) := by
+  have hC1 := metricComp_intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+    (I := I) (M := M) g background t hbackground
+  have hflip := contMDiff_flipBilinearFormSection_tangent_zero hC1
+  exact hC1.add_section hflip
+
 end RicciFlow
