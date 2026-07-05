@@ -6287,5 +6287,50 @@ theorem lipschitzWith_heatSemigroupNDbcf {n : ℕ} {t : ℝ} (ht : 0 < t) :
     rw [dist_eq_norm, dist_eq_norm, NNReal.coe_one, one_mul]
     exact norm_heatSemigroupNDbcf_sub_le ht f g)
 
+/-- Additivity of the heat semigroup as a bounded-continuous-function operator. -/
+theorem heatSemigroupNDbcf_add {n : ℕ} {t : ℝ} (ht : 0 < t)
+    (f g : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    heatSemigroupNDbcf ht (f + g) = heatSemigroupNDbcf ht f + heatSemigroupNDbcf ht g := by
+  ext x
+  simp only [heatSemigroupNDbcf_apply, BoundedContinuousFunction.add_apply]
+  exact heatSemigroupND_add ht x f.continuous.aestronglyMeasurable
+    (fun y => le_trans (f.norm_coe_le_norm y) (le_max_left ‖f‖ ‖g‖))
+    g.continuous.aestronglyMeasurable
+    (fun y => le_trans (g.norm_coe_le_norm y) (le_max_right ‖f‖ ‖g‖))
+
+/-- Real-scalar homogeneity of the heat semigroup as a bounded-continuous-function operator. -/
+theorem heatSemigroupNDbcf_smul {n : ℕ} {t : ℝ} (ht : 0 < t) (c : ℝ)
+    (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    heatSemigroupNDbcf ht (c • f) = c • heatSemigroupNDbcf ht f := by
+  ext x
+  simp only [heatSemigroupNDbcf_apply, BoundedContinuousFunction.smul_apply, smul_eq_mul]
+  exact heatSemigroupND_smul c (⇑f) x
+
+/-- **The `n`-dimensional heat semigroup as a bounded linear operator of norm `≤ 1` on the Banach
+space of bounded continuous functions.**  Bundles `heatSemigroupNDbcf ht` (additive by
+`heatSemigroupND_add`, real-homogeneous by `heatSemigroupND_smul`, `L^∞`-nonexpansive by
+`norm_heatSemigroupNDbcf_le`) as a continuous `ℝ`-linear map
+`(Fin n → ℝ) →ᵇ ℝ →L[ℝ] (Fin n → ℝ) →ᵇ ℝ`.  This is the operator-theoretic object the abstract
+parabolic Banach fixed-point machinery consumes: the linear propagator whose Duhamel perturbation is
+a short-time contraction. -/
+noncomputable def heatSemigroupNDclm {n : ℕ} {t : ℝ} (ht : 0 < t) :
+    BoundedContinuousFunction (Fin n → ℝ) ℝ →L[ℝ]
+      BoundedContinuousFunction (Fin n → ℝ) ℝ :=
+  LinearMap.mkContinuous
+    { toFun := heatSemigroupNDbcf ht
+      map_add' := heatSemigroupNDbcf_add ht
+      map_smul' := fun c f => by simpa using heatSemigroupNDbcf_smul ht c f }
+    1
+    (fun f => by simpa using norm_heatSemigroupNDbcf_le ht f)
+
+@[simp] theorem heatSemigroupNDclm_apply {n : ℕ} {t : ℝ} (ht : 0 < t)
+    (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    heatSemigroupNDclm ht f = heatSemigroupNDbcf ht f := rfl
+
+/-- The heat-semigroup operator has operator norm `≤ 1`. -/
+theorem norm_heatSemigroupNDclm_le {n : ℕ} {t : ℝ} (ht : 0 < t) :
+    ‖heatSemigroupNDclm (n := n) ht‖ ≤ 1 :=
+  LinearMap.mkContinuous_norm_le _ zero_le_one _
+
 end AnalyticPDE
 end RicciFlow
