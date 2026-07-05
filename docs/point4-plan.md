@@ -7686,3 +7686,45 @@ field).
 `exists_pos_closedBall_toSection_subset_positiveDefiniteLocus`); or (ii) the `realization` decode
 `RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`; or (iii) further parabolic
 Schauder gain (spatial second-derivative Hölder control) toward the `geometric` identification.
+
+---
+
+## Milestone (2026-07-05) — spatial `C¹`/`C^{0,α}` Schauder regularity of the model mild solution (GAP 2 analytic core)
+
+Four additive, fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`) theorems appended
+to `AnalyticPDE/HeatKernel1D.lean`, promoting the model semilinear mild-solution theory from mere
+sup/deviation control to genuine spatial *gain of regularity* — the parabolic Schauder half that shows
+the (`C⁰`-bounded) mild Ricci–DeTurck representative is spatially `C¹`/`C^{0,α}` after any positive
+time. Full `lake build` green (2911 jobs); `scan cheats` `TOTAL 0`.
+
+* `lipschitzWith_heatMildValueNDbcf` — **spatial `C¹` (Lipschitz) regularity of the mild-value map.**
+  `Φ(t) = H_{t−t₀}u₀ + ∫ H_{t−s}(q s) ds` at any `t > t₀` is `LipschitzWith
+  (n·‖u₀‖/√(π(t−t₀)) + 2nC√(t−t₀)/√π)`, packaged as a mathlib `LipschitzWith` instance: the
+  `t^{-1/2}` propagator smoothing (`heatSemigroupND_spatial_lipschitz_sqrt_rate_norm`) plus the
+  `√(t−t₀)` Duhamel gain (`heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound`), combined by the
+  triangle inequality after `intervalIntegral.integral_sub`.
+* `heatMildValueNDbcf_spatial_holder_bound` — **spatial `C^{0,α}` (Hölder) regularity of the
+  mild-value map.** Fractional companion: `|Φ(t)(x) − Φ(t)(x')| ≤ (Psg + Pdu)·‖x−x'‖^α` for every
+  `0 ≤ α ≤ 1`, with `Psg = (2‖u₀‖)^{1−α}(‖u₀‖/√(π(t−t₀)))^α n^α`,
+  `Pdu = (2C)^{1−α}(C/√π)^α n^α ((t−t₀)^{1−α/2}/(1−α/2))`
+  (`heatSemigroupND_spatial_holder_seminorm_bound_norm` + `heatSemigroupND_duhamel_spatial_holder_bound`).
+* `lipschitzWith_heatMildFixedPoint_apply` — **spatial `C¹` regularity of the genuine mild solution.**
+  Transfers the map-level `C¹` gain to the actual fixed point `z`: `z(t)` equals `heatMildValueNDbcf`
+  for the trajectory source `s ↦ Q(z(projIcc s))` (`heatMildFixedPoint_apply`), so `⇑(z t)` is
+  `LipschitzWith` the same rate.
+* `heatMildFixedPoint_apply_spatial_holder_bound` — **spatial `C^{0,α}` regularity of the genuine
+  mild solution.** Fractional companion at the solution level.
+
+**Fractional progress on `{A, picard, realization, encode}`.** This is a concrete step of GAP 2's
+heat-kernel Schauder estimate (the directive's explicitly-endorsed "concrete step of the heat-kernel
+Schauder estimate" / "Lipschitz estimate for the mild representative"): the model mild representative
+now carries the spatial first-derivative regularity — bounded data becomes spatially Lipschitz/Hölder
+after any positive time — that the `geometric` identification of the chart operator `A` with
+`intrinsicRicciDeTurckRHS` ultimately consumes. The complete 2×2 spatial-regularity picture (`C¹`/`C^{0,α}`
+× map/solution) is now available on the model space `(Fin n → ℝ) →ᵇ ℝ`.
+
+**Next target.** Either (i) the *time*-regularity companion (time-Hölder `|t−t'|^{α/2}` modulus of the
+mild value) completing the full parabolic space-time `C^{0,α}` modulus toward `ParabolicC0AlphaOn`
+membership; or (ii) transfer of the spatial-regularity suite to the section-space representative (the
+coordinatewise readout `K`-Lipschitz-in-section datum feeding `chart.lipschitz`); or (iii) the
+`realization` decode `RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`.
