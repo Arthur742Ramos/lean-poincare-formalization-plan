@@ -2179,6 +2179,85 @@ theorem smul_apply
   rw [he]
   rfl
 
+/-- Uniform control of every compact coordinate readout by a constant `C` controls the
+transported finite-cover section norm.  This is the boundedness companion of
+`dist_le_of_forall_coord_dist_le` (the case `t = 0`): the norm-level handoff turning local
+trivialization/coordinate sup-bounds into the global boundedness hypothesis
+`∀ s, ‖A s‖ ≤ C` demanded by the Banach-space Picard–Lindelöf foundation for a section-space
+vector field. -/
+theorem norm_le_of_forall_coord_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {C : ℝ} (hC : 0 ≤ C)
+    (hcoord : ∀ i (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ ≤ C) :
+    ‖s‖ ≤ C := by
+  have he0 :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+        (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover)) = 0 := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_zero _
+  have hdist : dist s
+      (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover) ≤ C := by
+    refine dist_le_of_forall_coord_dist_le (𝕜 := 𝕜) (F := F) (V := V)
+      (et := et) (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq)
+      (hcover := hcover) (s := s)
+      (t := (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover)) hC ?_
+    intro i x
+    rw [he0]
+    simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply, dist_zero_right]
+    exact hcoord i x
+  rwa [dist_zero_right] at hdist
+
+/-- Global (`LipschitzWith`) version of `lipschitzOnWith_of_forall_coord_dist_le`: coordinatewise
+finite-cover Lipschitz estimates on *all* sections imply a global Lipschitz estimate for a
+section-space map.  This is the form consumed as the `hlip` hypothesis of the Banach-space
+Picard–Lindelöf foundation `isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc`. -/
+theorem lipschitzWith_of_forall_coord_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {L : NNReal}
+    (hcoord : ∀ s t, ∀ i (x : Kc i),
+      dist
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A s)).1 i x)
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t)).1 i x)
+        ≤ (L : ℝ) * dist s t) :
+    LipschitzWith L A := by
+  rw [← lipschitzOnWith_univ]
+  exact lipschitzOnWith_of_forall_coord_dist_le
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover) (A := A) (L := L)
+    (stateSet := Set.univ)
+    (fun s _ t _ i x => hcoord s t i x)
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
