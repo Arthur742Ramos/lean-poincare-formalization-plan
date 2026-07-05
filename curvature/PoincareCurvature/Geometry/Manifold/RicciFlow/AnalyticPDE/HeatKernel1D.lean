@@ -2557,6 +2557,86 @@ lemma heatKernelND_sub_comm {n : ℕ} (t : ℝ) (a z : Fin n → ℝ) :
     heatKernelND t (a - z) = heatKernelND t (z - a) := by
   simp only [heatKernelND, Pi.sub_apply, heatKernel1D_sub_comm]
 
+/-- **`n`-dimensional heat-semigroup composition law.** `Hₜ(Hₛf) = H_{t+s}f` for
+bounded a.e.-strongly-measurable `f`, the semigroup/Markov structure of the
+`n`-dimensional heat flow, proved by Fubini from the `n`-dimensional
+Chapman–Kolmogorov identity (`heatKernelND_chapman_kolmogorov`).  This is the
+`ND` analog of `heatSemigroup1D_comp`; via the `ε`-regularisation
+`Hₜ = H_{t−ε}(H_ε ·)` it is the missing input for `BCF`-norm time-continuity of
+the mild-solution path `t ↦ heatMildValueNDbcf …`. -/
+theorem heatSemigroupND_comp {n : ℕ} (t s : ℝ) (ht : 0 < t) (hs : 0 < s)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    heatSemigroupND t (fun w => heatSemigroupND s f w) x = heatSemigroupND (t + s) f x := by
+  have hpair_cont : Continuous
+      (fun p : (Fin n → ℝ) × (Fin n → ℝ) =>
+        heatKernelND t (x - p.1) * heatKernelND s (p.1 - p.2)) :=
+    ((continuous_heatKernelND t).comp (continuous_const.sub continuous_fst)).mul
+      ((continuous_heatKernelND s).comp (continuous_fst.sub continuous_snd))
+  have hpair_meas : AEStronglyMeasurable
+      (fun p : (Fin n → ℝ) × (Fin n → ℝ) =>
+        heatKernelND t (x - p.1) * heatKernelND s (p.1 - p.2))
+      (volume.prod volume) := hpair_cont.aestronglyMeasurable
+  have hbase : Integrable
+      (fun p : (Fin n → ℝ) × (Fin n → ℝ) =>
+        heatKernelND t (x - p.1) * heatKernelND s (p.1 - p.2))
+      (volume.prod volume) := by
+    refine (integrable_prod_iff hpair_meas).mpr ⟨?_, ?_⟩
+    · exact Filter.Eventually.of_forall
+        (fun z => (integrable_heatKernelND_sub hs z).const_mul (heatKernelND t (x - z)))
+    · have hfun :
+          (fun z : Fin n → ℝ => ∫ y, ‖heatKernelND t (x - z) * heatKernelND s (z - y)‖)
+            = fun z => heatKernelND t (x - z) := by
+        funext z
+        have hnorm :
+            (fun y : Fin n → ℝ => ‖heatKernelND t (x - z) * heatKernelND s (z - y)‖)
+              = fun y => heatKernelND t (x - z) * heatKernelND s (z - y) := by
+          funext y
+          rw [Real.norm_eq_abs,
+            abs_of_nonneg (mul_nonneg (heatKernelND_nonneg ht _) (heatKernelND_nonneg hs _))]
+        rw [hnorm, integral_const_mul, integral_heatKernelND_sub hs z, mul_one]
+      rw [hfun]
+      exact integrable_heatKernelND_sub ht x
+  have hfull : Integrable
+      (fun p : (Fin n → ℝ) × (Fin n → ℝ) =>
+        (heatKernelND t (x - p.1) * heatKernelND s (p.1 - p.2)) * f p.2)
+      (volume.prod volume) :=
+    hbase.mul_bdd hfm.comp_snd (Filter.Eventually.of_forall (fun p => hfb p.2))
+  have hintegr : Integrable
+      (Function.uncurry
+        (fun z y : Fin n → ℝ =>
+          heatKernelND t (x - z) * (heatKernelND s (z - y) * f y)))
+      (volume.prod volume) := by
+    have heq :
+        (Function.uncurry
+          (fun z y : Fin n → ℝ =>
+            heatKernelND t (x - z) * (heatKernelND s (z - y) * f y)))
+          = fun p : (Fin n → ℝ) × (Fin n → ℝ) =>
+            (heatKernelND t (x - p.1) * heatKernelND s (p.1 - p.2)) * f p.2 := by
+      funext p
+      simp only [Function.uncurry]
+      ring
+    rw [heq]
+    exact hfull
+  simp only [heatSemigroupND]
+  have step1 : ∀ z : Fin n → ℝ,
+      heatKernelND t (x - z) * (∫ y, heatKernelND s (z - y) * f y)
+        = ∫ y, heatKernelND t (x - z) * (heatKernelND s (z - y) * f y) := by
+    intro z
+    rw [integral_const_mul]
+  simp_rw [step1]
+  rw [integral_integral_swap hintegr]
+  have step3 : ∀ y : Fin n → ℝ,
+      (∫ z, heatKernelND t (x - z) * (heatKernelND s (z - y) * f y))
+        = heatKernelND (t + s) (x - y) * f y := by
+    intro y
+    have hassoc :
+        (fun z : Fin n → ℝ => heatKernelND t (x - z) * (heatKernelND s (z - y) * f y))
+          = fun z => (heatKernelND t (x - z) * heatKernelND s (z - y)) * f y := by
+      funext z; ring
+    rw [hassoc, integral_mul_const, heatKernelND_chapman_kolmogorov t s ht hs x y]
+  simp_rw [step3]
+
 /-- **Duhamel time-convolution.** `duhamelKernel1D t g x = ∫₀ᵗ H_{t−s}(g s) x ds`,
 the particular-solution term for the inhomogeneous heat equation
 `∂ₜu = ∂ₓₓu + g`. This seeds the perturbation engine toward variable-coefficient
