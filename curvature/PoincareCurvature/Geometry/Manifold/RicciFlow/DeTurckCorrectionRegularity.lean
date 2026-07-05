@@ -2,6 +2,7 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp
 
 /-!
 # Continuity of the covariant derivative of the intrinsic DeTurck vector field
@@ -90,5 +91,26 @@ theorem intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
   rw [← contMDiffOn_univ]
   exact intrinsicDeTurckVectorField_covariantDerivative_contMDiffOn_zero
     (I := I) (M := M) g background t hbackground isOpen_univ
+
+/-- The covariant part of the intrinsic DeTurck correction, `x ↦ (g t).inner x ∘L ∇W`, is a
+continuous `BilinearFormBundle` section for a `C¹` background connection slice.  This is the
+fiberwise composition of the `C²` metric section with the continuous `Hom(TM, TM)`-section `∇W`,
+proved via the fiber-norm-free bundle-level `clm_bundle_comp`. -/
+theorem metricComp_intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x
+        (((g t).inner x).comp
+          ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+            (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x))) := by
+  have hmetric :
+      ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+        (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) x ((g t).toSection x)) :=
+    ((g t).contMDiff_toSection).of_le (by norm_num)
+  have hW := intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+    (I := I) (M := M) g background t hbackground
+  exact hmetric.clm_bundle_comp hW
 
 end RicciFlow
