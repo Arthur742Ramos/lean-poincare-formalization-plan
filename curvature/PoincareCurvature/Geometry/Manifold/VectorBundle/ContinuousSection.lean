@@ -2561,6 +2561,54 @@ theorem continuousOn_coord_of_continuousOn
         coordContinuousMap_dist_le_dist z w i
   exact hLip.continuous.comp_continuousOn hf
 
+/-- **Fiberwise Lipschitz control of a section-space operator upgrades to a `LipschitzOnWith`
+estimate in the transported finite-cover Banach norm.**  If every fiber trivialization map of the
+finite cover is bounded in operator norm by `L`, and the operator `A` is fiber-pointwise
+`C`-Lipschitz in the state — i.e. `dist ((A s) x) ((A t) x) ≤ C * dist s t` at every base point `x`,
+uniformly over the state set — then `A` is `L * C`-Lipschitz on the state set.  This is the
+interface a (regularised) geometric section-space operator naturally verifies: its value's fiber at
+each base point is Lipschitz in the state, and the finite cover's trivialization maps are uniformly
+bounded; the conclusion is precisely the `hlip` hypothesis of the section-space Picard–Lindelöf
+capstone `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn`. -/
+theorem lipschitzOnWith_of_forall_fiber_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {A : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {L C : NNReal}
+    (hL : ∀ i (x : Kc i), ‖(et i).continuousLinearMapAt 𝕜 x.1‖ ≤ (L : ℝ))
+    (hfiber : ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ x : M, dist ((A s) x) ((A t) x) ≤ (C : ℝ) * dist s t) :
+    LipschitzOnWith (L * C) A stateSet := by
+  refine lipschitzOnWith_of_forall_coord_dist_le
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+    (A := A) (L := L * C) (stateSet := stateSet) ?_
+  intro s hs t ht i x
+  calc
+    dist
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A s)).1 i x)
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t)).1 i x)
+        ≤ (L : ℝ) * dist ((A s) x.1) ((A t) x.1) :=
+      coord_dist_le_of_trivialization_opNorm_le (L := (L : ℝ)) hL (A s) (A t) i x
+    _ ≤ (L : ℝ) * ((C : ℝ) * dist s t) :=
+      mul_le_mul_of_nonneg_left (hfiber hs ht x.1) (NNReal.coe_nonneg L)
+    _ = ((L * C : NNReal) : ℝ) * dist s t := by
+      rw [NNReal.coe_mul]; ring
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
