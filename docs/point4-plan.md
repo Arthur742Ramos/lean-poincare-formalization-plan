@@ -8195,3 +8195,51 @@ a continuous `BilinearFormBundle` section → the intrinsic Ricci–DeTurck RHS 
 **NEXT.**  Transcribe the decomposition cascade into `DowngradeNormFree.lean` (namespace
 `TangentFrame`, using `frameCovariantDerivativeTangent`), prove the tangent-bundle `_zero_` downgrade,
 then apply it to `chosenLeviCivitaFamily` with the `C¹` intrinsic DeTurck vector field.
+
+## Milestone (2026-07-05, later still) — tangent-bundle `_zero_` downgrade PROVED + applied to `chosenLeviCivitaFamily`: ∇(DeTurck VF) is continuous (Item 3 / GAP 2 geometric-A regularity)
+
+The previous milestone's stated NEXT target is now **done, sorry-free, `#print axioms`-clean**
+(`propext`/`Classical.choice`/`Quot.sound`), comment-stripped `scan cheats` `TOTAL 0`, full `lake build`
+green (2915 jobs).  Two additive commits, no heavy file rewritten.
+
+**(1) Fiber-norm-free tangent-bundle level downgrade `1 → 0`** — appended to
+`VectorBundle/CovariantDerivative/DowngradeNormFree.lean` (namespace `CovariantDerivative.TangentFrame`).
+The whole frame-decomposition cascade of `Existence.lean` was transcribed against the fiber-norm-free
+`frameCovariantDerivativeTangent` (the Mathlib `IsCovariantDerivativeOn`/`difference`/`CovariantDerivative`
+machinery is *already* fiber-norm-free — only `Existence.frameCovariantDerivative`'s definition carried
+the `Π` fiber-norm, which the `Tangent` copy drops):
+`isCovariantDerivativeOn_frameCovariantDerivativeTangent`,
+`covariantDerivative_eq_frameCovariantDerivativeTangent_add_difference`,
+`covariantDerivative_apply_eq_frameCovariantDerivativeTangent_apply_add_difference`,
+`covariantDerivative_apply_eq_sum_localFrame_add_difference`,
+`frameCovariantDerivativeTangent_localFrame_eq_zero`,
+`difference_localFrame_eq_covariantDerivative`,
+`covariantDerivative_apply_eq_sum_localFrame_add_sum_covariantDerivative_localFrame`, and finally
+`contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` — a globally `C¹` covariant
+derivative on the tangent bundle sends a `C¹` vector field to a **continuous** `Hom(TM, TM)`-section, with
+**no** `Π` fiber-norm hypothesis anywhere.
+
+**(2) Consumption — ∇(DeTurck VF) continuous** — new isolated module
+`RicciFlow/DeTurckCorrectionRegularity.lean` (imports `DeTurck` + `DowngradeNormFree`, added to the root):
+* `chosenLeviCivitaFamily_contMDiffCovariantDerivativeOn_zero` — the canonical smooth Levi-Civita slice
+  is a `C⁰` covariant derivative on every open set (feeds `someContMDiffLeviCivitaConnection_contMDiff`
+  to the downgrade).
+* `intrinsicDeTurckVectorField_covariantDerivative_contMDiffOn_zero` /
+  `..._contMDiff_zero` — for a `C¹` background connection slice,
+  `∇W = (chosenLeviCivitaFamily g t) (intrinsicDeTurckVectorField g background t)` is a **continuous**
+  `Hom(TM, TM)`-section (locally / globally).
+**Confirmed the plan's key prediction:** applying the fiber-norm-free downgrade to `chosenLeviCivitaFamily`
+inside the `RiemannianBundle` context triggers **no** transported-instance norm diamond — the conclusion's
+hom bundle uses the synonym `E`-norm on both sides, so `.contMDiff` accepts the `C¹` DeTurck vector field
+directly.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still the `A`-regularity side of GAP 2,
+but the last regularity obstruction to reading `∇W` as a continuous section is now removed.
+
+**NEXT.**  Metric composition: promote `∇W` continuity to continuity of the symmetrized correction
+`intrinsicDeTurckCorrection g background t x u v = (g t).inner x (∇W u) v + (g t).inner x u (∇W v)` as a
+continuous `BilinearFormBundle` section, then package the intrinsic Ricci–DeTurck RHS as a
+`ContinuousSectionSpace` value (the geometric `A`).  This needs a *metric-section continuity* lemma
+(continuity of `x ↦ (g t).inner x` as a `BilinearFormBundle` section, from the `C²` metric family) plus a
+diamond-safe composition `(BilinearForm) ∘ (Hom(TM,TM))`; build that metric-section continuity brick
+first (watch the `letI : RiemannianBundle` in `intrinsicDeTurckCorrection`).
