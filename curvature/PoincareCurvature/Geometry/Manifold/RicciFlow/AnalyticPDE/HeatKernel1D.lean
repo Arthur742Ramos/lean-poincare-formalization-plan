@@ -6524,5 +6524,73 @@ noncomputable def heatDuhamelNDbcf_of_continuous {n : ℕ} {t₀ t : ℝ} (hT : 
     heatDuhamelNDbcf_of_continuous hT hq hqb x
       = ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x := rfl
 
+/-- Self-map sup-norm bound for the continuous-source Duhamel BCF (wrapper of
+`norm_heatDuhamelNDbcf_le`). -/
+theorem norm_heatDuhamelNDbcf_of_continuous_le {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ‖heatDuhamelNDbcf_of_continuous hT hq hqb‖ ≤ C * (t - t₀) :=
+  norm_heatDuhamelNDbcf_le hT q hqb _
+
+/-- Short-time contraction bound for the continuous-source Duhamel BCF (wrapper of
+`norm_heatDuhamelNDbcf_sub_le`). -/
+theorem norm_heatDuhamelNDbcf_of_continuous_sub_le {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    {q₁ q₂ : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq₁ : Continuous q₁) (hq₂ : Continuous q₂) {C D : ℝ}
+    (hqb₁ : ∀ s y, ‖q₁ s y‖ ≤ C) (hqb₂ : ∀ s y, ‖q₂ s y‖ ≤ C)
+    (hD : ∀ s y, ‖q₁ s y - q₂ s y‖ ≤ D) :
+    ‖heatDuhamelNDbcf_of_continuous hT hq₁ hqb₁ - heatDuhamelNDbcf_of_continuous hT hq₂ hqb₂‖
+      ≤ D * (t - t₀) :=
+  norm_heatDuhamelNDbcf_sub_le hT q₁ q₂ hqb₁ hqb₂ hD _ _
+
+/-- **The value of the mild-solution map of the `n`-dimensional heat flow at a fixed time, as a
+bounded continuous function.**  For an initial datum `u₀` and a continuous, uniformly sup-norm-bounded
+reaction source `q`, this is `Φ(t) = H_{t−t₀}(u₀) + ∫_{t₀}^{t} H_{t−s}(q s) ds`, the sum of the
+homogeneous propagator `heatSemigroupNDbcf` and the inhomogeneous Duhamel term
+`heatDuhamelNDbcf_of_continuous`, both first-class elements of the Banach state space
+`(Fin n → ℝ) →ᵇ ℝ`.  This is the right-hand side the mild Ricci–DeTurck fixed point iterates. -/
+noncomputable def heatMildValueNDbcf {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    BoundedContinuousFunction (Fin n → ℝ) ℝ :=
+  heatSemigroupNDbcf (show (0 : ℝ) < t - t₀ by linarith) u₀
+    + heatDuhamelNDbcf_of_continuous ht.le hq hqb
+
+/-- **Self-map (sup-norm) bound for the mild-solution map value.**  `‖Φ(t)‖ ≤ ‖u₀‖ + C·(t − t₀)`:
+the homogeneous propagator is `L^∞`-nonexpansive (`norm_heatSemigroupNDbcf_le`, `‖H_{t−t₀}u₀‖ ≤
+‖u₀‖`) and the Duhamel term is bounded by `C·(t − t₀)` (`norm_heatDuhamelNDbcf_of_continuous_le`),
+combined by the triangle inequality.  The self-map half of the mild Banach fixed-point data: `Φ` maps
+a sup-ball of radius `≥ ‖u₀‖ + C·(t − t₀)` into itself over a short time window. -/
+theorem norm_heatMildValueNDbcf_le {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ‖heatMildValueNDbcf ht u₀ hq hqb‖ ≤ ‖u₀‖ + C * (t - t₀) :=
+  (norm_add_le _ _).trans
+    (add_le_add (norm_heatSemigroupNDbcf_le _ u₀)
+      (norm_heatDuhamelNDbcf_of_continuous_le ht.le hq hqb))
+
+/-- **Short-time contraction (sup-norm) bound for the mild-solution map value.**  For a *fixed*
+initial datum `u₀` and two continuous sup-norm-`C`-bounded sources `q₁, q₂` with pointwise difference
+`≤ D`, `‖Φ(q₁)(t) − Φ(q₂)(t)‖ ≤ D·(t − t₀)`: the homogeneous propagator `H_{t−t₀}u₀` is independent
+of the source and **cancels** in the difference, leaving exactly the Duhamel contraction
+`norm_heatDuhamelNDbcf_of_continuous_sub_le`.  Composed with a `D = Kstate·‖q₁ − q₂‖` Lipschitz bound
+on the reaction term, this is the short-time contraction of the mild-solution map — the Banach
+fixed-point contraction datum for a mild Ricci–DeTurck representative on the model space. -/
+theorem norm_heatMildValueNDbcf_sub_le {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q₁ q₂ : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq₁ : Continuous q₁) (hq₂ : Continuous q₂) {C D : ℝ}
+    (hqb₁ : ∀ s y, ‖q₁ s y‖ ≤ C) (hqb₂ : ∀ s y, ‖q₂ s y‖ ≤ C)
+    (hD : ∀ s y, ‖q₁ s y - q₂ s y‖ ≤ D) :
+    ‖heatMildValueNDbcf ht u₀ hq₁ hqb₁ - heatMildValueNDbcf ht u₀ hq₂ hqb₂‖ ≤ D * (t - t₀) := by
+  have hcancel : heatMildValueNDbcf ht u₀ hq₁ hqb₁ - heatMildValueNDbcf ht u₀ hq₂ hqb₂
+      = heatDuhamelNDbcf_of_continuous ht.le hq₁ hqb₁
+        - heatDuhamelNDbcf_of_continuous ht.le hq₂ hqb₂ := by
+    simp only [heatMildValueNDbcf]; abel
+  rw [hcancel]
+  exact norm_heatDuhamelNDbcf_of_continuous_sub_le ht.le hq₁ hq₂ hqb₁ hqb₂ hD
+
 end AnalyticPDE
 end RicciFlow
