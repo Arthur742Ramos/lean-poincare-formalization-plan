@@ -46,6 +46,11 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "THom" => (fun x : M ↦ TangentSpace I x →L[ℝ] TangentSpace I x)
 
+local instance instDeTurckBilENormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) := inferInstance
+local instance instDeTurckBilENormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := inferInstance
+
 /-- The canonical smooth Levi-Civita slice of a metric family is a `C⁰` covariant derivative on every
 open set: it sends a `C¹` vector field to a *continuous* `Hom(TM, TM)`-section.  Obtained by feeding the
 `C¹` covariant-derivative class of `chosenLeviCivitaFamily` (from
@@ -112,5 +117,62 @@ theorem metricComp_intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zer
   have hW := intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
     (I := I) (M := M) g background t hbackground
   exact hmetric.clm_bundle_comp hW
+
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 1000000 in
+/-- Fiberwise slot-flip preserves continuity of a `BilinearFormBundle` section, fiber-norm-free.
+In preferred local coordinates the flip is the fixed model slot-flip `ContinuousLinearMap.flipBilinear`,
+so this mirrors `Bundle.contMDiff_symmetrizeBilinearSection` but with the flip operator and without any
+`Π` fiber-norm hypothesis (the tangent-bundle readout `trivializationAt_bilinearFormBundle_apply_eq`
+needs only the vector-bundle structure). -/
+theorem contMDiff_flipBilinearFormSection_tangent_zero
+    {s : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x}
+    (hs : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x (s x))) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x ((s x).flip)) := by
+  intro x0
+  have hsx := hs x0
+  rw [Bundle.contMDiffAt_section (IB := I) (F := (E →L[ℝ] E →L[ℝ] ℝ))
+      (E := _root_.Bundle.BilinearFormBundle (V := TM)) (s := s) x0] at hsx
+  rw [Bundle.contMDiffAt_section (IB := I) (F := (E →L[ℝ] E →L[ℝ] ℝ))
+      (E := _root_.Bundle.BilinearFormBundle (V := TM)) (s := fun x ↦ (s x).flip) x0]
+  have hcomp : ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) 0
+      (fun x ↦ ContinuousLinearMap.flipBilinear (E := E)
+        ((trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+          (_root_.Bundle.BilinearFormBundle (V := TM)) x0 ⟨x, s x⟩).2)) x0 := by
+    simpa [Function.comp_def] using
+      ((ContinuousLinearMap.flipBilinear (E := E)).contMDiffAt (n := 0)).comp x0 hsx
+  refine hcomp.congr_of_eventuallyEq ?_
+  filter_upwards [((trivializationAt E TM x0).open_baseSet.mem_nhds
+    (FiberBundle.mem_baseSet_trivializationAt E TM x0))] with x hx
+  ext u v
+  rw [ContinuousLinearMap.flipBilinear_apply_apply,
+    trivializationAt_bilinearFormBundle_apply_eq (F := E) (W := TM) x0 x hx ((s x).flip) u v,
+    trivializationAt_bilinearFormBundle_apply_eq (F := E) (W := TM) x0 x hx (s x) v u]
+  exact ContinuousLinearMap.flip_apply (s x) _ _
+
+/-- The intrinsic DeTurck correction, at the scalar level, is the metric-composition covariant term
+`C1 = (g t).inner ∘L ∇W` symmetrized with its slot-flip: `intrinsicDeTurckCorrection = C1 + flip C1`.
+Combined with the continuity of `C1`
+(`metricComp_intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`) and of `flip C1`
+(`contMDiff_flipBilinearFormSection_tangent_zero`), this exhibits the intrinsic Ricci–DeTurck reaction
+term as a sum of two continuous `BilinearFormBundle` sections. -/
+lemma intrinsicDeTurckCorrection_eq_metricComp_add_flip
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v =
+      (((g t).inner x).comp
+        ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x)) u v +
+      ((((g t).inner x).comp
+        ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x)).flip) u v := by
+  simp only [intrinsicDeTurckCorrection_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.flip_apply]
+  congr 1
+  exact (g t).symm x u _
 
 end RicciFlow
