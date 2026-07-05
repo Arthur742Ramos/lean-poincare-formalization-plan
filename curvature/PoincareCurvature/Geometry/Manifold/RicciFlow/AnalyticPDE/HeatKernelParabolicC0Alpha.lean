@@ -310,5 +310,42 @@ theorem heatMildFixedPoint_parabolicC0AlphaOn_of_bounded {n : ℕ} {t₀ T : ℝ
   ((heatMildFixedPoint_parabolicC0AlphaOn hT u₀ hLnn hlip Q hQcont hQb z hz ht_lo ht_loT).mono_set
     hsub).exponent_le_of_bounded hD hbdd hα0 hα1
 
+/-- **Parabolic `C^{0,α}` membership of the model mild solution on an interior parabolic closed
+ball.**  Specialisation of `heatMildFixedPoint_parabolicC0AlphaOn_of_bounded` to a concrete
+`parabolicClosedBall c R` whose full time-extent `[c.1 − R², c.1 + R²]` lies in the interior
+`[t_lo, T]` (`t₀ < t_lo`).  The ball is contained in the interior slab (its time coordinate is pinned
+by `time_abs_le_sq_of_mem`) and has parabolic diameter `≤ 2R` (triangle inequality through the
+centre), so the mild solution is parabolic `C^{0,α}` on it for every `0 ≤ α ≤ 1`.  This is the
+ball-localised regularity datum consumed by the parabolic Schauder local-to-global gluing
+(`ParabolicC0AlphaOn.of_parabolicBall_cover_closedBall` and companions). -/
+theorem heatMildFixedPoint_parabolicC0AlphaOn_closedBall {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t_lo : ℝ} (ht_lo : t₀ < t_lo) (ht_loT : t_lo ≤ T)
+    (c : ℝ × (Fin n → ℝ)) {R : ℝ} (hR : 0 ≤ R)
+    (hlo : t_lo ≤ c.1 - R ^ 2) (hhi : c.1 + R ^ 2 ≤ T)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) :
+    ParabolicC0AlphaOn α
+      (fun p : ℝ × (Fin n → ℝ) => Set.IccExtend hT (⇑z) p.1 p.2) (parabolicClosedBall c R) := by
+  refine heatMildFixedPoint_parabolicC0AlphaOn_of_bounded hT u₀ hLnn hlip Q hQcont hQb z hz
+    ht_lo ht_loT (D := 2 * R) (by linarith) ?_ ?_ hα0 hα1
+  · intro p hp
+    refine ⟨?_, Set.mem_univ _⟩
+    rw [Set.mem_Icc]
+    have htime := parabolicClosedBall.time_abs_le_sq_of_mem hR hp
+    have h2 := abs_le.mp htime
+    constructor <;> linarith [h2.1, h2.2]
+  · intro p hp q hq
+    have hpc : parabolicDistance p c ≤ R := by
+      rw [parabolicDistance.comm]; exact hp
+    calc parabolicDistance p q
+        ≤ parabolicDistance p c + parabolicDistance c q := parabolicDistance.triangle p c q
+      _ ≤ R + R := add_le_add hpc hq
+      _ = 2 * R := by ring
+
 end AnalyticPDE
 end RicciFlow
