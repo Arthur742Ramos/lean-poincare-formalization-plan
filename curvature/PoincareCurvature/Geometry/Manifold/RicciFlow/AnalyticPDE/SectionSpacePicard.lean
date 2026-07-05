@@ -222,4 +222,67 @@ theorem isPicardLindelof_continuousSectionSpace_of_forall_coord_superset
     exact norm_le_of_forall_coord_norm_le (NNReal.coe_nonneg L)
       (fun i x => hbound t ht s hs i x)
 
+/-- **Section-space centre-bound ball-local Picard–Lindelöf constructor (route (ii), sharpest
+honest form).**  The most economical `picard` datum: the only norm information required about the
+`C⁰`-unbounded operator is its coordinatewise readout size at the **fixed centre** `x0` (the initial
+metric `g₀`), not a bound over a whole ball — the ball bound `Mc + K·a` is *derived* from the
+`K`-Lipschitz control on `closedBall x0 a`.  From coordinatewise `K`-Lipschitz-in-section control on
+the ball, time-continuity on `[t₀, T]` at each ball point, the centre readout bound
+`‖(A t x0)ᵢ x‖ ≤ Mc`, and the compatibility `(Mc + K·a)·(T − t₀) ≤ a`, the time-dependent operator
+`A` is `IsPicardLindelof` with anchor `t₀`, initial datum `x0`, radius `a`, bound `Mc + K·a` and
+Lipschitz constant `K` — the exact shape of `TimeDependentGeometricRicciDeTurckBanachChart.picard`.
+Assembles the coordinate→section handoffs with the centre-bound Banach ODE foundation
+`isPicardLindelof_of_lipschitzOn_centerBound_closedBall_timeDependent_Icc`; this is the form where the
+only genuinely analytic input is the size of the Ricci–DeTurck operator applied to the initial
+metric. -/
+theorem isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T : ℝ) (hT : t₀ < T) (a K Mc : ℝ≥0)
+    (hlip : ∀ t ∈ Set.Icc t₀ T, ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+        ∀ ⦃s'⦄, s' ∈ Metric.closedBall x0 (a : ℝ) → ∀ (i : κ) (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s')).1 i x)
+          ≤ (K : ℝ) * dist s s')
+    (hcont : ∀ s ∈ Metric.closedBall x0 (a : ℝ), ∀ (i : κ),
+        ContinuousOn
+          (fun t => (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i)
+          (Set.Icc t₀ T))
+    (hcenter : ∀ t ∈ Set.Icc t₀ T, ∀ (i : κ) (x : Kc i),
+        ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t x0)).1 i x‖ ≤ (Mc : ℝ))
+    (hLa : ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (T - t₀) ≤ (a : ℝ)) :
+    IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + K * a) K := by
+  refine isPicardLindelof_of_lipschitzOn_centerBound_closedBall_timeDependent_Icc
+    A x0 t₀ T hT a K Mc ?_ ?_ ?_ hLa
+  · intro t ht
+    exact lipschitzOnWith_of_forall_coord_dist_le
+      (fun s hs s' hs' i x => hlip t ht hs hs' i x)
+  · intro s hs
+    exact continuousOn_of_forall_coord_continuousOn (fun i => hcont s hs i)
+  · intro t ht
+    exact norm_le_of_forall_coord_norm_le (NNReal.coe_nonneg Mc)
+      (fun i x => hcenter t ht i x)
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
