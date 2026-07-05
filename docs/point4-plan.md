@@ -7215,3 +7215,36 @@ rank-`≤1`) closures already exist directly and are **not** on the general-`M` 
 `norm_heatMildValueNDbcf_sub_le` gives the path-space short-time contraction and the Banach fixed point
 yields a genuine mild solution of the ND reaction–diffusion model — the model template for the mild
 Ricci–DeTurck representative feeding `A`/`picard`.
+
+Update — **the propagator half of that time-continuity input is now proved** (extending
+`AnalyticPDE/HeatKernel1D.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`, cheat-scan
+`TOTAL 0`, module green).  The recorded next target asked for time-continuity of the
+propagator/Duhamel/mild-value paths; this session closes the **propagator** path (the homogeneous
+`H_{t−t₀}u₀` term of `heatMildValueNDbcf`):
+
+* `continuousAt_heatSemigroupND_time` / `continuousOn_heatSemigroupND_time` — for bounded continuous
+  data `f` (`|f y| ≤ C`), the propagator path `t ↦ (Hₜf)(x) = ∫ Kₙ(t, x−y)·f(y) dy` is continuous at
+  every `t₁ > 0` (and `ContinuousOn (0, ∞)`).  Dominated convergence: near `t₁` (on `Ioo (t₁/2) (2t₁)`)
+  the integrand is dominated by the `t`-independent integrable envelope `c^n·Kₙ(2t₁, x−y)·C`, is
+  `t`-continuous for a.e. `y`, and measurable in `y`.
+* `heatKernelND_le_const_mul_heatKernelND_of_mem_Icc` — the supporting **time-monotone Gaussian
+  domination** on a compact time interval: for `0 < a ≤ t ≤ b`,
+  `Kₙ(t, w) ≤ ((4πa)^(-1/2)·(4πb)^(1/2))^n·Kₙ(b, w)` (antitone prefactor `(4πt)^(-1/2)` × monotone
+  Gaussian `exp(-|w|²/(4t))`, product over coordinates) — the `t`-independent dominating function.
+* `continuousAt_heatKernelND_time` — time-continuity of the `n`-D heat kernel `t ↦ Kₙ(t, z)` on
+  `(0, ∞)` (finite product of the existing `continuousOn_heatKernel1D_time`), the a.e.-`t`-continuity
+  input to the dominated-convergence argument.
+* `continuousAt_heatSemigroupND_shift_time` / `continuousOn_heatSemigroupND_shift_time` — the shifted
+  form `t ↦ (H_{t−t₀}f)(x)` continuous at every `t₁ > t₀` (composition with `t ↦ t − t₀`), i.e. the
+  time-continuity of the homogeneous term of the mild-solution map value.
+
+**Next target.**  The remaining **Duhamel** path time-continuity `t ↦ ∫_{t₀}^{t} H_{t−s}(q s)(x) ds`
+(then the mild-value path `t ↦ heatMildValueNDbcf(t)(x)` as their sum).  Subtlety to handle: the
+Duhamel integrand is *singular at the upper endpoint* `s = t` (`H_{t−s}` as `t−s → 0⁺`), so plain
+`continuousAt_of_dominated` does not apply directly; the honest route is the substitution `u = t − s`
+turning it into `∫_0^{t−t₀} H_u(q(t−u))(x) du = ∫_ℝ 1_{[0,t−t₀]}(u)·H_u(q(t−u))(x) du`, where the
+integrand is bounded by `C`, `t`-continuous for a.e. `u` (exceptional set `{0, t−t₀}` is null), and
+dominated on a `t₁`-neighbourhood by `C·1_{[0, t₁+δ−t₀]}` — a dominated-convergence argument for the
+substituted (non-singular-in-`u`) form.  With propagator + Duhamel time-continuity in hand, the
+per-time `norm_heatMildValueNDbcf_sub_le` gives the path-space short-time contraction and the Banach
+fixed point yields a genuine mild solution of the ND reaction–diffusion model.
