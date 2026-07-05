@@ -6592,5 +6592,18 @@ theorem norm_heatMildValueNDbcf_sub_le {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
   rw [hcancel]
   exact norm_heatDuhamelNDbcf_of_continuous_sub_le ht.le hq₁ hq₂ hqb₁ hqb₂ hD
 
+/-- The pointwise value of the mild-solution map: `Φ(t)(x) = H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t}
+H_{t−s}(q s)(x) ds`, the sum of the homogeneous propagator and the Duhamel integral evaluated at
+`x`. -/
+@[simp] theorem heatMildValueNDbcf_apply {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+    heatMildValueNDbcf ht u₀ hq hqb x
+      = heatSemigroupND (t - t₀) (⇑u₀) x
+        + ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x := by
+  simp only [heatMildValueNDbcf, BoundedContinuousFunction.add_apply, heatSemigroupNDbcf_apply,
+    heatDuhamelNDbcf_of_continuous_apply]
+
 end AnalyticPDE
 end RicciFlow
