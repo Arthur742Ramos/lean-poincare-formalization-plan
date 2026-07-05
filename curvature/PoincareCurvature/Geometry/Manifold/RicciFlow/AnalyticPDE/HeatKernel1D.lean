@@ -5571,5 +5571,21 @@ theorem heatSemigroupND_coord_second_deriv_integral_bound {n : ℕ} {t : ℝ} (h
         exact integral_abs_secondDeriv_coord_heatKernelND_sub_le ht k x
     _ = C / t := by ring
 
+/-- **`n`-dimensional heat semigroup is spatially Lipschitz with the parabolic gain rate.**
+First-class `LipschitzWith` packaging of `heatSemigroupND_spatial_lipschitz_sqrt_rate_norm`: for
+bounded measurable data `f`, the map `x ↦ Hₜf(x)` is `LipschitzWith (n·‖f‖∞/√(πt))`, the smoothing
+that turns merely-bounded data into a Lipschitz function at cost `t^{-1/2}`. -/
+theorem heatSemigroupND_lipschitzWith_spatial {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    LipschitzWith (((n : ℝ) * (C / Real.sqrt (π * t))).toNNReal)
+      (fun x => heatSemigroupND t f x) := by
+  have hcoef_nn : (0 : ℝ) ≤ (n : ℝ) * (C / Real.sqrt (π * t)) := by
+    have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+    have hpt : (0 : ℝ) < Real.sqrt (π * t) := Real.sqrt_pos.mpr (by positivity)
+    positivity
+  refine LipschitzWith.of_dist_le_mul (fun x y => ?_)
+  rw [Real.dist_eq, Real.coe_toNNReal _ hcoef_nn, dist_eq_norm]
+  exact heatSemigroupND_spatial_lipschitz_sqrt_rate_norm ht hfm hfb x y
+
 end AnalyticPDE
 end RicciFlow
