@@ -729,4 +729,73 @@ lemma ricciCurvature_eq_sum_localFrame_coeff
     (trivializationAt E TM x0).localFrame_apply_of_mem_baseSet b hx]
   exact repr_basisAt_eq_localFrame_coeff b x0 hx _ k
 
+/-- The intrinsic Ricci tensor packaged as a genuine `BilinearFormBundle` (i.e. continuous-linear)
+section: the linear-map-valued Ricci curvature `ricciCurvature cov x : TM x →ₗ TM x →ₗ ℝ` is promoted
+to `TM x →L TM x →L ℝ` fiberwise via the finite-dimensional `LinearMap.toContinuousLinearMap`. -/
+noncomputable def ricciBilinearFormSection
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] :
+    Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x :=
+  fun x ↦ LinearMap.toContinuousLinearMap
+    ((LinearMap.toContinuousLinearMap (𝕜 := ℝ) (E := TangentSpace I x) (F' := ℝ)).toLinearMap.comp
+      (CovariantDerivative.ricciCurvature (cov := cov) x))
+
+@[simp] lemma ricciBilinearFormSection_apply
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] (x : M) (u v : TM x) :
+    ricciBilinearFormSection (I := I) (M := M) cov x u v =
+      CovariantDerivative.ricciCurvature (cov := cov) x u v := rfl
+
+/-- **The intrinsic Ricci tensor is a continuous `BilinearFormBundle` section.**
+Continuity is established via the frame-component criterion
+`contMDiff_zero_bilinearFormBundleSection_of_forall_localFrame`: at each base point `x0`, the
+scalar `x ↦ ricci x (eᵢ x) (eⱼ x)` is expanded by the frame trace formula
+`ricciCurvature_eq_sum_localFrame_coeff` into a finite sum of `localFrame_coeff` applied to
+`curvatureTensor x (eₖ x)(eᵢ x)(eⱼ x)`; each summand is continuous because the frame contraction of
+the curvature tensor is a continuous `TM`-section (`curvatureTensor_contMDiffOn_frame_zero`) and the
+coframe coefficient of a continuous section is continuous (`contMDiffOn_localFrame_coeff` at `k = 0`).
+This supplies the last outstanding input — the continuous Ricci section `rs` — to
+`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`. -/
+theorem ricciBilinearFormSection_contMDiff_zero
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x
+        (ricciBilinearFormSection (I := I) (M := M) cov x)) := by
+  classical
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
+    ContMDiffVectorBundle.of_le (n := 2) (by norm_num)
+  refine contMDiff_zero_bilinearFormBundleSection_of_forall_localFrame b (fun x0 i j ↦ ?_)
+  have hbase : IsOpen (trivializationAt E TM x0).baseSet := (trivializationAt E TM x0).open_baseSet
+  have hframe : ∀ m : ι, ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2
+      (fun x ↦ TotalSpace.mk' E x ((trivializationAt E TM x0).localFrame b m x))
+      (trivializationAt E TM x0).baseSet :=
+    fun m ↦ (trivializationAt E TM x0).contMDiffOn_localFrame_baseSet (I := I) (n := 2) b m
+  have hsum : Set.EqOn
+      (fun x ↦ ricciBilinearFormSection (I := I) (M := M) cov x
+        ((trivializationAt E TM x0).localFrame b i x) ((trivializationAt E TM x0).localFrame b j x))
+      (fun x ↦ ∑ k, (trivializationAt E TM x0).localFrame_coeff I b k x
+        (CovariantDerivative.curvatureTensor (cov := cov) x
+          ((trivializationAt E TM x0).localFrame b k x)
+          ((trivializationAt E TM x0).localFrame b i x)
+          ((trivializationAt E TM x0).localFrame b j x)))
+      (trivializationAt E TM x0).baseSet := by
+    intro x hx
+    dsimp only
+    rw [ricciBilinearFormSection_apply]
+    exact ricciCurvature_eq_sum_localFrame_coeff b x0 hx
+      ((trivializationAt E TM x0).localFrame b i x) ((trivializationAt E TM x0).localFrame b j x)
+  refine ContinuousOn.congr ?_ hsum
+  refine continuousOn_finset_sum Finset.univ (fun k _ ↦ ?_)
+  have hcurv := curvatureTensor_contMDiffOn_frame_zero (cov := cov) hbase
+    (hframe k) (hframe i) (hframe j)
+  have hcoeff := contMDiffOn_localFrame_coeff (I := I) (e := trivializationAt E TM x0) (b := b)
+    (k := (0 : WithTop ℕ∞)) hbase (subset_refl _) hcurv k
+  exact hcoeff.continuousOn
+
 end RicciFlow
