@@ -345,4 +345,58 @@ theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coo
   · intro t ht
     exact hcenter t (Set.Icc_subset_Ici_self ht)
 
+/-- **Section-space evolution existence from centre-bound ball-local data (honest form).**  The
+ball-local companion of `sectionSpace_evolution_exists_unique_of_forall_coord` (which assumes the
+unattainable *global* bound): from the honest centre-bound ball-local coordinatewise data — `K`-
+Lipschitz-in-section on `closedBall x0 a`, time-continuity there, centre readout bound
+`‖(A t x0)ᵢ x‖ ≤ Mc`, and `(Mc + K·a)·(T − t₀) ≤ a` — the time-dependent operator `A` on the complete
+section space admits a `[t₀, T]`-evolution `α` with `α t₀ = x0` solving `α'(t) = A t (α t)`.  Combines
+the centre-bound section-space Picard constructor with the Mathlib differential Picard–Lindelöf
+theorem `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀`.  This is the raw evolution
+curve a downstream `realization` decode into a genuine intrinsic De Turck local solution consumes,
+now available from the honest (not globally bounded) analytic input. -/
+theorem sectionSpace_evolution_exists_of_forall_coord_centerBound
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T : ℝ) (hT : t₀ < T) (a K Mc : ℝ≥0)
+    (hlip : ∀ t ∈ Set.Icc t₀ T, ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+        ∀ ⦃s'⦄, s' ∈ Metric.closedBall x0 (a : ℝ) → ∀ (i : κ) (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s')).1 i x)
+          ≤ (K : ℝ) * dist s s')
+    (hcont : ∀ s ∈ Metric.closedBall x0 (a : ℝ), ∀ (i : κ),
+        ContinuousOn
+          (fun t => (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i)
+          (Set.Icc t₀ T))
+    (hcenter : ∀ t ∈ Set.Icc t₀ T, ∀ (i : κ) (x : Kc i),
+        ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t x0)).1 i x‖ ≤ (Mc : ℝ))
+    (hLa : ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (T - t₀) ≤ (a : ℝ)) :
+    ∃ α : ℝ →
+        ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+      α t₀ = x0 ∧
+      (∀ t ∈ Set.Icc t₀ T, HasDerivWithinAt α (A t (α t)) (Set.Icc t₀ T) t) :=
+  (isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
+    A x0 t₀ T hT a K Mc hlip hcont hcenter hLa).exists_eq_forall_mem_Icc_hasDerivWithinAt₀
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
