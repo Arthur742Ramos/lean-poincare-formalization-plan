@@ -7333,5 +7333,41 @@ lemma intervalIntegrable_heatSemigroupND_comp_sub {n : ℕ} (t : ℝ) {b : ℝ} 
   exact abs_heatSemigroupND_le hupos x
     (fun y => by rw [← Real.norm_eq_abs]; exact hqb (t - u) y)
 
+/-- **Continuity of the source time-modulus integral.**  For a continuous, uniformly
+sup-norm-bounded `BCF`-valued source `q`, the integral of the sup-norm time-increment of the shifted
+source, `t ↦ ∫_{0}^{b} ‖q(t−u) − q(t₁−u)‖ du`, is continuous at `t₁` (where it vanishes).  By interval
+dominated convergence (`continuousAt_of_dominated_interval`): the integrand `u ↦ ‖q(t−u) − q(t₁−u)‖`
+is continuous (hence a.e.-measurable), dominated by the constant `2C` on the finite interval
+`[0, b]`, and continuous in `t` for every `u`.  This is the non-singular modulus governing the main
+term of the `BCF`-norm Duhamel-path time-continuity (after the `u = t − s` substitution the
+propagator `H_u` is nonexpansive, so the source increment alone controls the difference). -/
+lemma continuousAt_intervalIntegral_normSub_shift {n : ℕ} {b t₁ : ℝ}
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ContinuousAt (fun t => ∫ u in (0 : ℝ)..b, ‖q (t - u) - q (t₁ - u)‖) t₁ := by
+  have hC : (0 : ℝ) ≤ C := le_trans (norm_nonneg _) (hqb 0 0)
+  have hqnorm : ∀ s, ‖q s‖ ≤ C :=
+    fun s => (BoundedContinuousFunction.norm_le hC).mpr (fun y => hqb s y)
+  have hcont_u : ∀ t : ℝ, Continuous (fun u : ℝ => ‖q (t - u) - q (t₁ - u)‖) := by
+    intro t
+    exact ((hq.comp (continuous_const.sub continuous_id)).sub
+      (hq.comp (continuous_const.sub continuous_id))).norm
+  refine intervalIntegral.continuousAt_of_dominated_interval
+    (bound := fun _ => 2 * C) ?_ ?_ ?_ ?_
+  · filter_upwards with t
+    exact (hcont_u t).aestronglyMeasurable.restrict
+  · filter_upwards with t
+    filter_upwards with u
+    intro _
+    rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+    calc ‖q (t - u) - q (t₁ - u)‖
+        ≤ ‖q (t - u)‖ + ‖q (t₁ - u)‖ := norm_sub_le _ _
+      _ ≤ C + C := add_le_add (hqnorm _) (hqnorm _)
+      _ = 2 * C := by ring
+  · exact intervalIntegrable_const
+  · filter_upwards with u
+    intro _
+    exact (((hq.comp (continuous_id.sub continuous_const)).sub continuous_const).norm).continuousAt
+
 end AnalyticPDE
 end RicciFlow
