@@ -8271,5 +8271,45 @@ theorem dist_heatMildFixedPoint_const_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤
       _ ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (T - t₀)) + CQ * (T - t₀) :=
           add_le_add hterm1 hterm2
 
+/-- **The mild-trajectory containment radius is driven below any target by a forward endpoint.**
+Given nonnegative modulus constants `M₁ M₂` and a positive target radius `a`, there is a forward time
+`T > t₀` with `M₁·√(T − t₀) + M₂·(T − t₀) ≤ a`.  This is the `√`-analog of
+`exists_forwardTime_mul_sub_le`: the mild-trajectory containment bound
+`dist_heatMildFixedPoint_const_le` has exactly the shape `M₁·√(T − t₀) + M₂·(T − t₀)` and tends to `0`
+as `T → t₀⁺`, so a chart can *choose* its per-IVP window `T` short enough that the whole mild
+trajectory stays inside the prescribed ball `closedBall u₀ a` (hence inside the positive-definite
+locus).  Concretely `T = t₀ + min ((a/(2(M₁+1)))², a/(2(M₂+1)))` works, splitting the target as
+`M₁·√d ≤ a/2` and `M₂·d ≤ a/2`. -/
+lemma exists_forwardTime_sqrt_add_mul_sub_le (t₀ M₁ M₂ a : ℝ)
+    (hM₁ : 0 ≤ M₁) (hM₂ : 0 ≤ M₂) (ha : 0 < a) :
+    ∃ T : ℝ, t₀ < T ∧ M₁ * Real.sqrt (T - t₀) + M₂ * (T - t₀) ≤ a := by
+  have hM₁1 : (0 : ℝ) < M₁ + 1 := by linarith
+  have hM₂1 : (0 : ℝ) < M₂ + 1 := by linarith
+  have hb₁ : (0 : ℝ) < a / (2 * (M₁ + 1)) := div_pos ha (by linarith)
+  have hb₂ : (0 : ℝ) < a / (2 * (M₂ + 1)) := div_pos ha (by linarith)
+  set d₁ : ℝ := (a / (2 * (M₁ + 1))) ^ 2 with hd₁
+  set d₂ : ℝ := a / (2 * (M₂ + 1)) with hd₂
+  have hd₁p : 0 < d₁ := by rw [hd₁]; exact pow_pos hb₁ 2
+  have hd₂p : 0 < d₂ := hb₂
+  set d : ℝ := min d₁ d₂ with hd
+  have hdp : 0 < d := lt_min hd₁p hd₂p
+  refine ⟨t₀ + d, by linarith, ?_⟩
+  have hsub : t₀ + d - t₀ = d := by ring
+  rw [hsub]
+  have hdle1 : d ≤ d₁ := min_le_left _ _
+  have hdle2 : d ≤ d₂ := min_le_right _ _
+  have hsqrt : Real.sqrt d ≤ a / (2 * (M₁ + 1)) := by
+    have hle : Real.sqrt d ≤ Real.sqrt d₁ := Real.sqrt_le_sqrt hdle1
+    rwa [hd₁, Real.sqrt_sq hb₁.le] at hle
+  have hterm1 : M₁ * Real.sqrt d ≤ a / 2 := by
+    refine (mul_le_mul_of_nonneg_left hsqrt hM₁).trans ?_
+    rw [← mul_div_assoc, div_le_div_iff₀ (by linarith) (by norm_num : (0 : ℝ) < 2)]
+    nlinarith [ha, mul_nonneg hM₁ ha.le]
+  have hterm2 : M₂ * d ≤ a / 2 := by
+    refine (mul_le_mul_of_nonneg_left hdle2 hM₂).trans ?_
+    rw [hd₂, ← mul_div_assoc, div_le_div_iff₀ (by linarith) (by norm_num : (0 : ℝ) < 2)]
+    nlinarith [ha, mul_nonneg hM₂ ha.le]
+  linarith [hterm1, hterm2]
+
 end AnalyticPDE
 end RicciFlow
