@@ -5587,5 +5587,34 @@ theorem heatSemigroupND_lipschitzWith_spatial {n : ℕ} {t : ℝ} (ht : 0 < t)
   rw [Real.dist_eq, Real.coe_toNNReal _ hcoef_nn, dist_eq_norm]
   exact heatSemigroupND_spatial_lipschitz_sqrt_rate_norm ht hfm hfb x y
 
+/-- **Local (closed-ball) time-dependent Picard–Lindelöf bridge on `[t₀, T]`.**
+The Mathlib `IsPicardLindelof` predicate only demands the norm bound and Lipschitz control on the
+closed ball `closedBall x₀ a` about the base point — not globally (see its `lipschitzOnWith`,
+`continuousOn`, `norm_le` fields).  This is the honest form the Ricci–DeTurck chart's `picard`
+field consumes: a mild / regularised time-dependent representative `A` of the (globally
+`C⁰`-unbounded) Ricci–DeTurck operator need only be bounded by `L` and `K`-Lipschitz on the ball
+`closedBall g₀ a` about the initial metric, continuous in time there, with `L·(T − t₀) ≤ a`.
+Unlike `isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc`, which demands the *global*
+bounds unattainable for the real operator, this consumes exactly the ball-local a-priori control a
+parabolic estimate supplies.  The output anchor/radii `a 0 L K` match the chart `picard` field
+verbatim (`r = 0`), so `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀` still applies. -/
+lemma isPicardLindelof_of_boundedOn_lipschitzOn_closedBall_timeDependent_Icc
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : ℝ → E → E) (x0 : E) (t₀ T : ℝ) (hT : t₀ < T) (a L K : ℝ≥0)
+    (hlip : ∀ t ∈ Set.Icc t₀ T, LipschitzOnWith K (g t) (Metric.closedBall x0 (a : ℝ)))
+    (hcont : ∀ x ∈ Metric.closedBall x0 (a : ℝ),
+      ContinuousOn (fun t => g t x) (Set.Icc t₀ T))
+    (hbound : ∀ t ∈ Set.Icc t₀ T, ∀ x ∈ Metric.closedBall x0 (a : ℝ), ‖g t x‖ ≤ (L : ℝ))
+    (hLa : (L : ℝ) * (T - t₀) ≤ (a : ℝ)) :
+    IsPicardLindelof g (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 L K := by
+  refine ⟨hlip, hcont, hbound, ?_⟩
+  have ht0 : ((⟨t₀, ⟨le_rfl, hT.le⟩⟩ : Set.Icc t₀ T) : ℝ) = t₀ := rfl
+  have hle : (0 : ℝ) ≤ T - t₀ := by linarith
+  rw [ht0]
+  simp only [sub_self, max_eq_left hle]
+  push_cast
+  linarith [hLa]
+
 end AnalyticPDE
 end RicciFlow
