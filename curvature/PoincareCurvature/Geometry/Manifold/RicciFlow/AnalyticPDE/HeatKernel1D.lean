@@ -6685,6 +6685,60 @@ H_{t−s}(q s)(x) ds`, the sum of the homogeneous propagator and the Duhamel int
   simp only [heatMildValueNDbcf, BoundedContinuousFunction.add_apply, heatSemigroupNDbcf_apply,
     heatDuhamelNDbcf_of_continuous_apply]
 
+/-- **Spatial `C¹` (Lipschitz) parabolic Schauder regularity of the mild-solution value.**  The
+mild-solution value `Φ(t) = H_{t−t₀}(u₀) + ∫_{t₀}^{t} H_{t−s}(q s) ds` at any positive time `t > t₀`
+is spatially Lipschitz, even for merely bounded initial data `u₀` and a merely bounded continuous
+reaction source `q`: the homogeneous propagator contributes the `t^{-1/2}` smoothing rate
+`n·‖u₀‖/√(π(t−t₀))` (`heatSemigroupND_spatial_lipschitz_sqrt_rate_norm`) and the inhomogeneous
+Duhamel term the `√(t−t₀)` rate `2nC·√(t−t₀)/√π`
+(`heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound`), combined by the triangle inequality.  This
+is the parabolic `C¹` smoothing gain the mild Ricci–DeTurck representative inherits: bounded data
+becomes, after any positive time, a spatially Lipschitz section — the first-derivative Schauder
+control feeding the `geometric` identification of the chart operator. -/
+theorem lipschitzWith_heatMildValueNDbcf {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    LipschitzWith
+      (((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t - t₀)))).toNNReal
+        + (2 * (n : ℝ) * C * Real.sqrt (t - t₀) / Real.sqrt π).toNNReal)
+      (⇑(heatMildValueNDbcf ht u₀ hq hqb)) := by
+  have hpos : (0 : ℝ) < t - t₀ := by linarith
+  have hR1nn : (0 : ℝ) ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t - t₀))) := by
+    have hpt : (0 : ℝ) < Real.sqrt (π * (t - t₀)) := Real.sqrt_pos.mpr (by positivity)
+    positivity
+  have hR2nn : (0 : ℝ) ≤ 2 * (n : ℝ) * C * Real.sqrt (t - t₀) / Real.sqrt π := by
+    have hsp : (0 : ℝ) < Real.sqrt π := Real.sqrt_pos.mpr Real.pi_pos
+    have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hqb t₀ 0)
+    positivity
+  refine LipschitzWith.of_dist_le_mul (fun x x' => ?_)
+  rw [Real.dist_eq, dist_eq_norm, NNReal.coe_add,
+    Real.coe_toNNReal _ hR1nn, Real.coe_toNNReal _ hR2nn]
+  have hsg := heatSemigroupND_spatial_lipschitz_sqrt_rate_norm hpos
+    u₀.continuous.aestronglyMeasurable (fun y => u₀.norm_coe_le_norm y) x x'
+  have hdu := heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound (q := fun s => ⇑(q s)) ht.le
+    (fun s => (q s).continuous.aestronglyMeasurable) (fun s y => hqb s y) x x'
+  rw [heatMildValueNDbcf_apply ht u₀ hq hqb x, heatMildValueNDbcf_apply ht u₀ hq hqb x']
+  have hBsub : (∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x)
+        - ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x'
+      = ∫ s in t₀..t,
+          (heatSemigroupND (t - s) (⇑(q s)) x - heatSemigroupND (t - s) (⇑(q s)) x') :=
+    (intervalIntegral.integral_sub (intervalIntegrable_heatSemigroupND_duhamel ht.le hq hqb x)
+      (intervalIntegrable_heatSemigroupND_duhamel ht.le hq hqb x')).symm
+  set A₁ : ℝ := heatSemigroupND (t - t₀) (⇑u₀) x
+  set A₂ : ℝ := heatSemigroupND (t - t₀) (⇑u₀) x'
+  set B₁ : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x
+  set B₂ : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x'
+  calc |A₁ + B₁ - (A₂ + B₂)|
+      = |(A₁ - A₂) + (B₁ - B₂)| := by
+        rw [show A₁ + B₁ - (A₂ + B₂) = (A₁ - A₂) + (B₁ - B₂) by ring]
+    _ ≤ |A₁ - A₂| + |B₁ - B₂| := abs_add_le _ _
+    _ ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t - t₀))) * ‖x - x'‖
+          + 2 * (n : ℝ) * C * ‖x - x'‖ * Real.sqrt (t - t₀) / Real.sqrt π :=
+        add_le_add hsg (by rw [hBsub]; exact hdu)
+    _ = ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t - t₀)))
+          + 2 * (n : ℝ) * C * Real.sqrt (t - t₀) / Real.sqrt π) * ‖x - x'‖ := by ring
+
 /-- **Time-continuity of the `n`-D heat kernel on `(0, ∞)`.**  For a fixed space point `z`, the map
 `t ↦ Kₙ(t, z) = ∏ᵢ K(t, zᵢ)` is continuous at every `t₁ > 0`, a finite product of the `1`-D
 time-continuities `continuousOn_heatKernel1D_time`. -/
