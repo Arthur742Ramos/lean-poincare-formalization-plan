@@ -6123,5 +6123,68 @@ theorem heatSemigroupND_duhamel_sub_spatial_holder_bound {n : ℕ} {t₀ t : ℝ
   rw [hgval] at hmain
   simpa [hK] using hmain
 
+/-- **Spatial `C^1` (Lipschitz) contraction of the Duhamel term on a difference of reaction terms.**
+The `√`-rate Lipschitz-seminorm contraction — the `α = 1` companion of
+`heatSemigroupND_duhamel_sub_spatial_holder_bound` with the clean `√(t − t₀)` constant, and the
+difference version of `heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound`.  For sup-norm-bounded
+reaction families `q₁, q₂` (`‖q₁ s y‖, ‖q₂ s y‖ ≤ C`) with `‖q₁ s y − q₂ s y‖ ≤ D`, the spatial
+first-order modulus of the Duhamel integral of the difference obeys
+`|∫_{t₀}^{t} ((H_{t−s}(q₁ s)(x) − H_{t−s}(q₂ s)(x)) − (H_{t−s}(q₁ s)(x') − H_{t−s}(q₂ s)(x'))) ds|
+    ≤ 2·n·D·‖x − x'‖·√(t − t₀) / √π`.
+The heat semigroup's difference spatial Lipschitz rate
+`heatSemigroupND_sub_spatial_lipschitz_sqrt_rate_norm` bounds the integrand by
+`n·D·‖x − x'‖·(π(t − s))^{−1/2}`, integrated to the finite `√(t − t₀)` modulus by
+`integral_rpow_neg_half_sub` through `intervalIntegral.norm_integral_le_of_norm_le`.  Paired with the
+sup-norm contraction `heatSemigroupND_duhamel_sub_sup_bound`, this is the Lipschitz-seminorm half of
+the full `C^1`-norm contraction of the mild-solution map — the input a `C^1`-norm parabolic Schauder
+fixed point directly consumes. -/
+theorem heatSemigroupND_duhamel_sub_spatial_lipschitz_sqrt_bound {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    {q₁ q₂ : ℝ → (Fin n → ℝ) → ℝ} {C D : ℝ}
+    (h1m : ∀ s, AEStronglyMeasurable (q₁ s)) (h1b : ∀ s y, ‖q₁ s y‖ ≤ C)
+    (h2m : ∀ s, AEStronglyMeasurable (q₂ s)) (h2b : ∀ s y, ‖q₂ s y‖ ≤ C)
+    (hDb : ∀ s y, ‖q₁ s y - q₂ s y‖ ≤ D) (x x' : Fin n → ℝ) :
+    |∫ s in t₀..t, ((heatSemigroupND (t - s) (q₁ s) x - heatSemigroupND (t - s) (q₂ s) x)
+        - (heatSemigroupND (t - s) (q₁ s) x' - heatSemigroupND (t - s) (q₂ s) x'))|
+      ≤ 2 * (n : ℝ) * D * ‖x - x'‖ * Real.sqrt (t - t₀) / Real.sqrt π := by
+  set g : ℝ → ℝ := fun s => ((n : ℝ) * D * ‖x - x'‖ / Real.sqrt π) * (t - s) ^ (-(1 / 2) : ℝ)
+    with hg
+  have hae : ∀ᵐ s ∂(volume : MeasureTheory.Measure ℝ), s ∈ Set.Ioc t₀ t →
+      ‖(heatSemigroupND (t - s) (q₁ s) x - heatSemigroupND (t - s) (q₂ s) x)
+        - (heatSemigroupND (t - s) (q₁ s) x' - heatSemigroupND (t - s) (q₂ s) x')‖ ≤ g s := by
+    have hset : {a : ℝ | ¬ a ≠ t} = {t} := by
+      ext s; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+    have htne : ∀ᵐ (s : ℝ), s ≠ t := by
+      rw [MeasureTheory.ae_iff, hset]; exact MeasureTheory.measure_singleton t
+    filter_upwards [htne] with s hs hmem
+    have hlt : s < t := lt_of_le_of_ne hmem.2 hs
+    have hpos : 0 < t - s := by linarith
+    have hst : (0 : ℝ) < Real.sqrt (t - s) := Real.sqrt_pos.mpr hpos
+    rw [Real.norm_eq_abs]
+    refine (heatSemigroupND_sub_spatial_lipschitz_sqrt_rate_norm hpos (h1m s) (h1b s)
+      (h2m s) (h2b s) (hDb s) x x').trans ?_
+    simp only [hg]
+    have hrp : (t - s) ^ (-(1 / 2) : ℝ) = (Real.sqrt (t - s))⁻¹ := by
+      rw [Real.rpow_neg hpos.le, ← Real.sqrt_eq_rpow]
+    rw [Real.sqrt_mul Real.pi_pos.le, hrp]
+    refine le_of_eq ?_
+    field_simp
+  have hgint : IntervalIntegrable g volume t₀ t := by
+    have h4 : IntervalIntegrable (fun s : ℝ => (t - s) ^ (-(1 / 2) : ℝ)) volume t₀ t := by
+      have hbase : IntervalIntegrable (fun z : ℝ => z ^ (-(1 / 2) : ℝ)) volume 0 (t - t₀) :=
+        intervalIntegral.intervalIntegrable_rpow' (by norm_num)
+      have h3 := hbase.comp_sub_left t
+      simpa using h3.symm
+    simp only [hg]
+    exact h4.const_mul _
+  have hmain := intervalIntegral.norm_integral_le_of_norm_le hT hae hgint
+  have hgval : (∫ s in t₀..t, g s)
+      = 2 * (n : ℝ) * D * ‖x - x'‖ * Real.sqrt (t - t₀) / Real.sqrt π := by
+    simp only [hg]
+    rw [intervalIntegral.integral_const_mul, integral_rpow_neg_half_sub, ← Real.sqrt_eq_rpow]
+    ring
+  rw [Real.norm_eq_abs] at hmain
+  rw [hgval] at hmain
+  exact hmain
+
 end AnalyticPDE
 end RicciFlow
