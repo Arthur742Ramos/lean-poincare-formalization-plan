@@ -8526,3 +8526,58 @@ no longer packaged as abstract section-space hypotheses.
 `hfiber` (Lipschitz-in-state at each base point) and `hcont` (joint `(t,x)`-continuity of each coordinate readout), feeding
 the new fiber-pointwise capstone directly to obtain the chart's `picard` field.  The trivialization op-norm `hL` is already a
 solved compactness/`symmL` quantity.
+
+## Milestone (2026-07-05, later still) — the `picard` field reduced to a *bounded-linear generator + source* (mild-operator) interface, endpoint-choosing AND fixed-window, run through to a state-constrained local solution (Item 3 / GAP 2 `picard` half)
+
+Four additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0` theorems (three commits); full `lake build PoincareCurvature`
+green (2916 jobs).  This reframes the still-open `picard` half of GAP 2 around the *honest structural
+shape* a regularised (mild) Ricci–DeTurck section-space operator has — a **bounded** linear generator
+plus a continuous inhomogeneity, `A t s = L t s + b t` with `L t : CSS →L[ℝ] CSS` — and discharges the
+entire section-space Picard/solution machinery from that shape, so the only remaining `picard` obligation
+is *exhibiting the regularised generator family `L`* (its op-norm bound + strong continuity) and the source
+`b`.  The affine structure makes every estimate exact with **no** bundle-distortion bookkeeping: the
+Lipschitz constant is read directly off the operator norm via `dist (L t s + b t)(L t s' + b t) =
+‖L t (s − s')‖ ≤ ‖L t‖·‖s − s'‖`.
+
+All four live in `AnalyticPDE/SectionSpacePicard.lean`
+(`namespace …ContinuousSectionSpace`):
+
+* **`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source`** —
+  endpoint-choosing `picard`: from `‖L t‖ ≤ K` on `[t₀,T₀]`, strong time-continuity `t ↦ L t s`, and
+  continuous source `b`, chooses a forward `T > t₀` and yields `IsPicardLindelof (fun t s => L t s + b t)
+  ⟨t₀,_⟩ x0 a 0 (Mc + K·a) K` (the chart's exact `picard` shape).  Feeds the section-level LipschitzOnWith
+  capstone with the affine Lipschitz discharge + `ContinuousOn.add`.
+* **`exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_boundedLinear_generator_source`** —
+  runs the above through `IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset`
+  (needs `[CompleteSpace F]`, so `CSS` is Banach) with `closedBall x0 a ⊆ locus`, giving
+  `Nonempty (BanachEvolutionLocalSolutionIn (fun t s => L t s + b t) locus t₀ x0)` — the state-constrained
+  Banach evolution object a downstream `realization` decode consumes.
+* **`isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn_centerBound`** — the
+  *fixed-window* (caller-supplied `[t₀,T]`) section-level capstone, the prescribed-endpoint complement of
+  the endpoint-choosing `…_of_lipschitzOnWith_continuousOn`: from section-norm `LipschitzOnWith K (A t)` on
+  the ball, section-norm time-continuity, a coordinate centre bound `Mc`, and the compatibility
+  `(Mc + K·a)·(T − t₀) ≤ a`, gives `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0 (Mc + K·a) K`.  Reusable for the
+  *actual* geometric `A` (not just affine); discharges to
+  `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` via `coord_dist_le_dist` +
+  `continuousOn_coord_of_continuousOn`.  This is the shape the chart fixes (`t₀`, `T` are chart parameters).
+* **`isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source_fixedWindow`** — the mild
+  affine specialization of the previous, `IsPicardLindelof (fun t s => L t s + b t) ⟨t₀,_⟩ x0 a 0 (Mc+K·a)
+  K` on a caller-supplied `[t₀,T]` — the `TimeDependentGeometricRicciDeTurckBanachChart.picard` field
+  *verbatim* (`L := Mc + K·a`, `Kpic := K`).
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: the section-space Picard–Lindelöf
+field is now reducible, in **both** the endpoint-choosing and the chart-window-fixed forms, to *exhibiting a
+bounded linear generator family* `L : ℝ → (CSS →L[ℝ] CSS)` with a uniform operator-norm bound and strong
+time-continuity, plus a continuous source `b` and the (compactness-derivable) coordinate centre bound.  The
+whole Picard/solution stack downstream of the generator is now assembled and axiom-clean; the surviving
+`picard` obligation is purely *analytic*: build the regularised generator `L` (the bounded/mild form of the
+C⁰-unbounded 2nd-order Ricci–DeTurck operator) and its op-norm bound.  The **`geometric` field** of the chart
+(`A τ s x u v = intrinsicRicciDeTurckRHS …`) remains the faithfulness constraint tying this `A` to the actual
+RHS — the value-section regularity work (already CLOSED) is its content.
+
+**NEXT.**  Construct the regularised bounded generator `L t : CSS →L[ℝ] CSS` for the Ricci–DeTurck operator
+about `g₀` (e.g. a Yosida/heat-semigroup regularisation, or the bounded reaction/zeroth-order part from a
+continuous bundle endomorphism applied pointwise to a section), and prove its operator-norm bound + strong
+continuity, feeding `…_boundedLinear_generator_source_fixedWindow` to obtain the chart's `picard` field, and
+supply the `geometric` identification linking `A = fun t s => L t s + b t` to `intrinsicRicciDeTurckRHS`.
