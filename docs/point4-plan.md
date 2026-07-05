@@ -7328,3 +7328,48 @@ the path space `C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`.  Then the committed p
 gives the path-space short-time contraction and the Banach fixed point (`ContractingWith`) yields a
 genuine mild solution of the ND reaction–diffusion model — the model template for the mild Ricci–DeTurck
 representative feeding the chart `A`/`picard`.
+
+Update — **the `BCF`-norm mild-value path lift is now complete** (extending
+`AnalyticPDE/HeatKernel1D.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`, cheat-scan
+`TOTAL 0`, module green).  This session closes the recorded next target — the singular Duhamel-path
+`BCF`-norm time-continuity and the mild-value path as the sum — via the `u = t − s` substitution route
+(which decouples the heat time from `t`, so the propagator `H_u` acts *nonexpansively* and the
+`(t−s)^{−1/2}` diagonal singularity never appears):
+
+* `intervalIntegrable_heatSemigroupND_comp_sub` — **interval-integrability of the substituted Duhamel
+  integrand** `u ↦ H_u(q(t−u))(x)` on `[0, b]`.  After the substitution the only singular time `u = 0`
+  is a null endpoint, so the bound `|H_u(q(t−u))(x)| ≤ C` (`abs_heatSemigroupND_le`) holds on all of
+  `Ioc 0 b`; with a.e.-measurability (`aestronglyMeasurable_heatSemigroupND_comp_sub`) and finite
+  interval measure this gives integrability, discharging the interval-split side-conditions.
+* `continuousAt_intervalIntegral_normSub_shift` — **continuity of the source time-modulus integral**
+  `t ↦ ∫_0^b ‖q(t−u) − q(t₁−u)‖ du` at `t₁` (where it vanishes), by interval dominated convergence
+  (`continuousAt_of_dominated_interval`): the integrand is continuous, dominated by the constant `2C`
+  on the finite interval, and continuous in `t` for every `u`.  This is the *non-singular* modulus
+  governing the main term.
+* `continuousAt_heatDuhamelPathBcf` (+ total path `heatDuhamelPathBcf`, `heatDuhamelPathBcf_of_le`) —
+  the **singular-endpoint capstone**: for continuous sup-`C`-bounded `q`, the Duhamel path
+  `t ↦ ∫_{t₀}^{t} H_{t−s}(q s) ds` is `ContinuousAt t₁` in `(Fin n → ℝ) →ᵇ ℝ` for every `t₁ > t₀`.
+  Substituting `u = t − s` and splitting at `b = t₁ − t₀` gives (with `a = t − t₀`)
+  `Duhamel(t)(x) − Duhamel(t₁)(x) = ∫_b^a H_u(q(t−u))(x) du + ∫_0^b H_u(q(t−u) − q(t₁−u))(x) du`; the
+  tail is `≤ C·|t − t₁|` (nonexpansiveness, uniform in `x`) and the main term `≤ ∫_0^b ‖q(t−u) −
+  q(t₁−u)‖ du = G(t)` (linearity + nonexpansiveness of `H_u`, uniform in `x`).  Taking the sup over `x`
+  (`BoundedContinuousFunction.norm_le`) gives `‖Duhamel(t) − Duhamel(t₁)‖ ≤ C·|t − t₁| + G(t) → 0`, so
+  the distance is squeezed to `0` (`squeeze_zero'`).
+* `continuousAt_heatMildValuePathBcf` (+ total path `heatMildValuePathBcf`, `heatMildValuePathBcf_of_lt`)
+  — the **mild-value path lift**: `t ↦ Φ(t) = H_{t−t₀}u₀ + Duhamel(q)` is `ContinuousAt t₁` for every
+  `t₁ > t₀`, the sum of `continuousAt_heatFlowPathBcf_shift` (homogeneous) and
+  `continuousAt_heatDuhamelPathBcf` (Duhamel).  `heatMildValuePathBcf_of_lt` identifies the bundled
+  path with the fixed-time `heatMildValueNDbcf` for `t > t₀`.
+* `continuousOn_heatDuhamelPathBcf` / `continuousOn_heatMildValuePathBcf` — the `ContinuousOn (Ioi t₀)`
+  forms: the Duhamel and mild-value paths are `BCF`-norm-continuous on the open forward time ray, i.e.
+  genuine elements of `C((t₀, T], (Fin n → ℝ) →ᵇ ℝ)`, the domain on which a mild trajectory lives.
+
+**Next target.**  With the mild-value path now a `BCF`-norm-continuous element of `C((t₀, T],
+(Fin n → ℝ) →ᵇ ℝ)`, build the **path-space Banach fixed point**: pick the complete metric space (e.g.
+`BoundedContinuousFunction ↥(Set.Ioc t₀ T) ((Fin n → ℝ) →ᵇ ℝ)`, noting the heat semigroup on `C_b` is
+*not* `C₀`, so the closed-interval left endpoint `t₀` needs care — the trajectory matches `u₀` at `t₀`
+only in the mild sense), define the mild-solution self-map `Φ(u)(t) = H_{t−t₀}u₀ + ∫_{t₀}^{t}
+H_{t−s}(Q(u s)) ds`, and use the committed per-time contraction `norm_heatMildValueNDbcf_sub_le`
+(`‖Φ(u₁)(t) − Φ(u₂)(t)‖ ≤ Kstate·(t − t₀)·‖u₁ − u₂‖`, uniform over `t ∈ (t₀, T]`) to get a
+`ContractingWith` on a short time window, whose fixed point is the model mild solution — the analytic
+template for the mild Ricci–DeTurck representative feeding the chart `A`/`picard`.
