@@ -347,5 +347,50 @@ theorem heatMildFixedPoint_parabolicC0AlphaOn_closedBall {n : ℕ} {t₀ T : ℝ
       _ ≤ R + R := add_le_add hpc hq
       _ = 2 * R := by ring
 
+/-- **Explicit parabolic sup bound of the model mild solution.**  The `C^0` part of the parabolic
+`C^{0,α}` norm package with an *explicit* constant: the (time-clamped) model mild solution
+`(t, x) ↦ z(t)(x)` is uniformly bounded by `‖u₀‖ + CQ·(T − t₀)` on *every* time-space set `s`
+(the a-priori sup bound `norm_heatMildFixedPoint_le` holds globally and `Set.IccExtend` only clamps
+the time argument into `[t₀, T]`).  Unlike the existential `ParabolicC0AlphaOn` membership, this
+exposes the concrete constant the parabolic Schauder fixed-point a-priori estimate consumes. -/
+theorem heatMildFixedPoint_parabolicBoundedWith {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    (s : Set (ℝ × (Fin n → ℝ))) :
+    ParabolicBoundedWith (‖u₀‖ + CQ * (T - t₀))
+      (fun p : ℝ × (Fin n → ℝ) => Set.IccExtend hT (⇑z) p.1 p.2) s := by
+  intro p _hp
+  calc ‖Set.IccExtend hT (⇑z) p.1 p.2‖
+      ≤ ‖Set.IccExtend hT (⇑z) p.1‖ :=
+        (Set.IccExtend hT (⇑z) p.1).norm_coe_le_norm p.2
+    _ = ‖(⇑z) (Set.projIcc t₀ T hT p.1)‖ := rfl
+    _ ≤ ‖z‖ := z.norm_coe_le_norm _
+    _ ≤ ‖u₀‖ + CQ * (T - t₀) :=
+        norm_heatMildFixedPoint_le hT u₀ hLnn hlip Q hQcont hQb z hz
+
+/-- **Explicit parabolic sup-norm bound of the model mild solution.**  The parabolic sup-norm
+functional of the (time-clamped) model mild solution is bounded by the explicit a-priori constant
+`‖u₀‖ + CQ·(T − t₀)` on every time-space set.  Immediate from
+`heatMildFixedPoint_parabolicBoundedWith` and `parabolicSupNorm_le`. -/
+theorem heatMildFixedPoint_parabolicSupNorm_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    (s : Set (ℝ × (Fin n → ℝ))) :
+    parabolicSupNorm (fun p : ℝ × (Fin n → ℝ) => Set.IccExtend hT (⇑z) p.1 p.2) s
+      ≤ ‖u₀‖ + CQ * (T - t₀) := by
+  have hCQ : 0 ≤ CQ := le_trans (norm_nonneg _) (hQb 0)
+  have hB_nonneg : (0 : ℝ) ≤ ‖u₀‖ + CQ * (T - t₀) :=
+    add_nonneg (norm_nonneg _) (mul_nonneg hCQ (by linarith))
+  exact parabolicSupNorm_le hB_nonneg
+    (heatMildFixedPoint_parabolicBoundedWith hT u₀ hLnn hlip Q hQcont hQb z hz s)
+
 end AnalyticPDE
 end RicciFlow
