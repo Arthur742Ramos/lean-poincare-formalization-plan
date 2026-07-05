@@ -7096,5 +7096,43 @@ theorem abs_heatSemigroupND_sub_self_le_of_lipschitz {n : ℕ} {s : ℝ} (hs : 0
     _ = L * (n : ℝ) * ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) := by
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]; ring
 
+/-- **Quantitative sup-norm time-modulus of the `n`-dimensional heat semigroup.**  For bounded
+continuous data `w` (`‖w y‖ ≤ C`) and times `t', s > 0`, the increment of the propagator between the
+consecutive times `t'` and `t' + s` obeys
+`|H_{t'+s}w x − H_{t'}w x| ≤ (n·C/√(πt'))·n·((4πs)^{−1/2}·(4s))`.
+Via the semigroup law `heatSemigroupND_comp` (`H_{t'+s} = H_s(H_{t'} ·)`) this is the strong-continuity
+estimate `abs_heatSemigroupND_sub_self_le_of_lipschitz` applied to `v := H_{t'}w`, which is *already*
+Lipschitz with the `√t'`-parabolic-smoothing constant `n·C/√(πt')`
+(`heatSemigroupND_spatial_lipschitz_sqrt_rate_norm`) — so no Lipschitz hypothesis on `w` itself is
+needed.  As `s → 0⁺` the bound `→ 0`, giving right-time-continuity of `t ↦ H_t w` in `BCF`-norm at
+every `t' > 0`; the `t'`-fixed prefactor is uniform in `x`, so this is genuine sup-norm control. -/
+theorem abs_heatSemigroupND_add_sub_le {n : ℕ} {t' s : ℝ} (ht' : 0 < t') (hs : 0 < s)
+    {w : (Fin n → ℝ) → ℝ} {C : ℝ} (hwc : Continuous w) (hwb : ∀ y, ‖w y‖ ≤ C)
+    (x : Fin n → ℝ) :
+    |heatSemigroupND (t' + s) w x - heatSemigroupND t' w x|
+      ≤ ((n : ℝ) * (C / Real.sqrt (π * t'))) * (n : ℝ)
+          * ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) := by
+  have hwm : AEStronglyMeasurable w := hwc.aestronglyMeasurable
+  have hwb_abs : ∀ y, |w y| ≤ C := fun y => (Real.norm_eq_abs (w y)) ▸ hwb y
+  have hvc : Continuous (fun z => heatSemigroupND t' w z) :=
+    continuous_heatSemigroupND ht' hwc hwb_abs
+  have hvb : ∀ z, ‖heatSemigroupND t' w z‖ ≤ C := fun z => by
+    rw [Real.norm_eq_abs]; exact abs_heatSemigroupND_le ht' z hwb_abs
+  have hL'nn : (0 : ℝ) ≤ (n : ℝ) * (C / Real.sqrt (π * t')) := by
+    have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hwb 0)
+    have hpt : (0 : ℝ) < Real.sqrt (π * t') := Real.sqrt_pos.mpr (by positivity)
+    positivity
+  have hvlip : ∀ a b : Fin n → ℝ,
+      |heatSemigroupND t' w a - heatSemigroupND t' w b|
+        ≤ ((n : ℝ) * (C / Real.sqrt (π * t'))) * ‖a - b‖ :=
+    fun a b => heatSemigroupND_spatial_lipschitz_sqrt_rate_norm ht' hwm hwb a b
+  have hcomp : heatSemigroupND (t' + s) w x
+      = heatSemigroupND s (fun z => heatSemigroupND t' w z) x := by
+    rw [add_comm t' s]
+    exact (heatSemigroupND_comp s t' hs ht' x hwm hwb).symm
+  rw [hcomp]
+  exact abs_heatSemigroupND_sub_self_le_of_lipschitz hs hL'nn
+    hvc.aestronglyMeasurable hvb hvlip x
+
 end AnalyticPDE
 end RicciFlow
