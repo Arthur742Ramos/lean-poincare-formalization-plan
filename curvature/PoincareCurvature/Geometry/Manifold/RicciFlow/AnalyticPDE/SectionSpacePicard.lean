@@ -285,4 +285,64 @@ theorem isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
     exact norm_le_of_forall_coord_norm_le (NNReal.coe_nonneg Mc)
       (fun i x => hcenter t ht i x)
 
+/-- **Section-space centre-bound Picard endpoint chooser (route (ii) capstone).**  The
+`TimeDependentGeometricRicciDeTurckBanachChart`'s only `T`-dependent data are `hT : t₀ < T` and the
+`picard` field (its `lipschitz`/`geometric` fields quantify over *all* times).  This lemma supplies
+both at once: from *forward*-time-uniform (on `Set.Ici t₀`) coordinatewise `K`-Lipschitz-in-section
+control on `closedBall x0 a`, continuity there, and the centre readout bound `‖(A t x0)ᵢ x‖ ≤ Mc`
+(for a genuinely positive radius `a`), there **exists** a forward endpoint `T > t₀` for which `A` is
+`IsPicardLindelof` with radius `a`, bound `Mc + K·a`, Lipschitz `K` — the chart's exact `picard`
+shape.  The endpoint is produced by `exists_forwardTime_mul_sub_le` (satisfying the time-radius
+compatibility `(Mc + K·a)·(T − t₀) ≤ a` automatically), letting the chart *choose* its per-IVP Picard
+window from the analytic size constants `Mc` (centre bound) and `K` (Lipschitz constant) alone. -/
+theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ : ℝ) (a K Mc : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hlip : ∀ t ∈ Set.Ici t₀, ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+        ∀ ⦃s'⦄, s' ∈ Metric.closedBall x0 (a : ℝ) → ∀ (i : κ) (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s')).1 i x)
+          ≤ (K : ℝ) * dist s s')
+    (hcont : ∀ s ∈ Metric.closedBall x0 (a : ℝ), ∀ (i : κ),
+        ContinuousOn
+          (fun t => (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i)
+          (Set.Ici t₀))
+    (hcenter : ∀ t ∈ Set.Ici t₀, ∀ (i : κ) (x : Kc i),
+        ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t x0)).1 i x‖ ≤ (Mc : ℝ)) :
+    ∃ (T : ℝ) (hT : t₀ < T),
+      IsPicardLindelof A (tmin := t₀) (tmax := T)
+        ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + K * a) K := by
+  obtain ⟨T, hT, hLa⟩ := RicciFlow.AnalyticPDE.exists_forwardTime_mul_sub_le t₀ a K Mc ha
+  refine ⟨T, hT, ?_⟩
+  refine isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
+    A x0 t₀ T hT a K Mc ?_ ?_ ?_ hLa
+  · intro t ht
+    exact hlip t (Set.Icc_subset_Ici_self ht)
+  · intro s hs i
+    exact (hcont s hs i).mono Set.Icc_subset_Ici_self
+  · intro t ht
+    exact hcenter t (Set.Icc_subset_Ici_self ht)
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
