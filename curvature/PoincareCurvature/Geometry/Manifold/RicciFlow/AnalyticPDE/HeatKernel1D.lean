@@ -8260,6 +8260,38 @@ theorem heatMildFixedPoint_apply {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
   rw [heatMildValuePathBcf_of_lt ht, heatMildValueNDbcf_apply]
   simp only [Function.comp_apply]
 
+/-- **Spatial `C¹` (Lipschitz) parabolic Schauder regularity of the model mild solution.**  At every
+interior time `t₀ < t ≤ T`, the value `z(t)` of the genuine model mild solution (any fixed point of
+`heatMildSelfMap`) is spatially Lipschitz as a bounded continuous function on `Fin n → ℝ`, with the
+same explicit `t^{-1/2}`-propagator + `√(t−t₀)`-Duhamel rate as the abstract mild-value map.  Since
+`z(t)` equals `heatMildValueNDbcf` for the trajectory-reaction source `s ↦ Q(z(projIcc s))`
+(`heatMildFixedPoint_apply`), the spatial `C¹` gain `lipschitzWith_heatMildValueNDbcf` transfers to
+the solution itself: bounded initial data becomes, after any positive time, a spatially Lipschitz
+section — the first-derivative Schauder regularity of the actual solution that feeds the geometric
+identification of the mild Ricci–DeTurck representative. -/
+theorem lipschitzWith_heatMildFixedPoint_apply {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t : ↥(Set.Icc t₀ T)} (ht : t₀ < (t : ℝ)) :
+    LipschitzWith
+      (((n : ℝ) * (‖u₀‖ / Real.sqrt (π * ((t : ℝ) - t₀)))).toNNReal
+        + (2 * (n : ℝ) * CQ * Real.sqrt ((t : ℝ) - t₀) / Real.sqrt π).toNNReal)
+      (⇑(z t)) := by
+  have hqc : Continuous (fun s => Q (Set.IccExtend hT (⇑z) s)) :=
+    hQcont.comp (continuous_IccExtend_iff.mpr z.continuous)
+  have hqb : ∀ s y, ‖Q (Set.IccExtend hT (⇑z) s) y‖ ≤ CQ := fun s y =>
+    le_trans ((Q (Set.IccExtend hT (⇑z) s)).norm_coe_le_norm y) (hQb _)
+  have hfun : ⇑(z t) = ⇑(heatMildValueNDbcf ht u₀ hqc hqb) := by
+    funext x
+    rw [heatMildValueNDbcf_apply ht u₀ hqc hqb x]
+    exact heatMildFixedPoint_apply hT u₀ hLnn hlip Q hQcont hQb z hz ht x
+  rw [hfun]
+  exact lipschitzWith_heatMildValueNDbcf ht u₀ hqc hqb
+
 /-- **A-priori sup bound for the model mild solution.**  Any fixed point `z` of the mild-solution
 self-map (for initial datum `u₀` and reaction nonlinearity `Q` bounded by `CQ`) obeys the uniform
 `L^∞` estimate `‖z‖ ≤ ‖u₀‖ + CQ·(T − t₀)` in the state space `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.
