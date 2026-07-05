@@ -8024,5 +8024,112 @@ theorem exists_unique_heatMildFixedPoint {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤
     exact hsmall
   exact banach_fixedPoint_exists_unique _ hcontr
 
+/-- **Fixed-initial-datum-difference bound for the mild-solution map value.**  For a common source
+`q` and two initial data `u₀, v₀`, `‖Φ_{u₀}(t) − Φ_{v₀}(t)‖ ≤ ‖u₀ − v₀‖`: the Duhamel term
+`∫_{t₀}^{t} H_{t−s}(q s) ds` is independent of the initial datum and **cancels** in the difference,
+leaving exactly the homogeneous propagator difference `H_{t−t₀}u₀ − H_{t−t₀}v₀`, which is
+`L^∞`-nonexpansive (`norm_heatSemigroupNDbcf_sub_le`).  The initial-datum companion of
+`norm_heatMildValueNDbcf_sub_le` (which fixes `u₀` and varies the source) — the ingredient governing
+continuous dependence of the mild solution on the initial datum. -/
+theorem norm_heatMildValueNDbcf_sub_initial_le {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ v₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ‖heatMildValueNDbcf ht u₀ hq hqb - heatMildValueNDbcf ht v₀ hq hqb‖ ≤ ‖u₀ - v₀‖ := by
+  have hcancel : heatMildValueNDbcf ht u₀ hq hqb - heatMildValueNDbcf ht v₀ hq hqb
+      = heatSemigroupNDbcf (show (0 : ℝ) < t - t₀ by linarith) u₀
+        - heatSemigroupNDbcf (show (0 : ℝ) < t - t₀ by linarith) v₀ := by
+    simp only [heatMildValueNDbcf]; abel
+  rw [hcancel]
+  exact norm_heatSemigroupNDbcf_sub_le _ u₀ v₀
+
+/-- **Continuous dependence on the initial datum in the closed-interval Banach state space.**  For a
+fixed common source `q` and two `Lipschitz` initial data `u₀, v₀`, the closed-interval mild-value
+path elements satisfy `dist (Φ(u₀)) (Φ(v₀)) ≤ ‖u₀ − v₀‖` in `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.
+At the left endpoint `t₀` both values equal their initial data `u₀, v₀` (`heatMildValuePathBcf_initial`),
+so the pointwise distance is exactly `‖u₀ − v₀‖`; for `t > t₀` the Duhamel term cancels and the
+homogeneous propagator difference is `‖u₀ − v₀‖`-bounded (`norm_heatMildValueNDbcf_sub_initial_le`).
+The initial-datum companion of `dist_heatMildValuePathBcfIcc_le`. -/
+theorem dist_heatMildValuePathBcfIcc_initial_le {n : ℕ} (t₀ T : ℝ)
+    (u₀ v₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {Lu : ℝ} (hLunn : 0 ≤ Lu) (hulip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ Lu * ‖a - b‖)
+    {Lv : ℝ} (hLvnn : 0 ≤ Lv) (hvlip : ∀ a b : Fin n → ℝ, |v₀ a - v₀ b| ≤ Lv * ‖a - b‖)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (hT : t₀ ≤ T) :
+    dist (heatMildValuePathBcfIcc t₀ T u₀ hLunn hulip hq hqb)
+        (heatMildValuePathBcfIcc t₀ T v₀ hLvnn hvlip hq hqb) ≤ ‖u₀ - v₀‖ := by
+  refine (BoundedContinuousFunction.dist_le (norm_nonneg _)).2 (fun t => ?_)
+  rw [heatMildValuePathBcfIcc_apply, heatMildValuePathBcfIcc_apply, dist_eq_norm]
+  have hge : t₀ ≤ (t : ℝ) := t.2.1
+  rcases eq_or_lt_of_le hge with h | hlt
+  · have heq : heatMildValuePathBcf t₀ u₀ hq hqb (↑t)
+        - heatMildValuePathBcf t₀ v₀ hq hqb (↑t) = u₀ - v₀ := by
+      rw [← h, heatMildValuePathBcf_initial t₀ u₀ hq hqb,
+        heatMildValuePathBcf_initial t₀ v₀ hq hqb]
+    exact le_of_eq (by rw [heq])
+  · rw [heatMildValuePathBcf_of_lt hlt u₀ hq hqb, heatMildValuePathBcf_of_lt hlt v₀ hq hqb]
+    exact norm_heatMildValueNDbcf_sub_initial_le hlt u₀ v₀ hq hqb
+
+/-- **The mild-solution self-map is `1`-Lipschitz in the initial datum** (fixed iterate `u`).  For a
+fixed reaction `Q` and a fixed state-space input `u`, varying only the initial datum gives
+`dist (Φ_{u₀}(u)) (Φ_{v₀}(u)) ≤ ‖u₀ − v₀‖`: both self-map values are `heatMildValuePathBcfIcc` for the
+*same* reaction source `s ↦ Q(u(projIcc s))`, so `dist_heatMildValuePathBcfIcc_initial_le` applies. -/
+theorem dist_heatMildSelfMap_initial_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ v₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {Lu : ℝ} (hLunn : 0 ≤ Lu) (hulip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ Lu * ‖a - b‖)
+    {Lv : ℝ} (hLvnn : 0 ≤ Lv) (hvlip : ∀ a b : Fin n → ℝ, |v₀ a - v₀ b| ≤ Lv * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (u : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ)) :
+    dist (heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb u)
+        (heatMildSelfMap hT v₀ hLvnn hvlip Q hQcont hQb u)
+      ≤ ‖u₀ - v₀‖ :=
+  dist_heatMildValuePathBcfIcc_initial_le t₀ T u₀ v₀ hLunn hulip hLvnn hvlip
+    (hQcont.comp (continuous_IccExtend_iff.mpr u.continuous))
+    (fun s y => le_trans ((Q (Set.IccExtend hT (⇑u) s)).norm_coe_le_norm y) (hQb _)) hT
+
+/-- **Continuous (Lipschitz) dependence of the model mild solution on the initial datum
+(well-posedness).**  Let `z` be a fixed point of the mild-solution self-map for the initial datum
+`u₀` and `w` a fixed point for `v₀` (same bounded `Kstate`-Lipschitz reaction `Q`), on a short time
+window `Kstate·(T − t₀) < 1`.  Then the two mild solutions differ by at most
+`‖u₀ − v₀‖ / (1 − Kstate·(T − t₀))` in the state space `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.  The
+triangle estimate `dist z w = dist (Φ_{u₀} z) (Φ_{v₀} w) ≤ dist (Φ_{u₀} z) (Φ_{u₀} w) +
+dist (Φ_{u₀} w) (Φ_{v₀} w)` combines the short-time contraction `dist_heatMildSelfMap_le`
+(`≤ Kstate·(T − t₀)·dist z w`) with the initial-datum `1`-Lipschitz bound
+`dist_heatMildSelfMap_initial_le` (`≤ ‖u₀ − v₀‖`), and `1 − Kstate·(T − t₀) > 0` closes the loop.  This
+is the third pillar of well-posedness — continuous dependence on the data — for the model semilinear
+mild solution, alongside existence and uniqueness (`exists_unique_heatMildFixedPoint`); the analytic
+template for the corresponding stability of the mild Ricci–DeTurck representative. -/
+theorem dist_heatMildFixedPoint_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ v₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {Lu : ℝ} (hLunn : 0 ≤ Lu) (hulip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ Lu * ‖a - b‖)
+    {Lv : ℝ} (hLvnn : 0 ≤ Lv) (hvlip : ∀ a b : Fin n → ℝ, |v₀ a - v₀ b| ≤ Lv * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    {Kstate : ℝ} (hKnn : 0 ≤ Kstate)
+    (hQlip : ∀ v w, ‖Q v - Q w‖ ≤ Kstate * ‖v - w‖)
+    (hsmall : Kstate * (T - t₀) < 1)
+    (z w : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb z = z)
+    (hw : heatMildSelfMap hT v₀ hLvnn hvlip Q hQcont hQb w = w) :
+    dist z w ≤ ‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)) := by
+  have hpos : 0 < 1 - Kstate * (T - t₀) := by linarith
+  have hcontract : dist (heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb z)
+      (heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb w) ≤ Kstate * (T - t₀) * dist z w :=
+    dist_heatMildSelfMap_le hT u₀ hLunn hulip Q hQcont hQb hKnn hQlip z w
+  have hinit : dist (heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb w)
+      (heatMildSelfMap hT v₀ hLvnn hvlip Q hQcont hQb w) ≤ ‖u₀ - v₀‖ :=
+    dist_heatMildSelfMap_initial_le hT u₀ v₀ hLunn hulip hLvnn hvlip Q hQcont hQb w
+  have htri : dist z w ≤ Kstate * (T - t₀) * dist z w + ‖u₀ - v₀‖ := by
+    calc dist z w = dist (heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb z)
+            (heatMildSelfMap hT v₀ hLvnn hvlip Q hQcont hQb w) := by rw [hz, hw]
+      _ ≤ dist (heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb z)
+            (heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb w)
+          + dist (heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb w)
+            (heatMildSelfMap hT v₀ hLvnn hvlip Q hQcont hQb w) := dist_triangle _ _ _
+      _ ≤ Kstate * (T - t₀) * dist z w + ‖u₀ - v₀‖ := add_le_add hcontract hinit
+  rw [le_div_iff₀ hpos]
+  nlinarith [htri]
+
 end AnalyticPDE
 end RicciFlow
