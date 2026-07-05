@@ -7445,3 +7445,47 @@ or (ii) route the section-space picard through the ODE foundation
 `isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc` with a genuinely bounded-Lipschitz
 *regularised* representative `A` (the mild/Yosida route), where the well-posedness template above pins
 down exactly the boundedness + Lipschitz + time-continuity estimates that must be supplied.
+
+Update — **the section-space route (ii) `picard`/evolution transport is now assembled from a
+complete coordinate→section handoff suite** (extending `VectorBundle/ContinuousSection.lean` and a
+new dedicated module `AnalyticPDE/SectionSpacePicard.lean`; all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, `scan cheats` `TOTAL 0`, full `lake build` green). The
+model `ℝⁿ` mild solution is fully well-posed but its `ℝⁿ` heat propagator is coordinate-specific;
+this session builds the missing bridges that let the *section-space* `A`/`picard` be supplied
+directly through the already-proved Banach ODE foundation
+`isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc` (route (ii)), for a general
+finite-rank bundle:
+
+* `norm_le_of_forall_coord_norm_le` — **boundedness handoff**: a uniform sup-bound `C` on every
+  compact trivialization readout of a section gives `‖s‖ ≤ C` in the transported finite-cover norm
+  (the `t = 0` companion of `dist_le_of_forall_coord_dist_le`). Supplies the foundation's `hbound`.
+* `lipschitzWith_of_forall_coord_dist_le` — **global-Lipschitz handoff**: coordinatewise
+  `LipschitzWith`-style readout estimates over *all* sections give `LipschitzWith K A`
+  (`stateSet = univ` companion of `lipschitzOnWith_of_forall_coord_dist_le`). Supplies `hlip`.
+* `continuousOn_of_forall_coord_continuousOn` — **time-continuity handoff**: continuity of each
+  readout `x ↦ (f x)ᵢ` into `C(Kc i, F)` gives continuity of `x ↦ f x` in the section norm (the
+  transport `equivCompatibleCoordFamilySubmodule` is a definitional isometry into `∀ i, C(Kc i, F)`,
+  composed with the submodule-coercion isometry; `IsInducing.continuousOn_iff` + `continuousOn_pi`
+  over the finite trivialization index). Supplies `hcont`.
+* `isPicardLindelof_continuousSectionSpace_of_forall_coord` (new module) — **route (ii) `picard`-field
+  constructor**: assembles the three handoffs with the Banach ODE foundation to produce
+  `IsPicardLindelof A` in exactly the interval/anchor/constant shape
+  (`⟨t₀,_⟩ x0 (L·(T−t₀)₊+1) 0 L K`) of `TimeDependentGeometricRicciDeTurckBanachChart.picard`, from
+  purely coordinatewise boundedness / Lipschitz / continuity data.
+* `sectionSpace_evolution_exists_unique_of_forall_coord` (new module) — **transport step (a)**: the
+  same coordinate data yields a *unique* `[t₀, T]`-evolution `α` in the complete section space with
+  `α t₀ = x0`, `α'(t) = A t (α t)` (via `bounded_lipschitz_evolution_exists_unique_timeDependent_Icc`).
+  Lifts the model `ℝⁿ` mild-solution existence–uniqueness to the manifold-bundle section space.
+
+**Fractional progress on `{A, picard, realization, encode}`.** `picard` is now *constructible* from
+coordinatewise analytic control of `A` (route (ii)), and the section-space evolution it produces is
+in hand. The remaining gap for `A`/`picard` is the *genuine* mild/regularised operator: exhibiting a
+concrete time-dependent `A` on the section space whose trivialization readouts are actually bounded +
+Lipschitz + time-continuous (the boundedness being where the C⁰-unbounded second-order Ricci–DeTurck
+operator meets the mild/Yosida regularisation) — at which point these constructors close `picard`.
+
+**Next target.** Construct a concrete bounded-Lipschitz section-space representative `A` (mild/Yosida
+form) and prove the three coordinatewise estimates (`hbound`/`hlip`/`hcont`) it must satisfy to feed
+`isPicardLindelof_continuousSectionSpace_of_forall_coord`; alternatively begin the `realization`
+decode (`BanachEvolutionLocalSolutionIn A → ChosenIntrinsicDeTurckLocalSolution`) that the
+section-space evolution now makes available.
