@@ -7134,5 +7134,33 @@ theorem abs_heatSemigroupND_add_sub_le {n : ℕ} {t' s : ℝ} (ht' : 0 < t') (hs
   exact abs_heatSemigroupND_sub_self_le_of_lipschitz hs hL'nn
     hvc.aestronglyMeasurable hvb hvlip x
 
+/-- **`BCF`-norm (Banach-space) consecutive-time modulus of the `n`-dimensional heat semigroup.**
+The sup-over-`x` packaging of `abs_heatSemigroupND_add_sub_le`: since that pointwise bound is uniform
+in `x`, for `f : (Fin n → ℝ) →ᵇ ℝ` and `t', s > 0`,
+`‖H_{t'+s}f − H_{t'}f‖ ≤ (n·‖f‖/√(πt'))·n·((4πs)^{−1/2}·(4s))`
+in the Banach space `(Fin n → ℝ) →ᵇ ℝ` (`heatSemigroupNDbcf`).  As `s → 0⁺` the right-hand side `→ 0`
+with a `t'`-fixed prefactor, so `s ↦ H_{t'+s}f` is `BCF`-norm-continuous at `s = 0⁺` — the Banach-space
+right-time-continuity datum for lifting the model mild-solution map into the path space
+`C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`. -/
+theorem norm_heatSemigroupNDbcf_add_sub_le {n : ℕ} {t' s : ℝ} (ht' : 0 < t') (hs : 0 < s)
+    (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    ‖heatSemigroupNDbcf (add_pos ht' hs) f - heatSemigroupNDbcf ht' f‖
+      ≤ ((n : ℝ) * (‖f‖ / Real.sqrt (π * t'))) * (n : ℝ)
+          * ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) := by
+  have hRHSnn : (0 : ℝ) ≤ ((n : ℝ) * (‖f‖ / Real.sqrt (π * t'))) * (n : ℝ)
+          * ((4 * π * s) ^ (-(1 : ℝ) / 2) * (4 * s)) := by
+    have hpre : (0 : ℝ) ≤ (4 * π * s) ^ (-(1 : ℝ) / 2) := Real.rpow_nonneg (by positivity) _
+    have hf0 : (0 : ℝ) ≤ ‖f‖ := norm_nonneg f
+    have hpt : (0 : ℝ) < Real.sqrt (π * t') := Real.sqrt_pos.mpr (by positivity)
+    have h1 : (0 : ℝ) ≤ (n : ℝ) * (‖f‖ / Real.sqrt (π * t')) * (n : ℝ) :=
+      mul_nonneg (mul_nonneg (Nat.cast_nonneg n) (div_nonneg hf0 hpt.le)) (Nat.cast_nonneg n)
+    exact mul_nonneg h1 (mul_nonneg hpre (by positivity))
+  rw [BoundedContinuousFunction.norm_le hRHSnn]
+  intro x
+  rw [BoundedContinuousFunction.sub_apply, heatSemigroupNDbcf_apply, heatSemigroupNDbcf_apply,
+    Real.norm_eq_abs]
+  exact abs_heatSemigroupND_add_sub_le ht' hs f.continuous
+    (fun y => f.norm_coe_le_norm y) x
+
 end AnalyticPDE
 end RicciFlow
