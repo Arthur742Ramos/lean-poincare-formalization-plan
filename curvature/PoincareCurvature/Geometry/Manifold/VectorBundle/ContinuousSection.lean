@@ -2258,6 +2258,54 @@ theorem lipschitzWith_of_forall_coord_dist_le
     (stateSet := Set.univ)
     (fun s _ t _ i x => hcoord s t i x)
 
+/-- Coordinatewise time-continuity of every compact readout transports to continuity of a
+section-valued map in the finite-cover Banach norm.  With finitely many trivializing pieces the
+transported section norm is the sup of the compact coordinate `C(Kc i, F)` norms (the transport
+`equivCompatibleCoordFamilySubmodule` is a definitional isometry into `∀ i, C(Kc i, F)`), so
+continuity of each readout `x ↦ (f x)ᵢ` into `C(Kc i, F)` yields continuity of `x ↦ f x` into
+`ContinuousSectionSpace`.  This is the time-continuity handoff
+`∀ s, ContinuousOn (fun t => A t s) (Icc t₀ T)` demanded by the Banach-space Picard–Lindelöf
+foundation `isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc`. -/
+theorem continuousOn_of_forall_coord_continuousOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {X : Type*} [TopologicalSpace X]
+    {f : X → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {s : Set X}
+    (hcoord : ∀ i, ContinuousOn
+      (fun x => (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f x)).1 i) s) :
+    ContinuousOn f s := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedAddCommGroup
+      (𝕜 := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+  have he : Isometry e := fun _ _ => rfl
+  have hval : Isometry
+      (fun a : compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo =>
+        (a : CoordFamily (F := F) Kc)) :=
+    Isometry.of_nndist_eq fun _ _ => rfl
+  have hInd : Topology.IsInducing
+      (fun z : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover =>
+        ((e z).1 : CoordFamily (F := F) Kc)) :=
+    (hval.comp he).isUniformEmbedding.toIsUniformInducing.isInducing
+  rw [hInd.continuousOn_iff, continuousOn_pi]
+  exact hcoord
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
