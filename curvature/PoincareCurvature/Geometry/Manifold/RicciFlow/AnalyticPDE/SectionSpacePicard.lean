@@ -701,4 +701,71 @@ theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_fib
     exact continuousOn_of_forall_coord_uncurry_continuousOn
       (f := fun t => A t s) (hcont hs)
 
+/-- **Section-space Picard–Lindelöf endpoint chooser for a bounded-linear generator family with a
+continuous source** — the honest *mild-operator* interface for the chart's `picard` field.
+
+If the time-dependent operator has the affine "generator + source" shape `A t s = L t s + b t`,
+where `L t : CSS →L[ℝ] CSS` is a *bounded* linear operator on the continuous-section Banach space
+with a uniform operator-norm bound `‖L t‖ ≤ K` on `[t₀, T₀]`, the family is *strongly continuous* in
+time (`t ↦ L t s` continuous on `[t₀, T₀]` for each `s`), and the source `b` is continuous on
+`[t₀, T₀]`, then a forward endpoint `T > t₀` can be chosen so that
+
+`IsPicardLindelof A ⟨t₀,_⟩ x0 a 0 (Mc + K·a) K`
+
+holds — the chart's exact `picard` shape, with Lipschitz constant `K`.
+
+This is precisely the structure a *regularised* (mild) geometric Ricci–DeTurck operator has: a bounded
+generator on the section space plus a `g₀`-dependent inhomogeneity.  It therefore reduces the chart's
+`picard` field to *exhibiting the bounded linear generator family `L`, its operator-norm bound, its
+strong continuity, and the continuous source `b`* — no bundle-distortion or coordinate bookkeeping
+survives, because `A t` is affine and the Lipschitz constant is read directly off the operator norm.
+
+The `LipschitzOnWith` hypothesis of
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn` is
+discharged by the affine identity `dist (L t s + b t) (L t s' + b t) = dist (L t s) (L t s') =
+‖L t (s − s')‖ ≤ ‖L t‖ · ‖s − s'‖ ≤ K · dist s s'`; the time-continuity hypothesis is the strong
+continuity of `L` plus the continuity of `b`. -/
+theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (L : ℝ →
+      (ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →L[ℝ]
+        ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover))
+    (b : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a K : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hK : ∀ t ∈ Set.Icc t₀ T₀, ‖L t‖ ≤ (K : ℝ))
+    (hLc : ∀ s, ContinuousOn (fun t => (L t) s) (Set.Icc t₀ T₀))
+    (hb : ContinuousOn b (Set.Icc t₀ T₀)) :
+    ∃ (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof (fun t s => (L t) s + b t) (tmin := t₀) (tmax := T)
+        ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + K * a) K := by
+  refine exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn
+    (fun t s => (L t) s + b t) x0 t₀ T₀ hT₀ a K ha ?_ ?_
+  · intro t ht
+    rw [lipschitzOnWith_iff_dist_le_mul]
+    intro s _ s' _
+    calc
+      dist ((L t) s + b t) ((L t) s' + b t)
+          = dist ((L t) s) ((L t) s') := dist_add_right _ _ _
+      _ = ‖(L t) s - (L t) s'‖ := dist_eq_norm _ _
+      _ = ‖(L t) (s - s')‖ := by rw [← map_sub]
+      _ ≤ ‖L t‖ * ‖s - s'‖ := (L t).le_opNorm _
+      _ ≤ (K : ℝ) * ‖s - s'‖ := mul_le_mul_of_nonneg_right (hK t ht) (norm_nonneg _)
+      _ = (K : ℝ) * dist s s' := by rw [dist_eq_norm]
+  · intro s _
+    exact (hLc s).add hb
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
