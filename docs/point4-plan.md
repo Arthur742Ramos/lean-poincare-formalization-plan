@@ -7973,3 +7973,55 @@ e.g. continuity in `x` of `intrinsicDeTurckCorrection` (first-order in the metri
 of a single curvature contraction, from the `ContMDiff` structure of `someContMDiffLeviCivitaConnection`;
 or (ii) the ball-local coordinate `K`-Lipschitz-in-state estimate for a mild/regularised
 representative feeding the `hlip` input of the new endpoint chooser.
+
+## Milestone (2026-07-05) — section-space Picard field from Banach-norm hypotheses alone; C¹-connection block on the *direct* geometric `A` (GAP 2 route (ii))
+
+Two additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats` `TOTAL 0` commits; full `lake build` green (2911 jobs).  Continues route (ii) — lifting
+control through the section-space coordinate readout to the chart `picard` field — by removing the
+last coordinate-level bookkeeping from its inputs.
+
+**Committed.**
+* `coordContinuousMap_dist_le_dist` / `coord_dist_le_dist` / `continuousOn_coord_of_continuousOn`
+  (ContinuousSection.lean) — the coordinate readout `s ↦ (coord s).1 i` is **`1`-Lipschitz** in the
+  section (finite-cover Banach) distance, at the `C(Kc i, F)` level and the pointwise `F` level, and
+  section-space continuity of `f : X → ContinuousSectionSpace` transfers to each compact readout.
+  These are the exact **converse** of `continuousOn_of_forall_coord_continuousOn`, proved from the
+  definitional isometry `equivCompatibleCoordFamilySubmodule` onto `∀ i, C(Kc i, F)` (Pi sup metric)
+  via `dist_le_pi_dist` + `ContinuousMap.dist_apply_le_dist`.
+* `coord_norm_le_norm` (+ `coord_zero_apply`) — norm-side twin: `‖(coord s).1 i x‖ ≤ ‖s‖`, converting
+  a section-space *boundedness* estimate `‖A t x0‖ ≤ Mc` into the coordinate `hcenter` datum.
+* `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn`
+  (SectionSpacePicard.lean) — **the honest `picard` field from purely section-space hypotheses**: from
+  ball-local `LipschitzOnWith K (A t)` on `closedBall x0 a` and section-space `ContinuousOn (t ↦ A t s)`
+  on `Icc t₀ T₀`, chooses a forward endpoint and produces `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0 (Mc+K·a) K`
+  (the chart's exact `picard` shape).  All trivialization/coordinate bookkeeping is discharged
+  internally via the readout lemmas above.  This is the interface a mild/regularised Ricci–DeTurck
+  section-space operator must verify: a Banach-norm Lipschitz-in-state bound + Banach-norm
+  time-continuity — nothing coordinate-level.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: now reducible to two
+Banach-norm facts about the operator (ball-local `LipschitzOnWith` + `ContinuousOn` in time), the
+cleanest possible target for the eventual operator; no residual coordinate obligations.
+
+**STRUCTURAL FINDING — the *direct* (non-regularised) geometric `A` is blocked at the current
+regularity, not merely by missing lemmas.**  Ground-truth: the intrinsic Levi-Civita connection is
+only **C¹** (`someContMDiffLeviCivitaConnection_contMDiff … 1`), because the ambient tangent bundle is
+only **C²** (`ContMDiffVectorBundle 2 F (TangentSpace I) I`) and the initial metric `g₀` is a mere
+`ContinuousRiemannianMetric`.  Curvature (`curvatureAux X Y σ = ∇_X∇_Y σ − ∇_Y∇_X σ − ∇_{[X,Y]}σ`) and
+the DeTurck correction (which contracts `∇` of the DeTurck vector field, itself first-order in the
+metric) each need a **C² connection** to be a *continuous* section of the bilinear-form bundle: the
+double covariant derivative `∇_X(∇_Y σ)` requires `∇_Y σ ∈ C²` via `contMDiff_along`, i.e. connection
+level `≥ 2`.  Mathlib's covariant-derivative smoothness monotonicity (`C^{k+1} conn ⟹ C^k conn`) is an
+explicit TODO ("later file") and in any case runs the *wrong* direction (roughening, not smoothing) to
+recover C² from C¹.  Consequence: `x ↦ intrinsicRicciDeTurckRHS g background τ x` cannot be shown to
+land in `ContinuousSectionSpace` at the current regularity; the direct chart `A` is genuinely
+unavailable.  The two honest resolutions are (a) **strengthen the ambient regularity** (C³⁺ bundle /
+C³ metric so the connection is C²), a broad refactor, or (b) the **mild/regularised operator** whose
+section-space boundedness + Lipschitz are exactly what the new capstone now consumes.
+
+**Next target.**  Route (b): construct the mild/regularised Ricci–DeTurck section-space operator about
+`g₀` and prove its section-space `LipschitzOnWith` on `closedBall` + `ContinuousOn` in time (feeding
+the new capstone directly) — starting from the completed model heat-kernel mild toolkit.  Or route
+(a): the connection-regularity strengthening (C² intrinsic connection from a C³ metric/bundle), which
+would unblock the direct curvature-continuity path.
