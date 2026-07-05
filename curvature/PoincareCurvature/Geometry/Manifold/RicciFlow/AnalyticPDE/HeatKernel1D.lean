@@ -8158,5 +8158,29 @@ theorem heatMildFixedPoint_apply {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
   rw [heatMildValuePathBcf_of_lt ht, heatMildValueNDbcf_apply]
   simp only [Function.comp_apply]
 
+/-- **A-priori sup bound for the model mild solution.**  Any fixed point `z` of the mild-solution
+self-map (for initial datum `u₀` and reaction nonlinearity `Q` bounded by `CQ`) obeys the uniform
+`L^∞` estimate `‖z‖ ≤ ‖u₀‖ + CQ·(T − t₀)` in the state space `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.
+Since `z = Φ(z)`, its norm is the norm of one self-map value, and `norm_heatMildValuePathBcfIcc_le`
+bounds that by the homogeneous propagator (`L^∞`-nonexpansive, contributing `‖u₀‖`) plus the Duhamel
+integral of the reaction source `s ↦ Q(z(projIcc s))` (uniformly bounded by `CQ`, contributing
+`CQ·(T − t₀)`).  This is the fourth pillar of the model reaction–diffusion well-posedness theory — the
+a-priori bound — alongside existence/uniqueness (`exists_unique_heatMildFixedPoint`) and continuous
+dependence on the data (`dist_heatMildFixedPoint_le`); the `C^0` centre-size estimate the mild
+Ricci–DeTurck representative supplies to the chart `picard` field. -/
+theorem norm_heatMildFixedPoint_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z) :
+    ‖z‖ ≤ ‖u₀‖ + CQ * (T - t₀) := by
+  calc ‖z‖ = ‖heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z‖ := by rw [hz]
+    _ ≤ ‖u₀‖ + CQ * (T - t₀) :=
+        norm_heatMildValuePathBcfIcc_le t₀ T u₀ hLnn hlip
+          (hQcont.comp (continuous_IccExtend_iff.mpr z.continuous))
+          (fun s y => le_trans ((Q (Set.IccExtend hT (⇑z) s)).norm_coe_le_norm y) (hQb _)) hT
+
 end AnalyticPDE
 end RicciFlow
