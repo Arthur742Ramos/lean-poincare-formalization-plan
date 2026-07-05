@@ -2306,6 +2306,45 @@ theorem continuousOn_of_forall_coord_continuousOn
   rw [hInd.continuousOn_iff, continuousOn_pi]
   exact hcoord
 
+/-- **A continuous section has a uniformly bounded compact coordinate readout.**  For a section `s`
+along a finite trivializing cover, the finite family of compact coordinate maps
+`(equivCompatibleCoordFamilySubmodule … s).1 i : C(Kc i, F)` — each a continuous function on the
+compact base piece `Kc i` — is uniformly bounded: there is a single constant `C ≥ 0` with
+`‖(coord s).1 i x‖ ≤ C` for every trivialization index `i` and base point `x ∈ Kc i`.  Each
+coordinate map is bounded by its sup-norm `‖(coord s).1 i‖` (finite because `Kc i` is compact) and
+the finite index family of these sup-norms is bounded above.  This is the existence form supplying
+the constant that `norm_le_of_forall_coord_norm_le` consumes as input, and is exactly the
+centre-readout size datum feeding the section-space Picard–Lindelöf `hcenter` hypothesis for a
+genuine (continuous) section such as the initial metric. -/
+theorem exists_forall_coord_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ i (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ ≤ C := by
+  classical
+  obtain ⟨C, hC⟩ :=
+    (Set.finite_range (fun i => ‖(equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i‖)).bddAbove
+  refine ⟨max C 0, le_max_right _ _, fun i x => ?_⟩
+  calc
+    ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖
+        ≤ ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i‖ :=
+      ContinuousMap.norm_coe_le_norm _ x
+    _ ≤ C := hC (Set.mem_range_self i)
+    _ ≤ max C 0 := le_max_left _ _
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
