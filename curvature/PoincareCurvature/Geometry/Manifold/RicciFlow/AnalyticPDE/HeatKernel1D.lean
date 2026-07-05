@@ -6605,5 +6605,116 @@ H_{t−s}(q s)(x) ds`, the sum of the homogeneous propagator and the Duhamel int
   simp only [heatMildValueNDbcf, BoundedContinuousFunction.add_apply, heatSemigroupNDbcf_apply,
     heatDuhamelNDbcf_of_continuous_apply]
 
+/-- **Time-continuity of the `n`-D heat kernel on `(0, ∞)`.**  For a fixed space point `z`, the map
+`t ↦ Kₙ(t, z) = ∏ᵢ K(t, zᵢ)` is continuous at every `t₁ > 0`, a finite product of the `1`-D
+time-continuities `continuousOn_heatKernel1D_time`. -/
+lemma continuousAt_heatKernelND_time {n : ℕ} {t₁ : ℝ} (ht₁ : 0 < t₁) (z : Fin n → ℝ) :
+    ContinuousAt (fun t => heatKernelND t z) t₁ := by
+  have hON : ContinuousOn (fun t => heatKernelND t z) (Set.Ioi (0 : ℝ)) := by
+    simp only [heatKernelND_apply]
+    exact continuousOn_finset_prod Finset.univ (fun i _ => continuousOn_heatKernel1D_time)
+  exact hON.continuousAt (Ioi_mem_nhds ht₁)
+
+/-- **Time-monotone domination of the `n`-D heat kernel on a compact time interval.**  For
+`0 < a ≤ t ≤ b`, the heat kernel at time `t` is dominated by a fixed (`t`-independent) constant
+multiple of the heat kernel at the right endpoint `b`:
+`Kₙ(t, w) ≤ ((4πa)^(-1/2)·(4πb)^(1/2))^n · Kₙ(b, w)`.  The prefactor `(4πt)^(-1/2)` is antitone in
+`t` (bounded above by its value at the left endpoint `a`) while the Gaussian `exp(-|w|²/(4t))` is
+monotone in `t` (bounded above by its value at the right endpoint `b`); the pointwise product bound,
+taken over the `n` coordinates, yields the constant.  This is the dominating function used in the
+dominated-convergence proof of the heat-semigroup's time-continuity. -/
+lemma heatKernelND_le_const_mul_heatKernelND_of_mem_Icc {n : ℕ} {a b t : ℝ}
+    (ha : 0 < a) (hta : a ≤ t) (htb : t ≤ b) (w : Fin n → ℝ) :
+    heatKernelND t w
+      ≤ ((4 * π * a) ^ (-(1 : ℝ) / 2) * (4 * π * b) ^ ((1 : ℝ) / 2)) ^ n * heatKernelND b w := by
+  have h4π : (0 : ℝ) < 4 * π := by positivity
+  have ht0 : 0 < t := lt_of_lt_of_le ha hta
+  have hb0 : 0 < b := lt_of_lt_of_le ht0 htb
+  have h4πa : (0 : ℝ) < 4 * π * a := mul_pos h4π ha
+  have h4πb : (0 : ℝ) < 4 * π * b := mul_pos h4π hb0
+  have hbb : (4 * π * b) ^ ((1 : ℝ) / 2) * (4 * π * b) ^ (-(1 : ℝ) / 2) = 1 := by
+    rw [← Real.rpow_add h4πb, show (1 : ℝ) / 2 + -(1 : ℝ) / 2 = 0 from by norm_num, Real.rpow_zero]
+  have hcoord : ∀ z : ℝ, heatKernel1D t z
+      ≤ ((4 * π * a) ^ (-(1 : ℝ) / 2) * (4 * π * b) ^ ((1 : ℝ) / 2)) * heatKernel1D b z := by
+    intro z
+    have hpref : (4 * π * t) ^ (-(1 : ℝ) / 2) ≤ (4 * π * a) ^ (-(1 : ℝ) / 2) :=
+      Real.rpow_le_rpow_of_nonpos h4πa (mul_le_mul_of_nonneg_left hta h4π.le) (by norm_num)
+    have hexp : Real.exp (-z ^ 2 / (4 * t)) ≤ Real.exp (-z ^ 2 / (4 * b)) := by
+      apply Real.exp_le_exp.2
+      rw [neg_div, neg_div, neg_le_neg_iff]
+      exact div_le_div_of_nonneg_left (sq_nonneg z) (by linarith) (by linarith)
+    have hcb : ((4 * π * a) ^ (-(1 : ℝ) / 2) * (4 * π * b) ^ ((1 : ℝ) / 2)) * heatKernel1D b z
+             = (4 * π * a) ^ (-(1 : ℝ) / 2) * Real.exp (-z ^ 2 / (4 * b)) := by
+      rw [heatKernel1D_apply,
+        show ((4 * π * a) ^ (-(1 : ℝ) / 2) * (4 * π * b) ^ ((1 : ℝ) / 2))
+              * ((4 * π * b) ^ (-(1 : ℝ) / 2) * Real.exp (-z ^ 2 / (4 * b)))
+            = (4 * π * a) ^ (-(1 : ℝ) / 2)
+              * ((4 * π * b) ^ ((1 : ℝ) / 2) * (4 * π * b) ^ (-(1 : ℝ) / 2))
+              * Real.exp (-z ^ 2 / (4 * b)) from by ring,
+        hbb, mul_one]
+    rw [hcb]
+    calc heatKernel1D t z
+        = (4 * π * t) ^ (-(1 : ℝ) / 2) * Real.exp (-z ^ 2 / (4 * t)) := rfl
+      _ ≤ (4 * π * a) ^ (-(1 : ℝ) / 2) * Real.exp (-z ^ 2 / (4 * b)) :=
+          mul_le_mul hpref hexp (Real.exp_pos _).le (Real.rpow_nonneg h4πa.le _)
+  calc heatKernelND t w
+      = ∏ i, heatKernel1D t (w i) := rfl
+    _ ≤ ∏ i, ((4 * π * a) ^ (-(1 : ℝ) / 2) * (4 * π * b) ^ ((1 : ℝ) / 2)) * heatKernel1D b (w i) :=
+        Finset.prod_le_prod (fun i _ => heatKernel1D_nonneg ht0 (w i)) (fun i _ => hcoord (w i))
+    _ = ((4 * π * a) ^ (-(1 : ℝ) / 2) * (4 * π * b) ^ ((1 : ℝ) / 2)) ^ n
+          * ∏ i, heatKernel1D b (w i) := by
+        rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+    _ = ((4 * π * a) ^ (-(1 : ℝ) / 2) * (4 * π * b) ^ ((1 : ℝ) / 2)) ^ n * heatKernelND b w := rfl
+
+/-- **Time-continuity of the `n`-D heat semigroup on `(0, ∞)`.**  For a bounded continuous datum
+`f` (`|f y| ≤ C`) and a fixed space point `x`, the map `t ↦ (Hₜf)(x) = ∫ Kₙ(t, x − y)·f(y) dy` is
+continuous at every `t₁ > 0`.  Dominated convergence: near `t₁` (on `Ioo (t₁/2) (2t₁)`) the
+integrand is dominated by the `t`-independent integrable envelope `c^n·Kₙ(2t₁, x − y)·C`
+(`heatKernelND_le_const_mul_heatKernelND_of_mem_Icc`), the integrand is continuous in `t` for a.e.
+`y` (`continuousAt_heatKernelND_time`), and measurable in `y`.  This is the propagator half of the
+time-continuity input required to lift the model mild-solution map to the path space
+`C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`. -/
+theorem continuousAt_heatSemigroupND_time {n : ℕ} {t₁ : ℝ} (ht₁ : 0 < t₁)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hf : Continuous f) (hb : ∀ y, |f y| ≤ C)
+    (x : Fin n → ℝ) :
+    ContinuousAt (fun t => heatSemigroupND t f x) t₁ := by
+  have hC : 0 ≤ C := (abs_nonneg (f x)).trans (hb x)
+  have ha : (0 : ℝ) < t₁ / 2 := by linarith
+  have haltt : t₁ / 2 < t₁ := by linarith
+  have httltb : t₁ < 2 * t₁ := by linarith
+  have hb0 : (0 : ℝ) < 2 * t₁ := by linarith
+  have hnhds : Set.Ioo (t₁ / 2) (2 * t₁) ∈ 𝓝 t₁ := Ioo_mem_nhds haltt httltb
+  show ContinuousAt (fun t => ∫ y : Fin n → ℝ, heatKernelND t (x - y) * f y) t₁
+  refine continuousAt_of_dominated
+    (bound := fun y : Fin n → ℝ =>
+      ((4 * π * (t₁ / 2)) ^ (-(1 : ℝ) / 2) * (4 * π * (2 * t₁)) ^ ((1 : ℝ) / 2)) ^ n
+        * heatKernelND (2 * t₁) (x - y) * C) ?_ ?_ ?_ ?_
+  · refine Filter.eventually_of_mem hnhds (fun t _ => ?_)
+    exact ((continuous_heatKernelND_sub t x).mul hf).aestronglyMeasurable
+  · refine Filter.eventually_of_mem hnhds (fun t ht => ?_)
+    refine Filter.Eventually.of_forall (fun y => ?_)
+    have htpos : 0 < t := lt_trans ha ht.1
+    rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (heatKernelND_nonneg htpos _)]
+    calc heatKernelND t (x - y) * |f y|
+        ≤ heatKernelND t (x - y) * C :=
+          mul_le_mul_of_nonneg_left (hb y) (heatKernelND_nonneg htpos _)
+      _ ≤ (((4 * π * (t₁ / 2)) ^ (-(1 : ℝ) / 2) * (4 * π * (2 * t₁)) ^ ((1 : ℝ) / 2)) ^ n
+            * heatKernelND (2 * t₁) (x - y)) * C :=
+          mul_le_mul_of_nonneg_right
+            (heatKernelND_le_const_mul_heatKernelND_of_mem_Icc ha ht.1.le ht.2.le _) hC
+      _ = ((4 * π * (t₁ / 2)) ^ (-(1 : ℝ) / 2) * (4 * π * (2 * t₁)) ^ ((1 : ℝ) / 2)) ^ n
+            * heatKernelND (2 * t₁) (x - y) * C := by ring
+  · exact ((integrable_heatKernelND_sub hb0 x).const_mul _).mul_const C
+  · refine Filter.Eventually.of_forall (fun y => ?_)
+    exact (continuousAt_heatKernelND_time ht₁ (x - y)).mul continuousAt_const
+
+/-- **Time-continuity of the `n`-D heat semigroup path on `(0, ∞)`.**  The `ContinuousOn` form of
+`continuousAt_heatSemigroupND_time`: for bounded continuous data the propagator path
+`t ↦ (Hₜf)(x)` is continuous on the open time ray `(0, ∞)`. -/
+theorem continuousOn_heatSemigroupND_time {n : ℕ}
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hf : Continuous f) (hb : ∀ y, |f y| ≤ C) (x : Fin n → ℝ) :
+    ContinuousOn (fun t => heatSemigroupND t f x) (Set.Ioi 0) :=
+  fun _t ht => (continuousAt_heatSemigroupND_time (Set.mem_Ioi.1 ht) hf hb x).continuousWithinAt
+
 end AnalyticPDE
 end RicciFlow
