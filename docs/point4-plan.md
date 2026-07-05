@@ -7532,3 +7532,53 @@ remaining analytic input the picard route now needs; or (ii) the a-posteriori ba
 `curve t ∈ closedBall x0 a` on `[t₀,T]`, upgrading `sectionSpace_evolution_exists_of_forall_coord_centerBound`
 to a full `BanachEvolutionLocalSolutionIn A locus t₀ x0` (the direct `realization` input) given
 `closedBall x0 a ⊆ locus`.
+
+Update — **the a-posteriori ball-membership route (ii) is now closed**: the honest ball-local
+centre-bound Picard data now yields a genuine state-constrained `BanachEvolutionLocalSolutionIn` on
+the *full* window (extending `AnalyticPDE/SectionSpacePicard.lean`, which now `public import`s
+`AnalyticPDE` so it can produce the `BanachEvolutionLocalSolutionIn` carrier; all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, `scan cheats` `TOTAL 0`, bare `lake build` green — 2911
+jobs, and the module itself green — 2960 jobs):
+
+* `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt_mem_closedBall` — **the missing
+  single-solution Picard–Lindelöf state-membership readout.**  Mathlib's differential
+  `exists_eq_forall_mem_Icc_hasDerivWithinAt` produces the local integral curve `α` but *discards*
+  the a-priori bound `α t ∈ closedBall x₀ a` (for all `t ∈ [tmin,tmax]`) that its own proof
+  establishes via `ODE.FunSpace.compProj_mem_closedBall`.  This variant mirrors that proof and
+  *retains* the ball-membership conjunct — the exact datum that upgrades a raw evolution curve to a
+  state-constrained solution.
+* `IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset` — **the closed-ball
+  a-posteriori bridge.**  From `IsPicardLindelof F ⟨t₀,_⟩ u₀ a 0 L K` and the containment
+  `closedBall u₀ a ⊆ stateSet`, the forward Picard solution — which stays in `closedBall u₀ a` on the
+  *whole* `[t₀,T]` — is a genuine `BanachEvolutionLocalSolutionIn F stateSet t₀ u₀` on the full
+  window, with **no** interval shrinking and **no** openness hypothesis (contrast
+  `exists_banachEvolutionLocalSolutionIn_of_mem_isOpen`, which shrinks the terminal time to keep the
+  curve inside an *open* set).  Since a `TimeDependentGeometricRicciDeTurckBanachChart` already
+  supplies `hT` and `picard`, this bridge takes `chart.hT`/`chart.picard` plus the ball containment
+  straight to the `realization` input shape.
+* `sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` — **route (ii)
+  capstone.**  From the honest centre-bound ball-local coordinatewise control (`K`-Lipschitz-in-
+  section on `closedBall x0 a`, time-continuity there, centre readout bound `‖(A t x0)ᵢ x‖ ≤ Mc`,
+  `(Mc + K·a)·(T − t₀) ≤ a`) *plus* the a-priori containment `closedBall x0 a ⊆ locus`, the
+  section-space operator `A` admits a genuine `BanachEvolutionLocalSolutionIn A locus t₀ x0` on
+  `[t₀,T]` — assembling `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` with the
+  closed-ball bridge.  This is precisely the state-constrained Banach solution a downstream
+  `realization` decode consumes, now from honest (not globally bounded) analytic input.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The `realization` *input* — a genuine
+`BanachEvolutionLocalSolutionIn chart.A (positiveDefiniteLocus …) …` on the full window — is now
+CONSTRUCTIBLE from `chart.picard` (equivalently, from the honest ball-local centre-bound analytic
+data) plus the single a-priori containment `closedBall (initial section) a ⊆ positiveDefiniteLocus`.
+The `picard` plumbing (both global-window and forward-endpoint forms) and this closed-ball
+solution-existence bridge are complete; the residual `A`/`picard` gap is purely the *analytic*
+production of the two coordinatewise size estimates (ball-Lipschitz `K`, centre-size `Mc`) for a
+concrete mild/regularised representative — the parabolic Schauder input — together with the geometric
+positivity fact `closedBall (g₀ section) a ⊆ positiveDefiniteLocus`.
+
+**Next target.** Either (i) the parabolic Schauder ball-Lipschitz `K` + centre-size `Mc` estimates
+(`hlip`/`hcenter`) for a concrete mild/regularised section-space representative `A` — the sole
+remaining analytic input the picard/solution route now needs; or (ii) the geometric a-priori
+positivity lemma `closedBall (g₀ section) a ⊆ positiveDefiniteLocus` (a short-time metric-cone
+containment) that discharges the last hypothesis of the closed-ball bridge; or (iii) the
+`realization` decode `RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution` that
+consumes the `BanachEvolutionLocalSolutionIn` now constructible.
