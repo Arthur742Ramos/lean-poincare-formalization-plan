@@ -7882,3 +7882,41 @@ fixed-point contraction ingredient); (ii) lift the explicit norm bounds through 
 to the section-space representative feeding `chart.lipschitz`/`picard`; or (iii) the `realization`
 decode consuming the ball-localised explicit `C^{0,α}` norm control via a parabolic Schauder interior
 estimate.
+
+## Milestone (2026-07-05) — spatial data-difference contraction of the model mild solution (GAP 2 Schauder contraction ingredient; plan Next-target (i))
+
+Progress on **Next target (i)** — the contraction/difference norm bound (two mild solutions differ by
+the data difference), the Schauder fixed-point contraction ingredient.  The prior milestones controlled
+the parabolic `C^{0,α}` norm of a *single* mild solution; this milestone controls the *difference* of
+two mild solutions (same reaction `Q`, initial data `u₀, v₀`) by the initial-data difference, in the
+spatial (`C^{0,α}`) directions and in the parabolic sup norm.  All in `HeatKernel1D.lean` /
+`HeatKernelParabolicC0Alpha.lean`, appended, `#print axioms`-clean.
+
+* `heatMildValueNDbcf_sub_spatial_lipschitz_bound` — **spatial `C¹` data-difference modulus of the
+  mild-solution value**: for data `u₀, v₀` (sup diff `≤ D₀`) and sources `q₁, q₂` (pointwise sup diff
+  `≤ D`), `|(Φ₁(t)(x) − Φ₂(t)(x)) − (Φ₁(t)(x') − Φ₂(t)(x'))| ≤ (n·D₀/√(π(t−t₀)) + 2nD·√(t−t₀)/√π)·‖x−x'‖`.
+  Assembles the homogeneous (`heatSemigroupND_sub_spatial_lipschitz_sqrt_rate_norm`) and Duhamel
+  (`heatSemigroupND_duhamel_sub_spatial_lipschitz_sqrt_bound`) difference building blocks, fusing the
+  four Duhamel integrals via `intervalIntegral.integral_sub`.
+* `heatMildFixedPoint_sub_spatial_lipschitz_bound` — **spatial `C¹` contraction of the model mild
+  solution**: for two genuine mild solutions `z, w`, the spatial modulus of `z − w` is controlled by
+  the *initial-data* difference, the Duhamel source difference sized by `Kstate·‖u₀−v₀‖/(1−Kstate(T−t₀))`
+  via `dist_heatMildFixedPoint_le`.
+* `heatMildValueNDbcf_sub_spatial_holder_bound` / `heatMildFixedPoint_sub_spatial_holder_bound` — the
+  **fractional-exponent** (`0 ≤ α ≤ 1`) companions, using the Hölder-scale homogeneous / Duhamel
+  difference building blocks; the full spatial `C^{0,α}` gain a Hölder-norm Schauder contraction reads.
+* `heatMildFixedPoint_parabolicSupNorm_sub_le` — the **`C^0` (sup) half in the parabolic framework**:
+  `parabolicSupNorm (z − w) s ≤ ‖u₀ − v₀‖/(1 − Kstate(T−t₀))`, packaging `dist_heatMildFixedPoint_le`
+  into `ParabolicBoundedWith` / `parabolicSupNorm_le`.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still on the `realization`/Schauder
+side of GAP 2.  The contraction estimate now has both halves in place at the spatial+sup level: the
+`C^0` part (`parabolicSupNorm` difference `≤` data difference) and the spatial `C^{0,α}` seminorm part
+(difference modulus `≤` data-difference constant).  This is exactly the interface a parabolic Schauder
+interior fixed-point iteration contracts in.
+
+**Next target.**  The one remaining piece for a full `parabolicC0AlphaNorm`-difference (direction (i)
+headline) is the **time**-difference modulus of two mild solutions (`‖(z−w)(t₂) − (z−w)(t₁)‖`
+`Hölder-1/2` in `√|Δt|`), which combines with the spatial difference modulus into a full parabolic
+`ParabolicHolderWith` bound on `z − w`.  Then (ii)/(iii): lift through the coordinate readout to the
+section-space representative feeding `chart.lipschitz`/`picard`, or the `realization` decode.
