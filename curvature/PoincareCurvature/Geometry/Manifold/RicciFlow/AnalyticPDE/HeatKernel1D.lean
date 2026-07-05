@@ -6049,5 +6049,79 @@ theorem heatSemigroupND_duhamel_spatial_holder_bound {n : ℕ} {t₀ t : ℝ} (h
   rw [hgval] at hmain
   simpa [hK] using hmain
 
+/-- **Spatial `C^{0,α}` (Hölder) contraction of the Duhamel term on a difference of reaction
+terms.**  The contraction companion of `heatSemigroupND_duhamel_spatial_holder_bound`: for two
+sup-norm-bounded reaction families `q₁, q₂` (`‖q₁ s y‖, ‖q₂ s y‖ ≤ C`) whose pointwise difference is
+bounded by `D` (`‖q₁ s y − q₂ s y‖ ≤ D`), the spatial `C^{0,α}` modulus of the Duhamel integral of
+the difference obeys, for every `0 ≤ α ≤ 1`,
+`|∫_{t₀}^{t} ((H_{t−s}(q₁ s)(x) − H_{t−s}(q₂ s)(x)) − (H_{t−s}(q₁ s)(x') − H_{t−s}(q₂ s)(x'))) ds|
+    ≤ (2D)^{1−α}·(D/√π)^α·n^α·‖x − x'‖^α · (t − t₀)^{1−α/2}/(1 − α/2)`.
+The heat semigroup's difference-Hölder rate `heatSemigroupND_sub_spatial_holder_seminorm_bound_norm`
+bounds the integrand by `const·(t − s)^{−α/2}`, integrated to the finite `(t − t₀)^{1−α/2}` time
+modulus by `integral_rpow_sub` through `intervalIntegral.norm_integral_le_of_norm_le`.  Together with
+the sup-norm difference contraction `heatSemigroupND_duhamel_sub_sup_bound`, this is the *Hölder
+seminorm* half of the full `C^{0,α}`-norm contraction of the mild-solution map — the estimate a
+Hölder-norm parabolic Schauder fixed point directly consumes to force uniqueness and existence of a
+mild Ricci–DeTurck flow. -/
+theorem heatSemigroupND_duhamel_sub_spatial_holder_bound {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    {q₁ q₂ : ℝ → (Fin n → ℝ) → ℝ} {C D : ℝ}
+    (h1m : ∀ s, AEStronglyMeasurable (q₁ s)) (h1b : ∀ s y, ‖q₁ s y‖ ≤ C)
+    (h2m : ∀ s, AEStronglyMeasurable (q₂ s)) (h2b : ∀ s y, ‖q₂ s y‖ ≤ C)
+    (hDb : ∀ s y, ‖q₁ s y - q₂ s y‖ ≤ D)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) (x x' : Fin n → ℝ) :
+    |∫ s in t₀..t, ((heatSemigroupND (t - s) (q₁ s) x - heatSemigroupND (t - s) (q₂ s) x)
+        - (heatSemigroupND (t - s) (q₁ s) x' - heatSemigroupND (t - s) (q₂ s) x'))|
+      ≤ (2 * D) ^ (1 - α) * (D / Real.sqrt π) ^ α * (n : ℝ) ^ α * ‖x - x'‖ ^ α
+          * ((t - t₀) ^ (1 - α / 2) / (1 - α / 2)) := by
+  have hD : 0 ≤ D := le_trans (norm_nonneg _) (hDb 0 0)
+  have hr : (-1 : ℝ) < -(α / 2) := by linarith
+  set K : ℝ := (2 * D) ^ (1 - α) * (D / Real.sqrt π) ^ α * (n : ℝ) ^ α * ‖x - x'‖ ^ α with hK
+  set g : ℝ → ℝ := fun s => K * (t - s) ^ (-(α / 2) : ℝ) with hg
+  have hpid : ∀ s, 0 < t - s →
+      (D / Real.sqrt (π * (t - s))) ^ α = (D / Real.sqrt π) ^ α * (t - s) ^ (-(α / 2) : ℝ) := by
+    intro s hpos
+    have hsp : (0 : ℝ) < Real.sqrt π := Real.sqrt_pos.mpr Real.pi_pos
+    have hDsp : 0 ≤ D / Real.sqrt π := div_nonneg hD hsp.le
+    have hts : (0 : ℝ) ≤ (t - s) ^ (-(1 / 2) : ℝ) := Real.rpow_nonneg hpos.le _
+    have hbase_eq : D / Real.sqrt (π * (t - s))
+        = (D / Real.sqrt π) * (t - s) ^ (-(1 / 2) : ℝ) := by
+      rw [Real.sqrt_mul Real.pi_pos.le, Real.rpow_neg hpos.le, ← Real.sqrt_eq_rpow]
+      field_simp
+    have hexp : (-(1 / 2 : ℝ)) * α = -(α / 2) := by ring
+    rw [hbase_eq, Real.mul_rpow hDsp hts, ← Real.rpow_mul hpos.le, hexp]
+  have hae : ∀ᵐ s ∂(volume : MeasureTheory.Measure ℝ), s ∈ Set.Ioc t₀ t →
+      ‖(heatSemigroupND (t - s) (q₁ s) x - heatSemigroupND (t - s) (q₂ s) x)
+        - (heatSemigroupND (t - s) (q₁ s) x' - heatSemigroupND (t - s) (q₂ s) x')‖ ≤ g s := by
+    have hset : {a : ℝ | ¬ a ≠ t} = {t} := by
+      ext s; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+    have htne : ∀ᵐ (s : ℝ), s ≠ t := by
+      rw [MeasureTheory.ae_iff, hset]; exact MeasureTheory.measure_singleton t
+    filter_upwards [htne] with s hs hmem
+    have hlt : s < t := lt_of_le_of_ne hmem.2 hs
+    have hpos : 0 < t - s := by linarith
+    rw [Real.norm_eq_abs]
+    refine (heatSemigroupND_sub_spatial_holder_seminorm_bound_norm hpos (h1m s) (h1b s)
+      (h2m s) (h2b s) (hDb s) hα0 hα1 x x').trans ?_
+    simp only [hg, hK]
+    rw [hpid s hpos]
+    refine le_of_eq ?_
+    ring
+  have hgint : IntervalIntegrable g volume t₀ t := by
+    have h4 : IntervalIntegrable (fun s : ℝ => (t - s) ^ (-(α / 2) : ℝ)) volume t₀ t := by
+      have hbase : IntervalIntegrable (fun z : ℝ => z ^ (-(α / 2) : ℝ)) volume 0 (t - t₀) :=
+        intervalIntegral.intervalIntegrable_rpow' hr
+      have h3 := hbase.comp_sub_left t
+      simpa using h3.symm
+    simp only [hg]
+    exact h4.const_mul _
+  have hmain := intervalIntegral.norm_integral_le_of_norm_le hT hae hgint
+  have hgval : (∫ s in t₀..t, g s) = K * ((t - t₀) ^ (1 - α / 2) / (1 - α / 2)) := by
+    simp only [hg]
+    rw [intervalIntegral.integral_const_mul, integral_rpow_sub t₀ t hr,
+      show (-(α / 2) + 1 : ℝ) = 1 - α / 2 by ring]
+  rw [Real.norm_eq_abs] at hmain
+  rw [hgval] at hmain
+  simpa [hK] using hmain
+
 end AnalyticPDE
 end RicciFlow
