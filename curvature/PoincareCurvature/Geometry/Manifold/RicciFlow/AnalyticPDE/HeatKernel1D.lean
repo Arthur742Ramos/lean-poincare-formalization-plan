@@ -6186,5 +6186,39 @@ theorem heatSemigroupND_duhamel_sub_spatial_lipschitz_sqrt_bound {n : ℕ} {t₀
   rw [hgval] at hmain
   exact hmain
 
+/-- **Spatial continuity of the `n`-dimensional heat semigroup on bounded continuous data.**
+For `t > 0` and a bounded continuous input `f` (`|f y| ≤ C`), the heat-smoothed function
+`x ↦ (Hₜf)(x) = ∫ y, Kₙ(t, x − y)·f y dy` is continuous.  Via the reflection change of variables
+`y ↦ x − y` (`integral_sub_left_eq_self`, `volume` on `Fin n → ℝ` being negation- and
+translation-invariant), `(Hₜf)(x) = ∫ z, Kₙ(t, z)·f(x − z) dz`; for each fixed `z` the integrand is
+continuous in `x` (translation of the continuous `f`), and it is dominated by the `x`-independent
+integrable envelope `z ↦ Kₙ(t, z)·C`, so `continuous_of_dominated` yields continuity.  This is the
+continuity input that lets the mild-solution map `Φ(u)(t) = H_{t−t₀}u₀ + ∫ H_{t−s}Q(u(s)) ds` act on
+the complete metric space of bounded continuous functions — a prerequisite for realising the
+Banach-fixed-point mild representative that the parabolic Ricci–DeTurck chart consumes. -/
+theorem continuous_heatSemigroupND {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hf : Continuous f) (hb : ∀ y, |f y| ≤ C) :
+    Continuous (fun x : Fin n → ℝ => heatSemigroupND t f x) := by
+  have hCoV : (fun x : Fin n → ℝ => heatSemigroupND t f x)
+      = fun x : Fin n → ℝ => ∫ z : Fin n → ℝ, heatKernelND t z * f (x - z) := by
+    funext x
+    rw [heatSemigroupND,
+      ← integral_sub_left_eq_self (fun z => heatKernelND t z * f (x - z)) volume x]
+    refine integral_congr_ae (Filter.Eventually.of_forall (fun y => ?_))
+    simp only [sub_sub_cancel]
+  rw [hCoV]
+  refine continuous_of_dominated
+    (F := fun (x z : Fin n → ℝ) => heatKernelND t z * f (x - z))
+    (bound := fun z : Fin n → ℝ => heatKernelND t z * C)
+    (fun x => ?_) (fun x => ?_) ?_ ?_
+  · exact ((continuous_heatKernelND t).mul
+      (hf.comp (continuous_const.sub continuous_id))).aestronglyMeasurable
+  · refine Filter.Eventually.of_forall (fun z => ?_)
+    rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (heatKernelND_nonneg ht z)]
+    exact mul_le_mul_of_nonneg_left (hb (x - z)) (heatKernelND_nonneg ht z)
+  · exact (integrable_heatKernelND ht).mul_const C
+  · refine Filter.Eventually.of_forall (fun z => ?_)
+    exact continuous_const.mul (hf.comp (continuous_id.sub continuous_const))
+
 end AnalyticPDE
 end RicciFlow
