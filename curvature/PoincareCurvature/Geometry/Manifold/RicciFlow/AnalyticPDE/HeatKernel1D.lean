@@ -7924,5 +7924,105 @@ theorem dist_heatMildValuePathBcfIcc_le {n : ℕ} (t₀ T : ℝ)
           have hle : (t : ℝ) ≤ T := t.2.2
           gcongr
 
+/-- **The mild-solution self-map on the closed-interval Banach state space.**  Given a bounded
+continuous reaction nonlinearity `Q` and an `L`-Lipschitz initial datum `u₀`, this is the semilinear
+mild-solution operator `Φ(u) = t ↦ H_{t−t₀}u₀ + ∫_{t₀}^{t} H_{t−s}(Q(u(s))) ds` on the complete state
+space `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.  The iterate `u` is extended off the interval by the
+continuous clamp `Set.IccExtend`, so the reaction source `s ↦ Q(u(projIcc s))` is globally continuous
+and uniformly bounded (`hQb`), and `heatMildValuePathBcfIcc` bundles the resulting mild-value path as
+a closed-interval state-space element. -/
+noncomputable def heatMildSelfMap {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ) :
+    (BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ)) →
+      (BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ)) :=
+  fun u => heatMildValuePathBcfIcc t₀ T u₀ hLnn hlip
+    (hQcont.comp (continuous_IccExtend_iff.mpr u.continuous))
+    (fun s y => le_trans ((Q (Set.IccExtend hT (⇑u) s)).norm_coe_le_norm y) (hQb _))
+
+/-- **Short-time contraction of the mild-solution self-map.**  If the reaction nonlinearity `Q` is
+`Kstate`-Lipschitz, then `dist (Φ(u)) (Φ(v)) ≤ Kstate·(T − t₀)·dist(u, v)`.  The reaction sources
+differ pointwise by `‖Q(u(p)) − Q(v(p))‖ ≤ Kstate·‖u(p) − v(p)‖ ≤ Kstate·dist(u, v)` (nonexpansiveness
+of the clamp `Set.IccExtend`), and `dist_heatMildValuePathBcfIcc_le` propagates this to the whole
+path with the extra `(T − t₀)` factor.  For `Kstate·(T − t₀) < 1` this is a genuine contraction. -/
+theorem dist_heatMildSelfMap_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    {Kstate : ℝ} (hKnn : 0 ≤ Kstate)
+    (hQlip : ∀ v w, ‖Q v - Q w‖ ≤ Kstate * ‖v - w‖)
+    (u v : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ)) :
+    dist (heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb u)
+        (heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb v)
+      ≤ Kstate * (T - t₀) * dist u v := by
+  have hdv : (0 : ℝ) ≤ dist u v := dist_nonneg
+  have hD : ∀ s y, ‖(Q (Set.IccExtend hT (⇑u) s)) y - (Q (Set.IccExtend hT (⇑v) s)) y‖
+      ≤ Kstate * dist u v := by
+    intro s y
+    have hpt : ‖(Q (Set.IccExtend hT (⇑u) s)) y - (Q (Set.IccExtend hT (⇑v) s)) y‖
+        ≤ ‖Q (Set.IccExtend hT (⇑u) s) - Q (Set.IccExtend hT (⇑v) s)‖ := by
+      rw [← BoundedContinuousFunction.sub_apply]
+      exact (Q (Set.IccExtend hT (⇑u) s) - Q (Set.IccExtend hT (⇑v) s)).norm_coe_le_norm y
+    have hext : ‖Set.IccExtend hT (⇑u) s - Set.IccExtend hT (⇑v) s‖ ≤ dist u v := by
+      have h1 : Set.IccExtend hT (⇑u) s - Set.IccExtend hT (⇑v) s
+          = (u - v) (Set.projIcc t₀ T hT s) := by
+        show (⇑u) (Set.projIcc t₀ T hT s) - (⇑v) (Set.projIcc t₀ T hT s)
+            = (u - v) (Set.projIcc t₀ T hT s)
+        rw [BoundedContinuousFunction.sub_apply]
+      rw [h1]
+      calc ‖(u - v) (Set.projIcc t₀ T hT s)‖
+          ≤ ‖u - v‖ := (u - v).norm_coe_le_norm _
+        _ = dist u v := (dist_eq_norm u v).symm
+    calc ‖(Q (Set.IccExtend hT (⇑u) s)) y - (Q (Set.IccExtend hT (⇑v) s)) y‖
+        ≤ ‖Q (Set.IccExtend hT (⇑u) s) - Q (Set.IccExtend hT (⇑v) s)‖ := hpt
+      _ ≤ Kstate * ‖Set.IccExtend hT (⇑u) s - Set.IccExtend hT (⇑v) s‖ := hQlip _ _
+      _ ≤ Kstate * dist u v := mul_le_mul_of_nonneg_left hext hKnn
+  have hmain := dist_heatMildValuePathBcfIcc_le t₀ T u₀ hLnn hlip
+    (hQcont.comp (continuous_IccExtend_iff.mpr u.continuous))
+    (hQcont.comp (continuous_IccExtend_iff.mpr v.continuous))
+    (fun s y => le_trans ((Q (Set.IccExtend hT (⇑u) s)).norm_coe_le_norm y) (hQb _))
+    (fun s y => le_trans ((Q (Set.IccExtend hT (⇑v) s)).norm_coe_le_norm y) (hQb _))
+    hD hT
+  calc dist (heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb u)
+        (heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb v)
+      ≤ Kstate * dist u v * (T - t₀) := hmain
+    _ = Kstate * (T - t₀) * dist u v := by ring
+
+/-- **Existence and uniqueness of the model mild solution (path-space Banach fixed point).**  For an
+`L`-Lipschitz initial datum `u₀`, a bounded `Kstate`-Lipschitz reaction nonlinearity `Q`, and a short
+time window `Kstate·(T − t₀) < 1`, the mild-solution self-map `heatMildSelfMap` has a *unique* fixed
+point in the complete state space `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.  This is the genuine model
+mild solution of the `n`-dimensional semilinear reaction–diffusion equation `u_t = Δu + Q(u)`,
+`u(t₀) = u₀`, obtained from mathlib's `ContractingWith` fixed-point theorem
+(`banach_fixedPoint_exists_unique`) via the short-time contraction `dist_heatMildSelfMap_le` — the
+analytic template for the mild Ricci–DeTurck representative feeding the chart `A`/`picard`. -/
+theorem exists_unique_heatMildFixedPoint {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    {Kstate : ℝ} (hKnn : 0 ≤ Kstate)
+    (hQlip : ∀ v w, ‖Q v - Q w‖ ≤ Kstate * ‖v - w‖)
+    (hsmall : Kstate * (T - t₀) < 1) :
+    ∃! z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ),
+      heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z := by
+  have hTt : (0 : ℝ) ≤ T - t₀ := by linarith
+  have hknn : (0 : ℝ) ≤ Kstate * (T - t₀) := mul_nonneg hKnn hTt
+  have hlip' : LipschitzWith (Real.toNNReal (Kstate * (T - t₀)))
+      (heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb) := by
+    apply LipschitzWith.of_dist_le_mul
+    intro u v
+    rw [Real.coe_toNNReal (Kstate * (T - t₀)) hknn]
+    exact dist_heatMildSelfMap_le hT u₀ hLnn hlip Q hQcont hQb hKnn hQlip u v
+  have hcontr : ContractingWith (Real.toNNReal (Kstate * (T - t₀)))
+      (heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb) := by
+    refine ⟨?_, hlip'⟩
+    rw [← NNReal.coe_lt_coe, NNReal.coe_one, Real.coe_toNNReal (Kstate * (T - t₀)) hknn]
+    exact hsmall
+  exact banach_fixedPoint_exists_unique _ hcontr
+
 end AnalyticPDE
 end RicciFlow
