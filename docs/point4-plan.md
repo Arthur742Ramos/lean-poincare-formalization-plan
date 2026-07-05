@@ -7163,3 +7163,55 @@ space this session's operator now lives on — not a direct Mathlib Banach ODE. 
 bounded; needs the Duhamel integrand's `s`-continuity/measurability), then the short-time-contraction
 Banach fixed point `Hₜu₀ + Duhamel(Q u)` giving a genuine mild solution of the ND reaction–diffusion
 model.
+
+Update — **the model (`ℝⁿ`) mild-solution map is now built as a genuine Banach-space object with its
+complete short-time fixed-point datum**, extending `AnalyticPDE/HeatKernel1D.lean` (all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, cheat-scan `TOTAL 0`, full aggregate green).  The previous
+milestone realised the *homogeneous* propagator `Hₜ` as a bounded linear operator on the Banach space
+`(Fin n → ℝ) →ᵇ ℝ`; the committed pointwise Duhamel Schauder bounds still lived on the bare curried
+type carrying no complete-metric structure.  This session bundles the *inhomogeneous* half and the full
+map value on that Banach state space, completing the model mild map's self-map + contraction data:
+
+* `heatDuhamelNDbcf` / `heatDuhamelNDbcf_apply` — the Duhamel term `x ↦ ∫_{t₀}^{t} H_{t−s}(q s)(x) ds`
+  as a `BoundedContinuousFunction`, for a sup-norm-`C`-bounded source `q : ℝ → (Fin n → ℝ) →ᵇ ℝ` whose
+  Duhamel integrand is per-`x` interval-integrable.  Continuity is **Lipschitz** continuity from the
+  committed spatial `C¹` Schauder gain `heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound`
+  (`|D(x)−D(x')| ≤ 2nC√(t−t₀)/√π·‖x−x'‖`, splitting the Duhamel integral of the difference via
+  `intervalIntegral.integral_sub`); boundedness (`‖·‖ ≤ C·(t−t₀)`) is `heatSemigroupND_duhamel_sup_bound`.
+* `norm_heatDuhamelNDbcf_le` / `norm_heatDuhamelNDbcf_sub_le` — the Banach-space (`norm_le`) forms of the
+  Duhamel sup / sub-sup bounds: `‖heatDuhamelNDbcf q‖ ≤ C·(t−t₀)` (self-map) and
+  `‖heatDuhamelNDbcf q₁ − heatDuhamelNDbcf q₂‖ ≤ D·(t−t₀)` (short-time contraction, from
+  `‖q₁ s y − q₂ s y‖ ≤ D`).
+* `measurable_uncurry_heatKernel1D` / `measurable_uncurry_heatKernelND` — the heat kernel is **jointly
+  measurable** in `(t, x)` (Gaussian formula via `fun_prop`; finite product for the `n`-D kernel).
+* `intervalIntegrable_heatSemigroupND_duhamel` — **discharges the integrability side-condition** from
+  mere *continuity* of the source: measurability of the parametric Duhamel integral
+  `s ↦ ∫_y Kₙ(t−s, x−y)·(q s)(y) dy` via `AEStronglyMeasurable.integral_prod_right'` (kernel factor
+  jointly measurable, source factor from joint eval-continuity of `q : ℝ → BCF`), bounded a.e. by `C` on
+  `(t₀, t]` (`abs_heatSemigroupND_le`, `s = t` null), hence interval-integrable.
+* `heatDuhamelNDbcf_of_continuous` (+ `_apply`, `norm_…_le`, `norm_…_sub_le`) — the Duhamel BCF with
+  **no free integrability hypothesis**, the form the mild fixed point (`q s = Q(u s)` continuous)
+  consumes.
+* `heatMildValueNDbcf` (+ `_apply`) — the **full mild-map value** `Φ(t) = H_{t−t₀}u₀ +
+  ∫_{t₀}^{t} H_{t−s}(q s) ds` as a `BCF`, and its two fixed-point bounds:
+  `norm_heatMildValueNDbcf_le` (self-map, `‖Φ(t)‖ ≤ ‖u₀‖ + C·(t−t₀)`, triangle + `L∞`-nonexpansive `H`)
+  and `norm_heatMildValueNDbcf_sub_le` (contraction, `‖Φ(q₁)(t) − Φ(q₂)(t)‖ ≤ D·(t−t₀)` — the
+  source-independent homogeneous part cancels, leaving the Duhamel contraction).  The complete Banach
+  fixed-point datum (self-map ∧ short-time contraction) for the model mild ND heat flow.
+
+**Formulation finding (re-confirmed, per directive).**  Unchanged: for a *general* initial metric the
+true 2nd-order Ricci–DeTurck RHS is `C⁰`-unbounded, so the chart field `A`'s `geometric` obligation
+(`A = intrinsicRicciDeTurckRHS` on the positive-definite locus) cannot coexist with a `C⁰`-bounded `A`
+satisfying `picard : IsPicardLindelof A` directly; the honest route is the **mild / regularised**
+representative — the Banach fixed point `Hₜu₀ + Duhamel(Q u)` on the complete state space this session's
+`heatMildValueNDbcf` now inhabits — with the obstruction moving into `D`'s `realization`/`encode` (a
+regularised Banach solution decoding to a genuine geometric solution needs the parabolic Schauder gain,
+now available in the Duhamel `_spatial_holder`/`_spatial_lipschitz` bounds).  The trivial (empty /
+rank-`≤1`) closures already exist directly and are **not** on the general-`M` critical path.
+
+**Next target.**  Lift the fixed-time mild-map value to the **time-path space** `C([t₀, T], (Fin n → ℝ)
+→ᵇ ℝ)`: the missing analytic input is **time-continuity** of the propagator/Duhamel/mild-value paths
+`t ↦ heatMildValueNDbcf …` (ND heat-semigroup time-continuity), after which the committed per-time
+`norm_heatMildValueNDbcf_sub_le` gives the path-space short-time contraction and the Banach fixed point
+yields a genuine mild solution of the ND reaction–diffusion model — the model template for the mild
+Ricci–DeTurck representative feeding `A`/`picard`.
