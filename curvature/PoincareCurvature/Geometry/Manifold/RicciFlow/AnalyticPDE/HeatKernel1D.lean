@@ -7504,5 +7504,43 @@ theorem continuousAt_heatDuhamelPathBcf {n : ℕ} (t₀ : ℝ) {t₁ : ℝ}
     rw [← hsa, ← Real.norm_eq_abs]
     exact (q (t - u) - q (t₁ - u)).norm_coe_le_norm y
 
+/-- The value of the mild-solution map as a *total* `BCF`-valued path `ℝ → (Fin n → ℝ) →ᵇ ℝ`, the sum
+of the homogeneous propagator path `t ↦ H_{t−t₀}u₀` (`heatFlowPathBcf` shifted) and the inhomogeneous
+Duhamel path `t ↦ ∫_{t₀}^{t} H_{t−s}(q s) ds` (`heatDuhamelPathBcf`).  For `t > t₀` this agrees with
+`heatMildValueNDbcf` (`heatMildValuePathBcf_of_lt`). -/
+noncomputable def heatMildValuePathBcf {n : ℕ} (t₀ : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ :=
+  fun t => heatFlowPathBcf u₀ (t - t₀) + heatDuhamelPathBcf t₀ hq hqb t
+
+/-- For `t > t₀` the total mild-value path agrees with the fixed-time mild-solution value
+`heatMildValueNDbcf`. -/
+lemma heatMildValuePathBcf_of_lt {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    heatMildValuePathBcf t₀ u₀ hq hqb t = heatMildValueNDbcf ht u₀ hq hqb := by
+  rw [heatMildValuePathBcf, heatFlowPathBcf_of_pos u₀ (show (0 : ℝ) < t - t₀ by linarith),
+    heatDuhamelPathBcf_of_le ht.le hq hqb, heatMildValueNDbcf]
+
+/-- **`BCF`-norm time-continuity of the mild-solution path.**  For bounded continuous initial datum
+`u₀` and a continuous, uniformly sup-norm-bounded `BCF`-valued reaction source `q`, the mild-solution
+path `t ↦ Φ(t) = H_{t−t₀}u₀ + ∫_{t₀}^{t} H_{t−s}(q s) ds` is continuous at every `t₁ > t₀` in the
+Banach space `(Fin n → ℝ) →ᵇ ℝ`.  It is the sum of the `BCF`-norm-continuous homogeneous propagator
+path `continuousAt_heatFlowPathBcf_shift` and the singular-endpoint Duhamel path
+`continuousAt_heatDuhamelPathBcf`.  Together with the per-time short-time contraction
+`norm_heatMildValueNDbcf_sub_le`, this makes the mild-solution map a genuine element of the path space
+`C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)` — the model template for the mild Ricci–DeTurck representative feeding
+the chart `A`/`picard`. -/
+theorem continuousAt_heatMildValuePathBcf {n : ℕ} (t₀ : ℝ) {t₁ : ℝ}
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (ht : t₀ < t₁) :
+    ContinuousAt (heatMildValuePathBcf t₀ u₀ hq hqb) t₁ :=
+  (continuousAt_heatFlowPathBcf_shift u₀ ht).add
+    (continuousAt_heatDuhamelPathBcf t₀ hq hqb ht)
+
 end AnalyticPDE
 end RicciFlow
