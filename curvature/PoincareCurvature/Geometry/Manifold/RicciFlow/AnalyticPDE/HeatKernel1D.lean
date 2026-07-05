@@ -5790,5 +5790,25 @@ theorem heatSemigroupND_sub_spatial_lipschitz_sqrt_rate_norm {n : ℕ} {t : ℝ}
       ← heatSemigroupND_sub ht x' hfm hfb hgm hgb]
   exact heatSemigroupND_spatial_lipschitz_sqrt_rate_norm ht (hfm.sub hgm) hD x x'
 
+/-- **Spatial `C^{0,α}` Schauder modulus of a difference of heat-smoothed data.**  The Hölder-scale
+companion of `heatSemigroupND_sub_spatial_lipschitz_sqrt_rate_norm`: for every exponent
+`0 ≤ α ≤ 1`, the difference `Hₜf − Hₜg` obeys the ambient-sup-norm Hölder modulus
+`|(Hₜf(x) − Hₜg(x)) − (Hₜf(x') − Hₜg(x'))| ≤ (2D)^{1−α}·(D/√(πt))^α·n^α·‖x − x'‖^α`
+with `D ≥ ‖f − g‖∞`.  Obtained from `heatSemigroupND_sub` and
+`heatSemigroupND_spatial_holder_seminorm_bound_norm` applied to `f − g`.  This is the `C^{0,α}`
+contraction-in-modulus estimate on differences on which a parabolic Schauder fixed-point argument
+(contraction in a Hölder norm) for a mild Ricci–DeTurck representative directly rests. -/
+theorem heatSemigroupND_sub_spatial_holder_seminorm_bound_norm {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f g : (Fin n → ℝ) → ℝ} {C D : ℝ}
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    (hgm : AEStronglyMeasurable g) (hgb : ∀ y, ‖g y‖ ≤ C)
+    (hD : ∀ y, ‖f y - g y‖ ≤ D) {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) (x x' : Fin n → ℝ) :
+    |(heatSemigroupND t f x - heatSemigroupND t g x)
+        - (heatSemigroupND t f x' - heatSemigroupND t g x')|
+      ≤ (2 * D) ^ (1 - α) * (D / Real.sqrt (π * t)) ^ α * (n : ℝ) ^ α * ‖x - x'‖ ^ α := by
+  rw [← heatSemigroupND_sub ht x hfm hfb hgm hgb,
+      ← heatSemigroupND_sub ht x' hfm hfb hgm hgb]
+  exact heatSemigroupND_spatial_holder_seminorm_bound_norm ht (hfm.sub hgm) hD hα0 hα1 x x'
+
 end AnalyticPDE
 end RicciFlow
