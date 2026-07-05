@@ -5303,5 +5303,105 @@ theorem heatSemigroupND_coord_holder_seminorm_bound {n : ℕ} {t : ℝ} (ht : 0 
     _ = (2 * C) ^ (1 - α) * ((C / Real.sqrt (π * t)) ^ α * |a - b| ^ α) := by rw [hsplitq]
     _ = (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * |a - b| ^ α := by ring
 
+/-- **`n`-dimensional full spatial `C¹` parabolic Schauder smoothing rate.**  Summing the
+coordinate-slice gradient rate `heatSemigroupND_coord_lipschitz_sqrt_rate` along a coordinate
+path from `x` to `y` (telescoping through the hybrid points that agree with `y` below the current
+coordinate and with `x` at/above it) gives the full spatial bound
+`|Hₜf(x) − Hₜf(y)| ≤ (‖f‖∞/√(πt))·∑_i |x_i − y_i|`.  This is the true Schauder-form gradient
+estimate over the whole space, of which the coordinate-slice rate is one summand. -/
+theorem heatSemigroupND_spatial_lipschitz_sqrt_rate {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    (x y : Fin n → ℝ) :
+    |heatSemigroupND t f x - heatSemigroupND t f y|
+      ≤ (C / Real.sqrt (π * t)) * ∑ i : Fin n, |x i - y i| := by
+  classical
+  set w : ℕ → (Fin n → ℝ) := fun j i => if (i : ℕ) < j then y i else x i with hw
+  have hw0 : w 0 = x := by funext i; simp [hw]
+  have hwn : w n = y := by
+    funext i; simp only [hw]; rw [if_pos i.isLt]
+  have hstep : ∀ j : ℕ, ∀ hj : j < n,
+      |heatSemigroupND t f (w j) - heatSemigroupND t f (w (j + 1))|
+        ≤ (C / Real.sqrt (π * t)) * |x ⟨j, hj⟩ - y ⟨j, hj⟩| := by
+    intro j hj
+    have hA : Function.update (w j) ⟨j, hj⟩ (x ⟨j, hj⟩) = w j := by
+      funext i
+      by_cases hik : i = ⟨j, hj⟩
+      · subst hik; rw [Function.update_self]; simp only [hw]; rw [if_neg (by simp)]
+      · rw [Function.update_of_ne hik]
+    have hB : Function.update (w j) ⟨j, hj⟩ (y ⟨j, hj⟩) = w (j + 1) := by
+      funext i
+      by_cases hik : i = ⟨j, hj⟩
+      · subst hik; rw [Function.update_self]; simp only [hw]; rw [if_pos (by simp)]
+      · rw [Function.update_of_ne hik]
+        have hij : (i : ℕ) ≠ j := fun h => hik (Fin.ext (by simpa using h))
+        simp only [hw]
+        by_cases hlt : (i : ℕ) < j
+        · rw [if_pos hlt, if_pos (Nat.lt_succ_of_lt hlt)]
+        · rw [if_neg hlt, if_neg (by omega)]
+    have hcoord := heatSemigroupND_coord_lipschitz_sqrt_rate ht (w j) ⟨j, hj⟩ hfm hfb
+      (x ⟨j, hj⟩) (y ⟨j, hj⟩)
+    rw [hA, hB] at hcoord
+    exact hcoord
+  have htel : heatSemigroupND t f x - heatSemigroupND t f y
+      = ∑ j ∈ Finset.range n,
+          (heatSemigroupND t f (w j) - heatSemigroupND t f (w (j + 1))) := by
+    rw [← hw0, ← hwn, Finset.sum_range_sub' (fun j => heatSemigroupND t f (w j)) n]
+  set g : ℕ → ℝ := fun j => if h : j < n then |x ⟨j, h⟩ - y ⟨j, h⟩| else 0 with hg
+  have hgsum : ∑ i : Fin n, |x i - y i| = ∑ j ∈ Finset.range n, g j := by
+    rw [← Fin.sum_univ_eq_sum_range g n]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    simp only [hg, i.isLt, dif_pos]
+  rw [htel, hgsum, Finset.mul_sum]
+  calc |∑ j ∈ Finset.range n,
+          (heatSemigroupND t f (w j) - heatSemigroupND t f (w (j + 1)))|
+      ≤ ∑ j ∈ Finset.range n,
+          |heatSemigroupND t f (w j) - heatSemigroupND t f (w (j + 1))| :=
+        Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ j ∈ Finset.range n, (C / Real.sqrt (π * t)) * g j := by
+        refine Finset.sum_le_sum (fun j hj => ?_)
+        have hjn : j < n := Finset.mem_range.mp hj
+        have hst := hstep j hjn
+        simp only [hg, hjn, dif_pos]
+        exact hst
+
+/-- **`n`-dimensional full spatial `C^{0,α}` parabolic Schauder seminorm bound.**  Interpolating
+the sup bound `|Hₜf(x) − Hₜf(y)| ≤ 2‖f‖∞` against the full spatial Lipschitz rate
+`heatSemigroupND_spatial_lipschitz_sqrt_rate` gives, for every Hölder exponent `0 ≤ α ≤ 1`,
+`|Hₜf(x) − Hₜf(y)| ≤ (2‖f‖∞)^{1−α}·(‖f‖∞/√(πt))^α·(∑_i |x_i − y_i|)^α`.  The whole-space
+`C^{0,α}` seminorm gain that a Schauder estimate directly consumes. -/
+theorem heatSemigroupND_spatial_holder_seminorm_bound {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) (x y : Fin n → ℝ) :
+    |heatSemigroupND t f x - heatSemigroupND t f y|
+      ≤ (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α
+          * (∑ i : Fin n, |x i - y i|) ^ α := by
+  set S := ∑ i : Fin n, |x i - y i| with hS
+  have hSnn : 0 ≤ S := Finset.sum_nonneg (fun i _ => abs_nonneg _)
+  have hfabs : ∀ z, |f z| ≤ C := fun z => by simpa [Real.norm_eq_abs] using hfb z
+  set D := |heatSemigroupND t f x - heatSemigroupND t f y| with hD
+  have hsupx : |heatSemigroupND t f x| ≤ C := abs_heatSemigroupND_le ht x hfabs
+  have hsupy : |heatSemigroupND t f y| ≤ C := abs_heatSemigroupND_le ht y hfabs
+  have hsup : D ≤ 2 * C := by
+    calc D ≤ |heatSemigroupND t f x| + |heatSemigroupND t f y| := abs_sub _ _
+      _ ≤ C + C := add_le_add hsupx hsupy
+      _ = 2 * C := by ring
+  have hlip : D ≤ (C / Real.sqrt (π * t)) * S :=
+    heatSemigroupND_spatial_lipschitz_sqrt_rate ht hfm hfb x y
+  have hcoef_nn : (0 : ℝ) ≤ C / Real.sqrt (π * t) := by
+    have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+    have hpt : (0 : ℝ) < Real.sqrt (π * t) := Real.sqrt_pos.mpr (by positivity)
+    positivity
+  have hp_nn : (0 : ℝ) ≤ 2 * C := by
+    have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0); positivity
+  have hq_nn : (0 : ℝ) ≤ (C / Real.sqrt (π * t)) * S := mul_nonneg hcoef_nn hSnn
+  have hDmin : D ≤ min (2 * C) ((C / Real.sqrt (π * t)) * S) := le_min hsup hlip
+  have hstep := min_le_rpow_mul_rpow hp_nn hq_nn hα0 hα1
+  have hsplit : ((C / Real.sqrt (π * t)) * S) ^ α
+      = (C / Real.sqrt (π * t)) ^ α * S ^ α := Real.mul_rpow hcoef_nn hSnn
+  calc D ≤ min (2 * C) ((C / Real.sqrt (π * t)) * S) := hDmin
+    _ ≤ (2 * C) ^ (1 - α) * ((C / Real.sqrt (π * t)) * S) ^ α := hstep
+    _ = (2 * C) ^ (1 - α) * ((C / Real.sqrt (π * t)) ^ α * S ^ α) := by rw [hsplit]
+    _ = (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * S ^ α := by ring
+
 end AnalyticPDE
 end RicciFlow
