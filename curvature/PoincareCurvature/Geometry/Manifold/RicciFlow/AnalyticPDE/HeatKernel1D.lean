@@ -8131,5 +8131,32 @@ theorem dist_heatMildFixedPoint_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
   rw [le_div_iff₀ hpos]
   nlinarith [htri]
 
+/-- **A fixed point of the mild-solution self-map genuinely solves the Duhamel integral equation.**
+For a fixed point `z` of `heatMildSelfMap` (for initial datum `u₀` and reaction `Q`), every interior
+value `z(t)(x)` (`t₀ < t`) is the pointwise mild-solution formula
+`z(t)(x) = H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t} H_{t−s}(Q(z(projIcc s)))(x) ds`, the sum of the homogeneous heat
+propagator applied to the initial datum and the Duhamel integral of the reaction along the trajectory
+`s ↦ Q(z(projIcc s))` (with `z` extended off `[t₀, T]` by the continuous clamp `Set.IccExtend`).  This
+upgrades the abstract Banach fixed point `exists_unique_heatMildFixedPoint` to a genuine **mild
+solution** of the `n`-dimensional semilinear reaction–diffusion equation `u_t = Δu + Q(u)`,
+`u(t₀) = u₀`, obtained by unfolding the fixed-point identity through `heatMildValuePathBcfIcc_apply`,
+`heatMildValuePathBcf_of_lt`, and `heatMildValueNDbcf_apply`.  The concrete integral-equation form is
+what a downstream decode of the mild representative into a genuine local solution consumes. -/
+theorem heatMildFixedPoint_apply {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t : ↥(Set.Icc t₀ T)} (ht : t₀ < (t : ℝ)) (x : Fin n → ℝ) :
+    z t x = heatSemigroupND ((t : ℝ) - t₀) (⇑u₀) x
+      + ∫ s in t₀..(t : ℝ),
+          heatSemigroupND ((t : ℝ) - s) (⇑(Q (Set.IccExtend hT (⇑z) s))) x := by
+  conv_lhs => rw [← hz]
+  simp only [heatMildSelfMap, heatMildValuePathBcfIcc_apply]
+  rw [heatMildValuePathBcf_of_lt ht, heatMildValueNDbcf_apply]
+  simp only [Function.comp_apply]
+
 end AnalyticPDE
 end RicciFlow
